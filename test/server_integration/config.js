@@ -23,7 +23,7 @@ import {
   ElasticsearchSupertestProvider,
 } from './services';
 
-export default async function({ readConfigFile }) {
+export default async function ({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 

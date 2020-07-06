@@ -1,13 +1,14 @@
 {
-  "id": "data_enhanced",
+  "id": "dataEnhanced",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": [
-    "xpack"
+    "xpack", "data_enhanced"
   ],
   "requiredPlugins": [
     "data"
   ],
-  "server": false,
+  "optionalPlugins": ["kibanaReact", "kibanaUtils"],
+  "server": true,
   "ui": true
 }

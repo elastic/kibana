@@ -5,12 +5,18 @@
  */
 import { useEffect, useState, useReducer, useCallback } from 'react';
 import createContainer from 'constate';
-import { pick, throttle, omit } from 'lodash';
-import { useGraphQLQueries } from './gql_queries';
+import { pick, throttle } from 'lodash';
 import { TimeKey, timeKeyIsBetween } from '../../../../common/time';
-import { InfraLogEntry } from './types';
+import {
+  LogEntriesResponse,
+  LogEntry,
+  LogEntriesRequest,
+  LogEntriesBaseRequest,
+} from '../../../../common/http_api';
+import { fetchLogEntries } from './api/fetch_log_entries';
 
 const DESIRED_BUFFER_PAGES = 2;
+const LIVE_STREAM_INTERVAL = 5000;
 
 enum Action {
   FetchingNewEntries,
@@ -20,6 +26,7 @@ enum Action {
   ReceiveEntriesAfter,
   ErrorOnNewEntries,
   ErrorOnMoreEntries,
+  ExpandRange,
 }
 
 type ReceiveActions =
@@ -29,41 +36,46 @@ type ReceiveActions =
 
 interface ReceiveEntriesAction {
   type: ReceiveActions;
-  payload: LogEntriesResponse;
+  payload: LogEntriesResponse['data'];
+}
+interface ExpandRangeAction {
+  type: Action.ExpandRange;
+  payload: { before: boolean; after: boolean };
 }
 interface FetchOrErrorAction {
-  type: Exclude<Action, ReceiveActions>;
+  type: Exclude<Action, ReceiveActions | Action.ExpandRange>;
 }
-type ActionObj = ReceiveEntriesAction | FetchOrErrorAction;
+type ActionObj = ReceiveEntriesAction | FetchOrErrorAction | ExpandRangeAction;
 
 type Dispatch = (action: ActionObj) => void;
 
 interface LogEntriesProps {
+  startTimestamp: number;
+  endTimestamp: number;
+  timestampsLastUpdate: number;
   filterQuery: string | null;
   timeKey: TimeKey | null;
   pagesBeforeStart: number | null;
   pagesAfterEnd: number | null;
   sourceId: string;
-  isAutoReloading: boolean;
+  isStreaming: boolean;
   jumpToTargetPosition: (position: TimeKey) => void;
 }
 
-type FetchEntriesParams = Omit<LogEntriesProps, 'isAutoReloading'>;
+type FetchEntriesParams = Omit<LogEntriesProps, 'isStreaming'>;
 type FetchMoreEntriesParams = Pick<LogEntriesProps, 'pagesBeforeStart' | 'pagesAfterEnd'>;
 
-export interface LogEntriesResponse {
-  entries: InfraLogEntry[];
-  entriesStart: TimeKey | null;
-  entriesEnd: TimeKey | null;
-  hasMoreAfterEnd: boolean;
-  hasMoreBeforeStart: boolean;
-  lastLoadedTime: Date | null;
-}
-
-export type LogEntriesStateParams = {
+export interface LogEntriesStateParams {
+  entries: LogEntriesResponse['data']['entries'];
+  topCursor: LogEntriesResponse['data']['topCursor'] | null;
+  bottomCursor: LogEntriesResponse['data']['bottomCursor'] | null;
+  centerCursor: TimeKey | null;
   isReloading: boolean;
   isLoadingMore: boolean;
-} & LogEntriesResponse;
+  lastLoadedTime: Date | null;
+  hasMoreBeforeStart: boolean;
+  hasMoreAfterEnd: boolean;
+}
 
 export interface LogEntriesCallbacks {
   fetchNewerEntries: () => Promise<TimeKey | null | undefined>;
@@ -75,32 +87,40 @@ export const logEntriesInitialCallbacks = {
 
 export const logEntriesInitialState: LogEntriesStateParams = {
   entries: [],
-  entriesStart: null,
-  entriesEnd: null,
-  hasMoreAfterEnd: false,
-  hasMoreBeforeStart: false,
+  topCursor: null,
+  bottomCursor: null,
+  centerCursor: null,
   isReloading: true,
   isLoadingMore: false,
   lastLoadedTime: null,
+  hasMoreBeforeStart: false,
+  hasMoreAfterEnd: false,
 };
 
-const cleanDuplicateItems = (entriesA: InfraLogEntry[], entriesB: InfraLogEntry[]) => {
-  const gids = new Set(entriesB.map(item => item.gid));
-  return entriesA.filter(item => !gids.has(item.gid));
+const cleanDuplicateItems = (entriesA: LogEntry[], entriesB: LogEntry[]) => {
+  const ids = new Set(entriesB.map((item) => item.id));
+  return entriesA.filter((item) => !ids.has(item.id));
 };
 
 const shouldFetchNewEntries = ({
   prevParams,
   timeKey,
   filterQuery,
-  entriesStart,
-  entriesEnd,
-}: FetchEntriesParams & LogEntriesStateParams & { prevParams: FetchEntriesParams }) => {
-  if (!timeKey) return false;
-  const shouldLoadWithNewFilter = filterQuery !== prevParams.filterQuery;
+  topCursor,
+  bottomCursor,
+  startTimestamp,
+  endTimestamp,
+}: FetchEntriesParams & LogEntriesStateParams & { prevParams: FetchEntriesParams | undefined }) => {
+  const shouldLoadWithNewDates = prevParams
+    ? (startTimestamp !== prevParams.startTimestamp &&
+        startTimestamp > prevParams.startTimestamp) ||
+      (endTimestamp !== prevParams.endTimestamp && endTimestamp < prevParams.endTimestamp)
+    : true;
+  const shouldLoadWithNewFilter = prevParams ? filterQuery !== prevParams.filterQuery : true;
   const shouldLoadAroundNewPosition =
-    !entriesStart || !entriesEnd || !timeKeyIsBetween(entriesStart, entriesEnd, timeKey);
-  return shouldLoadWithNewFilter || shouldLoadAroundNewPosition;
+    timeKey && (!topCursor || !bottomCursor || !timeKeyIsBetween(topCursor, bottomCursor, timeKey));
+
+  return shouldLoadWithNewDates || shouldLoadWithNewFilter || shouldLoadAroundNewPosition;
 };
 
 enum ShouldFetchMoreEntries {
@@ -124,48 +144,108 @@ const useFetchEntriesEffect = (
   dispatch: Dispatch,
   props: LogEntriesProps
 ) => {
-  const { getLogEntriesAround, getLogEntriesBefore, getLogEntriesAfter } = useGraphQLQueries();
-
-  const [prevParams, cachePrevParams] = useState(props);
+  const [prevParams, cachePrevParams] = useState<LogEntriesProps | undefined>();
   const [startedStreaming, setStartedStreaming] = useState(false);
 
-  const runFetchNewEntriesRequest = async (override = {}) => {
+  const runFetchNewEntriesRequest = async (overrides: Partial<LogEntriesProps> = {}) => {
+    if (!props.startTimestamp || !props.endTimestamp) {
+      return;
+    }
+
     dispatch({ type: Action.FetchingNewEntries });
+
     try {
-      const payload = await getLogEntriesAround({
-        ...omit(props, 'jumpToTargetPosition'),
-        ...override,
-      });
+      const commonFetchArgs: LogEntriesBaseRequest = {
+        sourceId: overrides.sourceId || props.sourceId,
+        startTimestamp: overrides.startTimestamp || props.startTimestamp,
+        endTimestamp: overrides.endTimestamp || props.endTimestamp,
+        query: overrides.filterQuery || props.filterQuery,
+      };
+
+      const fetchArgs: LogEntriesRequest = props.timeKey
+        ? {
+            ...commonFetchArgs,
+            center: props.timeKey,
+          }
+        : {
+            ...commonFetchArgs,
+            before: 'last',
+          };
+
+      const { data: payload } = await fetchLogEntries(fetchArgs);
       dispatch({ type: Action.ReceiveNewEntries, payload });
+
+      // Move position to the bottom if it's the first load.
+      // Do it in the next tick to allow the `dispatch` to fire
+      if (!props.timeKey && payload.bottomCursor) {
+        setTimeout(() => {
+          props.jumpToTargetPosition(payload.bottomCursor!);
+        });
+      } else if (
+        props.timeKey &&
+        payload.topCursor &&
+        payload.bottomCursor &&
+        !timeKeyIsBetween(payload.topCursor, payload.bottomCursor, props.timeKey)
+      ) {
+        props.jumpToTargetPosition(payload.topCursor);
+      }
     } catch (e) {
       dispatch({ type: Action.ErrorOnNewEntries });
     }
   };
 
-  const runFetchMoreEntriesRequest = async (direction: ShouldFetchMoreEntries) => {
-    dispatch({ type: Action.FetchingMoreEntries });
+  const runFetchMoreEntriesRequest = async (
+    direction: ShouldFetchMoreEntries,
+    overrides: Partial<LogEntriesProps> = {}
+  ) => {
+    if (!props.startTimestamp || !props.endTimestamp) {
+      return;
+    }
     const getEntriesBefore = direction === ShouldFetchMoreEntries.Before;
-    const timeKey = getEntriesBefore
-      ? state.entries[0].key
-      : state.entries[state.entries.length - 1].key;
-    const getMoreLogEntries = getEntriesBefore ? getLogEntriesBefore : getLogEntriesAfter;
+
+    // Control that cursors are correct
+    if ((getEntriesBefore && !state.topCursor) || !state.bottomCursor) {
+      return;
+    }
+
+    dispatch({ type: Action.FetchingMoreEntries });
+
     try {
-      const payload = await getMoreLogEntries({ ...props, timeKey });
+      const commonFetchArgs: LogEntriesBaseRequest = {
+        sourceId: overrides.sourceId || props.sourceId,
+        startTimestamp: overrides.startTimestamp || props.startTimestamp,
+        endTimestamp: overrides.endTimestamp || props.endTimestamp,
+        query: overrides.filterQuery || props.filterQuery,
+      };
+
+      const fetchArgs: LogEntriesRequest = getEntriesBefore
+        ? {
+            ...commonFetchArgs,
+            before: state.topCursor!, // We already check for nullity above
+          }
+        : {
+            ...commonFetchArgs,
+            after: state.bottomCursor,
+          };
+
+      const { data: payload } = await fetchLogEntries(fetchArgs);
+
       dispatch({
         type: getEntriesBefore ? Action.ReceiveEntriesBefore : Action.ReceiveEntriesAfter,
         payload,
       });
-      return payload.entriesEnd;
+
+      return payload.bottomCursor;
     } catch (e) {
       dispatch({ type: Action.ErrorOnMoreEntries });
     }
   };
 
   const fetchNewEntriesEffectDependencies = Object.values(
-    pick(props, ['sourceId', 'filterQuery', 'timeKey'])
+    pick(props, ['sourceId', 'filterQuery', 'timeKey', 'startTimestamp', 'endTimestamp'])
   );
   const fetchNewEntriesEffect = () => {
-    if (props.isAutoReloading) return;
+    if (props.isStreaming && prevParams) return;
     if (shouldFetchNewEntries({ ...props, ...state, prevParams })) {
       runFetchNewEntriesRequest();
     }
@@ -177,7 +257,7 @@ const useFetchEntriesEffect = (
     Object.values(pick(state, ['hasMoreBeforeStart', 'hasMoreAfterEnd'])),
   ];
   const fetchMoreEntriesEffect = () => {
-    if (state.isLoadingMore || props.isAutoReloading) return;
+    if (state.isLoadingMore || props.isStreaming) return;
     const direction = shouldFetchMoreEntries(props, state);
     switch (direction) {
       case ShouldFetchMoreEntries.Before:
@@ -189,55 +269,81 @@ const useFetchEntriesEffect = (
     }
   };
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const fetchNewerEntries = useCallback(
     throttle(() => runFetchMoreEntriesRequest(ShouldFetchMoreEntries.After), 500),
-    [props, state.entriesEnd]
+    [props, state.bottomCursor]
   );
 
   const streamEntriesEffectDependencies = [
-    props.isAutoReloading,
+    props.isStreaming,
     state.isLoadingMore,
     state.isReloading,
   ];
   const streamEntriesEffect = () => {
     (async () => {
-      if (props.isAutoReloading && !state.isLoadingMore && !state.isReloading) {
+      if (props.isStreaming && !state.isLoadingMore && !state.isReloading) {
+        const endTimestamp = Date.now();
         if (startedStreaming) {
-          await new Promise(res => setTimeout(res, 5000));
+          await new Promise((res) => setTimeout(res, LIVE_STREAM_INTERVAL));
         } else {
-          const nowKey = {
-            tiebreaker: 0,
-            time: Date.now(),
-          };
-          props.jumpToTargetPosition(nowKey);
+          props.jumpToTargetPosition({ tiebreaker: 0, time: endTimestamp });
           setStartedStreaming(true);
           if (state.hasMoreAfterEnd) {
-            runFetchNewEntriesRequest({
-              timeKey: nowKey,
-            });
+            runFetchNewEntriesRequest({ endTimestamp });
             return;
           }
         }
-        const newEntriesEnd = await runFetchMoreEntriesRequest(ShouldFetchMoreEntries.After);
+        const newEntriesEnd = await runFetchMoreEntriesRequest(ShouldFetchMoreEntries.After, {
+          endTimestamp,
+        });
         if (newEntriesEnd) {
           props.jumpToTargetPosition(newEntriesEnd);
         }
-      } else if (!props.isAutoReloading) {
+      } else if (!props.isStreaming) {
         setStartedStreaming(false);
       }
     })();
   };
 
+  const expandRangeEffect = () => {
+    if (!prevParams || !prevParams.startTimestamp || !prevParams.endTimestamp) {
+      return;
+    }
+
+    if (props.timestampsLastUpdate === prevParams.timestampsLastUpdate) {
+      return;
+    }
+
+    const shouldExpand = {
+      before: props.startTimestamp < prevParams.startTimestamp,
+      after: props.endTimestamp > prevParams.endTimestamp,
+    };
+
+    dispatch({ type: Action.ExpandRange, payload: shouldExpand });
+  };
+
+  const expandRangeEffectDependencies = [
+    prevParams?.startTimestamp,
+    prevParams?.endTimestamp,
+    props.startTimestamp,
+    props.endTimestamp,
+    props.timestampsLastUpdate,
+  ];
+
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(fetchNewEntriesEffect, fetchNewEntriesEffectDependencies);
   useEffect(fetchMoreEntriesEffect, fetchMoreEntriesEffectDependencies);
   useEffect(streamEntriesEffect, streamEntriesEffectDependencies);
+  useEffect(expandRangeEffect, expandRangeEffectDependencies);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   return { fetchNewerEntries, checkForNewEntries: runFetchNewEntriesRequest };
 };
 
 export const useLogEntriesState: (
   props: LogEntriesProps
-) => [LogEntriesStateParams, LogEntriesCallbacks] = props => {
+) => [LogEntriesStateParams, LogEntriesCallbacks] = (props) => {
   const [state, dispatch] = useReducer(logEntriesStateReducer, logEntriesInitialState);
 
   const { fetchNewerEntries, checkForNewEntries } = useFetchEntriesEffect(state, dispatch, props);
@@ -249,44 +355,87 @@ export const useLogEntriesState: (
 const logEntriesStateReducer = (prevState: LogEntriesStateParams, action: ActionObj) => {
   switch (action.type) {
     case Action.ReceiveNewEntries:
-      return { ...prevState, ...action.payload, isReloading: false };
-    case Action.ReceiveEntriesBefore: {
-      const prevEntries = cleanDuplicateItems(prevState.entries, action.payload.entries);
-      const newEntries = [...action.payload.entries, ...prevEntries];
-      const { hasMoreBeforeStart, entriesStart, lastLoadedTime } = action.payload;
-      const update = {
-        entries: newEntries,
-        isLoadingMore: false,
-        hasMoreBeforeStart,
-        entriesStart,
-        lastLoadedTime,
+      return {
+        ...prevState,
+        ...action.payload,
+        centerCursor: getCenterCursor(action.payload.entries),
+        lastLoadedTime: new Date(),
+        isReloading: false,
+
+        // Be optimistic. If any of the before/after requests comes empty, set
+        // the corresponding flag to `false`
+        hasMoreBeforeStart: true,
+        hasMoreAfterEnd: true,
       };
+    case Action.ReceiveEntriesBefore: {
+      const newEntries = action.payload.entries;
+      const prevEntries = cleanDuplicateItems(prevState.entries, newEntries);
+      const entries = [...newEntries, ...prevEntries];
+
+      const update = {
+        entries,
+        isLoadingMore: false,
+        hasMoreBeforeStart: newEntries.length > 0,
+        // Keep the previous cursor if request comes empty, to easily extend the range.
+        topCursor: newEntries.length > 0 ? action.payload.topCursor : prevState.topCursor,
+        centerCursor: getCenterCursor(entries),
+        lastLoadedTime: new Date(),
+      };
+
       return { ...prevState, ...update };
     }
     case Action.ReceiveEntriesAfter: {
-      const prevEntries = cleanDuplicateItems(prevState.entries, action.payload.entries);
-      const newEntries = [...prevEntries, ...action.payload.entries];
-      const { hasMoreAfterEnd, entriesEnd, lastLoadedTime } = action.payload;
+      const newEntries = action.payload.entries;
+      const prevEntries = cleanDuplicateItems(prevState.entries, newEntries);
+      const entries = [...prevEntries, ...newEntries];
+
       const update = {
-        entries: newEntries,
+        entries,
         isLoadingMore: false,
-        hasMoreAfterEnd,
-        entriesEnd,
-        lastLoadedTime,
+        hasMoreAfterEnd: newEntries.length > 0,
+        // Keep the previous cursor if request comes empty, to easily extend the range.
+        bottomCursor: newEntries.length > 0 ? action.payload.bottomCursor : prevState.bottomCursor,
+        centerCursor: getCenterCursor(entries),
+        lastLoadedTime: new Date(),
       };
+
       return { ...prevState, ...update };
     }
     case Action.FetchingNewEntries:
-      return { ...prevState, isReloading: true };
+      return {
+        ...prevState,
+        isReloading: true,
+        entries: [],
+        topCursor: null,
+        bottomCursor: null,
+        centerCursor: null,
+        hasMoreBeforeStart: true,
+        hasMoreAfterEnd: true,
+      };
     case Action.FetchingMoreEntries:
       return { ...prevState, isLoadingMore: true };
     case Action.ErrorOnNewEntries:
       return { ...prevState, isReloading: false };
     case Action.ErrorOnMoreEntries:
       return { ...prevState, isLoadingMore: false };
+
+    case Action.ExpandRange: {
+      const hasMoreBeforeStart = action.payload.before ? true : prevState.hasMoreBeforeStart;
+      const hasMoreAfterEnd = action.payload.after ? true : prevState.hasMoreAfterEnd;
+
+      return {
+        ...prevState,
+        hasMoreBeforeStart,
+        hasMoreAfterEnd,
+      };
+    }
     default:
       throw new Error();
   }
 };
+
+function getCenterCursor(entries: LogEntry[]): TimeKey | null {
+  return entries.length > 0 ? entries[Math.floor(entries.length / 2)].cursor : null;
+}
 
 export const LogEntriesState = createContainer(useLogEntriesState);

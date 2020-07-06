@@ -14,7 +14,7 @@ export function PipelineEditorProvider({ getService }) {
 
   // test subject selectors
   const SUBJ_CONTAINER = '~pipelineEdit';
-  const getContainerSubjForId = id => `~pipelineEdit-${id}`;
+  const getContainerSubjForId = (id) => `~pipelineEdit-${id}`;
   const SUBJ_INPUT_ID = '~pipelineEdit > inputId';
   const SUBJ_INPUT_DESCRIPTION = '~pipelineEdit > inputDescription';
   const SUBJ_UI_ACE_PIPELINE = '~pipelineEdit > acePipeline';

@@ -12,17 +12,16 @@ import {
   resolveCopySavedObjectsToSpacesConflictsFactory,
 } from '../../../lib/copy_to_spaces';
 import { ExternalRouteDeps } from '.';
-import { COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS } from '../../../lib/copy_to_spaces/copy_to_spaces';
 import { SPACE_ID_REGEX } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
 
 type SavedObjectIdentifier = Pick<SavedObject, 'id' | 'type'>;
 
 const areObjectsUnique = (objects: SavedObjectIdentifier[]) =>
-  _.uniq(objects, (o: SavedObjectIdentifier) => `${o.type}:${o.id}`).length === objects.length;
+  _.uniqBy(objects, (o: SavedObjectIdentifier) => `${o.type}:${o.id}`).length === objects.length;
 
 export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
-  const { externalRouter, spacesService, getSavedObjects } = deps;
+  const { externalRouter, spacesService, getImportExportObjectLimit, getStartServices } = deps;
 
   externalRouter.post(
     {
@@ -34,14 +33,14 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         body: schema.object({
           spaces: schema.arrayOf(
             schema.string({
-              validate: value => {
+              validate: (value) => {
                 if (!SPACE_ID_REGEX.test(value)) {
                   return `lower case, a-z, 0-9, "_", and "-" are allowed`;
                 }
               },
             }),
             {
-              validate: spaceIds => {
+              validate: (spaceIds) => {
                 if (_.uniq(spaceIds).length !== spaceIds.length) {
                   return 'duplicate space ids are not allowed';
                 }
@@ -54,7 +53,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
               id: schema.string(),
             }),
             {
-              validate: objects => {
+              validate: (objects) => {
                 if (!areObjectsUnique(objects)) {
                   return 'duplicate objects are not allowed';
                 }
@@ -67,13 +66,12 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
-      const savedObjectsClient = getSavedObjects().getScopedSavedObjectsClient(
-        request,
-        COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS
-      );
+      const [startServices] = await getStartServices();
+
       const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
-        savedObjectsClient,
-        getSavedObjects()
+        startServices.savedObjects,
+        getImportExportObjectLimit,
+        request
       );
       const { spaces: destinationSpaceIds, objects, includeReferences, overwrite } = request.body;
       const sourceSpaceId = spacesService.getSpaceId(request);
@@ -96,7 +94,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         body: schema.object({
           retries: schema.recordOf(
             schema.string({
-              validate: spaceId => {
+              validate: (spaceId) => {
                 if (!SPACE_ID_REGEX.test(spaceId)) {
                   return `Invalid space id: ${spaceId}`;
                 }
@@ -116,7 +114,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
               id: schema.string(),
             }),
             {
-              validate: objects => {
+              validate: (objects) => {
                 if (!areObjectsUnique(objects)) {
                   return 'duplicate objects are not allowed';
                 }
@@ -128,13 +126,12 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
-      const savedObjectsClient = getSavedObjects().getScopedSavedObjectsClient(
-        request,
-        COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS
-      );
+      const [startServices] = await getStartServices();
+
       const resolveCopySavedObjectsToSpacesConflicts = resolveCopySavedObjectsToSpacesConflictsFactory(
-        savedObjectsClient,
-        getSavedObjects()
+        startServices.savedObjects,
+        getImportExportObjectLimit,
+        request
       );
       const { objects, includeReferences, retries } = request.body;
       const sourceSpaceId = spacesService.getSpaceId(request);

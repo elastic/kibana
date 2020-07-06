@@ -40,11 +40,13 @@ export class ProcessMetricsCollector implements MetricsCollector<OpsProcessMetri
       uptime_in_millis: process.uptime() * 1000,
     };
   }
+
+  public reset() {}
 }
 
 const getEventLoopDelay = (): Promise<number> => {
   const bench = new Bench();
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setImmediate(() => {
       return resolve(bench.elapsed());
     });

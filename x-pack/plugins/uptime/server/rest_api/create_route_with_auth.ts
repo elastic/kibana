@@ -16,7 +16,7 @@ export const createRouteWithAuth = (
   const licenseCheckHandler: UMRouteHandler = async (customParams, context, request, response) => {
     const { statusCode, message } = libs.license(context.licensing.license);
     if (statusCode === 200) {
-      return await handler(customParams, context, request, response);
+      return handler(customParams, context, request, response);
     }
     switch (statusCode) {
       case 400:

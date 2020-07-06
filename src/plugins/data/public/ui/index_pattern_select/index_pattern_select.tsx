@@ -24,9 +24,10 @@ import { Required } from '@kbn/utility-types';
 import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
 
 import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
-import { getTitle } from '../../index_patterns/lib';
+import { getTitle } from '../../../common/index_patterns/lib';
 
 export type IndexPatternSelectProps = Required<
+  // Omit<EuiComboBoxProps<any>, 'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions' | 'append' | 'prepend' | 'sortMatchesBy'>,
   Omit<EuiComboBoxProps<any>, 'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions'>,
   'onChange' | 'placeholder'
 > & {
@@ -39,7 +40,7 @@ export type IndexPatternSelectProps = Required<
 interface IndexPatternSelectState {
   isLoading: boolean;
   options: [];
-  selectedIndexPattern: string | undefined;
+  selectedIndexPattern: { value: string; label: string } | undefined;
   searchValue: string | undefined;
 }
 

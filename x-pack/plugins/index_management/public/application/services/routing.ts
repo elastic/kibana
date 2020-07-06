@@ -3,29 +3,35 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { BASE_PATH } from '../../../common/constants';
 
-export const getTemplateListLink = () => {
-  return `${BASE_PATH}templates`;
-};
+export const getTemplateListLink = () => `/templates`;
 
-// Need to add some additonal encoding/decoding logic to work with React Router
-// For background, see: https://github.com/ReactTraining/history/issues/505
-export const getTemplateDetailsLink = (name: string, withHash = false) => {
-  const baseUrl = `${BASE_PATH}templates/${encodeURIComponent(encodeURIComponent(name))}`;
-  const url = withHash ? `#${baseUrl}` : baseUrl;
+export const getTemplateDetailsLink = (name: string, isLegacy?: boolean, withHash = false) => {
+  const baseUrl = `/templates/${encodePathForReactRouter(name)}`;
+  let url = withHash ? `#${baseUrl}` : baseUrl;
+  if (isLegacy) {
+    url = `${url}?legacy=${isLegacy}`;
+  }
   return encodeURI(url);
 };
 
-export const getTemplateEditLink = (name: string) => {
-  return encodeURI(`${BASE_PATH}edit_template/${encodeURIComponent(encodeURIComponent(name))}`);
+export const getTemplateEditLink = (name: string, isLegacy?: boolean) => {
+  let url = `/edit_template/${encodePathForReactRouter(name)}`;
+  if (isLegacy) {
+    url = `${url}?legacy=true`;
+  }
+  return encodeURI(url);
 };
 
-export const getTemplateCloneLink = (name: string) => {
-  return encodeURI(`${BASE_PATH}clone_template/${encodeURIComponent(encodeURIComponent(name))}`);
+export const getTemplateCloneLink = (name: string, isLegacy?: boolean) => {
+  let url = `/clone_template/${encodePathForReactRouter(name)}`;
+  if (isLegacy) {
+    url = `${url}?legacy=true`;
+  }
+  return encodeURI(url);
 };
 
-export const decodePath = (pathname: string): string => {
+export const decodePathFromReactRouter = (pathname: string): string => {
   let decodedPath;
   try {
     decodedPath = decodeURI(pathname);
@@ -35,3 +41,8 @@ export const decodePath = (pathname: string): string => {
   }
   return decodeURIComponent(decodedPath);
 };
+
+// Need to add some additonal encoding/decoding logic to work with React Router
+// For background, see: https://github.com/ReactTraining/history/issues/505
+export const encodePathForReactRouter = (pathname: string): string =>
+  encodeURIComponent(encodeURIComponent(pathname));

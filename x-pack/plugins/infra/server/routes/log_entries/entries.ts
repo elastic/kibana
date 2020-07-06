@@ -22,7 +22,7 @@ import {
 import { parseFilterQuery } from '../../utils/serialized_query';
 import { LogEntriesParams } from '../../lib/domains/log_entries_domain';
 
-const escapeHatch = schema.object({}, { allowUnknowns: true });
+const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs) => {
   framework.registerRoute(
@@ -38,13 +38,19 @@ export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs)
           fold(throwErrors(Boom.badRequest), identity)
         );
 
-        const { startDate, endDate, sourceId, query, size } = payload;
+        const {
+          startTimestamp: startTimestamp,
+          endTimestamp: endTimestamp,
+          sourceId,
+          query,
+          size,
+        } = payload;
 
         let entries;
         if ('center' in payload) {
-          entries = await logEntries.getLogEntriesAround__new(requestContext, sourceId, {
-            startDate,
-            endDate,
+          entries = await logEntries.getLogEntriesAround(requestContext, sourceId, {
+            startTimestamp,
+            endTimestamp,
             query: parseFilterQuery(query),
             center: payload.center,
             size,
@@ -58,20 +64,22 @@ export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs)
           }
 
           entries = await logEntries.getLogEntries(requestContext, sourceId, {
-            startDate,
-            endDate,
+            startTimestamp,
+            endTimestamp,
             query: parseFilterQuery(query),
             cursor,
             size,
           });
         }
 
+        const hasEntries = entries.length > 0;
+
         return response.ok({
           body: logEntriesResponseRT.encode({
             data: {
               entries,
-              topCursor: entries[0].cursor,
-              bottomCursor: entries[entries.length - 1].cursor,
+              topCursor: hasEntries ? entries[0].cursor : null,
+              bottomCursor: hasEntries ? entries[entries.length - 1].cursor : null,
             },
           }),
         });

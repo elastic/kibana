@@ -8,54 +8,52 @@ import { times } from 'lodash';
 import { v4 as uuid } from 'uuid';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '../../../../../common/lib';
 
-// date to start writing data
-export const START_DATE = '2020-01-01T00:00:00Z';
+// default end date
+export const END_DATE = '2020-01-01T00:00:00Z';
 
-const DOCUMENT_SOURCE = 'queryDataEndpointTests';
+export const DOCUMENT_SOURCE = 'queryDataEndpointTests';
+export const DOCUMENT_REFERENCE = '-na-';
 
 // Create a set of es documents to run the queries against.
-// Will create 2 documents for each interval.
+// Will create `groups` documents for each interval.
 // The difference between the dates of the docs will be intervalMillis.
 // The date of the last documents will be startDate - intervalMillis / 2.
-// So there will be 2 documents written in the middle of each interval range.
-// The data value written to each doc is a power of 2, with 2^0 as the value
-// of the last documents, the values increasing for older documents.  The
-// second document for each time value will be power of 2 + 1
+// So the documents will be written in the middle of each interval range.
+// The data value written to each doc is a power of 2 + the group index, with
+// 2^0 as the value of the last documents, the values increasing for older
+// documents.
 export async function createEsDocuments(
   es: any,
   esTestIndexTool: ESTestIndexTool,
-  startDate: string,
-  intervals: number,
-  intervalMillis: number
+  endDate: string = END_DATE,
+  intervals: number = 1,
+  intervalMillis: number = 1000,
+  groups: number = 2
 ) {
-  const totalDocuments = intervals * 2;
-  const startDateMillis = Date.parse(startDate) - intervalMillis / 2;
+  const endDateMillis = Date.parse(endDate) - intervalMillis / 2;
 
-  times(intervals, interval => {
-    const date = startDateMillis - interval * intervalMillis;
+  times(intervals, (interval) => {
+    const date = endDateMillis - interval * intervalMillis;
 
-    // base value for each window is 2^window
+    // base value for each window is 2^interval
     const testedValue = 2 ** interval;
 
     // don't need await on these, wait at the end of the function
-    createEsDocument(es, '-na-', date, testedValue, 'groupA');
-    createEsDocument(es, '-na-', date, testedValue + 1, 'groupB');
+    times(groups, (group) => {
+      createEsDocument(es, date, testedValue + group, `group-${group}`);
+    });
   });
 
-  await esTestIndexTool.waitForDocs(DOCUMENT_SOURCE, '-na-', totalDocuments);
+  const totalDocuments = intervals * groups;
+  await esTestIndexTool.waitForDocs(DOCUMENT_SOURCE, DOCUMENT_REFERENCE, totalDocuments);
 }
 
-async function createEsDocument(
-  es: any,
-  reference: string,
-  epochMillis: number,
-  testedValue: number,
-  group: string
-) {
+async function createEsDocument(es: any, epochMillis: number, testedValue: number, group: string) {
   const document = {
     source: DOCUMENT_SOURCE,
-    reference,
+    reference: DOCUMENT_REFERENCE,
     date: new Date(epochMillis).toISOString(),
+    date_epoch_millis: epochMillis,
     testedValue,
     group,
   };
@@ -65,6 +63,7 @@ async function createEsDocument(
     index: ES_TEST_INDEX_NAME,
     body: document,
   });
+  // console.log(`writing document to ${ES_TEST_INDEX_NAME}:`, JSON.stringify(document, null, 4));
 
   if (response.result !== 'created') {
     throw new Error(`document not created: ${JSON.stringify(response)}`);

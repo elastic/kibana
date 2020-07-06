@@ -35,7 +35,7 @@ const summarizeBundles = (w: Assignments) =>
 
 const readConfigs = (workers: Assignments[]) =>
   workers.map(
-    (w, i) => `worker ${i} (${summarizeBundles(w)}) => ${w.bundles.map(b => b.id).join(',')}`
+    (w, i) => `worker ${i} (${summarizeBundles(w)}) => ${w.bundles.map((b) => b.id).join(',')}`
   );
 
 const assertReturnVal = (workers: Assignments[]) => {
@@ -57,7 +57,7 @@ const assertReturnVal = (workers: Assignments[]) => {
 const testBundle = (id: string) =>
   new Bundle({
     contextDir: `/repo/plugin/${id}/public`,
-    entry: 'index.ts',
+    publicDirNames: ['public'],
     id,
     outputDir: `/repo/plugins/${id}/target/public`,
     sourceRoot: `/repo`,

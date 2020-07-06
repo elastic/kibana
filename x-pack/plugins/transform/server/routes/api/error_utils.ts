@@ -13,7 +13,8 @@ import { ResponseError, CustomHttpResponseOptions } from 'src/core/server';
 import {
   TransformEndpointRequest,
   TransformEndpointResult,
-} from '../../../../../legacy/plugins/transform/public/app/hooks/use_api_types';
+  DeleteTransformEndpointResult,
+} from '../../../common';
 
 const REQUEST_TIMEOUT = 'RequestTimeout';
 
@@ -22,7 +23,7 @@ export function isRequestTimeout(error: any) {
 }
 
 interface Params {
-  results: TransformEndpointResult;
+  results: TransformEndpointResult | DeleteTransformEndpointResult;
   id: string;
   items: TransformEndpointRequest[];
   action: string;
@@ -62,7 +63,7 @@ export function fillResultsWithTimeouts({ results, id, items, action }: Params) 
     },
   };
 
-  const newResults: TransformEndpointResult = {};
+  const newResults: TransformEndpointResult | DeleteTransformEndpointResult = {};
 
   return items.reduce((accumResults, currentVal) => {
     if (results[currentVal.id] === undefined) {

@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { deserializeCluster, serializeCluster } from './cluster_serialization';
+export {
+  deserializeCluster,
+  serializeCluster,
+  Cluster,
+  ClusterInfoEs,
+} from './cluster_serialization';

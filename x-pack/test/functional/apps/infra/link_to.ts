@@ -5,25 +5,30 @@
  */
 
 import expect from '@kbn/expect';
+import { URL } from 'url';
 import { FtrProviderContext } from '../../ftr_provider_context';
+
+const ONE_HOUR = 60 * 60 * 1000;
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common']);
   const retry = getService('retry');
   const browser = getService('browser');
 
-  describe('Infra link-to', function() {
-    this.tags('smoke');
+  const timestamp = Date.now();
+  const startDate = new Date(timestamp - ONE_HOUR).toISOString();
+  const endDate = new Date(timestamp + ONE_HOUR).toISOString();
+
+  const traceId = '433b4651687e18be2c6c8e3b11f53d09';
+
+  describe('Infra link-to', function () {
     it('redirects to the logs app and parses URL search params correctly', async () => {
       const location = {
         hash: '',
-        pathname: '/link-to/logs',
-        search: 'time=1565707203194&filter=trace.id:433b4651687e18be2c6c8e3b11f53d09',
+        pathname: '/link-to',
+        search: `time=${timestamp}&filter=trace.id:${traceId}`,
         state: undefined,
       };
-      const expectedSearchString =
-        "sourceId=default&logPosition=(position:(tiebreaker:0,time:1565707203194),streamLive:!f)&logFilter=(expression:'trace.id:433b4651687e18be2c6c8e3b11f53d09',kind:kuery)";
-      const expectedRedirectPath = '/logs/stream?';
 
       await pageObjects.common.navigateToUrlWithBrowserHistory(
         'infraLogs',
@@ -35,9 +40,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
       await retry.tryForTime(5000, async () => {
         const currentUrl = await browser.getCurrentUrl();
-        const decodedUrl = decodeURIComponent(currentUrl);
-        expect(decodedUrl).to.contain(expectedRedirectPath);
-        expect(decodedUrl).to.contain(expectedSearchString);
+        const parsedUrl = new URL(currentUrl);
+
+        expect(parsedUrl.pathname).to.be('/app/logs/stream');
+        expect(parsedUrl.searchParams.get('logFilter')).to.be(
+          `(expression:'trace.id:${traceId}',kind:kuery)`
+        );
+        expect(parsedUrl.searchParams.get('logPosition')).to.be(
+          `(end:'${endDate}',position:(tiebreaker:0,time:${timestamp}),start:'${startDate}',streamLive:!f)`
+        );
+        expect(parsedUrl.searchParams.get('sourceId')).to.be('default');
       });
     });
   });

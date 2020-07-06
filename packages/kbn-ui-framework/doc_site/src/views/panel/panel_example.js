@@ -25,7 +25,7 @@ import panelHtml from './panel.html';
 import panelWithToolBarHtml from './panel_with_toolbar.html';
 import panelWithHeaderSectionsHtml from './panel_with_header_sections.html';
 
-export default props => (
+export default (props) => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="Panel"

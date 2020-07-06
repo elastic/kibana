@@ -14,7 +14,7 @@ import {
   MetricsExplorerChartType,
   MetricsExplorerYAxisMode,
   MetricsExplorerChartOptions,
-} from '../../containers/metrics_explorer/use_metrics_explorer_options';
+} from '../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 
 export const options: MetricsExplorerOptions = {
   limit: 3,
@@ -29,6 +29,8 @@ export const source = {
   logAlias: 'filebeat-*',
   metricAlias: 'metricbeat-*',
   logColumns: [],
+  inventoryDefaultView: 'host',
+  metricsExplorerDefaultView: 'host',
   fields: {
     host: 'host.name',
     container: 'container.id',

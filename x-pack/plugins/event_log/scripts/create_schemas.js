@@ -30,11 +30,13 @@ function main() {
   const exportedProperties = mappings.EcsEventLogProperties;
   const multiValuedProperties = new Set(mappings.EcsEventLogMultiValuedProperties);
 
+  augmentMappings(ecsMappings.mappings, multiValuedProperties);
+
   const elMappings = getEventLogMappings(ecsMappings, exportedProperties);
 
   console.log(`generating files in ${PLUGIN_DIR}`);
   writeEventLogMappings(elMappings);
-  writeEventLogConfigSchema(elMappings, ecsVersion, multiValuedProperties);
+  writeEventLogConfigSchema(elMappings, ecsVersion);
 }
 
 // return a stripped down version of the ecs schema, with only exportedProperties
@@ -57,7 +59,6 @@ function getEventLogMappings(ecsSchema, exportedProperties) {
     const elValue = lodash.get(result.mappings.properties, prop);
 
     elValue.type = ecsValue.type;
-    elValue.dynamic = 'strict';
   }
 
   return result;
@@ -86,7 +87,7 @@ function writeEventLogMappings(elSchema) {
   // fixObjectTypes(elSchema.mappings);
 
   const mappings = {
-    dynamic: 'strict',
+    dynamic: 'false',
     properties: elSchema.mappings.properties,
   };
 
@@ -94,11 +95,10 @@ function writeEventLogMappings(elSchema) {
   console.log('generated:', EVENT_LOG_MAPPINGS_FILE);
 }
 
-function writeEventLogConfigSchema(elSchema, ecsVersion, multiValuedProperties) {
+function writeEventLogConfigSchema(elSchema, ecsVersion) {
   const lineWriter = LineWriter.createLineWriter();
 
-  const elSchemaMappings = augmentMappings(elSchema.mappings, multiValuedProperties);
-  generateSchemaLines(lineWriter, null, elSchemaMappings);
+  generateSchemaLines(lineWriter, null, elSchema.mappings);
   // last line will have an extraneous comma
   const schemaLines = lineWriter.getContent().replace(/,$/, '');
 
@@ -113,22 +113,21 @@ const StringTypes = new Set(['string', 'keyword', 'text', 'ip']);
 const NumberTypes = new Set(['long', 'integer', 'float']);
 
 function augmentMappings(mappings, multiValuedProperties) {
-  // clone the mappings, as we're adding some additional properties
-  mappings = JSON.parse(JSON.stringify(mappings));
-
   for (const prop of multiValuedProperties) {
     const fullProp = replaceDotWithProperties(prop);
-    lodash.set(mappings.properties, `${fullProp}.multiValued`, true);
+    const metaPropName = `${fullProp}.meta`;
+    const meta = lodash.get(mappings.properties, metaPropName) || {};
+    meta.isArray = 'true';
+    lodash.set(mappings.properties, metaPropName, meta);
   }
-
-  return mappings;
 }
 
 function generateSchemaLines(lineWriter, prop, mappings) {
   const propKey = legalPropertyName(prop);
+  if (mappings == null) return;
 
   if (StringTypes.has(mappings.type)) {
-    if (mappings.multiValued) {
+    if (mappings.meta && mappings.meta.isArray === 'true') {
       lineWriter.addLine(`${propKey}: ecsStringMulti(),`);
     } else {
       lineWriter.addLine(`${propKey}: ecsString(),`);
@@ -169,6 +168,7 @@ function generateSchemaLines(lineWriter, prop, mappings) {
   // write the object properties
   lineWriter.indent();
   for (const prop of Object.keys(mappings.properties)) {
+    if (prop === 'meta') continue;
     generateSchemaLines(lineWriter, prop, mappings.properties[prop]);
   }
   lineWriter.dedent();

@@ -3,81 +3,90 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SavedObjectsClientContract, KibanaRequest } from 'kibana/server';
-import { NewOutput, Output } from '../types';
-import { DEFAULT_OUTPUT, DEFAULT_OUTPUT_ID, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
+import { SavedObjectsClientContract } from 'src/core/server';
+import { NewOutput, Output, OutputSOAttributes } from '../types';
+import { DEFAULT_OUTPUT, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
 import { appContextService } from './app_context';
+import { decodeCloudId } from '../../common';
 
 const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
 
+let cachedAdminUser: null | { username: string; password: string } = null;
+
 class OutputService {
-  public async createDefaultOutput(
-    soClient: SavedObjectsClientContract,
-    adminUser: { username: string; password: string }
-  ) {
-    let defaultOutput;
-
-    try {
-      defaultOutput = await this.get(soClient, DEFAULT_OUTPUT_ID);
-    } catch (err) {
-      if (!err.isBoom || err.output.statusCode !== 404) {
-        throw err;
-      }
-    }
-
-    if (!defaultOutput) {
-      const newDefaultOutput = {
-        ...DEFAULT_OUTPUT,
-        hosts: [appContextService.getConfig()!.fleet.defaultOutputHost],
-        api_key: await this.createDefaultOutputApiKey(adminUser.username, adminUser.password),
-        admin_username: adminUser.username,
-        admin_password: adminUser.password,
-      } as NewOutput;
-
-      await this.create(soClient, newDefaultOutput, {
-        id: DEFAULT_OUTPUT_ID,
-      });
-    }
+  public async getDefaultOutput(soClient: SavedObjectsClientContract) {
+    return await soClient.find<Output>({
+      type: OUTPUT_SAVED_OBJECT_TYPE,
+      searchFields: ['is_default'],
+      search: 'true',
+    });
   }
 
-  public async getAdminUser() {
-    const so = await appContextService
-      .getEncryptedSavedObjects()
-      ?.getDecryptedAsInternalUser<Output>(OUTPUT_SAVED_OBJECT_TYPE, DEFAULT_OUTPUT_ID);
+  public async ensureDefaultOutput(soClient: SavedObjectsClientContract) {
+    const outputs = await this.getDefaultOutput(soClient);
+    const cloud = appContextService.getCloud();
+    const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
+    const cloudUrl = cloudId && decodeCloudId(cloudId)?.elasticsearchUrl;
+    const flagsUrl = appContextService.getConfig()!.fleet.elasticsearch.host;
+    const defaultUrl = 'http://localhost:9200';
+    const defaultOutputUrl = cloudUrl || flagsUrl || defaultUrl;
+
+    if (!outputs.saved_objects.length) {
+      const newDefaultOutput = {
+        ...DEFAULT_OUTPUT,
+        hosts: [defaultOutputUrl],
+        ca_sha256: appContextService.getConfig()!.fleet.elasticsearch.ca_sha256,
+      } as NewOutput;
+
+      return await this.create(soClient, newDefaultOutput);
+    }
 
     return {
-      username: so!.attributes.admin_username,
-      password: so!.attributes.admin_password,
+      ...outputs.saved_objects[0].attributes,
     };
   }
 
-  // TODO: TEMPORARY this is going to be per agent
-  private async createDefaultOutputApiKey(username: string, password: string): Promise<string> {
-    const key = await appContextService.getSecurity()?.authc.createAPIKey(
-      {
-        headers: {
-          authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
-        },
-      } as KibanaRequest,
-      {
-        name: 'fleet-default-output',
-        role_descriptors: {
-          'fleet-output': {
-            cluster: ['monitor'],
-            index: [
-              {
-                names: ['logs-*', 'metrics-*'],
-                privileges: ['write'],
-              },
-            ],
-          },
-        },
-      }
-    );
-    if (!key) {
-      throw new Error('An error occured while creating default API Key');
+  public async updateOutput(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    data: Partial<NewOutput>
+  ) {
+    await soClient.update<OutputSOAttributes>(SAVED_OBJECT_TYPE, id, data);
+  }
+
+  public async getDefaultOutputId(soClient: SavedObjectsClientContract) {
+    const outputs = await this.getDefaultOutput(soClient);
+
+    if (!outputs.saved_objects.length) {
+      return null;
     }
-    return `${key.id}:${key.api_key}`;
+
+    return outputs.saved_objects[0].id;
+  }
+
+  public async getAdminUser(soClient: SavedObjectsClientContract) {
+    if (cachedAdminUser) {
+      return cachedAdminUser;
+    }
+
+    const defaultOutputId = await this.getDefaultOutputId(soClient);
+    if (!defaultOutputId) {
+      return null;
+    }
+    const so = await appContextService
+      .getEncryptedSavedObjects()
+      ?.getDecryptedAsInternalUser<OutputSOAttributes>(OUTPUT_SAVED_OBJECT_TYPE, defaultOutputId);
+
+    if (!so || !so.attributes.fleet_enroll_username || !so.attributes.fleet_enroll_password) {
+      return null;
+    }
+
+    cachedAdminUser = {
+      username: so!.attributes.fleet_enroll_username,
+      password: so!.attributes.fleet_enroll_password,
+    };
+
+    return cachedAdminUser;
   }
 
   public async create(
@@ -85,7 +94,11 @@ class OutputService {
     output: NewOutput,
     options?: { id?: string }
   ): Promise<Output> {
-    const newSo = await soClient.create<Output>(SAVED_OBJECT_TYPE, output as Output, options);
+    const newSo = await soClient.create<OutputSOAttributes>(
+      SAVED_OBJECT_TYPE,
+      output as Output,
+      options
+    );
 
     return {
       id: newSo.id,
@@ -93,11 +106,8 @@ class OutputService {
     };
   }
 
-  public async get(soClient: SavedObjectsClientContract, id: string): Promise<Output | null> {
-    const outputSO = await soClient.get<Output>(SAVED_OBJECT_TYPE, id);
-    if (!outputSO) {
-      return null;
-    }
+  public async get(soClient: SavedObjectsClientContract, id: string): Promise<Output> {
+    const outputSO = await soClient.get<OutputSOAttributes>(SAVED_OBJECT_TYPE, id);
 
     if (outputSO.error) {
       throw new Error(outputSO.error.message);
@@ -107,6 +117,40 @@ class OutputService {
       id: outputSO.id,
       ...outputSO.attributes,
     };
+  }
+
+  public async update(soClient: SavedObjectsClientContract, id: string, data: Partial<Output>) {
+    const outputSO = await soClient.update<OutputSOAttributes>(SAVED_OBJECT_TYPE, id, data);
+
+    if (outputSO.error) {
+      throw new Error(outputSO.error.message);
+    }
+  }
+
+  public async list(soClient: SavedObjectsClientContract) {
+    const outputs = await soClient.find<OutputSOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      page: 1,
+      perPage: 1000,
+    });
+
+    return {
+      items: outputs.saved_objects.map<Output>((outputSO) => {
+        return {
+          id: outputSO.id,
+          ...outputSO.attributes,
+        };
+      }),
+      total: outputs.total,
+      page: 1,
+      perPage: 1000,
+    };
+  }
+
+  // Warning! This method is not going to working in a scenario with multiple Kibana instances,
+  // in this case Kibana should be restarted if the Admin User change
+  public invalidateCache() {
+    cachedAdminUser = null;
   }
 }
 

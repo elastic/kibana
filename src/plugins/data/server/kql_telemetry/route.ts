@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { CoreSetup, IRouter, Logger } from 'kibana/server';
+import { StartServicesAccessor, IRouter, Logger } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 
 export function registerKqlTelemetryRoute(
   router: IRouter,
-  getStartServices: CoreSetup['getStartServices'],
+  getStartServices: StartServicesAccessor,
   logger: Logger
 ) {
   router.post(

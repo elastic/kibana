@@ -27,13 +27,13 @@ import { getEnvOptions } from '../../config/__mocks__/env';
 import { BehaviorSubject, from } from 'rxjs';
 import { rawConfigServiceMock } from '../../config/raw_config_service.mock';
 import { config } from '../plugins_config';
-import { loggingServiceMock } from '../../logging/logging_service.mock';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { coreMock } from '../../mocks';
 import { Plugin } from '../types';
 import { PluginWrapper } from '../plugin';
 
 describe('PluginsService', () => {
-  const logger = loggingServiceMock.create();
+  const logger = loggingSystemMock.create();
   let pluginsService: PluginsService;
 
   const createPlugin = (
@@ -107,7 +107,7 @@ describe('PluginsService', () => {
   });
 
   it("properly resolves `getStartServices` in plugin's lifecycle", async () => {
-    expect.assertions(5);
+    expect.assertions(6);
 
     const pluginPath = 'plugin-path';
 
@@ -125,20 +125,25 @@ describe('PluginsService', () => {
     let contextFromStart: any = null;
     let contextFromStartService: any = null;
 
+    const pluginStartContract = {
+      someApi: () => 'foo',
+    };
+
     const pluginInitializer = () =>
       ({
         setup: async (coreSetup, deps) => {
-          coreSetup.getStartServices().then(([core, plugins]) => {
+          coreSetup.getStartServices().then(([core, plugins, pluginStart]) => {
             startDependenciesResolved = true;
-            contextFromStartService = { core, plugins };
+            contextFromStartService = { core, plugins, pluginStart };
           });
         },
         start: async (core, plugins) => {
           contextFromStart = { core, plugins };
-          await new Promise(resolve => setTimeout(resolve, 10));
+          await new Promise((resolve) => setTimeout(resolve, 10));
           expect(startDependenciesResolved).toBe(false);
+          return pluginStartContract;
         },
-      } as Plugin);
+      } as Plugin<void, typeof pluginStartContract, {}, {}>);
 
     jest.doMock(
       join(pluginPath, 'server'),
@@ -163,5 +168,6 @@ describe('PluginsService', () => {
     expect(startDependenciesResolved).toBe(true);
     expect(contextFromStart!.core).toEqual(contextFromStartService!.core);
     expect(contextFromStart!.plugins).toEqual(contextFromStartService!.plugins);
+    expect(contextFromStartService!.pluginStart).toEqual(pluginStartContract);
   });
 });

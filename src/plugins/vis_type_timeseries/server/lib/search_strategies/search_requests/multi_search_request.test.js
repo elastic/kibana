@@ -17,6 +17,7 @@
  * under the License.
  */
 import { MultiSearchRequest } from './multi_search_request';
+import { UI_SETTINGS } from '../../../../../data/server';
 
 describe('MultiSearchRequest', () => {
   let searchRequest;
@@ -51,7 +52,7 @@ describe('MultiSearchRequest', () => {
 
     expect(responses).toEqual([]);
     expect(req.getUiSettingsService).toHaveBeenCalled();
-    expect(getServiceMock).toHaveBeenCalledWith('search:includeFrozen');
+    expect(getServiceMock).toHaveBeenCalledWith(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
     expect(callWithRequest).toHaveBeenCalledWith(req, 'msearch', {
       body: [
         { ignoreUnavailable: true, index: 'index' },

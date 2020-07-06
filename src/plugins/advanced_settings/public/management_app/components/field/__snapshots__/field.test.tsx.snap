@@ -381,7 +381,7 @@ exports[`Field for array setting should render user value if there is user value
     helpText={
       <span>
         <span>
-          <ForwardRef
+          <EuiLink
             aria-label="Reset array test setting to default"
             data-test-subj="advancedSetting-resetField-array:test:setting"
             onClick={[Function]}
@@ -391,7 +391,7 @@ exports[`Field for array setting should render user value if there is user value
               id="advancedSettings.field.resetToDefaultLinkText"
               values={Object {}}
             />
-          </ForwardRef>
+          </EuiLink>
              
         </span>
       </span>
@@ -818,7 +818,7 @@ exports[`Field for boolean setting should render user value if there is user val
     helpText={
       <span>
         <span>
-          <ForwardRef
+          <EuiLink
             aria-label="Reset boolean test setting to default"
             data-test-subj="advancedSetting-resetField-boolean:test:setting"
             onClick={[Function]}
@@ -828,7 +828,7 @@ exports[`Field for boolean setting should render user value if there is user val
               id="advancedSettings.field.resetToDefaultLinkText"
               values={Object {}}
             />
-          </ForwardRef>
+          </EuiLink>
              
         </span>
       </span>
@@ -1236,7 +1236,7 @@ exports[`Field for image setting should render user value if there is user value
     helpText={
       <span>
         <span>
-          <ForwardRef
+          <EuiLink
             aria-label="Reset image test setting to default"
             data-test-subj="advancedSetting-resetField-image:test:setting"
             onClick={[Function]}
@@ -1246,11 +1246,11 @@ exports[`Field for image setting should render user value if there is user value
               id="advancedSettings.field.resetToDefaultLinkText"
               values={Object {}}
             />
-          </ForwardRef>
+          </EuiLink>
              
         </span>
         <span>
-          <ForwardRef
+          <EuiLink
             aria-label="Change image test setting"
             data-test-subj="advancedSetting-changeImage-image:test:setting"
             onClick={[Function]}
@@ -1260,7 +1260,7 @@ exports[`Field for image setting should render user value if there is user value
               id="advancedSettings.field.changeImageLinkText"
               values={Object {}}
             />
-          </ForwardRef>
+          </EuiLink>
         </span>
       </span>
     }
@@ -1350,7 +1350,6 @@ exports[`Field for json setting should render as read only if saving is disabled
             "$blockScrolling": Infinity,
           }
         }
-        fullWidth={true}
         height="auto"
         isReadOnly={true}
         maxLines={30}
@@ -1456,7 +1455,6 @@ exports[`Field for json setting should render as read only with help text if ove
             "$blockScrolling": Infinity,
           }
         }
-        fullWidth={true}
         height="auto"
         isReadOnly={true}
         maxLines={30}
@@ -1538,7 +1536,6 @@ exports[`Field for json setting should render custom setting icon if it is custo
             "$blockScrolling": Infinity,
           }
         }
-        fullWidth={true}
         height="auto"
         isReadOnly={false}
         maxLines={30}
@@ -1623,7 +1620,7 @@ exports[`Field for json setting should render default value if there is no user 
     helpText={
       <span>
         <span>
-          <ForwardRef
+          <EuiLink
             aria-label="Reset json test setting to default"
             data-test-subj="advancedSetting-resetField-json:test:setting"
             onClick={[Function]}
@@ -1633,7 +1630,7 @@ exports[`Field for json setting should render default value if there is no user 
               id="advancedSettings.field.resetToDefaultLinkText"
               values={Object {}}
             />
-          </ForwardRef>
+          </EuiLink>
              
         </span>
       </span>
@@ -1651,7 +1648,6 @@ exports[`Field for json setting should render default value if there is no user 
             "$blockScrolling": Infinity,
           }
         }
-        fullWidth={true}
         height="auto"
         isReadOnly={false}
         maxLines={30}
@@ -1740,7 +1736,6 @@ exports[`Field for json setting should render unsaved value if there are unsaved
             "$blockScrolling": Infinity,
           }
         }
-        fullWidth={true}
         height="auto"
         isReadOnly={false}
         maxLines={30}
@@ -1836,7 +1831,7 @@ exports[`Field for json setting should render user value if there is user value 
     helpText={
       <span>
         <span>
-          <ForwardRef
+          <EuiLink
             aria-label="Reset json test setting to default"
             data-test-subj="advancedSetting-resetField-json:test:setting"
             onClick={[Function]}
@@ -1846,7 +1841,7 @@ exports[`Field for json setting should render user value if there is user value 
               id="advancedSettings.field.resetToDefaultLinkText"
               values={Object {}}
             />
-          </ForwardRef>
+          </EuiLink>
              
         </span>
       </span>
@@ -1864,7 +1859,6 @@ exports[`Field for json setting should render user value if there is user value 
             "$blockScrolling": Infinity,
           }
         }
-        fullWidth={true}
         height="auto"
         isReadOnly={false}
         maxLines={30}
@@ -1935,7 +1929,6 @@ exports[`Field for markdown setting should render as read only if saving is disa
             "$blockScrolling": Infinity,
           }
         }
-        fullWidth={true}
         height="auto"
         isReadOnly={true}
         maxLines={30}
@@ -2038,7 +2031,6 @@ exports[`Field for markdown setting should render as read only with help text if
             "$blockScrolling": Infinity,
           }
         }
-        fullWidth={true}
         height="auto"
         isReadOnly={true}
         maxLines={30}
@@ -2120,7 +2112,6 @@ exports[`Field for markdown setting should render custom setting icon if it is c
             "$blockScrolling": Infinity,
           }
         }
-        fullWidth={true}
         height="auto"
         isReadOnly={false}
         maxLines={30}
@@ -2191,7 +2182,6 @@ exports[`Field for markdown setting should render default value if there is no u
             "$blockScrolling": Infinity,
           }
         }
-        fullWidth={true}
         height="auto"
         isReadOnly={false}
         maxLines={30}
@@ -2280,7 +2270,6 @@ exports[`Field for markdown setting should render unsaved value if there are uns
             "$blockScrolling": Infinity,
           }
         }
-        fullWidth={true}
         height="auto"
         isReadOnly={false}
         maxLines={30}
@@ -2369,7 +2358,7 @@ exports[`Field for markdown setting should render user value if there is user va
     helpText={
       <span>
         <span>
-          <ForwardRef
+          <EuiLink
             aria-label="Reset markdown test setting to default"
             data-test-subj="advancedSetting-resetField-markdown:test:setting"
             onClick={[Function]}
@@ -2379,7 +2368,7 @@ exports[`Field for markdown setting should render user value if there is user va
               id="advancedSettings.field.resetToDefaultLinkText"
               values={Object {}}
             />
-          </ForwardRef>
+          </EuiLink>
              
         </span>
       </span>
@@ -2397,7 +2386,6 @@ exports[`Field for markdown setting should render user value if there is user va
             "$blockScrolling": Infinity,
           }
         }
-        fullWidth={true}
         height="auto"
         isReadOnly={false}
         maxLines={30}
@@ -2797,7 +2785,7 @@ exports[`Field for number setting should render user value if there is user valu
     helpText={
       <span>
         <span>
-          <ForwardRef
+          <EuiLink
             aria-label="Reset number test setting to default"
             data-test-subj="advancedSetting-resetField-number:test:setting"
             onClick={[Function]}
@@ -2807,7 +2795,7 @@ exports[`Field for number setting should render user value if there is user valu
               id="advancedSettings.field.resetToDefaultLinkText"
               values={Object {}}
             />
-          </ForwardRef>
+          </EuiLink>
              
         </span>
       </span>
@@ -3284,7 +3272,7 @@ exports[`Field for select setting should render user value if there is user valu
     helpText={
       <span>
         <span>
-          <ForwardRef
+          <EuiLink
             aria-label="Reset select test setting to default"
             data-test-subj="advancedSetting-resetField-select:test:setting"
             onClick={[Function]}
@@ -3294,7 +3282,7 @@ exports[`Field for select setting should render user value if there is user valu
               id="advancedSettings.field.resetToDefaultLinkText"
               values={Object {}}
             />
-          </ForwardRef>
+          </EuiLink>
              
         </span>
       </span>
@@ -3707,7 +3695,7 @@ exports[`Field for string setting should render user value if there is user valu
     helpText={
       <span>
         <span>
-          <ForwardRef
+          <EuiLink
             aria-label="Reset string test setting to default"
             data-test-subj="advancedSetting-resetField-string:test:setting"
             onClick={[Function]}
@@ -3717,7 +3705,7 @@ exports[`Field for string setting should render user value if there is user valu
               id="advancedSettings.field.resetToDefaultLinkText"
               values={Object {}}
             />
-          </ForwardRef>
+          </EuiLink>
              
         </span>
       </span>
@@ -4114,7 +4102,7 @@ exports[`Field for stringWithValidation setting should render user value if ther
     helpText={
       <span>
         <span>
-          <ForwardRef
+          <EuiLink
             aria-label="Reset string test validation setting to default"
             data-test-subj="advancedSetting-resetField-string:test-validation:setting"
             onClick={[Function]}
@@ -4124,7 +4112,7 @@ exports[`Field for stringWithValidation setting should render user value if ther
               id="advancedSettings.field.resetToDefaultLinkText"
               values={Object {}}
             />
-          </ForwardRef>
+          </EuiLink>
              
         </span>
       </span>

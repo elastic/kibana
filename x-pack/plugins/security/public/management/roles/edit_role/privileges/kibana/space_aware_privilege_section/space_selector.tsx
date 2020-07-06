@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiComboBox, EuiComboBoxOptionProps, EuiHealth, EuiHighlight } from '@elastic/eui';
-import { InjectedIntl } from '@kbn/i18n/react';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiHealth, EuiHighlight } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
-import { Space, getSpaceColor } from '../../../../../../../../spaces/public';
+import { getSpaceColor } from '../../../../../../../../spaces/public';
+import { Space } from '../../../../../../../../spaces/common/model/space';
 
 const spaceToOption = (space?: Space, currentSelection?: 'global' | 'spaces') => {
   if (!space) {
@@ -25,14 +26,13 @@ const spaceToOption = (space?: Space, currentSelection?: 'global' | 'spaces') =>
 };
 
 const spaceIdToOption = (spaces: Space[]) => (s: string) =>
-  spaceToOption(spaces.find(space => space.id === s));
+  spaceToOption(spaces.find((space) => space.id === s));
 
 interface Props {
   spaces: Space[];
   selectedSpaceIds: string[];
   onChange: (spaceIds: string[]) => void;
   disabled?: boolean;
-  intl: InjectedIntl;
 }
 
 export class SpaceSelector extends Component<Props, {}> {
@@ -51,8 +51,7 @@ export class SpaceSelector extends Component<Props, {}> {
     return (
       <EuiComboBox
         data-test-subj={'spaceSelectorComboBox'}
-        aria-label={this.props.intl.formatMessage({
-          id: 'xpack.security.management.editRole.spaceSelectorLabel',
+        aria-label={i18n.translate('xpack.security.management.editRole.spaceSelectorLabel', {
           defaultMessage: 'Spaces',
         })}
         fullWidth
@@ -65,12 +64,12 @@ export class SpaceSelector extends Component<Props, {}> {
     );
   }
 
-  private onChange = (selectedSpaces: EuiComboBoxOptionProps[]) => {
-    this.props.onChange(selectedSpaces.map(s => (s.id as string).split('spaceOption_')[1]));
+  private onChange = (selectedSpaces: EuiComboBoxOptionOption[]) => {
+    this.props.onChange(selectedSpaces.map((s) => (s.id as string).split('spaceOption_')[1]));
   };
 
   private getOptions = () => {
-    const options = this.props.spaces.map(space =>
+    const options = this.props.spaces.map((space) =>
       spaceToOption(
         space,
         this.props.selectedSpaceIds.includes('*')
@@ -81,12 +80,12 @@ export class SpaceSelector extends Component<Props, {}> {
       )
     );
 
-    return options.filter(Boolean) as EuiComboBoxOptionProps[];
+    return options.filter(Boolean) as EuiComboBoxOptionOption[];
   };
 
   private getSelectedOptions = () => {
     const options = this.props.selectedSpaceIds.map(spaceIdToOption(this.props.spaces));
 
-    return options.filter(Boolean) as EuiComboBoxOptionProps[];
+    return options.filter(Boolean) as EuiComboBoxOptionOption[];
   };
 }

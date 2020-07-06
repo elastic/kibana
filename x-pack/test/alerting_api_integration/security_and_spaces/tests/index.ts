@@ -17,8 +17,8 @@ export default function alertingApiIntegrationTests({
   const spacesService = getService('spaces');
   const esArchiver = getService('esArchiver');
 
-  describe('alerting api integration security and spaces enabled', function() {
-    this.tags('ciGroup3');
+  describe('alerting api integration security and spaces enabled', function () {
+    this.tags('ciGroup5');
 
     before(async () => {
       for (const space of Spaces) {
@@ -31,7 +31,7 @@ export default function alertingApiIntegrationTests({
         await securityService.user.create(user.username, {
           password: user.password,
           full_name: user.fullName,
-          roles: roles.map(role => role.name),
+          roles: roles.map((role) => role.name),
         });
 
         for (const role of roles) {

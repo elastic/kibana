@@ -8,17 +8,16 @@ import { Feature } from '../../../../plugins/features/server';
 import { Space } from '../../common/model/space';
 import { setupCapabilitiesSwitcher } from './capabilities_switcher';
 import { Capabilities, CoreSetup } from 'src/core/server';
-import { coreMock, httpServerMock, loggingServiceMock } from 'src/core/server/mocks';
+import { coreMock, httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
 import { featuresPluginMock } from '../../../features/server/mocks';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
 import { PluginsStart } from '../plugin';
 
-const features: Feature[] = [
+const features = ([
   {
     id: 'feature_1',
     name: 'Feature 1',
     app: [],
-    privileges: {},
   },
   {
     id: 'feature_2',
@@ -60,7 +59,7 @@ const features: Feature[] = [
       },
     },
   },
-];
+] as unknown) as Feature[];
 
 const buildCapabilities = () =>
   Object.freeze({
@@ -104,12 +103,13 @@ const setup = (space: Space) => {
   coreSetup.getStartServices.mockResolvedValue([
     coreMock.createStart(),
     { features: featuresStart },
+    {},
   ]);
 
   const spacesService = spacesServiceMock.createSetupContract();
   spacesService.getActiveSpace.mockResolvedValue(space);
 
-  const logger = loggingServiceMock.createLogger();
+  const logger = loggingSystemMock.createLogger();
 
   const switcher = setupCapabilitiesSwitcher(
     (coreSetup as unknown) as CoreSetup<PluginsStart>,
@@ -154,7 +154,7 @@ describe('capabilitiesSwitcher', () => {
     expect(result).toEqual(buildCapabilities());
   });
 
-  it('logs a warning, and does not toggle capabilities if an error is encountered', async () => {
+  it('logs a debug message, and does not toggle capabilities if an error is encountered', async () => {
     const space: Space = {
       id: 'space',
       name: '',
@@ -171,7 +171,7 @@ describe('capabilitiesSwitcher', () => {
     const result = await switcher(request, capabilities);
 
     expect(result).toEqual(buildCapabilities());
-    expect(logger.warn).toHaveBeenCalledWith(
+    expect(logger.debug).toHaveBeenCalledWith(
       `Error toggling capabilities for request to /path: Error: Something terrible happened`
     );
   });

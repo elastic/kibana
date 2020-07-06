@@ -18,8 +18,7 @@
  */
 
 import { snakeCase } from 'lodash';
-import { Logger } from 'kibana/server';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { Logger, LegacyAPICaller } from 'kibana/server';
 import { Collector, CollectorOptions } from './collector';
 import { UsageCollector } from './usage_collector';
 
@@ -31,7 +30,7 @@ interface CollectorSetConfig {
 
 export class CollectorSet {
   private _waitingForAllCollectorsTimestamp?: number;
-  private logger: Logger;
+  private readonly logger: Logger;
   private readonly maximumWaitTimeForAllCollectorsInS: number;
   private collectors: Array<Collector<any, any>> = [];
   constructor({ logger, maximumWaitTimeForAllCollectorsInS, collectors = [] }: CollectorSetConfig) {
@@ -43,7 +42,7 @@ export class CollectorSet {
   public makeStatsCollector = <T, U>(options: CollectorOptions<T, U>) => {
     return new Collector(this.logger, options);
   };
-  public makeUsageCollector = <T, U>(options: CollectorOptions<T, U>) => {
+  public makeUsageCollector = <T, U = T>(options: CollectorOptions<T, U>) => {
     return new UsageCollector(this.logger, options);
   };
 
@@ -65,14 +64,15 @@ export class CollectorSet {
   };
 
   public getCollectorByType = (type: string) => {
-    return this.collectors.find(c => c.type === type);
+    return this.collectors.find((c) => c.type === type);
   };
 
   public isUsageCollector = (x: UsageCollector | any): x is UsageCollector => {
     return x instanceof UsageCollector;
   };
 
-  public areAllCollectorsReady = async (collectorSet = this) => {
+  public areAllCollectorsReady = async (collectorSet: CollectorSet = this) => {
+    // Kept this for runtime validation in JS code.
     if (!(collectorSet instanceof CollectorSet)) {
       throw new Error(
         `areAllCollectorsReady method given bad collectorSet parameter: ` + typeof collectorSet
@@ -112,7 +112,7 @@ export class CollectorSet {
   };
 
   public bulkFetch = async (
-    callCluster: CallCluster,
+    callCluster: LegacyAPICaller,
     collectors: Array<Collector<any, any>> = this.collectors
   ) => {
     const responses = [];
@@ -135,13 +135,13 @@ export class CollectorSet {
   /*
    * @return {new CollectorSet}
    */
-  public getFilteredCollectorSet = (filter: any) => {
+  public getFilteredCollectorSet = (filter: (col: Collector) => boolean) => {
     const filtered = this.collectors.filter(filter);
     return this.makeCollectorSetFromArray(filtered);
   };
 
-  public bulkFetchUsage = async (callCluster: CallCluster) => {
-    const usageCollectors = this.getFilteredCollectorSet((c: any) => c instanceof UsageCollector);
+  public bulkFetchUsage = async (callCluster: LegacyAPICaller) => {
+    const usageCollectors = this.getFilteredCollectorSet((c) => c instanceof UsageCollector);
     return await this.bulkFetch(callCluster, usageCollectors.collectors);
   };
 

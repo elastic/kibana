@@ -8,6 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
 import { objectValuesToArrays } from '../../lib/helper';
+import { API_URLS } from '../../../common/constants';
 
 const arrayOrStringType = schema.maybe(
   schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
@@ -15,7 +16,7 @@ const arrayOrStringType = schema.maybe(
 
 export const createGetOverviewFilters: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
-  path: '/api/uptime/filters',
+  path: API_URLS.FILTERS,
   validate: {
     query: schema.object({
       dateRangeStart: schema.string(),
@@ -27,11 +28,7 @@ export const createGetOverviewFilters: UMRestApiRouteFactory = (libs: UMServerLi
       tags: arrayOrStringType,
     }),
   },
-
-  options: {
-    tags: ['access:uptime'],
-  },
-  handler: async ({ callES }, _context, request, response) => {
+  handler: async ({ callES, dynamicSettings }, _context, request, response) => {
     const { dateRangeStart, dateRangeEnd, locations, schemes, search, ports, tags } = request.query;
 
     let parsedSearch: Record<string, any> | undefined;
@@ -45,6 +42,7 @@ export const createGetOverviewFilters: UMRestApiRouteFactory = (libs: UMServerLi
 
     const filtersResponse = await libs.requests.getFilterBar({
       callES,
+      dynamicSettings,
       dateRangeStart,
       dateRangeEnd,
       search: parsedSearch,

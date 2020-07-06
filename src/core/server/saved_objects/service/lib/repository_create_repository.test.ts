@@ -32,7 +32,7 @@ describe('SavedObjectsRepository#createRepository', () => {
   typeRegistry.registerType({
     name: 'nsAgnosticType',
     hidden: false,
-    namespaceAgnostic: true,
+    namespaceType: 'agnostic',
     mappings: {
       properties: {
         name: { type: 'keyword' },
@@ -44,7 +44,7 @@ describe('SavedObjectsRepository#createRepository', () => {
   typeRegistry.registerType({
     name: 'nsType',
     hidden: false,
-    namespaceAgnostic: false,
+    namespaceType: 'single',
     indexPattern: 'beats',
     mappings: {
       properties: {
@@ -56,7 +56,7 @@ describe('SavedObjectsRepository#createRepository', () => {
   typeRegistry.registerType({
     name: 'hiddenType',
     hidden: true,
-    namespaceAgnostic: true,
+    namespaceType: 'agnostic',
     mappings: {
       properties: {
         name: { type: 'keyword' },
@@ -102,7 +102,6 @@ describe('SavedObjectsRepository#createRepository', () => {
     expect(repository).toBeDefined();
     expect(RepositoryConstructor.mock.calls[0][0].allowedTypes).toMatchInlineSnapshot(`
       Array [
-        "config",
         "nsAgnosticType",
         "nsType",
       ]
@@ -121,7 +120,6 @@ describe('SavedObjectsRepository#createRepository', () => {
     expect(repository).toBeDefined();
     expect(RepositoryConstructor.mock.calls[0][0].allowedTypes).toMatchInlineSnapshot(`
       Array [
-        "config",
         "nsAgnosticType",
         "nsType",
         "hiddenType",

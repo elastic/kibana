@@ -22,7 +22,7 @@ export const expectErrorAsync = (fn: (...args: unknown[]) => Promise<unknown>): 
     .then(() => {
       throw new Error('Expected an error throw.');
     })
-    .catch(error => {
+    .catch((error) => {
       if (error.message === 'Expected an error throw.') {
         throw error;
       }

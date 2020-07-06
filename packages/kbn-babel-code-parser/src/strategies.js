@@ -59,7 +59,7 @@ export async function dependenciesParseStrategy(
   // Get dependencies from a single file and filter
   // out node native modules from the result
   const dependencies = (await parseSingleFile(mainEntry, dependenciesVisitorsGenerator)).filter(
-    dep => !builtinModules.includes(dep)
+    (dep) => !builtinModules.includes(dep)
   );
 
   // Return the list of all the new entries found into

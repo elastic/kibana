@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
+export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
@@ -39,7 +39,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
         await supertest
           .get('/api/np-context-in-legacy')
           .expect(200)
-          .expect(JSON.stringify({ contexts: ['core', 'search', 'pluginA'] }));
+          .expect(JSON.stringify({ contexts: ['core', 'pluginA'] }));
       });
     });
 

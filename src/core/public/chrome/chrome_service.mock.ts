@@ -23,7 +23,8 @@ import {
   ChromeBreadcrumb,
   ChromeService,
   InternalChromeStart,
-} from './chrome_service';
+  NavType,
+} from './';
 
 const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<InternalChromeStart> = {
@@ -61,8 +62,6 @@ const createStartContractMock = () => {
     getBrand$: jest.fn(),
     setIsVisible: jest.fn(),
     getIsVisible$: jest.fn(),
-    setIsCollapsed: jest.fn(),
-    getIsCollapsed$: jest.fn(),
     addApplicationClass: jest.fn(),
     removeApplicationClass: jest.fn(),
     getApplicationClasses$: jest.fn(),
@@ -73,15 +72,21 @@ const createStartContractMock = () => {
     getHelpExtension$: jest.fn(),
     setHelpExtension: jest.fn(),
     setHelpSupportUrl: jest.fn(),
+    getIsNavDrawerLocked$: jest.fn(),
+    getNavType$: jest.fn(),
+    getCustomNavLink$: jest.fn(),
+    setCustomNavLink: jest.fn(),
   };
   startContract.navLinks.getAll.mockReturnValue([]);
   startContract.getBrand$.mockReturnValue(new BehaviorSubject({} as ChromeBrand));
   startContract.getIsVisible$.mockReturnValue(new BehaviorSubject(false));
-  startContract.getIsCollapsed$.mockReturnValue(new BehaviorSubject(false));
   startContract.getApplicationClasses$.mockReturnValue(new BehaviorSubject(['class-name']));
   startContract.getBadge$.mockReturnValue(new BehaviorSubject({} as ChromeBadge));
   startContract.getBreadcrumbs$.mockReturnValue(new BehaviorSubject([{} as ChromeBreadcrumb]));
+  startContract.getCustomNavLink$.mockReturnValue(new BehaviorSubject(undefined));
   startContract.getHelpExtension$.mockReturnValue(new BehaviorSubject(undefined));
+  startContract.getIsNavDrawerLocked$.mockReturnValue(new BehaviorSubject(false));
+  startContract.getNavType$.mockReturnValue(new BehaviorSubject('modern' as NavType));
   return startContract;
 };
 

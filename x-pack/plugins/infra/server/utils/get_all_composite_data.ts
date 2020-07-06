@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
-import { KibanaFramework } from '../lib/adapters/framework/kibana_framework_adapter';
 import { InfraDatabaseSearchResponse } from '../lib/adapters/framework';
 
 export const getAllCompositeData = async <
@@ -13,18 +11,13 @@ export const getAllCompositeData = async <
   Bucket = {},
   Options extends object = {}
 >(
-  framework: KibanaFramework,
-  requestContext: RequestHandlerContext,
+  callCluster: (options: Options) => Promise<InfraDatabaseSearchResponse<{}, Aggregation>>,
   options: Options,
   bucketSelector: (response: InfraDatabaseSearchResponse<{}, Aggregation>) => Bucket[],
   onAfterKey: (options: Options, response: InfraDatabaseSearchResponse<{}, Aggregation>) => Options,
   previousBuckets: Bucket[] = []
 ): Promise<Bucket[]> => {
-  const response = await framework.callWithRequest<{}, Aggregation>(
-    requestContext,
-    'search',
-    options
-  );
+  const response = await callCluster(options);
 
   // Nothing available, return the previous buckets.
   if (response.hits.total.value === 0) {
@@ -46,8 +39,7 @@ export const getAllCompositeData = async <
   // There is possibly more data, concat previous and current buckets and call ourselves recursively.
   const newOptions = onAfterKey(options, response);
   return getAllCompositeData(
-    framework,
-    requestContext,
+    callCluster,
     newOptions,
     bucketSelector,
     onAfterKey,

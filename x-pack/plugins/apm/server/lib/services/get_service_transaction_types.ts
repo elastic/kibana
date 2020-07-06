@@ -6,9 +6,9 @@
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
-  TRANSACTION_TYPE
+  TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../helpers/range_filter';
+import { rangeFilter } from '../../../common/utils/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export async function getServiceTransactionTypes(
@@ -26,20 +26,20 @@ export async function getServiceTransactionTypes(
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             { terms: { [PROCESSOR_EVENT]: ['transaction'] } },
-            { range: rangeFilter(start, end) }
-          ]
-        }
+            { range: rangeFilter(start, end) },
+          ],
+        },
       },
       aggs: {
         types: {
-          terms: { field: TRANSACTION_TYPE, size: 100 }
-        }
-      }
-    }
+          terms: { field: TRANSACTION_TYPE, size: 100 },
+        },
+      },
+    },
   };
 
   const { aggregations } = await client.search(params);
   const transactionTypes =
-    aggregations?.types.buckets.map(bucket => bucket.key as string) || [];
+    aggregations?.types.buckets.map((bucket) => bucket.key as string) || [];
   return { transactionTypes };
 }

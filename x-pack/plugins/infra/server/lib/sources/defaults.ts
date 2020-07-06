@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraSourceConfiguration } from './types';
+import { InfraSourceConfiguration } from '../../../common/http_api/source_api';
 
 export const defaultSourceConfiguration: InfraSourceConfiguration = {
   name: 'Default',
@@ -19,6 +19,8 @@ export const defaultSourceConfiguration: InfraSourceConfiguration = {
     tiebreaker: '_doc',
     timestamp: '@timestamp',
   },
+  inventoryDefaultView: '0',
+  metricsExplorerDefaultView: '0',
   logColumns: [
     {
       timestampColumn: {

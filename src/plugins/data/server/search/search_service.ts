@@ -17,86 +17,52 @@
  * under the License.
  */
 
+import { Plugin, PluginInitializerContext, CoreSetup } from '../../../../core/server';
 import {
-  PluginInitializerContext,
-  Plugin,
-  CoreSetup,
-  IContextContainer,
-} from '../../../../core/server';
-import { registerSearchRoute } from './routes';
-import { ISearchSetup } from './i_search_setup';
-import { createApi } from './create_api';
-import {
+  ISearchSetup,
+  ISearchStart,
   TSearchStrategiesMap,
-  TSearchStrategyProvider,
-  TRegisterSearchStrategyProvider,
-} from './i_search_strategy';
-import { IRouteHandlerSearchContext } from './i_route_handler_search_context';
-import { esSearchService } from './es_search';
+  TRegisterSearchStrategy,
+  TGetSearchStrategy,
+} from './types';
+import { registerSearchRoute } from './routes';
+import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './es_search';
+import { searchSavedObjectType } from '../saved_objects';
+import { DataPluginStart } from '../plugin';
 
-declare module 'kibana/server' {
-  interface RequestHandlerContext {
-    search?: IRouteHandlerSearchContext;
-  }
-}
-
-export class SearchService implements Plugin<ISearchSetup, void> {
+export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private searchStrategies: TSearchStrategiesMap = {};
-
-  private contextContainer?: IContextContainer<TSearchStrategyProvider<any>>;
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup): ISearchSetup {
-    const router = core.http.createRouter();
-    registerSearchRoute(router);
+  public setup(core: CoreSetup<object, DataPluginStart>): ISearchSetup {
+    core.savedObjects.registerType(searchSavedObjectType);
 
-    this.contextContainer = core.context.createContextContainer();
-
-    core.http.registerRouteHandlerContext<'search'>('search', context => {
-      return createApi({
-        caller: context.core!.elasticsearch.dataClient.callAsCurrentUser,
-        searchStrategies: this.searchStrategies,
-      });
-    });
-
-    const registerSearchStrategyProvider: TRegisterSearchStrategyProvider = (
-      plugin,
-      name,
-      strategyProvider
-    ) => {
-      this.searchStrategies[name] = this.contextContainer!.createHandler(plugin, strategyProvider);
-    };
-
-    const api: ISearchSetup = {
-      registerSearchStrategyContext: this.contextContainer!.registerContext,
-      registerSearchStrategyProvider,
-      __LEGACY: {
-        search: (caller, request, strategyName) => {
-          const searchAPI = createApi({
-            caller,
-            searchStrategies: this.searchStrategies,
-          });
-          return searchAPI.search(request, {}, strategyName);
-        },
-      },
-    };
-
-    api.registerSearchStrategyContext(this.initializerContext.opaqueId, 'core', () => core);
-    api.registerSearchStrategyContext(
-      this.initializerContext.opaqueId,
-      'config$',
-      () => this.initializerContext.config.legacy.globalConfig$
+    this.registerSearchStrategy(
+      ES_SEARCH_STRATEGY,
+      esSearchStrategyProvider(this.initializerContext.config.legacy.globalConfig$)
     );
 
-    // ES search capabilities are written in a way that it could easily be a separate plugin,
-    // however these two plugins are tightly coupled due to the default search strategy using
-    // es search types.
-    esSearchService(this.initializerContext).setup(core, { search: api });
+    registerSearchRoute(core);
 
-    return api;
+    return { registerSearchStrategy: this.registerSearchStrategy };
   }
 
-  public start() {}
+  public start(): ISearchStart {
+    return { getSearchStrategy: this.getSearchStrategy };
+  }
+
   public stop() {}
+
+  private registerSearchStrategy: TRegisterSearchStrategy = (name, strategy) => {
+    this.searchStrategies[name] = strategy;
+  };
+
+  private getSearchStrategy: TGetSearchStrategy = (name) => {
+    const strategy = this.searchStrategies[name];
+    if (!strategy) {
+      throw new Error(`Search strategy ${name} not found`);
+    }
+    return strategy;
+  };
 }

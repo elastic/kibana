@@ -19,20 +19,10 @@ export function setupXPackMain(server) {
   const info = new XPackInfo(server, { licensing: server.newPlatform.setup.plugins.licensing });
 
   server.expose('info', info);
-  server.expose('createXPackInfo', options => {
-    const client = server.newPlatform.setup.core.elasticsearch.createClient(options.clusterSource);
-    const monitoringLicensing = server.newPlatform.setup.plugins.licensing.createLicensePoller(
-      client,
-      options.pollFrequencyInMillis
-    );
-
-    return new XPackInfo(server, { licensing: monitoringLicensing });
-  });
 
   server.ext('onPreResponse', (request, h) => injectXPackInfoSignature(info, request, h));
 
-  const { registerFeature, getFeatures } = server.newPlatform.setup.plugins.features;
-  server.expose('registerFeature', registerFeature);
+  const { getFeatures } = server.newPlatform.setup.plugins.features;
   server.expose('getFeatures', getFeatures);
 
   const setPluginStatus = () => {

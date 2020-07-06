@@ -11,6 +11,7 @@ import { curry } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import { ActionsConfigType } from './types';
+import { ActionTypeDisabledError } from './lib';
 
 export enum WhitelistedHosts {
   Any = '*',
@@ -65,8 +66,8 @@ function isWhitelisted({ whitelistedHosts }: ActionsConfigType, hostname: string
 function isWhitelistedHostnameInUri(config: ActionsConfigType, uri: string): boolean {
   return pipe(
     tryCatch(() => new URL(uri)),
-    map(url => url.hostname),
-    mapNullable(hostname => isWhitelisted(config, hostname)),
+    map((url) => url.hostname),
+    mapNullable((hostname) => isWhitelisted(config, hostname)),
     getOrElse<boolean>(() => false)
   );
 }
@@ -103,7 +104,7 @@ export function getActionsConfigurationUtilities(
     },
     ensureActionTypeEnabled(actionType: string) {
       if (!isActionTypeEnabled(actionType)) {
-        throw new Error(disabledActionTypeErrorMessage(actionType));
+        throw new ActionTypeDisabledError(disabledActionTypeErrorMessage(actionType), 'config');
       }
     },
   };

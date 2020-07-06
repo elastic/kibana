@@ -24,7 +24,8 @@ import { LegacyConfig } from '../../legacy';
  * @internal
  **/
 interface SavedObjectsSchemaTypeDefinition {
-  isNamespaceAgnostic: boolean;
+  isNamespaceAgnostic?: boolean;
+  multiNamespace?: boolean;
   hidden?: boolean;
   indexPattern?: ((config: LegacyConfig) => string) | string;
   convertToAliasScript?: string;
@@ -72,7 +73,7 @@ export class SavedObjectsSchema {
   }
 
   public isNamespaceAgnostic(type: string) {
-    // if no plugins have registered a uiExports.savedObjectSchemas,
+    // if no plugins have registered a Saved Objects Schema,
     // this.schema will be undefined, and no types are namespace agnostic
     if (!this.definition) {
       return false;
@@ -83,5 +84,33 @@ export class SavedObjectsSchema {
       return false;
     }
     return Boolean(typeSchema.isNamespaceAgnostic);
+  }
+
+  public isSingleNamespace(type: string) {
+    // if no plugins have registered a Saved Objects Schema,
+    // this.schema will be undefined, and all types are namespace isolated
+    if (!this.definition) {
+      return true;
+    }
+
+    const typeSchema = this.definition[type];
+    if (!typeSchema) {
+      return true;
+    }
+    return !Boolean(typeSchema.isNamespaceAgnostic) && !Boolean(typeSchema.multiNamespace);
+  }
+
+  public isMultiNamespace(type: string) {
+    // if no plugins have registered a Saved Objects Schema,
+    // this.schema will be undefined, and no types are multi-namespace
+    if (!this.definition) {
+      return false;
+    }
+
+    const typeSchema = this.definition[type];
+    if (!typeSchema) {
+      return false;
+    }
+    return !Boolean(typeSchema.isNamespaceAgnostic) && Boolean(typeSchema.multiNamespace);
   }
 }

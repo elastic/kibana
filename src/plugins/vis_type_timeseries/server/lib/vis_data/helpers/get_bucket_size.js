@@ -61,7 +61,7 @@ const calculateBucketData = (timeInterval, capabilities) => {
   };
 };
 
-const calculateBucketSizeForAutoInterval = req => {
+const calculateBucketSizeForAutoInterval = (req) => {
   const duration = getTimerangeDuration(req);
 
   return calculateAuto.near(100, duration).asSeconds();

@@ -8,10 +8,10 @@ import {
   KibanaRequest,
   Logger,
   HttpServiceSetup,
-  IClusterClient,
+  ILegacyClusterClient,
   Headers,
 } from '../../../../../../src/core/server';
-import { deepFreeze } from '../../../../../../src/core/utils';
+import { deepFreeze } from '../../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../common/model';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -21,10 +21,14 @@ import { Tokens } from '../tokens';
  * Represents available provider options.
  */
 export interface AuthenticationProviderOptions {
+  name: string;
   basePath: HttpServiceSetup['basePath'];
-  client: IClusterClient;
+  client: ILegacyClusterClient;
   logger: Logger;
   tokens: PublicMethodsOf<Tokens>;
+  urls: {
+    loggedOut: string;
+  };
 }
 
 /**
@@ -40,6 +44,12 @@ export abstract class BaseAuthenticationProvider {
    * Type of the provider.
    */
   static readonly type: string;
+
+  /**
+   * Type of the provider. We use `this.constructor` trick to get access to the static `type` field
+   * of the specific `BaseAuthenticationProvider` subclass.
+   */
+  public readonly type = (this.constructor as any).type as string;
 
   /**
    * Logger instance bound to a specific provider context.
@@ -102,9 +112,7 @@ export abstract class BaseAuthenticationProvider {
       ...(await this.options.client
         .asScoped({ headers: { ...request.headers, ...authHeaders } })
         .callAsCurrentUser('shield.authenticate')),
-      // We use `this.constructor` trick to get access to the static `type` field of the specific
-      // `BaseAuthenticationProvider` subclass.
-      authentication_provider: (this.constructor as any).type,
+      authentication_provider: this.options.name,
     } as AuthenticatedUser);
   }
 }

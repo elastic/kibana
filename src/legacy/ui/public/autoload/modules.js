@@ -25,7 +25,6 @@ import '../private';
 import '../promises';
 import '../state_management/app_state';
 import '../state_management/global_state';
-import '../style_compile';
 import '../url';
 import '../directives/watch_multi';
 import '../react_components';

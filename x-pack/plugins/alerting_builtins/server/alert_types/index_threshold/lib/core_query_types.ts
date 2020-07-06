@@ -41,9 +41,15 @@ export type CoreQueryParams = TypeOf<typeof CoreQueryParamsSchema>;
 // Meant to be used in a "subclass"'s schema body validator, so the
 // anyParams object is assumed to have been validated with the schema
 // above.
-// Using direct type not allowed, circular reference, so body is typed to any.
-export function validateCoreQueryBody(anyParams: any): string | undefined {
-  const { aggType, aggField, groupBy, termField, termSize }: CoreQueryParams = anyParams;
+// Using direct type not allowed, circular reference, so body is typed to unknown.
+export function validateCoreQueryBody(anyParams: unknown): string | undefined {
+  const {
+    aggType,
+    aggField,
+    groupBy,
+    termField,
+    termSize,
+  }: CoreQueryParams = anyParams as CoreQueryParams;
   if (aggType !== 'count' && !aggField) {
     return i18n.translate('xpack.alertingBuiltins.indexThreshold.aggTypeRequiredErrorMessage', {
       defaultMessage: '[aggField]: must have a value when [aggType] is "{aggType}"',

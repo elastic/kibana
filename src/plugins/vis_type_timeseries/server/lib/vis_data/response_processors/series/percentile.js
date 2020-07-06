@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { getAggValue } from '../../helpers/get_agg_value';
 import { getDefaultDecoration } from '../../helpers/get_default_decoration';
 import { getSplits } from '../../helpers/get_splits';
@@ -25,51 +24,55 @@ import { getLastMetric } from '../../helpers/get_last_metric';
 import { METRIC_TYPES } from '../../../../../common/metric_types';
 
 export function percentile(resp, panel, series, meta) {
-  return next => results => {
+  return (next) => (results) => {
     const metric = getLastMetric(series);
 
     if (metric.type !== METRIC_TYPES.PERCENTILE) {
       return next(results);
     }
 
-    getSplits(resp, panel, series, meta).forEach(split => {
-      metric.percentiles.forEach(percentile => {
+    getSplits(resp, panel, series, meta).forEach((split) => {
+      metric.percentiles.forEach((percentile) => {
         const percentileValue = percentile.value ? percentile.value : 0;
-        const label = `${split.label} (${percentileValue})`;
-        const data = split.timeseries.buckets.map(bucket => {
-          const m = _.assign({}, metric, { percent: percentileValue });
-          return [bucket.key, getAggValue(bucket, m)];
+        const id = `${split.id}:${percentile.id}`;
+        const data = split.timeseries.buckets.map((bucket) => {
+          const higherMetric = { ...metric, percent: percentileValue };
+          const serieData = [bucket.key, getAggValue(bucket, higherMetric)];
+
+          if (percentile.mode === 'band') {
+            const lowerMetric = { ...metric, percent: percentile.percentile };
+            serieData.push(getAggValue(bucket, lowerMetric));
+          }
+
+          return serieData;
         });
         if (percentile.mode === 'band') {
-          const fillData = split.timeseries.buckets.map(bucket => {
-            const m = _.assign({}, metric, { percent: percentile.percentile });
-            return [bucket.key, getAggValue(bucket, m)];
-          });
           results.push({
-            id: `${split.id}:${percentile.id}`,
+            id,
             color: split.color,
-            label,
+            label: split.label,
             data,
-            lines: { show: true, fill: percentile.shade, lineWidth: 0 },
+            lines: {
+              show: series.chart_type === 'line',
+              fill: Number(percentile.shade),
+              lineWidth: 0,
+              mode: 'band',
+            },
+            bars: {
+              show: series.chart_type === 'bar',
+              fill: Number(percentile.shade),
+              mode: 'band',
+            },
             points: { show: false },
-            legend: false,
-            fillBetween: `${split.id}:${percentile.id}:${percentile.percentile}`,
-          });
-          results.push({
-            id: `${split.id}:${percentile.id}:${percentile.percentile}`,
-            color: split.color,
-            label,
-            data: fillData,
-            lines: { show: true, fill: false, lineWidth: 0 },
-            legend: false,
-            points: { show: false },
+            y1AccessorFormat: ` (${percentileValue})`,
+            y0AccessorFormat: ` (${percentile.percentile})`,
           });
         } else {
           const decoration = getDefaultDecoration(series);
           results.push({
-            id: `${split.id}:${percentile.id}`,
+            id,
             color: split.color,
-            label,
+            label: `${split.label} (${percentileValue})`,
             data,
             ...decoration,
           });

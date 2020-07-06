@@ -17,6 +17,10 @@
  * under the License.
  */
 
+export { CSV_QUOTE_VALUES_SETTING, CSV_SEPARATOR_SETTING } from '../common/constants';
+
+export { UrlGeneratorStateMapping } from './url_generators/url_generator_definition';
+
 export { SharePluginSetup, SharePluginStart } from './plugin';
 export {
   ShareContext,
@@ -25,6 +29,15 @@ export {
   ShowShareMenuOptions,
   ShareContextMenuPanelItem,
 } from './types';
+
+export {
+  UrlGeneratorId,
+  UrlGeneratorState,
+  UrlGeneratorsDefinition,
+  UrlGeneratorContract,
+  UrlGeneratorsService,
+} from './url_generators';
+
 import { SharePlugin } from './plugin';
 
 export const plugin = () => new SharePlugin();

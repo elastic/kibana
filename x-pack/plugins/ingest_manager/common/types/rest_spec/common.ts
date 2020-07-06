@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface ListWithKuerySchema {
-  page: number;
-  perPage: number;
+export interface ListWithKuery {
+  page?: number;
+  perPage?: number;
+  sortField?: string;
+  sortOrder?: 'desc' | 'asc';
   kuery?: string;
 }
-
-export type ListWithKuery = ListWithKuerySchema;

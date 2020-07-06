@@ -18,11 +18,11 @@
  */
 
 import { Observable } from 'rxjs';
-import { UiSettingsParams, UserProvidedValues } from 'src/core/server/types';
+import { PublicUiSettingsParams, UserProvidedValues } from 'src/core/server/types';
 
 /** @public */
 export interface UiSettingsState {
-  [key: string]: UiSettingsParams & UserProvidedValues;
+  [key: string]: PublicUiSettingsParams & UserProvidedValues;
 }
 
 /**
@@ -53,7 +53,7 @@ export interface IUiSettingsClient {
    * Gets the metadata about all uiSettings, including the type, default value, and user value
    * for each key.
    */
-  getAll: () => Readonly<Record<string, UiSettingsParams & UserProvidedValues>>;
+  getAll: () => Readonly<Record<string, PublicUiSettingsParams & UserProvidedValues>>;
 
   /**
    * Sets the value for a uiSetting. If the setting is not registered by any plugin

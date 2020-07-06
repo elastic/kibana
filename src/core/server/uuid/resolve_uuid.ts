@@ -44,14 +44,8 @@ export async function resolveInstanceUuid({
   logger: Logger;
 }): Promise<string> {
   const [pathConfig, serverConfig] = await Promise.all([
-    configService
-      .atPath<PathConfigType>(pathConfigDef.path)
-      .pipe(take(1))
-      .toPromise(),
-    configService
-      .atPath<HttpConfigType>(httpConfigDef.path)
-      .pipe(take(1))
-      .toPromise(),
+    configService.atPath<PathConfigType>(pathConfigDef.path).pipe(take(1)).toPromise(),
+    configService.atPath<HttpConfigType>(httpConfigDef.path).pipe(take(1)).toPromise(),
   ]);
 
   const uuidFilePath = join(pathConfig.data, FILE_NAME);

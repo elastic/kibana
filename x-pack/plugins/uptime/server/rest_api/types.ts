@@ -9,13 +9,14 @@ import {
   RequestHandler,
   RouteConfig,
   RouteMethod,
-  CallAPIOptions,
-  SavedObjectsClient,
+  LegacyCallAPIOptions,
+  SavedObjectsClientContract,
   RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
   IKibanaResponse,
-} from 'src/core/server';
+} from 'kibana/server';
+import { DynamicSettings } from '../../common/runtime_types';
 import { UMServerLibs } from '../lib/lib';
 
 /**
@@ -23,6 +24,7 @@ import { UMServerLibs } from '../lib/lib';
  */
 export interface UMServerRoute<T> {
   method: string;
+  writeAccess?: boolean;
   handler: T;
 }
 
@@ -64,20 +66,10 @@ export interface UMRouteParams {
   callES: (
     endpoint: string,
     clientParams?: Record<string, any>,
-    options?: CallAPIOptions | undefined
+    options?: LegacyCallAPIOptions | undefined
   ) => Promise<any>;
-  savedObjectsClient: Pick<
-    SavedObjectsClient,
-    | 'errors'
-    | 'create'
-    | 'bulkCreate'
-    | 'delete'
-    | 'find'
-    | 'bulkGet'
-    | 'get'
-    | 'update'
-    | 'bulkUpdate'
-  >;
+  dynamicSettings: DynamicSettings;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 /**

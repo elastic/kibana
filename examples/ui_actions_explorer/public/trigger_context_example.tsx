@@ -47,7 +47,7 @@ const createRowData = (
     <Fragment>
       <EuiButtonEmpty
         onClick={() => {
-          uiActionsApi.executeTriggerActions(COUNTRY_TRIGGER, user.countryOfResidence);
+          uiActionsApi.executeTriggerActions(COUNTRY_TRIGGER, { country: user.countryOfResidence });
         }}
       >
         {user.countryOfResidence}
@@ -59,7 +59,7 @@ const createRowData = (
       <EuiButtonEmpty
         disabled={user.phone === undefined}
         onClick={() => {
-          uiActionsApi.executeTriggerActions(PHONE_TRIGGER, user.phone!);
+          uiActionsApi.executeTriggerActions(PHONE_TRIGGER, { phone: user.phone! });
         }}
       >
         {user.phone}
@@ -105,7 +105,7 @@ export function TriggerContextExample({ uiActionsApi }: Props) {
   ];
 
   const updateUser = (newUser: User, oldName: string) => {
-    const index = rows.findIndex(u => u.name === oldName);
+    const index = rows.findIndex((u) => u.name === oldName);
     const newRows = [...rows];
     newRows.splice(index, 1, createRowData(newUser, uiActionsApi, updateUser));
     setRows(newRows);

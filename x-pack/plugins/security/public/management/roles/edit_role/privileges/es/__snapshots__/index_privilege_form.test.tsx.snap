@@ -26,6 +26,7 @@ exports[`it renders without crashing 1`] = `
             labelType="label"
           >
             <EuiComboBox
+              async={false}
               compressed={false}
               data-test-subj="indicesInput0"
               fullWidth={false}
@@ -36,6 +37,7 @@ exports[`it renders without crashing 1`] = `
               options={Array []}
               selectedOptions={Array []}
               singleSelection={false}
+              sortMatchesBy="none"
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -56,6 +58,7 @@ exports[`it renders without crashing 1`] = `
             labelType="label"
           >
             <EuiComboBox
+              async={false}
               compressed={false}
               data-test-subj="privilegesInput0"
               fullWidth={false}
@@ -80,6 +83,7 @@ exports[`it renders without crashing 1`] = `
               }
               selectedOptions={Array []}
               singleSelection={false}
+              sortMatchesBy="none"
             />
           </EuiFormRow>
         </EuiFlexItem>

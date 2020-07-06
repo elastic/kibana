@@ -4,15 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
+import { Legacy } from 'kibana';
+import { KibanaRequest } from 'kibana/server';
 import { Space, SpacesPluginSetup } from '../../../spaces/server';
+
+export type RequestFacade = KibanaRequest | Legacy.Request;
 
 interface GetActiveSpaceResponse {
   valid: boolean;
   space?: Space;
 }
 
-export function spacesUtilsProvider(spacesPlugin: SpacesPluginSetup, request: Request) {
+export function spacesUtilsProvider(spacesPlugin: SpacesPluginSetup, request: RequestFacade) {
   async function activeSpace(): Promise<GetActiveSpaceResponse> {
     try {
       return {

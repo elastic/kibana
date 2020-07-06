@@ -70,7 +70,7 @@ export const PathParameter = ({ field, allFields }: Props) => {
         deserializer: getDeserializer(allFields),
       }}
     >
-      {pathField => {
+      {(pathField) => {
         const error = pathField.getErrorsMessages();
         const isInvalid = error ? Boolean(error.length) : false;
 
@@ -123,7 +123,7 @@ export const PathParameter = ({ field, allFields }: Props) => {
                   singleSelection={{ asPlainText: true }}
                   options={suggestedFields}
                   selectedOptions={pathField.value as AliasOption[]}
-                  onChange={value => pathField.setValue(value)}
+                  onChange={(value) => pathField.setValue(value)}
                   isClearable={false}
                   fullWidth
                 />

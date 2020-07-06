@@ -1,5 +1,6 @@
 {
   "id": "watcher",
+  "configPath": ["xpack", "watcher"],
   "version": "kibana",
   "requiredPlugins": [
     "home",

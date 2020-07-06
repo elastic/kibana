@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getPageObjects, getService }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
   const DOC_COUNT_PROP_NAME = 'doc_count';
@@ -238,6 +238,39 @@ export default function({ getPageObjects, getService }) {
           await PageObjects.maps.removeLayer('logstash-*');
           const noRequests = await PageObjects.maps.doesInspectorHaveRequests();
           expect(noRequests).to.equal(true);
+        });
+      });
+    });
+
+    describe('vector grid with geo_shape', () => {
+      before(async () => {
+        await PageObjects.maps.loadSavedMap('geo grid vector grid example with shape');
+      });
+
+      const LAYER_ID = 'g1xkv';
+      it('should get expected number of grid cells', async () => {
+        const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+        expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(13);
+      });
+
+      describe('inspector', () => {
+        afterEach(async () => {
+          await inspector.close();
+        });
+
+        it('should contain geotile_grid aggregation elasticsearch request', async () => {
+          await inspector.open();
+          await inspector.openInspectorRequestsView();
+          const requestStats = await inspector.getTableData();
+          const totalHits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
+          expect(totalHits).to.equal('4'); //4 geometries result in 13 cells due to way they overlap geotile_grid cells
+          const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
+          expect(hits).to.equal('0'); // aggregation requests do not return any documents
+          const indexPatternName = PageObjects.maps.getInspectorStatRowHit(
+            requestStats,
+            'Index pattern'
+          );
+          expect(indexPatternName).to.equal('geo_shapes*');
         });
       });
     });

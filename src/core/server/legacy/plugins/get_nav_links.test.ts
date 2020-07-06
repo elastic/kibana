@@ -40,7 +40,7 @@ const createLegacyExports = ({
 
 const createPluginSpecs = (...ids: string[]): LegacyPluginSpec[] =>
   ids.map(
-    id =>
+    (id) =>
       ({
         getId: () => id,
       } as LegacyPluginSpec)
@@ -133,6 +133,7 @@ describe('getNavLinks', () => {
               id: 'app-a',
               title: 'AppA',
               category: {
+                id: 'foo',
                 label: 'My Category',
               },
               order: 42,
@@ -151,6 +152,7 @@ describe('getNavLinks', () => {
         id: 'app-a',
         title: 'AppA',
         category: {
+          id: 'foo',
           label: 'My Category',
         },
         order: 42,
@@ -211,6 +213,7 @@ describe('getNavLinks', () => {
               id: 'link-a',
               title: 'AppA',
               category: {
+                id: 'foo',
                 label: 'My Second Cat',
               },
               order: 72,
@@ -232,6 +235,7 @@ describe('getNavLinks', () => {
         id: 'link-a',
         title: 'AppA',
         category: {
+          id: 'foo',
           label: 'My Second Cat',
         },
         order: 72,

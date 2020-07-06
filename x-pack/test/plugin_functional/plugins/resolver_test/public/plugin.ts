@@ -6,13 +6,13 @@
 
 import { Plugin, CoreSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { IEmbeddable, IEmbeddableStart } from '../../../../../../src/plugins/embeddable/public';
+import { IEmbeddable, EmbeddableStart } from '../../../../../../src/plugins/embeddable/public';
 
 export type ResolverTestPluginSetup = void;
 export type ResolverTestPluginStart = void;
 export interface ResolverTestPluginSetupDependencies {} // eslint-disable-line @typescript-eslint/no-empty-interface
 export interface ResolverTestPluginStartDependencies {
-  embeddable: IEmbeddableStart;
+  embeddable: EmbeddableStart;
 }
 
 export class ResolverTestPlugin
@@ -34,14 +34,16 @@ export class ResolverTestPlugin
           value: IEmbeddable | undefined | PromiseLike<IEmbeddable | undefined> | undefined
         ) => void;
 
-        const promise = new Promise<IEmbeddable | undefined>(resolve => {
+        const promise = new Promise<IEmbeddable | undefined>((resolve) => {
           resolveEmbeddable = resolve;
         });
 
         (async () => {
           const [, { embeddable }] = await core.getStartServices();
           const factory = embeddable.getEmbeddableFactory('resolver');
-          resolveEmbeddable!(factory.create({ id: 'test basic render' }));
+          if (factory) {
+            resolveEmbeddable!(factory.create({ id: 'test basic render' }));
+          }
         })();
 
         const { renderApp } = await import('./applications/resolver_test');

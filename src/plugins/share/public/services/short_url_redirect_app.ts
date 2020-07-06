@@ -19,7 +19,6 @@
 
 import { CoreSetup } from 'kibana/public';
 import { getUrlIdFromGotoRoute, getUrlPath, GOTO_PREFIX } from '../../common/short_url_routes';
-import { hashUrl } from '../../../kibana_utils/public';
 
 export const createShortUrlRedirectApp = (core: CoreSetup, location: Location) => ({
   id: 'short_url_redirect',
@@ -35,6 +34,7 @@ export const createShortUrlRedirectApp = (core: CoreSetup, location: Location) =
 
     const response = await core.http.get<{ url: string }>(getUrlPath(urlId));
     const redirectUrl = response.url;
+    const { hashUrl } = await import('../../../kibana_utils/public');
     const hashedUrl = hashUrl(redirectUrl);
     const url = core.http.basePath.prepend(hashedUrl);
 

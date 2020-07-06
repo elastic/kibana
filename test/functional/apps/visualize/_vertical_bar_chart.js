@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const inspector = getService('inspector');
@@ -27,9 +27,9 @@ export default function({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
-  describe('vertical bar chart', function() {
+  describe('vertical bar chart', function () {
     describe('bar charts x axis tick labels', () => {
-      it('should show tick labels also after rotation of the chart', async function() {
+      it('should show tick labels also after rotation of the chart', async function () {
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickVerticalBarChart();
         await PageObjects.visualize.clickNewSearch();
@@ -48,14 +48,55 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.visEditor.selectXAxisPosition('left');
         await PageObjects.visEditor.clickGo();
 
-        const leftLabels = await PageObjects.visChart.getXAxisLabels();
+        // the getYAxisLabels helper always returns the labels on the left axis
+        const leftLabels = await PageObjects.visChart.getYAxisLabels();
         log.debug(`${leftLabels.length} tick labels on left x axis`);
         expect(leftLabels.length).to.be.greaterThan(bottomLabels.length * (2 / 3));
+      });
+
+      it('should not filter out first label after rotation of the chart', async function () {
+        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.clickVerticalBarChart();
+        await PageObjects.visualize.clickNewSearch();
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.visEditor.clickBucket('X-axis');
+        await PageObjects.visEditor.selectAggregation('Date Range');
+        await PageObjects.visEditor.selectField('@timestamp');
+        await PageObjects.visEditor.clickGo();
+        const bottomLabels = await PageObjects.visChart.getXAxisLabels();
+        expect(bottomLabels.length).to.be(1);
+
+        await PageObjects.visEditor.clickMetricsAndAxes();
+        await PageObjects.visEditor.selectXAxisPosition('left');
+        await PageObjects.visEditor.clickGo();
+
+        // the getYAxisLabels helper always returns the labels on the left axis
+        const leftLabels = await PageObjects.visChart.getYAxisLabels();
+        expect(leftLabels.length).to.be(1);
+      });
+    });
+
+    describe('bar charts range on x axis', () => {
+      it('should individual bars for each configured range', async function () {
+        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.clickVerticalBarChart();
+        await PageObjects.visualize.clickNewSearch();
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.visEditor.clickBucket('X-axis');
+        log.debug('Aggregation = Date Range');
+        await PageObjects.visEditor.selectAggregation('Date Range');
+        log.debug('Field = @timestamp');
+        await PageObjects.visEditor.selectField('@timestamp');
+        await PageObjects.visEditor.clickAddDateRange();
+        await PageObjects.visEditor.setDateRangeByIndex('1', 'now-2w/w', 'now-1w/w');
+        await PageObjects.visEditor.clickGo();
+        const bottomLabels = await PageObjects.visChart.getXAxisLabels();
+        expect(bottomLabels.length).to.be(2);
       });
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/22322
-    describe.skip('vertical bar chart flaky part', function() {
+    describe.skip('vertical bar chart flaky part', function () {
       const vizName1 = 'Visualization VerticalBarChart';
 
       const initBarChart = async () => {
@@ -77,18 +118,18 @@ export default function({ getService, getPageObjects }) {
 
       before(initBarChart);
 
-      it('should save and load', async function() {
+      it('should save and load', async function () {
         await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
         await PageObjects.visualize.loadSavedVisualization(vizName1);
         await PageObjects.visChart.waitForVisualization();
       });
 
-      it('should have inspector enabled', async function() {
+      it('should have inspector enabled', async function () {
         await inspector.expectIsEnabled();
       });
 
-      it('should show correct chart', async function() {
+      it('should show correct chart', async function () {
         const expectedChartValues = [
           37,
           202,
@@ -127,7 +168,7 @@ export default function({ getService, getPageObjects }) {
         });
       });
 
-      it('should show correct data', async function() {
+      it('should show correct data', async function () {
         // this is only the first page of the tabular data.
         const expectedChartData = [
           ['2015-09-20 00:00', '37'],
@@ -442,7 +483,7 @@ export default function({ getService, getPageObjects }) {
       });
 
       describe('vertical bar in percent mode', async () => {
-        it('should show ticks with percentage values', async function() {
+        it('should show ticks with percentage values', async function () {
           const axisId = 'ValueAxis-1';
           await PageObjects.visEditor.clickMetricsAndAxes();
           await PageObjects.visEditor.clickYAxisOptions(axisId);
@@ -456,10 +497,10 @@ export default function({ getService, getPageObjects }) {
         });
       });
 
-      describe('vertical bar with Split series', function() {
+      describe('vertical bar with Split series', function () {
         before(initBarChart);
 
-        it('should show correct series', async function() {
+        it('should show correct series', async function () {
           await PageObjects.visEditor.toggleOpenEditor(2, 'false');
           await PageObjects.visEditor.clickBucket('Split series');
           await PageObjects.visEditor.selectAggregation('Terms');
@@ -493,10 +534,10 @@ export default function({ getService, getPageObjects }) {
         });
       });
 
-      describe('vertical bar with multiple splits', function() {
+      describe('vertical bar with multiple splits', function () {
         before(initBarChart);
 
-        it('should show correct series', async function() {
+        it('should show correct series', async function () {
           await PageObjects.visEditor.toggleOpenEditor(2, 'false');
           await PageObjects.visEditor.clickBucket('Split series');
           await PageObjects.visEditor.selectAggregation('Terms');
@@ -531,7 +572,7 @@ export default function({ getService, getPageObjects }) {
           expect(legendEntries).to.eql(expectedEntries);
         });
 
-        it('should show correct series when disabling first agg', async function() {
+        it('should show correct series when disabling first agg', async function () {
           // this will avoid issues with the play tooltip covering the disable agg button
           await testSubjects.scrollIntoView('metricsAggGroup');
           await PageObjects.visEditor.toggleDisabledAgg(3);
@@ -543,10 +584,10 @@ export default function({ getService, getPageObjects }) {
         });
       });
 
-      describe('vertical bar with derivative', function() {
+      describe('vertical bar with derivative', function () {
         before(initBarChart);
 
-        it('should show correct series', async function() {
+        it('should show correct series', async function () {
           await PageObjects.visEditor.toggleOpenEditor(2, 'false');
           await PageObjects.visEditor.toggleOpenEditor(1);
           await PageObjects.visEditor.selectAggregation('Derivative', 'metrics');

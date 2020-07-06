@@ -22,15 +22,19 @@ import { Type } from '@kbn/config-schema';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { ConfigDeprecationProvider } from './config';
 import { ContextSetup } from './context';
-import { InternalElasticsearchServiceSetup } from './elasticsearch';
-import { InternalHttpServiceSetup } from './http';
+import { InternalElasticsearchServiceSetup, ElasticsearchServiceStart } from './elasticsearch';
+import { InternalHttpServiceSetup, InternalHttpServiceStart } from './http';
 import {
   InternalSavedObjectsServiceSetup,
   InternalSavedObjectsServiceStart,
 } from './saved_objects';
 import { InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart } from './ui_settings';
 import { UuidServiceSetup } from './uuid';
-import { InternalMetricsServiceSetup } from './metrics';
+import { InternalMetricsServiceStart } from './metrics';
+import { InternalRenderingServiceSetup } from './rendering';
+import { InternalHttpResourcesSetup } from './http_resources';
+import { InternalStatusServiceSetup } from './status';
+import { InternalLoggingServiceSetup } from './logging';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -38,10 +42,13 @@ export interface InternalCoreSetup {
   context: ContextSetup;
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
-  uiSettings: InternalUiSettingsServiceSetup;
   savedObjects: InternalSavedObjectsServiceSetup;
+  status: InternalStatusServiceSetup;
+  uiSettings: InternalUiSettingsServiceSetup;
   uuid: UuidServiceSetup;
-  metrics: InternalMetricsServiceSetup;
+  rendering: InternalRenderingServiceSetup;
+  httpResources: InternalHttpResourcesSetup;
+  logging: InternalLoggingServiceSetup;
 }
 
 /**
@@ -49,6 +56,9 @@ export interface InternalCoreSetup {
  */
 export interface InternalCoreStart {
   capabilities: CapabilitiesStart;
+  elasticsearch: ElasticsearchServiceStart;
+  http: InternalHttpServiceStart;
+  metrics: InternalMetricsServiceStart;
   savedObjects: InternalSavedObjectsServiceStart;
   uiSettings: InternalUiSettingsServiceStart;
 }

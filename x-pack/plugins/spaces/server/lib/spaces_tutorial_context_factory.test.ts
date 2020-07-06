@@ -8,25 +8,15 @@ import * as Rx from 'rxjs';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { createSpacesTutorialContextFactory } from './spaces_tutorial_context_factory';
 import { SpacesService } from '../spaces_service';
-import { SavedObjectsLegacyService } from 'src/core/server';
 import { SpacesAuditLogger } from './audit_logger';
-import {
-  elasticsearchServiceMock,
-  coreMock,
-  loggingServiceMock,
-} from '../../../../../src/core/server/mocks';
+import { coreMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
-import { LegacyAPI } from '../plugin';
 import { spacesConfig } from './__fixtures__';
 import { securityMock } from '../../../security/server/mocks';
 
-const log = loggingServiceMock.createLogger();
+const log = loggingSystemMock.createLogger();
 
-const legacyAPI: LegacyAPI = {
-  savedObjects: {} as SavedObjectsLegacyService,
-} as LegacyAPI;
-
-const service = new SpacesService(log, () => legacyAPI);
+const service = new SpacesService(log);
 
 describe('createSpacesTutorialContextFactory', () => {
   it('should create a valid context factory', async () => {
@@ -49,9 +39,9 @@ describe('createSpacesTutorialContextFactory', () => {
   it('should create context with the current space id for the default space', async () => {
     const spacesService = await service.setup({
       http: coreMock.createSetup().http,
-      elasticsearch: elasticsearchServiceMock.createSetup(),
+      getStartServices: async () => [coreMock.createStart(), {}, {}],
       authorization: securityMock.createSetup().authz,
-      getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
+      auditLogger: {} as SpacesAuditLogger,
       config$: Rx.of(spacesConfig),
     });
     const contextFactory = createSpacesTutorialContextFactory(spacesService);

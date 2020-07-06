@@ -11,31 +11,19 @@ import { defineCommonRoutes } from './common';
 import { defineOIDCRoutes } from './oidc';
 import { RouteDefinitionParams } from '..';
 
-export function createCustomResourceResponse(body: string, contentType: string, cspHeader: string) {
-  return {
-    body,
-    headers: {
-      'content-type': contentType,
-      'cache-control': 'private, no-cache, no-store',
-      'content-security-policy': cspHeader,
-    },
-    statusCode: 200,
-  };
-}
-
 export function defineAuthenticationRoutes(params: RouteDefinitionParams) {
   defineSessionRoutes(params);
   defineCommonRoutes(params);
 
-  if (params.authc.isProviderEnabled('basic') || params.authc.isProviderEnabled('token')) {
+  if (params.authc.isProviderTypeEnabled('basic') || params.authc.isProviderTypeEnabled('token')) {
     defineBasicRoutes(params);
   }
 
-  if (params.authc.isProviderEnabled('saml')) {
+  if (params.authc.isProviderTypeEnabled('saml')) {
     defineSAMLRoutes(params);
   }
 
-  if (params.authc.isProviderEnabled('oidc')) {
+  if (params.authc.isProviderTypeEnabled('oidc')) {
     defineOIDCRoutes(params);
   }
 }

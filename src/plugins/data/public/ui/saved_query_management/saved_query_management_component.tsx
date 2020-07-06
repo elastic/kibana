@@ -33,7 +33,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useEffect, useState, Fragment, useRef } from 'react';
+import React, { useCallback, useEffect, useState, Fragment, useRef } from 'react';
 import { sortBy } from 'lodash';
 import { SavedQuery, SavedQueryService } from '../..';
 import { SavedQueryListItem } from './saved_query_list_item';
@@ -49,7 +49,7 @@ interface Props {
   onClearSavedQuery: () => void;
 }
 
-export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
+export function SavedQueryManagementComponent({
   showSaveQuery,
   loadedSavedQuery,
   onSave,
@@ -57,7 +57,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
   onLoad,
   onClearSavedQuery,
   savedQueryService,
-}) => {
+}: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const [count, setTotalCount] = useState(0);
@@ -88,9 +88,51 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
     }
   }, [isOpen, activePage, savedQueryService]);
 
-  const goToPage = (pageNumber: number) => {
-    setActivePage(pageNumber);
-  };
+  const handleTogglePopover = useCallback(() => setIsOpen((currentState) => !currentState), [
+    setIsOpen,
+  ]);
+
+  const handleClosePopover = useCallback(() => setIsOpen(false), []);
+
+  const handleSave = useCallback(() => {
+    handleClosePopover();
+    onSave();
+  }, [handleClosePopover, onSave]);
+
+  const handleSaveAsNew = useCallback(() => {
+    handleClosePopover();
+    onSaveAsNew();
+  }, [handleClosePopover, onSaveAsNew]);
+
+  const handleSelect = useCallback(
+    (savedQueryToSelect) => {
+      handleClosePopover();
+      onLoad(savedQueryToSelect);
+    },
+    [handleClosePopover, onLoad]
+  );
+
+  const handleDelete = useCallback(
+    (savedQueryToDelete: SavedQuery) => {
+      const onDeleteSavedQuery = async (savedQuery: SavedQuery) => {
+        cancelPendingListingRequest.current();
+        setSavedQueries(
+          savedQueries.filter((currentSavedQuery) => currentSavedQuery.id !== savedQuery.id)
+        );
+
+        if (loadedSavedQuery && loadedSavedQuery.id === savedQuery.id) {
+          onClearSavedQuery();
+        }
+
+        await savedQueryService.deleteSavedQuery(savedQuery.id);
+        setActivePage(0);
+      };
+
+      onDeleteSavedQuery(savedQueryToDelete);
+      handleClosePopover();
+    },
+    [handleClosePopover, loadedSavedQuery, onClearSavedQuery, savedQueries, savedQueryService]
+  );
 
   const savedQueryDescriptionText = i18n.translate(
     'data.search.searchBar.savedQueryDescriptionText',
@@ -113,24 +155,13 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
     }
   );
 
-  const onDeleteSavedQuery = async (savedQuery: SavedQuery) => {
-    cancelPendingListingRequest.current();
-    setSavedQueries(
-      savedQueries.filter(currentSavedQuery => currentSavedQuery.id !== savedQuery.id)
-    );
-
-    if (loadedSavedQuery && loadedSavedQuery.id === savedQuery.id) {
-      onClearSavedQuery();
-    }
-
-    await savedQueryService.deleteSavedQuery(savedQuery.id);
+  const goToPage = (pageNumber: number) => {
+    setActivePage(pageNumber);
   };
 
   const savedQueryPopoverButton = (
     <EuiButtonEmpty
-      onClick={() => {
-        setIsOpen(!isOpen);
-      }}
+      onClick={handleTogglePopover}
       aria-label={i18n.translate('data.search.searchBar.savedQueryPopoverButtonText', {
         defaultMessage: 'See saved queries',
       })}
@@ -145,7 +176,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
   );
 
   const savedQueryRows = () => {
-    const savedQueriesWithoutCurrent = savedQueries.filter(savedQuery => {
+    const savedQueriesWithoutCurrent = savedQueries.filter((savedQuery) => {
       if (!loadedSavedQuery) return true;
       return savedQuery.id !== loadedSavedQuery.id;
     });
@@ -153,16 +184,13 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
       loadedSavedQuery && savedQueriesWithoutCurrent.length !== savedQueries.length
         ? [loadedSavedQuery, ...savedQueriesWithoutCurrent]
         : [...savedQueriesWithoutCurrent];
-    return savedQueriesReordered.map(savedQuery => (
+    return savedQueriesReordered.map((savedQuery) => (
       <SavedQueryListItem
         key={savedQuery.id}
         savedQuery={savedQuery}
         isSelected={!!loadedSavedQuery && loadedSavedQuery.id === savedQuery.id}
-        onSelect={savedQueryToSelect => {
-          onLoad(savedQueryToSelect);
-          setIsOpen(false);
-        }}
-        onDelete={savedQueryToDelete => onDeleteSavedQuery(savedQueryToDelete)}
+        onSelect={handleSelect}
+        onDelete={handleDelete}
         showWriteOperations={!!showSaveQuery}
       />
     ));
@@ -174,12 +202,12 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
         id="savedQueryPopover"
         button={savedQueryPopoverButton}
         isOpen={isOpen}
-        closePopover={() => {
-          setIsOpen(false);
-        }}
+        closePopover={handleClosePopover}
         anchorPosition="downLeft"
         panelPaddingSize="none"
+        buffer={-8}
         ownFocus
+        repositionOnScroll
       >
         <div
           className="kbnSavedQueryManagement__popover"
@@ -232,7 +260,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
                     <EuiButton
                       size="s"
                       fill
-                      onClick={() => onSave()}
+                      onClick={handleSave}
                       aria-label={i18n.translate(
                         'data.search.searchBar.savedQueryPopoverSaveChangesButtonAriaLabel',
                         {
@@ -253,7 +281,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       size="s"
-                      onClick={() => onSaveAsNew()}
+                      onClick={handleSaveAsNew}
                       aria-label={i18n.translate(
                         'data.search.searchBar.savedQueryPopoverSaveAsNewButtonAriaLabel',
                         {
@@ -277,7 +305,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
                   <EuiButton
                     size="s"
                     fill
-                    onClick={() => onSave()}
+                    onClick={handleSave}
                     aria-label={i18n.translate(
                       'data.search.searchBar.savedQueryPopoverSaveButtonAriaLabel',
                       { defaultMessage: 'Save a new saved query' }
@@ -296,7 +324,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
                   <EuiButtonEmpty
                     size="s"
                     flush="left"
-                    onClick={() => onClearSavedQuery()}
+                    onClick={onClearSavedQuery}
                     aria-label={i18n.translate(
                       'data.search.searchBar.savedQueryPopoverClearButtonAriaLabel',
                       { defaultMessage: 'Clear current saved query' }
@@ -315,4 +343,4 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
       </EuiPopover>
     </Fragment>
   );
-};
+}

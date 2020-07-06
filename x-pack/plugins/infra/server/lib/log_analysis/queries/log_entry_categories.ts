@@ -5,9 +5,8 @@
  */
 
 import * as rt from 'io-ts';
-
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
-import { defaultRequestParameters, getMlResultIndex } from './common';
+import { createCategoryIdFilters, createJobIdFilters, defaultRequestParameters } from './common';
 
 export const createLogEntryCategoriesQuery = (
   logEntryCategoriesJobId: string,
@@ -18,17 +17,13 @@ export const createLogEntryCategoriesQuery = (
     query: {
       bool: {
         filter: [
-          {
-            terms: {
-              category_id: categoryIds,
-            },
-          },
+          ...createJobIdFilters(logEntryCategoriesJobId),
+          ...createCategoryIdFilters(categoryIds),
         ],
       },
     },
-    _source: ['category_id', 'regex'],
+    _source: ['category_id', 'regex', 'terms'],
   },
-  index: getMlResultIndex(logEntryCategoriesJobId),
   size: categoryIds.length,
 });
 
@@ -36,6 +31,7 @@ export const logEntryCategoryHitRT = rt.type({
   _source: rt.type({
     category_id: rt.number,
     regex: rt.string,
+    terms: rt.string,
   }),
 });
 

@@ -31,6 +31,6 @@
 //
 const PATH_IMPORT_RE = /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[/\\])/;
 
-exports.getIsPathRequest = function(source) {
+exports.getIsPathRequest = function (source) {
   return PATH_IMPORT_RE.test(source);
 };

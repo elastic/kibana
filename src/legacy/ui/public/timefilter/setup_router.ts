@@ -20,10 +20,16 @@
 import _ from 'lodash';
 import { IScope } from 'angular';
 import moment from 'moment';
-import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import chrome from 'ui/chrome';
-import { RefreshInterval, TimeRange, TimefilterContract } from 'src/plugins/data/public';
 import { Subscription } from 'rxjs';
+import { fatalError } from 'ui/notify/fatal_error';
+import { subscribeWithScope } from '../../../../plugins/kibana_legacy/public';
+import {
+  RefreshInterval,
+  TimeRange,
+  TimefilterContract,
+  UI_SETTINGS,
+} from '../../../../plugins/data/public';
 
 // TODO
 // remove everything underneath once globalState is no longer an angular service
@@ -37,7 +43,7 @@ export function getTimefilterConfig() {
   const settings = chrome.getUiSettingsClient();
   return {
     timeDefaults: settings.get('timepicker:timeDefaults'),
-    refreshIntervalDefaults: settings.get('timepicker:refreshIntervalDefaults'),
+    refreshIntervalDefaults: settings.get(UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS),
   };
 }
 
@@ -79,15 +85,25 @@ export const registerTimefilterWithGlobalStateFactory = (
 
   const subscriptions = new Subscription();
   subscriptions.add(
-    subscribeWithScope($rootScope, timefilter.getRefreshIntervalUpdate$(), {
-      next: updateGlobalStateWithTime,
-    })
+    subscribeWithScope(
+      $rootScope,
+      timefilter.getRefreshIntervalUpdate$(),
+      {
+        next: updateGlobalStateWithTime,
+      },
+      fatalError
+    )
   );
 
   subscriptions.add(
-    subscribeWithScope($rootScope, timefilter.getTimeUpdate$(), {
-      next: updateGlobalStateWithTime,
-    })
+    subscribeWithScope(
+      $rootScope,
+      timefilter.getTimeUpdate$(),
+      {
+        next: updateGlobalStateWithTime,
+      },
+      fatalError
+    )
   );
 
   $rootScope.$on('$destroy', () => {

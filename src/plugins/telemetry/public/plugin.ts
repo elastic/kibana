@@ -16,9 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Plugin, CoreStart, CoreSetup, HttpStart } from '../../../core/public';
+
+import {
+  Plugin,
+  CoreStart,
+  CoreSetup,
+  HttpStart,
+  PluginInitializerContext,
+  SavedObjectsClientContract,
+  SavedObjectsBatchResponse,
+} from '../../../core/public';
 
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
+import {
+  TelemetrySavedObjectAttributes,
+  TelemetrySavedObject,
+} from '../common/telemetry_config/types';
+import {
+  getTelemetryAllowChangingOptInStatus,
+  getTelemetryOptIn,
+  getTelemetrySendUsageFrom,
+} from '../common/telemetry_config';
+import { getNotifyUserAboutOptInDefault } from '../common/telemetry_config/get_telemetry_notify_user_about_optin_default';
+import { PRIVACY_STATEMENT_URL } from '../common/constants';
 
 export interface TelemetryPluginSetup {
   telemetryService: TelemetryService;
@@ -27,19 +47,37 @@ export interface TelemetryPluginSetup {
 export interface TelemetryPluginStart {
   telemetryService: TelemetryService;
   telemetryNotifications: TelemetryNotifications;
+  telemetryConstants: {
+    getPrivacyStatementUrl: () => string;
+  };
+}
+
+export interface TelemetryPluginConfig {
+  enabled: boolean;
+  url: string;
+  banner: boolean;
+  allowChangingOptInStatus: boolean;
+  optIn: boolean | null;
+  optInStatusUrl: string;
+  sendUsageFrom: 'browser' | 'server';
+  telemetryNotifyUserAboutOptInDefault?: boolean;
 }
 
 export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPluginStart> {
+  private readonly currentKibanaVersion: string;
+  private readonly config: TelemetryPluginConfig;
   private telemetrySender?: TelemetrySender;
   private telemetryNotifications?: TelemetryNotifications;
   private telemetryService?: TelemetryService;
 
-  public setup({ http, injectedMetadata, notifications }: CoreSetup): TelemetryPluginSetup {
-    this.telemetryService = new TelemetryService({
-      http,
-      injectedMetadata,
-      notifications,
-    });
+  constructor(initializerContext: PluginInitializerContext<TelemetryPluginConfig>) {
+    this.currentKibanaVersion = initializerContext.env.packageInfo.version;
+    this.config = initializerContext.config.get();
+  }
+
+  public setup({ http, notifications }: CoreSetup): TelemetryPluginSetup {
+    const config = this.config;
+    this.telemetryService = new TelemetryService({ config, http, notifications });
 
     this.telemetrySender = new TelemetrySender(this.telemetryService);
 
@@ -48,23 +86,28 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     };
   }
 
-  public start({ injectedMetadata, http, overlays, application }: CoreStart): TelemetryPluginStart {
+  public start({ http, overlays, application, savedObjects }: CoreStart): TelemetryPluginStart {
     if (!this.telemetryService) {
       throw Error('Telemetry plugin failed to initialize properly.');
     }
-
-    const telemetryBanner = injectedMetadata.getInjectedVar('telemetryBanner') as boolean;
 
     this.telemetryNotifications = new TelemetryNotifications({
       overlays,
       telemetryService: this.telemetryService,
     });
 
-    application.currentAppId$.subscribe(appId => {
+    application.currentAppId$.subscribe(async () => {
       const isUnauthenticated = this.getIsUnauthenticated(http);
       if (isUnauthenticated) {
         return;
       }
+
+      // Update the telemetry config based as a mix of the config files and saved objects
+      const telemetrySavedObject = await this.getTelemetrySavedObject(savedObjects.client);
+      const updatedConfig = await this.updateConfigsBasedOnSavedObjects(telemetrySavedObject);
+      this.telemetryService!.config = updatedConfig;
+
+      const telemetryBanner = updatedConfig.banner;
 
       this.maybeStartTelemetryPoller();
       if (telemetryBanner) {
@@ -76,6 +119,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     return {
       telemetryService: this.telemetryService,
       telemetryNotifications: this.telemetryNotifications,
+      telemetryConstants: {
+        getPrivacyStatementUrl: () => PRIVACY_STATEMENT_URL,
+      },
     };
   }
 
@@ -109,6 +155,73 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     const shouldShowBanner = this.telemetryNotifications.shouldShowOptInBanner();
     if (shouldShowBanner) {
       this.telemetryNotifications.renderOptInBanner();
+    }
+  }
+
+  private async updateConfigsBasedOnSavedObjects(
+    telemetrySavedObject: TelemetrySavedObject
+  ): Promise<TelemetryPluginConfig> {
+    const configTelemetrySendUsageFrom = this.config.sendUsageFrom;
+    const configTelemetryOptIn = this.config.optIn as boolean;
+    const configTelemetryAllowChangingOptInStatus = this.config.allowChangingOptInStatus;
+
+    const currentKibanaVersion = this.currentKibanaVersion;
+
+    const allowChangingOptInStatus = getTelemetryAllowChangingOptInStatus({
+      configTelemetryAllowChangingOptInStatus,
+      telemetrySavedObject,
+    });
+
+    const optIn = getTelemetryOptIn({
+      configTelemetryOptIn,
+      allowChangingOptInStatus,
+      telemetrySavedObject,
+      currentKibanaVersion,
+    });
+
+    const sendUsageFrom = getTelemetrySendUsageFrom({
+      configTelemetrySendUsageFrom,
+      telemetrySavedObject,
+    });
+
+    const telemetryNotifyUserAboutOptInDefault = getNotifyUserAboutOptInDefault({
+      telemetrySavedObject,
+      allowChangingOptInStatus,
+      configTelemetryOptIn,
+      telemetryOptedIn: optIn,
+    });
+
+    return {
+      ...this.config,
+      optIn,
+      sendUsageFrom,
+      telemetryNotifyUserAboutOptInDefault,
+    };
+  }
+
+  private async getTelemetrySavedObject(savedObjectsClient: SavedObjectsClientContract) {
+    try {
+      // Use bulk get API here to avoid the queue. This could fail independent requests if we don't have rights to access the telemetry object otherwise
+      const {
+        savedObjects: [{ attributes }],
+      } = (await savedObjectsClient.bulkGet([
+        {
+          id: 'telemetry',
+          type: 'telemetry',
+        },
+      ])) as SavedObjectsBatchResponse<TelemetrySavedObjectAttributes>;
+      return attributes;
+    } catch (error) {
+      const errorCode = error[Symbol('SavedObjectsClientErrorCode')];
+      if (errorCode === 'SavedObjectsClient/notFound') {
+        return null;
+      }
+
+      if (errorCode === 'SavedObjectsClient/forbidden') {
+        return false;
+      }
+
+      throw error;
     }
   }
 }

@@ -119,24 +119,19 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
       const $ = await tableBody.parseDomContent();
       return $('tr')
         .toArray()
-        .map(tr => {
+        .map((tr) => {
           return $(tr)
             .find('td')
             .toArray()
-            .map(cell => {
+            .map((cell) => {
               // if this is an EUI table, filter down to the specific cell content
               // otherwise this will include mobile-specific header information
               const euiTableCellContent = $(cell).find('.euiTableCellContent');
 
               if (euiTableCellContent.length > 0) {
-                return $(cell)
-                  .find('.euiTableCellContent')
-                  .text()
-                  .trim();
+                return $(cell).find('.euiTableCellContent').text().trim();
               } else {
-                return $(cell)
-                  .text()
-                  .trim();
+                return $(cell).text().trim();
               }
             });
         });
@@ -155,11 +150,7 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
       const $ = await dataTableHeader.parseDomContent();
       return $('th span.euiTableCellContent__text')
         .toArray()
-        .map(cell =>
-          $(cell)
-            .text()
-            .trim()
-        );
+        .map((cell) => $(cell).text().trim());
     }
 
     /**
@@ -236,10 +227,7 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
         await testSubjects.click('inspectorRequestChooser');
         const menu = await testSubjects.find('inspectorRequestChooserMenuPanel');
         const requestNames = await menu.getVisibleText();
-        return requestNames
-          .trim()
-          .split('\n')
-          .join(',');
+        return requestNames.trim().split('\n').join(',');
       }
 
       const singleRequest = await testSubjects.find('inspectorRequestName');

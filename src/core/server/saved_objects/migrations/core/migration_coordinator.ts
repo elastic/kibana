@@ -39,6 +39,8 @@ import { SavedObjectsMigrationLogger } from './migration_logger';
 
 const DEFAULT_POLL_INTERVAL = 15000;
 
+export type MigrationStatus = 'waiting' | 'running' | 'completed';
+
 export type MigrationResult =
   | { status: 'skipped' }
   | { status: 'patched' }
@@ -121,5 +123,5 @@ async function waitForMigration(
 }
 
 function sleep(ms: number) {
-  return new Promise(r => setTimeout(r, ms));
+  return new Promise((r) => setTimeout(r, ms));
 }

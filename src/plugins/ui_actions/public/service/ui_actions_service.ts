@@ -24,7 +24,7 @@ import {
   TriggerId,
   TriggerContextMapping,
 } from '../types';
-import { Action } from '../actions';
+import { ActionInternal, Action, ActionDefinition, ActionContext } from '../actions';
 import { Trigger, TriggerContext } from '../triggers/trigger';
 import { TriggerInternal } from '../triggers/trigger_internal';
 import { TriggerContract } from '../triggers/trigger_contract';
@@ -75,17 +75,28 @@ export class UiActionsService {
     return trigger.contract;
   };
 
-  public readonly registerAction = <Context>(action: Action<Context>) => {
-    if (this.actions.has(action.id)) {
-      throw new Error(`Action [action.id = ${action.id}] already registered.`);
+  public readonly registerAction = <A extends ActionDefinition>(
+    definition: A
+  ): Action<ActionContext<A>> => {
+    if (this.actions.has(definition.id)) {
+      throw new Error(`Action [action.id = ${definition.id}] already registered.`);
     }
 
+    const action = new ActionInternal(definition);
+
     this.actions.set(action.id, action);
+
+    return action;
   };
 
-  // TODO: make this
-  // <T extends TriggerId>(triggerId: T, action: Action<TriggerContextMapping[T]>): \
-  // to get type checks here!
+  public readonly unregisterAction = (actionId: string): void => {
+    if (!this.actions.has(actionId)) {
+      throw new Error(`Action [action.id = ${actionId}] is not registered.`);
+    }
+
+    this.actions.delete(actionId);
+  };
+
   public readonly attachAction = <T extends TriggerId>(triggerId: T, actionId: string): void => {
     const trigger = this.triggers.get(triggerId);
 
@@ -97,7 +108,7 @@ export class UiActionsService {
 
     const actionIds = this.triggerToActions.get(triggerId);
 
-    if (!actionIds!.find(id => id === actionId)) {
+    if (!actionIds!.find((id) => id === actionId)) {
       this.triggerToActions.set(triggerId, [...actionIds!, actionId]);
     }
   };
@@ -115,8 +126,34 @@ export class UiActionsService {
 
     this.triggerToActions.set(
       triggerId,
-      actionIds!.filter(id => id !== actionId)
+      actionIds!.filter((id) => id !== actionId)
     );
+  };
+
+  /**
+   * `addTriggerAction` is similar to `attachAction` as it attaches action to a
+   * trigger, but it also registers the action, if it has not been registered, yet.
+   *
+   * `addTriggerAction` also infers better typing of the `action` argument.
+   */
+  public readonly addTriggerAction = <T extends TriggerId>(
+    triggerId: T,
+    // The action can accept partial or no context, but if it needs context not provided
+    // by this type of trigger, typescript will complain. yay!
+    action: Action<TriggerContextMapping[T]>
+  ): void => {
+    if (!this.actions.has(action.id)) this.registerAction(action);
+    this.attachAction(triggerId, action.id);
+  };
+
+  public readonly getAction = <T extends ActionDefinition>(
+    id: string
+  ): Action<ActionContext<T>> => {
+    if (!this.actions.has(id)) {
+      throw new Error(`Action [action.id = ${id}] not registered.`);
+    }
+
+    return this.actions.get(id) as ActionInternal<T>;
   };
 
   public readonly getTriggerActions = <T extends TriggerId>(
@@ -127,9 +164,9 @@ export class UiActionsService {
 
     const actionIds = this.triggerToActions.get(triggerId);
 
-    const actions = actionIds!.map(actionId => this.actions.get(actionId)).filter(Boolean) as Array<
-      Action<TriggerContextMapping[T]>
-    >;
+    const actions = actionIds!
+      .map((actionId) => this.actions.get(actionId) as ActionInternal)
+      .filter(Boolean);
 
     return actions as Array<Action<TriggerContext<T>>>;
   };
@@ -139,7 +176,7 @@ export class UiActionsService {
     context: TriggerContextMapping[T]
   ): Promise<Array<Action<TriggerContextMapping[T]>>> => {
     const actions = this.getTriggerActions!(triggerId);
-    const isCompatibles = await Promise.all(actions.map(action => action.isCompatible(context)));
+    const isCompatibles = await Promise.all(actions.map((action) => action.isCompatible(context)));
     return actions.reduce(
       (acc: Array<Action<TriggerContextMapping[T]>>, action, i) =>
         isCompatibles[i] ? [...acc, action] : acc,
@@ -183,7 +220,6 @@ export class UiActionsService {
     for (const [key, value] of this.actions.entries()) actions.set(key, value);
     for (const [key, value] of this.triggerToActions.entries())
       triggerToActions.set(key, [...value]);
-
     return new UiActionsService({ triggers, actions, triggerToActions });
   };
 }

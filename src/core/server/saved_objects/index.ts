@@ -21,8 +21,6 @@ export * from './service';
 
 export { SavedObjectsSchema } from './schema';
 
-export { SavedObjectsManagement } from './management';
-
 export * from './import';
 
 export {
@@ -70,7 +68,12 @@ export {
   SavedObjectMigrationContext,
 } from './migrations';
 
-export { SavedObjectsType } from './types';
+export {
+  SavedObjectsNamespaceType,
+  SavedObjectStatusMeta,
+  SavedObjectsType,
+  SavedObjectsTypeManagementDefinition,
+} from './types';
 
 export { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects_config';
 export { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';

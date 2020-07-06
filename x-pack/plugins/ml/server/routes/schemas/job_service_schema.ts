@@ -29,21 +29,24 @@ export const chartSchema = {
   splitFieldValue: schema.maybe(schema.nullable(schema.string())),
 };
 
-export const datafeedIdsSchema = { datafeedIds: schema.arrayOf(schema.maybe(schema.string())) };
+export const datafeedIdsSchema = schema.object({
+  datafeedIds: schema.arrayOf(schema.maybe(schema.string())),
+});
 
-export const forceStartDatafeedSchema = {
+export const forceStartDatafeedSchema = schema.object({
   datafeedIds: schema.arrayOf(schema.maybe(schema.string())),
   start: schema.maybe(schema.number()),
   end: schema.maybe(schema.number()),
-};
+});
 
-export const jobIdsSchema = {
-  jobIds: schema.maybe(
-    schema.oneOf([schema.string(), schema.arrayOf(schema.maybe(schema.string()))])
-  ),
-};
+export const jobIdsSchema = schema.object({
+  /** Optional list of job IDs. */
+  jobIds: schema.maybe(schema.arrayOf(schema.maybe(schema.string()))),
+});
 
-export const jobsWithTimerangeSchema = { dateFormatTz: schema.maybe(schema.string()) };
+export const jobsWithTimerangeSchema = {
+  dateFormatTz: schema.maybe(schema.string()),
+};
 
 export const lookBackProgressSchema = {
   jobId: schema.string(),
@@ -63,3 +66,20 @@ export const updateGroupsSchema = {
     )
   ),
 };
+
+export const revertModelSnapshotSchema = schema.object({
+  jobId: schema.string(),
+  snapshotId: schema.string(),
+  replay: schema.boolean(),
+  end: schema.maybe(schema.number()),
+  deleteInterveningResults: schema.maybe(schema.boolean()),
+  calendarEvents: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        start: schema.number(),
+        end: schema.number(),
+        description: schema.string(),
+      })
+    )
+  ),
+});

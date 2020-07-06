@@ -10,8 +10,8 @@ export const LOG_ENTRIES_SUMMARY_PATH = '/api/log_entries/summary';
 
 export const logEntriesSummaryRequestRT = rt.type({
   sourceId: rt.string,
-  startDate: rt.number,
-  endDate: rt.number,
+  startTimestamp: rt.number,
+  endTimestamp: rt.number,
   bucketSize: rt.number,
   query: rt.union([rt.string, rt.undefined, rt.null]),
 });

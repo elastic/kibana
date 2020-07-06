@@ -205,7 +205,7 @@ const getFieldSettingValue = (wrapper: ReactWrapper, name: string, type: string)
 };
 
 describe('Field', () => {
-  Object.keys(settings).forEach(type => {
+  Object.keys(settings).forEach((type) => {
     const setting = settings[type];
 
     describe(`for ${type} setting`, () => {
@@ -325,10 +325,10 @@ describe('Field', () => {
         );
         const select = findTestSubject(component, `advancedSetting-editField-${setting.name}`);
         // @ts-ignore
-        const values = select.find('option').map(option => option.prop('value'));
+        const values = select.find('option').map((option) => option.prop('value'));
         expect(values).toEqual(['apple', 'orange', 'banana']);
         // @ts-ignore
-        const labels = select.find('option').map(option => option.text());
+        const labels = select.find('option').map((option) => option.text());
         expect(labels).toEqual(['Apple', 'Orange', 'banana']);
       });
     }
@@ -363,7 +363,7 @@ describe('Field', () => {
         (component.instance() as Field).getImageAsBase64 = ({}: Blob) => Promise.resolve('');
 
         it('should be able to change value and cancel', async () => {
-          (component.instance() as Field).onImageChange([userValue]);
+          (component.instance() as Field).onImageChange(([userValue] as unknown) as FileList);
           expect(handleChange).toBeCalled();
           await wrapper.setProps({
             unsavedChanges: {
@@ -387,7 +387,9 @@ describe('Field', () => {
           const updated = wrapper.update();
           findTestSubject(updated, `advancedSetting-changeImage-${setting.name}`).simulate('click');
           const newUserValue = `${userValue}=`;
-          await (component.instance() as Field).onImageChange([newUserValue]);
+          await (component.instance() as Field).onImageChange(([
+            newUserValue,
+          ] as unknown) as FileList);
           expect(handleChange).toBeCalled();
         });
 

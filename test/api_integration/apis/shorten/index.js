@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
@@ -31,7 +31,7 @@ export default function({ getService }) {
       const resp = await supertest
         .post('/api/shorten_url')
         .set('content-type', 'application/json')
-        .send({ url: '/app/kibana#/visualize/create' })
+        .send({ url: '/app/visualize#/create' })
         .expect(200);
 
       expect(resp.body).to.have.property('urlId');
@@ -43,13 +43,13 @@ export default function({ getService }) {
       const resp = await supertest
         .post('/api/shorten_url')
         .set('content-type', 'application/json')
-        .send({ url: '/app/kibana#/visualize/create' });
+        .send({ url: '/app/visualize#/create' });
 
       const urlId = resp.body.urlId;
       await supertest
         .get(`/goto/${urlId}`)
         .expect(302)
-        .expect('location', '/app/kibana#/visualize/create');
+        .expect('location', '/app/visualize#/create');
     });
   });
 }

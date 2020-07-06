@@ -63,10 +63,10 @@ describe('esArchiver: createGenerateIndexRecordsStream()', () => {
     const params = (client.indices.get as sinon.SinonSpy).args[0][0];
     expect(params).to.have.property('filterPath');
     const filters: string[] = params.filterPath;
-    expect(filters.some(path => path.includes('index.creation_date'))).to.be(true);
-    expect(filters.some(path => path.includes('index.uuid'))).to.be(true);
-    expect(filters.some(path => path.includes('index.version'))).to.be(true);
-    expect(filters.some(path => path.includes('index.provided_name'))).to.be(true);
+    expect(filters.some((path) => path.includes('index.creation_date'))).to.be(true);
+    expect(filters.some((path) => path.includes('index.uuid'))).to.be(true);
+    expect(filters.some((path) => path.includes('index.version'))).to.be(true);
+    expect(filters.some((path) => path.includes('index.provided_name'))).to.be(true);
   });
 
   it('produces one index record for each index name it receives', async () => {

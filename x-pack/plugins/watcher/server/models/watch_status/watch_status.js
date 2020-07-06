@@ -14,10 +14,10 @@ import { i18n } from '@kbn/i18n';
 function getActionStatusTotals(watchStatus) {
   const result = {};
 
-  forEach(ACTION_STATES, state => {
+  forEach(ACTION_STATES, (state) => {
     result[state] = 0;
   });
-  forEach(watchStatus.actionStatuses, actionStatus => {
+  forEach(watchStatus.actionStatuses, (actionStatus) => {
     result[actionStatus.state] = result[actionStatus.state] + 1;
   });
 
@@ -43,6 +43,7 @@ export class WatchStatus {
         id,
         actionStatusJson,
         errors: this.watchErrors.actions && this.watchErrors.actions[id],
+        lastCheckedRawFormat: get(this.watchStatusJson, 'last_checked'),
       };
       return ActionStatus.fromUpstreamJson(json);
     });
@@ -134,7 +135,7 @@ export class WatchStatus {
       lastChecked: this.lastChecked,
       lastMetCondition: this.lastMetCondition,
       lastFired: this.lastFired,
-      actionStatuses: map(this.actionStatuses, actionStatus => actionStatus.downstreamJson),
+      actionStatuses: map(this.actionStatuses, (actionStatus) => actionStatus.downstreamJson),
     };
 
     return json;

@@ -6,11 +6,16 @@
 
 import moment from 'moment';
 
-import { SavedObjectsFindResponse, SavedObjectsClientContract, APICaller } from 'src/core/server';
+import {
+  SavedObjectsFindResponse,
+  SavedObjectsClientContract,
+  LegacyAPICaller,
+} from 'src/core/server';
 import {
   IndexGroup,
   REINDEX_OP_TYPE,
   ReindexOperation,
+  ReindexOptions,
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
@@ -34,8 +39,9 @@ export interface ReindexActions {
   /**
    * Creates a new reindexOp, does not perform any pre-flight checks.
    * @param indexName
+   * @param opts Additional options when creating the reindex operation
    */
-  createReindexOp(indexName: string): Promise<ReindexSavedObject>;
+  createReindexOp(indexName: string, opts?: ReindexOptions): Promise<ReindexSavedObject>;
 
   /**
    * Deletes a reindexOp.
@@ -110,7 +116,7 @@ export interface ReindexActions {
 
 export const reindexActionsFactory = (
   client: SavedObjectsClientContract,
-  callAsUser: APICaller
+  callAsUser: LegacyAPICaller
 ): ReindexActions => {
   // ----- Internal functions
   const isLocked = (reindexOp: ReindexSavedObject) => {
@@ -150,7 +156,7 @@ export const reindexActionsFactory = (
 
   // ----- Public interface
   return {
-    async createReindexOp(indexName: string) {
+    async createReindexOp(indexName: string, opts?: ReindexOptions) {
       return client.create<ReindexOperation>(REINDEX_OP_TYPE, {
         indexName,
         newIndexName: generateNewIndexName(indexName),
@@ -161,6 +167,7 @@ export const reindexActionsFactory = (
         reindexTaskPercComplete: null,
         errorMessage: null,
         runningReindexCount: null,
+        reindexOptions: opts,
       });
     },
 
@@ -277,7 +284,7 @@ export const reindexActionsFactory = (
             throw new Error(`Could not acquire lock for ML jobs`);
           }
 
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise((resolve) => setTimeout(resolve, 1000));
           return lockDoc(attempt + 1);
         }
       };
@@ -286,7 +293,7 @@ export const reindexActionsFactory = (
     },
 
     async incrementIndexGroupReindexes(indexGroup) {
-      this.runWhileIndexGroupLocked(indexGroup, lockDoc =>
+      this.runWhileIndexGroupLocked(indexGroup, (lockDoc) =>
         this.updateReindexOp(lockDoc, {
           runningReindexCount: lockDoc.attributes.runningReindexCount! + 1,
         })
@@ -294,7 +301,7 @@ export const reindexActionsFactory = (
     },
 
     async decrementIndexGroupReindexes(indexGroup) {
-      this.runWhileIndexGroupLocked(indexGroup, lockDoc =>
+      this.runWhileIndexGroupLocked(indexGroup, (lockDoc) =>
         this.updateReindexOp(lockDoc, {
           runningReindexCount: lockDoc.attributes.runningReindexCount! - 1,
         })

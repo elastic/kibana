@@ -9,7 +9,7 @@ import { RouteDependencies } from '../types';
 import { registerPrivilegesRoute } from './api/privileges';
 import { registerTransformsRoutes } from './api/transforms';
 
-import { API_BASE_PATH } from '../../../../legacy/plugins/transform/common/constants';
+import { API_BASE_PATH } from '../../common/constants';
 
 export const addBasePath = (uri: string): string => `${API_BASE_PATH}${uri}`;
 

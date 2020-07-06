@@ -26,12 +26,12 @@ interface ServerResponseTime {
 }
 
 export class ServerMetricsCollector implements MetricsCollector<OpsServerMetrics> {
-  private readonly requests: OpsServerMetrics['requests'] = {
+  private requests: OpsServerMetrics['requests'] = {
     disconnects: 0,
     total: 0,
     statusCodes: {},
   };
-  private readonly responseTimes: ServerResponseTime = {
+  private responseTimes: ServerResponseTime = {
     count: 0,
     total: 0,
     max: 0,
@@ -45,7 +45,7 @@ export class ServerMetricsCollector implements MetricsCollector<OpsServerMetrics
       });
       return h.continue;
     });
-    this.server.events.on('response', request => {
+    this.server.events.on('response', (request) => {
       const statusCode = (request.response as ResponseObject)?.statusCode;
       if (statusCode) {
         if (!this.requests.statusCodes[statusCode]) {
@@ -62,7 +62,7 @@ export class ServerMetricsCollector implements MetricsCollector<OpsServerMetrics
   }
 
   public async collect(): Promise<OpsServerMetrics> {
-    const connections = await new Promise<number>(resolve => {
+    const connections = await new Promise<number>((resolve) => {
       this.server.listener.getConnections((_, count) => {
         resolve(count);
       });
@@ -75,6 +75,19 @@ export class ServerMetricsCollector implements MetricsCollector<OpsServerMetrics
         max_in_millis: this.responseTimes.max,
       },
       concurrent_connections: connections,
+    };
+  }
+
+  public reset() {
+    this.requests = {
+      disconnects: 0,
+      total: 0,
+      statusCodes: {},
+    };
+    this.responseTimes = {
+      count: 0,
+      total: 0,
+      max: 0,
     };
   }
 }

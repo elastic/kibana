@@ -6,20 +6,19 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  VALID_TOKEN_COUNT,
+  MEDIAN_LINE_LENGTH_LIMIT,
+  NULL_COUNT_PERCENT_LIMIT,
   CATEGORY_EXAMPLES_VALIDATION_STATUS,
   CATEGORY_EXAMPLES_ERROR_LIMIT,
   CATEGORY_EXAMPLES_WARNING_LIMIT,
-} from '../../../../../../../legacy/plugins/ml/common/constants/new_job';
+} from '../../../../../common/constants/categorization_job';
 import {
   FieldExampleCheck,
   CategoryFieldExample,
   VALIDATION_RESULT,
-} from '../../../../../../../legacy/plugins/ml/common/types/categories';
-import { getMedianStringLength } from '../../../../../../../legacy/plugins/ml/common/util/string_utils';
-
-const VALID_TOKEN_COUNT = 3;
-const MEDIAN_LINE_LENGTH_LIMIT = 400;
-const NULL_COUNT_PERCENT_LIMIT = 0.75;
+} from '../../../../../common/types/categories';
+import { getMedianStringLength } from '../../../../../common/util/string_utils';
 
 export class ValidationResults {
   private _results: FieldExampleCheck[] = [];
@@ -29,17 +28,19 @@ export class ValidationResults {
   }
 
   public get overallResult() {
-    if (this._results.some(c => c.valid === CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID)) {
+    if (this._results.some((c) => c.valid === CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID)) {
       return CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID;
     }
-    if (this._results.some(c => c.valid === CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID)) {
+    if (
+      this._results.some((c) => c.valid === CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID)
+    ) {
       return CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID;
     }
     return CATEGORY_EXAMPLES_VALIDATION_STATUS.VALID;
   }
 
   private _resultExists(id: VALIDATION_RESULT) {
-    return this._results.some(r => r.id === id);
+    return this._results.some((r) => r.id === id);
   }
 
   public createTokenCountResult(examples: CategoryFieldExample[], sampleSize: number) {
@@ -54,7 +55,7 @@ export class ValidationResults {
       return;
     }
 
-    const validExamplesSize = examples.filter(e => e.tokens.length >= VALID_TOKEN_COUNT).length;
+    const validExamplesSize = examples.filter((e) => e.tokens.length >= VALID_TOKEN_COUNT).length;
     const percentValid = sampleSize === 0 ? 0 : validExamplesSize / sampleSize;
 
     let valid = CATEGORY_EXAMPLES_VALIDATION_STATUS.VALID;
@@ -120,7 +121,7 @@ export class ValidationResults {
   }
 
   public createNullValueResult(examples: Array<string | null | undefined>) {
-    const nullCount = examples.filter(e => e === null).length;
+    const nullCount = examples.filter((e) => e === null).length;
 
     if (nullCount / examples.length >= NULL_COUNT_PERCENT_LIMIT) {
       this._results.push({
@@ -187,7 +188,6 @@ export class ValidationResults {
         valid: CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID,
         message,
       });
-      return;
     }
   }
 

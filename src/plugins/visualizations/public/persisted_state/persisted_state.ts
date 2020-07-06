@@ -19,17 +19,24 @@
 
 import { EventEmitter } from 'events';
 
-import { isPlainObject, cloneDeep, get, set, isEqual, isString, merge } from 'lodash';
-import toPath from 'lodash/internal/toPath';
+import {
+  isPlainObject,
+  cloneDeep,
+  get,
+  set,
+  isEqual,
+  isString,
+  merge,
+  mergeWith,
+  toPath,
+} from 'lodash';
 
 function prepSetParams(key: PersistedStateKey, value: any, path: PersistedStatePath) {
   // key must be the value, set the entire state using it
   if (value === undefined && (isPlainObject(key) || path.length > 0)) {
     // setting entire tree, swap the key and value to write to the state
-    return {
-      value: key,
-      key: undefined,
-    };
+    value = key;
+    key = undefined;
   }
 
   // ensure the value being passed in is never mutated
@@ -87,13 +94,13 @@ export class PersistedState extends EventEmitter {
   setSilent(key: PersistedStateKey | any, value?: any) {
     const params = prepSetParams(key, value, this._path);
 
-    if (params.key) {
+    if (params.key || params.value) {
       return this.setValue(params.key, params.value, true);
     }
   }
 
   clearAllKeys() {
-    Object.getOwnPropertyNames(this._changedState).forEach(key => {
+    Object.getOwnPropertyNames(this._changedState).forEach((key) => {
       this.set(key, null);
     });
   }
@@ -152,7 +159,7 @@ export class PersistedState extends EventEmitter {
       while (partialPath.length > 0) {
         const lastKey = partialPath.splice(partialPath.length - 1, 1)[0];
         const statePath = [...this._path, partialPath];
-        const stateVal = statePath.length > 0 ? get(stateTree, statePath) : stateTree;
+        const stateVal = statePath.length > 0 ? get(stateTree, statePath as string[]) : stateTree;
 
         // if stateVal isn't an object, do nothing
         if (!isPlainObject(stateVal)) return;
@@ -231,7 +238,7 @@ export class PersistedState extends EventEmitter {
     const sourceObj = merge({}, this._changedState);
 
     // handler arguments are (targetValue, sourceValue, key, target, source)
-    const mergeMethod = function(targetValue: any, sourceValue: any, mergeKey: string) {
+    const mergeMethod = function (targetValue: any, sourceValue: any, mergeKey: string) {
       // if not initial state, skip default merge method (ie. return value, see note below)
       if (!initialState && isEqual(keyPath, self.getIndex(mergeKey))) {
         // use the sourceValue or fall back to targetValue
@@ -242,7 +249,7 @@ export class PersistedState extends EventEmitter {
     // If `mergeMethod` is provided it is invoked to produce the merged values of the
     // destination and source properties.
     // If `mergeMethod` returns `undefined` the default merging method is used
-    this._mergedState = merge(targetObj, sourceObj, mergeMethod);
+    this._mergedState = mergeWith(targetObj, sourceObj, mergeMethod);
 
     // sanity check; verify that there are actually changes
     if (isEqual(this._mergedState, this._defaultState)) this._changedState = {};

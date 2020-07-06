@@ -22,17 +22,17 @@ import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ToastsStart } from 'src/core/public';
-import {
-  SavedObjectsManagementRecord,
-  ProcessedImportResponse,
-  processImportResponse,
-} from '../../../../../../src/legacy/core_plugins/management/public';
+import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';
 import { Space } from '../../../common/model/space';
 import { SpacesManager } from '../../spaces_manager';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
 import { CopyToSpaceFlyoutFooter } from './copy_to_space_flyout_footer';
 import { CopyToSpaceForm } from './copy_to_space_form';
 import { CopyOptions, ImportRetry } from '../types';
+import {
+  ProcessedImportResponse,
+  processImportResponse,
+} from '../../../../../../src/plugins/saved_objects_management/public';
 
 interface Props {
   onClose: () => void;
@@ -62,10 +62,10 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
       .then(([allSpaces, activeSpace]) => {
         setSpacesState({
           isLoading: false,
-          spaces: allSpaces.filter(space => space.id !== activeSpace.id),
+          spaces: allSpaces.filter((space) => space.id !== activeSpace.id),
         });
       })
-      .catch(e => {
+      .catch((e) => {
         toastNotifications.addError(e, {
           title: i18n.translate('xpack.spaces.management.copyToSpace.spacesLoadErrorTitle', {
             defaultMessage: 'Error loading available spaces',
@@ -113,8 +113,8 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
   }
 
   async function finishCopy() {
-    const needsConflictResolution = Object.values(retries).some(spaceRetry =>
-      spaceRetry.some(retry => retry.overwrite)
+    const needsConflictResolution = Object.values(retries).some((spaceRetry) =>
+      spaceRetry.some((retry) => retry.overwrite)
     );
 
     if (needsConflictResolution) {

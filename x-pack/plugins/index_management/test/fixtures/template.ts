@@ -5,24 +5,33 @@
  */
 
 import { getRandomString, getRandomNumber } from '../../../../test_utils';
-import { Template } from '../../common/types';
+import { TemplateDeserialized } from '../../common';
 
 export const getTemplate = ({
   name = getRandomString(),
   version = getRandomNumber(),
   order = getRandomNumber(),
   indexPatterns = [],
-  settings,
-  aliases,
-  mappings,
+  template: { settings, aliases, mappings } = {},
   isManaged = false,
-}: Partial<Template> = {}): Template => ({
+  isLegacy = false,
+}: Partial<
+  TemplateDeserialized & {
+    isLegacy?: boolean;
+    isManaged: boolean;
+  }
+> = {}): TemplateDeserialized => ({
   name,
   version,
   order,
   indexPatterns,
-  settings,
-  aliases,
-  mappings,
-  isManaged,
+  template: {
+    aliases,
+    mappings,
+    settings,
+  },
+  _kbnMeta: {
+    isManaged,
+    isLegacy,
+  },
 });

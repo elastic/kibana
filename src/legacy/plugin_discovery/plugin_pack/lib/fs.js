@@ -38,7 +38,7 @@ function assertAbsolutePath(path) {
 
 async function statTest(path, test) {
   try {
-    const stats = await fcb(cb => stat(path, cb));
+    const stats = await fcb((cb) => stat(path, cb));
     return Boolean(test(stats));
   } catch (error) {
     if (error.code !== 'ENOENT') {
@@ -55,7 +55,7 @@ async function statTest(path, test) {
  */
 export async function isDirectory(path) {
   assertAbsolutePath(path);
-  return await statTest(path, stat => stat.isDirectory());
+  return await statTest(path, (stat) => stat.isDirectory());
 }
 
 /**
@@ -63,18 +63,18 @@ export async function isDirectory(path) {
  *  @param  {string} path
  *  @return {Promise<Array<string>>}
  */
-export const createChildDirectory$ = path =>
+export const createChildDirectory$ = (path) =>
   Rx.defer(() => {
     assertAbsolutePath(path);
-    return fcb(cb => readdir(path, cb));
+    return fcb((cb) => readdir(path, cb));
   }).pipe(
-    catchError(error => {
+    catchError((error) => {
       throw createInvalidDirectoryError(error, path);
     }),
     mergeAll(),
-    filter(name => !name.startsWith('.')),
-    map(name => resolve(path, name)),
-    mergeMap(async absolute => {
+    filter((name) => !name.startsWith('.')),
+    map((name) => resolve(path, name)),
+    mergeMap(async (absolute) => {
       if (await isDirectory(absolute)) {
         return [absolute];
       } else {

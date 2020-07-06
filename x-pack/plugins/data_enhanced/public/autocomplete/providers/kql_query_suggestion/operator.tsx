@@ -148,21 +148,21 @@ const getDescription = (operator: string) => <p>{getOperatorByName(operator).des
 export const setupGetOperatorSuggestions: KqlQuerySuggestionProvider = () => {
   return ({ indexPatterns }, { end, fieldName, nestedPath }) => {
     const allFields = flatten(
-      indexPatterns.map(indexPattern => {
+      indexPatterns.map((indexPattern) => {
         return indexPattern.fields.slice();
       })
     );
     const fullFieldName = nestedPath ? `${nestedPath}.${fieldName}` : fieldName;
     const fields = allFields
-      .filter(field => field.name === fullFieldName)
-      .map(field => {
-        const matchingOperators = Object.keys(operators).filter(operator => {
+      .filter((field) => field.name === fullFieldName)
+      .map((field) => {
+        const matchingOperators = Object.keys(operators).filter((operator) => {
           const { fieldTypes } = getOperatorByName(operator);
 
           return !fieldTypes || fieldTypes.includes(field.type);
         });
 
-        const suggestions = matchingOperators.map(operator => ({
+        const suggestions = matchingOperators.map((operator) => ({
           type: QuerySuggestionTypes.Operator,
           text: operator + ' ',
           description: getDescription(operator),

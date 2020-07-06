@@ -23,7 +23,6 @@ export function AlertDetailsPageProvider({ getService }: FtrProviderContext) {
     async getActionsLabels() {
       return {
         actionType: await testSubjects.getVisibleText('actionTypeLabel'),
-        actionCount: await testSubjects.getVisibleText('actionCountLabel'),
       };
     },
     async getAlertInstancesList() {
@@ -33,7 +32,7 @@ export function AlertDetailsPageProvider({ getService }: FtrProviderContext) {
       const $ = await table.parseDomContent();
       return $.findTestSubjects('alert-instance-row')
         .toArray()
-        .map(row => {
+        .map((row) => {
           return {
             instance: $(row)
               .findTestSubject('alertInstancesTableCell-instance')
@@ -54,6 +53,12 @@ export function AlertDetailsPageProvider({ getService }: FtrProviderContext) {
           };
         });
     },
+    async getAlertInstanceDurationEpoch(): Promise<number> {
+      const alertInstancesDurationEpoch = await find.byCssSelector(
+        'input[data-test-subj="alertInstancesDurationEpoch"]'
+      );
+      return parseInt(await alertInstancesDurationEpoch.getAttribute('value'), 10);
+    },
     async clickAlertInstanceMuteButton(instance: string) {
       const muteAlertInstanceButton = await testSubjects.find(
         `muteAlertInstanceButton_${instance}`
@@ -65,12 +70,10 @@ export function AlertDetailsPageProvider({ getService }: FtrProviderContext) {
         const muteAlertInstanceButton = await testSubjects.find(
           `muteAlertInstanceButton_${instance}`
         );
-        log.debug(`checked:${await muteAlertInstanceButton.getAttribute('checked')}`);
-        expect(await muteAlertInstanceButton.getAttribute('checked')).to.eql(
-          isMuted ? 'true' : null
+        log.debug(`checked:${await muteAlertInstanceButton.getAttribute('aria-checked')}`);
+        expect(await muteAlertInstanceButton.getAttribute('aria-checked')).to.eql(
+          isMuted ? 'true' : 'false'
         );
-
-        expect(await testSubjects.exists(`mutedAlertInstanceLabel_${instance}`)).to.eql(isMuted);
       });
     },
     async ensureAlertInstanceExistance(instance: string, shouldExist: boolean) {
@@ -83,7 +86,7 @@ export function AlertDetailsPageProvider({ getService }: FtrProviderContext) {
           $.findTestSubjects('alert-instance-row')
             .toArray()
             .filter(
-              row =>
+              (row) =>
                 $(row)
                   .findTestSubject('alertInstancesTableCell-instance')
                   .find('.euiTableCellContent')
@@ -95,6 +98,30 @@ export function AlertDetailsPageProvider({ getService }: FtrProviderContext) {
     async clickPaginationNextPage() {
       const nextButton = await testSubjects.find(`pagination-button-next`);
       nextButton.click();
+    },
+    async isViewInAppDisabled() {
+      await retry.try(async () => {
+        const viewInAppButton = await testSubjects.find(`alertDetails-viewInApp`);
+        expect(await viewInAppButton.getAttribute('disabled')).to.eql('true');
+      });
+      return true;
+    },
+    async isViewInAppEnabled() {
+      await retry.try(async () => {
+        const viewInAppButton = await testSubjects.find(`alertDetails-viewInApp`);
+        expect(await viewInAppButton.getAttribute('disabled')).to.not.eql('true');
+      });
+      return true;
+    },
+    async clickViewInApp() {
+      return await testSubjects.click('alertDetails-viewInApp');
+    },
+    async getNoOpAppTitle() {
+      await retry.try(async () => {
+        const title = await testSubjects.find('noop-title');
+        expect(title.isDisplayed()).to.eql(true);
+      });
+      return await testSubjects.getVisibleText('noop-title');
     },
   };
 }

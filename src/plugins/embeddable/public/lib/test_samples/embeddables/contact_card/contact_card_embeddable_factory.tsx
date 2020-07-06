@@ -23,26 +23,23 @@ import { UiActionsStart } from 'src/plugins/ui_actions/public';
 
 import { CoreStart } from 'src/core/public';
 import { toMountPoint } from '../../../../../../kibana_react/public';
-import { EmbeddableFactory } from '../../../embeddables';
+import { EmbeddableFactoryDefinition } from '../../../embeddables';
 import { Container } from '../../../containers';
 import { ContactCardEmbeddable, ContactCardEmbeddableInput } from './contact_card_embeddable';
 import { ContactCardInitializer } from './contact_card_initializer';
-import { EmbeddableFactoryOptions } from '../../../embeddables/embeddable_factory';
 
 export const CONTACT_CARD_EMBEDDABLE = 'CONTACT_CARD_EMBEDDABLE';
 
-export class ContactCardEmbeddableFactory extends EmbeddableFactory<ContactCardEmbeddableInput> {
+export class ContactCardEmbeddableFactory
+  implements EmbeddableFactoryDefinition<ContactCardEmbeddableInput> {
   public readonly type = CONTACT_CARD_EMBEDDABLE;
 
   constructor(
-    options: EmbeddableFactoryOptions<any>,
     private readonly execTrigger: UiActionsStart['executeTriggerActions'],
     private readonly overlays: CoreStart['overlays']
-  ) {
-    super(options);
-  }
+  ) {}
 
-  public isEditable() {
+  public async isEditable() {
     return true;
   }
 
@@ -52,8 +49,8 @@ export class ContactCardEmbeddableFactory extends EmbeddableFactory<ContactCardE
     });
   }
 
-  public getExplicitInput(): Promise<Partial<ContactCardEmbeddableInput>> {
-    return new Promise(resolve => {
+  public getExplicitInput = (): Promise<Partial<ContactCardEmbeddableInput>> => {
+    return new Promise((resolve) => {
       const modalSession = this.overlays.openModal(
         toMountPoint(
           <ContactCardInitializer
@@ -72,9 +69,9 @@ export class ContactCardEmbeddableFactory extends EmbeddableFactory<ContactCardE
         }
       );
     });
-  }
+  };
 
-  public async create(initialInput: ContactCardEmbeddableInput, parent?: Container) {
+  public create = async (initialInput: ContactCardEmbeddableInput, parent?: Container) => {
     return new ContactCardEmbeddable(
       initialInput,
       {
@@ -82,5 +79,5 @@ export class ContactCardEmbeddableFactory extends EmbeddableFactory<ContactCardE
       },
       parent
     );
-  }
+  };
 }

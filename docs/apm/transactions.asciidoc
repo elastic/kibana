@@ -1,3 +1,4 @@
+[role="xpack"]
 [[transactions]]
 === Transaction overview
 
@@ -50,25 +51,11 @@ If there's a particular endpoint you're worried about, you can click on it to vi
 [IMPORTANT]
 ====
 If you only see one route in the Transactions table, or if you have transactions named "unknown route",
-it could be a symptom that the agent either wasn't installed correctly or doesn't support your framework. 
+it could be a symptom that the agent either wasn't installed correctly or doesn't support your framework.
 
 For further details, including troubleshooting and custom implementation instructions,
 refer to the documentation for each {apm-agents-ref}[APM Agent] you've implemented.
 ====
-
-[[transactions-annotations]]
-==== Transaction annotations
-
-For enhanced visibility into your deployments, we offer deployment annotations on all transaction charts.
-This feature automatically tags new deployments, so you can easily see if your deploy has increased response times
-for an end-user, or if the memory/CPU footprint of your application has increased.
-Being able to quickly identify bad deployments enables you to rollback and fix issues without causing costly outages.
-
-Deployment annotations are automatically enabled, and appear when the `service.version` of your app changes.
-
-[role="screenshot"]
-image::apm/images/apm-transaction-annotation.png[Example view of transactions annotation in the APM app in Kibana]
-
 
 [[rum-transaction-overview]]
 ==== RUM Transaction overview
@@ -77,12 +64,12 @@ The transaction overview page is customized for the JavaScript RUM Agent.
 This page highlights things like *page load times*, *transactions per minute*, and even the *average page load duration distribution by country*.
 
 [role="screenshot"]
-image::apm/images/apm-geo-ui.jpg[average page load duration distribution]
+image::apm/images/apm-geo-ui.png[average page load duration distribution]
 
 This data is available due to the geo-ip and user agent pipelines being enabled by default,
 which allows for the capture of geo-location and user agent data.
 These visualizations make it easy for you to visualize performance information about your
-end users' experience based on their location.
+end-users' experience based on their location.
 
 [[transaction-details]]
 ==== Transaction details
@@ -103,15 +90,12 @@ The number of requests per bucket is displayed when hovering over the graph, and
 [role="screenshot"]
 image::apm/images/apm-transaction-duration-dist.png[Example view of transactions duration distribution graph]
 
-Let's look at an example.
-In the screenshot below,
-you'll notice most of the requests fall into buckets on the left side of the graph,
-with a long tail of smaller buckets to the right.
-This is a typical distribution, and indicates most of our requests were served quickly - awesome!
+This graph shows a typical distribution, and indicates most of our requests were served quickly--awesome!
 It's the requests on the right, the ones taking longer than average, that we probably want to focus on.
+
 When you select one of these buckets,
 you're presented with up to ten trace samples.
-Each sample has a span timeline waterfall that shows what a typical request in that bucket was doing.
+Each sample has a trace timeline waterfall that shows what a typical request in that bucket was doing.
 By investigating this timeline waterfall, we can hopefully determine _why_ this request was slow and then implement a fix.
 
 [role="screenshot"]

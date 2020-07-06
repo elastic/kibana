@@ -17,6 +17,6 @@
  * under the License.
  */
 
-module.exports = function(uid) {
+module.exports = function (uid) {
   return uid === 0;
 };

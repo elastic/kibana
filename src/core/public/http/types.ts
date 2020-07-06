@@ -24,6 +24,7 @@ import { MaybePromise } from '@kbn/utility-types';
 export interface HttpSetup {
   /**
    * APIs for manipulating the basePath on URL segments.
+   * See {@link IBasePath}
    */
   basePath: IBasePath;
 
@@ -205,7 +206,12 @@ export interface HttpRequestInit {
 
 /** @public */
 export interface HttpFetchQuery {
-  [key: string]: string | number | boolean | undefined;
+  [key: string]:
+    | string
+    | number
+    | boolean
+    | undefined
+    | Array<string | number | boolean | undefined>;
 }
 
 /**

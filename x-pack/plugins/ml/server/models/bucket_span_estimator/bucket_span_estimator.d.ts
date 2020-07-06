@@ -4,11 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'src/core/server';
-import { BucketSpanEstimatorData } from '../../../../../legacy/plugins/ml/public/application/services/ml_api_service';
+import { LegacyAPICaller } from 'kibana/server';
+import { ES_AGGREGATION } from '../../../common/constants/aggregation_types';
+
+export interface BucketSpanEstimatorData {
+  aggTypes: Array<ES_AGGREGATION | null>;
+  duration: {
+    start: number;
+    end: number;
+  };
+  fields: Array<string | null>;
+  index: string;
+  query: any;
+  splitField: string | undefined;
+  timeField: string | undefined;
+}
 
 export function estimateBucketSpanFactory(
-  callAsCurrentUser: APICaller,
-  callAsInternalUser: APICaller,
+  callAsCurrentUser: LegacyAPICaller,
+  callAsInternalUser: LegacyAPICaller,
   isSecurityDisabled: boolean
 ): (config: BucketSpanEstimatorData) => Promise<any>;

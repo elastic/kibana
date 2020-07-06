@@ -1,0 +1,15 @@
+{
+  "id": "beats_management",
+  "configPath": ["xpack", "beats_management"],
+  "ui": true,
+  "server": true,
+  "version": "kibana",
+  "requiredPlugins": [
+    "data",
+    "licensing",
+    "management"
+  ],
+  "optionalPlugins": [
+    "security"
+  ]
+}

@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-const { set, get, isEmpty } = require('lodash');
+import { overwrite } from '../../helpers';
+import _ from 'lodash';
 
-const isEmptyFilter = (filter = {}) => Boolean(filter.match_all) && isEmpty(filter.match_all);
+const isEmptyFilter = (filter = {}) => Boolean(filter.match_all) && _.isEmpty(filter.match_all);
 const hasSiblingPipelineAggregation = (aggs = {}) => Object.keys(aggs).length > 1;
 
 /* For grouping by the 'Everything', the splitByEverything request processor
@@ -30,12 +31,12 @@ const hasSiblingPipelineAggregation = (aggs = {}) => Object.keys(aggs).length > 
  *
  */
 function removeEmptyTopLevelAggregation(doc, series) {
-  const filter = get(doc, `aggs.${series.id}.filter`);
+  const filter = _.get(doc, `aggs.${series.id}.filter`);
 
   if (isEmptyFilter(filter) && !hasSiblingPipelineAggregation(doc.aggs[series.id].aggs)) {
-    const meta = get(doc, `aggs.${series.id}.meta`);
-    set(doc, `aggs`, doc.aggs[series.id].aggs);
-    set(doc, `aggs.timeseries.meta`, meta);
+    const meta = _.get(doc, `aggs.${series.id}.meta`);
+    overwrite(doc, `aggs`, doc.aggs[series.id].aggs);
+    overwrite(doc, `aggs.timeseries.meta`, meta);
   }
 
   return doc;
@@ -45,7 +46,7 @@ function removeEmptyTopLevelAggregation(doc, series) {
  * as the last place where you can modify the "doc" (request body) object before sending it to ES.
  */
 export function normalizeQuery(req, panel, series) {
-  return next => doc => {
+  return (next) => (doc) => {
     return next(removeEmptyTopLevelAggregation(doc, series));
   };
 }

@@ -18,7 +18,6 @@
  */
 import React, { useCallback, useContext } from 'react';
 import {
-  EuiIcon,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -30,11 +29,11 @@ import {
   EuiButtonEmpty,
   EuiText,
   EuiBadge,
+  EuiHeaderAlert,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiHeaderAlert } from '../../../../legacy/core_plugins/newsfeed/public/np_ready/components/header_alert/header_alert';
 import { NewsfeedContext } from './newsfeed_header_nav_button';
-import { NewsfeedItem } from '../../types';
+import { NewsfeedItem } from '../types';
 import { NewsEmptyPrompt } from './empty_news';
 import { NewsLoadingPrompt } from './loading_news';
 
@@ -53,7 +52,10 @@ export const NewsfeedFlyout = () => {
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 id="flyoutSmallTitle">
-            <FormattedMessage id="newsfeed.flyoutList.whatsNewTitle" defaultMessage="What's new" />
+            <FormattedMessage
+              id="newsfeed.flyoutList.whatsNewTitle"
+              defaultMessage="What's new at Elastic"
+            />
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -69,13 +71,12 @@ export const NewsfeedFlyout = () => {
                 text={item.description}
                 data-test-subj="newsHeadAlert"
                 action={
-                  <EuiLink target="_blank" href={item.linkUrl}>
+                  <EuiLink target="_blank" href={item.linkUrl} external>
                     {item.linkText}
-                    <EuiIcon type="popout" size="s" />
                   </EuiLink>
                 }
                 date={item.publishOn.format('DD MMMM YYYY')}
-                badge={<EuiBadge color="hollow">{item.badge}</EuiBadge>}
+                badge={item.badge ? <EuiBadge color="hollow">{item.badge}</EuiBadge> : undefined}
               />
             );
           })

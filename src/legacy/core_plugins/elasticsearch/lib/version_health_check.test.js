@@ -20,7 +20,7 @@ import { versionHealthCheck } from './version_health_check';
 import { Subject } from 'rxjs';
 
 describe('plugins/elasticsearch', () => {
-  describe('lib/health_version_check', function() {
+  describe('lib/health_version_check', function () {
     let plugin;
     let logWithMetadata;
 
@@ -37,7 +37,7 @@ describe('plugins/elasticsearch', () => {
       jest.clearAllMocks();
     });
 
-    it('returned promise resolves when all nodes are compatible ', function() {
+    it('returned promise resolves when all nodes are compatible ', function () {
       const esNodesCompatibility$ = new Subject();
       const versionHealthyPromise = versionHealthCheck(
         plugin,
@@ -48,7 +48,7 @@ describe('plugins/elasticsearch', () => {
       return expect(versionHealthyPromise).resolves.toBe(undefined);
     });
 
-    it('should set elasticsearch plugin status to green when all nodes are compatible', function() {
+    it('should set elasticsearch plugin status to green when all nodes are compatible', function () {
       const esNodesCompatibility$ = new Subject();
       versionHealthCheck(plugin, logWithMetadata, esNodesCompatibility$);
       expect(plugin.status.yellow).toHaveBeenCalledWith('Waiting for Elasticsearch');
@@ -58,7 +58,7 @@ describe('plugins/elasticsearch', () => {
       expect(plugin.status.red).not.toHaveBeenCalled();
     });
 
-    it('should set elasticsearch plugin status to red when some nodes are incompatible', function() {
+    it('should set elasticsearch plugin status to red when some nodes are incompatible', function () {
       const esNodesCompatibility$ = new Subject();
       versionHealthCheck(plugin, logWithMetadata, esNodesCompatibility$);
       expect(plugin.status.yellow).toHaveBeenCalledWith('Waiting for Elasticsearch');

@@ -7,12 +7,19 @@
 import { EuiButton, EuiButtonProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
+import { useLinkProps } from '../../../hooks/use_link_props';
 
-export const UserManagementLink: React.FunctionComponent<EuiButtonProps> = props => (
-  <EuiButton href="kibana#/management/security/users" color="primary" fill {...props}>
-    <FormattedMessage
-      id="xpack.infra.logs.analysis.userManagementButtonLabel"
-      defaultMessage="Manage users"
-    />
-  </EuiButton>
-);
+export const UserManagementLink: React.FunctionComponent<EuiButtonProps> = (props) => {
+  const linkProps = useLinkProps({
+    app: 'kibana',
+    hash: '/management/security/users',
+  });
+  return (
+    <EuiButton color="primary" fill {...linkProps} {...props}>
+      <FormattedMessage
+        id="xpack.infra.logs.analysis.userManagementButtonLabel"
+        defaultMessage="Manage users"
+      />
+    </EuiButton>
+  );
+};

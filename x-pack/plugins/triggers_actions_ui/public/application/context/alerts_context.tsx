@@ -5,26 +5,33 @@
  */
 
 import React, { useContext, createContext } from 'react';
-import { HttpSetup, IUiSettingsClient, ToastsApi } from 'kibana/public';
+import {
+  HttpSetup,
+  IUiSettingsClient,
+  ToastsApi,
+  DocLinksStart,
+  ApplicationStart,
+} from 'kibana/public';
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import { TypeRegistry } from '../type_registry';
 import { AlertTypeModel, ActionTypeModel } from '../../types';
 
-export interface AlertsContextValue {
-  addFlyoutVisible: boolean;
-  setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+export interface AlertsContextValue<MetaData = Record<string, any>> {
   reloadAlerts?: () => Promise<void>;
   http: HttpSetup;
   alertTypeRegistry: TypeRegistry<AlertTypeModel>;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  uiSettings?: IUiSettingsClient;
-  toastNotifications?: Pick<
+  toastNotifications: Pick<
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
+  uiSettings?: IUiSettingsClient;
   charts?: ChartsPluginSetup;
+  docLinks: DocLinksStart;
+  capabilities: ApplicationStart['capabilities'];
   dataFieldsFormats?: DataPublicPluginSetup['fieldFormats'];
+  metadata?: MetaData;
 }
 
 const AlertsContext = createContext<AlertsContextValue>(null as any);
@@ -42,7 +49,7 @@ export const AlertsContextProvider = ({
 export const useAlertsContext = () => {
   const ctx = useContext(AlertsContext);
   if (!ctx) {
-    throw new Error('ActionsConnectorsContext has not been set.');
+    throw new Error('AlertsContext has not been set.');
   }
   return ctx;
 };

@@ -16,10 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../../expression_functions';
 import { KibanaContext } from '../../expression_types';
+import { Query, uniqFilters } from '../../../../data/common';
 
 interface Arguments {
   q?: string | null;
@@ -34,6 +35,15 @@ export type ExpressionFunctionKibanaContext = ExpressionFunctionDefinition<
   Arguments,
   Promise<KibanaContext>
 >;
+
+const getParsedValue = (data: any, defaultValue: any) =>
+  typeof data === 'string' && data.length ? JSON.parse(data) || defaultValue : defaultValue;
+
+const mergeQueries = (first: Query | Query[] = [], second: Query | Query[]) =>
+  uniqBy<Query>(
+    [...(Array.isArray(first) ? first : [first]), ...(Array.isArray(second) ? second : [second])],
+    (n: any) => JSON.stringify(n.query)
+  );
 
 export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
   name: 'kibana_context',
@@ -75,9 +85,9 @@ export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
   },
 
   async fn(input, args, { getSavedObject }) {
-    const queryArg = args.q ? JSON.parse(args.q) : [];
-    let queries = Array.isArray(queryArg) ? queryArg : [queryArg];
-    let filters = args.filters ? JSON.parse(args.filters) : [];
+    const timeRange = getParsedValue(args.timeRange, input?.timeRange);
+    let queries = mergeQueries(input?.query, getParsedValue(args?.q, []));
+    let filters = [...(input?.filters || []), ...getParsedValue(args?.filters, [])];
 
     if (args.savedSearchId) {
       if (typeof getSavedObject !== 'function') {
@@ -89,29 +99,20 @@ export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
       }
       const obj = await getSavedObject('search', args.savedSearchId);
       const search = obj.attributes.kibanaSavedObjectMeta as { searchSourceJSON: string };
-      const data = JSON.parse(search.searchSourceJSON) as { query: string; filter: any[] };
-      queries = queries.concat(data.query);
-      filters = filters.concat(data.filter);
-    }
+      const { query, filter } = getParsedValue(search.searchSourceJSON, {});
 
-    if (input && input.query) {
-      queries = queries.concat(input.query);
+      if (query) {
+        queries = mergeQueries(queries, query);
+      }
+      if (filter) {
+        filters = [...filters, ...(Array.isArray(filter) ? filter : [filter])];
+      }
     }
-
-    if (input && input.filters) {
-      filters = filters.concat(input.filters).filter((f: any) => !f.meta.disabled);
-    }
-
-    const timeRange = args.timeRange
-      ? JSON.parse(args.timeRange)
-      : input
-      ? input.timeRange
-      : undefined;
 
     return {
       type: 'kibana_context',
       query: queries,
-      filters,
+      filters: uniqFilters(filters).filter((f: any) => !f.meta?.disabled),
       timeRange,
     };
   },

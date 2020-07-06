@@ -10,44 +10,21 @@
  * will possibly go away with https://github.com/elastic/kibana/issues/52300.
  */
 
-export function hasShowAlertsCapability(capabilities: any): boolean {
-  if (capabilities.siem && capabilities.siem['alerting:show']) {
-    return true;
-  }
-  return false;
+type Capabilities = Record<string, any>;
+
+const apps = ['apm', 'siem', 'uptime', 'infrastructure'];
+
+function hasCapability(capabilities: Capabilities, capability: string) {
+  return apps.some((app) => capabilities[app]?.[capability]);
 }
 
-export function hasShowActionsCapability(capabilities: any): boolean {
-  if (capabilities.siem && capabilities.siem['actions:show']) {
-    return true;
-  }
-  return false;
+function createCapabilityCheck(capability: string) {
+  return (capabilities: Capabilities) => hasCapability(capabilities, capability);
 }
 
-export function hasSaveAlertsCapability(capabilities: any): boolean {
-  if (capabilities.siem && capabilities.siem['alerting:save']) {
-    return true;
-  }
-  return false;
-}
-
-export function hasSaveActionsCapability(capabilities: any): boolean {
-  if (capabilities.siem && capabilities.siem['actions:save']) {
-    return true;
-  }
-  return false;
-}
-
-export function hasDeleteAlertsCapability(capabilities: any): boolean {
-  if (capabilities.siem && capabilities.siem['alerting:delete']) {
-    return true;
-  }
-  return false;
-}
-
-export function hasDeleteActionsCapability(capabilities: any): boolean {
-  if (capabilities.siem && capabilities.siem['actions:delete']) {
-    return true;
-  }
-  return false;
-}
+export const hasShowAlertsCapability = createCapabilityCheck('alerting:show');
+export const hasShowActionsCapability = createCapabilityCheck('actions:show');
+export const hasSaveAlertsCapability = createCapabilityCheck('alerting:save');
+export const hasSaveActionsCapability = createCapabilityCheck('actions:save');
+export const hasDeleteAlertsCapability = createCapabilityCheck('alerting:delete');
+export const hasDeleteActionsCapability = createCapabilityCheck('actions:delete');

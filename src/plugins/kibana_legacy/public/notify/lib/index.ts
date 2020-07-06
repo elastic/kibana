@@ -25,3 +25,4 @@ export {
   formatAngularHttpError,
   AngularHttpError,
 } from './format_angular_http_error';
+export { addFatalError } from './add_fatal_error';

@@ -21,10 +21,9 @@ import { Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import _ from 'lodash';
 import { BaseStateContainer } from '../../../../kibana_utils/public';
-import { COMPARE_ALL_OPTIONS, compareFilters } from '../filter_manager/lib/compare_filters';
 import { QuerySetup, QueryStart } from '../query_service';
 import { QueryState, QueryStateChange } from './types';
-import { FilterStateStore } from '../../../common/es_query/filters';
+import { FilterStateStore, COMPARE_ALL_OPTIONS, compareFilters } from '../../../common';
 
 /**
  * Helper to setup two-way syncing of global data and a state container
@@ -92,7 +91,10 @@ export const connectToQueryState = <S extends QueryState>(
     } else if (syncConfig.filters === FilterStateStore.GLOBAL_STATE) {
       if (
         !initialState.filters ||
-        !compareFilters(initialState.filters, filterManager.getGlobalFilters(), COMPARE_ALL_OPTIONS)
+        !compareFilters(initialState.filters, filterManager.getGlobalFilters(), {
+          ...COMPARE_ALL_OPTIONS,
+          state: false,
+        })
       ) {
         initialState.filters = filterManager.getGlobalFilters();
         initialDirty = true;
@@ -100,7 +102,10 @@ export const connectToQueryState = <S extends QueryState>(
     } else if (syncConfig.filters === FilterStateStore.APP_STATE) {
       if (
         !initialState.filters ||
-        !compareFilters(initialState.filters, filterManager.getAppFilters(), COMPARE_ALL_OPTIONS)
+        !compareFilters(initialState.filters, filterManager.getAppFilters(), {
+          ...COMPARE_ALL_OPTIONS,
+          state: false,
+        })
       ) {
         initialState.filters = filterManager.getAppFilters();
         initialDirty = true;
@@ -120,7 +125,7 @@ export const connectToQueryState = <S extends QueryState>(
       .pipe(
         filter(({ changes, state }) => {
           if (updateInProgress) return false;
-          return syncKeys.some(syncKey => changes[syncKey]);
+          return syncKeys.some((syncKey) => changes[syncKey]);
         }),
         map(({ changes }) => {
           const newState: QueryState = {};
@@ -145,10 +150,10 @@ export const connectToQueryState = <S extends QueryState>(
           return newState;
         })
       )
-      .subscribe(newState => {
+      .subscribe((newState) => {
         stateContainer.set({ ...stateContainer.get(), ...newState });
       }),
-    stateContainer.state$.subscribe(state => {
+    stateContainer.state$.subscribe((state) => {
       updateInProgress = true;
 
       // cloneDeep is required because services are mutating passed objects
@@ -174,11 +179,21 @@ export const connectToQueryState = <S extends QueryState>(
             filterManager.setFilters(_.cloneDeep(filters));
           }
         } else if (syncConfig.filters === FilterStateStore.APP_STATE) {
-          if (!compareFilters(filters, filterManager.getAppFilters(), COMPARE_ALL_OPTIONS)) {
+          if (
+            !compareFilters(filters, filterManager.getAppFilters(), {
+              ...COMPARE_ALL_OPTIONS,
+              state: false,
+            })
+          ) {
             filterManager.setAppFilters(_.cloneDeep(filters));
           }
         } else if (syncConfig.filters === FilterStateStore.GLOBAL_STATE) {
-          if (!compareFilters(filters, filterManager.getGlobalFilters(), COMPARE_ALL_OPTIONS)) {
+          if (
+            !compareFilters(filters, filterManager.getGlobalFilters(), {
+              ...COMPARE_ALL_OPTIONS,
+              state: false,
+            })
+          ) {
             filterManager.setGlobalFilters(_.cloneDeep(filters));
           }
         }
@@ -189,6 +204,6 @@ export const connectToQueryState = <S extends QueryState>(
   ];
 
   return () => {
-    subs.forEach(s => s.unsubscribe());
+    subs.forEach((s) => s.unsubscribe());
   };
 };

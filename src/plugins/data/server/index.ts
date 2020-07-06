@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '../../../core/server';
+import { ConfigSchema, configSchema } from '../config';
 import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
 import {
@@ -96,13 +97,11 @@ import {
   UrlFormat,
   StringFormat,
   TruncateFormat,
-  serializeFieldFormat,
 } from '../common/field_formats';
 
 export const fieldFormats = {
   FieldFormatsRegistry,
   FieldFormat,
-  serializeFieldFormat,
   BoolFormat,
   BytesFormat,
   ColorFormat,
@@ -145,14 +144,53 @@ export {
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   IndexPatternAttributes,
+  UI_SETTINGS,
 } from '../common';
 
 /**
  * Search
  */
 
-export { IRequestTypesMap, IResponseTypesMap } from './search';
-export * from './search';
+import {
+  dateHistogramInterval,
+  InvalidEsCalendarIntervalError,
+  InvalidEsIntervalFormatError,
+  isValidEsInterval,
+  isValidInterval,
+  parseEsInterval,
+  parseInterval,
+  toAbsoluteDates,
+} from '../common';
+
+export { ParsedInterval } from '../common';
+
+export {
+  ISearch,
+  ISearchCancel,
+  ISearchOptions,
+  IRequestTypesMap,
+  IResponseTypesMap,
+  ISearchSetup,
+  ISearchStart,
+  TStrategyTypes,
+  ISearchStrategy,
+  getDefaultSearchParams,
+  getTotalLoaded,
+} from './search';
+
+// Search namespace
+export const search = {
+  aggs: {
+    dateHistogramInterval,
+    InvalidEsCalendarIntervalError,
+    InvalidEsIntervalFormatError,
+    isValidEsInterval,
+    isValidInterval,
+    parseEsInterval,
+    parseInterval,
+    toAbsoluteDates,
+  },
+};
 
 /**
  * Types to be shared externally
@@ -164,6 +202,7 @@ export {
   castEsToKbnFieldTypeName,
   // query
   Filter,
+  getTime,
   Query,
   // timefilter
   RefreshInterval,
@@ -177,7 +216,7 @@ export {
  * @public
  */
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
   return new DataServerPlugin(initializerContext);
 }
 
@@ -185,4 +224,11 @@ export {
   DataServerPlugin as Plugin,
   DataPluginSetup as PluginSetup,
   DataPluginStart as PluginStart,
+};
+
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  exposeToBrowser: {
+    autocomplete: true,
+  },
+  schema: configSchema,
 };

@@ -7,62 +7,223 @@
 import React, { Fragment, useState, useEffect, useMemo } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { ScopedHistory } from 'kibana/public';
 import {
   EuiEmptyPrompt,
   EuiSpacer,
   EuiTitle,
   EuiText,
-  EuiSwitch,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiButton,
 } from '@elastic/eui';
+
+import { UIM_TEMPLATE_LIST_LOAD } from '../../../../../common/constants';
+import { TemplateListItem } from '../../../../../common';
 import { SectionError, SectionLoading, Error } from '../../../components';
-import { TemplateTable } from './template_table';
 import { useLoadIndexTemplates } from '../../../services/api';
-import { Template } from '../../../../../common/types';
 import { useServices } from '../../../app_context';
 import {
   getTemplateEditLink,
   getTemplateListLink,
   getTemplateCloneLink,
 } from '../../../services/routing';
-import { UIM_TEMPLATE_LIST_LOAD } from '../../../../../common/constants';
-import { TemplateDetails } from './template_details';
+import { getIsLegacyFromQueryParams } from '../../../lib/index_templates';
+import { TemplateTable } from './template_table';
+import { LegacyTemplateTable } from './legacy_templates/template_table';
+import { LegacyTemplateDetails } from './legacy_templates/template_details';
+import { FilterListButton, Filters } from './components';
 
+type FilterName = 'composable' | 'system';
 interface MatchParams {
-  templateName?: Template['name'];
+  templateName?: string;
 }
+
+const stripOutSystemTemplates = (templates: TemplateListItem[]): TemplateListItem[] =>
+  templates.filter((template) => !template.name.startsWith('.'));
 
 export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   match: {
     params: { templateName },
   },
+  location,
   history,
 }) => {
   const { uiMetricService } = useServices();
-  const { error, isLoading, data: templates, sendRequest: reload } = useLoadIndexTemplates();
+  const { error, isLoading, data: allTemplates, sendRequest: reload } = useLoadIndexTemplates();
 
-  let content;
+  const [filters, setFilters] = useState<Filters<FilterName>>({
+    composable: {
+      name: i18n.translate('xpack.idxMgmt.indexTemplatesList.viewComposableTemplateLabel', {
+        defaultMessage: 'Composable templates',
+      }),
+      checked: 'on',
+    },
+    system: {
+      name: i18n.translate('xpack.idxMgmt.indexTemplatesList.viewSystemTemplateLabel', {
+        defaultMessage: 'System templates',
+      }),
+      checked: 'off',
+    },
+  });
 
-  const [showSystemTemplates, setShowSystemTemplates] = useState<boolean>(false);
+  const filteredTemplates = useMemo(() => {
+    if (!allTemplates) {
+      return { templates: [], legacyTemplates: [] };
+    }
 
-  // Filter out system index templates
-  const filteredTemplates = useMemo(
-    () =>
-      templates ? templates.filter((template: Template) => !template.name.startsWith('.')) : [],
-    [templates]
-  );
+    return filters.system.checked === 'on'
+      ? allTemplates
+      : {
+          templates: stripOutSystemTemplates(allTemplates.templates),
+          legacyTemplates: stripOutSystemTemplates(allTemplates.legacyTemplates),
+        };
+  }, [allTemplates, filters.system.checked]);
+
+  const showComposableTemplateTable = filters.composable.checked === 'on';
+
+  const selectedTemplate = Boolean(templateName)
+    ? {
+        name: templateName!,
+        isLegacy: getIsLegacyFromQueryParams(location),
+      }
+    : null;
+
+  const isLegacyTemplateDetailsVisible = selectedTemplate !== null && selectedTemplate.isLegacy;
+  const hasTemplates =
+    allTemplates && (allTemplates.legacyTemplates.length > 0 || allTemplates.templates.length > 0);
 
   const closeTemplateDetails = () => {
     history.push(getTemplateListLink());
   };
 
-  const editTemplate = (name: Template['name']) => {
-    history.push(getTemplateEditLink(name));
+  const editTemplate = (name: string, isLegacy?: boolean) => {
+    history.push(getTemplateEditLink(name, isLegacy));
   };
 
-  const cloneTemplate = (name: Template['name']) => {
-    history.push(getTemplateCloneLink(name));
+  const cloneTemplate = (name: string, isLegacy?: boolean) => {
+    history.push(getTemplateCloneLink(name, isLegacy));
+  };
+
+  const renderHeader = () => (
+    <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexItem grow={true}>
+        <EuiTitle size="s">
+          <EuiText color="subdued">
+            <FormattedMessage
+              id="xpack.idxMgmt.home.indexTemplatesDescription"
+              defaultMessage="Use index templates to automatically apply settings, mappings, and aliases to indices."
+            />
+          </EuiText>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <FilterListButton<FilterName> filters={filters} onChange={setFilters} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          color="secondary"
+          iconType="refresh"
+          onClick={reload}
+          data-test-subj="reloadButton"
+          key="reloadButton"
+        >
+          <FormattedMessage
+            id="xpack.idxMgmt.templateList.table.reloadTemplatesButtonLabel"
+            defaultMessage="Reload"
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  const renderTemplatesTable = () =>
+    showComposableTemplateTable ? (
+      <>
+        <EuiSpacer size="l" />
+        <TemplateTable
+          templates={filteredTemplates.templates}
+          reload={reload}
+          editTemplate={editTemplate}
+          history={history as ScopedHistory}
+        />
+      </>
+    ) : null;
+
+  const renderLegacyTemplatesTable = () => (
+    <>
+      <EuiSpacer size="xl" />
+      <EuiTitle size="s">
+        <h1>
+          <FormattedMessage
+            id="xpack.idxMgmt.home.legacyIndexTemplatesTitle"
+            defaultMessage="Legacy index templates"
+          />
+        </h1>
+      </EuiTitle>
+      <EuiSpacer />
+      <LegacyTemplateTable
+        templates={filteredTemplates.legacyTemplates}
+        reload={reload}
+        editTemplate={editTemplate}
+        cloneTemplate={cloneTemplate}
+        history={history as ScopedHistory}
+      />
+    </>
+  );
+
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <SectionLoading>
+          <FormattedMessage
+            id="xpack.idxMgmt.indexTemplatesList.loadingIndexTemplatesDescription"
+            defaultMessage="Loading templates…"
+          />
+        </SectionLoading>
+      );
+    } else if (error) {
+      return (
+        <SectionError
+          title={
+            <FormattedMessage
+              id="xpack.idxMgmt.indexTemplatesList.loadingIndexTemplatesErrorMessage"
+              defaultMessage="Error loading templates"
+            />
+          }
+          error={error as Error}
+        />
+      );
+    } else if (!hasTemplates) {
+      return (
+        <EuiEmptyPrompt
+          iconType="managementApp"
+          title={
+            <h1 data-test-subj="title">
+              <FormattedMessage
+                id="xpack.idxMgmt.indexTemplatesList.emptyPrompt.noIndexTemplatesTitle"
+                defaultMessage="You don't have any templates yet"
+              />
+            </h1>
+          }
+          data-test-subj="emptyPrompt"
+        />
+      );
+    } else {
+      return (
+        <Fragment>
+          {/* Header */}
+          {renderHeader()}
+
+          {/* Composable index templates table */}
+          {renderTemplatesTable()}
+
+          {/* Legacy index templates table */}
+          {renderLegacyTemplatesTable()}
+        </Fragment>
+      );
+    }
   };
 
   // Track component loaded
@@ -70,88 +231,13 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
     uiMetricService.trackMetric('loaded', UIM_TEMPLATE_LIST_LOAD);
   }, [uiMetricService]);
 
-  if (isLoading) {
-    content = (
-      <SectionLoading>
-        <FormattedMessage
-          id="xpack.idxMgmt.indexTemplatesList.loadingIndexTemplatesDescription"
-          defaultMessage="Loading templates…"
-        />
-      </SectionLoading>
-    );
-  } else if (error) {
-    content = (
-      <SectionError
-        title={
-          <FormattedMessage
-            id="xpack.idxMgmt.indexTemplatesList.loadingIndexTemplatesErrorMessage"
-            defaultMessage="Error loading templates"
-          />
-        }
-        error={error as Error}
-      />
-    );
-  } else if (Array.isArray(templates) && templates.length === 0) {
-    content = (
-      <EuiEmptyPrompt
-        iconType="managementApp"
-        title={
-          <h1 data-test-subj="title">
-            <FormattedMessage
-              id="xpack.idxMgmt.indexTemplatesList.emptyPrompt.noIndexTemplatesTitle"
-              defaultMessage="You don't have any templates yet"
-            />
-          </h1>
-        }
-        data-test-subj="emptyPrompt"
-      />
-    );
-  } else if (Array.isArray(templates) && templates.length > 0) {
-    content = (
-      <Fragment>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={true}>
-            <EuiTitle size="s">
-              <EuiText color="subdued">
-                <FormattedMessage
-                  id="xpack.idxMgmt.home.indexTemplatesDescription"
-                  defaultMessage="Use index templates to automatically apply settings, mappings, and aliases to indices."
-                />
-              </EuiText>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiSwitch
-              id="checkboxShowSystemIndexTemplates"
-              data-test-subj="systemTemplatesSwitch"
-              checked={showSystemTemplates}
-              onChange={event => setShowSystemTemplates(event.target.checked)}
-              label={
-                <FormattedMessage
-                  id="xpack.idxMgmt.indexTemplatesTable.systemIndexTemplatesSwitchLabel"
-                  defaultMessage="Include system templates"
-                />
-              }
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="l" />
-        <TemplateTable
-          templates={showSystemTemplates ? templates : filteredTemplates}
-          reload={reload}
-          editTemplate={editTemplate}
-          cloneTemplate={cloneTemplate}
-        />
-      </Fragment>
-    );
-  }
-
   return (
     <div data-test-subj="templateList">
-      {content}
-      {templateName && (
-        <TemplateDetails
-          templateName={templateName}
+      {renderContent()}
+
+      {isLegacyTemplateDetailsVisible && (
+        <LegacyTemplateDetails
+          template={selectedTemplate!}
           onClose={closeTemplateDetails}
           editTemplate={editTemplate}
           cloneTemplate={cloneTemplate}

@@ -8,11 +8,11 @@ import { createUsersAndRoles } from '../../common/lib/create_users_and_roles';
 import { TestInvoker } from '../../common/lib/types';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ loadTestFile, getService }: TestInvoker) {
+export default function ({ loadTestFile, getService }: TestInvoker) {
   const es = getService('legacyEs');
   const supertest = getService('supertest');
 
-  describe('spaces api with security', function() {
+  describe('spaces api with security', function () {
     this.tags('ciGroup8');
 
     before(async () => {
@@ -25,6 +25,8 @@ export default function({ loadTestFile, getService }: TestInvoker) {
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./get_all'));
     loadTestFile(require.resolve('./get'));
+    loadTestFile(require.resolve('./share_add'));
+    loadTestFile(require.resolve('./share_remove'));
     loadTestFile(require.resolve('./update'));
   });
 }

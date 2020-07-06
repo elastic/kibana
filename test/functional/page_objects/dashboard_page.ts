@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { DashboardConstants } from '../../../src/legacy/core_plugins/kibana/public/dashboard/np_ready/dashboard_constants';
+import { DashboardConstants } from '../../../src/plugins/dashboard/public/dashboard_constants';
 
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
 export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
@@ -104,13 +104,18 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     public async getDashboardIdFromCurrentUrl() {
       const currentUrl = await browser.getCurrentUrl();
-      const urlSubstring = 'kibana#/dashboard/';
-      const startOfIdIndex = currentUrl.indexOf(urlSubstring) + urlSubstring.length;
-      const endIndex = currentUrl.indexOf('?');
-      const id = currentUrl.substring(startOfIdIndex, endIndex < 0 ? currentUrl.length : endIndex);
+      const id = this.getDashboardIdFromUrl(currentUrl);
 
       log.debug(`Dashboard id extracted from ${currentUrl} is ${id}`);
 
+      return id;
+    }
+
+    public getDashboardIdFromUrl(url: string) {
+      const urlSubstring = '#/view/';
+      const startOfIdIndex = url.indexOf(urlSubstring) + urlSubstring.length;
+      const endIndex = url.indexOf('?');
+      const id = url.substring(startOfIdIndex, endIndex < 0 ? url.length : endIndex);
       return id;
     }
 
@@ -186,9 +191,9 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
     public async expectToolbarPaginationDisplayed({ displayed = true }) {
       const subjects = ['btnPrevPage', 'btnNextPage', 'toolBarPagerText'];
       if (displayed) {
-        await Promise.all(subjects.map(async subj => await testSubjects.existOrFail(subj)));
+        await Promise.all(subjects.map(async (subj) => await testSubjects.existOrFail(subj)));
       } else {
-        await Promise.all(subjects.map(async subj => await testSubjects.missingOrFail(subj)));
+        await Promise.all(subjects.map(async (subj) => await testSubjects.missingOrFail(subj)));
       }
     }
 
@@ -215,6 +220,8 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     public async clickNewDashboard() {
       await listingTable.clickNewButton('createDashboardPromptButton');
+      // make sure the dashboard page is shown
+      await this.waitForRenderComplete();
     }
 
     public async clickCreateDashboardPrompt() {
@@ -374,13 +381,13 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
     public async getPanelTitles() {
       log.debug('in getPanelTitles');
       const titleObjects = await testSubjects.findAll('dashboardPanelTitle');
-      return await Promise.all(titleObjects.map(async title => await title.getVisibleText()));
+      return await Promise.all(titleObjects.map(async (title) => await title.getVisibleText()));
     }
 
     public async getPanelDimensions() {
       const panels = await find.allByCssSelector('.react-grid-item'); // These are gridster-defined elements and classes
       return await Promise.all(
-        panels.map(async panel => {
+        panels.map(async (panel) => {
           const size = await panel.getSize();
           return {
             width: size.width,
@@ -409,11 +416,11 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
     }
 
     public getTestVisualizationNames() {
-      return this.getTestVisualizations().map(visualization => visualization.name);
+      return this.getTestVisualizations().map((visualization) => visualization.name);
     }
 
     public getTestVisualizationDescriptions() {
-      return this.getTestVisualizations().map(visualization => visualization.description);
+      return this.getTestVisualizations().map((visualization) => visualization.description);
     }
 
     public async getDashboardPanels() {
@@ -480,7 +487,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       const $ = await sharedItemscontainer.parseDomContent();
       return $('[data-shared-item]')
         .toArray()
-        .map(item => {
+        .map((item) => {
           return {
             title: $(item).attr('data-title'),
             description: $(item).attr('data-description'),
@@ -508,7 +515,21 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
         checkList.push({ name, isPresent });
       }
 
-      return checkList.filter(viz => viz.isPresent === false).map(viz => viz.name);
+      return checkList.filter((viz) => viz.isPresent === false).map((viz) => viz.name);
+    }
+
+    public async getPanelDrilldownCount(panelIndex = 0): Promise<number> {
+      log.debug('getPanelDrilldownCount');
+      const panel = (await this.getDashboardPanels())[panelIndex];
+      try {
+        const count = await panel.findByTestSubject(
+          'embeddablePanelNotification-ACTION_PANEL_NOTIFICATIONS'
+        );
+        return Number.parseInt(await count.getVisibleText(), 10);
+      } catch (e) {
+        // if not found then this is 0 (we don't show badge with 0)
+        return 0;
+      }
     }
   }
 

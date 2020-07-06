@@ -5,14 +5,23 @@
  */
 
 import { first, map } from 'rxjs/operators';
-import { CoreSetup, Logger, PluginInitializerContext } from 'kibana/server';
-import { ConfigType } from './config';
-import { initCaseApi } from './routes/api';
-import { CaseService } from './services';
+import { Logger, PluginInitializerContext } from 'kibana/server';
+import { CoreSetup } from 'src/core/server';
+
 import { SecurityPluginSetup } from '../../security/server';
 
+import { ConfigType } from './config';
+import { initCaseApi } from './routes/api';
+import {
+  caseSavedObjectType,
+  caseConfigureSavedObjectType,
+  caseCommentSavedObjectType,
+  caseUserActionSavedObjectType,
+} from './saved_object_types';
+import { CaseConfigureService, CaseService, CaseUserActionService } from './services';
+
 function createConfig$(context: PluginInitializerContext) {
-  return context.config.create<ConfigType>().pipe(map(config => config));
+  return context.config.create<ConfigType>().pipe(map((config) => config));
 }
 
 export interface PluginsSetup {
@@ -27,15 +36,20 @@ export class CasePlugin {
   }
 
   public async setup(core: CoreSetup, plugins: PluginsSetup) {
-    const config = await createConfig$(this.initializerContext)
-      .pipe(first())
-      .toPromise();
+    const config = await createConfig$(this.initializerContext).pipe(first()).toPromise();
 
     if (!config.enabled) {
       return;
     }
 
-    const service = new CaseService(this.log);
+    core.savedObjects.registerType(caseSavedObjectType);
+    core.savedObjects.registerType(caseCommentSavedObjectType);
+    core.savedObjects.registerType(caseConfigureSavedObjectType);
+    core.savedObjects.registerType(caseUserActionSavedObjectType);
+
+    const caseServicePlugin = new CaseService(this.log);
+    const caseConfigureServicePlugin = new CaseConfigureService(this.log);
+    const userActionServicePlugin = new CaseUserActionService(this.log);
 
     this.log.debug(
       `Setting up Case Workflow with core contract [${Object.keys(
@@ -43,13 +57,17 @@ export class CasePlugin {
       )}] and plugins [${Object.keys(plugins)}]`
     );
 
-    const caseService = await service.setup({
-      authentication: plugins.security.authc,
+    const caseService = await caseServicePlugin.setup({
+      authentication: plugins.security != null ? plugins.security.authc : null,
     });
+    const caseConfigureService = await caseConfigureServicePlugin.setup();
+    const userActionService = await userActionServicePlugin.setup();
 
     const router = core.http.createRouter();
     initCaseApi({
+      caseConfigureService,
       caseService,
+      userActionService,
       router,
     });
   }

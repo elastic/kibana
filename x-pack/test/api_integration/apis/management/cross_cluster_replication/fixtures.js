@@ -7,13 +7,6 @@
 import { REMOTE_CLUSTER_NAME } from './constants';
 import { getRandomString } from './lib';
 
-export const getAutoFollowIndexPayload = (remoteCluster = REMOTE_CLUSTER_NAME, active = true) => ({
-  active,
-  remoteCluster,
-  leaderIndexPatterns: ['leader-*'],
-  followIndexPattern: '{{leader_index}}_follower',
-});
-
 export const getFollowerIndexPayload = (
   leaderIndexName = getRandomString(),
   remoteCluster = REMOTE_CLUSTER_NAME,

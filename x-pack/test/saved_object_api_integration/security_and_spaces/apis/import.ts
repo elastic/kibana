@@ -4,245 +4,92 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AUTHENTICATION } from '../../common/lib/authentication';
 import { SPACES } from '../../common/lib/spaces';
+import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
+import { TestUser } from '../../common/lib/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { importTestSuiteFactory } from '../../common/suites/import';
+import {
+  importTestSuiteFactory,
+  TEST_CASES as CASES,
+  ImportTestDefinition,
+} from '../../common/suites/import';
 
-export default function({ getService }: FtrProviderContext) {
+const {
+  DEFAULT: { spaceId: DEFAULT_SPACE_ID },
+  SPACE_1: { spaceId: SPACE_1_ID },
+  SPACE_2: { spaceId: SPACE_2_ID },
+} = SPACES;
+const { fail400, fail409 } = testCaseFailures;
+
+const createTestCases = (spaceId: string) => {
+  // for each permitted (non-403) outcome, if failure !== undefined then we expect
+  // to receive an error; otherwise, we expect to receive a success result
+  const importableTypes = [
+    { ...CASES.SINGLE_NAMESPACE_DEFAULT_SPACE, ...fail409(spaceId === DEFAULT_SPACE_ID) },
+    { ...CASES.SINGLE_NAMESPACE_SPACE_1, ...fail409(spaceId === SPACE_1_ID) },
+    { ...CASES.SINGLE_NAMESPACE_SPACE_2, ...fail409(spaceId === SPACE_2_ID) },
+    { ...CASES.NAMESPACE_AGNOSTIC, ...fail409() },
+    CASES.NEW_SINGLE_NAMESPACE_OBJ,
+    CASES.NEW_NAMESPACE_AGNOSTIC_OBJ,
+  ];
+  const nonImportableTypes = [
+    { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, ...fail400() },
+    { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...fail400() },
+    { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, ...fail400() },
+    { ...CASES.HIDDEN, ...fail400() },
+    { ...CASES.NEW_MULTI_NAMESPACE_OBJ, ...fail400() },
+  ];
+  const allTypes = importableTypes.concat(nonImportableTypes);
+  return { importableTypes, nonImportableTypes, allTypes };
+};
+
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const es = getService('legacyEs');
 
-  const {
-    importTest,
-    createExpectResults,
-    expectRbacForbidden,
-    expectUnknownTypeUnsupported: expectUnknownTypeUnsupported,
-    expectHiddenTypeUnsupported,
-  } = importTestSuiteFactory(es, esArchiver, supertest);
+  const { addTests, createTestDefinitions, expectForbidden } = importTestSuiteFactory(
+    es,
+    esArchiver,
+    supertest
+  );
+  const createTests = (spaceId: string) => {
+    const { importableTypes, nonImportableTypes, allTypes } = createTestCases(spaceId);
+    // use singleRequest to reduce execution time and/or test combined cases
+    return {
+      unauthorized: [
+        createTestDefinitions(importableTypes, true, { spaceId }),
+        createTestDefinitions(nonImportableTypes, false, { spaceId, singleRequest: true }),
+        createTestDefinitions(allTypes, true, {
+          spaceId,
+          singleRequest: true,
+          responseBodyOverride: expectForbidden(['dashboard', 'globaltype', 'isolatedtype']),
+        }),
+      ].flat(),
+      authorized: createTestDefinitions(allTypes, false, { spaceId, singleRequest: true }),
+    };
+  };
 
   describe('_import', () => {
-    [
-      {
-        spaceId: SPACES.DEFAULT.spaceId,
-        users: {
-          noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
-          superuser: AUTHENTICATION.SUPERUSER,
-          legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-          allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
-          readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
-          dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
-          dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
-          allAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
-          readAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
-          allAtOtherSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
-        },
-      },
-      {
-        spaceId: SPACES.SPACE_1.spaceId,
-        users: {
-          noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
-          superuser: AUTHENTICATION.SUPERUSER,
-          legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-          allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
-          readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
-          dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
-          dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
-          allAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
-          readAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
-          allAtOtherSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
-        },
-      },
-    ].forEach(scenario => {
-      importTest(`user with no access within the ${scenario.spaceId} space`, {
-        user: scenario.users.noAccess,
-        spaceId: scenario.spaceId,
-        tests: {
-          default: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-          hiddenType: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-          unknownType: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-        },
-      });
+    getTestScenarios().securityAndSpaces.forEach(({ spaceId, users }) => {
+      const suffix = ` within the ${spaceId} space`;
+      const { unauthorized, authorized } = createTests(spaceId);
+      const _addTests = (user: TestUser, tests: ImportTestDefinition[]) => {
+        addTests(`${user.description}${suffix}`, { user, spaceId, tests });
+      };
 
-      importTest(`superuser within the ${scenario.spaceId} space`, {
-        user: scenario.users.superuser,
-        spaceId: scenario.spaceId,
-        tests: {
-          default: {
-            statusCode: 200,
-            response: createExpectResults(scenario.spaceId),
-          },
-          hiddenType: {
-            statusCode: 200,
-            response: expectHiddenTypeUnsupported,
-          },
-          unknownType: {
-            statusCode: 200,
-            response: expectUnknownTypeUnsupported,
-          },
-        },
+      [
+        users.noAccess,
+        users.legacyAll,
+        users.dualRead,
+        users.readGlobally,
+        users.readAtSpace,
+        users.allAtOtherSpace,
+      ].forEach((user) => {
+        _addTests(user, unauthorized);
       });
-
-      importTest(`legacy user within the ${scenario.spaceId} space`, {
-        user: scenario.users.legacyAll,
-        spaceId: scenario.spaceId,
-        tests: {
-          default: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-          hiddenType: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-          unknownType: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-        },
-      });
-
-      importTest(`dual-privileges user within the ${scenario.spaceId} space`, {
-        user: scenario.users.dualAll,
-        spaceId: scenario.spaceId,
-        tests: {
-          default: {
-            statusCode: 200,
-            response: createExpectResults(scenario.spaceId),
-          },
-          hiddenType: {
-            statusCode: 200,
-            response: expectHiddenTypeUnsupported,
-          },
-          unknownType: {
-            statusCode: 200,
-            response: expectUnknownTypeUnsupported,
-          },
-        },
-      });
-
-      importTest(`dual-privileges readonly user within the ${scenario.spaceId} space`, {
-        user: scenario.users.dualRead,
-        spaceId: scenario.spaceId,
-        tests: {
-          default: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-          hiddenType: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-          unknownType: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-        },
-      });
-
-      importTest(`rbac user with all globally within the ${scenario.spaceId} space`, {
-        user: scenario.users.allGlobally,
-        spaceId: scenario.spaceId,
-        tests: {
-          default: {
-            statusCode: 200,
-            response: createExpectResults(scenario.spaceId),
-          },
-          hiddenType: {
-            statusCode: 200,
-            response: expectHiddenTypeUnsupported,
-          },
-          unknownType: {
-            statusCode: 200,
-            response: expectUnknownTypeUnsupported,
-          },
-        },
-      });
-
-      importTest(`rbac user with read globally within the ${scenario.spaceId} space`, {
-        user: scenario.users.readGlobally,
-        spaceId: scenario.spaceId,
-        tests: {
-          default: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-          hiddenType: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-          unknownType: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-        },
-      });
-
-      importTest(`rbac user with all at the space within the ${scenario.spaceId} space`, {
-        user: scenario.users.allAtSpace,
-        spaceId: scenario.spaceId,
-        tests: {
-          default: {
-            statusCode: 200,
-            response: createExpectResults(scenario.spaceId),
-          },
-          hiddenType: {
-            statusCode: 200,
-            response: expectHiddenTypeUnsupported,
-          },
-          unknownType: {
-            statusCode: 200,
-            response: expectUnknownTypeUnsupported,
-          },
-        },
-      });
-
-      importTest(`rbac user with read at the space within the ${scenario.spaceId} space`, {
-        user: scenario.users.readAtSpace,
-        spaceId: scenario.spaceId,
-        tests: {
-          default: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-          hiddenType: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-          unknownType: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-        },
-      });
-
-      importTest(`rbac user with all at other space within the ${scenario.spaceId} space`, {
-        user: scenario.users.allAtOtherSpace,
-        spaceId: scenario.spaceId,
-        tests: {
-          default: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-          hiddenType: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-          unknownType: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-        },
+      [users.dualAll, users.allGlobally, users.allAtSpace, users.superuser].forEach((user) => {
+        _addTests(user, authorized);
       });
     });
   });

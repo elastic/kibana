@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
-                     entityID="http://www.elastic.co">
+                     entityID="http://www.elastic.co/saml1">
   <md:IDPSSODescriptor WantAuthnRequestsSigned="false"
                        protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
     <md:KeyDescriptor use="signing">

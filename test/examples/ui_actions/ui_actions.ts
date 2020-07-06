@@ -22,7 +22,7 @@ import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from 'test/plugin_functional/services';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService }: PluginFunctionalProviderContext) {
+export default function ({ getService }: PluginFunctionalProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
@@ -41,7 +41,7 @@ export default function({ getService }: PluginFunctionalProviderContext) {
       await testSubjects.click('addDynamicAction');
       await retry.try(async () => {
         await testSubjects.click('emitHelloWorldTrigger');
-        await testSubjects.click('embeddablePanelAction-HELLO_WORLD_ACTION_TYPE-Waldo');
+        await testSubjects.click('embeddablePanelAction-ACTION_HELLO_WORLD-Waldo');
       });
       await retry.try(async () => {
         const text = await testSubjects.getVisibleText('dynamicHelloWorldActionText');

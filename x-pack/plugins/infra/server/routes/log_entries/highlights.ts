@@ -22,7 +22,7 @@ import {
 import { parseFilterQuery } from '../../utils/serialized_query';
 import { LogEntriesParams } from '../../lib/domains/log_entries_domain';
 
-const escapeHatch = schema.object({}, { allowUnknowns: true });
+const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 export const initLogEntriesHighlightsRoute = ({ framework, logEntries }: InfraBackendLibs) => {
   framework.registerRoute(
@@ -38,16 +38,16 @@ export const initLogEntriesHighlightsRoute = ({ framework, logEntries }: InfraBa
           fold(throwErrors(Boom.badRequest), identity)
         );
 
-        const { startDate, endDate, sourceId, query, size, highlightTerms } = payload;
+        const { startTimestamp, endTimestamp, sourceId, query, size, highlightTerms } = payload;
 
         let entriesPerHighlightTerm;
 
         if ('center' in payload) {
           entriesPerHighlightTerm = await Promise.all(
-            highlightTerms.map(highlightTerm =>
-              logEntries.getLogEntriesAround__new(requestContext, sourceId, {
-                startDate,
-                endDate,
+            highlightTerms.map((highlightTerm) =>
+              logEntries.getLogEntriesAround(requestContext, sourceId, {
+                startTimestamp,
+                endTimestamp,
                 query: parseFilterQuery(query),
                 center: payload.center,
                 size,
@@ -64,10 +64,10 @@ export const initLogEntriesHighlightsRoute = ({ framework, logEntries }: InfraBa
           }
 
           entriesPerHighlightTerm = await Promise.all(
-            highlightTerms.map(highlightTerm =>
+            highlightTerms.map((highlightTerm) =>
               logEntries.getLogEntries(requestContext, sourceId, {
-                startDate,
-                endDate,
+                startTimestamp,
+                endTimestamp,
                 query: parseFilterQuery(query),
                 cursor,
                 size,
@@ -79,11 +79,21 @@ export const initLogEntriesHighlightsRoute = ({ framework, logEntries }: InfraBa
 
         return response.ok({
           body: logEntriesHighlightsResponseRT.encode({
-            data: entriesPerHighlightTerm.map(entries => ({
-              entries,
-              topCursor: entries[0].cursor,
-              bottomCursor: entries[entries.length - 1].cursor,
-            })),
+            data: entriesPerHighlightTerm.map((entries) => {
+              if (entries.length > 0) {
+                return {
+                  entries,
+                  topCursor: entries[0].cursor,
+                  bottomCursor: entries[entries.length - 1].cursor,
+                };
+              } else {
+                return {
+                  entries,
+                  topCursor: null,
+                  bottomCursor: null,
+                };
+              }
+            }),
           }),
         });
       } catch (error) {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   EuiButtonEmpty,
   EuiOverlayMask,
@@ -35,7 +35,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { sortBy, isEqual } from 'lodash';
-import { SavedQuery, SavedQueryAttributes, SavedQueryService } from '../..';
+import { SavedQuery, SavedQueryService } from '../..';
+import { SavedQueryAttributes } from '../../query';
 
 interface Props {
   savedQuery?: SavedQueryAttributes;
@@ -53,15 +54,16 @@ export interface SavedQueryMeta {
   shouldIncludeTimefilter: boolean;
 }
 
-export const SaveQueryForm: FunctionComponent<Props> = ({
+export function SaveQueryForm({
   savedQuery,
   savedQueryService,
   onSave,
   onClose,
   showFilterOption = true,
   showTimeFilterOption = true,
-}) => {
+}: Props) {
   const [title, setTitle] = useState(savedQuery ? savedQuery.title : '');
+  const [enabledSaveButton, setEnabledSaveButton] = useState(Boolean(savedQuery));
   const [description, setDescription] = useState(savedQuery ? savedQuery.description : '');
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
   const [shouldIncludeFilters, setShouldIncludeFilters] = useState(
@@ -75,6 +77,20 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
   );
   const [formErrors, setFormErrors] = useState<string[]>([]);
 
+  const titleConflictErrorText = i18n.translate(
+    'data.search.searchBar.savedQueryForm.titleConflictText',
+    {
+      defaultMessage: 'Name conflicts with an existing saved query',
+    }
+  );
+
+  const savedQueryDescriptionText = i18n.translate(
+    'data.search.searchBar.savedQueryDescriptionText',
+    {
+      defaultMessage: 'Save query text and filters that you want to use again.',
+    }
+  );
+
   useEffect(() => {
     const fetchQueries = async () => {
       const allSavedQueries = await savedQueryService.getAllSavedQueries();
@@ -84,43 +100,11 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
     fetchQueries();
   }, [savedQueryService]);
 
-  const savedQueryDescriptionText = i18n.translate(
-    'data.search.searchBar.savedQueryDescriptionText',
-    {
-      defaultMessage: 'Save query text and filters that you want to use again.',
-    }
-  );
-
-  const titleConflictErrorText = i18n.translate(
-    'data.search.searchBar.savedQueryForm.titleConflictText',
-    {
-      defaultMessage: 'Name conflicts with an existing saved query',
-    }
-  );
-  const titleMissingErrorText = i18n.translate(
-    'data.search.searchBar.savedQueryForm.titleMissingText',
-    {
-      defaultMessage: 'Name is required',
-    }
-  );
-  const whitespaceErrorText = i18n.translate(
-    'data.search.searchBar.savedQueryForm.whitespaceErrorText',
-    {
-      defaultMessage: 'Name cannot contain leading or trailing whitespace',
-    }
-  );
-
-  const validate = () => {
+  const validate = useCallback(() => {
     const errors = [];
-    if (!title.length) {
-      errors.push(titleMissingErrorText);
-    }
-    if (title.length > title.trim().length) {
-      errors.push(whitespaceErrorText);
-    }
     if (
       !!savedQueries.find(
-        existingSavedQuery => !savedQuery && existingSavedQuery.attributes.title === title
+        (existingSavedQuery) => !savedQuery && existingSavedQuery.attributes.title === title
       )
     ) {
       errors.push(titleConflictErrorText);
@@ -128,14 +112,37 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
 
     if (!isEqual(errors, formErrors)) {
       setFormErrors(errors);
+      return false;
     }
-  };
+
+    return !formErrors.length;
+  }, [savedQueries, savedQuery, title, titleConflictErrorText, formErrors]);
+
+  const onClickSave = useCallback(() => {
+    if (validate()) {
+      onSave({
+        title,
+        description,
+        shouldIncludeFilters,
+        shouldIncludeTimefilter,
+      });
+    }
+  }, [validate, onSave, title, description, shouldIncludeFilters, shouldIncludeTimefilter]);
+
+  const onInputChange = useCallback((event) => {
+    setEnabledSaveButton(Boolean(event.target.value));
+    setFormErrors([]);
+    setTitle(event.target.value);
+  }, []);
+
+  const autoTrim = useCallback(() => {
+    const trimmedTitle = title.trim();
+    if (title.length > trimmedTitle.length) {
+      setTitle(trimmedTitle);
+    }
+  }, [title]);
 
   const hasErrors = formErrors.length > 0;
-
-  if (hasErrors) {
-    validate();
-  }
 
   const saveQueryForm = (
     <EuiForm isInvalid={hasErrors} error={formErrors} data-test-subj="saveQueryForm">
@@ -156,12 +163,10 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
           disabled={!!savedQuery}
           value={title}
           name="title"
-          onChange={event => {
-            setTitle(event.target.value);
-          }}
+          onChange={onInputChange}
           data-test-subj="saveQueryFormTitle"
           isInvalid={hasErrors}
-          onBlur={validate}
+          onBlur={autoTrim}
         />
       </EuiFormRow>
 
@@ -173,7 +178,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
         <EuiFieldText
           value={description}
           name="description"
-          onChange={event => {
+          onChange={(event) => {
             setDescription(event.target.value);
           }}
           data-test-subj="saveQueryFormDescription"
@@ -234,17 +239,10 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
           </EuiButtonEmpty>
 
           <EuiButton
-            onClick={() =>
-              onSave({
-                title,
-                description,
-                shouldIncludeFilters,
-                shouldIncludeTimefilter,
-              })
-            }
+            onClick={onClickSave}
             fill
             data-test-subj="savedQueryFormSaveButton"
-            disabled={hasErrors}
+            disabled={hasErrors || !enabledSaveButton}
           >
             {i18n.translate('data.search.searchBar.savedQueryFormSaveButtonText', {
               defaultMessage: 'Save',
@@ -254,4 +252,4 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
       </EuiModal>
     </EuiOverlayMask>
   );
-};
+}

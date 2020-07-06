@@ -12,7 +12,7 @@ import {
   RequestHandlerContext,
 } from 'kibana/server';
 
-import { LicensingPluginSetup, LicenseType, LICENSE_CHECK_STATE } from '../../../licensing/server';
+import { LicensingPluginSetup, LicenseType } from '../../../licensing/server';
 
 export interface LicenseStatus {
   isValid: boolean;
@@ -37,9 +37,9 @@ export class License {
     { pluginId, minimumLicenseType, defaultErrorMessage }: SetupSettings,
     { licensing, logger }: { licensing: LicensingPluginSetup; logger: Logger }
   ) {
-    licensing.license$.subscribe(license => {
+    licensing.license$.subscribe((license) => {
       const { state, message } = license.check(pluginId, minimumLicenseType);
-      const hasRequiredLicense = state === LICENSE_CHECK_STATE.Valid;
+      const hasRequiredLicense = state === 'valid';
 
       const securityFeature = license.getFeature('security');
       const isSecurityEnabled =

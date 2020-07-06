@@ -5,12 +5,9 @@
  */
 
 import Boom from 'boom';
-import { IScopedClusterClient } from 'src/core/server';
+import { LegacyAPICaller } from 'kibana/server';
 
-import {
-  DetectorRule,
-  DetectorRuleScope,
-} from '../../../../../legacy/plugins/ml/common/types/detector_rules';
+import { DetectorRule, DetectorRuleScope } from '../../../common/types/detector_rules';
 
 export interface Filter {
   filter_id: string;
@@ -61,18 +58,14 @@ interface PartialJob {
 }
 
 export class FilterManager {
-  private _client: IScopedClusterClient['callAsCurrentUser'];
-
-  constructor(client: IScopedClusterClient['callAsCurrentUser']) {
-    this._client = client;
-  }
+  constructor(private callAsCurrentUser: LegacyAPICaller) {}
 
   async getFilter(filterId: string) {
     try {
       const [JOBS, FILTERS] = [0, 1];
       const results = await Promise.all([
-        this._client('ml.jobs'),
-        this._client('ml.filters', { filterId }),
+        this.callAsCurrentUser('ml.jobs'),
+        this.callAsCurrentUser('ml.filters', { filterId }),
       ]);
 
       if (results[FILTERS] && results[FILTERS].filters.length) {
@@ -94,7 +87,7 @@ export class FilterManager {
 
   async getAllFilters() {
     try {
-      const filtersResp = await this._client('ml.filters');
+      const filtersResp = await this.callAsCurrentUser('ml.filters');
       return filtersResp.filters;
     } catch (error) {
       throw Boom.badRequest(error);
@@ -104,7 +97,10 @@ export class FilterManager {
   async getAllFilterStats() {
     try {
       const [JOBS, FILTERS] = [0, 1];
-      const results = await Promise.all([this._client('ml.jobs'), this._client('ml.filters')]);
+      const results = await Promise.all([
+        this.callAsCurrentUser('ml.jobs'),
+        this.callAsCurrentUser('ml.filters'),
+      ]);
 
       // Build a map of filter_ids against jobs and detectors using that filter.
       let filtersInUse: FiltersInUse = {};
@@ -141,7 +137,7 @@ export class FilterManager {
     delete filter.filterId;
     try {
       // Returns the newly created filter.
-      return await this._client('ml.addFilter', { filterId, body: filter });
+      return await this.callAsCurrentUser('ml.addFilter', { filterId, body: filter });
     } catch (error) {
       throw Boom.badRequest(error);
     }
@@ -161,7 +157,7 @@ export class FilterManager {
       }
 
       // Returns the newly updated filter.
-      return await this._client('ml.updateFilter', {
+      return await this.callAsCurrentUser('ml.updateFilter', {
         filterId,
         body,
       });
@@ -171,22 +167,22 @@ export class FilterManager {
   }
 
   async deleteFilter(filterId: string) {
-    return this._client('ml.deleteFilter', { filterId });
+    return this.callAsCurrentUser('ml.deleteFilter', { filterId });
   }
 
   buildFiltersInUse(jobsList: PartialJob[]) {
     // Build a map of filter_ids against jobs and detectors using that filter.
     const filtersInUse: FiltersInUse = {};
-    jobsList.forEach(job => {
+    jobsList.forEach((job) => {
       const detectors = job.analysis_config.detectors;
-      detectors.forEach(detector => {
+      detectors.forEach((detector) => {
         if (detector.custom_rules) {
           const rules = detector.custom_rules;
-          rules.forEach(rule => {
+          rules.forEach((rule) => {
             if (rule.scope) {
               const ruleScope: DetectorRuleScope = rule.scope;
               const scopeFields = Object.keys(ruleScope);
-              scopeFields.forEach(scopeField => {
+              scopeFields.forEach((scopeField) => {
                 const filter = ruleScope[scopeField];
                 const filterId = filter.filter_id;
                 if (filtersInUse[filterId] === undefined) {

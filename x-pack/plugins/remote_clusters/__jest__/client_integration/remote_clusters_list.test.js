@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { act } from 'react-dom/test-utils';
 
 import {
   pageHelpers,
@@ -15,7 +16,7 @@ import {
 import { getRouter } from '../../public/application/services';
 import { getRemoteClusterMock } from '../../fixtures/remote_cluster';
 
-jest.mock('ui/new_platform');
+import { PROXY_MODE } from '../../common/constants';
 
 const { setup } = pageHelpers.remoteClustersList;
 
@@ -68,6 +69,53 @@ describe('<RemoteClusterList />', () => {
     });
   });
 
+  describe('when there are multiple pages of remote clusters', () => {
+    let find;
+    let table;
+    let actions;
+    let waitFor;
+    let form;
+
+    const remoteClusters = [
+      {
+        name: 'unique',
+        seeds: [],
+      },
+    ];
+
+    for (let i = 0; i < 29; i++) {
+      remoteClusters.push({
+        name: `name${i}`,
+        seeds: [],
+      });
+    }
+
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
+
+      await act(async () => {
+        ({ find, table, actions, waitFor, form } = setup());
+        await waitFor('remoteClusterListTable');
+      });
+    });
+
+    test('pagination works', () => {
+      actions.clickPaginationNextButton();
+      const { tableCellsValues } = table.getMetaData('remoteClusterListTable');
+
+      // Pagination defaults to 20 remote clusters per page. We loaded 30 remote clusters,
+      // so the second page should have 10.
+      expect(tableCellsValues.length).toBe(10);
+    });
+
+    // Skipped until we can figure out how to get this test to work.
+    test.skip('search works', () => {
+      form.setInputValue(find('remoteClusterSearch'), 'unique');
+      const { tableCellsValues } = table.getMetaData('remoteClusterListTable');
+      expect(tableCellsValues.length).toBe(1);
+    });
+  });
+
   describe('when there are remote clusters', () => {
     let find;
     let exists;
@@ -76,6 +124,7 @@ describe('<RemoteClusterList />', () => {
     let actions;
     let tableCellsValues;
     let rows;
+    let waitFor;
 
     // For deterministic tests, we need to make sure that remoteCluster1 comes before remoteCluster2
     // in the table list that is rendered. As the table orders alphabetically by index name
@@ -84,21 +133,35 @@ describe('<RemoteClusterList />', () => {
     const remoteCluster2 = getRemoteClusterMock({
       name: `b${getRandomString()}`,
       isConnected: false,
-      connectedNodesCount: 0,
-      seeds: ['localhost:9500'],
+      connectedSocketsCount: 0,
+      proxyAddress: 'localhost:9500',
       isConfiguredByNode: true,
+      mode: PROXY_MODE,
+      seeds: null,
+      connectedNodesCount: null,
+    });
+    const remoteCluster3 = getRemoteClusterMock({
+      name: `c${getRandomString()}`,
+      isConnected: false,
+      connectedSocketsCount: 0,
+      proxyAddress: 'localhost:9500',
+      isConfiguredByNode: false,
+      mode: PROXY_MODE,
+      hasDeprecatedProxySetting: true,
+      seeds: null,
+      connectedNodesCount: null,
     });
 
-    const remoteClusters = [remoteCluster1, remoteCluster2];
+    const remoteClusters = [remoteCluster1, remoteCluster2, remoteCluster3];
 
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
 
-      // Mount the component
-      ({ component, find, exists, table, actions } = setup());
+      await act(async () => {
+        ({ component, find, exists, table, actions, waitFor } = setup());
 
-      await nextTick(100); // Make sure that the Http request is fulfilled
-      component.update();
+        await waitFor('remoteClusterListTable');
+      });
 
       // Read the remote clusters list table
       ({ rows, tableCellsValues } = table.getMetaData('remoteClusterListTable'));
@@ -118,17 +181,28 @@ describe('<RemoteClusterList />', () => {
         [
           '', // Empty because the first column is the checkbox to select the row
           remoteCluster1.name,
-          remoteCluster1.seeds.join(', '),
           'Connected',
+          'default',
+          remoteCluster1.seeds.join(', '),
           remoteCluster1.connectedNodesCount.toString(),
           '', // Empty because the last column is for the "actions" on the resource
         ],
         [
           '',
           remoteCluster2.name,
-          remoteCluster2.seeds.join(', '),
           'Not connected',
-          remoteCluster2.connectedNodesCount.toString(),
+          PROXY_MODE,
+          remoteCluster2.proxyAddress,
+          remoteCluster2.connectedSocketsCount.toString(),
+          '',
+        ],
+        [
+          '',
+          remoteCluster3.name,
+          'Not connected',
+          PROXY_MODE,
+          remoteCluster2.proxyAddress,
+          remoteCluster2.connectedSocketsCount.toString(),
           '',
         ],
       ]);
@@ -138,6 +212,14 @@ describe('<RemoteClusterList />', () => {
       const secondRow = rows[1].reactWrapper; // The second cluster has been defined by node
       expect(
         findTestSubject(secondRow, 'remoteClustersTableListClusterDefinedByNodeTooltip').length
+      ).toBe(1);
+    });
+
+    test('should have a tooltip to indicate that the cluster has a deprecated setting', () => {
+      const secondRow = rows[2].reactWrapper; // The third cluster has been defined with deprecated setting
+      expect(
+        findTestSubject(secondRow, 'remoteClustersTableListClusterWithDeprecatedSettingTooltip')
+          .length
       ).toBe(1);
     });
 
@@ -199,19 +281,21 @@ describe('<RemoteClusterList />', () => {
           errors: [],
         });
 
-        // Make sure that we have our 2 remote clusters in the table
-        expect(rows.length).toBe(2);
+        // Make sure that we have our 3 remote clusters in the table
+        expect(rows.length).toBe(3);
 
         actions.selectRemoteClusterAt(0);
         actions.clickBulkDeleteButton();
         actions.clickConfirmModalDeleteRemoteCluster();
 
-        await nextTick(600); // there is a 500ms timeout in the api action
-        component.update();
+        await act(async () => {
+          await nextTick(600); // there is a 500ms timeout in the api action
+          component.update();
+        });
 
         ({ rows } = table.getMetaData('remoteClusterListTable'));
 
-        expect(rows.length).toBe(1);
+        expect(rows.length).toBe(2);
         expect(rows[0].columns[1].value).toEqual(remoteCluster2.name);
       });
     });
@@ -232,11 +316,7 @@ describe('<RemoteClusterList />', () => {
 
       test('should have a "Status" section', () => {
         actions.clickRemoteClusterAt(0);
-        expect(
-          find('remoteClusterDetailPanelStatusSection')
-            .find('h3')
-            .text()
-        ).toEqual('Status');
+        expect(find('remoteClusterDetailPanelStatusSection').find('h3').text()).toEqual('Status');
         expect(exists('remoteClusterDetailPanelStatusValues')).toBe(true);
       });
 

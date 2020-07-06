@@ -4,15 +4,16 @@
   "kibanaVersion": "kibana",
   "requiredPlugins": [
     "features",
-    "apm",
     "usageCollection",
     "spaces",
     "home",
     "data",
-    "data_enhanced",
-    "metrics",
-    "alerting"
+    "dataEnhanced",
+    "visTypeTimeseries",
+    "alerts",
+    "triggers_actions_ui"
   ],
+  "optionalPlugins": ["ml", "observability"],
   "server": true,
   "ui": true,
   "configPath": ["xpack", "infra"]

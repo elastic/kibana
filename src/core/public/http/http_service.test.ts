@@ -17,13 +17,14 @@
  * under the License.
  */
 
-// @ts-ignore
+// @ts-expect-error
 import fetchMock from 'fetch-mock/es5/client';
 import { loadingServiceMock } from './http_service.test.mocks';
 
 import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.mock';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { HttpService } from './http_service';
+import { Observable } from 'rxjs';
 
 describe('interceptors', () => {
   afterEach(() => fetchMock.restore());
@@ -49,6 +50,18 @@ describe('interceptors', () => {
     await start.get('/other-blah');
     expect(setupInterceptor).toHaveBeenCalledTimes(2);
     expect(startInterceptor).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('#setup()', () => {
+  it('registers Fetch#getLoadingCount$() with LoadingCountSetup#addLoadingCountSource()', () => {
+    const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
+    const fatalErrors = fatalErrorsServiceMock.createSetupContract();
+    const httpService = new HttpService();
+    httpService.setup({ fatalErrors, injectedMetadata });
+    const loadingServiceSetup = loadingServiceMock.setup.mock.results[0].value;
+    // We don't verify that this Observable comes from Fetch#getLoadingCount$() to avoid complex mocking
+    expect(loadingServiceSetup.addLoadingCountSource).toHaveBeenCalledWith(expect.any(Observable));
   });
 });
 

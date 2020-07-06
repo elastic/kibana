@@ -5,58 +5,53 @@
  */
 import * as Rx from 'rxjs';
 import { SpacesService } from './spaces_service';
-import {
-  coreMock,
-  elasticsearchServiceMock,
-  httpServerMock,
-  loggingServiceMock,
-} from 'src/core/server/mocks';
+import { coreMock, httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
 import { SpacesAuditLogger } from '../lib/audit_logger';
 import {
   KibanaRequest,
-  SavedObjectsLegacyService,
   SavedObjectsErrorHelpers,
   HttpServiceSetup,
+  SavedObjectsRepository,
 } from 'src/core/server';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { getSpaceIdFromPath } from '../../common/lib/spaces_url_parser';
-import { LegacyAPI } from '../plugin';
 import { spacesConfig } from '../lib/__fixtures__';
 import { securityMock } from '../../../security/server/mocks';
 
-const mockLogger = loggingServiceMock.createLogger();
+const mockLogger = loggingSystemMock.createLogger();
 
 const createService = async (serverBasePath: string = '') => {
-  const legacyAPI = {
-    savedObjects: ({
-      getSavedObjectsRepository: jest.fn().mockReturnValue({
-        get: jest.fn().mockImplementation((type, id) => {
-          if (type === 'space' && id === 'foo') {
-            return Promise.resolve({
-              id: 'space:foo',
-              attributes: {
-                name: 'Foo Space',
-                disabledFeatures: [],
-              },
-            });
-          }
-          if (type === 'space' && id === 'default') {
-            return Promise.resolve({
-              id: 'space:default',
-              attributes: {
-                name: 'Default Space',
-                disabledFeatures: [],
-                _reserved: true,
-              },
-            });
-          }
-          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-        }),
-      }),
-    } as unknown) as SavedObjectsLegacyService,
-  } as LegacyAPI;
+  const spacesService = new SpacesService(mockLogger);
 
-  const spacesService = new SpacesService(mockLogger, () => legacyAPI);
+  const coreStart = coreMock.createStart();
+
+  const respositoryMock = ({
+    get: jest.fn().mockImplementation((type, id) => {
+      if (type === 'space' && id === 'foo') {
+        return Promise.resolve({
+          id: 'space:foo',
+          attributes: {
+            name: 'Foo Space',
+            disabledFeatures: [],
+          },
+        });
+      }
+      if (type === 'space' && id === 'default') {
+        return Promise.resolve({
+          id: 'space:default',
+          attributes: {
+            name: 'Default Space',
+            disabledFeatures: [],
+            _reserved: true,
+          },
+        });
+      }
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }),
+  } as unknown) as SavedObjectsRepository;
+
+  coreStart.savedObjects.createInternalRepository.mockReturnValue(respositoryMock);
+  coreStart.savedObjects.createScopedRepository.mockReturnValue(respositoryMock);
 
   const httpSetup = coreMock.createSetup().http;
   httpSetup.basePath = {
@@ -73,10 +68,10 @@ const createService = async (serverBasePath: string = '') => {
 
   const spacesServiceSetup = await spacesService.setup({
     http: httpSetup,
-    elasticsearch: elasticsearchServiceMock.createSetup(),
+    getStartServices: async () => [coreStart, {}, {}],
     config$: Rx.of(spacesConfig),
     authorization: securityMock.createSetup().authz,
-    getSpacesAuditLogger: () => new SpacesAuditLogger({}),
+    auditLogger: new SpacesAuditLogger(),
   });
 
   return spacesServiceSetup;

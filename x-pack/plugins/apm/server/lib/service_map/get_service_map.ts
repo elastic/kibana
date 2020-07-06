@@ -3,67 +3,78 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { PromiseReturnType } from '../../../typings/common';
+import { chunk } from 'lodash';
 import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters
-} from '../helpers/setup_request';
-import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
-import { getTraceSampleIds } from './get_trace_sample_ids';
+  AGENT_NAME,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+} from '../../../common/elasticsearch_fieldnames';
 import { getServicesProjection } from '../../../common/projections/services';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
-import {
-  SERVICE_AGENT_NAME,
-  SERVICE_NAME,
-  SERVICE_FRAMEWORK_NAME
-} from '../../../common/elasticsearch_fieldnames';
+import { PromiseReturnType } from '../../../typings/common';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { transformServiceMapResponses } from './transform_service_map_responses';
+import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
+import { getTraceSampleIds } from './get_trace_sample_ids';
 
 export interface IEnvOptions {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   serviceName?: string;
   environment?: string;
-  after?: string;
 }
 
 async function getConnectionData({
   setup,
   serviceName,
   environment,
-  after
 }: IEnvOptions) {
-  const { traceIds, after: nextAfter } = await getTraceSampleIds({
+  const { traceIds } = await getTraceSampleIds({
     setup,
     serviceName,
     environment,
-    after
   });
 
-  const serviceMapData = traceIds.length
-    ? await getServiceMapFromTraceIds({
+  const chunks = chunk(
+    traceIds,
+    setup.config['xpack.apm.serviceMapMaxTracesPerRequest']
+  );
+
+  const init = {
+    connections: [],
+    discoveredServices: [],
+  };
+
+  if (!traceIds.length) {
+    return init;
+  }
+
+  const chunkedResponses = await Promise.all(
+    chunks.map((traceIdsChunk) =>
+      getServiceMapFromTraceIds({
         setup,
         serviceName,
         environment,
-        traceIds
+        traceIds: traceIdsChunk,
       })
-    : { connections: [], discoveredServices: [] };
+    )
+  );
 
-  return {
-    after: nextAfter,
-    ...serviceMapData
-  };
+  return chunkedResponses.reduce((prev, current) => {
+    return {
+      connections: prev.connections.concat(current.connections),
+      discoveredServices: prev.discoveredServices.concat(
+        current.discoveredServices
+      ),
+    };
+  });
 }
 
 async function getServicesData(options: IEnvOptions) {
-  // only return services on the first request for the global service map
-  if (options.after) {
-    return [];
-  }
-
   const { setup } = options;
 
-  const projection = getServicesProjection({ setup });
+  const projection = getServicesProjection({
+    setup: { ...setup, uiFiltersES: [] },
+  });
 
   const { filter } = projection.body.query.bool;
 
@@ -76,33 +87,28 @@ async function getServicesData(options: IEnvOptions) {
           filter: options.serviceName
             ? filter.concat({
                 term: {
-                  [SERVICE_NAME]: options.serviceName
-                }
+                  [SERVICE_NAME]: options.serviceName,
+                },
               })
-            : filter
-        }
+            : filter,
+        },
       },
       aggs: {
         services: {
           terms: {
             field: projection.body.aggs.services.terms.field,
-            size: 500
+            size: 500,
           },
           aggs: {
             agent_name: {
               terms: {
-                field: SERVICE_AGENT_NAME
-              }
+                field: AGENT_NAME,
+              },
             },
-            service_framework_name: {
-              terms: {
-                field: SERVICE_FRAMEWORK_NAME
-              }
-            }
-          }
-        }
-      }
-    }
+          },
+        },
+      },
+    },
   });
 
   const { client } = setup;
@@ -110,30 +116,29 @@ async function getServicesData(options: IEnvOptions) {
   const response = await client.search(params);
 
   return (
-    response.aggregations?.services.buckets.map(bucket => {
+    response.aggregations?.services.buckets.map((bucket) => {
       return {
-        'service.name': bucket.key as string,
-        'agent.name':
+        [SERVICE_NAME]: bucket.key as string,
+        [AGENT_NAME]:
           (bucket.agent_name.buckets[0]?.key as string | undefined) || '',
-        'service.environment': options.environment || null,
-        'service.framework.name':
-          (bucket.service_framework_name.buckets[0]?.key as
-            | string
-            | undefined) || null
+        [SERVICE_ENVIRONMENT]: options.environment || null,
       };
     }) || []
   );
 }
 
+export type ConnectionsResponse = PromiseReturnType<typeof getConnectionData>;
+export type ServicesResponse = PromiseReturnType<typeof getServicesData>;
 export type ServiceMapAPIResponse = PromiseReturnType<typeof getServiceMap>;
+
 export async function getServiceMap(options: IEnvOptions) {
   const [connectionData, servicesData] = await Promise.all([
     getConnectionData(options),
-    getServicesData(options)
+    getServicesData(options),
   ]);
 
-  return {
+  return transformServiceMapResponses({
     ...connectionData,
-    services: servicesData
-  };
+    services: servicesData,
+  });
 }

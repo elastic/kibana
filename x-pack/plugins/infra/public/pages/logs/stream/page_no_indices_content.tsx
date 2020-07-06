@@ -6,20 +6,24 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { identity } from 'fp-ts/lib/function';
 import React from 'react';
 
 import { NoIndices } from '../../../components/empty_states/no_indices';
 import { ViewSourceConfigurationButton } from '../../../components/source_configuration';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useLinkProps } from '../../../hooks/use_link_props';
 
 export const LogsPageNoIndicesContent = () => {
   const {
-    services: { application, http },
+    services: { application },
   } = useKibana<{}>();
 
   const canConfigureSource = application?.capabilities?.logs?.configureSource ? true : false;
-  const prependBasePath = http?.basePath.prepend ?? identity;
+
+  const tutorialLinkProps = useLinkProps({
+    app: 'home',
+    hash: '/tutorial_directory/logging',
+  });
 
   return (
     <NoIndices
@@ -34,7 +38,7 @@ export const LogsPageNoIndicesContent = () => {
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiButton
-              href={prependBasePath('/app/kibana#/home/tutorial_directory/logging')}
+              {...tutorialLinkProps}
               color="primary"
               fill
               data-test-subj="logsViewSetupInstructionsButton"
@@ -46,7 +50,7 @@ export const LogsPageNoIndicesContent = () => {
           </EuiFlexItem>
           {canConfigureSource ? (
             <EuiFlexItem>
-              <ViewSourceConfigurationButton data-test-subj="configureSourceButton">
+              <ViewSourceConfigurationButton app="logs" data-test-subj="configureSourceButton">
                 {i18n.translate('xpack.infra.configureSourceActionLabel', {
                   defaultMessage: 'Change source configuration',
                 })}

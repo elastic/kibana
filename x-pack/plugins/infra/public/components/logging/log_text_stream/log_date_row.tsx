@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
-import { localizedDate } from '../../../utils/formatters/datetime';
+import { localizedDate } from '../../../../common/formatters/datetime';
 
 interface LogDateRowProps {
   timestamp: number;

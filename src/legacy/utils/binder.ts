@@ -38,6 +38,6 @@ export class BinderBase {
   public destroy() {
     const destroyers = this.disposal;
     this.disposal = [];
-    destroyers.forEach(fn => fn());
+    destroyers.forEach((fn) => fn());
   }
 }

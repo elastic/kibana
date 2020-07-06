@@ -5,10 +5,7 @@
  */
 
 import { CursorPagination } from '../types';
-import {
-  CursorDirection,
-  SortOrder,
-} from '../../../../../../../legacy/plugins/uptime/common/graphql/types';
+import { CursorDirection, SortOrder } from '../../../../../common/runtime_types';
 import { QueryContext } from '../query_context';
 
 export const prevPagination = (key: any): CursorPagination => {
@@ -26,5 +23,14 @@ export const nextPagination = (key: any): CursorPagination => {
   };
 };
 export const simpleQueryContext = (): QueryContext => {
-  return new QueryContext(undefined, '', '', nextPagination('something'), undefined, 0, '');
+  return new QueryContext(
+    undefined,
+    'indexName',
+    '',
+    '',
+    nextPagination('something'),
+    undefined,
+    0,
+    ''
+  );
 };

@@ -17,66 +17,120 @@
  * under the License.
  */
 
+import { EmbeddableSetup, EmbeddableStart } from '../../../src/plugins/embeddable/public';
+import { CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
 import {
-  IEmbeddableSetup,
-  IEmbeddableStart,
-  EmbeddableFactory,
-} from '../../../src/plugins/embeddable/public';
-import { Plugin, CoreSetup, CoreStart } from '../../../src/core/public';
-import { HelloWorldEmbeddableFactory, HELLO_WORLD_EMBEDDABLE } from './hello_world';
-import { TODO_EMBEDDABLE, TodoEmbeddableFactory, TodoInput, TodoOutput } from './todo';
+  HELLO_WORLD_EMBEDDABLE,
+  HelloWorldEmbeddableFactoryDefinition,
+  HelloWorldEmbeddableFactory,
+} from './hello_world';
+import { TODO_EMBEDDABLE, TodoEmbeddableFactory, TodoEmbeddableFactoryDefinition } from './todo';
 import {
   MULTI_TASK_TODO_EMBEDDABLE,
   MultiTaskTodoEmbeddableFactory,
-  MultiTaskTodoOutput,
-  MultiTaskTodoInput,
+  MultiTaskTodoEmbeddableFactoryDefinition,
 } from './multi_task_todo';
 import {
   SEARCHABLE_LIST_CONTAINER,
+  SearchableListContainerFactoryDefinition,
   SearchableListContainerFactory,
 } from './searchable_list_container';
-import { LIST_CONTAINER, ListContainerFactory } from './list_container';
+import {
+  LIST_CONTAINER,
+  ListContainerFactoryDefinition,
+  ListContainerFactory,
+} from './list_container';
+import { createSampleData } from './create_sample_data';
+import { TODO_REF_EMBEDDABLE } from './todo/todo_ref_embeddable';
+import {
+  TodoRefEmbeddableFactory,
+  TodoRefEmbeddableFactoryDefinition,
+} from './todo/todo_ref_embeddable_factory';
 
-interface EmbeddableExamplesSetupDependencies {
-  embeddable: IEmbeddableSetup;
+export interface EmbeddableExamplesSetupDependencies {
+  embeddable: EmbeddableSetup;
 }
 
-interface EmbeddableExamplesStartDependencies {
-  embeddable: IEmbeddableStart;
+export interface EmbeddableExamplesStartDependencies {
+  embeddable: EmbeddableStart;
+}
+
+interface ExampleEmbeddableFactories {
+  getHelloWorldEmbeddableFactory: () => HelloWorldEmbeddableFactory;
+  getMultiTaskTodoEmbeddableFactory: () => MultiTaskTodoEmbeddableFactory;
+  getSearchableListContainerEmbeddableFactory: () => SearchableListContainerFactory;
+  getListContainerEmbeddableFactory: () => ListContainerFactory;
+  getTodoEmbeddableFactory: () => TodoEmbeddableFactory;
+  getTodoRefEmbeddableFactory: () => TodoRefEmbeddableFactory;
+}
+
+export interface EmbeddableExamplesStart {
+  createSampleData: () => Promise<void>;
+  factories: ExampleEmbeddableFactories;
 }
 
 export class EmbeddableExamplesPlugin
   implements
-    Plugin<void, void, EmbeddableExamplesSetupDependencies, EmbeddableExamplesStartDependencies> {
-  public setup(core: CoreSetup, deps: EmbeddableExamplesSetupDependencies) {
-    deps.embeddable.registerEmbeddableFactory(
+    Plugin<
+      void,
+      EmbeddableExamplesStart,
+      EmbeddableExamplesSetupDependencies,
+      EmbeddableExamplesStartDependencies
+    > {
+  private exampleEmbeddableFactories: Partial<ExampleEmbeddableFactories> = {};
+
+  public setup(
+    core: CoreSetup<EmbeddableExamplesStartDependencies>,
+    deps: EmbeddableExamplesSetupDependencies
+  ) {
+    this.exampleEmbeddableFactories.getHelloWorldEmbeddableFactory = deps.embeddable.registerEmbeddableFactory(
       HELLO_WORLD_EMBEDDABLE,
-      new HelloWorldEmbeddableFactory()
+      new HelloWorldEmbeddableFactoryDefinition()
     );
 
-    deps.embeddable.registerEmbeddableFactory<
-      EmbeddableFactory<MultiTaskTodoInput, MultiTaskTodoOutput>
-    >(MULTI_TASK_TODO_EMBEDDABLE, new MultiTaskTodoEmbeddableFactory());
+    this.exampleEmbeddableFactories.getMultiTaskTodoEmbeddableFactory = deps.embeddable.registerEmbeddableFactory(
+      MULTI_TASK_TODO_EMBEDDABLE,
+      new MultiTaskTodoEmbeddableFactoryDefinition()
+    );
+
+    this.exampleEmbeddableFactories.getSearchableListContainerEmbeddableFactory = deps.embeddable.registerEmbeddableFactory(
+      SEARCHABLE_LIST_CONTAINER,
+      new SearchableListContainerFactoryDefinition(async () => ({
+        embeddableServices: (await core.getStartServices())[1].embeddable,
+      }))
+    );
+
+    this.exampleEmbeddableFactories.getListContainerEmbeddableFactory = deps.embeddable.registerEmbeddableFactory(
+      LIST_CONTAINER,
+      new ListContainerFactoryDefinition(async () => ({
+        embeddableServices: (await core.getStartServices())[1].embeddable,
+      }))
+    );
+
+    this.exampleEmbeddableFactories.getTodoEmbeddableFactory = deps.embeddable.registerEmbeddableFactory(
+      TODO_EMBEDDABLE,
+      new TodoEmbeddableFactoryDefinition(async () => ({
+        openModal: (await core.getStartServices())[0].overlays.openModal,
+      }))
+    );
+
+    this.exampleEmbeddableFactories.getTodoRefEmbeddableFactory = deps.embeddable.registerEmbeddableFactory(
+      TODO_REF_EMBEDDABLE,
+      new TodoRefEmbeddableFactoryDefinition(async () => ({
+        savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
+        getEmbeddableFactory: (await core.getStartServices())[1].embeddable.getEmbeddableFactory,
+      }))
+    );
   }
 
-  public start(core: CoreStart, deps: EmbeddableExamplesStartDependencies) {
-    // These are registered in the start method because `getEmbeddableFactory `
-    // is only available in start. We could reconsider this I think and make it
-    // available in both.
-    deps.embeddable.registerEmbeddableFactory(
-      SEARCHABLE_LIST_CONTAINER,
-      new SearchableListContainerFactory(deps.embeddable.getEmbeddableFactory)
-    );
-
-    deps.embeddable.registerEmbeddableFactory(
-      LIST_CONTAINER,
-      new ListContainerFactory(deps.embeddable.getEmbeddableFactory)
-    );
-
-    deps.embeddable.registerEmbeddableFactory<EmbeddableFactory<TodoInput, TodoOutput>>(
-      TODO_EMBEDDABLE,
-      new TodoEmbeddableFactory(core.overlays.openModal)
-    );
+  public start(
+    core: CoreStart,
+    deps: EmbeddableExamplesStartDependencies
+  ): EmbeddableExamplesStart {
+    return {
+      createSampleData: () => createSampleData(core.savedObjects.client),
+      factories: this.exampleEmbeddableFactories as ExampleEmbeddableFactories,
+    };
   }
 
   public stop() {}

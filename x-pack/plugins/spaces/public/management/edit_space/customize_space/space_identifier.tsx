@@ -57,7 +57,7 @@ class SpaceIdentifierUI extends Component<Props, State> {
             }
             value={id}
             onChange={this.onChange}
-            inputRef={ref => (this.textFieldRef = ref)}
+            inputRef={(ref) => (this.textFieldRef = ref)}
             fullWidth
           />
         </EuiFormRow>

@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import RowParser from '../../../lib/row_parser';
-import { collapseLiteralStrings } from '../../../../../es_ui_shared/console_lang/lib';
+import { collapseLiteralStrings } from '../../../../../es_ui_shared/public';
 import * as utils from '../../../lib/utils';
 
 // @ts-ignore
@@ -44,6 +44,7 @@ export class SenseEditor {
       coreEditor,
       parser: this.parser,
     });
+    this.coreEditor.registerAutocompleter(this.autocomplete.getCompletions);
     this.coreEditor.on(
       'tokenizerUpdate',
       this.highlightCurrentRequestsAndUpdateActionBar.bind(this)
@@ -424,8 +425,8 @@ export class SenseEditor {
     }
 
     const column =
-        (this.coreEditor.getLineValue(curLineNumber) || '').length +
-        1 /* Range goes to 1 after last char */;
+      (this.coreEditor.getLineValue(curLineNumber) || '').length +
+      1; /* Range goes to 1 after last char */
 
     return {
       lineNumber: curLineNumber,
@@ -466,7 +467,7 @@ export class SenseEditor {
 
   getRequestsAsCURL = async (elasticsearchBaseUrl: string, range?: Range): Promise<string> => {
     const requests = await this.getRequestsInRange(range, true);
-    const result = _.map(requests, req => {
+    const result = _.map(requests, (req) => {
       if (typeof req === 'string') {
         // no request block
         return req;
@@ -483,8 +484,9 @@ export class SenseEditor {
       if (esData && esData.length) {
         ret += " -H 'Content-Type: application/json' -d'\n";
         const dataAsString = collapseLiteralStrings(esData.join('\n'));
-        // since Sense doesn't allow single quote json string any single qoute is within a string.
-        ret += dataAsString.replace(/'/g, '\\"');
+
+        // We escape single quoted strings that that are wrapped in single quoted strings
+        ret += dataAsString.replace(/'/g, "'\\''");
         if (esData.length > 1) {
           ret += '\n';
         } // end with a new line

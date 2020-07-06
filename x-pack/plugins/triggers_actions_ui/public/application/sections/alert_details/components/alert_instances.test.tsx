@@ -37,8 +37,18 @@ describe('alert_instances', () => {
 
     const alertState = mockAlertState();
     const instances: AlertInstanceListItem[] = [
-      alertInstanceToListItem(alert, 'first_instance', alertState.alertInstances!.first_instance),
-      alertInstanceToListItem(alert, 'second_instance', alertState.alertInstances!.second_instance),
+      alertInstanceToListItem(
+        fakeNow.getTime(),
+        alert,
+        'first_instance',
+        alertState.alertInstances!.first_instance
+      ),
+      alertInstanceToListItem(
+        fakeNow.getTime(),
+        alert,
+        'second_instance',
+        alertState.alertInstances!.second_instance
+      ),
     ];
 
     expect(
@@ -46,6 +56,24 @@ describe('alert_instances', () => {
         .find(EuiBasicTable)
         .prop('items')
     ).toEqual(instances);
+  });
+
+  it('render a hidden field with duration epoch', () => {
+    const alert = mockAlert();
+    const alertState = mockAlertState();
+
+    expect(
+      shallow(
+        <AlertInstances
+          durationEpoch={fake2MinutesAgo.getTime()}
+          {...mockAPIs}
+          alert={alert}
+          alertState={alertState}
+        />
+      )
+        .find('[name="alertInstancesDurationEpoch"]')
+        .prop('value')
+    ).toEqual(fake2MinutesAgo.getTime());
   });
 
   it('render all active alert instances', () => {
@@ -75,8 +103,8 @@ describe('alert_instances', () => {
         .find(EuiBasicTable)
         .prop('items')
     ).toEqual([
-      alertInstanceToListItem(alert, 'us-central', instances['us-central']),
-      alertInstanceToListItem(alert, 'us-east', instances['us-east']),
+      alertInstanceToListItem(fakeNow.getTime(), alert, 'us-central', instances['us-central']),
+      alertInstanceToListItem(fakeNow.getTime(), alert, 'us-east', instances['us-east']),
     ]);
   });
 
@@ -98,8 +126,8 @@ describe('alert_instances', () => {
         .find(EuiBasicTable)
         .prop('items')
     ).toEqual([
-      alertInstanceToListItem(alert, 'us-west'),
-      alertInstanceToListItem(alert, 'us-east'),
+      alertInstanceToListItem(fakeNow.getTime(), alert, 'us-west'),
+      alertInstanceToListItem(fakeNow.getTime(), alert, 'us-east'),
     ]);
   });
 });
@@ -117,7 +145,7 @@ describe('alertInstanceToListItem', () => {
       },
     };
 
-    expect(alertInstanceToListItem(alert, 'id', instance)).toEqual({
+    expect(alertInstanceToListItem(fakeNow.getTime(), alert, 'id', instance)).toEqual({
       instance: 'id',
       status: { label: 'Active', healthColor: 'primary' },
       start,
@@ -140,7 +168,7 @@ describe('alertInstanceToListItem', () => {
       },
     };
 
-    expect(alertInstanceToListItem(alert, 'id', instance)).toEqual({
+    expect(alertInstanceToListItem(fakeNow.getTime(), alert, 'id', instance)).toEqual({
       instance: 'id',
       status: { label: 'Active', healthColor: 'primary' },
       start,
@@ -153,7 +181,7 @@ describe('alertInstanceToListItem', () => {
     const alert = mockAlert();
     const instance: RawAlertInstance = {};
 
-    expect(alertInstanceToListItem(alert, 'id', instance)).toEqual({
+    expect(alertInstanceToListItem(fakeNow.getTime(), alert, 'id', instance)).toEqual({
       instance: 'id',
       status: { label: 'Active', healthColor: 'primary' },
       start: undefined,
@@ -168,7 +196,7 @@ describe('alertInstanceToListItem', () => {
       meta: {},
     };
 
-    expect(alertInstanceToListItem(alert, 'id', instance)).toEqual({
+    expect(alertInstanceToListItem(fakeNow.getTime(), alert, 'id', instance)).toEqual({
       instance: 'id',
       status: { label: 'Active', healthColor: 'primary' },
       start: undefined,
@@ -181,7 +209,7 @@ describe('alertInstanceToListItem', () => {
     const alert = mockAlert({
       mutedInstanceIds: ['id'],
     });
-    expect(alertInstanceToListItem(alert, 'id')).toEqual({
+    expect(alertInstanceToListItem(fakeNow.getTime(), alert, 'id')).toEqual({
       instance: 'id',
       status: { label: 'Inactive', healthColor: 'subdued' },
       start: undefined,

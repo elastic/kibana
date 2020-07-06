@@ -5,32 +5,35 @@
  */
 
 import React, { memo, useMemo } from 'react';
+import stringify from 'json-stable-stringify';
 
-import { euiStyled, css } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../observability/public';
 import {
   isConstantSegment,
   isFieldSegment,
   isHighlightMessageColumn,
   isMessageColumn,
-  LogEntryColumn,
-  LogEntryHighlightColumn,
-  LogEntryMessageSegment,
+  isHighlightFieldSegment,
 } from '../../../utils/log_entry';
 import { ActiveHighlightMarker, highlightFieldValue, HighlightMarker } from './highlighting';
 import { LogEntryColumnContent } from './log_entry_column';
-import { hoveredContentStyle } from './text_styles';
+import {
+  longWrappedContentStyle,
+  preWrappedContentStyle,
+  unwrappedContentStyle,
+  WrapMode,
+} from './text_styles';
+import { LogColumn, LogMessagePart } from '../../../../common/http_api';
 
 interface LogEntryMessageColumnProps {
-  columnValue: LogEntryColumn;
-  highlights: LogEntryHighlightColumn[];
+  columnValue: LogColumn;
+  highlights: LogColumn[];
   isActiveHighlight: boolean;
-  isHighlighted: boolean;
-  isHovered: boolean;
-  isWrapped: boolean;
+  wrapMode: WrapMode;
 }
 
 export const LogEntryMessageColumn = memo<LogEntryMessageColumnProps>(
-  ({ columnValue, highlights, isActiveHighlight, isHighlighted, isHovered, isWrapped }) => {
+  ({ columnValue, highlights, isActiveHighlight, wrapMode }) => {
     const message = useMemo(
       () =>
         isMessageColumn(columnValue)
@@ -39,66 +42,58 @@ export const LogEntryMessageColumn = memo<LogEntryMessageColumnProps>(
       [columnValue, highlights, isActiveHighlight]
     );
 
-    return (
-      <MessageColumnContent
-        isHighlighted={isHighlighted}
-        isHovered={isHovered}
-        isWrapped={isWrapped}
-      >
-        {message}
-      </MessageColumnContent>
-    );
+    return <MessageColumnContent wrapMode={wrapMode}>{message}</MessageColumnContent>;
   }
 );
 
-const wrappedContentStyle = css`
-  overflow: visible;
-  white-space: pre-wrap;
-  word-break: break-all;
-`;
-
-const unwrappedContentStyle = css`
-  overflow: hidden;
-  white-space: pre;
-`;
-
 interface MessageColumnContentProps {
-  isHovered: boolean;
-  isHighlighted: boolean;
-  isWrapped?: boolean;
+  wrapMode: WrapMode;
 }
 
 const MessageColumnContent = euiStyled(LogEntryColumnContent)<MessageColumnContentProps>`
-  background-color: ${props => props.theme.eui.euiColorEmptyShade};
   text-overflow: ellipsis;
-
-  ${props => (props.isHovered || props.isHighlighted ? hoveredContentStyle : '')};
-  ${props => (props.isWrapped ? wrappedContentStyle : unwrappedContentStyle)};
+  ${(props) =>
+    props.wrapMode === 'long'
+      ? longWrappedContentStyle
+      : props.wrapMode === 'pre-wrapped'
+      ? preWrappedContentStyle
+      : unwrappedContentStyle};
 `;
 
 const formatMessageSegments = (
-  messageSegments: LogEntryMessageSegment[],
-  highlights: LogEntryHighlightColumn[],
+  messageSegments: LogMessagePart[],
+  highlights: LogColumn[],
   isActiveHighlight: boolean
 ) =>
   messageSegments.map((messageSegment, index) =>
     formatMessageSegment(
       messageSegment,
-      highlights.map(highlight =>
-        isHighlightMessageColumn(highlight) ? highlight.message[index].highlights : []
-      ),
+      highlights.map((highlight) => {
+        if (isHighlightMessageColumn(highlight)) {
+          const segment = highlight.message[index];
+          if (isHighlightFieldSegment(segment)) {
+            return segment.highlights;
+          }
+        }
+        return [];
+      }),
       isActiveHighlight
     )
   );
 
 const formatMessageSegment = (
-  messageSegment: LogEntryMessageSegment,
+  messageSegment: LogMessagePart,
   [firstHighlight = []]: string[][], // we only support one highlight for now
   isActiveHighlight: boolean
 ): React.ReactNode => {
   if (isFieldSegment(messageSegment)) {
+    const value =
+      typeof messageSegment.value === 'string'
+        ? messageSegment.value
+        : stringify(messageSegment.value);
+
     return highlightFieldValue(
-      messageSegment.value,
+      value,
       firstHighlight,
       isActiveHighlight ? ActiveHighlightMarker : HighlightMarker
     );

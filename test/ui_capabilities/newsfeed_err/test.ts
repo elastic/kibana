@@ -25,7 +25,7 @@ export default function uiCapabilitiesTests({ getService, getPageObjects }: FtrP
   const globalNav = getService('globalNav');
   const PageObjects = getPageObjects(['common', 'newsfeed']);
 
-  describe('Newsfeed icon button handle errors', function() {
+  describe('Newsfeed icon button handle errors', function () {
     this.tags('ciGroup6');
 
     before(async () => {

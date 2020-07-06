@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './space_selector.scss';
+
 import {
   EuiFieldSearch,
   EuiFlexGroup,
@@ -69,7 +71,7 @@ export class SpaceSelector extends Component<Props, State> {
     this.setState({ loading: true });
     const { spacesManager } = this.props;
 
-    spacesManager.getSpaces().then(spaces => {
+    spacesManager.getSpaces().then((spaces) => {
       this.setState({
         loading: false,
         spaces,
@@ -83,7 +85,7 @@ export class SpaceSelector extends Component<Props, State> {
     let filteredSpaces = spaces;
     if (searchTerm) {
       filteredSpaces = spaces.filter(
-        space =>
+        (space) =>
           space.name.toLowerCase().indexOf(searchTerm) >= 0 ||
           (space.description || '').toLowerCase().indexOf(searchTerm) >= 0
       );
@@ -95,7 +97,7 @@ export class SpaceSelector extends Component<Props, State> {
           <EuiPageHeader className="spcSpaceSelector__heading">
             <EuiSpacer size="xxl" />
             <span className="spcSpaceSelector__logo">
-              <EuiIcon size="xxl" type={`logoKibana`} />
+              <EuiIcon size="xxl" type={`logoElastic`} />
             </span>
 
             <EuiTitle size="l">

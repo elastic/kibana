@@ -47,7 +47,13 @@ export const CreateDockerPackageTask = {
   async run(config, log, build) {
     // Builds Docker targets for default and oss
     await runDockerGenerator(config, log, build);
+  },
+};
 
+export const CreateDockerUbiPackageTask = {
+  description: 'Creating docker ubi package',
+
+  async run(config, log, build) {
     // Builds Docker target default with ubi7 base image
     await runDockerGeneratorForUBI(config, log, build);
   },

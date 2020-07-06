@@ -11,16 +11,16 @@ import { isAddingCluster, getAddClusterError } from '../../store/selectors';
 
 import { addCluster, clearAddClusterErrors } from '../../store/actions';
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     isAddingCluster: isAddingCluster(state),
     addClusterError: getAddClusterError(state),
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    addCluster: cluster => {
+    addCluster: (cluster) => {
       dispatch(addCluster(cluster));
     },
     clearAddClusterErrors: () => {

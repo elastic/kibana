@@ -12,8 +12,8 @@ export default ({ getService }: FtrProviderContext) => {
   const logsUi = getService('logsUi');
   const retry = getService('retry');
 
-  describe('Log Entry Categories Tab', function() {
-    this.tags('smoke');
+  describe('Log Entry Categories Tab', function () {
+    this.tags('includeFirefox');
 
     describe('with a trial license', () => {
       it('is visible', async () => {

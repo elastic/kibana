@@ -9,17 +9,33 @@ import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import { Header, HeaderProps } from '../components';
 
 const Page = styled(EuiPage)`
-  background: ${props => props.theme.eui.euiColorEmptyShade};
+  background: ${(props) => props.theme.eui.euiColorEmptyShade};
 `;
 
 interface Props extends HeaderProps {
+  restrictWidth?: number;
+  restrictHeaderWidth?: number;
+  'data-test-subj'?: string;
   children?: React.ReactNode;
 }
 
-export const WithHeaderLayout: React.FC<Props> = ({ children, ...rest }) => (
+export const WithHeaderLayout: React.FC<Props> = ({
+  restrictWidth,
+  restrictHeaderWidth,
+  children,
+  'data-test-subj': dataTestSubj,
+  ...rest
+}) => (
   <Fragment>
-    <Header {...rest} />
-    <Page restrictWidth={1200}>
+    <Header
+      maxWidth={restrictHeaderWidth}
+      data-test-subj={dataTestSubj ? `${dataTestSubj}_header` : undefined}
+      {...rest}
+    />
+    <Page
+      restrictWidth={restrictWidth || 1200}
+      data-test-subj={dataTestSubj ? `${dataTestSubj}_page` : undefined}
+    >
       <EuiPageBody>
         <EuiSpacer size="m" />
         {children}

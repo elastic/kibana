@@ -4,15 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
+import { ScopedHistory } from 'kibana/public';
+
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ActionsConnectorsList } from './actions_connectors_list';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../../../../src/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { AppContextProvider } from '../../../app_context';
 import { chartPluginMock } from '../../../../../../../../src/plugins/charts/public/mocks';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
+import { alertingPluginMock } from '../../../../../../alerts/public/mocks';
 
 jest.mock('../../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
@@ -28,12 +31,7 @@ describe('actions_connectors_list component empty', () => {
     const { loadAllActions, loadActionTypes } = jest.requireMock(
       '../../../lib/action_connector_api'
     );
-    loadAllActions.mockResolvedValueOnce({
-      page: 1,
-      perPage: 10000,
-      total: 0,
-      data: [],
-    });
+    loadAllActions.mockResolvedValueOnce([]);
     loadActionTypes.mockResolvedValueOnce([
       {
         id: 'test',
@@ -49,7 +47,7 @@ describe('actions_connectors_list component empty', () => {
       {
         chrome,
         docLinks,
-        application: { capabilities },
+        application: { capabilities, navigateToApp },
       },
     ] = await mockes.getStartServices();
     const deps = {
@@ -57,10 +55,11 @@ describe('actions_connectors_list component empty', () => {
       docLinks,
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
+      alerting: alertingPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
+      navigateToApp,
       capabilities: {
         ...capabilities,
         siem: {
@@ -69,6 +68,7 @@ describe('actions_connectors_list component empty', () => {
           'actions:delete': true,
         },
       },
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: {} as any,
@@ -94,10 +94,7 @@ describe('actions_connectors_list component empty', () => {
   });
 
   test('if click create button should render ConnectorAddFlyout', () => {
-    wrapper
-      .find('[data-test-subj="createFirstActionButton"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="createFirstActionButton"]').first().simulate('click');
     expect(wrapper.find('ConnectorAddFlyout')).toHaveLength(1);
   });
 });
@@ -109,35 +106,42 @@ describe('actions_connectors_list component with items', () => {
     const { loadAllActions, loadActionTypes } = jest.requireMock(
       '../../../lib/action_connector_api'
     );
-    loadAllActions.mockResolvedValueOnce({
-      page: 1,
-      perPage: 10000,
-      total: 2,
-      data: [
-        {
-          id: '1',
-          actionTypeId: 'test',
-          description: 'My test',
-          referencedByCount: 1,
-          config: {},
-        },
-        {
-          id: '2',
-          actionTypeId: 'test2',
-          description: 'My test 2',
-          referencedByCount: 1,
-          config: {},
-        },
-      ],
-    });
+    loadAllActions.mockResolvedValueOnce([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        description: 'My test',
+        isPreconfigured: false,
+        referencedByCount: 1,
+        config: {},
+      },
+      {
+        id: '2',
+        actionTypeId: 'test2',
+        description: 'My test 2',
+        referencedByCount: 1,
+        isPreconfigured: false,
+        config: {},
+      },
+      {
+        id: '3',
+        actionTypeId: 'test2',
+        description: 'My preconfigured test 2',
+        referencedByCount: 1,
+        isPreconfigured: true,
+        config: {},
+      },
+    ]);
     loadActionTypes.mockResolvedValueOnce([
       {
         id: 'test',
         name: 'Test',
+        enabled: true,
       },
       {
         id: 'test2',
         name: 'Test2',
+        enabled: true,
       },
     ]);
 
@@ -146,7 +150,7 @@ describe('actions_connectors_list component with items', () => {
       {
         chrome,
         docLinks,
-        application: { capabilities },
+        application: { capabilities, navigateToApp },
       },
     ] = await mockes.getStartServices();
     const deps = {
@@ -154,18 +158,20 @@ describe('actions_connectors_list component with items', () => {
       docLinks,
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
+      alerting: alertingPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
+      navigateToApp,
       capabilities: {
         ...capabilities,
-        siem: {
+        securitySolution: {
           'actions:show': true,
           'actions:save': true,
           'actions:delete': true,
         },
       },
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: {
         get() {
@@ -190,14 +196,16 @@ describe('actions_connectors_list component with items', () => {
 
   it('renders table of connectors', () => {
     expect(wrapper.find('EuiInMemoryTable')).toHaveLength(1);
-    expect(wrapper.find('EuiTableRow')).toHaveLength(2);
+    expect(wrapper.find('EuiTableRow')).toHaveLength(3);
   });
 
-  test('if select item for edit should render ConnectorEditFlyout', () => {
-    wrapper
-      .find('[data-test-subj="edit1"]')
-      .first()
-      .simulate('click');
+  it('renders table with preconfigured connectors', () => {
+    expect(wrapper.find('[data-test-subj="preConfiguredTitleMessage"]')).toHaveLength(2);
+  });
+
+  test('if select item for edit should render ConnectorEditFlyout', async () => {
+    await wrapper.find('[data-test-subj="edit1"]').first().simulate('click');
+
     expect(wrapper.find('ConnectorEditFlyout')).toHaveLength(1);
   });
 });
@@ -209,12 +217,7 @@ describe('actions_connectors_list component empty with show only capability', ()
     const { loadAllActions, loadActionTypes } = jest.requireMock(
       '../../../lib/action_connector_api'
     );
-    loadAllActions.mockResolvedValueOnce({
-      page: 1,
-      perPage: 10000,
-      total: 0,
-      data: [],
-    });
+    loadAllActions.mockResolvedValueOnce([]);
     loadActionTypes.mockResolvedValueOnce([
       {
         id: 'test',
@@ -230,7 +233,7 @@ describe('actions_connectors_list component empty with show only capability', ()
       {
         chrome,
         docLinks,
-        application: { capabilities },
+        application: { capabilities, navigateToApp },
       },
     ] = await mockes.getStartServices();
     const deps = {
@@ -238,18 +241,20 @@ describe('actions_connectors_list component empty with show only capability', ()
       docLinks,
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
+      alerting: alertingPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
+      navigateToApp,
       capabilities: {
         ...capabilities,
-        siem: {
+        securitySolution: {
           'actions:show': true,
           'actions:save': false,
           'actions:delete': false,
         },
       },
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: {
         get() {
@@ -283,27 +288,22 @@ describe('actions_connectors_list with show only capability', () => {
     const { loadAllActions, loadActionTypes } = jest.requireMock(
       '../../../lib/action_connector_api'
     );
-    loadAllActions.mockResolvedValueOnce({
-      page: 1,
-      perPage: 10000,
-      total: 2,
-      data: [
-        {
-          id: '1',
-          actionTypeId: 'test',
-          description: 'My test',
-          referencedByCount: 1,
-          config: {},
-        },
-        {
-          id: '2',
-          actionTypeId: 'test2',
-          description: 'My test 2',
-          referencedByCount: 1,
-          config: {},
-        },
-      ],
-    });
+    loadAllActions.mockResolvedValueOnce([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        description: 'My test',
+        referencedByCount: 1,
+        config: {},
+      },
+      {
+        id: '2',
+        actionTypeId: 'test2',
+        description: 'My test 2',
+        referencedByCount: 1,
+        config: {},
+      },
+    ]);
     loadActionTypes.mockResolvedValueOnce([
       {
         id: 'test',
@@ -319,7 +319,7 @@ describe('actions_connectors_list with show only capability', () => {
       {
         chrome,
         docLinks,
-        application: { capabilities },
+        application: { capabilities, navigateToApp },
       },
     ] = await mockes.getStartServices();
     const deps = {
@@ -327,18 +327,20 @@ describe('actions_connectors_list with show only capability', () => {
       docLinks,
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
+      alerting: alertingPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
+      navigateToApp,
       capabilities: {
         ...capabilities,
-        siem: {
+        securitySolution: {
           'actions:show': true,
           'actions:save': false,
           'actions:delete': false,
         },
       },
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: {
         get() {
@@ -362,11 +364,112 @@ describe('actions_connectors_list with show only capability', () => {
   it('renders table of connectors with delete button disabled', () => {
     expect(wrapper.find('EuiInMemoryTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
-    wrapper.find('EuiTableRow').forEach(elem => {
+    wrapper.find('EuiTableRow').forEach((elem) => {
       const deleteButton = elem.find('[data-test-subj="deleteConnector"]').first();
       expect(deleteButton).toBeTruthy();
       expect(deleteButton.prop('isDisabled')).toBeTruthy();
     });
+  });
+});
+
+describe('actions_connectors_list component with disabled items', () => {
+  let wrapper: ReactWrapper<any>;
+
+  beforeAll(async () => {
+    const { loadAllActions, loadActionTypes } = jest.requireMock(
+      '../../../lib/action_connector_api'
+    );
+    loadAllActions.mockResolvedValueOnce([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        description: 'My test',
+        referencedByCount: 1,
+        config: {},
+      },
+      {
+        id: '2',
+        actionTypeId: 'test2',
+        description: 'My test 2',
+        referencedByCount: 1,
+        config: {},
+      },
+    ]);
+    loadActionTypes.mockResolvedValueOnce([
+      {
+        id: 'test',
+        name: 'Test',
+        enabled: false,
+        enabledInConfig: false,
+        enabledInLicense: true,
+      },
+      {
+        id: 'test2',
+        name: 'Test2',
+        enabled: false,
+        enabledInConfig: true,
+        enabledInLicense: false,
+      },
+    ]);
+
+    const mockes = coreMock.createSetup();
+    const [
+      {
+        chrome,
+        docLinks,
+        application: { capabilities, navigateToApp },
+      },
+    ] = await mockes.getStartServices();
+    const deps = {
+      chrome,
+      docLinks,
+      dataPlugin: dataPluginMock.createStartContract(),
+      charts: chartPluginMock.createStartContract(),
+      toastNotifications: mockes.notifications.toasts,
+      injectedMetadata: mockes.injectedMetadata,
+      http: mockes.http,
+      uiSettings: mockes.uiSettings,
+      navigateToApp,
+      capabilities: {
+        ...capabilities,
+        securitySolution: {
+          'actions:show': true,
+          'actions:save': true,
+          'actions:delete': true,
+        },
+      },
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+      setBreadcrumbs: jest.fn(),
+      actionTypeRegistry: {
+        get() {
+          return null;
+        },
+      } as any,
+      alertTypeRegistry: {} as any,
+    };
+
+    await act(async () => {
+      wrapper = mountWithIntl(
+        <AppContextProvider appDeps={deps}>
+          <ActionsConnectorsList />
+        </AppContextProvider>
+      );
+    });
+
+    await waitForRender(wrapper);
+
+    expect(loadAllActions).toHaveBeenCalled();
+  });
+
+  it('renders table of connectors', () => {
+    expect(wrapper.find('EuiInMemoryTable')).toHaveLength(1);
+    expect(wrapper.find('EuiTableRow')).toHaveLength(2);
+    expect(wrapper.find('EuiTableRow').at(0).prop('className')).toEqual(
+      'actConnectorsList__tableRowDisabled'
+    );
+    expect(wrapper.find('EuiTableRow').at(1).prop('className')).toEqual(
+      'actConnectorsList__tableRowDisabled'
+    );
   });
 });
 

@@ -18,14 +18,15 @@
  */
 import {
   CoreSetup,
-  CoreStart,
   Plugin,
   PluginInitializerContext,
   IUiSettingsClient,
+  CoreStart,
 } from 'kibana/public';
 import { getTimeChart } from './panels/timechart/timechart';
 import { Panel } from './panels/panel';
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
+import { KibanaLegacyStart } from '../../../../plugins/kibana_legacy/public';
 
 /** @internal */
 export interface TimelionVisualizationDependencies extends LegacyDependenciesPluginSetup {
@@ -65,12 +66,8 @@ export class TimelionPlugin implements Plugin<Promise<void>, void> {
     dependencies.timelionPanels.set(timeChartPanel.name, timeChartPanel);
   }
 
-  public start(core: CoreStart) {
-    const timelionUiEnabled = core.injectedMetadata.getInjectedVar('timelionUiEnabled');
-
-    if (timelionUiEnabled === false) {
-      core.chrome.navLinks.update('timelion', { hidden: true });
-    }
+  public start(core: CoreStart, { kibanaLegacy }: { kibanaLegacy: KibanaLegacyStart }) {
+    kibanaLegacy.loadFontAwesome();
   }
 
   public stop(): void {}

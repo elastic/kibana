@@ -48,7 +48,7 @@ export function consulMetricsSpecProvider(context: TutorialContext): TutorialSch
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-consul.html',
       },
     }),
-    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/consul.svg',
+    euiIconType: '/plugins/home/assets/logos/consul.svg',
     artifacts: {
       dashboards: [
         {
@@ -64,7 +64,7 @@ export function consulMetricsSpecProvider(context: TutorialContext): TutorialSch
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/consul_metrics/screenshot.png',
+    previewImagePath: '/plugins/home/assets/consul_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),

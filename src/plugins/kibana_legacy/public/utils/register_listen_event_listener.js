@@ -26,9 +26,9 @@ export function registerListenEventListener($rootScope) {
    * @param  {Function} handler - the event handler
    * @return {undefined}
    */
-  $rootScope.constructor.prototype.$listen = function(emitter, eventName, handler) {
+  $rootScope.constructor.prototype.$listen = function (emitter, eventName, handler) {
     emitter.on(eventName, handler);
-    this.$on('$destroy', function() {
+    this.$on('$destroy', function () {
       emitter.off(eventName, handler);
     });
   };

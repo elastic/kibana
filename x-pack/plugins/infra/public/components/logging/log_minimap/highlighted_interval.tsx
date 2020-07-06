@@ -13,6 +13,7 @@ interface HighlightedIntervalProps {
   getPositionOfTime: (time: number) => number;
   start: number;
   end: number;
+  targetWidth: number;
   width: number;
   target: number | null;
 }
@@ -22,6 +23,7 @@ export const HighlightedInterval: React.FC<HighlightedIntervalProps> = ({
   end,
   getPositionOfTime,
   start,
+  targetWidth,
   width,
   target,
 }) => {
@@ -35,14 +37,14 @@ export const HighlightedInterval: React.FC<HighlightedIntervalProps> = ({
         <HighlightTargetMarker
           className={className}
           x1={0}
-          x2={width / 3}
+          x2={targetWidth}
           y1={yTarget}
           y2={yTarget}
         />
       )}
       <HighlightPolygon
         className={className}
-        points={` ${width / 3},${yStart} ${width},${yStart} ${width},${yEnd}  ${width / 3},${yEnd}`}
+        points={` ${targetWidth},${yStart} ${width},${yStart} ${width},${yEnd}  ${targetWidth},${yEnd}`}
       />
     </>
   );
@@ -51,13 +53,13 @@ export const HighlightedInterval: React.FC<HighlightedIntervalProps> = ({
 HighlightedInterval.displayName = 'HighlightedInterval';
 
 const HighlightTargetMarker = euiStyled.line`
-  stroke: ${props => props.theme.eui.euiColorPrimary};
+  stroke: ${(props) => props.theme.eui.euiColorPrimary};
   stroke-width: 1;
 `;
 
 const HighlightPolygon = euiStyled.polygon`
-  fill: ${props => props.theme.eui.euiColorPrimary};
+  fill: ${(props) => props.theme.eui.euiColorPrimary};
   fill-opacity: 0.3;
-  stroke: ${props => props.theme.eui.euiColorPrimary};
+  stroke: ${(props) => props.theme.eui.euiColorPrimary};
   stroke-width: 1;
 `;

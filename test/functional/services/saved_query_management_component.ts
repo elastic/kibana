@@ -151,6 +151,12 @@ export function SavedQueryManagementComponentProvider({ getService }: FtrProvide
       await testSubjects.existOrFail(`~load-saved-query-${title}-button`);
     }
 
+    async savedQueryTextExist(text: string) {
+      await this.openSavedQueryManagementComponent();
+      const queryString = await queryBar.getQueryString();
+      expect(queryString).to.eql(text);
+    }
+
     async savedQueryMissingOrFail(title: string) {
       await retry.try(async () => {
         await this.openSavedQueryManagementComponent();
@@ -164,6 +170,10 @@ export function SavedQueryManagementComponentProvider({ getService }: FtrProvide
       if (isOpenAlready) return;
 
       await testSubjects.click('saved-query-management-popover-button');
+      await retry.waitFor('saved query management popover to have any text', async () => {
+        const queryText = await testSubjects.getVisibleText('saved-query-management-popover');
+        return queryText.length > 0;
+      });
     }
 
     async closeSavedQueryManagementComponent() {

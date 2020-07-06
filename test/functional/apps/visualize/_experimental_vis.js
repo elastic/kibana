@@ -23,9 +23,7 @@ export default ({ getService, getPageObjects }) => {
   const log = getService('log');
   const PageObjects = getPageObjects(['visualize']);
 
-  describe('visualize app', function() {
-    this.tags('smoke');
-
+  describe('experimental visualizations in visualize app ', function () {
     describe('experimental visualizations', () => {
       beforeEach(async () => {
         log.debug('navigateToApp visualize');

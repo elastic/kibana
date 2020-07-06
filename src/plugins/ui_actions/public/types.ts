@@ -17,20 +17,37 @@
  * under the License.
  */
 
-import { Action } from './actions/action';
+import { ActionInternal } from './actions/action_internal';
 import { TriggerInternal } from './triggers/trigger_internal';
+import { Filter } from '../../data/public';
+import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER, APPLY_FILTER_TRIGGER } from './triggers';
+import { IEmbeddable } from '../../embeddable/public';
+import { RangeSelectContext, ValueClickContext } from '../../embeddable/public';
 
 export type TriggerRegistry = Map<TriggerId, TriggerInternal<any>>;
-export type ActionRegistry = Map<string, Action<any>>;
+export type ActionRegistry = Map<string, ActionInternal>;
 export type TriggerToActionsRegistry = Map<TriggerId, string[]>;
 
 const DEFAULT_TRIGGER = '';
 
 export type TriggerId = keyof TriggerContextMapping;
 
+export type BaseContext = object;
 export type TriggerContext = BaseContext;
-export type BaseContext = object | undefined | string | number;
 
 export interface TriggerContextMapping {
   [DEFAULT_TRIGGER]: TriggerContext;
+  [SELECT_RANGE_TRIGGER]: RangeSelectContext;
+  [VALUE_CLICK_TRIGGER]: ValueClickContext;
+  [APPLY_FILTER_TRIGGER]: {
+    embeddable: IEmbeddable;
+    filters: Filter[];
+  };
+}
+
+const DEFAULT_ACTION = '';
+export type ActionType = keyof ActionContextMapping;
+
+export interface ActionContextMapping {
+  [DEFAULT_ACTION]: BaseContext;
 }

@@ -54,7 +54,7 @@ export class BfetchExplorerPlugin implements Plugin {
           // Validate inputs.
           if (num < 0) throw new Error('Invalid number');
           // Wait number of specified milliseconds.
-          await new Promise(r => setTimeout(r, num));
+          await new Promise((r) => setTimeout(r, num));
           // Double the number and send it back.
           return { num: 2 * num };
         },

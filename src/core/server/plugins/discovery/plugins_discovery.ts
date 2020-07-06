@@ -19,7 +19,7 @@
 
 import { readdir, stat } from 'fs';
 import { resolve } from 'path';
-import { bindNodeCallback, from, merge } from 'rxjs';
+import { bindNodeCallback, from, merge, Observable } from 'rxjs';
 import { catchError, filter, map, mergeMap, shareReplay } from 'rxjs/operators';
 import { CoreContext } from '../../core_context';
 import { Logger } from '../../logging';
@@ -31,6 +31,13 @@ import { parseManifest } from './plugin_manifest_parser';
 
 const fsReadDir$ = bindNodeCallback<string, string[]>(readdir);
 const fsStat$ = bindNodeCallback(stat);
+
+const maxScanDepth = 5;
+
+interface PluginSearchPathEntry {
+  dir: string;
+  depth: number;
+}
 
 /**
  * Tries to discover all possible plugins based on the provided plugin config.
@@ -56,7 +63,7 @@ export function discover(config: PluginsConfig, coreContext: CoreContext) {
     from(config.additionalPluginPaths),
     processPluginSearchPaths$(config.pluginSearchPaths, log)
   ).pipe(
-    mergeMap(pluginPathOrError => {
+    mergeMap((pluginPathOrError) => {
       return typeof pluginPathOrError === 'string'
         ? createPlugin$(pluginPathOrError, log, coreContext)
         : [pluginPathOrError];
@@ -75,31 +82,93 @@ export function discover(config: PluginsConfig, coreContext: CoreContext) {
 }
 
 /**
- * Iterates over every plugin search path and returns a merged stream of all
- * sub-directories. If directory cannot be read or it's impossible to get stat
+ * Recursively iterates over every plugin search path and returns a merged stream of all
+ * sub-directories containing a manifest file. If directory cannot be read or it's impossible to get stat
  * for any of the nested entries then error is added into the stream instead.
+ *
  * @param pluginDirs List of the top-level directories to process.
  * @param log Plugin discovery logger instance.
  */
-function processPluginSearchPaths$(pluginDirs: readonly string[], log: Logger) {
-  return from(pluginDirs).pipe(
-    mergeMap(dir => {
-      log.debug(`Scanning "${dir}" for plugin sub-directories...`);
+function processPluginSearchPaths$(
+  pluginDirs: readonly string[],
+  log: Logger
+): Observable<string | PluginDiscoveryError> {
+  function recursiveScanFolder(
+    ent: PluginSearchPathEntry
+  ): Observable<string | PluginDiscoveryError> {
+    return from([ent]).pipe(
+      mergeMap((entry) => {
+        return findManifestInFolder(entry.dir, () => {
+          if (entry.depth > maxScanDepth) {
+            return [];
+          }
+          return mapSubdirectories(entry.dir, (subDir) =>
+            recursiveScanFolder({ dir: subDir, depth: entry.depth + 1 })
+          );
+        });
+      })
+    );
+  }
 
-      return fsReadDir$(dir).pipe(
-        mergeMap((subDirs: string[]) => subDirs.map(subDir => resolve(dir, subDir))),
-        mergeMap(path =>
-          fsStat$(path).pipe(
-            // Filter out non-directory entries from target directories, it's expected that
-            // these directories may contain files (e.g. `README.md` or `package.json`).
-            // We shouldn't silently ignore the entries we couldn't get stat for though.
-            mergeMap(pathStat => (pathStat.isDirectory() ? [path] : [])),
-            catchError(err => [PluginDiscoveryError.invalidPluginPath(path, err)])
-          )
-        ),
-        catchError(err => [PluginDiscoveryError.invalidSearchPath(dir, err)])
+  return from(pluginDirs.map((dir) => ({ dir, depth: 0 }))).pipe(
+    mergeMap((entry) => {
+      log.debug(`Scanning "${entry.dir}" for plugin sub-directories...`);
+      return fsReadDir$(entry.dir).pipe(
+        mergeMap(() => recursiveScanFolder(entry)),
+        catchError((err) => [PluginDiscoveryError.invalidSearchPath(entry.dir, err)])
       );
     })
+  );
+}
+
+/**
+ * Attempts to read manifest file in specified directory or calls `notFound` and returns results if not found. For any
+ * manifest files that cannot be read, a PluginDiscoveryError is added.
+ * @param dir
+ * @param notFound
+ */
+function findManifestInFolder(
+  dir: string,
+  notFound: () => never[] | Observable<string | PluginDiscoveryError>
+): string[] | Observable<string | PluginDiscoveryError> {
+  return fsStat$(resolve(dir, 'kibana.json')).pipe(
+    mergeMap((stats) => {
+      // `kibana.json` exists in given directory, we got a plugin
+      if (stats.isFile()) {
+        return [dir];
+      }
+      return [];
+    }),
+    catchError((manifestStatError) => {
+      // did not find manifest. recursively process sub directories until we reach max depth.
+      if (manifestStatError.code !== 'ENOENT') {
+        return [PluginDiscoveryError.invalidPluginPath(dir, manifestStatError)];
+      }
+      return notFound();
+    })
+  );
+}
+
+/**
+ * Finds all subdirectories in `dir` and executed `mapFunc` for each one. For any directories that cannot be read,
+ * a PluginDiscoveryError is added.
+ * @param dir
+ * @param mapFunc
+ */
+function mapSubdirectories(
+  dir: string,
+  mapFunc: (subDir: string) => Observable<string | PluginDiscoveryError>
+): Observable<string | PluginDiscoveryError> {
+  return fsReadDir$(dir).pipe(
+    mergeMap((subDirs: string[]) => subDirs.map((subDir) => resolve(dir, subDir))),
+    mergeMap((subDir) =>
+      fsStat$(subDir).pipe(
+        mergeMap((pathStat) => (pathStat.isDirectory() ? mapFunc(subDir) : [])),
+        catchError((subDirStatError) => [
+          PluginDiscoveryError.invalidPluginPath(subDir, subDirStatError),
+        ])
+      )
+    )
   );
 }
 
@@ -113,7 +182,7 @@ function processPluginSearchPaths$(pluginDirs: readonly string[], log: Logger) {
  */
 function createPlugin$(path: string, log: Logger, coreContext: CoreContext) {
   return from(parseManifest(path, coreContext.env.packageInfo, log)).pipe(
-    map(manifest => {
+    map((manifest) => {
       log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
       const opaqueId = Symbol(manifest.id);
       return new PluginWrapper({
@@ -123,6 +192,6 @@ function createPlugin$(path: string, log: Logger, coreContext: CoreContext) {
         initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
       });
     }),
-    catchError(err => [err])
+    catchError((err) => [err])
   );
 }

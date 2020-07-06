@@ -10,7 +10,7 @@ import { registerHelpers } from './rollup.test_helpers';
 import { INDEX_TO_ROLLUP_MAPPINGS, INDEX_PATTERNS_EXTENSION_BASE_PATH } from './constants';
 import { getRandomString } from './lib';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
@@ -78,7 +78,7 @@ export default function({ getService }) {
           uri = `${BASE_URI}?${stringify(params, { sort: false })}`;
           ({ body } = await supertest.get(uri).expect(400));
           expect(body.message).to.contain(
-            '[request query.meta_fields]: could not parse array value from [stringValue]'
+            '[request query.meta_fields]: could not parse array value from json input'
           );
         });
 
@@ -112,7 +112,7 @@ export default function({ getService }) {
 
         // Verify that the fields for wildcard correspond to our declared mappings
         const propertiesWithMappings = Object.keys(INDEX_TO_ROLLUP_MAPPINGS.properties);
-        const fieldsForWildcard = body.fields.map(field => field.name);
+        const fieldsForWildcard = body.fields.map((field) => field.name);
         expect(fieldsForWildcard.sort()).eql(propertiesWithMappings.sort());
 
         // Cleanup

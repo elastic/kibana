@@ -30,12 +30,7 @@ describe('RecentlyAccessed#start()', () => {
       const navControls = getStart();
       const nc = { mount: jest.fn() };
       navControls.registerLeft(nc);
-      expect(
-        await navControls
-          .getLeft$()
-          .pipe(take(1))
-          .toPromise()
-      ).toEqual([nc]);
+      expect(await navControls.getLeft$().pipe(take(1)).toPromise()).toEqual([nc]);
     });
 
     it('sorts controls by order property', async () => {
@@ -46,12 +41,7 @@ describe('RecentlyAccessed#start()', () => {
       navControls.registerLeft(nc1);
       navControls.registerLeft(nc2);
       navControls.registerLeft(nc3);
-      expect(
-        await navControls
-          .getLeft$()
-          .pipe(take(1))
-          .toPromise()
-      ).toEqual([nc2, nc1, nc3]);
+      expect(await navControls.getLeft$().pipe(take(1)).toPromise()).toEqual([nc2, nc1, nc3]);
     });
   });
 
@@ -60,12 +50,7 @@ describe('RecentlyAccessed#start()', () => {
       const navControls = getStart();
       const nc = { mount: jest.fn() };
       navControls.registerRight(nc);
-      expect(
-        await navControls
-          .getRight$()
-          .pipe(take(1))
-          .toPromise()
-      ).toEqual([nc]);
+      expect(await navControls.getRight$().pipe(take(1)).toPromise()).toEqual([nc]);
     });
 
     it('sorts controls by order property', async () => {
@@ -76,12 +61,7 @@ describe('RecentlyAccessed#start()', () => {
       navControls.registerRight(nc1);
       navControls.registerRight(nc2);
       navControls.registerRight(nc3);
-      expect(
-        await navControls
-          .getRight$()
-          .pipe(take(1))
-          .toPromise()
-      ).toEqual([nc2, nc1, nc3]);
+      expect(await navControls.getRight$().pipe(take(1)).toPromise()).toEqual([nc2, nc1, nc3]);
     });
   });
 });

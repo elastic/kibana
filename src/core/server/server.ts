@@ -26,15 +26,20 @@ import {
   RawConfigurationProvider,
   coreDeprecationProvider,
 } from './config';
+import { CoreApp } from './core_app';
 import { ElasticsearchService } from './elasticsearch';
-import { HttpService, InternalHttpServiceSetup } from './http';
-import { RenderingService, RenderingServiceSetup } from './rendering';
+import { HttpService } from './http';
+import { HttpResourcesService } from './http_resources';
+import { RenderingService } from './rendering';
 import { LegacyService, ensureValidConfiguration } from './legacy';
-import { Logger, LoggerFactory } from './logging';
+import { Logger, LoggerFactory, LoggingService, ILoggingSystem } from './logging';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
 import { SavedObjectsService } from '../server/saved_objects';
 import { MetricsService, opsConfig } from './metrics';
+import { CapabilitiesService } from './capabilities';
+import { UuidService } from './uuid';
+import { StatusService } from './status/status_service';
 
 import { config as cspConfig } from './csp';
 import { config as elasticsearchConfig } from './elasticsearch';
@@ -49,8 +54,6 @@ import { mapToObject } from '../utils';
 import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
 import { InternalCoreSetup, InternalCoreStart } from './internal_types';
-import { CapabilitiesService } from './capabilities';
-import { UuidService } from './uuid';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -69,18 +72,25 @@ export class Server {
   private readonly uiSettings: UiSettingsService;
   private readonly uuid: UuidService;
   private readonly metrics: MetricsService;
+  private readonly httpResources: HttpResourcesService;
+  private readonly status: StatusService;
+  private readonly logging: LoggingService;
+  private readonly coreApp: CoreApp;
 
+  #pluginsInitialized?: boolean;
   private coreStart?: InternalCoreStart;
+  private readonly logger: LoggerFactory;
 
   constructor(
     rawConfigProvider: RawConfigurationProvider,
     public readonly env: Env,
-    private readonly logger: LoggerFactory
+    private readonly loggingSystem: ILoggingSystem
   ) {
+    this.logger = this.loggingSystem.asLoggerFactory();
     this.log = this.logger.get('server');
-    this.configService = new ConfigService(rawConfigProvider, env, logger);
+    this.configService = new ConfigService(rawConfigProvider, env, this.logger);
 
-    const core = { coreId, configService: this.configService, env, logger };
+    const core = { coreId, configService: this.configService, env, logger: this.logger };
     this.context = new ContextService(core);
     this.http = new HttpService(core);
     this.rendering = new RenderingService(core);
@@ -92,13 +102,17 @@ export class Server {
     this.capabilities = new CapabilitiesService(core);
     this.uuid = new UuidService(core);
     this.metrics = new MetricsService(core);
+    this.status = new StatusService(core);
+    this.coreApp = new CoreApp(core);
+    this.httpResources = new HttpResourcesService(core);
+    this.logging = new LoggingService(core);
   }
 
   public async setup() {
     this.log.debug('setting up server');
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
-    const pluginDependencies = await this.plugins.discover();
+    const { pluginTree, uiPlugins } = await this.plugins.discover();
     const legacyPlugins = await this.legacy.discoverPlugins();
 
     // Immediately terminate in case of invalid configuration
@@ -110,10 +124,7 @@ export class Server {
       // 1) Can access context from any NP plugin
       // 2) Can register context providers that will only be available to other legacy plugins and will not leak into
       //    New Platform plugins.
-      pluginDependencies: new Map([
-        ...pluginDependencies,
-        [this.legacy.legacyId, [...pluginDependencies.keys()]],
-      ]),
+      pluginDependencies: new Map([...pluginTree, [this.legacy.legacyId, [...pluginTree.keys()]]]),
     });
 
     const uuidSetup = await this.uuid.setup();
@@ -122,15 +133,9 @@ export class Server {
       context: contextServiceSetup,
     });
 
-    this.registerDefaultRoute(httpSetup);
-
     const capabilitiesSetup = this.capabilities.setup({ http: httpSetup });
 
     const elasticsearchServiceSetup = await this.elasticsearch.setup({
-      http: httpSetup,
-    });
-
-    const uiSettingsSetup = await this.uiSettings.setup({
       http: httpSetup,
     });
 
@@ -140,54 +145,84 @@ export class Server {
       legacyPlugins,
     });
 
-    const metricsSetup = await this.metrics.setup({ http: httpSetup });
+    const uiSettingsSetup = await this.uiSettings.setup({
+      http: httpSetup,
+      savedObjects: savedObjectsSetup,
+    });
+
+    await this.metrics.setup({ http: httpSetup });
+
+    const renderingSetup = await this.rendering.setup({
+      http: httpSetup,
+      legacyPlugins,
+      uiPlugins,
+    });
+
+    const httpResourcesSetup = this.httpResources.setup({
+      http: httpSetup,
+      rendering: renderingSetup,
+    });
+
+    const statusSetup = this.status.setup({
+      elasticsearch: elasticsearchServiceSetup,
+      savedObjects: savedObjectsSetup,
+    });
+
+    const loggingSetup = this.logging.setup({
+      loggingSystem: this.loggingSystem,
+    });
 
     const coreSetup: InternalCoreSetup = {
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,
       elasticsearch: elasticsearchServiceSetup,
       http: httpSetup,
-      uiSettings: uiSettingsSetup,
       savedObjects: savedObjectsSetup,
+      status: statusSetup,
+      uiSettings: uiSettingsSetup,
       uuid: uuidSetup,
-      metrics: metricsSetup,
+      rendering: renderingSetup,
+      httpResources: httpResourcesSetup,
+      logging: loggingSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
-
-    const renderingSetup = await this.rendering.setup({
-      http: httpSetup,
-      legacyPlugins,
-      plugins: pluginsSetup,
-    });
+    this.#pluginsInitialized = pluginsSetup.initialized;
 
     await this.legacy.setup({
       core: { ...coreSetup, plugins: pluginsSetup, rendering: renderingSetup },
       plugins: mapToObject(pluginsSetup.contracts),
+      uiPlugins,
     });
 
-    this.registerCoreContext(coreSetup, renderingSetup);
+    this.registerCoreContext(coreSetup);
+    this.coreApp.setup(coreSetup);
 
     return coreSetup;
   }
 
   public async start() {
     this.log.debug('starting server');
-    const savedObjectsStart = await this.savedObjects.start({});
+    const elasticsearchStart = await this.elasticsearch.start();
+    const savedObjectsStart = await this.savedObjects.start({
+      elasticsearch: elasticsearchStart,
+      pluginsInitialized: this.#pluginsInitialized,
+    });
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
-
-    const pluginsStart = await this.plugins.start({
-      capabilities: capabilitiesStart,
-      savedObjects: savedObjectsStart,
-      uiSettings: uiSettingsStart,
-    });
+    const metricsStart = await this.metrics.start();
+    const httpStart = this.http.getStartContract();
 
     this.coreStart = {
       capabilities: capabilitiesStart,
+      elasticsearch: elasticsearchStart,
+      http: httpStart,
+      metrics: metricsStart,
       savedObjects: savedObjectsStart,
       uiSettings: uiSettingsStart,
     };
+
+    const pluginsStart = await this.plugins.start(this.coreStart);
 
     await this.legacy.start({
       core: {
@@ -198,8 +233,10 @@ export class Server {
     });
 
     await this.http.start();
-    await this.rendering.start();
-    await this.metrics.start();
+
+    await this.rendering.start({
+      legacy: this.legacy,
+    });
 
     return this.coreStart;
   }
@@ -215,40 +252,30 @@ export class Server {
     await this.uiSettings.stop();
     await this.rendering.stop();
     await this.metrics.stop();
+    await this.status.stop();
+    await this.logging.stop();
   }
 
-  private registerDefaultRoute(httpSetup: InternalHttpServiceSetup) {
-    const router = httpSetup.createRouter('/core');
-    router.get({ path: '/', validate: false }, async (context, req, res) =>
-      res.ok({ body: { version: '0.0.1' } })
-    );
-  }
-
-  private registerCoreContext(coreSetup: InternalCoreSetup, rendering: RenderingServiceSetup) {
+  private registerCoreContext(coreSetup: InternalCoreSetup) {
     coreSetup.http.registerRouteHandlerContext(
       coreId,
       'core',
       async (context, req, res): Promise<RequestHandlerContext['core']> => {
-        const savedObjectsClient = this.coreStart!.savedObjects.getScopedClient(req);
-        const uiSettingsClient = coreSetup.uiSettings.asScopedToClient(savedObjectsClient);
+        const coreStart = this.coreStart!;
+        const savedObjectsClient = coreStart.savedObjects.getScopedClient(req);
 
         return {
-          rendering: {
-            render: async (options = {}) =>
-              rendering.render(req, uiSettingsClient, {
-                ...options,
-                vars: await this.legacy.legacyInternals!.getVars('core', req),
-              }),
-          },
           savedObjects: {
             client: savedObjectsClient,
+            typeRegistry: coreStart.savedObjects.getTypeRegistry(),
           },
           elasticsearch: {
-            adminClient: coreSetup.elasticsearch.adminClient.asScoped(req),
-            dataClient: coreSetup.elasticsearch.dataClient.asScoped(req),
+            legacy: {
+              client: coreStart.elasticsearch.legacy.client.asScoped(req),
+            },
           },
           uiSettings: {
-            client: uiSettingsClient,
+            client: coreStart.uiSettings.asScopedToClient(savedObjectsClient),
           },
         };
       }

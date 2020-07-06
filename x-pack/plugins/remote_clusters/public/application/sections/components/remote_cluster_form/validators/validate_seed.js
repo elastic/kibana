@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { isSeedNodeValid, isSeedNodePortValid } from '../../../../services';
+import { isAddressValid, isPortValid } from '../../../../services';
 
 export function validateSeed(seed) {
   const errors = [];
@@ -15,7 +15,7 @@ export function validateSeed(seed) {
     return errors;
   }
 
-  const isValid = isSeedNodeValid(seed);
+  const isValid = isAddressValid(seed);
 
   if (!isValid) {
     errors.push(
@@ -30,9 +30,7 @@ export function validateSeed(seed) {
     );
   }
 
-  const isPortValid = isSeedNodePortValid(seed);
-
-  if (!isPortValid) {
+  if (!isPortValid(seed)) {
     errors.push(
       i18n.translate('xpack.remoteClusters.remoteClusterForm.localSeedError.invalidPortMessage', {
         defaultMessage: 'A port is required.',

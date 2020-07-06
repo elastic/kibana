@@ -6,10 +6,10 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiExpression,
   EuiPopover,
-  EuiPopoverTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -17,11 +17,14 @@ import {
 } from '@elastic/eui';
 import { builtInAggregationTypes } from '../constants';
 import { AggregationType } from '../types';
+import { IErrorObject } from '../../types';
+import { ClosablePopoverTitle } from './components';
+import './of.scss';
 
 interface OfExpressionProps {
   aggType: string;
   aggField?: string;
-  errors: { [key: string]: string[] };
+  errors: IErrorObject;
   onChangeSelectedAggField: (selectedAggType?: string) => void;
   fields: Record<string, any>;
   customAggTypesOptions?: {
@@ -40,6 +43,7 @@ interface OfExpressionProps {
     | 'rightCenter'
     | 'rightUp'
     | 'rightDown';
+  display?: 'fullWidth' | 'inline';
 }
 
 export const OfExpression = ({
@@ -48,6 +52,7 @@ export const OfExpression = ({
   errors,
   onChangeSelectedAggField,
   fields,
+  display = 'inline',
   customAggTypesOptions,
   popupPosition,
 }: OfExpressionProps) => {
@@ -83,12 +88,13 @@ export const OfExpression = ({
               defaultMessage: 'of',
             }
           )}
+          display={display === 'inline' ? 'inline' : 'columns'}
           value={aggField || firstFieldOption.text}
           isActive={aggFieldPopoverOpen || !aggField}
           onClick={() => {
             setAggFieldPopoverOpen(true);
           }}
-          color={aggField ? 'secondary' : 'danger'}
+          isInvalid={!aggField}
         />
       }
       isOpen={aggFieldPopoverOpen}
@@ -96,17 +102,19 @@ export const OfExpression = ({
         setAggFieldPopoverOpen(false);
       }}
       withTitle
+      display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
       anchorPosition={popupPosition ?? 'downRight'}
       zIndex={8000}
     >
       <div>
-        <EuiPopoverTitle>
-          {i18n.translate('xpack.triggersActionsUI.common.expressionItems.of.popoverTitle', {
-            defaultMessage: 'of',
-          })}
-        </EuiPopoverTitle>
+        <ClosablePopoverTitle onClose={() => setAggFieldPopoverOpen(false)}>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.common.expressionItems.of.popoverTitle"
+            defaultMessage="of"
+          />
+        </ClosablePopoverTitle>
         <EuiFlexGroup>
-          <EuiFlexItem grow={false} className="watcherThresholdAlertAggFieldContainer">
+          <EuiFlexItem grow={false} className="actOf__aggFieldContainer">
             <EuiFormRow
               fullWidth
               isInvalid={errors.aggField.length > 0 && aggField !== undefined}
@@ -121,11 +129,13 @@ export const OfExpression = ({
                 options={availablefieldsOptions}
                 noSuggestions={!availablefieldsOptions.length}
                 selectedOptions={aggField ? [{ label: aggField }] : []}
-                onChange={selectedOptions => {
+                onChange={(selectedOptions) => {
                   onChangeSelectedAggField(
                     selectedOptions.length === 1 ? selectedOptions[0].label : undefined
                   );
-                  setAggFieldPopoverOpen(false);
+                  if (selectedOptions.length > 0) {
+                    setAggFieldPopoverOpen(false);
+                  }
                 }}
               />
             </EuiFormRow>

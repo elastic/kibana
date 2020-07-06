@@ -36,30 +36,27 @@ export interface MultiTaskTodoInput extends EmbeddableInput {
   title: string;
 }
 
-// This embeddable has output! It's the tasks list that is filtered.
-// Output state is something only the embeddable itself can update. It
-// can be something completely internal, or it can be state that is
+// This embeddable has output! Output state is something only the embeddable itself
+// can update. It can be something completely internal, or it can be state that is
 // derived from input state and updates when input does.
 export interface MultiTaskTodoOutput extends EmbeddableOutput {
-  tasks: string[];
+  hasMatch: boolean;
 }
 
-function getFilteredTasks(tasks: string[], search?: string) {
-  const filteredTasks: string[] = [];
-  if (search === undefined) return tasks;
+function getHasMatch(tasks: string[], title?: string, search?: string) {
+  if (search === undefined || search === '') return false;
 
-  tasks.forEach(task => {
-    if (task.match(search)) {
-      filteredTasks.push(task);
-    }
-  });
+  if (title && title.match(search)) return true;
 
-  return filteredTasks;
+  const match = tasks.find((task) => task.match(search));
+  if (match) return true;
+
+  return false;
 }
 
 function getOutput(input: MultiTaskTodoInput) {
-  const tasks = getFilteredTasks(input.tasks, input.search);
-  return { tasks, hasMatch: tasks.length > 0 || (input.search && input.title.match(input.search)) };
+  const hasMatch = getHasMatch(input.tasks, input.title, input.search);
+  return { hasMatch };
 }
 
 export class MultiTaskTodoEmbeddable extends Embeddable<MultiTaskTodoInput, MultiTaskTodoOutput> {

@@ -6,11 +6,6 @@
 
 // TODO: Remove once typescript definitions are in EUI
 
-declare module '@elastic/eui' {
-  export const EuiCodeEditor: React.FC<any>;
-  export const Query: any;
-}
-
 declare module '@elastic/eui/lib/services' {
   export const RIGHT_ALIGNMENT: any;
 }

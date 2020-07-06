@@ -49,8 +49,9 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
             defaultMessage: 'Select values',
           })}
           options={options}
-          getLabel={option => option}
+          getLabel={(option) => option}
           selectedOptions={values || []}
+          onSearchChange={this.onSearchChange}
           onCreateOption={(option: string) => onChange([...(values || []), option])}
           onChange={onChange}
           isClearable={false}

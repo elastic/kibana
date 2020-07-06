@@ -10,16 +10,10 @@ export { showApiError, showApiWarning } from './api_errors';
 
 export { initRedirect, redirect } from './redirect';
 
-export { isSeedNodeValid, isSeedNodePortValid } from './validate_seed_node';
+export { isAddressValid, isPortValid } from './validate_address';
 
 export { extractQueryParams } from './query_params';
 
-export {
-  setUserHasLeftApp,
-  getUserHasLeftApp,
-  registerRouter,
-  getRouter,
-  getRouterLinkProps,
-} from './routing';
+export { setUserHasLeftApp, getUserHasLeftApp, registerRouter, getRouter } from './routing';
 
 export { trackUiMetric, METRIC_TYPE } from './ui_metric';

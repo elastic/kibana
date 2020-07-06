@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, ClusterClient } from 'src/core/server';
+import { Logger, LegacyClusterClient } from 'src/core/server';
 
 import { EsNames, getEsNames } from './names';
 import { initializeEs } from './init';
 import { ClusterClientAdapter, IClusterClientAdapter } from './cluster_client_adapter';
 import { createReadySignal, ReadySignal } from '../lib/ready_signal';
 
-export type EsClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
+export type EsClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 
 export interface EsContext {
   logger: Logger;
@@ -19,6 +19,7 @@ export interface EsContext {
   esAdapter: IClusterClientAdapter;
   initialize(): void;
   waitTillReady(): Promise<boolean>;
+  initialized: boolean;
 }
 
 export interface EsError {
@@ -32,7 +33,7 @@ export function createEsContext(params: EsContextCtorParams): EsContext {
 
 export interface EsContextCtorParams {
   logger: Logger;
-  clusterClient: EsClusterClient;
+  clusterClientPromise: Promise<EsClusterClient>;
   indexNameRoot: string;
 }
 
@@ -41,7 +42,7 @@ class EsContextImpl implements EsContext {
   public readonly esNames: EsNames;
   public esAdapter: IClusterClientAdapter;
   private readonly readySignal: ReadySignal<boolean>;
-  private initialized: boolean;
+  public initialized: boolean;
 
   constructor(params: EsContextCtorParams) {
     this.logger = params.logger;
@@ -50,7 +51,7 @@ class EsContextImpl implements EsContext {
     this.initialized = false;
     this.esAdapter = new ClusterClientAdapter({
       logger: params.logger,
-      clusterClient: params.clusterClient,
+      clusterClientPromise: params.clusterClientPromise,
     });
   }
 

@@ -7,17 +7,25 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { KibanaRequest, KibanaResponseFactory } from '../../../../../../src/core/server';
-import { OIDCAuthenticationFlow } from '../../authentication';
-import { createCustomResourceResponse } from '.';
+import { OIDCLogin } from '../../authentication';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { wrapIntoCustomErrorResponse } from '../../errors';
-import { ProviderLoginAttempt } from '../../authentication/providers/oidc';
+import {
+  OIDCAuthenticationProvider,
+  ProviderLoginAttempt,
+} from '../../authentication/providers/oidc';
 import { RouteDefinitionParams } from '..';
 
 /**
  * Defines routes required for SAML authentication.
  */
-export function defineOIDCRoutes({ router, logger, authc, csp, basePath }: RouteDefinitionParams) {
+export function defineOIDCRoutes({
+  router,
+  httpResources,
+  logger,
+  authc,
+  basePath,
+}: RouteDefinitionParams) {
   // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
   for (const path of ['/api/security/oidc/implicit', '/api/security/v1/oidc/implicit']) {
     /**
@@ -25,7 +33,7 @@ export function defineOIDCRoutes({ router, logger, authc, csp, basePath }: Route
      * is used, so that we can extract authentication response from URL fragment and send it to
      * the `/api/security/oidc/callback` route.
      */
-    router.get(
+    httpResources.register(
       {
         path,
         validate: false,
@@ -39,18 +47,14 @@ export function defineOIDCRoutes({ router, logger, authc, csp, basePath }: Route
             { tags: ['deprecation'] }
           );
         }
-        return response.custom(
-          createCustomResourceResponse(
-            `
-          <!DOCTYPE html>
-          <title>Kibana OpenID Connect Login</title>
-          <link rel="icon" href="data:,">
-          <script src="${serverBasePath}/internal/security/oidc/implicit.js"></script>
-        `,
-            'text/html',
-            csp.header
-          )
-        );
+        return response.renderHtml({
+          body: `
+            <!DOCTYPE html>
+            <title>Kibana OpenID Connect Login</title>
+            <link rel="icon" href="data:,">
+            <script src="${serverBasePath}/internal/security/oidc/implicit.js"></script>
+          `,
+        });
       }
     );
   }
@@ -60,7 +64,7 @@ export function defineOIDCRoutes({ router, logger, authc, csp, basePath }: Route
    * that extracts fragment part from the URL and send it to the `/api/security/oidc/callback` route.
    * We need this separate endpoint because of default CSP policy that forbids inline scripts.
    */
-  router.get(
+  httpResources.register(
     {
       path: '/internal/security/oidc/implicit.js',
       validate: false,
@@ -68,17 +72,13 @@ export function defineOIDCRoutes({ router, logger, authc, csp, basePath }: Route
     },
     (context, request, response) => {
       const serverBasePath = basePath.serverBasePath;
-      return response.custom(
-        createCustomResourceResponse(
-          `
+      return response.renderJs({
+        body: `
           window.location.replace(
             '${serverBasePath}/api/security/oidc/callback?authenticationResponseURI=' + encodeURIComponent(window.location.href)
           );
         `,
-          'text/javascript',
-          csp.header
-        )
-      );
+      });
     }
   );
 
@@ -103,7 +103,7 @@ export function defineOIDCRoutes({ router, logger, authc, csp, basePath }: Route
             // The client MUST ignore unrecognized response parameters according to
             // https://openid.net/specs/openid-connect-core-1_0.html#AuthResponseValidation and
             // https://tools.ietf.org/html/rfc6749#section-4.1.2.
-            { allowUnknowns: true }
+            { unknowns: 'allow' }
           ),
         },
         options: { authRequired: false },
@@ -118,7 +118,7 @@ export function defineOIDCRoutes({ router, logger, authc, csp, basePath }: Route
         let loginAttempt: ProviderLoginAttempt | undefined;
         if (request.query.authenticationResponseURI) {
           loginAttempt = {
-            flow: OIDCAuthenticationFlow.Implicit,
+            type: OIDCLogin.LoginWithImplicitFlow,
             authenticationResponseURI: request.query.authenticationResponseURI,
           };
         } else if (request.query.code || request.query.error) {
@@ -133,7 +133,7 @@ export function defineOIDCRoutes({ router, logger, authc, csp, basePath }: Route
           // failed) authentication from an OpenID Connect Provider during authorization code authentication flow.
           // See more details at https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth.
           loginAttempt = {
-            flow: OIDCAuthenticationFlow.AuthorizationCode,
+            type: OIDCLogin.LoginWithAuthorizationCodeFlow,
             //  We pass the path only as we can't be sure of the full URL and Elasticsearch doesn't need it anyway.
             authenticationResponseURI: request.url.path!,
           };
@@ -145,14 +145,16 @@ export function defineOIDCRoutes({ router, logger, authc, csp, basePath }: Route
           // An HTTP GET request with a query parameter named `iss` as part of a 3rd party initiated authentication.
           // See more details at https://openid.net/specs/openid-connect-core-1_0.html#ThirdPartyInitiatedLogin
           loginAttempt = {
-            flow: OIDCAuthenticationFlow.InitiatedBy3rdParty,
+            type: OIDCLogin.LoginInitiatedBy3rdParty,
             iss: request.query.iss,
             loginHint: request.query.login_hint,
           };
         }
 
         if (!loginAttempt) {
-          return response.badRequest({ body: 'Unrecognized login attempt.' });
+          return response.badRequest({
+            body: 'Unrecognized login attempt.',
+          });
         }
 
         return performOIDCLogin(request, response, loginAttempt);
@@ -178,10 +180,10 @@ export function defineOIDCRoutes({ router, logger, authc, csp, basePath }: Route
             },
             // Other parameters MAY be sent, if defined by extensions. Any parameters used that are not understood MUST
             // be ignored by the Client according to https://openid.net/specs/openid-connect-core-1_0.html#ThirdPartyInitiatedLogin.
-            { allowUnknowns: true }
+            { unknowns: 'allow' }
           ),
         },
-        options: { authRequired: false },
+        options: { authRequired: false, xsrfRequired: false },
       },
       createLicensedRouteHandler(async (context, request, response) => {
         const serverBasePath = basePath.serverBasePath;
@@ -193,7 +195,7 @@ export function defineOIDCRoutes({ router, logger, authc, csp, basePath }: Route
         }
 
         return performOIDCLogin(request, response, {
-          flow: OIDCAuthenticationFlow.InitiatedBy3rdParty,
+          type: OIDCLogin.LoginInitiatedBy3rdParty,
           iss: request.body.iss,
           loginHint: request.body.login_hint,
         });
@@ -217,14 +219,14 @@ export function defineOIDCRoutes({ router, logger, authc, csp, basePath }: Route
           },
           // Other parameters MAY be sent, if defined by extensions. Any parameters used that are not understood MUST
           // be ignored by the Client according to https://openid.net/specs/openid-connect-core-1_0.html#ThirdPartyInitiatedLogin.
-          { allowUnknowns: true }
+          { unknowns: 'allow' }
         ),
       },
       options: { authRequired: false },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       return performOIDCLogin(request, response, {
-        flow: OIDCAuthenticationFlow.InitiatedBy3rdParty,
+        type: OIDCLogin.LoginInitiatedBy3rdParty,
         iss: request.query.iss,
         loginHint: request.query.login_hint,
       });
@@ -240,7 +242,7 @@ export function defineOIDCRoutes({ router, logger, authc, csp, basePath }: Route
       // We handle the fact that the user might get redirected to Kibana while already having a session
       // Return an error notifying the user they are already logged in.
       const authenticationResult = await authc.login(request, {
-        provider: 'oidc',
+        provider: { type: OIDCAuthenticationProvider.type },
         value: loginAttempt,
       });
 

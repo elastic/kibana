@@ -5,11 +5,11 @@
  */
 
 import { Request, Server } from 'hapi';
-import { PLUGIN } from '../../../legacy/plugins/uptime/common/constants';
-import { KibanaTelemetryAdapter } from './lib/adapters/telemetry';
+import { PLUGIN } from '../common/constants';
 import { compose } from './lib/compose/kibana';
 import { initUptimeServer } from './uptime_server';
 import { UptimeCorePlugins, UptimeCoreSetup } from './lib/adapters/framework';
+import { umDynamicSettings } from './lib/saved_objects';
 
 export interface KibanaRouteOptions {
   path: string;
@@ -24,36 +24,65 @@ export interface KibanaServer extends Server {
 }
 
 export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCorePlugins) => {
-  const { features, usageCollection } = plugins;
+  const { features } = plugins;
   const libs = compose(server);
-  KibanaTelemetryAdapter.registerUsageCollector(usageCollection);
 
   features.registerFeature({
     id: PLUGIN.ID,
     name: PLUGIN.NAME,
+    order: 1000,
     navLinkId: PLUGIN.ID,
     icon: 'uptimeApp',
     app: ['uptime', 'kibana'],
     catalogue: ['uptime'],
     privileges: {
       all: {
-        api: ['uptime'],
+        app: ['uptime', 'kibana'],
+        catalogue: ['uptime'],
+        api: [
+          'uptime-read',
+          'uptime-write',
+          'actions-read',
+          'actions-all',
+          'alerting-read',
+          'alerting-all',
+        ],
         savedObject: {
-          all: [],
+          all: [umDynamicSettings.name, 'alert', 'action', 'action_task_params'],
           read: [],
         },
-        ui: ['save'],
+        ui: [
+          'save',
+          'configureSettings',
+          'show',
+          'alerting:show',
+          'actions:show',
+          'alerting:save',
+          'actions:save',
+          'alerting:delete',
+          'actions:delete',
+        ],
       },
       read: {
-        api: ['uptime'],
+        app: ['uptime', 'kibana'],
+        catalogue: ['uptime'],
+        api: ['uptime-read', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
         savedObject: {
-          all: [],
-          read: [],
+          all: ['alert', 'action', 'action_task_params'],
+          read: [umDynamicSettings.name],
         },
-        ui: [],
+        ui: [
+          'show',
+          'alerting:show',
+          'actions:show',
+          'alerting:save',
+          'actions:save',
+          'alerting:delete',
+          'actions:delete',
+        ],
       },
     },
   });
 
-  initUptimeServer(libs);
+  initUptimeServer(server, libs, plugins);
 };

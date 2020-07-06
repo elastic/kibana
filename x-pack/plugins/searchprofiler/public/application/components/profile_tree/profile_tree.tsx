@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo } from 'react';
+import React, { memo, Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { IndexDetails } from './index_details';
@@ -17,9 +17,10 @@ export interface Props {
   target: Targets;
   data: ShardSerialized[] | null;
   onHighlight: (args: OnHighlightChangeArgs) => void;
+  onDataInitError: (error: Error) => void;
 }
 
-export const ProfileTree = memo(({ data, target, onHighlight }: Props) => {
+export const ProfileTree = memo(({ data, target, onHighlight, onDataInitError }: Props) => {
   if (!data || data.length === 0) {
     return null;
   }
@@ -28,8 +29,7 @@ export const ProfileTree = memo(({ data, target, onHighlight }: Props) => {
   try {
     sortedIndices = initDataFor(target)(data);
   } catch (e) {
-    // eslint-disable-next-line no-console
-    console.error(e);
+    onDataInitError(e);
     return null;
   }
 
@@ -40,7 +40,7 @@ export const ProfileTree = memo(({ data, target, onHighlight }: Props) => {
         gutterSize="none"
         direction="column"
       >
-        {sortedIndices.map(index => (
+        {sortedIndices.map((index) => (
           <EuiFlexItem key={index.name} grow={false}>
             <EuiFlexGroup
               className="prfDevTool__profileTree__panel prfDevTool__profileTree__index"
@@ -53,13 +53,11 @@ export const ProfileTree = memo(({ data, target, onHighlight }: Props) => {
               </EuiFlexItem>
               <EuiSpacer size="s" />
               <EuiFlexItem grow={false}>
-                {index.shards.map(shard => (
-                  <ShardDetails
-                    key={shard.id[1]}
-                    index={index}
-                    shard={shard}
-                    operations={shard[target]!}
-                  />
+                {index.shards.map((shard, idx) => (
+                  <Fragment key={shard.id[1] + `_${idx}`}>
+                    <ShardDetails index={index} shard={shard} operations={shard[target]!} />
+                    {idx < index.shards.length - 1 ? <EuiSpacer size="s" /> : undefined}
+                  </Fragment>
                 ))}
               </EuiFlexItem>
             </EuiFlexGroup>

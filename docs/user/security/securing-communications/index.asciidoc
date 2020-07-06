@@ -1,7 +1,7 @@
 [[configuring-tls]]
-=== Encrypting communications in {kib}
+=== Encrypt communications in {kib}
 ++++
-<titleabbrev>Encrypting communications</titleabbrev>
+<titleabbrev>Encrypt communications</titleabbrev>
 ++++
 
 Secure Sockets Layer (SSL) and Transport Layer Security (TLS) provide encryption for data-in-transit. While these terms are often used
@@ -14,7 +14,7 @@ contains a public key and has an associated -- but separate -- private key; thes
 supports certificates and private keys in PEM or PKCS#12 format.
 
 [[configuring-tls-browser-kib]]
-==== Encrypting traffic between the browser and {kib}
+==== Encrypt traffic between the browser and {kib}
 
 NOTE: You do not need to enable the {es} {security-features} for this type of encryption.
 
@@ -106,7 +106,7 @@ server.ssl.enabled: true
 After making these changes, you must always access {kib} via HTTPS. For example, https://<your_kibana_host>.com.
 
 [[configuring-tls-kib-es]]
-==== Encrypting traffic between {kib} and {es}
+==== Encrypt traffic between {kib} and {es}
 
 NOTE: To perform this step, you must {ref}/configuring-security.html[enable the {es} {security-features}] or you must have a proxy that
 provides an HTTPS endpoint for {es}.
@@ -150,7 +150,7 @@ elasticsearch.ssl.certificateAuthorities: ["/path/to/elasticsearch-ca.pem"]
 +
 --
 WARNING: You should not use a PKCS#12 file that contains a private key. This is an unnecessary security risk. If you only have a PKCS#12
-file that contains a private key, a safer approach is to extract the CA certificate chain in PEM format as described above.
+file that contains a private key, a safer approach is to extract the CA certificate chain in PEM format.
 
 Specify your PKCS#12 file in `kibana.yml`:
 
@@ -188,5 +188,5 @@ verification. For more information about this setting, see <<settings,{kib} conf
 --
 
 If the Elastic {monitor-features} are enabled and you have set up a separate {es} monitoring cluster, you can also configure {kib} to
-connect to the monitoring cluster via HTTPS. The steps are the same as above, but each setting is prefixed by `xpack.monitoring.`. For
-example, `xpack.monitoring.elasticsearch.hosts`, `xpack.monitoring.elasticsearch.ssl.truststore.path`, etc.
+connect to the monitoring cluster via HTTPS. The steps are the same, but each setting is prefixed by `monitoring.`. For
+example, `monitoring.ui.elasticsearch.hosts`, `monitoring.ui.elasticsearch.ssl.truststore.path`, etc.

@@ -10,7 +10,7 @@ import { Reporter } from 'io-ts/lib/Reporter';
 export type ReporterResult = Array<{ path: string[]; message: string }>;
 
 const failure = (validation: ValidationError[]): ReporterResult => {
-  return validation.map(e => {
+  return validation.map((e) => {
     const path: string[] = [];
     let validationName = '';
 

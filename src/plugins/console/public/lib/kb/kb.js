@@ -32,68 +32,68 @@ import _ from 'lodash';
 import Api from './api';
 
 let ACTIVE_API = new Api();
-const isNotAnIndexName = name => name[0] === '_' && name !== '_all';
+const isNotAnIndexName = (name) => name[0] === '_' && name !== '_all';
 
 const idAutocompleteComponentFactory = (name, parent) => {
   return new IdAutocompleteComponent(name, parent);
 };
 const parametrizedComponentFactories = {
-  getComponent: function(name, parent, provideDefault) {
+  getComponent: function (name, parent, provideDefault) {
     if (this[name]) {
       return this[name];
     } else if (provideDefault) {
       return idAutocompleteComponentFactory;
     }
   },
-  index: function(name, parent) {
+  index: function (name, parent) {
     if (isNotAnIndexName(name)) return;
     return new IndexAutocompleteComponent(name, parent, false);
   },
-  indices: function(name, parent) {
+  indices: function (name, parent) {
     if (isNotAnIndexName(name)) return;
     return new IndexAutocompleteComponent(name, parent, true);
   },
-  type: function(name, parent) {
+  type: function (name, parent) {
     return new TypeAutocompleteComponent(name, parent, false);
   },
-  types: function(name, parent) {
+  types: function (name, parent) {
     return new TypeAutocompleteComponent(name, parent, true);
   },
-  id: function(name, parent) {
+  id: function (name, parent) {
     return idAutocompleteComponentFactory(name, parent);
   },
-  transform_id: function(name, parent) {
+  transform_id: function (name, parent) {
     return idAutocompleteComponentFactory(name, parent);
   },
-  username: function(name, parent) {
+  username: function (name, parent) {
     return new UsernameAutocompleteComponent(name, parent);
   },
-  user: function(name, parent) {
+  user: function (name, parent) {
     return new UsernameAutocompleteComponent(name, parent);
   },
-  template: function(name, parent) {
+  template: function (name, parent) {
     return new TemplateAutocompleteComponent(name, parent);
   },
-  task_id: function(name, parent) {
+  task_id: function (name, parent) {
     return idAutocompleteComponentFactory(name, parent);
   },
-  ids: function(name, parent) {
+  ids: function (name, parent) {
     return idAutocompleteComponentFactory(name, parent, true);
   },
-  fields: function(name, parent) {
+  fields: function (name, parent) {
     return new FieldAutocompleteComponent(name, parent, true);
   },
-  field: function(name, parent) {
+  field: function (name, parent) {
     return new FieldAutocompleteComponent(name, parent, false);
   },
-  nodes: function(name, parent) {
+  nodes: function (name, parent) {
     return new ListComponent(
       name,
       ['_local', '_master', 'data:true', 'data:false', 'master:true', 'master:false'],
       parent
     );
   },
-  node: function(name, parent) {
+  node: function (name, parent) {
     return new ListComponent(name, [], parent, false);
   },
 };
@@ -133,12 +133,12 @@ function loadApisFromJson(
     bodyParametrizedComponentFactories || urlParametrizedComponentFactories;
   const api = new Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactories);
   const names = [];
-  _.each(json, function(apiJson, name) {
+  _.each(json, function (apiJson, name) {
     names.unshift(name);
-    _.each(apiJson.globals || {}, function(globalJson, globalName) {
+    _.each(apiJson.globals || {}, function (globalJson, globalName) {
       api.addGlobalAutocompleteRules(globalName, globalJson);
     });
-    _.each(apiJson.endpoints || {}, function(endpointJson, endpointName) {
+    _.each(apiJson.endpoints || {}, function (endpointJson, endpointName) {
       api.addEndpointDescription(endpointName, endpointJson);
     });
   });
@@ -146,20 +146,23 @@ function loadApisFromJson(
   return api;
 }
 
+// TODO: clean up setting up of active API and use of jQuery.
+// This function should be attached to a class that holds the current state, not setup
+// when the file is required. Also, jQuery should not be used to make network requests
+// like this, it looks like a minor security issue.
 export function setActiveApi(api) {
-  if (_.isString(api)) {
+  if (!api) {
     $.ajax({
-      url:
-        '../api/console/api_server?sense_version=' +
-        encodeURIComponent('@@SENSE_VERSION') +
-        '&apis=' +
-        encodeURIComponent(api),
+      url: '../api/console/api_server',
       dataType: 'json', // disable automatic guessing
+      headers: {
+        'kbn-xsrf': 'kibana',
+      },
     }).then(
-      function(data) {
+      function (data) {
         setActiveApi(loadApisFromJson(data));
       },
-      function(jqXHR) {
+      function (jqXHR) {
         console.log("failed to load API '" + api + "': " + jqXHR.responseText);
       }
     );
@@ -169,7 +172,7 @@ export function setActiveApi(api) {
   ACTIVE_API = api;
 }
 
-setActiveApi('es_6_0');
+setActiveApi();
 
 export const _test = {
   loadApisFromJson: loadApisFromJson,

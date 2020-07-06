@@ -4,32 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, KibanaRequest } from '../../../../../src/core/server';
+import { Logger, KibanaRequest, SavedObjectsClientContract } from '../../../../../src/core/server';
 import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
 import {
   ActionTypeExecutorResult,
   ActionTypeRegistryContract,
   GetServicesFunction,
   RawAction,
+  PreConfiguredAction,
 } from '../types';
-import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
+import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { SpacesServiceSetup } from '../../../spaces/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
-import { IEvent, IEventLogger } from '../../../event_log/server';
+import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 
 export interface ActionExecutorContext {
   logger: Logger;
   spaces?: SpacesServiceSetup;
   getServices: GetServicesFunction;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
+  getScopedSavedObjectsClient: (req: KibanaRequest) => SavedObjectsClientContract;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   actionTypeRegistry: ActionTypeRegistryContract;
   eventLogger: IEventLogger;
+  preconfiguredActions: PreConfiguredAction[];
 }
 
 export interface ExecuteOptions {
   actionId: string;
   request: KibanaRequest;
-  params: Record<string, any>;
+  params: Record<string, unknown>;
 }
 
 export type ActionExecutorContract = PublicMethodsOf<ActionExecutor>;
@@ -69,41 +72,33 @@ export class ActionExecutor {
     const {
       spaces,
       getServices,
-      encryptedSavedObjectsPlugin,
+      encryptedSavedObjectsClient,
       actionTypeRegistry,
       eventLogger,
+      preconfiguredActions,
+      getScopedSavedObjectsClient,
     } = this.actionExecutorContext!;
 
     const services = getServices(request);
-    const namespace = spaces && spaces.getSpaceId(request);
+    const spaceId = spaces && spaces.getSpaceId(request);
+    const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
-    // Ensure user can read the action before processing
-    const {
-      attributes: { actionTypeId, config, name },
-    } = await services.savedObjectsClient.get<RawAction>('action', actionId);
-
-    try {
-      actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
-    } catch (err) {
-      return { status: 'error', actionId, message: err.message, retry: false };
-    }
-
-    // Only get encrypted attributes here, the remaining attributes can be fetched in
-    // the savedObjectsClient call
-    const {
-      attributes: { secrets },
-    } = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<RawAction>(
-      'action',
+    const { actionTypeId, name, config, secrets } = await getActionInfo(
+      getScopedSavedObjectsClient(request),
+      encryptedSavedObjectsClient,
+      preconfiguredActions,
       actionId,
-      {
-        namespace: namespace === 'default' ? undefined : namespace,
-      }
+      namespace.namespace
     );
+
+    if (!actionTypeRegistry.isActionExecutable(actionId, actionTypeId)) {
+      actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+    }
     const actionType = actionTypeRegistry.get(actionTypeId);
 
-    let validatedParams: Record<string, any>;
-    let validatedConfig: Record<string, any>;
-    let validatedSecrets: Record<string, any>;
+    let validatedParams: Record<string, unknown>;
+    let validatedConfig: Record<string, unknown>;
+    let validatedSecrets: Record<string, unknown>;
 
     try {
       validatedParams = validateParams(actionType, params);
@@ -116,7 +111,16 @@ export class ActionExecutor {
     const actionLabel = `${actionTypeId}:${actionId}: ${name}`;
     const event: IEvent = {
       event: { action: EVENT_LOG_ACTIONS.execute },
-      kibana: { namespace, saved_objects: [{ type: 'action', id: actionId }] },
+      kibana: {
+        saved_objects: [
+          {
+            rel: SAVED_OBJECT_REL_PRIMARY,
+            type: 'action',
+            id: actionId,
+            ...namespace,
+          },
+        ],
+      },
     };
 
     eventLogger.startTiming(event);
@@ -146,13 +150,18 @@ export class ActionExecutor {
       status: 'ok',
     };
 
+    event.event = event.event || {};
+
     if (result.status === 'ok') {
+      event.event.outcome = 'success';
       event.message = `action executed: ${actionLabel}`;
     } else if (result.status === 'error') {
+      event.event.outcome = 'failure';
       event.message = `action execution failure: ${actionLabel}`;
       event.error = event.error || {};
       event.error.message = actionErrorToMessage(result);
     } else {
+      event.event.outcome = 'failure';
       event.message = `action execution returned unexpected result: ${actionLabel}`;
       event.error = event.error || {};
       event.error.message = 'action execution returned unexpected result';
@@ -177,4 +186,51 @@ function actionErrorToMessage(result: ActionTypeExecutorResult): string {
   }
 
   return message;
+}
+
+interface ActionInfo {
+  actionTypeId: string;
+  name: string;
+  config: unknown;
+  secrets: unknown;
+}
+
+async function getActionInfo(
+  savedObjectsClient: SavedObjectsClientContract,
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
+  preconfiguredActions: PreConfiguredAction[],
+  actionId: string,
+  namespace: string | undefined
+): Promise<ActionInfo> {
+  // check to see if it's a pre-configured action first
+  const pcAction = preconfiguredActions.find(
+    (preconfiguredAction) => preconfiguredAction.id === actionId
+  );
+  if (pcAction) {
+    return {
+      actionTypeId: pcAction.actionTypeId,
+      name: pcAction.name,
+      config: pcAction.config,
+      secrets: pcAction.secrets,
+    };
+  }
+
+  // if not pre-configured action, should be a saved object
+  // ensure user can read the action before processing
+  const {
+    attributes: { actionTypeId, config, name },
+  } = await savedObjectsClient.get<RawAction>('action', actionId);
+
+  const {
+    attributes: { secrets },
+  } = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>('action', actionId, {
+    namespace: namespace === 'default' ? undefined : namespace,
+  });
+
+  return {
+    actionTypeId,
+    name,
+    config,
+    secrets,
+  };
 }

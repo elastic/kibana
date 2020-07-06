@@ -35,11 +35,17 @@ test('handles number', () => {
 });
 
 test('is required by default', () => {
-  expect(() => duration().validate(undefined)).toThrowErrorMatchingSnapshot();
+  expect(() => duration().validate(undefined)).toThrowErrorMatchingInlineSnapshot(
+    `"expected value of type [moment.Duration] but got [undefined]"`
+  );
 });
 
 test('includes namespace in failure', () => {
-  expect(() => duration().validate(undefined, {}, 'foo-namespace')).toThrowErrorMatchingSnapshot();
+  expect(() =>
+    duration().validate(undefined, {}, 'foo-namespace')
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"[foo-namespace]: expected value of type [moment.Duration] but got [undefined]"`
+  );
 });
 
 describe('#defaultValue', () => {
@@ -48,7 +54,7 @@ describe('#defaultValue', () => {
       duration({
         defaultValue: momentDuration(1, 'hour'),
       }).validate(undefined)
-    ).toMatchSnapshot();
+    ).toMatchInlineSnapshot(`"PT1H"`);
   });
 
   test('can be a string', () => {
@@ -56,7 +62,7 @@ describe('#defaultValue', () => {
       duration({
         defaultValue: '1h',
       }).validate(undefined)
-    ).toMatchSnapshot();
+    ).toMatchInlineSnapshot(`"PT1H"`);
   });
 
   test('can be a string-formatted number', () => {
@@ -64,7 +70,7 @@ describe('#defaultValue', () => {
       duration({
         defaultValue: '600',
       }).validate(undefined)
-    ).toMatchSnapshot();
+    ).toMatchInlineSnapshot(`"PT0.6S"`);
   });
 
   test('can be a number', () => {
@@ -72,7 +78,7 @@ describe('#defaultValue', () => {
       duration({
         defaultValue: 600,
       }).validate(undefined)
-    ).toMatchSnapshot();
+    ).toMatchInlineSnapshot(`"PT0.6S"`);
   });
 
   test('can be a function that returns compatible type', () => {
@@ -103,12 +109,12 @@ describe('#defaultValue', () => {
         fromContext: duration({ defaultValue: contextRef('val') }),
       }).validate({}, { val: momentDuration(700, 'ms') })
     ).toMatchInlineSnapshot(`
-Object {
-  "fromContext": "PT0.7S",
-  "source": "PT0.6S",
-  "target": "PT0.6S",
-}
-`);
+      Object {
+        "fromContext": "PT0.7S",
+        "source": "PT0.6S",
+        "target": "PT0.6S",
+      }
+    `);
 
     expect(
       object({
@@ -117,12 +123,12 @@ Object {
         fromContext: duration({ defaultValue: contextRef('val') }),
       }).validate({}, { val: momentDuration(2, 'hour') })
     ).toMatchInlineSnapshot(`
-Object {
-  "fromContext": "PT2H",
-  "source": "PT1H",
-  "target": "PT1H",
-}
-`);
+      Object {
+        "fromContext": "PT2H",
+        "source": "PT1H",
+        "target": "PT1H",
+      }
+    `);
 
     expect(
       object({
@@ -131,29 +137,45 @@ Object {
         fromContext: duration({ defaultValue: contextRef('val') }),
       }).validate({}, { val: momentDuration(2, 'hour') })
     ).toMatchInlineSnapshot(`
-Object {
-  "fromContext": "PT2H",
-  "source": "PT1H",
-  "target": "PT1H",
-}
-`);
+      Object {
+        "fromContext": "PT2H",
+        "source": "PT1H",
+        "target": "PT1H",
+      }
+    `);
   });
 });
 
 test('returns error when not valid string or non-safe positive integer', () => {
-  expect(() => duration().validate(-123)).toThrowErrorMatchingSnapshot();
+  expect(() => duration().validate(-123)).toThrowErrorMatchingInlineSnapshot(
+    `"Value in milliseconds is expected to be a safe positive integer."`
+  );
 
-  expect(() => duration().validate(NaN)).toThrowErrorMatchingSnapshot();
+  expect(() => duration().validate(NaN)).toThrowErrorMatchingInlineSnapshot(
+    `"Value in milliseconds is expected to be a safe positive integer."`
+  );
 
-  expect(() => duration().validate(Infinity)).toThrowErrorMatchingSnapshot();
+  expect(() => duration().validate(Infinity)).toThrowErrorMatchingInlineSnapshot(
+    `"Value in milliseconds is expected to be a safe positive integer."`
+  );
 
-  expect(() => duration().validate(Math.pow(2, 53))).toThrowErrorMatchingSnapshot();
+  expect(() => duration().validate(Math.pow(2, 53))).toThrowErrorMatchingInlineSnapshot(
+    `"Value in milliseconds is expected to be a safe positive integer."`
+  );
 
-  expect(() => duration().validate([1, 2, 3])).toThrowErrorMatchingSnapshot();
+  expect(() => duration().validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(
+    `"expected value of type [moment.Duration] but got [Array]"`
+  );
 
-  expect(() => duration().validate(/abc/)).toThrowErrorMatchingSnapshot();
+  expect(() => duration().validate(/abc/)).toThrowErrorMatchingInlineSnapshot(
+    `"expected value of type [moment.Duration] but got [RegExp]"`
+  );
 
-  expect(() => duration().validate('123foo')).toThrowErrorMatchingSnapshot();
+  expect(() => duration().validate('123foo')).toThrowErrorMatchingInlineSnapshot(
+    `"Failed to parse value as time value. Value must be a duration in milliseconds, or follow the format <count>[ms|s|m|h|d|w|M|Y] (e.g. '70ms', '5s', '3d', '1Y'), where the duration is a safe positive integer."`
+  );
 
-  expect(() => duration().validate('123 456')).toThrowErrorMatchingSnapshot();
+  expect(() => duration().validate('123 456')).toThrowErrorMatchingInlineSnapshot(
+    `"Failed to parse value as time value. Value must be a duration in milliseconds, or follow the format <count>[ms|s|m|h|d|w|M|Y] (e.g. '70ms', '5s', '3d', '1Y'), where the duration is a safe positive integer."`
+  );
 });

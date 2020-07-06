@@ -46,7 +46,7 @@ export const DocumentFieldsHeader = React.memo(({ searchValue, onSearchChange }:
             }
           )}
           value={searchValue}
-          onChange={e => {
+          onChange={(e) => {
             // Temporary fix until EUI fixes the contract
             // See my comment https://github.com/elastic/eui/pull/2723/files#r366725059
             if (typeof e === 'string') {

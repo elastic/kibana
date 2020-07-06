@@ -6,6 +6,5 @@
 
 export { getFilterClause } from './get_filter_clause';
 export { parseRelativeDate } from './get_histogram_interval';
-export { getHistogramIntervalFormatted } from './get_histogram_interval_formatted';
 export { assertCloseTo } from './assert_close_to';
 export { objectValuesToArrays } from './object_to_array';

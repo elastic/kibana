@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { KibanaDatatable } from '../../../../expressions';
 import { Trigger } from '../../../../ui_actions/public';
 import { IEmbeddable } from '..';
 
@@ -24,28 +25,41 @@ export interface EmbeddableContext {
   embeddable: IEmbeddable;
 }
 
-export interface EmbeddableVisTriggerContext {
-  embeddable: IEmbeddable;
-  timeFieldName: string;
+export interface ValueClickContext<T extends IEmbeddable = IEmbeddable> {
+  embeddable?: T;
   data: {
-    e: MouseEvent;
-    data: unknown;
+    data: Array<{
+      table: Pick<KibanaDatatable, 'rows' | 'columns'>;
+      column: number;
+      row: number;
+      value: any;
+    }>;
+    timeFieldName?: string;
+    negate?: boolean;
   };
 }
 
-export const SELECT_RANGE_TRIGGER = 'SELECT_RANGE_TRIGGER';
-export const selectRangeTrigger: Trigger<'SELECT_RANGE_TRIGGER'> = {
-  id: SELECT_RANGE_TRIGGER,
-  title: 'Select range',
-  description: 'Applies a range filter',
-};
+export interface RangeSelectContext<T extends IEmbeddable = IEmbeddable> {
+  embeddable?: T;
+  data: {
+    table: KibanaDatatable;
+    column: number;
+    range: number[];
+    timeFieldName?: string;
+  };
+}
 
-export const VALUE_CLICK_TRIGGER = 'VALUE_CLICK_TRIGGER';
-export const valueClickTrigger: Trigger<'VALUE_CLICK_TRIGGER'> = {
-  id: VALUE_CLICK_TRIGGER,
-  title: 'Value clicked',
-  description: 'Value was clicked',
-};
+export type ChartActionContext<T extends IEmbeddable = IEmbeddable> =
+  | ValueClickContext<T>
+  | RangeSelectContext<T>;
+
+export const isValueClickTriggerContext = (
+  context: ChartActionContext
+): context is ValueClickContext => context.data && 'data' in context.data;
+
+export const isRangeSelectTriggerContext = (
+  context: ChartActionContext
+): context is RangeSelectContext => context.data && 'range' in context.data;
 
 export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
 export const contextMenuTrigger: Trigger<'CONTEXT_MENU_TRIGGER'> = {
@@ -54,16 +68,16 @@ export const contextMenuTrigger: Trigger<'CONTEXT_MENU_TRIGGER'> = {
   description: 'Triggered on top-right corner context-menu select.',
 };
 
-export const APPLY_FILTER_TRIGGER = 'FILTER_TRIGGER';
-export const applyFilterTrigger: Trigger<'FILTER_TRIGGER'> = {
-  id: APPLY_FILTER_TRIGGER,
-  title: 'Filter click',
-  description: 'Triggered when user applies filter to an embeddable.',
-};
-
 export const PANEL_BADGE_TRIGGER = 'PANEL_BADGE_TRIGGER';
 export const panelBadgeTrigger: Trigger<'PANEL_BADGE_TRIGGER'> = {
   id: PANEL_BADGE_TRIGGER,
   title: 'Panel badges',
-  description: 'Actions appear in title bar when an embeddable loads in a panel',
+  description: 'Actions appear in title bar when an embeddable loads in a panel.',
+};
+
+export const PANEL_NOTIFICATION_TRIGGER = 'PANEL_NOTIFICATION_TRIGGER';
+export const panelNotificationTrigger: Trigger<'PANEL_NOTIFICATION_TRIGGER'> = {
+  id: PANEL_NOTIFICATION_TRIGGER,
+  title: 'Panel notifications',
+  description: 'Actions appear in top-right corner of a panel.',
 };

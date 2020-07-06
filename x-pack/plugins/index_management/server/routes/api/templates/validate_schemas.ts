@@ -11,14 +11,24 @@ export const templateSchema = schema.object({
   indexPatterns: schema.arrayOf(schema.string()),
   version: schema.maybe(schema.number()),
   order: schema.maybe(schema.number()),
-  settings: schema.maybe(schema.object({}, { allowUnknowns: true })),
-  aliases: schema.maybe(schema.object({}, { allowUnknowns: true })),
-  mappings: schema.maybe(schema.object({}, { allowUnknowns: true })),
+  priority: schema.maybe(schema.number()),
+  template: schema.maybe(
+    schema.object({
+      settings: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+      aliases: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+      mappings: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    })
+  ),
+  composedOf: schema.maybe(schema.arrayOf(schema.string())),
+  _meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   ilmPolicy: schema.maybe(
     schema.object({
       name: schema.maybe(schema.string()),
       rollover_alias: schema.maybe(schema.string()),
     })
   ),
-  isManaged: schema.maybe(schema.boolean()),
+  _kbnMeta: schema.object({
+    isManaged: schema.maybe(schema.boolean()),
+    isLegacy: schema.maybe(schema.boolean()),
+  }),
 });

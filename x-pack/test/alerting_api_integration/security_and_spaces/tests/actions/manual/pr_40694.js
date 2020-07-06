@@ -15,7 +15,7 @@ if (require.main === module) main();
 async function main() {
   let response;
 
-  response = await httpPost('api/action', {
+  response = await httpPost('api/actions/action', {
     actionTypeId: '.email',
     name: 'an email action',
     config: {
@@ -33,10 +33,10 @@ async function main() {
 
   const actionId = response.id;
 
-  response = await httpGet(`api/action/${actionId}`);
+  response = await httpGet(`api/actions/${actionId}`);
   console.log(`action after create: ${JSON.stringify(response, null, 4)}`);
 
-  response = await httpPut(`api/action/${actionId}`, {
+  response = await httpPut(`api/actions/action/${actionId}`, {
     name: 'an email action',
     config: {
       from: 'patrick.mueller@elastic.co',
@@ -50,10 +50,10 @@ async function main() {
 
   console.log(`response from update: ${JSON.stringify(response, null, 4)}`);
 
-  response = await httpGet(`api/action/${actionId}`);
+  response = await httpGet(`api/actions/${actionId}`);
   console.log(`action after update: ${JSON.stringify(response, null, 4)}`);
 
-  response = await httpPost(`api/action/${actionId}/_execute`, {
+  response = await httpPost(`api/actions/action/${actionId}/_execute`, {
     params: {
       to: ['patrick.mueller@elastic.co'],
       subject: 'the email subject',

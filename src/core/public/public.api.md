@@ -5,28 +5,157 @@
 ```ts
 
 import { Action } from 'history';
+import Boom from 'boom';
 import { Breadcrumb } from '@elastic/eui';
+import { BulkIndexDocumentsParams } from 'elasticsearch';
+import { CatAliasesParams } from 'elasticsearch';
+import { CatAllocationParams } from 'elasticsearch';
+import { CatCommonParams } from 'elasticsearch';
+import { CatFielddataParams } from 'elasticsearch';
+import { CatHealthParams } from 'elasticsearch';
+import { CatHelpParams } from 'elasticsearch';
+import { CatIndicesParams } from 'elasticsearch';
+import { CatRecoveryParams } from 'elasticsearch';
+import { CatSegmentsParams } from 'elasticsearch';
+import { CatShardsParams } from 'elasticsearch';
+import { CatSnapshotsParams } from 'elasticsearch';
+import { CatTasksParams } from 'elasticsearch';
+import { CatThreadPoolParams } from 'elasticsearch';
+import { ClearScrollParams } from 'elasticsearch';
+import { Client } from 'elasticsearch';
+import { ClusterAllocationExplainParams } from 'elasticsearch';
+import { ClusterGetSettingsParams } from 'elasticsearch';
+import { ClusterHealthParams } from 'elasticsearch';
+import { ClusterPendingTasksParams } from 'elasticsearch';
+import { ClusterPutSettingsParams } from 'elasticsearch';
+import { ClusterRerouteParams } from 'elasticsearch';
+import { ClusterStateParams } from 'elasticsearch';
+import { ClusterStatsParams } from 'elasticsearch';
+import { CountParams } from 'elasticsearch';
+import { CreateDocumentParams } from 'elasticsearch';
+import { DeleteDocumentByQueryParams } from 'elasticsearch';
+import { DeleteDocumentParams } from 'elasticsearch';
+import { DeleteScriptParams } from 'elasticsearch';
+import { DeleteTemplateParams } from 'elasticsearch';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
 import { ExclusiveUnion } from '@elastic/eui';
+import { ExistsParams } from 'elasticsearch';
+import { ExplainParams } from 'elasticsearch';
+import { FieldStatsParams } from 'elasticsearch';
+import { GenericParams } from 'elasticsearch';
+import { GetParams } from 'elasticsearch';
+import { GetResponse } from 'elasticsearch';
+import { GetScriptParams } from 'elasticsearch';
+import { GetSourceParams } from 'elasticsearch';
+import { GetTemplateParams } from 'elasticsearch';
 import { History } from 'history';
+import { Href } from 'history';
 import { IconType } from '@elastic/eui';
+import { IndexDocumentParams } from 'elasticsearch';
+import { IndicesAnalyzeParams } from 'elasticsearch';
+import { IndicesClearCacheParams } from 'elasticsearch';
+import { IndicesCloseParams } from 'elasticsearch';
+import { IndicesCreateParams } from 'elasticsearch';
+import { IndicesDeleteAliasParams } from 'elasticsearch';
+import { IndicesDeleteParams } from 'elasticsearch';
+import { IndicesDeleteTemplateParams } from 'elasticsearch';
+import { IndicesExistsAliasParams } from 'elasticsearch';
+import { IndicesExistsParams } from 'elasticsearch';
+import { IndicesExistsTemplateParams } from 'elasticsearch';
+import { IndicesExistsTypeParams } from 'elasticsearch';
+import { IndicesFlushParams } from 'elasticsearch';
+import { IndicesFlushSyncedParams } from 'elasticsearch';
+import { IndicesForcemergeParams } from 'elasticsearch';
+import { IndicesGetAliasParams } from 'elasticsearch';
+import { IndicesGetFieldMappingParams } from 'elasticsearch';
+import { IndicesGetMappingParams } from 'elasticsearch';
+import { IndicesGetParams } from 'elasticsearch';
+import { IndicesGetSettingsParams } from 'elasticsearch';
+import { IndicesGetTemplateParams } from 'elasticsearch';
+import { IndicesGetUpgradeParams } from 'elasticsearch';
+import { IndicesOpenParams } from 'elasticsearch';
+import { IndicesPutAliasParams } from 'elasticsearch';
+import { IndicesPutMappingParams } from 'elasticsearch';
+import { IndicesPutSettingsParams } from 'elasticsearch';
+import { IndicesPutTemplateParams } from 'elasticsearch';
+import { IndicesRecoveryParams } from 'elasticsearch';
+import { IndicesRefreshParams } from 'elasticsearch';
+import { IndicesRolloverParams } from 'elasticsearch';
+import { IndicesSegmentsParams } from 'elasticsearch';
+import { IndicesShardStoresParams } from 'elasticsearch';
+import { IndicesShrinkParams } from 'elasticsearch';
+import { IndicesStatsParams } from 'elasticsearch';
+import { IndicesUpdateAliasesParams } from 'elasticsearch';
+import { IndicesUpgradeParams } from 'elasticsearch';
+import { IndicesValidateQueryParams } from 'elasticsearch';
+import { InfoParams } from 'elasticsearch';
+import { IngestDeletePipelineParams } from 'elasticsearch';
+import { IngestGetPipelineParams } from 'elasticsearch';
+import { IngestPutPipelineParams } from 'elasticsearch';
+import { IngestSimulateParams } from 'elasticsearch';
+import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { MaybePromise } from '@kbn/utility-types';
+import { MGetParams } from 'elasticsearch';
+import { MGetResponse } from 'elasticsearch';
+import { MSearchParams } from 'elasticsearch';
+import { MSearchResponse } from 'elasticsearch';
+import { MSearchTemplateParams } from 'elasticsearch';
+import { MTermVectorsParams } from 'elasticsearch';
+import { NodesHotThreadsParams } from 'elasticsearch';
+import { NodesInfoParams } from 'elasticsearch';
+import { NodesStatsParams } from 'elasticsearch';
 import { Observable } from 'rxjs';
+import { ParsedQuery } from 'query-string';
+import { Path } from 'history';
+import { PingParams } from 'elasticsearch';
+import { PublicUiSettingsParams as PublicUiSettingsParams_2 } from 'src/core/server/types';
+import { PutScriptParams } from 'elasticsearch';
+import { PutTemplateParams } from 'elasticsearch';
 import React from 'react';
+import { RecursiveReadonly } from '@kbn/utility-types';
+import { ReindexParams } from 'elasticsearch';
+import { ReindexRethrottleParams } from 'elasticsearch';
+import { RenderSearchTemplateParams } from 'elasticsearch';
 import * as Rx from 'rxjs';
+import { ScrollParams } from 'elasticsearch';
+import { SearchParams } from 'elasticsearch';
+import { SearchResponse } from 'elasticsearch';
+import { SearchShardsParams } from 'elasticsearch';
+import { SearchTemplateParams } from 'elasticsearch';
 import { ShallowPromise } from '@kbn/utility-types';
-import { UiSettingsParams as UiSettingsParams_2 } from 'src/core/server/types';
+import { SnapshotCreateParams } from 'elasticsearch';
+import { SnapshotCreateRepositoryParams } from 'elasticsearch';
+import { SnapshotDeleteParams } from 'elasticsearch';
+import { SnapshotDeleteRepositoryParams } from 'elasticsearch';
+import { SnapshotGetParams } from 'elasticsearch';
+import { SnapshotGetRepositoryParams } from 'elasticsearch';
+import { SnapshotRestoreParams } from 'elasticsearch';
+import { SnapshotStatusParams } from 'elasticsearch';
+import { SnapshotVerifyRepositoryParams } from 'elasticsearch';
+import { SuggestParams } from 'elasticsearch';
+import { TasksCancelParams } from 'elasticsearch';
+import { TasksGetParams } from 'elasticsearch';
+import { TasksListParams } from 'elasticsearch';
+import { TermvectorsParams } from 'elasticsearch';
+import { Type } from '@kbn/config-schema';
+import { TypeOf } from '@kbn/config-schema';
 import { UnregisterCallback } from 'history';
+import { UpdateDocumentByQueryParams } from 'elasticsearch';
+import { UpdateDocumentParams } from 'elasticsearch';
 import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
+
+// @internal (undocumented)
+export function __kbnBootstrap__(): void;
 
 // @public
 export interface App<HistoryLocationState = unknown> extends AppBase {
     appRoute?: string;
     chromeless?: boolean;
+    exactRoute?: boolean;
     mount: AppMount<HistoryLocationState> | AppMountDeprecated<HistoryLocationState>;
 }
 
@@ -35,6 +164,7 @@ export interface AppBase {
     capabilities?: Partial<Capabilities>;
     category?: AppCategory;
     chromeless?: boolean;
+    defaultPath?: string;
     euiIconType?: string;
     icon?: string;
     id: string;
@@ -52,6 +182,7 @@ export interface AppBase {
 export interface AppCategory {
     ariaLabel?: string;
     euiIconType?: string;
+    id: string;
     label: string;
     order?: number;
 }
@@ -102,16 +233,15 @@ export interface ApplicationSetup {
 
 // @public (undocumented)
 export interface ApplicationStart {
+    applications$: Observable<ReadonlyMap<string, PublicAppInfo | PublicLegacyAppInfo>>;
     capabilities: RecursiveReadonly<Capabilities>;
     currentAppId$: Observable<string | undefined>;
     getUrlForApp(appId: string, options?: {
         path?: string;
         absolute?: boolean;
     }): string;
-    navigateToApp(appId: string, options?: {
-        path?: string;
-        state?: any;
-    }): Promise<void>;
+    navigateToApp(appId: string, options?: NavigateToAppOptions): Promise<void>;
+    navigateToUrl(url: string): Promise<void>;
     // @deprecated
     registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountDeprecated, T>): void;
 }
@@ -167,10 +297,13 @@ export enum AppStatus {
 export type AppUnmount = () => void;
 
 // @public
-export type AppUpdatableFields = Pick<AppBase, 'status' | 'navLinkStatus' | 'tooltip'>;
+export type AppUpdatableFields = Pick<AppBase, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath'>;
 
 // @public
 export type AppUpdater = (app: AppBase) => Partial<AppUpdatableFields> | undefined;
+
+// @public
+export function assertNever(x: never): never;
 
 // @public
 export interface Capabilities {
@@ -278,6 +411,7 @@ export interface ChromeNavLink {
     readonly disableSubUrlTracking?: boolean;
     readonly euiIconType?: string;
     readonly hidden?: boolean;
+    readonly href?: string;
     readonly icon?: string;
     readonly id: string;
     // @internal
@@ -289,7 +423,6 @@ export interface ChromeNavLink {
     readonly subUrlBase?: string;
     readonly title: string;
     readonly tooltip?: string;
-    // @deprecated
     readonly url?: string;
 }
 
@@ -307,7 +440,7 @@ export interface ChromeNavLinks {
 }
 
 // @public (undocumented)
-export type ChromeNavLinkUpdateableFields = Partial<Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'subUrlBase'>>;
+export type ChromeNavLinkUpdateableFields = Partial<Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'subUrlBase' | 'href'>>;
 
 // @public
 export interface ChromeRecentlyAccessed {
@@ -335,9 +468,11 @@ export interface ChromeStart {
     getBadge$(): Observable<ChromeBadge | undefined>;
     getBrand$(): Observable<ChromeBrand>;
     getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
+    getCustomNavLink$(): Observable<Partial<ChromeNavLink> | undefined>;
     getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
-    getIsCollapsed$(): Observable<boolean>;
+    getIsNavDrawerLocked$(): Observable<boolean>;
     getIsVisible$(): Observable<boolean>;
+    getNavType$(): Observable<NavType>;
     navControls: ChromeNavControls;
     navLinks: ChromeNavLinks;
     recentlyAccessed: ChromeRecentlyAccessed;
@@ -346,9 +481,9 @@ export interface ChromeStart {
     setBadge(badge?: ChromeBadge): void;
     setBrand(brand: ChromeBrand): void;
     setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;
+    setCustomNavLink(newCustomNavLink?: Partial<ChromeNavLink>): void;
     setHelpExtension(helpExtension?: ChromeHelpExtension): void;
     setHelpSupportUrl(url: string): void;
-    setIsCollapsed(isCollapsed: boolean): void;
     setIsVisible(isVisible: boolean): void;
 }
 
@@ -371,14 +506,15 @@ export interface CoreContext {
 }
 
 // @public
-export interface CoreSetup<TPluginsStart extends object = object> {
+export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
     // (undocumented)
     application: ApplicationSetup;
     // @deprecated (undocumented)
     context: ContextSetup;
     // (undocumented)
     fatalErrors: FatalErrorsSetup;
-    getStartServices(): Promise<[CoreStart, TPluginsStart]>;
+    // (undocumented)
+    getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
     // (undocumented)
     http: HttpSetup;
     // @deprecated
@@ -428,30 +564,40 @@ export class CoreSystem {
         fatalErrors: FatalErrorsSetup;
     } | undefined>;
     // (undocumented)
-    start(): Promise<void>;
+    start(): Promise<{
+        application: InternalApplicationStart;
+    } | undefined>;
     // (undocumented)
     stop(): void;
     }
 
+// @public
+export function deepFreeze<T extends Freezable>(object: T): RecursiveReadonly<T>;
+
 // @internal (undocumented)
 export const DEFAULT_APP_CATEGORIES: Readonly<{
-    analyze: {
+    kibana: {
+        id: string;
         label: string;
+        euiIconType: string;
         order: number;
     };
     observability: {
+        id: string;
         label: string;
         euiIconType: string;
         order: number;
     };
     security: {
+        id: string;
         label: string;
         order: number;
         euiIconType: string;
     };
     management: {
+        id: string;
         label: string;
-        euiIconType: string;
+        order: number;
     };
 }>;
 
@@ -463,6 +609,9 @@ export interface DocLinksStart {
     readonly ELASTIC_WEBSITE_URL: string;
     // (undocumented)
     readonly links: {
+        readonly dashboard: {
+            readonly drilldowns: string;
+        };
         readonly filebeat: {
             readonly base: string;
             readonly installation: string;
@@ -561,7 +710,7 @@ export interface EnvironmentMode {
 }
 
 // @public
-export interface ErrorToastOptions {
+export interface ErrorToastOptions extends ToastOptions {
     title: string;
     toastMessage?: string;
 }
@@ -583,6 +732,16 @@ export interface FatalErrorsSetup {
 // @public
 export type FatalErrorsStart = FatalErrorsSetup;
 
+// @public (undocumented)
+export type Freezable = {
+    [k: string]: any;
+} | any[];
+
+// @public
+export function getFlattenedObject(rootValue: Record<string, any>): {
+    [key: string]: any;
+};
+
 // @public
 export type HandlerContextType<T extends HandlerFunction<any>> = T extends HandlerFunction<infer U> ? U : never;
 
@@ -591,6 +750,23 @@ export type HandlerFunction<T extends object> = (context: T, ...args: any[]) => 
 
 // @public
 export type HandlerParameters<T extends HandlerFunction<any>> = T extends (context: any, ...args: infer U) => any ? U : never;
+
+// @internal (undocumented)
+export class HttpFetchError extends Error implements IHttpFetchError {
+    constructor(message: string, name: string, request: Request, response?: Response | undefined, body?: any);
+    // (undocumented)
+    readonly body?: any;
+    // (undocumented)
+    readonly name: string;
+    // (undocumented)
+    readonly req: Request;
+    // (undocumented)
+    readonly request: Request;
+    // (undocumented)
+    readonly res?: Response;
+    // (undocumented)
+    readonly response?: Response | undefined;
+}
 
 // @public
 export interface HttpFetchOptions extends HttpRequestInit {
@@ -610,7 +786,7 @@ export interface HttpFetchOptionsWithPath extends HttpFetchOptions {
 // @public (undocumented)
 export interface HttpFetchQuery {
     // (undocumented)
-    [key: string]: string | number | boolean | undefined;
+    [key: string]: string | number | boolean | undefined | Array<string | number | boolean | undefined>;
 }
 
 // @public
@@ -735,8 +911,10 @@ export interface IContextContainer<THandler extends HandlerFunction<any>> {
     registerContext<TContextName extends keyof HandlerContextType<THandler>>(pluginOpaqueId: PluginOpaqueId, contextName: TContextName, provider: IContextProvider<THandler, TContextName>): this;
 }
 
+// Warning: (ae-forgotten-export) The symbol "PartialExceptFor" needs to be exported by the entry point index.d.ts
+//
 // @public
-export type IContextProvider<THandler extends HandlerFunction<any>, TContextName extends keyof HandlerContextType<THandler>> = (context: Partial<HandlerContextType<THandler>>, ...rest: HandlerParameters<THandler>) => Promise<HandlerContextType<THandler>[TContextName]> | HandlerContextType<THandler>[TContextName];
+export type IContextProvider<THandler extends HandlerFunction<any>, TContextName extends keyof HandlerContextType<THandler>> = (context: PartialExceptFor<HandlerContextType<THandler>, 'core'>, ...rest: HandlerParameters<THandler>) => Promise<HandlerContextType<THandler>[TContextName]> | HandlerContextType<THandler>[TContextName];
 
 // @public (undocumented)
 export interface IHttpFetchError extends Error {
@@ -776,13 +954,16 @@ export interface ImageValidation {
 }
 
 // @public
-export type IToasts = Pick<ToastsApi, 'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'>;
+export function isRelativeUrl(candidatePath: string): boolean;
+
+// @public
+export type IToasts = Pick<ToastsApi, 'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError' | 'addInfo'>;
 
 // @public
 export interface IUiSettingsClient {
     get$: <T = any>(key: string, defaultOverride?: T) => Observable<T>;
     get: <T = any>(key: string, defaultOverride?: T) => T;
-    getAll: () => Readonly<Record<string, UiSettingsParams_2 & UserProvidedValues_2>>;
+    getAll: () => Readonly<Record<string, PublicUiSettingsParams_2 & UserProvidedValues_2>>;
     getSaved$: <T = any>() => Observable<{
         key: string;
         newValue: T;
@@ -803,8 +984,20 @@ export interface IUiSettingsClient {
     set: (key: string, value: any) => Promise<boolean>;
 }
 
+// @public (undocumented)
+export interface LegacyApp extends AppBase {
+    // (undocumented)
+    appUrl: string;
+    // (undocumented)
+    disableSubUrlTracking?: boolean;
+    // (undocumented)
+    linkToLastSubUrl?: boolean;
+    // (undocumented)
+    subUrlBase?: string;
+}
+
 // @public @deprecated
-export interface LegacyCoreSetup extends CoreSetup<any> {
+export interface LegacyCoreSetup extends CoreSetup<any, any> {
     // Warning: (ae-forgotten-export) The symbol "InjectedMetadataSetup" needs to be exported by the entry point index.d.ts
     //
     // @deprecated (undocumented)
@@ -838,7 +1031,24 @@ export interface LegacyNavLink {
 }
 
 // @public
+export function modifyUrl(url: string, urlModifier: (urlParts: URLMeaningfulParts) => Partial<URLMeaningfulParts> | void): string;
+
+// @public
 export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => UnmountCallback;
+
+// Warning: (ae-missing-release-tag) "NavigateToAppOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public
+export interface NavigateToAppOptions {
+    path?: string;
+    replace?: boolean;
+    state?: unknown;
+}
+
+// Warning: (ae-missing-release-tag) "NavType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export type NavType = 'modern' | 'legacy';
 
 // @public (undocumented)
 export interface NotificationsSetup {
@@ -904,7 +1114,7 @@ export interface PackageInfo {
 // @public
 export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
     // (undocumented)
-    setup(core: CoreSetup<TPluginsStart>, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
+    setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
     // (undocumented)
     start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
     // (undocumented)
@@ -931,13 +1141,26 @@ export interface PluginInitializerContext<ConfigSchema extends object = object> 
 // @public (undocumented)
 export type PluginOpaqueId = symbol;
 
-// Warning: (ae-forgotten-export) The symbol "RecursiveReadonlyArray" needs to be exported by the entry point index.d.ts
-//
-// @public (undocumented)
-export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T extends any[] ? RecursiveReadonlyArray<T[number]> : T extends object ? Readonly<{
-    [K in keyof T]: RecursiveReadonly<T[K]>;
-}> : T;
+// @public
+export type PublicAppInfo = Omit<App, 'mount' | 'updater$'> & {
+    legacy: false;
+    status: AppStatus;
+    navLinkStatus: AppNavLinkStatus;
+    appRoute: string;
+};
 
+// @public
+export type PublicLegacyAppInfo = Omit<LegacyApp, 'updater$'> & {
+    legacy: true;
+    status: AppStatus;
+    navLinkStatus: AppNavLinkStatus;
+};
+
+// @public
+export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
+
+// Warning: (ae-missing-release-tag) "SavedObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
 // @public (undocumented)
 export interface SavedObject<T = unknown> {
     attributes: T;
@@ -948,6 +1171,7 @@ export interface SavedObject<T = unknown> {
     };
     id: string;
     migrationVersion?: SavedObjectsMigrationVersion;
+    namespaces?: string[];
     references: SavedObjectReference[];
     type: string;
     updated_at?: string;
@@ -1024,15 +1248,17 @@ export interface SavedObjectsBulkUpdateOptions {
 export class SavedObjectsClient {
     // @internal
     constructor(http: HttpSetup);
-    bulkCreate: (objects?: SavedObjectsBulkCreateObject<unknown>[], options?: SavedObjectsBulkCreateOptions) => Promise<SavedObjectsBatchResponse<unknown>>;
-    bulkGet: (objects?: {
+    bulkCreate: (objects?: SavedObjectsBulkCreateObject[], options?: SavedObjectsBulkCreateOptions) => Promise<SavedObjectsBatchResponse<unknown>>;
+    bulkGet: (objects?: Array<{
         id: string;
         type: string;
-    }[]) => Promise<SavedObjectsBatchResponse<unknown>>;
+    }>) => Promise<SavedObjectsBatchResponse<unknown>>;
     bulkUpdate<T = unknown>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<unknown>>;
     create: <T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
-    delete: (type: string, id: string) => Promise<{}>;
-    find: <T = unknown>(options: Pick<SavedObjectsFindOptions, "search" | "filter" | "type" | "page" | "perPage" | "sortField" | "fields" | "searchFields" | "hasReference" | "defaultSearchOperator">) => Promise<SavedObjectsFindResponsePublic<T>>;
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsClientContract" needs to be exported by the entry point index.d.ts
+    delete: (type: string, id: string) => ReturnType<SavedObjectsClientContract_2['delete']>;
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsFindOptions" needs to be exported by the entry point index.d.ts
+    find: <T = unknown>(options: SavedObjectsFindOptions_2) => Promise<SavedObjectsFindResponsePublic<T>>;
     get: <T = unknown>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
     update<T = unknown>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
 }
@@ -1065,6 +1291,7 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     page?: number;
     // (undocumented)
     perPage?: number;
+    preference?: string;
     search?: string;
     searchFields?: string[];
     // (undocumented)
@@ -1187,7 +1414,9 @@ export class ScopedHistory<HistoryLocationState = unknown> implements History<Hi
     constructor(parentHistory: History, basePath: string);
     get action(): Action;
     block: (prompt?: string | boolean | History.TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
-    createHref: (location: LocationDescriptorObject<HistoryLocationState>) => string;
+    createHref: (location: LocationDescriptorObject<HistoryLocationState>, { prependBasePath }?: {
+        prependBasePath?: boolean | undefined;
+    }) => Href;
     createSubHistory: <SubHistoryLocationState = unknown>(basePath: string) => ScopedHistory<SubHistoryLocationState>;
     go: (n: number) => void;
     goBack: () => void;
@@ -1195,8 +1424,8 @@ export class ScopedHistory<HistoryLocationState = unknown> implements History<Hi
     get length(): number;
     listen: (listener: (location: Location<HistoryLocationState>, action: Action) => void) => UnregisterCallback;
     get location(): Location<HistoryLocationState>;
-    push: (pathOrLocation: string | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
-    replace: (pathOrLocation: string | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
+    push: (pathOrLocation: Path | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
+    replace: (pathOrLocation: Path | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
     }
 
 // @public
@@ -1227,6 +1456,9 @@ export class SimpleSavedObject<T = unknown> {
     // (undocumented)
     _version?: SavedObject<T>['version'];
 }
+
+// @public
+export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
 // @public
 export type StringValidation = StringValidationRegex | StringValidationRegexString;
@@ -1264,15 +1496,21 @@ export type ToastInputFields = Pick<EuiGlobalToastListToast, Exclude<keyof EuiGl
 };
 
 // @public
+export interface ToastOptions {
+    toastLifeTimeMs?: number;
+}
+
+// @public
 export class ToastsApi implements IToasts {
     constructor(deps: {
         uiSettings: IUiSettingsClient;
     });
     add(toastOrTitle: ToastInput): Toast;
-    addDanger(toastOrTitle: ToastInput): Toast;
+    addDanger(toastOrTitle: ToastInput, options?: ToastOptions): Toast;
     addError(error: Error, options: ErrorToastOptions): Toast;
-    addSuccess(toastOrTitle: ToastInput): Toast;
-    addWarning(toastOrTitle: ToastInput): Toast;
+    addInfo(toastOrTitle: ToastInput, options?: ToastOptions): Toast;
+    addSuccess(toastOrTitle: ToastInput, options?: ToastOptions): Toast;
+    addWarning(toastOrTitle: ToastInput, options?: ToastOptions): Toast;
     get$(): Rx.Observable<Toast[]>;
     remove(toastOrId: Toast | string): void;
     // @internal (undocumented)
@@ -1289,7 +1527,7 @@ export type ToastsSetup = IToasts;
 export type ToastsStart = IToasts;
 
 // @public
-export interface UiSettingsParams {
+export interface UiSettingsParams<T = unknown> {
     category?: string[];
     // Warning: (ae-forgotten-export) The symbol "DeprecationSettings" needs to be exported by the entry point index.d.ts
     deprecation?: DeprecationSettings;
@@ -1299,16 +1537,18 @@ export interface UiSettingsParams {
     options?: string[];
     readonly?: boolean;
     requiresPageReload?: boolean;
+    // (undocumented)
+    schema: Type<T>;
     type?: UiSettingsType;
     // (undocumented)
     validation?: ImageValidation | StringValidation;
-    value?: SavedObjectAttribute;
+    value?: T;
 }
 
 // @public (undocumented)
 export interface UiSettingsState {
     // (undocumented)
-    [key: string]: UiSettingsParams_2 & UserProvidedValues_2;
+    [key: string]: PublicUiSettingsParams_2 & UserProvidedValues_2;
 }
 
 // @public
@@ -1318,6 +1558,29 @@ export type UiSettingsType = 'undefined' | 'json' | 'markdown' | 'number' | 'sel
 export type UnmountCallback = () => void;
 
 // @public
+export const URL_MAX_LENGTH: number;
+
+// @public
+export interface URLMeaningfulParts {
+    // (undocumented)
+    auth?: string | null;
+    // (undocumented)
+    hash?: string | null;
+    // (undocumented)
+    hostname?: string | null;
+    // (undocumented)
+    pathname?: string | null;
+    // (undocumented)
+    port?: string | null;
+    // (undocumented)
+    protocol?: string | null;
+    // (undocumented)
+    query: ParsedQuery;
+    // (undocumented)
+    slashes?: boolean | null;
+}
+
+// @public
 export interface UserProvidedValues<T = any> {
     // (undocumented)
     isOverridden?: boolean;
@@ -1325,5 +1588,9 @@ export interface UserProvidedValues<T = any> {
     userValue?: T;
 }
 
+
+// Warnings were encountered during analysis:
+//
+// src/core/public/core_system.ts:215:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

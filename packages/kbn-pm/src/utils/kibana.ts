@@ -20,6 +20,7 @@
 import Path from 'path';
 
 import multimatch from 'multimatch';
+import isPathInside from 'is-path-inside';
 
 import { ProjectMap, getProjects, includeTransitiveProjects } from './projects';
 import { Project } from './project';
@@ -102,11 +103,11 @@ export class Kibana {
     const allProjects = this.getAllProjects();
     const filteredProjects: ProjectMap = new Map();
 
-    const pkgJsonPaths = Array.from(allProjects.values()).map(p => p.packageJsonLocation);
+    const pkgJsonPaths = Array.from(allProjects.values()).map((p) => p.packageJsonLocation);
     const filteredPkgJsonGlobs = getProjectPaths({
       ...options,
       rootPath: this.kibanaProject.path,
-    }).map(g => Path.resolve(g, 'package.json'));
+    }).map((g) => Path.resolve(g, 'package.json'));
     const matchingPkgJsonPaths = multimatch(pkgJsonPaths, filteredPkgJsonGlobs);
 
     for (const project of allProjects.values()) {
@@ -120,5 +121,16 @@ export class Kibana {
     }
 
     return filteredProjects;
+  }
+
+  isPartOfRepo(project: Project) {
+    return (
+      project.path === this.kibanaProject.path ||
+      isPathInside(project.path, this.kibanaProject.path)
+    );
+  }
+
+  isOutsideRepo(project: Project) {
+    return !this.isPartOfRepo(project);
   }
 }

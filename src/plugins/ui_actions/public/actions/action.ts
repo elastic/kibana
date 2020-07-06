@@ -17,18 +17,29 @@
  * under the License.
  */
 
-import { UiComponent } from 'src/plugins/kibana_utils/common';
+import { UiComponent } from 'src/plugins/kibana_utils/public';
+import { ActionType, ActionContextMapping } from '../types';
+import { Presentable } from '../util/presentable';
 
-export interface Action<Context = undefined> {
+export type ActionByType<T extends ActionType> = Action<ActionContextMapping[T], T>;
+
+export interface Action<Context extends {} = {}, T = ActionType>
+  extends Partial<Presentable<Context>> {
   /**
    * Determined the order when there is more than one action matched to a trigger.
    * Higher numbers are displayed first.
    */
   order?: number;
 
+  /**
+   * A unique identifier for this action instance.
+   */
   id: string;
 
-  readonly type: string;
+  /**
+   * The action type is what determines the context shape.
+   */
+  readonly type: T;
 
   /**
    * Optional EUI icon type that can be displayed along with the title.
@@ -54,12 +65,30 @@ export interface Action<Context = undefined> {
   isCompatible(context: Context): Promise<boolean>;
 
   /**
-   * If this returns something truthy, this is used in addition to the `execute` method when clicked.
+   * Executes the action.
    */
-  getHref?(context: Context): string | undefined;
+  execute(context: Context): Promise<void>;
+}
+
+/**
+ * A convenience interface used to register an action.
+ */
+export interface ActionDefinition<Context extends object = object>
+  extends Partial<Presentable<Context>> {
+  /**
+   * ID of the action that uniquely identifies this action in the actions registry.
+   */
+  readonly id: string;
+
+  /**
+   * ID of the factory for this action. Used to construct dynamic actions.
+   */
+  readonly type?: ActionType;
 
   /**
    * Executes the action.
    */
   execute(context: Context): Promise<void>;
 }
+
+export type ActionContext<A> = A extends ActionDefinition<infer Context> ? Context : never;

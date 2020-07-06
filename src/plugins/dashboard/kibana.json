@@ -1,0 +1,16 @@
+{
+  "id": "dashboard",
+  "version": "kibana",
+  "requiredPlugins": [
+    "data",
+    "embeddable",
+    "inspector",
+    "kibanaLegacy",
+    "navigation",
+    "uiActions",
+    "savedObjects"
+  ],
+  "optionalPlugins": ["home", "share", "usageCollection"],
+  "server": true,
+  "ui": true
+}

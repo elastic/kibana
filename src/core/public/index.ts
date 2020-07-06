@@ -35,6 +35,8 @@
  * @packageDocumentation
  */
 
+import './index.scss';
+
 import {
   ChromeBadge,
   ChromeBrand,
@@ -54,6 +56,7 @@ import {
   ChromeStart,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
+  NavType,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -77,7 +80,16 @@ import {
 } from './context';
 
 export { CoreContext, CoreSystem } from './core_system';
-export { RecursiveReadonly, DEFAULT_APP_CATEGORIES } from '../utils';
+export {
+  DEFAULT_APP_CATEGORIES,
+  getFlattenedObject,
+  URLMeaningfulParts,
+  modifyUrl,
+  isRelativeUrl,
+  Freezable,
+  deepFreeze,
+  assertNever,
+} from '../utils';
 export {
   AppCategory,
   UiSettingsParams,
@@ -93,6 +105,7 @@ export {
   ApplicationSetup,
   ApplicationStart,
   App,
+  PublicAppInfo,
   AppBase,
   AppMount,
   AppMountDeprecated,
@@ -109,6 +122,9 @@ export {
   AppUpdatableFields,
   AppUpdater,
   ScopedHistory,
+  LegacyApp,
+  PublicLegacyAppInfo,
+  NavigateToAppOptions,
 } from './application';
 
 export {
@@ -143,6 +159,7 @@ export {
 export {
   HttpHeadersInit,
   HttpRequestInit,
+  HttpFetchError,
   HttpFetchOptions,
   HttpFetchOptionsWithPath,
   HttpFetchQuery,
@@ -168,13 +185,21 @@ export {
   ToastInputFields,
   ToastsSetup,
   ToastsStart,
+  ToastOptions,
   ErrorToastOptions,
 } from './notifications';
 
-export { MountPoint, UnmountCallback } from './types';
+export { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
+
+export { URL_MAX_LENGTH } from './core_app';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
+ *
+ * @typeParam TPluginsStart - the type of the consuming plugin's start dependencies. Should be the same
+ *                            as the consuming {@link Plugin}'s `TPluginsStart` type. Used by `getStartServices`.
+ * @typeParam TStart - the type of the consuming plugin's start contract. Should be the same as the
+ *                     consuming {@link Plugin}'s `TStart` type. Used by `getStartServices`.
  *
  * @public
  *
@@ -182,7 +207,7 @@ export { MountPoint, UnmountCallback } from './types';
  * navigation in the generated docs until there's a fix for
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
-export interface CoreSetup<TPluginsStart extends object = object> {
+export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
   /** {@link ApplicationSetup} */
   application: ApplicationSetup;
   /**
@@ -207,14 +232,21 @@ export interface CoreSetup<TPluginsStart extends object = object> {
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
   };
-
-  /**
-   * Allows plugins to get access to APIs available in start inside async
-   * handlers, such as {@link App.mount}. Promise will not resolve until Core
-   * and plugin dependencies have completed `start`.
-   */
-  getStartServices(): Promise<[CoreStart, TPluginsStart]>;
+  /** {@link StartServicesAccessor} */
+  getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
 }
+
+/**
+ * Allows plugins to get access to APIs available in start inside async
+ * handlers, such as {@link App.mount}. Promise will not resolve until Core
+ * and plugin dependencies have completed `start`.
+ *
+ * @public
+ */
+export type StartServicesAccessor<
+  TPluginsStart extends object = object,
+  TStart = unknown
+> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
 /**
  * Core services exposed to the `Plugin` start lifecycle
@@ -267,7 +299,7 @@ export interface CoreStart {
  * @public
  * @deprecated
  */
-export interface LegacyCoreSetup extends CoreSetup<any> {
+export interface LegacyCoreSetup extends CoreSetup<any, any> {
   /** @deprecated */
   injectedMetadata: InjectedMetadataSetup;
 }
@@ -330,4 +362,7 @@ export {
   PluginOpaqueId,
   IUiSettingsClient,
   UiSettingsState,
+  NavType,
 };
+
+export { __kbnBootstrap__ } from './kbn_bootstrap';

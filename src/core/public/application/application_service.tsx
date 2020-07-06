@@ -26,6 +26,7 @@ import { InjectedMetadataSetup } from '../injected_metadata';
 import { HttpSetup, HttpStart } from '../http';
 import { OverlayStart } from '../overlays';
 import { ContextSetup, IContextContainer } from '../context';
+import { PluginOpaqueId } from '../plugins';
 import { AppRouter } from './ui';
 import { Capabilities, CapabilitiesService } from './capabilities';
 import {
@@ -34,7 +35,6 @@ import {
   AppLeaveHandler,
   AppMount,
   AppMountDeprecated,
-  AppMounter,
   AppNavLinkStatus,
   AppStatus,
   AppUpdatableFields,
@@ -44,18 +44,17 @@ import {
   LegacyApp,
   LegacyAppMounter,
   Mounter,
+  NavigateToAppOptions,
 } from './types';
 import { getLeaveAction, isConfirmAction } from './application_leave';
+import { appendAppPath, parseAppUrl, relativeToAbsolute, getAppInfo } from './utils';
 
 interface SetupDeps {
   context: ContextSetup;
   http: HttpSetup;
   injectedMetadata: InjectedMetadataSetup;
   history?: History<any>;
-  /**
-   * Only necessary for redirecting to legacy apps
-   * @deprecated
-   */
+  /** Used to redirect to external urls (and legacy apps) */
   redirectTo?: (path: string) => void;
 }
 
@@ -81,13 +80,7 @@ const getAppUrl = (mounters: Map<string, Mounter>, appId: string, path: string =
   const appBasePath = mounters.get(appId)?.appRoute
     ? `/${mounters.get(appId)!.appRoute}`
     : `/app/${appId}`;
-
-  // Only preppend slash if not a hash or query path
-  path = path.startsWith('#') || path.startsWith('?') ? path : `/${path}`;
-
-  return `${appBasePath}${path}`
-    .replace(/\/{2,}/g, '/') // Remove duplicate slashes
-    .replace(/\/$/, ''); // Remove trailing slash
+  return appendAppPath(appBasePath, path);
 };
 
 const allApplicationsFilter = '__ALL__';
@@ -113,13 +106,16 @@ export class ApplicationService {
   private registrationClosed = false;
   private history?: History<any>;
   private mountContext?: IContextContainer<AppMountDeprecated>;
-  private navigate?: (url: string, state: any) => void;
+  private navigate?: (url: string, state: unknown, replace: boolean) => void;
+  private redirectTo?: (url: string) => void;
 
   public setup({
     context,
     http: { basePath },
     injectedMetadata,
-    redirectTo = (path: string) => (window.location.href = path),
+    redirectTo = (path: string) => {
+      window.location.assign(path);
+    },
     history,
   }: SetupDeps): InternalApplicationSetup {
     const basename = basePath.get();
@@ -130,16 +126,22 @@ export class ApplicationService {
       this.history = history || createBrowserHistory({ basename });
     }
 
-    // If we do not have history available, use redirectTo to do a full page refresh.
-    this.navigate = (url, state) =>
-      // basePath not needed here because `history` is configured with basename
-      this.history ? this.history.push(url, state) : redirectTo(basePath.prepend(url));
+    this.navigate = (url, state, replace) => {
+      if (this.history) {
+        // basePath not needed here because `history` is configured with basename
+        return replace ? this.history.replace(url, state) : this.history.push(url, state);
+      } else {
+        // If we do not have history available (legacy mode), use redirectTo to do a full page refresh.
+        return redirectTo(basePath.prepend(url));
+      }
+    };
 
+    this.redirectTo = redirectTo;
     this.mountContext = context.createContextContainer();
 
     const registerStatusUpdater = (application: string, updater$: Observable<AppUpdater>) => {
       const updaterId = Symbol();
-      const subscription = updater$.subscribe(updater => {
+      const subscription = updater$.subscribe((updater) => {
         const nextValue = new Map(this.statusUpdaters$.getValue());
         nextValue.set(updaterId, {
           application,
@@ -148,6 +150,25 @@ export class ApplicationService {
         this.statusUpdaters$.next(nextValue);
       });
       this.subscriptions.push(subscription);
+    };
+
+    const wrapMount = (plugin: PluginOpaqueId, app: App<any>): AppMount => {
+      let handler: AppMount;
+      if (isAppMountDeprecated(app.mount)) {
+        handler = this.mountContext!.createHandler(plugin, app.mount);
+        if (process.env.NODE_ENV === 'development') {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `App [${app.id}] is using deprecated mount context. Use core.getStartServices() instead.`
+          );
+        }
+      } else {
+        handler = app.mount;
+      }
+      return async (params) => {
+        this.currentAppId$.next(app.id);
+        return handler(params);
+      };
     };
 
     return {
@@ -163,27 +184,9 @@ export class ApplicationService {
           throw new Error(
             `An application is already registered with the appRoute "${app.appRoute}"`
           );
-        } else if (basename && app.appRoute!.startsWith(basename)) {
+        } else if (basename && app.appRoute!.startsWith(`${basename}/`)) {
           throw new Error('Cannot register an application route that includes HTTP base path');
         }
-
-        let handler: AppMount;
-
-        if (isAppMountDeprecated(app.mount)) {
-          handler = this.mountContext!.createHandler(plugin, app.mount);
-          // eslint-disable-next-line no-console
-          console.warn(
-            `App [${app.id}] is using deprecated mount context. Use core.getStartServices() instead.`
-          );
-        } else {
-          handler = app.mount;
-        }
-
-        const mount: AppMounter = async params => {
-          const unmount = await handler(params);
-          this.currentAppId$.next(app.id);
-          return unmount;
-        };
 
         const { updater$, ...appProps } = app;
         this.apps.set(app.id, {
@@ -198,23 +201,28 @@ export class ApplicationService {
         this.mounters.set(app.id, {
           appRoute: app.appRoute!,
           appBasePath: basePath.prepend(app.appRoute!),
-          mount,
+          exactRoute: app.exactRoute ?? false,
+          mount: wrapMount(plugin, app),
           unmountBeforeMounting: false,
+          legacy: false,
         });
       },
-      registerLegacyApp: app => {
+      registerLegacyApp: (app) => {
         const appRoute = `/app/${app.id.split(':')[0]}`;
 
         if (this.registrationClosed) {
           throw new Error('Applications cannot be registered after "setup"');
         } else if (this.apps.has(app.id)) {
           throw new Error(`An application is already registered with the id "${app.id}"`);
-        } else if (basename && appRoute!.startsWith(basename)) {
+        } else if (basename && appRoute!.startsWith(`${basename}/`)) {
           throw new Error('Cannot register an application route that includes HTTP base path');
         }
 
         const appBasePath = basePath.prepend(appRoute);
-        const mount: LegacyAppMounter = () => redirectTo(appBasePath);
+        const mount: LegacyAppMounter = ({ history: appHistory }) => {
+          redirectTo(appHistory.createHref(appHistory.location));
+          window.location.reload();
+        };
 
         const { updater$, ...appProps } = app;
         this.apps.set(app.id, {
@@ -229,8 +237,10 @@ export class ApplicationService {
         this.mounters.set(app.id, {
           appRoute,
           appBasePath,
+          exactRoute: false,
           mount,
           unmountBeforeMounting: true,
+          legacy: true,
         });
       },
       registerAppUpdater: (appUpdater$: Observable<AppUpdater>) =>
@@ -242,6 +252,9 @@ export class ApplicationService {
     if (!this.mountContext) {
       throw new Error('ApplicationService#setup() must be invoked before start.');
     }
+
+    const httpLoadingCount$ = new BehaviorSubject(0);
+    http.addLoadingCountSource(httpLoadingCount$);
 
     this.registrationClosed = true;
     window.addEventListener('beforeunload', this.onBeforeUnload);
@@ -256,7 +269,7 @@ export class ApplicationService {
     const applications$ = new BehaviorSubject(availableApps);
     this.statusUpdaters$
       .pipe(
-        map(statusUpdaters => {
+        map((statusUpdaters) => {
           return new Map(
             [...availableApps].map(([id, app]) => [
               id,
@@ -265,21 +278,39 @@ export class ApplicationService {
           );
         })
       )
-      .subscribe(apps => applications$.next(apps));
+      .subscribe((apps) => applications$.next(apps));
 
     const applicationStatuses$ = applications$.pipe(
-      map(apps => new Map([...apps.entries()].map(([id, app]) => [id, app.status!]))),
+      map((apps) => new Map([...apps.entries()].map(([id, app]) => [id, app.status!]))),
       shareReplay(1)
     );
 
+    const navigateToApp: InternalApplicationStart['navigateToApp'] = async (
+      appId,
+      { path, state, replace = false }: NavigateToAppOptions = {}
+    ) => {
+      if (await this.shouldNavigate(overlays)) {
+        if (path === undefined) {
+          path = applications$.value.get(appId)?.defaultPath;
+        }
+        this.appLeaveHandlers.delete(this.currentAppId$.value!);
+        this.navigate!(getAppUrl(availableMounters, appId, path), state, replace);
+        this.currentAppId$.next(appId);
+      }
+    };
+
     return {
-      applications$,
+      applications$: applications$.pipe(
+        map((apps) => new Map([...apps.entries()].map(([id, app]) => [id, getAppInfo(app)]))),
+        shareReplay(1)
+      ),
       capabilities,
       currentAppId$: this.currentAppId$.pipe(
-        filter(appId => appId !== undefined),
+        filter((appId) => appId !== undefined),
         distinctUntilChanged(),
         takeUntil(this.stop$)
       ),
+      history: this.history,
       registerMountContext: this.mountContext.registerContext,
       getUrlForApp: (
         appId,
@@ -288,11 +319,13 @@ export class ApplicationService {
         const relUrl = http.basePath.prepend(getAppUrl(availableMounters, appId, path));
         return absolute ? relativeToAbsolute(relUrl) : relUrl;
       },
-      navigateToApp: async (appId, { path, state }: { path?: string; state?: any } = {}) => {
-        if (await this.shouldNavigate(overlays)) {
-          this.appLeaveHandlers.delete(this.currentAppId$.value!);
-          this.navigate!(getAppUrl(availableMounters, appId, path), state);
-          this.currentAppId$.next(appId);
+      navigateToApp,
+      navigateToUrl: async (url) => {
+        const appInfo = parseAppUrl(url, http.basePath, this.apps);
+        if (appInfo) {
+          return navigateToApp(appInfo.app, { path: appInfo.path });
+        } else {
+          return this.redirectTo!(url);
         }
       },
       getComponent: () => {
@@ -305,6 +338,7 @@ export class ApplicationService {
             mounters={availableMounters}
             appStatuses$={applicationStatuses$}
             setAppLeaveHandler={this.setAppLeaveHandler}
+            setIsMounting={(isMounting) => httpLoadingCount$.next(isMounting ? 1 : 0)}
           />
         );
       },
@@ -350,14 +384,14 @@ export class ApplicationService {
     this.stop$.next();
     this.currentAppId$.complete();
     this.statusUpdaters$.complete();
-    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
     window.removeEventListener('beforeunload', this.onBeforeUnload);
   }
 }
 
 const updateStatus = <T extends AppBase>(app: T, statusUpdaters: AppUpdaterWrapper[]): T => {
   let changes: Partial<AppUpdatableFields> = {};
-  statusUpdaters.forEach(wrapper => {
+  statusUpdaters.forEach((wrapper) => {
     if (wrapper.application !== allApplicationsFilter && wrapper.application !== app.id) {
       return;
     }
@@ -378,10 +412,3 @@ const updateStatus = <T extends AppBase>(app: T, statusUpdaters: AppUpdaterWrapp
     ...changes,
   };
 };
-
-function relativeToAbsolute(url: string) {
-  // convert all link urls to absolute urls
-  const a = document.createElement('a');
-  a.setAttribute('href', url);
-  return a.href;
-}

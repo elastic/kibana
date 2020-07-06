@@ -7,32 +7,31 @@
 import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
+import { API_URLS } from '../../../common/constants';
 
 export const createGetPingHistogramRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
-  path: '/api/uptime/ping/histogram',
+  path: API_URLS.PING_HISTOGRAM,
   validate: {
     query: schema.object({
       dateStart: schema.string(),
       dateEnd: schema.string(),
       monitorId: schema.maybe(schema.string()),
-      statusFilter: schema.maybe(schema.string()),
       filters: schema.maybe(schema.string()),
+      bucketSize: schema.maybe(schema.string()),
     }),
   },
-  options: {
-    tags: ['access:uptime'],
-  },
-  handler: async ({ callES }, _context, request, response): Promise<any> => {
-    const { dateStart, dateEnd, statusFilter, monitorId, filters } = request.query;
+  handler: async ({ callES, dynamicSettings }, _context, request, response): Promise<any> => {
+    const { dateStart, dateEnd, monitorId, filters, bucketSize } = request.query;
 
     const result = await libs.requests.getPingHistogram({
       callES,
+      dynamicSettings,
       from: dateStart,
       to: dateEnd,
       monitorId,
-      statusFilter,
       filters,
+      bucketSize,
     });
 
     return response.ok({

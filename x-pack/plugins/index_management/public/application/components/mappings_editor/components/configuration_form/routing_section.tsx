@@ -35,7 +35,11 @@ export const RoutingSection = () => {
         />
       }
     >
-      <UseField path="_routing.required" component={ToggleField} />
+      <UseField
+        path="_routing.required"
+        component={ToggleField}
+        componentProps={{ 'data-test-subj': 'routingRequiredToggle' }}
+      />
     </FormRow>
   );
 };

@@ -47,8 +47,11 @@
   }
 }
 
+// This value is calculated to static value using SCSS because calc in calc has issues in IE11
+$headerHeightOffset: $euiHeaderHeightCompensation * 2;
+
 .appRoot {
-  height: calc(100vh - calc(#{$euiHeaderChildSize} * 2));
+  height: calc(100vh - #{$headerHeightOffset});
   overflow: hidden;
   flex-shrink: 1;
 }

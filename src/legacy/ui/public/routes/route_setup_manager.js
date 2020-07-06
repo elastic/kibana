@@ -55,7 +55,7 @@ export class RouteSetupManager {
    */
   doWork(Promise, $injector, userWork) {
     const invokeEach = (arr, locals) => {
-      return Promise.map(arr, fn => {
+      return Promise.map(arr, (fn) => {
         if (!fn) return;
         return $injector.invoke(fn, null, locals);
       });
@@ -69,13 +69,13 @@ export class RouteSetupManager {
       // clone so we don't discard handlers or loose them
       handlers = handlers.slice(0);
 
-      const next = err => {
+      const next = (err) => {
         if (!handlers.length) throw err;
 
         const handler = handlers.shift();
         if (!handler) return next(err);
 
-        return Promise.try(function() {
+        return Promise.try(function () {
           return $injector.invoke(handler, null, { err });
         }).catch(next);
       };
@@ -86,7 +86,7 @@ export class RouteSetupManager {
     return invokeEach(this.setupWork)
       .then(
         () => invokeEach(this.onSetupComplete),
-        err => callErrorHandlers(this.onSetupError, err)
+        (err) => callErrorHandlers(this.onSetupError, err)
       )
       .then(() => {
         // wait for the queue to fill up, then do all the work
@@ -95,7 +95,7 @@ export class RouteSetupManager {
 
         return defer.promise.then(() => Promise.all(userWork.doWork()));
       })
-      .catch(error => {
+      .catch((error) => {
         if (error === WAIT_FOR_URL_CHANGE_TOKEN) {
           // prevent moving forward, return a promise that never resolves
           // so that the $router can observe the $location update
@@ -106,7 +106,7 @@ export class RouteSetupManager {
       })
       .then(
         () => invokeEach(this.onWorkComplete),
-        err => callErrorHandlers(this.onWorkError, err)
+        (err) => callErrorHandlers(this.onWorkError, err)
       );
   }
 }

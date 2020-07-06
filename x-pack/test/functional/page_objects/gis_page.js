@@ -5,6 +5,7 @@
  */
 
 import _ from 'lodash';
+import { APP_ID } from '../../../plugins/maps/common/constants';
 
 export function GisPageProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'header', 'timePicker']);
@@ -86,8 +87,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async waitForLayersToLoad() {
       log.debug('Wait for layers to load');
-      const tableOfContents = await testSubjects.find('mapLayerTOC');
       await retry.try(async () => {
+        const tableOfContents = await testSubjects.find('mapLayerTOC');
         await tableOfContents.waitForDeletedByCssSelector('.euiLoadingSpinner');
       });
     }
@@ -159,7 +160,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async onMapListingPage() {
       log.debug(`onMapListingPage`);
-      const exists = await testSubjects.exists('mapsListingPage');
+      const exists = await testSubjects.exists('mapsListingPage', { timeout: 3500 });
       return exists;
     }
 
@@ -197,7 +198,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       const onPage = await this.onMapListingPage();
       if (!onPage) {
         await retry.try(async () => {
-          await PageObjects.common.navigateToUrl('maps', '/', { basePath: this.basePath });
+          await PageObjects.common.navigateToUrlWithBrowserHistory(APP_ID, '/');
           const onMapListingPage = await this.onMapListingPage();
           if (!onMapListingPage) throw new Error('Not on map listing page.');
         });
@@ -209,8 +210,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
       log.debug(`getMapCountWithName: ${name}`);
       await this.searchForMapWithName(name);
-      const links = await find.allByLinkText(name);
-      return links.length;
+      const buttons = await find.allByButtonText(name);
+      return buttons.length;
     }
 
     async isSetViewPopoverOpen() {
@@ -451,7 +452,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async getCodeBlockParsedJson(dataTestSubjName) {
       log.debug(`Get parsed code block for ${dataTestSubjName}`);
-      const indexRespCodeBlock = await find.byCssSelector(`[data-test-subj="${dataTestSubjName}"]`);
+      const indexRespCodeBlock = await testSubjects.find(`${dataTestSubjName}`);
       const indexRespJson = await indexRespCodeBlock.getAttribute('innerText');
       return JSON.parse(indexRespJson);
     }
@@ -511,13 +512,11 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async selectGeoJsonUploadSource() {
       log.debug(`Select upload geojson source`);
-      await testSubjects.click('uploadedGeoJson');
+      await testSubjects.click('uploadGeoJson');
     }
 
     async uploadJsonFileForIndexing(path) {
-      log.debug(`Setting the path on the file input`);
-      const input = await find.byCssSelector('.euiFilePicker__input');
-      await input.type(path);
+      await PageObjects.common.setFileInputPath(path);
       log.debug(`File selected`);
 
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -609,7 +608,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       const STATS_ROW_NAME_INDEX = 0;
       const STATS_ROW_VALUE_INDEX = 1;
 
-      const statsRow = stats.find(statsRow => {
+      const statsRow = stats.find((statsRow) => {
         return statsRow[STATS_ROW_NAME_INDEX] === rowName;
       });
       if (!statsRow) {
@@ -639,6 +638,22 @@ export function GisPageProvider({ getService, getPageObjects }) {
           throw new Error('Tooltip is not locked at position');
         }
       });
+    }
+
+    async setStyleByValue(styleName, fieldName) {
+      await testSubjects.selectValue(`staticDynamicSelect_${styleName}`, 'DYNAMIC');
+      await comboBox.set(`styleFieldSelect_${styleName}`, fieldName);
+    }
+
+    async selectCustomColorRamp(styleName) {
+      // open super select menu
+      await testSubjects.click(`colorMapSelect_${styleName}`);
+      // Click option
+      await testSubjects.click(`colorMapSelectOption_CUSTOM_COLOR_MAP`);
+    }
+
+    async getCategorySuggestions() {
+      return await comboBox.getOptionsList(`colorStopInput1`);
     }
   }
   return new GisPage();

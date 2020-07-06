@@ -85,9 +85,29 @@ describe('convertLegacyTypes', () => {
         {
           pluginId: 'pluginB',
           properties: {
+            typeB: {
+              properties: {
+                fieldB: { type: 'text' },
+              },
+            },
+          },
+        },
+        {
+          pluginId: 'pluginC',
+          properties: {
             typeC: {
               properties: {
                 fieldC: { type: 'text' },
+              },
+            },
+          },
+        },
+        {
+          pluginId: 'pluginD',
+          properties: {
+            typeD: {
+              properties: {
+                fieldD: { type: 'text' },
               },
             },
           },
@@ -100,6 +120,18 @@ describe('convertLegacyTypes', () => {
           hidden: true,
           isNamespaceAgnostic: true,
         },
+        typeB: {
+          indexPattern: 'barBaz',
+          hidden: false,
+          multiNamespace: true,
+        },
+        typeD: {
+          indexPattern: 'bazQux',
+          hidden: false,
+          // if both isNamespaceAgnostic and multiNamespace are true, the resulting namespaceType is 'agnostic'
+          isNamespaceAgnostic: true,
+          multiNamespace: true,
+        },
       },
       savedObjectValidations: {},
       savedObjectsManagement: {},
@@ -110,7 +142,7 @@ describe('convertLegacyTypes', () => {
   });
 
   it('invokes indexPattern to retrieve the index when it is a function', () => {
-    const indexPatternAccessor: (config: LegacyConfig) => string = jest.fn(config => {
+    const indexPatternAccessor: (config: LegacyConfig) => string = jest.fn((config) => {
       config.get('foo.bar');
       return 'myIndex';
     });
@@ -235,6 +267,75 @@ describe('convertLegacyTypes', () => {
     expect(legacyMigration).toHaveBeenCalledWith(doc, context.log);
   });
 
+  it('imports type management information', () => {
+    const uiExports: SavedObjectsLegacyUiExports = {
+      savedObjectMappings: [
+        {
+          pluginId: 'pluginA',
+          properties: {
+            typeA: {
+              properties: {
+                fieldA: { type: 'text' },
+              },
+            },
+          },
+        },
+        {
+          pluginId: 'pluginB',
+          properties: {
+            typeB: {
+              properties: {
+                fieldB: { type: 'text' },
+              },
+            },
+            typeC: {
+              properties: {
+                fieldC: { type: 'text' },
+              },
+            },
+          },
+        },
+      ],
+      savedObjectsManagement: {
+        typeA: {
+          isImportableAndExportable: true,
+          icon: 'iconA',
+          defaultSearchField: 'searchFieldA',
+          getTitle: (savedObject) => savedObject.id,
+        },
+        typeB: {
+          isImportableAndExportable: false,
+          icon: 'iconB',
+          getEditUrl: (savedObject) => `/some-url/${savedObject.id}`,
+          getInAppUrl: (savedObject) => ({ path: 'path', uiCapabilitiesPath: 'ui-path' }),
+        },
+      },
+      savedObjectMigrations: {},
+      savedObjectSchemas: {},
+      savedObjectValidations: {},
+    };
+
+    const converted = convertLegacyTypes(uiExports, legacyConfig);
+    expect(converted.length).toEqual(3);
+    const [typeA, typeB, typeC] = converted;
+
+    expect(typeA.management).toEqual({
+      importableAndExportable: true,
+      icon: 'iconA',
+      defaultSearchField: 'searchFieldA',
+      getTitle: uiExports.savedObjectsManagement.typeA.getTitle,
+    });
+
+    expect(typeB.management).toEqual({
+      importableAndExportable: false,
+      icon: 'iconB',
+      getEditUrl: uiExports.savedObjectsManagement.typeB.getEditUrl,
+      getInAppUrl: uiExports.savedObjectsManagement.typeB.getInAppUrl,
+    });
+
+    expect(typeC.management).toBeUndefined();
+  });
+
   it('merges everything when all are present', () => {
     const uiExports: SavedObjectsLegacyUiExports = {
       savedObjectMappings: [
@@ -276,7 +377,7 @@ describe('convertLegacyTypes', () => {
       },
       savedObjectSchemas: {
         typeA: {
-          indexPattern: jest.fn(config => {
+          indexPattern: jest.fn((config) => {
             config.get('foo.bar');
             return 'myIndex';
           }),
@@ -303,15 +404,21 @@ describe('convertTypesToLegacySchema', () => {
       {
         name: 'typeA',
         hidden: false,
-        namespaceAgnostic: true,
+        namespaceType: 'agnostic',
         mappings: { properties: {} },
         convertToAliasScript: 'some script',
       },
       {
         name: 'typeB',
         hidden: true,
-        namespaceAgnostic: false,
+        namespaceType: 'single',
         indexPattern: 'myIndex',
+        mappings: { properties: {} },
+      },
+      {
+        name: 'typeC',
+        hidden: false,
+        namespaceType: 'multiple',
         mappings: { properties: {} },
       },
     ];
@@ -319,12 +426,19 @@ describe('convertTypesToLegacySchema', () => {
       typeA: {
         hidden: false,
         isNamespaceAgnostic: true,
+        multiNamespace: false,
         convertToAliasScript: 'some script',
       },
       typeB: {
         hidden: true,
         isNamespaceAgnostic: false,
+        multiNamespace: false,
         indexPattern: 'myIndex',
+      },
+      typeC: {
+        hidden: false,
+        isNamespaceAgnostic: false,
+        multiNamespace: true,
       },
     });
   });

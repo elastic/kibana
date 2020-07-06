@@ -58,7 +58,7 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
     const image = new Image();
     image.addEventListener(
       'load',
-      function() {
+      function () {
         const MAX_IMAGE_SIZE = 64;
         const imgDimx = image.width;
         const imgDimy = image.height;
@@ -91,8 +91,9 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
     image.src = imgUrl;
   };
 
-  private onFileUpload = (files: File[]) => {
-    const [file] = files;
+  private onFileUpload = (files: FileList | null) => {
+    if (files == null) return;
+    const file = files[0];
     if (imageTypes.indexOf(file.type) > -1) {
       encode(file).then((dataurl: string) => this.handleImageUpload(dataurl));
     }
@@ -169,7 +170,7 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
               }
             )}
             onChange={this.onFileUpload}
-            accept={imageTypes}
+            accept={imageTypes.join(',')}
           />
         </EuiFormRow>
       );

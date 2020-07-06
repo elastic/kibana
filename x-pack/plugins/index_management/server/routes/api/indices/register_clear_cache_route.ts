@@ -26,7 +26,7 @@ export function registerClearCacheRoute({ router, license, lib }: RouteDependenc
       };
 
       try {
-        await ctx.core.elasticsearch.dataClient.callAsCurrentUser('indices.clearCache', params);
+        await ctx.core.elasticsearch.legacy.client.callAsCurrentUser('indices.clearCache', params);
         return res.ok();
       } catch (e) {
         if (lib.isEsError(e)) {

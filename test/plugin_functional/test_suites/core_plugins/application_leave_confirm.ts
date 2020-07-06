@@ -30,7 +30,7 @@ const getKibanaUrl = (pathname?: string, search?: string) =>
   });
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
+export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');
   const appsMenu = getService('appsMenu');
@@ -59,19 +59,19 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
     describe('when navigating to a legacy app', () => {
       it('prevents navigation if user click cancel on the alert dialog', async () => {
         await PageObjects.common.navigateToApp('appleave1');
-        await appsMenu.clickLink('Core Legacy Compat');
+        await appsMenu.clickLink('Core Legacy Compat', { closeCollapsibleNav: false });
 
         const alert = await browser.getAlert();
-        expect(alert).not.to.eql(undefined);
+        expect(alert).not.to.eql(null);
         alert!.dismiss();
         expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/appleave1'));
       });
       it('allows navigation if user click leave on the alert dialog', async () => {
         await PageObjects.common.navigateToApp('appleave1');
-        await appsMenu.clickLink('Core Legacy Compat');
+        await appsMenu.clickLink('Core Legacy Compat', { closeCollapsibleNav: false });
 
         const alert = await browser.getAlert();
-        expect(alert).not.to.eql(undefined);
+        expect(alert).not.to.eql(null);
         alert!.accept();
         expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/core_legacy_compat'));
       });

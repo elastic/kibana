@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
-import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
+import { UiActionsStart, UiActionsSetup } from '../../../src/plugins/ui_actions/public';
+import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '../../../src/core/public';
 import {
   PHONE_TRIGGER,
   USER_TRIGGER,
@@ -27,18 +27,20 @@ import {
   lookUpWeatherAction,
   viewInMapsAction,
   createEditUserAction,
-  CALL_PHONE_NUMBER_ACTION,
-  VIEW_IN_MAPS_ACTION,
-  TRAVEL_GUIDE_ACTION,
-  PHONE_USER_ACTION,
-  EDIT_USER_ACTION,
   makePhoneCallAction,
   showcasePluggability,
-  SHOWCASE_PLUGGABILITY_ACTION,
   UserContext,
   CountryContext,
   PhoneContext,
+  ACTION_EDIT_USER,
+  ACTION_SHOWCASE_PLUGGABILITY,
+  ACTION_CALL_PHONE_NUMBER,
+  ACTION_TRAVEL_GUIDE,
+  ACTION_VIEW_IN_MAPS,
+  ACTION_PHONE_USER,
 } from './actions/actions';
+import { DeveloperExamplesSetup } from '../../developer_examples/public';
+import image from './ui_actions.png';
 
 interface StartDeps {
   uiActions: UiActionsStart;
@@ -46,6 +48,7 @@ interface StartDeps {
 
 interface SetupDeps {
   uiActions: UiActionsSetup;
+  developerExamples: DeveloperExamplesSetup;
 }
 
 declare module '../../../src/plugins/ui_actions/public' {
@@ -54,10 +57,19 @@ declare module '../../../src/plugins/ui_actions/public' {
     [COUNTRY_TRIGGER]: CountryContext;
     [PHONE_TRIGGER]: PhoneContext;
   }
+
+  export interface ActionContextMapping {
+    [ACTION_EDIT_USER]: UserContext;
+    [ACTION_SHOWCASE_PLUGGABILITY]: {};
+    [ACTION_CALL_PHONE_NUMBER]: PhoneContext;
+    [ACTION_TRAVEL_GUIDE]: CountryContext;
+    [ACTION_VIEW_IN_MAPS]: CountryContext;
+    [ACTION_PHONE_USER]: UserContext;
+  }
 }
 
 export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps> {
-  public setup(core: CoreSetup<{ uiActions: UiActionsStart }>, deps: SetupDeps) {
+  public setup(core: CoreSetup<StartDeps>, deps: SetupDeps) {
     deps.uiActions.registerTrigger({
       id: COUNTRY_TRIGGER,
     });
@@ -67,33 +79,29 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
     deps.uiActions.registerTrigger({
       id: USER_TRIGGER,
     });
-    deps.uiActions.registerAction(lookUpWeatherAction);
-    deps.uiActions.registerAction(viewInMapsAction);
-    deps.uiActions.registerAction(makePhoneCallAction);
-    deps.uiActions.registerAction(showcasePluggability);
 
     const startServices = core.getStartServices();
-    deps.uiActions.registerAction(
+
+    deps.uiActions.addTriggerAction(
+      USER_TRIGGER,
       createPhoneUserAction(async () => (await startServices)[1].uiActions)
     );
-    deps.uiActions.registerAction(
+    deps.uiActions.addTriggerAction(
+      USER_TRIGGER,
       createEditUserAction(async () => (await startServices)[0].overlays.openModal)
     );
-    deps.uiActions.attachAction(USER_TRIGGER, PHONE_USER_ACTION);
-    deps.uiActions.attachAction(USER_TRIGGER, EDIT_USER_ACTION);
 
-    // What's missing here is type analysis to ensure the context emitted by the trigger
-    // is the same context that the action requires.
-    deps.uiActions.attachAction(COUNTRY_TRIGGER, VIEW_IN_MAPS_ACTION);
-    deps.uiActions.attachAction(COUNTRY_TRIGGER, TRAVEL_GUIDE_ACTION);
-    deps.uiActions.attachAction(COUNTRY_TRIGGER, SHOWCASE_PLUGGABILITY_ACTION);
-    deps.uiActions.attachAction(PHONE_TRIGGER, CALL_PHONE_NUMBER_ACTION);
-    deps.uiActions.attachAction(PHONE_TRIGGER, SHOWCASE_PLUGGABILITY_ACTION);
-    deps.uiActions.attachAction(USER_TRIGGER, SHOWCASE_PLUGGABILITY_ACTION);
+    deps.uiActions.addTriggerAction(COUNTRY_TRIGGER, viewInMapsAction);
+    deps.uiActions.addTriggerAction(COUNTRY_TRIGGER, lookUpWeatherAction);
+    deps.uiActions.addTriggerAction(COUNTRY_TRIGGER, showcasePluggability);
+    deps.uiActions.addTriggerAction(PHONE_TRIGGER, makePhoneCallAction);
+    deps.uiActions.addTriggerAction(PHONE_TRIGGER, showcasePluggability);
+    deps.uiActions.addTriggerAction(USER_TRIGGER, showcasePluggability);
 
     core.application.register({
       id: 'uiActionsExplorer',
       title: 'Ui Actions Explorer',
+      navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');
@@ -102,6 +110,24 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
           params
         );
       },
+    });
+
+    deps.developerExamples.register({
+      appId: 'uiActionsExplorer',
+      title: 'Ui Actions & Triggers',
+      description: `Ui Actions can be used to make any part of your UI extensible. It has built in support for
+      context menus, but you can also render all actions attached to a given trigger however you like, just how
+      panel badges and panel notifications does.`,
+      image,
+      links: [
+        {
+          label: 'README',
+          href: 'https://github.com/elastic/kibana/blob/master/src/plugins/ui_actions/README.md',
+          iconType: 'logoGithub',
+          size: 's',
+          target: '_blank',
+        },
+      ],
     });
   }
 

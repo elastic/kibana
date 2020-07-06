@@ -31,9 +31,9 @@ export default class extends Component {
     };
   }
 
-  onToggleContent = ev => {
+  onToggleContent = (ev) => {
     ev.preventDefault();
-    this.setState(state => ({
+    this.setState((state) => ({
       isExpanded: !state.isExpanded,
     }));
   };

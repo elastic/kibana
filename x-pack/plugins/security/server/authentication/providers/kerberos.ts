@@ -6,13 +6,13 @@
 
 import Boom from 'boom';
 import {
-  ElasticsearchError,
-  ElasticsearchErrorHelpers,
+  LegacyElasticsearchError,
+  LegacyElasticsearchErrorHelpers,
   KibanaRequest,
 } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { getHTTPAuthenticationScheme } from '../get_http_authentication_scheme';
+import { HTTPAuthorizationHeader } from '../http_authentication';
 import { Tokens, TokenPair } from '../tokens';
 import { BaseAuthenticationProvider } from './base';
 
@@ -28,6 +28,15 @@ type ProviderState = TokenPair;
 const WWWAuthenticateHeaderName = 'WWW-Authenticate';
 
 /**
+ * Checks whether current request can initiate new session.
+ * @param request Request instance.
+ */
+function canStartNewSession(request: KibanaRequest) {
+  // We should try to establish new session only if request requires authentication.
+  return request.route.options.authRequired === true;
+}
+
+/**
  * Provider that supports Kerberos request authentication.
  */
 export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
@@ -37,6 +46,20 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
   static readonly type = 'kerberos';
 
   /**
+   * Performs initial login request.
+   * @param request Request instance.
+   */
+  public async login(request: KibanaRequest) {
+    this.logger.debug('Trying to perform a login.');
+
+    if (HTTPAuthorizationHeader.parseFromRequest(request)?.scheme.toLowerCase() === 'negotiate') {
+      return await this.authenticateWithNegotiateScheme(request);
+    }
+
+    return await this.authenticateViaSPNEGO(request);
+  }
+
+  /**
    * Performs Kerberos request authentication.
    * @param request Request instance.
    * @param [state] Optional state object associated with the provider.
@@ -44,13 +67,13 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
   public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
     this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
-    const authenticationScheme = getHTTPAuthenticationScheme(request);
-    if (authenticationScheme && authenticationScheme !== 'negotiate') {
-      this.logger.debug(`Unsupported authentication scheme: ${authenticationScheme}`);
+    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+    if (authorizationHeader && authorizationHeader.scheme.toLowerCase() !== 'negotiate') {
+      this.logger.debug(`Unsupported authentication scheme: ${authorizationHeader.scheme}`);
       return AuthenticationResult.notHandled();
     }
 
-    let authenticationResult = authenticationScheme
+    let authenticationResult = authorizationHeader
       ? await this.authenticateWithNegotiateScheme(request)
       : AuthenticationResult.notHandled();
 
@@ -66,7 +89,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
 
     // If we couldn't authenticate by means of all methods above, let's try to check if Elasticsearch can
     // start authentication mechanism negotiation, otherwise just return authentication result we have.
-    return authenticationResult.notHandled()
+    return authenticationResult.notHandled() && canStartNewSession(request)
       ? await this.authenticateViaSPNEGO(request, state)
       : authenticationResult;
   }
@@ -91,9 +114,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       return DeauthenticationResult.failed(err);
     }
 
-    return DeauthenticationResult.redirectTo(
-      `${this.options.basePath.serverBasePath}/security/logged_out`
-    );
+    return DeauthenticationResult.redirectTo(this.options.urls.loggedOut);
   }
 
   /**
@@ -128,7 +149,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       this.logger.debug(`Failed to exchange SPNEGO token for an access token: ${err.message}`);
 
       // Check if SPNEGO context wasn't established and we have a response token to return to the client.
-      const challenge = ElasticsearchErrorHelpers.isNotAuthorizedError(err)
+      const challenge = LegacyElasticsearchErrorHelpers.isNotAuthorizedError(err)
         ? this.getNegotiateChallenge(err)
         : undefined;
       if (!challenge) {
@@ -175,7 +196,9 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
 
     try {
       // Then attempt to query for the user details using the new token
-      const authHeaders = { authorization: `Bearer ${tokens.access_token}` };
+      const authHeaders = {
+        authorization: new HTTPAuthorizationHeader('Bearer', tokens.access_token).toString(),
+      };
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('User has been authenticated with new access token');
@@ -205,7 +228,9 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     try {
-      const authHeaders = { authorization: `Bearer ${accessToken}` };
+      const authHeaders = {
+        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
+      };
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('Request has been authenticated via state.');
@@ -235,14 +260,19 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
 
     // If refresh token is no longer valid, then we should clear session and renegotiate using SPNEGO.
     if (refreshedTokenPair === null) {
-      this.logger.debug(
-        'Both access and refresh tokens are expired. Re-initiating SPNEGO handshake.'
-      );
-      return this.authenticateViaSPNEGO(request, state);
+      this.logger.debug('Both access and refresh tokens are expired.');
+      return canStartNewSession(request)
+        ? this.authenticateViaSPNEGO(request, state)
+        : AuthenticationResult.notHandled();
     }
 
     try {
-      const authHeaders = { authorization: `Bearer ${refreshedTokenPair.accessToken}` };
+      const authHeaders = {
+        authorization: new HTTPAuthorizationHeader(
+          'Bearer',
+          refreshedTokenPair.accessToken
+        ).toString(),
+      };
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('Request has been authenticated via refreshed token.');
@@ -264,7 +294,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     this.logger.debug('Trying to authenticate request via SPNEGO.');
 
     // Try to authenticate current request with Elasticsearch to see whether it supports SPNEGO.
-    let elasticsearchError: ElasticsearchError;
+    let elasticsearchError: LegacyElasticsearchError;
     try {
       await this.getUser(request, {
         // We should send a fake SPNEGO token to Elasticsearch to make sure Kerberos realm is included
@@ -278,7 +308,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     } catch (err) {
       // Fail immediately if we get unexpected error (e.g. ES isn't available). We should not touch
       // session cookie in this case.
-      if (!ElasticsearchErrorHelpers.isNotAuthorizedError(err)) {
+      if (!LegacyElasticsearchErrorHelpers.isNotAuthorizedError(err)) {
         return AuthenticationResult.failed(err);
       }
 
@@ -304,10 +334,10 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
    * Extracts `Negotiate` challenge from the list of challenges returned with Elasticsearch error if any.
    * @param error Error to extract challenges from.
    */
-  private getNegotiateChallenge(error: ElasticsearchError) {
+  private getNegotiateChallenge(error: LegacyElasticsearchError) {
     const challenges = ([] as string[]).concat(error.output.headers[WWWAuthenticateHeaderName]);
 
-    const negotiateChallenge = challenges.find(challenge =>
+    const negotiateChallenge = challenges.find((challenge) =>
       challenge.toLowerCase().startsWith('negotiate')
     );
     if (negotiateChallenge) {

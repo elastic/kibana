@@ -21,7 +21,7 @@ import {
 } from '../../../common/http_api/log_entries';
 import { parseFilterQuery } from '../../utils/serialized_query';
 
-const escapeHatch = schema.object({}, { allowUnknowns: true });
+const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 export const initLogEntriesSummaryHighlightsRoute = ({
   framework,
@@ -39,13 +39,20 @@ export const initLogEntriesSummaryHighlightsRoute = ({
           logEntriesSummaryHighlightsRequestRT.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
-        const { sourceId, startDate, endDate, bucketSize, query, highlightTerms } = payload;
+        const {
+          sourceId,
+          startTimestamp,
+          endTimestamp,
+          bucketSize,
+          query,
+          highlightTerms,
+        } = payload;
 
         const bucketsPerHighlightTerm = await logEntries.getLogSummaryHighlightBucketsBetween(
           requestContext,
           sourceId,
-          startDate,
-          endDate,
+          startTimestamp,
+          endTimestamp,
           bucketSize,
           highlightTerms,
           parseFilterQuery(query)
@@ -53,9 +60,9 @@ export const initLogEntriesSummaryHighlightsRoute = ({
 
         return response.ok({
           body: logEntriesSummaryHighlightsResponseRT.encode({
-            data: bucketsPerHighlightTerm.map(buckets => ({
-              start: startDate,
-              end: endDate,
+            data: bucketsPerHighlightTerm.map((buckets) => ({
+              start: startTimestamp,
+              end: endTimestamp,
               buckets,
             })),
           }),

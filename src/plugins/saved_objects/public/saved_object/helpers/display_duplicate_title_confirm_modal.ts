@@ -23,7 +23,7 @@ import { confirmModalPromise } from './confirm_modal_promise';
 import { SavedObject } from '../../types';
 
 export function displayDuplicateTitleConfirmModal(
-  savedObject: SavedObject,
+  savedObject: Pick<SavedObject, 'title' | 'getDisplayName'>,
   overlays: OverlayStart
 ): Promise<true> {
   const confirmMessage = i18n.translate(

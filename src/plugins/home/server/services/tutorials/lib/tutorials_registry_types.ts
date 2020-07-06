@@ -22,7 +22,7 @@ import { KibanaRequest } from 'src/core/server';
 /** @public */
 export enum TutorialsCategory {
   LOGGING = 'logging',
-  SIEM = 'siem',
+  SECURITY_SOLUTION = 'security',
   METRICS = 'metrics',
   OTHER = 'other',
 }
@@ -82,7 +82,7 @@ export interface TutorialSchema {
   name: string;
   isBeta?: boolean;
   shortDescription: string;
-  euiIconType?: IconType; // EUI icon type string, one of https://elastic.github.io/eui/#/icon;
+  euiIconType?: IconType; // EUI icon type string, one of https://elastic.github.io/eui/#/display/icons;
   longDescription: string;
   completionTimeMinutes?: number;
   previewImagePath?: string;

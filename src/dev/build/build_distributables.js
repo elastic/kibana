@@ -30,11 +30,13 @@ import {
   CleanTypescriptTask,
   CleanNodeBuildsTask,
   CleanTask,
+  CopyBinScriptsTask,
   CopySourceTask,
   CreateArchivesSourcesTask,
   CreateArchivesTask,
   CreateDebPackageTask,
   CreateDockerPackageTask,
+  CreateDockerUbiPackageTask,
   CreateEmptyDirsAndFilesTask,
   CreateNoticeFileTask,
   CreatePackageJsonTask,
@@ -45,6 +47,7 @@ import {
   InstallDependenciesTask,
   BuildKibanaPlatformPluginsTask,
   OptimizeBuildTask,
+  PatchNativeModulesTask,
   RemovePackageJsonDepsTask,
   RemoveWorkspacesTask,
   TranspileBabelTask,
@@ -68,6 +71,7 @@ export async function buildDistributables(options) {
     createRpmPackage,
     createDebPackage,
     createDockerPackage,
+    createDockerUbiPackage,
     versionQualifier,
     targetAllPlatforms,
   } = options;
@@ -108,6 +112,7 @@ export async function buildDistributables(options) {
    * run platform-generic build tasks
    */
   await run(CopySourceTask);
+  await run(CopyBinScriptsTask);
   await run(CreateEmptyDirsAndFilesTask);
   await run(CreateReadmeTask);
   await run(TranspileBabelTask);
@@ -132,6 +137,7 @@ export async function buildDistributables(options) {
    * directories and perform platform-specific steps
    */
   await run(CreateArchivesSourcesTask);
+  await run(PatchNativeModulesTask);
   await run(CleanExtraBinScriptsTask);
   await run(CleanExtraBrowsersTask);
   await run(CleanNodeBuildsTask);
@@ -156,8 +162,11 @@ export async function buildDistributables(options) {
     await run(CreateRpmPackageTask);
   }
   if (createDockerPackage) {
-    // control w/ --docker or --skip-os-packages
+    // control w/ --docker or --skip-docker-ubi or --skip-os-packages
     await run(CreateDockerPackageTask);
+    if (createDockerUbiPackage) {
+      await run(CreateDockerUbiPackageTask);
+    }
   }
 
   /**

@@ -19,7 +19,8 @@
 
 jest.mock('./assign_bundles_to_workers.ts');
 jest.mock('./kibana_platform_plugins.ts');
-jest.mock('./get_bundles.ts');
+jest.mock('./get_plugin_bundles.ts');
+jest.mock('../common/theme_tags.ts');
 
 import Path from 'path';
 import Os from 'os';
@@ -27,6 +28,7 @@ import Os from 'os';
 import { REPO_ROOT, createAbsolutePathSerializer } from '@kbn/dev-utils';
 
 import { OptimizerConfig } from './optimizer_config';
+import { parseThemeTags } from '../common';
 
 jest.spyOn(Os, 'cpus').mockReturnValue(['foo'] as any);
 
@@ -35,6 +37,7 @@ expect.addSnapshotSerializer(createAbsolutePathSerializer());
 beforeEach(() => {
   delete process.env.KBN_OPTIMIZER_MAX_WORKERS;
   delete process.env.KBN_OPTIMIZER_NO_CACHE;
+  delete process.env.KBN_OPTIMIZER_THEMES;
   jest.clearAllMocks();
 });
 
@@ -81,6 +84,26 @@ describe('OptimizerConfig::parseOptions()', () => {
     }).toThrowErrorMatchingInlineSnapshot(`"worker count must be a number"`);
   });
 
+  it('defaults to * theme when dist = true', () => {
+    OptimizerConfig.parseOptions({
+      repoRoot: REPO_ROOT,
+      dist: true,
+    });
+
+    expect(parseThemeTags).toBeCalledWith('*');
+  });
+
+  it('defaults to KBN_OPTIMIZER_THEMES when dist = false', () => {
+    process.env.KBN_OPTIMIZER_THEMES = 'foo';
+
+    OptimizerConfig.parseOptions({
+      repoRoot: REPO_ROOT,
+      dist: false,
+    });
+
+    expect(parseThemeTags).toBeCalledWith('foo');
+  });
+
   it('applies defaults', () => {
     expect(
       OptimizerConfig.parseOptions({
@@ -90,6 +113,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       Object {
         "cache": true,
         "dist": false,
+        "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 2,
         "pluginPaths": Array [],
@@ -101,6 +125,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         ],
         "profileWebpack": false,
         "repoRoot": <absolute path>,
+        "themeTags": undefined,
         "watch": false,
       }
     `);
@@ -114,6 +139,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       Object {
         "cache": false,
         "dist": false,
+        "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 2,
         "pluginPaths": Array [],
@@ -125,6 +151,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         ],
         "profileWebpack": false,
         "repoRoot": <absolute path>,
+        "themeTags": undefined,
         "watch": false,
       }
     `);
@@ -138,6 +165,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       Object {
         "cache": true,
         "dist": false,
+        "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 2,
         "pluginPaths": Array [],
@@ -146,10 +174,12 @@ describe('OptimizerConfig::parseOptions()', () => {
           <absolute path>/x-pack/plugins,
           <absolute path>/plugins,
           <absolute path>/examples,
+          <absolute path>/x-pack/examples,
           <absolute path>-extra,
         ],
         "profileWebpack": false,
         "repoRoot": <absolute path>,
+        "themeTags": undefined,
         "watch": false,
       }
     `);
@@ -163,6 +193,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       Object {
         "cache": true,
         "dist": false,
+        "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 2,
         "pluginPaths": Array [],
@@ -173,6 +204,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         ],
         "profileWebpack": false,
         "repoRoot": <absolute path>,
+        "themeTags": undefined,
         "watch": false,
       }
     `);
@@ -186,6 +218,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       Object {
         "cache": true,
         "dist": false,
+        "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 2,
         "pluginPaths": Array [],
@@ -195,6 +228,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         ],
         "profileWebpack": false,
         "repoRoot": <absolute path>,
+        "themeTags": undefined,
         "watch": false,
       }
     `);
@@ -209,12 +243,14 @@ describe('OptimizerConfig::parseOptions()', () => {
       Object {
         "cache": true,
         "dist": false,
+        "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 100,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [],
         "profileWebpack": false,
         "repoRoot": <absolute path>,
+        "themeTags": undefined,
         "watch": false,
       }
     `);
@@ -229,12 +265,14 @@ describe('OptimizerConfig::parseOptions()', () => {
       Object {
         "cache": false,
         "dist": false,
+        "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 100,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [],
         "profileWebpack": false,
         "repoRoot": <absolute path>,
+        "themeTags": undefined,
         "watch": false,
       }
     `);
@@ -249,12 +287,14 @@ describe('OptimizerConfig::parseOptions()', () => {
       Object {
         "cache": false,
         "dist": false,
+        "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 100,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [],
         "profileWebpack": false,
         "repoRoot": <absolute path>,
+        "themeTags": undefined,
         "watch": false,
       }
     `);
@@ -270,12 +310,14 @@ describe('OptimizerConfig::parseOptions()', () => {
       Object {
         "cache": false,
         "dist": false,
+        "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 100,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [],
         "profileWebpack": false,
         "repoRoot": <absolute path>,
+        "themeTags": undefined,
         "watch": false,
       }
     `);
@@ -291,12 +333,14 @@ describe('OptimizerConfig::parseOptions()', () => {
       Object {
         "cache": true,
         "dist": false,
+        "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 100,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [],
         "profileWebpack": false,
         "repoRoot": <absolute path>,
+        "themeTags": undefined,
         "watch": false,
       }
     `);
@@ -313,7 +357,7 @@ describe('OptimizerConfig::create()', () => {
     .assignBundlesToWorkers;
   const findKibanaPlatformPlugins: jest.Mock = jest.requireMock('./kibana_platform_plugins.ts')
     .findKibanaPlatformPlugins;
-  const getBundles: jest.Mock = jest.requireMock('./get_bundles.ts').getBundles;
+  const getPluginBundles: jest.Mock = jest.requireMock('./get_plugin_bundles.ts').getPluginBundles;
 
   beforeEach(() => {
     if ('mock' in OptimizerConfig.parseOptions) {
@@ -325,7 +369,7 @@ describe('OptimizerConfig::create()', () => {
       { config: Symbol('worker config 2') },
     ]);
     findKibanaPlatformPlugins.mockReturnValue(Symbol('new platform plugins'));
-    getBundles.mockReturnValue(Symbol('bundles'));
+    getPluginBundles.mockReturnValue([Symbol('bundle1'), Symbol('bundle2')]);
 
     jest.spyOn(OptimizerConfig, 'parseOptions').mockImplementation((): any => ({
       cache: Symbol('parsed cache'),
@@ -335,6 +379,7 @@ describe('OptimizerConfig::create()', () => {
       pluginScanDirs: Symbol('parsed plugin scan dirs'),
       repoRoot: Symbol('parsed repo root'),
       watch: Symbol('parsed watch'),
+      themeTags: Symbol('theme tags'),
       inspectWorkers: Symbol('parsed inspect workers'),
       profileWebpack: Symbol('parsed profile webpack'),
     }));
@@ -347,7 +392,10 @@ describe('OptimizerConfig::create()', () => {
 
     expect(config).toMatchInlineSnapshot(`
       OptimizerConfig {
-        "bundles": Symbol(bundles),
+        "bundles": Array [
+          Symbol(bundle1),
+          Symbol(bundle2),
+        ],
         "cache": Symbol(parsed cache),
         "dist": Symbol(parsed dist),
         "inspectWorkers": Symbol(parsed inspect workers),
@@ -355,6 +403,7 @@ describe('OptimizerConfig::create()', () => {
         "plugins": Symbol(new platform plugins),
         "profileWebpack": Symbol(parsed profile webpack),
         "repoRoot": Symbol(parsed repo root),
+        "themeTags": Symbol(theme tags),
         "watch": Symbol(parsed watch),
       }
     `);
@@ -371,7 +420,7 @@ describe('OptimizerConfig::create()', () => {
           [Window],
         ],
         "invocationCallOrder": Array [
-          7,
+          21,
         ],
         "results": Array [
           Object {
@@ -382,7 +431,7 @@ describe('OptimizerConfig::create()', () => {
       }
     `);
 
-    expect(getBundles.mock).toMatchInlineSnapshot(`
+    expect(getPluginBundles.mock).toMatchInlineSnapshot(`
       Object {
         "calls": Array [
           Array [
@@ -394,12 +443,15 @@ describe('OptimizerConfig::create()', () => {
           [Window],
         ],
         "invocationCallOrder": Array [
-          8,
+          22,
         ],
         "results": Array [
           Object {
             "type": "return",
-            "value": Symbol(bundles),
+            "value": Array [
+              Symbol(bundle1),
+              Symbol(bundle2),
+            ],
           },
         ],
       }

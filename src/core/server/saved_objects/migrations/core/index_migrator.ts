@@ -153,11 +153,11 @@ async function deleteIndexTemplates({ callCluster, log, obsoleteIndexTemplatePat
     return;
   }
 
-  const templateNames = templates.map(t => t.name);
+  const templateNames = templates.map((t) => t.name);
 
   log.info(`Removing index templates: ${templateNames}`);
 
-  return Promise.all(templateNames.map(name => callCluster('indices.deleteTemplate', { name })));
+  return Promise.all(templateNames.map((name) => callCluster('indices.deleteTemplate', { name })));
 }
 
 /**
@@ -190,12 +190,12 @@ async function migrateSourceToDest(context: Context) {
       return;
     }
 
-    log.debug(`Migrating saved objects ${docs.map(d => d._id).join(', ')}`);
+    log.debug(`Migrating saved objects ${docs.map((d) => d._id).join(', ')}`);
 
     await Index.write(
       callCluster,
       dest.indexName,
-      migrateRawDocs(serializer, documentMigrator.migrate, docs)
+      await migrateRawDocs(serializer, documentMigrator.migrate, docs, log)
     );
   }
 }

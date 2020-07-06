@@ -1,0 +1,38 @@
+{
+  "action": {
+    "properties": {
+      "name": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "actionTypeId": {
+        "type": "keyword"
+      },
+      "config": {
+        "enabled": false,
+        "type": "object"
+      },
+      "secrets": {
+        "type": "binary"
+      }
+    }
+  },
+  "action_task_params": {
+    "properties": {
+      "actionId": {
+        "type": "keyword"
+      },
+      "params": {
+        "enabled": false,
+        "type": "object"
+      },
+      "apiKey": {
+        "type": "binary"
+      }
+    }
+  }
+}

@@ -7,17 +7,21 @@
 import * as Rx from 'rxjs';
 import {
   createSpaces,
-  createLegacyAPI,
   createMockSavedObjectsRepository,
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { CoreSetup, IRouter, kibanaResponseFactory, RouteValidatorConfig } from 'src/core/server';
 import {
-  loggingServiceMock,
-  elasticsearchServiceMock,
+  CoreSetup,
+  kibanaResponseFactory,
+  RouteValidatorConfig,
+  SavedObjectsErrorHelpers,
+} from 'src/core/server';
+import {
+  loggingSystemMock,
   httpServiceMock,
   httpServerMock,
+  coreMock,
 } from 'src/core/server/mocks';
 import { SpacesService } from '../../../spaces_service';
 import { SpacesAuditLogger } from '../../../lib/audit_logger';
@@ -29,24 +33,23 @@ import { ObjectType } from '@kbn/config-schema';
 
 describe('Spaces Public API', () => {
   const spacesSavedObjects = createSpaces();
-  const spaces = spacesSavedObjects.map(s => ({ id: s.id, ...s.attributes }));
 
   const setup = async () => {
     const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
-
-    const legacyAPI = createLegacyAPI({ spaces });
+    const router = httpService.createRouter();
 
     const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
 
-    const log = loggingServiceMock.create().get('spaces');
+    const log = loggingSystemMock.create().get('spaces');
 
-    const service = new SpacesService(log, () => legacyAPI);
+    const coreStart = coreMock.createStart();
+
+    const service = new SpacesService(log);
     const spacesService = await service.setup({
       http: (httpService as unknown) as CoreSetup['http'],
-      elasticsearch: elasticsearchServiceMock.createSetup(),
+      getStartServices: async () => [coreStart, {}, {}],
       authorization: securityMock.createSetup().authz,
-      getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
+      auditLogger: {} as SpacesAuditLogger,
       config$: Rx.of(spacesConfig),
     });
 
@@ -66,7 +69,8 @@ describe('Spaces Public API', () => {
 
     initDeleteSpacesApi({
       externalRouter: router,
-      getSavedObjects: () => legacyAPI.savedObjects,
+      getStartServices: async () => [coreStart, {}, {}],
+      getImportExportObjectLimit: () => 1000,
       log,
       spacesService,
     });
@@ -76,6 +80,7 @@ describe('Spaces Public API', () => {
     return {
       routeValidation: routeDefinition.validate as RouteValidatorConfig<{}, {}, {}>,
       routeHandler,
+      savedObjectsRepositoryMock,
     };
   };
 
@@ -142,6 +147,27 @@ describe('Spaces Public API', () => {
     const { status } = response;
 
     expect(status).toEqual(404);
+  });
+
+  it(`returns http/400 when scripts cannot be executed in Elasticsearch`, async () => {
+    const { routeHandler, savedObjectsRepositoryMock } = await setup();
+
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        id: 'a-space',
+      },
+      method: 'delete',
+    });
+    // @ts-ignore
+    savedObjectsRepositoryMock.deleteByNamespace.mockRejectedValue(
+      SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError(new Error())
+    );
+    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+    const { status, payload } = response;
+
+    expect(status).toEqual(400);
+    expect(payload.message).toEqual('Cannot execute script in Elasticsearch query');
   });
 
   it(`DELETE spaces/{id}' cannot delete reserved spaces`, async () => {

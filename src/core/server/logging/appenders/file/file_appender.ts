@@ -66,7 +66,7 @@ export class FileAppender implements DisposableAppender {
    * Disposes `FileAppender`. Waits for the underlying file stream to be completely flushed and closed.
    */
   public async dispose() {
-    await new Promise(resolve => {
+    await new Promise((resolve) => {
       if (this.outputStream === undefined) {
         return resolve();
       }

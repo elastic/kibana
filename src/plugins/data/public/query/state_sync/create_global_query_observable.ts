@@ -20,10 +20,10 @@
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { TimefilterSetup } from '../timefilter';
-import { COMPARE_ALL_OPTIONS, compareFilters, FilterManager } from '../filter_manager';
+import { FilterManager } from '../filter_manager';
 import { QueryState, QueryStateChange } from './index';
 import { createStateContainer } from '../../../../kibana_utils/public';
-import { isFilterPinned } from '../../../common/es_query/filters';
+import { isFilterPinned, compareFilters, COMPARE_ALL_OPTIONS } from '../../../common';
 
 export function createQueryStateObservable({
   timefilter: { timefilter },
@@ -32,7 +32,7 @@ export function createQueryStateObservable({
   timefilter: TimefilterSetup;
   filterManager: FilterManager;
 }): Observable<{ changes: QueryStateChange; state: QueryState }> {
-  return new Observable(subscriber => {
+  return new Observable((subscriber) => {
     const state = createStateContainer<QueryState>({
       time: timefilter.getTime(),
       refreshInterval: timefilter.getRefreshInterval(),
@@ -53,8 +53,8 @@ export function createQueryStateObservable({
         currentChange.filters = true;
 
         const { filters } = state.get();
-        const globalOld = filters?.filter(f => isFilterPinned(f));
-        const appOld = filters?.filter(f => !isFilterPinned(f));
+        const globalOld = filters?.filter((f) => isFilterPinned(f));
+        const appOld = filters?.filter((f) => !isFilterPinned(f));
         const globalNew = filterManager.getGlobalFilters();
         const appNew = filterManager.getAppFilters();
 
@@ -73,7 +73,7 @@ export function createQueryStateObservable({
       }),
       state.state$
         .pipe(
-          map(newState => ({ state: newState, changes: currentChange })),
+          map((newState) => ({ state: newState, changes: currentChange })),
           tap(() => {
             currentChange = {};
           })
@@ -81,7 +81,7 @@ export function createQueryStateObservable({
         .subscribe(subscriber),
     ];
     return () => {
-      subs.forEach(s => s.unsubscribe());
+      subs.forEach((s) => s.unsubscribe());
     };
   });
 }

@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'kibana/server';
-import { loggingServiceMock, httpServiceMock } from '../../../../../../../src/core/server/mocks';
-import { CaseService } from '../../../services';
+import { loggingSystemMock, httpServiceMock } from '../../../../../../../src/core/server/mocks';
+import { CaseService, CaseConfigureService } from '../../../services';
 import { authenticationMock } from '../__fixtures__';
-import { RouteDeps } from '../index';
+import { RouteDeps } from '../types';
 
 export const createRoute = async (
   api: (deps: RouteDeps) => void,
@@ -16,18 +15,26 @@ export const createRoute = async (
   badAuth = false
 ) => {
   const httpService = httpServiceMock.createSetupContract();
-  const router = httpService.createRouter('') as jest.Mocked<IRouter>;
+  const router = httpService.createRouter();
 
-  const log = loggingServiceMock.create().get('case');
+  const log = loggingSystemMock.create().get('case');
 
-  const service = new CaseService(log);
-  const caseService = await service.setup({
+  const caseServicePlugin = new CaseService(log);
+  const caseConfigureServicePlugin = new CaseConfigureService(log);
+
+  const caseService = await caseServicePlugin.setup({
     authentication: badAuth ? authenticationMock.createInvalid() : authenticationMock.create(),
   });
+  const caseConfigureService = await caseConfigureServicePlugin.setup();
 
   api({
-    router,
+    caseConfigureService,
     caseService,
+    router,
+    userActionService: {
+      postUserActions: jest.fn(),
+      getUserActions: jest.fn(),
+    },
   });
 
   return router[method].mock.calls[0][1];

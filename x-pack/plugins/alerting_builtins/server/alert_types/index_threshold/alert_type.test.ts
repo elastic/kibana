@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { loggingServiceMock } from '../../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { getAlertType } from './alert_type';
 import { Params } from './alert_type_params';
 
@@ -13,15 +13,42 @@ describe('alertType', () => {
     indexThreshold: {
       timeSeriesQuery: jest.fn(),
     },
-    logger: loggingServiceMock.create().get(),
+    logger: loggingSystemMock.create().get(),
   };
 
   const alertType = getAlertType(service);
 
   it('alert type creation structure is the expected value', async () => {
     expect(alertType.id).toBe('.index-threshold');
-    expect(alertType.name).toBe('Index Threshold');
+    expect(alertType.name).toBe('Index threshold');
     expect(alertType.actionGroups).toEqual([{ id: 'threshold met', name: 'Threshold Met' }]);
+
+    expect(alertType.actionVariables).toMatchInlineSnapshot(`
+      Object {
+        "context": Array [
+          Object {
+            "description": "A pre-constructed message for the alert.",
+            "name": "message",
+          },
+          Object {
+            "description": "A pre-constructed title for the alert.",
+            "name": "title",
+          },
+          Object {
+            "description": "The group that exceeded the threshold.",
+            "name": "group",
+          },
+          Object {
+            "description": "The date the alert exceeded the threshold.",
+            "name": "date",
+          },
+          Object {
+            "description": "The value that exceeded the threshold.",
+            "name": "value",
+          },
+        ],
+      }
+    `);
   });
 
   it('validator succeeds with valid params', async () => {

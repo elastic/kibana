@@ -9,72 +9,76 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function UptimePageProvider({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'timePicker']);
-  const uptimeService = getService('uptime');
+  const { common: commonService, monitor, navigation } = getService('uptime');
   const retry = getService('retry');
 
   return new (class UptimePage {
-    public async goToUptimePageAndSetDateRange(
-      datePickerStartValue: string,
-      datePickerEndValue: string
-    ) {
-      await pageObjects.common.navigateToApp('uptime');
-      await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
-    }
-
-    public async goToUptimeOverviewAndLoadData(
-      datePickerStartValue: string,
-      datePickerEndValue: string,
-      monitorIdToCheck: string
-    ) {
-      await pageObjects.common.navigateToApp('uptime');
-      await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
-      await uptimeService.monitorIdExists(monitorIdToCheck);
-    }
-
-    public async loadDataAndGoToMonitorPage(
-      datePickerStartValue: string,
-      datePickerEndValue: string,
-      monitorId: string,
-      monitorName?: string
-    ) {
-      await pageObjects.common.navigateToApp('uptime');
-      await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
-      await uptimeService.navigateToMonitorWithId(monitorId);
-      if (
-        monitorName &&
-        (await uptimeService.getMonitorNameDisplayedOnPageTitle()) !== monitorName
-      ) {
-        throw new Error('Expected monitor name not found');
+    public async goToRoot(refresh?: boolean) {
+      await navigation.goToUptime();
+      if (refresh) {
+        await navigation.refreshApp();
       }
     }
 
+    public async setDateRange(start: string, end: string) {
+      const { start: prevStart, end: prevEnd } = await pageObjects.timePicker.getTimeConfig();
+      if (start !== prevStart || prevEnd !== end) {
+        await pageObjects.timePicker.setAbsoluteRange(start, end);
+      } else {
+        await navigation.refreshApp();
+      }
+    }
+
+    public async goToUptimeOverviewAndLoadData(
+      dateStart: string,
+      dateEnd: string,
+      monitorIdToCheck?: string
+    ) {
+      await navigation.goToUptime();
+      await this.setDateRange(dateStart, dateEnd);
+      if (monitorIdToCheck) {
+        await commonService.monitorIdExists(monitorIdToCheck);
+      }
+    }
+
+    public async loadDataAndGoToMonitorPage(dateStart: string, dateEnd: string, monitorId: string) {
+      await this.setDateRange(dateStart, dateEnd);
+      await navigation.goToMonitor(monitorId);
+    }
+
     public async inputFilterQuery(filterQuery: string) {
-      await uptimeService.setFilterText(filterQuery);
+      await commonService.setFilterText(filterQuery);
     }
 
-    public async pageHasExpectedIds(monitorIdsToCheck: string[]) {
-      await Promise.all(monitorIdsToCheck.map(id => uptimeService.monitorPageLinkExists(id)));
+    public async pageHasDataMissing() {
+      return await commonService.pageHasDataMissing();
     }
 
-    public async pageUrlContains(value: string, expected: boolean = true) {
-      await retry.try(async () => {
-        expect(await uptimeService.urlContains(value)).to.eql(expected);
+    public async pageHasExpectedIds(monitorIdsToCheck: string[]): Promise<void> {
+      return retry.tryForTime(15000, async () => {
+        await Promise.all(monitorIdsToCheck.map((id) => commonService.monitorPageLinkExists(id)));
+      });
+    }
+
+    public async pageUrlContains(value: string, expected: boolean = true): Promise<void> {
+      return retry.tryForTime(12000, async () => {
+        expect(await commonService.urlContains(value)).to.eql(expected);
       });
     }
 
     public async changePage(direction: 'next' | 'prev') {
       if (direction === 'next') {
-        await uptimeService.goToNextPage();
+        await commonService.goToNextPage();
       } else if (direction === 'prev') {
-        await uptimeService.goToPreviousPage();
+        await commonService.goToPreviousPage();
       }
     }
 
     public async setStatusFilter(value: 'up' | 'down') {
       if (value === 'up') {
-        await uptimeService.setStatusFilterUp();
+        await commonService.setStatusFilterUp();
       } else if (value === 'down') {
-        await uptimeService.setStatusFilterDown();
+        await commonService.setStatusFilterDown();
       }
     }
 
@@ -83,18 +87,43 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
         if (filters.hasOwnProperty(key)) {
           const values = filters[key];
           for (let i = 0; i < values.length; i++) {
-            await uptimeService.selectFilterItem(key, values[i]);
+            await commonService.selectFilterItem(key, values[i]);
           }
         }
       }
     }
 
     public async getSnapshotCount() {
-      return await uptimeService.getSnapshotCount();
+      return await commonService.getSnapshotCount();
     }
 
-    public locationMissingIsDisplayed() {
-      return uptimeService.locationMissingExists();
+    public async setAlertKueryBarText(filters: string) {
+      const { setKueryBarText } = commonService;
+      await setKueryBarText('xpack.uptime.alerts.monitorStatus.filterBar', filters);
+    }
+
+    public async setMonitorListPageSize(size: number): Promise<void> {
+      await commonService.openPageSizeSelectPopover();
+      return commonService.clickPageSizeSelectPopoverItem(size);
+    }
+
+    public async checkPingListInteractions(
+      timestamps: string[],
+      location?: string,
+      status?: string
+    ): Promise<void> {
+      if (location) {
+        await monitor.setPingListLocation(location);
+      }
+      if (status) {
+        await monitor.setPingListStatus(status);
+      }
+      return monitor.checkForPingListTimestamps(timestamps);
+    }
+
+    public async resetFilters() {
+      await this.inputFilterQuery('');
+      await commonService.resetStatusFilter();
     }
   })();
 }

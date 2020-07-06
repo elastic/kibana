@@ -17,8 +17,9 @@
  * under the License.
  */
 
-const { resolve } = require('path');
+const { parse, resolve } = require('path');
 const webpack = require('webpack');
+const { stringifyRequest } = require('loader-utils');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { REPO_ROOT, DLL_DIST_DIR } = require('../lib/constants');
 // eslint-disable-next-line import/no-unresolved
@@ -28,7 +29,7 @@ const { currentConfig } = require('../../../built_assets/storybook/current.confi
 module.exports = async ({ config }) => {
   // Find and alter the CSS rule to replace the Kibana public path string with a path
   // to the route we've added in middleware.js
-  const cssRule = config.module.rules.find(rule => rule.test.source.includes('.css$'));
+  const cssRule = config.module.rules.find((rule) => rule.test.source.includes('.css$'));
   cssRule.use.push({
     loader: 'string-replace-loader',
     options: {
@@ -45,6 +46,13 @@ module.exports = async ({ config }) => {
     loaders: 'babel-loader',
     options: {
       presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+    },
+  });
+
+  config.module.rules.push({
+    test: /\.(html|md|txt|tmpl)$/,
+    use: {
+      loader: 'raw-loader',
     },
   });
 
@@ -72,6 +80,59 @@ module.exports = async ({ config }) => {
     ],
   });
 
+  // Enable SASS
+  config.module.rules.push({
+    test: /\.scss$/,
+    exclude: /\.module.(s(a|c)ss)$/,
+    use: [
+      { loader: 'style-loader' },
+      { loader: 'css-loader', options: { importLoaders: 2 } },
+      {
+        loader: 'postcss-loader',
+        options: {
+          config: {
+            path: resolve(REPO_ROOT, 'src/optimize/'),
+          },
+        },
+      },
+      {
+        loader: 'resolve-url-loader',
+        options: {
+          // If you don't have arguments (_, __) to the join function, the
+          // resolve-url-loader fails with a loader misconfiguration error.
+          //
+          // eslint-disable-next-line no-unused-vars
+          join: (_, __) => (uri, base) => {
+            if (!base || !parse(base).dir.includes('legacy')) {
+              return null;
+            }
+
+            // URIs on mixins in src/legacy/public/styles need to be resolved.
+            if (uri.startsWith('ui/assets')) {
+              return resolve(REPO_ROOT, 'src/core/server/core_app/', uri.replace('ui/', ''));
+            }
+
+            return null;
+          },
+        },
+      },
+      {
+        loader: 'sass-loader',
+        options: {
+          prependData(loaderContext) {
+            return `@import ${stringifyRequest(
+              loaderContext,
+              resolve(REPO_ROOT, 'src/legacy/ui/public/styles/_globals_v7light.scss')
+            )};\n`;
+          },
+          sassOptions: {
+            includePaths: [resolve(REPO_ROOT, 'node_modules')],
+          },
+        },
+      },
+    ],
+  });
+
   // Reference the built DLL file of static(ish) dependencies, which are removed
   // during kbn:bootstrap and rebuilt if missing.
   config.plugins.push(
@@ -83,20 +144,22 @@ module.exports = async ({ config }) => {
 
   // Copy the DLL files to the Webpack build for use in the Storybook UI
   config.plugins.push(
-    new CopyWebpackPlugin([
-      {
-        from: resolve(DLL_DIST_DIR, 'dll.js'),
-        to: 'dll.js',
-      },
-      {
-        from: resolve(DLL_DIST_DIR, 'dll.css'),
-        to: 'dll.css',
-      },
-    ])
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: resolve(DLL_DIST_DIR, 'dll.js'),
+          to: 'dll.js',
+        },
+        {
+          from: resolve(DLL_DIST_DIR, 'dll.css'),
+          to: 'dll.css',
+        },
+      ],
+    })
   );
 
   // Tell Webpack about the ts/x extensions
-  config.resolve.extensions.push('.ts', '.tsx');
+  config.resolve.extensions.push('.ts', '.tsx', '.scss');
 
   // Load custom Webpack config specified by a plugin.
   if (currentConfig.webpackHook) {

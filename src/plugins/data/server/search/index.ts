@@ -17,12 +17,16 @@
  * under the License.
  */
 
-export { ISearchSetup } from './i_search_setup';
+export {
+  ISearch,
+  ISearchCancel,
+  ISearchOptions,
+  IRequestTypesMap,
+  IResponseTypesMap,
+  ISearchSetup,
+  ISearchStart,
+  TStrategyTypes,
+  ISearchStrategy,
+} from './types';
 
-export { ISearchContext } from './i_search_context';
-
-export { IRequestTypesMap, IResponseTypesMap } from './i_search';
-
-export { TStrategyTypes } from './strategy_types';
-
-export { TSearchStrategyProvider } from './i_search_strategy';
+export { getDefaultSearchParams, getTotalLoaded } from './es_search';

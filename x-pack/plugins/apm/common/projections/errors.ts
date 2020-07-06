@@ -7,20 +7,20 @@
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../server/lib/helpers/setup_request';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
-  ERROR_GROUP_ID
+  ERROR_GROUP_ID,
 } from '../elasticsearch_fieldnames';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { rangeFilter } from '../../server/lib/helpers/range_filter';
+import { rangeFilter } from '../utils/range_filter';
 
 export function getErrorGroupsProjection({
   setup,
-  serviceName
+  serviceName,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
   serviceName: string;
@@ -36,17 +36,17 @@ export function getErrorGroupsProjection({
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [PROCESSOR_EVENT]: 'error' } },
             { range: rangeFilter(start, end) },
-            ...uiFiltersES
-          ]
-        }
+            ...uiFiltersES,
+          ],
+        },
       },
       aggs: {
         error_groups: {
           terms: {
-            field: ERROR_GROUP_ID
-          }
-        }
-      }
-    }
+            field: ERROR_GROUP_ID,
+          },
+        },
+      },
+    },
   };
 }

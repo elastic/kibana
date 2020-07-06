@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface GetFleetSetupRequestSchema {}
-
-export interface CreateFleetSetupRequestSchema {
-  body: {
-    admin_username: string;
-    admin_password: string;
-  };
-}
-
 export interface CreateFleetSetupResponse {
   isInitialized: boolean;
+}
+
+export interface GetFleetStatusResponse {
+  isReady: boolean;
+  missing_requirements: Array<
+    | 'tls_required'
+    | 'api_keys'
+    | 'fleet_admin_user'
+    | 'encrypted_saved_object_encryption_key_required'
+  >;
 }

@@ -7,9 +7,9 @@
 jest.mock('./api_keys_grid', () => ({
   APIKeysGridPage: (props: any) => `Page: ${JSON.stringify(props)}`,
 }));
-
+import { ScopedHistory } from 'src/core/public';
 import { apiKeysManagementApp } from './api_keys_management_app';
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
 
 describe('apiKeysManagementApp', () => {
   it('create() returns proper management app descriptor', () => {
@@ -37,10 +37,11 @@ describe('apiKeysManagementApp', () => {
         basePath: '/some-base-path',
         element: container,
         setBreadcrumbs,
+        history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
       });
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
-    expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: '#/some-base-path', text: 'API Keys' }]);
+    expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: '/', text: 'API Keys' }]);
     expect(container).toMatchInlineSnapshot(`
       <div>
         Page: {"notifications":{"toasts":{}},"docLinks":{"esDocBasePath":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/"},"apiKeysAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}}}

@@ -22,11 +22,11 @@ export class AlertingBuiltinsPlugin implements Plugin<IService, IService> {
     };
   }
 
-  public async setup(core: CoreSetup, { alerting }: AlertingBuiltinsDeps): Promise<IService> {
+  public async setup(core: CoreSetup, { alerts }: AlertingBuiltinsDeps): Promise<IService> {
     registerBuiltInAlertTypes({
       service: this.service,
       router: core.http.createRouter(),
-      alerting,
+      alerts,
       baseRoute: '/api/alerting_builtins',
     });
     return this.service;

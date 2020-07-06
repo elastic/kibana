@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './spaces_popover_list.scss';
+
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -12,14 +14,14 @@ import {
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import { Space, SpaceAvatar } from '../../../../../../spaces/public';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../../../spaces/common';
 
 interface Props {
   spaces: Space[];
-  intl: InjectedIntl;
   buttonText: string;
 }
 
@@ -59,15 +61,13 @@ export class SpacesPopoverList extends Component<Props, State> {
   }
 
   private getMenuPanel = () => {
-    const { intl } = this.props;
     const { searchTerm } = this.state;
 
     const items = this.getVisibleSpaces(searchTerm).map(this.renderSpaceMenuItem);
 
     const panelProps = {
       className: 'spcMenu',
-      title: intl.formatMessage({
-        id: 'xpack.security.management.editRole.spacesPopoverList.popoverTitle',
+      title: i18n.translate('xpack.security.management.editRole.spacesPopoverList.popoverTitle', {
         defaultMessage: 'Spaces',
       }),
       watchedItemProps: ['data-search-term'],
@@ -104,7 +104,7 @@ export class SpacesPopoverList extends Component<Props, State> {
 
     let filteredSpaces = spaces;
     if (searchTerm) {
-      filteredSpaces = spaces.filter(space => {
+      filteredSpaces = spaces.filter((space) => {
         const { name, description = '' } = space;
         return (
           name.toLowerCase().indexOf(searchTerm) >= 0 ||
@@ -141,15 +141,16 @@ export class SpacesPopoverList extends Component<Props, State> {
   };
 
   private renderSearchField = () => {
-    const { intl } = this.props;
     return (
       <div key="manageSpacesSearchField" className="spcMenu__searchFieldWrapper">
         {
           <EuiFieldSearch
-            placeholder={intl.formatMessage({
-              id: 'xpack.security.management.editRole.spacesPopoverList.findSpacePlaceholder',
-              defaultMessage: 'Find a space',
-            })}
+            placeholder={i18n.translate(
+              'xpack.security.management.editRole.spacesPopoverList.findSpacePlaceholder',
+              {
+                defaultMessage: 'Find a space',
+              }
+            )}
             incremental={true}
             onSearch={this.onSearch}
             onKeyDown={this.onSearchKeyDown}

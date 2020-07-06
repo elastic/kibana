@@ -5,36 +5,27 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ElasticsearchMappingOf } from '../../server/utils/typed_elasticsearch_mappings';
-import {
-  MetricsExplorerOptions,
-  MetricsExplorerChartOptions,
-  MetricsExplorerTimeOptions,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../public/containers/metrics_explorer/use_metrics_explorer_options';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedViewSavedObject } from '../../public/hooks/use_saved_view';
+import { SavedObjectsType } from 'src/core/server';
 
-interface MetricsExplorerSavedView {
-  options: MetricsExplorerOptions;
-  chartOptions: MetricsExplorerChartOptions;
-  currentTimerange: MetricsExplorerTimeOptions;
-}
+export const metricsExplorerViewSavedObjectName = 'metrics-explorer-view';
 
-export const metricsExplorerViewSavedObjectType = 'metrics-explorer-view';
-
-export const metricsExplorerViewSavedObjectMappings: {
-  [metricsExplorerViewSavedObjectType]: ElasticsearchMappingOf<
-    SavedViewSavedObject<MetricsExplorerSavedView>
-  >;
-} = {
-  [metricsExplorerViewSavedObjectType]: {
+export const metricsExplorerViewSavedObjectType: SavedObjectsType = {
+  name: metricsExplorerViewSavedObjectName,
+  hidden: false,
+  namespaceType: 'single',
+  management: {
+    importableAndExportable: true,
+  },
+  mappings: {
     properties: {
       name: {
         type: 'keyword',
       },
       options: {
         properties: {
+          forceInterval: {
+            type: 'boolean',
+          },
           metrics: {
             type: 'nested',
             properties: {
@@ -62,6 +53,9 @@ export const metricsExplorerViewSavedObjectMappings: {
             type: 'keyword',
           },
           aggregation: {
+            type: 'keyword',
+          },
+          source: {
             type: 'keyword',
           },
         },

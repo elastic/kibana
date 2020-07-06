@@ -5,7 +5,7 @@
  */
 
 import {
-  loggingServiceMock,
+  loggingSystemMock,
   httpServiceMock,
   elasticsearchServiceMock,
 } from '../../../../../../src/core/server/mocks';
@@ -14,14 +14,15 @@ export type MockAuthenticationProviderOptions = ReturnType<
   typeof mockAuthenticationProviderOptions
 >;
 
-export function mockAuthenticationProviderOptions() {
-  const basePath = httpServiceMock.createSetupContract().basePath;
-  basePath.get.mockReturnValue('/base-path');
-
+export function mockAuthenticationProviderOptions(options?: { name: string }) {
   return {
     client: elasticsearchServiceMock.createClusterClient(),
-    logger: loggingServiceMock.create().get(),
-    basePath,
+    logger: loggingSystemMock.create().get(),
+    basePath: httpServiceMock.createBasePath(),
     tokens: { refresh: jest.fn(), invalidate: jest.fn() },
+    name: options?.name ?? 'basic1',
+    urls: {
+      loggedOut: '/mock-server-basepath/security/logged_out',
+    },
   };
 }

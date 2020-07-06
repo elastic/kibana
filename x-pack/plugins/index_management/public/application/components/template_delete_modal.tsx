@@ -4,28 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { Fragment, useState } from 'react';
 import { EuiConfirmModal, EuiOverlayMask, EuiCallOut, EuiCheckbox, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Fragment, useState } from 'react';
+
 import { deleteTemplates } from '../services/api';
 import { notificationService } from '../services/notification';
-import { Template } from '../../../common/types';
 
 export const TemplateDeleteModal = ({
   templatesToDelete,
   callback,
 }: {
-  templatesToDelete: Array<Template['name']>;
+  templatesToDelete: Array<{ name: string; isLegacy?: boolean }>;
   callback: (data?: { hasDeletedTemplates: boolean }) => void;
 }) => {
   const [isDeleteConfirmed, setIsDeleteConfirmed] = useState<boolean>(false);
 
   const numTemplatesToDelete = templatesToDelete.length;
 
-  const hasSystemTemplate = Boolean(
-    templatesToDelete.find(templateName => templateName.startsWith('.'))
-  );
+  const hasSystemTemplate = Boolean(templatesToDelete.find(({ name }) => name.startsWith('.')));
 
   const handleDeleteTemplates = () => {
     deleteTemplates(templatesToDelete).then(({ data: { templatesDeleted, errors }, error }) => {
@@ -38,7 +36,7 @@ export const TemplateDeleteModal = ({
                 'xpack.idxMgmt.deleteTemplatesModal.successDeleteSingleNotificationMessageText',
                 {
                   defaultMessage: "Deleted template '{templateName}'",
-                  values: { templateName: templatesToDelete[0] },
+                  values: { templateName: templatesToDelete[0].name },
                 }
               )
             : i18n.translate(
@@ -120,10 +118,10 @@ export const TemplateDeleteModal = ({
           </p>
 
           <ul>
-            {templatesToDelete.map(template => (
-              <li key={template}>
-                {template}
-                {template.startsWith('.') ? (
+            {templatesToDelete.map(({ name }) => (
+              <li key={name}>
+                {name}
+                {name.startsWith('.') ? (
                   <Fragment>
                     {' '}
                     <EuiBadge iconType="alert" color="hollow">
@@ -165,7 +163,7 @@ export const TemplateDeleteModal = ({
                   />
                 }
                 checked={isDeleteConfirmed}
-                onChange={e => setIsDeleteConfirmed(e.target.checked)}
+                onChange={(e) => setIsDeleteConfirmed(e.target.checked)}
               />
             </EuiCallOut>
           )}

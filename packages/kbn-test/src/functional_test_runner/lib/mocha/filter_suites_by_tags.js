@@ -30,7 +30,7 @@
 export function filterSuitesByTags({ log, mocha, include, exclude }) {
   mocha.excludedTests = [];
   // collect all the tests from some suite, including it's children
-  const collectTests = suite =>
+  const collectTests = (suite) =>
     suite.suites.reduce((acc, s) => acc.concat(collectTests(s)), suite.tests);
 
   // if include tags were provided, filter the tree once to
@@ -38,8 +38,10 @@ export function filterSuitesByTags({ log, mocha, include, exclude }) {
   if (include.length) {
     log.info('Only running suites (and their sub-suites) if they include the tag(s):', include);
 
-    const isIncluded = suite => (!suite._tags ? false : suite._tags.some(t => include.includes(t)));
-    const isChildIncluded = suite => suite.suites.some(s => isIncluded(s) || isChildIncluded(s));
+    const isIncluded = (suite) =>
+      !suite._tags ? false : suite._tags.some((t) => include.includes(t));
+    const isChildIncluded = (suite) =>
+      suite.suites.some((s) => isIncluded(s) || isChildIncluded(s));
 
     (function recurse(parentSuite) {
       const children = parentSuite.suites;
@@ -73,7 +75,7 @@ export function filterSuitesByTags({ log, mocha, include, exclude }) {
   if (exclude.length) {
     log.info('Filtering out any suites that include the tag(s):', exclude);
 
-    const isNotExcluded = suite => !suite._tags || !suite._tags.some(t => exclude.includes(t));
+    const isNotExcluded = (suite) => !suite._tags || !suite._tags.some((t) => exclude.includes(t));
 
     (function recurse(parentSuite) {
       const children = parentSuite.suites;

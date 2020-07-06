@@ -20,10 +20,15 @@ const getTestAlertType = (id?: string, name?: string, iconClass?: string) => {
       return { errors: {} };
     },
     alertParamsExpression: ExpressionComponent,
+    requiresAppContext: false,
   };
 };
 
-const getTestActionType = (id?: string, iconClass?: string, selectedMessage?: string) => {
+const getTestActionType = (
+  id?: string,
+  iconClass?: string,
+  selectedMessage?: string
+): ActionTypeModel<any, any> => {
   return {
     id: id || 'my-action-type',
     iconClass: iconClass || 'test',
@@ -78,9 +83,13 @@ describe('get()', () => {
     `);
   });
 
-  test(`return null when action type doesn't exist`, () => {
+  test(`throw error when action type doesn't exist`, () => {
     const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-    expect(actionTypeRegistry.get('not-exist-action-type')).toBeNull();
+    expect(() =>
+      actionTypeRegistry.get('not-exist-action-type')
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Object type \\"not-exist-action-type\\" is not registered."`
+    );
   });
 });
 

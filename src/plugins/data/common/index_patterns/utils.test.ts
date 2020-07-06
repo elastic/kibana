@@ -30,20 +30,20 @@ const mockField = {
 describe('isFilterable', () => {
   describe('types', () => {
     it('should return true for filterable types', () => {
-      ['string', 'number', 'date', 'ip', 'boolean'].forEach(type => {
+      ['string', 'number', 'date', 'ip', 'boolean'].forEach((type) => {
         expect(isFilterable({ ...mockField, type })).toBe(true);
       });
     });
 
     it('should return false for filterable types if the field is not searchable', () => {
-      ['string', 'number', 'date', 'ip', 'boolean'].forEach(type => {
+      ['string', 'number', 'date', 'ip', 'boolean'].forEach((type) => {
         expect(isFilterable({ ...mockField, type, searchable: false })).toBe(false);
       });
     });
 
     it('should return false for un-filterable types', () => {
       ['geo_point', 'geo_shape', 'attachment', 'murmur3', '_source', 'unknown', 'conflict'].forEach(
-        type => {
+        (type) => {
           expect(isFilterable({ ...mockField, type })).toBe(false);
         }
       );

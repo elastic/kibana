@@ -15,6 +15,7 @@ import { coreMock } from '../../../../src/core/public/mocks';
 import { managementPluginMock } from '../../../../src/plugins/management/public/mocks';
 import { licensingMock } from '../../licensing/public/mocks';
 import { ManagementService } from './management';
+import { FeaturesPluginStart } from '../../features/public';
 
 describe('Security Plugin', () => {
   beforeAll(() => {
@@ -36,7 +37,7 @@ describe('Security Plugin', () => {
         )
       ).toEqual({
         __legacyCompat: { logoutUrl: '/some-base-path/logout', tenant: '/some-base-path' },
-        authc: { getCurrentUser: expect.any(Function) },
+        authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
         license: {
           isEnabled: expect.any(Function),
           getFeatures: expect.any(Function),
@@ -62,7 +63,7 @@ describe('Security Plugin', () => {
 
       expect(setupManagementServiceMock).toHaveBeenCalledTimes(1);
       expect(setupManagementServiceMock).toHaveBeenCalledWith({
-        authc: { getCurrentUser: expect.any(Function) },
+        authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
         license: {
           isEnabled: expect.any(Function),
           getFeatures: expect.any(Function),
@@ -86,6 +87,7 @@ describe('Security Plugin', () => {
       expect(
         plugin.start(coreMock.createStart({ basePath: '/some-base-path' }), {
           data: {} as DataPublicPluginStart,
+          features: {} as FeaturesPluginStart,
         })
       ).toBeUndefined();
     });
@@ -110,6 +112,7 @@ describe('Security Plugin', () => {
 
       plugin.start(coreMock.createStart({ basePath: '/some-base-path' }), {
         data: {} as DataPublicPluginStart,
+        features: {} as FeaturesPluginStart,
         management: managementStartMock,
       });
 
@@ -139,6 +142,7 @@ describe('Security Plugin', () => {
 
       plugin.start(coreMock.createStart({ basePath: '/some-base-path' }), {
         data: {} as DataPublicPluginStart,
+        features: {} as FeaturesPluginStart,
       });
 
       expect(() => plugin.stop()).not.toThrow();

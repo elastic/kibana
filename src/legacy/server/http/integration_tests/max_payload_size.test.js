@@ -30,7 +30,7 @@ beforeAll(async () => {
     path: '/payload_size_check/test/route',
     method: 'POST',
     config: { payload: { maxBytes: 200 } },
-    handler: req => req.payload.data.slice(0, 5),
+    handler: (req) => req.payload.data.slice(0, 5),
   });
 }, 30000);
 
@@ -40,9 +40,7 @@ test('accepts payload with a size larger than default but smaller than route con
   await kbnTestServer.request
     .post(root, '/payload_size_check/test/route')
     .send({
-      data: Array(150)
-        .fill('+')
-        .join(''),
+      data: Array(150).fill('+').join(''),
     })
     .expect(200, '+++++');
 });
@@ -51,9 +49,7 @@ test('fails with 413 if payload size is larger than default and route config all
   await kbnTestServer.request
     .post(root, '/payload_size_check/test/route')
     .send({
-      data: Array(250)
-        .fill('+')
-        .join(''),
+      data: Array(250).fill('+').join(''),
     })
     .expect(413, {
       statusCode: 413,

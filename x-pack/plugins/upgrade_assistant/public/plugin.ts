@@ -7,12 +7,10 @@ import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/public';
 
 import { CloudSetup } from '../../cloud/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
+import { ManagementSetup, ManagementSectionId } from '../../../../src/plugins/management/public';
 
 import { NEXT_MAJOR_VERSION } from '../common/version';
 import { Config } from '../common/config';
-
-import { renderApp } from './application/render_app';
 
 interface Dependencies {
   cloud: CloudSetup;
@@ -21,12 +19,12 @@ interface Dependencies {
 
 export class UpgradeAssistantUIPlugin implements Plugin {
   constructor(private ctx: PluginInitializerContext) {}
-  setup({ http, getStartServices }: CoreSetup, { cloud, management }: Dependencies) {
+  setup(coreSetup: CoreSetup, { cloud, management }: Dependencies) {
     const { enabled } = this.ctx.config.get<Config>();
     if (!enabled) {
       return;
     }
-    const appRegistrar = management.sections.getSection('elasticsearch')!;
+    const appRegistrar = management.sections.getSection(ManagementSectionId.Stack);
     const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
 
     appRegistrar.registerApp({
@@ -35,10 +33,10 @@ export class UpgradeAssistantUIPlugin implements Plugin {
         defaultMessage: '{version} Upgrade Assistant',
         values: { version: `${NEXT_MAJOR_VERSION}.0` },
       }),
-      order: 1000,
-      async mount({ element }) {
-        const [{ i18n: i18nDep }] = await getStartServices();
-        return renderApp({ element, isCloudEnabled, http, i18n: i18nDep });
+      order: 1,
+      async mount(params) {
+        const { mountManagementSection } = await import('./application/mount_management_section');
+        return mountManagementSection(coreSetup, isCloudEnabled, params);
       },
     });
   }

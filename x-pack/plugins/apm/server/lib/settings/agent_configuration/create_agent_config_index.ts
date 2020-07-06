@@ -4,101 +4,77 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IClusterClient, Logger } from 'src/core/server';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { ILegacyClusterClient, Logger } from 'src/core/server';
+import {
+  createOrUpdateIndex,
+  MappingsDefinition,
+} from '../../../../../observability/server';
 import { APMConfig } from '../../..';
 import { getApmIndicesConfig } from '../apm_indices/get_apm_indices';
 
 export async function createApmAgentConfigurationIndex({
   esClient,
   config,
-  logger
+  logger,
 }: {
-  esClient: IClusterClient;
+  esClient: ILegacyClusterClient;
   config: APMConfig;
   logger: Logger;
 }) {
-  try {
-    const index = getApmIndicesConfig(config).apmAgentConfigurationIndex;
-    const { callAsInternalUser } = esClient;
-    const indexExists = await callAsInternalUser('indices.exists', { index });
-    const result = indexExists
-      ? await updateExistingIndex(index, callAsInternalUser)
-      : await createNewIndex(index, callAsInternalUser);
-
-    if (!result.acknowledged) {
-      const resultError =
-        result && result.error && JSON.stringify(result.error);
-      throw new Error(
-        `Unable to create APM Agent Configuration index '${index}': ${resultError}`
-      );
-    }
-  } catch (e) {
-    logger.error(`Could not create APM Agent configuration: ${e.message}`);
-  }
-}
-
-function createNewIndex(index: string, callWithInternalUser: CallCluster) {
-  return callWithInternalUser('indices.create', {
+  const index = getApmIndicesConfig(config).apmAgentConfigurationIndex;
+  return createOrUpdateIndex({
     index,
-    body: {
-      settings: { 'index.auto_expand_replicas': '0-1' },
-      mappings: { properties: mappingProperties }
-    }
+    apiCaller: esClient.callAsInternalUser,
+    logger,
+    mappings,
   });
 }
 
-// Necessary for migration reasons
-// Added in 7.5: `capture_body`, `transaction_max_spans`, `applied_by_agent`, `agent_name` and `etag`
-function updateExistingIndex(index: string, callWithInternalUser: CallCluster) {
-  return callWithInternalUser('indices.putMapping', {
-    index,
-    body: { properties: mappingProperties }
-  });
-}
-
-const mappingProperties = {
-  '@timestamp': {
-    type: 'date'
-  },
-  service: {
-    properties: {
-      name: {
-        type: 'keyword',
-        ignore_above: 1024
+const mappings: MappingsDefinition = {
+  dynamic: 'strict',
+  dynamic_templates: [
+    {
+      // force string to keyword (instead of default of text + keyword)
+      strings: {
+        match_mapping_type: 'string',
+        mapping: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
       },
-      environment: {
-        type: 'keyword',
-        ignore_above: 1024
-      }
-    }
-  },
-  settings: {
-    properties: {
-      transaction_sample_rate: {
-        type: 'scaled_float',
-        scaling_factor: 1000,
-        ignore_malformed: true,
-        coerce: false
+    },
+  ],
+  properties: {
+    '@timestamp': {
+      type: 'date',
+    },
+    service: {
+      properties: {
+        name: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+        environment: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
       },
-      capture_body: {
-        type: 'keyword',
-        ignore_above: 1024
-      },
-      transaction_max_spans: {
-        type: 'short'
-      }
-    }
+    },
+    settings: {
+      // allowing dynamic fields without specifying anything specific
+      dynamic: true,
+      properties: {},
+    },
+    applied_by_agent: {
+      type: 'boolean',
+    },
+    agent_name: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
+    etag: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
   },
-  applied_by_agent: {
-    type: 'boolean'
-  },
-  agent_name: {
-    type: 'keyword',
-    ignore_above: 1024
-  },
-  etag: {
-    type: 'keyword',
-    ignore_above: 1024
-  }
 };

@@ -41,11 +41,18 @@ export class TypeRegistry<T extends BaseObjectType> {
   }
 
   /**
-   * Returns an object type, null if not registered
+   * Returns an object type, throw error if not registered
    */
-  public get(id: string): T | null {
+  public get(id: string): T {
     if (!this.has(id)) {
-      return null;
+      throw new Error(
+        i18n.translate('xpack.triggersActionsUI.typeRegistry.get.missingActionTypeErrorMessage', {
+          defaultMessage: 'Object type "{id}" is not registered.',
+          values: {
+            id,
+          },
+        })
+      );
     }
     return this.objectTypes.get(id)!;
   }

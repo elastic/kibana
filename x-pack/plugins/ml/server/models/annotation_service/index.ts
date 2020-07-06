@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { annotationProvider } from './annotation';
 
-export function annotationServiceProvider(context: RequestHandlerContext) {
+export function annotationServiceProvider(callAsCurrentUser: LegacyAPICaller) {
   return {
-    ...annotationProvider(context),
+    ...annotationProvider(callAsCurrentUser),
   };
 }

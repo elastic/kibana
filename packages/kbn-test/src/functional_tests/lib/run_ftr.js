@@ -22,7 +22,7 @@ import { CliError } from './run_cli';
 
 async function createFtr({
   configPath,
-  options: { installDir, log, bail, grep, updateBaselines, suiteTags },
+  options: { installDir, log, bail, grep, updateBaselines, suiteFiles, suiteTags },
 }) {
   const config = await readConfigFile(log, configPath);
 
@@ -37,6 +37,10 @@ async function createFtr({
         installDir,
       },
       updateBaselines,
+      suiteFiles: {
+        include: [...suiteFiles.include, ...config.get('suiteFiles.include')],
+        exclude: [...suiteFiles.exclude, ...config.get('suiteFiles.exclude')],
+      },
       suiteTags: {
         include: [...suiteTags.include, ...config.get('suiteTags.include')],
         exclude: [...suiteTags.exclude, ...config.get('suiteTags.exclude')],

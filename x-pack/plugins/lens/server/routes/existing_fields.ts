@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient, SavedObject, RequestHandlerContext } from 'src/core/server';
+import { ILegacyScopedClusterClient, SavedObject, RequestHandlerContext } from 'src/core/server';
 import { CoreSetup } from 'src/core/server';
 import { BASE_API_URL } from '../../common';
 import {
@@ -41,19 +41,20 @@ export interface Field {
   script?: string;
 }
 
-// TODO: Pull this from kibana advanced settings
-const metaFields = ['_source', '_id', '_type', '_index', '_score'];
+const metaFields = ['_source', '_type'];
 
 export async function existingFieldsRoute(setup: CoreSetup) {
   const router = setup.http.createRouter();
-  router.get(
+
+  router.post(
     {
       path: `${BASE_API_URL}/existing_fields/{indexPatternId}`,
       validate: {
         params: schema.object({
           indexPatternId: schema.string(),
         }),
-        query: schema.object({
+        body: schema.object({
+          dslQuery: schema.object({}, { unknowns: 'allow' }),
           fromDate: schema.maybe(schema.string()),
           toDate: schema.maybe(schema.string()),
           timeFieldName: schema.maybe(schema.string()),
@@ -64,8 +65,8 @@ export async function existingFieldsRoute(setup: CoreSetup) {
       try {
         return res.ok({
           body: await fetchFieldExistence({
-            ...req.query,
             ...req.params,
+            ...req.body,
             context,
           }),
         });
@@ -91,12 +92,14 @@ export async function existingFieldsRoute(setup: CoreSetup) {
 async function fetchFieldExistence({
   context,
   indexPatternId,
+  dslQuery = { match_all: {} },
   fromDate,
   toDate,
   timeFieldName,
 }: {
   indexPatternId: string;
   context: RequestHandlerContext;
+  dslQuery: object;
   fromDate?: string;
   toDate?: string;
   timeFieldName?: string;
@@ -109,11 +112,11 @@ async function fetchFieldExistence({
   } = await fetchIndexPatternDefinition(indexPatternId, context);
 
   const fields = buildFieldList(indexPattern, mappings, fieldDescriptors);
-
   const docs = await fetchIndexPatternStats({
     fromDate,
     toDate,
-    client: context.core.elasticsearch.dataClient,
+    dslQuery,
+    client: context.core.elasticsearch.legacy.client,
     index: indexPatternTitle,
     timeFieldName: timeFieldName || indexPattern.attributes.timeFieldName,
     fields,
@@ -127,12 +130,24 @@ async function fetchFieldExistence({
 
 async function fetchIndexPatternDefinition(indexPatternId: string, context: RequestHandlerContext) {
   const savedObjectsClient = context.core.savedObjects.client;
-  const requestClient = context.core.elasticsearch.dataClient;
+  const requestClient = context.core.elasticsearch.legacy.client;
   const indexPattern = await savedObjectsClient.get<IndexPatternAttributes>(
     'index-pattern',
     indexPatternId
   );
   const indexPatternTitle = indexPattern.attributes.title;
+
+  if (indexPatternTitle.includes(':')) {
+    // Cross cluster search patterns include a colon, and we aren't able to fetch
+    // mapping information.
+    return {
+      indexPattern,
+      indexPatternTitle,
+      mappings: {},
+      fieldDescriptors: [],
+    };
+  }
+
   // TODO: maybe don't use IndexPatternsFetcher at all, since we're only using it
   // to look up field values in the resulting documents. We can accomplish the same
   // using the mappings which we're also fetching here.
@@ -162,12 +177,12 @@ async function fetchIndexPatternDefinition(indexPatternId: string, context: Requ
  */
 export function buildFieldList(
   indexPattern: SavedObject<IndexPatternAttributes>,
-  mappings: MappingResult,
+  mappings: MappingResult | {},
   fieldDescriptors: FieldDescriptor[]
 ): Field[] {
-  const aliasMap = Object.entries(Object.values(mappings)[0].mappings.properties)
+  const aliasMap = Object.entries(Object.values(mappings)[0]?.mappings.properties ?? {})
     .map(([name, v]) => ({ ...v, name }))
-    .filter(f => f.type === 'alias')
+    .filter((f) => f.type === 'alias')
     .reduce((acc, f) => {
       acc[f.name] = f.path;
       return acc;
@@ -197,24 +212,23 @@ export function buildFieldList(
 async function fetchIndexPatternStats({
   client,
   index,
+  dslQuery,
   timeFieldName,
   fromDate,
   toDate,
   fields,
 }: {
-  client: IScopedClusterClient;
+  client: ILegacyScopedClusterClient;
   index: string;
+  dslQuery: object;
   timeFieldName?: string;
   fromDate?: string;
   toDate?: string;
   fields: Field[];
 }) {
-  let query;
-
-  if (timeFieldName && fromDate && toDate) {
-    query = {
-      bool: {
-        filter: [
+  const filter =
+    timeFieldName && fromDate && toDate
+      ? [
           {
             range: {
               [timeFieldName]: {
@@ -223,21 +237,23 @@ async function fetchIndexPatternStats({
               },
             },
           },
-        ],
-      },
-    };
-  } else {
-    query = {
-      match_all: {},
-    };
-  }
-  const scriptedFields = fields.filter(f => f.isScript);
+          dslQuery,
+        ]
+      : [dslQuery];
 
+  const query = {
+    bool: {
+      filter,
+    },
+  };
+
+  const scriptedFields = fields.filter((f) => f.isScript);
   const result = await client.callAsCurrentUser('search', {
     index,
     body: {
       size: SAMPLE_SIZE,
       query,
+      sort: timeFieldName && fromDate && toDate ? [{ [timeFieldName]: 'desc' }] : [],
       // _source is required because we are also providing script fields.
       _source: '*',
       script_fields: scriptedFields.reduce((acc, field) => {
@@ -251,10 +267,11 @@ async function fetchIndexPatternStats({
       }, {} as Record<string, unknown>),
     },
   });
-
   return result.hits.hits;
 }
 
+// Recursive function to determine if the _source of a document
+// contains a known path.
 function exists(obj: unknown, path: string[], i = 0): boolean {
   if (obj == null) {
     return false;
@@ -265,10 +282,26 @@ function exists(obj: unknown, path: string[], i = 0): boolean {
   }
 
   if (Array.isArray(obj)) {
-    return obj.some(child => exists(child, path, i));
+    return obj.some((child) => exists(child, path, i));
   }
 
   if (typeof obj === 'object') {
+    // Because Elasticsearch flattens paths, dots in the field name are allowed
+    // as JSON keys. For example, { 'a.b': 10 }
+    const partialKeyMatches = Object.getOwnPropertyNames(obj)
+      .map((key) => key.split('.'))
+      .filter((keyPaths) => keyPaths.every((key, keyIndex) => key === path[keyIndex + i]));
+
+    if (partialKeyMatches.length) {
+      return partialKeyMatches.every((keyPaths) => {
+        return exists(
+          (obj as Record<string, unknown>)[keyPaths.join('.')],
+          path,
+          i + keyPaths.length
+        );
+      });
+    }
+
     return exists((obj as Record<string, unknown>)[path[i]], path, i + 1);
   }
 
@@ -289,12 +322,12 @@ export function existingFields(
       break;
     }
 
-    missingFields.forEach(field => {
+    missingFields.forEach((field) => {
       if (exists(field.isScript ? doc.fields : doc._source, field.path)) {
         missingFields.delete(field);
       }
     });
   }
 
-  return fields.filter(field => !missingFields.has(field)).map(f => f.name);
+  return fields.filter((field) => !missingFields.has(field)).map((f) => f.name);
 }

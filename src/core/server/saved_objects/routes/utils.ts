@@ -37,7 +37,26 @@ export function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable) {
     )
     .pipe(
       createFilterStream<SavedObject | SavedObjectsExportResultDetails>(
-        obj => !!obj && !(obj as SavedObjectsExportResultDetails).exportedCount
+        (obj) => !!obj && !(obj as SavedObjectsExportResultDetails).exportedCount
       )
     );
+}
+
+export function validateTypes(types: string[], supportedTypes: string[]): string | undefined {
+  const invalidTypes = types.filter((t) => !supportedTypes.includes(t));
+  if (invalidTypes.length) {
+    return `Trying to export non-exportable type(s): ${invalidTypes.join(', ')}`;
+  }
+}
+
+export function validateObjects(
+  objects: Array<{ id: string; type: string }>,
+  supportedTypes: string[]
+): string | undefined {
+  const invalidObjects = objects.filter((obj) => !supportedTypes.includes(obj.type));
+  if (invalidObjects.length) {
+    return `Trying to export object(s) with non-exportable types: ${invalidObjects
+      .map((obj) => `${obj.type}:${obj.id}`)
+      .join(', ')}`;
+  }
 }

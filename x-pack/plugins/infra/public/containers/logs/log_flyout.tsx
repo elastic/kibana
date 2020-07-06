@@ -8,25 +8,25 @@ import createContainer from 'constate';
 import { isString } from 'lodash';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 
+import { LogEntriesItem } from '../../../common/http_api';
 import { UrlStateContainer } from '../../utils/url_state';
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
-import { Source } from '../source';
 import { fetchLogEntriesItem } from './log_entries/api/fetch_log_entries_item';
-import { LogEntriesItem } from '../../../common/http_api';
+import { useLogSourceContext } from './log_source';
 
 export enum FlyoutVisibility {
   hidden = 'hidden',
   visible = 'visible',
 }
 
-interface FlyoutOptionsUrlState {
+export interface FlyoutOptionsUrlState {
   flyoutId?: string | null;
   flyoutVisibility?: string | null;
   surroundingLogsId?: string | null;
 }
 
 export const useLogFlyout = () => {
-  const { sourceId } = useContext(Source.Context);
+  const { sourceId } = useLogSourceContext();
   const [flyoutVisible, setFlyoutVisibility] = useState<boolean>(false);
   const [flyoutId, setFlyoutId] = useState<string | null>(null);
   const [flyoutItem, setFlyoutItem] = useState<LogEntriesItem | null>(null);
@@ -41,7 +41,7 @@ export const useLogFlyout = () => {
         }
         return await fetchLogEntriesItem({ sourceId, id: flyoutId });
       },
-      onResolve: response => {
+      onResolve: (response) => {
         if (response) {
           const { data } = response;
           setFlyoutItem(data || null);
@@ -94,7 +94,7 @@ export const WithFlyoutOptionsUrlState = () => {
       }}
       urlStateKey="flyoutOptions"
       mapToUrlState={mapToUrlState}
-      onChange={newUrlState => {
+      onChange={(newUrlState) => {
         if (newUrlState && newUrlState.flyoutId) {
           setFlyoutId(newUrlState.flyoutId);
         }
@@ -108,7 +108,7 @@ export const WithFlyoutOptionsUrlState = () => {
           setFlyoutVisibility(false);
         }
       }}
-      onInitialize={initialUrlState => {
+      onInitialize={(initialUrlState) => {
         if (initialUrlState && initialUrlState.flyoutId) {
           setFlyoutId(initialUrlState.flyoutId);
         }

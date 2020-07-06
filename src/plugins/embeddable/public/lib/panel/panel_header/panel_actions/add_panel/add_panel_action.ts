@@ -19,23 +19,24 @@
 import { i18n } from '@kbn/i18n';
 import { Action } from 'src/plugins/ui_actions/public';
 import { NotificationsStart, OverlayStart } from 'src/core/public';
-import { ViewMode, GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
+import { EmbeddableStart } from 'src/plugins/embeddable/public/plugin';
+import { ViewMode } from '../../../../types';
 import { openAddPanelFlyout } from './open_add_panel_flyout';
 import { IContainer } from '../../../../containers';
 
-export const ADD_PANEL_ACTION_ID = 'ADD_PANEL_ACTION_ID';
+export const ACTION_ADD_PANEL = 'ACTION_ADD_PANEL';
 
 interface ActionContext {
   embeddable: IContainer;
 }
 
 export class AddPanelAction implements Action<ActionContext> {
-  public readonly type = ADD_PANEL_ACTION_ID;
-  public readonly id = ADD_PANEL_ACTION_ID;
+  public readonly type = ACTION_ADD_PANEL;
+  public readonly id = ACTION_ADD_PANEL;
 
   constructor(
-    private readonly getFactory: GetEmbeddableFactory,
-    private readonly getAllFactories: GetEmbeddableFactories,
+    private readonly getFactory: EmbeddableStart['getEmbeddableFactory'],
+    private readonly getAllFactories: EmbeddableStart['getEmbeddableFactories'],
     private readonly overlays: OverlayStart,
     private readonly notifications: NotificationsStart,
     private readonly SavedObjectFinder: React.ComponentType<any>

@@ -40,7 +40,7 @@ export async function retryForTruthy(
     methodName,
     block,
     onFailureBlock,
-    onFailure: lastError => {
+    onFailure: (lastError) => {
       let msg = `timed out waiting for ${description}`;
 
       if (lastError) {
@@ -49,6 +49,6 @@ export async function retryForTruthy(
 
       throw new Error(msg);
     },
-    accept: result => Boolean(result),
+    accept: (result) => Boolean(result),
   });
 }

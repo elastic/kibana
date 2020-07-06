@@ -90,7 +90,7 @@ export function createTaskPoller<T, H>({
       closeSleepPerf();
       return mapResult<H, Error, Result<H, PollingError<T>>>(
         await promiseResult<H, Error>(work(...pullFromSet(set, getCapacity()))),
-        workResult => asOk(workResult),
+        (workResult) => asOk(workResult),
         (err: Error) => {
           return asPollingError<T>(err, PollingErrorType.WorkError);
         }
@@ -116,7 +116,7 @@ function pushOptionalIntoSet<T>(
 ): Result<Set<T>, Set<T>> {
   return pipe(
     value,
-    mapOptional<T, Result<Set<T>, Set<T>>>(req => {
+    mapOptional<T, Result<Set<T>, Set<T>>>((req) => {
       if (set.size >= maxCapacity) {
         return asErr(set);
       }

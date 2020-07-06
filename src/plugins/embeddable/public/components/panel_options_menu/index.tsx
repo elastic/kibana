@@ -45,7 +45,7 @@ export const PanelOptionsMenu: React.FC<PanelOptionsMenuProps> = ({
   }, [close]);
 
   const handleContextMenuClick = () => {
-    setOpen(isOpen => !isOpen);
+    setOpen((isOpen) => !isOpen);
   };
 
   const handlePopoverClose = () => {
@@ -61,9 +61,7 @@ export const PanelOptionsMenu: React.FC<PanelOptionsMenuProps> = ({
   );
   const ariaLabelWithoutTitle = i18n.translate(
     'embeddableApi.panel.optionsMenu.panelOptionsButtonAriaLabel',
-    {
-      defaultMessage: 'Panel options',
-    }
+    { defaultMessage: 'Panel options' }
   );
 
   const button = (

@@ -6,6 +6,7 @@
 
 export interface Service {
   name: string;
+  environment?: string;
   framework?: {
     name: string;
     version: string;

@@ -4,15 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'src/core/server';
+import { LegacyAPICaller, LegacyCallAPIOptions } from 'src/core/server';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { IndexPatternsFetcher, IIndexPattern } from '../../../../../../src/plugins/data/server';
-import { INDEX_NAMES } from '../../../../../legacy/plugins/uptime/common/constants';
 
-export const getUptimeIndexPattern: UMElasticsearchQueryFn<any, {}> = async callES => {
-  const indexPatternsFetcher = new IndexPatternsFetcher((...rest: Parameters<APICaller>) =>
-    callES(...rest)
-  );
+export const getUptimeIndexPattern: UMElasticsearchQueryFn<{}, IIndexPattern | undefined> = async ({
+  callES,
+  dynamicSettings,
+}) => {
+  const callAsCurrentUser: LegacyAPICaller = async (
+    endpoint: string,
+    clientParams: Record<string, any> = {},
+    options?: LegacyCallAPIOptions
+  ) => callES(endpoint, clientParams, options);
+  const indexPatternsFetcher = new IndexPatternsFetcher(callAsCurrentUser);
 
   // Since `getDynamicIndexPattern` is called in setup_request (and thus by every endpoint)
   // and since `getFieldsForWildcard` will throw if the specified indices don't exist,
@@ -20,12 +25,12 @@ export const getUptimeIndexPattern: UMElasticsearchQueryFn<any, {}> = async call
   // (would be a bad first time experience)
   try {
     const fields = await indexPatternsFetcher.getFieldsForWildcard({
-      pattern: INDEX_NAMES.HEARTBEAT,
+      pattern: dynamicSettings.heartbeatIndices,
     });
 
     const indexPattern: IIndexPattern = {
       fields,
-      title: INDEX_NAMES.HEARTBEAT,
+      title: dynamicSettings.heartbeatIndices,
     };
 
     return indexPattern;
@@ -34,7 +39,7 @@ export const getUptimeIndexPattern: UMElasticsearchQueryFn<any, {}> = async call
     if (notExists) {
       // eslint-disable-next-line no-console
       console.error(
-        `Could not get dynamic index pattern because indices "${INDEX_NAMES.HEARTBEAT}" don't exist`
+        `Could not get dynamic index pattern because indices "${dynamicSettings.heartbeatIndices}" don't exist`
       );
       return;
     }

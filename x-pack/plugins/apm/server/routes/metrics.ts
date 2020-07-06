@@ -14,18 +14,18 @@ export const metricsChartsRoute = createRoute(() => ({
   path: `/api/apm/services/{serviceName}/metrics/charts`,
   params: {
     path: t.type({
-      serviceName: t.string
+      serviceName: t.string,
     }),
     query: t.intersection([
       t.type({
-        agentName: t.string
+        agentName: t.string,
       }),
       t.partial({
-        serviceNodeName: t.string
+        serviceNodeName: t.string,
       }),
       uiFiltersRt,
-      rangeRt
-    ])
+      rangeRt,
+    ]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
@@ -36,7 +36,7 @@ export const metricsChartsRoute = createRoute(() => ({
       setup,
       serviceName,
       agentName,
-      serviceNodeName
+      serviceNodeName,
     });
-  }
+  },
 }));

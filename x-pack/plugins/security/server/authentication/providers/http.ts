@@ -7,7 +7,7 @@
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { getHTTPAuthenticationScheme } from '../get_http_authentication_scheme';
+import { HTTPAuthorizationHeader } from '../http_authentication';
 import { AuthenticationProviderOptions, BaseAuthenticationProvider } from './base';
 
 interface HTTPAuthenticationProviderOptions {
@@ -38,7 +38,9 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
     if ((httpOptions?.supportedSchemes?.size ?? 0) === 0) {
       throw new Error('Supported schemes should be specified');
     }
-    this.supportedSchemes = httpOptions.supportedSchemes;
+    this.supportedSchemes = new Set(
+      [...httpOptions.supportedSchemes].map((scheme) => scheme.toLowerCase())
+    );
   }
 
   /**
@@ -56,26 +58,26 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
   public async authenticate(request: KibanaRequest) {
     this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
-    const authenticationScheme = getHTTPAuthenticationScheme(request);
-    if (authenticationScheme == null) {
+    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+    if (authorizationHeader == null) {
       this.logger.debug('Authorization header is not presented.');
       return AuthenticationResult.notHandled();
     }
 
-    if (!this.supportedSchemes.has(authenticationScheme)) {
-      this.logger.debug(`Unsupported authentication scheme: ${authenticationScheme}`);
+    if (!this.supportedSchemes.has(authorizationHeader.scheme.toLowerCase())) {
+      this.logger.debug(`Unsupported authentication scheme: ${authorizationHeader.scheme}`);
       return AuthenticationResult.notHandled();
     }
 
     try {
       const user = await this.getUser(request);
       this.logger.debug(
-        `Request to ${request.url.path} has been authenticated via authorization header with "${authenticationScheme}" scheme.`
+        `Request to ${request.url.path} has been authenticated via authorization header with "${authorizationHeader.scheme}" scheme.`
       );
       return AuthenticationResult.succeeded(user);
     } catch (err) {
       this.logger.debug(
-        `Failed to authenticate request to ${request.url.path} via authorization header with "${authenticationScheme}" scheme: ${err.message}`
+        `Failed to authenticate request to ${request.url.path} via authorization header with "${authorizationHeader.scheme}" scheme: ${err.message}`
       );
       return AuthenticationResult.failed(err);
     }

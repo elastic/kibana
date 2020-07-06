@@ -1,8 +1,8 @@
 [[managing-fields]]
-== Index Patterns and Fields
+== Index patterns and fields
 
 The *Index patterns* UI helps you create and manage
-the index patterns that retrieve your data from Elasticsearch.
+the index patterns that retrieve your data from {es}.
 
 [role="screenshot"]
 image::images/management-index-patterns.png[]
@@ -10,8 +10,8 @@ image::images/management-index-patterns.png[]
 [float]
 === Create an index pattern
 
-An index pattern is the glue that connects Kibana to your Elasticsearch data. Create an
-index pattern whenever you load your own data into Kibana. To get started,
+An index pattern is the glue that connects {kib} to your {es} data. Create an
+index pattern whenever you load your own data into {kib}. To get started,
 click *Create index pattern*, and then follow the guided steps. Refer to
 <<index-patterns, Creating an index pattern>> for the types of index patterns
 that you can create.
@@ -25,7 +25,7 @@ the *Index patterns* overview.
 [role="screenshot"]
 image::management/index-patterns/images/new-index-pattern.png["Index files and data types"]
 
-Use the icons in the upper right to perform the following actions:
+Use the icons to perform the following actions:
 
 * [[set-default-pattern]]*Set the default index pattern.* {kib} uses a badge to make users
 aware of which index pattern is the default. The first pattern
@@ -33,7 +33,7 @@ you create is automatically designated as the default pattern. The default
 index pattern is loaded when you open *Discover*.
 
 * *Refresh the index fields list.* You can refresh the index fields list to
-pick up any newly-added fields. Doing so also resets Kibana’s popularity counters
+pick up any newly-added fields. Doing so also resets the {kib} popularity counters
 for the fields. The popularity counters are used in *Discover* to sort fields in lists.
 
 * [[delete-pattern]]*Delete the index pattern.* This action removes the pattern from the list of
@@ -60,7 +60,7 @@ Kibana has field formatters for the following field types:
 * <<field-formatters-numeric, Numbers>>
 
 [[field-formatters-string]]
-=== String Field Formatters
+=== String field formatters
 
 String fields support the `String` and `Url` formatters.
 
@@ -69,7 +69,7 @@ include::field-formatters/string-formatter.asciidoc[]
 include::field-formatters/url-formatter.asciidoc[]
 
 [[field-formatters-date]]
-=== Date Field Formatters
+=== Date field formatters
 
 Date fields support the `Date`, `Url`, and `String` formatters.
 
@@ -81,19 +81,19 @@ include::field-formatters/string-formatter.asciidoc[]
 include::field-formatters/url-formatter.asciidoc[]
 
 [[field-formatters-geopoint]]
-=== Geographic Point Field Formatters
+=== Geographic point field formatters
 
 Geographic point fields support the `String` formatter.
 
 include::field-formatters/string-formatter.asciidoc[]
 
 [[field-formatters-numeric]]
-=== Numeric Field Formatters
+=== Numeric field formatters
 
 Numeric fields support the `Url`, `Bytes`, `Duration`, `Number`, `Percentage`, `String`, and `Color` formatters.
 
 The `Bytes`, `Number`, and `Percentage` formatters enable you to choose the display formats of numbers in this field using
-the <<numeral, Elastic numeral pattern>> syntax that Kibana maintains.
+the <<numeral, Elastic numeral pattern>> syntax that {kib} maintains.
 
 include::field-formatters/url-formatter.asciidoc[]
 
@@ -104,25 +104,22 @@ include::field-formatters/duration-formatter.asciidoc[]
 include::field-formatters/color-formatter.asciidoc[]
 
 [[scripted-fields]]
-=== Scripted Fields
+=== Scripted fields
 
-Scripted fields compute data on the fly from the data in your Elasticsearch indices. Scripted field data is shown on
-the Discover tab as part of the document data, and you can use scripted fields in your visualizations.
-Scripted field values are computed at query time so they aren't indexed and cannot be searched using Kibana's default
-query language. However they can be queried using Kibana's new <<kuery-query, experimental query language>>. Scripted
-fields are also supported in the filter bar.
+Scripted fields compute data on the fly from the data in your {es} indices. The data is shown on
+the Discover tab as part of the document data, and you can use scripted fields in your visualizations. You query scripted fields with the <<kuery-query, {kib} query language>>, and can filter them using the filter bar. The scripted field values are computed at query time, so they aren't indexed and cannot be searched using the {kib} default
+query language.
 
 WARNING: Computing data on the fly with scripted fields can be very resource intensive and can have a direct impact on
-Kibana's performance. Keep in mind that there's no built-in validation of a scripted field. If your scripts are
+{kib} performance. Keep in mind that there's no built-in validation of a scripted field. If your scripts are
 buggy, you'll get exceptions whenever you try to view the dynamically generated data.
 
-When you define a scripted field in Kibana, you have a choice of scripting languages. Starting with 5.0, the default
+When you define a scripted field in {kib}, you have a choice of scripting languages. In 5.0 and later, the default
 options are {ref}/modules-scripting-expression.html[Lucene expressions] and {ref}/modules-scripting-painless.html[Painless].
-While you can use other scripting languages if you enable dynamic scripting for them in Elasticsearch, this is not recommended
+While you can use other scripting languages if you enable dynamic scripting for them in {es}, this is not recommended
 because they cannot be sufficiently {ref}/modules-scripting-security.html[sandboxed].
 
-WARNING: Use of Groovy, JavaScript, and Python scripting is deprecated starting in Elasticsearch 5.0, and support for those
-scripting languages will be removed in the future.
+WARNING: In 5.0 and later, Groovy, JavaScript, and Python scripting are deprecated and unsupported.
 
 You can reference any single value numeric field in your expressions, for example:
 
@@ -130,44 +127,38 @@ You can reference any single value numeric field in your expressions, for exampl
 doc['field_name'].value
 ----
 
-For more background on scripted fields and additional examples, refer to this blog:
-https://www.elastic.co/blog/using-painless-kibana-scripted-fields[Using Painless in Kibana scripted fields]
+For more information on scripted fields and additional examples, refer to
+https://www.elastic.co/blog/using-painless-kibana-scripted-fields[Using Painless in {kib} scripted fields]
 
 [float]
 [[create-scripted-field]]
-=== Creating a Scripted Field
-To create a scripted field:
+=== Create a scripted field
 
-. Go to *Management > Kibana > Index Patterns*
+. Open the menu, then go to *Stack Management > {kib} > Index Patterns*
 . Select the index pattern you want to add a scripted field to.
-. Go to the pattern's *Scripted fields* tab.
-. Click *Add scripted field*.
+. Go to the *Scripted fields* tab for the index pattern, then click *Add scripted field*.
 . Enter a name for the scripted field.
 . Enter the expression that you want to use to compute a value on the fly from your index data.
 . Click *Create field*.
 
-For more information about scripted fields in Elasticsearch, see
+For more information about scripted fields in {es}, see
 {ref}/modules-scripting.html[Scripting].
 
 [float]
 [[update-scripted-field]]
-=== Updating a Scripted Field
-To modify a scripted field:
+=== Update a scripted field
 
-. Go to *Management > Kibana > Index Patterns*
-. Click the index pattern's *Scripted fields* tab.
+. Click the *Scripted fields* tab for the index pattern.
 . Click the *Edit* button for the scripted field you want to change.
-. Make your changes and then click *Save field* to update the field.
+. Make your changes, then click *Save field*.
 
-WARNING: Keep in mind that there's no built-in validation of a scripted field. If your scripts are buggy, you'll get
+WARNING: Built-in validation is unsupported for scripted fields. If your scripts are buggy, you'll get
 exceptions whenever you try to view the dynamically generated data.
 
 [float]
 [[delete-scripted-field]]
-=== Deleting a Scripted Field
-To delete a scripted field:
+=== Delete a scripted field
 
-. Go to *Management > Kibana > Index Patterns*
-. Click the index pattern's *Scripted fields* tab.
-. Click the *Delete* button for the scripted field you want to remove.
-. Click *Delete* in the confirmation window.
+. Click the *Scripted fields* tab for the index pattern.
+. Click *Delete* for the scripted field you want to remove.
+. Click *Delete* on the confirmation window.

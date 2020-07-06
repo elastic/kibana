@@ -4,7 +4,7 @@
   "server": true,
   "ui": true,
   "requiredPlugins": [
-    "bfetch",
-    "inspector"
-  ]
+    "bfetch"
+  ],
+  "extraPublicDirs": ["common", "common/fonts"]
 }

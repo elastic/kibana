@@ -18,29 +18,41 @@
  */
 
 import { getEsPreference } from './get_es_preference';
-
-jest.useFakeTimers();
+import { CoreStart } from '../../../../../core/public';
+import { coreMock } from '../../../../../core/public/mocks';
+import { UI_SETTINGS } from '../../../common';
 
 describe('Get ES preference', () => {
+  let mockCoreStart: MockedKeys<CoreStart>;
+
+  beforeEach(() => {
+    mockCoreStart = coreMock.createStart();
+  });
+
   test('returns the session ID if set to sessionId', () => {
-    const setPreference = 'sessionId';
-    const customPreference = 'foobar';
-    const sessionId = 'my_session_id';
-    const preference = getEsPreference(setPreference, customPreference, sessionId);
-    expect(preference).toBe(sessionId);
+    mockCoreStart.uiSettings.get.mockImplementation((key: string) => {
+      if (key === UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE) return 'sessionId';
+      if (key === UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE) return 'foobar';
+    });
+    const preference = getEsPreference(mockCoreStart.uiSettings, 'my_session_id');
+    expect(preference).toBe('my_session_id');
   });
 
   test('returns the custom preference if set to custom', () => {
-    const setPreference = 'custom';
-    const customPreference = 'foobar';
-    const preference = getEsPreference(setPreference, customPreference);
-    expect(preference).toBe(customPreference);
+    mockCoreStart.uiSettings.get.mockImplementation((key: string) => {
+      if (key === UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE) return 'custom';
+      if (key === UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE) return 'foobar';
+    });
+    const preference = getEsPreference(mockCoreStart.uiSettings);
+    expect(preference).toBe('foobar');
   });
 
   test('returns undefined if set to none', () => {
-    const setPreference = 'none';
-    const customPreference = 'foobar';
-    const preference = getEsPreference(setPreference, customPreference);
+    mockCoreStart.uiSettings.get.mockImplementation((key: string) => {
+      if (key === UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE) return 'none';
+      if (key === UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE) return 'foobar';
+    });
+    const preference = getEsPreference(mockCoreStart.uiSettings);
     expect(preference).toBe(undefined);
   });
 });

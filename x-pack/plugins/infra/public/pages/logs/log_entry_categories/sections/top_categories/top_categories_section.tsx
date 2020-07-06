@@ -25,6 +25,7 @@ export const TopCategoriesSection: React.FunctionComponent<{
   onChangeDatasetSelection: (datasets: string[]) => void;
   onRequestRecreateMlJob: () => void;
   selectedDatasets: string[];
+  sourceId: string;
   timeRange: TimeRange;
   topCategories: LogEntryCategory[];
 }> = ({
@@ -35,6 +36,7 @@ export const TopCategoriesSection: React.FunctionComponent<{
   onChangeDatasetSelection,
   onRequestRecreateMlJob,
   selectedDatasets,
+  sourceId,
   timeRange,
   topCategories,
 }) => {
@@ -67,7 +69,12 @@ export const TopCategoriesSection: React.FunctionComponent<{
         isLoading={isLoadingTopCategories}
         loadingChildren={<LoadingOverlayContent />}
       >
-        <TopCategoriesTable timeRange={timeRange} topCategories={topCategories} />
+        <TopCategoriesTable
+          categorizationJobId={jobId}
+          sourceId={sourceId}
+          timeRange={timeRange}
+          topCategories={topCategories}
+        />
       </LoadingOverlayWrapper>
     </>
   );

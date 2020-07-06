@@ -21,6 +21,6 @@ export { PromiseServiceCreator } from './promises';
 // @ts-ignore
 export { watchMultiDecorator } from './watch_multi';
 export * from './angular_config';
-export { ensureDefaultIndexPattern } from './ensure_default_index_pattern';
 // @ts-ignore
 export { createTopNavDirective, createTopNavHelper, loadKbnTopNavDirectives } from './kbn_top_nav';
+export { subscribeWithScope } from './subscribe_with_scope';

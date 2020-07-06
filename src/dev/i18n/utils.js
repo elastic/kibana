@@ -55,7 +55,7 @@ export function normalizePath(inputPath) {
 }
 
 export function difference(left = [], right = []) {
-  return left.filter(value => !right.includes(value));
+  return left.filter((value) => !right.includes(value));
 }
 
 export function isPropertyWithKey(property, identifierName) {
@@ -103,7 +103,9 @@ export function* traverseNodes(nodes) {
 
     // if node is an object / array, traverse all of its object values
     if (node && typeof node === 'object') {
-      yield* traverseNodes(Object.values(node).filter(value => value && typeof value === 'object'));
+      yield* traverseNodes(
+        Object.values(node).filter((value) => value && typeof value === 'object')
+      );
     }
   }
 }
@@ -187,7 +189,7 @@ export function checkValuesProperty(prefixedValuesKeys, defaultMessage, messageI
     return;
   }
 
-  const valuesKeys = prefixedValuesKeys.map(key =>
+  const valuesKeys = prefixedValuesKeys.map((key) =>
     key.startsWith(HTML_KEY_PREFIX) ? key.slice(HTML_KEY_PREFIX.length) : key
   );
 
@@ -206,6 +208,28 @@ export function checkValuesProperty(prefixedValuesKeys, defaultMessage, messageI
   }
 }
 
+/**
+ * Verifies valid ICU message.
+ * @param message ICU message.
+ * @param messageId ICU message id
+ * @returns {undefined}
+ */
+export function verifyICUMessage(message) {
+  try {
+    parser.parse(message);
+  } catch (error) {
+    if (error.name === 'SyntaxError') {
+      const errorWithContext = createParserErrorMessage(message, {
+        loc: {
+          line: error.location.start.line,
+          column: error.location.start.column - 1,
+        },
+        message: error.message,
+      });
+      throw errorWithContext;
+    }
+  }
+}
 /**
  * Extracts value references from the ICU message.
  * @param message ICU message.
@@ -309,7 +333,7 @@ export function extractValuesKeysFromNode(node, messageId) {
     throw createFailError(`"values" value should be an inline object literal ("${messageId}").`);
   }
 
-  return node.properties.map(property =>
+  return node.properties.map((property) =>
     isStringLiteral(property.key) ? property.key.value : property.key.name
   );
 }
@@ -318,7 +342,7 @@ export class ErrorReporter {
   errors = [];
 
   withContext(context) {
-    return { report: error => this.report(error, context) };
+    return { report: (error) => this.report(error, context) };
   }
 
   report(error, context) {

@@ -15,9 +15,24 @@ describe('getUpgradeAssistantStatus', () => {
   let deprecationsResponse: DeprecationAPIResponse;
 
   const dataClient = elasticsearchServiceMock.createScopedClusterClient();
-  (dataClient.callAsCurrentUser as jest.Mock).mockImplementation(async (api, { path }) => {
+  (dataClient.callAsCurrentUser as jest.Mock).mockImplementation(async (api, { path, index }) => {
     if (path === '/_migration/deprecations') {
       return deprecationsResponse;
+    } else if (api === 'cluster.state') {
+      return {
+        metadata: {
+          indices: {
+            ...index.reduce((acc: any, i: any) => {
+              return {
+                ...acc,
+                [i]: {
+                  state: 'open',
+                },
+              };
+            }, {}),
+          },
+        },
+      };
     } else if (api === 'indices.getMapping') {
       return {};
     } else {

@@ -6,9 +6,19 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import createContainer from 'constate';
+import { useSetState } from 'react-use';
 import { TimeKey } from '../../../../common/time';
+import { datemathToEpochMillis, isValidDatemath } from '../../../utils/datemath';
 
 type TimeKeyOrNull = TimeKey | null;
+
+interface DateRange {
+  startDateExpression: string;
+  endDateExpression: string;
+  startTimestamp: number;
+  endTimestamp: number;
+  timestampsLastUpdate: number;
+}
 
 interface VisiblePositions {
   startKey: TimeKeyOrNull;
@@ -19,23 +29,34 @@ interface VisiblePositions {
 }
 
 export interface LogPositionStateParams {
+  isInitialized: boolean;
   targetPosition: TimeKeyOrNull;
-  isAutoReloading: boolean;
+  isStreaming: boolean;
   firstVisiblePosition: TimeKeyOrNull;
   pagesBeforeStart: number;
   pagesAfterEnd: number;
   visibleMidpoint: TimeKeyOrNull;
   visibleMidpointTime: number | null;
   visibleTimeInterval: { start: number; end: number } | null;
+  startDateExpression: string;
+  endDateExpression: string;
+  startTimestamp: number | null;
+  endTimestamp: number | null;
+  timestampsLastUpdate: number;
 }
 
 export interface LogPositionCallbacks {
+  initialize: () => void;
   jumpToTargetPosition: (pos: TimeKeyOrNull) => void;
   jumpToTargetPositionTime: (time: number) => void;
   reportVisiblePositions: (visPos: VisiblePositions) => void;
   startLiveStreaming: () => void;
   stopLiveStreaming: () => void;
+  updateDateRange: (newDateRage: Partial<DateRange>) => void;
 }
+
+const DEFAULT_DATE_RANGE = { startDateExpression: 'now-1d', endDateExpression: 'now' };
+const DESIRED_BUFFER_PAGES = 2;
 
 const useVisibleMidpoint = (middleKey: TimeKeyOrNull, targetPosition: TimeKeyOrNull) => {
   // Of the two dependencies `middleKey` and `targetPosition`, return
@@ -60,14 +81,33 @@ const useVisibleMidpoint = (middleKey: TimeKeyOrNull, targetPosition: TimeKeyOrN
 };
 
 export const useLogPositionState: () => LogPositionStateParams & LogPositionCallbacks = () => {
+  // Flag to determine if `LogPositionState` has been fully initialized.
+  //
+  // When the page loads, there might be initial state in the URL. We want to
+  // prevent the entries from showing until we have processed that initial
+  // state. That prevents double fetching.
+  const [isInitialized, setInitialized] = useState<boolean>(false);
+  const initialize = useCallback(() => {
+    setInitialized(true);
+  }, [setInitialized]);
+
   const [targetPosition, jumpToTargetPosition] = useState<TimeKey | null>(null);
-  const [isAutoReloading, setIsAutoReloading] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
   const [visiblePositions, reportVisiblePositions] = useState<VisiblePositions>({
     endKey: null,
     middleKey: null,
     startKey: null,
     pagesBeforeStart: Infinity,
     pagesAfterEnd: Infinity,
+  });
+
+  // We group the `startDate` and `endDate` values in the same object to be able
+  // to set both at the same time, saving a re-render
+  const [dateRange, setDateRange] = useSetState<DateRange>({
+    ...DEFAULT_DATE_RANGE,
+    startTimestamp: datemathToEpochMillis(DEFAULT_DATE_RANGE.startDateExpression)!,
+    endTimestamp: datemathToEpochMillis(DEFAULT_DATE_RANGE.endDateExpression, 'up')!,
+    timestampsLastUpdate: Date.now(),
   });
 
   const { startKey, middleKey, endKey, pagesBeforeStart, pagesAfterEnd } = visiblePositions;
@@ -79,26 +119,87 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     [startKey, endKey]
   );
 
+  // Allow setting `startDate` and `endDate` separately, or together
+  const updateDateRange = useCallback(
+    (newDateRange: Partial<DateRange>) => {
+      // Prevent unnecessary re-renders
+      if (!('startDateExpression' in newDateRange) && !('endDateExpression' in newDateRange)) {
+        return;
+      }
+
+      const nextStartDateExpression =
+        newDateRange.startDateExpression || dateRange.startDateExpression;
+      const nextEndDateExpression = newDateRange.endDateExpression || dateRange.endDateExpression;
+
+      if (!isValidDatemath(nextStartDateExpression) || !isValidDatemath(nextEndDateExpression)) {
+        return;
+      }
+
+      // Dates are valid, so the function cannot return `null`
+      const nextStartTimestamp = datemathToEpochMillis(nextStartDateExpression)!;
+      const nextEndTimestamp = datemathToEpochMillis(nextEndDateExpression, 'up')!;
+
+      // Reset the target position if it doesn't fall within the new range.
+      if (
+        targetPosition &&
+        (nextStartTimestamp > targetPosition.time || nextEndTimestamp < targetPosition.time)
+      ) {
+        jumpToTargetPosition(null);
+      }
+
+      setDateRange({
+        ...newDateRange,
+        startTimestamp: nextStartTimestamp,
+        endTimestamp: nextEndTimestamp,
+        timestampsLastUpdate: Date.now(),
+      });
+    },
+    [setDateRange, dateRange, targetPosition]
+  );
+
+  // `endTimestamp` update conditions
+  useEffect(() => {
+    if (dateRange.endDateExpression !== 'now') {
+      return;
+    }
+
+    // User is close to the bottom edge of the scroll.
+    if (visiblePositions.pagesAfterEnd <= DESIRED_BUFFER_PAGES) {
+      setDateRange({
+        endTimestamp: datemathToEpochMillis(dateRange.endDateExpression, 'up')!,
+        timestampsLastUpdate: Date.now(),
+      });
+    }
+  }, [dateRange.endDateExpression, visiblePositions, setDateRange]);
+
   const state = {
+    isInitialized,
     targetPosition,
-    isAutoReloading,
+    isStreaming,
     firstVisiblePosition: startKey,
     pagesBeforeStart,
     pagesAfterEnd,
     visibleMidpoint,
     visibleMidpointTime: visibleMidpoint ? visibleMidpoint.time : null,
     visibleTimeInterval,
+    ...dateRange,
   };
 
   const callbacks = {
+    initialize,
     jumpToTargetPosition,
     jumpToTargetPositionTime: useCallback(
       (time: number) => jumpToTargetPosition({ tiebreaker: 0, time }),
       [jumpToTargetPosition]
     ),
     reportVisiblePositions,
-    startLiveStreaming: useCallback(() => setIsAutoReloading(true), [setIsAutoReloading]),
-    stopLiveStreaming: useCallback(() => setIsAutoReloading(false), [setIsAutoReloading]),
+    startLiveStreaming: useCallback(() => {
+      setIsStreaming(true);
+      jumpToTargetPosition(null);
+      updateDateRange({ startDateExpression: 'now-1d', endDateExpression: 'now' });
+    }, [setIsStreaming, updateDateRange]),
+    stopLiveStreaming: useCallback(() => setIsStreaming(false), [setIsStreaming]),
+    updateDateRange,
   };
 
   return { ...state, ...callbacks };

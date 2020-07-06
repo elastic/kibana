@@ -5,9 +5,8 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { OverviewFilters } from '../../../../../legacy/plugins/uptime/common/runtime_types';
+import { OverviewFilters } from '../../../common/runtime_types';
 import { generateFilterAggs } from './generate_filter_aggs';
-import { INDEX_NAMES } from '../../../../../legacy/plugins/uptime/common/constants';
 
 export interface GetFilterBarParams {
   /** @param dateRangeStart timestamp bounds */
@@ -34,12 +33,12 @@ export const combineRangeWithFilters = (
       },
     },
   };
-  if (!filters) return range;
+  if (!filters?.bool) return range;
   const clientFiltersList = Array.isArray(filters?.bool?.filter ?? {})
     ? // i.e. {"bool":{"filter":{ ...some nested filter objects }}}
       filters.bool.filter
     : // i.e. {"bool":{"filter":[ ...some listed filter objects ]}}
-      Object.keys(filters?.bool?.filter ?? {}).map(key => ({
+      Object.keys(filters?.bool?.filter ?? {}).map((key) => ({
         ...filters?.bool?.filter?.[key],
       }));
   filters.bool.filter = [...clientFiltersList, range];
@@ -58,8 +57,8 @@ export const extractFilterAggsResults = (
     schemes: [],
     tags: [],
   };
-  keys.forEach(key => {
-    const buckets = responseAggregations[key]?.term?.buckets ?? [];
+  keys.forEach((key) => {
+    const buckets = responseAggregations?.[key]?.term?.buckets ?? [];
     values[key] = buckets.map((item: { key: string | number }) => item.key);
   });
   return values;
@@ -67,6 +66,7 @@ export const extractFilterAggsResults = (
 
 export const getFilterBar: UMElasticsearchQueryFn<GetFilterBarParams, OverviewFilters> = async ({
   callES,
+  dynamicSettings,
   dateRangeStart,
   dateRangeEnd,
   search,
@@ -83,7 +83,7 @@ export const getFilterBar: UMElasticsearchQueryFn<GetFilterBarParams, OverviewFi
   );
   const filters = combineRangeWithFilters(dateRangeStart, dateRangeEnd, search);
   const params = {
-    index: INDEX_NAMES.HEARTBEAT,
+    index: dynamicSettings.heartbeatIndices,
     body: {
       size: 0,
       query: {

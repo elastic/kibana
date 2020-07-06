@@ -18,24 +18,34 @@
  */
 
 import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { IIndexPattern, IFieldType } from '../..';
 import { getIndexPatternFromFilter } from './get_index_pattern_from_filter';
 import { Filter } from '../filters';
 
 function getValueFormatter(indexPattern?: IIndexPattern, key?: string) {
   if (!indexPattern || !key) return;
+
   let format = get(indexPattern, ['fields', 'byName', key, 'format']);
   if (!format && (indexPattern.fields as any).getByName) {
     // TODO: Why is indexPatterns sometimes a map and sometimes an array?
-    format = ((indexPattern.fields as any).getByName(key) as IFieldType).format;
+    const field: IFieldType = (indexPattern.fields as any).getByName(key);
+    if (!field) {
+      throw new Error(
+        i18n.translate('data.filter.filterBar.fieldNotFound', {
+          defaultMessage: 'Field {key} not found in index pattern {indexPattern}',
+          values: { key, indexPattern: indexPattern.title },
+        })
+      );
+    }
+    format = field.format;
   }
   return format;
 }
 
 export function getDisplayValueFromFilter(filter: Filter, indexPatterns: IIndexPattern[]): string {
-  const indexPattern = getIndexPatternFromFilter(filter, indexPatterns);
-
   if (typeof filter.meta.value === 'function') {
+    const indexPattern = getIndexPatternFromFilter(filter, indexPatterns);
     const valueFormatter: any = getValueFormatter(indexPattern, filter.meta.key);
     return filter.meta.value(valueFormatter);
   } else {

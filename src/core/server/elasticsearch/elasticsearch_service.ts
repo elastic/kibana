@@ -33,19 +33,27 @@ import { CoreService } from '../../types';
 import { merge } from '../../utils';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import { ClusterClient, ScopeableRequest } from './cluster_client';
-import { ElasticsearchClientConfig } from './elasticsearch_client_config';
+import {
+  LegacyClusterClient,
+  ILegacyClusterClient,
+  ILegacyCustomClusterClient,
+  LegacyElasticsearchClientConfig,
+  LegacyCallAPIOptions,
+} from './legacy';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
 import { InternalHttpServiceSetup, GetAuthHeaders } from '../http/';
-import { InternalElasticsearchServiceSetup } from './types';
-import { CallAPIOptions } from './api_types';
+import {
+  InternalElasticsearchServiceSetup,
+  ElasticsearchServiceStart,
+  ScopeableRequest,
+} from './types';
 import { pollEsNodesVersion } from './version_check/ensure_es_version';
+import { calculateStatus$ } from './status';
 
 /** @internal */
 interface CoreClusterClients {
   config: ElasticsearchConfig;
-  adminClient: ClusterClient;
-  dataClient: ClusterClient;
+  client: LegacyClusterClient;
 }
 
 interface SetupDeps {
@@ -53,19 +61,25 @@ interface SetupDeps {
 }
 
 /** @internal */
-export class ElasticsearchService implements CoreService<InternalElasticsearchServiceSetup> {
+export class ElasticsearchService
+  implements CoreService<InternalElasticsearchServiceSetup, ElasticsearchServiceStart> {
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
-  private subscription: Subscription | undefined;
+  private subscription?: Subscription;
   private stop$ = new Subject();
   private kibanaVersion: string;
+  private createClient?: (
+    type: string,
+    clientConfig?: Partial<LegacyElasticsearchClientConfig>
+  ) => ILegacyCustomClusterClient;
+  private client?: ILegacyClusterClient;
 
   constructor(private readonly coreContext: CoreContext) {
     this.kibanaVersion = coreContext.env.packageInfo.version;
     this.log = coreContext.logger.get('elasticsearch-service');
     this.config$ = coreContext.configService
       .atPath<ElasticsearchConfigType>('elasticsearch')
-      .pipe(map(rawConfig => new ElasticsearchConfig(rawConfig)));
+      .pipe(map((rawConfig) => new ElasticsearchConfig(rawConfig)));
   }
 
   public async setup(deps: SetupDeps): Promise<InternalElasticsearchServiceSetup> {
@@ -81,23 +95,21 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
         return true;
       }),
       switchMap(
-        config =>
-          new Observable<CoreClusterClients>(subscriber => {
-            this.log.debug(`Creating elasticsearch clients`);
+        (config) =>
+          new Observable<CoreClusterClients>((subscriber) => {
+            this.log.debug('Creating elasticsearch client');
 
             const coreClients = {
               config,
-              adminClient: this.createClusterClient('admin', config),
-              dataClient: this.createClusterClient('data', config, deps.http.getAuthHeaders),
+              client: this.createClusterClient('data', config, deps.http.getAuthHeaders),
             };
 
             subscriber.next(coreClients);
 
             return () => {
-              this.log.debug(`Closing elasticsearch clients`);
+              this.log.debug('Closing elasticsearch client');
 
-              coreClients.adminClient.close();
-              coreClients.dataClient.close();
+              coreClients.client.close();
             };
           })
       ),
@@ -108,83 +120,74 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
 
     const config = await this.config$.pipe(first()).toPromise();
 
-    const adminClient$ = clients$.pipe(map(clients => clients.adminClient));
-    const dataClient$ = clients$.pipe(map(clients => clients.dataClient));
+    const client$ = clients$.pipe(map((clients) => clients.client));
 
-    const adminClient = {
+    const client = {
       async callAsInternalUser(
         endpoint: string,
         clientParams: Record<string, any> = {},
-        options?: CallAPIOptions
+        options?: LegacyCallAPIOptions
       ) {
-        const client = await adminClient$.pipe(take(1)).toPromise();
-        return await client.callAsInternalUser(endpoint, clientParams, options);
+        const _client = await client$.pipe(take(1)).toPromise();
+        return await _client.callAsInternalUser(endpoint, clientParams, options);
       },
       asScoped(request: ScopeableRequest) {
         return {
-          callAsInternalUser: adminClient.callAsInternalUser,
+          callAsInternalUser: client.callAsInternalUser,
           async callAsCurrentUser(
             endpoint: string,
             clientParams: Record<string, any> = {},
-            options?: CallAPIOptions
+            options?: LegacyCallAPIOptions
           ) {
-            const client = await adminClient$.pipe(take(1)).toPromise();
-            return await client
+            const _client = await client$.pipe(take(1)).toPromise();
+            return await _client
               .asScoped(request)
               .callAsCurrentUser(endpoint, clientParams, options);
           },
         };
       },
     };
-    const dataClient = {
-      async callAsInternalUser(
-        endpoint: string,
-        clientParams: Record<string, any> = {},
-        options?: CallAPIOptions
-      ) {
-        const client = await dataClient$.pipe(take(1)).toPromise();
-        return await client.callAsInternalUser(endpoint, clientParams, options);
-      },
-      asScoped(request: ScopeableRequest) {
-        return {
-          callAsInternalUser: dataClient.callAsInternalUser,
-          async callAsCurrentUser(
-            endpoint: string,
-            clientParams: Record<string, any> = {},
-            options?: CallAPIOptions
-          ) {
-            const client = await dataClient$.pipe(take(1)).toPromise();
-            return await client
-              .asScoped(request)
-              .callAsCurrentUser(endpoint, clientParams, options);
-          },
-        };
-      },
-    };
+
+    this.client = client;
 
     const esNodesCompatibility$ = pollEsNodesVersion({
-      callWithInternalUser: adminClient.callAsInternalUser,
+      callWithInternalUser: client.callAsInternalUser,
       log: this.log,
       ignoreVersionMismatch: config.ignoreVersionMismatch,
       esVersionCheckInterval: config.healthCheckDelay.asMilliseconds(),
       kibanaVersion: this.kibanaVersion,
     }).pipe(takeUntil(this.stop$), shareReplay({ refCount: true, bufferSize: 1 }));
 
+    this.createClient = (
+      type: string,
+      clientConfig: Partial<LegacyElasticsearchClientConfig> = {}
+    ) => {
+      const finalConfig = merge({}, config, clientConfig);
+      return this.createClusterClient(type, finalConfig, deps.http.getAuthHeaders);
+    };
+
     return {
-      legacy: { config$: clients$.pipe(map(clients => clients.config)) },
-
-      adminClient,
-      dataClient,
-      esNodesCompatibility$,
-
-      createClient: (type: string, clientConfig: Partial<ElasticsearchClientConfig> = {}) => {
-        const finalConfig = merge({}, config, clientConfig);
-        return this.createClusterClient(type, finalConfig, deps.http.getAuthHeaders);
+      legacy: {
+        config$: clients$.pipe(map((clients) => clients.config)),
+        client,
+        createClient: this.createClient,
       },
+      esNodesCompatibility$,
+      status$: calculateStatus$(esNodesCompatibility$),
     };
   }
-
-  public async start() {}
+  public async start() {
+    if (typeof this.client === 'undefined' || typeof this.createClient === 'undefined') {
+      throw new Error('ElasticsearchService needs to be setup before calling start');
+    } else {
+      return {
+        legacy: {
+          client: this.client,
+          createClient: this.createClient,
+        },
+      };
+    }
+  }
 
   public async stop() {
     this.log.debug('Stopping elasticsearch service');
@@ -196,10 +199,10 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
 
   private createClusterClient(
     type: string,
-    config: ElasticsearchClientConfig,
+    config: LegacyElasticsearchClientConfig,
     getAuthHeaders?: GetAuthHeaders
   ) {
-    return new ClusterClient(
+    return new LegacyClusterClient(
       config,
       this.coreContext.logger.get('elasticsearch', type),
       getAuthHeaders

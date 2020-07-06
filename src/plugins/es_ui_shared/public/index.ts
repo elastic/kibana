@@ -17,7 +17,18 @@
  * under the License.
  */
 
+/**
+ * Create a namespace for Forms
+ * In the future, each top level folder should be exported like that to avoid naming collision
+ */
+import * as Forms from './forms';
+import * as Monaco from './monaco';
+
 export { JsonEditor, OnJsonEditorUpdateHandler } from './components/json_editor';
+
+export { SectionLoading } from './components/section_loading';
+
+export { CronEditor, MINUTE, HOUR, DAY, WEEK, MONTH, YEAR } from './components/cron_editor';
 
 export {
   SendRequestConfig,
@@ -27,3 +38,40 @@ export {
   sendRequest,
   useRequest,
 } from './request/np_ready_request';
+
+export { indices } from './indices';
+
+export { useUIAceKeyboardMode } from './use_ui_ace_keyboard_mode';
+
+export {
+  installXJsonMode,
+  XJsonMode,
+  ElasticsearchSqlHighlightRules,
+  addXJsonToRules,
+  ScriptHighlightRules,
+  XJsonHighlightRules,
+  collapseLiteralStrings,
+  expandLiteralStrings,
+} from './console_lang';
+
+export {
+  AuthorizationContext,
+  AuthorizationProvider,
+  NotAuthorizedSection,
+  WithPrivileges,
+  Privileges,
+  MissingPrivileges,
+  SectionError,
+  Error,
+  useAuthorizationContext,
+} from './authorization';
+
+export { Monaco, Forms };
+
+/** dummy plugin, we just want esUiShared to have its own bundle */
+export function plugin() {
+  return new (class EsUiSharedPlugin {
+    setup() {}
+    start() {}
+  })();
+}

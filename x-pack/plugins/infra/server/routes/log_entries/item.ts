@@ -20,7 +20,7 @@ import {
   logEntriesItemResponseRT,
 } from '../../../common/http_api';
 
-const escapeHatch = schema.object({}, { allowUnknowns: true });
+const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 export const initLogEntriesItemRoute = ({ framework, sources, logEntries }: InfraBackendLibs) => {
   framework.registerRoute(
@@ -37,8 +37,9 @@ export const initLogEntriesItemRoute = ({ framework, sources, logEntries }: Infr
         );
 
         const { id, sourceId } = payload;
-        const sourceConfiguration = (await sources.getSourceConfiguration(requestContext, sourceId))
-          .configuration;
+        const sourceConfiguration = (
+          await sources.getSourceConfiguration(requestContext.core.savedObjects.client, sourceId)
+        ).configuration;
 
         const logEntry = await logEntries.getLogItem(requestContext, id, sourceConfiguration);
 

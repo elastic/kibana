@@ -9,17 +9,22 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { RequestHandler } from 'src/core/server';
 
-import { serializeCluster } from '../../../common/lib';
+import { serializeCluster, Cluster } from '../../../common/lib';
 import { doesClusterExist } from '../../lib/does_cluster_exist';
-import { API_BASE_PATH } from '../../../common/constants';
+import { API_BASE_PATH, PROXY_MODE, SNIFF_MODE } from '../../../common/constants';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
-import { isEsError } from '../../lib/is_es_error';
+import { isEsError } from '../../shared_imports';
 import { RouteDependencies } from '../../types';
 
 const bodyValidation = schema.object({
   name: schema.string(),
-  seeds: schema.arrayOf(schema.string()),
   skipUnavailable: schema.boolean(),
+  mode: schema.oneOf([schema.literal(PROXY_MODE), schema.literal(SNIFF_MODE)]),
+  seeds: schema.nullable(schema.arrayOf(schema.string())),
+  nodeConnections: schema.nullable(schema.number()),
+  proxyAddress: schema.nullable(schema.string()),
+  proxySocketConnections: schema.nullable(schema.number()),
+  serverName: schema.nullable(schema.string()),
 });
 
 type RouteBody = TypeOf<typeof bodyValidation>;
@@ -31,9 +36,9 @@ export const register = (deps: RouteDependencies): void => {
     response
   ) => {
     try {
-      const callAsCurrentUser = ctx.core.elasticsearch.dataClient.callAsCurrentUser;
+      const callAsCurrentUser = ctx.core.elasticsearch.legacy.client.callAsCurrentUser;
 
-      const { name, seeds, skipUnavailable } = request.body;
+      const { name } = request.body;
 
       // Check if cluster already exists.
       const existingCluster = await doesClusterExist(callAsCurrentUser, name);
@@ -50,7 +55,7 @@ export const register = (deps: RouteDependencies): void => {
         });
       }
 
-      const addClusterPayload = serializeCluster({ name, seeds, skipUnavailable });
+      const addClusterPayload = serializeCluster(request.body as Cluster);
       const updateClusterResponse = await callAsCurrentUser('cluster.putSettings', {
         body: addClusterPayload,
       });

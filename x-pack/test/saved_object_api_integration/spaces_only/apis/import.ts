@@ -5,56 +5,48 @@
  */
 
 import { SPACES } from '../../common/lib/spaces';
+import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { importTestSuiteFactory } from '../../common/suites/import';
+import { importTestSuiteFactory, TEST_CASES as CASES } from '../../common/suites/import';
 
-export default function({ getService }: FtrProviderContext) {
+const {
+  DEFAULT: { spaceId: DEFAULT_SPACE_ID },
+  SPACE_1: { spaceId: SPACE_1_ID },
+  SPACE_2: { spaceId: SPACE_2_ID },
+} = SPACES;
+const { fail400, fail409 } = testCaseFailures;
+
+const createTestCases = (spaceId: string) => [
+  // for each outcome, if failure !== undefined then we expect to receive
+  // an error; otherwise, we expect to receive a success result
+  { ...CASES.SINGLE_NAMESPACE_DEFAULT_SPACE, ...fail409(spaceId === DEFAULT_SPACE_ID) },
+  { ...CASES.SINGLE_NAMESPACE_SPACE_1, ...fail409(spaceId === SPACE_1_ID) },
+  { ...CASES.SINGLE_NAMESPACE_SPACE_2, ...fail409(spaceId === SPACE_2_ID) },
+  { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, ...fail400() },
+  { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...fail400() },
+  { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, ...fail400() },
+  { ...CASES.NAMESPACE_AGNOSTIC, ...fail409() },
+  { ...CASES.HIDDEN, ...fail400() },
+  CASES.NEW_SINGLE_NAMESPACE_OBJ,
+  { ...CASES.NEW_MULTI_NAMESPACE_OBJ, ...fail400() },
+  CASES.NEW_NAMESPACE_AGNOSTIC_OBJ,
+];
+
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('legacyEs');
 
-  const {
-    importTest,
-    createExpectResults,
-    expectUnknownTypeUnsupported,
-    expectHiddenTypeUnsupported,
-  } = importTestSuiteFactory(es, esArchiver, supertest);
+  const { addTests, createTestDefinitions } = importTestSuiteFactory(es, esArchiver, supertest);
+  const createTests = (spaceId: string) => {
+    const testCases = createTestCases(spaceId);
+    return createTestDefinitions(testCases, false, { spaceId, singleRequest: true });
+  };
 
   describe('_import', () => {
-    importTest('in the current space (space_1)', {
-      ...SPACES.SPACE_1,
-      tests: {
-        default: {
-          statusCode: 200,
-          response: createExpectResults(SPACES.SPACE_1.spaceId),
-        },
-        hiddenType: {
-          statusCode: 200,
-          response: expectHiddenTypeUnsupported,
-        },
-        unknownType: {
-          statusCode: 200,
-          response: expectUnknownTypeUnsupported,
-        },
-      },
-    });
-
-    importTest('in the default space', {
-      ...SPACES.DEFAULT,
-      tests: {
-        default: {
-          statusCode: 200,
-          response: createExpectResults(SPACES.DEFAULT.spaceId),
-        },
-        hiddenType: {
-          statusCode: 200,
-          response: expectHiddenTypeUnsupported,
-        },
-        unknownType: {
-          statusCode: 200,
-          response: expectUnknownTypeUnsupported,
-        },
-      },
+    getTestScenarios().spaces.forEach(({ spaceId }) => {
+      const tests = createTests(spaceId);
+      addTests(`within the ${spaceId} space`, { spaceId, tests });
     });
   });
 }

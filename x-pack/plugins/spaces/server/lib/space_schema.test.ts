@@ -55,7 +55,7 @@ describe('#id', () => {
   });
 
   ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '+', ',', '.', '/', '?'].forEach(
-    invalidCharacter => {
+    (invalidCharacter) => {
       test(`doesn't allow ${invalidCharacter}`, () => {
         expect(() =>
           spaceSchema.validate({
@@ -93,7 +93,7 @@ describe('#disabledFeatures', () => {
         disabledFeatures: 'foo',
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[disabledFeatures]: could not parse array value from [foo]"`
+      `"[disabledFeatures]: could not parse array value from json input"`
     );
   });
 

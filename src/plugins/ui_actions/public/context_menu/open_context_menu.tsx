@@ -36,7 +36,10 @@ function getOrCreateContainerElement() {
     container.style.left = getMouseX() + 'px';
     container.style.top = y + 'px';
     container.style.position = 'absolute';
-    container.style.zIndex = '999';
+
+    // EUI tooltip uses 9000
+    // have to make it larger to display menu on top of tooltips from charts
+    container.style.zIndex = '9999';
 
     container.id = CONTAINER_ID;
     document.body.appendChild(container);
@@ -149,7 +152,11 @@ export function openContextMenu(
       anchorPosition="downRight"
       withTitle
     >
-      <EuiContextMenu initialPanelId="mainMenu" panels={panels} />
+      <EuiContextMenu
+        initialPanelId="mainMenu"
+        panels={panels}
+        data-test-subj={props['data-test-subj']}
+      />
     </EuiPopover>,
     container
   );

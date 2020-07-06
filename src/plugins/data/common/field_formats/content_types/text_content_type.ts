@@ -27,7 +27,7 @@ export const setup = (
   format: IFieldFormat,
   convert: TextContextTypeConvert = asPrettyString
 ): TextContextTypeConvert => {
-  const recurse: TextContextTypeConvert = value => {
+  const recurse: TextContextTypeConvert = (value) => {
     if (!value || !isFunction(value.map)) {
       return convert.call(format, value);
     }

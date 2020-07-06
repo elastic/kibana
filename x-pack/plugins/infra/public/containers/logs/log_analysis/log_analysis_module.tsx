@@ -5,7 +5,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-
+import { DatasetFilter } from '../../../../common/log_analysis';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { useModuleStatus } from './log_analysis_module_status';
 import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
@@ -17,43 +17,17 @@ export const useLogAnalysisModule = <JobType extends string>({
   sourceConfiguration: ModuleSourceConfiguration;
   moduleDescriptor: ModuleDescriptor<JobType>;
 }) => {
-  const { spaceId, sourceId, timestampField, indices } = sourceConfiguration;
-  const [moduleStatus, dispatchModuleStatus] = useModuleStatus(moduleDescriptor.jobTypes, {
-    bucketSpan: moduleDescriptor.bucketSpan,
-    indexPattern: indices.join(','),
-    timestampField,
-  });
+  const { spaceId, sourceId, timestampField } = sourceConfiguration;
+  const [moduleStatus, dispatchModuleStatus] = useModuleStatus(moduleDescriptor.jobTypes);
 
-  const [fetchModuleDefinitionRequest, fetchModuleDefinition] = useTrackedPromise(
-    {
-      cancelPreviousOn: 'resolution',
-      createPromise: async () => {
-        dispatchModuleStatus({ type: 'fetchingModuleDefinition' });
-        return await moduleDescriptor.getModuleDefinition();
-      },
-      onResolve: response => {
-        dispatchModuleStatus({
-          type: 'fetchedModuleDefinition',
-          spaceId,
-          sourceId,
-          moduleDefinition: response,
-        });
-      },
-      onReject: () => {
-        dispatchModuleStatus({ type: 'failedFetchingModuleDefinition' });
-      },
-    },
-    [moduleDescriptor.getModuleDefinition, spaceId, sourceId]
-  );
-
-  const [fetchJobStatusRequest, fetchJobStatus] = useTrackedPromise(
+  const [, fetchJobStatus] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
         dispatchModuleStatus({ type: 'fetchingJobStatuses' });
         return await moduleDescriptor.getJobSummary(spaceId, sourceId);
       },
-      onResolve: jobResponse => {
+      onResolve: (jobResponse) => {
         dispatchModuleStatus({
           type: 'fetchedJobStatuses',
           payload: jobResponse,
@@ -68,30 +42,34 @@ export const useLogAnalysisModule = <JobType extends string>({
     [spaceId, sourceId]
   );
 
-  const isLoadingModuleStatus = useMemo(
-    () =>
-      fetchJobStatusRequest.state === 'pending' || fetchModuleDefinitionRequest.state === 'pending',
-    [fetchJobStatusRequest.state, fetchModuleDefinitionRequest.state]
-  );
-
   const [, setUpModule] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async (
         selectedIndices: string[],
         start: number | undefined,
-        end: number | undefined
+        end: number | undefined,
+        datasetFilter: DatasetFilter
       ) => {
         dispatchModuleStatus({ type: 'startedSetup' });
-        return await moduleDescriptor.setUpModule(start, end, {
+        const setupResult = await moduleDescriptor.setUpModule(start, end, datasetFilter, {
           indices: selectedIndices,
           sourceId,
           spaceId,
           timestampField,
         });
+        const jobSummaries = await moduleDescriptor.getJobSummary(spaceId, sourceId);
+        return { setupResult, jobSummaries };
       },
-      onResolve: ({ datafeeds, jobs }) => {
-        dispatchModuleStatus({ type: 'finishedSetup', datafeeds, jobs, spaceId, sourceId });
+      onResolve: ({ setupResult: { datafeeds, jobs }, jobSummaries }) => {
+        dispatchModuleStatus({
+          type: 'finishedSetup',
+          datafeedSetupResults: datafeeds,
+          jobSetupResults: jobs,
+          jobSummaries,
+          spaceId,
+          sourceId,
+        });
       },
       onReject: () => {
         dispatchModuleStatus({ type: 'failedSetup' });
@@ -115,11 +93,16 @@ export const useLogAnalysisModule = <JobType extends string>({
   ]);
 
   const cleanUpAndSetUpModule = useCallback(
-    (selectedIndices: string[], start: number | undefined, end: number | undefined) => {
+    (
+      selectedIndices: string[],
+      start: number | undefined,
+      end: number | undefined,
+      datasetFilter: DatasetFilter
+    ) => {
       dispatchModuleStatus({ type: 'startedSetup' });
       cleanUpModule()
         .then(() => {
-          setUpModule(selectedIndices, start, end);
+          setUpModule(selectedIndices, start, end, datasetFilter);
         })
         .catch(() => {
           dispatchModuleStatus({ type: 'failedSetup' });
@@ -150,11 +133,10 @@ export const useLogAnalysisModule = <JobType extends string>({
     cleanUpAndSetUpModule,
     cleanUpModule,
     fetchJobStatus,
-    fetchModuleDefinition,
     isCleaningUp,
-    isLoadingModuleStatus,
     jobIds,
     jobStatus: moduleStatus.jobStatus,
+    jobSummaries: moduleStatus.jobSummaries,
     lastSetupErrorMessages: moduleStatus.lastSetupErrorMessages,
     moduleDescriptor,
     setUpModule,

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import chalk from 'chalk';
 import del from 'del';
 import ora from 'ora';
 import { join, relative } from 'path';
@@ -57,10 +56,8 @@ export const CleanCommand: ICommand = {
     }
 
     if (toDelete.length === 0) {
-      log.write(chalk.bold.green('\n\nNothing to delete'));
+      log.success('Nothing to delete');
     } else {
-      log.write(chalk.bold.red('\n\nDeleting:\n'));
-
       /**
        * In order to avoid patterns like `/build` in packages from accidentally
        * impacting files outside the package we use `process.chdir()` to change
@@ -75,7 +72,11 @@ export const CleanCommand: ICommand = {
         for (const { pattern, cwd } of toDelete) {
           process.chdir(cwd);
           const promise = del(pattern);
-          ora.promise(promise, relative(originalCwd, join(cwd, String(pattern))));
+
+          if (log.wouldLogLevel('info')) {
+            ora.promise(promise, relative(originalCwd, join(cwd, String(pattern))));
+          }
+
           await promise;
         }
       } finally {

@@ -21,29 +21,30 @@ import Path from 'path';
 
 import { stringifyRequest } from 'loader-utils';
 import webpack from 'webpack';
-// @ts-ignore
+// @ts-expect-error
 import TerserPlugin from 'terser-webpack-plugin';
-// @ts-ignore
+// @ts-expect-error
 import webpackMerge from 'webpack-merge';
-// @ts-ignore
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
-import * as SharedDeps from '@kbn/ui-shared-deps';
+import CompressionPlugin from 'compression-webpack-plugin';
+import * as UiSharedDeps from '@kbn/ui-shared-deps';
 
-import { Bundle, WorkerConfig } from '../common';
-import { parseDirPath } from './parse_path';
+import { Bundle, BundleRefs, WorkerConfig, parseDirPath, DisallowedSyntaxPlugin } from '../common';
+import { BundleRefsPlugin } from './bundle_refs_plugin';
 
 const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
 const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
-const PUBLIC_PATH_PLACEHOLDER = '__REPLACE_WITH_PUBLIC_PATH__';
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
 
-export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
+export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker: WorkerConfig) {
+  const ENTRY_CREATOR = require.resolve('./entry_point_creator');
+
   const commonConfig: webpack.Configuration = {
     node: { fs: 'empty' },
     context: bundle.contextDir,
     cache: true,
     entry: {
-      [bundle.id]: bundle.entry,
+      [bundle.id]: ENTRY_CREATOR,
     },
 
     devtool: worker.dist ? false : '#cheap-source-map',
@@ -51,42 +52,68 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
 
     output: {
       path: bundle.outputDir,
-      filename: '[name].plugin.js',
-      publicPath: PUBLIC_PATH_PLACEHOLDER,
-      devtoolModuleFilenameTemplate: info =>
+      filename: `[name].${bundle.type}.js`,
+      devtoolModuleFilenameTemplate: (info) =>
         `/${bundle.type}:${bundle.id}/${Path.relative(
           bundle.sourceRoot,
           info.absoluteResourcePath
         )}${info.query}`,
       jsonpFunction: `${bundle.id}_bundle_jsonpfunction`,
-      ...(bundle.type === 'plugin'
-        ? {
-            // When the entry point is loaded, assign it's exported `plugin`
-            // value to a key on the global `__kbnBundles__` object.
-            library: ['__kbnBundles__', `plugin/${bundle.id}`],
-            libraryExport: 'plugin',
-          }
-        : {}),
     },
 
     optimization: {
       noEmitOnErrors: true,
     },
 
-    externals: {
-      ...SharedDeps.externals,
-    },
+    externals: [UiSharedDeps.externals],
 
-    plugins: [new CleanWebpackPlugin()],
+    plugins: [
+      new CleanWebpackPlugin(),
+      new DisallowedSyntaxPlugin(),
+      new BundleRefsPlugin(bundle, bundleRefs),
+    ],
 
     module: {
       // no parse rules for a few known large packages which have no require() statements
+      // or which have require() statements that should be ignored because the file is
+      // already bundled with all its necessary depedencies
       noParse: [
-        /[\///]node_modules[\///]elasticsearch-browser[\///]/,
-        /[\///]node_modules[\///]lodash[\///]index\.js/,
+        /[\/\\]node_modules[\/\\]elasticsearch-browser[\/\\]/,
+        /[\/\\]node_modules[\/\\]lodash[\/\\]index\.js$/,
+        /[\/\\]node_modules[\/\\]vega[\/\\]build[\/\\]vega\.js$/,
       ],
 
       rules: [
+        {
+          include: [ENTRY_CREATOR],
+          use: [
+            {
+              loader: UiSharedDeps.publicPathLoader,
+              options: {
+                key: bundle.id,
+              },
+            },
+            {
+              loader: require.resolve('val-loader'),
+              options: {
+                entries: bundle.publicDirNames.map((name) => {
+                  const absolute = Path.resolve(bundle.contextDir, name);
+                  const newContext = Path.dirname(ENTRY_CREATOR);
+                  const importId = `${bundle.type}/${bundle.id}/${name}`;
+
+                  // relative path from context of the ENTRY_CREATOR, with linux path separators
+                  let requirePath = Path.relative(newContext, absolute).split('\\').join('/');
+                  if (!requirePath.startsWith('.')) {
+                    // ensure requirePath is identified by node as relative
+                    requirePath = `./${requirePath}`;
+                  }
+
+                  return { importId, requirePath };
+                }),
+              },
+            },
+          ],
+        },
         {
           test: /\.css$/,
           include: /node_modules/,
@@ -106,8 +133,8 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
           test: /\.scss$/,
           exclude: /node_modules/,
           oneOf: [
-            {
-              resourceQuery: /dark|light/,
+            ...worker.themeTags.map((theme) => ({
+              resourceQuery: `?${theme}`,
               use: [
                 {
                   loader: 'style-loader',
@@ -131,12 +158,21 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
                   loader: 'resolve-url-loader',
                   options: {
                     join: (_: string, __: any) => (uri: string, base?: string) => {
-                      if (!base) {
+                      // apply only to legacy platform styles
+                      if (!base || !parseDirPath(base).dirs.includes('legacy')) {
                         return null;
                       }
 
+                      if (uri.startsWith('ui/assets')) {
+                        return Path.resolve(
+                          worker.repoRoot,
+                          'src/core/server/core_app/',
+                          uri.replace('ui/', '')
+                        );
+                      }
+
                       // manually force ui/* urls in legacy styles to resolve to ui/legacy/public
-                      if (uri.startsWith('ui/') && parseDirPath(base).dirs.includes('legacy')) {
+                      if (uri.startsWith('ui/')) {
                         return Path.resolve(
                           worker.repoRoot,
                           'src/legacy/ui/public',
@@ -159,34 +195,27 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
                         loaderContext,
                         Path.resolve(
                           worker.repoRoot,
-                          'src/legacy/ui/public/styles/_styling_constants.scss'
+                          `src/legacy/ui/public/styles/_globals_${theme}.scss`
                         )
                       )};\n`;
                     },
                     webpackImporter: false,
                     implementation: require('node-sass'),
-                    sassOptions(loaderContext: webpack.loader.LoaderContext) {
-                      const darkMode = loaderContext.resourceQuery === '?dark';
-
-                      return {
-                        outputStyle: 'nested',
-                        includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
-                        sourceMapRoot: `/${bundle.type}:${bundle.id}`,
-                        importer: (url: string) => {
-                          if (darkMode && url.includes('eui_colors_light')) {
-                            return { file: url.replace('eui_colors_light', 'eui_colors_dark') };
-                          }
-
-                          return { file: url };
-                        },
-                      };
+                    sassOptions: {
+                      outputStyle: 'nested',
+                      includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
+                      sourceMapRoot: `/${bundle.type}:${bundle.id}`,
                     },
                   },
                 },
               ],
-            },
+            })),
             {
               loader: require.resolve('./theme_loader'),
+              options: {
+                bundleId: bundle.id,
+                themeTags: worker.themeTags,
+              },
             },
           ],
         },
@@ -220,7 +249,8 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
     },
 
     resolve: {
-      extensions: ['.js', '.ts', '.tsx', '.json'],
+      extensions: ['.js', '.ts', '.tsx', 'json'],
+      mainFields: ['browser', 'main'],
       alias: {
         tinymath: require.resolve('tinymath/lib/tinymath.es5.js'),
       },
@@ -246,6 +276,18 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
         'process.env': {
           IS_KIBANA_DISTRIBUTABLE: `"true"`,
         },
+      }),
+      new CompressionPlugin({
+        algorithm: 'brotliCompress',
+        filename: '[path].br',
+        test: /\.(js|css)$/,
+        cache: false,
+      }),
+      new CompressionPlugin({
+        algorithm: 'gzip',
+        filename: '[path].gz',
+        test: /\.(js|css)$/,
+        cache: false,
       }),
     ],
 

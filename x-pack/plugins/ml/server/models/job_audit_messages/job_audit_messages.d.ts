@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'src/core/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 export function jobAuditMessagesProvider(
-  callAsCurrentUser: APICaller
+  callAsCurrentUser: LegacyAPICaller
 ): {
   getJobAuditMessages: (jobId?: string, from?: string) => any;
   getAuditMessagesSummary: (jobIds?: string[]) => any;

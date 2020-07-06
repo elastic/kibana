@@ -23,7 +23,7 @@ import { SavedObjectsType } from './types';
 const createType = (type: Partial<SavedObjectsType>): SavedObjectsType => ({
   name: 'unknown',
   hidden: false,
-  namespaceAgnostic: false,
+  namespaceType: 'single' as 'single',
   mappings: { properties: {} },
   migrations: {},
   ...type,
@@ -44,7 +44,7 @@ describe('SavedObjectTypeRegistry', () => {
     expect(
       registry
         .getAllTypes()
-        .map(type => type.name)
+        .map((type) => type.name)
         .sort()
     ).toEqual(['typeA', 'typeB', 'typeC']);
   });
@@ -99,10 +99,37 @@ describe('SavedObjectTypeRegistry', () => {
     });
   });
 
+  describe('#getVisibleTypes', () => {
+    it('returns only visible registered types', () => {
+      const typeA = createType({ name: 'typeA', hidden: false });
+      const typeB = createType({ name: 'typeB', hidden: true });
+      const typeC = createType({ name: 'typeC', hidden: false });
+      registry.registerType(typeA);
+      registry.registerType(typeB);
+      registry.registerType(typeC);
+
+      const registered = registry.getVisibleTypes();
+      expect(registered.length).toEqual(2);
+      expect(registered).toContainEqual(typeA);
+      expect(registered).toContainEqual(typeC);
+    });
+
+    it('does not mutate the registered types when altering the list', () => {
+      registry.registerType(createType({ name: 'typeA', hidden: false }));
+      registry.registerType(createType({ name: 'typeB', hidden: true }));
+      registry.registerType(createType({ name: 'typeC', hidden: false }));
+
+      const types = registry.getVisibleTypes();
+      types.splice(0, 2);
+
+      expect(registry.getVisibleTypes().length).toEqual(2);
+    });
+  });
+
   describe('#getAllTypes', () => {
     it('returns all registered types', () => {
       const typeA = createType({ name: 'typeA' });
-      const typeB = createType({ name: 'typeB' });
+      const typeB = createType({ name: 'typeB', hidden: true });
       const typeC = createType({ name: 'typeC' });
       registry.registerType(typeA);
       registry.registerType(typeB);
@@ -164,18 +191,68 @@ describe('SavedObjectTypeRegistry', () => {
   });
 
   describe('#isNamespaceAgnostic', () => {
-    it('returns correct value for the type', () => {
-      registry.registerType(createType({ name: 'typeA', namespaceAgnostic: true }));
-      registry.registerType(createType({ name: 'typeB', namespaceAgnostic: false }));
+    const expectResult = (expected: boolean, schemaDefinition?: Partial<SavedObjectsType>) => {
+      registry = new SavedObjectTypeRegistry();
+      registry.registerType(createType({ name: 'foo', ...schemaDefinition }));
+      expect(registry.isNamespaceAgnostic('foo')).toBe(expected);
+    };
 
-      expect(registry.isNamespaceAgnostic('typeA')).toEqual(true);
-      expect(registry.isNamespaceAgnostic('typeB')).toEqual(false);
-    });
-    it('returns false when the type is not registered', () => {
-      registry.registerType(createType({ name: 'typeA', namespaceAgnostic: true }));
-      registry.registerType(createType({ name: 'typeB', namespaceAgnostic: false }));
-
+    it(`returns false when the type is not registered`, () => {
       expect(registry.isNamespaceAgnostic('unknownType')).toEqual(false);
+    });
+
+    it(`returns true for namespaceType 'agnostic'`, () => {
+      expectResult(true, { namespaceType: 'agnostic' });
+    });
+
+    it(`returns false for other namespaceType`, () => {
+      expectResult(false, { namespaceType: 'multiple' });
+      expectResult(false, { namespaceType: 'single' });
+      expectResult(false, { namespaceType: undefined });
+    });
+  });
+
+  describe('#isSingleNamespace', () => {
+    const expectResult = (expected: boolean, schemaDefinition?: Partial<SavedObjectsType>) => {
+      registry = new SavedObjectTypeRegistry();
+      registry.registerType(createType({ name: 'foo', ...schemaDefinition }));
+      expect(registry.isSingleNamespace('foo')).toBe(expected);
+    };
+
+    it(`returns true when the type is not registered`, () => {
+      expect(registry.isSingleNamespace('unknownType')).toEqual(true);
+    });
+
+    it(`returns true for namespaceType 'single'`, () => {
+      expectResult(true, { namespaceType: 'single' });
+      expectResult(true, { namespaceType: undefined });
+    });
+
+    it(`returns false for other namespaceType`, () => {
+      expectResult(false, { namespaceType: 'agnostic' });
+      expectResult(false, { namespaceType: 'multiple' });
+    });
+  });
+
+  describe('#isMultiNamespace', () => {
+    const expectResult = (expected: boolean, schemaDefinition?: Partial<SavedObjectsType>) => {
+      registry = new SavedObjectTypeRegistry();
+      registry.registerType(createType({ name: 'foo', ...schemaDefinition }));
+      expect(registry.isMultiNamespace('foo')).toBe(expected);
+    };
+
+    it(`returns false when the type is not registered`, () => {
+      expect(registry.isMultiNamespace('unknownType')).toEqual(false);
+    });
+
+    it(`returns true for namespaceType 'multiple'`, () => {
+      expectResult(true, { namespaceType: 'multiple' });
+    });
+
+    it(`returns false for other namespaceType`, () => {
+      expectResult(false, { namespaceType: 'agnostic' });
+      expectResult(false, { namespaceType: 'single' });
+      expectResult(false, { namespaceType: undefined });
     });
   });
 
@@ -206,10 +283,51 @@ describe('SavedObjectTypeRegistry', () => {
       expect(registry.getIndex('typeWithNoIndex')).toBeUndefined();
     });
     it('returns undefined when the type is not registered', () => {
-      registry.registerType(createType({ name: 'typeA', namespaceAgnostic: true }));
-      registry.registerType(createType({ name: 'typeB', namespaceAgnostic: false }));
+      registry.registerType(createType({ name: 'typeA', namespaceType: 'agnostic' }));
+      registry.registerType(createType({ name: 'typeB', namespaceType: 'single' }));
 
       expect(registry.getIndex('unknownType')).toBeUndefined();
+    });
+  });
+
+  describe('#isImportableAndExportable', () => {
+    it('returns correct value for the type', () => {
+      registry.registerType(
+        createType({ name: 'typeA', management: { importableAndExportable: true } })
+      );
+      registry.registerType(
+        createType({ name: 'typeB', management: { importableAndExportable: false } })
+      );
+
+      expect(registry.isImportableAndExportable('typeA')).toBe(true);
+      expect(registry.isImportableAndExportable('typeB')).toBe(false);
+    });
+    it('returns false when the type is not registered', () => {
+      registry.registerType(createType({ name: 'typeA', management: {} }));
+      registry.registerType(createType({ name: 'typeB', management: {} }));
+
+      expect(registry.isImportableAndExportable('typeA')).toBe(false);
+    });
+    it('returns false when management is not defined for the type', () => {
+      registry.registerType(createType({ name: 'typeA' }));
+      expect(registry.isImportableAndExportable('unknownType')).toBe(false);
+    });
+  });
+
+  describe('#getImportableAndExportableTypes', () => {
+    it('returns all registered types that are importable/exportable', () => {
+      const typeA = createType({ name: 'typeA', management: { importableAndExportable: true } });
+      const typeB = createType({ name: 'typeB' });
+      const typeC = createType({ name: 'typeC', management: { importableAndExportable: false } });
+      const typeD = createType({ name: 'typeD', management: { importableAndExportable: true } });
+      registry.registerType(typeA);
+      registry.registerType(typeB);
+      registry.registerType(typeC);
+      registry.registerType(typeD);
+
+      const types = registry.getImportableAndExportableTypes();
+      expect(types.length).toEqual(2);
+      expect(types.map((t) => t.name)).toEqual(['typeA', 'typeD']);
     });
   });
 });

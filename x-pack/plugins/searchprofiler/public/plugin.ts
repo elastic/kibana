@@ -4,20 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { Plugin, CoreStart, CoreSetup, PluginInitializerContext } from 'kibana/public';
 import { first } from 'rxjs/operators';
+import { i18n } from '@kbn/i18n';
+import { Plugin, CoreSetup } from 'src/core/public';
 
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
-import { LICENSE_CHECK_STATE } from '../../licensing/public';
+import { ILicense } from '../../licensing/common/types';
 
 import { PLUGIN } from '../common';
 import { AppPublicPluginDependencies } from './types';
 
-export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPluginDependencies> {
-  constructor(ctx: PluginInitializerContext) {}
+const checkLicenseStatus = (license: ILicense) => {
+  const { state, message } = license.check(PLUGIN.id, PLUGIN.minimumLicenseType);
+  return state === 'valid' ? { valid: true } : { valid: false, message };
+};
 
-  async setup(
+export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPluginDependencies> {
+  public setup(
     { http, getStartServices }: CoreSetup,
     { devTools, home, licensing }: AppPublicPluginDependencies
   ) {
@@ -30,27 +33,25 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
         defaultMessage: 'Quickly check the performance of any Elasticsearch query.',
       }),
       icon: 'searchProfilerApp',
-      path: '/app/kibana#/dev_tools/searchprofiler',
+      path: '/app/dev_tools#/searchprofiler',
       showOnHomePage: false,
       category: FeatureCatalogueCategory.ADMIN,
     });
 
-    devTools.register({
+    const devTool = devTools.register({
       id: 'searchprofiler',
       title: i18n.translate('xpack.searchProfiler.pageDisplayName', {
         defaultMessage: 'Search Profiler',
       }),
       order: 5,
       enableRouting: false,
-      mount: async (ctx, params) => {
+      mount: async (params) => {
         const [coreStart] = await getStartServices();
         const { notifications, i18n: i18nDep } = coreStart;
         const { boot } = await import('./application/boot');
 
         const license = await licensing.license$.pipe(first()).toPromise();
-        const { state, message } = license.check(PLUGIN.id, PLUGIN.minimumLicenseType);
-        const initialLicenseStatus =
-          state === LICENSE_CHECK_STATE.Valid ? { valid: true } : { valid: false, message };
+        const initialLicenseStatus = checkLicenseStatus(license);
 
         return boot({
           http,
@@ -61,9 +62,17 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
         });
       },
     });
+
+    licensing.license$.subscribe((license) => {
+      if (!checkLicenseStatus(license).valid && !devTool.isDisabled()) {
+        devTool.disable();
+      } else if (devTool.isDisabled()) {
+        devTool.enable();
+      }
+    });
   }
 
-  async start(core: CoreStart, plugins: any) {}
+  public start() {}
 
-  async stop() {}
+  public stop() {}
 }

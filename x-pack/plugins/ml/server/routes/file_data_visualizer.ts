@@ -6,23 +6,30 @@
 
 import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext } from 'kibana/server';
-import { MAX_BYTES } from '../../../../legacy/plugins/ml/common/constants/file_datavisualizer';
-import { wrapError } from '../client/error_wrapper';
+import { MAX_FILE_SIZE_BYTES } from '../../common/constants/file_datavisualizer';
 import {
   InputOverrides,
+  Settings,
+  IngestPipelineWrapper,
+  Mappings,
+} from '../../common/types/file_datavisualizer';
+import { wrapError } from '../client/error_wrapper';
+import {
   InputData,
   fileDataVisualizerProvider,
   importDataProvider,
-  Settings,
-  InjectPipeline,
-  Mappings,
 } from '../models/file_data_visualizer';
 
 import { RouteInitialization } from '../types';
-import { incrementFileDataVisualizerIndexCreationCount } from '../lib/ml_telemetry';
+import { updateTelemetry } from '../lib/telemetry';
+import {
+  analyzeFileQuerySchema,
+  importFileBodySchema,
+  importFileQuerySchema,
+} from './schemas/file_data_visualizer_schema';
 
 function analyzeFiles(context: RequestHandlerContext, data: InputData, overrides: InputOverrides) {
-  const { analyzeFile } = fileDataVisualizerProvider(context);
+  const { analyzeFile } = fileDataVisualizerProvider(context.ml!.mlClient.callAsCurrentUser);
   return analyzeFile(data, overrides);
 }
 
@@ -32,10 +39,10 @@ function importData(
   index: string,
   settings: Settings,
   mappings: Mappings,
-  ingestPipeline: InjectPipeline,
+  ingestPipeline: IngestPipelineWrapper,
   data: InputData
 ) {
-  const { importData: importDataFunc } = importDataProvider(context);
+  const { importData: importDataFunc } = importDataProvider(context.ml!.mlClient.callAsCurrentUser);
   return importDataFunc(id, index, settings, mappings, ingestPipeline, data);
 }
 
@@ -49,36 +56,22 @@ export function fileDataVisualizerRoutes({ router, mlLicense }: RouteInitializat
    * @api {post} /api/ml/file_data_visualizer/analyze_file Analyze file data
    * @apiName AnalyzeFile
    * @apiDescription Performs analysis of the file data.
+   *
+   * @apiSchema (query) analyzeFileQuerySchema
    */
   router.post(
     {
       path: '/api/ml/file_data_visualizer/analyze_file',
       validate: {
         body: schema.any(),
-        query: schema.maybe(
-          schema.object({
-            charset: schema.maybe(schema.string()),
-            column_names: schema.maybe(schema.string()),
-            delimiter: schema.maybe(schema.string()),
-            explain: schema.maybe(schema.string()),
-            format: schema.maybe(schema.string()),
-            grok_pattern: schema.maybe(schema.string()),
-            has_header_row: schema.maybe(schema.string()),
-            line_merge_size_limit: schema.maybe(schema.string()),
-            lines_to_sample: schema.maybe(schema.string()),
-            quote: schema.maybe(schema.string()),
-            should_trim_fields: schema.maybe(schema.string()),
-            timeout: schema.maybe(schema.string()),
-            timestamp_field: schema.maybe(schema.string()),
-            timestamp_format: schema.maybe(schema.string()),
-          })
-        ),
+        query: analyzeFileQuerySchema,
       },
       options: {
         body: {
           accepts: ['text/*', 'application/json'],
-          maxBytes: MAX_BYTES,
+          maxBytes: MAX_FILE_SIZE_BYTES,
         },
+        tags: ['access:ml:canFindFileStructure'],
       },
     },
     mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
@@ -97,30 +90,23 @@ export function fileDataVisualizerRoutes({ router, mlLicense }: RouteInitializat
    * @api {post} /api/ml/file_data_visualizer/import Import file data
    * @apiName ImportFile
    * @apiDescription Imports file data into elasticsearch index.
+   *
+   * @apiSchema (query) importFileQuerySchema
+   * @apiSchema (body) importFileBodySchema
    */
   router.post(
     {
       path: '/api/ml/file_data_visualizer/import',
       validate: {
-        query: schema.object({
-          id: schema.maybe(schema.string()),
-        }),
-        body: schema.object({
-          index: schema.maybe(schema.string()),
-          data: schema.arrayOf(schema.any()),
-          settings: schema.maybe(schema.any()),
-          mappings: schema.any(),
-          ingestPipeline: schema.object({
-            id: schema.maybe(schema.string()),
-            pipeline: schema.maybe(schema.any()),
-          }),
-        }),
+        query: importFileQuerySchema,
+        body: importFileBodySchema,
       },
       options: {
         body: {
           accepts: ['application/json'],
-          maxBytes: MAX_BYTES,
+          maxBytes: MAX_FILE_SIZE_BYTES,
         },
+        tags: ['access:ml:canFindFileStructure'],
       },
     },
     mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
@@ -132,8 +118,7 @@ export function fileDataVisualizerRoutes({ router, mlLicense }: RouteInitializat
         // follow-up import calls to just add additional data will include the `id` of the created
         // index, we'll ignore those and don't increment the counter.
         if (id === undefined) {
-          // @ts-ignore
-          await incrementFileDataVisualizerIndexCreationCount(context.core.savedObjects.client);
+          await updateTelemetry();
         }
 
         const result = await importData(

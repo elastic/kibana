@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const inspector = getService('inspector');
@@ -28,8 +28,6 @@ export default function({ getService, getPageObjects }) {
 
   // FLAKY: https://github.com/elastic/kibana/issues/45089
   describe('gauge chart', function indexPatternCreation() {
-    this.tags('smoke');
-
     async function initGaugeVis() {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
@@ -41,11 +39,11 @@ export default function({ getService, getPageObjects }) {
 
     before(initGaugeVis);
 
-    it('should have inspector enabled', async function() {
+    it('should have inspector enabled', async function () {
       await inspector.expectIsEnabled();
     });
 
-    it('should show Count', function() {
+    it('should show Count', function () {
       const expectedCount = ['14,004', 'Count'];
 
       // initial metric of "Count" is selected by default
@@ -55,7 +53,7 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    it('should show Split Gauges', async function() {
+    it('should show Split Gauges', async function () {
       log.debug('Bucket = Split Group');
       await PageObjects.visEditor.clickBucket('Split group');
       log.debug('Aggregation = Terms');
@@ -80,7 +78,7 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    it('should show correct values for fields with fieldFormatters', async function() {
+    it('should show correct values for fields with fieldFormatters', async function () {
       const expectedTexts = ['2,904', 'win 8: Count', '0B', 'win 8: Min bytes'];
 
       await PageObjects.visEditor.selectAggregation('Terms');
@@ -97,7 +95,7 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    it('should format the metric correctly in percentage mode', async function() {
+    it('should format the metric correctly in percentage mode', async function () {
       await initGaugeVis();
       await PageObjects.visEditor.clickMetricEditor();
       await PageObjects.visEditor.selectAggregation('Average', 'metrics');

@@ -13,26 +13,27 @@ interface GroupByEntry {
   intervalLabel?: string;
 }
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('creation_index_pattern', function() {
-    this.tags(['smoke']);
+  describe('creation_index_pattern', function () {
     before(async () => {
-      await esArchiver.load('ml/ecommerce');
+      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
+      await transform.testResources.setKibanaTimeZoneToUTC();
+
       await transform.securityUI.loginAsTransformPowerUser();
     });
 
     after(async () => {
-      await esArchiver.unload('ml/ecommerce');
       await transform.api.cleanTransformIndices();
     });
 
     const testDataList = [
       {
         suiteTitle: 'batch transform with terms+date_histogram groups and avg agg',
-        source: 'ecommerce',
+        source: 'ft_ecommerce',
         groupByEntries: [
           {
             identifier: 'terms(category.keyword)',
@@ -49,6 +50,34 @@ export default function({ getService }: FtrProviderContext) {
             identifier: 'avg(products.base_price)',
             label: 'products.base_price.avg',
           },
+          {
+            identifier: 'filter(geoip.city_name)',
+            label: 'geoip.city_name.filter',
+            form: {
+              transformFilterAggTypeSelector: 'term',
+              transformFilterTermValueSelector: 'New York',
+            },
+            subAggs: [
+              {
+                identifier: 'max(products.base_price)',
+                label: 'products.base_price.max',
+              },
+              {
+                identifier: 'filter(customer_gender)',
+                label: 'customer_gender.filter',
+                form: {
+                  transformFilterAggTypeSelector: 'term',
+                  transformFilterTermValueSelector: 'FEMALE',
+                },
+                subAggs: [
+                  {
+                    identifier: 'avg(taxful_total_price)',
+                    label: 'taxful_total_price.avg',
+                  },
+                ],
+              },
+            ],
+          },
         ],
         transformId: `ec_1_${Date.now()}`,
         transformDescription:
@@ -57,6 +86,7 @@ export default function({ getService }: FtrProviderContext) {
           return `user-${this.transformId}`;
         },
         expected: {
+          pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "category.keyword": {'],
           pivotAdvancedEditorValue: {
             group_by: {
               'category.keyword': {
@@ -77,6 +107,34 @@ export default function({ getService }: FtrProviderContext) {
                   field: 'products.base_price',
                 },
               },
+              'New York': {
+                filter: {
+                  term: {
+                    'geoip.city_name': 'New York',
+                  },
+                },
+                aggs: {
+                  'products.base_price.max': {
+                    max: {
+                      field: 'products.base_price',
+                    },
+                  },
+                  FEMALE: {
+                    filter: {
+                      term: {
+                        customer_gender: 'FEMALE',
+                      },
+                    },
+                    aggs: {
+                      'taxful_total_price.avg': {
+                        avg: {
+                          field: 'taxful_total_price',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
           },
           pivotPreview: {
@@ -88,18 +146,118 @@ export default function({ getService }: FtrProviderContext) {
             mode: 'batch',
             progress: '100',
           },
-          sourcePreview: {
-            columns: 45,
+          indexPreview: {
+            columns: 10,
             rows: 5,
           },
+          histogramCharts: [
+            { chartAvailable: false, id: 'category', legend: 'Chart not supported.' },
+            { chartAvailable: true, id: 'currency', legend: '1 category' },
+            {
+              chartAvailable: false,
+              id: 'customer_birth_date',
+              legend: '0 documents contain field.',
+            },
+            { chartAvailable: false, id: 'customer_first_name', legend: 'Chart not supported.' },
+            { chartAvailable: false, id: 'customer_full_name', legend: 'Chart not supported.' },
+            { chartAvailable: true, id: 'customer_gender', legend: '2 categories' },
+            { chartAvailable: true, id: 'customer_id', legend: 'top 20 of 46 categories' },
+            { chartAvailable: false, id: 'customer_last_name', legend: 'Chart not supported.' },
+            { chartAvailable: true, id: 'customer_phone', legend: '1 category' },
+            { chartAvailable: true, id: 'day_of_week', legend: '7 categories' },
+          ],
+        },
+      },
+      {
+        suiteTitle: 'batch transform with terms group and percentiles agg',
+        source: 'ft_ecommerce',
+        groupByEntries: [
+          {
+            identifier: 'terms(geoip.country_iso_code)',
+            label: 'geoip.country_iso_code',
+          } as GroupByEntry,
+        ],
+        aggregationEntries: [
+          {
+            identifier: 'percentiles(products.base_price)',
+            label: 'products.base_price.percentiles',
+          },
+          {
+            identifier: 'filter(customer_phone)',
+            label: 'customer_phone.filter',
+            form: {
+              transformFilterAggTypeSelector: 'exists',
+            },
+            subAggs: [
+              {
+                identifier: 'max(products.discount_amount)',
+                label: 'products.discount_amount.max',
+              },
+            ],
+          },
+        ],
+        transformId: `ec_2_${Date.now()}`,
+        transformDescription:
+          'ecommerce batch transform with group by terms(geoip.country_iso_code) and aggregation percentiles(products.base_price)',
+        get destinationIndex(): string {
+          return `user-${this.transformId}`;
+        },
+        expected: {
+          pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "geoip.country_iso_code": {'],
+          pivotAdvancedEditorValue: {
+            group_by: {
+              'geoip.country_iso_code': {
+                terms: {
+                  field: 'geoip.country_iso_code',
+                },
+              },
+            },
+            aggregations: {
+              'products.base_price.percentiles': {
+                percentiles: {
+                  field: 'products.base_price',
+                  percents: [1, 5, 25, 50, 75, 95, 99],
+                },
+              },
+              'customer_phone.filter': {
+                filter: {
+                  exists: {
+                    field: 'customer_phone',
+                  },
+                },
+                aggs: {
+                  'products.discount_amount.max': {
+                    max: {
+                      field: 'products.discount_amount',
+                    },
+                  },
+                },
+              },
+            },
+          },
+          pivotPreview: {
+            column: 0,
+            values: ['AE', 'CO', 'EG', 'FR', 'GB'],
+          },
+          row: {
+            status: 'stopped',
+            mode: 'batch',
+            progress: '100',
+          },
+          indexPreview: {
+            columns: 10,
+            rows: 5,
+          },
+          histogramCharts: [],
         },
       },
     ];
 
     for (const testData of testDataList) {
-      describe(`${testData.suiteTitle}`, function() {
+      describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
+          await transform.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
         });
 
         it('loads the home page', async () => {
@@ -123,14 +281,14 @@ export default function({ getService }: FtrProviderContext) {
           await transform.wizard.assertDefineStepActive();
         });
 
-        it('loads the source index preview', async () => {
-          await transform.wizard.assertSourceIndexPreviewLoaded();
+        it('loads the index preview', async () => {
+          await transform.wizard.assertIndexPreviewLoaded();
         });
 
-        it('shows the source index preview', async () => {
-          await transform.wizard.assertSourceIndexPreview(
-            testData.expected.sourcePreview.columns,
-            testData.expected.sourcePreview.rows
+        it('shows the index preview', async () => {
+          await transform.wizard.assertIndexPreview(
+            testData.expected.indexPreview.columns,
+            testData.expected.indexPreview.rows
           );
         });
 
@@ -148,6 +306,16 @@ export default function({ getService }: FtrProviderContext) {
           await transform.wizard.assertAdvancedQueryEditorSwitchCheckState(false);
         });
 
+        it('enables the index preview histogram charts', async () => {
+          await transform.wizard.enableIndexPreviewHistogramCharts();
+        });
+
+        it('displays the index preview histogram charts', async () => {
+          await transform.wizard.assertIndexPreviewHistogramCharts(
+            testData.expected.histogramCharts
+          );
+        });
+
         it('adds the group by entries', async () => {
           for (const [index, entry] of testData.groupByEntries.entries()) {
             await transform.wizard.assertGroupByInputExists();
@@ -162,11 +330,7 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('adds the aggregation entries', async () => {
-          for (const [index, agg] of testData.aggregationEntries.entries()) {
-            await transform.wizard.assertAggregationInputExists();
-            await transform.wizard.assertAggregationInputValue([]);
-            await transform.wizard.addAggregationEntry(index, agg.identifier, agg.label);
-          }
+          await transform.wizard.addAggregationEntries(testData.aggregationEntries);
         });
 
         it('displays the advanced pivot editor switch', async () => {
@@ -177,7 +341,7 @@ export default function({ getService }: FtrProviderContext) {
         it('displays the advanced configuration', async () => {
           await transform.wizard.enabledAdvancedPivotEditor();
           await transform.wizard.assertAdvancedPivotEditorContent(
-            testData.expected.pivotAdvancedEditorValue
+            testData.expected.pivotAdvancedEditorValueArr
           );
         });
 
@@ -186,6 +350,7 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('shows the pivot preview', async () => {
+          await transform.wizard.assertPivotPreviewChartHistogramButtonMissing();
           await transform.wizard.assertPivotPreviewColumnValues(
             testData.expected.pivotPreview.column,
             testData.expected.pivotPreview.values
@@ -264,15 +429,13 @@ export default function({ getService }: FtrProviderContext) {
           await transform.table.refreshTransformList();
           await transform.table.filterWithSearchString(testData.transformId);
           const rows = await transform.table.parseTransformTable();
-          expect(rows.filter(row => row.id === testData.transformId)).to.have.length(1);
+          expect(rows.filter((row) => row.id === testData.transformId)).to.have.length(1);
         });
 
-        it('job creation displays details for the created job in the job list', async () => {
+        it('transform creation displays details for the created transform in the transform list', async () => {
           await transform.table.assertTransformRowFields(testData.transformId, {
             id: testData.transformId,
             description: testData.transformDescription,
-            sourceIndex: testData.source,
-            destinationIndex: testData.destinationIndex,
             status: testData.expected.row.status,
             mode: testData.expected.row.mode,
             progress: testData.expected.row.progress,

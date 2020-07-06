@@ -1,16 +1,22 @@
 {
-  "name": "perf_task_plugin",
+  "name": "task_manager_performance",
   "version": "1.0.0",
   "kibana": {
     "version": "kibana",
     "templateVersion": "1.0.0"
   },
-  "license": "Apache-2.0",
+  "main": "target/test/plugin_api_perf/plugins/task_manager_performance",
+  "scripts": {
+    "kbn": "node ../../../../../scripts/kbn.js",
+    "build": "rm -rf './target' && tsc"
+  },
   "dependencies": {
-    "lodash": "^4.17.15",
     "uuid": "3.3.2",
-    "joi": "^13.5.2",
     "stats-lite": "2.2.0",
     "pretty-ms": "5.0.0"
-  }
+  },
+  "devDependencies": {
+    "typescript": "3.9.5"
+  },
+  "license": "Apache-2.0"
 }

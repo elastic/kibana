@@ -19,7 +19,7 @@
 
 import { Agent, IncomingMessage } from 'http';
 import * as url from 'url';
-import { pick, trimLeft, trimRight } from 'lodash';
+import { pick, trimStart, trimEnd } from 'lodash';
 
 import { KibanaRequest, Logger, RequestHandler } from 'kibana/server';
 
@@ -46,7 +46,7 @@ export interface CreateHandlerDependencies {
 }
 
 function toURL(base: string, path: string) {
-  const urlResult = new url.URL(`${trimRight(base, '/')}/${trimLeft(path, '/')}`);
+  const urlResult = new url.URL(`${trimEnd(base, '/')}/${trimStart(path, '/')}`);
   // Appending pretty here to have Elasticsearch do the JSON formatting, as doing
   // in JS can lead to data loss (7.0 will get munged into 7, thus losing indication of
   // measurement precision)
@@ -57,7 +57,7 @@ function toURL(base: string, path: string) {
 }
 
 function filterHeaders(originalHeaders: object, headersToKeep: string[]): object {
-  const normalizeHeader = function(header: any) {
+  const normalizeHeader = function (header: any) {
     if (!header) {
       return '';
     }
@@ -131,7 +131,7 @@ export const createHandler = ({
   const { body, query } = request;
   const { path, method } = query;
 
-  if (!pathFilters.some(re => re.test(path))) {
+  if (!pathFilters.some((re) => re.test(path))) {
     return response.forbidden({
       body: `Error connecting to '${path}':\n\nUnable to send requests to that path.`,
       headers: {
@@ -175,10 +175,9 @@ export const createHandler = ({
 
       break;
     } catch (e) {
+      // If we reached here it means we hit a lower level network issue than just, for e.g., a 500.
+      // We try contacting another node in that case.
       log.error(e);
-      if (e.code !== 'ECONNREFUSED') {
-        return response.internalError(e);
-      }
       if (idx === hosts.length - 1) {
         log.warn(`Could not connect to any configured ES node [${hosts.join(', ')}]`);
         return response.customError({

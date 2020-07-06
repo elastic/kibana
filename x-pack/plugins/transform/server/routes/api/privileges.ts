@@ -3,13 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  APP_CLUSTER_PRIVILEGES,
-  APP_INDEX_PRIVILEGES,
-} from '../../../../../legacy/plugins/transform/common/constants';
-// NOTE: now we import it from our "public" folder, but when the Authorisation lib
-// will move to the "es_ui_shared" plugin, it will be imported from its "static" folder
-import { Privileges } from '../../../../../legacy/plugins/transform/public/app/lib/authorization';
+import { APP_CLUSTER_PRIVILEGES, APP_INDEX_PRIVILEGES } from '../../../common/constants';
+import { Privileges } from '../../../common';
 
 import { RouteDependencies } from '../../types';
 import { addBasePath } from '../index';
@@ -59,7 +54,7 @@ export function registerPrivilegesRoute({ router, license }: RouteDependencies) 
           return true;
         }
 
-        const indexHasAllPrivileges = APP_INDEX_PRIVILEGES.every(privilege =>
+        const indexHasAllPrivileges = APP_INDEX_PRIVILEGES.every((privilege) =>
           privileges.includes(privilege)
         );
 

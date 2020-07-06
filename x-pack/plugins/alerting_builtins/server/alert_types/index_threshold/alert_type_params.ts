@@ -30,12 +30,12 @@ export const ParamsSchema = schema.object(
 const betweenComparators = new Set(['between', 'notBetween']);
 
 // using direct type not allowed, circular reference, so body is typed to any
-function validateParams(anyParams: any): string | undefined {
+function validateParams(anyParams: unknown): string | undefined {
   // validate core query parts, return if it fails validation (returning string)
   const coreQueryValidated = validateCoreQueryBody(anyParams);
   if (coreQueryValidated) return coreQueryValidated;
 
-  const { thresholdComparator, threshold }: Params = anyParams;
+  const { thresholdComparator, threshold }: Params = anyParams as Params;
 
   if (betweenComparators.has(thresholdComparator) && threshold.length === 1) {
     return i18n.translate('xpack.alertingBuiltins.indexThreshold.invalidThreshold2ErrorMessage', {

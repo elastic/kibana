@@ -17,9 +17,10 @@
  * under the License.
  */
 import { SavedObjectsClientContract } from '../saved_objects/types';
-import { UiSettingsParams, UserProvidedValues } from '../../types';
+import { UiSettingsParams, UserProvidedValues, PublicUiSettingsParams } from '../../types';
 export {
   UiSettingsParams,
+  PublicUiSettingsParams,
   StringValidationRegexString,
   StringValidationRegex,
   StringValidation,
@@ -41,7 +42,7 @@ export interface IUiSettingsClient {
   /**
    * Returns registered uiSettings values {@link UiSettingsParams}
    */
-  getRegistered: () => Readonly<Record<string, UiSettingsParams>>;
+  getRegistered: () => Readonly<Record<string, PublicUiSettingsParams>>;
   /**
    * Retrieves uiSettings values set by the user with fallbacks to default values if not specified.
    */
@@ -83,11 +84,6 @@ export interface InternalUiSettingsServiceSetup {
    * @param settings
    */
   register(settings: Record<string, UiSettingsParams>): void;
-  /**
-   * Creates uiSettings client with provided *scoped* saved objects client {@link IUiSettingsClient}
-   * @param savedObjectsClient
-   */
-  asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
 }
 
 /** @public */

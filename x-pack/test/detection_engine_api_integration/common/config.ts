@@ -8,6 +8,7 @@ import path from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { services } from './services';
+import { listsEnvFeatureFlagName } from '../../../plugins/security_solution/server/lib/detection_engine/feature_flags';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -31,13 +32,17 @@ const enabledActionTypes = [
   'test.rate-limit',
 ];
 
+// Temporary feature flag for the lists feature
+// TODO: Remove this once lists land in a Kibana version
+process.env[listsEnvFeatureFlagName] = 'true';
+
 // eslint-disable-next-line import/no-default-export
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
   const { license = 'trial', disabledPlugins = [], ssl = false } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackApiIntegrationTestsConfig = await readConfigFile(
-      require.resolve('../../api_integration/config.js')
+      require.resolve('../../api_integration/config.ts')
     );
     const servers = {
       ...xPackApiIntegrationTestsConfig.get('servers'),
@@ -61,7 +66,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ssl,
         serverArgs: [
           `xpack.license.self_generated.type=${license}`,
-          `xpack.security.enabled=${!disabledPlugins.includes('security') && license === 'trial'}`,
+          `xpack.security.enabled=${!disabledPlugins.includes('security')}`,
         ],
       },
       kbnTestServer: {
@@ -73,9 +78,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             'some.non.existent.com',
           ])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
-          '--xpack.alerting.enabled=true',
           '--xpack.eventLog.logEntries=true',
-          ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
+          '--xpack.lists.enabled=true',
+          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions')}`,
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'task_manager')}`,

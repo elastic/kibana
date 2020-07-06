@@ -30,9 +30,10 @@ export function setupCapabilitiesSwitcher(
 
       const registeredFeatures = features.getFeatures();
 
+      // try to retrieve capabilities for authenticated or "maybe authenticated" users
       return toggleCapabilities(registeredFeatures, capabilities, activeSpace);
     } catch (e) {
-      logger.warn(`Error toggling capabilities for request to ${request.url.pathname}: ${e}`);
+      logger.debug(`Error toggling capabilities for request to ${request.url.pathname}: ${e}`);
       return capabilities;
     }
   };
@@ -54,8 +55,8 @@ function toggleDisabledFeatures(
   const disabledFeatureKeys = activeSpace.disabledFeatures;
 
   const disabledFeatures = disabledFeatureKeys
-    .map(key => features.find(feature => feature.id === key))
-    .filter(feature => typeof feature !== 'undefined') as Feature[];
+    .map((key) => features.find((feature) => feature.id === key))
+    .filter((feature) => typeof feature !== 'undefined') as Feature[];
 
   const navLinks = capabilities.navLinks;
   const catalogueEntries = capabilities.catalogue;
@@ -69,14 +70,14 @@ function toggleDisabledFeatures(
 
     // Disable associated catalogue entries
     const privilegeCatalogueEntries = feature.catalogue || [];
-    privilegeCatalogueEntries.forEach(catalogueEntryId => {
+    privilegeCatalogueEntries.forEach((catalogueEntryId) => {
       catalogueEntries[catalogueEntryId] = false;
     });
 
     // Disable associated management items
     const privilegeManagementSections = feature.management || {};
     Object.entries(privilegeManagementSections).forEach(([sectionId, sectionItems]) => {
-      sectionItems.forEach(item => {
+      sectionItems.forEach((item) => {
         if (
           managementItems.hasOwnProperty(sectionId) &&
           managementItems[sectionId].hasOwnProperty(item)
@@ -89,7 +90,7 @@ function toggleDisabledFeatures(
     // Disable "sub features" that match the disabled feature
     if (capabilities.hasOwnProperty(feature.id)) {
       const capability = capabilities[feature.id];
-      Object.keys(capability).forEach(featureKey => {
+      Object.keys(capability).forEach((featureKey) => {
         capability[featureKey] = false;
       });
     }

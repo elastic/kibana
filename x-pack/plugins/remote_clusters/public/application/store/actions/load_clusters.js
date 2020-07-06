@@ -10,7 +10,7 @@ import { loadClusters as sendLoadClustersRequest, showApiError } from '../../ser
 
 import { LOAD_CLUSTERS_START, LOAD_CLUSTERS_SUCCESS, LOAD_CLUSTERS_FAILURE } from '../action_types';
 
-export const loadClusters = () => async dispatch => {
+export const loadClusters = () => async (dispatch) => {
   dispatch({
     type: LOAD_CLUSTERS_START,
   });

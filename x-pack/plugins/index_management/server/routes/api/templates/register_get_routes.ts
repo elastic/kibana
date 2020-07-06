@@ -3,23 +3,42 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-import { deserializeTemplate, deserializeTemplateList } from '../../../../common/lib';
+import {
+  deserializeTemplate,
+  deserializeTemplateList,
+  deserializeLegacyTemplate,
+  deserializeLegacyTemplateList,
+} from '../../../../common/lib';
 import { getManagedTemplatePrefix } from '../../../lib/get_managed_templates';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 
 export function registerGetAllRoute({ router, license }: RouteDependencies) {
   router.get(
-    { path: addBasePath('/templates'), validate: false },
+    { path: addBasePath('/index_templates'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.dataManagement!.client;
       const managedTemplatePrefix = await getManagedTemplatePrefix(callAsCurrentUser);
 
-      const indexTemplatesByName = await callAsCurrentUser('indices.getTemplate');
+      const legacyTemplatesEs = await callAsCurrentUser('indices.getTemplate');
+      const { index_templates: templatesEs } = await callAsCurrentUser(
+        'dataManagement.getComposableIndexTemplates'
+      );
 
-      return res.ok({ body: deserializeTemplateList(indexTemplatesByName, managedTemplatePrefix) });
+      const legacyTemplates = deserializeLegacyTemplateList(
+        legacyTemplatesEs,
+        managedTemplatePrefix
+      );
+      const templates = deserializeTemplateList(templatesEs, managedTemplatePrefix);
+
+      const body = {
+        templates,
+        legacyTemplates,
+      };
+
+      return res.ok({ body });
     })
   );
 }
@@ -28,24 +47,50 @@ const paramsSchema = schema.object({
   name: schema.string(),
 });
 
+// Require the template format version (V1 or V2) to be provided as Query param
+const querySchema = schema.object({
+  legacy: schema.maybe(schema.oneOf([schema.literal('true'), schema.literal('false')])),
+});
+
 export function registerGetOneRoute({ router, license, lib }: RouteDependencies) {
   router.get(
-    { path: addBasePath('/templates/{name}'), validate: { params: paramsSchema } },
+    {
+      path: addBasePath('/index_templates/{name}'),
+      validate: { params: paramsSchema, query: querySchema },
+    },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { name } = req.params as typeof paramsSchema.type;
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { name } = req.params as TypeOf<typeof paramsSchema>;
+      const { callAsCurrentUser } = ctx.dataManagement!.client;
+
+      const isLegacy = (req.query as TypeOf<typeof querySchema>).legacy === 'true';
 
       try {
         const managedTemplatePrefix = await getManagedTemplatePrefix(callAsCurrentUser);
-        const indexTemplateByName = await callAsCurrentUser('indices.getTemplate', { name });
 
-        if (indexTemplateByName[name]) {
-          return res.ok({
-            body: deserializeTemplate(
-              { ...indexTemplateByName[name], name },
-              managedTemplatePrefix
-            ),
-          });
+        if (isLegacy) {
+          const indexTemplateByName = await callAsCurrentUser('indices.getTemplate', { name });
+
+          if (indexTemplateByName[name]) {
+            return res.ok({
+              body: deserializeLegacyTemplate(
+                { ...indexTemplateByName[name], name },
+                managedTemplatePrefix
+              ),
+            });
+          }
+        } else {
+          const {
+            index_templates: indexTemplates,
+          } = await callAsCurrentUser('dataManagement.getComposableIndexTemplate', { name });
+
+          if (indexTemplates.length > 0) {
+            return res.ok({
+              body: deserializeTemplate(
+                { ...indexTemplates[0].index_template, name },
+                managedTemplatePrefix
+              ),
+            });
+          }
         }
 
         return res.notFound();

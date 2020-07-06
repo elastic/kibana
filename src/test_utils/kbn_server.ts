@@ -50,6 +50,7 @@ const DEFAULTS_SETTINGS = {
   logging: { silent: true },
   plugins: {},
   optimize: { enabled: false },
+  migrations: { skip: true },
 };
 
 const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
@@ -216,7 +217,7 @@ export function createTestServers({
   if (!adjustTimeout) {
     throw new Error('adjustTimeout is required in order to avoid flaky tests');
   }
-  const license = get<'oss' | 'basic' | 'gold' | 'trial'>(settings, 'es.license', 'oss');
+  const license = get(settings, 'es.license', 'oss');
   const usersToBeAdded = get(settings, 'users', []);
   if (usersToBeAdded.length > 0) {
     if (license !== 'trial') {
@@ -252,7 +253,7 @@ export function createTestServers({
 
   return {
     startES: async () => {
-      await es.start();
+      await es.start(get(settings, 'es.esArgs', []));
 
       if (['gold', 'trial'].includes(license)) {
         await setupUsers({

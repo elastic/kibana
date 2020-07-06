@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiExpression,
   EuiPopover,
-  EuiPopoverTitle,
   EuiSelect,
   EuiFlexGroup,
   EuiFormRow,
@@ -20,12 +19,14 @@ import {
 import { getTimeUnitLabel } from '../lib/get_time_unit_label';
 import { TIME_UNITS } from '../../application/constants';
 import { getTimeOptions } from '../lib/get_time_options';
+import { ClosablePopoverTitle } from './components';
+import { IErrorObject } from '../../types';
 
 interface ForLastExpressionProps {
   timeWindowSize?: number;
   timeWindowUnit?: string;
-  errors: { [key: string]: string[] };
-  onChangeWindowSize: (selectedWindowSize: number | '') => void;
+  errors: IErrorObject;
+  onChangeWindowSize: (selectedWindowSize: number | undefined) => void;
   onChangeWindowUnit: (selectedWindowUnit: string) => void;
   popupPosition?:
     | 'upCenter'
@@ -40,11 +41,13 @@ interface ForLastExpressionProps {
     | 'rightCenter'
     | 'rightUp'
     | 'rightDown';
+  display?: 'fullWidth' | 'inline';
 }
 
 export const ForLastExpression = ({
-  timeWindowSize = 1,
+  timeWindowSize,
   timeWindowUnit = 's',
+  display = 'inline',
   errors,
   onChangeWindowSize,
   onChangeWindowUnit,
@@ -64,13 +67,14 @@ export const ForLastExpression = ({
           )}
           value={`${timeWindowSize} ${getTimeUnitLabel(
             timeWindowUnit as TIME_UNITS,
-            timeWindowSize.toString()
+            (timeWindowSize ?? '').toString()
           )}`}
           isActive={alertDurationPopoverOpen}
           onClick={() => {
             setAlertDurationPopoverOpen(true);
           }}
-          color={timeWindowSize ? 'secondary' : 'danger'}
+          display={display === 'inline' ? 'inline' : 'columns'}
+          isInvalid={!timeWindowSize}
         />
       }
       isOpen={alertDurationPopoverOpen}
@@ -78,16 +82,17 @@ export const ForLastExpression = ({
         setAlertDurationPopoverOpen(false);
       }}
       ownFocus
+      display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
       withTitle
       anchorPosition={popupPosition ?? 'downLeft'}
     >
       <div>
-        <EuiPopoverTitle>
+        <ClosablePopoverTitle onClose={() => setAlertDurationPopoverOpen(false)}>
           <FormattedMessage
             id="xpack.triggersActionsUI.common.expressionItems.forTheLast.popoverTitle"
             defaultMessage="For the last"
           />
-        </EuiPopoverTitle>
+        </ClosablePopoverTitle>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiFormRow
@@ -97,11 +102,11 @@ export const ForLastExpression = ({
               <EuiFieldNumber
                 data-test-subj="timeWindowSizeNumber"
                 isInvalid={errors.timeWindowSize.length > 0 && timeWindowSize !== undefined}
-                min={1}
-                value={timeWindowSize}
-                onChange={e => {
+                min={0}
+                value={timeWindowSize || ''}
+                onChange={(e) => {
                   const { value } = e.target;
-                  const timeWindowSizeVal = value !== '' ? parseInt(value, 10) : value;
+                  const timeWindowSizeVal = value !== '' ? parseInt(value, 10) : undefined;
                   onChangeWindowSize(timeWindowSizeVal);
                 }}
               />
@@ -111,10 +116,10 @@ export const ForLastExpression = ({
             <EuiSelect
               data-test-subj="timeWindowUnitSelect"
               value={timeWindowUnit}
-              onChange={e => {
+              onChange={(e) => {
                 onChangeWindowUnit(e.target.value);
               }}
-              options={getTimeOptions(timeWindowSize)}
+              options={getTimeOptions(timeWindowSize ?? 1)}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
