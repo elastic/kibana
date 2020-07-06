@@ -37,7 +37,7 @@ describe('Security Plugin', () => {
 
     mockCoreSetup = coreMock.createSetup();
     mockCoreSetup.http.getServerInfo.mockReturnValue({
-      host: 'localhost',
+      hostname: 'localhost',
       name: 'kibana',
       port: 80,
       protocol: 'https',
