@@ -21,13 +21,14 @@ export interface LegendItem {
   color?: string;
   dataProviderId: string;
   field: string;
+  timelineId?: string;
   value: string;
 }
 
 const DraggableLegendItemComponent: React.FC<{
   legendItem: LegendItem;
 }> = ({ legendItem }) => {
-  const { color, dataProviderId, field, value } = legendItem;
+  const { color, dataProviderId, field, timelineId, value } = legendItem;
 
   return (
     <EuiText size="xs">
@@ -44,6 +45,7 @@ const DraggableLegendItemComponent: React.FC<{
               data-test-subj={`legend-item-${dataProviderId}`}
               field={field}
               id={dataProviderId}
+              timelineId={timelineId}
               value={value}
             />
           ) : (
