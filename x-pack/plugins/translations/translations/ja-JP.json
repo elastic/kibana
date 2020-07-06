@@ -8154,7 +8154,6 @@
     "xpack.ingestManager.configDetails.packageConfigsTable.nameColumnTitle": "データソース",
     "xpack.ingestManager.configDetails.packageConfigsTable.namespaceColumnTitle": "名前空間",
     "xpack.ingestManager.configDetails.packageConfigsTable.packageNameColumnTitle": "統合",
-    "xpack.ingestManager.configDetails.packageConfigsTable.streamsCountColumnTitle": "ストリーム",
     "xpack.ingestManager.configDetails.subTabs.packageConfigsTabText": "データソース",
     "xpack.ingestManager.configDetails.subTabs.settingsTabText": "設定",
     "xpack.ingestManager.configDetails.summary.lastUpdated": "最終更新日:",
