@@ -5,16 +5,13 @@
  */
 
 import { uniq } from 'lodash';
-import {
-  BeatTag,
-  CMBeat,
-} from '../../../../../../legacy/plugins/beats_management/common/domain_types';
+import { BeatTag, CMBeat } from '../../../../common/domain_types';
 import {
   ReturnTypeBulkDelete,
   ReturnTypeBulkGet,
   ReturnTypeList,
   ReturnTypeUpsert,
-} from '../../../../../../legacy/plugins/beats_management/common/return_types';
+} from '../../../../common/return_types';
 import { RestAPIAdapter } from '../rest_api/adapter_types';
 import { CMTagsAdapter } from './adapter_types';
 

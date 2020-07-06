@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { Subscribe } from 'unstated';
-import { CMBeat } from '../../../../../legacy/plugins/beats_management/common/domain_types';
+import { CMBeat } from '../../../common/domain_types';
 import { PrimaryLayout } from '../../components/layouts/primary';
 import { ChildRoutes } from '../../components/navigation/child_routes';
 import { BeatsContainer } from '../../containers/beats';

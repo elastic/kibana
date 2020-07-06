@@ -9,7 +9,7 @@
 import { Lifecycle, ResponseToolkit } from 'hapi';
 import * as t from 'io-ts';
 import { CoreSetup, CoreStart } from 'src/core/server';
-import { SecurityPluginSetup } from '../../../../../../../plugins/security/server';
+import { SecurityPluginSetup } from '../../../../../security/server';
 import { LicenseType } from '../../../../common/constants/security';
 
 export const internalAuthData = Symbol('internalAuthData');

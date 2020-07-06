@@ -8,7 +8,7 @@ import { ResponseToolkit } from 'hapi';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { get } from 'lodash';
 import { isLeft } from 'fp-ts/lib/Either';
-import { KibanaRequest, LegacyRequest } from '../../../../../../../../src/core/server';
+import { KibanaRequest, LegacyRequest } from 'src/core/server';
 // @ts-ignore
 import { mirrorPluginStatus } from '../../../../../../server/lib/mirror_plugin_status';
 import {

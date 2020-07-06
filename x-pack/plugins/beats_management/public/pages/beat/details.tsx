@@ -19,14 +19,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import React from 'react';
-import { configBlockSchemas } from '../../../../../legacy/plugins/beats_management/common/config_schemas';
-import { translateConfigSchema } from '../../../../../legacy/plugins/beats_management/common/config_schemas_translations_map';
-import { TABLE_CONFIG } from '../../../../../legacy/plugins/beats_management/common/constants';
-import {
-  BeatTag,
-  CMBeat,
-  ConfigurationBlock,
-} from '../../../../../legacy/plugins/beats_management/common/domain_types';
+import { configBlockSchemas } from '../../../common/config_schemas';
+import { translateConfigSchema } from '../../../common/config_schemas_translations_map';
+import { TABLE_CONFIG } from '../../../common/constants';
+import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { ConnectedLink } from '../../components/navigation/connected_link';
 import { TagBadge } from '../../components/tag';

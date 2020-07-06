@@ -8,7 +8,7 @@ import Joi from 'joi';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { ReturnTypeBulkAction } from '../../../common/return_types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { BeatsTagAssignment } from '../../../../../../plugins/beats_management/public/lib/adapters/beats/adapter_types';
+import type { BeatsTagAssignment } from '../../../public/lib/adapters/beats/adapter_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
 

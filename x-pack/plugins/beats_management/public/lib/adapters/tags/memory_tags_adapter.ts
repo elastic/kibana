@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  BeatTag,
-  CMBeat,
-} from '../../../../../../legacy/plugins/beats_management/common/domain_types';
+import { BeatTag, CMBeat } from '../../../../common/domain_types';
 import { CMTagsAdapter } from './adapter_types';
 
 export class MemoryTagsAdapter implements CMTagsAdapter {

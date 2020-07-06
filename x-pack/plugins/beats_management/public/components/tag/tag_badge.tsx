@@ -6,7 +6,7 @@
 
 import { EuiBadge, EuiBadgeProps } from '@elastic/eui';
 import React from 'react';
-import { TABLE_CONFIG } from '../../../../../legacy/plugins/beats_management/common/constants';
+import { TABLE_CONFIG } from '../../../common/constants';
 
 type TagBadgeProps = EuiBadgeProps & {
   maxIdRenderSize?: number;
