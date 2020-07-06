@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import './table_visualization.scss';
 import React, { useEffect } from 'react';
 
 import { ReactVisComponentProps } from 'src/plugins/visualizations/public';
@@ -35,9 +36,13 @@ export const TableVisualization = ({
     renderComplete();
   }, [renderComplete]);
 
-  return table ? (
-    <TableVisBasic table={table} vis={vis} visParams={visParams} />
-  ) : (
-    <TableVisSplit tables={tables} vis={vis} visParams={visParams} />
+  return (
+    <div className="tbvChart" data-test-subj="tableVis">
+      {table ? (
+        <TableVisBasic table={table} vis={vis} visParams={visParams} />
+      ) : (
+        <TableVisSplit tables={tables} vis={vis} visParams={visParams} />
+      )}
+    </div>
   );
 };

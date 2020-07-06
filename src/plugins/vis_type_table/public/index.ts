@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import './index.scss';
 import { PluginInitializerContext } from 'kibana/public';
 import { TableVisPlugin as Plugin } from './plugin';
 
