@@ -3940,7 +3940,6 @@
     "xpack.actions.builtin.case.configuration.emptyMapping": "[casesConfiguration.mapping]：空以外の値が必要ですが空でした",
     "xpack.actions.builtin.case.connectorApiNullError": "コネクター[apiUrl]が必要です",
     "xpack.actions.builtin.case.jiraTitle": "Jira",
-    "xpack.actions.builtin.case.servicenowTitle": "ServiceNow",
     "xpack.actions.builtin.email.errorSendingErrorMessage": "エラー送信メールアドレス",
     "xpack.actions.builtin.emailTitle": "メール",
     "xpack.actions.builtin.esIndex.errorIndexingErrorMessage": "エラーインデックス作成ドキュメント",

@@ -19,6 +19,7 @@ export interface ActionsConnectorsContextValue {
   capabilities: ApplicationStart['capabilities'];
   reloadConnectors?: () => Promise<void>;
   docLinks: DocLinksStart;
+  consumer?: string;
 }
 
 const ActionsConnectorsContext = createContext<ActionsConnectorsContextValue>(null as any);
