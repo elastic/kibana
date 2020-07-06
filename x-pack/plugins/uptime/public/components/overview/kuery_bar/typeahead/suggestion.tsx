@@ -11,7 +11,7 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 import { QuerySuggestion } from '../../../../../../../../src/plugins/data/public';
 
-const SuggestionItem = styled<{ selected: boolean }>(EuiSuggestItem)`
+const SuggestionItem = styled.div<{ selected: boolean }>`
   background: ${(props) => (props.selected ? theme.euiColorLightestShade : 'initial')};
 `;
 
@@ -27,6 +27,8 @@ function getIconColor(type: string) {
       return 'tint3';
     case 'recentSearch':
       return 'tint10';
+    default:
+      return 'tint5';
   }
 }
 
@@ -78,15 +80,14 @@ export const Suggestion: React.FC<SuggestionProps> = ({
   }
 
   return (
-    <div ref={childNode}>
-      <SuggestionItem
+    <SuggestionItem ref={childNode} selected={selected}>
+      <EuiSuggestItem
         type={{ iconType: getEuiIconType(suggestion.type), color: getIconColor(suggestion.type) }}
         label={suggestion.text}
         onClick={() => onClick(suggestion)}
         onMouseEnter={onMouseEnter}
-        // selected={selected}
         description={descr}
       />
-    </div>
+    </SuggestionItem>
   );
 };

@@ -7,7 +7,6 @@
 import React, { useState } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import * as labels from './translations';
 import {
   DownNoExpressionSelect,
@@ -20,7 +19,6 @@ import { KueryBar } from '..';
 
 export interface AlertMonitorStatusProps {
   alertParams: { [key: string]: any };
-  autocomplete: DataPublicPluginSetup['autocomplete'];
   enabled: boolean;
   hasFilters: boolean;
   isOldAlert: boolean;
@@ -60,7 +58,6 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
 
       <KueryBar
         aria-label={labels.ALERT_KUERY_BAR_ARIA}
-        autocomplete={props.autocomplete}
         defaultKuery={alertParams.search}
         shouldUpdateUrl={shouldUpdateUrl}
         updateDefaultKuery={(value: string) => setAlertParams('search', value)}

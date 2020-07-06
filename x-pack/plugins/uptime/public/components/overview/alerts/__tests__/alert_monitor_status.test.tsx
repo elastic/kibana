@@ -17,10 +17,6 @@ describe('alert monitor status component', () => {
         timerangeUnit: 'h',
         timerangeCount: 21,
       },
-      autocomplete: {
-        addQuerySuggestionProvider: jest.fn(),
-        getQuerySuggestions: jest.fn(),
-      },
       enabled: true,
       hasFilters: false,
       isOldAlert: true,

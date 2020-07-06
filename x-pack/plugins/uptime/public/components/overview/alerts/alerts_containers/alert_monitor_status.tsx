@@ -7,7 +7,6 @@
 import React, { useMemo, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import { isRight } from 'fp-ts/lib/Either';
 import {
   selectMonitorStatusAlert,
@@ -29,7 +28,6 @@ import { useUpdateKueryString } from '../../../../hooks';
 
 interface Props {
   alertParams: { [key: string]: any };
-  autocomplete: DataPublicPluginSetup['autocomplete'];
   enabled: boolean;
   numTimes: number;
   setAlertParams: (key: string, value: any) => void;
@@ -40,7 +38,6 @@ interface Props {
 }
 
 export const AlertMonitorStatus: React.FC<Props> = ({
-  autocomplete,
   enabled,
   numTimes,
   setAlertParams,
@@ -116,7 +113,6 @@ export const AlertMonitorStatus: React.FC<Props> = ({
   return (
     <AlertMonitorStatusComponent
       alertParams={alertParams}
-      autocomplete={autocomplete}
       enabled={enabled}
       hasFilters={!!overviewFilters?.filters}
       isOldAlert={isOldAlert}
