@@ -5,7 +5,7 @@
  */
 
 import './datapanel.scss';
-import { uniq, indexBy, groupBy, throttle } from 'lodash';
+import { uniq, keyBy, groupBy, throttle } from 'lodash';
 import React, { useState, useEffect, memo, useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
@@ -47,9 +47,11 @@ export type Props = DatasourceDataPanelProps<IndexPatternPrivateState> & {
     state: IndexPatternPrivateState,
     setState: StateSetter<IndexPatternPrivateState>
   ) => void;
+  charts: ChartsPluginSetup;
 };
 import { LensFieldIcon } from './lens_field_icon';
 import { ChangeIndexPattern } from './change_indexpattern';
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 
 // TODO the typings for EuiContextMenuPanel are incorrect - watchedItemProps is missing. This can be removed when the types are adjusted
 const FixedEuiContextMenuPanel = (EuiContextMenuPanel as unknown) as React.FunctionComponent<
@@ -82,6 +84,8 @@ export function IndexPatternDataPanel({
   filters,
   dateRange,
   changeIndexPattern,
+  charts,
+  showNoDataPopover,
 }: Props) {
   const { indexPatternRefs, indexPatterns, currentIndexPatternId } = state;
   const onChangeIndexPattern = useCallback(
@@ -116,6 +120,9 @@ export function IndexPatternDataPanel({
           syncExistingFields({
             dateRange,
             setState,
+            isFirstExistenceFetch: state.isFirstExistenceFetch,
+            currentIndexPatternTitle: indexPatterns[currentIndexPatternId].title,
+            showNoDataPopover,
             indexPatterns: indexPatternList,
             fetchJson: core.http.post,
             dslQuery,
@@ -166,6 +173,7 @@ export function IndexPatternDataPanel({
           dragDropContext={dragDropContext}
           core={core}
           data={data}
+          charts={charts}
           onChangeIndexPattern={onChangeIndexPattern}
           existingFields={state.existingFields}
         />
@@ -210,7 +218,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   core,
   data,
   existingFields,
-}: Pick<DatasourceDataPanelProps, Exclude<keyof DatasourceDataPanelProps, 'state' | 'setState'>> & {
+  charts,
+}: Omit<DatasourceDataPanelProps, 'state' | 'setState' | 'showNoDataPopover'> & {
   data: DataPublicPluginStart;
   currentIndexPatternId: string;
   indexPatternRefs: IndexPatternRef[];
@@ -218,6 +227,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   dragDropContext: DragContextState;
   onChangeIndexPattern: (newId: string) => void;
   existingFields: IndexPatternPrivateState['existingFields'];
+  charts: ChartsPluginSetup;
 }) {
   const [localState, setLocalState] = useState<DataPanelState>({
     nameFilter: '',
@@ -246,7 +256,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
 
   const fieldGroups: FieldsGroup = useMemo(() => {
     const containsData = (field: IndexPatternField) => {
-      const fieldByName = indexBy(allFields, 'name');
+      const fieldByName = keyBy(allFields, 'name');
       const overallField = fieldByName[field.name];
 
       return (
@@ -372,6 +382,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       dateRange,
       query,
       filters,
+      chartsThemeService: charts.theme,
     }),
     [core, data, currentIndexPattern, dateRange, query, filters, localState.nameFilter]
   );

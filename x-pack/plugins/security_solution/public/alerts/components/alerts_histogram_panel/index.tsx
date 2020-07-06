@@ -7,12 +7,11 @@ import { Position } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash/fp';
 import uuid from 'uuid';
 
-import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
+import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
 import { UpdateDateRange } from '../../../common/components/charts/common';
 import { LegendItem } from '../../../common/components/charts/draggable_legend_item';
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
@@ -70,6 +69,7 @@ interface AlertsHistogramPanelProps {
   showLinkToAlerts?: boolean;
   showTotalAlertsCount?: boolean;
   stackByOptions?: AlertsHistogramOption[];
+  timelineId?: string;
   title?: string;
   to: number;
   updateDateRange: UpdateDateRange;
@@ -99,11 +99,11 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     showLinkToAlerts = false,
     showTotalAlertsCount = false,
     stackByOptions,
-    to,
+    timelineId,
     title = i18n.HISTOGRAM_HEADER,
+    to,
     updateDateRange,
   }) => {
-    const history = useHistory();
     // create a unique, but stable (across re-renders) query id
     const uniqueQueryId = useMemo(() => `${DETECTIONS_HISTOGRAM_ID}-${uuid.v4()}`, []);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -124,6 +124,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       signalIndexName
     );
     const kibana = useKibana();
+    const { navigateToApp } = kibana.services.application;
     const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.alerts);
 
     const totalAlerts = useMemo(
@@ -147,9 +148,11 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     const goToDetectionEngine = useCallback(
       (ev) => {
         ev.preventDefault();
-        history.push(getDetectionEngineUrl(urlSearch));
+        navigateToApp(`${APP_ID}:${SecurityPageName.alerts}`, {
+          path: getDetectionEngineUrl(urlSearch),
+        });
       },
-      [history, urlSearch]
+      [navigateToApp, urlSearch]
     );
     const formattedAlertsData = useMemo(() => formatAlertsData(alertsData), [alertsData]);
 
@@ -162,11 +165,12 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
                 `draggable-legend-item-${uuid.v4()}-${selectedStackByOption.value}-${bucket.key}`
               ),
               field: selectedStackByOption.value,
+              timelineId,
               value: bucket.key,
             }))
           : NO_LEGEND_DATA,
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [alertsData, selectedStackByOption.value]
+      [alertsData, selectedStackByOption.value, timelineId]
     );
 
     useEffect(() => {
@@ -240,7 +244,11 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       if (showLinkToAlerts) {
         return (
           <ViewAlertsFlexItem grow={false}>
-            <LinkButton onClick={goToDetectionEngine} href={formatUrl(getDetectionEngineUrl())}>
+            <LinkButton
+              data-test-subj="alerts-histogram-panel-go-to-alerts-page"
+              onClick={goToDetectionEngine}
+              href={formatUrl(getDetectionEngineUrl())}
+            >
               {i18n.VIEW_ALERTS}
             </LinkButton>
           </ViewAlertsFlexItem>
