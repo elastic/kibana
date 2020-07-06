@@ -30,28 +30,15 @@ describe('Index Templates tab', () => {
     server.restore();
   });
 
-  beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadIndicesResponse([]);
-
-    await act(async () => {
-      testBed = await setup();
-    });
-  });
-
   describe('when there are no index templates', () => {
-    beforeEach(async () => {
-      const { actions, component } = testBed;
-
+    test('should display an empty prompt', async () => {
       httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
 
       await act(async () => {
-        actions.goToTemplatesList();
+        testBed = await setup();
       });
+      const { exists, component } = testBed;
       component.update();
-    });
-
-    test('should display an empty prompt', async () => {
-      const { exists } = testBed;
 
       expect(exists('sectionLoading')).toBe(false);
       expect(exists('emptyPrompt')).toBe(true);
@@ -119,14 +106,12 @@ describe('Index Templates tab', () => {
     const legacyTemplates = [template4, template5, template6];
 
     beforeEach(async () => {
-      const { actions, component } = testBed;
-
       httpRequestsMockHelpers.setLoadTemplatesResponse({ templates, legacyTemplates });
 
       await act(async () => {
-        actions.goToTemplatesList();
+        testBed = await setup();
       });
-      component.update();
+      testBed.component.update();
     });
 
     test('should list them in the table', async () => {
@@ -151,6 +136,7 @@ describe('Index Templates tab', () => {
           composedOfString,
           priorityFormatted,
           'M S A', // Mappings Settings Aliases badges
+          '', // Column of actions
         ]);
       });
 
@@ -192,8 +178,10 @@ describe('Index Templates tab', () => {
       );
     });
 
-    test('should have a button to create a new template', () => {
+    test('should have a button to create a template', () => {
       const { exists } = testBed;
+      // Both composable and legacy templates
+      expect(exists('createTemplateButton')).toBe(true);
       expect(exists('createLegacyTemplateButton')).toBe(true);
     });
 
