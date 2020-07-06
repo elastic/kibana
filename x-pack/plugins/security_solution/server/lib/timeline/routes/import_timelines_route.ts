@@ -46,7 +46,7 @@ export const importTimelinesRoute = (
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const { file } = request.body;
+        const { file, isImmutable } = request.body;
         const { filename } = file.hapi;
         const fileExtension = extname(filename).toLowerCase();
 
@@ -62,7 +62,8 @@ export const importTimelinesRoute = (
         const res = await importTimelines(
           file,
           config.maxTimelineImportExportSize,
-          frameworkRequest
+          frameworkRequest,
+          isImmutable === 'true'
         );
         if (typeof res !== 'string') return response.ok({ body: res ?? {} });
         else throw res;

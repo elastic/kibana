@@ -18,5 +18,6 @@ curl -s -k \
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
   -X POST "${KIBANA_URL}${SPACE_URL}/api/timeline/_import" \
+  --form isImmutable=true \
   --form file=@${TIMELINES} \
   | jq .;

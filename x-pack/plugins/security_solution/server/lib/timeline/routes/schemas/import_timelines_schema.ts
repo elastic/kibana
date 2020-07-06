@@ -44,14 +44,20 @@ const ReadableRt = new rt.Type<Readable, Readable, unknown>(
     }),
   (a) => a
 );
-export const ImportTimelinesPayloadSchemaRt = rt.type({
-  file: rt.intersection([
-    ReadableRt,
-    rt.type({
-      hapi: rt.type({ filename: rt.string }),
-    }),
-  ]),
-});
+
+const booleanInString = rt.union([rt.literal('true'), rt.literal('false')]);
+
+export const ImportTimelinesPayloadSchemaRt = rt.intersection([
+  rt.type({
+    file: rt.intersection([
+      ReadableRt,
+      rt.type({
+        hapi: rt.type({ filename: rt.string }),
+      }),
+    ]),
+  }),
+  rt.partial({ isImmutable: booleanInString }),
+]);
 
 export const importTimelineResultSchema = rt.exact(
   rt.type({
