@@ -3924,7 +3924,6 @@
     "xpack.actions.builtin.case.configuration.emptyMapping": "[casesConfiguration.mapping]：应为非空，但却为空",
     "xpack.actions.builtin.case.connectorApiNullError": "需要指定连接器 [apiUrl]",
     "xpack.actions.builtin.case.jiraTitle": "Jira",
-    "xpack.actions.builtin.case.servicenowTitle": "ServiceNow",
     "xpack.actions.builtin.email.errorSendingErrorMessage": "发送电子邮件时出错",
     "xpack.actions.builtin.emailTitle": "电子邮件",
     "xpack.actions.builtin.esIndex.errorIndexingErrorMessage": "索引文档时出错",
