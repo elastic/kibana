@@ -7,22 +7,20 @@
 import { createHash } from 'crypto';
 import { validate } from '../../../../common/validate';
 
-import {
-  Entry,
-  EntryNested,
-  EntryMatch,
-  EntryMatchAny,
-} from '../../../../../lists/common/schemas/types/entries';
+import { Entry, EntryNested } from '../../../../../lists/common/schemas/types/entries';
 import { FoundExceptionListItemSchema } from '../../../../../lists/common/schemas/response/found_exception_list_item_schema';
 import { ExceptionListClient } from '../../../../../lists/server';
 import {
   InternalArtifactSchema,
   TranslatedEntry,
-  TranslatedEntryMatch,
-  TranslatedEntryMatchAny,
-  TranslatedEntryNested,
   WrappedTranslatedExceptionList,
   wrappedExceptionList,
+  TranslatedEntryNestedEntry,
+  translatedEntryNestedEntry,
+  translatedEntry as translatedEntryType,
+  TranslatedEntryMatcher,
+  translatedEntryMatchMatcher,
+  translatedEntryMatchAnyMatcher,
 } from '../../schemas';
 import { ArtifactConstants } from './common';
 
@@ -36,11 +34,14 @@ export async function buildArtifact(
 
   return {
     identifier: `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-${os}-${schemaVersion}`,
-    sha256,
-    encoding: 'application/json',
+    compressionAlgorithm: 'none',
+    encryptionAlgorithm: 'none',
+    decompressedSha256: sha256,
+    compressedSha256: sha256,
+    decompressedSize: exceptionsBuffer.byteLength,
+    compressedSize: exceptionsBuffer.byteLength,
     created: Date.now(),
     body: exceptionsBuffer.toString('base64'),
-    size: exceptionsBuffer.byteLength,
   };
 }
 
@@ -92,66 +93,80 @@ export function translateToEndpointExceptions(
   exc: FoundExceptionListItemSchema,
   schemaVersion: string
 ): TranslatedEntry[] {
-  const translatedList: TranslatedEntry[] = [];
-
   if (schemaVersion === '1.0.0') {
-    exc.data.forEach((list) => {
-      list.entries.forEach((entry) => {
-        const tEntry = translateEntry(schemaVersion, entry);
-        if (tEntry !== undefined) {
-          translatedList.push(tEntry);
+    return exc.data
+      .flatMap((list) => {
+        return list.entries;
+      })
+      .reduce((entries: TranslatedEntry[], entry) => {
+        const translatedEntry = translateEntry(schemaVersion, entry);
+        if (translatedEntry !== undefined && translatedEntryType.is(translatedEntry)) {
+          entries.push(translatedEntry);
         }
-      });
-    });
+        return entries;
+      }, []);
   } else {
     throw new Error('unsupported schemaVersion');
   }
-  return translatedList;
+}
+
+function getMatcherFunction(field: string, matchAny?: boolean): TranslatedEntryMatcher {
+  return matchAny
+    ? field.endsWith('.text')
+      ? 'exact_caseless_any'
+      : 'exact_cased_any'
+    : field.endsWith('.text')
+    ? 'exact_caseless'
+    : 'exact_cased';
+}
+
+function normalizeFieldName(field: string): string {
+  return field.endsWith('.text') ? field.substring(0, field.length - 5) : field;
 }
 
 function translateEntry(
   schemaVersion: string,
   entry: Entry | EntryNested
 ): TranslatedEntry | undefined {
-  let translatedEntry;
   switch (entry.type) {
     case 'nested': {
-      const e = (entry as unknown) as EntryNested;
-      const nestedEntries: TranslatedEntry[] = [];
-      for (const nestedEntry of e.entries) {
-        const translation = translateEntry(schemaVersion, nestedEntry);
-        if (translation !== undefined) {
-          nestedEntries.push(translation);
-        }
-      }
-      translatedEntry = {
+      const nestedEntries = entry.entries.reduce(
+        (entries: TranslatedEntryNestedEntry[], nestedEntry) => {
+          const translatedEntry = translateEntry(schemaVersion, nestedEntry);
+          if (nestedEntry !== undefined && translatedEntryNestedEntry.is(translatedEntry)) {
+            entries.push(translatedEntry);
+          }
+          return entries;
+        },
+        []
+      );
+      return {
         entries: nestedEntries,
-        field: e.field,
+        field: entry.field,
         type: 'nested',
-      } as TranslatedEntryNested;
-      break;
+      };
     }
     case 'match': {
-      const e = (entry as unknown) as EntryMatch;
-      translatedEntry = {
-        field: e.field.endsWith('.text') ? e.field.substring(0, e.field.length - 5) : e.field,
-        operator: e.operator,
-        type: e.field.endsWith('.text') ? 'exact_caseless' : 'exact_cased',
-        value: e.value,
-      } as TranslatedEntryMatch;
-      break;
+      const matcher = getMatcherFunction(entry.field);
+      return translatedEntryMatchMatcher.is(matcher)
+        ? {
+            field: normalizeFieldName(entry.field),
+            operator: entry.operator,
+            type: matcher,
+            value: entry.value,
+          }
+        : undefined;
     }
-    case 'match_any':
-      {
-        const e = (entry as unknown) as EntryMatchAny;
-        translatedEntry = {
-          field: e.field.endsWith('.text') ? e.field.substring(0, e.field.length - 5) : e.field,
-          operator: e.operator,
-          type: e.field.endsWith('.text') ? 'exact_caseless_any' : 'exact_cased_any',
-          value: e.value,
-        } as TranslatedEntryMatchAny;
-      }
-      break;
+    case 'match_any': {
+      const matcher = getMatcherFunction(entry.field, true);
+      return translatedEntryMatchAnyMatcher.is(matcher)
+        ? {
+            field: normalizeFieldName(entry.field),
+            operator: entry.operator,
+            type: matcher,
+            value: entry.value,
+          }
+        : undefined;
+    }
   }
-  return translatedEntry || undefined;
 }

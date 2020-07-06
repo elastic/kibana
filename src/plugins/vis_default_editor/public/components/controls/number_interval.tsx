@@ -56,7 +56,7 @@ function NumberIntervalParamEditor({
   setValidity,
   setValue,
 }: AggParamEditorProps<number | undefined>) {
-  const base: number = get(editorConfig, 'interval.base');
+  const base: number = get(editorConfig, 'interval.base') as number;
   const min = base || 0;
   const isValid = value !== undefined && value >= min;
 

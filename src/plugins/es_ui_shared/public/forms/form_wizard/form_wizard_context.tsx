@@ -23,7 +23,7 @@ import { WithMultiContent, useMultiContentContext, HookProps } from '../multi_co
 
 export interface Props<T extends object> {
   onSave: (data: T) => void | Promise<void>;
-  children: JSX.Element | JSX.Element[];
+  children: JSX.Element | Array<JSX.Element | null | false>;
   isEditing?: boolean;
   defaultActiveStep?: number;
   defaultValue?: HookProps<T>['defaultValue'];
