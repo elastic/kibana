@@ -97,8 +97,8 @@ export function initSavedObjectFinderDirective(app, savedSheetLoader, uiSettings
           self.sortHits = function (hits) {
             self.isAscending = !self.isAscending;
             self.hits = self.isAscending
-              ? _.sortBy(hits, 'title')
-              : _.sortBy(hits, 'title').reverse();
+              ? _.sortBy(hits, ['title'])
+              : _.sortBy(hits, ['title']).reverse();
           };
 
           /**
@@ -304,7 +304,7 @@ export function initSavedObjectFinderDirective(app, savedSheetLoader, uiSettings
               // as we can't really cancel requests
               if (currentFilter === filter) {
                 self.hitCount = hits.total;
-                self.hits = _.sortBy(hits.hits, 'title');
+                self.hits = _.sortBy(hits.hits, ['title']);
               }
             });
           }

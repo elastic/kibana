@@ -28,7 +28,13 @@ interface Arguments {
   stateDefaults: TimelionAppState;
 }
 
-export function useTimelionAppState({ stateDefaults, kbnUrlStateStorage }: Arguments) {
+export function initTimelionAppState({ stateDefaults, kbnUrlStateStorage }: Arguments) {
+  const urlState = kbnUrlStateStorage.get<TimelionAppState>(STATE_STORAGE_KEY);
+  const initialState = {
+    ...stateDefaults,
+    ...urlState,
+  };
+
   /*
     make sure url ('_a') matches initial state
     Initializing appState does two things - first it translates the defaults into AppState,
@@ -36,10 +42,10 @@ export function useTimelionAppState({ stateDefaults, kbnUrlStateStorage }: Argum
     we update the state format at all and want to handle BWC, we must not only migrate the
     data stored with saved vis, but also any old state in the url.
   */
-  kbnUrlStateStorage.set(STATE_STORAGE_KEY, stateDefaults, { replace: true });
+  kbnUrlStateStorage.set(STATE_STORAGE_KEY, initialState, { replace: true });
 
   const stateContainer = createStateContainer<TimelionAppState, TimelionAppStateTransitions>(
-    stateDefaults,
+    initialState,
     {
       set: (state) => (prop, value) => ({ ...state, [prop]: value }),
       updateState: (state) => (newValues) => ({ ...state, ...newValues }),

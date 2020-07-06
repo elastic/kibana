@@ -43,8 +43,8 @@ export function initCellsDirective(app) {
         };
 
         $scope.dropCell = function (item, partFrom, partTo, indexFrom, indexTo) {
-          $scope.onSelect(indexTo);
           move($scope.sheet, indexFrom, indexTo);
+          $scope.onSelect(indexTo);
         };
       },
     };

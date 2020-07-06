@@ -49,11 +49,9 @@ import { TimelionInterval } from './directives/timelion_interval/timelion_interv
 import { timelionExpInput } from './directives/timelion_expression_input';
 import { TimelionExpressionSuggestions } from './directives/timelion_expression_suggestions/timelion_expression_suggestions';
 import { initSavedSheetService } from './services/saved_sheets';
-import { useTimelionAppState } from './timelion_app_state';
+import { initTimelionAppState } from './timelion_app_state';
 
 import rootTemplate from './index.html';
-
-document.title = 'Timelion - Kibana';
 
 export function initTimelionApp(app, deps) {
   app.run(registerListenEventListener);
@@ -122,6 +120,8 @@ export function initTimelionApp(app, deps) {
     timefilter.enableAutoRefreshSelector();
     timefilter.enableTimeRangeSelector();
 
+    deps.core.chrome.docTitle.change('Timelion - Kibana');
+
     // starts syncing `_g` portion of url with query services
     const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
       deps.plugins.data.query,
@@ -140,8 +140,7 @@ export function initTimelionApp(app, deps) {
       };
     }
 
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const { stateContainer, stopStateSync } = useTimelionAppState({
+    const { stateContainer, stopStateSync } = initTimelionAppState({
       stateDefaults: getStateDefaults(),
       kbnUrlStateStorage,
     });
@@ -375,11 +374,17 @@ export function initTimelionApp(app, deps) {
       };
 
       $scope.$watch('opts.state.rows', function (newRow) {
-        stateContainer.transitions.set('rows', newRow);
+        const state = stateContainer.getState();
+        if (state.rows !== newRow) {
+          stateContainer.transitions.set('rows', newRow);
+        }
       });
 
       $scope.$watch('opts.state.columns', function (newColumn) {
-        stateContainer.transitions.set('columns', newColumn);
+        const state = stateContainer.getState();
+        if (state.columns !== newColumn) {
+          stateContainer.transitions.set('columns', newColumn);
+        }
       });
 
       $scope.menus = {
@@ -442,18 +447,18 @@ export function initTimelionApp(app, deps) {
 
     $scope.$watch('expression', function (newExpression) {
       const state = stateContainer.getState();
-      const newSheet = _.clone(state.sheet);
-      newSheet[state.selected] = newExpression;
-      const updatedSheet = $scope.updatedSheets.find(
-        (updatedSheet) => updatedSheet.id === state.selected
-      );
-      if (updatedSheet) {
-        updatedSheet.expression = newExpression;
-      } else {
-        $scope.updatedSheets.push({
-          id: state.selected,
-          expression: newExpression,
-        });
+      if (state.sheet[state.selected] !== newExpression) {
+        const updatedSheet = $scope.updatedSheets.find(
+          (updatedSheet) => updatedSheet.id === state.selected
+        );
+        if (updatedSheet) {
+          updatedSheet.expression = newExpression;
+        } else {
+          $scope.updatedSheets.push({
+            id: state.selected,
+            expression: newExpression,
+          });
+        }
       }
     });
 
@@ -501,7 +506,10 @@ export function initTimelionApp(app, deps) {
     };
 
     $scope.setActiveCell = function (cell) {
-      stateContainer.transitions.set('selected', cell);
+      const state = stateContainer.getState();
+      if (state.selected !== cell) {
+        stateContainer.transitions.updateState({ sheet: $scope.state.sheet, selected: cell });
+      }
     };
 
     $scope.search = function () {
@@ -514,7 +522,7 @@ export function initTimelionApp(app, deps) {
       const httpResult = $http
         .post('../api/timelion/run', {
           sheet: state.sheet,
-          time: _.extend(
+          time: _.assignIn(
             {
               from: timeRangeBounds.min,
               to: timeRangeBounds.max,
@@ -534,7 +542,7 @@ export function initTimelionApp(app, deps) {
         .then(function (resp) {
           $scope.stats = resp.stats;
           $scope.sheet = resp.sheet;
-          _.each(resp.sheet, function (cell) {
+          _.forEach(resp.sheet, function (cell) {
             if (cell.exception && cell.plot !== state.selected) {
               stateContainer.transitions.set('selected', cell.plot);
             }
