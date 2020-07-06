@@ -18,6 +18,7 @@ import {
   getFormattedComments,
   filterExceptionItems,
   getNewExceptionItem,
+  formatOperatingSystems,
 } from './helpers';
 import { FormattedEntry, DescriptionListItem, EmptyEntry } from './types';
 import {
@@ -278,27 +279,33 @@ describe('Exception helpers', () => {
 
   describe('#getOperatingSystems', () => {
     test('it returns null if no operating system tag specified', () => {
-      const result = getOperatingSystems(['some tag', 'some other tag']);
+      const result = formatOperatingSystems(getOperatingSystems(['some tag', 'some other tag']));
 
       expect(result).toEqual('');
     });
 
     test('it returns null if operating system tag malformed', () => {
-      const result = getOperatingSystems(['some tag', 'jibberos:mac,windows', 'some other tag']);
+      const result = formatOperatingSystems(
+        getOperatingSystems(['some tag', 'jibberos:mac,windows', 'some other tag'])
+      );
 
       expect(result).toEqual('');
     });
 
     test('it returns formatted operating systems if space included in os tag', () => {
-      const result = getOperatingSystems(['some tag', 'os: mac', 'some other tag']);
+      const result = formatOperatingSystems(
+        getOperatingSystems(['some tag', 'os: macos', 'some other tag'])
+      );
 
-      expect(result).toEqual('Mac');
+      expect(result).toEqual('macOS');
     });
 
     test('it returns formatted operating systems if multiple os tags specified', () => {
-      const result = getOperatingSystems(['some tag', 'os: mac', 'some other tag', 'os:windows']);
+      const result = formatOperatingSystems(
+        getOperatingSystems(['some tag', 'os: macos', 'some other tag', 'os:windows'])
+      );
 
-      expect(result).toEqual('Mac, Windows');
+      expect(result).toEqual('macOS, Windows');
     });
   });
 

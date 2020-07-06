@@ -401,9 +401,15 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     closeAddExceptionModal();
   }, [closeAddExceptionModal]);
 
-  const onAddExceptionConfirm = useCallback(() => {
-    closeAddExceptionModal();
-  }, [closeAddExceptionModal]);
+  const onAddExceptionConfirm = useCallback(
+    (didCloseAlert?: boolean) => {
+      closeAddExceptionModal();
+      if (didCloseAlert === true) {
+        updateTimeline();
+      }
+    },
+    [closeAddExceptionModal, updateTimeline]
+  );
 
   if (loading || isEmpty(signalsIndex)) {
     return (

@@ -43,6 +43,7 @@ import {
   defaultEndpointExceptionItems,
   entryHasListType,
   entryHasNonEcsType,
+  getMappedNonEcsValue,
 } from '../helpers';
 import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
 
@@ -65,7 +66,7 @@ interface AddExceptionModalProps {
     nonEcsData: TimelineNonEcsData[];
   };
   onCancel: () => void;
-  onConfirm: () => void;
+  onConfirm: (didCloseAlert?: boolean) => void;
 }
 
 const Modal = styled(EuiModal)`
@@ -130,8 +131,8 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   );
   const onSuccess = useCallback(() => {
     displaySuccessToast(i18n.ADD_EXCEPTION_SUCCESS, dispatchToaster);
-    onConfirm();
-  }, [dispatchToaster, onConfirm]);
+    onConfirm(shouldCloseAlert);
+  }, [dispatchToaster, onConfirm, shouldCloseAlert]);
 
   const [{ isLoading: addExceptionIsLoading }, addOrUpdateExceptionItems] = useAddOrUpdateException(
     {
@@ -193,6 +194,12 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     indexPatterns,
   ]);
 
+  useEffect(() => {
+    if (shouldDisableBulkClose === true) {
+      setShouldBulkCloseAlert(false);
+    }
+  }, [shouldDisableBulkClose]);
+
   const onCommentChange = useCallback(
     (value: string) => {
       setComment(value);
@@ -221,7 +228,9 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         ? enrichExceptionItemsWithComments(exceptionItemsToAdd, [{ comment }])
         : exceptionItemsToAdd;
     if (exceptionListType === 'endpoint') {
-      const osTypes = alertData ? ['windows'] : ['windows', 'macos', 'linux'];
+      const osTypes = alertData
+        ? getMappedNonEcsValue({ data: alertData.nonEcsData, fieldName: 'host.os.family' })
+        : ['windows', 'macos', 'linux'];
       enriched = enrichExceptionItemsWithOS(enriched, osTypes);
     }
     return enriched;

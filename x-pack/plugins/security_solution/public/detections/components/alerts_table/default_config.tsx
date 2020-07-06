@@ -308,12 +308,12 @@ export const getAlertActions = ({
     // TODO: disable this option if the alert is not an Endpoint alert
     {
       onClick: ({ ecsData, data }: TimelineRowActionOnClick) => {
-        const ruleNameValue = getMappedNonEcsValue({ data, fieldName: 'signal.rule.name' });
-        const ruleId = getMappedNonEcsValue({ data, fieldName: 'signal.rule.id' });
-        if (ruleId !== undefined && ruleId.length > 0) {
+        const [ruleName] = getMappedNonEcsValue({ data, fieldName: 'signal.rule.name' });
+        const [ruleId] = getMappedNonEcsValue({ data, fieldName: 'signal.rule.id' });
+        if (ruleId !== undefined) {
           openAddExceptionModal({
-            ruleName: ruleNameValue ? ruleNameValue[0] : '',
-            ruleId: ruleId[0],
+            ruleName: ruleName ?? '',
+            ruleId,
             exceptionListType: 'endpoint',
             alertData: {
               ecsData,
@@ -331,12 +331,12 @@ export const getAlertActions = ({
     },
     {
       onClick: ({ ecsData, data }: TimelineRowActionOnClick) => {
-        const ruleNameValue = getMappedNonEcsValue({ data, fieldName: 'signal.rule.name' });
-        const ruleId = getMappedNonEcsValue({ data, fieldName: 'signal.rule.id' });
-        if (ruleId !== undefined && ruleId.length > 0) {
+        const [ruleName] = getMappedNonEcsValue({ data, fieldName: 'signal.rule.name' });
+        const [ruleId] = getMappedNonEcsValue({ data, fieldName: 'signal.rule.id' });
+        if (ruleId !== undefined) {
           openAddExceptionModal({
-            ruleName: ruleNameValue ? ruleNameValue[0] : '',
-            ruleId: ruleId[0],
+            ruleName: ruleName ?? '',
+            ruleId,
             exceptionListType: 'detection',
             alertData: {
               ecsData,
