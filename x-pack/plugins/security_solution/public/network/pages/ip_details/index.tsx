@@ -9,6 +9,7 @@ import React, { useCallback, useEffect } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 
+import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LastEventTime } from '../../../common/components/last_event_time';
@@ -51,14 +52,11 @@ export const IPDetailsComponent: React.FC<IPDetailsComponentProps & PropsFromRed
   detailName,
   filters,
   flowTarget,
-  from,
-  isInitializing,
   query,
   setAbsoluteRangeDatePicker,
   setIpDetailsTablesActivePageToZero,
-  setQuery,
-  to,
 }) => {
+  const { to, from, setQuery, isInitializing } = useGlobalTime();
   const type = networkModel.NetworkType.details;
   const narrowDateRange = useCallback(
     (score, interval) => {
