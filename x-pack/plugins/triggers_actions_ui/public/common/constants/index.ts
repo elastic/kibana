@@ -7,6 +7,5 @@
 export { COMPARATORS, builtInComparators } from './comparators';
 export { AGGREGATION_TYPES, builtInAggregationTypes } from './aggregation_types';
 export { builtInGroupByTypes } from './group_by_types';
-export { connectorConfiguration as ServiceNowConnectorConfiguration } from '../../application/components/builtin_action_types/servicenow/config';
 
 export const VIEW_LICENSE_OPTIONS_LINK = 'https://www.elastic.co/subscriptions';

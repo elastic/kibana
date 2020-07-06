@@ -5,7 +5,7 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ServiceNowConnectorConfiguration } from '../../../../../triggers_actions_ui/public/common/constants';
+import { ServiceNowConnectorConfiguration } from '../../../../../triggers_actions_ui/public/common';
 import { connector as jiraConnectorConfig } from './jira/config';
 import { ConnectorConfiguration } from './types';
 

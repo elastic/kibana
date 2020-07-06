@@ -5,14 +5,13 @@
  */
 
 import Boom from 'boom';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ServiceNowConnectorConfiguration } from '../../../../../../triggers_actions_ui/public/common/constants';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
 
 import {
   CASE_CONFIGURE_CONNECTORS_URL,
   SUPPORTED_CONNECTORS,
+  SERVICENOW_ACTION_TYPE_ID,
 } from '../../../../../common/constants';
 
 /*
@@ -37,9 +36,8 @@ export function initCaseConfigureGetActionConnector({ caseService, router }: Rou
           (action) =>
             SUPPORTED_CONNECTORS.includes(action.actionTypeId) &&
             // Need this filtering temporary to display only Case owned ServiceNow connectors
-            (action.actionTypeId !== ServiceNowConnectorConfiguration.id ||
-              (action.actionTypeId === ServiceNowConnectorConfiguration.id &&
-                action.config!.isCaseOwned))
+            (action.actionTypeId !== SERVICENOW_ACTION_TYPE_ID ||
+              (action.actionTypeId === SERVICENOW_ACTION_TYPE_ID && action.config!.isCaseOwned))
         );
         return response.ok({ body: results });
       } catch (error) {
