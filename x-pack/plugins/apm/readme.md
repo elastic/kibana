@@ -105,7 +105,7 @@ node scripts/functional_tests_server --config x-pack/test/apm_api_integration/tr
 node scripts/functional_test_runner --config x-pack/test/apm_api_integration/trial/config.ts
 ```
 
-The API tests tests for "trial" are located in `x-pack/test/apm_api_integration/trial/tests`.
+The API tests for "trial" are located in `x-pack/test/apm_api_integration/trial/tests`.
 
 For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
 
