@@ -57,6 +57,8 @@ export const getPackageConfigCreateCallback = (
     try {
       return updatedPackageConfig;
     } finally {
+      // TODO: confirm creation of package config
+      // then commit.
       await manifestManager.commit(wrappedManifest);
     }
   };
