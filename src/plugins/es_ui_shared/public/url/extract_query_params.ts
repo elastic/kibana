@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { parse } from 'query-string';
+import { parse, ParsedQuery } from 'query-string';
 
-export function extractQueryParams(queryString: string): string {
+export function extractQueryParams(queryString: string = ''): ParsedQuery<string> {
   const hrefSplit = queryString.split('?');
   if (!hrefSplit.length) {
     return {};
