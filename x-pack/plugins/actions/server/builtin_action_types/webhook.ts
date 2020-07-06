@@ -90,12 +90,15 @@ function validateActionTypeConfig(
     url = new URL(configObject.url);
   } catch (err) {
     return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationErrorNoHostname', {
-      defaultMessage: `error configuring webhook action: unable to parse url: ${err}`,
+      defaultMessage: 'error configuring webhook action: unable to parse url: {err}',
+      values: {
+        err,
+      },
     });
   }
 
   try {
-    configurationUtilities.ensureWhitelistedUri(url.hostname);
+    configurationUtilities.ensureWhitelistedUri(url);
   } catch (whitelistError) {
     return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationError', {
       defaultMessage: 'error configuring webhook action: {message}',
