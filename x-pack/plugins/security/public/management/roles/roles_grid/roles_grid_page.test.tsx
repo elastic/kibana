@@ -45,7 +45,9 @@ describe('<RolesGridPage />', () => {
   let history: ScopedHistory;
 
   beforeEach(() => {
-    history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+    history = (scopedHistoryMock.create({
+      createHref: jest.fn((to) => to.pathname),
+    }) as unknown) as ScopedHistory;
     apiClientMock = rolesAPIClientMock.create();
     apiClientMock.getRoles.mockResolvedValue([
       {
@@ -135,15 +137,19 @@ describe('<RolesGridPage />', () => {
     });
 
     expect(wrapper.find(PermissionDenied)).toHaveLength(0);
-    expect(
-      wrapper.find('EuiButtonIcon[data-test-subj="edit-role-action-test-role-1"]')
-    ).toHaveLength(1);
-    expect(
-      wrapper.find('EuiButtonIcon[data-test-subj="edit-role-action-disabled-role"]')
-    ).toHaveLength(1);
+
+    const editButton = wrapper.find('EuiButtonIcon[data-test-subj="edit-role-action-test-role-1"]');
+    expect(editButton).toHaveLength(1);
+    expect(editButton.prop('href')).toBe('/edit/test-role-1');
+
+    const cloneButton = wrapper.find(
+      'EuiButtonIcon[data-test-subj="clone-role-action-test-role-1"]'
+    );
+    expect(cloneButton).toHaveLength(1);
+    expect(cloneButton.prop('href')).toBe('/clone/test-role-1');
 
     expect(
-      wrapper.find('EuiButtonIcon[data-test-subj="clone-role-action-test-role-1"]')
+      wrapper.find('EuiButtonIcon[data-test-subj="edit-role-action-disabled-role"]')
     ).toHaveLength(1);
     expect(
       wrapper.find('EuiButtonIcon[data-test-subj="clone-role-action-disabled-role"]')
