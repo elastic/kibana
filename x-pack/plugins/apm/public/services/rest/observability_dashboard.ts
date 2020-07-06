@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import mean from 'lodash.mean';
+import { mean } from 'lodash';
 import { Theme } from '@kbn/ui-shared-deps/theme';
 import {
   ApmFetchDataResponse,
