@@ -380,6 +380,7 @@ export const npStart = {
     kibanaLegacy: {
       getForwards: () => [],
       loadFontAwesome: () => {},
+      loadStyles: () => {},
       config: {
         defaultAppId: 'home',
       },
