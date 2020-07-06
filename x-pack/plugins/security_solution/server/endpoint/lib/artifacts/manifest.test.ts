@@ -55,21 +55,33 @@ describe('manifest', () => {
       expect(manifest1.toEndpointFormat()).toStrictEqual({
         artifacts: {
           'endpoint-exceptionlist-linux-1.0.0': {
-            sha256: '70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
-            size: 268,
-            url:
+            compression_algorithm: 'none',
+            encryption_algorithm: 'none',
+            precompress_sha256: '70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
+            postcompress_sha256: '70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
+            precompress_size: 268,
+            postcompress_size: 268,
+            relative_url:
               '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-1.0.0/70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
           },
           'endpoint-exceptionlist-macos-1.0.0': {
-            sha256: '70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
-            size: 268,
-            url:
+            compression_algorithm: 'none',
+            encryption_algorithm: 'none',
+            precompress_sha256: '70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
+            postcompress_sha256: '70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
+            precompress_size: 268,
+            postcompress_size: 268,
+            relative_url:
               '/api/endpoint/artifacts/download/endpoint-exceptionlist-macos-1.0.0/70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
           },
           'endpoint-exceptionlist-windows-1.0.0': {
-            sha256: '70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
-            size: 268,
-            url:
+            compression_algorithm: 'none',
+            encryption_algorithm: 'none',
+            precompress_sha256: '70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
+            postcompress_sha256: '70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
+            precompress_size: 268,
+            postcompress_size: 268,
+            relative_url:
               '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-1.0.0/70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
           },
         },
@@ -107,7 +119,7 @@ describe('manifest', () => {
 
     test('Manifest returns data for given artifact', async () => {
       const artifact = artifacts[0];
-      const returned = manifest1.getArtifact(`${artifact.identifier}-${artifact.sha256}`);
+      const returned = manifest1.getArtifact(`${artifact.identifier}-${artifact.compressedSha256}`);
       expect(returned).toEqual(artifact);
     });
 

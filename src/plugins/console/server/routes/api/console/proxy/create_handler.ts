@@ -19,7 +19,7 @@
 
 import { Agent, IncomingMessage } from 'http';
 import * as url from 'url';
-import { pick, trimLeft, trimRight } from 'lodash';
+import { pick, trimStart, trimEnd } from 'lodash';
 
 import { KibanaRequest, Logger, RequestHandler } from 'kibana/server';
 
@@ -46,7 +46,7 @@ export interface CreateHandlerDependencies {
 }
 
 function toURL(base: string, path: string) {
-  const urlResult = new url.URL(`${trimRight(base, '/')}/${trimLeft(path, '/')}`);
+  const urlResult = new url.URL(`${trimEnd(base, '/')}/${trimStart(path, '/')}`);
   // Appending pretty here to have Elasticsearch do the JSON formatting, as doing
   // in JS can lead to data loss (7.0 will get munged into 7, thus losing indication of
   // measurement precision)
