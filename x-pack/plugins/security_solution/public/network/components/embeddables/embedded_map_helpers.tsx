@@ -8,7 +8,7 @@ import uuid from 'uuid';
 import React from 'react';
 import { OutPortal, PortalNode } from 'react-reverse-portal';
 import minimatch from 'minimatch';
-import { IndexPatternMapping, SetQuery } from './types';
+import { IndexPatternMapping } from './types';
 import { getLayerList } from './map_config';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../maps/public';
 import {
@@ -30,6 +30,7 @@ import {
   ErrorEmbeddable,
 } from '../../../../../../../src/plugins/embeddable/public';
 import { IndexPatternSavedObject } from '../../../common/hooks/types';
+import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 /**
  * Creates MapEmbeddable with provided initial configuration
@@ -49,9 +50,9 @@ export const createEmbeddable = async (
   filters: Filter[],
   indexPatterns: IndexPatternMapping[],
   query: Query,
-  startDate: number,
-  endDate: number,
-  setQuery: SetQuery,
+  startDate: GlobalTimeArgs['from'],
+  endDate: GlobalTimeArgs['to'],
+  setQuery: GlobalTimeArgs['setQuery'],
   portalNode: PortalNode,
   embeddableApi: EmbeddableStart
 ): Promise<MapEmbeddable | ErrorEmbeddable> => {
