@@ -221,7 +221,7 @@ export const CleanExtraBrowsersTask = {
         const paths = [];
         if (platforms.windows) {
           paths.push({
-            src: srcPath('chromium-312d84c-win32.zip'),
+            src: srcPath('chromium-312d84c-windows.zip'),
             dest: destPath('headless_shell-windows/headless_shell.exe'),
             archiveChecksum: '3e36adfb755dacacc226ed5fd6b43105',
             binaryChecksum: '9913e431fbfc7dfcd958db74ace4d58b',
@@ -249,23 +249,34 @@ export const CleanExtraBrowsersTask = {
       };
     };
 
-    const extract = async (src, dest) => {
-      await extractZip(src, {
-        dir: dest,
+    const extract = (src, dest) => {
+      return new Promise(function (resolve, reject) {
+        extractZip(src, { dir: dest }, (err) => {
+          if (err) {
+            return reject(err);
+          }
+          chmodSync(dest, '755');
+          resolve();
+        });
       });
-      chmodSync(dest, '755');
     };
     for (const platform of config.getNodePlatforms()) {
       const getBrowserPaths = getBrowserPathsForPlatform(platform);
       if (platform.isWindows()) {
-        const metadata = getBrowserPaths({ windows: true }).pop();
-        await extract(metadata.src, metadata.dest);
+        if (!build.isOss()) {
+          const metadata = getBrowserPaths({ windows: true }).pop();
+          await extract(metadata.src, metadata.dest);
+        }
       } else if (platform.isMac()) {
-        const metadata = getBrowserPaths({ darwin: true }).pop();
-        await extract(metadata.src, metadata.dest);
+        if (!build.isOss()) {
+          const metadata = getBrowserPaths({ darwin: true }).pop();
+          await extract(metadata.src, metadata.dest);
+        }
       } else if (platform.isLinux()) {
-        const metadata = getBrowserPaths({ linux: true }).pop();
-        await extract(metadata.src, metadata.dest);
+        if (!build.isOss()) {
+          const metadata = getBrowserPaths({ linux: true }).pop();
+          await extract(metadata.src, metadata.dest);
+        }
       }
       await deleteAll(
         getBrowserPaths({ linux: true, darwin: true, windows: true }).map((browser) => browser.src),
