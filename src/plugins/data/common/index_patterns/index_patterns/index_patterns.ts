@@ -231,13 +231,11 @@ export class IndexPatternsService {
 
   /**
    * Deletes an index pattern from .kibana index
-   * @param indexPattern: IndexPattern instance to delete
+   * @param indexPatternId: Id of kibana Index Pattern to delete
    */
-  async delete(indexPattern: IndexPattern) {
-    if (indexPattern.id) {
-      indexPatternCache.clear(indexPattern.id);
-      return this.savedObjectsClient.delete('index-pattern', indexPattern.id);
-    }
+  async delete(indexPatternId: string) {
+    indexPatternCache.clear(indexPatternId);
+    return this.savedObjectsClient.delete('index-pattern', indexPatternId);
   }
 }
 

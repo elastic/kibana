@@ -143,10 +143,11 @@ export const EditIndexPattern = withRouter(
             uiSettings.set('defaultIndex', otherPatterns[0].id);
           }
         }
-
-        Promise.resolve(data.indexPatterns.delete(indexPattern)).then(function () {
-          history.push('');
-        });
+        if (indexPattern.id) {
+          Promise.resolve(data.indexPatterns.delete(indexPattern.id)).then(function () {
+            history.push('');
+          });
+        }
       }
 
       overlays.openConfirm('', confirmModalOptionsDelete).then((isConfirmed) => {
