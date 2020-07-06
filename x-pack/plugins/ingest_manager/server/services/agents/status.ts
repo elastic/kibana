@@ -61,7 +61,7 @@ async function getEventsCount(soClient: SavedObjectsClientContract, configId?: s
     perPage: 0,
     page: 1,
     sortField: 'timestamp',
-    sortOrder: 'DESC',
+    sortOrder: 'desc',
     defaultSearchOperator: 'AND',
   });
 
