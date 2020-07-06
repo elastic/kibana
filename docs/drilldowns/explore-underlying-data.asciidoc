@@ -1,0 +1,45 @@
+[[explore-underlying-data]]
+== Explore data underlying visualizations
+
+Dashboard panels have "Explore underlying data" actions that will redirect
+you to Discover app narrowing down Discover documents to ones likely used in
+the visualization.
+
+"Explore underlying data" actions are available for visualizations which are
+backed by a single index pattern.
+
+There are two "Explore underlying data" actions: (1) one which appears in the
+panel's context menu; (2) and the other which appears when user clicks or brushes
+the chart.
+
+[float]
+[[explore-data-from-panel-context-menu]]
+=== Explore data from panel context menu
+
+Context menu "Explore underlying data" action will navigate you to Discover app,
+to the index pattern used in the visualization and will carry over all filters,
+query, and time range used in the visualization.
+
+[role="screenshot"]
+image::images/explore_data_context_menu.png[Explore underlying data from panel context menu]
+
+[float]
+[[explore-data-from-chart]]
+=== Explore data from chart action
+
+In-chart "Explore underlying data" action will also navigate you to Discover app,
+to the index pattern used in the visualization and will carry over all the
+filters, query and time range, but it will also apply the filters and time range
+created from the click or brush events that triggered this action to appear in
+context menu. For example, if you will brush a chart the time range associated
+with that brush event will be carried over to Discover app.
+
+[role="screenshot"]
+image::images/explore_data_in_chart.png[Explore underlying data from chart]
+
+In-chart action can be optionally disabled by adding below line to your `kibana.yml` config.
+
+["source","yml"]
+-----------
+xpack.discoverEnhanced.actions.exploreDataInChart.enabled: false
+-----------
