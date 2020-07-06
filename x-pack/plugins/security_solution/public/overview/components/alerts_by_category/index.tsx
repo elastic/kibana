@@ -19,7 +19,6 @@ import {
   IIndexPattern,
   Query,
 } from '../../../../../../../src/plugins/data/public';
-import { inputsModel } from '../../../common/store';
 import { HostsTableType, HostsType } from '../../../hosts/store/model';
 
 import * as i18n from '../../pages/translations';
@@ -29,6 +28,7 @@ import {
 } from '../../../common/components/alerts_viewer/histogram_configs';
 import { MatrixHisrogramConfigs } from '../../../common/components/matrix_histogram/types';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
+import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { SecurityPageName } from '../../../app/types';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { LinkButton } from '../../../common/components/links';
@@ -39,20 +39,11 @@ const NO_FILTERS: Filter[] = [];
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 const DEFAULT_STACK_BY = 'event.module';
 
-interface Props {
-  deleteQuery?: ({ id }: { id: string }) => void;
+interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
   filters?: Filter[];
-  from: number;
   hideHeaderChildren?: boolean;
   indexPattern: IIndexPattern;
   query?: Query;
-  setQuery: (params: {
-    id: string;
-    inspect: inputsModel.InspectQuery | null;
-    loading: boolean;
-    refetch: inputsModel.Refetch;
-  }) => void;
-  to: number;
 }
 
 const AlertsByCategoryComponent: React.FC<Props> = ({
