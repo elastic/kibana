@@ -13,6 +13,7 @@ import {
 import { SecurityPluginSetup } from '../../security/server';
 import { LicensingPluginStart } from '../../licensing/server';
 import { BeatsManagementConfigType } from '../common';
+import { CMServerLibs } from './lib/types';
 
 interface SetupDeps {
   security?: SecurityPluginSetup;
@@ -22,6 +23,12 @@ interface StartDeps {
   licensing: LicensingPluginStart;
 }
 
+declare module 'src/core/server' {
+  interface RequestHandlerContext {
+    beatsManagement?: CMServerLibs;
+  }
+}
+
 export class BeatsManagementPlugin implements Plugin<{}, {}, SetupDeps, StartDeps> {
   constructor(
     private readonly initializerContext: PluginInitializerContext<BeatsManagementConfigType>
@@ -29,6 +36,10 @@ export class BeatsManagementPlugin implements Plugin<{}, {}, SetupDeps, StartDep
 
   public async setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
     this.initializerContext.config.create();
+
+    core.http.registerRouteHandlerContext('beatsManagement', (_, req) => {
+      return {} as CMServerLibs;
+    });
 
     return {};
   }
