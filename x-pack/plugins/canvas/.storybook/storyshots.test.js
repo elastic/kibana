@@ -5,7 +5,6 @@
  */
 
 import fs from 'fs';
-import execa from 'execa';
 import path from 'path';
 import moment from 'moment';
 import 'moment-timezone';
