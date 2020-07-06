@@ -48,7 +48,8 @@ let mmLValidator: (value: any) => MemoryInputValidatorResult;
 export const EditAnalyticsFlyout: FC<EditAnalyticsJobFlyoutProps> = ({ closeFlyout, item }) => {
   const { id: jobId, config } = item;
   const { state } = item.stats;
-  const initialAllowLazyStart = config.allow_lazy_start ? String(config.allow_lazy_start) : '';
+  const initialAllowLazyStart =
+    config.allow_lazy_start !== undefined ? String(config.allow_lazy_start) : '';
 
   const [allowLazyStart, setAllowLazyStart] = useState<string>(initialAllowLazyStart);
   const [description, setDescription] = useState<string>(config.description || '');
