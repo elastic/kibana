@@ -353,9 +353,9 @@ export class IndexPattern implements IIndexPattern {
 
   async addScriptedField(name: string, script: string, fieldType: string = 'string', lang: string) {
     const scriptedFields = this.getScriptedFields();
-    const names = _.pluck(scriptedFields, 'name');
+    const names = _.map(scriptedFields, 'name');
 
-    if (_.contains(names, name)) {
+    if (_.includes(names, name)) {
       throw new DuplicateField(name);
     }
 
@@ -417,11 +417,11 @@ export class IndexPattern implements IIndexPattern {
   }
 
   getNonScriptedFields() {
-    return _.where(this.fields, { scripted: false });
+    return _.filter(this.fields, { scripted: false });
   }
 
   getScriptedFields() {
-    return _.where(this.fields, { scripted: true });
+    return _.filter(this.fields, { scripted: true });
   }
 
   isTimeBased(): boolean {
