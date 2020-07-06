@@ -82,8 +82,7 @@ export enum ExceptionListTypeEnum {
   ENDPOINT = 'endpoint',
 }
 
-// TODO: Change this into a t.keyof enumeration when we know what types of lists we going to have.
-export const exceptionListItemType = t.string;
+export const exceptionListItemType = t.keyof({ simple: null });
 export const exceptionListItemTypeOrUndefined = t.union([exceptionListItemType, t.undefined]);
 export type ExceptionListItemType = t.TypeOf<typeof exceptionListItemType>;
 export type ExceptionListItemTypeOrUndefined = t.TypeOf<typeof exceptionListItemTypeOrUndefined>;
