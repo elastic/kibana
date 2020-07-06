@@ -12,9 +12,9 @@ import { TagAttachmentsClient } from './tag_attachments_client';
 export type TagsServiceSetupParams = TagsClientParams;
 
 export class TagsService {
-  public tags?: TagsClient;
-  public attachments?: TagAttachmentsClient;
-  public manager?: TagManager;
+  public tags!: TagsClient;
+  public attachments!: TagAttachmentsClient;
+  public manager!: TagManager;
 
   setup(params: TagsServiceSetupParams): TagsServiceContract {
     const tags = (this.tags = new TagsClient(params));

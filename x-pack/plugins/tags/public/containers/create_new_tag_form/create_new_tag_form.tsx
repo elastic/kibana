@@ -6,22 +6,21 @@
 
 import React, { useState } from 'react';
 import { takeUntil } from 'rxjs/operators';
-import { useToasts } from '../../../../../../../src/plugins/kibana_react/public';
-import { CreateNewTagForm as CreateNewTagFormUi } from '../../../components/create_new_tag_form';
-import { useServices } from '../../context';
-import { RawTagWithId } from '../../../../common';
+import { useToasts } from '../../../../../../src/plugins/kibana_react/public';
+import { CreateNewTagForm as CreateNewTagFormUi } from '../../components/create_new_tag_form';
 import { txtTagCreated, txtCouldNotCreate } from './i18n';
 import { useUnmount$ } from '../../hooks/use_unmount';
+import { useTags } from '../../context';
 
 const defaultColor = '#548034';
 
 export interface Props {
-  onCreate?: (tag: RawTagWithId) => void;
+  onCreate?: () => void;
 }
 
 export const CreateNewTagForm: React.FC<Props> = ({ onCreate }) => {
+  const { manager } = useTags();
   const unmount$ = useUnmount$();
-  const { manager, params } = useServices();
   const toasts = useToasts();
   const [title, setTitle] = useState('');
   const [color, setColor] = useState(defaultColor);
@@ -47,7 +46,7 @@ export const CreateNewTagForm: React.FC<Props> = ({ onCreate }) => {
     toasts.addSuccess({
       title: txtTagCreated,
     });
-    params.history.push('/');
+    if (onCreate) onCreate();
   };
 
   return (

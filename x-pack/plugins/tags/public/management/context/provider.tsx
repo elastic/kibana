@@ -9,15 +9,18 @@ import { Router } from 'react-router-dom';
 import { ToastsProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { TagsManagementServices } from '../services';
 import { ServicesProvider } from './services';
+import { TagsProvider } from '../../context';
 
 export interface Props {
   services: TagsManagementServices;
 }
 
 export const Provider: React.FC<Props> = ({ services, children }) => (
-  <ServicesProvider value={services}>
-    <ToastsProvider value={services.params.toasts}>
-      <Router history={services.params.history}>{children}</Router>
-    </ToastsProvider>
-  </ServicesProvider>
+  <TagsProvider value={services.params.tags}>
+    <ServicesProvider value={services}>
+      <ToastsProvider value={services.params.toasts}>
+        <Router history={services.params.history}>{children}</Router>
+      </ToastsProvider>
+    </ServicesProvider>
+  </TagsProvider>
 );

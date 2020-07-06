@@ -9,9 +9,12 @@ import { Link } from 'react-router-dom';
 import { EuiButtonToggle } from '@elastic/eui';
 import { Page } from '../page';
 import { txtTitle, txtSubtitle, txtGoBack } from './i18n';
-import { CreateNewTagForm } from '../create_new_tag_form';
+import { CreateNewTagForm } from '../../../containers/create_new_tag_form';
+import { useServices } from '../../context';
 
 export const CreateNewPage: React.FC = () => {
+  const { params } = useServices();
+
   return (
     <Page
       id={'CreateNew'}
@@ -25,7 +28,7 @@ export const CreateNewPage: React.FC = () => {
         </Link>
       }
     >
-      <CreateNewTagForm />
+      <CreateNewTagForm onCreate={() => params.history.push('/')} />
     </Page>
   );
 };
