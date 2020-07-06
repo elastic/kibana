@@ -139,7 +139,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
     <Portal
       containerInfo={
         <div
-          class="euiOverlayMask"
+          class="euiOverlayMask euiOverlayMask--aboveHeader"
         >
           <div
             data-focus-guard="true"
@@ -1709,7 +1709,7 @@ exports[`NewVisModal should render as expected 1`] = `
     <Portal
       containerInfo={
         <div
-          class="euiOverlayMask"
+          class="euiOverlayMask euiOverlayMask--aboveHeader"
         >
           <div
             data-focus-guard="true"
