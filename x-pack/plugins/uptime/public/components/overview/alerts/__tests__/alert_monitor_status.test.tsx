@@ -41,12 +41,6 @@ describe('alert monitor status component', () => {
           />
           <KueryBar
             aria-label="Input that allows filtering criteria for the monitor status alert"
-            autocomplete={
-              Object {
-                "addQuerySuggestionProvider": [MockFunction],
-                "getQuerySuggestions": [MockFunction],
-              }
-            }
             data-test-subj="xpack.uptime.alerts.monitorStatus.filterBar"
             defaultKuery="monitor.id: foo"
             shouldUpdateUrl={false}
