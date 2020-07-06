@@ -6,7 +6,7 @@
 
 export default function ({ loadTestFile }) {
   describe('security', function () {
-    this.tags('ciGroup6');
+    this.tags(['ciGroup6', 'james']);
 
     // Updates here should be mirrored in `./security_basic.ts` if tests
     // should also run under a basic license.

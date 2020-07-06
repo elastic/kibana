@@ -6,7 +6,7 @@
 
 import { TypeOf } from '@kbn/config-schema';
 
-import { RequestHandlerContext } from 'kibana/server';
+import { RequestHandlerContext, KibanaRequest } from 'kibana/server';
 import { DatafeedOverride, JobOverride } from '../../common/types/modules';
 import { wrapError } from '../client/error_wrapper';
 import { DataRecognizer } from '../models/data_recognizer';
@@ -18,13 +18,25 @@ import {
 } from './schemas/modules';
 import { RouteInitialization } from '../types';
 
-function recognize(context: RequestHandlerContext, indexPatternTitle: string) {
-  const dr = new DataRecognizer(context.ml!.mlClient, context.core.savedObjects.client);
+function recognize(
+  context: RequestHandlerContext,
+  request: KibanaRequest,
+  indexPatternTitle: string
+) {
+  const dr = new DataRecognizer(
+    context.ml!.mlClient,
+    context.core.savedObjects.client,
+    request.headers.authorization
+  );
   return dr.findMatches(indexPatternTitle);
 }
 
-function getModule(context: RequestHandlerContext, moduleId: string) {
-  const dr = new DataRecognizer(context.ml!.mlClient, context.core.savedObjects.client);
+function getModule(context: RequestHandlerContext, request: KibanaRequest, moduleId: string) {
+  const dr = new DataRecognizer(
+    context.ml!.mlClient,
+    context.core.savedObjects.client,
+    request.headers.authorization
+  );
   if (moduleId === undefined) {
     return dr.listModules();
   } else {
@@ -34,6 +46,7 @@ function getModule(context: RequestHandlerContext, moduleId: string) {
 
 function setup(
   context: RequestHandlerContext,
+  request: KibanaRequest,
   moduleId: string,
   prefix?: string,
   groups?: string[],
@@ -47,7 +60,11 @@ function setup(
   datafeedOverrides?: DatafeedOverride | DatafeedOverride[],
   estimateModelMemory?: boolean
 ) {
-  const dr = new DataRecognizer(context.ml!.mlClient, context.core.savedObjects.client);
+  const dr = new DataRecognizer(
+    context.ml!.mlClient,
+    context.core.savedObjects.client,
+    request.headers.authorization
+  );
   return dr.setup(
     moduleId,
     prefix,
@@ -64,8 +81,16 @@ function setup(
   );
 }
 
-function dataRecognizerJobsExist(context: RequestHandlerContext, moduleId: string) {
-  const dr = new DataRecognizer(context.ml!.mlClient, context.core.savedObjects.client);
+function dataRecognizerJobsExist(
+  context: RequestHandlerContext,
+  request: KibanaRequest,
+  moduleId: string
+) {
+  const dr = new DataRecognizer(
+    context.ml!.mlClient,
+    context.core.savedObjects.client,
+    request.headers.authorization
+  );
   return dr.dataRecognizerJobsExist(moduleId);
 }
 
@@ -113,7 +138,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { indexPatternTitle } = request.params;
-        const results = await recognize(context, indexPatternTitle);
+        const results = await recognize(context, request, indexPatternTitle);
 
         return response.ok({ body: results });
       } catch (e) {
@@ -248,7 +273,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
           // the moduleId will be an empty string.
           moduleId = undefined;
         }
-        const results = await getModule(context, moduleId);
+        const results = await getModule(context, request, moduleId);
 
         return response.ok({ body: results });
       } catch (e) {
@@ -428,6 +453,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
 
         const result = await setup(
           context,
+          request,
           moduleId,
           prefix,
           groups,
@@ -514,7 +540,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { moduleId } = request.params;
-        const result = await dataRecognizerJobsExist(context, moduleId);
+        const result = await dataRecognizerJobsExist(context, request, moduleId);
 
         return response.ok({ body: result });
       } catch (e) {

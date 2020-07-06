@@ -111,6 +111,7 @@ export class DataRecognizer {
   private _callAsCurrentUser: LegacyAPICaller;
   private _callAsInternalUser: LegacyAPICaller;
   private _mlClusterClient: ILegacyScopedClusterClient;
+  private _authorizationHeader: any;
   private _modulesDir = `${__dirname}/modules`;
   private _indexPatternName: string = '';
   private _indexPatternId: string | undefined = undefined;
@@ -121,11 +122,13 @@ export class DataRecognizer {
 
   constructor(
     mlClusterClient: ILegacyScopedClusterClient,
-    private savedObjectsClient: SavedObjectsClientContract
+    private savedObjectsClient: SavedObjectsClientContract,
+    authorizationHeader: string | string[] | undefined
   ) {
     this._mlClusterClient = mlClusterClient;
     this._callAsCurrentUser = mlClusterClient.callAsCurrentUser;
     this._callAsInternalUser = mlClusterClient.callAsInternalUser;
+    this._authorizationHeader = authorizationHeader;
   }
 
   // list all directories under the given directory
@@ -703,7 +706,11 @@ export class DataRecognizer {
 
   async saveDatafeed(datafeed: ModuleDataFeed) {
     const { id: datafeedId, config: body } = datafeed;
-    return this._callAsInternalUser('ml.addDatafeed', { datafeedId, body });
+    return this._callAsInternalUser('ml.addDatafeed', {
+      datafeedId,
+      body,
+      headers: { authorization: this._authorizationHeader },
+    });
   }
 
   async startDatafeeds(
