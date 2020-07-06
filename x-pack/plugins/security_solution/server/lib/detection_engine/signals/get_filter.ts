@@ -50,6 +50,7 @@ export const getFilter = async ({
   lists,
 }: GetFilterArgs): Promise<unknown> => {
   switch (type) {
+    case 'threshold':
     case 'query': {
       if (query != null && language != null && index != null) {
         return getQueryFilter(query, language, filters || [], index, lists);

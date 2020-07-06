@@ -84,6 +84,12 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
     id: rule.timeline_id ?? null,
     title: rule.timeline_title ?? null,
   },
+  threshold: rule.threshold
+    ? {
+        field: rule.threshold.field,
+        value: parseInt(rule.threshold.value, 10),
+      }
+    : undefined,
 });
 
 export const getScheduleStepsData = (rule: Rule): ScheduleStepRule => {
@@ -243,6 +249,18 @@ export const redirectToDetections = (
   hasEncryptionKey != null &&
   (!isSignalIndexExists || !isAuthenticated || !hasEncryptionKey);
 
+const getRuleSpecificRuleParamKeys = (ruleType: RuleType) => {
+  if (isMlRule(ruleType)) {
+    return ['anomaly_threshold', 'machine_learning_job_id'];
+  }
+
+  if (ruleType === 'threshold') {
+    return ['index', 'filters', 'language', 'query', 'saved_id', 'threshold'];
+  }
+
+  return ['index', 'filters', 'language', 'query', 'saved_id'];
+};
+
 export const getActionMessageRuleParams = (ruleType: RuleType): string[] => {
   const commonRuleParamsKeys = [
     'id',
@@ -265,9 +283,7 @@ export const getActionMessageRuleParams = (ruleType: RuleType): string[] => {
 
   const ruleParamsKeys = [
     ...commonRuleParamsKeys,
-    ...(isMlRule(ruleType)
-      ? ['anomaly_threshold', 'machine_learning_job_id']
-      : ['index', 'filters', 'language', 'query', 'saved_id']),
+    ...getRuleSpecificRuleParamKeys(ruleType),
   ].sort();
 
   return ruleParamsKeys;

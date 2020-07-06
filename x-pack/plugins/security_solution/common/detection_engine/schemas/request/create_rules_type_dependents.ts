@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
 import { CreateRulesSchema } from './create_rules_schema';
 
 export const validateAnomalyThreshold = (rule: CreateRulesSchema): string[] => {
@@ -92,6 +93,21 @@ export const validateTimelineTitle = (rule: CreateRulesSchema): string[] => {
   return [];
 };
 
+export const validateThreshold = (rule: CreateRulesSchema): string[] => {
+  if (rule.type === 'threshold') {
+    if (!rule.threshold) {
+      return ['when "type" is "threshold", "threshold" ois required'];
+    } else if (isEmpty(rule.threshold.field)) {
+      return ['"threshold.field" cannot be an empty string'];
+    } else if (rule.threshold.value <= 0) {
+      return ['"threshold.value" has to be bigger than 0'];
+    } else {
+      return [];
+    }
+  }
+  return [];
+};
+
 export const createRuleValidateTypeDependents = (schema: CreateRulesSchema): string[] => {
   return [
     ...validateAnomalyThreshold(schema),
@@ -101,5 +117,6 @@ export const createRuleValidateTypeDependents = (schema: CreateRulesSchema): str
     ...validateMachineLearningJobId(schema),
     ...validateTimelineId(schema),
     ...validateTimelineTitle(schema),
+    ...validateThreshold(schema),
   ];
 };

@@ -35,6 +35,7 @@ import { MlJobSelect } from '../ml_job_select';
 import { PickTimeline } from '../pick_timeline';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { NextStep } from '../next_step';
+import { ThresholdInput } from '../threshold_input';
 import {
   Field,
   Form,
@@ -63,6 +64,10 @@ const stepDefineDefaultValue: DefineStepRule = {
     query: { query: '', language: 'kuery' },
     filters: [],
     saved_id: undefined,
+  },
+  threshold: {
+    field: 'host.name',
+    value: 1000,
   },
   timeline: {
     id: null,
@@ -246,6 +251,17 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               />
             </>
           </EuiFormRow>
+          {/* {myStepData.ruleType === 'threshold' && ( */}
+          <UseField
+            path="threshold"
+            component={ThresholdInput}
+            componentProps={{
+              idAria: 'detectionEngineStepDefineRuleTimeline',
+              isDisabled: isLoading,
+              dataTestSubj: 'detectionEngineStepDefineRuleTimeline',
+            }}
+          />
+          {/* )} */}
           <UseField
             path="timeline"
             component={PickTimeline}

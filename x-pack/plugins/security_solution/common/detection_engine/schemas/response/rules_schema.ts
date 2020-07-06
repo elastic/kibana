@@ -44,6 +44,8 @@ import {
   timeline_title,
   type,
   threat,
+  threshold,
+  thresholdOrUndefined,
   throttle,
   job_status,
   status_date,
@@ -123,6 +125,9 @@ export const dependentRulesSchema = t.partial({
   // ML fields
   anomaly_threshold,
   machine_learning_job_id,
+
+  // Threshold fields
+  threshold: thresholdOrUndefined,
 });
 
 /**
@@ -225,6 +230,18 @@ export const addMlFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[]
   }
 };
 
+export const addThresholdFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
+  if (typeAndTimelineOnly.type === 'threshold') {
+    return [
+      t.exact(t.type({ query: dependentRulesSchema.props.query })),
+      t.exact(t.type({ language: dependentRulesSchema.props.language })),
+      t.exact(t.type({ threshold: dependentRulesSchema.props.threshold })),
+    ];
+  } else {
+    return [];
+  }
+};
+
 export const getDependents = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed => {
   const dependents: t.Mixed[] = [
     t.exact(requiredRulesSchema),
@@ -233,6 +250,7 @@ export const getDependents = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed
     ...addTimelineTitle(typeAndTimelineOnly),
     ...addQueryFields(typeAndTimelineOnly),
     ...addMlFields(typeAndTimelineOnly),
+    ...addThresholdFields(typeAndTimelineOnly),
   ];
 
   if (dependents.length > 1) {

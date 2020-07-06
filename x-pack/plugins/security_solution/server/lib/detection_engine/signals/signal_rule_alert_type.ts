@@ -7,6 +7,7 @@
 /* eslint-disable complexity */
 
 import { Logger, KibanaRequest } from 'src/core/server';
+import deepMerge from 'deepmerge';
 
 import {
   SIGNALS_ID,
@@ -26,6 +27,7 @@ import { getGapBetweenRuns, parseScheduleDates, getListsClient, getExceptions } 
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
 import { findMlSignals } from './find_ml_signals';
+import { findThresholdSignals } from './find_threshold_signals';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
 import {
   scheduleNotificationActions,
@@ -78,6 +80,7 @@ export const signalRulesAlertType = ({
         savedId,
         query,
         to,
+        threshold,
         type,
         exceptionsList,
       } = params;
@@ -224,6 +227,69 @@ export const signalRulesAlertType = ({
           if (bulkCreateDuration) {
             result.bulkCreateTimes.push(bulkCreateDuration);
           }
+        } else if (type === 'threshold') {
+          console.log('ruleTytpe', 'threshold');
+          const inputIndex = await getInputIndex(services, version, index);
+          const esFilter = await getFilter({
+            type,
+            filters,
+            language,
+            query,
+            savedId,
+            services,
+            index: inputIndex,
+            lists: exceptionItems ?? [],
+          });
+
+          const thresholdResults = await findThresholdSignals({
+            inputIndexPattern: inputIndex,
+            from,
+            to,
+            services,
+            logger,
+            filter: esFilter,
+            threshold,
+          });
+
+          console.log(
+            'thresholdResults',
+            thresholdResults,
+            JSON.stringify(thresholdResults.aggregations.threshold.buckets, null, 2)
+          );
+
+          const thresholdCount = thresholdResults.aggregations.threshold.buckets.length;
+          if (thresholdCount) {
+            logger.info(buildRuleMessage(`Found ${thresholdCount} signals from Threshold aggs.`));
+          }
+
+          // const {
+          //   success,
+          //   bulkCreateDuration,
+          //   createdItemsCount,
+          // } = await bulkCreateThresholdSignals({
+          //   actions,
+          //   throttle,
+          //   someResult: thresholdResults,
+          //   ruleParams: params,
+          //   services,
+          //   logger,
+          //   id: alertId,
+          //   signalsIndex: outputIndex,
+          //   name,
+          //   createdBy,
+          //   createdAt,
+          //   updatedBy,
+          //   updatedAt,
+          //   interval,
+          //   enabled,
+          //   refresh,
+          //   tags,
+          // });
+          // result.success = success;
+          // result.createdSignalsCount = createdItemsCount;
+          // if (bulkCreateDuration) {
+          //   result.bulkCreateTimes.push(bulkCreateDuration);
+          // }
         } else {
           const inputIndex = await getInputIndex(services, version, index);
           const esFilter = await getFilter({

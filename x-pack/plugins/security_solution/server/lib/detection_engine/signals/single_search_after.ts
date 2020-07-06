@@ -32,6 +32,7 @@ export const singleSearchAfter = async ({
   filter,
   logger,
   pageSize,
+  threshold,
 }: SingleSearchAfterParams): Promise<{
   searchResult: SignalSearchResponse;
   searchDuration: string;
@@ -44,6 +45,7 @@ export const singleSearchAfter = async ({
       filter,
       size: pageSize,
       searchAfterSortId,
+      threshold,
     });
     const start = performance.now();
     const nextSearchAfterResult: SignalSearchResponse = await services.callCluster(

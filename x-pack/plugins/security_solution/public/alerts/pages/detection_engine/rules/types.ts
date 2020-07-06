@@ -17,6 +17,7 @@ import {
   RiskScoreMapping,
   RuleNameOverride,
   SeverityMapping,
+  Threshold,
   TimestampOverride,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 
@@ -99,6 +100,7 @@ export interface DefineStepRule extends StepRuleData {
   queryBar: FieldValueQueryBar;
   ruleType: RuleType;
   timeline: FieldValueTimeline;
+  threshold: Threshold;
 }
 
 export interface ScheduleStepRule extends StepRuleData {
@@ -122,6 +124,7 @@ export interface DefineStepRuleJson {
   saved_id?: string;
   query?: string;
   language?: string;
+  threshold?: Threshold;
   timeline_id?: string;
   timeline_title?: string;
   type: RuleType;

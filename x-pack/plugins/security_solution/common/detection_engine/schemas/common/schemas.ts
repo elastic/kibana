@@ -279,7 +279,7 @@ export const type = t.keyof({
   machine_learning: null,
   query: null,
   saved_query: null,
-  treshold: null,
+  threshold: null,
 });
 export type Type = t.TypeOf<typeof type>;
 
@@ -373,6 +373,17 @@ export type Threat = t.TypeOf<typeof threat>;
 
 export const threatOrUndefined = t.union([threat, t.undefined]);
 export type ThreatOrUndefined = t.TypeOf<typeof threatOrUndefined>;
+
+export const threshold = t.exact(
+  t.type({
+    field: t.string,
+    value: PositiveIntegerGreaterThanZero,
+  })
+);
+export type Threshold = t.TypeOf<typeof threshold>;
+
+export const thresholdOrUndefined = t.union([threshold, t.undefined]);
+export type thresholdOrUndefined = t.TypeOf<typeof thresholdOrUndefined>;
 
 export const created_at = IsoDateString;
 export const updated_at = IsoDateString;

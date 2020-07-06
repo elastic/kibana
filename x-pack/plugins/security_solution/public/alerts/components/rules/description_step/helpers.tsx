@@ -292,6 +292,14 @@ export const buildRuleTypeDescription = (label: string, ruleType: RuleType): Lis
         },
       ];
     }
+    case 'threshold': {
+      return [
+        {
+          title: label,
+          description: i18n.THRESHOLD_TYPE_DESCRIPTION,
+        },
+      ];
+    }
     default:
       return assertUnreachable(ruleType);
   }

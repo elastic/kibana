@@ -41,6 +41,13 @@ export const QUERY_TYPE_DESCRIPTION = i18n.translate(
   }
 );
 
+export const THRESHOLD_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.thresholdRuleTypeDescription',
+  {
+    defaultMessage: 'Threshold',
+  }
+);
+
 export const ML_JOB_STARTED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.mlJobStartedDescription',
   {

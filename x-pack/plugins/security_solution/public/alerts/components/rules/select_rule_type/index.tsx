@@ -22,7 +22,7 @@ import { FieldHook } from '../../../../shared_imports';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 
-const isTresholdRule = (ruleType: RuleType) => ruleType === 'treshold';
+const isThresholdRule = (ruleType: RuleType) => ruleType === 'threshold';
 
 const MlCardDescription = ({
   subscriptionUrl,
@@ -77,7 +77,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
   );
   const setMl = useCallback(() => setType('machine_learning'), [setType]);
   const setQuery = useCallback(() => setType('query'), [setType]);
-  const setTreshold = useCallback(() => setType('treshold'), [setType]);
+  const setThreshold = useCallback(() => setType('threshold'), [setType]);
   const mlCardDisabled = isReadOnly || !hasValidLicense || !isMlAdmin;
   const licensingUrl = useKibana().services.application.getUrlForApp('kibana', {
     path: '#/management/stack/license_management',
@@ -100,7 +100,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
             selectable={{
               isDisabled: isReadOnly,
               onClick: setQuery,
-              isSelected: !isMlRule(ruleType) && !isTresholdRule(ruleType),
+              isSelected: !isMlRule(ruleType) && !isThresholdRule(ruleType),
             }}
           />
         </EuiFlexItem>
@@ -123,13 +123,13 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
         <EuiFlexItem>
           <EuiCard
             data-test-subj="thresholdRuleType"
-            title={i18n.TRESHOLD_TYPE_TITLE}
-            description={i18n.TRESHOLD_TYPE_DESCRIPTION}
+            title={i18n.THRESHOLD_TYPE_TITLE}
+            description={i18n.THRESHOLD_TYPE_DESCRIPTION}
             icon={<EuiIcon size="l" type="indexFlush" />}
             selectable={{
               isDisabled: isReadOnly,
-              onClick: setTreshold,
-              isSelected: isTresholdRule(ruleType),
+              onClick: setThreshold,
+              isSelected: isThresholdRule(ruleType),
             }}
           />
         </EuiFlexItem>

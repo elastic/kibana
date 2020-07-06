@@ -144,6 +144,7 @@ export const transformAlertToRule = (
     to: alert.params.to,
     type: alert.params.type,
     threat: alert.params.threat ?? [],
+    threshold: alert.params.threshold ?? undefined,
     throttle: ruleActions?.ruleThrottle || 'no_actions',
     timestamp_override: alert.params.timestampOverride,
     note: alert.params.note,

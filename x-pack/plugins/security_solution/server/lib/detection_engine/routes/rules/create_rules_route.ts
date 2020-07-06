@@ -44,6 +44,9 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
+
+      console.log(JSON.stringify(request.body, null, 2));
+
       const {
         actions: actionsRest,
         anomaly_threshold: anomalyThreshold,
@@ -75,6 +78,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         severity_mapping: severityMapping,
         tags,
         threat,
+        threshold,
         throttle,
         timestamp_override: timestampOverride,
         to,
@@ -125,6 +129,9 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
             });
           }
         }
+
+        console.log('aaa');
+
         const createdRule = await createRules({
           alertsClient,
           anomalyThreshold,
@@ -159,6 +166,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           to,
           type,
           threat,
+          threshold,
           timestampOverride,
           references,
           note,
@@ -167,6 +175,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           actions: throttle === 'rule' ? actions : [], // Only enable actions if throttle is rule, otherwise we are a notification and should not enable it,
         });
 
+        console.log('bbb');
         const ruleActions = await updateRulesNotifications({
           ruleAlertId: createdRule.id,
           alertsClient,
@@ -177,6 +186,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           name,
         });
 
+        console.log('ccc');
         const ruleStatuses = await ruleStatusSavedObjectsClientFactory(savedObjectsClient).find({
           perPage: 1,
           sortField: 'statusDate',
@@ -184,11 +194,13 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           search: `${createdRule.id}`,
           searchFields: ['alertId'],
         });
+        console.log('ddd');
         const [validated, errors] = transformValidate(
           createdRule,
           ruleActions,
           ruleStatuses.saved_objects[0]
         );
+        console.log('eee', errors);
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
         } else {

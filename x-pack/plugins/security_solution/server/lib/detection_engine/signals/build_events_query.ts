@@ -20,6 +20,7 @@ export const buildEventsSearchQuery = ({
   filter,
   size,
   searchAfterSortId,
+  threshold,
 }: BuildEventsSearchQuery) => {
   const filterWithTime = [
     filter,
@@ -58,6 +59,18 @@ export const buildEventsSearchQuery = ({
       },
     },
   ];
+  const aggregations = threshold
+    ? {
+        aggs: {
+          threshold: {
+            terms: {
+              field: threshold.field,
+              min_doc_count: threshold.value,
+            },
+          },
+        },
+      }
+    : {};
   const searchQuery = {
     allowNoIndices: true,
     index,
@@ -74,6 +87,7 @@ export const buildEventsSearchQuery = ({
           ],
         },
       },
+      ...aggregations,
       sort: [
         {
           '@timestamp': {
@@ -83,6 +97,9 @@ export const buildEventsSearchQuery = ({
       ],
     },
   };
+
+  console.log('searchQuery', JSON.stringify(searchQuery, null, 2));
+
   if (searchAfterSortId) {
     return {
       ...searchQuery,
