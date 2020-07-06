@@ -22,6 +22,7 @@ export interface ComponentTemplateDeserialized extends ComponentTemplateSerializ
   name: string;
   _kbnMeta: {
     usedBy: string[];
+    isManaged: boolean;
   };
 }
 
@@ -36,4 +37,5 @@ export interface ComponentTemplateListItem {
   hasMappings: boolean;
   hasAliases: boolean;
   hasSettings: boolean;
+  isManaged: boolean;
 }

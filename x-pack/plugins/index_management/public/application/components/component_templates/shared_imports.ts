@@ -28,3 +28,5 @@ export {
   ComponentTemplateDeserialized,
   ComponentTemplateListItem,
 } from '../../../../common';
+
+export { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';

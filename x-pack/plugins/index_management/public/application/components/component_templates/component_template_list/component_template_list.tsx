@@ -9,6 +9,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ScopedHistory } from 'kibana/public';
+import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 
 import { SectionLoading, ComponentTemplateDeserialized } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_LIST_LOAD } from '../constants';
@@ -56,12 +57,25 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
     );
   } else if (data?.length) {
     content = (
-      <ComponentTable
-        componentTemplates={data}
-        onReloadClick={sendRequest}
-        onDeleteClick={setComponentTemplatesToDelete}
-        history={history as ScopedHistory}
-      />
+      <>
+        <EuiTitle size="s">
+          <EuiText color="subdued">
+            <FormattedMessage
+              id="xpack.idxMgmt.home.componentTemplates.list.componentTemplatesDescription"
+              defaultMessage="Component templates are reusable building blocks that configure mappings, settings, and aliases."
+            />
+          </EuiText>
+        </EuiTitle>
+
+        <EuiSpacer />
+
+        <ComponentTable
+          componentTemplates={data}
+          onReloadClick={sendRequest}
+          onDeleteClick={setComponentTemplatesToDelete}
+          history={history as ScopedHistory}
+        />
+      </>
     );
   } else if (data && data.length === 0) {
     content = <EmptyPrompt />;
@@ -94,6 +108,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
         <ComponentTemplateDetailsFlyout
           onClose={goToList}
           componentTemplateName={componentTemplateName}
+          showSummaryCallToAction={true}
           actions={[
             {
               name: i18n.translate('xpack.idxMgmt.componentTemplateDetails.deleteButtonLabel', {

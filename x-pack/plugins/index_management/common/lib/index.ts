@@ -19,5 +19,5 @@ export { getTemplateParameter } from './utils';
 
 export {
   deserializeComponentTemplate,
-  deserializeComponenTemplateList,
+  deserializeComponentTemplateList,
 } from './component_template_serialization';
