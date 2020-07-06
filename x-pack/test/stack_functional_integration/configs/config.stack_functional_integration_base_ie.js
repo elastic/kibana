@@ -77,9 +77,6 @@ export default async ({ readConfigFile }) => {
         pathname: '/app/home',
         hash: '/tutorial_directory/sampleData',
       },
-      monitoring: {
-        pathname: '/app/monitoring',
-      },
     },
     stackFunctionalIntegrationTests: {
       envObj: provisionedConfigs,
