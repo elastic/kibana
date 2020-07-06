@@ -136,7 +136,7 @@ describe('Index Templates tab', () => {
           composedOfString,
           priorityFormatted,
           'M S A', // Mappings Settings Aliases badges
-          '', // Column of actions
+          'Edit', // Column of actions
         ]);
       });
 
