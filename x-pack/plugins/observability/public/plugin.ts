@@ -52,8 +52,6 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
     });
 
     if (plugins.home) {
-      plugins.home.environment.update({ observability: true });
-
       plugins.home.featureCatalogue.register({
         id: 'observability',
         title: i18n.translate('xpack.observability.featureCatalogueTitle', {
