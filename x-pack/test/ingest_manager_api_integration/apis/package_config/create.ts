@@ -84,9 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    // This test is disabled as the docker image used does not contain necessary package registry changes
-    // to support this functionality
-    it.skip('should not allow multiple limited packages on the same agent config', async function () {
+    it('should not allow multiple limited packages on the same agent config', async function () {
       if (server.enabled) {
         await supertest
           .post(`/api/ingest_manager/package_configs`)
@@ -102,7 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
             package: {
               name: 'endpoint',
               title: 'Endpoint',
-              version: '0.5.0',
+              version: '0.8.0',
             },
           })
           .expect(200);
@@ -120,7 +118,7 @@ export default function ({ getService }: FtrProviderContext) {
             package: {
               name: 'endpoint',
               title: 'Endpoint',
-              version: '0.5.0',
+              version: '0.8.0',
             },
           })
           .expect(500);
