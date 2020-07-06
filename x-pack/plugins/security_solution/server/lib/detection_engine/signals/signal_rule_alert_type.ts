@@ -229,7 +229,7 @@ export const signalRulesAlertType = ({
             result.bulkCreateTimes.push(bulkCreateDuration);
           }
         } else if (type === 'threshold') {
-          console.log('ruleTytpe', 'threshold');
+          // console.log('ruleTytpe', 'threshold');
           const inputIndex = await getInputIndex(services, version, index);
           const esFilter = await getFilter({
             type,
@@ -252,11 +252,11 @@ export const signalRulesAlertType = ({
             threshold,
           });
 
-          console.log(
-            'thresholdResults',
-            thresholdResults,
-            JSON.stringify(thresholdResults.aggregations.threshold.buckets, null, 2)
-          );
+          // console.log(
+          //   'thresholdResults',
+          //   thresholdResults,
+          //   JSON.stringify(thresholdResults.aggregations.threshold.buckets, null, 2)
+          // );
 
           const thresholdCount = thresholdResults.aggregations.threshold.buckets.length;
           if (thresholdCount) {
@@ -293,7 +293,7 @@ export const signalRulesAlertType = ({
           if (bulkCreateDuration) {
             result.bulkCreateTimes.push(bulkCreateDuration);
           }
-          console.log('resulttttt', result);
+          // console.log('resulttttt', result);
         } else {
           const inputIndex = await getInputIndex(services, version, index);
           const esFilter = await getFilter({

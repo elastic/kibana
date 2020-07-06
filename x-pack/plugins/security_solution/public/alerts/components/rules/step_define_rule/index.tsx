@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { FC, memo, useCallback, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
@@ -99,6 +99,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   setForm,
   setStepData,
 }) => {
+  // console.error('aaaa', defaultValues);
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
@@ -160,6 +161,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const handleCloseTimelineSearch = useCallback(() => {
     setOpenTimelineSearch(false);
   }, []);
+
+  // console.error('form', myStepData, form);
 
   return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
@@ -251,17 +254,39 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               />
             </>
           </EuiFormRow>
-          {/* {myStepData.ruleType === 'threshold' && ( */}
-          <UseField
-            path="threshold"
-            component={ThresholdInput}
-            componentProps={{
-              idAria: 'detectionEngineStepDefineRuleTimeline',
-              isDisabled: isLoading,
-              dataTestSubj: 'detectionEngineStepDefineRuleTimeline',
-            }}
-          />
-          {/* )} */}
+          <EuiFormRow data-test-subj="thresholdInput">
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <CommonUseField
+                  path="threshold.field"
+                  componentProps={{
+                    idAria: 'detectionEngineStepAboutRuleName',
+                    'data-test-subj': 'detectionEngineStepAboutRuleName',
+                    euiFieldProps: {
+                      fullWidth: true,
+                      // disabled: isLoading,
+                    },
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{'>='}</EuiFlexItem>
+              <EuiFlexItem>
+                <CommonUseField
+                  path="threshold.value"
+                  componentProps={{
+                    idAria: 'detectionEngineStepAboutRuleName',
+                    'data-test-subj': 'detectionEngineStepAboutRuleName',
+                    type: 'number',
+                    euiFieldProps: {
+                      fullWidth: true,
+                      type: 'number',
+                      // disabled: isLoading,
+                    },
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
           <UseField
             path="timeline"
             component={PickTimeline}

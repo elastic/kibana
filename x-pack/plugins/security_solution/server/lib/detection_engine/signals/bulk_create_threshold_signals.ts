@@ -71,12 +71,12 @@ const transformThresholdResultsToEcs = (
   filter,
   threshold
 ): SearchResponse<EcsAnomaly> => {
-  console.log(
-    'transformThresholdResultsToEcs',
-    JSON.stringify(results),
-    JSON.stringify(filter),
-    JSON.stringify(threshold)
-  );
+  // console.log(
+  //   'transformThresholdResultsToEcs',
+  //   JSON.stringify(results),
+  //   JSON.stringify(filter),
+  //   JSON.stringify(threshold)
+  // );
 
   const transformedHits = results.aggregations.threshold.buckets.map(({ key, doc_count }) => ({
     // ...rest,
@@ -110,7 +110,7 @@ export const bulkCreateThresholdSignals = async (
     params.threshold
   );
 
-  console.log('ecsResults', JSON.stringify(ecsResults, null, 2));
+  // console.log('ecsResults', JSON.stringify(ecsResults, null, 2));
 
   return singleBulkCreate({ ...params, filteredEvents: ecsResults });
 };
