@@ -319,6 +319,15 @@ export function updateLayerAlpha(id: string, alpha: number) {
   };
 }
 
+export function updateLabelsOnTop(id: string, areLabelsOnTop: boolean) {
+  return {
+    type: UPDATE_LAYER_PROP,
+    id,
+    propName: 'areLabelsOnTop',
+    newValue: areLabelsOnTop,
+  };
+}
+
 export function setLayerQuery(id: string, query: Query) {
   return (dispatch: Dispatch) => {
     dispatch({

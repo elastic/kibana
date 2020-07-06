@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { omit, isEqual, pluck } from 'lodash';
+import { omit, isEqual, map } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   Logger,
@@ -647,7 +647,7 @@ export class AlertsClient {
   private validateActions(alertType: AlertType, actions: NormalizedAlertAction[]): void {
     const { actionGroups: alertTypeActionGroups } = alertType;
     const usedAlertActionGroups = actions.map((action) => action.group);
-    const availableAlertTypeActionGroups = new Set(pluck(alertTypeActionGroups, 'id'));
+    const availableAlertTypeActionGroups = new Set(map(alertTypeActionGroups, 'id'));
     const invalidActionGroups = usedAlertActionGroups.filter(
       (group) => !availableAlertTypeActionGroups.has(group)
     );
