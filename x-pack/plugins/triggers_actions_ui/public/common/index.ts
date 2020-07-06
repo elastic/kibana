@@ -6,4 +6,4 @@
 
 export * from './expression_items';
 
-export { ServiceNowConnectorConfiguration } from '../application/components/builtin_action_types/servicenow/config';
+export { connectorConfiguration as ServiceNowConnectorConfiguration } from '../application/components/builtin_action_types/servicenow/config';
