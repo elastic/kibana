@@ -61,7 +61,7 @@ export const EditAnalyticsFlyout: FC<EditAnalyticsJobFlyoutProps> = ({ closeFlyo
   } = useMlKibana();
   const { refresh } = useRefreshAnalyticsList();
 
-  // Disable if all fields are empty or mml is not valid
+  // Disable if mml is not valid
   const updateButtonDisabled = mmlValidationError !== undefined;
 
   useEffect(() => {
@@ -82,7 +82,11 @@ export const EditAnalyticsFlyout: FC<EditAnalyticsJobFlyoutProps> = ({ closeFlyo
         setMmlValidationError(undefined);
       }
     } else {
-      setMmlValidationError(undefined);
+      setMmlValidationError(
+        i18n.translate('xpack.ml.dataframe.analytics.create.modelMemoryEmptyError', {
+          defaultMessage: 'Model memory limit must not be empty',
+        })
+      );
     }
   }, [modelMemoryLimit]);
 
