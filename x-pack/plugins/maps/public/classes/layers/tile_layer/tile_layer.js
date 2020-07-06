@@ -74,8 +74,8 @@ export class TileLayer extends AbstractLayer {
         return;
       }
 
-      const sourceId = this.getId();
-      mbMap.addSource(sourceId, {
+      const mbSourceId = this._getMbSourceId();
+      mbMap.addSource(mbSourceId, {
         type: 'raster',
         tiles: [tmsSourceData.url],
         tileSize: 256,
@@ -85,7 +85,7 @@ export class TileLayer extends AbstractLayer {
       mbMap.addLayer({
         id: mbLayerId,
         type: 'raster',
-        source: sourceId,
+        source: mbSourceId,
         minzoom: this._descriptor.minZoom,
         maxzoom: this._descriptor.maxZoom,
       });

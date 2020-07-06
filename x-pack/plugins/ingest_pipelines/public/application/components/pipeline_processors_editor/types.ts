@@ -38,6 +38,8 @@ export interface OnUpdateHandlerArg extends FormValidityState {
   getData: () => SerializeResult;
 }
 
+export type OnUpdateHandler = (arg: OnUpdateHandlerArg) => void;
+
 /**
  * The editor can be in different modes. This enables us to hold
  * a reference to data dispatch to the reducer (like the {@link ProcessorSelector}
