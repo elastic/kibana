@@ -56,7 +56,7 @@ export function NoDataPopover({
           <p style={{ maxWidth: 300 }}>
             {i18n.translate('data.noDataPopover.content', {
               defaultMessage:
-                "This time range doesn't contain any data. Increase or adjust the time range to see more fields and create charts",
+                "This time range doesn't contain any data. Increase or adjust the time range to see more fields and create charts.",
             })}
           </p>
         </EuiText>
