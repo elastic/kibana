@@ -1011,7 +1011,11 @@ function discoverController(
       $scope.indexPattern.popularizeField(columnName, 1);
     }
     const columns = columnActions.removeColumn($scope.state.columns, columnName);
-    setAppState({ columns });
+    // The state's sort property is an array of [sortByColumn,sortDirection]
+    const sort = $scope.state.sort.length
+      ? $scope.state.sort.filter((subArr) => subArr[0] !== columnName)
+      : [];
+    setAppState({ columns, sort });
   };
 
   $scope.moveColumn = function moveColumn(columnName, newIndex) {

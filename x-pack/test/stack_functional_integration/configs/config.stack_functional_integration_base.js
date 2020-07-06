@@ -28,9 +28,7 @@ export default async ({ readConfigFile }) => {
     kibana: kbnTestConfig.getUrlParts(),
     elasticsearch: esTestConfig.getUrlParts(),
   };
-  console.log(servers);
-  console.log(JSON.stringify(servers));
-
+  log.info(`servers data: ${JSON.stringify(servers)}`);
   return {
     ...defaultConfigs.getAll(),
     junit: {

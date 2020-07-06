@@ -41,18 +41,11 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
     });
   }
 
-  async function waitForLoginForm(isSaml = false) {
-    log.debug(`### isSaml: ${isSaml}`);
-    log.debug('Waiting on the login form to appear');
-    // Tre': I wonder if the following wait, looking for login form is correct, when it is saml?  We shall see :)
+  async function waitForLoginForm() {
     log.debug('Waiting for Login Form to appear.');
-    await retry.waitForWithTimeout(
-      isSaml ? 'form.auth0-lock-widget' : '.login-form',
-      config.get('timeouts.waitFor') * 5,
-      async () => {
-        return await testSubjects.exists('loginForm');
-      }
-    );
+    await retry.waitForWithTimeout('login form', config.get('timeouts.waitFor') * 5, async () => {
+      return await testSubjects.exists('loginForm');
+    });
   }
 
   async function waitForLoginSelector() {
@@ -225,7 +218,7 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
       await waitForLoginPage();
     }
 
-    async forceLogout(isSaml = false) {
+    async forceLogout() {
       log.debug('SecurityPage.forceLogout');
       if (await find.existsByDisplayedByCssSelector('.login-form', 100)) {
         log.debug('Already on the login page, not forcing anything');
@@ -236,7 +229,7 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
       const url = PageObjects.common.getHostPort() + '/logout';
       await browser.get(url);
       log.debug('Waiting on the login form to appear');
-      await waitForLoginForm(isSaml);
+      await waitForLoginPage();
     }
 
     async clickRolesSection() {

@@ -33,6 +33,7 @@ export default async ({ readConfigFile }) => {
       type: 'ie',
     },
     servers,
+    security: { disableTestUser: true },
     apps: {
       kibana: {
         pathname: '/app/kibana',

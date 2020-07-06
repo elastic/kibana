@@ -17,6 +17,11 @@ import { useWithSource } from '../../../common/containers/source';
 jest.mock('../../components/user_info');
 jest.mock('../../../common/containers/source');
 jest.mock('../../../common/components/link_to');
+jest.mock('../../../common/containers/use_global_time', () => ({
+  useGlobalTime: jest
+    .fn()
+    .mockReturnValue({ from: 0, isInitializing: false, to: 0, setQuery: jest.fn() }),
+}));
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
 

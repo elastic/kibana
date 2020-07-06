@@ -303,6 +303,13 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       );
     }
 
+    async getAllIndexPatternNames() {
+      const indexPatterns = await this.getIndexPatternList();
+      return await mapAsync(indexPatterns, async (index) => {
+        return await index.getVisibleText();
+      });
+    }
+
     async isIndexPatternListEmpty() {
       await testSubjects.existOrFail('indexPatternTable', { timeout: 5000 });
       const indexPatternList = await this.getIndexPatternList();
@@ -319,10 +326,8 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     async createIndexPattern(
       indexPatternName: string,
       timefield = '@timestamp',
-      isStandardIndexPattern = true,
-      expectWildcard = true
+      isStandardIndexPattern = true
     ) {
-      log.debug(`createIndexPattern expectWildcard = ${expectWildcard}`);
       await retry.try(async () => {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickKibanaIndexPatterns();

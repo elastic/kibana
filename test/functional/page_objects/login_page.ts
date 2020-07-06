@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { delay } from 'bluebird';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function LoginPageProvider({ getService }: FtrProviderContext) {
@@ -71,7 +72,8 @@ export function LoginPageProvider({ getService }: FtrProviderContext) {
       log.debug('### found and clicked log out--------------------------');
       await this.sleep(8002);
     }
-    async sleep(sleepMilliseconds) {
+
+    async sleep(sleepMilliseconds: number) {
       log.debug(`... sleep(${sleepMilliseconds}) start`);
       await delay(sleepMilliseconds);
       log.debug(`... sleep(${sleepMilliseconds}) end`);
