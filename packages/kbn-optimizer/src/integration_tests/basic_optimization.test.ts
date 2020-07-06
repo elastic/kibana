@@ -168,8 +168,7 @@ it.skip('builds expected bundles, saves bundle counts to metadata', async () => 
   `);
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/70764
-it.skip('uses cache on second run and exist cleanly', async () => {
+it('uses cache on second run and exist cleanly', async () => {
   const config = OptimizerConfig.create({
     repoRoot: MOCK_REPO_DIR,
     pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
