@@ -143,8 +143,10 @@ export const AvailabilityExpressionSelect: React.FC<Props> = ({ alertParams, set
                 aria-label={labels.ENTER_AVAILABILITY_RANGE_SELECT_ARIA}
                 data-test-subj="xpack.uptime.alerts.monitorStatus.availability.timerangeUnit.select"
                 headlineText={labels.ENTER_AVAILABILITY_RANGE_SELECT_HEADLINE}
-                onChange={(newOptions: TimeRangeOption[]) => {
-                  const checkedOption = newOptions.find(({ checked }) => checked === 'on');
+                // TODO: this should not be `any`
+                onChange={(newOptions: any) => {
+                  // TODO: this should not be `any`
+                  const checkedOption = newOptions.find(({ checked }: any) => checked === 'on');
                   if (checkedOption) {
                     setTimerangeUnitOptions(newOptions);
                     setRangeUnit(checkedOption.key);
