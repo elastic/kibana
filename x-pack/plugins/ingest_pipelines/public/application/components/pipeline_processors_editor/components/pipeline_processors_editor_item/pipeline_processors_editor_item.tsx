@@ -82,6 +82,30 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
       'pipelineProcessorsEditor__item--displayNone': !isMovingThisProcessor,
     });
 
+    const moveButtonClasses = classNames({
+      'pipelineProcessorsEditor__item--displayNone': isMovingThisProcessor,
+    });
+
+    const moveButton = (
+      <EuiButtonIcon
+        data-test-subj="moveItemButton"
+        size="s"
+        disabled={isDisabled}
+        aria-label={i18nTexts.moveButtonLabel}
+        onClick={onMove}
+        iconType="sortable"
+      />
+    );
+
+    // Remove the tooltip from the DOM to prevent it from lingering if the mouse leave event
+    // did not fire.
+    const renderMoveButton = () =>
+      !isInMoveMode ? (
+        <EuiToolTip content={i18nTexts.moveButtonLabel}>{moveButton}</EuiToolTip>
+      ) : (
+        moveButton
+      );
+
     return (
       <EuiPanel className={panelClasses} paddingSize="s">
         <EuiFlexGroup
@@ -93,19 +117,17 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
         >
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-              <EuiFlexItem className={actionElementClasses} grow={false}>
-                {!isInMoveMode && (
-                  <EuiToolTip content={i18nTexts.moveButtonLabel}>
-                    <EuiButtonIcon
-                      data-test-subj="moveItemButton"
-                      size="s"
-                      disabled={isDisabled}
-                      aria-label={i18nTexts.moveButtonLabel}
-                      onClick={onMove}
-                      iconType="sortable"
-                    />
-                  </EuiToolTip>
-                )}
+              <EuiFlexItem grow={false} className={moveButtonClasses}>
+                {renderMoveButton()}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} className={cancelMoveButtonClasses}>
+                <EuiButtonIcon
+                  iconType="crossInACircleFilled"
+                  data-test-subj="cancelMoveItemButton"
+                  size="s"
+                  onClick={onCancelMove}
+                  aria-label={i18nTexts.cancelMoveButtonLabel}
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText
@@ -144,11 +166,6 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                   text={description}
                   placeholder={i18nTexts.descriptionPlaceholder}
                 />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} className={cancelMoveButtonClasses}>
-                <EuiButton data-test-subj="cancelMoveItemButton" size="s" onClick={onCancelMove}>
-                  {i18nTexts.cancelMoveButtonLabel}
-                </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem className={actionElementClasses} grow={false}>
                 {!isInMoveMode && (
