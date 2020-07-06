@@ -36,6 +36,8 @@ export function MochaReporterProvider({ getService }) {
   let originalLogWriters;
   let reporterCaptureStartTime;
 
+  const failuresOverTime = [];
+
   return class MochaReporter extends Mocha.reporters.Base {
     constructor(runner, options) {
       super(runner, options);
@@ -158,25 +160,35 @@ export function MochaReporterProvider({ getService }) {
       //
       let output = '';
       const realLog = console.log;
-      console.log = (...args) => (output += `${format(...args)}\n`);
+      Mocha.reporters.Base.consoleLog = (...args) => (output += `${format(...args)}\n`);
       try {
         Mocha.reporters.Base.list([runnable]);
       } finally {
-        console.log = realLog;
+        Mocha.reporters.Base.consoleLog = realLog;
       }
 
+      const outputLines = output.split('\n');
+
+      const errorMarkerStart = outputLines.reduce((index, line, i) => {
+        if (index !== -1) {
+          return index;
+        }
+        return /Error:/.test(line) ? i : -1;
+      }, -1);
+
+      const errorMessage = outputLines
+        // drop the first ${errorMarkerStart} lines, (empty + test title)
+        .slice(errorMarkerStart)
+        // move leading colors behind leading spaces
+        .map((line) => line.replace(/^((?:\[.+m)+)(\s+)/, '$2$1'))
+        .map((line) => colors.fail(` ${line}`))
+        .join('\n');
+
       log.write(
-        `- ${colors.fail(`${symbols.err} fail: "${runnable.fullTitle()}"`)}` +
-          '\n' +
-          output
-            .split('\n')
-            // drop the first two lines, (empty + test title)
-            .slice(2)
-            // move leading colors behind leading spaces
-            .map((line) => line.replace(/^((?:\[.+m)+)(\s+)/, '$2$1'))
-            .map((line) => ` ${line}`)
-            .join('\n')
+        `- ${colors.fail(`${symbols.err} fail: ${runnable.fullTitle()}`)}` + '\n' + errorMessage
       );
+
+      failuresOverTime.push({ title: runnable.fullTitle(), error: errorMessage });
 
       // failed hooks trigger the `onFail(runnable)` callback, so we snapshot the logs for
       // them here. Tests will re-capture the snapshot in `onTestEnd()`
@@ -188,7 +200,7 @@ export function MochaReporterProvider({ getService }) {
         log.setWriters(originalLogWriters);
       }
 
-      writeEpilogue(log, this.stats);
+      writeEpilogue(log, this.stats, failuresOverTime);
     };
   };
 }

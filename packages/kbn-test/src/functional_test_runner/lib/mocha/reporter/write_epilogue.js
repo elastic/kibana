@@ -20,7 +20,7 @@
 import * as colors from './colors';
 import { ms } from './ms';
 
-export function writeEpilogue(log, stats) {
+export function writeEpilogue(log, stats, failuresDetail) {
   // header
   log.write('');
 
@@ -35,6 +35,17 @@ export function writeEpilogue(log, stats) {
   // failures
   if (stats.failures) {
     log.write('%d failing', stats.failures);
+
+    log.write(
+      failuresDetail
+        .map(
+          ({ title, error }, i) => `
+      ${i + 1}) ${title}
+      ${error}
+    `
+        )
+        .join('\n')
+    );
   }
 
   // footer
