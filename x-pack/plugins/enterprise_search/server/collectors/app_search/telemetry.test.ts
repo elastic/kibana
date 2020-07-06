@@ -25,7 +25,6 @@ describe('App Search Telemetry Usage Collector', () => {
         'ui_viewed.setup_guide': 10,
         'ui_viewed.engines_overview': 20,
         'ui_error.cannot_connect': 3,
-        'ui_error.no_as_account': 4,
         'ui_clicked.create_first_engine_button': 40,
         'ui_clicked.header_launch_button': 50,
         'ui_clicked.engine_table_link': 60,
@@ -64,7 +63,6 @@ describe('App Search Telemetry Usage Collector', () => {
         },
         ui_error: {
           cannot_connect: 3,
-          no_as_account: 4,
         },
         ui_clicked: {
           create_first_engine_button: 40,
@@ -87,7 +85,6 @@ describe('App Search Telemetry Usage Collector', () => {
         },
         ui_error: {
           cannot_connect: 0,
-          no_as_account: 0,
         },
         ui_clicked: {
           create_first_engine_button: 0,

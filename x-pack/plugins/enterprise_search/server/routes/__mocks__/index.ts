@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getUserName } from './get_username';
+export { MockRouter } from './router.mock';
+export { mockConfig } from './config.mock';

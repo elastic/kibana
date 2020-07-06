@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { LoadingState } from './loading_state';
-export { EmptyState } from './empty_state';
-export { ErrorState } from './error_state';
+export const mockConfig = {
+  enabled: true,
+  host: 'http://localhost:3002',
+  accessCheckTimeout: 5000,
+  accessCheckTimeoutWarning: 300,
+};
