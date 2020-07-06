@@ -22,7 +22,7 @@ yarn test:mocha
 
 [float]
 ==== Jest
-Jest tests are stored in the same directory as source code files with the `.test.{js,ts,tsx}` suffix.
+Jest tests are stored in the same directory as source code files with the `.test.{js,mjs,ts,tsx}` suffix.
 
 *Running Jest Unit Tests*
 

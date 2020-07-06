@@ -63,7 +63,8 @@ afterAll(async () => {
   await del(TMP_DIR);
 });
 
-it('builds expected bundles, saves bundle counts to metadata', async () => {
+// FLAKY: https://github.com/elastic/kibana/issues/70762
+it.skip('builds expected bundles, saves bundle counts to metadata', async () => {
   const config = OptimizerConfig.create({
     repoRoot: MOCK_REPO_DIR,
     pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
@@ -167,7 +168,8 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   `);
 });
 
-it('uses cache on second run and exist cleanly', async () => {
+// FLAKY: https://github.com/elastic/kibana/issues/70764
+it.skip('uses cache on second run and exist cleanly', async () => {
   const config = OptimizerConfig.create({
     repoRoot: MOCK_REPO_DIR,
     pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
@@ -180,7 +182,7 @@ it('uses cache on second run and exist cleanly', async () => {
       tap((state) => {
         if (state.event?.type === 'worker stdio') {
           // eslint-disable-next-line no-console
-          console.log('worker', state.event.stream, state.event.chunk.toString('utf8'));
+          console.log('worker', state.event.stream, state.event.line);
         }
       }),
       toArray()
@@ -226,7 +228,7 @@ const expectFileMatchesSnapshotWithCompression = (filePath: string, snapshotLabe
 
   // Verify the brotli variant matches
   expect(
-    // @ts-ignore @types/node is missing the brotli functions
+    // @ts-expect-error @types/node is missing the brotli functions
     Zlib.brotliDecompressSync(
       Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, `${filePath}.br`))
     ).toString()
