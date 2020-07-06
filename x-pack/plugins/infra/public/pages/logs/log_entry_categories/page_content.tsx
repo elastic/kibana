@@ -52,10 +52,10 @@ export const LogEntryCategoriesPageContent = () => {
 
   // Open flyout if there are no ML jobs
   useEffect(() => {
-    if (jobStatus['log-entry-categories-count'] === 'missing') {
+    if (setupStatus.type === 'required' && setupStatus.reason === 'missing') {
       openFlyout();
     }
-  }, [jobStatus, openFlyout]);
+  }, [setupStatus, openFlyout]);
 
   if (isLoading || isUninitialized) {
     return <SourceLoadingPage />;
