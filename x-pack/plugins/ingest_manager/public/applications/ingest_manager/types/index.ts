@@ -13,11 +13,12 @@ export {
   NewAgentConfig,
   AgentEvent,
   EnrollmentAPIKey,
-  Datasource,
-  NewDatasource,
-  DatasourceInput,
-  DatasourceInputStream,
-  DatasourceConfigRecordEntry,
+  PackageConfig,
+  NewPackageConfig,
+  UpdatePackageConfig,
+  PackageConfigInput,
+  PackageConfigInputStream,
+  PackageConfigConfigRecordEntry,
   Output,
   DataStream,
   // API schema - misc setup, status
@@ -35,11 +36,11 @@ export {
   CopyAgentConfigResponse,
   DeleteAgentConfigRequest,
   DeleteAgentConfigResponse,
-  // API schemas - Datasource
-  CreateDatasourceRequest,
-  CreateDatasourceResponse,
-  UpdateDatasourceRequest,
-  UpdateDatasourceResponse,
+  // API schemas - Package config
+  CreatePackageConfigRequest,
+  CreatePackageConfigResponse,
+  UpdatePackageConfigRequest,
+  UpdatePackageConfigResponse,
   // API schemas - Data Streams
   GetDataStreamsResponse,
   // API schemas - Agents

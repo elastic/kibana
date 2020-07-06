@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import { capitalize, get } from 'lodash';
+import { upperFirst, get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { createBeatsQuery } from './create_beats_query';
 import { calculateRate } from '../calculate_rate';
@@ -59,8 +59,8 @@ export function handleResponse(response, start, end) {
     accum.beats.push({
       uuid: get(stats, 'beat.uuid'),
       name: get(stats, 'beat.name'),
-      type: capitalize(get(stats, 'beat.type')),
-      output: capitalize(get(stats, 'metrics.libbeat.output.type')),
+      type: upperFirst(get(stats, 'beat.type')),
+      output: upperFirst(get(stats, 'metrics.libbeat.output.type')),
       total_events_rate: totalEventsRate,
       bytes_sent_rate: bytesSentRate,
       errors,

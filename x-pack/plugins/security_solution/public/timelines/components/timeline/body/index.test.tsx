@@ -17,6 +17,7 @@ import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
 import { wait } from '../../../../common/lib/helpers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
+import { SELECTOR_TIMELINE_BODY_CLASS_NAME } from '../styles';
 
 const testBodyHeight = 700;
 const mockGetNotesByIds = (eventId: string[]) => [];
@@ -133,6 +134,20 @@ describe('Body', () => {
         ).toEqual(true);
       });
     }, 20000);
+
+    test(`it add attribute data-timeline-id in ${SELECTOR_TIMELINE_BODY_CLASS_NAME}`, () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Body {...props} />
+        </TestProviders>
+      );
+      expect(
+        wrapper
+          .find(`[data-timeline-id="timeline-test"].${SELECTOR_TIMELINE_BODY_CLASS_NAME}`)
+          .first()
+          .exists()
+      ).toEqual(true);
+    });
   });
 
   describe('action on event', () => {
