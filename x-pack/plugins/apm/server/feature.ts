@@ -61,11 +61,6 @@ export const APM_FEATURE = {
         'alerting:delete',
         'actions:delete',
       ],
-      catalogue: ['apm'],
-      savedObject: {
-        all: ['alert'],
-        read: [],
-      },
     },
   },
 };

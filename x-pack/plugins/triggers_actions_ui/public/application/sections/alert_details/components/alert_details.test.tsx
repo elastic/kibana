@@ -644,6 +644,7 @@ describe('edit button', () => {
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
       producer: 'alerting',
+      authorizedConsumers,
     };
 
     expect(
@@ -685,6 +686,7 @@ describe('edit button', () => {
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
       producer: 'alerting',
+      authorizedConsumers,
     };
 
     expect(
@@ -719,6 +721,7 @@ describe('edit button', () => {
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
       producer: 'alerting',
+      authorizedConsumers,
     };
 
     expect(

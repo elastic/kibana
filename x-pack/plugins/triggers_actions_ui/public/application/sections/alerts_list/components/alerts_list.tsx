@@ -33,11 +33,7 @@ import { TypeFilter } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
 import { loadAlerts, loadAlertTypes, deleteAlerts } from '../../../lib/alert_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
-import {
-  hasDeleteAlertsCapability,
-  hasSaveAlertsCapability,
-  hasExecuteActionsCapability,
-} from '../../../lib/capabilities';
+import { hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { routeToAlertDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
