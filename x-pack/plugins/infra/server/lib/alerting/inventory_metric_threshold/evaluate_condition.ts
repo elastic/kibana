@@ -70,7 +70,7 @@ export const evaluateCondition = async (
         value !== null &&
         (Array.isArray(value)
           ? value.map((v) => comparisonFunction(Number(v), threshold))
-          : comparisonFunction(value, threshold)),
+          : comparisonFunction(value as number, threshold)),
       isNoData: value === null,
       isError: value === undefined,
       currentValue: getCurrentValue(value),
