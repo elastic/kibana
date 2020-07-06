@@ -39,12 +39,18 @@ export const createTableVisCell = (table: Table, formattedColumns: any[], vis: E
 }: EuiDataGridCellValueElementProps) => {
   const rowValue = table.rows[rowIndex][columnId];
   const column = formattedColumns[colIndex];
-
-  // An AggConfigResult can "enrich" cell contents by applying a field formatter,
-  // which we want to do if possible.
   const contentsIsDefined = rowValue !== null && rowValue !== undefined;
 
-  const cellContent = contentsIsDefined ? column?.formatter?.convert(rowValue) : '';
+  const cellContent = (
+    <div
+      /*
+       * Justification for dangerouslySetInnerHTML:
+       * The Data table visualization can "enrich" cell contents by applying a field formatter,
+       * which we want to do if possible.
+       */
+      dangerouslySetInnerHTML={{ __html: column?.formatter?.convert(rowValue, 'html') }} // eslint-disable-line react/no-danger
+    />
+  );
 
   const onFilterClick = useCallback(
     (negate: boolean) => {
