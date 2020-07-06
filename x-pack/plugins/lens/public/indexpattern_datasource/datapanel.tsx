@@ -5,7 +5,7 @@
  */
 
 import './datapanel.scss';
-import { uniq, indexBy, groupBy, throttle } from 'lodash';
+import { uniq, keyBy, groupBy, throttle } from 'lodash';
 import React, { useState, useEffect, memo, useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
@@ -256,7 +256,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
 
   const fieldGroups: FieldsGroup = useMemo(() => {
     const containsData = (field: IndexPatternField) => {
-      const fieldByName = indexBy(allFields, 'name');
+      const fieldByName = keyBy(allFields, 'name');
       const overallField = fieldByName[field.name];
 
       return (
