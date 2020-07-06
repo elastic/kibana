@@ -182,7 +182,7 @@ export class ManifestManager {
             Buffer.from(artifact.body, 'base64')
           );
           artifact.body = compressedArtifact.toString('base64');
-          artifact.compressedSize = compressedArtifact.length;
+          artifact.compressedSize = compressedArtifact.byteLength;
           artifact.compressionAlgorithm = 'zlib';
           artifact.compressedSha256 = createHash('sha256').update(compressedArtifact).digest('hex');
 
