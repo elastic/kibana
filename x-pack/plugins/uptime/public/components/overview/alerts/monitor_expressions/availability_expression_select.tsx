@@ -45,20 +45,17 @@ const TimeRangeOptions: TimeRangeOption[] = [
 
 const DEFAULT_RANGE = 30;
 const DEFAULT_TIMERANGE_UNIT = 'd';
-const DEFAULT_THRESHOLD = '99';
+const DEFAULT_THRESHOLD = 99;
 const DEFAULT_IS_ENABLED = true;
 
-const isThresholdInvalid = (value: string): boolean => {
-  const n = Number(value);
-  return isNaN(n) || n <= 0 || n > 100;
-};
+const isThresholdInvalid = (n: number): boolean => isNaN(n) || n <= 0 || n > 100;
 
 export const AvailabilityExpressionSelect: React.FC<Props> = ({ alertParams, setAlertParams }) => {
   const [range, setRange] = useState<number>(alertParams?.availability?.range ?? DEFAULT_RANGE);
   const [rangeUnit, setRangeUnit] = useState<string>(
     alertParams?.availability?.rangeUnit ?? DEFAULT_TIMERANGE_UNIT
   );
-  const [threshold, setThreshold] = useState<string>(
+  const [threshold, setThreshold] = useState<number>(
     alertParams?.availability?.threshold ?? DEFAULT_THRESHOLD
   );
   const [isEnabled, setIsEnabled] = useState<boolean>(
@@ -106,7 +103,7 @@ export const AvailabilityExpressionSelect: React.FC<Props> = ({ alertParams, set
               isInvalid={isThresholdInvalid(threshold)}
               value={threshold}
               onChange={(e) => {
-                setThreshold(e.target.value);
+                setThreshold(Number(e.target.value));
               }}
             />
           }

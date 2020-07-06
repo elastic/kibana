@@ -196,12 +196,12 @@ export const ENTER_AVAILABILITY_THRESHOLD_DESCRIPTION = i18n.translate(
   }
 );
 
-export const ENTER_AVAILABILITY_THRESHOLD_VALUE = (value: string) =>
+export const ENTER_AVAILABILITY_THRESHOLD_VALUE = (value: number) =>
   i18n.translate('xpack.uptime.alerts.monitorStatus.availability.threshold.value', {
     defaultMessage: '< {value}% of checks',
     description:
       'This fragment specifies criteria that will cause an alert to fire for uptime monitors',
-    values: { value },
+    values: { value: isNaN(value) ? '' : value },
   });
 
 export const ENTER_AVAILABILITY_RANGE_SELECT_ARIA = i18n.translate(
