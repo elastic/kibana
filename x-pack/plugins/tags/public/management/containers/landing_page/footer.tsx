@@ -43,7 +43,7 @@ export const Footer = () => {
   const { manager } = useServices();
 
   const handleSampleTagsClick = () => {
-    for (const tag of defaultTags) manager.create$({ tag }).subscribe();
+    for (const tag of defaultTags) manager.create$(tag).subscribe();
   };
 
   return (

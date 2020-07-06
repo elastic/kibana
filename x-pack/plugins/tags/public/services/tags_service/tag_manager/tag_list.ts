@@ -45,8 +45,12 @@ export class TagList {
     return this.data$$;
   }
 
+  public get data() {
+    return this.data$$.getValue();
+  }
+
   public tag(tagId: string): Tag | undefined {
-    const data = this.data$$.getValue();
+    const { data } = this;
     if (!data.hasOwnProperty(tagId)) return undefined;
     return data[tagId];
   }
@@ -71,6 +75,14 @@ export class TagList {
     const data = { ...this.data$$.getValue(), ...newTags };
     this.data$$.next(data);
     return data;
+  }
+
+  public remove(tagIds: string[]): TagMap {
+    const { data } = this;
+    const newData: TagMap = {};
+    for (const tag of Object.values(data)) if (tagIds.indexOf(tag.id) === -1) newData[tag.id] = tag;
+    this.data$$.next(newData);
+    return newData;
   }
 
   public delete(ids: string[]): Tag[] {

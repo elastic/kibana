@@ -9,7 +9,7 @@ import { Observable, from, of } from 'rxjs';
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { v4 as uuidv4 } from 'uuid';
-import { TagsClientCreateParams } from '../../../../common';
+import { RawTagWithId, TagsClientCreateParams, parseTag } from '../../../../common';
 import { TagsManagerParams } from './types';
 import { TagList } from './tag_list';
 import { Tag } from './tag';
@@ -36,9 +36,26 @@ export class TagManager {
     return tagList;
   };
 
-  public create$({ tag }: Omit<TagsClientCreateParams, 'id'>): Observable<Tag> {
+  public create$(tag: Omit<TagsClientCreateParams['tag'], 'id'>): Observable<Tag> {
     const { tags: client } = this.params;
+
+    // Add tag optimistically to UI.
     const id = uuidv4();
+    const { key, value } = parseTag(tag.title);
+    const at = new Date().toISOString();
+    const optimisticTag: RawTagWithId = {
+      id,
+      createdAt: at,
+      updatedAt: at,
+      createdBy: '',
+      updatedBy: '',
+      enabled: true,
+      key,
+      value,
+      ...tag,
+    };
+    this.tags.add([optimisticTag]);
+
     const observable = from(client.create({ tag: { ...tag, id } })).pipe(
       share(),
       map((response) => {
@@ -46,6 +63,13 @@ export class TagManager {
         return tags[response.tag.id]!;
       })
     );
+
+    // Remove optimistically created tag on error.
+    observable.subscribe({
+      error: (error) => {
+        this.tags.remove([id]);
+      },
+    });
 
     return observable;
   }

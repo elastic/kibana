@@ -32,25 +32,22 @@ export const CreateNewTagForm: React.FC<Props> = ({ onCreate }) => {
     setDisabled(true);
     manager
       .create$({
-        tag: {
-          title,
-          color,
-          description,
-        },
+        title,
+        color,
+        description,
       })
       .pipe(takeUntil(unmount$))
       .subscribe(
-        () => {
-          toasts.addSuccess({
-            title: txtTagCreated,
-          });
-          params.history.push('/');
-        },
+        () => {},
         (error) => {
           toasts.addError(error, { title: txtCouldNotCreate });
           setDisabled(false);
         }
       );
+    toasts.addSuccess({
+      title: txtTagCreated,
+    });
+    params.history.push('/');
   };
 
   return (
