@@ -14,7 +14,9 @@ interface Props {
 }
 
 export const StepSettingsContainer = React.memo(({ esDocsBase }: Props) => {
-  const { defaultValue, updateContent } = Forms.useContent<CommonWizardSteps>('settings');
+  const { defaultValue, updateContent } = Forms.useContent<CommonWizardSteps, 'settings'>(
+    'settings'
+  );
 
   return (
     <StepSettings defaultValue={defaultValue} onChange={updateContent} esDocsBase={esDocsBase} />

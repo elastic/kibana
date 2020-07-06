@@ -247,8 +247,11 @@ function getBaseTemplate(
   packageName: string
 ): IndexTemplate {
   return {
-    // This takes precedence over all index templates installed with the 'base' package
-    priority: 1,
+    // This takes precedence over all index templates installed by ES by default (logs-*-* and metrics-*-*)
+    // if this number is lower than the ES value (which is 100) this template will never be applied when a data stream
+    // is created. I'm using 200 here to give some room for users to create their own template and fit it between the
+    // default and the one the ingest manager uses.
+    priority: 200,
     // To be completed with the correct index patterns
     index_patterns: [`${templateName}-*`],
     template: {
