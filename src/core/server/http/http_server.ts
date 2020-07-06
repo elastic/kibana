@@ -25,7 +25,7 @@ import { HttpConfig } from './http_config';
 import { createServer, getListenerOptions, getServerOptions } from './http_tools';
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
 import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';
-import { adoptToHapiOnRequest, OnPreRoutingHandler } from './lifecycle/on_pre_auth';
+import { adoptToHapiOnRequest, OnPreRoutingHandler } from './lifecycle/on_pre_routing';
 import { adoptToHapiOnPreResponseFormat, OnPreResponseHandler } from './lifecycle/on_pre_response';
 import { IRouter, RouteConfigOptions, KibanaRouteState, isSafeMethod } from './router';
 import {

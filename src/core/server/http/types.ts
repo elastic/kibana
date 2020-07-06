@@ -25,7 +25,7 @@ import { HttpServerSetup } from './http_server';
 import { SessionStorageCookieOptions } from './cookie_session_storage';
 import { SessionStorageFactory } from './session_storage';
 import { AuthenticationHandler } from './lifecycle/auth';
-import { OnPreRoutingHandler } from './lifecycle/on_pre_auth';
+import { OnPreRoutingHandler } from './lifecycle/on_pre_routing';
 import { OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { OnPreResponseHandler } from './lifecycle/on_pre_response';
 import { IBasePath } from './base_path_service';
