@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { createStore, Store } from 'redux';
-import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
+import { EndpointDocGenerator, TreeNode } from '../../../../common/endpoint/generate_data';
 import { mock as mockResolverTree } from '../../models/resolver_tree';
 import { dataReducer } from './reducer';
 import * as selectors from './selectors';
@@ -16,6 +16,7 @@ import { DataAction } from './action';
  */
 describe('Resolver Data Middleware', () => {
   let store: Store<DataState, DataAction>;
+  let firstChildNodeInTree: TreeNode;
 
   beforeEach(() => {
     store = createStore(dataReducer, undefined);
@@ -24,10 +25,19 @@ describe('Resolver Data Middleware', () => {
   describe('when data was received and the ancestry and children edges had cursors', () => {
     beforeEach(() => {
       const generator = new EndpointDocGenerator('seed');
+      const baseTree = generator.generateTree({
+        ancestors: 1,
+        generations: 2,
+        children: 3,
+        percentWithRelated: 100,
+        alwaysGenMaxChildrenPerNode: true,
+      });
+      const { children } = baseTree;
+      firstChildNodeInTree = [...children.values()][0];
       const tree = mockResolverTree({
-        events: generator.generateTree({ ancestors: 1, generations: 2, children: 2 }).allEvents,
+        events: baseTree.allEvents,
         cursors: {
-          childrenNextChild: 'aValidChildursor',
+          childrenNextChild: 'aValidChildCursor',
           ancestryNextAncestor: 'aValidAncestorCursor',
         },
       });
@@ -40,6 +50,15 @@ describe('Resolver Data Middleware', () => {
           },
         };
         store.dispatch(action);
+        const relatedAction: DataAction = {
+          type: 'serverReturnedRelatedEventData',
+          payload: {
+            entityID: firstChildNodeInTree.id,
+            events: firstChildNodeInTree.relatedEvents,
+            nextEvent: null,
+          },
+        };
+        store.dispatch(relatedAction);
       }
     });
     it('should indicate there are additional ancestor', () => {
@@ -47,6 +66,12 @@ describe('Resolver Data Middleware', () => {
     });
     it('should indicate there are additional children', () => {
       expect(selectors.hasMoreChildren(store.getState())).toBe(true);
+    });
+    it('should have the correct related events', () => {
+      const selectedEventsByEntityId = selectors.relatedEventsByEntityId(store.getState());
+      const selectedEventsForFirstChildNode = selectedEventsByEntityId.get(firstChildNodeInTree.id)!
+        .events;
+      expect(selectedEventsForFirstChildNode).toBe(firstChildNodeInTree.relatedEvents);
     });
   });
 });
