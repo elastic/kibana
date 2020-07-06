@@ -24,7 +24,7 @@ import { inspect } from 'util';
 
 import cpy from 'cpy';
 import del from 'del';
-import { toArray, tap } from 'rxjs/operators';
+import { toArray, tap, filter } from 'rxjs/operators';
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import { runOptimizer, OptimizerConfig, OptimizerUpdate, logOptimizerState } from '@kbn/optimizer';
 
@@ -50,8 +50,7 @@ afterAll(async () => {
   await del(TMP_DIR);
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/70762
-it.skip('builds expected bundles, saves bundle counts to metadata', async () => {
+it('builds expected bundles, saves bundle counts to metadata', async () => {
   const config = OptimizerConfig.create({
     repoRoot: MOCK_REPO_DIR,
     pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
@@ -74,7 +73,11 @@ it.skip('builds expected bundles, saves bundle counts to metadata', async () => 
     },
   });
   const msgs = await runOptimizer(config)
-    .pipe(logOptimizerState(log, config), toArray())
+    .pipe(
+      logOptimizerState(log, config),
+      filter((x) => x.event?.type !== 'worker stdio'),
+      toArray()
+    )
     .toPromise();
 
   const assert = (statement: string, truth: boolean, altStates?: OptimizerUpdate[]) => {
@@ -176,8 +179,7 @@ it.skip('builds expected bundles, saves bundle counts to metadata', async () => 
   `);
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/70764
-it.skip('uses cache on second run and exist cleanly', async () => {
+it('uses cache on second run and exist cleanly', async () => {
   const config = OptimizerConfig.create({
     repoRoot: MOCK_REPO_DIR,
     pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
