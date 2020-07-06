@@ -197,17 +197,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return rows;
     }
 
-    /**
-     * Mind that originalRowIndex here refers to the original table index.
-     * Use getDocTableRows() to have the clean list of rows.
-     */
-    public async getDocTableRowDetails(originalRowIndex: number): Promise<WebElementWrapper> {
-      const detailsEl = await find.byCssSelector(
-        `tr.kbnDocTable__row:nth-child(${originalRowIndex}) + [data-test-subj='docTableDetailsRow']`
-      );
-      return detailsEl;
-    }
-
     public async getDocTableIndex(index: number) {
       const row = await find.byCssSelector(`tr.kbnDocTable__row:nth-child(${index})`);
       return await row.getVisibleText();

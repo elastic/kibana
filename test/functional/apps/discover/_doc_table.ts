@@ -92,7 +92,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const rowToInspect = 1;
       beforeEach(async function () {
         // close the toggle if open
-        if (await PageObjects.discover.getDocTableRowDetails(rowToInspect)) {
+        const details = await docTable.getDetailsRows();
+        if (details.length) {
           await docTable.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
         }
       });
@@ -100,8 +101,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should expand the detail row when the toggle arrow is clicked', async function () {
         await retry.try(async function () {
           await docTable.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
-          const detailsEl = await PageObjects.discover.getDocTableRowDetails(rowToInspect);
-          const defaultMessageEl = await detailsEl.findByTestSubject('docTableRowDetailsTitle');
+          const detailsEl = await docTable.getDetailsRows();
+          const defaultMessageEl = await detailsEl[0].findByTestSubject('docTableRowDetailsTitle');
           expect(defaultMessageEl).to.be.ok();
         });
       });
@@ -109,10 +110,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show the detail panel actions', async function () {
         await retry.try(async function () {
           await docTable.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
-          const detailsEl = await PageObjects.discover.getDocTableRowDetails(rowToInspect);
-          const [surroundingActionEl, singleActionEl] = await detailsEl.findAllByTestSubject(
-            'docTableRowAction'
-          );
+          // const detailsEl = await PageObjects.discover.getDocTableRowDetails(rowToInspect);
+          const [surroundingActionEl, singleActionEl] = await docTable.getRowActions({
+            isAnchorRow: false,
+            rowIndex: rowToInspect - 1,
+          });
           expect(surroundingActionEl).to.be.ok();
           expect(singleActionEl).to.be.ok();
           // TODO: test something more meaninful here?
