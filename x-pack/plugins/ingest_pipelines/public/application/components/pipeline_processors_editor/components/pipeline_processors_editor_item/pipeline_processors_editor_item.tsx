@@ -8,7 +8,7 @@ import classNames from 'classnames';
 import React, { FunctionComponent, memo } from 'react';
 import {
   EuiButtonIcon,
-  EuiButton,
+  EuiButtonToggle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -78,33 +78,40 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
       'pipelineProcessorsEditor__item--displayNone': isInMoveMode && !processor.options.description,
     });
 
-    const cancelMoveButtonClasses = classNames('pipelineProcessorsEditor__item__cancelMoveButton', {
-      'pipelineProcessorsEditor__item--displayNone': !isMovingThisProcessor,
-    });
-
-    const moveButtonClasses = classNames({
-      'pipelineProcessorsEditor__item--displayNone': isMovingThisProcessor,
-    });
-
-    const moveButton = (
-      <EuiButtonIcon
-        data-test-subj="moveItemButton"
-        size="s"
-        disabled={isDisabled}
-        aria-label={i18nTexts.moveButtonLabel}
-        onClick={onMove}
-        iconType="sortable"
-      />
-    );
-
-    // Remove the tooltip from the DOM to prevent it from lingering if the mouse leave event
-    // did not fire.
-    const renderMoveButton = () =>
-      !isInMoveMode ? (
-        <EuiToolTip content={i18nTexts.moveButtonLabel}>{moveButton}</EuiToolTip>
-      ) : (
-        moveButton
+    const renderMoveButton = () => {
+      const label = !isMovingThisProcessor
+        ? i18nTexts.moveButtonLabel
+        : i18nTexts.cancelMoveButtonLabel;
+      const dataTestSubj = !isMovingThisProcessor ? 'moveItemButton' : 'cancelMoveItemButton';
+      const moveButtonClasses = classNames('pipelineProcessorsEditor__item__moveButton', {
+        'pipelineProcessorsEditor__item__moveButton--cancel': isMovingThisProcessor,
+      });
+      const moveButton = (
+        <EuiButtonToggle
+          isEmpty={!isMovingThisProcessor}
+          fill={isMovingThisProcessor}
+          isIconOnly
+          iconType="sortable"
+          data-test-subj={dataTestSubj}
+          size="s"
+          disabled={isDisabled && !isMovingThisProcessor}
+          label={label}
+          aria-label={label}
+          onChange={() => (!isMovingThisProcessor ? onMove() : onCancelMove())}
+        />
       );
+      // Remove the tooltip from the DOM to prevent it from lingering if the mouse leave event
+      // did not fire.
+      return (
+        <div className={moveButtonClasses}>
+          {!isInMoveMode ? (
+            <EuiToolTip content={i18nTexts.moveButtonLabel}>{moveButton}</EuiToolTip>
+          ) : (
+            moveButton
+          )}
+        </div>
+      );
+    };
 
     return (
       <EuiPanel className={panelClasses} paddingSize="s">
@@ -117,18 +124,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
         >
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false} className={moveButtonClasses}>
-                {renderMoveButton()}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} className={cancelMoveButtonClasses}>
-                <EuiButtonIcon
-                  iconType="crossInACircleFilled"
-                  data-test-subj="cancelMoveItemButton"
-                  size="s"
-                  onClick={onCancelMove}
-                  aria-label={i18nTexts.cancelMoveButtonLabel}
-                />
-              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{renderMoveButton()}</EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText
                   className="pipelineProcessorsEditor__item__processorTypeLabel"

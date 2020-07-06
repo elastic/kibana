@@ -49,8 +49,13 @@
     min-width: 200px;
   }
 
-  &__cancelMoveButton {
-    // Ensure that the cancel button is above the drop zones
-    z-index: $cancelButtonZIndex;
+  &__moveButton {
+    &:hover {
+      transform: none !important;
+    }
+    &--cancel {
+      // Ensure that the cancel button is above the drop zones
+      z-index: $cancelButtonZIndex;
+    }
   }
 }
