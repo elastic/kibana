@@ -149,7 +149,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                         class="euiBadge__text"
                       >
                         <span
-                          class="euiTextColor"
+                          class="euiTextColor euiTextColor--ghost"
                         >
                           <h4>
                             Berlin
@@ -226,7 +226,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                         class="euiBadge__text"
                       >
                         <span
-                          class="euiTextColor"
+                          class="euiTextColor euiTextColor--ghost"
                         >
                           <h4>
                             Islamabad
@@ -397,7 +397,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                         class="euiBadge__text"
                       >
                         <span
-                          class="euiTextColor"
+                          class="euiTextColor euiTextColor--default"
                         >
                           <h4>
                             Berlin
@@ -474,7 +474,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                         class="euiBadge__text"
                       >
                         <span
-                          class="euiTextColor"
+                          class="euiTextColor euiTextColor--default"
                         >
                           <h4>
                             Islamabad
@@ -645,7 +645,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                         class="euiBadge__text"
                       >
                         <span
-                          class="euiTextColor"
+                          class="euiTextColor euiTextColor--ghost"
                         >
                           <h4>
                             Berlin
@@ -722,7 +722,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                         class="euiBadge__text"
                       >
                         <span
-                          class="euiTextColor"
+                          class="euiTextColor euiTextColor--ghost"
                         >
                           <h4>
                             Islamabad
@@ -799,7 +799,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                         class="euiBadge__text"
                       >
                         <span
-                          class="euiTextColor"
+                          class="euiTextColor euiTextColor--ghost"
                         >
                           <h4>
                             New York
@@ -876,7 +876,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                         class="euiBadge__text"
                       >
                         <span
-                          class="euiTextColor"
+                          class="euiTextColor euiTextColor--ghost"
                         >
                           <h4>
                             Paris
@@ -953,7 +953,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                         class="euiBadge__text"
                       >
                         <span
-                          class="euiTextColor"
+                          class="euiTextColor euiTextColor--ghost"
                         >
                           <h4>
                             Sydney

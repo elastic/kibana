@@ -112,7 +112,7 @@ Array [
                         class="euiBadge__text"
                       >
                         <span
-                          class="euiTextColor"
+                          class="euiTextColor euiTextColor--default"
                         >
                           <h4>
                             au-heartbeat
@@ -189,7 +189,7 @@ Array [
                         class="euiBadge__text"
                       >
                         <span
-                          class="euiTextColor"
+                          class="euiTextColor euiTextColor--ghost"
                         >
                           <h4>
                             nyc-heartbeat
@@ -266,7 +266,7 @@ Array [
                         class="euiBadge__text"
                       >
                         <span
-                          class="euiTextColor"
+                          class="euiTextColor euiTextColor--ghost"
                         >
                           <h4>
                             spa-heartbeat
@@ -356,18 +356,21 @@ exports[`AvailabilityReporting component shallow renders correctly against snaps
           "availability": 100,
           "color": "#d3dae6",
           "label": "au-heartbeat",
+          "status": "up",
           "timestamp": "36m ago",
         },
         Object {
           "availability": 100,
           "color": "#d3dae6",
           "label": "nyc-heartbeat",
+          "status": "down",
           "timestamp": "36m ago",
         },
         Object {
           "availability": 100,
           "color": "#d3dae6",
           "label": "spa-heartbeat",
+          "status": "down",
           "timestamp": "36m ago",
         },
       ]

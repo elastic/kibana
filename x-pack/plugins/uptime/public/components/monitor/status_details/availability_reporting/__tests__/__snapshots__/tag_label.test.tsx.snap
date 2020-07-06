@@ -27,7 +27,7 @@ exports[`TagLabel component renders correctly against snapshot 1`] = `
         class="euiBadge__text"
       >
         <span
-          class="euiTextColor"
+          class="euiTextColor euiTextColor--ghost"
         >
           <h4>
             US-East
@@ -45,8 +45,7 @@ exports[`TagLabel component shallow render correctly against snapshot 1`] = `
     color="#fff"
   >
     <EuiTextColor
-      color=" default"
-      size="s"
+      color="default"
     >
       <h4>
         US-East

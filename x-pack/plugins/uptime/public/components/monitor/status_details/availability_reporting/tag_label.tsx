@@ -22,7 +22,7 @@ export const TagLabel: React.FC<StatusTag> = ({ color, label, status }) => {
   return (
     <BadgeItem>
       <EuiBadge color={color}>
-        <EuiTextColor size="s" color={status === 'down' ? 'ghost' : ' default'}>
+        <EuiTextColor color={status === 'down' ? 'ghost' : 'default'}>
           <h4>{label}</h4>
         </EuiTextColor>
       </EuiBadge>
