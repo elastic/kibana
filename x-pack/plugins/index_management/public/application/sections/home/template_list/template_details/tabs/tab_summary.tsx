@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiDescriptionList,
@@ -24,12 +25,17 @@ interface Props {
   templateDetails: TemplateDeserialized;
 }
 
-const NoneDescriptionText = () => (
-  <FormattedMessage
-    id="xpack.idxMgmt.templateDetails.summaryTab.noneDescriptionText"
-    defaultMessage="None"
-  />
-);
+const i18nTexts = {
+  yes: i18n.translate('xpack.idxMgmt.templateDetails.summaryTab.yesDescriptionText', {
+    defaultMessage: 'Yes',
+  }),
+  no: i18n.translate('xpack.idxMgmt.templateDetails.summaryTab.noDescriptionText', {
+    defaultMessage: 'No',
+  }),
+  none: i18n.translate('xpack.idxMgmt.templateDetails.summaryTab.noneDescriptionText', {
+    defaultMessage: 'None',
+  }),
+};
 
 export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) => {
   const {
@@ -40,7 +46,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
     indexPatterns = [],
     ilmPolicy,
     _meta,
-    _kbnMeta: { isLegacy },
+    _kbnMeta: { isLegacy, hasDatastream },
   } = templateDetails;
 
   const numIndexPatterns = indexPatterns.length;
@@ -87,7 +93,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
-                {priority || priority === 0 ? priority : <NoneDescriptionText />}
+                {priority || priority === 0 ? priority : i18nTexts.none}
               </EuiDescriptionListDescription>
             </>
           ) : (
@@ -99,7 +105,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
-                {order || order === 0 ? order : <NoneDescriptionText />}
+                {order || order === 0 ? order : i18nTexts.none}
               </EuiDescriptionListDescription>
             </>
           )}
@@ -125,7 +131,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
                     ))}
                   </ul>
                 ) : (
-                  <NoneDescriptionText />
+                  i18nTexts.none
                 )}
               </EuiDescriptionListDescription>
             </>
@@ -135,20 +141,40 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
 
       <EuiFlexItem>
         <EuiDescriptionList textStyle="reverse">
-          {/* ILM Policy */}
-          <EuiDescriptionListTitle>
-            <FormattedMessage
-              id="xpack.idxMgmt.templateDetails.summaryTab.ilmPolicyDescriptionListTitle"
-              defaultMessage="ILM policy"
-            />
-          </EuiDescriptionListTitle>
-          <EuiDescriptionListDescription>
-            {ilmPolicy && ilmPolicy.name ? (
-              <EuiLink href={getILMPolicyPath(ilmPolicy.name)}>{ilmPolicy.name}</EuiLink>
-            ) : (
-              <NoneDescriptionText />
-            )}
-          </EuiDescriptionListDescription>
+          {/* ILM Policy (only for legacy as composable template could have ILM policy
+              inside one of their components) */}
+          {isLegacy && (
+            <>
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.idxMgmt.templateDetails.summaryTab.ilmPolicyDescriptionListTitle"
+                  defaultMessage="ILM policy"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                {ilmPolicy && ilmPolicy.name ? (
+                  <EuiLink href={getILMPolicyPath(ilmPolicy.name)}>{ilmPolicy.name}</EuiLink>
+                ) : (
+                  i18nTexts.none
+                )}
+              </EuiDescriptionListDescription>
+            </>
+          )}
+
+          {/* Has data stream? (only for composable template) */}
+          {isLegacy !== true && (
+            <>
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.idxMgmt.templateDetails.summaryTab.dataStreamDescriptionListTitle"
+                  defaultMessage="Data stream"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                {hasDatastream ? i18nTexts.yes : i18nTexts.no}
+              </EuiDescriptionListDescription>
+            </>
+          )}
 
           {/* Version */}
           <EuiDescriptionListTitle>
@@ -158,7 +184,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
             />
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
-            {version || version === 0 ? version : <NoneDescriptionText />}
+            {version || version === 0 ? version : i18nTexts.none}
           </EuiDescriptionListDescription>
 
           {/* Metadata (optional) */}
