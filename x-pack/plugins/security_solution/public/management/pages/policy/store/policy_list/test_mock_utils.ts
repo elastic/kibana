@@ -5,7 +5,7 @@
  */
 
 import { HttpStart } from 'kibana/public';
-import { INGEST_API_DATASOURCES, INGEST_API_EPM_PACKAGES } from './services/ingest';
+import { INGEST_API_PACKAGE_CONFIGS, INGEST_API_EPM_PACKAGES } from './services/ingest';
 import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
 import { GetPolicyListResponse } from '../../types';
 import {
@@ -99,12 +99,12 @@ export const apiPathMockResponseProviders = {
  */
 export const setPolicyListApiMockImplementation = (
   mockedHttpService: jest.Mocked<HttpStart>,
-  responseItems: GetPolicyListResponse['items'] = [generator.generatePolicyDatasource()]
+  responseItems: GetPolicyListResponse['items'] = [generator.generatePolicyPackageConfig()]
 ): void => {
   mockedHttpService.get.mockImplementation((...args) => {
     const [path] = args;
     if (typeof path === 'string') {
-      if (path === INGEST_API_DATASOURCES) {
+      if (path === INGEST_API_PACKAGE_CONFIGS) {
         return Promise.resolve<GetPolicyListResponse>({
           items: responseItems,
           total: 10,
