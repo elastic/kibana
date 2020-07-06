@@ -124,8 +124,8 @@ export const OnboardingSteps: React.FC<IAppServerData> = ({
           actionTitle={
             <FormattedMessage
               id="xpack.enterpriseSearch.workplaceSearch.sourcesOnboardingCard.buttonLabel"
-              defaultMessage="Add {count, plural, zero {} other {more}} sources"
-              values={{ count: sourcesCount }}
+              defaultMessage="Add {label} sources"
+              values={{ label: sourcesCount > 0 ? 'more' : '' }}
             />
           }
           actionPath={sourcesPath}
@@ -140,8 +140,8 @@ export const OnboardingSteps: React.FC<IAppServerData> = ({
             actionTitle={
               <FormattedMessage
                 id="xpack.enterpriseSearch.workplaceSearch.usersOnboardingCard.buttonLabel"
-                defaultMessage="Invite {count, plural, one {} other {more}} users"
-                values={{ count: accountsCount }}
+                defaultMessage="Invite {label} users"
+                values={{ label: accountsCount > 0 ? 'more' : '' }}
               />
             }
             actionPath={accountsPath}
