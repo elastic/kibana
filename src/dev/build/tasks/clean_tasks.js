@@ -18,6 +18,8 @@
  */
 
 import minimatch from 'minimatch';
+import extractZip from 'extract-zip';
+import { chmodSync } from 'fs';
 
 import { deleteAll, deleteEmptyFolders, scanDelete } from '../lib';
 
@@ -208,34 +210,67 @@ export const CleanExtraBrowsersTask = {
     const getBrowserPathsForPlatform = (platform) => {
       const reportingDir = 'x-pack/plugins/reporting';
       const chromiumDir = '.chromium';
-      const chromiumPath = (p) =>
-        build.resolvePathForPlatform(platform, reportingDir, chromiumDir, p);
+      const dataDir = 'data';
+      const srcPath = (p) => {
+        return build.resolvePathForPlatform(platform, reportingDir, chromiumDir, p);
+      };
+      const destPath = (p) => {
+        return build.resolvePathForPlatform(platform, dataDir, p);
+      };
       return (platforms) => {
         const paths = [];
         if (platforms.windows) {
-          paths.push(chromiumPath('chromium-*-win32.zip'));
-          paths.push(chromiumPath('chromium-*-windows.zip'));
+          paths.push({
+            src: srcPath('chromium-312d84c-win32.zip'),
+            dest: destPath('headless_shell-windows/headless_shell.exe'),
+            archiveChecksum: '3e36adfb755dacacc226ed5fd6b43105',
+            binaryChecksum: '9913e431fbfc7dfcd958db74ace4d58b',
+          });
         }
 
         if (platforms.darwin) {
-          paths.push(chromiumPath('chromium-*-darwin.zip'));
+          paths.push({
+            src: srcPath('chromium-312d84c-darwin.zip'),
+            dest: destPath('headless_shell-darwin/headless_shell'),
+            archiveChecksum: '020303e829745fd332ae9b39442ce570',
+            binaryChecksum: '5cdec11d45a0eddf782bed9b9f10319f',
+          });
         }
 
         if (platforms.linux) {
-          paths.push(chromiumPath('chromium-*-linux.zip'));
+          paths.push({
+            src: srcPath('chromium-312d84c-linux.zip'),
+            dest: destPath('headless_shell-linux/headless_shell'),
+            archiveChecksum: '15ba9166a42f93ee92e42217b737018d',
+            binaryChecksum: 'c7fe36ed3e86a6dd23323be0a4e8c0fd',
+          });
         }
         return paths;
       };
     };
+
+    const extract = async (src, dest) => {
+      await extractZip(src, {
+        dir: dest,
+      });
+      chmodSync(dest, '755');
+    };
     for (const platform of config.getNodePlatforms()) {
       const getBrowserPaths = getBrowserPathsForPlatform(platform);
       if (platform.isWindows()) {
-        await deleteAll(getBrowserPaths({ linux: true, darwin: true }), log);
+        const metadata = getBrowserPaths({ windows: true }).pop();
+        await extract(metadata.src, metadata.dest);
       } else if (platform.isMac()) {
-        await deleteAll(getBrowserPaths({ linux: true, windows: true }), log);
+        const metadata = getBrowserPaths({ darwin: true }).pop();
+        await extract(metadata.src, metadata.dest);
       } else if (platform.isLinux()) {
-        await deleteAll(getBrowserPaths({ windows: true, darwin: true }), log);
+        const metadata = getBrowserPaths({ linux: true }).pop();
+        await extract(metadata.src, metadata.dest);
       }
+      await deleteAll(
+        getBrowserPaths({ linux: true, darwin: true, windows: true }).map((browser) => browser.src),
+        log
+      );
     }
   },
 };
