@@ -27,10 +27,11 @@ const NoPermissions = memo(() => {
       <EuiEmptyPrompt
         iconType="alert"
         iconColor="danger"
+        titleSize="l"
         title={
           <FormattedMessage
             id="xpack.securitySolution.endpointManagemnet.noPermissionsText"
-            defaultMessage="You do not have permission to use Elastic Endpoint Secuirty."
+            defaultMessage="You do not have the required Kibana permissions to use Elastic Security Administration"
           />
         }
         body={
@@ -38,7 +39,7 @@ const NoPermissions = memo(() => {
             <EuiText color="subdued">
               <FormattedMessage
                 id="xpack.securitySolution.endpointManagemnet.noPermissionsSubText"
-                defaultMessage="It looks like Ingest Mananger is disabled which is required for this feature.  If you do not have permissions to enable Ingest Manager, contact your Kibana administrator."
+                defaultMessage="It looks like Ingest Manager is disabled. Ingest Manager must be enabled to use this feature. If you do not have permissions to enable Ingest Manager, contact your Kibana administrator."
               />
             </EuiText>
           </p>
@@ -56,11 +57,11 @@ export const ManagementContainer = memo(() => {
     <Switch>
       <Route
         path={MANAGEMENT_ROUTING_ENDPOINTS_PATH}
-        component={false ? NoPermissions : EndpointsContainer}
+        component={true ? NoPermissions : EndpointsContainer}
       />
       <Route
         path={MANAGEMENT_ROUTING_POLICIES_PATH}
-        component={false ? NoPermissions : PolicyContainer}
+        component={true ? NoPermissions : PolicyContainer}
       />
       <Route
         path={MANAGEMENT_ROUTING_ROOT_PATH}
