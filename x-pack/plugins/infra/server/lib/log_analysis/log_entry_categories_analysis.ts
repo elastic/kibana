@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import type { IScopedClusterClient } from 'src/core/server';
+import type { ILegacyScopedClusterClient } from 'src/core/server';
 import { LogEntryContext } from '../../../common/http_api';
 import {
   compareDatasetsByMaximumAnomalyScore,
@@ -188,7 +188,7 @@ export async function getLogEntryCategoryDatasets(
 
 export async function getLogEntryCategoryExamples(
   context: {
-    core: { elasticsearch: { legacy: { client: IScopedClusterClient } } };
+    core: { elasticsearch: { legacy: { client: ILegacyScopedClusterClient } } };
     infra: {
       mlAnomalyDetectors: MlAnomalyDetectors;
       mlSystem: MlSystem;
@@ -477,7 +477,7 @@ async function fetchMlJob(
 }
 
 async function fetchLogEntryCategoryExamples(
-  requestContext: { core: { elasticsearch: { legacy: { client: IScopedClusterClient } } } },
+  requestContext: { core: { elasticsearch: { legacy: { client: ILegacyScopedClusterClient } } } },
   indices: string,
   timestampField: string,
   tiebreakerField: string,

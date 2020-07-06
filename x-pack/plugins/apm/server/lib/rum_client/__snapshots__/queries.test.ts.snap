@@ -67,13 +67,7 @@ exports[`rum client dashboard queries fetches page load distribution 1`] = `
 Object {
   "body": Object {
     "aggs": Object {
-      "durationMinMax": Object {
-        "min": Object {
-          "field": "transaction.duration.us",
-          "missing": 0,
-        },
-      },
-      "durationPercentiles": Object {
+      "durPercentiles": Object {
         "percentiles": Object {
           "field": "transaction.duration.us",
           "percents": Array [
@@ -83,13 +77,12 @@ Object {
             95,
             99,
           ],
-          "script": Object {
-            "lang": "painless",
-            "params": Object {
-              "timeUnit": 1000,
-            },
-            "source": "doc['transaction.duration.us'].value / params.timeUnit",
-          },
+        },
+      },
+      "minDuration": Object {
+        "min": Object {
+          "field": "transaction.duration.us",
+          "missing": 0,
         },
       },
     },
@@ -139,13 +132,7 @@ Object {
   "body": Object {
     "aggs": Object {
       "pageViews": Object {
-        "aggs": Object {
-          "trans_count": Object {
-            "value_count": Object {
-              "field": "transaction.type",
-            },
-          },
-        },
+        "aggs": Object {},
         "auto_date_histogram": Object {
           "buckets": 50,
           "field": "@timestamp",

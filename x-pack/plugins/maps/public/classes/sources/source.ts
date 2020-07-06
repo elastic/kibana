@@ -17,7 +17,7 @@ import { MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
 import { OnSourceChangeArgs } from '../../connected_components/layer_panel/view';
 
 export type SourceEditorArgs = {
-  onChange: (args: OnSourceChangeArgs) => void;
+  onChange: (...args: OnSourceChangeArgs[]) => void;
 };
 
 export type ImmutableSourceProperty = {
@@ -133,7 +133,7 @@ export class AbstractSource implements ISource {
   }
 
   getApplyGlobalQuery(): boolean {
-    return !!this._descriptor.applyGlobalQuery;
+    return 'applyGlobalQuery' in this._descriptor ? !!this._descriptor.applyGlobalQuery : false;
   }
 
   getIndexPatternIds(): string[] {

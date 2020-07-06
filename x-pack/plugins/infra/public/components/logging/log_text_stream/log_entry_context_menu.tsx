@@ -13,7 +13,8 @@ import { LogEntryColumnContent } from './log_entry_column';
 
 interface LogEntryContextMenuItem {
   label: string;
-  onClick: (e: any) => void;
+  onClick: (e: React.MouseEvent) => void;
+  href?: string;
 }
 
 interface LogEntryContextMenuProps {
@@ -40,7 +41,7 @@ export const LogEntryContextMenu: React.FC<LogEntryContextMenuProps> = ({
 }) => {
   const closeMenuAndCall = useMemo(() => {
     return (callback: LogEntryContextMenuItem['onClick']) => {
-      return (e: any) => {
+      return (e: React.MouseEvent) => {
         onClose();
         callback(e);
       };
@@ -60,7 +61,7 @@ export const LogEntryContextMenu: React.FC<LogEntryContextMenuProps> = ({
 
   const wrappedItems = useMemo(() => {
     return items.map((item, i) => (
-      <EuiContextMenuItem key={i} onClick={closeMenuAndCall(item.onClick)}>
+      <EuiContextMenuItem key={i} onClick={closeMenuAndCall(item.onClick)} href={item.href}>
         {item.label}
       </EuiContextMenuItem>
     ));

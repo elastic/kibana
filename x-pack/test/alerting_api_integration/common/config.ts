@@ -82,6 +82,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             'localhost',
             'some.non.existent.com',
           ])}`,
+          '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           '--xpack.eventLog.logEntries=true',
           `--xpack.actions.preconfigured=${JSON.stringify({

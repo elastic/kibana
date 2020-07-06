@@ -28,7 +28,6 @@ import { IAggConfigs } from './agg_configs';
 import { Adapters } from '../../../../../plugins/inspector/public';
 import { BaseParamType } from './param_types/base';
 import { AggParamType } from './param_types/agg';
-import { KBN_FIELD_TYPES, IFieldFormat } from '../../../common';
 import { ISearchSource } from '../search_source';
 import { GetInternalStartServicesFn } from '../../types';
 
@@ -58,7 +57,6 @@ export interface AggTypeConfig<
     inspectorAdapters: Adapters,
     abortSignal?: AbortSignal
   ) => Promise<any>;
-  getFormat?: (agg: TAggConfig) => IFieldFormat;
   getSerializedFormat?: (agg: TAggConfig) => SerializedFieldFormat;
   getValue?: (agg: TAggConfig, bucket: any) => any;
   getKey?: (bucket: any, key: any, agg: TAggConfig) => any;
@@ -198,16 +196,6 @@ export class AggType<
     abortSignal?: AbortSignal
   ) => Promise<any>;
   /**
-   * Pick a format for the values produced by this agg type,
-   * overridden by several metrics that always output a simple
-   * number
-   *
-   * @param  {agg} agg - the agg to pick a format for
-   * @return {FieldFormat}
-   */
-  getFormat: (agg: TAggConfig) => IFieldFormat;
-
-  /**
    * Get the serialized format for the values produced by this agg type,
    * overridden by several metrics that always output a simple number.
    * You can pass this output to fieldFormatters.deserialize to get
@@ -282,15 +270,6 @@ export class AggType<
     this.getResponseAggs = config.getResponseAggs || (() => {});
     this.decorateAggConfig = config.decorateAggConfig || (() => ({}));
     this.postFlightRequest = config.postFlightRequest || identity;
-
-    this.getFormat =
-      config.getFormat ||
-      ((agg: TAggConfig) => {
-        const field = agg.getField();
-        const { fieldFormats } = getInternalStartServices();
-
-        return field ? field.format : fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING);
-      });
 
     this.getSerializedFormat =
       config.getSerializedFormat ||

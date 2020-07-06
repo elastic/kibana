@@ -7,16 +7,20 @@
 import { ActionFactoryRegistry } from '../types';
 import { ActionFactory, ActionFactoryDefinition } from '../dynamic_actions';
 import { DrilldownDefinition } from '../drilldowns';
+import { ILicense } from '../../../licensing/common/types';
 
 export interface UiActionsServiceEnhancementsParams {
   readonly actionFactories?: ActionFactoryRegistry;
+  readonly getLicenseInfo: () => ILicense;
 }
 
 export class UiActionsServiceEnhancements {
   protected readonly actionFactories: ActionFactoryRegistry;
+  protected readonly getLicenseInfo: () => ILicense;
 
-  constructor({ actionFactories = new Map() }: UiActionsServiceEnhancementsParams = {}) {
+  constructor({ actionFactories = new Map(), getLicenseInfo }: UiActionsServiceEnhancementsParams) {
     this.actionFactories = actionFactories;
+    this.getLicenseInfo = getLicenseInfo;
   }
 
   /**
@@ -34,7 +38,10 @@ export class UiActionsServiceEnhancements {
       throw new Error(`ActionFactory [actionFactory.id = ${definition.id}] already registered.`);
     }
 
-    const actionFactory = new ActionFactory<Config, FactoryContext, ActionContext>(definition);
+    const actionFactory = new ActionFactory<Config, FactoryContext, ActionContext>(
+      definition,
+      this.getLicenseInfo
+    );
 
     this.actionFactories.set(actionFactory.id, actionFactory as ActionFactory<any, any, any>);
   };
@@ -72,9 +79,11 @@ export class UiActionsServiceEnhancements {
     euiIcon,
     execute,
     getHref,
+    minimalLicense,
   }: DrilldownDefinition<Config, ExecutionContext>): void => {
     const actionFactory: ActionFactoryDefinition<Config, object, ExecutionContext> = {
       id: factoryId,
+      minimalLicense,
       order,
       CollectConfig,
       createConfig,

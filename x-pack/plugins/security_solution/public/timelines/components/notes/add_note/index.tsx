@@ -61,7 +61,6 @@ export const AddNote = React.memo<{
       }),
     [associateNote, getNewNoteId, newNote, updateNewNote, updateNote]
   );
-
   return (
     <AddNotesContainer alignItems="flexEnd" direction="column" gutterSize="none">
       <NewNote note={newNote} noteInputHeight={200} updateNewNote={updateNewNote} />

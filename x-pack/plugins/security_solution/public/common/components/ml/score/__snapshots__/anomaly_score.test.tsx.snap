@@ -95,6 +95,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
       onClick={[Function]}
       ownFocus={false}
       panelPaddingSize="m"
+      repositionOnScroll={true}
     >
       <EuiDescriptionList
         data-test-subj="anomaly-description-list"

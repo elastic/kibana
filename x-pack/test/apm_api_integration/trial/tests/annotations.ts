@@ -11,14 +11,14 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const DEFAULT_INDEX_NAME = 'observability-annotations';
 
-// eslint-disable-next-line import/no-default-export
 export default function annotationApiTests({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertestRead = getService('supertestAsApmReadUser');
+  const supertestWrite = getService('supertestAsApmAnnotationsWriteUser');
   const es = getService('es');
 
   function expectContainsObj(source: JsonObject, expected: JsonObject) {
     expect(source).to.eql(
-      merge(cloneDeep(source), expected, (a, b) => {
+      merge(cloneDeep(source), expected, (a: any, b: any) => {
         if (isPlainObject(a) && isPlainObject(b)) {
           return undefined;
         }
@@ -30,13 +30,13 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
   function request({ method, url, data }: { method: string; url: string; data?: JsonObject }) {
     switch (method.toLowerCase()) {
       case 'get':
-        return supertest.get(url).set('kbn-xsrf', 'foo');
+        return supertestRead.get(url).set('kbn-xsrf', 'foo');
 
       case 'post':
-        return supertest.post(url).send(data).set('kbn-xsrf', 'foo');
+        return supertestWrite.post(url).send(data).set('kbn-xsrf', 'foo');
 
       default:
-        throw new Error(`Unsupported methoed ${method}`);
+        throw new Error(`Unsupported method ${method}`);
     }
   }
 

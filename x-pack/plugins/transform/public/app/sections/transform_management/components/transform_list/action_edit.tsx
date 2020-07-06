@@ -35,6 +35,7 @@ export const EditAction: FC<EditActionProps> = ({ config }) => {
 
   const editButton = (
     <EuiButtonEmpty
+      data-test-subj="transformActionEdit"
       size="xs"
       color="text"
       disabled={!canCreateTransform}

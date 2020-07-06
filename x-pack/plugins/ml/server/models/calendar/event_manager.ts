@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 
 export interface CalendarEvent {
@@ -16,7 +16,7 @@ export interface CalendarEvent {
 }
 
 export class EventManager {
-  constructor(private _callAsCurrentUser: APICaller) {}
+  constructor(private _callAsCurrentUser: LegacyAPICaller) {}
 
   async getCalendarEvents(calendarId: string) {
     const resp = await this._callAsCurrentUser('ml.events', { calendarId });

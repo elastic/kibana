@@ -258,7 +258,7 @@ describe('url state', () => {
       expect(matched).to.have.lengthOf(1);
       closeTimeline();
       cy.visit('/app/home');
-      cy.visit(`/app/security/timelines?timeline=(id:'${newTimelineId}',isOpen:!t)`);
+      cy.visit(`/app/security/timelines?timeline=(id:%27${newTimelineId}%27,isOpen:!t)`);
       cy.contains('a', 'Security');
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).invoke('text').should('not.equal', 'Updating');
       cy.get(TIMELINE_TITLE).should('be.visible');
