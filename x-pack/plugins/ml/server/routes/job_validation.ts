@@ -64,10 +64,7 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         let errorResp;
-        const resp = await estimateBucketSpanFactory(
-          context.ml!.mlClient,
-          mlLicense.isSecurityEnabled() === false
-        )(request.body)
+        const resp = await estimateBucketSpanFactory(context.ml!.mlClient)(request.body)
           // this catch gets triggered when the estimation code runs without error
           // but isn't able to come up with a bucket span estimation.
           // this doesn't return a HTTP error but an object with an error message

@@ -155,43 +155,15 @@ export function systemRoutes(
       path: '/api/ml/ml_node_count',
       validate: false,
       options: {
-        tags: ['access:ml:canGetJobs'],
+        tags: ['access:ml:canGetJobs', 'access:ml:canGetDatafeeds'],
       },
     },
 
     mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
-        // check for basic license first for consistency with other
-        // security disabled checks
-        if (mlLicense.isSecurityEnabled() === false) {
-          return response.ok({
-            body: await getNodeCount(context),
-          });
-        } else {
-          // if security is enabled, check that the user has permission to
-          // view jobs before calling getNodeCount.
-          // getNodeCount calls the _nodes endpoint as the internal user
-          // and so could give the user access to more information than
-          // they are entitled to.
-          const requiredPrivileges = [
-            'cluster:monitor/xpack/ml/job/get',
-            'cluster:monitor/xpack/ml/job/stats/get',
-            'cluster:monitor/xpack/ml/datafeeds/get',
-            'cluster:monitor/xpack/ml/datafeeds/stats/get',
-          ];
-          const body = { cluster: requiredPrivileges };
-          const resp = await context.ml!.mlClient.callAsCurrentUser('ml.privilegeCheck', { body });
-
-          if (resp.has_all_requested) {
-            return response.ok({
-              body: await getNodeCount(context),
-            });
-          } else {
-            // if the user doesn't have permission to create jobs
-            // return a 403
-            return response.forbidden();
-          }
-        }
+        return response.ok({
+          body: await getNodeCount(context),
+        });
       } catch (e) {
         return response.customError(wrapError(e));
       }

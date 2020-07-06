@@ -20,7 +20,7 @@ export interface BucketSpanEstimatorData {
   timeField: string | undefined;
 }
 
-export function estimateBucketSpanFactory(
-  { callAsCurrentUser, callAsInternalUser }: ILegacyScopedClusterClient,
-  isSecurityDisabled: boolean
-): (config: BucketSpanEstimatorData) => Promise<any>;
+export function estimateBucketSpanFactory({
+  callAsCurrentUser,
+  callAsInternalUser,
+}: ILegacyScopedClusterClient): (config: BucketSpanEstimatorData) => Promise<any>;
