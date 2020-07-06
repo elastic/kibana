@@ -42,7 +42,7 @@ export const TagTable: React.FC = () => {
           truncateText: true,
           sortable: (tag) => tag.title.toLowerCase(),
           render: (value: string, tag: RawTagWithId) => (
-            <Link to={`/tag/${tag.id}`}>
+            <Link to={`/edit/${tag.id}`}>
               <EuiLink>{tag.title}</EuiLink>
             </Link>
           ),
@@ -50,7 +50,7 @@ export const TagTable: React.FC = () => {
         {
           name: txtTag,
           render: (tag: RawTagWithId) => (
-            <Link to={`/tag/${tag.id}`}>
+            <Link to={`/edit/${tag.id}`}>
               <Tag tag={tag} />
             </Link>
           ),
