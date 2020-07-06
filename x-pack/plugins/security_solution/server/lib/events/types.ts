@@ -68,6 +68,7 @@ export interface TimerangeFilter {
     [timestamp: string]: {
       gte: number;
       lte: number;
+      format: string;
     };
   };
 }

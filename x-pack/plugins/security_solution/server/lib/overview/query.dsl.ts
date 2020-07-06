@@ -21,6 +21,7 @@ export const buildOverviewNetworkQuery = ({
         [timestamp]: {
           gte: from,
           lte: to,
+          format: 'strict_date_optional_time',
         },
       },
     },
@@ -120,6 +121,7 @@ export const buildOverviewHostQuery = ({
         [timestamp]: {
           gte: from,
           lte: to,
+          format: 'strict_date_optional_time',
         },
       },
     },

@@ -26,6 +26,7 @@ export const buildEventsOverTimeQuery = ({
         [timestamp]: {
           gte: from,
           lte: to,
+          format: 'strict_date_optional_time',
         },
       },
     },

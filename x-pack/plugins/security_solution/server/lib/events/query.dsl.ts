@@ -26,6 +26,7 @@ export const buildQuery = (options: RequestOptionsPaginated) => {
             [options.sourceConfiguration.fields.timestamp]: {
               gte: from,
               lte: to,
+              format: 'strict_date_optional_time',
             },
           },
         },
@@ -86,6 +87,7 @@ export const buildTimelineQuery = (options: RequestOptions) => {
             [options.sourceConfiguration.fields.timestamp]: {
               gte: from,
               lte: to,
+              format: 'strict_date_optional_time',
             },
           },
         },
