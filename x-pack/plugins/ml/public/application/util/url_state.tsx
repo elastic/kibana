@@ -5,15 +5,7 @@
  */
 
 import { parse, stringify } from 'query-string';
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  FC,
-} from 'react';
+import React, { createContext, useCallback, useContext, useMemo, FC } from 'react';
 import { isEqual } from 'lodash';
 import { decode, encode } from 'rison-node';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -29,7 +21,7 @@ export type SetUrlState = (
   value?: any
 ) => void;
 export interface UrlState {
-  urlState: Dictionary<any>;
+  searchString: string;
   setUrlState: SetUrlState;
 }
 
@@ -75,103 +67,86 @@ export function parseUrlState(search: string): Dictionary<any> {
 // This uses a context to be able to maintain only one instance
 // of the url state. It gets passed down with `UrlStateProvider`
 // and can be used via `useUrlState`.
-export const urlStateStore = createContext<UrlState>({ urlState: {}, setUrlState: () => {} });
+export const urlStateStore = createContext<UrlState>({
+  searchString: '',
+  setUrlState: () => {},
+});
 const { Provider } = urlStateStore;
 export const UrlStateProvider: FC = ({ children }) => {
   const history = useHistory();
-  const { search: locationSearchString } = useLocation();
-
-  // We maintain a local state of useLocation's search.
-  // This allows us to use the callback variant of setSearch()
-  // later on so we can make sure we always act on the
-  // latest url state.
-  const [searchString, setSearchString] = useState(locationSearchString);
-
-  // Any change of the original search
-  // string we get from React Router
-  // we pass on to our own state.
-  useEffect(() => {
-    setSearchString(locationSearchString);
-  }, [locationSearchString]);
-
-  // Any change to the search string we maintain in our own state
-  // should trigger a possible URL update.
-  useEffect(() => {
-    if (locationSearchString !== searchString) {
-      history.push({ search: searchString });
-    }
-    // `locationSearchString` is not part of this comparator since we only want
-    // to trigger this when `searchString` updates. Since `locationSearchString` triggers
-    // the previous `useEffect` and updates to `searchString` anyway it's not necessary
-    // to have it here too.
-  }, [searchString]);
+  const { search: searchString } = useLocation();
 
   const setUrlState: SetUrlState = useCallback(
     (accessor: Accessor, attribute: string | Dictionary<any>, value?: any) => {
-      setSearchString((prevSearchString) => {
-        const urlState = parseUrlState(prevSearchString);
-        const parsedQueryString = parse(prevSearchString, { sort: false });
+      const prevSearchString = searchString;
+      const urlState = parseUrlState(prevSearchString);
+      const parsedQueryString = parse(prevSearchString, { sort: false });
 
-        if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
-          urlState[accessor] = {};
+      if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
+        urlState[accessor] = {};
+      }
+
+      if (typeof attribute === 'string') {
+        if (isEqual(getNestedProperty(urlState, `${accessor}.${attribute}`), value)) {
+          return prevSearchString;
         }
 
-        if (typeof attribute === 'string') {
-          if (isEqual(getNestedProperty(urlState, `${accessor}.${attribute}`), value)) {
-            return prevSearchString;
+        urlState[accessor][attribute] = value;
+      } else {
+        const attributes = attribute;
+        Object.keys(attributes).forEach((a) => {
+          urlState[accessor][a] = attributes[a];
+        });
+      }
+
+      try {
+        const oldLocationSearchString = stringify(parsedQueryString, {
+          sort: false,
+          encode: false,
+        });
+
+        Object.keys(urlState).forEach((a) => {
+          if (isRisonSerializationRequired(a)) {
+            parsedQueryString[a] = encode(urlState[a]);
+          } else {
+            parsedQueryString[a] = urlState[a];
           }
+        });
+        const newLocationSearchString = stringify(parsedQueryString, {
+          sort: false,
+          encode: false,
+        });
 
-          urlState[accessor][attribute] = value;
-        } else {
-          const attributes = attribute;
-          Object.keys(attributes).forEach((a) => {
-            urlState[accessor][a] = attributes[a];
-          });
+        if (oldLocationSearchString !== newLocationSearchString) {
+          const newSearchString = stringify(parsedQueryString, { sort: false });
+          history.push({ search: newSearchString });
         }
-
-        try {
-          const oldLocationSearchString = stringify(parsedQueryString, {
-            sort: false,
-            encode: false,
-          });
-
-          Object.keys(urlState).forEach((a) => {
-            if (isRisonSerializationRequired(a)) {
-              parsedQueryString[a] = encode(urlState[a]);
-            } else {
-              parsedQueryString[a] = urlState[a];
-            }
-          });
-          const newLocationSearchString = stringify(parsedQueryString, {
-            sort: false,
-            encode: false,
-          });
-
-          if (oldLocationSearchString !== newLocationSearchString) {
-            return stringify(parsedQueryString, { sort: false });
-          }
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error('Could not save url state', error);
-        }
-
-        // as a fallback and to satisfy the hooks callback requirements
-        // return the previous state if we didn't need or were not able to update.
-        return prevSearchString;
-      });
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Could not save url state', error);
+      }
     },
     [searchString]
   );
 
-  const urlState = useMemo(() => parseUrlState(searchString), [searchString]);
-
-  return <Provider value={{ urlState, setUrlState }}>{children}</Provider>;
+  return <Provider value={{ searchString, setUrlState }}>{children}</Provider>;
 };
 
 export const useUrlState = (accessor: Accessor) => {
-  const { urlState, setUrlState } = useContext(urlStateStore);
-  return [
-    typeof urlState !== 'object' ? undefined : urlState[accessor],
-    (attribute: string | Dictionary<any>, value?: any) => setUrlState(accessor, attribute, value),
-  ];
+  const { searchString, setUrlState: setUrlStateContext } = useContext(urlStateStore);
+
+  const urlState = useMemo(() => {
+    const fullUrlState = parseUrlState(searchString);
+    if (typeof fullUrlState === 'object') {
+      return fullUrlState[accessor];
+    }
+    return undefined;
+  }, [searchString]);
+
+  const setUrlState = useCallback(
+    (attribute: string | Dictionary<any>, value?: any) =>
+      setUrlStateContext(accessor, attribute, value),
+    [accessor, setUrlStateContext]
+  );
+  return [urlState, setUrlState];
 };
