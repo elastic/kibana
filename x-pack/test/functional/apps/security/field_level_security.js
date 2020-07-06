@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { indexBy } from 'lodash';
+import { keyBy } from 'lodash';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       await PageObjects.common.sleep(1000);
-      const roles = indexBy(await PageObjects.security.getElasticsearchRoles(), 'rolename');
+      const roles = keyBy(await PageObjects.security.getElasticsearchRoles(), 'rolename');
       log.debug('actualRoles = %j', roles);
       expect(roles).to.have.key('a_viewssnrole');
       expect(roles.a_viewssnrole.reserved).to.be(false);
@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }) {
         },
       });
       await PageObjects.common.sleep(1000);
-      const roles = indexBy(await PageObjects.security.getElasticsearchRoles(), 'rolename');
+      const roles = keyBy(await PageObjects.security.getElasticsearchRoles(), 'rolename');
       log.debug('actualRoles = %j', roles);
       expect(roles).to.have.key('a_view_no_ssn_role');
       expect(roles.a_view_no_ssn_role.reserved).to.be(false);
@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }) {
         save: true,
         roles: ['kibana_admin', 'a_viewssnrole'],
       });
-      const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+      const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
       expect(users.customer1.roles).to.eql(['kibana_admin', 'a_viewssnrole']);
     });
@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }) {
         save: true,
         roles: ['kibana_admin', 'a_view_no_ssn_role'],
       });
-      const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+      const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
       expect(users.customer2.roles).to.eql(['kibana_admin', 'a_view_no_ssn_role']);
     });

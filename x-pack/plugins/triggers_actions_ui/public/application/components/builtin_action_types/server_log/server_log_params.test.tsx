@@ -27,7 +27,7 @@ describe('ServerLogParamsFields renders', () => {
     expect(
       wrapper.find('[data-test-subj="loggingLevelSelect"]').first().prop('value')
     ).toStrictEqual('trace');
-    expect(wrapper.find('[data-test-subj="loggingMessageInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="messageTextArea"]').length > 0).toBeTruthy();
   });
 
   test('level param field is rendered with default value if not selected', () => {
@@ -47,6 +47,6 @@ describe('ServerLogParamsFields renders', () => {
     expect(
       wrapper.find('[data-test-subj="loggingLevelSelect"]').first().prop('value')
     ).toStrictEqual('info');
-    expect(wrapper.find('[data-test-subj="loggingMessageInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="messageTextArea"]').length > 0).toBeTruthy();
   });
 });

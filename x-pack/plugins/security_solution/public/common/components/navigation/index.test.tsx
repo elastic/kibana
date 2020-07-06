@@ -141,13 +141,6 @@ describe('SIEM Navigation', () => {
             name: 'Timelines',
             urlKey: 'timeline',
           },
-          endpointAlerts: {
-            disabled: false,
-            href: '/app/security/endpoint-alerts',
-            id: 'endpointAlerts',
-            name: 'Endpoint Alerts',
-            urlKey: 'management',
-          },
         },
         pageName: 'hosts',
         pathName: '/',
@@ -217,13 +210,6 @@ describe('SIEM Navigation', () => {
             id: 'case',
             name: 'Cases',
             urlKey: 'case',
-          },
-          endpointAlerts: {
-            disabled: false,
-            href: '/app/security/endpoint-alerts',
-            id: 'endpointAlerts',
-            name: 'Endpoint Alerts',
-            urlKey: 'management',
           },
           hosts: {
             disabled: false,

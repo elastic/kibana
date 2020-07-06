@@ -32,6 +32,8 @@ import * as i18n from './translations';
 const OverlayContainer = styled.div<{ bodyHeight?: number }>`
   height: ${({ bodyHeight }) => (bodyHeight ? `${bodyHeight}px` : 'auto')};
   width: 100%;
+  display: flex;
+  flex-direction: column;
 `;
 
 const StyledResolver = styled(Resolver)`
