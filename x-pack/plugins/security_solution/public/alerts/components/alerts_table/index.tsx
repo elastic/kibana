@@ -104,7 +104,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
   const [shouldShowAddExceptionModal, setShouldShowAddExceptionModal] = useState(false);
-  const [addExceptionModalState, setAddExceptionModalState] = useState(
+  const [addExceptionModalState, setAddExceptionModalState] = useState<AddExceptionOnClick>(
     addExceptionModalInitialState
   );
   const [{ browserFields, indexPatterns }] = useFetchIndexPatterns(

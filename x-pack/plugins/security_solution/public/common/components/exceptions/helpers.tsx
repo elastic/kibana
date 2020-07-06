@@ -194,7 +194,7 @@ export const getDescriptionListContent = (
   const details = [
     {
       title: i18n.OPERATING_SYSTEM,
-      value: getOperatingSystems(exceptionItem._tags ?? []),
+      value: getOperatingSystems(exceptionItem._tags),
     },
     {
       title: i18n.DATE_CREATED,

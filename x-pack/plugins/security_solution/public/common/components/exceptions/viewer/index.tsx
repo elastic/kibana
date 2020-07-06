@@ -15,7 +15,7 @@ import { Panel } from '../../../../common/components/panel';
 import { Loader } from '../../../../common/components/loader';
 import { ExceptionsViewerHeader } from './exceptions_viewer_header';
 import { ExceptionListItemIdentifiers, Filter } from '../types';
-import { allExceptionItemsReducer, State } from './reducer';
+import { allExceptionItemsReducer, State, ViewerModalName } from './reducer';
 import {
   useExceptionList,
   ExceptionIdentifiers,
@@ -132,7 +132,7 @@ const ExceptionsViewerComponent = ({
   });
 
   const setCurrentModal = useCallback(
-    (modalName: string | null): void => {
+    (modalName: ViewerModalName): void => {
       dispatch({
         type: 'updateModalOpen',
         modalName,
@@ -260,7 +260,7 @@ const ExceptionsViewerComponent = ({
           />
         )}
 
-      {currentModal === 'addModal' && exceptionListTypeToEdit !== null && (
+      {currentModal === 'addModal' && exceptionListTypeToEdit != null && (
         <AddExceptionModal
           ruleName={ruleName}
           ruleId={ruleId}

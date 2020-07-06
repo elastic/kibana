@@ -12,6 +12,8 @@ import {
   Pagination,
 } from '../../../../../public/lists_plugin_deps';
 
+export type ViewerModalName = 'addModal' | 'editModal' | null;
+
 export interface State {
   filterOptions: FilterOptions;
   pagination: ExceptionsPagination;
@@ -23,7 +25,7 @@ export interface State {
   loadingLists: ExceptionIdentifiers[];
   loadingItemIds: ExceptionListItemIdentifiers[];
   isInitLoading: boolean;
-  currentModal: string | null;
+  currentModal: ViewerModalName;
   exceptionListTypeToEdit: ExceptionListType | null;
 }
 
@@ -41,7 +43,7 @@ export type Action =
       allLists: ExceptionIdentifiers[];
     }
   | { type: 'updateIsInitLoading'; loading: boolean }
-  | { type: 'updateModalOpen'; modalName: string | null }
+  | { type: 'updateModalOpen'; modalName: ViewerModalName }
   | { type: 'updateExceptionToEdit'; exception: ExceptionListItemSchema }
   | { type: 'updateLoadingItemIds'; items: ExceptionListItemIdentifiers[] }
   | { type: 'updateExceptionListTypeToEdit'; exceptionListType: ExceptionListType | null };

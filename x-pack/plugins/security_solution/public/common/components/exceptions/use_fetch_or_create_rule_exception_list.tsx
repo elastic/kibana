@@ -23,7 +23,6 @@ export interface UseFetchOrCreateRuleExceptionListProps {
   ruleId: Rule['id'];
   exceptionListType: ExceptionListSchema['type'];
   onError: (arg: Error) => void;
-  onSuccess?: (arg: ExceptionListSchema) => void;
 }
 
 /**
@@ -33,7 +32,6 @@ export interface UseFetchOrCreateRuleExceptionListProps {
  * @param ruleId id of the rule
  * @param exceptionListType type of the exception list to be fetched or created
  * @param onError error callback
- * @param onSuccess optional callback when all lists fetched successfully
  *
  */
 export const useFetchOrCreateRuleExceptionList = ({
@@ -41,7 +39,6 @@ export const useFetchOrCreateRuleExceptionList = ({
   ruleId,
   exceptionListType,
   onError,
-  onSuccess,
 }: UseFetchOrCreateRuleExceptionListProps): ReturnUseFetchOrCreateRuleExceptionList => {
   const [isLoading, setIsLoading] = useState(false);
   const [exceptionList, setExceptionList] = useState<ExceptionListSchema | null>(null);
@@ -77,17 +74,14 @@ export const useFetchOrCreateRuleExceptionList = ({
     ): Promise<ExceptionListSchema> {
       const newExceptionList = await createExceptionList(ruleResponse);
 
-      let newExceptionListReferences: ListArray;
-      const newExceptonListReference = {
+      const newExceptionListReference = {
         id: newExceptionList.id,
         namespace_type: newExceptionList.namespace_type,
       };
-      const exceptionListReferences = ruleResponse.exceptions_list as ListArray;
-      if (exceptionListReferences && exceptionListReferences.length > 0) {
-        newExceptionListReferences = [...exceptionListReferences, newExceptonListReference];
-      } else {
-        newExceptionListReferences = [newExceptonListReference];
-      }
+      const newExceptionListReferences: ListArray = [
+        ...(ruleResponse.exceptions_list ?? []),
+        newExceptionListReference,
+      ];
 
       await patchRule({
         ruleProperties: {
@@ -149,9 +143,6 @@ export const useFetchOrCreateRuleExceptionList = ({
         if (isSubscribed) {
           setExceptionList(exceptionListToUse);
           setIsLoading(false);
-          if (onSuccess !== undefined) {
-            onSuccess(exceptionListToUse);
-          }
         }
       } catch (error) {
         if (isSubscribed) {
@@ -167,7 +158,7 @@ export const useFetchOrCreateRuleExceptionList = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [http, ruleId, exceptionListType, onSuccess, onError]);
+  }, [http, ruleId, exceptionListType, onError]);
 
   return [isLoading, exceptionList];
 };
