@@ -12,6 +12,8 @@ import {
   EuiToolTip,
   EuiText,
   EuiInMemoryTable,
+  EuiBasicTableColumn,
+  EuiTableActionsColumnType,
   EuiSpacer,
   EuiButton,
 } from '@elastic/eui';
@@ -67,33 +69,33 @@ export const VarConfig: FC<Props> = ({
     setPanelMode(PanelMode.Delete);
   };
 
-  const actions = [
+  const actions: EuiTableActionsColumnType<CanvasVariable>['actions'] = [
     {
+      type: 'icon',
       name: strings.getCopyActionButtonLabel(),
       description: strings.getCopyActionTooltipLabel(),
       icon: 'copyClipboard',
-      type: 'icon',
-      isPrimary: true,
       onClick: onCopyVar,
+      isPrimary: true,
     },
     {
+      type: 'icon',
       name: strings.getEditActionButtonLabel(),
       description: '',
       icon: 'pencil',
-      type: 'icon',
       onClick: selectAndEditVar,
     },
     {
+      type: 'icon',
       name: strings.getDeleteActionButtonLabel(),
       description: '',
       icon: 'trash',
-      type: 'icon',
       color: 'danger',
       onClick: selectAndDeleteVar,
     },
   ];
 
-  const varColumns = [
+  const varColumns: Array<EuiBasicTableColumn<CanvasVariable>> = [
     {
       field: 'type',
       name: strings.getTableTypeLabel(),
