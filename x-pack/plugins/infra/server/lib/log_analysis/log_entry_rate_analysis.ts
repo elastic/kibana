@@ -7,16 +7,30 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-import { getJobId } from '../../../common/log_analysis';
+import { RequestHandlerContext } from 'src/core/server';
 import { throwErrors, createPlainError } from '../../../common/runtime_types';
-import { NoLogAnalysisResultsIndexError } from './errors';
 import {
   logRateModelPlotResponseRT,
   createLogEntryRateQuery,
   LogRateModelPlotBucket,
   CompositeTimestampPartitionKey,
 } from './queries';
-import { MlSystem } from '../../types';
+import { startTracingSpan } from '../../../common/performance_tracing';
+import { decodeOrThrow } from '../../../common/runtime_types';
+import { getJobId, jobCustomSettingsRT } from '../../../common/log_analysis';
+import {
+  createLogEntryRateExamplesQuery,
+  logEntryRateExamplesResponseRT,
+} from './queries/log_entry_rate_examples';
+import {
+  InsufficientLogAnalysisMlJobConfigurationError,
+  NoLogAnalysisMlJobError,
+  NoLogAnalysisResultsIndexError,
+} from './errors';
+import { InfraSource } from '../sources';
+import type { MlSystem } from '../../types';
+import { InfraRequestHandlerContext } from '../../types';
+import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
 
 const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
 
@@ -73,6 +87,7 @@ export async function getLogEntryRateBuckets(
       partitions: Array<{
         analysisBucketCount: number;
         anomalies: Array<{
+          id: string;
           actualLogEntryRate: number;
           anomalyScore: number;
           duration: number;
@@ -91,7 +106,8 @@ export async function getLogEntryRateBuckets(
     const partition = {
       analysisBucketCount: timestampPartitionBucket.filter_model_plot.doc_count,
       anomalies: timestampPartitionBucket.filter_records.top_hits_record.hits.hits.map(
-        ({ _source: record }) => ({
+        ({ _id, _source: record }) => ({
+          id: _id,
           actualLogEntryRate: record.actual[0],
           anomalyScore: record.record_score,
           duration: record.bucket_span * 1000,
@@ -126,4 +142,131 @@ export async function getLogEntryRateBuckets(
       ];
     }
   }, []);
+}
+
+export async function getLogEntryRateExamples(
+  context: RequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
+  sourceId: string,
+  startTime: number,
+  endTime: number,
+  dataset: string,
+  exampleCount: number,
+  sourceConfiguration: InfraSource,
+  callWithRequest: KibanaFramework['callWithRequest']
+) {
+  const finalizeLogEntryRateExamplesSpan = startTracingSpan(
+    'get log entry rate example log entries'
+  );
+
+  const jobId = getJobId(context.infra.spaceId, sourceId, 'log-entry-rate');
+
+  const {
+    mlJob,
+    timing: { spans: fetchMlJobSpans },
+  } = await fetchMlJob(context, jobId);
+
+  const customSettings = decodeOrThrow(jobCustomSettingsRT)(mlJob.custom_settings);
+  const indices = customSettings?.logs_source_config?.indexPattern;
+  const timestampField = customSettings?.logs_source_config?.timestampField;
+  const tiebreakerField = sourceConfiguration.configuration.fields.tiebreaker;
+
+  if (indices == null || timestampField == null) {
+    throw new InsufficientLogAnalysisMlJobConfigurationError(
+      `Failed to find index configuration for ml job ${jobId}`
+    );
+  }
+
+  const {
+    examples,
+    timing: { spans: fetchLogEntryRateExamplesSpans },
+  } = await fetchLogEntryRateExamples(
+    context,
+    indices,
+    timestampField,
+    tiebreakerField,
+    startTime,
+    endTime,
+    dataset,
+    exampleCount,
+    callWithRequest
+  );
+
+  const logEntryRateExamplesSpan = finalizeLogEntryRateExamplesSpan();
+
+  return {
+    data: examples,
+    timing: {
+      spans: [logEntryRateExamplesSpan, ...fetchMlJobSpans, ...fetchLogEntryRateExamplesSpans],
+    },
+  };
+}
+
+export async function fetchLogEntryRateExamples(
+  context: RequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
+  indices: string,
+  timestampField: string,
+  tiebreakerField: string,
+  startTime: number,
+  endTime: number,
+  dataset: string,
+  exampleCount: number,
+  callWithRequest: KibanaFramework['callWithRequest']
+) {
+  const finalizeEsSearchSpan = startTracingSpan('Fetch log rate examples from ES');
+
+  const {
+    hits: { hits },
+  } = decodeOrThrow(logEntryRateExamplesResponseRT)(
+    await callWithRequest(
+      context,
+      'search',
+      createLogEntryRateExamplesQuery(
+        indices,
+        timestampField,
+        tiebreakerField,
+        startTime,
+        endTime,
+        dataset,
+        exampleCount
+      )
+    )
+  );
+
+  const esSearchSpan = finalizeEsSearchSpan();
+
+  return {
+    examples: hits.map((hit) => ({
+      id: hit._id,
+      dataset,
+      message: hit._source.message ?? '',
+      timestamp: hit.sort[0],
+      tiebreaker: hit.sort[1],
+    })),
+    timing: {
+      spans: [esSearchSpan],
+    },
+  };
+}
+
+async function fetchMlJob(
+  context: RequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
+  logEntryRateJobId: string
+) {
+  const finalizeMlGetJobSpan = startTracingSpan('Fetch ml job from ES');
+  const {
+    jobs: [mlJob],
+  } = await context.infra.mlAnomalyDetectors.jobs(logEntryRateJobId);
+
+  const mlGetJobSpan = finalizeMlGetJobSpan();
+
+  if (mlJob == null) {
+    throw new NoLogAnalysisMlJobError(`Failed to find ml job ${logEntryRateJobId}.`);
+  }
+
+  return {
+    mlJob,
+    timing: {
+      spans: [mlGetJobSpan],
+    },
+  };
 }

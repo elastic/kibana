@@ -20,13 +20,17 @@
 // @ts-ignore
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
 // @ts-ignore
-import { setToasts, setUiSettings, setInjectedVarFunc } from './kibana_services';
+import { setToasts, setUiSettings, setKibanaVersion, setMapsLegacyConfig } from './kibana_services';
 // @ts-ignore
 import { ServiceSettings } from './map/service_settings';
 // @ts-ignore
 import { getPrecision, getZoomPrecision } from './map/precision';
+// @ts-ignore
+import { KibanaMap } from './map/kibana_map';
 import { MapsLegacyConfigType, MapsLegacyPluginSetup, MapsLegacyPluginStart } from './index';
 import { ConfigSchema } from '../config';
+// @ts-ignore
+import { BaseMapsVisualizationProvider } from './map/base_maps_visualization';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -34,10 +38,15 @@ import { ConfigSchema } from '../config';
  * @public
  */
 
-export const bindSetupCoreAndPlugins = (core: CoreSetup) => {
+export const bindSetupCoreAndPlugins = (
+  core: CoreSetup,
+  config: MapsLegacyConfigType,
+  kibanaVersion: string
+) => {
   setToasts(core.notifications.toasts);
   setUiSettings(core.uiSettings);
-  setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
+  setKibanaVersion(kibanaVersion);
+  setMapsLegacyConfig(config);
 };
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -53,15 +62,23 @@ export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup, MapsLegac
   }
 
   public setup(core: CoreSetup, plugins: MapsLegacySetupDependencies) {
-    bindSetupCoreAndPlugins(core);
-
     const config = this._initializerContext.config.get<MapsLegacyConfigType>();
+    const kibanaVersion = this._initializerContext.env.packageInfo.version;
+
+    bindSetupCoreAndPlugins(core, config, kibanaVersion);
+
+    const serviceSettings = new ServiceSettings(config, config.tilemap);
+    const getKibanaMapFactoryProvider = (...args: any) => new KibanaMap(...args);
+    const getBaseMapsVis = () =>
+      new BaseMapsVisualizationProvider(getKibanaMapFactoryProvider, serviceSettings);
 
     return {
-      serviceSettings: new ServiceSettings(config, config.tilemap),
+      serviceSettings,
       getZoomPrecision,
       getPrecision,
       config,
+      getKibanaMapFactoryProvider,
+      getBaseMapsVis,
     };
   }
 
