@@ -24,6 +24,7 @@ import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
 import { createServer, getListenerOptions, getServerOptions } from './http_tools';
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
+import { adoptToHapiOnPreAuth, OnPreAuthHandler } from './lifecycle/on_pre_auth';
 import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { adoptToHapiOnRequest, OnPreRoutingHandler } from './lifecycle/on_pre_routing';
 import { adoptToHapiOnPreResponseFormat, OnPreResponseHandler } from './lifecycle/on_pre_response';
@@ -49,8 +50,9 @@ export interface HttpServerSetup {
   basePath: HttpServiceSetup['basePath'];
   csp: HttpServiceSetup['csp'];
   createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
-  registerAuth: HttpServiceSetup['registerAuth'];
   registerOnPreRouting: HttpServiceSetup['registerOnPreRouting'];
+  registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
+  registerAuth: HttpServiceSetup['registerAuth'];
   registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
   registerOnPreResponse: HttpServiceSetup['registerOnPreResponse'];
   getAuthHeaders: GetAuthHeaders;
@@ -114,11 +116,12 @@ export class HttpServer {
       registerRouter: this.registerRouter.bind(this),
       registerStaticDir: this.registerStaticDir.bind(this),
       registerOnPreRouting: this.registerOnPreRouting.bind(this),
+      registerOnPreAuth: this.registerOnPreAuth.bind(this),
+      registerAuth: this.registerAuth.bind(this),
       registerOnPostAuth: this.registerOnPostAuth.bind(this),
       registerOnPreResponse: this.registerOnPreResponse.bind(this),
       createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) =>
         this.createCookieSessionStorageFactory(cookieOptions, config.basePath),
-      registerAuth: this.registerAuth.bind(this),
       basePath: basePathService,
       csp: config.csp,
       auth: {
@@ -261,6 +264,17 @@ export class HttpServer {
         return h.continue;
       });
     }
+  }
+
+  private registerOnPreAuth(fn: OnPreAuthHandler) {
+    if (this.server === undefined) {
+      throw new Error('Server is not created yet');
+    }
+    if (this.stopped) {
+      this.log.warn(`registerOnPreAuth called after stop`);
+    }
+
+    this.server.ext('onPreAuth', adoptToHapiOnPreAuth(fn, this.log));
   }
 
   private registerOnPostAuth(fn: OnPostAuthHandler) {

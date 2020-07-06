@@ -88,6 +88,7 @@ const createInternalSetupContractMock = () => {
     } as unknown) as jest.MockedClass<Server>,
     createCookieSessionStorageFactory: jest.fn(),
     registerOnPreRouting: jest.fn(),
+    registerOnPreAuth: jest.fn(),
     registerAuth: jest.fn(),
     registerOnPostAuth: jest.fn(),
     registerRouteHandlerContext: jest.fn(),
@@ -118,6 +119,7 @@ const createSetupContractMock = () => {
   const mock: HttpServiceSetupMock = {
     createCookieSessionStorageFactory: internalMock.createCookieSessionStorageFactory,
     registerOnPreRouting: internalMock.registerOnPreRouting,
+    registerOnPreAuth: jest.fn(),
     registerAuth: internalMock.registerAuth,
     registerOnPostAuth: internalMock.registerOnPostAuth,
     registerOnPreResponse: internalMock.registerOnPreResponse,
