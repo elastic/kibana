@@ -3,11 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
-import { EuiLoadingChart } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 import { EuiLoadingChartSize } from '@elastic/eui/src/components/loading/loading_chart';
+import React, { useContext } from 'react';
+import { ThemeContext } from 'styled-components';
 
 interface Props {
   isLoading: boolean;
@@ -18,10 +17,19 @@ interface Props {
 }
 
 export const ChartContainer = ({ isLoading, height, children, iconSize = 'xl', width }: Props) => {
-  const style = { height, marginTop: `-${height}px`, marginBottom: 0, width };
+  const theme = useContext(ThemeContext);
+  const style = {
+    height,
+    marginTop: `-${height}px`,
+    marginBottom: 0,
+    width,
+    opacity: 0.3,
+    backgroundColor: theme.eui.euiColorFullShade,
+    borderRadius: '4px',
+  };
   return (
     <>
-      {children}
+      <div style={{ height }}>{isLoading === false && children}</div>
       {isLoading === true && (
         <EuiFlexGroup
           justifyContent="spaceAround"

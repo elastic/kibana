@@ -3,16 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiIconTip,
+  EuiLink,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiLink } from '@elastic/eui';
-import { EuiBadge } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
-import { EuiIcon } from '@elastic/eui';
 import moment from 'moment';
-import { EuiHorizontalRule } from '@elastic/eui';
+import React from 'react';
 import { SectionContainer } from '..';
 
 const _alerts = [
@@ -59,11 +61,11 @@ export const AlertsSection = ({ alerts }: Props) => {
   return (
     <SectionContainer
       title="Alerts"
-      subtitle={i18n.translate('xpack.observability.overview.alerts.subtitle', {
-        defaultMessage: 'Recent activity',
-      })}
       appLink={'/app/management/insightsAndAlerting/triggersActions/alerts'}
       hasError={false}
+      appLinkName={i18n.translate('xpack.observability.overview.alert.appLink', {
+        defaultMessage: 'Manage alerts',
+      })}
     >
       {alerts.map((alert, index) => {
         const isLastElement = index === alerts.length - 1;
@@ -95,7 +97,12 @@ export const AlertsSection = ({ alerts }: Props) => {
                 </EuiFlexItem>
                 {alert.muteAll && (
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="minusInCircle" />
+                    <EuiIconTip
+                      type="minusInCircle"
+                      content={i18n.translate('xpack.observability.overview.alerts.muted', {
+                        defaultMessage: 'Muted',
+                      })}
+                    />
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>

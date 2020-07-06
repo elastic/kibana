@@ -61,16 +61,6 @@ const NewsItem = ({ item }: { item: News }) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <img
-              style={{ border: theme.eui.euiBorderThin }}
-              width={48}
-              height={48}
-              alt={item.title}
-              src={item.image_url}
-              className="newItem__image"
-            />
-          </EuiFlexItem>
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="s" alignItems="baseline">
               <EuiFlexItem>
@@ -88,6 +78,16 @@ const NewsItem = ({ item }: { item: News }) => {
                 </EuiLink>
               </EuiFlexItem>
             </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <img
+              style={{ border: theme.eui.euiBorderThin }}
+              width={48}
+              height={48}
+              alt={item.title}
+              src={item.image_url}
+              className="newItem__image"
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

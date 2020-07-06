@@ -51,7 +51,7 @@ export const OverviewPage = ({ routeParams }: Props) => {
   const {
     rangeFrom = timePickerTime.from,
     rangeTo = timePickerTime.to,
-    refreshInterval = 15000,
+    refreshInterval = 10000,
     refreshPaused = true,
   } = routeParams.query;
 
@@ -90,7 +90,7 @@ export const OverviewPage = ({ routeParams }: Props) => {
         <EuiFlexItem grow={6}>
           <EuiFlexGroup direction="column">
             {hasData?.infra_logs && (
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <LogsSection
                   startTime={startTime}
                   endTime={endTime}
@@ -99,7 +99,7 @@ export const OverviewPage = ({ routeParams }: Props) => {
               </EuiFlexItem>
             )}
             {hasData?.infra_metrics && (
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <MetricsSection
                   startTime={startTime}
                   endTime={endTime}
@@ -108,7 +108,7 @@ export const OverviewPage = ({ routeParams }: Props) => {
               </EuiFlexItem>
             )}
             {hasData?.apm && (
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <APMSection
                   startTime={startTime}
                   endTime={endTime}
@@ -117,7 +117,7 @@ export const OverviewPage = ({ routeParams }: Props) => {
               </EuiFlexItem>
             )}
             {hasData?.uptime && (
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <UptimeSection
                   startTime={startTime}
                   endTime={endTime}

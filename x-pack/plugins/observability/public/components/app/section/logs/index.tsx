@@ -8,28 +8,26 @@ import {
   Axis,
   BarSeries,
   Chart,
-  DARK_THEME,
-  LIGHT_THEME,
   niceTimeFormatter,
   Position,
   ScaleType,
   Settings,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, euiPaletteColorBlind, EuiStat } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, euiPaletteColorBlind, EuiSpacer, EuiTitle } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import React, { Fragment, useContext } from 'react';
+import React, { Fragment } from 'react';
 import { useHistory } from 'react-router-dom';
-import { ThemeContext } from 'styled-components';
 import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
+import { useChartTheme } from '../../../../hooks/use_chart_theme';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { LogsFetchDataResponse } from '../../../../typings';
 import { formatStatValue } from '../../../../utils/format_stat_value';
 import { ChartContainer } from '../../chart_container';
-import { onBrushEnd } from '../helper';
 import { StyledStat } from '../../styled_stat';
+import { onBrushEnd } from '../helper';
 
 interface Props {
   startTime?: string;
@@ -38,7 +36,6 @@ interface Props {
 }
 
 export const LogsSection = ({ startTime, endTime, bucketSize }: Props) => {
-  const theme = useContext(ThemeContext);
   const history = useHistory();
 
   const { data, status } = useFetcher(() => {
@@ -64,26 +61,23 @@ export const LogsSection = ({ startTime, endTime, bucketSize }: Props) => {
       }, {})
     : {};
 
-  const customColors = {
-    colors: {
-      vizColors: euiPaletteColorBlind({
-        rotations: data ? Math.ceil(Object.keys(data.series).length / 10) : 1,
-      }),
-    },
-  };
-
   const isLoading = status === FETCH_STATUS.LOADING;
 
   return (
     <SectionContainer
-      minHeight={296}
+      minHeight={304}
       title={title}
-      subtitle={i18n.translate('xpack.observability.overview.chart.logs.subtitle', {
-        defaultMessage: 'Logs rate',
-      })}
       appLink={appLink}
       hasError={status === FETCH_STATUS.FAILURE}
     >
+      <EuiTitle size="xs">
+        <h3>
+          {i18n.translate('xpack.observability.overview.logs.subtitle', {
+            defaultMessage: 'Log rate',
+          })}
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
       <EuiFlexGroup>
         {stats &&
           Object.keys(stats).map((key) => {
@@ -105,7 +99,7 @@ export const LogsSection = ({ startTime, endTime, bucketSize }: Props) => {
         <Chart size={{ height: 177 }}>
           <Settings
             onBrushEnd={({ x }) => onBrushEnd({ x, history })}
-            theme={theme.darkMode ? DARK_THEME : LIGHT_THEME}
+            theme={useChartTheme()}
             showLegend
             legendPosition={Position.Right}
             xDomain={{ min, max }}

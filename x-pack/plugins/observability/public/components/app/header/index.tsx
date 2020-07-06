@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, EuiSpacer } from '@elasti
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiBetaBadge } from '@elastic/eui';
 
 const Container = styled.div<{ color: string }>`
   background: ${(props) => props.color};
@@ -43,7 +44,11 @@ export const Header = ({ color, restrictWidth, showAddData = false }: Props) => 
               <h1>
                 {i18n.translate('xpack.observability.home.title', {
                   defaultMessage: 'Observability',
-                })}
+                })}{' '}
+                <EuiBetaBadge
+                  label={i18n.translate('xpack.observability.beta', { defaultMessage: 'Beta' })}
+                  tooltipContent="This feature is in beta. Please help us improve it by reporting any bugs or give us feedback."
+                />
               </h1>
             </EuiTitle>
           </EuiFlexItem>

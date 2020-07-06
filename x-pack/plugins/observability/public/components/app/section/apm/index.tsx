@@ -8,8 +8,6 @@ import {
   Axis,
   BarSeries,
   Chart,
-  DARK_THEME,
-  LIGHT_THEME,
   niceTimeFormatter,
   Position,
   ScaleType,
@@ -22,6 +20,7 @@ import moment from 'moment';
 import React, { useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
+import { useChartTheme } from '../../../../hooks/use_chart_theme';
 import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -62,11 +61,8 @@ export const APMSection = ({ startTime, endTime, bucketSize }: Props) => {
 
   return (
     <SectionContainer
-      minHeight={296}
+      minHeight={273}
       title={title || 'APM'}
-      subtitle={i18n.translate('xpack.observability.overview.chart.apm.subtitle', {
-        defaultMessage: 'Summary',
-      })}
       appLink={appLink}
       hasError={status === FETCH_STATUS.FAILURE}
     >
@@ -93,7 +89,7 @@ export const APMSection = ({ startTime, endTime, bucketSize }: Props) => {
         <Chart size={{ height: 177 }}>
           <Settings
             onBrushEnd={({ x }) => onBrushEnd({ x, history })}
-            theme={theme.darkMode ? DARK_THEME : LIGHT_THEME}
+            theme={useChartTheme()}
             showLegend={false}
             xDomain={{ min, max }}
           />

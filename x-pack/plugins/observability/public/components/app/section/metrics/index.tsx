@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { AreaSeries, Chart, DARK_THEME, LIGHT_THEME, ScaleType, Settings } from '@elastic/charts';
+import { AreaSeries, Chart, ScaleType, Settings } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer, EuiStat } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -11,6 +11,7 @@ import React, { useContext } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
+import { useChartTheme } from '../../../../hooks/use_chart_theme';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { Series } from '../../../../typings';
 import { ChartContainer } from '../../chart_container';
@@ -64,11 +65,8 @@ export const MetricsSection = ({ startTime, endTime, bucketSize }: Props) => {
 
   return (
     <SectionContainer
-      minHeight={165}
+      minHeight={135}
       title={title}
-      subtitle={i18n.translate('xpack.observability.overview.chart.metrics.subtitle', {
-        defaultMessage: 'Summary',
-      })}
       appLink={appLink}
       hasError={status === FETCH_STATUS.FAILURE}
     >
@@ -158,7 +156,7 @@ const AreaChart = ({
   isLoading: boolean;
   color: string;
 }) => {
-  const theme = useContext(ThemeContext);
+  const chartTheme = useChartTheme();
   if (!serie) {
     return null;
   }
@@ -166,11 +164,7 @@ const AreaChart = ({
   return (
     <ChartContainer height={30} width={100} isLoading={isLoading} iconSize="m">
       <Chart size={{ height: 30, width: 100 }}>
-        <Settings
-          theme={theme.darkMode ? DARK_THEME : LIGHT_THEME}
-          showLegend={false}
-          tooltip="none"
-        />
+        <Settings theme={chartTheme} showLegend={false} tooltip="none" />
         <AreaSeries
           id="area"
           xScaleType={ScaleType.Time}

@@ -8,8 +8,6 @@ import {
   Axis,
   BarSeries,
   Chart,
-  DARK_THEME,
-  LIGHT_THEME,
   niceTimeFormatter,
   Position,
   ScaleType,
@@ -23,13 +21,14 @@ import moment from 'moment';
 import React, { useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
+import { useChartTheme } from '../../../../hooks/use_chart_theme';
 import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { Series } from '../../../../typings';
 import { ChartContainer } from '../../chart_container';
-import { onBrushEnd } from '../helper';
 import { StyledStat } from '../../styled_stat';
+import { onBrushEnd } from '../helper';
 
 interface Props {
   startTime?: string;
@@ -60,11 +59,8 @@ export const UptimeSection = ({ startTime, endTime, bucketSize }: Props) => {
 
   return (
     <SectionContainer
-      minHeight={296}
+      minHeight={273}
       title={title}
-      subtitle={i18n.translate('xpack.observability.overview.chart.uptime.subtitle', {
-        defaultMessage: 'Summary',
-      })}
       appLink={appLink}
       hasError={status === FETCH_STATUS.FAILURE}
     >
@@ -103,7 +99,7 @@ export const UptimeSection = ({ startTime, endTime, bucketSize }: Props) => {
         <Chart size={{ height: 177 }}>
           <Settings
             onBrushEnd={({ x }) => onBrushEnd({ x, history })}
-            theme={theme.darkMode ? DARK_THEME : LIGHT_THEME}
+            theme={useChartTheme()}
             showLegend={false}
             legendPosition={Position.Right}
             xDomain={{ min, max }}

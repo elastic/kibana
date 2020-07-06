@@ -21,8 +21,7 @@ const resources = [
     label: i18n.translate('xpack.observability.resources.forum', {
       defaultMessage: 'Discuss forum',
     }),
-    // TODO: caue what's the url?
-    href: 'https://www.elastic.co',
+    href: 'https://discuss.elastic.co/c/observability/',
   },
   {
     iconType: 'training',
