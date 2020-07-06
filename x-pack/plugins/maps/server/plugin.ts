@@ -26,12 +26,15 @@ import { initRoutes } from './routes';
 import { ILicense } from '../../licensing/common/types';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
+import { PluginSetupContract as AlertingSetup } from '../../alerts/server';
+import { alertType as peopleInSpaceAlert } from './alert_types/astros';
 
 interface SetupDeps {
   features: FeaturesPluginSetupContract;
   usageCollection: UsageCollectionSetup;
   home: HomeServerPluginSetup;
   licensing: LicensingPluginSetup;
+  alerts: AlertingSetup;
 }
 
 export class MapsPlugin implements Plugin {
@@ -129,7 +132,7 @@ export class MapsPlugin implements Plugin {
 
   // @ts-ignore
   async setup(core: CoreSetup, plugins: SetupDeps) {
-    const { usageCollection, home, licensing, features } = plugins;
+    const { alerts, usageCollection, home, licensing, features } = plugins;
     // @ts-ignore
     const config$ = this._initializerContext.config.create();
     const currentConfig = await config$.pipe(take(1)).toPromise();
@@ -194,6 +197,7 @@ export class MapsPlugin implements Plugin {
     core.savedObjects.registerType(mapsTelemetrySavedObjects);
     core.savedObjects.registerType(mapSavedObjects);
     registerMapsUsageCollector(usageCollection, currentConfig);
+    alerts.registerType(peopleInSpaceAlert);
 
     return {
       config: config$,

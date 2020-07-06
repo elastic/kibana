@@ -253,3 +253,16 @@ export enum MB_LOOKUP_FUNCTION {
   GET = 'get',
   FEATURE_STATE = 'feature-state',
 }
+
+export const ALERTING_EXAMPLE_APP_ID = 'MapsAlertingExample';
+
+// Astros
+export enum Craft {
+  OuterSpace = 'Outer Space',
+  ISS = 'ISS',
+}
+export enum Operator {
+  AreAbove = 'Are above',
+  AreBelow = 'Are below',
+  AreExactly = 'Are exactly',
+}

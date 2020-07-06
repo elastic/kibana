@@ -4,6 +4,7 @@
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "maps"],
   "requiredPlugins": [
+    "alerts",
     "licensing",
     "features",
     "inspector",
