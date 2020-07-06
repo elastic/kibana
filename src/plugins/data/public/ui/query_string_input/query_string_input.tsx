@@ -490,6 +490,8 @@ export class QueryStringInputUI extends Component<Props, State> {
 
     this.initPersistedLog();
     this.fetchIndexPatterns().then(this.updateSuggestions);
+
+    window.addEventListener('resize', this.handleAutoHeight);
   }
 
   public componentDidUpdate(prevProps: Props) {
@@ -526,10 +528,11 @@ export class QueryStringInputUI extends Component<Props, State> {
     if (this.abortController) this.abortController.abort();
     this.updateSuggestions.cancel();
     this.componentIsUnmounting = true;
+    window.removeEventListener('resize', this.handleAutoHeight);
   }
 
   handleAutoHeight = () => {
-    if (this.inputRef !== null) {
+    if (this.inputRef !== null && document.activeElement === this.inputRef) {
       this.inputRef.style.setProperty('height', `${this.inputRef.scrollHeight}px`, 'important');
     }
   };
