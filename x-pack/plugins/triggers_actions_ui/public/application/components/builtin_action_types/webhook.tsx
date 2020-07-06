@@ -19,7 +19,6 @@ import {
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
   EuiTitle,
-  EuiCodeEditor,
   EuiSwitch,
   EuiButtonEmpty,
 } from '@elastic/eui';
@@ -31,7 +30,7 @@ import {
   ActionParamsProps,
 } from '../../../types';
 import { WebhookActionParams, WebhookActionConnector } from './types';
-import { AddMessageVariables } from '../add_message_variables';
+import { JsonEditorWithMessageVariables } from '../json_editor_with_message_variables';
 
 const HTTP_VERBS = ['post', 'put'];
 
@@ -465,48 +464,28 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookActi
   errors,
 }) => {
   const { body } = actionParams;
-  const onSelectMessageVariable = (paramsProperty: string, variable: string) => {
-    editAction(paramsProperty, (body ?? '').concat(` {{${variable}}}`), index);
-  };
+
   return (
-    <Fragment>
-      <EuiFormRow
-        id="webhookBody"
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.bodyFieldLabel',
-          {
-            defaultMessage: 'Body',
-          }
-        )}
-        isInvalid={errors.body.length > 0 && body !== undefined}
-        fullWidth
-        error={errors.body}
-        labelAppend={
-          <AddMessageVariables
-            messageVariables={messageVariables}
-            onSelectEventHandler={(variable: string) => onSelectMessageVariable('body', variable)}
-            paramsProperty="body"
-          />
+    <JsonEditorWithMessageVariables
+      messageVariables={messageVariables}
+      paramsProperty={'body'}
+      inputTargetValue={body || ''}
+      label={i18n.translate(
+        'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.bodyFieldLabel',
+        {
+          defaultMessage: 'Body',
         }
-      >
-        <EuiCodeEditor
-          mode="json"
-          width="100%"
-          height="200px"
-          theme="github"
-          data-test-subj="webhookBodyEditor"
-          aria-label={i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.bodyCodeEditorAriaLabel',
-            {
-              defaultMessage: 'Code editor',
-            }
-          )}
-          value={body || ''}
-          onChange={(json: string) => {
-            editAction('body', json, index);
-          }}
-        />
-      </EuiFormRow>
-    </Fragment>
+      )}
+      aria-label={i18n.translate(
+        'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.bodyCodeEditorAriaLabel',
+        {
+          defaultMessage: 'Code editor',
+        }
+      )}
+      errors={errors.body as string[]}
+      onDocumentsChange={(json: string) => {
+        editAction('body', json, index);
+      }}
+    />
   );
 };
