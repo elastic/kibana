@@ -17,27 +17,21 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
+import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-import { ReactVisComponentProps } from 'src/plugins/visualizations/public';
-import { TableVisParams } from '../types';
-import { TableContext } from '../table_vis_response_handler';
-import { TableVisBasic } from './table_vis_basic';
-import { TableVisSplit } from './table_vis_split';
+export const TableVisNoResults = () => (
+  <div className="visError">
+    <EuiText size="xs" color="subdued">
+      <EuiIcon type="alert" size="m" color="danger" aria-hidden="true" />
 
-export const TableVisualization = ({
-  renderComplete,
-  vis,
-  visData: { direction, table, tables },
-  visParams,
-}: ReactVisComponentProps<TableContext, TableVisParams>) => {
-  useEffect(() => {
-    renderComplete();
-  }, [renderComplete]);
+      <EuiSpacer size="s" />
 
-  return table ? (
-    <TableVisBasic table={table} vis={vis} visParams={visParams} />
-  ) : (
-    <TableVisSplit tables={tables} vis={vis} visParams={visParams} />
-  );
-};
+      <FormattedMessage
+        id="visTypeTable.vis.noResultsFoundTitle"
+        defaultMessage="No results found"
+      />
+    </EuiText>
+  </div>
+);

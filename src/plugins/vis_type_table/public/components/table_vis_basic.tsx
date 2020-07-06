@@ -25,6 +25,7 @@ import { createTableVisCell } from './table_vis_cell';
 import { Table } from '../table_vis_response_handler';
 import { TableVisParams } from '../types';
 import { useFormattedColumns } from '../utils';
+import { TableVisNoResults } from './table_vis_no_results';
 
 interface TableVisBasicProps {
   table: Table;
@@ -40,7 +41,7 @@ export const TableVisBasic = memo(({ table, vis, visParams }: TableVisBasicProps
     vis,
   ]);
 
-  return (
+  return table.rows.length > 0 ? (
     <EuiDataGrid
       aria-label=""
       columns={table.columns.map((col) => ({
@@ -61,5 +62,7 @@ export const TableVisBasic = memo(({ table, vis, visParams }: TableVisBasicProps
         onChangeItemsPerPage: () => {},
       }}
     />
+  ) : (
+    <TableVisNoResults />
   );
 });
