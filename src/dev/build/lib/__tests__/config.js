@@ -72,6 +72,22 @@ describe('dev/build/lib/config', () => {
     });
   });
 
+  describe('#getPlatform()', () => {
+    it('throws error when platform does not exist', async () => {
+      const { config } = await setup();
+      const fn = () => config.getPlatform('foo', 'x64');
+
+      expect(fn).to.throwException(/Unable to find platform/);
+    });
+
+    it('throws error when architecture does not exist', async () => {
+      const { config } = await setup();
+      const fn = () => config.getPlatform('linux', 'foo');
+
+      expect(fn).to.throwException(/Unable to find platform/);
+    });
+  });
+
   describe('#getTargetPlatforms()', () => {
     it('returns an array of all platform objects', async () => {
       const { config } = await setup();

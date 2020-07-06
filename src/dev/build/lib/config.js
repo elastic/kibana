@@ -113,9 +113,15 @@ export async function getConfig({ isRelease, targetAllPlatforms, versionQualifie
     }
 
     getPlatform(name, arch) {
-      return platforms.find((p) => {
+      const selected = platforms.find((p) => {
         return name === p.getName() && arch === p.getArchitecture();
       });
+
+      if (!selected) {
+        throw new Error(`Unable to find platform (${name}) with architecture (${arch})`);
+      }
+
+      return selected;
     }
 
     /**
@@ -123,15 +129,7 @@ export async function getConfig({ isRelease, targetAllPlatforms, versionQualifie
      * @return {Platform}
      */
     getPlatformForThisOs() {
-      const currentPlatform = this.getPlatform(os.platform(), os.arch());
-
-      if (!currentPlatform) {
-        throw new Error(
-          `Unable to find platform for this OS (${os.platform()}) and architecture (${os.arch()})`
-        );
-      }
-
-      return currentPlatform;
+      return this.getPlatform(os.platform(), os.arch());
     }
 
     /**
