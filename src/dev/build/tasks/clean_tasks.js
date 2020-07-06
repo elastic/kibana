@@ -19,7 +19,7 @@
 
 import minimatch from 'minimatch';
 import extractZip from 'extract-zip';
-import { chmodSync } from 'fs';
+import { chmodSync, createReadStream } from 'fs';
 
 import { deleteAll, deleteEmptyFolders, scanDelete } from '../lib';
 
@@ -249,13 +249,25 @@ export const CleanExtraBrowsersTask = {
       };
     };
 
-    const extract = (src, dest) => {
+    const md5 = (file) => {
+      return new Promise((resolve) => {
+        const hash = crypto.createHash('md5');
+        createReadStream(file)
+          .on('data', (data) => hash.update(data))
+          .on('end', () => resolve(hash.digest('hex')));
+      });
+    };
+    const extract = (metadata) => {
       return new Promise(function (resolve, reject) {
-        extractZip(src, { dir: dest }, (err) => {
+        extractZip(metadata.src, { dir: metadata.dest }, async (err) => {
           if (err) {
             return reject(err);
           }
-          chmodSync(dest, '755');
+          chmodSync(metadata.dest, '755');
+          const binaryMD5 = await md5(metadata.dest);
+          if (binaryMD5 !== metadata.binaryChecksum) {
+            reject(new Error('chromium binary checksum mismatch'));
+          }
           resolve();
         });
       });
@@ -265,17 +277,17 @@ export const CleanExtraBrowsersTask = {
       if (platform.isWindows()) {
         if (!build.isOss()) {
           const metadata = getBrowserPaths({ windows: true }).pop();
-          await extract(metadata.src, metadata.dest);
+          await extract(metadata);
         }
       } else if (platform.isMac()) {
         if (!build.isOss()) {
           const metadata = getBrowserPaths({ darwin: true }).pop();
-          await extract(metadata.src, metadata.dest);
+          await extract(metadata);
         }
       } else if (platform.isLinux()) {
         if (!build.isOss()) {
           const metadata = getBrowserPaths({ linux: true }).pop();
-          await extract(metadata.src, metadata.dest);
+          await extract(metadata);
         }
       }
       await deleteAll(
