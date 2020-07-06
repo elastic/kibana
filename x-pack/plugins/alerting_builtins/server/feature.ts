@@ -25,10 +25,10 @@ export const BUILT_IN_ALERTS_FEATURE = {
         read: [],
       },
       savedObject: {
-        all: ['action'],
+        all: ['action', 'action_task_params'],
         read: [],
       },
-      api: ['actions-read'],
+      api: ['actions-read', 'actions-all'],
       ui: ['alerting:show', 'actions:show', 'actions:save', 'actions:delete'],
     },
     read: {
@@ -39,7 +39,7 @@ export const BUILT_IN_ALERTS_FEATURE = {
         read: [IndexThreshold],
       },
       savedObject: {
-        all: [],
+        all: ['action_task_params'],
         read: ['action'],
       },
       api: ['actions-read'],
