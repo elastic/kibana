@@ -27,7 +27,7 @@ import { setKqlQueryBarPlaceholder } from './set_kql_query_bar_placeholder';
 export const explorerReducer = (state: ExplorerState, nextAction: Action): ExplorerState => {
   const { type, payload } = nextAction;
 
-  let nextState;
+  let nextState: ExplorerState;
 
   switch (type) {
     case EXPLORER_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS:
@@ -39,6 +39,7 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
         ...state,
         ...getClearedSelectedAnomaliesState(),
         loading: false,
+        viewByFromPage: 1,
         selectedJobs: [],
       };
       break;
@@ -82,22 +83,7 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
       break;
 
     case EXPLORER_ACTION.SET_SWIMLANE_CONTAINER_WIDTH:
-      if (state.noInfluencersConfigured === true) {
-        // swimlane is full width, minus 30 for the 'no influencers' info icon,
-        // minus 170 for the lane labels, minus 50 padding
-        nextState = { ...state, swimlaneContainerWidth: payload - 250 };
-      } else {
-        // swimlane width is 5 sixths of the window,
-        // minus 170 for the lane labels, minus 50 padding
-        nextState = { ...state, swimlaneContainerWidth: (payload / 6) * 5 - 220 };
-      }
-      break;
-
-    case EXPLORER_ACTION.SET_SWIMLANE_LIMIT:
-      nextState = {
-        ...state,
-        swimlaneLimit: payload,
-      };
+      nextState = { ...state, swimlaneContainerWidth: payload };
       break;
 
     case EXPLORER_ACTION.SET_VIEW_BY_SWIMLANE_FIELD_NAME:
@@ -117,6 +103,9 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
         ...getClearedSelectedAnomaliesState(),
         maskAll,
         viewBySwimlaneFieldName,
+        viewBySwimlaneData: getDefaultSwimlaneData(),
+        viewByFromPage: 1,
+        viewBySwimlaneDataLoading: true,
       };
       break;
 
@@ -125,12 +114,28 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
       nextState = {
         ...state,
         annotationsData,
-        ...overallState,
+        overallSwimlaneData: overallState,
         tableData,
         viewBySwimlaneData: {
           ...getDefaultSwimlaneData(),
         },
         viewBySwimlaneDataLoading: true,
+      };
+      break;
+
+    case EXPLORER_ACTION.SET_VIEW_BY_FROM_PAGE:
+      nextState = {
+        ...state,
+        viewByFromPage: payload,
+      };
+      break;
+
+    case EXPLORER_ACTION.SET_VIEW_BY_PER_PAGE:
+      nextState = {
+        ...state,
+        // reset current page on the page size change
+        viewByFromPage: 1,
+        viewByPerPage: payload,
       };
       break;
 
@@ -155,7 +160,7 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
     filteredFields: nextState.filteredFields,
     isAndOperator: nextState.isAndOperator,
     selectedJobs: nextState.selectedJobs,
-    selectedCells: nextState.selectedCells,
+    selectedCells: nextState.selectedCells!,
   });
 
   const { bounds, selectedCells } = nextState;

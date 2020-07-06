@@ -14,7 +14,7 @@ import { EndpointAppContext } from '../../types';
 
 export const ManifestTaskConstants = {
   TIMEOUT: '1m',
-  TYPE: 'securitySolution:endpoint:exceptions-packager',
+  TYPE: 'endpoint:user-artifact-packager',
   VERSION: '1.0.0',
 };
 

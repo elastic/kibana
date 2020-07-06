@@ -90,7 +90,7 @@ export const getFiltersBucketAgg = ({
 
             const outFilters = transform(
               inFilters,
-              function (filters, filter) {
+              function (filters: any, filter) {
                 const input = cloneDeep(filter.input);
 
                 if (!input) {

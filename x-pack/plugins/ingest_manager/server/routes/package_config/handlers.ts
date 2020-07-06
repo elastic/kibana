@@ -178,7 +178,7 @@ export const updatePackageConfigHandler: RequestHandler<
     });
   } catch (e) {
     return response.customError({
-      statusCode: 500,
+      statusCode: e.statusCode || 500,
       body: { message: e.message },
     });
   }
