@@ -8,6 +8,7 @@ import { map, share, tap, switchMap } from 'rxjs/operators';
 import { Observable, from, of } from 'rxjs';
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { v4 as uuidv4 } from 'uuid';
 import { TagsClientCreateParams } from '../../../../common';
 import { TagsManagerParams } from './types';
 import { TagList } from './tag_list';
@@ -35,15 +36,18 @@ export class TagManager {
     return tagList;
   };
 
-  public create$(params: TagsClientCreateParams): Observable<Tag> {
+  public create$({ tag }: Omit<TagsClientCreateParams, 'id'>): Observable<Tag> {
     const { tags: client } = this.params;
-    return from(client.create(params)).pipe(
+    const id = uuidv4();
+    const observable = from(client.create({ tag: { ...tag, id } })).pipe(
       share(),
       map((response) => {
         const tags = this.tags.add([response.tag]);
         return tags[response.tag.id]!;
       })
     );
+
+    return observable;
   }
 
   private getAttachedTags$(kid: string) {

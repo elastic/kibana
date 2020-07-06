@@ -22,7 +22,7 @@ export interface RawTagWithId extends RawTag {
 }
 
 export interface TagsClientCreateParams {
-  tag: Pick<RawTag, 'title' | 'description' | 'color'>;
+  tag: Pick<RawTagWithId, 'id' | 'title' | 'description' | 'color'>;
 }
 
 export interface TagsClientCreateResult {

@@ -52,8 +52,9 @@ export class TagsClient implements ITagsClient {
   };
 
   public async create({ tag }: TagsClientCreateParams): Promise<{ tag: RawTagWithId }> {
-    const { title, description, color } = tag;
+    const { id, title, description, color } = tag;
 
+    validateTagId(id);
     validateTagTitle(title);
     validateTagDescription(description);
     validateTagColor(color);
@@ -75,11 +76,9 @@ export class TagsClient implements ITagsClient {
       createdBy: username,
       updatedBy: username,
     };
-    const savedObject: TagSavedObject = await savedObjectsClient.create<RawTag>(
-      this.type,
-      rawTag,
-      {}
-    );
+    const savedObject: TagSavedObject = await savedObjectsClient.create<RawTag>(this.type, rawTag, {
+      id,
+    });
 
     return { tag: this.savedObjectToTag(savedObject) };
   }

@@ -17,6 +17,7 @@ export const createTag = ({ router }: RouteParams) => {
       validate: {
         body: schema.object({
           tag: schema.object({
+            id: schema.string(),
             title: schema.string(),
             description: schema.string(),
             color: schema.string(),
