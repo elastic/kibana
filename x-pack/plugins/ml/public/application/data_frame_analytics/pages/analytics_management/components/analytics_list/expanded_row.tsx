@@ -29,6 +29,7 @@ import { getDataFrameAnalyticsProgressPhase, isCompletedAnalyticsJob } from './c
 import {
   isRegressionAnalysis,
   ANALYSIS_CONFIG_TYPE,
+  REGRESSION_STATS,
   isRegressionEvaluateResponse,
 } from '../../../../common/analytics';
 import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
@@ -44,7 +45,7 @@ function getItemDescription(value: any) {
 interface LoadedStatProps {
   isLoading: boolean;
   evalData: Eval;
-  resultProperty: 'meanSquaredError' | 'rSquared';
+  resultProperty: REGRESSION_STATS;
 }
 
 const LoadedStat: FC<LoadedStatProps> = ({ isLoading, evalData, resultProperty }) => {
@@ -61,7 +62,7 @@ interface Props {
   item: DataFrameAnalyticsListRow;
 }
 
-const defaultEval: Eval = { meanSquaredError: '', rSquared: '', error: null };
+const defaultEval: Eval = { mse: '', msle: '', huber: '', rSquared: '', error: null };
 
 export const ExpandedRow: FC<Props> = ({ item }) => {
   const [trainingEval, setTrainingEval] = useState<Eval>(defaultEval);
@@ -94,9 +95,11 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       genErrorEval.eval &&
       isRegressionEvaluateResponse(genErrorEval.eval)
     ) {
-      const { meanSquaredError, rSquared } = getValuesFromResponse(genErrorEval.eval);
+      const { mse, msle, huber, rSquared } = getValuesFromResponse(genErrorEval.eval);
       setGeneralizationEval({
-        meanSquaredError,
+        mse,
+        msle,
+        huber,
         rSquared,
         error: null,
       });
@@ -104,7 +107,9 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     } else {
       setIsLoadingGeneralization(false);
       setGeneralizationEval({
-        meanSquaredError: '',
+        mse: '',
+        msle: '',
+        huber: '',
         rSquared: '',
         error: genErrorEval.error,
       });
@@ -124,9 +129,11 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       trainingErrorEval.eval &&
       isRegressionEvaluateResponse(trainingErrorEval.eval)
     ) {
-      const { meanSquaredError, rSquared } = getValuesFromResponse(trainingErrorEval.eval);
+      const { mse, msle, huber, rSquared } = getValuesFromResponse(trainingErrorEval.eval);
       setTrainingEval({
-        meanSquaredError,
+        mse,
+        msle,
+        huber,
         rSquared,
         error: null,
       });
@@ -134,7 +141,9 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     } else {
       setIsLoadingTraining(false);
       setTrainingEval({
-        meanSquaredError: '',
+        mse: '',
+        msle: '',
+        huber: '',
         rSquared: '',
         error: genErrorEval.error,
       });
@@ -221,7 +230,17 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
           <LoadedStat
             isLoading={isLoadingGeneralization}
             evalData={generalizationEval}
-            resultProperty={'meanSquaredError'}
+            resultProperty={REGRESSION_STATS.MSE}
+          />
+        ),
+      },
+      {
+        title: 'generalization mean squared logarithmic error',
+        description: (
+          <LoadedStat
+            isLoading={isLoadingGeneralization}
+            evalData={generalizationEval}
+            resultProperty={REGRESSION_STATS.MSLE}
           />
         ),
       },
@@ -231,7 +250,17 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
           <LoadedStat
             isLoading={isLoadingGeneralization}
             evalData={generalizationEval}
-            resultProperty={'rSquared'}
+            resultProperty={REGRESSION_STATS.R_SQUARED}
+          />
+        ),
+      },
+      {
+        title: 'generalization pseudo huber loss function',
+        description: (
+          <LoadedStat
+            isLoading={isLoadingTraining}
+            evalData={generalizationEval}
+            resultProperty={REGRESSION_STATS.HUBER}
           />
         ),
       },
@@ -241,7 +270,17 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
           <LoadedStat
             isLoading={isLoadingTraining}
             evalData={trainingEval}
-            resultProperty={'meanSquaredError'}
+            resultProperty={REGRESSION_STATS.MSE}
+          />
+        ),
+      },
+      {
+        title: 'training mean squared logarithmic error',
+        description: (
+          <LoadedStat
+            isLoading={isLoadingTraining}
+            evalData={trainingEval}
+            resultProperty={REGRESSION_STATS.MSLE}
           />
         ),
       },
@@ -251,7 +290,17 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
           <LoadedStat
             isLoading={isLoadingTraining}
             evalData={trainingEval}
-            resultProperty={'rSquared'}
+            resultProperty={REGRESSION_STATS.R_SQUARED}
+          />
+        ),
+      },
+      {
+        title: 'training pseudo huber loss function',
+        description: (
+          <LoadedStat
+            isLoading={isLoadingTraining}
+            evalData={trainingEval}
+            resultProperty={REGRESSION_STATS.HUBER}
           />
         ),
       }

@@ -121,14 +121,22 @@ export interface DfAnalyticsExplainResponse {
 }
 
 export interface Eval {
-  meanSquaredError: number | string;
+  mse: number | string;
+  msle: number | string;
+  huber: number | string;
   rSquared: number | string;
   error: null | string;
 }
 
 export interface RegressionEvaluateResponse {
   regression: {
+    huber: {
+      value: number;
+    };
     mse: {
+      value: number;
+    };
+    msle: {
       value: number;
     };
     r_squared: {
@@ -415,18 +423,25 @@ export const useRefreshAnalyticsList = (
 const DEFAULT_SIG_FIGS = 3;
 
 export function getValuesFromResponse(response: RegressionEvaluateResponse) {
-  let meanSquaredError = response?.regression?.mse?.value;
-
-  if (meanSquaredError) {
-    meanSquaredError = Number(meanSquaredError.toPrecision(DEFAULT_SIG_FIGS));
-  }
-
+  let mse = response?.regression?.mse?.value;
   let rSquared = response?.regression?.r_squared?.value;
+  let msle = response?.regression?.msle?.value;
+  let huber = response?.regression?.huber?.value;
+
+  if (mse) {
+    mse = Number(mse.toPrecision(DEFAULT_SIG_FIGS));
+  }
   if (rSquared) {
     rSquared = Number(rSquared.toPrecision(DEFAULT_SIG_FIGS));
   }
+  if (msle) {
+    msle = Number(msle.toPrecision(DEFAULT_SIG_FIGS));
+  }
+  if (huber) {
+    huber = Number(huber.toPrecision(DEFAULT_SIG_FIGS));
+  }
 
-  return { meanSquaredError, rSquared };
+  return { mse, rSquared, msle, huber };
 }
 interface ResultsSearchBoolQuery {
   bool: Dictionary<any>;
@@ -490,6 +505,13 @@ export function getEvalQueryBody({
   return query;
 }
 
+export enum REGRESSION_STATS {
+  MSE = 'mse',
+  MSLE = 'msle',
+  R_SQUARED = 'rSquared',
+  HUBER = 'huber',
+}
+
 interface EvaluateMetrics {
   classification: {
     multiclass_confusion_matrix: object;
@@ -497,6 +519,8 @@ interface EvaluateMetrics {
   regression: {
     r_squared: object;
     mse: object;
+    msle: object;
+    huber: object;
   };
 }
 
@@ -542,6 +566,8 @@ export const loadEvalData = async ({
     regression: {
       r_squared: {},
       mse: {},
+      msle: {},
+      huber: {},
     },
   };
 

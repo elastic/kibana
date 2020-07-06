@@ -34,15 +34,17 @@ import {
   isResultsSearchBoolQuery,
   isRegressionEvaluateResponse,
   ANALYSIS_CONFIG_TYPE,
+  REGRESSION_STATS,
 } from '../../../../common/analytics';
 
+const EMPTY_STAT = '--';
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
   jobStatus?: DATA_FRAME_TASK_STATE;
   searchQuery: SavedSearchQuery;
 }
 
-const defaultEval: Eval = { meanSquaredError: '', rSquared: '', error: null };
+const defaultEval: Eval = { mse: '', msle: '', huber: '', rSquared: '', error: null };
 
 export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) => {
   const {
@@ -82,9 +84,11 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       genErrorEval.eval &&
       isRegressionEvaluateResponse(genErrorEval.eval)
     ) {
-      const { meanSquaredError, rSquared } = getValuesFromResponse(genErrorEval.eval);
+      const { mse, msle, huber, rSquared } = getValuesFromResponse(genErrorEval.eval);
       setGeneralizationEval({
-        meanSquaredError,
+        mse,
+        msle,
+        huber,
         rSquared,
         error: null,
       });
@@ -92,8 +96,10 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     } else {
       setIsLoadingGeneralization(false);
       setGeneralizationEval({
-        meanSquaredError: '--',
-        rSquared: '--',
+        mse: EMPTY_STAT,
+        msle: EMPTY_STAT,
+        huber: EMPTY_STAT,
+        rSquared: EMPTY_STAT,
         error: genErrorEval.error,
       });
     }
@@ -118,9 +124,11 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       trainingErrorEval.eval &&
       isRegressionEvaluateResponse(trainingErrorEval.eval)
     ) {
-      const { meanSquaredError, rSquared } = getValuesFromResponse(trainingErrorEval.eval);
+      const { mse, msle, huber, rSquared } = getValuesFromResponse(trainingErrorEval.eval);
       setTrainingEval({
-        meanSquaredError,
+        mse,
+        msle,
+        huber,
         rSquared,
         error: null,
       });
@@ -128,8 +136,10 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     } else {
       setIsLoadingTraining(false);
       setTrainingEval({
-        meanSquaredError: '--',
-        rSquared: '--',
+        mse: EMPTY_STAT,
+        msle: EMPTY_STAT,
+        rSquared: EMPTY_STAT,
+        huber: EMPTY_STAT,
         error: trainingErrorEval.error,
       });
     }
@@ -274,22 +284,48 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
           <EuiSpacer />
           <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexItem>
-              <EuiFlexGroup>
+              <EuiFlexGroup direction="column" gutterSize="s">
+                {/* First row stats */}
                 <EuiFlexItem>
-                  <EvaluateStat
-                    dataTestSubj={'mlDFAnalyticsRegressionGenMSEstat'}
-                    isLoading={isLoadingGeneralization}
-                    title={generalizationEval.meanSquaredError}
-                    isMSE
-                  />
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      <EvaluateStat
+                        dataTestSubj={'mlDFAnalyticsRegressionGenMSEstat'}
+                        isLoading={isLoadingGeneralization}
+                        title={generalizationEval.mse}
+                        statType={REGRESSION_STATS.MSE}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EvaluateStat
+                        dataTestSubj={'mlDFAnalyticsRegressionGenRSquaredStat'}
+                        isLoading={isLoadingGeneralization}
+                        title={generalizationEval.rSquared}
+                        statType={REGRESSION_STATS.R_SQUARED}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
+                {/* Second row stats */}
                 <EuiFlexItem>
-                  <EvaluateStat
-                    dataTestSubj={'mlDFAnalyticsRegressionGenRSquaredStat'}
-                    isLoading={isLoadingGeneralization}
-                    title={generalizationEval.rSquared}
-                    isMSE={false}
-                  />
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      <EvaluateStat
+                        dataTestSubj={'mlDFAnalyticsRegressionGenMsleStat'}
+                        isLoading={isLoadingGeneralization}
+                        title={generalizationEval.msle}
+                        statType={REGRESSION_STATS.MSLE}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EvaluateStat
+                        dataTestSubj={'mlDFAnalyticsRegressionGenHuberStat'}
+                        isLoading={isLoadingGeneralization}
+                        title={generalizationEval.huber}
+                        statType={REGRESSION_STATS.HUBER}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -331,22 +367,48 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
           <EuiSpacer />
           <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexItem>
-              <EuiFlexGroup>
+              <EuiFlexGroup direction="column" gutterSize="s">
+                {/* First row stats */}
                 <EuiFlexItem>
-                  <EvaluateStat
-                    dataTestSubj={'mlDFAnalyticsRegressionTrainingMSEstat'}
-                    isLoading={isLoadingTraining}
-                    title={trainingEval.meanSquaredError}
-                    isMSE
-                  />
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      <EvaluateStat
+                        dataTestSubj={'mlDFAnalyticsRegressionTrainingMSEstat'}
+                        isLoading={isLoadingTraining}
+                        title={trainingEval.mse}
+                        statType={REGRESSION_STATS.MSE}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EvaluateStat
+                        dataTestSubj={'mlDFAnalyticsRegressionTrainingRSquaredStat'}
+                        isLoading={isLoadingTraining}
+                        title={trainingEval.rSquared}
+                        statType={REGRESSION_STATS.R_SQUARED}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
+                {/* Second row stats */}
                 <EuiFlexItem>
-                  <EvaluateStat
-                    dataTestSubj={'mlDFAnalyticsRegressionTrainingRSquaredStat'}
-                    isLoading={isLoadingTraining}
-                    title={trainingEval.rSquared}
-                    isMSE={false}
-                  />
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      <EvaluateStat
+                        dataTestSubj={'mlDFAnalyticsRegressionTrainingMsleStat'}
+                        isLoading={isLoadingTraining}
+                        title={trainingEval.msle}
+                        statType={REGRESSION_STATS.MSLE}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EvaluateStat
+                        dataTestSubj={'mlDFAnalyticsRegressionTrainingHuberStat'}
+                        isLoading={isLoadingTraining}
+                        title={trainingEval.huber}
+                        statType={REGRESSION_STATS.HUBER}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
