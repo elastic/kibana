@@ -496,7 +496,7 @@ interface EvaluateMetrics {
   };
   regression: {
     r_squared: object;
-    mean_squared_error: object;
+    mse: object;
   };
 }
 
@@ -541,7 +541,7 @@ export const loadEvalData = async ({
     },
     regression: {
       r_squared: {},
-      mean_squared_error: {},
+      mse: {},
     },
   };
 
