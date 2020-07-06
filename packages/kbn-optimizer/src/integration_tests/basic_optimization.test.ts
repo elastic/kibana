@@ -63,8 +63,7 @@ afterAll(async () => {
   await del(TMP_DIR);
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/70762
-it.skip('builds expected bundles, saves bundle counts to metadata', async () => {
+it('builds expected bundles, saves bundle counts to metadata', async () => {
   const config = OptimizerConfig.create({
     repoRoot: MOCK_REPO_DIR,
     pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
