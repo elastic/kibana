@@ -23,9 +23,14 @@ import { ConfigType } from './';
 import { checkAccess } from './lib/check_access';
 import { registerPublicUrlRoute } from './routes/enterprise_search/public_url';
 import { registerEnginesRoute } from './routes/app_search/engines';
-import { registerTelemetryRoute } from './routes/app_search/telemetry';
-import { registerTelemetryUsageCollector } from './collectors/app_search/telemetry';
+import { registerTelemetryRoute as registerASTelemetryRoute } from './routes/app_search/telemetry';
+import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
 import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
+
+import { registerWSOverviewRoute } from './routes/workplace_search/overview';
+import { registerTelemetryRoute as registerWSTelemetryRoute } from './routes/workplace_search/telemetry';
+import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
+import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/telemetry';
 
 export interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
@@ -72,21 +77,27 @@ export class EnterpriseSearchPlugin implements Plugin {
     /**
      * Register user access to the Enterprise Search plugins
      */
-    capabilities.registerSwitcher(async (request: KibanaRequest) => {
-      const dependencies = { config, security, request, log: this.logger };
+    capabilities.registerSwitcher(
+      async (request: KibanaRequest, uiCapabilities: UICapabilities) => {
+        const dependencies = { config, security, request, log: this.logger };
 
-      const { hasAppSearchAccess } = await checkAccess(dependencies);
-      // TODO: hasWorkplaceSearchAccess
+        const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
 
-      return {
-        navLinks: {
-          appSearch: hasAppSearchAccess,
-        },
-        catalogue: {
-          appSearch: hasAppSearchAccess,
-        },
-      };
-    });
+        return {
+          ...uiCapabilities,
+          navLinks: {
+            ...uiCapabilities.navLinks,
+            app_search: hasAppSearchAccess,
+            workplaceSearch: hasWorkplaceSearchAccess,
+          },
+          catalogue: {
+            ...uiCapabilities.catalogue,
+            app_search: hasAppSearchAccess,
+            workplaceSearch: hasWorkplaceSearchAccess,
+          },
+        };
+      }
+    );
 
     /**
      * Register routes
@@ -96,22 +107,36 @@ export class EnterpriseSearchPlugin implements Plugin {
 
     registerPublicUrlRoute(dependencies);
     registerEnginesRoute(dependencies);
+    registerWSOverviewRoute(dependencies);
 
     /**
      * Bootstrap the routes, saved objects, and collector for telemetry
      */
     savedObjects.registerType(appSearchTelemetryType);
-    let savedObjectsStarted: SavedObjectsServiceStart;
+    savedObjects.registerType(workplaceSearchTelemetryType);
 
     getStartServices().then(([coreStart]) => {
-      savedObjectsStarted = coreStart.savedObjects;
+      const savedObjectsStarted = coreStart.savedObjects as SavedObjectsServiceStart;
+
+      const telemetryRouteDependencies = {
+        ...dependencies,
+        getSavedObjectsService: () => savedObjectsStarted
+      };
+      registerASTelemetryRoute(telemetryRouteDependencies);
+      registerWSTelemetryRoute(telemetryRouteDependencies);
+
       if (usageCollection) {
-        registerTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
+        registerASTelemetryUsageCollector(
+          usageCollection,
+          savedObjectsStarted,
+          this.logger
+        );
+        registerWSTelemetryUsageCollector(
+          usageCollection,
+          savedObjectsStarted,
+          this.logger
+        );
       }
-    });
-    registerTelemetryRoute({
-      ...dependencies,
-      getSavedObjectsService: () => savedObjectsStarted,
     });
   }
 
