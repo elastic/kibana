@@ -86,12 +86,13 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
       const moveButtonClasses = classNames('pipelineProcessorsEditor__item__moveButton', {
         'pipelineProcessorsEditor__item__moveButton--cancel': isMovingThisProcessor,
       });
+      const icon = isMovingThisProcessor ? 'cross' : 'sortable';
       const moveButton = (
         <EuiButtonToggle
           isEmpty={!isMovingThisProcessor}
           fill={isMovingThisProcessor}
           isIconOnly
-          iconType="sortable"
+          iconType={icon}
           data-test-subj={dataTestSubj}
           size="s"
           disabled={isDisabled && !isMovingThisProcessor}
