@@ -17,6 +17,7 @@ import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { EuiProgress, EuiLoadingSpinner } from '@elastic/eui';
 import { documentField } from './document_field';
+import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 
 const initialState: IndexPatternPrivateState = {
   indexPatternRefs: [],
@@ -230,6 +231,7 @@ describe('IndexPattern Data Panel', () => {
         fromDate: 'now-7d',
         toDate: 'now',
       },
+      charts: chartPluginMock.createSetupContract(),
       query: { query: '', language: 'lucene' },
       filters: [],
       showNoDataPopover: jest.fn(),
