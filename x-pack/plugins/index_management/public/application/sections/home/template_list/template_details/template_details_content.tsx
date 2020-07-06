@@ -98,7 +98,7 @@ export const TemplateDetailsContent = ({
     decodedTemplateName,
     isLegacy
   );
-  const isManaged = templateDetails?._kbnMeta.isManaged ?? false;
+  const isCloudManaged = templateDetails?._kbnMeta.isCloudManaged ?? false;
   const [templateToDelete, setTemplateToDelete] = useState<
     Array<{ name: string; isLegacy?: boolean }>
   >([]);
@@ -158,7 +158,7 @@ export const TemplateDetailsContent = ({
 
       const tabContent = tabToComponentMap[activeTab];
 
-      const managedTemplateCallout = isManaged && (
+      const managedTemplateCallout = isCloudManaged && (
         <>
           <EuiCallOut
             title={
@@ -268,7 +268,7 @@ export const TemplateDetailsContent = ({
                           }),
                           icon: 'pencil',
                           onClick: () => editTemplate(templateName, isLegacy),
-                          disabled: isManaged,
+                          disabled: isCloudManaged,
                         },
                         {
                           name: i18n.translate('xpack.idxMgmt.templateDetails.cloneButtonLabel', {
@@ -284,7 +284,7 @@ export const TemplateDetailsContent = ({
                           icon: 'trash',
                           onClick: () =>
                             setTemplateToDelete([{ name: decodedTemplateName, isLegacy }]),
-                          disabled: isManaged,
+                          disabled: isCloudManaged,
                         },
                       ],
                     },

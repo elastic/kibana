@@ -143,7 +143,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           onClick: ({ name }: TemplateListItem) => {
             editTemplate(name);
           },
-          enabled: ({ _kbnMeta: { isManaged } }: TemplateListItem) => !isManaged,
+          enabled: ({ _kbnMeta: { isCloudManaged } }: TemplateListItem) => !isCloudManaged,
         },
         {
           type: 'icon',
@@ -172,7 +172,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
             setTemplatesToDelete([{ name, isLegacy }]);
           },
           isPrimary: true,
-          enabled: ({ _kbnMeta: { isManaged } }: TemplateListItem) => !isManaged,
+          enabled: ({ _kbnMeta: { isCloudManaged } }: TemplateListItem) => !isCloudManaged,
         },
       ],
     },
@@ -192,7 +192,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
 
   const selectionConfig = {
     onSelectionChange: setSelection,
-    selectable: ({ _kbnMeta: { isManaged } }: TemplateListItem) => !isManaged,
+    selectable: ({ _kbnMeta: { isCloudManaged } }: TemplateListItem) => !isCloudManaged,
     selectableMessage: (selectable: boolean) => {
       if (!selectable) {
         return i18n.translate(
