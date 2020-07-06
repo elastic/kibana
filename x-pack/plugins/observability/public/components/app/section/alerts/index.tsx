@@ -15,7 +15,7 @@ import moment from 'moment';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { SectionContainer } from '..';
 
-const alerts = [
+const _alerts = [
   {
     id: '1',
     name: 'Error rate | opbeans-java',
@@ -24,33 +24,38 @@ const alerts = [
     updatedAt: '2020-07-03T14:27:51.488Z',
     muteAll: true,
   },
-  {
-    id: '2',
-    name: 'Error rate | opbeans-java',
-    alertTypeId: 'apm.error_rate',
-    tags: ['apm', 'service.name:opbeans-java'],
-    updatedAt: '2020-07-02T14:27:51.488Z',
-    muteAll: true,
-  },
-  {
-    id: '3',
-    name: 'Error rate | opbeans-java',
-    alertTypeId: 'apm.error_rate',
-    tags: ['apm', 'service.name:opbeans-java'],
-    updatedAt: '2020-06-25T14:27:51.488Z',
-    muteAll: true,
-  },
-  {
-    id: '4',
-    name: 'Error rate | opbeans-java',
-    alertTypeId: 'apm.error_rate',
-    tags: ['apm', 'service.name:opbeans-java'],
-    updatedAt: '2020-03-25T14:27:51.488Z',
-    muteAll: true,
-  },
 ];
+//   {
+//     id: '2',
+//     name: 'Error rate | opbeans-java',
+//     alertTypeId: 'apm.error_rate',
+//     tags: ['apm', 'service.name:opbeans-java'],
+//     updatedAt: '2020-07-02T14:27:51.488Z',
+//     muteAll: true,
+//   },
+//   {
+//     id: '3',
+//     name: 'Error rate | opbeans-java',
+//     alertTypeId: 'apm.error_rate',
+//     tags: ['apm', 'service.name:opbeans-java'],
+//     updatedAt: '2020-06-25T14:27:51.488Z',
+//     muteAll: true,
+//   },
+//   {
+//     id: '4',
+//     name: 'Error rate | opbeans-java',
+//     alertTypeId: 'apm.error_rate',
+//     tags: ['apm', 'service.name:opbeans-java'],
+//     updatedAt: '2020-03-25T14:27:51.488Z',
+//     muteAll: true,
+//   },
+// ];
 
-export const AlertsSection = () => {
+interface Props {
+  alerts: Array<typeof _alerts[0]>;
+}
+
+export const AlertsSection = ({ alerts }: Props) => {
   return (
     <SectionContainer
       title="Alerts"
@@ -88,9 +93,11 @@ export const AlertsSection = () => {
                     Updated {moment.duration(moment().diff(alert.updatedAt)).humanize()} ago
                   </EuiText>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="minusInCircle" />
-                </EuiFlexItem>
+                {alert.muteAll && (
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="minusInCircle" />
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             </EuiFlexItem>
             {!isLastElement && <EuiHorizontalRule margin="xs" />}
