@@ -178,23 +178,6 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         const { jobId } = request.params;
         const body: Partial<Job> = request.body;
 
-        // if annotations is enabled but model plot is not
-        if (
-          body.model_plot_config?.annotations_enabled === true &&
-          body.model_plot_config?.enabled === undefined
-        ) {
-          body.model_plot_config.enabled = false;
-        }
-
-        // if annotations is undefined, change it to false by default
-        // else server side will turn it on by default
-        if (
-          body.model_plot_config?.annotations_enabled === undefined &&
-          body.model_plot_config?.enabled === true
-        ) {
-          body.model_plot_config.annotations_enabled = false;
-        }
-
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.addJob', {
           jobId,
           body,

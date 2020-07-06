@@ -14,16 +14,12 @@ import { Description } from './description';
 export const AnnotationsSwitch: FC = () => {
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const [annotationsEnabled, setAnnotationsEnabled] = useState(
-    jobCreator.modelPlot ?? jobCreator.annotations
+    jobCreator.modelPlot ?? jobCreator.modelChangeAnnotations
   );
   const [showCallOut, setShowCallout] = useState(jobCreator.modelPlot && annotationsEnabled);
 
   useEffect(() => {
-    if (jobCreator.modelPlot === undefined) {
-      jobCreator.modelPlot = false;
-    }
-
-    jobCreator.annotations = annotationsEnabled;
+    jobCreator.modelChangeAnnotations = annotationsEnabled;
     jobCreatorUpdate();
   }, [annotationsEnabled]);
 
@@ -46,7 +42,7 @@ export const AnnotationsSwitch: FC = () => {
           label={i18n.translate(
             'xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.enableModelPlotAnnotations.title',
             {
-              defaultMessage: 'Enable model plot annotations',
+              defaultMessage: 'Enable model change annotations',
             }
           )}
         />

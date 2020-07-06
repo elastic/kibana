@@ -13,7 +13,7 @@ export const Description: FC = memo(({ children }) => {
   const title = i18n.translate(
     'xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.enableModelPlotAnnotations.title',
     {
-      defaultMessage: 'Enable model plot annotations',
+      defaultMessage: 'Enable model change annotations',
     }
   );
   return (

@@ -228,11 +228,23 @@ export class JobCreator {
 
   public set modelPlot(enable: boolean) {
     if (enable) {
-      this._job_config.model_plot_config = {
-        enabled: true,
-      };
+      if (this._job_config.model_plot_config) {
+        this._job_config.model_plot_config.enabled = true;
+      } else {
+        this._job_config.model_plot_config = {
+          enabled: true,
+          annotations_enabled: false,
+        };
+      }
     } else {
-      delete this._job_config.model_plot_config;
+      if (this._job_config.model_plot_config) {
+        if (this.modelChangeAnnotations === false) {
+          // delete model_plot_config if both modelPlot and annotation are false
+          delete this._job_config.model_plot_config;
+        } else {
+          this._job_config.model_plot_config.enabled = false;
+        }
+      }
     }
   }
 
@@ -243,7 +255,7 @@ export class JobCreator {
     );
   }
 
-  public set annotations(enable: boolean) {
+  public set modelChangeAnnotations(enable: boolean) {
     if (enable) {
       if (this._job_config.model_plot_config) {
         this._job_config.model_plot_config.annotations_enabled = true;
@@ -254,11 +266,20 @@ export class JobCreator {
         };
       }
     } else {
-      delete this._job_config.model_plot_config?.annotations_enabled;
+      if (this._job_config.model_plot_config) {
+        if (this.modelPlot === false) {
+          // delete model_plot_config if both modelPlot and annotation are false
+          delete this._job_config.model_plot_config;
+        } else {
+          // explicitly set this to false instead of omitting if modelPlot is true
+          // else by default if only modelPlot is true, it will also include annotations
+          this._job_config.model_plot_config.annotations_enabled = false;
+        }
+      }
     }
   }
 
-  public get annotations() {
+  public get modelChangeAnnotations() {
     return this._job_config.model_plot_config?.annotations_enabled === true;
   }
 
