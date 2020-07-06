@@ -100,6 +100,30 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           resp[0].stack_stats.kibana.plugins.infraops.last_24_hours.hits.infraops_docker
         ).to.be.greaterThan(0);
       });
+
+      it('records telemetry for kubernetes', async () => {
+        await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
+        await pageObjects.infraHome.getWaffleMap();
+        await pageObjects.infraHome.goToPods();
+
+        const resp = await supertest
+          .post(`/api/telemetry/v2/clusters/_stats`)
+          .set(COMMON_REQUEST_HEADERS)
+          .set('Accept', 'application/json')
+          .send({
+            timeRange: {
+              min: moment().subtract(1, 'hour').toISOString(),
+              max: moment().toISOString(),
+            },
+            unencrypted: true,
+          })
+          .expect(200)
+          .then((res: any) => res.body);
+
+        expect(
+          resp[0].stack_stats.kibana.plugins.infraops.last_24_hours.hits.infraops_kubernetes
+        ).to.be.greaterThan(0);
+      });
     });
   });
 };
