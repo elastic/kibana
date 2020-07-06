@@ -19,8 +19,8 @@ const PanelDisplayNames: Record<DetailViewPanelName, string> = {
   overview: i18n.translate('xpack.ingestManager.epm.packageDetailsNav.overviewLinkText', {
     defaultMessage: 'Overview',
   }),
-  'data-sources': i18n.translate('xpack.ingestManager.epm.packageDetailsNav.datasourcesLinkText', {
-    defaultMessage: 'Data sources',
+  usages: i18n.translate('xpack.ingestManager.epm.packageDetailsNav.packageConfigsLinkText', {
+    defaultMessage: 'Usages',
   }),
   settings: i18n.translate('xpack.ingestManager.epm.packageDetailsNav.settingsLinkText', {
     defaultMessage: 'Settings',
@@ -43,12 +43,9 @@ export function SideNavLinks({ name, version, active }: NavLinkProps) {
               ? p.theme.eui.euiFontWeightSemiBold
               : p.theme.eui.euiFontWeightRegular};
         `;
-        // Don't display Data Sources tab as we haven't implemented this yet
-        // FIXME: Restore when we implement data sources page
-        if (
-          panel === 'data-sources' &&
-          (true || packageInstallStatus.status !== InstallStatus.installed)
-        )
+        // Don't display usages tab as we haven't implemented this yet
+        // FIXME: Restore when we implement usages page
+        if (panel === 'usages' && (true || packageInstallStatus.status !== InstallStatus.installed))
           return null;
 
         return (

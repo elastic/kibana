@@ -29,11 +29,11 @@ const FieldsBrowserContainer = styled.div<{ width: number }>`
   border: ${({ theme }) => theme.eui.euiBorderWidthThin} solid
     ${({ theme }) => theme.eui.euiColorMediumShade};
   border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
-  left: 0;
+  left: 8px;
   padding: ${({ theme }) => theme.eui.paddingSizes.s} ${({ theme }) => theme.eui.paddingSizes.s}
-    ${({ theme }) => theme.eui.paddingSizes.m};
+    ${({ theme }) => theme.eui.paddingSizes.s};
   position: absolute;
-  top: calc(100% + ${({ theme }) => theme.eui.euiSize});
+  top: calc(100% + 4px);
   width: ${({ width }) => width}px;
   z-index: 9990;
 `;

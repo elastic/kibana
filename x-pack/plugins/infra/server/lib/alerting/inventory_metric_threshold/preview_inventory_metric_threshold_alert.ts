@@ -6,7 +6,7 @@
 import { Unit } from '@elastic/datemath';
 import { first } from 'lodash';
 import { InventoryMetricConditions } from './types';
-import { IScopedClusterClient } from '../../../../../../../src/core/server';
+import { ILegacyScopedClusterClient } from '../../../../../../../src/core/server';
 import { InfraSource } from '../../../../common/http_api/source_api';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
@@ -20,7 +20,7 @@ interface InventoryMetricThresholdParams {
 }
 
 interface PreviewInventoryMetricThresholdAlertParams {
-  callCluster: IScopedClusterClient['callAsCurrentUser'];
+  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   params: InventoryMetricThresholdParams;
   config: InfraSource['configuration'];
   lookback: Unit;
@@ -53,7 +53,7 @@ export const previewInventoryMetricThresholdAlert = async ({
     )
   );
 
-  const inventoryItems = Object.keys(first(results));
+  const inventoryItems = Object.keys(first(results) as any);
   const previewResults = inventoryItems.map((item) => {
     const isNoData = results.some((result) => result[item].isNoData);
     if (isNoData) {

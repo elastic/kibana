@@ -82,7 +82,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`landing page shows "Create new Visualization" button`, async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
-        await testSubjects.existOrFail('visualizeLandingPage', {
+        await testSubjects.existOrFail('visualizationLandingPage', {
           timeout: config.get('timeouts.waitFor'),
         });
         await testSubjects.existOrFail('newItemButton');
@@ -206,7 +206,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`landing page shows "Create new Visualization" button`, async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
-        await testSubjects.existOrFail('visualizeLandingPage', {
+        await testSubjects.existOrFail('visualizationLandingPage', {
           timeout: config.get('timeouts.waitFor'),
         });
         await testSubjects.existOrFail('newItemButton');
@@ -321,7 +321,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`landing page shows "Create new Visualization" button`, async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
-        await testSubjects.existOrFail('visualizeLandingPage', { timeout: 10000 });
+        await testSubjects.existOrFail('visualizationLandingPage', { timeout: 10000 });
         await testSubjects.existOrFail('newItemButton');
       });
 

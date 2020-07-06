@@ -21,6 +21,7 @@ export interface DefaultDraggableType {
   name?: string | null;
   queryValue?: string | null;
   children?: React.ReactNode;
+  timelineId?: string;
   tooltipContent?: React.ReactNode;
 }
 
@@ -83,7 +84,7 @@ Content.displayName = 'Content';
  * @param queryValue - defaults to `value`, this query overrides the `queryMatch.value` used by the `DataProvider` that represents the data
  */
 export const DefaultDraggable = React.memo<DefaultDraggableType>(
-  ({ id, field, value, name, children, tooltipContent, queryValue }) =>
+  ({ id, field, value, name, children, timelineId, tooltipContent, queryValue }) =>
     value != null ? (
       <DraggableWrapper
         dataProvider={{
@@ -110,6 +111,7 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
             </Content>
           )
         }
+        timelineId={timelineId}
       />
     ) : null
 );
