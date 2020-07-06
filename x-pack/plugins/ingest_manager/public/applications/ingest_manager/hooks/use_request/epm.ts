@@ -44,6 +44,13 @@ export const sendGetPackageInfoByKey = (pkgkey: string) => {
   });
 };
 
+export const useGetFileByPath = (filePath: string) => {
+  return useRequest<string>({
+    path: epmRouteService.getFilePath(filePath),
+    method: 'get',
+  });
+};
+
 export const sendGetFileByPath = (filePath: string) => {
   return sendRequest<string>({
     path: epmRouteService.getFilePath(filePath),

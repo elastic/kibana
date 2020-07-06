@@ -20,22 +20,16 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Loading } from '../../../components';
 import { PackageList } from '../../../types';
 import { useLocalSearch, searchIdField } from '../hooks';
-import { BadgeProps, PackageCard } from './package_card';
+import { PackageCard } from './package_card';
 
-type ListProps = {
+interface ListProps {
   isLoading?: boolean;
   controls?: ReactNode;
   title: string;
   list: PackageList;
-} & BadgeProps;
+}
 
-export function PackageListGrid({
-  isLoading,
-  controls,
-  title,
-  list,
-  showInstalledBadge,
-}: ListProps) {
+export function PackageListGrid({ isLoading, controls, title, list }: ListProps) {
   const initialQuery = EuiSearchBar.Query.MATCH_ALL;
 
   const [query, setQuery] = useState<Query | null>(initialQuery);
@@ -71,7 +65,7 @@ export function PackageListGrid({
             .includes(item[searchIdField])
         )
       : list;
-    gridContent = <GridColumn list={filteredList} showInstalledBadge={showInstalledBadge} />;
+    gridContent = <GridColumn list={filteredList} />;
   }
 
   return (
@@ -115,9 +109,9 @@ function ControlsColumn({ controls, title }: ControlsColumnProps) {
   );
 }
 
-type GridColumnProps = {
+interface GridColumnProps {
   list: PackageList;
-} & BadgeProps;
+}
 
 function GridColumn({ list }: GridColumnProps) {
   return (
