@@ -115,6 +115,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [MetricsServiceSetup](./kibana-plugin-core-server.metricsservicesetup.md) |  |
 |  [NodesVersionCompatibility](./kibana-plugin-core-server.nodesversioncompatibility.md) |  |
 |  [OnPostAuthToolkit](./kibana-plugin-core-server.onpostauthtoolkit.md) | A tool set defining an outcome of OnPostAuth interceptor for incoming request. |
+|  [OnPreAuthToolkit](./kibana-plugin-core-server.onpreauthtoolkit.md) | A tool set defining an outcome of OnPreAuth interceptor for incoming request. |
 |  [OnPreResponseExtensions](./kibana-plugin-core-server.onpreresponseextensions.md) | Additional data to extend a response. |
 |  [OnPreResponseInfo](./kibana-plugin-core-server.onpreresponseinfo.md) | Response status code. |
 |  [OnPreResponseToolkit](./kibana-plugin-core-server.onpreresponsetoolkit.md) | A tool set defining an outcome of OnPreRouting interceptor for incoming request. |
@@ -250,6 +251,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [MIGRATION\_DEPRECATION\_LEVEL](./kibana-plugin-core-server.migration_deprecation_level.md) |  |
 |  [MutatingOperationRefreshSetting](./kibana-plugin-core-server.mutatingoperationrefreshsetting.md) | Elasticsearch Refresh setting for mutating operation |
 |  [OnPostAuthHandler](./kibana-plugin-core-server.onpostauthhandler.md) | See [OnPostAuthToolkit](./kibana-plugin-core-server.onpostauthtoolkit.md)<!-- -->. |
+|  [OnPreAuthHandler](./kibana-plugin-core-server.onpreauthhandler.md) | See [OnPreAuthToolkit](./kibana-plugin-core-server.onpreauthtoolkit.md)<!-- -->. |
 |  [OnPreResponseHandler](./kibana-plugin-core-server.onpreresponsehandler.md) | See [OnPreRoutingToolkit](./kibana-plugin-core-server.onpreroutingtoolkit.md)<!-- -->. |
 |  [OnPreRoutingHandler](./kibana-plugin-core-server.onpreroutinghandler.md) | See [OnPreRoutingToolkit](./kibana-plugin-core-server.onpreroutingtoolkit.md)<!-- -->. |
 |  [PluginConfigSchema](./kibana-plugin-core-server.pluginconfigschema.md) | Dedicated type for plugin configuration schema. |

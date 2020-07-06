@@ -761,6 +761,7 @@ export interface HttpServiceSetup {
     getServerInfo: () => HttpServerInfo;
     registerAuth: (handler: AuthenticationHandler) => void;
     registerOnPostAuth: (handler: OnPostAuthHandler) => void;
+    registerOnPreAuth: (handler: OnPreAuthHandler) => void;
     registerOnPreResponse: (handler: OnPreResponseHandler) => void;
     registerOnPreRouting: (handler: OnPreRoutingHandler) => void;
     registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(contextName: T, provider: RequestHandlerContextProvider<T>) => RequestHandlerContextContainer;
@@ -1478,6 +1479,16 @@ export type OnPostAuthHandler = (request: KibanaRequest, response: LifecycleResp
 // @public
 export interface OnPostAuthToolkit {
     next: () => OnPostAuthResult;
+}
+
+// Warning: (ae-forgotten-export) The symbol "OnPreAuthResult" needs to be exported by the entry point index.d.ts
+//
+// @public
+export type OnPreAuthHandler = (request: KibanaRequest, response: LifecycleResponseFactory, toolkit: OnPreAuthToolkit) => OnPreAuthResult | KibanaResponse | Promise<OnPreAuthResult | KibanaResponse>;
+
+// @public
+export interface OnPreAuthToolkit {
+    next: () => OnPreAuthResult;
 }
 
 // @public
