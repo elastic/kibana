@@ -21,7 +21,7 @@ type payloadType = 'params' | 'query' | 'body';
 
 interface IMockRouterProps {
   method: methodType;
-  payload: payloadType;
+  payload?: payloadType;
 }
 interface IMockRouterRequest {
   body?: object;
@@ -33,7 +33,7 @@ type TMockRouterRequest = KibanaRequest | IMockRouterRequest;
 export class MockRouter {
   public router!: jest.Mocked<IRouter>;
   public method: methodType;
-  public payload: payloadType;
+  public payload?: payloadType;
   public response = httpServerMock.createResponseFactory();
 
   constructor({ method, payload }: IMockRouterProps) {
@@ -58,6 +58,8 @@ export class MockRouter {
    */
 
   public validateRoute = (request: TMockRouterRequest) => {
+    if (!this.payload) throw new Error('Cannot validate wihout a payload type specified.');
+
     const [config] = this.router[this.method].mock.calls[0];
     const validate = config.validate as RouteValidatorConfig<{}, {}, {}>;
 
