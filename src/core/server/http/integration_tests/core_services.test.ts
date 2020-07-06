@@ -333,7 +333,7 @@ describe('http service', () => {
       it('basePath information for an incoming request is available in legacy server', async () => {
         const reqBasePath = '/requests-specific-base-path';
         const { http } = await root.setup();
-        http.registerOnPreAuth((req, res, toolkit) => {
+        http.registerOnPreRouting((req, res, toolkit) => {
           http.basePath.set(req, reqBasePath);
           return toolkit.next();
         });

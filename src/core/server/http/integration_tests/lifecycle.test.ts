@@ -56,20 +56,22 @@ interface StorageData {
   expires: number;
 }
 
-describe('OnPreAuth', () => {
+describe('OnPreRouting', () => {
   it('supports registering a request interceptor', async () => {
-    const { registerOnPreAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
+    const { registerOnPreRouting, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'ok' }));
 
     const callingOrder: string[] = [];
-    registerOnPreAuth((req, res, t) => {
+    registerOnPreRouting((req, res, t) => {
       callingOrder.push('first');
       return t.next();
     });
 
-    registerOnPreAuth((req, res, t) => {
+    registerOnPreRouting((req, res, t) => {
       callingOrder.push('second');
       return t.next();
     });
@@ -81,7 +83,9 @@ describe('OnPreAuth', () => {
   });
 
   it('supports request forwarding to specified url', async () => {
-    const { registerOnPreAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
+    const { registerOnPreRouting, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
     const router = createRouter('/');
 
     router.get({ path: '/initial', validate: false }, (context, req, res) =>
@@ -92,13 +96,13 @@ describe('OnPreAuth', () => {
     );
 
     let urlBeforeForwarding;
-    registerOnPreAuth((req, res, t) => {
+    registerOnPreRouting((req, res, t) => {
       urlBeforeForwarding = ensureRawRequest(req).raw.req.url;
       return t.rewriteUrl('/redirectUrl');
     });
 
     let urlAfterForwarding;
-    registerOnPreAuth((req, res, t) => {
+    registerOnPreRouting((req, res, t) => {
       // used by legacy platform
       urlAfterForwarding = ensureRawRequest(req).raw.req.url;
       return t.next();
@@ -113,13 +117,15 @@ describe('OnPreAuth', () => {
   });
 
   it('supports redirection from the interceptor', async () => {
-    const { registerOnPreAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
+    const { registerOnPreRouting, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
     const router = createRouter('/');
 
     const redirectUrl = '/redirectUrl';
     router.get({ path: '/initial', validate: false }, (context, req, res) => res.ok());
 
-    registerOnPreAuth((req, res, t) =>
+    registerOnPreRouting((req, res, t) =>
       res.redirected({
         headers: {
           location: redirectUrl,
@@ -134,12 +140,14 @@ describe('OnPreAuth', () => {
   });
 
   it('supports rejecting request and adjusting response headers', async () => {
-    const { registerOnPreAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
+    const { registerOnPreRouting, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
 
-    registerOnPreAuth((req, res, t) =>
+    registerOnPreRouting((req, res, t) =>
       res.unauthorized({
         headers: {
           'www-authenticate': 'challenge',
@@ -154,12 +162,14 @@ describe('OnPreAuth', () => {
   });
 
   it('does not expose error details if interceptor throws', async () => {
-    const { registerOnPreAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
+    const { registerOnPreRouting, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
 
-    registerOnPreAuth((req, res, t) => {
+    registerOnPreRouting((req, res, t) => {
       throw new Error('reason');
     });
     await server.start();
@@ -177,12 +187,14 @@ describe('OnPreAuth', () => {
   });
 
   it('returns internal error if interceptor returns unexpected result', async () => {
-    const { registerOnPreAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
+    const { registerOnPreRouting, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
 
-    registerOnPreAuth((req, res, t) => ({} as any));
+    registerOnPreRouting((req, res, t) => ({} as any));
     await server.start();
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
@@ -191,22 +203,24 @@ describe('OnPreAuth', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
-          [Error: Unexpected result from OnPreAuth. Expected OnPreAuthResult or KibanaResponse, but given: [object Object].],
+          [Error: Unexpected result from OnPreRouting. Expected OnPreRoutingResult or KibanaResponse, but given: [object Object].],
         ],
       ]
     `);
   });
 
   it(`doesn't share request object between interceptors`, async () => {
-    const { registerOnPreAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
+    const { registerOnPreRouting, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
     const router = createRouter('/');
 
-    registerOnPreAuth((req, res, t) => {
+    registerOnPreRouting((req, res, t) => {
       // don't complain customField is not defined on Request type
       (req as any).customField = { value: 42 };
       return t.next();
     });
-    registerOnPreAuth((req, res, t) => {
+    registerOnPreRouting((req, res, t) => {
       // don't complain customField is not defined on Request type
       if (typeof (req as any).customField !== 'undefined') {
         throw new Error('Request object was mutated');
@@ -597,7 +611,7 @@ describe('Auth', () => {
 
   it.skip('is the only place with access to the authorization header', async () => {
     const {
-      registerOnPreAuth,
+      registerOnPreRouting,
       registerAuth,
       registerOnPostAuth,
       server: innerServer,
@@ -605,9 +619,9 @@ describe('Auth', () => {
     } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    let fromRegisterOnPreAuth;
-    await registerOnPreAuth((req, res, toolkit) => {
-      fromRegisterOnPreAuth = req.headers.authorization;
+    let fromregisterOnPreRouting;
+    await registerOnPreRouting((req, res, toolkit) => {
+      fromregisterOnPreRouting = req.headers.authorization;
       return toolkit.next();
     });
 
@@ -634,7 +648,7 @@ describe('Auth', () => {
     const token = 'Basic: user:password';
     await supertest(innerServer.listener).get('/').set('Authorization', token).expect(200);
 
-    expect(fromRegisterOnPreAuth).toEqual({});
+    expect(fromregisterOnPreRouting).toEqual({});
     expect(fromRegisterAuth).toEqual({ authorization: token });
     expect(fromRegisterOnPostAuth).toEqual({});
     expect(fromRouteHandler).toEqual({});

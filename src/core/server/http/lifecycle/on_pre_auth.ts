@@ -41,48 +41,48 @@ interface RewriteUrl {
   url: string;
 }
 
-type OnPreAuthResult = Next | RewriteUrl;
+type OnPreRoutingResult = Next | RewriteUrl;
 
-const preAuthResult = {
-  next(): OnPreAuthResult {
+const preRoutingResult = {
+  next(): OnPreRoutingResult {
     return { type: ResultType.next };
   },
-  rewriteUrl(url: string): OnPreAuthResult {
+  rewriteUrl(url: string): OnPreRoutingResult {
     return { type: ResultType.rewriteUrl, url };
   },
-  isNext(result: OnPreAuthResult): result is Next {
+  isNext(result: OnPreRoutingResult): result is Next {
     return result && result.type === ResultType.next;
   },
-  isRewriteUrl(result: OnPreAuthResult): result is RewriteUrl {
+  isRewriteUrl(result: OnPreRoutingResult): result is RewriteUrl {
     return result && result.type === ResultType.rewriteUrl;
   },
 };
 
 /**
  * @public
- * A tool set defining an outcome of OnPreAuth interceptor for incoming request.
+ * A tool set defining an outcome of OnPreRouting interceptor for incoming request.
  */
-export interface OnPreAuthToolkit {
+export interface OnPreRoutingToolkit {
   /** To pass request to the next handler */
-  next: () => OnPreAuthResult;
+  next: () => OnPreRoutingResult;
   /** Rewrite requested resources url before is was authenticated and routed to a handler */
-  rewriteUrl: (url: string) => OnPreAuthResult;
+  rewriteUrl: (url: string) => OnPreRoutingResult;
 }
 
-const toolkit: OnPreAuthToolkit = {
-  next: preAuthResult.next,
-  rewriteUrl: preAuthResult.rewriteUrl,
+const toolkit: OnPreRoutingToolkit = {
+  next: preRoutingResult.next,
+  rewriteUrl: preRoutingResult.rewriteUrl,
 };
 
 /**
- * See {@link OnPreAuthToolkit}.
+ * See {@link OnPreRoutingToolkit}.
  * @public
  */
-export type OnPreAuthHandler = (
+export type OnPreRoutingHandler = (
   request: KibanaRequest,
   response: LifecycleResponseFactory,
-  toolkit: OnPreAuthToolkit
-) => OnPreAuthResult | KibanaResponse | Promise<OnPreAuthResult | KibanaResponse>;
+  toolkit: OnPreRoutingToolkit
+) => OnPreRoutingResult | KibanaResponse | Promise<OnPreRoutingResult | KibanaResponse>;
 
 /**
  * @public
@@ -90,8 +90,8 @@ export type OnPreAuthHandler = (
  * @param fn - an extension point allowing to perform custom logic for
  * incoming HTTP requests.
  */
-export function adoptToHapiOnPreAuthFormat(fn: OnPreAuthHandler, log: Logger) {
-  return async function interceptPreAuthRequest(
+export function adoptToHapiOnRequest(fn: OnPreRoutingHandler, log: Logger) {
+  return async function interceptPreRoutingRequest(
     request: Request,
     responseToolkit: HapiResponseToolkit
   ): Promise<Lifecycle.ReturnValue> {
@@ -103,11 +103,11 @@ export function adoptToHapiOnPreAuthFormat(fn: OnPreAuthHandler, log: Logger) {
         return hapiResponseAdapter.handle(result);
       }
 
-      if (preAuthResult.isNext(result)) {
+      if (preRoutingResult.isNext(result)) {
         return responseToolkit.continue;
       }
 
-      if (preAuthResult.isRewriteUrl(result)) {
+      if (preRoutingResult.isRewriteUrl(result)) {
         const { url } = result;
         request.setUrl(url);
         // We should update raw request as well since it can be proxied to the old platform
@@ -115,7 +115,7 @@ export function adoptToHapiOnPreAuthFormat(fn: OnPreAuthHandler, log: Logger) {
         return responseToolkit.continue;
       }
       throw new Error(
-        `Unexpected result from OnPreAuth. Expected OnPreAuthResult or KibanaResponse, but given: ${result}.`
+        `Unexpected result from OnPreRouting. Expected OnPreRoutingResult or KibanaResponse, but given: ${result}.`
       );
     } catch (error) {
       log.error(error);

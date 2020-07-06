@@ -25,7 +25,7 @@ import { HttpServerSetup } from './http_server';
 import { SessionStorageCookieOptions } from './cookie_session_storage';
 import { SessionStorageFactory } from './session_storage';
 import { AuthenticationHandler } from './lifecycle/auth';
-import { OnPreAuthHandler } from './lifecycle/on_pre_auth';
+import { OnPreRoutingHandler } from './lifecycle/on_pre_auth';
 import { OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { OnPreResponseHandler } from './lifecycle/on_pre_response';
 import { IBasePath } from './base_path_service';
@@ -151,11 +151,11 @@ export interface HttpServiceSetup {
    * Runs the handler before Auth interceptor performs a check that user has access to requested resources, so it's the
    * only place when you can forward a request to another URL right on the server.
    * Can register any number of registerOnPostAuth, which are called in sequence
-   * (from the first registered to the last). See {@link OnPreAuthHandler}.
+   * (from the first registered to the last). See {@link OnPreRoutingHandler}.
    *
-   * @param handler {@link OnPreAuthHandler} - function to call.
+   * @param handler {@link OnPreRoutingHandler} - function to call.
    */
-  registerOnPreAuth: (handler: OnPreAuthHandler) => void;
+  registerOnPreRouting: (handler: OnPreRoutingHandler) => void;
 
   /**
    * To define custom authentication and/or authorization mechanism for incoming requests.
@@ -176,7 +176,7 @@ export interface HttpServiceSetup {
    * Runs the handler after Auth interceptor
    * did make sure a user has access to the requested resource.
    * The auth state is available at stage via http.auth.get(..)
-   * Can register any number of registerOnPreAuth, which are called in sequence
+   * Can register any number of registerOnPreRouting, which are called in sequence
    * (from the first registered to the last). See {@link OnPostAuthHandler}.
    *
    * @param handler {@link OnPostAuthHandler} - function to call.

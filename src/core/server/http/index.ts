@@ -64,7 +64,7 @@ export {
   SafeRouteMethod,
 } from './router';
 export { BasePathProxyServer } from './base_path_proxy_server';
-export { OnPreAuthHandler, OnPreAuthToolkit } from './lifecycle/on_pre_auth';
+export { OnPreRoutingHandler, OnPreRoutingToolkit } from './lifecycle/on_pre_auth';
 export {
   AuthenticationHandler,
   AuthHeaders,

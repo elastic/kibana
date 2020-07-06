@@ -157,7 +157,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       ),
       createRouter: () => router,
       resources: deps.httpResources.createRegistrar(router),
-      registerOnPreAuth: deps.http.registerOnPreAuth,
+      registerOnPreRouting: deps.http.registerOnPreRouting,
       registerAuth: deps.http.registerAuth,
       registerOnPostAuth: deps.http.registerOnPostAuth,
       registerOnPreResponse: deps.http.registerOnPreResponse,

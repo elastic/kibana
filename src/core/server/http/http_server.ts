@@ -25,7 +25,7 @@ import { HttpConfig } from './http_config';
 import { createServer, getListenerOptions, getServerOptions } from './http_tools';
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
 import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';
-import { adoptToHapiOnPreAuthFormat, OnPreAuthHandler } from './lifecycle/on_pre_auth';
+import { adoptToHapiOnRequest, OnPreRoutingHandler } from './lifecycle/on_pre_auth';
 import { adoptToHapiOnPreResponseFormat, OnPreResponseHandler } from './lifecycle/on_pre_response';
 import { IRouter, RouteConfigOptions, KibanaRouteState, isSafeMethod } from './router';
 import {
@@ -50,7 +50,7 @@ export interface HttpServerSetup {
   csp: HttpServiceSetup['csp'];
   createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
   registerAuth: HttpServiceSetup['registerAuth'];
-  registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
+  registerOnPreRouting: HttpServiceSetup['registerOnPreRouting'];
   registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
   registerOnPreResponse: HttpServiceSetup['registerOnPreResponse'];
   getAuthHeaders: GetAuthHeaders;
@@ -64,7 +64,7 @@ export interface HttpServerSetup {
 /** @internal */
 export type LifecycleRegistrar = Pick<
   HttpServerSetup,
-  'registerAuth' | 'registerOnPreAuth' | 'registerOnPostAuth' | 'registerOnPreResponse'
+  'registerAuth' | 'registerOnPreRouting' | 'registerOnPostAuth' | 'registerOnPreResponse'
 >;
 
 export class HttpServer {
@@ -113,7 +113,7 @@ export class HttpServer {
     return {
       registerRouter: this.registerRouter.bind(this),
       registerStaticDir: this.registerStaticDir.bind(this),
-      registerOnPreAuth: this.registerOnPreAuth.bind(this),
+      registerOnPreRouting: this.registerOnPreRouting.bind(this),
       registerOnPostAuth: this.registerOnPostAuth.bind(this),
       registerOnPreResponse: this.registerOnPreResponse.bind(this),
       createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) =>
@@ -222,7 +222,7 @@ export class HttpServer {
       return;
     }
 
-    this.registerOnPreAuth((request, response, toolkit) => {
+    this.registerOnPreRouting((request, response, toolkit) => {
       const oldUrl = request.url.href!;
       const newURL = basePathService.remove(oldUrl);
       const shouldRedirect = newURL !== oldUrl;
@@ -274,15 +274,15 @@ export class HttpServer {
     this.server.ext('onPostAuth', adoptToHapiOnPostAuthFormat(fn, this.log));
   }
 
-  private registerOnPreAuth(fn: OnPreAuthHandler) {
+  private registerOnPreRouting(fn: OnPreRoutingHandler) {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
     if (this.stopped) {
-      this.log.warn(`registerOnPreAuth called after stop`);
+      this.log.warn(`registerOnPreRouting called after stop`);
     }
 
-    this.server.ext('onRequest', adoptToHapiOnPreAuthFormat(fn, this.log));
+    this.server.ext('onRequest', adoptToHapiOnRequest(fn, this.log));
   }
 
   private registerOnPreResponse(fn: OnPreResponseHandler) {
