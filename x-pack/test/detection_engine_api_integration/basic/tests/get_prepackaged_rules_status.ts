@@ -34,7 +34,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllAlerts(es);
       });
 
-      it('should return expected JSON keys of the pre-packaged rules status', async () => {
+      it('should return expected JSON keys of the pre-packaged rules and pre-packaged timelines status', async () => {
         const { body } = await supertest
           .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
           .set('kbn-xsrf', 'true')
@@ -46,6 +46,9 @@ export default ({ getService }: FtrProviderContext): void => {
           'rules_installed',
           'rules_not_installed',
           'rules_not_updated',
+          'timelines_installed',
+          'timelines_not_installed',
+          'timelines_not_updated',
         ]);
       });
 
