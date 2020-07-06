@@ -31,6 +31,17 @@ Once uploaded to the telemetry cluster, the data telemetry is stored in
 
 The script in `scripts/upload-telemetry-data` can generate sample telemetry data and upload it to a cluster of your choosing.
 
+You'll need to set the `GITHUB_TOKEN` environment variable to a token that has `repo` scope so it can read from the
+[elastic/telemetry](https://github.com/elastic/telemetry) repository. (You probably have a token that works for this in
+~/.backport/config.json.)
+
+The script will run as the `elastic` user using the elasticsearch hosts and password settings from the config/kibana.yml
+and/or config/kibana.dev.yml files.
+
+Running the script with `--clear` will delete the index first.
+
+After running the script you should see sample telemetry data in the "xpack-phone-home" index.
+
 ### Updating Data Telemetry Mappings
 
 In order for fields to be searchable on the telemetry cluster, they need to be

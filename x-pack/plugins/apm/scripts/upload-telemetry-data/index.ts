@@ -11,7 +11,7 @@
 // - Easier testing of the telemetry tasks
 // - Validate whether we can run the queries we want to on the telemetry data
 
-import { merge, chunk, flatten } from 'lodash';
+import { merge, chunk, flatten, omit } from 'lodash';
 import { Client } from '@elastic/elasticsearch';
 import { argv } from 'yargs';
 import { Logger } from 'kibana/server';
@@ -48,17 +48,24 @@ async function uploadData() {
     nodes: [config['elasticsearch.hosts']],
     ...(httpAuth
       ? {
-          auth: httpAuth,
+          auth: { ...httpAuth, username: 'elastic' },
         }
       : {}),
   });
 
-  const newTemplate = mergeApmTelemetryMapping(
-    merge(telemetryTemplate, {
-      settings: {
-        index: { mapping: { total_fields: { limit: 10000 } } },
-      },
-    })
+  // The new template is the template downloaded from the telemetry repo, with
+  // our current telemetry mapping merged in, with the "index_patterns" key
+  // (which cannot be used when creating an index) removed.
+  const newTemplate = omit(
+    mergeApmTelemetryMapping(
+      merge(telemetryTemplate, {
+        index_patterns: undefined,
+        settings: {
+          index: { mapping: { total_fields: { limit: 10000 } } },
+        },
+      })
+    ),
+    'index_patterns'
   );
 
   await createOrUpdateIndex({
