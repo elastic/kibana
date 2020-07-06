@@ -613,10 +613,8 @@ export interface PolicyConfig {
     };
     malware: MalwareFields;
     logging: {
-      stdout: string;
       file: string;
     };
-    advanced: PolicyConfigAdvancedOptions;
   };
   mac: {
     events: {
@@ -626,10 +624,8 @@ export interface PolicyConfig {
     };
     malware: MalwareFields;
     logging: {
-      stdout: string;
       file: string;
     };
-    advanced: PolicyConfigAdvancedOptions;
   };
   linux: {
     events: {
@@ -638,10 +634,8 @@ export interface PolicyConfig {
       network: boolean;
     };
     logging: {
-      stdout: string;
       file: string;
     };
-    advanced: PolicyConfigAdvancedOptions;
   };
 }
 
@@ -663,20 +657,6 @@ export interface UIPolicyConfig {
   linux: Pick<PolicyConfig['linux'], 'events'>;
 }
 
-interface PolicyConfigAdvancedOptions {
-  elasticsearch: {
-    indices: {
-      control: string;
-      event: string;
-      logging: string;
-    };
-    kernel: {
-      connect: boolean;
-      process: boolean;
-    };
-  };
-}
-
 /** Policy: Malware protection fields */
 export interface MalwareFields {
   mode: ProtectionModes;
@@ -686,7 +666,6 @@ export interface MalwareFields {
 export enum ProtectionModes {
   detect = 'detect',
   prevent = 'prevent',
-  preventNotify = 'preventNotify',
   off = 'off',
 }
 

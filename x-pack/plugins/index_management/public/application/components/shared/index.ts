@@ -12,4 +12,5 @@ export {
   StepMappingsContainer,
   StepSettingsContainer,
   CommonWizardSteps,
+  TemplateContentIndicator,
 } from './components';

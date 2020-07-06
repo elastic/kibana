@@ -89,7 +89,19 @@ exports[`LayerPanel is rendered 1`] = `
         className="mapLayerPanel__bodyOverflow"
       >
         <LayerErrors />
-        <LayerSettings />
+        <LayerSettings
+          layer={
+            Object {
+              "getDisplayName": [Function],
+              "getId": [Function],
+              "getImmutableSourceProperties": [Function],
+              "getLayerTypeIconName": [Function],
+              "isJoinable": [Function],
+              "renderSourceSettingsEditor": [Function],
+              "supportsElasticsearchFilters": [Function],
+            }
+          }
+        />
         <div>
           mockSourceSettings
         </div>
