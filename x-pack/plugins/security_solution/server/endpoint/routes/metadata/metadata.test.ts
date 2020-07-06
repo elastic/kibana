@@ -47,8 +47,9 @@ describe('test endpoint route', () => {
   let routeHandler: RequestHandler<any, any, any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let routeConfig: RouteConfig<any, any, any, any>;
-  let mockAgentService: ReturnType<
-    typeof createMockEndpointAppContextServiceStartContract
+  // tests assume that ingestManager is enabled, and thus agentService is available
+  let mockAgentService: Required<
+    ReturnType<typeof createMockEndpointAppContextServiceStartContract>
   >['agentService'];
   let endpointAppContextService: EndpointAppContextService;
   const noUnenrolledAgent = {
@@ -70,7 +71,7 @@ describe('test endpoint route', () => {
     endpointAppContextService = new EndpointAppContextService();
     const startContract = createMockEndpointAppContextServiceStartContract();
     endpointAppContextService.start(startContract);
-    mockAgentService = startContract.agentService;
+    mockAgentService = startContract.agentService!;
 
     registerEndpointRoutes(routerMock, {
       logFactory: loggingSystemMock.create(),
