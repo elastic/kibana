@@ -13,6 +13,7 @@ import {
   TRANSACTION_DURATION,
   PROCESSOR_EVENT,
 } from '../../../common/elasticsearch_fieldnames';
+import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 
 const ML_MODULE_ID_APM_TRANSACTION = 'apm_transaction';
 export const ML_GROUP_NAME_APM = 'apm';
@@ -90,7 +91,9 @@ async function createAnomalyDetectionJob({
         filter: [
           { term: { [PROCESSOR_EVENT]: 'transaction' } },
           { exists: { field: TRANSACTION_DURATION } },
-          { term: { [SERVICE_ENVIRONMENT]: environment } },
+          environment === ENVIRONMENT_NOT_DEFINED
+            ? ENVIRONMENT_NOT_DEFINED_FILTER
+            : { term: { [SERVICE_ENVIRONMENT]: environment } },
         ],
       },
     },
@@ -104,6 +107,16 @@ async function createAnomalyDetectionJob({
     ],
   });
 }
+
+const ENVIRONMENT_NOT_DEFINED_FILTER = {
+  bool: {
+    must_not: {
+      exists: {
+        field: SERVICE_ENVIRONMENT,
+      },
+    },
+  },
+};
 
 export function convertToMLIdentifier(value: string) {
   return value.replace(/\s+/g, '_').toLowerCase();

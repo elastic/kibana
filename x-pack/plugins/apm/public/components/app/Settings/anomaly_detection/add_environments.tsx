@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 import { createJobs } from './create_jobs';
+import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
 
 interface Props {
   currentEnvironments: string[];
@@ -95,7 +96,7 @@ export const AddEnvironments = ({
               defaultMessage: 'Select or add environments',
             }
           )}
-          options={availableEnvironmentOptions}
+          options={[...availableEnvironmentOptions, NOT_DEFINED_OPTION]}
           selectedOptions={selectedOptions}
           onChange={(nextSelectedOptions) => {
             setSelected(nextSelectedOptions);
@@ -153,4 +154,11 @@ export const AddEnvironments = ({
       <EuiSpacer size="l" />
     </EuiPanel>
   );
+};
+
+const NOT_DEFINED_OPTION = {
+  value: ENVIRONMENT_NOT_DEFINED,
+  label: i18n.translate('xpack.apm.filter.environment.notDefinedLabel', {
+    defaultMessage: 'Not defined',
+  }),
 };

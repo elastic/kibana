@@ -21,6 +21,7 @@ import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { AnomalyDetectionJobByEnv } from '../../../../../typings/anomaly_detection';
 import { MLJobLink } from '../../../shared/Links/MachineLearningLinks/MLJobLink';
 import { MLLink } from '../../../shared/Links/MachineLearningLinks/MLLink';
+import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
 
 const columns: Array<ITableColumn<AnomalyDetectionJobByEnv>> = [
   {
@@ -29,7 +30,14 @@ const columns: Array<ITableColumn<AnomalyDetectionJobByEnv>> = [
       'xpack.apm.settings.anomalyDetection.jobList.environmentColumnLabel',
       { defaultMessage: 'Environment' }
     ),
-    render: (environment: string) => environment,
+    render: (environment: string) => {
+      if (environment === ENVIRONMENT_NOT_DEFINED) {
+        return i18n.translate('xpack.apm.filter.environment.notDefinedLabel', {
+          defaultMessage: 'Not defined',
+        });
+      }
+      return environment;
+    },
   },
   {
     field: 'job_id',
