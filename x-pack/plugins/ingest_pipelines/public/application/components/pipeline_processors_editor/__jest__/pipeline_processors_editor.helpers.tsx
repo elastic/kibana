@@ -6,7 +6,12 @@
 import { act } from 'react-dom/test-utils';
 import React from 'react';
 import { registerTestBed, TestBed } from '../../../../../../../test_utils';
-import { PipelineProcessorsEditor, Props } from '../pipeline_processors_editor.container';
+import {
+  PipelineProcessorsContextProvider,
+  Props,
+  ProcessorsEditor,
+  GlobalOnFailureProcessorsEditor,
+} from '../';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -24,8 +29,15 @@ jest.mock('@elastic/eui', () => {
         }}
       />
     ),
-    // Mocking EuiCodeEditor, which uses React Ace under the hood
-    EuiCodeEditor: (props: any) => (
+  };
+});
+
+jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => {
+  const original = jest.requireActual('../../../../../../../../src/plugins/kibana_react/public');
+  return {
+    ...original,
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
       <input
         data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
         data-currentvalue={props.value}
@@ -48,9 +60,16 @@ jest.mock('react-virtualized', () => {
   };
 });
 
-const testBedSetup = registerTestBed<TestSubject>(PipelineProcessorsEditor, {
-  doMountAsync: false,
-});
+const testBedSetup = registerTestBed<TestSubject>(
+  (props: Props) => (
+    <PipelineProcessorsContextProvider {...props}>
+      <ProcessorsEditor /> <GlobalOnFailureProcessorsEditor />
+    </PipelineProcessorsContextProvider>
+  ),
+  {
+    doMountAsync: false,
+  }
+);
 
 export interface SetupResult extends TestBed<TestSubject> {
   actions: ReturnType<typeof createActions>;
@@ -95,8 +114,9 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       act(() => {
         find(`${processorSelector}.moveItemButton`).simulate('click');
       });
+      component.update();
       act(() => {
-        find(dropZoneSelector).last().simulate('click');
+        find(dropZoneSelector).simulate('click');
       });
       component.update();
     },
@@ -122,13 +142,6 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       });
     },
 
-    duplicateProcessor(processorSelector: string) {
-      find(`${processorSelector}.moreMenu.button`).simulate('click');
-      act(() => {
-        find(`${processorSelector}.moreMenu.duplicateButton`).simulate('click');
-      });
-    },
-
     startAndCancelMove(processorSelector: string) {
       act(() => {
         find(`${processorSelector}.moveItemButton`).simulate('click');
@@ -139,8 +152,11 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       });
     },
 
-    toggleOnFailure() {
-      find('pipelineEditorOnFailureToggle').simulate('click');
+    duplicateProcessor(processorSelector: string) {
+      find(`${processorSelector}.moreMenu.button`).simulate('click');
+      act(() => {
+        find(`${processorSelector}.moreMenu.duplicateButton`).simulate('click');
+      });
     },
   };
 };

@@ -11,9 +11,10 @@ import styled from 'styled-components';
 import { EuiRange, EuiPanel, EuiIcon } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
 import { SideEffectContext } from './side_effect_context';
-import { ResolverAction, Vector2 } from '../types';
+import { Vector2 } from '../types';
 import * as selectors from '../store/selectors';
 import { useResolverTheme } from './assets';
+import { ResolverAction } from '../store/actions';
 
 interface StyledGraphControls {
   graphControlsBackground: string;

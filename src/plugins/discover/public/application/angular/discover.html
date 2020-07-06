@@ -65,18 +65,7 @@
         <div class="dscWrapper__content" ng-show="resultState === 'ready'">
           <!-- result -->
           <div class="dscResults">
-            <button
-              class="kuiButton kuiButton--basic kuiButton--iconText dscSkipButton"
-              ng-click="showAllRows(); scrollToBottom()"
-            >
-              <span class="kuiButton__inner">
-                <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-chevron-down"></span>
-                <span
-                  i18n-id="discover.skipToBottomButtonLabel"
-                  i18n-default-message="Skip to bottom"
-                ></span>
-              </span>
-            </button>
+            <skip-bottom-button on-click="onSkipBottomButtonClick"></skip-bottom-button>
 
             <hits-counter
               hits="hits || 0"
@@ -122,46 +111,45 @@
                 i18n-id="discover.documentsAriaLabel"
                 i18n-default-message="Documents"
               ></h2>
+              <doc-table
+                hits="rows"
+                index-pattern="indexPattern"
+                sorting="state.sort"
+                columns="state.columns"
+                infinite-scroll="true"
+                filter="filterQuery"
+                data-shared-item
+                data-title="{{opts.savedSearch.lastSavedTitle}}"
+                data-description="{{opts.savedSearch.description}}"
+                data-test-subj="discoverDocTable"
+                minimum-visible-rows="minimumVisibleRows"
+                render-complete
+                on-add-column="addColumn"
+                on-change-sort-order="setSortOrder"
+                on-move-column="moveColumn"
+                on-remove-column="removeColumn"
+              ></doc-table>
 
-                <doc-table
-                  hits="rows"
-                  index-pattern="indexPattern"
-                  sorting="state.sort"
-                  columns="state.columns"
-                  infinite-scroll="true"
-                  filter="filterQuery"
-                  data-shared-item
-                  data-title="{{opts.savedSearch.lastSavedTitle}}"
-                  data-description="{{opts.savedSearch.description}}"
-                  data-test-subj="discoverDocTable"
-                  minimum-visible-rows="minimumVisibleRows"
-                  render-complete
-                  on-add-column="addColumn"
-                  on-change-sort-order="setSortOrder"
-                  on-move-column="moveColumn"
-                  on-remove-column="removeColumn"
-                ></doc-table>
+              <a tabindex="0" id="discoverBottomMarker">&#8203;</a>
 
-                <a tabindex="0" id="discoverBottomMarker"></a>
-
-                <div
-                  ng-if="rows.length == opts.sampleSize"
-                  class="dscTable__footer"
-                >
-                  <span
-                    i18n-id="discover.howToSeeOtherMatchingDocumentsDescription"
-                    i18n-default-message="These are the first {sampleSize} documents matching
-                    your search, refine your search to see others. "
-                    i18n-values="{
-                      sampleSize: opts.sampleSize,
-                    }"
-                  ></span>
-                  <a
-                    kbn-accessible-click
-                    ng-click="scrollToTop()"
-                    i18n-id="discover.backToTopLinkText"
-                    i18n-default-message="Back to top."
-                  ></a>
+              <div
+                ng-if="rows.length == opts.sampleSize"
+                class="dscTable__footer"
+              >
+                <span
+                  i18n-id="discover.howToSeeOtherMatchingDocumentsDescription"
+                  i18n-default-message="These are the first {sampleSize} documents matching
+                  your search, refine your search to see others. "
+                  i18n-values="{
+                    sampleSize: opts.sampleSize,
+                  }"
+                ></span>
+                <a
+                  kbn-accessible-click
+                  ng-click="scrollToTop()"
+                  i18n-id="discover.backToTopLinkText"
+                  i18n-default-message="Back to top."
+                ></a>
               </div>
             </section>
           </div>

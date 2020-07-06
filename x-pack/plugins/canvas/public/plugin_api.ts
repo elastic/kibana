@@ -21,7 +21,6 @@ export interface CanvasApi {
   addModelUIs: AddToRegistry<any>;
   addRenderers: AddToRegistry<RendererFactory>;
   addTagUIs: AddToRegistry<any>;
-  addTemplates: AddToRegistry<any>;
   addTransformUIs: AddToRegistry<any>;
   addTransitions: AddToRegistry<any>;
   addTypes: AddToRegistry<() => AnyExpressionTypeDefinition>;
@@ -35,7 +34,6 @@ export interface SetupRegistries {
   modelUIs: any[];
   viewUIs: any[];
   argumentUIs: any[];
-  templates: any[];
   tagUIs: any[];
   transitions: any[];
 }
@@ -50,7 +48,6 @@ export function getPluginApi(
     modelUIs: [],
     viewUIs: [],
     argumentUIs: [],
-    templates: [],
     tagUIs: [],
     transitions: [],
   };
@@ -80,7 +77,6 @@ export function getPluginApi(
     addModelUIs: (models) => registries.modelUIs.push(...models),
     addViewUIs: (views) => registries.viewUIs.push(...views),
     addArgumentUIs: (args) => registries.argumentUIs.push(...args),
-    addTemplates: (templates) => registries.templates.push(...templates),
     addTagUIs: (tags) => registries.tagUIs.push(...tags),
     addTransitions: (transitions) => registries.transitions.push(...transitions),
   };

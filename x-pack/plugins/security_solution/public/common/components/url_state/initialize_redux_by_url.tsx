@@ -81,6 +81,7 @@ export const dispatchSetInitialStateFromUrl = (
         queryTimelineById({
           apolloClient,
           duplicate: false,
+          graphEventId: timeline.graphEventId,
           timelineId: timeline.id,
           openTimeline: timeline.isOpen,
           updateIsLoading: updateTimelineIsLoading,

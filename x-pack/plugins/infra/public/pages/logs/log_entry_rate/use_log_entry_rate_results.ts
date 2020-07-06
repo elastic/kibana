@@ -10,6 +10,7 @@ import {
   GetLogEntryRateSuccessResponsePayload,
   LogEntryRateHistogramBucket,
   LogEntryRatePartition,
+  LogEntryRateAnomaly,
 } from '../../../../common/http_api/log_analysis';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callGetLogEntryRateAPI } from './service_calls/get_log_entry_rate';
@@ -23,11 +24,16 @@ type PartitionRecord = Record<
   { buckets: PartitionBucket[]; topAnomalyScore: number; totalNumberOfLogEntries: number }
 >;
 
+export type AnomalyRecord = LogEntryRateAnomaly & {
+  partitionId: string;
+};
+
 export interface LogEntryRateResults {
   bucketDuration: number;
   totalNumberOfLogEntries: number;
   histogramBuckets: LogEntryRateHistogramBucket[];
   partitionBuckets: PartitionRecord;
+  anomalies: AnomalyRecord[];
 }
 
 export const useLogEntryRateResults = ({
@@ -55,6 +61,7 @@ export const useLogEntryRateResults = ({
           totalNumberOfLogEntries: data.totalNumberOfLogEntries,
           histogramBuckets: data.histogramBuckets,
           partitionBuckets: formatLogEntryRateResultsByPartition(data),
+          anomalies: formatLogEntryRateResultsByAllAnomalies(data),
         });
       },
       onReject: () => {
@@ -116,4 +123,24 @@ const formatLogEntryRateResultsByPartition = (
   });
 
   return resultsByPartition;
+};
+
+const formatLogEntryRateResultsByAllAnomalies = (
+  results: GetLogEntryRateSuccessResponsePayload['data']
+): AnomalyRecord[] => {
+  return results.histogramBuckets.reduce<AnomalyRecord[]>((anomalies, bucket) => {
+    return bucket.partitions.reduce<AnomalyRecord[]>((_anomalies, partition) => {
+      if (partition.anomalies.length > 0) {
+        partition.anomalies.forEach((anomaly) => {
+          _anomalies.push({
+            partitionId: partition.partitionId,
+            ...anomaly,
+          });
+        });
+        return _anomalies;
+      } else {
+        return _anomalies;
+      }
+    }, anomalies);
+  }, []);
 };

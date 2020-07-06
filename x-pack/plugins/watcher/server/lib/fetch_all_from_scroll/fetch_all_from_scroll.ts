@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { get } from 'lodash';
 import { ES_SCROLL_SETTINGS } from '../../../common/constants';
 
 export function fetchAllFromScroll(
   searchResuls: any,
-  dataClient: IScopedClusterClient,
+  dataClient: ILegacyScopedClusterClient,
   hits: any[] = []
 ): Promise<any> {
   const newHits = get(searchResuls, 'hits.hits', []);
