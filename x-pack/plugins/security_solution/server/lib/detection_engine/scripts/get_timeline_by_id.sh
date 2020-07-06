@@ -12,4 +12,4 @@ set -e
 
 curl -s -k \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -X GET ${KIBANA_URL}${SPACE_URL}/api/saved_objects/siem-ui-timeline/"$1" | jq .
+  -X GET ${KIBANA_URL}${SPACE_URL}/api/timeline/?ids="$1" | jq .
