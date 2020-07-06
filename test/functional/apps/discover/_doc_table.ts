@@ -123,6 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       afterEach(async function () {
         for (const column of extraColumns) {
           await PageObjects.discover.clickFieldListItemRemove(column);
+          await PageObjects.header.waitUntilLoadingHasFinished();
         }
       });
 
@@ -138,6 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should remove columns from the table', async function () {
         for (const column of extraColumns) {
+          await PageObjects.discover.clearFieldSearchInput();
           await PageObjects.discover.findFieldByName(column);
           log.debug(`add a ${column} column`);
           await PageObjects.discover.clickFieldListItemAdd(column);

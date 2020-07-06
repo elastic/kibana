@@ -46,6 +46,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       await fieldSearch.type(name);
     }
 
+    public async clearFieldSearchInput() {
+      const fieldSearch = await testSubjects.find('fieldFilterSearchInput');
+      await fieldSearch.clearValue();
+    }
+
     public async saveSearch(searchName: string) {
       log.debug('saveSearch');
       await this.clickSaveSearchButton();
@@ -306,10 +311,9 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async clickFieldListItemAdd(field: string) {
-      const availableList = await testSubjects.find('fieldList-unpopular');
-      if (await testSubjects.descendantExists(`field-${field}`, availableList)) {
-        await this.clickFieldListItemToggle(field);
-      }
+      // a filter check may make sense here, but it should be properly handled to make
+      // it work with the _score and _source fields as well
+      await this.clickFieldListItemToggle(field);
     }
 
     public async clickFieldListItemRemove(field: string) {
