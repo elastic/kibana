@@ -19,7 +19,6 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 export function DiscoverPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
