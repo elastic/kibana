@@ -10,6 +10,7 @@ import {
   CoreSetup,
   CoreStart,
   AppMountParameters,
+  HttpSetup,
 } from 'src/core/public';
 
 import {
@@ -19,6 +20,7 @@ import {
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 
+import { getPublicUrl } from './applications/shared/enterprise_search_url';
 import AppSearchLogo from './applications/app_search/assets/logo.svg';
 
 export interface ClientConfigType {
@@ -31,13 +33,14 @@ export interface PluginsSetup {
 
 export class EnterpriseSearchPlugin implements Plugin {
   private config: ClientConfigType;
+  private hasCheckedPublicUrl: boolean = false;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
   }
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
-    const config = this.config;
+    const config = { host: this.config.host };
 
     core.application.register({
       id: 'app_search',
@@ -46,6 +49,8 @@ export class EnterpriseSearchPlugin implements Plugin {
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
+
+        await this.setPublicUrl(config, coreStart.http);
 
         const { renderApp } = await import('./applications');
         const { AppSearch } = await import('./applications/app_search');
@@ -71,4 +76,13 @@ export class EnterpriseSearchPlugin implements Plugin {
   public start(core: CoreStart) {}
 
   public stop() {}
+
+  private async setPublicUrl(config: ClientConfigType, http: HttpSetup) {
+    if (!config.host) return; // No API to check
+    if (this.hasCheckedPublicUrl) return; // We've already performed the check
+
+    const publicUrl = await getPublicUrl(http);
+    if (publicUrl) config.host = publicUrl;
+    this.hasCheckedPublicUrl = true;
+  }
 }

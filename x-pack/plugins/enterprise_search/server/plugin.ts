@@ -21,6 +21,7 @@ import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 
 import { checkAccess } from './lib/check_access';
+import { registerPublicUrlRoute } from './routes/enterprise_search/public_url';
 import { registerEnginesRoute } from './routes/app_search/engines';
 import { registerTelemetryRoute } from './routes/app_search/telemetry';
 import { registerTelemetryUsageCollector } from './collectors/app_search/telemetry';
@@ -113,6 +114,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     const router = http.createRouter();
     const dependencies = { router, config, log: this.logger };
 
+    registerPublicUrlRoute(dependencies);
     registerEnginesRoute(dependencies);
 
     /**
