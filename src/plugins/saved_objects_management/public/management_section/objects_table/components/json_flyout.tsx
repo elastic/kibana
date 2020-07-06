@@ -75,9 +75,13 @@ export const JsonFlyout: React.FC<JsonFlyoutProps> = ({
         <EuiCodeBlock language="js" fontSize="m" paddingSize="m" isCopyable>
           {JSON.stringify(
             {
-              id: so.id,
-              type: so.type,
-              attributes: so.attributes,
+              ...{
+                id: so.id,
+                type: so.type,
+                references: so.references,
+                attributes: so.attributes,
+              },
+              ...(so.namespaces ? { namespaces: so.namespaces } : {}),
             },
             null,
             4
