@@ -13,7 +13,7 @@ import {
 } from './types';
 
 // TODO: to remove, need to support Case
-import { transformers, Transformer } from '../case/transformers';
+import { transformers } from '../case/transformers';
 import { PushToServiceResponse, TransformFieldsArgs } from './case_types';
 import { prepareFieldsForTransformation } from '../case/utils';
 
@@ -120,7 +120,7 @@ export const transformFields = ({
   currentIncident,
 }: TransformFieldsArgs): Record<string, string> => {
   return fields.reduce((prev, cur) => {
-    const transform = flow<Transformer>(...cur.pipes.map((p) => transformers[p]));
+    const transform = flow(...cur.pipes.map((p) => transformers[p]));
     return {
       ...prev,
       [cur.key]: transform({
@@ -128,11 +128,13 @@ export const transformFields = ({
         date: params.updatedAt ?? params.createdAt,
         user:
           (params.updatedBy != null
-            ? params.updatedBy.fullName || params.updatedBy.username
+            ? params.updatedBy.fullName
+              ? params.updatedBy.fullName
+              : params.updatedBy.username
             : params.createdBy.fullName
             ? params.createdBy.fullName
             : params.createdBy.username) ?? '',
-        previousValue: currentIncident ? (currentIncident[cur.key] as string) : '',
+        previousValue: currentIncident ? currentIncident[cur.key] : '',
       }).value,
     };
   }, {});
