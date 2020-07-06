@@ -18,13 +18,13 @@
  */
 
 import { SavedObjectMigrationContext } from 'kibana/server';
-import { searchSavedObjectTypeMigrations } from './search_migrations';
+import { searchMigrations } from './search_migrations';
 
 const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
 
 describe('migration search', () => {
   describe('6.7.2', () => {
-    const migrationFn = searchSavedObjectTypeMigrations['6.7.2'];
+    const migrationFn = searchMigrations['6.7.2'];
 
     it('should migrate obsolete match_all query', () => {
       const migratedDoc = migrationFn(
@@ -56,7 +56,7 @@ describe('migration search', () => {
   });
 
   describe('7.0.0', () => {
-    const migrationFn = searchSavedObjectTypeMigrations['7.0.0'];
+    const migrationFn = searchMigrations['7.0.0'];
 
     test('skips errors when searchSourceJSON is null', () => {
       const doc = {
@@ -278,7 +278,7 @@ Object {
   });
 
   describe('7.4.0', function () {
-    const migrationFn = searchSavedObjectTypeMigrations['7.4.0'];
+    const migrationFn = searchMigrations['7.4.0'];
 
     test('transforms one dimensional sort arrays into two dimensional arrays', () => {
       const doc = {
