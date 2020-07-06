@@ -20,6 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import { usePolicyDetailsSelector } from './policy_hooks';
 import {
   policyDetails,
@@ -41,11 +42,20 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../app/types';
 import { getPoliciesPath } from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';
+import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
+import { MANAGEMENT_APP_ID } from '../../../common/constants';
+import { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
-  const { notifications } = useKibana();
+  const {
+    notifications,
+    services: {
+      application: { navigateToApp },
+    },
+  } = useKibana();
   const { formatUrl, search } = useFormatUrl(SecurityPageName.management);
+  const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
 
   // Store values
   const policyItem = usePolicyDetailsSelector(policyDetails);
@@ -56,6 +66,7 @@ export const PolicyDetails = React.memo(() => {
 
   // Local state
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
+  const [routeState, setRouteState] = useState<PolicyDetailsRouteState>();
   const policyName = policyItem?.name ?? '';
 
   // Handle showing update statuses
@@ -80,6 +91,10 @@ export const PolicyDetails = React.memo(() => {
             </span>
           ),
         });
+
+        if (routeState && routeState.onSaveNavigateTo) {
+          navigateToApp(...routeState.onSaveNavigateTo);
+        }
       } else {
         notifications.toasts.danger({
           toastLifeTimeMs: 10000,
@@ -90,9 +105,15 @@ export const PolicyDetails = React.memo(() => {
         });
       }
     }
-  }, [notifications.toasts, policyName, policyUpdateStatus]);
+  }, [navigateToApp, notifications.toasts, policyName, policyUpdateStatus, routeState]);
 
   const handleBackToListOnClick = useNavigateByRouterEventHandler(getPoliciesPath());
+
+  const handleCancelOnClick = useNavigateToAppEventHandler(
+    ...(routeState && routeState.onCancelNavigateTo
+      ? routeState.onCancelNavigateTo
+      : [MANAGEMENT_APP_ID, { path: getPoliciesPath() }]) // << FIXME: PT - cache this array or input to the `useNavigateToAppEventHandler()`
+  );
 
   const handleSaveOnClick = useCallback(() => {
     setShowConfirm(true);
@@ -108,6 +129,12 @@ export const PolicyDetails = React.memo(() => {
   const handleSaveCancel = useCallback(() => {
     setShowConfirm(false);
   }, []);
+
+  useEffect(() => {
+    if (!routeState && locationRouteState) {
+      setRouteState(locationRouteState);
+    }
+  }, [locationRouteState, routeState]);
 
   // Before proceeding - check if we have a policy data.
   // If not, and we are still loading, show spinner.
@@ -159,10 +186,7 @@ export const PolicyDetails = React.memo(() => {
         <VerticalDivider spacing="l" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          onClick={handleBackToListOnClick}
-          data-test-subj="policyDetailsCancelButton"
-        >
+        <EuiButtonEmpty onClick={handleCancelOnClick} data-test-subj="policyDetailsCancelButton">
           <FormattedMessage
             id="xpack.securitySolution.endpoint.policy.details.cancel"
             defaultMessage="Cancel"
