@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { capitalize } from 'lodash';
+import { upperFirst } from 'lodash';
 
 /**
  * Map the {@code severity} value to the associated alert level to be usable within the UI.
@@ -68,7 +68,7 @@ export function mapSeverity(severity) {
   return {
     title: i18n.translate('xpack.monitoring.alerts.severityTitle', {
       defaultMessage: '{severity} severity alert',
-      values: { severity: capitalize(mapped.value) },
+      values: { severity: upperFirst(mapped.value) },
     }),
     ...mapped,
   };

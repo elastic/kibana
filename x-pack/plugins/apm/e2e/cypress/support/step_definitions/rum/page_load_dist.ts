@@ -18,7 +18,9 @@ Given(`a user click page load breakdown filter`, () => {
 });
 
 When(`the user selected the breakdown`, () => {
-  cy.get('[data-cy=filter-breakdown-item_Browser]').click();
+  cy.get('[data-cy=filter-breakdown-item_Browser]', {
+    timeout: DEFAULT_TIMEOUT,
+  }).click();
   // click outside popover to close it
   cy.get('[data-cy=pageLoadDist]').click();
 });
