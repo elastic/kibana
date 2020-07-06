@@ -35,13 +35,10 @@ export function registerMappings(registerType: SavedObjectsServiceSetup['registe
     hidden: false,
     namespaceType: 'agnostic',
     mappings: {
+      // Not indexing any of its contents because we use them "as-is" and don't search by these fields
+      // for more info, see the README.md for application_usage
       dynamic: false,
-      properties: {
-        // Disabled the mapping of these fields since they are not searched and we need to reduce the amount of indexed fields (#43673)
-        // appId: { type: 'keyword' },
-        // numberOfClicks: { type: 'long' },
-        // minutesOnScreen: { type: 'float' },
-      },
+      properties: {},
     },
   });
 
@@ -53,10 +50,6 @@ export function registerMappings(registerType: SavedObjectsServiceSetup['registe
       dynamic: false,
       properties: {
         timestamp: { type: 'date' },
-        // Disabled the mapping of these fields since they are not searched and we need to reduce the amount of indexed fields (#43673)
-        // appId: { type: 'keyword' },
-        // numberOfClicks: { type: 'long' },
-        // minutesOnScreen: { type: 'float' },
       },
     },
   });
