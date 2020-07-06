@@ -10,7 +10,6 @@ import {
   EuiInMemoryTable,
   EuiInMemoryTableProps,
   EuiBadge,
-  EuiTextColor,
   EuiContextMenuItem,
   EuiButton,
   EuiFlexGroup,
