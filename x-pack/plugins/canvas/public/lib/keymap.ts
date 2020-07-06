@@ -153,10 +153,12 @@ export const keymap: KeyMap = {
     displayName: namespaceDisplayNames.PRESENTATION,
     FULLSCREEN: fullscreenShortcut,
     FULLSCREEN_EXIT: getShortcuts('esc', { help: shortcutHelp.FULLSCREEN_EXIT }),
+    // @ts-expect-error TODO: figure out why lodash is inferring booleans, rather than ShortcutMap.
     PREV: mapValues(previousPageShortcut, (osShortcuts: string[], key?: string) =>
       // adds 'backspace' and 'left' to list of shortcuts per OS
       key === 'help' ? osShortcuts : osShortcuts.concat(['backspace', 'left'])
     ),
+    // @ts-expect-error TODO: figure out why lodash is inferring booleans, rather than ShortcutMap.
     NEXT: mapValues(nextPageShortcut, (osShortcuts: string[], key?: string) =>
       // adds 'space' and 'right' to list of shortcuts per OS
       key === 'help' ? osShortcuts : osShortcuts.concat(['space', 'right'])
