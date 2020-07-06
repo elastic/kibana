@@ -60,6 +60,7 @@ const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
           'filebeat-*',
           'packetbeat-*',
           'winlogbeat-*',
+          'logs-*',
         ],
         inspect: false,
       },
