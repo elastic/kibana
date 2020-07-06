@@ -24,6 +24,7 @@ export const AtomicStatusCheckParamsType = t.intersection([
   t.partial({
     search: t.string,
     filters: StatusCheckFiltersType,
+    shouldCheckStatus: t.boolean,
   }),
 ]);
 
@@ -32,6 +33,7 @@ export type AtomicStatusCheckParams = t.TypeOf<typeof AtomicStatusCheckParamsTyp
 export const StatusCheckParamsType = t.intersection([
   t.partial({
     filters: t.string,
+    shouldCheckStatus: t.boolean,
   }),
   t.type({
     locations: t.array(t.string),
@@ -70,11 +72,9 @@ export const MonitorAvailabilityParamsType = t.intersection([
 
 export type MonitorAvailabilityParams = t.TypeOf<typeof MonitorAvailabilityParamsType>;
 
-export const UniversalStatusCheckParamsType = t.partial({
+export const MonitorAvailabilityType = t.type({
   availability: MonitorAvailabilityParamsType,
-  shouldCheckStatus: t.boolean,
   shouldCheckAvailability: t.boolean,
-  version: t.string,
 });
 
-export type UniversalStatusCheckParams = t.TypeOf<typeof UniversalStatusCheckParamsType>;
+export type MonitorAvailability = t.Type<typeof MonitorAvailabilityType>;

@@ -18,8 +18,7 @@ import {
   StatusCheckParams,
   StatusCheckFilters,
   AtomicStatusCheckParamsType,
-  UniversalStatusCheckParamsType,
-  UniversalStatusCheckParams,
+  MonitorAvailabilityType,
 } from '../../../common/runtime_types';
 import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants';
 import { savedObjectsAdapter } from '../saved_objects';
@@ -123,7 +122,7 @@ export const contextMessage = (
   }
 
   if (availabilityResult.length) {
-    return message + availabilityMessage(availabilityResult, availabilityThreshold);
+    return message + '\n' + availabilityMessage(availabilityResult, availabilityThreshold);
   }
 
   return message;
@@ -294,8 +293,9 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
       options.services.savedObjectsClient
     );
     const atomicDecoded = AtomicStatusCheckParamsType.decode(rawParams);
+    const availabilityDecoded = MonitorAvailabilityType.decode(rawParams);
     const decoded = StatusCheckParamsType.decode(rawParams);
-    let params: StatusCheckParams & UniversalStatusCheckParams;
+    let params: StatusCheckParams;
     if (isRight(atomicDecoded)) {
       const { filters, search, numTimes, timerangeCount, timerangeUnit } = atomicDecoded.right;
       const timerange = { from: `now-${String(timerangeCount) + timerangeUnit}`, to: 'now' };
@@ -318,24 +318,22 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
       };
     } else if (isRight(decoded)) {
       params = decoded.right;
-    } else {
+    } else if (!isRight(availabilityDecoded)) {
       ThrowReporter.report(decoded);
       return {
         error: 'Alert param types do not conform to required shape.',
       };
     }
 
-    const universalDecoded = UniversalStatusCheckParamsType.decode(rawParams);
-    if (isRight(universalDecoded)) {
-      params = { ...universalDecoded.right, ...params };
-    }
-
     let availabilityResults: GetMonitorAvailabilityResult[] = [];
-    if (params.shouldCheckAvailability === true && params.availability) {
+    if (
+      isRight(availabilityDecoded) &&
+      availabilityDecoded.right.shouldCheckAvailability === true
+    ) {
       availabilityResults = await libs.requests.getMonitorAvailability({
         callES: options.services.callCluster,
         dynamicSettings,
-        ...params.availability,
+        ...availabilityDecoded.right.availability,
       });
     }
 
@@ -346,7 +344,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
     let monitorsByLocation: GetMonitorStatusResult[] = [];
 
     // old alert versions are missing this field so it must default to true
-    if (params.shouldCheckStatus ?? true) {
+    if ((isRight(StatusCheckParamsType.decode(params)) && params?.shouldCheckStatus) ?? true) {
       monitorsByLocation = await libs.requests.getMonitorStatus({
         callES: options.services.callCluster,
         dynamicSettings,
@@ -368,7 +366,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
           Array.from(uniqueIds.keys()),
           DEFAULT_MAX_MESSAGE_ROWS,
           availabilityResults,
-          params?.availability?.threshold ?? 100
+          isRight(availabilityDecoded) ? availabilityDecoded.right.availability.threshold : 100
         ),
         downMonitorsWithGeo: fullListByIdAndLocation(monitorsByLocation),
       });

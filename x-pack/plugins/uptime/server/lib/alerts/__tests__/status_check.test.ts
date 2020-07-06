@@ -46,7 +46,11 @@ const bootstrapDependencies = (customRequests?: any) => {
  * @param state the state the alert maintains
  */
 const mockOptions = (
-  params = { numTimes: 5, locations: [], timerange: { from: 'now-15m', to: 'now' } },
+  params: any = {
+    numTimes: 5,
+    locations: [],
+    timerange: { from: 'now-15m', to: 'now' },
+  },
   services = alertsMock.createAlertServices(),
   state = {}
 ): any => {
@@ -188,6 +192,358 @@ describe('status check alert', () => {
         ]
       `);
     });
+
+    it('supports 7.7 alert format', async () => {
+      toISOStringSpy.mockImplementation(() => '7.7 date');
+      const mockGetter = jest.fn();
+      mockGetter.mockReturnValue([
+        {
+          monitor_id: 'first',
+          location: 'harrisburg',
+          count: 234,
+          status: 'down',
+        },
+        {
+          monitor_id: 'first',
+          location: 'fairbanks',
+          count: 234,
+          status: 'down',
+        },
+      ]);
+      const { server, libs } = bootstrapDependencies({
+        getMonitorStatus: mockGetter,
+        getIndexPattern: jest.fn(),
+      });
+      const alert = statusCheckAlertFactory(server, libs);
+      const options = mockOptions({
+        numTimes: 4,
+        timerange: { from: 'now-14h', to: 'now' },
+        locations: ['fairbanks'],
+        filters: '',
+      });
+      const alertServices: AlertServicesMock = options.services;
+      const state = await alert.executor(options);
+      const [{ value: alertInstanceMock }] = alertServices.alertInstanceFactory.mock.results;
+      expect(alertInstanceMock.replaceState).toHaveBeenCalledTimes(1);
+      expect(alertInstanceMock.replaceState.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "currentTriggerStarted": "7.7 date",
+            "firstCheckedAt": "7.7 date",
+            "firstTriggeredAt": "7.7 date",
+            "isTriggered": true,
+            "lastCheckedAt": "7.7 date",
+            "lastResolvedAt": undefined,
+            "lastTriggeredAt": "7.7 date",
+            "monitors": Array [
+              Object {
+                "count": 234,
+                "location": "fairbanks",
+                "monitor_id": "first",
+                "status": "down",
+              },
+              Object {
+                "count": 234,
+                "location": "harrisburg",
+                "monitor_id": "first",
+                "status": "down",
+              },
+            ],
+          },
+        ]
+      `);
+      expect(state).toMatchInlineSnapshot(`
+        Object {
+          "currentTriggerStarted": "7.7 date",
+          "firstCheckedAt": "7.7 date",
+          "firstTriggeredAt": "7.7 date",
+          "isTriggered": true,
+          "lastCheckedAt": "7.7 date",
+          "lastResolvedAt": undefined,
+          "lastTriggeredAt": "7.7 date",
+        }
+      `);
+    });
+
+    it('supports 7.8 alert format', async () => {
+      expect.assertions(5);
+      toISOStringSpy.mockImplementation(() => 'foo date string');
+      const mockGetter = jest.fn();
+      mockGetter.mockReturnValue([
+        {
+          monitor_id: 'first',
+          location: 'harrisburg',
+          count: 234,
+          status: 'down',
+        },
+        {
+          monitor_id: 'first',
+          location: 'fairbanks',
+          count: 234,
+          status: 'down',
+        },
+      ]);
+      const { server, libs } = bootstrapDependencies({
+        getMonitorStatus: mockGetter,
+        getIndexPattern: jest.fn(),
+      });
+      const alert = statusCheckAlertFactory(server, libs);
+      const options = mockOptions({
+        numTimes: 3,
+        timerangeUnit: 'm',
+        timerangeCount: 15,
+        search: 'monitor.ip : * ',
+        filters: {
+          'url.port': ['12349', '5601', '443'],
+          'observer.geo.name': ['harrisburg'],
+          'monitor.type': ['http'],
+          tags: ['unsecured', 'containers', 'org:google'],
+        },
+      });
+      const alertServices: AlertServicesMock = options.services;
+      const state = await alert.executor(options);
+      const [{ value: alertInstanceMock }] = alertServices.alertInstanceFactory.mock.results;
+      expect(mockGetter).toHaveBeenCalledTimes(1);
+      expect(mockGetter.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "callES": [MockFunction],
+            "dynamicSettings": Object {
+              "certAgeThreshold": 730,
+              "certExpirationThreshold": 30,
+              "heartbeatIndices": "heartbeat-8*",
+            },
+            "filters": "{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"url.port\\":12349}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"url.port\\":5601}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"url.port\\":443}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"observer.geo.name\\":\\"harrisburg\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"monitor.type\\":\\"http\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"tags\\":\\"unsecured\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"tags\\":\\"containers\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"tags\\":\\"org:google\\"}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}]}}]}}]}},{\\"bool\\":{\\"should\\":[{\\"exists\\":{\\"field\\":\\"monitor.ip\\"}}],\\"minimum_should_match\\":1}}]}}",
+            "locations": Array [],
+            "numTimes": 3,
+            "timerange": Object {
+              "from": "now-15m",
+              "to": "now",
+            },
+          },
+        ]
+      `);
+      expect(alertInstanceMock.replaceState).toHaveBeenCalledTimes(1);
+      expect(alertInstanceMock.replaceState.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "currentTriggerStarted": "foo date string",
+            "firstCheckedAt": "foo date string",
+            "firstTriggeredAt": "foo date string",
+            "isTriggered": true,
+            "lastCheckedAt": "foo date string",
+            "lastResolvedAt": undefined,
+            "lastTriggeredAt": "foo date string",
+            "monitors": Array [
+              Object {
+                "count": 234,
+                "location": "fairbanks",
+                "monitor_id": "first",
+                "status": "down",
+              },
+              Object {
+                "count": 234,
+                "location": "harrisburg",
+                "monitor_id": "first",
+                "status": "down",
+              },
+            ],
+          },
+        ]
+      `);
+      expect(state).toMatchInlineSnapshot(`
+        Object {
+          "currentTriggerStarted": "foo date string",
+          "firstCheckedAt": "foo date string",
+          "firstTriggeredAt": "foo date string",
+          "isTriggered": true,
+          "lastCheckedAt": "foo date string",
+          "lastResolvedAt": undefined,
+          "lastTriggeredAt": "foo date string",
+        }
+      `);
+    });
+
+    it('supports searches', async () => {
+      toISOStringSpy.mockImplementation(() => 'search test');
+      const mockGetter = jest.fn();
+      mockGetter.mockReturnValue([]);
+      const { server, libs } = bootstrapDependencies({
+        getIndexPattern: jest.fn(),
+        getMonitorStatus: mockGetter,
+      });
+      const alert = statusCheckAlertFactory(server, libs);
+      const options = mockOptions({
+        numTimes: 20,
+        timerangeCount: 30,
+        timerangeUnit: 'h',
+        filters: {
+          'monitor.type': ['http'],
+          'observer.geo.name': [],
+          tags: [],
+          'url.port': [],
+        },
+        search: 'url.full: *',
+      });
+      await alert.executor(options);
+      expect(mockGetter).toHaveBeenCalledTimes(1);
+      expect(mockGetter.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "callES": [MockFunction],
+            "dynamicSettings": Object {
+              "certAgeThreshold": 730,
+              "certExpirationThreshold": 30,
+              "heartbeatIndices": "heartbeat-8*",
+            },
+            "filters": "{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"monitor.type\\":\\"http\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"exists\\":{\\"field\\":\\"url.full\\"}}],\\"minimum_should_match\\":1}}]}}",
+            "locations": Array [],
+            "numTimes": 20,
+            "timerange": Object {
+              "from": "now-30h",
+              "to": "now",
+            },
+          },
+        ]
+      `);
+    });
+
+    it('supports availability checks', async () => {
+      expect.assertions(8);
+      toISOStringSpy.mockImplementation(() => 'availability test');
+      const mockGetter = jest.fn();
+      mockGetter.mockReturnValue([
+        {
+          monitor_id: 'first',
+          location: 'harrisburg',
+          count: 234,
+          status: 'down',
+        },
+        {
+          monitor_id: 'first',
+          location: 'fairbanks',
+          count: 234,
+          status: 'down',
+        },
+      ]);
+      const mockAvailability = jest.fn();
+      mockAvailability.mockReturnValue([
+        {
+          monitorId: 'foo',
+          location: 'harrisburg',
+          name: 'Foo',
+          url: 'https://foo.com',
+          up: 2341,
+          down: 17,
+          availabilityRatio: 99.2790500424088,
+        },
+        {
+          monitorId: 'foo',
+          location: 'fairbanks',
+          name: 'Foo',
+          url: 'https://foo.com',
+          up: 2343,
+          down: 47,
+          availabilityRatio: 98.0334728033473,
+        },
+        {
+          monitorId: 'unreliable',
+          location: 'fairbanks',
+          name: 'Unreliable',
+          url: 'https://unreliable.co',
+          up: 2134,
+          down: 213,
+          availabilityRatio: 90.9245845760545,
+        },
+        {
+          monitorId: 'no-name',
+          location: 'fairbanks',
+          url: 'https://no-name.co',
+          up: 2134,
+          down: 213,
+          availabilityRatio: 90.9245845760545,
+        },
+      ]);
+      const { server, libs } = bootstrapDependencies({
+        getMonitorAvailability: mockAvailability,
+        getMonitorStatus: mockGetter,
+        getIndexPattern: jest.fn(),
+      });
+      const alert = statusCheckAlertFactory(server, libs);
+      const options = mockOptions({
+        availability: {
+          range: 35,
+          rangeUnit: 'd',
+          threshold: 99.34,
+          filters: 'url.full: *',
+        },
+        shouldCheckAvailability: true,
+      });
+      const alertServices: AlertServicesMock = options.services;
+      const state = await alert.executor(options);
+      const [{ value: alertInstanceMock }] = alertServices.alertInstanceFactory.mock.results;
+      expect(alertInstanceMock.replaceState).toHaveBeenCalledTimes(1);
+      expect(alertInstanceMock.replaceState.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "currentTriggerStarted": "availability test",
+            "firstCheckedAt": "availability test",
+            "firstTriggeredAt": "availability test",
+            "isTriggered": true,
+            "lastCheckedAt": "availability test",
+            "lastResolvedAt": undefined,
+            "lastTriggeredAt": "availability test",
+            "monitors": Array [],
+          },
+        ]
+      `);
+      expect(alertInstanceMock.scheduleActions).toHaveBeenCalledTimes(1);
+      expect(alertInstanceMock.scheduleActions.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "xpack.uptime.alerts.actionGroups.monitorStatus",
+            Object {
+              "downMonitorsWithGeo": "",
+              "message": "No down monitor IDs received
+        Top 3 Monitors Below Availability Threshold (99.34 %):
+        Unreliable(https://unreliable.co): 90.9245845760545
+        no-name(https://no-name.co): 90.9245845760545
+        Foo(https://foo.com): 98.0334728033473
+        ",
+            },
+          ],
+        ]
+      `);
+      expect(mockGetter).not.toHaveBeenCalled();
+      expect(mockAvailability).toHaveBeenCalledTimes(1);
+      expect(mockAvailability.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "callES": [MockFunction],
+            "dynamicSettings": Object {
+              "certAgeThreshold": 730,
+              "certExpirationThreshold": 30,
+              "heartbeatIndices": "heartbeat-8*",
+            },
+            "filters": "url.full: *",
+            "range": 35,
+            "rangeUnit": "d",
+            "threshold": 99.34,
+          },
+        ]
+      `);
+      expect(state).toMatchInlineSnapshot(`
+        Object {
+          "currentTriggerStarted": undefined,
+          "firstCheckedAt": "availability test",
+          "firstTriggeredAt": undefined,
+          "isTriggered": false,
+          "lastCheckedAt": "availability test",
+          "lastResolvedAt": undefined,
+          "lastTriggeredAt": undefined,
+        }
+      `);
+    });
   });
 
   describe('fullListByIdAndLocation', () => {
@@ -312,13 +668,17 @@ describe('status check alert', () => {
       // @ts-ignore the `props` key here isn't described
       expect(Object.keys(alert.validate?.params?.props ?? {})).toMatchInlineSnapshot(`
         Array [
+          "availability",
           "filters",
           "locations",
           "numTimes",
           "search",
+          "shouldCheckStatus",
+          "shouldCheckAvailability",
           "timerangeCount",
           "timerangeUnit",
           "timerange",
+          "version",
         ]
       `);
     });

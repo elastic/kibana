@@ -13,7 +13,7 @@ import { AlertTypeInitializer } from '.';
 import {
   AtomicStatusCheckParamsType,
   StatusCheckParamsType,
-  UniversalStatusCheckParamsType,
+  MonitorAvailabilityType,
 } from '../../../common/runtime_types';
 import { MonitorStatusTitle } from './monitor_status_title';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants';
@@ -25,7 +25,7 @@ export const validate = (alertParams: unknown) => {
   const errors: Record<string, any> = {};
   const decoded = AtomicStatusCheckParamsType.decode(alertParams);
   const oldDecoded = StatusCheckParamsType.decode(alertParams);
-  const universalDecoded = UniversalStatusCheckParamsType.decode(alertParams);
+  const availabilityDecoded = MonitorAvailabilityType.decode(alertParams);
 
   if (!isRight(decoded) && !isRight(oldDecoded)) {
     return {
@@ -36,9 +36,8 @@ export const validate = (alertParams: unknown) => {
     };
   }
   if (
-    isRight(universalDecoded) &&
-    !universalDecoded.right.shouldCheckAvailability &&
-    !universalDecoded.right.shouldCheckStatus
+    (isRight(availabilityDecoded) && !availabilityDecoded.right.shouldCheckAvailability) ||
+    (isRight(decoded) && !decoded.right.shouldCheckStatus)
   ) {
     return {
       errors: {
@@ -46,7 +45,7 @@ export const validate = (alertParams: unknown) => {
       },
     };
   }
-  if (isRight(decoded) && isRight(universalDecoded) && universalDecoded.right.shouldCheckStatus) {
+  if (isRight(decoded) && decoded.right.shouldCheckStatus) {
     const { numTimes, timerangeCount } = decoded.right;
     if (numTimes < 1) {
       errors.invalidNumTimes = 'Number of alert check down times must be an integer greater than 0';
