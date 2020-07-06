@@ -5,7 +5,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { ReturnPrePackagedRules, usePrePackagedRules } from './use_pre_packaged_rules';
+import { ReturnPrePackagedRulesAndTimelines, usePrePackagedRules } from './use_pre_packaged_rules';
 import * as api from './api';
 
 jest.mock('./api');
@@ -18,14 +18,15 @@ describe('usePersistRule', () => {
 
   test('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRules>(() =>
-        usePrePackagedRules({
-          canUserCRUD: null,
-          hasIndexWrite: null,
-          isAuthenticated: null,
-          hasEncryptionKey: null,
-          isSignalIndexExists: null,
-        })
+      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRulesAndTimelines>(
+        () =>
+          usePrePackagedRules({
+            canUserCRUD: null,
+            hasIndexWrite: null,
+            isAuthenticated: null,
+            hasEncryptionKey: null,
+            isSignalIndexExists: null,
+          })
       );
 
       await waitForNextUpdate();
@@ -48,14 +49,15 @@ describe('usePersistRule', () => {
 
   test('fetch getPrePackagedRulesStatus', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRules>(() =>
-        usePrePackagedRules({
-          canUserCRUD: null,
-          hasIndexWrite: null,
-          isAuthenticated: null,
-          hasEncryptionKey: null,
-          isSignalIndexExists: null,
-        })
+      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRulesAndTimelines>(
+        () =>
+          usePrePackagedRules({
+            canUserCRUD: null,
+            hasIndexWrite: null,
+            isAuthenticated: null,
+            hasEncryptionKey: null,
+            isSignalIndexExists: null,
+          })
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -79,14 +81,15 @@ describe('usePersistRule', () => {
   test('happy path to createPrePackagedRules', async () => {
     const spyOnCreatePrepackagedRules = jest.spyOn(api, 'createPrepackagedRules');
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRules>(() =>
-        usePrePackagedRules({
-          canUserCRUD: true,
-          hasIndexWrite: true,
-          isAuthenticated: true,
-          hasEncryptionKey: true,
-          isSignalIndexExists: true,
-        })
+      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRulesAndTimelines>(
+        () =>
+          usePrePackagedRules({
+            canUserCRUD: true,
+            hasIndexWrite: true,
+            isAuthenticated: true,
+            hasEncryptionKey: true,
+            isSignalIndexExists: true,
+          })
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -118,14 +121,15 @@ describe('usePersistRule', () => {
       throw new Error('Something went wrong');
     });
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRules>(() =>
-        usePrePackagedRules({
-          canUserCRUD: true,
-          hasIndexWrite: true,
-          isAuthenticated: true,
-          hasEncryptionKey: true,
-          isSignalIndexExists: true,
-        })
+      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRulesAndTimelines>(
+        () =>
+          usePrePackagedRules({
+            canUserCRUD: true,
+            hasIndexWrite: true,
+            isAuthenticated: true,
+            hasEncryptionKey: true,
+            isSignalIndexExists: true,
+          })
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -140,14 +144,15 @@ describe('usePersistRule', () => {
 
   test('can NOT createPrePackagedRules because canUserCrud === false', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRules>(() =>
-        usePrePackagedRules({
-          canUserCRUD: false,
-          hasIndexWrite: true,
-          isAuthenticated: true,
-          hasEncryptionKey: true,
-          isSignalIndexExists: true,
-        })
+      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRulesAndTimelines>(
+        () =>
+          usePrePackagedRules({
+            canUserCRUD: false,
+            hasIndexWrite: true,
+            isAuthenticated: true,
+            hasEncryptionKey: true,
+            isSignalIndexExists: true,
+          })
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -161,14 +166,15 @@ describe('usePersistRule', () => {
 
   test('can NOT createPrePackagedRules because hasIndexWrite === false', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRules>(() =>
-        usePrePackagedRules({
-          canUserCRUD: true,
-          hasIndexWrite: false,
-          isAuthenticated: true,
-          hasEncryptionKey: true,
-          isSignalIndexExists: true,
-        })
+      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRulesAndTimelines>(
+        () =>
+          usePrePackagedRules({
+            canUserCRUD: true,
+            hasIndexWrite: false,
+            isAuthenticated: true,
+            hasEncryptionKey: true,
+            isSignalIndexExists: true,
+          })
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -182,14 +188,15 @@ describe('usePersistRule', () => {
 
   test('can NOT createPrePackagedRules because isAuthenticated === false', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRules>(() =>
-        usePrePackagedRules({
-          canUserCRUD: true,
-          hasIndexWrite: true,
-          isAuthenticated: false,
-          hasEncryptionKey: true,
-          isSignalIndexExists: true,
-        })
+      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRulesAndTimelines>(
+        () =>
+          usePrePackagedRules({
+            canUserCRUD: true,
+            hasIndexWrite: true,
+            isAuthenticated: false,
+            hasEncryptionKey: true,
+            isSignalIndexExists: true,
+          })
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -203,14 +210,15 @@ describe('usePersistRule', () => {
 
   test('can NOT createPrePackagedRules because hasEncryptionKey === false', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRules>(() =>
-        usePrePackagedRules({
-          canUserCRUD: true,
-          hasIndexWrite: true,
-          isAuthenticated: true,
-          hasEncryptionKey: false,
-          isSignalIndexExists: true,
-        })
+      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRulesAndTimelines>(
+        () =>
+          usePrePackagedRules({
+            canUserCRUD: true,
+            hasIndexWrite: true,
+            isAuthenticated: true,
+            hasEncryptionKey: false,
+            isSignalIndexExists: true,
+          })
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -224,14 +232,15 @@ describe('usePersistRule', () => {
 
   test('can NOT createPrePackagedRules because isSignalIndexExists === false', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRules>(() =>
-        usePrePackagedRules({
-          canUserCRUD: true,
-          hasIndexWrite: true,
-          isAuthenticated: true,
-          hasEncryptionKey: true,
-          isSignalIndexExists: false,
-        })
+      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRulesAndTimelines>(
+        () =>
+          usePrePackagedRules({
+            canUserCRUD: true,
+            hasIndexWrite: true,
+            isAuthenticated: true,
+            hasEncryptionKey: true,
+            isSignalIndexExists: false,
+          })
       );
       await waitForNextUpdate();
       await waitForNextUpdate();

@@ -6,7 +6,7 @@
 
 import { validate } from '../../../../../common/validate';
 import {
-  PrePackagedRulesStatusSchema,
+  PrePackagedRulesAndTimelinesStatusSchema,
   prePackagedRulesAndTimelinesStatusSchema,
 } from '../../../../../common/detection_engine/schemas/response/prepackaged_rules_status_schema';
 import { IRouter } from '../../../../../../../../src/core/server';
@@ -68,7 +68,7 @@ export const getPrepackagedRulesStatusRoute = (
           checkTimelineStatusRt
         );
 
-        const prepackagedRulesStatus: PrePackagedRulesStatusSchema = {
+        const prepackagedRulesStatus: PrePackagedRulesAndTimelinesStatusSchema = {
           rules_custom_installed: customRules.total,
           rules_installed: prepackagedRules.length,
           rules_not_installed: rulesToInstall.length,

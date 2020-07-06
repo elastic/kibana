@@ -7,7 +7,7 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import {
-  PrePackagedRulesStatusSchema,
+  PrePackagedRulesAndTimelinesStatusSchema,
   prePackagedRulesAndTimelinesStatusSchema,
 } from './prepackaged_rules_status_schema';
 import { exactCheck } from '../../../exact_check';
@@ -15,7 +15,7 @@ import { foldLeftRight, getPaths } from '../../../test_utils';
 
 describe('prepackaged_rules_schema', () => {
   test('it should validate an empty prepackaged response with defaults', () => {
-    const payload: PrePackagedRulesStatusSchema = {
+    const payload: PrePackagedRulesAndTimelinesStatusSchema = {
       rules_installed: 0,
       rules_not_installed: 0,
       rules_not_updated: 0,
@@ -33,7 +33,7 @@ describe('prepackaged_rules_schema', () => {
   });
 
   test('it should not validate an extra invalid field added', () => {
-    const payload: PrePackagedRulesStatusSchema & { invalid_field: string } = {
+    const payload: PrePackagedRulesAndTimelinesStatusSchema & { invalid_field: string } = {
       rules_installed: 0,
       rules_not_installed: 0,
       rules_not_updated: 0,
@@ -52,7 +52,7 @@ describe('prepackaged_rules_schema', () => {
   });
 
   test('it should NOT validate an empty prepackaged response with a negative "rules_installed" number', () => {
-    const payload: PrePackagedRulesStatusSchema = {
+    const payload: PrePackagedRulesAndTimelinesStatusSchema = {
       rules_installed: -1,
       rules_not_installed: 0,
       rules_not_updated: 0,
@@ -72,7 +72,7 @@ describe('prepackaged_rules_schema', () => {
   });
 
   test('it should NOT validate an empty prepackaged response with a negative "rules_not_installed"', () => {
-    const payload: PrePackagedRulesStatusSchema = {
+    const payload: PrePackagedRulesAndTimelinesStatusSchema = {
       rules_installed: 0,
       rules_not_installed: -1,
       rules_not_updated: 0,
@@ -92,7 +92,7 @@ describe('prepackaged_rules_schema', () => {
   });
 
   test('it should NOT validate an empty prepackaged response with a negative "rules_not_updated"', () => {
-    const payload: PrePackagedRulesStatusSchema = {
+    const payload: PrePackagedRulesAndTimelinesStatusSchema = {
       rules_installed: 0,
       rules_not_installed: 0,
       rules_not_updated: -1,
@@ -112,7 +112,7 @@ describe('prepackaged_rules_schema', () => {
   });
 
   test('it should NOT validate an empty prepackaged response with a negative "rules_custom_installed"', () => {
-    const payload: PrePackagedRulesStatusSchema = {
+    const payload: PrePackagedRulesAndTimelinesStatusSchema = {
       rules_installed: 0,
       rules_not_installed: 0,
       rules_not_updated: 0,
@@ -132,7 +132,7 @@ describe('prepackaged_rules_schema', () => {
   });
 
   test('it should NOT validate an empty prepackaged response if "rules_installed" is not there', () => {
-    const payload: PrePackagedRulesStatusSchema = {
+    const payload: PrePackagedRulesAndTimelinesStatusSchema = {
       rules_installed: 0,
       rules_not_installed: 0,
       rules_not_updated: 0,

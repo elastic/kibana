@@ -6,8 +6,8 @@
 
 import { validate } from '../../../../../common/validate';
 import {
-  PrePackagedRulesSchema,
-  prePackagedRulesSchema,
+  PrePackagedRulesAndTimelinesSchema,
+  prePackagedRulesAndTimelinesSchema,
 } from '../../../../../common/detection_engine/schemas/response/prepackaged_rules_schema';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
@@ -78,13 +78,16 @@ export const addPrepackedRulesRoute = (
         );
         await updatePrepackagedRules(alertsClient, savedObjectsClient, rulesToUpdate, signalsIndex);
 
-        const prepackagedRulesOutput: PrePackagedRulesSchema = {
+        const prepackagedRulesOutput: PrePackagedRulesAndTimelinesSchema = {
           rules_installed: rulesToInstall.length,
           rules_updated: rulesToUpdate.length,
           timelines_installed: prepackagedTimelinesResult?.timelines_installed ?? 0,
           timelines_updated: prepackagedTimelinesResult?.timelines_updated ?? 0,
         };
-        const [validated, rulesErrors] = validate(prepackagedRulesOutput, prePackagedRulesSchema);
+        const [validated, rulesErrors] = validate(
+          prepackagedRulesOutput,
+          prePackagedRulesAndTimelinesSchema
+        );
         if (rulesErrors != null && timelinesErrors != null) {
           return siemResponse.error({
             statusCode: 500,

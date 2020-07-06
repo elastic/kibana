@@ -15,13 +15,20 @@ import {
 } from '../common/schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
-export const prePackagedRulesSchema = t.exact(
-  t.type({
-    rules_installed,
-    rules_updated,
-    timelines_installed,
-    timelines_updated,
-  })
+const prePackagedRulesSchema = t.type({
+  rules_installed,
+  rules_updated,
+});
+
+const prePackagedTimelinesSchema = t.type({
+  timelines_installed,
+  timelines_updated,
+});
+
+export const prePackagedRulesAndTimelinesSchema = t.exact(
+  t.intersection([prePackagedRulesSchema, prePackagedTimelinesSchema])
 );
 
-export type PrePackagedRulesSchema = t.TypeOf<typeof prePackagedRulesSchema>;
+export type PrePackagedRulesAndTimelinesSchema = t.TypeOf<
+  typeof prePackagedRulesAndTimelinesSchema
+>;

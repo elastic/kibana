@@ -35,6 +35,6 @@ export const prePackagedRulesAndTimelinesStatusSchema = t.exact(
   t.intersection([prePackagedRulesStatusSchema, prePackagedTimelinesStatusSchema])
 );
 
-export type PrePackagedRulesStatusSchema = t.TypeOf<
+export type PrePackagedRulesAndTimelinesStatusSchema = t.TypeOf<
   typeof prePackagedRulesAndTimelinesStatusSchema
 >;

@@ -16,7 +16,14 @@ import * as i18n from './translations';
 
 type Func = () => void;
 export type CreatePreBuiltRules = () => Promise<boolean>;
-export interface ReturnPrePackagedRules {
+
+interface ReturnPrePackagedTimelines {
+  timelinesInstalled: number | null;
+  timelinesNotInstalled: number | null;
+  timelinesNotUpdated: number | null;
+}
+
+interface ReturnPrePackagedRules {
   createPrePackagedRules: null | CreatePreBuiltRules;
   loading: boolean;
   loadingCreatePrePackagedRules: boolean;
@@ -25,10 +32,10 @@ export interface ReturnPrePackagedRules {
   rulesInstalled: number | null;
   rulesNotInstalled: number | null;
   rulesNotUpdated: number | null;
-  timelinesInstalled: number | null;
-  timelinesNotInstalled: number | null;
-  timelinesNotUpdated: number | null;
 }
+
+export type ReturnPrePackagedRulesAndTimelines = ReturnPrePackagedRules &
+  ReturnPrePackagedTimelines;
 
 interface UsePrePackagedRuleProps {
   canUserCRUD: boolean | null;
@@ -53,10 +60,10 @@ export const usePrePackagedRules = ({
   isAuthenticated,
   hasEncryptionKey,
   isSignalIndexExists,
-}: UsePrePackagedRuleProps): ReturnPrePackagedRules => {
+}: UsePrePackagedRuleProps): ReturnPrePackagedRulesAndTimelines => {
   const [rulesStatus, setRuleStatus] = useState<
     Pick<
-      ReturnPrePackagedRules,
+      ReturnPrePackagedRulesAndTimelines,
       | 'createPrePackagedRules'
       | 'refetchPrePackagedRulesStatus'
       | 'rulesCustomInstalled'
