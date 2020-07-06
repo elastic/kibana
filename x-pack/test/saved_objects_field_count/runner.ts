@@ -54,15 +54,8 @@ export async function testRunner({ getService }: FtrProviderContext) {
       return accumulator;
     }, new Map());
 
-  const fieldCountPerType = Array.from(fieldCountPerTypeMap.entries());
-
-  const fieldCountTotal = fieldCountPerType.reduce((acc, [type, count]) => acc + count, 0);
-  await reporter.metrics([
-    { group: 'Saved Objects field count', id: 'total', value: fieldCountTotal },
-  ]);
-
   await Promise.all(
-    fieldCountPerType
+    Array.from(fieldCountPerTypeMap.entries())
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([fieldType, count]) => {
         return reporter.metrics([
