@@ -48,7 +48,7 @@ interface Props {
 }
 
 export const StepReview: React.FunctionComponent<Props> = React.memo(({ componentTemplate }) => {
-  const { name, version } = componentTemplate;
+  const { name } = componentTemplate;
 
   const serializedComponentTemplate = serializeComponentTemplate(
     stripEmptyFields(componentTemplate, {
@@ -63,6 +63,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(({ componen
       aliases: serializedAliases,
     },
     _meta: serializedMeta,
+    version: serializedVersion,
   } = serializedComponentTemplate;
 
   const SummaryTab = () => (
@@ -73,7 +74,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(({ componen
         <EuiFlexItem>
           <EuiDescriptionList textStyle="reverse">
             {/* Version */}
-            {version !== '' && (
+            {typeof serializedVersion !== 'undefined' && (
               <>
                 <EuiDescriptionListTitle>
                   <FormattedMessage
@@ -81,7 +82,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(({ componen
                     defaultMessage="Version"
                   />
                 </EuiDescriptionListTitle>
-                <EuiDescriptionListDescription>{version}</EuiDescriptionListDescription>
+                <EuiDescriptionListDescription>{serializedVersion}</EuiDescriptionListDescription>
               </>
             )}
 
