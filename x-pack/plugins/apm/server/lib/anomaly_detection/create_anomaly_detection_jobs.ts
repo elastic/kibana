@@ -8,7 +8,6 @@ import { Logger } from 'kibana/server';
 import uuid from 'uuid/v4';
 import { PromiseReturnType } from '../../../../observability/typings/common';
 import { Setup } from '../helpers/setup_request';
-import { JobResponse } from '../../../../ml/common/types/modules';
 import {
   SERVICE_ENVIRONMENT,
   TRANSACTION_DURATION,
@@ -28,17 +27,17 @@ export async function createAnomalyDetectionJobs(
 ) {
   const { ml, config } = setup;
   if (!ml) {
+    logger.warn('Anomaly detection plugin is not available.');
     return [];
   }
   const mlCapabilities = await ml.mlSystem.mlCapabilities();
-  if (
-    !(
-      mlCapabilities.mlFeatureEnabledInSpace &&
-      mlCapabilities.isPlatinumOrTrialLicense
-    )
-  ) {
+  if (!mlCapabilities.mlFeatureEnabledInSpace) {
+    logger.warn('Anomaly detection feature is not enabled for the space.');
+    return [];
+  }
+  if (!mlCapabilities.isPlatinumOrTrialLicense) {
     logger.warn(
-      'Anomaly detection integration is not available for this user.'
+      'Unable to create anomaly detection jobs due to insufficient license.'
     );
     return [];
   }
@@ -47,41 +46,29 @@ export async function createAnomalyDetectionJobs(
   );
 
   const indexPatternName = config['apm_oss.transactionIndices']; // TODO [ML] - Do we want to use the config index name?
-  const dataRecognizerConfigResponses = await Promise.all(
+  const responses = await Promise.all(
     environments.map((environment) =>
-      configureAnomalyDetectionJob({ ml, environment, indexPatternName })
+      createAnomalyDetectionJob({ ml, environment, indexPatternName })
     )
   );
-  const newJobResponses = dataRecognizerConfigResponses.reduce(
-    (acc, response) => {
-      return [...acc, ...response.jobs];
-    },
-    [] as JobResponse[]
-  );
-
-  const failedJobs = newJobResponses.filter(({ success }) => !success);
+  const jobResponses = responses.flatMap((response) => response.jobs);
+  const failedJobs = jobResponses.filter(({ success }) => !success);
 
   if (failedJobs.length > 0) {
-    const allJobsFailed = failedJobs.length === newJobResponses.length;
-
-    logger.error('Failed to create anomaly detection ML jobs.');
+    const failedJobIds = failedJobs.map(({ id }) => id).join(', ');
+    logger.error(
+      `Failed to create anomaly detection ML jobs for: [${failedJobIds}]:`
+    );
     failedJobs.forEach(({ error }) => logger.error(JSON.stringify(error)));
-
-    if (allJobsFailed) {
-      throw new Error('Failed to setup anomaly detection ML jobs.');
-    }
-    const failedJobIds = failedJobs.map(({ id }) => id);
     throw new Error(
-      `Some anomaly detection ML jobs failed to setup: [${failedJobIds.join(
-        ', '
-      )}]`
+      `Failed to create anomaly detection ML jobs for: [${failedJobIds}].`
     );
   }
 
-  return newJobResponses;
+  return jobResponses;
 }
 
-async function configureAnomalyDetectionJob({
+async function createAnomalyDetectionJob({
   ml,
   environment,
   indexPatternName = 'apm-*-transaction-*',
@@ -111,9 +98,7 @@ async function configureAnomalyDetectionJob({
     jobOverrides: [
       {
         custom_settings: {
-          job_tags: {
-            [SERVICE_ENVIRONMENT]: environment,
-          },
+          job_tags: { environment },
         },
       },
     ],

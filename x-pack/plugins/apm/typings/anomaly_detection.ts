@@ -5,6 +5,6 @@
  */
 
 export interface AnomalyDetectionJobByEnv {
-  'service.environment': string;
+  environment: string;
   job_id: string;
 }

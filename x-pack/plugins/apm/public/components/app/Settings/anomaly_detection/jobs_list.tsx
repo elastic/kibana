@@ -24,7 +24,7 @@ import { MLLink } from '../../../shared/Links/MachineLearningLinks/MLLink';
 
 const columns: Array<ITableColumn<AnomalyDetectionJobByEnv>> = [
   {
-    field: 'service.environment',
+    field: 'environment',
     name: i18n.translate(
       'xpack.apm.settings.anomalyDetection.jobList.environmentColumnLabel',
       { defaultMessage: 'Environment' }
@@ -122,7 +122,6 @@ export const JobsList = ({
         }
         columns={columns}
         items={isLoading || hasFetchFailure ? [] : anomalyDetectionJobsByEnv}
-        pagination={false}
       />
       <EuiSpacer size="l" />
     </EuiPanel>

@@ -44,9 +44,7 @@ export const AnomalyDetection = () => {
       <EuiSpacer size="l" />
       {viewAddEnvironments ? (
         <AddEnvironments
-          currentEnvironments={data.map(
-            ({ 'service.environment': environment }) => environment
-          )}
+          currentEnvironments={data.map(({ environment }) => environment)}
           onCreateJobSuccess={() => {
             refetch();
             setViewAddEnvironments(false);
