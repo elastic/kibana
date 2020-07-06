@@ -81,9 +81,16 @@ export function FieldSelect({ fields, selectedFieldName, onChange, styleName, ..
 
   let selectedOption;
   if (selectedFieldName) {
-    selectedOption = fields.find((field) => {
+    const field = fields.find((field) => {
       return field.name === selectedFieldName;
     });
+    //Do not spread in all the other unused values (e.g. type, supportsAutoDomain etc...)
+    if (field) {
+      selectedOption = {
+        value: field.value,
+        label: field.label,
+      };
+    }
   }
 
   return (

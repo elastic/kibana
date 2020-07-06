@@ -7,6 +7,17 @@
 import * as t from 'io-ts';
 
 import { RuleTypeSchema } from '../../../../../common/detection_engine/types';
+/* eslint-disable @typescript-eslint/camelcase */
+import {
+  author,
+  building_block_type,
+  license,
+  risk_score_mapping,
+  rule_name_override,
+  severity_mapping,
+  timestamp_override,
+} from '../../../../../common/detection_engine/schemas/common/schemas';
+/* eslint-enable @typescript-eslint/camelcase */
 
 /**
  * Params is an "record", since it is a type of AlertActionParams which is action templates.
@@ -76,6 +87,7 @@ const MetaRule = t.intersection([
 
 export const RuleSchema = t.intersection([
   t.type({
+    author,
     created_at: t.string,
     created_by: t.string,
     description: t.string,
@@ -89,8 +101,10 @@ export const RuleSchema = t.intersection([
     max_signals: t.number,
     references: t.array(t.string),
     risk_score: t.number,
+    risk_score_mapping,
     rule_id: t.string,
     severity: t.string,
+    severity_mapping,
     tags: t.array(t.string),
     type: RuleTypeSchema,
     to: t.string,
@@ -101,21 +115,25 @@ export const RuleSchema = t.intersection([
     throttle: t.union([t.string, t.null]),
   }),
   t.partial({
+    building_block_type,
     anomaly_threshold: t.number,
     filters: t.array(t.unknown),
     index: t.array(t.string),
     language: t.string,
+    license,
     last_failure_at: t.string,
     last_failure_message: t.string,
     meta: MetaRule,
     machine_learning_job_id: t.string,
     output_index: t.string,
     query: t.string,
+    rule_name_override,
     saved_id: t.string,
     status: t.string,
     status_date: t.string,
     timeline_id: t.string,
     timeline_title: t.string,
+    timestamp_override,
     note: t.string,
     version: t.number,
   }),

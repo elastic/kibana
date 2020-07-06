@@ -14,22 +14,23 @@ import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '../../../common/component
 /**
  * TIMELINE BODY
  */
+export const SELECTOR_TIMELINE_BODY_CLASS_NAME = 'securitySolutionTimeline__body';
 
 // SIDE EFFECT: the following creates a global class selector
 export const TimelineBodyGlobalStyle = createGlobalStyle`
-  body.${IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME} .siemTimeline__body {
+  body.${IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME} .${SELECTOR_TIMELINE_BODY_CLASS_NAME} {
     overflow: hidden;
   }
 `;
 
 export const TimelineBody = styled.div.attrs(({ className = '' }) => ({
-  className: `siemTimeline__body ${className}`,
+  className: `${SELECTOR_TIMELINE_BODY_CLASS_NAME} ${className}`,
 }))<{ bodyHeight?: number; visible: boolean }>`
   height: ${({ bodyHeight }) => (bodyHeight ? `${bodyHeight}px` : 'auto')};
   overflow: auto;
   scrollbar-width: thin;
   flex: 1;
-  visibility: ${({ visible }) => (visible ? 'visible' : 'hidden')};
+  display: ${({ visible }) => (visible ? 'block' : 'none')};
 
   &::-webkit-scrollbar {
     height: ${({ theme }) => theme.eui.euiScrollBar};
@@ -204,6 +205,7 @@ export const EventsTrSupplement = styled.div.attrs(({ className = '' }) => ({
 export const EventsTdGroupActions = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__tdGroupActions ${className}`,
 }))<{ actionsColumnWidth: number }>`
+  align-items: center;
   display: flex;
   flex: 0 0 ${({ actionsColumnWidth }) => `${actionsColumnWidth}px`};
   min-width: 0;

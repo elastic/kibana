@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { map, trunc } from 'lodash';
+import { map, truncate } from 'lodash';
 import open from 'opn';
 import { ElementHandle, EvaluateFn, Page, Response, SerializableOrJSHandle } from 'puppeteer';
 import { parse as parseUrl } from 'url';
@@ -70,7 +70,7 @@ export class HeadlessChromiumDriver {
   }
 
   private truncateUrl(url: string) {
-    return trunc(url, {
+    return truncate(url, {
       length: 100,
       omission: '[truncated]',
     });

@@ -13,7 +13,6 @@ export const validateTree = {
   params: schema.object({ id: schema.string() }),
   query: schema.object({
     children: schema.number({ defaultValue: 10, min: 0, max: 100 }),
-    generations: schema.number({ defaultValue: 3, min: 0, max: 3 }),
     ancestors: schema.number({ defaultValue: 3, min: 0, max: 5 }),
     events: schema.number({ defaultValue: 100, min: 0, max: 1000 }),
     alerts: schema.number({ defaultValue: 100, min: 0, max: 1000 }),
@@ -66,8 +65,23 @@ export const validateChildren = {
   params: schema.object({ id: schema.string() }),
   query: schema.object({
     children: schema.number({ defaultValue: 10, min: 1, max: 100 }),
-    generations: schema.number({ defaultValue: 3, min: 1, max: 3 }),
     afterChild: schema.maybe(schema.string()),
     legacyEndpointID: schema.maybe(schema.string()),
+  }),
+};
+
+/**
+ * Used to validate GET requests for 'entities'
+ */
+export const validateEntities = {
+  query: schema.object({
+    /**
+     * Return the process entities related to the document w/ the matching `_id`.
+     */
+    _id: schema.string(),
+    /**
+     * Indices to search in.
+     */
+    indices: schema.arrayOf(schema.string()),
   }),
 };
