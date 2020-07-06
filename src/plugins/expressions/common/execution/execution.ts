@@ -426,7 +426,7 @@ export class Execution<
       case 'expression':
         const execution = this.params.executor.createExecution(
           ast as ExpressionAstExpression,
-          undefined,
+          this.context,
           options
         );
         execution.start(input);
