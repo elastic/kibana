@@ -52,11 +52,11 @@ export interface SetupPlugins {
   encryptedSavedObjects?: EncryptedSavedObjectsSetup;
   features: FeaturesSetup;
   licensing: LicensingPluginSetup;
+  lists?: ListPluginSetup;
+  ml?: MlSetup;
   security?: SecuritySetup;
   spaces?: SpacesSetup;
   taskManager: TaskManagerSetupContract;
-  ml?: MlSetup;
-  lists?: ListPluginSetup;
 }
 
 export interface StartPlugins {
