@@ -5,8 +5,10 @@
  */
 import { HttpFetchQuery } from 'src/core/public';
 
-export interface ListWithKuery extends HttpFetchQuery {
+export interface ListWithKuery {
   page?: number;
   perPage?: number;
+  sortField?: string;
+  sortOrder?: 'desc' | 'asc';
   kuery?: string;
 }

@@ -145,10 +145,19 @@ class AgentConfigService {
       withPackageConfigs?: boolean;
     }
   ): Promise<{ items: AgentConfig[]; total: number; page: number; perPage: number }> {
-    const { page = 1, perPage = 20, kuery, withPackageConfigs = false } = options;
+    const {
+      page = 1,
+      perPage = 20,
+      sortField = 'updated_at',
+      sortOrder = 'desc',
+      kuery,
+      withPackageConfigs = false,
+    } = options;
 
     const agentConfigsSO = await soClient.find<AgentConfigSOAttributes>({
       type: SAVED_OBJECT_TYPE,
+      sortField,
+      sortOrder,
       page,
       perPage,
       // To ensure users don't need to know about SO data structure...
@@ -292,7 +301,6 @@ class AgentConfigService {
       soClient,
       id,
       {
-        ...oldAgentConfig,
         package_configs: uniq(
           [...((oldAgentConfig.package_configs || []) as string[])].filter(
             (pkgConfigId) => !packageConfigIds.includes(pkgConfigId)

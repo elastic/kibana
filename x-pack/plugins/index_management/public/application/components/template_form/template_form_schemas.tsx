@@ -7,6 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCode } from '@elastic/eui';
 
 import {
   FormSchema,
@@ -28,6 +29,7 @@ const {
   startsWithField,
   indexPatternField,
   lowerCaseStringField,
+  isJsonField,
 } = fieldValidators;
 const { toInt } = fieldFormatters;
 const indexPatternInvalidCharacters = INVALID_INDEX_PATTERN_CHARS.join(' ');
@@ -133,12 +135,57 @@ export const schemas: Record<string, FormSchema> = {
       }),
       formatters: [toInt],
     },
+    priority: {
+      type: FIELD_TYPES.NUMBER,
+      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.fieldPriorityLabel', {
+        defaultMessage: 'Priority (optional)',
+      }),
+      formatters: [toInt],
+    },
     version: {
       type: FIELD_TYPES.NUMBER,
       label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.fieldVersionLabel', {
         defaultMessage: 'Version (optional)',
       }),
       formatters: [toInt],
+    },
+    _meta: {
+      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.metaFieldEditorLabel', {
+        defaultMessage: '_meta field data (optional)',
+      }),
+      helpText: (
+        <FormattedMessage
+          id="xpack.idxMgmt.templateForm.stepLogistics.metaFieldEditorHelpText"
+          defaultMessage="Use JSON format: {code}"
+          values={{
+            code: <EuiCode>{JSON.stringify({ arbitrary_data: 'anything_goes' })}</EuiCode>,
+          }}
+        />
+      ),
+      validations: [
+        {
+          validator: isJsonField(
+            i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.metaFieldEditorJsonError', {
+              defaultMessage: 'The _meta field JSON is not valid.',
+            }),
+            { allowEmptyString: true }
+          ),
+        },
+      ],
+      deserializer: (value: any) => {
+        if (value === '') {
+          return value;
+        }
+        return JSON.stringify(value, null, 2);
+      },
+      serializer: (value: string) => {
+        try {
+          return JSON.parse(value);
+        } catch (error) {
+          // swallow error and return non-parsed value;
+          return value;
+        }
+      },
     },
   },
 };
