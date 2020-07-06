@@ -27,4 +27,16 @@ describe('getAllEnvironments', () => {
 
     expect(mock.params).toMatchSnapshot();
   });
+
+  it('fetches all environments with includeMissing', async () => {
+    mock = await inspectSearchParams((setup) =>
+      getAllEnvironments({
+        serviceName: 'test',
+        setup,
+        includeMissing: true,
+      })
+    );
+
+    expect(mock.params).toMatchSnapshot();
+  });
 });
