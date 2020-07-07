@@ -71,7 +71,7 @@ export default function (providerContext: FtrProviderContext) {
     it('should download an artifact with correct hash', async () => {
       await supertestWithoutAuth
         .get(
-          '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-1.0.0/d162f0302cbf419038ade7ea978e0a7ade7aad317fedefe455ff38dfa28b7cff'
+          '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-1.0.0/f59266b06ffb1d7250edb9dbabd946e00e98afa950f955d8ea9d8ffef0eb142a'
         )
         .set('kbn-xsrf', 'xxx')
         .set('authorization', `ApiKey ${agentAccessAPIKey}`)
@@ -80,7 +80,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect((response) => {
           const artifactJson = JSON.parse(response.text);
           expect(artifactJson).to.eql({
-            exceptions_list: [
+            entries: [
               {
                 field: 'actingProcess.file.signer',
                 operator: 'included',
@@ -113,7 +113,7 @@ export default function (providerContext: FtrProviderContext) {
     it('should download an artifact with correct hash from cache', async () => {
       await supertestWithoutAuth
         .get(
-          '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-1.0.0/d162f0302cbf419038ade7ea978e0a7ade7aad317fedefe455ff38dfa28b7cff'
+          '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-1.0.0/f59266b06ffb1d7250edb9dbabd946e00e98afa950f955d8ea9d8ffef0eb142a'
         )
         .set('kbn-xsrf', 'xxx')
         .set('authorization', `ApiKey ${agentAccessAPIKey}`)
@@ -125,7 +125,7 @@ export default function (providerContext: FtrProviderContext) {
         .then(async () => {
           await supertestWithoutAuth
             .get(
-              '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-1.0.0/d162f0302cbf419038ade7ea978e0a7ade7aad317fedefe455ff38dfa28b7cff'
+              '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-1.0.0/f59266b06ffb1d7250edb9dbabd946e00e98afa950f955d8ea9d8ffef0eb142a'
             )
             .set('kbn-xsrf', 'xxx')
             .set('authorization', `ApiKey ${agentAccessAPIKey}`)
@@ -134,7 +134,7 @@ export default function (providerContext: FtrProviderContext) {
             .expect((response) => {
               const artifactJson = JSON.parse(response.text);
               expect(artifactJson).to.eql({
-                exceptions_list: [
+                entries: [
                   {
                     field: 'actingProcess.file.signer',
                     operator: 'included',

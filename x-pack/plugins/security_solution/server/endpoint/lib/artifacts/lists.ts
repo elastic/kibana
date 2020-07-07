@@ -14,7 +14,7 @@ import {
   InternalArtifactSchema,
   TranslatedEntry,
   WrappedTranslatedExceptionList,
-  wrappedExceptionList,
+  wrappedTranslatedExceptionList,
   TranslatedEntryNestedEntry,
   translatedEntryNestedEntry,
   translatedEntry as translatedEntryType,
@@ -36,10 +36,10 @@ export async function buildArtifact(
     identifier: `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-${os}-${schemaVersion}`,
     compressionAlgorithm: 'none',
     encryptionAlgorithm: 'none',
-    decompressedSha256: sha256,
-    compressedSha256: sha256,
-    decompressedSize: exceptionsBuffer.byteLength,
-    compressedSize: exceptionsBuffer.byteLength,
+    decodedSha256: sha256,
+    encodedSha256: sha256,
+    decodedSize: exceptionsBuffer.byteLength,
+    encodedSize: exceptionsBuffer.byteLength,
     created: Date.now(),
     body: exceptionsBuffer.toString('base64'),
   };
@@ -50,7 +50,7 @@ export async function getFullEndpointExceptionList(
   os: string,
   schemaVersion: string
 ): Promise<WrappedTranslatedExceptionList> {
-  const exceptions: WrappedTranslatedExceptionList = { exceptions_list: [] };
+  const exceptions: WrappedTranslatedExceptionList = { entries: [] };
   let numResponses = 0;
   let page = 1;
 
@@ -68,7 +68,7 @@ export async function getFullEndpointExceptionList(
     if (response?.data !== undefined) {
       numResponses = response.data.length;
 
-      exceptions.exceptions_list = exceptions.exceptions_list.concat(
+      exceptions.entries = exceptions.entries.concat(
         translateToEndpointExceptions(response, schemaVersion)
       );
 
@@ -78,7 +78,7 @@ export async function getFullEndpointExceptionList(
     }
   } while (numResponses > 0);
 
-  const [validated, errors] = validate(exceptions, wrappedExceptionList);
+  const [validated, errors] = validate(exceptions, wrappedTranslatedExceptionList);
   if (errors != null) {
     throw new Error(errors);
   }

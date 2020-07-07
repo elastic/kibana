@@ -1,23 +1,23 @@
 {
   "type": "doc",
   "value": {
-    "id": "endpoint:user-artifact:endpoint-exceptionlist-linux-1.0.0-d162f0302cbf419038ade7ea978e0a7ade7aad317fedefe455ff38dfa28b7cff",
+    "id": "endpoint:user-artifact:v2:endpoint-exceptionlist-linux-1.0.0-f59266b06ffb1d7250edb9dbabd946e00e98afa950f955d8ea9d8ffef0eb142a",
     "index": ".kibana",
     "source": {
       "references": [
       ],
-      "endpoint:user-artifact": {
-        "body": "eyJleGNlcHRpb25zX2xpc3QiOlt7ImZpZWxkIjoiYWN0aW5nUHJvY2Vzcy5maWxlLnNpZ25lciIsIm9wZXJhdG9yIjoiaW5jbHVkZWQiLCJ0eXBlIjoiZXhhY3RfY2FzZWQiLCJ2YWx1ZSI6IkVsYXN0aWMsIE4uVi4ifSx7ImVudHJpZXMiOlt7ImZpZWxkIjoic2lnbmVyIiwib3BlcmF0b3IiOiJpbmNsdWRlZCIsInR5cGUiOiJleGFjdF9jYXNlZCIsInZhbHVlIjoiRXZpbCJ9LHsiZmllbGQiOiJ0cnVzdGVkIiwib3BlcmF0b3IiOiJpbmNsdWRlZCIsInR5cGUiOiJleGFjdF9jYXNlZCIsInZhbHVlIjoidHJ1ZSJ9XSwiZmllbGQiOiJmaWxlLnNpZ25hdHVyZSIsInR5cGUiOiJuZXN0ZWQifV19",
+      "endpoint:user-artifact:v2": {
+        "body": "eyJlbnRyaWVzIjpbeyJmaWVsZCI6ImFjdGluZ1Byb2Nlc3MuZmlsZS5zaWduZXIiLCJvcGVyYXRvciI6ImluY2x1ZGVkIiwidHlwZSI6ImV4YWN0X2Nhc2VkIiwidmFsdWUiOiJFbGFzdGljLCBOLlYuIn0seyJlbnRyaWVzIjpbeyJmaWVsZCI6InNpZ25lciIsIm9wZXJhdG9yIjoiaW5jbHVkZWQiLCJ0eXBlIjoiZXhhY3RfY2FzZWQiLCJ2YWx1ZSI6IkV2aWwifSx7ImZpZWxkIjoidHJ1c3RlZCIsIm9wZXJhdG9yIjoiaW5jbHVkZWQiLCJ0eXBlIjoiZXhhY3RfY2FzZWQiLCJ2YWx1ZSI6InRydWUifV0sImZpZWxkIjoiZmlsZS5zaWduYXR1cmUiLCJ0eXBlIjoibmVzdGVkIn1dfQ==",
         "created": 1593016187465,
         "compressionAlgorithm": "none",
         "encryptionAlgorithm": "none",
         "identifier": "endpoint-exceptionlist-linux-1.0.0",
-        "compressedSha256": "d162f0302cbf419038ade7ea978e0a7ade7aad317fedefe455ff38dfa28b7cff",
-        "compressedSize": 336,
-        "decompressedSha256": "d162f0302cbf419038ade7ea978e0a7ade7aad317fedefe455ff38dfa28b7cff",
-        "decompressedSize": 336
+        "encodedSha256": "f59266b06ffb1d7250edb9dbabd946e00e98afa950f955d8ea9d8ffef0eb142a",
+        "encodedSize": 328,
+        "decodedSha256": "f59266b06ffb1d7250edb9dbabd946e00e98afa950f955d8ea9d8ffef0eb142a",
+        "decodedSize": 328
       },
-      "type": "endpoint:user-artifact",
+      "type": "endpoint:user-artifact:v2",
       "updated_at": "2020-06-24T16:29:47.584Z"
     }
   }
@@ -26,20 +26,20 @@
 {
   "type": "doc",
   "value": {
-    "id": "endpoint:user-artifact-manifest:endpoint-manifest-1.0.0",
+    "id": "endpoint:user-artifact-manifest:v2:endpoint-manifest-1.0.0",
     "index": ".kibana",
     "source": {
       "references": [
       ],
-      "endpoint:user-artifact-manifest": {
+      "endpoint:user-artifact-manifest:v2": {
         "created": 1593183699663,
         "ids": [
-          "endpoint-exceptionlist-linux-1.0.0-a4e4586e895fcb46dd25a25358b446f9a425279452afa3ef9a98bca39c39122d",
-          "endpoint-exceptionlist-macos-1.0.0-a4e4586e895fcb46dd25a25358b446f9a425279452afa3ef9a98bca39c39122d",
-          "endpoint-exceptionlist-windows-1.0.0-a4e4586e895fcb46dd25a25358b446f9a425279452afa3ef9a98bca39c39122d"
+          "endpoint-exceptionlist-linux-1.0.0-f59266b06ffb1d7250edb9dbabd946e00e98afa950f955d8ea9d8ffef0eb142a",
+          "endpoint-exceptionlist-macos-1.0.0-d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
+          "endpoint-exceptionlist-windows-1.0.0-d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658"
         ]
       },
-      "type": "endpoint:user-artifact-manifest",
+      "type": "endpoint:user-artifact-manifest:v2",
       "updated_at": "2020-06-26T15:01:39.704Z"
     }
   }

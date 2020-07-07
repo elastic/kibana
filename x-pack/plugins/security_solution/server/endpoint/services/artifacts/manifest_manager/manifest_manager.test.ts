@@ -21,7 +21,7 @@ describe('manifest_manager', () => {
       expect(manifestWrapper!.diffs).toEqual([
         {
           id:
-            'endpoint-exceptionlist-linux-1.0.0-d34a1f6659bd86fc2023d7477aa2e5d2055c9c0fb0a0f10fae76bf8b94bebe49',
+            'endpoint-exceptionlist-linux-1.0.0-2a2ec06c957330deb42f41835d3029001432038106f823173fb9e7ea603decb5',
           type: 'add',
         },
       ]);
@@ -35,14 +35,14 @@ describe('manifest_manager', () => {
       expect(manifestWrapper!.diffs).toEqual([
         {
           id:
-            'endpoint-exceptionlist-linux-1.0.0-d34a1f6659bd86fc2023d7477aa2e5d2055c9c0fb0a0f10fae76bf8b94bebe49',
+            'endpoint-exceptionlist-linux-1.0.0-2a2ec06c957330deb42f41835d3029001432038106f823173fb9e7ea603decb5',
           type: 'add',
         },
       ]);
       const diff = manifestWrapper!.diffs[0];
       const entry = JSON.parse(cache.get(diff!.id)!);
       expect(entry).toEqual({
-        exceptions_list: [
+        entries: [
           {
             entries: [
               {
@@ -82,11 +82,11 @@ describe('manifest_manager', () => {
           [artifact.identifier]: {
             compression_algorithm: 'none',
             encryption_algorithm: 'none',
-            precompress_sha256: artifact.decompressedSha256,
-            postcompress_sha256: artifact.compressedSha256,
-            precompress_size: artifact.decompressedSize,
-            postcompress_size: artifact.compressedSize,
-            relative_url: `/api/endpoint/artifacts/download/${artifact.identifier}/${artifact.compressedSha256}`,
+            decoded_sha256: artifact.decodedSha256,
+            encoded_sha256: artifact.encodedSha256,
+            decoded_size: artifact.decodedSize,
+            encoded_size: artifact.encodedSize,
+            relative_url: `/api/endpoint/artifacts/download/${artifact.identifier}/${artifact.encodedSha256}`,
           },
         },
       });

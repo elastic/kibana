@@ -21,7 +21,7 @@ describe('buildEventTypeSignal', () => {
 
   test('it should convert the exception lists response to the proper endpoint format', async () => {
     const expectedEndpointExceptions = {
-      exceptions_list: [
+      entries: [
         {
           entries: [
             {
@@ -57,7 +57,7 @@ describe('buildEventTypeSignal', () => {
     ];
 
     const expectedEndpointExceptions = {
-      exceptions_list: [
+      entries: [
         {
           field: 'server.domain',
           operator: 'included',
@@ -100,7 +100,7 @@ describe('buildEventTypeSignal', () => {
     ];
 
     const expectedEndpointExceptions = {
-      exceptions_list: [
+      entries: [
         {
           field: 'server.domain',
           operator: 'included',
@@ -147,7 +147,7 @@ describe('buildEventTypeSignal', () => {
     ];
 
     const expectedEndpointExceptions = {
-      exceptions_list: [
+      entries: [
         {
           field: 'server.domain',
           operator: 'included',
@@ -182,7 +182,7 @@ describe('buildEventTypeSignal', () => {
       .mockReturnValueOnce(second)
       .mockReturnValueOnce(third);
     const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', '1.0.0');
-    expect(resp.exceptions_list.length).toEqual(6);
+    expect(resp.entries.length).toEqual(6);
   });
 
   test('it should handle no exceptions', async () => {
@@ -191,6 +191,6 @@ describe('buildEventTypeSignal', () => {
     exceptionsResponse.total = 0;
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionsResponse);
     const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', '1.0.0');
-    expect(resp.exceptions_list.length).toEqual(0);
+    expect(resp.entries.length).toEqual(0);
   });
 });
