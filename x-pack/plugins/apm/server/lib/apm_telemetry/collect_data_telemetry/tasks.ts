@@ -85,7 +85,7 @@ export const tasks: TelemetryTask[] = [
       const { aggregations } = response;
 
       if (!aggregations) {
-        return { [az]: [], [provider]: [], [region]: [] };
+        return { cloud: { [az]: [], [provider]: [], [region]: [] } };
       }
       const cloud = {
         [az]: getBucketKeys(aggregations[az]),

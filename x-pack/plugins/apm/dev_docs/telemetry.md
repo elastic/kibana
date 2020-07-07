@@ -40,6 +40,9 @@ and/or config/kibana.dev.yml files.
 
 Running the script with `--clear` will delete the index first.
 
+If you're using an Elasticsearch instance without TLS verification (if you have `elasticsearch.ssl.verificationMode: none` set in your kibana.yml)
+you can run the script with `env NODE_TLS_REJECT_UNAUTHORIZED=0` to avoid TLS connection errors.
+
 After running the script you should see sample telemetry data in the "xpack-phone-home" index.
 
 ### Updating Data Telemetry Mappings
