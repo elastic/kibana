@@ -139,6 +139,7 @@ export const Body = React.memo<BodyProps>(
         )}
         <TimelineBody
           data-test-subj="timeline-body"
+          data-timeline-id={id}
           bodyHeight={height}
           ref={containerElementRef}
           visible={show && !showGraphView(graphEventId)}

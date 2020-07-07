@@ -51,7 +51,7 @@ describe('Vislib Dispatch Class Test Suite', function () {
     });
 
     it('implements on, off, emit methods', function () {
-      const events = _.pluck(vis.handler.charts, 'events');
+      const events = _.map(vis.handler.charts, 'events');
       expect(events.length).to.be.above(0);
       events.forEach(function (dispatch) {
         expect(dispatch).to.have.property('on');

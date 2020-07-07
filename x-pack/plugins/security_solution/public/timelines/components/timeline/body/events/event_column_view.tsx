@@ -188,14 +188,14 @@ export const EventColumnView = React.memo<Props>(
                 closePopover={closePopover}
                 panelPaddingSize="none"
                 anchorPosition="downLeft"
+                repositionOnScroll
               >
                 <ContextMenuPanel items={grouped.contextMenu} />
               </EuiPopover>
             </EventsTdContent>,
           ]
         : grouped.icon;
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [button, ecsData, timelineActions, isPopoverOpen]); // , isPopoverOpen, closePopover, onButtonClick]);
+    }, [button, closePopover, id, onClickCb, ecsData, timelineActions, isPopoverOpen]);
 
     return (
       <EventsTrData data-test-subj="event-column-view">
