@@ -7,10 +7,7 @@ function checkout_sibling {
   targetDir=$2
   useExistingParamName=$3
   useExisting="$(eval "echo "\$$useExistingParamName"")"
-  repoAddress="git@github.com:"
-  if [[ "$USE_HTTPS_CLONE" ]]; then
-    repoAddress="https://github.com/"
-  fi
+  repoAddress="https://github.com/"
 
   if [ -z ${useExisting:+x} ]; then
     if [ -d "$targetDir" ]; then
