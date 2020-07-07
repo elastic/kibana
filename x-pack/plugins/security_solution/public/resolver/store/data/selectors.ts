@@ -32,7 +32,7 @@ import {
 } from '../../../../common/endpoint/types';
 import * as resolverTreeModel from '../../models/resolver_tree';
 import { isometricTaxiLayout } from '../../models/indexed_process_tree/isometric_taxi_layout';
-import { primaryEventCategory } from '../../../../common/endpoint/models/event';
+import { allEventCategories } from '../../../../common/endpoint/models/event';
 
 /**
  * If there is currently a request.
@@ -197,6 +197,7 @@ export const relatedEventInfoByEntityId = createSelector(
         const getAggregateTotalForCategory = (eventCategory: string): number => {
           return stats.events.byCategory[eventCategory] || 0;
         };
+
         /**
          * Get all the related events in the category provided.
          *
@@ -207,9 +208,15 @@ export const relatedEventInfoByEntityId = createSelector(
             return [];
           }
           return eventsResponseForThisEntry.events.filter((resolverEvent) => {
-            return primaryEventCategory(resolverEvent) === eventCategory;
+            for(const category of [allEventCategories(resolverEvent)].flat()){
+              if (category === eventCategory){
+                return true;
+              }
+            }
+            return false;
           });
         };
+
         /**
          * The number of events that occurred before the API limit was reached.
          *
@@ -218,6 +225,7 @@ export const relatedEventInfoByEntityId = createSelector(
         const getNumberActuallyDisplayedForCategory = (eventCategory: string): number => {
           return getMatchingEventsForCategory(eventCategory)?.length || 0;
         };
+
         /**
          * The total number counted by the backend - the number displayed
          *
@@ -229,6 +237,7 @@ export const relatedEventInfoByEntityId = createSelector(
             getNumberActuallyDisplayedForCategory(eventCategory)
           );
         };
+
         /**
          * `true` when the `nextEvent` cursor appeared in the results and we are short on the number needed to
          * fullfill the aggregate count.
@@ -236,6 +245,7 @@ export const relatedEventInfoByEntityId = createSelector(
          * @param eventCategory {string} The ECS category like 'file','dns',etc.
          */
         const shouldShowLimitForCategory = (eventCategory: string): boolean => {
+        
           if (hasMoreEvents && getNumberNotDisplayedForCategory(eventCategory) > 0) {
             return true;
           }

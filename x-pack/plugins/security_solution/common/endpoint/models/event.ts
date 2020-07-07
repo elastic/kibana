@@ -97,6 +97,21 @@ export function primaryEventCategory(event: ResolverEvent): string | undefined {
 }
 
 /**
+ * @param event The event to get the full ECS category for
+ */
+export function allEventCategories(event: ResolverEvent): string | string[] | undefined {
+  // Returning "Process" as a catch-all here because it seems pretty general
+  if (isLegacyEvent(event)) {
+    const legacyFullType = event.endgame.event_type_full;
+    if (legacyFullType) {
+      return legacyFullType;
+    }
+  } else {
+    return event.event.category;
+  }
+}
+
+/**
  * ECS event type will be things like 'creation', 'deletion', 'access', etc.
  * see: https://www.elastic.co/guide/en/ecs/current/ecs-event.html
  * @param event The ResolverEvent to get the ecs type for
