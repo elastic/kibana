@@ -61,7 +61,9 @@ export function EPMHomePage() {
 
 function InstalledPackages() {
   useBreadcrumbs('integrations_installed');
-  const { data: allPackages, isLoading: isLoadingPackages } = useGetPackages();
+  const { data: allPackages, isLoading: isLoadingPackages } = useGetPackages({
+    experimental: true,
+  });
   const [selectedCategory, setSelectedCategory] = useState('');
 
   const title = i18n.translate('xpack.ingestManager.epmList.installedTitle', {
@@ -115,7 +117,8 @@ function InstalledPackages() {
 function AvailablePackages() {
   useBreadcrumbs('integrations_all');
   const [selectedCategory, setSelectedCategory] = useState('');
-  const { data: categoryPackagesRes, isLoading: isLoadingPackages } = useGetPackages({
+  const { data: allPackagesRes, isLoading: isLoadingAllPackages } = useGetPackages();
+  const { data: categoryPackagesRes, isLoading: isLoadingCategoryPackages } = useGetPackages({
     category: selectedCategory,
   });
   const { data: categoriesRes, isLoading: isLoadingCategories } = useGetCategories();
@@ -132,13 +135,13 @@ function AvailablePackages() {
       title: i18n.translate('xpack.ingestManager.epmList.allPackagesFilterLinkText', {
         defaultMessage: 'All',
       }),
-      count: packages.length,
+      count: allPackagesRes?.response?.length || 0,
     },
     ...(categoriesRes ? categoriesRes.response : []),
   ];
   const controls = categories ? (
     <CategoryFacets
-      isLoading={isLoadingCategories}
+      isLoading={isLoadingCategories || isLoadingAllPackages}
       categories={categories}
       selectedCategory={selectedCategory}
       onCategoryChange={({ id }: CategorySummaryItem) => setSelectedCategory(id)}
@@ -147,7 +150,7 @@ function AvailablePackages() {
 
   return (
     <PackageListGrid
-      isLoading={isLoadingPackages}
+      isLoading={isLoadingCategoryPackages}
       title={title}
       controls={controls}
       list={packages}
