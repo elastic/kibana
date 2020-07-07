@@ -23,12 +23,12 @@
   margin-bottom: 0;
 }
 
-.dscFieldList--selected,
-.dscFieldList--unpopular,
-.dscFieldList--popular {
-  padding-left: $euiSizeS;
-  padding-right: $euiSizeS;
-}
+// .dscFieldList--selected,
+// .dscFieldList--unpopular,
+// .dscFieldList--popular {
+// padding-left: $euiSizeS;
+// padding-right: $euiSizeS;
+// }
 
 .dscFieldListHeader {
   padding: $euiSizeS $euiSizeS 0 $euiSizeS;
@@ -40,8 +40,9 @@
 }
 
 .dscFieldChooser {
-  padding-left: $euiSizeS !important;
-  padding-right: $euiSizeS !important;
+  // padding-left: $euiSizeS !important;
+  padding-left: $euiSize !important;
+  // padding-right: $euiSizeS !important;
 }
 
 .dscFieldChooser__toggle {
@@ -55,12 +56,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 2px;
+  // padding: 0 2px;
   cursor: pointer;
   font-size: $euiFontSizeXS;
   border-top: solid 1px transparent;
   border-bottom: solid 1px transparent;
   line-height: normal;
+  margin-bottom: $euiSizeXS * 0.5;
 
   &:hover,
   &:focus {
@@ -72,7 +74,7 @@
 
 .dscSidebarItem--active {
   border-top: 1px solid $euiColorLightShade;
-  background: shade($euiColorLightestShade, 5%);
+  // background: shade($euiColorLightestShade, 5%);
   color: $euiColorFullShade;
   .euiText {
     font-weight: bold;
@@ -80,20 +82,24 @@
 }
 
 .dscSidebarField {
-  padding: $euiSizeXS 0;
+  // padding: $euiSizeXS 0;
+  padding: $euiSizeXS;
   display: flex;
-  align-items: flex-start;
+  // align-items: flex-start;
+  align-items: center;
   max-width: 100%;
-  margin: 0;
+  // margin: 0;
   width: 100%;
   border: none;
-  border-radius: 0;
+  // border-radius: 0;
+  border-radius: $euiBorderRadius - 1px;
   text-align: left;
 }
 
 .dscSidebarField__name {
   margin-left: $euiSizeS;
   flex-grow: 1;
+  word-break: break-word;
 }
 
 .dscSidebarField__fieldIcon {

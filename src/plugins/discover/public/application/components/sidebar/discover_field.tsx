@@ -108,6 +108,13 @@ export function DiscoverField({
     }
   };
 
+  function wrapOnDot(str?: string) {
+    // u200B is a non-width white-space character, which allows
+    // the browser to efficiently word-wrap right after the dot
+    // without us having to draw a lot of extra DOM elements, etc
+    return str ? str.replace(/\./g, '.\u200B') : '';
+  }
+
   return (
     <>
       <div
@@ -124,15 +131,20 @@ export function DiscoverField({
             scripted={field.scripted}
           />
         </span>
-        <span className="dscSidebarField__name eui-textTruncate">
-          <EuiText
-            size="xs"
-            data-test-subj={`field-${field.name}`}
-            className="eui-textTruncate"
-            title={field.name}
-          >
-            {useShortDots ? shortenDottedString(field.name) : field.displayName}
-          </EuiText>
+        <span
+          data-test-subj={`field-${field.name}`}
+          title={field.name}
+          className="dscSidebarField__name xeui-textTruncate"
+        >
+          {/* <EuiText
+            size="xs" */}
+          {/* // data-test-subj={`field-${field.name}`}
+            // className="xeui-textTruncate"
+            // title={field.name} */}
+          {/* > */}
+          {/* {useShortDots ? shortenDottedString(field.name) : field.displayName} */}
+          {wrapOnDot(field.name)}
+          {/* </EuiText> */}
         </span>
         <span>
           {field.name !== '_source' && !selected && (
