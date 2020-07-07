@@ -13,7 +13,7 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 describe('Empty', () => {
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
-      const wrapper = shallow(<Empty timelineId="test" />);
+      const wrapper = shallow(<Empty timelineId="test" browserFields={{}} />);
       expect(wrapper).toMatchSnapshot();
     });
 
@@ -22,7 +22,7 @@ describe('Empty', () => {
     test('it renders the expected message', () => {
       const wrapper = mount(
         <TestProviders>
-          <Empty timelineId="test" />
+          <Empty timelineId="test" browserFields={{}} />
         </TestProviders>
       );
 

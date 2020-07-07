@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty, noop } from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import React from 'react';
 
 import { DataProvider, DataProviderType, IS_OPERATOR } from './data_provider';
@@ -21,12 +21,6 @@ export const Provider = React.memo<OwnProps>(({ dataProvider }) => (
     kqlQuery={dataProvider.kqlQuery}
     isEnabled={dataProvider.enabled}
     isExcluded={dataProvider.excluded}
-    isInvalid={
-      !!(
-        dataProvider.queryMatch.operator === IS_OPERATOR &&
-        isEmpty(dataProvider.queryMatch.displayValue || dataProvider.queryMatch.value)
-      )
-    }
     providerId={dataProvider.id}
     toggleExcludedProvider={noop}
     toggleEnabledProvider={noop}

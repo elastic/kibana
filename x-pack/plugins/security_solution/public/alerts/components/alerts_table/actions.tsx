@@ -147,6 +147,7 @@ export const sendAlertToTimelineAction = async ({
           timeline: {
             ...timeline,
             timelineType: TimelineType.default,
+            templateTimelineId: null,
             status: TimelineStatus.draft,
             dataProviders,
             eventType: 'all',

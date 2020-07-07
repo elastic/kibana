@@ -37,6 +37,7 @@ exports[`Empty rendering renders correctly against snapshot 1`] = `
     </Text>
   </NoWrap>
   <AddDataProviderPopover
+    browserFields={Object {}}
     timelineId="test"
   />
 </EmptyContainer>

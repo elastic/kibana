@@ -8,7 +8,6 @@ import {
   EuiContextMenuPanelDescriptor,
   EuiPopover,
   EuiPopoverProps,
-  EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';

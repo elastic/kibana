@@ -107,7 +107,6 @@ interface ProviderBadgeProps {
   kqlQuery: string;
   isEnabled: boolean;
   isExcluded: boolean;
-  isInvalid: boolean;
   providerId: string;
   togglePopover: () => void;
   toggleType: () => void;
@@ -129,7 +128,6 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
     field,
     isEnabled,
     isExcluded,
-    isInvalid,
     operator,
     providerId,
     togglePopover,
@@ -154,9 +152,8 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
         classNames('globalFilterItem', {
           'globalFilterItem-isDisabled': !isEnabled,
           'globalFilterItem-isExcluded': isExcluded,
-          'globalFilterItem-isError': isInvalid,
         }),
-      [isEnabled, isExcluded, isInvalid]
+      [isEnabled, isExcluded]
     );
 
     const formattedValue = useMemo(() => (isString(val) && val === '' ? getEmptyString() : val), [

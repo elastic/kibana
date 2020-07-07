@@ -15,8 +15,8 @@ import {
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { BrowserFields } from '../../../../common/containers/source';
 import { TimelineType } from '../../../../../common/types/timeline';
-import { useWithSource } from '../../../../common/containers/source';
 import { StatefulEditDataProvider } from '../../edit_data_provider';
 import { addContentToTimeline } from './helpers';
 import { DataProviderType } from './data_provider';
@@ -24,15 +24,18 @@ import { timelineSelectors } from '../../../store/timeline';
 import { ADD_FIELD_LABEL, ADD_TEMPLATE_FIELD_LABEL } from './translations';
 
 interface AddDataProviderPopoverProps {
+  browserFields: BrowserFields;
   timelineId: string;
 }
 
-const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = ({ timelineId }) => {
+const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = ({
+  browserFields,
+  timelineId,
+}) => {
   const dispatch = useDispatch();
   const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
   const timelineById = useSelector(timelineSelectors.timelineByIdSelector);
   const { dataProviders, timelineType } = timelineById[timelineId] ?? {};
-  const { browserFields } = useWithSource('default');
 
   const handleOpenPopover = useCallback(() => setIsAddFilterPopoverOpen(true), [
     setIsAddFilterPopoverOpen,

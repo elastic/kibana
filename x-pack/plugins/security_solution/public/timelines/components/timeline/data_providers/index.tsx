@@ -126,7 +126,7 @@ export const DataProviders = React.memo<Props>(
             />
           ) : (
             <DroppableWrapper isDropDisabled={isLoading} droppableId={getDroppableId(timelineId)}>
-              <Empty timelineId={timelineId} />
+              <Empty browserFields={browserFields} timelineId={timelineId} />
             </DroppableWrapper>
           )}
         </DropTargetDataProviders>

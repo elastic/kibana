@@ -11,6 +11,7 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     >
       <styled.div>
         <AddDataProviderPopover
+          browserFields={Object {}}
           timelineId="foo"
         />
       </styled.div>

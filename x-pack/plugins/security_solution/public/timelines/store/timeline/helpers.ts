@@ -16,6 +16,8 @@ import {
   QueryOperator,
   QueryMatch,
   DataProviderType,
+  IS_OPERATOR,
+  EXISTS_OPERATOR,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/model';
 import { TimelineNonEcsData } from '../../../graphql/types';
@@ -1075,6 +1077,9 @@ const updateTypeAndProvider = (
                     displayValue: undefined,
                     value:
                       type === DataProviderType.template ? `{${andProvider.queryMatch.field}}` : '',
+                    operator: (type === DataProviderType.template
+                      ? IS_OPERATOR
+                      : EXISTS_OPERATOR) as QueryOperator,
                   },
                 }
               : andProvider
@@ -1095,6 +1100,9 @@ const updateTypeProvider = (type: DataProviderType, providerId: string, timeline
             displayField: undefined,
             displayValue: undefined,
             value: type === DataProviderType.template ? `{${provider.queryMatch.field}}` : '',
+            operator: (type === DataProviderType.template
+              ? IS_OPERATOR
+              : EXISTS_OPERATOR) as QueryOperator,
           },
         }
       : provider

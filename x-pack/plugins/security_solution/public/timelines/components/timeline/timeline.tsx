@@ -49,7 +49,6 @@ const TimelineContainer = styled.div`
   display: flex;
   flex-direction: column;
   position: relative;
-  padding-top: 4px; // to fit saving progress bar
 `;
 
 const TimelineHeaderContainer = styled.div`

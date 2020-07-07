@@ -8,6 +8,7 @@ import { EuiBadge, EuiText } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
+import { BrowserFields } from '../../../../common/containers/source';
 import { AndOrBadge } from '../../../../common/components/and_or_badge';
 import { AddDataProviderPopover } from './add_data_provider_popover';
 
@@ -73,13 +74,14 @@ const NoWrap = styled.div`
 
 NoWrap.displayName = 'NoWrap';
 interface Props {
+  browserFields: BrowserFields;
   showSmallMsg?: boolean;
   timelineId: string;
 }
 /**
  * Prompts the user to drop anything with a facet count into the data providers section.
  */
-export const Empty = React.memo<Props>(({ showSmallMsg = false, timelineId }) => (
+export const Empty = React.memo<Props>(({ showSmallMsg = false, browserFields, timelineId }) => (
   <EmptyContainer
     className="timeline-drop-area-empty"
     data-test-subj="empty"
@@ -105,7 +107,7 @@ export const Empty = React.memo<Props>(({ showSmallMsg = false, timelineId }) =>
           </Text>
         </NoWrap>
 
-        <AddDataProviderPopover timelineId={timelineId} />
+        <AddDataProviderPopover browserFields={browserFields} timelineId={timelineId} />
       </>
     )}
     {showSmallMsg && <AndOrBadge type="or" />}

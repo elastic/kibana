@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem, EuiFormHelpText, EuiSpacer } from '@elastic/eui';
 import { rgba } from 'polished';
 import React, { Fragment, useMemo } from 'react';
@@ -121,11 +120,6 @@ const AddDataProviderContainer = styled.div`
 const getDataProviderValue = (dataProvider: DataProvidersAnd) =>
   dataProvider.queryMatch.displayValue ?? dataProvider.queryMatch.value;
 
-const isInvalid = (dataProvider: DataProvidersAnd): boolean =>
-  !!(
-    dataProvider.queryMatch.operator === IS_OPERATOR && isEmpty(getDataProviderValue(dataProvider))
-  );
-
 /**
  * Renders an interactive card representation of the data providers. It also
  * affords uniform UI controls for the following actions:
@@ -160,7 +154,7 @@ export const Providers = React.memo<Props>(
               <OrFlexItem grow={false}>
                 {groupIndex === 0 ? (
                   <AddDataProviderContainer>
-                    <AddDataProviderPopover timelineId={timelineId} />
+                    <AddDataProviderPopover browserFields={browserFields} timelineId={timelineId} />
                   </AddDataProviderContainer>
                 ) : (
                   <AndOrBadgeContainer>
@@ -228,7 +222,6 @@ export const Providers = React.memo<Props>(
                                     isExcluded={
                                       index > 0 ? dataProvider.excluded : group[0].excluded
                                     }
-                                    isInvalid={isInvalid(index > 0 ? dataProvider : group[0])}
                                     onDataProviderEdited={onDataProviderEdited}
                                     operator={
                                       index > 0
