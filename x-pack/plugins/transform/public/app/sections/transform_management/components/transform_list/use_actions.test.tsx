@@ -9,6 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useActions } from './use_actions';
 
 jest.mock('../../../../../shared_imports');
+jest.mock('../../../../../app/app_dependencies');
 
 describe('Transform: Transform List Actions', () => {
   test('useActions()', () => {
