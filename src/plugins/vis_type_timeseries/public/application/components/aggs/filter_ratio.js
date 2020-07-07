@@ -57,7 +57,9 @@ export const FilterRatioAgg = (props) => {
   const htmlId = htmlIdGenerator();
 
   const restrictFields =
-    model.metric_agg === METRIC_TYPES.CARDINALITY ? [] : [KBN_FIELD_TYPES.NUMBER];
+    model.metric_agg === METRIC_TYPES.CARDINALITY
+      ? []
+      : [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.HISTOGRAM];
 
   return (
     <AggRow

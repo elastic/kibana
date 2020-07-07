@@ -21,13 +21,14 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { Agg } from './agg';
 import { FieldSelect } from './field_select';
-import { FIELDS, METRIC, SERIES, PANEL } from '../../../../common/constants';
-const runTest = (aggType, name, test) => {
+import { FIELDS, METRIC, SERIES, PANEL } from '../../../test_utils';
+const runTest = (aggType, name, test, additionalProps = {}) => {
   describe(aggType, () => {
     const metric = {
       ...METRIC,
       type: aggType,
       field: 'histogram_value',
+      ...additionalProps,
     };
     const series = { ...SERIES, metrics: [metric] };
     const panel = { ...PANEL, series };
@@ -55,20 +56,29 @@ const runTest = (aggType, name, test) => {
 
 describe('Histogram Types', () => {
   describe('supported', () => {
-    const shouldHaveHistogramSupport = (aggType) => {
-      runTest(aggType, 'supports', (wrapper) =>
-        expect(wrapper.find(FieldSelect).at(0).props().restrict).toContain('histogram')
+    const shouldHaveHistogramSupport = (aggType, additionalProps = {}) => {
+      runTest(
+        aggType,
+        'supports',
+        (wrapper) =>
+          expect(wrapper.find(FieldSelect).at(0).props().restrict).toContain('histogram'),
+        additionalProps
       );
     };
     shouldHaveHistogramSupport('avg');
     shouldHaveHistogramSupport('value_count');
     shouldHaveHistogramSupport('percentile');
     shouldHaveHistogramSupport('percentile_rank');
+    shouldHaveHistogramSupport('filter_ratio', { metric_agg: 'avg' });
   });
   describe('not supported', () => {
-    const shouldNotHaveHistogramSupport = (aggType) => {
-      runTest(aggType, 'does not support', (wrapper) =>
-        expect(wrapper.find(FieldSelect).at(0).props().restrict).not.toContain('histogram')
+    const shouldNotHaveHistogramSupport = (aggType, additionalProps = {}) => {
+      runTest(
+        aggType,
+        'does not support',
+        (wrapper) =>
+          expect(wrapper.find(FieldSelect).at(0).props().restrict).not.toContain('histogram'),
+        additionalProps
       );
     };
     shouldNotHaveHistogramSupport('cardinality');
