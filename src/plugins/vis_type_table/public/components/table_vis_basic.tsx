@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useMemo, memo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiDataGrid } from '@elastic/eui';
 
 import { ExprVis } from 'src/plugins/visualizations/public';
@@ -33,6 +33,38 @@ interface TableVisBasicProps {
   visParams: TableVisParams;
 }
 
+const usePagination = (visParams: TableVisParams) => {
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: visParams.perPage || 0,
+    pageSizeOptions: [visParams.perPage || 0, 50],
+  });
+  const onChangeItemsPerPage = useCallback(
+    (pageSize: number) => setPagination((pag) => ({ ...pag, pageSize, pageIndex: 0 })),
+    []
+  );
+  const onChangePage = useCallback(
+    (pageIndex: number) => setPagination((pag) => ({ ...pag, pageIndex })),
+    []
+  );
+
+  useEffect(() => {
+    setPagination({
+      pageIndex: 0,
+      pageSize: visParams.perPage || 0,
+      pageSizeOptions: [visParams.perPage || 0, 50],
+    });
+  }, [visParams.perPage]);
+
+  return pagination.pageSize
+    ? {
+        ...pagination,
+        onChangeItemsPerPage,
+        onChangePage,
+      }
+    : undefined;
+};
+
 export const TableVisBasic = memo(({ table, vis, visParams }: TableVisBasicProps) => {
   const formattedColumns = useFormattedColumns(table, visParams);
   const renderCellValue = useMemo(() => createTableVisCell(table, formattedColumns, vis), [
@@ -40,6 +72,8 @@ export const TableVisBasic = memo(({ table, vis, visParams }: TableVisBasicProps
     formattedColumns,
     vis,
   ]);
+
+  const pagination = usePagination(visParams);
 
   return table.rows.length > 0 ? (
     <EuiDataGrid
@@ -54,13 +88,7 @@ export const TableVisBasic = memo(({ table, vis, visParams }: TableVisBasicProps
         setVisibleColumns: () => {},
       }}
       renderCellValue={renderCellValue}
-      pagination={{
-        pageIndex: 0,
-        pageSize: 10,
-        pageSizeOptions: [50, 100, 200],
-        onChangePage: () => {},
-        onChangeItemsPerPage: () => {},
-      }}
+      pagination={pagination}
     />
   ) : (
     <TableVisNoResults />
