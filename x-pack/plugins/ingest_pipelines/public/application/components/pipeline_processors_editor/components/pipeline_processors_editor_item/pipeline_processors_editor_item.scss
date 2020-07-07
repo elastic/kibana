@@ -1,11 +1,12 @@
 @import '../shared';
 
 .pipelineProcessorsEditor__item {
-  transition: border-color 1s;
+  transition: border-color $euiAnimSpeedExtraSlow $euiAnimSlightResistance;
   min-height: 50px;
 
   &--selected {
-    border: 1px solid $euiColorPrimary;
+    border: $euiBorderThin;
+    border-color: $euiColorPrimary;
   }
 
   &--displayNone {
@@ -30,7 +31,8 @@
     border-bottom: 1px dashed transparent;
 
     &--notEditing {
-      border-bottom: 1px dashed $euiColorLightShade;
+      border-bottom: $euiBorderEditable;
+      border-width: $euiBorderWidthThin;
       &:hover {
         border-color: $euiColorMediumShade;
       }
@@ -45,7 +47,7 @@
   }
 
   &__textInput {
-    height: 24px;
+    height: $euiSizeL;
     min-width: 200px;
   }
 
