@@ -9,18 +9,18 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { useForm, Form, FormConfig } from '../../../shared_imports';
-import { Pipeline } from '../../../../common/types';
+import { Pipeline, Processor } from '../../../../common/types';
+
+import './pipeline_form.scss';
+
+import { OnUpdateHandlerArg, OnUpdateHandler } from '../pipeline_processors_editor';
 
 import { PipelineRequestFlyout } from './pipeline_request_flyout';
 import { PipelineTestFlyout } from './pipeline_test_flyout';
 import { PipelineFormFields } from './pipeline_form_fields';
 import { PipelineFormError } from './pipeline_form_error';
 import { pipelineFormSchema } from './schema';
-import {
-  OnUpdateHandlerArg,
-  OnUpdateHandler,
-  SerializeResult,
-} from '../pipeline_processors_editor';
+import { PipelineForm as IPipelineForm } from './types';
 
 export interface PipelineFormProps {
   onSave: (pipeline: Pipeline) => void;
@@ -31,14 +31,15 @@ export interface PipelineFormProps {
   isEditing?: boolean;
 }
 
+const defaultFormValue: Pipeline = Object.freeze({
+  name: '',
+  description: '',
+  processors: [],
+  on_failure: [],
+});
+
 export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
-  defaultValue = {
-    name: '',
-    description: '',
-    processors: [],
-    on_failure: [],
-    version: '',
-  },
+  defaultValue = defaultFormValue,
   onSave,
   isSaving,
   saveError,
@@ -49,34 +50,42 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
 
   const [isTestingPipeline, setIsTestingPipeline] = useState<boolean>(false);
 
+  const {
+    processors: initialProcessors,
+    on_failure: initialOnFailureProcessors,
+    ...defaultFormValues
+  } = defaultValue;
+
+  const [processorsState, setProcessorsState] = useState<{
+    processors: Processor[];
+    onFailure?: Processor[];
+  }>({
+    processors: initialProcessors,
+    onFailure: initialOnFailureProcessors,
+  });
+
   const processorStateRef = useRef<OnUpdateHandlerArg>();
 
-  const handleSave: FormConfig['onSubmit'] = async (formData, isValid) => {
-    let override: SerializeResult | undefined;
-
+  const handleSave: FormConfig<IPipelineForm>['onSubmit'] = async (formData, isValid) => {
     if (!isValid) {
       return;
     }
 
     if (processorStateRef.current) {
-      const processorsState = processorStateRef.current;
-      if (await processorsState.validate()) {
-        override = processorsState.getData();
-      } else {
-        return;
+      const state = processorStateRef.current;
+      if (await state.validate()) {
+        onSave({ ...formData, ...state.getData() });
       }
     }
-
-    onSave({ ...formData, ...(override || {}) } as Pipeline);
   };
 
   const handleTestPipelineClick = () => {
     setIsTestingPipeline(true);
   };
 
-  const { form } = useForm({
+  const { form } = useForm<IPipelineForm>({
     schema: pipelineFormSchema,
-    defaultValue,
+    defaultValue: defaultFormValues,
     onSubmit: handleSave,
   });
 
@@ -116,13 +125,16 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
         error={form.getErrors()}
       >
         {/* Request error */}
-        {saveError && <PipelineFormError errorMessage={saveError.message} />}
+        {saveError && <PipelineFormError error={saveError} />}
 
         {/* All form fields */}
         <PipelineFormFields
+          onLoadJson={({ processors, on_failure: onFailure }) => {
+            setProcessorsState({ processors, onFailure });
+          }}
           onEditorFlyoutOpen={onEditorFlyoutOpen}
-          initialProcessors={defaultValue.processors}
-          initialOnFailureProcessors={defaultValue.on_failure}
+          processors={processorsState.processors}
+          onFailure={processorsState.onFailure}
           onProcessorsUpdate={onProcessorsChangeHandler}
           hasVersion={Boolean(defaultValue.version)}
           isTestButtonDisabled={isTestingPipeline || form.isValid === false}

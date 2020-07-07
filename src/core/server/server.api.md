@@ -108,7 +108,7 @@ import { PingParams } from 'elasticsearch';
 import { PutScriptParams } from 'elasticsearch';
 import { PutTemplateParams } from 'elasticsearch';
 import { Readable } from 'stream';
-import { RecursiveReadonly as RecursiveReadonly_2 } from 'kibana/public';
+import { RecursiveReadonly } from '@kbn/utility-types';
 import { ReindexParams } from 'elasticsearch';
 import { ReindexRethrottleParams } from 'elasticsearch';
 import { RenderSearchTemplateParams } from 'elasticsearch';
@@ -299,7 +299,7 @@ export const config: {
             startupTimeout: import("@kbn/config-schema").Type<import("moment").Duration>;
             logQueries: import("@kbn/config-schema").Type<boolean>;
             ssl: import("@kbn/config-schema").ObjectType<{
-                verificationMode: import("@kbn/config-schema").Type<"none" | "full" | "certificate">;
+                verificationMode: import("@kbn/config-schema").Type<"none" | "certificate" | "full">;
                 certificateAuthorities: import("@kbn/config-schema").Type<string | string[] | undefined>;
                 certificate: import("@kbn/config-schema").Type<string | undefined>;
                 key: import("@kbn/config-schema").Type<string | undefined>;
@@ -1663,13 +1663,6 @@ export interface PluginsServiceStart {
 // @public
 export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
 
-// Warning: (ae-forgotten-export) The symbol "RecursiveReadonlyArray" needs to be exported by the entry point index.d.ts
-//
-// @public (undocumented)
-export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T extends any[] ? RecursiveReadonlyArray<T[number]> : T extends object ? Readonly<{
-    [K in keyof T]: RecursiveReadonly<T[K]>;
-}> : T;
-
 // @public
 export type RedirectResponseOptions = HttpResponseOptions & {
     headers: {
@@ -2006,6 +1999,8 @@ export interface SavedObjectsClientWrapperOptions {
 // @public
 export interface SavedObjectsComplexFieldMapping {
     // (undocumented)
+    doc_values?: boolean;
+    // (undocumented)
     properties: SavedObjectsMappingProperties;
     // (undocumented)
     type?: string;
@@ -2013,6 +2008,8 @@ export interface SavedObjectsComplexFieldMapping {
 
 // @public
 export interface SavedObjectsCoreFieldMapping {
+    // (undocumented)
+    doc_values?: boolean;
     // (undocumented)
     enabled?: boolean;
     // (undocumented)
@@ -2526,6 +2523,7 @@ export class SavedObjectTypeRegistry {
     getImportableAndExportableTypes(): SavedObjectsType[];
     getIndex(type: string): string | undefined;
     getType(type: string): SavedObjectsType | undefined;
+    getVisibleTypes(): SavedObjectsType[];
     isHidden(type: string): boolean;
     isImportableAndExportable(type: string): boolean;
     isMultiNamespace(type: string): boolean;
@@ -2601,7 +2599,7 @@ export interface SessionStorageFactory<T> {
 }
 
 // @public (undocumented)
-export type SharedGlobalConfig = RecursiveReadonly_2<{
+export type SharedGlobalConfig = RecursiveReadonly<{
     kibana: Pick<KibanaConfigType_2, typeof SharedGlobalConfigKeys.kibana[number]>;
     elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;
     path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
