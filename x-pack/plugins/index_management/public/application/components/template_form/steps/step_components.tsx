@@ -45,7 +45,11 @@ export const StepComponents = ({ defaultValue = [], onChange, esDocsBase }: Prop
 
   const onComponentSelectionChange = useCallback(
     (components: string[]) => {
-      onChange({ isValid: true, validate: async () => true, getData: () => components });
+      onChange({
+        isValid: true,
+        validate: async () => true,
+        getData: () => (components.length > 0 ? components : undefined),
+      });
     },
     [onChange]
   );

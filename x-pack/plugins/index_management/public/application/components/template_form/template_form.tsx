@@ -91,12 +91,7 @@ export const TemplateForm = ({
   const indexTemplate = defaultValue ?? {
     name: '',
     indexPatterns: [],
-    composedOf: [],
-    template: {
-      settings: {},
-      mappings: {},
-      aliases: {},
-    },
+    template: {},
     _kbnMeta: {
       isManaged: false,
       isCloudManaged: false,
@@ -150,18 +145,50 @@ export const TemplateForm = ({
     </>
   ) : null;
 
-  const buildTemplateObject = (initialTemplate: TemplateDeserialized) => (
-    wizardData: WizardContent
-  ): TemplateDeserialized => ({
-    ...initialTemplate,
-    ...wizardData.logistics,
-    composedOf: wizardData.components,
-    template: {
-      settings: wizardData.settings,
-      mappings: wizardData.mappings,
-      aliases: wizardData.aliases,
+  /**
+   * If no mappings, settings or aliases are defined, it is better to not send empty
+   * object for those values.
+   * This method takes care of that and other cleanup of empty fields.
+   * @param template The template object to clean up
+   */
+  const cleanupTemplateObject = (template: TemplateDeserialized) => {
+    const outputTemplate = { ...template };
+
+    if (outputTemplate.template.settings === undefined) {
+      delete outputTemplate.template.settings;
+    }
+    if (outputTemplate.template.mappings === undefined) {
+      delete outputTemplate.template.mappings;
+    }
+    if (outputTemplate.template.aliases === undefined) {
+      delete outputTemplate.template.aliases;
+    }
+    if (Object.keys(outputTemplate.template).length === 0) {
+      delete outputTemplate.template;
+    }
+
+    return outputTemplate;
+  };
+
+  const buildTemplateObject = useCallback(
+    (initialTemplate: TemplateDeserialized) => (
+      wizardData: WizardContent
+    ): TemplateDeserialized => {
+      const outputTemplate = {
+        ...initialTemplate,
+        ...wizardData.logistics,
+        composedOf: wizardData.components,
+        template: {
+          settings: wizardData.settings,
+          mappings: wizardData.mappings,
+          aliases: wizardData.aliases,
+        },
+      };
+
+      return cleanupTemplateObject(outputTemplate);
     },
-  });
+    []
+  );
 
   const onSaveTemplate = useCallback(
     async (wizardData: WizardContent) => {
@@ -177,7 +204,7 @@ export const TemplateForm = ({
 
       clearSaveError();
     },
-    [indexTemplate, onSave, clearSaveError]
+    [indexTemplate, buildTemplateObject, onSave, clearSaveError]
   );
 
   return (

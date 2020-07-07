@@ -103,8 +103,8 @@ function formDeserializer(formData: LogisticsForm): LogisticsFormInternal {
 }
 
 function formSerializer(formData: LogisticsFormInternal): LogisticsForm {
-  const { __internal__, ...data } = formData;
-  return data;
+  const { __internal__, ...rest } = formData;
+  return rest;
 }
 
 export const StepLogistics: React.FunctionComponent<Props> = React.memo(
