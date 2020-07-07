@@ -8,7 +8,6 @@
 import { SavedObjectsClient } from 'src/core/server/saved_objects';
 import * as AgentService from '../services/agents';
 export interface AgentUsage {
-  events: number;
   total: number;
   online: number;
   error: number;
@@ -19,12 +18,20 @@ export const getAgentUsage = async (soClient?: SavedObjectsClient): Promise<Agen
   // TODO: unsure if this case is possible at all.
   if (!soClient) {
     return {
-      events: 0,
       total: 0,
       online: 0,
       error: 0,
       offline: 0,
     };
   }
-  return AgentService.getAgentStatusForConfig(soClient, undefined);
+  const { total, online, error, offline } = await AgentService.getAgentStatusForConfig(
+    soClient,
+    undefined
+  );
+  return {
+    total,
+    online,
+    error,
+    offline,
+  };
 };

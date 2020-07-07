@@ -56,7 +56,6 @@ export function registerIngestManagerUsageCollector(
     // schema: { // temporarily disabled because of type errors
     //   fleet_enabled: { type: 'boolean' },
     //   agents: {
-    //    events: { type: 'number' },
     //    total: { type: 'number' },
     //    online: { type: 'number' },
     //    error: { type: 'number' },
