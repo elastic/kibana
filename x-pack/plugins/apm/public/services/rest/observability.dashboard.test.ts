@@ -48,25 +48,20 @@ describe('Observability dashboard data', () => {
         stats: {
           services: {
             type: 'number',
-            label: 'Services',
             value: 10,
           },
           transactions: {
             type: 'number',
-            label: 'Transactions',
             value: 2,
-            color: '#6092c0',
           },
         },
         series: {
           transactions: {
-            label: 'Transactions',
             coordinates: [
               { x: 1, y: 1 },
               { x: 2, y: 2 },
               { x: 3, y: 3 },
             ],
-            color: '#6092c0',
           },
         },
       });
@@ -89,21 +84,16 @@ describe('Observability dashboard data', () => {
         stats: {
           services: {
             type: 'number',
-            label: 'Services',
             value: 0,
           },
           transactions: {
             type: 'number',
-            label: 'Transactions',
             value: 0,
-            color: '#6092c0',
           },
         },
         series: {
           transactions: {
-            label: 'Transactions',
             coordinates: [],
-            color: '#6092c0',
           },
         },
       });
@@ -126,21 +116,16 @@ describe('Observability dashboard data', () => {
         stats: {
           services: {
             type: 'number',
-            label: 'Services',
             value: 0,
           },
           transactions: {
             type: 'number',
-            label: 'Transactions',
             value: 0,
-            color: '#6092c0',
           },
         },
         series: {
           transactions: {
-            label: 'Transactions',
             coordinates: [{ x: 1 }, { x: 2 }, { x: 3 }],
-            color: '#6092c0',
           },
         },
       });
