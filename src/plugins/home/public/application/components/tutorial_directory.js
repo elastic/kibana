@@ -30,6 +30,7 @@ import {
   EuiTab,
   EuiFlexItem,
   EuiFlexGrid,
+  EuiFlexGroup,
   EuiSpacer,
   EuiTitle,
   EuiPageBody,
@@ -227,18 +228,60 @@ class TutorialDirectoryUi extends React.Component {
     );
   };
 
+  renderNotices = () => {
+    const notices = getServices().tutorialService.getDirectoryNotices();
+    return notices.length ? (
+      <EuiFlexGroup direction="column" gutterSize="m">
+        {notices.map((notice) => (
+          <EuiFlexItem>{notice}</EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    ) : null;
+  };
+
+  renderHeader = () => {
+    const headerLinks = getServices().tutorialService.getDirectoryHeaderLinks();
+    const notices = this.renderNotices();
+
+    return (
+      <>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiTitle size="l">
+              <h1>
+                <FormattedMessage
+                  id="home.tutorial.addDataToKibanaTitle"
+                  defaultMessage="Add data"
+                />
+              </h1>
+            </EuiTitle>
+          </EuiFlexItem>
+          {headerLinks.length ? (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="m" alignItems="center">
+                {headerLinks.map((headerLink) => (
+                  <EuiFlexItem>{headerLink}</EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+        {notices ? (
+          <>
+            <EuiSpacer />
+            {notices}
+          </>
+        ) : null}
+      </>
+    );
+  };
+
   render() {
     return (
       <EuiPage restrictWidth={1200}>
         <EuiPageBody>
-          <EuiTitle size="l">
-            <h1>
-              <FormattedMessage id="home.tutorial.addDataToKibanaTitle" defaultMessage="Add data" />
-            </h1>
-          </EuiTitle>
-
+          {this.renderHeader()}
           <EuiSpacer size="m" />
-
           <EuiTabs>{this.renderTabs()}</EuiTabs>
           <EuiSpacer />
           {this.renderTabContent()}

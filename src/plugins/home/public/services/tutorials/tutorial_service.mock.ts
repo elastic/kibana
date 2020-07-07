@@ -22,6 +22,8 @@ import { TutorialService, TutorialServiceSetup } from './tutorial_service';
 const createSetupMock = (): jest.Mocked<TutorialServiceSetup> => {
   const setup = {
     setVariable: jest.fn(),
+    registerDirectoryNotice: jest.fn(),
+    registerDirectoryHeaderLink: jest.fn(),
   };
   return setup;
 };
@@ -30,6 +32,8 @@ const createMock = (): jest.Mocked<PublicMethodsOf<TutorialService>> => {
   const service = {
     setup: jest.fn(),
     getVariables: jest.fn(() => ({})),
+    getDirectoryNotices: jest.fn(() => []),
+    getDirectoryHeaderLinks: jest.fn(() => []),
   };
   service.setup.mockImplementation(createSetupMock);
   return service;

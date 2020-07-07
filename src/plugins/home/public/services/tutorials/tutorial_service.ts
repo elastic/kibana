@@ -16,12 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
 
 /** @public */
 export type TutorialVariables = Partial<Record<string, unknown>>;
 
+/** @public */
+export type TutorialDirectoryNoticeComponent = React.FC;
+
+/** @public */
+export type TutorialDirectoryHeaderLinkComponent = React.FC;
+
 export class TutorialService {
   private tutorialVariables: TutorialVariables = {};
+  private tutorialDirectoryNotices: { [key: string]: TutorialDirectoryNoticeComponent } = {};
+  private tutorialDirectoryHeaderLinks: {
+    [key: string]: TutorialDirectoryHeaderLinkComponent;
+  } = {};
 
   public setup() {
     return {
@@ -34,11 +45,42 @@ export class TutorialService {
         }
         this.tutorialVariables[key] = value;
       },
+
+      /**
+       * Registers a component that will be rendered at the top of tutorial directory page.
+       */
+      registerDirectoryNotice: (id: string, component: TutorialDirectoryNoticeComponent) => {
+        if (this.tutorialDirectoryNotices[id]) {
+          throw new Error(`directory notice ${id} already set`);
+        }
+        this.tutorialDirectoryNotices[id] = component;
+      },
+
+      /**
+       * Registers a component that will be rendered next to tutorial directory title/header area.
+       */
+      registerDirectoryHeaderLink: (
+        id: string,
+        component: TutorialDirectoryHeaderLinkComponent
+      ) => {
+        if (this.tutorialDirectoryHeaderLinks[id]) {
+          throw new Error(`directory header link ${id} already set`);
+        }
+        this.tutorialDirectoryHeaderLinks[id] = component;
+      },
     };
   }
 
   public getVariables() {
     return this.tutorialVariables;
+  }
+
+  public getDirectoryNotices() {
+    return Object.values(this.tutorialDirectoryNotices);
+  }
+
+  public getDirectoryHeaderLinks() {
+    return Object.values(this.tutorialDirectoryHeaderLinks);
   }
 }
 
