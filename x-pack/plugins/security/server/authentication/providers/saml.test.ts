@@ -533,7 +533,7 @@ describe('SAMLAuthenticationProvider', () => {
         });
 
         const user = mockAuthenticatedUser();
-        const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
         mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
         customMockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -758,7 +758,7 @@ describe('SAMLAuthenticationProvider', () => {
             }
 
             if (scopeableRequest?.headers.authorization === 'Bearer new-valid-token') {
-              const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+              const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
               mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(newUser);
               return mockScopedClusterClient;
             }
@@ -821,13 +821,13 @@ describe('SAMLAuthenticationProvider', () => {
           const newUser = { username: 'user', authentication_realm: { name: 'saml2' } };
           mockOptions.client.asScoped.mockImplementation((scopeableRequest) => {
             if (scopeableRequest?.headers.authorization === `Bearer ${state.accessToken}`) {
-              const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+              const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
               mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(existingUser);
               return mockScopedClusterClient;
             }
 
             if (scopeableRequest?.headers.authorization === 'Bearer new-valid-token') {
-              const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+              const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
               mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(newUser);
               return mockScopedClusterClient;
             }
