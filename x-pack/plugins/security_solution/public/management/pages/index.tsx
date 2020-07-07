@@ -20,6 +20,7 @@ import { EndpointsContainer } from './endpoint_hosts';
 import { getEndpointListPath } from '../common/routing';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
+import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
 
 const NoPermissions = memo(() => {
   return (
@@ -28,6 +29,7 @@ const NoPermissions = memo(() => {
         iconType="alert"
         iconColor="danger"
         titleSize="l"
+        data-test-subj="noIngestPermissions"
         title={
           <FormattedMessage
             id="xpack.securitySolution.endpointManagemnet.noPermissionsText"
@@ -53,15 +55,16 @@ NoPermissions.displayName = 'NoPermissions';
 
 export const ManagementContainer = memo(() => {
   const history = useHistory();
+  const { allEnabled: isIngestEnabled } = useIngestEnabledCheck();
   return (
     <Switch>
       <Route
         path={MANAGEMENT_ROUTING_ENDPOINTS_PATH}
-        component={true ? NoPermissions : EndpointsContainer}
+        component={!isIngestEnabled ? NoPermissions : EndpointsContainer}
       />
       <Route
         path={MANAGEMENT_ROUTING_POLICIES_PATH}
-        component={true ? NoPermissions : PolicyContainer}
+        component={!isIngestEnabled ? NoPermissions : PolicyContainer}
       />
       <Route
         path={MANAGEMENT_ROUTING_ROOT_PATH}
