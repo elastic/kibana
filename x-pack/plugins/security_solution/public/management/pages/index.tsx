@@ -9,25 +9,25 @@ import { useHistory, Route, Switch } from 'react-router-dom';
 
 import { PolicyContainer } from './policy';
 import {
-  MANAGEMENT_ROUTING_ENDPOINTS_PATH,
+  MANAGEMENT_ROUTING_HOSTS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_ROOT_PATH,
 } from '../common/constants';
 import { NotFoundPage } from '../../app/404';
 import { EndpointsContainer } from './endpoint_hosts';
-import { getEndpointListPath } from '../common/routing';
+import { getHostListPath } from '../common/routing';
 
 export const ManagementContainer = memo(() => {
   const history = useHistory();
   return (
     <Switch>
-      <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH} component={EndpointsContainer} />
+      <Route path={MANAGEMENT_ROUTING_HOSTS_PATH} component={EndpointsContainer} />
       <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} component={PolicyContainer} />
       <Route
         path={MANAGEMENT_ROUTING_ROOT_PATH}
         exact
         render={() => {
-          history.replace(getEndpointListPath({ name: 'endpointList' }));
+          history.replace(getHostListPath({ name: 'hostList' }));
           return null;
         }}
       />

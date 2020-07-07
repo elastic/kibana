@@ -10,6 +10,8 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiText,
+  EuiTitle,
+  EuiSpacer,
   EuiLink,
   EuiHealth,
   EuiToolTip,
@@ -41,11 +43,7 @@ import {
   AgentConfigDetailsDeployAgentAction,
 } from '../../../../../../ingest_manager/public';
 import { SecurityPageName } from '../../../../app/types';
-import {
-  getEndpointListPath,
-  getEndpointDetailsPath,
-  getPolicyDetailPath,
-} from '../../../common/routing';
+import { getHostListPath, getHostDetailsPath, getPolicyDetailPath } from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { HostAction } from '../store/action';
 
@@ -107,8 +105,8 @@ export const HostList = () => {
       const { index, size } = page;
       // FIXME: PT: if host details is open, table is not displaying correct number of rows
       history.push(
-        getEndpointListPath({
-          name: 'endpointList',
+        getHostListPath({
+          name: 'hostList',
           ...queryParams,
           page_index: JSON.stringify(index),
           page_size: JSON.stringify(size),
@@ -127,12 +125,12 @@ export const HostList = () => {
       state: {
         onCancelNavigateTo: [
           'securitySolution:management',
-          { path: getEndpointListPath({ name: 'endpointList' }) },
+          { path: getHostListPath({ name: 'hostList' }) },
         ],
-        onCancelUrl: formatUrl(getEndpointListPath({ name: 'endpointList' })),
+        onCancelUrl: formatUrl(getHostListPath({ name: 'hostList' })),
         onSaveNavigateTo: [
           'securitySolution:management',
-          { path: getEndpointListPath({ name: 'endpointList' }) },
+          { path: getHostListPath({ name: 'hostList' }) },
         ],
       },
     }
@@ -145,7 +143,7 @@ export const HostList = () => {
     state: {
       onDoneNavigateTo: [
         'securitySolution:management',
-        { path: getEndpointListPath({ name: 'endpointList' }) },
+        { path: getHostListPath({ name: 'hostList' }) },
       ],
     },
   });
@@ -191,10 +189,10 @@ export const HostList = () => {
           defaultMessage: 'Hostname',
         }),
         render: ({ hostname, id }: HostInfo['metadata']['host']) => {
-          const toRoutePath = getEndpointDetailsPath(
+          const toRoutePath = getHostDetailsPath(
             {
               ...queryParams,
-              name: 'endpointDetails',
+              name: 'hostDetails',
               selected_host: id,
             },
             search
@@ -259,8 +257,8 @@ export const HostList = () => {
         }),
         // eslint-disable-next-line react/display-name
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
-          const toRoutePath = getEndpointDetailsPath({
-            name: 'endpointPolicyResponse',
+          const toRoutePath = getHostDetailsPath({
+            name: 'hostPolicyResponse',
             selected_host: item.metadata.host.id,
           });
           const toRouteUrl = formatUrl(toRoutePath);
@@ -371,12 +369,32 @@ export const HostList = () => {
   ]);
 
   return (
+    // i18n.translate('xpack.securitySolution.endpointLis.pageTitle', {
+    //  defaultMessage: 'Hosts',
     <ManagementPageView
       viewType="list"
       data-test-subj="hostPage"
-      headerLeft={i18n.translate('xpack.securitySolution.endpointLis.pageTitle', {
-        defaultMessage: 'Endpoints',
-      })}
+      headerLeft={
+        <>
+          <EuiTitle size="l">
+            <h1>
+              <FormattedMessage
+                id="xpack.securitySolution.hostList.pageTitle"
+                defaultMessage="Hosts"
+              />
+            </h1>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            <p>
+              <FormattedMessage
+                id="xpack.securitySolution.hostList.pageSubTitle"
+                defaultMessage="Hosts running the Elastic Endpoint"
+              />
+            </p>
+          </EuiText>
+        </>
+      }
     >
       {hasSelectedHost && <HostDetailsFlyout />}
       {listData && listData.length > 0 && (
