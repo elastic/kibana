@@ -22,6 +22,7 @@ import { manageQuery } from '../../common/components/page/manage_query';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { KpiHostsQuery } from '../containers/kpi_hosts';
+import { useGlobalTime } from '../../common/containers/use_global_time';
 import { useWithSource } from '../../common/containers/source';
 import { LastEventIndexKey } from '../../graphql/types';
 import { useKibana } from '../../common/lib/kibana';
@@ -32,7 +33,7 @@ import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { esQuery } from '../../../../../../src/plugins/data/public';
 import { useMlCapabilities } from '../../common/components/ml_popover/hooks/use_ml_capabilities';
-import { HostsEmptyPage } from './hosts_empty_page';
+import { OverviewEmpty } from '../../overview/components/overview_empty';
 import { HostsTabs } from './hosts_tabs';
 import { navTabsHosts } from './nav_tabs';
 import * as i18n from './translations';
@@ -44,17 +45,8 @@ import { HostsTableType } from '../store/model';
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 
 export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
-  ({
-    deleteQuery,
-    isInitializing,
-    filters,
-    from,
-    query,
-    setAbsoluteRangeDatePicker,
-    setQuery,
-    to,
-    hostsPagePath,
-  }) => {
+  ({ filters, query, setAbsoluteRangeDatePicker, hostsPagePath }) => {
+    const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
     const capabilities = useMlCapabilities();
     const kibana = useKibana();
     const { tabName } = useParams();
@@ -149,7 +141,7 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
           <WrapperPage>
             <HeaderPage border title={i18n.PAGE_TITLE} />
 
-            <HostsEmptyPage />
+            <OverviewEmpty />
           </WrapperPage>
         )}
 
