@@ -14,6 +14,7 @@ import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_SUBTYPE,
   SPAN_TYPE,
+  TRANSACTION_TYPE,
 } from './elasticsearch_fieldnames';
 
 export interface ServiceConnectionNode extends cytoscape.NodeDataDefinition {
@@ -37,8 +38,11 @@ export interface Connection {
 export interface ServiceNodeMetrics {
   avgMemoryUsage: number | null;
   avgCpuUsage: number | null;
-  avgTransactionDuration: number | null;
-  avgRequestsPerMinute: number | null;
+  transactionMetrics: Array<{
+    [TRANSACTION_TYPE]: string;
+    avgTransactionDuration: number | null;
+    avgRequestsPerMinute: number | null;
+  }>;
   avgErrorsPerMinute: number | null;
 }
 

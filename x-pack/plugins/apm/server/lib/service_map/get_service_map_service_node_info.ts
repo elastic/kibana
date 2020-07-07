@@ -12,6 +12,7 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_DURATION,
+  TRANSACTION_TYPE,
   METRIC_SYSTEM_CPU_PERCENT,
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
@@ -65,7 +66,7 @@ export async function getServiceMapServiceNodeInfo({
 
   return {
     ...errorMetrics,
-    ...transactionMetrics,
+    transactionMetrics,
     ...cpuMetrics,
     ...memoryMetrics,
   };
@@ -103,16 +104,19 @@ async function getTransactionMetrics({
   setup,
   filter,
   minutes,
-}: TaskParameters): Promise<{
-  avgTransactionDuration: number | null;
-  avgRequestsPerMinute: number | null;
-}> {
+}: TaskParameters): Promise<
+  Array<{
+    [TRANSACTION_TYPE]: string;
+    avgTransactionDuration: number | null;
+    avgRequestsPerMinute: number | null;
+  }>
+> {
   const { indices, client } = setup;
 
-  const response = await client.search({
+  const params = {
     index: indices['apm_oss.transactionIndices'],
     body: {
-      size: 1,
+      size: 0,
       query: {
         bool: {
           filter: filter.concat({
@@ -122,24 +126,35 @@ async function getTransactionMetrics({
           }),
         },
       },
-      track_total_hits: true,
       aggs: {
-        duration: {
-          avg: {
-            field: TRANSACTION_DURATION,
+        transaction_types: {
+          terms: {
+            field: TRANSACTION_TYPE,
+          },
+          aggs: {
+            duration: {
+              avg: {
+                field: TRANSACTION_DURATION,
+              },
+            },
           },
         },
       },
     },
-  });
-
-  return {
-    avgTransactionDuration: response.aggregations?.duration.value ?? null,
-    avgRequestsPerMinute:
-      response.hits.total.value > 0
-        ? response.hits.total.value / minutes
-        : null,
   };
+  const response = await client.search(params);
+  const transactionTypesBuckets =
+    response.aggregations?.transaction_types.buckets ?? [];
+  return transactionTypesBuckets.map((transactionTypesBucket) => {
+    const avgTransactionDuration =
+      transactionTypesBucket?.duration?.value ?? null;
+    const docCount = transactionTypesBucket?.doc_count ?? 0;
+    return {
+      [TRANSACTION_TYPE]: transactionTypesBucket.key as string,
+      avgTransactionDuration,
+      avgRequestsPerMinute: docCount > 0 ? docCount / minutes : null,
+    };
+  });
 }
 
 async function getCpuMetrics({

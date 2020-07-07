@@ -10,7 +10,7 @@ import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { EuiTheme } from '../../../../../observability/public';
-import { severity } from '../../../../common/ml_job_constants';
+import { severity, getSeverity } from '../../../../common/ml_job_constants';
 import { defaultIcon, iconForNode } from './icons';
 
 export const popoverMinWidth = 280;
@@ -29,12 +29,23 @@ export function getSeverityColor(theme: EuiTheme, nodeSeverity?: string) {
   }
 }
 
+function getNodeSeverity(el: cytoscape.NodeSingular) {
+  const anomalies: Array<{ anomaly_score: number }> = el.data('anomalies');
+  if (!Array.isArray(anomalies)) {
+    return;
+  }
+  const maxScore = Math.max(
+    ...anomalies.map(({ anomaly_score: score }) => score)
+  );
+  return getSeverity(maxScore);
+}
+
 function getBorderColorFn(
   theme: EuiTheme
 ): cytoscape.Css.MapperFunction<cytoscape.NodeSingular, string> {
   return (el: cytoscape.NodeSingular) => {
-    const hasAnomalyDetectionJob = el.data('ml_job_id') !== undefined;
-    const nodeSeverity = el.data('anomaly_severity');
+    const hasAnomalyDetectionJob = el.data('anomalies') !== undefined;
+    const nodeSeverity = getNodeSeverity(el);
     if (hasAnomalyDetectionJob) {
       return (
         getSeverityColor(theme, nodeSeverity) || theme.eui.euiColorMediumShade
@@ -51,7 +62,7 @@ const getBorderStyle: cytoscape.Css.MapperFunction<
   cytoscape.NodeSingular,
   cytoscape.Css.LineStyle
 > = (el: cytoscape.NodeSingular) => {
-  const nodeSeverity = el.data('anomaly_severity');
+  const nodeSeverity = getNodeSeverity(el);
   if (nodeSeverity === severity.critical) {
     return 'double';
   } else {
@@ -60,7 +71,7 @@ const getBorderStyle: cytoscape.Css.MapperFunction<
 };
 
 function getBorderWidth(el: cytoscape.NodeSingular) {
-  const nodeSeverity = el.data('anomaly_severity');
+  const nodeSeverity = getNodeSeverity(el);
 
   if (nodeSeverity === severity.minor || nodeSeverity === severity.major) {
     return 4;

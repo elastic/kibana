@@ -5,23 +5,40 @@
  */
 
 import React from 'react';
+import {
+  EuiLoadingSpinner,
+  EuiFlexGroup,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import { ServiceNodeMetrics } from '../../../../../common/service_map';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { ServiceMetricList } from './ServiceMetricList';
+import { ServiceHealth } from './ServiceHealth';
 
 interface ServiceMetricFetcherProps {
   serviceName: string;
+  anomalies:
+    | undefined
+    | Array<{
+        'transaction.type': string;
+        anomaly_score: number;
+        actual_value: number;
+      }>;
 }
 
 export function ServiceMetricFetcher({
   serviceName,
+  anomalies,
 }: ServiceMetricFetcherProps) {
   const {
     urlParams: { start, end, environment },
   } = useUrlParams();
 
-  const { data = {} as ServiceNodeMetrics, status } = useFetcher(
+  const {
+    data = ({ transactionMetrics: [] } as unknown) as ServiceNodeMetrics,
+    status,
+  } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
@@ -37,5 +54,30 @@ export function ServiceMetricFetcher({
   );
   const isLoading = status === 'loading';
 
-  return <ServiceMetricList {...data} isLoading={isLoading} />;
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  return (
+    <>
+      <ServiceHealth
+        anomalies={anomalies}
+        transactionMetrics={data.transactionMetrics}
+      />
+      <EuiHorizontalRule margin="xs" />
+      <ServiceMetricList {...data} />
+    </>
+  );
+}
+
+function LoadingSpinner() {
+  return (
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="spaceAround"
+      style={{ height: 170 }}
+    >
+      <EuiLoadingSpinner size="xl" />
+    </EuiFlexGroup>
+  );
 }

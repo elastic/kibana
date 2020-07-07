@@ -18,6 +18,7 @@ import {
   ExternalConnectionNode,
 } from '../../../common/service_map';
 import { ConnectionsResponse, ServicesResponse } from './get_service_map';
+import { TopAnomaliesResponse } from './get_top_anomalies';
 
 function getConnectionNodeId(node: ConnectionNode): string {
   if ('span.destination.service.resource' in node) {
@@ -63,10 +64,11 @@ export function getServiceNodes(allNodes: ConnectionNode[]) {
 
 export type ServiceMapResponse = ConnectionsResponse & {
   services: ServicesResponse;
+  anomalies: TopAnomaliesResponse;
 };
 
 export function transformServiceMapResponses(response: ServiceMapResponse) {
-  const { discoveredServices, services, connections } = response;
+  const { discoveredServices, services, connections, anomalies } = response;
 
   const allNodes = getAllNodes(services, connections);
   const serviceNodes = getServiceNodes(allNodes);
@@ -104,6 +106,10 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
       (serviceNode) => serviceNode[SERVICE_NAME] === serviceName
     );
 
+    const matchedAnomalies = anomalies.find(
+      (anomalyData) => anomalyData[SERVICE_NAME] === serviceName
+    );
+
     if (matchedServiceNodes.length) {
       return {
         ...map,
@@ -113,7 +119,8 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
           },
           ...matchedServiceNodes.map((serviceNode) =>
             pickBy(serviceNode, identity)
-          )
+          ),
+          matchedAnomalies
         ),
       };
     }

@@ -68,8 +68,7 @@ export function Contents({
         </EuiTitle>
         <EuiHorizontalRule margin="xs" />
       </FlexColumnItem>
-      {/* //TODO [APM ML] add service health stats here:
-      isService && (
+      {/* isService && (
         <FlexColumnItem>
           <ServiceHealth serviceNodeData={selectedNodeData} />
           <EuiHorizontalRule margin="xs" />
@@ -77,7 +76,10 @@ export function Contents({
       )*/}
       <FlexColumnItem>
         {isService ? (
-          <ServiceMetricFetcher serviceName={selectedNodeServiceName} />
+          <ServiceMetricFetcher
+            serviceName={selectedNodeServiceName}
+            anomalies={selectedNodeData.anomalies}
+          />
         ) : (
           <Info {...selectedNodeData} />
         )}
