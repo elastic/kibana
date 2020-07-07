@@ -11,6 +11,14 @@ export const indexPatternTitleSchema = schema.object({
   indexPatternTitle: schema.string(),
 });
 
+export const dataVisualizerFieldHistogramsSchema = schema.object({
+  /** Query to match documents in the index. */
+  query: schema.any(),
+  fields: schema.arrayOf(schema.any()),
+  /** Number of documents to be collected in the sample processed on each shard, or -1 for no sampling. */
+  samplerShardSize: schema.number(),
+});
+
 export const dataVisualizerFieldStatsSchema = schema.object({
   /** Query to match documents in the index. */
   query: schema.any(),

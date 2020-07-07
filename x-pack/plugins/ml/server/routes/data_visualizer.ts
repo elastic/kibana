@@ -9,6 +9,7 @@ import { wrapError } from '../client/error_wrapper';
 import { DataVisualizer } from '../models/data_visualizer';
 import { Field } from '../models/data_visualizer/data_visualizer';
 import {
+  dataVisualizerFieldHistogramsSchema,
   dataVisualizerFieldStatsSchema,
   dataVisualizerOverallStatsSchema,
   indexPatternTitleSchema,
@@ -65,10 +66,68 @@ function getStatsForFields(
   );
 }
 
+function getHistogramsForFields(
+  context: RequestHandlerContext,
+  indexPatternTitle: string,
+  query: any,
+  fields: Field[],
+  samplerShardSize: number
+) {
+  const dv = new DataVisualizer(context.ml!.mlClient.callAsCurrentUser);
+  return dv.getHistogramsForFields(indexPatternTitle, query, fields, samplerShardSize);
+}
+
 /**
  * Routes for the index data visualizer.
  */
 export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization) {
+  /**
+   * @apiGroup DataVisualizer
+   *
+   * @api {post} /api/ml/data_visualizer/get_field_stats/:indexPatternTitle Get stats for fields
+   * @apiName GetStatsForFields
+   * @apiDescription Returns the stats on individual fields in the specified index pattern.
+   *
+   * @apiSchema (params) indexPatternTitleSchema
+   * @apiSchema (body) dataVisualizerFieldHistogramsSchema
+   *
+   * @apiSuccess {Object} fieldName stats by field, keyed on the name of the field.
+   */
+  router.post(
+    {
+      path: '/api/ml/data_visualizer/get_field_histograms/{indexPatternTitle}',
+      validate: {
+        params: indexPatternTitleSchema,
+        body: dataVisualizerFieldHistogramsSchema,
+      },
+      options: {
+        tags: ['access:ml:canAccessML'],
+      },
+    },
+    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
+      try {
+        const {
+          params: { indexPatternTitle },
+          body: { query, fields, samplerShardSize },
+        } = request;
+
+        const results = await getHistogramsForFields(
+          context,
+          indexPatternTitle,
+          query,
+          fields,
+          samplerShardSize
+        );
+
+        return response.ok({
+          body: results,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
   /**
    * @apiGroup DataVisualizer
    *

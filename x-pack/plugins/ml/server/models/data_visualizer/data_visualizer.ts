@@ -8,6 +8,7 @@ import { LegacyCallAPIOptions, LegacyAPICaller } from 'kibana/server';
 import _ from 'lodash';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import { getSafeAggregationName } from '../../../common/util/job_utils';
+import { stringHash } from '../../../common/util/string_utils';
 import {
   buildBaseFilterCriteria,
   buildSamplerAggregation,
@@ -18,6 +19,8 @@ const SAMPLER_TOP_TERMS_THRESHOLD = 100000;
 const SAMPLER_TOP_TERMS_SHARD_SIZE = 5000;
 const AGGREGATABLE_EXISTS_REQUEST_BATCH_SIZE = 200;
 const FIELDS_REQUEST_BATCH_SIZE = 10;
+
+const MAX_CHART_COLUMNS = 20;
 
 interface FieldData {
   fieldName: string;
@@ -33,6 +36,11 @@ export interface Field {
   fieldName: string;
   type: string;
   cardinality: number;
+}
+
+interface HistogramField {
+  fieldName: string;
+  type: string;
 }
 
 interface Distribution {
@@ -97,6 +105,70 @@ interface FieldExamples {
   fieldName: string;
   examples: any[];
 }
+
+interface NumericColumnStats {
+  interval: number;
+  min: number;
+  max: number;
+}
+type NumericColumnStatsMap = Record<string, NumericColumnStats>;
+
+interface AggHistogram {
+  histogram: {
+    field: string;
+    interval: number;
+  };
+}
+
+interface AggCardinality {
+  cardinality: {
+    field: string;
+  };
+}
+
+interface AggTerms {
+  terms: {
+    field: string;
+    size: number;
+  };
+}
+
+interface NumericDataItem {
+  key: number;
+  key_as_string?: string;
+  doc_count: number;
+}
+
+interface NumericChartData {
+  data: NumericDataItem[];
+  id: string;
+  interval: number;
+  stats: [number, number];
+  type: 'numeric';
+}
+
+interface OrdinalDataItem {
+  key: string;
+  key_as_string?: string;
+  doc_count: number;
+}
+
+interface OrdinalChartData {
+  type: 'ordinal' | 'boolean';
+  cardinality: number;
+  data: OrdinalDataItem[];
+  id: string;
+}
+
+interface UnsupportedChartData {
+  id: string;
+  type: 'unsupported';
+}
+
+type ChartRequestAgg = AggHistogram | AggCardinality | AggTerms;
+
+// type ChartDataItem = NumericDataItem | OrdinalDataItem;
+type ChartData = NumericChartData | OrdinalChartData | UnsupportedChartData;
 
 type BatchStats =
   | NumericFieldStats
@@ -198,6 +270,167 @@ export class DataVisualizer {
     );
 
     return stats;
+  }
+
+  async getAggIntervals(
+    indexPatternTitle: string,
+    query: any,
+    fields: HistogramField[],
+    samplerShardSize: number
+  ): Promise<NumericColumnStatsMap> {
+    const numericColumns = fields.filter((field) => {
+      return field.type === 'number' || field.type === 'number';
+    });
+
+    if (numericColumns.length === 0) {
+      return {};
+    }
+
+    const minMaxAggs = numericColumns.reduce((aggs, c) => {
+      const id = stringHash(c.fieldName);
+      aggs[id] = {
+        stats: {
+          field: c.fieldName,
+        },
+      };
+      return aggs;
+    }, {} as Record<string, object>);
+
+    const respStats = await this.callAsCurrentUser('search', {
+      index: indexPatternTitle,
+      size: 0,
+      body: {
+        query,
+        aggs: minMaxAggs,
+        size: 0,
+      },
+    });
+
+    return Object.keys(respStats.aggregations).reduce((p, aggName) => {
+      const stats = [respStats.aggregations[aggName].min, respStats.aggregations[aggName].max];
+      if (!stats.includes(null)) {
+        const delta = respStats.aggregations[aggName].max - respStats.aggregations[aggName].min;
+
+        let aggInterval = 1;
+
+        if (delta > MAX_CHART_COLUMNS) {
+          aggInterval = Math.round(delta / MAX_CHART_COLUMNS);
+        }
+
+        if (delta <= 1) {
+          aggInterval = delta / MAX_CHART_COLUMNS;
+        }
+
+        p[aggName] = { interval: aggInterval, min: stats[0], max: stats[1] };
+      }
+
+      return p;
+    }, {} as NumericColumnStatsMap);
+  }
+
+  // Obtains binned histograms for supplied list of fields. The statistics for each field in the
+  // returned array depend on the type of the field (keyword, number, date etc).
+  // Sampling will be used if supplied samplerShardSize > 0.
+  async getHistogramsForFields(
+    indexPatternTitle: string,
+    query: any,
+    fields: HistogramField[],
+    samplerShardSize: number
+  ): Promise<any> {
+    const aggIntervals = await this.getAggIntervals(
+      indexPatternTitle,
+      query,
+      fields,
+      samplerShardSize
+    );
+
+    const chartDataAggs = fields.reduce((aggs, field) => {
+      const fieldName = field.fieldName;
+      const fieldType = field.type;
+      const id = stringHash(fieldName);
+      if (fieldType === 'number' || fieldType === 'date') {
+        if (aggIntervals[id] !== undefined) {
+          aggs[`${id}_histogram`] = {
+            histogram: {
+              field: fieldName,
+              interval: aggIntervals[id].interval !== 0 ? aggIntervals[id].interval : 1,
+            },
+          };
+        }
+      } else if (fieldType === 'string' || fieldType === 'boolean') {
+        if (fieldType === 'string') {
+          aggs[`${id}_cardinality`] = {
+            cardinality: {
+              field: fieldName,
+            },
+          };
+        }
+        aggs[`${id}_terms`] = {
+          terms: {
+            field: fieldName,
+            size: MAX_CHART_COLUMNS,
+          },
+        };
+      }
+      return aggs;
+    }, {} as Record<string, ChartRequestAgg>);
+
+    if (Object.keys(chartDataAggs).length === 0) {
+      return [];
+    }
+
+    const respChartsData = await this.callAsCurrentUser('search', {
+      index: indexPatternTitle,
+      size: 0,
+      body: {
+        query,
+        aggs: chartDataAggs,
+        size: 0,
+      },
+    });
+
+    const chartsData: ChartData[] = fields.map(
+      (field): ChartData => {
+        const fieldName = field.fieldName;
+        const fieldType = field.type;
+        const id = stringHash(field.fieldName);
+
+        if (fieldType === 'number' || fieldType === 'date') {
+          if (aggIntervals[id] === undefined) {
+            return {
+              type: 'numeric',
+              data: [],
+              interval: 0,
+              stats: [0, 0],
+              id: fieldName,
+            };
+          }
+
+          return {
+            data: respChartsData.aggregations[`${id}_histogram`].buckets,
+            interval: aggIntervals[id].interval,
+            stats: [aggIntervals[id].min, aggIntervals[id].max],
+            type: 'numeric',
+            id: fieldName,
+          };
+        } else if (fieldType === 'string' || fieldType === 'boolean') {
+          return {
+            type: fieldType === 'string' ? 'ordinal' : 'boolean',
+            cardinality:
+              fieldType === 'string' ? respChartsData.aggregations[`${id}_cardinality`].value : 2,
+            data: respChartsData.aggregations[`${id}_terms`].buckets,
+            id: fieldName,
+          };
+        }
+
+        return {
+          type: 'unsupported',
+          id: fieldName,
+        };
+      }
+    );
+
+    return chartsData;
   }
 
   // Obtains statistics for supplied list of fields. The statistics for each field in the
