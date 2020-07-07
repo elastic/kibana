@@ -1,13 +1,13 @@
 {
-  "rule_id": "d0ac97c4-3322-47d1-959d-9c18661ff340",
+  "rule_id": "query-with-exceptions",
   "exceptions_list": [
     { 
-      "id": "810bc370-c006-11ea-b059-5326012dd965",
+      "id": "ID_HERE",
       "namespace_type": "single",
       "type": "endpoint"
     },
     {
-      "id": "eecb3a40-c00f-11ea-979d-49d40b1ffc8f",
+      "id": "ID_HERE",
       "namespace_type": "single",
       "type": "detection"
     }
