@@ -28,11 +28,11 @@ const dataStreamLabel = i18n.translate('indexPatternManagement.dataStreamLabel',
   defaultMessage: 'Data stream',
 });
 
-const indexLabel = i18n.translate('indexPatternManagement.dataStreamLabel', {
+const indexLabel = i18n.translate('indexPatternManagement.indexLabel', {
   defaultMessage: 'Index',
 });
 
-const frozenLabel = i18n.translate('indexPatternManagement.dataStreamLabel', {
+const frozenLabel = i18n.translate('indexPatternManagement.frozenLabel', {
   defaultMessage: 'Frozen',
 });
 
