@@ -65,7 +65,7 @@ export const EventsQueryTabBody = ({
     initializeTimeline({
       id: TimelineId.hostsPageEvents,
       defaultModel: eventsDefaultModel,
-      timelineRowActions: [
+      timelineRowActions: () => [
         getInvestigateInResolverAction({ dispatch, timelineId: TimelineId.hostsPageEvents }),
       ],
     });
