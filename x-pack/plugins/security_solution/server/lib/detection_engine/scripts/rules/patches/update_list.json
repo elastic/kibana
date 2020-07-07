@@ -1,9 +1,15 @@
 {
-  "rule_id": "query-with-list",
+  "rule_id": "d0ac97c4-3322-47d1-959d-9c18661ff340",
   "exceptions_list": [
+    { 
+      "id": "810bc370-c006-11ea-b059-5326012dd965",
+      "namespace_type": "single",
+      "type": "endpoint"
+    },
     {
-      "id": "some_updated_fake_id",
-      "namespace_type": "single"
+      "id": "eecb3a40-c00f-11ea-979d-49d40b1ffc8f",
+      "namespace_type": "single",
+      "type": "detection"
     }
   ]
 }
