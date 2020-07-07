@@ -100,6 +100,7 @@ describe('alert monitor status component', () => {
                 "timerangeUnit": "h",
               }
             }
+            isOldAlert={true}
             setAlertParams={[MockFunction]}
           />
           <EuiSpacer

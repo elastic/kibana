@@ -12,7 +12,7 @@ import {
 } from '../get_monitor_availability';
 import { setupMockEsCompositeQuery } from './helper';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
-import { MonitorAvailabilityParams } from '../../../../common/runtime_types';
+import { GetMonitorAvailabilityParams } from '../../../../common/runtime_types';
 
 interface AvailabilityDoc {
   key: {
@@ -159,6 +159,20 @@ describe('monitor availability', () => {
                         },
                       },
                     },
+                    Object {
+                      "name": Object {
+                        "terms": Object {
+                          "field": "monitor.name",
+                        },
+                      },
+                    },
+                    Object {
+                      "url": Object {
+                        "terms": Object {
+                          "field": "url.full",
+                        },
+                      },
+                    },
                   ],
                 },
               },
@@ -252,7 +266,7 @@ describe('monitor availability', () => {
         ],
         genBucketItem
       );
-      const clientParameters: MonitorAvailabilityParams = {
+      const clientParameters: GetMonitorAvailabilityParams = {
         range: 23,
         rangeUnit: 'd',
         threshold: 66,
@@ -311,6 +325,20 @@ describe('monitor availability', () => {
                         "terms": Object {
                           "field": "observer.geo.name",
                           "missing_bucket": true,
+                        },
+                      },
+                    },
+                    Object {
+                      "name": Object {
+                        "terms": Object {
+                          "field": "monitor.name",
+                        },
+                      },
+                    },
+                    Object {
+                      "url": Object {
+                        "terms": Object {
+                          "field": "url.full",
                         },
                       },
                     },
@@ -494,6 +522,20 @@ describe('monitor availability', () => {
                         },
                       },
                     },
+                    Object {
+                      "name": Object {
+                        "terms": Object {
+                          "field": "monitor.name",
+                        },
+                      },
+                    },
+                    Object {
+                      "url": Object {
+                        "terms": Object {
+                          "field": "url.full",
+                        },
+                      },
+                    },
                   ],
                 },
               },
@@ -571,6 +613,20 @@ describe('monitor availability', () => {
                           "terms": Object {
                             "field": "observer.geo.name",
                             "missing_bucket": true,
+                          },
+                        },
+                      },
+                      Object {
+                        "name": Object {
+                          "terms": Object {
+                            "field": "monitor.name",
+                          },
+                        },
+                      },
+                      Object {
+                        "url": Object {
+                          "terms": Object {
+                            "field": "url.full",
                           },
                         },
                       },

@@ -525,7 +525,7 @@ describe('status check alert', () => {
               "certExpirationThreshold": 30,
               "heartbeatIndices": "heartbeat-8*",
             },
-            "filters": "url.full: *",
+            "filters": undefined,
             "range": 35,
             "rangeUnit": "d",
             "threshold": 99.34,

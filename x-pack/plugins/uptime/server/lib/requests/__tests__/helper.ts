@@ -31,7 +31,7 @@ export const setupMockEsCompositeQuery = <K, C, I>(
   criteria: Array<MultiPageCriteria<K, C>>,
   genBucketItem: (criteria: C) => I
 ): [MockCallES, jest.Mocked<Pick<LegacyScopedClusterClient, 'callAsCurrentUser'>>] => {
-  const esMock = elasticsearchServiceMock.createScopedClusterClient();
+  const esMock = elasticsearchServiceMock.createLegacyScopedClusterClient();
 
   criteria.forEach(({ after_key, bucketCriteria }) => {
     const mockResponse = {
