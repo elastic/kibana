@@ -100,7 +100,7 @@ export const VarConfig: FC<Props> = ({
       field: 'type',
       name: strings.getTableTypeLabel(),
       sortable: true,
-      render: (varType: 'string' | 'boolean' | 'number', _v: CanvasVariable) => {
+      render: (varType: CanvasVariable['type'], _v: CanvasVariable) => {
         return <EuiToken iconType={typeToToken[varType]} />;
       },
       width: '50px',
@@ -115,6 +115,9 @@ export const VarConfig: FC<Props> = ({
       name: strings.getTableValueLabel(),
       sortable: true,
       truncateText: true,
+      render: (value: CanvasVariable['value'], _v: CanvasVariable) => {
+        return '' + value;
+      },
     },
     {
       actions,
