@@ -141,11 +141,20 @@ class AgentConfigService {
 
   public async list(
     soClient: SavedObjectsClientContract,
-    options: ListWithKuery
+    options: ListWithKuery & {
+      withPackageConfigs?: boolean;
+    }
   ): Promise<{ items: AgentConfig[]; total: number; page: number; perPage: number }> {
-    const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
+    const {
+      page = 1,
+      perPage = 20,
+      sortField = 'updated_at',
+      sortOrder = 'desc',
+      kuery,
+      withPackageConfigs = false,
+    } = options;
 
-    const agentConfigs = await soClient.find<AgentConfigSOAttributes>({
+    const agentConfigsSO = await soClient.find<AgentConfigSOAttributes>({
       type: SAVED_OBJECT_TYPE,
       sortField,
       sortOrder,
@@ -160,12 +169,29 @@ class AgentConfigService {
         : undefined,
     });
 
+    const agentConfigs = await Promise.all(
+      agentConfigsSO.saved_objects.map(async (agentConfigSO) => {
+        const agentConfig = {
+          id: agentConfigSO.id,
+          ...agentConfigSO.attributes,
+        };
+        if (withPackageConfigs) {
+          const agentConfigWithPackageConfigs = await this.get(
+            soClient,
+            agentConfigSO.id,
+            withPackageConfigs
+          );
+          if (agentConfigWithPackageConfigs) {
+            agentConfig.package_configs = agentConfigWithPackageConfigs.package_configs;
+          }
+        }
+        return agentConfig;
+      })
+    );
+
     return {
-      items: agentConfigs.saved_objects.map<AgentConfig>((agentConfigSO) => ({
-        id: agentConfigSO.id,
-        ...agentConfigSO.attributes,
-      })),
-      total: agentConfigs.total,
+      items: agentConfigs,
+      total: agentConfigsSO.total,
       page,
       perPage,
     };
