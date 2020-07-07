@@ -28,7 +28,8 @@ describe('Index Fields & Browser Fields', () => {
       errorMessage: null,
       indexPattern: {
         fields: [],
-        title: 'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,packetbeat-*,winlogbeat-*',
+        title:
+          'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,packetbeat-*,winlogbeat-*,logs-*',
       },
       indicesExist: true,
       loading: true,
@@ -57,7 +58,8 @@ describe('Index Fields & Browser Fields', () => {
         browserFields: mockBrowserFields,
         indexPattern: {
           fields: mockIndexFields,
-          title: 'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,packetbeat-*,winlogbeat-*',
+          title:
+            'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,packetbeat-*,winlogbeat-*,logs-*',
         },
         loading: false,
         errorMessage: null,

@@ -7,24 +7,27 @@ import { SavedObjectsClientContract } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/server';
 import {
   DeletePackageConfigsResponse,
-  packageToPackageConfig,
   PackageConfigInput,
   PackageConfigInputStream,
   PackageInfo,
+  ListWithKuery,
+  packageToPackageConfig,
+  isPackageLimited,
+  doesAgentConfigAlreadyIncludePackage,
 } from '../../common';
 import { PACKAGE_CONFIG_SAVED_OBJECT_TYPE } from '../constants';
 import {
   NewPackageConfig,
   UpdatePackageConfig,
   PackageConfig,
-  ListWithKuery,
   PackageConfigSOAttributes,
   RegistryPackage,
+  CallESAsCurrentUser,
 } from '../types';
 import { agentConfigService } from './agent_config';
 import { outputService } from './output';
 import * as Registry from './epm/registry';
-import { getPackageInfo, getInstallation } from './epm/packages';
+import { getPackageInfo, getInstallation, ensureInstalledPackage } from './epm/packages';
 import { getAssetsData } from './epm/packages/assets';
 import { createStream } from './epm/agent/agent';
 
@@ -37,9 +40,39 @@ function getDataset(st: string) {
 class PackageConfigService {
   public async create(
     soClient: SavedObjectsClientContract,
+    callCluster: CallESAsCurrentUser,
     packageConfig: NewPackageConfig,
     options?: { id?: string; user?: AuthenticatedUser }
   ): Promise<PackageConfig> {
+    // Make sure the associated package is installed
+    if (packageConfig.package?.name) {
+      const [, pkgInfo] = await Promise.all([
+        ensureInstalledPackage({
+          savedObjectsClient: soClient,
+          pkgName: packageConfig.package.name,
+          callCluster,
+        }),
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: packageConfig.package.name,
+          pkgVersion: packageConfig.package.version,
+        }),
+      ]);
+
+      // Check if it is a limited package, and if so, check that the corresponding agent config does not
+      // already contain a package config for this package
+      if (isPackageLimited(pkgInfo)) {
+        const agentConfig = await agentConfigService.get(soClient, packageConfig.config_id, true);
+        if (agentConfig && doesAgentConfigAlreadyIncludePackage(agentConfig, pkgInfo.name)) {
+          throw new Error(
+            `Unable to create package config. Package '${pkgInfo.name}' already exists on this agent config.`
+          );
+        }
+      }
+
+      packageConfig.inputs = await this.assignPackageStream(pkgInfo, packageConfig.inputs);
+    }
+
     const isoDate = new Date().toISOString();
     const newSo = await soClient.create<PackageConfigSOAttributes>(
       SAVED_OBJECT_TYPE,
