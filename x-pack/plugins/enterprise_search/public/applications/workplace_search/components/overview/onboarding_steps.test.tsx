@@ -81,7 +81,7 @@ describe('OnboardingSteps', () => {
     expect(wrapper.find(OnboardingCard).prop('description')).toStrictEqual(
       <FormattedMessage
         defaultMessage="You have added {sourcesCount} shared {sourcesCount, number} {sourcesCount, plural, one {source} other {sources} }. Happy searching"
-        id="xpack.enterpriseSearch.workplaceSearch.overviewOnboardingHeader.description"
+        id="xpack.enterpriseSearch.workplaceSearch.sourcesOnboardingCard.description"
         values={{ sourcesCount: 1 }}
       />
     );
