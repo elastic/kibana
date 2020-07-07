@@ -17,13 +17,14 @@ import { MetricsSection } from '../../components/app/section/metrics';
 import { UptimeSection } from '../../components/app/section/uptime';
 import { DatePicker, TimePickerTime } from '../../components/shared/data_picker';
 import { fetchHasData } from '../../data_handler';
-import { useFetcher, FETCH_STATUS } from '../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
 import { UI_SETTINGS, useKibanaUISettings } from '../../hooks/use_kibana_ui_settings';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { RouteParams } from '../../routes';
+import { getObservabilityAlerts } from '../../services/get_observability_alerts';
 import { getParsedDate } from '../../utils/date';
 import { getBucketSize } from '../../utils/get_bucket_size';
-import { emptySections } from './emptySection';
+import { getEmptySections } from './empty_section';
 import { LoadingObservability } from './loading_observability';
 
 interface Props {
@@ -43,15 +44,9 @@ function calculatetBucketSize({ startTime, endTime }: { startTime?: string; endT
 export const OverviewPage = ({ routeParams }: Props) => {
   const { core } = usePluginContext();
 
-  const alerts = useFetcher(() => {
-    return core.http.get('/api/alerts/_find', {
-      query: {
-        page: 1,
-        per_page: 10,
-      },
-    });
+  const { data: alerts = [], status: alertStatus } = useFetcher(() => {
+    return getObservabilityAlerts({ core });
   }, []);
-  const alertData = alerts?.data?.data;
 
   const theme = useContext(ThemeContext);
   const timePickerTime = useKibanaUISettings<TimePickerTime>(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
@@ -74,9 +69,9 @@ export const OverviewPage = ({ routeParams }: Props) => {
   const endTime = getParsedDate(rangeTo, { roundUp: true });
   const bucketSize = calculatetBucketSize({ startTime, endTime });
 
-  const appEmptySections = emptySections.filter(({ id }) => {
+  const appEmptySections = getEmptySections({ core }).filter(({ id }) => {
     if (id === 'alert') {
-      return alerts.status !== FETCH_STATUS.FAILURE && !alertData?.length;
+      return alertStatus !== FETCH_STATUS.FAILURE && !alerts.length;
     }
     return !hasData[id];
   });
@@ -183,9 +178,9 @@ export const OverviewPage = ({ routeParams }: Props) => {
         </EuiFlexItem>
 
         {/* Alert section */}
-        {alertData && (
+        {!!alerts.length && (
           <EuiFlexItem grow={3}>
-            <AlertsSection alerts={alertData} />
+            <AlertsSection alerts={alerts} />
           </EuiFlexItem>
         )}
 
