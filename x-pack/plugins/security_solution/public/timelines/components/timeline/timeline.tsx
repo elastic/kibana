@@ -191,6 +191,7 @@ export const TimelineComponent: React.FC<Props> = ({
   const [isQueryLoading, setIsQueryLoading] = useState(false);
   const {
     initializeTimeline,
+    setIndexToAdd,
     setIsTimelineLoading,
     setTimelineFilterManager,
     setTimelineRowActions,
@@ -207,11 +208,15 @@ export const TimelineComponent: React.FC<Props> = ({
 
   useEffect(() => {
     setIsTimelineLoading({ id, isLoading: isQueryLoading || loadingIndexName });
-  }, [loadingIndexName, isQueryLoading, setIsTimelineLoading, id]);
+  }, [loadingIndexName, id, isQueryLoading, setIsTimelineLoading]);
 
   useEffect(() => {
     setTimelineFilterManager({ id, filterManager });
   }, [filterManager, id, setTimelineFilterManager]);
+
+  useEffect(() => {
+    setIndexToAdd({ id, indexToAdd });
+  }, [id, indexToAdd, setIndexToAdd]);
 
   return (
     <TimelineContainer data-test-subj="timeline">

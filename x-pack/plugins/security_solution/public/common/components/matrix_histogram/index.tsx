@@ -31,7 +31,7 @@ import {
   GetTitle,
   GetSubTitle,
 } from '../../components/matrix_histogram/types';
-import { SetQuery } from '../../../hosts/pages/navigation/types';
+import { GlobalTimeArgs } from '../../containers/use_global_time';
 import { QueryTemplateProps } from '../../containers/query_template';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
@@ -48,11 +48,12 @@ export interface OwnProps extends QueryTemplateProps {
   legendPosition?: Position;
   mapping?: MatrixHistogramMappingTypes;
   showSpacer?: boolean;
-  setQuery: SetQuery;
+  setQuery: GlobalTimeArgs['setQuery'];
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
   showLegend?: boolean;
   stackByOptions: MatrixHistogramOption[];
   subtitle?: string | GetSubTitle;
+  timelineId?: string;
   title: string | GetTitle;
   type: hostsModel.HostsType | networkModel.NetworkType;
 }
@@ -94,6 +95,7 @@ export const MatrixHistogramComponent: React.FC<
   stackByOptions,
   startDate,
   subtitle,
+  timelineId,
   title,
   titleSize,
   dispatchSetAbsoluteRangeDatePicker,
@@ -242,6 +244,7 @@ export const MatrixHistogramComponent: React.FC<
               barChart={barChartData}
               configs={barchartConfigs}
               stackByField={selectedStackByOption.value}
+              timelineId={timelineId}
             />
           )}
         </HistogramPanel>
