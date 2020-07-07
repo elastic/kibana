@@ -71,7 +71,7 @@ export const registerListAgentsRoute = (router: IRouter) => {
       path: '/api/beats/agents/{listByAndValue*}',
       validate: {
         params: schema.object({
-          listByAndValue: schema.string(),
+          listByAndValue: schema.maybe(schema.string()),
         }),
         query: schema.object(
           {
@@ -88,12 +88,6 @@ export const registerListAgentsRoute = (router: IRouter) => {
       },
       async (context, request, response) => {
         const beatsManagement = context.beatsManagement!;
-        const enrollmentToken = request.headers['kbn-beats-enrollment-token'];
-        if (!enrollmentToken) {
-          return response.badRequest({
-            body: 'beats enrollment token required',
-          });
-        }
         const user = beatsManagement.framework.getUser(request);
 
         const listByAndValueParts = request.params.listByAndValue?.split('/') ?? [];

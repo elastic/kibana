@@ -40,7 +40,7 @@ export function wrapRouteWithSecurity<P, Q, B>(
       });
     }
 
-    if (requiredRoles) {
+    if (requiredRoles.length > 0) {
       if (user.kind !== 'authenticated') {
         return response.forbidden({
           body: {

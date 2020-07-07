@@ -60,12 +60,6 @@ export const registerListTagsRoute = (router: IRouter) => {
         requiredRoles: ['beats_admin'],
       },
       async (context, request, response) => {
-        if (!request.headers['kbn-beats-enrollment-token']) {
-          return response.badRequest({
-            body: 'invalid request',
-          });
-        }
-
         const beatsManagement = context.beatsManagement!;
         const user = beatsManagement.framework.getUser(request);
 
