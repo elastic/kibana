@@ -122,6 +122,7 @@ async function getArtifactSpecForSnapshot(urlVersion, license, log) {
     archive =>
       archive.version === desiredVersion &&
       archive.filename.endsWith(ext) &&
+      !archive.filename.match(/docker-image/) &&
       archive.license === desiredLicense
   );
 
