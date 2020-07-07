@@ -34,9 +34,6 @@ export function registerIngestManagerUsageCollector(
     type: 'ingest_manager',
     isReady: () => true,
     fetch: async () => {
-      // query ES and get some data
-      // summarize the data into a model
-      // return the modeled object that includes whatever you want to track
       const soClient = await getInternalSavedObjectsClient(core);
       return {
         fleet_enabled: getIsFleetEnabled(config),
@@ -55,6 +52,7 @@ export function registerIngestManagerUsageCollector(
     //   packages: {
     //     name: { type: 'keyword' },
     //     version: { type: 'keyword' },
+    //     enabled: { type: boolean },
     //   },
     // },
   });
