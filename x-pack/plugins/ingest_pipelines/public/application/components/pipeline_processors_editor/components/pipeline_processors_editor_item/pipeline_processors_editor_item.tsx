@@ -16,25 +16,23 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { ProcessorInternal, ProcessorSelector } from '../../types';
+import { ProcessorInternal, ProcessorSelector, ContextValueEditor } from '../../types';
 import { selectorToDataTestSubject } from '../../utils';
+import { ProcessorsDispatch } from '../../processors_reducer';
 
-import { usePipelineProcessorsContext } from '../../context';
+import { ProcessorInfo } from '../processors_tree';
 
 import './pipeline_processors_editor_item.scss';
 
 import { InlineTextInput } from './inline_text_input';
 import { ContextMenu } from './context_menu';
 import { i18nTexts } from './i18n_texts';
-import { ProcessorInfo } from '../processors_tree';
-
-export interface Handlers {
-  onMove: () => void;
-  onCancelMove: () => void;
-}
+import { Handlers } from './types';
 
 export interface Props {
   processor: ProcessorInternal;
+  processorsDispatch: ProcessorsDispatch;
+  editor: ContextValueEditor;
   handlers: Handlers;
   selector: ProcessorSelector;
   description?: string;
@@ -43,18 +41,16 @@ export interface Props {
 }
 
 export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
-  ({
+  function PipelineProcessorsEditorItem({
     processor,
     description,
     handlers: { onCancelMove, onMove },
     selector,
     movingProcessor,
     renderOnFailureHandlers,
-  }) => {
-    const {
-      state: { editor, processors },
-    } = usePipelineProcessorsContext();
-
+    editor,
+    processorsDispatch,
+  }) {
     const isDisabled = editor.mode.id !== 'idle';
     const isInMoveMode = Boolean(movingProcessor);
     const isMovingThisProcessor = processor.id === movingProcessor?.id;
@@ -148,7 +144,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                         description: nextDescription,
                       };
                     }
-                    processors.dispatch({
+                    processorsDispatch({
                       type: 'updateProcessor',
                       payload: {
                         processor: {
@@ -197,7 +193,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                 editor.setMode({ id: 'removingProcessor', arg: { selector } });
               }}
               onDuplicate={() => {
-                processors.dispatch({
+                processorsDispatch({
                   type: 'duplicateProcessor',
                   payload: {
                     source: selector,
