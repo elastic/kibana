@@ -5,11 +5,15 @@
  */
 
 import { SavedObjectsClient } from 'kibana/server';
+import _ from 'lodash';
 import { getPackageSavedObjects } from '../services/epm/packages/get';
+import { agentConfigService } from '../services';
+import { NewPackageConfig } from '../types';
 
 export interface PackageUsage {
   name: string;
   version: string;
+  enabled: boolean;
 }
 
 export const getPackageUsage = async (soClient?: SavedObjectsClient): Promise<PackageUsage[]> => {
@@ -17,11 +21,31 @@ export const getPackageUsage = async (soClient?: SavedObjectsClient): Promise<Pa
     return [];
   }
   const packagesSavedObjects = await getPackageSavedObjects(soClient);
-  // console.log('packages is ', JSON.stringify(packagesSave, null, 2));
+  const agentConfigs = await agentConfigService.list(soClient, {
+    perPage: 1000, // avoiding pagination
+    withPackageConfigs: true,
+  });
+
+  // Once we provide detailed telemetry on agent configs, this logic should probably be moved
+  // to the (then to be created) agent config collector, so we only query and loop over these
+  // objects once.
+
+  // I couldn't convince TS that no undefined will end up in this string[][], so let it be any
+  const packagesInConfigs: any[][] = [];
+  agentConfigs.items.forEach((agentConfig) => {
+    const packageConfigs: NewPackageConfig[] = agentConfig.package_configs as NewPackageConfig[];
+    packagesInConfigs.push(
+      packageConfigs.map((pc) => pc.package?.name).filter((pn) => pn !== undefined)
+    );
+  });
+
+  const enabledPackages = _.uniq(_.flatten(packagesInConfigs));
+
   return packagesSavedObjects.saved_objects.map((p) => {
     return {
       name: p.attributes.name,
       version: p.attributes.version,
+      enabled: p.attributes.name in enabledPackages,
     };
   });
 };
