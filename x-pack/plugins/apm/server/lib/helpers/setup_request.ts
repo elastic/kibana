@@ -116,6 +116,11 @@ function getMlSetup(context: APMRequestHandlerContext, request: KibanaRequest) {
   return {
     mlSystem: ml.mlSystemProvider(mlClient, request),
     anomalyDetectors: ml.anomalyDetectorsProvider(mlClient, request),
+    modules: ml.modulesProvider(
+      mlClient,
+      request,
+      context.core.savedObjects.client
+    ),
     mlClient,
   };
 }
