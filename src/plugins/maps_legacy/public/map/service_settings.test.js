@@ -33,7 +33,7 @@ import EMS_STYLE_DARK_MAP from '../__tests__/map/ems_mocks/sample_style_dark';
 import { ORIGIN } from '../common/constants/origin';
 import { ServiceSettings } from './service_settings';
 
-describe('FOOBARFOOBAR', function () {
+describe('service_settings (FKA tile_map test)', function () {
   const emsFileApiUrl = 'https://files.foobar';
   const emsTileApiUrl = 'https://tiles.foobar';
 
