@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const docTable = getService('docTable');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'context']);
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
 
@@ -55,17 +55,20 @@ export default function ({ getService, getPageObjects }) {
     it('add filter should create an exists filter if value is null (#7189)', async function () {
       // Filter special document
       await filterBar.addFilter('agent', 'is', 'Missing/Fields');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
 
       // navigate to the doc view
       await docTable.clickRowToggle({ rowIndex: 0 });
 
       const details = await docTable.getDetailsRow();
       await docTable.addInclusiveFilter(details, 'referer');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
 
       const hasInclusiveFilter = await filterBar.hasFilter('referer', 'exists', true, false, true);
       expect(hasInclusiveFilter).to.be(true);
 
       await docTable.removeInclusiveFilter(details, 'referer');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
       const hasExcludeFilter = await filterBar.hasFilter('referer', 'exists', true, false, false);
       expect(hasExcludeFilter).to.be(true);
     });
