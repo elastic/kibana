@@ -47,7 +47,7 @@ export const TIMELINE_DESCRIPTION = '[data-test-subj="timeline-description"]';
 export const TIMELINE_DROPPED_DATA_PROVIDERS = '[data-test-subj="providerContainer"]';
 
 export const TIMELINE_FIELDS_BUTTON =
-  '[data-test-subj="timeline"] [data-test-subj="show-field-browser"]';
+  '[data-test-subj="timeline"] [data-test-subj="show-field-browser-gear"]';
 
 export const TIMELINE_FLYOUT_HEADER = '[data-test-subj="eui-flyout-header"]';
 

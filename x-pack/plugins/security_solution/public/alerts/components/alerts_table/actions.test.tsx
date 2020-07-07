@@ -158,6 +158,7 @@ describe('alert actions', () => {
             description: 'This is a sample rule description',
             eventIdToNoteIds: {},
             eventType: 'all',
+            excludedRowRendererIds: [],
             filters: [
               {
                 $state: {

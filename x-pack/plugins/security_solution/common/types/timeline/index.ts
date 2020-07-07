@@ -290,7 +290,6 @@ export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection(
   }),
   runtimeTypes.partial({
     eventIdToNoteIds: runtimeTypes.array(NoteSavedObjectToReturnRuntimeType),
-    excludedRowRendererIds: runtimeTypes.array(RowRendererIdRuntimeType),
     noteIds: runtimeTypes.array(runtimeTypes.string),
     notes: runtimeTypes.array(NoteSavedObjectToReturnRuntimeType),
     pinnedEventIds: runtimeTypes.array(runtimeTypes.string),

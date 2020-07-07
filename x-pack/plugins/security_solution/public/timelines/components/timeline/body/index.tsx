@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import React, { useMemo, useRef } from 'react';
 
 import { BrowserFields } from '../../../../common/containers/source';
@@ -23,9 +22,6 @@ import {
   OnUnPinEvent,
   OnUpdateColumns,
 } from '../events';
-import { StatefulFieldsBrowser } from '../../fields_browser';
-import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../../fields_browser/helpers';
-import { StatefulRowRenderersBrowser } from '../../row_renderers_browser';
 import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
 import { getActionsColumnWidth } from './column_headers/helpers';
@@ -138,25 +134,6 @@ export const Body = React.memo<BodyProps>(
 
     return (
       <>
-        <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <StatefulFieldsBrowser
-              browserFields={browserFields}
-              columnHeaders={columnHeaders}
-              data-test-subj="field-browser"
-              height={FIELD_BROWSER_HEIGHT}
-              isEventViewer={isEventViewer}
-              onUpdateColumns={onUpdateColumns}
-              timelineId={id}
-              toggleColumn={toggleColumn}
-              width={FIELD_BROWSER_WIDTH}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <StatefulRowRenderersBrowser data-test-subj="row-renderers-browser" timelineId={id} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiHorizontalRule margin="xs" />
         {showGraphView(graphEventId) && (
           <GraphOverlay bodyHeight={height} graphEventId={graphEventId} timelineId={id} />
         )}
@@ -170,6 +147,7 @@ export const Body = React.memo<BodyProps>(
           <EventsTable data-test-subj="events-table" columnWidths={columnWidths}>
             <ColumnHeaders
               actionsColumnWidth={actionsColumnWidth}
+              browserFields={browserFields}
               columnHeaders={columnHeaders}
               isEventViewer={isEventViewer}
               isSelectAllChecked={isSelectAllChecked}
@@ -178,10 +156,12 @@ export const Body = React.memo<BodyProps>(
               onColumnSorted={onColumnSorted}
               onFilterChange={onFilterChange}
               onSelectAll={onSelectAll}
+              onUpdateColumns={onUpdateColumns}
               showEventsSelect={false}
               showSelectAllCheckbox={showCheckboxes}
               sort={sort}
               timelineId={id}
+              toggleColumn={toggleColumn}
             />
 
             <Events

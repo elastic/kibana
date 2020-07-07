@@ -11,12 +11,11 @@ import styled from 'styled-components';
 
 import { RowRendererId } from '../../../../common/types/timeline';
 import { renderers, RowRendererOption } from './catalog';
-import { FieldBrowserProps } from './types';
 
-type Props = Pick<FieldBrowserProps, 'height' | 'timelineId'> & {
+interface RowRenderersBrowserProps {
   excludedRowRendererIds: RowRendererId[];
   setExcludedRowRendererIds: (excludedRowRendererIds: RowRendererId[]) => void;
-};
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
@@ -66,7 +65,7 @@ const search = {
  */
 const renderSearchableDescriptionNoop = () => <></>;
 
-const RowRenderersBrowserComponent: React.FC<Props> = React.forwardRef(
+const RowRenderersBrowserComponent: React.FC<RowRenderersBrowserProps> = React.forwardRef(
   ({ excludedRowRendererIds = [], setExcludedRowRendererIds }, ref) => {
     const sort = useMemo(
       () => ({

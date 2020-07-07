@@ -11108,6 +11108,20 @@
             "defaultValue": null
           },
           {
+            "name": "excludedRowRendererIds",
+            "description": "",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": { "kind": "ENUM", "name": "RowRendererId", "ofType": null }
+              }
+            },
+            "defaultValue": null
+          },
+          {
             "name": "filters",
             "description": "",
             "type": {

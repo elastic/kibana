@@ -6,20 +6,20 @@
 
 import React from 'react';
 
-import { mockTimelineData } from '../../../../common/mock/mock_timeline_data';
 import { createGenericSystemRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
+import { mockEndgameTerminationEvent } from '../../../../common/mock/mock_endgame_ecs_data';
 
 const SystemExampleComponent: React.FC = () => {
   const systemRowRenderer = createGenericSystemRowRenderer({
-    actionName: 'process_started',
-    text: 'some text',
+    actionName: 'termination_event',
+    text: 'terminated process',
   });
 
   return (
     <>
       {systemRowRenderer.renderRow({
         browserFields: {},
-        data: mockTimelineData[29].ecs,
+        data: mockEndgameTerminationEvent,
         timelineId: 'row-renderer-example',
       })}
     </>

@@ -113,7 +113,7 @@ exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly aga
           "zeek": null,
         }
       }
-      text="some text"
+      text="connected using"
       timelineId="test"
     />
   </RowRendererContainer>
@@ -135,7 +135,7 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
               "success",
             ],
             "session": Array [
-              "unset",
+              "242",
             ],
             "summary": Object {
               "actor": Object {
@@ -259,7 +259,7 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
         }
       }
       fileIcon="document"
-      text="some text"
+      text="opened file using"
       timelineId="test"
     />
   </RowRendererContainer>

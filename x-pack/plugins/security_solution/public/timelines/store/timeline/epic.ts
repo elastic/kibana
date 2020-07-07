@@ -329,6 +329,7 @@ const timelineInput: TimelineInput = {
   dataProviders: null,
   description: null,
   eventType: null,
+  excludedRowRendererIds: null,
   filters: null,
   kqlMode: null,
   kqlQuery: null,

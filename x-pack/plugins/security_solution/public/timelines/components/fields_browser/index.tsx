@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
@@ -17,11 +17,14 @@ import { filterBrowserFieldsByFieldName, mergeBrowserFieldsWithDefaultCategory }
 import * as i18n from './translations';
 import { FieldBrowserProps } from './types';
 
+const fieldsButtonClassName = 'fields-button';
+
 /** wait this many ms after the user completes typing before applying the filter input */
 export const INPUT_TIMEOUT = 250;
 
 const FieldsBrowserButtonContainer = styled.div`
   position: relative;
+  width: 24px;
 `;
 
 FieldsBrowserButtonContainer.displayName = 'FieldsBrowserButtonContainer';
@@ -143,14 +146,15 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   return (
     <FieldsBrowserButtonContainer data-test-subj="fields-browser-button-container">
       <EuiToolTip content={i18n.CUSTOMIZE_COLUMNS}>
-        <EuiButtonEmpty
-          data-test-subj="show-field-browser"
+        <EuiButtonIcon
+          aria-label={i18n.CUSTOMIZE_COLUMNS}
+          className={fieldsButtonClassName}
+          data-test-subj="show-field-browser-gear"
           iconType="list"
           onClick={toggleShow}
-          size="xs"
         >
           {i18n.FIELDS}
-        </EuiButtonEmpty>
+        </EuiButtonIcon>
       </EuiToolTip>
 
       {show && (

@@ -123,7 +123,7 @@ export const renderers: RowRendererOption[] = [
         <p>{i18n.SYSTEM_DESCRIPTION_PART3}</p>
       </div>
     ),
-    example: SystemExample, // TODO: replace this example with data from `event.category: process and event.module: system`
+    example: SystemExample,
     searchableDescription: `${i18n.SYSTEM_DESCRIPTION_PART1} ${i18n.SYSTEM_NAME} ${i18n.SYSTEM_DESCRIPTION_PART2} ${i18n.SYSTEM_DESCRIPTION_PART3}`,
   },
   {
@@ -150,7 +150,7 @@ export const renderers: RowRendererOption[] = [
     id: RowRendererId.system_file,
     name: i18n.FILE_NAME,
     description: i18n.FILE_DESCRIPTION_PART1,
-    example: SystemFileExample, // TODO: replace this example with a real CRUD example, similar to FIM
+    example: SystemFileExample,
     searchableDescription: i18n.FILE_DESCRIPTION_PART1,
   },
   {

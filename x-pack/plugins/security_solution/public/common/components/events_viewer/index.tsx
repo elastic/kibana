@@ -71,7 +71,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     if (createTimeline != null) {
       createTimeline({ id, columns, sort, itemsPerPage, showCheckboxes, showRowRenderers });
     }
-
     return () => {
       deleteEventQuery({ id, inputId: 'global' });
     };
@@ -205,10 +204,10 @@ export const StatefulEventsViewer = connector(
       prevProps.kqlMode === nextProps.kqlMode &&
       deepEqual(prevProps.query, nextProps.query) &&
       deepEqual(prevProps.sort, nextProps.sort) &&
-      prevProps.showCheckboxes === nextProps.showCheckboxes &&
-      prevProps.showRowRenderers === nextProps.showRowRenderers &&
       prevProps.start === nextProps.start &&
       deepEqual(prevProps.pageFilters, nextProps.pageFilters) &&
+      prevProps.showCheckboxes === nextProps.showCheckboxes &&
+      prevProps.showRowRenderers === nextProps.showRowRenderers &&
       prevProps.start === nextProps.start &&
       prevProps.utilityBar === nextProps.utilityBar
   )

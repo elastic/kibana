@@ -258,20 +258,22 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   // Callback for creating the AlertsUtilityBar which receives totalCount from EventsViewer component
   const utilityBarCallback = useCallback(
-    (refetchQuery: inputsModel.Refetch, totalCount: number) => (
-      <AlertsUtilityBar
-        canUserCRUD={canUserCRUD}
-        areEventsLoading={loadingEventIds.length > 0}
-        clearSelection={clearSelectionCallback}
-        hasIndexWrite={hasIndexWrite}
-        currentFilter={filterGroup}
-        selectAll={selectAllCallback}
-        selectedEventIds={selectedEventIds}
-        showClearSelection={showClearSelectionAction}
-        totalCount={totalCount}
-        updateAlertsStatus={updateAlertsStatusCallback.bind(null, refetchQuery)}
-      />
-    ),
+    (refetchQuery: inputsModel.Refetch, totalCount: number) => {
+      return (
+        <AlertsUtilityBar
+          canUserCRUD={canUserCRUD}
+          areEventsLoading={loadingEventIds.length > 0}
+          clearSelection={clearSelectionCallback}
+          hasIndexWrite={hasIndexWrite}
+          currentFilter={filterGroup}
+          selectAll={selectAllCallback}
+          selectedEventIds={selectedEventIds}
+          showClearSelection={showClearSelectionAction}
+          totalCount={totalCount}
+          updateAlertsStatus={updateAlertsStatusCallback.bind(null, refetchQuery)}
+        />
+      );
+    },
     [
       canUserCRUD,
       hasIndexWrite,

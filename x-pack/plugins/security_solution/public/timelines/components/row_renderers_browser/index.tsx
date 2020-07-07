@@ -6,6 +6,7 @@
 
 import {
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiText,
   EuiToolTip,
   EuiOverlayMask,
@@ -32,6 +33,7 @@ import * as i18n from './translations';
 const StyledEuiModal = styled(EuiModal)`
   margin: 0 auto;
   max-width: 95vw;
+  min-height: 95vh;
 
   > .euiModal__flex {
     max-height: 95vh;
@@ -101,25 +103,27 @@ const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowser
 
   const handleDisableAll = useCallback(() => {
     setExcludedRowRendererIds(Object.values(RowRendererId));
-    tableRef?.current.setSelection([]);
+    // eslint-disable-next-line no-unused-expressions
+    tableRef?.current?.setSelection([]);
   }, [tableRef, setExcludedRowRendererIds]);
 
   const handleEnableAll = useCallback(() => {
-    tableRef?.current.setSelection(renderers);
     setExcludedRowRendererIds([]);
+    // eslint-disable-next-line no-unused-expressions
+    tableRef?.current?.setSelection(renderers);
   }, [tableRef, setExcludedRowRendererIds]);
 
   return (
     <>
       <EuiToolTip content={i18n.CUSTOMIZE_EVENT_RENDERERS_TITLE}>
-        <EuiButtonEmpty
-          data-test-subj="show-field-browser"
+        <EuiButtonIcon
+          aria-label={i18n.CUSTOMIZE_EVENT_RENDERERS_TITLE}
+          data-test-subj="show-row-renderers-gear"
           iconType="gear"
           onClick={toggleShow}
-          size="xs"
         >
           {i18n.EVENT_RENDERERS_TITLE}
-        </EuiButtonEmpty>
+        </EuiButtonIcon>
       </EuiToolTip>
 
       {show && (

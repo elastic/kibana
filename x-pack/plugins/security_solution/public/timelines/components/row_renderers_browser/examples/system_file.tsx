@@ -6,20 +6,20 @@
 
 import React from 'react';
 
-import { mockTimelineData } from '../../../../common/mock/mock_timeline_data';
+import { mockEndgameFileDeleteEvent } from '../../../../common/mock/mock_endgame_ecs_data';
 import { createGenericFileRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
 
 const SystemFileExampleComponent: React.FC = () => {
   const systemFileRowRenderer = createGenericFileRowRenderer({
-    actionName: 'user_login',
-    text: 'some text',
+    actionName: 'file_delete_event',
+    text: 'deleted a file',
   });
 
   return (
     <>
       {systemFileRowRenderer.renderRow({
         browserFields: {},
-        data: mockTimelineData[28].ecs,
+        data: mockEndgameFileDeleteEvent,
         timelineId: 'row-renderer-example',
       })}
     </>

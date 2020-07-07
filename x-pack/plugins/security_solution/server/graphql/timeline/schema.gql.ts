@@ -162,6 +162,7 @@ export const timelineSchema = gql`
     dataProviders: [DataProviderInput!]
     description: String
     eventType: String
+    excludedRowRendererIds: [RowRendererId!]
     filters: [FilterTimelineInput!]
     kqlMode: String
     kqlQuery: SerializedFilterQueryInput
