@@ -200,8 +200,8 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         description: details.host.hostname,
       },
       {
-        title: i18n.translate('xpack.securitySolution.endpoint.host.details.sensorVersion', {
-          defaultMessage: 'Sensor Version',
+        title: i18n.translate('xpack.securitySolution.endpoint.host.details.endpointVersion', {
+          defaultMessage: 'Endpoint Version',
         }),
         description: details.agent.version,
       },

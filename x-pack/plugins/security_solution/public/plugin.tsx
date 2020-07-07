@@ -95,7 +95,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     core.application.register({
       exactRoute: true,
       id: APP_ID,
-      title: 'Security',
+      title: i18n.translate('xpack.securitySolution.security.title', {
+        defaultMessage: 'Security',
+      }),
       appRoute: APP_PATH,
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
@@ -166,7 +168,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     core.application.register({
       id: `${APP_ID}:${SecurityPageName.hosts}`,
-      title: 'Hosts',
+      title: i18n.translate('xpack.securitySolution.hostsPage.title', { defaultMessage: 'Hosts' }),
       order: 9002,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
@@ -193,7 +195,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     core.application.register({
       id: `${APP_ID}:${SecurityPageName.network}`,
-      title: 'Network',
+      title: i18n.translate('xpack.securitySolution.networkPage.title', {
+        defaultMessage: 'Network',
+      }),
       order: 9002,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
@@ -220,7 +224,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     core.application.register({
       id: `${APP_ID}:${SecurityPageName.timelines}`,
-      title: 'Timelines',
+      title: i18n.translate('xpack.securitySolution.timelinesPage.title', {
+        defaultMessage: 'Timelines',
+      }),
       order: 9002,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
@@ -274,7 +280,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     core.application.register({
       id: `${APP_ID}:${SecurityPageName.management}`,
-      title: 'Management',
+      title: i18n.translate('xpack.securitySolution.administrationPage.title', {
+        defaultMessage: 'Administration',
+      }),
       order: 9002,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,

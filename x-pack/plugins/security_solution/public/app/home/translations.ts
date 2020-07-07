@@ -37,6 +37,6 @@ export const CASE = i18n.translate('xpack.securitySolution.navigation.case', {
   defaultMessage: 'Cases',
 });
 
-export const MANAGEMENT = i18n.translate('xpack.securitySolution.navigation.management', {
-  defaultMessage: 'Management',
+export const ADMINISTRATION = i18n.translate('xpack.securitySolution.navigation.administration', {
+  defaultMessage: 'Administration',
 });

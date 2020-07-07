@@ -14,14 +14,14 @@ import {
   MANAGEMENT_ROUTING_ROOT_PATH,
 } from '../common/constants';
 import { NotFoundPage } from '../../app/404';
-import { EndpointsContainer } from './endpoint_hosts';
+import { HostsContainer } from './endpoint_hosts';
 import { getHostListPath } from '../common/routing';
 
 export const ManagementContainer = memo(() => {
   const history = useHistory();
   return (
     <Switch>
-      <Route path={MANAGEMENT_ROUTING_HOSTS_PATH} component={EndpointsContainer} />
+      <Route path={MANAGEMENT_ROUTING_HOSTS_PATH} component={HostsContainer} />
       <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} component={PolicyContainer} />
       <Route
         path={MANAGEMENT_ROUTING_ROOT_PATH}

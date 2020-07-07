@@ -395,7 +395,7 @@ export const PolicyList = React.memo(() => {
         headerLeft={
           <>
             <EuiTitle size="l">
-              <h1>
+              <h1 data-test-subj="pageViewHeaderLeftTitle">
                 <FormattedMessage
                   id="xpack.securitySolution.policyList.pageTitle"
                   defaultMessage="Policies"

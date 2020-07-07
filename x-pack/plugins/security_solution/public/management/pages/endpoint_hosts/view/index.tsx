@@ -35,7 +35,7 @@ import { CreateStructuredSelector } from '../../../../common/store';
 import { Immutable, HostInfo } from '../../../../../common/endpoint/types';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { ManagementPageView } from '../../../components/management_page_view';
-import { PolicyEmptyState, EndpointsEmptyState } from '../../../components/management_empty_state';
+import { PolicyEmptyState, HostsEmptyState } from '../../../components/management_empty_state';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import {
@@ -339,7 +339,7 @@ export const HostList = () => {
       );
     } else if (!policyItemsLoading && policyItems && policyItems.length > 0) {
       return (
-        <EndpointsEmptyState
+        <HostsEmptyState
           loading={loading}
           onActionClick={handleDeployEndpointsClick}
           actionDisabled={selectedPolicyId === undefined}
@@ -377,7 +377,7 @@ export const HostList = () => {
       headerLeft={
         <>
           <EuiTitle size="l">
-            <h1>
+            <h1 data-test-subj="pageViewHeaderLeftTitle">
               <FormattedMessage
                 id="xpack.securitySolution.hostList.pageTitle"
                 defaultMessage="Hosts"
