@@ -52,7 +52,7 @@ const ELASTIC_LICENSE_HEADER = `
 const SAFER_LODASH_SET_HEADER = `
 /*
  * Elasticsearch B.V licenses this file to you under the MIT License.
- * See \`packages/elastic-safer-lodash-set/LICENSE\` more information.
+ * See \`packages/elastic-safer-lodash-set/LICENSE\` for more information.
  */
 `;
 
@@ -61,7 +61,7 @@ const SAFER_LODASH_SET_LODASH_HEADER = `
  * This file is forked from the lodash project (https://lodash.com/),
  * and may include modifications made by Elasticsearch B.V.
  * Elasticsearch B.V. licenses this file to you under the MIT License.
- * See \`packages/elastic-safer-lodash-set/LICENSE\` more information.
+ * See \`packages/elastic-safer-lodash-set/LICENSE\` for more information.
  */
 `;
 
@@ -70,7 +70,7 @@ const SAFER_LODASH_SET_DEFINITELYTYPED_HEADER = `
  * This file is forked from the DefinitelyTyped project (https://github.com/DefinitelyTyped/DefinitelyTyped),
  * and may include modifications made by Elasticsearch B.V.
  * Elasticsearch B.V. licenses this file to you under the MIT License.
- * See \`packages/elastic-safer-lodash-set/LICENSE\` more information.
+ * See \`packages/elastic-safer-lodash-set/LICENSE\` for more information.
  */
 `;
 
