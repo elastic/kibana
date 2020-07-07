@@ -49,8 +49,10 @@ export async function generateNoticeFromSource({ productName, directory, log }: 
     ignore: [
       '{node_modules,build,target,dist,optimize,built_assets}/**',
       'packages/*/{node_modules,build,target,dist}/**',
-      'x-pack/{node_modules,build,target,dist,optimize}/**',
+      'src/plugins/*/{node_modules,build,target,dist}/**',
+      'x-pack/{node_modules,build,target,dist,data,optimize}/**',
       'x-pack/packages/*/{node_modules,build,target,dist}/**',
+      'x-pack/plugins/*/{node_modules,build,target,dist}/**',
     ],
   };
 
@@ -62,7 +64,7 @@ export async function generateNoticeFromSource({ productName, directory, log }: 
   const noticeComments: string[] = [];
   await new Promise((resolve, reject) => {
     files
-      .on('data', (file) => {
+      .on('data', file => {
         log.verbose(`Checking for @notice comments in ${file.relative}`);
 
         const source = file.contents.toString('utf8');
@@ -86,7 +88,7 @@ export async function generateNoticeFromSource({ productName, directory, log }: 
     noticeText += '\n---\n';
     noticeText += comment
       .split(NEWLINE_RE)
-      .map((line) =>
+      .map(line =>
         line
           // trim whitespace
           .trim()
