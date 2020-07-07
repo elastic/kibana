@@ -13,6 +13,7 @@ import {
 import * as readRules from './read_rules';
 import { alertsClientMock } from '../../../../../alerts/server/mocks';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../feature_flags';
+import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 
 describe('get_export_by_object_ids', () => {
   beforeAll(() => {
@@ -91,10 +92,7 @@ describe('get_export_by_object_ids', () => {
           throttle: 'no_actions',
           note: '# Investigative notes',
           version: 1,
-          exceptions_list: [
-            { id: 'some_uuid', namespace_type: 'single' },
-            { id: 'some_uuid', namespace_type: 'agnostic' },
-          ],
+          exceptions_list: getListArrayMock(),
         })}\n`,
         exportDetails: `${JSON.stringify({
           exported_count: 1,
@@ -195,10 +193,7 @@ describe('get_export_by_object_ids', () => {
             throttle: 'no_actions',
             note: '# Investigative notes',
             version: 1,
-            exceptions_list: [
-              { id: 'some_uuid', namespace_type: 'single' },
-              { id: 'some_uuid', namespace_type: 'agnostic' },
-            ],
+            exceptions_list: getListArrayMock(),
           },
         ],
       };
