@@ -6,5 +6,5 @@
   "type": "query",
   "query": "host.name: *",
   "interval": "30s",
-  "exceptions_list": [{ "id": "endpoint_list", "namespace_type": "single" }]
+  "exceptions_list": [{ "id": "810bc370-c006-11ea-b059-5326012dd965", "namespace_type": "single", "type": "endpoint" }]
 }
