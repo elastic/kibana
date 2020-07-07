@@ -4,46 +4,64 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { NewPackageConfig } from '../../../ingest_manager/common/types/models';
 import { factory as policyConfigFactory } from '../../common/endpoint/models/policy_config';
 import { NewPolicyData } from '../../common/endpoint/types';
-import { NewPackageConfig } from '../../../ingest_manager/common/types/models';
+import { ManifestManager } from './services/artifacts';
 
 /**
- * Callback to handle creation of package configs in Ingest Manager
- * @param newPackageConfig
+ * Callback to handle creation of PackageConfigs in Ingest Manager
  */
-export const handlePackageConfigCreate = async (
-  newPackageConfig: NewPackageConfig
-): Promise<NewPackageConfig> => {
-  // We only care about Endpoint package configs
-  if (newPackageConfig.package?.name !== 'endpoint') {
-    return newPackageConfig;
-  }
+export const getPackageConfigCreateCallback = (
+  manifestManager: ManifestManager
+): ((newPackageConfig: NewPackageConfig) => Promise<NewPackageConfig>) => {
+  const handlePackageConfigCreate = async (
+    newPackageConfig: NewPackageConfig
+  ): Promise<NewPackageConfig> => {
+    // We only care about Endpoint package configs
+    if (newPackageConfig.package?.name !== 'endpoint') {
+      return newPackageConfig;
+    }
 
-  // We cast the type here so that any changes to the Endpoint specific data
-  // follow the types/schema expected
-  let updatedPackageConfig = newPackageConfig as NewPolicyData;
+    // We cast the type here so that any changes to the Endpoint specific data
+    // follow the types/schema expected
+    let updatedPackageConfig = newPackageConfig as NewPolicyData;
 
-  // Until we get the Default Policy Configuration in the Endpoint package,
-  // we will add it here manually at creation time.
-  // @ts-ignore
-  if (newPackageConfig.inputs.length === 0) {
-    updatedPackageConfig = {
-      ...newPackageConfig,
-      inputs: [
-        {
-          type: 'endpoint',
-          enabled: true,
-          streams: [],
-          config: {
-            policy: {
-              value: policyConfigFactory(),
+    const wrappedManifest = await manifestManager.refresh({ initialize: true });
+    if (wrappedManifest !== null) {
+      // Until we get the Default Policy Configuration in the Endpoint package,
+      // we will add it here manually at creation time.
+      // @ts-ignore
+      if (newPackageConfig.inputs.length === 0) {
+        updatedPackageConfig = {
+          ...newPackageConfig,
+          inputs: [
+            {
+              type: 'endpoint',
+              enabled: true,
+              streams: [],
+              config: {
+                artifact_manifest: {
+                  value: wrappedManifest.manifest.toEndpointFormat(),
+                },
+                policy: {
+                  value: policyConfigFactory(),
+                },
+              },
             },
-          },
-        },
-      ],
-    };
-  }
+          ],
+        };
+      }
+    }
 
-  return updatedPackageConfig;
+    try {
+      return updatedPackageConfig;
+    } finally {
+      // TODO: confirm creation of package config
+      // then commit.
+      await manifestManager.commit(wrappedManifest);
+    }
+  };
+
+  return handlePackageConfigCreate;
 };

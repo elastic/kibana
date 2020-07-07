@@ -15,6 +15,7 @@ export {
   EnrollmentAPIKey,
   PackageConfig,
   NewPackageConfig,
+  UpdatePackageConfig,
   PackageConfigInput,
   PackageConfigInputStream,
   PackageConfigConfigRecordEntry,
@@ -23,6 +24,7 @@ export {
   // API schema - misc setup, status
   GetFleetStatusResponse,
   // API schemas - Agent Config
+  GetAgentConfigsRequest,
   GetAgentConfigsResponse,
   GetAgentConfigsResponseItem,
   GetOneAgentConfigResponse,
@@ -91,6 +93,7 @@ export {
   ServiceName,
   GetCategoriesResponse,
   GetPackagesResponse,
+  GetLimitedPackagesResponse,
   GetInfoResponse,
   InstallPackageResponse,
   DeletePackageResponse,
