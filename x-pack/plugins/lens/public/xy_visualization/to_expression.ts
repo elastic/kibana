@@ -133,6 +133,7 @@ export const buildExpression = (
               ],
             },
           ],
+          fittingFunction: [state.fittingFunction || 'None'],
           layers: validLayers.map((layer) => {
             const columnToLabel: Record<string, string> = {};
 
