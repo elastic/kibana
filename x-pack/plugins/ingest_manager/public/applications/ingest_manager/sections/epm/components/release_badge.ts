@@ -6,7 +6,7 @@
 import { i18n } from '@kbn/i18n';
 import { RegistryRelease } from '../../../types';
 
-export const RELEASE_BADGE_LABEL: { [key: RegistryRelease]: string } = {
+export const RELEASE_BADGE_LABEL: { [key in Exclude<RegistryRelease, 'ga'>]: string } = {
   beta: i18n.translate('xpack.ingestManager.epm.releaseBadge.betaLabel', {
     defaultMessage: 'Beta',
   }),
@@ -15,7 +15,7 @@ export const RELEASE_BADGE_LABEL: { [key: RegistryRelease]: string } = {
   }),
 };
 
-export const RELEASE_BADGE_DESCRIPTION: { [key: RegistryRelease]: string } = {
+export const RELEASE_BADGE_DESCRIPTION: { [key in Exclude<RegistryRelease, 'ga'>]: string } = {
   beta: i18n.translate('xpack.ingestManager.epm.releaseBadge.betaDescription', {
     defaultMessage:
       'This integration might change or be removed in a future release and is not subject to the support SLA.',

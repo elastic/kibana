@@ -133,7 +133,7 @@ export function Detail() {
                         <h1 className="eui-textNoWrap">{packageInfo?.title}</h1>
                       </EuiText>
                     </EuiFlexItem>
-                    {packageInfo?.release && RELEASE_BADGE_LABEL[packageInfo.release] ? (
+                    {packageInfo?.release && packageInfo.release !== 'ga' ? (
                       <EuiFlexItem>
                         <EuiBetaBadge
                           label={RELEASE_BADGE_LABEL[packageInfo.release]}
@@ -228,6 +228,8 @@ export function Detail() {
           }
           error={packageInfoError}
         />
+      ) : isLoading || !packageInfo ? (
+        <Loading />
       ) : (
         <Content {...packageInfo} panel={panel} />
       )}

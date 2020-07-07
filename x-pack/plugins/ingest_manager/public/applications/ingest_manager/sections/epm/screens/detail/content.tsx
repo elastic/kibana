@@ -9,7 +9,6 @@ import React from 'react';
 import styled from 'styled-components';
 import { DEFAULT_PANEL, DetailParams } from '.';
 import { PackageInfo } from '../../../../types';
-import { Loading } from '../../../../components';
 import { AssetsFacetGroup } from '../../components/assets_facet_group';
 import { CenterColumn, LeftColumn, RightColumn } from './layout';
 import { OverviewPanel } from './overview_panel';
@@ -53,7 +52,7 @@ export function ContentPanel(props: ContentPanelProps) {
   const { panel, name, version, assets, title, removable, latestVersion } = props;
   switch (panel) {
     case 'settings':
-      return name ? (
+      return (
         <SettingsPanel
           name={name}
           version={version}
@@ -62,8 +61,6 @@ export function ContentPanel(props: ContentPanelProps) {
           removable={removable}
           latestVersion={latestVersion}
         />
-      ) : (
-        <Loading />
       );
     case 'usages':
       return <PackageConfigsPanel name={name} version={version} />;

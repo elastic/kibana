@@ -42,8 +42,10 @@ export function PackageCard({
       description={description}
       icon={<PackageIcon icons={icons} packageName={name} version={version} size="xl" />}
       href={getHref('integration_details', { pkgkey: `${name}-${urlVersion}` })}
-      betaBadgeLabel={release ? RELEASE_BADGE_LABEL[release] : undefined}
-      betaBadgeTooltipContent={release ? RELEASE_BADGE_DESCRIPTION[release] : undefined}
+      betaBadgeLabel={release && release !== 'ga' ? RELEASE_BADGE_LABEL[release] : undefined}
+      betaBadgeTooltipContent={
+        release && release !== 'ga' ? RELEASE_BADGE_DESCRIPTION[release] : undefined
+      }
     />
   );
 }
