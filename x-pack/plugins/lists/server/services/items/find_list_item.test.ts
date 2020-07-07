@@ -12,14 +12,6 @@ import { getFindListItemOptionsMock } from './find_list_item.mock';
 import { findListItem } from './find_list_item';
 
 describe('find_list_item', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   test('should find a simple single list item', async () => {
     const options = getFindListItemOptionsMock();
     const item = await findListItem(options);
