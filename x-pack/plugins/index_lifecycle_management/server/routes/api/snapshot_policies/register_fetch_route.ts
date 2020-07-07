@@ -26,9 +26,7 @@ export function registerFetchRoute({ router, license, lib }: RouteDependencies) 
         const policiesByName = await fetchSnapshotPolicies(
           context.core.elasticsearch.legacy.client.callAsCurrentUser
         );
-        const policies = Object.keys(policiesByName);
-        const okResponse = { body: policies };
-        return response.ok(okResponse);
+        return response.ok({ body: Object.keys(policiesByName) });
       } catch (e) {
         if (lib.isEsError(e)) {
           return response.customError({

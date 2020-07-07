@@ -5,8 +5,3 @@
  */
 
 export { SnapshotPolicies } from './snapshot_policies';
-
-export interface SnapshotPoliciesProps {
-  value: string;
-  onChange: (value: string) => void;
-}

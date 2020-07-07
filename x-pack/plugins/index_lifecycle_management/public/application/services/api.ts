@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UiStatsMetricType } from '@kbn/analytics';
+import { METRIC_TYPE } from '@kbn/analytics/src';
+import { trackUiMetric } from './ui_metric';
 
 import {
   UIM_POLICY_DELETE,
@@ -13,7 +14,7 @@ import {
   UIM_POLICY_DETACH_INDEX,
   UIM_INDEX_RETRY_STEP,
 } from '../constants';
-import { trackUiMetric } from './ui_metric';
+
 import { sendGet, sendPost, sendDelete, useRequest } from './http';
 
 export async function loadNodes() {
@@ -39,35 +40,35 @@ export async function savePolicy(policy: any) {
 export async function deletePolicy(policyName: string) {
   const response = await sendDelete(`policies/${encodeURIComponent(policyName)}`);
   // Only track successful actions.
-  trackUiMetric('count' as UiStatsMetricType, UIM_POLICY_DELETE);
+  trackUiMetric(METRIC_TYPE.COUNT, UIM_POLICY_DELETE);
   return response;
 }
 
 export const retryLifecycleForIndex = async (indexNames: string[]) => {
   const response = await sendPost(`index/retry`, { indexNames });
   // Only track successful actions.
-  trackUiMetric('count' as UiStatsMetricType, UIM_INDEX_RETRY_STEP);
+  trackUiMetric(METRIC_TYPE.COUNT, UIM_INDEX_RETRY_STEP);
   return response;
 };
 
 export const removeLifecycleForIndex = async (indexNames: string[]) => {
   const response = await sendPost(`index/remove`, { indexNames });
   // Only track successful actions.
-  trackUiMetric('count' as UiStatsMetricType, UIM_POLICY_DETACH_INDEX);
+  trackUiMetric(METRIC_TYPE.COUNT, UIM_POLICY_DETACH_INDEX);
   return response;
 };
 
 export const addLifecyclePolicyToIndex = async (body: any) => {
   const response = await sendPost(`index/add`, body);
   // Only track successful actions.
-  trackUiMetric('count' as UiStatsMetricType, UIM_POLICY_ATTACH_INDEX);
+  trackUiMetric(METRIC_TYPE.COUNT, UIM_POLICY_ATTACH_INDEX);
   return response;
 };
 
 export const addLifecyclePolicyToTemplate = async (body: any) => {
   const response = await sendPost(`template`, body);
   // Only track successful actions.
-  trackUiMetric('count' as UiStatsMetricType, UIM_POLICY_ATTACH_INDEX_TEMPLATE);
+  trackUiMetric(METRIC_TYPE.COUNT, UIM_POLICY_ATTACH_INDEX_TEMPLATE);
   return response;
 };
 

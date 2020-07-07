@@ -57,7 +57,7 @@ export const setup = async (): Promise<EditPolicyTestBed> => {
   const setWaitForSnapshotPolicy = async (snapshotPolicyName: string) => {
     const { component } = testBed;
     act(() => {
-      testBed.find('snapshotPolicyCombobox').prop('onChange')!([{ label: snapshotPolicyName }]);
+      testBed.find('snapshotPolicyCombobox').simulate('change', [{ label: snapshotPolicyName }]);
     });
     component.update();
   };

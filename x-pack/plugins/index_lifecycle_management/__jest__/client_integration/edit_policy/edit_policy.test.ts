@@ -108,8 +108,8 @@ describe('<EditPolicy />', () => {
     });
 
     test('wait for snapshot field should display a callout when there are no snapshot policies', async () => {
+      // need to call setup on testBed again for it to use a newly defined snapshot policies response
       httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
-
       await act(async () => {
         testBed = await setup();
       });
@@ -121,8 +121,8 @@ describe('<EditPolicy />', () => {
     });
 
     test('wait for snapshot field should display a callout when there is an error loading snapshot policies', async () => {
+      // need to call setup on testBed again for it to use a newly defined snapshot policies response
       httpRequestsMockHelpers.setLoadSnapshotPolicies([], { status: 500, body: 'error' });
-
       await act(async () => {
         testBed = await setup();
       });

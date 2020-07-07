@@ -17,14 +17,13 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { SnapshotPoliciesProps } from './';
-
 import { useLoadSnapshotPolicies } from '../../../../services/api';
 
-export const SnapshotPolicies: React.FunctionComponent<SnapshotPoliciesProps> = ({
-  value,
-  onChange,
-}) => {
+interface Props {
+  value: string;
+  onChange: (value: string) => void;
+}
+export const SnapshotPolicies: React.FunctionComponent<Props> = ({ value, onChange }) => {
   const { error, isLoading, data, sendRequest } = useLoadSnapshotPolicies();
 
   const policies = data.map((name: string) => ({
@@ -139,12 +138,16 @@ export const SnapshotPolicies: React.FunctionComponent<SnapshotPoliciesProps> = 
         singleSelection={{ asPlainText: true }}
         isLoading={isLoading}
         onCreateOption={onCreateOption}
-        selectedOptions={[
-          {
-            label: value,
-            value,
-          },
-        ]}
+        selectedOptions={
+          value
+            ? [
+                {
+                  label: value,
+                  value,
+                },
+              ]
+            : []
+        }
         onChange={onComboChange}
         noSuggestions={!!(error || data.length === 0)}
       />
