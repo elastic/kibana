@@ -5079,6 +5079,7 @@ export namespace SuricataEcsFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = SuricataEcsFields> {
     eve?: EveResolver<Maybe<SuricataEveData>, TypeParent, TContext>;
   }
+
   export type EveResolver<
     R = Maybe<SuricataEveData>,
     Parent = SuricataEcsFields,
