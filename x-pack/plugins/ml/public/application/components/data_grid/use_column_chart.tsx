@@ -40,7 +40,7 @@ const getXScaleType = (kbnFieldType: KBN_FIELD_TYPES | undefined): XScaleType =>
   }
 };
 
-const getFieldType = (schema: EuiDataGridColumn['schema']): KBN_FIELD_TYPES | undefined => {
+export const getFieldType = (schema: EuiDataGridColumn['schema']): KBN_FIELD_TYPES | undefined => {
   if (schema === NON_AGGREGATABLE) {
     return undefined;
   }

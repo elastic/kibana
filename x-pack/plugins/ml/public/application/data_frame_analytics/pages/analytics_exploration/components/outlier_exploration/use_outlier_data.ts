@@ -10,21 +10,22 @@ import { EuiDataGridColumn } from '@elastic/eui';
 
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
+import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
+
 import {
   useColorRange,
   COLOR_RANGE,
   COLOR_RANGE_SCALE,
 } from '../../../../../components/color_range_legend';
 import {
-  fetchChartsData,
+  getFieldType,
   getDataGridSchemasFromFieldTypes,
   showDataGridColumnChartErrorMessageToast,
   useDataGrid,
   useRenderCellValue,
   UseIndexDataReturnType,
 } from '../../../../../components/data_grid';
-import { SavedSearchQuery } from '../../../../../contexts/ml';
-import { ml } from '../../../../../services/ml_api_service';
+import { useMlContext, SavedSearchQuery } from '../../../../../contexts/ml';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
@@ -40,6 +41,8 @@ export const useOutlierData = (
 ): UseIndexDataReturnType => {
   const needsDestIndexFields =
     indexPattern !== undefined && indexPattern.title === jobConfig?.source.index[0];
+
+  const { kibanaConfig } = useMlContext();
 
   const columns: EuiDataGridColumn[] = [];
 
@@ -81,12 +84,17 @@ export const useOutlierData = (
 
   const fetchColumnChartsData = async function () {
     try {
-      if (jobConfig !== undefined) {
-        const columnChartsData = await fetchChartsData(
-          jobConfig.dest.index,
-          ml.esSearch,
+      if (jobConfig !== undefined && indexPattern !== undefined) {
+        const dataLoader = new DataLoader(indexPattern, kibanaConfig);
+        const columnChartsData = await dataLoader.loadFieldHistograms(
           searchQuery,
-          columns.filter((cT) => dataGrid.visibleColumns.includes(cT.id))
+          5000, // samplerShardSize,
+          columns
+            .filter((cT) => dataGrid.visibleColumns.includes(cT.id))
+            .map((cT) => ({
+              fieldName: cT.id,
+              type: getFieldType(cT.schema),
+            }))
         );
         dataGrid.setColumnCharts(columnChartsData);
       }

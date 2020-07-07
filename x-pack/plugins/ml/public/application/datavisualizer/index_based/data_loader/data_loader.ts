@@ -13,7 +13,7 @@ import { SavedSearchQuery } from '../../../contexts/ml';
 import { IndexPatternTitle } from '../../../../../common/types/kibana';
 
 import { ml } from '../../../services/ml_api_service';
-import { FieldRequestConfig } from '../common';
+import { FieldHistogramRequestConfig, FieldRequestConfig } from '../common';
 
 // List of system fields we don't want to display.
 const OMIT_FIELDS: string[] = ['_source', '_type', '_index', '_id', '_version', '_score'];
@@ -86,6 +86,21 @@ export class DataLoader {
       interval,
       fields,
       maxExamples: this._maxExamples,
+    });
+
+    return stats;
+  }
+
+  async loadFieldHistograms(
+    query: string | SavedSearchQuery,
+    samplerShardSize: number,
+    fields: FieldHistogramRequestConfig[]
+  ): Promise<any[]> {
+    const stats = await ml.getVisualizerFieldHistograms({
+      indexPatternTitle: this._indexPatternTitle,
+      query,
+      samplerShardSize,
+      fields,
     });
 
     return stats;
