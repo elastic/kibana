@@ -194,7 +194,7 @@ describe('buildEventTypeSignal', () => {
       .mockReturnValueOnce(second)
       .mockReturnValueOnce(third);
     const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', '1.0.0');
-    expect(resp.entries.length).toEqual(6);
+    expect(resp.entries.length).toEqual(3);
   });
 
   test('it should handle no exceptions', async () => {

@@ -24,7 +24,7 @@ describe('manifest_entry', () => {
 
     test('Correct doc_id is returned', () => {
       expect(manifestEntry.getDocId()).toEqual(
-        'endpoint-exceptionlist-windows-1.0.0-339af4b7d15db33dfb80268d3fa0b40f7fd1806becd691d8a757f425e782db7d'
+        'endpoint-exceptionlist-windows-1.0.0-5f16e5e338c53e77cfa945c17c11b175c3967bf109aa87131de41fb93b149735'
       );
     });
 
@@ -34,21 +34,21 @@ describe('manifest_entry', () => {
 
     test('Correct sha256 is returned', () => {
       expect(manifestEntry.getEncodedSha256()).toEqual(
-        '339af4b7d15db33dfb80268d3fa0b40f7fd1806becd691d8a757f425e782db7d'
+        '5f16e5e338c53e77cfa945c17c11b175c3967bf109aa87131de41fb93b149735'
       );
       expect(manifestEntry.getDecodedSha256()).toEqual(
-        '339af4b7d15db33dfb80268d3fa0b40f7fd1806becd691d8a757f425e782db7d'
+        '5f16e5e338c53e77cfa945c17c11b175c3967bf109aa87131de41fb93b149735'
       );
     });
 
     test('Correct size is returned', () => {
-      expect(manifestEntry.getEncodedSize()).toEqual(260);
-      expect(manifestEntry.getDecodedSize()).toEqual(260);
+      expect(manifestEntry.getEncodedSize()).toEqual(430);
+      expect(manifestEntry.getDecodedSize()).toEqual(430);
     });
 
     test('Correct url is returned', () => {
       expect(manifestEntry.getUrl()).toEqual(
-        '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-1.0.0/339af4b7d15db33dfb80268d3fa0b40f7fd1806becd691d8a757f425e782db7d'
+        '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-1.0.0/5f16e5e338c53e77cfa945c17c11b175c3967bf109aa87131de41fb93b149735'
       );
     });
 
@@ -60,12 +60,12 @@ describe('manifest_entry', () => {
       expect(manifestEntry.getRecord()).toEqual({
         compression_algorithm: 'none',
         encryption_algorithm: 'none',
-        decoded_sha256: '339af4b7d15db33dfb80268d3fa0b40f7fd1806becd691d8a757f425e782db7d',
-        encoded_sha256: '339af4b7d15db33dfb80268d3fa0b40f7fd1806becd691d8a757f425e782db7d',
-        decoded_size: 260,
-        encoded_size: 260,
+        decoded_sha256: '5f16e5e338c53e77cfa945c17c11b175c3967bf109aa87131de41fb93b149735',
+        encoded_sha256: '5f16e5e338c53e77cfa945c17c11b175c3967bf109aa87131de41fb93b149735',
+        decoded_size: 430,
+        encoded_size: 430,
         relative_url:
-          '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-1.0.0/339af4b7d15db33dfb80268d3fa0b40f7fd1806becd691d8a757f425e782db7d',
+          '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-1.0.0/5f16e5e338c53e77cfa945c17c11b175c3967bf109aa87131de41fb93b149735',
       });
     });
   });

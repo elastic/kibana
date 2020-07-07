@@ -21,7 +21,7 @@ describe('manifest_manager', () => {
       expect(manifestWrapper!.diffs).toEqual([
         {
           id:
-            'endpoint-exceptionlist-linux-1.0.0-2a2ec06c957330deb42f41835d3029001432038106f823173fb9e7ea603decb5',
+            'endpoint-exceptionlist-linux-1.0.0-1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
           type: 'add',
         },
       ]);
@@ -35,7 +35,7 @@ describe('manifest_manager', () => {
       expect(manifestWrapper!.diffs).toEqual([
         {
           id:
-            'endpoint-exceptionlist-linux-1.0.0-2a2ec06c957330deb42f41835d3029001432038106f823173fb9e7ea603decb5',
+            'endpoint-exceptionlist-linux-1.0.0-1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
           type: 'add',
         },
       ]);
@@ -44,22 +44,27 @@ describe('manifest_manager', () => {
       expect(entry).toEqual({
         entries: [
           {
+            type: 'simple',
             entries: [
               {
-                field: 'nested.field',
+                entries: [
+                  {
+                    field: 'nested.field',
+                    operator: 'included',
+                    type: 'exact_cased',
+                    value: 'some value',
+                  },
+                ],
+                field: 'some.parentField',
+                type: 'nested',
+              },
+              {
+                field: 'some.not.nested.field',
                 operator: 'included',
                 type: 'exact_cased',
                 value: 'some value',
               },
             ],
-            field: 'some.parentField',
-            type: 'nested',
-          },
-          {
-            field: 'some.not.nested.field',
-            operator: 'included',
-            type: 'exact_cased',
-            value: 'some value',
           },
         ],
       });
