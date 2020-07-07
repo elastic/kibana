@@ -10,7 +10,6 @@ import { ReportingConfig } from '../../';
 import { HeadlessChromiumDriverFactory } from '../../browsers/chromium/driver_factory';
 import { LevelLogger } from '../../lib';
 import { validateBrowser } from './validate_browser';
-import { validateMaxContentLength } from './validate_max_content_length';
 
 export async function runValidations(
   config: ReportingConfig,
@@ -20,10 +19,7 @@ export async function runValidations(
 ) {
   const logger = parentLogger.clone(['validations']);
   try {
-    await Promise.all([
-      validateBrowser(browserFactory, logger),
-      validateMaxContentLength(config, elasticsearch, logger),
-    ]);
+    await Promise.all([validateBrowser(browserFactory, logger)]);
     logger.debug(
       i18n.translate('xpack.reporting.selfCheck.ok', {
         defaultMessage: `Reporting plugin self-check ok!`,

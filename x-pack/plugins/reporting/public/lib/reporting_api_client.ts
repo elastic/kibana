@@ -157,4 +157,28 @@ export class ReportingAPIClient {
    * provides the raw server basePath to allow it to be stripped out from relativeUrls in job params
    */
   public getServerBasePath = () => this.http.basePath.serverBasePath;
+
+  /*
+   * Diagnostic-related API calls
+   */
+  public verifyConfig = () =>
+    this.http.post(`${API_LIST_URL}/diagnose/config`, {
+      asSystemRequest: true,
+    });
+
+  /*
+   * Diagnostic-related API calls
+   */
+  public verifyBrowser = () =>
+    this.http.post(`${API_LIST_URL}/diagnose/browser`, {
+      asSystemRequest: true,
+    });
+
+  /*
+   * Diagnostic-related API calls
+   */
+  public verifyScreenCapture = () =>
+    this.http.post(`${API_LIST_URL}/diagnose/screen-capture`, {
+      asSystemRequest: true,
+    });
 }

@@ -6,6 +6,8 @@
 
 import {
   EuiBasicTable,
+  EuiFlexItem,
+  EuiFlexGroup,
   EuiPageContent,
   EuiSpacer,
   EuiText,
@@ -31,6 +33,7 @@ import {
   ReportErrorButton,
   ReportInfoButton,
 } from './buttons';
+import { ReportHelper } from './report_helper';
 
 export interface Job {
   id: string;
@@ -135,19 +138,29 @@ class ReportListingUi extends Component<Props, State> {
   public render() {
     return (
       <EuiPageContent horizontalPosition="center" className="euiPageBody--restrictWidth-default">
-        <EuiTitle>
-          <h1>
-            <FormattedMessage id="xpack.reporting.listing.reportstitle" defaultMessage="Reports" />
-          </h1>
-        </EuiTitle>
-        <EuiText color="subdued" size="s">
-          <p>
-            <FormattedMessage
-              id="xpack.reporting.listing.reports.subtitle"
-              defaultMessage="Find reports generated in Kibana applications here"
-            />
-          </p>
-        </EuiText>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiTitle>
+              <h1>
+                <FormattedMessage
+                  id="xpack.reporting.listing.reportstitle"
+                  defaultMessage="Reports"
+                />
+              </h1>
+            </EuiTitle>
+            <EuiText color="subdued" size="s">
+              <p>
+                <FormattedMessage
+                  id="xpack.reporting.listing.reports.subtitle"
+                  defaultMessage="Find reports generated in Kibana applications here"
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ReportHelper apiClient={this.props.apiClient} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer />
         {this.renderTable()}
       </EuiPageContent>
