@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import { useRouteMatch, Switch, Route } from 'react-router-dom';
+import { useRouteMatch, Switch, Route, useLocation, useHistory } from 'react-router-dom';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { i18n } from '@kbn/i18n';
 import { PAGE_ROUTING_PATHS } from '../../../../constants';
@@ -116,9 +116,12 @@ function InstalledPackages() {
 
 function AvailablePackages() {
   useBreadcrumbs('integrations_all');
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const history = useHistory();
+  const queryParams = new URLSearchParams(useLocation().search);
+  const initialCategory = queryParams.get('category') || '';
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const { data: allPackagesRes, isLoading: isLoadingAllPackages } = useGetPackages();
-  const { data: categoryPackagesRes, isLoading: isLoadingCategoryPackages } = useGetPackages({
+  const { data: categoryPackagesRes, isLoading: isLoadingPackages } = useGetPackages({
     category: selectedCategory,
   });
   const { data: categoriesRes, isLoading: isLoadingCategories } = useGetCategories();
@@ -144,7 +147,13 @@ function AvailablePackages() {
       isLoading={isLoadingCategories || isLoadingAllPackages}
       categories={categories}
       selectedCategory={selectedCategory}
-      onCategoryChange={({ id }: CategorySummaryItem) => setSelectedCategory(id)}
+      onCategoryChange={({ id }: CategorySummaryItem) => {
+        // clear category query param in the url
+        if (queryParams.get('category')) {
+          history.push({});
+        }
+        setSelectedCategory(id);
+      }}
     />
   ) : null;
 

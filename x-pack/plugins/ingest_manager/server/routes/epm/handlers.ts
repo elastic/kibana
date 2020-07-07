@@ -6,6 +6,14 @@
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler, CustomHttpResponseOptions } from 'src/core/server';
 import {
+  GetInfoResponse,
+  InstallPackageResponse,
+  DeletePackageResponse,
+  GetCategoriesResponse,
+  GetPackagesResponse,
+  GetLimitedPackagesResponse,
+} from '../../../common';
+import {
   GetCategoriesRequestSchema,
   GetPackagesRequestSchema,
   GetFileRequestSchema,
@@ -14,19 +22,13 @@ import {
   DeletePackageRequestSchema,
 } from '../../types';
 import {
-  GetInfoResponse,
-  InstallPackageResponse,
-  DeletePackageResponse,
-  GetCategoriesResponse,
-  GetPackagesResponse,
-} from '../../../common';
-import {
   getCategories,
   getPackages,
   getFile,
   getPackageInfo,
   installPackage,
   removeInstallation,
+  getLimitedPackages,
 } from '../../services/epm/packages';
 
 export const getCategoriesHandler: RequestHandler<
@@ -59,6 +61,25 @@ export const getListHandler: RequestHandler<
       ...request.query,
     });
     const body: GetPackagesResponse = {
+      response: res,
+      success: true,
+    };
+    return response.ok({
+      body,
+    });
+  } catch (e) {
+    return response.customError({
+      statusCode: 500,
+      body: { message: e.message },
+    });
+  }
+};
+
+export const getLimitedListHandler: RequestHandler = async (context, request, response) => {
+  try {
+    const savedObjectsClient = context.core.savedObjects.client;
+    const res = await getLimitedPackages({ savedObjectsClient });
+    const body: GetLimitedPackagesResponse = {
       response: res,
       success: true,
     };

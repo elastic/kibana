@@ -24,6 +24,7 @@ export {
   // API schema - misc setup, status
   GetFleetStatusResponse,
   // API schemas - Agent Config
+  GetAgentConfigsRequest,
   GetAgentConfigsResponse,
   GetAgentConfigsResponseItem,
   GetOneAgentConfigResponse,
@@ -94,6 +95,7 @@ export {
   GetCategoriesResponse,
   GetPackagesRequest,
   GetPackagesResponse,
+  GetLimitedPackagesResponse,
   GetInfoResponse,
   InstallPackageResponse,
   DeletePackageResponse,

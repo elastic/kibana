@@ -11,6 +11,7 @@ import {
   GetCategoriesResponse,
   GetPackagesRequest,
   GetPackagesResponse,
+  GetLimitedPackagesResponse,
   GetInfoResponse,
   InstallPackageResponse,
   DeletePackageResponse,
@@ -29,6 +30,13 @@ export const useGetPackages = (query: GetPackagesRequest['query'] = {}) => {
     path: epmRouteService.getListPath(),
     method: 'get',
     query,
+  });
+};
+
+export const useGetLimitedPackages = () => {
+  return useRequest<GetLimitedPackagesResponse>({
+    path: epmRouteService.getListLimitedPath(),
+    method: 'get',
   });
 };
 
