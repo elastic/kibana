@@ -12,7 +12,7 @@
   min-height: 100vh;
 
   &__sidebar {
-    flex-basis: 300px;
+    flex-basis: $euiSizeXXL * 7.5;
     flex-shrink: 0;
     padding: $euiSizeL;
     margin-right: 0;
@@ -26,10 +26,10 @@
       border-width: 0 $euiBorderWidthThin 0 0; // right - desktop view
     }
     @include euiBreakpoint('m', 'l') {
-      flex-basis: 400px;
+      flex-basis: $euiSizeXXL * 10;
     }
     @include euiBreakpoint('xl') {
-      flex-basis: 500px;
+      flex-basis: $euiSizeXXL * 12.5;
     }
   }
 

@@ -1,6 +1,6 @@
 {
   "id": "enterpriseSearch",
-  "version": "1.0.0",
+  "version": "kibana",
   "kibanaVersion": "kibana",
   "requiredPlugins": ["home", "features", "licensing"],
   "configPath": ["enterpriseSearch"],

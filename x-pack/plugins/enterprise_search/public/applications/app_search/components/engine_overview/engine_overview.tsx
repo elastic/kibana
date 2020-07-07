@@ -30,6 +30,15 @@ import { EngineTable } from './engine_table';
 
 import './engine_overview.scss';
 
+interface IGetEnginesParams {
+  type: string;
+  pageIndex: number;
+}
+interface ISetEnginesCallbacks {
+  setResults: React.Dispatch<React.SetStateAction<never[]>>;
+  setResultsTotal: React.Dispatch<React.SetStateAction<number>>;
+}
+
 export const EngineOverview: React.FC = () => {
   const { http } = useContext(KibanaContext) as IKibanaContext;
   const { license } = useContext(LicenseContext) as ILicenseContext;
@@ -144,16 +153,3 @@ export const EngineOverview: React.FC = () => {
     </EuiPage>
   );
 };
-
-/**
- * Type definitions
- */
-
-interface IGetEnginesParams {
-  type: string;
-  pageIndex: number;
-}
-interface ISetEnginesCallbacks {
-  setResults: React.Dispatch<React.SetStateAction<never[]>>;
-  setResultsTotal: React.Dispatch<React.SetStateAction<number>>;
-}

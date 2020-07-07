@@ -24,7 +24,7 @@ export function registerEnginesRoute({ router, config, log }: IRouteDependencies
     },
     async (context, request, response) => {
       try {
-        const appSearchUrl = config.host as string;
+        const enterpriseSearchUrl = config.host as string;
         const { type, pageIndex } = request.query;
 
         const params = querystring.stringify({
@@ -32,7 +32,7 @@ export function registerEnginesRoute({ router, config, log }: IRouteDependencies
           'page[current]': pageIndex,
           'page[size]': ENGINES_PAGE_SIZE,
         });
-        const url = `${encodeURI(appSearchUrl)}/as/engines/collection?${params}`;
+        const url = `${encodeURI(enterpriseSearchUrl)}/as/engines/collection?${params}`;
 
         const enginesResponse = await fetch(url, {
           headers: { Authorization: request.headers.authorization as string },
