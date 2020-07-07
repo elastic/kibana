@@ -188,7 +188,7 @@ setFunctions.forEach(([test, set]) => {
     });
   }
   {
-    // This doesn't really make sence to do with the `fp` variant of lodash, as it will return a regular non-function object
+    // This doesn't really make sense to do with the `fp` variant of lodash, as it will return a regular non-function object
     const obj = () => {};
     test(set, [obj, 'prototype', 'foo'], (result) => {
       assert.notStrictEqual(result, obj);
@@ -196,7 +196,7 @@ setFunctions.forEach(([test, set]) => {
     });
   }
   {
-    // This doesn't really make sence to do with the `fp` variant of lodash, as it will return a regular non-function object
+    // This doesn't really make sense to do with the `fp` variant of lodash, as it will return a regular non-function object
     const obj = function () {};
     test(set, [obj, 'prototype', 'foo'], (result) => {
       assert.notStrictEqual(result, obj);
