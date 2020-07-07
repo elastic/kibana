@@ -64,7 +64,7 @@ export async function setupAuthentication({
    * to construct a server base URL (deprecated, used by the SAML provider only).
    */
   const getServerBaseURL = () => {
-    const { protocol, host: hostname, port } = http.getServerInfo();
+    const { protocol, hostname, port } = http.getServerInfo();
     const serverConfig = { protocol, hostname, port, ...config.public };
 
     return `${serverConfig.protocol}://${serverConfig.hostname}:${serverConfig.port}`;

@@ -290,7 +290,7 @@ describe('setupAuthentication()', () => {
       mockSetupAuthenticationParams.http.getServerInfo.mockReturnValue({
         name: 'some-name',
         protocol: 'socket',
-        host: 'test-hostname',
+        hostname: 'test-hostname',
         port: 1234,
       });
 
