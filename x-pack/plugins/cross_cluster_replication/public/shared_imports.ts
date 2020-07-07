@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { LegacyTemplateDetails } from './template_details';
+export { extractQueryParams, indices } from '../../../../src/plugins/es_ui_shared/public';

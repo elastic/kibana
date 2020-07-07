@@ -10,8 +10,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
-
-  describe('regression creation', function () {
+  // flaky test https://github.com/elastic/kibana/issues/70455
+  describe.skip('regression creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/egs_regression');
       await ml.testResources.createIndexPatternIfNeeded('ft_egs_regression', '@timestamp');
