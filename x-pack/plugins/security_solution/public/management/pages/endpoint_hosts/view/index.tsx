@@ -369,8 +369,6 @@ export const HostList = () => {
   ]);
 
   return (
-    // i18n.translate('xpack.securitySolution.endpointLis.pageTitle', {
-    //  defaultMessage: 'Hosts',
     <ManagementPageView
       viewType="list"
       data-test-subj="hostPage"
