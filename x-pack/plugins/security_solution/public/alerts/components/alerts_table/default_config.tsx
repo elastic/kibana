@@ -36,6 +36,7 @@ import {
   SetEventsLoadingProps,
   UpdateTimelineLoading,
 } from './types';
+import { Ecs } from '../../../graphql/types';
 
 export const buildAlertStatusFilter = (status: Status): Filter[] => [
   {
@@ -173,24 +174,12 @@ export const requiredFieldsForActions = [
   'signal.rule.id',
 ];
 
-export const getAlertActions = ({
-  apolloClient,
-  canUserCRUD,
-  createTimeline,
-  dispatch,
-  hasIndexWrite,
-  onAlertStatusUpdateFailure,
-  onAlertStatusUpdateSuccess,
-  setEventsDeleted,
-  setEventsLoading,
-  status,
-  timelineId,
-  updateTimelineIsLoading,
-}: {
+interface AlertActionArgs {
   apolloClient?: ApolloClient<{}>;
   canUserCRUD: boolean;
   createTimeline: CreateTimeline;
   dispatch: Dispatch;
+  ecsRowData: Ecs;
   hasIndexWrite: boolean;
   onAlertStatusUpdateFailure: (status: Status, error: Error) => void;
   onAlertStatusUpdateSuccess: (count: number, status: Status) => void;
@@ -199,7 +188,23 @@ export const getAlertActions = ({
   status: Status;
   timelineId: string;
   updateTimelineIsLoading: UpdateTimelineLoading;
-}): TimelineRowAction[] => {
+}
+
+export const getAlertActions = ({
+  apolloClient,
+  canUserCRUD,
+  createTimeline,
+  dispatch,
+  ecsRowData,
+  hasIndexWrite,
+  onAlertStatusUpdateFailure,
+  onAlertStatusUpdateSuccess,
+  setEventsDeleted,
+  setEventsLoading,
+  status,
+  timelineId,
+  updateTimelineIsLoading,
+}: AlertActionArgs): TimelineRowAction[] => {
   const openAlertActionComponent: TimelineRowAction = {
     ariaLabel: 'Open alert',
     content: <EuiText size="m">{i18n.ACTION_OPEN_ALERT}</EuiText>,
