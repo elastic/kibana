@@ -11,7 +11,7 @@ import {
   deserializeLegacyTemplate,
   deserializeLegacyTemplateList,
 } from '../../../../common/lib';
-import { getManagedTemplatePrefix } from '../../../lib/get_managed_templates';
+import { getCloudManagedTemplatePrefix } from '../../../lib/get_managed_templates';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 
@@ -20,7 +20,7 @@ export function registerGetAllRoute({ router, license }: RouteDependencies) {
     { path: addBasePath('/index_templates'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.dataManagement!.client;
-      const managedTemplatePrefix = await getManagedTemplatePrefix(callAsCurrentUser);
+      const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(callAsCurrentUser);
 
       const legacyTemplatesEs = await callAsCurrentUser('indices.getTemplate');
       const { index_templates: templatesEs } = await callAsCurrentUser(
@@ -29,9 +29,9 @@ export function registerGetAllRoute({ router, license }: RouteDependencies) {
 
       const legacyTemplates = deserializeLegacyTemplateList(
         legacyTemplatesEs,
-        managedTemplatePrefix
+        cloudManagedTemplatePrefix
       );
-      const templates = deserializeTemplateList(templatesEs, managedTemplatePrefix);
+      const templates = deserializeTemplateList(templatesEs, cloudManagedTemplatePrefix);
 
       const body = {
         templates,
@@ -65,7 +65,7 @@ export function registerGetOneRoute({ router, license, lib }: RouteDependencies)
       const isLegacy = (req.query as TypeOf<typeof querySchema>).legacy === 'true';
 
       try {
-        const managedTemplatePrefix = await getManagedTemplatePrefix(callAsCurrentUser);
+        const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(callAsCurrentUser);
 
         if (isLegacy) {
           const indexTemplateByName = await callAsCurrentUser('indices.getTemplate', { name });
@@ -74,7 +74,7 @@ export function registerGetOneRoute({ router, license, lib }: RouteDependencies)
             return res.ok({
               body: deserializeLegacyTemplate(
                 { ...indexTemplateByName[name], name },
-                managedTemplatePrefix
+                cloudManagedTemplatePrefix
               ),
             });
           }
@@ -87,7 +87,7 @@ export function registerGetOneRoute({ router, license, lib }: RouteDependencies)
             return res.ok({
               body: deserializeTemplate(
                 { ...indexTemplates[0].index_template, name },
-                managedTemplatePrefix
+                cloudManagedTemplatePrefix
               ),
             });
           }
