@@ -58,7 +58,6 @@ import {
   KBN_FIELD_TYPES,
   ES_FIELD_TYPES,
   DataPublicPluginStart,
-  Field,
 } from '../../../../../plugins/data/public';
 import { context as contextType } from '../../../../kibana_react/public';
 import {
@@ -803,7 +802,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const { redirectAway } = this.props.services;
     const index = indexPattern.fields.findIndex((f: IFieldType) => f.name === field.name);
 
-    let oldField: Field | undefined;
+    let oldField: IFieldType | undefined;
 
     if (index > -1) {
       oldField = indexPattern.fields.getByName(field.name);
