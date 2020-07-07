@@ -12,6 +12,7 @@ import {
 import { alertsClientMock } from '../../../../../alerts/server/mocks';
 import { getExportAll } from './get_export_all';
 import { unSetFeatureFlagsForTestsOnly, setFeatureFlagsForTestsOnly } from '../feature_flags';
+import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 
 describe('getExportAll', () => {
   beforeAll(() => {
@@ -83,10 +84,7 @@ describe('getExportAll', () => {
         throttle: 'no_actions',
         note: '# Investigative notes',
         version: 1,
-        exceptions_list: [
-          { id: 'some_uuid', namespace_type: 'single' },
-          { id: 'some_uuid', namespace_type: 'agnostic' },
-        ],
+        exceptions_list: getListArrayMock(),
       })}\n`,
       exportDetails: `${JSON.stringify({
         exported_count: 1,

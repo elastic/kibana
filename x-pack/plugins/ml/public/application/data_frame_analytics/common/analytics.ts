@@ -327,9 +327,14 @@ export const isClassificationEvaluateResponse = (
   );
 };
 
+export interface UpdateDataFrameAnalyticsConfig {
+  allow_lazy_start?: string;
+  description?: string;
+  model_memory_limit?: string;
+}
+
 export interface DataFrameAnalyticsConfig {
   id: DataFrameAnalyticsId;
-  // Description attribute is not supported yet
   description?: string;
   dest: {
     index: IndexName;

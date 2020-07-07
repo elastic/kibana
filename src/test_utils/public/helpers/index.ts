@@ -24,3 +24,5 @@ export { WithStore } from './redux_helpers';
 export { WithMemoryRouter, WithRoute, reactRouterMock } from './router_helpers';
 
 export * from './utils';
+
+export { setSVGElementGetBBox, setHTMLElementOffset } from './jsdom_svg_mocks';

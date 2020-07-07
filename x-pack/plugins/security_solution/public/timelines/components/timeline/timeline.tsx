@@ -177,12 +177,11 @@ export const TimelineComponent: React.FC<Props> = ({
     setIndexToAdd,
     setIsTimelineLoading,
     setTimelineFilterManager,
-    setTimelineRowActions,
   } = useManageTimeline();
   useEffect(() => {
-    initializeTimeline({ id, indexToAdd });
-    setTimelineRowActions({
+    initializeTimeline({
       id,
+      indexToAdd,
       timelineRowActions: [getInvestigateInResolverAction({ dispatch, timelineId: id })],
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps

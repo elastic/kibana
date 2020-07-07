@@ -11,6 +11,9 @@ import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mock
 import { listMock } from '../../../../../lists/server/mocks';
 import { EntriesArray } from '../../../../common/detection_engine/lists_common_deps';
 import { buildRuleMessageFactory } from './rule_messages';
+import { ExceptionListClient } from '../../../../../lists/server';
+import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
+import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 
 import * as featureFlags from '../feature_flags';
 
@@ -24,6 +27,7 @@ import {
   getListsClient,
   hasLargeValueList,
   getSignalTimeTuples,
+  getExceptions,
 } from './utils';
 import { BulkResponseErrorAggregation } from './types';
 import {
@@ -54,6 +58,9 @@ describe('utils', () => {
 
   afterEach(() => {
     clock.restore();
+    jest.clearAllMocks();
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('generateId', () => {
@@ -553,10 +560,6 @@ describe('utils', () => {
       alertServices = alertsMock.createAlertServices();
     });
 
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-
     test('it successfully returns list and exceptions list client', async () => {
       jest.spyOn(featureFlags, 'hasListsFeature').mockReturnValue(true);
 
@@ -730,6 +733,122 @@ describe('utils', () => {
       expect(someTuples.length).toEqual(1);
       const someTuple = someTuples[0];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(13);
+    });
+  });
+
+  describe('#getExceptions', () => {
+    beforeEach(() => {
+      jest.spyOn(featureFlags, 'hasListsFeature').mockReturnValue(true);
+    });
+
+    test('it successfully returns array of exception list items', async () => {
+      const client = listMock.getExceptionListClient();
+      const exceptions = await getExceptions({
+        client,
+        lists: getListArrayMock(),
+      });
+
+      expect(client.getExceptionList).toHaveBeenNthCalledWith(1, {
+        id: 'some_uuid',
+        listId: undefined,
+        namespaceType: 'single',
+      });
+      expect(client.getExceptionList).toHaveBeenNthCalledWith(2, {
+        id: 'some_uuid',
+        listId: undefined,
+        namespaceType: 'agnostic',
+      });
+      expect(exceptions).toEqual([
+        getExceptionListItemSchemaMock(),
+        getExceptionListItemSchemaMock(),
+      ]);
+    });
+
+    test('it returns empty array if lists feature flag not turned on', async () => {
+      jest.spyOn(featureFlags, 'hasListsFeature').mockReturnValue(false);
+
+      const exceptions = await getExceptions({
+        client: listMock.getExceptionListClient(),
+        lists: getListArrayMock(),
+      });
+
+      expect(exceptions).toEqual([]);
+    });
+
+    test('it throws if "client" is undefined', async () => {
+      await expect(() =>
+        getExceptions({
+          client: undefined,
+          lists: getListArrayMock(),
+        })
+      ).rejects.toThrowError('lists plugin unavailable during rule execution');
+    });
+
+    test('it returns empty array if no "lists" is undefined', async () => {
+      const exceptions = await getExceptions({
+        client: listMock.getExceptionListClient(),
+        lists: undefined,
+      });
+
+      expect(exceptions).toEqual([]);
+    });
+
+    test('it throws if "getExceptionListClient" fails', async () => {
+      const err = new Error('error fetching list');
+      listMock.getExceptionListClient = () =>
+        (({
+          getExceptionList: jest.fn().mockRejectedValue(err),
+        } as unknown) as ExceptionListClient);
+
+      await expect(() =>
+        getExceptions({
+          client: listMock.getExceptionListClient(),
+          lists: getListArrayMock(),
+        })
+      ).rejects.toThrowError('unable to fetch exception list items');
+    });
+
+    test('it throws if "findExceptionListItem" fails', async () => {
+      const err = new Error('error fetching list');
+      listMock.getExceptionListClient = () =>
+        (({
+          findExceptionListItem: jest.fn().mockRejectedValue(err),
+        } as unknown) as ExceptionListClient);
+
+      await expect(() =>
+        getExceptions({
+          client: listMock.getExceptionListClient(),
+          lists: getListArrayMock(),
+        })
+      ).rejects.toThrowError('unable to fetch exception list items');
+    });
+
+    test('it returns empty array if "getExceptionList" returns null', async () => {
+      listMock.getExceptionListClient = () =>
+        (({
+          getExceptionList: jest.fn().mockResolvedValue(null),
+        } as unknown) as ExceptionListClient);
+
+      const exceptions = await getExceptions({
+        client: listMock.getExceptionListClient(),
+        lists: undefined,
+      });
+
+      expect(exceptions).toEqual([]);
+    });
+
+    test('it returns empty array if "findExceptionListItem" returns null', async () => {
+      listMock.getExceptionListClient = () =>
+        (({
+          findExceptionListItem: jest.fn().mockResolvedValue(null),
+        } as unknown) as ExceptionListClient);
+
+      const exceptions = await getExceptions({
+        client: listMock.getExceptionListClient(),
+        lists: undefined,
+      });
+
+      expect(exceptions).toEqual([]);
     });
   });
 });

@@ -43,7 +43,7 @@ import { DetectionEngineHeaderPage } from '../../../../components/detection_engi
 import { AlertsHistogramPanel } from '../../../../components/alerts_histogram_panel';
 import { AlertsTable } from '../../../../components/alerts_table';
 import { useUserInfo } from '../../../../components/user_info';
-import { DetectionEngineEmptyPage } from '../../detection_engine_empty_page';
+import { OverviewEmpty } from '../../../../../overview/components/overview_empty';
 import { useAlertInfo } from '../../../../components/alerts_info';
 import { StepDefineRule } from '../../../../components/rules/step_define_rule';
 import { StepScheduleRule } from '../../../../components/rules/step_schedule_rule';
@@ -72,7 +72,7 @@ import { SecurityPageName } from '../../../../../app/types';
 import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
-import { ExceptionListType } from '../../../../../common/components/exceptions/types';
+import { ExceptionListTypeEnum, ExceptionIdentifiers } from '../../../../../lists_plugin_deps';
 
 enum RuleDetailTabs {
   alerts = 'alerts',
@@ -254,6 +254,34 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
 
   const { indicesExist, indexPattern } = useWithSource('default', indexToAdd);
 
+  const exceptionLists = useMemo((): {
+    lists: ExceptionIdentifiers[];
+    allowedExceptionListTypes: ExceptionListTypeEnum[];
+  } => {
+    if (rule != null && rule.exceptions_list != null) {
+      return rule.exceptions_list.reduce<{
+        lists: ExceptionIdentifiers[];
+        allowedExceptionListTypes: ExceptionListTypeEnum[];
+      }>(
+        (acc, { id, namespace_type, type }) => {
+          const { allowedExceptionListTypes, lists } = acc;
+          const shouldAddEndpoint =
+            type === ExceptionListTypeEnum.ENDPOINT &&
+            !allowedExceptionListTypes.includes(ExceptionListTypeEnum.ENDPOINT);
+          return {
+            lists: [...lists, { id, namespaceType: namespace_type, type }],
+            allowedExceptionListTypes: shouldAddEndpoint
+              ? [...allowedExceptionListTypes, ExceptionListTypeEnum.ENDPOINT]
+              : allowedExceptionListTypes,
+          };
+        },
+        { lists: [], allowedExceptionListTypes: [ExceptionListTypeEnum.DETECTION] }
+      );
+    } else {
+      return { lists: [], allowedExceptionListTypes: [ExceptionListTypeEnum.DETECTION] };
+    }
+  }, [rule]);
+
   if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
     history.replace(getDetectionEngineUrl());
     return null;
@@ -411,12 +439,9 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
             {ruleDetailTab === RuleDetailTabs.exceptions && (
               <ExceptionsViewer
                 ruleId={ruleId ?? ''}
-                availableListTypes={[
-                  ExceptionListType.DETECTION_ENGINE,
-                  ExceptionListType.ENDPOINT,
-                ]}
+                availableListTypes={exceptionLists.allowedExceptionListTypes}
                 commentsAccordionId={'ruleDetailsTabExceptions'}
-                exceptionListsMeta={[]}
+                exceptionListsMeta={exceptionLists.lists}
               />
             )}
             {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}
@@ -426,7 +451,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
         <WrapperPage>
           <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
 
-          <DetectionEngineEmptyPage />
+          <OverviewEmpty />
         </WrapperPage>
       )}
 

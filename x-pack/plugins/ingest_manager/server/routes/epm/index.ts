@@ -8,6 +8,7 @@ import { PLUGIN_ID, EPM_API_ROUTES } from '../../constants';
 import {
   getCategoriesHandler,
   getListHandler,
+  getLimitedListHandler,
   getFileHandler,
   getInfoHandler,
   installPackageHandler,
@@ -38,6 +39,15 @@ export const registerRoutes = (router: IRouter) => {
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getListHandler
+  );
+
+  router.get(
+    {
+      path: EPM_API_ROUTES.LIMITED_LIST_PATTERN,
+      validate: false,
+      options: { tags: [`access:${PLUGIN_ID}`] },
+    },
+    getLimitedListHandler
   );
 
   router.get(
