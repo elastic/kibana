@@ -33,7 +33,7 @@ import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { esQuery } from '../../../../../../src/plugins/data/public';
 import { useMlCapabilities } from '../../common/components/ml_popover/hooks/use_ml_capabilities';
-import { HostsEmptyPage } from './hosts_empty_page';
+import { OverviewEmpty } from '../../overview/components/overview_empty';
 import { HostsTabs } from './hosts_tabs';
 import { navTabsHosts } from './nav_tabs';
 import * as i18n from './translations';
@@ -141,7 +141,7 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
           <WrapperPage>
             <HeaderPage border title={i18n.PAGE_TITLE} />
 
-            <HostsEmptyPage />
+            <OverviewEmpty />
           </WrapperPage>
         )}
 
