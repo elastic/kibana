@@ -4,20 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Setup } from '../../../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
-} from '../../../../../common/elasticsearch_fieldnames';
-import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration/all_option';
+} from '../../../common/elasticsearch_fieldnames';
+import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 
 export async function getAllEnvironments({
   serviceName,
   setup,
+  includeMissing = false,
 }: {
-  serviceName: string | undefined;
+  serviceName?: string;
   setup: Setup;
+  includeMissing?: boolean;
 }) {
   const { client, indices } = setup;
 
@@ -49,6 +51,7 @@ export async function getAllEnvironments({
           terms: {
             field: SERVICE_ENVIRONMENT,
             size: 100,
+            missing: includeMissing ? ENVIRONMENT_NOT_DEFINED : undefined,
           },
         },
       },
@@ -60,5 +63,5 @@ export async function getAllEnvironments({
     resp.aggregations?.environments.buckets.map(
       (bucket) => bucket.key as string
     ) || [];
-  return [ALL_OPTION_VALUE, ...environments];
+  return environments;
 }
