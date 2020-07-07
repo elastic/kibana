@@ -120,6 +120,7 @@ export const CategoryExampleMessage: React.FunctionComponent<{
                   defaultMessage: 'View in stream',
                 }),
                 onClick: viewInStreamLinkProps.onClick!,
+                href: viewInStreamLinkProps.href,
               },
               {
                 label: i18n.translate('xpack.infra.logs.categoryExample.viewInContextText', {
