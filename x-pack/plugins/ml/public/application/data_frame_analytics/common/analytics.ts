@@ -128,7 +128,7 @@ export interface Eval {
 
 export interface RegressionEvaluateResponse {
   regression: {
-    mean_squared_error: {
+    mse: {
       value: number;
     };
     r_squared: {
@@ -311,7 +311,7 @@ export const isRegressionEvaluateResponse = (arg: any): arg is RegressionEvaluat
   return (
     keys.length === 1 &&
     keys[0] === ANALYSIS_CONFIG_TYPE.REGRESSION &&
-    arg?.regression?.mean_squared_error !== undefined &&
+    arg?.regression?.mse !== undefined &&
     arg?.regression?.r_squared !== undefined
   );
 };
@@ -327,9 +327,14 @@ export const isClassificationEvaluateResponse = (
   );
 };
 
+export interface UpdateDataFrameAnalyticsConfig {
+  allow_lazy_start?: string;
+  description?: string;
+  model_memory_limit?: string;
+}
+
 export interface DataFrameAnalyticsConfig {
   id: DataFrameAnalyticsId;
-  // Description attribute is not supported yet
   description?: string;
   dest: {
     index: IndexName;
@@ -410,7 +415,7 @@ export const useRefreshAnalyticsList = (
 const DEFAULT_SIG_FIGS = 3;
 
 export function getValuesFromResponse(response: RegressionEvaluateResponse) {
-  let meanSquaredError = response?.regression?.mean_squared_error?.value;
+  let meanSquaredError = response?.regression?.mse?.value;
 
   if (meanSquaredError) {
     meanSquaredError = Number(meanSquaredError.toPrecision(DEFAULT_SIG_FIGS));

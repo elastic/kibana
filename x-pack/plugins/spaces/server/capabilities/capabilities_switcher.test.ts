@@ -43,7 +43,7 @@ const features = ([
     id: 'feature_3',
     name: 'Feature 3',
     navLinkId: 'feature3',
-    app: [],
+    app: ['feature3_app'],
     catalogue: ['feature3Entry'],
     management: {
       kibana: ['indices'],
@@ -67,6 +67,7 @@ const buildCapabilities = () =>
       feature1: true,
       feature2: true,
       feature3: true,
+      feature3_app: true,
       unknownFeature: true,
     },
     catalogue: {
@@ -241,6 +242,7 @@ describe('capabilitiesSwitcher', () => {
     expectedCapabilities.feature_2.foo = false;
 
     expectedCapabilities.navLinks.feature3 = false;
+    expectedCapabilities.navLinks.feature3_app = false;
     expectedCapabilities.catalogue.feature3Entry = false;
     expectedCapabilities.management.kibana.indices = false;
     expectedCapabilities.feature_3.bar = false;

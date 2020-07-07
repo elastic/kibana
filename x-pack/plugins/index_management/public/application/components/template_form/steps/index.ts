@@ -5,4 +5,5 @@
  */
 
 export { StepLogisticsContainer } from './step_logistics_container';
+export { StepComponentContainer } from './step_components_container';
 export { StepReviewContainer } from './step_review_container';

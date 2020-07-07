@@ -12,7 +12,7 @@ import { connect, ConnectedProps } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { SecurityPageName } from '../../../app/types';
 import { TimelineId } from '../../../../common/types/timeline';
-import { GlobalTime } from '../../../common/containers/global_time';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useWithSource } from '../../../common/containers/source';
 import { UpdateDateRange } from '../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../common/components/filters_global';
@@ -31,7 +31,7 @@ import { NoWriteAlertsCallOut } from '../../components/no_write_alerts_callout';
 import { AlertsHistogramPanel } from '../../components/alerts_histogram_panel';
 import { alertsHistogramOptions } from '../../components/alerts_histogram_panel/config';
 import { useUserInfo } from '../../components/user_info';
-import { DetectionEngineEmptyPage } from './detection_engine_empty_page';
+import { OverviewEmpty } from '../../../overview/components/overview_empty';
 import { DetectionEngineNoIndex } from './detection_engine_no_signal_index';
 import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
 import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
@@ -44,6 +44,7 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
   query,
   setAbsoluteRangeDatePicker,
 }) => {
+  const { to, from, deleteQuery, setQuery } = useGlobalTime();
   const {
     loading,
     isSignalIndexExists,
@@ -131,42 +132,34 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
               </LinkButton>
             </DetectionEngineHeaderPage>
 
-            <GlobalTime>
-              {({ to, from, deleteQuery, setQuery }) => (
-                <>
-                  <>
-                    <AlertsHistogramPanel
-                      deleteQuery={deleteQuery}
-                      filters={filters}
-                      from={from}
-                      query={query}
-                      setQuery={setQuery}
-                      showTotalAlertsCount={true}
-                      signalIndexName={signalIndexName}
-                      stackByOptions={alertsHistogramOptions}
-                      to={to}
-                      updateDateRange={updateDateRangeCallback}
-                    />
-                    <EuiSpacer size="l" />
-                    <AlertsTable
-                      timelineId={TimelineId.alertsPage}
-                      loading={loading}
-                      hasIndexWrite={hasIndexWrite ?? false}
-                      canUserCRUD={(canUserCRUD ?? false) && (hasEncryptionKey ?? false)}
-                      from={from}
-                      signalsIndex={signalIndexName ?? ''}
-                      to={to}
-                    />
-                  </>
-                </>
-              )}
-            </GlobalTime>
+            <AlertsHistogramPanel
+              deleteQuery={deleteQuery}
+              filters={filters}
+              from={from}
+              query={query}
+              setQuery={setQuery}
+              showTotalAlertsCount={true}
+              signalIndexName={signalIndexName}
+              stackByOptions={alertsHistogramOptions}
+              to={to}
+              updateDateRange={updateDateRangeCallback}
+            />
+            <EuiSpacer size="l" />
+            <AlertsTable
+              timelineId={TimelineId.alertsPage}
+              loading={loading}
+              hasIndexWrite={hasIndexWrite ?? false}
+              canUserCRUD={(canUserCRUD ?? false) && (hasEncryptionKey ?? false)}
+              from={from}
+              signalsIndex={signalIndexName ?? ''}
+              to={to}
+            />
           </WrapperPage>
         </StickyContainer>
       ) : (
         <WrapperPage>
           <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
-          <DetectionEngineEmptyPage />
+          <OverviewEmpty />
         </WrapperPage>
       )}
       <SpyRoute pageName={SecurityPageName.alerts} />

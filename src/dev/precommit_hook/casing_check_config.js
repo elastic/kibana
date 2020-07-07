@@ -98,7 +98,6 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'packages/*',
   'packages/kbn-ui-framework/generator-kui',
   'src/legacy/ui/public/flot-charts',
-  'src/legacy/ui/public/utils/lodash-mixins',
   'test/functional/fixtures/es_archiver/visualize_source-filters',
   'packages/kbn-pm/src/utils/__fixtures__/*',
   'x-pack/dev-tools',

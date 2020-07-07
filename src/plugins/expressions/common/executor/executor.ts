@@ -26,8 +26,7 @@ import { Execution, ExecutionParams } from '../execution/execution';
 import { IRegistry } from '../types';
 import { ExpressionType } from '../expression_types/expression_type';
 import { AnyExpressionTypeDefinition } from '../expression_types/types';
-import { getType } from '../expression_types';
-import { ExpressionAstExpression, ExpressionAstNode } from '../ast';
+import { ExpressionAstExpression } from '../ast';
 import { typeSpecs } from '../expression_types/specs';
 import { functionSpecs } from '../expression_functions/specs';
 
@@ -152,34 +151,6 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
 
   public get context(): Record<string, unknown> {
     return this.state.selectors.getContext();
-  }
-
-  public async interpret<T>(
-    ast: ExpressionAstNode,
-    input: T,
-    options?: ExpressionExecOptions
-  ): Promise<unknown> {
-    switch (getType(ast)) {
-      case 'expression':
-        return await this.interpretExpression(ast as ExpressionAstExpression, input, options);
-      case 'string':
-      case 'number':
-      case 'null':
-      case 'boolean':
-        return ast;
-      default:
-        throw new Error(`Unknown AST object: ${JSON.stringify(ast)}`);
-    }
-  }
-
-  public async interpretExpression<T>(
-    ast: string | ExpressionAstExpression,
-    input: T,
-    options?: ExpressionExecOptions
-  ): Promise<unknown> {
-    const execution = this.createExecution(ast, undefined, options);
-    execution.start(input);
-    return await execution.result;
   }
 
   /**
