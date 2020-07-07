@@ -18,6 +18,7 @@
  */
 
 import { Type } from '@kbn/config-schema';
+import apm from 'elastic-apm-node';
 
 import {
   ConfigService,
@@ -110,6 +111,7 @@ export class Server {
 
   public async setup() {
     this.log.debug('setting up server');
+    const setupTransaction = apm.startTransaction('server_setup', 'kibana_platform');
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
     const { pluginTree, uiPlugins } = await this.plugins.discover();
@@ -198,11 +200,16 @@ export class Server {
     this.registerCoreContext(coreSetup);
     this.coreApp.setup(coreSetup);
 
+    if (setupTransaction) {
+      setupTransaction.end();
+    }
     return coreSetup;
   }
 
   public async start() {
     this.log.debug('starting server');
+    const startTransaction = apm.startTransaction('server_start', 'kibana_platform');
+
     const elasticsearchStart = await this.elasticsearch.start();
     const savedObjectsStart = await this.savedObjects.start({
       elasticsearch: elasticsearchStart,
@@ -237,6 +244,10 @@ export class Server {
     await this.rendering.start({
       legacy: this.legacy,
     });
+
+    if (startTransaction) {
+      startTransaction.end();
+    }
 
     return this.coreStart;
   }
