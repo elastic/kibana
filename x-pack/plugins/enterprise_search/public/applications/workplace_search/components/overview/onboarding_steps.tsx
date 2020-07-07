@@ -86,7 +86,7 @@ export const OnboardingSteps: React.FC<IAppServerData> = ({
 
   const SOURCES_CARD_DESCRIPTION = (
     <FormattedMessage
-      id="xpack.enterpriseSearch.workplaceSearch.overviewOnboardingHeader.description"
+      id="xpack.enterpriseSearch.workplaceSearch.sourcesOnboardingCard.description"
       defaultMessage="You have added {sourcesCount} shared {sourcesCount, number} {sourcesCount, plural,
         one {source}
         other {sources}
