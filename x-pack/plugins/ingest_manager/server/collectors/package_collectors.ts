@@ -30,13 +30,11 @@ export const getPackageUsage = async (soClient?: SavedObjectsClient): Promise<Pa
   // to the (then to be created) agent config collector, so we only query and loop over these
   // objects once.
 
-  // I couldn't convince TS that no undefined will end up in this string[][], so let it be any
-  const packagesInConfigs: any[][] = [];
-  agentConfigs.items.forEach((agentConfig) => {
+  const packagesInConfigs = agentConfigs.items.map((agentConfig) => {
     const packageConfigs: NewPackageConfig[] = agentConfig.package_configs as NewPackageConfig[];
-    packagesInConfigs.push(
-      packageConfigs.map((pc) => pc.package?.name).filter((pn) => pn !== undefined)
-    );
+    return packageConfigs
+      .map((pc) => pc.package?.name)
+      .filter((pn): pn is string => pn !== undefined);
   });
 
   const enabledPackages = _.uniq(_.flatten(packagesInConfigs));
