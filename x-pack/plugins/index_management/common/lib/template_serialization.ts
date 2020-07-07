@@ -13,7 +13,7 @@ import {
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
 export function serializeTemplate(templateDeserialized: TemplateDeserialized): TemplateSerialized {
-  const { version, priority, indexPatterns, template, composedOf } = templateDeserialized;
+  const { version, priority, indexPatterns, template, composedOf, _meta } = templateDeserialized;
 
   return {
     version,
@@ -21,12 +21,13 @@ export function serializeTemplate(templateDeserialized: TemplateDeserialized): T
     template,
     index_patterns: indexPatterns,
     composed_of: composedOf,
+    _meta,
   };
 }
 
 export function deserializeTemplate(
   templateEs: TemplateSerialized & { name: string },
-  managedTemplatePrefix?: string
+  cloudManagedTemplatePrefix?: string
 ): TemplateDeserialized {
   const {
     name,
@@ -34,7 +35,9 @@ export function deserializeTemplate(
     index_patterns: indexPatterns,
     template = {},
     priority,
+    _meta,
     composed_of: composedOf,
+    data_stream: dataStream,
   } = templateEs;
   const { settings } = template;
 
@@ -46,8 +49,14 @@ export function deserializeTemplate(
     template,
     ilmPolicy: settings?.index?.lifecycle,
     composedOf,
+    dataStream,
+    _meta,
     _kbnMeta: {
-      isManaged: Boolean(managedTemplatePrefix && name.startsWith(managedTemplatePrefix)),
+      isManaged: Boolean(_meta?.managed === true),
+      isCloudManaged: Boolean(
+        cloudManagedTemplatePrefix && name.startsWith(cloudManagedTemplatePrefix)
+      ),
+      hasDatastream: Boolean(dataStream),
     },
   };
 
@@ -56,13 +65,13 @@ export function deserializeTemplate(
 
 export function deserializeTemplateList(
   indexTemplates: Array<{ name: string; index_template: TemplateSerialized }>,
-  managedTemplatePrefix?: string
+  cloudManagedTemplatePrefix?: string
 ): TemplateListItem[] {
   return indexTemplates.map(({ name, index_template: templateSerialized }) => {
     const {
       template: { mappings, settings, aliases },
       ...deserializedTemplate
-    } = deserializeTemplate({ name, ...templateSerialized }, managedTemplatePrefix);
+    } = deserializeTemplate({ name, ...templateSerialized }, cloudManagedTemplatePrefix);
 
     return {
       ...deserializedTemplate,
@@ -99,13 +108,13 @@ export function serializeLegacyTemplate(template: TemplateDeserialized): LegacyT
 
 export function deserializeLegacyTemplate(
   templateEs: LegacyTemplateSerialized & { name: string },
-  managedTemplatePrefix?: string
+  cloudManagedTemplatePrefix?: string
 ): TemplateDeserialized {
   const { settings, aliases, mappings, ...rest } = templateEs;
 
   const deserializedTemplate = deserializeTemplate(
     { ...rest, template: { aliases, settings, mappings } },
-    managedTemplatePrefix
+    cloudManagedTemplatePrefix
   );
 
   return {
@@ -120,13 +129,13 @@ export function deserializeLegacyTemplate(
 
 export function deserializeLegacyTemplateList(
   indexTemplatesByName: { [key: string]: LegacyTemplateSerialized },
-  managedTemplatePrefix?: string
+  cloudManagedTemplatePrefix?: string
 ): TemplateListItem[] {
   return Object.entries(indexTemplatesByName).map(([name, templateSerialized]) => {
     const {
       template: { mappings, settings, aliases },
       ...deserializedTemplate
-    } = deserializeLegacyTemplate({ name, ...templateSerialized }, managedTemplatePrefix);
+    } = deserializeLegacyTemplate({ name, ...templateSerialized }, cloudManagedTemplatePrefix);
 
     return {
       ...deserializedTemplate,

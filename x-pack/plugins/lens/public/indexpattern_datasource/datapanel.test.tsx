@@ -17,6 +17,7 @@ import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { EuiProgress, EuiLoadingSpinner } from '@elastic/eui';
 import { documentField } from './document_field';
+import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 
 const initialState: IndexPatternPrivateState = {
   indexPatternRefs: [],
@@ -204,12 +205,15 @@ const initialState: IndexPatternPrivateState = {
       ],
     },
   },
+  isFirstExistenceFetch: false,
 };
 
 const dslQuery = { bool: { must: [{ match_all: {} }], filter: [], should: [], must_not: [] } };
 
 describe('IndexPattern Data Panel', () => {
-  let defaultProps: Parameters<typeof InnerIndexPatternDataPanel>[0];
+  let defaultProps: Parameters<typeof InnerIndexPatternDataPanel>[0] & {
+    showNoDataPopover: () => void;
+  };
   let core: ReturnType<typeof coreMock['createSetup']>;
 
   beforeEach(() => {
@@ -227,8 +231,10 @@ describe('IndexPattern Data Panel', () => {
         fromDate: 'now-7d',
         toDate: 'now',
       },
+      charts: chartPluginMock.createSetupContract(),
       query: { query: '', language: 'lucene' },
       filters: [],
+      showNoDataPopover: jest.fn(),
     };
   });
 
@@ -301,6 +307,7 @@ describe('IndexPattern Data Panel', () => {
         state: {
           indexPatternRefs: [],
           existingFields: {},
+          isFirstExistenceFetch: false,
           currentIndexPatternId: 'a',
           indexPatterns: {
             a: { id: 'a', title: 'aaa', timeFieldName: 'atime', fields: [] },

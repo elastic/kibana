@@ -584,8 +584,8 @@ export abstract class FieldFormat {
     textConvert: TextContextTypeConvert | undefined;
     static title: string;
     toJSON(): {
-        id: unknown;
-        params: _.Dictionary<unknown> | undefined;
+        id: any;
+        params: any;
     };
     type: any;
 }
@@ -987,8 +987,6 @@ export class IndexPattern implements IIndexPattern {
     addScriptedField(name: string, script: string, fieldType: string | undefined, lang: string): Promise<void>;
     // (undocumented)
     create(allowOverride?: boolean): Promise<string | false>;
-    // (undocumented)
-    destroy(): Promise<{}> | undefined;
     // (undocumented)
     _fetchFields(): Promise<void>;
     // (undocumented)
@@ -1748,8 +1746,8 @@ export const search: {
 // Warning: (ae-missing-release-tag) "SearchBar" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const SearchBar: React.ComponentClass<Pick<Pick<SearchBarProps, "query" | "isLoading" | "filters" | "onRefresh" | "onRefreshChange" | "refreshInterval" | "intl" | "indexPatterns" | "dataTestSubj" | "customSubmitButton" | "screenTitle" | "showQueryBar" | "showQueryInput" | "showFilterBar" | "showDatePicker" | "showAutoRefreshOnly" | "isRefreshPaused" | "dateRangeFrom" | "dateRangeTo" | "showSaveQuery" | "savedQuery" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated" | "onClearSavedQuery" | "timeHistory" | "onFiltersUpdated">, "query" | "isLoading" | "filters" | "onRefresh" | "onRefreshChange" | "refreshInterval" | "indexPatterns" | "dataTestSubj" | "customSubmitButton" | "screenTitle" | "showQueryBar" | "showQueryInput" | "showFilterBar" | "showDatePicker" | "showAutoRefreshOnly" | "isRefreshPaused" | "dateRangeFrom" | "dateRangeTo" | "showSaveQuery" | "savedQuery" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated" | "onClearSavedQuery" | "timeHistory" | "onFiltersUpdated">, any> & {
-    WrappedComponent: React.ComponentType<Pick<SearchBarProps, "query" | "isLoading" | "filters" | "onRefresh" | "onRefreshChange" | "refreshInterval" | "intl" | "indexPatterns" | "dataTestSubj" | "customSubmitButton" | "screenTitle" | "showQueryBar" | "showQueryInput" | "showFilterBar" | "showDatePicker" | "showAutoRefreshOnly" | "isRefreshPaused" | "dateRangeFrom" | "dateRangeTo" | "showSaveQuery" | "savedQuery" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated" | "onClearSavedQuery" | "timeHistory" | "onFiltersUpdated"> & ReactIntl.InjectedIntlProps>;
+export const SearchBar: React.ComponentClass<Pick<Pick<SearchBarProps, "query" | "isLoading" | "filters" | "onRefresh" | "onRefreshChange" | "refreshInterval" | "intl" | "indexPatterns" | "dataTestSubj" | "customSubmitButton" | "screenTitle" | "showQueryBar" | "showQueryInput" | "showFilterBar" | "showDatePicker" | "showAutoRefreshOnly" | "isRefreshPaused" | "dateRangeFrom" | "dateRangeTo" | "showSaveQuery" | "savedQuery" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated" | "onClearSavedQuery" | "indicateNoData" | "timeHistory" | "onFiltersUpdated">, "query" | "isLoading" | "filters" | "onRefresh" | "onRefreshChange" | "refreshInterval" | "indexPatterns" | "dataTestSubj" | "customSubmitButton" | "screenTitle" | "showQueryBar" | "showQueryInput" | "showFilterBar" | "showDatePicker" | "showAutoRefreshOnly" | "isRefreshPaused" | "dateRangeFrom" | "dateRangeTo" | "showSaveQuery" | "savedQuery" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated" | "onClearSavedQuery" | "indicateNoData" | "timeHistory" | "onFiltersUpdated">, any> & {
+    WrappedComponent: React.ComponentType<Pick<SearchBarProps, "query" | "isLoading" | "filters" | "onRefresh" | "onRefreshChange" | "refreshInterval" | "intl" | "indexPatterns" | "dataTestSubj" | "customSubmitButton" | "screenTitle" | "showQueryBar" | "showQueryInput" | "showFilterBar" | "showDatePicker" | "showAutoRefreshOnly" | "isRefreshPaused" | "dateRangeFrom" | "dateRangeTo" | "showSaveQuery" | "savedQuery" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated" | "onClearSavedQuery" | "indicateNoData" | "timeHistory" | "onFiltersUpdated"> & ReactIntl.InjectedIntlProps>;
 };
 
 // Warning: (ae-forgotten-export) The symbol "SearchBarOwnProps" needs to be exported by the entry point index.d.ts
