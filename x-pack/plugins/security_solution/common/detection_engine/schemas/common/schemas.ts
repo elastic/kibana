@@ -383,7 +383,7 @@ export const threshold = t.exact(
 export type Threshold = t.TypeOf<typeof threshold>;
 
 export const thresholdOrUndefined = t.union([threshold, t.undefined]);
-export type thresholdOrUndefined = t.TypeOf<typeof thresholdOrUndefined>;
+export type ThresholdOrUndefined = t.TypeOf<typeof thresholdOrUndefined>;
 
 export const created_at = IsoDateString;
 export const updated_at = IsoDateString;
