@@ -5,6 +5,7 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
+import { isPackageLimited } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import { Installation, InstallationStatus, PackageInfo, KibanaAssetType } from '../../../types';
 import * as Registry from '../registry';
@@ -47,6 +48,28 @@ export async function getPackages(
     )
     .sort(sortByName);
   return packageList;
+}
+
+// Get package names for packages which cannot have more than one package config on an agent config
+// Assume packages only export one config template for now
+export async function getLimitedPackages(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+}): Promise<string[]> {
+  const { savedObjectsClient } = options;
+  const allPackages = await getPackages({ savedObjectsClient });
+  const installedPackages = allPackages.filter(
+    (pkg) => (pkg.status = InstallationStatus.installed)
+  );
+  const installedPackagesInfo = await Promise.all(
+    installedPackages.map((pkgInstall) => {
+      return getPackageInfo({
+        savedObjectsClient,
+        pkgName: pkgInstall.name,
+        pkgVersion: pkgInstall.version,
+      });
+    })
+  );
+  return installedPackagesInfo.filter((pkgInfo) => isPackageLimited).map((pkgInfo) => pkgInfo.name);
 }
 
 export async function getPackageSavedObjects(savedObjectsClient: SavedObjectsClientContract) {
