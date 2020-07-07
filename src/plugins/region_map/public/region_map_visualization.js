@@ -22,7 +22,7 @@ import ChoroplethLayer from './choropleth_layer';
 import { getFormatService, getNotifications, getKibanaLegacy } from './kibana_services';
 import { truncatedColorMaps } from '../../charts/public';
 import { tooltipFormatter } from './tooltip_formatter';
-import { mapTooltipProvider } from '../../maps_legacy/public';
+import { mapTooltipProvider, ORIGIN } from '../../maps_legacy/public';
 import _ from 'lodash';
 
 export function createRegionMapVisualization({
@@ -103,14 +103,24 @@ export function createRegionMapVisualization({
         return await serviceSettings.loadFileLayerConfig(fileLayerConfig);
       }
 
+      if (fileLayerConfig.layerId && fileLayerConfig.layerId.startsWith(`${ORIGIN.EMS}.`)) {
+        //fallback for older saved objects
+        return await serviceSettings.loadFileLayerConfig(fileLayerConfig);
+      }
+
       //Configured in the kibana.yml. Needs to be resolved through the settings.
       const configuredLayer = regionmapsConfig.layers.find(
         (layer) => layer.name === fileLayerConfig.name
       );
-      return {
-        ...configuredLayer,
-        attribution: _.escape(configuredLayer.attribution || ''),
-      };
+
+      if (configuredLayer) {
+        return {
+          ...configuredLayer,
+          attribution: _.escape(configuredLayer.attribution ? configuredLayer.attribution : ''),
+        };
+      }
+
+      return null;
     }
 
     async _updateParams() {
