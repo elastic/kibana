@@ -43,7 +43,7 @@ import { DetectionEngineHeaderPage } from '../../../../components/detection_engi
 import { AlertsHistogramPanel } from '../../../../components/alerts_histogram_panel';
 import { AlertsTable } from '../../../../components/alerts_table';
 import { useUserInfo } from '../../../../components/user_info';
-import { DetectionEngineEmptyPage } from '../../detection_engine_empty_page';
+import { OverviewEmpty } from '../../../../../overview/components/overview_empty';
 import { useAlertInfo } from '../../../../components/alerts_info';
 import { StepDefineRule } from '../../../../components/rules/step_define_rule';
 import { StepScheduleRule } from '../../../../components/rules/step_schedule_rule';
@@ -426,7 +426,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
         <WrapperPage>
           <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
 
-          <DetectionEngineEmptyPage />
+          <OverviewEmpty />
         </WrapperPage>
       )}
 

@@ -88,6 +88,7 @@ export const createMetricsFetchData = (
     metrics: ['cpu', 'memory', 'rx', 'tx'].map((type) => ({ type })) as SnapshotMetricInput[],
     groupBy: [],
     nodeType: 'host',
+    includeTimeseries: true,
     timerange: {
       from: moment(startTime).valueOf(),
       to: moment(endTime).valueOf(),

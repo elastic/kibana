@@ -802,7 +802,10 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const { redirectAway } = this.props.services;
     const index = indexPattern.fields.findIndex((f: IFieldType) => f.name === field.name);
 
+    let oldField: IFieldType | undefined;
+
     if (index > -1) {
+      oldField = indexPattern.fields.getByName(field.name);
       indexPattern.fields.update(field);
     } else {
       indexPattern.fields.add(field);
@@ -814,14 +817,23 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       indexPattern.fieldFormatMap[field.name] = field.format;
     }
 
-    return indexPattern.save().then(() => {
-      const message = i18n.translate('indexPatternManagement.deleteField.savedHeader', {
-        defaultMessage: "Saved '{fieldName}'",
-        values: { fieldName: field.name },
+    return indexPattern
+      .save()
+      .then(() => {
+        const message = i18n.translate('indexPatternManagement.deleteField.savedHeader', {
+          defaultMessage: "Saved '{fieldName}'",
+          values: { fieldName: field.name },
+        });
+        this.context.services.notifications.toasts.addSuccess(message);
+        redirectAway();
+      })
+      .catch((error) => {
+        if (oldField) {
+          indexPattern.fields.update(oldField);
+        } else {
+          indexPattern.fields.remove(field);
+        }
       });
-      this.context.services.notifications.toasts.addSuccess(message);
-      redirectAway();
-    });
   };
 
   isSavingDisabled() {
