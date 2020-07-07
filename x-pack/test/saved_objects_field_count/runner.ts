@@ -5,9 +5,6 @@
  */
 
 import { CiStatsReporter } from '@kbn/dev-utils';
-// @ts-ignore not TS yet
-import getUrl from '../../../src/test_utils/get_url';
-
 import { FtrProviderContext } from './../functional/ftr_provider_context';
 
 const IGNORED_FIELDS = [
@@ -37,7 +34,7 @@ export async function testRunner({ getService }: FtrProviderContext) {
 
   const reporter = CiStatsReporter.fromEnv(log);
 
-  log.debug('Saved Objects field count');
+  log.debug('Saved Objects field count metrics starting');
 
   const {
     body: { fields },
@@ -54,13 +51,18 @@ export async function testRunner({ getService }: FtrProviderContext) {
       return accumulator;
     }, new Map());
 
-  await Promise.all(
-    Array.from(fieldCountPerTypeMap.entries())
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([fieldType, count]) => {
-        return reporter.metrics([
-          { group: 'Saved Objects field count', id: fieldType, value: count },
-        ]);
-      })
+  const metrics = Array.from(fieldCountPerTypeMap.entries())
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([fieldType, count]) => ({
+      group: 'Saved Objects .kibana field count',
+      id: fieldType,
+      value: count,
+    }));
+
+  log.debug(
+    'Saved Objects field count metrics:\n',
+    metrics.map(({ id, value }) => `${id}:${value}`).join('\n')
   );
+  await reporter.metrics(metrics);
+  log.debug('Saved Objects field count metrics done');
 }

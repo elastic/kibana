@@ -11,9 +11,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
     require.resolve('../../../test/common/config.js')
   );
-  const xpackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../functional/config.js')
-  );
 
   return {
     ...kibanaCommonTestsConfig.getAll(),
@@ -21,12 +18,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testRunner,
 
     esTestCluster: {
-      ...xpackFunctionalTestsConfig.get('esTestCluster'),
-      serverArgs: [...xpackFunctionalTestsConfig.get('esTestCluster.serverArgs')],
+      license: 'trial',
+      from: 'snapshot',
+      serverArgs: ['path.repo=/tmp/'],
     },
 
     kbnTestServer: {
-      ...xpackFunctionalTestsConfig.get('kbnTestServer'),
+      ...kibanaCommonTestsConfig.get('kbnTestServer'),
+      serverArgs: [...kibanaCommonTestsConfig.get('kbnTestServer.serverArgs')],
     },
   };
 }
