@@ -29,6 +29,7 @@ interface Props {
   children?: React.ReactNode;
   restrictWidth?: number;
   showAddData?: boolean;
+  showGiveFeedback?: boolean;
 }
 
 export const WithHeaderLayout = ({
@@ -37,9 +38,15 @@ export const WithHeaderLayout = ({
   children,
   restrictWidth,
   showAddData,
+  showGiveFeedback,
 }: Props) => (
   <Container color={bodyColor}>
-    <Header color={headerColor} restrictWidth={restrictWidth} showAddData={showAddData} />
+    <Header
+      color={headerColor}
+      restrictWidth={restrictWidth}
+      showAddData={showAddData}
+      showGiveFeedback={showGiveFeedback}
+    />
     <Page restrictWidth={restrictWidth}>
       <EuiPageBody>{children}</EuiPageBody>
     </Page>

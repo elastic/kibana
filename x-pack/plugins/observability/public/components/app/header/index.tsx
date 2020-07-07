@@ -4,12 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, EuiSpacer } from '@elastic/eui';
+import {
+  EuiBetaBadge,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import styled from 'styled-components';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { EuiBetaBadge } from '@elastic/eui';
 
 const Container = styled.div<{ color: string }>`
   background: ${(props) => props.color};
@@ -28,9 +34,15 @@ interface Props {
   color: string;
   showAddData?: boolean;
   restrictWidth?: number;
+  showGiveFeedback?: boolean;
 }
 
-export const Header = ({ color, restrictWidth, showAddData = false }: Props) => {
+export const Header = ({
+  color,
+  restrictWidth,
+  showAddData = false,
+  showGiveFeedback = false,
+}: Props) => {
   return (
     <Container color={color}>
       <Wrapper restrictWidth={restrictWidth}>
@@ -52,8 +64,20 @@ export const Header = ({ color, restrictWidth, showAddData = false }: Props) => 
               </h1>
             </EuiTitle>
           </EuiFlexItem>
+          {showGiveFeedback && (
+            <EuiFlexItem style={{ alignItems: 'flex-end' }} grow={false}>
+              <EuiButtonEmpty
+                href={'https://discuss.elastic.co/c/observability/'}
+                iconType="popout"
+              >
+                {i18n.translate('xpack.observability.home.feedback', {
+                  defaultMessage: 'Give us feedback',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
           {showAddData && (
-            <EuiFlexItem style={{ alignItems: 'flex-end' }}>
+            <EuiFlexItem style={{ alignItems: 'flex-end' }} grow={false}>
               {/* TODO: caue: what is the URL here? */}
               <EuiButtonEmpty href="https://www.elastic.co" iconType="plusInCircle">
                 {i18n.translate('xpack.observability.home.addData', { defaultMessage: 'Add data' })}

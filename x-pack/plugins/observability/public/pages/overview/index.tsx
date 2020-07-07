@@ -20,30 +20,29 @@ import { DatePicker, TimePickerTime } from '../../components/shared/data_picker'
 import { fetchHasData } from '../../data_handler';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { UI_SETTINGS, useKibanaUISettings } from '../../hooks/use_kibana_ui_settings';
+import { usePluginContext } from '../../hooks/use_plugin_context';
 import { RouteParams } from '../../routes';
 import { getParsedDate } from '../../utils/date';
 import { getBucketSize } from '../../utils/get_bucket_size';
 import { emptySections } from './emptySection';
-import { usePluginContext } from '../../hooks/use_plugin_context';
 
 interface Props {
   routeParams: RouteParams<'/overview'>;
 }
 
 export const OverviewPage = ({ routeParams }: Props) => {
-  const getAlerts = async () => {
-    return await core.http.get('/api/alerts/_find', {
+  const { core } = usePluginContext();
+  const result = useFetcher(() => fetchHasData(), []);
+  const hasData = result.data;
+
+  const alerts = useFetcher(() => {
+    return core.http.get('/api/alerts/_find', {
       query: {
         page: 1,
         per_page: 10,
       },
     });
-  };
-  const { core } = usePluginContext();
-  const result = useFetcher(() => fetchHasData(), []);
-  const hasData = result.data;
-
-  const alerts = useFetcher(() => getAlerts(), []);
+  }, []);
 
   const theme = useContext(ThemeContext);
   const timePickerTime = useKibanaUISettings<TimePickerTime>(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
@@ -76,6 +75,7 @@ export const OverviewPage = ({ routeParams }: Props) => {
       headerColor={theme.eui.euiColorEmptyShade}
       bodyColor={theme.eui.euiPageBackgroundColor}
       showAddData
+      showGiveFeedback
     >
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>

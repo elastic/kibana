@@ -213,7 +213,6 @@ storiesOf('app/Overview', module)
     </MemoryRouter>
   ))
   .add('logs, metrics, APM  and alerts', () => {
-    // TODO: add alert here
     unregisterAll();
     registerDataHandler({
       appName: 'infra_logs',
