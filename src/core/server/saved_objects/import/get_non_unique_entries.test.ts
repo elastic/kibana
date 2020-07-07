@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getNonUniqueEntries } from './utilities';
+import { getNonUniqueEntries } from './get_non_unique_entries';
 
 const foo1 = { type: 'foo', id: '1' };
 const foo2 = { type: 'foo', id: '2' }; // same type as foo1, different ID

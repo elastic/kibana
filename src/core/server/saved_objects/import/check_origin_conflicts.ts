@@ -217,7 +217,7 @@ export async function checkOriginConflicts(
 }
 
 /**
- * Assume that all objects exist in the `retries` map (due to filtering at the beginnning of `resolveSavedObjectsImportErrors`).
+ * Assume that all objects exist in the `retries` map (due to filtering at the beginning of `resolveSavedObjectsImportErrors`).
  */
 export function getImportIdMapForRetries(
   objects: Array<SavedObject<{ title?: string }>>,

@@ -19,6 +19,7 @@
 
 import { SavedObject, SavedObjectsClientContract, SavedObjectsImportError } from '../types';
 import { extractErrors } from './extract_errors';
+import { CreatedObject } from './types';
 
 interface CreateSavedObjectsOptions {
   savedObjectsClient: SavedObjectsClientContract;
@@ -27,7 +28,7 @@ interface CreateSavedObjectsOptions {
   overwrite?: boolean;
 }
 interface CreateSavedObjectsResult<T> {
-  createdObjects: Array<SavedObject<T> & { destinationId?: string }>;
+  createdObjects: Array<CreatedObject<T>>;
   errors: SavedObjectsImportError[];
 }
 
@@ -53,30 +54,26 @@ export const createSavedObjects = async <T>(
     new Map<string, SavedObject<T>>()
   );
 
-  const objectsToCreate = objects
-    .map((object) => {
-      // use the import ID map to ensure that each object is being created with the correct ID, also ensure that the `originId` is set on
-      // the created object if it did not have one (or is omitted if specified)
-      const importIdEntry = importIdMap.get(`${object.type}:${object.id}`);
+  const objectsToCreate = objects.map((object) => {
+    // use the import ID map to ensure that each reference is being created with the correct ID
+    const references = object.references?.map((reference) => {
+      const { type, id } = reference;
+      const importIdEntry = importIdMap.get(`${type}:${id}`);
       if (importIdEntry?.id) {
-        objectIdMap.set(`${object.type}:${importIdEntry.id}`, object);
-        const originId = importIdEntry.omitOriginId ? undefined : object.originId ?? object.id;
-        return { ...object, id: importIdEntry.id, originId };
+        return { ...reference, id: importIdEntry.id };
       }
-      return object;
-    })
-    .map((object) => {
-      // use the import ID map to ensure that each reference is being created with the correct ID
-      const references = object.references?.map((reference) => {
-        const { type, id } = reference;
-        const importIdEntry = importIdMap.get(`${type}:${id}`);
-        if (importIdEntry?.id) {
-          return { ...reference, id: importIdEntry.id };
-        }
-        return reference;
-      });
-      return { ...object, ...(references && { references }) };
+      return reference;
     });
+    // use the import ID map to ensure that each object is being created with the correct ID, also ensure that the `originId` is set on
+    // the created object if it did not have one (or is omitted if specified)
+    const importIdEntry = importIdMap.get(`${object.type}:${object.id}`);
+    if (importIdEntry?.id) {
+      objectIdMap.set(`${object.type}:${importIdEntry.id}`, object);
+      const originId = importIdEntry.omitOriginId ? undefined : object.originId ?? object.id;
+      return { ...object, id: importIdEntry.id, originId, ...(references && { references }) };
+    }
+    return { ...object, ...(references && { references }) };
+  });
 
   const resolvableErrors = ['conflict', 'ambiguous_conflict', 'missing_references'];
   let expectedResults = objectsToCreate;
@@ -90,13 +87,11 @@ export const createSavedObjects = async <T>(
 
   // remap results to reflect the object IDs that were submitted for import
   // this ensures that consumers understand the results
-  const remappedResults = expectedResults.map<SavedObject<T> & { destinationId?: string }>(
-    (result) => {
-      const { id } = objectIdMap.get(`${result.type}:${result.id}`)!;
-      // also, include a `destinationId` field if the object create attempt was made with a different ID
-      return { ...result, id, ...(id !== result.id && { destinationId: result.id }) };
-    }
-  );
+  const remappedResults = expectedResults.map<CreatedObject<T>>((result) => {
+    const { id } = objectIdMap.get(`${result.type}:${result.id}`)!;
+    // also, include a `destinationId` field if the object create attempt was made with a different ID
+    return { ...result, id, ...(id !== result.id && { destinationId: result.id }) };
+  });
 
   return {
     createdObjects: remappedResults.filter((obj) => !obj.error),

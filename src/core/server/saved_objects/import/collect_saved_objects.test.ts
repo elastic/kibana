@@ -20,10 +20,10 @@
 import { Readable, PassThrough } from 'stream';
 import { collectSavedObjects } from './collect_saved_objects';
 import { createLimitStream } from './create_limit_stream';
-import { getNonUniqueEntries } from './utilities';
+import { getNonUniqueEntries } from './get_non_unique_entries';
 
 jest.mock('./create_limit_stream');
-jest.mock('./utilities');
+jest.mock('./get_non_unique_entries');
 
 const getMockFn = <T extends (...args: any[]) => any, U>(fn: (...args: Parameters<T>) => U) =>
   fn as jest.MockedFunction<(...args: Parameters<T>) => U>;

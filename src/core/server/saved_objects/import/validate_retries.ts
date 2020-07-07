@@ -18,7 +18,7 @@
  */
 
 import { SavedObjectsImportRetry } from './types';
-import { getNonUniqueEntries } from './utilities';
+import { getNonUniqueEntries } from './get_non_unique_entries';
 import { SavedObjectsErrorHelpers } from '..';
 
 export const validateRetries = (retries: SavedObjectsImportRetry[]) => {

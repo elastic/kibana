@@ -18,7 +18,7 @@
  */
 
 import { Readable } from 'stream';
-import { SavedObjectsClientContract } from '../types';
+import { SavedObjectsClientContract, SavedObject } from '../types';
 import { ISavedObjectTypeRegistry } from '..';
 
 /**
@@ -200,3 +200,5 @@ export interface SavedObjectsResolveImportErrorsOptions {
    */
   trueCopy: boolean;
 }
+
+export type CreatedObject<T> = SavedObject<T> & { destinationId?: string };

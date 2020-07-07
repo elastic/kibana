@@ -20,8 +20,8 @@
 import { validateRetries } from './validate_retries';
 import { SavedObjectsImportRetry } from '.';
 
-import { getNonUniqueEntries } from './utilities';
-jest.mock('./utilities');
+import { getNonUniqueEntries } from './get_non_unique_entries';
+jest.mock('./get_non_unique_entries');
 const mockGetNonUniqueEntries = getNonUniqueEntries as jest.MockedFunction<
   typeof getNonUniqueEntries
 >;

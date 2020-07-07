@@ -168,12 +168,6 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
               type: 'ambiguous_conflict',
               destinations: [getConflictDest(`${CID}2a`), getConflictDest(`${CID}2b`)],
             };
-          } else if (fail409Param === 'ambiguous_conflict_2c2d') {
-            // "ambiguous source and destination" conflict
-            error = {
-              type: 'ambiguous_conflict',
-              destinations: [getConflictDest(`${CID}2a`), getConflictDest(`${CID}2b`)],
-            };
           }
           expect(object!.error).to.eql(error);
         }

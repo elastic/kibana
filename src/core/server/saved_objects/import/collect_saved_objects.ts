@@ -27,7 +27,7 @@ import {
 import { SavedObject } from '../types';
 import { createLimitStream } from './create_limit_stream';
 import { SavedObjectsImportError } from './types';
-import { getNonUniqueEntries } from './utilities';
+import { getNonUniqueEntries } from './get_non_unique_entries';
 import { SavedObjectsErrorHelpers } from '..';
 
 interface CollectSavedObjectsOptions {

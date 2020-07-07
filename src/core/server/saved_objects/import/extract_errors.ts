@@ -17,11 +17,11 @@
  * under the License.
  */
 import { SavedObject } from '../types';
-import { SavedObjectsImportError } from './types';
+import { SavedObjectsImportError, CreatedObject } from './types';
 
 export function extractErrors(
   // TODO: define saved object type
-  savedObjectResults: Array<SavedObject<any> & { destinationId?: string }>,
+  savedObjectResults: Array<CreatedObject<unknown>>,
   savedObjectsToImport: Array<SavedObject<any>>
 ) {
   const errors: SavedObjectsImportError[] = [];

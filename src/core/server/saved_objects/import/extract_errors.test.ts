@@ -20,6 +20,7 @@
 import { SavedObject } from '../types';
 import { extractErrors } from './extract_errors';
 import { SavedObjectsErrorHelpers } from '..';
+import { CreatedObject } from './types';
 
 describe('extractErrors()', () => {
   test('returns empty array when no errors exist', () => {
@@ -29,7 +30,7 @@ describe('extractErrors()', () => {
   });
 
   test('extracts errors from saved objects', () => {
-    const savedObjects: Array<SavedObject & { destinationId?: string }> = [
+    const savedObjects: Array<CreatedObject<unknown>> = [
       {
         id: '1',
         type: 'dashboard',
