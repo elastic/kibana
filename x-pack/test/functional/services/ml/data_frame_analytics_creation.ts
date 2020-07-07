@@ -306,6 +306,18 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       );
     },
 
+    async assertModelMemoryInputPopulated() {
+      const actualModelMemory = await testSubjects.getAttribute(
+        'mlAnalyticsCreateJobWizardModelMemoryInput',
+        'value'
+      );
+
+      expect(actualModelMemory).not.to.be(
+        '',
+        'Model memory limit should be populated but was empty'
+      );
+    },
+
     async assertPredictionFieldNameValue(expectedValue: string) {
       const actualPredictedFieldName = await testSubjects.getAttribute(
         'mlAnalyticsCreateJobWizardPredictionFieldNameInput',
