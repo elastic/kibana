@@ -40,7 +40,7 @@ describe('webhook connector validation', () => {
       isPreconfigured: false,
       config: {
         method: 'PUT',
-        url: 'http:\\test',
+        url: 'http://test.com',
         headers: { 'content-type': 'text' },
       },
     } as WebhookActionConnector;
@@ -74,6 +74,31 @@ describe('webhook connector validation', () => {
         method: [],
         user: [],
         password: ['Password is required.'],
+      },
+    });
+  });
+
+  test('connector validation fails when url in config is not valid', () => {
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: 'pass',
+      },
+      id: 'test',
+      actionTypeId: '.webhook',
+      name: 'webhook',
+      config: {
+        method: 'PUT',
+        url: 'invalid.url',
+      },
+    } as WebhookActionConnector;
+
+    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+      errors: {
+        url: ['URL is invalid.'],
+        method: [],
+        user: [],
+        password: [],
       },
     });
   });
