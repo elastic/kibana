@@ -17,6 +17,12 @@
  * under the License.
  */
 
-import { DemoDataPlugin } from './plugin';
+import { PluginInitializer, PluginInitializerContext } from 'src/core/public';
+import { Plugin, StartDeps } from './plugin';
+export { StartDeps };
 
-export const plugin = () => new DemoDataPlugin();
+export const plugin: PluginInitializer<void, void, {}, StartDeps> = (
+  initializerContext: PluginInitializerContext
+) => {
+  return new Plugin(initializerContext);
+};
