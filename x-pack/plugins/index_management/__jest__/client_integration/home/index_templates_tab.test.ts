@@ -139,7 +139,7 @@ describe('Index Templates tab', () => {
           composedOfString,
           priorityFormatted,
           hasContent ? 'M S A' : 'None', // M S A -> Mappings Settings Aliases badges
-          'Edit', // Column of actions
+          'EditDelete', // Column of actions
         ]);
       });
 
