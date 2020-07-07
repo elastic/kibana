@@ -9,6 +9,7 @@
 
 var assignValue = require('lodash/_assignValue'),
     castPath = require('lodash/_castPath'),
+    isFunction = require('lodash/isFunction'),
     isIndex = require('lodash/_isIndex'),
     isObject = require('lodash/isObject'),
     toKey = require('lodash/_toKey');
@@ -38,7 +39,7 @@ function baseSet(object, path, value, customizer) {
     var key = toKey(path[index]),
         newValue = value;
 
-    if (typeof nested == 'function' && key == 'prototype') {
+    if (key == 'prototype' && isFunction(nested)) {
       throw new Error('Illegal access of function prototype')
     }
 
