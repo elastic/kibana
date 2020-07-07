@@ -6,7 +6,6 @@
 
 import { mapValues, first, last, isNaN } from 'lodash';
 import {
-  TooManyBucketsPreviewExceptionMetadata,
   isTooManyBucketsPreviewException,
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
 } from '../../../../../common/alerting/metrics';
@@ -58,22 +57,19 @@ export const evaluateAlert = (
       );
       const { threshold, comparator } = criterion;
       const comparisonFunction = comparatorMap[comparator];
-      return mapValues(
-        currentValues,
-        (values: number | number[] | null | TooManyBucketsPreviewExceptionMetadata) => {
-          if (isTooManyBucketsPreviewException(values)) throw values;
-          return {
-            ...criterion,
-            metric: criterion.metric ?? DOCUMENT_COUNT_I18N,
-            currentValue: Array.isArray(values) ? last(values) : NaN,
-            shouldFire: Array.isArray(values)
-              ? values.map((value) => comparisonFunction(value, threshold))
-              : [false],
-            isNoData: values === null,
-            isError: isNaN(values),
-          };
-        }
-      );
+      return mapValues(currentValues, (values: number | number[] | null) => {
+        if (isTooManyBucketsPreviewException(values)) throw values;
+        return {
+          ...criterion,
+          metric: criterion.metric ?? DOCUMENT_COUNT_I18N,
+          currentValue: Array.isArray(values) ? last(values) : NaN,
+          shouldFire: Array.isArray(values)
+            ? values.map((value) => comparisonFunction(value, threshold))
+            : [false],
+          isNoData: values === null,
+          isError: isNaN(values),
+        };
+      });
     })
   );
 };
