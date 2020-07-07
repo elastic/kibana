@@ -19,20 +19,25 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiIconTip,
+  EuiLink,
   EuiTitle,
 } from '@elastic/eui';
 
+import { reactRouterNavigate } from '../../../../../shared_imports';
 import { SectionLoading, SectionError, Error } from '../../../../components';
 import { useLoadDataStream } from '../../../../services/api';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
 
 interface Props {
   dataStreamName: string;
+  backingIndicesLink: reactRouterNavigate;
   onClose: (shouldReload?: boolean) => void;
 }
 
 export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
+  history,
   dataStreamName,
+  backingIndicesLink,
   onClose,
 }) => {
   const { error, data: dataStream, isLoading } = useLoadDataStream(dataStreamName);
@@ -64,60 +69,95 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       />
     );
   } else if (dataStream) {
-    const { timeStampField, generation } = dataStream;
+    const { indices, timeStampField, generation } = dataStream;
 
     content = (
-      <EuiDescriptionList textStyle="reverse">
-        <EuiDescriptionListTitle>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <FormattedMessage
-                id="xpack.idxMgmt.dataStreamDetailPanel.timestampFieldTitle"
-                defaultMessage="Timestamp field"
-              />
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiIconTip
-                content={
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiDescriptionList textStyle="reverse">
+            <EuiDescriptionListTitle>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
                   <FormattedMessage
-                    id="xpack.idxMgmt.dataStreamDetailPanel.timestampFieldToolTip"
-                    defaultMessage="Timestamp field shared by all documents in the data stream"
+                    id="xpack.idxMgmt.dataStreamDetailPanel.indicesTitle"
+                    defaultMessage="Indices"
                   />
-                }
-                position="top"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiDescriptionListTitle>
+                </EuiFlexItem>
 
-        <EuiDescriptionListDescription>{timeStampField.name}</EuiDescriptionListDescription>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.idxMgmt.dataStreamDetailPanel.indicesToolTip"
+                        defaultMessage="The data stream's current backing indices"
+                      />
+                    }
+                    position="top"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiDescriptionListTitle>
 
-        <EuiDescriptionListTitle>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <FormattedMessage
-                id="xpack.idxMgmt.dataStreamDetailPanel.generationTitle"
-                defaultMessage="Generation"
-              />
-            </EuiFlexItem>
+            <EuiDescriptionListDescription>
+              <EuiLink {...backingIndicesLink}>{indices.length}</EuiLink>
+            </EuiDescriptionListDescription>
 
-            <EuiFlexItem grow={false}>
-              <EuiIconTip
-                content={
+            <EuiDescriptionListTitle>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
                   <FormattedMessage
-                    id="xpack.idxMgmt.dataStreamDetailPanel.generationToolTip"
-                    defaultMessage="Cumulative count of backing indices created for the data stream"
+                    id="xpack.idxMgmt.dataStreamDetailPanel.timestampFieldTitle"
+                    defaultMessage="Timestamp field"
                   />
-                }
-                position="top"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiDescriptionListTitle>
+                </EuiFlexItem>
 
-        <EuiDescriptionListDescription>{generation}</EuiDescriptionListDescription>
-      </EuiDescriptionList>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.idxMgmt.dataStreamDetailPanel.timestampFieldToolTip"
+                        defaultMessage="Timestamp field shared by all documents in the data stream"
+                      />
+                    }
+                    position="top"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription>{timeStampField.name}</EuiDescriptionListDescription>
+          </EuiDescriptionList>
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EuiDescriptionList textStyle="reverse">
+            <EuiDescriptionListTitle>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.dataStreamDetailPanel.generationTitle"
+                    defaultMessage="Generation"
+                  />
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.idxMgmt.dataStreamDetailPanel.generationToolTip"
+                        defaultMessage="Cumulative count of backing indices created for the data stream"
+                      />
+                    }
+                    position="top"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription>{generation}</EuiDescriptionListDescription>
+          </EuiDescriptionList>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 

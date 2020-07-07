@@ -15,7 +15,7 @@ import { reactRouterNavigate, extractQueryParams } from '../../../../shared_impo
 import { useAppContext } from '../../../app_context';
 import { SectionError, SectionLoading, Error } from '../../../components';
 import { useLoadDataStreams } from '../../../services/api';
-import { decodePathFromReactRouter } from '../../../services/routing';
+import { encodePathForReactRouter, decodePathFromReactRouter } from '../../../services/routing';
 import { documentationService } from '../../../services/documentation';
 import { Section } from '../../home';
 import { DataStreamTable } from './data_stream_table';
@@ -182,6 +182,12 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
       {dataStreamName && (
         <DataStreamDetailPanel
           dataStreamName={decodePathFromReactRouter(dataStreamName)}
+          backingIndicesLink={reactRouterNavigate(history, {
+            pathname: '/indices',
+            search: `includeHiddenIndices=true&filter=data_stream=${encodePathForReactRouter(
+              dataStreamName
+            )}`,
+          })}
           onClose={(shouldReload?: boolean) => {
             history.push(`/${Section.DataStreams}`);
 
