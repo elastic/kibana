@@ -5,19 +5,19 @@
  */
 
 import { createEsContext } from './context';
-import { ClusterClient, Logger } from '../../../../../src/core/server';
+import { LegacyClusterClient, Logger } from '../../../../../src/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
 jest.mock('../lib/../../../../package.json', () => ({
   version: '1.2.3',
 }));
-type EsClusterClient = Pick<jest.Mocked<ClusterClient>, 'callAsInternalUser' | 'asScoped'>;
+type EsClusterClient = Pick<jest.Mocked<LegacyClusterClient>, 'callAsInternalUser' | 'asScoped'>;
 
 let logger: Logger;
 let clusterClient: EsClusterClient;
 
 beforeEach(() => {
   logger = loggingSystemMock.createLogger();
-  clusterClient = elasticsearchServiceMock.createClusterClient();
+  clusterClient = elasticsearchServiceMock.createLegacyClusterClient();
 });
 
 describe('createEsContext', () => {

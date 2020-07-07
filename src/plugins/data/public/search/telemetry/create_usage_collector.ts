@@ -20,11 +20,10 @@
 import { first } from 'rxjs/operators';
 import { CoreSetup } from '../../../../../core/public';
 import { METRIC_TYPE, UsageCollectionSetup } from '../../../../usage_collection/public';
-import { SearchServiceStartDependencies } from '../types';
 import { SEARCH_EVENT_TYPE, SearchUsageCollector } from './types';
 
 export const createUsageCollector = (
-  core: CoreSetup<SearchServiceStartDependencies>,
+  core: CoreSetup,
   usageCollection?: UsageCollectionSetup
 ): SearchUsageCollector => {
   const getCurrentApp = async () => {

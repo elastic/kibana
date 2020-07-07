@@ -22,32 +22,33 @@ export function useHostSelector<TSelected>(selector: (state: HostState) => TSele
 }
 
 /**
- * Returns an object that contains Kibana Logs app and URL information for a given host id
- * @param hostId
- */
-export const useHostLogsUrl = (hostId: string): { url: string; appId: string; appPath: string } => {
-  const { services } = useKibana();
-  return useMemo(() => {
-    const appPath = `/stream?logFilter=(expression:'host.id:${hostId}',kind:kuery)`;
-    return {
-      url: `${services.application.getUrlForApp('logs')}${appPath}`,
-      appId: 'logs',
-      appPath,
-    };
-  }, [hostId, services.application]);
-};
-
-/**
  * Returns an object that contains Ingest app and URL information
  */
-export const useHostIngestUrl = (): { url: string; appId: string; appPath: string } => {
+export const useIngestUrl = (subpath: string): { url: string; appId: string; appPath: string } => {
   const { services } = useKibana();
   return useMemo(() => {
-    const appPath = `#/fleet`;
+    const appPath = `#/${subpath}`;
     return {
       url: `${services.application.getUrlForApp('ingestManager')}${appPath}`,
       appId: 'ingestManager',
       appPath,
     };
-  }, [services.application]);
+  }, [services.application, subpath]);
+};
+
+/**
+ * Returns an object that contains Ingest app and URL information
+ */
+export const useAgentDetailsIngestUrl = (
+  agentId: string
+): { url: string; appId: string; appPath: string } => {
+  const { services } = useKibana();
+  return useMemo(() => {
+    const appPath = `#/fleet/agents/${agentId}/activity`;
+    return {
+      url: `${services.application.getUrlForApp('ingestManager')}${appPath}`,
+      appId: 'ingestManager',
+      appPath,
+    };
+  }, [services.application, agentId]);
 };

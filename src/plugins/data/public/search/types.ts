@@ -31,11 +31,9 @@ import {
   IEsSearchResponse,
 } from '../../common/search';
 import { IndexPatternsContract } from '../../common/index_patterns/index_patterns';
-import { FieldFormatsStart } from '../field_formats';
 import { ExpressionsSetup } from '../../../expressions/public';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { GetInternalStartServicesFn } from '../types';
-import { QuerySetup } from '../query';
 
 export interface ISearchOptions {
   signal?: AbortSignal;
@@ -87,10 +85,8 @@ export interface SearchServiceSetupDependencies {
   usageCollection?: UsageCollectionSetup;
   getInternalStartServices: GetInternalStartServicesFn;
   packageInfo: PackageInfo;
-  query: QuerySetup;
 }
 
 export interface SearchServiceStartDependencies {
   indexPatterns: IndexPatternsContract;
-  fieldFormats: FieldFormatsStart;
 }

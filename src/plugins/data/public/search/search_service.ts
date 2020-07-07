@@ -18,9 +18,10 @@
  */
 
 import { Plugin, CoreSetup, CoreStart } from '../../../../core/public';
-import { ISearchSetup, ISearchStart } from './types';
 import { createSearchSource, SearchSource, SearchSourceDependencies } from './search_source';
 import { getEsClient, LegacyApiCaller } from './legacy';
+import { getForceNow } from '../query/timefilter/lib/get_force_now';
+import { calculateBounds, TimeRange } from '../../common/query';
 import { SearchInterceptor } from './search_interceptor';
 import {
   getAggTypes,
@@ -29,10 +30,14 @@ import {
   AggConfigs,
   getCalculateAutoTimeExpression,
 } from './aggs';
-import { ISearchGeneric } from './types';
 import { createUsageCollector, SearchUsageCollector } from './telemetry';
-
-import { SearchServiceSetupDependencies, SearchServiceStartDependencies } from './types';
+import {
+  ISearchSetup,
+  ISearchStart,
+  ISearchGeneric,
+  SearchServiceSetupDependencies,
+  SearchServiceStartDependencies,
+} from './types';
 
 /**
  * The search plugin exposes a method `registerSearchStrategy` for other plugins
@@ -46,13 +51,19 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private searchInterceptor!: SearchInterceptor;
   private usageCollector?: SearchUsageCollector;
 
+  /**
+   * getForceNow uses window.location, so we must have a separate implementation
+   * of calculateBounds on the client and the server.
+   */
+  private calculateBounds = (timeRange: TimeRange) =>
+    calculateBounds(timeRange, { forceNow: getForceNow() });
+
   public setup(
     core: CoreSetup,
     {
       expressions,
       usageCollection,
       packageInfo,
-      query,
       getInternalStartServices,
     }: SearchServiceSetupDependencies
   ): ISearchSetup {
@@ -63,9 +74,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     // register each agg type
     const aggTypes = getAggTypes({
-      query,
-      uiSettings: core.uiSettings,
+      calculateBounds: this.calculateBounds,
       getInternalStartServices,
+      uiSettings: core.uiSettings,
     });
     aggTypes.buckets.forEach((b) => aggTypesSetup.registerBucket(b));
     aggTypes.metrics.forEach((m) => aggTypesSetup.registerMetric(m));
@@ -95,7 +106,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         application: core.application,
         http: core.http,
         uiSettings: core.uiSettings,
-        usageCollector: this.usageCollector,
+        usageCollector: this.usageCollector!,
       },
       core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
     );
@@ -122,14 +133,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
         createAggConfigs: (indexPattern, configStates = [], schemas) => {
           return new AggConfigs(indexPattern, configStates, {
-            fieldFormats: dependencies.fieldFormats,
             typesRegistry: aggTypesStart,
           });
         },
         types: aggTypesStart,
       },
       search: this.searchInterceptor.search,
-      usageCollector: this.usageCollector,
+      usageCollector: this.usageCollector!,
       searchSource: {
         create: createSearchSource(dependencies.indexPatterns, searchSourceDependencies),
         createEmpty: () => {
