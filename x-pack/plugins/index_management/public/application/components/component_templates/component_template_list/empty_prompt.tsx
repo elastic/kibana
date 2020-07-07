@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
 
-import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
+import { reactRouterNavigate } from '../shared_imports';
 import { useComponentTemplatesContext } from '../component_templates_context';
 
 interface Props {
