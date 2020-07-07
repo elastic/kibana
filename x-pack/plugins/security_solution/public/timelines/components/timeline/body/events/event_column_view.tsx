@@ -196,7 +196,7 @@ export const EventColumnView = React.memo<Props>(
             </EventsTdContent>,
           ]
         : grouped.icon;
-    }, [button, closePopover, id, onClickCb, ecsData, timelineActions, isPopoverOpen]);
+    }, [button, closePopover, id, onClickCb, data, ecsData, timelineActions, isPopoverOpen]);
 
     return (
       <EventsTrData data-test-subj="event-column-view">
