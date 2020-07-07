@@ -22,6 +22,7 @@ export interface TemplateSerialized {
   version?: number;
   priority?: number;
   _meta?: { [key: string]: any };
+  data_stream?: { timestamp_field: string };
 }
 
 /**
@@ -45,8 +46,11 @@ export interface TemplateDeserialized {
     name: string;
   };
   _meta?: { [key: string]: any };
+  dataStream?: { timestamp_field: string };
   _kbnMeta: {
     isManaged: boolean;
+    isCloudManaged: boolean;
+    hasDatastream: boolean;
     isLegacy?: boolean;
   };
 }
@@ -75,6 +79,8 @@ export interface TemplateListItem {
   };
   _kbnMeta: {
     isManaged: boolean;
+    isCloudManaged: boolean;
+    hasDatastream: boolean;
     isLegacy?: boolean;
   };
 }

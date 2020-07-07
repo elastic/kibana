@@ -64,9 +64,9 @@ export const MapToolTipComponent = ({ closeTooltip, features = [] }: MapToolTipP
       <>
         <EuiPopoverTitle>
           {layerId === 'up_points' ? (
-            <TagLabel label={locationName} color={gray} />
+            <TagLabel label={locationName} color={gray} status="up" />
           ) : (
-            <TagLabel label={locationName} color={danger} />
+            <TagLabel label={locationName} color={danger} status="down" />
           )}
         </EuiPopoverTitle>
         <EuiDescriptionList type="column" textStyle="reverse" compressed={true}>
