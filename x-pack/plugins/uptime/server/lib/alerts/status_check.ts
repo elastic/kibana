@@ -105,15 +105,15 @@ export const contextMessage = (
   for (let i = 0; i < monitorIds.length; i++) {
     const id = monitorIds[i];
     if (i === max) {
-      return (
+      message =
         message +
         i18n.translate('xpack.uptime.alerts.message.overflowBody', {
           defaultMessage: `... and {overflowCount} other monitors`,
           values: {
             overflowCount: monitorIds.length - i,
           },
-        })
-      );
+        });
+      break;
     } else if (i === 0) {
       message = message + id;
     } else {
@@ -330,10 +330,23 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
       isRight(availabilityDecoded) &&
       availabilityDecoded.right.shouldCheckAvailability === true
     ) {
+      const filterString = JSON.stringify(
+        await genFilterString(
+          () =>
+            libs.requests.getIndexPattern({
+              callES: options.services.callCluster,
+              dynamicSettings,
+            }),
+          availabilityDecoded.right.filters,
+          availabilityDecoded.right.search
+        )
+      );
+
       availabilityResults = await libs.requests.getMonitorAvailability({
         callES: options.services.callCluster,
         dynamicSettings,
         ...availabilityDecoded.right.availability,
+        filters: filterString,
       });
     }
 

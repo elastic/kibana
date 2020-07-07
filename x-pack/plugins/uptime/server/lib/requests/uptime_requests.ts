@@ -7,7 +7,7 @@
 import { UMElasticsearchQueryFn } from '../adapters';
 import {
   OverviewFilters,
-  MonitorAvailabilityParams,
+  GetMonitorAvailabilityParams,
   MonitorDetails,
   MonitorLocations,
   Snapshot,
@@ -44,7 +44,7 @@ export interface UptimeRequests {
   getFilterBar: ESQ<GetFilterBarParams, OverviewFilters>;
   getIndexPattern: ESQ<{}, IIndexPattern | undefined>;
   getLatestMonitor: ESQ<GetLatestMonitorParams, Ping>;
-  getMonitorAvailability: ESQ<MonitorAvailabilityParams, GetMonitorAvailabilityResult[]>;
+  getMonitorAvailability: ESQ<GetMonitorAvailabilityParams, GetMonitorAvailabilityResult[]>;
   getMonitorDurationChart: ESQ<GetMonitorChartsParams, MonitorDurationResult>;
   getMonitorDetails: ESQ<GetMonitorDetailsParams, MonitorDetails>;
   getMonitorLocations: ESQ<GetMonitorLocationsParams, MonitorLocations>;
