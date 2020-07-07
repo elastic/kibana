@@ -14,11 +14,15 @@ export const getTemplate = ({
   indexPatterns = [],
   template: { settings, aliases, mappings } = {},
   isManaged = false,
+  isCloudManaged = false,
+  hasDatastream = false,
   isLegacy = false,
 }: Partial<
   TemplateDeserialized & {
     isLegacy?: boolean;
     isManaged: boolean;
+    isCloudManaged: boolean;
+    hasDatastream: boolean;
   }
 > = {}): TemplateDeserialized => ({
   name,
@@ -32,6 +36,8 @@ export const getTemplate = ({
   },
   _kbnMeta: {
     isManaged,
+    isCloudManaged,
+    hasDatastream,
     isLegacy,
   },
 });
