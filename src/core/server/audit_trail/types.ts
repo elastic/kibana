@@ -45,7 +45,7 @@ export interface Auditor {
    * How to add a record in audit log:
    * ```typescript
    * router.get({ path: '/my_endpoint', validate: false }, async (context, request, response) => {
-   *   context.core.auditor.withScope('my_plugin_operation');
+   *   context.core.auditor.withAuditScope('my_plugin_operation');
    *   const value = await context.core.elasticsearch.legacy.client.callAsCurrentUser('...');
    *   context.core.add({ type: 'operation.type', message: 'perform an operation in ... endpoint' });
    * ```
@@ -55,7 +55,7 @@ export interface Auditor {
    * Add a high-level scope name for logged events.
    * It helps to identify the root cause of low-level events.
    */
-  withScope(name: string): void;
+  withAuditScope(name: string): void;
 }
 
 /**

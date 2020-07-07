@@ -30,9 +30,9 @@ describe('AuditTrailClient', () => {
     event$.complete();
   });
 
-  describe('#withScope', () => {
+  describe('#withAuditScope', () => {
     it('registers upper level scope', (done) => {
-      client.withScope('scope_name');
+      client.withAuditScope('scope_name');
       event$.subscribe((event) => {
         expect(event.scope).toBe('scope_name');
         done();
@@ -41,9 +41,9 @@ describe('AuditTrailClient', () => {
     });
 
     it('throws an exception if tries to re-write a scope', () => {
-      client.withScope('scope_name');
-      expect(() => client.withScope('another_scope_name')).toThrowErrorMatchingInlineSnapshot(
-        `"AuditTrail scope is already set to: scope_name"`
+      client.withAuditScope('scope_name');
+      expect(() => client.withAuditScope('another_scope_name')).toThrowErrorMatchingInlineSnapshot(
+        `"Audit scope is already set to: scope_name"`
       );
     });
   });

@@ -9,7 +9,7 @@ import { config } from './config';
 describe('config schema', () => {
   it('generates proper defaults', () => {
     expect(config.schema.validate({})).toEqual({
-      enabled: true,
+      enabled: false,
       logger: {
         enabled: false,
       },

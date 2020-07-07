@@ -21,7 +21,7 @@ export class AuditTrailTestPlugin implements Plugin {
     router.get(
       { path: '/audit_trail_test/context/as_current_user', validate: false },
       async (context, request, response) => {
-        context.core.auditor.withScope('audit_trail_test/context/as_current_user');
+        context.core.auditor.withAuditScope('audit_trail_test/context/as_current_user');
         await context.core.elasticsearch.legacy.client.callAsCurrentUser('ping');
         return response.noContent();
       }
@@ -30,7 +30,7 @@ export class AuditTrailTestPlugin implements Plugin {
     router.get(
       { path: '/audit_trail_test/context/as_internal_user', validate: false },
       async (context, request, response) => {
-        context.core.auditor.withScope('audit_trail_test/context/as_internal_user');
+        context.core.auditor.withAuditScope('audit_trail_test/context/as_internal_user');
         await context.core.elasticsearch.legacy.client.callAsInternalUser('ping');
         return response.noContent();
       }
@@ -41,7 +41,7 @@ export class AuditTrailTestPlugin implements Plugin {
       async (context, request, response) => {
         const [coreStart] = await core.getStartServices();
         const auditor = coreStart.auditTrail.asScoped(request);
-        auditor.withScope('audit_trail_test/contract/as_current_user');
+        auditor.withAuditScope('audit_trail_test/contract/as_current_user');
 
         await context.core.elasticsearch.legacy.client.callAsCurrentUser('ping');
         return response.noContent();
@@ -53,7 +53,7 @@ export class AuditTrailTestPlugin implements Plugin {
       async (context, request, response) => {
         const [coreStart] = await core.getStartServices();
         const auditor = coreStart.auditTrail.asScoped(request);
-        auditor.withScope('audit_trail_test/contract/as_internal_user');
+        auditor.withAuditScope('audit_trail_test/contract/as_internal_user');
 
         await context.core.elasticsearch.legacy.client.callAsInternalUser('ping');
         return response.noContent();

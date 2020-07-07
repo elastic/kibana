@@ -23,9 +23,9 @@ export class AuditTrailClient implements Auditor {
     private readonly deps: Deps
   ) {}
 
-  public withScope(name: string) {
+  public withAuditScope(name: string) {
     if (this.scope !== undefined) {
-      throw new Error(`AuditTrail scope is already set to: ${this.scope}`);
+      throw new Error(`Audit scope is already set to: ${this.scope}`);
     }
     this.scope = name;
   }

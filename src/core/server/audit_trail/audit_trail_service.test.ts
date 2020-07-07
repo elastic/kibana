@@ -32,7 +32,7 @@ describe('AuditTrailService', () => {
         const { register } = auditTrail.setup();
         const auditorFactory: AuditorFactory = {
           asScoped() {
-            return { add: () => undefined, withScope: (() => {}) as any };
+            return { add: () => undefined, withAuditScope: (() => {}) as any };
           },
         };
         register(auditorFactory);
@@ -46,7 +46,7 @@ describe('AuditTrailService', () => {
   describe('#start', () => {
     describe('asScoped', () => {
       it('initialize every auditor with a request', () => {
-        const scopedMock = jest.fn(() => ({ add: jest.fn(), withScope: jest.fn() }));
+        const scopedMock = jest.fn(() => ({ add: jest.fn(), withAuditScope: jest.fn() }));
         const auditorFactory = { asScoped: scopedMock };
 
         const auditTrail = new AuditTrailService(coreContext);
@@ -64,7 +64,7 @@ describe('AuditTrailService', () => {
         const addEventMock = jest.fn();
         const auditorFactory = {
           asScoped() {
-            return { add: addEventMock, withScope: jest.fn() };
+            return { add: addEventMock, withAuditScope: jest.fn() };
           },
         };
 

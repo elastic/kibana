@@ -27,7 +27,7 @@ const defaultAuditorFactory: AuditorFactory = {
   asScoped() {
     return {
       add() {},
-      withScope() {},
+      withAuditScope() {},
     };
   },
 };

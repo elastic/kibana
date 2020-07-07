@@ -5,11 +5,11 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor, config as _config } from '../../../../src/core/server';
+import { PluginConfigDescriptor, config as coreConfig } from '../../../../src/core/server';
 
 const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
-  appender: schema.maybe(_config.logging.appenders),
+  enabled: schema.boolean({ defaultValue: false }),
+  appender: schema.maybe(coreConfig.logging.appenders),
   logger: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
