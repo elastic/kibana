@@ -68,6 +68,8 @@ export {
 
 export { Monaco, Forms };
 
+export { extractQueryParams } from './url';
+
 /** dummy plugin, we just want esUiShared to have its own bundle */
 export function plugin() {
   return new (class EsUiSharedPlugin {
