@@ -18,7 +18,7 @@ import {
 } from './types';
 
 import * as i18n from './translations';
-import { getErrorMessage, request } from '../case/utils';
+import { getErrorMessage, request } from '../lib/axios_utils';
 
 const BASE_URL = `rest`;
 const INCIDENT_URL = `incidents`;
