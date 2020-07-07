@@ -62,7 +62,7 @@ describe('Resolver Data Middleware', () => {
             };
           }
           return childNode;
-        }) as TreeNode[],
+        }) as ResolverChildNode[],
       });
       if (tree) {
         const action: DataAction = {
@@ -171,7 +171,7 @@ describe('Resolver Data Middleware', () => {
             };
           }
           return childNode;
-        }) as TreeNode[],
+        }) as ResolverChildNode[],
       });
       if (tree) {
         const action: DataAction = {
