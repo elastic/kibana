@@ -257,8 +257,10 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
 
     public async openSavedVisualization(vizName: string) {
       const dataTestSubj = `visListingTitleLink-${vizName.split(' ').join('-')}`;
-      await testSubjects.click(dataTestSubj);
-      await header.waitUntilLoadingHasFinished();
+      await retry.try(async () => {
+        await testSubjects.click(dataTestSubj);
+        await header.waitUntilLoadingHasFinished();
+      });
     }
 
     public async waitForVisualizationSavedToastGone() {
