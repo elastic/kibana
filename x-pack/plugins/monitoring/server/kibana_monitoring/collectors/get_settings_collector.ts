@@ -4,15 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KIBANA_SETTINGS_TYPE } from '../../../common/constants';
+import {
+  KIBANA_SETTINGS_TYPE,
+  XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING,
+  CLUSTER_ALERTS_ADDRESS_CONFIG_KEY,
+} from '../../../common/constants';
 import { MonitoringConfig } from '../../config';
+import { CoreServices } from '../../core_services';
+import { Logger } from '../../../../../../src/core/server';
 
+let loggedDeprecationWarning = false;
 /*
  * Check if Cluster Alert email notifications is enabled in config
  * If so, use uiSettings API to fetch the X-Pack default admin email
  */
-export async function getDefaultAdminEmail(config: MonitoringConfig) {
-  return config.cluster_alerts.email_notifications.email_address || null;
+export async function getDefaultAdminEmail(config: MonitoringConfig, log?: Logger) {
+  const {
+    email_notifications: { enabled, email_address: emailAddress },
+  } = config.cluster_alerts;
+
+  if (enabled && emailAddress?.length) {
+    return emailAddress;
+  }
+
+  const defaultAdminEmail = await CoreServices.getUISetting(XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING);
+
+  if (defaultAdminEmail && !loggedDeprecationWarning && log) {
+    const emailAddressConfigKey = `monitoring.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}`;
+    loggedDeprecationWarning = true;
+    const message =
+      `Monitoring is using "${XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING}" for cluster alert notifications, ` +
+      `which will not be supported in Kibana 8.0. Please configure ${emailAddressConfigKey} in your kibana.yml settings`;
+    log.warn(message);
+  }
+
+  return defaultAdminEmail;
 }
 
 // we use shouldUseNull to determine if we need to send nulls; we only send nulls if the last email wasn't null
@@ -21,9 +47,10 @@ let shouldUseNull = true;
 export async function checkForEmailValue(
   config: MonitoringConfig,
   _shouldUseNull = shouldUseNull,
-  _getDefaultAdminEmail = getDefaultAdminEmail
+  _getDefaultAdminEmail = getDefaultAdminEmail,
+  log?: Logger
 ) {
-  const defaultAdminEmail = await _getDefaultAdminEmail(config);
+  const defaultAdminEmail = await _getDefaultAdminEmail(config, log);
 
   // Allow null so clearing the advanced setting will be reflected in the data
   const isAcceptableNull = defaultAdminEmail === null && _shouldUseNull;
