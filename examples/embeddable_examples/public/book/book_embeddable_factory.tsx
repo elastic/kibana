@@ -24,7 +24,6 @@ import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
 import {
   EmbeddableFactoryDefinition,
   EmbeddableStart,
-  ErrorEmbeddable,
   IContainer,
   AttributeService,
   EmbeddableFactory,
