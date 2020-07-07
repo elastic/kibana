@@ -520,9 +520,6 @@ export const ActionForm = ({
                 <FormattedMessage
                   id="xpack.triggersActionsUI.sections.alertForm.unauthorizedToCreateForEmptyConnectors"
                   defaultMessage="Only authorized users can configure a connector. Contact your administrator."
-                  values={{
-                    actionTypeName,
-                  }}
                 />
               </p>
             </EuiCallOut>
