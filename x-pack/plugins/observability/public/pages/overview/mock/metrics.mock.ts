@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MetricsFetchDataResponse, FetchData } from '../typings';
+import { MetricsFetchDataResponse, FetchData } from '../../../typings';
 
 export const fetchMetricsData: FetchData<MetricsFetchDataResponse> = () => {
   return Promise.resolve(response);
@@ -17,7 +17,6 @@ const response: MetricsFetchDataResponse = {
     hosts: { label: 'Hosts', value: 11, type: 'number' },
     cpu: { label: 'CPU usage', value: 0.8, type: 'percent' },
     memory: { label: 'Memory Usage', value: 0.362, type: 'percent' },
-    disk: { label: 'Disk Usage', value: 0.324, type: 'percent' },
     inboundTraffic: { label: 'Inbount traffic', value: 1024, type: 'bytesPerSecond' },
     outboundTraffic: { label: 'Outbount traffic', value: 1024, type: 'bytesPerSecond' },
   },
@@ -122,7 +121,6 @@ export const emptyResponse: MetricsFetchDataResponse = {
     hosts: { label: 'Hosts', value: 0, type: 'number' },
     cpu: { label: 'CPU usage', value: 0, type: 'percent' },
     memory: { label: 'Memory Usage', value: 0, type: 'percent' },
-    disk: { label: 'Disk Usage', value: 0, type: 'percent' },
     inboundTraffic: { label: 'Inbount traffic', value: 0, type: 'bytesPerSecond' },
     outboundTraffic: { label: 'Outbount traffic', value: 0, type: 'bytesPerSecond' },
   },

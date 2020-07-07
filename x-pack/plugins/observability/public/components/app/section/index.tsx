@@ -7,6 +7,7 @@ import { EuiAccordion, EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ErrorPanel } from './error_panel';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 interface Props {
   title: string;
@@ -25,6 +26,7 @@ export const SectionContainer = ({
   hasError,
   appLinkName,
 }: Props) => {
+  const { core } = usePluginContext();
   return (
     <EuiAccordion
       initialIsOpen
@@ -37,7 +39,7 @@ export const SectionContainer = ({
       }
       extraAction={
         appLink && (
-          <EuiLink href={appLink}>
+          <EuiLink href={core.http.basePath.prepend(appLink)}>
             <EuiText size="s">
               {appLinkName
                 ? appLinkName

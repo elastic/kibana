@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ApmFetchDataResponse, FetchData } from '../typings';
+import { ApmFetchDataResponse, FetchData } from '../../../typings';
 
 export const fetchApmData: FetchData<ApmFetchDataResponse> = () => {
   return Promise.resolve(response);

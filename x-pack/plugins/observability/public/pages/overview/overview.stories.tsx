@@ -10,14 +10,20 @@ import { MemoryRouter } from 'react-router-dom';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import { PluginContext } from '../../context/plugin_context';
 import { registerDataHandler, unregisterDataHandler } from '../../data_handler';
-import { emptyResponse as emptyAPMResponse, fetchApmData } from '../../mock/apm.mock';
-import { fetchLogsData, emptyResponse as emptyLogsResponse } from '../../mock/logs.mock';
-import { fetchMetricsData, emptyResponse as emptyMetricsResponse } from '../../mock/metrics.mock';
-import { fetchUptimeData, emptyResponse as emptyUptimeResponse } from '../../mock/uptime.mock';
+import { emptyResponse as emptyAPMResponse, fetchApmData } from './mock/apm.mock';
+import { fetchLogsData, emptyResponse as emptyLogsResponse } from './mock/logs.mock';
+import { fetchMetricsData, emptyResponse as emptyMetricsResponse } from './mock/metrics.mock';
+import { fetchUptimeData, emptyResponse as emptyUptimeResponse } from './mock/uptime.mock';
 import { EuiThemeProvider } from '../../typings';
 import { OverviewPage } from './';
+import { alertsFetchData } from './mock/alerts.mock';
 
 const core = {
+  http: {
+    basePath: {
+      prepend: (link) => `http://localhost:5601${link}`,
+    },
+  },
   uiSettings: {
     get: (key: string) => {
       const euiSettings = {
@@ -87,6 +93,14 @@ const core = {
     },
   },
 } as AppMountContext['core'];
+
+const coreWithAlerts = ({
+  ...core,
+  http: {
+    ...core.http,
+    get: alertsFetchData,
+  },
+} as unknown) as AppMountContext['core'];
 
 function unregisterAll() {
   unregisterDataHandler({ appName: 'apm' });
@@ -164,13 +178,12 @@ storiesOf('app/Overview', module)
 storiesOf('app/Overview', module)
   .addDecorator((storyFn) => (
     <MemoryRouter>
-      <PluginContext.Provider value={{ core }}>
+      <PluginContext.Provider value={{ core: coreWithAlerts }}>
         <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
       </PluginContext.Provider>
     </MemoryRouter>
   ))
   .add('logs, metrics and alerts', () => {
-    // TODO: add alert here
     unregisterAll();
     registerDataHandler({
       appName: 'infra_logs',
@@ -194,7 +207,7 @@ storiesOf('app/Overview', module)
 storiesOf('app/Overview', module)
   .addDecorator((storyFn) => (
     <MemoryRouter>
-      <PluginContext.Provider value={{ core }}>
+      <PluginContext.Provider value={{ core: coreWithAlerts }}>
         <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
       </PluginContext.Provider>
     </MemoryRouter>
@@ -268,7 +281,7 @@ storiesOf('app/Overview', module)
 storiesOf('app/Overview', module)
   .addDecorator((storyFn) => (
     <MemoryRouter>
-      <PluginContext.Provider value={{ core }}>
+      <PluginContext.Provider value={{ core: coreWithAlerts }}>
         <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
       </PluginContext.Provider>
     </MemoryRouter>
@@ -332,6 +345,62 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'uptime',
       fetchData: async () => emptyUptimeResponse,
+      hasData: () => Promise.resolve(true),
+    });
+    return (
+      <OverviewPage
+        routeParams={{
+          query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
+        }}
+      />
+    );
+  });
+
+const coreAlertsThrowsError = ({
+  ...core,
+  http: {
+    ...core.http,
+    get: async () => {
+      throw new Error('Error fetching Alerts data');
+    },
+  },
+} as unknown) as AppMountContext['core'];
+storiesOf('app/Overview', module)
+  .addDecorator((storyFn) => (
+    <MemoryRouter>
+      <PluginContext.Provider value={{ core: coreAlertsThrowsError }}>
+        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
+      </PluginContext.Provider>
+    </MemoryRouter>
+  ))
+  .add('with error', () => {
+    unregisterAll();
+    registerDataHandler({
+      appName: 'apm',
+      fetchData: async () => {
+        throw new Error('Error fetching APM data');
+      },
+      hasData: () => Promise.resolve(true),
+    });
+    registerDataHandler({
+      appName: 'infra_logs',
+      fetchData: async () => {
+        throw new Error('Error fetching Logs data');
+      },
+      hasData: () => Promise.resolve(true),
+    });
+    registerDataHandler({
+      appName: 'infra_metrics',
+      fetchData: async () => {
+        throw new Error('Error fetching Metric data');
+      },
+      hasData: () => Promise.resolve(true),
+    });
+    registerDataHandler({
+      appName: 'uptime',
+      fetchData: async () => {
+        throw new Error('Error fetching Uptime data');
+      },
       hasData: () => Promise.resolve(true),
     });
     return (

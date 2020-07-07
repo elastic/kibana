@@ -17,7 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 import { WithHeaderLayout } from '../../components/app/layout/with_header';
 import { usePluginContext } from '../../hooks/use_plugin_context';

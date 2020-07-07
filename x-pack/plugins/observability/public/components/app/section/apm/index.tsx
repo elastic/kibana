@@ -15,18 +15,17 @@ import {
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
-import { useChartTheme } from '../../../../hooks/use_chart_theme';
 import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
+import { useChartTheme } from '../../../../hooks/use_chart_theme';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { ChartContainer } from '../../chart_container';
-import { onBrushEnd } from '../helper';
 import { StyledStat } from '../../styled_stat';
+import { onBrushEnd } from '../helper';
 
 interface Props {
   startTime?: string;

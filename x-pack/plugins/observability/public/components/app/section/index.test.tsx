@@ -12,27 +12,25 @@ describe('SectionContainer', () => {
   it('renders section without app link', () => {
     const component = render(
       <EuiThemeProvider>
-        <SectionContainer title="Foo" subtitle="foo bar" minHeight={100}>
+        <SectionContainer title="Foo" minHeight={100} hasError={false}>
           <div>I am a very nice component</div>
         </SectionContainer>
       </EuiThemeProvider>
     );
     expect(component.getByText('I am a very nice component')).toBeInTheDocument();
     expect(component.getByText('Foo')).toBeInTheDocument();
-    expect(component.getByText('foo bar')).toBeInTheDocument();
     expect(component.queryAllByText('View in app')).toEqual([]);
   });
   it('renders section with app link', () => {
     const component = render(
       <EuiThemeProvider>
-        <SectionContainer title="Foo" subtitle="foo bar" minHeight={100} appLink="/foo/bar">
+        <SectionContainer title="Foo" minHeight={100} appLink="/foo/bar" hasError={false}>
           <div>I am a very nice component</div>
         </SectionContainer>
       </EuiThemeProvider>
     );
     expect(component.getByText('I am a very nice component')).toBeInTheDocument();
     expect(component.getByText('Foo')).toBeInTheDocument();
-    expect(component.getByText('foo bar')).toBeInTheDocument();
     expect(component.getByText('View in app')).toBeInTheDocument();
   });
 });

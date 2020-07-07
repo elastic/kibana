@@ -6,7 +6,6 @@
 import { AreaSeries, Chart, ScaleType, Settings } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer, EuiStat } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 import { SectionContainer } from '../';
