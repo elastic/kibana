@@ -46,7 +46,7 @@ describe('<RolesGridPage />', () => {
 
   beforeEach(() => {
     history = (scopedHistoryMock.create({
-      createHref: jest.fn((to) => to.pathname),
+      createHref: jest.fn((location) => location.pathname!),
     }) as unknown) as ScopedHistory;
     apiClientMock = rolesAPIClientMock.create();
     apiClientMock.getRoles.mockResolvedValue([
