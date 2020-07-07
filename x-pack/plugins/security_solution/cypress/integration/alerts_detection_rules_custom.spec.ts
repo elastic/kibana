@@ -64,7 +64,8 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { ALERTS_URL } from '../urls/navigation';
 
-describe('Detection rules, custom', () => {
+// Flaky: https://github.com/elastic/kibana/issues/67814
+describe.skip('Detection rules, custom', () => {
   before(() => {
     esArchiverLoad('custom_rule_with_timeline');
   });
