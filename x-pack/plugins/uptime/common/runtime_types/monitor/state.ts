@@ -70,16 +70,16 @@ export type MonitorSummary = t.TypeOf<typeof MonitorSummaryType>;
 
 export const MonitorSummariesResultType = t.intersection([
   t.partial({
-    summaries: t.array(MonitorSummaryType),
+    totalSummaryCount: t.number,
   }),
   t.type({
+    summaries: t.array(MonitorSummaryType),
     prevPagePagination: t.union([t.string, t.null]),
     nextPagePagination: t.union([t.string, t.null]),
-    totalSummaryCount: t.number,
   }),
 ]);
 
-export type MonitorSummaryResult = t.TypeOf<typeof MonitorSummariesResultType>;
+export type MonitorSummariesResult = t.TypeOf<typeof MonitorSummariesResultType>;
 
 export const FetchMonitorStatesQueryArgsType = t.intersection([
   t.partial({

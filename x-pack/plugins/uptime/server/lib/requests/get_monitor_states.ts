@@ -6,7 +6,7 @@
 
 import { CONTEXT_DEFAULTS, QUERY } from '../../../common/constants';
 import { UMElasticsearchQueryFn } from '../adapters';
-import { MonitorSummary, SortOrder, CursorDirection } from '../../../common/runtime_types';
+import { SortOrder, CursorDirection, MonitorSummariesResult } from '../../../common/runtime_types';
 import { QueryContext, MonitorSummaryIterator } from './search';
 import { HistogramPoint, Histogram } from '../../../common/runtime_types';
 import { getHistogramInterval } from '../helper/get_histogram_interval';
@@ -26,12 +26,6 @@ export interface GetMonitorStatesParams {
   statusFilter?: string;
 }
 
-export interface GetMonitorStatesResult {
-  summaries: MonitorSummary[];
-  nextPagePagination: string | null;
-  prevPagePagination: string | null;
-}
-
 // To simplify the handling of the group of pagination vars they're passed back to the client as a string
 const jsonifyPagination = (p: any): string | null => {
   if (!p) {
@@ -44,7 +38,7 @@ const jsonifyPagination = (p: any): string | null => {
 // Gets a page of monitor states.
 export const getMonitorStates: UMElasticsearchQueryFn<
   GetMonitorStatesParams,
-  GetMonitorStatesResult
+  MonitorSummariesResult
 > = async ({
   callES,
   dynamicSettings,

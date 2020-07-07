@@ -142,6 +142,7 @@ export const query = async (
                   aggs: {
                     top: {
                       top_hits: {
+                        _source: ['@timestamp'],
                         sort: [{ '@timestamp': 'desc' }],
                         size: 1,
                       },

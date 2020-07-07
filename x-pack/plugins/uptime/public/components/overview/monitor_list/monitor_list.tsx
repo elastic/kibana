@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { HistogramPoint } from '../../../../common/runtime_types';
+import { HistogramPoint, X509Expiry } from '../../../../common/runtime_types';
 import { MonitorSummary } from '../../../../common/runtime_types';
 import { MonitorListStatusColumn } from './monitor_list_status_column';
 import { ExpandedRowMap } from './types';
@@ -122,7 +122,7 @@ export const MonitorListComponent: React.FC<Props> = ({
       align: 'left' as const,
       field: 'state.tls.server.x509',
       name: labels.TLS_COLUMN_LABEL,
-      render: (x509: any) => <CertStatusColumn expiry={x509} />,
+      render: (x509: X509Expiry) => <CertStatusColumn expiry={x509} />,
     },
     {
       align: 'center' as const,

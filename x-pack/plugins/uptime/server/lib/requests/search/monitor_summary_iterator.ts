@@ -31,9 +31,6 @@ export interface ChunkResult {
  * querying, this class provides a `next` function that is cleaner to call. `next` provides the next matching result,
  * which may require many subsequent fetches, while keeping the external API clean.
  */
-// matches, or may simple be empty results that tell us a to keep looking for more, this class exists to simplify things.
-// The idea is that you can call next() on it and receive the next matching result, even if internally we need to fetch
-// multiple chunks to find that result.
 export class MonitorSummaryIterator {
   queryContext: QueryContext;
   // Cache representing pre-fetched query results.
@@ -137,7 +134,7 @@ export class MonitorSummaryIterator {
    * to free up space.
    * @param size the number of items to chunk
    */
-  async attemptBufferMore(): Promise<{ hasMore: boolean; gotHit: boolean }> {
+  async attemptBufferMore(): Promise<{ gotHit: boolean }> {
     // Trim the buffer to just the current element since we'll be fetching more
     const current = this.getCurrent();
 
@@ -156,13 +153,14 @@ export class MonitorSummaryIterator {
       this.searchAfter = results.searchAfter;
     }
 
+    // Remember, the chunk fetcher might return no results in one chunk, but still have more matching
+    // results, so we use the searchAfter field to determine whether we keep going.
     if (!results.searchAfter) {
       this.endOfResults = true;
     }
 
     return {
       gotHit: results.monitorSummaries.length > 0,
-      hasMore: this.endOfResults,
     };
   }
 

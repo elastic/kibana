@@ -6,7 +6,7 @@
 
 import React from 'react';
 import {
-  MonitorSummaryResult,
+  MonitorSummariesResult,
   CursorDirection,
   SortOrder,
   makePing,
@@ -98,7 +98,7 @@ const testBarSummary: MonitorSummary = {
 
 // Failing: See https://github.com/elastic/kibana/issues/70386
 describe.skip('MonitorList component', () => {
-  let result: MonitorSummaryResult;
+  let result: MonitorSummariesResult;
   let localStorageMock: any;
 
   beforeEach(() => {
@@ -191,7 +191,7 @@ describe.skip('MonitorList component', () => {
   });
 
   describe('MonitorListPagination component', () => {
-    let paginationResult: MonitorSummaryResult;
+    let paginationResult: MonitorSummariesResult;
 
     beforeEach(() => {
       paginationResult = {
