@@ -17,11 +17,9 @@ export const RELEASE_BADGE_LABEL: { [key in Exclude<RegistryRelease, 'ga'>]: str
 
 export const RELEASE_BADGE_DESCRIPTION: { [key in Exclude<RegistryRelease, 'ga'>]: string } = {
   beta: i18n.translate('xpack.ingestManager.epm.releaseBadge.betaDescription', {
-    defaultMessage:
-      'This integration might change or be removed in a future release and is not subject to the support SLA.',
+    defaultMessage: 'This integration is not recommended for use in production environments.',
   }),
   experimental: i18n.translate('xpack.ingestManager.epm.releaseBadge.experimentalDescription', {
-    defaultMessage:
-      'This integration might change or be removed in a future release and is not subject to the support SLA.',
+    defaultMessage: 'This integration may have breaking changes or be removed in a future release.',
   }),
 };
