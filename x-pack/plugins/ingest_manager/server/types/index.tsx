@@ -41,6 +41,7 @@ export {
   PackageInfo,
   RegistryVarsEntry,
   Dataset,
+  RegistryElasticsearch,
   AssetReference,
   ElasticsearchAssetType,
   IngestAssetType,
