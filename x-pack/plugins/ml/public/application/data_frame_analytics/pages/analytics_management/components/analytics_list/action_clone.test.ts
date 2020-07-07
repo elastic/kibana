@@ -64,7 +64,7 @@ describe('Analytics job clone action', () => {
         },
         analyzed_fields: {
           includes: [],
-          excludes: ['id', 'outlier'],
+          excludes: [],
         },
         model_memory_limit: '1mb',
         allow_lazy_start: false,
@@ -96,7 +96,7 @@ describe('Analytics job clone action', () => {
           },
         },
         analyzed_fields: {
-          includes: [],
+          includes: ['included_field', 'other_included_field'],
           excludes: [],
         },
         model_memory_limit: '150mb',
@@ -140,6 +140,40 @@ describe('Analytics job clone action', () => {
       expect(isAdvancedConfig(advancedClassificationJob)).toBe(true);
     });
 
+    test('should detect advanced classification job with excludes set', () => {
+      const advancedClassificationJob = {
+        description: "Classification job with 'bank-marketing' dataset",
+        source: {
+          index: ['bank-marketing'],
+          query: {
+            match_all: {},
+          },
+        },
+        dest: {
+          index: 'dest_bank_1',
+          results_field: 'ml',
+        },
+        analysis: {
+          classification: {
+            dependent_variable: 'y',
+            num_top_classes: 2,
+            num_top_feature_importance_values: 4,
+            prediction_field_name: 'y_prediction',
+            training_percent: 2,
+            randomize_seed: 6233212276062807000,
+          },
+        },
+        analyzed_fields: {
+          includes: [],
+          excludes: ['excluded_field', 'other_excluded_field'],
+        },
+        model_memory_limit: '350mb',
+        allow_lazy_start: false,
+      };
+
+      expect(isAdvancedConfig(advancedClassificationJob)).toBe(true);
+    });
+
     test('should detect advanced regression job', () => {
       const advancedRegressionJob = {
         description: "Outlier detection job with 'glass' dataset",
@@ -161,7 +195,7 @@ describe('Analytics job clone action', () => {
         },
         analyzed_fields: {
           includes: [],
-          excludes: ['id', 'outlier'],
+          excludes: [],
         },
         model_memory_limit: '1mb',
         allow_lazy_start: false,
