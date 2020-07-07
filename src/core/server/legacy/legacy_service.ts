@@ -280,6 +280,7 @@ export class LegacyService implements CoreService {
         getOpsMetrics$: startDeps.core.metrics.getOpsMetrics$,
       },
       uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
+      auditTrail: startDeps.core.auditTrail,
     };
 
     const router = setupDeps.core.http.createRouter('', this.legacyId);
@@ -330,6 +331,7 @@ export class LegacyService implements CoreService {
       uuid: {
         getInstanceUuid: setupDeps.core.uuid.getInstanceUuid,
       },
+      auditTrail: setupDeps.core.auditTrail,
       getStartServices: () => Promise.resolve([coreStart, startDeps.plugins, {}]),
     };
 
