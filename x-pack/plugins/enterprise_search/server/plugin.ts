@@ -70,8 +70,9 @@ export class EnterpriseSearchPlugin implements Plugin {
       name: 'Enterprise Search',
       order: 0,
       icon: 'logoEnterpriseSearch',
-      app: ['enterprise_search', 'app_search', 'workplace_search'],
-      catalogue: ['enterprise_search', 'app_search', 'workplace_search'],
+      navLinkId: 'app_search', // TODO - remove this once functional tests no longer rely on navLinkId
+      app: ['kibana', 'app_search'], // TODO: 'enterprise_search', 'workplace_search'
+      catalogue: ['app_search'], // TODO: 'enterprise_search', 'workplace_search'
       privileges: null,
     });
 
