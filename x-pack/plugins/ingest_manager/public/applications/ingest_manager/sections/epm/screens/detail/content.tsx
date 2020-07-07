@@ -9,6 +9,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { DEFAULT_PANEL, DetailParams } from '.';
 import { PackageInfo } from '../../../../types';
+import { Loading } from '../../../../components';
 import { AssetsFacetGroup } from '../../components/assets_facet_group';
 import { CenterColumn, LeftColumn, RightColumn } from './layout';
 import { OverviewPanel } from './overview_panel';
@@ -17,19 +18,21 @@ import { PackageConfigsPanel } from './package_configs_panel';
 import { SettingsPanel } from './settings_panel';
 
 type ContentProps = PackageInfo & Pick<DetailParams, 'panel'>;
+
+const SideNavColumn = styled(LeftColumn)`
+  /* 🤢🤷 https://www.styled-components.com/docs/faqs#how-can-i-override-styles-with-higher-specificity */
+  &&& {
+    margin-top: 77px;
+  }
+`;
+
+// fixes IE11 problem with nested flex items
+const ContentFlexGroup = styled(EuiFlexGroup)`
+  flex: 0 0 auto !important;
+`;
+
 export function Content(props: ContentProps) {
   const { name, panel, version } = props;
-  const SideNavColumn = styled(LeftColumn)`
-    /* 🤢🤷 https://www.styled-components.com/docs/faqs#how-can-i-override-styles-with-higher-specificity */
-    &&& {
-      margin-top: 77px;
-    }
-  `;
-
-  // fixes IE11 problem with nested flex items
-  const ContentFlexGroup = styled(EuiFlexGroup)`
-    flex: 0 0 auto !important;
-  `;
   return (
     <ContentFlexGroup>
       <SideNavColumn>
@@ -50,7 +53,7 @@ export function ContentPanel(props: ContentPanelProps) {
   const { panel, name, version, assets, title, removable, latestVersion } = props;
   switch (panel) {
     case 'settings':
-      return (
+      return name ? (
         <SettingsPanel
           name={name}
           version={version}
@@ -59,6 +62,8 @@ export function ContentPanel(props: ContentPanelProps) {
           removable={removable}
           latestVersion={latestVersion}
         />
+      ) : (
+        <Loading />
       );
     case 'usages':
       return <PackageConfigsPanel name={name} version={version} />;
