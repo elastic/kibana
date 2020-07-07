@@ -19,17 +19,19 @@ export const ConfigurationStep: FC<CreateAnalyticsStepProps> = ({
   step,
   stepActivated,
 }) => {
+  const showForm = step === ANALYTICS_STEPS.CONFIGURATION;
+  const showDetails = step !== ANALYTICS_STEPS.CONFIGURATION && stepActivated === true;
+
+  const dataTestSubj = `mlAnalyticsCreateJobWizardConfigurationStep${showForm ? ' active' : ''}${
+    showDetails ? ' summary' : ''
+  }`;
+
   return (
-    <EuiForm
-      className="mlDataFrameAnalyticsCreateForm"
-      data-test-subj="mlAnalyticsCreateJobWizardConfigurationStep"
-    >
-      {step === ANALYTICS_STEPS.CONFIGURATION && (
+    <EuiForm className="mlDataFrameAnalyticsCreateForm" data-test-subj={dataTestSubj}>
+      {showForm && (
         <ConfigurationStepForm actions={actions} state={state} setCurrentStep={setCurrentStep} />
       )}
-      {step !== ANALYTICS_STEPS.CONFIGURATION && stepActivated === true && (
-        <ConfigurationStepDetails setCurrentStep={setCurrentStep} state={state} />
-      )}
+      {showDetails && <ConfigurationStepDetails setCurrentStep={setCurrentStep} state={state} />}
     </EuiForm>
   );
 };
