@@ -140,14 +140,17 @@ export class Home extends Component {
 
   renderNormal() {
     const { addBasePath, canChangeHomeRoute = true, directories } = this.props;
+
     console.log({ directories });
 
     const fileDataVisualizer = this.findDirectoryById('ml_file_data_visualizer');
-    const ingestManager = this.findDirectoryById('ingest_manager', { isBeta: true });
+    const ingestManager = this.findDirectoryById('ingestManager', { isBeta: true });
     const security = this.findDirectoryById('security');
     const monitoring = this.findDirectoryById('monitoring');
     const snapshotRestore = this.findDirectoryById('snapshot_restore');
     const indexLifecycleManagement = this.findDirectoryById('index_lifecycle_management');
+    const devTools = this.findDirectoryById('console');
+    const stackManagement = this.findDirectoryById('stack-management');
 
     return (
       <EuiPage restrictWidth={1200} data-test-subj="homeApp">
@@ -179,30 +182,34 @@ export class Home extends Component {
                     })}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
+                {stackManagement ? (
+                  <EuiFlexItem>
+                    <EuiButtonEmpty
+                      onClick={createAppNavigationHandler(stackManagement.path)}
+                      iconType="gear"
+                    >
+                      {i18n.translate('home.pageHeader.managementButtonLabel', {
+                        defaultMessage: 'Manage',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                ) : null}
+                {devTools ? (
+                  <EuiFlexItem>
+                    <EuiButtonEmpty
+                      onClick={createAppNavigationHandler(devTools.path)}
+                      iconType="wrench"
+                    >
+                      {i18n.translate('home.pageHeader.devToolsButtonLabel', {
+                        defaultMessage: 'Dev tools',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                ) : null}
                 <EuiFlexItem>
                   <EuiButtonEmpty href="#/feature_directory" iconType="apps">
                     {i18n.translate('home.pageHeader.appDirectoryButtonLabel', {
                       defaultMessage: 'App directory',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiButtonEmpty
-                    onClick={createAppNavigationHandler('/app/dev_tools')} // TODO: passing both causes EUI lint error, but providing an href allows the user to open the link in a new tab
-                    iconType="wrench"
-                  >
-                    {i18n.translate('home.pageHeader.devToolsButtonLabel', {
-                      defaultMessage: 'Dev tools',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiButtonEmpty
-                    onClick={createAppNavigationHandler('/app/management')} // TODO: passing both causes EUI lint error, but providing an href allows the user to open the link in a new tab
-                    iconType="gear"
-                  >
-                    {i18n.translate('home.pageHeader.managementButtonLabel', {
-                      defaultMessage: 'Manage',
                     })}
                   </EuiButtonEmpty>
                 </EuiFlexItem>

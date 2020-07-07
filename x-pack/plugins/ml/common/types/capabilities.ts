@@ -78,7 +78,7 @@ export function getPluginPrivileges() {
     management: {
       insightsAndAlerting: ['jobsListLink'],
     },
-    catalogue: [PLUGIN_ID],
+    catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
     savedObject: {
       all: [],
       read: ['index-pattern', 'search'],

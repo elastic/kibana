@@ -27,7 +27,7 @@ interface Props {
   defaultRoute?: string;
 }
 
-export const ChangeHomeRoute: FunctionComponent<Props = ({ defaultRoute }) => {
+export const ChangeHomeRoute: FunctionComponent<Props> = ({ defaultRoute }) => {
   const { uiSettings } = getServices();
   const changeDefaultRoute = () => uiSettings.set('defaultRoute', defaultRoute);
 

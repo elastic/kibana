@@ -61,7 +61,7 @@ export class IndexLifecycleManagementPlugin {
       });
 
       home.featureCatalogue.register({
-        id: 'index_lifecycle_management',
+        id: PLUGIN.ID,
         title: i18n.translate('xpack.indexLifecycleManagement.featureCatalogueTitle', {
           defaultMessage: 'Manage index lifecycles',
         }),

@@ -19,6 +19,7 @@ import {
 } from '../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { PLUGIN_ID, CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
+import { BASE_PATH } from './constants';
 
 import { IngestManagerConfigType } from '../common/types';
 import { setupRouteService, appRoutesService } from '../common';
@@ -99,7 +100,7 @@ export class IngestManagerPlugin
       deps.home.tutorials.registerModuleNotice(PLUGIN_ID, TutorialModuleNotice);
 
       deps.home.featureCatalogue.register({
-        id: 'ingest_manager',
+        id: 'ingestManager',
         title: i18n.translate('xpack.ingestManager.featureCatalogueTitle', {
           defaultMessage: 'Manage ingest',
         }),
@@ -107,8 +108,8 @@ export class IngestManagerPlugin
           defaultMessage: 'Management for Elastic Agents and integrations.',
         }),
         icon: 'logstashInput',
-        path: '/app/ingestManager',
         showOnHomePage: true,
+        path: BASE_PATH,
         category: FeatureCatalogueCategory.ADMIN, // TODO: is the correct category for this plugin?
       });
     }
