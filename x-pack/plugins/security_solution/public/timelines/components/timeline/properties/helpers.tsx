@@ -20,19 +20,31 @@ import {
 import React, { useCallback } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
-import { useHistory } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { TimelineStatus } from '../../../../../common/types/timeline';
+import { APP_ID } from '../../../../../common/constants';
+import {
+  TimelineTypeLiteral,
+  TimelineStatus,
+  TimelineType,
+  TimelineStatusLiteral,
+  TimelineId,
+} from '../../../../../common/types/timeline';
+import { SecurityPageName } from '../../../../app/types';
+import { timelineSelectors } from '../../../../timelines/store/timeline';
+import { getCreateCaseUrl } from '../../../../common/components/link_to';
+import { State } from '../../../../common/store';
+import { useKibana } from '../../../../common/lib/kibana';
 import { Note } from '../../../../common/lib/note';
+
 import { Notes } from '../../notes';
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
+
 import { NOTES_PANEL_WIDTH } from './notes_size';
 import { ButtonContainer, DescriptionContainer, LabelText, NameField, StyledStar } from './styles';
 import * as i18n from './translations';
-import { SiemPageName } from '../../../../app/types';
-import { timelineSelectors } from '../../../../timelines/store/timeline';
-import { State } from '../../../../common/store';
+import { setInsertTimeline, showTimeline } from '../../../store/timeline/actions';
+import { useCreateTimelineButton } from './use_create_timeline';
 
 export const historyToolTip = 'The chronological history of actions related to this timeline';
 export const streamLiveToolTip = 'Update the Timeline as new data arrives';
@@ -44,7 +56,15 @@ const NotesCountBadge = (styled(EuiBadge)`
 
 NotesCountBadge.displayName = 'NotesCountBadge';
 
-type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
+type CreateTimeline = ({
+  id,
+  show,
+  timelineType,
+}: {
+  id: string;
+  show?: boolean;
+  timelineType?: TimelineTypeLiteral;
+}) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
 type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
@@ -118,6 +138,8 @@ export const Name = React.memo<NameProps>(({ timelineId, title, updateTitle }) =
 Name.displayName = 'Name';
 
 interface NewCaseProps {
+  compact?: boolean;
+  graphEventId?: string;
   onClosePopover: () => void;
   timelineId: string;
   timelineStatus: TimelineStatus;
@@ -125,65 +147,114 @@ interface NewCaseProps {
 }
 
 export const NewCase = React.memo<NewCaseProps>(
-  ({ onClosePopover, timelineId, timelineStatus, timelineTitle }) => {
-    const history = useHistory();
+  ({ compact, graphEventId, onClosePopover, timelineId, timelineStatus, timelineTitle }) => {
+    const dispatch = useDispatch();
     const { savedObjectId } = useSelector((state: State) =>
       timelineSelectors.selectTimeline(state, timelineId)
     );
+    const { navigateToApp } = useKibana().services.application;
+    const buttonText = compact ? i18n.ATTACH_TO_NEW_CASE : i18n.ATTACH_TIMELINE_TO_NEW_CASE;
+
     const handleClick = useCallback(() => {
       onClosePopover();
-      history.push({
-        pathname: `/${SiemPageName.case}/create`,
-        state: {
-          insertTimeline: {
+
+      dispatch(showTimeline({ id: TimelineId.active, show: false }));
+
+      navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+        path: getCreateCaseUrl(),
+      }).then(() =>
+        dispatch(
+          setInsertTimeline({
+            graphEventId,
             timelineId,
             timelineSavedObjectId: savedObjectId,
             timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
-          },
-        },
-      });
-    }, [onClosePopover, history, timelineId, timelineTitle]);
+          })
+        )
+      );
+    }, [
+      dispatch,
+      graphEventId,
+      navigateToApp,
+      onClosePopover,
+      savedObjectId,
+      timelineId,
+      timelineTitle,
+    ]);
 
     return (
       <EuiButtonEmpty
         data-test-subj="attach-timeline-case"
-        color="text"
+        color={compact ? undefined : 'text'}
         iconSide="left"
         iconType="paperClip"
         disabled={timelineStatus === TimelineStatus.draft}
         onClick={handleClick}
+        size={compact ? 'xs' : undefined}
       >
-        {i18n.ATTACH_TIMELINE_TO_NEW_CASE}
+        {buttonText}
       </EuiButtonEmpty>
     );
   }
 );
 NewCase.displayName = 'NewCase';
 
-interface NewTimelineProps {
-  createTimeline: CreateTimeline;
+interface ExistingCaseProps {
+  compact?: boolean;
   onClosePopover: () => void;
+  onOpenCaseModal: () => void;
+  timelineStatus: TimelineStatus;
+}
+export const ExistingCase = React.memo<ExistingCaseProps>(
+  ({ compact, onClosePopover, onOpenCaseModal, timelineStatus }) => {
+    const handleClick = useCallback(() => {
+      onClosePopover();
+      onOpenCaseModal();
+    }, [onOpenCaseModal, onClosePopover]);
+    const buttonText = compact
+      ? i18n.ATTACH_TO_EXISTING_CASE
+      : i18n.ATTACH_TIMELINE_TO_EXISTING_CASE;
+
+    return (
+      <>
+        <EuiButtonEmpty
+          data-test-subj="attach-timeline-existing-case"
+          color={compact ? undefined : 'text'}
+          iconSide="left"
+          iconType="paperClip"
+          disabled={timelineStatus === TimelineStatus.draft}
+          onClick={handleClick}
+          size={compact ? 'xs' : undefined}
+        >
+          {buttonText}
+        </EuiButtonEmpty>
+      </>
+    );
+  }
+);
+ExistingCase.displayName = 'ExistingCase';
+
+export interface NewTimelineProps {
+  createTimeline?: CreateTimeline;
+  closeGearMenu?: () => void;
+  outline?: boolean;
   timelineId: string;
+  title?: string;
 }
 
 export const NewTimeline = React.memo<NewTimelineProps>(
-  ({ createTimeline, onClosePopover, timelineId }) => {
-    const handleClick = useCallback(() => {
-      createTimeline({ id: timelineId, show: true });
-      onClosePopover();
-    }, [createTimeline, timelineId, onClosePopover]);
+  ({ closeGearMenu, outline = false, timelineId, title = i18n.NEW_TIMELINE }) => {
+    const uiCapabilities = useKibana().services.application.capabilities;
+    const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.siem.crud;
 
-    return (
-      <EuiButtonEmpty
-        data-test-subj="timeline-new"
-        color="text"
-        iconSide="left"
-        iconType="plusInCircle"
-        onClick={handleClick}
-      >
-        {i18n.NEW_TIMELINE}
-      </EuiButtonEmpty>
-    );
+    const { getButton } = useCreateTimelineButton({
+      timelineId,
+      timelineType: TimelineType.default,
+      closeGearMenu,
+    });
+    const button = getButton({ outline, title });
+
+    return capabilitiesCanUserCRUD ? button : null;
   }
 );
 NewTimeline.displayName = 'NewTimeline';
@@ -194,11 +265,13 @@ interface NotesButtonProps {
   getNotesByIds: (noteIds: string[]) => Note[];
   noteIds: string[];
   size: 's' | 'l';
+  status: TimelineStatusLiteral;
   showNotes: boolean;
   toggleShowNotes: () => void;
   text?: string;
   toolTip?: string;
   updateNote: UpdateNote;
+  timelineType: TimelineTypeLiteral;
 }
 
 const getNewNoteId = (): string => uuid.v4();
@@ -235,16 +308,24 @@ LargeNotesButton.displayName = 'LargeNotesButton';
 interface SmallNotesButtonProps {
   noteIds: string[];
   toggleShowNotes: () => void;
+  timelineType: TimelineTypeLiteral;
 }
 
-const SmallNotesButton = React.memo<SmallNotesButtonProps>(({ noteIds, toggleShowNotes }) => (
-  <EuiButtonIcon
-    aria-label={i18n.NOTES}
-    data-test-subj="timeline-notes-button-small"
-    iconType="editorComment"
-    onClick={() => toggleShowNotes()}
-  />
-));
+const SmallNotesButton = React.memo<SmallNotesButtonProps>(
+  ({ noteIds, toggleShowNotes, timelineType }) => {
+    const isTemplate = timelineType === TimelineType.template;
+
+    return (
+      <EuiButtonIcon
+        aria-label={i18n.NOTES}
+        data-test-subj="timeline-notes-button-small"
+        iconType="editorComment"
+        onClick={() => toggleShowNotes()}
+        isDisabled={isTemplate}
+      />
+    );
+  }
+);
 SmallNotesButton.displayName = 'SmallNotesButton';
 
 /**
@@ -258,25 +339,32 @@ const NotesButtonComponent = React.memo<NotesButtonProps>(
     noteIds,
     showNotes,
     size,
+    status,
     toggleShowNotes,
     text,
     updateNote,
+    timelineType,
   }) => (
     <ButtonContainer animate={animate} data-test-subj="timeline-notes-button-container">
       <>
         {size === 'l' ? (
           <LargeNotesButton noteIds={noteIds} text={text} toggleShowNotes={toggleShowNotes} />
         ) : (
-          <SmallNotesButton noteIds={noteIds} toggleShowNotes={toggleShowNotes} />
+          <SmallNotesButton
+            noteIds={noteIds}
+            toggleShowNotes={toggleShowNotes}
+            timelineType={timelineType}
+          />
         )}
         {size === 'l' && showNotes ? (
           <EuiOverlayMask>
             <EuiModal maxWidth={NOTES_PANEL_WIDTH} onClose={toggleShowNotes}>
               <Notes
                 associateNote={associateNote}
-                getNotesByIds={getNotesByIds}
-                noteIds={noteIds}
                 getNewNoteId={getNewNoteId}
+                getNotesByIds={getNotesByIds}
+                status={status}
+                noteIds={noteIds}
                 updateNote={updateNote}
               />
             </EuiModal>
@@ -296,6 +384,8 @@ export const NotesButton = React.memo<NotesButtonProps>(
     noteIds,
     showNotes,
     size,
+    status,
+    timelineType,
     toggleShowNotes,
     toolTip,
     text,
@@ -309,9 +399,11 @@ export const NotesButton = React.memo<NotesButtonProps>(
         noteIds={noteIds}
         showNotes={showNotes}
         size={size}
+        status={status}
         toggleShowNotes={toggleShowNotes}
         text={text}
         updateNote={updateNote}
+        timelineType={timelineType}
       />
     ) : (
       <EuiToolTip content={toolTip || ''} data-test-subj="timeline-notes-tool-tip">
@@ -322,9 +414,11 @@ export const NotesButton = React.memo<NotesButtonProps>(
           noteIds={noteIds}
           showNotes={showNotes}
           size={size}
+          status={status}
           toggleShowNotes={toggleShowNotes}
           text={text}
           updateNote={updateNote}
+          timelineType={timelineType}
         />
       </EuiToolTip>
     )

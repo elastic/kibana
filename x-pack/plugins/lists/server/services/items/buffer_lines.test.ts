@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TestReadable } from '../../../common/test_readable.mock';
-
 import { BufferLines } from './buffer_lines';
+import { TestReadable } from './test_readable.mock';
 
 describe('buffer_lines', () => {
   test('it can read a single line', (done) => {

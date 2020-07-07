@@ -4,36 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { AlertType, State, AlertExecutorOptions } from '../../../../../alerts/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
-import { RuleAlertParams, OutputRuleAlertRest } from '../types';
+import { RuleTypeParams } from '../types';
 import { SearchResponse } from '../../types';
 
 export interface SignalsParams {
   signalIds: string[] | undefined | null;
   query: object | undefined | null;
-  status: 'open' | 'closed';
+  status: Status;
 }
 
 export interface SignalsStatusParams {
   signalIds: string[] | undefined | null;
   query: object | undefined | null;
-  status: 'open' | 'closed';
+  status: Status;
 }
-
-export interface SignalQueryParams {
-  query: object | undefined | null;
-  aggs: object | undefined | null;
-  _source: string[] | undefined | null;
-  size: number | undefined | null;
-  track_total_hits: boolean | undefined | null;
-}
-
-export type SignalsStatusRestParams = Omit<SignalsStatusParams, 'signalIds'> & {
-  signal_ids: SignalsStatusParams['signalIds'];
-};
-
-export type SignalsQueryRestParams = SignalQueryParams;
 
 export type SearchTypes =
   | string
@@ -105,10 +93,7 @@ export type SignalSearchResponse = SearchResponse<SignalSource>;
 export type SignalSourceHit = SignalSearchResponse['hits']['hits'][number];
 
 export type RuleExecutorOptions = Omit<AlertExecutorOptions, 'params'> & {
-  params: RuleAlertParams & {
-    scrollSize: number;
-    scrollLock: string;
-  };
+  params: RuleTypeParams;
 };
 
 // This returns true because by default a RuleAlertTypeDefinition is an AlertType
@@ -130,12 +115,12 @@ export interface Ancestor {
 }
 
 export interface Signal {
-  rule: Partial<OutputRuleAlertRest>;
+  rule: Partial<RulesSchema>;
   parent: Ancestor;
   ancestors: Ancestor[];
   original_time: string;
   original_event?: SearchTypes;
-  status: 'open' | 'closed';
+  status: Status;
 }
 
 export interface SignalHit {
@@ -159,12 +144,7 @@ export interface AlertAttributes {
 }
 
 export interface RuleAlertAttributes extends AlertAttributes {
-  params: Omit<
-    RuleAlertParams,
-    'ruleId' | 'name' | 'enabled' | 'interval' | 'tags' | 'actions' | 'throttle'
-  > & {
-    ruleId: string;
-  };
+  params: RuleTypeParams;
 }
 
 export type BulkResponseErrorAggregation = Record<string, { count: number; statusCode: number }>;

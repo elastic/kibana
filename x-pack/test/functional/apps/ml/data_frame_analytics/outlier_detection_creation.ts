@@ -11,7 +11,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('outlier detection creation', function () {
+  // Flaky: https://github.com/elastic/kibana/issues/70906
+  describe.skip('outlier detection creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ihp_outlier');
       await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier', '@timestamp');
@@ -34,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
         get destinationIndex(): string {
           return `user-${this.jobId}`;
         },
-        modelMemory: '55mb',
+        modelMemory: '5mb',
         createIndexPattern: true,
         expected: {
           row: {
@@ -50,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await ml.api.deleteIndices(testData.destinationIndex);
-          await ml.testResources.deleteIndexPattern(testData.destinationIndex);
+          await ml.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
         });
 
         it('loads the data frame analytics page', async () => {
@@ -63,7 +64,8 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('selects the source data and loads the job wizard page', async () => {
-          ml.jobSourceSelection.selectSourceForAnalyticsJob(testData.source);
+          await ml.jobSourceSelection.selectSourceForAnalyticsJob(testData.source);
+          await ml.dataFrameAnalyticsCreation.assertConfigurationStepActive();
         });
 
         it('selects the job type', async () => {
@@ -77,6 +79,14 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('does not display the training percent input', async () => {
           await ml.dataFrameAnalyticsCreation.assertTrainingPercentInputMissing();
+        });
+
+        it('displays the source data preview', async () => {
+          await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewExists();
+        });
+
+        it('displays the include fields selection', async () => {
+          await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
         });
 
         it('continues to the additional options step', async () => {

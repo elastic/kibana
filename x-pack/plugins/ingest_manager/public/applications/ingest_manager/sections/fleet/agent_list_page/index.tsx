@@ -236,7 +236,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'active',
-      width: '100px',
+      width: '120px',
       name: i18n.translate('xpack.ingestManager.agentList.statusColumnTitle', {
         defaultMessage: 'Status',
       }),
@@ -245,7 +245,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     {
       field: 'config_id',
       name: i18n.translate('xpack.ingestManager.agentList.configColumnTitle', {
-        defaultMessage: 'Configuration',
+        defaultMessage: 'Agent config',
       }),
       render: (configId: string, agent: Agent) => {
         const configName = agentConfigs.find((p) => p.id === configId)?.name;
@@ -445,7 +445,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                     >
                       <FormattedMessage
                         id="xpack.ingestManager.agentList.configFilterText"
-                        defaultMessage="Configs"
+                        defaultMessage="Agent config"
                       />
                     </EuiFilterButton>
                   }
@@ -489,6 +489,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       <EuiSpacer size="m" />
       <EuiBasicTable<Agent>
         className="fleet__agentList__table"
+        data-test-subj="fleetAgentListTable"
         loading={isLoading && agentsRequest.isInitialRequest}
         hasActions={true}
         noItemsMessage={

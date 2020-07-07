@@ -91,6 +91,7 @@ export const StartAction: FC<StartActionProps> = ({ items, forceDisable }) => {
 
   let startButton = (
     <EuiButtonEmpty
+      data-test-subj="transformActionStart"
       size="xs"
       color="text"
       disabled={forceDisable === true || actionIsDisabled}

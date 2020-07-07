@@ -13,10 +13,10 @@ import {
 describe('checkActionTypeEnabled', () => {
   test(`returns isEnabled:true when action type isn't provided`, async () => {
     expect(checkActionTypeEnabled()).toMatchInlineSnapshot(`
-    Object {
-      "isEnabled": true,
-    }
-  `);
+          Object {
+            "isEnabled": true,
+          }
+      `);
   });
 
   test('returns isEnabled:true when action type is enabled', async () => {
@@ -29,10 +29,10 @@ describe('checkActionTypeEnabled', () => {
       enabledInLicense: true,
     };
     expect(checkActionTypeEnabled(actionType)).toMatchInlineSnapshot(`
-    Object {
-      "isEnabled": true,
-    }
-  `);
+          Object {
+            "isEnabled": true,
+          }
+      `);
   });
 
   test('returns isEnabled:false when action type is disabled by license', async () => {
@@ -45,28 +45,28 @@ describe('checkActionTypeEnabled', () => {
       enabledInLicense: false,
     };
     expect(checkActionTypeEnabled(actionType)).toMatchInlineSnapshot(`
-    Object {
-      "isEnabled": false,
-      "message": "This connector requires a Basic license.",
-      "messageCard": <EuiCard
-        className="actCheckActionTypeEnabled__disabledActionWarningCard"
-        description="To re-enable this action, please upgrade your license."
-        title="This feature requires a Basic license."
-        titleSize="xs"
-      >
-        <ForwardRef
-          href="https://www.elastic.co/subscriptions"
-          target="_blank"
+      Object {
+        "isEnabled": false,
+        "message": "This connector requires a Basic license.",
+        "messageCard": <EuiCard
+          className="actCheckActionTypeEnabled__disabledActionWarningCard"
+          description="To re-enable this action, please upgrade your license."
+          title="This feature requires a Basic license."
+          titleSize="xs"
         >
-          <FormattedMessage
-            defaultMessage="View license options"
-            id="xpack.triggersActionsUI.sections.alertForm.actionTypeDisabledByLicenseLinkTitle"
-            values={Object {}}
-          />
-        </ForwardRef>
-      </EuiCard>,
-    }
-  `);
+          <EuiLink
+            href="https://www.elastic.co/subscriptions"
+            target="_blank"
+          >
+            <FormattedMessage
+              defaultMessage="View license options"
+              id="xpack.triggersActionsUI.sections.alertForm.actionTypeDisabledByLicenseLinkTitle"
+              values={Object {}}
+            />
+          </EuiLink>
+        </EuiCard>,
+      }
+    `);
   });
 
   test('returns isEnabled:false when action type is disabled by config', async () => {
@@ -79,16 +79,16 @@ describe('checkActionTypeEnabled', () => {
       enabledInLicense: true,
     };
     expect(checkActionTypeEnabled(actionType)).toMatchInlineSnapshot(`
-    Object {
-      "isEnabled": false,
-      "message": "This connector is disabled by the Kibana configuration.",
-      "messageCard": <EuiCard
-        className="actCheckActionTypeEnabled__disabledActionWarningCard"
-        description=""
-        title="This feature is disabled by the Kibana configuration."
-      />,
-    }
-  `);
+          Object {
+            "isEnabled": false,
+            "message": "This connector is disabled by the Kibana configuration.",
+            "messageCard": <EuiCard
+              className="actCheckActionTypeEnabled__disabledActionWarningCard"
+              description=""
+              title="This feature is disabled by the Kibana configuration."
+            />,
+          }
+      `);
   });
 });
 
@@ -126,10 +126,10 @@ describe('checkActionFormActionTypeEnabled', () => {
 
     expect(checkActionFormActionTypeEnabled(actionType, preconfiguredConnectors))
       .toMatchInlineSnapshot(`
-    Object {
-      "isEnabled": true,
-    }
-  `);
+          Object {
+            "isEnabled": true,
+          }
+      `);
   });
 
   test('returns isEnabled:false when action type is disabled by config and not preconfigured', async () => {
@@ -143,15 +143,15 @@ describe('checkActionFormActionTypeEnabled', () => {
     };
     expect(checkActionFormActionTypeEnabled(actionType, preconfiguredConnectors))
       .toMatchInlineSnapshot(`
-    Object {
-      "isEnabled": false,
-      "message": "This connector is disabled by the Kibana configuration.",
-      "messageCard": <EuiCard
-        className="actCheckActionTypeEnabled__disabledActionWarningCard"
-        description=""
-        title="This feature is disabled by the Kibana configuration."
-      />,
-    }
-  `);
+          Object {
+            "isEnabled": false,
+            "message": "This connector is disabled by the Kibana configuration.",
+            "messageCard": <EuiCard
+              className="actCheckActionTypeEnabled__disabledActionWarningCard"
+              description=""
+              title="This feature is disabled by the Kibana configuration."
+            />,
+          }
+      `);
   });
 });

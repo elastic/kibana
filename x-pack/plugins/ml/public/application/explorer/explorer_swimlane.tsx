@@ -22,14 +22,14 @@ import { numTicksForDateFormat } from '../util/chart_utils';
 import { getSeverityColor } from '../../../common/util/anomaly_utils';
 import { mlEscape } from '../util/string_utils';
 import { ALLOW_CELL_RANGE_SELECTION, dragSelect$ } from './explorer_dashboard_service';
-import { DRAG_SELECT_ACTION } from './explorer_constants';
+import { DRAG_SELECT_ACTION, SwimlaneType } from './explorer_constants';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
 import {
   ChartTooltipService,
   ChartTooltipValue,
 } from '../components/chart_tooltip/chart_tooltip_service';
-import { OverallSwimlaneData } from './explorer_utils';
+import { OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 
 const SCSS = {
   mlDragselectDragging: 'mlDragselectDragging',
@@ -57,8 +57,8 @@ export interface ExplorerSwimlaneProps {
   maskAll?: boolean;
   timeBuckets: InstanceType<typeof TimeBucketsClass>;
   swimlaneCellClick?: Function;
-  swimlaneData: OverallSwimlaneData;
-  swimlaneType: string;
+  swimlaneData: OverallSwimlaneData | ViewBySwimLaneData;
+  swimlaneType: SwimlaneType;
   selection?: {
     lanes: any[];
     type: string;
@@ -211,7 +211,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
     const { swimlaneType } = this.props;
 
     // This selects both overall and viewby swimlane
-    const wrapper = d3.selectAll('.ml-explorer-swimlane');
+    const wrapper = d3.selectAll('.mlExplorerSwimlane');
 
     wrapper.selectAll('.lane-label').classed('lane-label-masked', true);
     wrapper
@@ -242,7 +242,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
   maskIrrelevantSwimlanes(maskAll: boolean) {
     if (maskAll === true) {
       // This selects both overall and viewby swimlane
-      const allSwimlanes = d3.selectAll('.ml-explorer-swimlane');
+      const allSwimlanes = d3.selectAll('.mlExplorerSwimlane');
       allSwimlanes.selectAll('.lane-label').classed('lane-label-masked', true);
       allSwimlanes
         .selectAll('.sl-cell-inner,.sl-cell-inner-dragselect')
@@ -258,7 +258,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
 
   clearSelection() {
     // This selects both overall and viewby swimlane
-    const wrapper = d3.selectAll('.ml-explorer-swimlane');
+    const wrapper = d3.selectAll('.mlExplorerSwimlane');
 
     wrapper.selectAll('.lane-label').classed('lane-label-masked', false);
     wrapper.selectAll('.sl-cell-inner').classed('sl-cell-inner-masked', false);

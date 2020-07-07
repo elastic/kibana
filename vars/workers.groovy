@@ -3,16 +3,18 @@
 
 def label(size) {
   switch(size) {
+    case 'flyweight':
+      return 'flyweight'
     case 's':
-      return 'linux && immutable'
+      return 'docker && linux && immutable'
     case 's-highmem':
-      return 'tests-s'
+      return 'docker && tests-s'
     case 'l':
-      return 'tests-l'
+      return 'docker && tests-l'
     case 'xl':
-      return 'tests-xl'
+      return 'docker && tests-xl'
     case 'xxl':
-      return 'tests-xxl'
+      return 'docker && tests-xxl'
   }
 
   error "unknown size '${size}'"
@@ -63,6 +65,12 @@ def base(Map params, Closure closure) {
 
       dir("kibana") {
         checkoutInfo = getCheckoutInfo()
+
+        // use `checkoutInfo` as a flag to indicate that we've already reported the pending commit status
+        if (buildState.get('shouldSetCommitStatus') && !buildState.has('checkoutInfo')) {
+          buildState.set('checkoutInfo', checkoutInfo)
+          githubCommitStatus.onStart()
+        }
       }
 
       ciStats.reportGitInfo(

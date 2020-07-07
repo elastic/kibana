@@ -25,8 +25,15 @@ import { Sort } from './body/sort';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { StatefulTimeline, Props as StatefulTimelineProps } from './index';
 import { Timeline } from './timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../common/lib/kibana');
+  return {
+    ...originalModule,
+    useGetUserSavedObjectPermissions: jest.fn(),
+  };
+});
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
@@ -34,7 +41,15 @@ mockUseResizeObserver.mockImplementation(() => ({}));
 
 const mockUseSignalIndex: jest.Mock = useSignalIndex as jest.Mock<ReturnSignalIndex>;
 jest.mock('../../../alerts/containers/detection_engine/alerts/use_signal_index');
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
 
+  return {
+    ...original,
+    useHistory: jest.fn(),
+  };
+});
+jest.mock('../flyout/header_with_close_button');
 describe('StatefulTimeline', () => {
   let props = {} as StatefulTimelineProps;
   const sort: Sort = {
@@ -58,8 +73,10 @@ describe('StatefulTimeline', () => {
       eventType: 'raw',
       end: endDate,
       filters: [],
+      graphEventId: undefined,
       id: 'foo',
       isLive: false,
+      isTimelineExists: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search',
@@ -72,6 +89,8 @@ describe('StatefulTimeline', () => {
       showCallOutUnauthorizedMsg: false,
       sort,
       start: startDate,
+      status: TimelineStatus.active,
+      timelineType: TimelineType.default,
       updateColumns: timelineActions.updateColumns,
       updateDataProviderEnabled: timelineActions.updateDataProviderEnabled,
       updateDataProviderExcluded: timelineActions.updateDataProviderExcluded,

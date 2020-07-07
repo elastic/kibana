@@ -31,6 +31,7 @@ export const ThrottleSelectField: ThrottleSelectField = (props) => {
       props.field.setValue(throttle);
       props.handleChange(throttle);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.field.setValue, props.handleChange]
   );
   const newEuiFieldProps = { ...props.euiFieldProps, onChange };

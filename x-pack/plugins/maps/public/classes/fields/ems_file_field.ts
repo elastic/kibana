@@ -30,12 +30,6 @@ export class EMSFileField extends AbstractField implements IField {
   }
 
   async getLabel(): Promise<string> {
-    const emsFileLayer = await this._source.getEMSFileLayer();
-    // TODO remove any and @ts-ignore when emsFileLayer type defined
-    // @ts-ignore
-    const emsFields: any[] = emsFileLayer.getFieldsInLanguage();
-    // Map EMS field name to language specific label
-    const emsField = emsFields.find((field) => field.name === this.getName());
-    return emsField ? emsField.description : this.getName();
+    return this._source.getEmsFieldLabel(this.getName());
   }
 }

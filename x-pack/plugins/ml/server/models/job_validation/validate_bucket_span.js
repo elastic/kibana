@@ -5,9 +5,8 @@
  */
 
 import { estimateBucketSpanFactory } from '../../models/bucket_span_estimator';
-import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
+import { mlFunctionToESAggregation, parseTimeIntervalForJob } from '../../../common/util/job_utils';
 import { SKIP_BUCKET_SPAN_ESTIMATION } from '../../../common/constants/validation';
-import { parseInterval } from '../../../common/util/parse_interval';
 
 import { validateJobObject } from './validate_job_object';
 
@@ -65,8 +64,11 @@ export async function validateBucketSpan(
   }
 
   const messages = [];
-  const parsedBucketSpan = parseInterval(job.analysis_config.bucket_span);
-  if (parsedBucketSpan === null || parsedBucketSpan.asMilliseconds() === 0) {
+
+  // Bucket span must be a valid interval, greater than 0,
+  // and if specified in ms must be a multiple of 1000ms
+  const parsedBucketSpan = parseTimeIntervalForJob(job.analysis_config.bucket_span);
+  if (parsedBucketSpan === null) {
     messages.push({ id: 'bucket_span_invalid' });
     return messages;
   }

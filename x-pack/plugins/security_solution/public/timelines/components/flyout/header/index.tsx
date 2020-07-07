@@ -33,14 +33,16 @@ const StatefulFlyoutHeader = React.memo<Props>(
     associateNote,
     createTimeline,
     description,
-    isFavorite,
+    graphEventId,
     isDataInTimeline,
     isDatepickerLocked,
-    title,
+    isFavorite,
     noteIds,
     notesById,
     status,
     timelineId,
+    timelineType,
+    title,
     toggleLock,
     updateDescription,
     updateIsFavorite,
@@ -58,18 +60,20 @@ const StatefulFlyoutHeader = React.memo<Props>(
         createTimeline={createTimeline}
         description={description}
         getNotesByIds={getNotesByIds}
+        graphEventId={graphEventId}
         isDataInTimeline={isDataInTimeline}
         isDatepickerLocked={isDatepickerLocked}
         isFavorite={isFavorite}
-        title={title}
         noteIds={noteIds}
         status={status}
         timelineId={timelineId}
+        timelineType={timelineType}
+        title={title}
         toggleLock={toggleLock}
         updateDescription={updateDescription}
         updateIsFavorite={updateIsFavorite}
-        updateTitle={updateTitle}
         updateNote={updateNote}
+        updateTitle={updateTitle}
         usersViewing={usersViewing}
       />
     );
@@ -92,26 +96,30 @@ const makeMapStateToProps = () => {
     const {
       dataProviders,
       description = '',
+      graphEventId,
       isFavorite = false,
       kqlQuery,
       title = '',
       noteIds = emptyNotesId,
       status,
+      timelineType,
     } = timeline;
 
     const history = emptyHistory; // TODO: get history from store via selector
 
     return {
       description,
-      notesById: getNotesByIds(state),
+      graphEventId,
       history,
       isDataInTimeline:
         !isEmpty(dataProviders) || !isEmpty(get('filterQuery.kuery.expression', kqlQuery)),
       isFavorite,
       isDatepickerLocked: globalInput.linkTo.includes('timeline'),
       noteIds,
+      notesById: getNotesByIds(state),
       status,
       title,
+      timelineType,
     };
   };
   return mapStateToProps;

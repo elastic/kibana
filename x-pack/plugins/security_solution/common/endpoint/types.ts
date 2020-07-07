@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Datasource, NewDatasource } from '../../../ingest_manager/common';
+import { PackageConfig, NewPackageConfig } from '../../../ingest_manager/common';
+import { ManifestSchema } from './schema/manifest';
 
 /**
  * Object that allows you to maintain stateful information in the location object across navigation events
@@ -74,14 +75,20 @@ export interface ResolverNodeStats {
 /**
  * A child node can also have additional children so we need to provide a pagination cursor.
  */
-export interface ChildNode extends LifecycleNode {
+export interface ResolverChildNode extends ResolverLifecycleNode {
   /**
-   * A child node's pagination cursor can be null for a couple reasons:
-   * 1. At the time of querying it could have no children in ES, in which case it will be marked as
-   *  null because we know it does not have children during this query.
-   * 2. If the max level was reached we do not know if this node has children or not so we'll mark it as null
+   * nextChild can have 3 different states:
+   *
+   * undefined: This indicates that you should not use this node for additional queries. It does not mean that node does
+   * not have any more direct children. The node could have more direct children but to determine that, use the
+   * ResolverChildren node's nextChild.
+   *
+   * null: Indicates that we have received all the children of the node. There may be more descendants though.
+   *
+   * string: Indicates this is a leaf node and it can be used to continue querying for additional descendants
+   * using this node's entity_id
    */
-  nextChild: string | null;
+  nextChild?: string | null;
 }
 
 /**
@@ -89,9 +96,16 @@ export interface ChildNode extends LifecycleNode {
  * has an array of lifecycle events.
  */
 export interface ResolverChildren {
-  childNodes: ChildNode[];
+  childNodes: ResolverChildNode[];
   /**
-   * This is the children cursor for the origin of a tree.
+   * nextChild can have 2 different states:
+   *
+   * null: Indicates that we have received all the descendants that can be retrieved using this node. To retrieve more
+   * nodes in the tree use a cursor provided in one of the returned children. If no other cursor exists then the tree
+   * is complete.
+   *
+   * string: Indicates this node has more descendants that can be retrieved, pass this cursor in while using this node's
+   * entity_id for the request.
    */
   nextChild: string | null;
 }
@@ -107,6 +121,7 @@ export interface ResolverTree {
   entityID: string;
   children: ResolverChildren;
   relatedEvents: Omit<ResolverRelatedEvents, 'entityID'>;
+  relatedAlerts: Omit<ResolverRelatedAlerts, 'entityID'>;
   ancestry: ResolverAncestry;
   lifecycle: ResolverEvent[];
   stats: ResolverNodeStats;
@@ -115,7 +130,7 @@ export interface ResolverTree {
 /**
  * The lifecycle events (start, end etc) for a node.
  */
-export interface LifecycleNode {
+export interface ResolverLifecycleNode {
   entityID: string;
   lifecycle: ResolverEvent[];
   /**
@@ -131,7 +146,7 @@ export interface ResolverAncestry {
   /**
    * An array of ancestors with the lifecycle events grouped together
    */
-  ancestors: LifecycleNode[];
+  ancestors: ResolverLifecycleNode[];
   /**
    * A cursor for retrieving additional ancestors for a particular node. `null` indicates that there were no additional
    * ancestors when the request returned. More could have been ingested by ES after the fact though.
@@ -149,6 +164,15 @@ export interface ResolverRelatedEvents {
 }
 
 /**
+ * Response structure for the alerts route.
+ */
+export interface ResolverRelatedAlerts {
+  entityID: string;
+  alerts: ResolverEvent[];
+  nextAlert: string | null;
+}
+
+/**
  * Returned by the server via /api/endpoint/metadata
  */
 export interface HostResultList {
@@ -163,12 +187,21 @@ export interface HostResultList {
 }
 
 /**
- * Operating System metadata for a host.
+ * Operating System metadata.
  */
-export interface HostOS {
+export interface OSFields {
   full: string;
   name: string;
   version: string;
+  platform: string;
+  family: string;
+  Ext: OSFieldsExt;
+}
+
+/**
+ * Extended Operating System metadata.
+ */
+export interface OSFieldsExt {
   variant: string;
 }
 
@@ -178,9 +211,11 @@ export interface HostOS {
 export interface Host {
   id: string;
   hostname: string;
+  name: string;
   ip: string[];
   mac: string[];
-  os: HostOS;
+  architecture: string;
+  os: OSFields;
 }
 
 /**
@@ -210,36 +245,43 @@ interface MalwareClassification {
 
 interface ThreadFields {
   id: number;
-  service_name: string;
-  start: number;
-  start_address: number;
-  start_address_module: string;
+  Ext: {
+    service_name: string;
+    start: number;
+    start_address: number;
+    start_address_module: string;
+  };
 }
 
 interface DllFields {
+  hash: Hashes;
+  path: string;
   pe: {
     architecture: string;
-    imphash: string;
   };
   code_signature: {
     subject_name: string;
     trusted: boolean;
   };
-  compile_time: number;
-  hash: Hashes;
-  malware_classification: MalwareClassification;
-  mapped_address: number;
-  mapped_size: number;
-  path: string;
+  Ext: {
+    compile_time: number;
+    malware_classification: MalwareClassification;
+    mapped_address: number;
+    mapped_size: number;
+  };
 }
 
 /**
  * Describes an Alert Event.
  */
-export type AlertEvent = Immutable<{
+export interface AlertEvent {
   '@timestamp': number;
   agent: {
     id: string;
+    version: string;
+    type: string;
+  };
+  ecs: {
     version: string;
   };
   event: {
@@ -251,18 +293,17 @@ export type AlertEvent = Immutable<{
     module: string;
     type: string;
   };
-  endpoint: {
+  Endpoint: {
     policy: {
-      id: string;
+      applied: {
+        id: string;
+        status: HostPolicyResponseActionStatus;
+        name: string;
+      };
     };
   };
   process: {
-    code_signature: {
-      subject_name: string;
-      trusted: boolean;
-    };
     command_line?: string;
-    domain?: string;
     pid: number;
     ppid?: number;
     entity_id: string;
@@ -272,29 +313,37 @@ export type AlertEvent = Immutable<{
     };
     name: string;
     hash: Hashes;
-    pe?: {
-      imphash: string;
-    };
     executable: string;
-    sid?: string;
     start: number;
-    malware_classification?: MalwareClassification;
-    token: {
-      domain: string;
-      type: string;
-      user: string;
-      sid: string;
-      integrity_level: number;
-      integrity_level_name: string;
-      privileges?: Array<{
-        description: string;
-        name: string;
-        enabled: boolean;
-      }>;
-    };
     thread?: ThreadFields[];
     uptime: number;
-    user: string;
+    Ext: {
+      /*
+       * The array has a special format. The entity_ids towards the beginning of the array are closer ancestors and the
+       * values towards the end of the array are more distant ancestors (grandparents). Therefore
+       * ancestry_array[0] == process.parent.entity_id and ancestry_array[1] == process.parent.parent.entity_id
+       */
+      ancestry: string[];
+      code_signature: Array<{
+        subject_name: string;
+        trusted: boolean;
+      }>;
+      malware_classification?: MalwareClassification;
+      token: {
+        domain: string;
+        type: string;
+        user: string;
+        sid: string;
+        integrity_level: number;
+        integrity_level_name: string;
+        privileges?: Array<{
+          description: string;
+          name: string;
+          enabled: boolean;
+        }>;
+      };
+      user: string;
+    };
   };
   file: {
     owner: string;
@@ -305,22 +354,37 @@ export type AlertEvent = Immutable<{
     created: number;
     size: number;
     hash: Hashes;
-    pe?: {
-      imphash: string;
+    Ext: {
+      malware_classification: MalwareClassification;
+      temp_file_path: string;
+      code_signature: Array<{
+        trusted: boolean;
+        subject_name: string;
+      }>;
     };
-    code_signature: {
-      trusted: boolean;
-      subject_name: string;
-    };
-    malware_classification: MalwareClassification;
-    temp_file_path: string;
   };
   host: Host;
   dll?: DllFields[];
-}>;
+}
 
 /**
- * The status of the host
+ * The status of the Endpoint Agent as reported by the Agent or the
+ * Security Solution app using events from Fleet.
+ */
+export enum EndpointStatus {
+  /**
+   * Agent is enrolled with Fleet
+   */
+  enrolled = 'enrolled',
+
+  /**
+   * Agent is unenrrolled from Fleet
+   */
+  unenrolled = 'unenrolled',
+}
+
+/**
+ * The status of the host, which is mapped to the Elastic Agent status in Fleet
  */
 export enum HostStatus {
   /**
@@ -349,15 +413,27 @@ export type HostMetadata = Immutable<{
   '@timestamp': number;
   event: {
     created: number;
+    kind: string;
+    id: string;
+    category: string[];
+    type: string[];
+    module: string;
+    action: string;
+    dataset: string;
   };
   elastic: {
     agent: {
       id: string;
     };
   };
-  endpoint: {
+  Endpoint: {
+    status: EndpointStatus;
     policy: {
-      id: string;
+      applied: {
+        id: string;
+        status: HostPolicyResponseActionStatus;
+        name: string;
+      };
     };
   };
   agent: {
@@ -415,24 +491,55 @@ export interface EndpointEvent {
     id: string;
     kind: string;
   };
-  host: {
-    id: string;
-    hostname: string;
-    ip: string[];
-    mac: string[];
-    os: HostOS;
+  host: Host;
+  network?: {
+    direction: unknown;
+    forwarded_ip: unknown;
+  };
+  dns?: {
+    question: { name: unknown };
   };
   process: {
     entity_id: string;
     name: string;
+    executable?: string;
+    args?: string;
+    code_signature?: {
+      status?: string;
+      subject_name: string;
+    };
+    pid?: number;
+    hash?: {
+      md5: string;
+    };
     parent?: {
       entity_id: string;
       name?: string;
+      pid?: number;
+    };
+    /*
+     * The array has a special format. The entity_ids towards the beginning of the array are closer ancestors and the
+     * values towards the end of the array are more distant ancestors (grandparents). Therefore
+     * ancestry_array[0] == process.parent.entity_id and ancestry_array[1] == process.parent.parent.entity_id
+     */
+    Ext: {
+      ancestry: string[];
     };
   };
+  user?: {
+    domain?: string;
+    name: string;
+  };
+  file?: { path: unknown };
+  registry?: { path: unknown; key: unknown };
 }
 
 export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
+
+/**
+ * The response body for the resolver '/entity' index API
+ */
+export type ResolverEntityIndex = Array<{ entity_id: string }>;
 
 /**
  * Takes a @kbn/config-schema 'schema' type and returns a type that represents valid inputs.
@@ -506,10 +613,8 @@ export interface PolicyConfig {
     };
     malware: MalwareFields;
     logging: {
-      stdout: string;
       file: string;
     };
-    advanced: PolicyConfigAdvancedOptions;
   };
   mac: {
     events: {
@@ -519,10 +624,8 @@ export interface PolicyConfig {
     };
     malware: MalwareFields;
     logging: {
-      stdout: string;
       file: string;
     };
-    advanced: PolicyConfigAdvancedOptions;
   };
   linux: {
     events: {
@@ -531,10 +634,8 @@ export interface PolicyConfig {
       network: boolean;
     };
     logging: {
-      stdout: string;
       file: string;
     };
-    advanced: PolicyConfigAdvancedOptions;
   };
 }
 
@@ -556,20 +657,6 @@ export interface UIPolicyConfig {
   linux: Pick<PolicyConfig['linux'], 'events'>;
 }
 
-interface PolicyConfigAdvancedOptions {
-  elasticsearch: {
-    indices: {
-      control: string;
-      event: string;
-      logging: string;
-    };
-    kernel: {
-      connect: boolean;
-      process: boolean;
-    };
-  };
-}
-
 /** Policy: Malware protection fields */
 export interface MalwareFields {
   mode: ProtectionModes;
@@ -579,25 +666,27 @@ export interface MalwareFields {
 export enum ProtectionModes {
   detect = 'detect',
   prevent = 'prevent',
-  preventNotify = 'preventNotify',
   off = 'off',
 }
 
 /**
- * Endpoint Policy data, which extends Ingest's `Datasource` type
+ * Endpoint Policy data, which extends Ingest's `PackageConfig` type
  */
-export type PolicyData = Datasource & NewPolicyData;
+export type PolicyData = PackageConfig & NewPolicyData;
 
 /**
  * New policy data. Used when updating the policy record via ingest APIs
  */
-export type NewPolicyData = NewDatasource & {
+export type NewPolicyData = NewPackageConfig & {
   inputs: [
     {
       type: 'endpoint';
       enabled: boolean;
       streams: [];
       config: {
+        artifact_manifest: {
+          value: ManifestSchema;
+        };
         policy: {
           value: PolicyConfig;
         };
@@ -650,7 +739,7 @@ export interface HostPolicyResponseAppliedAction {
   message: string;
 }
 
-export type HostPolicyResponseConfiguration = HostPolicyResponse['endpoint']['policy']['applied']['response']['configurations'];
+export type HostPolicyResponseConfiguration = HostPolicyResponse['Endpoint']['policy']['applied']['response']['configurations'];
 
 interface HostPolicyResponseConfigurationStatus {
   status: HostPolicyResponseActionStatus;
@@ -685,8 +774,8 @@ export interface HostPolicyResponse {
     created: number;
     kind: string;
     id: string;
-    category: string;
-    type: string;
+    category: string[];
+    type: string[];
     module: string;
     action: string;
     dataset: string;
@@ -695,11 +784,12 @@ export interface HostPolicyResponse {
     version: string;
     id: string;
   };
-  endpoint: {
+  Endpoint: {
     policy: {
       applied: {
         version: string;
         id: string;
+        name: string;
         status: HostPolicyResponseActionStatus;
         actions: HostPolicyResponseAppliedAction[];
         response: {

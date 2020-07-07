@@ -60,6 +60,7 @@ export const MlCapabilitiesProvider = React.memo<{ children: JSX.Element }>(({ c
       isSubscribed = false;
       abortCtrl.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AuthenticatedUser } from '../../../security/public';
+import { AuthenticatedUser } from '../../../security/common/model';
 import { RequestHandlerContext } from '../../../../../src/core/server';
 export { ConfigType as Configuration } from '../config';
 

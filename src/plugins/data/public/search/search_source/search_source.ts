@@ -69,7 +69,18 @@
  *    `appSearchSource`.
  */
 
-import { uniqueId, uniq, extend, pick, difference, omit, set, keys, isFunction } from 'lodash';
+import {
+  uniqueId,
+  uniq,
+  extend,
+  pick,
+  difference,
+  omit,
+  setWith,
+  isObject,
+  keys,
+  isFunction,
+} from 'lodash';
 import { map } from 'rxjs/operators';
 import { CoreStart } from 'kibana/public';
 import { normalizeSortRequest } from './normalize_sort_request';
@@ -77,7 +88,7 @@ import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/public';
 import { IIndexPattern, ISearchGeneric, SearchRequest } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
-import { FetchOptions, RequestFailure, getSearchParams, handleResponse } from '../fetch';
+import { FetchOptions, RequestFailure, handleResponse, getSearchParamsFromRequest } from '../fetch';
 
 import { getEsQueryConfig, buildEsQuery, Filter, UI_SETTINGS } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
@@ -204,13 +215,12 @@ export class SearchSource {
    */
   private fetch$(searchRequest: SearchRequest, signal?: AbortSignal) {
     const { search, injectedMetadata, uiSettings } = this.dependencies;
-    const esShardTimeout = injectedMetadata.getInjectedVar('esShardTimeout') as number;
-    const searchParams = getSearchParams(uiSettings, esShardTimeout);
-    const params = {
-      index: searchRequest.index.title || searchRequest.index,
-      body: searchRequest.body,
-      ...searchParams,
-    };
+
+    const params = getSearchParamsFromRequest(searchRequest, {
+      injectedMetadata,
+      uiSettings,
+    });
+
     return search({ params, indexType: searchRequest.indexType }, { signal }).pipe(
       map(({ rawResponse }) => handleResponse(searchRequest, rawResponse))
     );
@@ -440,7 +450,9 @@ export class SearchSource {
       // request the remaining fields from both stored_fields and _source
       const remainingFields = difference(fields, keys(body.script_fields));
       body.stored_fields = remainingFields;
-      set(body, '_source.includes', remainingFields);
+      setWith(body, '_source.includes', remainingFields, (nsValue) =>
+        isObject(nsValue) ? {} : nsValue
+      );
     }
 
     const esQueryConfigs = getEsQueryConfig(uiSettings);
@@ -461,7 +473,7 @@ export class SearchSource {
     ]);
     let serializedSearchSourceFields: SearchSourceFields = {
       ...searchSourceFields,
-      index: searchSourceFields.index ? searchSourceFields.index.id : undefined,
+      index: (searchSourceFields.index ? searchSourceFields.index.id : undefined) as any,
     };
     if (originalFilters) {
       const filters = this.getFilters(originalFilters);

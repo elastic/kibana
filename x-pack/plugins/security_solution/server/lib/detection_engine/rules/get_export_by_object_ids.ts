@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { AlertsClient } from '../../../../../alerts/server';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 import { isAlertType } from '../rules/types';
 import { readRules } from './read_rules';
 import { transformAlertToRule } from '../routes/rules/utils';
-import { OutputRuleAlertRest } from '../types';
 import { transformDataToNdjson } from '../../../utils/read_stream/create_stream_from_ndjson';
 
-interface ExportSuccesRule {
+interface ExportSuccessRule {
   statusCode: 200;
-  rule: Partial<OutputRuleAlertRest>;
+  rule: Partial<RulesSchema>;
 }
 
 interface ExportFailedRule {
@@ -22,12 +22,12 @@ interface ExportFailedRule {
   missingRuleId: { rule_id: string };
 }
 
-type ExportRules = ExportSuccesRule | ExportFailedRule;
+type ExportRules = ExportSuccessRule | ExportFailedRule;
 
 export interface RulesErrors {
   exportedCount: number;
   missingRules: Array<{ rule_id: string }>;
-  rules: Array<Partial<OutputRuleAlertRest>>;
+  rules: Array<Partial<RulesSchema>>;
 }
 
 export const getExportByObjectIds = async (
@@ -51,7 +51,7 @@ export const getRulesFromObjects = async (
     objects.reduce<Array<Promise<ExportRules>>>((accumPromise, object) => {
       const exportWorkerPromise = new Promise<ExportRules>(async (resolve) => {
         try {
-          const rule = await readRules({ alertsClient, ruleId: object.rule_id });
+          const rule = await readRules({ alertsClient, ruleId: object.rule_id, id: undefined });
           if (rule != null && isAlertType(rule) && rule.params.immutable !== true) {
             const transformedRule = transformAlertToRule(rule);
             resolve({
@@ -80,7 +80,7 @@ export const getRulesFromObjects = async (
   ) as ExportFailedRule[];
   const exportedRules = alertsAndErrors.filter(
     (resp) => resp.statusCode === 200
-  ) as ExportSuccesRule[];
+  ) as ExportSuccessRule[];
 
   return {
     exportedCount: exportedRules.length,

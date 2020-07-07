@@ -19,7 +19,7 @@
 
 import { ExpressionRenderHandler, render } from './render';
 import { Observable } from 'rxjs';
-import { RenderError } from './types';
+import { ExpressionRenderError } from './types';
 import { getRenderersRegistry } from './services';
 import { first, take, toArray } from 'rxjs/operators';
 import { IInterpreterRenderHandlers } from '../common';
@@ -50,7 +50,8 @@ jest.mock('./services', () => {
 });
 
 const mockMockErrorRenderFunction = jest.fn(
-  (el: HTMLElement, error: RenderError, handlers: IInterpreterRenderHandlers) => handlers.done()
+  (el: HTMLElement, error: ExpressionRenderError, handlers: IInterpreterRenderHandlers) =>
+    handlers.done()
 );
 // extracts data from mockMockErrorRenderFunction call to assert in tests
 const getHandledError = () => {

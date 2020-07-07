@@ -103,7 +103,7 @@ const ErrorGroupList: React.FC<Props> = (props) => {
         }),
         field: 'type',
         sortable: false,
-        render: (type: string, item: ErrorGroupListAPIResponse[0]) => {
+        render: (type: string) => {
           return (
             <ErrorLink
               title={type}

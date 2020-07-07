@@ -48,7 +48,7 @@ function isValidMoment(m: any): boolean {
   return m && 'isValid' in m && m.isValid();
 }
 
-export interface TimeBucketsConfig {
+export interface TimeBucketsConfig extends Record<string, any> {
   'histogram:maxBars': number;
   'histogram:barTarget': number;
   dateFormat: string;
@@ -113,7 +113,7 @@ export class TimeBuckets {
       bounds = Array.isArray(input) ? input : [];
     }
 
-    const moments: Moment[] = sortBy(bounds, Number);
+    const moments: Moment[] = sortBy(bounds, Number) as Moment[];
 
     const valid = moments.length === 2 && moments.every(isValidMoment);
     if (!valid) {

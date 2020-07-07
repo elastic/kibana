@@ -19,7 +19,7 @@ import {
 } from '../../../common/schemas';
 import { SavedObjectType } from '../../saved_objects';
 
-import { getSavedObjectType, transformSavedObjectsToFounExceptionListItem } from './utils';
+import { getSavedObjectType, transformSavedObjectsToFoundExceptionListItem } from './utils';
 import { getExceptionList } from './get_exception_list';
 
 interface FindExceptionListItemOptions {
@@ -61,7 +61,7 @@ export const findExceptionListItem = async ({
       sortOrder,
       type: savedObjectType,
     });
-    return transformSavedObjectsToFounExceptionListItem({
+    return transformSavedObjectsToFoundExceptionListItem({
       namespaceType,
       savedObjectsFindResponse,
     });

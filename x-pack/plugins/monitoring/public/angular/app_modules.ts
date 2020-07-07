@@ -10,7 +10,7 @@ import '../views/all';
 import 'angular-sanitize';
 import 'angular-route';
 import '../index.scss';
-import { capitalize } from 'lodash';
+import { upperFirst } from 'lodash';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import { AppMountContext } from 'kibana/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
@@ -28,8 +28,6 @@ import { formatNumber, formatMetric } from '../lib/format_number';
 import { extractIp } from '../lib/extract_ip';
 // @ts-ignore
 import { PrivateProvider } from './providers/private';
-// @ts-ignore
-import { KbnUrlProvider } from './providers/url';
 // @ts-ignore
 import { breadcrumbsProvider } from '../services/breadcrumbs';
 // @ts-ignore
@@ -67,7 +65,6 @@ export const localAppModule = ({
   createLocalPrivateModule();
   createLocalStorage();
   createLocalConfigModule(core);
-  createLocalKbnUrlModule();
   createLocalStateModule(query);
   createLocalTopNavModule(navigation);
   createHrefModule(core);
@@ -80,7 +77,6 @@ export const localAppModule = ({
     ...thirdPartyAngularDependencies,
     'monitoring/I18n',
     'monitoring/Private',
-    'monitoring/KbnUrl',
     'monitoring/Storage',
     'monitoring/Config',
     'monitoring/State',
@@ -126,14 +122,6 @@ function createLocalStateModule(query: any) {
     });
 }
 
-function createLocalKbnUrlModule() {
-  angular
-    .module('monitoring/KbnUrl', ['monitoring/Private', 'ngRoute'])
-    .service('kbnUrl', function (Private: IPrivate) {
-      return Private(KbnUrlProvider);
-    });
-}
-
 function createMonitoringAppServices() {
   angular
     .module('monitoring/services', ['monitoring/Private'])
@@ -171,7 +159,7 @@ function createMonitoringAppFilters() {
     .module('monitoring/filters', [])
     .filter('capitalize', function () {
       return function (input: string) {
-        return capitalize(input?.toLowerCase());
+        return upperFirst(input?.toLowerCase());
       };
     })
     .filter('formatNumber', function () {

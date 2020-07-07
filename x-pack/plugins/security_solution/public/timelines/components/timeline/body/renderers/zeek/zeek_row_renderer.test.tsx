@@ -14,6 +14,8 @@ import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import { zeekRowRenderer } from './zeek_row_renderer';
 
+jest.mock('../../../../../../common/components/link_to');
+
 describe('zeek_row_renderer', () => {
   const mount = useMountAppended();
   let nonZeek: Ecs;

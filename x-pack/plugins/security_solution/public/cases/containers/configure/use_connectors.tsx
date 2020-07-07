@@ -50,10 +50,12 @@ export const useConnectors = (): ReturnConnectors => {
       didCancel = true;
       abortCtrl.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     refetchConnectors();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {

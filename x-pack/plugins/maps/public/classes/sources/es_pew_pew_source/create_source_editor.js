@@ -13,8 +13,9 @@ import { getIndexPatternService, getIndexPatternSelectComponent } from '../../..
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiFormRow, EuiCallOut } from '@elastic/eui';
-import { AGGREGATABLE_GEO_FIELD_TYPES, getFieldsWithGeoTileAgg } from '../../../index_pattern_util';
+import { EuiFormRow, EuiCallOut, EuiPanel } from '@elastic/eui';
+import { getFieldsWithGeoTileAgg } from '../../../index_pattern_util';
+import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 
 export class CreateSourceEditor extends Component {
   static propTypes = {
@@ -177,7 +178,7 @@ export class CreateSourceEditor extends Component {
           placeholder={i18n.translate('xpack.maps.source.pewPew.indexPatternPlaceholder', {
             defaultMessage: 'Select index pattern',
           })}
-          fieldTypes={AGGREGATABLE_GEO_FIELD_TYPES}
+          fieldTypes={[ES_GEO_FIELD_TYPE.GEO_POINT]}
         />
       </EuiFormRow>
     );
@@ -199,11 +200,11 @@ export class CreateSourceEditor extends Component {
     }
 
     return (
-      <Fragment>
+      <EuiPanel>
         {callout}
         {this._renderIndexPatternSelect()}
         {this._renderGeoSelects()}
-      </Fragment>
+      </EuiPanel>
     );
   }
 }

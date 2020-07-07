@@ -7,9 +7,17 @@
 import { chunk } from 'lodash/fp';
 import { extname } from 'path';
 
+import { validate } from '../../../../../common/validate';
 import {
-  ImportRulesSchema,
-  importRulesSchema,
+  importRulesQuerySchema,
+  ImportRulesQuerySchemaDecoded,
+  importRulesPayloadSchema,
+  ImportRulesPayloadSchemaDecoded,
+  ImportRulesSchemaDecoded,
+} from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
+import {
+  ImportRulesSchema as ImportRulesResponseSchema,
+  importRulesSchema as importRulesResponseSchema,
 } from '../../../../../common/detection_engine/schemas/response/import_rules_schema';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils/streams';
@@ -19,11 +27,9 @@ import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
 import { createRules } from '../../rules/create_rules';
-import { ImportRulesRequestParams } from '../../rules/types';
 import { readRules } from '../../rules/read_rules';
 import { getIndexExists } from '../../index/get_index_exists';
 import {
-  buildRouteValidation,
   createBulkErrorObject,
   ImportRuleResponse,
   BulkError,
@@ -32,14 +38,14 @@ import {
   transformError,
   buildSiemResponse,
 } from '../utils';
-import { ImportRuleAlertRest } from '../../types';
 import { patchRules } from '../../rules/patch_rules';
-import { importRulesQuerySchema, importRulesPayloadSchema } from '../schemas/import_rules_schema';
 import { getTupleDuplicateErrorsAndUniqueRules } from './utils';
-import { validate } from './validate';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
+import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import { HapiReadableStream } from '../../rules/types';
+import { PartialFilter } from '../../types';
 
-type PromiseFromStreams = ImportRuleAlertRest | Error;
+type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
 const CHUNK_PARSED_OBJECT_SIZE = 10;
 
@@ -48,8 +54,13 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_import`,
       validate: {
-        query: buildRouteValidation<ImportRulesRequestParams['query']>(importRulesQuerySchema),
-        body: buildRouteValidation<ImportRulesRequestParams['body']>(importRulesPayloadSchema),
+        query: buildRouteValidation<typeof importRulesQuerySchema, ImportRulesQuerySchemaDecoded>(
+          importRulesQuerySchema
+        ),
+        body: buildRouteValidation<
+          typeof importRulesPayloadSchema,
+          ImportRulesPayloadSchemaDecoded
+        >(importRulesPayloadSchema),
       },
       options: {
         tags: ['access:securitySolution'],
@@ -74,7 +85,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
 
         const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
 
-        const { filename } = request.body.file.hapi;
+        const { filename } = (request.body.file as HapiReadableStream).hapi;
         const fileExtension = extname(filename).toLowerCase();
         if (fileExtension !== '.ndjson') {
           return siemResponse.error({
@@ -94,7 +105,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
         const objectLimit = config.maxRuleImportExportSize;
         const readStream = createRulesStreamFromNdJson(objectLimit);
         const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
-          request.body.file,
+          request.body.file as HapiReadableStream,
           ...readStream,
         ]);
         const [duplicateIdErrors, uniqueParsedObjects] = getTupleDuplicateErrorsAndUniqueRules(
@@ -123,27 +134,34 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                 }
                 const {
                   anomaly_threshold: anomalyThreshold,
+                  author,
+                  building_block_type: buildingBlockType,
                   description,
                   enabled,
                   false_positives: falsePositives,
                   from,
                   immutable,
-                  query,
-                  language,
+                  query: queryOrUndefined,
+                  language: languageOrUndefined,
+                  license,
                   machine_learning_job_id: machineLearningJobId,
                   output_index: outputIndex,
                   saved_id: savedId,
                   meta,
-                  filters,
+                  filters: filtersRest,
                   rule_id: ruleId,
                   index,
                   interval,
                   max_signals: maxSignals,
                   risk_score: riskScore,
+                  risk_score_mapping: riskScoreMapping,
+                  rule_name_override: ruleNameOverride,
                   name,
                   severity,
+                  severity_mapping: severityMapping,
                   tags,
                   threat,
+                  timestamp_override: timestampOverride,
                   to,
                   type,
                   references,
@@ -151,17 +169,30 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                   timeline_id: timelineId,
                   timeline_title: timelineTitle,
                   version,
-                  exceptions_list,
+                  exceptions_list: exceptionsList,
                 } = parsedRule;
 
                 try {
+                  const query =
+                    type !== 'machine_learning' && queryOrUndefined == null ? '' : queryOrUndefined;
+
+                  const language =
+                    type !== 'machine_learning' && languageOrUndefined == null
+                      ? 'kuery'
+                      : languageOrUndefined;
+
+                  // TODO: Fix these either with an is conversion or by better typing them within io-ts
+                  const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
+
                   throwHttpError(await mlAuthz.validateRuleType(type));
 
-                  const rule = await readRules({ alertsClient, ruleId });
+                  const rule = await readRules({ alertsClient, ruleId, id: undefined });
                   if (rule == null) {
                     await createRules({
                       alertsClient,
                       anomalyThreshold,
+                      author,
+                      buildingBlockType,
                       description,
                       enabled,
                       falsePositives,
@@ -169,6 +200,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                       immutable,
                       query,
                       language,
+                      license,
                       machineLearningJobId,
                       outputIndex: signalsIndex,
                       savedId,
@@ -180,31 +212,37 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                       index,
                       interval,
                       maxSignals,
-                      riskScore,
                       name,
+                      riskScore,
+                      riskScoreMapping,
+                      ruleNameOverride,
                       severity,
+                      severityMapping,
                       tags,
                       to,
                       type,
                       threat,
+                      timestampOverride,
                       references,
                       note,
                       version,
-                      exceptions_list,
+                      exceptionsList,
                       actions: [], // Actions are not imported nor exported at this time
                     });
                     resolve({ rule_id: ruleId, status_code: 200 });
                   } else if (rule != null && request.query.overwrite) {
                     await patchRules({
                       alertsClient,
+                      author,
+                      buildingBlockType,
                       savedObjectsClient,
                       description,
                       enabled,
                       falsePositives,
                       from,
-                      immutable,
                       query,
                       language,
+                      license,
                       outputIndex,
                       savedId,
                       timelineId,
@@ -216,18 +254,23 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                       interval,
                       maxSignals,
                       riskScore,
+                      riskScoreMapping,
+                      ruleNameOverride,
                       name,
                       severity,
+                      severityMapping,
                       tags,
+                      timestampOverride,
                       to,
                       type,
                       threat,
                       references,
                       note,
                       version,
-                      exceptions_list,
+                      exceptionsList,
                       anomalyThreshold,
                       machineLearningJobId,
+                      actions: undefined,
                     });
                     resolve({ rule_id: ruleId, status_code: 200 });
                   } else if (rule != null) {
@@ -267,12 +310,12 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
             return false;
           }
         });
-        const importRules: ImportRulesSchema = {
+        const importRules: ImportRulesResponseSchema = {
           success: errorsResp.length === 0,
           success_count: successes.length,
           errors: errorsResp,
         };
-        const [validated, errors] = validate(importRules, importRulesSchema);
+        const [validated, errors] = validate(importRules, importRulesResponseSchema);
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
         } else {

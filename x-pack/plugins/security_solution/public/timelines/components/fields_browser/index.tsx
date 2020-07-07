@@ -26,6 +26,7 @@ export const INPUT_TIMEOUT = 250;
 
 const FieldsBrowserButtonContainer = styled.div`
   position: relative;
+  width: 24px;
 `;
 
 FieldsBrowserButtonContainer.displayName = 'FieldsBrowserButtonContainer';
@@ -108,6 +109,7 @@ export const StatefulFieldsBrowserComponent = React.memo<FieldBrowserProps & Pro
           setSelectedCategoryId(newSelectedCategoryId);
         }, INPUT_TIMEOUT);
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [browserFields, filterInput, inputTimeoutId.current]
     );
 
@@ -126,6 +128,7 @@ export const StatefulFieldsBrowserComponent = React.memo<FieldBrowserProps & Pro
      */
     const updateColumnsAndSelectCategoryId = useCallback((columns: ColumnHeaderOptions[]) => {
       onUpdateColumns(columns); // show the category columns in the timeline
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     /** Invoked when the field browser should be hidden */

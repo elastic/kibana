@@ -5,15 +5,14 @@
  */
 
 import { isString } from 'lodash';
-import memoizeOne from 'memoize-one';
 import { getExportType as getTypeCsv } from '../export_types/csv';
 import { getExportType as getTypeCsvFromSavedObject } from '../export_types/csv_from_savedobject';
 import { getExportType as getTypePng } from '../export_types/png';
 import { getExportType as getTypePrintablePdf } from '../export_types/printable_pdf';
 import { ExportTypeDefinition } from '../types';
 
-type GetCallbackFn<JobParamsType, CreateJobFnType, JobPayloadType, ExecuteJobFnType> = (
-  item: ExportTypeDefinition<JobParamsType, CreateJobFnType, JobPayloadType, ExecuteJobFnType>
+type GetCallbackFn<JobParamsType, ScheduleTaskFnType, JobPayloadType, RunTaskFnType> = (
+  item: ExportTypeDefinition<JobParamsType, ScheduleTaskFnType, JobPayloadType, ScheduleTaskFnType>
 ) => boolean;
 // => ExportTypeDefinition<T, U, V, W>
 
@@ -22,8 +21,8 @@ export class ExportTypesRegistry {
 
   constructor() {}
 
-  register<JobParamsType, CreateJobFnType, JobPayloadType, ExecuteJobFnType>(
-    item: ExportTypeDefinition<JobParamsType, CreateJobFnType, JobPayloadType, ExecuteJobFnType>
+  register<JobParamsType, ScheduleTaskFnType, JobPayloadType, RunTaskFnType>(
+    item: ExportTypeDefinition<JobParamsType, ScheduleTaskFnType, JobPayloadType, RunTaskFnType>
   ): void {
     if (!isString(item.id)) {
       throw new Error(`'item' must have a String 'id' property `);
@@ -33,8 +32,6 @@ export class ExportTypesRegistry {
       throw new Error(`'item' with id ${item.id} has already been registered`);
     }
 
-    // TODO: Unwrap the execute function from the item's executeJobFactory
-    // Move that work out of server/lib/create_worker to reduce dependence on ESQueue
     this._map.set(item.id, item);
   }
 
@@ -46,24 +43,24 @@ export class ExportTypesRegistry {
     return this._map.size;
   }
 
-  getById<JobParamsType, CreateJobFnType, JobPayloadType, ExecuteJobFnType>(
+  getById<JobParamsType, ScheduleTaskFnType, JobPayloadType, RunTaskFnType>(
     id: string
-  ): ExportTypeDefinition<JobParamsType, CreateJobFnType, JobPayloadType, ExecuteJobFnType> {
+  ): ExportTypeDefinition<JobParamsType, ScheduleTaskFnType, JobPayloadType, RunTaskFnType> {
     if (!this._map.has(id)) {
       throw new Error(`Unknown id ${id}`);
     }
 
     return this._map.get(id) as ExportTypeDefinition<
       JobParamsType,
-      CreateJobFnType,
+      ScheduleTaskFnType,
       JobPayloadType,
-      ExecuteJobFnType
+      RunTaskFnType
     >;
   }
 
-  get<JobParamsType, CreateJobFnType, JobPayloadType, ExecuteJobFnType>(
-    findType: GetCallbackFn<JobParamsType, CreateJobFnType, JobPayloadType, ExecuteJobFnType>
-  ): ExportTypeDefinition<JobParamsType, CreateJobFnType, JobPayloadType, ExecuteJobFnType> {
+  get<JobParamsType, ScheduleTaskFnType, JobPayloadType, RunTaskFnType>(
+    findType: GetCallbackFn<JobParamsType, ScheduleTaskFnType, JobPayloadType, RunTaskFnType>
+  ): ExportTypeDefinition<JobParamsType, ScheduleTaskFnType, JobPayloadType, RunTaskFnType> {
     let result;
     for (const value of this._map.values()) {
       if (!findType(value)) {
@@ -71,9 +68,9 @@ export class ExportTypesRegistry {
       }
       const foundResult: ExportTypeDefinition<
         JobParamsType,
-        CreateJobFnType,
+        ScheduleTaskFnType,
         JobPayloadType,
-        ExecuteJobFnType
+        RunTaskFnType
       > = value;
 
       if (result) {
@@ -91,7 +88,7 @@ export class ExportTypesRegistry {
   }
 }
 
-function getExportTypesRegistryFn(): ExportTypesRegistry {
+export function getExportTypesRegistry(): ExportTypesRegistry {
   const registry = new ExportTypesRegistry();
 
   /* this replaces the previously async method of registering export types,
@@ -108,6 +105,3 @@ function getExportTypesRegistryFn(): ExportTypesRegistry {
   });
   return registry;
 }
-
-// FIXME: is this the best way to return a singleton?
-export const getExportTypesRegistry = memoizeOne(getExportTypesRegistryFn);

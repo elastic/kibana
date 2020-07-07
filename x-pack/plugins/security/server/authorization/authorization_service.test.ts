@@ -25,7 +25,7 @@ import { AuthorizationService } from '.';
 import {
   coreMock,
   elasticsearchServiceMock,
-  loggingServiceMock,
+  loggingSystemMock,
 } from '../../../../../src/core/server/mocks';
 import { featuresPluginMock } from '../../../features/server/mocks';
 import { licenseMock } from '../../common/licensing/index.mock';
@@ -56,7 +56,7 @@ afterEach(() => {
 });
 
 it(`#setup returns exposed services`, () => {
-  const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+  const mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
   const mockGetSpacesService = jest
     .fn()
     .mockReturnValue({ getSpaceId: jest.fn(), namespaceToSpaceId: jest.fn() });
@@ -71,7 +71,7 @@ it(`#setup returns exposed services`, () => {
     status: mockCoreSetup.status,
     clusterClient: mockClusterClient,
     license: mockLicense,
-    loggers: loggingServiceMock.create(),
+    loggers: loggingSystemMock.create(),
     kibanaIndexName,
     packageVersion: 'some-version',
     features: mockFeaturesSetup,
@@ -119,7 +119,7 @@ describe('#start', () => {
   let licenseSubject: BehaviorSubject<SecurityLicenseFeatures>;
   let mockLicense: jest.Mocked<SecurityLicense>;
   beforeEach(() => {
-    const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+    const mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
 
     licenseSubject = new BehaviorSubject(({} as unknown) as SecurityLicenseFeatures);
     mockLicense = licenseMock.create();
@@ -140,7 +140,7 @@ describe('#start', () => {
       status: mockCoreSetup.status,
       clusterClient: mockClusterClient,
       license: mockLicense,
-      loggers: loggingServiceMock.create(),
+      loggers: loggingSystemMock.create(),
       kibanaIndexName,
       packageVersion: 'some-version',
       features: featuresPluginMock.createSetup(),
@@ -221,7 +221,7 @@ describe('#start', () => {
 });
 
 it('#stop unsubscribes from license and ES updates.', () => {
-  const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+  const mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
 
   const licenseSubject = new BehaviorSubject(({} as unknown) as SecurityLicenseFeatures);
   const mockLicense = licenseMock.create();
@@ -241,7 +241,7 @@ it('#stop unsubscribes from license and ES updates.', () => {
     status: mockCoreSetup.status,
     clusterClient: mockClusterClient,
     license: mockLicense,
-    loggers: loggingServiceMock.create(),
+    loggers: loggingSystemMock.create(),
     kibanaIndexName,
     packageVersion: 'some-version',
     features: featuresPluginMock.createSetup(),

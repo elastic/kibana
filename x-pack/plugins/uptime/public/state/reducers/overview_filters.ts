@@ -10,6 +10,7 @@ import {
   FETCH_OVERVIEW_FILTERS_FAIL,
   FETCH_OVERVIEW_FILTERS_SUCCESS,
   OverviewFiltersAction,
+  SET_OVERVIEW_FILTERS,
 } from '../actions';
 
 export interface OverviewFiltersState {
@@ -50,6 +51,11 @@ export function overviewFiltersReducer(
         ...state,
         errors: [...state.errors, action.payload],
         loading: false,
+      };
+    case SET_OVERVIEW_FILTERS:
+      return {
+        ...state,
+        filters: action.payload,
       };
     default:
       return state;

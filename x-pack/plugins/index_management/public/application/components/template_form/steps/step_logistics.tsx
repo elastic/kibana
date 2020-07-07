@@ -8,9 +8,16 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiButtonEmpty, EuiSpacer } from '
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { useForm, Form, getUseField, getFormRow, Field } from '../../../../shared_imports';
+import {
+  useForm,
+  Form,
+  getUseField,
+  getFormRow,
+  Field,
+  Forms,
+  JsonEditorField,
+} from '../../../../shared_imports';
 import { documentationService } from '../../../services/documentation';
-import { StepProps } from '../types';
 import { schemas, nameConfig, nameConfigWithoutValidations } from '../template_form_schemas';
 
 // Create or Form components with partial props that are common to all instances
@@ -48,6 +55,15 @@ const fieldsMeta = {
     }),
     testSubject: 'orderField',
   },
+  priority: {
+    title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.priorityTitle', {
+      defaultMessage: 'Merge priority',
+    }),
+    description: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.priorityDescription', {
+      defaultMessage: 'The merge priority when multiple templates match an index.',
+    }),
+    testSubject: 'priorityField',
+  },
   version: {
     title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.versionTitle', {
       defaultMessage: 'Version',
@@ -59,96 +75,180 @@ const fieldsMeta = {
   },
 };
 
-export const StepLogistics: React.FunctionComponent<StepProps> = ({
-  template,
-  isEditing,
-  setDataGetter,
-  onStepValidityChange,
-}) => {
-  const { form } = useForm({
-    schema: schemas.logistics,
-    defaultValue: template,
-    options: { stripEmptyFields: false },
-  });
+interface Props {
+  defaultValue: { [key: string]: any };
+  onChange: (content: Forms.Content) => void;
+  isEditing?: boolean;
+  isLegacy?: boolean;
+}
 
-  useEffect(() => {
-    onStepValidityChange(form.isValid);
-  }, [form.isValid, onStepValidityChange]);
+export const StepLogistics: React.FunctionComponent<Props> = React.memo(
+  ({ defaultValue, isEditing = false, onChange, isLegacy = false }) => {
+    const { form } = useForm({
+      schema: schemas.logistics,
+      defaultValue,
+      options: { stripEmptyFields: false },
+    });
 
-  useEffect(() => {
-    setDataGetter(form.submit);
-  }, [form.submit, setDataGetter]);
+    /**
+     * When the consumer call validate() on this step, we submit the form so it enters the "isSubmitted" state
+     * and we can display the form errors on top of the forms if there are any.
+     */
+    const validate = async () => {
+      return (await form.submit()).isValid;
+    };
 
-  const { name, indexPatterns, order, version } = fieldsMeta;
+    useEffect(() => {
+      onChange({
+        isValid: form.isValid,
+        validate,
+        getData: form.getFormData,
+      });
+    }, [form.isValid, onChange]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  return (
-    <Form form={form} data-test-subj="stepLogistics">
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h2>
+    useEffect(() => {
+      const subscription = form.subscribe(({ data, isValid }) => {
+        onChange({
+          isValid,
+          validate,
+          getData: data.format,
+        });
+      });
+      return subscription.unsubscribe;
+    }, [onChange]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const { name, indexPatterns, order, priority, version } = fieldsMeta;
+
+    return (
+      <>
+        {/* Header */}
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiTitle>
+              <h2>
+                <FormattedMessage
+                  id="xpack.idxMgmt.templateForm.stepLogistics.stepTitle"
+                  defaultMessage="Logistics"
+                />
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              flush="right"
+              href={documentationService.getTemplatesDocumentationLink()}
+              target="_blank"
+              iconType="help"
+            >
               <FormattedMessage
-                id="xpack.idxMgmt.templateForm.stepLogistics.stepTitle"
-                defaultMessage="Logistics"
+                id="xpack.idxMgmt.templateForm.stepLogistics.docsButtonLabel"
+                defaultMessage="Index Templates docs"
               />
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            flush="right"
-            href={documentationService.getTemplatesDocumentationLink()}
-            target="_blank"
-            iconType="help"
-          >
-            <FormattedMessage
-              id="xpack.idxMgmt.templateForm.stepLogistics.docsButtonLabel"
-              defaultMessage="Index Templates docs"
+        <EuiSpacer size="l" />
+
+        <Form
+          form={form}
+          isInvalid={form.isSubmitted && !form.isValid}
+          error={form.getErrors()}
+          data-test-subj="stepLogistics"
+        >
+          {/* Name */}
+          <FormRow title={name.title} description={name.description}>
+            <UseField
+              path="name"
+              componentProps={{
+                ['data-test-subj']: name.testSubject,
+                euiFieldProps: { disabled: isEditing },
+              }}
+              config={isEditing ? nameConfigWithoutValidations : nameConfig}
             />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="l" />
-      {/* Name */}
-      <FormRow title={name.title} description={name.description}>
-        <UseField
-          path="name"
-          componentProps={{
-            ['data-test-subj']: name.testSubject,
-            euiFieldProps: { disabled: isEditing },
-          }}
-          config={isEditing ? nameConfigWithoutValidations : nameConfig}
-        />
-      </FormRow>
-      {/* Index patterns */}
-      <FormRow title={indexPatterns.title} description={indexPatterns.description}>
-        <UseField
-          path="indexPatterns"
-          componentProps={{
-            ['data-test-subj']: indexPatterns.testSubject,
-          }}
-        />
-      </FormRow>
-      {/* Order */}
-      <FormRow title={order.title} description={order.description}>
-        <UseField
-          path="order"
-          componentProps={{
-            ['data-test-subj']: order.testSubject,
-          }}
-        />
-      </FormRow>
-      {/* Version */}
-      <FormRow title={version.title} description={version.description}>
-        <UseField
-          path="version"
-          componentProps={{
-            ['data-test-subj']: version.testSubject,
-          }}
-        />
-      </FormRow>
-    </Form>
-  );
-};
+          </FormRow>
+
+          {/* Index patterns */}
+          <FormRow title={indexPatterns.title} description={indexPatterns.description}>
+            <UseField
+              path="indexPatterns"
+              componentProps={{
+                ['data-test-subj']: indexPatterns.testSubject,
+              }}
+            />
+          </FormRow>
+
+          {/* Order */}
+          {isLegacy && (
+            <FormRow title={order.title} description={order.description}>
+              <UseField
+                path="order"
+                componentProps={{
+                  ['data-test-subj']: order.testSubject,
+                }}
+              />
+            </FormRow>
+          )}
+
+          {/* Priority */}
+          {isLegacy === false && (
+            <FormRow title={priority.title} description={priority.description}>
+              <UseField
+                path="priority"
+                componentProps={{
+                  ['data-test-subj']: priority.testSubject,
+                }}
+              />
+            </FormRow>
+          )}
+
+          {/* Version */}
+          <FormRow title={version.title} description={version.description}>
+            <UseField
+              path="version"
+              componentProps={{
+                ['data-test-subj']: version.testSubject,
+              }}
+            />
+          </FormRow>
+
+          {/* _meta */}
+          {isLegacy === false && (
+            <FormRow
+              title={i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.metaFieldTitle', {
+                defaultMessage: '_meta field',
+              })}
+              description={
+                <>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.templateForm.stepLogistics.metaFieldDescription"
+                    defaultMessage="Use the _meta field to store any metadata you want."
+                  />
+                </>
+              }
+            >
+              <UseField
+                path="_meta"
+                component={JsonEditorField}
+                componentProps={{
+                  euiCodeEditorProps: {
+                    height: '280px',
+                    'aria-label': i18n.translate(
+                      'xpack.idxMgmt.templateForm.stepLogistics.metaFieldEditorAriaLabel',
+                      {
+                        defaultMessage: '_meta field data editor',
+                      }
+                    ),
+                    'data-test-subj': 'metaField',
+                  },
+                }}
+              />
+            </FormRow>
+          )}
+        </Form>
+      </>
+    );
+  }
+);

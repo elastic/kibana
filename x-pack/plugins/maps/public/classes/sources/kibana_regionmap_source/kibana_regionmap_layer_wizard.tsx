@@ -12,13 +12,14 @@ import { KibanaRegionmapSource, sourceTitle } from './kibana_regionmap_source';
 import { VectorLayer } from '../../layers/vector_layer/vector_layer';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
-// @ts-ignore
 import { getKibanaRegionList } from '../../../meta';
+import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 
 export const kibanaRegionMapLayerWizardConfig: LayerWizard = {
-  checkVisibility: () => {
+  categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
+  checkVisibility: async () => {
     const regions = getKibanaRegionList();
-    return regions.length;
+    return regions.length > 0;
   },
   description: i18n.translate('xpack.maps.source.kbnRegionMapDescription', {
     defaultMessage: 'Vector data from hosted GeoJSON configured in kibana.yml',

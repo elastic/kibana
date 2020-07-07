@@ -19,12 +19,7 @@ import { MatrixLoader } from './matrix_loader';
 import { Panel } from '../panel';
 import { getBarchartConfigs, getCustomChartData } from './utils';
 import { useQuery } from '../../containers/matrix_histogram';
-import {
-  MatrixHistogramProps,
-  MatrixHistogramOption,
-  HistogramAggregation,
-  MatrixHistogramQueryProps,
-} from './types';
+import { MatrixHistogramProps, MatrixHistogramOption, MatrixHistogramQueryProps } from './types';
 import { InspectButtonContainer } from '../inspect';
 
 import { State, inputsSelectors } from '../../store';
@@ -36,7 +31,7 @@ import {
   GetTitle,
   GetSubTitle,
 } from '../../components/matrix_histogram/types';
-import { SetQuery } from '../../../hosts/pages/navigation/types';
+import { GlobalTimeArgs } from '../../containers/use_global_time';
 import { QueryTemplateProps } from '../../containers/query_template';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
@@ -53,11 +48,12 @@ export interface OwnProps extends QueryTemplateProps {
   legendPosition?: Position;
   mapping?: MatrixHistogramMappingTypes;
   showSpacer?: boolean;
-  setQuery: SetQuery;
+  setQuery: GlobalTimeArgs['setQuery'];
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
   showLegend?: boolean;
   stackByOptions: MatrixHistogramOption[];
   subtitle?: string | GetSubTitle;
+  timelineId?: string;
   title: string | GetTitle;
   type: hostsModel.HostsType | networkModel.NetworkType;
 }
@@ -99,6 +95,7 @@ export const MatrixHistogramComponent: React.FC<
   stackByOptions,
   startDate,
   subtitle,
+  timelineId,
   title,
   titleSize,
   dispatchSetAbsoluteRangeDatePicker,
@@ -125,6 +122,7 @@ export const MatrixHistogramComponent: React.FC<
         yTickFormatter,
         showLegend,
       }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       chartHeight,
       startDate,
@@ -145,21 +143,20 @@ export const MatrixHistogramComponent: React.FC<
         stackByOptions.find((co) => co.value === event.target.value) ?? defaultStackByOption
       );
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
-  const { data, loading, inspect, totalCount, refetch = noop } = useQuery<{}, HistogramAggregation>(
-    {
-      endDate,
-      errorMessage,
-      filterQuery,
-      histogramType,
-      indexToAdd,
-      startDate,
-      isInspected,
-      stackByField: selectedStackByOption.value,
-    }
-  );
+  const { data, loading, inspect, totalCount, refetch = noop } = useQuery({
+    endDate,
+    errorMessage,
+    filterQuery,
+    histogramType,
+    indexToAdd,
+    startDate,
+    isInspected,
+    stackByField: selectedStackByOption.value,
+  });
 
   const titleWithStackByField = useMemo(
     () => (title != null && typeof title === 'function' ? title(selectedStackByOption) : title),
@@ -247,6 +244,7 @@ export const MatrixHistogramComponent: React.FC<
               barChart={barChartData}
               configs={barchartConfigs}
               stackByField={selectedStackByOption.value}
+              timelineId={timelineId}
             />
           )}
         </HistogramPanel>
@@ -260,7 +258,7 @@ export const MatrixHistogram = React.memo(MatrixHistogramComponent);
 
 const makeMapStateToProps = () => {
   const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const mapStateToProps = (state: State, { type, id }: OwnProps) => {
+  const mapStateToProps = (state: State, { id }: OwnProps) => {
     const { isInspected } = getQuery(state, id);
     return {
       isInspected,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -26,6 +26,7 @@ import { getTickFormat } from './get_tick_format';
 import { ChartEmptyState } from './chart_empty_state';
 import { DurationAnomaliesBar } from './duration_line_bar_list';
 import { AnomalyRecords } from '../../../state/actions';
+import { UptimeThemeContext } from '../../../contexts';
 
 interface DurationChartProps {
   /**
@@ -58,6 +59,8 @@ export const DurationChartComponent = ({
   const { absoluteDateRangeStart: min, absoluteDateRangeEnd: max } = getUrlParams();
 
   const [hiddenLegends, setHiddenLegends] = useState<string[]>([]);
+
+  const { chartTheme } = useContext(UptimeThemeContext);
 
   const onBrushEnd: BrushEndListener = ({ x }) => {
     if (!x) {
@@ -93,6 +96,7 @@ export const DurationChartComponent = ({
             legendPosition={Position.Bottom}
             onBrushEnd={onBrushEnd}
             onLegendItemClick={legendToggleVisibility}
+            {...chartTheme}
           />
           <Axis
             id="bottom"

@@ -17,21 +17,21 @@
  * under the License.
  */
 
-import { Readable } from 'stream';
 import { inspect } from 'util';
 
 import execa from 'execa';
 import * as Rx from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { map, takeUntil, first, ignoreElements } from 'rxjs/operators';
 
-import { isWorkerMsg, WorkerConfig, WorkerMsg, Bundle } from '../common';
+import { isWorkerMsg, WorkerConfig, WorkerMsg, Bundle, BundleRefs } from '../common';
 
+import { observeStdio$ } from './observe_stdio';
 import { OptimizerConfig } from './optimizer_config';
 
 export interface WorkerStdio {
   type: 'worker stdio';
   stream: 'stdout' | 'stderr';
-  chunk: Buffer;
+  line: string;
 }
 
 export interface WorkerStarted {
@@ -68,15 +68,11 @@ if (inspectFlagIndex !== -1) {
 
 function usingWorkerProc<T>(
   config: OptimizerConfig,
-  workerConfig: WorkerConfig,
-  bundles: Bundle[],
   fn: (proc: execa.ExecaChildProcess) => Rx.Observable<T>
 ) {
   return Rx.using(
     (): ProcResource => {
-      const args = [JSON.stringify(workerConfig), JSON.stringify(bundles.map((b) => b.toSpec()))];
-
-      const proc = execa.node(require.resolve('../worker/run_worker'), args, {
+      const proc = execa.node(require.resolve('../worker/run_worker'), [], {
         nodeOptions: [
           ...(inspectFlag && config.inspectWorkers
             ? [`${inspectFlag}=${inspectPortCounter++}`]
@@ -103,26 +99,49 @@ function usingWorkerProc<T>(
   );
 }
 
-function observeStdio$(stream: Readable, name: WorkerStdio['stream']) {
-  return Rx.fromEvent<Buffer>(stream, 'data').pipe(
-    takeUntil(
-      Rx.race(
-        Rx.fromEvent<void>(stream, 'end'),
-        Rx.fromEvent<Error>(stream, 'error').pipe(
-          map((error) => {
-            throw error;
-          })
-        )
-      )
-    ),
-    map(
-      (chunk): WorkerStdio => ({
-        type: 'worker stdio',
-        chunk,
-        stream: name,
-      })
-    )
+/**
+ * We used to pass configuration to the worker as JSON encoded arguments, but they
+ * grew too large for argv, especially on Windows, so we had to move to an async init
+ * where we send the args over IPC. To keep the logic simple we basically mock the
+ * argv behavior and don't use complicated messages or anything so that state can
+ * be initialized in the worker before most of the code is run.
+ */
+function initWorker(
+  proc: execa.ExecaChildProcess,
+  config: OptimizerConfig,
+  workerConfig: WorkerConfig,
+  bundles: Bundle[]
+) {
+  const msg$ = Rx.fromEvent<[unknown]>(proc, 'message').pipe(
+    // validate the initialization messages from the process
+    map(([msg]) => {
+      if (typeof msg === 'string') {
+        switch (msg) {
+          case 'init':
+            return 'init' as const;
+          case 'ready':
+            return 'ready' as const;
+        }
+      }
+
+      throw new Error(`unexpected message from worker while initializing: [${inspect(msg)}]`);
+    })
   );
+
+  return Rx.concat(
+    msg$.pipe(first((msg) => msg === 'init')),
+    Rx.defer(() => {
+      proc.send({
+        args: [
+          JSON.stringify(workerConfig),
+          JSON.stringify(bundles.map((b) => b.toSpec())),
+          BundleRefs.fromBundles(config.bundles).toSpecJson(),
+        ],
+      });
+      return [];
+    }),
+    msg$.pipe(first((msg) => msg === 'ready'))
+  ).pipe(ignoreElements());
 }
 
 /**
@@ -136,16 +155,33 @@ export function observeWorker(
   workerConfig: WorkerConfig,
   bundles: Bundle[]
 ): Rx.Observable<WorkerMsg | WorkerStatus> {
-  return usingWorkerProc(config, workerConfig, bundles, (proc) => {
-    let lastMsg: WorkerMsg;
+  return usingWorkerProc(config, (proc) => {
+    const init$ = initWorker(proc, config, workerConfig, bundles);
 
-    return Rx.merge(
+    let lastMsg: WorkerMsg;
+    const worker$: Rx.Observable<WorkerMsg | WorkerStatus> = Rx.merge(
       Rx.of({
         type: 'worker started',
         bundles,
       }),
-      observeStdio$(proc.stdout, 'stdout'),
-      observeStdio$(proc.stderr, 'stderr'),
+      observeStdio$(proc.stdout).pipe(
+        map(
+          (line): WorkerStdio => ({
+            type: 'worker stdio',
+            line,
+            stream: 'stdout',
+          })
+        )
+      ),
+      observeStdio$(proc.stderr).pipe(
+        map(
+          (line): WorkerStdio => ({
+            type: 'worker stdio',
+            line,
+            stream: 'stderr',
+          })
+        )
+      ),
       Rx.fromEvent<[unknown]>(proc, 'message')
         .pipe(
           // validate the messages from the process
@@ -197,5 +233,7 @@ export function observeWorker(
           )
         )
     );
+
+    return Rx.concat(init$, worker$);
   });
 }

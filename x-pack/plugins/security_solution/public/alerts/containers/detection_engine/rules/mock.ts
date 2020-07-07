@@ -36,6 +36,7 @@ export const ruleMock: NewRule = {
 };
 
 export const savedRuleMock: Rule = {
+  author: [],
   actions: [],
   created_at: 'mm/dd/yyyyTHH:MM:sssz',
   created_by: 'mockUser',
@@ -58,11 +59,13 @@ export const savedRuleMock: Rule = {
   rule_id: 'bbd3106e-b4b5-4d7c-a1a2-47531d6a2baf',
   language: 'kuery',
   risk_score: 75,
+  risk_score_mapping: [],
   name: 'Test rule',
   max_signals: 100,
   query: "user.email: 'root@elastic.co'",
   references: [],
   severity: 'high',
+  severity_mapping: [],
   tags: ['APM'],
   to: 'now',
   type: 'query',
@@ -79,6 +82,7 @@ export const rulesMock: FetchRulesResponse = {
   data: [
     {
       actions: [],
+      author: [],
       created_at: '2020-02-14T19:49:28.178Z',
       updated_at: '2020-02-14T19:49:28.320Z',
       created_by: 'elastic',
@@ -96,12 +100,14 @@ export const rulesMock: FetchRulesResponse = {
       output_index: '.siem-signals-default',
       max_signals: 100,
       risk_score: 73,
+      risk_score_mapping: [],
       name: 'Credential Dumping - Detected - Elastic Endpoint',
       query:
         'event.kind:alert and event.module:endgame and event.action:cred_theft_event and endgame.metadata.type:detection',
       filters: [],
       references: [],
       severity: 'high',
+      severity_mapping: [],
       updated_by: 'elastic',
       tags: ['Elastic', 'Endpoint'],
       to: 'now',
@@ -112,6 +118,7 @@ export const rulesMock: FetchRulesResponse = {
     },
     {
       actions: [],
+      author: [],
       created_at: '2020-02-14T19:49:28.189Z',
       updated_at: '2020-02-14T19:49:28.326Z',
       created_by: 'elastic',
@@ -129,11 +136,13 @@ export const rulesMock: FetchRulesResponse = {
       output_index: '.siem-signals-default',
       max_signals: 100,
       risk_score: 47,
+      risk_score_mapping: [],
       name: 'Adversary Behavior - Detected - Elastic Endpoint',
       query: 'event.kind:alert and event.module:endgame and event.action:rules_engine_event',
       filters: [],
       references: [],
       severity: 'medium',
+      severity_mapping: [],
       updated_by: 'elastic',
       tags: ['Elastic', 'Endpoint'],
       to: 'now',

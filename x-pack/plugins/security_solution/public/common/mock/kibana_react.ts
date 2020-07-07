@@ -26,6 +26,8 @@ import {
   DEFAULT_INDEX_PATTERN,
 } from '../../../common/constants';
 import { createKibanaCoreStartMock, createKibanaPluginsStartMock } from './kibana_core';
+import { StartServices } from '../../types';
+import { createSecuritySolutionStorageMock } from './mock_local_storage';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const mockUiSettings: Record<string, any> = {
@@ -70,10 +72,13 @@ export const createUseUiSetting$Mock = () => {
   ): [T, () => void] | undefined => [useUiSettingMock(key, defaultValue), jest.fn()];
 };
 
+export const createKibanaObservable$Mock = createKibanaCoreStartMock;
+
 export const createUseKibanaMock = () => {
   const core = createKibanaCoreStartMock();
   const plugins = createKibanaPluginsStartMock();
   const useUiSetting = createUseUiSettingMock();
+  const { storage } = createSecuritySolutionStorageMock();
 
   const services = {
     ...core,
@@ -82,9 +87,40 @@ export const createUseKibanaMock = () => {
       ...core.uiSettings,
       get: useUiSetting,
     },
+    storage,
   };
 
   return () => ({ services });
+};
+
+export const createStartServices = () => {
+  const core = createKibanaCoreStartMock();
+  const plugins = createKibanaPluginsStartMock();
+  const security = {
+    authc: {
+      getCurrentUser: jest.fn(),
+      areAPIKeysEnabled: jest.fn(),
+    },
+    sessionTimeout: {
+      start: jest.fn(),
+      stop: jest.fn(),
+      extend: jest.fn(),
+    },
+    license: {
+      isEnabled: jest.fn(),
+      getFeatures: jest.fn(),
+      features$: jest.fn(),
+    },
+    __legacyCompat: { logoutUrl: 'logoutUrl', tenant: 'tenant' },
+  };
+
+  const services = ({
+    ...core,
+    ...plugins,
+    security,
+  } as unknown) as StartServices;
+
+  return services;
 };
 
 export const createWithKibanaMock = () => {

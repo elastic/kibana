@@ -22,9 +22,7 @@ import { fields } from '../../../index_patterns/mocks';
 import { nodeTypes } from './index';
 import { IIndexPattern } from '../../../index_patterns';
 
-// @ts-ignore
 import { buildNode, buildNodeWithArgumentNodes, toElasticsearchQuery } from './function';
-// @ts-ignore
 import { toElasticsearchQuery as isFunctionToElasticsearchQuery } from '../functions/is';
 
 describe('kuery node types', () => {

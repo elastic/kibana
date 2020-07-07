@@ -252,7 +252,7 @@ const getSetupStatus = <JobType extends string>(everyJobStatus: Record<JobType, 
   Object.entries<JobStatus>(everyJobStatus).reduce<SetupStatus>((setupStatus, [, jobStatus]) => {
     if (jobStatus === 'missing') {
       return { type: 'required', reason: 'missing' };
-    } else if (setupStatus.type === 'required') {
+    } else if (setupStatus.type === 'required' || setupStatus.type === 'succeeded') {
       return setupStatus;
     } else if (setupStatus.type === 'skipped' || isJobStatusWithResults(jobStatus)) {
       return {
@@ -265,8 +265,9 @@ const getSetupStatus = <JobType extends string>(everyJobStatus: Record<JobType, 
     return setupStatus;
   }, previousSetupStatus);
 
-const hasError = <Value extends any>(value: Value): value is MandatoryProperty<Value, 'error'> =>
-  value.error != null;
+const hasError = <Value extends { error?: any }>(
+  value: Value
+): value is MandatoryProperty<Value, 'error'> => value.error != null;
 
 export const useModuleStatus = <JobType extends string>(jobTypes: JobType[]) => {
   return useReducer(createStatusReducer(jobTypes), { jobTypes }, createInitialState);

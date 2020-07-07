@@ -9,9 +9,9 @@ import { ReportingCore } from '../../../../';
 import { CancellationToken } from '../../../../../common';
 import { cryptoFactory, LevelLogger } from '../../../../lib';
 import { createMockReportingCore } from '../../../../test_helpers';
-import { JobDocPayloadPNG } from '../../types';
+import { ScheduledTaskParamsPNG } from '../../types';
 import { generatePngObservableFactory } from '../lib/generate_png';
-import { executeJobFactory } from './';
+import { runTaskFnFactory } from './';
 
 jest.mock('../lib/generate_png', () => ({ generatePngObservableFactory: jest.fn() }));
 
@@ -36,7 +36,7 @@ const encryptHeaders = async (headers: Record<string, string>) => {
   return await crypto.encrypt(headers);
 };
 
-const getJobDocPayload = (baseObj: any) => baseObj as JobDocPayloadPNG;
+const getScheduledTaskParams = (baseObj: any) => baseObj as ScheduledTaskParamsPNG;
 
 beforeEach(async () => {
   const kbnConfig = {
@@ -81,11 +81,11 @@ test(`passes browserTimezone to generatePng`, async () => {
   const generatePngObservable = (await generatePngObservableFactory(mockReporting)) as jest.Mock;
   generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
-  const executeJob = await executeJobFactory(mockReporting, getMockLogger());
+  const runTask = await runTaskFnFactory(mockReporting, getMockLogger());
   const browserTimezone = 'UTC';
-  await executeJob(
+  await runTask(
     'pngJobId',
-    getJobDocPayload({
+    getScheduledTaskParams({
       relativeUrl: '/app/kibana#/something',
       browserTimezone,
       headers: encryptedHeaders,
@@ -125,15 +125,15 @@ test(`passes browserTimezone to generatePng`, async () => {
 });
 
 test(`returns content_type of application/png`, async () => {
-  const executeJob = await executeJobFactory(mockReporting, getMockLogger());
+  const runTask = await runTaskFnFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
 
   const generatePngObservable = await generatePngObservableFactory(mockReporting);
   (generatePngObservable as jest.Mock).mockReturnValue(Rx.of('foo'));
 
-  const { content_type: contentType } = await executeJob(
+  const { content_type: contentType } = await runTask(
     'pngJobId',
-    getJobDocPayload({ relativeUrl: '/app/kibana#/something', headers: encryptedHeaders }),
+    getScheduledTaskParams({ relativeUrl: '/app/kibana#/something', headers: encryptedHeaders }),
     cancellationToken
   );
   expect(contentType).toBe('image/png');
@@ -144,11 +144,11 @@ test(`returns content of generatePng getBuffer base64 encoded`, async () => {
   const generatePngObservable = await generatePngObservableFactory(mockReporting);
   (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ base64: testContent }));
 
-  const executeJob = await executeJobFactory(mockReporting, getMockLogger());
+  const runTask = await runTaskFnFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
-  const { content } = await executeJob(
+  const { content } = await runTask(
     'pngJobId',
-    getJobDocPayload({ relativeUrl: '/app/kibana#/something', headers: encryptedHeaders }),
+    getScheduledTaskParams({ relativeUrl: '/app/kibana#/something', headers: encryptedHeaders }),
     cancellationToken
   );
 

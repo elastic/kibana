@@ -8,8 +8,8 @@
 
 import * as t from 'io-ts';
 
-import { DefaultStringArray, NonEmptyString } from '../types';
 import { DefaultNamespace } from '../types/default_namespace';
+import { DefaultStringArray, NonEmptyString } from '../../siem_common_deps';
 
 export const name = t.string;
 export type Name = t.TypeOf<typeof name>;
@@ -86,12 +86,6 @@ export type ExceptionListItemType = t.TypeOf<typeof exceptionListItemType>;
 export const list_type = t.keyof({ item: null, list: null });
 export type ListType = t.TypeOf<typeof list_type>;
 
-// TODO: Investigate what the deep structure of a comment is really going to be and then change this to use that deep structure with a default array
-export const comment = DefaultStringArray;
-export type Comment = t.TypeOf<typeof comment>;
-export const commentOrUndefined = t.union([comment, t.undefined]);
-export type CommentOrUndefined = t.TypeOf<typeof commentOrUndefined>;
-
 export const item_id = NonEmptyString;
 export type ItemId = t.TypeOf<typeof item_id>;
 export const itemIdOrUndefined = t.union([item_id, t.undefined]);
@@ -133,3 +127,25 @@ export type CursorOrUndefined = t.TypeOf<typeof cursorOrUndefined>;
 
 export const namespace_type = DefaultNamespace;
 export type NamespaceType = t.TypeOf<typeof namespace_type>;
+
+export const operator = t.keyof({ excluded: null, included: null });
+export type Operator = t.TypeOf<typeof operator>;
+export enum OperatorEnum {
+  INCLUDED = 'included',
+  EXCLUDED = 'excluded',
+}
+
+export const operator_type = t.keyof({
+  exists: null,
+  list: null,
+  match: null,
+  match_any: null,
+});
+export type OperatorType = t.TypeOf<typeof operator_type>;
+export enum OperatorTypeEnum {
+  NESTED = 'nested',
+  MATCH = 'match',
+  MATCH_ANY = 'match_any',
+  EXISTS = 'exists',
+  LIST = 'list',
+}

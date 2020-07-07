@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useState } from 'react';
+import React, { FC, useState } from 'react';
 import {
   EuiButton,
   EuiCheckbox,
@@ -16,9 +16,10 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
-import { Messages } from '../../../analytics_management/components/create_analytics_form/messages';
+import { Messages } from '../shared';
 import { ANALYTICS_STEPS } from '../../page';
 import { BackToListPanel } from '../back_to_list_panel';
+import { ProgressStats } from './progress_stats';
 
 interface Props extends CreateAnalyticsFormProps {
   step: ANALYTICS_STEPS;
@@ -26,16 +27,11 @@ interface Props extends CreateAnalyticsFormProps {
 
 export const CreateStep: FC<Props> = ({ actions, state, step }) => {
   const { createAnalyticsJob, startAnalyticsJob } = actions;
-  const {
-    isAdvancedEditorValidJson,
-    isJobCreated,
-    isJobStarted,
-    isModalButtonDisabled,
-    isValid,
-    requestMessages,
-  } = state;
+  const { isAdvancedEditorValidJson, isJobCreated, isJobStarted, isValid, requestMessages } = state;
+  const { jobId } = state.form;
 
   const [checked, setChecked] = useState<boolean>(true);
+  const [showProgress, setShowProgress] = useState<boolean>(false);
 
   if (step !== ANALYTICS_STEPS.CREATE) return null;
 
@@ -43,12 +39,13 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
     await createAnalyticsJob();
 
     if (checked) {
+      setShowProgress(true);
       startAnalyticsJob();
     }
   };
 
   return (
-    <Fragment>
+    <div data-test-subj="mlAnalyticsCreateJobWizardCreateStep active">
       {!isJobCreated && !isJobStarted && (
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>
@@ -75,7 +72,7 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
           <EuiFlexItem grow={false}>
             <EuiButton
               className="mlAnalyticsCreateWizard__footerButton"
-              disabled={!isValid || !isAdvancedEditorValidJson || isModalButtonDisabled}
+              disabled={!isValid || !isAdvancedEditorValidJson}
               onClick={handleCreation}
               fill
               data-test-subj="mlAnalyticsCreateJobWizardCreateButton"
@@ -89,7 +86,8 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
       )}
       <EuiSpacer size="s" />
       <Messages messages={requestMessages} />
+      {isJobCreated === true && showProgress && <ProgressStats jobId={jobId} />}
       {isJobCreated === true && <BackToListPanel />}
-    </Fragment>
+    </div>
   );
 };

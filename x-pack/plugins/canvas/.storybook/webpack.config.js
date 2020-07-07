@@ -80,7 +80,7 @@ module.exports = async ({ config }) => {
           prependData(loaderContext) {
             return `@import ${stringifyRequest(
               loaderContext,
-              path.resolve(KIBANA_ROOT, 'src/legacy/ui/public/styles/_styling_constants.scss')
+              path.resolve(KIBANA_ROOT, 'src/legacy/ui/public/styles/_globals_v7light.scss')
             )};\n`;
           },
           sassOptions: {
@@ -136,16 +136,18 @@ module.exports = async ({ config }) => {
 
   // Copy the DLL files to the Webpack build for use in the Storybook UI
   config.plugins.push(
-    new CopyWebpackPlugin([
-      {
-        from: path.resolve(DLL_OUTPUT, 'dll.js'),
-        to: 'dll.js',
-      },
-      {
-        from: path.resolve(DLL_OUTPUT, 'dll.css'),
-        to: 'dll.css',
-      },
-    ])
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: path.resolve(DLL_OUTPUT, 'dll.js'),
+          to: 'dll.js',
+        },
+        {
+          from: path.resolve(DLL_OUTPUT, 'dll.css'),
+          to: 'dll.css',
+        },
+      ],
+    })
   );
 
   config.plugins.push(

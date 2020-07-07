@@ -8,7 +8,7 @@ Snapshots are important because they provide a copy of your data in case
 something goes wrong. If you need to roll back to an older version of your data,
 you can restore a snapshot from the repository.
 
-You’ll find *Snapshot and Restore* under *Management > Elasticsearch*.
+To get started, open the menu, then go to *Stack Management > {es} > Snapshot and Restore*.
 With this UI, you can:
 
 * Register a repository for storing your snapshots
@@ -32,7 +32,7 @@ The minimum required permissions to access *Snapshot and Restore* include:
 * Cluster privileges: `monitor`, `manage_slm`, `cluster:admin/snapshot`, and `cluster:admin/repository`
 * Index privileges: `all` on the `monitor` index if you want to access content in the *Restore Status* tab
 
-You can add these privileges in *Management > Security > Roles*.
+To add privileges, open the menu, then go to *Stack Management > Security > Roles*.
 
 [role="screenshot"]
 image:management/snapshot-restore/images/snapshot_permissions.png["Edit Role"]
@@ -191,7 +191,7 @@ your master and data nodes.  You can do this in one of two ways:
 Use *Snapshot and Restore* to register the repository where your snapshots
 will live.
 
-. Go to *Management > Elasticsearch > Snapshot and Restore*.
+. Open the menu, then go to *Stack Management > {es} > Snapshot and Restore*.
 . Click *Register a repository* in either the introductory message or *Repository view*.
 . Enter a name for your repository, for example, `my_backup`.
 . Select *Shared file system*.
@@ -212,7 +212,7 @@ The repository currently doesn’t have any snapshots.
 ==== Add a snapshot to the repository
 Use the {ref}/snapshots-take-snapshot.html[snapshot API] to create a snapshot.
 
-. Go to *Dev Tools > Console*.
+. Open the menu, go to *Dev Tools*, then select *Console*.
 . Create the snapshot:
 +
 [source,js]

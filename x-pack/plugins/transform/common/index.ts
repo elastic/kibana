@@ -38,3 +38,21 @@ export interface ResultData {
 export interface TransformEndpointResult {
   [key: string]: ResultData;
 }
+
+export interface DeleteTransformEndpointRequest {
+  transformsInfo: TransformEndpointRequest[];
+  deleteDestIndex?: boolean;
+  deleteDestIndexPattern?: boolean;
+  forceDelete?: boolean;
+}
+
+export interface DeleteTransformStatus {
+  transformDeleted: ResultData;
+  destIndexDeleted?: ResultData;
+  destIndexPatternDeleted?: ResultData;
+  destinationIndex?: string | undefined;
+}
+
+export interface DeleteTransformEndpointResult {
+  [key: string]: DeleteTransformStatus;
+}

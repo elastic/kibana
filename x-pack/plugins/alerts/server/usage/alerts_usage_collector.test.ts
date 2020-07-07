@@ -22,12 +22,12 @@ describe('registerAlertsUsageCollector', () => {
   });
 
   it('should call registerCollector', () => {
-    registerAlertsUsageCollector(usageCollectionMock, taskManagerStart);
+    registerAlertsUsageCollector(usageCollectionMock as UsageCollectionSetup, taskManagerStart);
     expect(usageCollectionMock.registerCollector).toHaveBeenCalledTimes(1);
   });
 
   it('should call makeUsageCollector with type = alerts', () => {
-    registerAlertsUsageCollector(usageCollectionMock, taskManagerStart);
+    registerAlertsUsageCollector(usageCollectionMock as UsageCollectionSetup, taskManagerStart);
     expect(usageCollectionMock.makeUsageCollector).toHaveBeenCalledTimes(1);
     expect(usageCollectionMock.makeUsageCollector.mock.calls[0][0].type).toBe('alerts');
   });

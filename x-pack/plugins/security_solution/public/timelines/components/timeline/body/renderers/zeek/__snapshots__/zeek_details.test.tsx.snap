@@ -371,6 +371,7 @@ exports[`ZeekDetails rendering it renders the default ZeekDetails 1`] = `
               "filebeat-*",
               "packetbeat-*",
               "winlogbeat-*",
+              "logs-*",
             ],
             "name": "event.end",
             "searchable": true,

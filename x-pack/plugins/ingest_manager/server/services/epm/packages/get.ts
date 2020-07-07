@@ -5,10 +5,11 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
+import { isPackageLimited } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import { Installation, InstallationStatus, PackageInfo, KibanaAssetType } from '../../../types';
 import * as Registry from '../registry';
-import { createInstallableFrom } from './index';
+import { createInstallableFrom, isRequiredPackage } from './index';
 
 export { fetchFile as getFile, SearchParams } from '../registry';
 
@@ -49,6 +50,28 @@ export async function getPackages(
   return packageList;
 }
 
+// Get package names for packages which cannot have more than one package config on an agent config
+// Assume packages only export one config template for now
+export async function getLimitedPackages(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+}): Promise<string[]> {
+  const { savedObjectsClient } = options;
+  const allPackages = await getPackages({ savedObjectsClient });
+  const installedPackages = allPackages.filter(
+    (pkg) => (pkg.status = InstallationStatus.installed)
+  );
+  const installedPackagesInfo = await Promise.all(
+    installedPackages.map((pkgInstall) => {
+      return getPackageInfo({
+        savedObjectsClient,
+        pkgName: pkgInstall.name,
+        pkgVersion: pkgInstall.version,
+      });
+    })
+  );
+  return installedPackagesInfo.filter((pkgInfo) => isPackageLimited).map((pkgInfo) => pkgInfo.name);
+}
+
 export async function getPackageSavedObjects(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient.find<Installation>({
     type: PACKAGES_SAVED_OBJECT_TYPE,
@@ -79,10 +102,7 @@ export async function getPackageInfo(options: {
     getInstallationObject({ savedObjectsClient, pkgName }),
     Registry.fetchFindLatestPackage(pkgName),
     Registry.getArchiveInfo(pkgName, pkgVersion),
-  ] as const);
-  // adding `as const` due to regression in TS 3.7.2
-  // see https://github.com/microsoft/TypeScript/issues/34925#issuecomment-550021453
-  // and https://github.com/microsoft/TypeScript/pull/33707#issuecomment-550718523
+  ]);
 
   // add properties that aren't (or aren't yet) on Registry response
   const updated = {
@@ -90,6 +110,7 @@ export async function getPackageInfo(options: {
     latestVersion: latestPackage.version,
     title: item.title || nameAsTitle(item.name),
     assets: Registry.groupPathsByService(assets || []),
+    removable: !isRequiredPackage(pkgName),
   };
   return createInstallableFrom(updated, savedObject);
 }

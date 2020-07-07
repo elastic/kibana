@@ -1,9 +1,8 @@
+[chapter]
 [role="xpack"]
 [[xpack-logs]]
 = Logs
 
-[partintro]
---
 The Logs app in Kibana enables you to explore logs for common servers, containers, and services.
 
 The Logs app has a compact, console-like display that you can customize.
@@ -13,23 +12,10 @@ You can open the Logs app from the *Logs* tab in Kibana.
 You can also open the Logs app directly from a component in the Metrics app.
 In this case, you will only see the logs for the selected component.
 
-* <<xpack-logs-getting-started>>
-* <<xpack-logs-using>>
-* <<xpack-logs-configuring>>
-* <<xpack-logs-analysis>>
-* <<xpack-logs-alerting>>
-
 [role="screenshot"]
-image::logs/images/logs-console.png[Log Console in Kibana]
+image::logs/images/logs-console.png[Logs Console in Kibana]
 
---
+[float]
+=== Get started
 
-include::getting-started.asciidoc[]
-
-include::using.asciidoc[]
-
-include::configuring.asciidoc[]
-
-include::log-rate.asciidoc[]
-
-include::logs-alerting.asciidoc[]
+To get started with Elastic Logs, refer to {logs-guide}/install-logs-monitoring.html[Install Logs].

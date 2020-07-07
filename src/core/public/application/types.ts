@@ -18,6 +18,8 @@
  */
 
 import { Observable } from 'rxjs';
+import { History } from 'history';
+import { RecursiveReadonly } from '@kbn/utility-types';
 
 import { Capabilities } from './capabilities';
 import { ChromeStart } from '../chrome';
@@ -29,7 +31,6 @@ import { NotificationsStart } from '../notifications';
 import { OverlayStart } from '../overlays';
 import { PluginOpaqueId } from '../plugins';
 import { IUiSettingsClient } from '../ui_settings';
-import { RecursiveReadonly } from '../../utils';
 import { SavedObjectsStart } from '../saved_objects';
 import { AppCategory } from '../../types';
 import { ScopedHistory } from './scoped_history';
@@ -233,6 +234,24 @@ export interface App<HistoryLocationState = unknown> extends AppBase {
    * base path from HTTP.
    */
   appRoute?: string;
+
+  /**
+   * If set to true, the application's route will only be checked against an exact match. Defaults to `false`.
+   *
+   * @example
+   * ```ts
+   * core.application.register({
+   *   id: 'my_app',
+   *   title: 'My App'
+   *   exactRoute: true,
+   *   mount: () => { ... },
+   * })
+   *
+   * // '[basePath]/app/my_app' will be matched
+   * // '[basePath]/app/my_app/some/path' will not be matched
+   * ```
+   */
+  exactRoute?: boolean;
 }
 
 /** @public */
@@ -250,6 +269,10 @@ export interface LegacyApp extends AppBase {
  */
 export type PublicAppInfo = Omit<App, 'mount' | 'updater$'> & {
   legacy: false;
+  // remove optional on fields populated with default values
+  status: AppStatus;
+  navLinkStatus: AppNavLinkStatus;
+  appRoute: string;
 };
 
 /**
@@ -259,6 +282,9 @@ export type PublicAppInfo = Omit<App, 'mount' | 'updater$'> & {
  */
 export type PublicLegacyAppInfo = Omit<LegacyApp, 'updater$'> & {
   legacy: true;
+  // remove optional on fields populated with default values
+  status: AppStatus;
+  navLinkStatus: AppNavLinkStatus;
 };
 
 /**
@@ -568,10 +594,17 @@ export type Mounter<T = App | LegacyApp> = SelectivePartial<
     appBasePath: string;
     mount: T extends LegacyApp ? LegacyAppMounter : AppMounter;
     legacy: boolean;
+    exactRoute: boolean;
     unmountBeforeMounting: T extends LegacyApp ? true : boolean;
   },
   T extends LegacyApp ? never : 'unmountBeforeMounting'
 >;
+
+/** @internal */
+export interface ParsedAppUrl {
+  app: string;
+  path?: string;
+}
 
 /** @public */
 export interface ApplicationSetup {
@@ -660,6 +693,28 @@ export interface InternalApplicationSetup extends Pick<ApplicationSetup, 'regist
   ): void;
 }
 
+/**
+ * Options for the {@link ApplicationStart.navigateToApp | navigateToApp API}
+ */
+export interface NavigateToAppOptions {
+  /**
+   * optional path inside application to deep link to.
+   * If undefined, will use {@link AppBase.defaultPath | the app's default path}` as default.
+   */
+  path?: string;
+  /**
+   * optional state to forward to the application
+   */
+  state?: unknown;
+  /**
+   * if true, will not create a new history entry when navigating (using `replace` instead of `push`)
+   *
+   * @remarks
+   * This option not be used when navigating from and/or to legacy applications.
+   */
+  replace?: boolean;
+}
+
 /** @public */
 export interface ApplicationStart {
   /**
@@ -680,11 +735,9 @@ export interface ApplicationStart {
    * Navigate to a given app
    *
    * @param appId
-   * @param options.path - optional path inside application to deep link to.
-   *                       If undefined, will use {@link AppBase.defaultPath | the app's default path}` as default.
-   * @param options.state - optional state to forward to the application
+   * @param options - navigation options
    */
-  navigateToApp(appId: string, options?: { path?: string; state?: any }): Promise<void>;
+  navigateToApp(appId: string, options?: NavigateToAppOptions): Promise<void>;
 
   /**
    * Navigate to given url, which can either be an absolute url or a relative path, in a SPA friendly way when possible.
@@ -766,6 +819,12 @@ export interface InternalApplicationStart extends Omit<ApplicationStart, 'regist
 
   // Internal APIs
   getComponent(): JSX.Element | null;
+
+  /**
+   * The global history instance, exposed only to Core. Undefined when rendering a legacy application.
+   * @internal
+   */
+  history: History<unknown> | undefined;
 }
 
 /** @internal */

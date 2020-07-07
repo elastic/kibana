@@ -34,6 +34,7 @@ export const getRulesCount = async ({
     page: 1,
     sortField: 'createdAt',
     sortOrder: 'desc',
+    fields: undefined,
   });
   return firstRule.total;
 };
@@ -53,6 +54,7 @@ export const getRules = async ({
     page: 1,
     sortField: 'createdAt',
     sortOrder: 'desc',
+    fields: undefined,
   });
 
   if (isAlertTypes(rules.data)) {

@@ -72,7 +72,6 @@ uiRoutes.when('/logstash/node/:uuid/pipelines', {
   },
   controller: class extends MonitoringViewBaseEuiTableController {
     constructor($injector, $scope) {
-      const kbnUrl = $injector.get('kbnUrl');
       const config = $injector.get('config');
 
       super({
@@ -116,10 +115,6 @@ uiRoutes.when('/logstash/node/:uuid/pipelines', {
               {...this.getPaginationTableProps(pagination)}
               dateFormat={config.get('dateFormat')}
               upgradeMessage={makeUpgradeMessage(data.nodeSummary.version, i18n)}
-              angular={{
-                kbnUrl,
-                scope: $scope,
-              }}
             />
           );
         }

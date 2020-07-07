@@ -5,40 +5,44 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { lazy } from 'react';
+import { euiThemeVars as theme } from '@kbn/ui-shared-deps/theme';
+import { ConfigSchema } from '.';
+import { ObservabilityPluginSetup } from '../../observability/public';
 import {
   AppMountParameters,
   CoreSetup,
   CoreStart,
+  DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
 } from '../../../../src/core/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-
-import {
-  PluginSetupContract as AlertingPluginPublicSetup,
-  PluginStartContract as AlertingPluginPublicStart,
-} from '../../alerts/public';
-import { FeaturesPluginSetup } from '../../features/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import {
+  PluginSetupContract as AlertingPluginPublicSetup,
+  PluginStartContract as AlertingPluginPublicStart,
+} from '../../alerts/public';
+import { FeaturesPluginSetup } from '../../features/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
-import { ConfigSchema } from '.';
-import { createCallApmApi } from './services/rest/createCallApmApi';
-import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { AlertType } from '../common/alert_types';
-import { ErrorRateAlertTrigger } from './components/shared/ErrorRateAlertTrigger';
-import { TransactionDurationAlertTrigger } from './components/shared/TransactionDurationAlertTrigger';
+import { featureCatalogueEntry } from './featureCatalogueEntry';
+import { createCallApmApi } from './services/rest/createCallApmApi';
 import { setHelpExtension } from './setHelpExtension';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { setReadonlyBadge } from './updateBadge';
 import { createStaticIndexPattern } from './services/rest/index_pattern';
+import {
+  fetchLandingPageData,
+  hasData,
+} from './services/rest/observability_dashboard';
 
 export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
@@ -50,6 +54,7 @@ export interface ApmPluginSetupDeps {
   home: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
   triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  observability?: ObservabilityPluginSetup;
 }
 
 export interface ApmPluginStartDeps {
@@ -66,11 +71,22 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     this.initializerContext = initializerContext;
   }
   public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
+    createCallApmApi(core.http);
     const config = this.initializerContext.config.get();
     const pluginSetupDeps = plugins;
 
     pluginSetupDeps.home.environment.update({ apmUi: true });
     pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
+
+    if (plugins.observability) {
+      plugins.observability.dashboard.register({
+        appName: 'apm',
+        fetchData: async (params) => {
+          return fetchLandingPageData(params, { theme });
+        },
+        hasData,
+      });
+    }
 
     core.application.register({
       id: 'apm',
@@ -102,8 +118,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     });
   }
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
-    createCallApmApi(core.http);
-
     toggleAppLinkInNav(core, this.initializerContext.config.get());
 
     plugins.triggers_actions_ui.alertTypeRegistry.register({
@@ -112,7 +126,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         defaultMessage: 'Error rate',
       }),
       iconClass: 'bell',
-      alertParamsExpression: ErrorRateAlertTrigger,
+      alertParamsExpression: lazy(() =>
+        import('./components/shared/ErrorRateAlertTrigger')
+      ),
       validate: () => ({
         errors: [],
       }),
@@ -125,7 +141,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         defaultMessage: 'Transaction duration',
       }),
       iconClass: 'bell',
-      alertParamsExpression: TransactionDurationAlertTrigger,
+      alertParamsExpression: lazy(() =>
+        import('./components/shared/TransactionDurationAlertTrigger')
+      ),
       validate: () => ({
         errors: [],
       }),

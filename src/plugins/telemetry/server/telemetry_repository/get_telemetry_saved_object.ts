@@ -28,7 +28,7 @@ export const getTelemetrySavedObject: GetTelemetrySavedObject = async (
   repository: SavedObjectsClientContract
 ) => {
   try {
-    const { attributes } = await repository.get('telemetry', 'telemetry');
+    const { attributes } = await repository.get<TelemetrySavedObject>('telemetry', 'telemetry');
     return attributes;
   } catch (error) {
     if (SavedObjectsErrorHelpers.isNotFoundError(error)) {

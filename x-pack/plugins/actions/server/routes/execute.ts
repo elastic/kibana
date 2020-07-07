@@ -13,7 +13,6 @@ import {
 } from 'kibana/server';
 import { ILicenseState, verifyApiAccess, isErrorThatHandlesItsOwnResponse } from '../lib';
 
-import { ActionExecutorContract } from '../lib';
 import { ActionTypeExecutorResult } from '../types';
 import { BASE_ACTION_API_PATH } from '../../common';
 
@@ -25,11 +24,7 @@ const bodySchema = schema.object({
   params: schema.recordOf(schema.string(), schema.any()),
 });
 
-export const executeActionRoute = (
-  router: IRouter,
-  licenseState: ILicenseState,
-  actionExecutor: ActionExecutorContract
-) => {
+export const executeActionRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.post(
     {
       path: `${BASE_ACTION_API_PATH}/action/{id}/_execute`,
@@ -47,12 +42,17 @@ export const executeActionRoute = (
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse> {
       verifyApiAccess(licenseState);
+
+      if (!context.actions) {
+        return res.badRequest({ body: 'RouteHandlerContext is not registered for actions' });
+      }
+
+      const actionsClient = context.actions.getActionsClient();
       const { params } = req.body;
       const { id } = req.params;
       try {
-        const body: ActionTypeExecutorResult = await actionExecutor.execute({
+        const body: ActionTypeExecutorResult = await actionsClient.execute({
           params,
-          request: req,
           actionId: id,
         });
         return body

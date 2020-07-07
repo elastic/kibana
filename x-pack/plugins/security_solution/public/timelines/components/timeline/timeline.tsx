@@ -7,6 +7,7 @@
 import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
 import { getOr, isEmpty } from 'lodash/fp';
 import React, { useState, useMemo, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { FlyoutHeaderWithCloseButton } from '../flyout/header_with_close_button';
@@ -16,6 +17,7 @@ import { Direction } from '../../../graphql/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { ColumnHeaderOptions, KqlMode, EventType } from '../../../timelines/store/timeline/model';
 import { defaultHeaders } from './body/column_headers/default_headers';
+import { getInvestigateInResolverAction } from './body/helpers';
 import { Sort } from './body/sort';
 import { StatefulBody } from './body/stateful_body';
 import { DataProvider } from './data_providers/data_provider';
@@ -38,6 +40,7 @@ import {
   IIndexPattern,
 } from '../../../../../../../src/plugins/data/public';
 import { useManageTimeline } from '../manage_timeline';
+import { TimelineStatusLiteral } from '../../../../common/types/timeline';
 
 const TimelineContainer = styled.div`
   height: 100%;
@@ -88,6 +91,7 @@ export interface Props {
   end: number;
   eventType?: EventType;
   filters: Filter[];
+  graphEventId?: string;
   id: string;
   indexPattern: IIndexPattern;
   indexToAdd: string[];
@@ -107,6 +111,7 @@ export interface Props {
   showCallOutUnauthorizedMsg: boolean;
   start: number;
   sort: Sort;
+  status: TimelineStatusLiteral;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   usersViewing: string[];
 }
@@ -119,6 +124,7 @@ export const TimelineComponent: React.FC<Props> = ({
   end,
   eventType,
   filters,
+  graphEventId,
   id,
   indexPattern,
   indexToAdd,
@@ -137,10 +143,12 @@ export const TimelineComponent: React.FC<Props> = ({
   show,
   showCallOutUnauthorizedMsg,
   start,
+  status,
   sort,
   toggleColumn,
   usersViewing,
 }) => {
+  const dispatch = useDispatch();
   const kibana = useKibana();
   const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
   const combinedQueries = combineQueries({
@@ -166,18 +174,29 @@ export const TimelineComponent: React.FC<Props> = ({
   const [isQueryLoading, setIsQueryLoading] = useState(false);
   const {
     initializeTimeline,
+    setIndexToAdd,
     setIsTimelineLoading,
     setTimelineFilterManager,
+    setTimelineRowActions,
   } = useManageTimeline();
   useEffect(() => {
     initializeTimeline({ id, indexToAdd });
+    setTimelineRowActions({
+      id,
+      timelineRowActions: [getInvestigateInResolverAction({ dispatch, timelineId: id })],
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
     setIsTimelineLoading({ id, isLoading: isQueryLoading || loadingIndexName });
-  }, [loadingIndexName, isQueryLoading]);
+  }, [loadingIndexName, id, isQueryLoading, setIsTimelineLoading]);
   useEffect(() => {
     setTimelineFilterManager({ id, filterManager });
-  }, [filterManager]);
+  }, [filterManager, id, setTimelineFilterManager]);
+
+  useEffect(() => {
+    setIndexToAdd({ id, indexToAdd });
+  }, [id, indexToAdd, setIndexToAdd]);
 
   return (
     <TimelineContainer data-test-subj="timeline">
@@ -194,12 +213,14 @@ export const TimelineComponent: React.FC<Props> = ({
             indexPattern={indexPattern}
             dataProviders={dataProviders}
             filterManager={filterManager}
+            graphEventId={graphEventId}
             onDataProviderEdited={onDataProviderEdited}
             onDataProviderRemoved={onDataProviderRemoved}
             onToggleDataProviderEnabled={onToggleDataProviderEnabled}
             onToggleDataProviderExcluded={onToggleDataProviderExcluded}
             show={show}
             showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
+            status={status}
           />
         </TimelineHeaderContainer>
       </StyledEuiFlyoutHeader>

@@ -15,14 +15,15 @@ import { getIndexPatternTitleIdMapping } from '../../../common/hooks/api/helpers
 import { useIndexPatterns } from '../../../common/hooks/use_index_patterns';
 import { Loader } from '../../../common/components/loader';
 import { displayErrorToast, useStateToaster } from '../../../common/components/toasters';
+import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { Embeddable } from './embeddable';
 import { EmbeddableHeader } from './embeddable_header';
 import { createEmbeddable, findMatchingIndexPatterns } from './embedded_map_helpers';
 import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
 import { MapToolTip } from './map_tool_tip/map_tool_tip';
 import * as i18n from './translations';
-import { SetQuery } from './types';
-import { MapEmbeddable } from '../../../../../../legacy/plugins/maps/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { MapEmbeddable } from '../../../../../../plugins/maps/public/embeddable';
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 
@@ -72,7 +73,7 @@ export interface EmbeddedMapProps {
   filters: Filter[];
   startDate: number;
   endDate: number;
-  setQuery: SetQuery;
+  setQuery: GlobalTimeArgs['setQuery'];
 }
 
 export const EmbeddedMapComponent = ({
@@ -149,6 +150,7 @@ export const EmbeddedMapComponent = ({
     return () => {
       isSubscribed = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadingKibanaIndexPatterns, kibanaIndexPatterns]);
 
   // queryExpression updated useEffect
@@ -156,12 +158,14 @@ export const EmbeddedMapComponent = ({
     if (embeddable != null) {
       embeddable.updateInput({ query });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
   useEffect(() => {
     if (embeddable != null) {
       embeddable.updateInput({ filters });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
   // DateRange updated useEffect
@@ -173,6 +177,7 @@ export const EmbeddedMapComponent = ({
       };
       embeddable.updateInput({ timeRange });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startDate, endDate]);
 
   return isError ? null : (

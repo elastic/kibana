@@ -20,14 +20,13 @@ import {
   UptimeStartupPluginsContextProvider,
 } from './contexts';
 import { CommonlyUsedRange } from './components/common/uptime_date_picker';
-import { store } from './state';
 import { setBasePath } from './state/actions';
 import { PageRouter } from './routes';
 import {
   UptimeAlertsContextProvider,
   UptimeAlertsFlyoutWrapper,
 } from './components/overview/alerts';
-import { kibanaService } from './state/kibana_service';
+import { store } from './state';
 
 export interface UptimeAppColors {
   danger: string;
@@ -86,8 +85,6 @@ const Application = (props: UptimeAppProps) => {
         : undefined
     );
   }, [canSave, renderGlobalHelpControls, setBadge]);
-
-  kibanaService.core = core;
 
   store.dispatch(setBasePath(basePath));
 

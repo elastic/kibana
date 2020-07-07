@@ -55,7 +55,7 @@ describe('AggConfig Filters', () => {
         },
       } as any;
 
-      return new AggConfigs(indexPattern, aggs, { typesRegistry, fieldFormats });
+      return new AggConfigs(indexPattern, aggs, { typesRegistry });
     };
 
     test('should return a range filter for ip_range agg', () => {

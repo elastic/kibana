@@ -5,6 +5,7 @@
  */
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
 import moment from 'moment-timezone';
 import { CoreSetup } from 'src/core/public';
 import { Action, IncompatibleActionError } from '../../../../../src/plugins/ui_actions/public';
@@ -57,7 +58,7 @@ export class GetCsvReportPanelAction implements Action<ActionContext> {
     });
   }
 
-  public async getSearchRequestBody({ searchEmbeddable }: { searchEmbeddable: any }) {
+  public getSearchRequestBody({ searchEmbeddable }: { searchEmbeddable: any }) {
     const adapters = searchEmbeddable.getInspectorAdapters();
     if (!adapters) {
       return {};

@@ -10,7 +10,17 @@ import { Action } from 'typescript-fsa';
 import uuid from 'uuid';
 import { Dispatch } from 'redux';
 import { oneTimelineQuery } from '../../containers/one/index.gql_query';
-import { TimelineResult, GetOneTimeline, NoteResult } from '../../../graphql/types';
+import {
+  TimelineResult,
+  GetOneTimeline,
+  NoteResult,
+  FilterTimelineResult,
+  ColumnHeaderResult,
+  PinnedEvent,
+} from '../../../graphql/types';
+
+import { TimelineStatus, TimelineType } from '../../../../common/types/timeline';
+
 import {
   addNotes as dispatchAddNotes,
   updateNote as dispatchUpdateNote,
@@ -22,9 +32,9 @@ import {
   addTimeline as dispatchAddTimeline,
   addNote as dispatchAddGlobalTimelineNote,
 } from '../../../timelines/store/timeline/actions';
-
 import { ColumnHeaderOptions, TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+
 import {
   defaultColumnHeaderType,
   defaultHeaders,
@@ -77,103 +87,115 @@ const parseString = (params: string) => {
   }
 };
 
+const setTimelineColumn = (col: ColumnHeaderResult) => {
+  const timelineCols: ColumnHeaderOptions = {
+    ...col,
+    columnHeaderType: defaultColumnHeaderType,
+    id: col.id != null ? col.id : 'unknown',
+    placeholder: col.placeholder != null ? col.placeholder : undefined,
+    category: col.category != null ? col.category : undefined,
+    description: col.description != null ? col.description : undefined,
+    example: col.example != null ? col.example : undefined,
+    type: col.type != null ? col.type : undefined,
+    aggregatable: col.aggregatable != null ? col.aggregatable : undefined,
+    width: col.id === '@timestamp' ? DEFAULT_DATE_COLUMN_MIN_WIDTH : DEFAULT_COLUMN_MIN_WIDTH,
+  };
+  return timelineCols;
+};
+
+const setTimelineFilters = (filter: FilterTimelineResult) => ({
+  $state: {
+    store: 'appState',
+  },
+  meta: {
+    ...filter.meta,
+    ...(filter.meta && filter.meta.field != null ? { params: parseString(filter.meta.field) } : {}),
+    ...(filter.meta && filter.meta.params != null
+      ? { params: parseString(filter.meta.params) }
+      : {}),
+    ...(filter.meta && filter.meta.value != null ? { value: parseString(filter.meta.value) } : {}),
+  },
+  ...(filter.exists != null ? { exists: parseString(filter.exists) } : {}),
+  ...(filter.match_all != null ? { exists: parseString(filter.match_all) } : {}),
+  ...(filter.missing != null ? { exists: parseString(filter.missing) } : {}),
+  ...(filter.query != null ? { query: parseString(filter.query) } : {}),
+  ...(filter.range != null ? { range: parseString(filter.range) } : {}),
+  ...(filter.script != null ? { exists: parseString(filter.script) } : {}),
+});
+
+const setEventIdToNoteIds = (
+  duplicate: boolean,
+  eventIdToNoteIds: NoteResult[] | null | undefined
+) =>
+  duplicate
+    ? {}
+    : eventIdToNoteIds != null
+    ? eventIdToNoteIds.reduce((acc, note) => {
+        if (note.eventId != null) {
+          const eventNotes = getOr([], note.eventId, acc);
+          return { ...acc, [note.eventId]: [...eventNotes, note.noteId] };
+        }
+        return acc;
+      }, {})
+    : {};
+
+const setPinnedEventsSaveObject = (
+  duplicate: boolean,
+  pinnedEventsSaveObject: PinnedEvent[] | null | undefined
+) =>
+  duplicate
+    ? {}
+    : pinnedEventsSaveObject != null
+    ? pinnedEventsSaveObject.reduce(
+        (acc, pinnedEvent) => ({
+          ...acc,
+          ...(pinnedEvent.eventId != null ? { [pinnedEvent.eventId]: pinnedEvent } : {}),
+        }),
+        {}
+      )
+    : {};
+
+const setPinnedEventIds = (duplicate: boolean, pinnedEventIds: string[] | null | undefined) =>
+  duplicate
+    ? {}
+    : pinnedEventIds != null
+    ? pinnedEventIds.reduce((acc, pinnedEventId) => ({ ...acc, [pinnedEventId]: true }), {})
+    : {};
+
+// eslint-disable-next-line complexity
 export const defaultTimelineToTimelineModel = (
   timeline: TimelineResult,
   duplicate: boolean
 ): TimelineModel => {
-  return Object.entries({
+  const isTemplate = timeline.timelineType === TimelineType.template;
+  const timelineEntries = {
     ...timeline,
-    columns:
-      timeline.columns != null
-        ? timeline.columns.map((col) => {
-            const timelineCols: ColumnHeaderOptions = {
-              ...col,
-              columnHeaderType: defaultColumnHeaderType,
-              id: col.id != null ? col.id : 'unknown',
-              placeholder: col.placeholder != null ? col.placeholder : undefined,
-              category: col.category != null ? col.category : undefined,
-              description: col.description != null ? col.description : undefined,
-              example: col.example != null ? col.example : undefined,
-              type: col.type != null ? col.type : undefined,
-              aggregatable: col.aggregatable != null ? col.aggregatable : undefined,
-              width:
-                col.id === '@timestamp' ? DEFAULT_DATE_COLUMN_MIN_WIDTH : DEFAULT_COLUMN_MIN_WIDTH,
-            };
-            return timelineCols;
-          })
-        : defaultHeaders,
-    eventIdToNoteIds: duplicate
-      ? {}
-      : timeline.eventIdToNoteIds != null
-      ? timeline.eventIdToNoteIds.reduce((acc, note) => {
-          if (note.eventId != null) {
-            const eventNotes = getOr([], note.eventId, acc);
-            return { ...acc, [note.eventId]: [...eventNotes, note.noteId] };
-          }
-          return acc;
-        }, {})
-      : {},
-    filters:
-      timeline.filters != null
-        ? timeline.filters.map((filter) => ({
-            $state: {
-              store: 'appState',
-            },
-            meta: {
-              ...filter.meta,
-              ...(filter.meta && filter.meta.field != null
-                ? { params: parseString(filter.meta.field) }
-                : {}),
-              ...(filter.meta && filter.meta.params != null
-                ? { params: parseString(filter.meta.params) }
-                : {}),
-              ...(filter.meta && filter.meta.value != null
-                ? { value: parseString(filter.meta.value) }
-                : {}),
-            },
-            ...(filter.exists != null ? { exists: parseString(filter.exists) } : {}),
-            ...(filter.match_all != null ? { exists: parseString(filter.match_all) } : {}),
-            ...(filter.missing != null ? { exists: parseString(filter.missing) } : {}),
-            ...(filter.query != null ? { query: parseString(filter.query) } : {}),
-            ...(filter.range != null ? { range: parseString(filter.range) } : {}),
-            ...(filter.script != null ? { exists: parseString(filter.script) } : {}),
-          }))
-        : [],
+    columns: timeline.columns != null ? timeline.columns.map(setTimelineColumn) : defaultHeaders,
+    eventIdToNoteIds: setEventIdToNoteIds(duplicate, timeline.eventIdToNoteIds),
+    filters: timeline.filters != null ? timeline.filters.map(setTimelineFilters) : [],
     isFavorite: duplicate
       ? false
       : timeline.favorite != null
       ? timeline.favorite.length > 0
       : false,
     noteIds: duplicate ? [] : timeline.noteIds != null ? timeline.noteIds : [],
-    pinnedEventIds: duplicate
-      ? {}
-      : timeline.pinnedEventIds != null
-      ? timeline.pinnedEventIds.reduce(
-          (acc, pinnedEventId) => ({ ...acc, [pinnedEventId]: true }),
-          {}
-        )
-      : {},
-    pinnedEventsSaveObject: duplicate
-      ? {}
-      : timeline.pinnedEventsSaveObject != null
-      ? timeline.pinnedEventsSaveObject.reduce(
-          (acc, pinnedEvent) => ({
-            ...acc,
-            ...(pinnedEvent.eventId != null ? { [pinnedEvent.eventId]: pinnedEvent } : {}),
-          }),
-          {}
-        )
-      : {},
+    pinnedEventIds: setPinnedEventIds(duplicate, timeline.pinnedEventIds),
+    pinnedEventsSaveObject: setPinnedEventsSaveObject(duplicate, timeline.pinnedEventsSaveObject),
     id: duplicate ? '' : timeline.savedObjectId,
+    status: duplicate ? TimelineStatus.active : timeline.status,
     savedObjectId: duplicate ? null : timeline.savedObjectId,
     version: duplicate ? null : timeline.version,
-    title: duplicate ? '' : timeline.title || '',
-    templateTimelineId: duplicate ? null : timeline.templateTimelineId,
-    templateTimelineVersion: duplicate ? null : timeline.templateTimelineVersion,
-  }).reduce((acc: TimelineModel, [key, value]) => (value != null ? set(key, value, acc) : acc), {
-    ...timelineDefaults,
-    id: '',
-  });
+    title: duplicate ? `${timeline.title} - Duplicate` : timeline.title || '',
+    templateTimelineId: duplicate && isTemplate ? uuid.v4() : timeline.templateTimelineId,
+    templateTimelineVersion: duplicate && isTemplate ? 1 : timeline.templateTimelineVersion,
+  };
+  return Object.entries(timelineEntries).reduce(
+    (acc: TimelineModel, [key, value]) => (value != null ? set(key, value, acc) : acc),
+    {
+      ...timelineDefaults,
+      id: '',
+    }
+  );
 };
 
 export const formatTimelineResultToModel = (
@@ -190,6 +212,7 @@ export const formatTimelineResultToModel = (
 export interface QueryTimelineById<TCache> {
   apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
   duplicate?: boolean;
+  graphEventId?: string;
   timelineId: string;
   onOpenTimeline?: (timeline: TimelineModel) => void;
   openTimeline?: boolean;
@@ -206,6 +229,7 @@ export interface QueryTimelineById<TCache> {
 export const queryTimelineById = <TCache>({
   apolloClient,
   duplicate = false,
+  graphEventId = '',
   timelineId,
   onOpenTimeline,
   openTimeline = true,
@@ -221,7 +245,7 @@ export const queryTimelineById = <TCache>({
         variables: { id: timelineId },
       })
       // eslint-disable-next-line
-      .then(result => {
+      .then((result) => {
         const timelineToOpen: TimelineResult = omitTypenameInTimeline(
           getOr({}, 'data.getOneTimeline', result)
         );
@@ -238,6 +262,7 @@ export const queryTimelineById = <TCache>({
             notes,
             timeline: {
               ...timeline,
+              graphEventId,
               show: openTimeline,
             },
             to: getOr(to, 'dateRange.end', timeline),

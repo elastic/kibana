@@ -94,6 +94,7 @@ export default function ({ getService }) {
                     buildNum: 8467,
                     defaultIndex: '91200a00-9efd-11e7-acb3-3dab96693fab',
                   },
+                  migrationVersion: resp.body.saved_objects[2].migrationVersion,
                   references: [],
                 },
               ],

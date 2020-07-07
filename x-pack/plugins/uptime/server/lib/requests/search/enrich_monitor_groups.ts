@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, sortBy } from 'lodash';
 import { QueryContext } from './query_context';
 import {
   Check,
@@ -138,11 +137,11 @@ export const enrichMonitorGroups: MonitorEnricher = async (
                         if (curCheck.tls == null) {
                           curCheck.tls = new HashMap();
                         }
-                        if (!doc["tls.server.x509.not_after"].isEmpty()) {
-                          curCheck.tls.not_after = doc["tls.server.x509.not_after"][0];
+                         if (!doc["tls.certificate_not_valid_after"].isEmpty()) {
+                          curCheck.tls.not_after = doc["tls.certificate_not_valid_after"][0];
                         }
-                        if (!doc["tls.server.x509.not_before"].isEmpty()) {
-                          curCheck.tls.not_before = doc["tls.server.x509.not_before"][0];
+                         if (!doc["tls.certificate_not_valid_before"].isEmpty()) {
+                          curCheck.tls.not_before = doc["tls.certificate_not_valid_before"][0];
                         }
 
                         state.checksByAgentIdIP[agentIdIP] = curCheck;
@@ -245,17 +244,17 @@ export const enrichMonitorGroups: MonitorEnricher = async (
 
   const items = await queryContext.search(params);
 
-  const monitorBuckets = get(items, 'aggregations.monitors.buckets', []);
+  const monitorBuckets = items?.aggregations?.monitors?.buckets ?? [];
 
   const monitorIds: string[] = [];
   const summaries: MonitorSummary[] = monitorBuckets.map((monitor: any) => {
-    const monitorId = get<string>(monitor, 'key.monitor_id');
+    const monitorId = monitor.key.monitor_id;
     monitorIds.push(monitorId);
     const state: any = monitor.state?.value;
     state.timestamp = state['@timestamp'];
     const { checks } = state;
-    if (checks) {
-      state.checks = sortBy<SortChecks, Check>(checks, checksSortBy);
+    if (Array.isArray(checks)) {
+      checks.sort(sortChecksBy);
       state.checks = state.checks.map((check: any) => ({
         ...check,
         timestamp: check['@timestamp'],
@@ -276,7 +275,11 @@ export const enrichMonitorGroups: MonitorEnricher = async (
     histogram: histogramMap[summary.monitor_id],
   }));
 
-  const sortedResItems: any = sortBy(resItems, 'monitor_id');
+  const sortedResItems: any = resItems.sort((a, b) => {
+    if (a.monitor_id === b.monitor_id) return 0;
+    return a.monitor_id > b.monitor_id ? 1 : -1;
+  });
+
   if (queryContext.pagination.sortOrder === SortOrder.DESC) {
     sortedResItems.reverse();
   }
@@ -378,8 +381,29 @@ const cursorDirectionToOrder = (cd: CursorDirection): 'asc' | 'desc' => {
   return CursorDirection[cd] === CursorDirection.AFTER ? 'asc' : 'desc';
 };
 
-type SortChecks = (check: Check) => string[];
-const checksSortBy = (check: Check) => [
-  get<string>(check, 'observer.geo.name'),
-  get<string>(check, 'monitor.ip'),
-];
+const getStringValue = (value: string | Array<string | null> | null | undefined): string => {
+  if (Array.isArray(value)) {
+    value.sort();
+    return value[0] ?? '';
+  }
+  return value ?? '';
+};
+
+export const sortChecksBy = (
+  a: Pick<Check, 'observer' | 'monitor'>,
+  b: Pick<Check, 'observer' | 'monitor'>
+) => {
+  const nameA: string = a.observer?.geo?.name ?? '';
+  const nameB: string = b.observer?.geo?.name ?? '';
+
+  if (nameA === nameB) {
+    const ipA = getStringValue(a.monitor.ip);
+    const ipB = getStringValue(b.monitor.ip);
+
+    if (ipA === ipB) {
+      return 0;
+    }
+    return ipA > ipB ? 1 : -1;
+  }
+  return nameA > nameB ? 1 : -1;
+};

@@ -46,6 +46,7 @@ export const GroupsFilterPopoverComponent = ({
 
   useEffect(() => {
     onSelectedGroupsChanged(selectedGroups);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedGroups.sort().join()]);
 
   return (
@@ -66,6 +67,7 @@ export const GroupsFilterPopoverComponent = ({
       isOpen={isGroupPopoverOpen}
       closePopover={() => setIsGroupPopoverOpen(!isGroupPopoverOpen)}
       panelPaddingSize="none"
+      repositionOnScroll
     >
       {uniqueGroups.map((group, index) => (
         <EuiFilterSelectItem

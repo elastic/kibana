@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { sortBy, pick, identity } from 'lodash';
+import { sortBy, pickBy, identity } from 'lodash';
 import { ValuesType } from 'utility-types';
 import {
   SERVICE_NAME,
@@ -17,12 +17,7 @@ import {
   ServiceConnectionNode,
   ExternalConnectionNode,
 } from '../../../common/service_map';
-import {
-  ConnectionsResponse,
-  ServicesResponse,
-  AnomaliesResponse,
-} from './get_service_map';
-import { addAnomaliesDataToNodes } from './ml_helpers';
+import { ConnectionsResponse, ServicesResponse } from './get_service_map';
 
 function getConnectionNodeId(node: ConnectionNode): string {
   if ('span.destination.service.resource' in node) {
@@ -38,14 +33,10 @@ function getConnectionId(connection: Connection) {
   )}`;
 }
 
-export type ServiceMapResponse = ConnectionsResponse & {
-  anomalies: AnomaliesResponse;
-  services: ServicesResponse;
-};
-
-export function transformServiceMapResponses(response: ServiceMapResponse) {
-  const { anomalies, discoveredServices, services, connections } = response;
-
+export function getAllNodes(
+  services: ServiceMapResponse['services'],
+  connections: ServiceMapResponse['connections']
+) {
   // Derive the rest of the map nodes from the connections and add the services
   // from the services data query
   const allNodes: ConnectionNode[] = connections
@@ -58,10 +49,27 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
       }))
     );
 
+  return allNodes;
+}
+
+export function getServiceNodes(allNodes: ConnectionNode[]) {
   // List of nodes that are services
   const serviceNodes = allNodes.filter(
     (node) => SERVICE_NAME in node
   ) as ServiceConnectionNode[];
+
+  return serviceNodes;
+}
+
+export type ServiceMapResponse = ConnectionsResponse & {
+  services: ServicesResponse;
+};
+
+export function transformServiceMapResponses(response: ServiceMapResponse) {
+  const { discoveredServices, services, connections } = response;
+
+  const allNodes = getAllNodes(services, connections);
+  const serviceNodes = getServiceNodes(allNodes);
 
   // List of nodes that are externals
   const externalNodes = allNodes.filter(
@@ -104,7 +112,7 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
             id: matchedServiceNodes[0][SERVICE_NAME],
           },
           ...matchedServiceNodes.map((serviceNode) =>
-            pick(serviceNode, identity)
+            pickBy(serviceNode, identity)
           )
         ),
       };
@@ -200,18 +208,10 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
     return prev.concat(connection);
   }, []);
 
-  // Add anomlies data
-  const dedupedNodesWithAnomliesData = addAnomaliesDataToNodes(
-    dedupedNodes,
-    anomalies
-  );
-
   // Put everything together in elements, with everything in the "data" property
-  const elements = [...dedupedConnections, ...dedupedNodesWithAnomliesData].map(
-    (element) => ({
-      data: element,
-    })
-  );
+  const elements = [...dedupedConnections, ...dedupedNodes].map((element) => ({
+    data: element,
+  }));
 
   return { elements };
 }

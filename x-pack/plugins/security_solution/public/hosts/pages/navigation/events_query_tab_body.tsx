@@ -5,6 +5,7 @@
  */
 
 import React, { useEffect } from 'react';
+import { TimelineId } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
 import { HostsComponentsQueryProps } from './types';
 import { hostsModel } from '../../store';
@@ -16,8 +17,8 @@ import {
 import { MatrixHistogramContainer } from '../../../common/components/matrix_histogram';
 import * as i18n from '../translations';
 import { HistogramType } from '../../../graphql/types';
+import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 
-const HOSTS_PAGE_TIMELINE_ID = 'hosts-page';
 const EVENTS_HISTOGRAM_ID = 'eventsOverTimeQuery';
 
 export const eventsStackByOptions: MatrixHistogramOption[] = [
@@ -55,6 +56,15 @@ export const EventsQueryTabBody = ({
   setQuery,
   startDate,
 }: HostsComponentsQueryProps) => {
+  const { initializeTimeline } = useManageTimeline();
+
+  useEffect(() => {
+    initializeTimeline({
+      id: TimelineId.hostsPageEvents,
+      defaultModel: eventsDefaultModel,
+    });
+  }, [initializeTimeline]);
+
   useEffect(() => {
     return () => {
       if (deleteQuery) {
@@ -78,7 +88,7 @@ export const EventsQueryTabBody = ({
       <StatefulEventsViewer
         defaultModel={eventsDefaultModel}
         end={endDate}
-        id={HOSTS_PAGE_TIMELINE_ID}
+        id={TimelineId.hostsPageEvents}
         start={startDate}
         pageFilters={pageFilters}
       />

@@ -7,7 +7,7 @@
 import { SanitizedAlert } from '../../../../../alerts/common';
 import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
 import { findRules } from './find_rules';
-import { ReadRuleParams, isAlertType } from './types';
+import { isAlertType, ReadRuleOptions } from './types';
 
 /**
  * This reads the rules through a cascade try of what is fastest to what is slowest.
@@ -21,7 +21,7 @@ export const readRules = async ({
   alertsClient,
   id,
   ruleId,
-}: ReadRuleParams): Promise<SanitizedAlert | null> => {
+}: ReadRuleOptions): Promise<SanitizedAlert | null> => {
   if (id != null) {
     try {
       const rule = await alertsClient.get({ id });
@@ -43,6 +43,10 @@ export const readRules = async ({
       alertsClient,
       filter: `alert.attributes.tags: "${INTERNAL_RULE_ID_KEY}:${ruleId}"`,
       page: 1,
+      fields: undefined,
+      perPage: undefined,
+      sortField: undefined,
+      sortOrder: undefined,
     });
     if (ruleFromFind.data.length === 0 || !isAlertType(ruleFromFind.data[0])) {
       return null;

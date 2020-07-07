@@ -7,6 +7,7 @@
 import { ClusterMetric, Metric } from '../classes';
 import { SMALL_FLOAT, LARGE_FLOAT } from '../../../../common/formatting';
 import { i18n } from '@kbn/i18n';
+import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
 
 export class ApmClusterMetric extends ClusterMetric {
   constructor(opts) {
@@ -76,8 +77,8 @@ export class ApmEventsRateClusterMetric extends ApmClusterMetric {
       derivative: true,
       format: LARGE_FLOAT,
       metricAgg: 'max',
-      units: i18n.translate('xpack.monitoring.metrics.apm.perMinuteUnitLabel', {
-        defaultMessage: '/m',
+      units: i18n.translate('xpack.monitoring.metrics.apm.perSecondUnitLabel', {
+        defaultMessage: '/s',
       }),
     });
 
@@ -105,7 +106,7 @@ export class ApmEventsRateClusterMetric extends ApmClusterMetric {
         derivative: {
           buckets_path: 'event_rate',
           gap_policy: 'skip',
-          unit: '1m',
+          unit: NORMALIZED_DERIVATIVE_UNIT,
         },
       },
     };

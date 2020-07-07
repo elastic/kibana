@@ -8,7 +8,6 @@ import { useReducer } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { SimpleSavedObject } from 'kibana/public';
 import { getErrorMessage } from '../../../../../../../common/util/errors';
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { ml } from '../../../../../services/ml_api_service';
@@ -87,12 +86,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     dispatch({ type: ACTION.SET_IS_JOB_STARTED, isJobStarted });
   };
 
-  const setIsModalButtonDisabled = (isModalButtonDisabled: boolean) =>
-    dispatch({ type: ACTION.SET_IS_MODAL_BUTTON_DISABLED, isModalButtonDisabled });
-
-  const setIsModalVisible = (isModalVisible: boolean) =>
-    dispatch({ type: ACTION.SET_IS_MODAL_VISIBLE, isModalVisible });
-
   const setJobIds = (jobIds: DataFrameAnalyticsId[]) =>
     dispatch({ type: ACTION.SET_JOB_IDS, jobIds });
 
@@ -102,7 +95,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
 
   const createAnalyticsJob = async () => {
     resetRequestMessages();
-    setIsModalButtonDisabled(true);
 
     const analyticsJobConfig = (isAdvancedEditorEnabled
       ? jobConfig
@@ -123,7 +115,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
           }
         ),
       });
-      setIsModalButtonDisabled(false);
       setIsJobCreated(true);
       if (createIndexPattern) {
         createKibanaIndexPattern();
@@ -139,7 +130,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
           }
         ),
       });
-      setIsModalButtonDisabled(false);
     }
   };
 
@@ -244,7 +234,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       // Set the index pattern titles which the user can choose as the source.
       const indexPatternsMap: SourceIndexMap = {};
       const savedObjects = (await mlContext.indexPatterns.getCache()) || [];
-      savedObjects.forEach((obj: SimpleSavedObject<Record<string, any>>) => {
+      savedObjects.forEach((obj) => {
         const title = obj?.attributes?.title;
         if (title !== undefined) {
           const id = obj?.id || '';
@@ -265,13 +255,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
         ),
       });
     }
-  };
-
-  const openModal = async () => {
-    await mlContext.indexPatterns.clearCache();
-    resetForm();
-    await prepareFormValidation();
-    dispatch({ type: ACTION.OPEN_MODAL });
   };
 
   const initiateWizard = async () => {
@@ -327,8 +310,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
 
   const setJobClone = async (cloneJob: DeepReadonly<DataFrameAnalyticsConfig>) => {
     resetForm();
-    await prepareFormValidation();
-
     const config = extractCloningConfig(cloneJob);
     if (isAdvancedConfig(config)) {
       setJobConfig(config);
@@ -339,18 +320,15 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     }
 
     dispatch({ type: ACTION.SET_JOB_CLONE, cloneJob });
-    dispatch({ type: ACTION.OPEN_MODAL });
   };
 
   const actions: ActionDispatchers = {
     closeModal,
     createAnalyticsJob,
-    openModal,
     initiateWizard,
     resetAdvancedEditorMessages,
     setAdvancedEditorRawString,
     setFormState,
-    setIsModalVisible,
     setJobConfig,
     startAnalyticsJob,
     switchToAdvancedEditor,

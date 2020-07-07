@@ -5,10 +5,10 @@
  */
 
 import { createAction } from 'redux-actions';
-import { createThunk } from 'redux-thunks/cjs';
 import immutable from 'object-path-immutable';
 import { get, pick, cloneDeep, without } from 'lodash';
 import { toExpression, safeElementFromExpression } from '@kbn/interpreter/common';
+import { createThunk } from '../../lib/create_thunk';
 import { getPages, getNodeById, getNodes, getSelectedPageIndex } from '../selectors/workpad';
 import { getValue as getResolvedArgsValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';

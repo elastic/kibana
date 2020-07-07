@@ -12,7 +12,7 @@ import { localAppModule, appModuleName } from './app_modules';
 
 import { MonitoringPluginDependencies } from '../types';
 
-const APP_WRAPPER_CLASS = 'monitoringApplicationWrapper';
+const APP_WRAPPER_CLASS = 'monApplicationWrapper';
 export class AngularApp {
   private injector?: angular.auto.IInjectorService;
 
@@ -25,12 +25,22 @@ export class AngularApp {
       isCloud,
       pluginInitializerContext,
       externalConfig,
+      kibanaLegacy,
     } = deps;
     const app: IModule = localAppModule(deps);
     app.run(($injector: angular.auto.IInjectorService) => {
       this.injector = $injector;
       Legacy.init(
-        { core, element, data, navigation, isCloud, pluginInitializerContext, externalConfig },
+        {
+          core,
+          element,
+          data,
+          navigation,
+          isCloud,
+          pluginInitializerContext,
+          externalConfig,
+          kibanaLegacy,
+        },
         this.injector
       );
     });

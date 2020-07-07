@@ -56,8 +56,15 @@ export default function ({ getService }: FtrProviderContext) {
         cluster: ['monitor', 'manage_api_key'],
         indices: [
           {
-            names: ['logs-*', 'metrics-*', 'events-*'],
-            privileges: ['write', 'create_index'],
+            names: [
+              'logs-*',
+              'metrics-*',
+              'events-*',
+              '.ds-logs-*',
+              '.ds-metrics-*',
+              '.ds-events-*',
+            ],
+            privileges: ['write', 'create_index', 'indices:admin/auto_create'],
             allow_restricted_indices: false,
           },
         ],

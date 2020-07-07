@@ -8,6 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexItem, EuiBadge, EuiText } from '@elastic/eui';
 import classNames from 'classnames';
+import './metric.scss';
 
 export function Metric({ className, warning, value }) {
   const classes = classNames('monPipelineViewer__metric', className);

@@ -16,6 +16,7 @@ export const useEditTimelineActions = () => {
   const onCloseDeleteTimelineModal = useCallback(() => {
     setIsDeleteTimelineModalOpen(false);
     setActionTimeline(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionItem]);
 
   const onOpenDeleteTimelineModal = useCallback((selectedActionItem?: OpenTimelineResult) => {

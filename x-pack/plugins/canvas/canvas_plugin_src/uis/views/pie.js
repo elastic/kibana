@@ -75,6 +75,9 @@ export const pie = () => ({
       help: strings.getLabelsHelp(),
       argType: 'toggle',
       default: true,
+      options: {
+        labelValue: strings.getLabelsToggleSwitch(),
+      },
     },
     {
       name: 'seriesStyle',

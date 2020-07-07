@@ -111,7 +111,7 @@ export class ReportingPublicPlugin implements Plugin<void, void> {
         defaultMessage: 'Manage your reports generated from Discover, Visualize, and Dashboard.',
       }),
       icon: 'reportingApp',
-      path: '/app/management/kibana/reporting',
+      path: '/app/management/insightsAndAlerting/reporting',
       showOnHomePage: false,
       category: FeatureCatalogueCategory.ADMIN,
     });
@@ -155,8 +155,6 @@ export class ReportingPublicPlugin implements Plugin<void, void> {
     );
   }
 
-  // FIXME: only perform these actions for authenticated routes
-  // Depends on https://github.com/elastic/kibana/pull/39477
   public start(core: CoreStart) {
     const { http, notifications } = core;
     const apiClient = new ReportingAPIClient(http);

@@ -5,3 +5,6 @@
  */
 
 export * from '../common/types/anomalies';
+export * from '../common/types/anomaly_detection_jobs';
+export * from './lib/capabilities/errors';
+export { ModuleSetupPayload } from './shared_services/providers/modules';

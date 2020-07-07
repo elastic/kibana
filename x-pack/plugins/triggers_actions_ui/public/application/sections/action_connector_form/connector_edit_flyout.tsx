@@ -48,6 +48,7 @@ export const ConnectorEditFlyout = ({
     actionTypeRegistry,
     reloadConnectors,
     docLinks,
+    consumer,
   } = useActionsConnectorsContext();
   const canSave = hasSaveActionsCapability(capabilities);
   const closeFlyout = useCallback(() => setEditFlyoutVisibility(false), [setEditFlyoutVisibility]);
@@ -185,6 +186,7 @@ export const ConnectorEditFlyout = ({
             actionTypeRegistry={actionTypeRegistry}
             http={http}
             docLinks={docLinks}
+            consumer={consumer}
           />
         ) : (
           <Fragment>
@@ -197,7 +199,7 @@ export const ConnectorEditFlyout = ({
               )}
             </EuiText>
             <EuiLink
-              href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/pre-configured-connectors.html`}
+              href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/pre-configured-action-types-and-connectors.html`}
               target="_blank"
             >
               <FormattedMessage

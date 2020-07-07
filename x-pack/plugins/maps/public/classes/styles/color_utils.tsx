@@ -139,11 +139,11 @@ const COLOR_PALETTES_CONFIGS: ColorPalette[] = [
   },
   {
     id: 'palette_20',
-    colors: euiPaletteColorBlind(2),
+    colors: euiPaletteColorBlind({ rotations: 2 }),
   },
   {
     id: 'palette_30',
-    colors: euiPaletteColorBlind(3),
+    colors: euiPaletteColorBlind({ rotations: 3 }),
   },
 ];
 

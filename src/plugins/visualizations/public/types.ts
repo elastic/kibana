@@ -35,6 +35,7 @@ export type VisualizationControllerConstructor = new (
 ) => VisualizationController;
 
 export interface SavedVisState {
+  title: string;
   type: string;
   params: VisParams;
   aggs: AggConfigOptions[];

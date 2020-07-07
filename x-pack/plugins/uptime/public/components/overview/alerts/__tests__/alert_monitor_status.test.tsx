@@ -5,141 +5,120 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { AlertFieldNumber, handleAlertFieldNumberChange } from '../alert_field_number';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { AlertMonitorStatusComponent, AlertMonitorStatusProps } from '../alert_monitor_status';
 
 describe('alert monitor status component', () => {
-  describe('handleAlertFieldNumberChange', () => {
-    let mockSetIsInvalid: jest.Mock;
-    let mockSetFieldValue: jest.Mock;
+  describe('AlertMonitorStatus', () => {
+    const defaultProps: AlertMonitorStatusProps = {
+      alertParams: {
+        numTimes: 3,
+        search: 'monitor.id: foo',
+        timerangeUnit: 'h',
+        timerangeCount: 21,
+      },
+      autocomplete: {
+        addQuerySuggestionProvider: jest.fn(),
+        getQuerySuggestions: jest.fn(),
+      },
+      enabled: true,
+      hasFilters: false,
+      isOldAlert: true,
+      locations: [],
+      shouldUpdateUrl: false,
+      snapshotCount: 0,
+      snapshotLoading: false,
+      numTimes: 14,
+      setAlertParams: jest.fn(),
+      timerange: { from: 'now-12h', to: 'now' },
+    };
 
-    beforeEach(() => {
-      mockSetIsInvalid = jest.fn();
-      mockSetFieldValue = jest.fn();
-    });
-
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('sets a valid number', () => {
-      handleAlertFieldNumberChange(
-        // @ts-ignore no need to implement this entire type here
-        { target: { value: '23' } },
-        false,
-        mockSetIsInvalid,
-        mockSetFieldValue
-      );
-      expect(mockSetIsInvalid).not.toHaveBeenCalled();
-      expect(mockSetFieldValue).toHaveBeenCalledTimes(1);
-      expect(mockSetFieldValue.mock.calls).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            23,
-          ],
-        ]
+    it('passes default props to children', () => {
+      const component = shallowWithIntl(<AlertMonitorStatusComponent {...defaultProps} />);
+      expect(component).toMatchInlineSnapshot(`
+        <Fragment>
+          <OldAlertCallOut
+            isOldAlert={true}
+          />
+          <EuiSpacer
+            size="m"
+          />
+          <KueryBar
+            aria-label="Input that allows filtering criteria for the monitor status alert"
+            autocomplete={
+              Object {
+                "addQuerySuggestionProvider": [MockFunction],
+                "getQuerySuggestions": [MockFunction],
+              }
+            }
+            data-test-subj="xpack.uptime.alerts.monitorStatus.filterBar"
+            defaultKuery="monitor.id: foo"
+            shouldUpdateUrl={false}
+            updateDefaultKuery={[Function]}
+          />
+          <EuiSpacer
+            size="s"
+          />
+          <DownNoExpressionSelect
+            defaultNumTimes={3}
+            hasFilters={false}
+            setAlertParams={[MockFunction]}
+          />
+          <EuiSpacer
+            size="xs"
+          />
+          <TimeExpressionSelect
+            defaultTimerangeCount={21}
+            defaultTimerangeUnit="h"
+            setAlertParams={[MockFunction]}
+          />
+          <EuiSpacer
+            size="xs"
+          />
+          <FiltersExpressionSelectContainer
+            alertParams={
+              Object {
+                "numTimes": 3,
+                "search": "monitor.id: foo",
+                "timerangeCount": 21,
+                "timerangeUnit": "h",
+              }
+            }
+            newFilters={Array []}
+            onRemoveFilter={[Function]}
+            setAlertParams={[MockFunction]}
+            shouldUpdateUrl={false}
+          />
+          <EuiSpacer
+            size="xs"
+          />
+          <AddFilterButton
+            newFilters={Array []}
+            onNewFilter={[Function]}
+          />
+          <EuiSpacer
+            size="m"
+          />
+          <EuiCallOut
+            iconType="iInCircle"
+            size="s"
+            title={
+              <FormattedMessage
+                defaultMessage="This alert will apply to approximately {snapshotCount} monitors."
+                id="xpack.uptime.alerts.monitorStatus.monitorCallOut.title"
+                values={
+                  Object {
+                    "snapshotCount": 0,
+                  }
+                }
+              />
+            }
+          />
+          <EuiSpacer
+            size="m"
+          />
+        </Fragment>
       `);
-    });
-
-    it('sets invalid for NaN value', () => {
-      handleAlertFieldNumberChange(
-        // @ts-ignore no need to implement this entire type here
-        { target: { value: 'foo' } },
-        false,
-        mockSetIsInvalid,
-        mockSetFieldValue
-      );
-      expect(mockSetIsInvalid).toHaveBeenCalledTimes(1);
-      expect(mockSetIsInvalid.mock.calls).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            true,
-          ],
-        ]
-      `);
-      expect(mockSetFieldValue).not.toHaveBeenCalled();
-    });
-
-    it('sets invalid to false when a valid value is received and invalid is true', () => {
-      handleAlertFieldNumberChange(
-        // @ts-ignore no need to implement this entire type here
-        { target: { value: '23' } },
-        true,
-        mockSetIsInvalid,
-        mockSetFieldValue
-      );
-      expect(mockSetIsInvalid).toHaveBeenCalledTimes(1);
-      expect(mockSetIsInvalid.mock.calls).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            false,
-          ],
-        ]
-      `);
-      expect(mockSetFieldValue).toHaveBeenCalledTimes(1);
-      expect(mockSetFieldValue.mock.calls).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            23,
-          ],
-        ]
-      `);
-    });
-  });
-
-  describe('AlertFieldNumber', () => {
-    it('responds with correct number value when a valid number is specified', () => {
-      const mockValueHandler = jest.fn();
-      const component = mountWithIntl(
-        <AlertFieldNumber
-          aria-label="test label"
-          data-test-subj="foo"
-          disabled={false}
-          fieldValue={23}
-          setFieldValue={mockValueHandler}
-        />
-      );
-      component.find('input').simulate('change', { target: { value: '45' } });
-      expect(mockValueHandler).toHaveBeenCalled();
-      expect(mockValueHandler.mock.calls).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            45,
-          ],
-        ]
-      `);
-    });
-
-    it('does not set an invalid number value', () => {
-      const mockValueHandler = jest.fn();
-      const component = mountWithIntl(
-        <AlertFieldNumber
-          aria-label="test label"
-          data-test-subj="foo"
-          disabled={false}
-          fieldValue={23}
-          setFieldValue={mockValueHandler}
-        />
-      );
-      component.find('input').simulate('change', { target: { value: 'not a number' } });
-      expect(mockValueHandler).not.toHaveBeenCalled();
-      expect(mockValueHandler.mock.calls).toEqual([]);
-    });
-
-    it('does not set a number value less than 1', () => {
-      const mockValueHandler = jest.fn();
-      const component = mountWithIntl(
-        <AlertFieldNumber
-          aria-label="test label"
-          data-test-subj="foo"
-          disabled={false}
-          fieldValue={23}
-          setFieldValue={mockValueHandler}
-        />
-      );
-      component.find('input').simulate('change', { target: { value: '0' } });
-      expect(mockValueHandler).not.toHaveBeenCalled();
-      expect(mockValueHandler.mock.calls).toEqual([]);
     });
   });
 });

@@ -126,6 +126,7 @@ export const AddItem = ({
       inputsRef.current[haveBeenKeyboardDeleted].focus();
       setHaveBeenKeyboardDeleted(-1);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [haveBeenKeyboardDeleted, inputsRef.current]);
 
   const values = field.value as string[];

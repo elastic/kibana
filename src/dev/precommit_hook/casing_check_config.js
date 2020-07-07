@@ -47,6 +47,7 @@ export const IGNORE_FILE_GLOBS = [
   '**/Jenkinsfile*',
   'Dockerfile*',
   'vars/*',
+  '.ci/pipeline-library/**/*',
 
   // Files in this directory must match a pre-determined name in some cases.
   'x-pack/plugins/canvas/.storybook/*',
@@ -97,7 +98,6 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'packages/*',
   'packages/kbn-ui-framework/generator-kui',
   'src/legacy/ui/public/flot-charts',
-  'src/legacy/ui/public/utils/lodash-mixins',
   'test/functional/fixtures/es_archiver/visualize_source-filters',
   'packages/kbn-pm/src/utils/__fixtures__/*',
   'x-pack/dev-tools',

@@ -4,56 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
+import {
+  LanguageOrUndefined,
+  QueryOrUndefined,
+  Type,
+  SavedIdOrUndefined,
+  IndexOrUndefined,
+  Language,
+} from '../../../../common/detection_engine/schemas/common/schemas';
+import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { AlertServices } from '../../../../../alerts/server';
 import { assertUnreachable } from '../../../utils/build_query';
-import {
-  Filter,
-  Query,
-  esQuery,
-  esFilters,
-  IIndexPattern,
-} from '../../../../../../../src/plugins/data/server';
-import { PartialFilter, RuleAlertParams, Language } from '../types';
+import { PartialFilter } from '../types';
 import { BadRequestError } from '../errors/bad_request_error';
-import { buildQueryExceptions } from './build_exceptions_query';
-
-export const getQueryFilter = (
-  query: string,
-  language: Language,
-  filters: PartialFilter[],
-  index: string[],
-  lists: RuleAlertParams['exceptions_list']
-) => {
-  const indexPattern = {
-    fields: [],
-    title: index.join(),
-  } as IIndexPattern;
-
-  const queries: Query[] = buildQueryExceptions({ query, language, lists });
-
-  const config = {
-    allowLeadingWildcards: true,
-    queryStringOptions: { analyze_wildcard: true },
-    ignoreFilterIfFieldNotInIndex: false,
-    dateFormatTZ: 'Zulu',
-  };
-
-  const enabledFilters = ((filters as unknown) as Filter[]).filter(
-    (f) => f && !esFilters.isFilterDisabled(f)
-  );
-
-  return esQuery.buildEsQuery(indexPattern, queries, enabledFilters, config);
-};
 
 interface GetFilterArgs {
-  type: RuleAlertParams['type'];
-  filters: PartialFilter[] | undefined | null;
-  language: Language | undefined | null;
-  query: string | undefined | null;
-  savedId: string | undefined | null;
+  type: Type;
+  filters: PartialFilter[] | undefined;
+  language: LanguageOrUndefined;
+  query: QueryOrUndefined;
+  savedId: SavedIdOrUndefined;
   services: AlertServices;
-  index: string[] | undefined | null;
-  lists: RuleAlertParams['exceptions_list'];
+  index: IndexOrUndefined;
+  lists: ExceptionListItemSchema[];
 }
 
 interface QueryAttributes {

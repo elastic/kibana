@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { PingHistogramComponent, PingHistogramComponentProps } from '../ping_histogram';
-import { renderWithRouter, shallowWithRouter } from '../../../../lib';
+import { renderWithRouter, shallowWithRouter, MountWithReduxProvider } from '../../../../lib';
 
 describe('PingHistogram component', () => {
   const props: PingHistogramComponentProps = {
@@ -49,7 +49,12 @@ describe('PingHistogram component', () => {
   });
 
   it('renders the component without errors', () => {
-    const component = renderWithRouter(<PingHistogramComponent {...props} />);
+    const component = renderWithRouter(
+      <MountWithReduxProvider>
+        <PingHistogramComponent {...props} />
+      </MountWithReduxProvider>
+    );
+
     expect(component).toMatchSnapshot();
   });
 });

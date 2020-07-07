@@ -41,12 +41,12 @@
 
 import {
   ElasticsearchServiceSetup,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
   configSchema as elasticsearchConfigSchema,
   ElasticsearchServiceStart,
 } from './elasticsearch';
 
-import { HttpServiceSetup } from './http';
+import { HttpServiceSetup, HttpServiceStart } from './http';
 import { HttpResources } from './http_resources';
 
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
@@ -60,8 +60,14 @@ import {
 } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { UuidServiceSetup } from './uuid';
-import { MetricsServiceSetup } from './metrics';
+import { MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
+import {
+  LoggingServiceSetup,
+  appendersSchema,
+  loggerContextConfigSchema,
+  loggerSchema,
+} from './logging';
 
 export { bootstrap } from './bootstrap';
 export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
@@ -85,25 +91,24 @@ export {
 export { CoreId } from './core_context';
 export { CspConfig, ICspConfig } from './csp';
 export {
-  ClusterClient,
-  IClusterClient,
-  ICustomClusterClient,
-  Headers,
-  ScopedClusterClient,
-  IScopedClusterClient,
+  LegacyClusterClient,
+  ILegacyClusterClient,
+  ILegacyCustomClusterClient,
+  LegacyScopedClusterClient,
+  ILegacyScopedClusterClient,
   ElasticsearchConfig,
-  ElasticsearchClientConfig,
-  ElasticsearchError,
-  ElasticsearchErrorHelpers,
+  LegacyElasticsearchClientConfig,
+  LegacyElasticsearchError,
+  LegacyElasticsearchErrorHelpers,
   ElasticsearchServiceSetup,
   ElasticsearchServiceStart,
   ElasticsearchStatusMeta,
   NodesVersionCompatibility,
-  APICaller,
+  LegacyAPICaller,
   FakeRequest,
   ScopeableRequest,
 } from './elasticsearch';
-export * from './elasticsearch/api_types';
+export * from './elasticsearch/legacy/api_types';
 export {
   AuthenticationHandler,
   AuthHeaders,
@@ -121,6 +126,8 @@ export {
   CustomHttpResponseOptions,
   GetAuthHeaders,
   GetAuthState,
+  Headers,
+  HttpAuth,
   HttpResponseOptions,
   HttpResponsePayload,
   HttpServerInfo,
@@ -186,7 +193,17 @@ export {
 } from './http_resources';
 
 export { IRenderOptions } from './rendering';
-export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
+export {
+  Logger,
+  LoggerFactory,
+  LogMeta,
+  LogRecord,
+  LogLevel,
+  LoggingServiceSetup,
+  LoggerContextConfigInput,
+  LoggerConfigType,
+  AppenderConfigType,
+} from './logging';
 
 export {
   DiscoveredPlugin,
@@ -217,6 +234,7 @@ export {
   SavedObjectsErrorHelpers,
   SavedObjectsExportOptions,
   SavedObjectsExportResultDetails,
+  SavedObjectsFindResult,
   SavedObjectsFindResponse,
   SavedObjectsImportConflictError,
   SavedObjectsImportError,
@@ -289,7 +307,6 @@ export {
 } from './metrics';
 
 export {
-  RecursiveReadonly,
   DEFAULT_APP_CATEGORIES,
   getFlattenedObject,
   URLMeaningfulParts,
@@ -338,7 +355,7 @@ export {
  *      which uses the credentials of the incoming request
  *    - {@link ISavedObjectTypeRegistry | savedObjects.typeRegistry} - Type registry containing
  *      all the registered types.
- *    - {@link ScopedClusterClient | elasticsearch.legacy.client} - Elasticsearch
+ *    - {@link LegacyScopedClusterClient | elasticsearch.legacy.client} - Elasticsearch
  *      data client which uses the credentials of the incoming request
  *    - {@link IUiSettingsClient | uiSettings.client} - uiSettings client
  *      which uses the credentials of the incoming request
@@ -353,7 +370,7 @@ export interface RequestHandlerContext {
     };
     elasticsearch: {
       legacy: {
-        client: IScopedClusterClient;
+        client: ILegacyScopedClusterClient;
       };
     };
     uiSettings: {
@@ -383,8 +400,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     /** {@link HttpResources} */
     resources: HttpResources;
   };
-  /** {@link MetricsServiceSetup} */
-  metrics: MetricsServiceSetup;
+  /** {@link LoggingServiceSetup} */
+  logging: LoggingServiceSetup;
   /** {@link SavedObjectsServiceSetup} */
   savedObjects: SavedObjectsServiceSetup;
   /** {@link StatusServiceSetup} */
@@ -420,6 +437,10 @@ export interface CoreStart {
   capabilities: CapabilitiesStart;
   /** {@link ElasticsearchServiceStart} */
   elasticsearch: ElasticsearchServiceStart;
+  /** {@link HttpServiceStart} */
+  http: HttpServiceStart;
+  /** {@link MetricsServiceStart} */
+  metrics: MetricsServiceStart;
   /** {@link SavedObjectsServiceStart} */
   savedObjects: SavedObjectsServiceStart;
   /** {@link UiSettingsServiceStart} */
@@ -445,5 +466,10 @@ export {
 export const config = {
   elasticsearch: {
     schema: elasticsearchConfigSchema,
+  },
+  logging: {
+    appenders: appendersSchema,
+    loggers: loggerSchema,
+    loggerContext: loggerContextConfigSchema,
   },
 };

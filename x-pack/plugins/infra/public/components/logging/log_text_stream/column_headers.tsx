@@ -68,7 +68,7 @@ export const LogColumnHeaders: React.FunctionComponent<{
   );
 };
 
-const LogColumnHeader: React.FunctionComponent<{
+export const LogColumnHeader: React.FunctionComponent<{
   columnWidth: LogEntryColumnWidth;
   'data-test-subj'?: string;
 }> = ({ children, columnWidth, 'data-test-subj': dataTestSubj }) => (
@@ -77,8 +77,8 @@ const LogColumnHeader: React.FunctionComponent<{
   </LogColumnHeaderWrapper>
 );
 
-const LogColumnHeadersWrapper = euiStyled.div.attrs(() => ({
-  role: 'row',
+export const LogColumnHeadersWrapper = euiStyled.div.attrs((props) => ({
+  role: props.role ?? 'row',
 }))`
   align-items: stretch;
   display: flex;
@@ -93,8 +93,8 @@ const LogColumnHeadersWrapper = euiStyled.div.attrs(() => ({
   z-index: 1;
 `;
 
-const LogColumnHeaderWrapper = euiStyled(LogEntryColumn).attrs(() => ({
-  role: 'columnheader',
+const LogColumnHeaderWrapper = euiStyled(LogEntryColumn).attrs((props) => ({
+  role: props.role ?? 'columnheader',
 }))`
   align-items: center;
   display: flex;

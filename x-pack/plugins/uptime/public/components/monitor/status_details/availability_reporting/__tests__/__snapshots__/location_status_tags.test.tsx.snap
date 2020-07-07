@@ -1,0 +1,1088 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LocationStatusTags component renders properly against props 1`] = `
+<Fragment>
+  <styled.div>
+    <AvailabilityReporting
+      allLocations={
+        Array [
+          Object {
+            "availability": 100,
+            "color": "#d3dae6",
+            "label": "Berlin",
+            "status": "up",
+            "timestamp": "1 Mon ago",
+          },
+          Object {
+            "availability": 100,
+            "color": "#bd271e",
+            "label": "Berlin",
+            "status": "down",
+            "timestamp": "1 Mon ago",
+          },
+          Object {
+            "availability": 100,
+            "color": "#d3dae6",
+            "label": "Islamabad",
+            "status": "up",
+            "timestamp": "1 Mon ago",
+          },
+        ]
+      }
+    />
+  </styled.div>
+</Fragment>
+`;
+
+exports[`LocationStatusTags component renders when all locations are down 1`] = `
+.c1 {
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.c0 {
+  max-height: 246px;
+  overflow: hidden;
+}
+
+@media (max-width:1042px) {
+  .c1 {
+    display: inline-block;
+    margin-right: 16px;
+  }
+}
+
+<div
+  class="c0"
+>
+  <div
+    class="euiSpacer euiSpacer--s"
+  />
+  <div
+    class="euiBasicTable"
+  >
+    <div>
+      <table
+        class="euiTable euiTable--compressed"
+      >
+        <caption
+          class="euiScreenReaderOnly euiTableCaption"
+        />
+        <thead>
+          <tr>
+            <th
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_label_0"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  Location
+                </span>
+              </div>
+            </th>
+            <th
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_availability_1"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  Availability
+                </span>
+              </div>
+            </th>
+            <th
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_timestamp_2"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  Last check
+                </span>
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            class="euiTableRow"
+          >
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Location
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+              >
+                <div
+                  class="c1"
+                >
+                  <span
+                    class="euiBadge euiBadge--iconLeft"
+                    style="background-color:#bd271e;color:#fff"
+                  >
+                    <span
+                      class="euiBadge__content"
+                    >
+                      <span
+                        class="euiBadge__text"
+                      >
+                        <span
+                          class="euiTextColor euiTextColor--ghost"
+                        >
+                          <h4>
+                            Berlin
+                          </h4>
+                        </span>
+                      </span>
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Availability
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class=""
+                >
+                  100.00 %
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Last check
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  5m ago
+                </span>
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow"
+          >
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Location
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+              >
+                <div
+                  class="c1"
+                >
+                  <span
+                    class="euiBadge euiBadge--iconLeft"
+                    style="background-color:#bd271e;color:#fff"
+                  >
+                    <span
+                      class="euiBadge__content"
+                    >
+                      <span
+                        class="euiBadge__text"
+                      >
+                        <span
+                          class="euiTextColor euiTextColor--ghost"
+                        >
+                          <h4>
+                            Islamabad
+                          </h4>
+                        </span>
+                      </span>
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Availability
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class=""
+                >
+                  100.00 %
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Last check
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  5s ago
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`LocationStatusTags component renders when all locations are up 1`] = `
+.c1 {
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.c0 {
+  max-height: 246px;
+  overflow: hidden;
+}
+
+@media (max-width:1042px) {
+  .c1 {
+    display: inline-block;
+    margin-right: 16px;
+  }
+}
+
+<div
+  class="c0"
+>
+  <div
+    class="euiSpacer euiSpacer--s"
+  />
+  <div
+    class="euiBasicTable"
+  >
+    <div>
+      <table
+        class="euiTable euiTable--compressed"
+      >
+        <caption
+          class="euiScreenReaderOnly euiTableCaption"
+        />
+        <thead>
+          <tr>
+            <th
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_label_0"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  Location
+                </span>
+              </div>
+            </th>
+            <th
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_availability_1"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  Availability
+                </span>
+              </div>
+            </th>
+            <th
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_timestamp_2"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  Last check
+                </span>
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            class="euiTableRow"
+          >
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Location
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+              >
+                <div
+                  class="c1"
+                >
+                  <span
+                    class="euiBadge euiBadge--iconLeft"
+                    style="background-color:#d3dae6;color:#000"
+                  >
+                    <span
+                      class="euiBadge__content"
+                    >
+                      <span
+                        class="euiBadge__text"
+                      >
+                        <span
+                          class="euiTextColor euiTextColor--default"
+                        >
+                          <h4>
+                            Berlin
+                          </h4>
+                        </span>
+                      </span>
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Availability
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class=""
+                >
+                  100.00 %
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Last check
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  5d ago
+                </span>
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow"
+          >
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Location
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+              >
+                <div
+                  class="c1"
+                >
+                  <span
+                    class="euiBadge euiBadge--iconLeft"
+                    style="background-color:#d3dae6;color:#000"
+                  >
+                    <span
+                      class="euiBadge__content"
+                    >
+                      <span
+                        class="euiBadge__text"
+                      >
+                        <span
+                          class="euiTextColor euiTextColor--default"
+                        >
+                          <h4>
+                            Islamabad
+                          </h4>
+                        </span>
+                      </span>
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Availability
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class=""
+                >
+                  100.00 %
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Last check
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  5s ago
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`LocationStatusTags component renders when there are many location 1`] = `
+.c1 {
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.c0 {
+  max-height: 246px;
+  overflow: hidden;
+}
+
+@media (max-width:1042px) {
+  .c1 {
+    display: inline-block;
+    margin-right: 16px;
+  }
+}
+
+<div
+  class="c0"
+>
+  <div
+    class="euiSpacer euiSpacer--s"
+  />
+  <div
+    class="euiBasicTable"
+  >
+    <div>
+      <table
+        class="euiTable euiTable--compressed"
+      >
+        <caption
+          class="euiScreenReaderOnly euiTableCaption"
+        />
+        <thead>
+          <tr>
+            <th
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_label_0"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  Location
+                </span>
+              </div>
+            </th>
+            <th
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_availability_1"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  Availability
+                </span>
+              </div>
+            </th>
+            <th
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_timestamp_2"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  Last check
+                </span>
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            class="euiTableRow"
+          >
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Location
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+              >
+                <div
+                  class="c1"
+                >
+                  <span
+                    class="euiBadge euiBadge--iconLeft"
+                    style="background-color:#bd271e;color:#fff"
+                  >
+                    <span
+                      class="euiBadge__content"
+                    >
+                      <span
+                        class="euiBadge__text"
+                      >
+                        <span
+                          class="euiTextColor euiTextColor--ghost"
+                        >
+                          <h4>
+                            Berlin
+                          </h4>
+                        </span>
+                      </span>
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Availability
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class=""
+                >
+                  100.00 %
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Last check
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  5m ago
+                </span>
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow"
+          >
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Location
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+              >
+                <div
+                  class="c1"
+                >
+                  <span
+                    class="euiBadge euiBadge--iconLeft"
+                    style="background-color:#bd271e;color:#fff"
+                  >
+                    <span
+                      class="euiBadge__content"
+                    >
+                      <span
+                        class="euiBadge__text"
+                      >
+                        <span
+                          class="euiTextColor euiTextColor--ghost"
+                        >
+                          <h4>
+                            Islamabad
+                          </h4>
+                        </span>
+                      </span>
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Availability
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class=""
+                >
+                  100.00 %
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Last check
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  5s ago
+                </span>
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow"
+          >
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Location
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+              >
+                <div
+                  class="c1"
+                >
+                  <span
+                    class="euiBadge euiBadge--iconLeft"
+                    style="background-color:#bd271e;color:#fff"
+                  >
+                    <span
+                      class="euiBadge__content"
+                    >
+                      <span
+                        class="euiBadge__text"
+                      >
+                        <span
+                          class="euiTextColor euiTextColor--ghost"
+                        >
+                          <h4>
+                            New York
+                          </h4>
+                        </span>
+                      </span>
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Availability
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class=""
+                >
+                  100.00 %
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Last check
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  1 Mon ago
+                </span>
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow"
+          >
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Location
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+              >
+                <div
+                  class="c1"
+                >
+                  <span
+                    class="euiBadge euiBadge--iconLeft"
+                    style="background-color:#bd271e;color:#fff"
+                  >
+                    <span
+                      class="euiBadge__content"
+                    >
+                      <span
+                        class="euiBadge__text"
+                      >
+                        <span
+                          class="euiTextColor euiTextColor--ghost"
+                        >
+                          <h4>
+                            Paris
+                          </h4>
+                        </span>
+                      </span>
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Availability
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class=""
+                >
+                  100.00 %
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Last check
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  5 Yr ago
+                </span>
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow"
+          >
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Location
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+              >
+                <div
+                  class="c1"
+                >
+                  <span
+                    class="euiBadge euiBadge--iconLeft"
+                    style="background-color:#bd271e;color:#fff"
+                  >
+                    <span
+                      class="euiBadge__content"
+                    >
+                      <span
+                        class="euiBadge__text"
+                      >
+                        <span
+                          class="euiTextColor euiTextColor--ghost"
+                        >
+                          <h4>
+                            Sydney
+                          </h4>
+                        </span>
+                      </span>
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Availability
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class=""
+                >
+                  100.00 %
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Last check
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  5 Yr ago
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div
+        class="euiSpacer euiSpacer--m"
+      />
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        />
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            class="euiPagination"
+            role="group"
+          >
+            <button
+              aria-label="Previous page"
+              class="euiButtonIcon euiButtonIcon--text"
+              data-test-subj="pagination-button-previous"
+              disabled=""
+              type="button"
+            >
+              <div
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                data-euiicon-type="arrowLeft"
+              />
+            </button>
+            <button
+              aria-label="Page 1 of 2"
+              class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+              data-test-subj="pagination-button-0"
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content"
+              >
+                <span
+                  class="euiButtonEmpty__text"
+                >
+                  1
+                </span>
+              </span>
+            </button>
+            <button
+              aria-label="Page 2 of 2"
+              class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+              data-test-subj="pagination-button-1"
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content"
+              >
+                <span
+                  class="euiButtonEmpty__text"
+                >
+                  2
+                </span>
+              </span>
+            </button>
+            <button
+              aria-label="Next page"
+              class="euiButtonIcon euiButtonIcon--text"
+              data-test-subj="pagination-button-next"
+              type="button"
+            >
+              <div
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                data-euiicon-type="arrowRight"
+              />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

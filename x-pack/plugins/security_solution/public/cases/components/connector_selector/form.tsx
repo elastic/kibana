@@ -33,6 +33,7 @@ export const ConnectorSelector = ({
 
   useEffect(() => {
     field.setValue(defaultValue);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultValue]);
 
   const handleContentChange = useCallback(

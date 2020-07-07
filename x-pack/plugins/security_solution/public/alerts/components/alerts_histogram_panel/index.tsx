@@ -4,33 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Position } from '@elastic/charts';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSelect, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash/fp';
 import uuid from 'uuid';
 
-import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
+import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
 import { UpdateDateRange } from '../../../common/components/charts/common';
 import { LegendItem } from '../../../common/components/charts/draggable_legend_item';
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { HeaderSection } from '../../../common/components/header_section';
 import { Filter, esQuery, Query } from '../../../../../../../src/plugins/data/public';
 import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
-import { getDetectionEngineUrl } from '../../../common/components/link_to';
+import { getDetectionEngineUrl, useFormatUrl } from '../../../common/components/link_to';
 import { defaultLegendColors } from '../../../common/components/matrix_histogram/utils';
 import { InspectButtonContainer } from '../../../common/components/inspect';
-import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
 import { MatrixLoader } from '../../../common/components/matrix_histogram/matrix_loader';
 import { MatrixHistogramOption } from '../../../common/components/matrix_histogram/types';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
-import { navTabs } from '../../../app/home/home_navigations';
 import { alertsHistogramOptions } from './config';
 import { formatAlertsData, getAlertsHistogramQuery, showInitialLoadingSpinner } from './helpers';
 import { AlertsHistogram } from './alerts_histogram';
 import * as i18n from './translations';
-import { RegisterQuery, AlertsHistogramOption, AlertsAggregation, AlertsTotal } from './types';
+import { AlertsHistogramOption, AlertsAggregation, AlertsTotal } from './types';
+import { LinkButton } from '../../../common/components/links';
+import { SecurityPageName } from '../../../app/types';
 
 const DEFAULT_PANEL_HEIGHT = 300;
 
@@ -52,12 +53,11 @@ const ViewAlertsFlexItem = styled(EuiFlexItem)`
   margin-left: 24px;
 `;
 
-interface AlertsHistogramPanelProps {
+interface AlertsHistogramPanelProps
+  extends Pick<GlobalTimeArgs, 'from' | 'to' | 'setQuery' | 'deleteQuery'> {
   chartHeight?: number;
   defaultStackByOption?: AlertsHistogramOption;
-  deleteQuery?: ({ id }: { id: string }) => void;
   filters?: Filter[];
-  from: number;
   headerChildren?: React.ReactNode;
   /** Override all defaults, and only display this field */
   onlyField?: string;
@@ -65,12 +65,11 @@ interface AlertsHistogramPanelProps {
   legendPosition?: Position;
   panelHeight?: number;
   signalIndexName: string | null;
-  setQuery: (params: RegisterQuery) => void;
   showLinkToAlerts?: boolean;
   showTotalAlertsCount?: boolean;
   stackByOptions?: AlertsHistogramOption[];
+  timelineId?: string;
   title?: string;
-  to: number;
   updateDateRange: UpdateDateRange;
 }
 
@@ -98,8 +97,9 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     showLinkToAlerts = false,
     showTotalAlertsCount = false,
     stackByOptions,
-    to,
+    timelineId,
     title = i18n.HISTOGRAM_HEADER,
+    to,
     updateDateRange,
   }) => {
     // create a unique, but stable (across re-renders) query id
@@ -122,7 +122,8 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       signalIndexName
     );
     const kibana = useKibana();
-    const urlSearch = useGetUrlSearch(navTabs.detections);
+    const { navigateToApp } = kibana.services.application;
+    const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.alerts);
 
     const totalAlerts = useMemo(
       () =>
@@ -131,6 +132,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
           totalAlertsObj.value,
           totalAlertsObj.relation === 'gte' ? '>' : totalAlertsObj.relation === 'lte' ? '<' : ''
         ),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [totalAlertsObj]
     );
 
@@ -138,8 +140,18 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       setSelectedStackByOption(
         stackByOptions?.find((co) => co.value === event.target.value) ?? defaultStackByOption
       );
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    const goToDetectionEngine = useCallback(
+      (ev) => {
+        ev.preventDefault();
+        navigateToApp(`${APP_ID}:${SecurityPageName.alerts}`, {
+          path: getDetectionEngineUrl(urlSearch),
+        });
+      },
+      [navigateToApp, urlSearch]
+    );
     const formattedAlertsData = useMemo(() => formatAlertsData(alertsData), [alertsData]);
 
     const legendItems: LegendItem[] = useMemo(
@@ -151,10 +163,12 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
                 `draggable-legend-item-${uuid.v4()}-${selectedStackByOption.value}-${bucket.key}`
               ),
               field: selectedStackByOption.value,
+              timelineId,
               value: bucket.key,
             }))
           : NO_LEGEND_DATA,
-      [alertsData, selectedStackByOption.value]
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [alertsData, selectedStackByOption.value, timelineId]
     );
 
     useEffect(() => {
@@ -175,6 +189,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
           deleteQuery({ id: uniqueQueryId });
         }
       };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -189,6 +204,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
           refetch,
         });
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [setQuery, isLoadingAlerts, alertsData, response, request, refetch]);
 
     useEffect(() => {
@@ -219,17 +235,24 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
           !isEmpty(converted) ? [converted] : []
         )
       );
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedStackByOption.value, from, to, query, filters]);
 
     const linkButton = useMemo(() => {
       if (showLinkToAlerts) {
         return (
           <ViewAlertsFlexItem grow={false}>
-            <EuiButton href={getDetectionEngineUrl(urlSearch)}>{i18n.VIEW_ALERTS}</EuiButton>
+            <LinkButton
+              data-test-subj="alerts-histogram-panel-go-to-alerts-page"
+              onClick={goToDetectionEngine}
+              href={formatUrl(getDetectionEngineUrl())}
+            >
+              {i18n.VIEW_ALERTS}
+            </LinkButton>
           </ViewAlertsFlexItem>
         );
       }
-    }, [showLinkToAlerts, urlSearch]);
+    }, [showLinkToAlerts, goToDetectionEngine, formatUrl]);
 
     const titleText = useMemo(() => (onlyField == null ? title : i18n.TOP(onlyField)), [
       onlyField,

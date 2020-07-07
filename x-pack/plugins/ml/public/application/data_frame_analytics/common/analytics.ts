@@ -25,11 +25,18 @@ export enum ANALYSIS_CONFIG_TYPE {
 }
 
 export enum ANALYSIS_ADVANCED_FIELDS {
+  ETA = 'eta',
+  FEATURE_BAG_FRACTION = 'feature_bag_fraction',
   FEATURE_INFLUENCE_THRESHOLD = 'feature_influence_threshold',
   GAMMA = 'gamma',
   LAMBDA = 'lambda',
   MAX_TREES = 'max_trees',
+  METHOD = 'method',
+  N_NEIGHBORS = 'n_neighbors',
+  NUM_TOP_CLASSES = 'num_top_classes',
   NUM_TOP_FEATURE_IMPORTANCE_VALUES = 'num_top_feature_importance_values',
+  OUTLIER_FRACTION = 'outlier_fraction',
+  RANDOMIZE_SEED = 'randomize_seed',
 }
 
 export enum OUTLIER_ANALYSIS_METHOD {
@@ -121,8 +128,8 @@ export interface Eval {
 
 export interface RegressionEvaluateResponse {
   regression: {
-    mean_squared_error: {
-      error: number;
+    mse: {
+      value: number;
     };
     r_squared: {
       value: number;
@@ -228,6 +235,16 @@ export const getPredictionFieldName = (
   return predictionFieldName;
 };
 
+export const getNumTopClasses = (
+  analysis: AnalysisConfig
+): ClassificationAnalysis['classification']['num_top_classes'] => {
+  let numTopClasses;
+  if (isClassificationAnalysis(analysis) && analysis.classification.num_top_classes !== undefined) {
+    numTopClasses = analysis.classification.num_top_classes;
+  }
+  return numTopClasses;
+};
+
 export const getNumTopFeatureImportanceValues = (
   analysis: AnalysisConfig
 ):
@@ -294,7 +311,7 @@ export const isRegressionEvaluateResponse = (arg: any): arg is RegressionEvaluat
   return (
     keys.length === 1 &&
     keys[0] === ANALYSIS_CONFIG_TYPE.REGRESSION &&
-    arg?.regression?.mean_squared_error !== undefined &&
+    arg?.regression?.mse !== undefined &&
     arg?.regression?.r_squared !== undefined
   );
 };
@@ -310,9 +327,14 @@ export const isClassificationEvaluateResponse = (
   );
 };
 
+export interface UpdateDataFrameAnalyticsConfig {
+  allow_lazy_start?: string;
+  description?: string;
+  model_memory_limit?: string;
+}
+
 export interface DataFrameAnalyticsConfig {
   id: DataFrameAnalyticsId;
-  // Description attribute is not supported yet
   description?: string;
   dest: {
     index: IndexName;
@@ -393,7 +415,7 @@ export const useRefreshAnalyticsList = (
 const DEFAULT_SIG_FIGS = 3;
 
 export function getValuesFromResponse(response: RegressionEvaluateResponse) {
-  let meanSquaredError = response?.regression?.mean_squared_error?.error;
+  let meanSquaredError = response?.regression?.mse?.value;
 
   if (meanSquaredError) {
     meanSquaredError = Number(meanSquaredError.toPrecision(DEFAULT_SIG_FIGS));

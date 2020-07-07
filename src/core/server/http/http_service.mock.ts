@@ -19,9 +19,14 @@
 
 import { Server } from 'hapi';
 import { CspConfig } from '../csp';
-import { mockRouter } from './router/router.mock';
+import { mockRouter, RouterMock } from './router/router.mock';
 import { configMock } from '../config/config.mock';
-import { InternalHttpServiceSetup } from './types';
+import {
+  InternalHttpServiceSetup,
+  HttpServiceSetup,
+  HttpServiceStart,
+  InternalHttpServiceStart,
+} from './types';
 import { HttpService } from './http_service';
 import { AuthStatus } from './auth_state_storage';
 import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
@@ -32,7 +37,23 @@ import { OnPreResponseToolkit } from './lifecycle/on_pre_response';
 
 type BasePathMocked = jest.Mocked<InternalHttpServiceSetup['basePath']>;
 type AuthMocked = jest.Mocked<InternalHttpServiceSetup['auth']>;
-export type HttpServiceSetupMock = jest.Mocked<InternalHttpServiceSetup> & {
+
+export type HttpServiceSetupMock = jest.Mocked<
+  Omit<HttpServiceSetup, 'basePath' | 'createRouter'>
+> & {
+  basePath: BasePathMocked;
+  createRouter: jest.MockedFunction<() => RouterMock>;
+};
+export type InternalHttpServiceSetupMock = jest.Mocked<
+  Omit<InternalHttpServiceSetup, 'basePath' | 'createRouter'>
+> & {
+  basePath: BasePathMocked;
+  createRouter: jest.MockedFunction<(path: string) => RouterMock>;
+};
+export type HttpServiceStartMock = jest.Mocked<HttpServiceStart> & {
+  basePath: BasePathMocked;
+};
+export type InternalHttpServiceStartMock = jest.Mocked<InternalHttpServiceStart> & {
   basePath: BasePathMocked;
 };
 
@@ -54,8 +75,8 @@ const createAuthMock = () => {
   return mock;
 };
 
-const createSetupContractMock = () => {
-  const setupContract: HttpServiceSetupMock = {
+const createInternalSetupContractMock = () => {
+  const mock: InternalHttpServiceSetupMock = {
     // we can mock other hapi server methods when we need it
     server: ({
       name: 'http-server-test',
@@ -77,31 +98,78 @@ const createSetupContractMock = () => {
     csp: CspConfig.DEFAULT,
     auth: createAuthMock(),
     getAuthHeaders: jest.fn(),
-    isTlsEnabled: false,
     getServerInfo: jest.fn(),
   };
-  setupContract.createCookieSessionStorageFactory.mockResolvedValue(
-    sessionStorageMock.createFactory()
-  );
-  setupContract.createRouter.mockImplementation(() => mockRouter.create());
-  setupContract.getAuthHeaders.mockReturnValue({ authorization: 'authorization-header' });
-  setupContract.getServerInfo.mockReturnValue({
-    host: 'localhost',
+  mock.createCookieSessionStorageFactory.mockResolvedValue(sessionStorageMock.createFactory());
+  mock.createRouter.mockImplementation(() => mockRouter.create());
+  mock.getAuthHeaders.mockReturnValue({ authorization: 'authorization-header' });
+  mock.getServerInfo.mockReturnValue({
+    hostname: 'localhost',
     name: 'kibana',
     port: 80,
     protocol: 'http',
   });
-  return setupContract;
+  return mock;
+};
+
+const createSetupContractMock = () => {
+  const internalMock = createInternalSetupContractMock();
+
+  const mock: HttpServiceSetupMock = {
+    createCookieSessionStorageFactory: internalMock.createCookieSessionStorageFactory,
+    registerOnPreAuth: internalMock.registerOnPreAuth,
+    registerAuth: internalMock.registerAuth,
+    registerOnPostAuth: internalMock.registerOnPostAuth,
+    registerOnPreResponse: internalMock.registerOnPreResponse,
+    basePath: internalMock.basePath,
+    csp: CspConfig.DEFAULT,
+    createRouter: jest.fn(),
+    registerRouteHandlerContext: jest.fn(),
+    auth: {
+      get: internalMock.auth.get,
+      isAuthenticated: internalMock.auth.isAuthenticated,
+    },
+    getServerInfo: internalMock.getServerInfo,
+  };
+
+  mock.createRouter.mockImplementation(() => internalMock.createRouter(''));
+
+  return mock;
+};
+
+const createStartContractMock = () => {
+  const mock: HttpServiceStartMock = {
+    auth: createAuthMock(),
+    basePath: createBasePathMock(),
+    getServerInfo: jest.fn(),
+  };
+
+  return mock;
+};
+
+const createInternalStartContractMock = () => {
+  const mock: InternalHttpServiceStartMock = {
+    ...createStartContractMock(),
+    isListening: jest.fn(),
+  };
+
+  mock.isListening.mockReturnValue(true);
+
+  return mock;
 };
 
 type HttpServiceContract = PublicMethodsOf<HttpService>;
+
 const createHttpServiceMock = () => {
   const mocked: jest.Mocked<HttpServiceContract> = {
     setup: jest.fn(),
+    getStartContract: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
   };
-  mocked.setup.mockResolvedValue(createSetupContractMock());
+  mocked.setup.mockResolvedValue(createInternalSetupContractMock());
+  mocked.getStartContract.mockReturnValue(createInternalStartContractMock());
+  mocked.start.mockResolvedValue(createInternalStartContractMock());
   return mocked;
 };
 
@@ -128,7 +196,10 @@ export const httpServiceMock = {
   create: createHttpServiceMock,
   createBasePath: createBasePathMock,
   createAuth: createAuthMock,
+  createInternalSetupContract: createInternalSetupContractMock,
   createSetupContract: createSetupContractMock,
+  createInternalStartContract: createInternalStartContractMock,
+  createStartContract: createStartContractMock,
   createOnPreAuthToolkit: createOnPreAuthToolkitMock,
   createOnPostAuthToolkit: createOnPostAuthToolkitMock,
   createOnPreResponseToolkit: createOnPreResponseToolkitMock,

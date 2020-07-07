@@ -71,6 +71,7 @@ Table of Contents
     - [`params`](#params-7)
       - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-1)
 - [Command Line Utility](#command-line-utility)
+- [Developing New Action Types](#developing-new-action-types)
 
 ## Terminology
 
@@ -234,9 +235,24 @@ Payload:
 
 ## Firing actions
 
-The plugin exposes an execute function that you can use to run actions.
+Running actions is possible by using the ActionsClient which is provided by the `getActionsClientWithRequest` function part of the plugin's Start Contract.
+By providing the user's Request you'll receive an instance of the ActionsClient which is tailered to the current user and is scoped to the resources the user is authorized to access.
 
-**server.plugins.actions.execute(options)**
+## Accessing a scoped ActionsClient
+
+```
+const actionsClient = server.plugins.actions.getActionsClientWithRequest(request);
+```
+
+Once you have a scoped ActionsClient you can execute an action by caling either the `enqueueExecution` which will schedule the action to run later or the `execute` apis which will run it immediately and return the result respectively.
+
+### actionsClient.enqueueExecution(options)
+
+This api schedules a task which will run the action using the current user scope at the soonest opportunity.
+
+Running the action by scheduling a task means that we will no longer have a user request by which to ascertain the action's privileges and so you might need to provide these yourself:
+- The **SpaceId** in which the user's action is expected to run
+- When security is enabled you'll also need to provide an **apiKey** which allows us to mimic the user and their privileges.
 
 The following table describes the properties of the `options` object.
 
@@ -251,10 +267,39 @@ The following table describes the properties of the `options` object.
 
 This example makes action `3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5` send an email. The action plugin will load the saved object and find what action type to call with `params`.
 
-```
-server.plugins.actions.execute({
+```typescript
+const actionsClient = await server.plugins.actions.getActionsClientWithRequest(request);
+await actionsClient.enqueueExecution({
   id: '3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5',
   spaceId: 'default', // The spaceId of the action
+  params: {
+    from: 'example@elastic.co',
+    to: ['destination@elastic.co'],
+    subject: 'My email subject',
+    body: 'My email body',
+  },
+});
+```
+
+### actionsClient.execute(options)
+
+This api runs the action and asynchronously returns the result of running the action.
+
+The following table describes the properties of the `options` object.
+
+| Property | Description                                                                                            | Type   |
+| -------- | ------------------------------------------------------------------------------------------------------ | ------ |
+| id       | The id of the action you want to execute.                                                              | string |
+| params   | The `params` value to give the action type executor.                                                   | object |
+
+## Example
+
+As with the previous example, we'll use the action `3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5` to send an email. 
+
+```typescript
+const actionsClient = await server.plugins.actions.getActionsClientWithRequest(request);
+const result = await actionsClient.execute({
+  id: '3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5',
   params: {
     from: 'example@elastic.co',
     to: ['destination@elastic.co'],
@@ -562,3 +607,39 @@ $ kbn-action create .slack "post to slack" '{"webhookUrl": "https://hooks.slack.
     "version": "WzMsMV0="
 }
 ```
+
+# Developing New Action Types
+
+When creating a new action type, your plugin will eventually call `server.plugins.actions.setup.registerType()` to register the type with the actions plugin, but there are some additional things to think about about and implement.
+
+Consider working with the alerting team on early structure /design feedback of new actions, especially as the APIs and infrastructure are still under development.
+
+## licensing
+
+Currently actions are licensed as "basic" if the action only interacts with the stack, eg the server log and es index actions.  Other actions are at least "gold" level.  
+
+## plugin location
+
+Currently actions that are licensed as "basic" **MUST** be implemented in the actions plugin, other actions can be implemented in any other plugin that pre-reqs the actions plugin.  If the new action is generic across the stack, it probably belongs in the actions plugin, but if your action is very specific to a plugin/solution, it might be easiest to implement it in the plugin/solution.  Keep in mind that if Kibana is run without the plugin being enabled, any actions defined in that plugin will not run, nor will those actions be available via APIs or UI.
+
+Actions that take URLs or hostnames should check that those values are whitelisted.  The whitelisting utilities are currently internal to the actions plugin, and so such actions will need to be implemented in the actions plugin.  Longer-term, we will expose these utilities so they can be used by alerts implemented in other plugins; see [issue #64659](https://github.com/elastic/kibana/issues/64659).
+
+## documentation
+
+You should also create some asciidoc for the new action type.  An entry should be made in the action type index - [`docs/user/alerting/action-types.asciidoc`](../../../docs/user/alerting/action-types.asciidoc) which points to a new document for the action type that should be in the directory [`docs/user/alerting/action-types`](../../../docs/user/alerting/action-types).
+
+## tests
+
+The action type should have both jest tests and functional tests.  For functional tests, if your action interacts with a 3rd party service via HTTP, you may be able to create a simulator for your service, to test with.  See the existing functional test servers in the directory [`x-pack/test/alerting_api_integration/common/fixtures/plugins/actions_simulators/server`](../../test/alerting_api_integration/common/fixtures/plugins/actions_simulators/server)
+
+## action type config and secrets
+
+Action types must define `config` and `secrets` which are used to create connectors.  This data should be described with `@kbn/config-schema` object schemas, and you **MUST NOT** use `schema.maybe()` to define properties.
+
+This is due to the fact that the structures are persisted in saved objects, which performs partial updates on the persisted data.  If a property value is already persisted, but an update either doesn't include the property, or sets it to `undefined`, the persisted value will not be changed.  Beyond this being a semantic error in general, it also ends up invalidating the encryption used to save secrets, and will render the secrets will not be able to be unencrypted later.
+
+Instead of `schema.maybe()`, use `schema.nullable()`, which is the same as `schema.maybe()` except that when passed an `undefined` value, the object returned from the validation will be set to `null`.  The resulting type will be `property-type | null`, whereas with `schema.maybe()` it would be `property-type | undefined`.
+
+## user interface
+
+In order to make this action usable in the Kibana UI, you will need to provide all the UI editing aspects of the action.  The existing action type user interfaces are defined in [`x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types`](../triggers_actions_ui/public/application/components/builtin_action_types).  For more information, see the [UI documentation](../triggers_actions_ui/README.md#create-and-register-new-action-type-ui).

@@ -33,6 +33,7 @@ import * as i18nTimeline from '../../open_timeline/translations';
 import { OpenTimelineResult } from '../../open_timeline/types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import * as i18n from '../translations';
+import { useTimelineStatus } from '../../open_timeline/use_timeline_status';
 
 const MyEuiFlexItem = styled(EuiFlexItem)`
   display: inline-block;
@@ -88,7 +89,11 @@ export interface SelectableTimelineProps {
     searchTimelineValue,
   }: GetSelectableOptions) => EuiSelectableOption[];
   onClosePopover: () => void;
-  onTimelineChange: (timelineTitle: string, timelineId: string | null) => void;
+  onTimelineChange: (
+    timelineTitle: string,
+    timelineId: string | null,
+    graphEventId?: string
+  ) => void;
   timelineType: TimelineTypeLiteral;
 }
 
@@ -114,6 +119,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   const [onlyFavorites, setOnlyFavorites] = useState(false);
   const [searchRef, setSearchRef] = useState<HTMLElement | null>(null);
   const { fetchAllTimeline, timelines, loading, totalCount: timelineCount } = useGetAllTimeline();
+  const { timelineStatus, templateTimelineType } = useTimelineStatus({ timelineType });
 
   const onSearchTimeline = useCallback((val) => {
     setSearchTimelineValue(val);
@@ -202,7 +208,8 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
           isEmpty(selectedTimeline[0].title)
             ? i18nTimeline.UNTITLED_TIMELINE
             : selectedTimeline[0].title,
-          selectedTimeline[0].id === '-1' ? null : selectedTimeline[0].id
+          selectedTimeline[0].id === '-1' ? null : selectedTimeline[0].id,
+          selectedTimeline[0].graphEventId ?? ''
         );
       }
       onClosePopover();
@@ -256,9 +263,19 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
         sortOrder: Direction.desc,
       },
       onlyUserFavorite: onlyFavorites,
+      status: timelineStatus,
       timelineType,
+      templateTimelineType,
     });
-  }, [onlyFavorites, pageSize, searchTimelineValue, timelineType]);
+  }, [
+    fetchAllTimeline,
+    onlyFavorites,
+    pageSize,
+    searchTimelineValue,
+    timelineType,
+    timelineStatus,
+    templateTimelineType,
+  ]);
 
   return (
     <EuiSelectableContainer isLoading={loading}>

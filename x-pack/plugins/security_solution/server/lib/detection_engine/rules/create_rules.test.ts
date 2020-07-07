@@ -4,36 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { alertsClientMock } from '../../../../../alerts/server/mocks';
-import { getMlResult } from '../routes/__mocks__/request_responses';
 import { createRules } from './create_rules';
+import { getCreateMlRulesOptionsMock } from './create_rules.mock';
 
 describe('createRules', () => {
-  let alertsClient: ReturnType<typeof alertsClientMock.create>;
-
-  beforeEach(() => {
-    alertsClient = alertsClientMock.create();
-  });
-
   it('calls the alertsClient with ML params', async () => {
-    const params = {
-      ...getMlResult().params,
-      anomalyThreshold: 55,
-      machineLearningJobId: 'new_job_id',
-    };
-
-    await createRules({
-      alertsClient,
-      ...params,
-      ruleId: 'new-rule-id',
-      enabled: true,
-      interval: '',
-      name: '',
-      tags: [],
-      actions: [],
-    });
-
-    expect(alertsClient.create).toHaveBeenCalledWith(
+    const ruleOptions = getCreateMlRulesOptionsMock();
+    await createRules(ruleOptions);
+    expect(ruleOptions.alertsClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
           params: expect.objectContaining({

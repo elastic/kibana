@@ -10,15 +10,18 @@ import {
   SavedObject,
   SavedObjectsFindResponse,
 } from '../../../../../../../../src/core/server';
-import { loggingServiceMock } from '../../../../../../../../src/core/server/mocks';
-import { RuleTypeParams, OutputRuleAlertRest } from '../../types';
+import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
+import { RuleTypeParams } from '../../types';
 import { IRuleStatusAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 
 export const sampleRuleAlertParams = (
   maxSignals?: number | undefined,
   riskScore?: number | undefined
 ): RuleTypeParams => ({
+  author: ['Elastic'],
+  buildingBlockType: 'default',
   ruleId: 'rule-1',
   description: 'Detecting root and admin users',
   falsePositives: [],
@@ -28,11 +31,15 @@ export const sampleRuleAlertParams = (
   from: 'now-6m',
   to: 'now',
   severity: 'high',
+  severityMapping: [],
   query: 'user.name: root or user.name: admin',
   language: 'kuery',
+  license: 'Elastic License',
   outputIndex: '.siem-signals',
   references: ['http://google.com'],
   riskScore: riskScore ? riskScore : 50,
+  riskScoreMapping: [],
+  ruleNameOverride: undefined,
   maxSignals: maxSignals ? maxSignals : 10000,
   note: '',
   anomalyThreshold: undefined,
@@ -41,41 +48,11 @@ export const sampleRuleAlertParams = (
   savedId: undefined,
   timelineId: undefined,
   timelineTitle: undefined,
+  timestampOverride: undefined,
   meta: undefined,
   threat: undefined,
   version: 1,
-  exceptions_list: [
-    {
-      field: 'source.ip',
-      values_operator: 'included',
-      values_type: 'exists',
-    },
-    {
-      field: 'host.name',
-      values_operator: 'excluded',
-      values_type: 'match',
-      values: [
-        {
-          name: 'rock01',
-        },
-      ],
-      and: [
-        {
-          field: 'host.id',
-          values_operator: 'included',
-          values_type: 'match_all',
-          values: [
-            {
-              name: '123',
-            },
-            {
-              name: '678',
-            },
-          ],
-        },
-      ],
-    },
-  ],
+  exceptionsList: getListArrayMock(),
 });
 
 export const sampleDocNoSortId = (someUuid: string = sampleIdGuid): SignalSourceHit => ({
@@ -364,34 +341,6 @@ export const sampleDocSearchResultsWithSortId = (
 export const sampleRuleGuid = '04128c15-0d1b-4716-a4c5-46997ac7f3bd';
 export const sampleIdGuid = 'e1e08ddc-5e37-49ff-a258-5393aa44435a';
 
-export const sampleRule = (): Partial<OutputRuleAlertRest> => {
-  return {
-    created_by: 'elastic',
-    description: 'Detecting root and admin users',
-    enabled: true,
-    false_positives: [],
-    from: 'now-6m',
-    id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-    immutable: false,
-    index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-    interval: '5m',
-    risk_score: 50,
-    rule_id: 'rule-1',
-    language: 'kuery',
-    max_signals: 100,
-    name: 'Detect Root/Admin Users',
-    output_index: '.siem-signals',
-    query: 'user.name: root or user.name: admin',
-    references: ['http://www.example.com', 'https://ww.example.com'],
-    severity: 'high',
-    updated_by: 'elastic',
-    tags: ['some fake tag 1', 'some fake tag 2'],
-    to: 'now',
-    type: 'query',
-    note: '',
-  };
-};
-
 export const exampleRuleStatus: () => SavedObject<IRuleStatusAttributes> = () => ({
   type: ruleStatusSavedObjectType,
   id: '042e6d90-7069-11ea-af8b-0f8ae4fa817e',
@@ -419,10 +368,10 @@ export const exampleFindRuleStatusResponse: (
   total: 1,
   per_page: 6,
   page: 1,
-  saved_objects: mockStatuses,
+  saved_objects: mockStatuses.map((obj) => ({ ...obj, score: 1 })),
 });
 
-export const mockLogger: Logger = loggingServiceMock.createLogger();
+export const mockLogger: Logger = loggingSystemMock.createLogger();
 
 export const sampleBulkErrorItem = (
   {

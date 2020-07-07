@@ -12,11 +12,11 @@ import {
   createSignalsIndex,
   deleteAllAlerts,
   deleteSignalsIndex,
-  getSimpleRule,
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
   getSimpleRuleOutputWithoutRuleId,
   removeServerGeneratedPropertiesIncludingRuleId,
+  getSimpleRuleUpdate,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -40,10 +40,10 @@ export default ({ getService }: FtrProviderContext) => {
         await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send(getSimpleRule('rule-1'))
+          .send(getSimpleRuleUpdate('rule-1'))
           .expect(200);
 
-        const updatedRule = getSimpleRule('rule-1');
+        const updatedRule = getSimpleRuleUpdate('rule-1');
         updatedRule.name = 'some other name';
 
         // update a simple rule's name
@@ -65,20 +65,20 @@ export default ({ getService }: FtrProviderContext) => {
         await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send(getSimpleRule('rule-1'))
+          .send(getSimpleRuleUpdate('rule-1'))
           .expect(200);
 
         // create a second simple rule
         await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send(getSimpleRule('rule-2'))
+          .send(getSimpleRuleUpdate('rule-2'))
           .expect(200);
 
-        const updatedRule1 = getSimpleRule('rule-1');
+        const updatedRule1 = getSimpleRuleUpdate('rule-1');
         updatedRule1.name = 'some other name';
 
-        const updatedRule2 = getSimpleRule('rule-2');
+        const updatedRule2 = getSimpleRuleUpdate('rule-2');
         updatedRule2.name = 'some other name';
 
         // update both rule names
@@ -107,11 +107,11 @@ export default ({ getService }: FtrProviderContext) => {
         const { body: createRuleBody } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send(getSimpleRule('rule-1'))
+          .send(getSimpleRuleUpdate('rule-1'))
           .expect(200);
 
         // update a simple rule's name
-        const updatedRule1 = getSimpleRule('rule-1');
+        const updatedRule1 = getSimpleRuleUpdate('rule-1');
         updatedRule1.id = createRuleBody.id;
         updatedRule1.name = 'some other name';
         delete updatedRule1.rule_id;
@@ -134,23 +134,23 @@ export default ({ getService }: FtrProviderContext) => {
         const { body: createRule1 } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send(getSimpleRule('rule-1'))
+          .send(getSimpleRuleUpdate('rule-1'))
           .expect(200);
 
         // create a second simple rule
         const { body: createRule2 } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send(getSimpleRule('rule-2'))
+          .send(getSimpleRuleUpdate('rule-2'))
           .expect(200);
 
         // update both rule names
-        const updatedRule1 = getSimpleRule('rule-1');
+        const updatedRule1 = getSimpleRuleUpdate('rule-1');
         updatedRule1.id = createRule1.id;
         updatedRule1.name = 'some other name';
         delete updatedRule1.rule_id;
 
-        const updatedRule2 = getSimpleRule('rule-1');
+        const updatedRule2 = getSimpleRuleUpdate('rule-1');
         updatedRule2.id = createRule2.id;
         updatedRule2.name = 'some other name';
         delete updatedRule2.rule_id;
@@ -180,11 +180,11 @@ export default ({ getService }: FtrProviderContext) => {
         const { body: createdBody } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send(getSimpleRule('rule-1'))
+          .send(getSimpleRuleUpdate('rule-1'))
           .expect(200);
 
         // update a simple rule's name
-        const updatedRule1 = getSimpleRule('rule-1');
+        const updatedRule1 = getSimpleRuleUpdate('rule-1');
         updatedRule1.id = createdBody.id;
         updatedRule1.name = 'some other name';
         delete updatedRule1.rule_id;
@@ -207,11 +207,11 @@ export default ({ getService }: FtrProviderContext) => {
         await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send(getSimpleRule('rule-1'))
+          .send(getSimpleRuleUpdate('rule-1'))
           .expect(200);
 
         // update a simple rule's enabled to false and another property
-        const updatedRule1 = getSimpleRule('rule-1');
+        const updatedRule1 = getSimpleRuleUpdate('rule-1');
         updatedRule1.severity = 'low';
         updatedRule1.enabled = false;
 
@@ -235,11 +235,11 @@ export default ({ getService }: FtrProviderContext) => {
         await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send(getSimpleRule('rule-1'))
+          .send(getSimpleRuleUpdate('rule-1'))
           .expect(200);
 
         // update a simple rule's timeline_title
-        const ruleUpdate = getSimpleRule('rule-1');
+        const ruleUpdate = getSimpleRuleUpdate('rule-1');
         ruleUpdate.timeline_title = 'some title';
         ruleUpdate.timeline_id = 'some id';
 
@@ -250,7 +250,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         // update a simple rule's name
-        const ruleUpdate2 = getSimpleRule('rule-1');
+        const ruleUpdate2 = getSimpleRuleUpdate('rule-1');
         ruleUpdate2.name = 'some other name';
 
         const { body } = await supertest
@@ -268,8 +268,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return a 200 but give a 404 in the message if it is given a fake id', async () => {
-        const ruleUpdate = getSimpleRule('rule-1');
-        ruleUpdate.id = 'fake_id';
+        const ruleUpdate = getSimpleRuleUpdate('rule-1');
+        ruleUpdate.id = '1fd52120-d3a9-4e7a-b23c-96c0e1a74ae5';
         delete ruleUpdate.rule_id;
 
         const { body } = await supertest
@@ -279,12 +279,18 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(body).to.eql([
-          { id: 'fake_id', error: { status_code: 404, message: 'id: "fake_id" not found' } },
+          {
+            id: '1fd52120-d3a9-4e7a-b23c-96c0e1a74ae5',
+            error: {
+              status_code: 404,
+              message: 'id: "1fd52120-d3a9-4e7a-b23c-96c0e1a74ae5" not found',
+            },
+          },
         ]);
       });
 
       it('should return a 200 but give a 404 in the message if it is given a fake rule_id', async () => {
-        const ruleUpdate = getSimpleRule('rule-1');
+        const ruleUpdate = getSimpleRuleUpdate('rule-1');
         ruleUpdate.rule_id = 'fake_id';
         delete ruleUpdate.id;
 
@@ -307,14 +313,14 @@ export default ({ getService }: FtrProviderContext) => {
         await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send(getSimpleRule('rule-1'))
+          .send(getSimpleRuleUpdate('rule-1'))
           .expect(200);
 
-        const ruleUpdate = getSimpleRule('rule-1');
+        const ruleUpdate = getSimpleRuleUpdate('rule-1');
         ruleUpdate.name = 'some other name';
         delete ruleUpdate.id;
 
-        const ruleUpdate2 = getSimpleRule('fake_id');
+        const ruleUpdate2 = getSimpleRuleUpdate('fake_id');
         ruleUpdate2.name = 'some other name';
         delete ruleUpdate.id;
 
@@ -347,18 +353,18 @@ export default ({ getService }: FtrProviderContext) => {
         const { body: createdBody } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send(getSimpleRule('rule-1'))
+          .send(getSimpleRuleUpdate('rule-1'))
           .expect(200);
 
         // update one rule name and give a fake id for the second
-        const rule1 = getSimpleRule();
+        const rule1 = getSimpleRuleUpdate();
         delete rule1.rule_id;
         rule1.id = createdBody.id;
         rule1.name = 'some other name';
 
-        const rule2 = getSimpleRule();
+        const rule2 = getSimpleRuleUpdate();
         delete rule2.rule_id;
-        rule2.id = 'fake_id';
+        rule2.id = 'b3aa019a-656c-4311-b13b-4d9852e24347';
         rule2.name = 'some other name';
 
         const { body } = await supertest
@@ -376,10 +382,10 @@ export default ({ getService }: FtrProviderContext) => {
           outputRule,
           {
             error: {
-              message: 'id: "fake_id" not found',
+              message: 'id: "b3aa019a-656c-4311-b13b-4d9852e24347" not found',
               status_code: 404,
             },
-            id: 'fake_id',
+            id: 'b3aa019a-656c-4311-b13b-4d9852e24347',
           },
         ]);
       });

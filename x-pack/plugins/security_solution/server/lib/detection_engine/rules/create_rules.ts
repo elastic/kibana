@@ -7,19 +7,22 @@
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { Alert } from '../../../../../alerts/common';
 import { APP_ID, SIGNALS_ID } from '../../../../common/constants';
-import { CreateRuleParams } from './types';
+import { CreateRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { hasListsFeature } from '../feature_flags';
 
 export const createRules = async ({
   alertsClient,
   anomalyThreshold,
+  author,
+  buildingBlockType,
   description,
   enabled,
   falsePositives,
   from,
   query,
   language,
+  license,
   savedId,
   timelineId,
   timelineTitle,
@@ -32,21 +35,25 @@ export const createRules = async ({
   interval,
   maxSignals,
   riskScore,
+  riskScoreMapping,
+  ruleNameOverride,
   outputIndex,
   name,
   severity,
+  severityMapping,
   tags,
   threat,
+  timestampOverride,
   to,
   type,
   references,
   note,
   version,
-  exceptions_list,
+  exceptionsList,
   actions,
-}: CreateRuleParams): Promise<Alert> => {
+}: CreateRulesOptions): Promise<Alert> => {
   // TODO: Remove this and use regular exceptions_list once the feature is stable for a release
-  const exceptionsListParam = hasListsFeature() ? { exceptions_list } : {};
+  const exceptionsListParam = hasListsFeature() ? { exceptionsList } : {};
   return alertsClient.create({
     data: {
       name,
@@ -55,6 +62,8 @@ export const createRules = async ({
       consumer: APP_ID,
       params: {
         anomalyThreshold,
+        author,
+        buildingBlockType,
         description,
         ruleId,
         index,
@@ -63,6 +72,7 @@ export const createRules = async ({
         immutable,
         query,
         language,
+        license,
         outputIndex,
         savedId,
         timelineId,
@@ -72,8 +82,12 @@ export const createRules = async ({
         filters,
         maxSignals,
         riskScore,
+        riskScoreMapping,
+        ruleNameOverride,
         severity,
+        severityMapping,
         threat,
+        timestampOverride,
         to,
         type,
         references,

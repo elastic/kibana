@@ -8,6 +8,8 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '../../../../src/core/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { ManagementSetup, ManagementSectionId } from '../../../../src/plugins/management/public';
+
+import { IngestManagerSetup } from '../../ingest_manager/public';
 import { UIM_APP_NAME, PLUGIN } from '../common/constants';
 
 import { httpService } from './application/services/http';
@@ -25,6 +27,7 @@ export interface IndexManagementPluginSetup {
 }
 
 interface PluginsDependencies {
+  ingestManager?: IngestManagerSetup;
   usageCollection: UsageCollectionSetup;
   management: ManagementSetup;
 }
@@ -42,7 +45,7 @@ export class IndexMgmtUIPlugin {
 
   public setup(coreSetup: CoreSetup, plugins: PluginsDependencies): IndexManagementPluginSetup {
     const { http, notifications } = coreSetup;
-    const { usageCollection, management } = plugins;
+    const { ingestManager, usageCollection, management } = plugins;
 
     httpService.setup(http);
     notificationService.setup(notifications);
@@ -60,7 +63,7 @@ export class IndexMgmtUIPlugin {
           uiMetricService: this.uiMetricService,
           extensionsService: this.extensionsService,
         };
-        return mountManagementSection(coreSetup, usageCollection, services, params);
+        return mountManagementSection(coreSetup, usageCollection, services, params, ingestManager);
       },
     });
 

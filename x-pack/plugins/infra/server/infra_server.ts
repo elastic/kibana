@@ -15,6 +15,7 @@ import {
   initGetLogEntryCategoryDatasetsRoute,
   initGetLogEntryCategoryExamplesRoute,
   initGetLogEntryRateRoute,
+  initGetLogEntryRateExamplesRoute,
   initValidateLogAnalysisDatasetsRoute,
   initValidateLogAnalysisIndicesRoute,
 } from './routes/log_analysis';
@@ -32,6 +33,7 @@ import {
 import { initInventoryMetaRoute } from './routes/inventory_metadata';
 import { initLogSourceConfigurationRoutes, initLogSourceStatusRoutes } from './routes/log_sources';
 import { initSourceRoute } from './routes/source';
+import { initAlertPreviewRoute } from './routes/alerting';
 
 export const initInfraServer = (libs: InfraBackendLibs) => {
   const schema = makeExecutableSchema({
@@ -55,6 +57,7 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initValidateLogAnalysisDatasetsRoute(libs);
   initValidateLogAnalysisIndicesRoute(libs);
   initLogEntriesRoute(libs);
+  initGetLogEntryRateExamplesRoute(libs);
   initLogEntriesHighlightsRoute(libs);
   initLogEntriesSummaryRoute(libs);
   initLogEntriesSummaryHighlightsRoute(libs);
@@ -64,4 +67,5 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initInventoryMetaRoute(libs);
   initLogSourceConfigurationRoutes(libs);
   initLogSourceStatusRoutes(libs);
+  initAlertPreviewRoute(libs);
 };

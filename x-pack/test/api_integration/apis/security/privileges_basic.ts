@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import util from 'util';
-import { isEqual } from 'lodash';
+import { isEqual, isEqualWith } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
             logs: ['all', 'read'],
             uptime: ['all', 'read'],
             apm: ['all', 'read'],
-            securitySolution: ['all', 'read'],
+            siem: ['all', 'read'],
             ingestManager: ['all', 'read'],
           },
           global: ['all', 'read'],
@@ -51,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
             // supertest uses assert.deepStrictEqual.
             // expect.js doesn't help us here.
             // and lodash's isEqual doesn't know how to compare Sets.
-            const success = isEqual(res.body, expected, (value, other, key) => {
+            const success = isEqualWith(res.body, expected, (value, other, key) => {
               if (Array.isArray(value) && Array.isArray(other)) {
                 return isEqual(value.sort(), other.sort());
               }

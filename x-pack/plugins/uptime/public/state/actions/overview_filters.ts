@@ -9,6 +9,7 @@ import { OverviewFilters } from '../../../common/runtime_types';
 export const FETCH_OVERVIEW_FILTERS = 'FETCH_OVERVIEW_FILTERS';
 export const FETCH_OVERVIEW_FILTERS_FAIL = 'FETCH_OVERVIEW_FILTERS_FAIL';
 export const FETCH_OVERVIEW_FILTERS_SUCCESS = 'FETCH_OVERVIEW_FILTERS_SUCCESS';
+export const SET_OVERVIEW_FILTERS = 'SET_OVERVIEW_FILTERS';
 
 export interface GetOverviewFiltersPayload {
   dateRangeStart: string;
@@ -36,10 +37,16 @@ interface GetOverviewFiltersFailAction {
   payload: Error;
 }
 
+interface SetOverviewFiltersAction {
+  type: typeof SET_OVERVIEW_FILTERS;
+  payload: OverviewFilters;
+}
+
 export type OverviewFiltersAction =
   | GetOverviewFiltersFetchAction
   | GetOverviewFiltersSuccessAction
-  | GetOverviewFiltersFailAction;
+  | GetOverviewFiltersFailAction
+  | SetOverviewFiltersAction;
 
 export const fetchOverviewFilters = (
   payload: GetOverviewFiltersPayload
@@ -57,5 +64,10 @@ export const fetchOverviewFiltersSuccess = (
   filters: OverviewFilters
 ): GetOverviewFiltersSuccessAction => ({
   type: FETCH_OVERVIEW_FILTERS_SUCCESS,
+  payload: filters,
+});
+
+export const setOverviewFilters = (filters: OverviewFilters): SetOverviewFiltersAction => ({
+  type: SET_OVERVIEW_FILTERS,
   payload: filters,
 });

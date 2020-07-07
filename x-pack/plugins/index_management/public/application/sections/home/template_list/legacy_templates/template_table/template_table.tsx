@@ -9,12 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiInMemoryTable, EuiIcon, EuiButton, EuiLink, EuiBasicTableColumn } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
-import { reactRouterNavigate } from '../../../../../../../../../../src/plugins/kibana_react/public';
+import { SendRequestResponse, reactRouterNavigate } from '../../../../../../shared_imports';
 import { TemplateListItem } from '../../../../../../../common';
 import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../../common/constants';
 import { TemplateDeleteModal } from '../../../../../components';
+import { encodePathForReactRouter } from '../../../../../services/routing';
 import { useServices } from '../../../../../app_context';
-import { SendRequestResponse } from '../../../../../../shared_imports';
 
 interface Props {
   templates: TemplateListItem[];
@@ -52,7 +52,7 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
             {...reactRouterNavigate(
               history,
               {
-                pathname: `/templates/${encodeURIComponent(encodeURIComponent(name))}`,
+                pathname: `/templates/${encodePathForReactRouter(name)}`,
                 search: `legacy=${Boolean(item._kbnMeta.isLegacy)}`,
               },
               () => uiMetricService.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)
@@ -150,10 +150,10 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
           ),
           icon: 'pencil',
           type: 'icon',
-          onClick: ({ name, _kbnMeta: { isLegacy } }: TemplateListItem) => {
-            editTemplate(name, isLegacy);
+          onClick: ({ name }: TemplateListItem) => {
+            editTemplate(name, true);
           },
-          enabled: ({ _kbnMeta: { isManaged } }: TemplateListItem) => !isManaged,
+          enabled: ({ _kbnMeta: { isCloudManaged } }: TemplateListItem) => !isCloudManaged,
         },
         {
           type: 'icon',
@@ -167,8 +167,8 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
             }
           ),
           icon: 'copy',
-          onClick: ({ name, _kbnMeta: { isLegacy } }: TemplateListItem) => {
-            cloneTemplate(name, isLegacy);
+          onClick: ({ name }: TemplateListItem) => {
+            cloneTemplate(name, true);
           },
         },
         {
@@ -188,7 +188,7 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
             setTemplatesToDelete([{ name, isLegacy }]);
           },
           isPrimary: true,
-          enabled: ({ _kbnMeta: { isManaged } }: TemplateListItem) => !isManaged,
+          enabled: ({ _kbnMeta: { isCloudManaged } }: TemplateListItem) => !isCloudManaged,
         },
       ],
     },
@@ -208,7 +208,7 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
 
   const selectionConfig = {
     onSelectionChange: setSelection,
-    selectable: ({ _kbnMeta: { isManaged } }: TemplateListItem) => !isManaged,
+    selectable: ({ _kbnMeta: { isCloudManaged } }: TemplateListItem) => !isCloudManaged,
     selectableMessage: (selectable: boolean) => {
       if (!selectable) {
         return i18n.translate(
@@ -252,7 +252,10 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
         iconType="plusInCircle"
         data-test-subj="createLegacyTemplateButton"
         key="createTemplateButton"
-        {...reactRouterNavigate(history, '/create_template')}
+        {...reactRouterNavigate(history, {
+          pathname: '/create_template',
+          search: 'legacy=true',
+        })}
       >
         <FormattedMessage
           id="xpack.idxMgmt.templateList.legacyTable.createLegacyTemplatesButtonLabel"
@@ -262,6 +265,10 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
     ],
   };
 
+  const goToList = () => {
+    return history.push('templates');
+  };
+
   return (
     <Fragment>
       {templatesToDelete && templatesToDelete.length > 0 ? (
@@ -269,9 +276,10 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
           callback={(data) => {
             if (data && data.hasDeletedTemplates) {
               reload();
-            } else {
-              setTemplatesToDelete([]);
+              // Close the flyout if it is opened
+              goToList();
             }
+            setTemplatesToDelete([]);
           }}
           templatesToDelete={templatesToDelete}
         />

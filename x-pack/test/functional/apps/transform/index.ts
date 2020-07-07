@@ -5,9 +5,10 @@
  */
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, loadTestFile }: FtrProviderContext) {
+export default function ({ getService, loadTestFile, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
+  const PageObjects = getPageObjects(['security']);
 
   describe('transform', function () {
     this.tags(['ciGroup9', 'transform']);
@@ -23,17 +24,19 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       await transform.testResources.deleteSavedSearches();
 
-      await transform.testResources.deleteIndexPattern('ft_farequote');
-      await transform.testResources.deleteIndexPattern('ft_ecommerce');
+      await transform.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
 
       await esArchiver.unload('ml/farequote');
       await esArchiver.unload('ml/ecommerce');
 
       await transform.testResources.resetKibanaTimeZone();
+      await PageObjects.security.logout();
     });
 
     loadTestFile(require.resolve('./creation_index_pattern'));
     loadTestFile(require.resolve('./creation_saved_search'));
     loadTestFile(require.resolve('./cloning'));
+    loadTestFile(require.resolve('./editing'));
   });
 }

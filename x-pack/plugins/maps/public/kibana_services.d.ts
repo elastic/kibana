@@ -3,7 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IIndexPattern, DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { IndexPatternsService } from 'src/plugins/data/public/index_patterns';
 import { MapsConfigType } from '../config';
 import { MapsLegacyConfigType } from '../../../../src/plugins/maps_legacy/public';
 
@@ -14,9 +16,7 @@ export function getIndexPatternSelectComponent(): any;
 export function getHttp(): any;
 export function getTimeFilter(): any;
 export function getToasts(): any;
-export function getIndexPatternService(): {
-  get: (id: string) => IIndexPattern | undefined;
-};
+export function getIndexPatternService(): IndexPatternsService;
 export function getAutocompleteService(): any;
 export function getSavedObjectsClient(): any;
 export function getMapsCapabilities(): any;
@@ -48,6 +48,7 @@ export function getShowMapsInspectorAdapter(): boolean;
 export function getPreserveDrawingBuffer(): boolean;
 export function getEnableVectorTiles(): boolean;
 export function getProxyElasticMapsServiceInMaps(): boolean;
+export function getIsGoldPlus(): boolean;
 
 export function setLicenseId(args: unknown): void;
 export function setInspector(args: unknown): void;
@@ -74,3 +75,4 @@ export function setSearchService(args: DataPublicPluginStart['search']): void;
 export function setKibanaCommonConfig(config: MapsLegacyConfigType): void;
 export function setMapAppConfig(config: MapsConfigType): void;
 export function setKibanaVersion(version: string): void;
+export function setIsGoldPlus(isGoldPlus: boolean): void;

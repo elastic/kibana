@@ -36,7 +36,7 @@ export const snapshotDataSelector = ({ snapshot }: AppState) => snapshot;
 
 const mlCapabilitiesSelector = (state: AppState) => state.ml.mlCapabilities.data;
 
-export const hasMLFeatureAvailable = createSelector(
+export const hasMLFeatureSelector = createSelector(
   mlCapabilitiesSelector,
   (mlCapabilities) =>
     mlCapabilities?.isPlatinumOrTrialLicense && mlCapabilities?.mlFeatureEnabledInSpace
@@ -86,3 +86,5 @@ export const overviewFiltersSelector = ({ overviewFilters }: AppState) => overvi
 export const esKuerySelector = ({ ui: { esKuery } }: AppState) => esKuery;
 
 export const searchTextSelector = ({ ui: { searchText } }: AppState) => searchText;
+
+export const selectedFiltersSelector = ({ selectedFilters }: AppState) => selectedFilters;

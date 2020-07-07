@@ -29,6 +29,8 @@ import { AdvancedSettings } from './advanced_settings';
 import { ManagementAppMountParams } from '../../../management/public';
 import { ComponentRegistry } from '../types';
 
+import './index.scss';
+
 const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
   defaultMessage: 'Advanced Settings',
 });

@@ -31,6 +31,7 @@ export const CountryFlag = memo<{
     if (displayCountryNameOnHover && isEmpty(countries.getNames('en'))) {
       countries.registerLocale(countryJson);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const flag = getFlag(countryCode);
 

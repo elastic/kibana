@@ -7,8 +7,8 @@
 import { createSelector, defaultMemoize } from 'reselect';
 import { easing } from 'ts-easing';
 import { clamp, lerp } from '../../lib/math';
-import * as vector2 from '../../lib/vector2';
-import { multiply, add as addMatrix } from '../../lib/matrix3';
+import * as vector2 from '../../models/vector2';
+import { multiply, add as addMatrix } from '../../models/matrix3';
 import {
   inverseOrthographicProjection,
   scalingTransformation,
