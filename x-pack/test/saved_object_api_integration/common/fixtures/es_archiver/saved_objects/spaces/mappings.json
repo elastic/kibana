@@ -81,6 +81,7 @@
           }
         },
         "globaltype": {
+          "dynamic": "true",
           "properties": {
             "title": {
               "fields": {
