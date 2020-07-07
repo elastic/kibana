@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { mockUuidv4 } from '../../import/__mocks__';
 import supertest from 'supertest';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { registerResolveImportErrorsRoute } from '../resolve_import_errors';
@@ -57,6 +58,8 @@ describe(`POST ${URL}`, () => {
   };
 
   beforeEach(async () => {
+    mockUuidv4.mockReset();
+    mockUuidv4.mockImplementation(() => jest.requireActual('uuidv4'));
     ({ server, httpSetup, handlerContext } = await setupServer());
     handlerContext.savedObjects.typeRegistry.getImportableAndExportableTypes.mockReturnValue(
       allowedTypes.map(createExportableType)
@@ -243,6 +246,7 @@ describe(`POST ${URL}`, () => {
 
   describe('trueCopy enabled', () => {
     it('imports objects, regenerating all IDs/reference IDs present, and resetting all origin IDs', async () => {
+      mockUuidv4.mockReturnValue('new-id-1');
       savedObjectsClient.bulkGet.mockResolvedValueOnce({ saved_objects: [mockIndexPattern] });
       savedObjectsClient.bulkCreate.mockResolvedValueOnce({
         saved_objects: [
@@ -265,7 +269,7 @@ describe(`POST ${URL}`, () => {
             '--EXAMPLE',
             'Content-Disposition: form-data; name="retries"',
             '',
-            '[{"type":"visualization","id":"my-vis","destinationId":"new-id-1","replaceReferences":[{"type":"index-pattern","from":"my-pattern","to":"existing"}]},{"type":"dashboard","id":"my-dashboard","destinationId":"new-id-2"}]',
+            '[{"type":"visualization","id":"my-vis","replaceReferences":[{"type":"index-pattern","from":"my-pattern","to":"existing"}]},{"type":"dashboard","id":"my-dashboard","destinationId":"new-id-2"}]',
             '--EXAMPLE--',
           ].join('\r\n')
         )

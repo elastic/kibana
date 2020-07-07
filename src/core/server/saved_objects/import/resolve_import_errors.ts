@@ -24,6 +24,7 @@ import {
   SavedObjectsImportResponse,
   SavedObjectsResolveImportErrorsOptions,
 } from './types';
+import { regenerateIds } from './regenerate_ids';
 import { validateReferences } from './validate_references';
 import { validateRetries } from './validate_retries';
 import { createSavedObjects } from './create_saved_objects';
@@ -97,6 +98,13 @@ export async function resolveSavedObjectsImportErrors({
     namespace
   );
   errorAccumulator = [...errorAccumulator, ...validateReferencesResult.errors];
+
+  if (trueCopy) {
+    // In case any missing reference errors were resolved, ensure that we regenerate those object IDs as well
+    // This is because a retry to resolve a missing reference error may not necessarily specify a destinationId
+    const regenerateIdsResult = regenerateIds(objectsToResolve);
+    importIdMap = regenerateIdsResult.importIdMap;
+  }
 
   // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
   const checkConflictsOptions = {
