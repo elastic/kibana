@@ -246,13 +246,11 @@ export class CreateIndexPatternWizard extends Component<
           <StepIndexPattern
             allIndices={allIndices}
             initialQuery={indexPattern || initialQuery}
-            // isIncludingSystemIndices={isIncludingSystemIndices}
             indexPatternCreationType={this.state.indexPatternCreationType}
             goToNextStep={this.goToTimeFieldStep}
             showSystemIndices={
               this.state.indexPatternCreationType.getShowSystemIndices() && this.state.step === 1
             }
-            // onChangeIncludingSystemIndices={this.onChangeIncludingSystemIndices}
           />
         </EuiPageContent>
       );
