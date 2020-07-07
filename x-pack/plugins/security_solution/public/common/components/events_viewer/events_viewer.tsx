@@ -7,7 +7,6 @@
 import { EuiPanel } from '@elastic/eui';
 import { getOr, isEmpty, union } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
@@ -35,7 +34,6 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../store';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
-import { getInvestigateInResolverAction } from '../../../timelines/components/timeline/body/helpers';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 500;
 
@@ -93,7 +91,6 @@ const EventsViewerComponent: React.FC<Props> = ({
   toggleColumn,
   utilityBar,
 }) => {
-  const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const kibana = useKibana();
   const { filterManager } = useKibana().services.data.query;
@@ -103,15 +100,7 @@ const EventsViewerComponent: React.FC<Props> = ({
     getManageTimelineById,
     setIsTimelineLoading,
     setTimelineFilterManager,
-    setTimelineRowActions,
   } = useManageTimeline();
-
-  useEffect(() => {
-    setTimelineRowActions({
-      id,
-      timelineRowActions: [getInvestigateInResolverAction({ dispatch, timelineId: id })],
-    });
-  }, [setTimelineRowActions, id, dispatch]);
 
   useEffect(() => {
     setIsTimelineLoading({ id, isLoading: isQueryLoading });
