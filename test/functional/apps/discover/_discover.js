@@ -260,13 +260,14 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('invalid time range in URL', function () {
-      it('should display a "Invalid time range toast"', async function () {
+      it('should get the default timerange', async function () {
         await PageObjects.common.navigateToUrl('discover', '#/?_g=(time:(from:now-15m,to:null))', {
           useActualUrl: true,
         });
         await PageObjects.header.awaitKibanaChrome();
-        const toastMessage = await PageObjects.common.closeToast();
-        expect(toastMessage).to.be('Invalid time range');
+        const time = await PageObjects.timePicker.getTimeConfig();
+        expect(time.start).to.be('~ 15 minutes ago');
+        expect(time.end).to.be('now');
       });
     });
 
