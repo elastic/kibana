@@ -33,6 +33,7 @@ export interface ActionConnectorFieldsProps<TActionConnector> {
   docLinks: DocLinksStart;
   http?: HttpSetup;
   readOnly: boolean;
+  consumer?: string;
 }
 
 export interface ActionParamsProps<TParams> {

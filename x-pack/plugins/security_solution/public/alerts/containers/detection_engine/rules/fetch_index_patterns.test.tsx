@@ -354,6 +354,7 @@ describe('useFetchIndexPatterns', () => {
                     'filebeat-*',
                     'packetbeat-*',
                     'winlogbeat-*',
+                    'logs-*',
                   ],
                   name: 'event.end',
                   searchable: true,
@@ -370,6 +371,7 @@ describe('useFetchIndexPatterns', () => {
             'filebeat-*',
             'packetbeat-*',
             'winlogbeat-*',
+            'logs-*',
           ],
           indicesExists: true,
           indexPatterns: {
@@ -415,7 +417,8 @@ describe('useFetchIndexPatterns', () => {
               { name: 'source.port', searchable: true, type: 'long', aggregatable: true },
               { name: 'event.end', searchable: true, type: 'date', aggregatable: true },
             ],
-            title: 'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,packetbeat-*,winlogbeat-*',
+            title:
+              'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,packetbeat-*,winlogbeat-*,logs-*',
           },
         },
         result.current[1],
@@ -449,6 +452,7 @@ describe('useFetchIndexPatterns', () => {
             'filebeat-*',
             'packetbeat-*',
             'winlogbeat-*',
+            'logs-*',
           ],
           indicesExists: false,
           isLoading: false,

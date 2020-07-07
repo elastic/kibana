@@ -55,6 +55,7 @@ interface ActionConnectorProps {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   docLinks: DocLinksStart;
   capabilities: ApplicationStart['capabilities'];
+  consumer?: string;
 }
 
 export const ActionConnectorForm = ({
@@ -67,6 +68,7 @@ export const ActionConnectorForm = ({
   actionTypeRegistry,
   docLinks,
   capabilities,
+  consumer,
 }: ActionConnectorProps) => {
   const canSave = hasSaveActionsCapability(capabilities);
 
@@ -177,6 +179,7 @@ export const ActionConnectorForm = ({
             editActionSecrets={setActionSecretsProperty}
             http={http}
             docLinks={docLinks}
+            consumer={consumer}
           />
         </Suspense>
       ) : null}

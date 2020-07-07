@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsType } from 'src/core/server';
+import { addNewIndexingStrategyIndexNames } from './migrations/7_9_0_add_new_indexing_strategy_index_names';
 
 export const infraSourceConfigurationSavedObjectName = 'infrastructure-ui-source';
 
@@ -85,5 +85,8 @@ export const infraSourceConfigurationSavedObjectType: SavedObjectsType = {
         },
       },
     },
+  },
+  migrations: {
+    '7.9.0': addNewIndexingStrategyIndexNames,
   },
 };
