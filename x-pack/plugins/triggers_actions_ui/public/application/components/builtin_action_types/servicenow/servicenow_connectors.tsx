@@ -23,7 +23,7 @@ import { FieldMapping } from './case_mappings/field_mapping';
 
 const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
   ServiceNowActionConnector
->> = ({ action, editActionSecrets, editActionConfig, errors, consumer }) => {
+>> = ({ action, editActionSecrets, editActionConfig, errors, consumer, readOnly }) => {
   // TODO: remove incidentConfiguration later, when Case ServiceNow will move their fields to the level of action execution
   const { apiUrl, incidentConfiguration, isCaseOwned } = action.config;
   const mapping = incidentConfiguration ? incidentConfiguration.mapping : [];
@@ -84,6 +84,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
               fullWidth
               isInvalid={isApiUrlInvalid}
               name="apiUrl"
+              readOnly={readOnly}
               value={apiUrl || ''} // Needed to prevent uncontrolled input error when value is undefined
               data-test-subj="apiUrlFromInput"
               placeholder="https://<site-url>"
@@ -110,6 +111,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
             <EuiFieldText
               fullWidth
               isInvalid={isUsernameInvalid}
+              readOnly={readOnly}
               name="connector-servicenow-username"
               value={username || ''} // Needed to prevent uncontrolled input error when value is undefined
               data-test-subj="connector-servicenow-username-form-input"
@@ -135,6 +137,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
           >
             <EuiFieldPassword
               fullWidth
+              readOnly={readOnly}
               isInvalid={isPasswordInvalid}
               name="connector-servicenow-password"
               value={password || ''} // Needed to prevent uncontrolled input error when value is undefined
