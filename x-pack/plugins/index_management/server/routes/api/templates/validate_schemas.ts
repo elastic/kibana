@@ -20,6 +20,7 @@ export const templateSchema = schema.object({
     })
   ),
   composedOf: schema.maybe(schema.arrayOf(schema.string())),
+  dataStream: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   _meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   ilmPolicy: schema.maybe(
     schema.object({

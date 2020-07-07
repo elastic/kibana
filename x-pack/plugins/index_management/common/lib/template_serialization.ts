@@ -13,13 +13,22 @@ import {
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
 export function serializeTemplate(templateDeserialized: TemplateDeserialized): TemplateSerialized {
-  const { version, priority, indexPatterns, template, composedOf, _meta } = templateDeserialized;
+  const {
+    version,
+    priority,
+    indexPatterns,
+    template,
+    composedOf,
+    dataStream,
+    _meta,
+  } = templateDeserialized;
 
   return {
     version,
     priority,
     template,
     index_patterns: indexPatterns,
+    data_stream: dataStream,
     composed_of: composedOf,
     _meta,
   };

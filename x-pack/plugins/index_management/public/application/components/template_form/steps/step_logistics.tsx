@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiButtonEmpty,
+  EuiSpacer,
+  EuiLink,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
@@ -25,56 +32,82 @@ import { schemas, nameConfig, nameConfigWithoutValidations } from '../template_f
 const UseField = getUseField({ component: Field });
 const FormRow = getFormRow({ titleTag: 'h3' });
 
-const fieldsMeta = {
-  name: {
-    title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.nameTitle', {
-      defaultMessage: 'Name',
-    }),
-    description: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.nameDescription', {
-      defaultMessage: 'A unique identifier for this template.',
-    }),
-    testSubject: 'nameField',
-  },
-  indexPatterns: {
-    title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.indexPatternsTitle', {
-      defaultMessage: 'Index patterns',
-    }),
-    description: i18n.translate(
-      'xpack.idxMgmt.templateForm.stepLogistics.indexPatternsDescription',
-      {
-        defaultMessage: 'The index patterns to apply to the template.',
-      }
-    ),
-    testSubject: 'indexPatternsField',
-  },
-  order: {
-    title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.orderTitle', {
-      defaultMessage: 'Merge order',
-    }),
-    description: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.orderDescription', {
-      defaultMessage: 'The merge order when multiple templates match an index.',
-    }),
-    testSubject: 'orderField',
-  },
-  priority: {
-    title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.priorityTitle', {
-      defaultMessage: 'Priority',
-    }),
-    description: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.priorityDescription', {
-      defaultMessage: 'Only the highest priority template will be applied.',
-    }),
-    testSubject: 'priorityField',
-  },
-  version: {
-    title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.versionTitle', {
-      defaultMessage: 'Version',
-    }),
-    description: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.versionDescription', {
-      defaultMessage: 'A number that identifies the template to external management systems.',
-    }),
-    testSubject: 'versionField',
-  },
-};
+function getFieldsMeta(esDocsBase: string) {
+  return {
+    name: {
+      title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.nameTitle', {
+        defaultMessage: 'Name',
+      }),
+      description: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.nameDescription', {
+        defaultMessage: 'A unique identifier for this template.',
+      }),
+      testSubject: 'nameField',
+    },
+    indexPatterns: {
+      title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.indexPatternsTitle', {
+        defaultMessage: 'Index patterns',
+      }),
+      description: i18n.translate(
+        'xpack.idxMgmt.templateForm.stepLogistics.indexPatternsDescription',
+        {
+          defaultMessage: 'The index patterns to apply to the template.',
+        }
+      ),
+      testSubject: 'indexPatternsField',
+    },
+    dataStream: {
+      title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.dataStreamTitle', {
+        defaultMessage: 'Data stream',
+      }),
+      description: (
+        <FormattedMessage
+          id="xpack.idxMgmt.templateForm.stepLogistics.dataStreamDescription"
+          defaultMessage="Wheter indices that match the index patterns should automatically create a data stream. {docsLink}"
+          values={{
+            docsLink: (
+              <>
+                <br />
+                <EuiLink href={`${esDocsBase}/data-streams.html`} target="_blank">
+                  {i18n.translate('xpack.idxMgmt.mappingsEditor.dynamicMappingDocumentionLink', {
+                    defaultMessage: 'Learn more about data streams.',
+                  })}
+                </EuiLink>
+              </>
+            ),
+          }}
+        />
+      ),
+      testSubject: 'dataStreamField',
+    },
+    order: {
+      title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.orderTitle', {
+        defaultMessage: 'Merge order',
+      }),
+      description: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.orderDescription', {
+        defaultMessage: 'The merge order when multiple templates match an index.',
+      }),
+      testSubject: 'orderField',
+    },
+    priority: {
+      title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.priorityTitle', {
+        defaultMessage: 'Priority',
+      }),
+      description: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.priorityDescription', {
+        defaultMessage: 'Only the highest priority template will be applied.',
+      }),
+      testSubject: 'priorityField',
+    },
+    version: {
+      title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.versionTitle', {
+        defaultMessage: 'Version',
+      }),
+      description: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.versionDescription', {
+        defaultMessage: 'A number that identifies the template to external management systems.',
+      }),
+      testSubject: 'versionField',
+    },
+  };
+}
 
 interface LogisticsForm {
   [key: string]: any;
@@ -144,7 +177,9 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       return subscription.unsubscribe;
     }, [onChange]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const { name, indexPatterns, order, priority, version } = fieldsMeta;
+    const { name, indexPatterns, dataStream, order, priority, version } = getFieldsMeta(
+      documentationService.getEsDocsBase()
+    );
 
     return (
       <>
@@ -206,6 +241,16 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
               }}
             />
           </FormRow>
+
+          {/* Create data stream */}
+          {isLegacy !== true && (
+            <FormRow title={dataStream.title} description={dataStream.description}>
+              <UseField
+                path="dataStream"
+                componentProps={{ 'data-test-subj': dataStream.testSubject }}
+              />
+            </FormRow>
+          )}
 
           {/* Order */}
           {isLegacy && (
