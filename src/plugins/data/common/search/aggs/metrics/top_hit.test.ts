@@ -36,7 +36,7 @@ describe('Top hit metric', () => {
     fieldType = KBN_FIELD_TYPES.NUMBER,
     size = 1,
   }: any) => {
-    const typesRegistry = mockAggTypesRegistry([getTopHitMetricAgg()]);
+    const typesRegistry = mockAggTypesRegistry();
     const field = {
       name: fieldName,
       displayName: fieldName,

@@ -32,7 +32,7 @@ describe('AggTypesMetricsPercentileRanksProvider class', function () {
 
   beforeEach(() => {
     aggTypesDependencies = { getFieldFormatsStart: mockGetFieldFormatsStart };
-    const typesRegistry = mockAggTypesRegistry([getPercentileRanksMetricAgg(aggTypesDependencies)]);
+    const typesRegistry = mockAggTypesRegistry();
     const field = {
       name: 'bytes',
     };

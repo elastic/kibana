@@ -146,12 +146,7 @@ export class DataPublicPlugin
     );
 
     const searchService = this.searchService.setup(core, {
-      expressions,
       usageCollection,
-      getFieldFormatsStart: () => ({
-        deserialize: startServices().self.fieldFormats.deserialize,
-        getDefaultInstance: startServices().self.fieldFormats.getDefaultInstance,
-      }),
       packageInfo: this.packageInfo,
       registerFunction: expressions.registerFunction,
     });
@@ -202,7 +197,7 @@ export class DataPublicPlugin
     });
     setQueryService(query);
 
-    const search = this.searchService.start(core, { indexPatterns });
+    const search = this.searchService.start(core, { fieldFormats, indexPatterns });
     setSearchService(search);
 
     uiActions.addTriggerAction(
@@ -239,5 +234,7 @@ export class DataPublicPlugin
 
   public stop() {
     this.autocomplete.clearProviders();
+    this.queryService.stop();
+    this.searchService.stop();
   }
 }

@@ -19,16 +19,19 @@
 
 import { Query } from '../../../../common';
 import { AggConfigs } from '../agg_configs';
-import { mockAggTypesRegistry } from '../test_helpers';
+import { AggTypesDependencies } from '../agg_types';
+import { mockAggTypesRegistry, mockAggTypesDependencies } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { getFiltersBucketAgg, FiltersBucketAggDependencies } from './filters';
 
 describe('Filters Agg', () => {
-  let aggTypesDependencies: FiltersBucketAggDependencies;
+  let aggTypesDependencies: AggTypesDependencies;
 
   beforeEach(() => {
     jest.resetAllMocks();
-    aggTypesDependencies = { getConfig: jest.fn() };
+    aggTypesDependencies = {
+      ...mockAggTypesDependencies,
+      getConfig: jest.fn(),
+    };
   });
 
   describe('order agg editor UI', () => {
@@ -58,7 +61,7 @@ describe('Filters Agg', () => {
           },
         ],
         {
-          typesRegistry: mockAggTypesRegistry([getFiltersBucketAgg(aggTypesDependencies)]),
+          typesRegistry: mockAggTypesRegistry(aggTypesDependencies),
         }
       );
     };

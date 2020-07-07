@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { getFiltersBucketAgg, FiltersBucketAggDependencies } from '../filters';
 import { createFilterFilters } from './filters';
 import { AggConfigs } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
@@ -25,12 +24,6 @@ import { IBucketAggConfig } from '../bucket_agg_type';
 
 describe('AggConfig Filters', () => {
   describe('filters', () => {
-    let aggTypesDependencies: FiltersBucketAggDependencies;
-
-    beforeEach(() => {
-      aggTypesDependencies = { getConfig: jest.fn() };
-    });
-
     const getAggConfigs = () => {
       const field = {
         name: 'bytes',
@@ -60,7 +53,7 @@ describe('AggConfig Filters', () => {
           },
         ],
         {
-          typesRegistry: mockAggTypesRegistry([getFiltersBucketAgg(aggTypesDependencies)]),
+          typesRegistry: mockAggTypesRegistry(),
         }
       );
     };

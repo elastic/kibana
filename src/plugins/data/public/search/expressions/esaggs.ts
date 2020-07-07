@@ -19,12 +19,7 @@
 
 import { get, hasIn } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  KibanaContext,
-  KibanaDatatable,
-  ExpressionFunctionDefinition,
-  KibanaDatatableColumn,
-} from 'src/plugins/expressions/public';
+import { KibanaDatatable, KibanaDatatableColumn } from 'src/plugins/expressions/public';
 import { calculateObjectHash } from '../../../../../plugins/kibana_utils/public';
 import { PersistedState } from '../../../../../plugins/visualizations/public';
 import { Adapters } from '../../../../../plugins/inspector/public';

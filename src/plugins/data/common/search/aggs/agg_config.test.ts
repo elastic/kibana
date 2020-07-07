@@ -623,7 +623,7 @@ describe('AggConfig', () => {
 
     it('creates a subexpression for param types other than "agg" which have specified toExpressionAst', () => {
       // Overwrite the `ranges` param in the `range` agg with a mock toExpressionAst function
-      const range: MetricAggType = typesRegistry.get('range');
+      const range = typesRegistry.get('range') as MetricAggType;
       range.expressionName = 'aggRange';
       const rangesParam = range.params.find((p) => p.name === 'ranges');
       rangesParam!.toExpressionAst = (val: any) => ({

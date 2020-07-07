@@ -18,7 +18,6 @@
  */
 
 import moment from 'moment';
-import { getDateRangeBucketAgg, DateRangeBucketAggDependencies } from '../date_range';
 import { createFilterDateRange } from './date_range';
 import { AggConfigs } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
@@ -27,15 +26,6 @@ import { IBucketAggConfig } from '../bucket_agg_type';
 
 describe('AggConfig Filters', () => {
   describe('Date range', () => {
-    let aggTypesDependencies: DateRangeBucketAggDependencies;
-
-    beforeEach(() => {
-      aggTypesDependencies = {
-        getConfig: jest.fn(),
-        isDefaultTimezone: jest.fn().mockReturnValue(true),
-      };
-    });
-
     const getAggConfigs = () => {
       const field = {
         name: '@timestamp',
@@ -63,7 +53,7 @@ describe('AggConfig Filters', () => {
           },
         ],
         {
-          typesRegistry: mockAggTypesRegistry([getDateRangeBucketAgg(aggTypesDependencies)]),
+          typesRegistry: mockAggTypesRegistry(),
         }
       );
     };

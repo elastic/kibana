@@ -17,19 +17,12 @@
  * under the License.
  */
 
-import { getRangeBucketAgg, RangeBucketAggDependencies } from './range';
 import { AggConfigs } from '../agg_configs';
-import { mockGetFieldFormatsStart, mockAggTypesRegistry } from '../test_helpers';
+import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { FieldFormatsGetConfigFn, NumberFormat } from '../../../../common/field_formats';
 
 describe('Range Agg', () => {
-  let aggTypesDependencies: RangeBucketAggDependencies;
-
-  beforeEach(() => {
-    aggTypesDependencies = { getFieldFormatsStart: mockGetFieldFormatsStart };
-  });
-
   const getConfig = (() => {}) as FieldFormatsGetConfigFn;
   const getAggConfigs = () => {
     const field = {
@@ -67,7 +60,7 @@ describe('Range Agg', () => {
         },
       ],
       {
-        typesRegistry: mockAggTypesRegistry([getRangeBucketAgg(aggTypesDependencies)]),
+        typesRegistry: mockAggTypesRegistry(),
       }
     );
   };

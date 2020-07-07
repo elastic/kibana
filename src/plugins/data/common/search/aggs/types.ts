@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { Assign } from '@kbn/utility-types';
 import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
 import {
   AggConfigSerialized,
@@ -52,6 +53,7 @@ import {
   AggParamsTopHit,
   AggParamsHistogram,
   AggParamsDateHistogram,
+  AggTypesRegistry,
   AggTypesRegistrySetup,
   AggTypesRegistryStart,
   CreateAggConfigParams,
@@ -71,21 +73,29 @@ export { IpRangeKey } from './buckets/lib/ip_range';
 export { OptionedValueProp } from './param_types/optioned';
 
 /** @internal */
-export interface AggsSetup {
-  calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
+export interface AggsCommonSetup {
   types: AggTypesRegistrySetup;
 }
 
 /** @internal */
-export interface AggsStart {
+export interface AggsCommonStart {
   calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
   createAggConfigs: (
     indexPattern: IndexPattern,
     configStates?: CreateAggConfigParams[],
     schemas?: Record<string, any>
   ) => InstanceType<typeof AggConfigs>;
-  types: AggTypesRegistryStart;
+  types: ReturnType<AggTypesRegistry['start']>;
 }
+
+/**
+ * AggsStart represents the actual external contract as AggsCommonStart
+ * is only used internally. The difference is that AggsStart includes the
+ * typings for the registry with initialized agg types.
+ *
+ * @internal
+ */
+export type AggsStart = Assign<AggsCommonStart, { types: AggTypesRegistryStart }>;
 
 /** @internal */
 export interface BaseAggParams {

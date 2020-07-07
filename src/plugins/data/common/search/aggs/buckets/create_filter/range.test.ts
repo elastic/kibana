@@ -22,7 +22,6 @@ import { AggConfigs } from '../../agg_configs';
 import { mockAggTypesRegistry, mockGetFieldFormatsStart } from '../../test_helpers';
 import { IBucketAggConfig } from '../bucket_agg_type';
 import { BUCKET_TYPES } from '../bucket_agg_types';
-import { getRangeBucketAgg } from '../range';
 import { createFilterRange } from './range';
 
 describe('AggConfig Filters', () => {
@@ -57,9 +56,7 @@ describe('AggConfig Filters', () => {
           },
         ],
         {
-          typesRegistry: mockAggTypesRegistry([
-            getRangeBucketAgg({ getFieldFormatsStart: mockGetFieldFormatsStart }),
-          ]),
+          typesRegistry: mockAggTypesRegistry(),
         }
       );
     };

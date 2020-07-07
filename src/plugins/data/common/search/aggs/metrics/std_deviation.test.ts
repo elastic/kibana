@@ -23,7 +23,7 @@ import { mockAggTypesRegistry } from '../test_helpers';
 import { METRIC_TYPES } from './metric_agg_types';
 
 describe('AggTypeMetricStandardDeviationProvider class', () => {
-  const typesRegistry = mockAggTypesRegistry([getStdDeviationMetricAgg()]);
+  const typesRegistry = mockAggTypesRegistry();
   const getAggConfigs = (customLabel?: string) => {
     const field = {
       name: 'memory',

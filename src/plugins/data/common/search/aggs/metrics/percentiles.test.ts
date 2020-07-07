@@ -26,7 +26,7 @@ describe('AggTypesMetricsPercentilesProvider class', () => {
   let aggConfigs: IAggConfigs;
 
   beforeEach(() => {
-    const typesRegistry = mockAggTypesRegistry([getPercentilesMetricAgg()]);
+    const typesRegistry = mockAggTypesRegistry();
     const field = {
       name: 'bytes',
     };

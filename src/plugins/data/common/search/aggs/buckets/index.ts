@@ -18,6 +18,7 @@
  */
 
 export * from './_interval_options';
+export * from './bucket_agg_type';
 export * from './bucket_agg_types';
 export * from './histogram';
 export * from './date_histogram';

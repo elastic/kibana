@@ -20,7 +20,6 @@
 import { AggConfigs, IAggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { getSignificantTermsBucketAgg } from './significant_terms';
 
 describe('Significant Terms Agg', () => {
   describe('order agg editor UI', () => {
@@ -51,7 +50,7 @@ describe('Significant Terms Agg', () => {
             },
           ],
           {
-            typesRegistry: mockAggTypesRegistry([getSignificantTermsBucketAgg()]),
+            typesRegistry: mockAggTypesRegistry(),
           }
         );
       };

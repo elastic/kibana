@@ -17,16 +17,17 @@
  * under the License.
  */
 
-import { getDateRangeBucketAgg, DateRangeBucketAggDependencies } from './date_range';
 import { AggConfigs } from '../agg_configs';
-import { mockAggTypesRegistry } from '../test_helpers';
+import { AggTypesDependencies } from '../agg_types';
+import { mockAggTypesRegistry, mockAggTypesDependencies } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
 describe('date_range params', () => {
-  let aggTypesDependencies: DateRangeBucketAggDependencies;
+  let aggTypesDependencies: AggTypesDependencies;
 
   beforeEach(() => {
     aggTypesDependencies = {
+      ...mockAggTypesDependencies,
       getConfig: jest.fn(),
       isDefaultTimezone: jest.fn().mockReturnValue(false),
     };
@@ -68,7 +69,7 @@ describe('date_range params', () => {
         },
       ],
       {
-        typesRegistry: mockAggTypesRegistry([getDateRangeBucketAgg(aggTypesDependencies)]),
+        typesRegistry: mockAggTypesRegistry(aggTypesDependencies),
       }
     );
   };

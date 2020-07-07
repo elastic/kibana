@@ -22,29 +22,16 @@ import { createFilterDateHistogram } from './date_histogram';
 import { intervalOptions } from '../_interval_options';
 import { AggConfigs } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
-import {
-  getDateHistogramBucketAgg,
-  DateHistogramBucketAggDependencies,
-  IBucketDateHistogramAggConfig,
-} from '../date_histogram';
+import { IBucketDateHistogramAggConfig } from '../date_histogram';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { RangeFilter } from '../../../../../common';
 
 describe('AggConfig Filters', () => {
   describe('date_histogram', () => {
-    let aggTypesDependencies: DateHistogramBucketAggDependencies;
     let agg: IBucketDateHistogramAggConfig;
     let filter: RangeFilter;
     let bucketStart: any;
     let field: any;
-
-    beforeEach(() => {
-      aggTypesDependencies = {
-        calculateBounds: jest.fn(),
-        getConfig: jest.fn(),
-        isDefaultTimezone: jest.fn().mockReturnValue(true),
-      };
-    });
 
     const init = (interval: string = 'auto', duration: any = moment.duration(15, 'minutes')) => {
       field = {
@@ -69,7 +56,7 @@ describe('AggConfig Filters', () => {
           },
         ],
         {
-          typesRegistry: mockAggTypesRegistry([getDateHistogramBucketAgg(aggTypesDependencies)]),
+          typesRegistry: mockAggTypesRegistry(),
         }
       );
       const bucketKey = 1422579600000;

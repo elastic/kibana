@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { getTermsBucketAgg } from '../terms';
 import { createFilterTerms } from './terms';
 import { AggConfigs, CreateAggConfigParams } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
@@ -43,7 +42,7 @@ describe('AggConfig Filters', () => {
       };
 
       return new AggConfigs(indexPattern, aggs, {
-        typesRegistry: mockAggTypesRegistry([getTermsBucketAgg()]),
+        typesRegistry: mockAggTypesRegistry(),
       });
     };
 

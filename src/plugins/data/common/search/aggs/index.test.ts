@@ -24,27 +24,27 @@ import { isBucketAggType } from './buckets/bucket_agg_type';
 import { isMetricAggType } from './metrics/metric_agg_type';
 
 describe('AggTypesComponent', () => {
-  const aggTypes = getAggTypes({
+  const aggTypes = getAggTypes();
+  const { buckets, metrics } = aggTypes;
+  const aggTypesDependencies = {
     calculateBounds: jest.fn(),
     getConfig: jest.fn(),
     getFieldFormatsStart: mockGetFieldFormatsStart,
     isDefaultTimezone: jest.fn().mockReturnValue(true),
-  });
-
-  const { buckets, metrics } = aggTypes;
+  };
 
   describe('bucket aggs', () => {
     test('all extend BucketAggType', () => {
-      buckets.forEach((bucketAgg) => {
-        expect(isBucketAggType(bucketAgg)).toBeTruthy();
+      buckets.forEach(({ fn }) => {
+        expect(isBucketAggType(fn(aggTypesDependencies))).toBeTruthy();
       });
     });
   });
 
   describe('metric aggs', () => {
     test('all extend MetricAggType', () => {
-      metrics.forEach((metricAgg) => {
-        expect(isMetricAggType(metricAgg)).toBeTruthy();
+      metrics.forEach(({ fn }) => {
+        expect(isMetricAggType(fn(aggTypesDependencies))).toBeTruthy();
       });
     });
   });

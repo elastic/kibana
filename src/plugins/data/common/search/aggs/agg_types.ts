@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { AggsServiceSetupDependencies } from './aggs_service';
+import { FieldFormatsStartCommon } from '../../field_formats';
+import { BUCKET_TYPES } from './buckets';
+import { METRIC_TYPES } from './metrics';
 
 import { getCountMetricAgg } from './metrics/count';
 import { getAvgMetricAgg } from './metrics/avg';
@@ -37,7 +39,7 @@ import { getCumulativeSumMetricAgg } from './metrics/cumulative_sum';
 import { getMovingAvgMetricAgg } from './metrics/moving_avg';
 import { getSerialDiffMetricAgg } from './metrics/serial_diff';
 
-import { getDateHistogramBucketAgg } from './buckets/date_histogram';
+import { getDateHistogramBucketAgg, CalculateBoundsFn } from './buckets/date_histogram';
 import { getHistogramBucketAgg } from './buckets/histogram';
 import { getRangeBucketAgg } from './buckets/range';
 import { getDateRangeBucketAgg } from './buckets/date_range';
@@ -54,52 +56,49 @@ import { getBucketMinMetricAgg } from './metrics/bucket_min';
 import { getBucketMaxMetricAgg } from './metrics/bucket_max';
 
 /** @internal */
-export type AggTypesDependencies = Pick<
-  AggsServiceSetupDependencies,
-  'calculateBounds' | 'getFieldFormatsStart' | 'getConfig' | 'isDefaultTimezone'
->;
+export interface AggTypesDependencies {
+  calculateBounds: CalculateBoundsFn;
+  getConfig: <T = any>(key: string) => T;
+  getFieldFormatsStart: () => Pick<FieldFormatsStartCommon, 'deserialize' | 'getDefaultInstance'>;
+  isDefaultTimezone: () => boolean;
+}
 
-export const getAggTypes = ({
-  calculateBounds,
-  getConfig,
-  getFieldFormatsStart,
-  isDefaultTimezone,
-}: AggTypesDependencies) => ({
+export const getAggTypes = () => ({
   metrics: [
-    getCountMetricAgg(),
-    getAvgMetricAgg(),
-    getSumMetricAgg(),
-    getMedianMetricAgg(),
-    getMinMetricAgg(),
-    getMaxMetricAgg(),
-    getStdDeviationMetricAgg(),
-    getCardinalityMetricAgg(),
-    getPercentilesMetricAgg(),
-    getPercentileRanksMetricAgg({ getFieldFormatsStart }),
-    getTopHitMetricAgg(),
-    getDerivativeMetricAgg(),
-    getCumulativeSumMetricAgg(),
-    getMovingAvgMetricAgg(),
-    getSerialDiffMetricAgg(),
-    getBucketAvgMetricAgg(),
-    getBucketSumMetricAgg(),
-    getBucketMinMetricAgg(),
-    getBucketMaxMetricAgg(),
-    getGeoBoundsMetricAgg(),
-    getGeoCentroidMetricAgg(),
+    { name: METRIC_TYPES.COUNT, fn: getCountMetricAgg },
+    { name: METRIC_TYPES.AVG, fn: getAvgMetricAgg },
+    { name: METRIC_TYPES.SUM, fn: getSumMetricAgg },
+    { name: METRIC_TYPES.MEDIAN, fn: getMedianMetricAgg },
+    { name: METRIC_TYPES.MIN, fn: getMinMetricAgg },
+    { name: METRIC_TYPES.MAX, fn: getMaxMetricAgg },
+    { name: METRIC_TYPES.STD_DEV, fn: getStdDeviationMetricAgg },
+    { name: METRIC_TYPES.CARDINALITY, fn: getCardinalityMetricAgg },
+    { name: METRIC_TYPES.PERCENTILES, fn: getPercentilesMetricAgg },
+    { name: METRIC_TYPES.PERCENTILE_RANKS, fn: getPercentileRanksMetricAgg },
+    { name: METRIC_TYPES.TOP_HITS, fn: getTopHitMetricAgg },
+    { name: METRIC_TYPES.DERIVATIVE, fn: getDerivativeMetricAgg },
+    { name: METRIC_TYPES.CUMULATIVE_SUM, fn: getCumulativeSumMetricAgg },
+    { name: METRIC_TYPES.MOVING_FN, fn: getMovingAvgMetricAgg },
+    { name: METRIC_TYPES.SERIAL_DIFF, fn: getSerialDiffMetricAgg },
+    { name: METRIC_TYPES.AVG_BUCKET, fn: getBucketAvgMetricAgg },
+    { name: METRIC_TYPES.SUM_BUCKET, fn: getBucketSumMetricAgg },
+    { name: METRIC_TYPES.MIN_BUCKET, fn: getBucketMinMetricAgg },
+    { name: METRIC_TYPES.MAX_BUCKET, fn: getBucketMaxMetricAgg },
+    { name: METRIC_TYPES.GEO_BOUNDS, fn: getGeoBoundsMetricAgg },
+    { name: METRIC_TYPES.GEO_CENTROID, fn: getGeoCentroidMetricAgg },
   ],
   buckets: [
-    getDateHistogramBucketAgg({ calculateBounds, getConfig, isDefaultTimezone }),
-    getHistogramBucketAgg({ getConfig, getFieldFormatsStart }),
-    getRangeBucketAgg({ getFieldFormatsStart }),
-    getDateRangeBucketAgg({ getConfig, isDefaultTimezone }),
-    getIpRangeBucketAgg(),
-    getTermsBucketAgg(),
-    getFilterBucketAgg(),
-    getFiltersBucketAgg({ getConfig }),
-    getSignificantTermsBucketAgg(),
-    getGeoHashBucketAgg(),
-    getGeoTitleBucketAgg(),
+    { name: BUCKET_TYPES.DATE_HISTOGRAM, fn: getDateHistogramBucketAgg },
+    { name: BUCKET_TYPES.HISTOGRAM, fn: getHistogramBucketAgg },
+    { name: BUCKET_TYPES.RANGE, fn: getRangeBucketAgg },
+    { name: BUCKET_TYPES.DATE_RANGE, fn: getDateRangeBucketAgg },
+    { name: BUCKET_TYPES.IP_RANGE, fn: getIpRangeBucketAgg },
+    { name: BUCKET_TYPES.TERMS, fn: getTermsBucketAgg },
+    { name: BUCKET_TYPES.FILTER, fn: getFilterBucketAgg },
+    { name: BUCKET_TYPES.FILTERS, fn: getFiltersBucketAgg },
+    { name: BUCKET_TYPES.SIGNIFICANT_TERMS, fn: getSignificantTermsBucketAgg },
+    { name: BUCKET_TYPES.GEOHASH_GRID, fn: getGeoHashBucketAgg },
+    { name: BUCKET_TYPES.GEOTILE_GRID, fn: getGeoTitleBucketAgg },
   ],
 });
 

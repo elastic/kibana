@@ -59,7 +59,7 @@ export const getFiltersBucketAgg = ({ getConfig }: FiltersBucketAggDependencies)
     params: [
       {
         name: 'filters',
-        default: [
+        default: () => [
           {
             input: { query: '', language: getConfig(UI_SETTINGS.SEARCH_QUERY_LANGUAGE) },
             label: '',

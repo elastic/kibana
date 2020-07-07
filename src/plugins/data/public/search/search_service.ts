@@ -17,82 +17,40 @@
  * under the License.
  */
 
-import { Subscription } from 'rxjs';
-
 import { Plugin, CoreSetup, CoreStart, PackageInfo, IUiSettingsClient } from 'src/core/public';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
-import { ExpressionsSetup } from '../../../../plugins/expressions/public';
 
 import { createSearchSource, SearchSource, SearchSourceDependencies } from './search_source';
 import { getEsClient, LegacyApiCaller } from './legacy';
-import { getForceNow } from '../query/timefilter/lib/get_force_now';
-import { calculateBounds, TimeRange } from '../../common/query';
-import { AggsService, AggsServiceSetupDependencies } from '../../common/search/aggs';
+import { AggsService, AggsSetupDependencies, AggsStartDependencies } from './aggs';
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
-import {
-  getAggTypes,
-  getAggTypesFunctions,
-  AggTypesRegistry,
-  AggConfigs,
-  getCalculateAutoTimeExpression,
-} from './aggs';
 import { ISearchGeneric } from './types';
 import { SearchUsageCollector, createUsageCollector } from './collectors';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
-  getFieldFormatsStart: AggsServiceSetupDependencies['getFieldFormatsStart'];
   packageInfo: PackageInfo;
-  registerFunction: AggsServiceSetupDependencies['registerFunction'];
+  registerFunction: AggsSetupDependencies['registerFunction'];
   usageCollection?: UsageCollectionSetup;
 }
 
 /** @internal */
 export interface SearchServiceStartDependencies {
+  fieldFormats: AggsStartDependencies['fieldFormats'];
   indexPatterns: IndexPatternsContract;
 }
 
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private esClient?: LegacyApiCaller;
   private readonly aggsService = new AggsService();
-  private getConfig?: <T = any>(key: string) => T;
-  private subscriptions: Subscription[] = [];
   private searchInterceptor!: ISearchInterceptor;
   private usageCollector?: SearchUsageCollector;
 
-  private createGetConfig = (uiSettings: IUiSettingsClient, requiredSettings: string[]) => {
-    const settingsCache: Record<string, any> = {};
-
-    requiredSettings.forEach((setting) => {
-      this.subscriptions.push(
-        uiSettings.get$(setting).subscribe((value) => {
-          settingsCache[setting] = value;
-        })
-      );
-    });
-
-    return <T = any>(key: string): T => {
-      return settingsCache[key];
-    };
-  };
-
-  /**
-   * getForceNow uses window.location, so we must have a separate implementation
-   * of calculateBounds on the client and the server.
-   */
-  private calculateBounds = (timeRange: TimeRange) =>
-    calculateBounds(timeRange, { forceNow: getForceNow() });
-
   public setup(
     core: CoreSetup,
-    {
-      expressions,
-      usageCollection,
-      packageInfo,
-      getInternalStartServices,
-    }: SearchServiceSetupDependencies
+    { packageInfo, registerFunction, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
     this.usageCollector = createUsageCollector(core, usageCollection);
     this.esClient = getEsClient(core.injectedMetadata, core.http, packageInfo);
@@ -113,38 +71,22 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
     );
 
-    const aggTypesSetup = this.aggTypesRegistry.setup();
-
-    // register each agg type
-    const aggTypes = getAggTypes({
-      calculateBounds: this.calculateBounds,
-      getInternalStartServices,
-      uiSettings: core.uiSettings,
-    });
-    aggTypes.buckets.forEach((b) => aggTypesSetup.registerBucket(b));
-    aggTypes.metrics.forEach((m) => aggTypesSetup.registerMetric(m));
-
-    // register expression functions for each agg type
-    const aggFunctions = getAggTypesFunctions();
-    aggFunctions.forEach((fn) => expressions.registerFunction(fn));
-
     return {
+      aggs: this.aggsService.setup({
+        registerFunction,
+        uiSettings: core.uiSettings,
+      }),
       usageCollector: this.usageCollector!,
       __enhance: (enhancements: SearchEnhancements) => {
         this.searchInterceptor = enhancements.searchInterceptor;
       },
-      aggs: this.aggsService.setup({
-        calculateBounds: this.calculateBounds,
-        getConfig: this.getConfig,
-        getFieldFormatsStart,
-        isDefaultTimezone: () => core.uiSettings.isDefault('dateFormat:tz'),
-        registerFunction,
-      }),
     };
   }
 
-  public start(core: CoreStart, dependencies: SearchServiceStartDependencies): ISearchStart {
-    const aggTypesStart = this.aggTypesRegistry.start();
+  public start(
+    { application, http, injectedMetadata, notifications, uiSettings }: CoreStart,
+    { fieldFormats, indexPatterns }: SearchServiceStartDependencies
+  ): ISearchStart {
     const search: ISearchGeneric = (request, options) => {
       return this.searchInterceptor.search(request, options);
     };
@@ -154,20 +96,17 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     };
 
     const searchSourceDependencies: SearchSourceDependencies = {
-      uiSettings: core.uiSettings,
-      injectedMetadata: core.injectedMetadata,
+      uiSettings,
+      injectedMetadata,
       search,
       legacySearch,
     };
 
     return {
-      aggs: this.aggsService.start({
-        calculateBounds: this.calculateBounds,
-        getConfig: this.getConfig!,
-      }),
+      aggs: this.aggsService.start({ fieldFormats, uiSettings }),
       search,
       searchSource: {
-        create: createSearchSource(dependencies.indexPatterns, searchSourceDependencies),
+        create: createSearchSource(indexPatterns, searchSourceDependencies),
         createEmpty: () => {
           return new SearchSource({}, searchSourceDependencies);
         },
@@ -177,6 +116,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   }
 
   public stop() {
-    this.subscriptions.forEach((s) => s.unsubscribe());
+    this.aggsService.stop();
   }
 }

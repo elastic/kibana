@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { getIpRangeBucketAgg } from '../ip_range';
 import { createFilterIpRange } from './ip_range';
 import { AggConfigs, CreateAggConfigParams } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
@@ -27,7 +26,7 @@ import { IBucketAggConfig } from '../bucket_agg_type';
 
 describe('AggConfig Filters', () => {
   describe('IP range', () => {
-    const typesRegistry = mockAggTypesRegistry([getIpRangeBucketAgg()]);
+    const typesRegistry = mockAggTypesRegistry();
     const getAggConfigs = (aggs: CreateAggConfigParams[]) => {
       const field = {
         name: 'ip',

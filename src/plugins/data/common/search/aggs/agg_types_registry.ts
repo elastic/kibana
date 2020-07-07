@@ -19,9 +19,21 @@
 
 import { BucketAggType } from './buckets/bucket_agg_type';
 import { MetricAggType } from './metrics/metric_agg_type';
+import { AggTypesDependencies } from './agg_types';
 
 export type AggTypesRegistrySetup = ReturnType<AggTypesRegistry['setup']>;
-export type AggTypesRegistryStart = ReturnType<AggTypesRegistry['start']>;
+/**
+ * AggsCommonStart returns the _unitialized_ agg type providers, but in our
+ * real start contract we will need to return the initialized versions.
+ * So we need to provide the correct typings so they can be overwritten
+ * on client/server.
+ *
+ * @internal
+ */
+export interface AggTypesRegistryStart {
+  get: (id: string) => BucketAggType<any> | MetricAggType<any>;
+  getAll: () => { buckets: Array<BucketAggType<any>>; metrics: Array<MetricAggType<any>> };
+}
 
 export class AggTypesRegistry {
   private readonly bucketAggs = new Map();
@@ -29,17 +41,27 @@ export class AggTypesRegistry {
 
   setup = () => {
     return {
-      registerBucket: <T extends BucketAggType<any>>(type: T): void => {
-        const { name } = type;
-        if (this.bucketAggs.get(name)) {
-          throw new Error(`Bucket agg has already been registered with name: ${name}`);
+      registerBucket: <
+        N extends string,
+        T extends (deps: AggTypesDependencies) => BucketAggType<any>
+      >(
+        name: N,
+        type: T
+      ): void => {
+        if (this.bucketAggs.get(name) || this.metricAggs.get(name)) {
+          throw new Error(`Agg has already been registered with name: ${name}`);
         }
         this.bucketAggs.set(name, type);
       },
-      registerMetric: <T extends MetricAggType<any>>(type: T): void => {
-        const { name } = type;
-        if (this.metricAggs.get(name)) {
-          throw new Error(`Metric agg has already been registered with name: ${name}`);
+      registerMetric: <
+        N extends string,
+        T extends (deps: AggTypesDependencies) => MetricAggType<any>
+      >(
+        name: N,
+        type: T
+      ): void => {
+        if (this.bucketAggs.get(name) || this.metricAggs.get(name)) {
+          throw new Error(`Agg has already been registered with name: ${name}`);
         }
         this.metricAggs.set(name, type);
       },
@@ -50,12 +72,6 @@ export class AggTypesRegistry {
     return {
       get: (name: string) => {
         return this.bucketAggs.get(name) || this.metricAggs.get(name);
-      },
-      getBuckets: () => {
-        return Array.from(this.bucketAggs.values());
-      },
-      getMetrics: () => {
-        return Array.from(this.metricAggs.values());
       },
       getAll: () => {
         return {

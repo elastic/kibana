@@ -19,16 +19,14 @@
 
 import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
 import { UI_SETTINGS } from '../../../common';
-import { FieldFormatsStartCommon } from '../../field_formats';
 import {
+  AggConfigs,
+  AggTypesRegistry,
   getAggTypes,
   getAggTypesFunctions,
-  AggTypesRegistry,
-  AggConfigs,
   getCalculateAutoTimeExpression,
 } from './';
-import { AggsSetup, AggsStart } from './types';
-import { CalculateBoundsFn } from './buckets/date_histogram';
+import { AggsCommonSetup, AggsCommonStart } from './types';
 
 /** @internal */
 export const aggsRequiredUiSettings = [
@@ -44,16 +42,12 @@ export const aggsRequiredUiSettings = [
 ];
 
 /** @internal */
-export interface AggsServiceSetupDependencies {
-  calculateBounds: CalculateBoundsFn;
-  getConfig: <T = any>(key: string) => T;
-  getFieldFormatsStart: () => Pick<FieldFormatsStartCommon, 'deserialize' | 'getDefaultInstance'>;
-  isDefaultTimezone: () => boolean;
+export interface AggsCommonSetupDependencies {
   registerFunction: ExpressionsServiceSetup['registerFunction'];
 }
 
 /** @internal */
-export interface AggsServiceStartDependencies {
+export interface AggsCommonStartDependencies {
   getConfig: <T = any>(key: string) => T;
 }
 
@@ -62,39 +56,27 @@ export interface AggsServiceStartDependencies {
  * Elasticsearch aggregations supported by Kibana, providing the ability to
  * output the correct DSL when you are ready to send your request to ES.
  */
-export class AggsService {
+export class AggsCommonService {
   private readonly aggTypesRegistry = new AggTypesRegistry();
 
-  public setup({
-    calculateBounds,
-    getConfig,
-    getFieldFormatsStart,
-    isDefaultTimezone,
-    registerFunction,
-  }: AggsServiceSetupDependencies): AggsSetup {
+  public setup({ registerFunction }: AggsCommonSetupDependencies): AggsCommonSetup {
     const aggTypesSetup = this.aggTypesRegistry.setup();
 
     // register each agg type
-    const aggTypes = getAggTypes({
-      calculateBounds,
-      getFieldFormatsStart,
-      getConfig,
-      isDefaultTimezone,
-    });
-    aggTypes.buckets.forEach((b) => aggTypesSetup.registerBucket(b));
-    aggTypes.metrics.forEach((m) => aggTypesSetup.registerMetric(m));
+    const aggTypes = getAggTypes();
+    aggTypes.buckets.forEach(({ name, fn }) => aggTypesSetup.registerBucket(name, fn));
+    aggTypes.metrics.forEach(({ name, fn }) => aggTypesSetup.registerMetric(name, fn));
 
     // register expression functions for each agg type
     const aggFunctions = getAggTypesFunctions();
     aggFunctions.forEach((fn) => registerFunction(fn));
 
     return {
-      calculateAutoTimeExpression: getCalculateAutoTimeExpression(getConfig),
       types: aggTypesSetup,
     };
   }
 
-  public start({ getConfig }: AggsServiceStartDependencies): AggsStart {
+  public start({ getConfig }: AggsCommonStartDependencies): AggsCommonStart {
     const aggTypesStart = this.aggTypesRegistry.start();
 
     return {
@@ -107,6 +89,4 @@ export class AggsService {
       types: aggTypesStart,
     };
   }
-
-  public stop() {}
 }
