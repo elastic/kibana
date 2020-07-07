@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectsClient } from 'src/core/server/saved_objects';
+import { SavedObjectsClient } from 'kibana/server';
 import * as AgentService from '../services/agents';
 export interface AgentUsage {
   total: number;
