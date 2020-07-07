@@ -131,8 +131,8 @@ interface AddNewTimelineParams {
   columns: ColumnHeaderOptions[];
   dataProviders?: DataProvider[];
   dateRange?: {
-    start: number;
-    end: number;
+    start: string;
+    end: string;
   };
   excludedRowRendererIds?: RowRendererId[];
   filters?: Filter[];
@@ -153,8 +153,7 @@ interface AddNewTimelineParams {
 export const addNewTimeline = ({
   columns,
   dataProviders = [],
-  dateRange = { start: 0, end: 0 },
-  excludedRowRendererIds = [],
+  dateRange = { start: '0', end: '0' },
   filters = timelineDefaults.filters,
   id,
   itemsPerPage = timelineDefaults.itemsPerPage,
@@ -752,8 +751,8 @@ export const updateTimelineProviders = ({
 
 interface UpdateTimelineRangeParams {
   id: string;
-  start: number;
-  end: number;
+  start: string;
+  end: string;
   timelineById: TimelineById;
 }
 

@@ -62,7 +62,11 @@ export const HostsTabs = memo<HostsTabsProps>(
             return;
           }
           const [min, max] = x;
-          setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+          setAbsoluteRangeDatePicker({
+            id: 'global',
+            from: new Date(min).toISOString(),
+            to: new Date(max).toISOString(),
+          });
         },
         [setAbsoluteRangeDatePicker]
       ),

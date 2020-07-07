@@ -757,15 +757,15 @@ describe('helpers', () => {
       timelineDispatch({
         duplicate: true,
         id: 'timeline-1',
-        from: 1585233356356,
-        to: 1585233716356,
+        from: '2020-03-26T14:35:56.356Z',
+        to: '2020-03-26T14:41:56.356Z',
         notes: [],
         timeline: mockTimelineModel,
       })();
 
       expect(dispatchSetTimelineRangeDatePicker).toHaveBeenCalledWith({
-        from: 1585233356356,
-        to: 1585233716356,
+        from: '2020-03-26T14:35:56.356Z',
+        to: '2020-03-26T14:41:56.356Z',
       });
     });
 
@@ -773,8 +773,8 @@ describe('helpers', () => {
       timelineDispatch({
         duplicate: true,
         id: 'timeline-1',
-        from: 1585233356356,
-        to: 1585233716356,
+        from: '2020-03-26T14:35:56.356Z',
+        to: '2020-03-26T14:41:56.356Z',
         notes: [],
         timeline: mockTimelineModel,
       })();
@@ -789,8 +789,8 @@ describe('helpers', () => {
       timelineDispatch({
         duplicate: true,
         id: 'timeline-1',
-        from: 1585233356356,
-        to: 1585233716356,
+        from: '2020-03-26T14:35:56.356Z',
+        to: '2020-03-26T14:41:56.356Z',
         notes: [],
         timeline: mockTimelineModel,
       })();
@@ -803,8 +803,8 @@ describe('helpers', () => {
       timelineDispatch({
         duplicate: true,
         id: 'timeline-1',
-        from: 1585233356356,
-        to: 1585233716356,
+        from: '2020-03-26T14:35:56.356Z',
+        to: '2020-03-26T14:41:56.356Z',
         notes: [],
         timeline: mockTimelineModel,
       })();
@@ -826,8 +826,8 @@ describe('helpers', () => {
       timelineDispatch({
         duplicate: true,
         id: 'timeline-1',
-        from: 1585233356356,
-        to: 1585233716356,
+        from: '2020-03-26T14:35:56.356Z',
+        to: '2020-03-26T14:41:56.356Z',
         notes: [],
         timeline: mockTimeline,
       })();
@@ -850,8 +850,8 @@ describe('helpers', () => {
       timelineDispatch({
         duplicate: true,
         id: 'timeline-1',
-        from: 1585233356356,
-        to: 1585233716356,
+        from: '2020-03-26T14:35:56.356Z',
+        to: '2020-03-26T14:41:56.356Z',
         notes: [],
         timeline: mockTimeline,
       })();
@@ -879,8 +879,8 @@ describe('helpers', () => {
       timelineDispatch({
         duplicate: false,
         id: 'timeline-1',
-        from: 1585233356356,
-        to: 1585233716356,
+        from: '2020-03-26T14:35:56.356Z',
+        to: '2020-03-26T14:41:56.356Z',
         notes: [
           {
             created: 1585233356356,
@@ -913,8 +913,8 @@ describe('helpers', () => {
       timelineDispatch({
         duplicate: true,
         id: 'timeline-1',
-        from: 1585233356356,
-        to: 1585233716356,
+        from: '2020-03-26T14:35:56.356Z',
+        to: '2020-03-26T14:41:56.356Z',
         notes: [],
         timeline: mockTimelineModel,
         ruleNote: '# this would be some markdown',

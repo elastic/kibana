@@ -12,11 +12,11 @@ import { ESQuery } from '../../../common/typed_json';
 
 export interface QueryTemplateProps {
   id?: string;
-  endDate?: number;
+  endDate?: string;
   filterQuery?: ESQuery | string;
   skip?: boolean;
   sourceId: string;
-  startDate?: number;
+  startDate?: string;
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type FetchMoreOptionsArgs<TData, TVariables> = FetchMoreQueryOptions<any, any> &

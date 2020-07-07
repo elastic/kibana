@@ -8,21 +8,21 @@ import moment from 'moment';
 import { Anomaly } from '../types';
 
 export interface FromTo {
-  from: number;
-  to: number;
+  from: string;
+  to: string;
 }
 
 export const scoreIntervalToDateTime = (score: Anomaly, interval: string): FromTo => {
   if (interval === 'second' || interval === 'minute' || interval === 'hour') {
     return {
-      from: moment(score.time).subtract(1, 'hour').valueOf(),
-      to: moment(score.time).add(1, 'hour').valueOf(),
+      from: moment(score.time).subtract(1, 'hour').toISOString(),
+      to: moment(score.time).add(1, 'hour').toISOString(),
     };
   } else {
     // default should be a day
     return {
-      from: moment(score.time).subtract(1, 'day').valueOf(),
-      to: moment(score.time).add(1, 'day').valueOf(),
+      from: moment(score.time).subtract(1, 'day').toISOString(),
+      to: moment(score.time).add(1, 'day').toISOString(),
     };
   }
 };

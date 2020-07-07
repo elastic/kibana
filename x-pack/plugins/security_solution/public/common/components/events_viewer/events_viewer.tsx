@@ -51,7 +51,7 @@ interface Props {
   columns: ColumnHeaderOptions[];
   dataProviders: DataProvider[];
   deletedEventIds: Readonly<string[]>;
-  end: number;
+  end: string;
   filters: Filter[];
   headerFilterGroup?: React.ReactNode;
   height?: number;
@@ -63,7 +63,7 @@ interface Props {
   kqlMode: KqlMode;
   onChangeItemsPerPage: OnChangeItemsPerPage;
   query: Query;
-  start: number;
+  start: string;
   sort: Sort;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;

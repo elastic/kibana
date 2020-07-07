@@ -67,8 +67,8 @@ const getMockHistory = (ip: string) => ({
   listen: jest.fn(),
 });
 
-const to = new Date('2018-03-23T18:49:23.132Z').valueOf();
-const from = new Date('2018-03-24T03:33:52.253Z').valueOf();
+const to = '2018-03-23T18:49:23.132Z';
+const from = '2018-03-24T03:33:52.253Z';
 const getMockProps = (ip: string) => ({
   to,
   from,
@@ -88,8 +88,8 @@ const getMockProps = (ip: string) => ({
   match: { params: { detailName: ip, search: '' }, isExact: true, path: '', url: '' },
   setAbsoluteRangeDatePicker: (jest.fn() as unknown) as ActionCreator<{
     id: InputsModelId;
-    from: number;
-    to: number;
+    from: string;
+    to: string;
   }>,
   setIpDetailsTablesActivePageToZero: (jest.fn() as unknown) as ActionCreator<void>,
 });

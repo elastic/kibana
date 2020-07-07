@@ -35,8 +35,8 @@ describe('embedded_map_helpers', () => {
         [],
         [],
         { query: '', language: 'kuery' },
-        0,
-        0,
+        '0',
+        '0',
         setQueryMock,
         createPortalNode(),
         mockEmbeddable
@@ -50,8 +50,8 @@ describe('embedded_map_helpers', () => {
         [],
         [],
         { query: '', language: 'kuery' },
-        0,
-        0,
+        '0',
+        '0',
         setQueryMock,
         createPortalNode(),
         mockEmbeddable

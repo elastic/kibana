@@ -16,11 +16,11 @@ import { generateTablePaginationOptions } from '../components/paginated_table/he
 
 export interface QueryTemplatePaginatedProps {
   id?: string;
-  endDate?: number;
+  endDate?: string;
   filterQuery?: ESQuery | string;
   skip?: boolean;
   sourceId: string;
-  startDate?: number;
+  startDate?: string;
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type FetchMoreOptionsArgs<TData, TVariables> = FetchMoreQueryOptions<any, any> &

@@ -21,8 +21,8 @@ interface HostDetailsComponentReduxProps {
 interface HostBodyComponentDispatchProps {
   setAbsoluteRangeDatePicker: ActionCreator<{
     id: InputsModelId;
-    from: number;
-    to: number;
+    from: string;
+    to: string;
   }>;
   detailName: string;
   hostDetailsPagePath: string;
@@ -64,6 +64,6 @@ export type HostDetailsTabsProps = HostBodyComponentDispatchProps &
 
 export type SetAbsoluteRangeDatePicker = ActionCreator<{
   id: InputsModelId;
-  from: number;
-  to: number;
+  from: string;
+  to: string;
 }>;

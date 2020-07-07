@@ -35,8 +35,8 @@ describe('createOptions', () => {
         limit: 5,
       },
       timerange: {
-        from: 10,
-        to: 0,
+        from: '10',
+        to: '0',
         interval: '12 hours ago',
       },
       sortField: { sortFieldId: 'sort-1', direction: Direction.asc },
@@ -75,8 +75,8 @@ describe('createOptions', () => {
       filterQuery: {},
       fields: [],
       timerange: {
-        from: 10,
-        to: 0,
+        from: '10',
+        to: '0',
         interval: '12 hours ago',
       },
     };
@@ -104,8 +104,8 @@ describe('createOptions', () => {
       filterQuery: {},
       fields: [],
       timerange: {
-        from: 10,
-        to: 0,
+        from: '10',
+        to: '0',
         interval: '12 hours ago',
       },
     };

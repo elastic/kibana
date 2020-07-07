@@ -98,7 +98,7 @@ export interface Props {
   browserFields: BrowserFields;
   columns: ColumnHeaderOptions[];
   dataProviders: DataProvider[];
-  end: number;
+  end: string;
   eventType?: EventType;
   filters: Filter[];
   graphEventId?: string;
@@ -121,7 +121,7 @@ export interface Props {
   onToggleDataProviderType: OnToggleDataProviderType;
   show: boolean;
   showCallOutUnauthorizedMsg: boolean;
-  start: number;
+  start: string;
   sort: Sort;
   status: TimelineStatusLiteral;
   toggleColumn: (column: ColumnHeaderOptions) => void;

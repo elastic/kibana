@@ -37,7 +37,7 @@ export interface QueryBarTimelineComponentProps {
   filterManager: FilterManager;
   filterQuery: KueryFilterQuery;
   filterQueryDraft: KueryFilterQuery;
-  from: number;
+  from: string;
   fromStr: string;
   kqlMode: KqlMode;
   indexPattern: IIndexPattern;
@@ -48,7 +48,7 @@ export interface QueryBarTimelineComponentProps {
   setKqlFilterQueryDraft: (expression: string, kind: KueryFilterQueryKind) => void;
   setSavedQueryId: (savedQueryId: string | null) => void;
   timelineId: string;
-  to: number;
+  to: string;
   toStr: string;
   updateReduxTime: DispatchUpdateReduxTime;
 }

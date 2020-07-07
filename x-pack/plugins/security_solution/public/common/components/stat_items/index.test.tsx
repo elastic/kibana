@@ -41,8 +41,8 @@ import { State, createStore } from '../../store';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { KpiNetworkData, KpiHostsData } from '../../../graphql/types';
 
-const from = new Date('2019-06-15T06:00:00.000Z').valueOf();
-const to = new Date('2019-06-18T06:00:00.000Z').valueOf();
+const from = '2019-06-15T06:00:00.000Z';
+const to = '2019-06-18T06:00:00.000Z';
 
 jest.mock('../charts/areachart', () => {
   return { AreaChart: () => <div className="areachart" /> };

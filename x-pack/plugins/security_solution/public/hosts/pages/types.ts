@@ -21,8 +21,8 @@ export type HostsTabsProps = HostsComponentProps &
     indexPattern: IIndexPattern;
     setAbsoluteRangeDatePicker: ActionCreator<{
       id: InputsModelId;
-      from: number;
-      to: number;
+      from: string;
+      to: string;
     }>;
   };
 

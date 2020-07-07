@@ -40,10 +40,10 @@ jest.mock('../../../common/components/navigation/use_get_url_search');
 
 describe('AlertsHistogramPanel', () => {
   const defaultProps = {
-    from: 0,
+    from: '0',
     signalIndexName: 'signalIndexName',
     setQuery: jest.fn(),
-    to: 1,
+    to: '1',
     updateDateRange: jest.fn(),
   };
 

@@ -18,8 +18,8 @@ describe('AlertsHistogram', () => {
         legendItems={[]}
         loading={false}
         data={[]}
-        from={0}
-        to={1}
+        from={'0'}
+        to={'1'}
         updateDateRange={jest.fn()}
       />
     );

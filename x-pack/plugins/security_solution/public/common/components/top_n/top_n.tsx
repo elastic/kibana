@@ -54,8 +54,8 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   query: Query;
   setAbsoluteRangeDatePicker: ActionCreator<{
     id: InputsModelId;
-    from: number;
-    to: number;
+    from: string;
+    to: string;
   }>;
   setAbsoluteRangeDatePickerTarget: InputsModelId;
   timelineId?: string;

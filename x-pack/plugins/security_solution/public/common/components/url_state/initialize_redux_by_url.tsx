@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, isEmpty } from 'lodash/fp';
+import { get, isEmpty, isNumber } from 'lodash/fp';
 import { Dispatch } from 'redux';
 
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';
@@ -92,6 +92,20 @@ export const dispatchSetInitialStateFromUrl = (
   });
 };
 
+const timeRangeToISOString = <T extends { from: string; to: string }>(timerange: T): T => {
+  const range = { ...timerange };
+
+  if (isNumber(range.from)) {
+    range.from = new Date(range.from).toISOString();
+  }
+
+  if (isNumber(range.to)) {
+    range.to = new Date(range.to).toISOString();
+  }
+
+  return range;
+};
+
 const updateTimerange = (newUrlStateString: string, dispatch: Dispatch) => {
   const timerangeStateData = decodeRisonUrlState<UrlInputsModel>(newUrlStateString);
 
@@ -117,12 +131,10 @@ const updateTimerange = (newUrlStateString: string, dispatch: Dispatch) => {
 
   if (timelineType) {
     if (timelineType === 'absolute') {
-      const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
-        get('timeline.timerange', timerangeStateData)
+      const absoluteRange = timeRangeToISOString<AbsoluteTimeRange>(
+        normalizeTimeRange<AbsoluteTimeRange>(get('timeline.timerange', timerangeStateData))
       );
-      if (isNumber(absoluteRange.to)) {
-        absoluteRange.to = new Date(absoluteRange.to).toISOString();
-      }
+
       dispatch(
         inputsActions.setAbsoluteRangeDatePicker({
           ...absoluteRange,
@@ -130,10 +142,12 @@ const updateTimerange = (newUrlStateString: string, dispatch: Dispatch) => {
         })
       );
     }
+
     if (timelineType === 'relative') {
-      const relativeRange = normalizeTimeRange<RelativeTimeRange>(
-        get('timeline.timerange', timerangeStateData)
+      const relativeRange = timeRangeToISOString<RelativeTimeRange>(
+        normalizeTimeRange<RelativeTimeRange>(get('timeline.timerange', timerangeStateData))
       );
+
       dispatch(
         inputsActions.setRelativeRangeDatePicker({
           ...relativeRange,
@@ -145,9 +159,10 @@ const updateTimerange = (newUrlStateString: string, dispatch: Dispatch) => {
 
   if (globalType) {
     if (globalType === 'absolute') {
-      const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
-        get('global.timerange', timerangeStateData)
+      const absoluteRange = timeRangeToISOString<AbsoluteTimeRange>(
+        normalizeTimeRange<AbsoluteTimeRange>(get('global.timerange', timerangeStateData))
       );
+
       dispatch(
         inputsActions.setAbsoluteRangeDatePicker({
           ...absoluteRange,
@@ -156,9 +171,10 @@ const updateTimerange = (newUrlStateString: string, dispatch: Dispatch) => {
       );
     }
     if (globalType === 'relative') {
-      const relativeRange = normalizeTimeRange<RelativeTimeRange>(
-        get('global.timerange', timerangeStateData)
+      const relativeRange = timeRangeToISOString<RelativeTimeRange>(
+        normalizeTimeRange<RelativeTimeRange>(get('global.timerange', timerangeStateData))
       );
+
       dispatch(
         inputsActions.setRelativeRangeDatePicker({
           ...relativeRange,

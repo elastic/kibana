@@ -13,8 +13,8 @@ import { TestProviders } from '../../../mock';
 import React from 'react';
 import { useMountAppended } from '../../../utils/use_mount_appended';
 
-const startDate = new Date(2001).valueOf();
-const endDate = new Date(3000).valueOf();
+const startDate = new Date(2001).toISOString();
+const endDate = new Date(3000).toISOString();
 const interval = 'days';
 const narrowDateRange = jest.fn();
 

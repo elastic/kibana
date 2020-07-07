@@ -27,9 +27,9 @@ import { InspectButtonContainer } from '../inspect';
 export interface OwnProps {
   defaultIndices?: string[];
   defaultModel: SubsetTimelineModel;
-  end: number;
+  end: string;
   id: string;
-  start: number;
+  start: string;
   headerFilterGroup?: React.ReactNode;
   pageFilters?: Filter[];
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;

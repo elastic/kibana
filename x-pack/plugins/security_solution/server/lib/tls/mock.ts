@@ -458,7 +458,7 @@ export const mockOptions = {
       timestamp: '@timestamp',
     },
   },
-  timerange: { interval: '12h', to: 1570801871626, from: 1570715471626 },
+  timerange: { interval: '12h', to: '2019-10-11T13:51:11.626Z', from: '2019-10-10T13:51:11.626Z' },
   pagination: { activePage: 0, cursorStart: 0, fakePossibleCount: 50, querySize: 10 },
   filterQuery: {},
   fields: [

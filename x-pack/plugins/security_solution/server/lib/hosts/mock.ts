@@ -24,7 +24,7 @@ export const mockGetHostsOptions: HostsRequestOptions = {
       timestamp: '@timestamp',
     },
   },
-  timerange: { interval: '12h', to: 1554824274610, from: 1554737874610 },
+  timerange: { interval: '12h', to: '2019-04-09T15:37:54.610Z', from: '2019-04-08T15:37:54.610Z' },
   sort: { field: HostsFields.lastSeen, direction: Direction.asc },
   pagination: {
     activePage: 0,
@@ -295,7 +295,7 @@ export const mockGetHostOverviewOptions: HostOverviewRequestOptions = {
       timestamp: '@timestamp',
     },
   },
-  timerange: { interval: '12h', to: 1554824274610, from: 1554737874610 },
+  timerange: { interval: '12h', to: '2019-04-09T15:37:54.610Z', from: '2019-04-08T15:37:54.610Z' },
   defaultIndex: DEFAULT_INDEX_PATTERN,
   fields: [
     '_id',

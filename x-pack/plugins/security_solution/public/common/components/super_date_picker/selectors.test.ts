@@ -23,8 +23,8 @@ describe('selectors', () => {
     kind: 'absolute',
     fromStr: undefined,
     toStr: undefined,
-    from: 0,
-    to: 0,
+    from: '0',
+    to: '0',
   };
 
   let inputState: InputsRange = {
@@ -57,8 +57,8 @@ describe('selectors', () => {
       kind: 'absolute',
       fromStr: undefined,
       toStr: undefined,
-      from: 0,
-      to: 0,
+      from: '0',
+      to: '0',
     };
 
     inputState = {
@@ -147,8 +147,8 @@ describe('selectors', () => {
         kind: 'relative',
         fromStr: '',
         toStr: '',
-        from: 1,
-        to: 0,
+        from: '0',
+        to: '0',
       };
       const change: InputsRange = {
         ...inputState,
@@ -179,8 +179,8 @@ describe('selectors', () => {
         kind: 'relative',
         fromStr: '',
         toStr: '',
-        from: 1,
-        to: 0,
+        from: '0',
+        to: '0',
       };
       const change: InputsRange = {
         ...inputState,
@@ -211,8 +211,8 @@ describe('selectors', () => {
         kind: 'relative',
         fromStr: '',
         toStr: '',
-        from: 0,
-        to: 1,
+        from: '0',
+        to: '1',
       };
       const change: InputsRange = {
         ...inputState,
@@ -243,8 +243,8 @@ describe('selectors', () => {
         kind: 'relative',
         fromStr: '',
         toStr: '',
-        from: 0,
-        to: 0,
+        from: '0',
+        to: '0',
       };
       const change: InputsRange = {
         ...inputState,
@@ -275,8 +275,8 @@ describe('selectors', () => {
         kind: 'relative',
         fromStr: '',
         toStr: '',
-        from: 0,
-        to: 0,
+        from: '0',
+        to: '0',
       };
       const change: InputsRange = {
         ...inputState,

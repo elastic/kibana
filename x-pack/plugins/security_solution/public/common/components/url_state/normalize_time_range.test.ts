@@ -25,8 +25,8 @@ describe('#normalizeTimeRange', () => {
     if (isAbsoluteTimeRange(dateTimeRange)) {
       const expected: AbsoluteTimeRange = {
         kind: 'absolute',
-        from: 0,
-        to: 0,
+        from: '0',
+        to: '0',
         fromStr: undefined,
         toStr: undefined,
       };
@@ -47,8 +47,8 @@ describe('#normalizeTimeRange', () => {
     if (isAbsoluteTimeRange(dateTimeRange)) {
       const expected: AbsoluteTimeRange = {
         kind: 'absolute',
-        from: 0,
-        to: 0,
+        from: '0',
+        to: '0',
         fromStr: undefined,
         toStr: undefined,
       };
@@ -71,8 +71,8 @@ describe('#normalizeTimeRange', () => {
     if (isAbsoluteTimeRange(dateTimeRange)) {
       const expected: AbsoluteTimeRange = {
         kind: 'absolute',
-        from: from.valueOf(),
-        to: to.valueOf(),
+        from: from.toISOString(),
+        to: to.toISOString(),
         fromStr: undefined,
         toStr: undefined,
       };
@@ -89,14 +89,14 @@ describe('#normalizeTimeRange', () => {
       kind: 'absolute',
       fromStr: undefined,
       toStr: undefined,
-      from: from.valueOf(),
-      to: to.valueOf(),
+      from: from.toISOString(),
+      to: to.toISOString(),
     };
     if (isAbsoluteTimeRange(dateTimeRange)) {
       const expected: AbsoluteTimeRange = {
         kind: 'absolute',
-        from: from.valueOf(),
-        to: to.valueOf(),
+        from: from.toISOString(),
+        to: to.toISOString(),
         fromStr: undefined,
         toStr: undefined,
       };
@@ -113,14 +113,14 @@ describe('#normalizeTimeRange', () => {
       kind: 'absolute',
       fromStr: undefined,
       toStr: undefined,
-      from: `${from.valueOf()}`,
-      to: `${to.valueOf()}`,
+      from: `${from.toISOString()}`,
+      to: `${to.toISOString()}`,
     };
     if (isAbsoluteTimeRange(dateTimeRange)) {
       const expected: AbsoluteTimeRange = {
         kind: 'absolute',
-        from: from.valueOf(),
-        to: to.valueOf(),
+        from: from.toISOString(),
+        to: to.toISOString(),
         fromStr: undefined,
         toStr: undefined,
       };
@@ -130,7 +130,7 @@ describe('#normalizeTimeRange', () => {
     }
   });
 
-  test('Absolute time range returns NaN with from and to when garbage is sent in', () => {
+  test('Absolute time range returns empty string with from and to when garbage is sent in', () => {
     const to = 'garbage';
     const from = 'garbage';
     const dateTimeRange: URLTimeRange = {
@@ -143,8 +143,8 @@ describe('#normalizeTimeRange', () => {
     if (isAbsoluteTimeRange(dateTimeRange)) {
       const expected: AbsoluteTimeRange = {
         kind: 'absolute',
-        from: NaN,
-        to: NaN,
+        from: '',
+        to: '',
         fromStr: undefined,
         toStr: undefined,
       };
@@ -165,8 +165,8 @@ describe('#normalizeTimeRange', () => {
     if (isRelativeTimeRange(dateTimeRange)) {
       const expected: RelativeTimeRange = {
         kind: 'relative',
-        from: 0,
-        to: 0,
+        from: '0',
+        to: '0',
         fromStr: '',
         toStr: '',
       };
@@ -187,8 +187,8 @@ describe('#normalizeTimeRange', () => {
     if (isRelativeTimeRange(dateTimeRange)) {
       const expected: RelativeTimeRange = {
         kind: 'relative',
-        from: 0,
-        to: 0,
+        from: '0',
+        to: '0',
         fromStr: '',
         toStr: '',
       };
@@ -211,8 +211,8 @@ describe('#normalizeTimeRange', () => {
     if (isRelativeTimeRange(dateTimeRange)) {
       const expected: RelativeTimeRange = {
         kind: 'relative',
-        from: from.valueOf(),
-        to: to.valueOf(),
+        from: from.toISOString(),
+        to: to.toISOString(),
         fromStr: '',
         toStr: '',
       };
@@ -229,14 +229,14 @@ describe('#normalizeTimeRange', () => {
       kind: 'relative',
       fromStr: '',
       toStr: '',
-      from: from.valueOf(),
-      to: to.valueOf(),
+      from: from.toISOString(),
+      to: to.toISOString(),
     };
     if (isRelativeTimeRange(dateTimeRange)) {
       const expected: RelativeTimeRange = {
         kind: 'relative',
-        from: from.valueOf(),
-        to: to.valueOf(),
+        from: from.toISOString(),
+        to: to.toISOString(),
         fromStr: '',
         toStr: '',
       };
@@ -253,14 +253,14 @@ describe('#normalizeTimeRange', () => {
       kind: 'relative',
       fromStr: '',
       toStr: '',
-      from: `${from.valueOf()}`,
-      to: `${to.valueOf()}`,
+      from: `${from.toISOString()}`,
+      to: `${to.toISOString()}`,
     };
     if (isRelativeTimeRange(dateTimeRange)) {
       const expected: RelativeTimeRange = {
         kind: 'relative',
-        from: from.valueOf(),
-        to: to.valueOf(),
+        from: from.toISOString(),
+        to: to.toISOString(),
         fromStr: '',
         toStr: '',
       };
@@ -270,7 +270,7 @@ describe('#normalizeTimeRange', () => {
     }
   });
 
-  test('Relative time range returns NaN with from and to when garbage is sent in', () => {
+  test('Relative time range returns empty string with from and to when garbage is sent in', () => {
     const to = 'garbage';
     const from = 'garbage';
     const dateTimeRange: URLTimeRange = {
@@ -283,8 +283,8 @@ describe('#normalizeTimeRange', () => {
     if (isRelativeTimeRange(dateTimeRange)) {
       const expected: RelativeTimeRange = {
         kind: 'relative',
-        from: NaN,
-        to: NaN,
+        from: '',
+        to: '',
         fromStr: '',
         toStr: '',
       };

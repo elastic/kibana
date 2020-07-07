@@ -19,10 +19,10 @@ describe('AlertsTableComponent', () => {
           timelineId={TimelineId.test}
           canUserCRUD
           hasIndexWrite
-          from={0}
+          from={'0'}
           loading
           signalsIndex="index"
-          to={1}
+          to={'1'}
           globalQuery={{
             query: 'query',
             language: 'language',

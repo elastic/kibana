@@ -53,8 +53,8 @@ describe('Inputs', () => {
         kind: 'relative',
         fromStr: 'now-48h',
         toStr: 'now',
-        from: 23,
-        to: 26,
+        from: '23',
+        to: '26',
       };
       const newState: InputsModel = updateInputTimerange('global', newTimerange, state);
       expect(newState.timeline.timerange).toEqual(newState.global.timerange);
@@ -65,8 +65,8 @@ describe('Inputs', () => {
         kind: 'relative',
         fromStr: 'now-68h',
         toStr: 'NOTnow',
-        from: 29,
-        to: 33,
+        from: '29',
+        to: '33',
       };
       const newState: InputsModel = updateInputTimerange('timeline', newTimerange, state);
       expect(newState.timeline.timerange).toEqual(newState.global.timerange);
@@ -83,8 +83,8 @@ describe('Inputs', () => {
         kind: 'relative',
         fromStr: 'now-48h',
         toStr: 'now',
-        from: 23,
-        to: 26,
+        from: '23',
+        to: '26',
       };
       const newState: InputsModel = updateInputTimerange('global', newTimerange, state);
       expect(newState.timeline.timerange).toEqual(state.timeline.timerange);
@@ -96,8 +96,8 @@ describe('Inputs', () => {
         kind: 'relative',
         fromStr: 'now-68h',
         toStr: 'NOTnow',
-        from: 29,
-        to: 33,
+        from: '29',
+        to: '33',
       };
       const newState: InputsModel = updateInputTimerange('timeline', newTimerange, state);
       expect(newState.timeline.timerange).toEqual(newTimerange);
@@ -274,10 +274,10 @@ describe('Inputs', () => {
             },
           ],
           timerange: {
-            from: 0,
+            from: '0',
             fromStr: 'now-24h',
             kind: 'relative',
-            to: 1,
+            to: '1',
             toStr: 'now',
           },
           query: { query: '', language: 'kuery' },
@@ -291,10 +291,10 @@ describe('Inputs', () => {
           },
           queries: [],
           timerange: {
-            from: 0,
+            from: '0',
             fromStr: 'now-24h',
             kind: 'relative',
-            to: 1,
+            to: '1',
             toStr: 'now',
           },
           query: { query: '', language: 'kuery' },

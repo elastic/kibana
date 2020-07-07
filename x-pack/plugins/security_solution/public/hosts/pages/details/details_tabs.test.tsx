@@ -73,11 +73,11 @@ describe('body', () => {
         <TestProviders>
           <MemoryRouter initialEntries={[`/host-1/${path}`]}>
             <HostDetailsTabs
-              from={0}
+              from={'0'}
               isInitializing={false}
               detailName={'host-1'}
               setQuery={jest.fn()}
-              to={0}
+              to={'0'}
               setAbsoluteRangeDatePicker={(jest.fn() as unknown) as SetAbsoluteRangeDatePicker}
               hostDetailsPagePath={hostDetailsPagePath}
               indexPattern={mockIndexPattern}

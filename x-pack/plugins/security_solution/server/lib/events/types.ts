@@ -66,8 +66,8 @@ export interface LastEventTimeRequestOptions {
 export interface TimerangeFilter {
   range: {
     [timestamp: string]: {
-      gte: number;
-      lte: number;
+      gte: string;
+      lte: string;
       format: string;
     };
   };

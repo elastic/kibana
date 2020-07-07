@@ -62,10 +62,10 @@ interface OwnProps {
   canUserCRUD: boolean;
   defaultFilters?: Filter[];
   hasIndexWrite: boolean;
-  from: number;
+  from: string;
   loading: boolean;
   signalsIndex: string;
-  to: number;
+  to: string;
 }
 
 type AlertsTableComponentProps = OwnProps & PropsFromRedux;

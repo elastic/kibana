@@ -44,8 +44,8 @@ interface MatrixHistogramBasicProps {
   defaultStackByOption: MatrixHistogramOption;
   dispatchSetAbsoluteRangeDatePicker: ActionCreator<{
     id: InputsModelId;
-    from: number;
-    to: number;
+    from: string;
+    to: string;
   }>;
   endDate: GlobalTimeArgs['to'];
   headerChildren?: React.ReactNode;
@@ -63,17 +63,17 @@ interface MatrixHistogramBasicProps {
 }
 
 export interface MatrixHistogramQueryProps {
-  endDate: number;
+  endDate: string;
   errorMessage: string;
   filterQuery?: ESQuery | string | undefined;
   setAbsoluteRangeDatePicker?: ActionCreator<{
     id: InputsModelId;
-    from: number;
-    to: number;
+    from: string;
+    to: string;
   }>;
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
   stackByField: string;
-  startDate: number;
+  startDate: string;
   indexToAdd?: string[] | null;
   isInspected: boolean;
   histogramType: HistogramType;

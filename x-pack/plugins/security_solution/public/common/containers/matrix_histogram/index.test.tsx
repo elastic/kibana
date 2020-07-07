@@ -61,13 +61,13 @@ describe('useQuery', () => {
       });
       const TestComponent = () => {
         result = useQuery({
-          endDate: 100,
+          endDate: '100',
           errorMessage: 'fakeErrorMsg',
           filterQuery: '',
           histogramType: HistogramType.alerts,
           isInspected: false,
           stackByField: 'fakeField',
-          startDate: 0,
+          startDate: '0',
         });
 
         return <div />;
@@ -123,13 +123,13 @@ describe('useQuery', () => {
       });
       const TestComponent = () => {
         result = useQuery({
-          endDate: 100,
+          endDate: '100',
           errorMessage: 'fakeErrorMsg',
           filterQuery: '',
           histogramType: HistogramType.alerts,
           isInspected: false,
           stackByField: 'fakeField',
-          startDate: 0,
+          startDate: '0',
         });
 
         return <div />;

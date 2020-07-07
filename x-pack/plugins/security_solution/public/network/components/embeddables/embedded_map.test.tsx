@@ -26,11 +26,11 @@ describe('EmbeddedMapComponent', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
       <EmbeddedMapComponent
-        endDate={new Date('2019-08-28T05:50:57.877Z').getTime()}
+        endDate="2019-08-28T05:50:57.877Z"
         filters={[]}
         query={{ query: '', language: 'kuery' }}
         setQuery={setQuery}
-        startDate={new Date('2019-08-28T05:50:47.877Z').getTime()}
+        startDate="2019-08-28T05:50:47.877Z"
       />
     );
     expect(wrapper).toMatchSnapshot();

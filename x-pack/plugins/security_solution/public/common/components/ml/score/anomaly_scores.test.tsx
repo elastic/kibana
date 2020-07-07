@@ -14,7 +14,7 @@ import { getEmptyValue } from '../../empty_value';
 import { Anomalies } from '../types';
 import { useMountAppended } from '../../../utils/use_mount_appended';
 
-const endDate: number = new Date('3000-01-01T00:00:00.000Z').valueOf();
+const endDate: string = '3000-01-01T00:00:00.000Z';
 const narrowDateRange = jest.fn();
 
 describe('anomaly_scores', () => {
@@ -29,7 +29,7 @@ describe('anomaly_scores', () => {
     const wrapper = shallow(
       <AnomalyScoresComponent
         anomalies={anomalies}
-        startDate={0}
+        startDate={'0'}
         endDate={endDate}
         isLoading={false}
         narrowDateRange={narrowDateRange}
@@ -43,7 +43,7 @@ describe('anomaly_scores', () => {
       <TestProviders>
         <AnomalyScoresComponent
           anomalies={anomalies}
-          startDate={0}
+          startDate={'0'}
           endDate={endDate}
           isLoading={true}
           narrowDateRange={narrowDateRange}
@@ -58,7 +58,7 @@ describe('anomaly_scores', () => {
       <TestProviders>
         <AnomalyScoresComponent
           anomalies={anomalies}
-          startDate={0}
+          startDate={'0'}
           endDate={endDate}
           isLoading={false}
           narrowDateRange={narrowDateRange}
@@ -73,7 +73,7 @@ describe('anomaly_scores', () => {
       <TestProviders>
         <AnomalyScoresComponent
           anomalies={null}
-          startDate={0}
+          startDate={'0'}
           endDate={endDate}
           isLoading={false}
           narrowDateRange={narrowDateRange}
@@ -89,7 +89,7 @@ describe('anomaly_scores', () => {
       <TestProviders>
         <AnomalyScoresComponent
           anomalies={anomalies}
-          startDate={0}
+          startDate={'0'}
           endDate={endDate}
           isLoading={false}
           narrowDateRange={narrowDateRange}
@@ -109,7 +109,7 @@ describe('anomaly_scores', () => {
       <TestProviders>
         <AnomalyScoresComponent
           anomalies={anomalies}
-          startDate={0}
+          startDate={'0'}
           endDate={endDate}
           isLoading={false}
           narrowDateRange={narrowDateRange}
@@ -124,7 +124,7 @@ describe('anomaly_scores', () => {
       <TestProviders>
         <AnomalyScoresComponent
           anomalies={anomalies}
-          startDate={0}
+          startDate={'0'}
           endDate={endDate}
           isLoading={false}
           narrowDateRange={narrowDateRange}

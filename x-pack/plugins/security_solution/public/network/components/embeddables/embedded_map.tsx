@@ -71,8 +71,8 @@ EmbeddableMap.displayName = 'EmbeddableMap';
 export interface EmbeddedMapProps {
   query: Query;
   filters: Filter[];
-  startDate: number;
-  endDate: number;
+  startDate: string;
+  endDate: string;
   setQuery: GlobalTimeArgs['setQuery'];
 }
 

@@ -22,8 +22,8 @@ describe('utils', () => {
       let configs: BarchartConfigs;
       beforeAll(() => {
         configs = getBarchartConfigs({
-          from: 0,
-          to: 0,
+          from: '0',
+          to: '0',
           onBrushEnd: jest.fn() as UpdateDateRange,
         });
       });
@@ -53,8 +53,8 @@ describe('utils', () => {
       beforeAll(() => {
         configs = getBarchartConfigs({
           chartHeight: mockChartHeight,
-          from: 0,
-          to: 0,
+          from: '0',
+          to: '0',
           onBrushEnd: jest.fn() as UpdateDateRange,
           yTickFormatter: mockYTickFormatter,
           showLegend: false,
