@@ -5,7 +5,7 @@
  */
 
 import { createHash } from 'crypto';
-import { deflateRaw } from 'zlib';
+import { deflate } from 'zlib';
 import { validate } from '../../../../common/validate';
 
 import { Entry, EntryNested } from '../../../../../lists/common/schemas/types/entries';
@@ -175,7 +175,7 @@ function translateEntry(
 
 export function compressExceptionList(buffer: Buffer): Promise<Buffer> {
   return new Promise((resolve, reject) => {
-    deflateRaw(buffer, function (err, buf) {
+    deflate(buffer, function (err, buf) {
       if (err) {
         reject(err);
       } else {
