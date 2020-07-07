@@ -81,7 +81,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
               learnMoreLink: (
                 <EuiLink href={documentation.componentTemplates} target="_blank" external>
                   {i18n.translate('xpack.idxMgmt.componentTemplates.list.learnMoreLinkText', {
-                    defaultMessage: 'Learn more',
+                    defaultMessage: 'Learn more.',
                   })}
                 </EuiLink>
               ),

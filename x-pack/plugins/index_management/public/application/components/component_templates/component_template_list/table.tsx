@@ -182,7 +182,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
       {
         field: 'usedBy',
         name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.isInUseColumnTitle', {
-          defaultMessage: 'Index templates',
+          defaultMessage: 'Usage count',
         }),
         sortable: true,
         render: (usedBy: string[]) => {
