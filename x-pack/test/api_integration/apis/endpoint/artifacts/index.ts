@@ -110,6 +110,61 @@ export default function (providerContext: FtrProviderContext) {
         });
     });
 
+    it('should download an artifact with correct hash from cache', async () => {
+      await supertestWithoutAuth
+        .get(
+          '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-1.0.0/d162f0302cbf419038ade7ea978e0a7ade7aad317fedefe455ff38dfa28b7cff'
+        )
+        .set('kbn-xsrf', 'xxx')
+        .set('authorization', `ApiKey ${agentAccessAPIKey}`)
+        .send()
+        .expect(200)
+        .expect((response) => {
+          JSON.parse(response.text);
+        })
+        .then(async () => {
+          await supertestWithoutAuth
+            .get(
+              '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-1.0.0/d162f0302cbf419038ade7ea978e0a7ade7aad317fedefe455ff38dfa28b7cff'
+            )
+            .set('kbn-xsrf', 'xxx')
+            .set('authorization', `ApiKey ${agentAccessAPIKey}`)
+            .send()
+            .expect(200)
+            .expect((response) => {
+              const artifactJson = JSON.parse(response.text);
+              expect(artifactJson).to.eql({
+                exceptions_list: [
+                  {
+                    field: 'actingProcess.file.signer',
+                    operator: 'included',
+                    type: 'exact_cased',
+                    value: 'Elastic, N.V.',
+                  },
+                  {
+                    entries: [
+                      {
+                        field: 'signer',
+                        operator: 'included',
+                        type: 'exact_cased',
+                        value: 'Evil',
+                      },
+                      {
+                        field: 'trusted',
+                        operator: 'included',
+                        type: 'exact_cased',
+                        value: 'true',
+                      },
+                    ],
+                    field: 'file.signature',
+                    type: 'nested',
+                  },
+                ],
+              });
+            });
+        });
+    });
+
     it('should fail on invalid api key', async () => {
       await supertestWithoutAuth
         .get(
