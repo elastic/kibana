@@ -13,7 +13,7 @@ import { EuiFlexItem } from '@elastic/eui';
 import { TagPicker } from '../tag_picker';
 import { useTags } from '../../context';
 import { RawTagAttachmentWithId } from '../../../common';
-import { useUnmount$ } from '../../management/hooks/use_unmount';
+import { useUnmount$ } from '../../hooks/use_unmount';
 import { txtSave, txtCancel } from './i18n';
 
 export interface TagPickerForResourceProps {
