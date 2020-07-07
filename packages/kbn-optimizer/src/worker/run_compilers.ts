@@ -36,6 +36,7 @@ import {
   ascending,
   parseFilePath,
   BundleRefs,
+  BundleRef,
 } from '../common';
 import { BundleRefModule } from './bundle_ref_module';
 import { getWebpackConfig } from './webpack.config';
@@ -99,7 +100,7 @@ const observeCompiler = (
         });
       }
 
-      const bundleRefExportIds: string[] = [];
+      const bundleRefs: BundleRef[] = [];
       const referencedFiles = new Set<string>();
       let normalModuleCount = 0;
 
@@ -127,7 +128,7 @@ const observeCompiler = (
         }
 
         if (module instanceof BundleRefModule) {
-          bundleRefExportIds.push(module.exportId);
+          bundleRefs.push(module.ref);
           continue;
         }
 
@@ -154,7 +155,7 @@ const observeCompiler = (
       );
 
       bundle.cache.set({
-        bundleRefExportIds,
+        bundleRefExportIds: bundleRefs.map((ref) => ref.exportId),
         optimizerCacheKey: workerConfig.optimizerCacheKey,
         cacheKey: bundle.createCacheKey(files, mtimes),
         moduleCount: normalModuleCount,

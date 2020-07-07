@@ -53,6 +53,7 @@ it('returns a bundle for core and each plugin', () => {
       Object {
         "contextDir": <absolute path>/plugins/foo,
         "id": "foo",
+        "manifestPath": undefined,
         "outputDir": <absolute path>/plugins/foo/target/public,
         "publicDirNames": Array [
           "public",
@@ -63,6 +64,7 @@ it('returns a bundle for core and each plugin', () => {
       Object {
         "contextDir": "/outside/of/repo/plugins/baz",
         "id": "baz",
+        "manifestPath": undefined,
         "outputDir": "/outside/of/repo/plugins/baz/target/public",
         "publicDirNames": Array [
           "public",

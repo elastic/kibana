@@ -6,5 +6,8 @@
   "ui": true,
   "requiredPlugins": ["data"],
   "optionalPlugins": [],
-  "extraPublicDirs": ["common"]
+  "extraPublicDirs": ["common"],
+  "requiredBundles": [
+    "dataEnhanced"
+  ]
 }
