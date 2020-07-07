@@ -59,7 +59,7 @@ export type RangeUnit = t.TypeOf<typeof RangeUnitType>;
 
 export type StatusCheckParams = t.TypeOf<typeof StatusCheckParamsType>;
 
-export const MonitorAvailabilityParamsType = t.intersection([
+export const GetMonitorAvailabilityParamsType = t.intersection([
   t.type({
     range: t.number,
     rangeUnit: RangeUnitType,
@@ -70,11 +70,17 @@ export const MonitorAvailabilityParamsType = t.intersection([
   }),
 ]);
 
-export type MonitorAvailabilityParams = t.TypeOf<typeof MonitorAvailabilityParamsType>;
+export type GetMonitorAvailabilityParams = t.TypeOf<typeof GetMonitorAvailabilityParamsType>;
 
-export const MonitorAvailabilityType = t.type({
-  availability: MonitorAvailabilityParamsType,
-  shouldCheckAvailability: t.boolean,
-});
+export const MonitorAvailabilityType = t.intersection([
+  t.type({
+    availability: GetMonitorAvailabilityParamsType,
+    shouldCheckAvailability: t.boolean,
+  }),
+  t.partial({
+    filters: StatusCheckFiltersType,
+    search: t.string,
+  }),
+]);
 
 export type MonitorAvailability = t.Type<typeof MonitorAvailabilityType>;
