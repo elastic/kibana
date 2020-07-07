@@ -1174,7 +1174,7 @@ export const mockTimelineData: TimelineItem[] = [
       },
       auditd: {
         result: ['success'],
-        session: ['unset'],
+        session: ['242'],
         data: null,
         summary: {
           actor: { primary: ['unset'], secondary: ['root'] },

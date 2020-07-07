@@ -4,17 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable react/display-name */
-
 import { EuiFlexItem, EuiInMemoryTable } from '@elastic/eui';
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { xorBy } from 'lodash/fp';
 import styled from 'styled-components';
 
 import { RowRendererId } from '../../../../common/types/timeline';
 import { renderers, RowRendererOption } from './catalog';
 import { FieldBrowserProps } from './types';
-import { OnTableChangeParams } from '../open_timeline/types';
 
 type Props = Pick<FieldBrowserProps, 'height' | 'timelineId'> & {
   excludedRowRendererIds: RowRendererId[];
@@ -24,7 +21,9 @@ type Props = Pick<FieldBrowserProps, 'height' | 'timelineId'> & {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
   .euiTable {
-    width: auto;
+    tr > *:last-child {
+      display: none;
+    }
 
     .euiTableHeaderCellCheckbox > .euiTableCellContent {
       display: none; // we don't want to display checkbox in the table
@@ -33,6 +32,8 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
 `;
 
 const StyledEuiFlexItem = styled(EuiFlexItem)`
+  overflow: auto;
+
   > div {
     padding: 0;
 
@@ -42,7 +43,7 @@ const StyledEuiFlexItem = styled(EuiFlexItem)`
   }
 `;
 
-const ExampleWrapperComponent = (Example?: React.ReactElement) => {
+const ExampleWrapperComponent = (Example?: React.ElementType) => {
   if (!Example) return;
 
   return (
@@ -63,28 +64,18 @@ const search = {
  * Since `searchableDescription` contains raw text to power the Search bar,
  * this "noop" function ensures it's not actually rendered
  */
-const renderSearchableDescriptionNoop = () => null;
+const renderSearchableDescriptionNoop = () => <></>;
 
-const FieldsBrowserComponent: React.FC<Props> = React.forwardRef(
+const RowRenderersBrowserComponent: React.FC<Props> = React.forwardRef(
   ({ excludedRowRendererIds = [], setExcludedRowRendererIds }, ref) => {
-    const [sortField, setSortField] = useState('name');
-    const [sortDirection, setSortDirection] = useState('asc');
-
-    const onTableChange = useCallback(
-      ({ page, sort }: OnTableChangeParams) => {
-        const { field, direction } = sort;
-        setSortDirection(direction);
-        setSortField(field);
-      },
-      [setSortField, setSortDirection]
-    );
-
     const sort = useMemo(
       () => ({
-        sortField,
-        sortDirection,
+        sort: {
+          field: 'name',
+          direction: 'asc',
+        },
       }),
-      [sortField, sortDirection]
+      []
     );
 
     const columns = useMemo(
@@ -94,22 +85,23 @@ const FieldsBrowserComponent: React.FC<Props> = React.forwardRef(
           name: 'Name',
           sortable: true,
           truncateText: true,
-          width: '8%',
+          width: '10%',
         },
         {
           field: 'description',
           name: 'Description',
-          width: '32%',
+          width: '25%',
           render: (description: React.ReactNode) => description,
         },
         {
           field: 'example',
           name: 'Example',
-          width: '60%',
+          width: '65%',
           render: ExampleWrapperComponent,
         },
         {
           field: 'searchableDescription',
+          name: 'Searchable Description',
           sortable: false,
           width: '0px',
           render: renderSearchableDescriptionNoop,
@@ -154,18 +146,16 @@ const FieldsBrowserComponent: React.FC<Props> = React.forwardRef(
         itemId="id"
         columns={columns}
         search={search}
-        sorting={{
-          sort: {
-            field: 'id',
-            direction: 'desc',
-          },
-        }}
+        sorting={sort}
         isSelectable={true}
         selection={selectionValue}
-        onTableChange={onTableChange}
       />
     );
   }
 );
 
-export const RowRenderersBrowser = FieldsBrowserComponent;
+RowRenderersBrowserComponent.displayName = 'RowRenderersBrowserComponent';
+
+export const RowRenderersBrowser = RowRenderersBrowserComponent;
+
+RowRenderersBrowser.displayName = 'RowRenderersBrowser';

@@ -90,7 +90,7 @@ export const createFimRowRenderer = ({
   actionName: string;
   text: string;
 }): RowRenderer => ({
-  id: RowRendererId.system_fin,
+  id: RowRendererId.system_fim,
   isInstance: (ecs) => {
     const action: string | null | undefined = get('event.action[0]', ecs);
     const category: string | null | undefined = get('event.category[0]', ecs);

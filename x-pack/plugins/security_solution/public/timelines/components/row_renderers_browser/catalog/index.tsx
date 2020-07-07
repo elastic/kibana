@@ -57,7 +57,7 @@ export const renderers: RowRendererOption[] = [
         {i18n.AUDITD_DESCRIPTION_PART1}
       </span>
     ),
-    example: AuditdExample, // TODO: replace "some text" in this example
+    example: AuditdExample,
     searchableDescription: `${i18n.AUDITD_NAME} ${i18n.AUDITD_DESCRIPTION_PART1}`,
   },
   {
@@ -71,7 +71,7 @@ export const renderers: RowRendererOption[] = [
         {i18n.AUDITD_FILE_DESCRIPTION_PART1}
       </span>
     ),
-    example: AuditdFileExample, // TODO: replace both the `unset` session ID and "some text" in this example
+    example: AuditdFileExample,
     searchableDescription: `${i18n.AUDITD_FILE_NAME} ${i18n.AUDITD_FILE_DESCRIPTION_PART1}`,
   },
   {
@@ -140,7 +140,7 @@ export const renderers: RowRendererOption[] = [
     searchableDescription: `${i18n.PROCESS_DESCRIPTION_PART1} ${i18n.PROCESS_DESCRIPTION_PART2}`,
   },
   {
-    id: RowRendererId.system_fin, // TODO: this `id` should be "FIM"
+    id: RowRendererId.system_fim,
     name: i18n.FIM_NAME,
     description: i18n.FIM_DESCRIPTION_PART1,
     example: SystemFimExample,

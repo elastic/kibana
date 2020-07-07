@@ -151,7 +151,7 @@ export const timelineSchema = gql`
     system_dns
     system_endgame_process
     system_file
-    system_fin
+    system_fim
     system_security_event
     system_socket
     zeek

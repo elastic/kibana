@@ -354,7 +354,7 @@ export enum RowRendererId {
   system_dns = 'system_dns',
   system_endgame_process = 'system_endgame_process',
   system_file = 'system_file',
-  system_fin = 'system_fin',
+  system_fim = 'system_fim',
   system_security_event = 'system_security_event',
   system_socket = 'system_socket',
   zeek = 'zeek',

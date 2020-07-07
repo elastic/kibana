@@ -34,7 +34,7 @@ describe('GenericRowRenderer', () => {
       auditd = cloneDeep(mockTimelineData[26].ecs);
       connectedToRenderer = createGenericAuditRowRenderer({
         actionName: 'connected-to',
-        text: 'some text',
+        text: 'connected using',
       });
     });
     test('renders correctly against snapshot', () => {
@@ -95,7 +95,7 @@ describe('GenericRowRenderer', () => {
       auditdFile = cloneDeep(mockTimelineData[27].ecs);
       fileToRenderer = createGenericFileRowRenderer({
         actionName: 'opened-file',
-        text: 'some text',
+        text: 'opened file using',
       });
     });
 

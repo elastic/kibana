@@ -12,7 +12,7 @@ import { createGenericAuditRowRenderer } from '../../timeline/body/renderers/aud
 const AuditdExampleComponent: React.FC = () => {
   const auditdRowRenderer = createGenericAuditRowRenderer({
     actionName: 'connected-to',
-    text: 'some text',
+    text: 'connected using',
   });
 
   return (

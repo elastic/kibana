@@ -38,6 +38,7 @@ export interface OwnProps {
 type Props = OwnProps & PropsFromRedux;
 
 const StatefulEventsViewerComponent: React.FC<Props> = ({
+  createTimeline,
   columns,
   dataProviders,
   deletedEventIds,
@@ -55,6 +56,8 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   query,
   removeColumn,
   start,
+  showCheckboxes,
+  showRowRenderers,
   sort,
   updateItemsPerPage,
   upsertColumn,
@@ -64,12 +67,16 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     defaultIndices ?? useUiSetting<string[]>(DEFAULT_INDEX_KEY)
   );
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    if (createTimeline != null) {
+      createTimeline({ id, columns, sort, itemsPerPage, showCheckboxes, showRowRenderers });
+    }
+
+    return () => {
       deleteEventQuery({ id, inputId: 'global' });
-    },
-    [deleteEventQuery, id]
-  );
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
     (itemsChangedPerPage) => updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage }),
@@ -144,6 +151,8 @@ const makeMapStateToProps = () => {
       itemsPerPageOptions,
       kqlMode,
       sort,
+      showCheckboxes,
+      showRowRenderers,
     } = events;
 
     return {
@@ -159,12 +168,15 @@ const makeMapStateToProps = () => {
       kqlMode,
       query: getGlobalQuerySelector(state),
       sort,
+      showCheckboxes,
+      showRowRenderers,
     };
   };
   return mapStateToProps;
 };
 
 const mapDispatchToProps = {
+  createTimeline: timelineActions.createTimeline,
   deleteEventQuery: inputsActions.deleteOneQuery,
   updateItemsPerPage: timelineActions.updateItemsPerPage,
   removeColumn: timelineActions.removeColumn,
@@ -193,6 +205,8 @@ export const StatefulEventsViewer = connector(
       prevProps.kqlMode === nextProps.kqlMode &&
       deepEqual(prevProps.query, nextProps.query) &&
       deepEqual(prevProps.sort, nextProps.sort) &&
+      prevProps.showCheckboxes === nextProps.showCheckboxes &&
+      prevProps.showRowRenderers === nextProps.showRowRenderers &&
       prevProps.start === nextProps.start &&
       deepEqual(prevProps.pageFilters, nextProps.pageFilters) &&
       prevProps.start === nextProps.start &&

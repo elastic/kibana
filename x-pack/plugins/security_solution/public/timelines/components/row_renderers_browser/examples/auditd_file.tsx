@@ -12,7 +12,7 @@ import { createGenericFileRowRenderer } from '../../timeline/body/renderers/audi
 const AuditdFileExampleComponent: React.FC = () => {
   const auditdFileRowRenderer = createGenericFileRowRenderer({
     actionName: 'opened-file',
-    text: 'some text',
+    text: 'opened file using',
   });
 
   return (
