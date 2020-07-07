@@ -181,14 +181,24 @@ export function MochaReporterProvider({ getService }) {
         .slice(errorMarkerStart)
         // move leading colors behind leading spaces
         .map((line) => line.replace(/^((?:\[.+m)+)(\s+)/, '$2$1'))
-        .map((line) => colors.fail(` ${line}`))
+        .map((line) => ` ${line}`)
         .join('\n');
 
       log.write(
         `- ${colors.fail(`${symbols.err} fail: ${runnable.fullTitle()}`)}` + '\n' + errorMessage
       );
 
-      failuresOverTime.push({ title: runnable.fullTitle(), error: errorMessage });
+      // Prefer to reuse the nice Mocha nested title format for final summary
+      const nestedTitleFormat = outputLines
+        .slice(1, errorMarkerStart)
+        .join('\n')
+        // make sure to remove the list number
+        .replace(/\d+\)/, '');
+
+      failuresOverTime.push({
+        title: nestedTitleFormat,
+        error: errorMessage,
+      });
 
       // failed hooks trigger the `onFail(runnable)` callback, so we snapshot the logs for
       // them here. Tests will re-capture the snapshot in `onTestEnd()`
