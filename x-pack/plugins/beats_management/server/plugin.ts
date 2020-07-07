@@ -14,6 +14,7 @@ import { SecurityPluginSetup } from '../../security/server';
 import { LicensingPluginStart } from '../../licensing/server';
 import { BeatsManagementConfigType } from '../common';
 import { CMServerLibs } from './lib/types';
+import { registerRoutes } from './routes';
 
 interface SetupDeps {
   security?: SecurityPluginSetup;
@@ -37,7 +38,11 @@ export class BeatsManagementPlugin implements Plugin<{}, {}, SetupDeps, StartDep
   public async setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
     this.initializerContext.config.create();
 
+    const router = core.http.createRouter();
+    registerRoutes(router);
+
     core.http.registerRouteHandlerContext('beatsManagement', (_, req) => {
+      // TODO: fix
       return {} as CMServerLibs;
     });
 

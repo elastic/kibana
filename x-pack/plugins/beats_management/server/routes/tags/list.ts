@@ -4,13 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Joi from 'joi';
+import { schema } from '@kbn/config-schema';
+import { IRouter } from 'kibana/server';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { BeatTag } from '../../../common/domain_types';
 import { ReturnTypeList } from '../../../common/return_types';
+import { wrapRouteWithSecurity } from '../wrap_route_with_security';
+
+/*
+import * as Joi from 'joi';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
-
 export const createListTagsRoute = (libs: CMServerLibs) => ({
   method: 'GET',
   path: '/api/beats/tags',
@@ -35,3 +39,50 @@ export const createListTagsRoute = (libs: CMServerLibs) => ({
     return { list: tags, success: true, page: -1, total: -1 };
   },
 });
+*/
+
+export const registerListTagsRoute = (router: IRouter) => {
+  router.get(
+    {
+      path: '/api/beats/tags',
+      validate: {
+        query: schema.object(
+          {
+            ESQuery: schema.maybe(schema.string()),
+          },
+          { defaultValue: {} }
+        ),
+      },
+    },
+    wrapRouteWithSecurity(
+      {
+        requiredLicense: REQUIRED_LICENSES,
+        requiredRoles: ['beats_admin'],
+      },
+      async (context, request, response) => {
+        if (!request.headers['kbn-beats-enrollment-token']) {
+          return response.badRequest({
+            body: 'invalid request',
+          });
+        }
+
+        const beatsManagement = context.beatsManagement!;
+        const user = beatsManagement.framework.getUser(request);
+
+        const tags = await beatsManagement.tags.getAll(
+          user,
+          request.query && request.query.ESQuery ? JSON.parse(request.query.ESQuery) : undefined
+        );
+
+        return response.ok({
+          body: {
+            list: tags,
+            success: true,
+            page: -1,
+            total: -1,
+          } as ReturnTypeList<BeatTag>,
+        });
+      }
+    )
+  );
+};

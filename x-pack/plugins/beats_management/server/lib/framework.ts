@@ -6,11 +6,13 @@
 
 import { ResponseObject, ResponseToolkit } from 'hapi';
 import { difference } from 'lodash';
+import { Headers, KibanaRequest } from 'kibana/server';
 import { BaseReturnType } from '../../common/return_types';
 import {
   BackendFrameworkAdapter,
   FrameworkRequest,
   FrameworkResponse,
+  FrameworkUser,
 } from './adapters/framework/adapter_types';
 
 export class BackendFrameworkLib {
@@ -38,6 +40,10 @@ export class BackendFrameworkLib {
         this.wrapRouteWithSecurity(route.handler, route.licenseRequired || [], route.requiredRoles)
       ),
     });
+  }
+
+  public getUser(request: KibanaRequest): FrameworkUser<Headers> {
+    return this.adapter.getUser(request);
   }
 
   public getSetting(setting: 'encryptionKey'): string;

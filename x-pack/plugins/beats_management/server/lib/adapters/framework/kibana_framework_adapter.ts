@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ResponseToolkit } from 'hapi';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { get } from 'lodash';
 import { isLeft } from 'fp-ts/lib/Either';
-import { KibanaRequest, LegacyRequest } from 'src/core/server';
+import { KibanaRequest, Headers } from 'src/core/server';
 // @ts-ignore
 import { mirrorPluginStatus } from '../../../../../../server/lib/mirror_plugin_status';
 import {
@@ -17,11 +16,10 @@ import {
   FrameworkRequest,
   FrameworkResponse,
   FrameworkRouteOptions,
+  FrameworkUser,
   internalAuthData,
   internalUser,
   KibanaLegacyServer,
-  KibanaServerRequest,
-  KibanaUser,
   RuntimeFrameworkInfo,
   RuntimeKibanaUser,
   XpackInfo,
@@ -73,55 +71,19 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     RouteResponse extends FrameworkResponse
   >(route: FrameworkRouteOptions<RouteRequest, RouteResponse>) {
     this.server.route({
-      handler: async (request: KibanaServerRequest, h: ResponseToolkit) => {
-        // Note, RuntimeKibanaServerRequest is avalaible to validate request, and its type *is* KibanaServerRequest
-        // but is not used here for perf reasons. It's value here is not high enough...
-        return await route.handler(await this.wrapRequest<RouteRequest>(request), h);
-      },
+      handler: route.handler,
       method: route.method,
       path: route.path,
       config: route.config,
     });
   }
 
-  private async wrapRequest<InternalRequest extends KibanaServerRequest>(
-    req: KibanaServerRequest
-  ): Promise<FrameworkRequest<InternalRequest>> {
-    const { params, payload, query, headers, info } = req;
-
-    let isAuthenticated = headers.authorization != null;
-    let user;
-    if (isAuthenticated) {
-      user = await this.getUser(req);
-      if (!user) {
-        isAuthenticated = false;
-      }
-    }
-    return {
-      user:
-        isAuthenticated && user
-          ? {
-              kind: 'authenticated',
-              [internalAuthData]: headers,
-              ...user,
-            }
-          : {
-              kind: 'unauthenticated',
-            },
-      headers,
-      info,
-      params,
-      payload,
-      query,
-    };
-  }
-
-  private async getUser(request: KibanaServerRequest): Promise<KibanaUser | null> {
-    const user = this.server.newPlatform.setup.plugins.security?.authc.getCurrentUser(
-      KibanaRequest.from((request as unknown) as LegacyRequest)
-    );
+  getUser(request: KibanaRequest): FrameworkUser<Headers> {
+    const user = this.server.newPlatform.setup.plugins.security?.authc.getCurrentUser(request);
     if (!user) {
-      return null;
+      return {
+        kind: 'unauthenticated',
+      };
     }
     const assertKibanaUser = RuntimeKibanaUser.decode(user);
     if (isLeft(assertKibanaUser)) {
@@ -132,7 +94,11 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
       );
     }
 
-    return user;
+    return {
+      kind: 'authenticated',
+      [internalAuthData]: request.headers,
+      ...user,
+    };
   }
 
   private xpackInfoWasUpdatedHandler = (xpackInfo: XpackInfo) => {

@@ -8,7 +8,7 @@
 
 import { Lifecycle, ResponseToolkit } from 'hapi';
 import * as t from 'io-ts';
-import { CoreSetup, CoreStart } from 'src/core/server';
+import { CoreSetup, CoreStart, Headers, KibanaRequest } from 'src/core/server';
 import { SecurityPluginSetup } from '../../../../../security/server';
 import { LicenseType } from '../../../../common/constants/security';
 
@@ -29,6 +29,7 @@ export interface XpackInfo {
 }
 
 export interface BackendFrameworkAdapter {
+  getUser(request: KibanaRequest): FrameworkUser<Headers>;
   internalUser: FrameworkInternalUser;
   info: null | FrameworkInfo;
   log(text: string): void;
