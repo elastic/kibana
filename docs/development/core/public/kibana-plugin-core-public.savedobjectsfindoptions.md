@@ -15,6 +15,7 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [aggs](./kibana-plugin-core-public.savedobjectsfindoptions.aggs.md) | <code>SavedObjectAggs</code> |  |
 |  [defaultSearchOperator](./kibana-plugin-core-public.savedobjectsfindoptions.defaultsearchoperator.md) | <code>'AND' &#124; 'OR'</code> |  |
 |  [fields](./kibana-plugin-core-public.savedobjectsfindoptions.fields.md) | <code>string[]</code> | An array of fields to include in the results |
 |  [filter](./kibana-plugin-core-public.savedobjectsfindoptions.filter.md) | <code>string</code> |  |

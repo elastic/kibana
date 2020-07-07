@@ -100,7 +100,7 @@ export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
  */
 export interface SavedObjectsFindResponse<T = unknown, A = unknown> {
   aggregations?: A;
-  saved_objects: Array<SavedObject<T>>;
+  saved_objects: Array<SavedObjectsFindResult<T>>;
   total: number;
   per_page: number;
   page: number;
