@@ -20,10 +20,10 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import {
-  mockHTMLElementClientSizes,
+  setHTMLElementClientSizes,
   setSVGElementGetBBox,
   setSVGElementGetComputedTextLength,
-} from '../../../../../test_utils/public/helpers';
+} from '../../../../../test_utils/public';
 
 import { ChartTitle } from './chart_title';
 import { VisConfig } from './vis_config';
@@ -93,11 +93,13 @@ describe('Vislib ChartTitle Class Test Suite', function () {
   };
 
   let mockedHTMLElementClientSizes;
+  let mockedSVGElementGetBBox;
+  let mockedSVGElementGetComputedTextLength;
 
   beforeAll(() => {
-    mockedHTMLElementClientSizes = mockHTMLElementClientSizes(512, 512);
-    setSVGElementGetBBox(100);
-    setSVGElementGetComputedTextLength(100);
+    mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
+    mockedSVGElementGetBBox = setSVGElementGetBBox(100);
+    mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
   });
 
   beforeEach(() => {
@@ -126,8 +128,9 @@ describe('Vislib ChartTitle Class Test Suite', function () {
   });
 
   afterAll(() => {
-    mockedHTMLElementClientSizes.width.mockRestore();
-    mockedHTMLElementClientSizes.height.mockRestore();
+    mockedHTMLElementClientSizes.mockRestore();
+    mockedSVGElementGetBBox.mockRestore();
+    mockedSVGElementGetComputedTextLength.mockRestore();
   });
 
   describe('render Method', function () {

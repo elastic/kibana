@@ -19,10 +19,7 @@
 
 import $ from 'jquery';
 import _ from 'lodash';
-import {
-  mockHTMLElementClientSizes,
-  setSVGElementGetBBox,
-} from '../../../../../test_utils/public/helpers';
+import { setHTMLElementClientSizes, setSVGElementGetBBox } from '../../../../../test_utils/public';
 
 import data from '../../fixtures/mock_data/terms/_series_multiple';
 import { getMockUiState } from '../../fixtures/mocks';
@@ -85,11 +82,12 @@ describe('Vislib Gauge Chart Test Suite', function () {
     chartEl = vis.handler.charts[0].chartEl;
   }
 
-  let mockedHTMLElementClientSizes = {};
+  let mockedHTMLElementClientSizes;
+  let mockedSVGElementGetBBox;
 
   beforeAll(() => {
-    mockedHTMLElementClientSizes = mockHTMLElementClientSizes(512, 512);
-    setSVGElementGetBBox(100);
+    mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
+    mockedSVGElementGetBBox = setSVGElementGetBBox(100);
   });
 
   beforeEach(() => {
@@ -102,8 +100,8 @@ describe('Vislib Gauge Chart Test Suite', function () {
   });
 
   afterAll(function () {
-    mockedHTMLElementClientSizes.width.mockRestore();
-    mockedHTMLElementClientSizes.height.mockRestore();
+    mockedHTMLElementClientSizes.mockRestore();
+    mockedSVGElementGetBBox.mockRestore();
   });
 
   test('creates meter gauge', function () {

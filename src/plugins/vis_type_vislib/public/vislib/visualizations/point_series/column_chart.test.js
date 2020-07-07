@@ -21,10 +21,10 @@ import _ from 'lodash';
 import d3 from 'd3';
 import $ from 'jquery';
 import {
-  mockHTMLElementClientSizes,
+  setHTMLElementClientSizes,
   setSVGElementGetBBox,
   setSVGElementGetComputedTextLength,
-} from '../../../../../../test_utils/public/helpers';
+} from '../../../../../../test_utils/public';
 
 // Data
 import series from '../../../fixtures/mock_data/date_histogram/_series';
@@ -51,6 +51,8 @@ const dataTypesArray = [
 ];
 
 let mockedHTMLElementClientSizes;
+let mockedSVGElementGetBBox;
+let mockedSVGElementGetComputedTextLength;
 
 dataTypesArray.forEach(function (dataType) {
   const name = dataType[0];
@@ -73,9 +75,9 @@ dataTypesArray.forEach(function (dataType) {
     };
 
     beforeAll(() => {
-      mockedHTMLElementClientSizes = mockHTMLElementClientSizes(512, 512);
-      setSVGElementGetBBox(100);
-      setSVGElementGetComputedTextLength(100);
+      mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
+      mockedSVGElementGetBBox = setSVGElementGetBBox(100);
+      mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
     });
 
     beforeEach(() => {
@@ -90,8 +92,9 @@ dataTypesArray.forEach(function (dataType) {
     });
 
     afterAll(() => {
-      mockedHTMLElementClientSizes.width.mockRestore();
-      mockedHTMLElementClientSizes.height.mockRestore();
+      mockedHTMLElementClientSizes.mockRestore();
+      mockedSVGElementGetBBox.mockRestore();
+      mockedSVGElementGetComputedTextLength.mockRestore();
     });
 
     describe('stackData method', function () {
@@ -267,9 +270,9 @@ describe('stackData method - data set with zeros in percentage mode', function (
   };
 
   beforeAll(() => {
-    mockedHTMLElementClientSizes = mockHTMLElementClientSizes(512, 512);
-    setSVGElementGetBBox(100);
-    setSVGElementGetComputedTextLength(100);
+    mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
+    mockedSVGElementGetBBox = setSVGElementGetBBox(100);
+    mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
   });
 
   beforeEach(() => {
@@ -283,8 +286,9 @@ describe('stackData method - data set with zeros in percentage mode', function (
   });
 
   afterAll(() => {
-    mockedHTMLElementClientSizes.width.mockRestore();
-    mockedHTMLElementClientSizes.height.mockRestore();
+    mockedHTMLElementClientSizes.mockRestore();
+    mockedSVGElementGetBBox.mockRestore();
+    mockedSVGElementGetComputedTextLength.mockRestore();
   });
 
   test('should not mutate the injected zeros', function () {
@@ -325,9 +329,9 @@ describe('datumWidth - split chart data set with holes', function () {
   };
 
   beforeAll(() => {
-    mockedHTMLElementClientSizes = mockHTMLElementClientSizes(512, 512);
-    setSVGElementGetBBox(100);
-    setSVGElementGetComputedTextLength(100);
+    mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
+    mockedSVGElementGetBBox = setSVGElementGetBBox(100);
+    mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
   });
 
   beforeEach(() => {
@@ -342,8 +346,9 @@ describe('datumWidth - split chart data set with holes', function () {
   });
 
   afterAll(() => {
-    mockedHTMLElementClientSizes.width.mockRestore();
-    mockedHTMLElementClientSizes.height.mockRestore();
+    mockedHTMLElementClientSizes.mockRestore();
+    mockedSVGElementGetBBox.mockRestore();
+    mockedSVGElementGetComputedTextLength.mockRestore();
   });
 
   test('should not have bar widths that span multiple time bins', function () {
@@ -372,9 +377,9 @@ describe('datumWidth - monthly interval', function () {
   let mockWidth;
 
   beforeAll(() => {
-    mockedHTMLElementClientSizes = mockHTMLElementClientSizes(512, 512);
-    setSVGElementGetBBox(100);
-    setSVGElementGetComputedTextLength(100);
+    mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
+    mockedSVGElementGetBBox = setSVGElementGetBBox(100);
+    mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
     mockWidth = jest.spyOn($.prototype, 'width').mockReturnValue(900);
   });
 
@@ -390,8 +395,9 @@ describe('datumWidth - monthly interval', function () {
   });
 
   afterAll(() => {
-    mockedHTMLElementClientSizes.width.mockRestore();
-    mockedHTMLElementClientSizes.height.mockRestore();
+    mockedHTMLElementClientSizes.mockRestore();
+    mockedSVGElementGetBBox.mockRestore();
+    mockedSVGElementGetComputedTextLength.mockRestore();
     mockWidth.mockRestore();
   });
 

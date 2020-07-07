@@ -18,10 +18,7 @@
  */
 
 import d3 from 'd3';
-import {
-  mockHTMLElementClientSizes,
-  setSVGElementGetBBox,
-} from '../../../../../test_utils/public/helpers';
+import { setHTMLElementClientSizes, setSVGElementGetBBox } from '../../../../../test_utils/public';
 import { Chart } from './_chart';
 import { getMockUiState } from '../../fixtures/mocks';
 import { getVis } from './_vis_fixture';
@@ -108,11 +105,12 @@ describe('Vislib _chart Test Suite', function () {
     yAxisLabel: 'Count',
   };
 
-  let mockedHTMLElementClientSizes = {};
+  let mockedHTMLElementClientSizes;
+  let mockedSVGElementGetBBox;
 
   beforeAll(() => {
-    mockedHTMLElementClientSizes = mockHTMLElementClientSizes(512, 512);
-    setSVGElementGetBBox(100);
+    mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
+    mockedSVGElementGetBBox = setSVGElementGetBBox(100);
   });
 
   beforeEach(() => {
@@ -137,9 +135,8 @@ describe('Vislib _chart Test Suite', function () {
   });
 
   afterAll(() => {
-    mockedHTMLElementClientSizes.width.mockRestore();
-    mockedHTMLElementClientSizes.height.mockRestore();
-    delete window.SVGElement.prototype.getBBox;
+    mockedHTMLElementClientSizes.mockRestore();
+    mockedSVGElementGetBBox.mockRestore();
   });
 
   test('should be a constructor for visualization modules', function () {

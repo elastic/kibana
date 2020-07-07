@@ -21,10 +21,10 @@ import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
 import {
-  mockHTMLElementClientSizes,
+  setHTMLElementClientSizes,
   setSVGElementGetBBox,
   setSVGElementGetComputedTextLength,
-} from '../../../../../../test_utils/public/helpers';
+} from '../../../../../../test_utils/public';
 
 import { getMockUiState } from '../../../fixtures/mocks';
 import { getVis } from '../_vis_fixture';
@@ -46,6 +46,8 @@ const visLibParams = {
 };
 
 let mockedHTMLElementClientSizes;
+let mockedSVGElementGetBBox;
+let mockedSVGElementGetComputedTextLength;
 
 _.forOwn(dataTypesArray, function (dataType, dataTypeName) {
   describe('Vislib Area Chart Test Suite for ' + dataTypeName + ' Data', function () {
@@ -53,9 +55,9 @@ _.forOwn(dataTypesArray, function (dataType, dataTypeName) {
     let mockUiState;
 
     beforeAll(() => {
-      mockedHTMLElementClientSizes = mockHTMLElementClientSizes(512, 512);
-      setSVGElementGetBBox(100);
-      setSVGElementGetComputedTextLength(100);
+      mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
+      mockedSVGElementGetBBox = setSVGElementGetBBox(100);
+      mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
     });
 
     beforeEach(async () => {
@@ -70,8 +72,9 @@ _.forOwn(dataTypesArray, function (dataType, dataTypeName) {
     });
 
     afterAll(() => {
-      mockedHTMLElementClientSizes.width.mockRestore();
-      mockedHTMLElementClientSizes.height.mockRestore();
+      mockedHTMLElementClientSizes.mockRestore();
+      mockedSVGElementGetBBox.mockRestore();
+      mockedSVGElementGetComputedTextLength.mockRestore();
     });
 
     describe('stackData method', function () {

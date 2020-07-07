@@ -20,10 +20,10 @@
 import d3 from 'd3';
 import $ from 'jquery';
 import {
-  mockHTMLElementClientSizes,
+  setHTMLElementClientSizes,
   setSVGElementGetBBox,
   setSVGElementGetComputedTextLength,
-} from '../../../../../../test_utils/public/helpers';
+} from '../../../../../../test_utils/public';
 
 // Data
 import series from '../../../fixtures/mock_data/date_histogram/_series';
@@ -39,6 +39,8 @@ const dateHistogramArray = [series, columns, rows, stackedSeries];
 const names = ['series', 'columns', 'rows', 'stackedSeries'];
 
 let mockedHTMLElementClientSizes;
+let mockedSVGElementGetBBox;
+let mockedSVGElementGetComputedTextLength;
 
 dateHistogramArray.forEach(function (data, i) {
   describe('Vislib Layout Class Test Suite for ' + names[i] + ' Data', function () {
@@ -48,9 +50,9 @@ dateHistogramArray.forEach(function (data, i) {
     let testLayout;
 
     beforeAll(() => {
-      mockedHTMLElementClientSizes = mockHTMLElementClientSizes(512, 512);
-      setSVGElementGetBBox(100);
-      setSVGElementGetComputedTextLength(100);
+      mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
+      mockedSVGElementGetBBox = setSVGElementGetBBox(100);
+      mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
     });
 
     beforeEach(() => {
@@ -65,8 +67,9 @@ dateHistogramArray.forEach(function (data, i) {
     });
 
     afterAll(() => {
-      mockedHTMLElementClientSizes.width.mockRestore();
-      mockedHTMLElementClientSizes.height.mockRestore();
+      mockedHTMLElementClientSizes.mockRestore();
+      mockedSVGElementGetBBox.mockRestore();
+      mockedSVGElementGetComputedTextLength.mockRestore();
     });
 
     describe('createLayout Method', function () {

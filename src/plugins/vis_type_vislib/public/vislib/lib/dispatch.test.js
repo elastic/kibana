@@ -20,10 +20,10 @@
 import _ from 'lodash';
 import d3 from 'd3';
 import {
-  mockHTMLElementClientSizes,
+  setHTMLElementClientSizes,
   setSVGElementGetBBox,
   setSVGElementGetComputedTextLength,
-} from '../../../../../test_utils/public/helpers';
+} from '../../../../../test_utils/public';
 
 // Data
 import data from '../../fixtures/mock_data/date_histogram/_series';
@@ -32,6 +32,8 @@ import { getMockUiState } from '../../fixtures/mocks';
 import { getVis } from '../visualizations/_vis_fixture';
 
 let mockedHTMLElementClientSizes;
+let mockedSVGElementGetBBox;
+let mockedSVGElementGetComputedTextLength;
 
 describe('Vislib Dispatch Class Test Suite', function () {
   function destroyVis(vis) {
@@ -43,14 +45,15 @@ describe('Vislib Dispatch Class Test Suite', function () {
   }
 
   beforeAll(() => {
-    mockedHTMLElementClientSizes = mockHTMLElementClientSizes(512, 512);
-    setSVGElementGetBBox(100);
-    setSVGElementGetComputedTextLength(100);
+    mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
+    mockedSVGElementGetBBox = setSVGElementGetBBox(100);
+    mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
   });
 
   afterAll(() => {
-    mockedHTMLElementClientSizes.width.mockRestore();
-    mockedHTMLElementClientSizes.height.mockRestore();
+    mockedHTMLElementClientSizes.mockRestore();
+    mockedSVGElementGetBBox.mockRestore();
+    mockedSVGElementGetComputedTextLength.mockRestore();
   });
 
   describe('', function () {

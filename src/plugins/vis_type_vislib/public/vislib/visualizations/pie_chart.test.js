@@ -21,10 +21,10 @@ import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
 import {
-  mockHTMLElementClientSizes,
+  setHTMLElementClientSizes,
   setSVGElementGetBBox,
   setSVGElementGetComputedTextLength,
-} from '../../../../../test_utils/public/helpers';
+} from '../../../../../test_utils/public';
 import { getMockUiState } from '../../fixtures/mocks';
 import { getVis } from './_vis_fixture';
 import { pieChartMockData } from './pie_chart_mock_data';
@@ -36,6 +36,8 @@ const sizes = [0, 5, 15, 30, 60, 120];
 let mockedHTMLElementClientSizes = {};
 let mockWidth;
 let mockHeight;
+let mockedSVGElementGetBBox;
+let mockedSVGElementGetComputedTextLength;
 
 describe('No global chart settings', function () {
   const visLibParams1 = {
@@ -48,9 +50,9 @@ describe('No global chart settings', function () {
   let mockUiState;
 
   beforeAll(() => {
-    mockedHTMLElementClientSizes = mockHTMLElementClientSizes(512, 512);
-    setSVGElementGetBBox(100);
-    setSVGElementGetComputedTextLength(100);
+    mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
+    mockedSVGElementGetBBox = setSVGElementGetBBox(100);
+    mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
     mockWidth = jest.spyOn($.prototype, 'width').mockReturnValue(120);
     mockHeight = jest.spyOn($.prototype, 'height').mockReturnValue(120);
   });
@@ -69,8 +71,9 @@ describe('No global chart settings', function () {
   });
 
   afterAll(() => {
-    mockedHTMLElementClientSizes.width.mockRestore();
-    mockedHTMLElementClientSizes.height.mockRestore();
+    mockedHTMLElementClientSizes.mockRestore();
+    mockedSVGElementGetBBox.mockRestore();
+    mockedSVGElementGetComputedTextLength.mockRestore();
     mockWidth.mockRestore();
     mockHeight.mockRestore();
   });
@@ -117,9 +120,9 @@ describe('No global chart settings', function () {
 
 describe('Vislib PieChart Class Test Suite', function () {
   beforeAll(() => {
-    mockedHTMLElementClientSizes = mockHTMLElementClientSizes(512, 512);
-    setSVGElementGetBBox(100);
-    setSVGElementGetComputedTextLength(100);
+    mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
+    mockedSVGElementGetBBox = setSVGElementGetBBox(100);
+    mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
     let width = 120;
     let height = 120;
     const mockWidth = jest.spyOn($.prototype, 'width');
@@ -139,8 +142,9 @@ describe('Vislib PieChart Class Test Suite', function () {
   });
 
   afterAll(() => {
-    mockedHTMLElementClientSizes.width.mockRestore();
-    mockedHTMLElementClientSizes.height.mockRestore();
+    mockedHTMLElementClientSizes.mockRestore();
+    mockedSVGElementGetBBox.mockRestore();
+    mockedSVGElementGetComputedTextLength.mockRestore();
     mockWidth.mockRestore();
     mockHeight.mockRestore();
   });

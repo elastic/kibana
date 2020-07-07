@@ -21,10 +21,10 @@ import _ from 'lodash';
 import $ from 'jquery';
 import d3 from 'd3';
 import {
-  mockHTMLElementClientSizes,
+  setHTMLElementClientSizes,
   setSVGElementGetBBox,
   setSVGElementGetComputedTextLength,
-} from '../../../../../../test_utils/public/helpers';
+} from '../../../../../../test_utils/public';
 
 // Data
 import series from '../../../fixtures/mock_data/date_histogram/_series';
@@ -45,19 +45,22 @@ const dataTypesArray = [
 ];
 
 let mockedHTMLElementClientSizes;
+let mockedSVGElementGetBBox;
+let mockedSVGElementGetComputedTextLength;
 let mockWidth;
 
 describe('Vislib Heatmap Chart Test Suite', function () {
   beforeAll(() => {
-    mockedHTMLElementClientSizes = mockHTMLElementClientSizes(512, 512);
-    setSVGElementGetBBox(100);
-    setSVGElementGetComputedTextLength(100);
+    mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
+    mockedSVGElementGetBBox = setSVGElementGetBBox(100);
+    mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
     mockWidth = jest.spyOn($.prototype, 'width').mockReturnValue(900);
   });
 
   afterAll(() => {
-    mockedHTMLElementClientSizes.width.mockRestore();
-    mockedHTMLElementClientSizes.height.mockRestore();
+    mockedHTMLElementClientSizes.mockRestore();
+    mockedSVGElementGetBBox.mockRestore();
+    mockedSVGElementGetComputedTextLength.mockRestore();
     mockWidth.mockRestore();
   });
 

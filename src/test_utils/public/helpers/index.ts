@@ -25,4 +25,9 @@ export { WithMemoryRouter, WithRoute, reactRouterMock } from './router_helpers';
 
 export * from './utils';
 
-export * from './jsdom_svg_mocks';
+export {
+  setSVGElementGetBBox,
+  setHTMLElementOffset,
+  setHTMLElementClientSizes,
+  setSVGElementGetComputedTextLength,
+} from './jsdom_svg_mocks';

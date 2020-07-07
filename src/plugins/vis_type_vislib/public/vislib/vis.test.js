@@ -20,10 +20,10 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import {
-  mockHTMLElementClientSizes,
+  setHTMLElementClientSizes,
   setSVGElementGetBBox,
   setSVGElementGetComputedTextLength,
-} from '../../../../test_utils/public/helpers';
+} from '../../../../test_utils/public';
 import series from '../fixtures/mock_data/date_histogram/_series';
 import columns from '../fixtures/mock_data/date_histogram/_columns';
 import rows from '../fixtures/mock_data/date_histogram/_rows';
@@ -35,6 +35,8 @@ const dataArray = [series, columns, rows, stackedSeries];
 const names = ['series', 'columns', 'rows', 'stackedSeries'];
 
 let mockedHTMLElementClientSizes;
+let mockedSVGElementGetBBox;
+let mockedSVGElementGetComputedTextLength;
 
 dataArray.forEach(function (data, i) {
   describe('Vislib Vis Test Suite for ' + names[i] + ' Data', function () {
@@ -46,9 +48,9 @@ dataArray.forEach(function (data, i) {
     let numberOfCharts;
 
     beforeAll(() => {
-      mockedHTMLElementClientSizes = mockHTMLElementClientSizes(512, 512);
-      setSVGElementGetBBox(100);
-      setSVGElementGetComputedTextLength(100);
+      mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
+      mockedSVGElementGetBBox = setSVGElementGetBBox(100);
+      mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
     });
 
     beforeEach(() => {
@@ -63,8 +65,9 @@ dataArray.forEach(function (data, i) {
     });
 
     afterAll(() => {
-      mockedHTMLElementClientSizes.width.mockRestore();
-      mockedHTMLElementClientSizes.height.mockRestore();
+      mockedHTMLElementClientSizes.mockRestore();
+      mockedSVGElementGetBBox.mockRestore();
+      mockedSVGElementGetComputedTextLength.mockRestore();
     });
 
     describe('render Method', function () {
