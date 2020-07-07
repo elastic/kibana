@@ -8,7 +8,7 @@ import { WrappedTranslatedExceptionList } from './lists';
 
 export const getTranslatedExceptionListMock = (): WrappedTranslatedExceptionList => {
   return {
-    exceptions_list: [
+    entries: [
       {
         entries: [
           {

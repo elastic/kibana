@@ -31,7 +31,7 @@ import { WrappedTranslatedExceptionList } from '../../schemas/artifacts/lists';
 
 const mockArtifactName = `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-windows-1.0.0`;
 const expectedEndpointExceptions: WrappedTranslatedExceptionList = {
-  exceptions_list: [
+  entries: [
     {
       entries: [
         {
