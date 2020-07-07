@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
   bucketSpan,
   categoriesMessageField,
@@ -12,19 +13,25 @@ import {
   LogEntryCategoriesJobType,
   logEntryCategoriesJobTypes,
   partitionField,
-} from '../../../../common/log_analysis';
-import {
-  cleanUpJobsAndDatafeeds,
-  ModuleDescriptor,
-  ModuleSourceConfiguration,
-} from '../../../containers/logs/log_analysis';
-import { callJobsSummaryAPI } from '../../../containers/logs/log_analysis/api/ml_get_jobs_summary_api';
-import { callGetMlModuleAPI } from '../../../containers/logs/log_analysis/api/ml_get_module';
-import { callSetupMlModuleAPI } from '../../../containers/logs/log_analysis/api/ml_setup_module_api';
-import { callValidateDatasetsAPI } from '../../../containers/logs/log_analysis/api/validate_datasets';
-import { callValidateIndicesAPI } from '../../../containers/logs/log_analysis/api/validate_indices';
+} from '../../../../../../common/log_analysis';
+import { callJobsSummaryAPI } from '../../api/ml_get_jobs_summary_api';
+import { callGetMlModuleAPI } from '../../api/ml_get_module';
+import { callSetupMlModuleAPI } from '../../api/ml_setup_module_api';
+import { callValidateDatasetsAPI } from '../../api/validate_datasets';
+import { callValidateIndicesAPI } from '../../api/validate_indices';
+import { cleanUpJobsAndDatafeeds } from '../../log_analysis_cleanup';
+import { ModuleDescriptor, ModuleSourceConfiguration } from '../../log_analysis_module_types';
 
 const moduleId = 'logs_ui_categories';
+const moduleName = i18n.translate('xpack.infra.logs.analysis.logEntryCategoriesModuleName', {
+  defaultMessage: 'Categorization',
+});
+const moduleDescription = i18n.translate(
+  'xpack.infra.logs.analysis.logEntryCategoriesModuleDescription',
+  {
+    defaultMessage: 'Use Machine Learning to automatically categorize log messages.',
+  }
+);
 
 const getJobIds = (spaceId: string, sourceId: string) =>
   logEntryCategoriesJobTypes.reduce(
@@ -138,6 +145,8 @@ const validateSetupDatasets = async (
 
 export const logEntryCategoriesModule: ModuleDescriptor<LogEntryCategoriesJobType> = {
   moduleId,
+  moduleName,
+  moduleDescription,
   jobTypes: logEntryCategoriesJobTypes,
   bucketSpan,
   getJobIds,

@@ -20,16 +20,16 @@ import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { getAnnotationsForAll, getLogEntryRateCombinedSeries } from '../helpers/data_formatters';
 import { AnomaliesChart } from './chart';
 import { AnomaliesTable } from './table';
-import { RecreateJobButton } from '../../../../../components/logging/log_analysis_job_status';
+import { ManageJobsButton } from '../../../../../components/logging/log_analysis_setup/manage_jobs_button';
 import {
-  Page,
+  ChangePaginationOptions,
+  ChangeSortOptions,
   FetchNextPage,
   FetchPreviousPage,
-  ChangeSortOptions,
-  ChangePaginationOptions,
-  SortOptions,
-  PaginationOptions,
   LogEntryAnomalies,
+  Page,
+  PaginationOptions,
+  SortOptions,
 } from '../../use_log_entry_anomalies_results';
 import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 
@@ -40,7 +40,8 @@ export const AnomaliesResults: React.FunctionComponent<{
   anomalies: LogEntryAnomalies;
   setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange;
-  viewSetupForReconfiguration: () => void;
+  onViewModuleList: () => void;
+  jobId: string;
   page: Page;
   fetchNextPage?: FetchNextPage;
   fetchPreviousPage?: FetchPreviousPage;
@@ -54,7 +55,8 @@ export const AnomaliesResults: React.FunctionComponent<{
   logEntryRateResults,
   setTimeRange,
   timeRange,
-  viewSetupForReconfiguration,
+  onViewModuleList,
+  jobId,
   anomalies,
   changeSortOptions,
   sortOptions,
@@ -93,7 +95,7 @@ export const AnomaliesResults: React.FunctionComponent<{
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <RecreateJobButton onClick={viewSetupForReconfiguration} size="s" />
+          <ManageJobsButton onClick={onViewModuleList} size="s" />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />

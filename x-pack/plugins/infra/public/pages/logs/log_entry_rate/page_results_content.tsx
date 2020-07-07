@@ -12,11 +12,12 @@ import { euiStyled, useTrackPageview } from '../../../../../observability/public
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { bucketSpan } from '../../../../common/log_analysis';
 import { LogAnalysisJobProblemIndicator } from '../../../components/logging/log_analysis_job_status';
+import { useLogAnalysisSetupFlyoutStateContext } from '../../../components/logging/log_analysis_setup/setup_flyout';
+import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
 import { useInterval } from '../../../hooks/use_interval';
 import { AnomaliesResults } from './sections/anomalies';
-import { useLogEntryRateModuleContext } from './use_log_entry_rate_module';
-import { useLogEntryRateResults } from './use_log_entry_rate_results';
 import { useLogEntryAnomaliesResults } from './use_log_entry_anomalies_results';
+import { useLogEntryRateResults } from './use_log_entry_rate_results';
 import {
   StringTimeRange,
   useLogAnalysisResultsUrlState,
@@ -54,6 +55,8 @@ export const LogEntryRateResultsContent: React.FunctionComponent<LogEntryRateRes
     hasStoppedJobs,
     sourceConfiguration: { sourceId },
   } = useLogEntryRateModuleContext();
+
+  const { showModuleList } = useLogAnalysisSetupFlyoutStateContext();
 
   const {
     timeRange: selectedTimeRange,
@@ -222,7 +225,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<LogEntryRateRes
             <AnomaliesResults
               isLoadingLogRateResults={isLoading}
               isLoadingAnomaliesResults={isLoadingLogEntryAnomalies}
-              viewSetupForReconfiguration={viewSetupFlyoutForReconfiguration}
+              onViewModuleList={showModuleList}
               logEntryRateResults={logEntryRate}
               anomalies={logEntryAnomalies}
               setTimeRange={handleChartTimeRangeChange}
