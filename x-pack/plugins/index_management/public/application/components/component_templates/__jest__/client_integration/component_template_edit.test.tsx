@@ -52,7 +52,7 @@ describe('<ComponentTemplateEdit />', () => {
     template: {
       settings: { number_of_shards: 1 },
     },
-    _kbnMeta: { usedBy: [] },
+    _kbnMeta: { usedBy: [], isManaged: false },
   };
 
   beforeEach(async () => {

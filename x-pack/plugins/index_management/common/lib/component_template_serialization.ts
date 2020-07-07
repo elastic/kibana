@@ -60,7 +60,7 @@ export function deserializeComponentTemplate(
     _meta,
     _kbnMeta: {
       usedBy: indexTemplatesToUsedBy[name] || [],
-      isManaged: _meta?.managed,
+      isManaged: Boolean(_meta?.managed === true),
     },
   };
 
@@ -79,7 +79,7 @@ export function deserializeComponentTemplateList(
   const componentTemplateListItem: ComponentTemplateListItem = {
     name,
     usedBy: indexTemplatesToUsedBy[name] || [],
-    isManaged: _meta?.managed,
+    isManaged: Boolean(_meta?.managed === true),
     hasSettings: hasEntries(template.settings),
     hasMappings: hasEntries(template.mappings),
     hasAliases: hasEntries(template.aliases),

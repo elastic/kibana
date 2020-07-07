@@ -82,6 +82,7 @@ export const ComponentTemplateForm = ({
     _meta: {},
     _kbnMeta: {
       usedBy: [],
+      isManaged: false,
     },
   },
   isEditing,

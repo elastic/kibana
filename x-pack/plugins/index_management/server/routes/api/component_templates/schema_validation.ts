@@ -16,5 +16,6 @@ export const componentTemplateSchema = schema.object({
   _meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   _kbnMeta: schema.object({
     usedBy: schema.arrayOf(schema.string()),
+    isManaged: schema.boolean(),
   }),
 });

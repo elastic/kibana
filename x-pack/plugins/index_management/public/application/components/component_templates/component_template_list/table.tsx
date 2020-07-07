@@ -106,6 +106,13 @@ export const ComponentTable: FunctionComponent<Props> = ({
       },
       filters: [
         {
+          type: 'is',
+          field: 'isManaged',
+          name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.isManagedFilterLabel', {
+            defaultMessage: 'Managed',
+          }),
+        },
+        {
           type: 'field_value_toggle_group',
           field: 'usedBy.length',
           items: [
