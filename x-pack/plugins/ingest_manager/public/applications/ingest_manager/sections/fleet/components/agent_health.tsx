@@ -53,6 +53,14 @@ const Status = {
       />
     </EuiHealth>
   ),
+  Enrolling: (
+    <EuiHealth color="warning">
+      <FormattedMessage
+        id="xpack.ingestManager.agentHealth.enrollingStatusText"
+        defaultMessage="Enrolling"
+      />
+    </EuiHealth>
+  ),
   Unenrolling: (
     <EuiHealth color="warning">
       <FormattedMessage
@@ -75,6 +83,8 @@ function getStatusComponent(agent: Agent): React.ReactElement {
       return Status.Warning;
     case 'unenrolling':
       return Status.Unenrolling;
+    case 'enrolling':
+      return Status.Enrolling;
     default:
       return Status.Online;
   }
