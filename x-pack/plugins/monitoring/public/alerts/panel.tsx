@@ -4,7 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { EuiSpacer, EuiCallOut, EuiButton } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  EuiSpacer,
+  EuiCallOut,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSwitch,
+} from '@elastic/eui';
 
 import { CommonAlertStatus } from '../../common/types';
 import { AlertMessage } from '../../server/alerts/types';
@@ -14,6 +23,7 @@ import { AlertsContextProvider } from '../../../triggers_actions_ui/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertEdit } from '../../../triggers_actions_ui/public';
 import { isInSetupMode } from '../lib/setup_mode';
+import { BASE_ALERT_API_PATH } from '../../../alerts/common';
 
 interface Props {
   alert: CommonAlertStatus;
@@ -23,10 +33,61 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
     alert: { states, alert },
   } = props;
   const [showFlyout, setShowFlyout] = React.useState(false);
+  const [isEnabled, setIsEnabled] = React.useState(alert.rawAlert.enabled);
+  const [isMuted, setIsMuted] = React.useState(alert.rawAlert.muteAll);
   const inSetupMode = isInSetupMode();
 
   if (!alert.rawAlert) {
     return null;
+  }
+
+  async function disableAlert() {
+    try {
+      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.rawAlert.id}/_disable`);
+    } catch (err) {
+      Legacy.shims.toastNotifications.addDanger({
+        title: i18n.translate('xpack.monitoring.alerts.panel.disableAlert.errorTitle', {
+          defaultMessage: `Unable to disable alert`,
+        }),
+        text: err.message,
+      });
+    }
+  }
+  async function enableAlert() {
+    try {
+      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.rawAlert.id}/_enable`);
+    } catch (err) {
+      Legacy.shims.toastNotifications.addDanger({
+        title: i18n.translate('xpack.monitoring.alerts.panel.enableAlert.errorTitle', {
+          defaultMessage: `Unable to enable alert`,
+        }),
+        text: err.message,
+      });
+    }
+  }
+  async function muteAlert() {
+    try {
+      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.rawAlert.id}/_mute_all`);
+    } catch (err) {
+      Legacy.shims.toastNotifications.addDanger({
+        title: i18n.translate('xpack.monitoring.alerts.panel.muteAlert.errorTitle', {
+          defaultMessage: `Unable to mute alert`,
+        }),
+        text: err.message,
+      });
+    }
+  }
+  async function unmuteAlert() {
+    try {
+      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.rawAlert.id}/_unmute_all`);
+    } catch (err) {
+      Legacy.shims.toastNotifications.addDanger({
+        title: i18n.translate('xpack.monitoring.alerts.panel.muteAlert.errorTitle', {
+          defaultMessage: `Unable to unmute alert`,
+        }),
+        text: err.message,
+      });
+    }
   }
 
   const flyoutUi = showFlyout ? (
@@ -48,15 +109,63 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
     </AlertsContextProvider>
   ) : null;
 
+  const configurationUi = (
+    <Fragment>
+      <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            name="disable"
+            checked={!isEnabled}
+            onChange={async () => {
+              if (isEnabled) {
+                setIsEnabled(false);
+                await disableAlert();
+              } else {
+                setIsEnabled(true);
+                await enableAlert();
+              }
+            }}
+            label={
+              <FormattedMessage
+                id="xpack.monitoring.alerts.panel.disableTitle"
+                defaultMessage="Disable"
+              />
+            }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            name="mute"
+            checked={isMuted}
+            data-test-subj="muteSwitch"
+            onChange={async () => {
+              if (isMuted) {
+                setIsMuted(false);
+                await unmuteAlert();
+              } else {
+                setIsMuted(true);
+                await muteAlert();
+              }
+            }}
+            label={
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.muteTitle"
+                defaultMessage="Mute"
+              />
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
+      <EuiButton onClick={() => setShowFlyout(true)}>View alert configuration</EuiButton>
+      {flyoutUi}
+    </Fragment>
+  );
+
   const firingStates = states.filter((state) => state.firing);
   if (!firingStates.length) {
     if (inSetupMode) {
-      return (
-        <Fragment>
-          <EuiButton onClick={() => setShowFlyout(true)}>View alert configuration</EuiButton>
-          {flyoutUi}
-        </Fragment>
-      );
+      return configurationUi;
     }
     return null;
   }
@@ -80,8 +189,7 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
         {nextStepsUi}
       </EuiCallOut>
       <EuiSpacer size="m" />
-      <EuiButton onClick={() => setShowFlyout(true)}>View alert configuration</EuiButton>
-      {flyoutUi}
+      {configurationUi}
     </Fragment>
   );
 };
