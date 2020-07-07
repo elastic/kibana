@@ -10,7 +10,6 @@ import {
   EuiInMemoryTable,
   EuiInMemoryTableProps,
   EuiBadge,
-  EuiTextColor,
   EuiContextMenuItem,
   EuiButton,
   EuiFlexGroup,
@@ -23,7 +22,6 @@ import { useCapabilities, useLink } from '../../../../../hooks';
 import { useConfigRefresh } from '../../hooks';
 
 interface InMemoryPackageConfig extends PackageConfig {
-  streams: { total: number; enabled: number };
   inputTypes: string[];
   packageName?: string;
   packageTitle?: string;
@@ -72,30 +70,11 @@ export const PackageConfigsTable: React.FunctionComponent<Props> = ({
         }
 
         const dsInputTypes: string[] = [];
-        const streams = packageConfig.inputs.reduce(
-          (streamSummary, input) => {
-            if (!inputTypesValues.includes(input.type)) {
-              inputTypesValues.push(input.type);
-            }
-            if (!dsInputTypes.includes(input.type)) {
-              dsInputTypes.push(input.type);
-            }
-
-            streamSummary.total += input.streams.length;
-            streamSummary.enabled += input.enabled
-              ? input.streams.filter((stream) => stream.enabled).length
-              : 0;
-
-            return streamSummary;
-          },
-          { total: 0, enabled: 0 }
-        );
 
         dsInputTypes.sort(stringSortAscending);
 
         return {
           ...packageConfig,
-          streams,
           inputTypes: dsInputTypes,
           packageName: packageConfig.package?.name ?? '',
           packageTitle: packageConfig.package?.title ?? '',
@@ -173,23 +152,6 @@ export const PackageConfigsTable: React.FunctionComponent<Props> = ({
         ),
         render: (namespace: InMemoryPackageConfig['namespace']) => {
           return namespace ? <EuiBadge color="hollow">{namespace}</EuiBadge> : '';
-        },
-      },
-      {
-        field: 'streams',
-        name: i18n.translate(
-          'xpack.ingestManager.configDetails.packageConfigsTable.streamsCountColumnTitle',
-          {
-            defaultMessage: 'Streams',
-          }
-        ),
-        render: (streams: InMemoryPackageConfig['streams']) => {
-          return (
-            <>
-              <EuiTextColor>{streams.enabled}</EuiTextColor>
-              <EuiTextColor color="subdued">&nbsp;/ {streams.total}</EuiTextColor>
-            </>
-          );
         },
       },
       {

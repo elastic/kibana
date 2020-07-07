@@ -25,7 +25,7 @@ jest.mock('../../services/package_config', (): {
       assignPackageStream: jest.fn((packageInfo, dataInputs) => Promise.resolve(dataInputs)),
       buildPackageConfigFromPackage: jest.fn(),
       bulkCreate: jest.fn(),
-      create: jest.fn((soClient, newData) =>
+      create: jest.fn((soClient, callCluster, newData) =>
         Promise.resolve({
           ...newData,
           id: '1',
@@ -213,7 +213,7 @@ describe('When calling package config', () => {
         const request = getCreateKibanaRequest();
         await routeHandler(context, request, response);
         expect(response.ok).toHaveBeenCalled();
-        expect(packageConfigServiceMock.create.mock.calls[0][1]).toEqual({
+        expect(packageConfigServiceMock.create.mock.calls[0][2]).toEqual({
           config_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
           description: '',
           enabled: true,
@@ -294,7 +294,7 @@ describe('When calling package config', () => {
           const request = getCreateKibanaRequest();
           await routeHandler(context, request, response);
           expect(response.ok).toHaveBeenCalled();
-          expect(packageConfigServiceMock.create.mock.calls[0][1]).toEqual({
+          expect(packageConfigServiceMock.create.mock.calls[0][2]).toEqual({
             config_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
             description: '',
             enabled: true,

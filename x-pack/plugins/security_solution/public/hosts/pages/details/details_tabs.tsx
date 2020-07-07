@@ -12,6 +12,7 @@ import { scoreIntervalToDateTime } from '../../../common/components/ml/score/sco
 import { Anomaly } from '../../../common/components/ml/types';
 import { HostsTableType } from '../../store/model';
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { AnomaliesHostTable } from '../../../common/components/ml/tables/anomalies_host_table';
 
 import { HostDetailsTabsProps } from './types';
@@ -28,17 +29,13 @@ import {
 export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
   ({
     pageFilters,
-    deleteQuery,
     filterQuery,
-    from,
-    isInitializing,
     detailName,
     setAbsoluteRangeDatePicker,
-    setQuery,
-    to,
     indexPattern,
     hostDetailsPagePath,
   }) => {
+    const { from, to, isInitializing, deleteQuery, setQuery } = useGlobalTime();
     const narrowDateRange = useCallback(
       (score: Anomaly, interval: string) => {
         const fromTo = scoreIntervalToDateTime(score, interval);
