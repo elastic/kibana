@@ -52,7 +52,7 @@ export const getListHandler: RequestHandler<
     const savedObjectsClient = context.core.savedObjects.client;
     const res = await getPackages({
       savedObjectsClient,
-      category: request.query.category,
+      ...request.query,
     });
     const body: GetPackagesResponse = {
       response: res,

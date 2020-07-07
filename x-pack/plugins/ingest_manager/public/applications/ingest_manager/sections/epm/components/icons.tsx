@@ -7,7 +7,7 @@ import React from 'react';
 import { EuiIconTip, EuiIconProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const UpdateIcon = ({ size = 'm' }: { size: EuiIconProps['size'] }) => (
+export const UpdateIcon = ({ size = 'm' }: { size?: EuiIconProps['size'] }) => (
   <EuiIconTip
     aria-label={i18n.translate('xpack.ingestManager.epm.updateAvailableTooltip', {
       defaultMessage: 'Update available',

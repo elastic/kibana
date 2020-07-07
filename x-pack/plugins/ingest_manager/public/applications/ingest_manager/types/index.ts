@@ -91,6 +91,7 @@ export {
   ScreenshotItem,
   ServiceName,
   GetCategoriesResponse,
+  GetPackagesRequest,
   GetPackagesResponse,
   GetInfoResponse,
   InstallPackageResponse,

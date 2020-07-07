@@ -26,6 +26,7 @@ export { ArchiveEntry } from './extract';
 
 export interface SearchParams {
   category?: CategoryId;
+  experimental?: boolean;
 }
 
 export const pkgToPkgKey = ({ name, version }: { name: string; version: string }) =>
@@ -34,8 +35,13 @@ export const pkgToPkgKey = ({ name, version }: { name: string; version: string }
 export async function fetchList(params?: SearchParams): Promise<RegistrySearchResults> {
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/search`);
-  if (params && params.category) {
-    url.searchParams.set('category', params.category);
+  if (params) {
+    if (params.category) {
+      url.searchParams.set('category', params.category);
+    }
+    if (params.experimental) {
+      url.searchParams.set('experimental', params.experimental.toString());
+    }
   }
 
   return fetchUrl(url.toString()).then(JSON.parse);

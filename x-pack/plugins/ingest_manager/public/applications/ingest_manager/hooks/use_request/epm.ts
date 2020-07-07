@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpFetchQuery } from 'src/core/public';
 import { useRequest, sendRequest } from './use_request';
 import { epmRouteService } from '../../services';
 import {
   GetCategoriesResponse,
+  GetPackagesRequest,
   GetPackagesResponse,
   GetInfoResponse,
   InstallPackageResponse,
@@ -22,7 +22,7 @@ export const useGetCategories = () => {
   });
 };
 
-export const useGetPackages = (query: HttpFetchQuery = {}) => {
+export const useGetPackages = (query: GetPackagesRequest['query'] = {}) => {
   return useRequest<GetPackagesResponse>({
     path: epmRouteService.getListPath(),
     method: 'get',

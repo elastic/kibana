@@ -25,8 +25,8 @@ export async function getPackages(
     savedObjectsClient: SavedObjectsClientContract;
   } & Registry.SearchParams
 ) {
-  const { savedObjectsClient } = options;
-  const registryItems = await Registry.fetchList({ category: options.category }).then((items) => {
+  const { savedObjectsClient, experimental = false, category } = options;
+  const registryItems = await Registry.fetchList({ category, experimental }).then((items) => {
     return items.map((item) =>
       Object.assign({}, item, { title: item.title || nameAsTitle(item.name) })
     );

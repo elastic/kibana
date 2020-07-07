@@ -8,6 +8,7 @@ import { schema } from '@kbn/config-schema';
 export const GetPackagesRequestSchema = {
   query: schema.object({
     category: schema.maybe(schema.string()),
+    experimental: schema.maybe(schema.boolean()),
   }),
 };
 

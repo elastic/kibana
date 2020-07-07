@@ -19,6 +19,7 @@ export interface GetCategoriesResponse {
 export interface GetPackagesRequest {
   query: {
     category?: string;
+    experimental?: boolean;
   };
 }
 
