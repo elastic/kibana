@@ -103,37 +103,22 @@ setAndSetWithFunctions.forEach((set) => {
 
   // Function manipulation
   {
-    const obj = { fn: () => {} };
-    set(obj, 'fn.prototype', 'foo');
-    assert.strictEqual(typeof obj.fn, 'function');
-    assert.strictEqual(obj.fn.prototype, 'foo');
-  }
-  {
-    const obj = () => {};
-    set(obj, 'prototype', 'foo');
-    assert.strictEqual(obj.prototype, 'foo');
-  }
-  {
-    const obj = function () {};
-    assert.throws(
-      () => {
-        set(obj, 'prototype', 'foo');
-      },
-      {
-        message: 'Illegal access of function prototype',
-      }
-    );
-  }
-  {
-    const obj = { fn: function () {} };
-    assert.throws(
-      () => {
-        set(obj, 'fn.prototype', 'foo');
-      },
-      {
-        message: 'Illegal access of function prototype',
-      }
-    );
+    const funcTestCases = [
+      [function () {}, 'prototype'],
+      [() => {}, 'prototype'],
+      [{ fn: function () {} }, 'fn.prototype'],
+      [{ fn: () => {} }, 'fn.prototype'],
+    ];
+    funcTestCases.forEach(([obj, path]) => {
+      assert.throws(
+        () => {
+          set(obj, path, 'foo');
+        },
+        {
+          message: 'Illegal access of function prototype',
+        }
+      );
+    });
   }
 });
 

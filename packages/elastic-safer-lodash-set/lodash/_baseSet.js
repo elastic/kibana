@@ -38,7 +38,7 @@ function baseSet(object, path, value, customizer) {
     var key = toKey(path[index]),
         newValue = value;
 
-    if (typeof nested == 'function' && key == 'prototype' && hasOwnProperty.call(nested, 'prototype')) {
+    if (typeof nested == 'function' && key == 'prototype') {
       throw new Error('Illegal access of function prototype')
     }
 

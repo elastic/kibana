@@ -162,85 +162,30 @@ setFunctions.forEach(([test, set]) => {
   });
 
   // Function manipulation
-  if (isSetWith) {
-    {
-      const obj = { fn: () => {} };
-      const result = set(() => {}, 'fn.prototype', 'foo', obj);
-      assert.strictEqual(typeof result.fn, 'function');
-      assert.strictEqual(result.fn.prototype, 'foo');
-      assert.strictEqual(obj.fn, result.fn); // Functions are not clonable and will be identical, so the change will leak into `obj`
-    }
-    {
-      const obj = { fn: () => {} };
-      const result = set(() => {})('fn.prototype', 'foo', obj);
-      assert.strictEqual(typeof result.fn, 'function');
-      assert.strictEqual(result.fn.prototype, 'foo');
-      assert.strictEqual(obj.fn, result.fn); // Functions are not clonable and will be identical, so the change will leak into `obj`
-    }
-    {
-      const obj = { fn: () => {} };
-      const result = set(() => {})('fn.prototype')('foo', obj);
-      assert.strictEqual(typeof result.fn, 'function');
-      assert.strictEqual(result.fn.prototype, 'foo');
-      assert.strictEqual(obj.fn, result.fn); // Functions are not clonable and will be identical, so the change will leak into `obj`
-    }
-    {
-      const obj = { fn: () => {} };
-      const result = set(() => {})('fn.prototype')('foo')(obj);
-      assert.strictEqual(typeof result.fn, 'function');
-      assert.strictEqual(result.fn.prototype, 'foo');
-      assert.strictEqual(obj.fn, result.fn); // Functions are not clonable and will be identical, so the change will leak into `obj`
-    }
-    {
-      const obj = { fn: () => {} };
-      const result = set(() => {}, 'fn.prototype')('foo')(obj);
-      assert.strictEqual(typeof result.fn, 'function');
-      assert.strictEqual(result.fn.prototype, 'foo');
-      assert.strictEqual(obj.fn, result.fn); // Functions are not clonable and will be identical, so the change will leak into `obj`
-    }
-    {
-      const obj = { fn: () => {} };
-      const result = set(() => {}, 'fn.prototype', 'foo')(obj);
-      assert.strictEqual(typeof result.fn, 'function');
-      assert.strictEqual(result.fn.prototype, 'foo');
-      assert.strictEqual(obj.fn, result.fn); // Functions are not clonable and will be identical, so the change will leak into `obj`
-    }
-    {
-      const obj = { fn: () => {} };
-      const result = set(() => {})('fn.prototype', 'foo')(obj);
-      assert.strictEqual(typeof result.fn, 'function');
-      assert.strictEqual(result.fn.prototype, 'foo');
-      assert.strictEqual(obj.fn, result.fn); // Functions are not clonable and will be identical, so the change will leak into `obj`
-    }
-  } else {
-    {
-      const obj = { fn: () => {} };
-      const result = set('fn.prototype', 'foo', obj);
-      assert.strictEqual(typeof result.fn, 'function');
-      assert.strictEqual(result.fn.prototype, 'foo');
-      assert.strictEqual(obj.fn, result.fn); // Functions are not clonable and will be identical, so the change will leak into `obj`
-    }
-    {
-      const obj = { fn: () => {} };
-      const result = set('fn.prototype', 'foo')(obj);
-      assert.strictEqual(typeof result.fn, 'function');
-      assert.strictEqual(result.fn.prototype, 'foo');
-      assert.strictEqual(obj.fn, result.fn); // Functions are not clonable and will be identical, so the change will leak into `obj`
-    }
-    {
-      const obj = { fn: () => {} };
-      const result = set('fn.prototype')('foo', obj);
-      assert.strictEqual(typeof result.fn, 'function');
-      assert.strictEqual(result.fn.prototype, 'foo');
-      assert.strictEqual(obj.fn, result.fn); // Functions are not clonable and will be identical, so the change will leak into `obj`
-    }
-    {
-      const obj = { fn: () => {} };
-      const result = set('fn.prototype')('foo')(obj);
-      assert.strictEqual(typeof result.fn, 'function');
-      assert.strictEqual(result.fn.prototype, 'foo');
-      assert.strictEqual(obj.fn, result.fn); // Functions are not clonable and will be identical, so the change will leak into `obj`
-    }
+  {
+    const funcTestCases = [
+      [{ fn: function () {} }, 'fn.prototype'],
+      [{ fn: () => {} }, 'fn.prototype'],
+    ];
+    const msg = {
+      message: 'Illegal access of function prototype',
+    };
+    funcTestCases.forEach(([obj, path]) => {
+      if (isSetWith) {
+        assert.throws(() => set(() => {}, path, 'foo', obj), msg);
+        assert.throws(() => set(() => {})(path, 'foo', obj), msg);
+        assert.throws(() => set(() => {})(path)('foo', obj), msg);
+        assert.throws(() => set(() => {})(path)('foo')(obj), msg);
+        assert.throws(() => set(() => {}, path)('foo')(obj), msg);
+        assert.throws(() => set(() => {}, path, 'foo')(obj), msg);
+        assert.throws(() => set(() => {})(path, 'foo')(obj), msg);
+      } else {
+        assert.throws(() => set(path, 'foo', obj), msg);
+        assert.throws(() => set(path, 'foo')(obj), msg);
+        assert.throws(() => set(path)('foo', obj), msg);
+        assert.throws(() => set(path)('foo')(obj), msg);
+      }
+    });
   }
   {
     // This doesn't really make sence to do with the `fp` variant of lodash, as it will return a regular non-function object
@@ -257,99 +202,6 @@ setFunctions.forEach(([test, set]) => {
       assert.notStrictEqual(result, obj);
       assert.strictEqual(result.prototype, 'foo');
     });
-  }
-  if (isSetWith) {
-    const obj = { fn: function () {} };
-    assert.throws(
-      () => {
-        set(() => {}, 'fn.prototype', 'foo', obj);
-      },
-      {
-        message: 'Illegal access of function prototype',
-      }
-    );
-    assert.throws(
-      () => {
-        set(() => {})('fn.prototype', 'foo', obj);
-      },
-      {
-        message: 'Illegal access of function prototype',
-      }
-    );
-    assert.throws(
-      () => {
-        set(() => {})('fn.prototype')('foo', obj);
-      },
-      {
-        message: 'Illegal access of function prototype',
-      }
-    );
-    assert.throws(
-      () => {
-        set(() => {})('fn.prototype')('foo')(obj);
-      },
-      {
-        message: 'Illegal access of function prototype',
-      }
-    );
-    assert.throws(
-      () => {
-        set(() => {}, 'fn.prototype')('foo')(obj);
-      },
-      {
-        message: 'Illegal access of function prototype',
-      }
-    );
-    assert.throws(
-      () => {
-        set(() => {}, 'fn.prototype', 'foo')(obj);
-      },
-      {
-        message: 'Illegal access of function prototype',
-      }
-    );
-    assert.throws(
-      () => {
-        set(() => {})('fn.prototype', 'foo')(obj);
-      },
-      {
-        message: 'Illegal access of function prototype',
-      }
-    );
-  } else {
-    const obj = { fn: function () {} };
-    assert.throws(
-      () => {
-        set('fn.prototype', 'foo', obj);
-      },
-      {
-        message: 'Illegal access of function prototype',
-      }
-    );
-    assert.throws(
-      () => {
-        set('fn.prototype', 'foo')(obj);
-      },
-      {
-        message: 'Illegal access of function prototype',
-      }
-    );
-    assert.throws(
-      () => {
-        set('fn.prototype')('foo', obj);
-      },
-      {
-        message: 'Illegal access of function prototype',
-      }
-    );
-    assert.throws(
-      () => {
-        set('fn.prototype')('foo')(obj);
-      },
-      {
-        message: 'Illegal access of function prototype',
-      }
-    );
   }
 });
 
