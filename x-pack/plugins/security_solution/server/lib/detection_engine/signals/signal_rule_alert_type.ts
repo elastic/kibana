@@ -163,7 +163,7 @@ export const signalRulesAlertType = ({
             );
           }
 
-          const scopedClusterClient = services.getScopedClusterClient(ml.mlClient);
+          const scopedClusterClient = services.getLegacyScopedClusterClient(ml.mlClient);
           // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
           // currently unused by the jobsSummary function.
           const summaryJobs = await (

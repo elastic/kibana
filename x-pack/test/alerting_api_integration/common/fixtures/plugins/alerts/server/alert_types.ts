@@ -191,7 +191,7 @@ export function defineAlertTypes(
         callClusterError = e;
       }
       // Call scoped cluster
-      const scopedClusterClient = services.getScopedClusterClient(clusterClient);
+      const scopedClusterClient = services.getLegacyScopedClusterClient(clusterClient);
       let callScopedClusterSuccess = false;
       let callScopedClusterError;
       try {

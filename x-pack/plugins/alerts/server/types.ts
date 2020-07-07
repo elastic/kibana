@@ -40,7 +40,7 @@ declare module 'src/core/server' {
 export interface Services {
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
-  getScopedClusterClient(clusterClient: ILegacyClusterClient): ILegacyScopedClusterClient;
+  getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient): ILegacyScopedClusterClient;
 }
 
 export interface AlertServices extends Services {

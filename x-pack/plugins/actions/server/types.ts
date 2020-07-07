@@ -25,7 +25,7 @@ export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefine
 export interface Services {
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
-  getScopedClusterClient(clusterClient: ILegacyClusterClient): ILegacyScopedClusterClient;
+  getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient): ILegacyScopedClusterClient;
 }
 
 declare module 'src/core/server' {
