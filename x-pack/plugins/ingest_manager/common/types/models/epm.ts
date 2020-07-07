@@ -79,6 +79,7 @@ export interface RegistryConfigTemplate {
   title: string;
   description: string;
   inputs: RegistryInput[];
+  multiple?: boolean;
 }
 
 export interface RegistryInput {
@@ -175,6 +176,12 @@ export interface Dataset {
   package: string;
   path: string;
   ingest_pipeline: string;
+  elasticsearch?: RegistryElasticsearch;
+}
+
+export interface RegistryElasticsearch {
+  'index_template.settings'?: object;
+  'index_template.mappings'?: object;
 }
 
 // EPR types this as `[]map[string]interface{}`
@@ -272,6 +279,7 @@ export interface IndexTemplate {
   data_stream: {
     timestamp_field: string;
   };
+  composed_of: string[];
   _meta: object;
 }
 
