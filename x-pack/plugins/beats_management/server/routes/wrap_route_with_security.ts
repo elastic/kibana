@@ -33,28 +33,18 @@ export function wrapRouteWithSecurity<P, Q, B>(
       requiredLicense.length > 0 &&
       (license.expired || !requiredLicense.includes(license.type))
     ) {
-      return response.custom({
-        statusCode: 403,
+      return response.forbidden({
         body: {
-          error: {
-            message: `Your ${license.type} license does not support this API or is expired. Please upgrade your license.`,
-            code: 403,
-          },
-          success: false,
+          message: `Your ${license.type} license does not support this API or is expired. Please upgrade your license.`,
         },
       });
     }
 
     if (requiredRoles) {
       if (user.kind !== 'authenticated') {
-        return response.custom({
-          statusCode: 403,
+        return response.forbidden({
           body: {
-            error: {
-              message: `Request must be authenticated`,
-              code: 403,
-            },
-            success: false,
+            message: `Request must be authenticated`,
           },
         });
       }
@@ -64,16 +54,11 @@ export function wrapRouteWithSecurity<P, Q, B>(
         !user.roles.includes('superuser') &&
         difference(requiredRoles, user.roles).length !== 0
       ) {
-        return response.custom({
-          statusCode: 403,
+        return response.forbidden({
           body: {
-            error: {
-              message: `Request must be authenticated by a user with one of the following user roles: ${requiredRoles.join(
-                ','
-              )}`,
-              code: 403,
-            },
-            success: false,
+            message: `Request must be authenticated by a user with one of the following user roles: ${requiredRoles.join(
+              ','
+            )}`,
           },
         });
       }

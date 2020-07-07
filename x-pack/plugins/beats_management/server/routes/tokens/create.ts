@@ -64,7 +64,7 @@ export const registerCreateTokenRoute = (router: IRouter) => {
     {
       path: '/api/beats/enrollment_tokens',
       validate: {
-        body: schema.maybe(
+        body: schema.nullable(
           schema.object({
             num_tokens: schema.number({ defaultValue: DEFAULT_NUM_TOKENS, min: 1 }),
           })
@@ -95,14 +95,9 @@ export const registerCreateTokenRoute = (router: IRouter) => {
           });
         } catch (err) {
           beatsManagement.framework.log(err.message);
-          return response.custom({
-            statusCode: 500,
+          return response.internalError({
             body: {
-              error: {
-                message: 'An error occurred, please check your Kibana logs',
-                code: 500,
-              },
-              success: false,
+              message: 'An error occurred, please check your Kibana logs',
             },
           });
         }
