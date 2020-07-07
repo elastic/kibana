@@ -89,7 +89,7 @@ export const EventsTrHeader = styled.div.attrs(({ className }) => ({
   display: flex;
 `;
 
-export const EventsThGroupActions = styled.div.attrs(({ className = '', isEventViewer }) => ({
+export const EventsThGroupActions = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__thGroupActions ${className}`,
 }))<{ actionsColumnWidth: number; isEventViewer: boolean }>`
   display: flex;

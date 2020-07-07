@@ -103,13 +103,11 @@ const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowser
 
   const handleDisableAll = useCallback(() => {
     setExcludedRowRendererIds(Object.values(RowRendererId));
-    // eslint-disable-next-line no-unused-expressions
     tableRef?.current?.setSelection([]);
   }, [tableRef, setExcludedRowRendererIds]);
 
   const handleEnableAll = useCallback(() => {
     setExcludedRowRendererIds([]);
-    // eslint-disable-next-line no-unused-expressions
     tableRef?.current?.setSelection(renderers);
   }, [tableRef, setExcludedRowRendererIds]);
 
