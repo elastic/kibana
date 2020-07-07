@@ -56,7 +56,7 @@ export function NoDataPopover({
           <p style={{ maxWidth: 300 }}>
             {i18n.translate('data.noDataPopover.content', {
               defaultMessage:
-                "This time range doesn't contain any data. Increase or adjust the time range to see more fields and create charts",
+                "This time range doesn't contain any data. Increase or adjust the time range to see more fields and create charts.",
             })}
           </p>
         </EuiText>
@@ -66,11 +66,13 @@ export function NoDataPopover({
       step={1}
       stepsTotal={1}
       isStepOpen={noDataPopoverVisible}
-      subtitle={i18n.translate('data.noDataPopover.title', { defaultMessage: 'Tip' })}
-      title=""
+      subtitle={i18n.translate('data.noDataPopover.subtitle', { defaultMessage: 'Tip' })}
+      title={i18n.translate('data.noDataPopover.title', { defaultMessage: 'Empty dataset' })}
       footerAction={
         <EuiButtonEmpty
-          size="s"
+          size="xs"
+          flush="right"
+          color="text"
           data-test-subj="noDataPopoverDismissButton"
           onClick={() => {
             storage.set(NO_DATA_POPOVER_STORAGE_KEY, true);
