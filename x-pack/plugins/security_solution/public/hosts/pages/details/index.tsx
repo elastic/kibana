@@ -27,6 +27,7 @@ import { SiemSearchBar } from '../../../common/components/search_bar';
 import { WrapperPage } from '../../../common/components/wrapper_page';
 import { HostOverviewByNameQuery } from '../../containers/hosts/overview';
 import { KpiHostDetailsQuery } from '../../containers/kpi_host_details';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useWithSource } from '../../../common/containers/source';
 import { LastEventIndexKey } from '../../../graphql/types';
 import { useKibana } from '../../../common/lib/kibana';
@@ -37,7 +38,7 @@ import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '.
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { esQuery, Filter } from '../../../../../../../src/plugins/data/public';
 
-import { HostsEmptyPage } from '../hosts_empty_page';
+import { OverviewEmpty } from '../../../overview/components/overview_empty';
 import { HostDetailsTabs } from './details_tabs';
 import { navTabsHostDetails } from './nav_tabs';
 import { HostDetailsProps } from './types';
@@ -50,17 +51,13 @@ const KpiHostDetailsManage = manageQuery(KpiHostsComponent);
 const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
   ({
     filters,
-    from,
-    isInitializing,
     query,
     setAbsoluteRangeDatePicker,
     setHostDetailsTablesActivePageToZero,
-    setQuery,
-    to,
     detailName,
-    deleteQuery,
     hostDetailsPagePath,
   }) => {
+    const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
     useEffect(() => {
       setHostDetailsTablesActivePageToZero();
     }, [setHostDetailsTablesActivePageToZero, detailName]);
@@ -197,7 +194,7 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
           <WrapperPage>
             <HeaderPage border title={detailName} />
 
-            <HostsEmptyPage />
+            <OverviewEmpty />
           </WrapperPage>
         )}
 
