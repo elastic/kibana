@@ -20,7 +20,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
-  showNewVisualizeFlow: schema.boolean({ defaultValue: false }),
+  showNewVisualizeFlow: schema.boolean({ defaultValue: true }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

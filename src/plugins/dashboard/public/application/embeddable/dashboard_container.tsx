@@ -34,6 +34,9 @@ import {
   IEmbeddable,
   EmbeddableStart,
   PanelState,
+  EmbeddableOutput,
+  ErrorEmbeddable,
+  EmbeddableFactoryNotFoundError,
 } from '../../embeddable_plugin';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import { createPanelState } from './panel';
@@ -182,6 +185,92 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         lastReloadRequestTime: new Date().getTime(),
       });
     });
+  }
+
+  public replacePanel(
+    previousPanelState: DashboardPanelState<EmbeddableInput>,
+    newPanelState: Partial<PanelState>
+  ) {
+    // TODO: In the current infrastructure, embeddables in a container do not react properly to
+    // changes. Removing the existing embeddable, and adding a new one is a temporary workaround
+    // until the container logic is fixed.
+
+    const finalPanels = { ...this.input.panels };
+    delete finalPanels[previousPanelState.explicitInput.id];
+    const newPanelId = newPanelState.explicitInput?.id ? newPanelState.explicitInput.id : uuid.v4();
+    finalPanels[newPanelId] = {
+      ...previousPanelState,
+      ...newPanelState,
+      gridData: {
+        ...previousPanelState.gridData,
+        i: newPanelId,
+      },
+      explicitInput: {
+        ...newPanelState.explicitInput,
+        id: newPanelId,
+      },
+    };
+    this.updateInput({
+      panels: finalPanels,
+      lastReloadRequestTime: new Date().getTime(),
+    });
+  }
+
+  public async addOrUpdateEmbeddable<
+    EEI extends EmbeddableInput = EmbeddableInput,
+    EEO extends EmbeddableOutput = EmbeddableOutput,
+    E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>
+  >(type: string, explicitInput: Partial<EEI>, embeddableId?: string) {
+    const idToReplace = embeddableId ? embeddableId : explicitInput.id;
+    if (idToReplace && this.input.panels[idToReplace]) {
+      this.replacePanel(this.input.panels[idToReplace], {
+        type,
+        explicitInput: {
+          ...explicitInput,
+          id: uuid.v4(),
+        },
+      });
+    } else {
+      this.addNewEmbeddable<EEI, EEO, E>(type, explicitInput);
+    }
+  }
+
+  public async updateEmbeddable<
+    EEI extends EmbeddableInput = EmbeddableInput,
+    EEO extends EmbeddableOutput = EmbeddableOutput,
+    E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>
+  >(type: string, embeddableId: string, explicitInput: Partial<EEI>): Promise<E | ErrorEmbeddable> {
+    const factory = this.getFactory(type) as EmbeddableFactory<EEI, EEO, E> | undefined;
+    if (!factory) {
+      throw new EmbeddableFactoryNotFoundError(type);
+    }
+
+    const panel = this.input.panels[embeddableId];
+    if (!panel) {
+      throw new Error(`Panel with id: ${embeddableId} could not have been found`);
+    }
+
+    const explicitEmbeddableInput = super.createNewExplicitEmbeddableInput<EmbeddableInput>(
+      embeddableId,
+      factory,
+      explicitInput
+    ) as Partial<EmbeddableInput>;
+
+    this.input.panels[embeddableId] = {
+      type,
+      explicitInput: {
+        ...explicitEmbeddableInput,
+        id: embeddableId,
+      } as EmbeddableInput,
+      gridData: panel.gridData,
+    };
+
+    this.updateInput({
+      panels: this.input.panels,
+      lastReloadRequestTime: new Date().getTime(),
+    });
+
+    return await super.untilEmbeddableLoaded(embeddableId);
   }
 
   public render(dom: HTMLElement) {

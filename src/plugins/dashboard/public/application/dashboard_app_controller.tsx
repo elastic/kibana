@@ -428,19 +428,23 @@ export class DashboardAppController {
 
             const incomingState = embeddable
               .getStateTransfer(scopedHistory())
-              .getIncomingEmbeddablePackage();
+              .getIncomingEmbeddablePackage({
+                keysToRemoveAfterFetch: ['id', 'embeddableId', 'input'],
+              });
             if (incomingState) {
               if ('id' in incomingState) {
                 container.addNewEmbeddable<EmbeddableInput>(incomingState.type, {
                   savedObjectId: incomingState.id,
                 });
               } else if ('input' in incomingState) {
-                const input = incomingState.input;
+                debugger;
+                const { input, type, embeddableId } = incomingState;
                 delete input.id;
+                delete input.savedVisInstance;
                 const explicitInput = {
                   savedVis: input,
                 };
-                container.addNewEmbeddable<EmbeddableInput>(incomingState.type, explicitInput);
+                container.addOrUpdateEmbeddable(type, explicitInput, embeddableId);
               }
             }
           }

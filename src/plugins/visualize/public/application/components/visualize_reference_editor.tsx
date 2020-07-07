@@ -19,15 +19,12 @@
 
 import './visualize_editor.scss';
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
 import { EventEmitter } from 'events';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiScreenReaderOnly } from '@elastic/eui';
 
 import { useKibana } from '../../../../kibana_react/public';
 import {
   useChromeVisibility,
-  useSavedVisInstance,
+  useVisReference,
   useVisualizeAppState,
   useEditorUpdates,
   useLinkedSearchUpdates,
@@ -36,20 +33,21 @@ import { VisualizeServices } from '../types';
 import { ExperimentalVisInfo } from './experimental_vis_info';
 import { VisualizeTopNav } from './visualize_top_nav';
 
-export const VisualizeEditor = () => {
-  const { id: visualizationIdFromUrl } = useParams();
+export const VisualizeReferenceEditor = () => {
   const [originatingApp, setOriginatingApp] = useState<string>();
   const { services } = useKibana<VisualizeServices>();
   const [eventEmitter] = useState(new EventEmitter());
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(!visualizationIdFromUrl);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(true);
   const [embeddableId, setEmbeddableId] = useState<string>();
+  const [valueInput, setValueInput] = useState<string>();
 
   const isChromeVisible = useChromeVisibility(services.chrome);
-  const { savedVisInstance, visEditorRef, visEditorController } = useSavedVisInstance(
+  const { savedVisInstance, visEditorRef, visEditorController } = useVisReference(
     services,
     eventEmitter,
     isChromeVisible,
-    visualizationIdFromUrl
+    false,
+    valueInput
   );
   const { appState, hasUnappliedChanges } = useVisualizeAppState(
     services,
@@ -67,12 +65,13 @@ export const VisualizeEditor = () => {
   useLinkedSearchUpdates(services, eventEmitter, appState, savedVisInstance);
 
   useEffect(() => {
-    const { originatingApp: value, embeddableId: embeddableIdValue } =
+    const { originatingApp: value, embeddableId: embeddableIdValue, valueInput: valueInputValue } =
       services.embeddable
         .getStateTransfer(services.scopedHistory)
-        .getIncomingEditorState({ keysToRemoveAfterFetch: ['id', 'embeddableId', 'input'] }) || {};
+        .getIncomingEditorState({ keysToRemoveAfterFetch: ['id', 'embeddableId', 'valueInput'] }) ||
+      {};
     setOriginatingApp(value);
-    setEmbeddableId(embeddableIdValue);
+    setValueInput(valueInputValue);
   }, [services]);
 
   useEffect(() => {
@@ -95,25 +94,10 @@ export const VisualizeEditor = () => {
           originatingApp={originatingApp}
           savedVisInstance={savedVisInstance}
           stateContainer={appState}
-          visualizationIdFromUrl={visualizationIdFromUrl}
           embeddableId={embeddableId}
         />
       )}
       {savedVisInstance?.vis?.type?.isExperimental && <ExperimentalVisInfo />}
-      {savedVisInstance && (
-        <EuiScreenReaderOnly>
-          <h1>
-            <FormattedMessage
-              id="visualize.pageHeading"
-              defaultMessage="{chartName} {chartType} visualization"
-              values={{
-                chartName: savedVisInstance.savedVis.title,
-                chartType: savedVisInstance.vis.type.title,
-              }}
-            />
-          </h1>
-        </EuiScreenReaderOnly>
-      )}
       <div className={isChromeVisible ? 'visEditor__content' : 'visualize'} ref={visEditorRef} />
     </div>
   );

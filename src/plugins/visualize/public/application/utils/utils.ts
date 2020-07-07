@@ -61,11 +61,22 @@ export const visStateToEditorState = (
   services: VisualizeServices
 ) => {
   const savedVisState = services.visualizations.convertFromSerializedVis(vis.serialize());
+  if (savedVis) {
+    return {
+      uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : vis.uiState.toJSON(),
+      query: vis.data.searchSource?.getOwnField('query') || getDefaultQuery(services),
+      filters: (vis.data.searchSource?.getOwnField('filter') as Filter[]) || [],
+      vis: { ...savedVisState.visState, title: vis.title },
+      linked: !!savedVis.savedSearchId,
+    };
+  }
   return {
-    uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : vis.uiState.toJSON(),
+    uiState: savedVisState.uiStateJSON
+      ? JSON.parse(savedVisState.uiStateJSON)
+      : vis.uiState.toJSON(),
     query: vis.data.searchSource?.getOwnField('query') || getDefaultQuery(services),
     filters: (vis.data.searchSource?.getOwnField('filter') as Filter[]) || [],
-    vis: { ...savedVisState.visState, title: vis.title },
-    linked: !!savedVis.savedSearchId,
+    vis: { ...vis, title: '' },
+    linked: false,
   };
 };

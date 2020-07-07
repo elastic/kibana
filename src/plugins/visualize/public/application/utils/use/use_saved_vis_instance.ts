@@ -38,7 +38,8 @@ export const useSavedVisInstance = (
   services: VisualizeServices,
   eventEmitter: EventEmitter,
   isChromeVisible: boolean | undefined,
-  visualizationIdFromUrl: string | undefined
+  visualizationIdFromUrl: string | undefined,
+  valueInput?: object
 ) => {
   const [state, setState] = useState<{
     savedVisInstance?: SavedVisInstance;
@@ -155,6 +156,10 @@ export const useSavedVisInstance = (
 
     if (isChromeVisible === undefined) {
       // wait for specifying chrome
+      return;
+    }
+
+    if (valueInput) {
       return;
     }
 

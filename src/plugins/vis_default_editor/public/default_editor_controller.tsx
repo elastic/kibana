@@ -42,6 +42,7 @@ class DefaultEditorController {
 
   constructor(el: HTMLElement, vis: Vis, eventEmitter: EventEmitter, embeddableHandler: any) {
     this.el = el;
+    console.dir(el);
     const { type: visType } = vis;
 
     const optionTabs = [
@@ -103,7 +104,9 @@ class DefaultEditorController {
   }
 
   destroy() {
-    unmountComponentAtNode(this.el);
+    if (this.el) {
+      unmountComponentAtNode(this.el);
+    }
   }
 }
 

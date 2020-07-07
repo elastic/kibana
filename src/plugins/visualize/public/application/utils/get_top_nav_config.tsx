@@ -34,6 +34,7 @@ import { unhashUrl } from '../../../../kibana_utils/public';
 import { SavedVisInstance, VisualizeServices, VisualizeAppStateContainer } from '../types';
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
+import { useSavedVisInstance } from './use';
 interface TopNavConfigParams {
   hasUnsavedChanges: boolean;
   setHasUnsavedChanges: (value: boolean) => void;
@@ -43,6 +44,7 @@ interface TopNavConfigParams {
   savedVisInstance: SavedVisInstance;
   stateContainer: VisualizeAppStateContainer;
   visualizationIdFromUrl?: string;
+  embeddableId?: string;
 }
 
 export const getTopNavConfig = (
@@ -55,6 +57,7 @@ export const getTopNavConfig = (
     savedVisInstance: { embeddableHandler, savedVis, vis },
     stateContainer,
     visualizationIdFromUrl,
+    embeddableId,
   }: TopNavConfigParams,
   {
     application,
@@ -239,6 +242,7 @@ export const getTopNavConfig = (
                 if (!originatingApp) {
                   return;
                 }
+                debugger;
                 const input = {
                   ...vis.serialize(),
                   id: uuid.v4(),

@@ -24,7 +24,12 @@ import { take } from 'rxjs/operators';
 import { ViewMode } from '../types';
 import { EmbeddableFactoryNotFoundError } from '../errors';
 import { EmbeddableStart } from '../../plugin';
-import { IEmbeddable, EmbeddableEditorState, EmbeddableStateTransfer } from '../..';
+import {
+  IEmbeddable,
+  EmbeddableEditorState,
+  EmbeddableStateTransfer,
+  SavedObjectEmbeddableInput,
+} from '../..';
 
 export const ACTION_EDIT_PANEL = 'editPanel';
 
@@ -74,17 +79,20 @@ export class EditPanelAction implements Action<ActionContext> {
   }
 
   public async isCompatible({ embeddable }: ActionContext) {
-    const canEditEmbeddable = Boolean(
+    const canEditEmbeddable = true; /* Boolean(
       embeddable &&
         embeddable.getOutput().editable &&
         (embeddable.getOutput().editUrl ||
           (embeddable.getOutput().editApp && embeddable.getOutput().editPath))
-    );
+    );*/
     const inDashboardEditMode = embeddable.getInput().viewMode === ViewMode.EDIT;
     return Boolean(canEditEmbeddable && inDashboardEditMode);
   }
 
   public async execute(context: ActionContext) {
+    debugger;
+    const { embeddable } = context;
+    console.dir(embeddable);
     const appTarget = this.getAppTarget(context);
     if (appTarget) {
       if (this.stateTransfer && appTarget.state) {
@@ -96,7 +104,20 @@ export class EditPanelAction implements Action<ActionContext> {
         await this.application.navigateToApp(appTarget.app, { path: appTarget.path });
       }
       return;
-    }
+    } /* else if (embeddable && embeddable.type === 'visualization' && this.stateTransfer) {
+      debugger;
+      this.stateTransfer.navigateToEditor('visualize', {
+        state: {
+          originatingApp: 'dashboards',
+          input: embeddable.input,
+          type: 'visualization',
+          byValueMode: true,
+          embeddableId: embeddable.id,
+        },
+        appendToExistingState: true,
+      });
+      return;
+    }*/
 
     const href = await this.getHref(context);
     if (href) {
@@ -109,8 +130,16 @@ export class EditPanelAction implements Action<ActionContext> {
     const app = embeddable ? embeddable.getOutput().editApp : undefined;
     const path = embeddable ? embeddable.getOutput().editPath : undefined;
     if (app && path) {
-      const state = this.currentAppId ? { originatingApp: this.currentAppId } : undefined;
-      return { app, path, state };
+      if (this.currentAppId) {
+        const byValueMode = !(embeddable.getInput() as SavedObjectEmbeddableInput).savedObjectId;
+        const state: EmbeddableEditorState = {
+          originatingApp: this.currentAppId,
+          byValueMode,
+          valueInput: byValueMode ? embeddable.getInput() : undefined,
+        };
+        return { app, path, state };
+      }
+      return { app, path };
     }
   }
 

@@ -18,11 +18,76 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { VisSavedObject, VisualizeEmbeddableContract } from 'src/plugins/visualizations/public';
+import {
+  SavedVisState,
+  SerializedVis,
+  VisSavedObject,
+  VisualizeEmbeddableContract,
+} from 'src/plugins/visualizations/public';
 import { SearchSourceFields } from 'src/plugins/data/public';
 import { SavedObject } from 'src/plugins/saved_objects/public';
 import { createSavedSearchesLoader } from '../../../../discover/public';
 import { VisualizeServices } from '../types';
+import { EmbeddableInput } from '../../../../embeddable/public/lib/embeddables';
+
+export const getVisualizationInstanceFromInput = async (
+  {
+    chrome,
+    data,
+    overlays,
+    visualizations,
+    createVisEmbeddableFromObject,
+    savedObjects,
+    savedVisualizations,
+    toastNotifications,
+  }: VisualizeServices,
+  input?: EmbeddableInput,
+  opts?: Record<string, unknown> | string
+) => {
+  if (!input) {
+    return;
+  }
+  const serializedVis = input.savedVis as SerializedVis;
+  let vis = await visualizations.createVis(serializedVis.type, serializedVis);
+
+  if (vis.type.setup) {
+    try {
+      vis = await vis.type.setup(vis);
+    } catch {
+      // skip this catch block
+    }
+  }
+
+  const embeddableHandler = (await createVisEmbeddableFromObject(vis, {
+    timeRange: data.query.timefilter.timefilter.getTime(),
+    filters: data.query.filterManager.getFilters(),
+    id: '',
+  })) as VisualizeEmbeddableContract;
+
+  embeddableHandler.getOutput$().subscribe((output) => {
+    if (output.error) {
+      toastNotifications.addError(output.error, {
+        title: i18n.translate('visualize.error.title', {
+          defaultMessage: 'Visualization error',
+        }),
+      });
+    }
+  });
+
+  let savedSearch: SavedObject | undefined;
+
+  if (vis.data.savedSearchId) {
+    savedSearch = await createSavedSearchesLoader({
+      savedObjectsClient: savedObjects.client,
+      indexPatterns: data.indexPatterns,
+      search: data.search,
+      chrome,
+      overlays,
+    }).get(vis.data.savedSearchId);
+  }
+
+  return { vis, savedSearch, embeddableHandler };
+};
 
 export const getVisualizationInstance = async (
   {
