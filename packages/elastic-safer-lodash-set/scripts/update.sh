@@ -10,7 +10,7 @@ source ./scripts/_get_lodash.sh
 all_files=$(cd lodash && ls)
 modified_lodash_files=(_baseSet.js)
 
-# Get fresh copies of all the files that was originally copied from loadsh,
+# Get fresh copies of all the files that was originally copied from lodash,
 # expect the ones in the whitelist
 for file in $all_files
 do
@@ -23,7 +23,7 @@ do
 done
 
 # Check if there's changes to the patched files
-for file in $modified_lodash_files
+for file in "${modified_lodash_files[@]}"
 do
   diff ".tmp/node_modules/lodash/$file" "lodash/$file" > ".tmp/$file.patch" || true
   if [[ $(diff ".tmp/$file.patch" "scripts/patches/$file.patch") ]]; then

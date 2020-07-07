@@ -57,7 +57,7 @@ const setWith = require('@elastic/safer-lodash-set/fp/setWith');
 
 ## Limitations
 
-The safety improvements in this module is achived by adding the
+The safety improvements in this module is achieved by adding the
 following limitations to the algorithm used to walk the `path` given as
 the 2nd argument to the `set` and `setWith` functions:
 
@@ -85,8 +85,8 @@ console.log(Object.prototype.hasOwnProperty.call(child, 'foo')); // true
 
 ```js
 const object = {
-  fn1: function () {}, // regular functions has a prototype
-  fn2: () => {}, // arrow functions doesn't have a prototype
+  fn1: function () {}, // regular functions have a prototype
+  fn2: () => {}, // arrow functions don't have a prototype
 };
 
 // Attempting to access any function prototype will result in an
