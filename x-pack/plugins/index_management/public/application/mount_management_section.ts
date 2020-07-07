@@ -43,6 +43,7 @@ export async function mountManagementSection(
     core: {
       fatalErrors,
       getUrlForApp: application.getUrlForApp,
+      navigateToApp: application.navigateToApp,
     },
     plugins: {
       usageCollection,

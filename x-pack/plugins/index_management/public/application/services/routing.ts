@@ -31,6 +31,24 @@ export const getTemplateCloneLink = (name: string, isLegacy?: boolean) => {
   return encodeURI(url);
 };
 
+export const getILMPolicyPath = (policyName: string) => {
+  return encodeURI(
+    `/data/index_lifecycle_management/policies/edit/${encodeURIComponent(policyName)}`
+  );
+};
+
+export const getIndexListUri = (filter: any) => {
+  if (filter) {
+    // React router tries to decode url params but it can't because the browser partially
+    // decodes them. So we have to encode both the URL and the filter to get it all to
+    // work correctly for filters with URL unsafe characters in them.
+    return encodeURI(`/indices?includeHiddenIndices=true&filter=${encodeURIComponent(filter)}`);
+  }
+
+  // If no filter, URI is already safe so no need to encode.
+  return '/indices';
+};
+
 export const decodePathFromReactRouter = (pathname: string): string => {
   let decodedPath;
   try {
