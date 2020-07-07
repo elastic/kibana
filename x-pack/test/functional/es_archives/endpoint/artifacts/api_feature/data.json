@@ -1,21 +1,21 @@
 {
   "type": "doc",
   "value": {
-    "id": "endpoint:user-artifact:v2:endpoint-exceptionlist-linux-1.0.0-f59266b06ffb1d7250edb9dbabd946e00e98afa950f955d8ea9d8ffef0eb142a",
+    "id": "endpoint:user-artifact:v2:endpoint-exceptionlist-linux-1.0.0-d2a9c760005b08d43394e59a8701ae75c80881934ccf15a006944452b80f7f9f",
     "index": ".kibana",
     "source": {
       "references": [
       ],
       "endpoint:user-artifact:v2": {
-        "body": "eyJlbnRyaWVzIjpbeyJmaWVsZCI6ImFjdGluZ1Byb2Nlc3MuZmlsZS5zaWduZXIiLCJvcGVyYXRvciI6ImluY2x1ZGVkIiwidHlwZSI6ImV4YWN0X2Nhc2VkIiwidmFsdWUiOiJFbGFzdGljLCBOLlYuIn0seyJlbnRyaWVzIjpbeyJmaWVsZCI6InNpZ25lciIsIm9wZXJhdG9yIjoiaW5jbHVkZWQiLCJ0eXBlIjoiZXhhY3RfY2FzZWQiLCJ2YWx1ZSI6IkV2aWwifSx7ImZpZWxkIjoidHJ1c3RlZCIsIm9wZXJhdG9yIjoiaW5jbHVkZWQiLCJ0eXBlIjoiZXhhY3RfY2FzZWQiLCJ2YWx1ZSI6InRydWUifV0sImZpZWxkIjoiZmlsZS5zaWduYXR1cmUiLCJ0eXBlIjoibmVzdGVkIn1dfQ==",
+        "body": "eyJlbnRyaWVzIjpbeyJ0eXBlIjoic2ltcGxlIiwiZW50cmllcyI6W3siZmllbGQiOiJhY3RpbmdQcm9jZXNzLmZpbGUuc2lnbmVyIiwib3BlcmF0b3IiOiJpbmNsdWRlZCIsInR5cGUiOiJleGFjdF9jYXNlZCIsInZhbHVlIjoiRWxhc3RpYywgTi5WLiJ9LHsiZW50cmllcyI6W3siZmllbGQiOiJzaWduZXIiLCJvcGVyYXRvciI6ImluY2x1ZGVkIiwidHlwZSI6ImV4YWN0X2Nhc2VkIiwidmFsdWUiOiJFdmlsIn0seyJmaWVsZCI6InRydXN0ZWQiLCJvcGVyYXRvciI6ImluY2x1ZGVkIiwidHlwZSI6ImV4YWN0X2Nhc2VkIiwidmFsdWUiOiJ0cnVlIn1dLCJmaWVsZCI6ImZpbGUuc2lnbmF0dXJlIiwidHlwZSI6Im5lc3RlZCJ9XX1dfQ==",
         "created": 1593016187465,
         "compressionAlgorithm": "none",
         "encryptionAlgorithm": "none",
         "identifier": "endpoint-exceptionlist-linux-1.0.0",
-        "encodedSha256": "f59266b06ffb1d7250edb9dbabd946e00e98afa950f955d8ea9d8ffef0eb142a",
-        "encodedSize": 328,
-        "decodedSha256": "f59266b06ffb1d7250edb9dbabd946e00e98afa950f955d8ea9d8ffef0eb142a",
-        "decodedSize": 328
+        "encodedSha256": "d2a9c760005b08d43394e59a8701ae75c80881934ccf15a006944452b80f7f9f",
+        "encodedSize": 358,
+        "decodedSha256": "d2a9c760005b08d43394e59a8701ae75c80881934ccf15a006944452b80f7f9f",
+        "decodedSize": 358
       },
       "type": "endpoint:user-artifact:v2",
       "updated_at": "2020-06-24T16:29:47.584Z"
@@ -34,7 +34,7 @@
       "endpoint:user-artifact-manifest:v2": {
         "created": 1593183699663,
         "ids": [
-          "endpoint-exceptionlist-linux-1.0.0-f59266b06ffb1d7250edb9dbabd946e00e98afa950f955d8ea9d8ffef0eb142a",
+          "endpoint-exceptionlist-linux-1.0.0-d2a9c760005b08d43394e59a8701ae75c80881934ccf15a006944452b80f7f9f",
           "endpoint-exceptionlist-macos-1.0.0-d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
           "endpoint-exceptionlist-windows-1.0.0-d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658"
         ]
