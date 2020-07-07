@@ -154,14 +154,6 @@ describe('service_settings (FKA tile_map test)', function () {
       });
 
       it('should merge in tilemap url', async () => {
-        // tilemapsConfig.deprecated = {
-        //   isOverridden: true,
-        //   config: {
-        //     url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
-        //     options: { minZoom: 0, maxZoom: 20 },
-        //   },
-        // };
-
         serviceSettings = makeServiceSettings(
           {},
           {
