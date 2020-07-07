@@ -5,11 +5,9 @@
  */
 
 import { fetchStatus } from './fetch_status';
-import { AlertUiState } from '../../alerts/types';
+import { AlertUiState, AlertState } from '../../alerts/types';
 import { AlertSeverity } from '../../../common/enums';
 import { ALERT_CPU_USAGE } from '../../../common/constants';
-
-// jest.mock('../../alerts/alerts_factory')
 
 describe('fetchStatus', () => {
   const alertType = ALERT_CPU_USAGE;
@@ -30,6 +28,7 @@ describe('fetchStatus', () => {
     lastCheckedMS: 0,
     triggeredMS: 0,
   };
+  let alertStates: AlertState[] = [];
   const alertsClient = {
     find: jest.fn(() => ({
       total: 1,
@@ -43,13 +42,7 @@ describe('fetchStatus', () => {
       alertInstances: {
         abc: {
           state: {
-            alertStates: [
-              {
-                cluster: defaultClusterState,
-                ui: defaultUiState,
-                ccs: null,
-              },
-            ],
+            alertStates,
           },
         },
       },
@@ -87,24 +80,16 @@ describe('fetchStatus', () => {
   });
 
   it('should return alerts that are firing', async () => {
-    alertsClient.getAlertState = jest.fn(() => ({
-      alertInstances: {
-        abc: {
-          state: {
-            alertStates: [
-              {
-                cluster: defaultClusterState,
-                ccs: null,
-                ui: {
-                  ...defaultUiState,
-                  isFiring: true,
-                },
-              },
-            ],
-          },
+    alertStates = [
+      {
+        cluster: defaultClusterState,
+        ccs: null,
+        ui: {
+          ...defaultUiState,
+          isFiring: true,
         },
       },
-    }));
+    ];
 
     const status = await fetchStatus(
       alertsClient as any,
@@ -120,24 +105,16 @@ describe('fetchStatus', () => {
   });
 
   it('should return alerts that have been resolved in the time period', async () => {
-    alertsClient.getAlertState = jest.fn(() => ({
-      alertInstances: {
-        abc: {
-          state: {
-            alertStates: [
-              {
-                cluster: defaultClusterState,
-                ccs: null,
-                ui: {
-                  ...defaultUiState,
-                  resolvedMS: 1500,
-                },
-              },
-            ],
-          },
+    alertStates = [
+      {
+        cluster: defaultClusterState,
+        ccs: null,
+        ui: {
+          ...defaultUiState,
+          resolvedMS: 1500,
         },
       },
-    }));
+    ];
 
     const customStart = 1000;
     const customEnd = 2000;
