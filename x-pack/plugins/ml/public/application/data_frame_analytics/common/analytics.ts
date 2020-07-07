@@ -423,25 +423,21 @@ export const useRefreshAnalyticsList = (
 const DEFAULT_SIG_FIGS = 3;
 
 export function getValuesFromResponse(response: RegressionEvaluateResponse) {
-  let mse = response?.regression?.mse?.value;
-  let rSquared = response?.regression?.r_squared?.value;
-  let msle = response?.regression?.msle?.value;
-  let huber = response?.regression?.huber?.value;
+  const results = {};
 
-  if (mse) {
-    mse = Number(mse.toPrecision(DEFAULT_SIG_FIGS));
-  }
-  if (rSquared) {
-    rSquared = Number(rSquared.toPrecision(DEFAULT_SIG_FIGS));
-  }
-  if (msle) {
-    msle = Number(msle.toPrecision(DEFAULT_SIG_FIGS));
-  }
-  if (huber) {
-    huber = Number(huber.toPrecision(DEFAULT_SIG_FIGS));
+  if (response?.regression) {
+    for (const statType in response.regression) {
+      if (response.regression.hasOwnProperty(statType)) {
+        let currentStatValue = response.regression[statType]?.value;
+        if (currentStatValue) {
+          currentStatValue = Number(currentStatValue.toPrecision(DEFAULT_SIG_FIGS));
+        }
+        results[statType] = currentStatValue;
+      }
+    }
   }
 
-  return { mse, rSquared, msle, huber };
+  return results;
 }
 interface ResultsSearchBoolQuery {
   bool: Dictionary<any>;

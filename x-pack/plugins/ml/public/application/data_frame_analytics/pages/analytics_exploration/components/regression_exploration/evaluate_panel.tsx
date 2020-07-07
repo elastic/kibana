@@ -84,12 +84,12 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       genErrorEval.eval &&
       isRegressionEvaluateResponse(genErrorEval.eval)
     ) {
-      const { mse, msle, huber, rSquared } = getValuesFromResponse(genErrorEval.eval);
+      const { mse, msle, huber, r_squared } = getValuesFromResponse(genErrorEval.eval);
       setGeneralizationEval({
         mse,
         msle,
         huber,
-        rSquared,
+        rSquared: r_squared,
         error: null,
       });
       setIsLoadingGeneralization(false);
@@ -124,12 +124,12 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       trainingErrorEval.eval &&
       isRegressionEvaluateResponse(trainingErrorEval.eval)
     ) {
-      const { mse, msle, huber, rSquared } = getValuesFromResponse(trainingErrorEval.eval);
+      const { mse, msle, huber, r_squared } = getValuesFromResponse(trainingErrorEval.eval);
       setTrainingEval({
         mse,
         msle,
         huber,
-        rSquared,
+        rSquared: r_squared,
         error: null,
       });
       setIsLoadingTraining(false);

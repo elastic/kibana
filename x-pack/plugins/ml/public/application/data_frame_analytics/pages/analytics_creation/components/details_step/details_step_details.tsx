@@ -16,8 +16,6 @@ import {
 import { State } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { ANALYTICS_STEPS } from '../../page';
 
-const DEFAULT_RESULTS_FIELD = 'ml';
-
 export interface ListItems {
   title: string;
   description: string | JSX.Element;
