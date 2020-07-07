@@ -37,14 +37,15 @@ export const pkgToPkgKey = ({ name, version }: { name: string; version: string }
   `${name}-${version}`;
 
 export async function fetchList(params?: SearchParams): Promise<RegistrySearchResults> {
+  const options = { ...(params || {}), experimental: true };
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/search`);
-  if (params) {
-    if (params.category) {
-      url.searchParams.set('category', params.category);
+  if (options) {
+    if (options.category) {
+      url.searchParams.set('category', options.category);
     }
-    if (params.experimental) {
-      url.searchParams.set('experimental', params.experimental.toString());
+    if (options.experimental) {
+      url.searchParams.set('experimental', options.experimental.toString());
     }
   }
 
@@ -56,7 +57,9 @@ export async function fetchFindLatestPackage(
   internal: boolean = true
 ): Promise<RegistrySearchResult> {
   const registryUrl = getRegistryUrl();
-  const url = new URL(`${registryUrl}/search?package=${packageName}&internal=${internal}`);
+  const url = new URL(
+    `${registryUrl}/search?package=${packageName}&internal=${internal}&experimental=true`
+  );
   const res = await fetchUrl(url.toString());
   const searchResults = JSON.parse(res);
   if (searchResults.length) {
@@ -77,11 +80,12 @@ export async function fetchFile(filePath: string): Promise<Response> {
 }
 
 export async function fetchCategories(params?: CategoriesParams): Promise<CategorySummaryList> {
+  const options = { ...(params || {}), experimental: true };
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/categories`);
-  if (params) {
-    if (params.experimental) {
-      url.searchParams.set('experimental', params.experimental.toString());
+  if (options) {
+    if (options.experimental) {
+      url.searchParams.set('experimental', options.experimental.toString());
     }
   }
 
