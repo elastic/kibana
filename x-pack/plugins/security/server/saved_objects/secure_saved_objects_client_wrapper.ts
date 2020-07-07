@@ -98,10 +98,10 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     return await this.baseClient.delete(type, id, options);
   }
 
-  public async find<T = unknown>(options: SavedObjectsFindOptions) {
+  public async find<T = unknown, A = unknown>(options: SavedObjectsFindOptions) {
     await this.ensureAuthorized(options.type, 'find', options.namespace, { options });
 
-    const response = await this.baseClient.find<T>(options);
+    const response = await this.baseClient.find<T, A>(options);
     return await this.redactSavedObjectsNamespaces(response);
   }
 
