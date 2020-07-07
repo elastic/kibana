@@ -96,7 +96,11 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
 
       <EuiHorizontalRule />
 
-      <AvailabilityExpressionSelect alertParams={alertParams} setAlertParams={setAlertParams} />
+      <AvailabilityExpressionSelect
+        alertParams={alertParams}
+        isOldAlert={isOldAlert}
+        setAlertParams={setAlertParams}
+      />
 
       <EuiSpacer size="l" />
 

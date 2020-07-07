@@ -13,6 +13,7 @@ import { TimeRangeOption, TimeUnitSelectable } from './time_unit_selectable';
 
 interface Props {
   alertParams: { [param: string]: any };
+  isOldAlert: boolean;
   setAlertParams: (key: string, value: any) => void;
 }
 
@@ -50,7 +51,11 @@ const DEFAULT_IS_ENABLED = true;
 
 const isThresholdInvalid = (n: number): boolean => isNaN(n) || n <= 0 || n > 100;
 
-export const AvailabilityExpressionSelect: React.FC<Props> = ({ alertParams, setAlertParams }) => {
+export const AvailabilityExpressionSelect: React.FC<Props> = ({
+  alertParams,
+  isOldAlert,
+  setAlertParams,
+}) => {
   const [range, setRange] = useState<number>(alertParams?.availability?.range ?? DEFAULT_RANGE);
   const [rangeUnit, setRangeUnit] = useState<string>(
     alertParams?.availability?.rangeUnit ?? DEFAULT_TIMERANGE_UNIT
@@ -59,7 +64,8 @@ export const AvailabilityExpressionSelect: React.FC<Props> = ({ alertParams, set
     alertParams?.availability?.threshold ?? DEFAULT_THRESHOLD
   );
   const [isEnabled, setIsEnabled] = useState<boolean>(
-    alertParams?.shouldCheckAvailability ?? DEFAULT_IS_ENABLED
+    // if an older version of alert is displayed, this expression should default to disabled
+    alertParams?.shouldCheckAvailability ?? !isOldAlert
   );
   const [timerangeUnitOptions, setTimerangeUnitOptions] = useState<TimeRangeOption[]>(
     TimeRangeOptions.map((opt) =>
