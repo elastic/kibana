@@ -55,7 +55,7 @@ export const useActions = ({
       },
       {
         render: (item: TransformListRow) => {
-          return <EditButton config={item.config} onClick={editAction.showFlyout} />;
+          return <EditButton onClick={() => editAction.showFlyout(item.config)} />;
         },
       },
       {
