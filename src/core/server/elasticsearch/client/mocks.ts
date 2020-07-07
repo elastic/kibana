@@ -19,7 +19,7 @@
 
 import { Client, ApiResponse } from '@elastic/elasticsearch';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
-import { ElasticSearchClient } from './types';
+import { ElasticsearchClient } from './types';
 import { ICustomClusterClient } from './cluster_client';
 
 const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
@@ -63,7 +63,7 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
   return (client as unknown) as DeeplyMockedKeys<Client>;
 };
 
-export type ElasticSearchClientMock = DeeplyMockedKeys<ElasticSearchClient>;
+export type ElasticSearchClientMock = DeeplyMockedKeys<ElasticsearchClient>;
 
 const createClientMock = (): ElasticSearchClientMock =>
   (createInternalClientMock() as unknown) as ElasticSearchClientMock;

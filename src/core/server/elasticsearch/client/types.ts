@@ -29,7 +29,7 @@ import type {
  *
  * @public
  */
-export type ElasticSearchClient = Omit<
+export type ElasticsearchClient = Omit<
   Client,
   'connectionPool' | 'transport' | 'serializer' | 'extend' | 'helpers' | 'child' | 'close'
 > & {

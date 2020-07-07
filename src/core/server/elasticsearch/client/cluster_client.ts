@@ -22,7 +22,7 @@ import { Logger } from '../../logging';
 import { GetAuthHeaders, isRealRequest, Headers } from '../../http';
 import { ensureRawRequest, filterHeaders } from '../../http/router';
 import { ScopeableRequest } from '../types';
-import { ElasticSearchClient } from './types';
+import { ElasticsearchClient } from './types';
 import { configureClient } from './configure_client';
 import { ElasticsearchClientConfig } from './client_config';
 import { ScopedClusterClient, IScopedClusterClient } from './scoped_cluster_client';
@@ -38,9 +38,9 @@ const noop = () => undefined;
  **/
 export interface IClusterClient {
   /**
-   * A {@link ElasticSearchClient | client} to be used to query the ES cluster on behalf of the Kibana internal user
+   * A {@link ElasticsearchClient | client} to be used to query the ES cluster on behalf of the Kibana internal user
    */
-  readonly asInternalUser: ElasticSearchClient;
+  readonly asInternalUser: ElasticsearchClient;
   /**
    * Creates a {@link IScopedClusterClient | scoped cluster client} bound to given {@link ScopeableRequest | request}
    */

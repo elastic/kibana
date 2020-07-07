@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ElasticSearchClient } from './types';
+import { ElasticsearchClient } from './types';
 
 /**
  * Serves the same purpose as the normal {@link ClusterClient | cluster client} but exposes
@@ -29,21 +29,21 @@ import { ElasticSearchClient } from './types';
  **/
 export interface IScopedClusterClient {
   /**
-   * A {@link ElasticSearchClient | client} to be used to query the elasticsearch cluster
+   * A {@link ElasticsearchClient | client} to be used to query the elasticsearch cluster
    * on behalf of the internal Kibana user.
    */
-  readonly asInternalUser: ElasticSearchClient;
+  readonly asInternalUser: ElasticsearchClient;
   /**
-   * A {@link ElasticSearchClient | client} to be used to query the elasticsearch cluster
+   * A {@link ElasticsearchClient | client} to be used to query the elasticsearch cluster
    * on behalf of the user that initiated the request to the Kibana server.
    */
-  readonly asCurrentUser: ElasticSearchClient;
+  readonly asCurrentUser: ElasticsearchClient;
 }
 
 /** @internal **/
 export class ScopedClusterClient implements IScopedClusterClient {
   constructor(
-    public readonly asInternalUser: ElasticSearchClient,
-    public readonly asCurrentUser: ElasticSearchClient
+    public readonly asInternalUser: ElasticsearchClient,
+    public readonly asCurrentUser: ElasticsearchClient
   ) {}
 }
