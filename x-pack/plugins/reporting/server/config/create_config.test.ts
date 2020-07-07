@@ -11,7 +11,7 @@ import { createConfig$ } from './create_config';
 import { ReportingConfigType } from './schema';
 
 interface KibanaServer {
-  host?: string;
+  hostname?: string;
   port?: number;
   protocol?: string;
 }
