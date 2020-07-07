@@ -71,7 +71,15 @@ def functionalOss(Map params = [:]) {
 }
 
 def functionalXpack(Map params = [:]) {
-  def config = params ?: [ciGroups: true, firefox: true, accessibility: true, pluginFunctional: true, pageLoadMetrics: false, visualRegression: false]
+  def config = params ?: [
+    ciGroups: true,
+    firefox: true,
+    accessibility: true,
+    pluginFunctional: true,
+    savedObjectsFieldMetrics:true,
+    pageLoadMetrics: false,
+    visualRegression: false,
+  ]
 
   task {
     kibanaPipeline.buildXpack(10)
@@ -95,6 +103,10 @@ def functionalXpack(Map params = [:]) {
 
     if (config.pageLoadMetrics) {
       task(kibanaPipeline.functionalTestProcess('xpack-pageLoadMetrics', './test/scripts/jenkins_xpack_page_load_metrics.sh'))
+    }
+
+    if (config.savedObjectsFieldMetrics) {
+      task(kibanaPipeline.functionalTestProcess('xpack-savedObjectsFieldMetrics', './test/scripts/jenkins_xpack_saved_objects_field_metrics.sh'))
     }
 
     whenChanged(['x-pack/plugins/security_solution/', 'x-pack/test/security_solution_cypress/']) {
