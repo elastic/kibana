@@ -9,8 +9,10 @@ import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks'
 import * as rulesApi from '../../../alerts/containers/detection_engine/rules/api';
 import * as listsApi from '../../../../../lists/public/exceptions/api';
 import { getExceptionListSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_schema.mock';
-import { ruleMock } from '../../../alerts/containers/detection_engine/rules/mock';
+import { savedRuleMock } from '../../../alerts/containers/detection_engine/rules/mock';
 import { createKibanaCoreStartMock } from '../../mock/kibana_core';
+import { ExceptionListType } from '../../../lists_plugin_deps';
+import { ListArray } from '../../../../common/detection_engine/schemas/types';
 import {
   useFetchOrCreateRuleExceptionList,
   UseFetchOrCreateRuleExceptionListProps,
@@ -35,15 +37,15 @@ describe('useFetchOrCreateRuleExceptionList', () => {
   const error = new Error('Something went wrong');
   const ruleId = 'myRuleId';
   const abortCtrl = new AbortController();
-  const detectionListType = 'detection';
-  const endpointListType = 'endpoint';
+  const detectionListType: ExceptionListType = 'detection';
+  const endpointListType: ExceptionListType = 'endpoint';
   const detectionExceptionList = {
     ...getExceptionListSchemaMock(),
-    type: 'detection',
+    type: detectionListType,
   };
   const endpointExceptionList = {
     ...getExceptionListSchemaMock(),
-    type: 'endpoint',
+    type: endpointListType,
   };
   const newDetectionExceptionList = {
     ...detectionExceptionList,
@@ -53,22 +55,24 @@ describe('useFetchOrCreateRuleExceptionList', () => {
     ...endpointExceptionList,
     name: 'new endpoint exception list',
   };
-  const exceptionsListReferences = [
+  const exceptionsListReferences: ListArray = [
     {
       id: 'listId1',
+      type: detectionListType,
       namespace_type: 'single',
     },
     {
       id: 'listId2',
+      type: endpointListType,
       namespace_type: 'agnostic',
     },
   ];
   const ruleWithExceptionLists = {
-    ...ruleMock,
+    ...savedRuleMock,
     exceptions_list: exceptionsListReferences,
   };
   const ruleWithoutExceptionLists = {
-    ...ruleMock,
+    ...savedRuleMock,
     exceptions_list: undefined,
   };
 
