@@ -18,6 +18,11 @@ function getQueryParams(location: ReturnType<typeof useLocation>) {
   return queryParams;
 }
 
+/**
+ * Extracts query and path params from the url and validate it against the type defined in the route file.
+ * It removes any aditional item which is not declared in the type.
+ * @param params
+ */
 export function useUrlParams(params: Params) {
   const location = useLocation();
   const pathParams = useParams();
