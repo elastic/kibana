@@ -96,7 +96,7 @@ export default function (providerContext: FtrProviderContext) {
         decompressedJson.toString()
       );
 
-      expect(decompressedBody).to.equal({
+      expect(decompressedBody).to.eql({
         exceptions_list: [
           {
             field: 'actingProcess.file.signer',
