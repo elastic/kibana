@@ -27,6 +27,7 @@ import { getResultsUrl, isDataFrameAnalyticsRunning, DataFrameAnalyticsListRow }
 import { stopAnalytics } from '../../services/analytics_service';
 
 import { StartAction } from './action_start';
+import { EditAction } from './action_edit';
 import { DeleteAction } from './action_delete';
 
 interface Props {
@@ -131,6 +132,11 @@ export const getActions = (
             }
 
             return stopButton;
+          },
+        },
+        {
+          render: (item: DataFrameAnalyticsListRow) => {
+            return <EditAction item={item} />;
           },
         },
         {
