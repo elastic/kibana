@@ -25,14 +25,22 @@ describe('AvailabilityReporting component', () => {
         timestamp: '36m ago',
         color: '#d3dae6',
         availability: 100,
+        status: 'up',
       },
       {
         label: 'nyc-heartbeat',
         timestamp: '36m ago',
         color: '#d3dae6',
         availability: 100,
+        status: 'down',
       },
-      { label: 'spa-heartbeat', timestamp: '36m ago', color: '#d3dae6', availability: 100 },
+      {
+        label: 'spa-heartbeat',
+        timestamp: '36m ago',
+        color: '#d3dae6',
+        availability: 100,
+        status: 'down',
+      },
     ];
   });
 
