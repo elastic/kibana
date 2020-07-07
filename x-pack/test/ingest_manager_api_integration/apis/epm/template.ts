@@ -5,8 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
-import { getTemplate } from '../../../plugins/ingest_manager/server/services/epm/elasticsearch/template/template';
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { getTemplate } from '../../../../plugins/ingest_manager/server/services/epm/elasticsearch/template/template';
 
 export default function ({ getService }: FtrProviderContext) {
   const indexPattern = 'foo';
@@ -20,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
     },
   };
   // This test was inspired by https://github.com/elastic/kibana/blob/master/x-pack/test/api_integration/apis/monitoring/common/mappings_exist.js
-  describe('template', async () => {
+  describe('EPM - template', async () => {
     it('can be loaded', async () => {
       const template = getTemplate({
         type: 'logs',

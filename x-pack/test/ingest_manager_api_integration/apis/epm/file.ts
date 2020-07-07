@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
-import { warnAndSkipTest } from '../helpers';
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { warnAndSkipTest } from '../../helpers';
 
 export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
@@ -13,7 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
   const dockerServers = getService('dockerServers');
 
   const server = dockerServers.get('registry');
-  describe('package file', () => {
+  describe('EPM - package file', () => {
     it('fetches a .png screenshot image', async function () {
       if (server.enabled) {
         await supertest
