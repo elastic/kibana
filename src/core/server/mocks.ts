@@ -195,7 +195,7 @@ function createCoreRequestHandlerContextMock() {
     },
     elasticsearch: {
       legacy: {
-        client: elasticsearchServiceMock.createScopedClusterClient(),
+        client: elasticsearchServiceMock.createLegacyScopedClusterClient(),
       },
     },
     uiSettings: {
