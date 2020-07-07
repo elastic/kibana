@@ -5,10 +5,10 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('ilm', () => {
+  describe('EPM - ilm', () => {
     it('setup policy', async () => {
       const policyName = 'foo';
       const es = getService('es');

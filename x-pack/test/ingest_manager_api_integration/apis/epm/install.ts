@@ -5,8 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
-import { warnAndSkipTest } from '../helpers';
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { warnAndSkipTest } from '../../helpers';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
