@@ -45,9 +45,11 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     return supertestRead.get(`/api/apm/settings/agent-configuration`).set('kbn-xsrf', 'foo');
   }
 
-  async function createConfiguration(config: AgentConfigurationIntake) {
+  async function createConfiguration(config: AgentConfigurationIntake, { user = 'write' } = {}) {
     log.debug('creating configuration', config.service);
-    const res = await supertestWrite
+    const supertestClient = user === 'read' ? supertestRead : supertestWrite;
+
+    const res = await supertestClient
       .put(`/api/apm/settings/agent-configuration`)
       .send(config)
       .set('kbn-xsrf', 'foo');
@@ -57,9 +59,11 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     return res;
   }
 
-  async function updateConfiguration(config: AgentConfigurationIntake) {
+  async function updateConfiguration(config: AgentConfigurationIntake, { user = 'write' } = {}) {
     log.debug('updating configuration', config.service);
-    const res = await supertestWrite
+    const supertestClient = user === 'read' ? supertestRead : supertestWrite;
+
+    const res = await supertestClient
       .put(`/api/apm/settings/agent-configuration?overwrite=true`)
       .send(config)
       .set('kbn-xsrf', 'foo');
@@ -69,9 +73,14 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     return res;
   }
 
-  async function deleteConfiguration({ service }: AgentConfigurationIntake) {
+  async function deleteConfiguration(
+    { service }: AgentConfigurationIntake,
+    { user = 'write' } = {}
+  ) {
     log.debug('deleting configuration', service);
-    const res = await supertestWrite
+    const supertestClient = user === 'read' ? supertestRead : supertestWrite;
+
+    const res = await supertestClient
       .delete(`/api/apm/settings/agent-configuration`)
       .send({ service })
       .set('kbn-xsrf', 'foo');
@@ -84,11 +93,16 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
   function throwOnError(res: any) {
     const { statusCode, req, body } = res;
     if (statusCode !== 200) {
-      throw new Error(`
+      const e = new Error(`
       Endpoint: ${req.method} ${req.path}
       Service: ${JSON.stringify(res.request._data.service)}
       Status code: ${statusCode}
       Response: ${body.message}`);
+
+      // @ts-ignore
+      e.res = res;
+
+      throw e;
     }
   }
 
@@ -133,6 +147,47 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
       });
     });
 
+    describe('as a read-only user', () => {
+      const newConfig = { service: {}, settings: { transaction_sample_rate: '0.55' } };
+      it('throws when attempting to create config', async () => {
+        try {
+          await createConfiguration(newConfig, { user: 'read' });
+
+          // ensure that `createConfiguration` throws
+          expect(true).to.be(false);
+        } catch (e) {
+          expect(e.res.statusCode).to.be(404);
+        }
+      });
+
+      describe('when a configuration already exists', () => {
+        before(async () => createConfiguration(newConfig));
+        after(async () => deleteConfiguration(newConfig));
+
+        it('throws when attempting to update config', async () => {
+          try {
+            await updateConfiguration(newConfig, { user: 'read' });
+
+            // ensure that `updateConfiguration` throws
+            expect(true).to.be(false);
+          } catch (e) {
+            expect(e.res.statusCode).to.be(404);
+          }
+        });
+
+        it('throws when attempting to delete config', async () => {
+          try {
+            await deleteConfiguration(newConfig, { user: 'read' });
+
+            // ensure that `deleteConfiguration` throws
+            expect(true).to.be(false);
+          } catch (e) {
+            expect(e.res.statusCode).to.be(404);
+          }
+        });
+      });
+    });
+
     describe('when creating one configuration', () => {
       const newConfig = {
         service: {},
@@ -144,59 +199,53 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
         etag: '7312bdcc34999629a3d39df24ed9b2a7553c0c39',
       };
 
-      it('can find the created config', async () => {
-        // setup
+      it('can create and delete config', async () => {
+        // assert that config does not exist
+        const res1 = await searchConfigurations(searchParams);
+        expect(res1.status).to.equal(404);
+
+        // assert that config was created
         await createConfiguration(newConfig);
+        const res2 = await searchConfigurations(searchParams);
+        expect(res2.status).to.equal(200);
 
-        const { status, body } = await searchConfigurations(searchParams);
-        expect(status).to.equal(200);
-        expect(body._source.service).to.eql({});
-        expect(body._source.settings).to.eql({ transaction_sample_rate: '0.55' });
-
-        // cleanup
+        // assert that config was deleted
         await deleteConfiguration(newConfig);
+        const res3 = await searchConfigurations(searchParams);
+        expect(res3.status).to.equal(404);
       });
 
-      it('can list one config', async () => {
-        // setup
-        await createConfiguration(newConfig);
+      describe('when a configuration exists', () => {
+        before(async () => createConfiguration(newConfig));
+        after(async () => deleteConfiguration(newConfig));
 
-        const { status, body } = await getAllConfigurations();
-        expect(status).to.equal(200);
-        expect(omitTimestamp(body)).to.eql([
-          {
-            service: {},
-            settings: { transaction_sample_rate: '0.55' },
-            applied_by_agent: false,
-            etag: 'eb88a8997666cc4b33745ef355a1bbd7c4782f2d',
-          },
-        ]);
+        it('can find the config', async () => {
+          const { status, body } = await searchConfigurations(searchParams);
+          expect(status).to.equal(200);
+          expect(body._source.service).to.eql({});
+          expect(body._source.settings).to.eql({ transaction_sample_rate: '0.55' });
+        });
 
-        // cleanup
-        await deleteConfiguration(newConfig);
-      });
+        it('can list the config', async () => {
+          const { status, body } = await getAllConfigurations();
+          expect(status).to.equal(200);
+          expect(omitTimestamp(body)).to.eql([
+            {
+              service: {},
+              settings: { transaction_sample_rate: '0.55' },
+              applied_by_agent: false,
+              etag: 'eb88a8997666cc4b33745ef355a1bbd7c4782f2d',
+            },
+          ]);
+        });
 
-      it('can update the created config', async () => {
-        // setup
-        await createConfiguration(newConfig);
-
-        await updateConfiguration({ service: {}, settings: { transaction_sample_rate: '0.85' } });
-        const { status, body } = await searchConfigurations(searchParams);
-        expect(status).to.equal(200);
-        expect(body._source.service).to.eql({});
-        expect(body._source.settings).to.eql({ transaction_sample_rate: '0.85' });
-
-        // cleanup
-        await deleteConfiguration(newConfig);
-      });
-
-      it('can delete the created config', async () => {
-        // setup
-        await createConfiguration(newConfig);
-
-        await deleteConfiguration(newConfig);
-        const { status } = await searchConfigurations(searchParams);
-        expect(status).to.equal(404);
+        it('can update the config', async () => {
+          await updateConfiguration({ service: {}, settings: { transaction_sample_rate: '0.85' } });
+          const { status, body } = await searchConfigurations(searchParams);
+          expect(status).to.equal(200);
+          expect(body._source.service).to.eql({});
+          expect(body._source.settings).to.eql({ transaction_sample_rate: '0.85' });
+        });
       });
     });
 
