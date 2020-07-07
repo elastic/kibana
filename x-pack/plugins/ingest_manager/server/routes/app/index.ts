@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { IRouter, RequestHandler } from 'src/core/server';
-import { PLUGIN_ID, APP_API_ROUTES } from '../../constants';
+import { APP_API_ROUTES } from '../../constants';
 import { appContextService } from '../../services';
 import { CheckPermissionsResponse } from '../../../common';
 
@@ -37,7 +37,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
       validate: {},
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      options: { tags: [] },
     },
     getCheckPermissionsHandler
   );
