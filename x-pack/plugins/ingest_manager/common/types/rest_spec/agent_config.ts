@@ -7,7 +7,9 @@ import { AgentConfig, NewAgentConfig, FullAgentConfig } from '../models';
 import { ListWithKuery } from './common';
 
 export interface GetAgentConfigsRequest {
-  query: ListWithKuery;
+  query: ListWithKuery & {
+    full?: boolean;
+  };
 }
 
 export type GetAgentConfigsResponseItem = AgentConfig & { agents?: number };
