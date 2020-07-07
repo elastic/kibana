@@ -33,11 +33,7 @@ export const SetupGuide: React.FC = () => {
       <SetBreadcrumbs text="Setup Guide" />
       <SendTelemetry action="viewed" metric="setup_guide" />
 
-      <a
-        href="https://www.elastic.co/webinars/getting-started-with-elastic-app-search"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
+      <a href={GETTING_STARTED_LINK_URL} target="_blank" rel="noopener noreferrer">
         <img
           className="setup-guide__thumbnail"
           src={GettingStarted}
