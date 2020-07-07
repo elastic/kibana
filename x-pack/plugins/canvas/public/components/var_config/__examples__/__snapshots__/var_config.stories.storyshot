@@ -2,13 +2,13 @@
 
 exports[`Storyshots components/Variables/VarConfig default 1`] = `
 <div
-  className="canvasArg--expandable canvasVarConfig__container "
+  className="canvasSidebar__expandable canvasVarConfig__container "
 >
   <div
     className="canvasVarConfig__innerContainer"
   >
     <div
-      className="euiAccordion canvasVarConfig__listView canvasArg__accordion"
+      className="euiAccordion canvasVarConfig__listView canvasSidebar__accordion"
     >
       <div
         className="euiAccordion__triggerWrapper"
@@ -38,17 +38,12 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
               onMouseOut={[Function]}
               onMouseOver={[Function]}
             >
-              <div
-                className="euiText euiText--small"
+              <span
                 onBlur={[Function]}
                 onFocus={[Function]}
               >
-                <div
-                  className="euiTextColor euiTextColor--subdued"
-                >
-                  Variables
-                </div>
-              </div>
+                Variables
+              </span>
             </span>
           </span>
         </button>
@@ -62,6 +57,7 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
             onMouseOver={[Function]}
           >
             <button
+              aria-label="Add a variable"
               className="euiButtonIcon euiButtonIcon--primary"
               onBlur={[Function]}
               onClick={[Function]}
@@ -84,7 +80,7 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
       />
     </div>
     <div
-      className="canvasVarConfig__editView canvasArg__accordion"
+      className="canvasVarConfig__editView canvasSidebar__accordion"
     />
   </div>
 </div>

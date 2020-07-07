@@ -17,7 +17,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
 import { CanvasVariable } from '../../../types';
 
@@ -63,7 +62,8 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
       value: 'string',
       inputDisplay: (
         <div className="canvasEditVar__typeOption">
-          <EuiToken iconType="tokenString" /> <span>{strings.getTypeStringLabel()}</span>
+          <EuiToken iconType="tokenString" className="canvasEditVar__tokenIcon" />{' '}
+          <span>{strings.getTypeStringLabel()}</span>
         </div>
       ),
     },
@@ -71,7 +71,8 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
       value: 'number',
       inputDisplay: (
         <div className="canvasEditVar__typeOption">
-          <EuiToken iconType="tokenNumber" /> <span>{strings.getTypeNumberLabel()}</span>
+          <EuiToken iconType="tokenNumber" className="canvasEditVar__tokenIcon" />{' '}
+          <span>{strings.getTypeNumberLabel()}</span>
         </div>
       ),
     },
@@ -79,7 +80,8 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
       value: 'boolean',
       inputDisplay: (
         <div className="canvasEditVar__typeOption">
-          <EuiToken iconType="tokenBoolean" /> <span>{strings.getTypeBooleanLabel()}</span>
+          <EuiToken iconType="tokenBoolean" className="canvasEditVar__tokenIcon" />{' '}
+          <span>{strings.getTypeBooleanLabel()}</span>
         </div>
       ),
     },
@@ -94,14 +96,12 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
           </span>
           <span>
             <span className="canvasVarHeader__anchor">
-              <EuiText size="s" color="subdued">
-                {isNew ? strings.getAddTitle() : strings.getEditTitle()}
-              </EuiText>
+              {isNew ? strings.getAddTitle() : strings.getEditTitle()}
             </span>
           </span>
         </button>
       </div>
-      <div className="canvasArg__content">
+      <div className="canvasSidebar__accordionContent">
         <EuiForm component="form">
           <EuiFormRow label={strings.getTypeFieldLabel()} display="rowCompressed">
             <EuiSuperSelect
@@ -143,7 +143,7 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
             <VarValueField type={type} value={value} onChange={(v) => setValue(v)} />
           </EuiFormRow>
 
-          <EuiSpacer size="s" />
+          <EuiSpacer size="m" />
 
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
@@ -159,8 +159,9 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
                   })
                 }
                 disabled={hasDupeName || !name}
+                iconType="save"
               >
-                <EuiIcon type="save" /> {strings.getSaveButtonLabel()}
+                {strings.getSaveButtonLabel()}
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

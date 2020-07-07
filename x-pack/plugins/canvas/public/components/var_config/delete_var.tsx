@@ -36,15 +36,11 @@ export const DeleteVar: FC<Props> = ({ selectedVar, onCancel, onDelete }) => {
             <EuiIcon type="sortLeft" style={{ verticalAlign: 'top' }} />
           </span>
           <span>
-            <span className="canvasVarHeader__anchor">
-              <EuiText color="subdued" size="s">
-                {strings.getTitle()}
-              </EuiText>
-            </span>
+            <span className="canvasVarHeader__anchor">{strings.getTitle()}</span>
           </span>
         </button>
       </div>
-      <div className="canvasArg__content">
+      <div className="canvasSidebar__accordionContent">
         <div>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
@@ -54,12 +50,18 @@ export const DeleteVar: FC<Props> = ({ selectedVar, onCancel, onDelete }) => {
             </EuiFlexItem>
           </EuiFlexGroup>
 
-          <EuiSpacer size="s" />
+          <EuiSpacer size="m" />
 
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiButton color="danger" size="s" fill onClick={() => onDelete(selectedVar)}>
-                <EuiIcon type="trash" /> {strings.getDeleteButtonLabel()}
+              <EuiButton
+                color="danger"
+                size="s"
+                fill
+                onClick={() => onDelete(selectedVar)}
+                iconType="trash"
+              >
+                {strings.getDeleteButtonLabel()}
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

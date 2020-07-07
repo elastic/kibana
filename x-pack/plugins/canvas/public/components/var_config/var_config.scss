@@ -10,31 +10,26 @@
 }
 
 .canvasVarConfig__list {
-  .euiTable {
+  table {
     background-color: transparent;
   }
 
-  .euiTableHeaderCell:first-child .euiTableCellContent,
-  .euiTableRowCell:first-child .euiTableCellContent {
-    padding-left: 0;
-  }
-
-  .euiTableFooterCell,
-  .euiTableHeaderCell {
+  thead tr th,
+  thead tr td {
     border-bottom: none;
     border-top: none;
   }
 
-  .euiTableRowCell {
+  tbody tr td {
     border-top: none;
     border-bottom: none;
-
-    .euiTableCellContent {
-      padding-right: 0;
-    }
   }
 
-  .euiTableRow:last-child .euiTableRowCell {
+  tbody tr:hover {
+    background-color: transparent;
+  }
+
+  tbody tr:last-child td {
     border-bottom: none;
   }
 }

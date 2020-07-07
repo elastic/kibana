@@ -26,21 +26,13 @@ Array [
         <span
           className="canvasVarHeader__anchor"
         >
-          <div
-            className="euiText euiText--small"
-          >
-            <div
-              className="euiTextColor euiTextColor--subdued"
-            >
-              Edit Variable
-            </div>
-          </div>
+          Edit variable
         </span>
       </span>
     </button>
   </div>,
   <div
-    className="canvasArg__content"
+    className="canvasSidebar__accordionContent"
   >
     <form
       className="euiForm"
@@ -93,7 +85,7 @@ Array [
                       className="canvasEditVar__typeOption"
                     >
                       <span
-                        className="euiToken euiToken--euiColorVis7 euiToken--square euiToken--light euiToken--small"
+                        className="euiToken euiToken--euiColorVis7 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
                         style={Object {}}
                       >
                         <div
@@ -124,7 +116,7 @@ Array [
                       className="canvasEditVar__typeOption"
                     >
                       <span
-                        className="euiToken euiToken--euiColorVis7 euiToken--square euiToken--light euiToken--small"
+                        className="euiToken euiToken--euiColorVis7 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
                         style={Object {}}
                       >
                         <div
@@ -281,7 +273,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiSpacer euiSpacer--s"
+        className="euiSpacer euiSpacer--m"
       />
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -298,14 +290,16 @@ Array [
             <span
               className="euiButton__content"
             >
+              <div
+                aria-hidden="true"
+                className="euiButton__icon"
+                data-euiicon-type="save"
+                size="m"
+              />
               <span
                 className="euiButton__text"
               >
-                <div
-                  data-euiicon-type="save"
-                />
-                 
-                Save Changes
+                Save changes
               </span>
             </span>
           </button>
@@ -361,21 +355,13 @@ Array [
         <span
           className="canvasVarHeader__anchor"
         >
-          <div
-            className="euiText euiText--small"
-          >
-            <div
-              className="euiTextColor euiTextColor--subdued"
-            >
-              Edit Variable
-            </div>
-          </div>
+          Edit variable
         </span>
       </span>
     </button>
   </div>,
   <div
-    className="canvasArg__content"
+    className="canvasSidebar__accordionContent"
   >
     <form
       className="euiForm"
@@ -428,7 +414,7 @@ Array [
                       className="canvasEditVar__typeOption"
                     >
                       <span
-                        className="euiToken euiToken--euiColorVis0 euiToken--square euiToken--light euiToken--small"
+                        className="euiToken euiToken--euiColorVis0 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
                         style={Object {}}
                       >
                         <div
@@ -459,7 +445,7 @@ Array [
                       className="canvasEditVar__typeOption"
                     >
                       <span
-                        className="euiToken euiToken--euiColorVis0 euiToken--square euiToken--light euiToken--small"
+                        className="euiToken euiToken--euiColorVis0 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
                         style={Object {}}
                       >
                         <div
@@ -565,7 +551,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiSpacer euiSpacer--s"
+        className="euiSpacer euiSpacer--m"
       />
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -582,14 +568,16 @@ Array [
             <span
               className="euiButton__content"
             >
+              <div
+                aria-hidden="true"
+                className="euiButton__icon"
+                data-euiicon-type="save"
+                size="m"
+              />
               <span
                 className="euiButton__text"
               >
-                <div
-                  data-euiicon-type="save"
-                />
-                 
-                Save Changes
+                Save changes
               </span>
             </span>
           </button>
@@ -645,21 +633,13 @@ Array [
         <span
           className="canvasVarHeader__anchor"
         >
-          <div
-            className="euiText euiText--small"
-          >
-            <div
-              className="euiTextColor euiTextColor--subdued"
-            >
-              Edit Variable
-            </div>
-          </div>
+          Edit variable
         </span>
       </span>
     </button>
   </div>,
   <div
-    className="canvasArg__content"
+    className="canvasSidebar__accordionContent"
   >
     <form
       className="euiForm"
@@ -712,7 +692,7 @@ Array [
                       className="canvasEditVar__typeOption"
                     >
                       <span
-                        className="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small"
+                        className="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
                         style={Object {}}
                       >
                         <div
@@ -743,7 +723,7 @@ Array [
                       className="canvasEditVar__typeOption"
                     >
                       <span
-                        className="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small"
+                        className="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
                         style={Object {}}
                       >
                         <div
@@ -849,7 +829,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiSpacer euiSpacer--s"
+        className="euiSpacer euiSpacer--m"
       />
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -866,14 +846,16 @@ Array [
             <span
               className="euiButton__content"
             >
+              <div
+                aria-hidden="true"
+                className="euiButton__icon"
+                data-euiicon-type="save"
+                size="m"
+              />
               <span
                 className="euiButton__text"
               >
-                <div
-                  data-euiicon-type="save"
-                />
-                 
-                Save Changes
+                Save changes
               </span>
             </span>
           </button>
@@ -929,21 +911,13 @@ Array [
         <span
           className="canvasVarHeader__anchor"
         >
-          <div
-            className="euiText euiText--small"
-          >
-            <div
-              className="euiTextColor euiTextColor--subdued"
-            >
-              Add Variable
-            </div>
-          </div>
+          Add variable
         </span>
       </span>
     </button>
   </div>,
   <div
-    className="canvasArg__content"
+    className="canvasSidebar__accordionContent"
   >
     <form
       className="euiForm"
@@ -996,7 +970,7 @@ Array [
                       className="canvasEditVar__typeOption"
                     >
                       <span
-                        className="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small"
+                        className="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
                         style={Object {}}
                       >
                         <div
@@ -1027,7 +1001,7 @@ Array [
                       className="canvasEditVar__typeOption"
                     >
                       <span
-                        className="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small"
+                        className="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
                         style={Object {}}
                       >
                         <div
@@ -1133,7 +1107,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiSpacer euiSpacer--s"
+        className="euiSpacer euiSpacer--m"
       />
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -1150,14 +1124,16 @@ Array [
             <span
               className="euiButton__content"
             >
+              <div
+                aria-hidden="true"
+                className="euiButton__icon"
+                data-euiicon-type="save"
+                size="m"
+              />
               <span
                 className="euiButton__text"
               >
-                <div
-                  data-euiicon-type="save"
-                />
-                 
-                Save Changes
+                Save changes
               </span>
             </span>
           </button>

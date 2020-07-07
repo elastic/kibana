@@ -26,21 +26,13 @@ Array [
         <span
           className="canvasVarHeader__anchor"
         >
-          <div
-            className="euiText euiText--small"
-          >
-            <div
-              className="euiTextColor euiTextColor--subdued"
-            >
-              Delete Variable?
-            </div>
-          </div>
+          Delete variable?
         </span>
       </span>
     </button>
   </div>,
   <div
-    className="canvasArg__content"
+    className="canvasSidebar__accordionContent"
   >
     <div>
       <div
@@ -61,7 +53,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiSpacer euiSpacer--s"
+        className="euiSpacer euiSpacer--m"
       />
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -77,14 +69,16 @@ Array [
             <span
               className="euiButton__content"
             >
+              <div
+                aria-hidden="true"
+                className="euiButton__icon"
+                data-euiicon-type="trash"
+                size="m"
+              />
               <span
                 className="euiButton__text"
               >
-                <div
-                  data-euiicon-type="trash"
-                />
-                 
-                Delete Variable
+                Delete variable
               </span>
             </span>
           </button>

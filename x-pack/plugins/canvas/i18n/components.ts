@@ -545,7 +545,7 @@ export const ComponentStrings = {
       }),
     getTitle: () =>
       i18n.translate('xpack.canvas.pageConfig.title', {
-        defaultMessage: 'Page styles',
+        defaultMessage: 'Page settings',
       }),
     getTransitionLabel: () =>
       i18n.translate('xpack.canvas.pageConfig.transitionLabel', {
@@ -961,11 +961,11 @@ export const ComponentStrings = {
       }),
     getDeleteButtonLabel: () =>
       i18n.translate('xpack.canvas.varConfigDeleteVar.deleteButtonLabel', {
-        defaultMessage: 'Delete Variable',
+        defaultMessage: 'Delete variable',
       }),
     getTitle: () =>
       i18n.translate('xpack.canvas.varConfigDeleteVar.titleLabel', {
-        defaultMessage: 'Delete Variable?',
+        defaultMessage: 'Delete variable?',
       }),
     getWarningDescription: () =>
       i18n.translate('xpack.canvas.varConfigDeleteVar.warningDescription', {
@@ -976,7 +976,7 @@ export const ComponentStrings = {
   VarConfigEditVar: {
     getAddTitle: () =>
       i18n.translate('xpack.canvas.varConfigEditVar.addTitleLabel', {
-        defaultMessage: 'Add Variable',
+        defaultMessage: 'Add variable',
       }),
     getCancelButtonLabel: () =>
       i18n.translate('xpack.canvas.varConfigEditVar.cancelButtonLabel', {
@@ -988,7 +988,7 @@ export const ComponentStrings = {
       }),
     getEditTitle: () =>
       i18n.translate('xpack.canvas.varConfigEditVar.editTitleLabel', {
-        defaultMessage: 'Edit Variable',
+        defaultMessage: 'Edit variable',
       }),
     getNameFieldLabel: () =>
       i18n.translate('xpack.canvas.varConfigEditVar.nameFieldLabel', {
@@ -996,7 +996,7 @@ export const ComponentStrings = {
       }),
     getSaveButtonLabel: () =>
       i18n.translate('xpack.canvas.varConfigEditVar.saveButtonLabel', {
-        defaultMessage: 'Save Changes',
+        defaultMessage: 'Save changes',
       }),
     getTypeBooleanLabel: () =>
       i18n.translate('xpack.canvas.varConfigEditVar.typeBooleanLabel', {

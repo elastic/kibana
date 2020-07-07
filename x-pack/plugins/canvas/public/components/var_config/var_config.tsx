@@ -124,19 +124,17 @@ export const VarConfig: FC<Props> = ({
 
   return (
     <div
-      className={`canvasArg--expandable canvasVarConfig__container ${
+      className={`canvasSidebar__expandable canvasVarConfig__container ${
         panelMode !== PanelMode.List ? 'canvasVarConfig-isEditMode' : ''
       }`}
     >
       <div className="canvasVarConfig__innerContainer">
         <EuiAccordion
           id="accordion-variables"
-          className="canvasVarConfig__listView canvasArg__accordion"
+          className="canvasVarConfig__listView canvasSidebar__accordion"
           buttonContent={
             <EuiToolTip content={strings.getTitle()} position="left" className="canvasArg__tooltip">
-              <EuiText size="s" color="subdued">
-                {strings.getTitle()}
-              </EuiText>
+              <span>{strings.getTitle()}</span>
             </EuiToolTip>
           }
           extraAction={
@@ -144,6 +142,7 @@ export const VarConfig: FC<Props> = ({
               <EuiButtonIcon
                 color="primary"
                 iconType="plusInCircle"
+                aria-label={strings.getAddTooltipLabel()}
                 onClick={() => {
                   setSelectedVar(null);
                   setPanelMode(PanelMode.Edit);
@@ -153,7 +152,7 @@ export const VarConfig: FC<Props> = ({
           }
         >
           {variables.length !== 0 && (
-            <div className="canvasArg__content">
+            <div className="canvasSidebar__accordionContent">
               <EuiInMemoryTable
                 className="canvasVarConfig__list"
                 items={variables}
@@ -161,15 +160,16 @@ export const VarConfig: FC<Props> = ({
                 hasActions={true}
                 pagination={false}
                 sorting={true}
+                compressed
               />
             </div>
           )}
           {variables.length === 0 && (
-            <div className="canvasArg__content">
+            <div className="canvasSidebar__accordionContent">
               <EuiText color="subdued" size="s">
                 {strings.getEmptyDescription()}
               </EuiText>
-              <EuiSpacer size="s" />
+              <EuiSpacer size="m" />
               <EuiButton
                 size="s"
                 iconType="plusInCircle"
@@ -180,7 +180,7 @@ export const VarConfig: FC<Props> = ({
             </div>
           )}
         </EuiAccordion>
-        <div className="canvasVarConfig__editView canvasArg__accordion">
+        <div className="canvasVarConfig__editView canvasSidebar__accordion">
           {panelMode === PanelMode.Edit && (
             <EditVar
               variables={variables}

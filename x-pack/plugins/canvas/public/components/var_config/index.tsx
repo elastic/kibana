@@ -10,7 +10,10 @@ import { VarConfig as MyComponent } from './var_config';
 import {
   withKibana,
   KibanaReactContextValue,
+  KibanaServices,
 } from '../../../../../../src/plugins/kibana_react/public';
+import { CanvasServices } from '../../services';
+
 import { ComponentStrings } from '../../../i18n';
 
 import { CanvasVariable } from '../../../types';
@@ -18,7 +21,7 @@ import { CanvasVariable } from '../../../types';
 const { VarConfig: strings } = ComponentStrings;
 
 interface Props {
-  kibana: KibanaReactContextValue<any>; // TODO: type??
+  kibana: KibanaReactContextValue<{ canvas: CanvasServices } & KibanaServices>;
 
   variables: CanvasVariable[];
   setVariables: (variables: CanvasVariable[]) => void;

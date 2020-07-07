@@ -138,23 +138,22 @@ export const WorkpadConfig: FunctionComponent<Props> = (props) => {
 
       <VarConfig variables={variables} setVariables={setWorkpadVariables} />
 
-      <div className="canvasArg--expandable">
+      <div className="canvasSidebar__expandable">
         <EuiAccordion
           id="accordion-global-css"
-          className="canvasArg__accordion"
+          className="canvasSidebar__accordion"
+          style={{ marginBottom: 0 }}
           buttonContent={
             <EuiToolTip
               content={strings.getGlobalCSSTooltip()}
               position="left"
               className="canvasArg__tooltip"
             >
-              <EuiText size="s" color="subdued">
-                {strings.getGlobalCSSLabel()}
-              </EuiText>
+              <span>{strings.getGlobalCSSLabel()}</span>
             </EuiToolTip>
           }
         >
-          <div className="canvasArg__content">
+          <div className="canvasSidebar__accordionContent">
             <EuiTextArea
               aria-label={strings.getGlobalCSSTooltip()}
               value={css}
