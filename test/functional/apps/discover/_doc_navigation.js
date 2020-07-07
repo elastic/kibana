@@ -60,13 +60,13 @@ export default function ({ getService, getPageObjects }) {
       await docTable.clickRowToggle({ rowIndex: 0 });
 
       const details = await docTable.getDetailsRow();
-      await docTable.addInclusiveFilter(details, 'bytes');
+      await docTable.addInclusiveFilter(details, 'referer');
 
-      const hasInclusiveFilter = await filterBar.hasFilter('bytes', 'exists', true, false, true);
+      const hasInclusiveFilter = await filterBar.hasFilter('referer', 'exists', true, false, true);
       expect(hasInclusiveFilter).to.be(true);
 
-      await docTable.removeInclusiveFilter(details, 'bytes');
-      const hasExcludeFilter = await filterBar.hasFilter('bytes', 'exists', true, false, false);
+      await docTable.removeInclusiveFilter(details, 'referer');
+      const hasExcludeFilter = await filterBar.hasFilter('referer', 'exists', true, false, false);
       expect(hasExcludeFilter).to.be(true);
     });
   });
