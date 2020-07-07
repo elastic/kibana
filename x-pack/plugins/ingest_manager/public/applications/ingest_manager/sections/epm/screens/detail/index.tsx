@@ -130,27 +130,20 @@ export function Detail() {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFlexGroup alignItems="center" gutterSize="m" className="eui-textTruncate">
-                {isLoading ? (
-                  <EuiFlexItem>
-                    <Loading />
+                <FlexItemWithMinWidth grow={false}>
+                  <EuiText>
+                    {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
+                    <h1 className="eui-textTruncate">{packageInfo?.title || '\u00A0'}</h1>
+                  </EuiText>
+                </FlexItemWithMinWidth>
+                {packageInfo?.release && packageInfo.release !== 'ga' ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiBetaBadge
+                      label={RELEASE_BADGE_LABEL[packageInfo.release]}
+                      tooltipContent={RELEASE_BADGE_DESCRIPTION[packageInfo.release]}
+                    />
                   </EuiFlexItem>
-                ) : (
-                  <>
-                    <FlexItemWithMinWidth grow={false}>
-                      <EuiText>
-                        <h1 className="eui-textTruncate">{packageInfo?.title}</h1>
-                      </EuiText>
-                    </FlexItemWithMinWidth>
-                    {packageInfo?.release && packageInfo.release !== 'ga' ? (
-                      <EuiFlexItem grow={false}>
-                        <EuiBetaBadge
-                          label={RELEASE_BADGE_LABEL[packageInfo.release]}
-                          tooltipContent={RELEASE_BADGE_DESCRIPTION[packageInfo.release]}
-                        />
-                      </EuiFlexItem>
-                    ) : null}
-                  </>
-                )}
+                ) : null}
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>

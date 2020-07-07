@@ -23,6 +23,10 @@ const Panel = styled(EuiPanel)`
     height: ${(props) => parseFloat(props.theme.eui.euiSize) * 6}px;
     width: ${(props) => parseFloat(props.theme.eui.euiSize) * 6}px;
   }
+  .euiFlexItem {
+    height: ${(props) => parseFloat(props.theme.eui.euiSize) * 6}px;
+    justify-content: center;
+  }
 `;
 
 export function IconPanel({
