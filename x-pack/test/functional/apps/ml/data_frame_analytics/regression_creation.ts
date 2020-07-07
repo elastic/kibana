@@ -10,8 +10,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
-  // flaky test https://github.com/elastic/kibana/issues/70455
-  describe.skip('regression creation', function () {
+
+  describe('regression creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/egs_regression');
       await ml.testResources.createIndexPatternIfNeeded('ft_egs_regression', '@timestamp');
@@ -66,6 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('selects the source data and loads the job wizard page', async () => {
           await ml.jobSourceSelection.selectSourceForAnalyticsJob(testData.source);
+          await ml.dataFrameAnalyticsCreation.assertConfigurationStepActive();
         });
 
         it('selects the job type', async () => {
@@ -81,6 +82,14 @@ export default function ({ getService }: FtrProviderContext) {
         it('inputs the training percent', async () => {
           await ml.dataFrameAnalyticsCreation.assertTrainingPercentInputExists();
           await ml.dataFrameAnalyticsCreation.setTrainingPercent(testData.trainingPercent);
+        });
+
+        it('displays the source data preview', async () => {
+          await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewExists();
+        });
+
+        it('displays the include fields selection', async () => {
+          await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
         });
 
         it('continues to the additional options step', async () => {
