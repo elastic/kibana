@@ -49,8 +49,9 @@ async function uploadData() {
     ...(httpAuth
       ? {
           auth: { ...httpAuth, username: 'elastic' },
+          ssl: { rejectUnauthorized: false },
         }
-      : {}),
+      : { ssl: { rejectUnauthorized: false } }),
   });
 
   // The new template is the template downloaded from the telemetry repo, with

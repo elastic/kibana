@@ -62,6 +62,10 @@ node ./scripts/merge-telemetry-mapping.js ../../../../telemetry/config/templates
 
 this will replace the contents of the mapping in the repository checkout with the updated mapping. You can then [follow the telemetry team's instructions](https://github.com/elastic/telemetry#mappings) for opening a pull request with the mapping changes.
 
+The queries for the stats are in the [collect data telemetry tasks](../server/lib/apm_telemetry/collect_data_telemetry/tasks.ts).
+
+The collection tasks also use the [`APMDataTelemetry` type](../server/lib/apm_telemetry/types.ts) which also needs to be updated with any changes to the fields.
+
 ## Behavioral Telemetry
 
 Behavioral telemetry is recorded with the ui_metrics and application_usage methods from the Usage Collection plugin.
