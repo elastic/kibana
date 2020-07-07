@@ -740,15 +740,6 @@ describe('utils', () => {
       ]);
     });
 
-    test('it returns empty array if lists feature flag not turned on', async () => {
-      const exceptions = await getExceptions({
-        client: listMock.getExceptionListClient(),
-        lists: getListArrayMock(),
-      });
-
-      expect(exceptions).toEqual([]);
-    });
-
     test('it throws if "client" is undefined', async () => {
       await expect(() =>
         getExceptions({
