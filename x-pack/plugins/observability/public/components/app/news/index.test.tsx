@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { News } from './';
-import { EuiThemeProvider } from '../../../typings';
 import { render } from '../../../utils/test_helper';
+import { News } from './';
 
 describe('News', () => {
   it('renders resources with all elements', () => {

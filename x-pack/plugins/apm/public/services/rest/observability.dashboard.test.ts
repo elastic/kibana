@@ -6,7 +6,6 @@
 
 import { fetchLandingPageData, hasData } from './observability_dashboard';
 import * as createCallApmApi from './createCallApmApi';
-import { euiThemeVars as theme } from '@kbn/ui-shared-deps/theme';
 
 describe('Observability dashboard data', () => {
   const callApmApiMock = jest.spyOn(createCallApmApi, 'callApmApi');
@@ -38,14 +37,11 @@ describe('Observability dashboard data', () => {
           ],
         })
       );
-      const response = await fetchLandingPageData(
-        {
-          startTime: '1',
-          endTime: '2',
-          bucketSize: '3',
-        },
-        { theme }
-      );
+      const response = await fetchLandingPageData({
+        startTime: '1',
+        endTime: '2',
+        bucketSize: '3',
+      });
       expect(response).toEqual({
         title: 'APM',
         appLink: '/app/apm',
@@ -82,14 +78,11 @@ describe('Observability dashboard data', () => {
           transactionCoordinates: [],
         })
       );
-      const response = await fetchLandingPageData(
-        {
-          startTime: '1',
-          endTime: '2',
-          bucketSize: '3',
-        },
-        { theme }
-      );
+      const response = await fetchLandingPageData({
+        startTime: '1',
+        endTime: '2',
+        bucketSize: '3',
+      });
       expect(response).toEqual({
         title: 'APM',
         appLink: '/app/apm',
@@ -122,14 +115,11 @@ describe('Observability dashboard data', () => {
           transactionCoordinates: [{ x: 1 }, { x: 2 }, { x: 3 }],
         })
       );
-      const response = await fetchLandingPageData(
-        {
-          startTime: '1',
-          endTime: '2',
-          bucketSize: '3',
-        },
-        { theme }
-      );
+      const response = await fetchLandingPageData({
+        startTime: '1',
+        endTime: '2',
+        bucketSize: '3',
+      });
       expect(response).toEqual({
         title: 'APM',
         appLink: '/app/apm',

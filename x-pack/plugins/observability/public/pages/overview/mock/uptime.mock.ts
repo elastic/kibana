@@ -15,23 +15,19 @@ const response: UptimeFetchDataResponse = {
   stats: {
     monitors: {
       type: 'number',
-      label: 'Monitors',
       value: 26,
     },
     up: {
       type: 'number',
-      label: 'Up',
       value: 20,
     },
     down: {
       type: 'number',
-      label: 'Down',
       value: 6,
     },
   },
   series: {
     up: {
-      label: 'Up',
       coordinates: [
         {
           x: 1593295200000,
@@ -612,7 +608,6 @@ const response: UptimeFetchDataResponse = {
       ],
     },
     down: {
-      label: 'Down',
       coordinates: [
         {
           x: 1593295200000,
@@ -1201,27 +1196,22 @@ export const emptyResponse: UptimeFetchDataResponse = {
   stats: {
     monitors: {
       type: 'number',
-      label: 'Monitors',
       value: 0,
     },
     up: {
       type: 'number',
-      label: 'Up',
       value: 0,
     },
     down: {
       type: 'number',
-      label: 'Down',
       value: 0,
     },
   },
   series: {
     up: {
-      label: 'Up',
       coordinates: [],
     },
     down: {
-      label: 'Down',
       coordinates: [],
     },
   },

@@ -15,20 +15,15 @@ const response: ApmFetchDataResponse = {
   stats: {
     services: {
       type: 'number',
-      label: 'Services',
       value: 7,
     },
     transactions: {
       type: 'number',
-      label: 'Transactions',
       value: 125808,
-      color: '#6092c0',
     },
   },
   series: {
     transactions: {
-      label: 'Transactions',
-      color: '#6092c0',
       coordinates: [
         {
           x: 1593295200000,

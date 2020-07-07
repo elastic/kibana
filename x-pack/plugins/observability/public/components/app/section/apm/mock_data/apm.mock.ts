@@ -11,14 +11,11 @@ export const response: ApmFetchDataResponse = {
 
   appLink: '/app/apm',
   stats: {
-    services: { label: 'Services', value: 11, type: 'number' },
-    transactions: { label: 'Transactions', value: 312000, type: 'number', color: 'euiColorVis1' },
+    services: { value: 11, type: 'number' },
+    transactions: { value: 312000, type: 'number' },
   },
   series: {
     transactions: {
-      label: 'Transactions',
-
-      color: 'euiColorVis1',
       coordinates: [
         { x: 1591365600000, y: 32 },
         { x: 1591366200000, y: 43 },
