@@ -9,7 +9,7 @@ jest.mock('../../../meta', () => {
     getEmsTmsServices: () => {
       class MockTMSService {
         constructor(config) {
-          this.coreConfig = config;
+          this._config = config;
         }
         getMarkdownAttribution() {
           return this._config.attributionMarkdown;
