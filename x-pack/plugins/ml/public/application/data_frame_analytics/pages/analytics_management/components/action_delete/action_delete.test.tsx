@@ -7,13 +7,16 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import * as CheckPrivilige from '../../../../../capabilities/check_capabilities';
-import mockAnalyticsListItem from './__mocks__/analytics_list_item.json';
-import { DeleteButton } from './delete_button';
+import mockAnalyticsListItem from '../analytics_list/__mocks__/analytics_list_item.json';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
   coreMock as mockCoreServices,
   i18nServiceMock,
 } from '../../../../../../../../../../src/core/public/mocks';
+
+import { DeleteButton } from './delete_button';
+import { DeleteButtonModal } from './delete_button_modal';
+import { useDeleteAction } from './use_delete_action';
 
 jest.mock('../../../../../capabilities/check_capabilities', () => ({
   checkPermission: jest.fn(() => false),
@@ -77,9 +80,21 @@ describe('DeleteAction', () => {
     test('should allow to delete target index by default.', () => {
       const mock = jest.spyOn(CheckPrivilige, 'checkPermission');
       mock.mockImplementation((p) => p === 'canDeleteDataFrameAnalytics');
+
+      const TestComponent = () => {
+        const deleteAction = useDeleteAction();
+
+        return (
+          <>
+            {deleteAction.isModalVisible && <DeleteButtonModal {...deleteAction} />}
+            <DeleteButton item={mockAnalyticsListItem} onClick={deleteAction.openModal} />
+          </>
+        );
+      };
+
       const { getByTestId, queryByTestId } = render(
         <I18nProvider>
-          <DeleteButton item={mockAnalyticsListItem} onClick={() => {}} />
+          <TestComponent />
         </I18nProvider>
       );
       const deleteButton = getByTestId('mlAnalyticsJobDeleteButton');
