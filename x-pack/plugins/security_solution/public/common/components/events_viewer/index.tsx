@@ -119,7 +119,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         onChangeItemsPerPage={onChangeItemsPerPage}
         query={query}
         start={start}
-        sort={sort!}
+        sort={sort}
         toggleColumn={toggleColumn}
         utilityBar={utilityBar}
       />

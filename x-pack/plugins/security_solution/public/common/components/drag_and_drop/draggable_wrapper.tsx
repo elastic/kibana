@@ -198,7 +198,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
 
   const renderContent = useCallback(
     () => (
-      <Wrapper data-test-subj="draggableWrapperDiv">
+      <Wrapper data-test-subj="draggableWrapperDiv" disabled>
         <DragDropErrorBoundary>
           <Droppable
             isDropDisabled={true}

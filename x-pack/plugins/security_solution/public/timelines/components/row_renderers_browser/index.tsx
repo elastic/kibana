@@ -23,6 +23,7 @@ import styled from 'styled-components';
 
 import { State } from '../../../common/store';
 
+import { renderers } from './catalog';
 import { RowRendererId } from '../../../../common/types/timeline';
 import { setExcludedRowRendererIds as dispatchSetExcludedRowRendererIds } from '../../../timelines/store/timeline/actions';
 import { RowRenderersBrowser } from './row_renderers_browser';
@@ -63,6 +64,10 @@ const StyledEuiModalBody = styled(EuiModalBody)`
 const StyledEuiOverlayMask = styled(EuiOverlayMask)`
   z-index: 8001;
   padding-bottom: 0;
+
+  > div {
+    width: 100%;
+  }
 `;
 
 interface StatefulRowRenderersBrowserProps {
@@ -95,25 +100,25 @@ const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowser
   const hideFieldBrowser = useCallback(() => setShow(false), []);
 
   const handleDisableAll = useCallback(() => {
-    setExcludedRowRendererIds([RowRendererId.all]);
-    tableRef.current.setSelection([]);
-  }, [setExcludedRowRendererIds]);
+    setExcludedRowRendererIds(Object.values(RowRendererId));
+    tableRef?.current.setSelection([]);
+  }, [tableRef, setExcludedRowRendererIds]);
 
   const handleEnableAll = useCallback(() => {
+    tableRef?.current.setSelection(renderers);
     setExcludedRowRendererIds([]);
-    tableRef.current.setSelection([]);
-  }, [setExcludedRowRendererIds]);
+  }, [tableRef, setExcludedRowRendererIds]);
 
   return (
     <>
-      <EuiToolTip content={'Customize Event Renderers'}>
+      <EuiToolTip content={i18n.CUSTOMIZE_EVENT_RENDERERS_TITLE}>
         <EuiButtonEmpty
           data-test-subj="show-field-browser"
           iconType="gear"
           onClick={toggleShow}
           size="xs"
         >
-          {'Event Renderers'}
+          {i18n.EVENT_RENDERERS_TITLE}
         </EuiButtonEmpty>
       </EuiToolTip>
 
@@ -139,7 +144,7 @@ const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowser
                         data-test-subj="disable-all"
                         onClick={handleDisableAll}
                       >
-                        {'Disable All'}
+                        {i18n.DISABLE_ALL}
                       </EuiButtonEmpty>
                     </EuiFlexItem>
 
@@ -150,7 +155,7 @@ const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowser
                         data-test-subj="enable-all"
                         onClick={handleEnableAll}
                       >
-                        {'Enable All'}
+                        {i18n.ENABLE_ALL}
                       </EuiButton>
                     </EuiFlexItem>
                   </EuiFlexGroup>

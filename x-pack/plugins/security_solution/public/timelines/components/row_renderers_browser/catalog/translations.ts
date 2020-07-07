@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const AUDITD_NAME = i18n.translate('xpack.securitySolution.eventRenderers.auditdName', {
-  defaultMessage: 'auditd',
+  defaultMessage: 'Auditd',
 });
 
 export const AUDITD_DESCRIPTION_PART1 = i18n.translate(
@@ -20,7 +20,7 @@ export const AUDITD_DESCRIPTION_PART1 = i18n.translate(
 export const AUDITD_FILE_NAME = i18n.translate(
   'xpack.securitySolution.eventRenderers.auditdFileName',
   {
-    defaultMessage: 'auditd File',
+    defaultMessage: 'Auditd File',
   }
 );
 

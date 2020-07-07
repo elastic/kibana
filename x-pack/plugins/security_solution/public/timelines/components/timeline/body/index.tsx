@@ -137,99 +137,82 @@ export const Body = React.memo<BodyProps>(
     );
 
     return (
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <div>
-            <EuiFlexGroup gutterSize="xs">
-              <EuiFlexItem grow={false}>
-                <StatefulFieldsBrowser
-                  browserFields={browserFields}
-                  columnHeaders={columnHeaders}
-                  data-test-subj="field-browser"
-                  height={FIELD_BROWSER_HEIGHT}
-                  isEventViewer={isEventViewer}
-                  onUpdateColumns={onUpdateColumns}
-                  timelineId={id}
-                  toggleColumn={toggleColumn}
-                  width={FIELD_BROWSER_WIDTH}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <StatefulRowRenderersBrowser
-                  browserFields={browserFields}
-                  columnHeaders={columnHeaders}
-                  data-test-subj="row-renderers-browser"
-                  height={FIELD_BROWSER_HEIGHT}
-                  isEventViewer={isEventViewer}
-                  onUpdateColumns={onUpdateColumns}
-                  timelineId={id}
-                  toggleColumn={toggleColumn}
-                  width={FIELD_BROWSER_WIDTH}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
-          <EuiHorizontalRule margin="xs" />
-          {showGraphView(graphEventId) && (
-            <GraphOverlay bodyHeight={height} graphEventId={graphEventId} timelineId={id} />
-          )}
-          <TimelineBody
-            data-test-subj="timeline-body"
-            data-timeline-id={id}
-            bodyHeight={height}
-            ref={containerElementRef}
-            visible={show && !showGraphView(graphEventId)}
-          >
-            <EventsTable data-test-subj="events-table" columnWidths={columnWidths}>
-              <ColumnHeaders
-                actionsColumnWidth={actionsColumnWidth}
-                browserFields={browserFields}
-                columnHeaders={columnHeaders}
-                isEventViewer={isEventViewer}
-                isSelectAllChecked={isSelectAllChecked}
-                onColumnRemoved={onColumnRemoved}
-                onColumnResized={onColumnResized}
-                onColumnSorted={onColumnSorted}
-                onFilterChange={onFilterChange}
-                onSelectAll={onSelectAll}
-                onUpdateColumns={onUpdateColumns}
-                showEventsSelect={false}
-                showSelectAllCheckbox={showCheckboxes}
-                sort={sort}
-                timelineId={id}
-                toggleColumn={toggleColumn}
-              />
+      <>
+        <EuiFlexGroup gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <StatefulFieldsBrowser
+              browserFields={browserFields}
+              columnHeaders={columnHeaders}
+              data-test-subj="field-browser"
+              height={FIELD_BROWSER_HEIGHT}
+              isEventViewer={isEventViewer}
+              onUpdateColumns={onUpdateColumns}
+              timelineId={id}
+              toggleColumn={toggleColumn}
+              width={FIELD_BROWSER_WIDTH}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <StatefulRowRenderersBrowser data-test-subj="row-renderers-browser" timelineId={id} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiHorizontalRule margin="xs" />
+        {showGraphView(graphEventId) && (
+          <GraphOverlay bodyHeight={height} graphEventId={graphEventId} timelineId={id} />
+        )}
+        <TimelineBody
+          data-test-subj="timeline-body"
+          data-timeline-id={id}
+          bodyHeight={height}
+          ref={containerElementRef}
+          visible={show && !showGraphView(graphEventId)}
+        >
+          <EventsTable data-test-subj="events-table" columnWidths={columnWidths}>
+            <ColumnHeaders
+              actionsColumnWidth={actionsColumnWidth}
+              columnHeaders={columnHeaders}
+              isEventViewer={isEventViewer}
+              isSelectAllChecked={isSelectAllChecked}
+              onColumnRemoved={onColumnRemoved}
+              onColumnResized={onColumnResized}
+              onColumnSorted={onColumnSorted}
+              onFilterChange={onFilterChange}
+              onSelectAll={onSelectAll}
+              showEventsSelect={false}
+              showSelectAllCheckbox={showCheckboxes}
+              sort={sort}
+              timelineId={id}
+            />
 
-              <Events
-                containerElementRef={containerElementRef.current!}
-                actionsColumnWidth={actionsColumnWidth}
-                addNoteToEvent={addNoteToEvent}
-                browserFields={browserFields}
-                columnHeaders={columnHeaders}
-                columnRenderers={columnRenderers}
-                data={data}
-                eventIdToNoteIds={eventIdToNoteIds}
-                getNotesByIds={getNotesByIds}
-                id={id}
-                isEventViewer={isEventViewer}
-                loadingEventIds={loadingEventIds}
-                onColumnResized={onColumnResized}
-                onPinEvent={onPinEvent}
-                onRowSelected={onRowSelected}
-                onUpdateColumns={onUpdateColumns}
-                onUnPinEvent={onUnPinEvent}
-                pinnedEventIds={pinnedEventIds}
-                rowRenderers={rowRenderers}
-                selectedEventIds={selectedEventIds}
-                showCheckboxes={showCheckboxes}
-                toggleColumn={toggleColumn}
-                updateNote={updateNote}
-              />
-            </EventsTable>
-          </TimelineBody>
-          <TimelineBodyGlobalStyle />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            <Events
+              containerElementRef={containerElementRef.current!}
+              actionsColumnWidth={actionsColumnWidth}
+              addNoteToEvent={addNoteToEvent}
+              browserFields={browserFields}
+              columnHeaders={columnHeaders}
+              columnRenderers={columnRenderers}
+              data={data}
+              eventIdToNoteIds={eventIdToNoteIds}
+              getNotesByIds={getNotesByIds}
+              id={id}
+              isEventViewer={isEventViewer}
+              loadingEventIds={loadingEventIds}
+              onColumnResized={onColumnResized}
+              onPinEvent={onPinEvent}
+              onRowSelected={onRowSelected}
+              onUpdateColumns={onUpdateColumns}
+              onUnPinEvent={onUnPinEvent}
+              pinnedEventIds={pinnedEventIds}
+              rowRenderers={rowRenderers}
+              selectedEventIds={selectedEventIds}
+              showCheckboxes={showCheckboxes}
+              toggleColumn={toggleColumn}
+              updateNote={updateNote}
+            />
+          </EventsTable>
+        </TimelineBody>
+        <TimelineBodyGlobalStyle />
+      </>
     );
   }
 );

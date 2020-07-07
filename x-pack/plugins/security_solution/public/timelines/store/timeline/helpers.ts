@@ -1372,7 +1372,7 @@ export const updateExcludedRowRenderersIds = ({
     [id]: {
       ...timeline,
       excludedRowRendererIds,
-      showRowRenderers: excludedRowRendererIds[0] !== 'all',
+      showRowRenderers: excludedRowRendererIds.length !== Object.keys(RowRendererId).length,
     },
   };
 };

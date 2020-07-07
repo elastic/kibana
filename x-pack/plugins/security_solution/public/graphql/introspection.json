@@ -10131,7 +10131,6 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
-          { "name": "all", "description": "", "isDeprecated": false, "deprecationReason": null },
           { "name": "auditd", "description": "", "isDeprecated": false, "deprecationReason": null },
           {
             "name": "auditd_file",

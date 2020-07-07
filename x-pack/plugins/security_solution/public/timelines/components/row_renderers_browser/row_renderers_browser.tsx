@@ -94,18 +94,18 @@ const FieldsBrowserComponent: React.FC<Props> = React.forwardRef(
           name: 'Name',
           sortable: true,
           truncateText: true,
-          width: '10%',
+          width: '8%',
         },
         {
           field: 'description',
           name: 'Description',
-          width: '25%',
+          width: '32%',
           render: (description: React.ReactNode) => description,
         },
         {
           field: 'example',
           name: 'Example',
-          width: '65%',
+          width: '60%',
           render: ExampleWrapperComponent,
         },
         {
@@ -119,7 +119,7 @@ const FieldsBrowserComponent: React.FC<Props> = React.forwardRef(
     );
 
     const notExcludedRowRenderers = useMemo(() => {
-      if (excludedRowRendererIds.includes(RowRendererId.all)) return [];
+      if (excludedRowRendererIds.length === Object.keys(RowRendererId).length) return [];
 
       return renderers.filter((renderer) => !excludedRowRendererIds.includes(renderer.id));
     }, [excludedRowRendererIds]);
@@ -128,7 +128,8 @@ const FieldsBrowserComponent: React.FC<Props> = React.forwardRef(
 
     const handleSelectionChange = useCallback(
       (selection: RowRendererOption[]) => {
-        if (!selection || !selection.length) return setExcludedRowRendererIds([RowRendererId.all]);
+        if (!selection || !selection.length)
+          return setExcludedRowRendererIds(Object.values(RowRendererId));
 
         const excludedRowRenderers = xorBy('id', renderers, selection);
 
@@ -153,7 +154,12 @@ const FieldsBrowserComponent: React.FC<Props> = React.forwardRef(
         itemId="id"
         columns={columns}
         search={search}
-        sorting={sort}
+        sorting={{
+          sort: {
+            field: 'id',
+            direction: 'desc',
+          },
+        }}
         isSelectable={true}
         selection={selectionValue}
         onTableChange={onTableChange}
@@ -162,4 +168,4 @@ const FieldsBrowserComponent: React.FC<Props> = React.forwardRef(
   }
 );
 
-export const RowRenderersBrowser = React.memo(FieldsBrowserComponent);
+export const RowRenderersBrowser = FieldsBrowserComponent;

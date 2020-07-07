@@ -343,7 +343,6 @@ export enum TlsFields {
 }
 
 export enum RowRendererId {
-  all = 'all',
   auditd = 'auditd',
   auditd_file = 'auditd_file',
   netflow = 'netflow',

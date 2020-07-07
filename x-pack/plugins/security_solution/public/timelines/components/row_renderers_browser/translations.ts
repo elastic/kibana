@@ -6,25 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const CATEGORY = i18n.translate('xpack.securitySolution.fieldBrowser.categoryLabel', {
-  defaultMessage: 'Category',
-});
-
-export const CATEGORIES = i18n.translate('xpack.securitySolution.fieldBrowser.categoriesTitle', {
-  defaultMessage: 'Categories',
-});
-
-export const COPY_TO_CLIPBOARD = i18n.translate(
-  'xpack.securitySolution.fieldBrowser.copyToClipboard',
+export const EVENT_RENDERERS_TITLE = i18n.translate(
+  'xpack.securitySolution.customizeEventRenderers.eventRenderersTitle',
   {
-    defaultMessage: 'Copy to Clipboard',
-  }
-);
-
-export const CUSTOMIZE_COLUMNS = i18n.translate(
-  'xpack.securitySolution.fieldBrowser.customizeColumnsTitle',
-  {
-    defaultMessage: 'Customize Columns',
+    defaultMessage: 'Event Renderers',
   }
 );
 
@@ -40,6 +25,20 @@ export const CUSTOMIZE_EVENT_RENDERERS_DESCRIPTION = i18n.translate(
   {
     defaultMessage:
       'Event Renderers automatically convey the most relevant details in an event to reveal its story',
+  }
+);
+
+export const ENABLE_ALL = i18n.translate(
+  'xpack.securitySolution.customizeEventRenderers.enableAllRenderersButtonLabel',
+  {
+    defaultMessage: 'Enable all',
+  }
+);
+
+export const DISABLE_ALL = i18n.translate(
+  'xpack.securitySolution.customizeEventRenderers.disableAllRenderersButtonLabel',
+  {
+    defaultMessage: 'Disable all',
   }
 );
 

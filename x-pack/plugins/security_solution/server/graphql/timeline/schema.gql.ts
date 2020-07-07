@@ -142,7 +142,6 @@ export const timelineSchema = gql`
   }
 
   enum RowRendererId {
-    all
     auditd
     auditd_file
     netflow

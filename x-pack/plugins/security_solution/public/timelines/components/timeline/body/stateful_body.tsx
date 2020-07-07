@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
-import { TimelineId } from '../../../../../common/types/timeline';
+import { RowRendererId, TimelineId } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
 import { TimelineItem } from '../../../../graphql/types';
 import { Note } from '../../../../common/lib/note';
@@ -175,7 +175,11 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     }, [onSelectAll, selectAll]);
 
     const enabledRowRenderers = useMemo(() => {
-      if (!showRowRenderers || (excludedRowRendererIds && excludedRowRendererIds[0] === 'all'))
+      if (
+        !showRowRenderers ||
+        (excludedRowRendererIds &&
+          excludedRowRendererIds.length === Object.keys(RowRendererId).length)
+      )
         return [plainRowRenderer];
 
       if (!excludedRowRendererIds) return rowRenderers;

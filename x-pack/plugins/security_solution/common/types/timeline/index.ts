@@ -167,7 +167,6 @@ export enum RowRendererId {
   system_security_event = 'system_security_event',
   system_socket = 'system_socket',
   zeek = 'zeek',
-  all = 'all',
 }
 
 export const RowRendererIdRuntimeType = stringEnum(RowRendererId, 'RowRendererId');
