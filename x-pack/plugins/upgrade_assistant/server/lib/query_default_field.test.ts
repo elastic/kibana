@@ -54,7 +54,7 @@ describe('fixMetricbeatIndex', () => {
     },
   };
 
-  beforeEach(() => (dataClient = elasticsearchServiceMock.createScopedClusterClient()));
+  beforeEach(() => (dataClient = elasticsearchServiceMock.createLegacyScopedClusterClient()));
 
   it('fails if index already has index.query.default_field setting', async () => {
     (dataClient.callAsCurrentUser as jest.Mock).mockResolvedValueOnce({
