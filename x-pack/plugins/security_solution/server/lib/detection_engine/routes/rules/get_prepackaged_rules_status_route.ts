@@ -23,7 +23,7 @@ import { SetupPlugins } from '../../../../plugin';
 import {
   checkTimelinesStatus,
   checkTimelineStatusRt,
-} from '../../rules/install_prepacked_timelines';
+} from '../../../timeline/routes/utils/install_prepacked_timelines';
 
 export const getPrepackagedRulesStatusRoute = (
   router: IRouter,

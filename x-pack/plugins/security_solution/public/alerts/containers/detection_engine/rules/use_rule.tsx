@@ -41,7 +41,7 @@ export const useRule = (id: string | undefined): ReturnRule => {
       } catch (error) {
         if (isSubscribed) {
           setRule(null);
-          errorToToaster({ title: i18n.RULE_FETCH_FAILURE, error, dispatchToaster });
+          errorToToaster({ title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE, error, dispatchToaster });
         }
       }
       if (isSubscribed) {

@@ -9,20 +9,24 @@ import path, { join, resolve } from 'path';
 import { Readable } from 'stream';
 import * as rt from 'io-ts';
 
-import { createListStream } from '../../../../../../../src/legacy/utils';
-import { importTimelines } from '../../timeline/routes/utils/import_timelines';
-import { FrameworkRequest } from '../../framework';
-import {
-  ImportTimelineResultSchema,
-  ImportTimelinesSchemaRt,
-} from '../../timeline/routes/schemas/import_timelines_schema';
-import { getTimelinesToInstall } from './get_timelines_to_install';
-import { getTimelinesToUpdate } from './get_timelines_to_update';
-import { getExistingPrepackagedTimelines } from '../../timeline/saved_object';
+import { createListStream } from '../../../../../../../../src/legacy/utils';
+
 import {
   TimelineSavedObject,
   TimelineSavedToReturnObjectRuntimeType,
-} from '../../../../common/types/timeline';
+} from '../../../../../common/types/timeline';
+
+import { FrameworkRequest } from '../../../framework';
+
+import {
+  ImportTimelineResultSchema,
+  ImportTimelinesSchemaRt,
+} from '../schemas/import_timelines_schema';
+import { getExistingPrepackagedTimelines } from '../../saved_object';
+
+import { importTimelines } from './import_timelines';
+import { getTimelinesToInstall } from './get_timelines_to_install';
+import { getTimelinesToUpdate } from './get_timelines_to_update';
 
 export const checkTimelineStatusRt = rt.type({
   timelinesToInstall: rt.array(ImportTimelinesSchemaRt),
@@ -137,7 +141,9 @@ export const installPrepackagedTimelines = async (
   fileName?: string
 ): Promise<ImportTimelineResultSchema | Error> => {
   let readStream;
-  const dir = resolve(join(__dirname, filePath ?? './prepackaged_timelines'));
+  const dir = resolve(
+    join(__dirname, filePath ?? '../../../detection_engine/rules/prepackaged_timelines')
+  );
   const file = fileName ?? 'index.ndjson';
   const dataPath = path.join(dir, file);
   try {
@@ -173,7 +179,9 @@ export const checkTimelinesStatus = async (
     totalCount: number;
     timeline: TimelineSavedObject[];
   };
-  const dir = resolve(join(__dirname, filePath ?? './prepackaged_timelines'));
+  const dir = resolve(
+    join(__dirname, filePath ?? '../../../detection_engine/rules/prepackaged_timelines')
+  );
   const file = fileName ?? 'index.ndjson';
   const dataPath = path.join(dir, file);
 

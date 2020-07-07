@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ImportTimelinesSchema } from '../../timeline/routes/schemas/import_timelines_schema';
-import { TimelineSavedObject } from '../../../../common/types/timeline';
+import { ImportTimelinesSchema } from '../import_timelines_schema';
+import { TimelineSavedObject } from '../../../../../common/types/timeline';
 
 export const getTimelinesToInstall = (
   timelinesFromFileSystem: ImportTimelinesSchema[],

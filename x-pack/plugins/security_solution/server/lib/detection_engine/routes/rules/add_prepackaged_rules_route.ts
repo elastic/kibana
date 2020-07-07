@@ -23,7 +23,7 @@ import { ConfigType } from '../../../../config';
 import { SetupPlugins } from '../../../../plugin';
 import { buildFrameworkRequest } from '../../../timeline/routes/utils/common';
 import { importTimelineResultSchema } from '../../../timeline/routes/schemas/import_timelines_schema';
-import { installPrepackagedTimelines } from '../../rules/install_prepacked_timelines';
+import { installPrepackagedTimelines } from '../../../timeline/routes/utils/install_prepacked_timelines';
 
 export const addPrepackedRulesRoute = (
   router: IRouter,

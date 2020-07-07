@@ -15,7 +15,7 @@ import { requestContextMock, serverMock, createMockConfig, mockGetCurrentUser } 
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import { SecurityPluginSetup } from '../../../../../../security/server';
-import { installPrepackagedTimelines } from '../../rules/install_prepacked_timelines';
+import { installPrepackagedTimelines } from '../../../timeline/routes/utils/install_prepacked_timelines';
 import { addPrepackedRulesRoute } from './add_prepackaged_rules_route';
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
@@ -54,7 +54,7 @@ jest.mock('../../rules/get_prepackaged_rules', () => {
   };
 });
 
-jest.mock('../../rules/install_prepacked_timelines', () => {
+jest.mock('../../../timeline/routes/utils/install_prepacked_timelines', () => {
   return {
     installPrepackagedTimelines: jest.fn().mockResolvedValue({
       success: true,

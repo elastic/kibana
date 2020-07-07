@@ -5,21 +5,28 @@
  */
 import { join, resolve } from 'path';
 
-import { createMockConfig, requestContextMock, mockGetCurrentUser } from '../routes/__mocks__';
-import { buildFrameworkRequest } from '../../timeline/routes/utils/common';
-import { SecurityPluginSetup } from '../../../../../security/server';
+import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils/streams';
+import { SecurityPluginSetup } from '../../../../../../security/server';
+
+import { FrameworkRequest } from '../../../framework';
+import {
+  createMockConfig,
+  requestContextMock,
+  mockGetCurrentUser,
+} from '../../../detection_engine/routes/__mocks__';
 import {
   addPrepackagedRulesRequest,
   getNonEmptyIndex,
   getFindResultWithSingleHit,
-} from '../routes/__mocks__/request_responses';
-import { ImportTimelineResultSchema } from '../../timeline/routes/schemas/import_timelines_schema';
-import * as lib from './install_prepacked_timelines';
-import { FrameworkRequest } from '../../framework';
-import { importTimelines } from '../../timeline/routes/utils/import_timelines';
-import { createPromiseFromStreams } from '../../../../../../../src/legacy/utils/streams';
+} from '../../../detection_engine/routes/__mocks__/request_responses';
 
-jest.mock('../../timeline/routes/utils/import_timelines');
+import { ImportTimelineResultSchema } from '../schemas/import_timelines_schema';
+
+import * as lib from './install_prepacked_timelines';
+import { importTimelines } from './import_timelines';
+import { buildFrameworkRequest } from './common';
+
+jest.mock('./import_timelines');
 
 describe('installPrepackagedTimelines', () => {
   let securitySetup: SecurityPluginSetup;
@@ -28,6 +35,8 @@ describe('installPrepackagedTimelines', () => {
 
   const { clients, context } = requestContextMock.createTools();
   const config = createMockConfig();
+  const mockFilePath = '../__mocks__';
+  const mockFileName = 'prepackaged_timelines.ndjson';
 
   beforeEach(async () => {
     securitySetup = ({
@@ -64,16 +73,16 @@ describe('installPrepackagedTimelines', () => {
       config.maxTimelineImportExportSize,
       frameworkRequest,
       true,
-      '../routes/__mocks__',
-      'prepackaged_timelines.ndjson'
+      mockFilePath,
+      mockFileName
     );
 
     expect(importTimelines).toHaveBeenCalled();
   });
 
   test('should call importTimelines with Readables', async () => {
-    const dir = resolve(join(__dirname, '../routes/__mocks__'));
-    const file = 'prepackaged_timelines.ndjson';
+    const dir = resolve(join(__dirname, mockFilePath));
+    const file = mockFileName;
     await lib.installPrepackagedTimelines(
       config.maxTimelineImportExportSize,
       frameworkRequest,
@@ -186,8 +195,8 @@ describe('installPrepackagedTimelines', () => {
   });
 
   test('should call importTimelines with maxTimelineImportExportSize', async () => {
-    const dir = resolve(join(__dirname, '../routes/__mocks__'));
-    const file = 'prepackaged_timelines.ndjson';
+    const dir = resolve(join(__dirname, mockFilePath));
+    const file = mockFileName;
     await lib.installPrepackagedTimelines(
       config.maxTimelineImportExportSize,
       frameworkRequest,
@@ -202,8 +211,8 @@ describe('installPrepackagedTimelines', () => {
   });
 
   test('should call importTimelines with frameworkRequest', async () => {
-    const dir = resolve(join(__dirname, '../routes/__mocks__'));
-    const file = 'prepackaged_timelines.ndjson';
+    const dir = resolve(join(__dirname, mockFilePath));
+    const file = mockFileName;
     await lib.installPrepackagedTimelines(
       config.maxTimelineImportExportSize,
       frameworkRequest,
@@ -218,8 +227,8 @@ describe('installPrepackagedTimelines', () => {
   });
 
   test('should call importTimelines with immutable', async () => {
-    const dir = resolve(join(__dirname, '../routes/__mocks__'));
-    const file = 'prepackaged_timelines.ndjson';
+    const dir = resolve(join(__dirname, mockFilePath));
+    const file = mockFileName;
     await lib.installPrepackagedTimelines(
       config.maxTimelineImportExportSize,
       frameworkRequest,
@@ -236,7 +245,7 @@ describe('installPrepackagedTimelines', () => {
       config.maxTimelineImportExportSize,
       frameworkRequest,
       true,
-      '../routes/__mocks__',
+      mockFilePath,
       'prepackaged_timeline.ndjson'
     );
 
