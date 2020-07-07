@@ -23,6 +23,7 @@ import { KpiNetworkComponent } from '..//components/kpi_network';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { KpiNetworkQuery } from '../../network/containers/kpi_network';
+import { useGlobalTime } from '../../common/containers/use_global_time';
 import { useWithSource } from '../../common/containers/source';
 import { LastEventIndexKey } from '../../graphql/types';
 import { useKibana } from '../../common/lib/kibana';
@@ -33,7 +34,7 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { networkModel } from '../store';
 import { navTabsNetwork, NetworkRoutes, NetworkRoutesLoading } from './navigation';
 import { filterNetworkData } from './navigation/alerts_query_tab_body';
-import { NetworkEmptyPage } from './network_empty_page';
+import { OverviewEmpty } from '../../overview/components/overview_empty';
 import * as i18n from './translations';
 import { NetworkComponentProps } from './types';
 import { NetworkRouteType } from './navigation/types';
@@ -47,13 +48,10 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
     query,
     setAbsoluteRangeDatePicker,
     networkPagePath,
-    to,
-    from,
-    setQuery,
-    isInitializing,
     hasMlUserPermissions,
     capabilitiesFetched,
   }) => {
+    const { to, from, setQuery, isInitializing } = useGlobalTime();
     const kibana = useKibana();
     const { tabName } = useParams();
 
@@ -166,7 +164,7 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
         ) : (
           <WrapperPage>
             <HeaderPage border title={i18n.PAGE_TITLE} />
-            <NetworkEmptyPage />
+            <OverviewEmpty />
           </WrapperPage>
         )}
 

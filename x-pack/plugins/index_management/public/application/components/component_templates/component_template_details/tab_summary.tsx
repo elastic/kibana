@@ -118,7 +118,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({
         )}
 
         {/* Version (optional) */}
-        {version && (
+        {typeof version !== 'undefined' && (
           <>
             <EuiDescriptionListTitle data-test-subj="versionTitle">
               <FormattedMessage

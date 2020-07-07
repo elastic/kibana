@@ -45,6 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             analysis: {
               classification: {
+                prediction_field_name: 'test',
                 dependent_variable: 'y',
                 training_percent: 20,
               },
@@ -107,6 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             analysis: {
               regression: {
+                prediction_field_name: 'test',
                 dependent_variable: 'stab',
                 training_percent: 20,
               },
@@ -157,9 +159,9 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('should open the wizard with a proper header', async () => {
-          expect(await ml.dataFrameAnalyticsCreation.getHeaderText()).to.match(
-            /Clone analytics job/
-          );
+          const headerText = await ml.dataFrameAnalyticsCreation.getHeaderText();
+          expect(headerText).to.match(/Clone job/);
+          await ml.dataFrameAnalyticsCreation.assertConfigurationStepActive();
         });
 
         it('should have correct init form values for config step', async () => {
@@ -174,7 +176,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('should have correct init form values for additional options step', async () => {
           await ml.dataFrameAnalyticsCreation.assertInitialCloneJobAdditionalOptionsStep(
-            testData.job as DataFrameAnalyticsConfig
+            testData.job.analysis as DataFrameAnalyticsConfig['analysis']
           );
         });
 
