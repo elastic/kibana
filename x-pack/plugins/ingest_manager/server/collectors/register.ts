@@ -9,16 +9,13 @@ import { CoreSetup } from 'kibana/server';
 import { getIsFleetEnabled } from './config_collectors';
 import { AgentUsage, getAgentUsage } from './agent_collectors';
 import { getInternalSavedObjectsClient } from './helpers';
+import { PackageUsage, getPackageUsage } from './package_collectors';
 import { IngestManagerConfigType } from '..';
 
 interface Usage {
   fleet_enabled: boolean;
   agents: AgentUsage;
-  packages: Array<{
-    name: string;
-    version: string;
-    enabled: boolean;
-  }>;
+  packages: PackageUsage[];
 }
 
 export function registerIngestManagerUsageCollector(
@@ -44,13 +41,7 @@ export function registerIngestManagerUsageCollector(
       return {
         fleet_enabled: getIsFleetEnabled(config),
         agents: await getAgentUsage(soClient),
-        packages: [
-          {
-            name: 'system',
-            version: '0.0.1',
-            enabled: true,
-          },
-        ],
+        packages: await getPackageUsage(soClient),
       };
     },
     // schema: { // temporarily disabled because of type errors
@@ -64,7 +55,6 @@ export function registerIngestManagerUsageCollector(
     //   packages: {
     //     name: { type: 'keyword' },
     //     version: { type: 'keyword' },
-    //     enabled: { type: 'boolean' },
     //   },
     // },
   });
