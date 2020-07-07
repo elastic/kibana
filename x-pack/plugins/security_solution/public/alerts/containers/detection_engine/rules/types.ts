@@ -18,6 +18,10 @@ import {
   timestamp_override,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 /* eslint-enable @typescript-eslint/camelcase */
+import {
+  listArray,
+  listArrayOrUndefined,
+} from '../../../../../common/detection_engine/schemas/types';
 
 /**
  * Params is an "record", since it is a type of AlertActionParams which is action templates.
@@ -64,6 +68,7 @@ export const NewRuleSchema = t.intersection([
     to: t.string,
     updated_by: t.string,
     note: t.string,
+    exceptions_list: listArrayOrUndefined,
   }),
 ]);
 
@@ -135,6 +140,7 @@ export const RuleSchema = t.intersection([
     timeline_title: t.string,
     timestamp_override,
     note: t.string,
+    exceptions_list: listArray,
     version: t.number,
   }),
 ]);
