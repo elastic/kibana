@@ -179,6 +179,42 @@ describe('configureClient', () => {
       `);
     });
 
+    it('properly encode queries', () => {
+      const client = configureClient(
+        createFakeConfig({
+          logQueries: true,
+        }),
+        { logger, scoped: false }
+      );
+
+      const response = createApiResponse({
+        body: {},
+        statusCode: 200,
+        params: {
+          method: 'GET',
+          path: '/foo',
+          querystring: { city: 'Münich' },
+        },
+      });
+
+      client.emit('response', null, response);
+
+      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "200
+        GET /foo
+        city=M%C3%BCnich",
+            Object {
+              "tags": Array [
+                "query",
+              ],
+            },
+          ],
+        ]
+      `);
+    });
+
     it('logs queries even in case of errors if `logQueries` is true', () => {
       const client = configureClient(
         createFakeConfig({
