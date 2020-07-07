@@ -17,5 +17,5 @@ export interface Auditor
 |  Method | Description |
 |  --- | --- |
 |  [add(event)](./kibana-plugin-core-server.auditor.add.md) | Add a record to audit log. Service attaches to a log record: - metadata about an end-user initiating an operation - scope name, if presents |
-|  [withScope(name)](./kibana-plugin-core-server.auditor.withscope.md) | Add a high-level scope name for logged events. It helps to identify the root cause of low-level events. |
+|  [withAuditScope(name)](./kibana-plugin-core-server.auditor.withauditscope.md) | Add a high-level scope name for logged events. It helps to identify the root cause of low-level events. |
 

@@ -181,7 +181,7 @@ export interface AuditableEvent {
 // @public
 export interface Auditor {
     add(event: AuditableEvent): void;
-    withScope(name: string): void;
+    withAuditScope(name: string): void;
 }
 
 // @public
