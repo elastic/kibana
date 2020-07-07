@@ -34,6 +34,11 @@ export interface GetPackagesResponse {
   success: boolean;
 }
 
+export interface GetLimitedPackagesResponse {
+  response: string[];
+  success: boolean;
+}
+
 export interface GetFileRequest {
   params: {
     pkgkey: string;
