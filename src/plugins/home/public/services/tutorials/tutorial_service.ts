@@ -27,12 +27,18 @@ export type TutorialDirectoryNoticeComponent = React.FC;
 /** @public */
 export type TutorialDirectoryHeaderLinkComponent = React.FC;
 
+/** @public */
+export type TutorialModuleNoticeComponent = React.FC<{
+  moduleName: string;
+}>;
+
 export class TutorialService {
   private tutorialVariables: TutorialVariables = {};
   private tutorialDirectoryNotices: { [key: string]: TutorialDirectoryNoticeComponent } = {};
   private tutorialDirectoryHeaderLinks: {
     [key: string]: TutorialDirectoryHeaderLinkComponent;
   } = {};
+  private tutorialModuleNotices: { [key: string]: TutorialModuleNoticeComponent } = {};
 
   public setup() {
     return {
@@ -68,6 +74,16 @@ export class TutorialService {
         }
         this.tutorialDirectoryHeaderLinks[id] = component;
       },
+
+      /**
+       * Registers a component that will be rendered in the description of a tutorial that is associated with a module.
+       */
+      registerModuleNotice: (id: string, component: TutorialModuleNoticeComponent) => {
+        if (this.tutorialModuleNotices[id]) {
+          throw new Error(`module notice ${id} already set`);
+        }
+        this.tutorialModuleNotices[id] = component;
+      },
     };
   }
 
@@ -81,6 +97,10 @@ export class TutorialService {
 
   public getDirectoryHeaderLinks() {
     return Object.values(this.tutorialDirectoryHeaderLinks);
+  }
+
+  public getModuleNotices() {
+    return Object.values(this.tutorialModuleNotices);
   }
 }
 

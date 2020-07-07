@@ -68,6 +68,22 @@ describe('TutorialService', () => {
         setup.registerDirectoryHeaderLink('abc', () => <a>456</a>);
       }).toThrow();
     });
+
+    test('allows multiple register module notice calls', () => {
+      const setup = new TutorialService().setup();
+      expect(() => {
+        setup.registerModuleNotice('abc', () => <div />);
+        setup.registerModuleNotice('def', () => <span />);
+      }).not.toThrow();
+    });
+
+    test('throws when same module notice is registered twice', () => {
+      const setup = new TutorialService().setup();
+      expect(() => {
+        setup.registerModuleNotice('abc', () => <div />);
+        setup.registerModuleNotice('abc', () => <span />);
+      }).toThrow();
+    });
   });
 
   describe('getVariables', () => {
@@ -114,6 +130,22 @@ describe('TutorialService', () => {
       setup.registerDirectoryHeaderLink('abc', links[0]);
       setup.registerDirectoryHeaderLink('def', links[1]);
       expect(service.getDirectoryHeaderLinks()).toEqual(links);
+    });
+  });
+
+  describe('getModuleNotices', () => {
+    test('returns empty array', () => {
+      const service = new TutorialService();
+      expect(service.getModuleNotices()).toEqual([]);
+    });
+
+    test('returns last state of register calls', () => {
+      const service = new TutorialService();
+      const setup = service.setup();
+      const notices = [() => <div />, () => <span />];
+      setup.registerModuleNotice('abc', notices[0]);
+      setup.registerModuleNotice('def', notices[1]);
+      expect(service.getModuleNotices()).toEqual(notices);
     });
   });
 });
