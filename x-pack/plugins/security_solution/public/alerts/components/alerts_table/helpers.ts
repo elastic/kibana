@@ -159,7 +159,7 @@ export const reformatDataProviderWithNewValue = <T extends DataProvider | DataPr
         dataProvider.queryMatch.displayValue = undefined;
       }
     }
-    dataProvider.type = dataProvider.type ?? DataProviderType.default;
+    dataProvider.type = DataProviderType.default;
     return dataProvider;
   }
 

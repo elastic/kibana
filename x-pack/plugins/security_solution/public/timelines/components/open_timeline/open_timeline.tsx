@@ -140,13 +140,18 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     }, [setImportDataModalToggle, refetch, searchResults, totalSearchResultsCount]);
 
     const actionTimelineToShow = useMemo<ActionTimelineToShow[]>(() => {
-      const timelineActions = ['createFrom', 'duplicate', 'export', 'selectable'];
+      const timelineActions: ActionTimelineToShow[] = [
+        'createFrom',
+        'duplicate',
+        'export',
+        'selectable',
+      ];
 
       if (onDeleteSelected != null && deleteTimelines != null) {
         timelineActions.push('delete');
       }
 
-      return timelineActions as ActionTimelineToShow[];
+      return timelineActions;
     }, [onDeleteSelected, deleteTimelines]);
 
     const SearchRowContent = useMemo(() => <>{templateTimelineFilter}</>, [templateTimelineFilter]);
