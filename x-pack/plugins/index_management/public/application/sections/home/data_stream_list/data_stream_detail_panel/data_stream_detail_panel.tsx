@@ -8,17 +8,18 @@ import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButtonEmpty,
   EuiDescriptionList,
-  EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiIconTip,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { SectionLoading, SectionError, Error } from '../../../../components';
@@ -30,11 +31,6 @@ interface Props {
   onClose: (shouldReload?: boolean) => void;
 }
 
-/**
- * NOTE: This currently isn't in use by data_stream_list.tsx because it doesn't contain any
- * information that doesn't already exist in the table. We'll use it once we add additional
- * info, e.g. storage size, docs count.
- */
 export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
   dataStreamName,
   onClose,
@@ -73,19 +69,51 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
     content = (
       <EuiDescriptionList textStyle="reverse">
         <EuiDescriptionListTitle>
-          <FormattedMessage
-            id="xpack.idxMgmt.dataStreamDetailPanel.timestampFieldTitle"
-            defaultMessage="Timestamp field"
-          />
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <FormattedMessage
+                id="xpack.idxMgmt.dataStreamDetailPanel.timestampFieldTitle"
+                defaultMessage="Timestamp field"
+              />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                content={
+                  <FormattedMessage
+                    id="xpack.idxMgmt.dataStreamDetailPanel.timestampFieldToolTip"
+                    defaultMessage="The field that determines each document's age"
+                  />
+                }
+                position="top"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiDescriptionListTitle>
 
         <EuiDescriptionListDescription>{timeStampField.name}</EuiDescriptionListDescription>
 
         <EuiDescriptionListTitle>
-          <FormattedMessage
-            id="xpack.idxMgmt.dataStreamDetailPanel.generationTitle"
-            defaultMessage="Generation"
-          />
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <FormattedMessage
+                id="xpack.idxMgmt.dataStreamDetailPanel.generationTitle"
+                defaultMessage="Generation"
+              />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                content={
+                  <FormattedMessage
+                    id="xpack.idxMgmt.dataStreamDetailPanel.generationToolTip"
+                    defaultMessage="The number of backing indices created"
+                  />
+                }
+                position="top"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiDescriptionListTitle>
 
         <EuiDescriptionListDescription>{generation}</EuiDescriptionListDescription>
