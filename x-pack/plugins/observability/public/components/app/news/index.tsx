@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 import './index.scss';
+import { truncate } from 'lodash';
 import { news as newsMockData } from './mock/news.mock.data';
 
 interface NewsItem {
@@ -46,8 +47,7 @@ export const News = () => {
   );
 };
 
-const limitString = (string: string, limit: number) =>
-  `${string.slice(0, limit)}${string.length > limit ? '...' : ''}`;
+const limitString = (string: string, limit: number) => truncate(string, { length: limit });
 
 const NewsItem = ({ item }: { item: NewsItem }) => {
   const theme = useContext(ThemeContext);
