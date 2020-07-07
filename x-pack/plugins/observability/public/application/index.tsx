@@ -8,6 +8,7 @@ import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
 import { EuiThemeProvider } from '../../../../legacy/common/eui_styled_components';
 import { PluginContext } from '../context/plugin_context';
@@ -54,7 +55,9 @@ export const renderApp = (core: CoreStart, { element }: AppMountParameters) => {
       <Router history={history}>
         <EuiThemeProvider darkMode={isDarkMode}>
           <i18nCore.Context>
-            <App />
+            <RedirectAppLinks application={core.application}>
+              <App />
+            </RedirectAppLinks>
           </i18nCore.Context>
         </EuiThemeProvider>
       </Router>

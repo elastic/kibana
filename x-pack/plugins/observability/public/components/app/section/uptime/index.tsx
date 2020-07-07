@@ -146,7 +146,7 @@ const UptimeBarSeries = ({
   }
   const chartData = series.coordinates.map((coordinate) => ({
     ...coordinate,
-    g: series.label,
+    g: label,
   }));
   return (
     <>

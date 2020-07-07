@@ -26,7 +26,7 @@ interface Props {
   bucketSize?: string;
 }
 
-function formatTransactionValue(value?: number) {
+function formatTpm(value?: number) {
   return numeral(value).format('0.00a');
 }
 
@@ -69,7 +69,7 @@ export const APMSection = ({ startTime, endTime, bucketSize }: Props) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <StyledStat
-            title={formatTransactionValue(stats?.transactions.value)}
+            title={formatTpm(stats?.transactions.value)}
             description={i18n.translate('xpack.observability.overview.apm.transactionsPerMinute', {
               defaultMessage: 'Transactions per minute',
             })}
@@ -101,7 +101,7 @@ export const APMSection = ({ startTime, endTime, bucketSize }: Props) => {
               id="y-axis"
               position={Position.Left}
               showGridLines
-              tickFormat={(value) => `${numeral(value).format('0.00a')} tpm`}
+              tickFormat={(value) => `${formatTpm(value)} tpm`}
             />
             <Axis id="x-axis" position={Position.Bottom} tickFormat={formatter} />
           </>
