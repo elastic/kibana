@@ -15,6 +15,7 @@ import {
 } from '../../../../src/plugins/data/public';
 import { setStateToKbnUrl } from '../../../../src/plugins/kibana_utils/public';
 import { JobId } from '../../reporting/common/types';
+import { ExplorerAppState } from './application/explorer/explorer_dashboard_service';
 
 export const ML_APP_URL_GENERATOR = 'ML_APP_URL_GENERATOR';
 
@@ -28,14 +29,13 @@ export interface ExplorerUrlState {
    */
   jobIds: JobId[];
   /**
-   * Page size of a swim lane.
-   */
-  viewByPerPage?: number;
-  /**
    * Optionally set the time range in the time picker.
    */
   timeRange?: TimeRange;
-
+  /**
+   * Optional state for the swim lane
+   */
+  mlExplorerSwimlane?: ExplorerAppState['mlExplorerSwimlane'];
   /**
    * Optionally set the refresh interval.
    */
@@ -92,22 +92,18 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
     filters,
     refreshInterval,
     useHash = false,
+    mlExplorerSwimlane = {},
   }: Omit<ExplorerUrlState, 'page'>): string {
-    const appState: {
-      query?: Query;
-      filters?: Filter[];
-      index?: string;
-    } = {};
+    const appState: ExplorerAppState = {
+      mlExplorerSwimlane,
+      mlExplorerFilter: {},
+    };
 
     const queryState: ExplorerQueryState = {
       ml: {
         jobIds,
       },
     };
-
-    if (query) appState.query = query;
-    if (filters && filters.length)
-      appState.filters = filters?.filter((f) => !esFilters.isFilterPinned(f));
 
     if (timeRange) queryState.time = timeRange;
     if (filters && filters.length)

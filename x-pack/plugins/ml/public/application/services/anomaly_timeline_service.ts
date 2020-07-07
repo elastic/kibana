@@ -302,7 +302,7 @@ export class AnomalyTimelineService {
     // Store the earliest and latest times of the data returned by the ES aggregations,
     // These will be used for calculating the earliest and latest times for the swim lane charts.
     Object.entries(scoresByTime).forEach(([timeMs, score]) => {
-      const time = Number(timeMs) / 1000;
+      const time = +timeMs / 1000;
       dataset.points.push({
         laneLabel: overallLabel,
         time,
@@ -346,7 +346,7 @@ export class AnomalyTimelineService {
       maxScoreByLaneLabel[influencerFieldValue] = 0;
 
       Object.entries(influencerData).forEach(([timeMs, anomalyScore]) => {
-        const time = Number(timeMs) / 1000;
+        const time = +timeMs / 1000;
         dataset.points.push({
           laneLabel: influencerFieldValue,
           time,

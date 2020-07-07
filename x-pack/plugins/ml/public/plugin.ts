@@ -28,7 +28,7 @@ import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
 import { registerFeature } from './register_feature';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { registerEmbeddables } from './embeddables';
-import { UiActionsSetup } from '../../../../src/plugins/ui_actions/public';
+import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { registerMlUiActions } from './ui_actions';
 import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 import { MlUrlGenerator, MlUrlGeneratorState, ML_APP_URL_GENERATOR } from './url_generator';
@@ -37,6 +37,7 @@ export interface MlStartDependencies {
   data: DataPublicPluginStart;
   share: SharePluginStart;
   kibanaLegacy: KibanaLegacyStart;
+  uiActions: UiActionsStart;
 }
 export interface MlSetupDependencies {
   security?: SecurityPluginSetup;
@@ -51,7 +52,7 @@ export interface MlSetupDependencies {
   share: SharePluginSetup;
 }
 
-declare module 'src/plugins/share/public' {
+declare module '../../../../src/plugins/share/public' {
   export interface UrlGeneratorStateMapping {
     [ML_APP_URL_GENERATOR]: UrlGeneratorState<MlUrlGeneratorState>;
   }
@@ -98,7 +99,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             licenseManagement: pluginsSetup.licenseManagement,
             home: pluginsSetup.home,
             embeddable: pluginsSetup.embeddable,
-            uiActions: pluginsSetup.uiActions,
+            uiActions: pluginsStart.uiActions,
             kibanaVersion,
           },
           {
@@ -114,10 +115,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     registerFeature(pluginsSetup.home);
 
     initManagementSection(pluginsSetup, core);
-
-    registerMlUiActions(pluginsSetup.uiActions, core);
-
     registerEmbeddables(pluginsSetup.embeddable, core);
+    registerMlUiActions(pluginsSetup.uiActions, core);
 
     return {};
   }

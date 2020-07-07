@@ -30,7 +30,7 @@ import {
   ChartTooltipService,
   ChartTooltipValue,
 } from '../components/chart_tooltip/chart_tooltip_service';
-import { OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
+import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 
 const SCSS = {
   mlDragselectDragging: 'mlDragselectDragging',
@@ -64,7 +64,7 @@ export interface ExplorerSwimlaneProps {
     type: string;
     times: number[];
   };
-  onCellsSelection: Function;
+  onCellsSelection: (payload?: AppStateSelectedCells) => void;
   tooltipService: ChartTooltipService;
   'data-test-subj'?: string;
   /**
@@ -241,7 +241,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
     }
 
     if (triggerNewSelection === false) {
-      this.swimlaneCellClick({});
+      this.swimlaneCellClick();
       return;
     }
 
@@ -473,7 +473,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
       })
       .on('click', () => {
         if (selection && typeof selection.lanes !== 'undefined') {
-          this.swimlaneCellClick({});
+          this.swimlaneCellClick();
         }
       })
       .each(function (this: HTMLElement) {
@@ -697,10 +697,10 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
    * Listener for click events in the swim lane and execute a prop callback.
    * @param selectedCellsUpdate
    */
-  swimlaneCellClick(selectedCellsUpdate: any) {
+  swimlaneCellClick(selectedCellsUpdate?: AppStateSelectedCells) {
     // If selectedCells is an empty object we clear any existing selection,
     // otherwise we save the new selection in AppState and update the Explorer.
-    if (Object.keys(selectedCellsUpdate).length === 0) {
+    if (!selectedCellsUpdate) {
       this.props.onCellsSelection();
     } else {
       this.props.onCellsSelection(selectedCellsUpdate);

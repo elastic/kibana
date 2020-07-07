@@ -8,9 +8,8 @@ import { i18n } from '@kbn/i18n';
 import { ActionContextMapping, createAction } from '../../../../../src/plugins/ui_actions/public';
 import {
   AnomalySwimlaneEmbeddable,
-  EditSwimlanePanelContext,
+  SwimLaneDrilldownContext,
 } from '../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
-import { ViewMode } from '../../../../../src/plugins/embeddable/public';
 import { MlCoreSetup } from '../plugin';
 import { ML_APP_URL_GENERATOR } from '../url_generator';
 
@@ -27,7 +26,7 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
       i18n.translate('xpack.ml.actions.openInAnomalyExplorerTitle', {
         defaultMessage: 'Open in Anomaly Explorer',
       }),
-    async getHref({ embeddable }: EditSwimlanePanelContext): Promise<string> {
+    async getHref({ embeddable, data }: SwimLaneDrilldownContext): Promise<string> {
       const [, pluginsStart] = await getStartServices();
       const urlGenerator = pluginsStart.share.urlGenerators.getUrlGenerator(ML_APP_URL_GENERATOR);
       const { perPage, jobIds, query, filters, timeRange } = embeddable.getInput();
@@ -37,22 +36,30 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
         query,
         filters,
         timeRange,
-        viewByPerPage: perPage,
+        mlExplorerSwimlane: {
+          viewByPerPage: perPage,
+          viewByFromPage: 1,
+          ...(data
+            ? {
+                selectedType: data.type,
+                selectedTimes: data.times,
+                selectedLanes: data.lanes,
+                viewByFieldName: data.viewByFieldName,
+              }
+            : {}),
+        },
       });
     },
-    async execute({ embeddable }: EditSwimlanePanelContext) {
+    async execute({ embeddable, data }: SwimLaneDrilldownContext) {
       if (!embeddable) {
         throw new Error('Not possible to execute an action without the embeddable context');
       }
       const [{ application }] = await getStartServices();
-      const anomalyExplorerUrl = await this.getHref!({ embeddable });
+      const anomalyExplorerUrl = await this.getHref!({ embeddable, data });
       await application.navigateToUrl(anomalyExplorerUrl!);
     },
-    isCompatible: async ({ embeddable }: EditSwimlanePanelContext) => {
-      return (
-        embeddable instanceof AnomalySwimlaneEmbeddable &&
-        embeddable.getInput().viewMode === ViewMode.VIEW
-      );
+    async isCompatible({ embeddable }: SwimLaneDrilldownContext) {
+      return embeddable instanceof AnomalySwimlaneEmbeddable;
     },
   });
 }

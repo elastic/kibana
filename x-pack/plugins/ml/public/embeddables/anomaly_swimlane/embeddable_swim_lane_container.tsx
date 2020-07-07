@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { Observable } from 'rxjs';
 
 import { CoreStart } from 'kibana/public';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { MlStartDependencies } from '../../plugin';
 import {
+  AnomalySwimlaneEmbeddable,
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput,
   AnomalySwimlaneServices,
@@ -22,17 +22,22 @@ import {
   isViewBySwimLaneData,
   SwimlaneContainer,
 } from '../../application/explorer/swimlane_container';
+import { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
+import { MlDependencies } from '../../application/app';
+import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions/triggers';
 
 export interface ExplorerSwimlaneContainerProps {
   id: string;
+  embeddableContext: AnomalySwimlaneEmbeddable;
   embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>;
-  services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices];
+  services: [CoreStart, MlDependencies, AnomalySwimlaneServices];
   refresh: Observable<any>;
   onInputChange: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void;
 }
 
 export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
   id,
+  embeddableContext,
   embeddableInput,
   services,
   refresh,
@@ -40,6 +45,10 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
   const [fromPage, setFromPage] = useState<number>(1);
+
+  const [{}, { uiActions }] = services;
+
+  const [selectedCells, setSelectedCells] = useState<AppStateSelectedCells | undefined>();
 
   const [
     swimlaneType,
@@ -56,6 +65,23 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
     services,
     chartWidth,
     fromPage
+  );
+
+  const onCellsSelection = useCallback(
+    (update?: AppStateSelectedCells) => {
+      setSelectedCells(update);
+
+      if (update) {
+        uiActions.getTrigger(SWIM_LANE_SELECTION_TRIGGER).exec({
+          embeddable: embeddableContext,
+          data: {
+            ...update,
+            interval: swimlaneData?.interval,
+          },
+        });
+      }
+    },
+    [swimlaneData]
   );
 
   if (error) {
@@ -91,6 +117,8 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
         onResize={(width) => {
           setChartWidth(width);
         }}
+        selection={selectedCells}
+        onCellsSelection={onCellsSelection}
         onPaginationChange={(update) => {
           if (update.fromPage) {
             setFromPage(update.fromPage);

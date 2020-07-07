@@ -49,7 +49,7 @@ const explorerState$: Observable<ExplorerState> = explorerFilteredAction$.pipe(
   shareReplay(1)
 );
 
-interface ExplorerAppState {
+export interface ExplorerAppState {
   mlExplorerSwimlane: {
     selectedType?: string;
     selectedLanes?: string[];
