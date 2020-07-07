@@ -5,6 +5,7 @@
  */
 
 import { createHash } from 'crypto';
+import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { validate } from '../../../../common/validate';
 
 import { Entry, EntryNested } from '../../../../../lists/common/schemas/types/entries';
@@ -21,6 +22,7 @@ import {
   TranslatedEntryMatcher,
   translatedEntryMatchMatcher,
   translatedEntryMatchAnyMatcher,
+  TranslatedExceptionListItem,
 } from '../../schemas';
 import { ArtifactConstants } from './common';
 
@@ -92,19 +94,11 @@ export async function getFullEndpointExceptionList(
 export function translateToEndpointExceptions(
   exc: FoundExceptionListItemSchema,
   schemaVersion: string
-): TranslatedEntry[] {
+): TranslatedExceptionListItem[] {
   if (schemaVersion === '1.0.0') {
-    return exc.data
-      .flatMap((list) => {
-        return list.entries;
-      })
-      .reduce((entries: TranslatedEntry[], entry) => {
-        const translatedEntry = translateEntry(schemaVersion, entry);
-        if (translatedEntry !== undefined && translatedEntryType.is(translatedEntry)) {
-          entries.push(translatedEntry);
-        }
-        return entries;
-      }, []);
+    return exc.data.map((item) => {
+      return translateItem(schemaVersion, item);
+    });
   } else {
     throw new Error('unsupported schemaVersion');
   }
@@ -122,6 +116,22 @@ function getMatcherFunction(field: string, matchAny?: boolean): TranslatedEntryM
 
 function normalizeFieldName(field: string): string {
   return field.endsWith('.text') ? field.substring(0, field.length - 5) : field;
+}
+
+function translateItem(
+  schemaVersion: string,
+  item: ExceptionListItemSchema
+): TranslatedExceptionListItem {
+  return {
+    type: item.type,
+    entries: item.entries.reduce((translatedEntries: TranslatedEntry[], entry) => {
+      const translatedEntry = translateEntry(schemaVersion, entry);
+      if (translatedEntry !== undefined && translatedEntryType.is(translatedEntry)) {
+        translatedEntries.push(translatedEntry);
+      }
+      return translatedEntries;
+    }, []),
+  };
 }
 
 function translateEntry(

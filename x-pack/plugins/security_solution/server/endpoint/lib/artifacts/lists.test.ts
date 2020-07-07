@@ -21,6 +21,7 @@ describe('buildEventTypeSignal', () => {
 
   test('it should convert the exception lists response to the proper endpoint format', async () => {
     const expectedEndpointExceptions = {
+      type: 'simple',
       entries: [
         {
           entries: [
@@ -46,7 +47,9 @@ describe('buildEventTypeSignal', () => {
     const first = getFoundExceptionListItemSchemaMock();
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
     const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', '1.0.0');
-    expect(resp).toEqual(expectedEndpointExceptions);
+    expect(resp).toEqual({
+      entries: [expectedEndpointExceptions],
+    });
   });
 
   test('it should convert simple fields', async () => {
@@ -57,6 +60,7 @@ describe('buildEventTypeSignal', () => {
     ];
 
     const expectedEndpointExceptions = {
+      type: 'simple',
       entries: [
         {
           field: 'server.domain',
@@ -84,7 +88,9 @@ describe('buildEventTypeSignal', () => {
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
     const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', '1.0.0');
-    expect(resp).toEqual(expectedEndpointExceptions);
+    expect(resp).toEqual({
+      entries: [expectedEndpointExceptions],
+    });
   });
 
   test('it should convert fields case sensitive', async () => {
@@ -100,6 +106,7 @@ describe('buildEventTypeSignal', () => {
     ];
 
     const expectedEndpointExceptions = {
+      type: 'simple',
       entries: [
         {
           field: 'server.domain',
@@ -127,7 +134,9 @@ describe('buildEventTypeSignal', () => {
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
     const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', '1.0.0');
-    expect(resp).toEqual(expectedEndpointExceptions);
+    expect(resp).toEqual({
+      entries: [expectedEndpointExceptions],
+    });
   });
 
   test('it should ignore unsupported entries', async () => {
@@ -147,6 +156,7 @@ describe('buildEventTypeSignal', () => {
     ];
 
     const expectedEndpointExceptions = {
+      type: 'simple',
       entries: [
         {
           field: 'server.domain',
@@ -162,7 +172,9 @@ describe('buildEventTypeSignal', () => {
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
     const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', '1.0.0');
-    expect(resp).toEqual(expectedEndpointExceptions);
+    expect(resp).toEqual({
+      entries: [expectedEndpointExceptions],
+    });
   });
 
   test('it should convert the exception lists response to the proper endpoint format while paging', async () => {
