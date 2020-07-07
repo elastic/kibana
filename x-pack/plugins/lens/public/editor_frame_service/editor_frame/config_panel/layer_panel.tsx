@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   EuiPanel,
   EuiSpacer,
@@ -49,10 +49,6 @@ export function LayerPanel(
 ) {
   const dragDropContext = useContext(DragContext);
   const [popoverState, setPopoverState] = useState<DimensionPopoverState>(initialPopoverState);
-
-  useEffect(() => {
-    setPopoverState(initialPopoverState);
-  }, [props.activeVisualizationId]);
 
   const { framePublicAPI, layerId, isOnlyLayer, onRemoveLayer } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
@@ -265,7 +261,7 @@ export function LayerPanel(
                         panel={
                           <EuiTabbedContent
                             tabs={tabs}
-                            initialSelectedTab={tabs.find((t) => t.id === popoverState.tabId)}
+                            selectedTab={tabs.find((t) => t.id === popoverState.tabId) || tabs[0]}
                             size="s"
                             onTabClick={(tab) => {
                               setPopoverState({
