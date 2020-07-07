@@ -98,13 +98,10 @@ export function createRegionMapVisualization({
       // Do not use the selectedLayer from the visState.
       // These settings are stored in the URL and can be used to inject dirty display content.
 
-      if (fileLayerConfig.isEMS) {
-        //Hosted by EMS. Metadata needs to be resolved through EMS.
-        return await serviceSettings.loadFileLayerConfig(fileLayerConfig);
-      }
-
-      if (fileLayerConfig.layerId && fileLayerConfig.layerId.startsWith(`${ORIGIN.EMS}.`)) {
-        //fallback for older saved objects
+      if (
+        fileLayerConfig.isEMS || //Hosted by EMS. Metadata needs to be resolved through EMS
+        (fileLayerConfig.layerId && fileLayerConfig.layerId.startsWith(`${ORIGIN.EMS}.`)) //fallback for older saved objects
+      ) {
         return await serviceSettings.loadFileLayerConfig(fileLayerConfig);
       }
 
