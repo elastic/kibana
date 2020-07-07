@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect';
 
+import { WrappedTranslatedExceptionList } from '../../../../../plugins/security_solution/server/endpoint/schemas';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getSupertestWithoutAuth, setupIngest } from '../../fleet/agents/services';
 
@@ -69,7 +70,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should download an artifact with correct hash', async () => {
-      await supertestWithoutAuth
+      const { body } = await supertestWithoutAuth
         .get(
           '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-1.0.0/a4e4586e895fcb46dd25a25358b446f9a425279452afa3ef9a98bca39c39122d'
         )
@@ -77,6 +78,38 @@ export default function (providerContext: FtrProviderContext) {
         .set('authorization', `ApiKey ${agentAccessAPIKey}`)
         .send()
         .expect(200);
+
+      // console.log(body);
+
+      // const artifactObj: WrappedTranslatedExceptionList = JSON.parse(body);
+      expect(body).to.eql({
+        exceptions_list: [
+          {
+            field: 'actingProcess.file.signer',
+            operator: 'included',
+            type: 'exact_cased',
+            value: 'Elastic, N.V.',
+          },
+          {
+            entries: [
+              {
+                field: 'signer',
+                operator: 'included',
+                type: 'exact_cased',
+                value: 'Evil',
+              },
+              {
+                field: 'trusted',
+                operator: 'included',
+                type: 'exact_cased',
+                value: 'true',
+              },
+            ],
+            field: 'file.signature',
+            type: 'nested',
+          },
+        ],
+      } as WrappedTranslatedExceptionList);
     });
 
     it('should fail on invalid api key', async () => {

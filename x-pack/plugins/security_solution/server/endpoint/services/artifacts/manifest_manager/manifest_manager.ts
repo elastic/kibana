@@ -140,7 +140,7 @@ export class ManifestManager {
         try {
           await this.artifactClient.createArtifact(artifact);
           // Cache the body of the artifact
-          this.cache.set(diff.id, artifact.body);
+          this.cache.set(diff.id, Buffer.from(artifact.body, 'base64').toString());
         } catch (err) {
           if (err.status === 409) {
             // This artifact already existed...
