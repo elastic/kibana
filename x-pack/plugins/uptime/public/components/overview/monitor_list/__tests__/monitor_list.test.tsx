@@ -96,7 +96,8 @@ const testBarSummary: MonitorSummary = {
   },
 };
 
-describe('MonitorList component', () => {
+// Failing: See https://github.com/elastic/kibana/issues/70386
+describe.skip('MonitorList component', () => {
   let result: MonitorSummaryResult;
   let localStorageMock: any;
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'kibana/public';
+import { HttpHandler, SavedObjectsClientContract } from 'kibana/public';
 import _ from 'lodash';
 import {
   loadInitialState,
@@ -177,8 +177,7 @@ function mockClient() {
   } as unknown) as Pick<SavedObjectsClientContract, 'find' | 'bulkGet'>;
 }
 
-// Failing: See https://github.com/elastic/kibana/issues/70104
-describe.skip('loader', () => {
+describe('loader', () => {
   describe('loadIndexPatterns', () => {
     it('should not load index patterns that are already loaded', async () => {
       const cache = await loadIndexPatterns({
@@ -318,7 +317,6 @@ describe.skip('loader', () => {
           a: sampleIndexPatterns.a,
         },
         layers: {},
-        showEmptyFields: false,
       });
       expect(storage.set).toHaveBeenCalledWith('lens-settings', {
         indexPatternId: 'a',
@@ -341,7 +339,6 @@ describe.skip('loader', () => {
           b: sampleIndexPatterns.b,
         },
         layers: {},
-        showEmptyFields: false,
       });
     });
 
@@ -432,6 +429,7 @@ describe.skip('loader', () => {
         indexPatterns: {},
         existingFields: {},
         layers: {},
+        isFirstExistenceFetch: false,
       };
       const storage = createMockStorage({ indexPatternId: 'b' });
 
@@ -466,6 +464,7 @@ describe.skip('loader', () => {
         existingFields: {},
         indexPatterns: {},
         layers: {},
+        isFirstExistenceFetch: false,
       };
 
       const storage = createMockStorage({ indexPatternId: 'b' });
@@ -523,6 +522,7 @@ describe.skip('loader', () => {
             indexPatternId: 'a',
           },
         },
+        isFirstExistenceFetch: false,
       };
 
       const storage = createMockStorage({ indexPatternId: 'a' });
@@ -591,6 +591,7 @@ describe.skip('loader', () => {
             indexPatternId: 'a',
           },
         },
+        isFirstExistenceFetch: false,
       };
 
       const storage = createMockStorage({ indexPatternId: 'b' });
@@ -628,7 +629,7 @@ describe.skip('loader', () => {
 
     it('should call once for each index pattern', async () => {
       const setState = jest.fn();
-      const fetchJson = jest.fn((path: string) => {
+      const fetchJson = (jest.fn((path: string) => {
         const indexPatternTitle = _.last(path.split('/'));
         return {
           indexPatternTitle,
@@ -636,15 +637,17 @@ describe.skip('loader', () => {
             (fieldName) => `${indexPatternTitle}_${fieldName}`
           ),
         };
-      });
+      }) as unknown) as HttpHandler;
 
       await syncExistingFields({
         dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        fetchJson: fetchJson as any,
+        fetchJson,
         indexPatterns: [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
         setState,
         dslQuery,
+        showNoDataPopover: jest.fn(),
+        currentIndexPatternTitle: 'abc',
+        isFirstExistenceFetch: false,
       });
 
       expect(fetchJson).toHaveBeenCalledTimes(3);
@@ -658,12 +661,46 @@ describe.skip('loader', () => {
 
       expect(newState).toEqual({
         foo: 'bar',
+        isFirstExistenceFetch: false,
         existingFields: {
           a: { a_field_1: true, a_field_2: true },
           b: { b_field_1: true, b_field_2: true },
           c: { c_field_1: true, c_field_2: true },
         },
       });
+    });
+
+    it('should call showNoDataPopover callback if current index pattern returns no fields', async () => {
+      const setState = jest.fn();
+      const showNoDataPopover = jest.fn();
+      const fetchJson = (jest.fn((path: string) => {
+        const indexPatternTitle = _.last(path.split('/'));
+        return {
+          indexPatternTitle,
+          existingFieldNames:
+            indexPatternTitle === 'a'
+              ? ['field_1', 'field_2'].map((fieldName) => `${indexPatternTitle}_${fieldName}`)
+              : [],
+        };
+      }) as unknown) as HttpHandler;
+
+      const args = {
+        dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
+        fetchJson,
+        indexPatterns: [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
+        setState,
+        dslQuery,
+        showNoDataPopover: jest.fn(),
+        currentIndexPatternTitle: 'abc',
+        isFirstExistenceFetch: false,
+      };
+
+      await syncExistingFields(args);
+
+      expect(showNoDataPopover).not.toHaveBeenCalled();
+
+      await syncExistingFields({ ...args, isFirstExistenceFetch: true });
+      expect(showNoDataPopover).not.toHaveBeenCalled();
     });
   });
 });

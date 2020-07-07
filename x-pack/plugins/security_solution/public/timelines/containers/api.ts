@@ -12,6 +12,8 @@ import {
   TimelineResponse,
   TimelineResponseType,
   TimelineStatus,
+  TimelineErrorResponseType,
+  TimelineErrorResponse,
 } from '../../../common/types/timeline';
 import { TimelineInput, TimelineType } from '../../graphql/types';
 import {
@@ -48,6 +50,12 @@ const decodeTimelineResponse = (respTimeline?: TimelineResponse) =>
     fold(throwErrors(createToasterPlainError), identity)
   );
 
+const decodeTimelineErrorResponse = (respTimeline?: TimelineErrorResponse) =>
+  pipe(
+    TimelineErrorResponseType.decode(respTimeline),
+    fold(throwErrors(createToasterPlainError), identity)
+  );
+
 const postTimeline = async ({ timeline }: RequestPostTimeline): Promise<TimelineResponse> => {
   const response = await KibanaServices.get().http.post<TimelineResponse>(TIMELINE_URL, {
     method: 'POST',
@@ -61,12 +69,19 @@ const patchTimeline = async ({
   timelineId,
   timeline,
   version,
-}: RequestPatchTimeline): Promise<TimelineResponse> => {
-  const response = await KibanaServices.get().http.patch<TimelineResponse>(TIMELINE_URL, {
-    method: 'PATCH',
-    body: JSON.stringify({ timeline, timelineId, version }),
-  });
-
+}: RequestPatchTimeline): Promise<TimelineResponse | TimelineErrorResponse> => {
+  let response = null;
+  try {
+    response = await KibanaServices.get().http.patch<TimelineResponse>(TIMELINE_URL, {
+      method: 'PATCH',
+      body: JSON.stringify({ timeline, timelineId, version }),
+    });
+  } catch (err) {
+    // For Future developer
+    // We are not rejecting our promise here because we had issue with our RXJS epic
+    // the issue we were not able to pass the right object to it so we did manage the error in the success
+    return Promise.resolve(decodeTimelineErrorResponse(err.body));
+  }
   return decodeTimelineResponse(response);
 };
 
@@ -74,17 +89,31 @@ export const persistTimeline = async ({
   timelineId,
   timeline,
   version,
-}: RequestPersistTimeline): Promise<TimelineResponse> => {
-  if (timelineId == null && timeline.status === TimelineStatus.draft) {
-    const draftTimeline = await cleanDraftTimeline({ timelineType: timeline.timelineType! });
+}: RequestPersistTimeline): Promise<TimelineResponse | TimelineErrorResponse> => {
+  if (timelineId == null && timeline.status === TimelineStatus.draft && timeline) {
+    const draftTimeline = await cleanDraftTimeline({
+      timelineType: timeline.timelineType!,
+      templateTimelineId: timeline.templateTimelineId ?? undefined,
+      templateTimelineVersion: timeline.templateTimelineVersion ?? undefined,
+    });
+
+    const templateTimelineInfo =
+      timeline.timelineType! === TimelineType.template
+        ? {
+            templateTimelineId:
+              draftTimeline.data.persistTimeline.timeline.templateTimelineId ??
+              timeline.templateTimelineId,
+            templateTimelineVersion:
+              draftTimeline.data.persistTimeline.timeline.templateTimelineVersion ??
+              timeline.templateTimelineVersion,
+          }
+        : {};
 
     return patchTimeline({
       timelineId: draftTimeline.data.persistTimeline.timeline.savedObjectId,
       timeline: {
         ...timeline,
-        templateTimelineId: draftTimeline.data.persistTimeline.timeline.templateTimelineId,
-        templateTimelineVersion:
-          draftTimeline.data.persistTimeline.timeline.templateTimelineVersion,
+        ...templateTimelineInfo,
       },
       version: draftTimeline.data.persistTimeline.timeline.version ?? '',
     });
@@ -103,6 +132,7 @@ export const persistTimeline = async ({
 
 export const importTimelines = async ({
   fileToImport,
+  signal,
 }: ImportDataProps): Promise<ImportDataResponse> => {
   const formData = new FormData();
   formData.append('file', fileToImport);
@@ -111,24 +141,24 @@ export const importTimelines = async ({
     method: 'POST',
     headers: { 'Content-Type': undefined },
     body: formData,
+    signal,
   });
 };
 
-export const exportSelectedTimeline: ExportSelectedData = async ({
+export const exportSelectedTimeline: ExportSelectedData = ({
   filename = `timelines_export.ndjson`,
   ids = [],
   signal,
 }): Promise<Blob> => {
   const body = ids.length > 0 ? JSON.stringify({ ids }) : undefined;
-  const response = await KibanaServices.get().http.fetch<{ body: Blob }>(`${TIMELINE_EXPORT_URL}`, {
+  return KibanaServices.get().http.fetch<Blob>(`${TIMELINE_EXPORT_URL}`, {
     method: 'POST',
     body,
     query: {
       file_name: filename,
     },
+    signal,
   });
-
-  return response.body;
 };
 
 export const getDraftTimeline = async ({
@@ -147,12 +177,24 @@ export const getDraftTimeline = async ({
 
 export const cleanDraftTimeline = async ({
   timelineType,
+  templateTimelineId,
+  templateTimelineVersion,
 }: {
   timelineType: TimelineType;
+  templateTimelineId?: string;
+  templateTimelineVersion?: number;
 }): Promise<TimelineResponse> => {
+  const templateTimelineInfo =
+    timelineType === TimelineType.template
+      ? {
+          templateTimelineId,
+          templateTimelineVersion,
+        }
+      : {};
   const response = await KibanaServices.get().http.post<TimelineResponse>(TIMELINE_DRAFT_URL, {
     body: JSON.stringify({
       timelineType,
+      ...templateTimelineInfo,
     }),
   });
 

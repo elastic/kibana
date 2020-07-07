@@ -30,4 +30,5 @@ export const awsEC2: InventoryModel = {
     ip: 'aws.ec2.instance.public.ip',
   },
   requiredMetrics: ['awsEC2CpuUtilization', 'awsEC2NetworkTraffic', 'awsEC2DiskIOBytes'],
+  tooltipMetrics: ['cpu', 'rx', 'tx'],
 };

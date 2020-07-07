@@ -33,6 +33,7 @@ import * as i18nTimeline from '../../open_timeline/translations';
 import { OpenTimelineResult } from '../../open_timeline/types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import * as i18n from '../translations';
+import { useTimelineStatus } from '../../open_timeline/use_timeline_status';
 
 const MyEuiFlexItem = styled(EuiFlexItem)`
   display: inline-block;
@@ -118,6 +119,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   const [onlyFavorites, setOnlyFavorites] = useState(false);
   const [searchRef, setSearchRef] = useState<HTMLElement | null>(null);
   const { fetchAllTimeline, timelines, loading, totalCount: timelineCount } = useGetAllTimeline();
+  const { timelineStatus, templateTimelineType } = useTimelineStatus({ timelineType });
 
   const onSearchTimeline = useCallback((val) => {
     setSearchTimelineValue(val);
@@ -249,24 +251,31 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
     },
   };
 
-  useEffect(
-    () =>
-      fetchAllTimeline({
-        pageInfo: {
-          pageIndex: 1,
-          pageSize,
-        },
-        search: searchTimelineValue,
-        sort: {
-          sortField: SortFieldTimeline.updated,
-          sortOrder: Direction.desc,
-        },
-        onlyUserFavorite: onlyFavorites,
-        timelineType,
-      }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [onlyFavorites, pageSize, searchTimelineValue, timelineType]
-  );
+  useEffect(() => {
+    fetchAllTimeline({
+      pageInfo: {
+        pageIndex: 1,
+        pageSize,
+      },
+      search: searchTimelineValue,
+      sort: {
+        sortField: SortFieldTimeline.updated,
+        sortOrder: Direction.desc,
+      },
+      onlyUserFavorite: onlyFavorites,
+      status: timelineStatus,
+      timelineType,
+      templateTimelineType,
+    });
+  }, [
+    fetchAllTimeline,
+    onlyFavorites,
+    pageSize,
+    searchTimelineValue,
+    timelineType,
+    timelineStatus,
+    templateTimelineType,
+  ]);
 
   return (
     <EuiSelectableContainer isLoading={loading}>

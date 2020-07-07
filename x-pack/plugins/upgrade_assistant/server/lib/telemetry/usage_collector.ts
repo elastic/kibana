@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 import {
-  APICaller,
+  LegacyAPICaller,
   ElasticsearchServiceStart,
   ISavedObjectsRepository,
   SavedObjectsServiceStart,
@@ -38,7 +38,9 @@ async function getSavedObjectAttributesFromRepo(
   }
 }
 
-async function getDeprecationLoggingStatusValue(callAsCurrentUser: APICaller): Promise<boolean> {
+async function getDeprecationLoggingStatusValue(
+  callAsCurrentUser: LegacyAPICaller
+): Promise<boolean> {
   try {
     const loggerDeprecationCallResult = await callAsCurrentUser('cluster.getSettings', {
       includeDefaults: true,
@@ -120,9 +122,29 @@ export function registerUpgradeAssistantUsageCollector({
   usageCollection,
   savedObjects,
 }: Dependencies) {
-  const upgradeAssistantUsageCollector = usageCollection.makeUsageCollector({
-    type: UPGRADE_ASSISTANT_TYPE,
+  const upgradeAssistantUsageCollector = usageCollection.makeUsageCollector<
+    UpgradeAssistantTelemetry
+  >({
+    type: 'upgrade-assistant-telemetry',
     isReady: () => true,
+    schema: {
+      features: {
+        deprecation_logging: {
+          enabled: { type: 'boolean' },
+        },
+      },
+      ui_open: {
+        cluster: { type: 'long' },
+        indices: { type: 'long' },
+        overview: { type: 'long' },
+      },
+      ui_reindex: {
+        close: { type: 'long' },
+        open: { type: 'long' },
+        start: { type: 'long' },
+        stop: { type: 'long' },
+      },
+    },
     fetch: async () => fetchUpgradeAssistantMetrics(elasticsearch, savedObjects),
   });
 

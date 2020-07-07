@@ -476,6 +476,7 @@ exports[`Timeline rendering renders correctly against snapshot 1`] = `
                           "filebeat-*",
                           "packetbeat-*",
                           "winlogbeat-*",
+                          "logs-*",
                         ],
                         "name": "event.end",
                         "searchable": true,
@@ -926,6 +927,7 @@ In other use cases the message field can be used to concatenate different values
                 }
               }
               start={1521830963132}
+              status="active"
               toggleColumn={[MockFunction]}
               usersViewing={
                 Array [

@@ -34,9 +34,9 @@ export interface FilterMeta {
 
 function getFilterMeta(filter: string): FilterMeta {
   const ast = fromExpression(filter);
-  const column = get<string>(ast, 'chain[0].arguments.column[0]');
-  const start = get<string>(ast, 'chain[0].arguments.from[0]');
-  const end = get<string>(ast, 'chain[0].arguments.to[0]');
+  const column = get(ast, 'chain[0].arguments.column[0]') as string;
+  const start = get(ast, 'chain[0].arguments.from[0]') as string;
+  const end = get(ast, 'chain[0].arguments.to[0]') as string;
   return { column, start, end };
 }
 

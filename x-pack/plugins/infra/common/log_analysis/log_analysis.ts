@@ -35,7 +35,7 @@ export type SetupStatus =
   | {
       type: 'skipped';
       newlyCreated?: boolean;
-    }; // setup is hidden
+    }; // setup is not necessary
 
 /**
  * Maps a job status to the possibility that results have already been produced

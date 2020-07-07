@@ -345,6 +345,7 @@ export enum TlsFields {
 export enum TimelineStatus {
   active = 'active',
   draft = 'draft',
+  immutable = 'immutable',
 }
 
 export enum TimelineType {
@@ -357,6 +358,11 @@ export enum SortFieldTimeline {
   description = 'description',
   updated = 'updated',
   created = 'created',
+}
+
+export enum TemplateTimelineType {
+  elastic = 'elastic',
+  custom = 'custom',
 }
 
 export enum NetworkDirectionEcs {
@@ -2117,6 +2123,16 @@ export interface ResponseTimelines {
   timeline: (Maybe<TimelineResult>)[];
 
   totalCount?: Maybe<number>;
+
+  defaultTimelineCount?: Maybe<number>;
+
+  templateTimelineCount?: Maybe<number>;
+
+  elasticTemplateTimelineCount?: Maybe<number>;
+
+  customTemplateTimelineCount?: Maybe<number>;
+
+  favoriteCount?: Maybe<number>;
 }
 
 export interface Mutation {
@@ -2254,6 +2270,10 @@ export interface GetAllTimelineQueryArgs {
   onlyUserFavorite?: Maybe<boolean>;
 
   timelineType?: Maybe<TimelineType>;
+
+  templateTimelineType?: Maybe<TemplateTimelineType>;
+
+  status?: Maybe<TimelineStatus>;
 }
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
@@ -4315,6 +4335,8 @@ export namespace GetAllTimeline {
     sort?: Maybe<SortTimeline>;
     onlyUserFavorite?: Maybe<boolean>;
     timelineType?: Maybe<TimelineType>;
+    templateTimelineType?: Maybe<TemplateTimelineType>;
+    status?: Maybe<TimelineStatus>;
   };
 
   export type Query = {
@@ -4327,6 +4349,16 @@ export namespace GetAllTimeline {
     __typename?: 'ResponseTimelines';
 
     totalCount: Maybe<number>;
+
+    defaultTimelineCount: Maybe<number>;
+
+    templateTimelineCount: Maybe<number>;
+
+    elasticTemplateTimelineCount: Maybe<number>;
+
+    customTemplateTimelineCount: Maybe<number>;
+
+    favoriteCount: Maybe<number>;
 
     timeline: (Maybe<Timeline>)[];
   };

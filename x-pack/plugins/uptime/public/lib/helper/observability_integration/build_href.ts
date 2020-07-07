@@ -21,7 +21,7 @@ export const buildHref = (
   getHref: (value: string | string[] | undefined) => string | undefined
 ): string | undefined => {
   const queryValue = summaryPings
-    .map((ping) => get<string | undefined>(ping, path, undefined))
+    .map((ping) => get(ping, path, undefined))
     .filter((value: string | undefined) => value !== undefined);
   if (queryValue.length === 0) {
     return getHref(undefined);

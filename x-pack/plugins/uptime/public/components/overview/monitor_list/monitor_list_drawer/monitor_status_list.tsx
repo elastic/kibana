@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { get, capitalize } from 'lodash';
+import { upperFirst } from 'lodash';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { LocationLink } from '../../../common/location_link';
@@ -26,12 +26,12 @@ export const MonitorStatusList = ({ summaryPings }: MonitorStatusListProps) => {
 
   summaryPings.forEach((ping: Ping) => {
     // Doing this way because name is either string or null, get() default value only works on undefined value
-    const location = get<string | null>(ping, 'observer.geo.name', null) || UNNAMED_LOCATION;
+    const location = ping.observer?.geo?.name ?? UNNAMED_LOCATION;
 
     if (ping.monitor.status === STATUS.UP) {
-      upChecks.add(capitalize(location));
+      upChecks.add(upperFirst(location));
     } else if (ping.monitor.status === STATUS.DOWN) {
-      downChecks.add(capitalize(location));
+      downChecks.add(upperFirst(location));
     }
   });
 

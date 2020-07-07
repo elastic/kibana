@@ -160,7 +160,6 @@ export type SubsetTimelineModel = Readonly<
     | 'isLoading'
     | 'savedObjectId'
     | 'version'
-    | 'timelineType'
     | 'status'
   >
 >;

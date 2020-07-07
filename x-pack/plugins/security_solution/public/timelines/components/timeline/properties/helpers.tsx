@@ -27,6 +27,7 @@ import {
   TimelineTypeLiteral,
   TimelineStatus,
   TimelineType,
+  TimelineStatusLiteral,
   TimelineId,
 } from '../../../../../common/types/timeline';
 import { SecurityPageName } from '../../../../app/types';
@@ -156,19 +157,21 @@ export const NewCase = React.memo<NewCaseProps>(
 
     const handleClick = useCallback(() => {
       onClosePopover();
-      dispatch(
-        setInsertTimeline({
-          graphEventId,
-          timelineId,
-          timelineSavedObjectId: savedObjectId,
-          timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
-        })
-      );
+
       dispatch(showTimeline({ id: TimelineId.active, show: false }));
 
       navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
         path: getCreateCaseUrl(),
-      });
+      }).then(() =>
+        dispatch(
+          setInsertTimeline({
+            graphEventId,
+            timelineId,
+            timelineSavedObjectId: savedObjectId,
+            timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
+          })
+        )
+      );
     }, [
       dispatch,
       graphEventId,
@@ -262,11 +265,13 @@ interface NotesButtonProps {
   getNotesByIds: (noteIds: string[]) => Note[];
   noteIds: string[];
   size: 's' | 'l';
+  status: TimelineStatusLiteral;
   showNotes: boolean;
   toggleShowNotes: () => void;
   text?: string;
   toolTip?: string;
   updateNote: UpdateNote;
+  timelineType: TimelineTypeLiteral;
 }
 
 const getNewNoteId = (): string => uuid.v4();
@@ -303,16 +308,24 @@ LargeNotesButton.displayName = 'LargeNotesButton';
 interface SmallNotesButtonProps {
   noteIds: string[];
   toggleShowNotes: () => void;
+  timelineType: TimelineTypeLiteral;
 }
 
-const SmallNotesButton = React.memo<SmallNotesButtonProps>(({ noteIds, toggleShowNotes }) => (
-  <EuiButtonIcon
-    aria-label={i18n.NOTES}
-    data-test-subj="timeline-notes-button-small"
-    iconType="editorComment"
-    onClick={() => toggleShowNotes()}
-  />
-));
+const SmallNotesButton = React.memo<SmallNotesButtonProps>(
+  ({ noteIds, toggleShowNotes, timelineType }) => {
+    const isTemplate = timelineType === TimelineType.template;
+
+    return (
+      <EuiButtonIcon
+        aria-label={i18n.NOTES}
+        data-test-subj="timeline-notes-button-small"
+        iconType="editorComment"
+        onClick={() => toggleShowNotes()}
+        isDisabled={isTemplate}
+      />
+    );
+  }
+);
 SmallNotesButton.displayName = 'SmallNotesButton';
 
 /**
@@ -326,25 +339,32 @@ const NotesButtonComponent = React.memo<NotesButtonProps>(
     noteIds,
     showNotes,
     size,
+    status,
     toggleShowNotes,
     text,
     updateNote,
+    timelineType,
   }) => (
     <ButtonContainer animate={animate} data-test-subj="timeline-notes-button-container">
       <>
         {size === 'l' ? (
           <LargeNotesButton noteIds={noteIds} text={text} toggleShowNotes={toggleShowNotes} />
         ) : (
-          <SmallNotesButton noteIds={noteIds} toggleShowNotes={toggleShowNotes} />
+          <SmallNotesButton
+            noteIds={noteIds}
+            toggleShowNotes={toggleShowNotes}
+            timelineType={timelineType}
+          />
         )}
         {size === 'l' && showNotes ? (
           <EuiOverlayMask>
             <EuiModal maxWidth={NOTES_PANEL_WIDTH} onClose={toggleShowNotes}>
               <Notes
                 associateNote={associateNote}
-                getNotesByIds={getNotesByIds}
-                noteIds={noteIds}
                 getNewNoteId={getNewNoteId}
+                getNotesByIds={getNotesByIds}
+                status={status}
+                noteIds={noteIds}
                 updateNote={updateNote}
               />
             </EuiModal>
@@ -364,6 +384,8 @@ export const NotesButton = React.memo<NotesButtonProps>(
     noteIds,
     showNotes,
     size,
+    status,
+    timelineType,
     toggleShowNotes,
     toolTip,
     text,
@@ -377,9 +399,11 @@ export const NotesButton = React.memo<NotesButtonProps>(
         noteIds={noteIds}
         showNotes={showNotes}
         size={size}
+        status={status}
         toggleShowNotes={toggleShowNotes}
         text={text}
         updateNote={updateNote}
+        timelineType={timelineType}
       />
     ) : (
       <EuiToolTip content={toolTip || ''} data-test-subj="timeline-notes-tool-tip">
@@ -390,9 +414,11 @@ export const NotesButton = React.memo<NotesButtonProps>(
           noteIds={noteIds}
           showNotes={showNotes}
           size={size}
+          status={status}
           toggleShowNotes={toggleShowNotes}
           text={text}
           updateNote={updateNote}
+          timelineType={timelineType}
         />
       </EuiToolTip>
     )

@@ -137,24 +137,26 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
         timelineType = TimelineType.default,
         filters,
       }
-    ) => ({
-      ...state,
-      timelineById: addNewTimeline({
-        columns,
-        dataProviders,
-        dateRange,
-        filters,
-        id,
-        itemsPerPage,
-        kqlQuery,
-        sort,
-        show,
-        showCheckboxes,
-        showRowRenderers,
-        timelineById: state.timelineById,
-        timelineType,
-      }),
-    })
+    ) => {
+      return {
+        ...state,
+        timelineById: addNewTimeline({
+          columns,
+          dataProviders,
+          dateRange,
+          filters,
+          id,
+          itemsPerPage,
+          kqlQuery,
+          sort,
+          show,
+          showCheckboxes,
+          showRowRenderers,
+          timelineById: state.timelineById,
+          timelineType,
+        }),
+      };
+    }
   )
   .case(upsertColumn, (state, { column, id, index }) => ({
     ...state,

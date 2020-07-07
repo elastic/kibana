@@ -40,6 +40,7 @@ import {
   IIndexPattern,
 } from '../../../../../../../src/plugins/data/public';
 import { useManageTimeline } from '../manage_timeline';
+import { TimelineStatusLiteral } from '../../../../common/types/timeline';
 
 const TimelineContainer = styled.div`
   height: 100%;
@@ -110,6 +111,7 @@ export interface Props {
   showCallOutUnauthorizedMsg: boolean;
   start: number;
   sort: Sort;
+  status: TimelineStatusLiteral;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   usersViewing: string[];
 }
@@ -141,6 +143,7 @@ export const TimelineComponent: React.FC<Props> = ({
   show,
   showCallOutUnauthorizedMsg,
   start,
+  status,
   sort,
   toggleColumn,
   usersViewing,
@@ -171,6 +174,7 @@ export const TimelineComponent: React.FC<Props> = ({
   const [isQueryLoading, setIsQueryLoading] = useState(false);
   const {
     initializeTimeline,
+    setIndexToAdd,
     setIsTimelineLoading,
     setTimelineFilterManager,
     setTimelineRowActions,
@@ -185,12 +189,14 @@ export const TimelineComponent: React.FC<Props> = ({
   }, []);
   useEffect(() => {
     setIsTimelineLoading({ id, isLoading: isQueryLoading || loadingIndexName });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadingIndexName, isQueryLoading]);
+  }, [loadingIndexName, id, isQueryLoading, setIsTimelineLoading]);
   useEffect(() => {
     setTimelineFilterManager({ id, filterManager });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterManager]);
+  }, [filterManager, id, setTimelineFilterManager]);
+
+  useEffect(() => {
+    setIndexToAdd({ id, indexToAdd });
+  }, [id, indexToAdd, setIndexToAdd]);
 
   return (
     <TimelineContainer data-test-subj="timeline">
@@ -214,6 +220,7 @@ export const TimelineComponent: React.FC<Props> = ({
             onToggleDataProviderExcluded={onToggleDataProviderExcluded}
             show={show}
             showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
+            status={status}
           />
         </TimelineHeaderContainer>
       </StyledEuiFlyoutHeader>

@@ -255,6 +255,18 @@
                 "description": "",
                 "type": { "kind": "ENUM", "name": "TimelineType", "ofType": null },
                 "defaultValue": null
+              },
+              {
+                "name": "templateTimelineType",
+                "description": "",
+                "type": { "kind": "ENUM", "name": "TemplateTimelineType", "ofType": null },
+                "defaultValue": null
+              },
+              {
+                "name": "status",
+                "description": "",
+                "type": { "kind": "ENUM", "name": "TimelineStatus", "ofType": null },
+                "defaultValue": null
               }
             ],
             "type": {
@@ -10405,7 +10417,13 @@
         "interfaces": null,
         "enumValues": [
           { "name": "active", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "draft", "description": "", "isDeprecated": false, "deprecationReason": null }
+          { "name": "draft", "description": "", "isDeprecated": false, "deprecationReason": null },
+          {
+            "name": "immutable",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
         ],
         "possibleTypes": null
       },
@@ -10530,6 +10548,24 @@
         "possibleTypes": null
       },
       {
+        "kind": "ENUM",
+        "name": "TemplateTimelineType",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "elastic",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          { "name": "custom", "description": "", "isDeprecated": false, "deprecationReason": null }
+        ],
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "ResponseTimelines",
         "description": "",
@@ -10552,6 +10588,46 @@
           },
           {
             "name": "totalCount",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "defaultTimelineCount",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "templateTimelineCount",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "elasticTemplateTimelineCount",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "customTemplateTimelineCount",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "favoriteCount",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },

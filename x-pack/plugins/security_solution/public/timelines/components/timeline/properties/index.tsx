@@ -7,7 +7,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { TimelineStatus, TimelineTypeLiteral } from '../../../../../common/types/timeline';
+import { TimelineStatusLiteral, TimelineTypeLiteral } from '../../../../../common/types/timeline';
 import { useThrottledResizeObserver } from '../../../../common/components/utils';
 import { Note } from '../../../../common/lib/note';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -52,7 +52,8 @@ interface Props {
   isFavorite: boolean;
   noteIds: string[];
   timelineId: string;
-  status: TimelineStatus;
+  timelineType: TimelineTypeLiteral;
+  status: TimelineStatusLiteral;
   title: string;
   toggleLock: ToggleLock;
   updateDescription: UpdateDescription;
@@ -87,6 +88,7 @@ export const Properties = React.memo<Props>(
     noteIds,
     status,
     timelineId,
+    timelineType,
     title,
     toggleLock,
     updateDescription,
@@ -123,18 +125,18 @@ export const Properties = React.memo<Props>(
       (id: string) => {
         onCloseCaseModal();
 
-        dispatch(
-          setInsertTimeline({
-            graphEventId,
-            timelineId,
-            timelineSavedObjectId: currentTimeline.savedObjectId,
-            timelineTitle: title.length > 0 ? title : i18n.UNTITLED_TIMELINE,
-          })
-        );
-
         navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
           path: getCaseDetailsUrl({ id }),
-        });
+        }).then(() =>
+          dispatch(
+            setInsertTimeline({
+              graphEventId,
+              timelineId,
+              timelineSavedObjectId: currentTimeline.savedObjectId,
+              timelineTitle: title.length > 0 ? title : i18n.UNTITLED_TIMELINE,
+            })
+          )
+        );
       },
       [currentTimeline, dispatch, graphEventId, navigateToApp, onCloseCaseModal, timelineId, title]
     );
@@ -164,10 +166,12 @@ export const Properties = React.memo<Props>(
           isFavorite={isFavorite}
           noteIds={noteIds}
           onToggleShowNotes={onToggleShowNotes}
+          status={status}
           showDescription={width >= showDescriptionThreshold}
           showNotes={showNotes}
           showNotesFromWidth={width >= showNotesThreshold}
           timelineId={timelineId}
+          timelineType={timelineType}
           title={title}
           toggleLock={onToggleLock}
           updateDescription={updateDescription}
@@ -196,6 +200,7 @@ export const Properties = React.memo<Props>(
           showUsersView={title.length > 0}
           status={status}
           timelineId={timelineId}
+          timelineType={timelineType}
           title={title}
           updateDescription={updateDescription}
           updateNote={updateNote}

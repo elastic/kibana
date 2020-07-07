@@ -15,6 +15,7 @@ import { OnPinEvent, OnUnPinEvent } from '../events';
 import { TimelineRowAction, TimelineRowActionOnClick } from './actions';
 
 import * as i18n from './translations';
+import { TimelineTypeLiteral, TimelineType } from '../../../../../common/types/timeline';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const omitTypenameAndEmpty = (k: string, v: any): any | undefined =>
@@ -28,10 +29,19 @@ export const getPinTooltip = ({
   isPinned,
   // eslint-disable-next-line no-shadow
   eventHasNotes,
+  timelineType,
 }: {
   isPinned: boolean;
   eventHasNotes: boolean;
-}) => (isPinned && eventHasNotes ? i18n.PINNED_WITH_NOTES : isPinned ? i18n.PINNED : i18n.UNPINNED);
+  timelineType: TimelineTypeLiteral;
+}) =>
+  timelineType === TimelineType.template
+    ? i18n.DISABLE_PIN
+    : isPinned && eventHasNotes
+    ? i18n.PINNED_WITH_NOTES
+    : isPinned
+    ? i18n.PINNED
+    : i18n.UNPINNED;
 
 export interface IsPinnedParams {
   eventId: string;

@@ -204,23 +204,23 @@ export type Ping = t.TypeOf<typeof PingType>;
 // Convenience function for tests etc that makes an empty ping
 // object with the minimum of fields.
 export const makePing = (f: {
-  docId: string;
-  type: string;
-  id: string;
-  timestamp: string;
-  ip: string;
-  status: string;
-  duration: number;
+  docId?: string;
+  type?: string;
+  id?: string;
+  timestamp?: string;
+  ip?: string;
+  status?: string;
+  duration?: number;
 }): Ping => {
   return {
-    docId: f.docId,
-    timestamp: f.timestamp,
+    docId: f.docId || 'myDocId',
+    timestamp: f.timestamp || '2020-07-07T01:14:08Z',
     monitor: {
-      id: f.id,
-      type: f.type,
-      ip: f.ip,
-      status: f.status,
-      duration: { us: f.duration },
+      id: f.id || 'myId',
+      type: f.type || 'myType',
+      ip: f.ip || '127.0.0.1',
+      status: f.status || 'up',
+      duration: { us: f.duration || 100000 },
     },
   };
 };

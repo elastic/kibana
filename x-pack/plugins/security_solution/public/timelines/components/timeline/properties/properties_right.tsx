@@ -17,7 +17,7 @@ import {
 import { NewTimeline, Description, NotesButton, NewCase, ExistingCase } from './helpers';
 
 import { disableTemplate } from '../../../../../common/constants';
-import { TimelineStatus } from '../../../../../common/types/timeline';
+import { TimelineStatusLiteral, TimelineTypeLiteral } from '../../../../../common/types/timeline';
 
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -83,9 +83,10 @@ interface PropertiesRightComponentProps {
   showNotesFromWidth: boolean;
   showTimelineModal: boolean;
   showUsersView: boolean;
-  status: TimelineStatus;
+  status: TimelineStatusLiteral;
   timelineId: string;
   title: string;
+  timelineType: TimelineTypeLiteral;
   updateDescription: UpdateDescription;
   updateNote: UpdateNote;
   usersViewing: string[];
@@ -111,6 +112,7 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
   showTimelineModal,
   showUsersView,
   status,
+  timelineType,
   timelineId,
   title,
   updateDescription,
@@ -136,6 +138,7 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
             id="timelineSettingsPopover"
             isOpen={showActions}
             closePopover={onClosePopover}
+            repositionOnScroll
           >
             <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
               {capabilitiesCanUserCRUD && (
@@ -203,6 +206,8 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
                     noteIds={noteIds}
                     showNotes={showNotes}
                     size="l"
+                    status={status}
+                    timelineType={timelineType}
                     text={i18n.NOTES}
                     toggleShowNotes={onToggleShowNotes}
                     toolTip={i18n.NOTES_TOOL_TIP}
