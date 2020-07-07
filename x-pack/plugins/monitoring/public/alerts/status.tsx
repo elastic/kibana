@@ -80,7 +80,7 @@ export const AlertsStatus: React.FC<Props> = (props: Props) => {
   })();
 
   return (
-    <EuiToolTip content={tooltipText} position="bottom" trigger="hover">
+    <EuiToolTip content={tooltipText} position="bottom">
       <EuiHealth color={severity} data-test-subj="alertIcon">
         {showOnlyCount ? (
           count

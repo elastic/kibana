@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { get } from 'lodash';
-import { AlertCommonCluster } from '../../alerts/types';
+import { AlertCluster } from '../../alerts/types';
 
-export async function fetchClusters(
-  callCluster: any,
-  index: string
-): Promise<AlertCommonCluster[]> {
+export async function fetchClusters(callCluster: any, index: string): Promise<AlertCluster[]> {
   const params = {
     index,
     filterPath: [

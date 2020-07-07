@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Observable } from 'rxjs';
-import { IRouter, IClusterClient, Logger } from 'kibana/server';
+import { IRouter, ILegacyClusterClient, Logger } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
 import { LicenseFeature, ILicense } from '../../licensing/server';
@@ -66,7 +66,7 @@ export interface MonitoringCore {
 export interface LegacyShimDependencies {
   router: IRouter;
   instanceUuid: string;
-  esDataClient: IClusterClient;
+  esDataClient: ILegacyClusterClient;
   kibanaStatsCollector: any;
 }
 

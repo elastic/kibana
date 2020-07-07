@@ -9,8 +9,6 @@ import { first, map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { has, get } from 'lodash';
 import { TypeOf } from '@kbn/config-schema';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
 import {
   Logger,
   PluginInitializerContext,
@@ -20,8 +18,6 @@ import {
   CoreSetup,
   ILegacyCustomClusterClient,
   CoreStart,
-  IRouter,
-  ILegacyClusterClient,
   CustomHttpResponseOptions,
   ResponseError,
 } from 'kibana/server';
@@ -52,8 +48,6 @@ import {
   LegacyAPI,
   LegacyRequest,
 } from './types';
-import { getLicenseExpiration } from './alerts/license_expiration';
-import { getClusterState } from './alerts/cluster_state';
 
 // This is used to test the version of kibana
 const snapshotRegex = /-snapshot/i;

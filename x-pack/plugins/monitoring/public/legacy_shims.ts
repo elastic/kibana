@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreStart, ApplicationStart, HttpSetup, IUiSettingsClient } from 'kibana/public';
+import { CoreStart, HttpSetup, IUiSettingsClient } from 'kibana/public';
 import angular from 'angular';
 import { Observable } from 'rxjs';
 import { HttpRequestInit } from '../../../../src/core/public';
@@ -37,7 +37,7 @@ export interface KFetchKibanaOptions {
 
 export interface IShims {
   toastNotifications: CoreStart['notifications']['toasts'];
-  capabilities: { get: () => CoreStart['application']['capabilities'] };
+  capabilities: CoreStart['application']['capabilities'];
   getAngularInjector: () => angular.auto.IInjectorService;
   getBasePath: () => string;
   getInjected: (name: string, defaultValue?: unknown) => unknown;
@@ -70,7 +70,7 @@ export class Legacy {
   ) {
     this._shims = {
       toastNotifications: core.notifications.toasts,
-      capabilities: { get: () => core.application.capabilities },
+      capabilities: core.application.capabilities,
       getAngularInjector: (): angular.auto.IInjectorService => ngInjector,
       getBasePath: (): string => core.http.basePath.get(),
       getInjected: (name: string, defaultValue?: unknown): string | unknown =>
@@ -105,8 +105,8 @@ export class Legacy {
       docLinks: core.docLinks,
       docTitle: core.chrome.docTitle,
       timefilter: data.query.timefilter.timefilter,
-      actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
-      alertTypeRegistry: triggersActionsUi.alertTypeRegistry,
+      actionTypeRegistry: triggersActionsUi?.actionTypeRegistry,
+      alertTypeRegistry: triggersActionsUi?.alertTypeRegistry,
       uiSettings: core.uiSettings,
       http: core.http,
       kfetch: async (

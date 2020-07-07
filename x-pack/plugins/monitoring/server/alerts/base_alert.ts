@@ -6,7 +6,7 @@
 
 import {
   UiSettingsServiceStart,
-  ICustomClusterClient,
+  ILegacyCustomClusterClient,
   Logger,
   IUiSettingsClient,
 } from 'kibana/server';
@@ -49,7 +49,7 @@ export class BaseAlert {
   public isLegacy: boolean = false;
 
   protected getUiSettingsService!: () => Promise<UiSettingsServiceStart>;
-  protected monitoringCluster!: ICustomClusterClient;
+  protected monitoringCluster!: ILegacyCustomClusterClient;
   protected getLogger!: (...scopes: string[]) => Logger;
   protected config!: MonitoringConfig;
   protected kibanaUrl!: string;
@@ -82,7 +82,7 @@ export class BaseAlert {
 
   public initializeAlertType(
     getUiSettingsService: () => Promise<UiSettingsServiceStart>,
-    monitoringCluster: ICustomClusterClient,
+    monitoringCluster: ILegacyCustomClusterClient,
     getLogger: (...scopes: string[]) => Logger,
     config: MonitoringConfig,
     kibanaUrl: string

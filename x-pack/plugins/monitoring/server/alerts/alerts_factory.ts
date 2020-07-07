@@ -39,7 +39,7 @@ export class AlertsFactory {
   public static async getByType(
     type: string,
     alertsClient: AlertsClient | undefined
-  ): Promise<BaseAlert> {
+  ): Promise<BaseAlert | null> {
     const alertCls = (BY_TYPE[type] as unknown) as any;
     if (!alertCls) {
       return null;

@@ -5,7 +5,8 @@
  */
 
 import { fetchStatus } from './fetch_status';
-import { AlertCommonPerClusterState } from '../../alerts/types';
+import { AlertUiState } from '../../alerts/types';
+import { AlertSeverity } from '../../../common/enums';
 import { ALERT_CPU_USAGE } from '../../../common/constants';
 
 // jest.mock('../../alerts/alerts_factory')
@@ -21,9 +22,9 @@ describe('fetchStatus', () => {
     clusterUuid: 'abc',
     clusterName: 'test',
   };
-  const defaultUiState = {
+  const defaultUiState: AlertUiState = {
     isFiring: false,
-    severity: 0,
+    severity: AlertSeverity.Success,
     message: null,
     resolvedMS: 0,
     lastCheckedMS: 0,
@@ -39,10 +40,18 @@ describe('fetchStatus', () => {
       ],
     })),
     getAlertState: jest.fn(() => ({
-      alertTypeState: {
-        state: {
-          ui: defaultUiState,
-        } as AlertCommonPerClusterState,
+      alertInstances: {
+        abc: {
+          state: {
+            alertStates: [
+              {
+                cluster: defaultClusterState,
+                ui: defaultUiState,
+                ccs: null,
+              },
+            ],
+          },
+        },
       },
     })),
   };
@@ -85,6 +94,7 @@ describe('fetchStatus', () => {
             alertStates: [
               {
                 cluster: defaultClusterState,
+                ccs: null,
                 ui: {
                   ...defaultUiState,
                   isFiring: true,
@@ -117,6 +127,7 @@ describe('fetchStatus', () => {
             alertStates: [
               {
                 cluster: defaultClusterState,
+                ccs: null,
                 ui: {
                   ...defaultUiState,
                   resolvedMS: 1500,
@@ -145,7 +156,14 @@ describe('fetchStatus', () => {
   });
 
   it('should pass in the right filter to the alerts client', async () => {
-    await fetchStatus(alertsClient as any, alertTypes, start, end, log as any);
+    await fetchStatus(
+      alertsClient as any,
+      alertTypes,
+      defaultClusterState.clusterUuid,
+      start,
+      end,
+      log as any
+    );
     expect((alertsClient.find as jest.Mock).mock.calls[0][0].options.filter).toBe(
       `alert.attributes.alertTypeId:${alertType}`
     );
@@ -156,7 +174,14 @@ describe('fetchStatus', () => {
       alertTypeState: null,
     })) as any;
 
-    const status = await fetchStatus(alertsClient as any, alertTypes, start, end, log as any);
+    const status = await fetchStatus(
+      alertsClient as any,
+      alertTypes,
+      defaultClusterState.clusterUuid,
+      start,
+      end,
+      log as any
+    );
     expect(status[alertType].states.length).toEqual(0);
   });
 
@@ -166,7 +191,14 @@ describe('fetchStatus', () => {
       data: [],
     })) as any;
 
-    const status = await fetchStatus(alertsClient as any, alertTypes, start, end, log as any);
+    const status = await fetchStatus(
+      alertsClient as any,
+      alertTypes,
+      defaultClusterState.clusterUuid,
+      start,
+      end,
+      log as any
+    );
     expect(status).toEqual({});
   });
 });
