@@ -100,7 +100,7 @@ export class ServiceSettings {
       origin: fileLayer.getOrigin(),
       id: fileLayer.getId(),
       created_at: fileLayer.getCreatedAt(),
-      attribution: fileLayer.getHTMLAttribution(),
+      attribution: getAttributionString(fileLayer),
       fields: fileLayer.getFieldsInLanguage(),
       format: format, //legacy: format and meta are split up
       meta: meta, //legacy, format and meta are split up
@@ -142,7 +142,7 @@ export class ServiceSettings {
               id: tmsService.getId(),
               minZoom: await tmsService.getMinZoom(),
               maxZoom: await tmsService.getMaxZoom(),
-              attribution: tmsService.getHTMLAttribution(),
+              attribution: getAttributionString(tmsService),
             };
           })
       );
@@ -201,7 +201,7 @@ export class ServiceSettings {
       url: await tmsService.getUrlTemplate(),
       minZoom: await tmsService.getMinZoom(),
       maxZoom: await tmsService.getMaxZoom(),
-      attribution: await tmsService.getHTMLAttribution(),
+      attribution: getAttributionString(tmsService),
       origin: ORIGIN.EMS,
     };
   }
@@ -266,4 +266,18 @@ export class ServiceSettings {
     const response = await fetch(url);
     return await response.json();
   }
+}
+
+function getAttributionString(emsService) {
+  const attributions = emsService.getAttributions();
+  const attributionSnippets = attributions.map((attribution) => {
+    const anchorTag = document.createElement('a');
+    anchorTag.setAttribute('rel', 'noreferrer noopener');
+    if (attribution.url.startsWith('http://') || attribution.url.startsWith('https://')) {
+      anchorTag.setAttribute('href', attribution.url);
+    }
+    anchorTag.textContent = _.escape(attribution.label);
+    return anchorTag.outerHTML;
+  });
+  return attributionSnippets.join(' | '); //!!!this is the current convention used in Kibana
 }
