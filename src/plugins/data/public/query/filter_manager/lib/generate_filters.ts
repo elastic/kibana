@@ -92,7 +92,7 @@ export function generateFilters(
   const newFilters: Filter[] = [];
   const appFilters = filterManager.getAppFilters();
 
-  const negate = operation === '-';
+  let negate = operation === '-';
   let filter;
 
   _.each(values, function (value) {
@@ -104,8 +104,15 @@ export function generateFilters(
     } else {
       const tmpIndexPattern = { id: index } as IIndexPattern;
       // exists filter special case:  fieldname = '_exists' and value = fieldname
-      const filterType = fieldName === '_exists_' ? FILTERS.EXISTS : FILTERS.PHRASE;
+      let filterType = fieldName === '_exists_' ? FILTERS.EXISTS : FILTERS.PHRASE;
       const actualFieldObj = fieldName === '_exists_' ? ({ name: value } as IFieldType) : fieldObj;
+
+      // Fix for #7189 - if value is emtpy, phrase filters become exists filters.
+      if (value === null || value === undefined) {
+        filterType = FILTERS.EXISTS;
+        negate = !negate;
+      }
+
       filter = buildFilter(
         tmpIndexPattern,
         actualFieldObj,

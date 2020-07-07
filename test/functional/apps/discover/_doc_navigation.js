@@ -21,6 +21,7 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const docTable = getService('docTable');
+  const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
   const esArchiver = getService('esArchiver');
@@ -49,6 +50,24 @@ export default function ({ getService, getPageObjects }) {
 
       const hasDocHit = await testSubjects.exists('doc-hit');
       expect(hasDocHit).to.be(true);
+    });
+
+    it('add filter should create an exists filter if value is null (#7189)', async function () {
+      // Filter special document
+      await filterBar.addFilter('agent', 'is', 'Missing/Fields');
+
+      // navigate to the doc view
+      await docTable.clickRowToggle({ rowIndex: 0 });
+
+      const details = await docTable.getDetailsRow();
+      await docTable.addInclusiveFilter(details, 'bytes');
+
+      const hasInclusiveFilter = await filterBar.hasFilter('bytes', 'exists', true, false, true);
+      expect(hasInclusiveFilter).to.be(true);
+
+      await docTable.removeInclusiveFilter(details, 'bytes');
+      const hasExcludeFilter = await filterBar.hasFilter('bytes', 'exists', true, false, false);
+      expect(hasExcludeFilter).to.be(true);
     });
   });
 }
