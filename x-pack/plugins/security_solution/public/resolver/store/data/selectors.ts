@@ -208,8 +208,8 @@ export const relatedEventInfoByEntityId = createSelector(
             return [];
           }
           return eventsResponseForThisEntry.events.filter((resolverEvent) => {
-            for(const category of [allEventCategories(resolverEvent)].flat()){
-              if (category === eventCategory){
+            for (const category of [allEventCategories(resolverEvent)].flat()) {
+              if (category === eventCategory) {
                 return true;
               }
             }
@@ -245,7 +245,6 @@ export const relatedEventInfoByEntityId = createSelector(
          * @param eventCategory {string} The ECS category like 'file','dns',etc.
          */
         const shouldShowLimitForCategory = (eventCategory: string): boolean => {
-        
           if (hasMoreEvents && getNumberNotDisplayedForCategory(eventCategory) > 0) {
             return true;
           }

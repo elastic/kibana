@@ -12,7 +12,7 @@ import {
   ResolverChildNode,
 } from '../../../common/endpoint/types';
 import { uniquePidForProcess } from './process_event';
-import { TreeNode } from 'x-pack/plugins/security_solution/common/endpoint/generate_data';
+import { TreeNode } from '../../../common/endpoint/generate_data';
 
 /**
  * ResolverTree is a type returned by the server.
@@ -61,7 +61,7 @@ export function relatedEventsStats(tree: ResolverTree): Map<string, ResolverNode
  */
 export function mock({
   events,
-  cursors = { childrenNextChild: null, ancestryNextAncestor: null, },
+  cursors = { childrenNextChild: null, ancestryNextAncestor: null },
   children,
 }: {
   /**
@@ -82,7 +82,7 @@ export function mock({
     entityID: uniquePidForProcess(first),
     // Required
     children: {
-      childNodes: children ? children as unknown[] as ResolverChildNode[] : [],
+      childNodes: children ? ((children as unknown[]) as ResolverChildNode[]) : [],
       nextChild: cursors.childrenNextChild,
     },
     // Required
