@@ -411,7 +411,7 @@ export const ActionForm = ({
     const noConnectorsLabel = (
       <FormattedMessage
         id="xpack.triggersActionsUI.sections.alertForm.emptyConnectorsLabel"
-        defaultMessage="No {actionTypeName} connectors."
+        defaultMessage="No {actionTypeName} connectors"
         values={{
           actionTypeName,
         }}
@@ -511,7 +511,7 @@ export const ActionForm = ({
               <p>
                 <FormattedMessage
                   id="xpack.triggersActionsUI.sections.alertForm.unauthorizedToCreateForEmptyConnectors"
-                  defaultMessage="There are no {actionTypeName} connectors available, but they could be configured by an authorized user. Please contact your administrator for assistance."
+                  defaultMessage="Only authorized users can configure a connector. Contact your administrator."
                   values={{
                     actionTypeName,
                   }}
