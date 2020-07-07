@@ -219,6 +219,7 @@ export const getAlertActions = ({
   status,
   timelineId,
   updateTimelineIsLoading,
+  openAddExceptionModal,
 }: AlertActionArgs): TimelineRowAction[] => {
   const openAlertActionComponent: TimelineRowAction = {
     ariaLabel: 'Open alert',
