@@ -51,12 +51,15 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     find('reloadButton').simulate('click');
   };
 
-  const clickActionMenu = async (templateName: TemplateDeserialized['name']) => {
+  const clickActionMenu = (templateName: TemplateDeserialized['name']) => {
     const { component } = testBed;
 
     // When a table has > 2 actions, EUI displays an overflow menu with an id "<template_name>-actions"
     // The template name may contain a period (.) so we use bracket syntax for selector
-    component.find(`div[id="${templateName}-actions"] button`).simulate('click');
+    act(() => {
+      component.find(`div[id="${templateName}-actions"] button`).simulate('click');
+    });
+    component.update();
   };
 
   const clickTemplateAction = (
@@ -68,12 +71,15 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
 
     clickActionMenu(templateName);
 
-    component.find('.euiContextMenuItem').at(actions.indexOf(action)).simulate('click');
+    act(() => {
+      component.find('.euiContextMenuItem').at(actions.indexOf(action)).simulate('click');
+    });
+    component.update();
   };
 
-  const clickTemplateAt = async (index: number) => {
+  const clickTemplateAt = async (index: number, isLegacy = false) => {
     const { component, table, router } = testBed;
-    const { rows } = table.getMetaData('legacyTemplateTable');
+    const { rows } = table.getMetaData(isLegacy ? 'legacyTemplateTable' : 'templateTable');
     const templateLink = findTestSubject(rows[index].reactWrapper, 'templateDetailsLink');
 
     const { href } = templateLink.props();

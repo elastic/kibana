@@ -48,6 +48,8 @@ import {
   displaySuccessToast,
   displayErrorToast,
 } from '../../../common/components/toasters';
+import { Ecs } from '../../../graphql/types';
+import { getInvestigateInResolverAction } from '../../../timelines/components/timeline/body/helpers';
 
 interface OwnProps {
   timelineId: TimelineIdLiteral;
@@ -289,20 +291,21 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   // Send to Timeline / Update Alert Status Actions for each table row
   const additionalActions = useMemo(
-    () =>
+    () => (ecsRowData: Ecs) =>
       getAlertActions({
         apolloClient,
         canUserCRUD,
+        createTimeline: createTimelineCallback,
+        ecsRowData,
         dispatch,
         hasIndexWrite,
-        createTimeline: createTimelineCallback,
-        setEventsLoading: setEventsLoadingCallback,
+        onAlertStatusUpdateFailure,
+        onAlertStatusUpdateSuccess,
         setEventsDeleted: setEventsDeletedCallback,
+        setEventsLoading: setEventsLoadingCallback,
         status: filterGroup,
         timelineId,
         updateTimelineIsLoading,
-        onAlertStatusUpdateSuccess,
-        onAlertStatusUpdateFailure,
       }),
     [
       apolloClient,
@@ -327,17 +330,20 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       return [...defaultFilters, ...buildAlertStatusFilter(filterGroup)];
     }
   }, [defaultFilters, filterGroup]);
+  const { filterManager } = useKibana().services.data.query;
   const { initializeTimeline, setTimelineRowActions } = useManageTimeline();
 
   useEffect(() => {
     initializeTimeline({
-      id: timelineId,
-      documentType: i18n.ALERTS_DOCUMENT_TYPE,
       defaultModel: alertsDefaultModel,
+      documentType: i18n.ALERTS_DOCUMENT_TYPE,
+      filterManager,
       footerText: i18n.TOTAL_COUNT_OF_ALERTS,
+      id: timelineId,
       loadingText: i18n.LOADING_ALERTS,
-      title: i18n.ALERTS_TABLE_TITLE,
       selectAll: canUserCRUD ? selectAll : false,
+      timelineRowActions: () => [getInvestigateInResolverAction({ dispatch, timelineId })],
+      title: i18n.ALERTS_TABLE_TITLE,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
