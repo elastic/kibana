@@ -21,23 +21,19 @@ import { get, noop, find, every } from 'lodash';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 
-import { TimeBuckets } from './lib/time_buckets';
+import { KBN_FIELD_TYPES, TimeRange, TimeRangeBounds, UI_SETTINGS } from '../../../../common';
+
+import { intervalOptions } from './_interval_options';
+import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { createFilterDateHistogram } from './create_filter/date_histogram';
-import { intervalOptions } from './_interval_options';
+import { ExtendedBounds } from './lib/extended_bounds';
+import { TimeBuckets } from './lib/time_buckets';
+
 import { writeParams } from '../agg_params';
 import { isMetricAggType } from '../metrics/metric_agg_type';
-
-import {
-  dateHistogramInterval,
-  KBN_FIELD_TYPES,
-  TimeRange,
-  TimeRangeBounds,
-  UI_SETTINGS,
-} from '../../../../common';
 import { BaseAggParams } from '../types';
-import { ExtendedBounds } from './lib/extended_bounds';
+import { dateHistogramInterval } from '../utils';
 
 /** @internal */
 export type CalculateBoundsFn = (timeRange: TimeRange) => TimeRangeBounds;

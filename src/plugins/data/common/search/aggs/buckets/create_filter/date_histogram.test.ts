@@ -29,7 +29,6 @@ import {
 } from '../date_histogram';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { RangeFilter } from '../../../../../common';
-import { coreMock } from '../../../../../../../core/public/mocks';
 
 describe('AggConfig Filters', () => {
   describe('date_histogram', () => {
@@ -40,11 +39,10 @@ describe('AggConfig Filters', () => {
     let field: any;
 
     beforeEach(() => {
-      const { uiSettings } = coreMock.createSetup();
-
       aggTypesDependencies = {
         calculateBounds: jest.fn(),
-        uiSettings,
+        getConfig: jest.fn(),
+        isDefaultTimezone: jest.fn().mockReturnValue(true),
       };
     });
 

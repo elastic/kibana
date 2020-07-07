@@ -20,29 +20,26 @@
 import moment from 'moment';
 import { getDateRangeBucketAgg, DateRangeBucketAggDependencies } from '../date_range';
 import { createFilterDateRange } from './date_range';
-import { FieldFormatsGetConfigFn } from '../../../../../common';
-import { DateFormat } from '../../../../../public/field_formats';
 import { AggConfigs } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../bucket_agg_type';
-import { coreMock } from '../../../../../../../core/public/mocks';
 
 describe('AggConfig Filters', () => {
   describe('Date range', () => {
     let aggTypesDependencies: DateRangeBucketAggDependencies;
 
     beforeEach(() => {
-      const { uiSettings } = coreMock.createSetup();
-
-      aggTypesDependencies = { uiSettings };
+      aggTypesDependencies = {
+        getConfig: jest.fn(),
+        isDefaultTimezone: jest.fn().mockReturnValue(true),
+      };
     });
 
-    const getConfig = (() => {}) as FieldFormatsGetConfigFn;
     const getAggConfigs = () => {
       const field = {
         name: '@timestamp',
-        format: new DateFormat({}, getConfig),
+        format: {},
       };
 
       const indexPattern = {

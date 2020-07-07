@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { coreMock } from '../../../../../../src/core/public/mocks';
 import {
   AggConfigs,
   AggTypesRegistrySetup,
@@ -27,6 +26,8 @@ import {
   AggsStart,
 } from '../../../common';
 import { mockAggTypesRegistry } from '../../../common/search/aggs/test_helpers';
+
+const getConfig = jest.fn();
 
 const aggTypeBaseParamMock = () => ({
   name: 'some_param',
@@ -63,12 +64,12 @@ export const aggTypesRegistryStartMock = (): AggTypesRegistryStart => ({
 });
 
 export const searchAggsSetupMock = (): AggsSetup => ({
-  calculateAutoTimeExpression: getCalculateAutoTimeExpression(coreMock.createSetup().uiSettings),
+  calculateAutoTimeExpression: getCalculateAutoTimeExpression(getConfig),
   types: aggTypesRegistrySetupMock(),
 });
 
 export const searchAggsStartMock = (): AggsStart => ({
-  calculateAutoTimeExpression: getCalculateAutoTimeExpression(coreMock.createStart().uiSettings),
+  calculateAutoTimeExpression: getCalculateAutoTimeExpression(getConfig),
   createAggConfigs: jest.fn().mockImplementation((indexPattern, configStates = [], schemas) => {
     return new AggConfigs(indexPattern, configStates, {
       typesRegistry: mockAggTypesRegistry(),

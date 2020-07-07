@@ -18,10 +18,9 @@
  */
 
 import { coreMock } from '../../../../core/public/mocks';
-import { CoreSetup, CoreStart } from '../../../../core/public';
-import { expressionsPluginMock } from '../../../../plugins/expressions/public/mocks';
+import { CoreSetup } from '../../../../core/public';
 
-import { SearchService } from './search_service';
+import { SearchService, SearchServiceSetupDependencies } from './search_service';
 
 describe('Search service', () => {
   let searchService: SearchService;
@@ -36,10 +35,10 @@ describe('Search service', () => {
 
   describe('setup()', () => {
     it('exposes proper contract', async () => {
-      const setup = searchService.setup(mockCoreSetup, {
+      const setup = searchService.setup(mockCoreSetup, ({
         packageInfo: { version: '8' },
-        expressions: expressionsPluginMock.createSetupContract(),
-      } as any);
+        registerFunction: jest.fn(),
+      } as unknown) as SearchServiceSetupDependencies);
       expect(setup).toHaveProperty('aggs');
       expect(setup).toHaveProperty('__enhance');
     });

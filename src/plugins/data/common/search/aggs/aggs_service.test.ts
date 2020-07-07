@@ -17,28 +17,70 @@
  * under the License.
  */
 
-import { coreMock } from '../../../../core/public/mocks';
-import { CoreSetup } from '../../../../core/public';
-import { expressionsPluginMock } from '../../../../plugins/expressions/public/mocks';
+import { omit } from 'lodash';
 
-import { SearchService } from './search_service';
+import { getAggTypes } from './agg_types';
+import {
+  AggsService,
+  AggsServiceSetupDependencies,
+  AggsServiceStartDependencies,
+} from './aggs_service';
 
-describe('Search service', () => {
-  let searchService: SearchService;
-  let mockCoreSetup: MockedKeys<CoreSetup>;
+describe('Aggs service', () => {
+  let service: AggsService;
+  let setupDeps: AggsServiceSetupDependencies;
+  let startDeps: AggsServiceStartDependencies;
 
   beforeEach(() => {
-    searchService = new SearchService();
-    mockCoreSetup = coreMock.createSetup();
+    service = new AggsService();
+    setupDeps = {
+      calculateBounds: jest.fn(),
+      getConfig: jest.fn(),
+      getFieldFormatsStart: jest.fn(),
+      isDefaultTimezone: jest.fn(),
+      registerFunction: jest.fn(),
+    };
+    startDeps = {
+      getConfig: jest.fn(),
+    };
   });
 
   describe('setup()', () => {
-    it('exposes proper contract', async () => {
-      const setup = searchService.setup(mockCoreSetup, {
-        packageInfo: { version: '8' },
-        expressions: expressionsPluginMock.createSetupContract(),
-      } as any);
-      expect(setup).toHaveProperty('registerSearchStrategy');
+    test('exposes proper contract', () => {
+      const setup = service.setup(setupDeps);
+      expect(Object.keys(setup).length).toBe(2);
+      expect(setup).toHaveProperty('calculateAutoTimeExpression');
+      expect(setup).toHaveProperty('types');
+    });
+
+    test('registers all agg types', () => {
+      service.setup(setupDeps);
+      const start = service.start(setupDeps);
+      const aggTypes = getAggTypes(omit(setupDeps, 'registerFunction'));
+      expect(start.types.getAll().buckets.map((b) => b.name)).toEqual(
+        aggTypes.buckets.map((b) => b.name)
+      );
+      expect(start.types.getAll().metrics.map((m) => m.name)).toEqual(
+        aggTypes.metrics.map((m) => m.name)
+      );
+    });
+
+    test('registers all agg type expression functions', () => {
+      service.setup(setupDeps);
+      const aggTypes = getAggTypes(omit(setupDeps, 'registerFunction'));
+      expect(setupDeps.registerFunction).toHaveBeenCalledTimes(
+        aggTypes.buckets.length + aggTypes.metrics.length
+      );
+    });
+  });
+
+  describe('start()', () => {
+    test('exposes proper contract', () => {
+      const start = service.start(startDeps);
+      expect(Object.keys(start).length).toBe(3);
+      expect(start).toHaveProperty('calculateAutoTimeExpression');
+      expect(start).toHaveProperty('createAggConfigs');
+      expect(start).toHaveProperty('types');
     });
   });
 });

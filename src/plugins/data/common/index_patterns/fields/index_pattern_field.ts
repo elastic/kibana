@@ -18,13 +18,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  IFieldType,
-  KbnFieldType,
-  getKbnFieldType,
-  KBN_FIELD_TYPES,
-  FieldFormat,
-} from '../../../common';
+import { KbnFieldType, getKbnFieldType } from '../../kbn_field_types';
+import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
+import { FieldFormat } from '../../field_formats';
+import { IFieldType } from './types';
 import { OnNotification, FieldSpec } from '../types';
 
 import { IndexPattern } from '../index_patterns';

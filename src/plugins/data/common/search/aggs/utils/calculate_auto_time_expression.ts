@@ -17,8 +17,10 @@
  * under the License.
  */
 import moment from 'moment';
+import { UI_SETTINGS } from '../../../../common/constants';
+import { TimeRange } from '../../../../common/query';
 import { TimeBuckets } from '../buckets/lib/time_buckets';
-import { toAbsoluteDates, TimeRange, UI_SETTINGS } from '../../../../common';
+import { toAbsoluteDates } from './date_interval_utils';
 
 export function getCalculateAutoTimeExpression(getConfig: (key: string) => any) {
   return function calculateAutoTimeExpression(range: TimeRange) {

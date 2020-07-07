@@ -22,16 +22,13 @@ import { createFilterFilters } from './filters';
 import { AggConfigs } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
 import { IBucketAggConfig } from '../bucket_agg_type';
-import { coreMock } from '../../../../../../../core/public/mocks';
 
 describe('AggConfig Filters', () => {
   describe('filters', () => {
     let aggTypesDependencies: FiltersBucketAggDependencies;
 
     beforeEach(() => {
-      const { uiSettings } = coreMock.createSetup();
-
-      aggTypesDependencies = { uiSettings };
+      aggTypesDependencies = { getConfig: jest.fn() };
     });
 
     const getAggConfigs = () => {

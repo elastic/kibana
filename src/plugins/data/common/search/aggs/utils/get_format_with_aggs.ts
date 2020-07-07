@@ -20,7 +20,11 @@
 import { i18n } from '@kbn/i18n';
 
 import { SerializedFieldFormat } from 'src/plugins/expressions/common/types';
-import { FieldFormat, FieldFormatsContentType, IFieldFormat } from '../../../../common';
+import {
+  FieldFormat,
+  FieldFormatsContentType,
+  IFieldFormat,
+} from '../../../../common/field_formats';
 import { convertDateRangeToString, DateRangeKey } from '../buckets/lib/date_range';
 import { convertIPRangeToString, IpRangeKey } from '../buckets/lib/ip_range';
 

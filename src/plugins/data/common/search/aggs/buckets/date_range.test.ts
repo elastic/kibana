@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { getDateRangeBucketAgg, DateRangeBucketAggDependencies } from './date_range';
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
@@ -27,9 +26,10 @@ describe('date_range params', () => {
   let aggTypesDependencies: DateRangeBucketAggDependencies;
 
   beforeEach(() => {
-    const { uiSettings } = coreMock.createSetup();
-
-    aggTypesDependencies = { uiSettings };
+    aggTypesDependencies = {
+      getConfig: jest.fn(),
+      isDefaultTimezone: jest.fn().mockReturnValue(false),
+    };
   });
 
   const getAggConfigs = (params: Record<string, any> = {}, hasIncludeTypeMeta: boolean = true) => {
@@ -108,10 +108,7 @@ describe('date_range params', () => {
     test('should use the Kibana time_zone if no parameter specified', () => {
       aggTypesDependencies = {
         ...aggTypesDependencies,
-        uiSettings: {
-          ...aggTypesDependencies.uiSettings,
-          get: () => 'kibanaTimeZone' as any,
-        },
+        getConfig: () => 'kibanaTimeZone' as any,
       };
 
       const aggConfigs = getAggConfigs(

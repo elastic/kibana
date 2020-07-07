@@ -18,7 +18,6 @@
  */
 
 import { Query } from '../../../../common';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
@@ -29,9 +28,7 @@ describe('Filters Agg', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    const { uiSettings } = coreMock.createSetup();
-
-    aggTypesDependencies = { uiSettings };
+    aggTypesDependencies = { getConfig: jest.fn() };
   });
 
   describe('order agg editor UI', () => {
@@ -218,7 +215,7 @@ describe('Filters Agg', () => {
       });
 
       test('works with leading wildcards if allowed', () => {
-        aggTypesDependencies.uiSettings.get = (s: any) =>
+        aggTypesDependencies.getConfig = (s: any) =>
           s === 'query:allowLeadingWildcards' ? true : s;
 
         const aggConfigs = getAggConfigs({

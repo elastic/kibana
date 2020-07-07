@@ -18,7 +18,7 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { TimeRange } from '../../../../common';
+import { TimeRange } from '../../../../../common';
 
 export function toAbsoluteDates(range: TimeRange) {
   const fromDate = dateMath.parse(range.from);

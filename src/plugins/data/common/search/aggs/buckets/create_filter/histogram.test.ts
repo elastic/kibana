@@ -17,25 +17,14 @@
  * under the License.
  */
 
-import { createFilterHistogram } from './histogram';
+import { BytesFormat, FieldFormatsGetConfigFn } from '../../../../../common/field_formats';
 import { AggConfigs } from '../../agg_configs';
-import { mockAggTypesRegistry } from '../../test_helpers';
+import { mockAggTypesRegistry, mockGetFieldFormatsStart } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../bucket_agg_type';
-import { BytesFormat, FieldFormatsGetConfigFn } from '../../../../../common';
-import { GetInternalStartServicesFn, InternalStartServices } from '../../../../types';
-import { FieldFormatsStart } from '../../../../field_formats';
-import { fieldFormatsServiceMock } from '../../../../field_formats/mocks';
+import { createFilterHistogram } from './histogram';
 
 describe('AggConfig Filters', () => {
-  let getInternalStartServices: GetInternalStartServicesFn;
-  let fieldFormats: FieldFormatsStart;
-
-  beforeEach(() => {
-    fieldFormats = fieldFormatsServiceMock.createStartContract();
-    getInternalStartServices = () => (({ fieldFormats } as unknown) as InternalStartServices);
-  });
-
   describe('histogram', () => {
     const getConfig = (() => {}) as FieldFormatsGetConfigFn;
     const getAggConfigs = () => {
@@ -72,12 +61,12 @@ describe('AggConfig Filters', () => {
 
     test('should return an range filter for histogram', () => {
       const aggConfigs = getAggConfigs();
-      const filter = createFilterHistogram(getInternalStartServices)(
+      const filter = createFilterHistogram(mockGetFieldFormatsStart)(
         aggConfigs.aggs[0] as IBucketAggConfig,
         '2048'
       );
 
-      expect(fieldFormats.deserialize).toHaveBeenCalledTimes(1);
+      expect(mockGetFieldFormatsStart().deserialize).toHaveBeenCalledTimes(1);
       expect(filter).toHaveProperty('meta');
       expect(filter.meta).toHaveProperty('index', '1234');
       expect(filter).toHaveProperty('range');

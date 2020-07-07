@@ -33,7 +33,7 @@ describe('Histogram Agg', () => {
 
   beforeEach(() => {
     aggTypesDependencies = {
-      getConfig: (key: string) => key,
+      getConfig: (key: string) => key as any,
       getFieldFormatsStart: mockGetFieldFormatsStart,
     };
   });

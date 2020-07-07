@@ -20,7 +20,6 @@
 import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
 import { UI_SETTINGS } from '../../../common';
 import { FieldFormatsStartCommon } from '../../field_formats';
-import { TimeRange, TimeRangeBounds } from '../../query';
 import {
   getAggTypes,
   getAggTypesFunctions,
@@ -54,8 +53,7 @@ export interface AggsServiceSetupDependencies {
 }
 
 /** @internal */
-interface AggsServiceStartDependencies {
-  calculateBounds: (timeRange: TimeRange) => TimeRangeBounds;
+export interface AggsServiceStartDependencies {
   getConfig: <T = any>(key: string) => T;
 }
 

@@ -41,15 +41,16 @@ import { ISearchGeneric } from './types';
 import { SearchUsageCollector, createUsageCollector } from './collectors';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 
-interface SearchServiceSetupDependencies {
-  expressions: ExpressionsSetup;
-  usageCollection?: UsageCollectionSetup;
-  getInternalStartServices: GetInternalStartServicesFn;
+/** @internal */
+export interface SearchServiceSetupDependencies {
+  getFieldFormatsStart: AggsServiceSetupDependencies['getFieldFormatsStart'];
   packageInfo: PackageInfo;
   registerFunction: AggsServiceSetupDependencies['registerFunction'];
+  usageCollection?: UsageCollectionSetup;
 }
 
-interface SearchServiceStartDependencies {
+/** @internal */
+export interface SearchServiceStartDependencies {
   indexPatterns: IndexPatternsContract;
 }
 

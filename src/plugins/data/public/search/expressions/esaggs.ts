@@ -29,9 +29,6 @@ import { calculateObjectHash } from '../../../../../plugins/kibana_utils/public'
 import { PersistedState } from '../../../../../plugins/visualizations/public';
 import { Adapters } from '../../../../../plugins/inspector/public';
 
-import { IAggConfigs } from '../aggs';
-import { ISearchSource } from '../search_source';
-import { tabifyAggResponse } from '../tabify';
 import {
   calculateBounds,
   EsaggsExpressionFunctionDefinition,
@@ -42,6 +39,13 @@ import {
   Query,
   TimeRange,
 } from '../../../common';
+import {
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  IAggConfigs,
+  tabifyAggResponse,
+} from '../../../common/search';
+
 import { FilterManager } from '../../query';
 import {
   getFieldFormats,
@@ -49,8 +53,9 @@ import {
   getQueryService,
   getSearchService,
 } from '../../services';
+import { ISearchSource } from '../search_source';
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
-import { getRequestInspectorStats, getResponseInspectorStats, serializeAggConfig } from './utils';
+import { serializeAggConfig } from './utils';
 
 export interface RequestHandlerParams {
   searchSource: ISearchSource;
