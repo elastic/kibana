@@ -12,7 +12,7 @@ import { SlackActionConnector } from '../types';
 
 const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
   SlackActionConnector
->> = ({ action, editActionSecrets, errors, docLinks }) => {
+>> = ({ action, editActionSecrets, errors }) => {
   const { webhookUrl } = action.secrets;
 
   return (

@@ -846,4 +846,43 @@ describe('FeatureTable', () => {
       },
     });
   });
+
+  it('does not render features which lack privileges', () => {
+    const role = createRole([
+      {
+        spaces: ['foo'],
+        base: [],
+        feature: {},
+      },
+    ]);
+
+    const featureWithoutPrivileges = createFeature({
+      id: 'no_privs',
+      name: 'No Privileges Feature',
+      privileges: null,
+    });
+
+    const { displayedPrivileges } = setup({
+      role,
+      features: [...kibanaFeatures, featureWithoutPrivileges],
+      privilegeIndex: 0,
+      calculateDisplayedPrivileges: true,
+      canCustomizeSubFeaturePrivileges: false,
+    });
+
+    expect(displayedPrivileges).toEqual({
+      excluded_from_base: {
+        primaryFeaturePrivilege: 'none',
+      },
+      no_sub_features: {
+        primaryFeaturePrivilege: 'none',
+      },
+      with_excluded_sub_features: {
+        primaryFeaturePrivilege: 'none',
+      },
+      with_sub_features: {
+        primaryFeaturePrivilege: 'none',
+      },
+    });
+  });
 });
