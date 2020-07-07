@@ -19,6 +19,7 @@
 
 import { validateGetSavedObjectAggs } from './aggs_utils';
 import { mockMappings } from './filter_utils.test';
+import { SavedObjectAggs } from './saved_object_aggs_types';
 
 describe('Filter Utils', () => {
   describe('#validateGetSavedObjectAggs', () => {
@@ -75,11 +76,11 @@ describe('Filter Utils', () => {
             aggName: {
               MySuperAgg: { field: 'foo.attributes.bytes' },
             },
-          },
+          } as SavedObjectAggs,
           mockMappings
         );
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid value {\\"aggName\\":{\\"MySuperAgg\\":{\\"field\\":\\"foo.attributes.bytes\\"}}} supplied to : { [K in string]: ((Partial<{ filter: { term: { [K in string]: string } }, histogram: ({ field: string } & { interval: number } & Partial<{ min_doc_count: number, extended_bounds: { min: number, max: number }, keyed: boolean, missing: number, order: { [K in string]: desc } }>), terms: ({ field: string } & Partial<{ field: string, size: number, show_term_doc_count_error: boolean, order: { [K in string]: desc } }>) }> & Partial<{ avg: { field: string }, weighted_avg: ({ value: ({ field: string } & Partial<{ missing: number }>), weight: ({ field: string } & Partial<{ missing: number }>) } & Partial<{ format: string, value_type: string }>), cardinality: { field: string }, max: ({ field: string } & Partial<{ missing: number }>), min: ({ field: string } & Partial<{ missing: number }>), top_hits: Partial<{ explain: boolean, from: string, highlight: any, seq_no_primary_term: boolean, size: number, sort: any, stored_fields: Array<string>, version: boolean, _name: string, _source: Partial<{ includes: Array<string>, excludes: Array<string> }> }> }>) & Partial<{ aggs: (Partial<{ filter: { term: { [K in string]: string } }, histogram: ({ field: string } & { interval: number } & Partial<{ min_doc_count: number, extended_bounds: { min: number, max: number }, keyed: boolean, missing: number, order: { [K in string]: desc } }>), terms: ({ field: string } & Partial<{ field: string, size: number, show_term_doc_count_error: boolean, order: { [K in string]: desc } }>) }> & Partial<{ avg: { field: string }, weighted_avg: ({ value: ({ field: string } & Partial<{ missing: number }>), weight: ({ field: string } & Partial<{ missing: number }>) } & Partial<{ format: string, value_type: string }>), cardinality: { field: string }, max: ({ field: string } & Partial<{ missing: number }>), min: ({ field: string } & Partial<{ missing: number }>), top_hits: Partial<{ explain: boolean, from: string, highlight: any, seq_no_primary_term: boolean, size: number, sort: any, stored_fields: Array<string>, version: boolean, _name: string, _source: Partial<{ includes: Array<string>, excludes: Array<string> }> }> }>) }>) }, excess properties: [\\"MySuperAgg\\"]: Bad Request"`
+        `"Invalid value {\\"aggName\\":{\\"MySuperAgg\\":{\\"field\\":\\"foo.attributes.bytes\\"}}}, excess properties: [\\"MySuperAgg\\"]: Bad Request"`
       );
     });
 
@@ -92,11 +93,11 @@ describe('Filter Utils', () => {
               cardinality: { field: 'alert.attributes.actions.group' },
               script: 'I want to access that I should not',
             },
-          },
+          } as SavedObjectAggs,
           mockMappings
         );
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid value {\\"aggName\\":{\\"cardinality\\":{\\"field\\":\\"alert.attributes.actions.group\\"},\\"script\\":\\"I want to access that I should not\\"}} supplied to : { [K in string]: ((Partial<{ filter: { term: { [K in string]: string } }, histogram: ({ field: string } & { interval: number } & Partial<{ min_doc_count: number, extended_bounds: { min: number, max: number }, keyed: boolean, missing: number, order: { [K in string]: desc } }>), terms: ({ field: string } & Partial<{ field: string, size: number, show_term_doc_count_error: boolean, order: { [K in string]: desc } }>) }> & Partial<{ avg: { field: string }, weighted_avg: ({ value: ({ field: string } & Partial<{ missing: number }>), weight: ({ field: string } & Partial<{ missing: number }>) } & Partial<{ format: string, value_type: string }>), cardinality: { field: string }, max: ({ field: string } & Partial<{ missing: number }>), min: ({ field: string } & Partial<{ missing: number }>), top_hits: Partial<{ explain: boolean, from: string, highlight: any, seq_no_primary_term: boolean, size: number, sort: any, stored_fields: Array<string>, version: boolean, _name: string, _source: Partial<{ includes: Array<string>, excludes: Array<string> }> }> }>) & Partial<{ aggs: (Partial<{ filter: { term: { [K in string]: string } }, histogram: ({ field: string } & { interval: number } & Partial<{ min_doc_count: number, extended_bounds: { min: number, max: number }, keyed: boolean, missing: number, order: { [K in string]: desc } }>), terms: ({ field: string } & Partial<{ field: string, size: number, show_term_doc_count_error: boolean, order: { [K in string]: desc } }>) }> & Partial<{ avg: { field: string }, weighted_avg: ({ value: ({ field: string } & Partial<{ missing: number }>), weight: ({ field: string } & Partial<{ missing: number }>) } & Partial<{ format: string, value_type: string }>), cardinality: { field: string }, max: ({ field: string } & Partial<{ missing: number }>), min: ({ field: string } & Partial<{ missing: number }>), top_hits: Partial<{ explain: boolean, from: string, highlight: any, seq_no_primary_term: boolean, size: number, sort: any, stored_fields: Array<string>, version: boolean, _name: string, _source: Partial<{ includes: Array<string>, excludes: Array<string> }> }> }>) }>) }, excess properties: [\\"script\\"]: Bad Request"`
+        `"Invalid value {\\"aggName\\":{\\"cardinality\\":{\\"field\\":\\"alert.attributes.actions.group\\"},\\"script\\":\\"I want to access that I should not\\"}}, excess properties: [\\"script\\"]: Bad Request"`
       );
     });
   });

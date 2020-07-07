@@ -640,7 +640,7 @@ export class SavedObjectsRepository {
     let aggsObject = null;
     try {
       if (aggs) {
-        aggsObject = validateGetSavedObjectAggs(allowedTypes, JSON.parse(aggs), this._mappings);
+        aggsObject = validateGetSavedObjectAggs(allowedTypes, aggs, this._mappings);
       }
     } catch (e) {
       throw e;

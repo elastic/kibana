@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectsClient } from './service/saved_objects_client';
+import { SavedObjectsClient, SavedObjectAggs } from './service/saved_objects_client';
 import { SavedObjectsTypeMappingDefinition, SavedObjectsTypeMappingDefinitions } from './mappings';
 import { SavedObjectMigrationMap } from './migrations';
 import { PropertyValidators } from './validation';
@@ -82,7 +82,7 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
   hasReference?: { type: string; id: string };
   defaultSearchOperator?: 'AND' | 'OR';
   filter?: string;
-  aggs?: string;
+  aggs?: SavedObjectAggs;
   /** An optional ES preference value to be used for the query **/
   preference?: string;
 }

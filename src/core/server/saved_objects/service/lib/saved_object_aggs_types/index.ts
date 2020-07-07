@@ -20,6 +20,7 @@
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
+
 import * as rt from 'io-ts';
 
 import { BucketAggsTypeRt } from './bucket_aggs';

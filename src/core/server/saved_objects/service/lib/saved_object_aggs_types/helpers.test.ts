@@ -101,7 +101,7 @@ describe('Saved object aggs helpers', () => {
       );
 
       expect(runDecode(codec, { aggName: { max: { field: 'hi', script: '' } } })).toEqual([
-        'Invalid value {"aggName":{"max":{"field":"hi","script":""}}} supplied to : { [K in string]: Partial<{ max: { field: string } }> }, excess properties: ["script"]',
+        'Invalid value {"aggName":{"max":{"field":"hi","script":""}}}, excess properties: ["script"]',
       ]);
     });
 
@@ -121,7 +121,7 @@ describe('Saved object aggs helpers', () => {
       );
 
       expect(runDecode(codec, { aggName: { min: { field: 'hi', script: 'field' } } })).toEqual([
-        'Invalid value {"aggName":{"min":{"field":"hi","script":"field"}}} supplied to : { [K in string]: (Partial<{ max: { field: string } }> & Partial<{ min: { field: string } }>) }, excess properties: ["script"]',
+        'Invalid value {"aggName":{"min":{"field":"hi","script":"field"}}}, excess properties: ["script"]',
       ]);
     });
 
@@ -189,7 +189,7 @@ describe('Saved object aggs helpers', () => {
           },
         })
       ).toEqual([
-        'Invalid value {"aggName":{"filter":{"field":"hi"},"aggs":{"aggNewName":{"min":{"field":"low"},"script":"error"}}}} supplied to : { [K in string]: (Partial<{ max: { field: string } }> & Partial<{ filter: { field: string }, aggs: { [K in string]: Partial<{ min: { field: string } }> } }>) }, excess properties: ["script"]',
+        'Invalid value {"aggName":{"filter":{"field":"hi"},"aggs":{"aggNewName":{"min":{"field":"low"},"script":"error"}}}}, excess properties: ["script"]',
       ]);
     });
   });
