@@ -9,7 +9,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ScopedHistory } from 'kibana/public';
-import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
 import { SectionLoading, ComponentTemplateDeserialized } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_LIST_LOAD } from '../constants';
@@ -30,7 +30,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
   componentTemplateName,
   history,
 }) => {
-  const { api, trackMetric } = useComponentTemplatesContext();
+  const { api, trackMetric, documentation } = useComponentTemplatesContext();
 
   const { data, isLoading, error, sendRequest } = api.useLoadComponentTemplates();
 
@@ -66,21 +66,28 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
       <SectionLoading data-test-subj="sectionLoading">
         <FormattedMessage
           id="xpack.idxMgmt.home.componentTemplates.list.loadingMessage"
-          defaultMessage="Loading component templates..."
+          defaultMessage="Loading component templates…"
         />
       </SectionLoading>
     );
   } else if (data?.length) {
     content = (
       <>
-        <EuiTitle size="s">
-          <EuiText color="subdued">
-            <FormattedMessage
-              id="xpack.idxMgmt.home.componentTemplates.list.componentTemplatesDescription"
-              defaultMessage="Component templates are reusable building blocks that configure mappings, settings, and aliases."
-            />
-          </EuiText>
-        </EuiTitle>
+        <EuiText color="subdued">
+          <FormattedMessage
+            id="xpack.idxMgmt.home.componentTemplates.list.componentTemplatesDescription"
+            defaultMessage="Use component templates to reuse settings, mappings, and aliases configurations in multiple index templates. {learnMoreLink}"
+            values={{
+              learnMoreLink: (
+                <EuiLink href={documentation.componentTemplates} target="_blank" external>
+                  {i18n.translate('xpack.idxMgmt.componentTemplates.list.learnMoreLinkText', {
+                    defaultMessage: 'Learn more',
+                  })}
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiText>
 
         <EuiSpacer />
 
