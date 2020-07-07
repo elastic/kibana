@@ -3,11 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { render } from '@testing-library/react';
 import React from 'react';
-import { EuiThemeProvider } from '../../../typings';
-import { EmptySection } from './';
 import { ISection } from '../../../typings/section';
+import { render } from '../../../utils/test_helper';
+import { EmptySection } from './';
 
 describe('EmptySection', () => {
   it('renders without action button', () => {
@@ -17,11 +16,7 @@ describe('EmptySection', () => {
       icon: 'logoAPM',
       description: 'foo bar',
     };
-    const { getByText, queryAllByText } = render(
-      <EuiThemeProvider>
-        <EmptySection section={section} />
-      </EuiThemeProvider>
-    );
+    const { getByText, queryAllByText } = render(<EmptySection section={section} />);
 
     expect(getByText('APM')).toBeInTheDocument();
     expect(getByText('foo bar')).toBeInTheDocument();
@@ -36,11 +31,7 @@ describe('EmptySection', () => {
       linkTitle: 'install agent',
       href: 'https://www.elastic.co',
     };
-    const { getByText, getByTestId } = render(
-      <EuiThemeProvider>
-        <EmptySection section={section} />
-      </EuiThemeProvider>
-    );
+    const { getByText, getByTestId } = render(<EmptySection section={section} />);
 
     expect(getByText('APM')).toBeInTheDocument();
     expect(getByText('foo bar')).toBeInTheDocument();

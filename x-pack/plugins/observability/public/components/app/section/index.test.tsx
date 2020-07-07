@@ -4,18 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
+import { render } from '../../../utils/test_helper';
 import { SectionContainer } from './';
-import { render } from '@testing-library/react';
-import { EuiThemeProvider } from '../../../typings';
 
 describe('SectionContainer', () => {
   it('renders section without app link', () => {
     const component = render(
-      <EuiThemeProvider>
-        <SectionContainer title="Foo" minHeight={100} hasError={false}>
-          <div>I am a very nice component</div>
-        </SectionContainer>
-      </EuiThemeProvider>
+      <SectionContainer title="Foo" hasError={false}>
+        <div>I am a very nice component</div>
+      </SectionContainer>
     );
     expect(component.getByText('I am a very nice component')).toBeInTheDocument();
     expect(component.getByText('Foo')).toBeInTheDocument();
@@ -23,14 +20,24 @@ describe('SectionContainer', () => {
   });
   it('renders section with app link', () => {
     const component = render(
-      <EuiThemeProvider>
-        <SectionContainer title="Foo" minHeight={100} appLink="/foo/bar" hasError={false}>
-          <div>I am a very nice component</div>
-        </SectionContainer>
-      </EuiThemeProvider>
+      <SectionContainer title="Foo" appLink="/foo/bar" hasError={false}>
+        <div>I am a very nice component</div>
+      </SectionContainer>
     );
     expect(component.getByText('I am a very nice component')).toBeInTheDocument();
     expect(component.getByText('Foo')).toBeInTheDocument();
     expect(component.getByText('View in app')).toBeInTheDocument();
+  });
+  it('renders section with error', () => {
+    const component = render(
+      <SectionContainer title="Foo" hasError={true}>
+        <div>I am a very nice component</div>
+      </SectionContainer>
+    );
+    expect(component.queryByText('I am a very nice component')).not.toBeInTheDocument();
+    expect(component.getByText('Foo')).toBeInTheDocument();
+    expect(
+      component.getByText('An error happened when trying to fetch data. Please try again')
+    ).toBeInTheDocument();
   });
 });

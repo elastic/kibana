@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Chart } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
+import { EuiLoadingChart } from '@elastic/eui';
 import { EuiLoadingChartSize } from '@elastic/eui/src/components/loading/loading_chart';
 import React from 'react';
 
@@ -27,6 +27,7 @@ export const ChartContainer = ({
   if (isInitialLoad) {
     return (
       <div
+        data-test-subj="loading"
         style={{
           height,
           display: 'flex',
