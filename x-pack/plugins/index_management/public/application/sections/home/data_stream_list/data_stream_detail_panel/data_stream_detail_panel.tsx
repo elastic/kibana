@@ -82,7 +82,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
                 content={
                   <FormattedMessage
                     id="xpack.idxMgmt.dataStreamDetailPanel.timestampFieldToolTip"
-                    defaultMessage="Timestamp field shared by all documents in the stream"
+                    defaultMessage="Timestamp field shared by all documents in the data stream"
                   />
                 }
                 position="top"
