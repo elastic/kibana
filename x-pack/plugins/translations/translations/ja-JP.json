@@ -7079,8 +7079,6 @@
     "xpack.idxMgmt.templateForm.steps.mappingsStepName": "マッピング",
     "xpack.idxMgmt.templateForm.steps.settingsStepName": "インデックス設定",
     "xpack.idxMgmt.templateForm.steps.summaryStepName": "テンプレートのレビュー",
-    "xpack.idxMgmt.templateList.table.ilmPolicyColumnDescription": "インデックスライフサイクルポリシー「{policyName}」",
-    "xpack.idxMgmt.templateList.table.ilmPolicyColumnTitle": "ILM ポリシー",
     "xpack.idxMgmt.templateList.table.indexPatternsColumnTitle": "インデックスパターン",
     "xpack.idxMgmt.templateList.table.nameColumnTitle": "名前",
     "xpack.idxMgmt.templateList.table.noIndexTemplatesMessage": "インデックステンプレートが見つかりません",
