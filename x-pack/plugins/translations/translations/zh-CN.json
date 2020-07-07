@@ -14591,7 +14591,6 @@
     "xpack.securitySolution.overview.winlogbeatSecurityTitle": "安全",
     "xpack.securitySolution.pages.common.emptyActionPrimary": "使用 Beats 添加数据",
     "xpack.securitySolution.pages.common.emptyActionSecondary": "查看入门指南",
-    "xpack.securitySolution.pages.common.emptyMessage": "要开始使用安全信息和事件管理 (Security)，您将需要将 Security 相关数据以 Elastic Common Schema (ECS) 格式添加到 Elastic Stack。较为轻松的入门方式是安装并配置我们称作 Beats 的数据采集器。让我们现在就动手！",
     "xpack.securitySolution.pages.common.emptyTitle": "欢迎使用 SIEM。让我们教您如何入门。",
     "xpack.securitySolution.pages.fourohfour.noContentFoundDescription": "未找到任何内容",
     "xpack.securitySolution.paginatedTable.rowsButtonLabel": "每页行数",
