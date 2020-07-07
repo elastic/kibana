@@ -35,17 +35,12 @@ export function writeEpilogue(log, stats, failuresDetail) {
   // failures
   if (stats.failures) {
     log.write('%d failing', stats.failures);
-
-    log.write(
-      failuresDetail
-        .map(
-          ({ title, error }, i) => `
-      ${i + 1}) ${title}
-      ${error}
-    `
-        )
-        .join('\n')
-    );
+    log.write('');
+    failuresDetail.forEach(({ title, error }, i) => {
+      log.write('%d) %s', i + 1, title);
+      log.write('');
+      log.write('%s', error);
+    });
   }
 
   // footer

@@ -156,10 +156,10 @@ export function MochaReporterProvider({ getService }) {
       //  - I started by trying to extract the Base.list() logic from mocha
       //    but it's a lot more complicated than this is horrible.
       //  - In order to fix the numbering and indentation we monkey-patch
-      //    console.log and parse the logged output.
+      //    Mocha.reporters.Base.consoleLog and parse the logged output.
       //
       let output = '';
-      const realLog = console.log;
+      const realLog = Mocha.reporters.Base.consoleLog;
       Mocha.reporters.Base.consoleLog = (...args) => (output += `${format(...args)}\n`);
       try {
         Mocha.reporters.Base.list([runnable]);
@@ -170,10 +170,10 @@ export function MochaReporterProvider({ getService }) {
       const outputLines = output.split('\n');
 
       const errorMarkerStart = outputLines.reduce((index, line, i) => {
-        if (index !== -1) {
+        if (index >= 0) {
           return index;
         }
-        return /Error:/.test(line) ? i : -1;
+        return /Error:/.test(line) ? i : index;
       }, -1);
 
       const errorMessage = outputLines
