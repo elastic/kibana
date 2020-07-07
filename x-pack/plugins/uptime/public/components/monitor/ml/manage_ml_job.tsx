@@ -7,7 +7,8 @@
 import React, { useContext, useState } from 'react';
 
 import { EuiButtonEmpty, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { CLIENT_ALERT_TYPES } from '../../../../common/constants';
 import {
   canDeleteMLJobSelector,
   hasMLJobSelector,
@@ -18,6 +19,7 @@ import * as labels from './translations';
 import { getMLJobLinkHref } from './ml_job_link';
 import { useGetUrlParams } from '../../../hooks';
 import { useMonitorId } from '../../../hooks';
+import { setAlertFlyoutType, setAlertFlyoutVisible } from '../../../state/actions';
 
 interface Props {
   hasMLJob: boolean;
@@ -39,6 +41,8 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
   const monitorId = useMonitorId();
+
+  const dispatch = useDispatch();
 
   const button = (
     <EuiButtonEmpty
@@ -67,6 +71,15 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
             dateRange: { from: dateRangeStart, to: dateRangeEnd },
           }),
           target: '_blank',
+        },
+        {
+          name: labels.ENABLE_ANOMALY_ALERT,
+          'data-test-subj': 'uptimeEnableAnomalyAlertBtn',
+          icon: <EuiIcon type="bell" size="m" />,
+          onClick: () => {
+            dispatch(setAlertFlyoutType(CLIENT_ALERT_TYPES.DURATION_ANOMALY));
+            dispatch(setAlertFlyoutVisible(true));
+          },
         },
         {
           name: labels.DISABLE_ANOMALY_DETECTION,

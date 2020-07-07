@@ -9,6 +9,7 @@ import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
 import { initMonitorStatusAlertType } from './monitor_status';
 import { initTlsAlertType } from './tls';
 import { ClientPluginsStart } from '../../apps/plugin';
+import { initDurationAnomalyAlertType } from './duration_anomaly';
 
 export type AlertTypeInitializer = (dependenies: {
   core: CoreStart;
@@ -18,4 +19,5 @@ export type AlertTypeInitializer = (dependenies: {
 export const alertTypeInitializers: AlertTypeInitializer[] = [
   initMonitorStatusAlertType,
   initTlsAlertType,
+  initDurationAnomalyAlertType,
 ];

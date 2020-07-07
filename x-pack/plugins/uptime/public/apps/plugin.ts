@@ -106,10 +106,7 @@ export class UptimePlugin
         core: start,
         plugins,
       });
-      if (
-        plugins.triggers_actions_ui &&
-        !plugins.triggers_actions_ui.alertTypeRegistry.has(alertInitializer.id)
-      ) {
+      if (!plugins.triggers_actions_ui.alertTypeRegistry.has(alertInitializer.id)) {
         plugins.triggers_actions_ui.alertTypeRegistry.register(alertInitializer);
       }
     });

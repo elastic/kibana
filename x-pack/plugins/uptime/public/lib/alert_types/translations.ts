@@ -50,3 +50,34 @@ Aging Certificates: {agingCommonNameAndDate}
     defaultMessage: 'Uptime TLS',
   }),
 };
+
+export const DurationAnomalyTranslations = {
+  defaultActionMessage: i18n.translate('xpack.uptime.alerts.tls.defaultActionMessage', {
+    defaultMessage: `Detected {count} TLS certificates expiring or becoming too old.
+
+{expiringConditionalOpen}
+Expiring cert count: {expiringCount}
+Expiring Certificates: {expiringCommonNameAndDate}
+{expiringConditionalClose}    
+
+{agingConditionalOpen}
+Aging cert count: {agingCount}
+Aging Certificates: {agingCommonNameAndDate}
+{agingConditionalClose}
+`,
+    values: {
+      count: '{{state.count}}',
+      expiringCount: '{{state.expiringCount}}',
+      expiringCommonNameAndDate: '{{state.expiringCommonNameAndDate}}',
+      expiringConditionalOpen: '{{#state.hasExpired}}',
+      expiringConditionalClose: '{{/state.hasExpired}}',
+      agingCount: '{{state.agingCount}}',
+      agingCommonNameAndDate: '{{state.agingCommonNameAndDate}}',
+      agingConditionalOpen: '{{#state.hasAging}}',
+      agingConditionalClose: '{{/state.hasAging}}',
+    },
+  }),
+  name: i18n.translate('xpack.uptime.alerts.durationAnomaly.clientName', {
+    defaultMessage: 'Uptime Duration Anomaly',
+  }),
+};
