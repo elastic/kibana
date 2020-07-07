@@ -138,7 +138,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
         <EuiText color="subdued">
           <FormattedMessage
             id="xpack.idxMgmt.dataStreamList.dataStreamsDescription"
-            defaultMessage="Data streams represent the latest data in a rollover series. {learnMoreLink}"
+            defaultMessage="Data streams represent collections of time series indices. {learnMoreLink}"
             values={{
               learnMoreLink: (
                 <EuiLink
