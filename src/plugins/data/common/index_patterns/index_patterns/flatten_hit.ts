@@ -89,6 +89,8 @@ function decorateFlattenedWrapper(hit: Record<string, any>, metaFields: Record<s
           default:
             flattened[key] = val;
         }
+      } else {
+        flattened[key] = val;
       }
     });
 
