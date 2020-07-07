@@ -11,6 +11,12 @@ import { EuiTableActionsColumnType } from '@elastic/eui';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 import { CloneButton } from '../action_clone';
 import { useDeleteAction, DeleteButton, DeleteButtonModal } from '../action_delete';
+import {
+  isEditActionFlyoutVisible,
+  useEditAction,
+  EditButton,
+  EditButtonFlyout,
+} from '../action_edit';
 import { useStartAction, StartButton, StartButtonModal } from '../action_start';
 import { StopButton } from '../action_stop';
 import { getViewAction } from '../action_view';
@@ -25,6 +31,7 @@ export const useActions = (
   modals: JSX.Element | null;
 } => {
   const deleteAction = useDeleteAction();
+  const editAction = useEditAction();
   const startAction = useStartAction();
 
   let modals: JSX.Element | null = null;
@@ -38,6 +45,7 @@ export const useActions = (
       <>
         {startAction.isModalVisible && <StartButtonModal {...startAction} />}
         {deleteAction.isModalVisible && <DeleteButtonModal {...deleteAction} />}
+        {isEditActionFlyoutVisible(editAction) && <EditButtonFlyout {...editAction} />}
       </>
     );
     actions.push(
@@ -48,6 +56,11 @@ export const useActions = (
               return <StartButton item={item} onClick={startAction.openModal} />;
             }
             return <StopButton item={item} />;
+          },
+        },
+        {
+          render: (item: DataFrameAnalyticsListRow) => {
+            return <EditButton onClick={() => editAction.openFlyout(item)} />;
           },
         },
         {

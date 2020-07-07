@@ -85,8 +85,20 @@ function validateActionTypeConfig(
   configurationUtilities: ActionsConfigurationUtilities,
   configObject: ActionTypeConfigType
 ) {
+  let url: URL;
   try {
-    configurationUtilities.ensureWhitelistedUri(configObject.url);
+    url = new URL(configObject.url);
+  } catch (err) {
+    return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationErrorNoHostname', {
+      defaultMessage: 'error configuring webhook action: unable to parse url: {err}',
+      values: {
+        err,
+      },
+    });
+  }
+
+  try {
+    configurationUtilities.ensureWhitelistedUri(url.toString());
   } catch (whitelistError) {
     return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationError', {
       defaultMessage: 'error configuring webhook action: {message}',
