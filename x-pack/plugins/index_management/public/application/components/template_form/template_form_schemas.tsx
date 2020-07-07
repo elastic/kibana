@@ -187,5 +187,13 @@ export const schemas: Record<string, FormSchema> = {
         }
       },
     },
+    __internal__: {
+      addMeta: {
+        type: FIELD_TYPES.TOGGLE,
+        label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.addMetadataLabel', {
+          defaultMessage: 'Add metadata',
+        }),
+      } as FieldConfig,
+    },
   },
 };

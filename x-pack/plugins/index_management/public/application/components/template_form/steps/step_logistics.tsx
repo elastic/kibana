@@ -16,6 +16,7 @@ import {
   Field,
   Forms,
   JsonEditorField,
+  FormDataProvider,
 } from '../../../../shared_imports';
 import { documentationService } from '../../../services/documentation';
 import { schemas, nameConfig, nameConfigWithoutValidations } from '../template_form_schemas';
@@ -57,10 +58,10 @@ const fieldsMeta = {
   },
   priority: {
     title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.priorityTitle', {
-      defaultMessage: 'Merge priority',
+      defaultMessage: 'Priority',
     }),
     description: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.priorityDescription', {
-      defaultMessage: 'The merge priority when multiple templates match an index.',
+      defaultMessage: 'Only the highest priority template will be applied.',
     }),
     testSubject: 'priorityField',
   },
@@ -75,11 +76,35 @@ const fieldsMeta = {
   },
 };
 
+interface LogisticsForm {
+  [key: string]: any;
+}
+
+interface LogisticsFormInternal extends LogisticsForm {
+  __internal__: {
+    addMeta: boolean;
+  };
+}
+
 interface Props {
-  defaultValue: { [key: string]: any };
+  defaultValue: LogisticsForm;
   onChange: (content: Forms.Content) => void;
   isEditing?: boolean;
   isLegacy?: boolean;
+}
+
+function formDeserializer(formData: LogisticsForm): LogisticsFormInternal {
+  return {
+    ...formData,
+    __internal__: {
+      addMeta: Boolean(formData._meta && Object.keys(formData._meta).length),
+    },
+  };
+}
+
+function formSerializer(formData: LogisticsFormInternal): LogisticsForm {
+  const { __internal__, ...data } = formData;
+  return data;
 }
 
 export const StepLogistics: React.FunctionComponent<Props> = React.memo(
@@ -88,6 +113,8 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       schema: schemas.logistics,
       defaultValue,
       options: { stripEmptyFields: false },
+      serializer: formSerializer,
+      deserializer: formDeserializer,
     });
 
     /**
@@ -226,25 +253,35 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                     id="xpack.idxMgmt.templateForm.stepLogistics.metaFieldDescription"
                     defaultMessage="Use the _meta field to store any metadata you want."
                   />
+                  <EuiSpacer size="m" />
+                  <UseField path="__internal__.addMeta" data-test-subj="metaToggle" />
                 </>
               }
             >
-              <UseField
-                path="_meta"
-                component={JsonEditorField}
-                componentProps={{
-                  euiCodeEditorProps: {
-                    height: '280px',
-                    'aria-label': i18n.translate(
-                      'xpack.idxMgmt.templateForm.stepLogistics.metaFieldEditorAriaLabel',
-                      {
-                        defaultMessage: '_meta field data editor',
-                      }
-                    ),
-                    'data-test-subj': 'metaField',
-                  },
+              <FormDataProvider pathsToWatch="__internal__.addMeta">
+                {({ '__internal__.addMeta': addMeta }) => {
+                  return (
+                    addMeta && (
+                      <UseField
+                        path="_meta"
+                        component={JsonEditorField}
+                        componentProps={{
+                          euiCodeEditorProps: {
+                            height: '280px',
+                            'aria-label': i18n.translate(
+                              'xpack.idxMgmt.templateForm.stepLogistics.metaFieldEditorAriaLabel',
+                              {
+                                defaultMessage: '_meta field data editor',
+                              }
+                            ),
+                            'data-test-subj': 'metaField',
+                          },
+                        }}
+                      />
+                    )
+                  );
                 }}
-              />
+              </FormDataProvider>
             </FormRow>
           )}
         </Form>
