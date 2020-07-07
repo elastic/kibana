@@ -52,6 +52,7 @@ import {
 import { getLicenseExpiration } from './alerts/license_expiration';
 import { getClusterState } from './alerts/cluster_state';
 import { InfraPluginSetup } from '../../infra/server';
+import { CoreServices } from './core_services';
 
 export interface LegacyAPI {
   getServerStatus: () => string;
@@ -130,6 +131,8 @@ export class Plugin {
     ])
       .pipe(first())
       .toPromise();
+
+    CoreServices.init(core);
 
     this.legacyShimDependencies = {
       router: core.http.createRouter(),

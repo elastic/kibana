@@ -44,12 +44,15 @@ export const deprecations = ({
     ),
     renameFromRoot('xpack.monitoring', 'monitoring'),
     (config, fromPath, logger) => {
-      const clusterAlertsEnabled = get(config, 'cluster_alerts.enabled');
+      const clusterAlertsEnabled = get(config, 'monitoring.cluster_alerts.enabled', true);
       const emailNotificationsEnabled =
-        clusterAlertsEnabled && get(config, 'cluster_alerts.email_notifications.enabled');
-      if (emailNotificationsEnabled && !get(config, CLUSTER_ALERTS_ADDRESS_CONFIG_KEY)) {
+        clusterAlertsEnabled &&
+        get(config, 'monitoring.cluster_alerts.email_notifications.enabled', true);
+      const updatedKey = get(config, `monitoring.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}`);
+      const legacyKey = get(config, `xpack.monitoring.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}`);
+      if (emailNotificationsEnabled && !updatedKey && !legacyKey) {
         logger(
-          `Config key [${fromPath}.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}] will be required for email notifications to work in 7.0."`
+          `Config key [${fromPath}.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}] will be required for email notifications to work in 8.0."`
         );
       }
       return config;
