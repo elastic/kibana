@@ -18,6 +18,16 @@ import {
   registerDeleteTagsWithIdsRoute,
   registerAssignableTagsRoute,
 } from './tags';
+import {
+  registerBeatUpdateRoute,
+  registerTagRemovalsRoute,
+  registerTagAssignmentsRoute,
+  registerListAgentsRoute,
+  registerGetBeatRoute,
+  registerBeatEventsRoute,
+  registerBeatEnrollmentRoute,
+  registerGetBeatConfigurationRoute,
+} from './beats';
 
 export const registerRoutes = (router: IRouter) => {
   // configurations
@@ -25,7 +35,14 @@ export const registerRoutes = (router: IRouter) => {
   registerDeleteConfigurationBlocksRoute(router);
   registerUpsertConfigurationBlocksRoute(router);
   // beats
-  // TODO
+  registerBeatUpdateRoute(router);
+  registerTagRemovalsRoute(router);
+  registerTagAssignmentsRoute(router);
+  registerListAgentsRoute(router);
+  registerGetBeatRoute(router);
+  registerBeatEventsRoute(router);
+  registerBeatEnrollmentRoute(router);
+  registerGetBeatConfigurationRoute(router);
   // tags
   registerSetTagRoute(router);
   registerListTagsRoute(router);
