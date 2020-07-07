@@ -1,6 +1,6 @@
 // //
 // // KIBANA THEME
-@import 'src/plugins/kibana_legacy/public/styles/base';
+@import './base';
 
 // // Component
-@import 'src/plugins/kibana_legacy/public/styles/paginate';
+@import './paginate';
