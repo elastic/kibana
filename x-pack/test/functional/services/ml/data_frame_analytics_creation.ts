@@ -312,10 +312,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
         'value'
       );
 
-      expect(actualModelMemory).not.to.be(
-        '',
-        'Model memory limit should be populated but was empty'
-      );
+      expect(actualModelMemory).not.to.be('');
     },
 
     async assertPredictionFieldNameValue(expectedValue: string) {
