@@ -391,7 +391,7 @@ export const persistTimeline = async (
     await savedObjectsClient.update(
       timelineSavedObjectType,
       timelineId,
-      pickSavedTimeline(timelineId, timeline, request.user),
+      pickSavedTimeline(timelineId, timeline, userInfo),
       {
         version: version || undefined,
       }

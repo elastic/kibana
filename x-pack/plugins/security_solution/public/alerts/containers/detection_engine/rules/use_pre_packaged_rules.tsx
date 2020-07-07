@@ -70,9 +70,6 @@ export const usePrePackagedRules = ({
       | 'rulesInstalled'
       | 'rulesNotInstalled'
       | 'rulesNotUpdated'
-      | 'timelinesInstalled'
-      | 'timelinesNotInstalled'
-      | 'timelinesNotUpdated'
     >
   >({
     createPrePackagedRules: null,
@@ -81,6 +78,14 @@ export const usePrePackagedRules = ({
     rulesInstalled: null,
     rulesNotInstalled: null,
     rulesNotUpdated: null,
+  });
+
+  const [timelinesStatus, setTimelineStatus] = useState<
+    Pick<
+      ReturnPrePackagedRulesAndTimelines,
+      'timelinesInstalled' | 'timelinesNotInstalled' | 'timelinesNotUpdated'
+    >
+  >({
     timelinesInstalled: null,
     timelinesNotInstalled: null,
     timelinesNotUpdated: null,
@@ -108,6 +113,8 @@ export const usePrePackagedRules = ({
             rulesInstalled: prePackagedRuleStatusResponse.rules_installed,
             rulesNotInstalled: prePackagedRuleStatusResponse.rules_not_installed,
             rulesNotUpdated: prePackagedRuleStatusResponse.rules_not_updated,
+          });
+          setTimelineStatus({
             timelinesInstalled: prePackagedRuleStatusResponse.timelines_installed,
             timelinesNotInstalled: prePackagedRuleStatusResponse.timelines_not_installed,
             timelinesNotUpdated: prePackagedRuleStatusResponse.timelines_not_updated,
@@ -122,11 +129,13 @@ export const usePrePackagedRules = ({
             rulesInstalled: null,
             rulesNotInstalled: null,
             rulesNotUpdated: null,
+          });
+          setTimelineStatus({
             timelinesInstalled: null,
             timelinesNotInstalled: null,
             timelinesNotUpdated: null,
           });
-          errorToToaster({ title: i18n.RULE_FETCH_FAILURE, error, dispatchToaster });
+          errorToToaster({ title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE, error, dispatchToaster });
         }
       }
       if (isSubscribed) {
@@ -178,11 +187,16 @@ export const usePrePackagedRules = ({
                       rulesInstalled: prePackagedRuleStatusResponse.rules_installed,
                       rulesNotInstalled: prePackagedRuleStatusResponse.rules_not_installed,
                       rulesNotUpdated: prePackagedRuleStatusResponse.rules_not_updated,
+                    });
+                    setTimelineStatus({
                       timelinesInstalled: prePackagedRuleStatusResponse.timelines_installed,
                       timelinesNotInstalled: prePackagedRuleStatusResponse.timelines_not_installed,
                       timelinesNotUpdated: prePackagedRuleStatusResponse.timelines_not_updated,
                     });
-                    displaySuccessToast(i18n.RULE_PREPACKAGED_SUCCESS, dispatchToaster);
+                    displaySuccessToast(
+                      i18n.RULE_AND_TIMELINE_PREPACKAGED_SUCCESS,
+                      dispatchToaster
+                    );
                     stopTimeOut();
                     resolve(true);
                   } else {
@@ -197,7 +211,11 @@ export const usePrePackagedRules = ({
         } catch (error) {
           if (isSubscribed) {
             setLoadingCreatePrePackagedRules(false);
-            errorToToaster({ title: i18n.RULE_PREPACKAGED_FAILURE, error, dispatchToaster });
+            errorToToaster({
+              title: i18n.RULE_AND_TIMELINE_PREPACKAGED_FAILURE,
+              error,
+              dispatchToaster,
+            });
             resolve(false);
           }
         }
@@ -217,5 +235,6 @@ export const usePrePackagedRules = ({
     loading,
     loadingCreatePrePackagedRules,
     ...rulesStatus,
+    ...timelinesStatus,
   };
 };
