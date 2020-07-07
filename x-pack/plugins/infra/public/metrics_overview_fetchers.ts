@@ -16,15 +16,16 @@ import {
 } from '../common/http_api/snapshot_api';
 import { SnapshotMetricType } from '../common/inventory_models/types';
 import { InfraClientCoreSetup } from './types';
-import { SourceResponse } from '../common/http_api/source_api';
 
 export const createMetricsHasData = (
   getStartServices: InfraClientCoreSetup['getStartServices']
 ) => async () => {
   const [coreServices] = await getStartServices();
   const { http } = coreServices;
-  const results = await http.get<SourceResponse>('/api/metrics/source/default/metrics');
-  return results.status.metricIndicesExist;
+  const results = await http.get<{ hasData: boolean }>(
+    '/api/metrics/source/default/metrics/hasData'
+  );
+  return results.hasData;
 };
 
 export const average = (values: number[]) => (values.length ? sum(values) / values.length : 0);
@@ -88,6 +89,7 @@ export const createMetricsFetchData = (
     metrics: ['cpu', 'memory', 'rx', 'tx'].map((type) => ({ type })) as SnapshotMetricInput[],
     groupBy: [],
     nodeType: 'host',
+    includeTimeseries: true,
     timerange: {
       from: moment(startTime).valueOf(),
       to: moment(endTime).valueOf(),
