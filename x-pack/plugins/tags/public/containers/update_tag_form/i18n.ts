@@ -10,6 +10,6 @@ export const txtTagCreated = i18n.translate('xpack.tags.creanteNewTagForm.tagCre
   defaultMessage: 'Tag created',
 });
 
-export const txtCouldNotCreate = i18n.translate('xpack.tags.creanteNewTagForm.couldNotCreate', {
-  defaultMessage: 'Could not create tag',
+export const txtCouldNotUpdate = i18n.translate('xpack.tags.creanteNewTagForm.couldNotCreate', {
+  defaultMessage: 'Could not update tag',
 });

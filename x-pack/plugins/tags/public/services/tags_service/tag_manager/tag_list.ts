@@ -7,7 +7,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 
 import { useMemo } from 'react';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, of, throwError, iif } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import useObservable from 'react-use/lib/useObservable';
 import { RawTagWithId } from '../../../../common';
@@ -59,11 +59,18 @@ export class TagList {
     map((state) => state === 'start' || state === 'loading')
   );
 
-  public tagData$(tagId: string): Observable<RawTagWithId | null> {
+  public tag$(tagId: string): Observable<Tag> {
     return this.data$.pipe(
-      map((tags) => tags[tagId]),
-      switchMap((tag) => (tag ? tag.data$ : of(null)))
+      map((tags) => {
+        const tag = tags[tagId];
+        if (!tag) throw new Error('Tag not found.');
+        return tag;
+      })
     );
+  }
+
+  public tagData$(tagId: string): Observable<RawTagWithId> {
+    return this.tag$(tagId).pipe(switchMap((tag) => tag.data$));
   }
 
   public add(rawTags: RawTagWithId[]): TagMap {

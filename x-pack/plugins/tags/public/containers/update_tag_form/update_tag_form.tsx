@@ -9,7 +9,7 @@ import { takeUntil } from 'rxjs/operators';
 import { RawTagWithId } from '../../../common';
 import { useToasts } from '../../../../../../src/plugins/kibana_react/public';
 import { CreateNewTagForm as CreateNewTagFormUi } from '../../components/create_new_tag_form';
-import { txtTagCreated, txtCouldNotCreate } from './i18n';
+import { txtTagCreated, txtCouldNotUpdate } from './i18n';
 import { useUnmount$ } from '../../hooks/use_unmount';
 import { useTags } from '../../context';
 
@@ -29,6 +29,20 @@ export const UpdateTagForm: React.FC<UpdateTagFormProps> = ({ tag, onDone }) => 
 
   const handleSubmit = async () => {
     setDisabled(true);
+    manager
+      .update$({ id: tag.id, title, color, description })
+      .pipe(takeUntil(unmount$))
+      .subscribe(
+        () => {},
+        (error) => {
+          toasts.addError(error, { title: txtCouldNotUpdate });
+          setDisabled(false);
+        }
+      );
+
+    toasts.addSuccess({
+      title: txtTagCreated,
+    });
 
     if (onDone) onDone();
   };

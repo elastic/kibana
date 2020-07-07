@@ -126,7 +126,10 @@ export class TagsClient implements ITagsClient {
 
     if (title !== undefined) {
       needsUpdate = true;
+      const { key, value } = parseTag(title);
       attributePatch.title = title;
+      attributePatch.key = key;
+      attributePatch.value = value;
     }
 
     if (description !== undefined) {

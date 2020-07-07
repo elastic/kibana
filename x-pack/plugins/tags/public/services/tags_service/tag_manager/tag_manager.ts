@@ -4,12 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { map, share, tap, switchMap } from 'rxjs/operators';
+import { map, share, tap, switchMap, take } from 'rxjs/operators';
 import { Observable, from, of } from 'rxjs';
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { v4 as uuidv4 } from 'uuid';
-import { RawTagWithId, TagsClientCreateParams, parseTag } from '../../../../common';
+import {
+  RawTagWithId,
+  TagsClientCreateParams,
+  parseTag,
+  TagsClientUpdateParams,
+} from '../../../../common';
 import { TagsManagerParams } from './types';
 import { TagList } from './tag_list';
 import { Tag } from './tag';
@@ -72,6 +77,25 @@ export class TagManager {
     });
 
     return observable;
+  }
+
+  public update$(patch: TagsClientUpdateParams['patch']): Observable<RawTagWithId> {
+    let oldData: Partial<RawTagWithId> = {};
+    const observable = this.tags.tag$(patch.id).pipe(
+      take(1),
+      tap((tag) => {
+        oldData = tag.data;
+        tag.patch(patch);
+      }),
+      switchMap((tag) => from(this.params.tags.update({ patch })).pipe(share())),
+      tap((response) => {
+        this.tags.tag(patch.id)!.patch(response.patch);
+      })
+    );
+
+    observable.subscribe(() => {});
+
+    return this.tags.tagData$(patch.id);
   }
 
   private getAttachedTags$(kid: string) {

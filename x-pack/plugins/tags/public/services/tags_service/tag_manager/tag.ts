@@ -5,7 +5,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { RawTagWithId } from '../../../../common';
+import { RawTagWithId, parseTag } from '../../../../common';
 
 export class Tag {
   public readonly data$: BehaviorSubject<RawTagWithId>;
@@ -20,5 +20,12 @@ export class Tag {
 
   constructor(data: RawTagWithId) {
     this.data$ = new BehaviorSubject<RawTagWithId>(data);
+  }
+
+  public patch(patch: Partial<RawTagWithId>) {
+    const { data } = this;
+    const title = patch.title === undefined ? data.title : patch.title;
+    const { key, value } = parseTag(title);
+    this.data$.next({ ...data, ...patch, key, value });
   }
 }
