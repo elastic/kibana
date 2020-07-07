@@ -11,7 +11,7 @@ export const body = t.string;
 export const created = t.number; // TODO: Make this into an ISO Date string check
 
 export const encoding = t.keyof({
-  'application/json': null,
+  identity: null,
 });
 
 export const schemaVersion = t.keyof({

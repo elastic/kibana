@@ -77,7 +77,6 @@ describe('test alerts route', () => {
   let mockScopedClient: jest.Mocked<ILegacyScopedClusterClient>;
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
-  // @ts-ignore
   let routeConfig: RouteConfig<unknown, unknown, unknown, never>;
   let routeHandler: RequestHandler<unknown, unknown, unknown>;
   let endpointAppContextService: EndpointAppContextService;
@@ -98,8 +97,9 @@ describe('test alerts route', () => {
     // The authentication with the Fleet Plugin needs a separate scoped SO Client
     ingestSavedObjectClient = savedObjectsClientMock.create();
     ingestSavedObjectClient.find.mockReturnValue(Promise.resolve(mockIngestSOResponse));
-    // @ts-ignore
-    startContract.savedObjectsStart.getScopedClient.mockReturnValue(ingestSavedObjectClient);
+    (startContract.savedObjectsStart.getScopedClient as jest.Mock).mockReturnValue(
+      ingestSavedObjectClient
+    );
     endpointAppContextService.start(startContract);
 
     registerDownloadExceptionListRoute(
@@ -147,6 +147,8 @@ describe('test alerts route', () => {
       path.startsWith('/api/endpoint/artifacts/download')
     )!;
 
+    expect(routeConfig.options).toEqual({});
+
     await routeHandler(
       ({
         core: {
@@ -160,8 +162,8 @@ describe('test alerts route', () => {
     );
 
     const expectedHeaders = {
-      'content-encoding': 'application/json',
-      'content-disposition': `attachment; filename=${mockArtifactName}.json`,
+      'content-encoding': 'identity',
+      'content-disposition': `attachment; filename=${mockArtifactName}.zz`,
     };
 
     expect(mockResponse.ok).toBeCalled();
@@ -217,7 +219,7 @@ describe('test alerts route', () => {
     // Add to the download cache
     const mockArtifact = expectedEndpointExceptions;
     const cacheKey = `${mockArtifactName}-${mockSha}`;
-    cache.set(cacheKey, JSON.stringify(mockArtifact));
+    cache.set(cacheKey, Buffer.from(JSON.stringify(mockArtifact))); // TODO: add compression here
 
     [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/artifacts/download')

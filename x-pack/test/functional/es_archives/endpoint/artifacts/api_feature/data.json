@@ -1,21 +1,21 @@
 {
   "type": "doc",
   "value": {
-    "id": "endpoint:user-artifact:endpoint-exceptionlist-linux-1.0.0-a4e4586e895fcb46dd25a25358b446f9a425279452afa3ef9a98bca39c39122d",
+    "id": "endpoint:user-artifact:endpoint-exceptionlist-linux-1.0.0-1be2ae8d19368939c6e9ecfb32d46233e975feec9611469f62dd2578bd9c4507",
     "index": ".kibana",
     "source": {
       "references": [
       ],
       "endpoint:user-artifact": {
-        "body": "eyJleGNlcHRpb25zX2xpc3QiOltdfQ==",
+        "body": "pZDBCsIwEER/RfYc8gG9exVPXqSUkG7LwpKU7KZUSv7dGLDiVa+PmTcwO+DmcVGKQQYmUejuO0yEPEIHziuF+ZqiRxE7EaMVmgMmMBAXTE5jqjEKnvOIY6X6WLAS3Gp18E4aXB3nFz2zEyVvThd7s1DMDhg0EcrX6F8LK3ETv2WasmiL/GCrZYTSm8N2POA0J/zUA7aR0pcn",
         "created": 1593016187465,
-        "compressionAlgorithm": "none",
+        "compressionAlgorithm": "zlib",
         "encryptionAlgorithm": "none",
         "identifier": "endpoint-exceptionlist-linux-1.0.0",
-        "compressedSha256": "a4e4586e895fcb46dd25a25358b446f9a425279452afa3ef9a98bca39c39122d",
-        "compressedSize": 22,
-        "decompressedSha256": "a4e4586e895fcb46dd25a25358b446f9a425279452afa3ef9a98bca39c39122d",
-        "decompressedSize": 22
+        "compressedSha256": "1be2ae8d19368939c6e9ecfb32d46233e975feec9611469f62dd2578bd9c4507",
+        "compressedSize": 153,
+        "decompressedSha256": "d162f0302cbf419038ade7ea978e0a7ade7aad317fedefe455ff38dfa28b7cff",
+        "decompressedSize": 336
       },
       "type": "endpoint:user-artifact",
       "updated_at": "2020-06-24T16:29:47.584Z"
@@ -34,7 +34,7 @@
       "endpoint:user-artifact-manifest": {
         "created": 1593183699663,
         "ids": [
-          "endpoint-exceptionlist-linux-1.0.0-a4e4586e895fcb46dd25a25358b446f9a425279452afa3ef9a98bca39c39122d",
+          "endpoint-exceptionlist-linux-1.0.0-1be2ae8d19368939c6e9ecfb32d46233e975feec9611469f62dd2578bd9c4507",
           "endpoint-exceptionlist-macos-1.0.0-a4e4586e895fcb46dd25a25358b446f9a425279452afa3ef9a98bca39c39122d",
           "endpoint-exceptionlist-windows-1.0.0-a4e4586e895fcb46dd25a25358b446f9a425279452afa3ef9a98bca39c39122d"
         ]

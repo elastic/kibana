@@ -5,7 +5,9 @@
  */
 
 import expect from '@kbn/expect';
+import { inflateRawSync } from 'zlib';
 
+import { WrappedTranslatedExceptionList } from '../../../../../plugins/security_solution/server/endpoint/schemas';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getSupertestWithoutAuth, setupIngest } from '../../fleet/agents/services';
 
@@ -71,12 +73,57 @@ export default function (providerContext: FtrProviderContext) {
     it('should download an artifact with correct hash', async () => {
       await supertestWithoutAuth
         .get(
-          '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-1.0.0/a4e4586e895fcb46dd25a25358b446f9a425279452afa3ef9a98bca39c39122d'
+          '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-1.0.0/1be2ae8d19368939c6e9ecfb32d46233e975feec9611469f62dd2578bd9c4507'
         )
         .set('kbn-xsrf', 'xxx')
         .set('authorization', `ApiKey ${agentAccessAPIKey}`)
         .send()
         .expect(200);
+    });
+
+    it('should download valid compressed JSON', async () => {
+      const { body } = await supertestWithoutAuth
+        .get(
+          '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-1.0.0/1be2ae8d19368939c6e9ecfb32d46233e975feec9611469f62dd2578bd9c4507'
+        )
+        .set('kbn-xsrf', 'xxx')
+        .set('authorization', `ApiKey ${agentAccessAPIKey}`)
+        .send()
+        .expect(200);
+
+      const decompressedJson = inflateRawSync(body);
+      const decompressedBody: WrappedTranslatedExceptionList = JSON.parse(
+        decompressedJson.toString()
+      );
+
+      expect(decompressedBody).to.equal({
+        exceptions_list: [
+          {
+            field: 'actingProcess.file.signer',
+            operator: 'included',
+            type: 'exact_cased',
+            value: 'Elastic, N.V.',
+          },
+          {
+            entries: [
+              {
+                field: 'signer',
+                operator: 'included',
+                type: 'exact_cased',
+                value: 'Evil',
+              },
+              {
+                field: 'trusted',
+                operator: 'included',
+                type: 'exact_cased',
+                value: 'true',
+              },
+            ],
+            field: 'file.signature',
+            type: 'nested',
+          },
+        ],
+      } as WrappedTranslatedExceptionList);
     });
 
     it('should fail on invalid api key', async () => {
