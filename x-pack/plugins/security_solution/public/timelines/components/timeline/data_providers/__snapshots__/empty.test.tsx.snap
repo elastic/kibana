@@ -6,42 +6,38 @@ exports[`Empty rendering renders correctly against snapshot 1`] = `
   data-test-subj="empty"
   showSmallMsg={false}
 >
-  <div>
-    <NoWrap>
-      <Text
-        color="subdued"
-        size="s"
+  <NoWrap>
+    <Text
+      color="subdued"
+      size="s"
+    >
+      Drop anything
+    </Text>
+    <HighlightedBackground>
+      <BadgeHighlighted
+        className="highlighted-drop-target"
       >
-        Drop anything
-      </Text>
-      <HighlightedBackground>
-        <BadgeHighlighted
-          className="highlighted-drop-target"
-        >
-          highlighted
-        </BadgeHighlighted>
-      </HighlightedBackground>
-      <Text
-        color="subdued"
-        size="s"
-      >
-        here to build an
-      </Text>
-      <AndOrBadge
-        type="or"
-      />
-      <Text
-        color="subdued"
-        size="s"
-      >
-        query
-      </Text>
-    </NoWrap>
-  </div>
-  <div>
-    <AddDataProviderPopover
-      timelineId="test"
+        highlighted
+      </BadgeHighlighted>
+    </HighlightedBackground>
+    <Text
+      color="subdued"
+      size="s"
+    >
+      here to build an
+    </Text>
+    <AndOrBadge
+      type="or"
     />
-  </div>
+    <Text
+      color="subdued"
+      size="s"
+    >
+      query
+    </Text>
+  </NoWrap>
+  <AddDataProviderPopover
+    timelineId="test"
+  />
 </EmptyContainer>
 `;

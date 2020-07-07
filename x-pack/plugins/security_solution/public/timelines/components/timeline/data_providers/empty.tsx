@@ -87,29 +87,25 @@ export const Empty = React.memo<Props>(({ showSmallMsg = false, timelineId }) =>
   >
     {!showSmallMsg && (
       <>
-        <div>
-          <NoWrap>
-            <Text color="subdued" size="s">
-              {i18n.DROP_ANYTHING}
-            </Text>
-            <HighlightedBackground>
-              <BadgeHighlighted className={HIGHLIGHTED_DROP_TARGET_CLASS_NAME}>
-                {i18n.HIGHLIGHTED}
-              </BadgeHighlighted>
-            </HighlightedBackground>
-            <Text color="subdued" size="s">
-              {i18n.HERE_TO_BUILD_AN}
-            </Text>
-            <AndOrBadge type="or" />
-            <Text color="subdued" size="s">
-              {i18n.QUERY}
-            </Text>
-          </NoWrap>
-        </div>
+        <NoWrap>
+          <Text color="subdued" size="s">
+            {i18n.DROP_ANYTHING}
+          </Text>
+          <HighlightedBackground>
+            <BadgeHighlighted className={HIGHLIGHTED_DROP_TARGET_CLASS_NAME}>
+              {i18n.HIGHLIGHTED}
+            </BadgeHighlighted>
+          </HighlightedBackground>
+          <Text color="subdued" size="s">
+            {i18n.HERE_TO_BUILD_AN}
+          </Text>
+          <AndOrBadge type="or" />
+          <Text color="subdued" size="s">
+            {i18n.QUERY}
+          </Text>
+        </NoWrap>
 
-        <div>
-          <AddDataProviderPopover timelineId={timelineId} />
-        </div>
+        <AddDataProviderPopover timelineId={timelineId} />
       </>
     )}
     {showSmallMsg && <AndOrBadge type="or" />}

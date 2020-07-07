@@ -10,7 +10,6 @@ import { rgba } from 'polished';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import { TimelineType } from '../../../../../common/types/timeline';
 import { useWithSource } from '../../../../common/containers/source';
 import { IS_DRAGGING_CLASS_NAME } from '../../../../common/components/drag_and_drop/helpers';
 import { DataProvider } from '../../timeline/data_providers/data_provider';
@@ -80,11 +79,10 @@ interface FlyoutButtonProps {
   onOpen: () => void;
   show: boolean;
   timelineId: string;
-  timelineType: TimelineType;
 }
 
 export const FlyoutButton = React.memo<FlyoutButtonProps>(
-  ({ onOpen, show, dataProviders, timelineId, timelineType }) => {
+  ({ onOpen, show, dataProviders, timelineId }) => {
     const badgeCount = useMemo(() => getBadgeCount(dataProviders), [dataProviders]);
     const { browserFields } = useWithSource();
 
@@ -127,7 +125,6 @@ export const FlyoutButton = React.memo<FlyoutButtonProps>(
           <DataProviders
             browserFields={browserFields}
             timelineId={timelineId}
-            timelineType={timelineType}
             dataProviders={dataProviders}
             onDataProviderEdited={noop}
             onDataProviderRemoved={noop}

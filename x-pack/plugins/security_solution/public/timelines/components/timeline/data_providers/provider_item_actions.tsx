@@ -147,7 +147,7 @@ export const getProviderActions = ({
                 : i18n.CONVERT_TO_TEMPLATE_FIELD,
             onClick: toggleType,
           }
-        : null,
+        : { name: null },
       {
         className: DELETE_CLASS_NAME,
         disabled: isLoading,
@@ -155,7 +155,7 @@ export const getProviderActions = ({
         name: i18n.DELETE_DATA_PROVIDER,
         onClick: deleteItem,
       },
-    ].filter((item) => item != null) as EuiContextMenuPanelItemDescriptor[],
+    ].filter((item) => item.name != null),
   },
   {
     content:

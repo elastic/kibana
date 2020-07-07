@@ -178,7 +178,6 @@ export const getAllTimeline = async (
     searchFields: onlyUserFavorite
       ? ['title', 'description', 'favorite.keySearch']
       : ['title', 'description'],
-
     filter: getTimelineTypeFilter(timelineType, templateTimelineType, status),
     sortField: sort != null ? sort.sortField : undefined,
     sortOrder: sort != null ? sort.sortOrder : undefined,

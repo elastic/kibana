@@ -7,7 +7,6 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { TimelineType } from '../../../../../common/types/timeline';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 
@@ -42,7 +41,6 @@ describe('DataProviders', () => {
               data-test-subj="dataProviders-container"
               dataProviders={mockDataProviders}
               timelineId="foo"
-              timelineType={TimelineType.default}
               onDataProviderEdited={jest.fn()}
               onDataProviderRemoved={jest.fn()}
               onToggleDataProviderEnabled={jest.fn()}
@@ -63,7 +61,6 @@ describe('DataProviders', () => {
           <DataProviders
             browserFields={{}}
             timelineId="foo"
-            timelineType={TimelineType.default}
             dataProviders={dataProviders}
             onDataProviderEdited={jest.fn()}
             onDataProviderRemoved={jest.fn()}
@@ -83,7 +80,6 @@ describe('DataProviders', () => {
           <DataProviders
             browserFields={{}}
             timelineId="foo"
-            timelineType={TimelineType.default}
             dataProviders={mockDataProviders}
             onDataProviderEdited={jest.fn()}
             onDataProviderRemoved={jest.fn()}

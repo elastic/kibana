@@ -19,7 +19,8 @@ import { DataProviderType, EXISTS_OPERATOR, QueryOperator } from './data_provide
 import * as i18n from './translations';
 
 type ProviderBadgeStyledType = typeof EuiBadge & {
-  timelineType: TimelineType;
+  // https://styled-components.com/docs/api#transient-props
+  $timelineType: TimelineType;
 };
 
 const ProviderBadgeStyled = styled(EuiBadge)<ProviderBadgeStyledType>`
@@ -33,7 +34,8 @@ const ProviderBadgeStyled = styled(EuiBadge)<ProviderBadgeStyledType>`
 
   &.globalFilterItem {
     white-space: nowrap;
-    min-width: ${({ timelineType }) => (timelineType === TimelineType.template ? '140px' : 'none')};
+    min-width: ${({ $timelineType }) =>
+      $timelineType === TimelineType.template ? '140px' : 'none'};
     display: flex;
 
     &.globalFilterItem-isDisabled {
@@ -194,7 +196,7 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
             onClickAriaLabel={`${i18n.SHOW_OPTIONS_DATA_PROVIDER} ${formattedValue}`}
             closeButtonProps={closeButtonProps}
             data-test-subj="providerBadge"
-            timelineType={timelineType}
+            $timelineType={timelineType}
           >
             {content}
           </ProviderBadgeStyled>

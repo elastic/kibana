@@ -9,7 +9,6 @@ import { set } from 'lodash/fp';
 import React from 'react';
 import { ActionCreator } from 'typescript-fsa';
 
-import { TimelineType } from '../../../../common/types/timeline';
 import {
   apolloClientObservable,
   mockGlobalState,
@@ -172,7 +171,6 @@ describe('Flyout', () => {
             show={false}
             showTimeline={showTimeline}
             timelineId="test"
-            timelineType={TimelineType.default}
             width={100}
             usersViewing={usersViewing}
           />
@@ -194,7 +192,6 @@ describe('Flyout', () => {
             dataProviders={mockDataProviders}
             show={true}
             timelineId="test"
-            timelineType={TimelineType.default}
             onOpen={openMock}
           />
         </TestProviders>
@@ -212,7 +209,6 @@ describe('Flyout', () => {
             dataProviders={mockDataProviders}
             show={false}
             timelineId="test"
-            timelineType={TimelineType.default}
             onOpen={openMock}
           />
         </TestProviders>
@@ -230,7 +226,6 @@ describe('Flyout', () => {
             dataProviders={mockDataProviders}
             show={true}
             timelineId="test"
-            timelineType={TimelineType.default}
             onOpen={openMock}
           />
         </TestProviders>
@@ -248,7 +243,6 @@ describe('Flyout', () => {
             dataProviders={mockDataProviders}
             show={true}
             timelineId="test"
-            timelineType={TimelineType.default}
             onOpen={openMock}
           />
         </TestProviders>

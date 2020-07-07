@@ -6,10 +6,11 @@
 
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { TimelineType } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
+import { timelineSelectors } from '../../../store/timeline';
 
 import { OnDataProviderEdited } from '../events';
 import { ProviderBadge } from './provider_badge';
@@ -32,7 +33,6 @@ interface ProviderItemBadgeProps {
   providerId: string;
   register?: DataProvidersAnd;
   timelineId?: string;
-  timelineType?: TimelineType;
   toggleEnabledProvider: () => void;
   toggleExcludedProvider: () => void;
   toggleTypeProvider: () => void;
@@ -55,13 +55,14 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     providerId,
     register,
     timelineId,
-    timelineType = TimelineType.default,
     toggleEnabledProvider,
     toggleExcludedProvider,
     toggleTypeProvider,
     val,
     type = DataProviderType.default,
   }) => {
+    const timelineById = useSelector(timelineSelectors.timelineByIdSelector);
+    const timelineType = timelineId ? timelineById[timelineId]?.timelineType : TimelineType.default;
     const { getManageTimelineById } = useManageTimeline();
     const isLoading = useMemo(() => getManageTimelineById(timelineId ?? '').isLoading, [
       getManageTimelineById,
@@ -131,7 +132,7 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
         val={val}
         operator={operator}
         type={type}
-        timelineType={timelineType!}
+        timelineType={timelineType}
       />
     );
 

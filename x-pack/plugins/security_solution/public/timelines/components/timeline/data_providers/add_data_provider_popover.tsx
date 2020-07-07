@@ -8,7 +8,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiContextMenu,
-  EuiFlexItem,
   EuiText,
   EuiPopover,
   EuiIcon,
@@ -170,20 +169,18 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
   }, [browserFields, handleDataProviderEdited, panels, timelineId, timelineType]);
 
   return (
-    <EuiFlexItem grow={false}>
-      <EuiPopover
-        id="addFieldsPopover"
-        button={button}
-        isOpen={isAddFilterPopoverOpen}
-        closePopover={handleClosePopover}
-        anchorPosition="downLeft"
-        withTitle
-        panelPaddingSize="none"
-        ownFocus={true}
-      >
-        {content}
-      </EuiPopover>
-    </EuiFlexItem>
+    <EuiPopover
+      id="addFieldsPopover"
+      button={button}
+      isOpen={isAddFilterPopoverOpen}
+      closePopover={handleClosePopover}
+      anchorPosition="downLeft"
+      withTitle
+      panelPaddingSize="none"
+      ownFocus={true}
+    >
+      {content}
+    </EuiPopover>
   );
 };
 

@@ -7,7 +7,6 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { TimelineType } from '../../../../../common/types/timeline';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { twoGroups } from '../../timeline/data_providers/mock/mock_and_providers';
 
@@ -29,13 +28,7 @@ describe('FlyoutButton', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <FlyoutButton
-          dataProviders={[]}
-          onOpen={onOpen}
-          show={true}
-          timelineId="test"
-          timelineType={TimelineType.default}
-        />
+        <FlyoutButton dataProviders={[]} onOpen={onOpen} show={true} timelineId="test" />
       </TestProviders>
     );
 
@@ -47,13 +40,7 @@ describe('FlyoutButton', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <FlyoutButton
-          dataProviders={[]}
-          onOpen={onOpen}
-          show={true}
-          timelineId="test"
-          timelineType={TimelineType.default}
-        />
+        <FlyoutButton dataProviders={[]} onOpen={onOpen} show={true} timelineId="test" />
       </TestProviders>
     );
 
@@ -67,13 +54,7 @@ describe('FlyoutButton', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <FlyoutButton
-          dataProviders={[]}
-          onOpen={onOpen}
-          show={true}
-          timelineId="test"
-          timelineType={TimelineType.default}
-        />
+        <FlyoutButton dataProviders={[]} onOpen={onOpen} show={true} timelineId="test" />
       </TestProviders>
     );
 
@@ -85,13 +66,7 @@ describe('FlyoutButton', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <FlyoutButton
-          dataProviders={[]}
-          onOpen={onOpen}
-          show={false}
-          timelineId="test"
-          timelineType={TimelineType.default}
-        />
+        <FlyoutButton dataProviders={[]} onOpen={onOpen} show={false} timelineId="test" />
       </TestProviders>
     );
 
@@ -103,13 +78,7 @@ describe('FlyoutButton', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <FlyoutButton
-          dataProviders={[]}
-          onOpen={onOpen}
-          show={true}
-          timelineId="test"
-          timelineType={TimelineType.default}
-        />
+        <FlyoutButton dataProviders={[]} onOpen={onOpen} show={true} timelineId="test" />
       </TestProviders>
     );
 

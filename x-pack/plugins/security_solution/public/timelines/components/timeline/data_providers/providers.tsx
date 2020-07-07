@@ -7,13 +7,12 @@
 import { isEmpty } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem, EuiFormHelpText, EuiSpacer } from '@elastic/eui';
 import { rgba } from 'polished';
-import React, { useMemo } from 'react';
+import React, { Fragment, useMemo } from 'react';
 import { Draggable, DraggingStyle, Droppable, NotDraggingStyle } from 'react-beautiful-dnd';
 import styled, { css } from 'styled-components';
 
 import { AndOrBadge } from '../../../../common/components/and_or_badge';
 import { AddDataProviderPopover } from './add_data_provider_popover';
-import { TimelineType } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
 import {
   getTimelineProviderDroppableId,
@@ -37,7 +36,6 @@ export const EMPTY_PROVIDERS_GROUP_CLASS_NAME = 'empty-providers-group';
 interface Props {
   browserFields: BrowserFields;
   timelineId: string;
-  timelineType: TimelineType;
   dataProviders: DataProvider[];
   onDataProviderEdited: OnDataProviderEdited;
   onDataProviderRemoved: OnDataProviderRemoved;
@@ -139,7 +137,6 @@ export const Providers = React.memo<Props>(
   ({
     browserFields,
     timelineId,
-    timelineType,
     dataProviders,
     onDataProviderEdited,
     onDataProviderRemoved,
@@ -152,13 +149,14 @@ export const Providers = React.memo<Props>(
       () => [...flattenIntoAndGroups(dataProviders), ...EMPTY_GROUP],
       [dataProviders]
     );
+
     return (
-      <>
+      <div>
         {dataProviderGroups.map((group, groupIndex) => (
-          <>
+          <Fragment key={`droppable-${groupIndex}`}>
             {groupIndex !== 0 && <EuiSpacer size="xs" />}
 
-            <EuiFlexGroup alignItems="center" gutterSize="none" key={`droppable-${groupIndex}`}>
+            <EuiFlexGroup alignItems="center" gutterSize="none">
               <OrFlexItem grow={false}>
                 {groupIndex === 0 ? (
                   <AddDataProviderContainer>
@@ -240,7 +238,6 @@ export const Providers = React.memo<Props>(
                                     register={dataProvider}
                                     providerId={index > 0 ? group[0].id : dataProvider.id}
                                     timelineId={timelineId}
-                                    timelineType={timelineType}
                                     toggleEnabledProvider={() =>
                                       index > 0
                                         ? onToggleDataProviderEnabled({
@@ -311,9 +308,9 @@ export const Providers = React.memo<Props>(
                 <Parens>{')'}</Parens>
               </ParensContainer>
             </EuiFlexGroup>
-          </>
+          </Fragment>
         ))}
-      </>
+      </div>
     );
   }
 );

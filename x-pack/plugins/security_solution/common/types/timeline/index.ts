@@ -60,8 +60,6 @@ export const DataProviderTypeLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(DataProviderType.template),
 ]);
 
-const DataProviderTypeLiteralWithNullRt = unionWithNullType(DataProviderTypeLiteralRt);
-
 const SavedDataProviderRuntimeType = runtimeTypes.partial({
   id: unionWithNullType(runtimeTypes.string),
   name: unionWithNullType(runtimeTypes.string),
@@ -70,7 +68,7 @@ const SavedDataProviderRuntimeType = runtimeTypes.partial({
   kqlQuery: unionWithNullType(runtimeTypes.string),
   queryMatch: unionWithNullType(SavedDataProviderQueryMatchBasicRuntimeType),
   and: unionWithNullType(runtimeTypes.array(SavedDataProviderQueryMatchRuntimeType)),
-  type: unionWithNullType(DataProviderTypeLiteralWithNullRt),
+  type: unionWithNullType(DataProviderTypeLiteralRt),
 });
 
 /*

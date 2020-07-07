@@ -87,8 +87,8 @@ interface PropertiesRightComponentProps {
   showUsersView: boolean;
   status: TimelineStatusLiteral;
   timelineId: string;
-  timelineType: TimelineTypeLiteral;
   title: string;
+  timelineType: TimelineTypeLiteral;
   updateDescription: UpdateDescription;
   updateNote: UpdateNote;
   usersViewing: string[];

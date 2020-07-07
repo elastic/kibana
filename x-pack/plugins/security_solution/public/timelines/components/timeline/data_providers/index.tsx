@@ -8,7 +8,6 @@ import { rgba } from 'polished';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import { TimelineType } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
 import {
@@ -31,7 +30,6 @@ import { useManageTimeline } from '../../manage_timeline';
 interface Props {
   browserFields: BrowserFields;
   timelineId: string;
-  timelineType: TimelineType;
   dataProviders: DataProvider[];
   onDataProviderEdited: OnDataProviderEdited;
   onDataProviderRemoved: OnDataProviderRemoved;
@@ -98,7 +96,6 @@ export const DataProviders = React.memo<Props>(
     browserFields,
     dataProviders,
     timelineId,
-    timelineType,
     onDataProviderEdited,
     onDataProviderRemoved,
     onToggleDataProviderEnabled,
@@ -120,7 +117,6 @@ export const DataProviders = React.memo<Props>(
             <Providers
               browserFields={browserFields}
               timelineId={timelineId}
-              timelineType={timelineType}
               dataProviders={dataProviders}
               onDataProviderEdited={onDataProviderEdited}
               onDataProviderRemoved={onDataProviderRemoved}

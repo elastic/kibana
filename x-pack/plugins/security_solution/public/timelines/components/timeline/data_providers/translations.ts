@@ -38,10 +38,6 @@ export const DROP_ANYTHING = i18n.translate('xpack.securitySolution.dataProvider
   defaultMessage: 'Drop anything',
 });
 
-export const ADD_FILTER = i18n.translate('xpack.securitySolution.dataProviders.addFilter', {
-  defaultMessage: 'Add filter',
-});
-
 export const EDIT = i18n.translate('xpack.securitySolution.dataProviders.edit', {
   defaultMessage: 'Edit',
 });

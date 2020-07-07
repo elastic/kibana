@@ -24,7 +24,6 @@ import { BrowserFields } from '../../../../common/containers/source';
 
 import * as i18n from './translations';
 import {
-  TimelineType,
   TimelineStatus,
   TimelineStatusLiteralWithNull,
 } from '../../../../../common/types/timeline';
@@ -44,7 +43,6 @@ interface Props {
   showCallOutUnauthorizedMsg: boolean;
   status: TimelineStatusLiteralWithNull;
   timelineId: string;
-  timelineType: TimelineType;
 }
 
 const TimelineHeaderComponent: React.FC<Props> = ({
@@ -62,7 +60,6 @@ const TimelineHeaderComponent: React.FC<Props> = ({
   showCallOutUnauthorizedMsg,
   status,
   timelineId,
-  timelineType,
 }) => (
   <>
     {showCallOutUnauthorizedMsg && (
@@ -88,7 +85,6 @@ const TimelineHeaderComponent: React.FC<Props> = ({
         <DataProviders
           browserFields={browserFields}
           timelineId={timelineId}
-          timelineType={timelineType}
           dataProviders={dataProviders}
           onDataProviderEdited={onDataProviderEdited}
           onDataProviderRemoved={onDataProviderRemoved}
@@ -124,6 +120,5 @@ export const TimelineHeader = React.memo(
     prevProps.show === nextProps.show &&
     prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
     prevProps.status === nextProps.status &&
-    prevProps.timelineId === nextProps.timelineId &&
-    prevProps.timelineType === nextProps.timelineType
+    prevProps.timelineId === nextProps.timelineId
 );

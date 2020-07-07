@@ -9,7 +9,6 @@ import React, { useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import styled from 'styled-components';
 
-import { TimelineType } from '../../../../common/types/timeline';
 import { State } from '../../../common/store';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 import { FlyoutButton } from './button';
@@ -45,16 +44,7 @@ interface OwnProps {
 type Props = OwnProps & ProsFromRedux;
 
 export const FlyoutComponent = React.memo<Props>(
-  ({
-    dataProviders,
-    flyoutHeight,
-    show = true,
-    showTimeline,
-    timelineId,
-    timelineType,
-    usersViewing,
-    width,
-  }) => {
+  ({ dataProviders, flyoutHeight, show = true, showTimeline, timelineId, usersViewing, width }) => {
     const handleClose = useCallback(() => showTimeline({ id: timelineId, show: false }), [
       showTimeline,
       timelineId,
@@ -80,7 +70,6 @@ export const FlyoutComponent = React.memo<Props>(
           dataProviders={dataProviders}
           show={!show}
           timelineId={timelineId}
-          timelineType={timelineType}
           onOpen={handleOpen}
         />
       </>
@@ -103,11 +92,10 @@ const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
   const dataProviders = timelineById[timelineId]?.dataProviders.length
     ? timelineById[timelineId]?.dataProviders
     : DEFAULT_DATA_PROVIDERS;
-  const timelineType = timelineById[timelineId]?.timelineType ?? TimelineType.default;
   const show = timelineById[timelineId]?.show ?? false;
   const width = timelineById[timelineId]?.width ?? DEFAULT_TIMELINE_WIDTH;
 
-  return { dataProviders, show, timelineType, width };
+  return { dataProviders, show, width };
 };
 
 const mapDispatchToProps = {

@@ -49,7 +49,7 @@ const TimelineContainer = styled.div`
   display: flex;
   flex-direction: column;
   position: relative;
-  padding-top: 4px; // to fix saving progress bar
+  padding-top: 4px; // to fit saving progress bar
 `;
 
 const TimelineHeaderContainer = styled.div`
@@ -245,7 +245,6 @@ export const TimelineComponent: React.FC<Props> = ({
             show={show}
             showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
             timelineId={id}
-            timelineType={timelineType}
             status={status}
           />
         </TimelineHeaderContainer>
