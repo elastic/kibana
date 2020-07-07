@@ -422,17 +422,32 @@ export const useRefreshAnalyticsList = (
 
 const DEFAULT_SIG_FIGS = 3;
 
+interface RegressionEvaluteExtractedResponse {
+  mse: number | string;
+  msle: number | string;
+  huber: number | string;
+  r_squared: number | string;
+}
+
+export const EMPTY_STAT = '--';
+
 export function getValuesFromResponse(response: RegressionEvaluateResponse) {
-  const results = {};
+  const results: RegressionEvaluteExtractedResponse = {
+    mse: EMPTY_STAT,
+    msle: EMPTY_STAT,
+    huber: EMPTY_STAT,
+    r_squared: EMPTY_STAT,
+  };
 
   if (response?.regression) {
     for (const statType in response.regression) {
       if (response.regression.hasOwnProperty(statType)) {
-        let currentStatValue = response.regression[statType]?.value;
+        let currentStatValue =
+          response.regression[statType as keyof RegressionEvaluateResponse['regression']]?.value;
         if (currentStatValue) {
           currentStatValue = Number(currentStatValue.toPrecision(DEFAULT_SIG_FIGS));
         }
-        results[statType] = currentStatValue;
+        results[statType as keyof RegressionEvaluteExtractedResponse] = currentStatValue;
       }
     }
   }

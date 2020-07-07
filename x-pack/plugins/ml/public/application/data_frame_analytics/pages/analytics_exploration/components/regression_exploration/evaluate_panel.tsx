@@ -35,16 +35,26 @@ import {
   isRegressionEvaluateResponse,
   ANALYSIS_CONFIG_TYPE,
   REGRESSION_STATS,
+  EMPTY_STAT,
 } from '../../../../common/analytics';
 
-const EMPTY_STAT = '--';
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
   jobStatus?: DATA_FRAME_TASK_STATE;
   searchQuery: SavedSearchQuery;
 }
 
-const defaultEval: Eval = { mse: '', msle: '', huber: '', rSquared: '', error: null };
+const EMPTY_STATS = {
+  mse: EMPTY_STAT,
+  msle: EMPTY_STAT,
+  huber: EMPTY_STAT,
+  rSquared: EMPTY_STAT,
+};
+
+const defaultEval: Eval = {
+  ...EMPTY_STATS,
+  error: null,
+};
 
 export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) => {
   const {
@@ -96,10 +106,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     } else {
       setIsLoadingGeneralization(false);
       setGeneralizationEval({
-        mse: EMPTY_STAT,
-        msle: EMPTY_STAT,
-        huber: EMPTY_STAT,
-        rSquared: EMPTY_STAT,
+        ...EMPTY_STATS,
         error: genErrorEval.error,
       });
     }
@@ -136,10 +143,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     } else {
       setIsLoadingTraining(false);
       setTrainingEval({
-        mse: EMPTY_STAT,
-        msle: EMPTY_STAT,
-        rSquared: EMPTY_STAT,
-        huber: EMPTY_STAT,
+        ...EMPTY_STATS,
         error: trainingErrorEval.error,
       });
     }
