@@ -10,18 +10,21 @@ exports[`LocationStatusTags component renders properly against props 1`] = `
             "availability": 100,
             "color": "#d3dae6",
             "label": "Berlin",
+            "status": "up",
             "timestamp": "1 Mon ago",
           },
           Object {
             "availability": 100,
             "color": "#bd271e",
             "label": "Berlin",
+            "status": "down",
             "timestamp": "1 Mon ago",
           },
           Object {
             "availability": 100,
             "color": "#d3dae6",
             "label": "Islamabad",
+            "status": "up",
             "timestamp": "1 Mon ago",
           },
         ]
@@ -145,13 +148,13 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                       <span
                         class="euiBadge__text"
                       >
-                        <div
-                          class="euiText euiText--small"
+                        <span
+                          class="euiTextColor euiTextColor--ghost"
                         >
                           <h4>
                             Berlin
                           </h4>
-                        </div>
+                        </span>
                       </span>
                     </span>
                   </span>
@@ -222,13 +225,13 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                       <span
                         class="euiBadge__text"
                       >
-                        <div
-                          class="euiText euiText--small"
+                        <span
+                          class="euiTextColor euiTextColor--ghost"
                         >
                           <h4>
                             Islamabad
                           </h4>
-                        </div>
+                        </span>
                       </span>
                     </span>
                   </span>
@@ -393,13 +396,13 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                       <span
                         class="euiBadge__text"
                       >
-                        <div
-                          class="euiText euiText--small"
+                        <span
+                          class="euiTextColor euiTextColor--default"
                         >
                           <h4>
                             Berlin
                           </h4>
-                        </div>
+                        </span>
                       </span>
                     </span>
                   </span>
@@ -470,13 +473,13 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                       <span
                         class="euiBadge__text"
                       >
-                        <div
-                          class="euiText euiText--small"
+                        <span
+                          class="euiTextColor euiTextColor--default"
                         >
                           <h4>
                             Islamabad
                           </h4>
-                        </div>
+                        </span>
                       </span>
                     </span>
                   </span>
@@ -641,13 +644,13 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                       <span
                         class="euiBadge__text"
                       >
-                        <div
-                          class="euiText euiText--small"
+                        <span
+                          class="euiTextColor euiTextColor--ghost"
                         >
                           <h4>
                             Berlin
                           </h4>
-                        </div>
+                        </span>
                       </span>
                     </span>
                   </span>
@@ -718,13 +721,13 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                       <span
                         class="euiBadge__text"
                       >
-                        <div
-                          class="euiText euiText--small"
+                        <span
+                          class="euiTextColor euiTextColor--ghost"
                         >
                           <h4>
                             Islamabad
                           </h4>
-                        </div>
+                        </span>
                       </span>
                     </span>
                   </span>
@@ -795,13 +798,13 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                       <span
                         class="euiBadge__text"
                       >
-                        <div
-                          class="euiText euiText--small"
+                        <span
+                          class="euiTextColor euiTextColor--ghost"
                         >
                           <h4>
                             New York
                           </h4>
-                        </div>
+                        </span>
                       </span>
                     </span>
                   </span>
@@ -872,13 +875,13 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                       <span
                         class="euiBadge__text"
                       >
-                        <div
-                          class="euiText euiText--small"
+                        <span
+                          class="euiTextColor euiTextColor--ghost"
                         >
                           <h4>
                             Paris
                           </h4>
-                        </div>
+                        </span>
                       </span>
                     </span>
                   </span>
@@ -949,13 +952,13 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                       <span
                         class="euiBadge__text"
                       >
-                        <div
-                          class="euiText euiText--small"
+                        <span
+                          class="euiTextColor euiTextColor--ghost"
                         >
                           <h4>
                             Sydney
                           </h4>
-                        </div>
+                        </span>
                       </span>
                     </span>
                   </span>

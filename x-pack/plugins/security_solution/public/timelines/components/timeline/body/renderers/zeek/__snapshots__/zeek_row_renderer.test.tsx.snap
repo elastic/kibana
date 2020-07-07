@@ -373,6 +373,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                   "filebeat-*",
                   "packetbeat-*",
                   "winlogbeat-*",
+                  "logs-*",
                 ],
                 "name": "event.end",
                 "searchable": true,
