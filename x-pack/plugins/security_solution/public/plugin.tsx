@@ -22,7 +22,7 @@ import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
-import { serviceNowActionType, jiraActionType } from './common/lib/connectors';
+import { jiraActionType } from './common/lib/connectors';
 import {
   PluginSetup,
   PluginStart,
@@ -43,7 +43,7 @@ import {
   APP_CASES_PATH,
   APP_PATH,
 } from '../common/constants';
-import { ConfigureEndpointDatasource } from './management/pages/policy/view/ingest_manager_integration/configure_datasource';
+import { ConfigureEndpointPackageConfig } from './management/pages/policy/view/ingest_manager_integration/configure_package_config';
 
 import { State, createStore, createInitialState } from './common/store';
 import { SecurityPageName } from './app/types';
@@ -74,7 +74,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       category: FeatureCatalogueCategory.DATA,
     });
 
-    plugins.triggers_actions_ui.actionTypeRegistry.register(serviceNowActionType());
     plugins.triggers_actions_ui.actionTypeRegistry.register(jiraActionType());
 
     const mountSecurityFactory = async () => {
@@ -317,7 +316,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public start(core: CoreStart, plugins: StartPlugins) {
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
-    plugins.ingestManager.registerDatasource('endpoint', ConfigureEndpointDatasource);
+    plugins.ingestManager.registerPackageConfigComponent(
+      'endpoint',
+      ConfigureEndpointPackageConfig
+    );
 
     return {};
   }

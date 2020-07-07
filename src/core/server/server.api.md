@@ -744,7 +744,7 @@ export type HttpResponsePayload = undefined | string | Record<string, any> | Buf
 
 // @public (undocumented)
 export interface HttpServerInfo {
-    host: string;
+    hostname: string;
     name: string;
     port: number;
     protocol: 'http' | 'https' | 'socket';
@@ -1979,6 +1979,8 @@ export interface SavedObjectsClientWrapperOptions {
 // @public
 export interface SavedObjectsComplexFieldMapping {
     // (undocumented)
+    doc_values?: boolean;
+    // (undocumented)
     properties: SavedObjectsMappingProperties;
     // (undocumented)
     type?: string;
@@ -1986,6 +1988,8 @@ export interface SavedObjectsComplexFieldMapping {
 
 // @public
 export interface SavedObjectsCoreFieldMapping {
+    // (undocumented)
+    doc_values?: boolean;
     // (undocumented)
     enabled?: boolean;
     // (undocumented)
@@ -2468,6 +2472,7 @@ export class SavedObjectTypeRegistry {
     getImportableAndExportableTypes(): SavedObjectsType[];
     getIndex(type: string): string | undefined;
     getType(type: string): SavedObjectsType | undefined;
+    getVisibleTypes(): SavedObjectsType[];
     isHidden(type: string): boolean;
     isImportableAndExportable(type: string): boolean;
     isMultiNamespace(type: string): boolean;

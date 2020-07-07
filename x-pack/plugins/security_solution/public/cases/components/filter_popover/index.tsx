@@ -84,6 +84,7 @@ export const FilterPopoverComponent = ({
       isOpen={isPopoverOpen}
       closePopover={setIsPopoverOpenCb}
       panelPaddingSize="none"
+      repositionOnScroll
     >
       <ScrollableDiv>
         {options.map((option, index) => (
