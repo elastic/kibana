@@ -51,7 +51,7 @@ export async function resolveSavedObjectsImportErrors({
 
   let successCount = 0;
   let errorAccumulator: SavedObjectsImportError[] = [];
-  let importIdMap: Map<string, { id: string; omitOriginId?: boolean }> = new Map();
+  let importIdMap: Map<string, { id?: string; omitOriginId?: boolean }> = new Map();
   const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
   const filter = createObjectsFilter(retries);
 

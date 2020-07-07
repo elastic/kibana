@@ -102,7 +102,6 @@ describe('#checkConflicts', () => {
       filteredObjects: [],
       errors: [],
       importIdMap: new Map(),
-      importIds: new Set(),
     });
   });
 
@@ -132,7 +131,6 @@ describe('#checkConflicts', () => {
         },
       ],
       importIdMap: new Map([[`${obj3.type}:${obj3.id}`, { id: `new-object-id` }]]),
-      importIds: new Set(objects.map(({ type, id }) => `${type}:${id}`)),
     });
   });
 

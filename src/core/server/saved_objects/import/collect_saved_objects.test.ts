@@ -130,7 +130,7 @@ describe('collectSavedObjects()', () => {
       const readStream = createReadStream();
       const result = await collectSavedObjects({ readStream, supportedTypes: [], objectLimit });
 
-      expect(result).toEqual({ collectedObjects: [], errors: [] });
+      expect(result).toEqual({ collectedObjects: [], errors: [], importIdMap: new Map() });
     });
 
     test('collects objects from stream', async () => {
@@ -139,7 +139,8 @@ describe('collectSavedObjects()', () => {
       const result = await collectSavedObjects({ readStream, supportedTypes, objectLimit });
 
       const collectedObjects = [{ ...obj1, migrationVersion: {} }];
-      expect(result).toEqual({ collectedObjects, errors: [] });
+      const importIdMap = new Map([[`${obj1.type}:${obj1.id}`, {}]]);
+      expect(result).toEqual({ collectedObjects, errors: [], importIdMap });
     });
 
     test('unsupported types return as import errors', async () => {
@@ -149,7 +150,7 @@ describe('collectSavedObjects()', () => {
 
       const error = { type: 'unsupported_type' };
       const errors = [{ error, type: obj1.type, id: obj1.id, title: obj1.attributes.title }];
-      expect(result).toEqual({ collectedObjects: [], errors });
+      expect(result).toEqual({ collectedObjects: [], errors, importIdMap: new Map() });
     });
 
     test('returns mixed results', async () => {
@@ -158,9 +159,10 @@ describe('collectSavedObjects()', () => {
       const result = await collectSavedObjects({ readStream, supportedTypes, objectLimit });
 
       const collectedObjects = [{ ...obj2, migrationVersion: {} }];
+      const importIdMap = new Map([[`${obj2.type}:${obj2.id}`, {}]]);
       const error = { type: 'unsupported_type' };
       const errors = [{ error, type: obj1.type, id: obj1.id, title: obj1.attributes.title }];
-      expect(result).toEqual({ collectedObjects, errors });
+      expect(result).toEqual({ collectedObjects, errors, importIdMap });
     });
 
     describe('with optional filter', () => {
@@ -177,7 +179,7 @@ describe('collectSavedObjects()', () => {
 
         const error = { type: 'unsupported_type' };
         const errors = [{ error, type: obj1.type, id: obj1.id, title: obj1.attributes.title }];
-        expect(result).toEqual({ collectedObjects: [], errors });
+        expect(result).toEqual({ collectedObjects: [], errors, importIdMap: new Map() });
       });
 
       test('does not filter out objects when result === true', async () => {
@@ -192,9 +194,10 @@ describe('collectSavedObjects()', () => {
         });
 
         const collectedObjects = [{ ...obj2, migrationVersion: {} }];
+        const importIdMap = new Map([[`${obj2.type}:${obj2.id}`, {}]]);
         const error = { type: 'unsupported_type' };
         const errors = [{ error, type: obj1.type, id: obj1.id, title: obj1.attributes.title }];
-        expect(result).toEqual({ collectedObjects, errors });
+        expect(result).toEqual({ collectedObjects, errors, importIdMap });
       });
     });
   });

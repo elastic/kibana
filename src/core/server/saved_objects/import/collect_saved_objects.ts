@@ -45,6 +45,7 @@ export async function collectSavedObjects({
 }: CollectSavedObjectsOptions) {
   const errors: SavedObjectsImportError[] = [];
   const entries: Array<{ type: string; id: string }> = [];
+  const importIdMap = new Map<string, { id?: string; omitOriginId?: boolean }>();
   const collectedObjects: Array<SavedObject<{ title: string }>> = await createPromiseFromStreams([
     readStream,
     createLimitStream(objectLimit),
@@ -65,6 +66,7 @@ export async function collectSavedObjects({
     }),
     createFilterStream<SavedObject>((obj) => (filter ? filter(obj) : true)),
     createMapStream((obj: SavedObject) => {
+      importIdMap.set(`${obj.type}:${obj.id}`, {});
       // Ensure migrations execute on every saved object
       return Object.assign({ migrationVersion: {} }, obj);
     }),
@@ -82,5 +84,6 @@ export async function collectSavedObjects({
   return {
     errors,
     collectedObjects,
+    importIdMap,
   };
 }

@@ -45,19 +45,21 @@ export async function importSavedObjectsFromStream({
   namespace,
 }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
   let errorAccumulator: SavedObjectsImportError[] = [];
-  let importIdMap: Map<string, { id: string; omitOriginId?: boolean }> = new Map();
   const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
 
   // Get the objects to import
-  const {
-    errors: collectorErrors,
-    collectedObjects: objectsFromStream,
-  } = await collectSavedObjects({ readStream, objectLimit, supportedTypes });
-  errorAccumulator = [...errorAccumulator, ...collectorErrors];
+  const collectSavedObjectsResult = await collectSavedObjects({
+    readStream,
+    objectLimit,
+    supportedTypes,
+  });
+  errorAccumulator = [...errorAccumulator, ...collectSavedObjectsResult.errors];
+  /** Map of all IDs for objects that we are attempting to import; each value is empty by default */
+  let importIdMap = collectSavedObjectsResult.importIdMap;
 
   // Validate references
   const validateReferencesResult = await validateReferences(
-    objectsFromStream,
+    collectSavedObjectsResult.collectedObjects,
     savedObjectsClient,
     namespace
   );
@@ -65,7 +67,7 @@ export async function importSavedObjectsFromStream({
 
   let objectsToCreate = validateReferencesResult.filteredObjects;
   if (trueCopy) {
-    const regenerateIdsResult = regenerateIds(objectsFromStream);
+    const regenerateIdsResult = regenerateIds(collectSavedObjectsResult.collectedObjects);
     importIdMap = regenerateIdsResult.importIdMap;
   } else {
     // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
@@ -87,7 +89,7 @@ export async function importSavedObjectsFromStream({
       typeRegistry,
       namespace,
       ignoreRegularConflicts: overwrite,
-      importIds: checkConflictsResult.importIds,
+      importIdMap,
     };
     const checkOriginConflictsResult = await checkOriginConflicts(
       checkConflictsResult.filteredObjects,

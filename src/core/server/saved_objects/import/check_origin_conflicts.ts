@@ -31,7 +31,7 @@ interface CheckOriginConflictsOptions {
   typeRegistry: ISavedObjectTypeRegistry;
   namespace?: string;
   ignoreRegularConflicts?: boolean;
-  importIds: Set<string>;
+  importIdMap: Map<string, unknown>;
 }
 
 interface GetImportIdMapForRetriesOptions {
@@ -85,7 +85,8 @@ const checkOriginConflict = async (
   object: SavedObject<{ title?: string }>,
   options: CheckOriginConflictsOptions
 ): Promise<Either<{ title?: string }>> => {
-  const { savedObjectsClient, typeRegistry, namespace, importIds } = options;
+  const { savedObjectsClient, typeRegistry, namespace, importIdMap } = options;
+  const importIds = new Set(importIdMap.keys());
   const { type, originId } = object;
 
   if (!typeRegistry.isMultiNamespace(type)) {

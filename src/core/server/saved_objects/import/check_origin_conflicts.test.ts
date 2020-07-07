@@ -67,17 +67,17 @@ describe('#checkOriginConflicts', () => {
   const setupOptions = (
     options: {
       namespace?: string;
-      importIds?: Set<string>;
+      importIdMap?: Map<string, unknown>;
       ignoreRegularConflicts?: boolean;
     } = {}
   ): CheckOriginConflictsOptions => {
-    const { namespace, importIds = new Set<string>(), ignoreRegularConflicts } = options;
+    const { namespace, importIdMap = new Map<string, unknown>(), ignoreRegularConflicts } = options;
     savedObjectsClient = savedObjectsClientMock.create();
     find = savedObjectsClient.find;
     find.mockResolvedValue(getResultMock()); // mock zero hits response by default
     typeRegistry = typeRegistryMock.create();
     typeRegistry.isMultiNamespace.mockImplementation((type) => type === MULTI_NS_TYPE);
-    return { savedObjectsClient, typeRegistry, namespace, ignoreRegularConflicts, importIds };
+    return { savedObjectsClient, typeRegistry, namespace, ignoreRegularConflicts, importIdMap };
   };
 
   const mockFindResult = (...objects: SavedObjectType[]) => {
@@ -218,11 +218,11 @@ describe('#checkOriginConflicts', () => {
         const obj3 = createObject(MULTI_NS_TYPE, 'id-3', 'originId-foo');
         const obj4 = createObject(MULTI_NS_TYPE, 'id-4', obj3.originId);
         const options = setupOptions({
-          importIds: new Set([
-            `${obj1.type}:${obj1.id}`,
-            `${obj2.type}:${obj2.id}`,
-            `${obj3.type}:${obj3.id}`,
-            `${obj4.type}:${obj4.id}`,
+          importIdMap: new Map([
+            [`${obj1.type}:${obj1.id}`, {}],
+            [`${obj2.type}:${obj2.id}`, {}],
+            [`${obj3.type}:${obj3.id}`, {}],
+            [`${obj4.type}:${obj4.id}`, {}],
           ]),
         });
         mockFindResult(obj1); // find for obj2: the result is an inexact match with one destination that is exactly matched by obj1 so it is ignored -- accordingly, obj2 has no match
@@ -244,7 +244,11 @@ describe('#checkOriginConflicts', () => {
         const obj2 = createObject(MULTI_NS_TYPE, 'id-2', obj1.id);
         const obj3 = createObject(MULTI_NS_TYPE, 'id-3', obj1.id);
         const options = setupOptions({
-          importIds: new Set([`${obj1.type}:${obj1.id}`, `${obj2.type}:${obj2.id}`]),
+          importIdMap: new Map([
+            [`${obj1.type}:${obj1.id}`, {}],
+            [`${obj2.type}:${obj2.id}`, {}],
+            [`${obj3.type}:${obj3.id}`, {}],
+          ]),
         });
         mockFindResult(obj1, obj2); // find for obj3: the result is an inexact match with two destinations that are exactly matched by obj1 and obj2 so they are ignored -- accordingly, obj3 has no match
 
@@ -313,11 +317,11 @@ describe('#checkOriginConflicts', () => {
         const setup = (ignoreRegularConflicts: boolean) => {
           const options = setupOptions({
             ignoreRegularConflicts,
-            importIds: new Set([
-              `${obj1.type}:${obj1.id}`,
-              `${obj2.type}:${obj2.id}`,
-              `${obj3.type}:${obj3.id}`,
-              `${obj4.type}:${obj4.id}`,
+            importIdMap: new Map([
+              [`${obj1.type}:${obj1.id}`, {}],
+              [`${obj2.type}:${obj2.id}`, {}],
+              [`${obj3.type}:${obj3.id}`, {}],
+              [`${obj4.type}:${obj4.id}`, {}],
             ]),
           });
           mockFindResult(obj1, objA); // find for obj2: the result is an inexact match with two destinations, but the first destination is exactly matched by obj1 so it is ignored -- accordingly, obj2 has an inexact match with one destination (objA)
@@ -466,10 +470,11 @@ describe('#checkOriginConflicts', () => {
       const objD = createObject(MULTI_NS_TYPE, 'id-D', obj7.id);
       const objE = createObject(MULTI_NS_TYPE, 'id-E', obj7.id);
       const objects = [obj1, obj2, obj4, obj5, obj6, obj7, obj8];
-      const importIds = new Set([...objects, obj3].map(({ type, id }) => `${type}:${id}`));
+
+      const importIdMap = new Map([...objects, obj3].map(({ type, id }) => [`${type}:${id}`, {}]));
 
       const setup = (ignoreRegularConflicts: boolean) => {
-        const options = setupOptions({ importIds, ignoreRegularConflicts });
+        const options = setupOptions({ importIdMap, ignoreRegularConflicts });
         // obj1 is a non-multi-namespace type, so it is skipped while searching
         mockFindResult(); // find for obj2: the result is no match
         mockFindResult(obj3); // find for obj4: the result is an inexact match with one destination that is exactly matched by obj3 so it is ignored -- accordingly, obj4 has no match

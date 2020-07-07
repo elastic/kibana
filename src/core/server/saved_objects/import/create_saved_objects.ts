@@ -22,7 +22,7 @@ import { extractErrors } from './extract_errors';
 
 interface CreateSavedObjectsOptions {
   savedObjectsClient: SavedObjectsClientContract;
-  importIdMap: Map<string, { id: string; omitOriginId?: boolean }>;
+  importIdMap: Map<string, { id?: string; omitOriginId?: boolean }>;
   namespace?: string;
   overwrite?: boolean;
 }
@@ -58,7 +58,7 @@ export const createSavedObjects = async <T>(
       // use the import ID map to ensure that each object is being created with the correct ID, also ensure that the `originId` is set on
       // the created object if it did not have one (or is omitted if specified)
       const importIdEntry = importIdMap.get(`${object.type}:${object.id}`);
-      if (importIdEntry) {
+      if (importIdEntry?.id) {
         objectIdMap.set(`${object.type}:${importIdEntry.id}`, object);
         const originId = importIdEntry.omitOriginId ? undefined : object.originId ?? object.id;
         return { ...object, id: importIdEntry.id, originId };
@@ -70,7 +70,7 @@ export const createSavedObjects = async <T>(
       const references = object.references?.map((reference) => {
         const { type, id } = reference;
         const importIdEntry = importIdMap.get(`${type}:${id}`);
-        if (importIdEntry) {
+        if (importIdEntry?.id) {
           return { ...reference, id: importIdEntry.id };
         }
         return reference;

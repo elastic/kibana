@@ -41,12 +41,11 @@ export async function checkConflicts(
 ) {
   const filteredObjects: Array<SavedObject<{ title?: string }>> = [];
   const errors: SavedObjectsImportError[] = [];
-  const importIdMap = new Map<string, { id: string; omitOriginId?: boolean }>();
-  const importIds = new Set<string>();
+  const importIdMap = new Map<string, { id?: string; omitOriginId?: boolean }>();
 
   // exit early if there are no objects to check
   if (objects.length === 0) {
-    return { filteredObjects, errors, importIdMap, importIds };
+    return { filteredObjects, errors, importIdMap };
   }
 
   const { savedObjectsClient, namespace, ignoreRegularConflicts, trueCopy } = options;
@@ -62,7 +61,6 @@ export async function checkConflicts(
       id,
       attributes: { title },
     } = object;
-    importIds.add(`${type}:${id}`);
     const errorObj = errorMap.get(`${type}:${id}`);
     if (errorObj && isUnresolvableConflict(errorObj)) {
       // Any object create attempt that would result in an unresolvable conflict should have its ID regenerated. This way, when an object
@@ -79,5 +77,5 @@ export async function checkConflicts(
       filteredObjects.push(object);
     }
   });
-  return { filteredObjects, errors, importIdMap, importIds };
+  return { filteredObjects, errors, importIdMap };
 }
