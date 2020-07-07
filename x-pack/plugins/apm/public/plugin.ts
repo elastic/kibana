@@ -66,8 +66,9 @@ export interface ApmPluginStartDeps {
 }
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
-  private readonly initializerContext: PluginInitializerContext<ConfigSchema>;
-  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
+  constructor(
+    private readonly initializerContext: PluginInitializerContext<ConfigSchema>
+  ) {
     this.initializerContext = initializerContext;
   }
   public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
