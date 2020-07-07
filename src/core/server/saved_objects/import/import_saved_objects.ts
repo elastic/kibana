@@ -39,7 +39,7 @@ export async function importSavedObjectsFromStream({
   readStream,
   objectLimit,
   overwrite,
-  trueCopy,
+  createNewCopies,
   savedObjectsClient,
   typeRegistry,
   namespace,
@@ -66,7 +66,7 @@ export async function importSavedObjectsFromStream({
   errorAccumulator = [...errorAccumulator, ...validateReferencesResult.errors];
 
   let objectsToCreate = validateReferencesResult.filteredObjects;
-  if (trueCopy) {
+  if (createNewCopies) {
     const regenerateIdsResult = regenerateIds(collectSavedObjectsResult.collectedObjects);
     importIdMap = regenerateIdsResult.importIdMap;
   } else {
@@ -115,7 +115,7 @@ export async function importSavedObjectsFromStream({
         type,
         id,
         ...(destinationId && { destinationId }),
-        ...(destinationId && !originId && !trueCopy && { trueCopy: true }),
+        ...(destinationId && !originId && !createNewCopies && { createNewCopy: true }),
       };
     }
   );

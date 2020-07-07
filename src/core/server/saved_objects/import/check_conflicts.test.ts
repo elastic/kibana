@@ -77,14 +77,14 @@ describe('#checkConflicts', () => {
     options: {
       namespace?: string;
       ignoreRegularConflicts?: boolean;
-      trueCopy?: boolean;
+      createNewCopies?: boolean;
     } = {}
   ): CheckConflictsOptions => {
-    const { namespace, ignoreRegularConflicts, trueCopy } = options;
+    const { namespace, ignoreRegularConflicts, createNewCopies } = options;
     savedObjectsClient = savedObjectsClientMock.create();
     socCheckConflicts = savedObjectsClient.checkConflicts;
     socCheckConflicts.mockResolvedValue({ errors: [] }); // by default, mock to empty results
-    return { savedObjectsClient, namespace, ignoreRegularConflicts, trueCopy };
+    return { savedObjectsClient, namespace, ignoreRegularConflicts, createNewCopies };
   };
 
   beforeEach(() => {
@@ -154,9 +154,9 @@ describe('#checkConflicts', () => {
     );
   });
 
-  it('adds `omitOriginId` field to `importIdMap` entries when trueCopy=true', async () => {
+  it('adds `omitOriginId` field to `importIdMap` entries when createNewCopies=true', async () => {
     const namespace = 'foo-namespace';
-    const options = setupOptions({ namespace, trueCopy: true });
+    const options = setupOptions({ namespace, createNewCopies: true });
     socCheckConflicts.mockResolvedValue({ errors: [obj2Error, obj3Error, obj4Error] });
 
     const checkConflictsResult = await checkConflicts(objects, options);

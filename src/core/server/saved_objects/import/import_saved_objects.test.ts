@@ -78,7 +78,7 @@ describe('#importSavedObjectsFromStream', () => {
   let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
   const namespace = 'some-namespace';
 
-  const setupOptions = (trueCopy: boolean = false): SavedObjectsImportOptions => {
+  const setupOptions = (createNewCopies: boolean = false): SavedObjectsImportOptions => {
     readStream = new Readable();
     savedObjectsClient = savedObjectsClientMock.create();
     typeRegistry = typeRegistryMock.create();
@@ -89,7 +89,7 @@ describe('#importSavedObjectsFromStream', () => {
       savedObjectsClient,
       typeRegistry,
       namespace,
-      trueCopy,
+      createNewCopies,
     };
   };
   const createObject = () => {
@@ -136,7 +136,7 @@ describe('#importSavedObjectsFromStream', () => {
       );
     });
 
-    describe('with trueCopy disabled', () => {
+    describe('with createNewCopies disabled', () => {
       test('does not regenerate object IDs', async () => {
         const options = setupOptions();
         const collectedObjects = [createObject()];
@@ -231,7 +231,7 @@ describe('#importSavedObjectsFromStream', () => {
       });
     });
 
-    describe('with trueCopy enabled', () => {
+    describe('with createNewCopies enabled', () => {
       test('regenerates object IDs', async () => {
         const options = setupOptions(true);
         const collectedObjects = [createObject()];
@@ -312,7 +312,7 @@ describe('#importSavedObjectsFromStream', () => {
       const createdObjects = [obj1, obj2, obj3];
       const errors = [createError()];
 
-      test('with trueCopy disabled', async () => {
+      test('with createNewCopies disabled', async () => {
         const options = setupOptions();
         getMockFn(createSavedObjects).mockResolvedValue({ errors, createdObjects });
 
@@ -321,15 +321,21 @@ describe('#importSavedObjectsFromStream', () => {
         const successResults = [
           { type: obj1.type, id: obj1.id },
           { type: obj2.type, id: obj2.id, destinationId: obj2.destinationId },
-          // trueCopy mode is not enabled, but obj3 ran into an ambiguous source conflict and it was created with an empty originId; hence,
-          // this specific object is a true copy -- we would need this information for rendering the appropriate originId in the client UI,
-          // and we would need it to construct a retry for this object if other objects had errors that needed to be resolved
-          { type: obj3.type, id: obj3.id, destinationId: obj3.destinationId, trueCopy: true },
+          // `createNewCopies` mode is not enabled, but obj3 ran into an ambiguous source conflict and it was created with an empty
+          // originId; hence, this specific object is a new copy -- we would need this information for rendering the appropriate originId
+          // in the client UI, and we would need it to construct a retry for this object if other objects had errors that needed to be
+          // resolved
+          {
+            type: obj3.type,
+            id: obj3.id,
+            destinationId: obj3.destinationId,
+            createNewCopy: true,
+          },
         ];
         expect(result).toEqual({ success: false, successCount: 3, successResults, errors });
       });
 
-      test('with trueCopy enabled', async () => {
+      test('with createNewCopies enabled', async () => {
         // however, we include it here for posterity
         const options = setupOptions(true);
         getMockFn(createSavedObjects).mockResolvedValue({ errors, createdObjects });
@@ -338,7 +344,7 @@ describe('#importSavedObjectsFromStream', () => {
         // successResults only includes the imported object's type, id, and destinationId (if a new one was generated)
         const successResults = [
           { type: obj1.type, id: obj1.id },
-          // obj2 being created with trueCopy mode enabled isn't a realistic test case (all objects would have originId omitted)
+          // obj2 being created with createNewCopies mode enabled isn't a realistic test case (all objects would have originId omitted)
           { type: obj2.type, id: obj2.id, destinationId: obj2.destinationId },
           { type: obj3.type, id: obj3.id, destinationId: obj3.destinationId },
         ];

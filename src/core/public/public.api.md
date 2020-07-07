@@ -1375,6 +1375,8 @@ export interface SavedObjectsImportResponse {
 
 // @public
 export interface SavedObjectsImportRetry {
+    // @deprecated (undocumented)
+    createNewCopy?: boolean;
     destinationId?: string;
     // (undocumented)
     id: string;
@@ -1386,19 +1388,17 @@ export interface SavedObjectsImportRetry {
         from: string;
         to: string;
     }>;
-    // @deprecated (undocumented)
-    trueCopy?: boolean;
     // (undocumented)
     type: string;
 }
 
 // @public
 export interface SavedObjectsImportSuccess {
+    // @deprecated (undocumented)
+    createNewCopy?: boolean;
     destinationId?: string;
     // (undocumented)
     id: string;
-    // @deprecated (undocumented)
-    trueCopy?: boolean;
     // (undocumented)
     type: string;
 }

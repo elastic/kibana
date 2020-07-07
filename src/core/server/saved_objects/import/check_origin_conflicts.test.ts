@@ -525,17 +525,17 @@ describe('#checkOriginConflicts', () => {
 describe('#getImportIdMapForRetries', () => {
   const setupOptions = (
     retries: SavedObjectsImportRetry[],
-    trueCopy: boolean = false
+    createNewCopies: boolean = false
   ): GetImportIdMapForRetriesOptions => {
-    return { retries, trueCopy };
+    return { retries, createNewCopies };
   };
 
   const createRetry = (
     { type, id }: { type: string; id: string },
-    options: { destinationId?: string; trueCopy?: boolean } = {}
+    options: { destinationId?: string; createNewCopy?: boolean } = {}
   ): SavedObjectsImportRetry => {
-    const { destinationId, trueCopy } = options;
-    return { type, id, overwrite: false, destinationId, replaceReferences: [], trueCopy };
+    const { destinationId, createNewCopy } = options;
+    return { type, id, overwrite: false, destinationId, replaceReferences: [], createNewCopy };
   };
 
   test('throws an error if retry is not found for an object', async () => {
@@ -559,7 +559,7 @@ describe('#getImportIdMapForRetries', () => {
       createRetry(obj1), // retries that do not have `destinationId` specified are ignored
       createRetry(obj2, { destinationId: obj2.id }), // retries that have `id` that matches `destinationId` are ignored
       createRetry(obj3, { destinationId: 'id-X' }), // this retry will get added to the `importIdMap`!
-      createRetry(obj4, { destinationId: 'id-Y', trueCopy: true }), // this retry will get added to the `importIdMap`!
+      createRetry(obj4, { destinationId: 'id-Y', createNewCopy: true }), // this retry will get added to the `importIdMap`!
     ];
     const options = setupOptions(retries);
 
@@ -572,7 +572,7 @@ describe('#getImportIdMapForRetries', () => {
     );
   });
 
-  test('omits origin ID in `importIdMap` entries when trueCopy=true', async () => {
+  test('omits origin ID in `importIdMap` entries when createNewCopies=true', async () => {
     const obj = createObject('type-1', 'id-1');
     const objects = [obj];
     const retries = [createRetry(obj, { destinationId: 'id-X' })];

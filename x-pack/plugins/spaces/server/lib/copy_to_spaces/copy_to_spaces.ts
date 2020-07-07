@@ -55,7 +55,7 @@ export function copySavedObjectsToSpacesFactory(
         savedObjectsClient,
         typeRegistry: getTypeRegistry(),
         readStream: objectsStream,
-        trueCopy: options.trueCopy,
+        createNewCopies: options.createNewCopies,
       });
 
       return {

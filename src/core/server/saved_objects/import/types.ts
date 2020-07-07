@@ -40,11 +40,11 @@ export interface SavedObjectsImportRetry {
   }>;
   /**
    * @deprecated
-   * If `trueCopy` is specified, the new object has a new (undefined) origin ID. This is only needed for the case where True Copy mode is
-   * disabled and ambiguous source conflicts are detected. When True Copy mode is permanently enabled, this field will be redundant and can
-   * be removed.
+   * If `createNewCopy` is specified, the new object has a new (undefined) origin ID. This is only needed for the case where
+   * `createNewCopies` mode is disabled and ambiguous source conflicts are detected. When `createNewCopies` mode is permanently enabled,
+   * this field will be redundant and can be removed.
    */
-  trueCopy?: boolean;
+  createNewCopy?: boolean;
 }
 
 /**
@@ -128,11 +128,11 @@ export interface SavedObjectsImportSuccess {
   destinationId?: string;
   /**
    * @deprecated
-   * If `trueCopy` is specified, the new object has a new (undefined) origin ID. This is only needed for the case where True Copy mode is
-   * disabled and ambiguous source conflicts are detected. When True Copy mode is permanently enabled, this field will be redundant and can
-   * be removed.
+   * If `createNewCopy` is specified, the new object has a new (undefined) origin ID. This is only needed for the case where
+   * `createNewCopies` mode is disabled and ambiguous source conflicts are detected. When `createNewCopies` mode is permanently enabled,
+   * this field will be redundant and can be removed.
    */
-  trueCopy?: boolean;
+  createNewCopy?: boolean;
 }
 
 /**
@@ -159,7 +159,7 @@ export interface SavedObjectsImportOptions {
    * @deprecated
    * If true, will override existing object if present. This option will be removed and permanently disabled in a future release.
    *
-   * Note: this has no effect when used with the `trueCopy` option.
+   * Note: this has no effect when used with the `createNewCopies` option.
    */
   overwrite: boolean;
   /** {@link SavedObjectsClientContract | client} to use to perform the import operation */
@@ -173,7 +173,7 @@ export interface SavedObjectsImportOptions {
    * If true, will create new copies of import objects, each with a random `id` and undefined `originId`. This option will be removed and
    * permanently enabled in a future release.
    */
-  trueCopy: boolean;
+  createNewCopies: boolean;
 }
 
 /**
@@ -198,7 +198,7 @@ export interface SavedObjectsResolveImportErrorsOptions {
    * If true, will create new copies of import objects, each with a random `id` and undefined `originId`. This option will be removed and
    * permanently enabled in a future release.
    */
-  trueCopy: boolean;
+  createNewCopies: boolean;
 }
 
 export type CreatedObject<T> = SavedObject<T> & { destinationId?: string };

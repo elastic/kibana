@@ -36,7 +36,7 @@ interface CheckOriginConflictsOptions {
 
 interface GetImportIdMapForRetriesOptions {
   retries: SavedObjectsImportRetry[];
-  trueCopy: boolean;
+  createNewCopies: boolean;
 }
 
 interface InexactMatch<T> {
@@ -193,7 +193,7 @@ export async function checkOriginConflicts(
     //  - 2+ import objects have the same 2+ destination conflicts ("ambiguous source and destination")
     if (sources.length > 1) {
       // In the case of ambiguous source conflicts, don't treat them as errors; instead, regenerate the object ID and reset its origin
-      // (e.g., make a "true copy").
+      // (e.g., the same outcome as if `createNewCopies` was enabled for the entire import operation).
       importIdMap.set(`${type}:${id}`, { id: uuidv4(), omitOriginId: true });
       filteredObjects.push(object);
       return;
@@ -223,7 +223,7 @@ export function getImportIdMapForRetries(
   objects: Array<SavedObject<{ title?: string }>>,
   options: GetImportIdMapForRetriesOptions
 ) {
-  const { retries, trueCopy } = options;
+  const { retries, createNewCopies } = options;
 
   const retryMap = retries.reduce(
     (acc, cur) => acc.set(`${cur.type}:${cur.id}`, cur),
@@ -237,7 +237,7 @@ export function getImportIdMapForRetries(
       throw new Error(`Retry was expected for "${type}:${id}" but not found`);
     }
     const { destinationId } = retry;
-    const omitOriginId = trueCopy || Boolean(retry.trueCopy);
+    const omitOriginId = createNewCopies || Boolean(retry.createNewCopy);
     if (destinationId && destinationId !== id) {
       importIdMap.set(`${type}:${id}`, { id: destinationId, omitOriginId });
     }

@@ -132,7 +132,7 @@ describe('copySavedObjectsToSpaces', () => {
           id: 'my-dashboard',
         },
       ],
-      trueCopy: false,
+      createNewCopies: false,
     });
 
     expect(result).toMatchInlineSnapshot(`
@@ -193,6 +193,7 @@ describe('copySavedObjectsToSpaces', () => {
       Array [
         Array [
           Object {
+            "createNewCopies": false,
             "namespace": "destination1",
             "objectLimit": 1000,
             "overwrite": true,
@@ -251,7 +252,6 @@ describe('copySavedObjectsToSpaces', () => {
               "get": [MockFunction],
               "update": [MockFunction],
             },
-            "trueCopy": false,
             "typeRegistry": Object {
               "getAllTypes": [MockFunction],
               "getImportableAndExportableTypes": [MockFunction],
@@ -269,6 +269,7 @@ describe('copySavedObjectsToSpaces', () => {
         ],
         Array [
           Object {
+            "createNewCopies": false,
             "namespace": "destination2",
             "objectLimit": 1000,
             "overwrite": true,
@@ -327,7 +328,6 @@ describe('copySavedObjectsToSpaces', () => {
               "get": [MockFunction],
               "update": [MockFunction],
             },
-            "trueCopy": false,
             "typeRegistry": Object {
               "getAllTypes": [MockFunction],
               "getImportableAndExportableTypes": [MockFunction],
@@ -401,7 +401,7 @@ describe('copySavedObjectsToSpaces', () => {
             id: 'my-dashboard',
           },
         ],
-        trueCopy: false,
+        createNewCopies: false,
       }
     );
 
@@ -486,7 +486,7 @@ describe('copySavedObjectsToSpaces', () => {
               id: 'my-dashboard',
             },
           ],
-          trueCopy: false,
+          createNewCopies: false,
         }
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(

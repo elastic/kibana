@@ -191,19 +191,19 @@ describe('copy to space', () => {
       );
     });
 
-    it(`does not allow "overwrite" to be used with "trueCopy"`, async () => {
+    it(`does not allow "overwrite" to be used with "createNewCopies"`, async () => {
       const payload = {
         spaces: ['a-space'],
         objects: [{ type: 'foo', id: 'bar' }],
         overwrite: true,
-        trueCopy: true,
+        createNewCopies: true,
       };
 
       const { copyToSpace } = await setup();
 
       expect(() =>
         (copyToSpace.routeValidation.body as ObjectType).validate(payload)
-      ).toThrowErrorMatchingInlineSnapshot(`"cannot use [overwrite] with [trueCopy]"`);
+      ).toThrowErrorMatchingInlineSnapshot(`"cannot use [overwrite] with [createNewCopies]"`);
     });
 
     it(`requires objects to be unique`, async () => {

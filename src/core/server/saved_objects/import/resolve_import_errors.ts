@@ -45,7 +45,7 @@ export async function resolveSavedObjectsImportErrors({
   savedObjectsClient,
   typeRegistry,
   namespace,
-  trueCopy,
+  createNewCopies,
 }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse> {
   // throw a BadRequest error if we see invalid retries
   validateRetries(retries);
@@ -99,7 +99,7 @@ export async function resolveSavedObjectsImportErrors({
   );
   errorAccumulator = [...errorAccumulator, ...validateReferencesResult.errors];
 
-  if (trueCopy) {
+  if (createNewCopies) {
     // In case any missing reference errors were resolved, ensure that we regenerate those object IDs as well
     // This is because a retry to resolve a missing reference error may not necessarily specify a destinationId
     const regenerateIdsResult = regenerateIds(objectsToResolve);
@@ -111,7 +111,7 @@ export async function resolveSavedObjectsImportErrors({
     savedObjectsClient,
     namespace,
     ignoreRegularConflicts: true,
-    trueCopy,
+    createNewCopies,
   };
   const checkConflictsResult = await checkConflicts(
     validateReferencesResult.filteredObjects,
@@ -123,7 +123,7 @@ export async function resolveSavedObjectsImportErrors({
   // Check multi-namespace object types for regular conflicts and ambiguous conflicts
   const importIdMapForRetries = getImportIdMapForRetries(checkConflictsResult.filteredObjects, {
     retries,
-    trueCopy,
+    createNewCopies,
   });
   importIdMap = new Map([...importIdMap, ...importIdMapForRetries]);
 
@@ -145,7 +145,7 @@ export async function resolveSavedObjectsImportErrors({
         type,
         id,
         ...(destinationId && { destinationId }),
-        ...(destinationId && !originId && !trueCopy && { trueCopy: true }),
+        ...(destinationId && !originId && !createNewCopies && { createNewCopy: true }),
       })),
     ];
   };

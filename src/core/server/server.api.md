@@ -835,7 +835,7 @@ export interface ImageValidation {
 }
 
 // @public
-export function importSavedObjectsFromStream({ readStream, objectLimit, overwrite, trueCopy, savedObjectsClient, typeRegistry, namespace, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+export function importSavedObjectsFromStream({ readStream, objectLimit, overwrite, createNewCopies, savedObjectsClient, typeRegistry, namespace, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
 
 // @public (undocumented)
 export interface IndexSettingsDeprecationInfo {
@@ -1702,7 +1702,7 @@ export type RequestHandlerContextProvider<TContextName extends keyof RequestHand
 export type RequestHandlerWrapper = <P, Q, B, Method extends RouteMethod = any, ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory>(handler: RequestHandler<P, Q, B, Method, ResponseFactory>) => RequestHandler<P, Q, B, Method, ResponseFactory>;
 
 // @public
-export function resolveSavedObjectsImportErrors({ readStream, objectLimit, retries, savedObjectsClient, typeRegistry, namespace, trueCopy, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
+export function resolveSavedObjectsImportErrors({ readStream, objectLimit, retries, savedObjectsClient, typeRegistry, namespace, createNewCopies, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
 
 // @public
 export type ResponseError = string | Error | {
@@ -2228,14 +2228,14 @@ export interface SavedObjectsImportMissingReferencesError {
 
 // @public
 export interface SavedObjectsImportOptions {
+    // @deprecated (undocumented)
+    createNewCopies: boolean;
     namespace?: string;
     objectLimit: number;
     // @deprecated (undocumented)
     overwrite: boolean;
     readStream: Readable;
     savedObjectsClient: SavedObjectsClientContract;
-    // @deprecated (undocumented)
-    trueCopy: boolean;
     typeRegistry: ISavedObjectTypeRegistry;
 }
 
@@ -2253,6 +2253,8 @@ export interface SavedObjectsImportResponse {
 
 // @public
 export interface SavedObjectsImportRetry {
+    // @deprecated (undocumented)
+    createNewCopy?: boolean;
     destinationId?: string;
     // (undocumented)
     id: string;
@@ -2264,19 +2266,17 @@ export interface SavedObjectsImportRetry {
         from: string;
         to: string;
     }>;
-    // @deprecated (undocumented)
-    trueCopy?: boolean;
     // (undocumented)
     type: string;
 }
 
 // @public
 export interface SavedObjectsImportSuccess {
+    // @deprecated (undocumented)
+    createNewCopy?: boolean;
     destinationId?: string;
     // (undocumented)
     id: string;
-    // @deprecated (undocumented)
-    trueCopy?: boolean;
     // (undocumented)
     type: string;
 }
@@ -2406,13 +2406,13 @@ export interface SavedObjectsRepositoryFactory {
 
 // @public
 export interface SavedObjectsResolveImportErrorsOptions {
+    // @deprecated (undocumented)
+    createNewCopies: boolean;
     namespace?: string;
     objectLimit: number;
     readStream: Readable;
     retries: SavedObjectsImportRetry[];
     savedObjectsClient: SavedObjectsClientContract;
-    // @deprecated (undocumented)
-    trueCopy: boolean;
     typeRegistry: ISavedObjectTypeRegistry;
 }
 

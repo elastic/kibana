@@ -14,7 +14,7 @@ import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/
 export interface ImportTestDefinition extends TestDefinition {
   request: Array<{ type: string; id: string; originId?: string }>;
   overwrite: boolean;
-  trueCopy: boolean;
+  createNewCopies: boolean;
 }
 export type ImportTestSuite = TestSuite<ImportTestDefinition>;
 export interface ImportTestCase extends TestCase {
@@ -77,7 +77,7 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     statusCode: 200 | 403,
     singleRequest: boolean,
     overwrite: boolean,
-    trueCopy: boolean,
+    createNewCopies: boolean,
     spaceId = SPACES.DEFAULT.spaceId
   ): ExpectResponseBody => async (response: Record<string, any>) => {
     const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
@@ -114,23 +114,24 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
             // the new ID was randomly generated
             expect(destinationId).to.match(/^[0-9a-f-]{36}$/);
           }
-        } else if (successParam === 'trueCopy' || successParam === 'newOrigin') {
+        } else if (successParam === 'createNewCopies' || successParam === 'newOrigin') {
           // the new ID was randomly generated
           expect(destinationId).to.match(/^[0-9a-f-]{36}$/);
         } else {
           expect(destinationId).to.be(undefined);
         }
 
-        // This assertion is only needed for the case where True Copy mode is disabled and ambiguous source conflicts are detected. When
-        // True Copy mode is permanently enabled, this field will be removed, and this assertion will be redundant and can be removed too.
-        const resultTrueCopy = object!.trueCopy as boolean | undefined;
+        // This assertion is only needed for the case where `createNewCopies` mode is disabled and ambiguous source conflicts are detected.
+        // When `createNewCopies` mode is permanently enabled, this field will be removed, and this assertion will be redundant and can be
+        // removed too.
+        const resultNewCopies = object!.createNewCopies as boolean | undefined;
         if (successParam === 'newOrigin') {
-          expect(resultTrueCopy).to.be(true);
+          expect(resultNewCopies).to.be(true);
         } else {
-          expect(resultTrueCopy).to.be(undefined);
+          expect(resultNewCopies).to.be(undefined);
         }
 
-        if (!singleRequest || overwrite || trueCopy) {
+        if (!singleRequest || overwrite || createNewCopies) {
           // even if the object result was a "success" result, it may not have been created if other resolvable errors were returned
           const { _source } = await expectResponses.successCreated(
             es,
@@ -179,7 +180,7 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     forbidden: boolean,
     options: {
       overwrite?: boolean;
-      trueCopy?: boolean;
+      createNewCopies?: boolean;
       spaceId?: string;
       singleRequest?: boolean;
       responseBodyOverride?: ExpectResponseBody;
@@ -189,7 +190,7 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     const responseStatusCode = forbidden ? 403 : 200;
     const {
       overwrite = false,
-      trueCopy = false,
+      createNewCopies = false,
       spaceId,
       singleRequest,
       responseBodyOverride,
@@ -203,9 +204,9 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
         responseStatusCode,
         responseBody:
           responseBodyOverride ||
-          expectResponseBody(x, responseStatusCode, false, overwrite, trueCopy, spaceId),
+          expectResponseBody(x, responseStatusCode, false, overwrite, createNewCopies, spaceId),
         overwrite,
-        trueCopy,
+        createNewCopies,
       }));
     }
     // batch into a single request to save time during test execution
@@ -216,9 +217,9 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
         responseStatusCode,
         responseBody:
           responseBodyOverride ||
-          expectResponseBody(cases, responseStatusCode, true, overwrite, trueCopy, spaceId),
+          expectResponseBody(cases, responseStatusCode, true, overwrite, createNewCopies, spaceId),
         overwrite,
-        trueCopy,
+        createNewCopies,
       },
     ];
   };
@@ -240,7 +241,11 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
           const requestBody = test.request
             .map((obj) => JSON.stringify({ ...obj, ...attrs }))
             .join('\n');
-          const query = test.overwrite ? '?overwrite=true' : test.trueCopy ? '?trueCopy=true' : '';
+          const query = test.overwrite
+            ? '?overwrite=true'
+            : test.createNewCopies
+            ? '?createNewCopies=true'
+            : '';
           await supertest
             .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_import${query}`)
             .auth(user?.username, user?.password)

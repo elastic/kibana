@@ -23,12 +23,12 @@ const ambiguousConflict = (suffix: string) => ({
   fail409Param: `ambiguous_conflict_${suffix}`,
 });
 
-const createTrueCopyTestCases = () => {
+const createNewCopiesTestCases = () => {
   // for each outcome, if failure !== undefined then we expect to receive
   // an error; otherwise, we expect to receive a success result
   const cases = Object.entries(CASES).filter(([key]) => key !== 'HIDDEN');
   return [
-    ...cases.map(([, val]) => ({ ...val, successParam: 'trueCopy' })),
+    ...cases.map(([, val]) => ({ ...val, successParam: 'createNewCopies' })),
     { ...CASES.HIDDEN, ...fail400() },
   ];
 };
@@ -91,11 +91,11 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
 
   const { addTests, createTestDefinitions } = importTestSuiteFactory(es, esArchiver, supertest);
-  const createTests = (overwrite: boolean, trueCopy: boolean, spaceId: string) => {
+  const createTests = (overwrite: boolean, createNewCopies: boolean, spaceId: string) => {
     const singleRequest = true;
-    if (trueCopy) {
-      const cases = createTrueCopyTestCases();
-      return createTestDefinitions(cases, false, { trueCopy, spaceId, singleRequest });
+    if (createNewCopies) {
+      const cases = createNewCopiesTestCases();
+      return createTestDefinitions(cases, false, { createNewCopies, spaceId, singleRequest });
     }
 
     const { group1, group2, group3 } = createTestCases(overwrite, spaceId);
@@ -112,13 +112,13 @@ export default function ({ getService }: FtrProviderContext) {
       [false, true],
       [true, false],
     ]).spaces.forEach(({ spaceId, modifier }) => {
-      const [overwrite, trueCopy] = modifier!;
+      const [overwrite, createNewCopies] = modifier!;
       const suffix = overwrite
         ? ' with overwrite enabled'
-        : trueCopy
-        ? ' with trueCopy enabled'
+        : createNewCopies
+        ? ' with createNewCopies enabled'
         : '';
-      const tests = createTests(overwrite, trueCopy, spaceId);
+      const tests = createTests(overwrite, createNewCopies, spaceId);
       addTests(`within the ${spaceId} space${suffix}`, { spaceId, tests });
     });
   });

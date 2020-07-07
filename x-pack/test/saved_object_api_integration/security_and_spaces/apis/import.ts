@@ -28,11 +28,11 @@ const ambiguousConflict = (suffix: string) => ({
   fail409Param: `ambiguous_conflict_${suffix}`,
 });
 
-const createTrueCopyTestCases = () => {
+const createNewCopiesTestCases = () => {
   // for each outcome, if failure !== undefined then we expect to receive
   // an error; otherwise, we expect to receive a success result
   const cases = Object.entries(CASES).filter(([key]) => key !== 'HIDDEN');
-  const importable = cases.map(([, val]) => ({ ...val, successParam: 'trueCopy' }));
+  const importable = cases.map(([, val]) => ({ ...val, successParam: 'createNewCopies' }));
   const nonImportable = [{ ...CASES.HIDDEN, ...fail400() }];
   const all = [...importable, ...nonImportable];
   return { importable, nonImportable, all };
@@ -104,17 +104,17 @@ export default function ({ getService }: FtrProviderContext) {
     esArchiver,
     supertest
   );
-  const createTests = (overwrite: boolean, trueCopy: boolean, spaceId: string) => {
+  const createTests = (overwrite: boolean, createNewCopies: boolean, spaceId: string) => {
     const singleRequest = true;
 
-    if (trueCopy) {
-      const { importable, nonImportable, all } = createTrueCopyTestCases();
+    if (createNewCopies) {
+      const { importable, nonImportable, all } = createNewCopiesTestCases();
       return {
         unauthorized: [
-          createTestDefinitions(importable, true, { trueCopy, spaceId }),
-          createTestDefinitions(nonImportable, false, { trueCopy, spaceId, singleRequest }),
+          createTestDefinitions(importable, true, { createNewCopies, spaceId }),
+          createTestDefinitions(nonImportable, false, { createNewCopies, spaceId, singleRequest }),
           createTestDefinitions(all, true, {
-            trueCopy,
+            createNewCopies,
             spaceId,
             singleRequest,
             responseBodyOverride: expectForbidden('bulk_create')([
@@ -125,7 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
             ]),
           }),
         ].flat(),
-        authorized: createTestDefinitions(all, false, { trueCopy, spaceId, singleRequest }),
+        authorized: createTestDefinitions(all, false, { createNewCopies, spaceId, singleRequest }),
       };
     }
 
@@ -170,11 +170,15 @@ export default function ({ getService }: FtrProviderContext) {
       [false, true],
       [true, false],
     ]).securityAndSpaces.forEach(({ spaceId, users, modifier }) => {
-      const [overwrite, trueCopy] = modifier!;
+      const [overwrite, createNewCopies] = modifier!;
       const suffix = ` within the ${spaceId} space${
-        overwrite ? ' with overwrite enabled' : trueCopy ? ' with trueCopy enabled' : ''
+        overwrite
+          ? ' with overwrite enabled'
+          : createNewCopies
+          ? ' with createNewCopies enabled'
+          : ''
       }`;
-      const { unauthorized, authorized } = createTests(overwrite, trueCopy, spaceId);
+      const { unauthorized, authorized } = createTests(overwrite, createNewCopies, spaceId);
       const _addTests = (user: TestUser, tests: ImportTestDefinition[]) => {
         addTests(`${user.description}${suffix}`, { user, spaceId, tests });
       };

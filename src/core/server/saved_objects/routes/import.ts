@@ -48,12 +48,12 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
         query: schema.object(
           {
             overwrite: schema.boolean({ defaultValue: false }),
-            trueCopy: schema.boolean({ defaultValue: false }),
+            createNewCopies: schema.boolean({ defaultValue: false }),
           },
           {
             validate: (object) => {
-              if (object.overwrite && object.trueCopy) {
-                return 'cannot use [overwrite] with [trueCopy]';
+              if (object.overwrite && object.createNewCopies) {
+                return 'cannot use [overwrite] with [createNewCopies]';
               }
             },
           }
@@ -64,7 +64,7 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const { overwrite, trueCopy } = req.query;
+      const { overwrite, createNewCopies } = req.query;
       const file = req.body.file as FileStream;
       const fileExtension = extname(file.hapi.filename).toLowerCase();
       if (fileExtension !== '.ndjson') {
@@ -77,7 +77,7 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
         readStream: createSavedObjectsStreamFromNdJson(file),
         objectLimit: maxImportExportSize,
         overwrite,
-        trueCopy,
+        createNewCopies,
       });
 
       return res.ok({ body: result });

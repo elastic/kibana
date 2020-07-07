@@ -46,7 +46,7 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
       },
       validate: {
         query: schema.object({
-          trueCopy: schema.boolean({ defaultValue: false }),
+          createNewCopies: schema.boolean({ defaultValue: false }),
         }),
         body: schema.object({
           file: schema.stream(),
@@ -64,7 +64,7 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
                 }),
                 { defaultValue: [] }
               ),
-              trueCopy: schema.maybe(schema.boolean()),
+              createNewCopy: schema.maybe(schema.boolean()),
             })
           ),
         }),
@@ -83,7 +83,7 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
         readStream: createSavedObjectsStreamFromNdJson(file),
         retries: req.body.retries,
         objectLimit: maxImportExportSize,
-        trueCopy: req.query.trueCopy,
+        createNewCopies: req.query.createNewCopies,
       });
 
       return res.ok({ body: result });

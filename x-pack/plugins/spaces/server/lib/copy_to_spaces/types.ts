@@ -15,7 +15,7 @@ export interface CopyOptions {
   objects: Array<{ type: string; id: string }>;
   overwrite: boolean;
   includeReferences: boolean;
-  trueCopy: boolean;
+  createNewCopies: boolean;
 }
 
 export interface ResolveConflictsOptions {
@@ -24,7 +24,7 @@ export interface ResolveConflictsOptions {
   retries: {
     [spaceId: string]: Array<Omit<SavedObjectsImportRetry, 'replaceReferences'>>;
   };
-  trueCopy: boolean;
+  createNewCopies: boolean;
 }
 
 export interface CopyResponse {

@@ -16,11 +16,11 @@ export interface SavedObjectsImportOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [createNewCopies](./kibana-plugin-core-server.savedobjectsimportoptions.createnewcopies.md) | <code>boolean</code> |  |
 |  [namespace](./kibana-plugin-core-server.savedobjectsimportoptions.namespace.md) | <code>string</code> | if specified, will import in given namespace, else will import as global object |
 |  [objectLimit](./kibana-plugin-core-server.savedobjectsimportoptions.objectlimit.md) | <code>number</code> | The maximum number of object to import |
 |  [overwrite](./kibana-plugin-core-server.savedobjectsimportoptions.overwrite.md) | <code>boolean</code> |  |
 |  [readStream](./kibana-plugin-core-server.savedobjectsimportoptions.readstream.md) | <code>Readable</code> | The stream of [saved objects](./kibana-plugin-core-server.savedobject.md) to import |
 |  [savedObjectsClient](./kibana-plugin-core-server.savedobjectsimportoptions.savedobjectsclient.md) | <code>SavedObjectsClientContract</code> | [client](./kibana-plugin-core-server.savedobjectsclientcontract.md) to use to perform the import operation |
-|  [trueCopy](./kibana-plugin-core-server.savedobjectsimportoptions.truecopy.md) | <code>boolean</code> |  |
 |  [typeRegistry](./kibana-plugin-core-server.savedobjectsimportoptions.typeregistry.md) | <code>ISavedObjectTypeRegistry</code> | The registry of all known saved object types |
 

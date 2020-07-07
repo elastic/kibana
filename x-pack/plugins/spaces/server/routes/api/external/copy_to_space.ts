@@ -63,12 +63,12 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
             ),
             includeReferences: schema.boolean({ defaultValue: false }),
             overwrite: schema.boolean({ defaultValue: false }),
-            trueCopy: schema.boolean({ defaultValue: false }),
+            createNewCopies: schema.boolean({ defaultValue: false }),
           },
           {
             validate: (object) => {
-              if (object.overwrite && object.trueCopy) {
-                return 'cannot use [overwrite] with [trueCopy]';
+              if (object.overwrite && object.createNewCopies) {
+                return 'cannot use [overwrite] with [createNewCopies]';
               }
             },
           }
@@ -88,14 +88,14 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         objects,
         includeReferences,
         overwrite,
-        trueCopy,
+        createNewCopies,
       } = request.body;
       const sourceSpaceId = spacesService.getSpaceId(request);
       const copyResponse = await copySavedObjectsToSpaces(sourceSpaceId, destinationSpaceIds, {
         objects,
         includeReferences,
         overwrite,
-        trueCopy,
+        createNewCopies,
       });
       return response.ok({ body: copyResponse });
     })
@@ -123,7 +123,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
                 id: schema.string(),
                 overwrite: schema.boolean({ defaultValue: false }),
                 destinationId: schema.maybe(schema.string()),
-                trueCopy: schema.maybe(schema.boolean()),
+                createNewCopy: schema.maybe(schema.boolean()),
               })
             )
           ),
@@ -141,7 +141,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
             }
           ),
           includeReferences: schema.boolean({ defaultValue: false }),
-          trueCopy: schema.boolean({ defaultValue: false }),
+          createNewCopies: schema.boolean({ defaultValue: false }),
         }),
       },
     },
@@ -153,7 +153,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         getImportExportObjectLimit,
         request
       );
-      const { objects, includeReferences, retries, trueCopy } = request.body;
+      const { objects, includeReferences, retries, createNewCopies } = request.body;
       const sourceSpaceId = spacesService.getSpaceId(request);
       const resolveConflictsResponse = await resolveCopySavedObjectsToSpacesConflicts(
         sourceSpaceId,
@@ -161,7 +161,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
           objects,
           includeReferences,
           retries,
-          trueCopy,
+          createNewCopies,
         }
       );
       return response.ok({ body: resolveConflictsResponse });

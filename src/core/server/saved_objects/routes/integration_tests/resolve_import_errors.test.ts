@@ -244,7 +244,7 @@ describe(`POST ${URL}`, () => {
     );
   });
 
-  describe('trueCopy enabled', () => {
+  describe('createNewCopies enabled', () => {
     it('imports objects, regenerating all IDs/reference IDs present, and resetting all origin IDs', async () => {
       mockUuidv4.mockReturnValue('new-id-1');
       savedObjectsClient.bulkGet.mockResolvedValueOnce({ saved_objects: [mockIndexPattern] });
@@ -256,7 +256,7 @@ describe(`POST ${URL}`, () => {
       });
 
       const result = await supertest(httpSetup.server.listener)
-        .post(`${URL}?trueCopy=true`)
+        .post(`${URL}?createNewCopies=true`)
         .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
         .send(
           [

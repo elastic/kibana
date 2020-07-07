@@ -45,7 +45,7 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
     spaceId: string,
     objectsStream: Readable,
     retries: SavedObjectsImportRetry[],
-    trueCopy: boolean
+    createNewCopies: boolean
   ) => {
     try {
       const importResponse = await resolveSavedObjectsImportErrors({
@@ -55,7 +55,7 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
         typeRegistry: getTypeRegistry(),
         readStream: objectsStream,
         retries,
-        trueCopy,
+        createNewCopies,
       });
 
       return {
@@ -89,7 +89,7 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
         spaceId,
         createReadableStreamFromArray(exportedSavedObjects),
         retries,
-        options.trueCopy
+        options.createNewCopies
       );
     }
 

@@ -23,12 +23,16 @@ const destinationId = (condition?: boolean) =>
   condition !== false ? { successParam: 'destinationId' } : {};
 const newOrigin = () => ({ successParam: 'newOrigin' });
 
-const createTrueCopyTestCases = () => {
+const createNewCopiesTestCases = () => {
   // for each outcome, if failure !== undefined then we expect to receive
   // an error; otherwise, we expect to receive a success result
   const cases = Object.entries(CASES).filter(([key]) => key !== 'HIDDEN');
   return [
-    ...cases.map(([, val]) => ({ ...val, successParam: 'trueCopy', expectedNewId: uuidv4() })),
+    ...cases.map(([, val]) => ({
+      ...val,
+      successParam: 'createNewCopies',
+      expectedNewId: uuidv4(),
+    })),
     { ...CASES.HIDDEN, ...fail400() },
   ];
 };
@@ -82,13 +86,13 @@ export default function ({ getService }: FtrProviderContext) {
     esArchiver,
     supertest
   );
-  const createTests = (overwrite: boolean, trueCopy: boolean, spaceId: string) => {
+  const createTests = (overwrite: boolean, createNewCopies: boolean, spaceId: string) => {
     const singleRequest = true;
-    if (trueCopy) {
-      const cases = createTrueCopyTestCases();
-      // The resolveImportErrors API doesn't actually have a flag for "trueCopy" mode; rather, we create test cases as if we are resolving
-      // errors from a call to the import API that had trueCopy mode enabled.
-      return createTestDefinitions(cases, false, { trueCopy, spaceId, singleRequest });
+    if (createNewCopies) {
+      const cases = createNewCopiesTestCases();
+      // The resolveImportErrors API doesn't actually have a flag for "createNewCopies" mode; rather, we create test cases as if we are resolving
+      // errors from a call to the import API that had createNewCopies mode enabled.
+      return createTestDefinitions(cases, false, { createNewCopies, spaceId, singleRequest });
     }
 
     const testCases = createTestCases(overwrite, spaceId);
@@ -101,13 +105,13 @@ export default function ({ getService }: FtrProviderContext) {
       [false, true],
       [true, false],
     ]).spaces.forEach(({ spaceId, modifier }) => {
-      const [overwrite, trueCopy] = modifier!;
+      const [overwrite, createNewCopies] = modifier!;
       const suffix = overwrite
         ? ' with overwrite enabled'
-        : trueCopy
-        ? ' with trueCopy enabled'
+        : createNewCopies
+        ? ' with createNewCopies enabled'
         : '';
-      const tests = createTests(overwrite, trueCopy, spaceId);
+      const tests = createTests(overwrite, createNewCopies, spaceId);
       addTests(`within the ${spaceId} space${suffix}`, { spaceId, tests });
     });
   });

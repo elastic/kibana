@@ -88,7 +88,7 @@ describe('#importSavedObjectsFromStream', () => {
 
   const setupOptions = (
     retries: SavedObjectsImportRetry[] = [],
-    trueCopy: boolean = false
+    createNewCopies: boolean = false
   ): SavedObjectsResolveImportErrorsOptions => {
     readStream = new Readable();
     savedObjectsClient = savedObjectsClientMock.create();
@@ -99,9 +99,9 @@ describe('#importSavedObjectsFromStream', () => {
       retries,
       savedObjectsClient,
       typeRegistry,
-      // namespace and trueCopy don't matter, as they don't change the logic in this module, they just get passed to sub-module methods
+      // namespace and createNewCopies don't matter, as they don't change the logic in this module, they just get passed to sub-module methods
       namespace,
-      trueCopy,
+      createNewCopies,
     };
   };
 
@@ -203,8 +203,8 @@ describe('#importSavedObjectsFromStream', () => {
     });
 
     test('checks conflicts', async () => {
-      const trueCopy = (Symbol() as unknown) as boolean;
-      const options = setupOptions([], trueCopy);
+      const createNewCopies = (Symbol() as unknown) as boolean;
+      const options = setupOptions([], createNewCopies);
       const filteredObjects = [createObject()];
       getMockFn(validateReferences).mockResolvedValue({ errors: [], filteredObjects });
 
@@ -213,15 +213,15 @@ describe('#importSavedObjectsFromStream', () => {
         savedObjectsClient,
         namespace,
         ignoreRegularConflicts: true,
-        trueCopy,
+        createNewCopies,
       };
       expect(checkConflicts).toHaveBeenCalledWith(filteredObjects, checkConflictsOptions);
     });
 
     test('gets import ID map for retries', async () => {
       const retries = [createRetry()];
-      const trueCopy = (Symbol() as unknown) as boolean;
-      const options = setupOptions(retries, trueCopy);
+      const createNewCopies = (Symbol() as unknown) as boolean;
+      const options = setupOptions(retries, createNewCopies);
       const filteredObjects = [createObject()];
       getMockFn(checkConflicts).mockResolvedValue({
         errors: [],
@@ -230,7 +230,7 @@ describe('#importSavedObjectsFromStream', () => {
       });
 
       await resolveSavedObjectsImportErrors(options);
-      const opts = { retries, trueCopy };
+      const opts = { retries, createNewCopies };
       expect(getImportIdMapForRetries).toHaveBeenCalledWith(filteredObjects, opts);
     });
 
@@ -248,7 +248,7 @@ describe('#importSavedObjectsFromStream', () => {
       expect(splitOverwrites).toHaveBeenCalledWith(filteredObjects, retries);
     });
 
-    describe('with trueCopy disabled', () => {
+    describe('with createNewCopies disabled', () => {
       test('does not regenerate object IDs', async () => {
         const options = setupOptions();
         const collectedObjects = [createObject()];
@@ -310,7 +310,7 @@ describe('#importSavedObjectsFromStream', () => {
       });
     });
 
-    describe('with trueCopy enabled', () => {
+    describe('with createNewCopies enabled', () => {
       test('regenerates object IDs', async () => {
         const options = setupOptions([], true);
         const collectedObjects = [createObject()];
@@ -408,7 +408,7 @@ describe('#importSavedObjectsFromStream', () => {
       const obj1 = createObject();
       const tmp = createObject();
       const obj2 = { ...tmp, destinationId: 'some-destinationId', originId: tmp.id };
-      const obj3 = { ...createObject(), destinationId: 'another-destinationId' }; // empty originId; this is a true copy
+      const obj3 = { ...createObject(), destinationId: 'another-destinationId' }; // empty originId; this is a new copy
       getMockFn(createSavedObjects).mockResolvedValueOnce({
         errors,
         createdObjects: [obj1],
@@ -423,7 +423,7 @@ describe('#importSavedObjectsFromStream', () => {
       const successResults = [
         { type: obj1.type, id: obj1.id },
         { type: obj2.type, id: obj2.id, destinationId: obj2.destinationId },
-        { type: obj3.type, id: obj3.id, destinationId: obj3.destinationId, trueCopy: true },
+        { type: obj3.type, id: obj3.id, destinationId: obj3.destinationId, createNewCopy: true },
       ];
       expect(result).toEqual({ success: false, successCount: 3, successResults, errors });
     });

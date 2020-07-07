@@ -29,7 +29,7 @@ interface CheckConflictsOptions {
   savedObjectsClient: SavedObjectsClientContract;
   namespace?: string;
   ignoreRegularConflicts?: boolean;
-  trueCopy?: boolean;
+  createNewCopies?: boolean;
 }
 
 const isUnresolvableConflict = (error: SavedObjectError) =>
@@ -48,7 +48,7 @@ export async function checkConflicts(
     return { filteredObjects, errors, importIdMap };
   }
 
-  const { savedObjectsClient, namespace, ignoreRegularConflicts, trueCopy } = options;
+  const { savedObjectsClient, namespace, ignoreRegularConflicts, createNewCopies } = options;
   const checkConflictsResult = await savedObjectsClient.checkConflicts(objects, { namespace });
   const errorMap = checkConflictsResult.errors.reduce(
     (acc, { type, id, error }) => acc.set(`${type}:${id}`, error),
@@ -67,7 +67,7 @@ export async function checkConflicts(
       // with a "multi-namespace" type is exported from one namespace and imported to another, it does not result in an error, but instead a
       // new object is created.
       const destinationId = uuidv4();
-      importIdMap.set(`${type}:${id}`, { id: destinationId, omitOriginId: trueCopy });
+      importIdMap.set(`${type}:${id}`, { id: destinationId, omitOriginId: createNewCopies });
       filteredObjects.push(object);
     } else if (errorObj && errorObj.statusCode !== 409) {
       errors.push({ type, id, title, error: { ...errorObj, type: 'unknown' } });

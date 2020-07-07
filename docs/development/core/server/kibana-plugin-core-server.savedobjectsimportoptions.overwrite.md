@@ -8,7 +8,7 @@
 > 
 > If true, will override existing object if present. This option will be removed and permanently disabled in a future release.
 > 
-> Note: this has no effect when used with the `trueCopy` option.
+> Note: this has no effect when used with the `createNewCopies` option.
 > 
 
 <b>Signature:</b>
