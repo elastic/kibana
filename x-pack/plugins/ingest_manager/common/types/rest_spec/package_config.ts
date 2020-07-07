@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PackageConfig, NewPackageConfig } from '../models';
+import { PackageConfig, NewPackageConfig, UpdatePackageConfig } from '../models';
 
 export interface GetPackageConfigsRequest {
   query: {
@@ -42,7 +42,7 @@ export interface CreatePackageConfigResponse {
 }
 
 export type UpdatePackageConfigRequest = GetOnePackageConfigRequest & {
-  body: NewPackageConfig;
+  body: UpdatePackageConfig;
 };
 
 export type UpdatePackageConfigResponse = CreatePackageConfigResponse;

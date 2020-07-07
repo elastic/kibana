@@ -76,6 +76,7 @@ describe('Metrics UI Observability Homepage Functions', () => {
           metrics: [{ type: 'cpu' }, { type: 'memory' }, { type: 'rx' }, { type: 'tx' }],
           groupBy: [],
           nodeType: 'host',
+          includeTimeseries: true,
           timerange: {
             from: startTime.valueOf(),
             to: endTime.valueOf(),

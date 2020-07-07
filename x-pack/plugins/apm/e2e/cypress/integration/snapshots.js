@@ -1,12 +1,5 @@
 module.exports = {
-  "__version": "4.5.0",
-  "APM": {
-    "Transaction duration charts": {
-      "1": "55 ms",
-      "2": "28 ms",
-      "3": "0 ms"
-    }
-  },
+  "__version": "4.9.0",
   "RUM Dashboard": {
     "Client metrics": {
       "1": "55 ",
