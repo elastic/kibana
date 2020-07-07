@@ -13,8 +13,7 @@ const resources = [
     label: i18n.translate('xpack.observability.resources.documentation', {
       defaultMessage: 'Documentation',
     }),
-    // TODO: caue what's the url?
-    href: 'https://www.elastic.co',
+    href: 'https://www.elastic.co/guide/en/observability/current/observability-ui.html',
   },
   {
     iconType: 'editorComment',
@@ -26,10 +25,9 @@ const resources = [
   {
     iconType: 'training',
     label: i18n.translate('xpack.observability.resources.training', {
-      defaultMessage: 'Training and webinars',
+      defaultMessage: 'Observability fundamentals',
     }),
-    // TODO: caue what's the url?
-    href: 'https://www.elastic.co',
+    href: 'https://www.elastic.co/training/observability-fundamentals',
   },
 ];
 

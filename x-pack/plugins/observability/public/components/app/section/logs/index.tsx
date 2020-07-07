@@ -11,6 +11,9 @@ import { isEmpty } from 'lodash';
 import moment from 'moment';
 import React, { Fragment } from 'react';
 import { useHistory } from 'react-router-dom';
+import { EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiSpacer } from '@elastic/eui';
 import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
 import { useChartTheme } from '../../../../hooks/use_chart_theme';
@@ -68,6 +71,14 @@ export const LogsSection = ({ startTime, endTime, bucketSize }: Props) => {
       appLink={appLink}
       hasError={status === FETCH_STATUS.FAILURE}
     >
+      <EuiTitle size="xs">
+        <h4>
+          {i18n.translate('xpack.observability.overview.logs.subtitle', {
+            defaultMessage: 'Logs rate per minute',
+          })}
+        </h4>
+      </EuiTitle>
+      <EuiSpacer size="s" />
       <EuiFlexGroup>
         {!stats || isEmpty(stats) ? (
           <EuiFlexItem grow={false}>

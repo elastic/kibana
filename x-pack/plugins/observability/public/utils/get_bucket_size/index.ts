@@ -7,7 +7,6 @@
 import moment from 'moment';
 // @ts-ignore
 import { calculateAuto } from './calculate_auto';
-// @ts-ignore
 import { unitToSeconds } from './unit_to_seconds';
 
 export function getBucketSize({

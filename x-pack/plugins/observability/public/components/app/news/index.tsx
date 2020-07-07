@@ -17,7 +17,7 @@ import { ThemeContext } from 'styled-components';
 import './index.scss';
 import { news as newsMockData } from './mock/news.mock.data';
 
-interface News {
+interface NewsItem {
   title: string;
   description: string;
   link_url: string;
@@ -25,7 +25,7 @@ interface News {
 }
 
 export const News = () => {
-  const news: News[] = newsMockData;
+  const newsItems: NewsItem[] = newsMockData;
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
@@ -37,7 +37,7 @@ export const News = () => {
           </h4>
         </EuiTitle>
       </EuiFlexItem>
-      {news.map((item, index) => (
+      {newsItems.map((item, index) => (
         <EuiFlexItem key={index} grow={false}>
           <NewsItem item={item} />
         </EuiFlexItem>
@@ -49,7 +49,7 @@ export const News = () => {
 const limitString = (string: string, limit: number) =>
   `${string.slice(0, limit)}${string.length > limit ? '...' : ''}`;
 
-const NewsItem = ({ item }: { item: News }) => {
+const NewsItem = ({ item }: { item: NewsItem }) => {
   const theme = useContext(ThemeContext);
 
   return (

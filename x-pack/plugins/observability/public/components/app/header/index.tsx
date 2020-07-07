@@ -16,6 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 const Container = styled.div<{ color: string }>`
   background: ${(props) => props.color};
@@ -43,6 +44,7 @@ export const Header = ({
   showAddData = false,
   showGiveFeedback = false,
 }: Props) => {
+  const { core } = usePluginContext();
   return (
     <Container color={color}>
       <Wrapper restrictWidth={restrictWidth}>
@@ -78,8 +80,10 @@ export const Header = ({
           )}
           {showAddData && (
             <EuiFlexItem style={{ alignItems: 'flex-end' }} grow={false}>
-              {/* TODO: caue: what is the URL here? */}
-              <EuiButtonEmpty href="https://www.elastic.co" iconType="plusInCircle">
+              <EuiButtonEmpty
+                href={core.http.basePath.prepend('/app/home#/tutorial_directory/logging')}
+                iconType="plusInCircle"
+              >
                 {i18n.translate('xpack.observability.home.addData', { defaultMessage: 'Add data' })}
               </EuiButtonEmpty>
             </EuiFlexItem>

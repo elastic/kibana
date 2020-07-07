@@ -12,6 +12,6 @@ describe('Resources', () => {
     const { getByText } = render(<Resources />);
     expect(getByText('Documentation')).toBeInTheDocument();
     expect(getByText('Discuss forum')).toBeInTheDocument();
-    expect(getByText('Training and webinars')).toBeInTheDocument();
+    expect(getByText('Observability fundamentals')).toBeInTheDocument();
   });
 });
