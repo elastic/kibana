@@ -99,6 +99,8 @@ export const TemplateForm = ({
     },
     _kbnMeta: {
       isManaged: false,
+      isCloudManaged: false,
+      hasDatastream: false,
       isLegacy,
     },
   };
