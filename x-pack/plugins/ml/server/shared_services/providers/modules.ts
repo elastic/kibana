@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { LegacyAPICaller, KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
 import { DataRecognizer } from '../../models/data_recognizer';
