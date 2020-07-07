@@ -101,7 +101,14 @@ export function getUiSettingDefaults() {
         },
       }),
       type: 'select',
-      options: ['Browser', ...moment.tz.names()],
+      options: [
+        'Browser',
+        ...moment.tz
+          .names()
+          // We need to filter out some time zones, that moment.js knows about, but Elasticsearch
+          // does not understand and would fail thus with a 400 bad request when using them.
+          .filter((tz) => !['America/Nuuk', 'EST', 'HST', 'ROC', 'MST'].includes(tz)),
+      ],
       requiresPageReload: true,
     },
     'dateFormat:scaled': {
