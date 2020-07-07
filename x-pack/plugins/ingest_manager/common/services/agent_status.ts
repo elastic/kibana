@@ -27,8 +27,11 @@ export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentSta
   if (agent.unenrollment_started_at && !agent.unenrolled_at) {
     return 'unenrolling';
   }
-  if (agent.current_error_events.length > 0) {
+  if (agent.last_checkin_status === 'error') {
     return 'error';
+  }
+  if (agent.last_checkin_status === 'degraded') {
+    return 'degraded';
   }
   if (intervalsSinceLastCheckIn >= 4) {
     return 'offline';
