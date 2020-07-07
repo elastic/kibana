@@ -12,7 +12,11 @@ import {
 import * as Registry from '../../registry';
 import { AssetType, KibanaAssetType, AssetReference } from '../../../../types';
 
-type SavedObjectToBe = Required<SavedObjectsBulkCreateObject> & { type: AssetType };
+type SavedObjectToBe = Required<
+  Pick<SavedObjectsBulkCreateObject, 'type' | 'id' | keyof ArchiveAsset>
+> & {
+  type: AssetType;
+};
 export type ArchiveAsset = Pick<
   SavedObject,
   'id' | 'attributes' | 'migrationVersion' | 'references'
