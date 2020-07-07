@@ -72,7 +72,7 @@ export function getPluginPrivileges() {
   const adminMlCapabilitiesKeys = Object.keys(adminMlCapabilities);
   const allMlCapabilitiesKeys = [...adminMlCapabilitiesKeys, ...userMlCapabilitiesKeys];
 
-  const priv = {
+  const privilege = {
     app: [PLUGIN_ID, 'kibana'],
     excludeFromBasePrivileges: true,
     catalogue: [PLUGIN_ID],
@@ -84,12 +84,12 @@ export function getPluginPrivileges() {
 
   return {
     admin: {
-      ...priv,
+      ...privilege,
       api: allMlCapabilitiesKeys.map((k) => `ml:${k}`),
       ui: allMlCapabilitiesKeys,
     },
     user: {
-      ...priv,
+      ...privilege,
       api: userMlCapabilitiesKeys.map((k) => `ml:${k}`),
       ui: userMlCapabilitiesKeys,
     },
