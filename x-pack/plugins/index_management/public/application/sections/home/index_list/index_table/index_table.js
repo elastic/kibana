@@ -121,6 +121,11 @@ export class IndexTable extends Component {
   }
 
   componentWillUnmount() {
+    // When you deep-link to an index from the data streams tab, the hidden indices are toggled on.
+    // However, this state is lost when you navigate away. We need to clear the filter too, or else
+    // navigating back to this tab would just show an empty list because the backing indices
+    // would be hidden.
+    this.props.filterChanged('');
     clearInterval(this.interval);
   }
 
