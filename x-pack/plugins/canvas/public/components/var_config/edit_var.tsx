@@ -17,6 +17,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiSpacer,
+  EuiCallOut,
 } from '@elastic/eui';
 import { CanvasVariable } from '../../../types';
 
@@ -102,6 +103,18 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
         </button>
       </div>
       <div className="canvasSidebar__accordionContent">
+        {!isNew && (
+          <div>
+            <EuiCallOut
+              title="Editing a variable in use may adversely affect your workpad"
+              color="warning"
+              iconType="alert"
+              size="s"
+            />
+            <EuiSpacer size="m" />
+          </div>
+        )}
+
         <EuiForm component="form">
           <EuiFormRow label={strings.getTypeFieldLabel()} display="rowCompressed">
             <EuiSuperSelect
