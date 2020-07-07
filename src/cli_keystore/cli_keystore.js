@@ -18,19 +18,16 @@
  */
 
 import _ from 'lodash';
-import { join } from 'path';
-import { existsSync } from 'fs';
 
-import Logger from '../cli_plugin/lib/logger';
 import { pkg } from '../core/server/utils';
 import Command from '../cli/command';
-import { getConfigDirectory, getDataPath } from '../core/server/path';
 import { Keystore } from '../legacy/server/keystore';
 
 import { createCli } from './create';
 import { listCli } from './list';
 import { addCli } from './add';
 import { removeCli } from './remove';
+import { getKeystore } from './get_keystore';
 
 const argv = process.env.kbnWorkerArgv
   ? JSON.parse(process.env.kbnWorkerArgv)
@@ -40,19 +37,6 @@ const program = new Command('bin/kibana-keystore');
 program
   .version(pkg.version)
   .description('A tool for managing settings stored in the Kibana keystore');
-
-function getKeystore() {
-  const configKeystore = join(getConfigDirectory(), 'kibana.keystore');
-  const dataKeystore = join(getDataPath(), 'kibana.keystore');
-
-  if (existsSync(dataKeystore)) {
-    const logger = new Logger();
-    logger.log(
-      `kibana.keystore path at ${dataKeystore} is deprecated.  Future versions will read from ${configKeystore}.`
-    );
-  }
-  return [configKeystore, dataKeystore].filter((p) => existsSync(p)).shift();
-}
 
 const keystore = new Keystore(getKeystore());
 
