@@ -17,7 +17,7 @@ do
   if [[ ! "${modified_lodash_files[@]}" =~ "${file}" ]]
   then
     cat scripts/license-header.txt > "lodash/$file"
-    echo "/* eslint-disable */\n" >> "lodash/$file"
+    printf "/* eslint-disable */\n\n" >> "lodash/$file"
     cat ".tmp/node_modules/lodash/$file" >> "lodash/$file"
   fi
 done
