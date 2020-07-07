@@ -48,6 +48,7 @@ import {
   displaySuccessToast,
   displayErrorToast,
 } from '../../../common/components/toasters';
+import { getInvestigateInResolverAction } from '../../../timelines/components/timeline/body/helpers';
 
 interface OwnProps {
   timelineId: TimelineIdLiteral;
@@ -331,13 +332,14 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   useEffect(() => {
     initializeTimeline({
-      id: timelineId,
-      documentType: i18n.ALERTS_DOCUMENT_TYPE,
       defaultModel: alertsDefaultModel,
+      documentType: i18n.ALERTS_DOCUMENT_TYPE,
       footerText: i18n.TOTAL_COUNT_OF_ALERTS,
+      id: timelineId,
       loadingText: i18n.LOADING_ALERTS,
-      title: i18n.ALERTS_TABLE_TITLE,
       selectAll: canUserCRUD ? selectAll : false,
+      timelineRowActions: [getInvestigateInResolverAction({ dispatch, timelineId })],
+      title: i18n.ALERTS_TABLE_TITLE,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
