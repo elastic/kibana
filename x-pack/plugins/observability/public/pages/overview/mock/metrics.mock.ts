@@ -14,15 +14,14 @@ const response: MetricsFetchDataResponse = {
   title: 'Metrics',
   appLink: '/app/apm',
   stats: {
-    hosts: { label: 'Hosts', value: 11, type: 'number' },
-    cpu: { label: 'CPU usage', value: 0.8, type: 'percent' },
-    memory: { label: 'Memory Usage', value: 0.362, type: 'percent' },
-    inboundTraffic: { label: 'Inbount traffic', value: 1024, type: 'bytesPerSecond' },
-    outboundTraffic: { label: 'Outbount traffic', value: 1024, type: 'bytesPerSecond' },
+    hosts: { value: 11, type: 'number' },
+    cpu: { value: 0.8, type: 'percent' },
+    memory: { value: 0.362, type: 'percent' },
+    inboundTraffic: { value: 1024, type: 'bytesPerSecond' },
+    outboundTraffic: { value: 1024, type: 'bytesPerSecond' },
   },
   series: {
     outboundTraffic: {
-      label: 'Outbount traffic',
       coordinates: [
         {
           x: 1589805437549,
@@ -67,7 +66,6 @@ const response: MetricsFetchDataResponse = {
       ],
     },
     inboundTraffic: {
-      label: 'Inbound traffic',
       coordinates: [
         {
           x: 1589805437549,
@@ -118,19 +116,17 @@ export const emptyResponse: MetricsFetchDataResponse = {
   title: 'Metrics',
   appLink: '/app/apm',
   stats: {
-    hosts: { label: 'Hosts', value: 0, type: 'number' },
-    cpu: { label: 'CPU usage', value: 0, type: 'percent' },
-    memory: { label: 'Memory Usage', value: 0, type: 'percent' },
-    inboundTraffic: { label: 'Inbount traffic', value: 0, type: 'bytesPerSecond' },
-    outboundTraffic: { label: 'Outbount traffic', value: 0, type: 'bytesPerSecond' },
+    hosts: { value: 0, type: 'number' },
+    cpu: { value: 0, type: 'percent' },
+    memory: { value: 0, type: 'percent' },
+    inboundTraffic: { value: 0, type: 'bytesPerSecond' },
+    outboundTraffic: { value: 0, type: 'bytesPerSecond' },
   },
   series: {
     outboundTraffic: {
-      label: 'Outbount traffic',
       coordinates: [],
     },
     inboundTraffic: {
-      label: 'Inbound traffic',
       coordinates: [],
     },
   },

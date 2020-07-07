@@ -9,7 +9,7 @@ import React from 'react';
 
 export const ErrorPanel = () => {
   return (
-    <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: '100%' }}>
+    <EuiFlexGroup justifyContent="center" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiText color="subdued">
           {i18n.translate('xpack.observability.section.errorPanel', {

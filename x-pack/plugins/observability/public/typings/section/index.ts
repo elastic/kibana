@@ -7,7 +7,7 @@
 import { ObservabilityApp } from '../../../typings/common';
 
 export interface ISection {
-  id: ObservabilityApp;
+  id: ObservabilityApp | 'alert';
   title: string;
   icon: string;
   description: string;

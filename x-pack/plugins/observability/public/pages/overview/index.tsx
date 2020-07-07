@@ -9,7 +9,6 @@ import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 import { EmptySection } from '../../components/app/empty_section';
 import { WithHeaderLayout } from '../../components/app/layout/with_header';
-import { News } from '../../components/app/news';
 import { Resources } from '../../components/app/resources';
 import { AlertsSection } from '../../components/app/section/alerts';
 import { APMSection } from '../../components/app/section/apm';
@@ -18,22 +17,31 @@ import { MetricsSection } from '../../components/app/section/metrics';
 import { UptimeSection } from '../../components/app/section/uptime';
 import { DatePicker, TimePickerTime } from '../../components/shared/data_picker';
 import { fetchHasData } from '../../data_handler';
-import { useFetcher } from '../../hooks/use_fetcher';
+import { useFetcher, FETCH_STATUS } from '../../hooks/use_fetcher';
 import { UI_SETTINGS, useKibanaUISettings } from '../../hooks/use_kibana_ui_settings';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { RouteParams } from '../../routes';
 import { getParsedDate } from '../../utils/date';
 import { getBucketSize } from '../../utils/get_bucket_size';
 import { emptySections } from './emptySection';
+import { LoadingObservability } from './loading_observability';
 
 interface Props {
   routeParams: RouteParams<'/overview'>;
 }
 
+function calculatetBucketSize({ startTime, endTime }: { startTime?: string; endTime?: string }) {
+  if (startTime && endTime) {
+    return getBucketSize({
+      start: moment.utc(startTime).valueOf(),
+      end: moment.utc(endTime).valueOf(),
+      minInterval: '60s',
+    });
+  }
+}
+
 export const OverviewPage = ({ routeParams }: Props) => {
   const { core } = usePluginContext();
-  const result = useFetcher(() => fetchHasData(), []);
-  const hasData = result.data;
 
   const alerts = useFetcher(() => {
     return core.http.get('/api/alerts/_find', {
@@ -43,9 +51,17 @@ export const OverviewPage = ({ routeParams }: Props) => {
       },
     });
   }, []);
+  const alertData = alerts?.data?.data;
 
   const theme = useContext(ThemeContext);
   const timePickerTime = useKibanaUISettings<TimePickerTime>(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
+
+  const result = useFetcher(() => fetchHasData(), []);
+  const hasData = result.data;
+
+  if (!hasData) {
+    return <LoadingObservability />;
+  }
 
   const {
     rangeFrom = timePickerTime.from,
@@ -56,19 +72,17 @@ export const OverviewPage = ({ routeParams }: Props) => {
 
   const startTime = getParsedDate(rangeFrom);
   const endTime = getParsedDate(rangeTo, { roundUp: true });
-  const bucketSize =
-    startTime && endTime
-      ? getBucketSize({
-          start: moment.utc(startTime).valueOf(),
-          end: moment.utc(endTime).valueOf(),
-          minInterval: '60s',
-        })
-      : undefined;
+  const bucketSize = calculatetBucketSize({ startTime, endTime });
 
-  const appEmptySections = emptySections.filter(({ id }) => hasData && !hasData[id]);
-  const showSections = hasData
-    ? Object.values(hasData).some((hasPluginData) => hasPluginData)
-    : false;
+  const appEmptySections = emptySections.filter(({ id }) => {
+    if (id === 'alert') {
+      return alerts.status !== FETCH_STATUS.FAILURE && !alertData?.length;
+    }
+    return !hasData[id];
+  });
+
+  // Hides the data section when all 'hasData' is false or undefined
+  const showDataSections = Object.values(hasData).some((hasPluginData) => hasPluginData);
 
   return (
     <WithHeaderLayout
@@ -87,13 +101,20 @@ export const OverviewPage = ({ routeParams }: Props) => {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiHorizontalRule style={{ width: 'auto', margin: '24px -24px' }} />
+
+      <EuiHorizontalRule
+        style={{
+          width: 'auto', // full width
+          margin: '24px -24px', // counteract page paddings
+        }}
+      />
 
       <EuiFlexGroup>
         <EuiFlexItem grow={6}>
-          {showSections && (
+          {/* Data sections */}
+          {showDataSections && (
             <EuiFlexGroup direction="column">
-              {hasData?.infra_logs && (
+              {hasData.infra_logs && (
                 <EuiFlexItem grow={false}>
                   <LogsSection
                     startTime={startTime}
@@ -102,7 +123,7 @@ export const OverviewPage = ({ routeParams }: Props) => {
                   />
                 </EuiFlexItem>
               )}
-              {hasData?.infra_metrics && (
+              {hasData.infra_metrics && (
                 <EuiFlexItem grow={false}>
                   <MetricsSection
                     startTime={startTime}
@@ -111,7 +132,7 @@ export const OverviewPage = ({ routeParams }: Props) => {
                   />
                 </EuiFlexItem>
               )}
-              {hasData?.apm && (
+              {hasData.apm && (
                 <EuiFlexItem grow={false}>
                   <APMSection
                     startTime={startTime}
@@ -120,7 +141,7 @@ export const OverviewPage = ({ routeParams }: Props) => {
                   />
                 </EuiFlexItem>
               )}
-              {hasData?.uptime && (
+              {hasData.uptime && (
                 <EuiFlexItem grow={false}>
                   <UptimeSection
                     startTime={startTime}
@@ -131,10 +152,18 @@ export const OverviewPage = ({ routeParams }: Props) => {
               )}
             </EuiFlexGroup>
           )}
+
+          {/* Empty sections */}
           {!!appEmptySections.length && (
             <EuiFlexItem>
               <EuiSpacer size="s" />
-              <EuiFlexGrid columns={2} gutterSize="s">
+              <EuiFlexGrid
+                columns={
+                  // when more than 2 empty sections are available show them on 2 columns, otherwise 1
+                  appEmptySections.length > 2 ? 2 : 1
+                }
+                gutterSize="s"
+              >
                 {appEmptySections.map((app) => {
                   return (
                     <EuiFlexItem
@@ -153,19 +182,18 @@ export const OverviewPage = ({ routeParams }: Props) => {
           )}
         </EuiFlexItem>
 
-        {alerts?.data?.data && (
+        {/* Alert section */}
+        {alertData && (
           <EuiFlexItem grow={3}>
-            <AlertsSection alerts={alerts?.data?.data} />
+            <AlertsSection alerts={alertData} />
           </EuiFlexItem>
         )}
 
+        {/* Resources section */}
         <EuiFlexItem grow={1}>
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
               <Resources />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <News />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

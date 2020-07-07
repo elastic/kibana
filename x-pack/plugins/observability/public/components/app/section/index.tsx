@@ -18,14 +18,7 @@ interface Props {
   appLinkName?: string;
 }
 
-export const SectionContainer = ({
-  title,
-  appLink,
-  children,
-  minHeight,
-  hasError,
-  appLinkName,
-}: Props) => {
+export const SectionContainer = ({ title, appLink, children, hasError, appLinkName }: Props) => {
   const { core } = usePluginContext();
   return (
     <EuiAccordion
@@ -53,18 +46,7 @@ export const SectionContainer = ({
     >
       <>
         <EuiSpacer size="s" />
-        <EuiPanel
-          hasShadow
-          style={{
-            minHeight: `${minHeight}px`,
-            /*
-             * This is needed to centralize the error message in the panel.
-             * When a parent container sets min-height its children can't set height:100%
-             * https://bugs.webkit.org/show_bug.cgi?id=26559
-             */
-            height: minHeight ? '1px' : undefined,
-          }}
-        >
+        <EuiPanel hasShadow>
           {hasError ? (
             <ErrorPanel />
           ) : (

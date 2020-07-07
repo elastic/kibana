@@ -3,9 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { AreaSeries, Chart, ScaleType, Settings } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer, EuiStat } from '@elastic/eui';
+import { AreaSeries, ScaleType, Settings } from '@elastic/charts';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer } from '@elastic/eui';
 import numeral from '@elastic/numeral';
+import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 import { SectionContainer } from '../';
@@ -57,10 +58,10 @@ export const MetricsSection = ({ startTime, endTime, bucketSize }: Props) => {
 
   const { title = 'Metrics', appLink, stats, series } = data || {};
 
-  const cpuColor = stats?.cpu.color || theme.eui.euiColorVis7;
-  const memoryColor = stats?.cpu.color || theme.eui.euiColorVis0;
-  const inboundTrafficColor = series?.inboundTraffic.color || theme.eui.euiColorVis3;
-  const outboundTrafficColor = series?.outboundTraffic.color || theme.eui.euiColorVis2;
+  const cpuColor = theme.eui.euiColorVis7;
+  const memoryColor = theme.eui.euiColorVis0;
+  const inboundTrafficColor = theme.eui.euiColorVis3;
+  const outboundTrafficColor = theme.eui.euiColorVis2;
 
   return (
     <SectionContainer
@@ -71,18 +72,20 @@ export const MetricsSection = ({ startTime, endTime, bucketSize }: Props) => {
     >
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiStat
+          <StyledStat
             title={numeral(stats?.hosts.value).format('0a')}
-            description={stats?.hosts.label || ''}
-            titleSize="s"
+            description={i18n.translate('xpack.observability.overview.metrics.hosts', {
+              defaultMessage: 'Hosts',
+            })}
             isLoading={isLoading}
           />
         </EuiFlexItem>
         <EuiFlexItem>
           <StyledStat
             title={numeral(stats?.cpu.value).format('0.0%')}
-            description={stats?.cpu.label || ''}
-            titleSize="s"
+            description={i18n.translate('xpack.observability.overview.metrics.cpuUsage', {
+              defaultMessage: 'CPU Usage',
+            })}
             isLoading={isLoading}
             color={cpuColor}
           >
@@ -100,8 +103,9 @@ export const MetricsSection = ({ startTime, endTime, bucketSize }: Props) => {
         <EuiFlexItem>
           <StyledStat
             title={numeral(stats?.memory.value).format('0.0%')}
-            description={stats?.memory.label || ''}
-            titleSize="s"
+            description={i18n.translate('xpack.observability.overview.metrics.memoryUsage', {
+              defaultMessage: 'Memory usage',
+            })}
             isLoading={isLoading}
             color={memoryColor}
           >
@@ -114,8 +118,9 @@ export const MetricsSection = ({ startTime, endTime, bucketSize }: Props) => {
         <EuiFlexItem>
           <StyledStat
             title={`${numeral(stats?.inboundTraffic.value).format('0.0b')}/s`}
-            description={stats?.inboundTraffic.label || ''}
-            titleSize="s"
+            description={i18n.translate('xpack.observability.overview.metrics.inboundTraffic', {
+              defaultMessage: 'Inbound traffic',
+            })}
             isLoading={isLoading}
             color={inboundTrafficColor}
           >
@@ -129,8 +134,9 @@ export const MetricsSection = ({ startTime, endTime, bucketSize }: Props) => {
         <EuiFlexItem>
           <StyledStat
             title={`${numeral(stats?.outboundTraffic.value).format('0.0b')}/s`}
-            description={stats?.outboundTraffic.label || ''}
-            titleSize="s"
+            description={i18n.translate('xpack.observability.overview.metrics.outboundTraffic', {
+              defaultMessage: 'Outbound traffic',
+            })}
             isLoading={isLoading}
             color={outboundTrafficColor}
           >
@@ -156,14 +162,11 @@ const AreaChart = ({
   color: string;
 }) => {
   const chartTheme = useChartTheme();
-  if (!serie) {
-    return null;
-  }
 
   return (
-    <ChartContainer height={30} width={100} isLoading={isLoading} iconSize="m">
-      <Chart size={{ height: 30, width: 100 }}>
-        <Settings theme={chartTheme} showLegend={false} tooltip="none" />
+    <ChartContainer height={30} isInitialLoad={isLoading && !serie} iconSize="m">
+      <Settings theme={chartTheme} showLegend={false} tooltip="none" />
+      {serie && (
         <AreaSeries
           id="area"
           xScaleType={ScaleType.Time}
@@ -173,7 +176,7 @@ const AreaChart = ({
           data={serie.coordinates}
           color={color}
         />
-      </Chart>
+      )}
     </ChartContainer>
   );
 };

@@ -5,12 +5,23 @@
  */
 import styled from 'styled-components';
 import { EuiStat } from '@elastic/eui';
+import React from 'react';
+import { EuiStatProps } from '@elastic/eui/src/components/stat/stat';
 
-/**
- * This component is needed until EuiStat supports custom colors
- */
-export const StyledStat = styled(EuiStat)`
+const Stat = styled(EuiStat)`
   .euiStat__title {
     color: ${(props) => props.color};
   }
 `;
+
+interface Props extends Partial<EuiStatProps> {
+  children?: React.ReactNode;
+  color?: string;
+}
+
+const EMPTY_VALUE = '--';
+
+export const StyledStat = (props: Props) => {
+  const { description = EMPTY_VALUE, title = EMPTY_VALUE, ...rest } = props;
+  return <Stat description={description} title={title} titleSize="s" {...rest} />;
+};

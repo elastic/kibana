@@ -7,15 +7,15 @@
 import {
   Axis,
   BarSeries,
-  Chart,
   niceTimeFormatter,
   Position,
   ScaleType,
   Settings,
   TickFormatter,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import numeral from '@elastic/numeral';
+import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useContext } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -53,8 +53,8 @@ export const UptimeSection = ({ startTime, endTime, bucketSize }: Props) => {
 
   const { title = 'Uptime', appLink, stats, series } = data || {};
 
-  const downColor = series?.down.color || theme.eui.euiColorVis2;
-  const upColor = series?.up.color || theme.eui.euiColorLightShade;
+  const downColor = theme.eui.euiColorVis2;
+  const upColor = theme.eui.euiColorLightShade;
 
   return (
     <SectionContainer
@@ -66,18 +66,20 @@ export const UptimeSection = ({ startTime, endTime, bucketSize }: Props) => {
       <EuiFlexGroup>
         {/* Stats section */}
         <EuiFlexItem grow={false}>
-          <EuiStat
+          <StyledStat
             title={numeral(stats?.monitors.value).format('0a')}
-            description={stats?.monitors.label || ''}
-            titleSize="s"
+            description={i18n.translate('xpack.observability.overview.uptime.monitors', {
+              defaultMessage: 'Monitors',
+            })}
             isLoading={isLoading}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <StyledStat
             title={numeral(stats?.up.value).format('0a')}
-            description={stats?.up.label || ''}
-            titleSize="s"
+            description={i18n.translate('xpack.observability.overview.uptime.up', {
+              defaultMessage: 'Up',
+            })}
             isLoading={isLoading}
             color={upColor}
           />
@@ -85,8 +87,9 @@ export const UptimeSection = ({ startTime, endTime, bucketSize }: Props) => {
         <EuiFlexItem grow={false}>
           <StyledStat
             title={numeral(stats?.down.value).format('0a')}
-            description={stats?.down.label || ''}
-            titleSize="s"
+            description={i18n.translate('xpack.observability.overview.uptime.down', {
+              defaultMessage: 'Down',
+            })}
             isLoading={isLoading}
             color={downColor}
           />
@@ -94,23 +97,32 @@ export const UptimeSection = ({ startTime, endTime, bucketSize }: Props) => {
       </EuiFlexGroup>
 
       {/* Chart section */}
-      <ChartContainer height={177} isLoading={isLoading}>
-        <Chart size={{ height: 177 }}>
-          <Settings
-            onBrushEnd={({ x }) => onBrushEnd({ x, history })}
-            theme={useChartTheme()}
-            showLegend={false}
-            legendPosition={Position.Right}
-            xDomain={{ min, max }}
-          />
-          <UptimeBarSeries
-            id="down"
-            series={series?.down}
-            ticktFormatter={formatter}
-            color={downColor}
-          />
-          <UptimeBarSeries id="up" series={series?.up} ticktFormatter={formatter} color={upColor} />
-        </Chart>
+      <ChartContainer isInitialLoad={isLoading && !data}>
+        <Settings
+          onBrushEnd={({ x }) => onBrushEnd({ x, history })}
+          theme={useChartTheme()}
+          showLegend={false}
+          legendPosition={Position.Right}
+          xDomain={{ min, max }}
+        />
+        <UptimeBarSeries
+          id="down"
+          label={i18n.translate('xpack.observability.overview.uptime.chart.down', {
+            defaultMessage: 'Down',
+          })}
+          series={series?.down}
+          ticktFormatter={formatter}
+          color={downColor}
+        />
+        <UptimeBarSeries
+          id="up"
+          label={i18n.translate('xpack.observability.overview.uptime.chart.up', {
+            defaultMessage: 'Up',
+          })}
+          series={series?.up}
+          ticktFormatter={formatter}
+          color={upColor}
+        />
       </ChartContainer>
     </SectionContainer>
   );
@@ -118,11 +130,13 @@ export const UptimeSection = ({ startTime, endTime, bucketSize }: Props) => {
 
 const UptimeBarSeries = ({
   id,
+  label,
   series,
   color,
   ticktFormatter,
 }: {
   id: string;
+  label: string;
   series?: Series;
   color: string;
   ticktFormatter: TickFormatter;

@@ -67,4 +67,19 @@ export const emptySections: ISection[] = [
     }),
     href: 'https://www.elastic.co',
   },
+  {
+    id: 'alert',
+    title: i18n.translate('xpack.observability.emptySection.apps.alert.title', {
+      defaultMessage: 'No alerts found.',
+    }),
+    icon: 'watchesApp',
+    description: i18n.translate('xpack.observability.emptySection.apps.alert.description', {
+      defaultMessage:
+        '5003 errors stacking up. Applications not responding. CPU and RAM utilization jumping. See these warnings as they happen - not as part of the post-mortem.',
+    }),
+    linkTitle: i18n.translate('xpack.observability.emptySection.apps.alert.link', {
+      defaultMessage: 'Create alert',
+    }),
+    href: 'https://www.elastic.co',
+  },
 ];

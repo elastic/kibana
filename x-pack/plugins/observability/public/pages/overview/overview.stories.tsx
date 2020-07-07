@@ -119,6 +119,27 @@ storiesOf('app/Overview', module)
   ))
   .add('Empty state', () => {
     unregisterAll();
+    registerDataHandler({
+      appName: 'apm',
+      fetchData: fetchApmData,
+      hasData: async () => false,
+    });
+    registerDataHandler({
+      appName: 'infra_logs',
+      fetchData: fetchLogsData,
+      hasData: async () => false,
+    });
+    registerDataHandler({
+      appName: 'infra_metrics',
+      fetchData: fetchMetricsData,
+      hasData: async () => false,
+    });
+    registerDataHandler({
+      appName: 'uptime',
+      fetchData: fetchUptimeData,
+      hasData: async () => false,
+    });
+
     return <OverviewPage routeParams={{ query: {} }} />;
   });
 
@@ -135,7 +156,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: fetchLogsData,
-      hasData: () => Promise.resolve(true),
+      hasData: async () => true,
     });
     return (
       <OverviewPage
@@ -159,12 +180,12 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: fetchLogsData,
-      hasData: () => Promise.resolve(true),
+      hasData: async () => true,
     });
     registerDataHandler({
       appName: 'infra_metrics',
       fetchData: fetchMetricsData,
-      hasData: () => Promise.resolve(true),
+      hasData: async () => true,
     });
     return (
       <OverviewPage
@@ -188,12 +209,12 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: fetchLogsData,
-      hasData: () => Promise.resolve(true),
+      hasData: async () => true,
     });
     registerDataHandler({
       appName: 'infra_metrics',
       fetchData: fetchMetricsData,
-      hasData: () => Promise.resolve(true),
+      hasData: async () => true,
     });
     return (
       <OverviewPage
@@ -217,17 +238,17 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: fetchLogsData,
-      hasData: () => Promise.resolve(true),
+      hasData: async () => true,
     });
     registerDataHandler({
       appName: 'infra_metrics',
       fetchData: fetchMetricsData,
-      hasData: () => Promise.resolve(true),
+      hasData: async () => true,
     });
     registerDataHandler({
       appName: 'apm',
       fetchData: fetchApmData,
-      hasData: () => Promise.resolve(true),
+      hasData: async () => true,
     });
     return (
       <OverviewPage
@@ -251,22 +272,22 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'apm',
       fetchData: fetchApmData,
-      hasData: () => Promise.resolve(true),
+      hasData: async () => true,
     });
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: fetchLogsData,
-      hasData: () => Promise.resolve(true),
+      hasData: async () => true,
     });
     registerDataHandler({
       appName: 'infra_metrics',
       fetchData: fetchMetricsData,
-      hasData: () => Promise.resolve(true),
+      hasData: async () => true,
     });
     registerDataHandler({
       appName: 'uptime',
       fetchData: fetchUptimeData,
-      hasData: () => Promise.resolve(true),
+      hasData: async () => true,
     });
     return (
       <OverviewPage
@@ -290,22 +311,22 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'apm',
       fetchData: fetchApmData,
-      hasData: () => Promise.resolve(true),
+      hasData: async () => true,
     });
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: fetchLogsData,
-      hasData: () => Promise.resolve(true),
+      hasData: async () => true,
     });
     registerDataHandler({
       appName: 'infra_metrics',
       fetchData: fetchMetricsData,
-      hasData: () => Promise.resolve(true),
+      hasData: async () => true,
     });
     registerDataHandler({
       appName: 'uptime',
       fetchData: fetchUptimeData,
-      hasData: () => Promise.resolve(true),
+      hasData: async () => true,
     });
     return (
       <OverviewPage
@@ -329,22 +350,22 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'apm',
       fetchData: async () => emptyAPMResponse,
-      hasData: () => Promise.resolve(true),
+      hasData: async () => true,
     });
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: async () => emptyLogsResponse,
-      hasData: () => Promise.resolve(true),
+      hasData: async () => true,
     });
     registerDataHandler({
       appName: 'infra_metrics',
       fetchData: async () => emptyMetricsResponse,
-      hasData: () => Promise.resolve(true),
+      hasData: async () => true,
     });
     registerDataHandler({
       appName: 'uptime',
       fetchData: async () => emptyUptimeResponse,
-      hasData: () => Promise.resolve(true),
+      hasData: async () => true,
     });
     return (
       <OverviewPage
@@ -372,35 +393,136 @@ storiesOf('app/Overview', module)
       </PluginContext.Provider>
     </MemoryRouter>
   ))
-  .add('with error', () => {
+  .add('fetch data with error', () => {
     unregisterAll();
     registerDataHandler({
       appName: 'apm',
       fetchData: async () => {
         throw new Error('Error fetching APM data');
       },
-      hasData: () => Promise.resolve(true),
+      hasData: async () => true,
     });
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: async () => {
         throw new Error('Error fetching Logs data');
       },
-      hasData: () => Promise.resolve(true),
+      hasData: async () => true,
     });
     registerDataHandler({
       appName: 'infra_metrics',
       fetchData: async () => {
         throw new Error('Error fetching Metric data');
       },
-      hasData: () => Promise.resolve(true),
+      hasData: async () => true,
     });
     registerDataHandler({
       appName: 'uptime',
       fetchData: async () => {
         throw new Error('Error fetching Uptime data');
       },
-      hasData: () => Promise.resolve(true),
+      hasData: async () => true,
+    });
+    return (
+      <OverviewPage
+        routeParams={{
+          query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
+        }}
+      />
+    );
+  });
+
+storiesOf('app/Overview', module)
+  .addDecorator((storyFn) => (
+    <MemoryRouter>
+      <PluginContext.Provider value={{ core: coreWithAlerts }}>
+        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
+      </PluginContext.Provider>
+    </MemoryRouter>
+  ))
+  .add('hasData with error and alerts', () => {
+    unregisterAll();
+    registerDataHandler({
+      appName: 'apm',
+      fetchData: fetchApmData,
+      // @ts-ignore thows an error instead
+      hasData: async () => {
+        new Error('Error has data');
+      },
+    });
+    registerDataHandler({
+      appName: 'infra_logs',
+      fetchData: fetchLogsData,
+      // @ts-ignore thows an error instead
+      hasData: async () => {
+        new Error('Error has data');
+      },
+    });
+    registerDataHandler({
+      appName: 'infra_metrics',
+      fetchData: fetchMetricsData,
+      // @ts-ignore thows an error instead
+      hasData: async () => {
+        new Error('Error has data');
+      },
+    });
+    registerDataHandler({
+      appName: 'uptime',
+      fetchData: fetchUptimeData,
+      // @ts-ignore thows an error instead
+      hasData: async () => {
+        new Error('Error has data');
+      },
+    });
+    return (
+      <OverviewPage
+        routeParams={{
+          query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
+        }}
+      />
+    );
+  });
+storiesOf('app/Overview', module)
+  .addDecorator((storyFn) => (
+    <MemoryRouter>
+      <PluginContext.Provider value={{ core }}>
+        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
+      </PluginContext.Provider>
+    </MemoryRouter>
+  ))
+  .add('hasData with error', () => {
+    unregisterAll();
+    registerDataHandler({
+      appName: 'apm',
+      fetchData: fetchApmData,
+      // @ts-ignore thows an error instead
+      hasData: async () => {
+        new Error('Error has data');
+      },
+    });
+    registerDataHandler({
+      appName: 'infra_logs',
+      fetchData: fetchLogsData,
+      // @ts-ignore thows an error instead
+      hasData: async () => {
+        new Error('Error has data');
+      },
+    });
+    registerDataHandler({
+      appName: 'infra_metrics',
+      fetchData: fetchMetricsData,
+      // @ts-ignore thows an error instead
+      hasData: async () => {
+        new Error('Error has data');
+      },
+    });
+    registerDataHandler({
+      appName: 'uptime',
+      fetchData: fetchUptimeData,
+      // @ts-ignore thows an error instead
+      hasData: async () => {
+        new Error('Error has data');
+      },
     });
     return (
       <OverviewPage

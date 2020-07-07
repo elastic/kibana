@@ -617,20 +617,15 @@ export const emptyResponse: ApmFetchDataResponse = {
   stats: {
     services: {
       type: 'number',
-      label: 'Services',
       value: 0,
     },
     transactions: {
       type: 'number',
-      label: 'Transactions',
       value: 0,
-      color: '#6092c0',
     },
   },
   series: {
     transactions: {
-      label: 'Transactions',
-      color: '#6092c0',
       coordinates: [],
     },
   },

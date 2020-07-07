@@ -8,9 +8,7 @@ import { ObservabilityApp } from '../../../typings/common';
 
 export interface Stat {
   type: 'number' | 'percent' | 'bytesPerSecond';
-  label: string;
   value: number;
-  color?: string;
 }
 
 export interface Coordinates {
@@ -19,9 +17,7 @@ export interface Coordinates {
 }
 
 export interface Series {
-  label: string;
   coordinates: Coordinates[];
-  color?: string;
 }
 
 export interface FetchDataParams {
@@ -50,8 +46,8 @@ export interface FetchDataResponse {
 }
 
 export interface LogsFetchDataResponse extends FetchDataResponse {
-  stats: Record<string, Stat>;
-  series: Record<string, Series>;
+  stats: Record<string, Stat & { label: string }>;
+  series: Record<string, Series & { label: string }>;
 }
 
 export interface MetricsFetchDataResponse extends FetchDataResponse {
