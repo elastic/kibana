@@ -31,6 +31,13 @@ export const ADD_EXCEPTION_SUCCESS = i18n.translate(
   }
 );
 
+export const ADD_EXCEPTION_FETCH_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.exceptions.addException.fetchError.title',
+  {
+    defaultMessage: 'Error',
+  }
+);
+
 export const ADD_EXCEPTION_FETCH_ERROR = i18n.translate(
   'xpack.securitySolution.exceptions.addException.fetchError',
   {

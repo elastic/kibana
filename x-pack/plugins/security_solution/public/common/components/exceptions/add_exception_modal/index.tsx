@@ -260,7 +260,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         </ModalHeader>
 
         {fetchOrCreateListError === true && (
-          <EuiCallOut title={'Error'} color="danger" iconType="alert">
+          <EuiCallOut title={i18n.ADD_EXCEPTION_FETCH_ERROR_TITLE} color="danger" iconType="alert">
             <p>{i18n.ADD_EXCEPTION_FETCH_ERROR}</p>
           </EuiCallOut>
         )}
@@ -278,7 +278,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                 <EuiSpacer />
                 <ExceptionBuilder
                   exceptionListItems={initialExceptionItems}
-                  listType={exceptionListType as 'endpoint' | 'detection'}
+                  listType={exceptionListType}
                   listId={ruleExceptionList.list_id}
                   listNamespaceType={ruleExceptionList.namespace_type}
                   ruleName={ruleName}

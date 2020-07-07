@@ -103,7 +103,7 @@ export const useFetchOrCreateRuleExceptionList = ({
     }
 
     async function fetchRuleExceptionLists(ruleResponse: Rule): Promise<ExceptionListSchema[]> {
-      const exceptionListReferences = ruleResponse.exceptions_list as ListArray;
+      const exceptionListReferences = ruleResponse.exceptions_list;
       if (exceptionListReferences && exceptionListReferences.length > 0) {
         const exceptionListPromises = exceptionListReferences.map(
           (exceptionListReference: List) => {

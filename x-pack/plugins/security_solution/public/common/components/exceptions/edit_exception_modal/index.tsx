@@ -201,7 +201,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
             <ModalBodySection className="builder-section">
               <ExceptionBuilder
                 exceptionListItems={[exceptionItem]}
-                listType={exceptionListType as 'endpoint' | 'detection'}
+                listType={exceptionListType}
                 listId={exceptionItem.list_id}
                 listNamespaceType={exceptionItem.namespace_type}
                 ruleName={ruleName}

@@ -13,6 +13,7 @@ import { savedRuleMock } from '../../../alerts/containers/detection_engine/rules
 import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { ExceptionListType } from '../../../lists_plugin_deps';
 import { ListArray } from '../../../../common/detection_engine/schemas/types';
+import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import {
   useFetchOrCreateRuleExceptionList,
   UseFetchOrCreateRuleExceptionListProps,
@@ -55,18 +56,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
     ...endpointExceptionList,
     name: 'new endpoint exception list',
   };
-  const exceptionsListReferences: ListArray = [
-    {
-      id: 'listId1',
-      type: detectionListType,
-      namespace_type: 'single',
-    },
-    {
-      id: 'listId2',
-      type: endpointListType,
-      namespace_type: 'agnostic',
-    },
-  ];
+  const exceptionsListReferences: ListArray = getListArrayMock();
   const ruleWithExceptionLists = {
     ...savedRuleMock,
     exceptions_list: exceptionsListReferences,
