@@ -65,9 +65,9 @@ const SAFER_LODASH_SET_LODASH_HEADER = `
  */
 `;
 
-const SAFER_LODASH_SET_DEFINITLYTYPED_HEADER = `
+const SAFER_LODASH_SET_DEFINITELYTYPED_HEADER = `
 /*
- * This file is forked from the DefinitlyTyped project (https://github.com/DefinitelyTyped/DefinitelyTyped),
+ * This file is forked from the DefinitelyTyped project (https://github.com/DefinitelyTyped/DefinitelyTyped),
  * and may include modifications made by Elasticsearch B.V.
  * Elasticsearch B.V. licenses this file to you under the MIT License.
  * See \`packages/elastic-safer-lodash-set/LICENSE\` more information.
@@ -172,7 +172,7 @@ module.exports = {
               ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
-              SAFER_LODASH_SET_DEFINITLYTYPED_HEADER,
+              SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
             ],
           },
         ],
@@ -208,7 +208,7 @@ module.exports = {
               APACHE_2_0_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
-              SAFER_LODASH_SET_DEFINITLYTYPED_HEADER,
+              SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
             ],
           },
         ],
@@ -234,7 +234,7 @@ module.exports = {
               ELASTIC_LICENSE_HEADER,
               APACHE_2_0_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
-              SAFER_LODASH_SET_DEFINITLYTYPED_HEADER,
+              SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
             ],
           },
         ],
@@ -256,7 +256,7 @@ module.exports = {
               ELASTIC_LICENSE_HEADER,
               APACHE_2_0_LICENSE_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
-              SAFER_LODASH_SET_DEFINITLYTYPED_HEADER,
+              SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
             ],
           },
         ],
@@ -268,7 +268,7 @@ module.exports = {
         '@kbn/eslint/require-license-header': [
           'error',
           {
-            license: SAFER_LODASH_SET_DEFINITLYTYPED_HEADER,
+            license: SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
           },
         ],
         '@kbn/eslint/disallow-license-headers': [
