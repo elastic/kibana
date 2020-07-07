@@ -85,8 +85,8 @@ describe('test alerts route', () => {
   let ingestSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
-    mockClusterClient = elasticsearchServiceMock.createClusterClient();
-    mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
+    mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
+    mockScopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
     mockSavedObjectClient = savedObjectsClientMock.create();
     mockResponse = httpServerMock.createResponseFactory();
     mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
