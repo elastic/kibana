@@ -80,7 +80,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
           <p>
             <FormattedMessage
               id="xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsDescription"
-              defaultMessage="Data streams represent collections of time series indices."
+              defaultMessage="Data streams store time-series data across multiple indices."
             />
             {' ' /* We need this space to separate these two sentences. */}
             {ingestManager ? (
@@ -138,7 +138,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
         <EuiText color="subdued">
           <FormattedMessage
             id="xpack.idxMgmt.dataStreamList.dataStreamsDescription"
-            defaultMessage="Data streams represent collections of time series indices. {learnMoreLink}"
+            defaultMessage="Data streams store time-series data across multiple indices. {learnMoreLink}"
             values={{
               learnMoreLink: (
                 <EuiLink

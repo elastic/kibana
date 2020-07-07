@@ -82,7 +82,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
                 content={
                   <FormattedMessage
                     id="xpack.idxMgmt.dataStreamDetailPanel.timestampFieldToolTip"
-                    defaultMessage="The field that determines each document's age"
+                    defaultMessage="Timestamp field shared by all documents in the stream"
                   />
                 }
                 position="top"
@@ -107,7 +107,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
                 content={
                   <FormattedMessage
                     id="xpack.idxMgmt.dataStreamDetailPanel.generationToolTip"
-                    defaultMessage="The number of backing indices created"
+                    defaultMessage="Cumulative count of backing indices created for the data stream"
                   />
                 }
                 position="top"
