@@ -21,9 +21,16 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   };
 
   const expectResponse = (result: any) => {
-    expect(result.error).to.be(undefined);
-    expect(result.response).not.to.be(undefined);
-    expect(result.response).to.have.property('statusCode', 200);
+    if (result.response && result.response.statusCode === 400) {
+      // expect a change of telemetry settings to fail in cloud environment
+      expect(result.response.body.message).to.be(
+        '{"error":"Not allowed to change Opt-in Status."}'
+      );
+    } else {
+      expect(result.error).to.be(undefined);
+      expect(result.response).not.to.be(undefined);
+      expect(result.response).to.have.property('statusCode', 200);
+    }
   };
 
   async function saveAdvancedSetting(username: string, password: string, spaceId?: string) {

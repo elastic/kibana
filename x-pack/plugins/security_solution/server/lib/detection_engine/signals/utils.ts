@@ -84,24 +84,44 @@ export const getExceptions = async ({
           lists
             .map(async (list) => {
               const { id, namespace_type: namespaceType } = list;
-              const items = await client.findExceptionListItem({
-                listId: id,
-                namespaceType,
-                page: 1,
-                perPage: 5000,
-                filter: undefined,
-                sortOrder: undefined,
-                sortField: undefined,
-              });
-              return items != null ? items.data : [];
+              try {
+                // TODO update once exceptions client `findExceptionListItem`
+                // accepts an array of list ids
+                const foundList = await client.getExceptionList({
+                  id,
+                  namespaceType,
+                  listId: undefined,
+                });
+
+                if (foundList == null) {
+                  return [];
+                } else {
+                  const items = await client.findExceptionListItem({
+                    listId: foundList.list_id,
+                    namespaceType,
+                    page: 1,
+                    perPage: 5000,
+                    filter: undefined,
+                    sortOrder: undefined,
+                    sortField: undefined,
+                  });
+                  return items != null ? items.data : [];
+                }
+              } catch {
+                throw new Error('unable to fetch exception list items');
+              }
             })
             .flat()
         );
         return exceptions.flat();
       } catch {
-        return [];
+        throw new Error('unable to fetch exception list items');
       }
+    } else {
+      return [];
     }
+  } else {
+    return [];
   }
 };
 

@@ -39,7 +39,7 @@ import { initSavedObjects, savedObjectTypes } from './saved_objects';
 import { AppClientFactory } from './client';
 import { createConfig$, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
-import { APP_ID, APP_ICON, SERVER_APP_ID } from '../common/constants';
+import { APP_ID, APP_ICON, SERVER_APP_ID, SecurityPageName } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
@@ -69,6 +69,17 @@ export interface StartPlugins {
 export interface PluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
+
+const securitySubPlugins = [
+  APP_ID,
+  `${APP_ID}:${SecurityPageName.overview}`,
+  `${APP_ID}:${SecurityPageName.alerts}`,
+  `${APP_ID}:${SecurityPageName.hosts}`,
+  `${APP_ID}:${SecurityPageName.network}`,
+  `${APP_ID}:${SecurityPageName.timelines}`,
+  `${APP_ID}:${SecurityPageName.case}`,
+  `${APP_ID}:${SecurityPageName.management}`,
+];
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private readonly logger: Logger;
@@ -144,12 +155,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }),
       order: 1100,
       icon: APP_ICON,
-      navLinkId: 'securitySolution',
-      app: ['securitySolution', 'kibana'],
+      navLinkId: APP_ID,
+      app: [...securitySubPlugins, 'kibana'],
       catalogue: ['securitySolution'],
       privileges: {
         all: {
-          app: ['securitySolution', 'kibana'],
+          app: [...securitySubPlugins, 'kibana'],
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
           savedObject: {
@@ -177,7 +188,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ],
         },
         read: {
-          app: ['securitySolution', 'kibana'],
+          app: [...securitySubPlugins, 'kibana'],
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
           savedObject: {
