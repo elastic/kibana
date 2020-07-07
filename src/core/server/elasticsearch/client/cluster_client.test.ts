@@ -175,7 +175,7 @@ describe('ClusterClient', () => {
       });
     });
 
-    it('includes the `customHeaders` from the config when creating the child client', () => {
+    it('includes the `customHeaders` from the config without filtering them', () => {
       const config = createConfig({
         customHeaders: {
           foo: 'bar',

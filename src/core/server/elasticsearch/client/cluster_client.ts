@@ -61,7 +61,7 @@ export interface ICustomClusterClient extends IClusterClient {
 }
 
 /** @internal **/
-export class ClusterClient implements IClusterClient, ICustomClusterClient {
+export class ClusterClient implements ICustomClusterClient {
   public readonly asInternalUser: Client;
   private readonly rootScopedClient: Client;
 
