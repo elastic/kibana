@@ -32,13 +32,11 @@ source `$HOME/.zshrc` or `${HOME}.bashrc` to ensure variables are set:
 source ~/.zshrc
 ```
 
-Open your `kibana.dev.yml` file and add these lines:
+Open your `kibana.dev.yml` file and add these lines with your name:
 
 ```sh
-# Enable lists feature
-xpack.lists.enabled: true
-xpack.lists.listIndex: '.lists-frank'
-xpack.lists.listItemIndex: '.items-frank'
+xpack.lists.listIndex: '.lists-your-name'
+xpack.lists.listItemIndex: '.items-your-name'
 ```
 
 Restart Kibana and ensure that you are using `--no-base-path` as changing the base path is a feature but will

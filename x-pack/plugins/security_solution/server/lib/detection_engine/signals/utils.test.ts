@@ -12,8 +12,6 @@ import { listMock } from '../../../../../lists/server/mocks';
 import { EntriesArray } from '../../../../common/detection_engine/lists_common_deps';
 import { buildRuleMessageFactory } from './rule_messages';
 
-import * as featureFlags from '../feature_flags';
-
 import {
   generateId,
   parseInterval,
@@ -558,8 +556,6 @@ describe('utils', () => {
     });
 
     test('it successfully returns list and exceptions list client', async () => {
-      jest.spyOn(featureFlags, 'hasListsFeature').mockReturnValue(true);
-
       const { listClient, exceptionsClient } = await getListsClient({
         services: alertServices,
         savedObjectClient: alertServices.savedObjectsClient,
@@ -572,23 +568,7 @@ describe('utils', () => {
       expect(exceptionsClient).toBeDefined();
     });
 
-    test('it returns list and exceptions client of "undefined" if lists feature flag is off', async () => {
-      jest.spyOn(featureFlags, 'hasListsFeature').mockReturnValue(false);
-
-      const listsClient = await getListsClient({
-        services: alertServices,
-        savedObjectClient: alertServices.savedObjectsClient,
-        updatedByUser: 'some_user',
-        spaceId: '',
-        lists: listMock.createSetup(),
-      });
-
-      expect(listsClient).toEqual({ listClient: undefined, exceptionsClient: undefined });
-    });
-
     test('it throws if "lists" is undefined', async () => {
-      jest.spyOn(featureFlags, 'hasListsFeature').mockReturnValue(true);
-
       await expect(() =>
         getListsClient({
           services: alertServices,
