@@ -3,13 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Observable } from 'rxjs';
+
 import * as Rx from 'rxjs';
 
 export class AbortError extends Error {}
 
 export const toPromiseAbortable = <T>(
-  observable: Observable<T>,
+  observable: Rx.Observable<T>,
   signal?: AbortSignal
 ): Promise<T> =>
   new Promise((resolve, reject) => {
@@ -53,18 +53,18 @@ export function createLimiter(ratelimitIntervalMs: number, ratelimitRequestPerIn
 
   let currentInterval: { startedAt: number; numRequests: number } = createCurrentInterval();
   let observers: Array<[Rx.Subscriber<any>, any]> = [];
-  let timerSubsription: Rx.Subscription | undefined;
+  let timerSubscription: Rx.Subscription | undefined;
 
-  function createTimout() {
-    if (timerSubsription) {
+  function createTimeout() {
+    if (timerSubscription) {
       return;
     }
-    timerSubsription = Rx.asyncScheduler.schedule(() => {
-      timerSubsription = undefined;
+    timerSubscription = Rx.asyncScheduler.schedule(() => {
+      timerSubscription = undefined;
       currentInterval = createCurrentInterval();
       for (const [waitingObserver, value] of observers) {
         if (currentInterval.numRequests >= ratelimitRequestPerInterval) {
-          createTimout();
+          createTimeout();
           continue;
         }
         currentInterval.numRequests++;
@@ -75,7 +75,7 @@ export function createLimiter(ratelimitIntervalMs: number, ratelimitRequestPerIn
 
   return function limit<T>(): Rx.MonoTypeOperatorFunction<T> {
     return (observable) =>
-      new Observable<T>((observer) => {
+      new Rx.Observable<T>((observer) => {
         const subscription = observable.subscribe({
           next(value) {
             if (currentInterval.numRequests < ratelimitRequestPerInterval) {
@@ -85,7 +85,7 @@ export function createLimiter(ratelimitIntervalMs: number, ratelimitRequestPerIn
             }
 
             observers = [...observers, [observer, value]];
-            createTimout();
+            createTimeout();
           },
           error(err) {
             observer.error(err);
