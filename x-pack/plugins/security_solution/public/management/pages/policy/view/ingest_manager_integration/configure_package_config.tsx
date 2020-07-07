@@ -37,7 +37,8 @@ export const ConfigureEndpointPackageConfig = memo<CustomConfigurePackageConfigC
       if (from !== 'edit') {
         return undefined;
       }
-      const navigateTo = [
+      const navigateTo: PolicyDetailsRouteState['onSaveNavigateTo'] &
+        PolicyDetailsRouteState['onCancelNavigateTo'] = [
         'ingestManager',
         { path: `#/configs/${agentConfigId}/edit-integration/${packageConfigId}` },
       ];

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,6 +21,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
+import { ApplicationStart } from 'kibana/public';
 import { usePolicyDetailsSelector } from './policy_hooks';
 import {
   policyDetails,
@@ -109,11 +110,10 @@ export const PolicyDetails = React.memo(() => {
 
   const handleBackToListOnClick = useNavigateByRouterEventHandler(getPoliciesPath());
 
-  const handleCancelOnClick = useNavigateToAppEventHandler(
-    ...(routeState && routeState.onCancelNavigateTo
-      ? routeState.onCancelNavigateTo
-      : [MANAGEMENT_APP_ID, { path: getPoliciesPath() }]) // << FIXME: PT - cache this array or input to the `useNavigateToAppEventHandler()`
-  );
+  const navigateToAppArguments = useMemo((): Parameters<ApplicationStart['navigateToApp']> => {
+    return routeState?.onCancelNavigateTo ?? [MANAGEMENT_APP_ID, { path: getPoliciesPath() }];
+  }, [routeState?.onCancelNavigateTo]);
+  const handleCancelOnClick = useNavigateToAppEventHandler(...navigateToAppArguments);
 
   const handleSaveOnClick = useCallback(() => {
     setShowConfirm(true);
