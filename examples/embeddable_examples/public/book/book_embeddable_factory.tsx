@@ -80,14 +80,6 @@ export class BookEmbeddableFactoryDefinition
     return true;
   }
 
-  public createFromSavedObject = async (
-    savedObjectId: string,
-    input: BookEmbeddableInput,
-    parent?: IContainer
-  ): Promise<BookEmbeddable | ErrorEmbeddable> => {
-    return this.create(input, parent);
-  };
-
   public async create(input: BookEmbeddableInput, parent?: IContainer) {
     return new BookEmbeddable(input, await this.getAttributeService(), {
       parent,
