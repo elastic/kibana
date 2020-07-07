@@ -73,15 +73,19 @@ export type _Tags = t.TypeOf<typeof _tags>;
 export const _tagsOrUndefined = t.union([_tags, t.undefined]);
 export type _TagsOrUndefined = t.TypeOf<typeof _tagsOrUndefined>;
 
-// TODO: Change this into a t.keyof enumeration when we know what types of lists we going to have.
-export const exceptionListType = t.string;
+export const exceptionListType = t.keyof({ detection: null, endpoint: null });
 export const exceptionListTypeOrUndefined = t.union([exceptionListType, t.undefined]);
 export type ExceptionListType = t.TypeOf<typeof exceptionListType>;
 export type ExceptionListTypeOrUndefined = t.TypeOf<typeof exceptionListTypeOrUndefined>;
+export enum ExceptionListTypeEnum {
+  DETECTION = 'detection',
+  ENDPOINT = 'endpoint',
+}
 
-// TODO: Change this into a t.keyof enumeration when we know what types of lists we going to have.
-export const exceptionListItemType = t.string;
+export const exceptionListItemType = t.keyof({ simple: null });
+export const exceptionListItemTypeOrUndefined = t.union([exceptionListItemType, t.undefined]);
 export type ExceptionListItemType = t.TypeOf<typeof exceptionListItemType>;
+export type ExceptionListItemTypeOrUndefined = t.TypeOf<typeof exceptionListItemTypeOrUndefined>;
 
 export const list_type = t.keyof({ item: null, list: null });
 export type ListType = t.TypeOf<typeof list_type>;
