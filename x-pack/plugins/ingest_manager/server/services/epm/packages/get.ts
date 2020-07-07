@@ -26,7 +26,7 @@ export async function getPackages(
     savedObjectsClient: SavedObjectsClientContract;
   } & Registry.SearchParams
 ) {
-  const { savedObjectsClient, experimental = false, category } = options;
+  const { savedObjectsClient, experimental, category } = options;
   const registryItems = await Registry.fetchList({ category, experimental }).then((items) => {
     return items.map((item) =>
       Object.assign({}, item, { title: item.title || nameAsTitle(item.name) })
@@ -56,7 +56,7 @@ export async function getLimitedPackages(options: {
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<string[]> {
   const { savedObjectsClient } = options;
-  const allPackages = await getPackages({ savedObjectsClient });
+  const allPackages = await getPackages({ savedObjectsClient, experimental: true });
   const installedPackages = allPackages.filter(
     (pkg) => (pkg.status = InstallationStatus.installed)
   );

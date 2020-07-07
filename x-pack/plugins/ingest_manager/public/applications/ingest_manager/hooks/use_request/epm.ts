@@ -21,7 +21,7 @@ export const useGetCategories = (query: GetCategoriesRequest['query'] = {}) => {
   return useRequest<GetCategoriesResponse>({
     path: epmRouteService.getCategoriesPath(),
     method: 'get',
-    query,
+    query: { experimental: true, ...query },
   });
 };
 
@@ -29,7 +29,7 @@ export const useGetPackages = (query: GetPackagesRequest['query'] = {}) => {
   return useRequest<GetPackagesResponse>({
     path: epmRouteService.getListPath(),
     method: 'get',
-    query,
+    query: { experimental: true, ...query },
   });
 };
 

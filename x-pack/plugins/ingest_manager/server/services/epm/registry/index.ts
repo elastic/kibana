@@ -37,28 +37,24 @@ export const pkgToPkgKey = ({ name, version }: { name: string; version: string }
   `${name}-${version}`;
 
 export async function fetchList(params?: SearchParams): Promise<RegistrySearchResults> {
-  const options = { ...(params || {}), experimental: true };
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/search`);
-  if (options) {
-    if (options.category) {
-      url.searchParams.set('category', options.category);
+  if (params) {
+    if (params.category) {
+      url.searchParams.set('category', params.category);
     }
-    if (options.experimental) {
-      url.searchParams.set('experimental', options.experimental.toString());
+    if (params.experimental) {
+      url.searchParams.set('experimental', params.experimental.toString());
     }
   }
 
   return fetchUrl(url.toString()).then(JSON.parse);
 }
 
-export async function fetchFindLatestPackage(
-  packageName: string,
-  internal: boolean = true
-): Promise<RegistrySearchResult> {
+export async function fetchFindLatestPackage(packageName: string): Promise<RegistrySearchResult> {
   const registryUrl = getRegistryUrl();
   const url = new URL(
-    `${registryUrl}/search?package=${packageName}&internal=${internal}&experimental=true`
+    `${registryUrl}/search?package=${packageName}&internal=true&experimental=true`
   );
   const res = await fetchUrl(url.toString());
   const searchResults = JSON.parse(res);
@@ -80,12 +76,11 @@ export async function fetchFile(filePath: string): Promise<Response> {
 }
 
 export async function fetchCategories(params?: CategoriesParams): Promise<CategorySummaryList> {
-  const options = { ...(params || {}), experimental: true };
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/categories`);
-  if (options) {
-    if (options.experimental) {
-      url.searchParams.set('experimental', options.experimental.toString());
+  if (params) {
+    if (params.experimental) {
+      url.searchParams.set('experimental', params.experimental.toString());
     }
   }
 
