@@ -31,7 +31,7 @@ import { NoWriteAlertsCallOut } from '../../components/no_write_alerts_callout';
 import { AlertsHistogramPanel } from '../../components/alerts_histogram_panel';
 import { alertsHistogramOptions } from '../../components/alerts_histogram_panel/config';
 import { useUserInfo } from '../../components/user_info';
-import { DetectionEngineEmptyPage } from './detection_engine_empty_page';
+import { OverviewEmpty } from '../../../overview/components/overview_empty';
 import { DetectionEngineNoIndex } from './detection_engine_no_signal_index';
 import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
 import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
@@ -159,7 +159,7 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
       ) : (
         <WrapperPage>
           <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
-          <DetectionEngineEmptyPage />
+          <OverviewEmpty />
         </WrapperPage>
       )}
       <SpyRoute pageName={SecurityPageName.alerts} />
