@@ -4,55 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ResponseObject, ResponseToolkit } from 'hapi';
-import { difference } from 'lodash';
 import { Headers, KibanaRequest } from 'kibana/server';
-import { BaseReturnType } from '../../common/return_types';
-import {
-  BackendFrameworkAdapter,
-  FrameworkRequest,
-  FrameworkResponse,
-  FrameworkUser,
-} from './adapters/framework/adapter_types';
+import { BackendFrameworkAdapter, FrameworkUser } from './adapters/framework/adapter_types';
+import { BeatsManagementConfigType } from '../../common';
 
 export class BackendFrameworkLib {
   public log = this.adapter.log;
-  public on = this.adapter.on.bind(this.adapter);
   public internalUser = this.adapter.internalUser;
-  constructor(private readonly adapter: BackendFrameworkAdapter) {
+
+  constructor(
+    private readonly adapter: BackendFrameworkAdapter,
+    private readonly config: BeatsManagementConfigType
+  ) {
     this.validateConfig();
   }
 
-  public registerRoute<
-    RouteRequest extends FrameworkRequest,
-    RouteResponse extends FrameworkResponse
-  >(route: {
-    path: string;
-    method: string | string[];
-    licenseRequired?: string[];
-    requiredRoles?: string[];
-    handler: (request: FrameworkRequest<RouteRequest>) => Promise<BaseReturnType>;
-    config?: {};
-  }) {
-    this.adapter.registerRoute({
-      ...route,
-      handler: this.wrapErrors(
-        this.wrapRouteWithSecurity(route.handler, route.licenseRequired || [], route.requiredRoles)
-      ),
-    });
+  public getConfig(): BeatsManagementConfigType {
+    return this.config;
   }
 
   public getUser(request: KibanaRequest): FrameworkUser<Headers> {
     return this.adapter.getUser(request);
-  }
-
-  public getSetting(setting: 'encryptionKey'): string;
-  public getSetting(setting: 'enrollmentTokensTtlInSeconds'): number;
-  public getSetting(setting: 'defaultUserRoles'): string[];
-  public getSetting(
-    setting: 'encryptionKey' | 'enrollmentTokensTtlInSeconds' | 'defaultUserRoles'
-  ) {
-    return this.adapter.getSetting(`xpack.beats.${setting}`);
   }
 
   /**
@@ -70,7 +42,7 @@ export class BackendFrameworkLib {
   }
 
   private validateConfig() {
-    const encryptionKey = this.adapter.getSetting('xpack.beats.encryptionKey');
+    const encryptionKey = this.config.encryptionKey;
 
     if (!encryptionKey) {
       this.adapter.log(
@@ -79,55 +51,7 @@ export class BackendFrameworkLib {
     }
   }
 
-  private wrapRouteWithSecurity(
-    handler: (request: FrameworkRequest<any>) => Promise<BaseReturnType>,
-    requiredLicense: string[],
-    requiredRoles?: string[]
-  ): (request: FrameworkRequest) => Promise<BaseReturnType> {
-    return async (request: FrameworkRequest) => {
-      if (
-        requiredLicense.length > 0 &&
-        (this.license.expired || !requiredLicense.includes(this.license.type))
-      ) {
-        return {
-          error: {
-            message: `Your ${this.license.type} license does not support this API or is expired. Please upgrade your license.`,
-            code: 403,
-          },
-          success: false,
-        };
-      }
-
-      if (requiredRoles) {
-        if (request.user.kind !== 'authenticated') {
-          return {
-            error: {
-              message: `Request must be authenticated`,
-              code: 403,
-            },
-            success: false,
-          };
-        }
-
-        if (
-          request.user.kind === 'authenticated' &&
-          !request.user.roles.includes('superuser') &&
-          difference(requiredRoles, request.user.roles).length !== 0
-        ) {
-          return {
-            error: {
-              message: `Request must be authenticated by a user with one of the following user roles: ${requiredRoles.join(
-                ','
-              )}`,
-              code: 403,
-            },
-            success: false,
-          };
-        }
-      }
-      return await handler(request);
-    };
-  }
+  /*
   private wrapErrors(
     handler: (request: FrameworkRequest<any>) => Promise<BaseReturnType>
   ): (request: FrameworkRequest, h: ResponseToolkit) => Promise<ResponseObject> {
@@ -177,4 +101,5 @@ export class BackendFrameworkLib {
       }
     };
   }
+  */
 }

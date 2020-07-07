@@ -5,25 +5,20 @@
  */
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { get } from 'lodash';
 import { isLeft } from 'fp-ts/lib/Either';
-import { KibanaRequest, Headers } from 'src/core/server';
-// @ts-ignore
-import { mirrorPluginStatus } from '../../../../../../server/lib/mirror_plugin_status';
+import { KibanaRequest, Headers, Logger } from 'src/core/server';
 import {
   BackendFrameworkAdapter,
   FrameworkInfo,
-  FrameworkRequest,
-  FrameworkResponse,
-  FrameworkRouteOptions,
   FrameworkUser,
   internalAuthData,
   internalUser,
-  KibanaLegacyServer,
   RuntimeFrameworkInfo,
   RuntimeKibanaUser,
-  XpackInfo,
 } from './adapter_types';
+import { BeatsManagementConfigType } from '../../../../common';
+import { ILicense, LicensingPluginStart } from '../../../../../licensing/server';
+import { SecurityPluginSetup } from '../../../../../security/server';
 
 export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
   public readonly internalUser = internalUser;
@@ -31,55 +26,21 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
 
   constructor(
     private readonly PLUGIN_ID: string,
-    private readonly server: KibanaLegacyServer,
-    private readonly CONFIG_PREFIX?: string
+    private readonly kibanaVersion: string,
+    private readonly config: BeatsManagementConfigType,
+    private readonly logger: Logger,
+    private readonly licensing: LicensingPluginStart,
+    private readonly security?: SecurityPluginSetup
   ) {
-    const xpackMainPlugin = this.server.plugins.xpack_main;
-    const thisPlugin = this.server.plugins.beats_management;
-
-    mirrorPluginStatus(xpackMainPlugin, thisPlugin);
-
-    xpackMainPlugin.status.on('green', () => {
-      this.xpackInfoWasUpdatedHandler(xpackMainPlugin.info);
-      // Register a function that is called whenever the xpack info changes,
-      // to re-compute the license check results for this plugin
-      xpackMainPlugin.info
-        .feature(this.PLUGIN_ID)
-        .registerLicenseCheckResultsGenerator(this.xpackInfoWasUpdatedHandler);
-    });
-  }
-
-  public on(event: 'xpack.status.green' | 'elasticsearch.status.green', cb: () => void) {
-    switch (event) {
-      case 'xpack.status.green':
-        this.server.plugins.xpack_main.status.on('green', cb);
-      case 'elasticsearch.status.green':
-        this.server.plugins.elasticsearch.status.on('green', cb);
-    }
-  }
-
-  public getSetting(settingPath: string) {
-    return this.server.config().get(settingPath);
+    this.licensing.license$.subscribe((license) => this.licenseUpdateHandler(license));
   }
 
   public log(text: string) {
-    this.server.log(text);
-  }
-
-  public registerRoute<
-    RouteRequest extends FrameworkRequest,
-    RouteResponse extends FrameworkResponse
-  >(route: FrameworkRouteOptions<RouteRequest, RouteResponse>) {
-    this.server.route({
-      handler: route.handler,
-      method: route.method,
-      path: route.path,
-      config: route.config,
-    });
+    this.logger.info(text);
   }
 
   getUser(request: KibanaRequest): FrameworkUser<Headers> {
-    const user = this.server.newPlatform.setup.plugins.security?.authc.getCurrentUser(request);
+    const user = this.security?.authc.getCurrentUser(request);
     if (!user) {
       return {
         kind: 'unauthenticated',
@@ -101,40 +62,40 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     };
   }
 
-  private xpackInfoWasUpdatedHandler = (xpackInfo: XpackInfo) => {
+  private licenseUpdateHandler = (license: ILicense) => {
     let xpackInfoUnpacked: FrameworkInfo;
 
     // If, for some reason, we cannot get the license information
     // from Elasticsearch, assume worst case and disable
-    if (!xpackInfo || !xpackInfo.isAvailable()) {
+    if (!license.isAvailable) {
       this.info = null;
       return;
     }
 
+    const securityFeature = license.getFeature('security');
+    const watcherFeature = license.getFeature('watcher');
+
     try {
       xpackInfoUnpacked = {
         kibana: {
-          version: get(this.server, 'plugins.kibana.status.plugin.version', 'unknown'),
+          version: this.kibanaVersion,
         },
         license: {
-          type: xpackInfo.license.getType(),
-          expired: !xpackInfo.license.isActive(),
-          expiry_date_in_millis:
-            xpackInfo.license.getExpiryDateInMillis() !== undefined
-              ? xpackInfo.license.getExpiryDateInMillis()
-              : -1,
+          type: license.type!,
+          expired: !license.isActive,
+          expiry_date_in_millis: license.expiryDateInMillis ?? -1,
         },
         security: {
-          enabled: !!xpackInfo.feature('security') && xpackInfo.feature('security').isEnabled(),
-          available: !!xpackInfo.feature('security'),
+          enabled: securityFeature.isEnabled,
+          available: securityFeature.isAvailable,
         },
         watcher: {
-          enabled: !!xpackInfo.feature('watcher') && xpackInfo.feature('watcher').isEnabled(),
-          available: !!xpackInfo.feature('watcher'),
+          enabled: watcherFeature.isEnabled,
+          available: watcherFeature.isAvailable,
         },
       };
     } catch (e) {
-      this.server.log(`Error accessing required xPackInfo in ${this.PLUGIN_ID} Kibana adapter`);
+      this.logger.error(`Error accessing required xPackInfo in ${this.PLUGIN_ID} Kibana adapter`);
       throw e;
     }
 
@@ -148,7 +109,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
 
     return {
       security: xpackInfoUnpacked.security,
-      settings: this.getSetting(this.CONFIG_PREFIX || this.PLUGIN_ID),
+      settings: { ...this.config },
     };
   };
 }

@@ -26,7 +26,6 @@ export function wrapRouteWithSecurity<P, Q, B>(
     response: KibanaResponseFactory
   ) => {
     const beatsManagement = context.beatsManagement!;
-
     const license = beatsManagement.framework.license;
     const user = beatsManagement.framework.getUser(request);
 
