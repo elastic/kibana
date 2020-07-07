@@ -14,11 +14,12 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { Panel } from '../../../../common/components/panel';
 import { Loader } from '../../../../common/components/loader';
 import { ExceptionsViewerHeader } from './exceptions_viewer_header';
-import { ExceptionListType, Filter } from '../types';
+import { ExceptionListItemIdentifiers, Filter } from '../types';
 import { allExceptionItemsReducer, State } from './reducer';
 import {
   useExceptionList,
   ExceptionIdentifiers,
+  ExceptionListTypeEnum,
   ExceptionListItemSchema,
   UseExceptionListSuccess,
   useApi,
@@ -54,7 +55,7 @@ enum ModalAction {
 interface ExceptionsViewerProps {
   ruleId: string;
   exceptionListsMeta: ExceptionIdentifiers[];
-  availableListTypes: ExceptionListType[];
+  availableListTypes: ExceptionListTypeEnum[];
   commentsAccordionId: string;
   onAssociateList?: (listId: string) => void;
 }
@@ -159,7 +160,7 @@ const ExceptionsViewerComponent = ({
   );
 
   const handleAddException = useCallback(
-    (type: ExceptionListType): void => {
+    (type: ExceptionListTypeEnum): void => {
       setIsModalOpen(true);
     },
     [setIsModalOpen]
@@ -179,7 +180,7 @@ const ExceptionsViewerComponent = ({
     [setIsModalOpen]
   );
 
-  const onCloseExceptionModal = useCallback(
+  const handleCloseExceptionModal = useCallback(
     ({ actionType, listId }): void => {
       setIsModalOpen(false);
 
@@ -195,7 +196,7 @@ const ExceptionsViewerComponent = ({
   );
 
   const setLoadingItemIds = useCallback(
-    (items: ExceptionIdentifiers[]): void => {
+    (items: ExceptionListItemIdentifiers[]): void => {
       dispatch({
         type: 'updateLoadingItemIds',
         items,
@@ -205,14 +206,14 @@ const ExceptionsViewerComponent = ({
   );
 
   const handleDeleteException = useCallback(
-    ({ id, namespaceType }: ExceptionIdentifiers) => {
-      setLoadingItemIds([{ id, namespaceType }]);
+    ({ id: itemId, namespaceType }: ExceptionListItemIdentifiers) => {
+      setLoadingItemIds([{ id: itemId, namespaceType }]);
 
       deleteExceptionItem({
-        id,
+        id: itemId,
         namespaceType,
         onSuccess: () => {
-          setLoadingItemIds(loadingItemIds.filter((t) => t.id !== id));
+          setLoadingItemIds(loadingItemIds.filter(({ id }) => id !== itemId));
           handleFetchList();
         },
         onError: () => {
@@ -223,7 +224,7 @@ const ExceptionsViewerComponent = ({
           });
 
           dispatchToasterError();
-          setLoadingItemIds(loadingItemIds.filter((t) => t.id !== id));
+          setLoadingItemIds(loadingItemIds.filter(({ id }) => id !== itemId));
         },
       });
     },
@@ -255,7 +256,7 @@ const ExceptionsViewerComponent = ({
     <>
       {isModalOpen && (
         <EuiOverlayMask>
-          <EuiModal onClose={onCloseExceptionModal}>
+          <EuiModal onClose={handleCloseExceptionModal}>
             <EuiModalBody>
               <EuiCodeBlock language="json" fontSize="m" paddingSize="m" overflowHeight={300}>
                 {`Modal goes here`}
