@@ -12,7 +12,6 @@ import {
   EuiFieldNumber,
   EuiFieldPassword,
   EuiComboBox,
-  EuiTextArea,
   EuiButtonEmpty,
   EuiSwitch,
   EuiFormRow,
@@ -25,7 +24,8 @@ import {
   ActionParamsProps,
 } from '../../../types';
 import { EmailActionParams, EmailActionConnector } from './types';
-import { AddMessageVariables } from '../add_message_variables';
+import { TextFieldWithMessageVariables } from '../text_field_with_message_variables';
+import { TextAreaWithMessageVariables } from '../text_area_with_message_variables';
 
 export function getActionType(): ActionTypeModel {
   const mailformat = /^[^@\s]+@[^@\s]+$/;
@@ -372,14 +372,6 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps<EmailActionPa
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const onSelectMessageVariable = (paramsProperty: string, variable: string) => {
-    editAction(
-      paramsProperty,
-      ((actionParams as any)[paramsProperty] ?? '').concat(` {{${variable}}}`),
-      index
-    );
-  };
-
   return (
     <Fragment>
       <EuiFormRow
@@ -536,68 +528,30 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps<EmailActionPa
             defaultMessage: 'Subject',
           }
         )}
-        labelAppend={
-          <AddMessageVariables
-            messageVariables={messageVariables}
-            onSelectEventHandler={(variable: string) =>
-              onSelectMessageVariable('subject', variable)
-            }
-            paramsProperty="subject"
-          />
-        }
       >
-        <EuiFieldText
-          fullWidth
-          isInvalid={errors.subject.length > 0 && subject !== undefined}
-          name="subject"
-          data-test-subj="emailSubjectInput"
-          value={subject || ''}
-          onChange={(e) => {
-            editAction('subject', e.target.value, index);
-          }}
-          onBlur={() => {
-            if (!subject) {
-              editAction('subject', '', index);
-            }
-          }}
+        <TextFieldWithMessageVariables
+          index={index}
+          editAction={editAction}
+          messageVariables={messageVariables}
+          paramsProperty={'subject'}
+          inputTargetValue={subject}
+          errors={errors.subject as string[]}
         />
       </EuiFormRow>
-      <EuiFormRow
-        fullWidth
-        error={errors.message}
-        isInvalid={errors.message.length > 0 && message !== undefined}
+      <TextAreaWithMessageVariables
+        index={index}
+        editAction={editAction}
+        messageVariables={messageVariables}
+        paramsProperty={'message'}
+        inputTargetValue={message}
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.messageTextAreaFieldLabel',
           {
             defaultMessage: 'Message',
           }
         )}
-        labelAppend={
-          <AddMessageVariables
-            messageVariables={messageVariables}
-            onSelectEventHandler={(variable: string) =>
-              onSelectMessageVariable('message', variable)
-            }
-            paramsProperty="message"
-          />
-        }
-      >
-        <EuiTextArea
-          fullWidth
-          isInvalid={errors.message.length > 0 && message !== undefined}
-          value={message || ''}
-          name="message"
-          data-test-subj="emailMessageInput"
-          onChange={(e) => {
-            editAction('message', e.target.value, index);
-          }}
-          onBlur={() => {
-            if (!message) {
-              editAction('message', '', index);
-            }
-          }}
-        />
-      </EuiFormRow>
+        errors={errors.message as string[]}
+      />
     </Fragment>
   );
 };
