@@ -45,7 +45,6 @@ export const ConfigureEndpointPackageConfig = memo<CustomConfigurePackageConfigC
       return {
         onSaveNavigateTo: navigateTo,
         onCancelNavigateTo: navigateTo,
-        cancelUrl: '',
       };
     }, [agentConfigId, from, packageConfigId]);
 

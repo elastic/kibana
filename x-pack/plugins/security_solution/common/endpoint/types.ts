@@ -20,10 +20,6 @@ export interface PolicyDetailsRouteState {
    * Where the user should be redirected to when the `Cancel` button is clicked
    */
   onCancelNavigateTo?: Parameters<ApplicationStart['navigateToApp']>;
-  /**
-   * The URL to be used for the `Cancel` button (should use opt to open it in a different tab)
-   */
-  cancelUrl?: string;
 }
 
 /**
