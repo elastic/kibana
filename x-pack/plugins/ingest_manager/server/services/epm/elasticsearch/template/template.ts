@@ -43,14 +43,16 @@ export function getTemplate({
   mappings,
   pipelineName,
   packageName,
+  composedOfTemplates,
 }: {
   type: string;
   templateName: string;
   mappings: IndexTemplateMappings;
   pipelineName?: string | undefined;
   packageName: string;
+  composedOfTemplates: string[];
 }): IndexTemplate {
-  const template = getBaseTemplate(type, templateName, mappings, packageName);
+  const template = getBaseTemplate(type, templateName, mappings, packageName, composedOfTemplates);
   if (pipelineName) {
     template.template.settings.index.default_pipeline = pipelineName;
   }
@@ -244,7 +246,8 @@ function getBaseTemplate(
   type: string,
   templateName: string,
   mappings: IndexTemplateMappings,
-  packageName: string
+  packageName: string,
+  composedOfTemplates: string[]
 ): IndexTemplate {
   return {
     // This takes precedence over all index templates installed by ES by default (logs-*-* and metrics-*-*)
@@ -308,6 +311,7 @@ function getBaseTemplate(
     data_stream: {
       timestamp_field: '@timestamp',
     },
+    composed_of: composedOfTemplates,
     _meta: {
       package: {
         name: packageName,

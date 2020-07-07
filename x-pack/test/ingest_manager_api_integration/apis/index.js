@@ -5,11 +5,17 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('EPM Endpoints', function () {
+  describe('Ingest Manager Endpoints', function () {
     this.tags('ciGroup7');
-    loadTestFile(require.resolve('./list'));
-    loadTestFile(require.resolve('./file'));
-    //loadTestFile(require.resolve('./template'));
-    loadTestFile(require.resolve('./ilm'));
+
+    // EPM
+    loadTestFile(require.resolve('./epm/list'));
+    loadTestFile(require.resolve('./epm/file'));
+    //loadTestFile(require.resolve('./epm/template'));
+    loadTestFile(require.resolve('./epm/ilm'));
+    loadTestFile(require.resolve('./epm/install'));
+
+    // Package configs
+    loadTestFile(require.resolve('./package_config/create'));
   });
 }
