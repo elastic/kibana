@@ -29,8 +29,35 @@ test('get template', () => {
     templateName,
     packageName: 'nginx',
     mappings: { properties: {} },
+    composedOfTemplates: [],
   });
   expect(template.index_patterns).toStrictEqual([`${templateName}-*`]);
+});
+
+test('adds composed_of correctly', () => {
+  const composedOfTemplates = ['component1', 'component2'];
+
+  const template = getTemplate({
+    type: 'logs',
+    templateName: 'name',
+    packageName: 'nginx',
+    mappings: { properties: {} },
+    composedOfTemplates,
+  });
+  expect(template.composed_of).toStrictEqual(composedOfTemplates);
+});
+
+test('adds empty composed_of correctly', () => {
+  const composedOfTemplates: string[] = [];
+
+  const template = getTemplate({
+    type: 'logs',
+    templateName: 'name',
+    packageName: 'nginx',
+    mappings: { properties: {} },
+    composedOfTemplates,
+  });
+  expect(template.composed_of).toStrictEqual(composedOfTemplates);
 });
 
 test('tests loading base.yml', () => {
@@ -45,6 +72,7 @@ test('tests loading base.yml', () => {
     templateName: 'foo',
     packageName: 'nginx',
     mappings,
+    composedOfTemplates: [],
   });
 
   expect(template).toMatchSnapshot(path.basename(ymlPath));
@@ -62,6 +90,7 @@ test('tests loading coredns.logs.yml', () => {
     templateName: 'foo',
     packageName: 'coredns',
     mappings,
+    composedOfTemplates: [],
   });
 
   expect(template).toMatchSnapshot(path.basename(ymlPath));
@@ -79,6 +108,7 @@ test('tests loading system.yml', () => {
     templateName: 'whatsthis',
     packageName: 'system',
     mappings,
+    composedOfTemplates: [],
   });
 
   expect(template).toMatchSnapshot(path.basename(ymlPath));
