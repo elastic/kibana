@@ -7,7 +7,6 @@
 import { xpackMain } from './legacy/plugins/xpack_main';
 import { monitoring } from './legacy/plugins/monitoring';
 import { security } from './legacy/plugins/security';
-import { beats } from './legacy/plugins/beats_management';
 import { spaces } from './legacy/plugins/spaces';
 import { ingestManager } from './legacy/plugins/ingest_manager';
 
@@ -18,6 +17,5 @@ module.exports = function (kibana) {
     spaces(kibana),
     security(kibana),
     ingestManager(kibana),
-    beats(kibana),
   ];
 };
