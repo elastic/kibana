@@ -9,7 +9,7 @@ import { takeUntil } from 'rxjs/operators';
 import { RawTagWithId } from '../../../common';
 import { useToasts } from '../../../../../../src/plugins/kibana_react/public';
 import { CreateNewTagForm as CreateNewTagFormUi } from '../../components/create_new_tag_form';
-import { txtTagCreated, txtCouldNotUpdate } from './i18n';
+import { txtTagUpdated, txtCouldNotUpdate } from './i18n';
 import { useUnmount$ } from '../../hooks/use_unmount';
 import { useTags } from '../../context';
 
@@ -41,7 +41,7 @@ export const UpdateTagForm: React.FC<UpdateTagFormProps> = ({ tag, onDone }) => 
       );
 
     toasts.addSuccess({
-      title: txtTagCreated,
+      title: txtTagUpdated,
     });
 
     if (onDone) onDone();

@@ -6,8 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const txtTagCreated = i18n.translate('xpack.tags.creanteNewTagForm.tagCreated', {
-  defaultMessage: 'Tag created',
+export const txtTagUpdated = i18n.translate('xpack.tags.creanteNewTagForm.tagUpdated', {
+  defaultMessage: 'Tag updated',
 });
 
 export const txtCouldNotUpdate = i18n.translate('xpack.tags.creanteNewTagForm.couldNotCreate', {
