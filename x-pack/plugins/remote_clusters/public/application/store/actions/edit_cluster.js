@@ -9,12 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { toasts, fatalError } from '../../services/notification';
 import { loadClusters } from './load_clusters';
 
-import {
-  editCluster as sendEditClusterRequest,
-  extractQueryParams,
-  getRouter,
-  redirect,
-} from '../../services';
+import { extractQueryParams } from '../../../shared_imports';
+import { editCluster as sendEditClusterRequest, getRouter, redirect } from '../../services';
 
 import {
   EDIT_CLUSTER_START,
