@@ -74,7 +74,7 @@ export const AlertsStatus: React.FC<Props> = (props: Props) => {
       default:
         // might never show
         return i18n.translate('xpack.monitoring.alerts.status.lowSeverityTooltip', {
-          defaultMessage: 'There are some low-severity issues',
+          defaultMessage: 'There are some low-severity issues.',
         });
     }
   })();

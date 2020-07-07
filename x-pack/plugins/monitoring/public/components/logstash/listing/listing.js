@@ -16,7 +16,7 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { formatPercentageUsage, formatNumber } from '../../../lib/format_number';
-import { ClusterStatus } from '..//cluster_status';
+import { ClusterStatus } from '../cluster_status';
 import { EuiMonitoringTable } from '../../table';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -154,7 +154,7 @@ export class Listing extends PureComponent {
   }
 
   render() {
-    const { stats, sorting, pagination, onTableChange, data, setupMode } = this.props;
+    const { stats, alerts, sorting, pagination, onTableChange, data, setupMode } = this.props;
     const columns = this.getColumns();
     const flattenedData = data.map((item) => ({
       ...item,
@@ -189,7 +189,7 @@ export class Listing extends PureComponent {
             </h1>
           </EuiScreenReaderOnly>
           <EuiPanel>
-            <ClusterStatus stats={stats} />
+            <ClusterStatus stats={stats} alerts={alerts} />
           </EuiPanel>
           <EuiSpacer size="m" />
           {setupModeCallOut}

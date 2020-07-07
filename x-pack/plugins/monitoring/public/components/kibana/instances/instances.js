@@ -257,7 +257,7 @@ export class KibanaInstances extends PureComponent {
             </h1>
           </EuiScreenReaderOnly>
           <EuiPanel>
-            <ClusterStatus stats={clusterStatus} />
+            <ClusterStatus stats={clusterStatus} alerts={alerts} />
           </EuiPanel>
           <EuiSpacer size="m" />
           {setupModeCallOut}
