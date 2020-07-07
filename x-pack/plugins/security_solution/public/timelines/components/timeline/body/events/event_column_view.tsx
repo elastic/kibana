@@ -89,10 +89,10 @@ export const EventColumnView = React.memo<Props>(
     updateNote,
   }) => {
     const { getManageTimelineById } = useManageTimeline();
-    const timelineActions = useMemo(() => getManageTimelineById(timelineId).timelineRowActions, [
-      getManageTimelineById,
-      timelineId,
-    ]);
+    const timelineActions = useMemo(
+      () => getManageTimelineById(timelineId).timelineRowActions(ecsData),
+      [ecsData, getManageTimelineById, timelineId]
+    );
     const [isPopoverOpen, setPopover] = useState(false);
 
     const onButtonClick = useCallback(() => {
@@ -105,6 +105,7 @@ export const EventColumnView = React.memo<Props>(
 
     const button = (
       <EuiButtonIcon
+        aria-label="context menu"
         data-test-subj="timeline-context-menu-button"
         size="s"
         iconType="boxesHorizontal"
@@ -194,8 +195,7 @@ export const EventColumnView = React.memo<Props>(
             </EventsTdContent>,
           ]
         : grouped.icon;
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [button, ecsData, timelineActions, isPopoverOpen]); // , isPopoverOpen, closePopover, onButtonClick]);
+    }, [button, closePopover, id, onClickCb, ecsData, timelineActions, isPopoverOpen]);
 
     return (
       <EventsTrData data-test-subj="event-column-view">

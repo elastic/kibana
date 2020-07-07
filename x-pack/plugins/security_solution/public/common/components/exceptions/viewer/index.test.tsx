@@ -10,9 +10,12 @@ import { mount } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { ExceptionsViewer } from './';
-import { ExceptionListType } from '../types';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useExceptionList, useApi } from '../../../../../public/lists_plugin_deps';
+import {
+  ExceptionListTypeEnum,
+  useExceptionList,
+  useApi,
+} from '../../../../../public/lists_plugin_deps';
 import { getExceptionListSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_schema.mock';
 
 jest.mock('../../../../common/lib/kibana');
@@ -69,7 +72,7 @@ describe('ExceptionsViewer', () => {
               namespaceType: 'single',
             },
           ]}
-          availableListTypes={[ExceptionListType.DETECTION_ENGINE]}
+          availableListTypes={[ExceptionListTypeEnum.DETECTION]}
           commentsAccordionId="commentsAccordion"
         />
       </ThemeProvider>
@@ -84,7 +87,7 @@ describe('ExceptionsViewer', () => {
         <ExceptionsViewer
           ruleId={'123'}
           exceptionListsMeta={[]}
-          availableListTypes={[ExceptionListType.DETECTION_ENGINE]}
+          availableListTypes={[ExceptionListTypeEnum.DETECTION]}
           commentsAccordionId="commentsAccordion"
         />
       </ThemeProvider>
@@ -117,7 +120,7 @@ describe('ExceptionsViewer', () => {
               namespaceType: 'single',
             },
           ]}
-          availableListTypes={[ExceptionListType.DETECTION_ENGINE]}
+          availableListTypes={[ExceptionListTypeEnum.DETECTION]}
           commentsAccordionId="commentsAccordion"
         />
       </ThemeProvider>
