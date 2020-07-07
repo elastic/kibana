@@ -121,7 +121,7 @@ function AvailablePackages() {
   const initialCategory = queryParams.get('category') || '';
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const { data: allPackagesRes, isLoading: isLoadingAllPackages } = useGetPackages();
-  const { data: categoryPackagesRes, isLoading: isLoadingPackages } = useGetPackages({
+  const { data: categoryPackagesRes, isLoading: isLoadingCategoryPackages } = useGetPackages({
     category: selectedCategory,
   });
   const { data: categoriesRes, isLoading: isLoadingCategories } = useGetCategories();
@@ -129,7 +129,7 @@ function AvailablePackages() {
     categoryPackagesRes && categoryPackagesRes.response ? categoryPackagesRes.response : [];
 
   const title = i18n.translate('xpack.ingestManager.epmList.allTitle', {
-    defaultMessage: 'All integrations',
+    defaultMessage: 'Browse by category',
   });
 
   const categories = [

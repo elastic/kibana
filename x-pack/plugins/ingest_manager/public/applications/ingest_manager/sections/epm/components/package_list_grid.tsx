@@ -102,7 +102,7 @@ function ControlsColumn({ controls, title }: ControlsColumnProps) {
       </EuiTitle>
       <EuiSpacer size="l" />
       <EuiFlexGroup>
-        <EuiFlexItem grow={2}>{controls}</EuiFlexItem>
+        <EuiFlexItem grow={4}>{controls}</EuiFlexItem>
         <EuiFlexItem grow={1} />
       </EuiFlexGroup>
     </Fragment>

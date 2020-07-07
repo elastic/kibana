@@ -48,6 +48,11 @@ const Divider = styled.div`
   border-left: ${(props) => props.theme.eui.euiBorderThin};
 `;
 
+// Allows child text to be truncated
+const FlexItemWithMinWidth = styled(EuiFlexItem)`
+  min-width: 0px;
+`;
+
 function Breadcrumbs({ packageTitle }: { packageTitle: string }) {
   useBreadcrumbs('integration_details', { pkgTitle: packageTitle });
   return null;
@@ -93,22 +98,25 @@ export function Detail() {
 
   const headerLeftContent = useMemo(
     () => (
-      <EuiFlexGroup direction="column" gutterSize="m" alignItems="flexStart">
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            iconType="arrowLeft"
-            size="xs"
-            flush="left"
-            href={getHref('integrations_all')}
-          >
-            <FormattedMessage
-              id="xpack.ingestManager.epm.browseAllButtonText"
-              defaultMessage="Browse all integrations"
-            />
-          </EuiButtonEmpty>
+      <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiFlexItem>
+          {/* Allows button to break out of full width */}
+          <div>
+            <EuiButtonEmpty
+              iconType="arrowLeft"
+              size="xs"
+              flush="left"
+              href={getHref('integrations_all')}
+            >
+              <FormattedMessage
+                id="xpack.ingestManager.epm.browseAllButtonText"
+                defaultMessage="Browse all integrations"
+              />
+            </EuiButtonEmpty>
+          </div>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xl">
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="l">
             <EuiFlexItem grow={false}>
               {isLoading || !packageInfo ? (
                 <LoadingIconPanel />
@@ -121,20 +129,20 @@ export function Detail() {
               )}
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFlexGroup alignItems="center" gutterSize="m">
+              <EuiFlexGroup alignItems="center" gutterSize="m" className="eui-textTruncate">
                 {isLoading ? (
                   <EuiFlexItem>
                     <Loading />
                   </EuiFlexItem>
                 ) : (
                   <>
-                    <EuiFlexItem>
+                    <FlexItemWithMinWidth grow={false}>
                       <EuiText>
-                        <h1 className="eui-textNoWrap">{packageInfo?.title}</h1>
+                        <h1 className="eui-textTruncate">{packageInfo?.title}</h1>
                       </EuiText>
-                    </EuiFlexItem>
+                    </FlexItemWithMinWidth>
                     {packageInfo?.release && packageInfo.release !== 'ga' ? (
-                      <EuiFlexItem>
+                      <EuiFlexItem grow={false}>
                         <EuiBetaBadge
                           label={RELEASE_BADGE_LABEL[packageInfo.release]}
                           tooltipContent={RELEASE_BADGE_DESCRIPTION[packageInfo.release]}
@@ -216,7 +224,11 @@ export function Detail() {
   );
 
   return (
-    <WithHeaderLayout leftColumn={headerLeftContent} rightColumn={headerRightContent}>
+    <WithHeaderLayout
+      leftColumn={headerLeftContent}
+      rightColumn={headerRightContent}
+      rightColumnGrow={false}
+    >
       {packageInfo ? <Breadcrumbs packageTitle={packageInfo.title} /> : null}
       {packageInfoError ? (
         <Error
