@@ -39,7 +39,7 @@ import { IndicesList } from './components/indices_list';
 import { Header } from './components/header';
 import { context as contextType } from '../../../../../../kibana_react/public';
 import { IndexPatternCreationConfig } from '../../../../../../../plugins/index_pattern_management/public';
-import { MatchedItem, ResolveIndexResponseItemDataStream } from '../../types';
+import { MatchedItem } from '../../types';
 import { IndexPatternManagmentContextValue } from '../../../../types';
 
 interface StepIndexPatternProps {
@@ -69,7 +69,7 @@ export const canPreselectTimeField = (indices: MatchedItem[]) => {
       { canPreselect, timeFieldName }: { canPreselect: boolean; timeFieldName?: string },
       matchedItem
     ) => {
-      const dataStreamItem = matchedItem.item as ResolveIndexResponseItemDataStream;
+      const dataStreamItem = matchedItem.item;
       const dataStreamTimestampField = dataStreamItem.timestamp_field;
       const isDataStream = !!dataStreamItem.timestamp_field;
       const timestampFieldMatches =
@@ -107,7 +107,6 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     isIncludingSystemIndices: false,
   };
   ILLEGAL_CHARACTERS = [...indexPatterns.ILLEGAL_CHARACTERS];
-  lastQuery: string | undefined;
 
   constructor(props: StepIndexPatternProps, context: IndexPatternManagmentContextValue) {
     super(props, context);
@@ -117,6 +116,8 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
       initialQuery || context.services.uiSettings.get(UI_SETTINGS.INDEXPATTERN_PLACEHOLDER);
     this.state.indexPatternName = indexPatternCreationType.getIndexPatternName();
   }
+
+  lastQuery = '';
 
   async UNSAFE_componentWillMount() {
     this.fetchExistingIndexPatterns();

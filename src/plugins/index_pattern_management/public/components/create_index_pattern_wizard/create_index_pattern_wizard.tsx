@@ -23,7 +23,6 @@ import {
   EuiGlobalToastList,
   EuiGlobalToastListToast,
   EuiPageContent,
-  // EuiSwitchEvent,
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -49,7 +48,6 @@ interface CreateIndexPatternWizardState {
   allIndices: MatchedItem[];
   remoteClustersExist: boolean;
   isInitiallyLoadingIndices: boolean;
-  // isIncludingSystemIndices: boolean;
   toasts: EuiGlobalToastListToast[];
   indexPatternCreationType: IndexPatternCreationConfig;
   selectedTimeField?: string;
@@ -77,7 +75,6 @@ export class CreateIndexPatternWizard extends Component<
       allIndices: [],
       remoteClustersExist: false,
       isInitiallyLoadingIndices: true,
-      // isIncludingSystemIndices: false,
       toasts: [],
       indexPatternCreationType: context.services.indexPatternManagementStart.creation.getType(type),
       docLinks: context.services.docLinks,
@@ -111,14 +108,6 @@ export class CreateIndexPatternWizard extends Component<
   };
 
   fetchData = async () => {
-    /*
-    this.setState({
-      // allIndices: [],
-      // isInitiallyLoadingIndices: true,
-      remoteClustersExist: false,
-    });
-
-    */
     const indicesFailMsg = (
       <FormattedMessage
         id="indexPatternManagement.createIndexPattern.loadIndicesFailMsg"
@@ -210,12 +199,6 @@ export class CreateIndexPatternWizard extends Component<
     this.setState({ step: 1 });
   };
 
-  /*
-  onChangeIncludingSystemIndices = (event: EuiSwitchEvent) => {
-    this.setState({ isIncludingSystemIndices: event.target.checked }, () => this.fetchData());
-  };
-  */
-
   renderHeader() {
     return (
       <Header
@@ -231,7 +214,6 @@ export class CreateIndexPatternWizard extends Component<
     const {
       allIndices,
       isInitiallyLoadingIndices,
-      //      isIncludingSystemIndices,
       step,
       indexPattern,
       remoteClustersExist,
@@ -242,7 +224,6 @@ export class CreateIndexPatternWizard extends Component<
     }
 
     const hasDataIndices = allIndices.some(({ name }: MatchedItem) => !name.startsWith('.'));
-    //     if (!hasDataIndices && !isIncludingSystemIndices && !remoteClustersExist) {
     if (!hasDataIndices && !remoteClustersExist) {
       return (
         <EmptyState

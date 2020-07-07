@@ -89,7 +89,10 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
         &nbsp;
         <FormattedMessage
           id="indexPatternManagement.createIndexPattern.step.status.successLabel.successDetail"
-          defaultMessage="Your index pattern matches {sourceCount} sources."
+          defaultMessage="Your index pattern matches {sourceCount} {sourceCount, plural,
+            one {source}
+            other {sources}
+          }."
           values={{
             sourceCount: exactMatchedIndices.length,
           }}
