@@ -61,8 +61,7 @@ const DEFAULT_SCHEMA: string = 'https://vega.github.io/schema/vega/v5.json';
 const DEFAULT_PARSER: string = 'elasticsearch';
 
 export class VegaParser {
-  spec?: VegaSpec;
-  rawSpec: string;
+  spec: VegaSpec;
   hideWarnings: boolean;
   error?: string;
   warnings: string[];
@@ -82,13 +81,13 @@ export class VegaParser {
   controlsDir?: ControlsLocation;
 
   constructor(
-    spec: string,
+    spec: VegaSpec | string,
     searchAPI: SearchAPI,
     timeCache: TimeCache,
     filters: Bool,
     serviceSettings: IServiceSettings
   ) {
-    this.rawSpec = spec;
+    this.spec = spec as VegaSpec;
     this.hideWarnings = false;
 
     this.error = undefined;
@@ -115,8 +114,8 @@ export class VegaParser {
   async _parseAsync() {
     if (this.isVegaLite !== undefined) throw new Error();
 
-    if (!this.spec) {
-      this.spec = hjson.parse(this.rawSpec, { legacyRoot: false });
+    if (typeof this.spec === 'string') {
+      this.spec = hjson.parse(this.spec, { legacyRoot: false });
     }
     if (!_.isPlainObject(this.spec)) {
       throw new Error(
@@ -661,7 +660,6 @@ export class VegaParser {
    * @private
    */
   _setDefaultValue(value: unknown, ...fields: string[]) {
-    if (!this.spec) return;
     let o = this.spec;
     for (let i = 0; i < fields.length - 1; i++) {
       const field = fields[i];
