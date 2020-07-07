@@ -45,8 +45,11 @@ const statDescriptions = {
           <EuiLink
             href="https://en.wikipedia.org/wiki/Huber_loss#Pseudo-Huber_loss_function"
             target="_blank"
+            external
           >
-            Pseudo Huber loss function
+            {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.huberLinkText', {
+              defaultMessage: 'Pseudo Huber loss function',
+            })}
           </EuiLink>
         ),
       }}

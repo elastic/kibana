@@ -145,7 +145,9 @@ export const validateAdvancedEditor = (state: State): State => {
   const destinationIndexPatternTitleExists =
     state.indexPatternsMap[destinationIndexName] !== undefined;
 
-  const resultsFieldEmptyString = jobConfig?.dest?.results_field === '';
+  const resultsFieldEmptyString =
+    typeof jobConfig?.dest?.results_field === 'string' &&
+    jobConfig?.dest?.results_field.trim() === '';
 
   const mml = jobConfig.model_memory_limit;
   const modelMemoryLimitEmpty = mml === '' || mml === undefined;

@@ -200,7 +200,10 @@ export const getJobConfigFromFormState = (
     model_memory_limit: formState.modelMemoryLimit,
   };
 
-  if (jobConfig.dest && (formState.resultsField !== undefined || formState.resultsField !== '')) {
+  const resultsFieldEmpty =
+    typeof formState?.resultsField === 'string' && formState?.resultsField.trim() === '';
+
+  if (jobConfig.dest && !resultsFieldEmpty) {
     jobConfig.dest.results_field = formState.resultsField;
   }
 
