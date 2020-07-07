@@ -45,7 +45,6 @@ export function registerDownloadExceptionListRoute(
       },
       options: { tags: [] },
     },
-    // @ts-ignore
     async (context, req, res) => {
       let scopedSOClient: SavedObjectsClientContract;
       const logger = endpointContext.logFactory.get('download_exception_list');
@@ -62,12 +61,12 @@ export function registerDownloadExceptionListRoute(
         }
       }
 
-      const buildAndValidateResponse = (artName: string, body: string): IKibanaResponse => {
+      const buildAndValidateResponse = (artName: string, body: Buffer): IKibanaResponse => {
         const artifact: HttpResponseOptions = {
           body,
           headers: {
-            'content-encoding': 'application/json',
-            'content-disposition': `attachment; filename=${artName}.json`,
+            'content-encoding': 'identity',
+            'content-disposition': `attachment; filename=${artName}.zz`,
           },
         };
 
@@ -90,7 +89,7 @@ export function registerDownloadExceptionListRoute(
         return scopedSOClient
           .get<InternalArtifactSchema>(ArtifactConstants.SAVED_OBJECT_TYPE, id)
           .then((artifact: SavedObject<InternalArtifactSchema>) => {
-            const body = Buffer.from(artifact.attributes.body, 'base64').toString();
+            const body = Buffer.from(artifact.attributes.body, 'base64');
             cache.set(id, body);
             return buildAndValidateResponse(artifact.attributes.identifier, body);
           })
