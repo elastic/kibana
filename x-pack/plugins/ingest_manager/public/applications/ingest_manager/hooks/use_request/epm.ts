@@ -7,6 +7,7 @@
 import { useRequest, sendRequest } from './use_request';
 import { epmRouteService } from '../../services';
 import {
+  GetCategoriesRequest,
   GetCategoriesResponse,
   GetPackagesRequest,
   GetPackagesResponse,
@@ -15,10 +16,11 @@ import {
   DeletePackageResponse,
 } from '../../types';
 
-export const useGetCategories = () => {
+export const useGetCategories = (query: GetCategoriesRequest['query'] = {}) => {
   return useRequest<GetCategoriesResponse>({
     path: epmRouteService.getCategoriesPath(),
     method: 'get',
+    query,
   });
 };
 

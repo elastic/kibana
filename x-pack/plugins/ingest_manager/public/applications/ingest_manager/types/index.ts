@@ -90,6 +90,7 @@ export {
   RequirementVersion,
   ScreenshotItem,
   ServiceName,
+  GetCategoriesRequest,
   GetCategoriesResponse,
   GetPackagesRequest,
   GetPackagesResponse,

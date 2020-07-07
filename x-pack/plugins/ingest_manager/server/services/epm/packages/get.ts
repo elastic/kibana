@@ -16,8 +16,8 @@ function nameAsTitle(name: string) {
   return name.charAt(0).toUpperCase() + name.substr(1).toLowerCase();
 }
 
-export async function getCategories() {
-  return Registry.fetchCategories();
+export async function getCategories(options: Registry.CategoriesParams) {
+  return Registry.fetchCategories(options);
 }
 
 export async function getPackages(

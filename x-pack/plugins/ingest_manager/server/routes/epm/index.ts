@@ -14,6 +14,7 @@ import {
   deletePackageHandler,
 } from './handlers';
 import {
+  GetCategoriesRequestSchema,
   GetPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
@@ -25,7 +26,7 @@ export const registerRoutes = (router: IRouter) => {
   router.get(
     {
       path: EPM_API_ROUTES.CATEGORIES_PATTERN,
-      validate: false,
+      validate: GetCategoriesRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getCategoriesHandler

@@ -5,6 +5,12 @@
  */
 import { schema } from '@kbn/config-schema';
 
+export const GetCategoriesRequestSchema = {
+  query: schema.object({
+    experimental: schema.maybe(schema.boolean()),
+  }),
+};
+
 export const GetPackagesRequestSchema = {
   query: schema.object({
     category: schema.maybe(schema.string()),

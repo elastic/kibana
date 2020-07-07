@@ -6,6 +6,7 @@
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler, CustomHttpResponseOptions } from 'src/core/server';
 import {
+  GetCategoriesRequestSchema,
   GetPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
@@ -28,9 +29,12 @@ import {
   removeInstallation,
 } from '../../services/epm/packages';
 
-export const getCategoriesHandler: RequestHandler = async (context, request, response) => {
+export const getCategoriesHandler: RequestHandler<
+  undefined,
+  TypeOf<typeof GetCategoriesRequestSchema.query>
+> = async (context, request, response) => {
   try {
-    const res = await getCategories();
+    const res = await getCategories(request.query);
     const body: GetCategoriesResponse = {
       response: res,
       success: true,

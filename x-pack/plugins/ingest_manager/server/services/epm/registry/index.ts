@@ -29,6 +29,10 @@ export interface SearchParams {
   experimental?: boolean;
 }
 
+export interface CategoriesParams {
+  experimental?: boolean;
+}
+
 export const pkgToPkgKey = ({ name, version }: { name: string; version: string }) =>
   `${name}-${version}`;
 
@@ -72,9 +76,16 @@ export async function fetchFile(filePath: string): Promise<Response> {
   return getResponse(`${registryUrl}${filePath}`);
 }
 
-export async function fetchCategories(): Promise<CategorySummaryList> {
+export async function fetchCategories(params?: CategoriesParams): Promise<CategorySummaryList> {
   const registryUrl = getRegistryUrl();
-  return fetchUrl(`${registryUrl}/categories`).then(JSON.parse);
+  const url = new URL(`${registryUrl}/categories`);
+  if (params) {
+    if (params.experimental) {
+      url.searchParams.set('experimental', params.experimental.toString());
+    }
+  }
+
+  return fetchUrl(url.toString()).then(JSON.parse);
 }
 
 export async function getArchiveInfo(
