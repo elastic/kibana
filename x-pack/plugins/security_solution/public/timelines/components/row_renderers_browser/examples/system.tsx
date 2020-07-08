@@ -8,6 +8,7 @@ import React from 'react';
 
 import { createGenericSystemRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
 import { mockEndgameTerminationEvent } from '../../../../common/mock/mock_endgame_ecs_data';
+import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
 const SystemExampleComponent: React.FC = () => {
   const systemRowRenderer = createGenericSystemRowRenderer({
@@ -20,7 +21,7 @@ const SystemExampleComponent: React.FC = () => {
       {systemRowRenderer.renderRow({
         browserFields: {},
         data: mockEndgameTerminationEvent,
-        timelineId: 'row-renderer-example',
+        timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}
     </>
   );

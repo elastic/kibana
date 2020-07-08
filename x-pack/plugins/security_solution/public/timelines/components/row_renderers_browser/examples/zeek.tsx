@@ -8,13 +8,14 @@ import React from 'react';
 
 import { mockTimelineData } from '../../../../common/mock/mock_timeline_data';
 import { zeekRowRenderer } from '../../timeline/body/renderers/zeek/zeek_row_renderer';
+import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
 const ZeekExampleComponent: React.FC = () => (
   <>
     {zeekRowRenderer.renderRow({
       browserFields: {},
       data: mockTimelineData[13].ecs,
-      timelineId: 'row-renderer-example',
+      timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
     })}
   </>
 );

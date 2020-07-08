@@ -8,6 +8,7 @@ import React from 'react';
 
 import { mockTimelineData } from '../../../../common/mock/mock_timeline_data';
 import { createGenericFileRowRenderer } from '../../timeline/body/renderers/auditd/generic_row_renderer';
+import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
 const AuditdFileExampleComponent: React.FC = () => {
   const auditdFileRowRenderer = createGenericFileRowRenderer({
@@ -20,7 +21,7 @@ const AuditdFileExampleComponent: React.FC = () => {
       {auditdFileRowRenderer.renderRow({
         browserFields: {},
         data: mockTimelineData[27].ecs,
-        timelineId: 'row-renderer-example',
+        timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}
     </>
   );

@@ -15,13 +15,13 @@ import {
 } from 'react-beautiful-dnd';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import deepEqual from 'fast-deep-equal';
 
 import { dragAndDropActions } from '../../store/drag_and_drop';
 import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
+import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../../../timelines/components/row_renderers_browser/constants';
+
 import { TruncatableText } from '../truncatable_text';
 import { WithHoverActions } from '../with_hover_actions';
-
 import { DraggableWrapperHoverContent, useGetTimelineId } from './draggable_wrapper_hover_content';
 import { getDraggableId, getDroppableId } from './helpers';
 import { ProviderContainer } from './provider_container';
@@ -64,7 +64,9 @@ const Wrapper = styled.div<WrapperProps>`
   ${({ disabled }) =>
     disabled &&
     `
-    [data-rbd-draggable-id]:hover {
+    [data-rbd-draggable-id]:hover,
+    .euiBadge:hover,
+    .euiBadge__text:hover {
       cursor: default;
     }
   `}
@@ -116,7 +118,6 @@ export const getStyle = (
 
 const DraggableWrapperComponent: React.FC<Props> = ({
   dataProvider,
-  disabled,
   onFilterAdded,
   render,
   timelineId,
@@ -128,6 +129,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
   const [goGetTimelineId, setGoGetTimelineId] = useState(false);
   const timelineIdFind = useGetTimelineId(draggableRef, goGetTimelineId);
   const [providerRegistered, setProviderRegistered] = useState(false);
+  const isDisabled = dataProvider.id.includes(`-${ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID}-`);
 
   const dispatch = useDispatch();
 
@@ -147,11 +149,11 @@ const DraggableWrapperComponent: React.FC<Props> = ({
   }, [handleClosePopOverTrigger]);
 
   const registerProvider = useCallback(() => {
-    if (!disabled && !providerRegistered) {
+    if (!isDisabled && !providerRegistered) {
       dispatch(dragAndDropActions.registerProvider({ provider: dataProvider }));
       setProviderRegistered(true);
     }
-  }, [disabled, providerRegistered, dispatch, dataProvider]);
+  }, [isDisabled, providerRegistered, dispatch, dataProvider]);
 
   const unRegisterProvider = useCallback(
     () => dispatch(dragAndDropActions.unRegisterProvider({ id: dataProvider.id })),
@@ -160,11 +162,11 @@ const DraggableWrapperComponent: React.FC<Props> = ({
 
   useEffect(
     () => () => {
-      if (!disabled) {
+      if (!isDisabled) {
         unRegisterProvider();
       }
     },
-    [disabled, unRegisterProvider]
+    [isDisabled, unRegisterProvider]
   );
 
   const hoverContent = useMemo(
@@ -198,7 +200,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
 
   const renderContent = useCallback(
     () => (
-      <Wrapper data-test-subj="draggableWrapperDiv" disabled>
+      <Wrapper data-test-subj="draggableWrapperDiv" disabled={isDisabled}>
         <DragDropErrorBoundary>
           <Droppable
             isDropDisabled={true}
@@ -227,7 +229,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
                   draggableId={getDraggableId(dataProvider.id)}
                   index={0}
                   key={getDraggableId(dataProvider.id)}
-                  isDragDisabled={disabled}
+                  isDragDisabled={isDisabled}
                 >
                   {(provided, snapshot) => (
                     <ProviderContainer
@@ -262,10 +264,10 @@ const DraggableWrapperComponent: React.FC<Props> = ({
         </DragDropErrorBoundary>
       </Wrapper>
     ),
-    [dataProvider, registerProvider, render, disabled, truncate]
+    [dataProvider, registerProvider, render, isDisabled, truncate]
   );
 
-  if (disabled) return <>{renderContent()}</>;
+  if (isDisabled) return <>{renderContent()}</>;
 
   return (
     <WithHoverActions
@@ -277,13 +279,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
   );
 };
 
-export const DraggableWrapper = React.memo(
-  DraggableWrapperComponent,
-  (prevProps, nextProps) =>
-    deepEqual(prevProps.dataProvider, nextProps.dataProvider) &&
-    prevProps.render !== nextProps.render &&
-    prevProps.truncate === nextProps.truncate
-);
+export const DraggableWrapper = React.memo(DraggableWrapperComponent);
 
 DraggableWrapper.displayName = 'DraggableWrapper';
 

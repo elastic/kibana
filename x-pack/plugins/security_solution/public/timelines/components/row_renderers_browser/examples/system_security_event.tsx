@@ -8,6 +8,7 @@ import React from 'react';
 
 import { createSecurityEventRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
 import { mockEndgameUserLogon } from '../../../../common/mock/mock_endgame_ecs_data';
+import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
 const SystemSecurityEventExampleComponent: React.FC = () => {
   const systemSecurityEventRowRenderer = createSecurityEventRowRenderer({
@@ -19,7 +20,7 @@ const SystemSecurityEventExampleComponent: React.FC = () => {
       {systemSecurityEventRowRenderer.renderRow({
         browserFields: {},
         data: mockEndgameUserLogon,
-        timelineId: 'row-renderer-example',
+        timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}
     </>
   );

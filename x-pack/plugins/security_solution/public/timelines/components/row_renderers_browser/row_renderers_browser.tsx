@@ -13,6 +13,7 @@ import { RowRendererId } from '../../../../common/types/timeline';
 import { renderers, RowRendererOption } from './catalog';
 
 interface RowRenderersBrowserProps {
+  // ref?: React.Ref<EuiInMemoryTable<{}>>;
   excludedRowRendererIds: RowRendererId[];
   setExcludedRowRendererIds: (excludedRowRendererIds: RowRendererId[]) => void;
 }
@@ -65,8 +66,8 @@ const search = {
  */
 const renderSearchableDescriptionNoop = () => <></>;
 
-const RowRenderersBrowserComponent: React.FC<RowRenderersBrowserProps> = React.forwardRef(
-  ({ excludedRowRendererIds = [], setExcludedRowRendererIds }, ref) => {
+const RowRenderersBrowserComponent = React.forwardRef(
+  ({ excludedRowRendererIds = [], setExcludedRowRendererIds }: RowRenderersBrowserProps, ref) => {
     const sort = useMemo(
       () => ({
         sort: {
@@ -155,6 +156,6 @@ const RowRenderersBrowserComponent: React.FC<RowRenderersBrowserProps> = React.f
 
 RowRenderersBrowserComponent.displayName = 'RowRenderersBrowserComponent';
 
-export const RowRenderersBrowser = RowRenderersBrowserComponent;
+export const RowRenderersBrowser = React.memo(RowRenderersBrowserComponent);
 
 RowRenderersBrowser.displayName = 'RowRenderersBrowser';

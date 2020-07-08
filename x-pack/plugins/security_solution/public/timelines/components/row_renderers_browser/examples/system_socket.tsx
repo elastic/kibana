@@ -8,6 +8,7 @@ import React from 'react';
 
 import { createSocketRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
 import { mockEndgameIpv4ConnectionAcceptEvent } from '../../../../common/mock/mock_endgame_ecs_data';
+import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
 const SystemSocketExampleComponent: React.FC = () => {
   const systemSocketRowRenderer = createSocketRowRenderer({
@@ -19,7 +20,7 @@ const SystemSocketExampleComponent: React.FC = () => {
       {systemSocketRowRenderer.renderRow({
         browserFields: {},
         data: mockEndgameIpv4ConnectionAcceptEvent,
-        timelineId: 'row-renderer-example',
+        timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}
     </>
   );
