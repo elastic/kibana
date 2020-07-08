@@ -21,9 +21,9 @@ import { useResolverDispatch } from '../use_resolver_dispatch';
 import { SideEffectContext } from '../side_effect_context';
 import { CubeForProcess } from './process_cube_icon';
 import { ResolverEvent } from '../../../../common/endpoint/types';
-import { LineageLimitWarning } from '../limit_warnings';
+import { LimitWarning } from '../limit_warnings';
 
-const StyledLineageLimitWarning = styled(LineageLimitWarning)`
+const StyledLimitWarning = styled(LimitWarning)`
   flex-flow: row wrap;
   display: block;
   align-items: baseline;
@@ -190,7 +190,7 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
     <>
       <StyledBreadcrumbs breadcrumbs={crumbs} />
       {children === true || ancestors === true ? (
-        <StyledLineageLimitWarning numberDisplayed={numberOfProcesses} />
+        <StyledLimitWarning numberDisplayed={numberOfProcesses} />
       ) : null}
       <EuiSpacer size="l" />
       <EuiInMemoryTable<ProcessTableView> items={processTableView} columns={columns} sorting />

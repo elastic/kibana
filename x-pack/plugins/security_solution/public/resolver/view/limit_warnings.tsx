@@ -107,7 +107,7 @@ export const RelatedEventLimitWarning = React.memo(function RelatedEventLimitWar
 /**
  * Limit warning for hitting a limit of nodes in the tree
  */
-export const LineageLimitWarning = React.memo(function LineageLimitWarning({
+export const LimitWarning = React.memo(function LineageLimitWarning({
   className,
   numberDisplayed,
 }: {
