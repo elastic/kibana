@@ -33,7 +33,7 @@ function isSystemIndex(index: string): boolean {
   return false;
 }
 
-function filterSystemIndices(indices: MatchedIndex[], isIncludingSystemIndices: boolean) {
+function filterSystemIndices(indices: MatchedItem[], isIncludingSystemIndices: boolean) {
   if (!indices) {
     return indices;
   }
@@ -65,12 +65,12 @@ function filterSystemIndices(indices: MatchedIndex[], isIncludingSystemIndices: 
     We call this `exact` matches because ES is telling us exactly what it matches
  */
 
-import { MatchedIndex } from '../types';
+import { MatchedItem } from '../types';
 
 export function getMatchedIndices(
-  unfilteredAllIndices: MatchedIndex[],
-  unfilteredPartialMatchedIndices: MatchedIndex[],
-  unfilteredExactMatchedIndices: MatchedIndex[],
+  unfilteredAllIndices: MatchedItem[],
+  unfilteredPartialMatchedIndices: MatchedItem[],
+  unfilteredExactMatchedIndices: MatchedItem[],
   isIncludingSystemIndices: boolean = false
 ) {
   const allIndices = filterSystemIndices(unfilteredAllIndices, isIncludingSystemIndices);
