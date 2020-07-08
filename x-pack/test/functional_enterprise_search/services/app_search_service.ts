@@ -63,12 +63,6 @@ export async function AppSearchServiceProvider({ getService }: FtrProviderContex
   const security = getService('security');
 
   lifecycle.beforeTests.add(async () => {
-    const APP_SEARCH_API_KEY = process.env.APP_SEARCH_API_KEY;
-
-    if (!APP_SEARCH_API_KEY) {
-      throw new Error('Please provide a valid APP_SEARCH_API_KEY. See README for more details.');
-    }
-
     // The App Search plugin passes through the current user name and password
     // through on the API call to App Search. Therefore, we need to be signed
     // in as the enterprise_search user in order for this plugin to work.

@@ -14,16 +14,16 @@ Ex.
 # Run specs from the x-pack directory
 cd x-pack
 
+# Run tests that do not require enterpriseSearch.host variable
+node scripts/functional_tests --config test/functional_enterprise_search/without_host_configured.config.ts
+
 # Run tests that require enterpriseSearch.host variable
 APP_SEARCH_API_KEY=[use private key from local App Search instance here] node scripts/functional_tests --config test/functional_enterprise_search/with_host_configured.config.ts
-
-# Run tests that do not require enterpriseSearch.host variable
-APP_SEARCH_API_KEY=[use private key from local App Search instance here] node scripts/functional_tests --config test/functional_enterprise_search/without_host_configured.config.ts
 ```
 
 ## Enterprise Search Requirement
 
-These tests will not currently start an instance of App Search automatically. As such, they are not run as part of CI and are most useful for local regression testing.
+The `with_host_configured` tests will not currently start an instance of App Search automatically. As such, they are not run as part of CI and are most useful for local regression testing.
 
 The easiest way to start Enterprise Search for these tests is to check out the `ent-search` project
 and use the following script.

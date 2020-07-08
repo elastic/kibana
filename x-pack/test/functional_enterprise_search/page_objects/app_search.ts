@@ -14,7 +14,7 @@ export function AppSearchPageProvider({ getService, getPageObjects }: FtrProvide
 
   return {
     async navigateToPage(): Promise<void> {
-      return await PageObjects.common.navigateToApp('appSearch');
+      return await PageObjects.common.navigateToApp('enterprise_search/app_search');
     },
 
     async getEngineLinks(): Promise<WebElementWrapper[]> {
