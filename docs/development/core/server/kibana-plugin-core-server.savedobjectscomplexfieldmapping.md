@@ -6,8 +6,6 @@
 
 See [SavedObjectsFieldMapping](./kibana-plugin-core-server.savedobjectsfieldmapping.md) for documentation.
 
-Note: this type intentially doesn't include a type definition for defining `dynamic: true`<!-- -->. To limit the number of mapping fields, Saved Object types should only ever be set to `dynamic: false` or inherit the default `dynamic: 'strict'` from the top-level mapping.
-
 <b>Signature:</b>
 
 ```typescript
@@ -19,7 +17,7 @@ export interface SavedObjectsComplexFieldMapping
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [doc\_values](./kibana-plugin-core-server.savedobjectscomplexfieldmapping.doc_values.md) | <code>boolean</code> |  |
-|  [dynamic](./kibana-plugin-core-server.savedobjectscomplexfieldmapping.dynamic.md) | <code>false</code> |  |
+|  [dynamic](./kibana-plugin-core-server.savedobjectscomplexfieldmapping.dynamic.md) | <code>false &#124; 'strict'</code> | The dynamic property of the mapping, either <code>false</code> or <code>'strict'</code>. If unspecified <code>dynamic: 'strict'</code> will be inherited from the top-level index mappings.<!-- -->Note: To limit the number of mapping fields Saved Object types should \*never\* use <code>dynamic: true</code>. |
 |  [enabled](./kibana-plugin-core-server.savedobjectscomplexfieldmapping.enabled.md) | <code>boolean</code> |  |
 |  [properties](./kibana-plugin-core-server.savedobjectscomplexfieldmapping.properties.md) | <code>SavedObjectsMappingProperties</code> |  |
 |  [type](./kibana-plugin-core-server.savedobjectscomplexfieldmapping.type.md) | <code>string</code> |  |

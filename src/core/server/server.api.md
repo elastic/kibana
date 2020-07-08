@@ -2022,8 +2022,7 @@ export interface SavedObjectsClientWrapperOptions {
 export interface SavedObjectsComplexFieldMapping {
     // (undocumented)
     doc_values?: boolean;
-    // (undocumented)
-    dynamic?: false;
+    dynamic?: false | 'strict';
     // (undocumented)
     enabled?: boolean;
     // (undocumented)

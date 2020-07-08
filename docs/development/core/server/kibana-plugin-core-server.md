@@ -154,7 +154,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsBulkUpdateResponse](./kibana-plugin-core-server.savedobjectsbulkupdateresponse.md) |  |
 |  [SavedObjectsClientProviderOptions](./kibana-plugin-core-server.savedobjectsclientprovideroptions.md) | Options to control the creation of the Saved Objects Client. |
 |  [SavedObjectsClientWrapperOptions](./kibana-plugin-core-server.savedobjectsclientwrapperoptions.md) | Options passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance. |
-|  [SavedObjectsComplexFieldMapping](./kibana-plugin-core-server.savedobjectscomplexfieldmapping.md) | See [SavedObjectsFieldMapping](./kibana-plugin-core-server.savedobjectsfieldmapping.md) for documentation.<!-- -->Note: this type intentially doesn't include a type definition for defining <code>dynamic: true</code>. To limit the number of mapping fields, Saved Object types should only ever be set to <code>dynamic: false</code> or inherit the default <code>dynamic: 'strict'</code> from the top-level mapping. |
+|  [SavedObjectsComplexFieldMapping](./kibana-plugin-core-server.savedobjectscomplexfieldmapping.md) | See [SavedObjectsFieldMapping](./kibana-plugin-core-server.savedobjectsfieldmapping.md) for documentation. |
 |  [SavedObjectsCoreFieldMapping](./kibana-plugin-core-server.savedobjectscorefieldmapping.md) | See [SavedObjectsFieldMapping](./kibana-plugin-core-server.savedobjectsfieldmapping.md) for documentation. |
 |  [SavedObjectsCreateOptions](./kibana-plugin-core-server.savedobjectscreateoptions.md) |  |
 |  [SavedObjectsDeleteByNamespaceOptions](./kibana-plugin-core-server.savedobjectsdeletebynamespaceoptions.md) |  |

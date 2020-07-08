@@ -45,7 +45,9 @@
  * @public
  */
 export interface SavedObjectsTypeMappingDefinition {
-  /** The dynamic property of the mapping, either `false` or 'strict'. */
+  /** The dynamic property of the mapping, either `false` or `'strict'`. If
+   * unspecified `dynamic: 'strict'` will be inherited from the top-level
+   * index mappings. */
   dynamic?: false | 'strict';
   /** The underlying properties of the type mapping */
   properties: SavedObjectsMappingProperties;
@@ -145,15 +147,18 @@ export interface SavedObjectsCoreFieldMapping {
 /**
  * See {@link SavedObjectsFieldMapping} for documentation.
  *
- * Note: this type intentially doesn't include a type definition for defining
- * `dynamic: true`. To limit the number of mapping fields, Saved Object types
- * should only ever be set to `dynamic: false` or inherit the default
- * `dynamic: 'strict'` from the top-level mapping.
- *
  * @public
  */
 export interface SavedObjectsComplexFieldMapping {
-  dynamic?: false;
+  /**
+   * The dynamic property of the mapping, either `false` or `'strict'`. If
+   * unspecified `dynamic: 'strict'` will be inherited from the top-level
+   * index mappings.
+   *
+   * Note: To limit the number of mapping fields Saved Object types should
+   * *never* use `dynamic: true`.
+   */
+  dynamic?: false | 'strict';
   enabled?: boolean;
   doc_values?: boolean;
   type?: string;
