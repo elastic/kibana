@@ -21,7 +21,7 @@ export const StatusExpressionSelect: React.FC<Props> = ({
   hasFilters,
   setAlertParams,
 }) => {
-  const [isEnabled, setIsEnabled] = useState<boolean>(true);
+  const [isEnabled, setIsEnabled] = useState<boolean>(alertParams.shouldCheckStatus ?? true);
 
   useEffect(() => {
     setAlertParams('shouldCheckStatus', isEnabled);
