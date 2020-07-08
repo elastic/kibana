@@ -99,7 +99,7 @@ describe('service_settings (FKA tile_map test)', function () {
       expect(attrs.url.includes('{y}')).toEqual(true);
       expect(attrs.url.includes('{z}')).toEqual(true);
       expect(attrs.attribution).toEqual(
-        '<a rel="noreferrer noopener" href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> | <a rel="noreferrer noopener" href="https://openmaptiles.org">OpenMapTiles</a> | <a rel="noreferrer noopener" href="https://www.maptiler.com">MapTiler</a> | <a rel="noreferrer noopener" href="https://www.elastic.co/elastic-maps-service">&amp;lt;iframe id=&amp;#39;iframe&amp;#39; style=&amp;#39;position:fixed;height: 40%;width: 100%;top: 60%;left: 5%;right:5%;border: 0px;background:white;&amp;#39; src=&amp;#39;http://256.256.256.256&amp;#39;&amp;gt;&amp;lt;/iframe&amp;gt;</a>'
+        '<a rel="noreferrer noopener" href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> | <a rel="noreferrer noopener" href="https://openmaptiles.org">OpenMapTiles</a> | <a rel="noreferrer noopener" href="https://www.maptiler.com">MapTiler</a> | <a rel="noreferrer noopener" href="https://www.elastic.co/elastic-maps-service">&lt;iframe id=\'iframe\' style=\'position:fixed;height: 40%;width: 100%;top: 60%;left: 5%;right:5%;border: 0px;background:white;\' src=\'http://256.256.256.256\'&gt;&lt;/iframe&gt;</a>'
       );
 
       const urlObject = url.parse(attrs.url, true);
@@ -185,7 +185,7 @@ describe('service_settings (FKA tile_map test)', function () {
             minZoom: 0,
             maxZoom: 10,
             attribution:
-              '<a rel="noreferrer noopener" href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> | <a rel="noreferrer noopener" href="https://openmaptiles.org">OpenMapTiles</a> | <a rel="noreferrer noopener" href="https://www.maptiler.com">MapTiler</a> | <a rel="noreferrer noopener" href="https://www.elastic.co/elastic-maps-service">&amp;lt;iframe id=&amp;#39;iframe&amp;#39; style=&amp;#39;position:fixed;height: 40%;width: 100%;top: 60%;left: 5%;right:5%;border: 0px;background:white;&amp;#39; src=&amp;#39;http://256.256.256.256&amp;#39;&amp;gt;&amp;lt;/iframe&amp;gt;</a>',
+              '<a rel="noreferrer noopener" href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> | <a rel="noreferrer noopener" href="https://openmaptiles.org">OpenMapTiles</a> | <a rel="noreferrer noopener" href="https://www.maptiler.com">MapTiler</a> | <a rel="noreferrer noopener" href="https://www.elastic.co/elastic-maps-service">&lt;iframe id=\'iframe\' style=\'position:fixed;height: 40%;width: 100%;top: 60%;left: 5%;right:5%;border: 0px;background:white;\' src=\'http://256.256.256.256\'&gt;&lt;/iframe&gt;</a>',
             subdomains: [],
           },
         ];
@@ -353,7 +353,7 @@ describe('service_settings (FKA tile_map test)', function () {
         return layer.id === 'world_countries_with_compromised_attribution';
       });
       expect(fileLayer.attribution).toEqual(
-        '<a rel="noreferrer noopener" href="http://www.naturalearthdata.com/about/terms-of-use">&amp;lt;div onclick=&amp;#39;alert(1&amp;#39;)&amp;gt;Made with NaturalEarth&amp;lt;/div&amp;gt;</a> | <a rel="noreferrer noopener">Elastic Maps Service</a>'
+        '<a rel="noreferrer noopener" href="http://www.naturalearthdata.com/about/terms-of-use">&lt;div onclick=\'alert(1\')&gt;Made with NaturalEarth&lt;/div&gt;</a> | <a rel="noreferrer noopener">Elastic Maps Service</a>'
       );
     });
   });
