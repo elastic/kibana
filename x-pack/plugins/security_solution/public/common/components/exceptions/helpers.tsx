@@ -78,11 +78,6 @@ export const getExceptionOperatorSelect = (item: BuilderEntry): OperatorOption =
   }
 };
 
-export const getExceptionOperatorFromSelect = (value: string): OperatorOption => {
-  const operator = EXCEPTION_OPERATORS.filter(({ message }) => message === value);
-  return operator[0] ?? isOperator;
-};
-
 /**
  * Formats ExceptionItem entries into simple field, operator, value
  * for use in rendering items in table
@@ -443,7 +438,7 @@ export const entryHasListType = (
 ) => {
   for (const { entries } of exceptionItems) {
     for (const exceptionEntry of entries ?? []) {
-      if (getOperatorType(exceptionEntry) === 'list') {
+      if (getOperatorType(exceptionEntry) === OperatorTypeEnum.LIST) {
         return true;
       }
     }
@@ -463,12 +458,22 @@ export const entryHasNonEcsType = (
   }
   for (const { entries } of exceptionItems) {
     for (const exceptionEntry of entries ?? []) {
-      if (indexPatterns.fields.find(({ name }) => name === exceptionEntry.field) === undefined) {
+      if (exceptionEntry.type === 'nested') {
+        for (const nestedExceptionEntry of exceptionEntry.entries) {
+          if (doesFieldNameExist(nestedExceptionEntry) === true) {
+            return true;
+          }
+        }
+      } else if (doesFieldNameExist(exceptionEntry) === true) {
         return true;
       }
     }
   }
   return false;
+
+  function doesFieldNameExist(exceptionEntry: Entry) {
+    return indexPatterns.fields.find(({ name }) => name === exceptionEntry.field) === undefined;
+  }
 };
 
 /**
