@@ -33,7 +33,6 @@ import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
 import { rulesNotificationAlertType } from './lib/detection_engine/notifications/rules_notification_alert_type';
 import { isNotificationAlertExecutor } from './lib/detection_engine/notifications/types';
-import { hasListsFeature, listsEnvFeatureFlagName } from './lib/detection_engine/feature_flags';
 import { ManifestTask, ExceptionsCache } from './endpoint/lib/artifacts';
 import { initSavedObjects, savedObjectTypes } from './saved_objects';
 import { AppClientFactory } from './client';
@@ -112,13 +111,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public async setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
     this.logger.debug('plugin setup');
-
-    if (hasListsFeature()) {
-      // TODO: Remove this once we have the lists feature supported
-      this.logger.error(
-        `You have activated the lists feature flag which is NOT currently supported for Security Solution! You should turn this feature flag off immediately by un-setting the environment variable: ${listsEnvFeatureFlagName} and restarting Kibana`
-      );
-    }
 
     const config = await this.config$.pipe(first()).toPromise();
 

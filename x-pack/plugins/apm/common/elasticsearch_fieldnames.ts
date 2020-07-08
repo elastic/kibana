@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export const CLOUD_AVAILABILITY_ZONE = 'cloud.availability_zone';
+export const CLOUD_PROVIDER = 'cloud.provider';
+export const CLOUD_REGION = 'cloud.region';
+
 export const SERVICE_NAME = 'service.name';
 export const SERVICE_ENVIRONMENT = 'service.environment';
 export const SERVICE_FRAMEWORK_NAME = 'service.framework.name';
