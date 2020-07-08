@@ -168,41 +168,51 @@ const EndpointsEmptyState = React.memo<{
     () => [
       {
         title: i18n.translate('xpack.securitySolution.endpoint.endpointList.stepOneTitle', {
-          defaultMessage: 'Select a policy you created from the list below',
+          defaultMessage: 'Select the policy you want to use to protect your hosts',
         }),
         children: (
-          <EuiSelectable
-            options={selectionOptions}
-            singleSelection="always"
-            isLoading={loading}
-            height={100}
-            listProps={{ bordered: true, singleSelection: true }}
-            onChange={handleSelectableOnChange}
-            data-test-subj="onboardingPolicySelect"
-          >
-            {(list) => {
-              return loading ? (
-                <EuiSelectableMessage>
+          <>
+            <EuiText color="subdued" size="m" grow={false}>
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.endpointList.stepOne"
+                defaultMessage="Existing policies are listed below. This can be changed later."
+              />
+            </EuiText>
+            <EuiSpacer size="xxl" />
+            <EuiSelectable
+              options={selectionOptions}
+              singleSelection="always"
+              isLoading={loading}
+              height={100}
+              listProps={{ bordered: true, singleSelection: true }}
+              onChange={handleSelectableOnChange}
+              data-test-subj="onboardingPolicySelect"
+            >
+              {(list) => {
+                return loading ? (
+                  <EuiSelectableMessage>
+                    <FormattedMessage
+                      id="xpack.securitySolution.endpoint.endpointList.loadingPolicies"
+                      defaultMessage="Loading policy configs"
+                    />
+                  </EuiSelectableMessage>
+                ) : selectionOptions.length ? (
+                  list
+                ) : (
                   <FormattedMessage
-                    id="xpack.securitySolution.endpoint.endpointList.loadingPolicies"
-                    defaultMessage="Loading policy configs"
+                    id="xpack.securitySolution.endpoint.endpointList.noPolicies"
+                    defaultMessage="There are no policies."
                   />
-                </EuiSelectableMessage>
-              ) : selectionOptions.length ? (
-                list
-              ) : (
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.endpointList.noPolicies"
-                  defaultMessage="There are no policies."
-                />
-              );
-            }}
-          </EuiSelectable>
+                );
+              }}
+            </EuiSelectable>
+          </>
         ),
       },
       {
         title: i18n.translate('xpack.securitySolution.endpoint.endpointList.stepTwoTitle', {
-          defaultMessage: 'Head over to Ingest to deploy your Agent with Endpoint Security enabled',
+          defaultMessage:
+            'Enroll your agents enabled with Endpoint Security through Ingest Manager',
         }),
         status: actionDisabled ? 'disabled' : '',
         children: (
@@ -211,7 +221,7 @@ const EndpointsEmptyState = React.memo<{
               <EuiText color="subdued" size="m" grow={false}>
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.endpointList.stepTwo"
-                  defaultMessage="You'll be given a command in Ingest to get you started"
+                  defaultMessage="You’ll be provided with the necessary commands to get started."
                 />
               </EuiText>
             </EuiFlexItem>
@@ -243,13 +253,13 @@ const EndpointsEmptyState = React.memo<{
       headerComponent={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.endpointList.noEndpointsPrompt"
-          defaultMessage="You have a policy, but no Agents with Endpoint Security are deployed"
+          defaultMessage="Enable Elastic Endpoint Security on your agents"
         />
       }
       bodyComponent={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.endpointList.noEndpointsInstructions"
-          defaultMessage="Elastic Endpoint Security gives you the power to keep your endpoints safe from attack, as well as unparalleled visibility into any threat in your environment."
+          defaultMessage="You’ve created your security policy. Now you need to enable the Elastic Endpoint Security capabilities on your agents following the steps below. For additional information, view our ‘getting started guide’."
         />
       }
     />
