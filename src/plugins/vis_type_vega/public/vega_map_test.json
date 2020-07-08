@@ -1,0 +1,20 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "config": {
+    "kibana": { "renderer": "svg", "type": "map", "mapStyle": false}
+  },
+  "width": 512,
+  "height": 512,
+  "marks": [
+    {
+      "type": "rect",
+      "encode": {
+        "enter": {
+          "fill": {"value": "#0f0"},
+          "width": {"signal": "width"},
+          "height": {"signal": "height"}
+        }
+      }
+    }
+  ]
+}

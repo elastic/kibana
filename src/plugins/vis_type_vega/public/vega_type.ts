@@ -25,8 +25,7 @@ import { VegaVisEditor } from './components';
 import { createVegaRequestHandler } from './vega_request_handler';
 // @ts-ignore
 import { createVegaVisualization } from './vega_visualization';
-// @ts-ignore
-import defaultSpec from '!!raw-loader!./default.spec.hjson';
+import defaultSpec from './default.spec.json';
 
 export const createVegaTypeDefinition = (dependencies: VegaVisualizationDependencies) => {
   const requestHandler = createVegaRequestHandler(dependencies);
@@ -40,7 +39,7 @@ export const createVegaTypeDefinition = (dependencies: VegaVisualizationDependen
       description: 'Vega and Vega-Lite are product names and should not be translated',
     }),
     icon: 'visVega',
-    visConfig: { defaults: { spec: defaultSpec } },
+    visConfig: { defaults: { spec: JSON.stringify(defaultSpec) } },
     editorConfig: {
       optionsTemplate: VegaVisEditor,
       enableAutoApply: true,
