@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// @ts-ignore
+
 import expect from '@kbn/expect';
 import { Ipv4Address } from './ipv4_address';
 
