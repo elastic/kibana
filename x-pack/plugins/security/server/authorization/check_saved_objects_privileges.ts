@@ -29,21 +29,21 @@ export const checkSavedObjectsPrivilegesWithRequestFactory = (
       namespaceOrNamespaces?: string | string[]
     ) {
       const spacesService = getSpacesService();
-      if (Array.isArray(namespaceOrNamespaces)) {
-        if (spacesService === undefined) {
-          throw new Error(
-            `Can't check saved object privileges for multiple namespaces if Spaces is disabled`
-          );
-        } else if (!namespaceOrNamespaces.length) {
+      if (!spacesService) {
+        // Spaces disabled, authorizing globally
+        return await checkPrivilegesWithRequest(request).globally(actions);
+      } else if (Array.isArray(namespaceOrNamespaces)) {
+        // Spaces enabled, authorizing against multiple spaces
+        if (!namespaceOrNamespaces.length) {
           throw new Error(`Can't check saved object privileges for 0 namespaces`);
         }
         const spaceIds = namespaceOrNamespaces.map((x) => spacesService.namespaceToSpaceId(x));
         return await checkPrivilegesWithRequest(request).atSpaces(spaceIds, actions);
-      } else if (spacesService) {
+      } else {
+        // Spaces enabled, authorizing against a single space
         const spaceId = spacesService.namespaceToSpaceId(namespaceOrNamespaces);
         return await checkPrivilegesWithRequest(request).atSpace(spaceId, actions);
       }
-      return await checkPrivilegesWithRequest(request).globally(actions);
     };
   };
 };
