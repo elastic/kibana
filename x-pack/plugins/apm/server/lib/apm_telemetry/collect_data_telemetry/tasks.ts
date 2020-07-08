@@ -466,15 +466,17 @@ export const tasks: TelemetryTask[] = [
   {
     name: 'integrations',
     executor: async ({ transportRequest }) => {
+      const apmJobs = ['apm-*', '*-high_mean_response_time'];
+
       const response = (await transportRequest({
         method: 'get',
-        path: `/_ml/anomaly_detectors/${ML_GROUP_NAME_APM}-*`,
-      })) as { data?: { count: number } };
+        path: `/_ml/anomaly_detectors/${apmJobs.join(',')}`,
+      })) as { body?: { count: number } };
 
       return {
         integrations: {
           ml: {
-            all_jobs_count: response.data?.count ?? 0,
+            all_jobs_count: response.body?.count ?? 0,
           },
         },
       };

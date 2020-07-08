@@ -72,7 +72,7 @@ describe('data telemetry collection tasks', () => {
     it('returns the count of ML jobs', async () => {
       const transportRequest = jest
         .fn()
-        .mockResolvedValueOnce({ data: { count: 1 } });
+        .mockResolvedValueOnce({ body: { count: 1 } });
 
       expect(
         await integrationsTask?.executor({ indices, transportRequest } as any)
