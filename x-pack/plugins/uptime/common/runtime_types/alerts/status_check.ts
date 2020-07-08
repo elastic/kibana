@@ -5,7 +5,6 @@
  */
 
 import * as t from 'io-ts';
-import { number } from 'yargs';
 
 export const StatusCheckFiltersType = t.type({
   'monitor.type': t.array(t.string),

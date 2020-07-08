@@ -50,7 +50,7 @@ export const availabilityMessage = (
     .slice(0, MESSAGE_AVAILABILITY_MAX)
     .map(
       ({ availabilityRatio, name, monitorId, url }) =>
-        `${name || monitorId}(${url}): ${(availabilityRatio * 100).toPrecision(5)}%`
+        `${name || monitorId}(${url}): ${((availabilityRatio ?? 1.0) * 100).toPrecision(5)}%`
     )
     .reduce((prev: string, cur: string, _ind: number, array: string[]) => {
       let next = '';
