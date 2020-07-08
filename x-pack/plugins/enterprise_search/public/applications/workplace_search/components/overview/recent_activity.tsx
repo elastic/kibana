@@ -52,13 +52,6 @@ export const RecentActivity: React.FC<IAppServerData> = ({
       metric: 'recent_activity_source_details_link',
     });
 
-  const buttonProps = {
-    onClick,
-    target: '_blank',
-    external: true,
-    'data-test-subj': 'viewSourceDetailsButton',
-  } as EuiButtonProps & EuiLinkProps;
-
   const NAMED_EMPTY_FEED_TITLE = (
     <FormattedMessage
       id="xpack.enterpriseSearch.workplaceSearch.activityFeedNamedDefault.title"
@@ -93,16 +86,26 @@ export const RecentActivity: React.FC<IAppServerData> = ({
   const FeedTable = (
     <table className="table">
       <tbody className="table__body">
-        {activityFeed.map(({ id, status, message, timestamp, sourceId }: IFeedActivity, index) => (
-          <tr key={index} className={`activity ${status ? `activity__${status}` : ''}`}>
-            <td>
-              <EuiLink {...buttonProps} href={getWSRoute(getSourcePath(sourceId))}>
-                {id} {message} {status === 'error' && viewSourceLabel}
-              </EuiLink>
-            </td>
-            <td>{moment.utc(timestamp).fromNow()}</td>
-          </tr>
-        ))}
+        {activityFeed.map(({ id, status, message, timestamp, sourceId }: IFeedActivity, index) => {
+          const buttonProps = {
+            onClick,
+            target: '_blank',
+            href: getWSRoute(getSourcePath(sourceId)) as string,
+            external: true,
+            'data-test-subj': 'viewSourceDetailsButton',
+          } as EuiButtonProps & EuiLinkProps;
+
+          return (
+            <tr key={index} className={`activity ${status ? `activity__${status}` : ''}`}>
+              <td>
+                <EuiLink {...buttonProps}>
+                  {id} {message} {status === 'error' && viewSourceLabel}
+                </EuiLink>
+              </td>
+              <td>{moment.utc(timestamp).fromNow()}</td>
+            </tr>
+          );
+        })}
       </tbody>
     </table>
   );
