@@ -24,38 +24,31 @@ import { getSerialDiffMetricAgg } from './serial_diff';
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
-import { GetInternalStartServicesFn, InternalStartServices } from '../../../types';
-import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
 
 describe('parent pipeline aggs', function () {
-  const getInternalStartServices: GetInternalStartServicesFn = () =>
-    (({
-      notifications: notificationServiceMock.createStartContract(),
-    } as unknown) as InternalStartServices);
-
   const typesRegistry = mockAggTypesRegistry();
 
   const metrics = [
     {
       name: 'derivative',
       title: 'Derivative',
-      provider: getDerivativeMetricAgg({ getInternalStartServices }),
+      provider: getDerivativeMetricAgg(),
     },
     {
       name: 'cumulative_sum',
       title: 'Cumulative Sum',
-      provider: getCumulativeSumMetricAgg({ getInternalStartServices }),
+      provider: getCumulativeSumMetricAgg(),
     },
     {
       name: 'moving_avg',
       title: 'Moving Avg',
-      provider: getMovingAvgMetricAgg({ getInternalStartServices }),
+      provider: getMovingAvgMetricAgg(),
       dslName: 'moving_fn',
     },
     {
       name: 'serial_diff',
       title: 'Serial Diff',
-      provider: getSerialDiffMetricAgg({ getInternalStartServices }),
+      provider: getSerialDiffMetricAgg(),
     },
   ];
 
