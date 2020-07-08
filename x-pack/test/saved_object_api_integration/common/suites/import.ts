@@ -114,7 +114,7 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
             // the new ID was randomly generated
             expect(destinationId).to.match(/^[0-9a-f-]{36}$/);
           }
-        } else if (successParam === 'createNewCopies' || successParam === 'newOrigin') {
+        } else if (successParam === 'createNewCopies' || successParam === 'createNewCopy') {
           // the new ID was randomly generated
           expect(destinationId).to.match(/^[0-9a-f-]{36}$/);
         } else {
@@ -124,11 +124,11 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
         // This assertion is only needed for the case where `createNewCopies` mode is disabled and ambiguous source conflicts are detected.
         // When `createNewCopies` mode is permanently enabled, this field will be removed, and this assertion will be redundant and can be
         // removed too.
-        const resultNewCopies = object!.createNewCopies as boolean | undefined;
-        if (successParam === 'newOrigin') {
-          expect(resultNewCopies).to.be(true);
+        const createNewCopy = object!.createNewCopy as boolean | undefined;
+        if (successParam === 'createNewCopy') {
+          expect(createNewCopy).to.be(true);
         } else {
-          expect(resultNewCopies).to.be(undefined);
+          expect(createNewCopy).to.be(undefined);
         }
 
         if (!singleRequest || overwrite || createNewCopies) {

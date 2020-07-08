@@ -84,7 +84,7 @@ const createRequest = (
       id,
       overwrite,
       ...(expectedNewId && { destinationId: expectedNewId }),
-      ...(successParam === 'newOrigin' && { createNewCopy: true }),
+      ...(successParam === 'createNewCopy' && { createNewCopy: true }),
     },
   ],
 });
@@ -134,7 +134,7 @@ export function resolveImportErrorsTestSuiteFactory(
             // the new ID was randomly generated
             expect(destinationId).to.match(/^[0-9a-f-]{36}$/);
           }
-        } else if (successParam === 'createNewCopies' || successParam === 'newOrigin') {
+        } else if (successParam === 'createNewCopies' || successParam === 'createNewCopy') {
           expect(destinationId).to.be(expectedNewId!);
         } else {
           expect(destinationId).to.be(undefined);
@@ -143,11 +143,11 @@ export function resolveImportErrorsTestSuiteFactory(
         // This assertion is only needed for the case where `createNewCopies` mode is disabled and ambiguous source conflicts are detected.
         // When `createNewCopies` mode is permanently enabled, this field will be removed, and this assertion will be redundant and can be
         // removed too.
-        const resultNewCopies = object!.createNewCopies as boolean | undefined;
-        if (successParam === 'newOrigin') {
-          expect(resultNewCopies).to.be(true);
+        const createNewCopy = object!.createNewCopy as boolean | undefined;
+        if (successParam === 'createNewCopy') {
+          expect(createNewCopy).to.be(true);
         } else {
-          expect(resultNewCopies).to.be(undefined);
+          expect(createNewCopy).to.be(undefined);
         }
 
         const { _source } = await expectResponses.successCreated(

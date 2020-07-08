@@ -22,7 +22,7 @@ const {
 const { fail400, fail409 } = testCaseFailures;
 const destinationId = (condition?: boolean) =>
   condition !== false ? { successParam: 'destinationId' } : {};
-const newOrigin = () => ({ successParam: 'newOrigin' });
+const newCopy = () => ({ successParam: 'createNewCopy' });
 const ambiguousConflict = (suffix: string) => ({
   failure: 409 as 409,
   fail409Param: `ambiguous_conflict_${suffix}`,
@@ -73,8 +73,8 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
       ...fail409(!overwrite && spaceId === SPACE_2_ID),
       ...destinationId(spaceId !== SPACE_2_ID),
     },
-    { ...CASES.CONFLICT_1A_OBJ, ...newOrigin() }, // "ambiguous source" conflict which results in a new destination ID and empty origin ID
-    { ...CASES.CONFLICT_1B_OBJ, ...newOrigin() }, // "ambiguous source" conflict which results in a new destination ID and empty origin ID
+    { ...CASES.CONFLICT_1A_OBJ, ...newCopy() }, // "ambiguous source" conflict which results in a new destination ID and empty origin ID
+    { ...CASES.CONFLICT_1B_OBJ, ...newCopy() }, // "ambiguous source" conflict which results in a new destination ID and empty origin ID
     { ...CASES.CONFLICT_3A_OBJ, ...fail409(!overwrite), ...destinationId() }, // "inexact match" conflict
     { ...CASES.CONFLICT_4_OBJ, ...fail409(!overwrite), ...destinationId() }, // "inexact match" conflict
   ];
@@ -88,8 +88,8 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
     { ...CASES.CONFLICT_1_OBJ, ...fail409(!overwrite) }, // "exact match" conflict
     CASES.CONFLICT_1A_OBJ, // no conflict because CONFLICT_1_OBJ is an exact match
     CASES.CONFLICT_1B_OBJ, // no conflict because CONFLICT_1_OBJ is an exact match
-    { ...CASES.CONFLICT_2C_OBJ, ...newOrigin() }, // "ambiguous source and destination" conflict which results in a new destination ID and empty origin ID
-    { ...CASES.CONFLICT_2D_OBJ, ...newOrigin() }, // "ambiguous source and destination" conflict which results in a new destination ID and empty origin ID
+    { ...CASES.CONFLICT_2C_OBJ, ...newCopy() }, // "ambiguous source and destination" conflict which results in a new destination ID and empty origin ID
+    { ...CASES.CONFLICT_2D_OBJ, ...newCopy() }, // "ambiguous source and destination" conflict which results in a new destination ID and empty origin ID
   ];
   return { group1Importable, group1NonImportable, group1All, group2, group3, group4 };
 };
