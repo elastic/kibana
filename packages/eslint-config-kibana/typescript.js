@@ -124,7 +124,6 @@ module.exports = {
           }],
           '@typescript-eslint/no-var-requires': 'error',
           '@typescript-eslint/unified-signatures': 'error',
-          '@typescript-eslint/prefer-ts-expect-error': 'warn',
           'constructor-super': 'error',
           'dot-notation': 'error',
           'eqeqeq': ['error', 'always', {'null': 'ignore'}],

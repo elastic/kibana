@@ -18,3 +18,4 @@
  */
 
 export * from './date_interval_utils';
+export * from './ipv4_address';

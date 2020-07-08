@@ -18,6 +18,7 @@ export interface SavedObjectsComplexFieldMapping
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [doc\_values](./kibana-plugin-core-server.savedobjectscomplexfieldmapping.doc_values.md) | <code>boolean</code> |  |
 |  [properties](./kibana-plugin-core-server.savedobjectscomplexfieldmapping.properties.md) | <code>SavedObjectsMappingProperties</code> |  |
 |  [type](./kibana-plugin-core-server.savedobjectscomplexfieldmapping.type.md) | <code>string</code> |  |
 

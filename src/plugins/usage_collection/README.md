@@ -59,7 +59,7 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
 
       // create usage collector
       const myCollector = usageCollection.makeUsageCollector<Usage>({
-        type: MY_USAGE_TYPE,
+        type: 'MY_USAGE_TYPE',
         schema: {
           my_objects: {
             total: 'long',
@@ -84,7 +84,11 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
     }
     ```
 
-Some background: The `callCluster` that gets passed to the `fetch` method is created in a way that's a bit tricky, to support multiple contexts the `fetch` method could be called. Your `fetch` method could get called as a result of an HTTP API request: in this case, the `callCluster` function wraps `callWithRequest`, and the request headers are expected to have read privilege on the entire `.kibana` index. The use case for this is stats pulled from a Kibana Metricbeat module, where the Beat calls Kibana's stats API in Kibana to invoke collection.
+Some background: 
+
+- `MY_USAGE_TYPE` can be any string. It usually matches the plugin name. As a safety mechanism, we double check there are no duplicates at the moment of registering the collector.
+- The `fetch` method needs to support multiple contexts in which it is called. For example, when stats are pulled from a Kibana Metricbeat module, the Beat calls Kibana's stats API to invoke usage collection.
+In this case, the `fetch` method is called as a result of an HTTP API request and `callCluster` wraps `callWithRequest`, where the request headers are expected to have read privilege on the entire `.kibana' index.
 
 Note: there will be many cases where you won't need to use the `callCluster` function that gets passed in to your `fetch` method at all. Your feature might have an accumulating value in server memory, or read something from the OS, or use other clients like a custom SavedObjects client. In that case it's up to the plugin to initialize those clients like the example below:
 

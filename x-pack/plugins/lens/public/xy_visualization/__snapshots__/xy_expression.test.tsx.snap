@@ -5,6 +5,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
   renderer="canvas"
 >
   <Connect(SpecInstance)
+    baseTheme={Object {}}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -35,6 +36,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     title="a"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {
@@ -52,6 +54,11 @@ exports[`xy_expression XYChart component it renders area 1`] = `
       ]
     }
     enableHistogramMode={false}
+    fit={
+      Object {
+        "type": "none",
+      }
+    }
     groupId="left"
     id="d-a"
     key="0-0"
@@ -73,6 +80,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     yScaleType="linear"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {
@@ -90,6 +98,11 @@ exports[`xy_expression XYChart component it renders area 1`] = `
       ]
     }
     enableHistogramMode={false}
+    fit={
+      Object {
+        "type": "none",
+      }
+    }
     groupId="left"
     id="d-b"
     key="0-1"
@@ -118,6 +131,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
   renderer="canvas"
 >
   <Connect(SpecInstance)
+    baseTheme={Object {}}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -148,6 +162,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     title="a"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {
@@ -186,6 +201,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     yScaleType="linear"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {
@@ -231,6 +247,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
   renderer="canvas"
 >
   <Connect(SpecInstance)
+    baseTheme={Object {}}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -261,6 +278,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     title="a"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {
@@ -299,6 +317,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     yScaleType="linear"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {
@@ -344,6 +363,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
   renderer="canvas"
 >
   <Connect(SpecInstance)
+    baseTheme={Object {}}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -374,6 +394,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     title="a"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {
@@ -391,6 +412,11 @@ exports[`xy_expression XYChart component it renders line 1`] = `
       ]
     }
     enableHistogramMode={false}
+    fit={
+      Object {
+        "type": "none",
+      }
+    }
     groupId="left"
     id="d-a"
     key="0-0"
@@ -412,6 +438,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     yScaleType="linear"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {
@@ -429,6 +456,11 @@ exports[`xy_expression XYChart component it renders line 1`] = `
       ]
     }
     enableHistogramMode={false}
+    fit={
+      Object {
+        "type": "none",
+      }
+    }
     groupId="left"
     id="d-b"
     key="0-1"
@@ -457,6 +489,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
   renderer="canvas"
 >
   <Connect(SpecInstance)
+    baseTheme={Object {}}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -487,6 +520,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     title="a"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {
@@ -529,6 +563,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     yScaleType="linear"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {
@@ -578,6 +613,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
   renderer="canvas"
 >
   <Connect(SpecInstance)
+    baseTheme={Object {}}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -608,6 +644,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     title="a"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {
@@ -650,6 +687,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     yScaleType="linear"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {
@@ -699,6 +737,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
   renderer="canvas"
 >
   <Connect(SpecInstance)
+    baseTheme={Object {}}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -729,6 +768,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     title="a"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {
@@ -771,6 +811,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     yScaleType="linear"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {

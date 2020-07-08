@@ -51,15 +51,9 @@ export const ElasticEui = require('@elastic/eui');
 export const ElasticEuiLibServices = require('@elastic/eui/lib/services');
 export const ElasticEuiLibServicesFormat = require('@elastic/eui/lib/services/format');
 export const ElasticEuiChartsTheme = require('@elastic/eui/dist/eui_charts_theme');
-export let ElasticEuiLightTheme;
-export let ElasticEuiDarkTheme;
-if (window.__kbnThemeVersion__ === 'v7') {
-  ElasticEuiLightTheme = require('@elastic/eui/dist/eui_theme_light.json');
-  ElasticEuiDarkTheme = require('@elastic/eui/dist/eui_theme_dark.json');
-} else {
-  ElasticEuiLightTheme = require('@elastic/eui/dist/eui_theme_amsterdam_light.json');
-  ElasticEuiDarkTheme = require('@elastic/eui/dist/eui_theme_amsterdam_dark.json');
-}
+
+import * as Theme from './theme.ts';
+export { Theme };
 
 // massive deps that we should really get rid of or reduce in size substantially
 export const ElasticsearchBrowser = require('elasticsearch-browser/elasticsearch.js');

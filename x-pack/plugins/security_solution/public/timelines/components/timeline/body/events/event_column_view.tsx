@@ -89,10 +89,10 @@ export const EventColumnView = React.memo<Props>(
     updateNote,
   }) => {
     const { getManageTimelineById } = useManageTimeline();
-    const timelineActions = useMemo(() => getManageTimelineById(timelineId).timelineRowActions, [
-      getManageTimelineById,
-      timelineId,
-    ]);
+    const timelineActions = useMemo(
+      () => getManageTimelineById(timelineId).timelineRowActions(ecsData),
+      [ecsData, getManageTimelineById, timelineId]
+    );
     const [isPopoverOpen, setPopover] = useState(false);
 
     const onButtonClick = useCallback(() => {
@@ -105,6 +105,7 @@ export const EventColumnView = React.memo<Props>(
 
     const button = (
       <EuiButtonIcon
+        aria-label="context menu"
         data-test-subj="timeline-context-menu-button"
         size="s"
         iconType="boxesHorizontal"
@@ -144,7 +145,7 @@ export const EventColumnView = React.memo<Props>(
                       isDisabled={
                         action.isActionDisabled != null ? action.isActionDisabled(ecsData) : false
                       }
-                      onClick={() => action.onClick({ eventId: id, ecsData })}
+                      onClick={() => action.onClick({ eventId: id, ecsData, data })}
                     />
                   </EuiToolTip>
                 </EventsTdContent>,
@@ -163,7 +164,7 @@ export const EventColumnView = React.memo<Props>(
                 }
                 icon={action.iconType}
                 key={action.id}
-                onClick={() => onClickCb(() => action.onClick({ eventId: id, ecsData }))}
+                onClick={() => onClickCb(() => action.onClick({ eventId: id, ecsData, data }))}
               >
                 {action.content}
               </EuiContextMenuItem>,
@@ -187,14 +188,14 @@ export const EventColumnView = React.memo<Props>(
                 closePopover={closePopover}
                 panelPaddingSize="none"
                 anchorPosition="downLeft"
+                repositionOnScroll
               >
                 <ContextMenuPanel items={grouped.contextMenu} />
               </EuiPopover>
             </EventsTdContent>,
           ]
         : grouped.icon;
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [button, ecsData, timelineActions, isPopoverOpen]); // , isPopoverOpen, closePopover, onButtonClick]);
+    }, [button, closePopover, id, onClickCb, data, ecsData, timelineActions, isPopoverOpen]);
 
     return (
       <EventsTrData data-test-subj="event-column-view">
