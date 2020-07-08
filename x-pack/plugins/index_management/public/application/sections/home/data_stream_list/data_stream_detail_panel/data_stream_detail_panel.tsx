@@ -30,12 +30,11 @@ import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirm
 
 interface Props {
   dataStreamName: string;
-  backingIndicesLink: reactRouterNavigate;
+  backingIndicesLink: ReturnType<typeof reactRouterNavigate>;
   onClose: (shouldReload?: boolean) => void;
 }
 
 export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
-  history,
   dataStreamName,
   backingIndicesLink,
   onClose,
