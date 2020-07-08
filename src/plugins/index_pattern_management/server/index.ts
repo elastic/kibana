@@ -17,30 +17,9 @@
  * under the License.
  */
 
-import React from 'react';
+import { PluginInitializerContext } from 'src/core/server';
+import { IndexPatternManagementPlugin } from './plugin';
 
-import { EuiTitle, EuiSpacer, EuiText } from '@elastic/eui';
-
-import { FormattedMessage } from '@kbn/i18n/react';
-
-interface HeaderProps {
-  indexPattern: string;
-  indexPatternName: string;
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new IndexPatternManagementPlugin(initializerContext);
 }
-
-export const Header: React.FC<HeaderProps> = ({ indexPattern, indexPatternName }) => (
-  <div>
-    <EuiTitle size="s">
-      <h2>
-        <FormattedMessage
-          id="indexPatternManagement.createIndexPattern.stepTimeHeader"
-          defaultMessage="Step 2 of 2: Configure settings"
-        />
-      </h2>
-    </EuiTitle>
-    <EuiSpacer size="m" />
-    <EuiText>
-      <strong>{indexPattern}</strong>
-    </EuiText>
-  </div>
-);
