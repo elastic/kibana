@@ -26,33 +26,33 @@ describe('Kuery escape', () => {
     expect(escapeKuery(value)).to.be(expected);
   });
 
-  it('should escape keywords', () => {
+  it('should NOT escape keywords', () => {
     const value = 'foo and bar or baz not qux';
-    const expected = 'foo \\and bar \\or baz \\not qux';
+    const expected = 'foo and bar or baz not qux';
     expect(escapeKuery(value)).to.be(expected);
   });
 
-  it('should escape keywords next to each other', () => {
+  it('should NOT escape keywords next to each other', () => {
     const value = 'foo and bar or not baz';
-    const expected = 'foo \\and bar \\or \\not baz';
+    const expected = 'foo and bar or not baz';
     expect(escapeKuery(value)).to.be(expected);
   });
 
   it('should not escape keywords without surrounding spaces', () => {
     const value = 'And this has keywords, or does it not?';
-    const expected = 'And this has keywords, \\or does it not?';
+    const expected = 'And this has keywords, or does it not?';
     expect(escapeKuery(value)).to.be(expected);
   });
 
-  it('should escape uppercase keywords', () => {
+  it('should NOT escape uppercase keywords', () => {
     const value = 'foo AND bar';
-    const expected = 'foo \\AND bar';
+    const expected = 'foo AND bar';
     expect(escapeKuery(value)).to.be(expected);
   });
 
-  it('should escape both keywords and special characters', () => {
+  it('should escape special characters and NOT keywords', () => {
     const value = 'Hello, "world", and <nice> to meet you!';
-    const expected = 'Hello, \\"world\\", \\and <nice> to meet you!';
+    const expected = 'Hello, \\"world\\", and <nice> to meet you!';
     expect(escapeKuery(value)).to.be(expected);
   });
 

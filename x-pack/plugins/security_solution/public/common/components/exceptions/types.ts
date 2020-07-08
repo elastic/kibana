@@ -11,6 +11,7 @@ import {
   Entry,
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
+  NamespaceType,
   OperatorTypeEnum,
   OperatorEnum,
 } from '../../../lists_plugin_deps';
@@ -27,9 +28,9 @@ export interface DescriptionListItem {
   description: NonNullable<ReactNode>;
 }
 
-export enum ExceptionListType {
-  DETECTION_ENGINE = 'detection',
-  ENDPOINT = 'endpoint',
+export interface ExceptionListItemIdentifiers {
+  id: string;
+  namespaceType: NamespaceType;
 }
 
 export interface FilterOptions {

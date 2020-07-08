@@ -43,9 +43,9 @@ describe('Pipeline Editor', () => {
       },
       onFlyoutOpen: jest.fn(),
       onUpdate,
-      isTestButtonDisabled: false,
-      onTestPipelineClick: jest.fn(),
-      esDocsBasePath: 'test',
+      links: {
+        esDocsBasePath: 'test',
+      },
     });
   });
 
@@ -55,13 +55,6 @@ describe('Pipeline Editor', () => {
     } = onUpdate.mock;
 
     expect(arg.getData()).toEqual(testProcessors);
-  });
-
-  it('toggles the on-failure processors tree', () => {
-    const { actions, exists } = testBed;
-    expect(exists('pipelineEditorOnFailureTree')).toBe(false);
-    actions.toggleOnFailure();
-    expect(exists('pipelineEditorOnFailureTree')).toBe(true);
   });
 
   describe('processors', () => {
@@ -160,7 +153,7 @@ describe('Pipeline Editor', () => {
       const processorSelector = 'processors>0';
       actions.startAndCancelMove(processorSelector);
       // Assert that we have exited move mode for this processor
-      expect(exists(`moveItemButton-${processorSelector}`));
+      expect(exists(`${processorSelector}.moveItemButton`)).toBe(true);
       const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
       const { processors } = onUpdateResult.getData();
       // Assert that nothing has changed
@@ -169,7 +162,6 @@ describe('Pipeline Editor', () => {
 
     it('moves to and from the global on-failure tree', async () => {
       const { actions } = testBed;
-      actions.toggleOnFailure();
       await actions.addProcessor('onFailure', 'test', { if: '1 == 5' });
       actions.moveProcessor('processors>0', 'dropButtonBelow-onFailure>0');
       const [onUpdateResult1] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];

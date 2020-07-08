@@ -5,17 +5,26 @@
  */
 
 import * as t from 'io-ts';
-import { identifier, sha256, size } from '../../../../common/endpoint/schema/common';
-import { body, created, encoding } from './common';
+import {
+  compressionAlgorithm,
+  encryptionAlgorithm,
+  identifier,
+  sha256,
+  size,
+} from '../../../../common/endpoint/schema/common';
+import { body, created } from './common';
 
 export const internalArtifactSchema = t.exact(
   t.type({
     identifier,
-    sha256,
-    encoding,
+    compressionAlgorithm,
+    encryptionAlgorithm,
+    decodedSha256: sha256,
+    decodedSize: size,
+    encodedSha256: sha256,
+    encodedSize: size,
     created,
     body,
-    size,
   })
 );
 

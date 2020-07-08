@@ -5,7 +5,12 @@
  */
 
 import { savedObjectsClientMock } from 'src/core/server/mocks';
-import { ArtifactConstants, ManifestConstants, Manifest } from '../../../lib/artifacts';
+import {
+  ArtifactConstants,
+  ManifestConstants,
+  Manifest,
+  ExceptionsCache,
+} from '../../../lib/artifacts';
 import { getPackageConfigServiceMock, getManifestManagerMock } from './manifest_manager.mock';
 
 describe('manifest_manager', () => {
@@ -16,11 +21,53 @@ describe('manifest_manager', () => {
       expect(manifestWrapper!.diffs).toEqual([
         {
           id:
-            'endpoint-exceptionlist-linux-1.0.0-d34a1f6659bd86fc2023d7477aa2e5d2055c9c0fb0a0f10fae76bf8b94bebe49',
+            'endpoint-exceptionlist-linux-1.0.0-1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
           type: 'add',
         },
       ]);
       expect(manifestWrapper!.manifest).toBeInstanceOf(Manifest);
+    });
+
+    test('ManifestManager populates cache properly', async () => {
+      const cache = new ExceptionsCache(5);
+      const manifestManager = getManifestManagerMock({ cache });
+      const manifestWrapper = await manifestManager.refresh();
+      expect(manifestWrapper!.diffs).toEqual([
+        {
+          id:
+            'endpoint-exceptionlist-linux-1.0.0-1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
+          type: 'add',
+        },
+      ]);
+      const diff = manifestWrapper!.diffs[0];
+      const entry = JSON.parse(cache.get(diff!.id)!);
+      expect(entry).toEqual({
+        entries: [
+          {
+            type: 'simple',
+            entries: [
+              {
+                entries: [
+                  {
+                    field: 'nested.field',
+                    operator: 'included',
+                    type: 'exact_cased',
+                    value: 'some value',
+                  },
+                ],
+                field: 'some.parentField',
+                type: 'nested',
+              },
+              {
+                field: 'some.not.nested.field',
+                operator: 'included',
+                type: 'exact_cased',
+                value: 'some value',
+              },
+            ],
+          },
+        ],
+      });
     });
 
     test('ManifestManager can dispatch manifest', async () => {
@@ -38,9 +85,13 @@ describe('manifest_manager', () => {
         schema_version: '1.0.0',
         artifacts: {
           [artifact.identifier]: {
-            sha256: artifact.sha256,
-            size: artifact.size,
-            url: `/api/endpoint/artifacts/download/${artifact.identifier}/${artifact.sha256}`,
+            compression_algorithm: 'none',
+            encryption_algorithm: 'none',
+            decoded_sha256: artifact.decodedSha256,
+            encoded_sha256: artifact.encodedSha256,
+            decoded_size: artifact.decodedSize,
+            encoded_size: artifact.encodedSize,
+            relative_url: `/api/endpoint/artifacts/download/${artifact.identifier}/${artifact.encodedSha256}`,
           },
         },
       });
