@@ -30,7 +30,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({
   componentTemplateDetails,
   showCallToAction,
 }) => {
-  const { httpClient } = useComponentTemplatesContext();
+  const { navigateToApp } = useComponentTemplatesContext();
 
   const { version, _meta, _kbnMeta } = componentTemplateDetails;
 
@@ -61,9 +61,11 @@ export const TabSummary: React.FunctionComponent<Props> = ({
                   values={{
                     createLink: (
                       <EuiLink
-                        href={httpClient.basePath.prepend(
-                          '/app/management/data/index_management/create_template'
-                        )}
+                        onClick={() =>
+                          navigateToApp('management', {
+                            path: '/data/index_management/create_template',
+                          })
+                        }
                       >
                         <FormattedMessage
                           id="xpack.idxMgmt.componentTemplateDetails.summaryTab.createTemplateLink"
@@ -73,9 +75,9 @@ export const TabSummary: React.FunctionComponent<Props> = ({
                     ),
                     editLink: (
                       <EuiLink
-                        href={httpClient.basePath.prepend(
-                          '/app/management/data/index_management/templates'
-                        )}
+                        onClick={() =>
+                          navigateToApp('management', { path: '/data/index_management/templates' })
+                        }
                       >
                         <FormattedMessage
                           id="xpack.idxMgmt.componentTemplateDetails.summaryTab.updateTemplateLink"
