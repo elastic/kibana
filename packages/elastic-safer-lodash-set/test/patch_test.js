@@ -3,43 +3,60 @@
  * See `packages/elastic-safer-lodash-set/LICENSE` for more information.
  */
 
-const assert = require('assert');
+const test = require('tape');
 
-const setFunctions = [require('../').set, require('../set')];
-const setWithFunctions = [require('../').setWith, require('../setWith')];
+const setFunctions = [
+  [require('../').set, 'module.set'],
+  [require('../set'), 'module/set'],
+];
+const setWithFunctions = [
+  [require('../').setWith, 'module.setWith'],
+  [require('../setWith'), 'module/setWith'],
+];
 const setAndSetWithFunctions = [].concat(setFunctions, setWithFunctions);
 
-setAndSetWithFunctions.forEach((set) => {
+setAndSetWithFunctions.forEach(([set, testName]) => {
   /**
    * GENERAL USAGE TESTS
    */
 
-  // Returns same object
-  {
+  test(`${testName}: Returns same object`, (t) => {
     const o1 = {};
     const o2 = set(o1, 'foo', 'bar');
-    assert.strictEqual(o1, o2);
-  }
+    t.strictEqual(o1, o2);
+    t.end();
+  });
 
-  assert.strictEqual(set(null, 'a.b', 'foo'), null);
-  assert.strictEqual(set(undefined, 'a.b', 'foo'), undefined);
-  assert.strictEqual(set(NaN, 'a.b', 'foo'), NaN);
-  assert.strictEqual(set(42, 'a.b', 'foo'), 42);
+  test(`${testName}: Non-objects`, (t) => {
+    t.strictEqual(set(null, 'a.b', 'foo'), null);
+    t.strictEqual(set(undefined, 'a.b', 'foo'), undefined);
+    t.strictEqual(set(NaN, 'a.b', 'foo'), NaN);
+    t.strictEqual(set(42, 'a.b', 'foo'), 42);
+    t.end();
+  });
 
-  // Overwrites existing object properties
-  assert.deepStrictEqual(set({ a: { b: { c: 3 } } }, 'a.b', 'foo'), { a: { b: 'foo' } });
+  test(`${testName}: Overwrites existing object properties`, (t) => {
+    t.deepEqual(set({ a: { b: { c: 3 } } }, 'a.b', 'foo'), { a: { b: 'foo' } });
+    t.end();
+  });
 
-  // Adds missing properties without touching other areas
-  assert.deepStrictEqual(
-    set({ a: [{ aa: { aaa: 3, aab: 4 } }, { ab: 2 }], b: 1 }, 'a[0].aa.aaa.aaaa', 'foo'),
-    { a: [{ aa: { aaa: { aaaa: 'foo' }, aab: 4 } }, { ab: 2 }], b: 1 }
-  );
+  test(`${testName}: Adds missing properties without touching other areas`, (t) => {
+    t.deepEqual(
+      set({ a: [{ aa: { aaa: 3, aab: 4 } }, { ab: 2 }], b: 1 }, 'a[0].aa.aaa.aaaa', 'foo'),
+      { a: [{ aa: { aaa: { aaaa: 'foo' }, aab: 4 } }, { ab: 2 }], b: 1 }
+    );
+    t.end();
+  });
 
-  // Overwrites existing elements in array
-  assert.deepStrictEqual(set({ a: [1, 2, 3] }, 'a[1]', 'foo'), { a: [1, 'foo', 3] });
+  test(`${testName}: Overwrites existing elements in array`, (t) => {
+    t.deepEqual(set({ a: [1, 2, 3] }, 'a[1]', 'foo'), { a: [1, 'foo', 3] });
+    t.end();
+  });
 
-  // Create new array
-  assert.deepStrictEqual(set({}, ['x', '0', 'y', 'z'], 'foo'), { x: [{ y: { z: 'foo' } }] });
+  test(`${testName}: Create new array`, (t) => {
+    t.deepEqual(set({}, ['x', '0', 'y', 'z'], 'foo'), { x: [{ y: { z: 'foo' } }] });
+    t.end();
+  });
 
   /**
    * PROTOTYPE POLLUTION PROTECTION TESTS
@@ -86,23 +103,26 @@ setAndSetWithFunctions.forEach((set) => {
     ],
   ];
 
-  // Object manipulation
   testCases.forEach(([path, expected]) => {
-    assert.deepStrictEqual(set({}, path, 'foo'), expected);
-  });
-
-  // Array manipulation
-  testCases.forEach(([path, expected]) => {
-    const arr = [];
-    set(arr, path, 'foo');
-    Object.keys(expected).forEach((key) => {
-      assert(Object.prototype.hasOwnProperty.call(arr, key));
-      assert.deepStrictEqual(arr[key], expected[key]);
+    test(`${testName}: Object manipulation, ${path}`, (t) => {
+      t.deepEqual(set({}, path, 'foo'), expected);
+      t.end();
     });
   });
 
-  // Function manipulation
-  {
+  testCases.forEach(([path, expected]) => {
+    test(`${testName}: Array manipulation, ${path}`, (t) => {
+      const arr = [];
+      set(arr, path, 'foo');
+      Object.keys(expected).forEach((key) => {
+        t.ok(Object.prototype.hasOwnProperty.call(arr, key));
+        t.deepEqual(arr[key], expected[key]);
+      });
+      t.end();
+    });
+  });
+
+  test(`${testName}: Function manipulation`, (t) => {
     const funcTestCases = [
       [function () {}, 'prototype'],
       [() => {}, 'prototype'],
@@ -110,44 +130,45 @@ setAndSetWithFunctions.forEach((set) => {
       [{ fn: () => {} }, 'fn.prototype'],
     ];
     funcTestCases.forEach(([obj, path]) => {
-      assert.throws(
-        () => {
-          set(obj, path, 'foo');
-        },
-        {
-          message: 'Illegal access of function prototype',
-        }
-      );
+      t.throws(() => set(obj, path, 'foo'), /Illegal access of function prototype/);
     });
-  }
+    t.end();
+  });
 });
 
 /**
  * setWith specific tests
  */
 
-setWithFunctions.forEach((setWith) => {
-  // Return undefined
-  assert.deepStrictEqual(
-    setWith({}, 'a.b', 'foo', () => {}),
-    { a: { b: 'foo' } }
-  );
+setWithFunctions.forEach(([setWith, testName]) => {
+  test(`${testName}: Return undefined`, (t) => {
+    t.deepEqual(
+      setWith({}, 'a.b', 'foo', () => {}),
+      { a: { b: 'foo' } }
+    );
+    t.end();
+  });
 
-  // Customizer arguments
-  {
+  test(`${testName}: Customizer arguments`, (t) => {
+    t.plan(3);
+
     const expectedCustomizerArgs = [
       [{ b: 42 }, 'a', { a: { b: 42 } }],
       [42, 'b', { b: 42 }],
     ];
 
-    assert.deepStrictEqual(
+    t.deepEqual(
       setWith({ a: { b: 42 } }, 'a.b.c', 'foo', (...args) => {
-        assert.deepStrictEqual(args, expectedCustomizerArgs.shift());
+        t.deepEqual(args, expectedCustomizerArgs.shift());
       }),
       { a: { b: { c: 'foo' } } }
     );
-  }
 
-  // Return value
-  assert.deepStrictEqual(setWith({}, '[0][1]', 'a', Object), { 0: { 1: 'a' } });
+    t.end();
+  });
+
+  test(`${testName}: Return value`, (t) => {
+    t.deepEqual(setWith({}, '[0][1]', 'a', Object), { 0: { 1: 'a' } });
+    t.end();
+  });
 });

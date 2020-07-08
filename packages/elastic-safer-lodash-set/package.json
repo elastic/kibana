@@ -7,6 +7,7 @@
   "dependencies": {},
   "devDependencies": {
     "dependency-check": "^4.1.0",
+    "tape": "^5.0.1",
     "tsd": "^0.11.0"
   },
   "peerDependencies": {
@@ -14,7 +15,7 @@
   },
   "scripts": {
     "lint": "dependency-check --no-dev package.json set.js setWith.js fp/*",
-    "test": "npm run lint && node test/patch_test.js && node test/fp_patch_test.js && npm run test:types",
+    "test": "npm run lint && tape test/*.js && npm run test:types",
     "test:types": "tsd",
     "update": "./scripts/update.sh",
     "save_state": "./scripts/save_state.sh"

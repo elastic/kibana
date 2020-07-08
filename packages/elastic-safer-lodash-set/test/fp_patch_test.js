@@ -3,19 +3,22 @@
  * See `packages/elastic-safer-lodash-set/LICENSE` for more information.
  */
 
-const assert = require('assert');
+const test = require('tape');
 
 const setFunctions = [
-  [testSet, require('../fp').set],
-  [testSet, require('../fp/set')],
-  [testSet, require('../fp').assoc],
-  [testSet, require('../fp/assoc')],
-  [testSet, require('../fp').assocPath],
-  [testSet, require('../fp/assocPath')],
-  [testSetWithAsSet, require('../fp').setWith],
-  [testSetWithAsSet, require('../fp/setWith')],
+  [testSet, require('../fp').set, 'fp.set'],
+  [testSet, require('../fp/set'), 'fp/set'],
+  [testSet, require('../fp').assoc, 'fp.assoc'],
+  [testSet, require('../fp/assoc'), 'fp/assoc'],
+  [testSet, require('../fp').assocPath, 'fp.assocPath'],
+  [testSet, require('../fp/assocPath'), 'fp/assocPath'],
+  [testSetWithAsSet, require('../fp').setWith, 'fp.setWith'],
+  [testSetWithAsSet, require('../fp/setWith'), 'fp/setWith'],
 ];
-const setWithFunctions = [require('../fp').setWith, require('../fp/setWith')];
+const setWithFunctions = [
+  [testSetWith, require('../fp').setWith, 'fp.setWith'],
+  [testSetWith, require('../fp/setWith'), 'fp/setWith'],
+];
 
 function testSet(fn, args, onCall) {
   const [a, b, c] = args;
@@ -24,12 +27,7 @@ function testSet(fn, args, onCall) {
   onCall(fn(b)(c, a));
   onCall(fn(b)(c)(a));
 }
-
-// use `fp.setWith` with the same API as `fp.set` by injecting a noop function as the first argument
-function testSetWithAsSet(fn, args, onCall) {
-  args.push(() => {});
-  testSetWith(fn, args, onCall);
-}
+testSet.assertionCalls = 4;
 
 function testSetWith(fn, args, onCall) {
   const [a, b, c, d] = args;
@@ -41,59 +39,81 @@ function testSetWith(fn, args, onCall) {
   onCall(fn(d, b, c)(a));
   onCall(fn(d)(b, c)(a));
 }
+testSetWith.assertionCalls = 7;
 
-setFunctions.forEach(([test, set]) => {
+// use `fp.setWith` with the same API as `fp.set` by injecting a noop function as the first argument
+function testSetWithAsSet(fn, args, onCall) {
+  args.push(() => {});
+  testSetWith(fn, args, onCall);
+}
+testSetWithAsSet.assertionCalls = testSetWith.assertionCalls;
+
+setFunctions.forEach(([testPermutations, set, testName]) => {
   /**
    * GENERAL USAGE TESTS
    */
 
-  const isSetWith = test.name === 'testSetWithAsSet';
+  const isSetWith = testPermutations.name === 'testSetWithAsSet';
 
-  // No side-effects
-  {
-    const o1 = {};
-    test(set, [o1, 'foo', 'bar'], (o2) => {
-      assert.notStrictEqual(o1, o2);
-      assert.deepStrictEqual(o1, {});
-      assert.deepStrictEqual(o2, { foo: 'bar' });
+  test(`${testName}: No side-effects`, (t) => {
+    t.plan(testPermutations.assertionCalls * 5);
+    const o1 = {
+      a: { b: 1 },
+      c: { d: 2 },
+    };
+    testPermutations(set, [o1, 'a.b', 3], (o2) => {
+      t.notStrictEqual(o1, o2); // clone touched paths
+      t.notStrictEqual(o1.a, o2.a); // clone touched paths
+      t.deepEqual(o1.c, o2.c); // do not clone untouched paths
+      t.deepEqual(o1, { a: { b: 1 }, c: { d: 2 } });
+      t.deepEqual(o2, { a: { b: 3 }, c: { d: 2 } });
     });
-  }
+  });
 
-  // Non-objects
-  {
+  test(`${testName}: Non-objects`, (t) => {
     const nonObjects = [null, undefined, NaN, 42];
+    t.plan(testPermutations.assertionCalls * nonObjects.length);
     nonObjects.forEach((nonObject) => {
-      test(set, [nonObject, 'a.b', 'foo'], (result) => {
-        assert.strictEqual(result, nonObject);
+      t.comment(String(nonObject));
+      testPermutations(set, [nonObject, 'a.b', 'foo'], (result) => {
+        t.strictEqual(result, nonObject);
       });
     });
-  }
-
-  // Overwrites existing object properties
-  test(set, [{ a: { b: { c: 3 } } }, 'a.b', 'foo'], (result) => {
-    assert.deepStrictEqual(result, { a: { b: 'foo' } });
   });
 
-  // Adds missing properties without touching other areas
-  test(
-    set,
-    [{ a: [{ aa: { aaa: 3, aab: 4 } }, { ab: 2 }], b: 1 }, 'a[0].aa.aaa.aaaa', 'foo'],
-    (result) => {
-      assert.deepStrictEqual(result, {
-        a: [{ aa: { aaa: { aaaa: 'foo' }, aab: 4 } }, { ab: 2 }],
-        b: 1,
-      });
-    }
-  );
-
-  // Overwrites existing elements in array
-  test(set, [{ a: [1, 2, 3] }, 'a[1]', 'foo'], (result) => {
-    assert.deepStrictEqual(result, { a: [1, 'foo', 3] });
+  test(`${testName}: Overwrites existing object properties`, (t) => {
+    t.plan(testPermutations.assertionCalls);
+    testPermutations(set, [{ a: { b: { c: 3 } } }, 'a.b', 'foo'], (result) => {
+      t.deepEqual(result, { a: { b: 'foo' } });
+    });
   });
 
-  // Create new array
-  test(set, [{}, ['x', '0', 'y', 'z'], 'foo'], (result) => {
-    assert.deepStrictEqual(result, { x: [{ y: { z: 'foo' } }] });
+  test(`${testName}: Adds missing properties without touching other areas`, (t) => {
+    t.plan(testPermutations.assertionCalls);
+    testPermutations(
+      set,
+      [{ a: [{ aa: { aaa: 3, aab: 4 } }, { ab: 2 }], b: 1 }, 'a[0].aa.aaa.aaaa', 'foo'],
+      (result) => {
+        t.deepEqual(result, {
+          a: [{ aa: { aaa: { aaaa: 'foo' }, aab: 4 } }, { ab: 2 }],
+          b: 1,
+        });
+      }
+    );
+  });
+
+  test(`${testName}: Overwrites existing elements in array`, (t) => {
+    t.plan(testPermutations.assertionCalls);
+    testPermutations(set, [{ a: [1, 2, 3] }, 'a[1]', 'foo'], (result) => {
+      t.deepEqual(result, { a: [1, 'foo', 3] });
+    });
+  });
+
+  test(`${testName}: Create new array`, (t) => {
+    t.plan(testPermutations.assertionCalls);
+    testPermutations(set, [{}, ['x', '0', 'y', 'z'], 'foo'], (result) => {
+      t.deepEqual(result, { x: [{ y: { z: 'foo' } }] });
+    });
   });
 
   /**
@@ -141,105 +161,118 @@ setFunctions.forEach(([test, set]) => {
     ],
   ];
 
-  // Object manipulation
   testCases.forEach(([path, expected]) => {
-    test(set, [{}, path, 'foo'], (result) => {
-      assert.deepStrictEqual(result, expected);
-    });
-  });
-
-  // Array manipulation
-  testCases.forEach(([path, expected]) => {
-    const arr = [];
-    test(set, [arr, path, 'foo'], (result) => {
-      assert.notStrictEqual(arr, result);
-      assert(Array.isArray(result));
-      Object.keys(expected).forEach((key) => {
-        assert(Object.prototype.hasOwnProperty.call(result, key));
-        assert.deepStrictEqual(result[key], expected[key]);
+    test(`${testName}: Object manipulation, ${path}`, (t) => {
+      t.plan(testPermutations.assertionCalls);
+      testPermutations(set, [{}, path, 'foo'], (result) => {
+        t.deepLooseEqual(result, expected); // Use loose check because the prototype of result isn't Object.prototype
       });
     });
   });
 
-  // Function manipulation
-  {
+  testCases.forEach(([path, expected]) => {
+    test(`${testName}: Array manipulation, ${path}`, (t) => {
+      t.plan(testPermutations.assertionCalls * 4);
+      const arr = [];
+      testPermutations(set, [arr, path, 'foo'], (result) => {
+        t.notStrictEqual(arr, result);
+        t.ok(Array.isArray(result));
+        Object.keys(expected).forEach((key) => {
+          t.ok(Object.prototype.hasOwnProperty.call(result, key));
+          t.deepEqual(result[key], expected[key]);
+        });
+      });
+    });
+  });
+
+  test(`${testName}: Function manipulation, object containing function`, (t) => {
     const funcTestCases = [
       [{ fn: function () {} }, 'fn.prototype'],
       [{ fn: () => {} }, 'fn.prototype'],
     ];
-    const msg = {
-      message: 'Illegal access of function prototype',
-    };
+    const expected = /Illegal access of function prototype/;
+    t.plan((isSetWith ? 7 : 4) * funcTestCases.length);
     funcTestCases.forEach(([obj, path]) => {
       if (isSetWith) {
-        assert.throws(() => set(() => {}, path, 'foo', obj), msg);
-        assert.throws(() => set(() => {})(path, 'foo', obj), msg);
-        assert.throws(() => set(() => {})(path)('foo', obj), msg);
-        assert.throws(() => set(() => {})(path)('foo')(obj), msg);
-        assert.throws(() => set(() => {}, path)('foo')(obj), msg);
-        assert.throws(() => set(() => {}, path, 'foo')(obj), msg);
-        assert.throws(() => set(() => {})(path, 'foo')(obj), msg);
+        t.throws(() => set(() => {}, path, 'foo', obj), expected);
+        t.throws(() => set(() => {})(path, 'foo', obj), expected);
+        t.throws(() => set(() => {})(path)('foo', obj), expected);
+        t.throws(() => set(() => {})(path)('foo')(obj), expected);
+        t.throws(() => set(() => {}, path)('foo')(obj), expected);
+        t.throws(() => set(() => {}, path, 'foo')(obj), expected);
+        t.throws(() => set(() => {})(path, 'foo')(obj), expected);
       } else {
-        assert.throws(() => set(path, 'foo', obj), msg);
-        assert.throws(() => set(path, 'foo')(obj), msg);
-        assert.throws(() => set(path)('foo', obj), msg);
-        assert.throws(() => set(path)('foo')(obj), msg);
+        t.throws(() => set(path, 'foo', obj), expected);
+        t.throws(() => set(path, 'foo')(obj), expected);
+        t.throws(() => set(path)('foo', obj), expected);
+        t.throws(() => set(path)('foo')(obj), expected);
       }
     });
-  }
-  {
+  });
+  test(`${testName}: Function manipulation, arrow function`, (t) => {
     // This doesn't really make sense to do with the `fp` variant of lodash, as it will return a regular non-function object
+    t.plan(testPermutations.assertionCalls * 2);
     const obj = () => {};
-    test(set, [obj, 'prototype', 'foo'], (result) => {
-      assert.notStrictEqual(result, obj);
-      assert.strictEqual(result.prototype, 'foo');
+    testPermutations(set, [obj, 'prototype', 'foo'], (result) => {
+      t.notStrictEqual(result, obj);
+      t.strictEqual(result.prototype, 'foo');
     });
-  }
-  {
+  });
+  test(`${testName}: Function manipulation, regular function`, (t) => {
     // This doesn't really make sense to do with the `fp` variant of lodash, as it will return a regular non-function object
+    t.plan(testPermutations.assertionCalls * 2);
     const obj = function () {};
-    test(set, [obj, 'prototype', 'foo'], (result) => {
-      assert.notStrictEqual(result, obj);
-      assert.strictEqual(result.prototype, 'foo');
+    testPermutations(set, [obj, 'prototype', 'foo'], (result) => {
+      t.notStrictEqual(result, obj);
+      t.strictEqual(result.prototype, 'foo');
     });
-  }
+  });
 });
 
 /**
  * setWith specific tests
  */
-setWithFunctions.forEach((setWith) => {
-  // Return undefined
-  testSetWith(setWith, [{}, 'a.b', 'foo', () => {}], (result) => {
-    assert.deepStrictEqual(result, { a: { b: 'foo' } });
+setWithFunctions.forEach(([testPermutations, setWith, testName]) => {
+  test(`${testName}: Return undefined`, (t) => {
+    t.plan(testPermutations.assertionCalls);
+    testPermutations(setWith, [{}, 'a.b', 'foo', () => {}], (result) => {
+      t.deepEqual(result, { a: { b: 'foo' } });
+    });
   });
 
-  // Customizer arguments
-  {
+  test(`${testName}: Customizer arguments`, (t) => {
     let i = 0;
     const expectedCustomizerArgs = [
       [{ b: 42 }, 'a', { a: { b: 42 } }],
       [42, 'b', { b: 42 }],
     ];
 
-    testSetWith(
+    t.plan(testPermutations.assertionCalls * (expectedCustomizerArgs.length + 1));
+
+    testPermutations(
       setWith,
       [
         { a: { b: 42 } },
         'a.b.c',
         'foo',
         (...args) => {
-          assert.deepStrictEqual(args, expectedCustomizerArgs[i++ % 2]);
+          t.deepEqual(
+            args,
+            expectedCustomizerArgs[i++ % 2],
+            'customizer args should be as expected'
+          );
         },
       ],
       (result) => {
-        assert.deepStrictEqual(result, { a: { b: { c: 'foo' } } });
+        t.deepEqual(result, { a: { b: { c: 'foo' } } });
       }
     );
-  }
+  });
 
-  // Return value
-  testSetWith(setWith, [{}, '[0][1]', 'a', Object], (result) => {
-    assert.deepStrictEqual(result, { 0: { 1: 'a' } });
+  test(`${testName}: Return value`, (t) => {
+    t.plan(testPermutations.assertionCalls);
+    testSetWith(setWith, [{}, '[0][1]', 'a', Object], (result) => {
+      t.deepEqual(result, { 0: { 1: 'a' } });
+    });
   });
 });

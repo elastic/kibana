@@ -646,7 +646,7 @@ module.exports = {
      * Harden specific rules
      */
     {
-      files: ['test/harden/*.js'],
+      files: ['test/harden/*.js', 'packages/elastic-safer-lodash-set/test/*.js'],
       rules: allMochaRulesOff,
     },
     {
