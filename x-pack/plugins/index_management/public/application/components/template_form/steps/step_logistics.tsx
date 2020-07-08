@@ -68,9 +68,12 @@ function getFieldsMeta(esDocsBase: string) {
               <>
                 <br />
                 <EuiLink href={`${esDocsBase}/data-streams.html`} target="_blank">
-                  {i18n.translate('xpack.idxMgmt.mappingsEditor.dynamicMappingDocumentionLink', {
-                    defaultMessage: 'Learn more about data streams.',
-                  })}
+                  {i18n.translate(
+                    'xpack.idxMgmt.templateForm.stepLogistics.dataStreamDocumentionLink',
+                    {
+                      defaultMessage: 'Learn more about data streams.',
+                    }
+                  )}
                 </EuiLink>
               </>
             ),

@@ -217,7 +217,7 @@ describe('Index Templates tab', () => {
       await actions.clickTemplateAt(0);
       expect(exists('templateList')).toBe(true);
       expect(exists('templateDetails')).toBe(true);
-      expect(find('templateDetails.title').text()).toBe(templates[0].name);
+      expect(find('templateDetails.title').text().trim()).toBe(templates[0].name);
 
       // Close flyout
       await act(async () => {
@@ -229,7 +229,7 @@ describe('Index Templates tab', () => {
 
       expect(exists('templateList')).toBe(true);
       expect(exists('templateDetails')).toBe(true);
-      expect(find('templateDetails.title').text()).toBe(legacyTemplates[0].name);
+      expect(find('templateDetails.title').text().trim()).toBe(legacyTemplates[0].name);
     });
 
     describe('table row actions', () => {
@@ -466,7 +466,7 @@ describe('Index Templates tab', () => {
           const { find } = testBed;
           const [{ name }] = templates;
 
-          expect(find('templateDetails.title').text()).toEqual(name);
+          expect(find('templateDetails.title').text().trim()).toEqual(name);
         });
 
         it('should have a close button and be able to close flyout', async () => {
