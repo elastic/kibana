@@ -24,7 +24,7 @@ export const BUILT_IN_ALERTS_FEATURE = {
         read: [],
       },
       savedObject: {
-        all: ['action', 'action_task_params'],
+        all: [],
         read: [],
       },
       api: ['actions-read', 'actions-all'],
@@ -38,8 +38,8 @@ export const BUILT_IN_ALERTS_FEATURE = {
         read: [IndexThreshold],
       },
       savedObject: {
-        all: ['action_task_params'],
-        read: ['action'],
+        all: [],
+        read: [],
       },
       api: ['actions-read'],
       ui: ['alerting:show', 'actions:show'],
