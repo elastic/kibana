@@ -6,6 +6,7 @@
 
 import { LegacyCallAPIOptions, LegacyAPICaller } from 'kibana/server';
 import _ from 'lodash';
+import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/server';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import { getSafeAggregationName } from '../../../common/util/job_utils';
 import { stringHash } from '../../../common/util/string_utils';
@@ -279,7 +280,7 @@ export class DataVisualizer {
     samplerShardSize: number
   ): Promise<NumericColumnStatsMap> {
     const numericColumns = fields.filter((field) => {
-      return field.type === 'number' || field.type === 'number';
+      return field.type === KBN_FIELD_TYPES.NUMBER || field.type === KBN_FIELD_TYPES.DATE;
     });
 
     if (numericColumns.length === 0) {
@@ -301,15 +302,18 @@ export class DataVisualizer {
       size: 0,
       body: {
         query,
-        aggs: minMaxAggs,
+        aggs: buildSamplerAggregation(minMaxAggs, samplerShardSize),
         size: 0,
       },
     });
 
-    return Object.keys(respStats.aggregations).reduce((p, aggName) => {
-      const stats = [respStats.aggregations[aggName].min, respStats.aggregations[aggName].max];
+    const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
+    const aggregations = _.get(respStats.aggregations, aggsPath);
+
+    return Object.keys(aggregations).reduce((p, aggName) => {
+      const stats = [aggregations[aggName].min, aggregations[aggName].max];
       if (!stats.includes(null)) {
-        const delta = respStats.aggregations[aggName].max - respStats.aggregations[aggName].min;
+        const delta = aggregations[aggName].max - aggregations[aggName].min;
 
         let aggInterval = 1;
 
@@ -348,7 +352,7 @@ export class DataVisualizer {
       const fieldName = field.fieldName;
       const fieldType = field.type;
       const id = stringHash(fieldName);
-      if (fieldType === 'number' || fieldType === 'date') {
+      if (fieldType === KBN_FIELD_TYPES.NUMBER || fieldType === KBN_FIELD_TYPES.DATE) {
         if (aggIntervals[id] !== undefined) {
           aggs[`${id}_histogram`] = {
             histogram: {
@@ -357,8 +361,8 @@ export class DataVisualizer {
             },
           };
         }
-      } else if (fieldType === 'string' || fieldType === 'boolean') {
-        if (fieldType === 'string') {
+      } else if (fieldType === KBN_FIELD_TYPES.STRING || fieldType === KBN_FIELD_TYPES.BOOLEAN) {
+        if (fieldType === KBN_FIELD_TYPES.STRING) {
           aggs[`${id}_cardinality`] = {
             cardinality: {
               field: fieldName,
@@ -384,10 +388,13 @@ export class DataVisualizer {
       size: 0,
       body: {
         query,
-        aggs: chartDataAggs,
+        aggs: buildSamplerAggregation(chartDataAggs, samplerShardSize),
         size: 0,
       },
     });
+
+    const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
+    const aggregations = _.get(respChartsData.aggregations, aggsPath);
 
     const chartsData: ChartData[] = fields.map(
       (field): ChartData => {
@@ -395,7 +402,7 @@ export class DataVisualizer {
         const fieldType = field.type;
         const id = stringHash(field.fieldName);
 
-        if (fieldType === 'number' || fieldType === 'date') {
+        if (fieldType === KBN_FIELD_TYPES.NUMBER || fieldType === KBN_FIELD_TYPES.DATE) {
           if (aggIntervals[id] === undefined) {
             return {
               type: 'numeric',
@@ -407,18 +414,18 @@ export class DataVisualizer {
           }
 
           return {
-            data: respChartsData.aggregations[`${id}_histogram`].buckets,
+            data: aggregations[`${id}_histogram`].buckets,
             interval: aggIntervals[id].interval,
             stats: [aggIntervals[id].min, aggIntervals[id].max],
             type: 'numeric',
             id: fieldName,
           };
-        } else if (fieldType === 'string' || fieldType === 'boolean') {
+        } else if (fieldType === KBN_FIELD_TYPES.STRING || fieldType === KBN_FIELD_TYPES.BOOLEAN) {
           return {
-            type: fieldType === 'string' ? 'ordinal' : 'boolean',
+            type: fieldType === KBN_FIELD_TYPES.STRING ? 'ordinal' : 'boolean',
             cardinality:
-              fieldType === 'string' ? respChartsData.aggregations[`${id}_cardinality`].value : 2,
-            data: respChartsData.aggregations[`${id}_terms`].buckets,
+              fieldType === KBN_FIELD_TYPES.STRING ? aggregations[`${id}_cardinality`].value : 2,
+            data: aggregations[`${id}_terms`].buckets,
             id: fieldName,
           };
         }
