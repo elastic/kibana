@@ -19,22 +19,26 @@
 
 import { IUiSettingsClient } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { PersistedLog } from '../persisted_log';
-import { UI_SETTINGS } from '../../../common';
+import { Query } from '../../../common';
+import { getQueryLog } from './get_query_log';
 
-/** @internal */
-export function getQueryLog(
-  uiSettings: IUiSettingsClient,
-  storage: IStorageWrapper,
-  appName: string,
-  language: string
-) {
-  return new PersistedLog(
-    `typeahead:${appName}-${language}`,
-    {
-      maxLength: uiSettings.get(UI_SETTINGS.HISTORY_LIMIT),
-      filterDuplicates: true,
-    },
-    storage
-  );
+interface AddToQueryLogDependencies {
+  uiSettings: IUiSettingsClient;
+  storage: IStorageWrapper;
+}
+
+export function createAddToQueryLog({ storage, uiSettings }: AddToQueryLogDependencies) {
+  /**
+   * This function is to be used in conjunction with `<QueryStringInput />`.
+   * It provides a way for external editors to add new filter entries to the
+   * persisted query log which lives in `localStorage`. These entries are then
+   * read by `<QueryStringInput />` and provided in the autocomplete options.
+   *
+   * @param appName Name of the app where this filter is added from.
+   * @param query Filter value to add.
+   */
+  return function addToQueryLog(appName: string, { language, query }: Query) {
+    const persistedLog = getQueryLog(uiSettings, storage, appName, language);
+    persistedLog.add(query);
+  };
 }
