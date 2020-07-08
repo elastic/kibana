@@ -48,6 +48,15 @@ import { ConfigureEndpointPackageConfig } from './management/pages/policy/view/i
 import { State, createStore, createInitialState } from './common/store';
 import { SecurityPageName } from './app/types';
 import { manageOldSiemRoutes } from './helpers';
+import {
+  OVERVIEW,
+  HOSTS,
+  NETWORK,
+  TIMELINES,
+  ALERTS,
+  CASE,
+  ADMINISTRATION,
+} from './app/home/translations';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
@@ -95,10 +104,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     core.application.register({
       exactRoute: true,
       id: APP_ID,
-      title: 'Security',
+      title: i18n.translate('xpack.securitySolution.security.title', {
+        defaultMessage: 'Security',
+      }),
       appRoute: APP_PATH,
       navLinkStatus: AppNavLinkStatus.hidden,
-      mount: async (params: AppMountParameters) => {
+      mount: async () => {
         const [{ application }] = await core.getStartServices();
         application.navigateToApp(`${APP_ID}:${SecurityPageName.overview}`, { replace: true });
         return () => true;
@@ -107,9 +118,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     core.application.register({
       id: `${APP_ID}:${SecurityPageName.overview}`,
-      title: i18n.translate('xpack.securitySolution.overviewPage.title', {
-        defaultMessage: 'Overview',
-      }),
+      title: OVERVIEW,
       order: 9000,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
@@ -166,7 +175,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     core.application.register({
       id: `${APP_ID}:${SecurityPageName.hosts}`,
-      title: 'Hosts',
+      title: HOSTS,
       order: 9002,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
@@ -193,7 +202,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     core.application.register({
       id: `${APP_ID}:${SecurityPageName.network}`,
-      title: 'Network',
+      title: NETWORK,
       order: 9002,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
@@ -220,7 +229,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     core.application.register({
       id: `${APP_ID}:${SecurityPageName.timelines}`,
-      title: 'Timelines',
+      title: TIMELINES,
       order: 9002,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
@@ -247,7 +256,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     core.application.register({
       id: `${APP_ID}:${SecurityPageName.case}`,
-      title: 'Cases',
+      title: CASE,
       order: 9002,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
@@ -274,7 +283,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     core.application.register({
       id: `${APP_ID}:${SecurityPageName.management}`,
-      title: 'Management',
+      title: ADMINISTRATION,
       order: 9002,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,

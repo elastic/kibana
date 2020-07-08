@@ -63,7 +63,7 @@ export const navTabs: SiemNavTab = {
   },
   [SecurityPageName.management]: {
     id: SecurityPageName.management,
-    name: i18n.MANAGEMENT,
+    name: i18n.ADMINISTRATION,
     href: APP_MANAGEMENT_PATH,
     disabled: false,
     urlKey: SecurityPageName.management,

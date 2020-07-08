@@ -21,7 +21,7 @@ import {
   CASES_URL,
   HOSTS_URL,
   KIBANA_HOME,
-  MANAGEMENT_URL,
+  ADMINISTRATION_URL,
   NETWORK_URL,
   OVERVIEW_URL,
   TIMELINES_URL,
@@ -31,7 +31,7 @@ import {
   ALERTS_PAGE,
   CASES_PAGE,
   HOSTS_PAGE,
-  MANAGEMENT_PAGE,
+  ADMINISTRATION_PAGE,
   NETWORK_PAGE,
   OVERVIEW_PAGE,
   TIMELINES_PAGE,
@@ -72,9 +72,9 @@ describe('top-level navigation common to all pages in the Security app', () => {
     cy.url().should('include', CASES_URL);
   });
 
-  it('navigates to the Management page', () => {
+  it('navigates to the Administration page', () => {
     navigateFromHeaderTo(MANAGEMENT);
-    cy.url().should('include', MANAGEMENT_URL);
+    cy.url().should('include', ADMINISTRATION_URL);
   });
 });
 
@@ -115,8 +115,8 @@ describe('Kibana navigation to all pages in the Security app ', () => {
     cy.url().should('include', CASES_URL);
   });
 
-  it('navigates to the Management page', () => {
-    navigateFromKibanaCollapsibleTo(MANAGEMENT_PAGE);
-    cy.url().should('include', MANAGEMENT_URL);
+  it('navigates to the Administration page', () => {
+    navigateFromKibanaCollapsibleTo(ADMINISTRATION_PAGE);
+    cy.url().should('include', ADMINISTRATION_URL);
   });
 });
