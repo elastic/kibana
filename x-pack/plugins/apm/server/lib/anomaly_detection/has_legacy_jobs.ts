@@ -4,27 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Setup } from '../helpers/setup_request';
+import { getMlJobsWithAPMGroup } from './get_ml_jobs_by_group';
 
 // Determine whether there are any legacy ml jobs.
-// A legacy ML job has a job id suffix "high_mean_response_time" and a field_name of "transaction.duration.us"
+// A legacy ML job has a job id that ends with "high_mean_response_time" and created_by=ml-module-apm-transaction
 export async function hasLegacyJobs(setup: Setup) {
   const { ml } = setup;
-  const res = await ml?.mlSystem.mlAnomalySearch({
-    terminateAfter: 1,
-    size: 0,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            { term: { field_name: 'transaction.duration.us' } },
-            { wildcard: { job_id: '*high_mean_response_time' } },
-          ],
-        },
-      },
-    },
-  });
 
-  // types are for the old `hits.total` format
-  // @ts-ignore
-  return res?.hits.total.value > 0;
+  if (!ml) {
+    return false;
+  }
+
+  const response = await getMlJobsWithAPMGroup(ml);
+  return response.jobs.some(
+    (job) =>
+      job.job_id.endsWith('high_mean_response_time') &&
+      job.custom_settings?.created_by === 'ml-module-apm-transaction'
+  );
 }

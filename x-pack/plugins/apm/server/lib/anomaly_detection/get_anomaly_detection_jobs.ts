@@ -6,7 +6,7 @@
 
 import { Logger } from 'kibana/server';
 import { Setup } from '../helpers/setup_request';
-import { ML_GROUP_NAME_APM } from './create_anomaly_detection_jobs';
+import { getMlJobsWithAPMGroup } from './get_ml_jobs_by_group';
 
 export async function getAnomalyDetectionJobs(setup: Setup, logger: Logger) {
   const { ml } = setup;
@@ -25,23 +25,14 @@ export async function getAnomalyDetectionJobs(setup: Setup, logger: Logger) {
     return [];
   }
 
-  try {
-    const response = await ml.anomalyDetectors.jobs(ML_GROUP_NAME_APM);
-    return response.jobs
-      .map((job) => {
-        const environment = job.custom_settings?.job_tags?.environment ?? '';
-        return {
-          job_id: job.job_id,
-          environment,
-        };
-      })
-      .filter((job) => job.environment);
-  } catch (error) {
-    if (error.statusCode === 404) {
-      return [];
-    }
-
-    logger.warn('Unable to get APM ML jobs.');
-    logger.error(error);
-  }
+  const response = await getMlJobsWithAPMGroup(ml);
+  return response.jobs
+    .map((job) => {
+      const environment = job.custom_settings?.job_tags?.environment ?? '';
+      return {
+        job_id: job.job_id,
+        environment,
+      };
+    })
+    .filter((job) => job.environment);
 }
