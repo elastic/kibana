@@ -93,8 +93,7 @@ export const TemplateForm = ({
     indexPatterns: [],
     template: {},
     _kbnMeta: {
-      isManaged: false,
-      isCloudManaged: false,
+      type: 'default',
       hasDatastream: false,
       isLegacy,
     },

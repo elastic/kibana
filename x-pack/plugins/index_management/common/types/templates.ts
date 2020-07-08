@@ -48,12 +48,13 @@ export interface TemplateDeserialized {
   _meta?: { [key: string]: any }; // Composable template only
   dataStream?: { timestamp_field: string }; // Composable template only
   _kbnMeta: {
-    isManaged: boolean;
-    isCloudManaged: boolean;
+    type: TemplateType;
     hasDatastream: boolean;
     isLegacy?: boolean;
   };
 }
+
+export type TemplateType = 'default' | 'managed' | 'cloudManaged' | 'system';
 
 export interface TemplateFromEs {
   name: string;
@@ -78,8 +79,7 @@ export interface TemplateListItem {
     name: string;
   };
   _kbnMeta: {
-    isManaged: boolean;
-    isCloudManaged: boolean;
+    type: TemplateType;
     hasDatastream: boolean;
     isLegacy?: boolean;
   };

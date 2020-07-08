@@ -98,7 +98,7 @@ export const TemplateDetailsContent = ({
     decodedTemplateName,
     isLegacy
   );
-  const isCloudManaged = templateDetails?._kbnMeta.isCloudManaged ?? false;
+  const isCloudManaged = templateDetails?._kbnMeta.type === 'cloudManaged';
   const [templateToDelete, setTemplateToDelete] = useState<
     Array<{ name: string; isLegacy?: boolean }>
   >([]);
