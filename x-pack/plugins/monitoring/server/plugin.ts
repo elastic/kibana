@@ -117,7 +117,7 @@ export class Plugin {
     await this.licenseService.refresh();
 
     const serverInfo = core.http.getServerInfo();
-    let kibanaUrl = `${serverInfo.protocol}://${serverInfo.host}:${serverInfo.port}`;
+    let kibanaUrl = `${serverInfo.protocol}://${serverInfo.hostname}:${serverInfo.port}`;
     if (core.http.basePath.serverBasePath) {
       kibanaUrl += `/${core.http.basePath.serverBasePath}`;
     }

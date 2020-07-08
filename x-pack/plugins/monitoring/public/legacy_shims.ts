@@ -8,7 +8,7 @@ import { CoreStart, HttpSetup, IUiSettingsClient } from 'kibana/public';
 import angular from 'angular';
 import { Observable } from 'rxjs';
 import { HttpRequestInit } from '../../../../src/core/public';
-import { MonitoringPluginDependencies } from './types';
+import { MonitoringStartPluginDependencies } from './types';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TypeRegistry } from '../../triggers_actions_ui/public/application/type_registry';
@@ -48,7 +48,7 @@ export interface IShims {
   I18nContext: CoreStart['i18n']['Context'];
   docLinks: CoreStart['docLinks'];
   docTitle: CoreStart['chrome']['docTitle'];
-  timefilter: MonitoringPluginDependencies['data']['query']['timefilter']['timefilter'];
+  timefilter: MonitoringStartPluginDependencies['data']['query']['timefilter']['timefilter'];
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   alertTypeRegistry: TypeRegistry<AlertTypeModel>;
   uiSettings: IUiSettingsClient;
@@ -65,7 +65,7 @@ export class Legacy {
   private static _shims: IShims;
 
   public static init(
-    { core, data, isCloud, triggersActionsUi }: MonitoringPluginDependencies,
+    { core, data, isCloud, triggersActionsUi }: MonitoringStartPluginDependencies,
     ngInjector: angular.auto.IInjectorService
   ) {
     this._shims = {

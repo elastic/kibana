@@ -19,22 +19,25 @@ import {
 } from '../../../../src/plugins/home/public';
 import { UI_SETTINGS } from '../../../../src/plugins/data/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-import { MonitoringPluginDependencies, MonitoringConfig } from './types';
+import { MonitoringStartPluginDependencies, MonitoringConfig } from './types';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
 import { createCpuUsageAlertType } from './alerts/cpu_usage_alert';
 import { createLegacyAlertTypes } from './alerts/legacy_alert';
 
+interface MonitoringSetupPluginDependencies {
+  home?: HomePublicPluginSetup;
+  cloud?: { isCloudEnabled: boolean };
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+}
+
 export class MonitoringPlugin
-  implements Plugin<boolean, void, MonitoringPluginDependencies, MonitoringPluginDependencies> {
+  implements
+    Plugin<boolean, void, MonitoringSetupPluginDependencies, MonitoringStartPluginDependencies> {
   constructor(private initializerContext: PluginInitializerContext<MonitoringConfig>) {}
 
   public setup(
-    core: CoreSetup<MonitoringPluginDependencies>,
-    plugins: object & {
-      home?: HomePublicPluginSetup;
-      cloud?: { isCloudEnabled: boolean };
-      triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
-    }
+    core: CoreSetup<MonitoringStartPluginDependencies>,
+    plugins: MonitoringSetupPluginDependencies
   ) {
     const { home } = plugins;
     const id = 'monitoring';
@@ -77,7 +80,7 @@ export class MonitoringPlugin
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const { AngularApp } = await import('./angular');
-        const deps: MonitoringPluginDependencies = {
+        const deps: MonitoringStartPluginDependencies = {
           navigation: pluginsStart.navigation,
           kibanaLegacy: pluginsStart.kibanaLegacy,
           element: params.element,
@@ -114,7 +117,7 @@ export class MonitoringPlugin
 
   public stop() {}
 
-  private setInitialTimefilter({ core: coreContext, data }: MonitoringPluginDependencies) {
+  private setInitialTimefilter({ core: coreContext, data }: MonitoringStartPluginDependencies) {
     const { timefilter } = data.query.timefilter;
     const { uiSettings } = coreContext;
     const refreshInterval = { value: 10000, pause: false };

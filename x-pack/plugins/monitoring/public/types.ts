@@ -13,7 +13,7 @@ import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public'
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export { MonitoringConfig } from '../server';
 
-export interface MonitoringPluginDependencies {
+export interface MonitoringStartPluginDependencies {
   navigation: NavigationStart;
   data: DataPublicPluginStart;
   kibanaLegacy: KibanaLegacyStart;

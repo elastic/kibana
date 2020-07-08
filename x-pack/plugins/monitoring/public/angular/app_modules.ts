@@ -18,7 +18,7 @@ import {
   createTopNavDirective,
   createTopNavHelper,
 } from '../../../../../src/plugins/kibana_legacy/public';
-import { MonitoringPluginDependencies } from '../types';
+import { MonitoringStartPluginDependencies } from '../types';
 import { GlobalState } from '../url_state';
 import { getSafeForExternalLink } from '../lib/get_safe_for_external_link';
 
@@ -60,7 +60,7 @@ export const localAppModule = ({
   data: { query },
   navigation,
   externalConfig,
-}: MonitoringPluginDependencies) => {
+}: MonitoringStartPluginDependencies) => {
   createLocalI18nModule();
   createLocalPrivateModule();
   createLocalStorage();
@@ -90,7 +90,9 @@ export const localAppModule = ({
   return appModule;
 };
 
-function createMonitoringAppConfigConstants(keys: MonitoringPluginDependencies['externalConfig']) {
+function createMonitoringAppConfigConstants(
+  keys: MonitoringStartPluginDependencies['externalConfig']
+) {
   let constantsModule = angular.module('monitoring/constants', []);
   keys.map(([key, value]) => (constantsModule = constantsModule.constant(key as string, value)));
 }
@@ -173,7 +175,7 @@ function createMonitoringAppFilters() {
     });
 }
 
-function createLocalConfigModule(core: MonitoringPluginDependencies['core']) {
+function createLocalConfigModule(core: MonitoringStartPluginDependencies['core']) {
   angular.module('monitoring/Config', []).provider('config', function () {
     return {
       $get: () => ({
@@ -201,7 +203,7 @@ function createLocalPrivateModule() {
   angular.module('monitoring/Private', []).provider('Private', PrivateProvider);
 }
 
-function createLocalTopNavModule({ ui }: MonitoringPluginDependencies['navigation']) {
+function createLocalTopNavModule({ ui }: MonitoringStartPluginDependencies['navigation']) {
   angular
     .module('monitoring/TopNav', ['react'])
     .directive('kbnTopNav', createTopNavDirective)
