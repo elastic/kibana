@@ -14,16 +14,18 @@ import { SubsetTimelineModel } from '../../store/timeline/model';
 import * as i18n from '../../../common/components/events_viewer/translations';
 import * as i18nF from '../timeline/footer/translations';
 import { timelineDefaults as timelineDefaultModel } from '../../store/timeline/defaults';
+import { Ecs } from '../../../graphql/types';
 
 interface ManageTimelineInit {
   documentType?: string;
   defaultModel?: SubsetTimelineModel;
+  filterManager?: FilterManager;
   footerText?: string;
   id: string;
   indexToAdd?: string[] | null;
   loadingText?: string;
   selectAll?: boolean;
-  timelineRowActions: TimelineRowAction[];
+  timelineRowActions: (ecsData: Ecs) => TimelineRowAction[];
   title?: string;
   unit?: (totalCount: number) => string;
 }
@@ -39,7 +41,7 @@ interface ManageTimeline {
   loadingText: string;
   queryFields: string[];
   selectAll: boolean;
-  timelineRowActions: TimelineRowAction[];
+  timelineRowActions: (ecsData: Ecs) => TimelineRowAction[];
   title: string;
   unit: (totalCount: number) => string;
 }
@@ -67,12 +69,10 @@ type ActionManageTimeline =
   | {
       type: 'SET_TIMELINE_ACTIONS';
       id: string;
-      payload: { queryFields?: string[]; timelineRowActions: TimelineRowAction[] };
-    }
-  | {
-      type: 'SET_TIMELINE_FILTER_MANAGER';
-      id: string;
-      payload: { filterManager: FilterManager };
+      payload: {
+        queryFields?: string[];
+        timelineRowActions: (ecsData: Ecs) => TimelineRowAction[];
+      };
     };
 
 export const getTimelineDefaults = (id: string) => ({
@@ -85,7 +85,7 @@ export const getTimelineDefaults = (id: string) => ({
   id,
   isLoading: false,
   queryFields: [],
-  timelineRowActions: [],
+  timelineRowActions: () => [],
   title: i18n.EVENTS,
   unit: (n: number) => i18n.UNIT(n),
 });
@@ -112,7 +112,6 @@ const reducerManageTimeline = (
         },
       } as ManageTimelineById;
     case 'SET_TIMELINE_ACTIONS':
-    case 'SET_TIMELINE_FILTER_MANAGER':
       return {
         ...state,
         [action.id]: {
@@ -143,9 +142,8 @@ interface UseTimelineManager {
   setTimelineRowActions: (actionsArgs: {
     id: string;
     queryFields?: string[];
-    timelineRowActions: TimelineRowAction[];
+    timelineRowActions: (ecsData: Ecs) => TimelineRowAction[];
   }) => void;
-  setTimelineFilterManager: (filterArgs: { id: string; filterManager: FilterManager }) => void;
 }
 
 const useTimelineManager = (manageTimelineForTesting?: ManageTimelineById): UseTimelineManager => {
@@ -169,23 +167,12 @@ const useTimelineManager = (manageTimelineForTesting?: ManageTimelineById): UseT
     }: {
       id: string;
       queryFields?: string[];
-      timelineRowActions: TimelineRowAction[];
+      timelineRowActions: (ecsData: Ecs) => TimelineRowAction[];
     }) => {
       dispatch({
         type: 'SET_TIMELINE_ACTIONS',
         id,
         payload: { queryFields, timelineRowActions },
-      });
-    },
-    []
-  );
-
-  const setTimelineFilterManager = useCallback(
-    ({ id, filterManager }: { id: string; filterManager: FilterManager }) => {
-      dispatch({
-        type: 'SET_TIMELINE_FILTER_MANAGER',
-        id,
-        payload: { filterManager },
       });
     },
     []
@@ -219,7 +206,7 @@ const useTimelineManager = (manageTimelineForTesting?: ManageTimelineById): UseT
       if (state[id] != null) {
         return state[id];
       }
-      initializeTimeline({ id, timelineRowActions: [] });
+      initializeTimeline({ id, timelineRowActions: () => [] });
       return getTimelineDefaults(id);
     },
     [initializeTimeline, state]
@@ -234,7 +221,6 @@ const useTimelineManager = (manageTimelineForTesting?: ManageTimelineById): UseT
     setIndexToAdd,
     setIsTimelineLoading,
     setTimelineRowActions,
-    setTimelineFilterManager,
   };
 };
 
@@ -246,7 +232,6 @@ const init = {
   initializeTimeline: () => noop,
   setIsTimelineLoading: () => noop,
   setTimelineRowActions: () => noop,
-  setTimelineFilterManager: () => noop,
 };
 
 const ManageTimelineContext = createContext<UseTimelineManager>(init);
