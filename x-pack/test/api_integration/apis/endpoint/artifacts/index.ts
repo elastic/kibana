@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { inflateRawSync } from 'zlib';
+import { inflateSync } from 'zlib';
 
 import { WrappedTranslatedExceptionList } from '../../../../../plugins/security_solution/server/endpoint/schemas';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -63,7 +63,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should fail to find artifact with invalid hash', async () => {
       await supertestWithoutAuth
-        .get('/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-1.0.0/abcd')
+        .get('/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-v1/abcd')
         .set('kbn-xsrf', 'xxx')
         .set('authorization', `ApiKey ${agentAccessAPIKey}`)
         .send()
@@ -73,7 +73,7 @@ export default function (providerContext: FtrProviderContext) {
     it('should download an artifact with correct hash', async () => {
       await supertestWithoutAuth
         .get(
-          '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-1.0.0/d2a9c760005b08d43394e59a8701ae75c80881934ccf15a006944452b80f7f9f'
+          '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-v1/d2a9c760005b08d43394e59a8701ae75c80881934ccf15a006944452b80f7f9f'
         )
         .set('kbn-xsrf', 'xxx')
         .set('authorization', `ApiKey ${agentAccessAPIKey}`)
@@ -120,7 +120,7 @@ export default function (providerContext: FtrProviderContext) {
     it('should download an artifact with correct hash from cache', async () => {
       await supertestWithoutAuth
         .get(
-          '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-1.0.0/d2a9c760005b08d43394e59a8701ae75c80881934ccf15a006944452b80f7f9f'
+          '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-v1/d2a9c760005b08d43394e59a8701ae75c80881934ccf15a006944452b80f7f9f'
         )
         .set('kbn-xsrf', 'xxx')
         .set('authorization', `ApiKey ${agentAccessAPIKey}`)
@@ -132,7 +132,7 @@ export default function (providerContext: FtrProviderContext) {
         .then(async () => {
           await supertestWithoutAuth
             .get(
-              '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-1.0.0/d2a9c760005b08d43394e59a8701ae75c80881934ccf15a006944452b80f7f9f'
+              '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-v1/d2a9c760005b08d43394e59a8701ae75c80881934ccf15a006944452b80f7f9f'
             )
             .set('kbn-xsrf', 'xxx')
             .set('authorization', `ApiKey ${agentAccessAPIKey}`)
@@ -180,14 +180,14 @@ export default function (providerContext: FtrProviderContext) {
     it('should download valid compressed JSON', async () => {
       const { body } = await supertestWithoutAuth
         .get(
-          '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-1.0.0/1be2ae8d19368939c6e9ecfb32d46233e975feec9611469f62dd2578bd9c4507'
+          '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-v1/d2a9c760005b08d43394e59a8701ae75c80881934ccf15a006944452b80f7f9f'
         )
         .set('kbn-xsrf', 'xxx')
         .set('authorization', `ApiKey ${agentAccessAPIKey}`)
         .send()
         .expect(200);
 
-      const decompressedJson = inflateRawSync(body);
+      const decompressedJson = inflateSync(body);
       const decompressedBody: WrappedTranslatedExceptionList = JSON.parse(
         decompressedJson.toString()
       );
@@ -229,7 +229,7 @@ export default function (providerContext: FtrProviderContext) {
     it('should fail on invalid api key', async () => {
       await supertestWithoutAuth
         .get(
-          '/api/endpoint/artifacts/download/endpoint-exceptionlist-macos-1.0.0/1825fb19fcc6dc391cae0bc4a2e96dd7f728a0c3ae9e1469251ada67f9e1b975'
+          '/api/endpoint/artifacts/download/endpoint-exceptionlist-macos-v1/1825fb19fcc6dc391cae0bc4a2e96dd7f728a0c3ae9e1469251ada67f9e1b975'
         )
         .set('kbn-xsrf', 'xxx')
         .set('authorization', `ApiKey iNvAlId`)
