@@ -24,7 +24,7 @@ import {
   loadEvalData,
   Eval,
 } from '../../../../common';
-import { getTaskStateBadge } from './columns';
+import { getTaskStateBadge } from './use_columns';
 import { getDataFrameAnalyticsProgressPhase, isCompletedAnalyticsJob } from './common';
 import {
   isRegressionAnalysis,
