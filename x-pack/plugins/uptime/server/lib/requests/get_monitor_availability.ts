@@ -94,6 +94,13 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
                 top_hits: {
                   size: 1,
                   _source: ['monitor.name', 'url.full'],
+                  sort: [
+                    {
+                      '@timestamp': {
+                        order: 'desc',
+                      },
+                    },
+                  ],
                 },
               },
               up_sum: {

@@ -153,6 +153,13 @@ describe('monitor availability', () => {
                         "url.full",
                       ],
                       "size": 1,
+                      "sort": Array [
+                        Object {
+                          "@timestamp": Object {
+                            "order": "desc",
+                          },
+                        },
+                      ],
                     },
                   },
                   "filtered": Object {
@@ -325,6 +332,13 @@ describe('monitor availability', () => {
                         "url.full",
                       ],
                       "size": 1,
+                      "sort": Array [
+                        Object {
+                          "@timestamp": Object {
+                            "order": "desc",
+                          },
+                        },
+                      ],
                     },
                   },
                   "filtered": Object {
@@ -556,6 +570,13 @@ describe('monitor availability', () => {
                         "url.full",
                       ],
                       "size": 1,
+                      "sort": Array [
+                        Object {
+                          "@timestamp": Object {
+                            "order": "desc",
+                          },
+                        },
+                      ],
                     },
                   },
                   "filtered": Object {
@@ -647,6 +668,13 @@ describe('monitor availability', () => {
                           "url.full",
                         ],
                         "size": 1,
+                        "sort": Array [
+                          Object {
+                            "@timestamp": Object {
+                              "order": "desc",
+                            },
+                          },
+                        ],
                       },
                     },
                     "filtered": Object {
