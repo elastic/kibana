@@ -94,6 +94,9 @@ describe('service_settings (FKA tilemaptest)', function () {
       expect(mapUrl).to.contain('{x}');
       expect(mapUrl).to.contain('{y}');
       expect(mapUrl).to.contain('{z}');
+      expect(tmsService.attribution).to.eql(
+        '<p>&#169; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | <a href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a></p>&#10;'
+      );
 
       const urlObject = url.parse(mapUrl, true);
       expect(urlObject.hostname).to.be('tiles-stage.elastic.co');
@@ -240,7 +243,7 @@ describe('service_settings (FKA tilemaptest)', function () {
 
       serviceSettings.addQueryParams({ foo: 'bar' });
       const fileLayers = await serviceSettings.getFileLayers();
-      expect(fileLayers.length).to.be(18);
+      expect(fileLayers.length).to.be(19);
       const assertions = fileLayers.map(async function (fileLayer) {
 
         expect(fileLayer.origin).to.be(ORIGIN.EMS);
@@ -293,6 +296,16 @@ describe('service_settings (FKA tilemaptest)', function () {
       const hotlink = await serviceSettings.getEMSHotLink(fileLayers[0]);
       expect(hotlink).to.eql('?locale=en#file/world_countries');//url host undefined becuase emsLandingPageUrl is set at kibana-load
 
+    });
+
+    it('should sanitize EMS attribution', async () => {
+      const fileLayers = await serviceSettings.getFileLayers();
+      const fileLayer = fileLayers.find((layer) => {
+        return layer.id === 'world_countries_with_compromised_attribution';
+      });
+      expect(fileLayer.attribution).to.eql(
+        '<a rel="noreferrer noopener" href="http://www.naturalearthdata.com/about/terms-of-use">&lt;div onclick=\'alert(1\')&gt;Made with NaturalEarth&lt;/div&gt;</a> | <a rel="noreferrer noopener">Elastic Maps Service</a>'
+      );
     });
 
   });
