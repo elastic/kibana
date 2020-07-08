@@ -30,7 +30,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('visual builder', function describeIndexTests() {
     beforeEach(async () => {
-      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
+      await security.testUser.setRoles([
+        'kibana_admin',
+        'test_logstash_reader',
+        'kibana_sample_admin',
+      ]);
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisualBuilder();
       await PageObjects.visualBuilder.checkVisualBuilderIsPresent();
@@ -112,7 +116,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
         await PageObjects.visualBuilder.checkMetricTabIsPresent();
-        await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin']);
       });
       after(async () => {
         await security.testUser.restoreDefaults();
