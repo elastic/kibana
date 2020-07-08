@@ -211,7 +211,7 @@ export class AlertsAuthorization {
             );
           } else {
             if (authorizedEntries.has(alertTypeId)) {
-              authorizedEntries.get(alertTypeId).add(consumer);
+              authorizedEntries.get(alertTypeId)!.add(consumer);
             } else {
               authorizedEntries.set(alertTypeId, new Set([consumer]));
             }
@@ -221,7 +221,7 @@ export class AlertsAuthorization {
           if (authorizedEntries.size) {
             this.auditLogger.alertsBulkAuthorizationSuccess(
               username!,
-              [...authorizedEntries.entries()].reduce(
+              [...authorizedEntries.entries()].reduce<Array<[string, string]>>(
                 (authorizedPairs, [alertTypeId, consumers]) => {
                   for (const consumer of consumers) {
                     authorizedPairs.push([alertTypeId, consumer]);

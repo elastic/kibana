@@ -166,7 +166,7 @@ describe(`#alertsBulkAuthorizationSuccess`, () => {
     const alertsAuditLogger = new AlertsAuthorizationAuditLogger(auditLogger);
     const username = 'foo-user';
     const scopeType = ScopeType.Consumer;
-    const authorizedEntries = [
+    const authorizedEntries: Array<[string, string]> = [
       ['alert-type-id', 'myApp'],
       ['other-alert-type-id', 'myOtherApp'],
     ];
@@ -207,7 +207,7 @@ describe(`#alertsBulkAuthorizationSuccess`, () => {
     const alertsAuditLogger = new AlertsAuthorizationAuditLogger(auditLogger);
     const username = 'foo-user';
     const scopeType = ScopeType.Producer;
-    const authorizedEntries = [
+    const authorizedEntries: Array<[string, string]> = [
       ['alert-type-id', 'myApp'],
       ['other-alert-type-id', 'myOtherApp'],
     ];

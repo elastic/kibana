@@ -643,10 +643,7 @@ describe('getFindAuthorizationFilter', () => {
     });
     alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
-    const {
-      ensureAlertTypeIsAuthorized,
-      logSuccessfulAuthorization,
-    } = await alertAuthorization.getFindAuthorizationFilter();
+    const { ensureAlertTypeIsAuthorized } = await alertAuthorization.getFindAuthorizationFilter();
     expect(() => {
       ensureAlertTypeIsAuthorized('myAppAlertType', 'myOtherApp');
     }).not.toThrow();

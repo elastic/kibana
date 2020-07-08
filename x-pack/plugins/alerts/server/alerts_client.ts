@@ -268,6 +268,7 @@ export class AlertsClient {
     const {
       filter: authorizationFilter,
       ensureAlertTypeIsAuthorized,
+      logSuccessfulAuthorization,
     } = await this.authorization.getFindAuthorizationFilter();
 
     if (authorizationFilter) {
@@ -287,19 +288,23 @@ export class AlertsClient {
       type: 'alert',
     });
 
+    const authorizedData = data.map(({ id, attributes, updated_at, references }) => {
+      ensureAlertTypeIsAuthorized(attributes.alertTypeId, attributes.consumer);
+      return this.getAlertFromRaw(
+        id,
+        fields ? (pick(attributes, fields) as RawAlert) : attributes,
+        updated_at,
+        references
+      );
+    });
+
+    logSuccessfulAuthorization();
+
     return {
       page,
       perPage,
       total,
-      data: data.map(({ id, attributes, updated_at, references }) => {
-        ensureAlertTypeIsAuthorized(attributes.alertTypeId, attributes.consumer);
-        return this.getAlertFromRaw(
-          id,
-          fields ? (pick(attributes, fields) as RawAlert) : attributes,
-          updated_at,
-          references
-        );
-      }),
+      data: authorizedData,
     };
   }
 
