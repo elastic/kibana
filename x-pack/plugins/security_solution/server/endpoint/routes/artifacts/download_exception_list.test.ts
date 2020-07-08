@@ -164,6 +164,8 @@ describe('test alerts route', () => {
       path.startsWith('/api/endpoint/artifacts/download')
     )!;
 
+    expect(routeConfig.options).toEqual(undefined);
+
     await routeHandler(
       ({
         core: {
