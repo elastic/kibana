@@ -17,23 +17,16 @@
  * under the License.
  */
 
-export { ElasticsearchService } from './elasticsearch_service';
-export { config, configSchema, ElasticsearchConfig } from './elasticsearch_config';
-export { NodesVersionCompatibility } from './version_check/ensure_es_version';
-export {
-  ElasticsearchServiceSetup,
-  ElasticsearchServiceStart,
-  ElasticsearchStatusMeta,
-  InternalElasticsearchServiceSetup,
-  InternalElasticsearchServiceStart,
-  FakeRequest,
-  ScopeableRequest,
-} from './types';
-export * from './legacy';
-export {
-  IClusterClient,
-  ICustomClusterClient,
-  ElasticsearchClientConfig,
-  ElasticsearchClient,
-  IScopedClusterClient,
-} from './client';
+export const parseClientOptionsMock = jest.fn();
+jest.doMock('./client_config', () => ({
+  parseClientOptions: parseClientOptionsMock,
+}));
+
+export const ClientMock = jest.fn();
+jest.doMock('@elastic/elasticsearch', () => {
+  const actual = jest.requireActual('@elastic/elasticsearch');
+  return {
+    ...actual,
+    Client: ClientMock,
+  };
+});
