@@ -22,6 +22,7 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiButton,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -406,19 +407,19 @@ export const PolicyList = React.memo(() => {
             />
           </EuiButton>
         }
-        bodyHeader={
-          policyItems &&
-          policyItems.length > 0 && (
-            <EuiText color="subdued" data-test-subj="policyTotalCount">
+      >
+        {policyItems && policyItems.length > 0 && (
+          <>
+            <EuiText color="subdued" data-test-subj="policyTotalCount" size="xs">
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policyList.viewTitleTotalCount"
                 defaultMessage="{totalItemCount, plural, one {# Policy} other {# Policies}}"
                 values={{ totalItemCount }}
               />
             </EuiText>
-          )
-        }
-      >
+            <EuiHorizontalRule margin="xs" />
+          </>
+        )}
         {useMemo(() => {
           return (
             <>
