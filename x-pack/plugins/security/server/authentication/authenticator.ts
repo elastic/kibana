@@ -360,7 +360,7 @@ export class Authenticator {
     }
 
     const queryStringProviderName = (request.query as Record<string, string>)?.provider;
-    if (typeof queryStringProviderName === 'string') {
+    if (queryStringProviderName) {
       // provider name is passed in a query param and sourced from the browser's local storage;
       // hence, we can't assume that this provider exists, so we have to check it
       const provider = this.providers.get(queryStringProviderName);
@@ -461,7 +461,7 @@ export class Authenticator {
     // If there is no session to predict which provider to use first, let's use the order
     // providers are configured in. Otherwise return provider that owns session first, and only then the rest
     // of providers.
-    if (!sessionValue) {
+    if (!sessionValue || !this.providers.has(sessionValue.provider.name)) {
       yield* this.providers;
     } else {
       yield [sessionValue.provider.name, this.providers.get(sessionValue.provider.name)!];
@@ -516,10 +516,10 @@ export class Authenticator {
     // If authentication succeeds or requires redirect we should automatically extend existing user session,
     // unless authentication has been triggered by a system API request. In case provider explicitly returns new
     // state we should store it in the session regardless of whether it's a system API request or not.
-    const sessionCanBeUpdated =
+    const sessionShouldBeUpdatedOrExtended =
       (authenticationResult.succeeded() || authenticationResult.redirected()) &&
       (authenticationResult.shouldUpdateState() || (!request.isSystemRequest && ownsSession));
-    if (!sessionCanBeUpdated) {
+    if (!sessionShouldBeUpdatedOrExtended) {
       return ownsSession ? { value: existingSessionValue, overwritten: false } : null;
     }
 
@@ -653,12 +653,14 @@ export class Authenticator {
       return authenticationResult;
     }
 
+    const isSessionAuthenticated = !!sessionUpdateResult?.value?.username;
+
     let preAccessRedirectURL;
-    if (sessionUpdateResult?.overwritten) {
+    if (isSessionAuthenticated && sessionUpdateResult?.overwritten) {
       this.logger.debug('Redirecting user to the overwritten session UI.');
       preAccessRedirectURL = `${this.options.basePath.serverBasePath}${OVERWRITTEN_SESSION_ROUTE}`;
     } else if (
-      authenticationResult.succeeded() &&
+      isSessionAuthenticated &&
       this.shouldRedirectToAccessAgreement(sessionUpdateResult?.value ?? null)
     ) {
       this.logger.debug('Redirecting user to the access agreement UI.');
