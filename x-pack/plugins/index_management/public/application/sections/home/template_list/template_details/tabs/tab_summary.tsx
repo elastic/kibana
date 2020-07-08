@@ -53,7 +53,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
   const numIndexPatterns = indexPatterns.length;
 
   const {
-    core: { navigateToApp },
+    core: { getUrlForApp },
   } = useAppContext();
 
   return (
@@ -159,9 +159,9 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
               <EuiDescriptionListDescription>
                 {ilmPolicy && ilmPolicy.name ? (
                   <EuiLink
-                    onClick={() =>
-                      navigateToApp('management', { path: getILMPolicyPath(ilmPolicy.name) })
-                    }
+                    href={getUrlForApp('management', {
+                      path: getILMPolicyPath(ilmPolicy.name),
+                    })}
                   >
                     {ilmPolicy.name}
                   </EuiLink>

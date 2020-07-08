@@ -36,7 +36,7 @@ setExtensionsService(services.extensionsService);
 setUiMetricService(services.uiMetricService);
 const appDependencies = {
   services,
-  core: { getUrlForApp: () => {}, navigateToApp: () => {} },
+  core: { getUrlForApp: () => {} },
   plugins: {},
 } as any;
 

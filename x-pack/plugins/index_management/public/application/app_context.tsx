@@ -21,7 +21,6 @@ export interface AppDependencies {
   core: {
     fatalErrors: CoreStart['fatalErrors'];
     getUrlForApp: CoreStart['application']['getUrlForApp'];
-    navigateToApp: CoreStart['application']['navigateToApp'];
   };
   plugins: {
     usageCollection: UsageCollectionSetup;
