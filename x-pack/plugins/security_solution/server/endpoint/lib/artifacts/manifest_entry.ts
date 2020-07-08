@@ -15,31 +15,31 @@ export class ManifestEntry {
   }
 
   public getDocId(): string {
-    return `${this.getIdentifier()}-${this.getCompressedSha256()}`;
+    return `${this.getIdentifier()}-${this.getEncodedSha256()}`;
   }
 
   public getIdentifier(): string {
     return this.artifact.identifier;
   }
 
-  public getCompressedSha256(): string {
-    return this.artifact.compressedSha256;
+  public getEncodedSha256(): string {
+    return this.artifact.encodedSha256;
   }
 
-  public getDecompressedSha256(): string {
-    return this.artifact.decompressedSha256;
+  public getDecodedSha256(): string {
+    return this.artifact.decodedSha256;
   }
 
-  public getCompressedSize(): number {
-    return this.artifact.compressedSize;
+  public getEncodedSize(): number {
+    return this.artifact.encodedSize;
   }
 
-  public getDecompressedSize(): number {
-    return this.artifact.decompressedSize;
+  public getDecodedSize(): number {
+    return this.artifact.decodedSize;
   }
 
   public getUrl(): string {
-    return `/api/endpoint/artifacts/download/${this.getIdentifier()}/${this.getCompressedSha256()}`;
+    return `/api/endpoint/artifacts/download/${this.getIdentifier()}/${this.getEncodedSha256()}`;
   }
 
   public getArtifact(): InternalArtifactSchema {
@@ -50,10 +50,10 @@ export class ManifestEntry {
     return {
       compression_algorithm: 'none',
       encryption_algorithm: 'none',
-      precompress_sha256: this.getDecompressedSha256(),
-      precompress_size: this.getDecompressedSize(),
-      postcompress_sha256: this.getCompressedSha256(),
-      postcompress_size: this.getCompressedSize(),
+      decoded_sha256: this.getDecodedSha256(),
+      decoded_size: this.getDecodedSize(),
+      encoded_sha256: this.getEncodedSha256(),
+      encoded_size: this.getEncodedSize(),
       relative_url: this.getUrl(),
     };
   }

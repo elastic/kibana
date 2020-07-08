@@ -65,7 +65,6 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         last_updated: { type: 'date' },
         last_checkin: { type: 'date' },
         config_revision: { type: 'integer' },
-        config_newest_revision: { type: 'integer' },
         default_api_key_id: { type: 'keyword' },
         default_api_key: { type: 'binary', index: false },
         updated_at: { type: 'date' },

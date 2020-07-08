@@ -11,18 +11,9 @@ import {
 } from '../routes/__mocks__/request_responses';
 import { alertsClientMock } from '../../../../../alerts/server/mocks';
 import { getExportAll } from './get_export_all';
-import { unSetFeatureFlagsForTestsOnly, setFeatureFlagsForTestsOnly } from '../feature_flags';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 
 describe('getExportAll', () => {
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
-
   test('it exports everything from the alerts client', async () => {
     const alertsClient = alertsClientMock.create();
     alertsClient.get.mockResolvedValue(getResult());
