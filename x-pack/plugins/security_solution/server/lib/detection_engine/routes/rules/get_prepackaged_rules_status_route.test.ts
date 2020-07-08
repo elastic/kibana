@@ -13,7 +13,6 @@ import {
   getNonEmptyIndex,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock } from '../__mocks__';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
   return {
@@ -39,14 +38,6 @@ jest.mock('../../rules/get_prepackaged_rules', () => {
 });
 
 describe('get_prepackaged_rule_status_route', () => {
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
-
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 

@@ -24,18 +24,18 @@ export const exceptionsArtifactSavedObjectMappings: SavedObjectsType['mappings']
       type: 'keyword',
       index: false,
     },
-    compressedSha256: {
+    encodedSha256: {
       type: 'keyword',
     },
-    compressedSize: {
+    encodedSize: {
       type: 'long',
       index: false,
     },
-    decompressedSha256: {
+    decodedSha256: {
       type: 'keyword',
       index: false,
     },
-    decompressedSize: {
+    decodedSize: {
       type: 'long',
       index: false,
     },

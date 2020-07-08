@@ -42,7 +42,7 @@ export const registerRoutes = ({
         (await settingsService.getSettings(soClient)).kibana_url ||
         url.format({
           protocol: serverInfo.protocol,
-          hostname: serverInfo.host,
+          hostname: serverInfo.hostname,
           port: serverInfo.port,
           pathname: basePath.serverBasePath,
         });

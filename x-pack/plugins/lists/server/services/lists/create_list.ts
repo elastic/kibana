@@ -10,16 +10,20 @@ import { LegacyAPICaller } from 'kibana/server';
 
 import {
   Description,
+  DeserializerOrUndefined,
   IdOrUndefined,
   IndexEsListSchema,
   ListSchema,
   MetaOrUndefined,
   Name,
+  SerializerOrUndefined,
   Type,
 } from '../../../common/schemas';
 
 export interface CreateListOptions {
   id: IdOrUndefined;
+  deserializer: DeserializerOrUndefined;
+  serializer: SerializerOrUndefined;
   type: Type;
   name: Name;
   description: Description;
@@ -33,6 +37,8 @@ export interface CreateListOptions {
 
 export const createList = async ({
   id,
+  deserializer,
+  serializer,
   name,
   type,
   description,
@@ -48,8 +54,10 @@ export const createList = async ({
     created_at: createdAt,
     created_by: user,
     description,
+    deserializer,
     meta,
     name,
+    serializer,
     tie_breaker_id: tieBreaker ?? uuid.v4(),
     type,
     updated_at: createdAt,
