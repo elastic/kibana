@@ -77,28 +77,6 @@ export class EnterpriseSearchPlugin implements Plugin {
     /**
      * Register user access to the Enterprise Search plugins
      */
-    capabilities.registerSwitcher(
-      async (request: KibanaRequest, uiCapabilities: UICapabilities) => {
-        const dependencies = { config, security, request, log: this.logger };
-
-        const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
-
-        return {
-          ...uiCapabilities,
-          navLinks: {
-            ...uiCapabilities.navLinks,
-            app_search: hasAppSearchAccess,
-            workplaceSearch: hasWorkplaceSearchAccess,
-          },
-          catalogue: {
-            ...uiCapabilities.catalogue,
-            app_search: hasAppSearchAccess,
-            workplaceSearch: hasWorkplaceSearchAccess,
-          },
-        };
-      }
-    );
-
     capabilities.registerSwitcher(async (request: KibanaRequest) => {
       const dependencies = { config, security, request, log: this.logger };
 
