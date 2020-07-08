@@ -13,11 +13,13 @@ import {
   TYPE,
   USER,
 } from '../../../common/constants.mock';
+import { getConfigMockDecoded } from '../../config.mock';
 
 import { TestReadable } from './test_readable.mock';
 
 export const getImportListItemsToStreamOptionsMock = (): ImportListItemsToStreamOptions => ({
   callCluster: getCallClusterMock(),
+  config: getConfigMockDecoded(),
   deserializer: undefined,
   listId: LIST_ID,
   listIndex: LIST_INDEX,

@@ -335,11 +335,12 @@ export class ListClient {
     stream,
     meta,
   }: ImportListItemsToStreamOptions): Promise<ListSchema | null> => {
-    const { callCluster, user } = this;
+    const { callCluster, user, config } = this;
     const listItemIndex = this.getListItemIndex();
     const listIndex = this.getListIndex();
     return importListItemsToStream({
       callCluster,
+      config,
       deserializer,
       listId,
       listIndex,

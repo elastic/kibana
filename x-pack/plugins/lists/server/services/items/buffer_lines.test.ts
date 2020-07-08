@@ -4,15 +4,44 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IMPORT_BUFFER_SIZE } from '../../../common/constants.mock';
+
 import { BufferLines } from './buffer_lines';
 import { TestReadable } from './test_readable.mock';
 
 describe('buffer_lines', () => {
+  test('it will throw if given a buffer size of zero', () => {
+    expect(() => {
+      new BufferLines({ bufferSize: 0, input: new TestReadable() });
+    }).toThrow('bufferSize must be greater than zero');
+  });
+
+  test('it will throw if given a buffer size of -1', () => {
+    expect(() => {
+      new BufferLines({ bufferSize: -1, input: new TestReadable() });
+    }).toThrow('bufferSize must be greater than zero');
+  });
+
   test('it can read a single line', (done) => {
     const input = new TestReadable();
     input.push('line one\n');
     input.push(null);
-    const bufferedLine = new BufferLines({ input });
+    const bufferedLine = new BufferLines({ bufferSize: IMPORT_BUFFER_SIZE, input });
+    let linesToTest: string[] = [];
+    bufferedLine.on('lines', (lines: string[]) => {
+      linesToTest = [...linesToTest, ...lines];
+    });
+    bufferedLine.on('close', () => {
+      expect(linesToTest).toEqual(['line one']);
+      done();
+    });
+  });
+
+  test('it can read a single line using a buffer size of 1', (done) => {
+    const input = new TestReadable();
+    input.push('line one\n');
+    input.push(null);
+    const bufferedLine = new BufferLines({ bufferSize: 1, input });
     let linesToTest: string[] = [];
     bufferedLine.on('lines', (lines: string[]) => {
       linesToTest = [...linesToTest, ...lines];
@@ -28,7 +57,23 @@ describe('buffer_lines', () => {
     input.push('line one\n');
     input.push('line two\n');
     input.push(null);
-    const bufferedLine = new BufferLines({ input });
+    const bufferedLine = new BufferLines({ bufferSize: IMPORT_BUFFER_SIZE, input });
+    let linesToTest: string[] = [];
+    bufferedLine.on('lines', (lines: string[]) => {
+      linesToTest = [...linesToTest, ...lines];
+    });
+    bufferedLine.on('close', () => {
+      expect(linesToTest).toEqual(['line one', 'line two']);
+      done();
+    });
+  });
+
+  test('it can read two lines using a buffer size of 1', (done) => {
+    const input = new TestReadable();
+    input.push('line one\n');
+    input.push('line two\n');
+    input.push(null);
+    const bufferedLine = new BufferLines({ bufferSize: 1, input });
     let linesToTest: string[] = [];
     bufferedLine.on('lines', (lines: string[]) => {
       linesToTest = [...linesToTest, ...lines];
@@ -44,7 +89,7 @@ describe('buffer_lines', () => {
     input.push('line one\n');
     input.push('line one\n');
     input.push(null);
-    const bufferedLine = new BufferLines({ input });
+    const bufferedLine = new BufferLines({ bufferSize: IMPORT_BUFFER_SIZE, input });
     let linesToTest: string[] = [];
     bufferedLine.on('lines', (lines: string[]) => {
       linesToTest = [...linesToTest, ...lines];
@@ -58,7 +103,7 @@ describe('buffer_lines', () => {
   test('it can close out without writing any lines', (done) => {
     const input = new TestReadable();
     input.push(null);
-    const bufferedLine = new BufferLines({ input });
+    const bufferedLine = new BufferLines({ bufferSize: IMPORT_BUFFER_SIZE, input });
     let linesToTest: string[] = [];
     bufferedLine.on('lines', (lines: string[]) => {
       linesToTest = [...linesToTest, ...lines];
@@ -71,7 +116,7 @@ describe('buffer_lines', () => {
 
   test('it can read 200 lines', (done) => {
     const input = new TestReadable();
-    const bufferedLine = new BufferLines({ input });
+    const bufferedLine = new BufferLines({ bufferSize: IMPORT_BUFFER_SIZE, input });
     let linesToTest: string[] = [];
     const size200: string[] = new Array(200).fill(null).map((_, index) => `${index}\n`);
     size200.forEach((element) => input.push(element));
@@ -97,7 +142,7 @@ describe('buffer_lines', () => {
     input.push('\n');
     input.push('--boundary--\n');
     input.push(null);
-    const bufferedLine = new BufferLines({ input });
+    const bufferedLine = new BufferLines({ bufferSize: IMPORT_BUFFER_SIZE, input });
     let linesToTest: string[] = [];
     bufferedLine.on('lines', (lines: string[]) => {
       linesToTest = [...linesToTest, ...lines];
@@ -117,7 +162,7 @@ describe('buffer_lines', () => {
     input.push('\n');
     input.push('--boundary--\n');
     input.push(null);
-    const bufferedLine = new BufferLines({ input });
+    const bufferedLine = new BufferLines({ bufferSize: IMPORT_BUFFER_SIZE, input });
     let linesToTest: string[] = [];
     bufferedLine.on('lines', (lines: string[]) => {
       linesToTest = [...linesToTest, ...lines];
@@ -136,7 +181,7 @@ describe('buffer_lines', () => {
     input.push('\n');
     input.push('--boundary--\n');
     input.push(null);
-    const bufferedLine = new BufferLines({ input });
+    const bufferedLine = new BufferLines({ bufferSize: IMPORT_BUFFER_SIZE, input });
     let fileNameToTest: string;
     bufferedLine.on('fileName', (fileName: string) => {
       fileNameToTest = fileName;

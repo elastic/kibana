@@ -11,17 +11,19 @@ import { LIST_ITEM_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
 import { validate } from '../../common/siem_common_deps';
 import { importListItemQuerySchema, listSchema } from '../../common/schemas';
+import { ConfigType } from '../config';
 
 import { createStreamFromBuffer } from './utils/create_stream_from_buffer';
 
 import { getListClient } from '.';
 
-export const importListItemRoute = (router: IRouter): void => {
+export const importListItemRoute = (router: IRouter, config: ConfigType): void => {
   router.post(
     {
       options: {
         body: {
           accepts: ['multipart/form-data'],
+          maxBytes: config.maxImportPayloadBytes,
           parse: false,
         },
         tags: ['access:lists'],

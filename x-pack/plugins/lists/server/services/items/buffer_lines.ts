@@ -7,16 +7,18 @@
 import readLine from 'readline';
 import { Readable } from 'stream';
 
-const BUFFER_SIZE = 100;
-
 export class BufferLines extends Readable {
   private set = new Set<string>();
   private boundary: string | null = null;
   private readableText: boolean = false;
   private paused: boolean = false;
-
-  constructor({ input }: { input: NodeJS.ReadableStream }) {
+  private bufferSize: number;
+  constructor({ input, bufferSize }: { input: NodeJS.ReadableStream; bufferSize: number }) {
     super({ encoding: 'utf-8' });
+    if (bufferSize <= 0) {
+      throw new RangeError('bufferSize must be greater than zero');
+    }
+    this.bufferSize = bufferSize;
 
     const readline = readLine.createInterface({
       input,
@@ -74,7 +76,7 @@ export class BufferLines extends Readable {
       this.emit('lines', []);
     } else {
       while (arrayFromSet.length) {
-        const spliced = arrayFromSet.splice(0, BUFFER_SIZE);
+        const spliced = arrayFromSet.splice(0, this.bufferSize);
         this.emit('lines', spliced);
       }
     }
@@ -87,7 +89,7 @@ export class BufferLines extends Readable {
       if (this.paused) {
         return false;
       } else {
-        if (this.set.size > BUFFER_SIZE) {
+        if (this.set.size > this.bufferSize) {
           this.emptyBuffer();
         }
         return true;

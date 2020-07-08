@@ -17,12 +17,14 @@ import {
   SerializerOrUndefined,
   Type,
 } from '../../../common/schemas';
+import { ConfigType } from '../../config';
 
 import { BufferLines } from './buffer_lines';
 import { createListItemsBulk } from './create_list_items_bulk';
 
 export interface ImportListItemsToStreamOptions {
   listId: ListIdOrUndefined;
+  config: ConfigType;
   listIndex: string;
   deserializer: DeserializerOrUndefined;
   serializer: SerializerOrUndefined;
@@ -35,6 +37,7 @@ export interface ImportListItemsToStreamOptions {
 }
 
 export const importListItemsToStream = ({
+  config,
   deserializer,
   serializer,
   listId,
@@ -47,7 +50,7 @@ export const importListItemsToStream = ({
   meta,
 }: ImportListItemsToStreamOptions): Promise<ListSchema | null> => {
   return new Promise<ListSchema | null>((resolve) => {
-    const readBuffer = new BufferLines({ input: stream });
+    const readBuffer = new BufferLines({ bufferSize: config.importBufferSize, input: stream });
     let fileName: string | undefined;
     let list: ListSchema | null = null;
     readBuffer.on('fileName', async (fileNameEmitted: string) => {
