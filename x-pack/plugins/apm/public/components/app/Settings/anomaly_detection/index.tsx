@@ -30,7 +30,7 @@ export const AnomalyDetection = () => {
     (callApmApi) =>
       callApmApi({ pathname: `/api/apm/settings/anomaly-detection` }),
     [],
-    { preservePreviousData: false }
+    { preservePreviousData: false, showToastOnError: false }
   );
 
   if (!hasValidLicense) {
