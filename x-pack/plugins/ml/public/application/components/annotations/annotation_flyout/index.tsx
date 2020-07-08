@@ -192,8 +192,8 @@ class AnnotationFlyoutUI extends Component<CommonProps & Props> {
       });
       annotation.detector_index = detectorIndex;
     }
-    // Mark the annotation created by `user` instead of automatically generated
-    annotation.event = ANNOTATION_EVENT_USER;
+    // Mark the annotation created by `user` if and only if annotation is being created, not updated
+    annotation.event = annotation.event ?? ANNOTATION_EVENT_USER;
 
     annotation$.next(null);
 

@@ -258,7 +258,7 @@ const loadExplorerDataProvider = (anomalyTimelineService: AnomalyTimelineService
           { influencers, viewBySwimlaneState }
         ): Partial<ExplorerState> => {
           return {
-            annotationsData,
+            annotations: annotationsData,
             influencers,
             loading: false,
             viewBySwimlaneDataLoading: false,

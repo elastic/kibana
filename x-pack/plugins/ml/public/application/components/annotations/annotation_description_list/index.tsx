@@ -84,12 +84,9 @@ export const AnnotationDescriptionList = ({ annotation, detectorDescription }: P
   }
   if (detectorDescription !== undefined) {
     listItems.push({
-      title: i18n.translate(
-        'xpack.ml.timeSeriesExplorer.annotationDescriptionList.modifiedByTitle',
-        {
-          defaultMessage: 'Detector',
-        }
-      ),
+      title: i18n.translate('xpack.ml.timeSeriesExplorer.annotationDescriptionList.detectorTitle', {
+        defaultMessage: 'Detector',
+      }),
       description: detectorDescription,
     });
   }

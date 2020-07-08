@@ -11,7 +11,7 @@ exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
           "name": "Annotation",
           "scope": "row",
           "sortable": true,
-          "width": "50%",
+          "width": "40%",
         },
         Object {
           "dataType": "date",
@@ -44,6 +44,21 @@ exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
           "name": "Event",
           "sortable": true,
           "width": "10%",
+        },
+        Object {
+          "field": "partition_field_value",
+          "name": "Partition",
+          "sortable": true,
+        },
+        Object {
+          "field": "over_field_value",
+          "name": "Over",
+          "sortable": true,
+        },
+        Object {
+          "field": "by_field_value",
+          "name": "By",
+          "sortable": true,
         },
         Object {
           "actions": Array [
