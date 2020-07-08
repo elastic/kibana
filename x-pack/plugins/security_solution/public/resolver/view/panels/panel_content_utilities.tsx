@@ -32,6 +32,11 @@ const ThemedBreadcrumbs = styled(EuiBreadcrumbs)<{ background: string; text: str
     background-color: ${(props) => props.background};
     color: ${(props) => props.text};
     padding: 1em;
+    border-radius: 5px;
+  }
+
+  & .euiBreadcrumbSeparator {
+    background: ${(props) => props.text};
   }
 `;
 
@@ -46,11 +51,11 @@ export const StyledBreadcrumbs = memo(function StyledBreadcrumbs({
   truncate?: boolean;
 }) {
   const {
-    colorMap: { resolverEdge, resolverEdgeText },
+    colorMap: { resolverBreadcrumbBackground, resolverEdgeText },
   } = useResolverTheme();
   return (
     <ThemedBreadcrumbs
-      background={resolverEdge}
+      background={resolverBreadcrumbBackground}
       text={resolverEdgeText}
       breadcrumbs={breadcrumbs}
       truncate={truncate}

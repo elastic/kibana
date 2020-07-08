@@ -16,7 +16,7 @@ import { mockDataProviders } from './mock/mock_data_providers';
 import { Providers } from './providers';
 import { DELETE_CLASS_NAME, ENABLE_CLASS_NAME, EXCLUDE_CLASS_NAME } from './provider_item_actions';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
-import { ManageGlobalTimeline, timelineDefaults } from '../../manage_timeline';
+import { ManageGlobalTimeline, getTimelineDefaults } from '../../manage_timeline';
 
 const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
 
@@ -27,8 +27,7 @@ describe('Providers', () => {
 
   const manageTimelineForTesting = {
     foo: {
-      ...timelineDefaults,
-      id: 'foo',
+      ...getTimelineDefaults('foo'),
       filterManager,
       isLoading,
     },
