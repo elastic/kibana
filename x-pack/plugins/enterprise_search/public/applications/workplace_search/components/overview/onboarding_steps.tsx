@@ -90,7 +90,7 @@ export const OnboardingSteps: React.FC<IAppServerData> = ({
       defaultMessage="You have added {sourcesCount} shared {sourcesCount, number} {sourcesCount, plural,
         one {source}
         other {sources}
-      }. Happy searching"
+      }. Happy searching."
       values={{ sourcesCount }}
     />
   );
