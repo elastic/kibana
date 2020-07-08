@@ -90,6 +90,17 @@ describe('Resolver Data Middleware', () => {
           },
         };
         store.dispatch(action);
+      }
+    });
+    it('should indicate there are additional ancestor', () => {
+      expect(selectors.hasMoreAncestors(store.getState())).toBe(true);
+    });
+    it('should indicate there are additional children', () => {
+      expect(selectors.hasMoreChildren(store.getState())).toBe(true);
+    });
+
+    describe('and when related events were returned', () => {
+      beforeEach(() => {
         const relatedAction: DataAction = {
           type: 'serverReturnedRelatedEventData',
           payload: {
@@ -99,46 +110,41 @@ describe('Resolver Data Middleware', () => {
           },
         };
         store.dispatch(relatedAction);
-      }
-    });
-    it('should indicate there are additional ancestor', () => {
-      expect(selectors.hasMoreAncestors(store.getState())).toBe(true);
-    });
-    it('should indicate there are additional children', () => {
-      expect(selectors.hasMoreChildren(store.getState())).toBe(true);
-    });
-    it('should have the correct related events', () => {
-      const selectedEventsByEntityId = selectors.relatedEventsByEntityId(store.getState());
-      const selectedEventsForFirstChildNode = selectedEventsByEntityId.get(firstChildNodeInTree.id)!
-        .events;
+      });
+      it('should have the correct related events', () => {
+        const selectedEventsByEntityId = selectors.relatedEventsByEntityId(store.getState());
+        const selectedEventsForFirstChildNode = selectedEventsByEntityId.get(
+          firstChildNodeInTree.id
+        )!.events;
 
-      expect(selectedEventsForFirstChildNode).toBe(firstChildNodeInTree.relatedEvents);
-    });
-    it('should indicate the correct related event count for each category', () => {
-      const selectedRelatedInfo = selectors.relatedEventInfoByEntityId(store.getState());
-      const displayCountsForCategory = selectedRelatedInfo.get(firstChildNodeInTree.id)
-        ?.getNumberActuallyDisplayedForCategory!;
-      for (const typeCounted of Object.keys(statsForFirstChild)) {
-        expect(`${typeCounted}:${displayCountsForCategory(typeCounted)}`).toBe(
-          `${typeCounted}:${statsForFirstChild[typeCounted]}`
-        );
-      }
-    });
-    it('should not indicate the limit has been exceeded when the actual count >= stats count', () => {
-      const selectedRelatedInfo = selectors.relatedEventInfoByEntityId(store.getState());
-      const shouldShowLimit = selectedRelatedInfo.get(firstChildNodeInTree.id)
-        ?.shouldShowLimitForCategory!;
-      for (const typeCounted of Object.keys(statsForFirstChild)) {
-        expect(shouldShowLimit(typeCounted)).toBe(false);
-      }
-    });
-    it('should not indicate that there are any related events missing when the actual count >= stats count', () => {
-      const selectedRelatedInfo = selectors.relatedEventInfoByEntityId(store.getState());
-      const notDisplayed = selectedRelatedInfo.get(firstChildNodeInTree.id)
-        ?.getNumberNotDisplayedForCategory!;
-      for (const typeCounted of Object.keys(statsForFirstChild)) {
-        expect(notDisplayed(typeCounted)).toBe(0);
-      }
+        expect(selectedEventsForFirstChildNode).toBe(firstChildNodeInTree.relatedEvents);
+      });
+      it('should indicate the correct related event count for each category', () => {
+        const selectedRelatedInfo = selectors.relatedEventInfoByEntityId(store.getState());
+        const displayCountsForCategory = selectedRelatedInfo.get(firstChildNodeInTree.id)
+          ?.getNumberActuallyDisplayedForCategory!;
+        for (const typeCounted of Object.keys(statsForFirstChild)) {
+          expect(`${typeCounted}:${displayCountsForCategory(typeCounted)}`).toBe(
+            `${typeCounted}:${statsForFirstChild[typeCounted]}`
+          );
+        }
+      });
+      it('should not indicate the limit has been exceeded when the actual count >= stats count', () => {
+        const selectedRelatedInfo = selectors.relatedEventInfoByEntityId(store.getState());
+        const shouldShowLimit = selectedRelatedInfo.get(firstChildNodeInTree.id)
+          ?.shouldShowLimitForCategory!;
+        for (const typeCounted of Object.keys(statsForFirstChild)) {
+          expect(shouldShowLimit(typeCounted)).toBe(false);
+        }
+      });
+      it('should not indicate that there are any related events missing when the actual count >= stats count', () => {
+        const selectedRelatedInfo = selectors.relatedEventInfoByEntityId(store.getState());
+        const notDisplayed = selectedRelatedInfo.get(firstChildNodeInTree.id)
+          ?.getNumberNotDisplayedForCategory!;
+        for (const typeCounted of Object.keys(statsForFirstChild)) {
+          expect(notDisplayed(typeCounted)).toBe(0);
+        }
+      });
     });
   });
 
