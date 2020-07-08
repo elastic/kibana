@@ -22,7 +22,6 @@ import {
   TRANSACTION_REQUEST,
   TRANSACTION_PAGE_LOAD,
 } from '../../../common/transaction_types';
-import { getAllEnvironments } from '../environments/get_all_environments';
 
 interface Options {
   setup: Setup & SetupTimeRange;
@@ -58,30 +57,20 @@ export async function getServiceMapServiceNodeInfo({
   };
 
   const [
-    environmentsWithData,
     errorMetrics,
-    transactionKPIs,
+    transactionStats,
     cpuMetrics,
     memoryMetrics,
   ] = await Promise.all([
-    getAllEnvironments({
-      serviceName,
-      setup,
-      includeMissing: true,
-    }),
     getErrorMetrics(taskParams),
-    getTransactionKPIs(taskParams),
+    getTransactionStats(taskParams),
     getCpuMetrics(taskParams),
     getMemoryMetrics(taskParams),
   ]);
 
-  const hasEnvironmentData =
-    !environment || environmentsWithData.includes(environment);
-
   return {
-    hasEnvironmentData,
     ...errorMetrics,
-    transactionKPIs,
+    transactionStats,
     ...cpuMetrics,
     ...memoryMetrics,
   };
@@ -115,7 +104,7 @@ async function getErrorMetrics({ setup, minutes, filter }: TaskParameters) {
   };
 }
 
-async function getTransactionKPIs({
+async function getTransactionStats({
   setup,
   filter,
   minutes,

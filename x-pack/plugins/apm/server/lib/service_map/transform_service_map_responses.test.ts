@@ -37,14 +37,14 @@ const javaService = {
 
 const anomalies = {
   mlJobIds: ['apm-test-1234-ml-module-name'],
-  maxAnomalies: [
+  serviceAnomalies: [
     {
-      'service.name': 'opbeans-test',
-      maxAnomaly: {
-        'transaction.type': 'request',
-        actual_value: 10000,
-        anomaly_score: 50,
-        job_id: 'apm-test-1234-ml-module-name',
+      serviceName: 'opbeans-test',
+      serviceAnomalyStats: {
+        transactionType: 'request',
+        actualValue: 10000,
+        anomalyScore: 50,
+        jobId: 'apm-test-1234-ml-module-name',
       },
     },
   ],

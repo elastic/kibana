@@ -72,7 +72,7 @@ export function Contents({
         {isService ? (
           <ServiceMetricFetcher
             serviceName={selectedNodeServiceName}
-            maxAnomaly={selectedNodeData.maxAnomaly}
+            serviceAnomalyStats={selectedNodeData.serviceAnomalyStats}
           />
         ) : (
           <Info {...selectedNodeData} />

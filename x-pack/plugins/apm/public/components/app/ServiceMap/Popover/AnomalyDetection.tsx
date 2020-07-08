@@ -20,9 +20,8 @@ import { asInteger, asDuration } from '../../../../utils/formatters';
 import { MLJobLink } from '../../../shared/Links/MachineLearningLinks/MLJobLink';
 import { getSeverityColor, popoverWidth } from '../cytoscapeOptions';
 import { getSeverity } from '../../../../../common/ml_job_constants';
-import { TRANSACTION_TYPE } from '../../../../../common/elasticsearch_fieldnames';
 import { TRANSACTION_REQUEST } from '../../../../../common/transaction_types';
-import { MaxAnomaly } from '../../../../../common/anomaly_detection';
+import { ServiceAnomalyStats } from '../../../../../common/anomaly_detection';
 
 const HealthStatusTitle = styled(EuiTitle)`
   display: inline;
@@ -51,16 +50,17 @@ export const ContentLine = styled.section`
 
 interface Props {
   serviceName: string;
-  maxAnomaly: MaxAnomaly | undefined;
+  serviceAnomalyStats: ServiceAnomalyStats | undefined;
 }
-export function AnomalyDetection({ serviceName, maxAnomaly }: Props) {
+export function AnomalyDetection({ serviceName, serviceAnomalyStats }: Props) {
   const theme = useTheme();
 
-  const anomalyScore = maxAnomaly?.anomaly_score;
+  const anomalyScore = serviceAnomalyStats?.anomalyScore;
   const anomalySeverity = getSeverity(anomalyScore);
-  const actualValue = maxAnomaly?.actual_value;
-  const mlJobId = maxAnomaly?.job_id;
-  const transactionType = maxAnomaly?.[TRANSACTION_TYPE];
+  const actualValue = serviceAnomalyStats?.actualValue;
+  const mlJobId = serviceAnomalyStats?.jobId;
+  const transactionType =
+    serviceAnomalyStats?.transactionType ?? TRANSACTION_REQUEST;
   const hasAnomalyDetectionScore = anomalyScore !== undefined;
 
   return (
@@ -102,7 +102,7 @@ export function AnomalyDetection({ serviceName, maxAnomaly }: Props) {
             external
             jobId={mlJobId}
             serviceName={serviceName}
-            transactionType={transactionType || TRANSACTION_REQUEST}
+            transactionType={transactionType}
           >
             {ANOMALY_DETECTION_LINK}
           </MLJobLink>

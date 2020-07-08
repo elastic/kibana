@@ -83,6 +83,7 @@ async function createAnomalyDetectionJob({
 
   return ml.modules.setup({
     moduleId: ML_MODULE_ID_APM_TRANSACTION,
+    // removes all non-alphanumeric characters form environment
     prefix: `${ML_GROUP_NAME_APM}-${snakeCase(environment)}-${randomToken}-`,
     groups: [ML_GROUP_NAME_APM],
     indexPatternName,

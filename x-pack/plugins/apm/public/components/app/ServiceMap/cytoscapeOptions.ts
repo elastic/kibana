@@ -12,7 +12,7 @@ import {
 import { EuiTheme } from '../../../../../observability/public';
 import { severity, getSeverity } from '../../../../common/ml_job_constants';
 import { defaultIcon, iconForNode } from './icons';
-import { MaxAnomaly } from '../../../../common/anomaly_detection';
+import { ServiceAnomalyStats } from '../../../../common/anomaly_detection';
 
 export const popoverWidth = 280;
 
@@ -31,15 +31,17 @@ export function getSeverityColor(theme: EuiTheme, nodeSeverity?: string) {
 }
 
 function getNodeSeverity(el: cytoscape.NodeSingular) {
-  const maxAnomaly: MaxAnomaly | undefined = el.data('maxAnomaly');
-  return getSeverity(maxAnomaly?.anomaly_score);
+  const serviceAnomalyStats: ServiceAnomalyStats | undefined = el.data(
+    'serviceAnomalyStats'
+  );
+  return getSeverity(serviceAnomalyStats?.anomalyScore);
 }
 
 function getBorderColorFn(
   theme: EuiTheme
 ): cytoscape.Css.MapperFunction<cytoscape.NodeSingular, string> {
   return (el: cytoscape.NodeSingular) => {
-    const hasAnomalyDetectionJob = el.data('maxAnomaly') !== undefined;
+    const hasAnomalyDetectionJob = el.data('serviceAnomalyStats') !== undefined;
     const nodeSeverity = getNodeSeverity(el);
     if (hasAnomalyDetectionJob) {
       return (

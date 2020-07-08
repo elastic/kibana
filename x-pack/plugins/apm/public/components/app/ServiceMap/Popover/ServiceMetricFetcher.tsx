@@ -12,28 +12,29 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isNumber } from 'lodash';
 import { ServiceNodeMetrics } from '../../../../../common/service_map';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { ServiceMetricList } from './ServiceMetricList';
 import { AnomalyDetection } from './AnomalyDetection';
-import { MaxAnomaly } from '../../../../../common/anomaly_detection';
+import { ServiceAnomalyStats } from '../../../../../common/anomaly_detection';
 
 interface ServiceMetricFetcherProps {
   serviceName: string;
-  maxAnomaly: MaxAnomaly | undefined;
+  serviceAnomalyStats: ServiceAnomalyStats | undefined;
 }
 
 export function ServiceMetricFetcher({
   serviceName,
-  maxAnomaly,
+  serviceAnomalyStats,
 }: ServiceMetricFetcherProps) {
   const {
     urlParams: { start, end, environment },
   } = useUrlParams();
 
   const {
-    data = { transactionKPIs: {} } as ServiceNodeMetrics,
+    data = { transactionStats: {} } as ServiceNodeMetrics,
     status,
   } = useFetcher(
     (callApmApi) => {
@@ -57,13 +58,28 @@ export function ServiceMetricFetcher({
     return <LoadingSpinner />;
   }
 
-  if (environment && !data.hasEnvironmentData) {
+  const {
+    avgCpuUsage,
+    avgErrorsPerMinute,
+    avgMemoryUsage,
+    transactionStats: { avgRequestsPerMinute, avgTransactionDuration },
+  } = data;
+
+  const hasNoServiceData = [
+    avgCpuUsage,
+    avgErrorsPerMinute,
+    avgMemoryUsage,
+    avgRequestsPerMinute,
+    avgTransactionDuration,
+  ].every((stat) => !isNumber(stat));
+
+  if (environment && !hasNoServiceData) {
     return (
       <EuiCallOut
         title={i18n.translate(
           'xpack.apm.serviceMap.popoverMetrics.noEnvironmentDataCallout.title',
           {
-            defaultMessage: 'No data for current environment',
+            defaultMessage: 'No data for selected environment',
           }
         )}
         size="s"
@@ -72,7 +88,7 @@ export function ServiceMetricFetcher({
         {i18n.translate(
           'xpack.apm.serviceMap.popoverMetrics.noEnvironmentDataCallout.text',
           {
-            defaultMessage: `No data available. Try switching to another environment.`,
+            defaultMessage: `Try switching to another environment.`,
           }
         )}
       </EuiCallOut>
@@ -80,7 +96,10 @@ export function ServiceMetricFetcher({
   }
   return (
     <>
-      <AnomalyDetection serviceName={serviceName} maxAnomaly={maxAnomaly} />
+      <AnomalyDetection
+        serviceName={serviceName}
+        serviceAnomalyStats={serviceAnomalyStats}
+      />
       <EuiHorizontalRule margin="xs" />
       <ServiceMetricList {...data} />
     </>

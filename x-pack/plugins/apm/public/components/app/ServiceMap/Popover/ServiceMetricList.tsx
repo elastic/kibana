@@ -30,7 +30,7 @@ export function ServiceMetricList({
   avgErrorsPerMinute,
   avgCpuUsage,
   avgMemoryUsage,
-  transactionKPIs,
+  transactionStats,
 }: ServiceMetricListProps) {
   const listItems = [
     {
@@ -40,8 +40,8 @@ export function ServiceMetricList({
           defaultMessage: 'Trans. duration (avg.)',
         }
       ),
-      description: isNumber(transactionKPIs.avgTransactionDuration)
-        ? asDuration(transactionKPIs.avgTransactionDuration)
+      description: isNumber(transactionStats.avgTransactionDuration)
+        ? asDuration(transactionStats.avgTransactionDuration)
         : null,
     },
     {
@@ -51,8 +51,8 @@ export function ServiceMetricList({
           defaultMessage: 'Req. per minute (avg.)',
         }
       ),
-      description: isNumber(transactionKPIs.avgRequestsPerMinute)
-        ? `${transactionKPIs.avgRequestsPerMinute.toFixed(2)} ${tpmUnit(
+      description: isNumber(transactionStats.avgRequestsPerMinute)
+        ? `${transactionStats.avgRequestsPerMinute.toFixed(2)} ${tpmUnit(
             'request'
           )}`
         : null,

@@ -11,20 +11,15 @@ import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
-import {
-  TRANSACTION_TYPE,
-  SERVICE_NAME,
-} from '../../../common/elasticsearch_fieldnames';
-import { MaxAnomaly } from '../../../common/anomaly_detection';
+import { ServiceAnomalies } from '../../../common/anomaly_detection';
 
-const DEFAULT_VALUE = {
-  mlJobIds: [],
-  maxAnomalies: [],
-};
+export const DEFAULT_ANOMALIES = { mlJobIds: [], serviceAnomalies: [] };
 
-export type MaxAnomaliesResponse = PromiseReturnType<typeof getMaxAnomalies>;
+export type ServiceAnomaliesResponse = PromiseReturnType<
+  typeof getServiceAnomalies
+>;
 
-export async function getMaxAnomalies({
+export async function getServiceAnomalies({
   setup,
   logger,
   environment,
@@ -37,18 +32,18 @@ export async function getMaxAnomalies({
 
   if (!ml) {
     logger.warn('Anomaly detection plugin is not available.');
-    return DEFAULT_VALUE;
+    return DEFAULT_ANOMALIES;
   }
   const mlCapabilities = await ml.mlSystem.mlCapabilities();
   if (!mlCapabilities.mlFeatureEnabledInSpace) {
     logger.warn('Anomaly detection feature is not enabled for the space.');
-    return DEFAULT_VALUE;
+    return DEFAULT_ANOMALIES;
   }
   if (!mlCapabilities.isPlatinumOrTrialLicense) {
     logger.warn(
       'Unable to create anomaly detection jobs due to insufficient license.'
     );
-    return DEFAULT_VALUE;
+    return DEFAULT_ANOMALIES;
   }
 
   let mlJobIds: string[] = [];
@@ -56,7 +51,7 @@ export async function getMaxAnomalies({
     mlJobIds = await getMLJobIds(ml, environment);
   } catch (error) {
     logger.error(error);
-    return DEFAULT_VALUE;
+    return DEFAULT_ANOMALIES;
   }
 
   const params = {
@@ -65,27 +60,16 @@ export async function getMaxAnomalies({
       query: {
         bool: {
           filter: [
-            {
-              term: {
-                result_type: 'record',
-              },
-            },
-            {
-              terms: {
-                job_id: mlJobIds,
-              },
-            },
+            { term: { result_type: 'record' } },
+            { terms: { job_id: mlJobIds } },
             {
               range: {
-                timestamp: {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis',
-                },
+                timestamp: { gte: start, lte: end, format: 'epoch_millis' },
               },
             },
             {
               terms: {
+                // Only retrieving anomalies for transaction types "request" and "page-load"
                 by_field_value: [TRANSACTION_REQUEST, TRANSACTION_PAGE_LOAD],
               },
             },
@@ -93,19 +77,13 @@ export async function getMaxAnomalies({
         },
       },
       aggs: {
-        service_name: {
-          terms: {
-            field: 'partition_field_value',
-          },
+        services: {
+          terms: { field: 'partition_field_value' },
           aggs: {
             top_score: {
               top_hits: {
-                sort: {
-                  record_score: 'desc',
-                },
-                _source: {
-                  includes: ['actual', 'job_id', 'by_field_value'],
-                },
+                sort: { record_score: 'desc' },
+                _source: { includes: ['actual', 'job_id', 'by_field_value'] },
                 size: 1,
               },
             },
@@ -117,15 +95,15 @@ export async function getMaxAnomalies({
   const response = await ml.mlSystem.mlAnomalySearch(params);
   return {
     mlJobIds,
-    maxAnomalies: transformResponseToMaxAnomalies(
-      response as MaxAnomaliesAggResponse
+    serviceAnomalies: transformResponseToServiceAnomalies(
+      response as ServiceAnomaliesAggResponse
     ),
   };
 }
 
-interface MaxAnomaliesAggResponse {
+interface ServiceAnomaliesAggResponse {
   aggregations: {
-    service_name: {
+    services: {
       buckets: Array<{
         key: string;
         top_score: {
@@ -145,21 +123,18 @@ interface MaxAnomaliesAggResponse {
   };
 }
 
-function transformResponseToMaxAnomalies(
-  response: MaxAnomaliesAggResponse
-): Array<{
-  [SERVICE_NAME]: string;
-  maxAnomaly: MaxAnomaly;
-}> {
-  const services = response.aggregations.service_name.buckets.map(
+function transformResponseToServiceAnomalies(
+  response: ServiceAnomaliesAggResponse
+): ServiceAnomalies[] {
+  const services = response.aggregations.services.buckets.map(
     ({ key: serviceName, top_score: topScoreAgg }) => {
       return {
-        [SERVICE_NAME]: serviceName,
-        maxAnomaly: {
-          [TRANSACTION_TYPE]: topScoreAgg.hits.hits[0]?._source?.by_field_value,
-          anomaly_score: topScoreAgg.hits.hits[0]?.sort?.[0],
-          actual_value: topScoreAgg.hits.hits[0]?._source?.actual?.[0],
-          job_id: topScoreAgg.hits.hits[0]?._source?.job_id,
+        serviceName,
+        serviceAnomalyStats: {
+          transactionType: topScoreAgg.hits.hits[0]?._source?.by_field_value,
+          anomalyScore: topScoreAgg.hits.hits[0]?.sort?.[0],
+          actualValue: topScoreAgg.hits.hits[0]?._source?.actual?.[0],
+          jobId: topScoreAgg.hits.hits[0]?._source?.job_id,
         },
       };
     }
@@ -172,11 +147,12 @@ export async function getMLJobIds(
   environment?: string
 ) {
   const response = await ml.anomalyDetectors.jobs(ML_GROUP_NAME_APM);
-  const apmAnomalyDetectionMLJobs = response.jobs.filter(
+  // to filter out legacy jobs we are filtering by the existence of `environment` in `custom_settings`
+  const mlJobs = response.jobs.filter(
     (job) => job.custom_settings?.job_tags?.environment
   );
   if (environment) {
-    const matchingMLJob = apmAnomalyDetectionMLJobs.find(
+    const matchingMLJob = mlJobs.find(
       (job) => job.custom_settings?.job_tags?.environment === environment
     );
     if (!matchingMLJob) {
@@ -184,5 +160,5 @@ export async function getMLJobIds(
     }
     return [matchingMLJob.job_id];
   }
-  return apmAnomalyDetectionMLJobs.map((job) => job.job_id);
+  return mlJobs.map((job) => job.job_id);
 }

@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TRANSACTION_TYPE } from './elasticsearch_fieldnames';
+export interface ServiceAnomalyStats {
+  transactionType?: string;
+  anomalyScore?: number;
+  actualValue?: number;
+  jobId?: string;
+}
 
-export interface MaxAnomaly {
-  [TRANSACTION_TYPE]?: string;
-  anomaly_score?: number;
-  actual_value?: number;
-  job_id?: string;
+export interface ServiceAnomalies {
+  serviceName: string;
+  serviceAnomalyStats: ServiceAnomalyStats;
 }

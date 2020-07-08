@@ -18,8 +18,8 @@ import {
   ExternalConnectionNode,
 } from '../../../common/service_map';
 import { ConnectionsResponse, ServicesResponse } from './get_service_map';
-import { MaxAnomaliesResponse } from './get_max_anomalies';
-import { MaxAnomaly } from '../../../common/anomaly_detection';
+import { ServiceAnomaliesResponse } from './get_service_anomalies';
+import { ServiceAnomalyStats } from '../../../common/anomaly_detection';
 
 function getConnectionNodeId(node: ConnectionNode): string {
   if ('span.destination.service.resource' in node) {
@@ -63,31 +63,28 @@ export function getServiceNodes(allNodes: ConnectionNode[]) {
   return serviceNodes;
 }
 
-function getServiceAnomalyData(
-  anomalies: MaxAnomaliesResponse,
+function getServiceAnomalyStats(
+  anomalies: ServiceAnomaliesResponse,
   serviceName?: string
-): { [SERVICE_NAME]: string; maxAnomaly: MaxAnomaly } | undefined {
+): ServiceAnomalyStats | undefined {
   if (anomalies.mlJobIds.length === 0 || !serviceName) {
     return;
   }
 
-  const matchedAnomalyData = anomalies.maxAnomalies.find(
-    (anomalyData) => anomalyData[SERVICE_NAME] === serviceName
+  const matchedAnomalyData = anomalies.serviceAnomalies.find(
+    (anomalyData) => anomalyData.serviceName === serviceName
   );
   if (matchedAnomalyData) {
-    return matchedAnomalyData;
+    return matchedAnomalyData.serviceAnomalyStats;
   }
 
   // If there is no anomaly data, return a job_id to link to a running job
-  return {
-    [SERVICE_NAME]: serviceName,
-    maxAnomaly: { job_id: anomalies.mlJobIds[0] },
-  };
+  return { jobId: anomalies.mlJobIds[0] };
 }
 
 export type ServiceMapResponse = ConnectionsResponse & {
   services: ServicesResponse;
-  anomalies: MaxAnomaliesResponse;
+  anomalies: ServiceAnomaliesResponse;
 };
 
 export function transformServiceMapResponses(response: ServiceMapResponse) {
@@ -129,7 +126,7 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
       (serviceNode) => serviceNode[SERVICE_NAME] === serviceName
     );
 
-    const serviceAnomalyData = getServiceAnomalyData(anomalies, serviceName);
+    const serviceAnomalyStats = getServiceAnomalyStats(anomalies, serviceName);
 
     if (matchedServiceNodes.length) {
       return {
@@ -141,7 +138,7 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
           ...matchedServiceNodes.map((serviceNode) =>
             pickBy(serviceNode, identity)
           ),
-          serviceAnomalyData
+          serviceAnomalyStats ? { serviceAnomalyStats } : null
         ),
       };
     }
