@@ -25,7 +25,7 @@ export const DETECTION_ENGINE = i18n.translate(
   }
 );
 
-export const Alerts = i18n.translate('xpack.securitySolution.navigation.alerts', {
+export const ALERTS = i18n.translate('xpack.securitySolution.navigation.alerts', {
   defaultMessage: 'Alerts',
 });
 

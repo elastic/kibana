@@ -183,7 +183,7 @@ const HostsEmptyState = React.memo<{
       headerComponent={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.hostList.noHostsPrompt"
-          defaultMessage="You have a policy, but no Hosts are deployed!"
+          defaultMessage="You have a policy, but no hosts are deployed!"
         />
       }
       bodyComponent={

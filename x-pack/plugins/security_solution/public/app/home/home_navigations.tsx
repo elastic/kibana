@@ -27,7 +27,7 @@ export const navTabs: SiemNavTab = {
   },
   [SecurityPageName.alerts]: {
     id: SecurityPageName.alerts,
-    name: i18n.Alerts,
+    name: i18n.ALERTS,
     href: APP_ALERTS_PATH,
     disabled: false,
     urlKey: 'alerts',
