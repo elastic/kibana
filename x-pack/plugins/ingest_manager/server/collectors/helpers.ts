@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, SavedObjectsClient } from 'kibana/server';
+import { CoreSetup } from 'kibana/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SavedObjectsClient } from '../../../../../src/core/server/saved_objects/service/saved_objects_client';
 
 export async function getInternalSavedObjectsClient(core: CoreSetup) {
   return core.getStartServices().then(async ([coreStart]) => {
-    // TODO: is this safe?
-    return (coreStart.savedObjects.createInternalRepository() as unknown) as SavedObjectsClient;
+    const savedObjectsRepo = coreStart.savedObjects.createInternalRepository();
+    return new SavedObjectsClient(savedObjectsRepo);
   });
 }
