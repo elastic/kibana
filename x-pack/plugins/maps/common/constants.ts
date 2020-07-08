@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
+import { FeatureCollection } from 'geojson';
 export const EMS_APP_NAME = 'kibana';
 export const EMS_CATALOGUE_PATH = 'ems/catalogue';
 
@@ -124,7 +125,7 @@ export const POLYGON_COORDINATES_EXTERIOR_INDEX = 0;
 export const LON_INDEX = 0;
 export const LAT_INDEX = 1;
 
-export const EMPTY_FEATURE_COLLECTION = {
+export const EMPTY_FEATURE_COLLECTION: FeatureCollection = {
   type: 'FeatureCollection',
   features: [],
 };
@@ -221,6 +222,11 @@ export enum SCALING_TYPES {
 }
 
 export const RGBA_0000 = 'rgba(0,0,0,0)';
+
+export enum MVT_FIELD_TYPE {
+  STRING = 'String',
+  NUMBER = 'Number',
+}
 
 export const SPATIAL_FILTERS_LAYER_ID = 'SPATIAL_FILTERS_LAYER_ID';
 

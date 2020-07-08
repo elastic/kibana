@@ -236,8 +236,8 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
           <EuiFlexItem data-test-subj="indices">
             <EuiDescriptionListTitle data-test-subj="title">
               <FormattedMessage
-                id="xpack.snapshotRestore.policyDetails.indicesLabel"
-                defaultMessage="Indices"
+                id="xpack.snapshotRestore.policyDetails.dataStreamsAndIndicesLabel"
+                defaultMessage="Data streams and indices"
               />
             </EuiDescriptionListTitle>
 

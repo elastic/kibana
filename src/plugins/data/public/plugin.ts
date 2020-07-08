@@ -82,6 +82,7 @@ import {
   ValueClickActionContext,
 } from './actions/value_click_action';
 import { SavedObjectsClientPublicToCommon } from './index_patterns';
+import { indexPatternLoad } from './index_patterns/expressions/load_index_pattern';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
@@ -126,6 +127,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     };
 
     expressions.registerFunction(esaggs);
+    expressions.registerFunction(indexPatternLoad);
 
     const queryService = this.queryService.setup({
       uiSettings: core.uiSettings,
@@ -186,7 +188,11 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     });
     setIndexPatterns(indexPatterns);
 
-    const query = this.queryService.start(savedObjects);
+    const query = this.queryService.start({
+      storage: this.storage,
+      savedObjectsClient: savedObjects.client,
+      uiSettings,
+    });
     setQueryService(query);
 
     const search = this.searchService.start(core, { indexPatterns });
