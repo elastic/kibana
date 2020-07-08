@@ -62,6 +62,7 @@ export function create(workpad) {
   return fetch.post(getApiPath(), {
     ...sanitizeWorkpad({ ...workpad }),
     assets: workpad.assets || {},
+    variables: workpad.variables || [],
   });
 }
 

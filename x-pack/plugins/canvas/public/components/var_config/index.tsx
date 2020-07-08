@@ -6,7 +6,7 @@
 
 import React, { FC } from 'react';
 import copy from 'copy-to-clipboard';
-import { VarConfig as MyComponent } from './var_config';
+import { VarConfig as ChildComponent } from './var_config';
 import {
   withKibana,
   KibanaReactContextValue,
@@ -27,7 +27,7 @@ interface Props {
   setVariables: (variables: CanvasVariable[]) => void;
 }
 
-const C: FC<Props> = ({ kibana, variables, setVariables }) => {
+const WrappedComponent: FC<Props> = ({ kibana, variables, setVariables }) => {
   const onDeleteVar = (v: CanvasVariable) => {
     const index = variables.findIndex((targetVar: CanvasVariable) => {
       return targetVar.name === v.name;
@@ -60,15 +60,7 @@ const C: FC<Props> = ({ kibana, variables, setVariables }) => {
     setVariables(newVars);
   };
 
-  return (
-    <MyComponent
-      variables={variables}
-      onCopyVar={onCopyVar}
-      onDeleteVar={onDeleteVar}
-      onAddVar={onAddVar}
-      onEditVar={onEditVar}
-    />
-  );
+  return <ChildComponent {...{ variables, onCopyVar, onDeleteVar, onAddVar, onEditVar }} />;
 };
 
-export const VarConfig = withKibana(C);
+export const VarConfig = withKibana(WrappedComponent);

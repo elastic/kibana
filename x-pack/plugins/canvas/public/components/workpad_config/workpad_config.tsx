@@ -19,7 +19,6 @@ import {
   EuiToolTip,
   EuiTextArea,
   EuiAccordion,
-  EuiText,
   EuiButton,
 } from '@elastic/eui';
 

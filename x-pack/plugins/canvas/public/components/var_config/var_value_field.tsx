@@ -8,10 +8,12 @@ import React, { FC } from 'react';
 import { EuiFieldText, EuiFieldNumber, EuiButtonGroup } from '@elastic/eui';
 import { htmlIdGenerator } from '@elastic/eui';
 
+import { CanvasVariable } from '../../../types';
+
 interface Props {
-  type: 'string' | 'number' | 'boolean';
-  value: string | number | boolean;
-  onChange: (v: string | number | boolean) => void;
+  type: CanvasVariable['type'];
+  value: CanvasVariable['value'];
+  onChange: (v: CanvasVariable['value']) => void;
 }
 
 export const VarValueField: FC<Props> = ({ type, value, onChange }) => {
@@ -57,7 +59,7 @@ export const VarValueField: FC<Props> = ({ type, value, onChange }) => {
     <EuiFieldText
       compressed
       name="value"
-      value={value as string}
+      value={String(value)}
       onChange={(e) => onChange(e.target.value)}
     />
   );

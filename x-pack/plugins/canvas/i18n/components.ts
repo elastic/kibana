@@ -953,6 +953,10 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.varConfig.titleLabel', {
         defaultMessage: 'Variables',
       }),
+    getTitleTooltip: () =>
+      i18n.translate('xpack.canvas.varConfig.titleTooltip', {
+        defaultMessage: 'Add variables to store and edit common values',
+      }),
   },
   VarConfigDeleteVar: {
     getCancelButtonLabel: () =>
@@ -989,6 +993,10 @@ export const ComponentStrings = {
     getEditTitle: () =>
       i18n.translate('xpack.canvas.varConfigEditVar.editTitleLabel', {
         defaultMessage: 'Edit variable',
+      }),
+    getEditWarning: () =>
+      i18n.translate('xpack.canvas.varConfigEditVar.editWarning', {
+        defaultMessage: 'Editing a variable in use may adversely affect your workpad',
       }),
     getNameFieldLabel: () =>
       i18n.translate('xpack.canvas.varConfigEditVar.nameFieldLabel', {

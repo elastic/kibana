@@ -32,7 +32,6 @@ import './var_panel.scss';
 interface Props {
   selectedVar: CanvasVariable | null;
   variables: CanvasVariable[];
-
   onSave: (v: CanvasVariable) => void;
   onCancel: () => void;
 }
@@ -89,7 +88,7 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
   ];
 
   return (
-    <React.Fragment>
+    <>
       <div className="canvasVarHeader__triggerWrapper">
         <button className="canvasVarHeader__button" type="button" onClick={() => onCancel()}>
           <span className="canvasVarHeader__iconWrapper">
@@ -106,7 +105,7 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
         {!isNew && (
           <div>
             <EuiCallOut
-              title="Editing a variable in use may adversely affect your workpad"
+              title={strings.getEditWarning()}
               color="warning"
               iconType="alert"
               size="s"
@@ -122,7 +121,7 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
               valueOfSelected={type}
               onChange={(v) => {
                 // Only have these types possible in the dropdown
-                setType(v as 'string' | 'boolean' | 'number');
+                setType(v as CanvasVariable['type']);
 
                 // Reset default value
                 if (v === 'boolean') {
@@ -185,6 +184,6 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
           </EuiFlexGroup>
         </EuiForm>
       </div>
-    </React.Fragment>
+    </>
   );
 };

@@ -8,10 +8,15 @@ import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiAccordion } from '@elastic/eui';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { ComponentStrings } from '../../../i18n';
+import { State } from '../../../types';
 
 const { ElementConfig: strings } = ComponentStrings;
 
-export const ElementConfig = ({ elementStats }) => {
+interface Props {
+  elementStats: State['transient']['elementStats'];
+}
+
+export const ElementConfig = ({ elementStats }: Props) => {
   if (!elementStats) {
     return null;
   }
@@ -30,35 +35,19 @@ export const ElementConfig = ({ elementStats }) => {
         <div className="canvasSidebar__accordionContent">
           <EuiFlexGroup gutterSize="none">
             <EuiFlexItem>
-              <EuiStat
-                title={total}
-                description={strings.getTotalLabel()}
-                titleSize="xs"
-                textAlign="center"
-              />
+              <EuiStat title={total} description={strings.getTotalLabel()} titleSize="xs" />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiStat
-                title={ready}
-                description={strings.getLoadedLabel()}
-                titleSize="xs"
-                textAlign="center"
-              />
+              <EuiStat title={ready} description={strings.getLoadedLabel()} titleSize="xs" />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiStat
-                title={error}
-                description={strings.getFailedLabel()}
-                titleSize="xs"
-                textAlign="center"
-              />
+              <EuiStat title={error} description={strings.getFailedLabel()} titleSize="xs" />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiStat
                 title={progress + '%'}
                 description={strings.getProgressLabel()}
                 titleSize="xs"
-                textAlign="center"
               />
             </EuiFlexItem>
           </EuiFlexGroup>

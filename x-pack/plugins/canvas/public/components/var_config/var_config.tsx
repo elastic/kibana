@@ -42,7 +42,6 @@ const typeToToken = {
 
 interface Props {
   variables: CanvasVariable[];
-
   onCopyVar: (v: CanvasVariable) => void;
   onDeleteVar: (v: CanvasVariable) => void;
   onAddVar: (v: CanvasVariable) => void;
@@ -136,7 +135,11 @@ export const VarConfig: FC<Props> = ({
           id="accordion-variables"
           className="canvasVarConfig__listView canvasSidebar__accordion"
           buttonContent={
-            <EuiToolTip content={strings.getTitle()} position="left" className="canvasArg__tooltip">
+            <EuiToolTip
+              content={strings.getTitleTooltip()}
+              position="left"
+              className="canvasArg__tooltip"
+            >
               <span>{strings.getTitle()}</span>
             </EuiToolTip>
           }

@@ -90,7 +90,7 @@
 
 .canvasSidebar__accordionContent {
   padding-top: $euiSize;
-  padding-left: $euiSizeL;
+  padding-left: $euiSizeXS + $euiSizeS + $euiSize;
 }
 
 @keyframes sidebarPop {
