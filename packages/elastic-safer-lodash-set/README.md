@@ -85,8 +85,8 @@ console.log(Object.prototype.hasOwnProperty.call(child, 'foo')); // true
 
 ```js
 const object = {
-  fn1: function () {}, // regular functions have a prototype
-  fn2: () => {}, // arrow functions don't have a prototype
+  fn1: function () {},
+  fn2: () => {},
 };
 
 // Attempting to access any function prototype will result in an
@@ -96,10 +96,11 @@ assert.throws(() => {
   set(object, 'fn1.prototype.toString', 'bang!');
 });
 
-assert.doesNotThrow(() => {
-  // Will just create a fresh `prototype` property on the arrow function:
+// This also goes for arrow functions even though they don't have a
+// prototype property. This is just to keep things consistent:
+assert.throws(() => {
+  // Throws: Illegal access of function prototype
   set(object, 'fn2.prototype.toString', 'bang!');
-  console.log(object.fn2); // '[Function: fn2] { prototype: { toString: 'bang!' } }'
 });
 ```
 
