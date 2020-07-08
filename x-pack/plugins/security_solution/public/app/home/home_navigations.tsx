@@ -27,10 +27,10 @@ export const navTabs: SiemNavTab = {
   },
   [SecurityPageName.detections]: {
     id: SecurityPageName.detections,
-    name: i18n.Alerts,
+    name: i18n.DETECTION_ENGINE,
     href: APP_DETECTIONS_PATH,
     disabled: false,
-    urlKey: 'alerts',
+    urlKey: 'detections',
   },
   [SecurityPageName.hosts]: {
     id: SecurityPageName.hosts,

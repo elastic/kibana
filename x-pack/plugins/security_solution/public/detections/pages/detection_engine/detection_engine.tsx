@@ -146,7 +146,7 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
             />
             <EuiSpacer size="l" />
             <AlertsTable
-              timelineId={TimelineId.alertsPage}
+              timelineId={TimelineId.detectionsPage}
               loading={loading}
               hasIndexWrite={hasIndexWrite ?? false}
               canUserCRUD={(canUserCRUD ?? false) && (hasEncryptionKey ?? false)}

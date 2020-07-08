@@ -424,7 +424,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                 <EuiSpacer />
                 {ruleId != null && (
                   <AlertsTable
-                    timelineId={TimelineId.alertsRulesDetailsPage}
+                    timelineId={TimelineId.detectionsRulesDetailsPage}
                     canUserCRUD={canUserCRUD ?? false}
                     defaultFilters={alertDefaultFilters}
                     hasIndexWrite={hasIndexWrite ?? false}

@@ -92,7 +92,7 @@ export const TOP = (fieldName: string) =>
 export const HISTOGRAM_HEADER = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.histogram.headerTitle',
   {
-    defaultMessage: 'Alert count',
+    defaultMessage: 'Trend',
   }
 );
 

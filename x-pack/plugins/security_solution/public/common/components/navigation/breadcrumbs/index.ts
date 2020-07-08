@@ -103,7 +103,7 @@ export const getBreadcrumbsForRoute = (
     ];
   }
   if (isAlertsRoutes(spyState) && object.navTabs) {
-    const tempNav: SearchNavTab = { urlKey: 'alerts', isDetailPage: false };
+    const tempNav: SearchNavTab = { urlKey: 'detections', isDetailPage: false };
     let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
     if (spyState.tabName != null) {
       urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];

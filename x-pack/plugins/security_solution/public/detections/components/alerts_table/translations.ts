@@ -10,13 +10,6 @@ export const PAGE_TITLE = i18n.translate('xpack.securitySolution.detectionEngine
   defaultMessage: 'Detection engine',
 });
 
-export const ALERTS_TABLE_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.tableTitle',
-  {
-    defaultMessage: 'Alert list',
-  }
-);
-
 export const ALERTS_DOCUMENT_TYPE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.documentTypeTitle',
   {

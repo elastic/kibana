@@ -137,8 +137,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     core.application.register({
       id: `${APP_ID}:${SecurityPageName.detections}`,
-      title: i18n.translate('xpack.securitySolution.alertsPage.title', {
-        defaultMessage: 'Alerts',
+      title: i18n.translate('xpack.securitySolution.detectionsPage.title', {
+        defaultMessage: 'Detections',
       }),
       order: 9001,
       euiIconType: APP_ICON,

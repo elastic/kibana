@@ -11,8 +11,8 @@ import { AlertsRoutes } from './routes';
 import { SecuritySubPlugin } from '../app/types';
 
 const ALERTS_TIMELINE_IDS: TimelineIdLiteral[] = [
-  TimelineId.alertsRulesDetailsPage,
-  TimelineId.alertsPage,
+  TimelineId.detectionsRulesDetailsPage,
+  TimelineId.detectionsPage,
 ];
 
 export class Detections {

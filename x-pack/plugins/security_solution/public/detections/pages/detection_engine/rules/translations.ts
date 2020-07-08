@@ -6,10 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const BACK_TO_ALERTS = i18n.translate(
+export const BACK_TO_DETECTIONS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.backOptionsHeader',
   {
-    defaultMessage: 'Back to alerts',
+    defaultMessage: 'Back to detections',
   }
 );
 

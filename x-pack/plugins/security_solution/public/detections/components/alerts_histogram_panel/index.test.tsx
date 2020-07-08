@@ -73,7 +73,7 @@ describe('AlertsHistogramPanel', () => {
           preventDefault: jest.fn(),
         });
 
-      expect(mockNavigateToApp).toBeCalledWith('securitySolution:alerts', { path: '' });
+      expect(mockNavigateToApp).toBeCalledWith('securitySolution:detections', { path: '' });
     });
   });
 });

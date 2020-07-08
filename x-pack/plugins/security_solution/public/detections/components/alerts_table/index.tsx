@@ -343,7 +343,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       loadingText: i18n.LOADING_ALERTS,
       selectAll: canUserCRUD ? selectAll : false,
       timelineRowActions: () => [getInvestigateInResolverAction({ dispatch, timelineId })],
-      title: i18n.ALERTS_TABLE_TITLE,
+      title: '',
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -363,7 +363,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   if (loading || isEmpty(signalsIndex)) {
     return (
       <EuiPanel>
-        <HeaderSection title={i18n.ALERTS_TABLE_TITLE} />
+        <HeaderSection title="" />
         <EuiLoadingContent data-test-subj="loading-alerts-panel" />
       </EuiPanel>
     );

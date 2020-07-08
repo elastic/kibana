@@ -17,7 +17,7 @@ import { loginAndWaitForPage } from '../tasks/login';
 import { navigateFromHeaderTo } from '../tasks/security_header';
 
 import {
-  ALERTS_URL,
+  DETECTIONS_URL,
   CASES_URL,
   HOSTS_URL,
   KIBANA_HOME,
@@ -49,7 +49,7 @@ describe('top-level navigation common to all pages in the Security app', () => {
 
   it('navigates to the Alerts page', () => {
     navigateFromHeaderTo(ALERTS);
-    cy.url().should('include', ALERTS_URL);
+    cy.url().should('include', DETECTIONS_URL);
   });
 
   it('navigates to the Hosts page', () => {
@@ -92,7 +92,7 @@ describe('Kibana navigation to all pages in the Security app ', () => {
 
   it('navigates to the Alerts page', () => {
     navigateFromKibanaCollapsibleTo(ALERTS_PAGE);
-    cy.url().should('include', ALERTS_URL);
+    cy.url().should('include', DETECTIONS_URL);
   });
 
   it('navigates to the Hosts page', () => {
