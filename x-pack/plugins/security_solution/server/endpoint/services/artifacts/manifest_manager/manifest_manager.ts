@@ -111,12 +111,10 @@ export class ManifestManager {
         manifestSo.version
       );
 
-      await Promise.all(
-        manifestSo.attributes.ids.map(async (id) => {
-          const artifactSo = await this.artifactClient.getArtifact(id);
-          manifest.addEntry(artifactSo.attributes);
-        })
-      );
+      for (const id of manifestSo.attributes.ids) {
+        const artifactSo = await this.artifactClient.getArtifact(id);
+        manifest.addEntry(artifactSo.attributes);
+      }
       return manifest;
     } catch (err) {
       if (err.output.statusCode !== 404) {
@@ -202,38 +200,32 @@ export class ManifestManager {
       return diff.type === 'delete';
     });
 
-    await Promise.all(
-      adds.map(async (diff) => {
-        const artifact = snapshot.manifest.getArtifact(diff.id);
-        const compressedArtifact = await compressExceptionList(
-          Buffer.from(artifact.body, 'base64')
-        );
-        artifact.body = compressedArtifact.toString('base64');
-        artifact.encodedSize = compressedArtifact.byteLength;
-        artifact.compressionAlgorithm = 'zlib';
-        artifact.encodedSha256 = createHash('sha256').update(compressedArtifact).digest('hex');
+    for (const diff of adds) {
+      const artifact = snapshot.manifest.getArtifact(diff.id);
+      const compressedArtifact = await compressExceptionList(Buffer.from(artifact.body, 'base64'));
+      artifact.body = compressedArtifact.toString('base64');
+      artifact.encodedSize = compressedArtifact.byteLength;
+      artifact.compressionAlgorithm = 'zlib';
+      artifact.encodedSha256 = createHash('sha256').update(compressedArtifact).digest('hex');
 
-        try {
-          await this.artifactClient.createArtifact(artifact);
-        } catch (err) {
-          if (err.status === 409) {
-            this.logger.debug(`Tried to create artifact ${diff.id}, but it already exists.`);
-          } else {
-            throw err;
-          }
+      try {
+        await this.artifactClient.createArtifact(artifact);
+      } catch (err) {
+        if (err.status === 409) {
+          this.logger.debug(`Tried to create artifact ${diff.id}, but it already exists.`);
+        } else {
+          throw err;
         }
-        // Cache the body of the artifact
-        this.cache.set(diff.id, Buffer.from(artifact.body, 'base64'));
-      })
-    );
+      }
+      // Cache the body of the artifact
+      this.cache.set(diff.id, Buffer.from(artifact.body, 'base64'));
+    }
 
-    await Promise.all(
-      deletes.map(async (diff) => {
-        await this.artifactClient.deleteArtifact(diff.id);
-        // TODO: should we delete the cache entry here?
-        this.logger.info(`Cleaned up artifact ${diff.id}`);
-      })
-    );
+    for (const diff of deletes) {
+      await this.artifactClient.deleteArtifact(diff.id);
+      // TODO: should we delete the cache entry here?
+      this.logger.info(`Cleaned up artifact ${diff.id}`);
+    }
   }
 
   /**
@@ -252,35 +244,30 @@ export class ManifestManager {
         kuery: 'ingest-package-configs.package.name:endpoint',
       });
 
-      await Promise.all(
-        items.map(async (packageConfig) => {
-          const { id, revision, updated_at, updated_by, ...newPackageConfig } = packageConfig;
-          if (
-            newPackageConfig.inputs.length > 0 &&
-            newPackageConfig.inputs[0].config !== undefined
-          ) {
-            const artifactManifest = newPackageConfig.inputs[0].config.artifact_manifest ?? {
-              value: {},
-            };
-            artifactManifest.value = manifest.toEndpointFormat();
-            newPackageConfig.inputs[0].config.artifact_manifest = artifactManifest;
+      for (const packageConfig of items) {
+        const { id, revision, updated_at, updated_by, ...newPackageConfig } = packageConfig;
+        if (newPackageConfig.inputs.length > 0 && newPackageConfig.inputs[0].config !== undefined) {
+          const artifactManifest = newPackageConfig.inputs[0].config.artifact_manifest ?? {
+            value: {},
+          };
+          artifactManifest.value = manifest.toEndpointFormat();
+          newPackageConfig.inputs[0].config.artifact_manifest = artifactManifest;
 
-            try {
-              await this.packageConfigService.update(this.savedObjectsClient, id, newPackageConfig);
-              this.logger.debug(
-                `Updated package config ${id} with manifest version ${manifest.getVersion()}`
-              );
-            } catch (err) {
-              success = false;
-              this.logger.debug(`Error updating package config ${id}`);
-              this.logger.error(err);
-            }
-          } else {
+          try {
+            await this.packageConfigService.update(this.savedObjectsClient, id, newPackageConfig);
+            this.logger.debug(
+              `Updated package config ${id} with manifest version ${manifest.getVersion()}`
+            );
+          } catch (err) {
             success = false;
-            this.logger.debug(`Package config ${id} has no config.`);
+            this.logger.debug(`Error updating package config ${id}`);
+            this.logger.error(err);
           }
-        })
-      );
+        } else {
+          success = false;
+          this.logger.debug(`Package config ${id} has no config.`);
+        }
+      }
 
       paging = page * items.length < total;
       page++;

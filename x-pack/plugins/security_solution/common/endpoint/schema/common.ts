@@ -10,6 +10,7 @@ export const compressionAlgorithm = t.keyof({
   none: null,
   zlib: null,
 });
+export type CompressionAlgorithm = t.TypeOf<typeof compressionAlgorithm>;
 
 export const encryptionAlgorithm = t.keyof({
   none: null,

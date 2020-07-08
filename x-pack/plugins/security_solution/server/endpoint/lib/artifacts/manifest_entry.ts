@@ -5,6 +5,7 @@
  */
 
 import { InternalArtifactSchema } from '../../schemas/artifacts';
+import { CompressionAlgorithm } from '../../../../common/endpoint/schema/common';
 import { ManifestEntrySchema } from '../../../../common/endpoint/schema/manifest';
 
 export class ManifestEntry {
@@ -20,6 +21,10 @@ export class ManifestEntry {
 
   public getIdentifier(): string {
     return this.artifact.identifier;
+  }
+
+  public getCompressionAlgorithm(): CompressionAlgorithm {
+    return this.artifact.compressionAlgorithm;
   }
 
   public getEncodedSha256(): string {
@@ -48,7 +53,7 @@ export class ManifestEntry {
 
   public getRecord(): ManifestEntrySchema {
     return {
-      compression_algorithm: 'none',
+      compression_algorithm: this.getCompressionAlgorithm(),
       encryption_algorithm: 'none',
       decoded_sha256: this.getDecodedSha256(),
       decoded_size: this.getDecodedSize(),

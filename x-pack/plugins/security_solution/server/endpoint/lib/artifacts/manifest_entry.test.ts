@@ -68,5 +68,7 @@ describe('manifest_entry', () => {
           '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-v1/5f16e5e338c53e77cfa945c17c11b175c3967bf109aa87131de41fb93b149735',
       });
     });
+
+    // TODO: add test for entry with compression
   });
 });
