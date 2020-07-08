@@ -77,7 +77,7 @@ export const SnapshotPolicies: React.FunctionComponent<Props> = ({ value, onChan
         >
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.noPoliciesLoadedMessage"
-            defaultMessage="You still can type in a policy name."
+            defaultMessage="You still can enter a policy name to search for."
           />
         </EuiCallOut>
       </Fragment>
@@ -100,7 +100,7 @@ export const SnapshotPolicies: React.FunctionComponent<Props> = ({ value, onChan
         >
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.noPoliciesCreatedMessage"
-            defaultMessage="You haven't created any snapshot policies yet. You still can type in a policy name."
+            defaultMessage="Enter a name to use for a new snapshot policy."
           />
         </EuiCallOut>
       </Fragment>
@@ -123,7 +123,7 @@ export const SnapshotPolicies: React.FunctionComponent<Props> = ({ value, onChan
         >
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.customPolicyMessage"
-            defaultMessage="You can still save this value."
+            defaultMessage="However, you can create a new policy with this name."
           />
         </EuiCallOut>
       </Fragment>
