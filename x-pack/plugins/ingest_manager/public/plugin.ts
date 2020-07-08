@@ -20,7 +20,10 @@ import { PLUGIN_ID, CheckPermissionsResponse, PostIngestSetupResponse } from '..
 import { IngestManagerConfigType } from '../common/types';
 import { setupRouteService, appRoutesService } from '../common';
 import { setHttpClient } from './applications/ingest_manager/hooks';
-import { TutorialModuleNotice } from './applications/ingest_manager/components/home_integration';
+import {
+  TutorialDirectoryNotice,
+  TutorialModuleNotice,
+} from './applications/ingest_manager/components/home_integration';
 import { registerPackageConfigComponent } from './applications/ingest_manager/sections/agent_config/create_package_config_page/components/custom_package_config';
 
 export { IngestManagerConfigType } from '../common/types';
@@ -87,6 +90,7 @@ export class IngestManagerPlugin
 
     // Register components for home/add data integration
     if (deps.home) {
+      deps.home.tutorials.registerDirectoryNotice(PLUGIN_ID, TutorialDirectoryNotice);
       deps.home.tutorials.registerModuleNotice(PLUGIN_ID, TutorialModuleNotice);
     }
 

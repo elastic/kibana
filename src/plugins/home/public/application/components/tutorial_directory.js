@@ -103,6 +103,7 @@ class TutorialDirectoryUi extends React.Component {
     this.state = {
       selectedTabId: openTab,
       tutorialCards: [],
+      notices: getServices().tutorialService.getDirectoryNotices(),
     };
   }
 
@@ -231,9 +232,11 @@ class TutorialDirectoryUi extends React.Component {
   renderNotices = () => {
     const notices = getServices().tutorialService.getDirectoryNotices();
     return notices.length ? (
-      <EuiFlexGroup direction="column" gutterSize="m">
-        {notices.map((notice, index) => (
-          <EuiFlexItem key={index}>{notice}</EuiFlexItem>
+      <EuiFlexGroup direction="column" gutterSize="none">
+        {notices.map((DirectoryNotice, index) => (
+          <EuiFlexItem key={index}>
+            <DirectoryNotice />
+          </EuiFlexItem>
         ))}
       </EuiFlexGroup>
     ) : null;
@@ -259,19 +262,16 @@ class TutorialDirectoryUi extends React.Component {
           {headerLinks.length ? (
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="m" alignItems="center">
-                {headerLinks.map((headerLink, index) => (
-                  <EuiFlexItem key={index}>{headerLink}</EuiFlexItem>
+                {headerLinks.map((HeaderLink, index) => (
+                  <EuiFlexItem key={index}>
+                    <HeaderLink />
+                  </EuiFlexItem>
                 ))}
               </EuiFlexGroup>
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
-        {notices ? (
-          <>
-            <EuiSpacer />
-            {notices}
-          </>
-        ) : null}
+        {notices}
       </>
     );
   };
