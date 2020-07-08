@@ -92,7 +92,7 @@ export function generateFilters(
   const newFilters: Filter[] = [];
   const appFilters = filterManager.getAppFilters();
 
-  let negate = operation === '-';
+  const negate = operation === '-';
   let filter;
 
   _.each(values, function (value) {
@@ -104,20 +104,17 @@ export function generateFilters(
     } else {
       const tmpIndexPattern = { id: index } as IIndexPattern;
       // exists filter special case:  fieldname = '_exists' and value = fieldname
-      let filterType = fieldName === '_exists_' ? FILTERS.EXISTS : FILTERS.PHRASE;
+      const filterType = fieldName === '_exists_' ? FILTERS.EXISTS : FILTERS.PHRASE;
       const actualFieldObj = fieldName === '_exists_' ? ({ name: value } as IFieldType) : fieldObj;
 
       // Fix for #7189 - if value is empty, phrase filters become exists filters.
-      if (value === null || value === undefined) {
-        filterType = FILTERS.EXISTS;
-        negate = !negate;
-      }
+      const isNullFilter = value === null || value === undefined;
 
       filter = buildFilter(
         tmpIndexPattern,
         actualFieldObj,
-        filterType,
-        negate,
+        isNullFilter ? FILTERS.EXISTS : filterType,
+        isNullFilter ? !negate : negate,
         false,
         value,
         null,
