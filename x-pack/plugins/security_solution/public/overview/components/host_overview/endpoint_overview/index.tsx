@@ -10,15 +10,15 @@ import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 
-import { DEFAULT_DARK_MODE } from '../../../management/common/constants';
-import { DescriptionList } from '../../../../common/utility_types';
-import { useUiSetting$ } from '../../../common/lib/kibana';
-import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/field_renderers';
-import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
-import { HostItem } from '../../../graphql/types';
-import { Loader } from '../../../common/components/loader';
-import { DescriptionListStyled, OverviewWrapper } from '../../../common/components/page';
+import { DEFAULT_DARK_MODE } from '../../../../management/common/constants';
+import { DescriptionList } from '../../../../../common/utility_types';
+import { useUiSetting$ } from '../../../../common/lib/kibana';
+import { getEmptyTagValue } from '../../../../common/components/empty_value';
+import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/field_renderers';
+import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
+import { HostItem } from '../../../../graphql/types';
+import { Loader } from '../../../../common/components/loader';
+import { DescriptionListStyled, OverviewWrapper } from '../../../../common/components/page';
 
 import * as i18n from './translations';
 
@@ -34,9 +34,7 @@ const getDescriptionList = (descriptionList: DescriptionList[], key: number) => 
   </EuiFlexItem>
 );
 
-export const EndpointOverview = React.memo<Props>(({ data, loading, id }) => {
-  const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
-
+export const EndpointOverview = React.memo<Props>(({ data }) => {
   const getDefaultRenderer = (fieldName: string, fieldData: HostItem) => (
     <DefaultFieldRenderer
       rowItems={getOr([], fieldName, fieldData)}
@@ -73,25 +71,9 @@ export const EndpointOverview = React.memo<Props>(({ data, loading, id }) => {
   ];
 
   return (
-    <InspectButtonContainer>
-      <OverviewWrapper>
-        <InspectButton queryId={id} title={i18n.INSPECT_TITLE} inspectIndex={0} />
-
-        {descriptionLists.map((descriptionList, index) =>
-          getDescriptionList(descriptionList, index)
-        )}
-
-        {loading && (
-          <Loader
-            overlay
-            overlayBackground={
-              darkMode ? darkTheme.euiPageBackgroundColor : lightTheme.euiPageBackgroundColor
-            }
-            size="xl"
-          />
-        )}
-      </OverviewWrapper>
-    </InspectButtonContainer>
+    <>
+      {descriptionLists.map((descriptionList, index) => getDescriptionList(descriptionList, index))}
+    </>
   );
 });
 

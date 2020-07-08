@@ -11,7 +11,6 @@ import { inspectStringifyObject } from '../../utils/build_query';
 import { hostFieldsMap } from '../ecs_fields';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
-
 import { buildHostOverviewQuery } from './query.detail_host.dsl';
 import { buildHostsQuery } from './query.hosts.dsl';
 import { buildLastFirstSeenHostQuery } from './query.last_first_seen_host.dsl';
@@ -83,7 +82,39 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(response)],
     };
-
+    const formattedHostItem = formatHostItem(options.fields, aggregations);
+    const hostId =
+      formattedHostItem.host && formattedHostItem.host.id
+        ? Array.isArray(formattedHostItem.host.id)
+          ? formattedHostItem.host.id[0]
+          : formattedHostItem.host.id
+        : null;
+    console.log('hostId', hostId);
+    // const res22 = await this.framework.callWithRequest(
+    //   request,
+    //   'indices.getMappingt',
+    //   {
+    //     method: 'GET',
+    //     path: `/api/endpoint/metadata/${encodeURIComponent(hostId)}`,
+    //   }
+    // );
+    const res =
+      hostId !== null
+        ? await request.context.core.elasticsearch.legacy.client.callAsCurrentUser('get', {
+            method: 'GET',
+            path: `/api/endpoint/metadata/${encodeURIComponent(hostId)}`,
+          })
+        : {};
+    console.log('res!!!!!!!!!!!!~!!', JSON.stringify(res));
+    // const res = await KibanaServices.get().http.fetch(
+    //   `/api/endpoint/metadata/${aggregations.host_id}`,
+    //   {
+    //     method: 'GET',
+    //   }
+    // );
+    //
+    // // const res = await this.framework.callWithRequest<any, any>(request, 'get', dsl);
+    // console.log('RESSSS', JSON.stringify(res));
     return { inspect, _id: options.hostName, ...formatHostItem(options.fields, aggregations) };
   }
 

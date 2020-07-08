@@ -142,7 +142,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.security,
       plugins.ml
     );
-
     registerEndpointRoutes(router, endpointContext);
     registerResolverRoutes(router, endpointContext);
     registerPolicyRoutes(router, endpointContext);

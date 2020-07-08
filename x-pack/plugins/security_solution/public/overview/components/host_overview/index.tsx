@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { getOr } from 'lodash/fp';
@@ -33,6 +33,7 @@ import {
 } from '../../../hosts/components/first_last_seen_host';
 
 import * as i18n from './translations';
+import { EndpointOverview } from './endpoint_overview';
 
 interface HostSummaryProps {
   data: HostItem;
@@ -178,6 +179,9 @@ export const HostOverview = React.memo<HostSummaryProps>(
           {descriptionLists.map((descriptionList, index) =>
             getDescriptionList(descriptionList, index)
           )}
+
+          <EuiHorizontalRule />
+          <EndpointOverview data={data} />
 
           {loading && (
             <Loader
