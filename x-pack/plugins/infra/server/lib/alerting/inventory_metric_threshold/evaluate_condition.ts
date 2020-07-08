@@ -6,6 +6,10 @@
 import { mapValues, last, first } from 'lodash';
 import moment from 'moment';
 import {
+  isTooManyBucketsPreviewException,
+  TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
+} from '../../../../common/alerting/metrics';
+import {
   InfraDatabaseSearchResponse,
   CallWithRequestParams,
 } from '../../adapters/framework/adapter_types';
@@ -57,18 +61,23 @@ export const evaluateCondition = async (
 
   const comparisonFunction = comparatorMap[comparator];
 
-  return mapValues(currentValues, (value) => ({
-    ...condition,
-    shouldFire:
-      value !== undefined &&
-      value !== null &&
-      (Array.isArray(value)
-        ? value.map((v) => comparisonFunction(Number(v), threshold))
-        : comparisonFunction(value, threshold)),
-    isNoData: value === null,
-    isError: value === undefined,
-    currentValue: getCurrentValue(value),
-  }));
+  const result = mapValues(currentValues, (value) => {
+    if (isTooManyBucketsPreviewException(value)) throw value;
+    return {
+      ...condition,
+      shouldFire:
+        value !== undefined &&
+        value !== null &&
+        (Array.isArray(value)
+          ? value.map((v) => comparisonFunction(Number(v), threshold))
+          : comparisonFunction(value as number, threshold)),
+      isNoData: value === null,
+      isError: value === undefined,
+      currentValue: getCurrentValue(value),
+    };
+  }) as unknown; // Typescript doesn't seem to know what `throw` is doing
+
+  return result as Record<string, ConditionResult>;
 };
 
 const getCurrentValue: (value: any) => number = (value) => {
@@ -99,21 +108,36 @@ const getData = async (
     timerange,
     includeTimeseries: Boolean(timerange.lookbackSize),
   };
+  try {
+    const { nodes } = await snapshot.getNodes(esClient, options);
 
-  const { nodes } = await snapshot.getNodes(esClient, options);
-
-  return nodes.reduce((acc, n) => {
-    const nodePathItem = last(n.path) as any;
-    const m = first(n.metrics);
-    if (m && m.value && m.timeseries) {
-      const { timeseries } = m;
-      const values = timeseries.rows.map((row) => row.metric_0) as Array<number | null>;
-      acc[nodePathItem.label] = values;
-    } else {
-      acc[nodePathItem.label] = m && m.value;
+    return nodes.reduce((acc, n) => {
+      const nodePathItem = last(n.path) as any;
+      const m = first(n.metrics);
+      if (m && m.value && m.timeseries) {
+        const { timeseries } = m;
+        const values = timeseries.rows.map((row) => row.metric_0) as Array<number | null>;
+        acc[nodePathItem.label] = values;
+      } else {
+        acc[nodePathItem.label] = m && m.value;
+      }
+      return acc;
+    }, {} as Record<string, number | Array<number | string | null | undefined> | undefined | null>);
+  } catch (e) {
+    if (timerange.lookbackSize) {
+      // This code should only ever be reached when previewing the alert, not executing it
+      const causedByType = e.body?.error?.caused_by?.type;
+      if (causedByType === 'too_many_buckets_exception') {
+        return {
+          '*': {
+            [TOO_MANY_BUCKETS_PREVIEW_EXCEPTION]: true,
+            maxBuckets: e.body.error.caused_by.max_buckets,
+          },
+        };
+      }
     }
-    return acc;
-  }, {} as Record<string, number | Array<number | string | null | undefined> | undefined | null>);
+    return { '*': undefined };
+  }
 };
 
 const comparatorMap = {
