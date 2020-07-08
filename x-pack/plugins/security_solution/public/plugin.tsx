@@ -34,7 +34,7 @@ import {
 import {
   APP_ID,
   APP_ICON,
-  APP_ALERTS_PATH,
+  APP_DETECTIONS_PATH,
   APP_HOSTS_PATH,
   APP_OVERVIEW_PATH,
   APP_NETWORK_PATH,
@@ -136,19 +136,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     core.application.register({
-      id: `${APP_ID}:${SecurityPageName.alerts}`,
+      id: `${APP_ID}:${SecurityPageName.detections}`,
       title: i18n.translate('xpack.securitySolution.alertsPage.title', {
         defaultMessage: 'Alerts',
       }),
       order: 9001,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: APP_ALERTS_PATH,
+      appRoute: APP_DETECTIONS_PATH,
       mount: async (params: AppMountParameters) => {
         const [
           { coreStart, store, services, storage },
           { renderApp, composeLibs },
-          { alertsSubPlugin },
+          { detectionsSubPlugin },
         ] = await Promise.all([
           mountSecurityFactory(),
           this.downloadAssets(),
@@ -159,7 +159,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ...params,
           services,
           store,
-          SubPluginRoutes: alertsSubPlugin.start(storage).SubPluginRoutes,
+          SubPluginRoutes: detectionsSubPlugin.start(storage).SubPluginRoutes,
         });
       },
     });
@@ -342,7 +342,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   private async downloadSubPlugins() {
     const {
-      alertsSubPlugin,
+      detectionsSubPlugin,
       casesSubPlugin,
       hostsSubPlugin,
       networkSubPlugin,
@@ -352,7 +352,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     } = await import('./sub_plugins');
 
     return {
-      alertsSubPlugin,
+      detectionsSubPlugin,
       casesSubPlugin,
       hostsSubPlugin,
       networkSubPlugin,
@@ -366,7 +366,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const { composeLibs } = await this.downloadAssets();
 
     const {
-      alertsSubPlugin,
+      detectionsSubPlugin,
       hostsSubPlugin,
       networkSubPlugin,
       timelinesSubPlugin,
@@ -376,7 +376,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const appLibs: AppObservableLibs = { apolloClient, kibana: coreStart };
     const libs$ = new BehaviorSubject(appLibs);
 
-    const alertsStart = alertsSubPlugin.start(storage);
+    const detectionsStart = detectionsSubPlugin.start(storage);
     const hostsStart = hostsSubPlugin.start(storage);
     const networkStart = networkSubPlugin.start(storage);
     const timelinesStart = timelinesSubPlugin.start();
@@ -387,7 +387,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ...timelinesStart.store.initialState.timeline!,
         timelineById: {
           ...timelinesStart.store.initialState.timeline!.timelineById,
-          ...alertsStart.storageTimelines!.timelineById,
+          ...detectionsStart.storageTimelines!.timelineById,
           ...hostsStart.storageTimelines!.timelineById,
           ...networkStart.storageTimelines!.timelineById,
         },

@@ -90,7 +90,7 @@ export const getUrlType = (pageName: string): UrlStateType => {
     return 'host';
   } else if (pageName === SecurityPageName.network) {
     return 'network';
-  } else if (pageName === SecurityPageName.alerts) {
+  } else if (pageName === SecurityPageName.detections) {
     return 'alerts';
   } else if (pageName === SecurityPageName.timelines) {
     return 'timeline';

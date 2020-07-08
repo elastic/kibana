@@ -9,7 +9,7 @@ import { SecurityPageName } from '../types';
 import { SiemNavTab } from '../../common/components/navigation/types';
 import {
   APP_OVERVIEW_PATH,
-  APP_ALERTS_PATH,
+  APP_DETECTIONS_PATH,
   APP_HOSTS_PATH,
   APP_NETWORK_PATH,
   APP_TIMELINES_PATH,
@@ -25,10 +25,10 @@ export const navTabs: SiemNavTab = {
     disabled: false,
     urlKey: 'overview',
   },
-  [SecurityPageName.alerts]: {
-    id: SecurityPageName.alerts,
+  [SecurityPageName.detections]: {
+    id: SecurityPageName.detections,
     name: i18n.Alerts,
-    href: APP_ALERTS_PATH,
+    href: APP_DETECTIONS_PATH,
     disabled: false,
     urlKey: 'alerts',
   },
