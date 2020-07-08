@@ -56,16 +56,15 @@ NoPermissions.displayName = 'NoPermissions';
 export const ManagementContainer = memo(() => {
   const history = useHistory();
   const { allEnabled: isIngestEnabled } = useIngestEnabledCheck();
+
+  if (!isIngestEnabled) {
+    return <Route path="*" component={NoPermissions} />;
+  }
+
   return (
     <Switch>
-      <Route
-        path={MANAGEMENT_ROUTING_ENDPOINTS_PATH}
-        component={!isIngestEnabled ? NoPermissions : EndpointsContainer}
-      />
-      <Route
-        path={MANAGEMENT_ROUTING_POLICIES_PATH}
-        component={!isIngestEnabled ? NoPermissions : PolicyContainer}
-      />
+      <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH} component={EndpointsContainer} />
+      <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} component={PolicyContainer} />
       <Route
         path={MANAGEMENT_ROUTING_ROOT_PATH}
         exact

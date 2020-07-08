@@ -146,10 +146,7 @@ const PolicyEmptyState = React.memo<{
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policyList.placeholdForPictures"
-              defaultMessage="Pictures!!!"
-            />
+            <EuiIcon type="logoSecurity" size="xl" />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
@@ -259,7 +256,7 @@ const EndpointsEmptyState = React.memo<{
       bodyComponent={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.endpointList.noEndpointsInstructions"
-          defaultMessage="You’ve created your security policy. Now you need to enable the Elastic Endpoint Security capabilities on your agents following the steps below. For additional information, view our ‘getting started guide’."
+          defaultMessage="You’ve created your security policy. Now you need to enable the Elastic Endpoint Security capabilities on your agents following the steps below."
         />
       }
     />
