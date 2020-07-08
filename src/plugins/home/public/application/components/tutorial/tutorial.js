@@ -342,8 +342,8 @@ class TutorialUi extends React.Component {
           <EuiSpacer />
           <EuiFlexGroup direction="column" gutterSize="m">
             {notices.map((ModuleNotice, index) => (
-              <EuiFlexItem>
-                <ModuleNotice key={index} moduleName={this.state.tutorial.moduleName} />
+              <EuiFlexItem key={index}>
+                <ModuleNotice moduleName={this.state.tutorial.moduleName} />
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>

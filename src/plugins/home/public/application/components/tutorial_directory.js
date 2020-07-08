@@ -232,8 +232,8 @@ class TutorialDirectoryUi extends React.Component {
     const notices = getServices().tutorialService.getDirectoryNotices();
     return notices.length ? (
       <EuiFlexGroup direction="column" gutterSize="m">
-        {notices.map((notice) => (
-          <EuiFlexItem>{notice}</EuiFlexItem>
+        {notices.map((notice, index) => (
+          <EuiFlexItem key={index}>{notice}</EuiFlexItem>
         ))}
       </EuiFlexGroup>
     ) : null;
@@ -259,8 +259,8 @@ class TutorialDirectoryUi extends React.Component {
           {headerLinks.length ? (
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="m" alignItems="center">
-                {headerLinks.map((headerLink) => (
-                  <EuiFlexItem>{headerLink}</EuiFlexItem>
+                {headerLinks.map((headerLink, index) => (
+                  <EuiFlexItem key={index}>{headerLink}</EuiFlexItem>
                 ))}
               </EuiFlexGroup>
             </EuiFlexItem>
