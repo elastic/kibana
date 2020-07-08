@@ -15,6 +15,12 @@ export { useDeleteList } from './lists/hooks/use_delete_list';
 export { exportList } from './lists/api';
 export { useCursor } from './common/hooks/use_cursor';
 export {
+  addExceptionListItem,
+  updateExceptionListItem,
+  fetchExceptionListById,
+  addExceptionList,
+} from './exceptions/api';
+export {
   ExceptionList,
   ExceptionIdentifiers,
   Pagination,
