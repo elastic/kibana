@@ -188,7 +188,7 @@ export class ManifestManager {
 
           await this.artifactClient.createArtifact(artifact);
           // Cache the body of the artifact
-          this.cache.set(diff.id, artifact.body);
+          this.cache.set(diff.id, Buffer.from(artifact.body, 'base64').toString());
         } else if (diff.type === 'delete' && (diffType === undefined || diffType === 'delete')) {
           await this.artifactClient.deleteArtifact(diff.id);
           // TODO: should we delete the cache entry here?
