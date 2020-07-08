@@ -62,6 +62,7 @@ describe('copySavedObjectsToSpaces', () => {
     { type: 'dashboard', id: 'my-dashboard', attributes: {} },
     { type: 'visualization', id: 'my-viz', attributes: {} },
     { type: 'index-pattern', id: 'my-index-pattern', attributes: {} },
+    { type: 'globaltype', id: 'my-globaltype', attributes: {} },
   ];
 
   const setup = (setupOpts: SetupOpts) => {
@@ -71,6 +72,27 @@ describe('copySavedObjectsToSpaces', () => {
     const typeRegistry = savedObjectsTypeRegistryMock.create();
     coreStart.savedObjects.getScopedClient.mockReturnValue(savedObjectsClient);
     coreStart.savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
+
+    typeRegistry.getImportableAndExportableTypes.mockReturnValue([
+      // don't need to include all types, just need a positive case (agnostic) and a negative case (non-agnostic)
+      {
+        name: 'dashboard',
+        namespaceType: 'single',
+        hidden: false,
+        mappings: { properties: {} },
+      },
+      {
+        name: 'globaltype',
+        namespaceType: 'agnostic',
+        hidden: false,
+        mappings: { properties: {} },
+      },
+    ]);
+    typeRegistry.isNamespaceAgnostic.mockImplementation((type: string) =>
+      typeRegistry
+        .getImportableAndExportableTypes()
+        .some((t) => t.name === type && t.namespaceType === 'agnostic')
+    );
 
     (exportSavedObjectsToStream as jest.Mock).mockImplementation(
       async (opts: SavedObjectsExportOptions) => {
@@ -91,10 +113,12 @@ describe('copySavedObjectsToSpaces', () => {
     (importSavedObjectsFromStream as jest.Mock).mockImplementation(
       async (opts: SavedObjectsImportOptions) => {
         const defaultImpl = async () => {
-          await expectStreamToContainObjects(opts.readStream, setupOpts.objects);
+          // namespace-agnostic types should be filtered out before import
+          const filteredObjects = setupOpts.objects.filter(({ type }) => type !== 'globaltype');
+          await expectStreamToContainObjects(opts.readStream, filteredObjects);
           const response: SavedObjectsImportResponse = {
             success: true,
-            successCount: setupOpts.objects.length,
+            successCount: filteredObjects.length,
             successResults: [
               ('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess,
             ],
@@ -191,10 +215,12 @@ describe('copySavedObjectsToSpaces', () => {
         if (opts.namespace === 'failure-space') {
           throw new Error(`Some error occurred!`);
         }
-        await expectStreamToContainObjects(opts.readStream, mockExportResults);
+        // namespace-agnostic types should be filtered out before import
+        const filteredObjects = mockExportResults.filter(({ type }) => type !== 'globaltype');
+        await expectStreamToContainObjects(opts.readStream, filteredObjects);
         return Promise.resolve({
           success: true,
-          successCount: 3,
+          successCount: filteredObjects.length,
           successResults: [('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess],
         });
       },

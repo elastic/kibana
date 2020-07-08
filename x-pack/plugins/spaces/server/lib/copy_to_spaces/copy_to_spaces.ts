@@ -16,6 +16,7 @@ import { createReadableStreamFromArray } from './lib/readable_stream_from_array'
 import { createEmptyFailureResponse } from './lib/create_empty_failure_response';
 import { readStreamToCompletion } from './lib/read_stream_to_completion';
 import { COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS } from './lib/saved_objects_client_opts';
+import { getIneligibleTypes } from './lib/get_ineligible_types';
 
 export function copySavedObjectsToSpacesFactory(
   savedObjects: CoreStart['savedObjects'],
@@ -77,11 +78,15 @@ export function copySavedObjectsToSpacesFactory(
     const response: CopyResponse = {};
 
     const exportedSavedObjects = await exportRequestedObjects(sourceSpaceId, options);
+    const ineligibleTypes = getIneligibleTypes(getTypeRegistry());
+    const filteredObjects = exportedSavedObjects.filter(
+      ({ type }) => !ineligibleTypes.includes(type)
+    );
 
     for (const spaceId of destinationSpaceIds) {
       response[spaceId] = await importObjectsToSpace(
         spaceId,
-        createReadableStreamFromArray(exportedSavedObjects),
+        createReadableStreamFromArray(filteredObjects),
         options
       );
     }

@@ -16,6 +16,7 @@ import { createEmptyFailureResponse } from './lib/create_empty_failure_response'
 import { readStreamToCompletion } from './lib/read_stream_to_completion';
 import { createReadableStreamFromArray } from './lib/readable_stream_from_array';
 import { COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS } from './lib/saved_objects_client_opts';
+import { getIneligibleTypes } from './lib/get_ineligible_types';
 
 export function resolveCopySavedObjectsToSpacesConflictsFactory(
   savedObjects: CoreStart['savedObjects'],
@@ -79,6 +80,10 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
       includeReferences: options.includeReferences,
       objects: options.objects,
     });
+    const ineligibleTypes = getIneligibleTypes(getTypeRegistry());
+    const filteredObjects = exportedSavedObjects.filter(
+      ({ type }) => !ineligibleTypes.includes(type)
+    );
 
     for (const entry of Object.entries(options.retries)) {
       const [spaceId, entryRetries] = entry;
@@ -87,7 +92,7 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
 
       response[spaceId] = await resolveConflictsForSpace(
         spaceId,
-        createReadableStreamFromArray(exportedSavedObjects),
+        createReadableStreamFromArray(filteredObjects),
         retries,
         options.createNewCopies
       );
