@@ -14,6 +14,11 @@ jest.mock('../../collectors/app_search/telemetry', () => ({
 }));
 import { incrementUICounter } from '../../collectors/app_search/telemetry';
 
+/**
+ * Since these route callbacks are so thin, these serve simply as integration tests
+ * to ensure they're wired up to the collector functions correctly. Business logic
+ * is tested more thoroughly in the collectors/telemetry tests.
+ */
 describe('App Search Telemetry API', () => {
   const mockRouter = new MockRouter({ method: 'put', payload: 'body' });
   const mockLogger = loggingSystemMock.create().get();

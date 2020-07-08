@@ -122,7 +122,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         getSavedObjectsService: () => savedObjectsStarted,
       });
       if (usageCollection) {
-        registerTelemetryUsageCollector(usageCollection, savedObjectsStarted);
+        registerTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
       }
     });
   }

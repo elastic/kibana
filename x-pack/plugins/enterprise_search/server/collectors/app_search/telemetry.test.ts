@@ -4,14 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { loggingSystemMock } from 'src/core/server/mocks';
+
+jest.mock('../../../../../../src/core/server', () => ({
+  SavedObjectsErrorHelpers: {
+    isNotFoundError: jest.fn(),
+  },
+}));
+import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+
 import { registerTelemetryUsageCollector, incrementUICounter } from './telemetry';
 
-/**
- * Since these route callbacks are so thin, these serve simply as integration tests
- * to ensure they're wired up to the lib functions correctly. Business logic is tested
- * more thoroughly in the lib/telemetry tests.
- */
 describe('App Search Telemetry Usage Collector', () => {
+  const mockLogger = loggingSystemMock.create().get();
+
   const makeUsageCollectorStub = jest.fn();
   const registerStub = jest.fn();
   const usageCollectionMock = {
@@ -42,7 +48,7 @@ describe('App Search Telemetry Usage Collector', () => {
 
   describe('registerTelemetryUsageCollector', () => {
     it('should make and register the usage collector', () => {
-      registerTelemetryUsageCollector(usageCollectionMock, savedObjectsMock);
+      registerTelemetryUsageCollector(usageCollectionMock, savedObjectsMock, mockLogger);
 
       expect(registerStub).toHaveBeenCalledTimes(1);
       expect(makeUsageCollectorStub).toHaveBeenCalledTimes(1);
@@ -53,7 +59,7 @@ describe('App Search Telemetry Usage Collector', () => {
 
   describe('fetchTelemetryMetrics', () => {
     it('should return existing saved objects data', async () => {
-      registerTelemetryUsageCollector(usageCollectionMock, savedObjectsMock);
+      registerTelemetryUsageCollector(usageCollectionMock, savedObjectsMock, mockLogger);
       const savedObjectsCounts = await makeUsageCollectorStub.mock.calls[0][0].fetch();
 
       expect(savedObjectsCounts).toEqual({
@@ -72,10 +78,14 @@ describe('App Search Telemetry Usage Collector', () => {
       });
     });
 
-    it('should not error & should return a default telemetry object if no saved data exists', async () => {
-      const emptySavedObjectsMock = { createInternalRepository: () => ({}) } as any;
+    it('should return a default telemetry object if no saved data exists', async () => {
+      const emptySavedObjectsMock = {
+        createInternalRepository: () => ({
+          get: () => ({ attributes: null }),
+        }),
+      } as any;
 
-      registerTelemetryUsageCollector(usageCollectionMock, emptySavedObjectsMock);
+      registerTelemetryUsageCollector(usageCollectionMock, emptySavedObjectsMock, mockLogger);
       const savedObjectsCounts = await makeUsageCollectorStub.mock.calls[0][0].fetch();
 
       expect(savedObjectsCounts).toEqual({
@@ -92,6 +102,25 @@ describe('App Search Telemetry Usage Collector', () => {
           engine_table_link: 0,
         },
       });
+    });
+
+    it('should not throw but log a warning if saved objects errors', async () => {
+      const errorSavedObjectsMock = { createInternalRepository: () => ({}) } as any;
+      registerTelemetryUsageCollector(usageCollectionMock, errorSavedObjectsMock, mockLogger);
+
+      // Without log warning (not found)
+      (SavedObjectsErrorHelpers.isNotFoundError as jest.Mock).mockImplementationOnce(() => true);
+      await makeUsageCollectorStub.mock.calls[0][0].fetch();
+
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+
+      // With log warning
+      (SavedObjectsErrorHelpers.isNotFoundError as jest.Mock).mockImplementationOnce(() => false);
+      await makeUsageCollectorStub.mock.calls[0][0].fetch();
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Failed to retrieve App Search telemetry data: TypeError: savedObjectsRepository.get is not a function'
+      );
     });
   });
 
