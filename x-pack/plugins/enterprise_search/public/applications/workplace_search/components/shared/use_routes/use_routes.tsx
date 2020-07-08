@@ -10,6 +10,6 @@ import { KibanaContext, IKibanaContext } from '../../../../index';
 
 export const useRoutes = () => {
   const { enterpriseSearchUrl } = useContext(KibanaContext) as IKibanaContext;
-  const getWSRoute = (path?: string): string => `${enterpriseSearchUrl}/ws#${path}`;
+  const getWSRoute = (path: string): string => `${enterpriseSearchUrl}/ws${path}`;
   return { getWSRoute };
 };
