@@ -5,8 +5,7 @@
  */
 
 import { CoreSetup } from 'kibana/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectsClient } from '../../../../../src/core/server/saved_objects/service/saved_objects_client';
+import { SavedObjectsClient } from '../../../../../src/core/server';
 
 export async function getInternalSavedObjectsClient(core: CoreSetup) {
   return core.getStartServices().then(async ([coreStart]) => {
