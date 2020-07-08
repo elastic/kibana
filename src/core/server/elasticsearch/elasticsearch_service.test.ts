@@ -111,6 +111,7 @@ describe('#setup', () => {
       expect(MockLegacyClusterClient).toHaveBeenCalledWith(
         expect.objectContaining(customConfig),
         expect.objectContaining({ context: ['elasticsearch', 'some-custom-type'] }),
+        expect.any(Function),
         expect.any(Function)
       );
     });
