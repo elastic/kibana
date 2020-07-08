@@ -19,8 +19,10 @@
 
 import { constant, noop, identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { initParams } from './agg_params';
 
+import { SerializedFieldFormat } from 'src/plugins/expressions/public';
+
+import { initParams } from './agg_params';
 import { AggConfig } from './agg_config';
 import { IAggConfigs } from './agg_configs';
 import { Adapters } from '../../../../../plugins/inspector/public';
@@ -57,6 +59,7 @@ export interface AggTypeConfig<
     abortSignal?: AbortSignal
   ) => Promise<any>;
   getFormat?: (agg: TAggConfig) => IFieldFormat;
+  getSerializedFormat?: (agg: TAggConfig) => SerializedFieldFormat;
   getValue?: (agg: TAggConfig, bucket: any) => any;
   getKey?: (bucket: any, key: any, agg: TAggConfig) => any;
 }
@@ -204,6 +207,17 @@ export class AggType<
    */
   getFormat: (agg: TAggConfig) => IFieldFormat;
 
+  /**
+   * Get the serialized format for the values produced by this agg type,
+   * overridden by several metrics that always output a simple number.
+   * You can pass this output to fieldFormatters.deserialize to get
+   * the formatter instance.
+   *
+   * @param  {agg} agg - the agg to pick a format for
+   * @return {SerializedFieldFormat}
+   */
+  getSerializedFormat: (agg: TAggConfig) => SerializedFieldFormat;
+
   getValue: (agg: TAggConfig, bucket: any) => any;
 
   getKey?: (bucket: any, key: any, agg: TAggConfig) => any;
@@ -277,6 +291,13 @@ export class AggType<
 
         return field ? field.format : fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING);
       });
+
+    this.getSerializedFormat =
+      config.getSerializedFormat ||
+      ((agg: TAggConfig) => {
+        return agg.params.field ? agg.params.field.format.toJSON() : {};
+      });
+
     this.getValue = config.getValue || ((agg: TAggConfig, bucket: any) => {});
   }
 }

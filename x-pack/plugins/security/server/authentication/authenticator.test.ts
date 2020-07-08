@@ -109,6 +109,33 @@ describe('Authenticator', () => {
       ).toThrowError('Provider name "__http__" is reserved.');
     });
 
+    it('properly sets `loggedOut` URL.', () => {
+      const basicAuthenticationProviderMock = jest.requireMock('./providers/basic')
+        .BasicAuthenticationProvider;
+
+      basicAuthenticationProviderMock.mockClear();
+      new Authenticator(getMockOptions());
+      expect(basicAuthenticationProviderMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          urls: {
+            loggedOut: '/mock-server-basepath/security/logged_out',
+          },
+        }),
+        expect.anything()
+      );
+
+      basicAuthenticationProviderMock.mockClear();
+      new Authenticator(getMockOptions({ selector: { enabled: true } }));
+      expect(basicAuthenticationProviderMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          urls: {
+            loggedOut: `/mock-server-basepath/login?msg=LOGGED_OUT`,
+          },
+        }),
+        expect.anything()
+      );
+    });
+
     describe('HTTP authentication provider', () => {
       beforeEach(() => {
         jest

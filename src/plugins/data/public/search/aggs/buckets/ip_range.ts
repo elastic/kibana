@@ -78,6 +78,12 @@ export const getIpRangeBucketAgg = ({ getInternalStartServices }: IpRangeBucketA
         });
         return new IpRangeFormat();
       },
+      getSerializedFormat(agg) {
+        return {
+          id: 'ip_range',
+          params: agg.params.field ? agg.params.field.format.toJSON() : {},
+        };
+      },
       makeLabel(aggConfig) {
         return i18n.translate('data.search.aggs.buckets.ipRangeLabel', {
           defaultMessage: '{fieldName} IP ranges',

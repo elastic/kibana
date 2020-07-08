@@ -10,9 +10,7 @@ import { usePushToService, ReturnUsePushToService, UsePushToService } from './';
 import { TestProviders } from '../../../../mock';
 import { usePostPushToService } from '../../../../containers/case/use_post_push_to_service';
 import { basicPush, actionLicenses } from '../../../../containers/case/mock';
-import * as i18n from './translations';
 import { useGetActionLicense } from '../../../../containers/case/use_get_action_license';
-import { getKibanaConfigError, getLicenseError } from './helpers';
 import { connectorsMock } from '../../../../containers/case/configure/mock';
 jest.mock('../../../../containers/case/use_get_action_license');
 jest.mock('../../../../containers/case/use_post_push_to_service');
@@ -97,7 +95,7 @@ describe('usePushToService', () => {
       await waitForNextUpdate();
       const errorsMsg = result.current.pushCallouts?.props.messages;
       expect(errorsMsg).toHaveLength(1);
-      expect(errorsMsg[0].title).toEqual(getLicenseError().title);
+      expect(errorsMsg[0].id).toEqual('license-error');
     });
   });
 
@@ -119,7 +117,7 @@ describe('usePushToService', () => {
       await waitForNextUpdate();
       const errorsMsg = result.current.pushCallouts?.props.messages;
       expect(errorsMsg).toHaveLength(1);
-      expect(errorsMsg[0].title).toEqual(getKibanaConfigError().title);
+      expect(errorsMsg[0].id).toEqual('kibana-config-error');
     });
   });
 
@@ -139,7 +137,7 @@ describe('usePushToService', () => {
       await waitForNextUpdate();
       const errorsMsg = result.current.pushCallouts?.props.messages;
       expect(errorsMsg).toHaveLength(1);
-      expect(errorsMsg[0].title).toEqual(i18n.PUSH_DISABLE_BY_NO_CONFIG_TITLE);
+      expect(errorsMsg[0].id).toEqual('connector-missing-error');
     });
   });
 
@@ -158,7 +156,7 @@ describe('usePushToService', () => {
       await waitForNextUpdate();
       const errorsMsg = result.current.pushCallouts?.props.messages;
       expect(errorsMsg).toHaveLength(1);
-      expect(errorsMsg[0].title).toEqual(i18n.PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE);
+      expect(errorsMsg[0].id).toEqual('connector-not-selected-error');
     });
   });
 
@@ -178,7 +176,7 @@ describe('usePushToService', () => {
       await waitForNextUpdate();
       const errorsMsg = result.current.pushCallouts?.props.messages;
       expect(errorsMsg).toHaveLength(1);
-      expect(errorsMsg[0].title).toEqual(i18n.PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE);
+      expect(errorsMsg[0].id).toEqual('connector-deleted-error');
     });
   });
 
@@ -199,7 +197,7 @@ describe('usePushToService', () => {
       await waitForNextUpdate();
       const errorsMsg = result.current.pushCallouts?.props.messages;
       expect(errorsMsg).toHaveLength(1);
-      expect(errorsMsg[0].title).toEqual(i18n.PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE);
+      expect(errorsMsg[0].id).toEqual('connector-deleted-error');
     });
   });
 
@@ -218,7 +216,7 @@ describe('usePushToService', () => {
       await waitForNextUpdate();
       const errorsMsg = result.current.pushCallouts?.props.messages;
       expect(errorsMsg).toHaveLength(1);
-      expect(errorsMsg[0].title).toEqual(i18n.PUSH_DISABLE_BECAUSE_CASE_CLOSED_TITLE);
+      expect(errorsMsg[0].id).toEqual('closed-case-push-error');
     });
   });
 });

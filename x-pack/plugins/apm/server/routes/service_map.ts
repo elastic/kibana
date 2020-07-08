@@ -39,7 +39,12 @@ export const serviceMapRoute = createRoute(() => ({
     const {
       query: { serviceName, environment },
     } = context.params;
-    return getServiceMap({ setup, serviceName, environment });
+    return getServiceMap({
+      setup,
+      serviceName,
+      environment,
+      logger: context.logger,
+    });
   },
 }));
 

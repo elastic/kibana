@@ -101,6 +101,16 @@ export const getRangeBucketAgg = ({ getInternalStartServices }: RangeBucketAggDe
         formats.set(agg, aggFormat);
         return aggFormat;
       },
+      getSerializedFormat(agg) {
+        const format = agg.params.field ? agg.params.field.format.toJSON() : {};
+        return {
+          id: 'range',
+          params: {
+            id: format.id,
+            params: format.params,
+          },
+        };
+      },
       params: [
         {
           name: 'field',

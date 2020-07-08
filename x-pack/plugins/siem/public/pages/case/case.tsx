@@ -11,7 +11,7 @@ import { useGetUserSavedObjectPermissions } from '../../lib/kibana';
 import { SpyRoute } from '../../utils/route/spy_routes';
 import { AllCases } from './components/all_cases';
 
-import { savedObjectReadOnly, CaseCallOut } from './components/callout';
+import { savedObjectReadOnlyErrorMessage, CaseCallOut } from './components/callout';
 import { CaseSavedObjectNoPermissions } from './saved_object_no_permissions';
 
 export const CasesPage = React.memo(() => {
@@ -22,8 +22,8 @@ export const CasesPage = React.memo(() => {
       <WrapperPage>
         {userPermissions != null && !userPermissions?.crud && userPermissions?.read && (
           <CaseCallOut
-            title={savedObjectReadOnly.title}
-            message={savedObjectReadOnly.description}
+            title={savedObjectReadOnlyErrorMessage.title}
+            messages={[{ ...savedObjectReadOnlyErrorMessage }]}
           />
         )}
         <AllCases userCanCrud={userPermissions?.crud ?? false} />

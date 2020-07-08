@@ -518,7 +518,7 @@ describe('KerberosAuthenticationProvider', () => {
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith(tokenPair);
     });
 
-    it('redirects to `/logged_out` page if tokens are invalidated successfully.', async () => {
+    it('redirects to `loggedOut` URL if tokens are invalidated successfully.', async () => {
       const request = httpServerMock.createKibanaRequest();
       const tokenPair = {
         accessToken: 'some-valid-token',
@@ -528,7 +528,7 @@ describe('KerberosAuthenticationProvider', () => {
       mockOptions.tokens.invalidate.mockResolvedValue(undefined);
 
       await expect(provider.logout(request, tokenPair)).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/mock-server-basepath/security/logged_out')
+        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut)
       );
 
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);

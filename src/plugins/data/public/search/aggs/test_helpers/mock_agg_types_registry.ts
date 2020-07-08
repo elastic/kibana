@@ -25,6 +25,25 @@ import { MetricAggType } from '../metrics/metric_agg_type';
 import { queryServiceMock } from '../../../query/mocks';
 import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
 import { InternalStartServices } from '../../../types';
+import { TimeBucketsConfig } from '../buckets/lib/time_buckets/time_buckets';
+
+// Mocked uiSettings shared among aggs unit tests
+const mockUiSettings = jest.fn().mockImplementation((key: string) => {
+  const config: TimeBucketsConfig = {
+    'histogram:maxBars': 4,
+    'histogram:barTarget': 3,
+    dateFormat: 'YYYY-MM-DD',
+    'dateFormat:scaled': [
+      ['', 'HH:mm:ss.SSS'],
+      ['PT1S', 'HH:mm:ss'],
+      ['PT1M', 'HH:mm'],
+      ['PT1H', 'YYYY-MM-DD HH:mm'],
+      ['P1DT', 'YYYY-MM-DD'],
+      ['P1YT', 'YYYY'],
+    ],
+  };
+  return config[key] ?? key;
+});
 
 /**
  * Testing utility which creates a new instance of AggTypesRegistry,
@@ -54,7 +73,10 @@ export function mockAggTypesRegistry<T extends BucketAggType<any> | MetricAggTyp
     });
   } else {
     const coreSetup = coreMock.createSetup();
+    coreSetup.uiSettings.get = mockUiSettings;
+
     const coreStart = coreMock.createStart();
+    coreSetup.uiSettings.get = mockUiSettings;
 
     const aggTypes = getAggTypes({
       uiSettings: coreSetup.uiSettings,

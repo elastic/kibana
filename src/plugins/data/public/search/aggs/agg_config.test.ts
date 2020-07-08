@@ -370,6 +370,109 @@ describe('AggConfig', () => {
     });
   });
 
+  describe('#toSerializedFieldFormat', () => {
+    beforeEach(() => {
+      indexPattern.fields.getByName = identity as any;
+    });
+
+    it('works with aggs that have a special format type', () => {
+      const configStates = [
+        {
+          type: 'count',
+          params: {},
+        },
+        {
+          type: 'date_histogram',
+          params: { field: '@timestamp' },
+        },
+        {
+          type: 'terms',
+          params: { field: 'machine.os.keyword' },
+        },
+      ];
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry, fieldFormats });
+
+      expect(ac.aggs.map((agg) => agg.toSerializedFieldFormat())).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "id": "number",
+          },
+          Object {
+            "id": "date",
+            "params": Object {
+              "pattern": "HH:mm:ss.SSS",
+            },
+          },
+          Object {
+            "id": "terms",
+            "params": Object {
+              "id": undefined,
+              "missingBucketLabel": "Missing",
+              "otherBucketLabel": "Other",
+            },
+          },
+        ]
+      `);
+    });
+
+    it('works with pipeline aggs', () => {
+      const configStates = [
+        {
+          type: 'max_bucket',
+          params: {
+            customMetric: {
+              type: 'cardinality',
+              params: {
+                field: 'bytes',
+              },
+            },
+          },
+        },
+        {
+          type: 'cumulative_sum',
+          params: {
+            buckets_path: '1',
+            customMetric: {
+              type: 'cardinality',
+              params: {
+                field: 'bytes',
+              },
+            },
+          },
+        },
+        {
+          type: 'percentile_ranks',
+          id: 'myMetricAgg',
+          params: {},
+        },
+        {
+          type: 'cumulative_sum',
+          params: {
+            metricAgg: 'myMetricAgg',
+          },
+        },
+      ];
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry, fieldFormats });
+
+      expect(ac.aggs.map((agg) => agg.toSerializedFieldFormat())).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "id": "number",
+          },
+          Object {
+            "id": "number",
+          },
+          Object {
+            "id": "percent",
+          },
+          Object {
+            "id": "percent",
+          },
+        ]
+      `);
+    });
+  });
+
   describe('#toExpressionAst', () => {
     beforeEach(() => {
       fieldFormats.getDefaultInstance = (() => ({

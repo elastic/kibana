@@ -152,6 +152,14 @@ export const getDateHistogramBucketAgg = ({
           (key: string) => uiSettings.get(key)
         );
       },
+      getSerializedFormat(agg) {
+        return {
+          id: 'date',
+          params: {
+            pattern: agg.buckets.getScaledDateFormat(),
+          },
+        };
+      },
       params: [
         {
           name: 'field',

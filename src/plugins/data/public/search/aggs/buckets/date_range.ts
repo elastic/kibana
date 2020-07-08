@@ -70,6 +70,12 @@ export const getDateRangeBucketAgg = ({
         });
         return new DateRangeFormat();
       },
+      getSerializedFormat(agg) {
+        return {
+          id: 'date_range',
+          params: agg.params.field ? agg.params.field.format.toJSON() : {},
+        };
+      },
       makeLabel(aggConfig) {
         return aggConfig.getFieldDisplayName() + ' date ranges';
       },

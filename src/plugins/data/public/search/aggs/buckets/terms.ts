@@ -104,6 +104,18 @@ export const getTermsBucketAgg = ({ getInternalStartServices }: TermsBucketAggDe
           },
         } as IFieldFormat;
       },
+      getSerializedFormat(agg) {
+        const format = agg.params.field ? agg.params.field.format.toJSON() : {};
+        return {
+          id: 'terms',
+          params: {
+            id: format.id,
+            otherBucketLabel: agg.params.otherBucketLabel,
+            missingBucketLabel: agg.params.missingBucketLabel,
+            ...format.params,
+          },
+        };
+      },
       createFilter: createFilterTerms,
       postFlightRequest: async (
         resp: any,

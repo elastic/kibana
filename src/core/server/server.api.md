@@ -1869,8 +1869,6 @@ export interface SavedObjectsClientWrapperOptions {
 // @public
 export interface SavedObjectsComplexFieldMapping {
     // (undocumented)
-    dynamic?: string;
-    // (undocumented)
     properties: SavedObjectsMappingProperties;
     // (undocumented)
     type?: string;
@@ -1884,6 +1882,7 @@ export interface SavedObjectsCoreFieldMapping {
     fields?: {
         [subfield: string]: {
             type: string;
+            ignore_above?: number;
         };
     };
     // (undocumented)
