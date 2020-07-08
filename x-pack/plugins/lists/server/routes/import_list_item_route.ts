@@ -48,7 +48,7 @@ export const importListItemRoute = (router: IRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { list_id: listId, type } = request.query;
+        const { deserializer, list_id: listId, serializer, type } = request.query;
         const lists = getListClient(context);
         if (listId != null) {
           const list = await lists.getList({ id: listId });
@@ -59,8 +59,10 @@ export const importListItemRoute = (router: IRouter): void => {
             });
           }
           await lists.importListItemsToStream({
+            deserializer: list.deserializer,
             listId,
             meta: undefined,
+            serializer: list.serializer,
             stream: request.body.file,
             type: list.type,
           });
@@ -76,14 +78,18 @@ export const importListItemRoute = (router: IRouter): void => {
           // TODO: Should we prevent the same file from being uploaded multiple times?
           const list = await lists.createListIfItDoesNotExist({
             description: `File uploaded from file system of ${filename}`,
+            deserializer,
             id: filename,
             meta: undefined,
             name: filename,
+            serializer,
             type,
           });
           await lists.importListItemsToStream({
+            deserializer: list.deserializer,
             listId: list.id,
             meta: undefined,
+            serializer: list.serializer,
             stream: request.body.file,
             type: list.type,
           });
