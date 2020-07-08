@@ -20,6 +20,7 @@
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
+  const log = getService('log');
   const docTable = getService('docTable');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
@@ -28,7 +29,10 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
 
   describe('doc link in discover', function contextSize() {
-    before(async function () {
+    beforeEach(async function () {
+      log.debug('load kibana index with default index pattern');
+      await esArchiver.loadIfNeeded('discover');
+
       await esArchiver.loadIfNeeded('logstash_functional');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -53,6 +57,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('add filter should create an exists filter if value is null (#7189)', async function () {
+      await PageObjects.discover.waitUntilSearchingHasFinished();
       // Filter special document
       await filterBar.addFilter('agent', 'is', 'Missing/Fields');
       await PageObjects.discover.waitUntilSearchingHasFinished();
