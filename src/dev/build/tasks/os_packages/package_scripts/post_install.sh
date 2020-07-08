@@ -44,11 +44,3 @@ chown :<%= group %> ${KBN_PATH_CONF}
 chown :<%= group %> ${KBN_PATH_CONF}/kibana.yml
 chmod 2750 ${KBN_PATH_CONF}
 chmod 660 ${KBN_PATH_CONF}/kibana.yml
-
-# todo: requires keystore writes to /etc/kibana
-#if [ ! -f "${KBN_PATH_CONF}"/kibana.keystore ]; then
-    #/usr/share/kibana/bin/kibana-keystore --allow-root create
-    #chown root:kibana "${KBN_PATH_CONF}"/kibana.keystore
-    #chmod 660 "${KBN_PATH_CONF}"/kibana.keystore
-    #md5sum "${KBN_PATH_CONF}"/kibana.keystore > "${KBN_PATH_CONF}"/.kibana.keystore.initial_md5sum
-#fi
