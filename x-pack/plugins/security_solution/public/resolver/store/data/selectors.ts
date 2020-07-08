@@ -189,88 +189,90 @@ export const relatedEventInfoByEntityId: (
     relatedEventsStats
     /* eslint-enable no-shadow */
   ) {
-    const relatedEventInfoEntries = [...(relatedEventsStats || new Map()).entries()].map(
-      ([entityId, stats]) => {
-        const eventsResponseForThisEntry = relatedEventsByEntityId.get(entityId);
-        const hasMoreEvents =
-          eventsResponseForThisEntry && eventsResponseForThisEntry.nextEvent !== null;
-        /**
-         * Get the "aggregate" total for the event category (i.e. _all_ events that would qualify as being "in category")
-         * For a set like `[DNS,File][File,DNS][Registry]` The first and second events would contribute to the aggregate total for DNS being 2.
-         * This is currently aligned with how the backed provides this information.
-         *
-         * @param eventCategory {string} The ECS category like 'file','dns',etc.
-         */
-        const getAggregateTotalForCategory = (eventCategory: string): number => {
-          return stats.events.byCategory[eventCategory] || 0;
-        };
+    if (!relatedEventsStats) {
+      // If there are no related event stats, there are no related event info objects
+      return new Map();
+    }
+    const relatedEventInfoEntries = [...relatedEventsStats.entries()].map(([entityId, stats]) => {
+      const eventsResponseForThisEntry = relatedEventsByEntityId.get(entityId);
+      const hasMoreEvents =
+        eventsResponseForThisEntry && eventsResponseForThisEntry.nextEvent !== null;
+      /**
+       * Get the "aggregate" total for the event category (i.e. _all_ events that would qualify as being "in category")
+       * For a set like `[DNS,File][File,DNS][Registry]` The first and second events would contribute to the aggregate total for DNS being 2.
+       * This is currently aligned with how the backed provides this information.
+       *
+       * @param eventCategory {string} The ECS category like 'file','dns',etc.
+       */
+      const getAggregateTotalForCategory = (eventCategory: string): number => {
+        return stats.events.byCategory[eventCategory] || 0;
+      };
 
-        /**
-         * Get all the related events in the category provided.
-         *
-         * @param eventCategory {string} The ECS category like 'file','dns',etc.
-         */
-        const unmemoizedGetMatchingEventsForCategory = (eventCategory: string): ResolverEvent[] => {
-          if (!eventsResponseForThisEntry) {
-            return [];
-          }
-          return eventsResponseForThisEntry.events.filter((resolverEvent) => {
-            for (const category of [allEventCategories(resolverEvent)].flat()) {
-              if (category === eventCategory) {
-                return true;
-              }
+      /**
+       * Get all the related events in the category provided.
+       *
+       * @param eventCategory {string} The ECS category like 'file','dns',etc.
+       */
+      const unmemoizedGetMatchingEventsForCategory = (eventCategory: string): ResolverEvent[] => {
+        if (!eventsResponseForThisEntry) {
+          return [];
+        }
+        return eventsResponseForThisEntry.events.filter((resolverEvent) => {
+          for (const category of [allEventCategories(resolverEvent)].flat()) {
+            if (category === eventCategory) {
+              return true;
             }
-            return false;
-          });
-        };
-
-        const getMatchingEventsForCategory = defaultMemoize(unmemoizedGetMatchingEventsForCategory);
-
-        /**
-         * The number of events that occurred before the API limit was reached.
-         *
-         * @param eventCategory {string} The ECS category like 'file','dns',etc.
-         */
-        const getNumberActuallyDisplayedForCategory = (eventCategory: string): number => {
-          return getMatchingEventsForCategory(eventCategory)?.length || 0;
-        };
-
-        /**
-         * The total number counted by the backend - the number displayed
-         *
-         * @param eventCategory {string} The ECS category like 'file','dns',etc.
-         */
-        const getNumberNotDisplayedForCategory = (eventCategory: string): number => {
-          return (
-            getAggregateTotalForCategory(eventCategory) -
-            getNumberActuallyDisplayedForCategory(eventCategory)
-          );
-        };
-
-        /**
-         * `true` when the `nextEvent` cursor appeared in the results and we are short on the number needed to
-         * fullfill the aggregate count.
-         *
-         * @param eventCategory {string} The ECS category like 'file','dns',etc.
-         */
-        const shouldShowLimitForCategory = (eventCategory: string): boolean => {
-          if (hasMoreEvents && getNumberNotDisplayedForCategory(eventCategory) > 0) {
-            return true;
           }
           return false;
-        };
+        });
+      };
 
-        const entryValue = {
-          shouldShowLimitForCategory,
-          getNumberNotDisplayedForCategory,
-          getNumberActuallyDisplayedForCategory,
-        };
+      const getMatchingEventsForCategory = defaultMemoize(unmemoizedGetMatchingEventsForCategory);
 
-        const entry: [string, typeof entryValue] = [entityId, entryValue];
+      /**
+       * The number of events that occurred before the API limit was reached.
+       *
+       * @param eventCategory {string} The ECS category like 'file','dns',etc.
+       */
+      const getNumberActuallyDisplayedForCategory = (eventCategory: string): number => {
+        return getMatchingEventsForCategory(eventCategory)?.length || 0;
+      };
 
-        return entry;
-      }
-    );
+      /**
+       * The total number counted by the backend - the number displayed
+       *
+       * @param eventCategory {string} The ECS category like 'file','dns',etc.
+       */
+      const getNumberNotDisplayedForCategory = (eventCategory: string): number => {
+        return (
+          getAggregateTotalForCategory(eventCategory) -
+          getNumberActuallyDisplayedForCategory(eventCategory)
+        );
+      };
+
+      /**
+       * `true` when the `nextEvent` cursor appeared in the results and we are short on the number needed to
+       * fullfill the aggregate count.
+       *
+       * @param eventCategory {string} The ECS category like 'file','dns',etc.
+       */
+      const shouldShowLimitForCategory = (eventCategory: string): boolean => {
+        if (hasMoreEvents && getNumberNotDisplayedForCategory(eventCategory) > 0) {
+          return true;
+        }
+        return false;
+      };
+
+      const entryValue = {
+        shouldShowLimitForCategory,
+        getNumberNotDisplayedForCategory,
+        getNumberActuallyDisplayedForCategory,
+      };
+
+      const entry: [string, typeof entryValue] = [entityId, entryValue];
+
+      return entry;
+    });
 
     return new Map(relatedEventInfoEntries);
   }
