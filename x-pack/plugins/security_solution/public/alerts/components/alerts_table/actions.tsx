@@ -129,7 +129,11 @@ export const sendAlertToTimelineAction = async ({
       if (!isEmpty(resultingTimeline)) {
         const timelineTemplate: TimelineResult = omitTypenameInTimeline(resultingTimeline);
         openAlertInBasicTimeline = false;
-        const { timeline } = formatTimelineResultToModel(timelineTemplate, true);
+        const { timeline } = formatTimelineResultToModel(
+          timelineTemplate,
+          true,
+          timelineTemplate.timelineType ?? TimelineType.default
+        );
         const query = replaceTemplateFieldFromQuery(
           timeline.kqlQuery?.filterQuery?.kuery?.expression ?? '',
           ecsData,
@@ -146,6 +150,7 @@ export const sendAlertToTimelineAction = async ({
           from,
           timeline: {
             ...timeline,
+            title: '',
             timelineType: TimelineType.default,
             templateTimelineId: null,
             status: TimelineStatus.draft,
