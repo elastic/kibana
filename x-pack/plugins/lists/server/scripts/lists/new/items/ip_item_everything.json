@@ -1,6 +1,6 @@
 {
-  "id": "hand_inserted_item_id_everything",
-  "list_id": "list-ip",
+  "id": "item_id_everything",
+  "list_id": "ip_list",
   "value": "127.0.0.2",
   "meta": {
     "level_1_meta": {

@@ -69,7 +69,7 @@ You should see the new list created like so:
 
 ```sh
 {
-  "id": "list-ip",
+  "id": "list_ip",
   "created_at": "2020-05-28T19:15:22.344Z",
   "created_by": "yo",
   "description": "This list describes bad internet ip",
@@ -96,7 +96,7 @@ You should see the new list item created and attached to the above list like so:
   "value": "127.0.0.1",
   "created_at": "2020-05-28T19:15:49.790Z",
   "created_by": "yo",
-  "list_id": "list-ip",
+  "list_id": "list_ip",
   "tie_breaker_id": "a881bf2e-1e17-4592-bba8-d567cb07d234",
   "updated_at": "2020-05-28T19:15:49.790Z",
   "updated_by": "yo"
@@ -195,7 +195,7 @@ You can then do find for each one like so:
   "cursor": "WzIwLFsiYzU3ZWZiYzQtNDk3Ny00YTMyLTk5NWYtY2ZkMjk2YmVkNTIxIl1d",
   "data": [
     {
-      "id": "list-ip",
+      "id": "list_ip",
       "created_at": "2020-05-28T19:15:22.344Z",
       "created_by": "yo",
       "description": "This list describes bad internet ip",
