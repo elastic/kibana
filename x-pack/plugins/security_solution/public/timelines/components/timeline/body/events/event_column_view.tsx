@@ -145,7 +145,7 @@ export const EventColumnView = React.memo<Props>(
                       isDisabled={
                         action.isActionDisabled != null ? action.isActionDisabled(ecsData) : false
                       }
-                      onClick={() => action.onClick({ eventId: id, ecsData })}
+                      onClick={() => action.onClick({ eventId: id, ecsData, data })}
                     />
                   </EuiToolTip>
                 </EventsTdContent>,
@@ -164,7 +164,7 @@ export const EventColumnView = React.memo<Props>(
                 }
                 icon={action.iconType}
                 key={action.id}
-                onClick={() => onClickCb(() => action.onClick({ eventId: id, ecsData }))}
+                onClick={() => onClickCb(() => action.onClick({ eventId: id, ecsData, data }))}
               >
                 {action.content}
               </EuiContextMenuItem>,
@@ -195,7 +195,7 @@ export const EventColumnView = React.memo<Props>(
             </EventsTdContent>,
           ]
         : grouped.icon;
-    }, [button, closePopover, id, onClickCb, ecsData, timelineActions, isPopoverOpen]);
+    }, [button, closePopover, id, onClickCb, data, ecsData, timelineActions, isPopoverOpen]);
 
     return (
       <EventsTrData data-test-subj="event-column-view">
