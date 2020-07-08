@@ -49,8 +49,8 @@ export const DataViewer = ({ vegaAdapter }: DataViewerProps) => {
       <EuiSpacer size="s" />
       <EuiFormRow
         fullWidth
-        label={i18n.translate('visTypeVega.inspector.dataViewer.view', {
-          defaultMessage: 'View:',
+        label={i18n.translate('visTypeVega.inspector.dataViewer.dataset', {
+          defaultMessage: 'Dataset:',
         })}
       >
         <EuiComboBox
@@ -66,14 +66,7 @@ export const DataViewer = ({ vegaAdapter }: DataViewerProps) => {
         />
       </EuiFormRow>
       <EuiSpacer size="s" />
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate('visTypeVega.inspector.dataViewer.data', {
-          defaultMessage: 'Data:',
-        })}
-      >
-        <InspectorDataGrid columns={selectedView.columns} data={selectedView.data} />
-      </EuiFormRow>
+      <InspectorDataGrid columns={selectedView.columns} data={selectedView.data} />
     </>
   );
 };
