@@ -10,8 +10,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
-  // flaky test https://github.com/elastic/kibana/issues/70455
-  describe.skip('regression creation', function () {
+
+  describe('regression creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/egs_regression');
       await ml.testResources.createIndexPatternIfNeeded('ft_egs_regression', '@timestamp');
@@ -96,9 +96,9 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.continueToAdditionalOptionsStep();
         });
 
-        it('inputs the model memory limit', async () => {
+        it('accepts the suggested model memory limit', async () => {
           await ml.dataFrameAnalyticsCreation.assertModelMemoryInputExists();
-          await ml.dataFrameAnalyticsCreation.setModelMemory(testData.modelMemory);
+          await ml.dataFrameAnalyticsCreation.assertModelMemoryInputPopulated();
         });
 
         it('continues to the details step', async () => {
