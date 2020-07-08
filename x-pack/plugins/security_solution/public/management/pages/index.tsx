@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
 import React, { memo } from 'react';
 import { useHistory, Route, Switch } from 'react-router-dom';
 
@@ -16,6 +17,41 @@ import {
 import { NotFoundPage } from '../../app/404';
 import { HostsContainer } from './endpoint_hosts';
 import { getHostListPath } from '../common/routing';
+import {ChromeBreadcrumb} from 'kibana/public';
+import {APP_ID} from 'x-pack/plugins/security_solution/common/constants';
+import {GetUrlForApp} from '../../common/components/navigation/types';
+import {AdministrationRouteSpyState} from '../../common/utils/route/types';
+
+const TabNameMappedToI18nKey: Record<string, string> = {
+  
+};
+
+export const getBreadcrumbs = (
+  params: AdministrationRouteSpyState,
+  search: string[],
+  getUrlForApp: GetUrlForApp
+): ChromeBreadcrumb[] => {
+  let breadcrumb = [
+    {
+      text: PAGE_TITLE,
+      href: getUrlForApp(`${APP_ID}:${SecurityPageName.management}`, {
+        path: !isEmpty(search[0]) ? search[0] : '',
+      }),
+    },
+  ];
+
+  const tabName = params?.tabName;
+  if (!tabName) return breadcrumb;
+
+  breadcrumb = [
+    ...breadcrumb,
+    {
+      text: TabNameMappedToI18nKey[tabName],
+      href: '',
+    },
+  ];
+  return breadcrumb;
+};
 
 export const ManagementContainer = memo(() => {
   const history = useHistory();
