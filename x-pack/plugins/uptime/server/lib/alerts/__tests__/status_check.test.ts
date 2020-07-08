@@ -50,6 +50,7 @@ const mockOptions = (
     numTimes: 5,
     locations: [],
     timerange: { from: 'now-15m', to: 'now' },
+    shouldCheckStatus: true,
   },
   services = alertsMock.createAlertServices(),
   state = {}
@@ -100,6 +101,7 @@ describe('status check alert', () => {
             },
             "locations": Array [],
             "numTimes": 5,
+            "shouldCheckStatus": true,
             "timerange": Object {
               "from": "now-15m",
               "to": "now",
@@ -145,6 +147,7 @@ describe('status check alert', () => {
             },
             "locations": Array [],
             "numTimes": 5,
+            "shouldCheckStatus": true,
             "timerange": Object {
               "from": "now-15m",
               "to": "now",
@@ -509,8 +512,7 @@ describe('status check alert', () => {
             "xpack.uptime.alerts.actionGroups.monitorStatus",
             Object {
               "downMonitorsWithGeo": "",
-              "message": "No down monitor IDs received
-        Top 3 Monitors Below Availability Threshold (99.34 %):
+              "message": "Top 3 Monitors Below Availability Threshold (99.34 %):
         Unreliable(https://unreliable.co): 90.925%
         no-name(https://no-name.co): 90.925%
         Foo(https://foo.com): 98.033%
@@ -1064,25 +1066,25 @@ describe('status check alert', () => {
     });
 
     it('creates a message with appropriate number of monitors', () => {
-      expect(contextMessage(ids, 3, [], '0')).toMatchInlineSnapshot(
+      expect(contextMessage(ids, 3, [], '0', false, true)).toMatchInlineSnapshot(
         `"Down monitors: first, second, third... and 2 other monitors"`
       );
     });
 
     it('throws an error if `max` is less than 2', () => {
-      expect(() => contextMessage(ids, 1, [], '0')).toThrowErrorMatchingInlineSnapshot(
+      expect(() => contextMessage(ids, 1, [], '0', false, true)).toThrowErrorMatchingInlineSnapshot(
         '"Maximum value must be greater than 2, received 1."'
       );
     });
 
     it('returns only the ids if length < max', () => {
-      expect(contextMessage(ids.slice(0, 2), 3, [], '0')).toMatchInlineSnapshot(
+      expect(contextMessage(ids.slice(0, 2), 3, [], '0', false, true)).toMatchInlineSnapshot(
         `"Down monitors: first, second"`
       );
     });
 
     it('returns a default message when no monitors are provided', () => {
-      expect(contextMessage([], 3, [], '0')).toMatchInlineSnapshot(
+      expect(contextMessage([], 3, [], '0', false, true)).toMatchInlineSnapshot(
         `"No down monitor IDs received"`
       );
     });

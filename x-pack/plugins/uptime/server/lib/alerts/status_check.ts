@@ -47,28 +47,47 @@ export const availabilityMessage = (
   availabilityResult: GetMonitorAvailabilityResult[],
   threshold: string
 ): string => {
-  return availabilityResult
-    .sort((a, b) => (a.availabilityRatio ?? 100) - (b.availabilityRatio ?? 100))
-    .slice(0, MESSAGE_AVAILABILITY_MAX)
-    .map(
-      ({ availabilityRatio, name, monitorId, url }) =>
-        `${name || monitorId}(${url}): ${((availabilityRatio ?? 1.0) * 100).toPrecision(5)}%`
-    )
-    .reduce((prev: string, cur: string, _ind: number, array: string[]) => {
-      let next = '';
-      if (prev === '') {
-        if (array.length > 1) {
-          next = `Top ${Math.min(
-            array.length,
-            MESSAGE_AVAILABILITY_MAX
-          )} Monitors Below Availability Threshold (${threshold} %):\n`;
-        } else {
-          next = `Monitor Below Availability Threshold (${threshold} %):\n`;
-        }
-      }
-      next += `${cur}\n`;
-      return prev + next;
-    }, '');
+  return availabilityResult.length > 0
+    ? availabilityResult
+        .sort((a, b) => (a.availabilityRatio ?? 100) - (b.availabilityRatio ?? 100))
+        .slice(0, MESSAGE_AVAILABILITY_MAX)
+        .map(({ availabilityRatio, name, monitorId, url }) =>
+          i18n.translate('xpack.uptime.alerts.availability.monitorSummary', {
+            defaultMessage: '{nameOrId}({url}): {availabilityRatio}%',
+            values: {
+              nameOrId: name || monitorId,
+              url,
+              availabilityRatio: ((availabilityRatio ?? 1.0) * 100).toPrecision(5),
+            },
+          })
+        )
+        .reduce((prev: string, cur: string, _ind: number, array: string[]) => {
+          let next = '';
+          if (prev === '') {
+            if (array.length > 1) {
+              next = i18n.translate('xpack.uptime.alerts.availability.multiItemTitle', {
+                defaultMessage: `Top {monitorCount} Monitors Below Availability Threshold ({threshold} %):\n`,
+                values: {
+                  monitorCount: Math.min(array.length, MESSAGE_AVAILABILITY_MAX),
+                  threshold,
+                },
+              });
+            } else {
+              next = i18n.translate('xpack.uptime.alerts.availability.singleItemTitle', {
+                defaultMessage: `Monitor Below Availability Threshold ({threshold} %):\n`,
+                values: { threshold },
+              });
+            }
+          }
+          next += `${cur}\n`;
+          return prev + next;
+        }, '')
+    : i18n.translate('xpack.uptime.alerts.availability.emptyMessage', {
+        defaultMessage: `No monitors were below Availability Threshold ({threshold} %)`,
+        values: {
+          threshold,
+        },
+      });
 };
 
 /**
@@ -80,48 +99,53 @@ export const contextMessage = (
   monitorIds: string[],
   max: number,
   availabilityResult: GetMonitorAvailabilityResult[],
-  availabilityThreshold: string
+  availabilityThreshold: string,
+  availabilityWasChecked: boolean,
+  statusWasChecked: boolean
 ): string => {
   const MIN = 2;
   if (max < MIN) throw new Error(`Maximum value must be greater than ${MIN}, received ${max}.`);
 
   // generate the message
-  let message;
-  if (monitorIds.length === 1) {
-    message = i18n.translate('xpack.uptime.alerts.message.singularTitle', {
-      defaultMessage: 'Down monitor: ',
-    });
-  } else if (monitorIds.length) {
-    message = i18n.translate('xpack.uptime.alerts.message.multipleTitle', {
-      defaultMessage: 'Down monitors: ',
-    });
-  } else {
-    message = i18n.translate('xpack.uptime.alerts.message.emptyTitle', {
-      defaultMessage: 'No down monitor IDs received',
-    });
-  }
-
-  for (let i = 0; i < monitorIds.length; i++) {
-    const id = monitorIds[i];
-    if (i === max) {
-      message =
-        message +
-        i18n.translate('xpack.uptime.alerts.message.overflowBody', {
-          defaultMessage: `... and {overflowCount} other monitors`,
-          values: {
-            overflowCount: monitorIds.length - i,
-          },
-        });
-      break;
-    } else if (i === 0) {
-      message = message + id;
+  let message = '';
+  if (statusWasChecked) {
+    if (monitorIds.length === 1) {
+      message = i18n.translate('xpack.uptime.alerts.message.singularTitle', {
+        defaultMessage: 'Down monitor: ',
+      });
+    } else if (monitorIds.length) {
+      message = i18n.translate('xpack.uptime.alerts.message.multipleTitle', {
+        defaultMessage: 'Down monitors: ',
+      });
     } else {
-      message = message + `, ${id}`;
+      message = i18n.translate('xpack.uptime.alerts.message.emptyTitle', {
+        defaultMessage: 'No down monitor IDs received',
+      });
+    }
+
+    for (let i = 0; i < monitorIds.length; i++) {
+      const id = monitorIds[i];
+      if (i === max) {
+        message =
+          message +
+          i18n.translate('xpack.uptime.alerts.message.overflowBody', {
+            defaultMessage: `... and {overflowCount} other monitors`,
+            values: {
+              overflowCount: monitorIds.length - i,
+            },
+          });
+        break;
+      } else if (i === 0) {
+        message = message + id;
+      } else {
+        message = message + `, ${id}`;
+      }
     }
   }
 
-  if (availabilityResult.length) {
-    return message + '\n' + availabilityMessage(availabilityResult, availabilityThreshold);
+  if (availabilityWasChecked) {
+    const availabilityMsg = availabilityMessage(availabilityResult, availabilityThreshold);
+    return message ? message + '\n' + availabilityMsg : availabilityMsg;
   }
 
   return message;
@@ -382,7 +406,9 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
           Array.from(uniqueIds.keys()),
           DEFAULT_MAX_MESSAGE_ROWS,
           availabilityResults,
-          isRight(availabilityDecoded) ? availabilityDecoded.right.availability.threshold : '100'
+          isRight(availabilityDecoded) ? availabilityDecoded.right.availability.threshold : '100',
+          isRight(availabilityDecoded) && availabilityDecoded.right.shouldCheckAvailability,
+          isRight(verifiedParams) && !!verifiedParams.right.shouldCheckStatus
         ),
         downMonitorsWithGeo: fullListByIdAndLocation(monitorsByLocation),
       });
