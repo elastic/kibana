@@ -23,7 +23,8 @@ import { ContentSection } from '../shared/content_section';
 import { useRoutes } from '../shared/use_routes';
 import { sendTelemetry } from '../../../shared/telemetry';
 import { KibanaContext, IKibanaContext } from '../../../index';
-import { ORG_SOURCES_PATH } from '../../routes';
+import { getSourcePath } from '../../routes';
+import { IFeedActivity } from '../../types';
 
 import { IAppServerData } from './overview';
 
@@ -55,7 +56,6 @@ export const RecentActivity: React.FC<IAppServerData> = ({
     onClick,
     target: '_blank',
     external: true,
-    href: getWSRoute(ORG_SOURCES_PATH),
     'data-test-subj': 'viewSourceDetailsButton',
   } as EuiButtonProps & EuiLinkProps;
 
@@ -93,10 +93,10 @@ export const RecentActivity: React.FC<IAppServerData> = ({
   const FeedTable = (
     <table className="table">
       <tbody className="table__body">
-        {activityFeed.map(({ id, status, message, timestamp }, index) => (
+        {activityFeed.map(({ id, status, message, timestamp, sourceId }: IFeedActivity, index) => (
           <tr key={index} className={`activity ${status ? `activity__${status}` : ''}`}>
             <td>
-              <EuiLink {...buttonProps}>
+              <EuiLink {...buttonProps} href={getWSRoute(getSourcePath(sourceId))}>
                 {id} {message} {status === 'error' && viewSourceLabel}
               </EuiLink>
             </td>

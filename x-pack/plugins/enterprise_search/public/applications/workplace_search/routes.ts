@@ -8,3 +8,5 @@ export const ORG_SOURCES_PATH = '/org/sources';
 export const USERS_PATH = '/org/users';
 export const ORG_SETTINGS_PATH = '/org/settings';
 export const SETUP_GUIDE_PATH = '/setup_guide';
+
+export const getSourcePath = (sourceId: string): string => `${ORG_SOURCES_PATH}/${sourceId}`;

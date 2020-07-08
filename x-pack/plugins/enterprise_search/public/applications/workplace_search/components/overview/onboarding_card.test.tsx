@@ -22,7 +22,7 @@ const cardProps = {
   description: 'this is a card',
   actionTitle: 'action',
   testSubj: 'actionButton',
-  actionPath: 'foo_path',
+  actionPath: '/foo_path',
 };
 
 describe('OnboardingCard', () => {
@@ -34,7 +34,7 @@ describe('OnboardingCard', () => {
   it('renders an action button', () => {
     const wrapper = mount(<OnboardingCard {...cardProps} />);
     const button = wrapper.find('a[data-test-subj="actionButton"]');
-    expect(button.prop('href')).toBe(`http://localhost:3002/ws#${cardProps.actionPath}`);
+    expect(button.prop('href')).toBe(`http://localhost:3002/ws${cardProps.actionPath}`);
     expect(wrapper.find(EuiButton)).toHaveLength(1);
     expect(wrapper.find(EuiButtonEmpty)).toHaveLength(0);
 
@@ -46,7 +46,7 @@ describe('OnboardingCard', () => {
     const wrapper = mount(<OnboardingCard {...cardProps} complete />);
     const button = wrapper.find('a[data-test-subj="actionButton"]');
 
-    expect(button.prop('href')).toBe(`http://localhost:3002/ws#${cardProps.actionPath}`);
+    expect(button.prop('href')).toBe(`http://localhost:3002/ws${cardProps.actionPath}`);
     expect(wrapper.find(EuiButton)).toHaveLength(0);
     expect(wrapper.find(EuiButtonEmpty)).toHaveLength(1);
 

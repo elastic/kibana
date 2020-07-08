@@ -18,6 +18,7 @@ export interface IFeedActivity {
   id: string;
   message: string;
   timestamp: string;
+  sourceId: string;
 }
 
 export type TSpacerSize = 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl';
