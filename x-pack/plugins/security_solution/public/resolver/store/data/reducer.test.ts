@@ -248,13 +248,13 @@ describe('Resolver Data Middleware', () => {
 
       expect(selectedEventsForFirstChildNode).toBe(firstChildNodeInTree.relatedEvents);
     });
-    it('should indicate the limit has been exceeded when the actual count < stats count', () => {
+    it('should indicate the limit has been exceeded because the number of related events received for the category is less than what the stats count said it would be', () => {
       const selectedRelatedInfo = selectors.relatedEventInfoByEntityId(store.getState());
       const shouldShowLimit = selectedRelatedInfo.get(firstChildNodeInTree.id)
         ?.shouldShowLimitForCategory!;
       expect(shouldShowLimit(categoryToOverCount)).toBe(true);
     });
-    it('should indicate that there are related events missing when the actual count < stats count', () => {
+    it('should indicate that there are related events missing because the number of related events received for the category is less than what the stats count said it would be', () => {
       const selectedRelatedInfo = selectors.relatedEventInfoByEntityId(store.getState());
       const notDisplayed = selectedRelatedInfo.get(firstChildNodeInTree.id)
         ?.getNumberNotDisplayedForCategory!;
