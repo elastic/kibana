@@ -258,7 +258,7 @@ describe('service_settings (FKA tilemaptest)', function () {
     it('should load manifest (individual props)', async () => {
 
       const expected = {
-        attribution: '<a href="http://www.naturalearthdata.com/about/terms-of-use">Made with NaturalEarth</a> | <a href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a>',
+        attribution: '<a rel="noreferrer noopener" href="http://www.naturalearthdata.com/about/terms-of-use">Made with NaturalEarth</a> | <a rel="noreferrer noopener" href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a>',
         format: 'geojson',
         fields: [
           { 'type': 'id', 'name': 'iso2', 'description': 'ISO 3166-1 alpha-2 code' },
