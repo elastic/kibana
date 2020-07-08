@@ -24,27 +24,28 @@ export interface GetMonitorAvailabilityResult {
   availabilityRatio: number | null;
 }
 
-export const formatBuckets = async (
-  buckets: any[],
-  threshold: number
-): Promise<GetMonitorAvailabilityResult[]> => {
-  return buckets
-    .filter((bucket: any) => (100 * bucket?.ratio?.value ?? 1.0) < threshold)
-    .map(({ key, up_sum, down_sum, ratio }: any) => ({
-      ...key,
-      up: up_sum.value,
-      down: down_sum.value,
-      availabilityRatio: ratio.value,
-    }));
+export const formatBuckets = async (buckets: any[]): Promise<GetMonitorAvailabilityResult[]> => {
+  return buckets.map(({ key, up_sum, down_sum, ratio }: any) => ({
+    ...key,
+    up: up_sum.value,
+    down: down_sum.value,
+    availabilityRatio: ratio.value,
+  }));
 };
 
 export const getMonitorAvailability: UMElasticsearchQueryFn<
   GetMonitorAvailabilityParams,
   GetMonitorAvailabilityResult[]
-> = async ({ callES, dynamicSettings, range, rangeUnit, threshold, filters }) => {
+> = async ({ callES, dynamicSettings, range, rangeUnit, threshold: thresholdString, filters }) => {
   const queryResults: Array<Promise<GetMonitorAvailabilityResult[]>> = [];
   let afterKey: AvailabilityKey | undefined;
   const gte = `now-${range}${rangeUnit}`;
+  const threshold = Number(thresholdString) / 100;
+  if (threshold <= 0 || threshold > 1.0) {
+    throw new Error(
+      `Invalid availability threshold value ${thresholdString}. The value must be between 0 and 100`
+    );
+  }
 
   do {
     const esParams: any = {
@@ -126,6 +127,14 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
                 } return null;`,
                 },
               },
+              filtered: {
+                bucket_selector: {
+                  buckets_path: {
+                    threshold: 'ratio.value',
+                  },
+                  script: `params.threshold < ${threshold}`,
+                },
+              },
             },
           },
         },
@@ -144,7 +153,7 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
     const result = await callES('search', esParams);
     afterKey = result?.aggregations?.monitors?.after_key;
 
-    queryResults.push(formatBuckets(result?.aggregations?.monitors?.buckets || [], threshold));
+    queryResults.push(formatBuckets(result?.aggregations?.monitors?.buckets || []));
   } while (afterKey !== undefined);
 
   return (await Promise.all(queryResults)).reduce((acc, cur) => acc.concat(cur), []);

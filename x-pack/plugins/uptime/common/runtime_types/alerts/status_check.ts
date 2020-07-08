@@ -5,6 +5,7 @@
  */
 
 import * as t from 'io-ts';
+import { number } from 'yargs';
 
 export const StatusCheckFiltersType = t.type({
   'monitor.type': t.array(t.string),
@@ -63,7 +64,7 @@ export const GetMonitorAvailabilityParamsType = t.intersection([
   t.type({
     range: t.number,
     rangeUnit: RangeUnitType,
-    threshold: t.number,
+    threshold: t.string,
   }),
   t.partial({
     filters: t.string,

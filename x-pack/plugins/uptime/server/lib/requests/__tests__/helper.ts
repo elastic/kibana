@@ -44,5 +44,6 @@ export const setupMockEsCompositeQuery = <K, C, I>(
     };
     esMock.callAsCurrentUser.mockResolvedValueOnce(mockResponse);
   });
+
   return [(method: any, params: any) => esMock.callAsCurrentUser(method, params), esMock];
 };

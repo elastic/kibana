@@ -43,14 +43,14 @@ const MESSAGE_AVAILABILITY_MAX = 3;
 
 export const availabilityMessage = (
   availabilityResult: GetMonitorAvailabilityResult[],
-  threshold: number
+  threshold: string
 ): string => {
   return availabilityResult
     .sort((a, b) => (a.availabilityRatio ?? 100) - (b.availabilityRatio ?? 100))
     .slice(0, MESSAGE_AVAILABILITY_MAX)
     .map(
       ({ availabilityRatio, name, monitorId, url }) =>
-        `${name || monitorId}(${url}): ${availabilityRatio}`
+        `${name || monitorId}(${url}): ${(availabilityRatio * 100).toPrecision(5)}%`
     )
     .reduce((prev: string, cur: string, _ind: number, array: string[]) => {
       let next = '';
@@ -78,7 +78,7 @@ export const contextMessage = (
   monitorIds: string[],
   max: number,
   availabilityResult: GetMonitorAvailabilityResult[],
-  availabilityThreshold: number
+  availabilityThreshold: string
 ): string => {
   const MIN = 2;
   if (max < MIN) throw new Error(`Maximum value must be greater than ${MIN}, received ${max}.`);
@@ -222,7 +222,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
         schema.object({
           range: schema.number(),
           rangeUnit: schema.string(),
-          threshold: schema.number(),
+          threshold: schema.string(),
         })
       ),
       filters: schema.maybe(
@@ -380,7 +380,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
           Array.from(uniqueIds.keys()),
           DEFAULT_MAX_MESSAGE_ROWS,
           availabilityResults,
-          isRight(availabilityDecoded) ? availabilityDecoded.right.availability.threshold : 100
+          isRight(availabilityDecoded) ? availabilityDecoded.right.availability.threshold : '100'
         ),
         downMonitorsWithGeo: fullListByIdAndLocation(monitorsByLocation),
       });

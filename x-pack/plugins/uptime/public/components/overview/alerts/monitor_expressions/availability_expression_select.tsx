@@ -46,7 +46,7 @@ const TimeRangeOptions: TimeRangeOption[] = [
 
 const DEFAULT_RANGE = 30;
 const DEFAULT_TIMERANGE_UNIT = 'd';
-const DEFAULT_THRESHOLD = 99;
+const DEFAULT_THRESHOLD = '99';
 
 const isThresholdInvalid = (n: number): boolean => isNaN(n) || n <= 0 || n > 100;
 
