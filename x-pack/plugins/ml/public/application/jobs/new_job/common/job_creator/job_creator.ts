@@ -226,28 +226,27 @@ export class JobCreator {
     this._calendars = calendars;
   }
 
-  public set modelPlot(enable: boolean) {
-    if (enable) {
-      if (this._job_config.model_plot_config) {
-        this._job_config.model_plot_config.enabled = true;
-      } else {
-        this._job_config.model_plot_config = {
-          enabled: true,
-          annotations_enabled: false,
-        };
-      }
-    } else {
-      if (this._job_config.model_plot_config) {
-        if (this.modelChangeAnnotations === false) {
-          // delete model_plot_config if both modelPlot and annotation are false
-          delete this._job_config.model_plot_config;
-        } else {
-          this._job_config.model_plot_config.enabled = false;
-        }
-      }
+  private _initModelPlotConfig() {
+    // initialize configs to false if they are missing
+    if (this._job_config.model_plot_config === undefined) {
+      this._job_config.model_plot_config = {};
+    }
+    if (this._job_config.model_plot_config.enabled === undefined) {
+      this._job_config.model_plot_config.enabled = false;
+    }
+    if (this._job_config.model_plot_config.annotations_enabled === undefined) {
+      this._job_config.model_plot_config.annotations_enabled = false;
     }
   }
 
+  public set modelPlot(enable: boolean) {
+    this._initModelPlotConfig();
+    if (enable) {
+      this._job_config.model_plot_config.enabled = true;
+    } else {
+      this._job_config.model_plot_config.enabled = false;
+    }
+  }
   public get modelPlot() {
     return (
       this._job_config.model_plot_config !== undefined &&
@@ -256,26 +255,13 @@ export class JobCreator {
   }
 
   public set modelChangeAnnotations(enable: boolean) {
+    this._initModelPlotConfig();
     if (enable) {
-      if (this._job_config.model_plot_config) {
-        this._job_config.model_plot_config.annotations_enabled = true;
-      } else {
-        this._job_config.model_plot_config = {
-          enabled: false,
-          annotations_enabled: true,
-        };
-      }
+      this._job_config.model_plot_config.annotations_enabled = true;
     } else {
-      if (this._job_config.model_plot_config) {
-        if (this.modelPlot === false) {
-          // delete model_plot_config if both modelPlot and annotation are false
-          delete this._job_config.model_plot_config;
-        } else {
-          // explicitly set this to false instead of omitting if modelPlot is true
-          // else by default if only modelPlot is true, it will also include annotations
-          this._job_config.model_plot_config.annotations_enabled = false;
-        }
-      }
+      // explicitly set this to false instead of omitting if modelPlot is true
+      // else by default if only modelPlot is true, it will also include annotations
+      this._job_config.model_plot_config.annotations_enabled = false;
     }
   }
 

@@ -110,15 +110,6 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       jobCreator.calendars = mlJobService.tempJobCloningObjects.calendars;
       mlJobService.tempJobCloningObjects.calendars = undefined;
     }
-    if (clonedJob.model_plot_config) {
-      const { model_plot_config } = clonedJob;
-      if (model_plot_config.modelPlot !== undefined) {
-        jobCreator.modelPlot = model_plot_config.modelPlot;
-      }
-      if (model_plot_config.modelChangeAnnotations !== undefined) {
-        jobCreator.modelChangeAnnotations = model_plot_config.modelChangeAnnotations;
-      }
-    }
   } else {
     // creating a new job
     jobCreator.bucketSpan = DEFAULT_BUCKET_SPAN;
