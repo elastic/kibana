@@ -11,12 +11,13 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
+  const start = encodeURIComponent('2020-06-29T06:45:00.000Z');
+  const end = encodeURIComponent('2020-06-29T06:49:00.000Z');
+
   describe('Service Maps', () => {
     describe('when there is no data', () => {
       it('returns empty list', async () => {
-        const response = await supertest.get(
-          '/api/apm/service-map?start=2020-06-28T10%3A24%3A46.055Z&end=2020-06-29T10%3A24%3A46.055Z'
-        );
+        const response = await supertest.get(`/api/apm/service-map?start=${start}&end=${end}`);
 
         expect(response.status).to.be(200);
         expect(response.body).to.eql({ elements: [] });
@@ -28,12 +29,9 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
       after(() => esArchiver.unload('8.0.0'));
 
       it('returns service map elements', async () => {
-        const response = await supertest.get(
-          '/api/apm/service-map?start=2020-06-28T10%3A24%3A46.055Z&end=2020-06-29T10%3A24%3A46.055Z'
-        );
+        const response = await supertest.get(`/api/apm/service-map?start=${start}&end=${end}`);
 
         expect(response.status).to.be(200);
-
         expect(response.body).to.eql({
           elements: [
             {

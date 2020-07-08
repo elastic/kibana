@@ -7,11 +7,17 @@
 import React, { useState } from 'react';
 import { EuiTitle, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiPanel } from '@elastic/eui';
 import { JobsList } from './jobs_list';
 import { AddEnvironments } from './add_environments';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/useFetcher';
+import { LicensePrompt } from '../../../shared/LicensePrompt';
+import { useLicense } from '../../../../hooks/useLicense';
 
 export const AnomalyDetection = () => {
+  const license = useLicense();
+  const hasValidLicense = license?.isActive && license?.hasAtLeast('platinum');
+
   const [viewAddEnvironments, setViewAddEnvironments] = useState(false);
 
   const { refetch, data = [], status } = useFetcher(
@@ -24,6 +30,22 @@ export const AnomalyDetection = () => {
   const isLoading =
     status === FETCH_STATUS.PENDING || status === FETCH_STATUS.LOADING;
   const hasFetchFailure = status === FETCH_STATUS.FAILURE;
+
+  if (!hasValidLicense) {
+    return (
+      <EuiPanel>
+        <LicensePrompt
+          text={i18n.translate(
+            'xpack.apm.settings.anomaly_detection.license.text',
+            {
+              defaultMessage:
+                "To use anomaly detection, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability monitor your services with the aid of machine learning.",
+            }
+          )}
+        />
+      </EuiPanel>
+    );
+  }
 
   return (
     <>
