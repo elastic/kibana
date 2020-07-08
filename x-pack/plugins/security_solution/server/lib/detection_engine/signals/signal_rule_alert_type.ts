@@ -302,43 +302,92 @@ export const signalRulesAlertType = ({
           }
         } else {
           const inputIndex = await getInputIndex(services, version, index);
-          const esFilter = await getFilter({
-            type,
-            filters,
-            language,
-            query,
-            savedId,
-            services,
-            index: inputIndex,
-            lists: exceptionItems ?? [],
-          });
+          logger.debug(`exceptionItems: ${JSON.stringify(exceptionItems, null, 2)}`);
 
-          result = await searchAfterAndBulkCreate({
-            gap,
-            previousStartedAt,
-            listClient,
-            exceptionsList: exceptionItems ?? [],
-            ruleParams: params,
-            services,
-            logger,
-            id: alertId,
-            inputIndexPattern: inputIndex,
-            signalsIndex: outputIndex,
-            filter: esFilter,
-            actions,
-            name,
-            createdBy,
-            createdAt,
-            updatedBy,
-            updatedAt,
-            interval,
-            enabled,
-            pageSize: searchAfterSize,
-            refresh,
-            tags,
-            throttle,
-            buildRuleMessage,
-          });
+          if (exceptionItems != null) {
+            logger.debug('exceptions was not null');
+            const res = await Promise.all(
+              exceptionItems.map(async (excItem) => {
+                const esFilter = await getFilter({
+                  type,
+                  filters,
+                  language,
+                  query,
+                  savedId,
+                  services,
+                  index: inputIndex,
+                  lists: [excItem] ?? [],
+                });
+                logger.debug(`ESFILTER: ${JSON.stringify(esFilter, null, 2)}`);
+                result = await searchAfterAndBulkCreate({
+                  gap,
+                  previousStartedAt,
+                  listClient,
+                  exceptionsList: [excItem] ?? [],
+                  ruleParams: params,
+                  services,
+                  logger,
+                  id: alertId,
+                  inputIndexPattern: inputIndex,
+                  signalsIndex: outputIndex,
+                  filter: esFilter,
+                  actions,
+                  name,
+                  createdBy,
+                  createdAt,
+                  updatedBy,
+                  updatedAt,
+                  interval,
+                  enabled,
+                  pageSize: searchAfterSize,
+                  refresh,
+                  tags,
+                  throttle,
+                  buildRuleMessage,
+                });
+                return result;
+              })
+            );
+            logger.debug(`res ${JSON.stringify(res, null, 2)}`);
+          } else {
+            const esFilter = await getFilter({
+              type,
+              filters,
+              language,
+              query,
+              savedId,
+              services,
+              index: inputIndex,
+              lists: exceptionItems ?? [],
+            });
+
+            result = await searchAfterAndBulkCreate({
+              gap,
+              previousStartedAt,
+              listClient,
+              exceptionsList: exceptionItems ?? [],
+              ruleParams: params,
+              services,
+              logger,
+              id: alertId,
+              inputIndexPattern: inputIndex,
+              signalsIndex: outputIndex,
+              filter: esFilter,
+              actions,
+              name,
+              createdBy,
+              createdAt,
+              updatedBy,
+              updatedAt,
+              interval,
+              enabled,
+              pageSize: searchAfterSize,
+              refresh,
+              tags,
+              throttle,
+              buildRuleMessage,
+            });
+          }
         }
 
         if (result.success) {
