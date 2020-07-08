@@ -99,7 +99,7 @@ describe('Resolver Data Middleware', () => {
       expect(selectors.hasMoreChildren(store.getState())).toBe(true);
     });
 
-    describe('and when related events were returned', () => {
+    describe('and when related events were returned with totals equalling what stat counts indicate they should be', () => {
       beforeEach(() => {
         const relatedAction: DataAction = {
           type: 'serverReturnedRelatedEventData',
@@ -129,7 +129,14 @@ describe('Resolver Data Middleware', () => {
           );
         }
       });
-      it('should not indicate the limit has been exceeded when the actual count >= stats count', () => {
+      /**
+       * The general approach reflected here is to _avoid_ showing a limit warning - even if we hit
+       * the overall related event limit - as long as the number in our category matches what the stats
+       * say we have. E.g. If the stats say you have 20 dns events, and we receive 20 dns events, we
+       * don't need to display a limit warning for that, even if we hit some overall event limit of e.g. 100
+       * while we were fetching the 20.
+       */
+      it('should not indicate the limit has been exceeded because the number of related events received for the category is greater or equal to the stats count', () => {
         const selectedRelatedInfo = selectors.relatedEventInfoByEntityId(store.getState());
         const shouldShowLimit = selectedRelatedInfo.get(firstChildNodeInTree.id)
           ?.shouldShowLimitForCategory!;
@@ -137,7 +144,7 @@ describe('Resolver Data Middleware', () => {
           expect(shouldShowLimit(typeCounted)).toBe(false);
         }
       });
-      it('should not indicate that there are any related events missing when the actual count >= stats count', () => {
+      it('should not indicate that there are any related events missing because the number of related events received for the category is greater or equal to the stats count', () => {
         const selectedRelatedInfo = selectors.relatedEventInfoByEntityId(store.getState());
         const notDisplayed = selectedRelatedInfo.get(firstChildNodeInTree.id)
           ?.getNumberNotDisplayedForCategory!;
