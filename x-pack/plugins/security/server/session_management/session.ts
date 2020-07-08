@@ -75,7 +75,7 @@ export interface SessionOptions {
   logger: Logger;
   sessionIndex: SessionIndex;
   sessionCookie: SessionCookie;
-  config: Pick<ConfigType, 'encryptionKey' | 'authc' | 'session'>;
+  config: Pick<ConfigType, 'encryptionKey' | 'session'>;
 }
 
 interface SessionValueContentToEncrypt {
@@ -84,11 +84,6 @@ interface SessionValueContentToEncrypt {
 }
 
 export class Session {
-  /**
-   * Type/name mappings of the currently configured authentication providers.
-   */
-  readonly #providers: Map<string, string>;
-
   /**
    * Session timeout in ms. If `null` session will stay active until the browser is closed.
    */
@@ -122,9 +117,6 @@ export class Session {
 
   constructor(options: Readonly<SessionOptions>) {
     this.#options = options;
-    this.#providers = new Map(
-      this.#options.config.authc.sortedProviders.map(({ name, type }) => [name, type])
-    );
     this.#crypto = nodeCrypto({ encryptionKey: this.#options.config.encryptionKey });
     this.#idleTimeout = this.#options.config.session.idleTimeout;
     this.#lifespan = this.#options.config.session.lifespan;
@@ -135,8 +127,7 @@ export class Session {
 
   /**
    * Extracts session value for the specified request. Under the hood it can clear session if it is
-   * invalid, created by the legacy versions of Kibana or belongs to the provider that is no longer
-   * available.
+   * invalid or created by the legacy versions of Kibana.
    * @param request Request instance to get session value for.
    */
   async get(request: KibanaRequest) {
@@ -164,17 +155,6 @@ export class Session {
       return null;
     }
 
-    // If we detect that for some reason we have a session stored for the provider that is not
-    // available anymore (e.g. when user was logged in with one provider, but then configuration has
-    // changed and that provider is no longer available), then we should clear session entirely.
-    if (this.#providers.get(sessionIndexValue.provider.name) !== sessionIndexValue.provider.type) {
-      this.#options.logger.warn(
-        `Session was created for "${sessionIndexValue.provider.name}/${sessionIndexValue.provider.type}" provider that is no longer configured or has a different type. Session will be invalidated.`
-      );
-      await this.clear(request);
-      return null;
-    }
-
     try {
       return {
         ...(await this.decryptSessionValue(sessionIndexValue, sessionCookieValue.aad)),
@@ -182,6 +162,7 @@ export class Session {
         idleTimeoutExpiration: sessionCookieValue.idleTimeoutExpiration,
       };
     } catch (err) {
+      this.#options.logger.warn('Unable to decrypt session content, session will be invalidated.');
       await this.clear(request);
       return null;
     }

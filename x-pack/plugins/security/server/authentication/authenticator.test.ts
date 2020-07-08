@@ -81,6 +81,7 @@ describe('Authenticator', () => {
 
     jest.requireMock('./providers/saml').SAMLAuthenticationProvider.mockImplementation(() => ({
       type: 'saml',
+      authenticate: jest.fn().mockResolvedValue(AuthenticationResult.notHandled()),
       getHTTPAuthenticationScheme: jest.fn(),
     }));
   });
@@ -753,12 +754,21 @@ describe('Authenticator', () => {
     describe('with Overwritten Session', () => {
       const mockUser = mockAuthenticatedUser();
       beforeEach(() => {
+        mockOptions = getMockOptions({
+          providers: {
+            basic: { basic1: { order: 0 } },
+            saml: { saml1: { order: 1, realm: 'saml1' } },
+          },
+        });
+        mockOptions.session.get.mockResolvedValue(null);
         mockOptions.session.update.mockImplementation(async (request, value) => value);
         mockOptions.session.extend.mockImplementation(async (request, value) => value);
         mockOptions.session.create.mockImplementation(async (request, value) => ({
           ...mockSessVal,
           ...value,
         }));
+
+        authenticator = new Authenticator(mockOptions);
       });
 
       it('does not redirect to Overwritten Session its own requests', async () => {
@@ -1487,12 +1497,20 @@ describe('Authenticator', () => {
     describe('with Overwritten Session', () => {
       const mockUser = mockAuthenticatedUser();
       beforeEach(() => {
+        mockOptions = getMockOptions({
+          providers: {
+            basic: { basic1: { order: 0 } },
+            saml: { saml1: { order: 1, realm: 'saml1' } },
+          },
+        });
         mockOptions.session.update.mockImplementation(async (request, value) => value);
         mockOptions.session.extend.mockImplementation(async (request, value) => value);
         mockOptions.session.create.mockImplementation(async (request, value) => ({
           ...mockSessVal,
           ...value,
         }));
+
+        authenticator = new Authenticator(mockOptions);
       });
 
       it('does not redirect to Overwritten Session its own requests', async () => {

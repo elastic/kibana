@@ -244,7 +244,7 @@ export class Authenticator {
     assertRequest(request);
     assertLoginAttempt(attempt);
 
-    const existingSessionValue = await this.session.get(request);
+    const existingSessionValue = await this.getSessionValue(request);
 
     // Login attempt can target specific provider by its name (e.g. chosen at the Login Selector UI)
     // or a group of providers with the specified type (e.g. in case of 3rd-party initiated login
@@ -308,7 +308,7 @@ export class Authenticator {
   async authenticate(request: KibanaRequest) {
     assertRequest(request);
 
-    const existingSessionValue = await this.session.get(request);
+    const existingSessionValue = await this.getSessionValue(request);
 
     if (this.shouldRedirectToLoginSelector(request, existingSessionValue)) {
       this.logger.debug('Redirecting request to Login Selector.');
@@ -353,7 +353,7 @@ export class Authenticator {
   async logout(request: KibanaRequest) {
     assertRequest(request);
 
-    const sessionValue = await this.session.get(request);
+    const sessionValue = await this.getSessionValue(request);
     if (sessionValue) {
       await this.session.clear(request);
       return this.providers.get(sessionValue.provider.name)!.logout(request, sessionValue.state);
@@ -400,7 +400,7 @@ export class Authenticator {
   async acknowledgeAccessAgreement(request: KibanaRequest) {
     assertRequest(request);
 
-    const existingSessionValue = await this.session.get(request);
+    const existingSessionValue = await this.getSessionValue(request);
     const currentUser = this.options.getCurrentUser(request);
     if (!existingSessionValue || !currentUser) {
       throw new Error('Cannot acknowledge access agreement for unauthenticated user.');
@@ -461,7 +461,7 @@ export class Authenticator {
     // If there is no session to predict which provider to use first, let's use the order
     // providers are configured in. Otherwise return provider that owns session first, and only then the rest
     // of providers.
-    if (!sessionValue || !this.providers.has(sessionValue.provider.name)) {
+    if (!sessionValue) {
       yield* this.providers;
     } else {
       yield [sessionValue.provider.name, this.providers.get(sessionValue.provider.name)!];
@@ -474,6 +474,39 @@ export class Authenticator {
     }
   }
 
+  /**
+   * Extracts session value for the specified request. Under the hood it can clear session if it
+   * belongs to the provider that is not available.
+   * @param request Request instance.
+   */
+  private async getSessionValue(request: KibanaRequest) {
+    const existingSessionValue = await this.session.get(request);
+
+    // If we detect that for some reason we have a session stored for the provider that is not
+    // available anymore (e.g. when user was logged in with one provider, but then configuration has
+    // changed and that provider is no longer available), then we should clear session entirely.
+    if (
+      existingSessionValue &&
+      this.providers.get(existingSessionValue.provider.name)?.type !==
+        existingSessionValue.provider.type
+    ) {
+      this.logger.warn(
+        `Attempted to retrieve session for the "${existingSessionValue.provider.type}/${existingSessionValue.provider.name}" provider, but it is not configured.`
+      );
+      await this.session.clear(request);
+      return null;
+    }
+
+    return existingSessionValue;
+  }
+
+  /**
+   * Updates, creates, extends or clears session value based on the received authentication result.
+   * @param request Request instance.
+   * @param provider Provider that produced provided authentication result.
+   * @param authenticationResult Result of the authentication or login attempt.
+   * @param existingSessionValue Value of the existing session if any.
+   */
   private async updateSessionValue(
     request: KibanaRequest,
     {
