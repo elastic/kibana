@@ -22,6 +22,7 @@ import { DataFrameAnalyticsId } from '../../../../common/analytics';
 
 export const PROGRESS_REFRESH_INTERVAL_MS = 1000;
 const FAILED = 'failed';
+const STOPPED = 'stopped';
 
 export const ProgressStats: FC<{ jobId: DataFrameAnalyticsId }> = ({ jobId }) => {
   const [initialized, setInitialized] = useState<boolean>(false);
@@ -70,8 +71,9 @@ export const ProgressStats: FC<{ jobId: DataFrameAnalyticsId }> = ({ jobId }) =>
 
           setCurrentProgress(progressStats);
           if (
-            progressStats.currentPhase === progressStats.totalPhases &&
-            progressStats.progress === 100
+            (progressStats.currentPhase === progressStats.totalPhases &&
+              progressStats.progress === 100) ||
+            jobStats.state === STOPPED
           ) {
             clearInterval(interval);
           }
