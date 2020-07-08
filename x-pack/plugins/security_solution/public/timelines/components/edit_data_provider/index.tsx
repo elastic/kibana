@@ -53,7 +53,7 @@ interface Props {
   isExcluded: boolean;
   onDataProviderEdited: OnDataProviderEdited;
   operator: QueryOperator;
-  providerId?: string;
+  providerId: string;
   timelineId: string;
   value: string | number;
   type?: DataProviderType;
@@ -72,9 +72,6 @@ export const getInitialOperatorLabel = (
     return isExcluded ? [{ label: i18n.DOES_NOT_EXIST }] : [{ label: i18n.EXISTS }];
   }
 };
-
-export const getProviderId = (timelineId: string, label = 'blank-template-field', value: string) =>
-  `${timelineId}-${label}-${value}`;
 
 export const StatefulEditDataProvider = React.memo<Props>(
   ({
@@ -158,8 +155,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
         field: updatedField.length > 0 ? updatedField[0].label : '',
         id: timelineId,
         operator: getQueryOperatorFromSelection(updatedOperator),
-        providerId:
-          providerId ?? getProviderId(timelineId, updatedField[0].label, `${updatedValue}`),
+        providerId,
         value: updatedValue,
         type,
       });

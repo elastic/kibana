@@ -27,8 +27,6 @@ import {
 
 import { drag, drop } from '../tasks/common';
 
-export const hostExistsQuery = 'host.name: *';
-
 export const addDescriptionToTimeline = (description: string) => {
   cy.get(TIMELINE_DESCRIPTION).type(`${description}{enter}`);
   cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).click().invoke('text').should('not.equal', 'Updating');
@@ -57,10 +55,6 @@ export const createNewTimeline = () => {
   cy.get(CLOSE_TIMELINE_BTN).click({ force: true });
 };
 
-export const executeTimelineKQL = (query: string) => {
-  cy.get(`${SEARCH_OR_FILTER_CONTAINER} textarea`).type(`${query} {enter}`);
-};
-
 export const expandFirstTimelineEventDetails = () => {
   cy.get(TOGGLE_TIMELINE_EXPAND_EVENT).first().click({ force: true });
 };
@@ -79,7 +73,6 @@ export const openTimelineSettings = () => {
 };
 
 export const populateTimeline = () => {
-  executeTimelineKQL(hostExistsQuery);
   cy.get(SERVER_SIDE_EVENT_COUNT)
     .invoke('text')
     .then((strCount) => {

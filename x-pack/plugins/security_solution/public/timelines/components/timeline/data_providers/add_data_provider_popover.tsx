@@ -13,6 +13,7 @@ import {
   EuiIcon,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
+import uuid from 'uuid';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { BrowserFields } from '../../../../common/containers/source';
@@ -112,6 +113,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
             timelineId={timelineId}
             value=""
             type={DataProviderType.default}
+            providerId={`${timelineId}-${uuid.v4()}`}
           />
         ),
       },
@@ -129,6 +131,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
             timelineId={timelineId}
             value=""
             type={DataProviderType.template}
+            providerId={`${timelineId}-${uuid.v4()}`}
           />
         ),
       },
