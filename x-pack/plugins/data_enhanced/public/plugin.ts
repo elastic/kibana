@@ -5,18 +5,10 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import {
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-  ES_SEARCH_STRATEGY,
-} from '../../../../src/plugins/data/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { setAutocompleteService } from './services';
 import { setupKqlQuerySuggestionProvider, KUERY_LANGUAGE_NAME } from './autocomplete';
-import {
-  ASYNC_SEARCH_STRATEGY,
-  asyncSearchStrategyProvider,
-  enhancedEsSearchStrategyProvider,
-} from './search';
+
 import { EnhancedSearchInterceptor } from './search/search_interceptor';
 import { SessionService } from './session';
 
@@ -47,10 +39,6 @@ export class DataEnhancedPlugin
       KUERY_LANGUAGE_NAME,
       setupKqlQuerySuggestionProvider(core)
     );
-    const asyncSearchStrategy = asyncSearchStrategyProvider(core);
-    const esSearchStrategy = enhancedEsSearchStrategyProvider(core, asyncSearchStrategy);
-    data.search.registerSearchStrategy(ASYNC_SEARCH_STRATEGY, asyncSearchStrategy);
-    data.search.registerSearchStrategy(ES_SEARCH_STRATEGY, esSearchStrategy);
   }
 
   public start(core: CoreStart, plugins: DataEnhancedStartDependencies): DataEnhancedStart {
@@ -58,10 +46,13 @@ export class DataEnhancedPlugin
     this.sessionService = new SessionService(core.http, plugins.data.search);
 
     const enhancedSearchInterceptor = new EnhancedSearchInterceptor(
-      this.sessionService,
-      plugins.data,
-      core.notifications.toasts,
-      core.application,
+      {
+        session: this.sessionService,
+        toasts: core.notifications.toasts,
+        application: core.application,
+        http: core.http,
+        uiSettings: core.uiSettings,
+      },
       core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
     );
     plugins.data.search.setInterceptor(enhancedSearchInterceptor);

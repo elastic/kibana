@@ -126,29 +126,21 @@ async function asyncSearch(
   context?: IEnhancedSearchContext
 ) {
   const { timeout = undefined, restTotalHitsAsInt = undefined, ...params } = {
-    trackTotalHits: true, // Get the exact count of hits
     ...request.params,
   };
+
+  params.trackTotalHits = true; // Get the exact count of hits
 
   const storedAsyncId = await getBackgroundSession(request, options, context);
   const asyncId = request.id ? request.id : storedAsyncId;
 
   // If we have an ID, then just poll for that ID, otherwise send the entire request body
-  const { body = undefined, index = undefined, ...queryParams } = asyncId ? {} : params;
+  const { body = undefined, index = undefined, ...queryParams } = request.id ? {} : params;
   const method = asyncId ? 'GET' : 'POST';
-  const path = encodeURI(asyncId ? `/_async_search/${asyncId}` : `/${index}/_async_search`);
+  const path = encodeURI(request.id ? `/_async_search/${request.id}` : `/${index}/_async_search`);
 
-  // Wait up to 1ms for the response to return for new requests
-  // DONT MERGE WITH requestCache: false,
-  const query = toSnakeCase({
-    ...(asyncId
-      ? {}
-      : {
-          requestCache: false,
-          waitForCompletionTimeout: '1ms',
-        }),
-    ...queryParams,
-  });
+  // Wait up to 1s for the response to return
+  const query = toSnakeCase({ waitForCompletionTimeout: '100ms', ...queryParams });
 
   const { id, response, is_partial, is_running } = (await caller(
     'transport.request',
@@ -176,7 +168,7 @@ async function rollupSearch(
   request: IEnhancedEsSearchRequest,
   options?: ISearchOptions
 ) {
-  const { body, index, ...params } = request.params;
+  const { body, index, ...params } = request.params!;
   const method = 'POST';
   const path = encodeURI(`/${index}/_rollup_search`);
   const query = toSnakeCase(params);

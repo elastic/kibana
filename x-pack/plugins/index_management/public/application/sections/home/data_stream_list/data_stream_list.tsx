@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiTitle, EuiText, EuiSpacer, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 
-import { reactRouterNavigate } from '../../../../shared_imports';
+import { reactRouterNavigate, extractQueryParams } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
 import { SectionError, SectionLoading, Error } from '../../../components';
 import { useLoadDataStreams } from '../../../services/api';
@@ -28,8 +28,11 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   match: {
     params: { dataStreamName },
   },
+  location: { search },
   history,
 }) => {
+  const { isDeepLink } = extractQueryParams(search);
+
   const {
     core: { getUrlForApp },
     plugins: { ingestManager },
@@ -144,7 +147,9 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
 
         <DataStreamTable
           filters={
-            dataStreamName !== undefined ? `name=${decodePathFromReactRouter(dataStreamName)}` : ''
+            isDeepLink && dataStreamName !== undefined
+              ? `name=${decodePathFromReactRouter(dataStreamName)}`
+              : ''
           }
           dataStreams={dataStreams}
           reload={reload}

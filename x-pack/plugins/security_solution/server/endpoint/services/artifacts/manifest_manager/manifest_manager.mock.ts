@@ -84,9 +84,15 @@ export class ManifestManagerMock extends ManifestManager {
 }
 
 export const getManifestManagerMock = (opts?: {
+  cache?: ExceptionsCache;
   packageConfigService?: PackageConfigServiceMock;
   savedObjectsClient?: ReturnType<typeof savedObjectsClientMock.create>;
 }): ManifestManagerMock => {
+  let cache = new ExceptionsCache(5);
+  if (opts?.cache !== undefined) {
+    cache = opts.cache;
+  }
+
   let packageConfigService = getPackageConfigServiceMock();
   if (opts?.packageConfigService !== undefined) {
     packageConfigService = opts.packageConfigService;
@@ -99,7 +105,7 @@ export const getManifestManagerMock = (opts?: {
 
   const manifestManager = new ManifestManagerMock({
     artifactClient: getArtifactClientMock(savedObjectsClient),
-    cache: new ExceptionsCache(5),
+    cache,
     // @ts-ignore
     packageConfigService,
     exceptionListClient: listMock.getExceptionListClient(),

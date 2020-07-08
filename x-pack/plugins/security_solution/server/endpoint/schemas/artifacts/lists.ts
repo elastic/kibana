@@ -20,6 +20,9 @@ export const translatedEntryMatchAny = t.exact(
 );
 export type TranslatedEntryMatchAny = t.TypeOf<typeof translatedEntryMatchAny>;
 
+export const translatedEntryMatchAnyMatcher = translatedEntryMatchAny.type.props.type;
+export type TranslatedEntryMatchAnyMatcher = t.TypeOf<typeof translatedEntryMatchAnyMatcher>;
+
 export const translatedEntryMatch = t.exact(
   t.type({
     field: t.string,
@@ -33,11 +36,23 @@ export const translatedEntryMatch = t.exact(
 );
 export type TranslatedEntryMatch = t.TypeOf<typeof translatedEntryMatch>;
 
+export const translatedEntryMatchMatcher = translatedEntryMatch.type.props.type;
+export type TranslatedEntryMatchMatcher = t.TypeOf<typeof translatedEntryMatchMatcher>;
+
+export const translatedEntryMatcher = t.union([
+  translatedEntryMatchMatcher,
+  translatedEntryMatchAnyMatcher,
+]);
+export type TranslatedEntryMatcher = t.TypeOf<typeof translatedEntryMatcher>;
+
+export const translatedEntryNestedEntry = t.union([translatedEntryMatch, translatedEntryMatchAny]);
+export type TranslatedEntryNestedEntry = t.TypeOf<typeof translatedEntryNestedEntry>;
+
 export const translatedEntryNested = t.exact(
   t.type({
     field: t.string,
     type: t.keyof({ nested: null }),
-    entries: t.array(t.union([translatedEntryMatch, translatedEntryMatchAny])),
+    entries: t.array(translatedEntryNestedEntry),
   })
 );
 export type TranslatedEntryNested = t.TypeOf<typeof translatedEntryNested>;
@@ -49,17 +64,17 @@ export const translatedEntry = t.union([
 ]);
 export type TranslatedEntry = t.TypeOf<typeof translatedEntry>;
 
-export const translatedExceptionList = t.exact(
+export const translatedExceptionListItem = t.exact(
   t.type({
     type: t.string,
     entries: t.array(translatedEntry),
   })
 );
-export type TranslatedExceptionList = t.TypeOf<typeof translatedExceptionList>;
+export type TranslatedExceptionListItem = t.TypeOf<typeof translatedExceptionListItem>;
 
-export const wrappedExceptionList = t.exact(
+export const wrappedTranslatedExceptionList = t.exact(
   t.type({
-    exceptions_list: t.array(translatedEntry),
+    entries: t.array(translatedExceptionListItem),
   })
 );
-export type WrappedTranslatedExceptionList = t.TypeOf<typeof wrappedExceptionList>;
+export type WrappedTranslatedExceptionList = t.TypeOf<typeof wrappedTranslatedExceptionList>;

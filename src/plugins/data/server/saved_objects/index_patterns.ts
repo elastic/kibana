@@ -54,5 +54,5 @@ export const indexPatternSavedObjectType: SavedObjectsType = {
       typeMeta: { type: 'keyword' },
     },
   },
-  migrations: indexPatternSavedObjectTypeMigrations,
+  migrations: indexPatternSavedObjectTypeMigrations as any,
 };
