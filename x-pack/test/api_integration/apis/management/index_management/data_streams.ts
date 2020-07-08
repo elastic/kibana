@@ -71,7 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(dataStreams).to.eql([
           {
             name: testDataStreamName,
-            timeStampField: { name: '@timestamp', mapping: { type: 'date' } },
+            timeStampField: { name: '@timestamp' },
             indices: [
               {
                 name: indexName,

@@ -17,7 +17,9 @@ export function registerGetAllRoute({ router, license, lib: { isEsError } }: Rou
       const { callAsCurrentUser } = ctx.dataManagement!.client;
 
       try {
-        const dataStreams = await callAsCurrentUser('dataManagement.getDataStreams');
+        const { data_streams: dataStreams } = await callAsCurrentUser(
+          'dataManagement.getDataStreams'
+        );
         const body = deserializeDataStreamList(dataStreams);
 
         return res.ok({ body });
