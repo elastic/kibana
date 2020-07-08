@@ -71,15 +71,15 @@ export const getPackageConfigCreateCallback = (
       return updatedPackageConfig;
     } finally {
       if (snapshot.diffs.length > 0) {
-        // const created = await manifestManager.confirmPackageConfigExists(updatedPackageConfig.name);
-        const created = true;
-        if (created) {
+        // TODO: let's revisit the way this callback happens... use promises?
+        // only commit when we know the package config was created
+        try {
           await manifestManager.commit(snapshot.manifest);
 
           // clean up old artifacts
           await manifestManager.syncArtifacts(snapshot, 'delete');
-        } else {
-          logger.warn('Package config update failed.');
+        } catch (err) {
+          logger.error(err);
         }
       }
     }
