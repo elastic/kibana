@@ -3,16 +3,21 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import moment, { unitOfTime as UnitOfTIme } from 'moment';
+
+function getDurationAsSeconds(value: number, unitOfTime: UnitOfTIme.Base) {
+  return moment.duration(value, unitOfTime).asSeconds();
+}
 
 const units = {
-  ms: 0.001,
-  s: 1,
-  m: 60,
-  h: 3600,
-  d: 86400,
-  w: 86400 * 7, // Hum... might be wrong
-  M: 86400 * 30, // this too... 29,30,31?
-  y: 86400 * 356, // Leap year?
+  ms: getDurationAsSeconds(1, 'millisecond'),
+  s: getDurationAsSeconds(1, 'second'),
+  m: getDurationAsSeconds(1, 'minute'),
+  h: getDurationAsSeconds(1, 'hour'),
+  d: getDurationAsSeconds(1, 'day'),
+  w: getDurationAsSeconds(1, 'week'),
+  M: getDurationAsSeconds(1, 'month'),
+  y: getDurationAsSeconds(1, 'year'),
 };
 
 export function unitToSeconds(unit: string) {
