@@ -6,6 +6,7 @@
 
 import {
   AddRulesProps,
+  PatchRuleProps,
   NewRule,
   PrePackagedRulesStatusResponse,
   BasicFetchProps,
@@ -18,6 +19,9 @@ import {
 import { ruleMock, savedRuleMock, rulesMock } from '../mock';
 
 export const addRule = async ({ rule, signal }: AddRulesProps): Promise<NewRule> =>
+  Promise.resolve(ruleMock);
+
+export const patchRule = async ({ ruleProperties, signal }: PatchRuleProps): Promise<NewRule> =>
   Promise.resolve(ruleMock);
 
 export const getPrePackagedRulesStatus = async ({
