@@ -61,7 +61,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     core.application.register({
-      id: 'workplace_search',
+      id: 'workplaceSearch',
       title: 'Workplace Search',
       appRoute: '/app/enterprise_search/workplace_search',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
@@ -87,7 +87,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     plugins.home.featureCatalogue.register({
-      id: 'workplace_search',
+      id: 'workplaceSearch',
       title: 'Workplace Search',
       icon: WorkplaceSearchLogo,
       description:
