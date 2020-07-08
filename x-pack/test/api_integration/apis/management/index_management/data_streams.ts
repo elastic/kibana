@@ -60,7 +60,8 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => await createDataStream(testDataStreamName));
       after(async () => await deleteDataStream(testDataStreamName));
 
-      it('returns an array of all data streams', async () => {
+      // TODO: Unskip once promotion issue has been resolved: https://github.com/elastic/kibana/issues/71018
+      it.skip('returns an array of all data streams', async () => {
         const { body: dataStreams } = await supertest
           .get(`${API_BASE_PATH}/data_streams`)
           .set('kbn-xsrf', 'xxx')
@@ -83,7 +84,8 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
       });
 
-      it('returns a single data stream by ID', async () => {
+      // TODO: Unskip once promotion issue has been resolved: https://github.com/elastic/kibana/issues/71018
+      it.skip('returns a single data stream by ID', async () => {
         const { body: dataStream } = await supertest
           .get(`${API_BASE_PATH}/data_streams/${testDataStreamName}`)
           .set('kbn-xsrf', 'xxx')
@@ -93,7 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { name: indexName, uuid } = dataStream.indices[0];
         expect(dataStream).to.eql({
           name: testDataStreamName,
-          timeStampField: { name: '@timestamp', mapping: { type: 'date' } },
+          timeStampField: { name: '@timestamp' },
           indices: [
             {
               name: indexName,

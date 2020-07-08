@@ -52,7 +52,10 @@ export function registerGetOneRoute({ router, license, lib: { isEsError } }: Rou
       const { callAsCurrentUser } = ctx.dataManagement!.client;
 
       try {
-        const dataStream = await callAsCurrentUser('dataManagement.getDataStream', { name });
+        const { data_streams: dataStream } = await callAsCurrentUser(
+          'dataManagement.getDataStream',
+          { name }
+        );
 
         if (dataStream[0]) {
           const body = deserializeDataStream(dataStream[0]);
