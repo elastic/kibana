@@ -16,6 +16,7 @@ import {
   OperatorTypeEnum,
   OperatorEnum,
   CreateExceptionListItemSchema,
+  ExceptionListType,
 } from '../../../../../public/lists_plugin_deps';
 import { AndOrBadge } from '../../and_or_badge';
 import { BuilderButtonOptions } from './builder_button_options';
@@ -43,8 +44,8 @@ interface OnChangeProps {
 }
 
 interface ExceptionBuilderProps {
-  exceptionListItems: ExceptionListItemSchema[];
-  listType: 'detection' | 'endpoint';
+  exceptionListItems: ExceptionsBuilderExceptionItem[];
+  listType: ExceptionListType;
   listId: string;
   listNamespaceType: NamespaceType;
   ruleName: string;

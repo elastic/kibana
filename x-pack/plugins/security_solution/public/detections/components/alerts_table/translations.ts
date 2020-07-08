@@ -115,6 +115,20 @@ export const ACTION_INVESTIGATE_IN_TIMELINE = i18n.translate(
   }
 );
 
+export const ACTION_ADD_EXCEPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addException',
+  {
+    defaultMessage: 'Add exception',
+  }
+);
+
+export const ACTION_ADD_ENDPOINT_EXCEPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addEndpointException',
+  {
+    defaultMessage: 'Add Endpoint exception',
+  }
+);
+
 export const CLOSED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.alerts.closedAlertSuccessToastMessage', {
     values: { totalAlerts },
