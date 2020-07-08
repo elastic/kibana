@@ -18,7 +18,6 @@ interface IStatisticCardProps {
 
 export const StatisticCard: React.FC<IStatisticCardProps> = ({ title, count = 0, actionPath }) => {
   const { getWSRoute } = useRoutes();
-  const actionRoute = getWSRoute(actionPath);
 
   const card = (
     <EuiFlexItem>
@@ -43,7 +42,7 @@ export const StatisticCard: React.FC<IStatisticCardProps> = ({ title, count = 0,
   return (
     <EuiFlexItem>
       {actionPath ? (
-        <EuiLink target="_blank" href={actionRoute}>
+        <EuiLink target="_blank" href={getWSRoute(actionPath)}>
           {card}
         </EuiLink>
       ) : (

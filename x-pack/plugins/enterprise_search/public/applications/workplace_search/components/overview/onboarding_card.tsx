@@ -47,8 +47,6 @@ export const OnboardingCard: React.FC<IOnboardingCardProps> = ({
     'euiCard-isSelected euiCard--isSelectable--success': complete,
   });
   const { getWSRoute } = useRoutes();
-  const actionRoute = getWSRoute(actionPath);
-  const iconType = complete ? 'checkInCircleFilled' : (icon as IconType);
 
   const onClick = () =>
     sendTelemetry({
@@ -57,16 +55,22 @@ export const OnboardingCard: React.FC<IOnboardingCardProps> = ({
       action: 'clicked',
       metric: 'onboarding_card_button',
     });
+  const buttonActionProps = actionPath
+    ? {
+        onClick,
+        href: getWSRoute(actionPath),
+        target: '_blank',
+        'data-test-subj': testSubj,
+      }
+    : {
+        'data-test-subj': testSubj,
+      };
 
   const emptyButtonProps = {
-    onClick,
-    target: '_blank',
-    href: actionRoute,
-    'data-test-subj': testSubj,
+    ...buttonActionProps,
   } as EuiButtonEmptyProps & EuiLinkProps;
-
   const fillButtonProps = {
-    ...emptyButtonProps,
+    ...buttonActionProps,
     color: 'secondary',
     fill: true,
   } as EuiButtonProps & EuiLinkProps;
@@ -75,7 +79,7 @@ export const OnboardingCard: React.FC<IOnboardingCardProps> = ({
     <EuiFlexItem>
       <EuiPanel className={`euiPanel ${complete ? '' : 'euiPanel--inset'}`}>
         <EuiEmptyPrompt
-          iconType={iconType}
+          iconType={complete ? 'checkInCircleFilled' : (icon as IconType)}
           iconColor={`${complete ? 'secondary' : 'subdued'}`}
           title={<h3>{title}</h3>}
           body={description}
