@@ -26,7 +26,7 @@ interface ISendTelemetry extends ISendTelemetryProps {
 export const sendTelemetry = async ({ http, product, action, metric }: ISendTelemetry) => {
   try {
     await http.put(`/api/${product}/telemetry`, {
-      headers: { 'content-type': 'application/json; charset=utf-8' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action, metric }),
     });
   } catch (error) {
