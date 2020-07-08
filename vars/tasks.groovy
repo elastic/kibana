@@ -76,7 +76,7 @@ def functionalXpack(Map params = [:]) {
     firefox: true,
     accessibility: true,
     pluginFunctional: true,
-    savedObjectsFieldMetrics: true,
+    savedObjectsFieldMetrics:true,
     pageLoadMetrics: false,
     visualRegression: false,
   ]
