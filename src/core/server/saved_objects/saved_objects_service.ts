@@ -432,7 +432,7 @@ export class SavedObjectsService
       ).toPromise();
 
       this.logger.info('Starting saved objects migrations');
-      const migrationSpan = apm.startSpan('saved_objects.migration');
+      const migrationSpan = apm.startSpan('saved_objects', 'migration');
       await migrator.runMigrations();
       if (migrationSpan) {
         migrationSpan.end();
