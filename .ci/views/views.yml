@@ -1,0 +1,16 @@
+- view:
+    name: Main
+    regex: '^((?!multijob|periodic).)*$'
+    view-type: list
+- view:
+    name: Kibana
+    regex: '^elastic[-+]kibana((?!multijob).)*$'
+    view-type: list
+- view:
+    name: Visual Baselines
+    regex: '^elastic+kibana+(.*)-visual-baseline$'
+    view-type: list
+- view:
+    name: esvm
+    regex: '^elastic[-+]esvm((?!multijob).)*$'
+    view-type: list
