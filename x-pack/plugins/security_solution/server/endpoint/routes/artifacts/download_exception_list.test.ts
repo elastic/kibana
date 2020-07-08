@@ -164,8 +164,6 @@ describe('test alerts route', () => {
       path.startsWith('/api/endpoint/artifacts/download')
     )!;
 
-    expect(routeConfig.options).toEqual({ tags: ['access:securitySolution'] });
-
     await routeHandler(
       ({
         core: {
