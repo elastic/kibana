@@ -262,10 +262,6 @@ describe('helpers', () => {
           },
         ],
         dataProviders: [],
-        dateRange: {
-          end: '2020-07-08T08:20:18.966Z',
-          start: '2020-07-07T08:20:18.966Z',
-        },
         description: '',
         deletedEventIds: [],
         eventIdToNoteIds: {},
@@ -360,10 +356,6 @@ describe('helpers', () => {
           },
         ],
         dataProviders: [],
-        dateRange: {
-          end: '2020-07-08T08:20:18.966Z',
-          start: '2020-07-07T08:20:18.966Z',
-        },
         description: '',
         deletedEventIds: [],
         eventIdToNoteIds: {},
@@ -526,10 +518,6 @@ describe('helpers', () => {
         noteIds: [],
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
-        dateRange: {
-          start: '2020-07-07T08:20:18.966Z',
-          end: '2020-07-08T08:20:18.966Z',
-        },
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
@@ -695,10 +683,6 @@ describe('helpers', () => {
         noteIds: [],
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
-        dateRange: {
-          start: '2020-07-07T08:20:18.966Z',
-          end: '2020-07-08T08:20:18.966Z',
-        },
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,

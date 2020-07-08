@@ -153,10 +153,7 @@ interface AddNewTimelineParams {
 export const addNewTimeline = ({
   columns,
   dataProviders = [],
-  dateRange = {
-    start: '2020-07-07T08:20:18.966Z',
-    end: '2020-07-08T08:20:18.966Z',
-  },
+  dateRange,
   filters = timelineDefaults.filters,
   id,
   itemsPerPage = timelineDefaults.itemsPerPage,
