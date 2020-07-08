@@ -157,17 +157,18 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <EuiButton onClick={() => setShowFlyout(true)}>View alert configuration</EuiButton>
+      <EuiButton onClick={() => setShowFlyout(true)}>Edit alert</EuiButton>
       {flyoutUi}
     </Fragment>
   );
 
+  if (inSetupMode) {
+    return configurationUi;
+  }
+
   const firingStates = states.filter((state) => state.firing);
   if (!firingStates.length) {
-    if (inSetupMode) {
-      return configurationUi;
-    }
-    return null;
+    return configurationUi;
   }
 
   const firingState = firingStates[0];

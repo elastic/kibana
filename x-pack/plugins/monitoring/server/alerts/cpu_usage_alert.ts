@@ -103,7 +103,6 @@ export class CpuUsageAlert extends BaseAlert {
       endMs,
       this.config
     );
-    // TODO: ignore single spikes? look for consistency?
     return stats.map((stat) => {
       let cpuUsage = 0;
       if (this.config.ui.container.elasticsearch.enabled) {
