@@ -74,15 +74,17 @@ export const logMessageColumnRT = rt.type({
 
 export const logColumnRT = rt.union([logTimestampColumnRT, logFieldColumnRT, logMessageColumnRT]);
 
+export const logEntryContextRT = rt.union([
+  rt.type({}),
+  rt.type({ 'container.id': rt.string }),
+  rt.type({ 'host.name': rt.string, 'log.file.path': rt.string }),
+]);
+
 export const logEntryRT = rt.type({
   id: rt.string,
   cursor: logEntriesCursorRT,
   columns: rt.array(logColumnRT),
-  context: rt.union([
-    rt.type({}),
-    rt.type({ 'container.id': rt.string }),
-    rt.type({ 'host.name': rt.string, 'log.file.path': rt.string }),
-  ]),
+  context: logEntryContextRT,
 });
 
 export type LogMessageConstantPart = rt.TypeOf<typeof logMessageConstantPartRT>;
@@ -92,6 +94,7 @@ export type LogTimestampColumn = rt.TypeOf<typeof logTimestampColumnRT>;
 export type LogFieldColumn = rt.TypeOf<typeof logFieldColumnRT>;
 export type LogMessageColumn = rt.TypeOf<typeof logMessageColumnRT>;
 export type LogColumn = rt.TypeOf<typeof logColumnRT>;
+export type LogEntryContext = rt.TypeOf<typeof logEntryContextRT>;
 export type LogEntry = rt.TypeOf<typeof logEntryRT>;
 
 export const logEntriesResponseRT = rt.type({

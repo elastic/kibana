@@ -175,7 +175,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
     {
       field: 'config_id',
       name: i18n.translate('xpack.ingestManager.enrollmentTokensList.configTitle', {
-        defaultMessage: 'Config',
+        defaultMessage: 'Agent config',
       }),
       render: (configId: string) => {
         const config = agentConfigs.find((c) => c.id === configId);

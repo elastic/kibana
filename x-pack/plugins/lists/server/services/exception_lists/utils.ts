@@ -21,6 +21,8 @@ import {
   NamespaceType,
   UpdateCommentsArrayOrUndefined,
   comments as commentsSchema,
+  exceptionListItemType,
+  exceptionListType,
 } from '../../../common/schemas';
 import {
   SavedObjectType,
@@ -80,7 +82,7 @@ export const transformSavedObjectToExceptionList = ({
     namespace_type: namespaceType,
     tags,
     tie_breaker_id,
-    type,
+    type: exceptionListType.is(type) ? type : 'detection',
     updated_at: updatedAt ?? dateNow,
     updated_by,
   };
@@ -116,7 +118,7 @@ export const transformSavedObjectUpdateToExceptionList = ({
     namespace_type: namespaceType,
     tags: tags ?? exceptionList.tags,
     tie_breaker_id: exceptionList.tie_breaker_id,
-    type: type ?? exceptionList.type,
+    type: exceptionListType.is(type) ? type : exceptionList.type,
     updated_at: updatedAt ?? dateNow,
     updated_by: updatedBy ?? exceptionList.updated_by,
   };
@@ -168,7 +170,7 @@ export const transformSavedObjectToExceptionListItem = ({
     namespace_type: namespaceType,
     tags,
     tie_breaker_id,
-    type,
+    type: exceptionListItemType.is(type) ? type : 'simple',
     updated_at: updatedAt ?? dateNow,
     updated_by,
   };
@@ -202,6 +204,8 @@ export const transformSavedObjectUpdateToExceptionListItem = ({
 
   // TODO: Change this to do a decode and throw if the saved object is not as expected.
   // TODO: Do a throw if after the decode this is not the correct "list_type: list"
+  // TODO: Update exception list and item types (perhaps separating out) so as to avoid
+  // defaulting
   return {
     _tags: _tags ?? exceptionListItem._tags,
     comments: comments ?? exceptionListItem.comments,
@@ -217,7 +221,7 @@ export const transformSavedObjectUpdateToExceptionListItem = ({
     namespace_type: namespaceType,
     tags: tags ?? exceptionListItem.tags,
     tie_breaker_id: exceptionListItem.tie_breaker_id,
-    type: type ?? exceptionListItem.type,
+    type: exceptionListItemType.is(type) ? type : exceptionListItem.type,
     updated_at: updatedAt ?? dateNow,
     updated_by: updatedBy ?? exceptionListItem.updated_by,
   };

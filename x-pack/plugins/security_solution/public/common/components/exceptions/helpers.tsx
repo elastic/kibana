@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { EuiText, EuiCommentProps, EuiAvatar } from '@elastic/eui';
-import { capitalize } from 'lodash';
+import { capitalize, union } from 'lodash';
 import moment from 'moment';
 import uuid from 'uuid';
 
@@ -24,6 +24,8 @@ import { EXCEPTION_OPERATORS, isOperator } from '../autocomplete/operators';
 import { OperatorOption } from '../autocomplete/types';
 import {
   CommentsArray,
+  Comments,
+  CreateComments,
   Entry,
   ExceptionListItemSchema,
   NamespaceType,
@@ -33,11 +35,15 @@ import {
   entriesNested,
   createExceptionListItemSchema,
   exceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+  ExceptionListType,
 } from '../../../lists_plugin_deps';
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
 
 export const isListType = (item: BuilderEntry): item is EmptyListEntry =>
   item.type === OperatorTypeEnum.LIST;
+import { TimelineNonEcsData } from '../../../graphql/types';
+import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 
 /**
  * Returns the operator type, may not need this if using io-ts types
@@ -161,6 +167,10 @@ export const getOperatingSystems = (tags: string[]): string => {
   return osMatches;
 };
 
+export const getOsTagValues = (tags: string[]): string[] => {
+  return tags.filter((tag) => tag.startsWith('os:')).map((os) => os.substring(3).trim());
+};
+
 export const getTagsInclude = ({
   tags,
   regex,
@@ -221,6 +231,13 @@ export const getFormattedComments = (comments: CommentsArray): EuiCommentProps[]
     event: i18n.COMMENT_EVENT,
     timelineIcon: <EuiAvatar size="l" name={comment.created_by.toUpperCase()} />,
     children: <EuiText size="s">{comment.comment}</EuiText>,
+    actions: (
+      <WithCopyToClipboard
+        data-test-subj="copy-to-clipboard"
+        text={comment.comment}
+        titleSummary={i18n.ADD_TO_CLIPBOARD}
+      />
+    ),
   }));
 
 export const getFormattedBuilderEntries = (
@@ -292,7 +309,7 @@ export const getNewExceptionItem = ({
   namespaceType,
   ruleName,
 }: {
-  listType: 'detection' | 'endpoint';
+  listType: ExceptionListType;
   listId: string;
   namespaceType: NamespaceType;
   ruleName: string;
@@ -340,4 +357,160 @@ export const filterExceptionItems = (
     },
     []
   );
+};
+
+export const formatExceptionItemForUpdate = (
+  exceptionItem: ExceptionListItemSchema
+): UpdateExceptionListItemSchema => {
+  const {
+    created_at,
+    created_by,
+    list_id,
+    tie_breaker_id,
+    updated_at,
+    updated_by,
+    ...fieldsToUpdate
+  } = exceptionItem;
+  return {
+    ...fieldsToUpdate,
+  };
+};
+
+export const enrichExceptionItemsWithComments = (
+  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
+  comments: Array<Comments | CreateComments>
+): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
+  return exceptionItems.map((item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
+    return {
+      ...item,
+      comments,
+    };
+  });
+};
+
+export const enrichExceptionItemsWithOS = (
+  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
+  osTypes: string[]
+): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
+  const osTags = osTypes.map((os) => `os:${os}`);
+  return exceptionItems.map((item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
+    const newTags = item._tags ? union(item._tags, osTags) : [...osTags];
+    return {
+      ...item,
+      _tags: newTags,
+    };
+  });
+};
+
+export const getMappedNonEcsValue = ({
+  data,
+  fieldName,
+}: {
+  data: TimelineNonEcsData[];
+  fieldName: string;
+}): string[] | undefined => {
+  const item = data.find((d) => d.field === fieldName);
+  if (item != null && item.value != null) {
+    return item.value;
+  }
+  return undefined;
+};
+
+export const entryHasListType = (
+  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
+) => {
+  for (const { entries } of exceptionItems) {
+    for (const exceptionEntry of entries ?? []) {
+      if (getOperatorType(exceptionEntry) === 'list') {
+        return true;
+      }
+    }
+  }
+  return false;
+};
+
+export const entryHasNonEcsType = (
+  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
+  indexPatterns: IIndexPattern
+): boolean => {
+  if (exceptionItems.length === 0) {
+    return false;
+  }
+  for (const { entries } of exceptionItems) {
+    for (const exceptionEntry of entries ?? []) {
+      if (indexPatterns.fields.find(({ name }) => name === exceptionEntry.field) === undefined) {
+        return true;
+      }
+    }
+  }
+  return false;
+};
+
+export const defaultEndpointExceptionItems = (
+  listType: ExceptionListType,
+  listId: string,
+  ruleName: string,
+  alertData: TimelineNonEcsData[]
+): ExceptionsBuilderExceptionItem[] => {
+  const [filePath] = getMappedNonEcsValue({ data: alertData, fieldName: 'file.path' }) ?? [];
+  const [signatureSigner] =
+    getMappedNonEcsValue({ data: alertData, fieldName: 'file.Ext.code_signature.subject_name' }) ??
+    [];
+  const [signatureTrusted] =
+    getMappedNonEcsValue({ data: alertData, fieldName: 'file.Ext.code_signature.trusted' }) ?? [];
+  const [sha1Hash] = getMappedNonEcsValue({ data: alertData, fieldName: 'file.hash.sha1' }) ?? [];
+  const namespaceType = 'agnostic';
+
+  return [
+    {
+      ...getNewExceptionItem({ listType, listId, namespaceType, ruleName }),
+      entries: [
+        {
+          field: 'file.path',
+          operator: 'included',
+          type: 'match',
+          value: filePath ?? '',
+        },
+      ],
+    },
+    {
+      ...getNewExceptionItem({ listType, listId, namespaceType, ruleName }),
+      entries: [
+        {
+          field: 'file.Ext.code_signature.subject_name',
+          operator: 'included',
+          type: 'match',
+          value: signatureSigner ?? '',
+        },
+        {
+          field: 'file.code_signature.trusted',
+          operator: 'included',
+          type: 'match',
+          value: signatureTrusted ?? '',
+        },
+      ],
+    },
+    {
+      ...getNewExceptionItem({ listType, listId, namespaceType, ruleName }),
+      entries: [
+        {
+          field: 'file.hash.sha1',
+          operator: 'included',
+          type: 'match',
+          value: sha1Hash ?? '',
+        },
+      ],
+    },
+    {
+      ...getNewExceptionItem({ listType, listId, namespaceType, ruleName }),
+      entries: [
+        {
+          field: 'event.category',
+          operator: 'included',
+          type: 'match_any',
+          value: getMappedNonEcsValue({ data: alertData, fieldName: 'event.category' }) ?? [],
+        },
+      ],
+    },
+  ];
 };

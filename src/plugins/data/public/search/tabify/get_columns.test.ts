@@ -20,26 +20,27 @@
 import { tabifyGetColumns } from './get_columns';
 import { TabbedAggColumn } from './types';
 import { AggConfigs } from '../aggs';
-import { mockAggTypesRegistry, mockDataServices } from '../aggs/test_helpers';
+import { mockAggTypesRegistry } from '../aggs/test_helpers';
 
 describe('get columns', () => {
-  beforeEach(() => {
-    mockDataServices();
-  });
-
   const typesRegistry = mockAggTypesRegistry();
 
   const createAggConfigs = (aggs: any[] = []) => {
-    const field = {
-      name: '@timestamp',
-    };
+    const fields = [
+      {
+        name: '@timestamp',
+      },
+      {
+        name: 'bytes',
+      },
+    ];
 
     const indexPattern = {
       id: '1234',
       title: 'logstash-*',
       fields: {
-        getByName: () => field,
-        filter: () => [field],
+        getByName: (name: string) => fields.find((f) => f.name === name),
+        filter: () => fields,
       },
     } as any;
 

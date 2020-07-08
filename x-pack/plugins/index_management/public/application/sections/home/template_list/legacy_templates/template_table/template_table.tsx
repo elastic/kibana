@@ -19,7 +19,7 @@ import { useServices } from '../../../../../app_context';
 interface Props {
   templates: TemplateListItem[];
   reload: () => Promise<SendRequestResponse>;
-  editTemplate: (name: string, isLegacy: boolean) => void;
+  editTemplate: (name: string, isLegacy?: boolean) => void;
   cloneTemplate: (name: string, isLegacy?: boolean) => void;
   history: ScopedHistory;
 }
@@ -153,7 +153,7 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
           onClick: ({ name }: TemplateListItem) => {
             editTemplate(name, true);
           },
-          enabled: ({ _kbnMeta: { isManaged } }: TemplateListItem) => !isManaged,
+          enabled: ({ _kbnMeta: { isCloudManaged } }: TemplateListItem) => !isCloudManaged,
         },
         {
           type: 'icon',
@@ -167,8 +167,8 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
             }
           ),
           icon: 'copy',
-          onClick: ({ name, _kbnMeta: { isLegacy } }: TemplateListItem) => {
-            cloneTemplate(name, isLegacy);
+          onClick: ({ name }: TemplateListItem) => {
+            cloneTemplate(name, true);
           },
         },
         {
@@ -188,7 +188,7 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
             setTemplatesToDelete([{ name, isLegacy }]);
           },
           isPrimary: true,
-          enabled: ({ _kbnMeta: { isManaged } }: TemplateListItem) => !isManaged,
+          enabled: ({ _kbnMeta: { isCloudManaged } }: TemplateListItem) => !isCloudManaged,
         },
       ],
     },
@@ -208,7 +208,7 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
 
   const selectionConfig = {
     onSelectionChange: setSelection,
-    selectable: ({ _kbnMeta: { isManaged } }: TemplateListItem) => !isManaged,
+    selectable: ({ _kbnMeta: { isCloudManaged } }: TemplateListItem) => !isCloudManaged,
     selectableMessage: (selectable: boolean) => {
       if (!selectable) {
         return i18n.translate(
@@ -265,6 +265,10 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
     ],
   };
 
+  const goToList = () => {
+    return history.push('templates');
+  };
+
   return (
     <Fragment>
       {templatesToDelete && templatesToDelete.length > 0 ? (
@@ -272,9 +276,10 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
           callback={(data) => {
             if (data && data.hasDeletedTemplates) {
               reload();
-            } else {
-              setTemplatesToDelete([]);
+              // Close the flyout if it is opened
+              goToList();
             }
+            setTemplatesToDelete([]);
           }}
           templatesToDelete={templatesToDelete}
         />

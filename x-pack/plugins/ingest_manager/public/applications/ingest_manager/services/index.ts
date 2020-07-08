@@ -7,6 +7,7 @@
 export { getFlattenedObject } from '../../../../../../../src/core/public';
 
 export {
+  AgentStatusKueryHelper,
   agentConfigRouteService,
   packageConfigRouteService,
   dataStreamRouteService,
@@ -21,5 +22,6 @@ export {
   packageToPackageConfigInputs,
   storedPackageConfigsToAgentInputs,
   configToYaml,
-  AgentStatusKueryHelper,
+  isPackageLimited,
+  doesAgentConfigAlreadyIncludePackage,
 } from '../../../../common';
