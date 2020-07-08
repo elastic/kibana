@@ -12,6 +12,40 @@ import { DataState } from '../../types';
 import { DataAction } from './action';
 import { ResolverChildNode } from '../../../../common/endpoint/types';
 
+function generateBaseTree() {
+  const generator = new EndpointDocGenerator('seed');
+  return generator.generateTree({
+    ancestors: 1,
+    generations: 2,
+    children: 3,
+    percentWithRelated: 100,
+    alwaysGenMaxChildrenPerNode: true,
+  });
+}
+
+function compileStatsForChild(node: TreeNode) {
+  let totalRelatedEvents = 0;
+  let categoryToOverCount: string = '';
+  const compiledStats = node.relatedEvents.reduce(
+    (counts: Record<string, number>, relatedEvent) => {
+      totalRelatedEvents++;
+      for (const category of [relatedEvent.event.category].flat()) {
+        if (!categoryToOverCount) {
+          categoryToOverCount = category;
+        }
+        counts[category] = counts[category] ? counts[category] + 1 : 1;
+      }
+      return counts;
+    },
+    {}
+  );
+  return {
+    totalRelatedEvents,
+    categoryToOverCount,
+    compiledStats,
+  };
+}
+
 /**
  * Test the data reducer and selector.
  */
@@ -31,27 +65,11 @@ describe('Resolver Data Middleware', () => {
      */
     let statsForFirstChild: Record<string, number>;
     beforeEach(() => {
-      const generator = new EndpointDocGenerator('seed');
-      const baseTree = generator.generateTree({
-        ancestors: 1,
-        generations: 2,
-        children: 3,
-        percentWithRelated: 100,
-        alwaysGenMaxChildrenPerNode: true,
-      });
+      const baseTree = generateBaseTree();
       const { children } = baseTree;
       firstChildNodeInTree = [...children.values()][0];
-      let totalRelatedEvents = 0;
-      statsForFirstChild = firstChildNodeInTree.relatedEvents.reduce(
-        (counts: Record<string, number>, relatedEvent) => {
-          totalRelatedEvents++;
-          for (const category of [relatedEvent.event.category].flat()) {
-            counts[category] = counts[category] ? counts[category] + 1 : 1;
-          }
-          return counts;
-        },
-        {}
-      );
+      const statsResults = compileStatsForChild(firstChildNodeInTree);
+      statsForFirstChild = statsResults.compiledStats;
       const tree = mockResolverTree({
         events: baseTree.allEvents,
         cursors: {
@@ -70,7 +88,7 @@ describe('Resolver Data Middleware', () => {
           if (node.id === firstChildNodeInTree.id) {
             // attach stats
             childNode.stats = {
-              events: { total: totalRelatedEvents, byCategory: statsForFirstChild },
+              events: { total: statsResults.totalRelatedEvents, byCategory: statsForFirstChild },
               totalAlerts: 0,
             };
           }
@@ -165,30 +183,13 @@ describe('Resolver Data Middleware', () => {
     let statsForFirstChild: Record<string, number>;
     let categoryToOverCount: string;
     beforeEach(() => {
-      const generator = new EndpointDocGenerator('seed');
-      const baseTree = generator.generateTree({
-        ancestors: 1,
-        generations: 2,
-        children: 3,
-        percentWithRelated: 100,
-        alwaysGenMaxChildrenPerNode: true,
-      });
+      const baseTree = generateBaseTree();
       const { children } = baseTree;
       firstChildNodeInTree = [...children.values()][0];
-      let totalRelatedEvents = 0;
-      statsForFirstChild = firstChildNodeInTree.relatedEvents.reduce(
-        (counts: Record<string, number>, relatedEvent) => {
-          totalRelatedEvents++;
-          for (const category of [relatedEvent.event.category].flat()) {
-            if (!categoryToOverCount) {
-              categoryToOverCount = category;
-            }
-            counts[category] = counts[category] ? counts[category] + 1 : 1;
-          }
-          return counts;
-        },
-        {}
-      );
+      const totalRelatedEvents = 0;
+      const statsResults = compileStatsForChild(firstChildNodeInTree);
+      statsForFirstChild = statsResults.compiledStats;
+      categoryToOverCount = statsResults.categoryToOverCount;
       statsForFirstChild[categoryToOverCount] = statsForFirstChild[categoryToOverCount] + 1;
 
       const tree = mockResolverTree({
