@@ -475,7 +475,15 @@ describe('getFindAuthorizationFilter', () => {
     name: 'myAppAlertType',
     producer: 'myApp',
   };
-  const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType]);
+  const mySecondAppAlertType = {
+    actionGroups: [],
+    actionVariables: undefined,
+    defaultActionGroupId: 'default',
+    id: 'mySecondAppAlertType',
+    name: 'mySecondAppAlertType',
+    producer: 'myApp',
+  };
+  const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType, mySecondAppAlertType]);
 
   test('omits filter when there is no authorization api', async () => {
     const alertAuthorization = new AlertsAuthorization({
@@ -533,7 +541,7 @@ describe('getFindAuthorizationFilter', () => {
     alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
     expect((await alertAuthorization.getFindAuthorizationFilter()).filter).toMatchInlineSnapshot(
-      `"((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:myOtherAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)))"`
+      `"((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:myOtherAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:mySecondAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)))"`
     );
 
     expect(auditLogger.alertsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -635,19 +643,94 @@ describe('getFindAuthorizationFilter', () => {
     });
     alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
-    const { ensureAlertTypeIsAuthorized } = await alertAuthorization.getFindAuthorizationFilter();
+    const {
+      ensureAlertTypeIsAuthorized,
+      logSuccessfulAuthorization,
+    } = await alertAuthorization.getFindAuthorizationFilter();
     expect(() => {
       ensureAlertTypeIsAuthorized('myAppAlertType', 'myOtherApp');
     }).not.toThrow();
 
-    expect(auditLogger.alertsAuthorizationSuccess).toHaveBeenCalledTimes(1);
+    expect(auditLogger.alertsAuthorizationSuccess).not.toHaveBeenCalled();
     expect(auditLogger.alertsAuthorizationFailure).not.toHaveBeenCalled();
-    expect(auditLogger.alertsAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
+  });
+
+  test('creates an `logSuccessfulAuthorization` function which logs every authorized type', async () => {
+    const authorization = mockAuthorization();
+    const checkPrivileges: jest.MockedFunction<ReturnType<
+      typeof authorization.checkPrivilegesDynamicallyWithRequest
+    >> = jest.fn();
+    authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+    checkPrivileges.mockResolvedValueOnce({
+      username: 'some-user',
+      hasAllRequested: false,
+      privileges: [
+        {
+          privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'find'),
+          authorized: true,
+        },
+        {
+          privilege: mockAuthorizationAction('myOtherAppAlertType', 'myOtherApp', 'find'),
+          authorized: false,
+        },
+        {
+          privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'find'),
+          authorized: true,
+        },
+        {
+          privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'find'),
+          authorized: true,
+        },
+        {
+          privilege: mockAuthorizationAction('mySecondAppAlertType', 'myApp', 'find'),
+          authorized: true,
+        },
+        {
+          privilege: mockAuthorizationAction('mySecondAppAlertType', 'myOtherApp', 'find'),
+          authorized: true,
+        },
+      ],
+    });
+
+    const alertAuthorization = new AlertsAuthorization({
+      request,
+      authorization,
+      alertTypeRegistry,
+      features,
+      auditLogger,
+    });
+    alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
+
+    const {
+      ensureAlertTypeIsAuthorized,
+      logSuccessfulAuthorization,
+    } = await alertAuthorization.getFindAuthorizationFilter();
+    expect(() => {
+      ensureAlertTypeIsAuthorized('myAppAlertType', 'myOtherApp');
+      ensureAlertTypeIsAuthorized('mySecondAppAlertType', 'myOtherApp');
+      ensureAlertTypeIsAuthorized('myAppAlertType', 'myOtherApp');
+    }).not.toThrow();
+
+    expect(auditLogger.alertsAuthorizationSuccess).not.toHaveBeenCalled();
+    expect(auditLogger.alertsAuthorizationFailure).not.toHaveBeenCalled();
+
+    logSuccessfulAuthorization();
+
+    expect(auditLogger.alertsBulkAuthorizationSuccess).toHaveBeenCalledTimes(1);
+    expect(auditLogger.alertsBulkAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "some-user",
-        "myAppAlertType",
+        Array [
+          Array [
+            "myAppAlertType",
+            "myOtherApp",
+          ],
+          Array [
+            "mySecondAppAlertType",
+            "myOtherApp",
+          ],
+        ],
         0,
-        "myOtherApp",
         "find",
       ]
     `);

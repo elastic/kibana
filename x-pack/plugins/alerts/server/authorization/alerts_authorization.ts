@@ -56,10 +56,11 @@ export interface ConstructorOptions {
 
 export class AlertsAuthorization {
   private readonly alertTypeRegistry: AlertTypeRegistry;
-  private readonly features: FeaturesPluginStart;
   private readonly request: KibanaRequest;
   private readonly authorization?: SecurityPluginSetup['authz'];
   private readonly auditLogger: AlertsAuthorizationAuditLogger;
+  private readonly featuresIds: string[];
+  private readonly allPossibleConsumers: AuthorizedConsumers;
 
   constructor({
     alertTypeRegistry,
@@ -70,9 +71,31 @@ export class AlertsAuthorization {
   }: ConstructorOptions) {
     this.request = request;
     this.authorization = authorization;
-    this.features = features;
     this.alertTypeRegistry = alertTypeRegistry;
     this.auditLogger = auditLogger;
+
+    this.featuresIds = features
+      .getFeatures()
+      // ignore features which don't grant privileges to alerting
+      .filter(({ privileges, subFeatures }) => {
+        return (
+          hasAnyAlertingPrivileges(privileges?.all) ||
+          hasAnyAlertingPrivileges(privileges?.read) ||
+          subFeatures.some((subFeature) =>
+            subFeature.privilegeGroups.some((privilegeGroup) =>
+              privilegeGroup.privileges.some((subPrivileges) =>
+                hasAnyAlertingPrivileges(subPrivileges)
+              )
+            )
+          )
+        );
+      })
+      .map((feature) => feature.id);
+
+    this.allPossibleConsumers = asAuthorizedConsumers([ALERTS_FEATURE_ID, ...this.featuresIds], {
+      read: true,
+      all: true,
+    });
   }
 
   public async ensureAuthorized(
@@ -147,6 +170,7 @@ export class AlertsAuthorization {
   public async getFindAuthorizationFilter(): Promise<{
     filter?: string;
     ensureAlertTypeIsAuthorized: (alertTypeId: string, consumer: string) => void;
+    logSuccessfulAuthorization: () => void;
   }> {
     if (this.authorization) {
       const {
@@ -171,6 +195,7 @@ export class AlertsAuthorization {
         }, [])
       );
 
+      const authorizedEntries: Map<string, Set<string>> = new Map();
       return {
         filter: `(${this.asFiltersByAlertTypeAndConsumer(authorizedAlertTypes).join(' or ')})`,
         ensureAlertTypeIsAuthorized: (alertTypeId: string, consumer: string) => {
@@ -185,11 +210,27 @@ export class AlertsAuthorization {
               )
             );
           } else {
-            this.auditLogger.alertsAuthorizationSuccess(
+            if (authorizedEntries.has(alertTypeId)) {
+              authorizedEntries.get(alertTypeId).add(consumer);
+            } else {
+              authorizedEntries.set(alertTypeId, new Set([consumer]));
+            }
+          }
+        },
+        logSuccessfulAuthorization: () => {
+          if (authorizedEntries.size) {
+            this.auditLogger.alertsBulkAuthorizationSuccess(
               username!,
-              alertTypeId,
+              [...authorizedEntries.entries()].reduce(
+                (authorizedPairs, [alertTypeId, consumers]) => {
+                  for (const consumer of consumers) {
+                    authorizedPairs.push([alertTypeId, consumer]);
+                  }
+                  return authorizedPairs;
+                },
+                []
+              ),
               ScopeType.Consumer,
-              consumer,
               'find'
             );
           }
@@ -198,6 +239,7 @@ export class AlertsAuthorization {
     }
     return {
       ensureAlertTypeIsAuthorized: (alertTypeId: string, consumer: string) => {},
+      logSuccessfulAuthorization: () => {},
     };
   }
 
@@ -220,33 +262,13 @@ export class AlertsAuthorization {
     hasAllRequested: boolean;
     authorizedAlertTypes: Set<RegistryAlertTypeWithAuth>;
   }> {
-    const featuresIds = this.features
-      .getFeatures()
-      // ignore features which don't grant privileges to alerting
-      .filter(({ privileges, subFeatures }) => {
-        return (
-          hasAnyAlertingPrivileges(privileges?.all) ||
-          hasAnyAlertingPrivileges(privileges?.read) ||
-          subFeatures.some((subFeature) =>
-            subFeature.privilegeGroups.some((privilegeGroup) =>
-              privilegeGroup.privileges.some((subPrivileges) =>
-                hasAnyAlertingPrivileges(subPrivileges)
-              )
-            )
-          )
-        );
-      })
-      .map((feature) => feature.id);
-
-    const allPossibleConsumers: AuthorizedConsumers = asAuthorizedConsumers(
-      [ALERTS_FEATURE_ID, ...featuresIds],
-      { read: true, all: true }
-    );
-
     if (!this.authorization) {
       return {
         hasAllRequested: true,
-        authorizedAlertTypes: this.augmentWithAuthorizedConsumers(alertTypes, allPossibleConsumers),
+        authorizedAlertTypes: this.augmentWithAuthorizedConsumers(
+          alertTypes,
+          this.allPossibleConsumers
+        ),
       };
     } else {
       const checkPrivileges = this.authorization.checkPrivilegesDynamicallyWithRequest(
@@ -254,7 +276,7 @@ export class AlertsAuthorization {
       );
 
       // add an empty `authorizedConsumers` array on each alertType
-      const alertTypesWithAutherization = this.augmentWithAuthorizedConsumers(alertTypes, {});
+      const alertTypesWithAuthorization = this.augmentWithAuthorizedConsumers(alertTypes, {});
 
       // map from privilege to alertType which we can refer back to when analyzing the result
       // of checkPrivileges
@@ -264,8 +286,8 @@ export class AlertsAuthorization {
       >();
       // as we can't ask ES for the user's individual privileges we need to ask for each feature
       // and alertType in the system whether this user has this privilege
-      for (const alertType of alertTypesWithAutherization) {
-        for (const feature of featuresIds) {
+      for (const alertType of alertTypesWithAuthorization) {
+        for (const feature of this.featuresIds) {
           for (const operation of operations) {
             privilegeToAlertType.set(
               this.authorization!.actions.alerting.get(alertType.id, feature, operation),
@@ -289,7 +311,7 @@ export class AlertsAuthorization {
         hasAllRequested,
         authorizedAlertTypes: hasAllRequested
           ? // has access to all features
-            this.augmentWithAuthorizedConsumers(alertTypes, allPossibleConsumers)
+            this.augmentWithAuthorizedConsumers(alertTypes, this.allPossibleConsumers)
           : // only has some of the required privileges
             privileges.reduce((authorizedAlertTypes, { authorized, privilege }) => {
               if (authorized && privilegeToAlertType.has(privilege)) {
