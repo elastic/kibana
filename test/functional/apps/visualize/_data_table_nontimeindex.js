@@ -112,8 +112,7 @@ export default function ({ getService, getPageObjects }) {
       expect(data.trim().split('\n')).to.be.eql(['14,004 1,412.6']);
     });
 
-    // bug https://github.com/elastic/kibana/issues/68977
-    describe.skip('data table with date histogram', async () => {
+    describe('data table with date histogram', async () => {
       before(async () => {
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickDataTable();
