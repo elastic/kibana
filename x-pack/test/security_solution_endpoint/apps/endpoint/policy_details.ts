@@ -118,45 +118,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               },
               policy: {
                 linux: {
-                  advanced: {
-                    elasticsearch: {
-                      indices: {
-                        control: 'control-index',
-                        event: 'event-index',
-                        logging: 'logging-index',
-                      },
-                      kernel: { connect: true, process: true },
-                    },
-                  },
                   events: { file: false, network: true, process: true },
-                  logging: { file: 'info', stdout: 'debug' },
+                  logging: { file: 'info' },
                 },
                 mac: {
-                  advanced: {
-                    elasticsearch: {
-                      indices: {
-                        control: 'control-index',
-                        event: 'event-index',
-                        logging: 'logging-index',
-                      },
-                      kernel: { connect: true, process: true },
-                    },
-                  },
                   events: { file: false, network: true, process: true },
-                  logging: { file: 'info', stdout: 'debug' },
-                  malware: { mode: 'detect' },
+                  logging: { file: 'info' },
+                  malware: { mode: 'prevent' },
                 },
                 windows: {
-                  advanced: {
-                    elasticsearch: {
-                      indices: {
-                        control: 'control-index',
-                        event: 'event-index',
-                        logging: 'logging-index',
-                      },
-                      kernel: { connect: true, process: true },
-                    },
-                  },
                   events: {
                     dll_and_driver_load: true,
                     dns: true,
@@ -166,7 +136,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                     registry: true,
                     security: true,
                   },
-                  logging: { file: 'info', stdout: 'debug' },
+                  logging: { file: 'info' },
                   malware: { mode: 'prevent' },
                 },
               },
@@ -193,7 +163,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
     });
-
     describe('when on Ingest Configurations Edit Package Config page', async () => {
       let policyInfo: PolicyTestResourceInfo;
       beforeEach(async () => {
@@ -217,13 +186,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await linkToPolicy.click();
         await pageObjects.policy.ensureIsOnDetailsPage();
       });
-      it('should allow the user to navigate, edit and save Policy Details', async () => {
+      it('should allow the user to navigate, edit, save Policy Details and be redirected back to ingest', async () => {
         await (await testSubjects.find('editLinkToPolicyDetails')).click();
         await pageObjects.policy.ensureIsOnDetailsPage();
         await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_dns');
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
+        await pageObjects.ingestManagerCreatePackageConfig.ensureOnEditPageOrFail();
+      });
+      it('should navigate back to Ingest Configuration Edit package page on click of cancel button', async () => {
+        await (await testSubjects.find('editLinkToPolicyDetails')).click();
+        await (await pageObjects.policy.findCancelButton()).click();
+        await pageObjects.ingestManagerCreatePackageConfig.ensureOnEditPageOrFail();
       });
     });
   });

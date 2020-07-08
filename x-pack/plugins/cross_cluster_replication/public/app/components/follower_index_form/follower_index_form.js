@@ -28,12 +28,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { indices } from '../../../../../../../src/plugins/es_ui_shared/public';
+import { extractQueryParams, indices } from '../../../shared_imports';
 import { indexNameValidator, leaderIndexValidator } from '../../services/input_validation';
 import { routing } from '../../services/routing';
 import { getFatalErrors } from '../../services/notifications';
 import { loadIndices } from '../../services/api';
 import { API_STATUS } from '../../constants';
+import { getRemoteClusterName } from '../../services/get_remote_cluster_name';
+import { RemoteClustersFormField } from '../remote_clusters_form_field';
 import { SectionError } from '../section_error';
 import { FormEntryRow } from '../form_entry_row';
 import {
@@ -41,9 +43,6 @@ import {
   emptyAdvancedSettings,
   areAdvancedSettingsEdited,
 } from './advanced_settings_fields';
-import { extractQueryParams } from '../../services/query_params';
-import { getRemoteClusterName } from '../../services/get_remote_cluster_name';
-import { RemoteClustersFormField } from '../remote_clusters_form_field';
 
 import { FollowerIndexRequestFlyout } from './follower_index_request_flyout';
 

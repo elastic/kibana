@@ -67,6 +67,7 @@ export const GroupsFilterPopoverComponent = ({
       isOpen={isGroupPopoverOpen}
       closePopover={() => setIsGroupPopoverOpen(!isGroupPopoverOpen)}
       panelPaddingSize="none"
+      repositionOnScroll
     >
       {uniqueGroups.map((group, index) => (
         <EuiFilterSelectItem

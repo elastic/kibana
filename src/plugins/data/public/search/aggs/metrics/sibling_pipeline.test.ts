@@ -25,37 +25,30 @@ import { getBucketMaxMetricAgg } from './bucket_max';
 import { AggConfigs } from '../agg_configs';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { mockAggTypesRegistry } from '../test_helpers';
-import { GetInternalStartServicesFn, InternalStartServices } from '../../../types';
-import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
 
 describe('sibling pipeline aggs', () => {
-  const getInternalStartServices: GetInternalStartServicesFn = () =>
-    (({
-      notifications: notificationServiceMock.createStartContract(),
-    } as unknown) as InternalStartServices);
-
   const typesRegistry = mockAggTypesRegistry();
 
   const metrics = [
     {
       name: 'sum_bucket',
       title: 'Overall Sum',
-      provider: getBucketSumMetricAgg({ getInternalStartServices }),
+      provider: getBucketSumMetricAgg(),
     },
     {
       name: 'avg_bucket',
       title: 'Overall Average',
-      provider: getBucketAvgMetricAgg({ getInternalStartServices }),
+      provider: getBucketAvgMetricAgg(),
     },
     {
       name: 'min_bucket',
       title: 'Overall Min',
-      provider: getBucketMinMetricAgg({ getInternalStartServices }),
+      provider: getBucketMinMetricAgg(),
     },
     {
       name: 'max_bucket',
       title: 'Overall Max',
-      provider: getBucketMaxMetricAgg({ getInternalStartServices }),
+      provider: getBucketMaxMetricAgg(),
     },
   ];
 
