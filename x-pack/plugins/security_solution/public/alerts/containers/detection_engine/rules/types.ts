@@ -22,6 +22,7 @@ import {
   listArray,
   listArrayOrUndefined,
 } from '../../../../../common/detection_engine/schemas/types';
+import { PatchRulesSchema } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema';
 
 /**
  * Params is an "record", since it is a type of AlertActionParams which is action templates.
@@ -77,6 +78,11 @@ export type NewRule = t.TypeOf<typeof NewRuleSchema>;
 
 export interface AddRulesProps {
   rule: NewRule;
+  signal: AbortSignal;
+}
+
+export interface PatchRuleProps {
+  ruleProperties: PatchRulesSchema;
   signal: AbortSignal;
 }
 

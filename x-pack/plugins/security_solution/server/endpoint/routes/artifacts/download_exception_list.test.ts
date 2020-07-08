@@ -31,9 +31,22 @@ import { WrappedTranslatedExceptionList } from '../../schemas/artifacts/lists';
 
 const mockArtifactName = `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-windows-1.0.0`;
 const expectedEndpointExceptions: WrappedTranslatedExceptionList = {
-  exceptions_list: [
+  entries: [
     {
+      type: 'simple',
       entries: [
+        {
+          entries: [
+            {
+              field: 'some.not.nested.field',
+              operator: 'included',
+              type: 'exact_cased',
+              value: 'some value',
+            },
+          ],
+          field: 'some.field',
+          type: 'nested',
+        },
         {
           field: 'some.not.nested.field',
           operator: 'included',
@@ -41,14 +54,17 @@ const expectedEndpointExceptions: WrappedTranslatedExceptionList = {
           value: 'some value',
         },
       ],
-      field: 'some.field',
-      type: 'nested',
     },
     {
-      field: 'some.not.nested.field',
-      operator: 'included',
-      type: 'exact_cased',
-      value: 'some value',
+      type: 'simple',
+      entries: [
+        {
+          field: 'some.other.not.nested.field',
+          operator: 'included',
+          type: 'exact_cased',
+          value: 'some other value',
+        },
+      ],
     },
   ],
 };
