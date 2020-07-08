@@ -108,9 +108,9 @@ describe('SIEM Navigation', () => {
           },
           management: {
             disabled: false,
-            href: '/app/security/management',
+            href: '/app/security/administration',
             id: 'management',
-            name: 'Management',
+            name: 'Administration',
             urlKey: 'management',
           },
           hosts: {
@@ -220,9 +220,9 @@ describe('SIEM Navigation', () => {
           },
           management: {
             disabled: false,
-            href: '/app/security/management',
+            href: '/app/security/administration',
             id: 'management',
-            name: 'Management',
+            name: 'Administration',
             urlKey: 'management',
           },
           network: {
