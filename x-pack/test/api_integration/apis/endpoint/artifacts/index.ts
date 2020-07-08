@@ -7,7 +7,6 @@
 import expect from '@kbn/expect';
 import { inflateSync } from 'zlib';
 
-import { WrappedTranslatedExceptionList } from '../../../../../plugins/security_solution/server/endpoint/schemas';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getSupertestWithoutAuth, setupIngest } from '../../fleet/agents/services';
 
@@ -80,7 +79,7 @@ export default function (providerContext: FtrProviderContext) {
         .send()
         .expect(200)
         .expect((response) => {
-          const artifactJson = JSON.parse(response.text);
+          const artifactJson = JSON.parse(inflateSync(response.body).toString());
           expect(artifactJson).to.eql({
             entries: [
               {
@@ -127,7 +126,7 @@ export default function (providerContext: FtrProviderContext) {
         .send()
         .expect(200)
         .expect((response) => {
-          JSON.parse(response.text);
+          JSON.parse(inflateSync(response.body).toString());
         })
         .then(async () => {
           await supertestWithoutAuth
@@ -139,7 +138,7 @@ export default function (providerContext: FtrProviderContext) {
             .send()
             .expect(200)
             .expect((response) => {
-              const artifactJson = JSON.parse(response.text);
+              const artifactJson = JSON.parse(inflateSync(response.body).toString());
               expect(artifactJson).to.eql({
                 entries: [
                   {
@@ -175,55 +174,6 @@ export default function (providerContext: FtrProviderContext) {
               });
             });
         });
-    });
-
-    it('should download valid compressed JSON', async () => {
-      const { body } = await supertestWithoutAuth
-        .get(
-          '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-v1/d2a9c760005b08d43394e59a8701ae75c80881934ccf15a006944452b80f7f9f'
-        )
-        .set('kbn-xsrf', 'xxx')
-        .set('authorization', `ApiKey ${agentAccessAPIKey}`)
-        .send()
-        .expect(200);
-
-      const decompressedJson = inflateSync(body);
-      const decompressedBody: WrappedTranslatedExceptionList = JSON.parse(
-        decompressedJson.toString()
-      );
-
-      expect(decompressedBody).to.eql({
-        entries: [
-          {
-            entries: [
-              {
-                field: 'actingProcess.file.signer',
-                operator: 'included',
-                type: 'exact_cased',
-                value: 'Elastic, N.V.',
-              },
-              {
-                entries: [
-                  {
-                    field: 'signer',
-                    operator: 'included',
-                    type: 'exact_cased',
-                    value: 'Evil',
-                  },
-                  {
-                    field: 'trusted',
-                    operator: 'included',
-                    type: 'exact_cased',
-                    value: 'true',
-                  },
-                ],
-                field: 'file.signature',
-                type: 'nested',
-              },
-            ],
-          },
-        ],
-      } as WrappedTranslatedExceptionList);
     });
 
     it('should fail on invalid api key', async () => {
