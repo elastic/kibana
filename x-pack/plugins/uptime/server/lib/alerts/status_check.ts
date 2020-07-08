@@ -19,6 +19,7 @@ import {
   StatusCheckFilters,
   AtomicStatusCheckParamsType,
   MonitorAvailabilityType,
+  DynamicSettings,
 } from '../../../common/runtime_types';
 import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants';
 import { savedObjectsAdapter } from '../saved_objects';
@@ -26,6 +27,7 @@ import { updateState } from './common';
 import { commonStateTranslations } from './translations';
 import { stringifyKueries, combineFiltersAndUserSearch } from '../../../common/lib';
 import { GetMonitorAvailabilityResult } from '../requests/get_monitor_availability';
+import { UMServerLibs } from '../lib';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
@@ -93,10 +95,7 @@ export const contextMessage = (
     message = i18n.translate('xpack.uptime.alerts.message.multipleTitle', {
       defaultMessage: 'Down monitors: ',
     });
-  }
-  // this shouldn't happen because the function should only be called
-  // when > 0 monitors are down
-  else {
+  } else {
     message = i18n.translate('xpack.uptime.alerts.message.emptyTitle', {
       defaultMessage: 'No down monitor IDs received',
     });
@@ -183,7 +182,7 @@ export const hasFilters = (filters?: StatusCheckFilters) => {
   return false;
 };
 
-export const genFilterString = async (
+export const generateFilterDSL = async (
   getIndexPattern: () => Promise<IIndexPattern | undefined>,
   filters?: StatusCheckFilters,
   search?: string
@@ -210,6 +209,25 @@ export const genFilterString = async (
     await getIndexPattern()
   );
 };
+
+const formatFilterString = async (
+  libs: UMServerLibs,
+  dynamicSettings: DynamicSettings,
+  options: AlertExecutorOptions,
+  filters?: StatusCheckFilters,
+  search?: string
+) =>
+  JSON.stringify(
+    await generateFilterDSL(
+      () =>
+        libs.requests.getIndexPattern({
+          callES: options.services.callCluster,
+          dynamicSettings,
+        }),
+      filters,
+      search
+    )
+  );
 
 export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) => ({
   id: 'xpack.uptime.alerts.monitorStatus',
@@ -295,21 +313,12 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
     const atomicDecoded = AtomicStatusCheckParamsType.decode(rawParams);
     const availabilityDecoded = MonitorAvailabilityType.decode(rawParams);
     const decoded = StatusCheckParamsType.decode(rawParams);
+    let filterString: string = '';
     let params: StatusCheckParams;
     if (isRight(atomicDecoded)) {
       const { filters, search, numTimes, timerangeCount, timerangeUnit } = atomicDecoded.right;
       const timerange = { from: `now-${String(timerangeCount) + timerangeUnit}`, to: 'now' };
-      const filterString = JSON.stringify(
-        await genFilterString(
-          () =>
-            libs.requests.getIndexPattern({
-              callES: options.services.callCluster,
-              dynamicSettings,
-            }),
-          filters,
-          search
-        )
-      );
+      filterString = await formatFilterString(libs, dynamicSettings, options, filters, search);
       params = {
         timerange,
         numTimes,
@@ -330,23 +339,16 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
       isRight(availabilityDecoded) &&
       availabilityDecoded.right.shouldCheckAvailability === true
     ) {
-      const filterString = JSON.stringify(
-        await genFilterString(
-          () =>
-            libs.requests.getIndexPattern({
-              callES: options.services.callCluster,
-              dynamicSettings,
-            }),
-          availabilityDecoded.right.filters,
-          availabilityDecoded.right.search
-        )
-      );
+      const { filters, search } = availabilityDecoded.right;
+      if (filterString === '' && (filters || search)) {
+        filterString = await formatFilterString(libs, dynamicSettings, options, filters, search);
+      }
 
       availabilityResults = await libs.requests.getMonitorAvailability({
         callES: options.services.callCluster,
         dynamicSettings,
         ...availabilityDecoded.right.availability,
-        filters: filterString,
+        filters: filterString || undefined,
       });
     }
 

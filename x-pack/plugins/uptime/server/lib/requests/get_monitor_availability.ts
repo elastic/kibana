@@ -39,13 +39,15 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
 > = async ({ callES, dynamicSettings, range, rangeUnit, threshold: thresholdString, filters }) => {
   const queryResults: Array<Promise<GetMonitorAvailabilityResult[]>> = [];
   let afterKey: AvailabilityKey | undefined;
-  const gte = `now-${range}${rangeUnit}`;
+
   const threshold = Number(thresholdString) / 100;
   if (threshold <= 0 || threshold > 1.0) {
     throw new Error(
       `Invalid availability threshold value ${thresholdString}. The value must be between 0 and 100`
     );
   }
+
+  const gte = `now-${range}${rangeUnit}`;
 
   do {
     const esParams: any = {

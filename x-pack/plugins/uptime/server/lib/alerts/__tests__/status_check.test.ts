@@ -7,7 +7,7 @@
 import {
   contextMessage,
   fullListByIdAndLocation,
-  genFilterString,
+  generateFilterDSL,
   hasFilters,
   statusCheckAlertFactory,
   uniqueMonitorIds,
@@ -475,7 +475,12 @@ describe('status check alert', () => {
           range: 35,
           rangeUnit: 'd',
           threshold: '99.34',
-          filters: 'url.full: *',
+        },
+        filters: {
+          'url.port': ['12349', '5601', '443'],
+          'observer.geo.name': ['harrisburg'],
+          'monitor.type': ['http'],
+          tags: ['unsecured', 'containers', 'org:google'],
         },
         shouldCheckAvailability: true,
       });
@@ -525,7 +530,7 @@ describe('status check alert', () => {
               "certExpirationThreshold": 30,
               "heartbeatIndices": "heartbeat-8*",
             },
-            "filters": undefined,
+            "filters": "{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"url.port\\":12349}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"url.port\\":5601}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"url.port\\":443}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"observer.geo.name\\":\\"harrisburg\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"monitor.type\\":\\"http\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"tags\\":\\"unsecured\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"tags\\":\\"containers\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"tags\\":\\"org:google\\"}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}]}}]}}]}}",
             "range": 35,
             "rangeUnit": "d",
             "threshold": "99.34",
@@ -542,6 +547,87 @@ describe('status check alert', () => {
           "lastResolvedAt": undefined,
           "lastTriggeredAt": undefined,
         }
+      `);
+    });
+
+    it('supports availability checks with search', async () => {
+      expect.assertions(2);
+      toISOStringSpy.mockImplementation(() => 'availability with search');
+      const mockGetter = jest.fn();
+      mockGetter.mockReturnValue([]);
+      const mockAvailability = jest.fn();
+      mockAvailability.mockReturnValue([]);
+      const { server, libs } = bootstrapDependencies({
+        getMonitorAvailability: mockAvailability,
+        getIndexPattern: jest.fn(),
+      });
+      const alert = statusCheckAlertFactory(server, libs);
+      const options = mockOptions({
+        availability: {
+          range: 23,
+          rangeUnit: 'w',
+          threshold: '90',
+        },
+        search: 'ur.port: *',
+        shouldCheckAvailability: true,
+      });
+      await alert.executor(options);
+      expect(mockAvailability).toHaveBeenCalledTimes(1);
+      expect(mockAvailability.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "callES": [MockFunction],
+            "dynamicSettings": Object {
+              "certAgeThreshold": 730,
+              "certExpirationThreshold": 30,
+              "heartbeatIndices": "heartbeat-8*",
+            },
+            "filters": "{\\"bool\\":{\\"should\\":[{\\"exists\\":{\\"field\\":\\"ur.port\\"}}],\\"minimum_should_match\\":1}}",
+            "range": 23,
+            "rangeUnit": "w",
+            "threshold": "90",
+          },
+        ]
+      `);
+    });
+
+    it('supports availability checks with no filter or search', async () => {
+      expect.assertions(2);
+      toISOStringSpy.mockImplementation(() => 'availability with search');
+      const mockGetter = jest.fn();
+      mockGetter.mockReturnValue([]);
+      const mockAvailability = jest.fn();
+      mockAvailability.mockReturnValue([]);
+      const { server, libs } = bootstrapDependencies({
+        getMonitorAvailability: mockAvailability,
+        getIndexPattern: jest.fn(),
+      });
+      const alert = statusCheckAlertFactory(server, libs);
+      const options = mockOptions({
+        availability: {
+          range: 23,
+          rangeUnit: 'w',
+          threshold: '90',
+        },
+        shouldCheckAvailability: true,
+      });
+      await alert.executor(options);
+      expect(mockAvailability).toHaveBeenCalledTimes(1);
+      expect(mockAvailability.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "callES": [MockFunction],
+            "dynamicSettings": Object {
+              "certAgeThreshold": 730,
+              "certExpirationThreshold": 30,
+              "heartbeatIndices": "heartbeat-8*",
+            },
+            "filters": undefined,
+            "range": 23,
+            "rangeUnit": "w",
+            "threshold": "90",
+          },
+        ]
       `);
     });
   });
@@ -731,11 +817,11 @@ describe('status check alert', () => {
     mockGetIndexPattern.mockReturnValue(undefined);
 
     it('returns `undefined` for no filters or search', async () => {
-      expect(await genFilterString(mockGetIndexPattern)).toBeUndefined();
+      expect(await generateFilterDSL(mockGetIndexPattern)).toBeUndefined();
     });
 
     it('creates a filter string for filters only', async () => {
-      const res = await genFilterString(mockGetIndexPattern, {
+      const res = await generateFilterDSL(mockGetIndexPattern, {
         'monitor.type': [],
         'observer.geo.name': ['us-east', 'us-west'],
         tags: [],
@@ -777,7 +863,7 @@ describe('status check alert', () => {
     });
 
     it('creates a filter string for search only', async () => {
-      expect(await genFilterString(mockGetIndexPattern, undefined, 'monitor.id: "kibana-dev"'))
+      expect(await generateFilterDSL(mockGetIndexPattern, undefined, 'monitor.id: "kibana-dev"'))
         .toMatchInlineSnapshot(`
         Object {
           "bool": Object {
@@ -795,7 +881,7 @@ describe('status check alert', () => {
     });
 
     it('creates a filter string for filters and string', async () => {
-      const res = await genFilterString(
+      const res = await generateFilterDSL(
         mockGetIndexPattern,
         {
           'monitor.type': [],
