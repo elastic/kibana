@@ -20,11 +20,7 @@ export async function enroll(
   metadata?: { local: any; userProvided: any },
   sharedId?: string
 ): Promise<Agent> {
-  const kibanaVersion = appContextService.getKibanaVersion();
-  const version: string | undefined = metadata?.local?.elastic?.agent?.version;
-  if (!version || semver.compare(version, kibanaVersion) === 1) {
-    throw Boom.badRequest('Agent version is not compatible with kibana version');
-  }
+  validateAgentVersion(metadata);
 
   const existingAgent = sharedId ? await getAgentBySharedId(soClient, sharedId) : null;
 
@@ -91,4 +87,26 @@ async function getAgentBySharedId(soClient: SavedObjectsClientContract, sharedId
   }
 
   return null;
+}
+
+export function validateAgentVersion(metadata?: { local: any; userProvided: any }) {
+  const kibanaVersion = semver.parse(appContextService.getKibanaVersion());
+  if (!kibanaVersion) {
+    throw Boom.badRequest('Kibana version is not set');
+  }
+  const version = semver.parse(metadata?.local?.elastic?.agent?.version);
+  if (!version) {
+    throw Boom.badRequest('Agent version not provided in metadata.');
+  }
+
+  if (!version || !semver.lte(formatVersion(version), formatVersion(kibanaVersion))) {
+    throw Boom.badRequest('Agent version is not compatible with kibana version');
+  }
+}
+
+/**
+ * used to remove prelease from version as includePrerelease in not working as expected
+ */
+function formatVersion(version: semver.SemVer) {
+  return `${version.major}.${version.minor}.${version.patch}`;
 }

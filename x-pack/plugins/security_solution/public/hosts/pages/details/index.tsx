@@ -38,7 +38,7 @@ import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '.
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { esQuery, Filter } from '../../../../../../../src/plugins/data/public';
 
-import { HostsEmptyPage } from '../hosts_empty_page';
+import { OverviewEmpty } from '../../../overview/components/overview_empty';
 import { HostDetailsTabs } from './details_tabs';
 import { navTabsHostDetails } from './nav_tabs';
 import { HostDetailsProps } from './types';
@@ -194,7 +194,7 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
           <WrapperPage>
             <HeaderPage border title={detailName} />
 
-            <HostsEmptyPage />
+            <OverviewEmpty />
           </WrapperPage>
         )}
 

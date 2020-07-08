@@ -27,7 +27,7 @@ import {
   Eval,
   DataFrameAnalyticsConfig,
 } from '../../../../common';
-import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
+import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/use_columns';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 import { EvaluateStat } from './evaluate_stat';
 import {
