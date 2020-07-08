@@ -7,8 +7,8 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { TestProviders } from '../../../common/mock/test_providers';
 import { TimelineId } from '../../../../common/types/timeline';
+import { TestProviders } from '../../../common/mock';
 import { AlertsTableComponent } from './index';
 
 describe('AlertsTableComponent', () => {
