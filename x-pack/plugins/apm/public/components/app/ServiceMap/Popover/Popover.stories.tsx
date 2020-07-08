@@ -12,7 +12,6 @@ storiesOf('app/ServiceMap/Popover/ServiceMetricList', module)
   .add('example', () => (
     <ServiceMetricList
       hasEnvironmentData={true}
-      environmentsWithData={['test']}
       avgErrorsPerMinute={15.738888706725826}
       transactionKPIs={{
         avgTransactionDuration: 61634.38905590272,
@@ -25,7 +24,6 @@ storiesOf('app/ServiceMap/Popover/ServiceMetricList', module)
   .add('some null values', () => (
     <ServiceMetricList
       hasEnvironmentData={true}
-      environmentsWithData={['test']}
       avgErrorsPerMinute={7.615972134074397}
       transactionKPIs={{
         avgTransactionDuration: 238792.54809512055,
@@ -38,7 +36,6 @@ storiesOf('app/ServiceMap/Popover/ServiceMetricList', module)
   .add('all null values', () => (
     <ServiceMetricList
       hasEnvironmentData={true}
-      environmentsWithData={['test']}
       avgErrorsPerMinute={null}
       transactionKPIs={{
         avgTransactionDuration: null,

@@ -80,7 +80,6 @@ export async function getServiceMapServiceNodeInfo({
 
   return {
     hasEnvironmentData,
-    environmentsWithData,
     ...errorMetrics,
     transactionKPIs,
     ...cpuMetrics,

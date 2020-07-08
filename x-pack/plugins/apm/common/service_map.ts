@@ -36,7 +36,6 @@ export interface Connection {
 
 export interface ServiceNodeMetrics {
   hasEnvironmentData: boolean;
-  environmentsWithData: string[];
   avgMemoryUsage: number | null;
   avgCpuUsage: number | null;
   transactionKPIs: {

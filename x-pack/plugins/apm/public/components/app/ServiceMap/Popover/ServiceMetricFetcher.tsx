@@ -17,8 +17,6 @@ import { useFetcher, FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { ServiceMetricList } from './ServiceMetricList';
 import { AnomalyDetection } from './AnomalyDetection';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
-import { ALL_OPTION } from '../../../../hooks/useEnvironments';
 import { MaxAnomaly } from '../../../../../common/anomaly_detection';
 
 interface ServiceMetricFetcherProps {
@@ -65,7 +63,7 @@ export function ServiceMetricFetcher({
         title={i18n.translate(
           'xpack.apm.serviceMap.popoverMetrics.noEnvironmentDataCallout.title',
           {
-            defaultMessage: 'No service data for current environment',
+            defaultMessage: 'No data for current environment',
           }
         )}
         size="s"
@@ -74,14 +72,7 @@ export function ServiceMetricFetcher({
         {i18n.translate(
           'xpack.apm.serviceMap.popoverMetrics.noEnvironmentDataCallout.text',
           {
-            defaultMessage: `This service belongs to an environment outside of the currently selected environment ({currentEnvironment}). Change the environment filter to [{environmentsWithData}] to see info on this service.`,
-            values: {
-              currentEnvironment: getEnvironmentLabel(environment),
-              environmentsWithData: [
-                ALL_OPTION.text,
-                ...data.environmentsWithData.map(getEnvironmentLabel),
-              ].join(', '),
-            },
+            defaultMessage: `No data available. Try switching to another environment.`,
           }
         )}
       </EuiCallOut>
@@ -106,13 +97,4 @@ function LoadingSpinner() {
       <EuiLoadingSpinner size="xl" />
     </EuiFlexGroup>
   );
-}
-
-function getEnvironmentLabel(environment: string) {
-  if (environment === ENVIRONMENT_NOT_DEFINED) {
-    return i18n.translate('xpack.apm.filter.environment.notDefinedLabel', {
-      defaultMessage: 'Not defined',
-    });
-  }
-  return environment;
 }
