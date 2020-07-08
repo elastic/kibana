@@ -89,28 +89,31 @@ export class ServiceSettings {
     };
   }
 
+  _backfillSettings = (fileLayer) => {
+    // Older version of Kibana stored EMS state in the URL-params
+    // Creates object literal with required parameters as key-value pairs
+    const format = fileLayer.getDefaultFormatType();
+    const meta = fileLayer.getDefaultFormatMeta();
+
+    return {
+      name: fileLayer.getDisplayName(),
+      origin: fileLayer.getOrigin(),
+      id: fileLayer.getId(),
+      created_at: fileLayer.getCreatedAt(),
+      attribution: getAttributionString(fileLayer),
+      fields: fileLayer.getFieldsInLanguage(),
+      format: format, //legacy: format and meta are split up
+      meta: meta, //legacy, format and meta are split up
+    };
+  };
+
   async getFileLayers() {
     if (!this._mapConfig.includeElasticMapsService) {
       return [];
     }
 
     const fileLayers = await this._emsClient.getFileLayers();
-    return fileLayers.map((fileLayer) => {
-      //backfill to older settings
-      const format = fileLayer.getDefaultFormatType();
-      const meta = fileLayer.getDefaultFormatMeta();
-
-      return {
-        name: fileLayer.getDisplayName(),
-        origin: fileLayer.getOrigin(),
-        id: fileLayer.getId(),
-        created_at: fileLayer.getCreatedAt(),
-        attribution: fileLayer.getHTMLAttribution(),
-        fields: fileLayer.getFieldsInLanguage(),
-        format: format, //legacy: format and meta are split up
-        meta: meta, //legacy, format and meta are split up
-      };
-    });
+    return fileLayers.map(this._backfillSettings);
   }
 
   /**
@@ -139,7 +142,7 @@ export class ServiceSettings {
               id: tmsService.getId(),
               minZoom: await tmsService.getMinZoom(),
               maxZoom: await tmsService.getMaxZoom(),
-              attribution: tmsService.getHTMLAttribution(),
+              attribution: getAttributionString(tmsService),
             };
           })
       );
@@ -159,14 +162,23 @@ export class ServiceSettings {
     this._emsClient.addQueryParams(additionalQueryParams);
   }
 
-  async getEMSHotLink(fileLayerConfig) {
+  async getFileLayerFromConfig(fileLayerConfig) {
     const fileLayers = await this._emsClient.getFileLayers();
-    const layer = fileLayers.find((fileLayer) => {
+    return fileLayers.find((fileLayer) => {
       const hasIdByName = fileLayer.hasId(fileLayerConfig.name); //legacy
       const hasIdById = fileLayer.hasId(fileLayerConfig.id);
       return hasIdByName || hasIdById;
     });
+  }
+
+  async getEMSHotLink(fileLayerConfig) {
+    const layer = await this.getFileLayerFromConfig(fileLayerConfig);
     return layer ? layer.getEMSHotLink() : null;
+  }
+
+  async loadFileLayerConfig(fileLayerConfig) {
+    const fileLayer = await this.getFileLayerFromConfig(fileLayerConfig);
+    return fileLayer ? this._backfillSettings(fileLayer) : null;
   }
 
   async _getAttributesForEMSTMSLayer(isDesaturated, isDarkMode) {
@@ -189,7 +201,7 @@ export class ServiceSettings {
       url: await tmsService.getUrlTemplate(),
       minZoom: await tmsService.getMinZoom(),
       maxZoom: await tmsService.getMaxZoom(),
-      attribution: await tmsService.getHTMLAttribution(),
+      attribution: getAttributionString(tmsService),
       origin: ORIGIN.EMS,
     };
   }
@@ -254,4 +266,18 @@ export class ServiceSettings {
     const response = await fetch(url);
     return await response.json();
   }
+}
+
+function getAttributionString(emsService) {
+  const attributions = emsService.getAttributions();
+  const attributionSnippets = attributions.map((attribution) => {
+    const anchorTag = document.createElement('a');
+    anchorTag.setAttribute('rel', 'noreferrer noopener');
+    if (attribution.url.startsWith('http://') || attribution.url.startsWith('https://')) {
+      anchorTag.setAttribute('href', attribution.url);
+    }
+    anchorTag.textContent = attribution.label;
+    return anchorTag.outerHTML;
+  });
+  return attributionSnippets.join(' | '); //!!!this is the current convention used in Kibana
 }
