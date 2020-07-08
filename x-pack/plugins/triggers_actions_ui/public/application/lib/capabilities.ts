@@ -21,11 +21,8 @@ function hasCapability(capabilities: Capabilities, capability: string) {
   return apps.some((app) => capabilities[app]?.[capability]);
 }
 
-function createCapabilityCheck(capability: string) {
-  return (capabilities: Capabilities) => hasCapability(capabilities, capability);
-}
-
-export const hasShowAlertsCapability = createCapabilityCheck('alerting:show');
+export const hasShowAlertsCapability = (capabilities: Capabilities) =>
+  hasCapability(capabilities, 'alerting:show');
 
 export const hasShowActionsCapability = (capabilities: Capabilities) => capabilities?.actions?.show;
 export const hasSaveActionsCapability = (capabilities: Capabilities) => capabilities?.actions?.save;

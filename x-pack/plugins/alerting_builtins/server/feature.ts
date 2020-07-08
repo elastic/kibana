@@ -16,10 +16,16 @@ export const BUILT_IN_ALERTS_FEATURE = {
   icon: 'bell',
   navLinkId: 'builtInAlerts',
   app: [],
+  management: {
+    insightsAndAlerting: ['triggersActions'],
+  },
   privileges: {
     all: {
       app: [],
       catalogue: [],
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
       alerting: {
         all: [IndexThreshold],
         read: [],
@@ -29,11 +35,14 @@ export const BUILT_IN_ALERTS_FEATURE = {
         read: [],
       },
       api: ['actions-read', 'actions-all'],
-      ui: ['alerting:show', 'actions:show', 'actions:save', 'actions:delete'],
+      ui: ['actions:save', 'actions:delete'],
     },
     read: {
       app: [],
       catalogue: [],
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
       alerting: {
         all: [],
         read: [IndexThreshold],
@@ -43,7 +52,7 @@ export const BUILT_IN_ALERTS_FEATURE = {
         read: ['action'],
       },
       api: ['actions-read'],
-      ui: ['alerting:show', 'actions:show'],
+      ui: [],
     },
   },
 };

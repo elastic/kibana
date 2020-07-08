@@ -45,23 +45,17 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   const { chrome, capabilities, setBreadcrumbs, docLinks, http } = useAppDependencies();
 
   const canShowActions = hasShowActionsCapability(capabilities);
-  const canShowAlerts = hasShowAlertsCapability(capabilities);
   const tabs: Array<{
     id: Section;
     name: React.ReactNode;
   }> = [];
 
-  if (canShowAlerts) {
-    tabs.push({
-      id: 'alerts',
-      name: (
-        <FormattedMessage
-          id="xpack.triggersActionsUI.home.alertsTabTitle"
-          defaultMessage="Alerts"
-        />
-      ),
-    });
-  }
+  tabs.push({
+    id: 'alerts',
+    name: (
+      <FormattedMessage id="xpack.triggersActionsUI.home.alertsTabTitle" defaultMessage="Alerts" />
+    ),
+  });
 
   if (canShowActions) {
     tabs.push({
@@ -151,17 +145,15 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
               )}
             />
           )}
-          {canShowAlerts && (
-            <Route
-              exact
-              path={routeToAlerts}
-              component={() => (
-                <HealthCheck docLinks={docLinks} http={http}>
-                  <AlertsList />
-                </HealthCheck>
-              )}
-            />
-          )}
+          <Route
+            exact
+            path={routeToAlerts}
+            component={() => (
+              <HealthCheck docLinks={docLinks} http={http}>
+                <AlertsList />
+              </HealthCheck>
+            )}
+          />
         </Switch>
       </EuiPageContent>
     </EuiPageBody>
