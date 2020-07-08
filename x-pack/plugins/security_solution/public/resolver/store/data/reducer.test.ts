@@ -57,6 +57,12 @@ describe('Resolver Data Middleware', () => {
           ancestryNextAncestor: 'aValidAncestorCursor',
         },
         children: [...baseTree.children.values()].map((node) => {
+          /**
+           * The purpose of `children` here is to set the `actual`
+           * value that the stats values will be compared with
+           * to derive things like the number of missing events and if
+           * related event limits should be shown.
+           */
           const childNode: Partial<ResolverChildNode> = node;
           childNode.entityID = node.id;
           if (node.id === firstChildNodeInTree.id) {
@@ -175,6 +181,12 @@ describe('Resolver Data Middleware', () => {
           ancestryNextAncestor: 'aValidAncestorCursor',
         },
         children: [...baseTree.children.values()].map((node) => {
+          /**
+           * The purpose of `children` here is to set the `actual`
+           * value that the stats values will be compared with
+           * to derive things like the number of missing events and if
+           * related event limits should be shown.
+           */
           const childNode: Partial<ResolverChildNode> = node;
           childNode.entityID = node.id;
           if (node.id === firstChildNodeInTree.id) {
@@ -185,7 +197,7 @@ describe('Resolver Data Middleware', () => {
             };
           }
           return childNode;
-        }) as ResolverChildNode[]/**
+        }) as ResolverChildNode[] /**
         Cast to ResolverChildNode[] array is needed because incoming
         TreeNodes from the generator cannot be assigned cleanly to the
         tree model's expected ResolverChildNode type.
