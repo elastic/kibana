@@ -81,6 +81,11 @@ import {
   observabilityDashboardHasDataRoute,
   observabilityDashboardDataRoute,
 } from './observability_dashboard';
+import {
+  anomalyDetectionJobsRoute,
+  createAnomalyDetectionJobsRoute,
+  anomalyDetectionEnvironmentsRoute,
+} from './settings/anomaly_detection';
 
 const createApmApi = () => {
   const api = createApi()
@@ -170,7 +175,12 @@ const createApmApi = () => {
 
     // Observability dashboard
     .add(observabilityDashboardHasDataRoute)
-    .add(observabilityDashboardDataRoute);
+    .add(observabilityDashboardDataRoute)
+
+    // Anomaly detection
+    .add(anomalyDetectionJobsRoute)
+    .add(createAnomalyDetectionJobsRoute)
+    .add(anomalyDetectionEnvironmentsRoute);
 
   return api;
 };

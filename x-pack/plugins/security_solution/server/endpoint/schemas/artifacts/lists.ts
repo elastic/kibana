@@ -64,17 +64,17 @@ export const translatedEntry = t.union([
 ]);
 export type TranslatedEntry = t.TypeOf<typeof translatedEntry>;
 
-export const translatedExceptionList = t.exact(
+export const translatedExceptionListItem = t.exact(
   t.type({
     type: t.string,
     entries: t.array(translatedEntry),
   })
 );
-export type TranslatedExceptionList = t.TypeOf<typeof translatedExceptionList>;
+export type TranslatedExceptionListItem = t.TypeOf<typeof translatedExceptionListItem>;
 
-export const wrappedExceptionList = t.exact(
+export const wrappedTranslatedExceptionList = t.exact(
   t.type({
-    exceptions_list: t.array(translatedEntry),
+    entries: t.array(translatedExceptionListItem),
   })
 );
-export type WrappedTranslatedExceptionList = t.TypeOf<typeof wrappedExceptionList>;
+export type WrappedTranslatedExceptionList = t.TypeOf<typeof wrappedTranslatedExceptionList>;
