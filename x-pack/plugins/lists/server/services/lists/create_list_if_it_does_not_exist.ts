@@ -6,7 +6,16 @@
 
 import { LegacyAPICaller } from 'kibana/server';
 
-import { Description, Id, ListSchema, MetaOrUndefined, Name, Type } from '../../../common/schemas';
+import {
+  Description,
+  DeserializerOrUndefined,
+  Id,
+  ListSchema,
+  MetaOrUndefined,
+  Name,
+  SerializerOrUndefined,
+  Type,
+} from '../../../common/schemas';
 
 import { getList } from './get_list';
 import { createList } from './create_list';
@@ -15,6 +24,8 @@ export interface CreateListIfItDoesNotExistOptions {
   id: Id;
   type: Type;
   name: Name;
+  deserializer: DeserializerOrUndefined;
+  serializer: SerializerOrUndefined;
   description: Description;
   callCluster: LegacyAPICaller;
   listIndex: string;
@@ -29,10 +40,12 @@ export const createListIfItDoesNotExist = async ({
   name,
   type,
   description,
+  deserializer,
   callCluster,
   listIndex,
   user,
   meta,
+  serializer,
   dateNow,
   tieBreaker,
 }: CreateListIfItDoesNotExistOptions): Promise<ListSchema> => {
@@ -42,10 +55,12 @@ export const createListIfItDoesNotExist = async ({
       callCluster,
       dateNow,
       description,
+      deserializer,
       id,
       listIndex,
       meta,
       name,
+      serializer,
       tieBreaker,
       type,
       user,

@@ -16,7 +16,6 @@ import {
   MetaOrUndefined,
   SerializerOrUndefined,
   Type,
-  Type,
 } from '../../../common/schemas';
 
 import { BufferLines } from './buffer_lines';
@@ -27,7 +26,6 @@ export interface ImportListItemsToStreamOptions {
   listIndex: string;
   deserializer: DeserializerOrUndefined;
   serializer: SerializerOrUndefined;
-  listId: string;
   stream: Readable;
   callCluster: LegacyAPICaller;
   listItemIndex: string;
