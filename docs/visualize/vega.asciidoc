@@ -3,71 +3,2114 @@
 
 experimental[]
 
-Build custom visualizations from multiple data sources using Vega
-and Vega-Lite.
+Build custom visualizations using Vega and Vega-Lite, backed by any
+data source including {es}, Elastic Map Service, URL,
+or static data. Use the {kib} extensions to Vega to embed Vega into
+your dashboard, and to add interactivity to the visualizations.
 
-* *Vega* &mdash; A declarative format to create visualizations using JSON.
-  Generate interactive displays using D3.
-
-* *Vega-Lite* &mdash; An easier format to use than Vega that enables more rapid
-  data analysis. Compiles into Vega.
-
-For more information about Vega and Vega-Lite, refer to
-<<vega-useful-links, Resources and examples>>.
+Vega and Vega-Lite are both declarative formats to create visualizations
+using JSON. Vega-Lite is an easier format to use that compiles into Vega.
 
 [float]
-[[create-vega-viz]]
-=== Create Vega visualizations
+[[when-to-vega]]
+=== When to use Vega
 
-You create Vega visualizations by using the text editor, which is
-preconfigured with the options you need.
+Vega and Vega-Lite are capable of building most of the visualizations
+that {kib} provides, but with higher complexity. The most common reason
+to use Vega in {kib} is that your data or
+visualization isn't supported in other tools in {kib}, so you need
+to use the more powerful tool. The most common reasons to use Vega in {kib} are:
+
+* Aggregations using the `nested` mapping
+* Aggregations with bucket scripts
+* Queries using that custom time filters
+* Complex calculations
+* Calculating percentage changes
+* Extracting data from _source instead of aggregation
+* Scatter charts
+* Sankey charts
+* Custom maps
+* Using a visual theme that {kib} does not provide
+
+Because Vega supports all of these, it is often easier to write a Vega spec
+than to develop a {kib} plugin when in need of more features.
+
+[[vega-lite-tutorial]]
+=== Tutorial: First visualization in Vega-Lite
+
+When you first open the Vega editor in {kib}, you will see a pre-populated
+line chart which shows the total number of documents across all your indices
+within the time range.
 
 [role="screenshot"]
 image::images/vega_lite_default.png[]
 
-[float]
-[[vega-schema]]
-==== Change the Vega version
+This tutorial will show you how to build a stacked area chart, and how to debug
+the most common issues when writing a visualization in Vega:
 
-The default visualization uses Vega-Lite version 2. To use Vega version 4, edit
-the `schema`.
+[role="screenshot"]
+image::images/vega_lite_tutorial_1.png[]
 
-Go to `$schema`, enter `https://vega.github.io/schema/vega/v5.json`, then click
-*Update*.
+The text editor contains a Vega-Lite spec written in https://hjson.github.io/[HJSON],
+which is similar to JSON but optimized for human editing. HJSON supports:
 
-[float]
-[[vega-type]]
-==== Change the visualization type
+* Comments using // or /* syntax
+* Object keys without quotes
+* String values without quotes
+* Optional commas
+* Double or single quotes
 
-The default visualization is a line chart. To change the visualization type,
-change the `mark` value. The supported visualization types are listed in the
-text editor.
+Multiline strings are supported in HJSON, but will not work as expected in Vega.
 
-Go to `mark`, change the value to a different visualization type, then click
-*Update*.
+The default Vega-Lite spec is querying `_all` indices, but most visualizations are powered by a single index. Change the line:
 
-[float]
+```yaml
+index: _all
+```
+
+to:
+
+```yaml
+index: kibana_sample_data_ecommerce
+```
+
+and click "Update". The result is probably not what you expect, because it shows
+a flat line with 0 results. This shows the first thing that you need to understand
+when writing a Vega spec in {kib}: small changes can lead to unexpected results.
+
+In this case, you've only changed the index, so the problem must be that the results
+of your new query don't match what you expected. To debug this, you can use one of
+these techniques:
+
+* Use intuition to guess at the problem
+* Open the browser dev tools and look at the Network tab to inspect the {es} request
+* Open the browser dev tools and type `VEGA_DEBUG.vegalite_spec.data` to inspect
+    the response from {es}
+* Build a comparable query using the {kib} Dev Tools and see if the results match
+* Copy the spec from `JSON.stringify(VEGA_DEBUG.vegalite_spec)` and paste into the
+    online Vega-Lite editor
+* Use `VEGA_DEBUG.view.data('source_0')` or `VEGA_DEBUG.view.data('data_0')` to
+    understand the transformations that are applied after fetching data
+
+This complex debugging process will come up frequently while working on Vega in {kib}.
+
+In this specific case, it's easiest to use intuition. The problem is that
+`kibana_sample_data_ecommerce` uses the field `order_date` instead of `@timestamp`,
+so you should find and replace `@timestamp` to `order_date`. This fixes the problem,
+leaving you with this spec:
+
+.Expand Vega-Lite spec
+[%collapsible%closed]
+====
+[source,yaml]
+----
+{
+  $schema: https://vega.github.io/schema/vega-lite/v4.json
+  title: Event counts from ecommerce
+  data: {
+    url: {
+      %context%: true
+      %timefield%: order_date
+      index: kibana_sample_data_ecommerce
+      body: {
+        aggs: {
+          time_buckets: {
+            date_histogram: {
+              field: order_date
+              interval: {%autointerval%: true}
+              extended_bounds: {
+                min: {%timefilter%: "min"}
+                max: {%timefilter%: "max"}
+              }
+              min_doc_count: 0
+            }
+          }
+        }
+        size: 0
+      }
+    }
+    format: {property: "aggregations.time_buckets.buckets" }
+  }
+
+  mark: line
+
+  encoding: {
+    x: {
+      field: key
+      type: temporal
+      axis: { title: null }
+    }
+    y: {
+      field: doc_count
+      type: quantitative
+      axis: { title: "Document count" }
+    }
+  }
+}
+----
+
+====
+
+Now, let's make the visualization more interesting by adding another aggregation
+to create a stacked area chart.
+
+Click the wrench icon and select "Reformat as JSON, strip comments". Now, open
+the {kib} Dev Tools in a separate tab. This query is roughly equivalent to the
+one that is used in the default Vega-Lite spec:
+
+```js
+POST kibana_sample_data_ecommerce/_search
+{
+  "query": {
+    "range": {
+      "order_date": {
+        "gte": "now-7d"
+      }
+    }
+  },
+  "aggs": {
+    "time_buckets": {
+      "date_histogram": {
+        "field": "order_date",
+        "fixed_interval": "1d",
+        "extended_bounds": {
+          "min": "now-7d"
+        },
+        "min_doc_count": 0
+      }
+    }
+  },
+  "size": 0
+}
+```
+
+There's not enough data to create a stacked bar in the original query, so we
+will add a new
+{ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation]:
+
+```js
+POST kibana_sample_data_ecommerce/_search
+{
+  "query": {
+    "range": {
+      "order_date": {
+        "gte": "now-7d"
+      }
+    }
+  },
+  "aggs": {
+    "categories": {
+      "terms": { "field": "category.keyword" },
+      "aggs": {
+        "time_buckets": {
+          "date_histogram": {
+            "field": "order_date",
+            "fixed_interval": "1d",
+            "extended_bounds": {
+              "min": "now-7d"
+            },
+            "min_doc_count": 0
+          }
+        }
+      }
+    }
+  },
+  "size": 0
+}
+```
+
+You'll see that the response format looks different from the previous query:
+
+```json
+{
+  "aggregations" : {
+    "categories" : {
+      "doc_count_error_upper_bound" : 0,
+      "sum_other_doc_count" : 0,
+      "buckets" : [{
+        "key" : "Men's Clothing",
+        "doc_count" : 1661,
+        "time_buckets" : {
+          "buckets" : [{
+            "key_as_string" : "2020-06-30T00:00:00.000Z",
+            "key" : 1593475200000,
+            "doc_count" : 19
+          }, {
+            "key_as_string" : "2020-07-01T00:00:00.000Z",
+            "key" : 1593561600000,
+            "doc_count" : 71
+          }]
+        }
+      }]
+    }
+  }
+}
+```
+
+Now that we have data that we're happy with, it's time to convert this valid
+query back into a Vega-Lite data section, by adding the {kib} Vega context:
+
+```yaml
+  data: {
+    url: {
+      %context%: true
+      %timefield%: order_date
+      index: kibana_sample_data_ecommerce
+      body: {
+        aggs: {
+          categories: {
+            terms: { field: "category.keyword" }
+            aggs: {
+              time_buckets: {
+                date_histogram: {
+                  field: order_date
+                  interval: {%autointerval%: true}
+                  extended_bounds: {
+                    min: {%timefilter%: "min"}
+                    max: {%timefilter%: "max"}
+                  }
+                  min_doc_count: 0
+                }
+              }
+            }
+          }
+        }
+        size: 0
+      }
+    }
+    format: {property: "aggregations.categories.buckets" }
+  }
+```
+
+If you copy and paste that into your Vega-Lite spec, and click "Update",
+you will see a warning saying `Infinite extent for field "key": [Infinity, -Infinity]`.
+Let's use our Vega debugging skills to understand why.
+
+Open the browser dev tools console and type
+`VEGA_DEBUG.view.data('source_0')`. You will see:
+
+```js
+[{
+  doc_count: 454
+  key: "Men's Clothing"
+  time_buckets: {buckets: Array(57)}
+  Symbol(vega_id): 12822
+}, ...]
+```
+
+Open the browser dev tools console and type
+`VEGA_DEBUG.view.data('data_0')`. You will see:
+
+```js
+[{
+  doc_count: 454
+  key: NaN
+  time_buckets: {buckets: Array(57)}
+  Symbol(vega_id): 13879
+}]
+```
+
+The issue seems to be that the `key` property is not being converted the right way,
+which makes sense because the `key` is now `Men's Clothing` instead of a timestamp.
+
+To fix this, try updating the `encoding` of your Vega-Lite spec to:
+
+```yaml
+  encoding: {
+    x: {
+      field: time_buckets.buckets.key
+      type: temporal
+      axis: { title: null }
+    }
+    y: {
+      field: time_buckets.buckets.doc_count
+      type: quantitative
+      axis: { title: "Document count" }
+    }
+  }
+```
+
+This will show more errors, and you can inspect `VEGA_DEBUG.view.data('data_0')` to
+understand why. This now shows:
+
+```js
+[{
+  doc_count: 454
+  key: "Men's Clothing"
+  time_buckets: {buckets: Array(57)}
+  time_buckets.buckets.doc_count: undefined
+  time_buckets.buckets.key: null
+  Symbol(vega_id): 14094
+}]
+```
+
+It looks like the problem is that the `time_buckets` inner array is not being
+extracted by Vega. The solution is to use a Vega-lite
+https://vega.github.io/vega-lite/docs/flatten.html[flatten transformation], available in {kib} 7.9 and later.
+If using an older version of Kibana, the flatten transformation is available in Vega
+but not Vega-Lite.
+
+Add this section in between the `data` and `encoding` section:
+
+```yaml
+  transform: [{
+    flatten: ["time_buckets.buckets"]
+  }]
+```
+
+This does not yet produce the results you expect. Inspect the transformed data
+by typing `VEGA_DEBUG.view.data('data_0')` into the console again:
+
+```js
+[{
+  doc_count: 453
+  key: "Men's Clothing"
+  time_bucket.buckets.doc_count: undefined
+  time_buckets: {buckets: Array(57)}
+  time_buckets.buckets: {
+    key_as_string: "2020-06-30T15:00:00.000Z",
+    key: 1593529200000,
+    doc_count: 2
+  }
+  time_buckets.buckets.key: null
+  Symbol(vega_id): 21564
+}]
+```
+
+The debug view shows `undefined` values where you would expect to see numbers, and
+the cause is that there are duplicate names which are confusing Vega-Lite. This can
+be fixed by making this change to the `transform` and `encoding` blocks:
+
+```yaml
+  transform: [{
+    flatten: ["time_buckets.buckets"],
+    as: ["buckets"]
+  }]
+
+  mark: area
+
+  encoding: {
+    x: {
+      field: buckets.key
+      type: temporal
+      axis: { title: null }
+    }
+    y: {
+      field: buckets.doc_count
+      type: quantitative
+      axis: { title: "Document count" }
+    }
+    color: {
+      field: key
+      type: nominal
+    }
+  }
+```
+
+At this point, you have a stacked area chart that shows the top categories,
+but the chart is still missing some common features that we expect from a {kib}
+visualization. Let's add hover states and tooltips next.
+
+Hover states are handled differently in Vega-Lite and Vega. In Vega-Lite this is
+done using a concept called `selection`, which has many permutations that are not
+covered in this tutorial. We will be adding a simple tooltip and hover state.
+
+Because {kib} has enabled the https://vega.github.io/vega-lite/docs/tooltip.html[Vega tooltip plugin],
+tooltips can be defined in several ways:
+
+* Automatic tooltip based on the data, via `{ content: "data" }`
+* Array of fields, like `[{ field: "key", type: "nominal" }]`
+* Defining a custom Javascript object using the `calculate` transform
+
+For the simple tooltip, add this to your encoding:
+
+```yaml
+  encoding: {
+    tooltip: [{
+      field: buckets.key
+      type: temporal
+      title: "Date"
+    }, {
+      field: key
+      type: nominal
+      title: "Category"
+    }, {
+      field: buckets.doc_count
+      type: quantitative
+      title: "Count"
+    }]
+  }
+```
+
+As you hover over the area series in your chart, a multi-line tooltip will
+appear, but it won't indicate the nearest point that it's pointing to. To
+indicate the nearest point, we need to add a second layer.
+
+The first step is to remove the `mark: area` from your visualization.
+Once you've removed the previous mark, add a composite mark at the end of
+the Vega-Lite spec:
+
+```yaml
+  layer: [{
+    mark: area
+  }, {
+    mark: point
+  }]
+```
+
+You'll see that the points are not appearing to line up with the area chart,
+and the reason is that the points are not being stacked. Change your Y encoding
+to this:
+
+```yaml
+    y: {
+      field: buckets.doc_count
+      type: quantitative
+      axis: { title: "Document count" }
+      stack: true
+    }
+```
+
+Now, we will add a `selection` block inside the point mark:
+
+```yaml
+  layer: [{
+    mark: area
+  }, {
+    mark: point
+    
+    selection: {
+      pointhover: {
+        type: single
+        on: mouseover
+        clear: mouseout
+        empty: none
+        fields: ["buckets.key", "key"]
+        nearest: true
+      }
+    }
+
+    encoding: {
+      size: {
+        condition: {
+          selection: pointhover
+          value: 100
+        }
+        value: 5
+      }
+      fill: {
+        condition: {
+          selection: pointhover
+          value: white
+        }
+      }
+    }
+  }]
+```
+
+Now that you've enabled a selection, try moving the mouse around the visualization
+and seeing the points respond to the nearest position:
+
+[role="screenshot"]
+image::images/vega_lite_tutorial_2.png[]
+
+The final result of this tutorial is this spec:
+
+.Expand final Vega-Lite spec
+[%collapsible%closed]
+====
+[source,yaml]
+----
+{
+  $schema: https://vega.github.io/schema/vega-lite/v4.json
+  title: Event counts from ecommerce
+  data: {
+    url: {
+      %context%: true
+      %timefield%: order_date
+      index: kibana_sample_data_ecommerce
+      body: {
+        aggs: {
+          categories: {
+            terms: { field: "category.keyword" }
+            aggs: {
+              time_buckets: {
+                date_histogram: {
+                  field: order_date
+                  interval: {%autointerval%: true}
+                  extended_bounds: {
+                    min: {%timefilter%: "min"}
+                    max: {%timefilter%: "max"}
+                  }
+                  min_doc_count: 0
+                }
+              }
+            }
+          }
+        }
+        size: 0
+      }
+    }
+    format: {property: "aggregations.categories.buckets" }
+  }
+  
+  transform: [{
+    flatten: ["time_buckets.buckets"]
+    as: ["buckets"]
+  }]
+
+  encoding: {
+    x: {
+      field: buckets.key
+      type: temporal
+      axis: { title: null }
+    }
+    y: {
+      field: buckets.doc_count
+      type: quantitative
+      axis: { title: "Document count" }
+      stack: true
+    }
+    color: {
+      field: key
+      type: nominal
+      title: "Category"
+    }
+    tooltip: [{
+      field: buckets.key
+      type: temporal
+      title: "Date"
+    }, {
+      field: key
+      type: nominal
+      title: "Category"
+    }, {
+      field: buckets.doc_count
+      type: quantitative
+      title: "Count"
+    }]
+  }
+  
+  layer: [{
+    mark: area
+  }, {
+    mark: point
+    
+    selection: {
+      pointhover: {
+        type: single
+        on: mouseover
+        clear: mouseout
+        empty: none
+        fields: ["buckets.key", "key"]
+        nearest: true
+      }
+    }
+
+    encoding: {
+      size: {
+        condition: {
+          selection: pointhover
+          value: 100
+        }
+        value: 5
+      }
+      fill: {
+        condition: {
+          selection: pointhover
+          value: white
+        }
+      }
+    }
+  }]
+}
+----
+
+====
+
+[[vega-tutorial]]
+=== Tutorial: Updating {kib} filters from Vega
+
+This tutorial will build on the Vega-Lite spec from the previous tutorial by
+using the additional {kib} functions available in Vega to update {kib} filters.
+These functions are only available in Vega specs, not in Vega-Lite, so the first
+step is to convert your visualization from Vega-Lite to Vega.
+
+First, click the wrench icon. Click "Reformat as JSON, delete comments".
+Paste this into the https://vega.github.io/editor/#/custom/vega-lite[online Vega editor].
+The online Vega editor will complain that the `url` section is invalid, which is because
+of the custom {kib} integration. You can replace the `data` with:
+
+```json
+  "data": {
+    "values": [],
+    "format": {"property": "aggregations.categories.buckets"}
+  },
+```
+
+Click the "Export" button and choose JSON > Compiled Vega, then download. You will get:
+
+.Expand generated Vega spec
+[%collapsible%closed]
+====
+[source,json]
+----
+{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "background": "white",
+  "padding": 5,
+  "width": 200,
+  "height": 200,
+  "title": {
+    "text": "Event counts from ecommerce",
+    "frame": "group"
+  },
+  "style": "cell",
+  "data": [
+    {
+      "name": "pointhover_store"
+    },
+    {
+      "name": "source_0",
+      "values": [],
+      "format": {
+        "property": "aggregations.categories.buckets"
+      }
+    },
+    {
+      "name": "data_0",
+      "source": "source_0",
+      "transform": [
+        {
+          "type": "flatten",
+          "fields": [
+            "time_buckets.buckets"
+          ],
+          "as": [
+            "buckets"
+          ]
+        },
+        {
+          "type": "formula",
+          "expr": "toDate(datum[\"buckets\"] && datum[\"buckets\"][\"key\"])",
+          "as": "buckets.key"
+        },
+        {
+          "type": "formula",
+          "expr": "datum[\"buckets\"] && datum[\"buckets\"][\"doc_count\"]",
+          "as": "buckets.doc_count"
+        }
+      ]
+    },
+    {
+      "name": "data_1",
+      "source": "data_0",
+      "transform": [
+        {
+          "type": "impute",
+          "field": "buckets\\.doc_count",
+          "groupby": [
+            "key"
+          ],
+          "key": "buckets\\.key",
+          "method": "value",
+          "value": 0
+        },
+        {
+          "type": "stack",
+          "groupby": [
+            "buckets\\.key"
+          ],
+          "field": "buckets\\.doc_count",
+          "sort": {
+            "field": [
+              "key"
+            ],
+            "order": [
+              "descending"
+            ]
+          },
+          "as": [
+            "buckets.doc_count_start",
+            "buckets.doc_count_end"
+          ],
+          "offset": "zero"
+        }
+      ]
+    },
+    {
+      "name": "data_2",
+      "source": "data_0",
+      "transform": [
+        {
+          "type": "stack",
+          "groupby": [
+            "buckets\\.key"
+          ],
+          "field": "buckets\\.doc_count",
+          "sort": {
+            "field": [
+              "key"
+            ],
+            "order": [
+              "descending"
+            ]
+          },
+          "as": [
+            "buckets.doc_count_start",
+            "buckets.doc_count_end"
+          ],
+          "offset": "zero"
+        },
+        {
+          "type": "filter",
+          "expr": "(isDate(datum[\"buckets.key\"]) || (isValid(datum[\"buckets.key\"]) && isFinite(+datum[\"buckets.key\"]))) && isValid(datum[\"buckets.doc_count\"]) && isFinite(+datum[\"buckets.doc_count\"])"
+        }
+      ]
+    }
+  ],
+  "signals": [
+    {
+      "name": "unit",
+      "value": {},
+      "on": [
+        {
+          "events": "mousemove",
+          "update": "isTuple(group()) ? group() : unit"
+        }
+      ]
+    },
+    {
+      "name": "pointhover",
+      "update": "vlSelectionResolve(\"pointhover_store\", \"union\")"
+    },
+    {
+      "name": "pointhover_tuple",
+      "on": [
+        {
+          "events": [
+            {
+              "source": "scope",
+              "type": "mouseover",
+              "markname": "layer_1_voronoi"
+            }
+          ],
+          "update": "datum && item().mark.marktype !== 'group' ? {unit: \"layer_1\", fields: pointhover_tuple_fields, values: [(item().isVoronoi ? datum.datum : datum)[\"buckets.key\"], (item().isVoronoi ? datum.datum : datum)[\"key\"]]} : null",
+          "force": true
+        },
+        {
+          "events": [
+            {
+              "source": "scope",
+              "type": "mouseout"
+            }
+          ],
+          "update": "null"
+        }
+      ]
+    },
+    {
+      "name": "pointhover_tuple_fields",
+      "value": [
+        {
+          "type": "E",
+          "field": "buckets\\.key"
+        },
+        {
+          "type": "E",
+          "field": "key"
+        }
+      ]
+    },
+    {
+      "name": "pointhover_modify",
+      "on": [
+        {
+          "events": {
+            "signal": "pointhover_tuple"
+          },
+          "update": "modify(\"pointhover_store\", pointhover_tuple, true)"
+        }
+      ]
+    }
+  ],
+  "marks": [
+    {
+      "name": "layer_0_pathgroup",
+      "type": "group",
+      "from": {
+        "facet": {
+          "name": "faceted_path_layer_0_main",
+          "data": "data_1",
+          "groupby": [
+            "key"
+          ]
+        }
+      },
+      "encode": {
+        "update": {
+          "width": {
+            "field": {
+              "group": "width"
+            }
+          },
+          "height": {
+            "field": {
+              "group": "height"
+            }
+          }
+        }
+      },
+      "marks": [
+        {
+          "name": "layer_0_marks",
+          "type": "area",
+          "style": [
+            "area"
+          ],
+          "sort": {
+            "field": "datum[\"buckets.key\"]"
+          },
+          "interactive": false,
+          "from": {
+            "data": "faceted_path_layer_0_main"
+          },
+          "encode": {
+            "update": {
+              "orient": {
+                "value": "vertical"
+              },
+              "fill": {
+                "scale": "color",
+                "field": "key"
+              },
+              "tooltip": {
+                "signal": "{\"Date\": timeFormat(datum[\"buckets.key\"], '%b %d, %Y'), \"Category\": isValid(datum[\"key\"]) ? datum[\"key\"] : \"\"+datum[\"key\"], \"Count\": format(datum[\"buckets.doc_count\"], \"\")}"
+              },
+              "description": {
+                "signal": "\"buckets.key\" + \": \" + (timeFormat(datum[\"buckets.key\"], '%b %d, %Y')) + \"; \" + \"Document count\" + \": \" + (format(datum[\"buckets.doc_count\"], \"\")) + \"; \" + \"Category\" + \": \" + (isValid(datum[\"key\"]) ? datum[\"key\"] : \"\"+datum[\"key\"]) + \"; \" + \"Date\" + \": \" + (timeFormat(datum[\"buckets.key\"], '%b %d, %Y')) + \"; \" + \"Count\" + \": \" + (format(datum[\"buckets.doc_count\"], \"\"))"
+              },
+              "x": {
+                "scale": "x",
+                "field": "buckets\\.key"
+              },
+              "y": {
+                "scale": "y",
+                "field": "buckets\\.doc_count_end"
+              },
+              "y2": {
+                "scale": "y",
+                "field": "buckets\\.doc_count_start"
+              },
+              "defined": {
+                "signal": "isValid(datum[\"buckets.key\"]) && isFinite(+datum[\"buckets.key\"]) && isValid(datum[\"buckets.doc_count\"]) && isFinite(+datum[\"buckets.doc_count\"])"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "layer_1_marks",
+      "type": "symbol",
+      "style": [
+        "point"
+      ],
+      "interactive": true,
+      "from": {
+        "data": "data_2"
+      },
+      "encode": {
+        "update": {
+          "opacity": {
+            "value": 0.7
+          },
+          "fill": [
+            {
+              "test": "(vlSelectionTest(\"pointhover_store\", datum))",
+              "value": "white"
+            },
+            {
+              "value": "transparent"
+            }
+          ],
+          "stroke": {
+            "scale": "color",
+            "field": "key"
+          },
+          "tooltip": {
+            "signal": "{\"Date\": timeFormat(datum[\"buckets.key\"], '%b %d, %Y'), \"Category\": isValid(datum[\"key\"]) ? datum[\"key\"] : \"\"+datum[\"key\"], \"Count\": format(datum[\"buckets.doc_count\"], \"\")}"
+          },
+          "ariaRoleDescription": {
+            "value": "point"
+          },
+          "description": {
+            "signal": "\"buckets.key\" + \": \" + (timeFormat(datum[\"buckets.key\"], '%b %d, %Y')) + \"; \" + \"Document count\" + \": \" + (format(datum[\"buckets.doc_count\"], \"\")) + \"; \" + \"Category\" + \": \" + (isValid(datum[\"key\"]) ? datum[\"key\"] : \"\"+datum[\"key\"]) + \"; \" + \"Date\" + \": \" + (timeFormat(datum[\"buckets.key\"], '%b %d, %Y')) + \"; \" + \"Count\" + \": \" + (format(datum[\"buckets.doc_count\"], \"\"))"
+          },
+          "x": {
+            "scale": "x",
+            "field": "buckets\\.key"
+          },
+          "y": {
+            "scale": "y",
+            "field": "buckets\\.doc_count_end"
+          },
+          "size": [
+            {
+              "test": "(vlSelectionTest(\"pointhover_store\", datum))",
+              "value": 100
+            },
+            {
+              "value": 5
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "layer_1_voronoi",
+      "type": "path",
+      "interactive": true,
+      "from": {
+        "data": "layer_1_marks"
+      },
+      "encode": {
+        "update": {
+          "fill": {
+            "value": "transparent"
+          },
+          "strokeWidth": {
+            "value": 0.35
+          },
+          "stroke": {
+            "value": "transparent"
+          },
+          "isVoronoi": {
+            "value": true
+          },
+          "tooltip": {
+            "signal": "{\"Date\": timeFormat(datum.datum[\"buckets.key\"], '%b %d, %Y'), \"Category\": isValid(datum.datum[\"key\"]) ? datum.datum[\"key\"] : \"\"+datum.datum[\"key\"], \"Count\": format(datum.datum[\"buckets.doc_count\"], \"\")}"
+          }
+        }
+      },
+      "transform": [
+        {
+          "type": "voronoi",
+          "x": {
+            "expr": "datum.datum.x || 0"
+          },
+          "y": {
+            "expr": "datum.datum.y || 0"
+          },
+          "size": [
+            {
+              "signal": "width"
+            },
+            {
+              "signal": "height"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "scales": [
+    {
+      "name": "x",
+      "type": "time",
+      "domain": {
+        "fields": [
+          {
+            "data": "data_1",
+            "field": "buckets\\.key"
+          },
+          {
+            "data": "data_2",
+            "field": "buckets\\.key"
+          }
+        ]
+      },
+      "range": [
+        0,
+        {
+          "signal": "width"
+        }
+      ]
+    },
+    {
+      "name": "y",
+      "type": "linear",
+      "domain": {
+        "fields": [
+          {
+            "data": "data_1",
+            "field": "buckets\\.doc_count_start"
+          },
+          {
+            "data": "data_1",
+            "field": "buckets\\.doc_count_end"
+          },
+          {
+            "data": "data_2",
+            "field": "buckets\\.doc_count_start"
+          },
+          {
+            "data": "data_2",
+            "field": "buckets\\.doc_count_end"
+          }
+        ]
+      },
+      "range": [
+        {
+          "signal": "height"
+        },
+        0
+      ],
+      "nice": true,
+      "zero": true
+    },
+    {
+      "name": "color",
+      "type": "ordinal",
+      "domain": {
+        "fields": [
+          {
+            "data": "data_1",
+            "field": "key"
+          },
+          {
+            "data": "data_2",
+            "field": "key"
+          }
+        ],
+        "sort": true
+      },
+      "range": "category"
+    }
+  ],
+  "axes": [
+    {
+      "scale": "x",
+      "orient": "bottom",
+      "gridScale": "y",
+      "grid": true,
+      "tickCount": {
+        "signal": "ceil(width/40)"
+      },
+      "domain": false,
+      "labels": false,
+      "aria": false,
+      "maxExtent": 0,
+      "minExtent": 0,
+      "ticks": false,
+      "zindex": 0
+    },
+    {
+      "scale": "y",
+      "orient": "left",
+      "gridScale": "x",
+      "grid": true,
+      "tickCount": {
+        "signal": "ceil(height/40)"
+      },
+      "domain": false,
+      "labels": false,
+      "aria": false,
+      "maxExtent": 0,
+      "minExtent": 0,
+      "ticks": false,
+      "zindex": 0
+    },
+    {
+      "scale": "x",
+      "orient": "bottom",
+      "grid": false,
+      "labelFlush": true,
+      "labelOverlap": true,
+      "tickCount": {
+        "signal": "ceil(width/40)"
+      },
+      "zindex": 0
+    },
+    {
+      "scale": "y",
+      "orient": "left",
+      "grid": false,
+      "title": "Document count",
+      "labelOverlap": true,
+      "tickCount": {
+        "signal": "ceil(height/40)"
+      },
+      "zindex": 0
+    }
+  ],
+  "legends": [
+    {
+      "title": "Category",
+      "fill": "color",
+      "symbolType": "circle",
+      "stroke": "color",
+      "encode": {
+        "symbols": {
+          "update": {
+            "opacity": {
+              "value": 0.7
+            }
+          }
+        }
+      }
+    }
+  ],
+  "config": {}
+}
+
+----
+====
+
+First, the generated JSON here is too large for the URL storage in {kib}. Go
+to the Stack Management > Kibana > Advanced Settings, and change the setting
+`state:storeInSessionStorage` to be on. Go back to the {kib} Vega editor and
+paste in the JSON you downloaded.
+
+The first thing is to add back the {es} query that we removed. Find this section:
+
+```json
+    {
+      "name": "source_0",
+      "values": [],
+      "format": {
+        "property": "aggregations.categories.buckets"
+      }
+    },
+```
+
+and replace it with:
+
+```yaml
+    {
+      name: source_0
+      url: {
+        %context%: true
+        %timefield%: order_date
+        index: kibana_sample_data_ecommerce
+        body: {
+          aggs: {
+            categories: {
+              terms: { field: "category.keyword" }
+              aggs: {
+                time_buckets: {
+                  date_histogram: {
+                    field: order_date
+                    interval: {%autointerval%: true}
+                    extended_bounds: {
+                      min: {%timefilter%: "min"}
+                      max: {%timefilter%: "max"}
+                    }
+                    min_doc_count: 0
+                  }
+                }
+              }
+            }
+          }
+          size: 0
+        }
+      }
+      format: { property: "aggregations.categories.buckets" }
+    }
+```
+
+There is still a warning about `width` and `height`, so you need to remove
+these lines which are provided by the {kib} theme:
+
+```
+  "background": "white",
+  "padding": 5,
+  "width": 200,
+  "height": 200,
+```
+
+The next step is to find the Vega section for `signals`, and add a new entry
+to the list of signals:
+
+```yaml
+    {
+      "name": "point_click"
+      "on": [{
+        "events": {
+          "source": "scope",
+          "type": "click",
+          "markname": "layer_1_voronoi"
+        }
+        update: '''kibanaAddFilter({ match_phrase: { 'category.keyword': pointhover_tuple.values[1] } })'''
+      }]
+    }
+```
+
+This event is using the {kib} custom function `kibanaAddFilter` to generate a filter that
+gets applied to the entire dashboard on click. Try clicking anywhere in the chart area,
+and you'll see a filter get applied.
+
+The mouse cursor should indicate that the chart is interactive. Find the `marks` section,
+and update the mark named `layer_1_voronoi` by adding `cursor: { value: "pointer" }` to
+the `encoding` section like this:
+
+```yaml
+    {
+      "name": "layer_1_voronoi",
+      "type": "path",
+      "interactive": true,
+      "from": {
+        "data": "layer_1_marks"
+      },
+      "encode": {
+        "update": {
+          ...
+          "cursor": { value: "pointer" }
+        }
+      }
+    }
+```
+
+Next, we will add a "time selector" interaction which will allow the user to narrow into
+a specific time range in the visualization. This will require adding more signals, and
+adding a rectangle overlay:
+
+[role="screenshot"]
+image::images/vega_tutorial_3.png[]
+
+The first step is to add a new `signal` to track the X position of the cursor:
+
+```yaml
+    {
+      name: currentX
+      value: -1
+      on: [{
+        events: {
+          type: mousemove
+          source: view
+        },
+        update: "clamp(x(), 0, width)"
+      }, {
+        events: {
+          type: mouseout
+          source: view
+        }
+        update: "-1"
+      }]
+    }
+```
+
+Now add a new `mark` to indicate the current cursor position:
+
+```yaml
+    {
+      type: rule
+      interactive: false
+      encode: {
+        update: {
+          y: {value: 0}
+          y2: {signal: "height"}
+          stroke: {value: "gray"}
+          strokeDash: {
+            value: [2, 1]
+          }
+          x: {signal: "max(currentX,0)"}
+          defined: {signal: "currentX > 0"}
+        }
+      }
+    }
+```
+
+Next, add a signal to track the current selected range, which will update
+until the user releases the mouse button or uses the escape key:
+
+
+```yaml
+    {
+      name: selected
+      value: [0, 0]
+      on: [{
+        events: {
+          type: mousedown
+          source: view
+        }
+        update: "[clamp(x(), 0, width), clamp(x(), 0, width)]"
+      }, {
+        events: {
+          type: mousemove
+          source: window
+          consume: true
+          between: [{
+            type: mousedown
+            source: view
+          }, {
+            merge: [{
+              type: mouseup
+              source: window
+            }, {
+              type: keydown
+              source: window
+              filter: "event.key === 'Escape'"
+            }]
+          }]
+        }
+        update: "[selected[0], clamp(x(), 0, width)]"
+      }, {
+        events: {
+          type: keydown
+          source: window
+          filter: "event.key === 'Escape'"
+        }
+        update: "[0, 0]"
+      }]
+    }
+```
+
+Now that there is a signal which tracks the time range from the user, we need to indicate
+the range visually by adding a new mark which only appears conditionally:
+
+```yaml
+    {
+      type: rect
+      name: selectedRect
+      encode: {
+        update: {
+          height: {signal: "height"}
+          fill: {value: "#333"}
+          fillOpacity: {value: 0.2}
+          x: {signal: "selected[0]"}
+          x2: {signal: "selected[1]"}
+          defined: {signal: "selected[0] !== selected[1]"}
+        }
+      }
+    }
+```
+
+Finally, add a new signal which will update the {kib} time filter when the mouse is released while
+dragging:
+
+```yaml
+    {
+      name: applyTimeFilter
+      value: null
+      on: [{
+        events: {
+          type: mouseup
+          source: view
+        }
+        update: '''selected[0] !== selected[1] ? kibanaSetTimeFilter(
+               invert('x',selected[0]),
+               invert('x',selected[1])) : null'''
+      }]
+    }
+```
+
+Putting this all together, your visualization now supports the main features of
+standard visualizations in {kib}, but with the potential to add even more control.
+The final Vega spec for this tutorial is here:
+
+.Expand final Vega-Lite spec
+[%collapsible%closed]
+====
+[source,yaml]
+----
+{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "title": {
+    "text": "Event counts from ecommerce",
+    "frame": "group"
+  },
+  "style": "cell",
+  "data": [
+    {
+      "name": "pointhover_store"
+    },
+    {
+      name: source_0
+      url: {
+        %context%: true
+        %timefield%: order_date
+        index: kibana_sample_data_ecommerce
+        body: {
+          aggs: {
+            categories: {
+              terms: { field: "category.keyword" }
+              aggs: {
+                time_buckets: {
+                  date_histogram: {
+                    field: order_date
+                    interval: {%autointerval%: true}
+                    extended_bounds: {
+                      min: {%timefilter%: "min"}
+                      max: {%timefilter%: "max"}
+                    }
+                    min_doc_count: 0
+                  }
+                }
+              }
+            }
+          }
+          size: 0
+        }
+      }
+      format: { property: "aggregations.categories.buckets" }
+    }
+    {
+      "name": "data_0",
+      "source": "source_0",
+      "transform": [
+        {
+          "type": "flatten",
+          "fields": [
+            "time_buckets.buckets"
+          ],
+          "as": [
+            "buckets"
+          ]
+        },
+        {
+          "type": "formula",
+          "expr": "toDate(datum[\"buckets\"] && datum[\"buckets\"][\"key\"])",
+          "as": "buckets.key"
+        },
+        {
+          "type": "formula",
+          "expr": "datum[\"buckets\"] && datum[\"buckets\"][\"doc_count\"]",
+          "as": "buckets.doc_count"
+        }
+      ]
+    },
+    {
+      "name": "data_1",
+      "source": "data_0",
+      "transform": [
+        {
+          "type": "impute",
+          "field": "buckets\\.doc_count",
+          "groupby": [
+            "key"
+          ],
+          "key": "buckets\\.key",
+          "method": "value",
+          "value": 0
+        },
+        {
+          "type": "stack",
+          "groupby": [
+            "buckets\\.key"
+          ],
+          "field": "buckets\\.doc_count",
+          "sort": {
+            "field": [
+              "key"
+            ],
+            "order": [
+              "descending"
+            ]
+          },
+          "as": [
+            "buckets.doc_count_start",
+            "buckets.doc_count_end"
+          ],
+          "offset": "zero"
+        }
+      ]
+    },
+    {
+      "name": "data_2",
+      "source": "data_0",
+      "transform": [
+        {
+          "type": "stack",
+          "groupby": [
+            "buckets\\.key"
+          ],
+          "field": "buckets\\.doc_count",
+          "sort": {
+            "field": [
+              "key"
+            ],
+            "order": [
+              "descending"
+            ]
+          },
+          "as": [
+            "buckets.doc_count_start",
+            "buckets.doc_count_end"
+          ],
+          "offset": "zero"
+        },
+        {
+          "type": "filter",
+          "expr": "(isDate(datum[\"buckets.key\"]) || (isValid(datum[\"buckets.key\"]) && isFinite(+datum[\"buckets.key\"]))) && isValid(datum[\"buckets.doc_count\"]) && isFinite(+datum[\"buckets.doc_count\"])"
+        }
+      ]
+    }
+  ],
+  "signals": [
+    {
+      "name": "unit",
+      "value": {},
+      "on": [
+        {
+          "events": "mousemove",
+          "update": "isTuple(group()) ? group() : unit"
+        }
+      ]
+    },
+    {
+      "name": "pointhover",
+      "update": "vlSelectionResolve(\"pointhover_store\", \"union\")"
+    },
+    {
+      "name": "pointhover_tuple",
+      "on": [
+        {
+          "events": [
+            {
+              "source": "scope",
+              "type": "mouseover",
+              "markname": "layer_1_voronoi"
+            }
+          ],
+          "update": "datum && item().mark.marktype !== 'group' ? {unit: \"layer_1\", fields: pointhover_tuple_fields, values: [(item().isVoronoi ? datum.datum : datum)[\"buckets.key\"], (item().isVoronoi ? datum.datum : datum)[\"key\"]]} : null",
+          "force": true
+        },
+        {
+          "events": [
+            {
+              "source": "scope",
+              "type": "mouseout"
+            }
+          ],
+          "update": "null"
+        }
+      ]
+    },
+    {
+      "name": "pointhover_tuple_fields",
+      "value": [
+        {
+          "type": "E",
+          "field": "buckets\\.key"
+        },
+        {
+          "type": "E",
+          "field": "key"
+        }
+      ]
+    },
+    {
+      "name": "pointhover_modify",
+      "on": [
+        {
+          "events": {
+            "signal": "pointhover_tuple"
+          },
+          "update": "modify(\"pointhover_store\", pointhover_tuple, true)"
+        }
+      ]
+    },
+    {
+      "name": "point_click"
+      "on": [{
+        "events": {
+          "source": "scope",
+          "type": "click",
+          "markname": "layer_1_voronoi"
+        }
+        update: '''kibanaAddFilter({ match_phrase: { 'category.keyword': pointhover_tuple.values[1] } })'''
+      }]
+    },
+    {
+      name: currentX
+      value: -1
+      on: [{
+        events: {
+          type: mousemove
+          source: view
+        },
+        update: "clamp(x(), 0, width)"
+      }, {
+        events: {
+          type: mouseout
+          source: view
+        }
+        update: "-1"
+      }]
+    }
+    {
+      name: selected
+      value: [0, 0]
+      on: [{
+        events: {
+          type: mousedown
+          source: view
+        }
+        update: "[clamp(x(), 0, width), clamp(x(), 0, width)]"
+      }, {
+        events: {
+          type: mousemove
+          source: window
+          consume: true
+          between: [{
+            type: mousedown
+            source: view
+          }, {
+            merge: [{
+              type: mouseup
+              source: window
+            }, {
+              type: keydown
+              source: window
+              filter: "event.key === 'Escape'"
+            }]
+          }]
+        }
+        update: "[selected[0], clamp(x(), 0, width)]"
+      }, {
+        events: {
+          type: keydown
+          source: window
+          filter: "event.key === 'Escape'"
+        }
+        update: "[0, 0]"
+      }]
+    }
+    {
+      name: applyTimeFilter
+      value: null
+      on: [{
+        events: {
+          type: mouseup
+          source: view
+        }
+        update: '''selected[0] !== selected[1] ? kibanaSetTimeFilter(
+               invert('x',selected[0]),
+               invert('x',selected[1])) : null'''
+      }]
+    }
+  ],
+  "marks": [
+    {
+      "name": "layer_0_pathgroup",
+      "type": "group",
+      "from": {
+        "facet": {
+          "name": "faceted_path_layer_0_main",
+          "data": "data_1",
+          "groupby": [
+            "key"
+          ]
+        }
+      },
+      "encode": {
+        "update": {
+          "width": {
+            "field": {
+              "group": "width"
+            }
+          },
+          "height": {
+            "field": {
+              "group": "height"
+            }
+          }
+        }
+      },
+      "marks": [
+        {
+          "name": "layer_0_marks",
+          "type": "area",
+          "style": [
+            "area"
+          ],
+          "sort": {
+            "field": "datum[\"buckets.key\"]"
+          },
+          "interactive": false,
+          "from": {
+            "data": "faceted_path_layer_0_main"
+          },
+          "encode": {
+            "update": {
+              "orient": {
+                "value": "vertical"
+              },
+              "fill": {
+                "scale": "color",
+                "field": "key"
+              },
+              "tooltip": {
+                "signal": "{\"Date\": timeFormat(datum[\"buckets.key\"], '%b %d, %Y'), \"Category\": isValid(datum[\"key\"]) ? datum[\"key\"] : \"\"+datum[\"key\"], \"Count\": format(datum[\"buckets.doc_count\"], \"\")}"
+              },
+              "description": {
+                "signal": "\"buckets.key\" + \": \" + (timeFormat(datum[\"buckets.key\"], '%b %d, %Y')) + \"; \" + \"Document count\" + \": \" + (format(datum[\"buckets.doc_count\"], \"\")) + \"; \" + \"Category\" + \": \" + (isValid(datum[\"key\"]) ? datum[\"key\"] : \"\"+datum[\"key\"]) + \"; \" + \"Date\" + \": \" + (timeFormat(datum[\"buckets.key\"], '%b %d, %Y')) + \"; \" + \"Count\" + \": \" + (format(datum[\"buckets.doc_count\"], \"\"))"
+              },
+              "x": {
+                "scale": "x",
+                "field": "buckets\\.key"
+              },
+              "y": {
+                "scale": "y",
+                "field": "buckets\\.doc_count_end"
+              },
+              "y2": {
+                "scale": "y",
+                "field": "buckets\\.doc_count_start"
+              },
+              "defined": {
+                "signal": "isValid(datum[\"buckets.key\"]) && isFinite(+datum[\"buckets.key\"]) && isValid(datum[\"buckets.doc_count\"]) && isFinite(+datum[\"buckets.doc_count\"])"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "layer_1_marks",
+      "type": "symbol",
+      "style": [
+        "point"
+      ],
+      "interactive": true,
+      "from": {
+        "data": "data_2"
+      },
+      "encode": {
+        "update": {
+          "opacity": {
+            "value": 0.7
+          },
+          "fill": [
+            {
+              "test": "(vlSelectionTest(\"pointhover_store\", datum))",
+              "value": "white"
+            },
+            {
+              "value": "transparent"
+            }
+          ],
+          "stroke": {
+            "scale": "color",
+            "field": "key"
+          },
+          "tooltip": {
+            "signal": "{\"Date\": timeFormat(datum[\"buckets.key\"], '%b %d, %Y'), \"Category\": isValid(datum[\"key\"]) ? datum[\"key\"] : \"\"+datum[\"key\"], \"Count\": format(datum[\"buckets.doc_count\"], \"\")}"
+          },
+          "ariaRoleDescription": {
+            "value": "point"
+          },
+          "description": {
+            "signal": "\"buckets.key\" + \": \" + (timeFormat(datum[\"buckets.key\"], '%b %d, %Y')) + \"; \" + \"Document count\" + \": \" + (format(datum[\"buckets.doc_count\"], \"\")) + \"; \" + \"Category\" + \": \" + (isValid(datum[\"key\"]) ? datum[\"key\"] : \"\"+datum[\"key\"]) + \"; \" + \"Date\" + \": \" + (timeFormat(datum[\"buckets.key\"], '%b %d, %Y')) + \"; \" + \"Count\" + \": \" + (format(datum[\"buckets.doc_count\"], \"\"))"
+          },
+          "x": {
+            "scale": "x",
+            "field": "buckets\\.key"
+          },
+          "y": {
+            "scale": "y",
+            "field": "buckets\\.doc_count_end"
+          },
+          "size": [
+            {
+              "test": "(vlSelectionTest(\"pointhover_store\", datum))",
+              "value": 100
+            },
+            {
+              "value": 5
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "layer_1_voronoi",
+      "type": "path",
+      "interactive": true,
+      "from": {
+        "data": "layer_1_marks"
+      },
+      "encode": {
+        "update": {
+          "fill": {
+            "value": "transparent"
+          },
+          "strokeWidth": {
+            "value": 0.35
+          },
+          "stroke": {
+            "value": "transparent"
+          },
+          "isVoronoi": {
+            "value": true
+          },
+          "tooltip": {
+            "signal": "{\"Date\": timeFormat(datum.datum[\"buckets.key\"], '%b %d, %Y'), \"Category\": isValid(datum.datum[\"key\"]) ? datum.datum[\"key\"] : \"\"+datum.datum[\"key\"], \"Count\": format(datum.datum[\"buckets.doc_count\"], \"\")}"
+          },
+          "cursor": { value: "pointer" }
+        }
+      },
+      "transform": [
+        {
+          "type": "voronoi",
+          "x": {
+            "expr": "datum.datum.x || 0"
+          },
+          "y": {
+            "expr": "datum.datum.y || 0"
+          },
+          "size": [
+            {
+              "signal": "width"
+            },
+            {
+              "signal": "height"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      type: rect
+      name: selectedRect
+      encode: {
+        update: {
+          height: {signal: "height"}
+          fill: {value: "#333"}
+          fillOpacity: {value: 0.2}
+          x: {signal: "selected[0]"}
+          x2: {signal: "selected[1]"}
+          defined: {signal: "selected[0] !== selected[1]"}
+        }
+      }
+    }
+    {
+      type: rule
+      interactive: false
+      encode: {
+        update: {
+          y: {value: 0}
+          y2: {signal: "height"}
+          stroke: {value: "gray"}
+          strokeDash: {
+            value: [2, 1]
+          }
+          x: {signal: "max(currentX,0)"}
+          defined: {signal: "currentX > 0"}
+        }
+      }
+    }
+  ],
+  "scales": [
+    {
+      "name": "x",
+      "type": "time",
+      "domain": {
+        "fields": [
+          {
+            "data": "data_1",
+            "field": "buckets\\.key"
+          },
+          {
+            "data": "data_2",
+            "field": "buckets\\.key"
+          }
+        ]
+      },
+      "range": [
+        0,
+        {
+          "signal": "width"
+        }
+      ]
+    },
+    {
+      "name": "y",
+      "type": "linear",
+      "domain": {
+        "fields": [
+          {
+            "data": "data_1",
+            "field": "buckets\\.doc_count_start"
+          },
+          {
+            "data": "data_1",
+            "field": "buckets\\.doc_count_end"
+          },
+          {
+            "data": "data_2",
+            "field": "buckets\\.doc_count_start"
+          },
+          {
+            "data": "data_2",
+            "field": "buckets\\.doc_count_end"
+          }
+        ]
+      },
+      "range": [
+        {
+          "signal": "height"
+        },
+        0
+      ],
+      "nice": true,
+      "zero": true
+    },
+    {
+      "name": "color",
+      "type": "ordinal",
+      "domain": {
+        "fields": [
+          {
+            "data": "data_1",
+            "field": "key"
+          },
+          {
+            "data": "data_2",
+            "field": "key"
+          }
+        ],
+        "sort": true
+      },
+      "range": "category"
+    }
+  ],
+  "axes": [
+    {
+      "scale": "x",
+      "orient": "bottom",
+      "gridScale": "y",
+      "grid": true,
+      "tickCount": {
+        "signal": "ceil(width/40)"
+      },
+      "domain": false,
+      "labels": false,
+      "aria": false,
+      "maxExtent": 0,
+      "minExtent": 0,
+      "ticks": false,
+      "zindex": 0
+    },
+    {
+      "scale": "y",
+      "orient": "left",
+      "gridScale": "x",
+      "grid": true,
+      "tickCount": {
+        "signal": "ceil(height/40)"
+      },
+      "domain": false,
+      "labels": false,
+      "aria": false,
+      "maxExtent": 0,
+      "minExtent": 0,
+      "ticks": false,
+      "zindex": 0
+    },
+    {
+      "scale": "x",
+      "orient": "bottom",
+      "grid": false,
+      "labelFlush": true,
+      "labelOverlap": true,
+      "tickCount": {
+        "signal": "ceil(width/40)"
+      },
+      "zindex": 0
+    },
+    {
+      "scale": "y",
+      "orient": "left",
+      "grid": false,
+      "title": "Document count",
+      "labelOverlap": true,
+      "tickCount": {
+        "signal": "ceil(height/40)"
+      },
+      "zindex": 0
+    }
+  ],
+  "legends": [
+    {
+      "title": "Category",
+      "fill": "color",
+      "symbolType": "circle",
+      "stroke": "color",
+      "encode": {
+        "symbols": {
+          "update": {
+            "opacity": {
+              "value": 0.7
+            }
+          }
+        }
+      }
+    }
+  ],
+  "config": {}
+}
+
+----
+====
+
+[[vega-reference]]
+=== Reference for {kib} extensions
+
+{kib} has extended Vega and Vega-Lite with extensions that support:
+
+* Default height and width
+* Default theme to match {kib}
+* Writing {es} queries using the time range and filters from dashboards
+* Using the Elastic Map Service in Vega maps
+* Additional tooltip styling
+* Advanced setting to enable URL loading from any domain
+* Limited debugging support using the browser dev tools
+* (Vega only) Expression functions which can update the time range and dashboard filters
+
 [[vega-sizing-and-positioning]]
-==== Change the layout
+==== Default height and width
 
 By default, Vega visualizations use the `autosize = { type: 'fit', contains: 'padding' }` layout.
 `fit` uses all available space, ignores `width` and `height` values,
 and respects the padding values. To override this behavior, change the
 `autosize` value.
 
-[[vega-querying-elasticsearch]]
-=== Query {es}
+[[vega-theme]]
+==== Default theme to match {kib}
 
-experimental[] Vega https://vega.github.io/vega/docs/data/[data] elements
-use embedded and external data with a `"url"` parameter. {kib} adds support for
-direct {es} queries by overloading
-the `"url"` value.
+{kib} registers a default https://vega.github.io/vega/docs/schemes/[Vega color scheme]
+with the id `elastic`, and sets a default color for each `mark` type.
+Override it by providing an alternate color.
 
-NOTE: With Vega, you dynamically load your data by setting signals as data URLs.
-Since {kib} is unable to support dynamically loaded data, all data is fetched
-before it's passed to the Vega renderer.
+[[vega-queries]]
+==== Writing {es} queries in Vega
 
-For example, count the number of documents in all indices:
+experimental[] {kib} extends the Vega https://vega.github.io/vega/docs/data/[data] elements
+with support for direct {es} queries specified as a `url`.
+
+Because of this, {kib} is **unable to support dynamically loaded data**,
+which would otherwise work in Vega. All data is fetched before it's passed to
+the Vega renderer.
+
+To define an {es} query in Vega, set the `url` to an object. {kib} will parse
+the object looking for special tokens that allow your query to integrate with {kib}.
+These tokens are:
+
+* `%context%: true`: Set at the top level, and replaces the `query` section with filters from dashboard
+* `%timefield%: <name>`: Set at the top level, integrates the query with the dashboard time filter
+* `{%timefilter%: true}`: Replaced by an {es} range query with upper and lower bounds
+* `{%timefilter%: "min" | "max"}`: Replaced only by the upper or lower bounds
+* `{%timefilter: true, shift: -1, unit: 'hour'}`: Generates a time range query one hour in the past
+* `{%autointerval%: true}`: Replaced by the string representing the time interval, such as `1h`
+* `{%autointerval%: 10}`: Replaced by a string which is approximately dividing the time into 10 ranges
+* `"%dashboard_context-must_clause%"`: String replaced by object containing filters
+* `"%dashboard_context-filter_clause%"`: String replaced by an object containing filters
+* `"%dashboard_context-must_not_clause%"`: String replaced by an object containing filters
+
+Putting this together, an example query that counts the number of documents in 
+a specific index:
 
 [source,yaml]
 ----
@@ -80,8 +2123,8 @@ url: {
   %context%: true
 
   // Which indexes to search
-  index: _all
-  // The body element may contain "aggs" and "query" subfields
+  index: kibana_sample_data_logs
+  // The body element may contain "aggs" and "query" keys
   body: {
     aggs: {
       time_buckets: {
@@ -194,6 +2237,7 @@ also supported. The `"interval"` can also be set dynamically, depending
 on the currently picked range: `"interval": {"%autointerval%": 10}` will
 try to get about 10-15 data points (buckets).
 
+[float]
 [[vega-esmfiles]]
 === Access Elastic Map Service files
 
@@ -260,21 +2304,44 @@ Additionally, you can use `latitude`, `longitude`, and `zoom` signals.
 These signals can be used in the graph, or can be updated to modify the
 position of the map.
 
-Vega visualization ignore the `autosize`, `width`, `height`, and `padding`
-values, using `fit` model with zero padding.
+[float]
+[[vega-tooltip]]
+==== Additional tooltip styling
 
-[[vega-debugging]]
-=== Debugging Vega
+{kib} has installed the https://vega.github.io/vega-lite/docs/tooltip.html[Vega tooltip plugin],
+so tooltips can be defined in the ways documented there. Beyond that, {kib} also supports
+a configuration option for changing the tooltip position and padding:
+
+```js
+{
+  config: {
+    kibana: {
+      tooltips: {
+        position: 'top',
+        padding: 15
+      }
+    }
+  }
+}
+```
+
+[[vega-url-loading]]
+==== Advanced setting to enable URL loading from any domain
+
+Vega can load data from any URL, but this is disabled by default in {kib}. 
+To change this, set `vis_type_vega.enableExternalUrls: true` in `kibana.yml`,
+then restart {kib}.
 
 [[vega-browser-debugging-console]]
 ==== Browser debugging console
 
 experimental[] Use browser debugging tools (for example, F12 or Ctrl+Shift+J in Chrome) to
 inspect the `VEGA_DEBUG` variable:
-+
+
 * `view` &mdash; Access to the Vega View object. See https://vega.github.io/vega/docs/api/debugging/[Vega Debugging Guide]
-on how to inspect data and signals at runtime. For Vega-Lite, `VEGA_DEBUG.view.data('source_0')` gets the main data set.
-For Vega, it uses the data name as defined in your Vega spec.
+on how to inspect data and signals at runtime. For Vega-Lite,
+`VEGA_DEBUG.view.data('source_0')` gets the pre-transformed data, and `VEGA_DEBUG.view.data('data_0')`
+gets the encoded data. For Vega, it uses the data name as defined in your Vega spec.
 
 * `vega_spec` &mdash; Vega JSON graph specification after some modifications by {kib}. In case
 of Vega-Lite, this is the output of the Vega-Lite compiler.
@@ -283,7 +2350,7 @@ of Vega-Lite, this is the output of the Vega-Lite compiler.
 Vega-Lite compilation.
 
 [[vega-data]]
-==== Data
+==== Debugging data
 
 experimental[] If you are using an {es} query, make sure your resulting data is
 what you expected. The easiest way to view it is by using the "networking"
@@ -294,19 +2361,77 @@ https://www.elastic.co/guide/en/kibana/current/console-kibana.html[Dev Tools]. P
 `GET <INDEX_NAME>/_search`, then add your query as the following lines
 (just the value of the `"query"` field).
 
-If you need to share your graph with someone, copy the
-raw data response to https://gist.github.com/[gist.github.com], possibly
-with a `.json` extension, use the `[raw]` button, and use that url
-directly in your graph.
+[[vega-getting-help]]
+==== Asking for help with a Vega spec
 
-To restrict Vega from using non-ES data sources, add `vega.enableExternalUrls: false`
-to your kibana.yml file.
+Because of the dynamic nature of the data in {es}, it is hard to help you with
+Vega specs unless you can share a dataset. To do this, use the browser developer
+tools and type:
+
+`JSON.stringify(VEGA_DEBUG.vegalite_spec, null, 2)`
+
+Copy the response to https://gist.github.com/[gist.github.com], possibly
+with a `.json` extension, use the `[raw]` button, and share that when
+asking for help.
+
+[float]
+[[vega-expression-functions]]
+==== (Vega only) Expression functions which can update the time range and dashboard filters
+
+{kib} has extended the Vega expression language with these functions:
+
+```js
+/**
+  * @param {object} query Elastic Query DSL snippet, as used in the query DSL editor
+  * @param {string} [index] as defined in Kibana, or default if missing
+  */
+kibanaAddFilter(query, index)
+
+/**
+  * @param {object} query Elastic Query DSL snippet, as used in the query DSL editor
+  * @param {string} [index] as defined in Kibana, or default if missing
+  */
+kibanaRemoveFilter(query, index)
+
+kibanaRemoveAllFilters()
+
+/**
+  * Update dashboard time filter to the new values
+  * @param {number|string|Date} start
+  * @param {number|string|Date} end
+  */
+kibanaSetTimeFilter(start, end)
+```
+
+[float]
+[[vega-additional-configuration-options]]
+==== Additional configuration options
+
+[source,yaml]
+----
+{
+  config: {
+    kibana: {
+      // Placement of the Vega-defined signal bindings.
+      // Can be `left`, `right`, `top`, or `bottom` (default).
+      controlsLocation: top
+      // Can be `vertical` or `horizontal` (default).
+      controlsDirection: vertical
+      // If true, hides most of Vega and Vega-Lite warnings
+      hideWarnings: true
+      // Vega renderer to use: `svg` or `canvas` (default)
+      renderer: canvas
+    }
+  }
+}
+----
+
 
 [[vega-notes]]
 [[vega-useful-links]]
 === Resources and examples
 
-experimental[] To learn more about Vega and Vega-List, refer to the resources and examples.
+experimental[] To learn more about Vega and Vega-Lite, refer to the resources and examples.
 
 ==== Vega editor
 The https://vega.github.io/editor/[Vega Editor] includes examples for Vega & Vega-Lite, but does not support any
@@ -326,29 +2451,3 @@ TIP: When you use the examples, you may
 need to modify the "data" section to use absolute URL. For example,
 replace `"url": "data/world-110m.json"` with
 `"url": "https://vega.github.io/editor/data/world-110m.json"`.
-
-[[vega-additional-configuration-options]]
-==== Additional configuration options
-
-These options are specific to the {kib}. link:#vega-with-a-map[Map support] has
-additional configuration options.
-
-[source,yaml]
-----
-{
-  config: {
-    kibana: {
-      // Placement of the Vega-defined signal bindings.
-      // Can be `left`, `right`, `top`, or `bottom` (default).
-      controlsLocation: top
-      // Can be `vertical` or `horizontal` (default).
-      controlsDirection: vertical
-      // If true, hides most of Vega and VegaLite warnings
-      hideWarnings: true
-      // Vega renderer to use: `svg` or `canvas` (default)
-      renderer: canvas
-    }
-  }
-  /* the rest of Vega code */
-}
-----
