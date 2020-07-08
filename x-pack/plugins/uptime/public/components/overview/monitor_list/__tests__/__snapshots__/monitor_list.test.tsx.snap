@@ -51,21 +51,56 @@ exports[`MonitorList component MonitorListPagination component renders a no item
     }
   }
 >
-  <MonitorListComponent
-    monitorList={
+  <ContextProvider
+    value={
       Object {
-        "list": Object {
-          "nextPagePagination": null,
-          "prevPagePagination": null,
-          "summaries": Array [],
-          "totalSummaryCount": 0,
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
         },
-        "loading": false,
+        "push": [Function],
+        "replace": [Function],
       }
     }
-    pageSize={10}
-    setPageSize={[MockFunction]}
-  />
+  >
+    <MonitorListComponent
+      monitorList={
+        Object {
+          "list": Object {
+            "nextPagePagination": null,
+            "prevPagePagination": null,
+            "summaries": Array [],
+            "totalSummaryCount": 0,
+          },
+          "loading": false,
+        }
+      }
+      pageSize={10}
+      setPageSize={[MockFunction]}
+    />
+  </ContextProvider>
 </ContextProvider>
 `;
 
@@ -120,110 +155,9 @@ exports[`MonitorList component MonitorListPagination component renders the pagin
     }
   }
 >
-  <MonitorListComponent
-    monitorList={
+  <ContextProvider
+    value={
       Object {
-<<<<<<< HEAD
-        "list": Object {
-          "nextPagePagination": "{\\"cursorKey\\":{\\"monitor_id\\":456},\\"cursorDirection\\":\\"AFTER\\",\\"sortOrder\\":\\"ASC\\"}",
-          "prevPagePagination": "{\\"cursorKey\\":{\\"monitor_id\\":123},\\"cursorDirection\\":\\"BEFORE\\",\\"sortOrder\\":\\"ASC\\"}",
-          "summaries": Array [
-            Object {
-              "monitor_id": "foo",
-              "state": Object {
-                "monitor": Object {},
-                "summary": Object {
-                  "down": 2,
-                  "up": 1,
-                },
-                "summaryPings": Array [
-                  Object {
-                    "docId": "foo1",
-                    "monitor": Object {
-                      "duration": Object {
-                        "us": 123,
-                      },
-                      "id": "foo",
-                      "ip": "127.0.0.1",
-                      "status": "up",
-                      "type": "icmp",
-                    },
-                    "timestamp": "124",
-                  },
-                  Object {
-                    "docId": "foo2",
-                    "monitor": Object {
-                      "duration": Object {
-                        "us": 123,
-                      },
-                      "id": "foo",
-                      "ip": "127.0.0.2",
-                      "status": "up",
-                      "type": "icmp",
-                    },
-                    "timestamp": "125",
-                  },
-                  Object {
-                    "docId": "foo3",
-                    "monitor": Object {
-                      "duration": Object {
-                        "us": 123,
-                      },
-                      "id": "foo",
-                      "ip": "127.0.0.3",
-                      "status": "down",
-                      "type": "icmp",
-                    },
-                    "timestamp": "126",
-                  },
-                ],
-                "timestamp": "123",
-                "url": Object {},
-              },
-            },
-            Object {
-              "monitor_id": "bar",
-              "state": Object {
-                "monitor": Object {},
-                "summary": Object {
-                  "down": 0,
-                  "up": 2,
-                },
-                "summaryPings": Array [
-                  Object {
-                    "docId": "bar1",
-                    "monitor": Object {
-                      "duration": Object {
-                        "us": 123,
-                      },
-                      "id": "bar",
-                      "ip": "127.0.0.1",
-                      "status": "down",
-                      "type": "icmp",
-                    },
-                    "timestamp": "125",
-                  },
-                  Object {
-                    "docId": "bar2",
-                    "monitor": Object {
-                      "duration": Object {
-                        "us": 123,
-                      },
-                      "id": "bar",
-                      "ip": "127.0.0.1",
-                      "status": "down",
-                      "type": "icmp",
-                    },
-                    "timestamp": "126",
-                  },
-                ],
-                "timestamp": "125",
-                "url": Object {},
-              },
-            },
-          ],
-          "totalSummaryCount": 2,
-=======
         "action": "POP",
         "block": [Function],
         "canGo": [Function],
@@ -249,16 +183,11 @@ exports[`MonitorList component MonitorListPagination component renders the pagin
           "pathname": "/",
           "search": "",
           "state": undefined,
->>>>>>> avc/metricless
         },
-        "loading": false,
+        "push": [Function],
+        "replace": [Function],
       }
     }
-<<<<<<< HEAD
-    pageSize={10}
-    setPageSize={[MockFunction]}
-  />
-=======
   >
     <MonitorListComponent
       monitorList={
@@ -370,7 +299,6 @@ exports[`MonitorList component MonitorListPagination component renders the pagin
       setPageSize={[MockFunction]}
     />
   </ContextProvider>
->>>>>>> avc/metricless
 </ContextProvider>
 `;
 
@@ -425,21 +353,56 @@ exports[`MonitorList component renders a no items message when no data is provid
     }
   }
 >
-  <MonitorListComponent
-    monitorList={
+  <ContextProvider
+    value={
       Object {
-        "list": Object {
-          "nextPagePagination": null,
-          "prevPagePagination": null,
-          "summaries": Array [],
-          "totalSummaryCount": 0,
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
         },
-        "loading": true,
+        "push": [Function],
+        "replace": [Function],
       }
     }
-    pageSize={10}
-    setPageSize={[MockFunction]}
-  />
+  >
+    <MonitorListComponent
+      monitorList={
+        Object {
+          "list": Object {
+            "nextPagePagination": null,
+            "prevPagePagination": null,
+            "summaries": Array [],
+            "totalSummaryCount": 0,
+          },
+          "loading": true,
+        }
+      }
+      pageSize={10}
+      setPageSize={[MockFunction]}
+    />
+  </ContextProvider>
 </ContextProvider>
 `;
 
@@ -494,111 +457,9 @@ exports[`MonitorList component renders error list 1`] = `
     }
   }
 >
-  <MonitorListComponent
-    monitorList={
+  <ContextProvider
+    value={
       Object {
-<<<<<<< HEAD
-        "error": [Error: foo message],
-        "list": Object {
-          "nextPagePagination": null,
-          "prevPagePagination": null,
-          "summaries": Array [
-            Object {
-              "monitor_id": "foo",
-              "state": Object {
-                "monitor": Object {},
-                "summary": Object {
-                  "down": 2,
-                  "up": 1,
-                },
-                "summaryPings": Array [
-                  Object {
-                    "docId": "foo1",
-                    "monitor": Object {
-                      "duration": Object {
-                        "us": 123,
-                      },
-                      "id": "foo",
-                      "ip": "127.0.0.1",
-                      "status": "up",
-                      "type": "icmp",
-                    },
-                    "timestamp": "124",
-                  },
-                  Object {
-                    "docId": "foo2",
-                    "monitor": Object {
-                      "duration": Object {
-                        "us": 123,
-                      },
-                      "id": "foo",
-                      "ip": "127.0.0.2",
-                      "status": "up",
-                      "type": "icmp",
-                    },
-                    "timestamp": "125",
-                  },
-                  Object {
-                    "docId": "foo3",
-                    "monitor": Object {
-                      "duration": Object {
-                        "us": 123,
-                      },
-                      "id": "foo",
-                      "ip": "127.0.0.3",
-                      "status": "down",
-                      "type": "icmp",
-                    },
-                    "timestamp": "126",
-                  },
-                ],
-                "timestamp": "123",
-                "url": Object {},
-              },
-            },
-            Object {
-              "monitor_id": "bar",
-              "state": Object {
-                "monitor": Object {},
-                "summary": Object {
-                  "down": 0,
-                  "up": 2,
-                },
-                "summaryPings": Array [
-                  Object {
-                    "docId": "bar1",
-                    "monitor": Object {
-                      "duration": Object {
-                        "us": 123,
-                      },
-                      "id": "bar",
-                      "ip": "127.0.0.1",
-                      "status": "down",
-                      "type": "icmp",
-                    },
-                    "timestamp": "125",
-                  },
-                  Object {
-                    "docId": "bar2",
-                    "monitor": Object {
-                      "duration": Object {
-                        "us": 123,
-                      },
-                      "id": "bar",
-                      "ip": "127.0.0.1",
-                      "status": "down",
-                      "type": "icmp",
-                    },
-                    "timestamp": "126",
-                  },
-                ],
-                "timestamp": "125",
-                "url": Object {},
-              },
-            },
-          ],
-          "totalSummaryCount": 2,
-=======
         "action": "POP",
         "block": [Function],
         "canGo": [Function],
@@ -624,16 +485,11 @@ exports[`MonitorList component renders error list 1`] = `
           "pathname": "/",
           "search": "",
           "state": undefined,
->>>>>>> avc/metricless
         },
-        "loading": false,
+        "push": [Function],
+        "replace": [Function],
       }
     }
-<<<<<<< HEAD
-    pageSize={10}
-    setPageSize={[MockFunction]}
-  />
-=======
   >
     <MonitorListComponent
       monitorList={
@@ -746,7 +602,6 @@ exports[`MonitorList component renders error list 1`] = `
       setPageSize={[MockFunction]}
     />
   </ContextProvider>
->>>>>>> avc/metricless
 </ContextProvider>
 `;
 
@@ -801,110 +656,9 @@ exports[`MonitorList component renders loading state 1`] = `
     }
   }
 >
-  <MonitorListComponent
-    monitorList={
+  <ContextProvider
+    value={
       Object {
-<<<<<<< HEAD
-        "list": Object {
-          "nextPagePagination": null,
-          "prevPagePagination": null,
-          "summaries": Array [
-            Object {
-              "monitor_id": "foo",
-              "state": Object {
-                "monitor": Object {},
-                "summary": Object {
-                  "down": 2,
-                  "up": 1,
-                },
-                "summaryPings": Array [
-                  Object {
-                    "docId": "foo1",
-                    "monitor": Object {
-                      "duration": Object {
-                        "us": 123,
-                      },
-                      "id": "foo",
-                      "ip": "127.0.0.1",
-                      "status": "up",
-                      "type": "icmp",
-                    },
-                    "timestamp": "124",
-                  },
-                  Object {
-                    "docId": "foo2",
-                    "monitor": Object {
-                      "duration": Object {
-                        "us": 123,
-                      },
-                      "id": "foo",
-                      "ip": "127.0.0.2",
-                      "status": "up",
-                      "type": "icmp",
-                    },
-                    "timestamp": "125",
-                  },
-                  Object {
-                    "docId": "foo3",
-                    "monitor": Object {
-                      "duration": Object {
-                        "us": 123,
-                      },
-                      "id": "foo",
-                      "ip": "127.0.0.3",
-                      "status": "down",
-                      "type": "icmp",
-                    },
-                    "timestamp": "126",
-                  },
-                ],
-                "timestamp": "123",
-                "url": Object {},
-              },
-            },
-            Object {
-              "monitor_id": "bar",
-              "state": Object {
-                "monitor": Object {},
-                "summary": Object {
-                  "down": 0,
-                  "up": 2,
-                },
-                "summaryPings": Array [
-                  Object {
-                    "docId": "bar1",
-                    "monitor": Object {
-                      "duration": Object {
-                        "us": 123,
-                      },
-                      "id": "bar",
-                      "ip": "127.0.0.1",
-                      "status": "down",
-                      "type": "icmp",
-                    },
-                    "timestamp": "125",
-                  },
-                  Object {
-                    "docId": "bar2",
-                    "monitor": Object {
-                      "duration": Object {
-                        "us": 123,
-                      },
-                      "id": "bar",
-                      "ip": "127.0.0.1",
-                      "status": "down",
-                      "type": "icmp",
-                    },
-                    "timestamp": "126",
-                  },
-                ],
-                "timestamp": "125",
-                "url": Object {},
-              },
-            },
-          ],
-          "totalSummaryCount": 2,
-=======
         "action": "POP",
         "block": [Function],
         "canGo": [Function],
@@ -930,16 +684,11 @@ exports[`MonitorList component renders loading state 1`] = `
           "pathname": "/",
           "search": "",
           "state": undefined,
->>>>>>> avc/metricless
         },
-        "loading": true,
+        "push": [Function],
+        "replace": [Function],
       }
     }
-<<<<<<< HEAD
-    pageSize={10}
-    setPageSize={[MockFunction]}
-  />
-=======
   >
     <MonitorListComponent
       monitorList={
@@ -1051,7 +800,6 @@ exports[`MonitorList component renders loading state 1`] = `
       setPageSize={[MockFunction]}
     />
   </ContextProvider>
->>>>>>> avc/metricless
 </ContextProvider>
 `;
 
@@ -1384,7 +1132,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                           <div
                             class="euiTextColor euiTextColor--subdued"
                           >
-                            1897 Yr ago
+                            1898 Yr ago
                           </div>
                         </div>
                       </span>
@@ -1561,7 +1309,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                           <div
                             class="euiTextColor euiTextColor--subdued"
                           >
-                            1895 Yr ago
+                            1896 Yr ago
                           </div>
                         </div>
                       </span>
@@ -1824,110 +1572,9 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
     }
   }
 >
-  <MonitorListComponent
-    monitorList={
+  <ContextProvider
+    value={
       Object {
-<<<<<<< HEAD
-        "list": Object {
-          "nextPagePagination": null,
-          "prevPagePagination": null,
-          "summaries": Array [
-            Object {
-              "monitor_id": "foo",
-              "state": Object {
-                "monitor": Object {},
-                "summary": Object {
-                  "down": 2,
-                  "up": 1,
-                },
-                "summaryPings": Array [
-                  Object {
-                    "docId": "foo1",
-                    "monitor": Object {
-                      "duration": Object {
-                        "us": 123,
-                      },
-                      "id": "foo",
-                      "ip": "127.0.0.1",
-                      "status": "up",
-                      "type": "icmp",
-                    },
-                    "timestamp": "124",
-                  },
-                  Object {
-                    "docId": "foo2",
-                    "monitor": Object {
-                      "duration": Object {
-                        "us": 123,
-                      },
-                      "id": "foo",
-                      "ip": "127.0.0.2",
-                      "status": "up",
-                      "type": "icmp",
-                    },
-                    "timestamp": "125",
-                  },
-                  Object {
-                    "docId": "foo3",
-                    "monitor": Object {
-                      "duration": Object {
-                        "us": 123,
-                      },
-                      "id": "foo",
-                      "ip": "127.0.0.3",
-                      "status": "down",
-                      "type": "icmp",
-                    },
-                    "timestamp": "126",
-                  },
-                ],
-                "timestamp": "123",
-                "url": Object {},
-              },
-            },
-            Object {
-              "monitor_id": "bar",
-              "state": Object {
-                "monitor": Object {},
-                "summary": Object {
-                  "down": 0,
-                  "up": 2,
-                },
-                "summaryPings": Array [
-                  Object {
-                    "docId": "bar1",
-                    "monitor": Object {
-                      "duration": Object {
-                        "us": 123,
-                      },
-                      "id": "bar",
-                      "ip": "127.0.0.1",
-                      "status": "down",
-                      "type": "icmp",
-                    },
-                    "timestamp": "125",
-                  },
-                  Object {
-                    "docId": "bar2",
-                    "monitor": Object {
-                      "duration": Object {
-                        "us": 123,
-                      },
-                      "id": "bar",
-                      "ip": "127.0.0.1",
-                      "status": "down",
-                      "type": "icmp",
-                    },
-                    "timestamp": "126",
-                  },
-                ],
-                "timestamp": "125",
-                "url": Object {},
-              },
-            },
-          ],
-          "totalSummaryCount": 2,
-=======
         "action": "POP",
         "block": [Function],
         "canGo": [Function],
@@ -1953,16 +1600,11 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
           "pathname": "/",
           "search": "",
           "state": undefined,
->>>>>>> avc/metricless
         },
-        "loading": false,
+        "push": [Function],
+        "replace": [Function],
       }
     }
-<<<<<<< HEAD
-    pageSize={10}
-    setPageSize={[MockFunction]}
-  />
-=======
   >
     <MonitorListComponent
       monitorList={
@@ -2074,6 +1716,5 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
       setPageSize={[MockFunction]}
     />
   </ContextProvider>
->>>>>>> avc/metricless
 </ContextProvider>
 `;
