@@ -67,7 +67,11 @@ describe('Resolver Data Middleware', () => {
             };
           }
           return childNode;
-        }) as ResolverChildNode[],
+        }) as ResolverChildNode[] /**
+          Cast to ResolverChildNode[] array is needed because incoming
+          TreeNodes from the generator cannot be assigned cleanly to the
+          tree model's expected ResolverChildNode type.
+        */,
       });
       if (tree) {
         const action: DataAction = {
@@ -181,7 +185,11 @@ describe('Resolver Data Middleware', () => {
             };
           }
           return childNode;
-        }) as ResolverChildNode[],
+        }) as ResolverChildNode[]/**
+        Cast to ResolverChildNode[] array is needed because incoming
+        TreeNodes from the generator cannot be assigned cleanly to the
+        tree model's expected ResolverChildNode type.
+      */,
       });
       if (tree) {
         const action: DataAction = {
