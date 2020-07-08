@@ -9,7 +9,7 @@ import {
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiHorizontalRule,
-  EuiCallOut,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
@@ -75,32 +75,24 @@ export function ServiceMetricFetcher({
 
   if (environment && !hasServiceData) {
     return (
-      <EuiCallOut
-        title={i18n.translate(
-          'xpack.apm.serviceMap.popoverMetrics.noEnvironmentDataCallout.title',
-          {
-            defaultMessage: 'No data for selected environment',
-          }
-        )}
-        size="s"
-        iconType="iInCircle"
-      >
-        {i18n.translate(
-          'xpack.apm.serviceMap.popoverMetrics.noEnvironmentDataCallout.text',
-          {
-            defaultMessage: `Try switching to another environment.`,
-          }
-        )}
-      </EuiCallOut>
+      <EuiText color="subdued">
+        {i18n.translate('xpack.apm.serviceMap.popoverMetrics.noDataText', {
+          defaultMessage: `No data for selected environment. Try switching to another environment.`,
+        })}
+      </EuiText>
     );
   }
   return (
     <>
-      <AnomalyDetection
-        serviceName={serviceName}
-        serviceAnomalyStats={serviceAnomalyStats}
-      />
-      <EuiHorizontalRule margin="xs" />
+      {serviceAnomalyStats && (
+        <>
+          <AnomalyDetection
+            serviceName={serviceName}
+            serviceAnomalyStats={serviceAnomalyStats}
+          />
+          <EuiHorizontalRule margin="xs" />
+        </>
+      )}
       <ServiceMetricList {...data} />
     </>
   );

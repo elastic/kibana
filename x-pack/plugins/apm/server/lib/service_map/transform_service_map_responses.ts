@@ -19,7 +19,6 @@ import {
 } from '../../../common/service_map';
 import { ConnectionsResponse, ServicesResponse } from './get_service_map';
 import { ServiceAnomaliesResponse } from './get_service_anomalies';
-import { ServiceAnomalyStats } from '../../../common/anomaly_detection';
 
 function getConnectionNodeId(node: ConnectionNode): string {
   if ('span.destination.service.resource' in node) {
@@ -61,20 +60,6 @@ export function getServiceNodes(allNodes: ConnectionNode[]) {
   ) as ServiceConnectionNode[];
 
   return serviceNodes;
-}
-
-function getServiceAnomalyStats(
-  anomalies: ServiceAnomaliesResponse,
-  serviceName?: string
-): ServiceAnomalyStats | undefined {
-  if (anomalies.mlJobIds.length === 0 || !serviceName) {
-    // Don't return data when there are no anomaly jobs
-    return;
-  }
-  // If there is no anomaly data, return a job_id to link to a running job
-  return (
-    anomalies.serviceAnomalies[serviceName] || { jobId: anomalies.mlJobIds[0] }
-  );
 }
 
 export type ServiceMapResponse = ConnectionsResponse & {
@@ -122,7 +107,9 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
       .map((serviceNode) => pickBy(serviceNode, identity));
     const mergedServiceNode = Object.assign({}, ...matchedServiceNodes);
 
-    const serviceAnomalyStats = getServiceAnomalyStats(anomalies, serviceName);
+    const serviceAnomalyStats = serviceName
+      ? anomalies.serviceAnomalies[serviceName]
+      : null;
 
     if (matchedServiceNodes.length) {
       return {
