@@ -91,7 +91,7 @@ describe('Workplace Search Telemetry Usage Collector', () => {
         }),
       } as any;
 
-      registerTelemetryUsageCollector(usageCollectionMock, emptySavedObjectsMock);
+      registerTelemetryUsageCollector(usageCollectionMock, emptySavedObjectsMock, mockLogger);
       const savedObjectsCounts = await makeUsageCollectorStub.mock.calls[0][0].fetch();
 
       expect(savedObjectsCounts).toEqual({
@@ -116,13 +116,13 @@ describe('Workplace Search Telemetry Usage Collector', () => {
       registerTelemetryUsageCollector(usageCollectionMock, errorSavedObjectsMock, mockLogger);
 
       // Without log warning (not found)
-      (SavedObjectsErrorHelpers.isNotFoundError as jest.mock).mockImplementationOnce(() => true);
+      (SavedObjectsErrorHelpers.isNotFoundError as jest.Mock).mockImplementationOnce(() => true);
       await makeUsageCollectorStub.mock.calls[0][0].fetch();
 
       expect(mockLogger.warn).not.toHaveBeenCalled();
 
       // With log warning
-      (SavedObjectsErrorHelpers.isNotFoundError as jest.mock).mockImplementationOnce(() => false);
+      (SavedObjectsErrorHelpers.isNotFoundError as jest.Mock).mockImplementationOnce(() => false);
       await makeUsageCollectorStub.mock.calls[0][0].fetch();
 
       expect(mockLogger.warn).toHaveBeenCalledWith(

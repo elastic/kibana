@@ -22,6 +22,7 @@ const org = { name: 'foo', defaultOrgName: 'bar' };
 const feed = [
   {
     id: 'demo',
+    sourceId: 'd2d2d23d',
     message: 'was successfully connected',
     target: 'http://localhost:3002/ws/org/sources',
     timestamp: '2020-06-24 16:34:16',
