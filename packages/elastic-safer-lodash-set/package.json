@@ -8,7 +8,7 @@
   "devDependencies": {
     "dependency-check": "^4.1.0",
     "tape": "^5.0.1",
-    "tsd": "^0.11.0"
+    "tsd": "^0.13.1"
   },
   "peerDependencies": {
     "lodash": "4.x"
