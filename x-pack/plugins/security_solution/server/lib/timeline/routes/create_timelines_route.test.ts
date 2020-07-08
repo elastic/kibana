@@ -28,7 +28,7 @@ import {
 import {
   CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
   CREATE_TIMELINE_ERROR_MESSAGE,
-} from './utils/create_timelines';
+} from './utils/failure_cases';
 
 describe('create timelines', () => {
   let server: ReturnType<typeof serverMock.create>;
