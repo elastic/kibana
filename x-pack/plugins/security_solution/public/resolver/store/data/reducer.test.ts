@@ -24,6 +24,11 @@ describe('Resolver Data Middleware', () => {
 
   describe('when data was received and the ancestry and children edges had cursors', () => {
     let firstChildNodeInTree: TreeNode;
+    /**
+     * Compiling stats to use for checking limit warnings and counts of missing events
+     * e.g. Limit warnings should show when number of related events actually displayed
+     * is lower than the estimated count from stats.
+     */
     let statsForFirstChild: Record<string, number>;
     beforeEach(() => {
       const generator = new EndpointDocGenerator('seed');
@@ -127,6 +132,11 @@ describe('Resolver Data Middleware', () => {
 
   describe('when data was received and stats show more related than the API can provide', () => {
     let firstChildNodeInTree: TreeNode;
+    /**
+     * Compiling stats to use for checking limit warnings and counts of missing events
+     * e.g. Limit warnings should show when number of related events actually displayed
+     * is lower than the estimated count from stats.
+     */
     let statsForFirstChild: Record<string, number>;
     let categoryToOverCount: string;
     beforeEach(() => {
