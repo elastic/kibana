@@ -37,6 +37,7 @@ export function logstashLogsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('home.tutorials.logstashLogs.nameTitle', {
       defaultMessage: 'Logstash logs',
     }),
+    moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.logstashLogs.shortDescription', {
       defaultMessage: 'Collect and parse debug and slow logs created by Logstash itself.',
