@@ -243,6 +243,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.header.awaitKibanaChrome();
         await queryBar.setQuery('');
+        // To remove focus of the of the search bar so date/time picker can show
+        await PageObjects.discover.selectIndexPattern(defaultSettings.defaultIndex);
         await PageObjects.timePicker.setDefaultAbsoluteRange();
 
         log.debug(
