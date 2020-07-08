@@ -18,7 +18,7 @@ import { useAddToTimeline } from '../../hooks/use_add_to_timeline';
 import { DraggableWrapperHoverContent } from './draggable_wrapper_hover_content';
 import {
   ManageGlobalTimeline,
-  timelineDefaults,
+  getTimelineDefaults,
 } from '../../../timelines/components/manage_timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 
@@ -152,10 +152,7 @@ describe('DraggableWrapperHoverContent', () => {
         beforeEach(() => {
           onFilterAdded = jest.fn();
           const manageTimelineForTesting = {
-            [timelineId]: {
-              ...timelineDefaults,
-              id: timelineId,
-            },
+            [timelineId]: getTimelineDefaults(timelineId),
           };
 
           wrapper = mount(
@@ -249,8 +246,7 @@ describe('DraggableWrapperHoverContent', () => {
 
           const manageTimelineForTesting = {
             [timelineId]: {
-              ...timelineDefaults,
-              id: timelineId,
+              ...getTimelineDefaults(timelineId),
               filterManager,
             },
           };

@@ -5,7 +5,7 @@
  */
 
 import { Observable, throwError, EMPTY, timer, from } from 'rxjs';
-import { mergeMap, expand, takeUntil, catchError, finalize, tap } from 'rxjs/operators';
+import { mergeMap, expand, takeUntil, finalize, tap } from 'rxjs/operators';
 import { getLongQueryNotification } from './long_query_notification';
 import {
   SearchInterceptor,

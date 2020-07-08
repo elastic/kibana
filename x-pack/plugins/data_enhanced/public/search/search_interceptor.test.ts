@@ -347,7 +347,7 @@ describe('EnhancedSearchInterceptor', () => {
       await timeTravel();
 
       const areAllRequestsAborted = mockCoreStart.http.fetch.mock.calls.every(
-        ([{ signal }]) => signal.aborted
+        ([{ signal }]) => signal?.aborted
       );
       expect(areAllRequestsAborted).toBe(true);
     });

@@ -18,7 +18,7 @@
  */
 
 import { BehaviorSubject, throwError, timer, Subscription, defer, from, Observable } from 'rxjs';
-import { finalize, filter, catchError } from 'rxjs/operators';
+import { finalize, filter } from 'rxjs/operators';
 import { ApplicationStart, Toast, ToastsStart, CoreStart } from 'kibana/public';
 import { getCombinedSignal, AbortError } from '../../common/utils';
 import { IEsSearchRequest, IEsSearchResponse } from '../../common/search';
@@ -123,7 +123,6 @@ export class SearchInterceptor {
       this.pendingCount$.next(++this.pendingCount);
 
       return this.runSearch(request, combinedSignal).pipe(
-        catchError((e) => throwError(e)),
         finalize(() => {
           this.pendingCount$.next(--this.pendingCount);
           cleanup();
@@ -138,7 +137,6 @@ export class SearchInterceptor {
     const { signal: timeoutSignal } = timeoutController;
     const timeout$ = timer(this.requestTimeout);
     const subscription = timeout$.subscribe(() => {
-      this.deps.usageCollector.trackQueryTimedOut();
       timeoutController.abort();
     });
     this.timeoutSubscriptions.add(subscription);
@@ -158,7 +156,6 @@ export class SearchInterceptor {
 
     const combinedSignal = getCombinedSignal(signals);
     const cleanup = () => {
-      subscription.unsubscribe();
       this.timeoutSubscriptions.remove(subscription);
       notificationSubscription.unsubscribe();
     };

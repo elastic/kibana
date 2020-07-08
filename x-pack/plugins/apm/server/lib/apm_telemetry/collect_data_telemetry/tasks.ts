@@ -22,6 +22,9 @@ import {
   SERVICE_RUNTIME_NAME,
   SERVICE_RUNTIME_VERSION,
   USER_AGENT_ORIGINAL,
+  CLOUD_AVAILABILITY_ZONE,
+  CLOUD_PROVIDER,
+  CLOUD_REGION,
 } from '../../../../common/elasticsearch_fieldnames';
 import { Span } from '../../../../typings/es_schemas/ui/span';
 import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
@@ -32,6 +35,66 @@ const TIME_RANGES = ['1d', 'all'] as const;
 type TimeRange = typeof TIME_RANGES[number];
 
 export const tasks: TelemetryTask[] = [
+  {
+    name: 'cloud',
+    executor: async ({ indices, search }) => {
+      function getBucketKeys({
+        buckets,
+      }: {
+        buckets: Array<{
+          doc_count: number;
+          key: string | number;
+        }>;
+      }) {
+        return buckets.map((bucket) => bucket.key as string);
+      }
+
+      const az = 'availability_zone';
+      const region = 'region';
+      const provider = 'provider';
+
+      const response = await search({
+        index: [
+          indices['apm_oss.errorIndices'],
+          indices['apm_oss.metricsIndices'],
+          indices['apm_oss.spanIndices'],
+          indices['apm_oss.transactionIndices'],
+        ],
+        body: {
+          size: 0,
+          aggs: {
+            [az]: {
+              terms: {
+                field: CLOUD_AVAILABILITY_ZONE,
+              },
+            },
+            [provider]: {
+              terms: {
+                field: CLOUD_PROVIDER,
+              },
+            },
+            [region]: {
+              terms: {
+                field: CLOUD_REGION,
+              },
+            },
+          },
+        },
+      });
+
+      const { aggregations } = response;
+
+      if (!aggregations) {
+        return { cloud: { [az]: [], [provider]: [], [region]: [] } };
+      }
+      const cloud = {
+        [az]: getBucketKeys(aggregations[az]),
+        [provider]: getBucketKeys(aggregations[provider]),
+        [region]: getBucketKeys(aggregations[region]),
+      };
+      return { cloud };
+    },
+  },
   {
     name: 'processor_events',
     executor: async ({ indices, search }) => {

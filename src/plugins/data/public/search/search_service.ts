@@ -17,11 +17,17 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, CoreStart } from '../../../../core/public';
+import { Plugin, CoreSetup, CoreStart, PackageInfo } from '../../../../core/public';
+import { ISearchSetup, ISearchStart } from './types';
+import { ExpressionsSetup } from '../../../../plugins/expressions/public';
+
 import { createSearchSource, SearchSource, SearchSourceDependencies } from './search_source';
 import { getEsClient, LegacyApiCaller } from './legacy';
 import { getForceNow } from '../query/timefilter/lib/get_force_now';
 import { calculateBounds, TimeRange } from '../../common/query';
+
+import { IndexPatternsContract } from '../index_patterns/index_patterns';
+import { GetInternalStartServicesFn } from '../types';
 import { SearchInterceptor } from './search_interceptor';
 import {
   getAggTypes,
@@ -30,21 +36,18 @@ import {
   AggConfigs,
   getCalculateAutoTimeExpression,
 } from './aggs';
-import { createUsageCollector, SearchUsageCollector } from './telemetry';
-import {
-  ISearchSetup,
-  ISearchStart,
-  ISearchGeneric,
-  SearchServiceSetupDependencies,
-  SearchServiceStartDependencies,
-} from './types';
+import { ISearchGeneric } from './types';
 
-/**
- * The search plugin exposes a method `registerSearchStrategy` for other plugins
- * to add their own custom search strategies.
- *
- * It also comes with two search strategy implementations - SYNC_SEARCH_STRATEGY and ES_SEARCH_STRATEGY.
- */
+interface SearchServiceSetupDependencies {
+  expressions: ExpressionsSetup;
+  getInternalStartServices: GetInternalStartServicesFn;
+  packageInfo: PackageInfo;
+}
+
+interface SearchServiceStartDependencies {
+  indexPatterns: IndexPatternsContract;
+}
+
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private esClient?: LegacyApiCaller;
   private readonly aggTypesRegistry = new AggTypesRegistry();
@@ -138,7 +141,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         },
         types: aggTypesStart,
       },
-      search: this.searchInterceptor.search,
+      search,
       usageCollector: this.usageCollector!,
       searchSource: {
         create: createSearchSource(dependencies.indexPatterns, searchSourceDependencies),
