@@ -19,16 +19,44 @@ import {
 } from '../../../common/constants.mock';
 import { getShardMock } from '../../get_shard.mock';
 
-export const getSearchEsListItemMock = (): SearchEsListItemSchema => ({
+export const getSearchEsListItemsAsAllUndefinedMock = (): SearchEsListItemSchema => ({
+  binary: undefined,
+  boolean: undefined,
+  byte: undefined,
   created_at: DATE_NOW,
   created_by: USER,
-  ip: VALUE,
+  date: undefined,
+  date_nanos: undefined,
+  date_range: undefined,
+  deserializer: undefined,
+  double: undefined,
+  double_range: undefined,
+  float: undefined,
+  float_range: undefined,
+  geo_point: undefined,
+  geo_shape: undefined,
+  half_float: undefined,
+  integer: undefined,
+  integer_range: undefined,
+  ip: undefined,
+  ip_range: undefined,
   keyword: undefined,
   list_id: LIST_ID,
+  long: undefined,
+  long_range: undefined,
   meta: META,
+  serializer: undefined,
+  shape: undefined,
+  short: undefined,
+  text: undefined,
   tie_breaker_id: TIE_BREAKER,
   updated_at: DATE_NOW,
   updated_by: USER,
+});
+
+export const getSearchEsListItemMock = (): SearchEsListItemSchema => ({
+  ...getSearchEsListItemsAsAllUndefinedMock(),
+  ip: VALUE,
 });
 
 export const getSearchListItemMock = (): SearchResponse<SearchEsListItemSchema> => ({
