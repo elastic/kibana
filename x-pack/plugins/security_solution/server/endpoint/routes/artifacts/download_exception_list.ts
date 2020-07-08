@@ -43,7 +43,7 @@ export function registerDownloadExceptionListRoute(
           DownloadArtifactRequestParamsSchema
         >(downloadArtifactRequestParamsSchema),
       },
-      options: { tags: ['access:securitySolution'] },
+      options: {},
     },
     async (context, req, res) => {
       let scopedSOClient: SavedObjectsClientContract;
@@ -54,7 +54,7 @@ export function registerDownloadExceptionListRoute(
         scopedSOClient = endpointContext.service.getScopedSavedObjectsClient(req);
         await authenticateAgentWithAccessToken(scopedSOClient, req);
       } catch (err) {
-        if (err.output.statusCode === 401) {
+        if ((err.isBoom ? err.output.statusCode : err.statusCode) === 401) {
           return res.unauthorized();
         } else {
           return res.notFound();
