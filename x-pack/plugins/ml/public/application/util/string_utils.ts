@@ -147,3 +147,11 @@ export function calculateTextWidth(txt: string | number, isNumber: boolean) {
   }
   return Math.ceil(width);
 }
+
+export function stringMatch(str: string | undefined, substr: any) {
+  return (
+    typeof str === 'string' &&
+    typeof substr === 'string' &&
+    (str.toLowerCase().match(substr.toLowerCase()) === null) === false
+  );
+}
