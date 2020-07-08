@@ -105,7 +105,7 @@ describe('monitor availability', () => {
         filters: exampleFilter,
         range: 2,
         rangeUnit: 'w',
-        threshold: 54,
+        threshold: '54',
       });
       expect(esMock.callAsCurrentUser).toHaveBeenCalledTimes(1);
       const [method, params] = esMock.callAsCurrentUser.mock.calls[0];
@@ -120,6 +120,14 @@ describe('monitor availability', () => {
                     "sum": Object {
                       "field": "summary.down",
                       "missing": 0,
+                    },
+                  },
+                  "filtered": Object {
+                    "bucket_selector": Object {
+                      "buckets_path": Object {
+                        "threshold": "ratio.value",
+                      },
+                      "script": "params.threshold < 0.54",
                     },
                   },
                   "ratio": Object {
@@ -269,7 +277,7 @@ describe('monitor availability', () => {
       const clientParameters: GetMonitorAvailabilityParams = {
         range: 23,
         rangeUnit: 'd',
-        threshold: 66,
+        threshold: '69',
       };
       const result = await getMonitorAvailability({
         callES,
@@ -289,6 +297,14 @@ describe('monitor availability', () => {
                     "sum": Object {
                       "field": "summary.down",
                       "missing": 0,
+                    },
+                  },
+                  "filtered": Object {
+                    "bucket_selector": Object {
+                      "buckets_path": Object {
+                        "threshold": "ratio.value",
+                      },
+                      "script": "params.threshold < 0.69",
                     },
                   },
                   "ratio": Object {
@@ -369,6 +385,15 @@ describe('monitor availability', () => {
       expect(result).toMatchInlineSnapshot(`
         Array [
           Object {
+            "availabilityRatio": 0.660869565217391,
+            "down": 234,
+            "location": "harrisburg",
+            "monitorId": "foo",
+            "name": "Foo",
+            "up": 456,
+            "url": "http://foo.com",
+          },
+          Object {
             "availabilityRatio": 0.652173913043478,
             "down": 240,
             "location": "faribanks",
@@ -376,6 +401,15 @@ describe('monitor availability', () => {
             "name": "Foo",
             "up": 450,
             "url": "http://foo.com",
+          },
+          Object {
+            "availabilityRatio": 0.688235294117647,
+            "down": 212,
+            "location": "fairbanks",
+            "monitorId": "bar",
+            "name": "Bar",
+            "up": 468,
+            "url": "http://bar.com",
           },
         ]
       `);
@@ -446,7 +480,7 @@ describe('monitor availability', () => {
         dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
         range: 3,
         rangeUnit: 'M',
-        threshold: 98,
+        threshold: '98',
       });
       expect(result).toMatchInlineSnapshot(`
         Array [
@@ -468,6 +502,24 @@ describe('monitor availability', () => {
             "up": 251,
             "url": "http://foo.com",
           },
+          Object {
+            "availabilityRatio": 0.991279069767442,
+            "down": 3,
+            "location": "harrisburg",
+            "monitorId": "baz",
+            "name": "Baz",
+            "up": 341,
+            "url": "http://baz.com",
+          },
+          Object {
+            "availabilityRatio": 0.986486486486486,
+            "down": 5,
+            "location": "fairbanks",
+            "monitorId": "baz",
+            "name": "Baz",
+            "up": 365,
+            "url": "http://baz.com",
+          },
         ]
       `);
       const [method, params] = esMock.callAsCurrentUser.mock.calls[0];
@@ -483,6 +535,14 @@ describe('monitor availability', () => {
                     "sum": Object {
                       "field": "summary.down",
                       "missing": 0,
+                    },
+                  },
+                  "filtered": Object {
+                    "bucket_selector": Object {
+                      "buckets_path": Object {
+                        "threshold": "ratio.value",
+                      },
+                      "script": "params.threshold < 0.98",
                     },
                   },
                   "ratio": Object {
@@ -571,6 +631,14 @@ describe('monitor availability', () => {
                       "sum": Object {
                         "field": "summary.down",
                         "missing": 0,
+                      },
+                    },
+                    "filtered": Object {
+                      "bucket_selector": Object {
+                        "buckets_path": Object {
+                          "threshold": "ratio.value",
+                        },
+                        "script": "params.threshold < 0.98",
                       },
                     },
                     "ratio": Object {
@@ -701,8 +769,8 @@ describe('monitor availability', () => {
       ];
     });
 
-    it('filters buckets that are below the threshold', async () => {
-      expect(await formatBuckets(buckets, 50)).toMatchInlineSnapshot(`
+    it('formats the buckets to the correct shape', async () => {
+      expect(await formatBuckets(buckets)).toMatchInlineSnapshot(`
         Array [
           Object {
             "availabilityRatio": 0.25099357994497096,
@@ -711,6 +779,15 @@ describe('monitor availability', () => {
             "monitorId": "test-node-service",
             "name": "Test Node Service",
             "up": 821,
+            "url": "http://localhost:12349",
+          },
+          Object {
+            "availabilityRatio": 0.5804076040417879,
+            "down": 2450,
+            "location": "harrisburg",
+            "monitorId": "test-node-service",
+            "name": "Test Node Service",
+            "up": 3389,
             "url": "http://localhost:12349",
           },
         ]

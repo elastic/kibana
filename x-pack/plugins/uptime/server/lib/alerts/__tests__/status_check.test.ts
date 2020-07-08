@@ -435,7 +435,7 @@ describe('status check alert', () => {
           url: 'https://foo.com',
           up: 2341,
           down: 17,
-          availabilityRatio: 99.2790500424088,
+          availabilityRatio: 0.992790500424088,
         },
         {
           monitorId: 'foo',
@@ -444,7 +444,7 @@ describe('status check alert', () => {
           url: 'https://foo.com',
           up: 2343,
           down: 47,
-          availabilityRatio: 98.0334728033473,
+          availabilityRatio: 0.980334728033473,
         },
         {
           monitorId: 'unreliable',
@@ -453,7 +453,7 @@ describe('status check alert', () => {
           url: 'https://unreliable.co',
           up: 2134,
           down: 213,
-          availabilityRatio: 90.9245845760545,
+          availabilityRatio: 0.909245845760545,
         },
         {
           monitorId: 'no-name',
@@ -461,7 +461,7 @@ describe('status check alert', () => {
           url: 'https://no-name.co',
           up: 2134,
           down: 213,
-          availabilityRatio: 90.9245845760545,
+          availabilityRatio: 0.909245845760545,
         },
       ]);
       const { server, libs } = bootstrapDependencies({
@@ -474,7 +474,7 @@ describe('status check alert', () => {
         availability: {
           range: 35,
           rangeUnit: 'd',
-          threshold: 99.34,
+          threshold: '99.34',
           filters: 'url.full: *',
         },
         shouldCheckAvailability: true,
@@ -506,9 +506,9 @@ describe('status check alert', () => {
               "downMonitorsWithGeo": "",
               "message": "No down monitor IDs received
         Top 3 Monitors Below Availability Threshold (99.34 %):
-        Unreliable(https://unreliable.co): 90.9245845760545
-        no-name(https://no-name.co): 90.9245845760545
-        Foo(https://foo.com): 98.0334728033473
+        Unreliable(https://unreliable.co): 90.925%
+        no-name(https://no-name.co): 90.925%
+        Foo(https://foo.com): 98.033%
         ",
             },
           ],
@@ -528,7 +528,7 @@ describe('status check alert', () => {
             "filters": undefined,
             "range": 35,
             "rangeUnit": "d",
-            "threshold": 99.34,
+            "threshold": "99.34",
           },
         ]
       `);
@@ -978,25 +978,27 @@ describe('status check alert', () => {
     });
 
     it('creates a message with appropriate number of monitors', () => {
-      expect(contextMessage(ids, 3, [], 0)).toMatchInlineSnapshot(
+      expect(contextMessage(ids, 3, [], '0')).toMatchInlineSnapshot(
         `"Down monitors: first, second, third... and 2 other monitors"`
       );
     });
 
     it('throws an error if `max` is less than 2', () => {
-      expect(() => contextMessage(ids, 1, [], 0)).toThrowErrorMatchingInlineSnapshot(
+      expect(() => contextMessage(ids, 1, [], '0')).toThrowErrorMatchingInlineSnapshot(
         '"Maximum value must be greater than 2, received 1."'
       );
     });
 
     it('returns only the ids if length < max', () => {
-      expect(contextMessage(ids.slice(0, 2), 3, [], 0)).toMatchInlineSnapshot(
+      expect(contextMessage(ids.slice(0, 2), 3, [], '0')).toMatchInlineSnapshot(
         `"Down monitors: first, second"`
       );
     });
 
     it('returns a default message when no monitors are provided', () => {
-      expect(contextMessage([], 3, [], 0)).toMatchInlineSnapshot(`"No down monitor IDs received"`);
+      expect(contextMessage([], 3, [], '0')).toMatchInlineSnapshot(
+        `"No down monitor IDs received"`
+      );
     });
   });
 
@@ -1015,11 +1017,11 @@ describe('status check alert', () => {
               availabilityRatio: 0.25099357994497096,
             },
           ],
-          59
+          '59'
         )
       ).toMatchInlineSnapshot(`
         "Monitor Below Availability Threshold (59 %):
-        Test Node Service(http://localhost:12349): 0.25099357994497096
+        Test Node Service(http://localhost:12349): 25.099%
         "
       `);
     });
@@ -1047,12 +1049,12 @@ describe('status check alert', () => {
               availabilityRatio: 0.5804076040417879,
             },
           ],
-          59
+          '59'
         )
       ).toMatchInlineSnapshot(`
         "Top 2 Monitors Below Availability Threshold (59 %):
-        Test Node Service(http://localhost:12349): 0.25099357994497096
-        Test Node Service(http://localhost:12349): 0.5804076040417879
+        Test Node Service(http://localhost:12349): 25.099%
+        Test Node Service(http://localhost:12349): 58.041%
         "
       `);
     });
@@ -1098,13 +1100,13 @@ describe('status check alert', () => {
               availabilityRatio: 0.573225087551735,
             },
           ],
-          59
+          '59'
         )
       ).toMatchInlineSnapshot(`
         "Top 3 Monitors Below Availability Threshold (59 %):
-        Test Node Service(http://localhost:12349): 0.250993579944971
-        Test Node Service(http://localhost:12349): 0.550022634676324
-        Test Node Service(http://localhost:12349): 0.573225087551735
+        Test Node Service(http://localhost:12349): 25.099%
+        Test Node Service(http://localhost:12349): 55.002%
+        Test Node Service(http://localhost:12349): 57.323%
         "
       `);
     });
