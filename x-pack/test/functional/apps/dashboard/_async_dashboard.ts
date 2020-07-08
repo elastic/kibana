@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
 
-  describe('sample data dashboard', function describeIndexTests() {
+  describe.only('sample data dashboard', function describeIndexTests() {
     before(async () => {
       await PageObjects.common.sleep(5000);
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
