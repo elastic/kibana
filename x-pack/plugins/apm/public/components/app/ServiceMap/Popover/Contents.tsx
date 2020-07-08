@@ -15,7 +15,7 @@ import React, { MouseEvent } from 'react';
 import { Buttons } from './Buttons';
 import { Info } from './Info';
 import { ServiceMetricFetcher } from './ServiceMetricFetcher';
-import { popoverMinWidth } from '../cytoscapeOptions';
+import { popoverWidth } from '../cytoscapeOptions';
 
 interface ContentsProps {
   isService: boolean;
@@ -60,7 +60,7 @@ export function Contents({
     <FlexColumnGroup
       direction="column"
       gutterSize="s"
-      style={{ minWidth: popoverMinWidth }}
+      style={{ width: popoverWidth }}
     >
       <FlexColumnItem>
         <EuiTitle size="xxs">
@@ -68,17 +68,11 @@ export function Contents({
         </EuiTitle>
         <EuiHorizontalRule margin="xs" />
       </FlexColumnItem>
-      {/* isService && (
-        <FlexColumnItem>
-          <ServiceHealth serviceNodeData={selectedNodeData} />
-          <EuiHorizontalRule margin="xs" />
-        </FlexColumnItem>
-      )*/}
       <FlexColumnItem>
         {isService ? (
           <ServiceMetricFetcher
             serviceName={selectedNodeServiceName}
-            anomalies={selectedNodeData.anomalies}
+            maxAnomaly={selectedNodeData.maxAnomaly}
           />
         ) : (
           <Info {...selectedNodeData} />

@@ -9,7 +9,7 @@ import { isNumber } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
 import { ServiceNodeMetrics } from '../../../../../common/service_map';
-import { asPercent } from '../../../../utils/formatters';
+import { asDuration, asPercent, tpmUnit } from '../../../../utils/formatters';
 
 export const ItemRow = styled('tr')`
   line-height: 2;
@@ -30,8 +30,33 @@ export function ServiceMetricList({
   avgErrorsPerMinute,
   avgCpuUsage,
   avgMemoryUsage,
+  transactionKPIs,
 }: ServiceMetricListProps) {
   const listItems = [
+    {
+      title: i18n.translate(
+        'xpack.apm.serviceMap.avgTransDurationPopoverMetric',
+        {
+          defaultMessage: 'Trans. duration (avg.)',
+        }
+      ),
+      description: isNumber(transactionKPIs.avgTransactionDuration)
+        ? asDuration(transactionKPIs.avgTransactionDuration)
+        : null,
+    },
+    {
+      title: i18n.translate(
+        'xpack.apm.serviceMap.avgReqPerMinutePopoverMetric',
+        {
+          defaultMessage: 'Req. per minute (avg.)',
+        }
+      ),
+      description: isNumber(transactionKPIs.avgRequestsPerMinute)
+        ? `${transactionKPIs.avgRequestsPerMinute.toFixed(2)} ${tpmUnit(
+            'request'
+          )}`
+        : null,
+    },
     {
       title: i18n.translate(
         'xpack.apm.serviceMap.avgErrorsPerMinutePopoverMetric',

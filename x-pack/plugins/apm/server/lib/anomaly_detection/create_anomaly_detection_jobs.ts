@@ -6,6 +6,7 @@
 
 import { Logger } from 'kibana/server';
 import uuid from 'uuid/v4';
+import { snakeCase } from 'lodash';
 import { PromiseReturnType } from '../../../../observability/typings/common';
 import { Setup } from '../helpers/setup_request';
 import {
@@ -78,13 +79,12 @@ async function createAnomalyDetectionJob({
   environment: string;
   indexPatternName?: string | undefined;
 }) {
-  const convertedEnvironmentName = convertToMLIdentifier(environment);
   const randomToken = uuid().substr(-4);
 
   return ml.modules.setup({
     moduleId: ML_MODULE_ID_APM_TRANSACTION,
-    prefix: `${ML_GROUP_NAME_APM}-${convertedEnvironmentName}-${randomToken}-`,
-    groups: [ML_GROUP_NAME_APM, convertedEnvironmentName],
+    prefix: `${ML_GROUP_NAME_APM}-${snakeCase(environment)}-${randomToken}-`,
+    groups: [ML_GROUP_NAME_APM],
     indexPatternName,
     query: {
       bool: {
@@ -117,7 +117,3 @@ const ENVIRONMENT_NOT_DEFINED_FILTER = {
     },
   },
 };
-
-export function convertToMLIdentifier(value: string) {
-  return value.replace(/\s+/g, '_').toLowerCase();
-}

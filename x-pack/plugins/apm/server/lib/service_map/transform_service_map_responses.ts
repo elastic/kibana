@@ -18,7 +18,8 @@ import {
   ExternalConnectionNode,
 } from '../../../common/service_map';
 import { ConnectionsResponse, ServicesResponse } from './get_service_map';
-import { TopAnomaliesResponse } from './get_top_anomalies';
+import { MaxAnomaliesResponse } from './get_max_anomalies';
+import { MaxAnomaly } from '../../../common/anomaly_detection';
 
 function getConnectionNodeId(node: ConnectionNode): string {
   if ('span.destination.service.resource' in node) {
@@ -62,9 +63,31 @@ export function getServiceNodes(allNodes: ConnectionNode[]) {
   return serviceNodes;
 }
 
+function getServiceAnomalyData(
+  anomalies: MaxAnomaliesResponse,
+  serviceName?: string
+): { [SERVICE_NAME]: string; maxAnomaly: MaxAnomaly } | undefined {
+  if (anomalies.mlJobIds.length === 0 || !serviceName) {
+    return;
+  }
+
+  const matchedAnomalyData = anomalies.maxAnomalies.find(
+    (anomalyData) => anomalyData[SERVICE_NAME] === serviceName
+  );
+  if (matchedAnomalyData) {
+    return matchedAnomalyData;
+  }
+
+  // If there is no anomaly data, return a job_id to link to a running job
+  return {
+    [SERVICE_NAME]: serviceName,
+    maxAnomaly: { job_id: anomalies.mlJobIds[0] },
+  };
+}
+
 export type ServiceMapResponse = ConnectionsResponse & {
   services: ServicesResponse;
-  anomalies: TopAnomaliesResponse;
+  anomalies: MaxAnomaliesResponse;
 };
 
 export function transformServiceMapResponses(response: ServiceMapResponse) {
@@ -106,9 +129,7 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
       (serviceNode) => serviceNode[SERVICE_NAME] === serviceName
     );
 
-    const matchedAnomalies = anomalies.find(
-      (anomalyData) => anomalyData[SERVICE_NAME] === serviceName
-    );
+    const serviceAnomalyData = getServiceAnomalyData(anomalies, serviceName);
 
     if (matchedServiceNodes.length) {
       return {
@@ -120,7 +141,7 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
           ...matchedServiceNodes.map((serviceNode) =>
             pickBy(serviceNode, identity)
           ),
-          matchedAnomalies
+          serviceAnomalyData
         ),
       };
     }

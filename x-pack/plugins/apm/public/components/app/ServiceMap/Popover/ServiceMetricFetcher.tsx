@@ -9,34 +9,33 @@ import {
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiHorizontalRule,
+  EuiCallOut,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ServiceNodeMetrics } from '../../../../../common/service_map';
-import { useFetcher } from '../../../../hooks/useFetcher';
+import { useFetcher, FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { ServiceMetricList } from './ServiceMetricList';
-import { ServiceHealth } from './ServiceHealth';
+import { AnomalyDetection } from './AnomalyDetection';
+import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
+import { ALL_OPTION } from '../../../../hooks/useEnvironments';
+import { MaxAnomaly } from '../../../../../common/anomaly_detection';
 
 interface ServiceMetricFetcherProps {
   serviceName: string;
-  anomalies:
-    | undefined
-    | Array<{
-        'transaction.type': string;
-        anomaly_score: number;
-        actual_value: number;
-      }>;
+  maxAnomaly: MaxAnomaly | undefined;
 }
 
 export function ServiceMetricFetcher({
   serviceName,
-  anomalies,
+  maxAnomaly,
 }: ServiceMetricFetcherProps) {
   const {
     urlParams: { start, end, environment },
   } = useUrlParams();
 
   const {
-    data = ({ transactionMetrics: [] } as unknown) as ServiceNodeMetrics,
+    data = { transactionKPIs: {} } as ServiceNodeMetrics,
     status,
   } = useFetcher(
     (callApmApi) => {
@@ -52,18 +51,45 @@ export function ServiceMetricFetcher({
       preservePreviousData: false,
     }
   );
-  const isLoading = status === 'loading';
+
+  const isLoading =
+    status === FETCH_STATUS.PENDING || status === FETCH_STATUS.LOADING;
 
   if (isLoading) {
     return <LoadingSpinner />;
   }
 
+  if (environment && !data.hasEnvironmentData) {
+    return (
+      <EuiCallOut
+        title={i18n.translate(
+          'xpack.apm.serviceMap.popoverMetrics.noEnvironmentDataCallout.title',
+          {
+            defaultMessage: 'No service data for current environment',
+          }
+        )}
+        size="s"
+        iconType="iInCircle"
+      >
+        {i18n.translate(
+          'xpack.apm.serviceMap.popoverMetrics.noEnvironmentDataCallout.text',
+          {
+            defaultMessage: `This service belongs to an environment outside of the currently selected environment ({currentEnvironment}). Change the environment filter to [{environmentsWithData}] to see info on this service.`,
+            values: {
+              currentEnvironment: getEnvironmentLabel(environment),
+              environmentsWithData: [
+                ALL_OPTION.text,
+                ...data.environmentsWithData.map(getEnvironmentLabel),
+              ].join(', '),
+            },
+          }
+        )}
+      </EuiCallOut>
+    );
+  }
   return (
     <>
-      <ServiceHealth
-        anomalies={anomalies}
-        transactionMetrics={data.transactionMetrics}
-      />
+      <AnomalyDetection serviceName={serviceName} maxAnomaly={maxAnomaly} />
       <EuiHorizontalRule margin="xs" />
       <ServiceMetricList {...data} />
     </>
@@ -80,4 +106,13 @@ function LoadingSpinner() {
       <EuiLoadingSpinner size="xl" />
     </EuiFlexGroup>
   );
+}
+
+function getEnvironmentLabel(environment: string) {
+  if (environment === ENVIRONMENT_NOT_DEFINED) {
+    return i18n.translate('xpack.apm.filter.environment.notDefinedLabel', {
+      defaultMessage: 'Not defined',
+    });
+  }
+  return environment;
 }

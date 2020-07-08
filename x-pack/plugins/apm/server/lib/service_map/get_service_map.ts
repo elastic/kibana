@@ -17,7 +17,7 @@ import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { transformServiceMapResponses } from './transform_service_map_responses';
 import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
 import { getTraceSampleIds } from './get_trace_sample_ids';
-import { getTopAnomalies } from './get_top_anomalies';
+import { getMaxAnomalies, MaxAnomaliesResponse } from './get_max_anomalies';
 
 export interface IEnvOptions {
   setup: Setup & SetupTimeRange;
@@ -136,18 +136,13 @@ export type ServiceMapAPIResponse = PromiseReturnType<typeof getServiceMap>;
 
 export async function getServiceMap(options: IEnvOptions) {
   const { logger } = options;
-  let anomaliesPromise: ReturnType<typeof getTopAnomalies> = Promise.resolve(
-    []
-  );
-  if (options.environment) {
-    anomaliesPromise = getTopAnomalies(options, options.environment).catch(
-      (error) => {
-        logger.warn(`Unable to retrieve anomalies for service maps.`);
-        logger.error(error);
-        return [];
-      }
-    );
-  }
+  const anomaliesPromise: Promise<MaxAnomaliesResponse> = getMaxAnomalies(
+    options
+  ).catch((error) => {
+    logger.warn(`Unable to retrieve anomalies for service maps.`);
+    logger.error(error);
+    return { mlJobIds: [], maxAnomalies: [] };
+  });
   const [connectionData, servicesData, anomalies] = await Promise.all([
     getConnectionData(options),
     getServicesData(options),

@@ -18,6 +18,11 @@ import {
   METRIC_SYSTEM_TOTAL_MEMORY,
 } from '../../../common/elasticsearch_fieldnames';
 import { percentMemoryUsedScript } from '../metrics/by_agent/shared/memory';
+import {
+  TRANSACTION_REQUEST,
+  TRANSACTION_PAGE_LOAD,
+} from '../../../common/transaction_types';
+import { getAllEnvironments } from '../environments/get_all_environments';
 
 interface Options {
   setup: Setup & SetupTimeRange;
@@ -53,20 +58,31 @@ export async function getServiceMapServiceNodeInfo({
   };
 
   const [
+    environmentsWithData,
     errorMetrics,
-    transactionMetrics,
+    transactionKPIs,
     cpuMetrics,
     memoryMetrics,
   ] = await Promise.all([
+    getAllEnvironments({
+      serviceName,
+      setup,
+      includeMissing: true,
+    }),
     getErrorMetrics(taskParams),
-    getTransactionMetrics(taskParams),
+    getTransactionKPIs(taskParams),
     getCpuMetrics(taskParams),
     getMemoryMetrics(taskParams),
   ]);
 
+  const hasEnvironmentData =
+    !environment || environmentsWithData.includes(environment);
+
   return {
+    hasEnvironmentData,
+    environmentsWithData,
     ...errorMetrics,
-    transactionMetrics,
+    transactionKPIs,
     ...cpuMetrics,
     ...memoryMetrics,
   };
@@ -100,17 +116,14 @@ async function getErrorMetrics({ setup, minutes, filter }: TaskParameters) {
   };
 }
 
-async function getTransactionMetrics({
+async function getTransactionKPIs({
   setup,
   filter,
   minutes,
-}: TaskParameters): Promise<
-  Array<{
-    [TRANSACTION_TYPE]: string;
-    avgTransactionDuration: number | null;
-    avgRequestsPerMinute: number | null;
-  }>
-> {
+}: TaskParameters): Promise<{
+  avgTransactionDuration: number | null;
+  avgRequestsPerMinute: number | null;
+}> {
   const { indices, client } = setup;
 
   const params = {
@@ -119,42 +132,40 @@ async function getTransactionMetrics({
       size: 0,
       query: {
         bool: {
-          filter: filter.concat({
-            term: {
-              [PROCESSOR_EVENT]: 'transaction',
-            },
-          }),
-        },
-      },
-      aggs: {
-        transaction_types: {
-          terms: {
-            field: TRANSACTION_TYPE,
-          },
-          aggs: {
-            duration: {
-              avg: {
-                field: TRANSACTION_DURATION,
+          filter: [
+            ...filter,
+            {
+              term: {
+                [PROCESSOR_EVENT]: 'transaction',
               },
             },
+            {
+              terms: {
+                [TRANSACTION_TYPE]: [
+                  TRANSACTION_REQUEST,
+                  TRANSACTION_PAGE_LOAD,
+                ],
+              },
+            },
+          ],
+        },
+      },
+      track_total_hits: true,
+      aggs: {
+        duration: {
+          avg: {
+            field: TRANSACTION_DURATION,
           },
         },
       },
     },
   };
   const response = await client.search(params);
-  const transactionTypesBuckets =
-    response.aggregations?.transaction_types.buckets ?? [];
-  return transactionTypesBuckets.map((transactionTypesBucket) => {
-    const avgTransactionDuration =
-      transactionTypesBucket?.duration?.value ?? null;
-    const docCount = transactionTypesBucket?.doc_count ?? 0;
-    return {
-      [TRANSACTION_TYPE]: transactionTypesBucket.key as string,
-      avgTransactionDuration,
-      avgRequestsPerMinute: docCount > 0 ? docCount / minutes : null,
-    };
-  });
+  const docCount = response.hits.total.value;
+  return {
+    avgTransactionDuration: response.aggregations?.duration.value ?? null,
+    avgRequestsPerMinute: docCount > 0 ? docCount / minutes : null,
+  };
 }
 
 async function getCpuMetrics({
