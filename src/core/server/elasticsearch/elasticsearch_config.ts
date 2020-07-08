@@ -73,6 +73,7 @@ export const configSchema = schema.object({
   pingTimeout: schema.duration({ defaultValue: schema.siblingRef('requestTimeout') }),
   startupTimeout: schema.duration({ defaultValue: '5s' }),
   logQueries: schema.boolean({ defaultValue: false }),
+  maxSockets: schema.number({ defaultValue: Infinity }),
   ssl: schema.object(
     {
       verificationMode: schema.oneOf(
@@ -242,6 +243,11 @@ export class ElasticsearchConfig {
   public readonly password?: string;
 
   /**
+   * Maximum number of sockets to allow per host. Default is Infinity
+   */
+  public readonly maxSockets: number;
+
+  /**
    * Set of settings configure SSL connection between Kibana and Elasticsearch that
    * are required when `xpack.ssl.verification_mode` in Elasticsearch is set to
    * either `certificate` or `full`.
@@ -276,6 +282,7 @@ export class ElasticsearchConfig {
     this.username = rawConfig.username;
     this.password = rawConfig.password;
     this.customHeaders = rawConfig.customHeaders;
+    this.maxSockets = rawConfig.maxSockets;
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;
     const { key, keyPassphrase, certificate, certificateAuthorities } = readKeyAndCerts(rawConfig);

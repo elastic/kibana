@@ -39,6 +39,7 @@ export type LegacyElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 
     | 'apiVersion'
     | 'customHeaders'
     | 'logQueries'
+    | 'maxSockets'
     | 'requestHeadersWhitelist'
     | 'sniffOnStart'
     | 'sniffOnConnectionFault'
@@ -91,6 +92,7 @@ export function parseElasticsearchClientConfig(
     keepAlive: true,
     ...pick(config, [
       'apiVersion',
+      'maxSockets',
       'sniffOnStart',
       'sniffOnConnectionFault',
       'keepAlive',
