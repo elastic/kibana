@@ -97,8 +97,6 @@ export const validateThreshold = (rule: CreateRulesSchema): string[] => {
   if (rule.type === 'threshold') {
     if (!rule.threshold) {
       return ['when "type" is "threshold", "threshold" ois required'];
-    } else if (isEmpty(rule.threshold.field)) {
-      return ['"threshold.field" cannot be an empty string'];
     } else if (rule.threshold.value <= 0) {
       return ['"threshold.value" has to be bigger than 0'];
     } else {

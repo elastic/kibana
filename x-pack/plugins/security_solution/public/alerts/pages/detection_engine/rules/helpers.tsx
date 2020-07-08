@@ -86,7 +86,7 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
   },
   threshold: rule.threshold
     ? {
-        field: rule.threshold.field,
+        field: [rule.threshold.field],
         value: parseInt(rule.threshold.value, 10),
       }
     : undefined,

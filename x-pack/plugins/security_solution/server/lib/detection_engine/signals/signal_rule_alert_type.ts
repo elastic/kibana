@@ -252,13 +252,14 @@ export const signalRulesAlertType = ({
             threshold,
           });
 
-          // console.log(
-          //   'thresholdResults',
-          //   thresholdResults,
-          //   JSON.stringify(thresholdResults.aggregations.threshold.buckets, null, 2)
-          // );
+          console.log(
+            'thresholdResults',
+            thresholdResults
+            // JSON.stringify(thresholdResults.aggregations?.threshold.buckets, null, 2)
+          );
 
-          const thresholdCount = thresholdResults.aggregations.threshold.buckets.length;
+          const thresholdCount = 0;
+          // const thresholdCount = thresholdResults.aggregations.threshold.buckets.length;
           if (thresholdCount) {
             logger.info(buildRuleMessage(`Found ${thresholdCount} signals from Threshold aggs.`));
           }

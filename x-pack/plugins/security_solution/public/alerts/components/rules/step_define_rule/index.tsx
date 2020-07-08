@@ -35,7 +35,7 @@ import { MlJobSelect } from '../ml_job_select';
 import { PickTimeline } from '../pick_timeline';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { NextStep } from '../next_step';
-import { ThresholdInput } from '../threshold_input';
+import { getCategorizedFieldNames } from '../../../../timelines/components/edit_data_provider/helpers';
 import {
   Field,
   Form,
@@ -53,6 +53,7 @@ const CommonUseField = getUseField({ component: Field });
 interface StepDefineRuleProps extends RuleStepProps {
   defaultValues?: DefineStepRule | null;
 }
+const FIELD_COMBO_BOX_WIDTH = 195;
 
 const stepDefineDefaultValue: DefineStepRule = {
   anomalyThreshold: 50,
@@ -66,7 +67,7 @@ const stepDefineDefaultValue: DefineStepRule = {
     saved_id: undefined,
   },
   threshold: {
-    field: 'host.name',
+    field: ['host.name'],
     value: 1000,
   },
   timeline: {
@@ -99,11 +100,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   setForm,
   setStepData,
 }) => {
-  // console.error('aaaa', defaultValues);
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
-  const [localIsMlRule, setIsMlRule] = useState(false);
+  const [localRuleType, setLocalRuleType] = useState(defaultValues.ruleType);
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [myStepData, setMyStepData] = useState<DefineStepRule>({
     ...stepDefineDefaultValue,
@@ -162,8 +162,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     setOpenTimelineSearch(false);
   }, []);
 
-  // console.error('form', myStepData, form);
-
   return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
@@ -187,7 +185,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               isMlAdmin: hasMlAdminPermissions(mlCapabilities),
             }}
           />
-          <EuiFormRow fullWidth style={{ display: localIsMlRule ? 'none' : 'flex' }}>
+          <EuiFormRow fullWidth style={{ display: isMlRule(localRuleType) ? 'none' : 'flex' }}>
             <>
               <CommonUseField
                 path="index"
@@ -236,7 +234,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               />
             </>
           </EuiFormRow>
-          <EuiFormRow fullWidth style={{ display: localIsMlRule ? 'flex' : 'none' }}>
+          <EuiFormRow fullWidth style={{ display: isMlRule(localRuleType) ? 'flex' : 'none' }}>
             <>
               <UseField
                 path="machineLearningJobId"
@@ -254,8 +252,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               />
             </>
           </EuiFormRow>
-          <EuiFormRow data-test-subj="thresholdInput">
-            <EuiFlexGroup>
+          <EuiFormRow
+            data-test-subj="thresholdInput"
+            style={{ display: localRuleType === 'threshold' ? 'flex' : 'none' }}
+          >
+            <EuiFlexGroup alignItems="center">
               <EuiFlexItem>
                 <CommonUseField
                   path="threshold.field"
@@ -264,7 +265,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     'data-test-subj': 'detectionEngineStepAboutRuleName',
                     euiFieldProps: {
                       fullWidth: true,
-                      // disabled: isLoading,
+                      disabled: isLoading,
+                      singleSelection: { asPlainText: true },
+                      noSuggestions: false,
+                      options: getCategorizedFieldNames(browserFields),
+                      placeholder: 'All results',
+                      onCreateOption: undefined,
+                      style: { width: `${FIELD_COMBO_BOX_WIDTH}px` },
                     },
                   }}
                 />
@@ -280,7 +287,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     euiFieldProps: {
                       fullWidth: true,
                       type: 'number',
-                      // disabled: isLoading,
+                      disabled: isLoading,
                     },
                   }}
                 />
@@ -302,15 +309,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 if (deepEqual(index, indicesConfig) && indexModified) {
                   setIndexModified(false);
                 } else if (!deepEqual(index, indicesConfig) && !indexModified) {
+                  // TODO: refactor to form.subscribe()
+                  setMyStepData((currentValue) => ({ ...currentValue, index }));
                   setIndexModified(true);
                 }
               }
 
-              if (isMlRule(ruleType) && !localIsMlRule) {
-                setIsMlRule(true);
-                clearErrors();
-              } else if (!isMlRule(ruleType) && localIsMlRule) {
-                setIsMlRule(false);
+              if (ruleType !== localRuleType) {
+                setLocalRuleType(ruleType);
                 clearErrors();
               }
 

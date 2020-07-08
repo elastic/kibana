@@ -179,6 +179,10 @@ export const getDescriptionItem = (
       (singleThreat: IMitreEnterpriseAttack) => singleThreat.tactic.name !== 'none'
     );
     return buildThreatDescription({ label, threat });
+  } else if (field === 'threshold') {
+    console.error('thresholffi', field);
+
+    return [];
   } else if (field === 'references') {
     const urls: string[] = get(field, data);
     return buildUrlsDescription(label, urls);

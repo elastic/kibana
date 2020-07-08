@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
+
 interface BuildEventsSearchQuery {
   index: string[];
   from: string;
@@ -59,18 +61,19 @@ export const buildEventsSearchQuery = ({
       },
     },
   ];
-  const aggregations = threshold
-    ? {
-        aggs: {
-          threshold: {
-            terms: {
-              field: threshold.field,
-              min_doc_count: threshold.value,
+  const aggregations =
+    threshold && !isEmpty(threshold.field)
+      ? {
+          aggs: {
+            threshold: {
+              terms: {
+                field: threshold.field,
+                min_doc_count: threshold.value,
+              },
             },
           },
-        },
-      }
-    : {};
+        }
+      : {};
   const searchQuery = {
     allowNoIndices: true,
     index,

@@ -172,4 +172,29 @@ export const schema: FormSchema = {
       }
     ),
   },
+  threshold: {
+    field: {
+      type: FIELD_TYPES.COMBO_BOX,
+      label: i18n.translate(
+        'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdFieldLabel',
+        {
+          defaultMessage: 'Field',
+        }
+      ),
+      helpText: i18n.translate(
+        'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdFieldHelpText',
+        {
+          defaultMessage: 'Select a field to group results by',
+        }
+      ),
+    },
+    value: {
+      label: i18n.translate(
+        'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdValueLabel',
+        {
+          defaultMessage: 'Threshold',
+        }
+      ),
+    },
+  },
 };
