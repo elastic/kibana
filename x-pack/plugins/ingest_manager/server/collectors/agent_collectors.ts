@@ -23,10 +23,7 @@ export const getAgentUsage = async (soClient?: SavedObjectsClient): Promise<Agen
       offline: 0,
     };
   }
-  const { total, online, error, offline } = await AgentService.getAgentStatusForConfig(
-    soClient,
-    undefined
-  );
+  const { total, online, error, offline } = await AgentService.getAgentStatusForConfig(soClient);
   return {
     total,
     online,
