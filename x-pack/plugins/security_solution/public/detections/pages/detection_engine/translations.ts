@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.detectionsPageTitle',
   {
-    defaultMessage: 'Detections',
+    defaultMessage: 'Detection alerts',
   }
 );
 
