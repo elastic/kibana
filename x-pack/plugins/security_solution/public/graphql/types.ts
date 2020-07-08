@@ -1051,6 +1051,8 @@ export interface RuleField {
   version?: Maybe<string[]>;
 
   note?: Maybe<string[]>;
+
+  exceptions_list?: Maybe<ToAny>;
 }
 
 export interface SuricataEcsFields {
@@ -5041,6 +5043,8 @@ export namespace GetTimelineQuery {
     filters: Maybe<ToAny>;
 
     note: Maybe<string[]>;
+
+    exceptions_list: Maybe<ToAny>;
   };
 
   export type Suricata = {

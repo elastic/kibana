@@ -28,6 +28,7 @@ import {
   ImportDataResponse,
   PrePackagedRulesStatusResponse,
   BulkRuleResponse,
+  PatchRuleProps,
 } from './types';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
@@ -44,6 +45,21 @@ export const addRule = async ({ rule, signal }: AddRulesProps): Promise<NewRule>
   KibanaServices.get().http.fetch<NewRule>(DETECTION_ENGINE_RULES_URL, {
     method: rule.id != null ? 'PUT' : 'POST',
     body: JSON.stringify(rule),
+    signal,
+  });
+
+/**
+ * Patch provided Rule
+ *
+ * @param ruleProperties to patch
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const patchRule = async ({ ruleProperties, signal }: PatchRuleProps): Promise<NewRule> =>
+  KibanaServices.get().http.fetch<NewRule>(DETECTION_ENGINE_RULES_URL, {
+    method: 'PATCH',
+    body: JSON.stringify(ruleProperties),
     signal,
   });
 

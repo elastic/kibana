@@ -1053,6 +1053,8 @@ export interface RuleField {
   version?: Maybe<string[] | string>;
 
   note?: Maybe<string[] | string>;
+
+  exceptions_list?: Maybe<ToAny>;
 }
 
 export interface SuricataEcsFields {
@@ -4916,6 +4918,8 @@ export namespace RuleFieldResolvers {
     version?: VersionResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
     note?: NoteResolver<Maybe<string[] | string>, TypeParent, TContext>;
+
+    exceptions_list?: ExceptionsListResolver<Maybe<ToAny>, TypeParent, TContext>;
   }
 
   export type IdResolver<
@@ -5070,6 +5074,11 @@ export namespace RuleFieldResolvers {
   > = Resolver<R, Parent, TContext>;
   export type NoteResolver<
     R = Maybe<string[] | string>,
+    Parent = RuleField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ExceptionsListResolver<
+    R = Maybe<ToAny>,
     Parent = RuleField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;

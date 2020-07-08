@@ -13,7 +13,7 @@ import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { DataProviders } from '.';
 import { DataProvider } from './data_provider';
 import { mockDataProviders } from './mock/mock_data_providers';
-import { ManageGlobalTimeline, timelineDefaults } from '../../manage_timeline';
+import { ManageGlobalTimeline, getTimelineDefaults } from '../../manage_timeline';
 import { FilterManager } from '../../../../../../../../src/plugins/data/public/query/filter_manager';
 import { createKibanaCoreStartMock } from '../../../../common/mock/kibana_core';
 const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
@@ -28,8 +28,7 @@ describe('DataProviders', () => {
     test('renders correctly against snapshot', () => {
       const manageTimelineForTesting = {
         foo: {
-          ...timelineDefaults,
-          id: 'foo',
+          ...getTimelineDefaults('foo'),
           filterManager,
         },
       };
