@@ -431,8 +431,9 @@ export class DashboardAppController {
               .getIncomingEmbeddablePackage();
             if (incomingState) {
               if ('id' in incomingState) {
-                container.addNewEmbeddable<EmbeddableInput>(incomingState.type, {
+                container.addOrUpdateEmbeddable<SavedObjectEmbeddableInput>(incomingState.type, {
                   savedObjectId: incomingState.id,
+                  id: incomingState.embeddableIdToReplace,
                 });
               } else if ('input' in incomingState) {
                 const input = incomingState.input;
@@ -440,7 +441,7 @@ export class DashboardAppController {
                 const explicitInput = {
                   savedVis: input,
                 };
-                container.addNewEmbeddable<EmbeddableInput>(incomingState.type, explicitInput);
+                container.addOrUpdateEmbeddable<EmbeddableInput>(incomingState.type, explicitInput);
               }
             }
           }
