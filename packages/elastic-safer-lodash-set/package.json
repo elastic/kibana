@@ -14,7 +14,7 @@
     "lodash": "4.x"
   },
   "scripts": {
-    "lint": "dependency-check --no-dev package.json set.js setWith.js fp/*",
+    "lint": "dependency-check --no-dev package.json set.js setWith.js fp/*.js",
     "test": "npm run lint && tape test/*.js && npm run test:types",
     "test:types": "./scripts/tsd.sh",
     "update": "./scripts/update.sh",

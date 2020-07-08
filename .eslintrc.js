@@ -263,7 +263,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/elastic-safer-lodash-set/*.d.ts'],
+      files: ['packages/elastic-safer-lodash-set/**/*.d.ts'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
