@@ -94,14 +94,14 @@ export default function ({ getService }: FtrProviderContext) {
 
       const newSessionCookie = cookie(passwordChangeResponse.headers['set-cookie'][0])!;
 
-      // Let's check that previous cookie isn't valid anymore.
+      // Old cookie is still valid (since it's still the same user and cookie doesn't store password).
       await supertest
         .get('/internal/security/me')
         .set('kbn-xsrf', 'xxx')
         .set('Cookie', sessionCookie.cookieString())
-        .expect(401);
+        .expect(200);
 
-      // And that we can't login with the old password.
+      // But we can't login with the old password.
       await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
@@ -113,7 +113,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(401);
 
-      // But new cookie should be valid.
+      // New cookie should be valid.
       await supertest
         .get('/internal/security/me')
         .set('kbn-xsrf', 'xxx')

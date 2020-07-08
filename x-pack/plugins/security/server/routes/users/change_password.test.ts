@@ -198,6 +198,9 @@ describe('Change password', () => {
       });
       authc.getCurrentUser.mockReturnValue(mockUser);
       authc.login.mockResolvedValue(AuthenticationResult.succeeded(mockUser));
+      session.get.mockResolvedValue(
+        sessionMock.createSessionValue({ provider: { type: 'token', name: 'token1' } })
+      );
 
       const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
 

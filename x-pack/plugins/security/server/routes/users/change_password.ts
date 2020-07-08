@@ -81,11 +81,8 @@ export function defineChangeUserPasswordRoutes({
       // session and in such cases we shouldn't create a new one.
       if (isUserChangingOwnPassword && currentSession) {
         try {
-          // Even though user is still the same, password change warrants a new session.
-          await session.clear(request);
-
           const authenticationResult = await authc.login(request, {
-            provider: { name: currentUser!.authentication_provider },
+            provider: { name: currentSession.provider.name },
             value: { username, password: newPassword },
           });
 

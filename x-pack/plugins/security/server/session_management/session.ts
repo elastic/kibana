@@ -136,10 +136,11 @@ export class Session {
       return null;
     }
 
+    const now = Date.now();
     if (
       (sessionCookieValue.idleTimeoutExpiration &&
-        sessionCookieValue.idleTimeoutExpiration < Date.now()) ||
-      (sessionCookieValue.lifespanExpiration && sessionCookieValue.lifespanExpiration < Date.now())
+        sessionCookieValue.idleTimeoutExpiration < now) ||
+      (sessionCookieValue.lifespanExpiration && sessionCookieValue.lifespanExpiration < now)
     ) {
       this.#options.logger.debug('Session has expired and will be invalidated.');
       await this.clear(request);

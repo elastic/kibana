@@ -36,6 +36,9 @@ export interface OnlineStatusRetryScheduler {
   scheduleRetry: () => void;
 }
 
+/**
+ * Service responsible for interactions with the Elasticsearch.
+ */
 export class ElasticsearchService {
   readonly #logger: Logger;
   #clusterClient?: ILegacyCustomClusterClient;

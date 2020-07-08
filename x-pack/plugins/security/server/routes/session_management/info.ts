@@ -15,6 +15,7 @@ export function defineSessionInfoRoutes({ router, logger, session }: RouteDefini
     {
       path: '/internal/security/session',
       validate: false,
+      // We have both authenticated and non-authenticated sessions.
       options: { authRequired: 'optional' },
     },
     async (_context, request, response) => {
