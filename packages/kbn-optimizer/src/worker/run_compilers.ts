@@ -102,6 +102,11 @@ const observeCompiler = (
       const bundleRefExportIds: string[] = [];
       const referencedFiles = new Set<string>();
       let normalModuleCount = 0;
+      let workUnits = stats.compilation.fileDependencies.size;
+
+      if (bundle.manifestPath) {
+        referencedFiles.add(bundle.manifestPath);
+      }
 
       for (const module of stats.compilation.modules) {
         if (isNormalModule(module)) {
@@ -111,6 +116,15 @@ const observeCompiler = (
 
           if (!parsedPath.dirs.includes('node_modules')) {
             referencedFiles.add(path);
+
+            if (path.endsWith('.scss')) {
+              workUnits += 100;
+
+              for (const depPath of module.buildInfo.fileDependencies) {
+                referencedFiles.add(depPath);
+              }
+            }
+
             continue;
           }
 
@@ -127,7 +141,7 @@ const observeCompiler = (
         }
 
         if (module instanceof BundleRefModule) {
-          bundleRefExportIds.push(module.exportId);
+          bundleRefExportIds.push(module.ref.exportId);
           continue;
         }
 
@@ -158,6 +172,7 @@ const observeCompiler = (
         optimizerCacheKey: workerConfig.optimizerCacheKey,
         cacheKey: bundle.createCacheKey(files, mtimes),
         moduleCount: normalModuleCount,
+        workUnits,
         files,
       });
 

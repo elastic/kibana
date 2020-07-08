@@ -137,6 +137,15 @@ export interface PluginManifest {
   readonly requiredPlugins: readonly PluginName[];
 
   /**
+   * An optional list of the other plugins which are imported by the UI bundles
+   * of this plugin. If the plugins listed here are disabled their bundles will
+   * still be loaded into the browser. Required by the @kbn/optimizer to allow
+   * cross plugin imports. "core" and plugins listed in "requiredPlugins" do not
+   * need to be listed here.
+   */
+  readonly requiredBundles: readonly string[];
+
+  /**
    * An optional list of the other plugins that if installed and enabled **may be**
    * leveraged by this plugin for some additional functionality but otherwise are
    * not required for this plugin to work properly.
@@ -191,12 +200,25 @@ export interface DiscoveredPlugin {
    * not required for this plugin to work properly.
    */
   readonly optionalPlugins: readonly PluginName[];
+
+  /**
+   * An optional list of the other plugins which are imported by the UI bundles
+   * of this plugin. If the plugins listed here are disabled their bundles will
+   * still be loaded into the browser. Required by the @kbn/optimizer to allow
+   * cross plugin imports. "core" and plugins listed in "requiredPlugins" do not
+   * need to be listed here.
+   */
+  readonly requiredBundles: readonly PluginName[];
 }
 
 /**
  * @internal
  */
 export interface InternalPluginInfo {
+  /**
+   * Bundles that must be loaded for this plugoin
+   */
+  readonly requiredBundles: readonly string[];
   /**
    * Path to the target/public directory of the plugin which should be
    * served
