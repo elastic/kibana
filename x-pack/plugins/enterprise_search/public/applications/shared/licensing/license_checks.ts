@@ -6,6 +6,6 @@
 
 import { ILicense } from '../../../../../licensing/public';
 
-export const hasPlatinumLicense = (license: ILicense) => {
+export const hasPlatinumLicense = (license?: ILicense) => {
   return license?.isActive && ['platinum', 'enterprise', 'trial'].includes(license?.type as string);
 };

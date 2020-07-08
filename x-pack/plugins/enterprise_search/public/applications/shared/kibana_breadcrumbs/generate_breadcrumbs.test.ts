@@ -40,7 +40,7 @@ describe('generateBreadcrumb', () => {
     expect(event.preventDefault).toHaveBeenCalled();
   });
 
-  it('does not prevents default browser behavior on new tab/window clicks', () => {
+  it('does not prevent default browser behavior on new tab/window clicks', () => {
     const breadcrumb = generateBreadcrumb({ text: '', path: '/', history: mockHistory }) as any;
 
     (letBrowserHandleEvent as jest.Mock).mockImplementationOnce(() => true);
