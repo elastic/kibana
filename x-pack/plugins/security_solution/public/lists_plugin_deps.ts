@@ -31,6 +31,7 @@ export {
   OperatorEnum,
   OperatorType,
   OperatorTypeEnum,
+  ExceptionListTypeEnum,
   exceptionListItemSchema,
   createExceptionListItemSchema,
   listSchema,

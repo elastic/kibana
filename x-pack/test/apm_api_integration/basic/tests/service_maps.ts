@@ -10,11 +10,13 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default function serviceMapsApiTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
+  // url parameters
+  const start = encodeURIComponent('2020-06-29T06:45:00.000Z');
+  const end = encodeURIComponent('2020-06-29T06:49:00.000Z');
+
   describe('Service Maps', () => {
-    it('should only be available to users with Platinum license (or higher)', async () => {
-      const response = await supertest.get(
-        '/api/apm/service-map?start=2020-06-28T10%3A24%3A46.055Z&end=2020-06-29T10%3A24%3A46.055Z'
-      );
+    it('is only be available to users with Platinum license (or higher)', async () => {
+      const response = await supertest.get(`/api/apm/service-map?start=${start}&end=${end}`);
 
       expect(response.status).to.be(403);
       expect(response.body.message).to.be(
