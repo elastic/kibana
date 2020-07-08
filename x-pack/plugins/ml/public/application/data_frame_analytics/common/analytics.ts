@@ -422,7 +422,7 @@ export const useRefreshAnalyticsList = (
 
 const DEFAULT_SIG_FIGS = 3;
 
-interface RegressionEvaluteExtractedResponse {
+interface RegressionEvaluateExtractedResponse {
   mse: number | string;
   msle: number | string;
   huber: number | string;
@@ -432,7 +432,7 @@ interface RegressionEvaluteExtractedResponse {
 export const EMPTY_STAT = '--';
 
 export function getValuesFromResponse(response: RegressionEvaluateResponse) {
-  const results: RegressionEvaluteExtractedResponse = {
+  const results: RegressionEvaluateExtractedResponse = {
     mse: EMPTY_STAT,
     msle: EMPTY_STAT,
     huber: EMPTY_STAT,
@@ -447,7 +447,7 @@ export function getValuesFromResponse(response: RegressionEvaluateResponse) {
         if (currentStatValue) {
           currentStatValue = Number(currentStatValue.toPrecision(DEFAULT_SIG_FIGS));
         }
-        results[statType as keyof RegressionEvaluteExtractedResponse] = currentStatValue;
+        results[statType as keyof RegressionEvaluateExtractedResponse] = currentStatValue;
       }
     }
   }
