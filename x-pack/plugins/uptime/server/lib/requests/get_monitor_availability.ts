@@ -10,8 +10,6 @@ import { GetMonitorAvailabilityParams } from '../../../common/runtime_types';
 export interface AvailabilityKey {
   monitorId: string;
   location: string;
-  name: string;
-  url: string;
 }
 
 export interface GetMonitorAvailabilityResult {
@@ -24,14 +22,15 @@ export interface GetMonitorAvailabilityResult {
   availabilityRatio: number | null;
 }
 
-export const formatBuckets = async (buckets: any[]): Promise<GetMonitorAvailabilityResult[]> => {
-  return buckets.map(({ key, up_sum, down_sum, ratio }: any) => ({
+export const formatBuckets = async (buckets: any[]): Promise<GetMonitorAvailabilityResult[]> =>
+  buckets.map(({ key, fields, up_sum, down_sum, ratio }: any) => ({
     ...key,
+    name: fields?.hits?.hits?.[0]?._source?.monitor.name,
+    url: fields?.hits?.hits?.[0]?._source?.url.full,
     up: up_sum.value,
     down: down_sum.value,
     availabilityRatio: ratio.value,
   }));
-};
 
 export const getMonitorAvailability: UMElasticsearchQueryFn<
   GetMonitorAvailabilityParams,
@@ -88,23 +87,15 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
                     },
                   },
                 },
-                {
-                  name: {
-                    terms: {
-                      field: 'monitor.name',
-                    },
-                  },
-                },
-                {
-                  url: {
-                    terms: {
-                      field: 'url.full',
-                    },
-                  },
-                },
               ],
             },
             aggs: {
+              fields: {
+                top_hits: {
+                  size: 1,
+                  _source: ['monitor.name', 'url.full'],
+                },
+              },
               up_sum: {
                 sum: {
                   field: 'summary.up',

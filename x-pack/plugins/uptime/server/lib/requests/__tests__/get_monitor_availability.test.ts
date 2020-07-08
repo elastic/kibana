@@ -13,20 +13,30 @@ import {
 import { setupMockEsCompositeQuery } from './helper';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { GetMonitorAvailabilityParams } from '../../../../common/runtime_types';
+interface AvailabilityTopHit {
+  _source: {
+    monitor: {
+      name: string;
+    };
+    url: {
+      full: string;
+    };
+  };
+}
 
 interface AvailabilityDoc {
-  key: {
-    monitorId: string;
-    location: string;
-    name: string;
-    url: string;
-  };
+  key: AvailabilityKey;
   doc_count: number;
   up_sum: {
     value: number;
   };
   down_sum: {
     value: number;
+  };
+  fields: {
+    hits: {
+      hits: AvailabilityTopHit[];
+    };
   };
   ratio: {
     value: number | null;
@@ -45,10 +55,24 @@ const genBucketItem = ({
   key: {
     monitorId,
     location,
-    name,
-    url,
   },
   doc_count: up + down,
+  fields: {
+    hits: {
+      hits: [
+        {
+          _source: {
+            monitor: {
+              name,
+            },
+            url: {
+              full: url,
+            },
+          },
+        },
+      ],
+    },
+  },
   up_sum: {
     value: up,
   },
@@ -122,6 +146,15 @@ describe('monitor availability', () => {
                       "missing": 0,
                     },
                   },
+                  "fields": Object {
+                    "top_hits": Object {
+                      "_source": Array [
+                        "monitor.name",
+                        "url.full",
+                      ],
+                      "size": 1,
+                    },
+                  },
                   "filtered": Object {
                     "bucket_selector": Object {
                       "buckets_path": Object {
@@ -164,20 +197,6 @@ describe('monitor availability', () => {
                         "terms": Object {
                           "field": "observer.geo.name",
                           "missing_bucket": true,
-                        },
-                      },
-                    },
-                    Object {
-                      "name": Object {
-                        "terms": Object {
-                          "field": "monitor.name",
-                        },
-                      },
-                    },
-                    Object {
-                      "url": Object {
-                        "terms": Object {
-                          "field": "url.full",
                         },
                       },
                     },
@@ -299,6 +318,15 @@ describe('monitor availability', () => {
                       "missing": 0,
                     },
                   },
+                  "fields": Object {
+                    "top_hits": Object {
+                      "_source": Array [
+                        "monitor.name",
+                        "url.full",
+                      ],
+                      "size": 1,
+                    },
+                  },
                   "filtered": Object {
                     "bucket_selector": Object {
                       "buckets_path": Object {
@@ -341,20 +369,6 @@ describe('monitor availability', () => {
                         "terms": Object {
                           "field": "observer.geo.name",
                           "missing_bucket": true,
-                        },
-                      },
-                    },
-                    Object {
-                      "name": Object {
-                        "terms": Object {
-                          "field": "monitor.name",
-                        },
-                      },
-                    },
-                    Object {
-                      "url": Object {
-                        "terms": Object {
-                          "field": "url.full",
                         },
                       },
                     },
@@ -426,8 +440,6 @@ describe('monitor availability', () => {
             after_key: {
               monitorId: 'baz',
               location: 'harrisburg',
-              name: 'Baz',
-              url: 'http://baz.com',
             },
             bucketCriteria: [
               {
@@ -537,6 +549,15 @@ describe('monitor availability', () => {
                       "missing": 0,
                     },
                   },
+                  "fields": Object {
+                    "top_hits": Object {
+                      "_source": Array [
+                        "monitor.name",
+                        "url.full",
+                      ],
+                      "size": 1,
+                    },
+                  },
                   "filtered": Object {
                     "bucket_selector": Object {
                       "buckets_path": Object {
@@ -582,20 +603,6 @@ describe('monitor availability', () => {
                         },
                       },
                     },
-                    Object {
-                      "name": Object {
-                        "terms": Object {
-                          "field": "monitor.name",
-                        },
-                      },
-                    },
-                    Object {
-                      "url": Object {
-                        "terms": Object {
-                          "field": "url.full",
-                        },
-                      },
-                    },
                   ],
                 },
               },
@@ -633,6 +640,15 @@ describe('monitor availability', () => {
                         "missing": 0,
                       },
                     },
+                    "fields": Object {
+                      "top_hits": Object {
+                        "_source": Array [
+                          "monitor.name",
+                          "url.full",
+                        ],
+                        "size": 1,
+                      },
+                    },
                     "filtered": Object {
                       "bucket_selector": Object {
                         "buckets_path": Object {
@@ -664,8 +680,6 @@ describe('monitor availability', () => {
                     "after": Object {
                       "location": "harrisburg",
                       "monitorId": "baz",
-                      "name": "Baz",
-                      "url": "http://baz.com",
                     },
                     "size": 2000,
                     "sources": Array [
@@ -681,20 +695,6 @@ describe('monitor availability', () => {
                           "terms": Object {
                             "field": "observer.geo.name",
                             "missing_bucket": true,
-                          },
-                        },
-                      },
-                      Object {
-                        "name": Object {
-                          "terms": Object {
-                            "field": "monitor.name",
-                          },
-                        },
-                      },
-                      Object {
-                        "url": Object {
-                          "terms": Object {
-                            "field": "url.full",
                           },
                         },
                       },
@@ -734,10 +734,24 @@ describe('monitor availability', () => {
           key: {
             monitorId: 'test-node-service',
             location: 'fairbanks',
-            name: 'Test Node Service',
-            url: 'http://localhost:12349',
           },
           doc_count: 3271,
+          fields: {
+            hits: {
+              hits: [
+                {
+                  _source: {
+                    monitor: {
+                      name: 'Test Node Service',
+                    },
+                    url: {
+                      full: 'http://localhost:12349',
+                    },
+                  },
+                },
+              ],
+            },
+          },
           up_sum: {
             value: 821.0,
           },
@@ -752,8 +766,22 @@ describe('monitor availability', () => {
           key: {
             monitorId: 'test-node-service',
             location: 'harrisburg',
-            name: 'Test Node Service',
-            url: 'http://localhost:12349',
+          },
+          fields: {
+            hits: {
+              hits: [
+                {
+                  _source: {
+                    monitor: {
+                      name: 'Test Node Service',
+                    },
+                    url: {
+                      full: 'http://localhost:12349',
+                    },
+                  },
+                },
+              ],
+            },
           },
           doc_count: 5839,
           up_sum: {
