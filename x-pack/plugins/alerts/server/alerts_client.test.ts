@@ -2150,6 +2150,7 @@ describe('find()', () => {
   beforeEach(() => {
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureAlertTypeIsAuthorized() {},
+      logSuccessfulAuthorization() {},
     });
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
       total: 1,
@@ -2254,6 +2255,7 @@ describe('find()', () => {
         filter:
           '((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myOtherApp))',
         ensureAlertTypeIsAuthorized() {},
+        logSuccessfulAuthorization() {},
       });
 
       const alertsClient = new AlertsClient(alertsClientParams);
@@ -2276,9 +2278,11 @@ describe('find()', () => {
 
     test('ensures authorization even when the fields required to authorize are omitted from the find', async () => {
       const ensureAlertTypeIsAuthorized = jest.fn();
+      const logSuccessfulAuthorization = jest.fn();
       authorization.getFindAuthorizationFilter.mockResolvedValue({
         filter: '',
         ensureAlertTypeIsAuthorized,
+        logSuccessfulAuthorization,
       });
 
       unsecuredSavedObjectsClient.find.mockReset();
@@ -2325,6 +2329,7 @@ describe('find()', () => {
         type: 'alert',
       });
       expect(ensureAlertTypeIsAuthorized).toHaveBeenCalledWith('myType', 'myApp');
+      expect(logSuccessfulAuthorization).toHaveBeenCalled();
     });
   });
 });

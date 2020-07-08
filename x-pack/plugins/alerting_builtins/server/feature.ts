@@ -14,7 +14,6 @@ export const BUILT_IN_ALERTS_FEATURE = {
     defaultMessage: 'Built-In Alerts',
   }),
   icon: 'bell',
-  navLinkId: 'builtInAlerts',
   app: [],
   privileges: {
     all: {

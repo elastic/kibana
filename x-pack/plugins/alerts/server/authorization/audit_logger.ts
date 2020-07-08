@@ -91,4 +91,27 @@ export class AlertsAuthorizationAuditLogger {
     });
     return message;
   }
+
+  public alertsBulkAuthorizationSuccess(
+    username: string,
+    authorizedEntries: Array<[string, string]>,
+    scopeType: ScopeType,
+    operation: string
+  ): string {
+    const message = `${AuthorizationResult.Authorized} to ${operation}: ${authorizedEntries
+      .map(
+        ([alertTypeId, scope]) =>
+          `"${alertTypeId}" alert ${
+            scopeType === ScopeType.Consumer ? `for "${scope}"` : `by "${scope}"`
+          }`
+      )
+      .join(', ')}`;
+    this.auditLogger.log('alerts_authorization_success', `${username} ${message}`, {
+      username,
+      scopeType,
+      authorizedEntries,
+      operation,
+    });
+    return message;
+  }
 }

@@ -160,6 +160,90 @@ describe(`#alertsAuthorizationFailure`, () => {
   });
 });
 
+describe(`#alertsBulkAuthorizationSuccess`, () => {
+  test('logs auth success with consumer scope', () => {
+    const auditLogger = createMockAuditLogger();
+    const alertsAuditLogger = new AlertsAuthorizationAuditLogger(auditLogger);
+    const username = 'foo-user';
+    const scopeType = ScopeType.Consumer;
+    const authorizedEntries: Array<[string, string]> = [
+      ['alert-type-id', 'myApp'],
+      ['other-alert-type-id', 'myOtherApp'],
+    ];
+    const operation = 'create';
+
+    alertsAuditLogger.alertsBulkAuthorizationSuccess(
+      username,
+      authorizedEntries,
+      scopeType,
+      operation
+    );
+
+    expect(auditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "alerts_authorization_success",
+        "foo-user Authorized to create: \\"alert-type-id\\" alert for \\"myApp\\", \\"other-alert-type-id\\" alert for \\"myOtherApp\\"",
+        Object {
+          "authorizedEntries": Array [
+            Array [
+              "alert-type-id",
+              "myApp",
+            ],
+            Array [
+              "other-alert-type-id",
+              "myOtherApp",
+            ],
+          ],
+          "operation": "create",
+          "scopeType": 0,
+          "username": "foo-user",
+        },
+      ]
+    `);
+  });
+
+  test('logs auth success with producer scope', () => {
+    const auditLogger = createMockAuditLogger();
+    const alertsAuditLogger = new AlertsAuthorizationAuditLogger(auditLogger);
+    const username = 'foo-user';
+    const scopeType = ScopeType.Producer;
+    const authorizedEntries: Array<[string, string]> = [
+      ['alert-type-id', 'myApp'],
+      ['other-alert-type-id', 'myOtherApp'],
+    ];
+    const operation = 'create';
+
+    alertsAuditLogger.alertsBulkAuthorizationSuccess(
+      username,
+      authorizedEntries,
+      scopeType,
+      operation
+    );
+
+    expect(auditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "alerts_authorization_success",
+        "foo-user Authorized to create: \\"alert-type-id\\" alert by \\"myApp\\", \\"other-alert-type-id\\" alert by \\"myOtherApp\\"",
+        Object {
+          "authorizedEntries": Array [
+            Array [
+              "alert-type-id",
+              "myApp",
+            ],
+            Array [
+              "other-alert-type-id",
+              "myOtherApp",
+            ],
+          ],
+          "operation": "create",
+          "scopeType": 1,
+          "username": "foo-user",
+        },
+      ]
+    `);
+  });
+});
+
 describe(`#savedObjectsAuthorizationSuccess`, () => {
   test('logs auth success with consumer scope', () => {
     const auditLogger = createMockAuditLogger();
