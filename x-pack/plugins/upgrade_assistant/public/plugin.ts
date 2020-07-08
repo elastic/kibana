@@ -21,22 +21,39 @@ export class UpgradeAssistantUIPlugin implements Plugin {
   constructor(private ctx: PluginInitializerContext) {}
   setup(coreSetup: CoreSetup, { cloud, management }: Dependencies) {
     const { enabled } = this.ctx.config.get<Config>();
+
     if (!enabled) {
       return;
     }
+
     const appRegistrar = management.sections.getSection(ManagementSectionId.Stack);
     const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
 
+    const pluginName = i18n.translate('xpack.upgradeAssistant.appTitle', {
+      defaultMessage: '{version} Upgrade Assistant',
+      values: { version: `${NEXT_MAJOR_VERSION}.0` },
+    });
+
     appRegistrar.registerApp({
       id: 'upgrade_assistant',
-      title: i18n.translate('xpack.upgradeAssistant.appTitle', {
-        defaultMessage: '{version} Upgrade Assistant',
-        values: { version: `${NEXT_MAJOR_VERSION}.0` },
-      }),
+      title: pluginName,
       order: 1,
       async mount(params) {
+        const [coreStart] = await coreSetup.getStartServices();
+
+        const {
+          chrome: { docTitle },
+        } = coreStart;
+
+        docTitle.change(pluginName);
         const { mountManagementSection } = await import('./application/mount_management_section');
-        return mountManagementSection(coreSetup, isCloudEnabled, params);
+        const unmountAppCallback = await mountManagementSection(coreSetup, isCloudEnabled, params);
+
+        return () => {
+          // Change tab label back to Kibana.
+          docTitle.reset();
+          unmountAppCallback();
+        };
       },
     });
   }

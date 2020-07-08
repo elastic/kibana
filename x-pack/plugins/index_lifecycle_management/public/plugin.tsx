@@ -45,10 +45,13 @@ export class IndexLifecycleManagementPlugin {
         mount: async ({ element, history }) => {
           const [coreStart] = await getStartServices();
           const {
+            chrome: { docTitle },
             i18n: { Context: I18nContext },
             docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
             application: { navigateToApp },
           } = coreStart;
+
+          docTitle.change(PLUGIN.TITLE);
 
           // Initialize additional services.
           initDocumentation(
@@ -56,7 +59,13 @@ export class IndexLifecycleManagementPlugin {
           );
 
           const { renderApp } = await import('./application');
-          return renderApp(element, I18nContext, history, navigateToApp);
+          const unmountAppCallback = renderApp(element, I18nContext, history, navigateToApp);
+
+          return () => {
+            // Change tab label back to Kibana.
+            docTitle.reset();
+            unmountAppCallback();
+          };
         },
       });
 

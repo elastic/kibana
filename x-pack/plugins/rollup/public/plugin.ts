@@ -75,21 +75,32 @@ export class RollupPlugin implements Plugin {
       });
     }
 
+    const pluginName = i18n.translate('xpack.rollupJobs.appTitle', {
+      defaultMessage: 'Rollup Jobs',
+    });
+
     management.sections.getSection(ManagementSectionId.Data).registerApp({
       id: 'rollup_jobs',
-      title: i18n.translate('xpack.rollupJobs.appTitle', { defaultMessage: 'Rollup Jobs' }),
+      title: pluginName,
       order: 4,
       async mount(params) {
-        params.setBreadcrumbs([
-          {
-            text: i18n.translate('xpack.rollupJobs.breadcrumbsTitle', {
-              defaultMessage: 'Rollup Jobs',
-            }),
-          },
-        ]);
-        const { renderApp } = await import('./application');
+        const [coreStart] = await core.getStartServices();
 
-        return renderApp(core, params);
+        const {
+          chrome: { docTitle },
+        } = coreStart;
+
+        docTitle.change(pluginName);
+        params.setBreadcrumbs([{ text: pluginName }]);
+
+        const { renderApp } = await import('./application');
+        const unmountAppCallback = await renderApp(core, params);
+
+        return () => {
+          // Change tab label back to Kibana.
+          docTitle.reset();
+          unmountAppCallback();
+        };
       },
     });
   }
