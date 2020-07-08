@@ -29,6 +29,8 @@ export const templateSchema = schema.object({
   ),
   _kbnMeta: schema.object({
     isManaged: schema.maybe(schema.boolean()),
+    isCloudManaged: schema.maybe(schema.boolean()),
+    hasDatastream: schema.maybe(schema.boolean()),
     isLegacy: schema.maybe(schema.boolean()),
   }),
 });

@@ -18,7 +18,7 @@ import { getEntriesArrayMock, getEntryMatchMock, getEntryNestedMock } from './en
 // different entry types, it returns 5 of these. To make more readable,
 // extracted here.
 const returnedSchemaError =
-  '"Array<({| field: string, operator: "excluded" | "included", type: "match", value: string |} | {| field: string, operator: "excluded" | "included", type: "match_any", value: DefaultStringArray |} | {| field: string, list: {| id: string, type: "ip" | "keyword" |}, operator: "excluded" | "included", type: "list" |} | {| field: string, operator: "excluded" | "included", type: "exists" |} | {| entries: Array<{| field: string, operator: "excluded" | "included", type: "match", value: string |}>, field: string, type: "nested" |})>"';
+  '"Array<({| field: string, operator: "excluded" | "included", type: "match", value: string |} | {| field: string, operator: "excluded" | "included", type: "match_any", value: DefaultStringArray |} | {| field: string, list: {| id: string, type: "binary" | "boolean" | "byte" | "date" | "date_nanos" | "date_range" | "double" | "double_range" | "float" | "float_range" | "geo_point" | "geo_shape" | "half_float" | "integer" | "integer_range" | "ip" | "ip_range" | "keyword" | "long" | "long_range" | "shape" | "short" | "text" |}, operator: "excluded" | "included", type: "list" |} | {| field: string, operator: "excluded" | "included", type: "exists" |} | {| entries: Array<{| field: string, operator: "excluded" | "included", type: "match", value: string |}>, field: string, type: "nested" |})>"';
 
 describe('default_entries_array', () => {
   test('it should validate an empty array', () => {
