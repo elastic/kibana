@@ -34,7 +34,7 @@ export const registerAdoptionCollector: RegisterAdoptionCollector = ({
       ml_jobs_elastic_enabled: { type: 'number' },
       ml_jobs_elastic_disabled: { type: 'number' },
     },
-    isReady: () => true,
+    isReady: () => kibanaIndex.length > 0,
     fetch: buildFetch(kibanaIndex, ml),
   });
 
