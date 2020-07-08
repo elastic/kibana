@@ -44,7 +44,7 @@ import {
   topLogEntryCategoriesResponseRT,
 } from './queries/top_log_entry_categories';
 import { InfraSource } from '../sources';
-import { fetchMlJob } from './common';
+import { fetchMlJob, getLogEntryDatasets } from './common';
 
 const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
 
@@ -129,61 +129,15 @@ export async function getLogEntryCategoryDatasets(
   startTime: number,
   endTime: number
 ) {
-  const finalizeLogEntryDatasetsSpan = startTracingSpan('get data sets');
-
   const logEntryCategoriesCountJobId = getJobId(
     context.infra.spaceId,
     sourceId,
     logEntryCategoriesJobTypes[0]
   );
 
-  let logEntryDatasetBuckets: LogEntryDatasetBucket[] = [];
-  let afterLatestBatchKey: CompositeDatasetKey | undefined;
-  let esSearchSpans: TracingSpan[] = [];
+  const jobIds = [logEntryCategoriesCountJobId];
 
-  while (true) {
-    const finalizeEsSearchSpan = startTracingSpan('fetch category dataset batch from ES');
-
-    const logEntryDatasetsResponse = decodeOrThrow(logEntryDatasetsResponseRT)(
-      await context.infra.mlSystem.mlAnomalySearch(
-        createLogEntryDatasetsQuery(
-          logEntryCategoriesCountJobId,
-          startTime,
-          endTime,
-          COMPOSITE_AGGREGATION_BATCH_SIZE,
-          afterLatestBatchKey
-        )
-      )
-    );
-
-    if (logEntryDatasetsResponse._shards.total === 0) {
-      throw new NoLogAnalysisResultsIndexError(
-        `Failed to find ml result index for job ${logEntryCategoriesCountJobId}.`
-      );
-    }
-
-    const {
-      after_key: afterKey,
-      buckets: latestBatchBuckets,
-    } = logEntryDatasetsResponse.aggregations.dataset_buckets;
-
-    logEntryDatasetBuckets = [...logEntryDatasetBuckets, ...latestBatchBuckets];
-    afterLatestBatchKey = afterKey;
-    esSearchSpans = [...esSearchSpans, finalizeEsSearchSpan()];
-
-    if (latestBatchBuckets.length < COMPOSITE_AGGREGATION_BATCH_SIZE) {
-      break;
-    }
-  }
-
-  const logEntryDatasetsSpan = finalizeLogEntryDatasetsSpan();
-
-  return {
-    data: logEntryDatasetBuckets.map((logEntryDatasetBucket) => logEntryDatasetBucket.key.dataset),
-    timing: {
-      spans: [logEntryDatasetsSpan, ...esSearchSpans],
-    },
-  };
+  return await getLogEntryDatasets(context.infra.mlSystem, startTime, endTime, jobIds);
 }
 
 export async function getLogEntryCategoryExamples(

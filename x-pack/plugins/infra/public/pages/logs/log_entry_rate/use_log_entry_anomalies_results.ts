@@ -5,11 +5,17 @@
  */
 
 import { useMemo, useState, useCallback, useEffect } from 'react';
-
-import { LogEntryAnomaly } from '../../../../common/http_api';
-import { useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { useMount } from 'react-use';
+import { useTrackedPromise, CanceledPromiseError } from '../../../utils/use_tracked_promise';
 import { callGetLogEntryAnomaliesAPI } from './service_calls/get_log_entry_anomalies';
-import { Sort, Pagination, PaginationCursor } from '../../../../common/http_api/log_analysis';
+import { callGetLogEntryAnomaliesDatasetsAPI } from './service_calls/get_log_entry_anomalies_datasets';
+import {
+  Sort,
+  Pagination,
+  PaginationCursor,
+  GetLogEntryAnomaliesDatasetsSuccessResponsePayload,
+  LogEntryAnomaly,
+} from '../../../../common/http_api/log_analysis';
 
 export type SortOptions = Sort;
 export type PaginationOptions = Pick<Pagination, 'pageSize'>;
@@ -19,6 +25,7 @@ export type FetchPreviousPage = () => void;
 export type ChangeSortOptions = (sortOptions: Sort) => void;
 export type ChangePaginationOptions = (paginationOptions: PaginationOptions) => void;
 export type LogEntryAnomalies = LogEntryAnomaly[];
+type LogEntryAnomaliesDatasets = GetLogEntryAnomaliesDatasetsSuccessResponsePayload['data']['datasets'];
 interface PaginationCursors {
   previousPageCursor: PaginationCursor;
   nextPageCursor: PaginationCursor;
@@ -31,6 +38,8 @@ export const useLogEntryAnomaliesResults = ({
   lastChangedTime,
   defaultSortOptions,
   defaultPaginationOptions,
+  onGetLogEntryAnomaliesDatasetsError,
+  filteredDatasets,
 }: {
   endTime: number;
   startTime: number;
@@ -38,6 +47,8 @@ export const useLogEntryAnomaliesResults = ({
   lastChangedTime: number;
   defaultSortOptions: Sort;
   defaultPaginationOptions: Pick<Pagination, 'pageSize'>;
+  onGetLogEntryAnomaliesDatasetsError?: (error: Error) => void;
+  filteredDatasets?: string[];
 }) => {
   // Pagination
   const [page, setPage] = useState(1);
@@ -66,10 +77,17 @@ export const useLogEntryAnomaliesResults = ({
     {
       cancelPreviousOn: 'creation',
       createPromise: async () => {
-        return await callGetLogEntryAnomaliesAPI(sourceId, startTime, endTime, sortOptions, {
-          ...paginationOptions,
-          cursor: paginationCursor,
-        });
+        return await callGetLogEntryAnomaliesAPI(
+          sourceId,
+          startTime,
+          endTime,
+          sortOptions,
+          {
+            ...paginationOptions,
+            cursor: paginationCursor,
+          },
+          filteredDatasets
+        );
       },
       onResolve: ({ data: { anomalies, paginationCursors: requestCursors, hasMoreEntries } }) => {
         if (requestCursors) {
@@ -86,7 +104,16 @@ export const useLogEntryAnomaliesResults = ({
         setLogEntryAnomalies(anomalies);
       },
     },
-    [endTime, sourceId, startTime, sortOptions, paginationOptions, setHasNextPage, paginationCursor]
+    [
+      endTime,
+      sourceId,
+      startTime,
+      sortOptions,
+      paginationOptions,
+      setHasNextPage,
+      paginationCursor,
+      filteredDatasets,
+    ]
   );
 
   const changeSortOptions = useCallback(
@@ -106,14 +133,14 @@ export const useLogEntryAnomaliesResults = ({
   );
 
   useEffect(() => {
-    // Time range has changed
+    // Time range or dataset filters have changed
     resetPagination();
-  }, [lastChangedTime, resetPagination]);
+  }, [lastChangedTime, filteredDatasets, resetPagination]);
 
   useEffect(() => {
     // Refetch entries when options change
     getLogEntryAnomalies();
-  }, [sortOptions, paginationOptions, getLogEntryAnomalies, paginationCursor]);
+  }, [sortOptions, paginationOptions, getLogEntryAnomalies, page, paginationCursor]);
 
   const handleFetchNextPage = useCallback(() => {
     if (lastReceivedCursors) {
@@ -143,10 +170,53 @@ export const useLogEntryAnomaliesResults = ({
     [getLogEntryAnomaliesRequest.state]
   );
 
+  // Anomalies datasets
+  const [logEntryAnomaliesDatasets, setLogEntryAnomaliesDatasets] = useState<
+    LogEntryAnomaliesDatasets
+  >([]);
+
+  const [getLogEntryAnomaliesDatasetsRequest, getLogEntryAnomaliesDatasets] = useTrackedPromise(
+    {
+      cancelPreviousOn: 'creation',
+      createPromise: async () => {
+        return await callGetLogEntryAnomaliesDatasetsAPI(sourceId, startTime, endTime);
+      },
+      onResolve: ({ data: { datasets } }) => {
+        setLogEntryAnomaliesDatasets(datasets);
+      },
+      onReject: (error) => {
+        if (
+          error instanceof Error &&
+          !(error instanceof CanceledPromiseError) &&
+          onGetLogEntryAnomaliesDatasetsError
+        ) {
+          onGetLogEntryAnomaliesDatasetsError(error);
+        }
+      },
+    },
+    [endTime, sourceId, startTime]
+  );
+
+  const isLoadingDatasets = useMemo(() => getLogEntryAnomaliesDatasetsRequest.state === 'pending', [
+    getLogEntryAnomaliesDatasetsRequest.state,
+  ]);
+
+  const hasFailedLoadingDatasets = useMemo(
+    () => getLogEntryAnomaliesDatasetsRequest.state === 'rejected',
+    [getLogEntryAnomaliesDatasetsRequest.state]
+  );
+
+  useMount(() => {
+    getLogEntryAnomaliesDatasets();
+  });
+
   return {
     logEntryAnomalies,
     getLogEntryAnomalies,
     isLoadingLogEntryAnomalies,
+    isLoadingDatasets,
+    hasFailedLoadingDatasets,
+    datasets: logEntryAnomaliesDatasets,
     hasFailedLoadingLogEntryAnomalies,
     changeSortOptions,
     sortOptions,

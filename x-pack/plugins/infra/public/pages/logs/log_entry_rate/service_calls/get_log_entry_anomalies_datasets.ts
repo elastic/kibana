@@ -8,38 +8,36 @@ import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
 import { npStart } from '../../../../legacy_singletons';
+
 import {
-  getLogEntryRateRequestPayloadRT,
-  getLogEntryRateSuccessReponsePayloadRT,
-  LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH,
+  getLogEntryAnomaliesDatasetsRequestPayloadRT,
+  getLogEntryAnomaliesDatasetsSuccessReponsePayloadRT,
+  LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_DATASETS_PATH,
 } from '../../../../../common/http_api/log_analysis';
 import { createPlainError, throwErrors } from '../../../../../common/runtime_types';
 
-export const callGetLogEntryRateAPI = async (
+export const callGetLogEntryAnomaliesDatasetsAPI = async (
   sourceId: string,
   startTime: number,
-  endTime: number,
-  bucketDuration: number,
-  datasets?: string[]
+  endTime: number
 ) => {
-  const response = await npStart.http.fetch(LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH, {
+  const response = await npStart.http.fetch(LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_DATASETS_PATH, {
     method: 'POST',
     body: JSON.stringify(
-      getLogEntryRateRequestPayloadRT.encode({
+      getLogEntryAnomaliesDatasetsRequestPayloadRT.encode({
         data: {
           sourceId,
           timeRange: {
             startTime,
             endTime,
           },
-          bucketDuration,
-          datasets,
         },
       })
     ),
   });
+
   return pipe(
-    getLogEntryRateSuccessReponsePayloadRT.decode(response),
+    getLogEntryAnomaliesDatasetsSuccessReponsePayloadRT.decode(response),
     fold(throwErrors(createPlainError), identity)
   );
 };

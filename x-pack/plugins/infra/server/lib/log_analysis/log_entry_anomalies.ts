@@ -7,30 +7,25 @@
 import { RequestHandlerContext } from 'src/core/server';
 import { InfraRequestHandlerContext } from '../../types';
 import { TracingSpan, startTracingSpan } from '../../../common/performance_tracing';
-import { fetchMlJob } from './common';
+import { fetchMlJob, getLogEntryDatasets } from './common';
 import { getJobId, logEntryCategoriesJobTypes } from '../../../common/log_analysis';
-import { Sort, Pagination } from '../../../common/http_api/log_analysis';
-import type { MlSystem } from '../../types';
+import {
+  Sort,
+  Pagination,
+  GetLogEntryAnomaliesRequestPayload,
+} from '../../../common/http_api/log_analysis';
+import type { MlSystem, MlAnomalyDetectors } from '../../types';
 import { createLogEntryAnomaliesQuery, logEntryAnomaliesResponseRT } from './queries';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import { InsufficientAnomalyMlJobsConfigured } from './errors';
 
-export async function getLogEntryAnomalies(
-  context: RequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
+async function getCompatibleAnomaliesJobIds(
+  spaceId: string,
   sourceId: string,
-  startTime: number,
-  endTime: number,
-  sort: Sort,
-  pagination: Pagination
+  mlAnomalyDetectors: MlAnomalyDetectors
 ) {
-  const finalizeLogEntryAnomaliesSpan = startTracingSpan('get log entry anomalies');
-
-  const logRateJobId = getJobId(context.infra.spaceId, sourceId, 'log-entry-rate');
-  const logCategoriesJobId = getJobId(
-    context.infra.spaceId,
-    sourceId,
-    logEntryCategoriesJobTypes[0]
-  );
+  const logRateJobId = getJobId(spaceId, sourceId, 'log-entry-rate');
+  const logCategoriesJobId = getJobId(spaceId, sourceId, logEntryCategoriesJobTypes[0]);
 
   const jobIds: string[] = [];
   let jobSpans: TracingSpan[] = [];
@@ -38,7 +33,7 @@ export async function getLogEntryAnomalies(
   try {
     const {
       timing: { spans },
-    } = await fetchMlJob(context.infra.mlAnomalyDetectors, logRateJobId);
+    } = await fetchMlJob(mlAnomalyDetectors, logRateJobId);
     jobIds.push(logRateJobId);
     jobSpans = [...jobSpans, ...spans];
   } catch (e) {
@@ -48,12 +43,38 @@ export async function getLogEntryAnomalies(
   try {
     const {
       timing: { spans },
-    } = await fetchMlJob(context.infra.mlAnomalyDetectors, logCategoriesJobId);
+    } = await fetchMlJob(mlAnomalyDetectors, logCategoriesJobId);
     jobIds.push(logCategoriesJobId);
     jobSpans = [...jobSpans, ...spans];
   } catch (e) {
     // Job wasn't found
   }
+
+  return {
+    jobIds,
+    timing: { spans: jobSpans },
+  };
+}
+
+export async function getLogEntryAnomalies(
+  context: RequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
+  sourceId: string,
+  startTime: number,
+  endTime: number,
+  sort: Sort,
+  pagination: Pagination,
+  datasets: GetLogEntryAnomaliesRequestPayload['data']['datasets']
+) {
+  const finalizeLogEntryAnomaliesSpan = startTracingSpan('get log entry anomalies');
+
+  const {
+    jobIds,
+    timing: { spans: jobSpans },
+  } = await getCompatibleAnomaliesJobIds(
+    context.infra.spaceId,
+    sourceId,
+    context.infra.mlAnomalyDetectors
+  );
 
   if (jobIds.length === 0) {
     throw new InsufficientAnomalyMlJobsConfigured(
@@ -72,7 +93,8 @@ export async function getLogEntryAnomalies(
     startTime,
     endTime,
     sort,
-    pagination
+    pagination,
+    datasets
   );
 
   const data = anomalies.map((anomaly) => {
@@ -95,7 +117,7 @@ export async function getLogEntryAnomalies(
       actual,
       duration,
       startTime: anomalyStartTime,
-      type: jobId === logRateJobId ? ('logRate' as const) : ('logCategory' as const),
+      type: jobId.includes('log-entry-rate') ? ('logRate' as const) : ('logCategory' as const),
     };
   });
 
@@ -117,7 +139,8 @@ async function fetchLogEntryAnomalies(
   startTime: number,
   endTime: number,
   sort: Sort,
-  pagination: Pagination
+  pagination: Pagination,
+  datasets: GetLogEntryAnomaliesRequestPayload['data']['datasets']
 ) {
   // We'll request 1 extra entry on top of our pageSize to determine if there are
   // more entries to be fetched. This avoids scenarios where the client side can't
@@ -129,7 +152,7 @@ async function fetchLogEntryAnomalies(
 
   const results = decodeOrThrow(logEntryAnomaliesResponseRT)(
     await mlSystem.mlAnomalySearch(
-      createLogEntryAnomaliesQuery(jobIds, startTime, endTime, sort, expandedPagination)
+      createLogEntryAnomaliesQuery(jobIds, startTime, endTime, sort, expandedPagination, datasets)
     )
   );
 
@@ -188,6 +211,46 @@ async function fetchLogEntryAnomalies(
     hasMoreEntries,
     timing: {
       spans: [fetchLogEntryAnomaliesSpan],
+    },
+  };
+}
+
+export async function getLogEntryAnomaliesDatasets(
+  context: {
+    infra: {
+      mlSystem: MlSystem;
+      mlAnomalyDetectors: MlAnomalyDetectors;
+      spaceId: string;
+    };
+  },
+  sourceId: string,
+  startTime: number,
+  endTime: number
+) {
+  const {
+    jobIds,
+    timing: { spans: jobSpans },
+  } = await getCompatibleAnomaliesJobIds(
+    context.infra.spaceId,
+    sourceId,
+    context.infra.mlAnomalyDetectors
+  );
+
+  if (jobIds.length === 0) {
+    throw new InsufficientAnomalyMlJobsConfigured(
+      'Log rate or categorisation ML jobs need to be configured to search for anomaly datasets'
+    );
+  }
+
+  const {
+    data: datasets,
+    timing: { spans: datasetsSpans },
+  } = await getLogEntryDatasets(context.infra.mlSystem, startTime, endTime, jobIds);
+
+  return {
+    datasets,
+    timing: {
+      spans: [...jobSpans, ...datasetsSpans],
     },
   };
 }
