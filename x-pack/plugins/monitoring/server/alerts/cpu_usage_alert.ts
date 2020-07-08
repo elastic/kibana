@@ -101,7 +101,7 @@ export class CpuUsageAlert extends BaseAlert {
       esIndexPattern,
       startMs,
       endMs,
-      this.config
+      this.config.ui.max_bucket_size
     );
     return stats.map((stat) => {
       let cpuUsage = 0;

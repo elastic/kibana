@@ -27,7 +27,7 @@ export async function fetchCpuUsageNodeStats(
   index: string,
   startMs: number,
   endMs: number,
-  config: MonitoringConfig
+  size: number
 ): Promise<AlertCpuUsageNodeStats[]> {
   const filterPath = ['aggregations'];
   const params = {
@@ -64,14 +64,14 @@ export async function fetchCpuUsageNodeStats(
         clusters: {
           terms: {
             field: 'cluster_uuid',
-            size: config.ui.max_bucket_size,
+            size,
             include: clusters.map((cluster) => cluster.clusterUuid),
           },
           aggs: {
             nodes: {
               terms: {
                 field: 'node_stats.node_id',
-                size: config.ui.max_bucket_size,
+                size,
               },
               aggs: {
                 index: {
