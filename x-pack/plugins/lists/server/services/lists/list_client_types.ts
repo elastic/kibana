@@ -11,6 +11,7 @@ import { LegacyAPICaller } from 'kibana/server';
 import {
   Description,
   DescriptionOrUndefined,
+  DeserializerOrUndefined,
   Filter,
   Id,
   IdOrUndefined,
@@ -21,6 +22,7 @@ import {
   NameOrUndefined,
   Page,
   PerPage,
+  SerializerOrUndefined,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
   Type,
@@ -48,6 +50,8 @@ export interface DeleteListItemOptions {
 
 export interface CreateListOptions {
   id: IdOrUndefined;
+  deserializer: DeserializerOrUndefined;
+  serializer: SerializerOrUndefined;
   name: Name;
   description: Description;
   type: Type;
@@ -56,6 +60,8 @@ export interface CreateListOptions {
 
 export interface CreateListIfItDoesNotExistOptions {
   id: Id;
+  deserializer: DeserializerOrUndefined;
+  serializer: SerializerOrUndefined;
   name: Name;
   description: Description;
   type: Type;
@@ -82,6 +88,8 @@ export interface ExportListItemsToStreamOptions {
 
 export interface ImportListItemsToStreamOptions {
   listId: ListIdOrUndefined;
+  deserializer: DeserializerOrUndefined;
+  serializer: SerializerOrUndefined;
   type: Type;
   stream: Readable;
   meta: MetaOrUndefined;
@@ -89,6 +97,8 @@ export interface ImportListItemsToStreamOptions {
 
 export interface CreateListItemOptions {
   id: IdOrUndefined;
+  deserializer: DeserializerOrUndefined;
+  serializer: SerializerOrUndefined;
   listId: string;
   type: Type;
   value: string;

@@ -8,16 +8,26 @@ import { Readable } from 'stream';
 
 import { LegacyAPICaller } from 'kibana/server';
 
-import { ListIdOrUndefined, ListSchema, MetaOrUndefined, Type } from '../../../common/schemas';
 import { createListIfItDoesNotExist } from '../lists/create_list_if_it_does_not_exist';
+import {
+  DeserializerOrUndefined,
+  ListIdOrUndefined,
+  ListSchema,
+  MetaOrUndefined,
+  SerializerOrUndefined,
+  Type,
+  Type,
+} from '../../../common/schemas';
 
 import { BufferLines } from './buffer_lines';
-import { getListItemByValues } from './get_list_item_by_values';
 import { createListItemsBulk } from './create_list_items_bulk';
 
 export interface ImportListItemsToStreamOptions {
   listId: ListIdOrUndefined;
   listIndex: string;
+  deserializer: DeserializerOrUndefined;
+  serializer: SerializerOrUndefined;
+  listId: string;
   stream: Readable;
   callCluster: LegacyAPICaller;
   listItemIndex: string;
@@ -27,6 +37,8 @@ export interface ImportListItemsToStreamOptions {
 }
 
 export const importListItemsToStream = ({
+  deserializer,
+  serializer,
   listId,
   stream,
   callCluster,
@@ -47,10 +59,12 @@ export const importListItemsToStream = ({
         list = await createListIfItDoesNotExist({
           callCluster,
           description: `File uploaded from file system of ${fileNameEmitted}`,
+          deserializer,
           id: fileNameEmitted,
           listIndex,
           meta,
           name: fileNameEmitted,
+          serializer,
           type,
           user,
         });
@@ -63,9 +77,11 @@ export const importListItemsToStream = ({
         await writeBufferToItems({
           buffer: lines,
           callCluster,
+          deserializer,
           listId,
           listItemIndex,
           meta,
+          serializer,
           type,
           user,
         });
@@ -73,9 +89,11 @@ export const importListItemsToStream = ({
         await writeBufferToItems({
           buffer: lines,
           callCluster,
+          deserializer,
           listId: fileName,
           listItemIndex,
           meta,
+          serializer,
           type,
           user,
         });
@@ -90,6 +108,8 @@ export const importListItemsToStream = ({
 
 export interface WriteBufferToItemsOptions {
   listId: string;
+  deserializer: DeserializerOrUndefined;
+  serializer: SerializerOrUndefined;
   callCluster: LegacyAPICaller;
   listItemIndex: string;
   buffer: string[];
@@ -100,38 +120,29 @@ export interface WriteBufferToItemsOptions {
 
 export interface LinesResult {
   linesProcessed: number;
-  duplicatesFound: number;
 }
 
 export const writeBufferToItems = async ({
   listId,
   callCluster,
+  deserializer,
+  serializer,
   listItemIndex,
   buffer,
   type,
   user,
   meta,
 }: WriteBufferToItemsOptions): Promise<LinesResult> => {
-  const items = await getListItemByValues({
-    callCluster,
-    listId,
-    listItemIndex,
-    type,
-    value: buffer,
-  });
-  const duplicatesRemoved = buffer.filter(
-    (bufferedValue) => !items.some((item) => item.value === bufferedValue)
-  );
-  const linesProcessed = duplicatesRemoved.length;
-  const duplicatesFound = buffer.length - duplicatesRemoved.length;
   await createListItemsBulk({
     callCluster,
+    deserializer,
     listId,
     listItemIndex,
     meta,
+    serializer,
     type,
     user,
-    value: duplicatesRemoved,
+    value: buffer,
   });
-  return { duplicatesFound, linesProcessed };
+  return { linesProcessed: buffer.length };
 };

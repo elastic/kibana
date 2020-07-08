@@ -109,6 +109,8 @@ export class ListClient {
 
   public createList = async ({
     id,
+    deserializer,
+    serializer,
     name,
     description,
     type,
@@ -116,11 +118,24 @@ export class ListClient {
   }: CreateListOptions): Promise<ListSchema> => {
     const { callCluster, user } = this;
     const listIndex = this.getListIndex();
-    return createList({ callCluster, description, id, listIndex, meta, name, type, user });
+    return createList({
+      callCluster,
+      description,
+      deserializer,
+      id,
+      listIndex,
+      meta,
+      name,
+      serializer,
+      type,
+      user,
+    });
   };
 
   public createListIfItDoesNotExist = async ({
     id,
+    deserializer,
+    serializer,
     name,
     description,
     type,
@@ -131,10 +146,12 @@ export class ListClient {
     return createListIfItDoesNotExist({
       callCluster,
       description,
+      deserializer,
       id,
       listIndex,
       meta,
       name,
+      serializer,
       type,
       user,
     });
@@ -311,6 +328,8 @@ export class ListClient {
   };
 
   public importListItemsToStream = async ({
+    deserializer,
+    serializer,
     type,
     listId,
     stream,
@@ -321,10 +340,12 @@ export class ListClient {
     const listIndex = this.getListIndex();
     return importListItemsToStream({
       callCluster,
+      deserializer,
       listId,
       listIndex,
       listItemIndex,
       meta,
+      serializer,
       stream,
       type,
       user,
@@ -349,19 +370,23 @@ export class ListClient {
 
   public createListItem = async ({
     id,
+    deserializer,
+    serializer,
     listId,
     value,
     type,
     meta,
-  }: CreateListItemOptions): Promise<ListItemSchema> => {
+  }: CreateListItemOptions): Promise<ListItemSchema | null> => {
     const { callCluster, user } = this;
     const listItemIndex = this.getListItemIndex();
     return createListItem({
       callCluster,
+      deserializer,
       id,
       listId,
       listItemIndex,
       meta,
+      serializer,
       type,
       user,
       value,

@@ -18,10 +18,12 @@ import { TestReadable } from './test_readable.mock';
 
 export const getImportListItemsToStreamOptionsMock = (): ImportListItemsToStreamOptions => ({
   callCluster: getCallClusterMock(),
+  deserializer: undefined,
   listId: LIST_ID,
   listIndex: LIST_INDEX,
   listItemIndex: LIST_ITEM_INDEX,
   meta: META,
+  serializer: undefined,
   stream: new TestReadable(),
   type: TYPE,
   user: USER,
@@ -30,9 +32,11 @@ export const getImportListItemsToStreamOptionsMock = (): ImportListItemsToStream
 export const getWriteBufferToItemsOptionsMock = (): WriteBufferToItemsOptions => ({
   buffer: [],
   callCluster: getCallClusterMock(),
+  deserializer: undefined,
   listId: LIST_ID,
   listItemIndex: LIST_ITEM_INDEX,
   meta: META,
+  serializer: undefined,
   type: TYPE,
   user: USER,
 });

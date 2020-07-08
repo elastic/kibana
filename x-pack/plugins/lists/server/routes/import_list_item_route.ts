@@ -35,8 +35,8 @@ export const importListItemRoute = (router: IRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { list_id: listId, type } = request.query;
         const stream = createStreamFromBuffer(request.body);
+        const { deserializer, list_id: listId, serializer, type } = request.query;
         const lists = getListClient(context);
         if (listId != null) {
           const list = await lists.getList({ id: listId });
@@ -47,8 +47,10 @@ export const importListItemRoute = (router: IRouter): void => {
             });
           }
           await lists.importListItemsToStream({
+            deserializer: list.deserializer,
             listId,
             meta: undefined,
+            serializer: list.serializer,
             stream,
             type: list.type,
           });
@@ -61,8 +63,10 @@ export const importListItemRoute = (router: IRouter): void => {
           }
         } else if (type != null) {
           const importedList = await lists.importListItemsToStream({
+            deserializer,
             listId: undefined,
             meta: undefined,
+            serializer,
             stream,
             type,
           });
