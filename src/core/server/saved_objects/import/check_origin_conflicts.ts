@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import pMap from 'p-map';
 import { v4 as uuidv4 } from 'uuid';
 import {
   SavedObject,
@@ -53,6 +54,8 @@ interface Right<T> {
 }
 type Either<T> = Left<T> | Right<T>;
 const isLeft = <T>(object: Either<T>): object is Left<T> => object.tag === 'left';
+
+const MAX_CONCURRENT_SEARCHES = 10;
 
 const createQueryTerm = (input: string) => input.replace(/\\/g, '\\\\').replace(/\"/g, '\\"');
 const createQuery = (type: string, id: string, rawIdPrefix: string) =>
@@ -141,10 +144,12 @@ export async function checkOriginConflicts(
   objects: Array<SavedObject<{ title?: string }>>,
   options: CheckOriginConflictsOptions
 ) {
-  // Check each object for possible destination conflicts.
-  const checkOriginConflictResults = await Promise.all(
-    objects.map((object) => checkOriginConflict(object, options))
-  );
+  // Check each object for possible destination conflicts, ensuring we don't too many concurrent searches running.
+  const mapper = async (object: SavedObject<{ title?: string }>) =>
+    checkOriginConflict(object, options);
+  const checkOriginConflictResults = await pMap(objects, mapper, {
+    concurrency: MAX_CONCURRENT_SEARCHES,
+  });
 
   // Get a map of all inexact matches that share the same destination(s).
   const ambiguousConflictSourcesMap = checkOriginConflictResults

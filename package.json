@@ -228,6 +228,7 @@
     "node-forge": "^0.9.1",
     "opn": "^5.5.0",
     "oppsy": "^2.0.0",
+    "p-map": "^4.0.0",
     "pegjs": "0.10.0",
     "postcss-loader": "^3.0.0",
     "prop-types": "15.6.0",
