@@ -13,7 +13,7 @@ import {
   DataFrameAnalyticsConfig,
   ANALYSIS_CONFIG_TYPE,
 } from '../../../../common/analytics';
-import { CloneDataFrameAnalyticsConfig } from '../../components/analytics_list/action_clone';
+import { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';
 
 export enum DEFAULT_MODEL_MEMORY_LIMIT {
   regression = '100mb',

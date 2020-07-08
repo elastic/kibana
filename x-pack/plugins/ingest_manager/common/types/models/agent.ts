@@ -90,7 +90,6 @@ interface AgentBase {
   default_api_key_id?: string;
   config_id?: string;
   config_revision?: number | null;
-  config_newest_revision?: number;
   last_checkin?: string;
   last_checkin_status?: 'error' | 'online' | 'degraded';
   user_provided_metadata: AgentMetadata;
