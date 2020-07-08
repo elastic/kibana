@@ -53,7 +53,7 @@ describe('Workplace Search Telemetry Usage Collector', () => {
 
   describe('registerTelemetryUsageCollector', () => {
     it('should make and register the usage collector', () => {
-      registerTelemetryUsageCollector(usageCollectionMock, savedObjectsMock);
+      registerTelemetryUsageCollector(usageCollectionMock, savedObjectsMock, mockLogger);
 
       expect(registerStub).toHaveBeenCalledTimes(1);
       expect(makeUsageCollectorStub).toHaveBeenCalledTimes(1);
@@ -64,7 +64,7 @@ describe('Workplace Search Telemetry Usage Collector', () => {
 
   describe('fetchTelemetryMetrics', () => {
     it('should return existing saved objects data', async () => {
-      registerTelemetryUsageCollector(usageCollectionMock, savedObjectsMock);
+      registerTelemetryUsageCollector(usageCollectionMock, savedObjectsMock, mockLogger);
       const savedObjectsCounts = await makeUsageCollectorStub.mock.calls[0][0].fetch();
 
       expect(savedObjectsCounts).toEqual({

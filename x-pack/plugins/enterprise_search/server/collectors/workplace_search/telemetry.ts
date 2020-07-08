@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from 'lodash';
+import { get } from 'lodash';
 import {
   ISavedObjectsRepository,
   SavedObjectsServiceStart,
@@ -98,14 +98,25 @@ const fetchTelemetryMetrics = async (savedObjects: SavedObjectsServiceStart, log
     return defaultTelemetrySavedObject;
   }
 
-  // Iterate through each attribute key and set its saved values
-  const attributeKeys = Object.keys(savedObjectAttributes);
-  const telemetryObj = defaultTelemetrySavedObject;
-  attributeKeys.forEach((key: string) => {
-    set(telemetryObj, key, savedObjectAttributes[key]);
-  });
-
-  return telemetryObj as ITelemetry;
+  return {
+    ui_viewed: {
+      setup_guide: get(savedObjectAttributes, 'ui_viewed.setup_guide', 0),
+      overview: get(savedObjectAttributes, 'ui_viewed.overview', 0),
+    },
+    ui_error: {
+      cannot_connect: get(savedObjectAttributes, 'ui_error.cannot_connect', 0),
+    },
+    ui_clicked: {
+      header_launch_button: get(savedObjectAttributes, 'ui_clicked.header_launch_button', 0),
+      org_name_change_button: get(savedObjectAttributes, 'ui_clicked.org_name_change_button', 0),
+      onboarding_card_button: get(savedObjectAttributes, 'ui_clicked.onboarding_card_button', 0),
+      recent_activity_source_details_link: get(
+        savedObjectAttributes,
+        'ui_clicked.recent_activity_source_details_link',
+        0
+      ),
+    },
+  } as ITelemetry;
 };
 
 /**

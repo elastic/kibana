@@ -11,7 +11,7 @@ import { WS_TELEMETRY_NAME } from '../../collectors/workplace_search/telemetry';
 export const workplaceSearchTelemetryType: SavedObjectsType = {
   name: WS_TELEMETRY_NAME,
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'agnostic',
   mappings: {
     dynamic: false,
     properties: {},
