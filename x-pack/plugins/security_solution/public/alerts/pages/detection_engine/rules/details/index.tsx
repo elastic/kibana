@@ -72,7 +72,7 @@ import { SecurityPageName } from '../../../../../app/types';
 import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
-import { ExceptionListType } from '../../../../../common/components/exceptions/types';
+import { ExceptionListTypeEnum, ExceptionIdentifiers } from '../../../../../lists_plugin_deps';
 
 enum RuleDetailTabs {
   alerts = 'alerts',
@@ -254,6 +254,34 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
 
   const { indicesExist, indexPattern } = useWithSource('default', indexToAdd);
 
+  const exceptionLists = useMemo((): {
+    lists: ExceptionIdentifiers[];
+    allowedExceptionListTypes: ExceptionListTypeEnum[];
+  } => {
+    if (rule != null && rule.exceptions_list != null) {
+      return rule.exceptions_list.reduce<{
+        lists: ExceptionIdentifiers[];
+        allowedExceptionListTypes: ExceptionListTypeEnum[];
+      }>(
+        (acc, { id, namespace_type, type }) => {
+          const { allowedExceptionListTypes, lists } = acc;
+          const shouldAddEndpoint =
+            type === ExceptionListTypeEnum.ENDPOINT &&
+            !allowedExceptionListTypes.includes(ExceptionListTypeEnum.ENDPOINT);
+          return {
+            lists: [...lists, { id, namespaceType: namespace_type, type }],
+            allowedExceptionListTypes: shouldAddEndpoint
+              ? [...allowedExceptionListTypes, ExceptionListTypeEnum.ENDPOINT]
+              : allowedExceptionListTypes,
+          };
+        },
+        { lists: [], allowedExceptionListTypes: [ExceptionListTypeEnum.DETECTION] }
+      );
+    } else {
+      return { lists: [], allowedExceptionListTypes: [ExceptionListTypeEnum.DETECTION] };
+    }
+  }, [rule]);
+
   if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
     history.replace(getDetectionEngineUrl());
     return null;
@@ -411,12 +439,10 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
             {ruleDetailTab === RuleDetailTabs.exceptions && (
               <ExceptionsViewer
                 ruleId={ruleId ?? ''}
-                availableListTypes={[
-                  ExceptionListType.DETECTION_ENGINE,
-                  ExceptionListType.ENDPOINT,
-                ]}
+                ruleName={rule?.name ?? ''}
+                availableListTypes={exceptionLists.allowedExceptionListTypes}
                 commentsAccordionId={'ruleDetailsTabExceptions'}
-                exceptionListsMeta={[]}
+                exceptionListsMeta={exceptionLists.lists}
               />
             )}
             {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}

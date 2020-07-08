@@ -24,7 +24,7 @@ import {
   ExpressionAstFunction,
   ExpressionAstArgument,
   SerializedFieldFormat,
-} from 'src/plugins/expressions/public';
+} from 'src/plugins/expressions/common';
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
 import { IAggConfigs } from './agg_configs';
