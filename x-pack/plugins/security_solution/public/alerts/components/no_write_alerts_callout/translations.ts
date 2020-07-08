@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const NO_WRITE_ALERTS_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.noWriteAlertsCallOutTitle',
   {
-    defaultMessage: 'Alerts index permissions required',
+    defaultMessage: 'You cannot change alert states',
   }
 );
 
@@ -17,7 +17,7 @@ export const NO_WRITE_ALERTS_CALLOUT_MSG = i18n.translate(
   'xpack.securitySolution.detectionEngine.noWriteAlertsCallOutMsg',
   {
     defaultMessage:
-      'You are currently missing the required permissions to update alerts. Please contact your administrator for further assistance.',
+      'You only have permissions to view alerts. If you need to update alert states (open or close alerts), contact your Kibana administrator.',
   }
 );
 

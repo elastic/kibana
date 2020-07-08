@@ -8,7 +8,6 @@ import { useReducer } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { SimpleSavedObject } from 'kibana/public';
 import { getErrorMessage } from '../../../../../../../common/util/errors';
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { ml } from '../../../../../services/ml_api_service';
@@ -19,10 +18,7 @@ import {
   DataFrameAnalyticsId,
   DataFrameAnalyticsConfig,
 } from '../../../../common';
-import {
-  extractCloningConfig,
-  isAdvancedConfig,
-} from '../../components/analytics_list/action_clone';
+import { extractCloningConfig, isAdvancedConfig } from '../../components/action_clone';
 
 import { ActionDispatchers, ACTION } from './actions';
 import { reducer } from './reducer';
@@ -235,7 +231,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       // Set the index pattern titles which the user can choose as the source.
       const indexPatternsMap: SourceIndexMap = {};
       const savedObjects = (await mlContext.indexPatterns.getCache()) || [];
-      savedObjects.forEach((obj: SimpleSavedObject<Record<string, any>>) => {
+      savedObjects.forEach((obj) => {
         const title = obj?.attributes?.title;
         if (title !== undefined) {
           const id = obj?.id || '';

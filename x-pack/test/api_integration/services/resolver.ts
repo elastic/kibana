@@ -18,6 +18,7 @@ export interface Options extends TreeOptions {
    * Number of trees to generate.
    */
   numTrees?: number;
+  seed?: string;
 }
 
 /**
@@ -38,8 +39,9 @@ export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
       eventsIndex: string = 'logs-endpoint.events.process-default',
       alertsIndex: string = 'logs-endpoint.alerts-default'
     ): Promise<GeneratedTrees> {
+      const seed = options.seed || 'resolver-seed';
       const allTrees: Tree[] = [];
-      const generator = new EndpointDocGenerator();
+      const generator = new EndpointDocGenerator(seed);
       const numTrees = options.numTrees ?? 1;
       for (let j = 0; j < numTrees; j++) {
         const tree = generator.generateTree(options);

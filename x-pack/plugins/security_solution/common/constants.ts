@@ -33,6 +33,17 @@ export const DEFAULT_INTERVAL_TYPE = 'manual';
 export const DEFAULT_INTERVAL_VALUE = 300000; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
 export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51';
+export const ENDPOINT_METADATA_INDEX = 'metrics-endpoint.metadata-*';
+
+export enum SecurityPageName {
+  alerts = 'alerts',
+  overview = 'overview',
+  hosts = 'hosts',
+  network = 'network',
+  timelines = 'timelines',
+  case = 'case',
+  management = 'management',
+}
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}/overview`;
 export const APP_ALERTS_PATH = `${APP_PATH}/alerts`;
@@ -40,10 +51,7 @@ export const APP_HOSTS_PATH = `${APP_PATH}/hosts`;
 export const APP_NETWORK_PATH = `${APP_PATH}/network`;
 export const APP_TIMELINES_PATH = `${APP_PATH}/timelines`;
 export const APP_CASES_PATH = `${APP_PATH}/cases`;
-export const APP_MANAGEMENT_PATH = `${APP_PATH}/management`;
-
-export const SHOW_ENDPOINT_ALERTS_NAV = true;
-export const APP_ENDPOINT_ALERTS_PATH = `${APP_PATH}/endpoint-alerts`;
+export const APP_MANAGEMENT_PATH = `${APP_PATH}/administration`;
 
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
 export const DEFAULT_INDEX_PATTERN = [
@@ -53,6 +61,7 @@ export const DEFAULT_INDEX_PATTERN = [
   'filebeat-*',
   'packetbeat-*',
   'winlogbeat-*',
+  'logs-*',
 ];
 
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
@@ -158,6 +167,12 @@ export const showAllOthersBucket: string[] = [
 
 /**
  * CreateTemplateTimelineBtn
+ * https://github.com/elastic/kibana/pull/66613
  * Remove the comment here to enable template timeline
  */
-export const disableTemplate = true;
+export const disableTemplate = false;
+
+/*
+ * This should be set to true after https://github.com/elastic/kibana/pull/67496 is merged
+ */
+export const enableElasticFilter = false;

@@ -7,7 +7,7 @@
 import { EuiPanel, EuiLoadingContent } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -48,6 +48,12 @@ import {
   displaySuccessToast,
   displayErrorToast,
 } from '../../../common/components/toasters';
+import { Ecs } from '../../../graphql/types';
+import { getInvestigateInResolverAction } from '../../../timelines/components/timeline/body/helpers';
+import {
+  AddExceptionModal,
+  AddExceptionOnClick,
+} from '../../../common/components/exceptions/add_exception_modal';
 
 interface OwnProps {
   timelineId: TimelineIdLiteral;
@@ -61,6 +67,13 @@ interface OwnProps {
 }
 
 type AlertsTableComponentProps = OwnProps & PropsFromRedux;
+
+const addExceptionModalInitialState: AddExceptionOnClick = {
+  ruleName: '',
+  ruleId: '',
+  exceptionListType: 'detection',
+  alertData: undefined,
+};
 
 export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   timelineId,
@@ -84,11 +97,16 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   updateTimeline,
   updateTimelineIsLoading,
 }) => {
+  const dispatch = useDispatch();
   const [selectAll, setSelectAll] = useState(false);
   const apolloClient = useApolloClient();
 
   const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
+  const [shouldShowAddExceptionModal, setShouldShowAddExceptionModal] = useState(false);
+  const [addExceptionModalState, setAddExceptionModalState] = useState<AddExceptionOnClick>(
+    addExceptionModalInitialState
+  );
   const [{ browserFields, indexPatterns }] = useFetchIndexPatterns(
     signalsIndex !== '' ? [signalsIndex] : []
   );
@@ -187,6 +205,21 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       displayErrorToast(title, [error.message], dispatchToaster);
     },
     [dispatchToaster]
+  );
+
+  const openAddExceptionModalCallback = useCallback(
+    ({ ruleName, ruleId, exceptionListType, alertData }: AddExceptionOnClick) => {
+      if (alertData !== null && alertData !== undefined) {
+        setShouldShowAddExceptionModal(true);
+        setAddExceptionModalState({
+          ruleName,
+          ruleId,
+          exceptionListType,
+          alertData,
+        });
+      }
+    },
+    [setShouldShowAddExceptionModal, setAddExceptionModalState]
   );
 
   // Catches state change isSelectAllChecked->false upon user selection change to reset utility bar
@@ -288,30 +321,37 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   // Send to Timeline / Update Alert Status Actions for each table row
   const additionalActions = useMemo(
-    () =>
+    () => (ecsRowData: Ecs) =>
       getAlertActions({
         apolloClient,
         canUserCRUD,
-        hasIndexWrite,
         createTimeline: createTimelineCallback,
-        setEventsLoading: setEventsLoadingCallback,
-        setEventsDeleted: setEventsDeletedCallback,
-        status: filterGroup,
-        updateTimelineIsLoading,
-        onAlertStatusUpdateSuccess,
+        ecsRowData,
+        dispatch,
+        hasIndexWrite,
         onAlertStatusUpdateFailure,
+        onAlertStatusUpdateSuccess,
+        setEventsDeleted: setEventsDeletedCallback,
+        setEventsLoading: setEventsLoadingCallback,
+        status: filterGroup,
+        timelineId,
+        updateTimelineIsLoading,
+        openAddExceptionModal: openAddExceptionModalCallback,
       }),
     [
       apolloClient,
       canUserCRUD,
       createTimelineCallback,
+      dispatch,
       hasIndexWrite,
       filterGroup,
       setEventsLoadingCallback,
       setEventsDeletedCallback,
+      timelineId,
       updateTimelineIsLoading,
       onAlertStatusUpdateSuccess,
       onAlertStatusUpdateFailure,
+      openAddExceptionModalCallback,
     ]
   );
   const defaultIndices = useMemo(() => [signalsIndex], [signalsIndex]);
@@ -322,16 +362,20 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       return [...defaultFilters, ...buildAlertStatusFilter(filterGroup)];
     }
   }, [defaultFilters, filterGroup]);
+  const { filterManager } = useKibana().services.data.query;
   const { initializeTimeline, setTimelineRowActions } = useManageTimeline();
 
   useEffect(() => {
     initializeTimeline({
-      id: timelineId,
+      defaultModel: alertsDefaultModel,
       documentType: i18n.ALERTS_DOCUMENT_TYPE,
+      filterManager,
       footerText: i18n.TOTAL_COUNT_OF_ALERTS,
+      id: timelineId,
       loadingText: i18n.LOADING_ALERTS,
-      title: i18n.ALERTS_TABLE_TITLE,
       selectAll: canUserCRUD ? selectAll : false,
+      timelineRowActions: () => [getInvestigateInResolverAction({ dispatch, timelineId })],
+      title: i18n.ALERTS_TABLE_TITLE,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -348,6 +392,19 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     [onFilterGroupChangedCallback]
   );
 
+  const closeAddExceptionModal = useCallback(() => {
+    setShouldShowAddExceptionModal(false);
+    setAddExceptionModalState(addExceptionModalInitialState);
+  }, [setShouldShowAddExceptionModal, setAddExceptionModalState]);
+
+  const onAddExceptionCancel = useCallback(() => {
+    closeAddExceptionModal();
+  }, [closeAddExceptionModal]);
+
+  const onAddExceptionConfirm = useCallback(() => {
+    closeAddExceptionModal();
+  }, [closeAddExceptionModal]);
+
   if (loading || isEmpty(signalsIndex)) {
     return (
       <EuiPanel>
@@ -358,16 +415,28 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   }
 
   return (
-    <StatefulEventsViewer
-      defaultIndices={defaultIndices}
-      pageFilters={defaultFiltersMemo}
-      defaultModel={alertsDefaultModel}
-      end={to}
-      headerFilterGroup={headerFilterGroup}
-      id={timelineId}
-      start={from}
-      utilityBar={utilityBarCallback}
-    />
+    <>
+      <StatefulEventsViewer
+        defaultIndices={defaultIndices}
+        pageFilters={defaultFiltersMemo}
+        defaultModel={alertsDefaultModel}
+        end={to}
+        headerFilterGroup={headerFilterGroup}
+        id={timelineId}
+        start={from}
+        utilityBar={utilityBarCallback}
+      />
+      {shouldShowAddExceptionModal === true && addExceptionModalState.alertData !== null && (
+        <AddExceptionModal
+          ruleName={addExceptionModalState.ruleName}
+          ruleId={addExceptionModalState.ruleId}
+          exceptionListType={addExceptionModalState.exceptionListType}
+          alertData={addExceptionModalState.alertData}
+          onCancel={onAddExceptionCancel}
+          onConfirm={onAddExceptionConfirm}
+        />
+      )}
+    </>
   );
 };
 

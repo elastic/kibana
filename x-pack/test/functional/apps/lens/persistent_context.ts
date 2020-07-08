@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'header', 'timePicker']);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'header', 'timePicker']);
   const browser = getService('browser');
   const filterBar = getService('filterBar');
   const appsMenu = getService('appsMenu');
@@ -19,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should carry over time range and pinned filters to discover', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.timePicker.setAbsoluteRange(
+      await PageObjects.lens.goToTimeRange(
         'Sep 06, 2015 @ 06:31:44.000',
         'Sep 18, 2025 @ 06:31:44.000'
       );
@@ -33,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should remember time range and pinned filters from discover', async () => {
-      await PageObjects.timePicker.setAbsoluteRange(
+      await PageObjects.lens.goToTimeRange(
         'Sep 07, 2015 @ 06:31:44.000',
         'Sep 19, 2025 @ 06:31:44.000'
       );

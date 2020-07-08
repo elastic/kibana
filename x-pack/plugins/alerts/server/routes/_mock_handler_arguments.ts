@@ -8,7 +8,7 @@ import {
   RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
-  IClusterClient,
+  ILegacyClusterClient,
 } from 'kibana/server';
 import { identity } from 'lodash';
 import { httpServerMock } from '../../../../../src/core/server/mocks';
@@ -20,11 +20,11 @@ export function mockHandlerArguments(
   {
     alertsClient = alertsClientMock.create(),
     listTypes: listTypesRes = [],
-    esClient = elasticsearchServiceMock.createClusterClient(),
+    esClient = elasticsearchServiceMock.createLegacyClusterClient(),
   }: {
     alertsClient?: AlertsClientMock;
     listTypes?: AlertType[];
-    esClient?: jest.Mocked<IClusterClient>;
+    esClient?: jest.Mocked<ILegacyClusterClient>;
   },
   req: unknown,
   res?: Array<MethodKeysOf<KibanaResponseFactory>>

@@ -155,6 +155,7 @@ import {
   dateHistogramInterval,
   InvalidEsCalendarIntervalError,
   InvalidEsIntervalFormatError,
+  Ipv4Address,
   isValidEsInterval,
   isValidInterval,
   parseEsInterval,
@@ -184,6 +185,7 @@ export const search = {
     dateHistogramInterval,
     InvalidEsCalendarIntervalError,
     InvalidEsIntervalFormatError,
+    Ipv4Address,
     isValidEsInterval,
     isValidInterval,
     parseEsInterval,
@@ -202,6 +204,7 @@ export {
   castEsToKbnFieldTypeName,
   // query
   Filter,
+  getTime,
   Query,
   // timefilter
   RefreshInterval,

@@ -15,7 +15,6 @@ import {
   APP_TIMELINES_PATH,
   APP_CASES_PATH,
   APP_MANAGEMENT_PATH,
-  APP_ENDPOINT_ALERTS_PATH,
 } from '../../../common/constants';
 
 export const navTabs: SiemNavTab = {
@@ -28,7 +27,7 @@ export const navTabs: SiemNavTab = {
   },
   [SecurityPageName.alerts]: {
     id: SecurityPageName.alerts,
-    name: i18n.Alerts,
+    name: i18n.ALERTS,
     href: APP_ALERTS_PATH,
     disabled: false,
     urlKey: 'alerts',
@@ -64,16 +63,9 @@ export const navTabs: SiemNavTab = {
   },
   [SecurityPageName.management]: {
     id: SecurityPageName.management,
-    name: i18n.MANAGEMENT,
+    name: i18n.ADMINISTRATION,
     href: APP_MANAGEMENT_PATH,
     disabled: false,
     urlKey: SecurityPageName.management,
-  },
-  [SecurityPageName.endpointAlerts]: {
-    id: SecurityPageName.endpointAlerts,
-    name: 'Endpoint Alerts', // No Need of i18n since, it is just temporary
-    href: APP_ENDPOINT_ALERTS_PATH,
-    disabled: false,
-    urlKey: SecurityPageName.management, // Just to make type happy, this should go away soon
   },
 };

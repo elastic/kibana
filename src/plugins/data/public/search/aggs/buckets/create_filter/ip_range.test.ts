@@ -24,22 +24,10 @@ import { mockAggTypesRegistry } from '../../test_helpers';
 import { IpFormat } from '../../../../../common';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../bucket_agg_type';
-import { fieldFormatsServiceMock } from '../../../../field_formats/mocks';
-import { notificationServiceMock } from '../../../../../../../core/public/mocks';
-import { InternalStartServices } from '../../../../types';
 
 describe('AggConfig Filters', () => {
   describe('IP range', () => {
-    const fieldFormats = fieldFormatsServiceMock.createStartContract();
-    const typesRegistry = mockAggTypesRegistry([
-      getIpRangeBucketAgg({
-        getInternalStartServices: () =>
-          (({
-            fieldFormats,
-            notifications: notificationServiceMock.createStartContract(),
-          } as unknown) as InternalStartServices),
-      }),
-    ]);
+    const typesRegistry = mockAggTypesRegistry([getIpRangeBucketAgg()]);
     const getAggConfigs = (aggs: CreateAggConfigParams[]) => {
       const field = {
         name: 'ip',
@@ -55,7 +43,7 @@ describe('AggConfig Filters', () => {
         },
       } as any;
 
-      return new AggConfigs(indexPattern, aggs, { typesRegistry, fieldFormats });
+      return new AggConfigs(indexPattern, aggs, { typesRegistry });
     };
 
     test('should return a range filter for ip_range agg', () => {

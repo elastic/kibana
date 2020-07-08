@@ -4,6 +4,7 @@
 
 ```ts
 
+import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import Boom from 'boom';
 import { BulkIndexDocumentsParams } from 'elasticsearch';
 import { CatAliasesParams } from 'elasticsearch';
@@ -21,6 +22,8 @@ import { CatTasksParams } from 'elasticsearch';
 import { CatThreadPoolParams } from 'elasticsearch';
 import { ClearScrollParams } from 'elasticsearch';
 import { Client } from 'elasticsearch';
+import { Client as Client_2 } from '@elastic/elasticsearch';
+import { ClientOptions } from '@elastic/elasticsearch';
 import { ClusterAllocationExplainParams } from 'elasticsearch';
 import { ClusterGetSettingsParams } from 'elasticsearch';
 import { ClusterHealthParams } from 'elasticsearch';
@@ -108,7 +111,7 @@ import { PingParams } from 'elasticsearch';
 import { PutScriptParams } from 'elasticsearch';
 import { PutTemplateParams } from 'elasticsearch';
 import { Readable } from 'stream';
-import { RecursiveReadonly as RecursiveReadonly_2 } from 'kibana/public';
+import { RecursiveReadonly } from '@kbn/utility-types';
 import { ReindexParams } from 'elasticsearch';
 import { ReindexRethrottleParams } from 'elasticsearch';
 import { RenderSearchTemplateParams } from 'elasticsearch';
@@ -138,255 +141,13 @@ import { TasksCancelParams } from 'elasticsearch';
 import { TasksGetParams } from 'elasticsearch';
 import { TasksListParams } from 'elasticsearch';
 import { TermvectorsParams } from 'elasticsearch';
+import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
+import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UpdateDocumentByQueryParams } from 'elasticsearch';
 import { UpdateDocumentParams } from 'elasticsearch';
 import { Url } from 'url';
-
-// @public (undocumented)
-export interface APICaller {
-    // (undocumented)
-    (endpoint: 'bulk', params: BulkIndexDocumentsParams, options?: CallAPIOptions): ReturnType<Client['bulk']>;
-    // (undocumented)
-    (endpoint: 'clearScroll', params: ClearScrollParams, options?: CallAPIOptions): ReturnType<Client['clearScroll']>;
-    // (undocumented)
-    (endpoint: 'count', params: CountParams, options?: CallAPIOptions): ReturnType<Client['count']>;
-    // (undocumented)
-    (endpoint: 'create', params: CreateDocumentParams, options?: CallAPIOptions): ReturnType<Client['create']>;
-    // (undocumented)
-    (endpoint: 'delete', params: DeleteDocumentParams, options?: CallAPIOptions): ReturnType<Client['delete']>;
-    // (undocumented)
-    (endpoint: 'deleteByQuery', params: DeleteDocumentByQueryParams, options?: CallAPIOptions): ReturnType<Client['deleteByQuery']>;
-    // (undocumented)
-    (endpoint: 'deleteScript', params: DeleteScriptParams, options?: CallAPIOptions): ReturnType<Client['deleteScript']>;
-    // (undocumented)
-    (endpoint: 'deleteTemplate', params: DeleteTemplateParams, options?: CallAPIOptions): ReturnType<Client['deleteTemplate']>;
-    // (undocumented)
-    (endpoint: 'exists', params: ExistsParams, options?: CallAPIOptions): ReturnType<Client['exists']>;
-    // (undocumented)
-    (endpoint: 'explain', params: ExplainParams, options?: CallAPIOptions): ReturnType<Client['explain']>;
-    // (undocumented)
-    (endpoint: 'fieldStats', params: FieldStatsParams, options?: CallAPIOptions): ReturnType<Client['fieldStats']>;
-    // (undocumented)
-    <T>(endpoint: 'get', params: GetParams, options?: CallAPIOptions): Promise<GetResponse<T>>;
-    // (undocumented)
-    (endpoint: 'getScript', params: GetScriptParams, options?: CallAPIOptions): ReturnType<Client['getScript']>;
-    // (undocumented)
-    (endpoint: 'getSource', params: GetSourceParams, options?: CallAPIOptions): ReturnType<Client['getSource']>;
-    // (undocumented)
-    (endpoint: 'getTemplate', params: GetTemplateParams, options?: CallAPIOptions): ReturnType<Client['getTemplate']>;
-    // (undocumented)
-    <T>(endpoint: 'index', params: IndexDocumentParams<T>, options?: CallAPIOptions): ReturnType<Client['index']>;
-    // (undocumented)
-    (endpoint: 'info', params: InfoParams, options?: CallAPIOptions): ReturnType<Client['info']>;
-    // (undocumented)
-    <T>(endpoint: 'mget', params: MGetParams, options?: CallAPIOptions): Promise<MGetResponse<T>>;
-    // (undocumented)
-    <T>(endpoint: 'msearch', params: MSearchParams, options?: CallAPIOptions): Promise<MSearchResponse<T>>;
-    // (undocumented)
-    <T>(endpoint: 'msearchTemplate', params: MSearchTemplateParams, options?: CallAPIOptions): Promise<MSearchResponse<T>>;
-    // (undocumented)
-    (endpoint: 'mtermvectors', params: MTermVectorsParams, options?: CallAPIOptions): ReturnType<Client['mtermvectors']>;
-    // (undocumented)
-    (endpoint: 'ping', params: PingParams, options?: CallAPIOptions): ReturnType<Client['ping']>;
-    // (undocumented)
-    (endpoint: 'putScript', params: PutScriptParams, options?: CallAPIOptions): ReturnType<Client['putScript']>;
-    // (undocumented)
-    (endpoint: 'putTemplate', params: PutTemplateParams, options?: CallAPIOptions): ReturnType<Client['putTemplate']>;
-    // (undocumented)
-    (endpoint: 'reindex', params: ReindexParams, options?: CallAPIOptions): ReturnType<Client['reindex']>;
-    // (undocumented)
-    (endpoint: 'reindexRethrottle', params: ReindexRethrottleParams, options?: CallAPIOptions): ReturnType<Client['reindexRethrottle']>;
-    // (undocumented)
-    (endpoint: 'renderSearchTemplate', params: RenderSearchTemplateParams, options?: CallAPIOptions): ReturnType<Client['renderSearchTemplate']>;
-    // (undocumented)
-    <T>(endpoint: 'scroll', params: ScrollParams, options?: CallAPIOptions): Promise<SearchResponse<T>>;
-    // (undocumented)
-    <T>(endpoint: 'search', params: SearchParams, options?: CallAPIOptions): Promise<SearchResponse<T>>;
-    // (undocumented)
-    (endpoint: 'searchShards', params: SearchShardsParams, options?: CallAPIOptions): ReturnType<Client['searchShards']>;
-    // (undocumented)
-    (endpoint: 'searchTemplate', params: SearchTemplateParams, options?: CallAPIOptions): ReturnType<Client['searchTemplate']>;
-    // (undocumented)
-    (endpoint: 'suggest', params: SuggestParams, options?: CallAPIOptions): ReturnType<Client['suggest']>;
-    // (undocumented)
-    (endpoint: 'termvectors', params: TermvectorsParams, options?: CallAPIOptions): ReturnType<Client['termvectors']>;
-    // (undocumented)
-    (endpoint: 'update', params: UpdateDocumentParams, options?: CallAPIOptions): ReturnType<Client['update']>;
-    // (undocumented)
-    (endpoint: 'updateByQuery', params: UpdateDocumentByQueryParams, options?: CallAPIOptions): ReturnType<Client['updateByQuery']>;
-    // (undocumented)
-    (endpoint: 'cat.aliases', params: CatAliasesParams, options?: CallAPIOptions): ReturnType<Client['cat']['aliases']>;
-    // (undocumented)
-    (endpoint: 'cat.allocation', params: CatAllocationParams, options?: CallAPIOptions): ReturnType<Client['cat']['allocation']>;
-    // (undocumented)
-    (endpoint: 'cat.count', params: CatAllocationParams, options?: CallAPIOptions): ReturnType<Client['cat']['count']>;
-    // (undocumented)
-    (endpoint: 'cat.fielddata', params: CatFielddataParams, options?: CallAPIOptions): ReturnType<Client['cat']['fielddata']>;
-    // (undocumented)
-    (endpoint: 'cat.health', params: CatHealthParams, options?: CallAPIOptions): ReturnType<Client['cat']['health']>;
-    // (undocumented)
-    (endpoint: 'cat.help', params: CatHelpParams, options?: CallAPIOptions): ReturnType<Client['cat']['help']>;
-    // (undocumented)
-    (endpoint: 'cat.indices', params: CatIndicesParams, options?: CallAPIOptions): ReturnType<Client['cat']['indices']>;
-    // (undocumented)
-    (endpoint: 'cat.master', params: CatCommonParams, options?: CallAPIOptions): ReturnType<Client['cat']['master']>;
-    // (undocumented)
-    (endpoint: 'cat.nodeattrs', params: CatCommonParams, options?: CallAPIOptions): ReturnType<Client['cat']['nodeattrs']>;
-    // (undocumented)
-    (endpoint: 'cat.nodes', params: CatCommonParams, options?: CallAPIOptions): ReturnType<Client['cat']['nodes']>;
-    // (undocumented)
-    (endpoint: 'cat.pendingTasks', params: CatCommonParams, options?: CallAPIOptions): ReturnType<Client['cat']['pendingTasks']>;
-    // (undocumented)
-    (endpoint: 'cat.plugins', params: CatCommonParams, options?: CallAPIOptions): ReturnType<Client['cat']['plugins']>;
-    // (undocumented)
-    (endpoint: 'cat.recovery', params: CatRecoveryParams, options?: CallAPIOptions): ReturnType<Client['cat']['recovery']>;
-    // (undocumented)
-    (endpoint: 'cat.repositories', params: CatCommonParams, options?: CallAPIOptions): ReturnType<Client['cat']['repositories']>;
-    // (undocumented)
-    (endpoint: 'cat.segments', params: CatSegmentsParams, options?: CallAPIOptions): ReturnType<Client['cat']['segments']>;
-    // (undocumented)
-    (endpoint: 'cat.shards', params: CatShardsParams, options?: CallAPIOptions): ReturnType<Client['cat']['shards']>;
-    // (undocumented)
-    (endpoint: 'cat.snapshots', params: CatSnapshotsParams, options?: CallAPIOptions): ReturnType<Client['cat']['snapshots']>;
-    // (undocumented)
-    (endpoint: 'cat.tasks', params: CatTasksParams, options?: CallAPIOptions): ReturnType<Client['cat']['tasks']>;
-    // (undocumented)
-    (endpoint: 'cat.threadPool', params: CatThreadPoolParams, options?: CallAPIOptions): ReturnType<Client['cat']['threadPool']>;
-    // (undocumented)
-    (endpoint: 'cluster.allocationExplain', params: ClusterAllocationExplainParams, options?: CallAPIOptions): ReturnType<Client['cluster']['allocationExplain']>;
-    // (undocumented)
-    (endpoint: 'cluster.getSettings', params: ClusterGetSettingsParams, options?: CallAPIOptions): ReturnType<Client['cluster']['getSettings']>;
-    // (undocumented)
-    (endpoint: 'cluster.health', params: ClusterHealthParams, options?: CallAPIOptions): ReturnType<Client['cluster']['health']>;
-    // (undocumented)
-    (endpoint: 'cluster.pendingTasks', params: ClusterPendingTasksParams, options?: CallAPIOptions): ReturnType<Client['cluster']['pendingTasks']>;
-    // (undocumented)
-    (endpoint: 'cluster.putSettings', params: ClusterPutSettingsParams, options?: CallAPIOptions): ReturnType<Client['cluster']['putSettings']>;
-    // (undocumented)
-    (endpoint: 'cluster.reroute', params: ClusterRerouteParams, options?: CallAPIOptions): ReturnType<Client['cluster']['reroute']>;
-    // (undocumented)
-    (endpoint: 'cluster.state', params: ClusterStateParams, options?: CallAPIOptions): ReturnType<Client['cluster']['state']>;
-    // (undocumented)
-    (endpoint: 'cluster.stats', params: ClusterStatsParams, options?: CallAPIOptions): ReturnType<Client['cluster']['stats']>;
-    // (undocumented)
-    (endpoint: 'indices.analyze', params: IndicesAnalyzeParams, options?: CallAPIOptions): ReturnType<Client['indices']['analyze']>;
-    // (undocumented)
-    (endpoint: 'indices.clearCache', params: IndicesClearCacheParams, options?: CallAPIOptions): ReturnType<Client['indices']['clearCache']>;
-    // (undocumented)
-    (endpoint: 'indices.close', params: IndicesCloseParams, options?: CallAPIOptions): ReturnType<Client['indices']['close']>;
-    // (undocumented)
-    (endpoint: 'indices.create', params: IndicesCreateParams, options?: CallAPIOptions): ReturnType<Client['indices']['create']>;
-    // (undocumented)
-    (endpoint: 'indices.delete', params: IndicesDeleteParams, options?: CallAPIOptions): ReturnType<Client['indices']['delete']>;
-    // (undocumented)
-    (endpoint: 'indices.deleteAlias', params: IndicesDeleteAliasParams, options?: CallAPIOptions): ReturnType<Client['indices']['deleteAlias']>;
-    // (undocumented)
-    (endpoint: 'indices.deleteTemplate', params: IndicesDeleteTemplateParams, options?: CallAPIOptions): ReturnType<Client['indices']['deleteTemplate']>;
-    // (undocumented)
-    (endpoint: 'indices.exists', params: IndicesExistsParams, options?: CallAPIOptions): ReturnType<Client['indices']['exists']>;
-    // (undocumented)
-    (endpoint: 'indices.existsAlias', params: IndicesExistsAliasParams, options?: CallAPIOptions): ReturnType<Client['indices']['existsAlias']>;
-    // (undocumented)
-    (endpoint: 'indices.existsTemplate', params: IndicesExistsTemplateParams, options?: CallAPIOptions): ReturnType<Client['indices']['existsTemplate']>;
-    // (undocumented)
-    (endpoint: 'indices.existsType', params: IndicesExistsTypeParams, options?: CallAPIOptions): ReturnType<Client['indices']['existsType']>;
-    // (undocumented)
-    (endpoint: 'indices.flush', params: IndicesFlushParams, options?: CallAPIOptions): ReturnType<Client['indices']['flush']>;
-    // (undocumented)
-    (endpoint: 'indices.flushSynced', params: IndicesFlushSyncedParams, options?: CallAPIOptions): ReturnType<Client['indices']['flushSynced']>;
-    // (undocumented)
-    (endpoint: 'indices.forcemerge', params: IndicesForcemergeParams, options?: CallAPIOptions): ReturnType<Client['indices']['forcemerge']>;
-    // (undocumented)
-    (endpoint: 'indices.get', params: IndicesGetParams, options?: CallAPIOptions): ReturnType<Client['indices']['get']>;
-    // (undocumented)
-    (endpoint: 'indices.getAlias', params: IndicesGetAliasParams, options?: CallAPIOptions): ReturnType<Client['indices']['getAlias']>;
-    // (undocumented)
-    (endpoint: 'indices.getFieldMapping', params: IndicesGetFieldMappingParams, options?: CallAPIOptions): ReturnType<Client['indices']['getFieldMapping']>;
-    // (undocumented)
-    (endpoint: 'indices.getMapping', params: IndicesGetMappingParams, options?: CallAPIOptions): ReturnType<Client['indices']['getMapping']>;
-    // (undocumented)
-    (endpoint: 'indices.getSettings', params: IndicesGetSettingsParams, options?: CallAPIOptions): ReturnType<Client['indices']['getSettings']>;
-    // (undocumented)
-    (endpoint: 'indices.getTemplate', params: IndicesGetTemplateParams, options?: CallAPIOptions): ReturnType<Client['indices']['getTemplate']>;
-    // (undocumented)
-    (endpoint: 'indices.getUpgrade', params: IndicesGetUpgradeParams, options?: CallAPIOptions): ReturnType<Client['indices']['getUpgrade']>;
-    // (undocumented)
-    (endpoint: 'indices.open', params: IndicesOpenParams, options?: CallAPIOptions): ReturnType<Client['indices']['open']>;
-    // (undocumented)
-    (endpoint: 'indices.putAlias', params: IndicesPutAliasParams, options?: CallAPIOptions): ReturnType<Client['indices']['putAlias']>;
-    // (undocumented)
-    (endpoint: 'indices.putMapping', params: IndicesPutMappingParams, options?: CallAPIOptions): ReturnType<Client['indices']['putMapping']>;
-    // (undocumented)
-    (endpoint: 'indices.putSettings', params: IndicesPutSettingsParams, options?: CallAPIOptions): ReturnType<Client['indices']['putSettings']>;
-    // (undocumented)
-    (endpoint: 'indices.putTemplate', params: IndicesPutTemplateParams, options?: CallAPIOptions): ReturnType<Client['indices']['putTemplate']>;
-    // (undocumented)
-    (endpoint: 'indices.recovery', params: IndicesRecoveryParams, options?: CallAPIOptions): ReturnType<Client['indices']['recovery']>;
-    // (undocumented)
-    (endpoint: 'indices.refresh', params: IndicesRefreshParams, options?: CallAPIOptions): ReturnType<Client['indices']['refresh']>;
-    // (undocumented)
-    (endpoint: 'indices.rollover', params: IndicesRolloverParams, options?: CallAPIOptions): ReturnType<Client['indices']['rollover']>;
-    // (undocumented)
-    (endpoint: 'indices.segments', params: IndicesSegmentsParams, options?: CallAPIOptions): ReturnType<Client['indices']['segments']>;
-    // (undocumented)
-    (endpoint: 'indices.shardStores', params: IndicesShardStoresParams, options?: CallAPIOptions): ReturnType<Client['indices']['shardStores']>;
-    // (undocumented)
-    (endpoint: 'indices.shrink', params: IndicesShrinkParams, options?: CallAPIOptions): ReturnType<Client['indices']['shrink']>;
-    // (undocumented)
-    (endpoint: 'indices.stats', params: IndicesStatsParams, options?: CallAPIOptions): ReturnType<Client['indices']['stats']>;
-    // (undocumented)
-    (endpoint: 'indices.updateAliases', params: IndicesUpdateAliasesParams, options?: CallAPIOptions): ReturnType<Client['indices']['updateAliases']>;
-    // (undocumented)
-    (endpoint: 'indices.upgrade', params: IndicesUpgradeParams, options?: CallAPIOptions): ReturnType<Client['indices']['upgrade']>;
-    // (undocumented)
-    (endpoint: 'indices.validateQuery', params: IndicesValidateQueryParams, options?: CallAPIOptions): ReturnType<Client['indices']['validateQuery']>;
-    // (undocumented)
-    (endpoint: 'ingest.deletePipeline', params: IngestDeletePipelineParams, options?: CallAPIOptions): ReturnType<Client['ingest']['deletePipeline']>;
-    // (undocumented)
-    (endpoint: 'ingest.getPipeline', params: IngestGetPipelineParams, options?: CallAPIOptions): ReturnType<Client['ingest']['getPipeline']>;
-    // (undocumented)
-    (endpoint: 'ingest.putPipeline', params: IngestPutPipelineParams, options?: CallAPIOptions): ReturnType<Client['ingest']['putPipeline']>;
-    // (undocumented)
-    (endpoint: 'ingest.simulate', params: IngestSimulateParams, options?: CallAPIOptions): ReturnType<Client['ingest']['simulate']>;
-    // (undocumented)
-    (endpoint: 'nodes.hotThreads', params: NodesHotThreadsParams, options?: CallAPIOptions): ReturnType<Client['nodes']['hotThreads']>;
-    // (undocumented)
-    (endpoint: 'nodes.info', params: NodesInfoParams, options?: CallAPIOptions): ReturnType<Client['nodes']['info']>;
-    // (undocumented)
-    (endpoint: 'nodes.stats', params: NodesStatsParams, options?: CallAPIOptions): ReturnType<Client['nodes']['stats']>;
-    // (undocumented)
-    (endpoint: 'snapshot.create', params: SnapshotCreateParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['create']>;
-    // (undocumented)
-    (endpoint: 'snapshot.createRepository', params: SnapshotCreateRepositoryParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['createRepository']>;
-    // (undocumented)
-    (endpoint: 'snapshot.delete', params: SnapshotDeleteParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['delete']>;
-    // (undocumented)
-    (endpoint: 'snapshot.deleteRepository', params: SnapshotDeleteRepositoryParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['deleteRepository']>;
-    // (undocumented)
-    (endpoint: 'snapshot.get', params: SnapshotGetParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['get']>;
-    // (undocumented)
-    (endpoint: 'snapshot.getRepository', params: SnapshotGetRepositoryParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['getRepository']>;
-    // (undocumented)
-    (endpoint: 'snapshot.restore', params: SnapshotRestoreParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['restore']>;
-    // (undocumented)
-    (endpoint: 'snapshot.status', params: SnapshotStatusParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['status']>;
-    // (undocumented)
-    (endpoint: 'snapshot.verifyRepository', params: SnapshotVerifyRepositoryParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['verifyRepository']>;
-    // (undocumented)
-    (endpoint: 'tasks.cancel', params: TasksCancelParams, options?: CallAPIOptions): ReturnType<Client['tasks']['cancel']>;
-    // (undocumented)
-    (endpoint: 'tasks.get', params: TasksGetParams, options?: CallAPIOptions): ReturnType<Client['tasks']['get']>;
-    // (undocumented)
-    (endpoint: 'tasks.list', params: TasksListParams, options?: CallAPIOptions): ReturnType<Client['tasks']['list']>;
-    // (undocumented)
-    (endpoint: 'transport.request', clientParams: AssistantAPIClientParams, options?: CallAPIOptions): Promise<AssistanceAPIResponse>;
-    // (undocumented)
-    (endpoint: 'transport.request', clientParams: DeprecationAPIClientParams, options?: CallAPIOptions): Promise<DeprecationAPIResponse>;
-    // (undocumented)
-    <T = any>(endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions): Promise<T>;
-}
 
 // Warning: (ae-forgotten-export) The symbol "appendersSchema" needs to be exported by the entry point index.d.ts
 //
@@ -413,6 +174,38 @@ export interface AssistantAPIClientParams extends GenericParams {
     // (undocumented)
     path: '/_migration/assistance';
 }
+
+// @public
+export interface AuditableEvent {
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    type: string;
+}
+
+// @public
+export interface Auditor {
+    add(event: AuditableEvent): void;
+    withAuditScope(name: string): void;
+}
+
+// @public
+export interface AuditorFactory {
+    // (undocumented)
+    asScoped(request: KibanaRequest): Auditor;
+}
+
+// Warning: (ae-missing-release-tag) "AuditTrailSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface AuditTrailSetup {
+    register(auditor: AuditorFactory): void;
+}
+
+// Warning: (ae-missing-release-tag) "AuditTrailStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export type AuditTrailStart = AuditorFactory;
 
 // @public (undocumented)
 export interface Authenticated extends AuthResultParams {
@@ -498,12 +291,6 @@ export class BasePath {
 export function bootstrap({ configs, cliArgs, applyConfigOverrides, features, }: BootstrapArgs): Promise<void>;
 
 // @public
-export interface CallAPIOptions {
-    signal?: AbortSignal;
-    wrap401Errors?: boolean;
-}
-
-// @public
 export interface Capabilities {
     [key: string]: Record<string, boolean | Record<string, boolean>>;
     catalogue: Record<string, boolean>;
@@ -530,14 +317,6 @@ export interface CapabilitiesStart {
 // @public
 export type CapabilitiesSwitcher = (request: KibanaRequest, uiCapabilities: Capabilities) => Partial<Capabilities> | Promise<Partial<Capabilities>>;
 
-// @public
-export class ClusterClient implements IClusterClient {
-    constructor(config: ElasticsearchClientConfig, log: Logger, getAuthHeaders?: GetAuthHeaders);
-    asScoped(request?: ScopeableRequest): IScopedClusterClient;
-    callAsInternalUser: APICaller;
-    close(): void;
-    }
-
 // @alpha
 export const config: {
     elasticsearch: {
@@ -557,7 +336,7 @@ export const config: {
             startupTimeout: import("@kbn/config-schema").Type<import("moment").Duration>;
             logQueries: import("@kbn/config-schema").Type<boolean>;
             ssl: import("@kbn/config-schema").ObjectType<{
-                verificationMode: import("@kbn/config-schema").Type<"none" | "full" | "certificate">;
+                verificationMode: import("@kbn/config-schema").Type<"none" | "certificate" | "full">;
                 certificateAuthorities: import("@kbn/config-schema").Type<string | string[] | undefined>;
                 certificate: import("@kbn/config-schema").Type<string | undefined>;
                 key: import("@kbn/config-schema").Type<string | undefined>;
@@ -698,6 +477,8 @@ export type CoreId = symbol;
 // @public
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
     // (undocumented)
+    auditTrail: AuditTrailSetup;
+    // (undocumented)
     capabilities: CapabilitiesSetup;
     // (undocumented)
     context: ContextSetup;
@@ -723,6 +504,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 
 // @public
 export interface CoreStart {
+    // (undocumented)
+    auditTrail: AuditTrailStart;
     // (undocumented)
     capabilities: CapabilitiesStart;
     // (undocumented)
@@ -851,14 +634,6 @@ export interface DiscoveredPlugin {
     readonly requiredPlugins: readonly PluginName[];
 }
 
-// @public (undocumented)
-export type ElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' | 'plugins'> & Pick<ElasticsearchConfig, 'apiVersion' | 'customHeaders' | 'logQueries' | 'requestHeadersWhitelist' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'hosts' | 'username' | 'password'> & {
-    pingTimeout?: ElasticsearchConfig['pingTimeout'] | ConfigOptions['pingTimeout'];
-    requestTimeout?: ElasticsearchConfig['requestTimeout'] | ConfigOptions['requestTimeout'];
-    sniffInterval?: ElasticsearchConfig['sniffInterval'] | ConfigOptions['sniffInterval'];
-    ssl?: Partial<ElasticsearchConfig['ssl']>;
-};
-
 // @public
 export class ElasticsearchConfig {
     constructor(rawConfig: ElasticsearchConfigType);
@@ -885,25 +660,11 @@ export class ElasticsearchConfig {
 }
 
 // @public (undocumented)
-export interface ElasticsearchError extends Boom {
-    // (undocumented)
-    [code]?: string;
-}
-
-// @public
-export class ElasticsearchErrorHelpers {
-    // (undocumented)
-    static decorateNotAuthorizedError(error: Error, reason?: string): ElasticsearchError;
-    // (undocumented)
-    static isNotAuthorizedError(error: any): error is ElasticsearchError;
-}
-
-// @public (undocumented)
 export interface ElasticsearchServiceSetup {
     // @deprecated (undocumented)
     legacy: {
-        readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
-        readonly client: IClusterClient;
+        readonly createClient: (type: string, clientConfig?: Partial<LegacyElasticsearchClientConfig>) => ILegacyCustomClusterClient;
+        readonly client: ILegacyClusterClient;
     };
 }
 
@@ -911,8 +672,8 @@ export interface ElasticsearchServiceSetup {
 export interface ElasticsearchServiceStart {
     // @deprecated (undocumented)
     legacy: {
-        readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
-        readonly client: IClusterClient;
+        readonly createClient: (type: string, clientConfig?: Partial<LegacyElasticsearchClientConfig>) => ILegacyCustomClusterClient;
+        readonly client: ILegacyClusterClient;
     };
 }
 
@@ -1024,7 +785,7 @@ export type HttpResponsePayload = undefined | string | Record<string, any> | Buf
 
 // @public (undocumented)
 export interface HttpServerInfo {
-    host: string;
+    hostname: string;
     name: string;
     port: number;
     protocol: 'http' | 'https' | 'socket';
@@ -1057,9 +818,6 @@ export interface HttpServiceStart {
 export type IBasePath = Pick<BasePath, keyof BasePath>;
 
 // @public
-export type IClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
-
-// @public
 export interface IContextContainer<THandler extends HandlerFunction<any>> {
     createHandler(pluginOpaqueId: PluginOpaqueId, handler: THandler): (...rest: HandlerParameters<THandler>) => ShallowPromise<ReturnType<THandler>>;
     registerContext<TContextName extends keyof HandlerContextType<THandler>>(pluginOpaqueId: PluginOpaqueId, contextName: TContextName, provider: IContextProvider<THandler, TContextName>): this;
@@ -1077,9 +835,6 @@ export interface ICspConfig {
     readonly strict: boolean;
     readonly warnLegacyBrowsers: boolean;
 }
-
-// @public
-export type ICustomClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'close' | 'asScoped'>;
 
 // @public
 export interface IKibanaResponse<T extends HttpResponsePayload | ResponseError = any> {
@@ -1101,6 +856,15 @@ export interface IKibanaSocket {
     getPeerCertificate(detailed: false): PeerCertificate | null;
     getPeerCertificate(detailed?: boolean): PeerCertificate | DetailedPeerCertificate | null;
 }
+
+// @public
+export type ILegacyClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
+
+// @public
+export type ILegacyCustomClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'close' | 'asScoped'>;
+
+// @public
+export type ILegacyScopedClusterClient = Pick<LegacyScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
 
 // @public (undocumented)
 export interface ImageValidation {
@@ -1154,9 +918,6 @@ export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedOb
 
 // @public
 export type ISavedObjectTypeRegistry = Omit<SavedObjectTypeRegistry, 'registerType'>;
-
-// @public
-export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
 
 // @public
 export function isRelativeUrl(candidatePath: string): boolean;
@@ -1247,6 +1008,266 @@ export const kibanaResponseFactory: {
 // @public
 export type KnownHeaders = KnownKeys<IncomingHttpHeaders>;
 
+// @public (undocumented)
+export interface LegacyAPICaller {
+    // (undocumented)
+    (endpoint: 'bulk', params: BulkIndexDocumentsParams, options?: LegacyCallAPIOptions): ReturnType<Client['bulk']>;
+    // (undocumented)
+    (endpoint: 'clearScroll', params: ClearScrollParams, options?: LegacyCallAPIOptions): ReturnType<Client['clearScroll']>;
+    // (undocumented)
+    (endpoint: 'count', params: CountParams, options?: LegacyCallAPIOptions): ReturnType<Client['count']>;
+    // (undocumented)
+    (endpoint: 'create', params: CreateDocumentParams, options?: LegacyCallAPIOptions): ReturnType<Client['create']>;
+    // (undocumented)
+    (endpoint: 'delete', params: DeleteDocumentParams, options?: LegacyCallAPIOptions): ReturnType<Client['delete']>;
+    // (undocumented)
+    (endpoint: 'deleteByQuery', params: DeleteDocumentByQueryParams, options?: LegacyCallAPIOptions): ReturnType<Client['deleteByQuery']>;
+    // (undocumented)
+    (endpoint: 'deleteScript', params: DeleteScriptParams, options?: LegacyCallAPIOptions): ReturnType<Client['deleteScript']>;
+    // (undocumented)
+    (endpoint: 'deleteTemplate', params: DeleteTemplateParams, options?: LegacyCallAPIOptions): ReturnType<Client['deleteTemplate']>;
+    // (undocumented)
+    (endpoint: 'exists', params: ExistsParams, options?: LegacyCallAPIOptions): ReturnType<Client['exists']>;
+    // (undocumented)
+    (endpoint: 'explain', params: ExplainParams, options?: LegacyCallAPIOptions): ReturnType<Client['explain']>;
+    // (undocumented)
+    (endpoint: 'fieldStats', params: FieldStatsParams, options?: LegacyCallAPIOptions): ReturnType<Client['fieldStats']>;
+    // (undocumented)
+    <T>(endpoint: 'get', params: GetParams, options?: LegacyCallAPIOptions): Promise<GetResponse<T>>;
+    // (undocumented)
+    (endpoint: 'getScript', params: GetScriptParams, options?: LegacyCallAPIOptions): ReturnType<Client['getScript']>;
+    // (undocumented)
+    (endpoint: 'getSource', params: GetSourceParams, options?: LegacyCallAPIOptions): ReturnType<Client['getSource']>;
+    // (undocumented)
+    (endpoint: 'getTemplate', params: GetTemplateParams, options?: LegacyCallAPIOptions): ReturnType<Client['getTemplate']>;
+    // (undocumented)
+    <T>(endpoint: 'index', params: IndexDocumentParams<T>, options?: LegacyCallAPIOptions): ReturnType<Client['index']>;
+    // (undocumented)
+    (endpoint: 'info', params: InfoParams, options?: LegacyCallAPIOptions): ReturnType<Client['info']>;
+    // (undocumented)
+    <T>(endpoint: 'mget', params: MGetParams, options?: LegacyCallAPIOptions): Promise<MGetResponse<T>>;
+    // (undocumented)
+    <T>(endpoint: 'msearch', params: MSearchParams, options?: LegacyCallAPIOptions): Promise<MSearchResponse<T>>;
+    // (undocumented)
+    <T>(endpoint: 'msearchTemplate', params: MSearchTemplateParams, options?: LegacyCallAPIOptions): Promise<MSearchResponse<T>>;
+    // (undocumented)
+    (endpoint: 'mtermvectors', params: MTermVectorsParams, options?: LegacyCallAPIOptions): ReturnType<Client['mtermvectors']>;
+    // (undocumented)
+    (endpoint: 'ping', params: PingParams, options?: LegacyCallAPIOptions): ReturnType<Client['ping']>;
+    // (undocumented)
+    (endpoint: 'putScript', params: PutScriptParams, options?: LegacyCallAPIOptions): ReturnType<Client['putScript']>;
+    // (undocumented)
+    (endpoint: 'putTemplate', params: PutTemplateParams, options?: LegacyCallAPIOptions): ReturnType<Client['putTemplate']>;
+    // (undocumented)
+    (endpoint: 'reindex', params: ReindexParams, options?: LegacyCallAPIOptions): ReturnType<Client['reindex']>;
+    // (undocumented)
+    (endpoint: 'reindexRethrottle', params: ReindexRethrottleParams, options?: LegacyCallAPIOptions): ReturnType<Client['reindexRethrottle']>;
+    // (undocumented)
+    (endpoint: 'renderSearchTemplate', params: RenderSearchTemplateParams, options?: LegacyCallAPIOptions): ReturnType<Client['renderSearchTemplate']>;
+    // (undocumented)
+    <T>(endpoint: 'scroll', params: ScrollParams, options?: LegacyCallAPIOptions): Promise<SearchResponse<T>>;
+    // (undocumented)
+    <T>(endpoint: 'search', params: SearchParams, options?: LegacyCallAPIOptions): Promise<SearchResponse<T>>;
+    // (undocumented)
+    (endpoint: 'searchShards', params: SearchShardsParams, options?: LegacyCallAPIOptions): ReturnType<Client['searchShards']>;
+    // (undocumented)
+    (endpoint: 'searchTemplate', params: SearchTemplateParams, options?: LegacyCallAPIOptions): ReturnType<Client['searchTemplate']>;
+    // (undocumented)
+    (endpoint: 'suggest', params: SuggestParams, options?: LegacyCallAPIOptions): ReturnType<Client['suggest']>;
+    // (undocumented)
+    (endpoint: 'termvectors', params: TermvectorsParams, options?: LegacyCallAPIOptions): ReturnType<Client['termvectors']>;
+    // (undocumented)
+    (endpoint: 'update', params: UpdateDocumentParams, options?: LegacyCallAPIOptions): ReturnType<Client['update']>;
+    // (undocumented)
+    (endpoint: 'updateByQuery', params: UpdateDocumentByQueryParams, options?: LegacyCallAPIOptions): ReturnType<Client['updateByQuery']>;
+    // (undocumented)
+    (endpoint: 'cat.aliases', params: CatAliasesParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['aliases']>;
+    // (undocumented)
+    (endpoint: 'cat.allocation', params: CatAllocationParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['allocation']>;
+    // (undocumented)
+    (endpoint: 'cat.count', params: CatAllocationParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['count']>;
+    // (undocumented)
+    (endpoint: 'cat.fielddata', params: CatFielddataParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['fielddata']>;
+    // (undocumented)
+    (endpoint: 'cat.health', params: CatHealthParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['health']>;
+    // (undocumented)
+    (endpoint: 'cat.help', params: CatHelpParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['help']>;
+    // (undocumented)
+    (endpoint: 'cat.indices', params: CatIndicesParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['indices']>;
+    // (undocumented)
+    (endpoint: 'cat.master', params: CatCommonParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['master']>;
+    // (undocumented)
+    (endpoint: 'cat.nodeattrs', params: CatCommonParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['nodeattrs']>;
+    // (undocumented)
+    (endpoint: 'cat.nodes', params: CatCommonParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['nodes']>;
+    // (undocumented)
+    (endpoint: 'cat.pendingTasks', params: CatCommonParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['pendingTasks']>;
+    // (undocumented)
+    (endpoint: 'cat.plugins', params: CatCommonParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['plugins']>;
+    // (undocumented)
+    (endpoint: 'cat.recovery', params: CatRecoveryParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['recovery']>;
+    // (undocumented)
+    (endpoint: 'cat.repositories', params: CatCommonParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['repositories']>;
+    // (undocumented)
+    (endpoint: 'cat.segments', params: CatSegmentsParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['segments']>;
+    // (undocumented)
+    (endpoint: 'cat.shards', params: CatShardsParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['shards']>;
+    // (undocumented)
+    (endpoint: 'cat.snapshots', params: CatSnapshotsParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['snapshots']>;
+    // (undocumented)
+    (endpoint: 'cat.tasks', params: CatTasksParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['tasks']>;
+    // (undocumented)
+    (endpoint: 'cat.threadPool', params: CatThreadPoolParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['threadPool']>;
+    // (undocumented)
+    (endpoint: 'cluster.allocationExplain', params: ClusterAllocationExplainParams, options?: LegacyCallAPIOptions): ReturnType<Client['cluster']['allocationExplain']>;
+    // (undocumented)
+    (endpoint: 'cluster.getSettings', params: ClusterGetSettingsParams, options?: LegacyCallAPIOptions): ReturnType<Client['cluster']['getSettings']>;
+    // (undocumented)
+    (endpoint: 'cluster.health', params: ClusterHealthParams, options?: LegacyCallAPIOptions): ReturnType<Client['cluster']['health']>;
+    // (undocumented)
+    (endpoint: 'cluster.pendingTasks', params: ClusterPendingTasksParams, options?: LegacyCallAPIOptions): ReturnType<Client['cluster']['pendingTasks']>;
+    // (undocumented)
+    (endpoint: 'cluster.putSettings', params: ClusterPutSettingsParams, options?: LegacyCallAPIOptions): ReturnType<Client['cluster']['putSettings']>;
+    // (undocumented)
+    (endpoint: 'cluster.reroute', params: ClusterRerouteParams, options?: LegacyCallAPIOptions): ReturnType<Client['cluster']['reroute']>;
+    // (undocumented)
+    (endpoint: 'cluster.state', params: ClusterStateParams, options?: LegacyCallAPIOptions): ReturnType<Client['cluster']['state']>;
+    // (undocumented)
+    (endpoint: 'cluster.stats', params: ClusterStatsParams, options?: LegacyCallAPIOptions): ReturnType<Client['cluster']['stats']>;
+    // (undocumented)
+    (endpoint: 'indices.analyze', params: IndicesAnalyzeParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['analyze']>;
+    // (undocumented)
+    (endpoint: 'indices.clearCache', params: IndicesClearCacheParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['clearCache']>;
+    // (undocumented)
+    (endpoint: 'indices.close', params: IndicesCloseParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['close']>;
+    // (undocumented)
+    (endpoint: 'indices.create', params: IndicesCreateParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['create']>;
+    // (undocumented)
+    (endpoint: 'indices.delete', params: IndicesDeleteParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['delete']>;
+    // (undocumented)
+    (endpoint: 'indices.deleteAlias', params: IndicesDeleteAliasParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['deleteAlias']>;
+    // (undocumented)
+    (endpoint: 'indices.deleteTemplate', params: IndicesDeleteTemplateParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['deleteTemplate']>;
+    // (undocumented)
+    (endpoint: 'indices.exists', params: IndicesExistsParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['exists']>;
+    // (undocumented)
+    (endpoint: 'indices.existsAlias', params: IndicesExistsAliasParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['existsAlias']>;
+    // (undocumented)
+    (endpoint: 'indices.existsTemplate', params: IndicesExistsTemplateParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['existsTemplate']>;
+    // (undocumented)
+    (endpoint: 'indices.existsType', params: IndicesExistsTypeParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['existsType']>;
+    // (undocumented)
+    (endpoint: 'indices.flush', params: IndicesFlushParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['flush']>;
+    // (undocumented)
+    (endpoint: 'indices.flushSynced', params: IndicesFlushSyncedParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['flushSynced']>;
+    // (undocumented)
+    (endpoint: 'indices.forcemerge', params: IndicesForcemergeParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['forcemerge']>;
+    // (undocumented)
+    (endpoint: 'indices.get', params: IndicesGetParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['get']>;
+    // (undocumented)
+    (endpoint: 'indices.getAlias', params: IndicesGetAliasParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['getAlias']>;
+    // (undocumented)
+    (endpoint: 'indices.getFieldMapping', params: IndicesGetFieldMappingParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['getFieldMapping']>;
+    // (undocumented)
+    (endpoint: 'indices.getMapping', params: IndicesGetMappingParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['getMapping']>;
+    // (undocumented)
+    (endpoint: 'indices.getSettings', params: IndicesGetSettingsParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['getSettings']>;
+    // (undocumented)
+    (endpoint: 'indices.getTemplate', params: IndicesGetTemplateParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['getTemplate']>;
+    // (undocumented)
+    (endpoint: 'indices.getUpgrade', params: IndicesGetUpgradeParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['getUpgrade']>;
+    // (undocumented)
+    (endpoint: 'indices.open', params: IndicesOpenParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['open']>;
+    // (undocumented)
+    (endpoint: 'indices.putAlias', params: IndicesPutAliasParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['putAlias']>;
+    // (undocumented)
+    (endpoint: 'indices.putMapping', params: IndicesPutMappingParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['putMapping']>;
+    // (undocumented)
+    (endpoint: 'indices.putSettings', params: IndicesPutSettingsParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['putSettings']>;
+    // (undocumented)
+    (endpoint: 'indices.putTemplate', params: IndicesPutTemplateParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['putTemplate']>;
+    // (undocumented)
+    (endpoint: 'indices.recovery', params: IndicesRecoveryParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['recovery']>;
+    // (undocumented)
+    (endpoint: 'indices.refresh', params: IndicesRefreshParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['refresh']>;
+    // (undocumented)
+    (endpoint: 'indices.rollover', params: IndicesRolloverParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['rollover']>;
+    // (undocumented)
+    (endpoint: 'indices.segments', params: IndicesSegmentsParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['segments']>;
+    // (undocumented)
+    (endpoint: 'indices.shardStores', params: IndicesShardStoresParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['shardStores']>;
+    // (undocumented)
+    (endpoint: 'indices.shrink', params: IndicesShrinkParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['shrink']>;
+    // (undocumented)
+    (endpoint: 'indices.stats', params: IndicesStatsParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['stats']>;
+    // (undocumented)
+    (endpoint: 'indices.updateAliases', params: IndicesUpdateAliasesParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['updateAliases']>;
+    // (undocumented)
+    (endpoint: 'indices.upgrade', params: IndicesUpgradeParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['upgrade']>;
+    // (undocumented)
+    (endpoint: 'indices.validateQuery', params: IndicesValidateQueryParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['validateQuery']>;
+    // (undocumented)
+    (endpoint: 'ingest.deletePipeline', params: IngestDeletePipelineParams, options?: LegacyCallAPIOptions): ReturnType<Client['ingest']['deletePipeline']>;
+    // (undocumented)
+    (endpoint: 'ingest.getPipeline', params: IngestGetPipelineParams, options?: LegacyCallAPIOptions): ReturnType<Client['ingest']['getPipeline']>;
+    // (undocumented)
+    (endpoint: 'ingest.putPipeline', params: IngestPutPipelineParams, options?: LegacyCallAPIOptions): ReturnType<Client['ingest']['putPipeline']>;
+    // (undocumented)
+    (endpoint: 'ingest.simulate', params: IngestSimulateParams, options?: LegacyCallAPIOptions): ReturnType<Client['ingest']['simulate']>;
+    // (undocumented)
+    (endpoint: 'nodes.hotThreads', params: NodesHotThreadsParams, options?: LegacyCallAPIOptions): ReturnType<Client['nodes']['hotThreads']>;
+    // (undocumented)
+    (endpoint: 'nodes.info', params: NodesInfoParams, options?: LegacyCallAPIOptions): ReturnType<Client['nodes']['info']>;
+    // (undocumented)
+    (endpoint: 'nodes.stats', params: NodesStatsParams, options?: LegacyCallAPIOptions): ReturnType<Client['nodes']['stats']>;
+    // (undocumented)
+    (endpoint: 'snapshot.create', params: SnapshotCreateParams, options?: LegacyCallAPIOptions): ReturnType<Client['snapshot']['create']>;
+    // (undocumented)
+    (endpoint: 'snapshot.createRepository', params: SnapshotCreateRepositoryParams, options?: LegacyCallAPIOptions): ReturnType<Client['snapshot']['createRepository']>;
+    // (undocumented)
+    (endpoint: 'snapshot.delete', params: SnapshotDeleteParams, options?: LegacyCallAPIOptions): ReturnType<Client['snapshot']['delete']>;
+    // (undocumented)
+    (endpoint: 'snapshot.deleteRepository', params: SnapshotDeleteRepositoryParams, options?: LegacyCallAPIOptions): ReturnType<Client['snapshot']['deleteRepository']>;
+    // (undocumented)
+    (endpoint: 'snapshot.get', params: SnapshotGetParams, options?: LegacyCallAPIOptions): ReturnType<Client['snapshot']['get']>;
+    // (undocumented)
+    (endpoint: 'snapshot.getRepository', params: SnapshotGetRepositoryParams, options?: LegacyCallAPIOptions): ReturnType<Client['snapshot']['getRepository']>;
+    // (undocumented)
+    (endpoint: 'snapshot.restore', params: SnapshotRestoreParams, options?: LegacyCallAPIOptions): ReturnType<Client['snapshot']['restore']>;
+    // (undocumented)
+    (endpoint: 'snapshot.status', params: SnapshotStatusParams, options?: LegacyCallAPIOptions): ReturnType<Client['snapshot']['status']>;
+    // (undocumented)
+    (endpoint: 'snapshot.verifyRepository', params: SnapshotVerifyRepositoryParams, options?: LegacyCallAPIOptions): ReturnType<Client['snapshot']['verifyRepository']>;
+    // (undocumented)
+    (endpoint: 'tasks.cancel', params: TasksCancelParams, options?: LegacyCallAPIOptions): ReturnType<Client['tasks']['cancel']>;
+    // (undocumented)
+    (endpoint: 'tasks.get', params: TasksGetParams, options?: LegacyCallAPIOptions): ReturnType<Client['tasks']['get']>;
+    // (undocumented)
+    (endpoint: 'tasks.list', params: TasksListParams, options?: LegacyCallAPIOptions): ReturnType<Client['tasks']['list']>;
+    // (undocumented)
+    (endpoint: 'transport.request', clientParams: AssistantAPIClientParams, options?: LegacyCallAPIOptions): Promise<AssistanceAPIResponse>;
+    // (undocumented)
+    (endpoint: 'transport.request', clientParams: DeprecationAPIClientParams, options?: LegacyCallAPIOptions): Promise<DeprecationAPIResponse>;
+    // (undocumented)
+    <T = any>(endpoint: string, clientParams?: Record<string, any>, options?: LegacyCallAPIOptions): Promise<T>;
+}
+
+// @public
+export interface LegacyCallAPIOptions {
+    signal?: AbortSignal;
+    wrap401Errors?: boolean;
+}
+
+// Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "kibana" does not have an export "IClusterClient"
+//
+// @public (undocumented)
+export class LegacyClusterClient implements ILegacyClusterClient {
+    constructor(config: LegacyElasticsearchClientConfig, log: Logger, getAuditorFactory: () => AuditorFactory, getAuthHeaders?: GetAuthHeaders);
+    asScoped(request?: ScopeableRequest): ILegacyScopedClusterClient;
+    callAsInternalUser: LegacyAPICaller;
+    close(): void;
+    }
+
 // @internal @deprecated
 export interface LegacyConfig {
     // (undocumented)
@@ -1259,6 +1280,28 @@ export interface LegacyConfig {
     //
     // (undocumented)
     set(config: LegacyVars): void;
+}
+
+// @public (undocumented)
+export type LegacyElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' | 'plugins'> & Pick<ElasticsearchConfig, 'apiVersion' | 'customHeaders' | 'logQueries' | 'requestHeadersWhitelist' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'hosts' | 'username' | 'password'> & {
+    pingTimeout?: ElasticsearchConfig['pingTimeout'] | ConfigOptions['pingTimeout'];
+    requestTimeout?: ElasticsearchConfig['requestTimeout'] | ConfigOptions['requestTimeout'];
+    sniffInterval?: ElasticsearchConfig['sniffInterval'] | ConfigOptions['sniffInterval'];
+    ssl?: Partial<ElasticsearchConfig['ssl']>;
+};
+
+// @public (undocumented)
+export interface LegacyElasticsearchError extends Boom {
+    // (undocumented)
+    [code]?: string;
+}
+
+// @public
+export class LegacyElasticsearchErrorHelpers {
+    // (undocumented)
+    static decorateNotAuthorizedError(error: Error, reason?: string): LegacyElasticsearchError;
+    // (undocumented)
+    static isNotAuthorizedError(error: any): error is LegacyElasticsearchError;
 }
 
 // Warning: (ae-forgotten-export) The symbol "ILegacyInternals" needs to be exported by the entry point index.d.ts
@@ -1279,6 +1322,15 @@ export class LegacyInternals implements ILegacyInternals {
 // @public @deprecated (undocumented)
 export interface LegacyRequest extends Request {
 }
+
+// Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "kibana" does not have an export "IScopedClusterClient"
+//
+// @public (undocumented)
+export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
+    constructor(internalAPICaller: LegacyAPICaller, scopedAPICaller: LegacyAPICaller, headers?: Headers | undefined, auditor?: Auditor | undefined);
+    callAsCurrentUser(endpoint: string, clientParams?: Record<string, any>, options?: LegacyCallAPIOptions): Promise<any>;
+    callAsInternalUser(endpoint: string, clientParams?: Record<string, any>, options?: LegacyCallAPIOptions): Promise<any>;
+    }
 
 // Warning: (ae-forgotten-export) The symbol "LegacyPlugins" needs to be exported by the entry point index.d.ts
 //
@@ -1652,13 +1704,6 @@ export interface PluginsServiceStart {
 // @public
 export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
 
-// Warning: (ae-forgotten-export) The symbol "RecursiveReadonlyArray" needs to be exported by the entry point index.d.ts
-//
-// @public (undocumented)
-export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T extends any[] ? RecursiveReadonlyArray<T[number]> : T extends object ? Readonly<{
-    [K in keyof T]: RecursiveReadonly<T[K]>;
-}> : T;
-
 // @public
 export type RedirectResponseOptions = HttpResponseOptions & {
     headers: {
@@ -1679,12 +1724,13 @@ export interface RequestHandlerContext {
         };
         elasticsearch: {
             legacy: {
-                client: IScopedClusterClient;
+                client: ILegacyScopedClusterClient;
             };
         };
         uiSettings: {
             client: IUiSettingsClient;
         };
+        auditor: Auditor;
     };
 }
 
@@ -1975,6 +2021,8 @@ export interface SavedObjectsClientWrapperOptions {
 // @public
 export interface SavedObjectsComplexFieldMapping {
     // (undocumented)
+    doc_values?: boolean;
+    // (undocumented)
     properties: SavedObjectsMappingProperties;
     // (undocumented)
     type?: string;
@@ -1982,6 +2030,8 @@ export interface SavedObjectsComplexFieldMapping {
 
 // @public
 export interface SavedObjectsCoreFieldMapping {
+    // (undocumented)
+    doc_values?: boolean;
     // (undocumented)
     enabled?: boolean;
     // (undocumented)
@@ -2323,7 +2373,7 @@ export class SavedObjectsRepository {
     // Warning: (ae-forgotten-export) The symbol "KibanaMigrator" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    static createRepository(migrator: KibanaMigrator, typeRegistry: SavedObjectTypeRegistry, indexName: string, callCluster: APICaller, includedHiddenTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
+    static createRepository(migrator: KibanaMigrator, typeRegistry: SavedObjectTypeRegistry, indexName: string, callCluster: LegacyAPICaller, includedHiddenTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
     deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<{}>;
@@ -2464,6 +2514,7 @@ export class SavedObjectTypeRegistry {
     getImportableAndExportableTypes(): SavedObjectsType[];
     getIndex(type: string): string | undefined;
     getType(type: string): SavedObjectsType | undefined;
+    getVisibleTypes(): SavedObjectsType[];
     isHidden(type: string): boolean;
     isImportableAndExportable(type: string): boolean;
     isMultiNamespace(type: string): boolean;
@@ -2477,13 +2528,6 @@ export type SavedObjectUnsanitizedDoc<T = unknown> = SavedObjectDoc<T> & Partial
 
 // @public
 export type ScopeableRequest = KibanaRequest | LegacyRequest | FakeRequest;
-
-// @public
-export class ScopedClusterClient implements IScopedClusterClient {
-    constructor(internalAPICaller: APICaller, scopedAPICaller: APICaller, headers?: Headers | undefined);
-    callAsCurrentUser(endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions): Promise<any>;
-    callAsInternalUser(endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions): Promise<any>;
-    }
 
 // @public
 export interface ServiceStatus<Meta extends Record<string, any> | unknown = unknown> {
@@ -2546,7 +2590,7 @@ export interface SessionStorageFactory<T> {
 }
 
 // @public (undocumented)
-export type SharedGlobalConfig = RecursiveReadonly_2<{
+export type SharedGlobalConfig = RecursiveReadonly<{
     kibana: Pick<KibanaConfigType_2, typeof SharedGlobalConfigKeys.kibana[number]>;
     elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;
     path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;

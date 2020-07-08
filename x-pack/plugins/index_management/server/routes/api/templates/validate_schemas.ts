@@ -11,6 +11,7 @@ export const templateSchema = schema.object({
   indexPatterns: schema.arrayOf(schema.string()),
   version: schema.maybe(schema.number()),
   order: schema.maybe(schema.number()),
+  priority: schema.maybe(schema.number()),
   template: schema.maybe(
     schema.object({
       settings: schema.maybe(schema.object({}, { unknowns: 'allow' })),
@@ -18,6 +19,8 @@ export const templateSchema = schema.object({
       mappings: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     })
   ),
+  composedOf: schema.maybe(schema.arrayOf(schema.string())),
+  _meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   ilmPolicy: schema.maybe(
     schema.object({
       name: schema.maybe(schema.string()),
@@ -26,6 +29,8 @@ export const templateSchema = schema.object({
   ),
   _kbnMeta: schema.object({
     isManaged: schema.maybe(schema.boolean()),
+    isCloudManaged: schema.maybe(schema.boolean()),
+    hasDatastream: schema.maybe(schema.boolean()),
     isLegacy: schema.maybe(schema.boolean()),
   }),
 });

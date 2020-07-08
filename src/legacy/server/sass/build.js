@@ -29,19 +29,15 @@ import isPathInside from 'is-path-inside';
 import { PUBLIC_PATH_PLACEHOLDER } from '../../../optimize/public_path_placeholder';
 
 const renderSass = promisify(sass.render);
+const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
 const access = promisify(fs.access);
 const copyFile = promisify(fs.copyFile);
 const mkdirAsync = promisify(fs.mkdir);
 
 const UI_ASSETS_DIR = resolve(__dirname, '../../../core/server/core_app/assets');
-const DARK_THEME_IMPORTER = (url) => {
-  if (url.includes('eui_colors_light')) {
-    return { file: url.replace('eui_colors_light', 'eui_colors_dark') };
-  }
-
-  return { file: url };
-};
+const LIGHT_GLOBALS_PATH = resolve(__dirname, '../../../legacy/ui/public/styles/_globals_v7light');
+const DARK_GLOBALS_PATH = resolve(__dirname, '../../../legacy/ui/public/styles/_globals_v7dark');
 
 const makeAsset = (request, { path, root, boundry, copyRoot, urlRoot }) => {
   const relativePath = relative(root, path);
@@ -84,10 +80,16 @@ export class Build {
    */
 
   async build() {
+    const scss = await readFile(this.sourcePath);
+    const relativeGlobalsPath =
+      this.theme === 'dark'
+        ? relative(this.sourceDir, DARK_GLOBALS_PATH)
+        : relative(this.sourceDir, LIGHT_GLOBALS_PATH);
+
     const rendered = await renderSass({
       file: this.sourcePath,
+      data: `@import '${relativeGlobalsPath}';\n${scss}`,
       outFile: this.targetPath,
-      importer: this.theme === 'dark' ? DARK_THEME_IMPORTER : undefined,
       sourceMap: true,
       outputStyle: 'nested',
       sourceMapEmbed: true,

@@ -14,7 +14,7 @@ import React, {
   useEffect,
 } from 'react';
 import { useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
 import { EuiPanel } from '@elastic/eui';
@@ -22,7 +22,7 @@ import { displayNameRecord } from './process_event_dot';
 import * as selectors from '../store/selectors';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as event from '../../../common/endpoint/models/event';
-import { ResolverEvent } from '../../../common/endpoint/types';
+import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
 import { SideEffectContext } from './side_effect_context';
 import { ProcessEventListNarrowedByType } from './panels/panel_content_related_list';
 import { EventCountsForProcess } from './panels/panel_content_related_counts';
@@ -48,7 +48,7 @@ import { CrumbInfo } from './panels/panel_content_utilities';
  */
 const PanelContent = memo(function PanelContent() {
   const history = useHistory();
-  const urlSearch = history.location.search;
+  const urlSearch = useLocation().search;
   const dispatch = useResolverDispatch();
 
   const { timestamp } = useContext(SideEffectContext);
@@ -141,15 +141,10 @@ const PanelContent = memo(function PanelContent() {
     [history, urlSearch]
   );
 
-  // GO JONNY GO
   const relatedEventStats = useSelector(selectors.relatedEventsStats);
   const { crumbId, crumbEvent } = queryParams;
-  const relatedStatsForIdFromParams = useMemo(() => {
-    if (idFromParams) {
-      return relatedEventStats.get(idFromParams);
-    }
-    return undefined;
-  }, [relatedEventStats, idFromParams]);
+  const relatedStatsForIdFromParams: ResolverNodeStats | undefined =
+    idFromParams && relatedEventStats ? relatedEventStats.get(idFromParams) : undefined;
 
   /**
    * Determine which set of breadcrumbs to display based on the query parameters

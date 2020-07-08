@@ -10,18 +10,12 @@ const initContext = coreMock.createPluginInitializerContext();
 const coreSetup = coreMock.createSetup();
 const coreStart = coreMock.createStart();
 const typeRegistry = savedObjectsServiceMock.createTypeRegistryMock();
-typeRegistry.getAllTypes.mockReturnValue([
+typeRegistry.getVisibleTypes.mockReturnValue([
   {
     name: 'foo',
     hidden: false,
     mappings: { properties: {} },
     namespaceType: 'single' as 'single',
-  },
-  {
-    name: 'bar',
-    hidden: true,
-    mappings: { properties: {} },
-    namespaceType: 'agnostic' as 'agnostic',
   },
 ]);
 coreStart.savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
