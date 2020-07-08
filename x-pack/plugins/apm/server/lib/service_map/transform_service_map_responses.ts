@@ -117,24 +117,21 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
       serviceName = node[SERVICE_NAME];
     }
 
-    const matchedServiceNodes = serviceNodes.filter(
-      (serviceNode) => serviceNode[SERVICE_NAME] === serviceName
-    );
+    const matchedServiceNodes = serviceNodes
+      .filter((serviceNode) => serviceNode[SERVICE_NAME] === serviceName)
+      .map((serviceNode) => pickBy(serviceNode, identity));
+    const mergedServiceNode = Object.assign({}, ...matchedServiceNodes);
 
     const serviceAnomalyStats = getServiceAnomalyStats(anomalies, serviceName);
 
     if (matchedServiceNodes.length) {
       return {
         ...map,
-        [node.id]: Object.assign(
-          {
-            id: matchedServiceNodes[0][SERVICE_NAME],
-          },
-          ...matchedServiceNodes.map((serviceNode) =>
-            pickBy(serviceNode, identity)
-          ),
-          serviceAnomalyStats ? { serviceAnomalyStats } : null
-        ),
+        [node.id]: {
+          id: matchedServiceNodes[0][SERVICE_NAME],
+          ...mergedServiceNode,
+          ...(serviceAnomalyStats ? { serviceAnomalyStats } : null),
+        },
       };
     }
 
