@@ -68,18 +68,13 @@ function getServiceAnomalyStats(
   serviceName?: string
 ): ServiceAnomalyStats | undefined {
   if (anomalies.mlJobIds.length === 0 || !serviceName) {
+    // Don't return data when there are no anomaly jobs
     return;
   }
-
-  const matchedAnomalyData = anomalies.serviceAnomalies.find(
-    (anomalyData) => anomalyData.serviceName === serviceName
-  );
-  if (matchedAnomalyData) {
-    return matchedAnomalyData.serviceAnomalyStats;
-  }
-
   // If there is no anomaly data, return a job_id to link to a running job
-  return { jobId: anomalies.mlJobIds[0] };
+  return (
+    anomalies.serviceAnomalies[serviceName] || { jobId: anomalies.mlJobIds[0] }
+  );
 }
 
 export type ServiceMapResponse = ConnectionsResponse & {

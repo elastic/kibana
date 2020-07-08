@@ -11,9 +11,9 @@ import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
-import { ServiceAnomalies } from '../../../common/anomaly_detection';
+import { ServiceAnomalyStats } from '../../../common/anomaly_detection';
 
-export const DEFAULT_ANOMALIES = { mlJobIds: [], serviceAnomalies: [] };
+export const DEFAULT_ANOMALIES = { mlJobIds: [], serviceAnomalies: {} };
 
 export type ServiceAnomaliesResponse = PromiseReturnType<
   typeof getServiceAnomalies
@@ -125,21 +125,22 @@ interface ServiceAnomaliesAggResponse {
 
 function transformResponseToServiceAnomalies(
   response: ServiceAnomaliesAggResponse
-): ServiceAnomalies[] {
-  const services = response.aggregations.services.buckets.map(
-    ({ key: serviceName, top_score: topScoreAgg }) => {
+): Record<string, ServiceAnomalyStats> {
+  const serviceAnomaliesMap = response.aggregations.services.buckets.reduce(
+    (statsByServiceName, { key: serviceName, top_score: topScoreAgg }) => {
       return {
-        serviceName,
-        serviceAnomalyStats: {
+        ...statsByServiceName,
+        [serviceName]: {
           transactionType: topScoreAgg.hits.hits[0]?._source?.by_field_value,
           anomalyScore: topScoreAgg.hits.hits[0]?.sort?.[0],
           actualValue: topScoreAgg.hits.hits[0]?._source?.actual?.[0],
           jobId: topScoreAgg.hits.hits[0]?._source?.job_id,
         },
       };
-    }
+    },
+    {}
   );
-  return services;
+  return serviceAnomaliesMap;
 }
 
 export async function getMLJobIds(

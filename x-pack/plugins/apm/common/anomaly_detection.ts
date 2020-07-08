@@ -10,8 +10,3 @@ export interface ServiceAnomalyStats {
   actualValue?: number;
   jobId?: string;
 }
-
-export interface ServiceAnomalies {
-  serviceName: string;
-  serviceAnomalyStats: ServiceAnomalyStats;
-}
