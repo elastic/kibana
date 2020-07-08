@@ -14,19 +14,20 @@ import { Agent, AgentStatus } from '../types';
 export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentStatus {
   const { last_checkin: lastCheckIn } = agent;
 
+  if (!agent.active) {
+    return 'inactive';
+  }
   if (!agent.last_checkin) {
     return 'enrolling';
+  }
+  if (agent.unenrollment_started_at && !agent.unenrolled_at) {
+    return 'unenrolling';
   }
 
   const msLastCheckIn = new Date(lastCheckIn || 0).getTime();
   const msSinceLastCheckIn = new Date().getTime() - msLastCheckIn;
   const intervalsSinceLastCheckIn = Math.floor(msSinceLastCheckIn / AGENT_POLLING_THRESHOLD_MS);
-  if (!agent.active) {
-    return 'inactive';
-  }
-  if (agent.unenrollment_started_at && !agent.unenrolled_at) {
-    return 'unenrolling';
-  }
+
   if (agent.last_checkin_status === 'error') {
     return 'error';
   }
@@ -41,20 +42,15 @@ export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentSta
 }
 
 export function buildKueryForOnlineAgents() {
-  return `not( fleet-agents.last_checkin: * ) or (${AGENT_SAVED_OBJECT_TYPE}.last_checkin >= now-${
-    (4 * AGENT_POLLING_THRESHOLD_MS) / 1000
-  }s)`;
-}
-
-export function buildKueryForOfflineAgents() {
-  return `${AGENT_SAVED_OBJECT_TYPE}.type:${AGENT_TYPE_PERMANENT} AND ${AGENT_SAVED_OBJECT_TYPE}.last_checkin < now-${
-    (4 * AGENT_POLLING_THRESHOLD_MS) / 1000
-  }s`;
+  return `not (${buildKueryForOfflineAgents()}) AND not (${buildKueryForErrorAgents()})`;
 }
 
 export function buildKueryForErrorAgents() {
-  // TODO fix
-  return `${AGENT_SAVED_OBJECT_TYPE}.type:notexist AND ${AGENT_SAVED_OBJECT_TYPE}.last_checkin < now-${
-    (10000 * AGENT_POLLING_THRESHOLD_MS) / 1000
-  }s`;
+  return `( ${AGENT_SAVED_OBJECT_TYPE}.last_checkin_status:error or ${AGENT_SAVED_OBJECT_TYPE}.last_checkin_status:degraded )`;
+}
+
+export function buildKueryForOfflineAgents() {
+  return `((${AGENT_SAVED_OBJECT_TYPE}.type:${AGENT_TYPE_PERMANENT} AND ${AGENT_SAVED_OBJECT_TYPE}.last_checkin < now-${
+    (4 * AGENT_POLLING_THRESHOLD_MS) / 1000
+  }s) AND not ( ${buildKueryForErrorAgents()} ))`;
 }
