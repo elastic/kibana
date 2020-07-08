@@ -11,7 +11,7 @@ import { toExpression, safeElementFromExpression } from '@kbn/interpreter/common
 import { createThunk } from '../../lib/create_thunk';
 import {
   getPages,
-  getWorkpadVariables,
+  getWorkpadVariablesAsObject,
   getNodeById,
   getNodes,
   getSelectedPageIndex,
@@ -102,8 +102,7 @@ export const fetchContext = createThunk(
       return i < index;
     });
 
-    const workpadVars = getWorkpadVariables(getState());
-    const variables = workpadVars.reduce((vars, v) => ({ ...vars, [v.name]: v.value }), {});
+    const variables = getWorkpadVariablesAsObject(getState());
 
     // get context data from a partial AST
     return interpretAst(
@@ -124,8 +123,6 @@ export const fetchContext = createThunk(
 );
 
 const fetchRenderableWithContextFn = ({ dispatch, getState }, element, ast, context) => {
-  const workpadVars = getWorkpadVariables(getState());
-
   const argumentPath = [element.id, 'expressionRenderable'];
   dispatch(
     args.setLoading({
@@ -139,7 +136,7 @@ const fetchRenderableWithContextFn = ({ dispatch, getState }, element, ast, cont
       value: renderable,
     });
 
-  const variables = workpadVars.reduce((vars, v) => ({ ...vars, [v.name]: v.value }), {});
+  const variables = getWorkpadVariablesAsObject(getState());
 
   return runInterpreter(ast, context, variables, { castToRender: true })
     .then((renderable) => {
@@ -165,7 +162,6 @@ export const fetchRenderable = createThunk('fetchRenderable', ({ dispatch }, ele
 export const fetchAllRenderables = createThunk(
   'fetchAllRenderables',
   ({ dispatch, getState }, { onlyActivePage = false } = {}) => {
-    const workpadVars = getWorkpadVariables(getState());
     const workpadPages = getPages(getState());
     const currentPageIndex = getSelectedPageIndex(getState());
 
@@ -186,7 +182,7 @@ export const fetchAllRenderables = createThunk(
         const ast = element.ast || safeElementFromExpression(element.expression);
         const argumentPath = [element.id, 'expressionRenderable'];
 
-        const variables = workpadVars.reduce((vars, v) => ({ ...vars, [v.name]: v.value }), {});
+        const variables = getWorkpadVariablesAsObject(getState());
 
         return runInterpreter(ast, null, variables, { castToRender: true })
           .then((renderable) => ({ path: argumentPath, value: renderable }))

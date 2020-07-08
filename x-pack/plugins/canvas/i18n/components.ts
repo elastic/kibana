@@ -1027,6 +1027,16 @@ export const ComponentStrings = {
         defaultMessage: 'Value',
       }),
   },
+  VarConfigVarValueField: {
+    getFalseOption: () =>
+      i18n.translate('xpack.canvas.varConfigVarValueField.falseOption', {
+        defaultMessage: 'False',
+      }),
+    getTrueOption: () =>
+      i18n.translate('xpack.canvas.varConfigVarValueField.trueOption', {
+        defaultMessage: 'True',
+      }),
+  },
   WorkpadConfig: {
     getApplyStylesheetButtonLabel: () =>
       i18n.translate('xpack.canvas.workpadConfig.applyStylesheetButtonLabel', {

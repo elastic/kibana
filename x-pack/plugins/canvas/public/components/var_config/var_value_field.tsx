@@ -10,6 +10,9 @@ import { htmlIdGenerator } from '@elastic/eui';
 
 import { CanvasVariable } from '../../../types';
 
+import { ComponentStrings } from '../../../i18n';
+const { VarConfigVarValueField: strings } = ComponentStrings;
+
 interface Props {
   type: CanvasVariable['type'];
   value: CanvasVariable['value'];
@@ -22,11 +25,11 @@ export const VarValueField: FC<Props> = ({ type, value, onChange }) => {
   const options = [
     {
       id: `${idPrefix}-true`,
-      label: 'True',
+      label: strings.getTrueOption(),
     },
     {
       id: `${idPrefix}-false`,
-      label: 'False',
+      label: strings.getFalseOption(),
     },
   ];
 
