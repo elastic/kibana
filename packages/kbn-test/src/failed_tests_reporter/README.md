@@ -15,7 +15,7 @@ This copies a script to download the reports, which you should execute in the ro
 Next, run the CLI in `--no-github-update` mode so that it doesn't actually communicate with Github and `--no-report-update` to prevent the script from mutating the reports on disk and instead log the updated report.
 
 ```sh
-node scripts/report_failed_tests.js --verbose --no-github-update --no-report-update target/downloaded_junit/parallel/*/kibana/target/junit/**/*.xml
+node scripts/report_failed_tests.js --verbose --no-github-update --no-report-update target/downloaded_junit/**/*.xml
 ```
 
 Unless you specify the `GITHUB_TOKEN` environment variable requests to read existing issues will use anonymous access which is limited to 60 requests per hour.
