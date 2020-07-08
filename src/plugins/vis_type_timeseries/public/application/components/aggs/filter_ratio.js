@@ -38,6 +38,14 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
 import { METRIC_TYPES } from '../../../../../../plugins/vis_type_timeseries/common/metric_types';
 
+const isFieldHistogram = (fields, indexPattern, field) => {
+  const indexFields = fields[indexPattern];
+  if (!indexFields) return false;
+  const fieldObject = indexFields.find((f) => f.name === field);
+  if (!fieldObject) return false;
+  return fieldObject.type === KBN_FIELD_TYPES.HISTOGRAM;
+};
+
 export const FilterRatioAgg = (props) => {
   const { series, fields, panel } = props;
 
@@ -131,7 +139,9 @@ export const FilterRatioAgg = (props) => {
           <AggSelect
             id={htmlId('metric')}
             siblings={props.siblings}
-            panelType="metrics"
+            panelType={
+              isFieldHistogram(fields, indexPattern, model.field) ? 'histogram' : 'filter_ratio'
+            }
             value={model.metric_agg}
             onChange={handleSelectChange('metric_agg')}
           />

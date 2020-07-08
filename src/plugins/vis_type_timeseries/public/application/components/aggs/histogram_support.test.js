@@ -66,6 +66,7 @@ describe('Histogram Types', () => {
       );
     };
     shouldHaveHistogramSupport('avg');
+    shouldHaveHistogramSupport('sum');
     shouldHaveHistogramSupport('value_count');
     shouldHaveHistogramSupport('percentile');
     shouldHaveHistogramSupport('percentile_rank');
@@ -84,7 +85,6 @@ describe('Histogram Types', () => {
     shouldNotHaveHistogramSupport('cardinality');
     shouldNotHaveHistogramSupport('max');
     shouldNotHaveHistogramSupport('min');
-    shouldNotHaveHistogramSupport('sum');
     shouldNotHaveHistogramSupport('variance');
     shouldNotHaveHistogramSupport('sum_of_squares');
     shouldNotHaveHistogramSupport('std_deviation');

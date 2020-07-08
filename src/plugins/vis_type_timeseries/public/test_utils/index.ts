@@ -36,6 +36,7 @@ export const FIELDS = {
   ],
 };
 export const METRIC = {
+  id: 'sample_metric',
   type: 'avg',
   field: 'system.cpu.user.pct',
 };

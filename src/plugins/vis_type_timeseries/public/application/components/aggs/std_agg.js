@@ -42,6 +42,7 @@ function getSupportedFieldsByMetricType(type) {
       return Object.values(KBN_FIELD_TYPES).filter((type) => type !== KBN_FIELD_TYPES.HISTOGRAM);
     case METRIC_TYPES.VALUE_COUNT:
     case METRIC_TYPES.AVERAGE:
+    case METRIC_TYPES.SUM:
       return [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.HISTOGRAM];
     default:
       return [KBN_FIELD_TYPES.NUMBER];

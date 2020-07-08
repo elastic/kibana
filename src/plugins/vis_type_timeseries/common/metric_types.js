@@ -29,6 +29,7 @@ export const METRIC_TYPES = {
   CARDINALITY: 'cardinality',
   VALUE_COUNT: 'value_count',
   AVERAGE: 'avg',
+  SUM: 'sum',
 };
 
 export const EXTENDED_STATS_TYPES = [
