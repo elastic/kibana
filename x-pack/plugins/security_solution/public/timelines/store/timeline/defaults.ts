@@ -43,8 +43,8 @@ export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filter
   pinnedEventIds: {},
   pinnedEventsSaveObject: {},
   dateRange: {
-    start: '0',
-    end: '0',
+    start: '2020-07-07T08:20:18.966Z',
+    end: '2020-07-08T08:20:18.966Z',
   },
   savedObjectId: null,
   selectedEventIds: {},

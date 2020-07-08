@@ -13,6 +13,7 @@ import { Anomaly } from '../types';
 
 jest.mock('../../../lib/kibana');
 
+const startDate: string = '2020-07-07T08:20:18.966Z';
 const endDate: string = '3000-01-01T00:00:00.000Z';
 
 describe('create_description_list', () => {
@@ -27,7 +28,7 @@ describe('create_description_list', () => {
       <EuiDescriptionList
         listItems={createDescriptionList(
           mockAnomalies.anomalies[0],
-          '0',
+          startDate,
           endDate,
           'hours',
           narrowDateRange
@@ -42,7 +43,7 @@ describe('create_description_list', () => {
       <EuiDescriptionList
         listItems={createDescriptionList(
           mockAnomalies.anomalies[0],
-          '0',
+          startDate,
           endDate,
           'hours',
           narrowDateRange
@@ -63,7 +64,7 @@ describe('create_description_list', () => {
       <EuiDescriptionList
         listItems={createDescriptionList(
           mockAnomalies.anomalies[0],
-          '0',
+          startDate,
           endDate,
           'hours',
           narrowDateRange
@@ -123,7 +124,7 @@ describe('create_description_list', () => {
       <EuiDescriptionList
         listItems={createDescriptionList(
           mockAnomalies.anomalies[0],
-          '0',
+          startDate,
           endDate,
           'hours',
           narrowDateRange

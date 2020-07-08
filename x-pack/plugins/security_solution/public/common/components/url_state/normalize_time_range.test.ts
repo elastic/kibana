@@ -25,8 +25,8 @@ describe('#normalizeTimeRange', () => {
     if (isAbsoluteTimeRange(dateTimeRange)) {
       const expected: AbsoluteTimeRange = {
         kind: 'absolute',
-        from: '0',
-        to: '0',
+        from: '2020-07-07T08:20:18.966Z',
+        to: '2020-07-08T08:20:18.966Z',
         fromStr: undefined,
         toStr: undefined,
       };
@@ -47,8 +47,8 @@ describe('#normalizeTimeRange', () => {
     if (isAbsoluteTimeRange(dateTimeRange)) {
       const expected: AbsoluteTimeRange = {
         kind: 'absolute',
-        from: '0',
-        to: '0',
+        from: '2020-07-07T08:20:18.966Z',
+        to: '2020-07-08T08:20:18.966Z',
         fromStr: undefined,
         toStr: undefined,
       };
@@ -165,8 +165,8 @@ describe('#normalizeTimeRange', () => {
     if (isRelativeTimeRange(dateTimeRange)) {
       const expected: RelativeTimeRange = {
         kind: 'relative',
-        from: '0',
-        to: '0',
+        from: '2020-07-07T08:20:18.966Z',
+        to: '2020-07-08T08:20:18.966Z',
         fromStr: '',
         toStr: '',
       };
@@ -187,8 +187,8 @@ describe('#normalizeTimeRange', () => {
     if (isRelativeTimeRange(dateTimeRange)) {
       const expected: RelativeTimeRange = {
         kind: 'relative',
-        from: '0',
-        to: '0',
+        from: '2020-07-07T08:20:18.966Z',
+        to: '2020-07-08T08:20:18.966Z',
         fromStr: '',
         toStr: '',
       };
