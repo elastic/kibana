@@ -11,6 +11,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
+import '../../../common/mock/match_media';
 import { useQuery } from '../../../common/containers/matrix_histogram';
 import { wait } from '../../../common/lib/helpers';
 import { mockIndexPattern, TestProviders } from '../../../common/mock';

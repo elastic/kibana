@@ -13,6 +13,7 @@ import { timelineQuery } from '../../containers/index.gql_query';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { Direction } from '../../../graphql/types';
 import { defaultHeaders, mockTimelineData, mockIndexPattern } from '../../../common/mock';
+import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock/test_providers';
 
 import {

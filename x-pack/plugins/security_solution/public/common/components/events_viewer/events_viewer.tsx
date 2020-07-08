@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { getOr, isEmpty, union } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
 import { BrowserFields } from '../../containers/source';
@@ -34,11 +34,38 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../store';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
+import { ExitFullScreen } from '../exit_full_screen';
+import { useFullScreen } from '../../containers/use_full_screen';
+import { TimelineId } from '../../../../common/types/timeline';
+
+export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
+const UTILITY_BAR_HEIGHT = 19; // px
+const COMPACT_HEADER_HEIGHT = EVENTS_VIEWER_HEADER_HEIGHT - UTILITY_BAR_HEIGHT; // px
+
+const UtilityBar = styled.div`
+  height: ${UTILITY_BAR_HEIGHT}px;
+`;
+
+const TitleText = styled.span`
+  margin-right: 12px;
+`;
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 500;
 
-const StyledEuiPanel = styled(EuiPanel)`
+const StyledEuiPanel = styled(EuiPanel)<{ $isFullScreen: boolean }>`
+  ${({ $isFullScreen }) =>
+    $isFullScreen &&
+    css`
+      border: 0;
+      box-shadow: none;
+      padding-top: 0;
+      padding-bottom: 0;
+    `}
   max-width: 100%;
+`;
+
+const TitleFlexGroup = styled(EuiFlexGroup)`
+  margin-top: 8px;
 `;
 
 const EventsContainerLoading = styled.div`
@@ -94,6 +121,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   utilityBar,
   graphEventId,
 }) => {
+  const { globalFullScreen } = useFullScreen();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const kibana = useKibana();
   const [isQueryLoading, setIsQueryLoading] = useState(false);
@@ -109,6 +137,24 @@ const EventsViewerComponent: React.FC<Props> = ({
     getManageTimelineById,
     id,
   ]);
+
+  const justTitle = useMemo(() => <TitleText data-test-subj="just-title">{title}</TitleText>, [
+    title,
+  ]);
+
+  const titleWithExitFullScreen = useMemo(
+    () => (
+      <TitleFlexGroup alignItems="center" data-test-subj="title-flex-group" gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <TitleText data-test-subj="title-with-exit-full-screen">{title}</TitleText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ExitFullScreen />
+        </EuiFlexItem>
+      </TitleFlexGroup>
+    ),
+    [title]
+  );
 
   const combinedQueries = combineQueries({
     config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
@@ -139,7 +185,10 @@ const EventsViewerComponent: React.FC<Props> = ({
   );
 
   return (
-    <StyledEuiPanel data-test-subj="events-viewer-panel">
+    <StyledEuiPanel
+      data-test-subj="events-viewer-panel"
+      $isFullScreen={globalFullScreen && id !== TimelineId.active}
+    >
       {combinedQueries != null ? (
         <EventDetailsWidthProvider>
           <TimelineQuery
@@ -171,10 +220,17 @@ const EventsViewerComponent: React.FC<Props> = ({
 
               return (
                 <>
-                  <HeaderSection id={id} subtitle={utilityBar ? undefined : subtitle} title={title}>
+                  <HeaderSection
+                    id={id}
+                    height={headerFilterGroup ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT}
+                    subtitle={utilityBar ? undefined : subtitle}
+                    title={inspect ? justTitle : titleWithExitFullScreen}
+                  >
                     {headerFilterGroup}
                   </HeaderSection>
-                  {utilityBar?.(refetch, totalCountMinusDeleted)}
+                  {utilityBar && (
+                    <UtilityBar>{utilityBar?.(refetch, totalCountMinusDeleted)}</UtilityBar>
+                  )}
                   <EventsContainerLoading data-test-subj={`events-container-loading-${loading}`}>
                     <TimelineRefetch
                       id={id}

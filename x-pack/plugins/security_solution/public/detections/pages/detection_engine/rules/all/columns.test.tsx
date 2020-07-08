@@ -11,6 +11,7 @@ const history = createMemoryHistory();
 
 import { mockRule } from './__mocks__/mock';
 import { getActions } from './columns';
+import '../../../../../common/mock/match_media';
 
 jest.mock('./actions', () => ({
   duplicateRulesAction: jest.fn(),

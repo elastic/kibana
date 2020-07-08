@@ -83,6 +83,7 @@ export interface InputsRange {
   query: Query;
   filters: Filter[];
   savedQuery?: SavedQuery;
+  fullScreen?: boolean;
 }
 
 export interface LinkTo {

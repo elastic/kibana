@@ -61,6 +61,7 @@ interface OwnProps {
   timelineId: TimelineIdLiteral;
   canUserCRUD: boolean;
   defaultFilters?: Filter[];
+  eventsViewerBodyHeight?: number;
   hasIndexWrite: boolean;
   from: number;
   loading: boolean;
@@ -84,6 +85,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   clearEventsLoading,
   clearSelected,
   defaultFilters,
+  eventsViewerBodyHeight,
   from,
   globalFilters,
   globalQuery,
@@ -428,6 +430,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         defaultModel={alertsDefaultModel}
         end={to}
         headerFilterGroup={headerFilterGroup}
+        height={eventsViewerBodyHeight}
         id={timelineId}
         start={from}
         utilityBar={utilityBarCallback}

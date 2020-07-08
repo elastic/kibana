@@ -277,6 +277,7 @@ const StatefulEventComponent: React.FC<Props> = ({
                         event={detailsData || emptyDetails}
                         forceExpand={!!expanded[event._id] && !loading}
                         id={event._id}
+                        onEventToggled={onToggleExpanded}
                         onUpdateColumns={onUpdateColumns}
                         timelineId={timelineId}
                         toggleColumn={toggleColumn}

@@ -8,6 +8,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { getRenderedFieldValue, PointToolTipContentComponent } from './point_tool_tip_content';
 import { TestProviders } from '../../../../common/mock';
+import '../../../../common/mock/match_media';
 import { getEmptyStringTag } from '../../../../common/components/empty_value';
 import { HostDetailsLink, IPDetailsLink } from '../../../../common/components/links';
 import { FlowTarget } from '../../../../graphql/types';

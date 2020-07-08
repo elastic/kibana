@@ -7,6 +7,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
+import '../../../common/mock/match_media';
 import { AlertsHistogramPanel } from './index';
 
 jest.mock('react-router-dom', () => {

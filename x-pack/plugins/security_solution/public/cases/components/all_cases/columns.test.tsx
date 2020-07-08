@@ -9,6 +9,7 @@ import { mount } from 'enzyme';
 
 import { ExternalServiceColumn } from './columns';
 
+import '../../../common/mock/match_media';
 import { useGetCasesMockState } from '../../containers/mock';
 
 describe('ExternalServiceColumn ', () => {

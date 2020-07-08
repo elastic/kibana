@@ -28,6 +28,7 @@ export interface OwnProps {
   defaultIndices?: string[];
   defaultModel: SubsetTimelineModel;
   end: number;
+  height?: number;
   id: string;
   start: number;
   headerFilterGroup?: React.ReactNode;
@@ -48,6 +49,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   excludedRowRendererIds,
   filters,
   headerFilterGroup,
+  height,
   id,
   isLive,
   itemsPerPage,
@@ -126,6 +128,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         end={end}
         filters={globalFilters}
         headerFilterGroup={headerFilterGroup}
+        height={height}
         indexPattern={indexPatterns}
         isLive={isLive}
         itemsPerPage={itemsPerPage!}
@@ -210,6 +213,7 @@ export const StatefulEventsViewer = connector(
       prevProps.deletedEventIds === nextProps.deletedEventIds &&
       prevProps.end === nextProps.end &&
       deepEqual(prevProps.filters, nextProps.filters) &&
+      prevProps.height === nextProps.height &&
       prevProps.isLive === nextProps.isLive &&
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&

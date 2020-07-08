@@ -9,6 +9,7 @@ import { shallow } from 'enzyme';
 
 import { AlertsHistogram } from './alerts_histogram';
 
+import '../../../common/mock/match_media';
 jest.mock('../../../common/lib/kibana');
 
 describe('AlertsHistogram', () => {

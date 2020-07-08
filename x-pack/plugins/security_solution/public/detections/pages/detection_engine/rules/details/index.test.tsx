@@ -8,8 +8,16 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import '../../../../../common/mock/match_media';
-import { TestProviders } from '../../../../../common/mock';
+import {
+  apolloClientObservable,
+  createSecuritySolutionStorageMock,
+  kibanaObservable,
+  mockGlobalState,
+  TestProviders,
+  SUB_PLUGINS_REDUCER,
+} from '../../../../../common/mock';
 import { RuleDetailsPageComponent } from './index';
+import { createStore, State } from '../../../../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../../../../common/store/inputs/actions';
 import { useUserInfo } from '../../../../components/user_info';
 import { useWithSource } from '../../../../../common/containers/source';
@@ -35,6 +43,18 @@ jest.mock('react-router-dom', () => {
   };
 });
 
+const state: State = {
+  ...mockGlobalState,
+};
+const { storage } = createSecuritySolutionStorageMock();
+const store = createStore(
+  state,
+  SUB_PLUGINS_REDUCER,
+  apolloClientObservable,
+  kibanaObservable,
+  storage
+);
+
 describe('RuleDetailsPageComponent', () => {
   beforeAll(() => {
     (useUserInfo as jest.Mock).mockReturnValue({});
@@ -47,11 +67,13 @@ describe('RuleDetailsPageComponent', () => {
 
   it('renders correctly', () => {
     const wrapper = shallow(
-      <RuleDetailsPageComponent
-        query={{ query: '', language: 'language' }}
-        filters={[]}
-        setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-      />,
+      <TestProviders store={store}>
+        <RuleDetailsPageComponent
+          query={{ query: '', language: 'language' }}
+          filters={[]}
+          setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+        />
+      </TestProviders>,
       {
         wrappingComponent: TestProviders,
       }
