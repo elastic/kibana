@@ -1,9 +1,12 @@
 /*
- * Elasticsearch B.V licenses this file to you under the MIT License.
+ * This file is forked from the lodash project (https://lodash.com/),
+ * and may include modifications made by Elasticsearch B.V.
+ * Elasticsearch B.V. licenses this file to you under the MIT License.
  * See `packages/elastic-safer-lodash-set/LICENSE` for more information.
  */
 
-const set = require('../lodash/set');
-const { cloneDeep, curry } = require('lodash');
+const convert = require('lodash/fp/convert');
+const func = convert('set', require('../set'));
 
-module.exports = curry((b, c, a) => set(cloneDeep(a), b, c));
+func.placeholder = require('lodash/fp/placeholder');
+module.exports = func;

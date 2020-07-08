@@ -241,7 +241,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/elastic-safer-lodash-set/{fp,test}/*.{js,mjs,ts,tsx}'],
+      files: ['packages/elastic-safer-lodash-set/test/*.{js,mjs,ts,tsx}'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',

@@ -72,11 +72,23 @@ setFunctions.forEach(([testPermutations, set, testName]) => {
 
   test(`${testName}: Non-objects`, (t) => {
     const nonObjects = [null, undefined, NaN, 42];
-    t.plan(testPermutations.assertionCalls * nonObjects.length);
+    t.plan(testPermutations.assertionCalls * nonObjects.length * 3);
     nonObjects.forEach((nonObject) => {
       t.comment(String(nonObject));
       testPermutations(set, [nonObject, 'a.b', 'foo'], (result) => {
-        t.strictEqual(result, nonObject);
+        if (Number.isNaN(nonObject)) {
+          t.ok(result instanceof Number);
+          t.strictEqual(result.toString(), 'NaN');
+          t.deepEqual(result, Object.assign(NaN, { a: { b: 'foo' } })); // will produce new object due to cloning
+        } else if (nonObject === 42) {
+          t.ok(result instanceof Number);
+          t.strictEqual(result.toString(), '42');
+          t.deepEqual(result, Object.assign(42, { a: { b: 'foo' } })); // will produce new object due to cloning
+        } else {
+          t.ok(result instanceof Object);
+          t.strictEqual(result.toString(), '[object Object]');
+          t.deepEqual(result, { a: { b: 'foo' } }); // will produce new object due to cloning
+        }
       });
     });
   });
@@ -95,7 +107,7 @@ setFunctions.forEach(([testPermutations, set, testName]) => {
       [{ a: [{ aa: { aaa: 3, aab: 4 } }, { ab: 2 }], b: 1 }, 'a[0].aa.aaa.aaaa', 'foo'],
       (result) => {
         t.deepEqual(result, {
-          a: [{ aa: { aaa: { aaaa: 'foo' }, aab: 4 } }, { ab: 2 }],
+          a: [{ aa: { aaa: Object.assign(3, { aaaa: 'foo' }), aab: 4 } }, { ab: 2 }],
           b: 1,
         });
       }
@@ -243,8 +255,8 @@ setWithFunctions.forEach(([testPermutations, setWith, testName]) => {
   test(`${testName}: Customizer arguments`, (t) => {
     let i = 0;
     const expectedCustomizerArgs = [
-      [{ b: 42 }, 'a', { a: { b: 42 } }],
-      [42, 'b', { b: 42 }],
+      [{ b: Object(42) }, 'a', { a: { b: Object(42) } }],
+      [Object(42), 'b', { b: Object(42) }],
     ];
 
     t.plan(testPermutations.assertionCalls * (expectedCustomizerArgs.length + 1));
@@ -264,7 +276,7 @@ setWithFunctions.forEach(([testPermutations, setWith, testName]) => {
         },
       ],
       (result) => {
-        t.deepEqual(result, { a: { b: { c: 'foo' } } });
+        t.deepEqual(result, { a: { b: Object.assign(42, { c: 'foo' }) } });
       }
     );
   });
