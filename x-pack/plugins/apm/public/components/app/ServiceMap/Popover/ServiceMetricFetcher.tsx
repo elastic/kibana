@@ -65,15 +65,15 @@ export function ServiceMetricFetcher({
     transactionStats: { avgRequestsPerMinute, avgTransactionDuration },
   } = data;
 
-  const hasNoServiceData = [
+  const hasServiceData = [
     avgCpuUsage,
     avgErrorsPerMinute,
     avgMemoryUsage,
     avgRequestsPerMinute,
     avgTransactionDuration,
-  ].every((stat) => !isNumber(stat));
+  ].some((stat) => isNumber(stat));
 
-  if (environment && !hasNoServiceData) {
+  if (environment && !hasServiceData) {
     return (
       <EuiCallOut
         title={i18n.translate(

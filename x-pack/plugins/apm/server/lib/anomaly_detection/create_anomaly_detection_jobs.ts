@@ -102,7 +102,11 @@ async function createAnomalyDetectionJob({
     jobOverrides: [
       {
         custom_settings: {
-          job_tags: { environment },
+          job_tags: {
+            environment,
+            // identifies this as an APM ML job & facilitates future migrations
+            apm_ml_version: 2,
+          },
         },
       },
     ],

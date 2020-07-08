@@ -147,9 +147,10 @@ export async function getMLJobIds(
   environment?: string
 ) {
   const response = await ml.anomalyDetectors.jobs(ML_GROUP_NAME_APM);
-  // to filter out legacy jobs we are filtering by the existence of `environment` in `custom_settings`
+  // to filter out legacy jobs we are filtering by the existence of `apm_ml_version` in `custom_settings`
+  // and checking that it is compatable.
   const mlJobs = response.jobs.filter(
-    (job) => job.custom_settings?.job_tags?.environment
+    (job) => (job.custom_settings?.job_tags?.apm_ml_version ?? 0) >= 2
   );
   if (environment) {
     const matchingMLJob = mlJobs.find(
