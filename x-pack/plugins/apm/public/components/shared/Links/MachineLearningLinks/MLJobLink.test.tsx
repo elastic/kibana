@@ -19,7 +19,7 @@ describe('MLJobLink', () => {
     );
 
     expect(href).toEqual(
-      `/basepath/app/ml#/timeseriesexplorer?_g=(ml:(jobIds:!(myservicename-mytransactiontype-high_mean_response_time)),refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now-4h))`
+      `/basepath/app/ml#/timeseriesexplorer?_g=(ml%3A(jobIds%3A!(myservicename-mytransactiontype-high_mean_response_time))%2CrefreshInterval%3A(pause%3Atrue%2Cvalue%3A'0')%2Ctime%3A(from%3Anow%252Fw%2Cto%3Anow-4h))`
     );
   });
 });

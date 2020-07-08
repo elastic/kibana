@@ -35,6 +35,21 @@ const javaService = {
   [AGENT_NAME]: 'java',
 };
 
+const anomalies = {
+  mlJobIds: ['apm-test-1234-ml-module-name'],
+  maxAnomalies: [
+    {
+      'service.name': 'opbeans-test',
+      maxAnomaly: {
+        'transaction.type': 'request',
+        actual_value: 10000,
+        anomaly_score: 50,
+        job_id: 'apm-test-1234-ml-module-name',
+      },
+    },
+  ],
+};
+
 describe('transformServiceMapResponses', () => {
   it('maps external destinations to internal services', () => {
     const response: ServiceMapResponse = {
@@ -51,6 +66,7 @@ describe('transformServiceMapResponses', () => {
           destination: nodejsExternal,
         },
       ],
+      anomalies,
     };
 
     const { elements } = transformServiceMapResponses(response);
@@ -89,6 +105,7 @@ describe('transformServiceMapResponses', () => {
           },
         },
       ],
+      anomalies,
     };
 
     const { elements } = transformServiceMapResponses(response);
@@ -126,6 +143,7 @@ describe('transformServiceMapResponses', () => {
           },
         },
       ],
+      anomalies,
     };
 
     const { elements } = transformServiceMapResponses(response);
@@ -150,6 +168,7 @@ describe('transformServiceMapResponses', () => {
           destination: nodejsService,
         },
       ],
+      anomalies,
     };
 
     const { elements } = transformServiceMapResponses(response);
