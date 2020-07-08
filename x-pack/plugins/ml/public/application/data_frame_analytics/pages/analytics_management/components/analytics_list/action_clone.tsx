@@ -217,11 +217,11 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
   analyzed_fields: {
     excludes: {
       optional: true,
-      formKey: 'excludes',
       defaultValue: [],
     },
     includes: {
       optional: true,
+      formKey: 'includes',
       defaultValue: [],
     },
   },

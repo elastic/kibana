@@ -33,7 +33,7 @@ import { State, inputsSelectors } from '../../../common/store';
 import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { setIpDetailsTablesActivePageToZero as dispatchIpDetailsTablesActivePageToZero } from '../../store/actions';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { NetworkEmptyPage } from '../network_empty_page';
+import { OverviewEmpty } from '../../../overview/components/overview_empty';
 import { NetworkHttpQueryTable } from './network_http_query_table';
 import { NetworkTopCountriesQueryTable } from './network_top_countries_query_table';
 import { NetworkTopNFlowQueryTable } from './network_top_n_flow_query_table';
@@ -264,7 +264,7 @@ export const IPDetailsComponent: React.FC<IPDetailsComponentProps & PropsFromRed
         <WrapperPage>
           <HeaderPage border title={ip} />
 
-          <NetworkEmptyPage />
+          <OverviewEmpty />
         </WrapperPage>
       )}
 
