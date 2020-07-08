@@ -21,13 +21,26 @@ import { MonitorStatusTranslations } from './translations';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { store } from '../../state';
 
+interface HasShouldCheckFlags {
+  shouldCheckAvailability?: boolean;
+  shouldCheckStatus?: boolean;
+}
+
+function hasShouldCheckFlags(value: unknown): value is HasShouldCheckFlags {
+  const types = ['boolean', 'undefined'];
+  return (
+    types.includes(typeof (value as HasShouldCheckFlags).shouldCheckAvailability) &&
+    types.includes(typeof (value as HasShouldCheckFlags).shouldCheckStatus)
+  );
+}
+
 export const validate = (alertParams: unknown) => {
   const errors: Record<string, any> = {};
   const decoded = AtomicStatusCheckParamsType.decode(alertParams);
   const oldDecoded = StatusCheckParamsType.decode(alertParams);
   const availabilityDecoded = MonitorAvailabilityType.decode(alertParams);
 
-  if (!isRight(decoded) && !isRight(oldDecoded)) {
+  if (!isRight(decoded) && !isRight(oldDecoded) && !isRight(availabilityDecoded)) {
     return {
       errors: {
         typeCheckFailure: 'Provided parameters do not conform to the expected type.',
@@ -35,9 +48,11 @@ export const validate = (alertParams: unknown) => {
       },
     };
   }
+
   if (
-    (isRight(availabilityDecoded) && !availabilityDecoded.right.shouldCheckAvailability) ||
-    (isRight(decoded) && !decoded.right.shouldCheckStatus)
+    hasShouldCheckFlags(alertParams) &&
+    alertParams.shouldCheckAvailability !== true &&
+    alertParams.shouldCheckStatus !== true
   ) {
     return {
       errors: {
@@ -45,6 +60,7 @@ export const validate = (alertParams: unknown) => {
       },
     };
   }
+
   if (isRight(decoded) && decoded.right.shouldCheckStatus) {
     const { numTimes, timerangeCount } = decoded.right;
     if (numTimes < 1) {

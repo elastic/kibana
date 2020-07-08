@@ -44,6 +44,7 @@ describe('monitor status alert type', () => {
             to: 'now',
           },
           filters: '{foo: "bar"}',
+          shouldCheckStatus: true,
         })
       ).toMatchInlineSnapshot(`
         Object {
@@ -54,7 +55,7 @@ describe('monitor status alert type', () => {
 
     describe('should check flags', () => {
       it('does not pass without one or more should check flags', () => {
-        delete params.shouldCheckStatus;
+        params.shouldCheckStatus = false;
         expect(validate(params)).toMatchInlineSnapshot(`
           Object {
             "errors": Object {
@@ -64,8 +65,8 @@ describe('monitor status alert type', () => {
         `);
       });
 
-      it('does not pass when availability is defined, but check flag is false', () => {
-        delete params.shouldCheckStatus;
+      it('does not pass when availability is defined, but both check flags are false', () => {
+        params.shouldCheckStatus = false;
         params.shouldCheckAvailability = false;
         params.availability = {
           range: 3,
@@ -77,6 +78,43 @@ describe('monitor status alert type', () => {
             "errors": Object {
               "noAlertSelected": "Alert must check for monitor status or monitor availability.",
             },
+          }
+        `);
+      });
+
+      it('passes when status check is defined and flag is set to true', () => {
+        params.shouldCheckStatus = false;
+        params.shouldCheckAvailability = true;
+        params.availability = {
+          range: 3,
+          rangeUnit: 'w',
+          threshold: 98.3,
+        };
+        expect(validate(params)).toMatchInlineSnapshot(`
+          Object {
+            "errors": Object {},
+          }
+        `);
+      });
+
+      it('passes when status check and availability check flags are both true', () => {
+        params.shouldCheckAvailability = true;
+        params.availability = {
+          range: 3,
+          rangeUnit: 'w',
+          threshold: 98.3,
+        };
+        expect(validate(params)).toMatchInlineSnapshot(`
+          Object {
+            "errors": Object {},
+          }
+        `);
+      });
+
+      it('passes when availability check is defined and flag is set to true', () => {
+        expect(validate(params)).toMatchInlineSnapshot(`
+          Object {
+            "errors": Object {},
           }
         `);
       });
