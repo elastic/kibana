@@ -41,8 +41,10 @@ describe('Resolver Data Middleware', () => {
       });
       const { children } = baseTree;
       firstChildNodeInTree = [...children.values()][0];
+      let totalRelatedEvents = 0;
       statsForFirstChild = firstChildNodeInTree.relatedEvents.reduce(
         (counts: Record<string, number>, relatedEvent) => {
+          totalRelatedEvents++;
           for (const category of [relatedEvent.event.category].flat()) {
             counts[category] = counts[category] ? counts[category] + 1 : 1;
           }
@@ -68,7 +70,7 @@ describe('Resolver Data Middleware', () => {
           if (node.id === firstChildNodeInTree.id) {
             // attach stats
             childNode.stats = {
-              events: { total: 1, byCategory: statsForFirstChild },
+              events: { total: totalRelatedEvents, byCategory: statsForFirstChild },
               totalAlerts: 0,
             };
           }
@@ -160,8 +162,10 @@ describe('Resolver Data Middleware', () => {
       });
       const { children } = baseTree;
       firstChildNodeInTree = [...children.values()][0];
+      let totalRelatedEvents = 0;
       statsForFirstChild = firstChildNodeInTree.relatedEvents.reduce(
         (counts: Record<string, number>, relatedEvent) => {
+          totalRelatedEvents++;
           for (const category of [relatedEvent.event.category].flat()) {
             if (!categoryToOverCount) {
               categoryToOverCount = category;
@@ -192,7 +196,7 @@ describe('Resolver Data Middleware', () => {
           if (node.id === firstChildNodeInTree.id) {
             // attach stats
             childNode.stats = {
-              events: { total: 1, byCategory: statsForFirstChild },
+              events: { total: totalRelatedEvents, byCategory: statsForFirstChild },
               totalAlerts: 0,
             };
           }
