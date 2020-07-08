@@ -588,28 +588,26 @@ export function initTimelionApp(app, deps) {
       });
     }
 
-    function saveExpression(title) {
-      savedVisualizations
-        .get({ type: 'timelion', searchSource: true })
-        .then(function (savedExpression) {
-          const state = stateContainer.getState();
-          savedExpression.visState.params = {
-            expression: state.sheet[state.selected],
-            interval: state.interval,
-          };
-          savedExpression.title = title;
-          savedExpression.visState.title = title;
-          savedExpression.save().then(function (id) {
-            if (id) {
-              deps.core.notifications.toasts.addSuccess(
-                i18n.translate('timelion.saveExpression.successNotificationText', {
-                  defaultMessage: `Saved expression '{title}'`,
-                  values: { title: savedExpression.title },
-                })
-              );
-            }
-          });
-        });
+    async function saveExpression(title) {
+      const vis = await deps.plugins.visualizations.createVis('timelion', {
+        title,
+        params: {
+          expression: $scope.state.sheet[$scope.state.selected],
+          interval: $scope.state.interval,
+        },
+      });
+      const state = deps.plugins.visualizations.convertFromSerializedVis(vis.serialize());
+      const visSavedObject = await savedVisualizations.get();
+      Object.assign(visSavedObject, state);
+      const id = await visSavedObject.save();
+      if (id) {
+        deps.core.notifications.toasts.addSuccess(
+          i18n.translate('timelion.saveExpression.successNotificationText', {
+            defaultMessage: `Saved expression '{title}'`,
+            values: { title: state.title },
+          })
+        );
+      }
     }
 
     init();
