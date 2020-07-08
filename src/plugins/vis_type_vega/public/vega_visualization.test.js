@@ -38,8 +38,6 @@ import {
   setSavedObjects,
   setNotifications,
   setKibanaMapFactory,
-  setUISettings,
-  setMapsLegacyConfig,
 } from './services';
 import { coreMock } from '../../../core/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
@@ -62,39 +60,6 @@ describe('VegaVisualizations', () => {
   const coreStart = coreMock.createStart();
   const dataPluginStart = dataPluginMock.createStartContract();
 
-  const mockMapConfig = {
-    includeElasticMapsService: true,
-    proxyElasticMapsServiceInMaps: false,
-    tilemap: {
-      deprecated: {
-        config: {
-          options: {
-            attribution: '',
-          },
-        },
-      },
-      options: {
-        attribution: '',
-        minZoom: 0,
-        maxZoom: 10,
-      },
-    },
-    regionmap: {
-      includeElasticMapsService: true,
-      layers: [],
-    },
-    manifestServiceUrl: '',
-    emsFileApiUrl: 'https://vector.maps.elastic.co',
-    emsTileApiUrl: 'https://tiles.maps.elastic.co',
-    emsLandingPageUrl: 'https://maps.elastic.co/v7.7',
-    emsFontLibraryUrl: 'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf',
-    emsTileLayerId: {
-      bright: 'road_map',
-      desaturated: 'road_map_desaturated',
-      dark: 'dark_map',
-    },
-  };
-
   setKibanaMapFactory((...args) => new KibanaMap(...args));
   setInjectedVars({
     emsTileLayerId: {},
@@ -104,8 +69,6 @@ describe('VegaVisualizations', () => {
   setData(dataPluginStart);
   setSavedObjects(coreStart.savedObjects);
   setNotifications(coreStart.notifications);
-  setUISettings(coreStart.uiSettings);
-  setMapsLegacyConfig(mockMapConfig);
 
   beforeEach(() => {
     vegaVisualizationDependencies = {
