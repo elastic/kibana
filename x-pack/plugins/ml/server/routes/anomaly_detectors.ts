@@ -5,7 +5,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Job } from '../../common/types/anomaly_detection_jobs';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -176,7 +175,7 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { jobId } = request.params;
-        const body: Partial<Job> = request.body;
+        const body = request.body;
 
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.addJob', {
           jobId,

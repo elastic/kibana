@@ -241,11 +241,7 @@ export class JobCreator {
 
   public set modelPlot(enable: boolean) {
     this._initModelPlotConfig();
-    if (enable) {
-      this._job_config.model_plot_config.enabled = true;
-    } else {
-      this._job_config.model_plot_config.enabled = false;
-    }
+    this._job_config.model_plot_config!.enabled = enable;
   }
   public get modelPlot() {
     return (
@@ -256,13 +252,7 @@ export class JobCreator {
 
   public set modelChangeAnnotations(enable: boolean) {
     this._initModelPlotConfig();
-    if (enable) {
-      this._job_config.model_plot_config.annotations_enabled = true;
-    } else {
-      // explicitly set this to false instead of omitting if modelPlot is true
-      // else by default if only modelPlot is true, it will also include annotations
-      this._job_config.model_plot_config.annotations_enabled = false;
-    }
+    this._job_config.model_plot_config!.annotations_enabled = enable;
   }
 
   public get modelChangeAnnotations() {
