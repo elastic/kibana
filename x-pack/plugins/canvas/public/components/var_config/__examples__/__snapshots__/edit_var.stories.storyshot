@@ -34,6 +34,30 @@ Array [
   <div
     className="canvasSidebar__accordionContent"
   >
+    <div>
+      <div
+        className="euiCallOut euiCallOut--warning euiCallOut--small"
+      >
+        <div
+          className="euiCallOutHeader"
+        >
+          <div
+            aria-hidden="true"
+            className="euiCallOutHeader__icon"
+            data-euiicon-type="alert"
+            size="m"
+          />
+          <span
+            className="euiCallOutHeader__title"
+          >
+            Editing a variable in use may adversely affect your workpad
+          </span>
+        </div>
+      </div>
+      <div
+        className="euiSpacer euiSpacer--m"
+      />
+    </div>
     <form
       className="euiForm"
     >
@@ -363,6 +387,30 @@ Array [
   <div
     className="canvasSidebar__accordionContent"
   >
+    <div>
+      <div
+        className="euiCallOut euiCallOut--warning euiCallOut--small"
+      >
+        <div
+          className="euiCallOutHeader"
+        >
+          <div
+            aria-hidden="true"
+            className="euiCallOutHeader__icon"
+            data-euiicon-type="alert"
+            size="m"
+          />
+          <span
+            className="euiCallOutHeader__title"
+          >
+            Editing a variable in use may adversely affect your workpad
+          </span>
+        </div>
+      </div>
+      <div
+        className="euiSpacer euiSpacer--m"
+      />
+    </div>
     <form
       className="euiForm"
     >
@@ -641,6 +689,30 @@ Array [
   <div
     className="canvasSidebar__accordionContent"
   >
+    <div>
+      <div
+        className="euiCallOut euiCallOut--warning euiCallOut--small"
+      >
+        <div
+          className="euiCallOutHeader"
+        >
+          <div
+            aria-hidden="true"
+            className="euiCallOutHeader__icon"
+            data-euiicon-type="alert"
+            size="m"
+          />
+          <span
+            className="euiCallOutHeader__title"
+          >
+            Editing a variable in use may adversely affect your workpad
+          </span>
+        </div>
+      </div>
+      <div
+        className="euiSpacer euiSpacer--m"
+      />
+    </div>
     <form
       className="euiForm"
     >
