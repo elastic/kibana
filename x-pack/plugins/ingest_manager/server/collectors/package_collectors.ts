@@ -43,7 +43,7 @@ export const getPackageUsage = async (soClient?: SavedObjectsClient): Promise<Pa
     return {
       name: p.attributes.name,
       version: p.attributes.version,
-      enabled: p.attributes.name in enabledPackages,
+      enabled: enabledPackages.includes(p.attributes.name),
     };
   });
 };
