@@ -24,7 +24,7 @@ import { ExprVis } from 'src/plugins/visualizations/public';
 import { createTableVisCell } from './table_vis_cell';
 import { Table } from '../table_vis_response_handler';
 import { TableVisParams } from '../types';
-import { useFormattedColumns, usePagination } from '../utils';
+import { useFormattedColumnsAndRows, usePagination } from '../utils';
 import { TableVisNoResults } from './table_vis_no_results';
 
 interface TableVisBasicProps {
@@ -34,25 +34,26 @@ interface TableVisBasicProps {
 }
 
 export const TableVisBasic = memo(({ table, vis, visParams }: TableVisBasicProps) => {
-  const formattedColumns = useFormattedColumns(table, visParams);
-  const renderCellValue = useMemo(() => createTableVisCell(table, formattedColumns, vis), [
+  const { columns, rows } = useFormattedColumnsAndRows(table, visParams);
+  const renderCellValue = useMemo(() => createTableVisCell(table, columns, rows, vis), [
     table,
-    formattedColumns,
+    columns,
+    rows,
     vis,
   ]);
 
   const pagination = usePagination(visParams);
 
-  return table.rows.length > 0 ? (
+  return rows.length > 0 ? (
     <EuiDataGrid
       aria-label=""
-      columns={table.columns.map((col) => ({
+      columns={columns.map((col) => ({
         id: col.id,
-        display: col.name,
+        display: col.title,
       }))}
-      rowCount={table.rows.length}
+      rowCount={rows.length}
       columnVisibility={{
-        visibleColumns: table.columns.map((col) => col.id),
+        visibleColumns: columns.map((col) => col.id),
         setVisibleColumns: () => {},
       }}
       renderCellValue={renderCellValue}

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { SchemaConfig } from '../../visualizations/public';
 
 export enum AggTypes {
@@ -47,4 +48,14 @@ export interface TableVisParams {
   totalFunc: AggTypes;
   percentageCol: string;
   dimensions: Dimensions;
+}
+
+export interface FormattedColumn {
+  id: string;
+  title: string;
+  formatter?: ReturnType<DataPublicPluginStart['fieldFormats']['deserialize']>;
+  formattedTotal?: string | number;
+  filterable: boolean;
+  sumTotal?: number;
+  total?: number;
 }

@@ -30,16 +30,23 @@ import {
 import { ExprVis } from 'src/plugins/visualizations/public';
 import { i18n } from '@kbn/i18n';
 import { Table } from '../table_vis_response_handler';
+import { FormattedColumn } from '../types';
 
-export const createTableVisCell = (table: Table, formattedColumns: any[], vis: ExprVis) => ({
+export const createTableVisCell = (
+  table: Table,
+  formattedColumns: FormattedColumn[],
+  rows: Table['rows'],
+  vis: ExprVis
+) => ({
   // @ts-expect-error
   colIndex,
   rowIndex,
   columnId,
 }: EuiDataGridCellValueElementProps) => {
-  const rowValue = table.rows[rowIndex][columnId];
+  const rowValue = rows[rowIndex][columnId];
   const column = formattedColumns[colIndex];
   const contentsIsDefined = rowValue !== null && rowValue !== undefined;
+  const content = column?.formatter?.convert(rowValue, 'html') || (rowValue as string) || '';
 
   const cellContent = (
     <div
@@ -48,7 +55,7 @@ export const createTableVisCell = (table: Table, formattedColumns: any[], vis: E
        * The Data table visualization can "enrich" cell contents by applying a field formatter,
        * which we want to do if possible.
        */
-      dangerouslySetInnerHTML={{ __html: column?.formatter?.convert(rowValue, 'html') }} // eslint-disable-line react/no-danger
+      dangerouslySetInnerHTML={{ __html: content }} // eslint-disable-line react/no-danger
     />
   );
 

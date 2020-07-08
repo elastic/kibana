@@ -18,17 +18,22 @@
  */
 
 import { useMemo } from 'react';
+import { chain, findIndex } from 'lodash';
 
 import { Table } from '../../table_vis_response_handler';
-import { TableVisParams } from '../../types';
+import { FormattedColumn, TableVisParams, AggTypes } from '../../types';
 import { getFormatService } from '../../services';
+import { addPercentageColumn } from '../add_percentage_column';
 
-export const useFormattedColumns = (table: Table, visParams: TableVisParams) => {
-  const formattedColumns = useMemo(() => {
+export const useFormattedColumnsAndRows = (table: Table, visParams: TableVisParams) => {
+  const { formattedColumns: columns, formattedRows: rows } = useMemo(() => {
     const { buckets, metrics, splitColumn, splitRow } = visParams.dimensions;
+    // todo: use for split table by row/column
+    let splitRowGlobal: FormattedColumn;
+    let formattedRows = table.rows;
 
-    return table.columns
-      .map(function (col, i) {
+    let formattedColumns = table.columns
+      .map<FormattedColumn | undefined>((col, i) => {
         const isBucket = buckets.find(({ accessor }) => accessor === i);
         const isSplitColumn = splitColumn?.find(({ accessor }) => accessor === i);
         const isSplitRow = splitRow?.find(({ accessor }) => accessor === i);
@@ -37,76 +42,59 @@ export const useFormattedColumns = (table: Table, visParams: TableVisParams) => 
 
         const formatter = dimension ? getFormatService().deserialize(dimension.format) : undefined;
 
-        const formattedColumn = {
+        const formattedColumn: FormattedColumn = {
           id: col.id,
           title: col.name,
           formatter,
           filterable: !!isBucket,
         };
 
-        return formattedColumn;
-
         if (isSplitRow) {
-          $scope.splitRow = formattedColumn;
+          splitRowGlobal = formattedColumn;
         }
 
-        if (!dimension) return;
-
-        const last = i === table.columns.length - 1;
-
-        if (last || !isBucket) {
-          formattedColumn.class = 'visualize-table-right';
-        }
+        if (!dimension) return undefined;
 
         const isDate = dimension.format?.id === 'date' || dimension.format?.params?.id === 'date';
-        const allowsNumericalAggregations = formatter?.allowsNumericalAggregations;
+        // @ts-expect-error
+        const allowsNumericalAggregations: boolean = formatter?.allowsNumericalAggregations;
 
-        let { totalFunc } = $scope;
-        if (typeof totalFunc === 'undefined' && showPercentage) {
-          totalFunc = 'sum';
-        }
+        if (allowsNumericalAggregations || isDate || visParams.totalFunc === AggTypes.COUNT) {
+          const sumOfColumnValues = table.rows.reduce((prev, curr) => {
+            // some metrics return undefined for some of the values
+            // derivative is an example of this as it returns undefined in the first row
+            if (curr[col.id] === undefined) return prev;
+            return prev + (curr[col.id] as number);
+          }, 0);
 
-        if (allowsNumericalAggregations || isDate || totalFunc === 'count') {
-          const sum = (tableRows) => {
-            return _.reduce(
-              tableRows,
-              function (prev, curr) {
-                // some metrics return undefined for some of the values
-                // derivative is an example of this as it returns undefined in the first row
-                if (curr[col.id] === undefined) return prev;
-                return prev + curr[col.id];
-              },
-              0
-            );
-          };
+          formattedColumn.sumTotal = sumOfColumnValues;
 
-          formattedColumn.sumTotal = sum(table.rows);
-          switch (totalFunc) {
+          switch (visParams.totalFunc) {
             case 'sum': {
               if (!isDate) {
                 const total = formattedColumn.sumTotal;
-                formattedColumn.formattedTotal = formatter.convert(total);
+                formattedColumn.formattedTotal = formatter?.convert(total);
                 formattedColumn.total = formattedColumn.sumTotal;
               }
               break;
             }
             case 'avg': {
               if (!isDate) {
-                const total = sum(table.rows) / table.rows.length;
-                formattedColumn.formattedTotal = formatter.convert(total);
+                const total = sumOfColumnValues / table.rows.length;
+                formattedColumn.formattedTotal = formatter?.convert(total);
                 formattedColumn.total = total;
               }
               break;
             }
             case 'min': {
-              const total = _.chain(table.rows).map(col.id).min().value();
-              formattedColumn.formattedTotal = formatter.convert(total);
+              const total = chain(table.rows).map(col.id).min().value() as number;
+              formattedColumn.formattedTotal = formatter?.convert(total);
               formattedColumn.total = total;
               break;
             }
             case 'max': {
-              const total = _.chain(table.rows).map(col.id).max().value();
-              formattedColumn.formattedTotal = formatter.convert(total);
+              const total = chain(table.rows).map(col.id).max().value() as number;
+              formattedColumn.formattedTotal = formatter?.convert(total);
               formattedColumn.total = total;
               break;
             }
@@ -123,8 +111,27 @@ export const useFormattedColumns = (table: Table, visParams: TableVisParams) => 
 
         return formattedColumn;
       })
-      .filter((column) => column);
-  }, [table, visParams.dimensions]);
+      .filter((column): column is FormattedColumn => !!column);
 
-  return formattedColumns;
+    if (visParams.percentageCol) {
+      const insertAtIndex = findIndex(formattedColumns, { title: visParams.percentageCol });
+
+      // column to show percentage for was removed
+      if (insertAtIndex < 0) return { formattedColumns, formattedRows };
+
+      const { cols, rows: rowsWithPercentage } = addPercentageColumn(
+        formattedColumns,
+        visParams.percentageCol,
+        table.rows,
+        insertAtIndex
+      );
+
+      formattedRows = rowsWithPercentage;
+      formattedColumns = cols;
+    }
+
+    return { formattedColumns, formattedRows };
+  }, [table, visParams.dimensions, visParams.percentageCol, visParams.totalFunc]);
+
+  return { columns, rows };
 };
