@@ -23,7 +23,7 @@ jest.mock('fs', () => ({
   createWriteStream: jest.fn(() => ({ write: mockStreamWrite })),
 }));
 
-const dynamicProps = { pid: expect.any(Number) };
+const dynamicProps = { process: { pid: expect.any(Number) } };
 
 jest.mock('../../../legacy/server/logging/rotate', () => ({
   setupLoggingRotate: jest.fn().mockImplementation(() => Promise.resolve({})),
@@ -61,8 +61,10 @@ test('uses default memory buffer logger until config is provided', () => {
   anotherLogger.fatal('fatal message', { some: 'value' });
 
   expect(bufferAppendSpy).toHaveBeenCalledTimes(2);
-  expect(bufferAppendSpy.mock.calls[0][0]).toMatchSnapshot(dynamicProps);
-  expect(bufferAppendSpy.mock.calls[1][0]).toMatchSnapshot(dynamicProps);
+
+  // pid at args level, nested under process for ECS writes
+  expect(bufferAppendSpy.mock.calls[0][0]).toMatchSnapshot({ pid: expect.any(Number) });
+  expect(bufferAppendSpy.mock.calls[1][0]).toMatchSnapshot({ pid: expect.any(Number) });
 });
 
 test('flushes memory buffer logger and switches to real logger once config is provided', () => {
@@ -210,20 +212,26 @@ test('setContextConfig() updates config with relative contexts', () => {
   expect(mockConsoleLog).toHaveBeenCalledTimes(4);
   // Parent contexts are unaffected
   expect(JSON.parse(mockConsoleLog.mock.calls[0][0])).toMatchObject({
-    context: 'tests',
     message: 'tests log to default!',
-    level: 'WARN',
+    log: {
+      level: 'WARN',
+      logger: 'tests',
+    },
   });
   expect(JSON.parse(mockConsoleLog.mock.calls[1][0])).toMatchObject({
-    context: 'tests.child',
     message: 'tests.child log to default!',
-    level: 'ERROR',
+    log: {
+      level: 'ERROR',
+      logger: 'tests.child',
+    },
   });
   // Customized context is logged in both appender formats
   expect(JSON.parse(mockConsoleLog.mock.calls[2][0])).toMatchObject({
-    context: 'tests.child.grandchild',
     message: 'tests.child.grandchild log to default and custom!',
-    level: 'DEBUG',
+    log: {
+      level: 'DEBUG',
+      logger: 'tests.child.grandchild',
+    },
   });
   expect(mockConsoleLog.mock.calls[3][0]).toMatchInlineSnapshot(
     `"[DEBUG][tests.child.grandchild] tests.child.grandchild log to default and custom!"`
@@ -259,9 +267,11 @@ test('setContextConfig() updates config for a root context', () => {
   expect(mockConsoleLog).toHaveBeenCalledTimes(3);
   // Parent context is unaffected
   expect(JSON.parse(mockConsoleLog.mock.calls[0][0])).toMatchObject({
-    context: 'tests',
     message: 'tests log to default!',
-    level: 'WARN',
+    log: {
+      level: 'WARN',
+      logger: 'tests',
+    },
   });
   // Customized contexts
   expect(mockConsoleLog.mock.calls[1][0]).toMatchInlineSnapshot(
@@ -299,9 +309,11 @@ test('custom context configs are applied on subsequent calls to update()', () =>
   // Customized context is logged in both appender formats still
   expect(mockConsoleLog).toHaveBeenCalledTimes(2);
   expect(JSON.parse(mockConsoleLog.mock.calls[0][0])).toMatchObject({
-    context: 'tests.child.grandchild',
     message: 'tests.child.grandchild log to default and custom!',
-    level: 'DEBUG',
+    log: {
+      level: 'DEBUG',
+      logger: 'tests.child.grandchild',
+    },
   });
   expect(mockConsoleLog.mock.calls[1][0]).toMatchInlineSnapshot(
     `"[DEBUG][tests.child.grandchild] tests.child.grandchild log to default and custom!"`
@@ -347,9 +359,11 @@ test('subsequent calls to setContextConfig() for the same context override the p
   // Only the warn log should have been logged
   expect(mockConsoleLog).toHaveBeenCalledTimes(2);
   expect(JSON.parse(mockConsoleLog.mock.calls[0][0])).toMatchObject({
-    context: 'tests.child.grandchild',
     message: 'tests.child.grandchild log to default and custom!',
-    level: 'WARN',
+    log: {
+      level: 'WARN',
+      logger: 'tests.child.grandchild',
+    },
   });
   expect(mockConsoleLog.mock.calls[1][0]).toMatchInlineSnapshot(
     `"[WARN ][tests.child.grandchild] second pattern! tests.child.grandchild log to default and custom!"`
@@ -384,8 +398,10 @@ test('subsequent calls to setContextConfig() for the same context can disable th
   // Only the warn log should have been logged once on the default appender
   expect(mockConsoleLog).toHaveBeenCalledTimes(1);
   expect(JSON.parse(mockConsoleLog.mock.calls[0][0])).toMatchObject({
-    context: 'tests.child.grandchild',
     message: 'tests.child.grandchild log to default!',
-    level: 'WARN',
+    log: {
+      level: 'WARN',
+      logger: 'tests.child.grandchild',
+    },
   });
 });

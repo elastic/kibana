@@ -98,21 +98,27 @@ test('`format()` correctly formats record with meta-data', () => {
         timestamp,
         pid: 5355,
         meta: {
-          from: 'v7',
-          to: 'v8',
+          version: {
+            from: 'v7',
+            to: 'v8',
+          },
         },
       })
     )
   ).toStrictEqual({
     '@timestamp': '2012-02-01T09:30:22.011-05:00',
-    context: 'context-with-meta',
-    level: 'DEBUG',
+    log: {
+      level: 'DEBUG',
+      logger: 'context-with-meta',
+    },
     message: 'message-with-meta',
-    meta: {
+    version: {
       from: 'v7',
       to: 'v8',
     },
-    pid: 5355,
+    process: {
+      pid: 5355,
+    },
   });
 });
 
@@ -122,36 +128,42 @@ test('`format()` correctly formats error record with meta-data', () => {
   expect(
     JSON.parse(
       layout.format({
-        context: 'error-with-meta',
         level: LogLevel.Debug,
+        context: 'error-with-meta',
         error: {
           message: 'Some error message',
-          name: 'Some error name',
+          name: 'Some error type',
           stack: 'Some error stack',
         },
         message: 'Some error message',
         timestamp,
         pid: 5355,
         meta: {
-          from: 'v7',
-          to: 'v8',
+          version: {
+            from: 'v7',
+            to: 'v8',
+          },
         },
       })
     )
   ).toStrictEqual({
     '@timestamp': '2012-02-01T09:30:22.011-05:00',
-    context: 'error-with-meta',
-    level: 'DEBUG',
+    log: {
+      level: 'DEBUG',
+      logger: 'error-with-meta',
+    },
     error: {
       message: 'Some error message',
-      name: 'Some error name',
-      stack: 'Some error stack',
+      type: 'Some error type',
+      stack_trace: 'Some error stack',
     },
     message: 'Some error message',
-    meta: {
+    version: {
       from: 'v7',
       to: 'v8',
     },
-    pid: 5355,
+    process: {
+      pid: 5355,
+    },
   });
 });
