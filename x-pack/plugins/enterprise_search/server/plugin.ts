@@ -66,13 +66,13 @@ export class EnterpriseSearchPlugin implements Plugin {
      * Register space/feature control
      */
     features.registerFeature({
-      id: 'enterprise_search',
+      id: 'enterpriseSearch',
       name: 'Enterprise Search',
       order: 0,
       icon: 'logoEnterpriseSearch',
-      navLinkId: 'app_search', // TODO - remove this once functional tests no longer rely on navLinkId
-      app: ['kibana', 'app_search'], // TODO: 'enterprise_search', 'workplace_search'
-      catalogue: ['app_search'], // TODO: 'enterprise_search', 'workplace_search'
+      navLinkId: 'appSearch', // TODO - remove this once functional tests no longer rely on navLinkId
+      app: ['kibana', 'appSearch'], // TODO: 'enterpriseSearch', 'workplaceSearch'
+      catalogue: ['appSearch'], // TODO: 'enterpriseSearch', 'workplaceSearch'
       privileges: null,
     });
 
@@ -99,11 +99,11 @@ export class EnterpriseSearchPlugin implements Plugin {
           ...uiCapabilities,
           navLinks: {
             ...uiCapabilities.navLinks,
-            app_search: hasAppSearchAccess,
+            appSearch: hasAppSearchAccess,
           },
           catalogue: {
             ...uiCapabilities.catalogue,
-            app_search: hasAppSearchAccess,
+            appSearch: hasAppSearchAccess,
           },
         };
       }

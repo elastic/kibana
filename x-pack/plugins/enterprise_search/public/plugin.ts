@@ -43,7 +43,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     const config = { host: this.config.host };
 
     core.application.register({
-      id: 'app_search',
+      id: 'appSearch',
       title: 'App Search',
       appRoute: '/app/enterprise_search/app_search',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
@@ -61,7 +61,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     // TODO: Workplace Search will need to register its own plugin.
 
     plugins.home.featureCatalogue.register({
-      id: 'app_search',
+      id: 'appSearch',
       title: 'App Search',
       icon: AppSearchLogo,
       description:

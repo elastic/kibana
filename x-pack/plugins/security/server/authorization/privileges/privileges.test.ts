@@ -258,7 +258,7 @@ describe('features', () => {
               actions.ui.get('management', 'kibana', 'spaces'),
             ]
           : []),
-        ...(expectEnterpriseSearch ? [actions.ui.get('enterprise_search', 'all')] : []),
+        ...(expectEnterpriseSearch ? [actions.ui.get('enterpriseSearch', 'all')] : []),
         actions.ui.get('catalogue', 'all-catalogue-1'),
         actions.ui.get('catalogue', 'all-catalogue-2'),
         actions.ui.get('management', 'all-management', 'all-management-1'),
@@ -453,7 +453,7 @@ describe('features', () => {
               actions.ui.get('management', 'kibana', 'spaces'),
             ]
           : []),
-        ...(expectEnterpriseSearch ? [actions.ui.get('enterprise_search', 'all')] : []),
+        ...(expectEnterpriseSearch ? [actions.ui.get('enterpriseSearch', 'all')] : []),
       ]);
       expect(actual).toHaveProperty(`${group}.read`, [actions.login, actions.version]);
     });
@@ -518,7 +518,7 @@ describe('features', () => {
               actions.ui.get('management', 'kibana', 'spaces'),
             ]
           : []),
-        ...(expectEnterpriseSearch ? [actions.ui.get('enterprise_search', 'all')] : []),
+        ...(expectEnterpriseSearch ? [actions.ui.get('enterpriseSearch', 'all')] : []),
       ]);
       expect(actual).toHaveProperty(`${group}.read`, [actions.login, actions.version]);
     });
@@ -584,7 +584,7 @@ describe('features', () => {
               actions.ui.get('management', 'kibana', 'spaces'),
             ]
           : []),
-        ...(expectEnterpriseSearch ? [actions.ui.get('enterprise_search', 'all')] : []),
+        ...(expectEnterpriseSearch ? [actions.ui.get('enterpriseSearch', 'all')] : []),
       ]);
       expect(actual).toHaveProperty(`${group}.read`, [actions.login, actions.version]);
     });
@@ -846,7 +846,7 @@ describe('subFeatures', () => {
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
-        actions.ui.get('enterprise_search', 'all'),
+        actions.ui.get('enterpriseSearch', 'all'),
         actions.ui.get('foo', 'foo'),
       ]);
       expect(actual).toHaveProperty('global.read', [
@@ -998,7 +998,7 @@ describe('subFeatures', () => {
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
-        actions.ui.get('enterprise_search', 'all'),
+        actions.ui.get('enterpriseSearch', 'all'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1197,7 +1197,7 @@ describe('subFeatures', () => {
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
-        actions.ui.get('enterprise_search', 'all'),
+        actions.ui.get('enterpriseSearch', 'all'),
       ]);
       expect(actual).toHaveProperty('global.read', [actions.login, actions.version]);
 
@@ -1324,7 +1324,7 @@ describe('subFeatures', () => {
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
-        actions.ui.get('enterprise_search', 'all'),
+        actions.ui.get('enterpriseSearch', 'all'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1487,7 +1487,7 @@ describe('subFeatures', () => {
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
-        actions.ui.get('enterprise_search', 'all'),
+        actions.ui.get('enterpriseSearch', 'all'),
       ]);
       expect(actual).toHaveProperty('global.read', [actions.login, actions.version]);
 
@@ -1603,7 +1603,7 @@ describe('subFeatures', () => {
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
-        actions.ui.get('enterprise_search', 'all'),
+        actions.ui.get('enterpriseSearch', 'all'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),

@@ -16,8 +16,8 @@ export class NavLinksBuilder {
         navLinkId: 'kibana:stack_management',
       },
       // TODO: Temp until navLinkIds fix is merged in
-      app_search: {
-        navLinkId: 'app_search',
+      appSearch: {
+        navLinkId: 'appSearch',
       },
     };
   }

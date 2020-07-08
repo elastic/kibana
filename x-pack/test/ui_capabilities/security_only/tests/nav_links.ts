@@ -49,7 +49,7 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(
-              navLinksBuilder.except('ml', 'monitoring', 'app_search')
+              navLinksBuilder.except('ml', 'monitoring', 'appSearch')
             );
             break;
           case 'foo_all':
