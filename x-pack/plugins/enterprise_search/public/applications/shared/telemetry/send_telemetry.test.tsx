@@ -27,7 +27,7 @@ describe('Shared Telemetry Helpers', () => {
       });
 
       expect(httpMock.put).toHaveBeenCalledWith('/api/enterprise_search/telemetry', {
-        headers: { 'content-type': 'application/json; charset=utf-8' },
+        headers: { 'Content-Type': 'application/json' },
         body: '{"action":"viewed","metric":"setup_guide"}',
       });
     });
@@ -48,7 +48,7 @@ describe('Shared Telemetry Helpers', () => {
       });
 
       expect(httpMock.put).toHaveBeenCalledWith('/api/app_search/telemetry', {
-        headers: { 'content-type': 'application/json; charset=utf-8' },
+        headers: { 'Content-Type': 'application/json' },
         body: '{"action":"clicked","metric":"button"}',
       });
     });
