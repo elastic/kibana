@@ -99,6 +99,23 @@ export class EnterpriseSearchPlugin implements Plugin {
       }
     );
 
+    capabilities.registerSwitcher(async (request: KibanaRequest) => {
+      const dependencies = { config, security, request, log: this.logger };
+
+      const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
+
+      return {
+        navLinks: {
+          appSearch: hasAppSearchAccess,
+          workplaceSearch: hasWorkplaceSearchAccess,
+        },
+        catalogue: {
+          appSearch: hasAppSearchAccess,
+          workplaceSearch: hasWorkplaceSearchAccess,
+        },
+      };
+    });
+
     /**
      * Register routes
      */
@@ -114,21 +131,23 @@ export class EnterpriseSearchPlugin implements Plugin {
      */
     savedObjects.registerType(appSearchTelemetryType);
     savedObjects.registerType(workplaceSearchTelemetryType);
+    let savedObjectsStarted: SavedObjectsServiceStart;
 
     getStartServices().then(([coreStart]) => {
-      const savedObjectsStarted = coreStart.savedObjects as SavedObjectsServiceStart;
-
-      const telemetryRouteDependencies = {
-        ...dependencies,
-        getSavedObjectsService: () => savedObjectsStarted,
-      };
-      registerASTelemetryRoute(telemetryRouteDependencies);
-      registerWSTelemetryRoute(telemetryRouteDependencies);
+      savedObjectsStarted = coreStart.savedObjects;
 
       if (usageCollection) {
         registerASTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
         registerWSTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
       }
+
+      const telemetryRouteDependencies = {
+        ...dependencies,
+        getSavedObjectsService: () => savedObjectsStarted,
+      };
+
+      registerASTelemetryRoute(telemetryRouteDependencies);
+      registerWSTelemetryRoute(telemetryRouteDependencies);
     });
   }
 
