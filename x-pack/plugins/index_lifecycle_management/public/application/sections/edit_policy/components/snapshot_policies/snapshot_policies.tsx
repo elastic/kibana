@@ -94,7 +94,7 @@ export const SnapshotPolicies: React.FunctionComponent<Props> = ({ value, onChan
           title={
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.noPoliciesCreatedTitle"
-              defaultMessage="No policies"
+              defaultMessage="No snapshot policies found"
             />
           }
         >
