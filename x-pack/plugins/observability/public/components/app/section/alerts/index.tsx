@@ -56,6 +56,7 @@ export const AlertsSection = ({ alerts }: Props) => {
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiSelect
+                compressed
                 id="filterAlerts"
                 options={[allTypes, ...filterOptions]}
                 value={filter}
