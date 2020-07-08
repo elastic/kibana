@@ -55,6 +55,10 @@ export const createNewTimeline = () => {
   cy.get(CLOSE_TIMELINE_BTN).click({ force: true });
 };
 
+export const executeTimelineKQL = (query: string) => {
+  cy.get(`${SEARCH_OR_FILTER_CONTAINER} textarea`).type(`${query} {enter}`);
+};
+
 export const expandFirstTimelineEventDetails = () => {
   cy.get(TOGGLE_TIMELINE_EXPAND_EVENT).first().click({ force: true });
 };

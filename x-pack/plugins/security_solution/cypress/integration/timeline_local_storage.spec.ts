@@ -8,7 +8,7 @@ import { reload } from '../tasks/common';
 import { loginAndWaitForPage } from '../tasks/login';
 import { HOSTS_URL } from '../urls/navigation';
 import { openEvents } from '../tasks/hosts/main';
-import { EVENTS_VIEWER_PANEL, DRAGGABLE_HEADER } from '../screens/timeline';
+import { DRAGGABLE_HEADER } from '../screens/timeline';
 import { TABLE_COLUMN_EVENTS_MESSAGE } from '../screens/hosts/external_events';
 import { waitsForEventsToBeLoaded, openEventsViewerFieldsBrowser } from '../tasks/hosts/events';
 import { removeColumn, resetFields } from '../tasks/timeline';
