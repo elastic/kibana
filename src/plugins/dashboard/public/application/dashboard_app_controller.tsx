@@ -434,7 +434,6 @@ export class DashboardAppController {
               if ('id' in incomingState) {
                 container.addOrUpdateEmbeddable<SavedObjectEmbeddableInput>(incomingState.type, {
                   savedObjectId: incomingState.id,
-                  id: incomingState.embeddableIdToReplace,
                 });
               } else if ('input' in incomingState) {
                 const input = incomingState.input;
