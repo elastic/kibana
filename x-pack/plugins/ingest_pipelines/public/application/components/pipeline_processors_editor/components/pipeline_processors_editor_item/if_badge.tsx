@@ -13,10 +13,10 @@ interface Props {
 }
 
 const i18nTexts = {
-  badgeBody: i18n.translate('xpack.ingestPipelines.pipelineEditor.item.moveButtonLabel', {
+  badgeBody: i18n.translate('xpack.ingestPipelines.pipelineEditor.item.ifBadgeLabel', {
     defaultMessage: 'if',
   }),
-  toolTip: i18n.translate('xpack.ingestPipelines.pipelineEditor.item.moveButtonLabel', {
+  toolTip: i18n.translate('xpack.ingestPipelines.pipelineEditor.item.ifBadgeToolTipContent', {
     defaultMessage: 'Copy to clipboard',
   }),
 };

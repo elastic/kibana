@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { notificationServiceMock } from '../../../../../../../../src/core/public/mocks';
 import { setup, SetupResult } from './pipeline_processors_editor.helpers';
 import { Pipeline } from '../../../../../common/types';
 
@@ -45,6 +47,9 @@ describe('Pipeline Editor', () => {
       onUpdate,
       links: {
         esDocsBasePath: 'test',
+      },
+      services: {
+        notifications: notificationServiceMock.createSetupContract().toasts,
       },
     });
   });
