@@ -76,6 +76,10 @@ const StyledTitleRule = memo(styled('hr')`
     margin-left: 0.5em;
   }
 `);
+const StyledTime = memo(styled('time')`
+  display: inline-block;
+  text-align: start;
+`);
 
 const TitleHr = memo(() => {
   return (
@@ -308,7 +312,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
 
   return (
     <>
-      <StyledBreadcrumbs truncate={false} breadcrumbs={crumbs} />
+      <StyledBreadcrumbs breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
       <EuiText size="s">
         <BoldCode>
@@ -321,11 +325,13 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
             defaultMessage="{category} {eventType}"
           />
         </BoldCode>
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.atTime"
-          values={{ date: formattedDate }}
-          defaultMessage="@ {date}"
-        />
+        <StyledTime dateTime={formattedDate}>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.atTime"
+            values={{ date: formattedDate }}
+            defaultMessage="@ {date}"
+          />
+        </StyledTime>
       </EuiText>
       <EuiSpacer size="m" />
       <EuiText>

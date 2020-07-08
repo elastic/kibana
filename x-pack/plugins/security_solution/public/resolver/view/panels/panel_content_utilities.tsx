@@ -45,10 +45,8 @@ const ThemedBreadcrumbs = styled(EuiBreadcrumbs)<{ background: string; text: str
  */
 export const StyledBreadcrumbs = memo(function StyledBreadcrumbs({
   breadcrumbs,
-  truncate,
 }: {
   breadcrumbs: Breadcrumb[];
-  truncate?: boolean;
 }) {
   const {
     colorMap: { resolverBreadcrumbBackground, resolverEdgeText },
@@ -58,7 +56,7 @@ export const StyledBreadcrumbs = memo(function StyledBreadcrumbs({
       background={resolverBreadcrumbBackground}
       text={resolverEdgeText}
       breadcrumbs={breadcrumbs}
-      truncate={truncate}
+      truncate={false}
     />
   );
 });
