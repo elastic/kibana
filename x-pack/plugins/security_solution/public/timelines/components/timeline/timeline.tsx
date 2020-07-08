@@ -172,27 +172,19 @@ export const TimelineComponent: React.FC<Props> = ({
     [sort.columnId, sort.sortDirection]
   );
   const [isQueryLoading, setIsQueryLoading] = useState(false);
-  const {
-    initializeTimeline,
-    setIndexToAdd,
-    setIsTimelineLoading,
-    setTimelineFilterManager,
-    setTimelineRowActions,
-  } = useManageTimeline();
+  const { initializeTimeline, setIndexToAdd, setIsTimelineLoading } = useManageTimeline();
   useEffect(() => {
-    initializeTimeline({ id, indexToAdd });
-    setTimelineRowActions({
+    initializeTimeline({
+      filterManager,
       id,
-      timelineRowActions: [getInvestigateInResolverAction({ dispatch, timelineId: id })],
+      indexToAdd,
+      timelineRowActions: () => [getInvestigateInResolverAction({ dispatch, timelineId: id })],
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
     setIsTimelineLoading({ id, isLoading: isQueryLoading || loadingIndexName });
   }, [loadingIndexName, id, isQueryLoading, setIsTimelineLoading]);
-  useEffect(() => {
-    setTimelineFilterManager({ id, filterManager });
-  }, [filterManager, id, setTimelineFilterManager]);
 
   useEffect(() => {
     setIndexToAdd({ id, indexToAdd });

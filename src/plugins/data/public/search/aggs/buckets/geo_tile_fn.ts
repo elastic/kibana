@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from '../../../../../expressions/public';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
 

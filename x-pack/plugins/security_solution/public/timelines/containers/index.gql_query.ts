@@ -212,6 +212,7 @@ export const timelineQuery = gql`
                   note
                   type
                   threshold
+                  exceptions_list
                 }
               }
               suricata {

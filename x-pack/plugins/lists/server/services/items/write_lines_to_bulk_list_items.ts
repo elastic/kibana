@@ -8,13 +8,19 @@ import { Readable } from 'stream';
 
 import { LegacyAPICaller } from 'kibana/server';
 
-import { MetaOrUndefined, Type } from '../../../common/schemas';
+import {
+  DeserializerOrUndefined,
+  MetaOrUndefined,
+  SerializerOrUndefined,
+  Type,
+} from '../../../common/schemas';
 
 import { BufferLines } from './buffer_lines';
-import { getListItemByValues } from './get_list_item_by_values';
 import { createListItemsBulk } from './create_list_items_bulk';
 
 export interface ImportListItemsToStreamOptions {
+  deserializer: DeserializerOrUndefined;
+  serializer: SerializerOrUndefined;
   listId: string;
   stream: Readable;
   callCluster: LegacyAPICaller;
@@ -25,6 +31,8 @@ export interface ImportListItemsToStreamOptions {
 }
 
 export const importListItemsToStream = ({
+  deserializer,
+  serializer,
   listId,
   stream,
   callCluster,
@@ -39,9 +47,11 @@ export const importListItemsToStream = ({
       await writeBufferToItems({
         buffer: lines,
         callCluster,
+        deserializer,
         listId,
         listItemIndex,
         meta,
+        serializer,
         type,
         user,
       });
@@ -55,6 +65,8 @@ export const importListItemsToStream = ({
 
 export interface WriteBufferToItemsOptions {
   listId: string;
+  deserializer: DeserializerOrUndefined;
+  serializer: SerializerOrUndefined;
   callCluster: LegacyAPICaller;
   listItemIndex: string;
   buffer: string[];
@@ -65,38 +77,29 @@ export interface WriteBufferToItemsOptions {
 
 export interface LinesResult {
   linesProcessed: number;
-  duplicatesFound: number;
 }
 
 export const writeBufferToItems = async ({
   listId,
   callCluster,
+  deserializer,
+  serializer,
   listItemIndex,
   buffer,
   type,
   user,
   meta,
 }: WriteBufferToItemsOptions): Promise<LinesResult> => {
-  const items = await getListItemByValues({
-    callCluster,
-    listId,
-    listItemIndex,
-    type,
-    value: buffer,
-  });
-  const duplicatesRemoved = buffer.filter(
-    (bufferedValue) => !items.some((item) => item.value === bufferedValue)
-  );
-  const linesProcessed = duplicatesRemoved.length;
-  const duplicatesFound = buffer.length - duplicatesRemoved.length;
   await createListItemsBulk({
     callCluster,
+    deserializer,
     listId,
     listItemIndex,
     meta,
+    serializer,
     type,
     user,
-    value: duplicatesRemoved,
+    value: buffer,
   });
-  return { duplicatesFound, linesProcessed };
+  return { linesProcessed: buffer.length };
 };
