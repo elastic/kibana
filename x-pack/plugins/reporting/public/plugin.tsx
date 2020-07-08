@@ -115,8 +115,7 @@ export class ReportingPublicPlugin implements Plugin<void, void> {
       showOnHomePage: false,
       category: FeatureCatalogueCategory.ADMIN,
     });
-
-    management.sections.section.insightAndAlerting.registerApp({
+    management.sections.section.insightsAndAlerting.registerApp({
       id: 'reporting',
       title: this.title,
       order: 1,

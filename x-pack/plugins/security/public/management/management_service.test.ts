@@ -9,6 +9,7 @@ import {
   ManagementApp,
   ManagementSetup,
   ManagementStart,
+  DefinedSections,
 } from '../../../../../src/plugins/management/public';
 import { SecurityLicenseFeatures } from '../../common/licensing/license_features';
 import { ManagementService } from './management_service';
@@ -33,6 +34,7 @@ describe('ManagementService', () => {
       const managementSetup: ManagementSetup = {
         sections: {
           register: jest.fn(),
+          section: {} as DefinedSections,
           getSection: jest.fn().mockReturnValue(mockSection),
         },
       };
@@ -89,6 +91,7 @@ describe('ManagementService', () => {
       const managementSetup: ManagementSetup = {
         sections: {
           register: jest.fn(),
+          section: {} as DefinedSections,
           getSection: jest.fn().mockReturnValue(mockSection),
         },
       };
@@ -125,10 +128,7 @@ describe('ManagementService', () => {
 
       const managementStart: ManagementStart = {
         sections: {
-          getSection: jest
-            .fn()
-            .mockReturnValue({ getApp: jest.fn().mockImplementation((id) => mockApps.get(id)) }),
-          getAllSections: jest.fn(),
+          section: {} as DefinedSections,
           getSectionsEnabled: jest.fn(),
         },
       };

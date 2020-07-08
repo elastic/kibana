@@ -68,7 +68,6 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, , selfStart] = await core.getStartServices();
-        // const selfStart = (await core.getStartServices())[2] ;
 
         return renderApp(params, {
           kibanaVersion,

@@ -26,9 +26,18 @@ export interface ManagementSetup {
   sections: SectionsServiceSetup;
 }
 
+export interface DefinedSections {
+  ingest: ManagementSection;
+  data: ManagementSection;
+  insightsAndAlerting: ManagementSection;
+  security: ManagementSection;
+  kibana: ManagementSection;
+  stack: ManagementSection;
+}
+
 export interface ManagementStart {
   sections: {
-    section: SectionsServiceStart['section'];
+    section: DefinedSections;
     getSectionsEnabled: () => ManagementSection[];
   };
 }
@@ -39,7 +48,7 @@ export interface SectionsServiceStartDeps {
 
 export interface SectionsServiceSetup {
   register: (args: Omit<RegisterManagementSectionArgs, 'capabilities'>) => ManagementSection;
-  section: Record<string, ManagementSection>;
+  section: DefinedSections;
   getSection: (sectionId: ManagementSectionId | string) => ManagementSection;
 }
 
@@ -48,7 +57,7 @@ export interface SectionsServiceStart {
   getAllSections: () => ManagementSection[];
   getSectionsEnabled: () => ManagementSection[];
 
-  section: Record<string, ManagementSection>;
+  section: DefinedSections;
 }
 
 export enum ManagementSectionId {

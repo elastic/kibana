@@ -19,7 +19,6 @@
 
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import {
-  // managementSections,
   IngestSection,
   DataSection,
   InsightsAndAlertingSection,
@@ -33,17 +32,11 @@ import {
   SectionsServiceSetup,
   SectionsServiceStart,
   SectionsServiceStartDeps,
+  DefinedSections,
 } from './types';
 
 export class ManagementSectionsService {
-  definedSections: {
-    ingest: ManagementSection;
-    data: ManagementSection;
-    insightsAndAlerting: ManagementSection;
-    security: ManagementSection;
-    kibana: ManagementSection;
-    stack: ManagementSection;
-  };
+  definedSections: DefinedSections;
 
   constructor() {
     this.definedSections = {
