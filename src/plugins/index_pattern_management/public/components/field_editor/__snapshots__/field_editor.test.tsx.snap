@@ -836,7 +836,6 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
                   testlang
                 </eui-code>,
                 "painlessLink": <eui-link
-                  href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html"
                   target="_blank"
                 >
                   <FormattedMessage
