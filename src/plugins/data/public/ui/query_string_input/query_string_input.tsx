@@ -55,6 +55,7 @@ interface Props {
   bubbleSubmitEvent?: boolean;
   placeholder?: string;
   languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
+  onBlur?: () => void;
   onChange?: (query: Query) => void;
   onChangeQueryInputFocus?: (isFocused: boolean) => void;
   onSubmit?: (query: Query) => void;
