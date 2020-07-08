@@ -839,6 +839,17 @@ Object {
             },
           },
         },
+        "cloud": Object {
+          "properties": Object {
+            "took": Object {
+              "properties": Object {
+                "ms": Object {
+                  "type": "long",
+                },
+              },
+            },
+          },
+        },
         "groupings": Object {
           "properties": Object {
             "took": Object {

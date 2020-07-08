@@ -57,13 +57,19 @@ The mapping used there can be generated with the output of the [`getTelemetryMap
 
 To make a change to the mapping, edit this function, run the tests to update the snapshots, then use the `merge_telemetry_mapping` script to merge the data into the telemetry repository.
 
+When adding a task, the key of the task and the `took` properties need to be added under the `tasks` properties in the mapping, as when tasks run they report the time they took.
+
 If the [telemetry repository](https://github.com/elastic/telemetry) is cloned as a sibling to the kibana directory, you can run the following from x-pack/plugins/apm:
 
 ```bash
-node ./scripts/merge-telemetry-mapping.js ../../../../telemetry/config/templates/xpack-phone-home.json
+node ./scripts/merge-telemetry-mapping.js ../../../../telemetry slug-for-my-change 7.9
 ```
 
-this will replace the contents of the mapping in the repository checkout with the updated mapping. You can then [follow the telemetry team's instructions](https://github.com/elastic/telemetry#mappings) for opening a pull request with the mapping changes.
+this will replace the contents of the mapping in the repository checkout with the updated mapping.
+
+It will also create a file in the mapping_migrations directory named "00XX-slug-for-my-change". You'll need to rename the file to replace the "XX" with the next sequential migration number based on what's there already and in open pull requests.
+
+You can then [follow the telemetry team's instructions](https://github.com/elastic/telemetry#mappings) for opening a pull request with the mapping changes.
 
 The queries for the stats are in the [collect data telemetry tasks](../server/lib/apm_telemetry/collect_data_telemetry/tasks.ts).
 

@@ -65,4 +65,63 @@ describe('data telemetry collection tasks', () => {
       });
     });
   });
+
+  describe('indices_stats', () => {
+    const indicesStatsTask = tasks.find(
+      (task) => task.name === 'indices_stats'
+    );
+
+    it('returns a map of index stats', async () => {
+      const indicesStats = jest.fn().mockResolvedValueOnce({
+        _all: { total: { docs: { count: 1 }, store: { size_in_bytes: 1 } } },
+        _shards: { total: 1 },
+      });
+
+      expect(
+        await indicesStatsTask?.executor({ indices, indicesStats } as any)
+      ).toEqual({
+        indices: {
+          shards: {
+            total: 1,
+          },
+          all: {
+            total: {
+              docs: {
+                count: 1,
+              },
+              store: {
+                size_in_bytes: 1,
+              },
+            },
+          },
+        },
+      });
+    });
+
+    describe('with no results', () => {
+      it('returns zero values', async () => {
+        const indicesStats = jest.fn().mockResolvedValueOnce({});
+
+        expect(
+          await indicesStatsTask?.executor({ indices, indicesStats } as any)
+        ).toEqual({
+          indices: {
+            shards: {
+              total: 0,
+            },
+            all: {
+              total: {
+                docs: {
+                  count: 0,
+                },
+                store: {
+                  size_in_bytes: 0,
+                },
+              },
+            },
+          },
+        });
+      });
+    });
+  });
 });

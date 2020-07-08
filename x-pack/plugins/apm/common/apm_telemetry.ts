@@ -199,6 +199,7 @@ export function getApmTelemetryMapping() {
           agent_configuration: tookProperties,
           agents: tookProperties,
           cardinality: tookProperties,
+          cloud: tookProperties,
           groupings: tookProperties,
           indices_stats: tookProperties,
           integrations: tookProperties,
@@ -233,4 +234,27 @@ export function mergeApmTelemetryMapping(
     draft.mappings.properties.stack_stats.properties.kibana.properties.plugins.properties.apm = getApmTelemetryMapping();
     return draft;
   });
+}
+
+/**
+ * Create the just the mapping at its full path
+ */
+export function getApmTelemetryMappingFullPath() {
+  return {
+    properties: {
+      stack_stats: {
+        properties: {
+          kibana: {
+            properties: {
+              plugins: {
+                properties: {
+                  apm: getApmTelemetryMapping(),
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
 }
