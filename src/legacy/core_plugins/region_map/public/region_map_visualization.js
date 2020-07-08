@@ -20,13 +20,14 @@
 import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
 import _ from 'lodash';
 import { BaseMapsVisualizationProvider } from '../../tile_map/public/base_maps_visualization';
+import { ORIGIN } from '../../tile_map/common/origin';
 import ChoroplethLayer from './choropleth_layer';
 import { truncatedColorMaps }  from 'ui/vislib/components/color/truncated_colormaps';
 import AggResponsePointSeriesTooltipFormatterProvider from './tooltip_formatter';
 import 'ui/vis/map/service_settings';
 import { toastNotifications } from 'ui/notify';
 
-export function RegionMapsVisualizationProvider(Private, config, i18n) {
+export function RegionMapsVisualizationProvider(Private, config, i18n, regionmapsConfig, serviceSettings) {
 
   const tooltipFormatter = Private(AggResponsePointSeriesTooltipFormatterProvider);
   const BaseMapsVisualization = Private(BaseMapsVisualizationProvider);
@@ -61,17 +62,18 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
         });
       }
 
-      if (!this._vis.params.selectedJoinField && this._vis.params.selectedLayer) {
-        this._vis.params.selectedJoinField = this._vis.params.selectedLayer.fields[0];
+      const selectedLayer = await this._loadConfig(this.vis.params.selectedLayer);
+      if (!this.vis.params.selectedJoinField && selectedLayer) {
+        this.vis.params.selectedJoinField = selectedLayer.fields[0];
       }
 
-      if (!this._vis.params.selectedLayer) {
+      if (!selectedLayer) {
         return;
       }
 
       this._updateChoroplethLayerForNewMetrics(
-        this._vis.params.selectedLayer.name,
-        this._vis.params.selectedLayer.attribution,
+        selectedLayer.name,
+        selectedLayer.attribution,
         this._vis.params.showAllShapes,
         results
       );
@@ -82,27 +84,55 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
       this._kibanaMap.useUiStateFromVisualization(this._vis);
     }
 
+    async _loadConfig(fileLayerConfig) {
+      // Load the selected layer from the metadata-service.
+      // Do not use the selectedLayer from the visState.
+      // These settings are stored in the URL and can be used to inject dirty display content.
+
+      if (
+        fileLayerConfig.isEMS || //Hosted by EMS. Metadata needs to be resolved through EMS
+        (fileLayerConfig.layerId && fileLayerConfig.layerId.startsWith(`${ORIGIN.EMS}.`)) //fallback for older saved objects
+      ) {
+        return await serviceSettings.loadFileLayerConfig(fileLayerConfig);
+      }
+
+      //Configured in the kibana.yml. Needs to be resolved through the settings.
+      const configuredLayer = regionmapsConfig.layers.find(
+        (layer) => layer.name === fileLayerConfig.name
+      );
+
+      if (configuredLayer) {
+        return {
+          ...configuredLayer,
+          attribution: _.escape(configuredLayer.attribution ? configuredLayer.attribution : ''),
+        };
+      }
+
+      return null;
+    }
+
     async  _updateParams() {
 
       await super._updateParams();
 
-      const visParams = this.vis.params;
-      if (!visParams.selectedJoinField && visParams.selectedLayer) {
-        visParams.selectedJoinField = visParams.selectedLayer.fields[0];
+      const selectedLayer = await this._loadConfig(this.vis.params.selectedLayer);
+
+      if (!this.vis.params.selectedJoinField && selectedLayer) {
+        this.vis.params.selectedJoinField = selectedLayer.fields[0];
       }
 
-      if (!visParams.selectedJoinField || !visParams.selectedLayer) {
+      if (!this.vis.params.selectedJoinField || !selectedLayer) {
         return;
       }
 
       this._updateChoroplethLayerForNewProperties(
-        visParams.selectedLayer.name,
-        visParams.selectedLayer.attribution,
+        selectedLayer.name,
+        selectedLayer.attribution,
         this._vis.params.showAllShapes
       );
-      this._choroplethLayer.setJoinField(visParams.selectedJoinField.name);
-      this._choroplethLayer.setColorRamp(truncatedColorMaps[visParams.colorSchema].value);
-      this._choroplethLayer.setLineWeight(visParams.outlineWeight);
+      this._choroplethLayer.setJoinField(this.vis.params.selectedJoinField.name);
+      this._choroplethLayer.setColorRamp(truncatedColorMaps[this.vis.params.colorSchema].value);
+      this._choroplethLayer.setLineWeight(this.vis.params.outlineWeight);
       this._setTooltipFormatter();
 
     }
@@ -136,14 +166,14 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
           this.vis.params.selectedLayer
         );
       } else {
-        this._choroplethLayer = new ChoroplethLayer(
+        this._choroplethLayer = new ChoroplethLayer({
           name,
           attribution,
-          this.vis.params.selectedLayer.format,
-          showAllData,
-          this.vis.params.selectedLayer.meta,
-          this.vis.params.selectedLayer
-        );
+          format: this.vis.params.selectedLayer.format,
+          showAllShapes: showAllData,
+          meta: this.vis.params.selectedLayer.meta,
+          layerConfig: this.vis.params.selectedLayer
+        });
       }
 
       this._choroplethLayer.on('select', (event) => {

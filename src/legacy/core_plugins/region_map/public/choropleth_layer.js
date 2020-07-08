@@ -78,7 +78,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
   }
 
 
-  constructor(name, attribution, format, showAllShapes, meta, layerConfig) {
+  constructor({ name, attribution, format, showAllShapes, meta, layerConfig }) {
 
     super();
 
@@ -263,7 +263,14 @@ CORS configuration of the server permits requests from the Kibana application on
   }
 
   cloneChoroplethLayerForNewData(name, attribution, format, showAllData, meta, layerConfig) {
-    const clonedLayer = new ChoroplethLayer(name, attribution, format, showAllData, meta, layerConfig);
+    const clonedLayer = new ChoroplethLayer({
+      name,
+      attribution,
+      format,
+      showAllShapes: showAllData,
+      meta,
+      layerConfig }
+    );
     clonedLayer.setJoinField(this._joinField);
     clonedLayer.setColorRamp(this._colorRamp);
     clonedLayer.setLineWeight(this._lineWeight);
