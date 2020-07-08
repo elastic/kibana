@@ -240,16 +240,25 @@ export const HostList = () => {
         truncateText: true,
         // eslint-disable-next-line react/display-name
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied']) => {
-          const toRoutePath = getPolicyDetailPath(policy.id);
-          const toRouteUrl = formatUrl(toRoutePath);
-          return (
-            <HostListNavLink
-              name={policy.name}
-              href={toRouteUrl}
-              route={toRoutePath}
-              dataTestSubj="policyNameCellLink"
-            />
-          );
+          if (policy.id && policy.id !== '') {
+            const toRoutePath = getPolicyDetailPath(policy.id);
+            const toRouteUrl = formatUrl(toRoutePath);
+            return (
+              <HostListNavLink
+                name={policy.name}
+                href={toRouteUrl}
+                route={toRoutePath}
+                dataTestSubj="policyNameCellLink"
+              />
+            );
+          } else {
+            return (
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.host.details.policyNotAppliedList"
+                defaultMessage="Policy not yet applied"
+              />
+            );
+          }
         },
       },
       {

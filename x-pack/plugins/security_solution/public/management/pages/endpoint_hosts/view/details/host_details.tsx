@@ -117,9 +117,11 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
   const policyStatusClickHandler = useNavigateByRouterEventHandler(policyResponseRoutePath);
 
   const [policyDetailsRoutePath, policyDetailsRouteUrl] = useMemo(() => {
+    const policyAppliedExists =
+      details.Endpoint.policy.applied.id && details.Endpoint.policy.applied.id !== '';
     return [
-      getPolicyDetailPath(details.Endpoint.policy.applied.id),
-      formatUrl(getPolicyDetailPath(details.Endpoint.policy.applied.id)),
+      policyAppliedExists ? getPolicyDetailPath(details.Endpoint.policy.applied.id) : '',
+      policyAppliedExists ? formatUrl(getPolicyDetailPath(details.Endpoint.policy.applied.id)) : '',
     ];
   }, [details.Endpoint.policy.applied.id, formatUrl]);
 
@@ -133,14 +135,23 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         }),
         description: (
           <>
-            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-            <EuiLink
-              data-test-subj="policyDetailsValue"
-              href={policyDetailsRouteUrl}
-              onClick={policyDetailsClickHandler}
-            >
-              {details.Endpoint.policy.applied.name}
-            </EuiLink>
+            {policyDetailsRouteUrl ? (
+              <>
+                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                <EuiLink
+                  data-test-subj="policyDetailsValue"
+                  href={policyDetailsRouteUrl}
+                  onClick={policyDetailsClickHandler}
+                >
+                  {details.Endpoint.policy.applied.name}
+                </EuiLink>
+              </>
+            ) : (
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.host.details.policyNotAppliedDetails"
+                defaultMessage="Policy not yet applied"
+              />
+            )}
           </>
         ),
       },
