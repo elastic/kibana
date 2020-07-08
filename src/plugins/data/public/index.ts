@@ -334,18 +334,13 @@ export {
   OptionedValueProp,
   // search
   ES_SEARCH_STRATEGY,
-  SYNC_SEARCH_STRATEGY,
   getEsPreference,
   getSearchErrorType,
-  ISearchStrategy,
   ISearch,
   ISearchOptions,
-  IRequestTypesMap,
-  IResponseTypesMap,
   ISearchGeneric,
   IEsSearchResponse,
   IEsSearchRequest,
-  ISyncSearchRequest,
   IKibanaSearchResponse,
   IKibanaSearchRequest,
   SearchRequest,
@@ -365,6 +360,7 @@ export {
   TabbedAggRow,
   TabbedTable,
   SearchInterceptor,
+  SearchInterceptorDeps,
   RequestTimeoutError,
 } from './search';
 

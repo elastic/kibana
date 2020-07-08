@@ -90,6 +90,7 @@ import { redisenterpriseMetricsSpecProvider } from './redisenterprise_metrics';
 import { openmetricsMetricsSpecProvider } from './openmetrics_metrics';
 import { iisMetricsSpecProvider } from './iis_metrics';
 import { azureLogsSpecProvider } from './azure_logs';
+import { googlecloudMetricsSpecProvider } from './googlecloud_metrics';
 
 export const builtInTutorials = [
   systemLogsSpecProvider,
@@ -166,4 +167,5 @@ export const builtInTutorials = [
   openmetricsMetricsSpecProvider,
   iisMetricsSpecProvider,
   azureLogsSpecProvider,
+  googlecloudMetricsSpecProvider,
 ];
