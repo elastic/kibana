@@ -126,6 +126,7 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
       {/* Pipeline Processors Editor */}
 
       <PipelineProcessorsContextProvider
+        services={{ notifications: services.notifications.toasts }}
         onFlyoutOpen={onEditorFlyoutOpen}
         links={{ esDocsBasePath: services.documentation.getEsDocsBasePath() }}
         onUpdate={onProcessorsUpdate}

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { IToasts } from 'kibana/public';
 import { Dispatch } from 'react';
 import { OnFormUpdateArg } from '../../../shared_imports';
 import { SerializeResult } from './serialize';
@@ -73,7 +73,12 @@ export interface ContextValueState {
   editor: ContextValueEditor;
 }
 
+export interface ContextServices {
+  notifications: IToasts;
+}
+
 export interface ContextValue {
+  services: ContextServices;
   links: Links;
   onTreeAction: OnActionHandler;
   state: ContextValueState;

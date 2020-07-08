@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IToasts } from 'kibana/public';
 import classNames from 'classnames';
 import React, { FunctionComponent, memo } from 'react';
 import {
@@ -14,6 +15,7 @@ import {
   EuiPanel,
   EuiText,
   EuiToolTip,
+  copyToClipboard,
 } from '@elastic/eui';
 
 import { ProcessorInternal, ProcessorSelector, ContextValueEditor } from '../../types';
@@ -26,6 +28,7 @@ import './pipeline_processors_editor_item.scss';
 
 import { InlineTextInput } from './inline_text_input';
 import { ContextMenu } from './context_menu';
+import { IfBadge } from './if_badge';
 import { i18nTexts } from './i18n_texts';
 import { Handlers } from './types';
 
@@ -38,6 +41,7 @@ export interface Props {
   description?: string;
   movingProcessor?: ProcessorInfo;
   renderOnFailureHandlers?: () => React.ReactNode;
+  notifications: IToasts;
 }
 
 export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
@@ -50,6 +54,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     renderOnFailureHandlers,
     editor,
     processorsDispatch,
+    notifications,
   }) {
     const isDisabled = editor.mode.id !== 'idle';
     const isInMoveMode = Boolean(movingProcessor);
@@ -110,6 +115,28 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
       );
     };
 
+    const renderEditButton = () => {
+      const editButton = (
+        <EuiButtonIcon
+          disabled={isDisabled}
+          aria-label={i18nTexts.editButtonLabel}
+          iconType="pencil"
+          size="s"
+          onClick={() => {
+            editor.setMode({
+              id: 'editingProcessor',
+              arg: { processor, selector },
+            });
+          }}
+        />
+      );
+      return editor.mode.id === 'idle' ? (
+        <EuiToolTip content={i18nTexts.editButtonLabel}>{editButton}</EuiToolTip>
+      ) : (
+        editButton
+      );
+    };
+
     return (
       <EuiPanel className={panelClasses} paddingSize="s">
         <EuiFlexGroup
@@ -160,23 +187,20 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                   placeholder={i18nTexts.descriptionPlaceholder}
                 />
               </EuiFlexItem>
+
+              {processor.options.if ? (
+                <EuiFlexItem grow={false}>
+                  <IfBadge
+                    onClick={() => {
+                      copyToClipboard(processor.options.if);
+                      notifications.addInfo(i18nTexts.copiedIfToClipboardNotificationBody);
+                    }}
+                  />
+                </EuiFlexItem>
+              ) : undefined}
+
               <EuiFlexItem className={actionElementClasses} grow={false}>
-                {!isInMoveMode && (
-                  <EuiToolTip content={i18nTexts.editButtonLabel}>
-                    <EuiButtonIcon
-                      disabled={isDisabled}
-                      aria-label={i18nTexts.editButtonLabel}
-                      iconType="pencil"
-                      size="s"
-                      onClick={() => {
-                        editor.setMode({
-                          id: 'editingProcessor',
-                          arg: { processor, selector },
-                        });
-                      }}
-                    />
-                  </EuiToolTip>
-                )}
+                {!isInMoveMode && renderEditButton()}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

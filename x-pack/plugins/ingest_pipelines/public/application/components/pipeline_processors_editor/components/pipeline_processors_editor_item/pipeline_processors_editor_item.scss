@@ -22,6 +22,10 @@
     box-shadow: none !important;
   }
 
+  &__ifBadge {
+    cursor: pointer;
+  }
+
   &__processorTypeLabel {
     line-height: $euiButtonHeightSmall;
   }

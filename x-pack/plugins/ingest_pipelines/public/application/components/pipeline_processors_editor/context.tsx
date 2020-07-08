@@ -24,6 +24,7 @@ import {
   OnUpdateHandlerArg,
   ContextValue,
   ContextValueState,
+  ContextServices,
   Links,
 } from './types';
 
@@ -44,6 +45,7 @@ import { getValue } from './utils';
 const PipelineProcessorsContext = createContext<ContextValue>({} as any);
 
 export interface Props {
+  services: ContextServices;
   links: Links;
   value: {
     processors: Processor[];
@@ -57,6 +59,7 @@ export interface Props {
 }
 
 export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
+  services,
   links,
   value: { processors: originalProcessors, onFailure: originalOnFailureProcessors },
   onUpdate,
@@ -202,6 +205,7 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
         links,
         onTreeAction,
         state,
+        services,
       }}
     >
       {children}

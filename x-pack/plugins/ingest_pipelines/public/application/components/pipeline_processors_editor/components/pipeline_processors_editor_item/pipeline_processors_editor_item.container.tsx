@@ -13,14 +13,15 @@ import {
   Props as ViewComponentProps,
 } from './pipeline_processors_editor_item';
 
-type Props = Omit<ViewComponentProps, 'editor' | 'processorsDispatch'>;
+type Props = Omit<ViewComponentProps, 'editor' | 'processorsDispatch' | 'notifications'>;
 
 export const PipelineProcessorsEditorItem: FunctionComponent<Props> = (props) => {
-  const { state } = usePipelineProcessorsContext();
+  const { state, services } = usePipelineProcessorsContext();
 
   return (
     <ViewComponent
       {...props}
+      notifications={services.notifications}
       editor={state.editor}
       processorsDispatch={state.processors.dispatch}
     />

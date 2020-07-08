@@ -3,8 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiCode } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const i18nTexts = {
   moveButtonLabel: i18n.translate('xpack.ingestPipelines.pipelineEditor.item.moveButtonLabel', {
@@ -51,5 +53,11 @@ export const i18nTexts = {
   descriptionPlaceholder: i18n.translate(
     'xpack.ingestPipelines.pipelineEditor.item.descriptionPlaceholder',
     { defaultMessage: 'No description' }
+  ),
+  copiedIfToClipboardNotificationBody: i18n.translate(
+    'xpack.ingestPipelines.pipelineEditor.item.copiedIfToClipboardNotificationBody',
+    {
+      defaultMessage: 'Copied to clipboard!',
+    }
   ),
 };
