@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SetupPlugins } from '../plugin';
-import { registerAdoptionCollector } from './adoption_collector';
-
-type CollectorDependencies = { kibanaIndex: string } & Pick<SetupPlugins, 'ml' | 'usageCollection'>;
+import { CollectorDependencies } from './types';
+import { registerCollector } from './collector';
 
 export type InitUsageCollectors = (deps: CollectorDependencies) => void;
 
 export const initUsageCollectors: InitUsageCollectors = (dependencies) => {
-  registerAdoptionCollector(dependencies);
+  registerCollector(dependencies);
 };

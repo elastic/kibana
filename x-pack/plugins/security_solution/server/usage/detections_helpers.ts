@@ -13,31 +13,31 @@ import { jobServiceProvider } from '../../../ml/server/models/job_service';
 import { DataRecognizer } from '../../../ml/server/models/data_recognizer';
 import { MlPluginSetup } from '../../../ml/server';
 import { SIGNALS_ID, INTERNAL_IMMUTABLE_KEY } from '../../common/constants';
-import { DetectionRulesAdoptionUsage, MlJobsAdoptionUsage } from './types';
+import { DetectionRulesUsage, MlJobsUsage } from './detections';
 import { isJobStarted } from '../../common/machine_learning/helpers';
 
-interface AdoptionMetric {
+interface DetectionsMetric {
   isElastic: boolean;
   isEnabled: boolean;
 }
 
 const isElasticRule = (tags: string[]) => tags.includes(`${INTERNAL_IMMUTABLE_KEY}:true`);
 
-const initialRuleStats: DetectionRulesAdoptionUsage = {
+const initialRuleUsage: DetectionRulesUsage = {
   detection_rules_custom_enabled: 0,
   detection_rules_custom_disabled: 0,
   detection_rules_elastic_enabled: 0,
   detection_rules_elastic_disabled: 0,
 };
 
-const initialMlJobStats: MlJobsAdoptionUsage = {
+const initialMlJobUsage: MlJobsUsage = {
   ml_jobs_custom_enabled: 0,
   ml_jobs_custom_disabled: 0,
   ml_jobs_elastic_enabled: 0,
   ml_jobs_elastic_disabled: 0,
 };
 
-export const buildRuleStats = (rulesMetrics: AdoptionMetric[]): DetectionRulesAdoptionUsage =>
+export const buildRuleUsage = (rulesMetrics: DetectionsMetric[]): DetectionRulesUsage =>
   rulesMetrics.reduce((stats, { isEnabled, isElastic }) => {
     if (isEnabled && isElastic) {
       return {
@@ -62,9 +62,9 @@ export const buildRuleStats = (rulesMetrics: AdoptionMetric[]): DetectionRulesAd
     } else {
       return stats;
     }
-  }, initialRuleStats);
+  }, initialRuleUsage);
 
-export const buildMlJobStats = (jobMetrics: AdoptionMetric[]): MlJobsAdoptionUsage =>
+export const buildMlJobUsage = (jobMetrics: DetectionsMetric[]): MlJobsUsage =>
   jobMetrics.reduce((stats, { isEnabled, isElastic }) => {
     if (isEnabled && isElastic) {
       return {
@@ -89,13 +89,13 @@ export const buildMlJobStats = (jobMetrics: AdoptionMetric[]): MlJobsAdoptionUsa
     } else {
       return stats;
     }
-  }, initialMlJobStats);
+  }, initialMlJobUsage);
 
 export const fetchRules = async (
   index: string,
   callCluster: LegacyAPICaller
-): Promise<AdoptionMetric[]> => {
-  let ruleMetrics: AdoptionMetric[] = [];
+): Promise<DetectionsMetric[]> => {
+  let ruleMetrics: DetectionsMetric[] = [];
   const ruleSearchOptions: SearchParams = {
     body: { query: { bool: { filter: { term: { 'alert.alertTypeId': SIGNALS_ID } } } } },
     filterPath: ['hits.hits._source.alert.enabled', 'hits.hits._source.alert.tags'],
@@ -122,9 +122,8 @@ export const fetchRules = async (
   return ruleMetrics;
 };
 
-const mlJobGroupId = 'siem';
-export const fetchJobs = async (ml: MlPluginSetup | undefined): Promise<AdoptionMetric[]> => {
-  let jobMetrics: AdoptionMetric[] = [];
+export const fetchJobs = async (ml: MlPluginSetup | undefined): Promise<DetectionsMetric[]> => {
+  let jobMetrics: DetectionsMetric[] = [];
 
   if (ml) {
     try {
@@ -134,7 +133,7 @@ export const fetchJobs = async (ml: MlPluginSetup | undefined): Promise<Adoption
         ({} as unknown) as SavedObjectsClient
       ).listModules();
       const moduleJobs = modules.flatMap((module) => module.jobs);
-      const jobs = await jobServiceProvider(mlCaller).jobsSummary([mlJobGroupId]);
+      const jobs = await jobServiceProvider(mlCaller).jobsSummary(['siem']);
 
       jobMetrics = jobs.map((job) => ({
         isElastic: moduleJobs.some((moduleJob) => moduleJob.id === job.id),

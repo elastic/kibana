@@ -4,18 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface DetectionRulesAdoptionUsage {
-  detection_rules_custom_enabled: number;
-  detection_rules_custom_disabled: number;
-  detection_rules_elastic_enabled: number;
-  detection_rules_elastic_disabled: number;
-}
+import { SetupPlugins } from '../plugin';
 
-export interface MlJobsAdoptionUsage {
-  ml_jobs_custom_enabled: number;
-  ml_jobs_custom_disabled: number;
-  ml_jobs_elastic_enabled: number;
-  ml_jobs_elastic_disabled: number;
-}
-
-export type AdoptionUsage = DetectionRulesAdoptionUsage & MlJobsAdoptionUsage;
+export type CollectorDependencies = { kibanaIndex: string } & Pick<
+  SetupPlugins,
+  'ml' | 'usageCollection'
+>;
