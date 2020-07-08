@@ -11,7 +11,6 @@ import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
 import { LevelLogger as Logger } from '../lib';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
-import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
 import { HandlerFunction } from './types';
 
@@ -100,6 +99,5 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
   }
 
   registerGenerateFromJobParams(reporting, handler, handleError);
-  registerGenerateCsvFromSavedObject(reporting, handler, handleError); // FIXME: remove this https://github.com/elastic/kibana/issues/62986
   registerGenerateCsvFromSavedObjectImmediate(reporting, handleError, logger);
 }
