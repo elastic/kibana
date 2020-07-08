@@ -18,6 +18,7 @@ export {
   ActionType,
   ActionTypeRegistryContract,
   AlertTypeParamsExpressionProps,
+  ActionVariable,
 } from './types';
 export {
   ConnectorAddFlyout,

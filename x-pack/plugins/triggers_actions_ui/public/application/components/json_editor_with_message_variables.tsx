@@ -11,7 +11,7 @@ import { useXJsonMode } from '../../../../../../src/plugins/es_ui_shared/static/
 import { AddMessageVariables } from './add_message_variables';
 
 interface Props {
-  messageVariables: string[] | undefined;
+  messageVariables?: ActionVariable[];
   paramsProperty: string;
   inputTargetValue: string;
   label: string;

@@ -19,7 +19,7 @@ export interface ActionContext extends BaseActionContext {
   message: string;
 }
 
-export interface BaseActionContext {
+export interface BaseActionContext extends Params {
   // the aggType used in the alert
   // the value of the aggField, if used, otherwise 'all documents'
   group: string;
@@ -65,5 +65,5 @@ export function addMessages(
     }
   );
 
-  return { ...baseContext, title, message };
+  return { ...params, ...baseContext, title, message };
 }

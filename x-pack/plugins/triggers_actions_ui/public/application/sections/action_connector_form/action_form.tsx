@@ -38,6 +38,7 @@ import {
   ActionTypeIndex,
   ActionConnector,
   ActionType,
+  ActionVariable,
 } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 import { ConnectorAddModal } from './connector_add_modal';
@@ -61,7 +62,7 @@ interface ActionAccordionFormProps {
   >;
   docLinks: DocLinksStart;
   actionTypes?: ActionType[];
-  messageVariables?: string[];
+  messageVariables?: ActionVariable[];
   defaultActionMessage?: string;
   setHasActionsDisabled?: (value: boolean) => void;
   capabilities: ApplicationStart['capabilities'];

@@ -16,6 +16,7 @@ import { findIndex } from 'lodash/fp';
 import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
+import { ActionVariable } from '../../../../../../triggers_actions_ui/public';
 import { setFieldValue } from '../../../pages/detection_engine/rules/helpers';
 import {
   RuleStep,
@@ -39,7 +40,7 @@ import { SecurityPageName } from '../../../../app/types';
 
 interface StepRuleActionsProps extends RuleStepProps {
   defaultValues?: ActionsStepRule | null;
-  actionMessageParams: string[];
+  actionMessageParams: ActionVariable[];
 }
 
 const stepActionsDefaultValue = {

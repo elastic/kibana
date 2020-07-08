@@ -7,9 +7,10 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import './add_message_variables.scss';
+import { ActionVariable } from '../../types';
 
 interface Props {
-  messageVariables: string[] | undefined;
+  messageVariables?: ActionVariable[];
   paramsProperty: string;
   onSelectEventHandler: (variable: string) => void;
 }
@@ -22,17 +23,19 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
   const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
 
   const getMessageVariables = () =>
-    messageVariables?.map((variable: string, i: number) => (
+    messageVariables?.map((variable: ActionVariable, i: number) => (
       <EuiContextMenuItem
-        key={variable}
+        key={variable.name}
         data-test-subj={`variableMenuButton-${i}`}
         icon="empty"
+        toolTipContent={variable.description}
+        toolTipPosition={'left'}
         onClick={() => {
-          onSelectEventHandler(variable);
+          onSelectEventHandler(variable.name);
           setIsVariablesPopoverOpen(false);
         }}
       >
-        {`{{${variable}}}`}
+        {`{{${variable.name}}}`}
       </EuiContextMenuItem>
     ));
 

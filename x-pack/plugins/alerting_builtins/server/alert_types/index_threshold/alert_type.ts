@@ -67,6 +67,10 @@ export function getAlertType(service: Service): AlertType {
     }
   );
 
+  const alertParamsVariables = Object.keys(ParamsSchema.props).map((propKey: string) => {
+    return { name: propKey, description: propKey };
+  });
+
   return {
     id: ID,
     name: alertTypeName,
@@ -82,6 +86,7 @@ export function getAlertType(service: Service): AlertType {
         { name: 'group', description: actionVariableContextGroupLabel },
         { name: 'date', description: actionVariableContextDateLabel },
         { name: 'value', description: actionVariableContextValueLabel },
+        ...alertParamsVariables,
       ],
     },
     executor,

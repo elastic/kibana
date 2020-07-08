@@ -40,7 +40,7 @@ export interface ActionParamsProps<TParams> {
   index: number;
   editAction: (property: string, value: any, index: number) => void;
   errors: IErrorObject;
-  messageVariables?: string[];
+  messageVariables?: ActionVariable[];
   defaultMessage?: string;
 }
 
