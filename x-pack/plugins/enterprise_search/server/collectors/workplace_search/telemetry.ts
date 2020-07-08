@@ -9,8 +9,12 @@ import {
   ISavedObjectsRepository,
   SavedObjectsServiceStart,
   SavedObjectAttributes,
+  Logger,
 } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+
+// This throws `Error: Cannot find module 'src/core/server'` if I import it via alias ¯\_(ツ)_/¯
+import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 
 interface ITelemetry {
   ui_viewed: {
@@ -36,11 +40,12 @@ export const WS_TELEMETRY_NAME = 'workplace_search_telemetry';
 
 export const registerTelemetryUsageCollector = (
   usageCollection: UsageCollectionSetup,
-  savedObjects: SavedObjectsServiceStart
+  savedObjects: SavedObjectsServiceStart,
+  log: Logger
 ) => {
   const telemetryUsageCollector = usageCollection.makeUsageCollector<ITelemetry>({
     type: 'workplace_search',
-    fetch: async () => fetchTelemetryMetrics(savedObjects),
+    fetch: async () => fetchTelemetryMetrics(savedObjects, log),
     isReady: () => true,
     schema: {
       ui_viewed: {
@@ -65,10 +70,11 @@ export const registerTelemetryUsageCollector = (
  * Fetch the aggregated telemetry metrics from our saved objects
  */
 
-const fetchTelemetryMetrics = async (savedObjects: SavedObjectsServiceStart) => {
+const fetchTelemetryMetrics = async (savedObjects: SavedObjectsServiceStart, log: Logger) => {
   const savedObjectsRepository = savedObjects.createInternalRepository();
   const savedObjectAttributes = (await getSavedObjectAttributesFromRepo(
-    savedObjectsRepository
+    savedObjectsRepository,
+    log
   )) as SavedObjectAttributes;
 
   const defaultTelemetrySavedObject: ITelemetry = {
@@ -107,11 +113,15 @@ const fetchTelemetryMetrics = async (savedObjects: SavedObjectsServiceStart) => 
  */
 
 const getSavedObjectAttributesFromRepo = async (
-  savedObjectsRepository: ISavedObjectsRepository
+  savedObjectsRepository: ISavedObjectsRepository,
+  log: Logger
 ) => {
   try {
     return (await savedObjectsRepository.get(WS_TELEMETRY_NAME, WS_TELEMETRY_NAME)).attributes;
   } catch (e) {
+    if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
+      log.warn(`Failed to retrieve Workplace Search telemetry data: ${e}`);
+    }
     return null;
   }
 };

@@ -4,6 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { loggingSystemMock } from 'src/core/server/mocks';
+
+jest.mock('../../../../../../src/core/server', () => ({
+  SavedObjectsErrorHelpers: {
+    isNotFoundError: jest.fn(),
+  },
+}));
+import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+
 import { registerTelemetryUsageCollector, incrementUICounter } from './telemetry';
 
 /**
@@ -12,6 +21,7 @@ import { registerTelemetryUsageCollector, incrementUICounter } from './telemetry
  * more thoroughly in the lib/telemetry tests.
  */
 describe('Workplace Search Telemetry Usage Collector', () => {
+  const mockLogger = loggingSystemMock.create().get();
   const makeUsageCollectorStub = jest.fn();
   const registerStub = jest.fn();
   const usageCollectionMock = {
@@ -74,8 +84,12 @@ describe('Workplace Search Telemetry Usage Collector', () => {
       });
     });
 
-    it('should not error & should return a default telemetry object if no saved data exists', async () => {
-      const emptySavedObjectsMock = { createInternalRepository: () => ({}) } as any;
+    it('should return a default telemetry object if no saved data exists', async () => {
+      const emptySavedObjectsMock = {
+        createInternalRepository: () => ({
+          get: () => ({ attributes: null }),
+        }),
+      } as any;
 
       registerTelemetryUsageCollector(usageCollectionMock, emptySavedObjectsMock);
       const savedObjectsCounts = await makeUsageCollectorStub.mock.calls[0][0].fetch();
@@ -95,6 +109,25 @@ describe('Workplace Search Telemetry Usage Collector', () => {
           recent_activity_source_details_link: 0,
         },
       });
+    });
+
+    it('should not throw but log a warning if saved objects errors', async () => {
+      const errorSavedObjectsMock = { createInternalRepository: () => ({}) } as any;
+      registerTelemetryUsageCollector(usageCollectionMock, errorSavedObjectsMock, mockLogger);
+
+      // Without log warning (not found)
+      (SavedObjectsErrorHelpers.isNotFoundError as jest.mock).mockImplementationOnce(() => true);
+      await makeUsageCollectorStub.mock.calls[0][0].fetch();
+
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+
+      // With log warning
+      (SavedObjectsErrorHelpers.isNotFoundError as jest.mock).mockImplementationOnce(() => false);
+      await makeUsageCollectorStub.mock.calls[0][0].fetch();
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Failed to retrieve Workplace Search telemetry data: TypeError: savedObjectsRepository.get is not a function'
+      );
     });
   });
 
