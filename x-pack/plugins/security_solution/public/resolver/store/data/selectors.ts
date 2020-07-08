@@ -175,8 +175,8 @@ export function hasMoreAncestors(state: DataState): boolean {
  */
 interface RelatedInfoFunctions {
   shouldShowLimitForCategory: (category: string) => boolean;
-  getNumberNotDisplayedForCategory: (category: string) => number;
-  getNumberActuallyDisplayedForCategory: (category: string) => number;
+  numberNotDisplayedForCategory: (category: string) => number;
+  numberActuallyDisplayedForCategory: (category: string) => number;
 }
 export const relatedEventInfoByEntityId: (
   state: DataState
@@ -204,7 +204,7 @@ export const relatedEventInfoByEntityId: (
        *
        * @param eventCategory {string} The ECS category like 'file','dns',etc.
        */
-      const getAggregateTotalForCategory = (eventCategory: string): number => {
+      const aggregateTotalForCategory = (eventCategory: string): number => {
         return stats.events.byCategory[eventCategory] || 0;
       };
 
@@ -213,7 +213,7 @@ export const relatedEventInfoByEntityId: (
        *
        * @param eventCategory {string} The ECS category like 'file','dns',etc.
        */
-      const unmemoizedGetMatchingEventsForCategory = (eventCategory: string): ResolverEvent[] => {
+      const unmemoizedMatchingEventsForCategory = (eventCategory: string): ResolverEvent[] => {
         if (!eventsResponseForThisEntry) {
           return [];
         }
@@ -227,15 +227,15 @@ export const relatedEventInfoByEntityId: (
         });
       };
 
-      const getMatchingEventsForCategory = defaultMemoize(unmemoizedGetMatchingEventsForCategory);
+      const matchingEventsForCategory = defaultMemoize(unmemoizedMatchingEventsForCategory);
 
       /**
        * The number of events that occurred before the API limit was reached.
        *
        * @param eventCategory {string} The ECS category like 'file','dns',etc.
        */
-      const getNumberActuallyDisplayedForCategory = (eventCategory: string): number => {
-        return getMatchingEventsForCategory(eventCategory)?.length || 0;
+      const numberActuallyDisplayedForCategory = (eventCategory: string): number => {
+        return matchingEventsForCategory(eventCategory)?.length || 0;
       };
 
       /**
@@ -243,10 +243,10 @@ export const relatedEventInfoByEntityId: (
        *
        * @param eventCategory {string} The ECS category like 'file','dns',etc.
        */
-      const getNumberNotDisplayedForCategory = (eventCategory: string): number => {
+      const numberNotDisplayedForCategory = (eventCategory: string): number => {
         return (
-          getAggregateTotalForCategory(eventCategory) -
-          getNumberActuallyDisplayedForCategory(eventCategory)
+          aggregateTotalForCategory(eventCategory) -
+          numberActuallyDisplayedForCategory(eventCategory)
         );
       };
 
@@ -257,7 +257,7 @@ export const relatedEventInfoByEntityId: (
        * @param eventCategory {string} The ECS category like 'file','dns',etc.
        */
       const shouldShowLimitForCategory = (eventCategory: string): boolean => {
-        if (hasMoreEvents && getNumberNotDisplayedForCategory(eventCategory) > 0) {
+        if (hasMoreEvents && numberNotDisplayedForCategory(eventCategory) > 0) {
           return true;
         }
         return false;
@@ -265,8 +265,8 @@ export const relatedEventInfoByEntityId: (
 
       const entryValue = {
         shouldShowLimitForCategory,
-        getNumberNotDisplayedForCategory,
-        getNumberActuallyDisplayedForCategory,
+        numberNotDisplayedForCategory,
+        numberActuallyDisplayedForCategory,
       };
 
       const entry: [string, typeof entryValue] = [entityId, entryValue];
