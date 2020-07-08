@@ -22,7 +22,6 @@ import { SideEffectContext } from '../side_effect_context';
 import { CubeForProcess } from './process_cube_icon';
 import { ResolverEvent } from '../../../../common/endpoint/types';
 import { LineageLimitWarning } from '../limit_warnings';
-import { hasMoreChildren, hasMoreAncestors } from '../../store/data/selectors';
 
 const StyledLineageLimitWarning = styled(LineageLimitWarning)`
   flex-flow: row wrap;
@@ -184,8 +183,8 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
     ];
   }, []);
 
-  const children = useSelector(hasMoreChildren);
-  const ancestors = useSelector(hasMoreAncestors);
+  const children = useSelector(selectors.hasMoreChildren);
+  const ancestors = useSelector(selectors.hasMoreAncestors);
 
   return (
     <>

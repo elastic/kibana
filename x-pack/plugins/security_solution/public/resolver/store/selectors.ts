@@ -174,6 +174,16 @@ export const isLoading = composeSelectors(dataStateSelector, dataSelectors.isLoa
 export const hasError = composeSelectors(dataStateSelector, dataSelectors.hasError);
 
 /**
+ * True if the children cursor is not null
+ */
+export const hasMoreChildren = composeSelectors(dataStateSelector, dataSelectors.hasMoreChildren);
+
+/**
+ * True if the ancestor cursor is not null
+ */
+export const hasMoreAncestors = composeSelectors(dataStateSelector, dataSelectors.hasMoreAncestors);
+
+/**
  * An array containing all the processes currently in the Resolver than can be graphed
  */
 export const graphableProcesses = composeSelectors(
