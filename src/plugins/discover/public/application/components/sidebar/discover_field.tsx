@@ -23,7 +23,6 @@ import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldIcon } from '../../../../../kibana_react/public';
 import { FieldDetails } from './types';
 import { IndexPatternField, IndexPattern } from '../../../../../data/public';
-import { shortenDottedString } from '../../helpers';
 import { getFieldTypeName } from './lib/get_field_type_name';
 
 export interface DiscoverFieldProps {
@@ -64,10 +63,6 @@ export interface DiscoverFieldProps {
    * Determines whether the field is selected
    */
   selected?: boolean;
-  /**
-   * Determines whether the field name is shortened test.sub1.sub2 = t.s.sub2
-   */
-  useShortDots?: boolean;
 }
 
 export function DiscoverField({
@@ -80,7 +75,6 @@ export function DiscoverField({
   showDetails,
   getDetails,
   selected,
-  useShortDots,
 }: DiscoverFieldProps) {
   const addLabel = i18n.translate('discover.fieldChooser.discoverField.addButtonLabel', {
     defaultMessage: 'Add',
@@ -136,15 +130,7 @@ export function DiscoverField({
           title={field.name}
           className="dscSidebarField__name xeui-textTruncate"
         >
-          {/* <EuiText
-            size="xs" */}
-          {/* // data-test-subj={`field-${field.name}`}
-            // className="xeui-textTruncate"
-            // title={field.name} */}
-          {/* > */}
-          {/* {useShortDots ? shortenDottedString(field.name) : field.displayName} */}
           {wrapOnDot(field.name)}
-          {/* </EuiText> */}
         </span>
         <span>
           {field.name !== '_source' && !selected && (
