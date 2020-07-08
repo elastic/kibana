@@ -13,11 +13,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { PLUGIN_ID, CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
 
 import { IngestManagerConfigType } from '../common/types';
 import { setupRouteService, appRoutesService } from '../common';
+import { setHttpClient } from './applications/ingest_manager/hooks';
+import { TutorialModuleNotice } from './applications/ingest_manager/components/home_integration';
 import { registerPackageConfigComponent } from './applications/ingest_manager/sections/agent_config/create_package_config_page/components/custom_package_config';
 
 export { IngestManagerConfigType } from '../common/types';
@@ -38,6 +41,7 @@ export interface IngestManagerStart {
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
   data: DataPublicPluginSetup;
+  home?: HomePublicPluginSetup;
 }
 
 export interface IngestManagerStartDeps {
@@ -55,6 +59,10 @@ export class IngestManagerPlugin
 
   public setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
     const config = this.config;
+
+    // Set up http client
+    setHttpClient(core.http);
+
     // Register main Ingest Manager app
     core.application.register({
       id: PLUGIN_ID,
@@ -76,6 +84,11 @@ export class IngestManagerPlugin
         };
       },
     });
+
+    // Register components for home/add data integration
+    if (deps.home) {
+      deps.home.tutorials.registerModuleNotice(PLUGIN_ID, TutorialModuleNotice);
+    }
 
     return {};
   }
