@@ -11,5 +11,6 @@ export default function observabilityApiIntegrationTests({ loadTestFile }: FtrPr
     this.tags('ciGroup1');
     loadTestFile(require.resolve('./annotations'));
     loadTestFile(require.resolve('./service_maps'));
+    loadTestFile(require.resolve('./rum_services'));
   });
 }
