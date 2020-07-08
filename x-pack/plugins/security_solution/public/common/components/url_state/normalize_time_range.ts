@@ -10,8 +10,8 @@ import { getMaybeDate } from '../formatted_date/maybe_date';
 export const normalizeTimeRange = <T extends URLTimeRange>(dateRange: T): T => {
   const maybeTo = getMaybeDate(dateRange.to);
   const maybeFrom = getMaybeDate(dateRange.from);
-  const to: number = maybeTo.isValid() ? maybeTo.valueOf() : Number(dateRange.to);
-  const from: number = maybeFrom.isValid() ? maybeFrom.valueOf() : Number(dateRange.from);
+  const to: string = maybeTo.isValid() ? maybeTo.toISOString() : '';
+  const from: string = maybeFrom.isValid() ? maybeFrom.toISOString() : '';
   return {
     ...dateRange,
     to,

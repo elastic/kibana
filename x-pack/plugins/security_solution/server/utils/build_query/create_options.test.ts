@@ -104,8 +104,8 @@ describe('createOptions', () => {
       filterQuery: {},
       fields: [],
       timerange: {
-        from: '10',
-        to: '0',
+        from: '2020-07-08T08:00:00.000Z',
+        to: '2020-07-08T20:00:00.000Z',
         interval: '12 hours ago',
       },
     };

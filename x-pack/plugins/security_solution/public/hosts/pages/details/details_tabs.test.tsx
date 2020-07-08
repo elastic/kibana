@@ -91,10 +91,10 @@ describe('body', () => {
 
       // match against everything but the functions to ensure they are there as expected
       expect(wrapper.find(componentName).props()).toMatchObject({
-        endDate: 0,
+        endDate: '2020-07-08T08:20:18.966Z',
         filterQuery,
         skip: false,
-        startDate: 0,
+        startDate: '2020-07-07T08:20:18.966Z',
         type: 'details',
         indexPattern: {
           fields: [

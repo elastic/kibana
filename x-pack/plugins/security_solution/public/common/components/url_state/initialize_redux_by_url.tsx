@@ -92,20 +92,6 @@ export const dispatchSetInitialStateFromUrl = (
   });
 };
 
-const timeRangeToISOString = <T extends { from: string; to: string }>(timerange: T): T => {
-  const range = { ...timerange };
-
-  if (isNumber(range.from)) {
-    range.from = new Date(range.from).toISOString();
-  }
-
-  if (isNumber(range.to)) {
-    range.to = new Date(range.to).toISOString();
-  }
-
-  return range;
-};
-
 const updateTimerange = (newUrlStateString: string, dispatch: Dispatch) => {
   const timerangeStateData = decodeRisonUrlState<UrlInputsModel>(newUrlStateString);
 
@@ -131,8 +117,8 @@ const updateTimerange = (newUrlStateString: string, dispatch: Dispatch) => {
 
   if (timelineType) {
     if (timelineType === 'absolute') {
-      const absoluteRange = timeRangeToISOString<AbsoluteTimeRange>(
-        normalizeTimeRange<AbsoluteTimeRange>(get('timeline.timerange', timerangeStateData))
+      const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
+        get('timeline.timerange', timerangeStateData)
       );
 
       dispatch(
@@ -144,8 +130,8 @@ const updateTimerange = (newUrlStateString: string, dispatch: Dispatch) => {
     }
 
     if (timelineType === 'relative') {
-      const relativeRange = timeRangeToISOString<RelativeTimeRange>(
-        normalizeTimeRange<RelativeTimeRange>(get('timeline.timerange', timerangeStateData))
+      const relativeRange = normalizeTimeRange<RelativeTimeRange>(
+        get('timeline.timerange', timerangeStateData)
       );
 
       dispatch(
@@ -159,8 +145,8 @@ const updateTimerange = (newUrlStateString: string, dispatch: Dispatch) => {
 
   if (globalType) {
     if (globalType === 'absolute') {
-      const absoluteRange = timeRangeToISOString<AbsoluteTimeRange>(
-        normalizeTimeRange<AbsoluteTimeRange>(get('global.timerange', timerangeStateData))
+      const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
+        get('global.timerange', timerangeStateData)
       );
 
       dispatch(
@@ -171,8 +157,8 @@ const updateTimerange = (newUrlStateString: string, dispatch: Dispatch) => {
       );
     }
     if (globalType === 'relative') {
-      const relativeRange = timeRangeToISOString<RelativeTimeRange>(
-        normalizeTimeRange<RelativeTimeRange>(get('global.timerange', timerangeStateData))
+      const relativeRange = normalizeTimeRange<RelativeTimeRange>(
+        get('global.timerange', timerangeStateData)
       );
 
       dispatch(

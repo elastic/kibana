@@ -32,8 +32,8 @@ const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
-const from = '2019-08-27T22:10:56.794Z';
-const to = '2019-08-26T22:10:56.791Z';
+const from = '2019-08-26T22:10:56.791Z';
+const to = '2019-08-27T22:10:56.794Z';
 
 describe('EventsViewer', () => {
   const mount = useMountAppended();

@@ -147,8 +147,8 @@ describe('selectors', () => {
         kind: 'relative',
         fromStr: '',
         toStr: '',
-        from: '2020-07-07T08:20:18.966Z',
-        to: '2020-07-08T08:20:18.966Z',
+        from: '2020-07-08T08:20:18.966Z',
+        to: '2020-07-09T08:20:18.966Z',
       };
       const change: InputsRange = {
         ...inputState,
@@ -179,8 +179,8 @@ describe('selectors', () => {
         kind: 'relative',
         fromStr: '',
         toStr: '',
-        from: '2020-07-07T08:20:18.966Z',
-        to: '2020-07-08T08:20:18.966Z',
+        from: '2020-07-08T08:20:18.966Z',
+        to: '2020-07-09T08:20:18.966Z',
       };
       const change: InputsRange = {
         ...inputState,
@@ -211,8 +211,8 @@ describe('selectors', () => {
         kind: 'relative',
         fromStr: '',
         toStr: '',
-        from: '2020-07-07T08:20:18.966Z',
-        to: '2020-07-08T08:20:18.966Z',
+        from: '2020-07-08T08:20:18.966Z',
+        to: '2020-07-09T08:20:18.966Z',
       };
       const change: InputsRange = {
         ...inputState,
@@ -243,8 +243,8 @@ describe('selectors', () => {
         kind: 'relative',
         fromStr: '',
         toStr: '',
-        from: '2020-07-07T08:20:18.966Z',
-        to: '2020-07-08T08:20:18.966Z',
+        from: '2020-07-08T08:20:18.966Z',
+        to: '2020-07-09T08:20:18.966Z',
       };
       const change: InputsRange = {
         ...inputState,
@@ -275,8 +275,8 @@ describe('selectors', () => {
         kind: 'relative',
         fromStr: '',
         toStr: '',
-        from: '2020-07-07T08:20:18.966Z',
-        to: '2020-07-08T08:20:18.966Z',
+        from: '2020-07-08T08:20:18.966Z',
+        to: '2020-07-09T08:20:18.966Z',
       };
       const change: InputsRange = {
         ...inputState,

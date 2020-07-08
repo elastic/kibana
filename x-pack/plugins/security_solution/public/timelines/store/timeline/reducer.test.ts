@@ -92,8 +92,8 @@ const timelineByIdMock: TimelineById = {
     pinnedEventIds: {},
     pinnedEventsSaveObject: {},
     dateRange: {
-      start: '2020-07-07T08:20:18.966Z0',
-      end: '2020-07-08T08:20:18.966Z0',
+      start: '2020-07-07T08:20:18.966Z',
+      end: '2020-07-08T08:20:18.966Z',
     },
     selectedEventIds: {},
     show: true,

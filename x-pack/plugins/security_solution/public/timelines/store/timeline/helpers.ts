@@ -154,8 +154,8 @@ export const addNewTimeline = ({
   columns,
   dataProviders = [],
   dateRange = {
-    start: new Date(Date.now()).toISOString(),
-    end: new Date(Date.now()).toISOString(),
+    start: '2020-07-07T08:20:18.966Z',
+    end: '2020-07-08T08:20:18.966Z',
   },
   filters = timelineDefaults.filters,
   id,

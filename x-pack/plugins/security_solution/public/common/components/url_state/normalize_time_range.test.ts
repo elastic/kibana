@@ -14,7 +14,7 @@ import {
 } from '../../store/inputs/model';
 
 describe('#normalizeTimeRange', () => {
-  test('Absolute time range returns empty strings as 0', () => {
+  test('Absolute time range returns empty strings as empty strings', () => {
     const dateTimeRange: URLTimeRange = {
       kind: 'absolute',
       fromStr: undefined,
@@ -25,30 +25,8 @@ describe('#normalizeTimeRange', () => {
     if (isAbsoluteTimeRange(dateTimeRange)) {
       const expected: AbsoluteTimeRange = {
         kind: 'absolute',
-        from: '2020-07-07T08:20:18.966Z',
-        to: '2020-07-08T08:20:18.966Z',
-        fromStr: undefined,
-        toStr: undefined,
-      };
-      expect(normalizeTimeRange<AbsoluteTimeRange>(dateTimeRange)).toEqual(expected);
-    } else {
-      throw new Error('Was expecting date time range to be a AbsoluteTimeRange');
-    }
-  });
-
-  test('Absolute time range returns string with empty spaces as 0', () => {
-    const dateTimeRange: URLTimeRange = {
-      kind: 'absolute',
-      fromStr: undefined,
-      toStr: undefined,
-      from: '  ',
-      to: '   ',
-    };
-    if (isAbsoluteTimeRange(dateTimeRange)) {
-      const expected: AbsoluteTimeRange = {
-        kind: 'absolute',
-        from: '2020-07-07T08:20:18.966Z',
-        to: '2020-07-08T08:20:18.966Z',
+        from: '',
+        to: '',
         fromStr: undefined,
         toStr: undefined,
       };
@@ -154,7 +132,7 @@ describe('#normalizeTimeRange', () => {
     }
   });
 
-  test('Relative time range returns empty strings as 0', () => {
+  test('Relative time range returns empty strings as empty strings', () => {
     const dateTimeRange: URLTimeRange = {
       kind: 'relative',
       fromStr: '',
@@ -165,30 +143,8 @@ describe('#normalizeTimeRange', () => {
     if (isRelativeTimeRange(dateTimeRange)) {
       const expected: RelativeTimeRange = {
         kind: 'relative',
-        from: '2020-07-07T08:20:18.966Z',
-        to: '2020-07-08T08:20:18.966Z',
-        fromStr: '',
-        toStr: '',
-      };
-      expect(normalizeTimeRange<RelativeTimeRange>(dateTimeRange)).toEqual(expected);
-    } else {
-      throw new Error('Was expecting date time range to be a RelativeTimeRange');
-    }
-  });
-
-  test('Relative time range returns string with empty spaces as 0', () => {
-    const dateTimeRange: URLTimeRange = {
-      kind: 'relative',
-      fromStr: '',
-      toStr: '',
-      from: '  ',
-      to: '   ',
-    };
-    if (isRelativeTimeRange(dateTimeRange)) {
-      const expected: RelativeTimeRange = {
-        kind: 'relative',
-        from: '2020-07-07T08:20:18.966Z',
-        to: '2020-07-08T08:20:18.966Z',
+        from: '',
+        to: '',
         fromStr: '',
         toStr: '',
       };

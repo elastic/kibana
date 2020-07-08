@@ -61,13 +61,13 @@ describe('useQuery', () => {
       });
       const TestComponent = () => {
         result = useQuery({
-          endDate: '2020-07-07T08:20:18.966Z',
+          endDate: '2020-07-07T08:20:00.000Z',
           errorMessage: 'fakeErrorMsg',
           filterQuery: '',
           histogramType: HistogramType.alerts,
           isInspected: false,
           stackByField: 'fakeField',
-          startDate: '2020-07-08T08:20:18.966Z',
+          startDate: '2020-07-07T08:08:00.000Z',
         });
 
         return <div />;
