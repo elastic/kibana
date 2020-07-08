@@ -26,7 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
 
-  describe('feature controls security', () => {
+  describe('visualize feature controls security', () => {
     before(async () => {
       await esArchiver.load('visualize/default');
       await esArchiver.loadIfNeeded('logstash_functional');
@@ -124,41 +124,40 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
       });
 
-      // Flaky: https://github.com/elastic/kibana/issues/50018
-      it.skip('allow saving via the saved query management component popover with no saved query loaded', async () => {
+      it('allows saving via the saved query management component popover with no saved query loaded', async () => {
         await queryBar.setQuery('response:200');
         await savedQueryManagementComponent.saveNewQuery('foo', 'bar', true, false);
         await savedQueryManagementComponent.savedQueryExistOrFail('foo');
         await savedQueryManagementComponent.closeSavedQueryManagementComponent();
+
+        await savedQueryManagementComponent.deleteSavedQuery('foo');
+        await savedQueryManagementComponent.savedQueryMissingOrFail('foo');
       });
 
-      // Depends on skipped test above
-      it.skip('allow saving a currently loaded saved query as a new query via the saved query management component ', async () => {
+      it('allow saving changes to a currently loaded query via the saved query management component', async () => {
+        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+        await queryBar.setQuery('response:404');
+        await savedQueryManagementComponent.updateCurrentlyLoadedQuery(
+          'new description',
+          false,
+          false
+        );
+        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+        const queryString = await queryBar.getQueryString();
+        expect(queryString).to.eql('response:200');
+      });
+
+      it('allow saving changes to a currently loaded query via the saved query management component 2', async () => {
+        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
         await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
-          'foo2',
-          'bar2',
+          'ok2',
+          'description',
           true,
           false
         );
-        await savedQueryManagementComponent.savedQueryExistOrFail('foo2');
-        await savedQueryManagementComponent.closeSavedQueryManagementComponent();
-      });
-
-      // Depends on skipped test above
-      it.skip('allow saving changes to a currently loaded query via the saved query management component', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('foo2');
-        await queryBar.setQuery('response:404');
-        await savedQueryManagementComponent.updateCurrentlyLoadedQuery('bar2', false, false);
-        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-        await savedQueryManagementComponent.loadSavedQuery('foo2');
-        const queryString = await queryBar.getQueryString();
-        expect(queryString).to.eql('response:404');
-      });
-
-      // Depends on skipped test above
-      it.skip('allows deleting saved queries in the saved query management component ', async () => {
-        await savedQueryManagementComponent.deleteSavedQuery('foo2');
-        await savedQueryManagementComponent.savedQueryMissingOrFail('foo2');
+        await savedQueryManagementComponent.savedQueryExistOrFail('ok2');
+        await savedQueryManagementComponent.deleteSavedQuery('ok2');
       });
     });
 
