@@ -43,6 +43,7 @@ import { kbnTypeToMLJobType } from '../../util/field_types_utils';
 import { useTimefilter } from '../../contexts/kibana';
 import { timeBasedIndexCheck, getQueryFromSavedSearch } from '../../util/index_utils';
 import { getTimeBucketsFromCache } from '../../util/time_buckets';
+import { getToastNotifications } from '../../util/dependency_cache';
 import { useUrlState } from '../../util/url_state';
 import { FieldRequestConfig, FieldVisConfig } from './common';
 import { ActionsPanel } from './components/actions_panel';
@@ -107,7 +108,7 @@ export const Page: FC = () => {
     autoRefreshSelector: true,
   });
 
-  const dataLoader = new DataLoader(currentIndexPattern, kibanaConfig);
+  const dataLoader = new DataLoader(currentIndexPattern, getToastNotifications());
   const [globalState, setGlobalState] = useUrlState('_g');
   useEffect(() => {
     if (globalState?.time !== undefined) {

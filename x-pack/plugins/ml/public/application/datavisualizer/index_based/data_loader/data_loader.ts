@@ -6,7 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { getToastNotifications } from '../../../util/dependency_cache';
+import { CoreSetup } from 'src/core/public';
+
 import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 import { SavedSearchQuery } from '../../../contexts/ml';
@@ -24,10 +25,15 @@ export class DataLoader {
   private _indexPattern: IndexPattern;
   private _indexPatternTitle: IndexPatternTitle = '';
   private _maxExamples: number = MAX_EXAMPLES_DEFAULT;
+  private _toastNotifications: CoreSetup['notifications']['toasts'];
 
-  constructor(indexPattern: IndexPattern, kibanaConfig: any) {
+  constructor(
+    indexPattern: IndexPattern,
+    toastNotifications: CoreSetup['notifications']['toasts']
+  ) {
     this._indexPattern = indexPattern;
     this._indexPatternTitle = indexPattern.title;
+    this._toastNotifications = toastNotifications;
   }
 
   async loadOverallData(
@@ -107,9 +113,8 @@ export class DataLoader {
   }
 
   displayError(err: any) {
-    const toastNotifications = getToastNotifications();
     if (err.statusCode === 500) {
-      toastNotifications.addDanger(
+      this._toastNotifications.addDanger(
         i18n.translate('xpack.ml.datavisualizer.dataLoader.internalServerErrorMessage', {
           defaultMessage:
             'Error loading data in index {index}. {message}. ' +
@@ -121,7 +126,7 @@ export class DataLoader {
         })
       );
     } else {
-      toastNotifications.addDanger(
+      this._toastNotifications.addDanger(
         i18n.translate('xpack.ml.datavisualizer.page.errorLoadingDataMessage', {
           defaultMessage: 'Error loading data in index {index}. {message}',
           values: {

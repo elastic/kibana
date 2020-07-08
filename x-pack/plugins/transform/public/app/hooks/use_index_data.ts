@@ -9,13 +9,14 @@ import { useEffect } from 'react';
 import { EuiDataGridColumn } from '@elastic/eui';
 
 import {
-  fetchChartsData,
+  getFieldType,
   getDataGridSchemaFromKibanaFieldType,
   getFieldsFromKibanaIndexPattern,
   getErrorMessage,
   showDataGridColumnChartErrorMessageToast,
   useDataGrid,
   useRenderCellValue,
+  DataLoader,
   EsSorting,
   SearchResponse7,
   UseIndexDataReturnType,
@@ -107,13 +108,17 @@ export const useIndexData = (
 
   const fetchColumnChartsData = async function () {
     try {
-      const columnChartsData = await fetchChartsData(
-        indexPattern.title,
-        api.esSearch,
+      const dataLoader = new DataLoader(indexPattern, toastNotifications);
+      const columnChartsData = await dataLoader.loadFieldHistograms(
         isDefaultQuery(query) ? matchAllQuery : query,
-        columns.filter((cT) => dataGrid.visibleColumns.includes(cT.id))
+        5000, // samplerShardSize,
+        columns
+          .filter((cT) => dataGrid.visibleColumns.includes(cT.id))
+          .map((cT) => ({
+            fieldName: cT.id,
+            type: getFieldType(cT.schema),
+          }))
       );
-
       setColumnCharts(columnChartsData);
     } catch (e) {
       showDataGridColumnChartErrorMessageToast(e, toastNotifications);

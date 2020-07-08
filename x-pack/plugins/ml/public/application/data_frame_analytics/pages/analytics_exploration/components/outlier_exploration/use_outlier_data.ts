@@ -25,7 +25,7 @@ import {
   useRenderCellValue,
   UseIndexDataReturnType,
 } from '../../../../../components/data_grid';
-import { useMlContext, SavedSearchQuery } from '../../../../../contexts/ml';
+import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
@@ -41,8 +41,6 @@ export const useOutlierData = (
 ): UseIndexDataReturnType => {
   const needsDestIndexFields =
     indexPattern !== undefined && indexPattern.title === jobConfig?.source.index[0];
-
-  const { kibanaConfig } = useMlContext();
 
   const columns: EuiDataGridColumn[] = [];
 
@@ -85,7 +83,7 @@ export const useOutlierData = (
   const fetchColumnChartsData = async function () {
     try {
       if (jobConfig !== undefined && indexPattern !== undefined) {
-        const dataLoader = new DataLoader(indexPattern, kibanaConfig);
+        const dataLoader = new DataLoader(indexPattern, getToastNotifications());
         const columnChartsData = await dataLoader.loadFieldHistograms(
           searchQuery,
           5000, // samplerShardSize,

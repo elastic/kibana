@@ -25,7 +25,6 @@ import {
   SearchResponse7,
   UseIndexDataReturnType,
 } from '../../../../components/data_grid';
-import { useMlContext } from '../../../../contexts/ml';
 import { getErrorMessage } from '../../../../../../common/util/errors';
 import { INDEX_STATUS } from '../../../common/analytics';
 import { ml } from '../../../../services/ml_api_service';
@@ -38,8 +37,6 @@ export const useIndexData = (
   toastNotifications: CoreSetup['notifications']['toasts']
 ): UseIndexDataReturnType => {
   const indexPatternFields = getFieldsFromKibanaIndexPattern(indexPattern);
-
-  const { kibanaConfig } = useMlContext();
 
   // EuiDataGrid State
   const columns: EuiDataGridColumn[] = [
@@ -111,7 +108,7 @@ export const useIndexData = (
 
   const fetchColumnChartsData = async function () {
     try {
-      const dataLoader = new DataLoader(indexPattern, kibanaConfig);
+      const dataLoader = new DataLoader(indexPattern, toastNotifications);
       const columnChartsData = await dataLoader.loadFieldHistograms(
         query,
         5000, // samplerShardSize,
