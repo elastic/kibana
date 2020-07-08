@@ -305,6 +305,7 @@ import {
   dateHistogramInterval,
   InvalidEsCalendarIntervalError,
   InvalidEsIntervalFormatError,
+  Ipv4Address,
   isValidEsInterval,
   isValidInterval,
   parseEsInterval,
@@ -372,6 +373,7 @@ export const search = {
     intervalOptions,
     InvalidEsCalendarIntervalError,
     InvalidEsIntervalFormatError,
+    Ipv4Address,
     isDateHistogramBucketAggConfig, // TODO: remove in build_pipeline refactor
     isNumberType,
     isStringType,
@@ -416,7 +418,6 @@ export {
   connectToQueryState,
   syncQueryStateWithUrl,
   QueryState,
-  getQueryLog,
   getDefaultQuery,
   FilterManager,
   SavedQuery,
