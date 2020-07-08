@@ -51,7 +51,7 @@ export const APP_HOSTS_PATH = `${APP_PATH}/hosts`;
 export const APP_NETWORK_PATH = `${APP_PATH}/network`;
 export const APP_TIMELINES_PATH = `${APP_PATH}/timelines`;
 export const APP_CASES_PATH = `${APP_PATH}/cases`;
-export const APP_MANAGEMENT_PATH = `${APP_PATH}/management`;
+export const APP_MANAGEMENT_PATH = `${APP_PATH}/administration`;
 
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
 export const DEFAULT_INDEX_PATTERN = [

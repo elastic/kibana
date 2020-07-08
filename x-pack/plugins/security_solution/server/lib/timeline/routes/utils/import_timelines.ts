@@ -76,7 +76,7 @@ export const timelineSavedObjectOmittedFields = [
 ];
 
 const CHUNK_PARSED_OBJECT_SIZE = 10;
-const DEFAULT_IMPORT_ERROR = `Something went wrong, there's something we didn't handle properly, please help us improve by providing the file you try to import on https://discuss.elastic.co/c/security/siem`;
+const DEFAULT_IMPORT_ERROR = `Something has gone wrong. We didn't handle something properly. To help us fix this, please upload your file to https://discuss.elastic.co/c/security/siem.`;
 
 export const importTimelines = async (
   file: Readable,
