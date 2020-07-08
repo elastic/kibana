@@ -338,16 +338,13 @@ class TutorialUi extends React.Component {
     const notices = getServices().tutorialService.getModuleNotices();
     if (notices.length && this.state.tutorial.moduleName) {
       return (
-        <>
-          <EuiSpacer />
-          <EuiFlexGroup direction="column" gutterSize="m">
-            {notices.map((ModuleNotice, index) => (
-              <EuiFlexItem key={index}>
-                <ModuleNotice moduleName={this.state.tutorial.moduleName} />
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          {notices.map((ModuleNotice, index) => (
+            <EuiFlexItem key={index}>
+              <ModuleNotice moduleName={this.state.tutorial.moduleName} />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
       );
     } else {
       return null;

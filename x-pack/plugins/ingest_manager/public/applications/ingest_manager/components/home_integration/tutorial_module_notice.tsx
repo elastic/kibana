@@ -5,7 +5,7 @@
  */
 import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiText, EuiLink } from '@elastic/eui';
+import { EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
 import { TutorialModuleNoticeComponent } from 'src/plugins/home/public';
 import { useGetPackages, useLink } from '../../hooks';
 
@@ -20,45 +20,52 @@ export const TutorialModuleNotice: TutorialModuleNoticeComponent = memo(({ modul
 
   if (pkgInfo) {
     return (
-      <EuiText>
-        <p>
-          <FormattedMessage
-            id="xpack.ingestManager.homeIntegration.tutorialModule.noticeText"
-            defaultMessage="{notePrefix} a newer version of this module is {availableAsIntegrationLink} in Ingest Manager Beta.
+      <>
+        <EuiSpacer />
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="xpack.ingestManager.homeIntegration.tutorialModule.noticeText"
+              defaultMessage="{notePrefix} a newer version of this module is {availableAsIntegrationLink} in Ingest Manager Beta.
               To learn more about agent configurations and the new Elastic Agent, read our {blogPostLink}."
-            values={{
-              notePrefix: (
-                <strong>
-                  <FormattedMessage
-                    id="xpack.ingestManager.homeIntegration.tutorialModule.noticeText.notePrefix"
-                    defaultMessage="Note:"
-                  />
-                </strong>
-              ),
-              availableAsIntegrationLink: (
-                <EuiLink
-                  href={getHref('integration_details', {
-                    pkgkey: `${pkgInfo.name}-${pkgInfo.version}`,
-                  })}
-                >
-                  <FormattedMessage
-                    id="xpack.ingestManager.homeIntegration.tutorialModule.noticeText.integrationLink"
-                    defaultMessage="available as an Integration"
-                  />
-                </EuiLink>
-              ),
-              blogPostLink: (
-                <EuiLink href="https://ela.st/ingest-manager-announcement" external target="_blank">
-                  <FormattedMessage
-                    id="xpack.ingestManager.homeIntegration.tutorialModule.noticeText.blogPostLink"
-                    defaultMessage="announcement blog post"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </p>
-      </EuiText>
+              values={{
+                notePrefix: (
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.ingestManager.homeIntegration.tutorialModule.noticeText.notePrefix"
+                      defaultMessage="Note:"
+                    />
+                  </strong>
+                ),
+                availableAsIntegrationLink: (
+                  <EuiLink
+                    href={getHref('integration_details', {
+                      pkgkey: `${pkgInfo.name}-${pkgInfo.version}`,
+                    })}
+                  >
+                    <FormattedMessage
+                      id="xpack.ingestManager.homeIntegration.tutorialModule.noticeText.integrationLink"
+                      defaultMessage="available as an Integration"
+                    />
+                  </EuiLink>
+                ),
+                blogPostLink: (
+                  <EuiLink
+                    href="https://ela.st/ingest-manager-announcement"
+                    external
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="xpack.ingestManager.homeIntegration.tutorialModule.noticeText.blogPostLink"
+                      defaultMessage="announcement blog post"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        </EuiText>
+      </>
     );
   }
 
