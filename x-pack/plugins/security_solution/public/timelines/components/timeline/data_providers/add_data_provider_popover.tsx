@@ -170,6 +170,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
         timelineId={timelineId}
         value=""
         type={DataProviderType.default}
+        providerId={`${timelineId}-${uuid.v4()}`}
       />
     );
   }, [browserFields, handleDataProviderEdited, panels, timelineId, timelineType]);
