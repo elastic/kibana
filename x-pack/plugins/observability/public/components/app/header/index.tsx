@@ -60,6 +60,7 @@ export const Header = ({
                   defaultMessage: 'Observability',
                 })}{' '}
                 <EuiBetaBadge
+                  className="eui-alignMiddle"
                   label={i18n.translate('xpack.observability.beta', { defaultMessage: 'Beta' })}
                   tooltipContent="This feature is in beta. Please help us improve it by reporting any bugs or give us feedback."
                 />
