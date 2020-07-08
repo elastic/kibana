@@ -17,7 +17,7 @@ const lineageLimitMessage = (
   </>
 );
 
-const LineageTitleMessage = React.memo(function RelatedEventsLimitMessage({
+const LineageTitleMessage = React.memo(function LineageTitleMessage({
   numberOfEntries,
 }: {
   numberOfEntries: number;
