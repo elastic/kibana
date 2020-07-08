@@ -1,0 +1,6 @@
+{
+  "id": "integer_range_list",
+  "name": "Simple list with integer ranges",
+  "description": "This list has integer ranges",
+  "type": "integer_range"
+}

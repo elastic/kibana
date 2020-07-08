@@ -170,6 +170,38 @@ export interface AssistantAPIClientParams extends GenericParams {
     path: '/_migration/assistance';
 }
 
+// @public
+export interface AuditableEvent {
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    type: string;
+}
+
+// @public
+export interface Auditor {
+    add(event: AuditableEvent): void;
+    withAuditScope(name: string): void;
+}
+
+// @public
+export interface AuditorFactory {
+    // (undocumented)
+    asScoped(request: KibanaRequest): Auditor;
+}
+
+// Warning: (ae-missing-release-tag) "AuditTrailSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface AuditTrailSetup {
+    register(auditor: AuditorFactory): void;
+}
+
+// Warning: (ae-missing-release-tag) "AuditTrailStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export type AuditTrailStart = AuditorFactory;
+
 // @public (undocumented)
 export interface Authenticated extends AuthResultParams {
     // (undocumented)
@@ -440,6 +472,8 @@ export type CoreId = symbol;
 // @public
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
     // (undocumented)
+    auditTrail: AuditTrailSetup;
+    // (undocumented)
     capabilities: CapabilitiesSetup;
     // (undocumented)
     context: ContextSetup;
@@ -465,6 +499,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 
 // @public
 export interface CoreStart {
+    // (undocumented)
+    auditTrail: AuditTrailStart;
     // (undocumented)
     capabilities: CapabilitiesStart;
     // (undocumented)
@@ -744,7 +780,7 @@ export type HttpResponsePayload = undefined | string | Record<string, any> | Buf
 
 // @public (undocumented)
 export interface HttpServerInfo {
-    host: string;
+    hostname: string;
     name: string;
     port: number;
     protocol: 'http' | 'https' | 'socket';
@@ -1221,7 +1257,7 @@ export interface LegacyCallAPIOptions {
 //
 // @public (undocumented)
 export class LegacyClusterClient implements ILegacyClusterClient {
-    constructor(config: LegacyElasticsearchClientConfig, log: Logger, getAuthHeaders?: GetAuthHeaders);
+    constructor(config: LegacyElasticsearchClientConfig, log: Logger, getAuditorFactory: () => AuditorFactory, getAuthHeaders?: GetAuthHeaders);
     asScoped(request?: ScopeableRequest): ILegacyScopedClusterClient;
     callAsInternalUser: LegacyAPICaller;
     close(): void;
@@ -1286,7 +1322,7 @@ export interface LegacyRequest extends Request {
 //
 // @public (undocumented)
 export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
-    constructor(internalAPICaller: LegacyAPICaller, scopedAPICaller: LegacyAPICaller, headers?: Headers | undefined);
+    constructor(internalAPICaller: LegacyAPICaller, scopedAPICaller: LegacyAPICaller, headers?: Headers | undefined, auditor?: Auditor | undefined);
     callAsCurrentUser(endpoint: string, clientParams?: Record<string, any>, options?: LegacyCallAPIOptions): Promise<any>;
     callAsInternalUser(endpoint: string, clientParams?: Record<string, any>, options?: LegacyCallAPIOptions): Promise<any>;
     }
@@ -1689,6 +1725,7 @@ export interface RequestHandlerContext {
         uiSettings: {
             client: IUiSettingsClient;
         };
+        auditor: Auditor;
     };
 }
 
