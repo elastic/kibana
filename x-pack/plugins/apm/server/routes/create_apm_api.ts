@@ -76,6 +76,7 @@ import {
   rumPageViewsTrendRoute,
   rumPageLoadDistributionRoute,
   rumPageLoadDistBreakdownRoute,
+  rumServicesRoute,
 } from './rum_client';
 import {
   observabilityDashboardHasDataRoute,
@@ -172,6 +173,7 @@ const createApmApi = () => {
     .add(rumPageLoadDistributionRoute)
     .add(rumPageLoadDistBreakdownRoute)
     .add(rumClientMetricsRoute)
+    .add(rumServicesRoute)
 
     // Observability dashboard
     .add(observabilityDashboardHasDataRoute)
