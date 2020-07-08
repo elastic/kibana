@@ -19,7 +19,7 @@ export const configSchema = schema.object({
   accessCheckTimeoutWarning: schema.number({ defaultValue: 300 }),
 });
 
-type ConfigType = TypeOf<typeof configSchema>;
+export type ConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<ConfigType> = {
   schema: configSchema,

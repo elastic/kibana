@@ -16,10 +16,10 @@ import {
   KibanaRequest,
 } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { UICapabilities } from 'ui/capabilities';
 import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 
+import { ConfigType } from './';
 import { checkAccess } from './lib/check_access';
 import { registerPublicUrlRoute } from './routes/enterprise_search/public_url';
 import { registerEnginesRoute } from './routes/app_search/engines';
@@ -33,26 +33,19 @@ export interface PluginsSetup {
   features: FeaturesPluginSetup;
 }
 
-export interface ServerConfigType {
-  host?: string;
-  enabled: boolean;
-  accessCheckTimeout: number;
-  accessCheckTimeoutWarning: number;
-}
-
 export interface IRouteDependencies {
   router: IRouter;
-  config: ServerConfigType;
+  config: ConfigType;
   log: Logger;
   getSavedObjectsService?(): SavedObjectsServiceStart;
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
-  private config: Observable<ServerConfigType>;
+  private config: Observable<ConfigType>;
   private logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.config = initializerContext.config.create<ServerConfigType>();
+    this.config = initializerContext.config.create<ConfigType>();
     this.logger = initializerContext.logger.get();
   }
 
@@ -79,26 +72,21 @@ export class EnterpriseSearchPlugin implements Plugin {
     /**
      * Register user access to the Enterprise Search plugins
      */
-    capabilities.registerSwitcher(
-      async (request: KibanaRequest, uiCapabilities: UICapabilities) => {
-        const dependencies = { config, security, request, log: this.logger };
+    capabilities.registerSwitcher(async (request: KibanaRequest) => {
+      const dependencies = { config, security, request, log: this.logger };
 
-        const { hasAppSearchAccess } = await checkAccess(dependencies);
-        // TODO: hasWorkplaceSearchAccess
+      const { hasAppSearchAccess } = await checkAccess(dependencies);
+      // TODO: hasWorkplaceSearchAccess
 
-        return {
-          ...uiCapabilities,
-          navLinks: {
-            ...uiCapabilities.navLinks,
-            appSearch: hasAppSearchAccess,
-          },
-          catalogue: {
-            ...uiCapabilities.catalogue,
-            appSearch: hasAppSearchAccess,
-          },
-        };
-      }
-    );
+      return {
+        navLinks: {
+          appSearch: hasAppSearchAccess,
+        },
+        catalogue: {
+          appSearch: hasAppSearchAccess,
+        },
+      };
+    });
 
     /**
      * Register routes
@@ -113,17 +101,17 @@ export class EnterpriseSearchPlugin implements Plugin {
      * Bootstrap the routes, saved objects, and collector for telemetry
      */
     savedObjects.registerType(appSearchTelemetryType);
+    let savedObjectsStarted: SavedObjectsServiceStart;
 
     getStartServices().then(([coreStart]) => {
-      const savedObjectsStarted = coreStart.savedObjects as SavedObjectsServiceStart;
-
-      registerTelemetryRoute({
-        ...dependencies,
-        getSavedObjectsService: () => savedObjectsStarted,
-      });
+      savedObjectsStarted = coreStart.savedObjects;
       if (usageCollection) {
         registerTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
       }
+    });
+    registerTelemetryRoute({
+      ...dependencies,
+      getSavedObjectsService: () => savedObjectsStarted,
     });
   }
 

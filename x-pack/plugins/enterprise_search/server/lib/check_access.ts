@@ -6,14 +6,14 @@
 
 import { KibanaRequest, Logger } from 'src/core/server';
 import { SecurityPluginSetup } from '../../../security/server';
-import { ServerConfigType } from '../plugin';
+import { ConfigType } from '../';
 
 import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
 
 interface ICheckAccess {
   request: KibanaRequest;
   security?: SecurityPluginSetup;
-  config: ServerConfigType;
+  config: ConfigType;
   log: Logger;
 }
 export interface IAccess {

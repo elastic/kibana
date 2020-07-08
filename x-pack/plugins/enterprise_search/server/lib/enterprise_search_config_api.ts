@@ -8,12 +8,12 @@ import AbortController from 'abort-controller';
 import fetch from 'node-fetch';
 
 import { KibanaRequest, Logger } from 'src/core/server';
-import { ServerConfigType } from '../plugin';
+import { ConfigType } from '../';
 import { IAccess } from './check_access';
 
 interface IParams {
   request: KibanaRequest;
-  config: ServerConfigType;
+  config: ConfigType;
   log: Logger;
 }
 interface IReturn {
