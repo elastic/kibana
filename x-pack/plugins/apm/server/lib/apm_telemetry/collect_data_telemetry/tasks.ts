@@ -29,7 +29,6 @@ import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { Span } from '../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { ML_GROUP_NAME_APM } from '../../anomaly_detection/create_anomaly_detection_jobs';
 import { APMTelemetry } from '../types';
 
 const TIME_RANGES = ['1d', 'all'] as const;
