@@ -37,6 +37,8 @@ import {
   UpdateTimelineLoading,
 } from './types';
 import { Ecs } from '../../../graphql/types';
+import { AddExceptionOnClick } from '../../../common/components/exceptions/add_exception_modal';
+import { getMappedNonEcsValue } from '../../../common/components/exceptions/helpers';
 
 export const buildAlertStatusFilter = (status: Status): Filter[] => [
   {
@@ -172,6 +174,13 @@ export const requiredFieldsForActions = [
   'signal.rule.query',
   'signal.rule.to',
   'signal.rule.id',
+
+  // Endpoint exception fields
+  'file.path',
+  'file.Ext.code_signature.subject_name',
+  'file.Ext.code_signature.trusted',
+  'file.hash.sha1',
+  'host.os.family',
 ];
 
 interface AlertActionArgs {
@@ -188,6 +197,12 @@ interface AlertActionArgs {
   status: Status;
   timelineId: string;
   updateTimelineIsLoading: UpdateTimelineLoading;
+  openAddExceptionModal: ({
+    exceptionListType,
+    alertData,
+    ruleName,
+    ruleId,
+  }: AddExceptionOnClick) => void;
 }
 
 export const getAlertActions = ({
@@ -204,6 +219,7 @@ export const getAlertActions = ({
   status,
   timelineId,
   updateTimelineIsLoading,
+  openAddExceptionModal,
 }: AlertActionArgs): TimelineRowAction[] => {
   const openAlertActionComponent: TimelineRowAction = {
     ariaLabel: 'Open alert',
@@ -289,5 +305,52 @@ export const getAlertActions = ({
     ...(FILTER_OPEN !== status ? [openAlertActionComponent] : []),
     ...(FILTER_CLOSED !== status ? [closeAlertActionComponent] : []),
     ...(FILTER_IN_PROGRESS !== status ? [inProgressAlertActionComponent] : []),
+    // TODO: disable this option if the alert is not an Endpoint alert
+    {
+      onClick: ({ ecsData, data }: TimelineRowActionOnClick) => {
+        const ruleNameValue = getMappedNonEcsValue({ data, fieldName: 'signal.rule.name' });
+        const ruleId = getMappedNonEcsValue({ data, fieldName: 'signal.rule.id' });
+        if (ruleId !== undefined && ruleId.length > 0) {
+          openAddExceptionModal({
+            ruleName: ruleNameValue ? ruleNameValue[0] : '',
+            ruleId: ruleId[0],
+            exceptionListType: 'endpoint',
+            alertData: {
+              ecsData,
+              nonEcsData: data,
+            },
+          });
+        }
+      },
+      id: 'addEndpointException',
+      isActionDisabled: () => !canUserCRUD || !hasIndexWrite,
+      dataTestSubj: 'add-endpoint-exception-menu-item',
+      ariaLabel: 'Add Endpoint Exception',
+      content: <EuiText size="m">{i18n.ACTION_ADD_ENDPOINT_EXCEPTION}</EuiText>,
+      displayType: 'contextMenu',
+    },
+    {
+      onClick: ({ ecsData, data }: TimelineRowActionOnClick) => {
+        const ruleNameValue = getMappedNonEcsValue({ data, fieldName: 'signal.rule.name' });
+        const ruleId = getMappedNonEcsValue({ data, fieldName: 'signal.rule.id' });
+        if (ruleId !== undefined && ruleId.length > 0) {
+          openAddExceptionModal({
+            ruleName: ruleNameValue ? ruleNameValue[0] : '',
+            ruleId: ruleId[0],
+            exceptionListType: 'detection',
+            alertData: {
+              ecsData,
+              nonEcsData: data,
+            },
+          });
+        }
+      },
+      id: 'addException',
+      isActionDisabled: () => !canUserCRUD || !hasIndexWrite,
+      dataTestSubj: 'add-exception-menu-item',
+      ariaLabel: 'Add Exception',
+      content: <EuiText size="m">{i18n.ACTION_ADD_EXCEPTION}</EuiText>,
+      displayType: 'contextMenu',
+    },
   ];
 };

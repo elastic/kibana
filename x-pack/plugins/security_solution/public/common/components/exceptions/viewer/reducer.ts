@@ -6,10 +6,13 @@
 import { FilterOptions, ExceptionsPagination, ExceptionListItemIdentifiers } from '../types';
 import {
   ExceptionList,
+  ExceptionListType,
   ExceptionListItemSchema,
   ExceptionIdentifiers,
   Pagination,
 } from '../../../../../public/lists_plugin_deps';
+
+export type ViewerModalName = 'addModal' | 'editModal' | null;
 
 export interface State {
   filterOptions: FilterOptions;
@@ -22,7 +25,8 @@ export interface State {
   loadingLists: ExceptionIdentifiers[];
   loadingItemIds: ExceptionListItemIdentifiers[];
   isInitLoading: boolean;
-  isModalOpen: boolean;
+  currentModal: ViewerModalName;
+  exceptionListTypeToEdit: ExceptionListType | null;
 }
 
 export type Action =
@@ -39,9 +43,10 @@ export type Action =
       allLists: ExceptionIdentifiers[];
     }
   | { type: 'updateIsInitLoading'; loading: boolean }
-  | { type: 'updateModalOpen'; isOpen: boolean }
+  | { type: 'updateModalOpen'; modalName: ViewerModalName }
   | { type: 'updateExceptionToEdit'; exception: ExceptionListItemSchema }
-  | { type: 'updateLoadingItemIds'; items: ExceptionListItemIdentifiers[] };
+  | { type: 'updateLoadingItemIds'; items: ExceptionListItemIdentifiers[] }
+  | { type: 'updateExceptionListTypeToEdit'; exceptionListType: ExceptionListType | null };
 
 export const allExceptionItemsReducer = () => (state: State, action: Action): State => {
   switch (action.type) {
@@ -116,15 +121,26 @@ export const allExceptionItemsReducer = () => (state: State, action: Action): St
       };
     }
     case 'updateExceptionToEdit': {
+      const exception = action.exception;
+      const exceptionListToEdit = [state.endpointList, state.detectionsList].find((list) => {
+        return list !== null && exception.list_id === list.list_id;
+      });
       return {
         ...state,
         exceptionToEdit: action.exception,
+        exceptionListTypeToEdit: exceptionListToEdit ? exceptionListToEdit.type : null,
       };
     }
     case 'updateModalOpen': {
       return {
         ...state,
-        isModalOpen: action.isOpen,
+        currentModal: action.modalName,
+      };
+    }
+    case 'updateExceptionListTypeToEdit': {
+      return {
+        ...state,
+        exceptionListTypeToEdit: action.exceptionListType,
       };
     }
     default:
