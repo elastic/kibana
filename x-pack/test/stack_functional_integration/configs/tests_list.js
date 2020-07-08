@@ -17,7 +17,6 @@ export default (envObj) => {
   // get the opt in/out banner out of the way early
   if (envObj.XPACK === 'YES') {
     xs.push('telemetry');
-    //         apps.push('code'); Code is off by default in 7.3.0
   }
 
   if (envObj.BEATS.includes('metricbeat')) {
