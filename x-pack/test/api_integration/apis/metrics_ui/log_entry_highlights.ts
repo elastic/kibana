@@ -122,9 +122,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
         });
 
-        // Skipped since it behaves differently in master and in the 7.X branch
-        // See https://github.com/elastic/kibana/issues/49959
-        it.skip('highlights field columns', async () => {
+        it('highlights field columns', async () => {
           const { body } = await supertest
             .post(LOG_ENTRIES_HIGHLIGHTS_PATH)
             .set(COMMON_HEADERS)
