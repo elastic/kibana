@@ -20,5 +20,5 @@ export const encoding = t.keyof({
 });
 
 export const schemaVersion = t.keyof({
-  '1.0.0': null,
+  v1: null,
 });

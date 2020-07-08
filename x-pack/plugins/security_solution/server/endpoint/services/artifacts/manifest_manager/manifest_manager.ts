@@ -117,7 +117,6 @@ export class ManifestManager {
           manifest.addEntry(artifactSo.attributes);
         })
       );
-
       return manifest;
     } catch (err) {
       if (err.output.statusCode !== 404) {
@@ -133,35 +132,44 @@ export class ManifestManager {
    * @param opts TODO
    */
   public async getSnapshot(opts?: ManifestSnapshotOpts) {
-    let oldManifest: Manifest | null;
+    try {
+      let oldManifest: Manifest | null;
 
-    // Get the last-dispatched manifest
-    oldManifest = await this.getLastDispatchedManifest(ManifestConstants.SCHEMA_VERSION);
+      // Get the last-dispatched manifest
+      oldManifest = await this.getLastDispatchedManifest(ManifestConstants.SCHEMA_VERSION);
 
-    if (oldManifest === null && opts !== undefined && opts.initialize) {
-      oldManifest = new Manifest(new Date(), ManifestConstants.SCHEMA_VERSION, 'v0'); // create empty manifest
-    } else if (oldManifest == null) {
-      this.logger.debug('Manifest does not exist yet. Waiting...');
+      if (oldManifest === null && opts !== undefined && opts.initialize) {
+        oldManifest = new Manifest(
+          new Date(),
+          ManifestConstants.SCHEMA_VERSION,
+          ManifestConstants.INITIAL_VERSION
+        ); // create empty manifest
+      } else if (oldManifest == null) {
+        this.logger.debug('Manifest does not exist yet. Waiting...');
+        return null;
+      }
+
+      // Build new exception list artifacts
+      const artifacts = await this.buildExceptionListArtifacts(ArtifactConstants.SCHEMA_VERSION);
+
+      // Build new manifest
+      const newManifest = Manifest.fromArtifacts(
+        artifacts,
+        ManifestConstants.SCHEMA_VERSION,
+        oldManifest.getVersion()
+      );
+
+      // Get diffs
+      const diffs = newManifest.diff(oldManifest);
+
+      return {
+        manifest: newManifest,
+        diffs,
+      };
+    } catch (err) {
+      this.logger.error(err);
       return null;
     }
-
-    // Build new exception list artifacts
-    const artifacts = await this.buildExceptionListArtifacts(ArtifactConstants.SCHEMA_VERSION);
-
-    // Build new manifest
-    const newManifest = Manifest.fromArtifacts(
-      artifacts,
-      ManifestConstants.SCHEMA_VERSION,
-      oldManifest.getVersion()
-    );
-
-    // Get diffs
-    const diffs = newManifest.diff(oldManifest);
-
-    return {
-      manifest: newManifest,
-      diffs,
-    };
   }
 
   /**
@@ -291,11 +299,11 @@ export class ManifestManager {
     const manifestClient = this.getManifestClient(manifest.getSchemaVersion());
 
     // Commit the new manifest
-    if (manifest.getVersion() === 'v0') {
+    if (manifest.getVersion() === ManifestConstants.INITIAL_VERSION) {
       await manifestClient.createManifest(manifest.toSavedObject());
     } else {
       const version = manifest.getVersion();
-      if (version === 'v0') {
+      if (version === ManifestConstants.INITIAL_VERSION) {
         throw new Error('Updating existing manifest with baseline version. Bad state.');
       }
       await manifestClient.updateManifest(manifest.toSavedObject(), {

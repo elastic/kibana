@@ -20,7 +20,7 @@ export const identifier = t.string;
 export const manifestVersion = t.string;
 
 export const manifestSchemaVersion = t.keyof({
-  '1.0.0': null,
+  v1: null,
 });
 export type ManifestSchemaVersion = t.TypeOf<typeof manifestSchemaVersion>;
 

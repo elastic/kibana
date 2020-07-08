@@ -30,7 +30,7 @@ import { createMockEndpointAppContextServiceStartContract } from '../../mocks';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { WrappedTranslatedExceptionList } from '../../schemas/artifacts/lists';
 
-const mockArtifactName = `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-windows-1.0.0`;
+const mockArtifactName = `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-windows-v1`;
 const expectedEndpointExceptions: WrappedTranslatedExceptionList = {
   entries: [
     {
@@ -147,7 +147,7 @@ describe('test alerts route', () => {
       references: [],
       attributes: {
         identifier: mockArtifactName,
-        schemaVersion: '1.0.0',
+        schemaVersion: 'v1',
         sha256: '123456',
         encoding: 'application/json',
         created: Date.now(),

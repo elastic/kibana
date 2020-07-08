@@ -97,7 +97,7 @@ export function translateToEndpointExceptions(
   exc: FoundExceptionListItemSchema,
   schemaVersion: string
 ): TranslatedExceptionListItem[] {
-  if (schemaVersion === '1.0.0') {
+  if (schemaVersion === 'v1') {
     return exc.data.map((item) => {
       return translateItem(schemaVersion, item);
     });

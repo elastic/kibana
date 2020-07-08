@@ -22,7 +22,7 @@ describe('manifest_manager', () => {
       expect(snapshot!.diffs).toEqual([
         {
           id:
-            'endpoint-exceptionlist-linux-1.0.0-1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
+            'endpoint-exceptionlist-linux-v1-1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
           type: 'add',
         },
       ]);
@@ -36,7 +36,7 @@ describe('manifest_manager', () => {
       expect(snapshot!.diffs).toEqual([
         {
           id:
-            'endpoint-exceptionlist-linux-1.0.0-1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
+            'endpoint-exceptionlist-linux-v1-1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
           type: 'add',
         },
       ]);
@@ -83,8 +83,8 @@ describe('manifest_manager', () => {
       expect(
         packageConfigService.update.mock.calls[0][2].inputs[0].config.artifact_manifest.value
       ).toEqual({
-        manifest_version: 'v0',
-        schema_version: '1.0.0',
+        manifest_version: ManifestConstants.INITIAL_VERSION,
+        schema_version: 'v1',
         artifacts: {
           [artifact.identifier]: {
             compression_algorithm: 'none',
@@ -93,7 +93,7 @@ describe('manifest_manager', () => {
             encoded_sha256: artifact.encodedSha256,
             decoded_size: artifact.decodedSize,
             encoded_size: artifact.encodedSize,
-            relative_url: `/api/endpoint/artifacts/download/${artifact.identifier}/${artifact.encodedSha256}`,
+            relative_url: `/api/endpoint/artifacts/download/${artifact.identifier}/${artifact.decodedSha256}`,
           },
         },
       });
