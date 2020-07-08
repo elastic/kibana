@@ -32,7 +32,7 @@ describe('Overview', () => {
       const wrapper: Cheerio = render(
         <I18nProvider>
           <KibanaContext.Provider value={{ http: {} }}>
-            <LicenseContext.Provider value={{ license: { isActive: false, type: 'trial' } }}>
+            <LicenseContext.Provider value={{ license: {} }}>
               <Overview />
             </LicenseContext.Provider>
           </KibanaContext.Provider>
@@ -95,10 +95,7 @@ const mountWithApiMock = async ({ get, license }: { get(): any; license?: object
   // TBH, I don't fully understand why since Enzyme's mount is supposed to
   // have act() baked in - could be because of the wrapping context provider?
   await act(async () => {
-    wrapper = mountWithContext(<Overview />, {
-      http: httpMock,
-      license: license || { isActive: false, type: 'trial' },
-    });
+    wrapper = mountWithContext(<Overview />, { http: httpMock, license });
   });
   if (wrapper) {
     wrapper.update(); // This seems to be required for the DOM to actually update
