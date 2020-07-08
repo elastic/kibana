@@ -54,6 +54,10 @@ export function HomePageProvider({ getService, getPageObjects }: FtrProviderCont
     async removeSampleDataSet(id: string) {
       // looks like overkill but we're hitting flaky cases where we click but it doesn't remove
       await testSubjects.waitForEnabled(`removeSampleDataSet${id}`);
+      // https://github.com/elastic/kibana/issues/65949
+      // Even after waiting for the "Remove" button to be enabled we still have failures
+      // where it appears the click just didn't work.
+      await PageObjects.common.sleep(1010);
       await testSubjects.click(`removeSampleDataSet${id}`);
       await this._waitForSampleDataLoadingAction(id);
     }
