@@ -13,10 +13,10 @@ import { Description } from './description';
 
 export const AnnotationsSwitch: FC = () => {
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
-  const [annotationsEnabled, setAnnotationsEnabled] = useState(
-    jobCreator.modelPlot ?? jobCreator.modelChangeAnnotations
+  const [annotationsEnabled, setAnnotationsEnabled] = useState(jobCreator.modelChangeAnnotations);
+  const [showCallOut, setShowCallout] = useState(
+    jobCreator.modelPlot && !jobCreator.modelChangeAnnotations
   );
-  const [showCallOut, setShowCallout] = useState(jobCreator.modelPlot && annotationsEnabled);
 
   useEffect(() => {
     jobCreator.modelChangeAnnotations = annotationsEnabled;
@@ -24,7 +24,7 @@ export const AnnotationsSwitch: FC = () => {
   }, [annotationsEnabled]);
 
   useEffect(() => {
-    setShowCallout(jobCreator.modelPlot === true && annotationsEnabled === false);
+    setShowCallout(jobCreator.modelPlot && !annotationsEnabled);
   }, [jobCreatorUpdated, annotationsEnabled]);
 
   function toggleAnnotations() {
