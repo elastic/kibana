@@ -29,7 +29,9 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
     async getHref({ embeddable, data }: SwimLaneDrilldownContext): Promise<string> {
       const [, pluginsStart] = await getStartServices();
       const urlGenerator = pluginsStart.share.urlGenerators.getUrlGenerator(ML_APP_URL_GENERATOR);
-      const { perPage, jobIds, query, filters, timeRange } = embeddable.getInput();
+      const { jobIds, query, filters, timeRange } = embeddable.getInput();
+      const { perPage, fromPage } = embeddable.getOutput();
+
       return urlGenerator.createUrl({
         page: 'explorer',
         jobIds,
@@ -37,8 +39,8 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
         filters,
         timeRange,
         mlExplorerSwimlane: {
+          viewByFromPage: fromPage,
           viewByPerPage: perPage,
-          viewByFromPage: 1,
           ...(data
             ? {
                 selectedType: data.type,

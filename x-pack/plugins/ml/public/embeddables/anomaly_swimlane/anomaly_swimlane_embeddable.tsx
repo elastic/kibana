@@ -60,7 +60,7 @@ export interface SwimLaneDrilldownContext extends EditSwimlanePanelContext {
   /**
    * Optional data provided by swim lane selection
    */
-  data?: AppStateSelectedCells & { interval: number };
+  data?: AppStateSelectedCells;
 }
 
 export type AnomalySwimlaneEmbeddableInput = EmbeddableInput & AnomalySwimlaneEmbeddableCustomInput;
@@ -73,6 +73,8 @@ export interface AnomalySwimlaneEmbeddableCustomOutput {
   swimlaneType: SwimlaneType;
   viewBy?: string;
   perPage?: number;
+  fromPage?: number;
+  interval?: number;
 }
 
 export interface AnomalySwimlaneServices {
@@ -125,9 +127,8 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
           embeddableInput={this.getInput$()}
           services={this.services}
           refresh={this.reload$.asObservable()}
-          onInputChange={(input) => {
-            this.updateInput(input);
-          }}
+          onInputChange={this.updateInput.bind(this)}
+          onOutputChange={this.updateOutput.bind(this)}
         />
       </I18nContext>,
       node
