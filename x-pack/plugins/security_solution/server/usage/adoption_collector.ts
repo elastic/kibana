@@ -5,6 +5,7 @@
  */
 
 import { LegacyAPICaller } from '../../../../../src/core/server';
+import { CollectorOptions } from '../../../../../src/plugins/usage_collection/server';
 import { SERVER_APP_ID } from '../../common/constants';
 import { SetupPlugins } from '../plugin';
 import { AdoptionUsage } from './types';
@@ -22,30 +23,32 @@ export const registerAdoptionCollector: RegisterAdoptionCollector = ({
     return;
   }
 
-  const collector = usageCollection.makeUsageCollector<AdoptionUsage>({
-    type: `${SERVER_APP_ID}_adoption`,
-    schema: {
-      detection_rules_custom_enabled: { type: 'number' },
-      detection_rules_custom_disabled: { type: 'number' },
-      detection_rules_elastic_enabled: { type: 'number' },
-      detection_rules_elastic_disabled: { type: 'number' },
-      ml_jobs_custom_enabled: { type: 'number' },
-      ml_jobs_custom_disabled: { type: 'number' },
-      ml_jobs_elastic_enabled: { type: 'number' },
-      ml_jobs_elastic_disabled: { type: 'number' },
-    },
-    isReady: () => kibanaIndex.length > 0,
-    fetch: buildFetch(kibanaIndex, ml),
-  });
+  const collector = usageCollection.makeUsageCollector<AdoptionUsage>(
+    buildCollectorOptions(kibanaIndex, ml)
+  );
 
   usageCollection.registerCollector(collector);
 };
 
-export const buildFetch = (kibanaIndex: string, ml: CollectorDependencies['ml']) => async (
-  callCluster: LegacyAPICaller
-): Promise<AdoptionUsage> => {
-  const rules = await fetchRules(kibanaIndex, callCluster);
-  const jobs = await fetchJobs(ml);
-
-  return { ...buildRuleStats(rules), ...buildMlJobStats(jobs) };
-};
+export const buildCollectorOptions = (
+  kibanaIndex: string,
+  ml: CollectorDependencies['ml']
+): CollectorOptions<AdoptionUsage> => ({
+  type: `${SERVER_APP_ID}_adoption`,
+  schema: {
+    detection_rules_custom_enabled: { type: 'number' },
+    detection_rules_custom_disabled: { type: 'number' },
+    detection_rules_elastic_enabled: { type: 'number' },
+    detection_rules_elastic_disabled: { type: 'number' },
+    ml_jobs_custom_enabled: { type: 'number' },
+    ml_jobs_custom_disabled: { type: 'number' },
+    ml_jobs_elastic_enabled: { type: 'number' },
+    ml_jobs_elastic_disabled: { type: 'number' },
+  },
+  isReady: () => kibanaIndex.length > 0,
+  fetch: async (callCluster: LegacyAPICaller) => {
+    const rules = await fetchRules(kibanaIndex, callCluster);
+    const jobs = await fetchJobs(ml);
+    return { ...buildRuleStats(rules), ...buildMlJobStats(jobs) };
+  },
+});
