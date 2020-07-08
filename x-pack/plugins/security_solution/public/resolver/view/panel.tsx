@@ -14,7 +14,7 @@ import React, {
   useEffect,
 } from 'react';
 import { useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
 import { EuiPanel } from '@elastic/eui';
@@ -48,7 +48,7 @@ import { CrumbInfo } from './panels/panel_content_utilities';
  */
 const PanelContent = memo(function PanelContent() {
   const history = useHistory();
-  const urlSearch = history.location.search;
+  const urlSearch = useLocation().search;
   const dispatch = useResolverDispatch();
 
   const { timestamp } = useContext(SideEffectContext);
