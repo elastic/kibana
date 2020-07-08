@@ -100,12 +100,20 @@ The API returns the following:
     {
       "id": "my-pattern",
       "type": "index-pattern",
-      "destinationId": "4aba3770-0d04-45e1-9e34-4cf0fd2165ae"
+      "destinationId": "4aba3770-0d04-45e1-9e34-4cf0fd2165ae",
+      "meta": {
+        "icon": "indexPatternApp",
+        "title": "my-pattern-*"
+      }
     },
     {
       "id": "my-dashboard",
       "type": "dashboard",
-      "destinationId": "c31d1eca-9bc0-4a81-b5f9-30c442824c48"
+      "destinationId": "c31d1eca-9bc0-4a81-b5f9-30c442824c48",
+      "meta": {
+        "icon": "dashboardApp",
+        "title": "Look at my dashboard"
+      }
     }
   ]
 }
@@ -143,11 +151,19 @@ The API returns the following:
   "successResults": [
     {
       "id": "my-pattern",
-      "type": "index-pattern"
+      "type": "index-pattern",
+      "meta": {
+        "icon": "indexPatternApp",
+        "title": "my-pattern-*"
+      }
     },
     {
       "id": "my-dashboard",
-      "type": "dashboard"
+      "type": "dashboard",
+      "meta": {
+        "icon": "dashboardApp",
+        "title": "Look at my dashboard"
+      }
     }
   ]
 }
@@ -190,6 +206,10 @@ The API returns the following:
       "title": "my-pattern-*",
       "error": {
         "type": "conflict"
+      },
+      "meta": {
+        "icon": "indexPatternApp",
+        "title": "my-pattern-*"
       }
     },
     {
@@ -199,6 +219,10 @@ The API returns the following:
       "error": {
         "type": "conflict",
         "destinationId": "another-vis"
+      },
+      "meta": {
+        "icon": "visualizeApp",
+        "title": "Look at my visualization"
       }
     },
     {
@@ -219,13 +243,21 @@ The API returns the following:
             "updatedAt": "2020-07-05T12:29:54.849Z"
           }
         ]
+      },
+      "meta": {
+        "icon": "canvasApp",
+        "title": "Look at my canvas"
       }
     }
   ],
   "successResults": [
     {
       "id": "my-dashboard",
-      "type": "dashboard"
+      "type": "dashboard",
+      "meta": {
+        "icon": "dashboardApp",
+        "title": "Look at my dashboard"
+      }
     }
   ]
 }
@@ -274,6 +306,7 @@ The API returns the following:
 
 [source,sh]
 --------------------------------------------------
+{
   "success": false,
   "successCount": 0,
   "errors": [
@@ -288,16 +321,25 @@ The API returns the following:
             "type": "index-pattern",
             "id": "my-pattern-*"
           }
-        ],
-        "blocking": [
-          {
-            "type": "dashboard",
-            "id": "my-dashboard"
-          }
         ]
+      },
+      "meta": {
+        "icon": "visualizeApp",
+        "title": "Look at my visualization"
+      }
+    }
+  ],
+  "successResults": [
+    {
+      "id": "my-dashboard",
+      "type": "dashboard",
+      "meta": {
+        "icon": "dashboardApp",
+        "title": "Look at my dashboard"
       }
     }
   ]
+}
 --------------------------------------------------
 
 This result indicates that the import was not successful because the visualization resulted in a missing references error. No objects will

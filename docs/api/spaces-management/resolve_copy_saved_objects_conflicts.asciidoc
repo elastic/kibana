@@ -183,21 +183,37 @@ The API returns the following:
     "successResults": [
       {
         "id": "my-pattern",
-        "type": "index-pattern"
+        "type": "index-pattern",
+        "meta": {
+          "icon": "indexPatternApp",
+          "title": "my-pattern-*"
+        }
       },
       {
         "id": "my-vis",
         "type": "visualization",
-        "destinationId": "another-vis"
+        "destinationId": "another-vis",
+        "meta": {
+          "icon": "visualizeApp",
+          "title": "Look at my visualization"
+        }
       },
       {
         "id": "my-canvas",
         "type": "canvas-workpad",
-        "destinationId": "yet-another-canvas"
+        "destinationId": "yet-another-canvas",
+        "meta": {
+          "icon": "canvasApp",
+          "title": "Look at my canvas"
+        }
       },
       {
         "id": "my-dashboard",
-        "type": "dashboard"
+        "type": "dashboard",
+        "meta": {
+          "icon": "dashboardApp",
+          "title": "Look at my dashboard"
+        }
       }
     ]
   }
