@@ -64,7 +64,7 @@ export class VegaAdapter {
       const value = runtimeScope.data[key].values.value;
 
       if (value && value[0]) {
-        const columns = Object.keys(value![0] || []);
+        const columns = Object.keys(value[0]);
         acc.push({
           id: key,
           columns: mapColumns(columns),
