@@ -29,6 +29,7 @@ import { argTypeSpecs } from './expression_types/arg_types';
 import { transitions } from './transitions';
 import { getPluginApi, CanvasApi } from './plugin_api';
 import { CanvasSrcPlugin } from '../canvas_plugin_src/plugin';
+import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 export { CoreStart, CoreSetup };
 
 /**
@@ -48,6 +49,7 @@ export interface CanvasStartDeps {
   expressions: ExpressionsStart;
   inspector: InspectorStart;
   uiActions: UiActionsStart;
+  kibanaLegacy: KibanaLegacyStart;
 }
 
 /**
@@ -126,6 +128,7 @@ export class CanvasPlugin
 
   public start(core: CoreStart, plugins: CanvasStartDeps) {
     this.srcPlugin.start(core, plugins);
+    plugins.kibanaLegacy.loadStyles();
     initLoadingIndicator(core.http.addLoadingCountSource);
   }
 }

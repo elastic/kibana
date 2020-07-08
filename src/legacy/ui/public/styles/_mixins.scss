@@ -22,6 +22,7 @@
     vertical-align: baseline;
   }
 }
+
 // Standardizes the look and layout of resizable area handles
 @mixin kbnResizer($size: ($euiSizeM + 2px), $direction: horizontal) {
   position: relative;
