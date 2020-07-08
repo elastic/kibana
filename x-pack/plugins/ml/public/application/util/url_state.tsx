@@ -5,7 +5,7 @@
  */
 
 import { parse, stringify } from 'query-string';
-import { useCallback } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, FC } from 'react';
 import { isEqual } from 'lodash';
 import { decode, encode } from 'rison-node';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -14,8 +14,16 @@ import { Dictionary } from '../../../common/types/common';
 
 import { getNestedProperty } from './object_utils';
 
-export type SetUrlState = (attribute: string | Dictionary<any>, value?: any) => void;
-export type UrlState = [Dictionary<any>, SetUrlState];
+type Accessor = '_a' | '_g';
+export type SetUrlState = (
+  accessor: Accessor,
+  attribute: string | Dictionary<any>,
+  value?: any
+) => void;
+export interface UrlState {
+  searchString: string;
+  setUrlState: SetUrlState;
+}
 
 /**
  * Set of URL query parameters that require the rison serialization.
@@ -30,7 +38,7 @@ function isRisonSerializationRequired(queryParam: string): boolean {
   return risonSerializedParams.has(queryParam);
 }
 
-export function getUrlState(search: string): Dictionary<any> {
+export function parseUrlState(search: string): Dictionary<any> {
   const urlState: Dictionary<any> = {};
   const parsedQueryString = parse(search, { sort: false });
 
@@ -56,14 +64,23 @@ export function getUrlState(search: string): Dictionary<any> {
 // - `history.push()` is the successor of `save`.
 // - The exposed state and set call make use of the above and make sure that
 //   different urlStates(e.g. `_a` / `_g`) don't overwrite each other.
-export const useUrlState = (accessor: string): UrlState => {
+// This uses a context to be able to maintain only one instance
+// of the url state. It gets passed down with `UrlStateProvider`
+// and can be used via `useUrlState`.
+export const urlStateStore = createContext<UrlState>({
+  searchString: '',
+  setUrlState: () => {},
+});
+const { Provider } = urlStateStore;
+export const UrlStateProvider: FC = ({ children }) => {
   const history = useHistory();
-  const { search } = useLocation();
+  const { search: searchString } = useLocation();
 
-  const setUrlState = useCallback(
-    (attribute: string | Dictionary<any>, value?: any) => {
-      const urlState = getUrlState(search);
-      const parsedQueryString = parse(search, { sort: false });
+  const setUrlState: SetUrlState = useCallback(
+    (accessor: Accessor, attribute: string | Dictionary<any>, value?: any) => {
+      const prevSearchString = searchString;
+      const urlState = parseUrlState(prevSearchString);
+      const parsedQueryString = parse(prevSearchString, { sort: false });
 
       if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
         urlState[accessor] = {};
@@ -71,7 +88,7 @@ export const useUrlState = (accessor: string): UrlState => {
 
       if (typeof attribute === 'string') {
         if (isEqual(getNestedProperty(urlState, `${accessor}.${attribute}`), value)) {
-          return;
+          return prevSearchString;
         }
 
         urlState[accessor][attribute] = value;
@@ -83,7 +100,10 @@ export const useUrlState = (accessor: string): UrlState => {
       }
 
       try {
-        const oldLocationSearch = stringify(parsedQueryString, { sort: false, encode: false });
+        const oldLocationSearchString = stringify(parsedQueryString, {
+          sort: false,
+          encode: false,
+        });
 
         Object.keys(urlState).forEach((a) => {
           if (isRisonSerializationRequired(a)) {
@@ -92,20 +112,41 @@ export const useUrlState = (accessor: string): UrlState => {
             parsedQueryString[a] = urlState[a];
           }
         });
-        const newLocationSearch = stringify(parsedQueryString, { sort: false, encode: false });
+        const newLocationSearchString = stringify(parsedQueryString, {
+          sort: false,
+          encode: false,
+        });
 
-        if (oldLocationSearch !== newLocationSearch) {
-          history.push({
-            search: stringify(parsedQueryString, { sort: false }),
-          });
+        if (oldLocationSearchString !== newLocationSearchString) {
+          const newSearchString = stringify(parsedQueryString, { sort: false });
+          history.push({ search: newSearchString });
         }
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Could not save url state', error);
       }
     },
-    [search]
+    [searchString]
   );
 
-  return [getUrlState(search)[accessor], setUrlState];
+  return <Provider value={{ searchString, setUrlState }}>{children}</Provider>;
+};
+
+export const useUrlState = (accessor: Accessor) => {
+  const { searchString, setUrlState: setUrlStateContext } = useContext(urlStateStore);
+
+  const urlState = useMemo(() => {
+    const fullUrlState = parseUrlState(searchString);
+    if (typeof fullUrlState === 'object') {
+      return fullUrlState[accessor];
+    }
+    return undefined;
+  }, [searchString]);
+
+  const setUrlState = useCallback(
+    (attribute: string | Dictionary<any>, value?: any) =>
+      setUrlStateContext(accessor, attribute, value),
+    [accessor, setUrlStateContext]
+  );
+  return [urlState, setUrlState];
 };
