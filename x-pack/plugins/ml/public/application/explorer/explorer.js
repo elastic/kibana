@@ -337,11 +337,10 @@ export class Explorer extends React.Component {
                         drillDown={true}
                         numberBadge={false}
                       />
-                      <AnnotationFlyout />
-                      <EuiSpacer size="l" />
                     </>
                   </EuiAccordion>
                 </EuiPanel>
+                <AnnotationFlyout />
                 <EuiSpacer size="m" />
               </>
             )}

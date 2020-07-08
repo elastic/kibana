@@ -228,9 +228,11 @@ export class AnnotationsTable extends Component {
         },
       },
     };
+    let mlTimeSeriesExplorer = {};
+    const entityCondition = {};
 
     if (annotation.timestamp !== undefined && annotation.end_timestamp !== undefined) {
-      appState.mlTimeSeriesExplorer = {
+      mlTimeSeriesExplorer = {
         zoom: {
           from: new Date(annotation.timestamp).toISOString(),
           to: new Date(annotation.end_timestamp).toISOString(),
@@ -245,6 +247,27 @@ export class AnnotationsTable extends Component {
         globalSettings.time.to = new Date(annotation.end_timestamp).toISOString();
       }
     }
+
+    // if the annotation is at the series level
+    // then pass the partitioning field(s) and detector index to the Single Metric Viewer
+    if (_.has(annotation, 'detector_index')) {
+      mlTimeSeriesExplorer.detector_index = annotation.detector_index;
+    }
+    if (_.has(annotation, 'partition_field_value')) {
+      entityCondition[annotation.partition_field_name] = annotation.partition_field_value;
+    }
+
+    if (_.has(annotation, 'over_field_value')) {
+      entityCondition[annotation.over_field_name] = annotation.over_field_value;
+    }
+
+    if (_.has(annotation, 'by_field_value')) {
+      // Note that analyses with by and over fields, will have a top-level by_field_name,
+      // but the by_field_value(s) will be in the nested causes array.
+      entityCondition[annotation.by_field_name] = annotation.by_field_value;
+    }
+    mlTimeSeriesExplorer.entities = entityCondition;
+    appState.mlTimeSeriesExplorer = mlTimeSeriesExplorer;
 
     const _g = rison.encode(globalSettings);
     const _a = rison.encode(appState);
@@ -346,7 +369,7 @@ export class AnnotationsTable extends Component {
           defaultMessage: 'Annotation',
         }),
         sortable: true,
-        width: '50%',
+        width: '40%',
         scope: 'row',
       },
       {
@@ -422,6 +445,9 @@ export class AnnotationsTable extends Component {
 
     actions.push({
       render: (annotation) => {
+        // find the original annotation because the table might not show everything
+        const annotationId = annotation._id;
+        const originalAnnotation = annotations.find((d) => d._id === annotationId);
         const editAnnotationsTooltipText = (
           <FormattedMessage
             id="xpack.ml.annotationsTable.editAnnotationsTooltip"
@@ -435,7 +461,7 @@ export class AnnotationsTable extends Component {
         return (
           <EuiToolTip position="bottom" content={editAnnotationsTooltipText}>
             <EuiButtonIcon
-              onClick={() => annotation$.next(annotation)}
+              onClick={() => annotation$.next(originalAnnotation ?? annotation)}
               iconType="pencil"
               aria-label={editAnnotationsTooltipAriaLabelText}
             />
@@ -510,41 +536,48 @@ export class AnnotationsTable extends Component {
       },
     ];
 
+    if (this.props.detectors) {
+      columns.push({
+        name: i18n.translate('xpack.ml.annotationsTable.detectorColumnName', {
+          defaultMessage: 'Detector',
+        }),
+        width: '10%',
+        render: (item) => {
+          if ('detector_index' in item) {
+            return this.props.detectors[item.detector_index].detector_description;
+          }
+          return '';
+        },
+      });
+    }
+
+    columns.push({
+      field: 'partition_field_value',
+      name: i18n.translate('xpack.ml.annotationsTable.partitionColumnName', {
+        defaultMessage: 'Partition',
+      }),
+      sortable: true,
+    });
+    columns.push({
+      field: 'over_field_value',
+      name: i18n.translate('xpack.ml.annotationsTable.overColumnName', {
+        defaultMessage: 'Over',
+      }),
+      sortable: true,
+    });
+
+    columns.push({
+      field: 'by_field_value',
+      name: i18n.translate('xpack.ml.annotationsTable.byColumnName', {
+        defaultMessage: 'By',
+      }),
+      sortable: true,
+    });
+
     if (
       this.props.chartDetails?.entityData?.entities &&
       this.props.chartDetails?.entityData?.entities.length > 0
     ) {
-      this.props.chartDetails?.entityData?.entities.forEach((entity) => {
-        if (entity.fieldType === 'partition_field') {
-          columns.push({
-            field: 'partition_field_value',
-            name: i18n.translate('xpack.ml.annotationsTable.partitionColumnName', {
-              defaultMessage: 'Partition',
-            }),
-            sortable: true,
-          });
-        }
-
-        if (entity.fieldType === 'over_field') {
-          columns.push({
-            field: 'over_field_value',
-            name: i18n.translate('xpack.ml.annotationsTable.overColumnName', {
-              defaultMessage: 'Over',
-            }),
-            sortable: true,
-          });
-        }
-        if (entity.fieldType === 'by_field') {
-          columns.push({
-            field: 'by_field_value',
-            name: i18n.translate('xpack.ml.annotationsTable.byColumnName', {
-              defaultMessage: 'By',
-            }),
-            sortable: true,
-          });
-        }
-      });
-
       filters.push({
         type: 'is',
         field: CURRENT_SERIES,

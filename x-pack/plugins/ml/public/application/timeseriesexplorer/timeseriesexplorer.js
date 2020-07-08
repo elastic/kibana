@@ -1080,8 +1080,8 @@ export class TimeSeriesExplorer extends React.Component {
     const entityControls = this.getControlsForDetector();
     const fieldNamesWithEmptyValues = this.getFieldNamesWithEmptyValues();
     const arePartitioningFieldsProvided = this.arePartitioningFieldsProvided();
-
-    const detectorSelectOptions = getViewableDetectors(selectedJob).map((d) => ({
+    const detectors = getViewableDetectors(selectedJob);
+    const detectorSelectOptions = detectors.map((d) => ({
       value: d.index,
       text: d.detector_description,
     }));
@@ -1344,6 +1344,7 @@ export class TimeSeriesExplorer extends React.Component {
                     <AnnotationsTable
                       chartDetails={chartDetails}
                       detectorIndex={selectedDetectorIndex}
+                      detectors={detectors}
                       jobIds={[this.props.selectedJobId]}
                       annotations={focusAnnotationData}
                       aggregations={focusAggregations}
@@ -1356,6 +1357,7 @@ export class TimeSeriesExplorer extends React.Component {
                 <AnnotationFlyout
                   chartDetails={chartDetails}
                   detectorIndex={selectedDetectorIndex}
+                  detectors={detectors}
                 />
                 <EuiTitle className="panel-title">
                   <h2>

@@ -46,6 +46,12 @@ import {
   getAnnotationFieldValue,
 } from '../../../../../common/types/annotations';
 import { PartitionFieldsType } from '../../../../../common/types/anomalies';
+
+interface ViewableDetector {
+  index: number;
+  detector_description: string;
+}
+
 interface Entity {
   fieldName: string;
   fieldType: string;
@@ -59,6 +65,7 @@ interface Props {
     functionLabel: string;
   };
   detectorIndex: number;
+  detectors: ViewableDetector[];
 }
 
 interface State {
@@ -69,7 +76,7 @@ interface State {
 class AnnotationFlyoutUI extends Component<CommonProps & Props> {
   public state: State = {
     isDeleteModalVisible: false,
-    applyAnnotationToSeries: false,
+    applyAnnotationToSeries: true,
   };
 
   public annotationSub: Rx.Subscription | null = null;
@@ -246,7 +253,7 @@ class AnnotationFlyoutUI extends Component<CommonProps & Props> {
   };
 
   public render(): ReactNode {
-    const { annotation } = this.props;
+    const { annotation, detectors, detectorIndex } = this.props;
     const { isDeleteModalVisible } = this.state;
 
     if (annotation === null) {
@@ -274,10 +281,13 @@ class AnnotationFlyoutUI extends Component<CommonProps & Props> {
         }
       );
     }
+    const detector = detectors ? detectors.find((d) => d.index === detectorIndex) : undefined;
+    const detectorDescription =
+      detector && 'detector_description' in detector ? detector.detector_description : '';
 
     return (
       <Fragment>
-        <EuiFlyout onClose={this.cancelEditingHandler} size="s" aria-labelledby="Add annotation">
+        <EuiFlyout onClose={this.cancelEditingHandler} size="m" aria-labelledby="Add annotation">
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="s">
               <h2 id="mlAnnotationFlyoutTitle">
@@ -296,7 +306,10 @@ class AnnotationFlyoutUI extends Component<CommonProps & Props> {
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <AnnotationDescriptionList annotation={annotation} />
+            <AnnotationDescriptionList
+              annotation={annotation}
+              detectorDescription={detectorDescription}
+            />
             <EuiSpacer size="m" />
             <EuiFormRow
               label={
