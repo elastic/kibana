@@ -7,14 +7,13 @@
 import { EuiCallOut, EuiButton } from '@elastic/eui';
 import React from 'react';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
-import { MLLink } from '../../../shared/Links/MachineLearningLinks/MLLink';
 
 export function LegacyJobsCallout() {
   const { core } = useApmPluginContext();
   return (
     <EuiCallOut
       title="Legacy ML jobs are no longer used in APM app"
-      iconType="info"
+      iconType="iInCircle"
     >
       <p>
         We have discovered legacy Machine Learning jobs from our previous
