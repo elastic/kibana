@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { deflateSync, inflateSync } from 'zlib';
 import {
   ILegacyClusterClient,
   IRouter,
@@ -150,7 +151,7 @@ describe('test alerts route', () => {
         sha256: '123456',
         encoding: 'application/json',
         created: Date.now(),
-        body: Buffer.from(JSON.stringify(expectedEndpointExceptions)).toString('base64'),
+        body: deflateSync(JSON.stringify(expectedEndpointExceptions)).toString('base64'),
         size: 100,
       },
     };
@@ -163,7 +164,7 @@ describe('test alerts route', () => {
       path.startsWith('/api/endpoint/artifacts/download')
     )!;
 
-    expect(routeConfig.options).toEqual({});
+    expect(routeConfig.options).toEqual({ tags: ['access:securitySolution'] });
 
     await routeHandler(
       ({
@@ -184,8 +185,10 @@ describe('test alerts route', () => {
 
     expect(mockResponse.ok).toBeCalled();
     expect(mockResponse.ok.mock.calls[0][0]?.headers).toEqual(expectedHeaders);
-    const artifact = mockResponse.ok.mock.calls[0][0]?.body;
-    expect(artifact).toEqual(Buffer.from(mockArtifact.attributes.body, 'base64').toString());
+    const artifact = inflateSync(mockResponse.ok.mock.calls[0][0]?.body as Buffer).toString();
+    expect(artifact).toEqual(
+      inflateSync(Buffer.from(mockArtifact.attributes.body, 'base64')).toString()
+    );
   });
 
   it('should handle fetching a non-existent artifact', async () => {

@@ -15,7 +15,7 @@ export class ManifestEntry {
   }
 
   public getDocId(): string {
-    return `${this.getIdentifier()}-${this.getEncodedSha256()}`;
+    return `${this.getIdentifier()}-${this.getDecodedSha256()}`;
   }
 
   public getIdentifier(): string {
@@ -39,7 +39,7 @@ export class ManifestEntry {
   }
 
   public getUrl(): string {
-    return `/api/endpoint/artifacts/download/${this.getIdentifier()}/${this.getEncodedSha256()}`;
+    return `/api/endpoint/artifacts/download/${this.getIdentifier()}/${this.getDecodedSha256()}`;
   }
 
   public getArtifact(): InternalArtifactSchema {

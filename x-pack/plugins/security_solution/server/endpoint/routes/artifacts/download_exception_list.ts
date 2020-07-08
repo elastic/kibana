@@ -43,7 +43,7 @@ export function registerDownloadExceptionListRoute(
           DownloadArtifactRequestParamsSchema
         >(downloadArtifactRequestParamsSchema),
       },
-      options: { tags: [] },
+      options: { tags: ['access:securitySolution'] },
     },
     async (context, req, res) => {
       let scopedSOClient: SavedObjectsClientContract;

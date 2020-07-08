@@ -193,30 +193,34 @@ export default function (providerContext: FtrProviderContext) {
       );
 
       expect(decompressedBody).to.eql({
-        exceptions_list: [
-          {
-            field: 'actingProcess.file.signer',
-            operator: 'included',
-            type: 'exact_cased',
-            value: 'Elastic, N.V.',
-          },
+        entries: [
           {
             entries: [
               {
-                field: 'signer',
+                field: 'actingProcess.file.signer',
                 operator: 'included',
                 type: 'exact_cased',
-                value: 'Evil',
+                value: 'Elastic, N.V.',
               },
               {
-                field: 'trusted',
-                operator: 'included',
-                type: 'exact_cased',
-                value: 'true',
+                entries: [
+                  {
+                    field: 'signer',
+                    operator: 'included',
+                    type: 'exact_cased',
+                    value: 'Evil',
+                  },
+                  {
+                    field: 'trusted',
+                    operator: 'included',
+                    type: 'exact_cased',
+                    value: 'true',
+                  },
+                ],
+                field: 'file.signature',
+                type: 'nested',
               },
             ],
-            field: 'file.signature',
-            type: 'nested',
           },
         ],
       } as WrappedTranslatedExceptionList);

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { inflateSync } from 'zlib';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import {
   ArtifactConstants,
@@ -31,16 +32,17 @@ describe('manifest_manager', () => {
     test('ManifestManager populates cache properly', async () => {
       const cache = new ExceptionsCache(5);
       const manifestManager = getManifestManagerMock({ cache });
-      const manifestWrapper = await manifestManager.refresh();
-      expect(manifestWrapper!.diffs).toEqual([
+      const snapshot = await manifestManager.getSnapshot();
+      expect(snapshot!.diffs).toEqual([
         {
           id:
             'endpoint-exceptionlist-linux-1.0.0-1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
           type: 'add',
         },
       ]);
-      const diff = manifestWrapper!.diffs[0];
-      const entry = JSON.parse(cache.get(diff!.id)!);
+      await manifestManager.syncArtifacts(snapshot!, 'add');
+      const diff = snapshot!.diffs[0];
+      const entry = JSON.parse(inflateSync(cache.get(diff!.id)! as Buffer).toString());
       expect(entry).toEqual({
         entries: [
           {

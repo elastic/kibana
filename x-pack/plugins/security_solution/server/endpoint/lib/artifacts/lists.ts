@@ -183,7 +183,7 @@ function translateEntry(
   }
 }
 
-export function compressExceptionList(buffer: Buffer): Promise<Buffer> {
+export async function compressExceptionList(buffer: Buffer): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     deflate(buffer, function (err, buf) {
       if (err) {
