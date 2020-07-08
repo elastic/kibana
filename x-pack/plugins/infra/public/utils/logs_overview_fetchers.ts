@@ -89,9 +89,8 @@ async function fetchLogsOverview(
   params: FetchDataParams,
   dataPlugin: InfraClientStartDeps['data']
 ): Promise<StatsAndSeries> {
-  const esSearcher = dataPlugin.search.getSearchStrategy('es');
   return new Promise((resolve, reject) => {
-    esSearcher
+    dataPlugin.search
       .search({
         params: {
           index: logParams.index,

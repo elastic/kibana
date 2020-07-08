@@ -170,7 +170,11 @@ describe('Policy Details', () => {
       );
       expect(history.location.pathname).toEqual(policyDetailsPathUrl);
       cancelbutton.simulate('click', { button: 0 });
-      expect(history.location.pathname).toEqual(policyListPathUrl);
+      const navigateToAppMockedCalls = coreStart.application.navigateToApp.mock.calls;
+      expect(navigateToAppMockedCalls[navigateToAppMockedCalls.length - 1]).toEqual([
+        'securitySolution:management',
+        { path: policyListPathUrl },
+      ]);
     });
     it('should display save button', async () => {
       await asyncActions;
