@@ -171,7 +171,7 @@ export const TemplateDetailsContent = ({
             title={
               <FormattedMessage
                 id="xpack.idxMgmt.templateDetails.cloudManagedTemplateInfoTitle"
-                defaultMessage="Editing a cloud-managed template is not permitted"
+                defaultMessage="Editing a cloud-managed template is not permitted."
               />
             }
             color="primary"

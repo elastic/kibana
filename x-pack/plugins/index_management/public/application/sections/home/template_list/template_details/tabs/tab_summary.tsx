@@ -118,7 +118,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
                 <EuiDescriptionListTitle data-test-subj="componentsTitle">
                   <FormattedMessage
                     id="xpack.idxMgmt.templateDetails.summaryTab.componentsDescriptionListTitle"
-                    defaultMessage="Components"
+                    defaultMessage="Component templates"
                   />
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>

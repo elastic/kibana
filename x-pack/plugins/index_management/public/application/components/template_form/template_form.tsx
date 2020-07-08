@@ -50,7 +50,7 @@ const wizardSections: { [id: string]: { id: WizardSection; label: string } } = {
   components: {
     id: 'components',
     label: i18n.translate('xpack.idxMgmt.templateForm.steps.componentsStepName', {
-      defaultMessage: 'Components',
+      defaultMessage: 'Component templates',
     }),
   },
   settings: {

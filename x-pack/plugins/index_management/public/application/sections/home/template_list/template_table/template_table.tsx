@@ -187,9 +187,9 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     selectableMessage: (selectable: boolean) => {
       if (!selectable) {
         return i18n.translate(
-          'xpack.idxMgmt.templateList.legacyTable.deleteManagedTemplateTooltip',
+          'xpack.idxMgmt.templateList.table.deleteCloudManagedTemplateTooltip',
           {
-            defaultMessage: 'You cannot delete a cloud managed template.',
+            defaultMessage: 'You cannot delete a cloud-managed template.',
           }
         );
       }

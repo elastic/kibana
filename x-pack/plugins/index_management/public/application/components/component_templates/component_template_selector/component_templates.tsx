@@ -48,7 +48,7 @@ const i18nTexts = {
   searchBoxPlaceholder: i18n.translate(
     'xpack.idxMgmt.componentTemplatesSelector.searchBox.placeholder',
     {
-      defaultMessage: 'Search components',
+      defaultMessage: 'Search component templates',
     }
   ),
 };
