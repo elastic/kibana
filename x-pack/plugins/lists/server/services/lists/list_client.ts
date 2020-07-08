@@ -108,6 +108,8 @@ export class ListClient {
 
   public createList = async ({
     id,
+    deserializer,
+    serializer,
     name,
     description,
     type,
@@ -115,11 +117,24 @@ export class ListClient {
   }: CreateListOptions): Promise<ListSchema> => {
     const { callCluster, user } = this;
     const listIndex = this.getListIndex();
-    return createList({ callCluster, description, id, listIndex, meta, name, type, user });
+    return createList({
+      callCluster,
+      description,
+      deserializer,
+      id,
+      listIndex,
+      meta,
+      name,
+      serializer,
+      type,
+      user,
+    });
   };
 
   public createListIfItDoesNotExist = async ({
     id,
+    deserializer,
+    serializer,
     name,
     description,
     type,
@@ -127,7 +142,7 @@ export class ListClient {
   }: CreateListIfItDoesNotExistOptions): Promise<ListSchema> => {
     const list = await this.getList({ id });
     if (list == null) {
-      return this.createList({ description, id, meta, name, type });
+      return this.createList({ description, deserializer, id, meta, name, serializer, type });
     } else {
       return list;
     }
@@ -304,6 +319,8 @@ export class ListClient {
   };
 
   public importListItemsToStream = async ({
+    deserializer,
+    serializer,
     type,
     listId,
     stream,
@@ -313,9 +330,11 @@ export class ListClient {
     const listItemIndex = this.getListItemIndex();
     return importListItemsToStream({
       callCluster,
+      deserializer,
       listId,
       listItemIndex,
       meta,
+      serializer,
       stream,
       type,
       user,
@@ -340,19 +359,23 @@ export class ListClient {
 
   public createListItem = async ({
     id,
+    deserializer,
+    serializer,
     listId,
     value,
     type,
     meta,
-  }: CreateListItemOptions): Promise<ListItemSchema> => {
+  }: CreateListItemOptions): Promise<ListItemSchema | null> => {
     const { callCluster, user } = this;
     const listItemIndex = this.getListItemIndex();
     return createListItem({
       callCluster,
+      deserializer,
       id,
       listId,
       listItemIndex,
       meta,
+      serializer,
       type,
       user,
       value,

@@ -42,6 +42,7 @@ import {
 } from './legacy';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
 import { InternalHttpServiceSetup, GetAuthHeaders } from '../http/';
+import { AuditTrailStart, AuditorFactory } from '../audit_trail';
 import {
   InternalElasticsearchServiceSetup,
   ElasticsearchServiceStart,
@@ -60,12 +61,17 @@ interface SetupDeps {
   http: InternalHttpServiceSetup;
 }
 
+interface StartDeps {
+  auditTrail: AuditTrailStart;
+}
+
 /** @internal */
 export class ElasticsearchService
   implements CoreService<InternalElasticsearchServiceSetup, ElasticsearchServiceStart> {
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
   private subscription?: Subscription;
+  private auditorFactory?: AuditorFactory;
   private stop$ = new Subject();
   private kibanaVersion: string;
   private createClient?: (
@@ -132,14 +138,24 @@ export class ElasticsearchService
         return await _client.callAsInternalUser(endpoint, clientParams, options);
       },
       asScoped(request: ScopeableRequest) {
+        const _clientPromise = client$.pipe(take(1)).toPromise();
         return {
-          callAsInternalUser: client.callAsInternalUser,
+          async callAsInternalUser(
+            endpoint: string,
+            clientParams: Record<string, any> = {},
+            options?: LegacyCallAPIOptions
+          ) {
+            const _client = await _clientPromise;
+            return await _client
+              .asScoped(request)
+              .callAsInternalUser(endpoint, clientParams, options);
+          },
           async callAsCurrentUser(
             endpoint: string,
             clientParams: Record<string, any> = {},
             options?: LegacyCallAPIOptions
           ) {
-            const _client = await client$.pipe(take(1)).toPromise();
+            const _client = await _clientPromise;
             return await _client
               .asScoped(request)
               .callAsCurrentUser(endpoint, clientParams, options);
@@ -176,7 +192,8 @@ export class ElasticsearchService
       status$: calculateStatus$(esNodesCompatibility$),
     };
   }
-  public async start() {
+  public async start({ auditTrail }: StartDeps) {
+    this.auditorFactory = auditTrail;
     if (typeof this.client === 'undefined' || typeof this.createClient === 'undefined') {
       throw new Error('ElasticsearchService needs to be setup before calling start');
     } else {
@@ -205,7 +222,15 @@ export class ElasticsearchService
     return new LegacyClusterClient(
       config,
       this.coreContext.logger.get('elasticsearch', type),
+      this.getAuditorFactory,
       getAuthHeaders
     );
   }
+
+  private getAuditorFactory = () => {
+    if (!this.auditorFactory) {
+      throw new Error('auditTrail has not been initialized');
+    }
+    return this.auditorFactory;
+  };
 }
