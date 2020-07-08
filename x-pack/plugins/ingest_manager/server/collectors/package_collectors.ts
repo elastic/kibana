@@ -33,8 +33,8 @@ export const getPackageUsage = async (soClient?: SavedObjectsClient): Promise<Pa
   const packagesInConfigs = agentConfigs.items.map((agentConfig) => {
     const packageConfigs: NewPackageConfig[] = agentConfig.package_configs as NewPackageConfig[];
     return packageConfigs
-      .map((pc) => pc.package?.name)
-      .filter((pn): pn is string => pn !== undefined);
+      .map((packageConfig) => packageConfig.package?.name)
+      .filter((packageName): packageName is string => packageName !== undefined);
   });
 
   const enabledPackages = _.uniq(_.flatten(packagesInConfigs));
