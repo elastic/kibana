@@ -54,7 +54,7 @@ jest.mock('../../../kibana_services', () => ({
   }),
 }));
 
-function getComponent(selected = false, showDetails = false) {
+function getComponent(selected = false, showDetails = false, useShortDots = false) {
   const indexPattern = new StubIndexPattern(
     'logstash-*',
     (cfg: any) => cfg,
@@ -88,6 +88,7 @@ function getComponent(selected = false, showDetails = false) {
     onShowDetails: jest.fn(),
     showDetails,
     selected,
+    useShortDots,
   };
   const comp = mountWithIntl(<DiscoverField {...props} />);
   return { comp, props };
