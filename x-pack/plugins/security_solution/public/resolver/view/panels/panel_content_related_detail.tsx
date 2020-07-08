@@ -340,14 +340,15 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
         return (
           <Fragment key={index}>
             {index === 0 ? null : <EuiSpacer size="m" />}
-            <EuiTitle size="xs">
-              <EuiTextColor color="secondary">
+            <EuiTitle size="xxxs">
+              <EuiTextColor color="subdued">
                 <StyledFlexTitle>
                   {sectionTitle}
                   <TitleHr />
                 </StyledFlexTitle>
               </EuiTextColor>
             </EuiTitle>
+            <EuiSpacer size="m" />
             <StyledDescriptionList
               type="column"
               align="left"
