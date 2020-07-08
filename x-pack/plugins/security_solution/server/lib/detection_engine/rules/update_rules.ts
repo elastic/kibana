@@ -10,17 +10,19 @@ import { readRules } from './read_rules';
 import { UpdateRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { calculateVersion } from './utils';
-import { hasListsFeature } from '../feature_flags';
 import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
 
 export const updateRules = async ({
   alertsClient,
+  author,
+  buildingBlockType,
   savedObjectsClient,
   description,
   falsePositives,
   enabled,
   query,
   language,
+  license,
   outputIndex,
   savedId,
   timelineId,
@@ -34,10 +36,14 @@ export const updateRules = async ({
   interval,
   maxSignals,
   riskScore,
+  riskScoreMapping,
+  ruleNameOverride,
   name,
   severity,
+  severityMapping,
   tags,
   threat,
+  timestampOverride,
   to,
   type,
   references,
@@ -54,10 +60,13 @@ export const updateRules = async ({
   }
 
   const calculatedVersion = calculateVersion(rule.params.immutable, rule.params.version, {
+    author,
+    buildingBlockType,
     description,
     falsePositives,
     query,
     language,
+    license,
     outputIndex,
     savedId,
     timelineId,
@@ -69,10 +78,14 @@ export const updateRules = async ({
     interval,
     maxSignals,
     riskScore,
+    riskScoreMapping,
+    ruleNameOverride,
     name,
     severity,
+    severityMapping,
     tags,
     threat,
+    timestampOverride,
     to,
     type,
     references,
@@ -83,9 +96,6 @@ export const updateRules = async ({
     exceptionsList,
   });
 
-  // TODO: Remove this and use regular exceptions_list once the feature is stable for a release
-  const exceptionsListParam = hasListsFeature() ? { exceptionsList } : {};
-
   const update = await alertsClient.update({
     id: rule.id,
     data: {
@@ -95,6 +105,8 @@ export const updateRules = async ({
       actions: actions.map(transformRuleToAlertAction),
       throttle: null,
       params: {
+        author,
+        buildingBlockType,
         description,
         ruleId: rule.params.ruleId,
         falsePositives,
@@ -102,6 +114,7 @@ export const updateRules = async ({
         immutable: rule.params.immutable,
         query,
         language,
+        license,
         outputIndex,
         savedId,
         timelineId,
@@ -111,8 +124,12 @@ export const updateRules = async ({
         index,
         maxSignals,
         riskScore,
+        riskScoreMapping,
+        ruleNameOverride,
         severity,
+        severityMapping,
         threat,
+        timestampOverride,
         to,
         type,
         references,
@@ -120,7 +137,7 @@ export const updateRules = async ({
         version: calculatedVersion,
         anomalyThreshold,
         machineLearningJobId,
-        ...exceptionsListParam,
+        exceptionsList,
       },
     },
   });

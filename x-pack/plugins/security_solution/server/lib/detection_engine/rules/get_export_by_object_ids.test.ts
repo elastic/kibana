@@ -12,17 +12,9 @@ import {
 } from '../routes/__mocks__/request_responses';
 import * as readRules from './read_rules';
 import { alertsClientMock } from '../../../../../alerts/server/mocks';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../feature_flags';
+import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 
 describe('get_export_by_object_ids', () => {
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
-
   beforeEach(() => {
     jest.resetAllMocks();
     jest.restoreAllMocks();
@@ -38,6 +30,7 @@ describe('get_export_by_object_ids', () => {
       const exports = await getExportByObjectIds(alertsClient, objects);
       expect(exports).toEqual({
         rulesNdjson: `${JSON.stringify({
+          author: ['Elastic'],
           actions: [],
           created_at: '2019-12-13T16:40:33.400Z',
           updated_at: '2019-12-13T16:40:33.400Z',
@@ -53,9 +46,11 @@ describe('get_export_by_object_ids', () => {
           interval: '5m',
           rule_id: 'rule-1',
           language: 'kuery',
+          license: 'Elastic License',
           output_index: '.siem-signals',
           max_signals: 100,
           risk_score: 50,
+          risk_score_mapping: [],
           name: 'Detect Root/Admin Users',
           query: 'user.name: root or user.name: admin',
           references: ['http://www.example.com', 'https://ww.example.com'],
@@ -63,6 +58,7 @@ describe('get_export_by_object_ids', () => {
           timeline_title: 'some-timeline-title',
           meta: { someMeta: 'someField' },
           severity: 'high',
+          severity_mapping: [],
           updated_by: 'elastic',
           tags: [],
           to: 'now',
@@ -87,10 +83,7 @@ describe('get_export_by_object_ids', () => {
           throttle: 'no_actions',
           note: '# Investigative notes',
           version: 1,
-          exceptions_list: [
-            { id: 'some_uuid', namespace_type: 'single' },
-            { id: 'some_uuid', namespace_type: 'agnostic' },
-          ],
+          exceptions_list: getListArrayMock(),
         })}\n`,
         exportDetails: `${JSON.stringify({
           exported_count: 1,
@@ -139,6 +132,7 @@ describe('get_export_by_object_ids', () => {
         rules: [
           {
             actions: [],
+            author: ['Elastic'],
             created_at: '2019-12-13T16:40:33.400Z',
             updated_at: '2019-12-13T16:40:33.400Z',
             created_by: 'elastic',
@@ -153,9 +147,11 @@ describe('get_export_by_object_ids', () => {
             interval: '5m',
             rule_id: 'rule-1',
             language: 'kuery',
+            license: 'Elastic License',
             output_index: '.siem-signals',
             max_signals: 100,
             risk_score: 50,
+            risk_score_mapping: [],
             name: 'Detect Root/Admin Users',
             query: 'user.name: root or user.name: admin',
             references: ['http://www.example.com', 'https://ww.example.com'],
@@ -163,6 +159,7 @@ describe('get_export_by_object_ids', () => {
             timeline_title: 'some-timeline-title',
             meta: { someMeta: 'someField' },
             severity: 'high',
+            severity_mapping: [],
             updated_by: 'elastic',
             tags: [],
             to: 'now',
@@ -187,10 +184,7 @@ describe('get_export_by_object_ids', () => {
             throttle: 'no_actions',
             note: '# Investigative notes',
             version: 1,
-            exceptions_list: [
-              { id: 'some_uuid', namespace_type: 'single' },
-              { id: 'some_uuid', namespace_type: 'agnostic' },
-            ],
+            exceptions_list: getListArrayMock(),
           },
         ],
       };

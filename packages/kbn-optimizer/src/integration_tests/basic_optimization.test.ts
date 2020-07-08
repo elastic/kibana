@@ -24,7 +24,7 @@ import { inspect } from 'util';
 
 import cpy from 'cpy';
 import del from 'del';
-import { toArray, tap } from 'rxjs/operators';
+import { toArray, tap, filter } from 'rxjs/operators';
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import { runOptimizer, OptimizerConfig, OptimizerUpdate, logOptimizerState } from '@kbn/optimizer';
 
@@ -74,7 +74,11 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   expect(config).toMatchSnapshot('OptimizerConfig');
 
   const msgs = await runOptimizer(config)
-    .pipe(logOptimizerState(log, config), toArray())
+    .pipe(
+      logOptimizerState(log, config),
+      filter((x) => x.event?.type !== 'worker stdio'),
+      toArray()
+    )
     .toPromise();
 
   const assert = (statement: string, truth: boolean, altStates?: OptimizerUpdate[]) => {
@@ -180,7 +184,7 @@ it('uses cache on second run and exist cleanly', async () => {
       tap((state) => {
         if (state.event?.type === 'worker stdio') {
           // eslint-disable-next-line no-console
-          console.log('worker', state.event.stream, state.event.chunk.toString('utf8'));
+          console.log('worker', state.event.stream, state.event.line);
         }
       }),
       toArray()
@@ -226,7 +230,7 @@ const expectFileMatchesSnapshotWithCompression = (filePath: string, snapshotLabe
 
   // Verify the brotli variant matches
   expect(
-    // @ts-ignore @types/node is missing the brotli functions
+    // @ts-expect-error @types/node is missing the brotli functions
     Zlib.brotliDecompressSync(
       Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, `${filePath}.br`))
     ).toString()

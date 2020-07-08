@@ -54,6 +54,7 @@ interface Props {
   bubbleSubmitEvent?: boolean;
   placeholder?: string;
   languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
+  onBlur?: () => void;
   onChange?: (query: Query) => void;
   onSubmit?: (query: Query) => void;
   dataTestSubj?: string;
@@ -95,7 +96,7 @@ export class QueryStringInputUI extends Component<Props, State> {
   public inputRef: HTMLInputElement | null = null;
 
   private persistedLog: PersistedLog | undefined;
-  private abortController: AbortController | undefined;
+  private abortController?: AbortController;
   private services = this.props.kibana.services;
   private componentIsUnmounting = false;
 
@@ -497,6 +498,7 @@ export class QueryStringInputUI extends Component<Props, State> {
   }
 
   public componentWillUnmount() {
+    if (this.abortController) this.abortController.abort();
     this.updateSuggestions.cancel();
     this.componentIsUnmounting = true;
   }
@@ -534,6 +536,7 @@ export class QueryStringInputUI extends Component<Props, State> {
                 onKeyUp={this.onKeyUp}
                 onChange={this.onInputChange}
                 onClick={this.onClickInput}
+                onBlur={this.props.onBlur}
                 fullWidth
                 autoFocus={!this.props.disableAutoFocus}
                 inputRef={(node) => {

@@ -40,7 +40,7 @@ export const PaletteArgInput: FC<Props> = ({ onValueChange, argId, argValue, ren
         return astObj;
       }) as string[];
 
-      const gradient = get<boolean>(chain[0].arguments.gradient, '[0]');
+      const gradient = get(chain[0].arguments.gradient, '[0]') as boolean;
       const palette = identifyPalette({ colors, gradient });
 
       if (palette) {

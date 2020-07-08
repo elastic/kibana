@@ -33,7 +33,6 @@ import {
   getAgentEventsHandler,
   postAgentCheckinHandler,
   postAgentEnrollHandler,
-  postAgentsUnenrollHandler,
   getAgentStatusForConfigHandler,
   putAgentsReassignHandler,
 } from './handlers';
@@ -41,6 +40,7 @@ import { postAgentAcksHandlerBuilder } from './acks_handlers';
 import * as AgentService from '../../services/agents';
 import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 import { appContextService } from '../../services';
+import { postAgentsUnenrollHandler } from './unenroll_handler';
 
 export const registerRoutes = (router: IRouter) => {
   // Get one

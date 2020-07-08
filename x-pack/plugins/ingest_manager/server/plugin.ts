@@ -30,7 +30,7 @@ import {
   PLUGIN_ID,
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_CONFIG_SAVED_OBJECT_TYPE,
-  DATASOURCE_SAVED_OBJECT_TYPE,
+  PACKAGE_CONFIG_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
@@ -39,7 +39,7 @@ import {
 import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
 import {
   registerEPMRoutes,
-  registerDatasourceRoutes,
+  registerPackageConfigRoutes,
   registerDataStreamRoutes,
   registerAgentConfigRoutes,
   registerSetupRoutes,
@@ -57,7 +57,7 @@ import {
   ESIndexPatternSavedObjectService,
   ESIndexPatternService,
   AgentService,
-  datasourceService,
+  packageConfigService,
 } from './services';
 import {
   getAgentStatusById,
@@ -96,7 +96,7 @@ export type IngestManagerSetupContract = void;
 const allSavedObjectTypes = [
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_CONFIG_SAVED_OBJECT_TYPE,
-  DATASOURCE_SAVED_OBJECT_TYPE,
+  PACKAGE_CONFIG_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
@@ -107,8 +107,8 @@ const allSavedObjectTypes = [
  * Callbacks supported by the Ingest plugin
  */
 export type ExternalCallback = [
-  'datasourceCreate',
-  (newDatasource: NewDatasource) => Promise<NewDatasource>
+  'packageConfigCreate',
+  (newPackageConfig: NewPackageConfig) => Promise<NewPackageConfig>
 ];
 
 export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;
@@ -120,9 +120,9 @@ export interface IngestManagerStartContract {
   esIndexPatternService: ESIndexPatternService;
   agentService: AgentService;
   /**
-   * Services for Ingest's Datasources
+   * Services for Ingest's package configs
    */
-  datasourceService: typeof datasourceService;
+  packageConfigService: typeof packageConfigService;
   /**
    * Register callbacks for inclusion in ingest API processing
    * @param args
@@ -239,7 +239,7 @@ export class IngestManagerPlugin
     if (this.security) {
       registerSetupRoutes(router, config);
       registerAgentConfigRoutes(router);
-      registerDatasourceRoutes(router);
+      registerPackageConfigRoutes(router);
       registerOutputRoutes(router);
       registerSettingsRoutes(router);
       registerDataStreamRoutes(router);
@@ -299,7 +299,7 @@ export class IngestManagerPlugin
         getAgentStatusById,
         authenticateAgentWithAccessToken,
       },
-      datasourceService,
+      packageConfigService,
       registerExternalCallback: (...args: ExternalCallback) => {
         return appContextService.addExternalCallback(...args);
       },
