@@ -18,7 +18,7 @@ import {
   ActionType,
   loadActionTypes,
 } from '../../../../../../triggers_actions_ui/public';
-import { AlertAction } from '../../../../../../alerts/common';
+import { AlertAction } from '../../../../../../detections/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { FORM_ERRORS_TITLE } from './translations';
 
