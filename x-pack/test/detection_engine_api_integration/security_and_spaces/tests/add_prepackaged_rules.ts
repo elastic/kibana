@@ -8,7 +8,12 @@ import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createSignalsIndex, deleteAllAlerts, deleteSignalsIndex } from '../../utils';
+import {
+  createSignalsIndex,
+  deleteAllAlerts,
+  deleteAllTimelines,
+  deleteSignalsIndex,
+} from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -40,6 +45,7 @@ export default ({ getService }: FtrProviderContext): void => {
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(es);
+        await deleteAllTimelines(es);
       });
 
       it('should contain two output keys of rules_installed and rules_updated', async () => {

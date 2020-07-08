@@ -248,6 +248,20 @@ export const deleteAllAlerts = async (es: Client): Promise<void> => {
 };
 
 /**
+ * Remove all timelines from the .kibana index
+ * @param es The ElasticSearch handle
+ */
+export const deleteAllTimelines = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: '.kibana',
+    q: 'type:siem-ui-timeline',
+    wait_for_completion: true,
+    refresh: true,
+    body: {},
+  });
+};
+
+/**
  * Remove all rules statuses from the .kibana index
  * @param es The ElasticSearch handle
  */

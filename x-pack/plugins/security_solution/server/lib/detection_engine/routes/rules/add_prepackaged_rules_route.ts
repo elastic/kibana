@@ -84,14 +84,14 @@ export const addPrepackedRulesRoute = (
           timelines_installed: prepackagedTimelinesResult?.timelines_installed ?? 0,
           timelines_updated: prepackagedTimelinesResult?.timelines_updated ?? 0,
         };
-        const [validated, rulesErrors] = validate(
+        const [validated, genericErrors] = validate(
           prepackagedRulesOutput,
           prePackagedRulesAndTimelinesSchema
         );
-        if (rulesErrors != null && timelinesErrors != null) {
+        if (genericErrors != null && timelinesErrors != null) {
           return siemResponse.error({
             statusCode: 500,
-            body: rulesErrors,
+            body: [genericErrors, timelinesErrors].filter((msg) => msg != null).join(', '),
           });
         } else {
           return response.ok({ body: validated ?? {} });
