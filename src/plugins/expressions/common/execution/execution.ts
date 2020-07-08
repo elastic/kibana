@@ -101,7 +101,7 @@ export class Execution<
   /**
    * Promise that rejects if/when abort controller sends "abort" signal.
    */
-  private readonly abortRejection = toPromise(this.abortController.signal, true);
+  private readonly abortRejection = toPromise(this.abortController.signal);
 
   /**
    * Races a given promise against the "abort" event of `abortController`.
