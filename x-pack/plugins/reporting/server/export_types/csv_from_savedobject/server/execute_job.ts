@@ -13,9 +13,8 @@ import { JobParamsPanelCsv, SearchPanel } from '../types';
 import { createGenerateCsv } from './lib';
 
 /*
- * The headers field is marked as optional (for now) in Immediate job params.
- * Other than the job params, the run function receives the full request which
- * provides the un-encrypted headers
+ * The run function receives the full request which provides the un-encrypted
+ * headers, so encrypted headers are not part of these kind of job params
  */
 type ImmediateJobParams = Omit<ScheduledTaskParams<JobParamsPanelCsv>, 'headers'>;
 
