@@ -57,7 +57,7 @@ export const SnapshotPolicies: React.FunctionComponent<Props> = ({ value, onChan
             <Fragment>
               <FormattedMessage
                 id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.noPoliciesLoadedTitle"
-                defaultMessage="Couldn't load existing policies."
+                defaultMessage="Unable to load existing policies."
               />
 
               <EuiButtonIcon
