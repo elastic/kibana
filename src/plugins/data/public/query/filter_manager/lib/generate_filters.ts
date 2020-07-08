@@ -107,7 +107,7 @@ export function generateFilters(
       let filterType = fieldName === '_exists_' ? FILTERS.EXISTS : FILTERS.PHRASE;
       const actualFieldObj = fieldName === '_exists_' ? ({ name: value } as IFieldType) : fieldObj;
 
-      // Fix for #7189 - if value is emtpy, phrase filters become exists filters.
+      // Fix for #7189 - if value is empty, phrase filters become exists filters.
       if (value === null || value === undefined) {
         filterType = FILTERS.EXISTS;
         negate = !negate;
