@@ -90,7 +90,11 @@ def functionalXpack(Map params = [:]) {
     }
 
     if (config.firefox) {
-      task(kibanaPipeline.functionalTestProcess('xpack-firefox', './test/scripts/jenkins_xpack_firefox_smoke.sh'))
+      task {
+        // This sleep is temporary, to help ensure oss firefox and xpack firefox do not overlap
+        sleep(60*12)
+        task(kibanaPipeline.functionalTestProcess('xpack-firefox', './test/scripts/jenkins_xpack_firefox_smoke.sh'))
+      }
     }
 
     if (config.accessibility) {
