@@ -6,9 +6,14 @@
 
 import * as t from 'io-ts';
 
-export const body = t.string;
+export const buffer = new t.Type<Buffer, Buffer, unknown>(
+  'buffer',
+  (input: unknown): input is Buffer => Buffer.isBuffer(input),
+  (input, context) => (Buffer.isBuffer(input) ? t.success(input) : t.failure(input, context)),
+  t.identity
+);
 
-export const created = t.number; // TODO: Make this into an ISO Date string check
+export const created = t.number;
 
 export const encoding = t.keyof({
   identity: null,

@@ -272,6 +272,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     this.endpointAppContextService.start({
       agentService: plugins.ingestManager?.agentService,
+      logger: this.logger,
       manifestManager,
       registerIngestCallback,
       savedObjectsStart: core.savedObjects,

@@ -75,18 +75,18 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     async (context, req, res) => {
-      const agentService = endpointAppContext.service.getAgentService();
-      if (agentService === undefined) {
-        return res.internalError({ body: 'agentService not available' });
-      }
-
-      const metadataRequestContext: MetadataRequestContext = {
-        agentService,
-        logger,
-        requestHandlerContext: context,
-      };
-
       try {
+        const agentService = endpointAppContext.service.getAgentService();
+        if (agentService === undefined) {
+          throw new Error('agentService not available');
+        }
+
+        const metadataRequestContext: MetadataRequestContext = {
+          agentService,
+          logger,
+          requestHandlerContext: context,
+        };
+
         const unenrolledAgentIds = await findAllUnenrolledAgentIds(
           agentService,
           context.core.savedObjects.client
@@ -105,6 +105,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
           'search',
           queryParams
         )) as SearchResponse<HostMetadata>;
+
         return res.ok({
           body: await mapToHostResultList(queryParams, response, metadataRequestContext),
         });
@@ -129,8 +130,14 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
         return res.internalError({ body: 'agentService not available' });
       }
 
+      const metadataRequestContext: MetadataRequestContext = {
+        agentService,
+        logger,
+        requestHandlerContext: context,
+      };
+
       try {
-        const doc = await getHostData(context, agentService, req.params.id);
+        const doc = await getHostData(metadataRequestContext, req.params.id);
         if (doc) {
           return res.ok({ body: doc });
         }
