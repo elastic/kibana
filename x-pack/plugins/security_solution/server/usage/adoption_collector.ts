@@ -23,7 +23,7 @@ export const registerAdoptionCollector: RegisterAdoptionCollector = ({
   }
 
   const collector = usageCollection.makeUsageCollector<AdoptionUsage>({
-    type: `${SERVER_APP_ID}:adoption`,
+    type: `${SERVER_APP_ID}_adoption`,
     schema: {
       detection_rules_custom_enabled: { type: 'number' },
       detection_rules_custom_disabled: { type: 'number' },
