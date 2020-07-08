@@ -173,7 +173,14 @@ export function hasMoreAncestors(state: DataState): boolean {
  * related events by ECS `.category` Primarily to avoid having business logic
  * in UI components.
  */
-export const relatedEventInfoByEntityId = createSelector(
+interface RelatedInfoFunctions {
+  shouldShowLimitForCategory: (category: string) => boolean;
+  getNumberNotDisplayedForCategory: (category: string) => number;
+  getNumberActuallyDisplayedForCategory: (category: string) => number;
+}
+export const relatedEventInfoByEntityId: (
+  state: DataState
+) => Map<string, RelatedInfoFunctions> = createSelector(
   relatedEventsByEntityId,
   relatedEventsStats,
   function selectLineageLimitInfo(
