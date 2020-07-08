@@ -25,12 +25,12 @@ export function getResultsServiceProvider({
 }: SharedServicesChecks): ResultsServiceProvider {
   return {
     resultsServiceProvider(callAsCurrentUser: LegacyAPICaller, request: KibanaRequest) {
-      const hasMlCapabilities = getHasMlCapabilities(request);
+      // const hasMlCapabilities = getHasMlCapabilities(request);
       const { getAnomaliesTableData } = resultsServiceProvider(callAsCurrentUser);
       return {
         async getAnomaliesTableData(...args) {
           isFullLicense();
-          await hasMlCapabilities(['canGetJobs']);
+          // await hasMlCapabilities(['canGetJobs']);
           return getAnomaliesTableData(...args);
         },
       };

@@ -24,6 +24,7 @@ describe('ui reducer', () => {
           esKuery: '',
           integrationsPopoverOpen: null,
           searchText: '',
+          monitorId: 'test',
         },
         action
       )
@@ -43,6 +44,7 @@ describe('ui reducer', () => {
           esKuery: '',
           integrationsPopoverOpen: null,
           searchText: '',
+          monitorId: 'test',
         },
         action
       )
@@ -59,6 +61,7 @@ describe('ui reducer', () => {
           esKuery: '',
           integrationsPopoverOpen: null,
           searchText: '',
+          monitorId: 'test',
         },
         action
       )
@@ -83,6 +86,7 @@ describe('ui reducer', () => {
           esKuery: '',
           integrationsPopoverOpen: null,
           searchText: '',
+          monitorId: 'test',
         },
         action
       )

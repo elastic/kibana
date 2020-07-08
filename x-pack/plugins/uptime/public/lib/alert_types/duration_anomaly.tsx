@@ -23,10 +23,10 @@ export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
 }): AlertTypeModel => ({
   id: CLIENT_ALERT_TYPES.DURATION_ANOMALY,
   iconClass: 'uptimeApp',
-  alertParamsExpression: (_params: any) => (
+  alertParamsExpression: (params: any) => (
     <ReduxProvider store={store}>
       <KibanaContextProvider services={{ ...core, ...plugins }}>
-        <AnomalyAlertExpression setAlertFlyoutVisible={() => {}} />
+        <AnomalyAlertExpression {...params} />
       </KibanaContextProvider>
     </ReduxProvider>
   ),

@@ -19,6 +19,6 @@ export const initUptimeServer = (
   );
 
   uptimeAlertTypeFactories.forEach((alertTypeFactory) =>
-    plugins.alerts.registerType(alertTypeFactory(server, libs))
+    plugins.alerts.registerType(alertTypeFactory(server, libs, plugins))
   );
 };

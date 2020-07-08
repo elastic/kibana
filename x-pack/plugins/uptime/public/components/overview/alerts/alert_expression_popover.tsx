@@ -13,7 +13,7 @@ interface AlertExpressionPopoverProps {
   description: string;
   'data-test-subj': string;
   id: string;
-  value: string;
+  value: string | JSX.Element;
 }
 
 export const AlertExpressionPopover: React.FC<AlertExpressionPopoverProps> = ({
