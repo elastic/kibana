@@ -17,10 +17,10 @@
  * under the License.
  */
 
+import { getInjectedVarFunc } from '../kibana_services';
+
 jest.mock('../kibana_services', () => ({
-  getKibanaVersion() {
-    return '1.2.3';
-  },
+  getInjectedVarFunc: jest.fn(),
 }));
 
 import url from 'url';
@@ -34,33 +34,51 @@ import { ORIGIN } from '../common/constants/origin';
 import { ServiceSettings } from './service_settings';
 
 describe('service_settings (FKA tile_map test)', function () {
-  const emsFileApiUrl = 'https://files.foobar';
-  const emsTileApiUrl = 'https://tiles.foobar';
+  let mapConfigOptions = {};
+  let tilemapConfigOptions = {};
 
-  const defaultMapConfig = {
-    emsFileApiUrl,
-    emsTileApiUrl,
-    includeElasticMapsService: true,
-    emsTileLayerId: {
-      bright: 'road_map',
-      desaturated: 'road_map_desaturated',
-      dark: 'dark_map',
-    },
-  };
+  beforeEach(() => {
+    const emsFileApiUrl = 'https://files.foobar';
+    const emsTileApiUrl = 'https://tiles.foobar';
 
-  const defaultTilemapConfig = {
-    deprecated: {
-      config: {
-        options: {},
+    const defaultMapConfig = {
+      emsFileApiUrl,
+      emsTileApiUrl,
+      includeElasticMapsService: true,
+      emsTileLayerId: {
+        bright: 'road_map',
+        desaturated: 'road_map_desaturated',
+        dark: 'dark_map',
       },
-    },
-  };
+    };
 
-  function makeServiceSettings(mapConfigOptions = {}, tilemapOptions = {}) {
-    const serviceSettings = new ServiceSettings(
-      { ...defaultMapConfig, ...mapConfigOptions },
-      { ...defaultTilemapConfig, ...tilemapOptions }
-    );
+    const defaultTilemapConfig = {
+      deprecated: {
+        config: {
+          options: {},
+        },
+      },
+    };
+    getInjectedVarFunc.mockImplementation(() => {
+      return (param) => {
+        if (param === 'version') {
+          return '1.2.3';
+        } else if (param === 'mapConfig') {
+          return { ...defaultMapConfig, ...mapConfigOptions };
+        } else if (param === 'tilemapsConfig') {
+          return { ...defaultTilemapConfig, ...tilemapConfigOptions };
+        }
+      };
+    });
+  });
+
+  afterEach(() => {
+    mapConfigOptions = {};
+    tilemapConfigOptions = {};
+  });
+
+  function makeServiceSettings() {
+    const serviceSettings = new ServiceSettings();
     serviceSettings.__debugStubManifestCalls(async (url) => {
       //simulate network calls
       if (url.startsWith('https://tiles.foobar')) {
@@ -154,18 +172,16 @@ describe('service_settings (FKA tile_map test)', function () {
       });
 
       it('should merge in tilemap url', async () => {
-        serviceSettings = makeServiceSettings(
-          {},
-          {
-            deprecated: {
-              isOverridden: true,
-              config: {
-                url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                options: { minZoom: 0, maxZoom: 20 },
-              },
+        tilemapConfigOptions = {
+          deprecated: {
+            isOverridden: true,
+            config: {
+              url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+              options: { minZoom: 0, maxZoom: 20 },
             },
-          }
-        );
+          },
+        };
+        serviceSettings = makeServiceSettings();
 
         const tilemapServices = await serviceSettings.getTMSServices();
         const expected = [
@@ -243,20 +259,19 @@ describe('service_settings (FKA tile_map test)', function () {
       });
 
       it('should exclude EMS', async () => {
-        serviceSettings = makeServiceSettings(
-          {
-            includeElasticMapsService: false,
-          },
-          {
-            deprecated: {
-              isOverridden: true,
-              config: {
-                url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                options: { minZoom: 0, maxZoom: 20 },
-              },
+        mapConfigOptions = {
+          includeElasticMapsService: false,
+        };
+        tilemapConfigOptions = {
+          deprecated: {
+            isOverridden: true,
+            config: {
+              url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+              options: { minZoom: 0, maxZoom: 20 },
             },
-          }
-        );
+          },
+        };
+        serviceSettings = makeServiceSettings();
         const tilemapServices = await serviceSettings.getTMSServices();
         const expected = [
           {
@@ -273,9 +288,10 @@ describe('service_settings (FKA tile_map test)', function () {
       });
 
       it('should exclude all when not configured', async () => {
-        serviceSettings = makeServiceSettings({
+        mapConfigOptions = {
           includeElasticMapsService: false,
-        });
+        };
+        serviceSettings = makeServiceSettings();
         // mapConfig.includeElasticMapsService = false;
         const tilemapServices = await serviceSettings.getTMSServices();
         const expected = [];
@@ -304,8 +320,7 @@ describe('service_settings (FKA tile_map test)', function () {
 
     it('should load manifest (individual props)', async () => {
       const expected = {
-        attribution:
-          '<a rel="noreferrer noopener" href="http://www.naturalearthdata.com/about/terms-of-use">Made with NaturalEarth</a> | <a rel="noreferrer noopener" href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a>',
+        attribution: `<a href=http://www.naturalearthdata.com/about/terms-of-use>Made with NaturalEarth</a> | <a href=https://www.elastic.co/elastic-maps-service>Elastic Maps Service</a>`,
         format: 'geojson',
         fields: [
           { type: 'id', name: 'iso2', description: 'ISO 3166-1 alpha-2 code' },
@@ -329,9 +344,10 @@ describe('service_settings (FKA tile_map test)', function () {
     });
 
     it('should exclude all when not configured', async () => {
-      const serviceSettings = makeServiceSettings({
+      mapConfigOptions = {
         includeElasticMapsService: false,
-      });
+      };
+      const serviceSettings = makeServiceSettings();
       const fileLayers = await serviceSettings.getFileLayers();
       const expected = [];
       expect(fileLayers).toEqual(expected);
