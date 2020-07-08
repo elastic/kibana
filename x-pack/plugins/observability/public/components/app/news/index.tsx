@@ -86,7 +86,7 @@ const NewsItem = ({ item }: { item: NewsItem }) => {
               height={48}
               alt={item.title}
               src={item.image_url}
-              className="observability-newsfeed-item-img"
+              className="obsNewsFeed__itemImg"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
