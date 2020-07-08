@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  SavedObjectsServiceStart,
   KibanaRequest,
+  Logger,
+  SavedObjectsServiceStart,
   SavedObjectsClientContract,
 } from 'src/core/server';
 import { AgentService, IngestManagerStartContract } from '../../../ingest_manager/server';
@@ -15,6 +16,7 @@ import { ManifestManager } from './services/artifacts';
 export type EndpointAppContextServiceStartContract = Partial<
   Pick<IngestManagerStartContract, 'agentService'>
 > & {
+  logger: Logger;
   manifestManager?: ManifestManager;
   registerIngestCallback?: IngestManagerStartContract['registerExternalCallback'];
   savedObjectsStart: SavedObjectsServiceStart;
@@ -37,7 +39,7 @@ export class EndpointAppContextService {
     if (this.manifestManager && dependencies.registerIngestCallback) {
       dependencies.registerIngestCallback(
         'packageConfigCreate',
-        getPackageConfigCreateCallback(this.manifestManager)
+        getPackageConfigCreateCallback(dependencies.logger, this.manifestManager)
       );
     }
   }

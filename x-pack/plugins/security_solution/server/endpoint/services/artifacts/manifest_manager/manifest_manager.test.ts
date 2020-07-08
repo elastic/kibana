@@ -4,8 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { inflateSync } from 'zlib';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
-import { ArtifactConstants, ManifestConstants, Manifest } from '../../../lib/artifacts';
+import {
+  ArtifactConstants,
+  ManifestConstants,
+  Manifest,
+  ExceptionsCache,
+} from '../../../lib/artifacts';
 import { getPackageConfigServiceMock, getManifestManagerMock } from './manifest_manager.mock';
 
 describe('manifest_manager', () => {
@@ -16,11 +22,54 @@ describe('manifest_manager', () => {
       expect(snapshot!.diffs).toEqual([
         {
           id:
-            'endpoint-exceptionlist-linux-1.0.0-d34a1f6659bd86fc2023d7477aa2e5d2055c9c0fb0a0f10fae76bf8b94bebe49',
+            'endpoint-exceptionlist-linux-v1-1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
           type: 'add',
         },
       ]);
       expect(snapshot!.manifest).toBeInstanceOf(Manifest);
+    });
+
+    test('ManifestManager populates cache properly', async () => {
+      const cache = new ExceptionsCache(5);
+      const manifestManager = getManifestManagerMock({ cache });
+      const snapshot = await manifestManager.getSnapshot();
+      expect(snapshot!.diffs).toEqual([
+        {
+          id:
+            'endpoint-exceptionlist-linux-v1-1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
+          type: 'add',
+        },
+      ]);
+      await manifestManager.syncArtifacts(snapshot!, 'add');
+      const diff = snapshot!.diffs[0];
+      const entry = JSON.parse(inflateSync(cache.get(diff!.id)! as Buffer).toString());
+      expect(entry).toEqual({
+        entries: [
+          {
+            type: 'simple',
+            entries: [
+              {
+                entries: [
+                  {
+                    field: 'nested.field',
+                    operator: 'included',
+                    type: 'exact_cased',
+                    value: 'some value',
+                  },
+                ],
+                field: 'some.parentField',
+                type: 'nested',
+              },
+              {
+                field: 'some.not.nested.field',
+                operator: 'included',
+                type: 'exact_cased',
+                value: 'some value',
+              },
+            ],
+          },
+        ],
+      });
     });
 
     test('ManifestManager can dispatch manifest', async () => {
@@ -34,17 +83,17 @@ describe('manifest_manager', () => {
       expect(
         packageConfigService.update.mock.calls[0][2].inputs[0].config.artifact_manifest.value
       ).toEqual({
-        manifest_version: 'v0',
-        schema_version: '1.0.0',
+        manifest_version: ManifestConstants.INITIAL_VERSION,
+        schema_version: 'v1',
         artifacts: {
           [artifact.identifier]: {
             compression_algorithm: 'none',
             encryption_algorithm: 'none',
-            precompress_sha256: artifact.decompressedSha256,
-            postcompress_sha256: artifact.compressedSha256,
-            precompress_size: artifact.decompressedSize,
-            postcompress_size: artifact.compressedSize,
-            relative_url: `/api/endpoint/artifacts/download/${artifact.identifier}/${artifact.compressedSha256}`,
+            decoded_sha256: artifact.decodedSha256,
+            encoded_sha256: artifact.encodedSha256,
+            decoded_size: artifact.decodedSize,
+            encoded_size: artifact.encodedSize,
+            relative_url: `/api/endpoint/artifacts/download/${artifact.identifier}/${artifact.decodedSha256}`,
           },
         },
       });

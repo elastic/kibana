@@ -5,7 +5,7 @@
  */
 
 import * as t from 'io-ts';
-import { encoding } from '../common';
+import { buffer, encoding } from '../common';
 
 const headers = t.exact(
   t.type({
@@ -16,7 +16,7 @@ const headers = t.exact(
 
 export const downloadArtifactResponseSchema = t.exact(
   t.type({
-    body: t.unknown, // TODO: make Buffer type
+    body: buffer,
     headers,
   })
 );

@@ -98,7 +98,7 @@ describe('test endpoint route', () => {
     );
 
     expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-    expect(routeConfig.options).toEqual({ authRequired: true });
+    expect(routeConfig.options).toEqual({ authRequired: true, tags: ['access:securitySolution'] });
     expect(mockResponse.ok).toBeCalled();
     const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as HostResultList;
     expect(endpointResultList.hosts.length).toEqual(1);
@@ -140,7 +140,7 @@ describe('test endpoint route', () => {
     expect(mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.body?.query).toEqual({
       match_all: {},
     });
-    expect(routeConfig.options).toEqual({ authRequired: true });
+    expect(routeConfig.options).toEqual({ authRequired: true, tags: ['access:securitySolution'] });
     expect(mockResponse.ok).toBeCalled();
     const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as HostResultList;
     expect(endpointResultList.hosts.length).toEqual(1);
@@ -203,7 +203,7 @@ describe('test endpoint route', () => {
         ],
       },
     });
-    expect(routeConfig.options).toEqual({ authRequired: true });
+    expect(routeConfig.options).toEqual({ authRequired: true, tags: ['access:securitySolution'] });
     expect(mockResponse.ok).toBeCalled();
     const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as HostResultList;
     expect(endpointResultList.hosts.length).toEqual(1);
@@ -235,7 +235,10 @@ describe('test endpoint route', () => {
       );
 
       expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(routeConfig.options).toEqual({ authRequired: true });
+      expect(routeConfig.options).toEqual({
+        authRequired: true,
+        tags: ['access:securitySolution'],
+      });
       expect(mockResponse.notFound).toBeCalled();
       const message = mockResponse.notFound.mock.calls[0][0]?.body;
       expect(message).toEqual('Endpoint Not Found');
@@ -264,7 +267,10 @@ describe('test endpoint route', () => {
       );
 
       expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(routeConfig.options).toEqual({ authRequired: true });
+      expect(routeConfig.options).toEqual({
+        authRequired: true,
+        tags: ['access:securitySolution'],
+      });
       expect(mockResponse.ok).toBeCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
       expect(result).toHaveProperty('metadata.Endpoint');
@@ -299,7 +305,10 @@ describe('test endpoint route', () => {
       );
 
       expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(routeConfig.options).toEqual({ authRequired: true });
+      expect(routeConfig.options).toEqual({
+        authRequired: true,
+        tags: ['access:securitySolution'],
+      });
       expect(mockResponse.ok).toBeCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
       expect(result.host_status).toEqual(HostStatus.ERROR);
@@ -329,7 +338,10 @@ describe('test endpoint route', () => {
       );
 
       expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(routeConfig.options).toEqual({ authRequired: true });
+      expect(routeConfig.options).toEqual({
+        authRequired: true,
+        tags: ['access:securitySolution'],
+      });
       expect(mockResponse.ok).toBeCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
       expect(result.host_status).toEqual(HostStatus.ERROR);

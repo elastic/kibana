@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Logger } from '../../../../../src/core/server';
 import { NewPackageConfig } from '../../../ingest_manager/common/types/models';
 import { factory as policyConfigFactory } from '../../common/endpoint/models/policy_config';
 import { NewPolicyData } from '../../common/endpoint/types';
@@ -13,6 +14,7 @@ import { ManifestManager } from './services/artifacts';
  * Callback to handle creation of PackageConfigs in Ingest Manager
  */
 export const getPackageConfigCreateCallback = (
+  logger: Logger,
   manifestManager: ManifestManager
 ): ((newPackageConfig: NewPackageConfig) => Promise<NewPackageConfig>) => {
   const handlePackageConfigCreate = async (
@@ -32,7 +34,7 @@ export const getPackageConfigCreateCallback = (
     const snapshot = await manifestManager.getSnapshot({ initialize: true });
 
     if (snapshot === null) {
-      // TODO: log error... should not be in this state
+      logger.warn('No manifest snapshot available.');
       return updatedPackageConfig;
     }
 
@@ -77,7 +79,7 @@ export const getPackageConfigCreateCallback = (
           // clean up old artifacts
           await manifestManager.syncArtifacts(snapshot, 'delete');
         } else {
-          // TODO: log error
+          logger.warn('Package config update failed.');
         }
       }
     }

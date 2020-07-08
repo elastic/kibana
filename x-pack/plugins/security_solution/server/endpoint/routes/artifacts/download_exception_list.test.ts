@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { deflateSync, inflateSync } from 'zlib';
 import {
   ILegacyClusterClient,
   IRouter,
@@ -29,11 +30,24 @@ import { createMockEndpointAppContextServiceStartContract } from '../../mocks';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { WrappedTranslatedExceptionList } from '../../schemas/artifacts/lists';
 
-const mockArtifactName = `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-windows-1.0.0`;
+const mockArtifactName = `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-windows-v1`;
 const expectedEndpointExceptions: WrappedTranslatedExceptionList = {
-  exceptions_list: [
+  entries: [
     {
+      type: 'simple',
       entries: [
+        {
+          entries: [
+            {
+              field: 'some.not.nested.field',
+              operator: 'included',
+              type: 'exact_cased',
+              value: 'some value',
+            },
+          ],
+          field: 'some.field',
+          type: 'nested',
+        },
         {
           field: 'some.not.nested.field',
           operator: 'included',
@@ -41,14 +55,17 @@ const expectedEndpointExceptions: WrappedTranslatedExceptionList = {
           value: 'some value',
         },
       ],
-      field: 'some.field',
-      type: 'nested',
     },
     {
-      field: 'some.not.nested.field',
-      operator: 'included',
-      type: 'exact_cased',
-      value: 'some value',
+      type: 'simple',
+      entries: [
+        {
+          field: 'some.other.not.nested.field',
+          operator: 'included',
+          type: 'exact_cased',
+          value: 'some other value',
+        },
+      ],
     },
   ],
 };
@@ -130,11 +147,11 @@ describe('test alerts route', () => {
       references: [],
       attributes: {
         identifier: mockArtifactName,
-        schemaVersion: '1.0.0',
+        schemaVersion: 'v1',
         sha256: '123456',
         encoding: 'application/json',
         created: Date.now(),
-        body: Buffer.from(JSON.stringify(expectedEndpointExceptions)).toString('base64'),
+        body: deflateSync(JSON.stringify(expectedEndpointExceptions)).toString('base64'),
         size: 100,
       },
     };
@@ -147,7 +164,7 @@ describe('test alerts route', () => {
       path.startsWith('/api/endpoint/artifacts/download')
     )!;
 
-    expect(routeConfig.options).toEqual({});
+    expect(routeConfig.options).toEqual({ tags: ['access:securitySolution'] });
 
     await routeHandler(
       ({
@@ -168,8 +185,10 @@ describe('test alerts route', () => {
 
     expect(mockResponse.ok).toBeCalled();
     expect(mockResponse.ok.mock.calls[0][0]?.headers).toEqual(expectedHeaders);
-    const artifact = mockResponse.ok.mock.calls[0][0]?.body;
-    expect(artifact).toEqual(Buffer.from(mockArtifact.attributes.body, 'base64').toString());
+    const artifact = inflateSync(mockResponse.ok.mock.calls[0][0]?.body as Buffer).toString();
+    expect(artifact).toEqual(
+      inflateSync(Buffer.from(mockArtifact.attributes.body, 'base64')).toString()
+    );
   });
 
   it('should handle fetching a non-existent artifact', async () => {

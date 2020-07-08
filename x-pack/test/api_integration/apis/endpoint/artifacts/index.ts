@@ -73,12 +73,108 @@ export default function (providerContext: FtrProviderContext) {
     it('should download an artifact with correct hash', async () => {
       await supertestWithoutAuth
         .get(
-          '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-1.0.0/1be2ae8d19368939c6e9ecfb32d46233e975feec9611469f62dd2578bd9c4507'
+          '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-1.0.0/d2a9c760005b08d43394e59a8701ae75c80881934ccf15a006944452b80f7f9f'
         )
         .set('kbn-xsrf', 'xxx')
         .set('authorization', `ApiKey ${agentAccessAPIKey}`)
         .send()
-        .expect(200);
+        .expect(200)
+        .expect((response) => {
+          const artifactJson = JSON.parse(response.text);
+          expect(artifactJson).to.eql({
+            entries: [
+              {
+                type: 'simple',
+                entries: [
+                  {
+                    field: 'actingProcess.file.signer',
+                    operator: 'included',
+                    type: 'exact_cased',
+                    value: 'Elastic, N.V.',
+                  },
+                  {
+                    entries: [
+                      {
+                        field: 'signer',
+                        operator: 'included',
+                        type: 'exact_cased',
+                        value: 'Evil',
+                      },
+                      {
+                        field: 'trusted',
+                        operator: 'included',
+                        type: 'exact_cased',
+                        value: 'true',
+                      },
+                    ],
+                    field: 'file.signature',
+                    type: 'nested',
+                  },
+                ],
+              },
+            ],
+          });
+        });
+    });
+
+    it('should download an artifact with correct hash from cache', async () => {
+      await supertestWithoutAuth
+        .get(
+          '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-1.0.0/d2a9c760005b08d43394e59a8701ae75c80881934ccf15a006944452b80f7f9f'
+        )
+        .set('kbn-xsrf', 'xxx')
+        .set('authorization', `ApiKey ${agentAccessAPIKey}`)
+        .send()
+        .expect(200)
+        .expect((response) => {
+          JSON.parse(response.text);
+        })
+        .then(async () => {
+          await supertestWithoutAuth
+            .get(
+              '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-1.0.0/d2a9c760005b08d43394e59a8701ae75c80881934ccf15a006944452b80f7f9f'
+            )
+            .set('kbn-xsrf', 'xxx')
+            .set('authorization', `ApiKey ${agentAccessAPIKey}`)
+            .send()
+            .expect(200)
+            .expect((response) => {
+              const artifactJson = JSON.parse(response.text);
+              expect(artifactJson).to.eql({
+                entries: [
+                  {
+                    type: 'simple',
+                    entries: [
+                      {
+                        field: 'actingProcess.file.signer',
+                        operator: 'included',
+                        type: 'exact_cased',
+                        value: 'Elastic, N.V.',
+                      },
+                      {
+                        entries: [
+                          {
+                            field: 'signer',
+                            operator: 'included',
+                            type: 'exact_cased',
+                            value: 'Evil',
+                          },
+                          {
+                            field: 'trusted',
+                            operator: 'included',
+                            type: 'exact_cased',
+                            value: 'true',
+                          },
+                        ],
+                        field: 'file.signature',
+                        type: 'nested',
+                      },
+                    ],
+                  },
+                ],
+              });
+            });
+        });
     });
 
     it('should download valid compressed JSON', async () => {
@@ -97,30 +193,34 @@ export default function (providerContext: FtrProviderContext) {
       );
 
       expect(decompressedBody).to.eql({
-        exceptions_list: [
-          {
-            field: 'actingProcess.file.signer',
-            operator: 'included',
-            type: 'exact_cased',
-            value: 'Elastic, N.V.',
-          },
+        entries: [
           {
             entries: [
               {
-                field: 'signer',
+                field: 'actingProcess.file.signer',
                 operator: 'included',
                 type: 'exact_cased',
-                value: 'Evil',
+                value: 'Elastic, N.V.',
               },
               {
-                field: 'trusted',
-                operator: 'included',
-                type: 'exact_cased',
-                value: 'true',
+                entries: [
+                  {
+                    field: 'signer',
+                    operator: 'included',
+                    type: 'exact_cased',
+                    value: 'Evil',
+                  },
+                  {
+                    field: 'trusted',
+                    operator: 'included',
+                    type: 'exact_cased',
+                    value: 'true',
+                  },
+                ],
+                field: 'file.signature',
+                type: 'nested',
               },
             ],
-            field: 'file.signature',
-            type: 'nested',
           },
         ],
       } as WrappedTranslatedExceptionList);
