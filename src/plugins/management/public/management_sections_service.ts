@@ -17,9 +17,16 @@
  * under the License.
  */
 
-import { ReactElement } from 'react';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
-import { managementSections } from './components/management_sections';
+import {
+  // managementSections,
+  IngestSection,
+  DataSection,
+  InsightsAndAlertingSection,
+  SecuritySection,
+  KibanaSection,
+  StackSection,
+} from './components/management_sections';
 
 import {
   ManagementSectionId,
@@ -29,6 +36,49 @@ import {
 } from './types';
 
 export class ManagementSectionsService {
+  definedSections: {
+    ingest: ManagementSection;
+    data: ManagementSection;
+    insightsAndAlerting: ManagementSection;
+    security: ManagementSection;
+    kibana: ManagementSection;
+    stack: ManagementSection;
+  };
+
+  constructor() {
+    this.definedSections = {
+      ingest: this.registerSection({
+        id: IngestSection.id,
+        title: IngestSection.title,
+        order: 0,
+      }),
+      data: this.registerSection({
+        id: DataSection.id,
+        title: DataSection.title,
+        order: 1,
+      }),
+      insightsAndAlerting: this.registerSection({
+        id: InsightsAndAlertingSection.id,
+        title: InsightsAndAlertingSection.title,
+        order: 2,
+      }),
+      security: this.registerSection({
+        id: SecuritySection.id,
+        title: SecuritySection.title,
+        order: 3,
+      }),
+      kibana: this.registerSection({
+        id: KibanaSection.id,
+        title: KibanaSection.title,
+        order: 4,
+      }),
+      stack: this.registerSection({
+        id: StackSection.id,
+        title: StackSection.title,
+        order: 5,
+      }),
+    };
+  }
   private sections: Map<ManagementSectionId | string, ManagementSection> = new Map();
 
   private getSection = (sectionId: ManagementSectionId | string) =>
@@ -48,15 +98,12 @@ export class ManagementSectionsService {
   };
 
   setup(): SectionsServiceSetup {
-    managementSections.forEach(
-      ({ id, title }: { id: ManagementSectionId; title: ReactElement }, idx: number) => {
-        this.registerSection({ id, title, order: idx });
-      }
-    );
-
     return {
       register: this.registerSection,
       getSection: this.getSection,
+      section: {
+        ...this.definedSections,
+      },
     };
   }
 
@@ -76,6 +123,9 @@ export class ManagementSectionsService {
       getSection: this.getSection,
       getAllSections: this.getAllSections,
       getSectionsEnabled: () => this.getAllSections().filter((section) => section.enabled),
+      section: {
+        ...this.definedSections,
+      },
     };
   }
 }

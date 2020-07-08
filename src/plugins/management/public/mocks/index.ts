@@ -33,14 +33,16 @@ const createSetupContract = (): DeeplyMockedKeys<ManagementSetup> => ({
   sections: {
     register: jest.fn(),
     getSection: jest.fn().mockReturnValue(createManagementSectionMock()),
+    section: {},
   },
 });
 
 const createStartContract = (): DeeplyMockedKeys<ManagementStart> => ({
   sections: {
-    getSection: jest.fn(),
-    getAllSections: jest.fn(),
+    // getSection: jest.fn(),
+    // getAllSections: jest.fn(),
     getSectionsEnabled: jest.fn(),
+    section: {},
   },
 });
 

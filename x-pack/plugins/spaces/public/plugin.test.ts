@@ -7,7 +7,7 @@
 import { coreMock } from 'src/core/public/mocks';
 import { SpacesPlugin } from './plugin';
 import { homePluginMock } from '../../../../src/plugins/home/public/mocks';
-import { ManagementSection, ManagementSectionId } from '../../../../src/plugins/management/public';
+import { ManagementSection } from '../../../../src/plugins/management/public';
 import { managementPluginMock } from '../../../../src/plugins/management/public/mocks';
 import { advancedSettingsMock } from '../../../../src/plugins/advanced_settings/public/mocks';
 import { featuresPluginMock } from '../../features/public/mocks';
@@ -34,7 +34,7 @@ describe('Spaces plugin', () => {
       const coreSetup = coreMock.createSetup();
 
       const kibanaSection = new ManagementSection({
-        id: ManagementSectionId.Kibana,
+        id: 'kibana',
         title: 'Mock Kibana Section',
         order: 1,
       });

@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin, CoreStart, PluginInitializerContext } from 'kibana/public';
 
-import { ManagementSectionId } from '../../../../src/plugins/management/public';
 import { init as initBreadcrumbs } from './application/services/breadcrumb';
 import { init as initDocumentation } from './application/services/documentation';
 import { init as initHttp } from './application/services/http';
@@ -33,7 +32,7 @@ export class RemoteClustersUIPlugin
     } = this.initializerContext.config.get<ClientConfigType>();
 
     if (isRemoteClustersUiEnabled) {
-      const esSection = management.sections.getSection(ManagementSectionId.Data);
+      const esSection = management.sections.section.data;
 
       esSection.registerApp({
         id: 'remote_clusters',

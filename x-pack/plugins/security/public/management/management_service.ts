@@ -10,7 +10,6 @@ import {
   ManagementApp,
   ManagementSetup,
   ManagementStart,
-  ManagementSectionId,
 } from '../../../../../src/plugins/management/public';
 import { SecurityLicense } from '../../common/licensing';
 import { AuthenticationServiceSetup } from '../authentication';
@@ -39,7 +38,7 @@ export class ManagementService {
   setup({ getStartServices, management, authc, license, fatalErrors }: SetupParams) {
     this.license = license;
 
-    const securitySection = management.sections.getSection(ManagementSectionId.Security);
+    const securitySection = management.sections.section.security;
 
     securitySection.registerApp(usersManagementApp.create({ authc, getStartServices }));
     securitySection.registerApp(
@@ -51,7 +50,7 @@ export class ManagementService {
 
   start({ management }: StartParams) {
     this.licenseFeaturesSubscription = this.license.features$.subscribe(async (features) => {
-      const securitySection = management.sections.getSection(ManagementSectionId.Security);
+      const securitySection = management.sections.section.security;
 
       const securityManagementAppsStatuses: Array<[ManagementApp, boolean]> = [
         [securitySection.getApp(usersManagementApp.id)!, features.showLinks],

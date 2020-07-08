@@ -17,12 +17,7 @@
  * under the License.
  */
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  AppMountContext,
-  AppMountParameters,
-  ChromeBreadcrumb,
-  ScopedHistory,
-} from 'kibana/public';
+import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import { EuiPage } from '@elastic/eui';
 import { ManagementStart } from '../../types';
@@ -36,7 +31,6 @@ import './management_app.scss';
 
 interface ManagementAppProps {
   appBasePath: string;
-  context: AppMountContext;
   history: AppMountParameters['history'];
   dependencies: ManagementAppDependencies;
 }
@@ -44,9 +38,11 @@ interface ManagementAppProps {
 export interface ManagementAppDependencies {
   management: ManagementStart;
   kibanaVersion: string;
+  setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
 }
 
-export const ManagementApp = ({ context, dependencies, history }: ManagementAppProps) => {
+export const ManagementApp = ({ dependencies, history }: ManagementAppProps) => {
+  const { setBreadcrumbs } = dependencies;
   const [selectedId, setSelectedId] = useState<string>('');
   const [sections, setSections] = useState<ManagementSection[]>();
 
@@ -55,19 +51,19 @@ export const ManagementApp = ({ context, dependencies, history }: ManagementAppP
     window.scrollTo(0, 0);
   }, []);
 
-  const setBreadcrumbs = useCallback(
+  const setBreadcrumbsScoped = useCallback(
     (crumbs: ChromeBreadcrumb[] = [], appHistory?: ScopedHistory) => {
       const wrapBreadcrumb = (item: ChromeBreadcrumb, scopedHistory: ScopedHistory) => ({
         ...item,
         ...(item.href ? reactRouterNavigate(scopedHistory, item.href) : {}),
       });
 
-      context.core.chrome.setBreadcrumbs([
+      setBreadcrumbs([
         wrapBreadcrumb(MANAGEMENT_BREADCRUMB, history),
         ...crumbs.map((item) => wrapBreadcrumb(item, appHistory || history)),
       ]);
     },
-    [context.core.chrome, history]
+    [setBreadcrumbs, history]
   );
 
   useEffect(() => {
@@ -84,7 +80,7 @@ export const ManagementApp = ({ context, dependencies, history }: ManagementAppP
         <ManagementSidebarNav selectedId={selectedId} sections={sections} history={history} />
         <ManagementRouter
           history={history}
-          setBreadcrumbs={setBreadcrumbs}
+          setBreadcrumbs={setBreadcrumbsScoped}
           onAppMounted={onAppMounted}
           sections={sections}
           dependencies={dependencies}

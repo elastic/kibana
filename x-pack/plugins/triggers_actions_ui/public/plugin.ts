@@ -12,7 +12,7 @@ import { registerBuiltInAlertTypes } from './application/components/builtin_aler
 import { hasShowActionsCapability, hasShowAlertsCapability } from './application/lib/capabilities';
 import { ActionTypeModel, AlertTypeModel } from './types';
 import { TypeRegistry } from './application/type_registry';
-import { ManagementStart, ManagementSectionId } from '../../../../src/plugins/management/public';
+import { ManagementStart } from '../../../../src/plugins/management/public';
 import { boot } from './application/boot';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { PluginStartContract as AlertingStart } from '../../alerts/public';
@@ -73,7 +73,7 @@ export class Plugin
 
     // Don't register routes when user doesn't have access to the application
     if (canShowActions || canShowAlerts) {
-      plugins.management.sections.getSection(ManagementSectionId.InsightsAndAlerting).registerApp({
+      plugins.management.sections.section.insightsAndAlerting.registerApp({
         id: 'triggersActions',
         title: i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
           defaultMessage: 'Alerts and Actions',

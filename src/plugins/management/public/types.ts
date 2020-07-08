@@ -27,7 +27,10 @@ export interface ManagementSetup {
 }
 
 export interface ManagementStart {
-  sections: SectionsServiceStart;
+  sections: {
+    section: SectionsServiceStart['section'];
+    getSectionsEnabled: () => ManagementSection[];
+  };
 }
 
 export interface SectionsServiceStartDeps {
@@ -36,6 +39,7 @@ export interface SectionsServiceStartDeps {
 
 export interface SectionsServiceSetup {
   register: (args: Omit<RegisterManagementSectionArgs, 'capabilities'>) => ManagementSection;
+  section: Record<string, ManagementSection>;
   getSection: (sectionId: ManagementSectionId | string) => ManagementSection;
 }
 
@@ -43,6 +47,8 @@ export interface SectionsServiceStart {
   getSection: (sectionId: ManagementSectionId | string) => ManagementSection;
   getAllSections: () => ManagementSection[];
   getSectionsEnabled: () => ManagementSection[];
+
+  section: Record<string, ManagementSection>;
 }
 
 export enum ManagementSectionId {

@@ -39,39 +39,51 @@ const ManagementSectionTitle = ({ text, tip }: ManagementSectionTitleProps) => (
   </EuiToolTip>
 );
 
+export const IngestSection = {
+  id: ManagementSectionId.Ingest,
+  title: (
+    <ManagementSectionTitle
+      text="Ingest"
+      tip="Manage how to transform data and load it into the cluster."
+    />
+  ),
+};
+
+export const DataSection = {
+  id: ManagementSectionId.Data,
+  title: <ManagementSectionTitle text="Data" tip="Manage your cluster data and backups" />,
+};
+
+export const InsightsAndAlertingSection = {
+  id: ManagementSectionId.InsightsAndAlerting,
+  title: (
+    <ManagementSectionTitle
+      text="Alerts and Insights"
+      tip="Manage how to detect changes in your data"
+    />
+  ),
+};
+
+export const SecuritySection = {
+  id: ManagementSectionId.Security,
+  title: <ManagementSectionTitle text="Security" tip="Control access to features and data" />,
+};
+
+export const KibanaSection = {
+  id: ManagementSectionId.Kibana,
+  title: <ManagementSectionTitle text="Kibana" tip="Customize Kibana and manage saved objects" />,
+};
+
+export const StackSection = {
+  id: ManagementSectionId.Stack,
+  title: <ManagementSectionTitle text="Stack" tip="Manage your license and upgrade the Stack" />,
+};
+
 export const managementSections = [
-  {
-    id: ManagementSectionId.Ingest,
-    title: (
-      <ManagementSectionTitle
-        text="Ingest"
-        tip="Manage how to transform data and load it into the cluster."
-      />
-    ),
-  },
-  {
-    id: ManagementSectionId.Data,
-    title: <ManagementSectionTitle text="Data" tip="Manage your cluster data and backups" />,
-  },
-  {
-    id: ManagementSectionId.InsightsAndAlerting,
-    title: (
-      <ManagementSectionTitle
-        text="Alerts and Insights"
-        tip="Manage how to detect changes in your data"
-      />
-    ),
-  },
-  {
-    id: ManagementSectionId.Security,
-    title: <ManagementSectionTitle text="Security" tip="Control access to features and data" />,
-  },
-  {
-    id: ManagementSectionId.Kibana,
-    title: <ManagementSectionTitle text="Kibana" tip="Customize Kibana and manage saved objects" />,
-  },
-  {
-    id: ManagementSectionId.Stack,
-    title: <ManagementSectionTitle text="Stack" tip="Manage your license and upgrade the Stack" />,
-  },
+  IngestSection,
+  DataSection,
+  InsightsAndAlertingSection,
+  SecuritySection,
+  KibanaSection,
+  StackSection,
 ];

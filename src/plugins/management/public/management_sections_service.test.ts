@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { ManagementSectionId } from './index';
 import { ManagementSectionsService } from './management_sections_service';
 
 describe('ManagementService', () => {
@@ -38,12 +37,12 @@ describe('ManagementService', () => {
     const start = managementService.start({ capabilities });
 
     expect(start.getAllSections().length).toEqual(6);
-    expect(start.getSection(ManagementSectionId.Ingest)).toBeDefined();
-    expect(start.getSection(ManagementSectionId.Data)).toBeDefined();
-    expect(start.getSection(ManagementSectionId.InsightsAndAlerting)).toBeDefined();
-    expect(start.getSection(ManagementSectionId.Security)).toBeDefined();
-    expect(start.getSection(ManagementSectionId.Kibana)).toBeDefined();
-    expect(start.getSection(ManagementSectionId.Stack)).toBeDefined();
+    expect(start.section.ingest).toBeDefined();
+    expect(start.section.data).toBeDefined();
+    expect(start.section.insightsAndAlerting).toBeDefined();
+    expect(start.section.security).toBeDefined();
+    expect(start.section.kibana).toBeDefined();
+    expect(start.section.stack).toBeDefined();
   });
 
   test('Register section, enable and disable', () => {

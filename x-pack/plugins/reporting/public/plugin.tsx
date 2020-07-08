@@ -23,7 +23,7 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
-import { ManagementSectionId, ManagementSetup } from '../../../../src/plugins/management/public';
+import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { SharePluginSetup } from '../../../../src/plugins/share/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { ReportingConfigType, JobId, JobStatusBuckets } from '../common/types';
@@ -116,7 +116,7 @@ export class ReportingPublicPlugin implements Plugin<void, void> {
       category: FeatureCatalogueCategory.ADMIN,
     });
 
-    management.sections.getSection(ManagementSectionId.InsightsAndAlerting).registerApp({
+    management.sections.section.insightAndAlerting.registerApp({
       id: 'reporting',
       title: this.title,
       order: 1,

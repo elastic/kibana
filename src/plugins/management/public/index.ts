@@ -27,7 +27,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export { RegisterManagementAppArgs, ManagementSection, ManagementApp } from './utils';
 
 export {
-  ManagementSectionId,
+  // ManagementSectionId,
   ManagementAppMountParams,
   ManagementSetup,
   ManagementStart,
