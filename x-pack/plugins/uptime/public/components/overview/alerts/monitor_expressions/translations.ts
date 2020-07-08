@@ -58,7 +58,7 @@ export const alertFilterLabels = {
 
 export const statusExpLabels = {
   ENABLED_CHECKBOX: i18n.translate('xpack.uptime.alerts.monitorStatus.statusEnabledCheck.label', {
-    defaultMessage: 'Status check enabled',
+    defaultMessage: 'Status check',
   }),
 };
 

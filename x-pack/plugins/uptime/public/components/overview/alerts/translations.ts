@@ -148,7 +148,7 @@ export const ENTER_NUMBER_OF_TIME_UNITS_VALUE = (value: number) =>
 export const ENTER_AVAILABILITY_RANGE_ENABLED = i18n.translate(
   'xpack.uptime.alerts.monitorStatus.availability.isEnabledCheckbox.label',
   {
-    defaultMessage: 'Availability enabled',
+    defaultMessage: 'Availability',
   }
 );
 
