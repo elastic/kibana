@@ -17,23 +17,26 @@
  * under the License.
  */
 
-export { ElasticsearchService } from './elasticsearch_service';
-export { config, configSchema, ElasticsearchConfig } from './elasticsearch_config';
-export { NodesVersionCompatibility } from './version_check/ensure_es_version';
-export {
-  ElasticsearchServiceSetup,
-  ElasticsearchServiceStart,
-  ElasticsearchStatusMeta,
-  InternalElasticsearchServiceSetup,
-  InternalElasticsearchServiceStart,
-  FakeRequest,
-  ScopeableRequest,
-} from './types';
-export * from './legacy';
-export {
-  IClusterClient,
-  ICustomClusterClient,
-  ElasticsearchClientConfig,
-  ElasticsearchClient,
-  IScopedClusterClient,
-} from './client';
+import type { Client } from '@elastic/elasticsearch';
+import type {
+  ApiResponse,
+  TransportRequestOptions,
+  TransportRequestParams,
+} from '@elastic/elasticsearch/lib/Transport';
+
+/**
+ * Client used to query the elasticsearch cluster.
+ *
+ * @public
+ */
+export type ElasticsearchClient = Omit<
+  Client,
+  'connectionPool' | 'transport' | 'serializer' | 'extend' | 'helpers' | 'child' | 'close'
+> & {
+  transport: {
+    request(
+      params: TransportRequestParams,
+      options?: TransportRequestOptions
+    ): Promise<ApiResponse>;
+  };
+};
