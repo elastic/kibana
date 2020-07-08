@@ -53,14 +53,17 @@ const getPinnedEventsIdsByTimelineId = (
 
 const getTimelinesFromObjects = async (
   request: FrameworkRequest,
-  ids: string[]
+  ids?: string[] | null
 ): Promise<Array<ExportedTimelines | ExportTimelineNotFoundError>> => {
   const { timelines, errors } = await getTimelines(request, ids);
+  const exportedIds = timelines.map((t) => t.savedObjectId);
 
   const [notes, pinnedEvents] = await Promise.all([
-    Promise.all(ids.map((timelineId) => noteLib.getNotesByTimelineId(request, timelineId))),
+    Promise.all(exportedIds.map((timelineId) => noteLib.getNotesByTimelineId(request, timelineId))),
     Promise.all(
-      ids.map((timelineId) => pinnedEventLib.getAllPinnedEventsByTimelineId(request, timelineId))
+      exportedIds.map((timelineId) =>
+        pinnedEventLib.getAllPinnedEventsByTimelineId(request, timelineId)
+      )
     ),
   ]);
 
@@ -71,7 +74,7 @@ const getTimelinesFromObjects = async (
     []
   );
 
-  const myResponse = ids.reduce<ExportedTimelines[]>((acc, timelineId) => {
+  const myResponse = exportedIds.reduce<ExportedTimelines[]>((acc, timelineId) => {
     const myTimeline = timelines.find((t) => t.savedObjectId === timelineId);
     if (myTimeline != null) {
       const timelineNotes = myNotes.filter((n) => n.timelineId === timelineId);
@@ -97,7 +100,7 @@ export const getExportTimelineByObjectIds = async ({
   ids,
 }: {
   frameworkRequest: FrameworkRequest;
-  ids: string[];
+  ids?: string[] | null;
 }) => {
   const timeline = await getTimelinesFromObjects(frameworkRequest, ids);
   return transformDataToNdjson(timeline);

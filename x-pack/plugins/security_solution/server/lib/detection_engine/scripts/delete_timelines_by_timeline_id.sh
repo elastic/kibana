@@ -9,16 +9,13 @@
 set -e
 ./check_env_variables.sh
 
-# Uses a default if no argument is specified
-TIMELINES=${1:-./rules/export/timelineid_queries.json}
 
+# Example: ./delete_all_alerts.sh {timeline_id}
 
-# Example: ./delete_all_alerts.sh
-# https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-delete-by-query.html
 curl -s -k \
   -H "Content-Type: application/json" \
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -X DELETE "${KIBANA_URL}${SPACE_URL}/api/timeline" \
-  -d @${TIMELINES}
+  -X POST "${KIBANA_URL}${SPACE_URL}/api/solutions/security/graphql" \
+  -d '{"operationName":"DeleteTimelineMutation","variables":{"id":["'$1'"]},"query":"mutation DeleteTimelineMutation($id: [ID!]!) {\n  deleteTimeline(id: $id)\n}\n"}'
 

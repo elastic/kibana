@@ -96,7 +96,7 @@ describe('export timelines', () => {
       const result = server.validate(request);
 
       expect(result.badRequest.mock.calls[0][0]).toEqual(
-        'Invalid value "undefined" supplied to "ids"'
+        'Invalid value "undefined" supplied to "file_name"'
       );
     });
 
@@ -104,12 +104,13 @@ describe('export timelines', () => {
       const request = requestMock.create({
         method: 'get',
         path: TIMELINE_EXPORT_URL,
-        body: { id: 'someId' },
+        query: { file_name: 'test.ndjson' },
+        body: { ids: 'someId' },
       });
       const result = server.validate(request);
 
-      expect(result.badRequest.mock.calls[1][0]).toEqual(
-        'Invalid value "undefined" supplied to "file_name"'
+      expect(result.badRequest.mock.calls[0][0]).toEqual(
+        'Invalid value "someId" supplied to "ids",Invalid value "someId" supplied to "ids",Invalid value "{"ids":"someId"}" supplied to "(Partial<{ ids: (Array<string> | null) }> | null)"'
       );
     });
   });

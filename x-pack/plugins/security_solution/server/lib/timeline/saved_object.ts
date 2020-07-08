@@ -205,8 +205,8 @@ export const getAllTimeline = async (
 ): Promise<AllTimelinesResponse> => {
   const options: SavedObjectsFindOptions = {
     type: timelineSavedObjectType,
-    perPage: pageInfo != null ? pageInfo.pageSize : undefined,
-    page: pageInfo != null ? pageInfo.pageIndex : undefined,
+    perPage: pageInfo?.pageSize ?? undefined,
+    page: pageInfo?.pageIndex ?? undefined,
     search: search != null ? search : undefined,
     searchFields: onlyUserFavorite
       ? ['title', 'description', 'favorite.keySearch']
@@ -571,11 +571,26 @@ export const timelineWithReduxProperties = (
   pinnedEventsSaveObject: pinnedEvents,
 });
 
-export const getTimelines = async (request: FrameworkRequest, timelineIds: string[]) => {
+export const getTimelines = async (request: FrameworkRequest, timelineIds?: string[] | null) => {
   const savedObjectsClient = request.context.core.savedObjects.client;
+  let exportedIds = timelineIds;
+  if (timelineIds == null || timelineIds.length === 0) {
+    const { timeline: savedAllTimelines } = await getAllTimeline(
+      request,
+      false,
+      null,
+      null,
+      null,
+      TimelineStatus.active,
+      null,
+      null
+    );
+    exportedIds = savedAllTimelines.map((t) => t.savedObjectId);
+  }
+
   const savedObjects = await Promise.resolve(
     savedObjectsClient.bulkGet(
-      timelineIds.reduce(
+      exportedIds?.reduce(
         (acc, timelineId) => [...acc, { id: timelineId, type: timelineSavedObjectType }],
         [] as Array<{ id: string; type: string }>
       )

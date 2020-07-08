@@ -50,7 +50,7 @@ export const exportTimelinesRoute = (
 
         const responseBody = await getExportTimelineByObjectIds({
           frameworkRequest,
-          ids: request.body.ids,
+          ids: request.body?.ids,
         });
 
         return response.ok({
