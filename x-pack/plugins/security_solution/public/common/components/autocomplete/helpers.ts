@@ -7,8 +7,8 @@
 import dateMath from '@elastic/datemath';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { IFieldType } from '../../../../../../../src/plugins/data/common';
-import { Ipv4Address } from '../../../../../../../src/plugins/kibana_utils/public';
+import { IFieldType, Ipv4Address } from '../../../../../../../src/plugins/data/common';
+
 import {
   EXCEPTION_OPERATORS,
   isOperator,
