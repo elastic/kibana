@@ -5,7 +5,7 @@
  */
 
 import rbush from 'rbush';
-import { createSelector } from 'reselect';
+import { createSelector, defaultMemoize } from 'reselect';
 import {
   DataState,
   AdjacentProcessMap,
@@ -210,7 +210,7 @@ export const relatedEventInfoByEntityId: (
          *
          * @param eventCategory {string} The ECS category like 'file','dns',etc.
          */
-        const getMatchingEventsForCategory = (eventCategory: string): ResolverEvent[] => {
+        const unmemoizedGetMatchingEventsForCategory = (eventCategory: string): ResolverEvent[] => {
           if (!eventsResponseForThisEntry) {
             return [];
           }
@@ -223,6 +223,8 @@ export const relatedEventInfoByEntityId: (
             return false;
           });
         };
+
+        const getMatchingEventsForCategory = defaultMemoize(unmemoizedGetMatchingEventsForCategory);
 
         /**
          * The number of events that occurred before the API limit was reached.
