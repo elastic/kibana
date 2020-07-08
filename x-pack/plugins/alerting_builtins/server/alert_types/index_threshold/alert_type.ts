@@ -13,6 +13,7 @@ import { TimeSeriesQuery } from './lib/time_series_query';
 export const ID = '.index-threshold';
 
 import { Service } from '../../types';
+import { CoreQueryParamsSchemaProperties } from './lib/core_query_types';
 
 const ActionGroupId = 'threshold met';
 const ComparatorFns = getComparatorFns();
@@ -67,9 +68,26 @@ export function getAlertType(service: Service): AlertType {
     }
   );
 
-  const alertParamsVariables = Object.keys(ParamsSchema.props).map((propKey: string) => {
-    return { name: propKey, description: propKey };
-  });
+  const actionVariableContextThresholdLabel = i18n.translate(
+    'xpack.alertingBuiltins.indexThreshold.actionVariableContextThresholdLabel',
+    {
+      defaultMessage:
+        "A values to use as the threshold; 'between' and 'notBetween' require two values, the others require one.",
+    }
+  );
+
+  const actionVariableContextThresholdComparatorLabel = i18n.translate(
+    'xpack.alertingBuiltins.indexThreshold.actionVariableContextThresholdComparatorLabel',
+    {
+      defaultMessage: 'A comparison function to use to determine if the threshold as been met.',
+    }
+  );
+
+  const alertParamsVariables = Object.keys(CoreQueryParamsSchemaProperties).map(
+    (propKey: string) => {
+      return { name: propKey, description: propKey };
+    }
+  );
 
   return {
     id: ID,
@@ -86,6 +104,8 @@ export function getAlertType(service: Service): AlertType {
         { name: 'group', description: actionVariableContextGroupLabel },
         { name: 'date', description: actionVariableContextDateLabel },
         { name: 'value', description: actionVariableContextValueLabel },
+        { name: 'threshold', description: actionVariableContextThresholdLabel },
+        { name: 'thresholdComparator', description: actionVariableContextThresholdComparatorLabel },
         ...alertParamsVariables,
       ],
     },
@@ -140,6 +160,7 @@ export function getAlertType(service: Service): AlertType {
         date,
         group: instanceId,
         value,
+        ...params,
       };
       const actionContext = addMessages(options, baseContext, params);
       const alertInstance = options.services.alertInstanceFactory(instanceId);

@@ -46,6 +46,50 @@ describe('alertType', () => {
             "description": "The value that exceeded the threshold.",
             "name": "value",
           },
+          Object {
+            "description": "A values to use as the threshold; 'between' and 'notBetween' require two values, the others require one.",
+            "name": "threshold",
+          },
+          Object {
+            "description": "A comparison function to use to determine if the threshold as been met.",
+            "name": "thresholdComparator",
+          },
+          Object {
+            "description": "index",
+            "name": "index",
+          },
+          Object {
+            "description": "timeField",
+            "name": "timeField",
+          },
+          Object {
+            "description": "aggType",
+            "name": "aggType",
+          },
+          Object {
+            "description": "aggField",
+            "name": "aggField",
+          },
+          Object {
+            "description": "groupBy",
+            "name": "groupBy",
+          },
+          Object {
+            "description": "termField",
+            "name": "termField",
+          },
+          Object {
+            "description": "termSize",
+            "name": "termSize",
+          },
+          Object {
+            "description": "timeWindowSize",
+            "name": "timeWindowSize",
+          },
+          Object {
+            "description": "timeWindowUnit",
+            "name": "timeWindowUnit",
+          },
         ],
       }
     `);

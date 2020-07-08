@@ -65,5 +65,5 @@ export function addMessages(
     }
   );
 
-  return { ...params, ...baseContext, title, message };
+  return { ...baseContext, title, message };
 }

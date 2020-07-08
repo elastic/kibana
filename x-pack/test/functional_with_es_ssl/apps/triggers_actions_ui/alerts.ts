@@ -86,7 +86,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('variableMenuButton-1');
 
       expect(await messageTextArea.getAttribute('value')).to.eql(
-        'test message {{alertId}} some additional text {{alertName}}'
+        'test message {{alertId}} some additional text {{alertInstanceId}}'
       );
 
       await testSubjects.click('saveAlertButton');

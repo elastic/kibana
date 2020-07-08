@@ -9,6 +9,7 @@ import './add_message_variables.scss';
 import { useXJsonMode } from '../../../../../../src/plugins/es_ui_shared/static/ace_x_json/hooks';
 
 import { AddMessageVariables } from './add_message_variables';
+import { ActionVariable } from '../../types';
 
 interface Props {
   messageVariables?: ActionVariable[];
