@@ -500,18 +500,18 @@ export function mlApiServicesProvider(httpService: HttpService) {
     getVisualizerFieldHistograms({
       indexPatternTitle,
       query,
-      samplerShardSize,
       fields,
+      samplerShardSize,
     }: {
       indexPatternTitle: string;
       query: any;
+      fields: FieldHistogramRequestConfig[];
       samplerShardSize?: number;
-      fields?: FieldHistogramRequestConfig[];
     }) {
       const body = JSON.stringify({
         query,
-        samplerShardSize,
         fields,
+        samplerShardSize,
       });
 
       return httpService.http<any>({

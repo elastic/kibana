@@ -85,14 +85,13 @@ export const useOutlierData = (
       if (jobConfig !== undefined && indexPattern !== undefined) {
         const dataLoader = new DataLoader(indexPattern, getToastNotifications());
         const columnChartsData = await dataLoader.loadFieldHistograms(
-          searchQuery,
-          5000, // samplerShardSize,
           columns
             .filter((cT) => dataGrid.visibleColumns.includes(cT.id))
             .map((cT) => ({
               fieldName: cT.id,
               type: getFieldType(cT.schema),
-            }))
+            })),
+          searchQuery
         );
         dataGrid.setColumnCharts(columnChartsData);
       }

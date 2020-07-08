@@ -12,6 +12,7 @@ import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 import { SavedSearchQuery } from '../../../contexts/ml';
 import { IndexPatternTitle } from '../../../../../common/types/kibana';
+import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../common/constants/field_histograms';
 
 import { ml } from '../../../services/ml_api_service';
 import { FieldHistogramRequestConfig, FieldRequestConfig } from '../common';
@@ -98,15 +99,15 @@ export class DataLoader {
   }
 
   async loadFieldHistograms(
+    fields: FieldHistogramRequestConfig[],
     query: string | SavedSearchQuery,
-    samplerShardSize: number,
-    fields: FieldHistogramRequestConfig[]
+    samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE
   ): Promise<any[]> {
     const stats = await ml.getVisualizerFieldHistograms({
       indexPatternTitle: this._indexPatternTitle,
       query,
-      samplerShardSize,
       fields,
+      samplerShardSize,
     });
 
     return stats;

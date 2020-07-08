@@ -110,14 +110,13 @@ export const useIndexData = (
     try {
       const dataLoader = new DataLoader(indexPattern, toastNotifications);
       const columnChartsData = await dataLoader.loadFieldHistograms(
-        query,
-        5000, // samplerShardSize,
         columns
           .filter((cT) => dataGrid.visibleColumns.includes(cT.id))
           .map((cT) => ({
             fieldName: cT.id,
             type: getFieldType(cT.schema),
-          }))
+          })),
+        query
       );
       dataGrid.setColumnCharts(columnChartsData);
     } catch (e) {
