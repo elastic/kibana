@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from 'react-intl';
 
-const LineageLimitMessage = (
+const lineageLimitMessage = (
   <>
     <FormattedMessage
       id="xpack.securitySolution.endpoint.resolver.eitherLineageLimitExceeded"
@@ -120,7 +120,7 @@ export const LineageLimitWarning = React.memo(function LineageLimitWarning({
       className={className}
       title={<LineageTitleMessage numberOfEntries={numberDisplayed} />}
     >
-      <p>{LineageLimitMessage}</p>
+      <p>{lineageLimitMessage}</p>
     </EuiCallOut>
   );
 });
