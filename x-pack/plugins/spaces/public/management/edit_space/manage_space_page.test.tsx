@@ -19,7 +19,8 @@ import { notificationServiceMock, scopedHistoryMock } from 'src/core/public/mock
 import { featuresPluginMock } from '../../../../features/public/mocks';
 import { Feature } from '../../../../features/public';
 
-// TODO: Temporary EUI mock
+// To be resolved by EUI team.
+// https://github.com/elastic/eui/issues/3712
 jest.mock('@elastic/eui/lib/components/overlay_mask', () => {
   return {
     EuiOverlayMask: (props: any) => <div>{props.children}</div>,
