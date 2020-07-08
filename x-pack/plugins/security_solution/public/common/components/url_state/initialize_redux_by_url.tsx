@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, isEmpty, isNumber } from 'lodash/fp';
+import { get, isEmpty } from 'lodash/fp';
 import { Dispatch } from 'redux';
 
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';

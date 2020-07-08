@@ -13,6 +13,18 @@ import {
   isRelativeTimeRange,
 } from '../../store/inputs/model';
 
+jest.mock('@elastic/datemath', () => ({
+  parse: (date: string) => {
+    if (date === 'now') {
+      return { toISOString: () => '2020-07-08T08:20:18.966Z' };
+    }
+
+    if (date === 'now-24h') {
+      return { toISOString: () => '2020-07-07T08:20:18.966Z' };
+    }
+  },
+}));
+
 describe('#normalizeTimeRange', () => {
   test('Absolute time range returns empty strings as empty strings', () => {
     const dateTimeRange: URLTimeRange = {
@@ -25,8 +37,8 @@ describe('#normalizeTimeRange', () => {
     if (isAbsoluteTimeRange(dateTimeRange)) {
       const expected: AbsoluteTimeRange = {
         kind: 'absolute',
-        from: '',
-        to: '',
+        from: '2020-07-07T08:20:18.966Z',
+        to: '2020-07-08T08:20:18.966Z',
         fromStr: undefined,
         toStr: undefined,
       };
@@ -121,8 +133,8 @@ describe('#normalizeTimeRange', () => {
     if (isAbsoluteTimeRange(dateTimeRange)) {
       const expected: AbsoluteTimeRange = {
         kind: 'absolute',
-        from: '',
-        to: '',
+        from: '2020-07-07T08:20:18.966Z',
+        to: '2020-07-08T08:20:18.966Z',
         fromStr: undefined,
         toStr: undefined,
       };
@@ -143,8 +155,8 @@ describe('#normalizeTimeRange', () => {
     if (isRelativeTimeRange(dateTimeRange)) {
       const expected: RelativeTimeRange = {
         kind: 'relative',
-        from: '',
-        to: '',
+        from: '2020-07-07T08:20:18.966Z',
+        to: '2020-07-08T08:20:18.966Z',
         fromStr: '',
         toStr: '',
       };
@@ -239,8 +251,8 @@ describe('#normalizeTimeRange', () => {
     if (isRelativeTimeRange(dateTimeRange)) {
       const expected: RelativeTimeRange = {
         kind: 'relative',
-        from: '',
-        to: '',
+        from: '2020-07-07T08:20:18.966Z',
+        to: '2020-07-08T08:20:18.966Z',
         fromStr: '',
         toStr: '',
       };
