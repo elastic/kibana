@@ -276,7 +276,7 @@ function getAttributionString(emsService) {
     if (attribution.url.startsWith('http://') || attribution.url.startsWith('https://')) {
       anchorTag.setAttribute('href', attribution.url);
     }
-    anchorTag.textContent = _.escape(attribution.label);
+    anchorTag.textContent = attribution.label;
     return anchorTag.outerHTML;
   });
   return attributionSnippets.join(' | '); //!!!this is the current convention used in Kibana
