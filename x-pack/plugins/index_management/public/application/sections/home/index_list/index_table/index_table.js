@@ -277,6 +277,7 @@ export class IndexTable extends Component {
           data-test-subj="dataStreamLink"
           {...reactRouterNavigate(history, {
             pathname: `/data_streams/${encodePathForReactRouter(value)}`,
+            search: '?isDeepLink=true',
           })}
         >
           {value}
