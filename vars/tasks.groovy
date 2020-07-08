@@ -42,13 +42,7 @@ def test() {
 }
 
 def functionalOss(Map params = [:]) {
-  def config = params ?: [
-    ciGroups: true,
-    firefox: !githubPr.isPr(),
-    accessibility: true,
-    pluginFunctional: true,
-    visualRegression: false
-  ]
+  def config = params ?: [ciGroups: true, firefox: true, accessibility: true, pluginFunctional: true, visualRegression: false]
 
   task {
     kibanaPipeline.buildOss(6)
@@ -79,7 +73,7 @@ def functionalOss(Map params = [:]) {
 def functionalXpack(Map params = [:]) {
   def config = params ?: [
     ciGroups: true,
-    firefox: !githubPr.isPr(),
+    firefox: true,
     accessibility: true,
     pluginFunctional: true,
     savedObjectsFieldMetrics: true,
