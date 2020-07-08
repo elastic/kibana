@@ -17,23 +17,8 @@
  * under the License.
  */
 
-export { ElasticsearchService } from './elasticsearch_service';
-export { config, configSchema, ElasticsearchConfig } from './elasticsearch_config';
-export { NodesVersionCompatibility } from './version_check/ensure_es_version';
-export {
-  ElasticsearchServiceSetup,
-  ElasticsearchServiceStart,
-  ElasticsearchStatusMeta,
-  InternalElasticsearchServiceSetup,
-  InternalElasticsearchServiceStart,
-  FakeRequest,
-  ScopeableRequest,
-} from './types';
-export * from './legacy';
-export {
-  IClusterClient,
-  ICustomClusterClient,
-  ElasticsearchClientConfig,
-  ElasticsearchClient,
-  IScopedClusterClient,
-} from './client';
+export { ElasticsearchClient } from './types';
+export { IScopedClusterClient, ScopedClusterClient } from './scoped_cluster_client';
+export { ElasticsearchClientConfig } from './client_config';
+export { IClusterClient, ICustomClusterClient, ClusterClient } from './cluster_client';
+export { configureClient } from './configure_client';
