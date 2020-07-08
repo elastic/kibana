@@ -32,7 +32,7 @@ export const fetchLandingPageData = async (
     title: i18n.translate('xpack.apm.observabilityDashboard.title', {
       defaultMessage: 'APM',
     }),
-    appLink: '/app/apm',
+    appLink: `/app/apm#/services?rangeFrom=${startTime}&rangeTo=${endTime}`,
     stats: {
       services: {
         type: 'number',
