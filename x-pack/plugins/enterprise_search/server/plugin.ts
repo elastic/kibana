@@ -79,15 +79,6 @@ export class EnterpriseSearchPlugin implements Plugin {
     /**
      * Register user access to the Enterprise Search plugins
      */
-    capabilities.registerProvider(() => ({
-      navLinks: {
-        app_search: true,
-      },
-      catalogue: {
-        app_search: true,
-      },
-    }));
-
     capabilities.registerSwitcher(
       async (request: KibanaRequest, uiCapabilities: UICapabilities) => {
         const dependencies = { config, security, request, log: this.logger };

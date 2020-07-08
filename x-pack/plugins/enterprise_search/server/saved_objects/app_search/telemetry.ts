@@ -11,7 +11,7 @@ import { AS_TELEMETRY_NAME } from '../../collectors/app_search/telemetry';
 export const appSearchTelemetryType: SavedObjectsType = {
   name: AS_TELEMETRY_NAME,
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'agnostic',
   mappings: {
     dynamic: false,
     properties: {},
