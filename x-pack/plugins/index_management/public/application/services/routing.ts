@@ -37,12 +37,16 @@ export const getILMPolicyPath = (policyName: string) => {
   );
 };
 
-export const getIndexListUri = (filter: any) => {
+export const getIndexListUri = (filter?: string, includeHiddenIndices?: boolean) => {
+  const hiddenIndicesParam =
+    typeof includeHiddenIndices !== 'undefined' ? includeHiddenIndices : false;
   if (filter) {
     // React router tries to decode url params but it can't because the browser partially
     // decodes them. So we have to encode both the URL and the filter to get it all to
     // work correctly for filters with URL unsafe characters in them.
-    return encodeURI(`/indices?includeHiddenIndices=true&filter=${encodeURIComponent(filter)}`);
+    return encodeURI(
+      `/indices?includeHiddenIndices=${hiddenIndicesParam}&filter=${encodeURIComponent(filter)}`
+    );
   }
 
   // If no filter, URI is already safe so no need to encode.
