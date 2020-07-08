@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useMemo } from 'react';
 import { EuiDataGrid } from '@elastic/eui';
 
 import { ExprVis } from 'src/plugins/visualizations/public';
 import { createTableVisCell } from './table_vis_cell';
 import { Table } from '../table_vis_response_handler';
 import { TableVisParams } from '../types';
-import { useFormattedColumns } from '../utils';
+import { useFormattedColumns, usePagination } from '../utils';
 import { TableVisNoResults } from './table_vis_no_results';
 
 interface TableVisBasicProps {
@@ -32,38 +32,6 @@ interface TableVisBasicProps {
   vis: ExprVis;
   visParams: TableVisParams;
 }
-
-const usePagination = (visParams: TableVisParams) => {
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: visParams.perPage || 0,
-    pageSizeOptions: [visParams.perPage || 0, 50],
-  });
-  const onChangeItemsPerPage = useCallback(
-    (pageSize: number) => setPagination((pag) => ({ ...pag, pageSize, pageIndex: 0 })),
-    []
-  );
-  const onChangePage = useCallback(
-    (pageIndex: number) => setPagination((pag) => ({ ...pag, pageIndex })),
-    []
-  );
-
-  useEffect(() => {
-    setPagination({
-      pageIndex: 0,
-      pageSize: visParams.perPage || 0,
-      pageSizeOptions: [visParams.perPage || 0, 50],
-    });
-  }, [visParams.perPage]);
-
-  return pagination.pageSize
-    ? {
-        ...pagination,
-        onChangeItemsPerPage,
-        onChangePage,
-      }
-    : undefined;
-};
 
 export const TableVisBasic = memo(({ table, vis, visParams }: TableVisBasicProps) => {
   const formattedColumns = useFormattedColumns(table, visParams);
