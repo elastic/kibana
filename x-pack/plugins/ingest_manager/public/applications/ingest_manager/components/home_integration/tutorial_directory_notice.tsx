@@ -20,7 +20,7 @@ import {
   TutorialDirectoryNoticeComponent,
   TutorialDirectoryHeaderLinkComponent,
 } from 'src/plugins/home/public';
-import { sendPutSettings, useGetSettings, useLink } from '../../hooks';
+import { sendPutSettings, useGetSettings, useLink, useCapabilities } from '../../hooks';
 
 const FlexItemButtonWrapper = styled(EuiFlexItem)`
   &&& {
@@ -35,6 +35,7 @@ const tutorialDirectoryNoticeState$ = new BehaviorSubject({
 
 export const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(() => {
   const { getHref } = useLink();
+  const { show: hasIngestManager } = useCapabilities();
   const { data: settingsData, isLoading } = useGetSettings();
   const [dismissedNotice, setDismissedNotice] = useState<boolean>(false);
 
@@ -55,7 +56,7 @@ export const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(()
   const hasSeenNotice =
     isLoading || settingsData?.item?.has_seen_add_data_notice || dismissedNotice;
 
-  return !hasSeenNotice ? (
+  return hasIngestManager && !hasSeenNotice ? (
     <>
       <EuiSpacer size="m" />
       <EuiCallOut
@@ -129,6 +130,7 @@ export const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(()
 
 export const TutorialDirectoryHeaderLink: TutorialDirectoryHeaderLinkComponent = memo(() => {
   const { getHref } = useLink();
+  const { show: hasIngestManager } = useCapabilities();
   const [noticeState, setNoticeState] = useState({
     settingsDataLoaded: false,
     hasSeenNotice: false,
@@ -141,7 +143,7 @@ export const TutorialDirectoryHeaderLink: TutorialDirectoryHeaderLinkComponent =
     };
   }, []);
 
-  return noticeState.settingsDataLoaded && noticeState.hasSeenNotice ? (
+  return hasIngestManager && noticeState.settingsDataLoaded && noticeState.hasSeenNotice ? (
     <EuiButtonEmpty size="s" iconType="link" flush="right" href={getHref('overview')}>
       <FormattedMessage
         id="xpack.ingestManager.homeIntegration.tutorialDirectory.ingestManagerAppButtonText"

@@ -7,18 +7,19 @@ import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
 import { TutorialModuleNoticeComponent } from 'src/plugins/home/public';
-import { useGetPackages, useLink } from '../../hooks';
+import { useGetPackages, useLink, useCapabilities } from '../../hooks';
 
 export const TutorialModuleNotice: TutorialModuleNoticeComponent = memo(({ moduleName }) => {
-  const { data: packagesData, isLoading } = useGetPackages();
   const { getHref } = useLink();
+  const { show: hasIngestManager } = useCapabilities();
+  const { data: packagesData, isLoading } = useGetPackages();
 
   const pkgInfo =
     !isLoading &&
     packagesData?.response &&
     packagesData.response.find((pkg) => pkg.name === moduleName);
 
-  if (pkgInfo) {
+  if (hasIngestManager && pkgInfo) {
     return (
       <>
         <EuiSpacer />
