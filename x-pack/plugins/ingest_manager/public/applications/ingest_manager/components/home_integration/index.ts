@@ -3,5 +3,5 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export { TutorialDirectoryNotice } from './tutorial_directory_notice';
+export { TutorialDirectoryNotice, TutorialDirectoryHeaderLink } from './tutorial_directory_notice';
 export { TutorialModuleNotice } from './tutorial_module_notice';

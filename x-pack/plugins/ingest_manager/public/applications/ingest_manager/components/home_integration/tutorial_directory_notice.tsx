@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { memo, useState, useCallback } from 'react';
+import React, { memo, useState, useCallback, useEffect } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -15,7 +16,10 @@ import {
   EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
-import { TutorialDirectoryNoticeComponent } from 'src/plugins/home/public';
+import {
+  TutorialDirectoryNoticeComponent,
+  TutorialDirectoryHeaderLinkComponent,
+} from 'src/plugins/home/public';
 import { sendPutSettings, useGetSettings, useLink } from '../../hooks';
 
 const FlexItemButtonWrapper = styled(EuiFlexItem)`
@@ -23,6 +27,11 @@ const FlexItemButtonWrapper = styled(EuiFlexItem)`
     margin-bottom: 0;
   }
 `;
+
+const tutorialDirectoryNoticeState$ = new BehaviorSubject({
+  settingsDataLoaded: false,
+  hasSeenNotice: false,
+});
 
 export const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(() => {
   const { getHref } = useLink();
@@ -36,10 +45,17 @@ export const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(()
     });
   }, []);
 
-  if (isLoading || settingsData?.item?.has_seen_add_data_notice || dismissedNotice) {
-    return null;
-  }
-  return (
+  useEffect(() => {
+    tutorialDirectoryNoticeState$.next({
+      settingsDataLoaded: !isLoading,
+      hasSeenNotice: Boolean(dismissedNotice || settingsData?.item?.has_seen_add_data_notice),
+    });
+  }, [isLoading, settingsData, dismissedNotice]);
+
+  const hasSeenNotice =
+    isLoading || settingsData?.item?.has_seen_add_data_notice || dismissedNotice;
+
+  return !hasSeenNotice ? (
     <>
       <EuiSpacer size="m" />
       <EuiCallOut
@@ -108,5 +124,29 @@ export const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(()
         </EuiFlexGroup>
       </EuiCallOut>
     </>
-  );
+  ) : null;
+});
+
+export const TutorialDirectoryHeaderLink: TutorialDirectoryHeaderLinkComponent = memo(() => {
+  const { getHref } = useLink();
+  const [noticeState, setNoticeState] = useState({
+    settingsDataLoaded: false,
+    hasSeenNotice: false,
+  });
+
+  useEffect(() => {
+    const subscription = tutorialDirectoryNoticeState$.subscribe((value) => setNoticeState(value));
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  return noticeState.settingsDataLoaded && noticeState.hasSeenNotice ? (
+    <EuiButtonEmpty size="s" iconType="link" flush="right" href={getHref('overview')}>
+      <FormattedMessage
+        id="xpack.ingestManager.homeIntegration.tutorialDirectory.ingestManagerAppButtonText"
+        defaultMessage="Try Ingest Manager Beta"
+      />
+    </EuiButtonEmpty>
+  ) : null;
 });

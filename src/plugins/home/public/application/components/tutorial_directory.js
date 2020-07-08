@@ -242,13 +242,26 @@ class TutorialDirectoryUi extends React.Component {
     ) : null;
   };
 
-  renderHeader = () => {
+  renderHeaderLinks = () => {
     const headerLinks = getServices().tutorialService.getDirectoryHeaderLinks();
+    return headerLinks.length ? (
+      <EuiFlexGroup gutterSize="m" alignItems="center">
+        {headerLinks.map((HeaderLink, index) => (
+          <EuiFlexItem key={index}>
+            <HeaderLink />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    ) : null;
+  };
+
+  renderHeader = () => {
     const notices = this.renderNotices();
+    const headerLinks = this.renderHeaderLinks();
 
     return (
       <>
-        <EuiFlexGroup>
+        <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
             <EuiTitle size="l">
               <h1>
@@ -259,17 +272,7 @@ class TutorialDirectoryUi extends React.Component {
               </h1>
             </EuiTitle>
           </EuiFlexItem>
-          {headerLinks.length ? (
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="m" alignItems="center">
-                {headerLinks.map((HeaderLink, index) => (
-                  <EuiFlexItem key={index}>
-                    <HeaderLink />
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          ) : null}
+          {headerLinks ? <EuiFlexItem grow={false}>{headerLinks}</EuiFlexItem> : null}
         </EuiFlexGroup>
         {notices}
       </>
