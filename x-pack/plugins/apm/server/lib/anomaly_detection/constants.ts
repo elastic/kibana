@@ -4,12 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function rangeFilter(start: number, end: number) {
-  return {
-    '@timestamp': {
-      gte: start,
-      lte: end,
-      format: 'epoch_millis',
-    },
-  };
-}
+export const ML_MODULE_ID_APM_TRANSACTION = 'apm_transaction';
+export const APM_ML_JOB_GROUP = 'apm';
