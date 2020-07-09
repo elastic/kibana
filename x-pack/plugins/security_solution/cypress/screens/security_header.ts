@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const ALERTS = '[data-test-subj="navigation-alerts"]';
+export const DETECTIONS = '[data-test-subj="navigation-detections"]';
 
 export const BREADCRUMBS = '[data-test-subj="breadcrumbs"] a';
 
