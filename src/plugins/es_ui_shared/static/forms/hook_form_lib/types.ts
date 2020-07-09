@@ -107,7 +107,7 @@ export interface FieldHook<T = unknown> {
     errorCode?: string;
   }) => string | null;
   onChange: (event: ChangeEvent<{ name?: string; value: string; checked?: boolean }>) => void;
-  setValue: (value: T) => void;
+  setValue: (value: T) => T;
   setErrors: (errors: ValidationError[]) => void;
   clearErrors: (type?: string | string[]) => void;
   validate: (validateData?: {
@@ -115,7 +115,7 @@ export interface FieldHook<T = unknown> {
     value?: unknown;
     validationType?: string;
   }) => FieldValidateResponse | Promise<FieldValidateResponse>;
-  reset: (options?: { resetValue: boolean }) => unknown;
+  reset: (options?: { resetValue: boolean }) => unknown | undefined;
   __serializeOutput: (rawValue?: unknown) => unknown;
 }
 

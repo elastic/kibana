@@ -30,8 +30,9 @@ describe('<UseField />', () => {
 
     const TestComp = ({ onData }: { onData: OnUpdateHandler }) => {
       const { form } = useForm();
+      const { subscribe } = form;
 
-      useEffect(() => form.subscribe(onData).unsubscribe, [form]);
+      useEffect(() => subscribe(onData).unsubscribe, [subscribe, onData]);
 
       return (
         <Form form={form}>
