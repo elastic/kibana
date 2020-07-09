@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, ChangeEvent, FunctionComponent, useState, useEffect } from 'react';
+import React, {
+  Fragment,
+  ChangeEvent,
+  FunctionComponent,
+  useState,
+  useEffect,
+  useRef,
+} from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiModal,
@@ -72,12 +79,16 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
   removeCustomElement,
   updateCustomElement,
 }) => {
+  const hasLoadedElements = useRef<boolean>(false);
   const [elementToDelete, setElementToDelete] = useState<CustomElement | null>(null);
   const [elementToEdit, setElementToEdit] = useState<CustomElement | null>(null);
 
   useEffect(() => {
-    findCustomElements();
-  });
+    if (!hasLoadedElements.current) {
+      hasLoadedElements.current = true;
+      findCustomElements();
+    }
+  }, [findCustomElements, hasLoadedElements]);
 
   const showEditModal = (element: CustomElement) => setElementToEdit(element);
   const hideEditModal = () => setElementToEdit(null);
