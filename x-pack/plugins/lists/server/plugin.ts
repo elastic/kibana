@@ -48,7 +48,7 @@ export class ListPlugin
 
     core.http.registerRouteHandlerContext('lists', this.createRouteHandlerContext());
     const router = core.http.createRouter();
-    initRoutes(router);
+    initRoutes(router, config);
 
     return {
       getExceptionListClient: (savedObjectsClient, user): ExceptionListClient => {
