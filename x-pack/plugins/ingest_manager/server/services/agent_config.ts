@@ -365,7 +365,8 @@ class AgentConfigService {
 
   public async getFullConfig(
     soClient: SavedObjectsClientContract,
-    id: string
+    id: string,
+    options?: { standalone: boolean }
   ): Promise<FullAgentConfig | null> {
     let config;
 
@@ -400,6 +401,13 @@ class AgentConfigService {
               api_key,
               ...outputConfig,
             };
+
+            if (options?.standalone) {
+              delete outputs[name].api_key;
+              outputs[name].username = 'ES_USERNAME';
+              outputs[name].password = 'ES_PASSWORD';
+            }
+
             return outputs;
           },
           {} as FullAgentConfig['outputs']
