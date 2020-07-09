@@ -6,6 +6,7 @@
 
 import { get, getOr, has, head, set } from 'lodash/fp';
 
+import { LoggerFactory } from 'kibana/server';
 import { FirstLastSeenHost, HostItem, HostsData, HostsEdges } from '../../graphql/types';
 import { inspectStringifyObject } from '../../utils/build_query';
 import { hostFieldsMap } from '../ecs_fields';
@@ -26,9 +27,14 @@ import {
   HostValue,
 } from './types';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
+import { EndpointAppContext } from '../../endpoint/types';
+import { getHostData } from '../../endpoint/routes/metadata';
 
 export class ElasticsearchHostsAdapter implements HostsAdapter {
-  constructor(private readonly framework: FrameworkAdapter) {}
+  constructor(
+    private readonly framework: FrameworkAdapter,
+    private readonly endpointContext: EndpointAppContext
+  ) {}
 
   public async getHosts(
     request: FrameworkRequest,
@@ -90,32 +96,18 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
           : formattedHostItem.host.id
         : null;
     console.log('hostId', hostId);
-    // const res22 = await this.framework.callWithRequest(
-    //   request,
-    //   'indices.getMappingt',
-    //   {
-    //     method: 'GET',
-    //     path: `/api/endpoint/metadata/${encodeURIComponent(hostId)}`,
-    //   }
-    // );
-    const res =
-      hostId !== null
-        ? await request.context.core.elasticsearch.legacy.client.callAsCurrentUser('get', {
-            method: 'GET',
-            path: `/api/endpoint/metadata/${encodeURIComponent(hostId)}`,
-          })
-        : {};
-    console.log('res!!!!!!!!!!!!~!!', JSON.stringify(res));
-    // const res = await KibanaServices.get().http.fetch(
-    //   `/api/endpoint/metadata/${aggregations.host_id}`,
-    //   {
-    //     method: 'GET',
-    //   }
-    // );
-    //
-    // // const res = await this.framework.callWithRequest<any, any>(request, 'get', dsl);
-    // console.log('RESSSS', JSON.stringify(res));
-    return { inspect, _id: options.hostName, ...formatHostItem(options.fields, aggregations) };
+
+    const metadataRequestContext: MetadataRequestContext = {
+      agentService: this.endpointContext.service.getAgentService(),
+      logger: this.endpointContext.logFactory.get('metadata'),
+      requestHandlerContext: request.context,
+    };
+    const endpointData =
+      metadataRequestContext.agentService != null
+        ? await getHostData(metadataRequestContext, hostId)
+        : null;
+    console.log('endpointData', JSON.stringify(endpointData));
+    return { inspect, _id: options.hostName, ...formattedHostItem };
   }
 
   public async getHostFirstLastSeen(
