@@ -48,10 +48,30 @@ export const configurationFormSchema: FormSchema<MappingsConfiguration> = {
         validator: isJsonField(
           i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.metaFieldEditorJsonError', {
             defaultMessage: 'The _meta field JSON is not valid.',
-          })
+          }),
+          { allowEmptyString: true }
         ),
       },
     ],
+    deserializer: (value: any) => {
+      if (value === '') {
+        return value;
+      }
+      return JSON.stringify(value, null, 2);
+    },
+    serializer: (value: string) => {
+      try {
+        const parsed = JSON.parse(value);
+        // If an empty object was passed, strip out this value entirely.
+        if (!Object.keys(parsed).length) {
+          return undefined;
+        }
+        return parsed;
+      } catch (error) {
+        // swallow error and return non-parsed value;
+        return value;
+      }
+    },
   },
   sourceField: {
     enabled: {

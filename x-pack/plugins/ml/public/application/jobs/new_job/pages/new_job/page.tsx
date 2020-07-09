@@ -125,6 +125,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
     if (jobCreator.type === JOB_TYPE.SINGLE_METRIC) {
       jobCreator.modelPlot = true;
+      jobCreator.modelChangeAnnotations = true;
     }
 
     if (mlContext.currentSavedSearch !== null) {
