@@ -9,6 +9,7 @@ import _ from 'lodash';
 import { LegacyAPICaller } from 'kibana/server';
 
 import { ANNOTATION_EVENT_USER, ANNOTATION_TYPE } from '../../../common/constants/annotations';
+import { PARTITION_FIELDS } from '../../../common/constants/anomalies';
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
@@ -19,6 +20,8 @@ import {
   Annotations,
   isAnnotation,
   isAnnotations,
+  getAnnotationFieldName,
+  getAnnotationFieldValue,
   EsAggregationResult,
 } from '../../../common/types/annotations';
 
@@ -40,6 +43,8 @@ export interface IndexAnnotationArgs {
   latestMs: number;
   maxAnnotations: number;
   fields?: FieldToBucket[];
+  detectorIndex?: number;
+  entities?: any[];
 }
 
 export interface AggTerm {
@@ -114,6 +119,8 @@ export function annotationProvider(callAsCurrentUser: LegacyAPICaller) {
     latestMs,
     maxAnnotations,
     fields,
+    detectorIndex,
+    entities,
   }: IndexAnnotationArgs) {
     const obj: GetResponse = {
       success: true,
@@ -201,6 +208,7 @@ export function annotationProvider(callAsCurrentUser: LegacyAPICaller) {
       });
     }
 
+    // Find unique buckets (e.g. events) from the queried annotations to show in dropdowns
     const aggs: Record<string, AggTerm> = {};
     if (fields) {
       fields.forEach((fieldToBucket) => {
@@ -210,6 +218,52 @@ export function annotationProvider(callAsCurrentUser: LegacyAPICaller) {
           },
         };
       });
+    }
+
+    // Build should clause to further query for annotations in SMV
+    // we want to show either the exact match with detector index and by/over/partition fields
+    // OR annotations without any partition fields defined
+    let shouldClauses;
+    if (detectorIndex !== undefined && Array.isArray(entities)) {
+      // build clause to get exact match of detector index and by/over/partition fields
+      const beExactMatch = [];
+      beExactMatch.push({
+        term: {
+          detector_index: detectorIndex,
+        },
+      });
+
+      entities.forEach(({ fieldName, fieldType, fieldValue }) => {
+        beExactMatch.push({
+          term: {
+            [getAnnotationFieldName(fieldType)]: fieldName,
+          },
+        });
+        beExactMatch.push({
+          term: {
+            [getAnnotationFieldValue(fieldType)]: fieldValue,
+          },
+        });
+      });
+
+      // clause to get annotations that have no partition fields
+      const haveAnyPartitionFields: object[] = [];
+      PARTITION_FIELDS.forEach((field) => {
+        haveAnyPartitionFields.push({
+          exists: {
+            field: getAnnotationFieldName(field),
+          },
+        });
+        haveAnyPartitionFields.push({
+          exists: {
+            field: getAnnotationFieldValue(field),
+          },
+        });
+      });
+      shouldClauses = [
+        { bool: { must_not: haveAnyPartitionFields } },
+        { bool: { must: beExactMatch } },
+      ];
     }
 
     const params: GetParams = {
@@ -231,6 +285,7 @@ export function annotationProvider(callAsCurrentUser: LegacyAPICaller) {
                 },
               },
             ],
+            ...(shouldClauses ? { should: shouldClauses, minimum_should_match: 1 } : {}),
           },
         },
         ...(fields ? { aggs } : {}),

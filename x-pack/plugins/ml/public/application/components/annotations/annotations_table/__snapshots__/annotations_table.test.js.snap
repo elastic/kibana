@@ -114,7 +114,7 @@ exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
           "incremental": true,
           "schema": true,
         },
-        "defaultQuery": "event:(user)",
+        "defaultQuery": "event:(user or delayed_data)",
         "filters": Array [
           Object {
             "field": "event",

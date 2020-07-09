@@ -34,11 +34,22 @@ export const getAnnotationsSchema = schema.object({
   earliestMs: schema.oneOf([schema.nullable(schema.number()), schema.maybe(schema.number())]),
   latestMs: schema.oneOf([schema.nullable(schema.number()), schema.maybe(schema.number())]),
   maxAnnotations: schema.number(),
+  /** Fields to find unique values for (e.g. events or created_by) */
   fields: schema.maybe(
     schema.arrayOf(
       schema.object({
         field: schema.string(),
         missing: schema.maybe(schema.string()),
+      })
+    )
+  ),
+  detectorIndex: schema.maybe(schema.number()),
+  entities: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        fieldType: schema.maybe(schema.string()),
+        fieldName: schema.maybe(schema.string()),
+        fieldValue: schema.maybe(schema.string()),
       })
     )
   ),

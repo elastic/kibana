@@ -92,6 +92,8 @@ export function getFocusData(
             missing: ANNOTATION_EVENT_USER,
           },
         ],
+        detectorIndex,
+        entities: nonBlankEntities,
       })
       .pipe(
         catchError(() => {
