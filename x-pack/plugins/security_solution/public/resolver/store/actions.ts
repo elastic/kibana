@@ -25,17 +25,6 @@ interface UserBroughtProcessIntoView {
 }
 
 /**
- * Dispatched to notify state that a different panel needs to be displayed
- */
-interface AppDisplayedDifferentPanel {
-  readonly type: 'appDisplayedDifferentPanel';
-  /**
-   * The name of the panel to display
-   */
-  readonly payload: string;
-}
-
-/**
  * When an examination of query params in the UI indicates that state needs to
  * be updated to reflect the new selection
  */
@@ -130,5 +119,4 @@ export type ResolverAction =
   | UserRequestedRelatedEventData
   | UserSelectedRelatedEventCategory
   | AppDetectedNewIdFromQueryParams
-  | AppDisplayedDifferentPanel
   | AppDetectedMissingEventData;

@@ -62,7 +62,7 @@ describe('Alerts by category', () => {
 
     test('it renders the expected title', () => {
       expect(wrapper.find('[data-test-subj="header-section-title"]').text()).toEqual(
-        'External alert count'
+        'External alert trend'
       );
     });
 

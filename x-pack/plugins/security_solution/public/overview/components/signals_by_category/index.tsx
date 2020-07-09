@@ -6,9 +6,9 @@
 
 import React, { useCallback } from 'react';
 
-import { AlertsHistogramPanel } from '../../../alerts/components/alerts_histogram_panel';
-import { alertsHistogramOptions } from '../../../alerts/components/alerts_histogram_panel/config';
-import { useSignalIndex } from '../../../alerts/containers/detection_engine/alerts/use_signal_index';
+import { AlertsHistogramPanel } from '../../../detections/components/alerts_histogram_panel';
+import { alertsHistogramOptions } from '../../../detections/components/alerts_histogram_panel/config';
+import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { SetAbsoluteRangeDatePicker } from '../../../network/pages/types';
 import { Filter, IIndexPattern, Query } from '../../../../../../../src/plugins/data/public';
 import { InputsModelId } from '../../../common/store/inputs/constants';
