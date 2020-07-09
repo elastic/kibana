@@ -6,10 +6,20 @@
 
 import { fetchLandingPageData, hasData } from './observability_dashboard';
 import * as createCallApmApi from './createCallApmApi';
-import { euiThemeVars as theme } from '@kbn/ui-shared-deps/theme';
 
 describe('Observability dashboard data', () => {
   const callApmApiMock = jest.spyOn(createCallApmApi, 'callApmApi');
+  const params = {
+    absoluteTime: {
+      start: '2020-07-02T13:25:11.629Z',
+      end: '2020-07-09T14:25:11.629Z',
+    },
+    relativeTime: {
+      start: 'now-15m',
+      end: 'now',
+    },
+    bucketSize: '600s',
+  };
   afterEach(() => {
     callApmApiMock.mockClear();
   });
@@ -38,39 +48,26 @@ describe('Observability dashboard data', () => {
           ],
         })
       );
-      const response = await fetchLandingPageData(
-        {
-          startTime: '1',
-          endTime: '2',
-          bucketSize: '3',
-        },
-        { theme }
-      );
+      const response = await fetchLandingPageData(params);
       expect(response).toEqual({
-        title: 'APM',
-        appLink: '/app/apm',
+        appLink: '/app/apm#/services?rangeFrom=now-15m&rangeTo=now',
         stats: {
           services: {
             type: 'number',
-            label: 'Services',
             value: 10,
           },
           transactions: {
             type: 'number',
-            label: 'Transactions',
             value: 2,
-            color: '#6092c0',
           },
         },
         series: {
           transactions: {
-            label: 'Transactions',
             coordinates: [
               { x: 1, y: 1 },
               { x: 2, y: 2 },
               { x: 3, y: 3 },
             ],
-            color: '#6092c0',
           },
         },
       });
@@ -82,35 +79,22 @@ describe('Observability dashboard data', () => {
           transactionCoordinates: [],
         })
       );
-      const response = await fetchLandingPageData(
-        {
-          startTime: '1',
-          endTime: '2',
-          bucketSize: '3',
-        },
-        { theme }
-      );
+      const response = await fetchLandingPageData(params);
       expect(response).toEqual({
-        title: 'APM',
-        appLink: '/app/apm',
+        appLink: '/app/apm#/services?rangeFrom=now-15m&rangeTo=now',
         stats: {
           services: {
             type: 'number',
-            label: 'Services',
             value: 0,
           },
           transactions: {
             type: 'number',
-            label: 'Transactions',
             value: 0,
-            color: '#6092c0',
           },
         },
         series: {
           transactions: {
-            label: 'Transactions',
             coordinates: [],
-            color: '#6092c0',
           },
         },
       });
@@ -122,35 +106,22 @@ describe('Observability dashboard data', () => {
           transactionCoordinates: [{ x: 1 }, { x: 2 }, { x: 3 }],
         })
       );
-      const response = await fetchLandingPageData(
-        {
-          startTime: '1',
-          endTime: '2',
-          bucketSize: '3',
-        },
-        { theme }
-      );
+      const response = await fetchLandingPageData(params);
       expect(response).toEqual({
-        title: 'APM',
-        appLink: '/app/apm',
+        appLink: '/app/apm#/services?rangeFrom=now-15m&rangeTo=now',
         stats: {
           services: {
             type: 'number',
-            label: 'Services',
             value: 0,
           },
           transactions: {
             type: 'number',
-            label: 'Transactions',
             value: 0,
-            color: '#6092c0',
           },
         },
         series: {
           transactions: {
-            label: 'Transactions',
             coordinates: [{ x: 1 }, { x: 2 }, { x: 3 }],
-            color: '#6092c0',
           },
         },
       });

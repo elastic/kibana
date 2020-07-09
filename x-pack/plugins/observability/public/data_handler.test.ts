@@ -6,8 +6,14 @@
 import { registerDataHandler, getDataHandler } from './data_handler';
 
 const params = {
-  startTime: '0',
-  endTime: '1',
+  absoluteTime: {
+    start: '2020-07-02T13:25:11.629Z',
+    end: '2020-07-09T13:25:11.629Z',
+  },
+  relativeTime: {
+    start: 'now-15m',
+    end: 'now',
+  },
   bucketSize: '10s',
 };
 
