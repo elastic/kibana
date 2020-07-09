@@ -8,6 +8,7 @@ Object {
     "params": Object {
       "listenOnChange": true,
     },
+    "title": undefined,
     "visConfig": Object {
       "dimensions": Object {
         "buckets": Array [],
