@@ -12,7 +12,7 @@ import {
   jobCustomSettingsRT,
   logEntryCategoriesJobTypes,
 } from '../../../common/log_analysis';
-import { startTracingSpan, TracingSpan } from '../../../common/performance_tracing';
+import { startTracingSpan } from '../../../common/performance_tracing';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type { MlAnomalyDetectors, MlSystem } from '../../types';
 import {
@@ -34,19 +34,11 @@ import {
   logEntryCategoryHistogramsResponseRT,
 } from './queries/log_entry_category_histograms';
 import {
-  CompositeDatasetKey,
-  createLogEntryDatasetsQuery,
-  LogEntryDatasetBucket,
-  logEntryDatasetsResponseRT,
-} from './queries/log_entry_data_sets';
-import {
   createTopLogEntryCategoriesQuery,
   topLogEntryCategoriesResponseRT,
 } from './queries/top_log_entry_categories';
 import { InfraSource } from '../sources';
 import { fetchMlJob, getLogEntryDatasets } from './common';
-
-const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
 
 export async function getTopLogEntryCategories(
   context: {
