@@ -17,24 +17,37 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
 import $ from 'jquery';
+import {
+  setHTMLElementClientSizes,
+  setSVGElementGetBBox,
+  setSVGElementGetComputedTextLength,
+} from '../../../../../test_utils/public';
 
 // Data
-import series from '../../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series';
-import columns from '../../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_columns';
-import rows from '../../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_rows';
-import stackedSeries from '../../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_stacked_series';
-import { getMockUiState } from '../../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
-import { getVis } from '../../_vis_fixture';
+import series from '../../fixtures/mock_data/date_histogram/_series';
+import columns from '../../fixtures/mock_data/date_histogram/_columns';
+import rows from '../../fixtures/mock_data/date_histogram/_rows';
+import stackedSeries from '../../fixtures/mock_data/date_histogram/_stacked_series';
+import { getMockUiState } from '../../fixtures/mocks';
+import { getVis } from '../visualizations/_vis_fixture';
 
 const dateHistogramArray = [series, columns, rows, stackedSeries];
 const names = ['series', 'columns', 'rows', 'stackedSeries'];
+let mockedHTMLElementClientSizes;
+let mockedSVGElementGetBBox;
+let mockedSVGElementGetComputedTextLength;
 
 dateHistogramArray.forEach(function (data, i) {
   describe('Vislib Handler Test Suite for ' + names[i] + ' Data', function () {
     const events = ['click', 'brush'];
     let vis;
+
+    beforeAll(() => {
+      mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
+      mockedSVGElementGetBBox = setSVGElementGetBBox(100);
+      mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
+    });
 
     beforeEach(() => {
       vis = getVis();
@@ -45,11 +58,17 @@ dateHistogramArray.forEach(function (data, i) {
       vis.destroy();
     });
 
+    afterAll(() => {
+      mockedHTMLElementClientSizes.mockRestore();
+      mockedSVGElementGetBBox.mockRestore();
+      mockedSVGElementGetComputedTextLength.mockRestore();
+    });
+
     describe('render Method', function () {
-      it('should render charts', function () {
-        expect(vis.handler.charts.length).to.be.greaterThan(0);
+      test('should render charts', function () {
+        expect(vis.handler.charts.length).toBeGreaterThan(0);
         vis.handler.charts.forEach(function (chart) {
-          expect($(chart.chartEl).find('svg').length).to.be(1);
+          expect($(chart.chartEl).find('svg').length).toBe(1);
         });
       });
     });
@@ -67,10 +86,10 @@ dateHistogramArray.forEach(function (data, i) {
         });
       });
 
-      it('should add events to chart and emit to the Events class', function () {
+      test('should add events to chart and emit to the Events class', function () {
         charts.forEach(function (chart) {
           events.forEach(function (event) {
-            expect(chart.events.listenerCount(event)).to.be.above(0);
+            expect(chart.events.listenerCount(event)).toBeGreaterThan(0);
           });
         });
       });
@@ -89,10 +108,10 @@ dateHistogramArray.forEach(function (data, i) {
         });
       });
 
-      it('should remove events from the chart', function () {
+      test('should remove events from the chart', function () {
         charts.forEach(function (chart) {
           events.forEach(function (event) {
-            expect(chart.events.listenerCount(event)).to.be(0);
+            expect(chart.events.listenerCount(event)).toBe(0);
           });
         });
       });
@@ -103,8 +122,8 @@ dateHistogramArray.forEach(function (data, i) {
         vis.handler.removeAll(vis.element);
       });
 
-      it('should remove all DOM elements from the el', function () {
-        expect($(vis.element).children().length).to.be(0);
+      test('should remove all DOM elements from the el', function () {
+        expect($(vis.element).children().length).toBe(0);
       });
     });
 
@@ -113,9 +132,9 @@ dateHistogramArray.forEach(function (data, i) {
         vis.handler.error('This is an error!');
       });
 
-      it('should return an error classed DOM element with a text message', function () {
-        expect($(vis.element).find('.error').length).to.be(1);
-        expect($('.error h4').html()).to.be('This is an error!');
+      test('should return an error classed DOM element with a text message', function () {
+        expect($(vis.element).find('.error').length).toBe(1);
+        expect($('.error h4').html()).toBe('This is an error!');
       });
     });
 
@@ -124,21 +143,21 @@ dateHistogramArray.forEach(function (data, i) {
         vis.handler.destroy();
       });
 
-      it('should destroy all the charts in the visualization', function () {
-        expect(vis.handler.charts.length).to.be(0);
+      test('should destroy all the charts in the visualization', function () {
+        expect(vis.handler.charts.length).toBe(0);
       });
     });
 
     describe('event proxying', function () {
-      it('should only pass the original event object to downstream handlers', function (done) {
+      test('should only pass the original event object to downstream handlers', function (done) {
         const event = {};
         const chart = vis.handler.charts[0];
 
         const mockEmitter = function () {
           const args = Array.from(arguments);
-          expect(args.length).to.be(2);
-          expect(args[0]).to.be('click');
-          expect(args[1]).to.be(event);
+          expect(args.length).toBe(2);
+          expect(args[0]).toBe('click');
+          expect(args[1]).toBe(event);
           done();
         };
 
