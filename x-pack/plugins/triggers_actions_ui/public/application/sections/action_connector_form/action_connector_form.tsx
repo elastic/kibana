@@ -138,7 +138,6 @@ export const ActionConnectorForm = ({
       >
         <EuiFieldText
           fullWidth
-          autoFocus={true}
           isInvalid={errors.name.length > 0 && connector.name !== undefined}
           name="name"
           placeholder="Untitled"
