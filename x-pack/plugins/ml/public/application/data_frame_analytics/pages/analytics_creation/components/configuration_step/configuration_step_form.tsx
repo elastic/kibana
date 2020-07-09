@@ -71,12 +71,8 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     EuiComboBoxOptionOption[]
   >([]);
   const [includesTableItems, setIncludesTableItems] = useState<FieldSelectionItem[]>([]);
-  const [maxDistinctValuesError, setMaxDistinctValuesError] = useState<string | undefined>(
-    undefined
-  );
-  const [unsupportedFieldsError, setUnsupportedFieldsError] = useState<string | undefined>(
-    undefined
-  );
+  const [maxDistinctValuesError, setMaxDistinctValuesError] = useState<string | undefined>();
+  const [unsupportedFieldsError, setUnsupportedFieldsError] = useState<string | undefined>();
 
   const { setEstimatedModelMemoryLimit, setFormState } = actions;
   const { estimatedModelMemoryLimit, form, isJobCreated, requestMessages } = state;
