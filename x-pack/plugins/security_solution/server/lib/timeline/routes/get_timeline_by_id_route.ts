@@ -15,10 +15,10 @@ import { buildRouteValidation } from '../../../utils/build_validation/route_vali
 import { buildSiemResponse, transformError } from '../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from './utils/common';
-import { getTimelineByTemplateTimelineIdSchemaQuery } from './schemas/get_timeline_by_template_timeline_id_schema';
-import { getTemplateTimeline } from './utils/create_timelines';
+import { getTimelineByIdSchemaQuery } from './schemas/get_timeline_by_template_timeline_id_schema';
+import { getTimeline, getTemplateTimeline } from './utils/create_timelines';
 
-export const getTimelineByTemplateTimelineIdRoute = (
+export const getTimelineByIdRoute = (
   router: IRouter,
   config: ConfigType,
   security: SetupPlugins['security']
@@ -26,7 +26,7 @@ export const getTimelineByTemplateTimelineIdRoute = (
   router.get(
     {
       path: `${TIMELINE_URL}`,
-      validate: { query: buildRouteValidation(getTimelineByTemplateTimelineIdSchemaQuery) },
+      validate: { query: buildRouteValidation(getTimelineByIdSchemaQuery) },
       options: {
         tags: ['access:securitySolution'],
       },
@@ -34,7 +34,13 @@ export const getTimelineByTemplateTimelineIdRoute = (
     async (context, request, response) => {
       try {
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
-        const res = await getTemplateTimeline(frameworkRequest, request.query.template_timeline_id);
+        const { template_timeline_id: templateTimelineId, id } = request.query;
+        let res = null;
+        if (templateTimelineId != null) {
+          res = await getTemplateTimeline(frameworkRequest, templateTimelineId);
+        } else if (id != null) {
+          res = await getTimeline(frameworkRequest, id);
+        }
 
         return response.ok({ body: res ?? {} });
       } catch (err) {

@@ -5,6 +5,7 @@
  */
 import * as rt from 'io-ts';
 
-export const getTimelineByTemplateTimelineIdSchemaQuery = rt.type({
+export const getTimelineByIdSchemaQuery = rt.partial({
   template_timeline_id: rt.string,
+  id: rt.string,
 });

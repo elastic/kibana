@@ -8,7 +8,7 @@
 
 set -e
 ./check_env_variables.sh
-# Example: ./get_timeline_by_id.sh {template_timeline_id}
+# Example: ./get_timeline_by_template_timeline_id.sh {template_timeline_id}
 
 curl -s -k \
   -H "Content-Type: application/json" \
