@@ -264,6 +264,17 @@ const AnomalyMessage = ({
   );
 };
 
+const previousPageLabel = i18n.translate(
+  'xpack.infra.logs.analysis.anomaliesTablePreviousPageLabel',
+  {
+    defaultMessage: 'Previous page',
+  }
+);
+
+const nextPageLabel = i18n.translate('xpack.infra.logs.analysis.anomaliesTableNextPageLabel', {
+  defaultMessage: 'Next page',
+});
+
 const PaginationControls = ({
   fetchPreviousPage,
   fetchNextPage,
@@ -283,6 +294,7 @@ const PaginationControls = ({
             iconType="arrowLeft"
             isDisabled={!fetchPreviousPage || isLoading}
             onClick={fetchPreviousPage}
+            aria-label={previousPageLabel}
           />
           <span>
             <strong>{page}</strong>
@@ -291,6 +303,7 @@ const PaginationControls = ({
             iconType="arrowRight"
             isDisabled={!fetchNextPage || isLoading}
             onClick={fetchNextPage}
+            aria-label={nextPageLabel}
           />
         </EuiFlexGroup>
       </EuiFlexItem>
