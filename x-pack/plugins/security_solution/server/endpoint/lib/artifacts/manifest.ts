@@ -11,6 +11,7 @@ import {
   ManifestSchemaVersion,
 } from '../../../../common/endpoint/schema/common';
 import { ManifestSchema, manifestSchema } from '../../../../common/endpoint/schema/manifest';
+import { ManifestConstants } from './common';
 import { ManifestEntry } from './manifest_entry';
 
 export interface ManifestDiff {
@@ -104,7 +105,7 @@ export class Manifest {
 
   public toEndpointFormat(): ManifestSchema {
     const manifestObj: ManifestSchema = {
-      manifest_version: this.version ?? 'v0',
+      manifest_version: this.version ?? ManifestConstants.INITIAL_VERSION,
       schema_version: this.schemaVersion,
       artifacts: {},
     };

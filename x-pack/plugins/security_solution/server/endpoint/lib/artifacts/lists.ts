@@ -5,6 +5,7 @@
  */
 
 import { createHash } from 'crypto';
+import { deflate } from 'zlib';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { validate } from '../../../../common/validate';
 
@@ -34,6 +35,7 @@ export async function buildArtifact(
   const exceptionsBuffer = Buffer.from(JSON.stringify(exceptions));
   const sha256 = createHash('sha256').update(exceptionsBuffer.toString()).digest('hex');
 
+  // Keep compression info empty in case its a duplicate. Lazily compress before committing if needed.
   return {
     identifier: `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-${os}-${schemaVersion}`,
     compressionAlgorithm: 'none',
@@ -95,7 +97,7 @@ export function translateToEndpointExceptions(
   exc: FoundExceptionListItemSchema,
   schemaVersion: string
 ): TranslatedExceptionListItem[] {
-  if (schemaVersion === '1.0.0') {
+  if (schemaVersion === 'v1') {
     return exc.data.map((item) => {
       return translateItem(schemaVersion, item);
     });
@@ -179,4 +181,16 @@ function translateEntry(
         : undefined;
     }
   }
+}
+
+export async function compressExceptionList(buffer: Buffer): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    deflate(buffer, function (err, buf) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(buf);
+      }
+    });
+  });
 }
