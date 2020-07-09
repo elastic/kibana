@@ -8,6 +8,13 @@ def withPostBuildReporting(Closure closure) {
 
     catchErrors {
       runbld.junit()
+
+      def parallelWorkspace = "${env.WORKSPACE}/parallel"
+      if (fileExists(parallelWorkspace)) {
+        dir(parallelWorkspace) {
+          runbld.junit()
+        }
+      }
     }
 
     catchErrors {
