@@ -26,6 +26,7 @@ import { Table } from '../table_vis_response_handler';
 import { TableVisParams } from '../types';
 import { useFormattedColumnsAndRows, usePagination } from '../utils';
 import { TableVisNoResults } from './table_vis_no_results';
+import { TableVisControls } from './table_vis_controls';
 
 interface TableVisBasicProps {
   table: Table;
@@ -51,10 +52,17 @@ export const TableVisBasic = memo(({ table, vis, visParams }: TableVisBasicProps
         id: col.id,
         display: col.title,
       }))}
+      gridStyle={{
+        border: 'horizontal',
+        header: 'underline',
+      }}
       rowCount={rows.length}
       columnVisibility={{
         visibleColumns: columns.map((col) => col.id),
         setVisibleColumns: () => {},
+      }}
+      toolbarVisibility={{
+        additionalControls: <TableVisControls cols={columns} rows={rows} table={table} />,
       }}
       renderCellValue={renderCellValue}
       pagination={pagination}

@@ -22,7 +22,7 @@ import { AggGroupNames } from '../../data/public';
 import { Schemas } from '../../vis_default_editor/public';
 import { Vis } from '../../visualizations/public';
 import { tableVisResponseHandler } from './table_vis_response_handler';
-import { TableOptions, TableVisualization } from './components';
+import { TableOptions, createTableVisualizationComponent } from './components';
 import { VIS_EVENT_TO_TRIGGER } from '../../../plugins/visualizations/public';
 
 export function getTableVisTypeDefinition(core: CoreSetup, context: PluginInitializerContext) {
@@ -40,7 +40,7 @@ export function getTableVisTypeDefinition(core: CoreSetup, context: PluginInitia
       return [VIS_EVENT_TO_TRIGGER.filter];
     },
     visConfig: {
-      component: TableVisualization,
+      component: createTableVisualizationComponent(core),
       defaults: {
         perPage: 10,
         showPartialRows: false,

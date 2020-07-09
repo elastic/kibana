@@ -18,4 +18,4 @@
  */
 
 export { TableOptions } from './table_vis_options_lazy';
-export { TableVisualization } from './table_visualization';
+export { createTableVisualizationComponent } from './table_visualization';

@@ -20,13 +20,15 @@
 import './table_visualization.scss';
 import React, { useEffect } from 'react';
 
+import { CoreSetup } from 'kibana/public';
 import { ReactVisComponentProps } from 'src/plugins/visualizations/public';
+import { KibanaContextProvider } from '../../../kibana_react/public';
 import { TableVisParams } from '../types';
 import { TableContext } from '../table_vis_response_handler';
 import { TableVisBasic } from './table_vis_basic';
 import { TableVisSplit } from './table_vis_split';
 
-export const TableVisualization = ({
+export const createTableVisualizationComponent = (core: CoreSetup) => ({
   renderComplete,
   vis,
   visData: { direction, table, tables },
@@ -37,12 +39,14 @@ export const TableVisualization = ({
   }, [renderComplete]);
 
   return (
-    <div className="tbvChart" data-test-subj="tableVis">
-      {table ? (
-        <TableVisBasic table={table} vis={vis} visParams={visParams} />
-      ) : (
-        <TableVisSplit tables={tables} vis={vis} visParams={visParams} />
-      )}
-    </div>
+    <KibanaContextProvider services={core}>
+      <div className="tbvChart" data-test-subj="tableVis">
+        {table ? (
+          <TableVisBasic table={table} vis={vis} visParams={visParams} />
+        ) : (
+          <TableVisSplit tables={tables} vis={vis} visParams={visParams} />
+        )}
+      </div>
+    </KibanaContextProvider>
   );
 };
