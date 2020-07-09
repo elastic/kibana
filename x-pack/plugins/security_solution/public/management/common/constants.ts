@@ -8,7 +8,7 @@ import { APP_ID } from '../../../common/constants';
 import { SecurityPageName } from '../../app/types';
 
 // --[ ROUTING ]---------------------------------------------------------------------------
-export const MANAGEMENT_APP_ID = `${APP_ID}:${SecurityPageName.management}`;
+export const MANAGEMENT_APP_ID = `${APP_ID}:${SecurityPageName.administration}`;
 export const MANAGEMENT_ROUTING_ROOT_PATH = '';
 export const MANAGEMENT_ROUTING_HOSTS_PATH = `${MANAGEMENT_ROUTING_ROOT_PATH}/:tabName(${AdministrationSubTab.hosts})`;
 export const MANAGEMENT_ROUTING_POLICIES_PATH = `${MANAGEMENT_ROUTING_ROOT_PATH}/:tabName(${AdministrationSubTab.policies})`;

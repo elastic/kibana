@@ -38,7 +38,7 @@ export const getBreadcrumbs = (
   let breadcrumb = [
     {
       text: ADMINISTRATION,
-      href: getUrlForApp(`${APP_ID}:${SecurityPageName.management}`, {
+      href: getUrlForApp(`${APP_ID}:${SecurityPageName.administration}`, {
         path: !isEmpty(search[0]) ? search[0] : '',
       }),
     },

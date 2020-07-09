@@ -22,6 +22,7 @@ import {
   HostRouteSpyState,
   NetworkRouteSpyState,
   TimelineRouteSpyState,
+  AdministrationRouteSpyState,
 } from '../../../utils/route/types';
 import { getAppOverviewUrl } from '../../link_to';
 
@@ -62,8 +63,8 @@ const isCaseRoutes = (spyState: RouteSpyState): spyState is RouteSpyState =>
 const isAlertsRoutes = (spyState: RouteSpyState) =>
   spyState != null && spyState.pageName === SecurityPageName.detections;
 
-const isAdminRoutes = (spyState: RouteSpyState) =>
-  spyState != null && spyState.pageName === SecurityPageName.management;
+const isAdminRoutes = (spyState: RouteSpyState): spyState is AdministrationRouteSpyState =>
+  spyState != null && spyState.pageName === SecurityPageName.administration;
 
 // eslint-disable-next-line complexity
 export const getBreadcrumbsForRoute = (

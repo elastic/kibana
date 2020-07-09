@@ -46,7 +46,7 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
     CONSTANTS.timerange,
     CONSTANTS.timeline,
   ],
-  management: [],
+  administration: [],
   network: [
     CONSTANTS.appQuery,
     CONSTANTS.filters,

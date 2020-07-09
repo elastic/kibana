@@ -86,7 +86,7 @@ export const HostList = () => {
     policyItemsLoading,
     endpointPackageVersion,
   } = useHostSelector(selector);
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.management);
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
 
   const dispatch = useDispatch<(a: HostAction) => void>();
 
@@ -408,7 +408,7 @@ export const HostList = () => {
         </>
       )}
       {renderTableOrEmptyState}
-      <SpyRoute pageName={SecurityPageName.management} />
+      <SpyRoute pageName={SecurityPageName.administration} />
     </ManagementPageView>
   );
 };

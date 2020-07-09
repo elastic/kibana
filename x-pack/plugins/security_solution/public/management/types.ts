@@ -33,7 +33,7 @@ export enum AdministrationSubTab {
  * The URL route params for the Management Policy List section
  */
 export interface ManagementRoutePolicyListParams {
-  pageName: SecurityPageName.management;
+  pageName: SecurityPageName.administration;
   tabName: AdministrationSubTab.policies;
 }
 

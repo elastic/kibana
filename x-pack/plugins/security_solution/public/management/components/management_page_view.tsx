@@ -15,7 +15,7 @@ import { getHostListPath, getPoliciesPath } from '../common/routing';
 import { useNavigateByRouterEventHandler } from '../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 
 export const ManagementPageView = memo<Omit<PageViewProps, 'tabs'>>((options) => {
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.management);
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
   const { tabName } = useParams<{ tabName: AdministrationSubTab }>();
 
   const goToEndpoint = useNavigateByRouterEventHandler(
