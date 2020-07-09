@@ -26,9 +26,6 @@ import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pa
 import * as visModule from 'ui/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
 import worldJson from './world.json';
-import EMS_CATALOGUE from '../../../../../ui/public/vis/__tests__/map/ems_mocks/sample_manifest_6.6.json';
-import EMS_FILES from '../../../../../ui/public/vis/__tests__/map/ems_mocks/sample_files_6.6.json';
-import EMS_TILES from '../../../../../ui/public/vis/__tests__/map/ems_mocks/sample_tiles_6.6.json';
 
 import initialPng from './initial.png';
 import toiso3Png from './toiso3.png';
@@ -80,8 +77,7 @@ describe('RegionMapsVisualizationTests', function () {
 
   beforeEach(ngMock.module('kibana'));
 
-  let getManifestStub;
-  beforeEach(ngMock.inject((Private, $injector) => {
+  beforeEach(ngMock.inject((Private) => {
 
     Vis = Private(visModule.VisProvider);
     RegionMapsVisualization = Private(RegionMapsVisualizationProvider);
@@ -96,24 +92,11 @@ describe('RegionMapsVisualizationTests', function () {
       });
     };
 
-    const serviceSettings = $injector.get('serviceSettings');
-    getManifestStub = serviceSettings.__debugStubManifestCalls(async (url) => {
-      //simulate network calls
-      if (url.startsWith('https://foobar')) {
-        return EMS_CATALOGUE;
-      } else if (url.startsWith('https://tiles.foobar')) {
-        return EMS_TILES;
-      } else if (url.startsWith('https://files.foobar')) {
-        return EMS_FILES;
-      }
-    });
-
   }));
 
 
   afterEach(function () {
     ChoroplethLayer.prototype._makeJsonAjaxCall = _makeJsonAjaxCallOld;
-    getManifestStub.removeStub();
   });
 
 
