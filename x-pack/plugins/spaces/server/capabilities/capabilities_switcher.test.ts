@@ -254,9 +254,12 @@ describe('capabilitiesSwitcher', () => {
 
     const expectedCapabilities = buildCapabilities();
 
+    // These capabilities are shared by feature_4, which is enabled
     expectedCapabilities.navLinks.feature3 = true;
+    expectedCapabilities.navLinks.feature3_app = true;
     expectedCapabilities.catalogue.feature3Entry = true;
     expectedCapabilities.management.kibana.indices = true;
+    // These capabilities are only exposed by feature_3, which is disabled
     expectedCapabilities.feature_3.bar = false;
     expectedCapabilities.feature_3.foo = false;
 
