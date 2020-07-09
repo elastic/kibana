@@ -1,5 +1,5 @@
-[[add-data-guide]]
-=== Add Data Guide
+[[add-data-tutorials]]
+=== Add data tutorials
 
 `Add Data` in the {kib} Home application contains tutorials for setting up data flows in the Elastic stack.
 

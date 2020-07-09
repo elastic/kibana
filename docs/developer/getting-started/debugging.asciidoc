@@ -1,7 +1,7 @@
 [[kibana-debugging]]
 === Debugging {kib}
 
-* <<debugging-unit-tests>>
+For information about how to debug unit tests, refer to <<debugging-unit-tests>>.
 
 [float]
 ==== Server Code

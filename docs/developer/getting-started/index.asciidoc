@@ -7,7 +7,7 @@ Get started building your own plugins, or contributing directly to the {kib} rep
 [[get-kibana-code]]
 === Get the code
 
-https://help.github.com/en/github/getting-started-with-github/fork-a-repo[Fork], then https://help.github.com/en/github/getting-started-with-github/fork-a-repo#step-2-create-a-local-clone-of-your-fork[clone] the {kib-repo}[{kib} repo] and change directory into it
+https://help.github.com/en/github/getting-started-with-github/fork-a-repo[Fork], then https://help.github.com/en/github/getting-started-with-github/fork-a-repo#step-2-create-a-local-clone-of-your-fork[clone] the {kib-repo}[{kib} repo] and change directory into it:
 
 [source,bash]
 ----
@@ -32,7 +32,7 @@ nvm use
  
 Install the latest version of https://yarnpkg.com[yarn].
 
-Bootstrap {kib} and install all the dependencies
+Bootstrap {kib} and install all the dependencies:
 
 [source,bash]
 ----
@@ -52,7 +52,7 @@ more info about this tool, see
 {kib-repo}tree/{branch}/packages/kbn-pm[{kib-repo}tree/{branch}packages/kbn-pm].)
 
 When switching branches which use different versions of npm packages you
-may need to run;
+may need to run:
 
 [source,bash]
 ----
@@ -60,7 +60,7 @@ yarn kbn clean
 ----
 
 If you have failures during `yarn kbn bootstrap` you may have some
-corrupted packages in your yarn cache which you can clean with;
+corrupted packages in your yarn cache which you can clean with:
 
 [source,bash]
 ----

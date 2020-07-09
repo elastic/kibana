@@ -21,7 +21,7 @@ To build the docs, you must clone the https://github.com/elastic/docs[elastic/do
 repo as a sibling of your {kib} repo. Follow the instructions in that project's
 README for getting the docs tooling set up.
 
-**To build the docs and open them in your browser:**
+**To build the docs:**
 
 ```bash
 node scripts/docs.js --open

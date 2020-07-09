@@ -17,7 +17,7 @@ Read <<development-getting-started>> to get your environment up and running, the
 * <<kibana-release-notes-process>>
 * <<kibana-linting>>
 
-[float]
+[discrete]
 [[signing-contributor-agreement]]
 === Signing the contributor license agreement
 
@@ -71,13 +71,6 @@ When you create the Release Notes text, use the following best practices:
   * For a breaking change, use `release_note:breaking`.
   * To **NOT** include your changes in the Release Notes, use `release_note:skip`.
 
-....
-# Dev Docs
-
-## Name the feature with the break (ex: Visualize Loader)
-
-Summary of the change. Anything Under `#Dev Docs` is used in the blog.
-....
 
 include::development-github.asciidoc[]
 
