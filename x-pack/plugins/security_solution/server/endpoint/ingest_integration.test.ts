@@ -43,16 +43,49 @@ describe('ingest_integration tests ', () => {
       const logger = loggerMock.create();
       const manifestManager = getManifestManagerMock();
       manifestManager.syncArtifacts = jest.fn().mockRejectedValue([new Error('error updating')]);
+      const lastDispatched = await manifestManager.getLastDispatchedManifest();
       const callback = getPackageConfigCreateCallback(logger, manifestManager);
       const policyConfig = createNewPackageConfigMock();
       const newPolicyConfig = await callback(policyConfig);
       expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
       expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyConfigFactory());
-      expect(newPolicyConfig.inputs[0]!.config!.artifact_manifest.value).toEqual({
-        manifest_version: 'WzAsMF0=',
-        schema_version: 'v1',
-        artifacts: {},
+      expect(newPolicyConfig.inputs[0]!.config!.artifact_manifest.value).toEqual(
+        lastDispatched.toEndpointFormat()
+      );
+    });
+
+    test('initial policy creation succeeds if snapshot retrieval fails', async () => {
+      const logger = loggerMock.create();
+      const manifestManager = getManifestManagerMock();
+      const lastDispatched = await manifestManager.getLastDispatchedManifest();
+      manifestManager.getSnapshot = jest.fn().mockResolvedValue(null);
+      const callback = getPackageConfigCreateCallback(logger, manifestManager);
+      const policyConfig = createNewPackageConfigMock();
+      const newPolicyConfig = await callback(policyConfig);
+      expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
+      expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyConfigFactory());
+      expect(newPolicyConfig.inputs[0]!.config!.artifact_manifest.value).toEqual(
+        lastDispatched.toEndpointFormat()
+      );
+    });
+
+    test('subsequent policy creations succeed', async () => {
+      const logger = loggerMock.create();
+      const manifestManager = getManifestManagerMock();
+      const snapshot = await manifestManager.getSnapshot();
+      manifestManager.getLastDispatchedManifest = jest.fn().mockResolvedValue(snapshot!.manifest);
+      manifestManager.getSnapshot = jest.fn().mockResolvedValue({
+        manifest: snapshot!.manifest,
+        diffs: [],
       });
+      const callback = getPackageConfigCreateCallback(logger, manifestManager);
+      const policyConfig = createNewPackageConfigMock();
+      const newPolicyConfig = await callback(policyConfig);
+      expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
+      expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyConfigFactory());
+      expect(newPolicyConfig.inputs[0]!.config!.artifact_manifest.value).toEqual(
+        snapshot!.manifest.toEndpointFormat()
+      );
     });
   });
 });
