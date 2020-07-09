@@ -20,10 +20,15 @@ export function UptimeMLAnomalyProvider({ getService }: FtrProviderContext) {
     },
 
     async openMLManageMenu() {
+      await this.cancelAlertFlyout();
       return retry.tryForTime(30000, async () => {
         await testSubjects.click('uptimeManageMLJobBtn');
         await testSubjects.existOrFail('uptimeManageMLContextMenu');
       });
+    },
+
+    async cancelAlertFlyout() {
+      await testSubjects.click('euiFlyoutCloseButton', 60 * 1000);
     },
 
     async alreadyHasJob() {
