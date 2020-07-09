@@ -5,7 +5,7 @@ source "$KIBANA_DIR/src/dev/ci_setup/setup_percy.sh"
 
 echo " -> building and extracting default Kibana distributable"
 cd "$KIBANA_DIR"
-node scripts/build --debug
+node scripts/build --debug --no-oss
 linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
 installDir="$PARENT_DIR/install/kibana"
 mkdir -p "$installDir"
