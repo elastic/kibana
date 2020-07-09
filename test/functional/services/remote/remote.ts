@@ -44,17 +44,9 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   };
 
   const { driver, consoleLog$ } = await initWebDriver(log, browserType, lifecycle, browserConfig);
-
-  const isW3CEnabled = (driver as any).executor_.w3c;
-
   const caps = await driver.getCapabilities();
-  const browserVersion = caps.get(isW3CEnabled ? 'browserVersion' : 'version');
 
-  log.info(
-    `Remote initialized: ${caps.get(
-      'browserName'
-    )} ${browserVersion}, w3c compliance=${isW3CEnabled}`
-  );
+  log.info(`Remote initialized: ${caps.get('browserName')} ${caps.get('browserVersion')}`);
 
   if ([Browsers.Chrome, Browsers.ChromiumEdge].includes(browserType)) {
     log.info(
@@ -65,12 +57,20 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   lifecycle.beforeTests.add(async () => {
     // hard coded default, can be overridden per suite using `browser.setWindowSize()`
     // and will be automatically reverted after each suite
-    await driver.manage().window().setRect({ width: 1600, height: 1000 });
+    await driver
+      .manage()
+      .window()
+      .setRect({ width: 1600, height: 1000 });
   });
 
   const windowSizeStack: Array<{ width: number; height: number }> = [];
   lifecycle.beforeTestSuite.add(async () => {
-    windowSizeStack.unshift(await driver.manage().window().getRect());
+    windowSizeStack.unshift(
+      await driver
+        .manage()
+        .window()
+        .getRect()
+    );
   });
 
   lifecycle.beforeEachTest.add(async () => {
@@ -79,7 +79,10 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
 
   lifecycle.afterTestSuite.add(async () => {
     const { width, height } = windowSizeStack.shift()!;
-    await driver.manage().window().setRect({ width, height });
+    await driver
+      .manage()
+      .window()
+      .setRect({ width, height });
     await clearBrowserStorage('sessionStorage');
     await clearBrowserStorage('localStorage');
   });

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { delimiter, resolve } from 'path';
+import { resolve } from 'path';
 import Fs from 'fs';
 
 import * as Rx from 'rxjs';
@@ -266,40 +266,6 @@ async function attemptToCreateCommand(
               ];
             })
           ),
-        };
-      }
-
-      case 'ie': {
-        // https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/ie_exports_Options.html
-        const driverPath = require.resolve('iedriver/lib/iedriver');
-        process.env.PATH = driverPath + delimiter + process.env.PATH;
-
-        const ieCapabilities = Capabilities.ie();
-        ieCapabilities.set('se:ieOptions', {
-          'ie.ensureCleanSession': true,
-          ignoreProtectedModeSettings: true,
-          ignoreZoomSetting: false, // requires us to have 100% zoom level
-          nativeEvents: true, // need this for values to stick but it requires 100% scaling and window focus
-          requireWindowFocus: true,
-          logLevel: 'TRACE',
-        });
-
-        let session;
-        if (remoteSessionUrl) {
-          session = await new Builder()
-            .forBrowser(browserType)
-            .withCapabilities(ieCapabilities)
-            .usingServer(remoteSessionUrl)
-            .build();
-        } else {
-          session = await new Builder()
-            .forBrowser(browserType)
-            .withCapabilities(ieCapabilities)
-            .build();
-        }
-        return {
-          session,
-          consoleLog$: Rx.EMPTY,
         };
       }
 
