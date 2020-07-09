@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
+  EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -12,51 +13,51 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { truncate } from 'lodash';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
+import { NewsItem as INewsItem } from '../../../services/get_news_feed';
 import './index.scss';
-import { truncate } from 'lodash';
-import { news as newsMockData } from './mock/news.mock.data';
 
-interface NewsItem {
-  title: string;
-  description: string;
-  link_url: string;
-  image_url: string;
+interface Props {
+  items: INewsItem[];
 }
 
-export const News = () => {
-  const newsItems: NewsItem[] = newsMockData;
+export const NewsFeed = ({ items }: Props) => {
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="xs">
-          <h4>
-            {i18n.translate('xpack.observability.news.title', {
-              defaultMessage: "What's new",
-            })}
-          </h4>
-        </EuiTitle>
-      </EuiFlexItem>
-      {newsItems.map((item, index) => (
-        <EuiFlexItem key={index} grow={false}>
-          <NewsItem item={item} />
+    // The news feed is manually added/edited, to prevent any errors caused by typos or missing fields,
+    // wraps the component with EuiErrorBoundary to avoid breaking the entire page.
+    <EuiErrorBoundary>
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h4>
+              {i18n.translate('xpack.observability.news.title', {
+                defaultMessage: "What's new",
+              })}
+            </h4>
+          </EuiTitle>
         </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
+        {items.map((item, index) => (
+          <EuiFlexItem key={index} grow={false}>
+            <NewsItem item={item} />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </EuiErrorBoundary>
   );
 };
 
 const limitString = (string: string, limit: number) => truncate(string, { length: limit });
 
-const NewsItem = ({ item }: { item: NewsItem }) => {
+const NewsItem = ({ item }: { item: INewsItem }) => {
   const theme = useContext(ThemeContext);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
         <EuiTitle size="xxxs">
-          <h4>{item.title}</h4>
+          <h4>{item.title.en}</h4>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -65,11 +66,11 @@ const NewsItem = ({ item }: { item: NewsItem }) => {
             <EuiFlexGroup direction="column" gutterSize="s" alignItems="baseline">
               <EuiFlexItem>
                 <EuiText grow={false} size="xs" color="subdued">
-                  {limitString(item.description, 128)}
+                  {limitString(item.description.en, 128)}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiLink href={item.link_url} target="_blank">
+                <EuiLink href={item.link_url.en} target="_blank">
                   <EuiText size="xs">
                     {i18n.translate('xpack.observability.news.readFullStory', {
                       defaultMessage: 'Read full story',
@@ -79,16 +80,19 @@ const NewsItem = ({ item }: { item: NewsItem }) => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <img
-              style={{ border: theme.eui.euiBorderThin }}
-              width={48}
-              height={48}
-              alt={item.title}
-              src={item.image_url}
-              className="obsNewsFeed__itemImg"
-            />
-          </EuiFlexItem>
+          {item.image_url?.en && (
+            <EuiFlexItem grow={false}>
+              <img
+                data-test-subj="news_image"
+                style={{ border: theme.eui.euiBorderThin }}
+                width={48}
+                height={48}
+                alt={item.title.en}
+                src={item.image_url.en}
+                className="obsNewsFeed__itemImg"
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiHorizontalRule margin="s" />
