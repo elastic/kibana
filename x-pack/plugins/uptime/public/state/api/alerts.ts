@@ -12,7 +12,7 @@ import { Alert } from '../../../../triggers_actions_ui/public';
 export const fetchAlertRecords = async ({ monitorId }: MonitorIdParam): Promise<Alert> => {
   const data = {
     page: 1,
-    per_page: 100,
+    per_page: 500,
     filter: 'alert.attributes.alertTypeId:(xpack.uptime.alerts.durationAnomaly)',
     default_search_operator: 'AND',
     sort_field: 'name.keyword',
