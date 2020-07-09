@@ -30,7 +30,7 @@ import {
 } from '../../common/schemas';
 import { LIST_INDEX, LIST_ITEM_URL, LIST_URL } from '../../common/constants';
 import { validateEither } from '../../common/siem_common_deps';
-import { toPromise } from '../common/fp_utils';
+import { toError, toPromise } from '../common/fp_utils';
 
 import {
   ApiParams,
@@ -70,7 +70,7 @@ const findListsWithValidation = async ({
       per_page: String(pageSize),
     },
     (payload) => fromEither(validateEither(findListSchema, payload)),
-    chain((payload) => tryCatch(() => findLists({ http, signal, ...payload }), String)),
+    chain((payload) => tryCatch(() => findLists({ http, signal, ...payload }), toError)),
     chain((response) => fromEither(validateEither(foundListSchema, response))),
     flow(toPromise)
   );
@@ -117,7 +117,7 @@ const importListWithValidation = async ({
         map((body) => ({ ...body, ...query }))
       )
     ),
-    chain((payload) => tryCatch(() => importList({ http, signal, ...payload }), String)),
+    chain((payload) => tryCatch(() => importList({ http, signal, ...payload }), toError)),
     chain((response) => fromEither(validateEither(listSchema, response))),
     flow(toPromise)
   );
@@ -143,7 +143,7 @@ const deleteListWithValidation = async ({
   pipe(
     { id },
     (payload) => fromEither(validateEither(deleteListSchema, payload)),
-    chain((payload) => tryCatch(() => deleteList({ http, signal, ...payload }), String)),
+    chain((payload) => tryCatch(() => deleteList({ http, signal, ...payload }), toError)),
     chain((response) => fromEither(validateEither(listSchema, response))),
     flow(toPromise)
   );
@@ -169,7 +169,7 @@ const exportListWithValidation = async ({
   pipe(
     { list_id: listId },
     (payload) => fromEither(validateEither(exportListItemQuerySchema, payload)),
-    chain((payload) => tryCatch(() => exportList({ http, signal, ...payload }), String)),
+    chain((payload) => tryCatch(() => exportList({ http, signal, ...payload }), toError)),
     chain((response) => fromEither(validateEither(listSchema, response))),
     flow(toPromise)
   );
@@ -187,7 +187,7 @@ const readListIndexWithValidation = async ({
   signal,
 }: ApiParams): Promise<ListItemIndexExistSchema> =>
   flow(
-    () => tryCatch(() => readListIndex({ http, signal }), String),
+    () => tryCatch(() => readListIndex({ http, signal }), toError),
     chain((response) => fromEither(validateEither(listItemIndexExistSchema, response))),
     flow(toPromise)
   )();
@@ -205,7 +205,7 @@ const createListIndexWithValidation = async ({
   signal,
 }: ApiParams): Promise<AcknowledgeSchema> =>
   flow(
-    () => tryCatch(() => createListIndex({ http, signal }), String),
+    () => tryCatch(() => createListIndex({ http, signal }), toError),
     chain((response) => fromEither(validateEither(acknowledgeSchema, response))),
     flow(toPromise)
   )();

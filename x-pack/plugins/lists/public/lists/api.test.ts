@@ -69,7 +69,7 @@ describe('Value Lists API', () => {
           ...((payload as unknown) as ApiPayload<DeleteListParams>),
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "23" supplied to "id"');
+      ).rejects.toEqual(new Error('Invalid value "23" supplied to "id"'));
       expect(httpMock.fetch).not.toHaveBeenCalled();
     });
 
@@ -85,7 +85,7 @@ describe('Value Lists API', () => {
           ...payload,
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
+      ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "id"'));
     });
   });
 
@@ -138,7 +138,7 @@ describe('Value Lists API', () => {
           ...payload,
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "0" supplied to "per_page"');
+      ).rejects.toEqual(new Error('Invalid value "0" supplied to "per_page"'));
       expect(httpMock.fetch).not.toHaveBeenCalled();
     });
 
@@ -154,7 +154,7 @@ describe('Value Lists API', () => {
           ...payload,
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "undefined" supplied to "cursor"');
+      ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "cursor"'));
     });
   });
 
@@ -223,7 +223,7 @@ describe('Value Lists API', () => {
           ...payload,
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "undefined" supplied to "file"');
+      ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "file"'));
       expect(httpMock.fetch).not.toHaveBeenCalled();
     });
 
@@ -242,7 +242,7 @@ describe('Value Lists API', () => {
           ...payload,
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "other" supplied to "type"');
+      ).rejects.toEqual(new Error('Invalid value "other" supplied to "type"'));
       expect(httpMock.fetch).not.toHaveBeenCalled();
     });
 
@@ -263,7 +263,7 @@ describe('Value Lists API', () => {
           ...payload,
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
+      ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "id"'));
     });
   });
 
@@ -316,7 +316,7 @@ describe('Value Lists API', () => {
           ...payload,
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "23" supplied to "list_id"');
+      ).rejects.toEqual(new Error('Invalid value "23" supplied to "list_id"'));
       expect(httpMock.fetch).not.toHaveBeenCalled();
     });
 
@@ -334,7 +334,7 @@ describe('Value Lists API', () => {
           ...payload,
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
+      ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "id"'));
     });
 
     describe('readListIndex', () => {
@@ -377,7 +377,7 @@ describe('Value Lists API', () => {
             http: httpMock,
             signal: abortCtrl.signal,
           })
-        ).rejects.toEqual('Invalid value "undefined" supplied to "list_index"');
+        ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "list_index"'));
       });
     });
   });
@@ -422,7 +422,7 @@ describe('Value Lists API', () => {
           http: httpMock,
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "undefined" supplied to "acknowledged"');
+      ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "acknowledged"'));
     });
   });
 });
