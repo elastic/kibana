@@ -381,7 +381,6 @@ const mockLibs: any = {
 const executor = createMetricThresholdExecutor(mockLibs) as (opts: {
   params: AlertExecutorOptions['params'];
   services: { callCluster: AlertExecutorOptions['params']['callCluster'] };
-  alertId: AlertExecutorOptions['alertId'];
 }) => Promise<void>;
 
 const services: AlertServicesMock = alertsMock.createAlertServices();
