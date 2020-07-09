@@ -6,7 +6,13 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiIcon,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+} from '@elastic/eui';
 
 import { euiStyled } from '../../../../../observability/public';
 import { LogEntryColumnContent } from './log_entry_column';
@@ -49,14 +55,15 @@ export const LogEntryContextMenu: React.FC<LogEntryContextMenuProps> = ({
   }, [onClose]);
 
   const button = (
-    <ButtonWrapper>
-      <EuiButtonIcon
-        aria-label={ariaLabel || DEFAULT_MENU_LABEL}
-        color="ghost"
-        iconType="boxesHorizontal"
-        onClick={onOpen}
-      />
-    </ButtonWrapper>
+    <EuiButton
+      size="s"
+      fill
+      aria-label={ariaLabel || DEFAULT_MENU_LABEL}
+      onClick={onOpen}
+      style={{ minWidth: 'auto', transform: 'translate(-6px, -6px)' }}
+    >
+      <EuiIcon type="boxesHorizontal" />
+    </EuiButton>
   );
 
   const wrappedItems = useMemo(() => {
@@ -85,11 +92,4 @@ const LogEntryContextMenuContent = euiStyled(LogEntryColumnContent)`
 
 const AbsoluteWrapper = euiStyled.div`
   position: absolute;
-`;
-
-const ButtonWrapper = euiStyled.div`
-  background: ${(props) => props.theme.eui.euiColorPrimary};
-  border-radius: 50%;
-  padding: 4px;
-  transform: translateY(-6px);
 `;
