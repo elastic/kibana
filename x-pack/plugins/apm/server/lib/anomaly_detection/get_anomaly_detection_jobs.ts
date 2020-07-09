@@ -27,12 +27,12 @@ export async function getAnomalyDetectionJobs(setup: Setup, logger: Logger) {
 
   const response = await getMlJobsWithAPMGroup(ml);
   return response.jobs
+    .filter((job) => (job.custom_settings?.job_tags?.apm_ml_version ?? 0) >= 2)
     .map((job) => {
       const environment = job.custom_settings?.job_tags?.environment ?? '';
       return {
         job_id: job.job_id,
         environment,
       };
-    })
-    .filter((job) => job.environment);
+    });
 }
