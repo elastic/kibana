@@ -81,7 +81,7 @@ const paginationPreviousPageCursorRT = rt.type({
   searchBefore: paginationCursorRT,
 });
 
-const paginationNextPageCursor = rt.type({
+const paginationNextPageCursorRT = rt.type({
   searchAfter: paginationCursorRT,
 });
 
