@@ -32,6 +32,11 @@ export const legacyInit = async (
   server: Legacy.Server,
   reportingLegacyPlugin: ReportingPluginSpecOptions
 ) => {
+  if (server.newPlatform.setup.plugins.reporting == null) {
+    // reporting plugin is disabled
+    return;
+  }
+
   const { core: coreSetup } = server.newPlatform.setup;
   const { config$ } = (server.newPlatform.setup.plugins.reporting as PluginsSetup).__legacy;
   const reportingConfig = await config$.pipe(take(1)).toPromise();
