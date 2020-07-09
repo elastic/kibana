@@ -20,11 +20,11 @@
 import { i18n } from '@kbn/i18n';
 import { ManagementSectionId } from '../types';
 
-const injestTitle = i18n.translate('management.sections.ingestTitle', {
+const ingestTitle = i18n.translate('management.sections.ingestTitle', {
   defaultMessage: 'Ingest',
 });
 
-const injestTip = i18n.translate('management.sections.ingestTip', {
+const ingestTip = i18n.translate('management.sections.ingestTip', {
   defaultMessage: 'Manage how to transform data and load it into the cluster',
 });
 
@@ -53,17 +53,17 @@ const kibanaTip = i18n.translate('management.sections.kibanaTip', {
 });
 
 const stackTitle = i18n.translate('management.sections.stackTitle', {
-  defaultMessage: 'Kibana',
+  defaultMessage: 'Stack',
 });
 
 const stackTip = i18n.translate('management.sections.stackTip', {
-  defaultMessage: 'Customize Kibana and manage saved objects',
+  defaultMessage: 'Manage your license and upgrade the Stack',
 });
 
 export const IngestSection = {
   id: ManagementSectionId.Ingest,
-  title: injestTitle,
-  tip: injestTip,
+  title: ingestTitle,
+  tip: ingestTip,
   order: 0,
 };
 

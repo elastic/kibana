@@ -942,7 +942,7 @@ export class MyPlugin implements Plugin<MyPluginSetup> {
         return mountApp(await core.getStartServices(), params);
       },
     });
-    plugins.management.sections.getSection('another').registerApp({
+    plugins.management.sections.section.kibana.registerApp({
       id: 'app',
       title: 'My app',
       order: 1,

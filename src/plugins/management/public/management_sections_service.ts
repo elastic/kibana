@@ -46,7 +46,7 @@ export class ManagementSectionsService {
 
   constructor() {
     // Note on adding sections - sections can be defined in a plugin and exported as a contract
-    //     It is not necessary to define all sections here.
+    // It is not necessary to define all sections here.
     this.definedSections = {
       ingest: this.registerSection(IngestSection),
       data: this.registerSection(DataSection),

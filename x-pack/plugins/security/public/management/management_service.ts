@@ -37,7 +37,7 @@ export class ManagementService {
     this.license = license;
 
     const sectionTitle = i18n.translate('xpack.security.management.section.title', {
-      defaultMessage: 'Section',
+      defaultMessage: 'Security',
     });
 
     const sectionTip = i18n.translate('xpack.security.management.section.tip', {
