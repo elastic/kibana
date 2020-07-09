@@ -5,7 +5,7 @@
  */
 
 import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
-import { MockRouter } from '../__mocks__/router.mock';
+import { MockRouter, mockConfig, mockLogger } from '../__mocks__';
 
 import { registerTelemetryRoute } from './telemetry';
 
@@ -20,18 +20,18 @@ import { incrementUICounter } from '../../collectors/app_search/telemetry';
  * is tested more thoroughly in the collectors/telemetry tests.
  */
 describe('App Search Telemetry API', () => {
-  const mockRouter = new MockRouter({ method: 'put', payload: 'body' });
-  const mockLogger = loggingSystemMock.create().get();
+  let mockRouter: MockRouter;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockRouter.createRouter();
+    mockRouter = new MockRouter({ method: 'put', payload: 'body' });
 
     registerTelemetryRoute({
       router: mockRouter.router,
-      getSavedObjectsService: () => savedObjectsServiceMock.create(),
+      getSavedObjectsService: () => savedObjectsServiceMock.createStartContract(),
       log: mockLogger,
-    } as any);
+      config: mockConfig,
+    });
   });
 
   describe('PUT /api/app_search/telemetry', () => {
@@ -71,6 +71,11 @@ describe('App Search Telemetry API', () => {
       expect(incrementUICounter).not.toHaveBeenCalled();
       expect(mockLogger.error).toHaveBeenCalled();
       expect(mockRouter.response.internalError).toHaveBeenCalled();
+      expect(loggingSystemMock.collect(mockLogger).error[0][0]).toEqual(
+        expect.stringContaining(
+          'App Search UI telemetry error: Error: Could not find Saved Objects service'
+        )
+      );
     });
 
     describe('validates', () => {
@@ -84,17 +89,17 @@ describe('App Search Telemetry API', () => {
         mockRouter.shouldThrow(request);
       });
 
-      describe('wrong metric type', () => {
+      it('wrong metric type', () => {
         const request = { body: { action: 'clicked', metric: true } };
         mockRouter.shouldThrow(request);
       });
 
-      describe('action is missing', () => {
+      it('action is missing', () => {
         const request = { body: { metric: 'engines_overview' } };
         mockRouter.shouldThrow(request);
       });
 
-      describe('metric is missing', () => {
+      it('metric is missing', () => {
         const request = { body: { action: 'error' } };
         mockRouter.shouldThrow(request);
       });

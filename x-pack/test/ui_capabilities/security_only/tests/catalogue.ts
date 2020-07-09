@@ -35,7 +35,7 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
           case 'dual_privileges_all': {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('catalogue');
-            // everything except ml and monitoring and enterprise_search is enabled
+            // everything except ml and monitoring is enabled
             const expected = mapValues(
               uiCapabilities.value!.catalogue,
               (enabled, catalogueId) => catalogueId !== 'ml' && catalogueId !== 'monitoring'
@@ -47,7 +47,7 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
           case 'dual_privileges_read': {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('catalogue');
-            // everything except ml and monitoring and enterprise_search is enabled
+            // everything except ml and monitoring and enterprise search is enabled
             const expected = mapValues(
               uiCapabilities.value!.catalogue,
               (enabled, catalogueId) => !['ml', 'monitoring', 'appSearch'].includes(catalogueId)

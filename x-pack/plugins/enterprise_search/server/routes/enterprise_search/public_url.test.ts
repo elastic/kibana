@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MockRouter } from '../__mocks__/router.mock';
+import { MockRouter, mockDependencies } from '../__mocks__';
 
 jest.mock('../../lib/enterprise_search_config_api', () => ({
   callEnterpriseSearchConfigAPI: jest.fn(),
@@ -14,17 +14,15 @@ import { callEnterpriseSearchConfigAPI } from '../../lib/enterprise_search_confi
 import { registerPublicUrlRoute } from './public_url';
 
 describe('Enterprise Search Public URL API', () => {
-  const mockRouter = new MockRouter({ method: 'get' });
+  let mockRouter: MockRouter;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockRouter.createRouter();
+    mockRouter = new MockRouter({ method: 'get' });
 
     registerPublicUrlRoute({
+      ...mockDependencies,
       router: mockRouter.router,
-      config: {},
-      log: {},
-    } as any);
+    });
   });
 
   describe('GET /api/enterprise_search/public_url', () => {

@@ -42,7 +42,7 @@ export const checkAccess = async ({
   log,
 }: ICheckAccess): Promise<IAccess> => {
   // If security has been disabled, always show the plugin
-  if (!security?.authz?.mode.useRbacForRequest(request)) {
+  if (!security?.authz.mode.useRbacForRequest(request)) {
     return ALLOW_ALL_PLUGINS;
   }
 

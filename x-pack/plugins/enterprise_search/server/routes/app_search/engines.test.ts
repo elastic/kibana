@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { MockRouter, mockConfig } from '../__mocks__';
+import { MockRouter, mockConfig, mockLogger } from '../__mocks__';
 
 import { registerEnginesRoute } from './engines';
 
@@ -27,12 +26,11 @@ describe('engine routes', () => {
       },
     };
 
-    const mockRouter = new MockRouter({ method: 'get', payload: 'query' });
-    const mockLogger = loggingSystemMock.create().get();
+    let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
-      mockRouter.createRouter();
+      mockRouter = new MockRouter({ method: 'get', payload: 'query' });
 
       registerEnginesRoute({
         router: mockRouter.router,
@@ -57,7 +55,6 @@ describe('engine routes', () => {
 
         expect(mockRouter.response.ok).toHaveBeenCalledWith({
           body: { results: [{ name: 'engine1' }], meta: { page: { total_results: 1 } } },
-          headers: { 'content-type': 'application/json' },
         });
       });
     });

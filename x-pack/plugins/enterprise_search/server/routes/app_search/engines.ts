@@ -43,10 +43,7 @@ export function registerEnginesRoute({ router, config, log }: IRouteDependencies
           Array.isArray(engines?.results) && typeof engines?.meta?.page?.total_results === 'number';
 
         if (hasValidData) {
-          return response.ok({
-            body: engines,
-            headers: { 'content-type': 'application/json' },
-          });
+          return response.ok({ body: engines });
         } else {
           // Either a completely incorrect Enterprise Search host URL was configured, or App Search is returning bad data
           throw new Error(`Invalid data received from App Search: ${JSON.stringify(engines)}`);
