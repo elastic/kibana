@@ -18,10 +18,13 @@ export const anomalyDetectionJobsRoute = createRoute(() => ({
   path: '/api/apm/settings/anomaly-detection',
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    const jobs = await getAnomalyDetectionJobs(setup, context.logger);
+    const [jobs, legacyJobs] = await Promise.all([
+      getAnomalyDetectionJobs(setup, context.logger),
+      hasLegacyJobs(setup),
+    ]);
     return {
       jobs,
-      hasLegacyJobs: await hasLegacyJobs(setup),
+      hasLegacyJobs: legacyJobs,
     };
   },
 }));

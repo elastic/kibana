@@ -6,7 +6,7 @@
 
 import { Logger } from 'kibana/server';
 import { Setup } from '../helpers/setup_request';
-import { getMlJobsWithAPMGroup } from './get_ml_jobs_by_group';
+import { getMlJobsWithAPMGroup } from './get_ml_jobs_with_apm_group';
 
 export async function getAnomalyDetectionJobs(setup: Setup, logger: Logger) {
   const { ml } = setup;
