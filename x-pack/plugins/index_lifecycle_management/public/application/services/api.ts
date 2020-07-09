@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { METRIC_TYPE } from '@kbn/analytics/src';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { trackUiMetric } from './ui_metric';
 
 import {
