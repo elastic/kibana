@@ -6,6 +6,7 @@
 
 import {
   getApmTelemetryMapping,
+  getApmTelemetryMappingFullPath,
   mergeApmTelemetryMapping,
 } from './apm_telemetry';
 
@@ -21,9 +22,9 @@ expect.addSnapshotSerializer({
 });
 
 describe('APM telemetry helpers', () => {
-  describe('getApmTelemetry', () => {
-    it('generates a JSON object with the telemetry mapping', () => {
-      expect(getApmTelemetryMapping()).toMatchSnapshot();
+  describe('getApmTelemetryFullPath', () => {
+    it('generates a JSON object with the full path telemetry mapping', () => {
+      expect(getApmTelemetryMappingFullPath()).toMatchSnapshot();
     });
   });
 
