@@ -744,15 +744,23 @@ export class EndpointDocGenerator {
    * @param percentTerminated - percent of nodes which will have process termination events
    * @param alwaysGenMaxChildrenPerNode - flag to always return the max children per node instead of it being a random number of children
    */
-  public *fullResolverTreeGenerator(options: TreeOptions = {}) {
+  public fullResolverTreeGenerator(
+    options: TreeOptions = {}
+  ): { ancestry: Event[]; alertEvent: Event; descendants: Iterator<Event> } {
     const opts = getTreeOptionsWithDef(options);
 
     const ancestry = this.createAlertEventAncestry(opts);
-    for (let i = 0; i < ancestry.length; i++) {
-      yield ancestry[i];
-    }
     // ancestry will always have at least 2 elements, and the last element will be the alert
-    yield* this.descendantsTreeGenerator(ancestry[ancestry.length - 1], opts);
+    const alertEvent = ancestry.pop();
+    if (alertEvent === undefined) {
+      // should never happen
+      throw new Error('createAlertEventAncestry failed to return an alert');
+    }
+    return {
+      ancestry,
+      alertEvent,
+      descendants: this.descendantsTreeGenerator(alertEvent, opts),
+    };
   }
 
   /**
