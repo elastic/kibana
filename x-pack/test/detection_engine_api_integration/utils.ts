@@ -250,7 +250,7 @@ export const deleteAllAlerts = async (es: Client, retryCount = 20): Promise<void
       });
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.log(`Failure trying to deleteAllAlerts, retries left are: ${retryCount - 1}`);
+      console.log(`Failure trying to deleteAllAlerts, retries left are: ${retryCount - 1}`, err);
       await deleteAllAlerts(es, retryCount - 1);
     }
   } else {
@@ -276,7 +276,10 @@ export const deleteAllRulesStatuses = async (es: Client, retryCount = 20): Promi
       });
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.log(`Failure trying to deleteAllRulesStatuses, retries left are: ${retryCount - 1}`);
+      console.log(
+        `Failure trying to deleteAllRulesStatuses, retries left are: ${retryCount - 1}`,
+        err
+      );
       await deleteAllRulesStatuses(es, retryCount - 1);
     }
   } else {
@@ -292,7 +295,15 @@ export const deleteAllRulesStatuses = async (es: Client, retryCount = 20): Promi
 export const createSignalsIndex = async (
   supertest: SuperTest<supertestAsPromised.Test>
 ): Promise<void> => {
-  await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send().expect(200);
+  try {
+    await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log(
+      'Warning, the create signals index did not happen correctly, this could cause test failures',
+      err
+    );
+  }
 };
 
 /**
@@ -308,7 +319,7 @@ export const deleteSignalsIndex = async (
       await supertest.delete(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.log(`Failure trying to deleteSignalsIndex, retries left are: ${retryCount - 1}`);
+      console.log(`Failure trying to deleteSignalsIndex, retries left are: ${retryCount - 1}`, err);
       await deleteSignalsIndex(supertest, retryCount - 1);
     }
   } else {
