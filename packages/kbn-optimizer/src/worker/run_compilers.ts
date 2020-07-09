@@ -51,6 +51,15 @@ import {
 const PLUGIN_NAME = '@kbn/optimizer';
 
 /**
+ * sass-loader creates about a 40% overhead on the overall optimizer runtime, and
+ * so this constant is used to indicate to assignBundlesToWorkers() that there is
+ * extra work done in a bundle that has a lot of scss imports. The value is
+ * arbitrary and just intended to weigh the bundles so that they are distributed
+ * across mulitple workers on machines with lots of cores.
+ */
+const EXTRA_SCSS_WORK_UNITS = 100;
+
+/**
  * Create an Observable<CompilerMsg> for a specific child compiler + bundle
  */
 const observeCompiler = (
@@ -118,7 +127,7 @@ const observeCompiler = (
             referencedFiles.add(path);
 
             if (path.endsWith('.scss')) {
-              workUnits += 100;
+              workUnits += EXTRA_SCSS_WORK_UNITS;
 
               for (const depPath of module.buildInfo.fileDependencies) {
                 referencedFiles.add(depPath);
