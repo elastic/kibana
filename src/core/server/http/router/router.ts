@@ -22,7 +22,7 @@ import Boom from 'boom';
 
 import { isConfigSchema } from '@kbn/config-schema';
 import { Logger } from '../../logging';
-import { LegacyElasticsearchErrorHelpers } from '../../elasticsearch/legacy';
+import { LegacyElasticsearchErrorHelpers } from '../../elasticsearch/legacy/errors';
 import { KibanaRequest } from './request';
 import { KibanaResponseFactory, kibanaResponseFactory, IKibanaResponse } from './response';
 import { RouteConfig, RouteConfigOptions, RouteMethod, validBodyOutput } from './route';
