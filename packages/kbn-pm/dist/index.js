@@ -40239,6 +40239,7 @@ module.exports = FastGlob;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.convertPatternGroupToTask = exports.convertPatternGroupsToTasks = exports.groupPatternsByBaseDirectory = exports.getNegativePatternsAsPositive = exports.getPositivePatterns = exports.convertPatternsToTasks = exports.generate = void 0;
 const utils = __webpack_require__(292);
 function generate(patterns, settings) {
     const positivePatterns = getPositivePatterns(patterns);
@@ -40310,6 +40311,7 @@ exports.convertPatternGroupToTask = convertPatternGroupToTask;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.string = exports.stream = exports.pattern = exports.path = exports.fs = exports.errno = exports.array = void 0;
 const array = __webpack_require__(293);
 exports.array = array;
 const errno = __webpack_require__(294);
@@ -40333,6 +40335,7 @@ exports.string = string;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.splitWhen = exports.flatten = void 0;
 function flatten(items) {
     return items.reduce((collection, item) => [].concat(collection, item), []);
 }
@@ -40361,6 +40364,7 @@ exports.splitWhen = splitWhen;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.isEnoentCodeError = void 0;
 function isEnoentCodeError(error) {
     return error.code === 'ENOENT';
 }
@@ -40374,6 +40378,7 @@ exports.isEnoentCodeError = isEnoentCodeError;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.createDirentFromStats = void 0;
 class DirentFromStats {
     constructor(name, stats) {
         this.name = name;
@@ -40399,6 +40404,7 @@ exports.createDirentFromStats = createDirentFromStats;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.removeLeadingDotSegment = exports.escape = exports.makeAbsolute = exports.unixify = void 0;
 const path = __webpack_require__(4);
 const LEADING_DOT_SEGMENT_CHARACTERS_COUNT = 2; // ./ or .\\
 const UNESCAPED_GLOB_SYMBOLS_RE = /(\\?)([()*?[\]{|}]|^!|[!+@](?=\())/g;
@@ -40438,6 +40444,7 @@ exports.removeLeadingDotSegment = removeLeadingDotSegment;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.matchAny = exports.convertPatternsToRe = exports.makeRe = exports.getPatternParts = exports.expandBraceExpansion = exports.expandPatternsWithBraceExpansion = exports.isAffectDepthOfReadingPattern = exports.endsWithSlashGlobStar = exports.hasGlobStar = exports.getBaseDirectory = exports.getPositivePatterns = exports.getNegativePatterns = exports.isPositivePattern = exports.isNegativePattern = exports.convertToNegativePattern = exports.convertToPositivePattern = exports.isDynamicPattern = exports.isStaticPattern = void 0;
 const path = __webpack_require__(4);
 const globParent = __webpack_require__(298);
 const micromatch = __webpack_require__(301);
@@ -40454,6 +40461,14 @@ function isStaticPattern(pattern, options = {}) {
 }
 exports.isStaticPattern = isStaticPattern;
 function isDynamicPattern(pattern, options = {}) {
+    /**
+     * A special case with an empty string is necessary for matching patterns that start with a forward slash.
+     * An empty string cannot be a dynamic pattern.
+     * For example, the pattern `/lib/*` will be spread into parts: '', 'lib', '*'.
+     */
+    if (pattern === '') {
+        return false;
+    }
     /**
      * When the `caseSensitiveMatch` option is disabled, all patterns must be marked as dynamic, because we cannot check
      * filepath directly (without read directory).
@@ -40528,12 +40543,23 @@ function expandBraceExpansion(pattern) {
 }
 exports.expandBraceExpansion = expandBraceExpansion;
 function getPatternParts(pattern, options) {
-    const info = picomatch.scan(pattern, Object.assign(Object.assign({}, options), { parts: true }));
-    // See micromatch/picomatch#58 for more details
-    if (info.parts.length === 0) {
-        return [pattern];
+    let { parts } = picomatch.scan(pattern, Object.assign(Object.assign({}, options), { parts: true }));
+    /**
+     * The scan method returns an empty array in some cases.
+     * See micromatch/picomatch#58 for more details.
+     */
+    if (parts.length === 0) {
+        parts = [pattern];
     }
-    return info.parts;
+    /**
+     * The scan method does not return an empty part for the pattern with a forward slash.
+     * This is another part of micromatch/picomatch#58.
+     */
+    if (parts[0].startsWith('/')) {
+        parts[0] = parts[0].slice(1);
+        parts.unshift('');
+    }
+    return parts;
 }
 exports.getPatternParts = getPatternParts;
 function makeRe(pattern, options) {
@@ -44746,6 +44772,7 @@ module.exports = parse;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.merge = void 0;
 const merge2 = __webpack_require__(284);
 function merge(streams) {
     const mergedStream = merge2(streams);
@@ -44769,6 +44796,7 @@ function propagateCloseEventToSources(streams) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.isEmpty = exports.isString = void 0;
 function isString(input) {
     return typeof input === 'string';
 }
@@ -46097,8 +46125,7 @@ class DeepFilter {
         return utils.pattern.convertPatternsToRe(affectDepthOfReadingPatterns, this._micromatchOptions);
     }
     _filter(basePath, entry, matcher, negativeRe) {
-        const depth = this._getEntryLevel(basePath, entry.path);
-        if (this._isSkippedByDeep(depth)) {
+        if (this._isSkippedByDeep(basePath, entry.path)) {
             return false;
         }
         if (this._isSkippedSymbolicLink(entry)) {
@@ -46110,22 +46137,31 @@ class DeepFilter {
         }
         return this._isSkippedByNegativePatterns(filepath, negativeRe);
     }
-    _isSkippedByDeep(entryDepth) {
-        return entryDepth >= this._settings.deep;
+    _isSkippedByDeep(basePath, entryPath) {
+        /**
+         * Avoid unnecessary depth calculations when it doesn't matter.
+         */
+        if (this._settings.deep === Infinity) {
+            return false;
+        }
+        return this._getEntryLevel(basePath, entryPath) >= this._settings.deep;
+    }
+    _getEntryLevel(basePath, entryPath) {
+        const entryPathDepth = entryPath.split('/').length;
+        if (basePath === '') {
+            return entryPathDepth;
+        }
+        const basePathDepth = basePath.split('/').length;
+        return entryPathDepth - basePathDepth;
     }
     _isSkippedSymbolicLink(entry) {
         return !this._settings.followSymbolicLinks && entry.dirent.isSymbolicLink();
     }
-    _getEntryLevel(basePath, entryPath) {
-        const basePathDepth = basePath.split('/').length;
-        const entryPathDepth = entryPath.split('/').length;
-        return entryPathDepth - (basePath === '' ? 0 : basePathDepth);
-    }
     _isSkippedByPositivePatterns(entryPath, matcher) {
         return !this._settings.baseNameMatch && !matcher.match(entryPath);
     }
-    _isSkippedByNegativePatterns(entryPath, negativeRe) {
-        return !utils.pattern.matchAny(entryPath, negativeRe);
+    _isSkippedByNegativePatterns(entryPath, patternsRe) {
+        return !utils.pattern.matchAny(entryPath, patternsRe);
     }
 }
 exports.default = DeepFilter;
@@ -46253,20 +46289,21 @@ class EntryFilter {
         return (entry) => this._filter(entry, positiveRe, negativeRe);
     }
     _filter(entry, positiveRe, negativeRe) {
-        if (this._settings.unique) {
-            if (this._isDuplicateEntry(entry)) {
-                return false;
-            }
-            this._createIndexRecord(entry);
+        if (this._settings.unique && this._isDuplicateEntry(entry)) {
+            return false;
         }
         if (this._onlyFileFilter(entry) || this._onlyDirectoryFilter(entry)) {
             return false;
         }
-        if (this._isSkippedByAbsoluteNegativePatterns(entry, negativeRe)) {
+        if (this._isSkippedByAbsoluteNegativePatterns(entry.path, negativeRe)) {
             return false;
         }
         const filepath = this._settings.baseNameMatch ? entry.name : entry.path;
-        return this._isMatchToPatterns(filepath, positiveRe) && !this._isMatchToPatterns(entry.path, negativeRe);
+        const isMatched = this._isMatchToPatterns(filepath, positiveRe) && !this._isMatchToPatterns(entry.path, negativeRe);
+        if (this._settings.unique && isMatched) {
+            this._createIndexRecord(entry);
+        }
+        return isMatched;
     }
     _isDuplicateEntry(entry) {
         return this.index.has(entry.path);
@@ -46280,12 +46317,12 @@ class EntryFilter {
     _onlyDirectoryFilter(entry) {
         return this._settings.onlyDirectories && !entry.dirent.isDirectory();
     }
-    _isSkippedByAbsoluteNegativePatterns(entry, negativeRe) {
+    _isSkippedByAbsoluteNegativePatterns(entryPath, patternsRe) {
         if (!this._settings.absolute) {
             return false;
         }
-        const fullpath = utils.path.makeAbsolute(this._settings.cwd, entry.path);
-        return this._isMatchToPatterns(fullpath, negativeRe);
+        const fullpath = utils.path.makeAbsolute(this._settings.cwd, entryPath);
+        return utils.pattern.matchAny(fullpath, patternsRe);
     }
     _isMatchToPatterns(entryPath, patternsRe) {
         const filepath = utils.path.removeLeadingDotSegment(entryPath);
@@ -46475,6 +46512,7 @@ exports.default = ReaderSync;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.DEFAULT_FILE_SYSTEM_ADAPTER = void 0;
 const fs = __webpack_require__(132);
 const os = __webpack_require__(121);
 const CPU_COUNT = os.cpus().length;
