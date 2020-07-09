@@ -5,6 +5,7 @@
  */
 import React, { useState, useEffect, useMemo, useCallback, ReactEventHandler } from 'react';
 import { useRouteMatch, useHistory } from 'react-router-dom';
+import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -45,6 +46,12 @@ import { StepSelectConfig } from './step_select_config';
 import { StepConfigurePackage } from './step_configure_package';
 import { StepDefinePackageConfig } from './step_define_package_config';
 import { useIntraAppState } from '../../../hooks/use_intra_app_state';
+
+const StepsWithLessPadding = styled(EuiSteps)`
+  .euiStep__content {
+    padding-bottom: ${(props) => props.theme.eui.paddingSizes.m};
+  }
+`;
 
 export const CreatePackageConfigPage: React.FunctionComponent = () => {
   const {
@@ -389,7 +396,7 @@ export const CreatePackageConfigPage: React.FunctionComponent = () => {
         : agentConfig && (
             <ConfigurationBreadcrumb configName={agentConfig.name} configId={agentConfig.id} />
           )}
-      <EuiSteps steps={steps} />
+      <StepsWithLessPadding steps={steps} />
       <EuiSpacer size="l" />
       {/* TODO #64541 - Remove classes */}
       <EuiBottomBar
