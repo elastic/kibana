@@ -12,16 +12,16 @@ import {
   EuiFieldPassword,
   EuiSwitch,
   EuiFormRow,
-  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiLink } from '@elastic/eui';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { EmailActionConnector } from '../types';
 
 export const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
   EmailActionConnector
->> = ({ action, editActionConfig, editActionSecrets, errors }) => {
+>> = ({ action, editActionConfig, editActionSecrets, errors, docLinks }) => {
   const { from, host, port, secure } = action.config;
   const { user, password } = action.secrets;
 
@@ -40,6 +40,17 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
                 defaultMessage: 'Sender',
               }
             )}
+            helpText={
+              <EuiLink
+                href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/pagerduty-action-type.html`}
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.routingKeyNameHelpLabel"
+                  defaultMessage="Configuring email accounts."
+                />
+              </EuiLink>
+            }
           >
             <EuiFieldText
               fullWidth
@@ -197,43 +208,6 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiLink target="_blank" href={'https://support.google.com/a/answer/176600?hl=en'} external>
-        {i18n.translate(
-          'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.helpGmailLink',
-          {
-            defaultMessage: 'How to configure Gmail',
-          }
-        )}
-      </EuiLink>
-      <EuiSpacer size="m" />
-      <EuiLink
-        target="_blank"
-        href={
-          'https://support.microsoft.com/en-us/office/pop-and-imap-email-settings-for-outlook-8361e398-8af4-4e97-b147-6c6c4ac95353?ui=en-us&rs=en-us&ad=us'
-        }
-        external
-      >
-        {i18n.translate(
-          'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.helpOutlookLink',
-          {
-            defaultMessage: 'How to configure Outlook',
-          }
-        )}
-      </EuiLink>
-      <EuiSpacer size="m" />
-      <EuiLink
-        target="_blank"
-        href={'https://docs.aws.amazon.com/ses/latest/DeveloperGuide/smtp-connect.html'}
-        external
-      >
-        {i18n.translate(
-          'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.helpAmazonLink',
-          {
-            defaultMessage: 'How to configure the Amazon SES SMTP Endpoint',
-          }
-        )}
-      </EuiLink>
     </Fragment>
   );
 };

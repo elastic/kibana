@@ -27,26 +27,27 @@ export const IndexParamsFields = ({
   };
 
   return (
-    <JsonEditorWithMessageVariables
-      messageVariables={messageVariables}
-      paramsProperty={'documents'}
-      inputTargetValue={
-        documents && documents.length > 0 ? ((documents[0] as unknown) as string) : ''
-      }
-      label={i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.documentsFieldLabel',
-        {
-          defaultMessage: 'Document to index',
+    <>
+      <JsonEditorWithMessageVariables
+        messageVariables={messageVariables}
+        paramsProperty={'documents'}
+        inputTargetValue={
+          documents && documents.length > 0 ? ((documents[0] as unknown) as string) : ''
         }
-      )}
-      aria-label={i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.jsonDocAriaLabel',
-        {
-          defaultMessage: 'Code editor',
-        }
-      )}
-      onDocumentsChange={onDocumentsChange}
-    />
+        label={i18n.translate(
+          'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.documentsFieldLabel',
+          {
+            defaultMessage: 'Document to index',
+          }
+        )}
+        aria-label={i18n.translate(
+          'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.jsonDocAriaLabel',
+          {
+            defaultMessage: 'Code editor',
+          }
+        )}
+        onDocumentsChange={onDocumentsChange}
+      />
       <EuiSpacer size="m" />
       <EuiLink
         target="_blank"
@@ -62,6 +63,7 @@ export const IndexParamsFields = ({
           }
         )}
       </EuiLink>
+    </>
   );
 };
 
