@@ -4,19 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { PackageInfo, RegistryStream, NewPackageConfig, PackageConfigInput } from '../../../types';
 import { Loading } from '../../../components';
-import { PackageConfigValidationResults, validationHasErrors } from './services';
+import { PackageConfigValidationResults } from './services';
 import { PackageConfigInputPanel, CustomPackageConfig } from './components';
 import { CreatePackageConfigFrom } from './types';
-
-const HorizontalRuleNoTopMargin = styled(EuiHorizontalRule)`
-  margin-top: 0;
-`;
 
 const findStreamsForInputType = (
   inputType: string,
@@ -57,8 +50,6 @@ export const StepConfigurePackage: React.FunctionComponent<{
   validationResults,
   submitAttempted,
 }) => {
-  const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
-
   // Configure inputs (and their streams)
   // Assume packages only export one config template for now
   const renderConfigureInputs = () =>
@@ -67,7 +58,7 @@ export const StepConfigurePackage: React.FunctionComponent<{
     packageInfo.config_templates[0].inputs &&
     packageInfo.config_templates[0].inputs.length ? (
       <>
-        <HorizontalRuleNoTopMargin margin="m" />
+        <EuiHorizontalRule margin="m" />
         <EuiFlexGroup direction="column" gutterSize="none">
           {packageInfo.config_templates[0].inputs.map((packageInput) => {
             const packageConfigInput = packageConfig.inputs.find(
@@ -111,33 +102,5 @@ export const StepConfigurePackage: React.FunctionComponent<{
       />
     );
 
-  return validationResults ? (
-    <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiFlexItem>{renderConfigureInputs()}</EuiFlexItem>
-      {hasErrors && submitAttempted ? (
-        <EuiFlexItem>
-          <EuiSpacer size="m" />
-          <EuiCallOut
-            title={i18n.translate(
-              'xpack.ingestManager.createPackageConfig.stepConfigure.validationErrorTitle',
-              {
-                defaultMessage: 'Your integration configuration has errors',
-              }
-            )}
-            color="danger"
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.ingestManager.createPackageConfig.stepConfigure.validationErrorText"
-                defaultMessage="Please fix the above errors before continuing"
-              />
-            </p>
-          </EuiCallOut>
-          <EuiSpacer size="m" />
-        </EuiFlexItem>
-      ) : null}
-    </EuiFlexGroup>
-  ) : (
-    <Loading />
-  );
+  return validationResults ? renderConfigureInputs() : <Loading />;
 };

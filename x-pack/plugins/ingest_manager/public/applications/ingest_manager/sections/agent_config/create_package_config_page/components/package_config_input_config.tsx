@@ -12,7 +12,6 @@ import {
   EuiText,
   EuiSpacer,
   EuiButtonEmpty,
-  EuiIconTip,
 } from '@elastic/eui';
 import { PackageConfigInput, RegistryVarsEntry } from '../../../../types';
 import {
@@ -69,33 +68,14 @@ export const PackageConfigInputConfig: React.FunctionComponent<{
           <EuiFlexGroup gutterSize="none" alignItems="flexStart">
             <EuiFlexItem grow={1} />
             <EuiFlexItem grow={5}>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiText color={hasErrors ? 'danger' : 'default'}>
-                    <h4>
-                      <FormattedMessage
-                        id="xpack.ingestManager.createPackageConfig.stepConfigure.inputSettingsTitle"
-                        defaultMessage="Settings"
-                      />
-                    </h4>
-                  </EuiText>
-                </EuiFlexItem>
-                {hasErrors ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiIconTip
-                      content={
-                        <FormattedMessage
-                          id="xpack.ingestManager.createPackageConfig.stepConfigure.inputConfigErrorsTooltip"
-                          defaultMessage="Fix configuration errors"
-                        />
-                      }
-                      position="right"
-                      type="alert"
-                      iconProps={{ color: 'danger' }}
-                    />
-                  </EuiFlexItem>
-                ) : null}
-              </EuiFlexGroup>
+              <EuiText>
+                <h4>
+                  <FormattedMessage
+                    id="xpack.ingestManager.createPackageConfig.stepConfigure.inputSettingsTitle"
+                    defaultMessage="Settings"
+                  />
+                </h4>
+              </EuiText>
               <EuiSpacer size="s" />
               <EuiText color="subdued" size="s">
                 <p>

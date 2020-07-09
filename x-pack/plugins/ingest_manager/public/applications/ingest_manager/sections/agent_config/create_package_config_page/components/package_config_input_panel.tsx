@@ -92,6 +92,9 @@ export const PackageConfigInputPanel: React.FunctionComponent<{
                     enabled,
                   })),
                 });
+                if (!enabled && isShowingStreams) {
+                  setIsShowingStreams(false);
+                }
               }}
             />
           </EuiFlexItem>

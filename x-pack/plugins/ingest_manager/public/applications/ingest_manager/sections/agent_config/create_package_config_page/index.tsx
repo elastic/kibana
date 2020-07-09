@@ -408,36 +408,48 @@ export const CreatePackageConfigPage: React.FunctionComponent = () => {
             : undefined
         }
       >
-        <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
-            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-            <EuiButtonEmpty
-              color="ghost"
-              href={cancelUrl}
-              onClick={cancelClickHandler}
-              data-test-subj="createPackageConfigCancelButton"
-            >
+            {!isLoadingSecondStep && agentConfig && packageInfo && formState === 'INVALID' ? (
               <FormattedMessage
-                id="xpack.ingestManager.createPackageConfig.cancelButton"
-                defaultMessage="Cancel"
+                id="xpack.ingestManager.createPackageConfig.errorOnSaveText"
+                defaultMessage="Your integration configuration has errors. Please fix them before saving."
               />
-            </EuiButtonEmpty>
+            ) : null}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={onSubmit}
-              isLoading={formState === 'LOADING'}
-              disabled={formState !== 'VALID'}
-              iconType="save"
-              color="primary"
-              fill
-              data-test-subj="createPackageConfigSaveButton"
-            >
-              <FormattedMessage
-                id="xpack.ingestManager.createPackageConfig.saveButton"
-                defaultMessage="Save integration"
-              />
-            </EuiButton>
+            <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                <EuiButtonEmpty
+                  color="ghost"
+                  href={cancelUrl}
+                  onClick={cancelClickHandler}
+                  data-test-subj="createPackageConfigCancelButton"
+                >
+                  <FormattedMessage
+                    id="xpack.ingestManager.createPackageConfig.cancelButton"
+                    defaultMessage="Cancel"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={onSubmit}
+                  isLoading={formState === 'LOADING'}
+                  disabled={formState !== 'VALID'}
+                  iconType="save"
+                  color="primary"
+                  fill
+                  data-test-subj="createPackageConfigSaveButton"
+                >
+                  <FormattedMessage
+                    id="xpack.ingestManager.createPackageConfig.saveButton"
+                    defaultMessage="Save integration"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiBottomBar>

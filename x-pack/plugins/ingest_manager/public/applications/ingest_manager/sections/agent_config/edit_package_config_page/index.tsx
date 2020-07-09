@@ -328,29 +328,41 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
                 : undefined
             }
           >
-            <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty color="ghost" href={cancelUrl}>
+                {agentConfig && packageInfo && formState === 'INVALID' ? (
                   <FormattedMessage
-                    id="xpack.ingestManager.editPackageConfig.cancelButton"
-                    defaultMessage="Cancel"
+                    id="xpack.ingestManager.createPackageConfig.errorOnSaveText"
+                    defaultMessage="Your integration configuration has errors. Please fix them before saving."
                   />
-                </EuiButtonEmpty>
+                ) : null}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  onClick={onSubmit}
-                  isLoading={formState === 'LOADING'}
-                  disabled={formState !== 'VALID'}
-                  iconType="save"
-                  color="primary"
-                  fill
-                >
-                  <FormattedMessage
-                    id="xpack.ingestManager.editPackageConfig.saveButton"
-                    defaultMessage="Save integration"
-                  />
-                </EuiButton>
+                <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty color="ghost" href={cancelUrl}>
+                      <FormattedMessage
+                        id="xpack.ingestManager.editPackageConfig.cancelButton"
+                        defaultMessage="Cancel"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      onClick={onSubmit}
+                      isLoading={formState === 'LOADING'}
+                      disabled={formState !== 'VALID'}
+                      iconType="save"
+                      color="primary"
+                      fill
+                    >
+                      <FormattedMessage
+                        id="xpack.ingestManager.editPackageConfig.saveButton"
+                        defaultMessage="Save integration"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiBottomBar>
