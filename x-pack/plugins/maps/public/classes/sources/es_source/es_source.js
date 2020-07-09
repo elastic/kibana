@@ -119,11 +119,13 @@ export class AbstractESSource extends AbstractVectorSource {
       const buffer = this.isGeoGridPrecisionAware()
         ? expandToTileBoundaries(searchFilters.buffer, searchFilters.geogridPrecision)
         : searchFilters.buffer;
+
       allFilters.push(createExtentFilter(buffer, geoField.name, geoField.type));
     }
     if (isTimeAware) {
       allFilters.push(getTimeFilter().createFilter(indexPattern, searchFilters.timeFilters));
     }
+
     const searchService = getSearchService();
     const searchSource = await searchService.searchSource.create(initialSearchContext);
 
@@ -207,7 +209,8 @@ export class AbstractESSource extends AbstractVectorSource {
     }
 
     try {
-      this.indexPattern = await getIndexPatternService().get(this.getIndexPatternId());
+      const indexPatternService = getIndexPatternService();
+      this.indexPattern = await indexPatternService.get(this.getIndexPatternId());
       return this.indexPattern;
     } catch (error) {
       throw new Error(

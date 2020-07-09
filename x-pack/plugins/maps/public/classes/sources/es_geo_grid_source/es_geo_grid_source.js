@@ -203,6 +203,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
       }
       searchSource.setField('aggs', aggs);
       const requestId = afterKey ? `${this.getId()} afterKey ${afterKey.geoSplit}` : this.getId();
+
       const esResponse = await this._runEsQuery({
         requestId,
         requestName: `${layerName} (${requestCount})`,

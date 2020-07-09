@@ -49,6 +49,7 @@ export function getPreserveDrawingBuffer(): boolean;
 export function getEnableVectorTiles(): boolean;
 export function getProxyElasticMapsServiceInMaps(): boolean;
 export function getIsGoldPlus(): boolean;
+export function fetchSearchSourceAndRecordWithInspector(args: unknown): any;
 
 export function setLicenseId(args: unknown): void;
 export function setInspector(args: unknown): void;
