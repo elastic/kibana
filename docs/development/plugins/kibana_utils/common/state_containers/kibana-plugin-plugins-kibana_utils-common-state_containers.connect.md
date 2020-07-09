@@ -4,7 +4,7 @@
 
 ## Connect type
 
-Similar to `connect` from react-redux, allows to map state from state container to component's props
+Similar to `connect` from react-redux, allows to map state from state container to component's props.
 
 <b>Signature:</b>
 
