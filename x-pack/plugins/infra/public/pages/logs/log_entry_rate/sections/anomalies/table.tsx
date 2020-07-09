@@ -38,6 +38,7 @@ import {
   PaginationOptions,
   LogEntryAnomalies,
 } from '../../use_log_entry_anomalies_results';
+import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 
 interface TableItem {
   id: string;
@@ -203,23 +204,25 @@ export const AnomaliesTable: React.FunctionComponent<{
   );
   return (
     <>
-      <EuiBasicTable
-        items={tableItems}
-        itemId="id"
-        itemIdToExpandedRowMap={expandedDatasetRowContents}
-        isExpandable={true}
-        hasActions={true}
-        columns={columns}
-        sorting={tableSortOptions}
-        onChange={handleTableChange}
-      />
-      <EuiSpacer size="l" />
-      <PaginationControls
-        fetchNextPage={fetchNextPage}
-        fetchPreviousPage={fetchPreviousPage}
-        page={page}
-        isLoading={isLoading}
-      />
+      <LoadingOverlayWrapper isLoading={isLoading}>
+        <EuiBasicTable
+          items={tableItems}
+          itemId="id"
+          itemIdToExpandedRowMap={expandedDatasetRowContents}
+          isExpandable={true}
+          hasActions={true}
+          columns={columns}
+          sorting={tableSortOptions}
+          onChange={handleTableChange}
+        />
+        <EuiSpacer size="l" />
+        <PaginationControls
+          fetchNextPage={fetchNextPage}
+          fetchPreviousPage={fetchPreviousPage}
+          page={page}
+          isLoading={isLoading}
+        />
+      </LoadingOverlayWrapper>
     </>
   );
 };

@@ -222,9 +222,10 @@ export const LogEntryRateResultsContent: React.FunctionComponent<LogEntryRateRes
         <EuiFlexItem grow={false}>
           <EuiPanel paddingSize="m">
             <AnomaliesResults
-              isLoading={isLoading || isLoadingLogEntryAnomalies}
+              isLoadingLogRateResults={isLoading}
+              isLoadingAnomaliesResults={isLoadingLogEntryAnomalies}
               viewSetupForReconfiguration={viewSetupFlyoutForReconfiguration}
-              results={logEntryRate}
+              logEntryRateResults={logEntryRate}
               anomalies={logEntryAnomalies}
               setTimeRange={handleChartTimeRangeChange}
               timeRange={queryTimeRange.value}
