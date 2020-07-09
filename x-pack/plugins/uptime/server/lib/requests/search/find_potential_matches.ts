@@ -5,7 +5,6 @@
  */
 
 import { get, set } from 'lodash';
-import { CursorDirection } from '../../../../common/runtime_types';
 import { QueryContext } from './query_context';
 
 /**
@@ -44,8 +43,6 @@ const query = async (queryContext: QueryContext, searchAfter: any, size: number)
 };
 
 const queryBody = async (queryContext: QueryContext, searchAfter: any, size: number) => {
-  const compositeOrder = cursorDirectionToOrder(queryContext.pagination.cursorDirection);
-
   const filters = await queryContext.dateAndCustomFilters();
 
   if (queryContext.statusFilter) {
@@ -66,7 +63,7 @@ const queryBody = async (queryContext: QueryContext, searchAfter: any, size: num
           size,
           sources: [
             {
-              monitor_id: { terms: { field: 'monitor.id', order: compositeOrder } },
+              monitor_id: { terms: { field: 'monitor.id', order: queryContext.cursorOrder() } },
             },
           ],
         },
@@ -79,8 +76,4 @@ const queryBody = async (queryContext: QueryContext, searchAfter: any, size: num
   }
 
   return body;
-};
-
-const cursorDirectionToOrder = (cd: CursorDirection): 'asc' | 'desc' => {
-  return CursorDirection[cd] === CursorDirection.AFTER ? 'asc' : 'desc';
 };
