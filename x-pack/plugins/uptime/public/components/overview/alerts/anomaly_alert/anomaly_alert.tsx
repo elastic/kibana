@@ -44,7 +44,7 @@ export default function AnomalyAlertComponent({ setAlertParams }: Props) {
       <EuiFlexGroup direction={'column'} gutterSize="none">
         <EuiFlexItem grow={false}>
           <EuiExpression
-            description={AnomalyTranslations.criteriaDescription}
+            description={AnomalyTranslations.whenMonitor}
             value={
               <EuiText className="eui-displayInlineBlock">
                 <h5>{monitorId}</h5>
@@ -63,7 +63,7 @@ export default function AnomalyAlertComponent({ setAlertParams }: Props) {
               />
             }
             data-test-subj={'uptimeAnomalySeverity'}
-            description={AnomalyTranslations.scoreDescription}
+            description={AnomalyTranslations.hasAnomalyWithSeverity}
             id="severity"
             value={
               <EuiHealth
