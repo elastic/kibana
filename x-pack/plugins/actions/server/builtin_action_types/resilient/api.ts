@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './jira';
-export * from './servicenow';
-export * from './resilient';
+export { api } from '../case/api';
