@@ -65,7 +65,7 @@ export interface Detector {
   function: string;
   over_field_name?: string;
   partition_field_name?: string;
-  use_null?: string;
+  use_null?: boolean;
   custom_rules?: CustomRule[];
 }
 export interface AnalysisLimits {
