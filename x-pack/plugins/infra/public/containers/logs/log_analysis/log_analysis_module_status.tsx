@@ -252,7 +252,7 @@ const getSetupStatus = <JobType extends string>(everyJobStatus: Record<JobType, 
   Object.entries<JobStatus>(everyJobStatus).reduce<SetupStatus>((setupStatus, [, jobStatus]) => {
     if (jobStatus === 'missing') {
       return { type: 'required', reason: 'missing' };
-    } else if (setupStatus.type === 'required') {
+    } else if (setupStatus.type === 'required' || setupStatus.type === 'succeeded') {
       return setupStatus;
     } else if (setupStatus.type === 'skipped' || isJobStatusWithResults(jobStatus)) {
       return {

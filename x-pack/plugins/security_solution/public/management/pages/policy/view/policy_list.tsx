@@ -8,6 +8,8 @@ import React, { useCallback, useEffect, useMemo, CSSProperties, useState } from 
 import {
   EuiBasicTable,
   EuiText,
+  EuiTitle,
+  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTableFieldDataColumnType,
@@ -20,7 +22,6 @@ import {
   EuiOverlayMask,
   EuiConfirmModal,
   EuiCallOut,
-  EuiSpacer,
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -391,9 +392,27 @@ export const PolicyList = React.memo(() => {
       <ManagementPageView
         viewType="list"
         data-test-subj="policyListPage"
-        headerLeft={i18n.translate('xpack.securitySolution.endpoint.policyList.viewTitle', {
-          defaultMessage: 'Policies',
-        })}
+        headerLeft={
+          <>
+            <EuiTitle size="l">
+              <h1 data-test-subj="pageViewHeaderLeftTitle">
+                <FormattedMessage
+                  id="xpack.securitySolution.policyList.pageTitle"
+                  defaultMessage="Policies"
+                />
+              </h1>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued">
+              <p>
+                <FormattedMessage
+                  id="xpack.securitySolution.policyList.pageSubTitle"
+                  defaultMessage="View and configure protections"
+                />
+              </p>
+            </EuiText>
+          </>
+        }
         headerRight={
           <EuiButton
             iconType="plusInCircle"
