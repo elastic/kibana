@@ -46,6 +46,7 @@ import {
   getAnnotationFieldValue,
 } from '../../../../../common/types/annotations';
 import { PartitionFieldsType } from '../../../../../common/types/anomalies';
+import { PARTITION_FIELDS } from '../../../../../common/constants/anomalies';
 
 interface ViewableDetector {
   index: number;
@@ -191,6 +192,14 @@ class AnnotationFlyoutUI extends Component<CommonProps & Props> {
         annotation[getAnnotationFieldValue(fieldType)] = fieldValue;
       });
       annotation.detector_index = detectorIndex;
+    }
+    // if unchecked, remove all the partitions before indexing
+    if (!this.state.applyAnnotationToSeries) {
+      delete annotation.detector_index;
+      PARTITION_FIELDS.forEach((fieldType) => {
+        delete annotation[getAnnotationFieldName(fieldType)];
+        delete annotation[getAnnotationFieldValue(fieldType)];
+      });
     }
     // Mark the annotation created by `user` if and only if annotation is being created, not updated
     annotation.event = annotation.event ?? ANNOTATION_EVENT_USER;
