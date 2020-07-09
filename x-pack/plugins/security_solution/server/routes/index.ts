@@ -37,6 +37,7 @@ import { cleanDraftTimelinesRoute } from '../lib/timeline/routes/clean_draft_tim
 import { SetupPlugins } from '../plugin';
 import { ConfigType } from '../config';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/install_prepacked_timelines_route';
+import { getTimelineByTemplateTimelineIdRoute } from '../lib/timeline/routes/get_timeline_by_template_timeline_id_route';
 
 export const initRoutes = (
   router: IRouter,
@@ -69,6 +70,7 @@ export const initRoutes = (
   importTimelinesRoute(router, config, security);
   exportTimelinesRoute(router, config, security);
   getDraftTimelinesRoute(router, config, security);
+  getTimelineByTemplateTimelineIdRoute(router, config, security);
   cleanDraftTimelinesRoute(router, config, security);
 
   installPrepackedTimelinesRoute(router, config, security);
