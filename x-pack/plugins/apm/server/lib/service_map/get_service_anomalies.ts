@@ -6,12 +6,12 @@
 import { Logger } from 'kibana/server';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { PromiseReturnType } from '../../../typings/common';
-import { ML_GROUP_NAME_APM } from '../anomaly_detection/create_anomaly_detection_jobs';
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
 import { ServiceAnomalyStats } from '../../../common/anomaly_detection';
+import { APM_ML_JOB_GROUP } from '../anomaly_detection/constants';
 
 export const DEFAULT_ANOMALIES = { mlJobIds: [], serviceAnomalies: {} };
 
@@ -147,7 +147,7 @@ export async function getMLJobIds(
   ml: Required<Setup>['ml'],
   environment?: string
 ) {
-  const response = await ml.anomalyDetectors.jobs(ML_GROUP_NAME_APM);
+  const response = await ml.anomalyDetectors.jobs(APM_ML_JOB_GROUP);
   // to filter out legacy jobs we are filtering by the existence of `apm_ml_version` in `custom_settings`
   // and checking that it is compatable.
   const mlJobs = response.jobs.filter(
