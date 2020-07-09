@@ -37,6 +37,7 @@ export function iptablesLogsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('home.tutorials.iptablesLogs.nameTitle', {
       defaultMessage: 'Iptables / Ubiquiti',
     }),
+    moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.iptablesLogs.shortDescription', {
       defaultMessage: 'Collect and parse iptables and ip6tables logs or from Ubiqiti firewalls.',
