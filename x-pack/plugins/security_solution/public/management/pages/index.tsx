@@ -9,6 +9,8 @@ import React, { memo } from 'react';
 import { useHistory, Route, Switch } from 'react-router-dom';
 
 import { ChromeBreadcrumb } from 'kibana/public';
+import { EuiText, EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { PolicyContainer } from './policy';
 import {
   MANAGEMENT_ROUTING_HOSTS_PATH,
@@ -24,6 +26,9 @@ import { AdministrationRouteSpyState } from '../../common/utils/route/types';
 import { ADMINISTRATION } from '../../app/home/translations';
 import { AdministrationSubTab } from '../types';
 import { HOSTS_TAB, POLICIES_TAB } from '../common/translations';
+import { SpyRoute } from '../../common/utils/route/spy_routes';
+import { SecurityPageName } from '../../app/types';
+import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
 
 const TabNameMappedToI18nKey: Record<string, string> = {
   [AdministrationSubTab.hosts]: HOSTS_TAB,
@@ -57,8 +62,45 @@ export const getBreadcrumbs = (
   return breadcrumb;
 };
 
+const NoPermissions = memo(() => {
+  return (
+    <>
+      <EuiEmptyPrompt
+        iconType="alert"
+        iconColor="danger"
+        titleSize="l"
+        data-test-subj="noIngestPermissions"
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.endpointManagemnet.noPermissionsText"
+            defaultMessage="You do not have the required Kibana permissions to use Elastic Security Administration"
+          />
+        }
+        body={
+          <p>
+            <EuiText color="subdued">
+              <FormattedMessage
+                id="xpack.securitySolution.endpointManagement.noPermissionsSubText"
+                defaultMessage="It looks like Ingest Manager is disabled. Ingest Manager must be enabled to use this feature. If you do not have permissions to enable Ingest Manager, contact your Kibana administrator."
+              />
+            </EuiText>
+          </p>
+        }
+      />
+      <SpyRoute pageName={SecurityPageName.management} />
+    </>
+  );
+});
+NoPermissions.displayName = 'NoPermissions';
+
 export const ManagementContainer = memo(() => {
   const history = useHistory();
+  const { allEnabled: isIngestEnabled } = useIngestEnabledCheck();
+
+  if (!isIngestEnabled) {
+    return <Route path="*" component={NoPermissions} />;
+  }
+
   return (
     <Switch>
       <Route path={MANAGEMENT_ROUTING_HOSTS_PATH} component={HostsContainer} />
