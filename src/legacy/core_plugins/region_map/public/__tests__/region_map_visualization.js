@@ -26,9 +26,6 @@ import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pa
 import * as visModule from 'ui/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
 import worldJson from './world.json';
-import EMS_CATALOGUE from '../../../../../ui/public/vis/__tests__/map/ems_mocks/sample_manifest_6.6.json';
-import EMS_FILES from '../../../../../ui/public/vis/__tests__/map/ems_mocks/sample_files_6.6.json';
-import EMS_TILES from '../../../../../ui/public/vis/__tests__/map/ems_mocks/sample_tiles_6.6.json';
 
 import initialPng from './initial.png';
 import toiso3Png from './toiso3.png';
@@ -49,6 +46,8 @@ describe('RegionMapsVisualizationTests', function () {
   let Vis;
   let indexPattern;
   let vis;
+  let serviceSettings;
+  let loadFileLayerConfig;
 
   let imageComparator;
 
@@ -80,7 +79,6 @@ describe('RegionMapsVisualizationTests', function () {
 
   beforeEach(ngMock.module('kibana'));
 
-  let getManifestStub;
   beforeEach(ngMock.inject((Private, $injector) => {
 
     Vis = Private(visModule.VisProvider);
@@ -96,24 +94,24 @@ describe('RegionMapsVisualizationTests', function () {
       });
     };
 
-    const serviceSettings = $injector.get('serviceSettings');
-    getManifestStub = serviceSettings.__debugStubManifestCalls(async (url) => {
-      //simulate network calls
-      if (url.startsWith('https://foobar')) {
-        return EMS_CATALOGUE;
-      } else if (url.startsWith('https://tiles.foobar')) {
-        return EMS_TILES;
-      } else if (url.startsWith('https://files.foobar')) {
-        return EMS_FILES;
-      }
-    });
+    serviceSettings = $injector.get('serviceSettings');
+    loadFileLayerConfig = serviceSettings.loadFileLayerConfig;
+    serviceSettings.loadFileLayerConfig = async (fl) => {
+      // Region-maps visualization calls EMS to dynamically load attribution iso grabbing it from visState
+      // Mock this call to avoid network-roundtrip
+      return {
+        attribution: fl.attribution + '_sanitized',
+        name: fl.name,
+      };
+    };
+
 
   }));
 
 
   afterEach(function () {
     ChoroplethLayer.prototype._makeJsonAjaxCall = _makeJsonAjaxCallOld;
-    getManifestStub.removeStub();
+    loadFileLayerConfig.loadFileLayerConfig = loadFileLayerConfig;
   });
 
 
