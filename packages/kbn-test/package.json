@@ -16,7 +16,6 @@
     "@types/joi": "^13.4.2",
     "@types/lodash": "^4.14.155",
     "@types/parse-link-header": "^1.0.0",
-    "@types/puppeteer": "^3.0.0",
     "@types/strip-ansi": "^5.2.1",
     "@types/xml2js": "^0.4.5",
     "diff": "^4.0.1"
@@ -31,7 +30,6 @@
     "joi": "^13.5.2",
     "lodash": "^4.17.15",
     "parse-link-header": "^1.0.1",
-    "puppeteer": "^3.3.0",
     "rxjs": "^6.5.5",
     "strip-ansi": "^5.2.0",
     "tar-fs": "^1.16.3",
