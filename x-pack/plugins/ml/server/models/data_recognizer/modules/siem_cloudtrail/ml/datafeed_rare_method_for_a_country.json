@@ -1,0 +1,16 @@
+{
+    "job_id": "JOB_ID",
+    "indices": [
+      "INDEX_PATTERN_NAME"
+    ],
+    "max_empty_searches": 10,
+    "query": {
+        "bool": {
+            "filter": [
+                {"term": {"event.dataset": "aws.cloudtrail"}},
+                {"term": {"event.module": "aws"}},
+                {"exists": {"field": "source.geo.country_iso_code"}}
+            ]
+        }
+    }
+}
