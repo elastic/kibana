@@ -97,97 +97,15 @@ const testBarSummary: MonitorSummary = {
   },
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/70386
-describe.skip('MonitorList component', () => {
-  let result: MonitorSummariesResult;
+describe('MonitorList component', () => {
   let localStorageMock: any;
 
-  const getMonitorList = (timestamp?: string): MonitorSummaryResult => {
+  const getMonitorList = (timestamp?: string): MonitorSummariesResult => {
+    if (timestamp) {
+      testBarSummary.state.timestamp = timestamp;
+      testFooSummary.state.timestamp = timestamp;
+    }
     return {
-      nextPagePagination: null,
-      prevPagePagination: null,
-      summaries: [
-        {
-          monitor_id: 'foo',
-          state: {
-            checks: [
-              {
-                monitor: {
-                  ip: '127.0.0.1',
-                  status: 'up',
-                },
-                timestamp: 124,
-              },
-              {
-                monitor: {
-                  ip: '127.0.0.2',
-                  status: 'down',
-                },
-                timestamp: 125,
-              },
-              {
-                monitor: {
-                  ip: '127.0.0.3',
-                  status: 'down',
-                },
-                timestamp: 126,
-              },
-            ],
-            summary: {
-              up: 1,
-              down: 2,
-            },
-            timestamp: timestamp ?? '123',
-            url: {},
-          },
-        },
-        {
-          monitor_id: 'bar',
-          state: {
-            checks: [
-              {
-                monitor: {
-                  ip: '127.0.0.1',
-                  status: 'up',
-                },
-                timestamp: 125,
-              },
-              {
-                monitor: {
-                  ip: '127.0.0.2',
-                  status: 'up',
-                },
-                timestamp: 126,
-              },
-            ],
-            summary: {
-              up: 2,
-              down: 0,
-            },
-            timestamp: timestamp ?? '125',
-            url: {},
-          },
-        },
-      ],
-      totalSummaryCount: 2,
-    };
-  };
-
-  beforeEach(() => {
-    const useDispatchSpy = jest.spyOn(redux, 'useDispatch');
-    useDispatchSpy.mockReturnValue(jest.fn());
-
-    const useSelectorSpy = jest.spyOn(redux, 'useSelector');
-    useSelectorSpy.mockReturnValue(true);
-
-    localStorageMock = {
-      getItem: jest.fn().mockImplementation(() => '25'),
-      setItem: jest.fn(),
-    };
-
-    // @ts-ignore replacing a call to localStorage we use for monitor list size
-    global.localStorage = localStorageMock;
-    result = {
       nextPagePagination: null,
       prevPagePagination: null,
       summaries: [testFooSummary, testBarSummary],

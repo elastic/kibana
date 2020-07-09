@@ -245,7 +245,7 @@ exports[`MonitorList component MonitorListPagination component renders the pagin
                       "timestamp": "126",
                     },
                   ],
-                  "timestamp": "123",
+                  "timestamp": "2020-07-09T15:45:00.151Z",
                   "url": Object {},
                 },
               },
@@ -285,7 +285,7 @@ exports[`MonitorList component MonitorListPagination component renders the pagin
                       "timestamp": "126",
                     },
                   ],
-                  "timestamp": "125",
+                  "timestamp": "2020-07-09T15:45:00.151Z",
                   "url": Object {},
                 },
               },
@@ -548,7 +548,7 @@ exports[`MonitorList component renders error list 1`] = `
                       "timestamp": "126",
                     },
                   ],
-                  "timestamp": "123",
+                  "timestamp": "2020-07-09T15:45:00.151Z",
                   "url": Object {},
                 },
               },
@@ -588,7 +588,7 @@ exports[`MonitorList component renders error list 1`] = `
                       "timestamp": "126",
                     },
                   ],
-                  "timestamp": "125",
+                  "timestamp": "2020-07-09T15:45:00.151Z",
                   "url": Object {},
                 },
               },
@@ -746,7 +746,7 @@ exports[`MonitorList component renders loading state 1`] = `
                       "timestamp": "126",
                     },
                   ],
-                  "timestamp": "123",
+                  "timestamp": "2020-07-09T15:45:00.151Z",
                   "url": Object {},
                 },
               },
@@ -786,7 +786,7 @@ exports[`MonitorList component renders loading state 1`] = `
                       "timestamp": "126",
                     },
                   ],
-                  "timestamp": "125",
+                  "timestamp": "2020-07-09T15:45:00.151Z",
                   "url": Object {},
                 },
               },
@@ -1132,7 +1132,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                           <div
                             class="euiTextColor euiTextColor--subdued"
                           >
-                            1898 Yr ago
+                            5m ago
                           </div>
                         </div>
                       </span>
@@ -1189,7 +1189,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   class="euiLink euiLink--text c4"
                   type="button"
                 >
-
+                   
                   <div
                     color="subbdued"
                     data-euiicon-type="popout"
@@ -1309,7 +1309,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                           <div
                             class="euiTextColor euiTextColor--subdued"
                           >
-                            1896 Yr ago
+                            5m ago
                           </div>
                         </div>
                       </span>
@@ -1366,7 +1366,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   class="euiLink euiLink--text c4"
                   type="button"
                 >
-
+                   
                   <div
                     color="subbdued"
                     data-euiicon-type="popout"
