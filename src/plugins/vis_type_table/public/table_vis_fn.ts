@@ -58,13 +58,14 @@ export const createTableVisFn = (): ExpressionFunctionDefinition<
     },
   },
   fn(input, args) {
-    const visConfig = args.visConfig && JSON.parse(args.visConfig);
+    const { title, ...visConfig } = args.visConfig && JSON.parse(args.visConfig);
     const convertedData = tableVisResponseHandler(input, visConfig.dimensions);
 
     return {
       type: 'render',
       as: 'visualization',
       value: {
+        title,
         visData: convertedData,
         visType: 'table',
         visConfig,
