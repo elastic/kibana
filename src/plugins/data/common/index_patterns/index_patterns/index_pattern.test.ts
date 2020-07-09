@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { defaults, pluck, last, get } from 'lodash';
+import { defaults, map, last, get } from 'lodash';
 
 import { IndexPattern } from './index_pattern';
 
@@ -29,6 +29,10 @@ import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_
 import { Field } from '../fields';
 
 import { fieldFormatsMock } from '../../field_formats/mocks';
+
+class MockFieldFormatter {}
+
+fieldFormatsMock.getType = jest.fn().mockImplementation(() => MockFieldFormatter);
 
 jest.mock('../../field_mapping', () => {
   const originalModule = jest.requireActual('../../field_mapping');
@@ -62,7 +66,7 @@ const savedObjectsClient = {
   create: jest.fn(),
   get: jest.fn().mockImplementation(() => object),
   update: jest.fn().mockImplementation(async (type, id, body, { version }) => {
-    if (object._version !== version) {
+    if (object.version !== version) {
       throw new Object({
         res: {
           status: 409,
@@ -70,10 +74,10 @@ const savedObjectsClient = {
       });
     }
     object.attributes.title = body.title;
-    object._version += 'a';
+    object.version += 'a';
     return {
-      id: object._id,
-      _version: object._version,
+      id: object.id,
+      version: object.version,
     };
   }),
 };
@@ -105,6 +109,7 @@ function create(id: string, payload?: any): Promise<IndexPattern> {
     fieldFormats: fieldFormatsMock,
     onNotification: () => {},
     onError: () => {},
+    uiSettingsValues: { shortDotsEnable: false, metaFields: [] },
   });
 
   setDocsourcePayload(id, payload);
@@ -167,7 +172,7 @@ describe('IndexPattern', () => {
       const scriptedNames = mockLogStashFields()
         .filter((item: Field) => item.scripted === true)
         .map((item: Field) => item.name);
-      const respNames = pluck(indexPattern.getScriptedFields(), 'name');
+      const respNames = map(indexPattern.getScriptedFields(), 'name');
 
       expect(respNames).toEqual(scriptedNames);
     });
@@ -211,7 +216,7 @@ describe('IndexPattern', () => {
       const notScriptedNames = mockLogStashFields()
         .filter((item: Field) => item.scripted === false)
         .map((item: Field) => item.name);
-      const respNames = pluck(indexPattern.getNonScriptedFields(), 'name');
+      const respNames = map(indexPattern.getNonScriptedFields(), 'name');
 
       expect(respNames).toEqual(notScriptedNames);
     });
@@ -282,7 +287,7 @@ describe('IndexPattern', () => {
       // const saveSpy = sinon.spy(indexPattern, 'save');
       const scriptedFields = indexPattern.getScriptedFields();
       const oldCount = scriptedFields.length;
-      const scriptedField = last(scriptedFields);
+      const scriptedField = last(scriptedFields) as any;
 
       await indexPattern.removeScriptedField(scriptedField);
 
@@ -293,13 +298,36 @@ describe('IndexPattern', () => {
 
     test('should not allow duplicate names', async () => {
       const scriptedFields = indexPattern.getScriptedFields();
-      const scriptedField = last(scriptedFields);
+      const scriptedField = last(scriptedFields) as any;
       expect.assertions(1);
       try {
         await indexPattern.addScriptedField(scriptedField.name, "'new script'", 'string', 'lang');
       } catch (e) {
         expect(e).toBeInstanceOf(DuplicateField);
       }
+    });
+  });
+
+  describe('toSpec', () => {
+    test('should match snapshot', () => {
+      indexPattern.fieldFormatMap.bytes = {
+        toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }),
+      };
+      expect(indexPattern.toSpec()).toMatchSnapshot();
+    });
+
+    test('can restore from spec', async () => {
+      indexPattern.fieldFormatMap.bytes = {
+        toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }),
+      };
+      const spec = indexPattern.toSpec();
+      const restoredPattern = await create(spec.id as string);
+      restoredPattern.initFromSpec(spec);
+      expect(restoredPattern.id).toEqual(indexPattern.id);
+      expect(restoredPattern.title).toEqual(indexPattern.title);
+      expect(restoredPattern.timeFieldName).toEqual(indexPattern.timeFieldName);
+      expect(restoredPattern.fields.length).toEqual(indexPattern.fields.length);
+      expect(restoredPattern.fieldFormatMap.bytes instanceof MockFieldFormatter).toEqual(true);
     });
   });
 
@@ -355,8 +383,8 @@ describe('IndexPattern', () => {
 
   test('should handle version conflicts', async () => {
     setDocsourcePayload(null, {
-      _id: 'foo',
-      _version: 'foo',
+      id: 'foo',
+      version: 'foo',
       attributes: {
         title: 'something',
       },
@@ -370,6 +398,7 @@ describe('IndexPattern', () => {
       fieldFormats: fieldFormatsMock,
       onNotification: () => {},
       onError: () => {},
+      uiSettingsValues: { shortDotsEnable: false, metaFields: [] },
     });
     await pattern.init();
 
@@ -384,6 +413,7 @@ describe('IndexPattern', () => {
       fieldFormats: fieldFormatsMock,
       onNotification: () => {},
       onError: () => {},
+      uiSettingsValues: { shortDotsEnable: false, metaFields: [] },
     });
     await samePattern.init();
 

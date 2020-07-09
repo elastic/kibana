@@ -8,7 +8,7 @@ import { fromExpression } from '@kbn/interpreter/common';
 import { get } from 'lodash';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/public';
 import { interpretAst } from '../lib/run_interpreter';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { getState } from '../state/store';
 import { getGlobalFilters } from '../state/selectors/workpad';
 import { ExpressionValueFilter } from '../../types';
@@ -36,7 +36,7 @@ function getFiltersByGroup(allFilters: string[], groups?: string[], ungrouped = 
 
   return allFilters.filter((filter: string) => {
     const ast = fromExpression(filter);
-    const expGroups = get(ast, 'chain[0].arguments.filterGroup', []);
+    const expGroups: string[] = get(ast, 'chain[0].arguments.filterGroup', []);
     return expGroups.length > 0 && expGroups.every((expGroup) => groups.includes(expGroup));
   });
 }

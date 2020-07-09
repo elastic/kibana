@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { get, has } from 'lodash';
+import { get, hasIn } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   KibanaContext,
   KibanaDatatable,
   ExpressionFunctionDefinition,
   KibanaDatatableColumn,
-} from '../../../../../plugins/expressions/public';
+} from 'src/plugins/expressions/public';
 import { calculateObjectHash } from '../../../../../plugins/kibana_utils/public';
 import { PersistedState } from '../../../../../plugins/visualizations/public';
 import { Adapters } from '../../../../../plugins/inspector/public';
@@ -33,15 +33,21 @@ import { IAggConfigs } from '../aggs';
 import { ISearchSource } from '../search_source';
 import { tabifyAggResponse } from '../tabify';
 import {
+  calculateBounds,
   Filter,
-  Query,
-  serializeFieldFormat,
-  TimeRange,
+  getTime,
   IIndexPattern,
   isRangeFilter,
+  Query,
+  TimeRange,
 } from '../../../common';
-import { FilterManager, calculateBounds, getTime } from '../../query';
-import { getSearchService, getQueryService, getIndexPatterns } from '../../services';
+import { FilterManager } from '../../query';
+import {
+  getFieldFormats,
+  getIndexPatterns,
+  getQueryService,
+  getSearchService,
+} from '../../services';
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
 import { getRequestInspectorStats, getResponseInspectorStats, serializeAggConfig } from './utils';
 
@@ -189,13 +195,13 @@ const handleCourierRequest = async ({
   // response data incorrectly in the inspector.
   let resp = (searchSource as any).rawResponse;
   for (const agg of aggs.aggs) {
-    if (has(agg, 'type.postFlightRequest')) {
+    if (hasIn(agg, 'type.postFlightRequest')) {
       resp = await agg.type.postFlightRequest(
         resp,
         aggs,
         agg,
         requestSearchSource,
-        inspectorAdapters,
+        inspectorAdapters.requests,
         abortSignal
       );
     }
@@ -227,7 +233,11 @@ const handleCourierRequest = async ({
   }
 
   inspectorAdapters.data.setTabularLoader(
-    () => buildTabularInspectorData((searchSource as any).tabifiedResponse, filterManager),
+    () =>
+      buildTabularInspectorData((searchSource as any).tabifiedResponse, {
+        queryFilter: filterManager,
+        deserializeFieldFormat: getFieldFormats().deserialize,
+      }),
     { returnsFormattedValues: true }
   );
 
@@ -292,7 +302,7 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
       aggs,
       indexPattern,
       timeRange: get(input, 'timeRange', undefined),
-      query: get(input, 'query', undefined),
+      query: get(input, 'query', undefined) as any,
       filters: get(input, 'filters', undefined),
       timeFields: args.timeFields,
       forceFetch: true,
@@ -313,7 +323,7 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
           meta: serializeAggConfig(column.aggConfig),
         };
         if (args.includeFormatHints) {
-          cleanedColumn.formatHint = serializeFieldFormat(column.aggConfig);
+          cleanedColumn.formatHint = column.aggConfig.toSerializedFieldFormat();
         }
         return cleanedColumn;
       }),

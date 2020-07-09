@@ -14,8 +14,6 @@ import {
   AnomalySwimlaneEmbeddableOutput,
 } from '../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
 import { resolveAnomalySwimlaneUserInput } from '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout';
-import { HttpService } from '../application/services/http_service';
-import { AnomalyDetectorService } from '../application/services/anomaly_detector_service';
 
 export const EDIT_SWIMLANE_PANEL_ACTION = 'editSwimlanePanelAction';
 
@@ -32,25 +30,17 @@ export function createEditSwimlanePanelAction(getStartServices: CoreSetup['getSt
     },
     getDisplayName: () =>
       i18n.translate('xpack.ml.actions.editSwimlaneTitle', {
-        defaultMessage: 'Edit swimlane',
+        defaultMessage: 'Edit swim lane',
       }),
     execute: async ({ embeddable }: EditSwimlanePanelContext) => {
       if (!embeddable) {
         throw new Error('Not possible to execute an action without the embeddable context');
       }
 
-      const [{ overlays, uiSettings, http }] = await getStartServices();
-      const anomalyDetectorService = new AnomalyDetectorService(new HttpService(http));
+      const [coreStart] = await getStartServices();
 
       try {
-        const result = await resolveAnomalySwimlaneUserInput(
-          {
-            anomalyDetectorService,
-            overlays,
-            uiSettings,
-          },
-          embeddable.getInput()
-        );
+        const result = await resolveAnomalySwimlaneUserInput(coreStart, embeddable.getInput());
         embeddable.updateInput(result);
       } catch (e) {
         return Promise.reject();

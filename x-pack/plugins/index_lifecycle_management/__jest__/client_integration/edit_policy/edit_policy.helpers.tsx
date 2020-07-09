@@ -8,7 +8,7 @@ import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, TestBed, TestBedConfig } from '../../../../../test_utils';
 
-import { POLICY_NAME } from './contants';
+import { POLICY_NAME } from './constants';
 import { TestSubjects } from '../helpers';
 
 import { EditPolicy } from '../../../public/application/sections/edit_policy';

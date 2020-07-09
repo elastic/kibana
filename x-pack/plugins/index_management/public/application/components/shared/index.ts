@@ -8,7 +8,9 @@ export {
   TabAliases,
   TabMappings,
   TabSettings,
-  StepAliases,
-  StepMappings,
-  StepSettings,
+  StepAliasesContainer,
+  StepMappingsContainer,
+  StepSettingsContainer,
+  CommonWizardSteps,
+  TemplateContentIndicator,
 } from './components';

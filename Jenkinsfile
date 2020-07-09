@@ -3,7 +3,7 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
-kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true) {
+kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true, setCommitStatus: true) {
   githubPr.withDefaultPrComments {
     ciStats.trackBuild {
       catchError {
@@ -41,6 +41,7 @@ kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true) {
             'xpack-ciGroup9': kibanaPipeline.xpackCiGroupProcess(9),
             'xpack-ciGroup10': kibanaPipeline.xpackCiGroupProcess(10),
             'xpack-accessibility': kibanaPipeline.functionalTestProcess('xpack-accessibility', './test/scripts/jenkins_xpack_accessibility.sh'),
+            'xpack-savedObjectsFieldMetrics': kibanaPipeline.functionalTestProcess('xpack-savedObjectsFieldMetrics', './test/scripts/jenkins_xpack_saved_objects_field_metrics.sh'),
             // 'xpack-pageLoadMetrics': kibanaPipeline.functionalTestProcess('xpack-pageLoadMetrics', './test/scripts/jenkins_xpack_page_load_metrics.sh'),
             'xpack-securitySolutionCypress': { processNumber ->
               whenChanged(['x-pack/plugins/security_solution/', 'x-pack/test/security_solution_cypress/']) {

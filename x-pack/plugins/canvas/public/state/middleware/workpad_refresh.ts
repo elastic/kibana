@@ -6,11 +6,10 @@
 
 import { Middleware } from 'redux';
 import { State } from '../../../types';
-// @ts-ignore Untyped Local
+// @ts-expect-error untyped local
 import { fetchAllRenderables } from '../actions/elements';
-// @ts-ignore Untyped Local
 import { setRefreshInterval } from '../actions/workpad';
-// @ts-ignore Untyped Local
+// @ts-expect-error untyped local
 import { appUnload } from '../actions/app';
 import { inFlightComplete } from '../actions/resolved_args';
 import { getInFlight } from '../selectors/resolved_args';

@@ -9,7 +9,7 @@ import moment from 'moment-timezone';
 import { TimeRange } from 'src/plugins/data/common';
 import { ExpressionFunctionDefinition, DatatableRow } from 'src/plugins/expressions/public';
 import { fetch } from '../../common/lib/fetch';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { buildBoolArray } from '../../public/lib/build_bool_array';
 import { Datatable, ExpressionValueFilter } from '../../types';
 import { getFunctionHelp } from '../../i18n';

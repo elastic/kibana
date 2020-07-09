@@ -22,6 +22,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { TypesStart, VisType } from '../vis_types';
 import { NewVisModal } from './new_vis_modal';
 import { ApplicationStart, SavedObjectsStart } from '../../../../core/public';
+import { embeddablePluginMock } from '../../../embeddable/public/mocks';
 
 describe('NewVisModal', () => {
   const defaultVisTypeParams = {
@@ -144,30 +145,34 @@ describe('NewVisModal', () => {
       );
     });
 
-    it('closes and redirects properly if visualization with aliasPath and addToDashboard in editorParams', () => {
+    it('closes and redirects properly if visualization with aliasPath and originatingApp in props', () => {
       const onClose = jest.fn();
       const navigateToApp = jest.fn();
+      const stateTransfer = embeddablePluginMock.createStartContract().getStateTransfer();
       const wrapper = mountWithIntl(
         <NewVisModal
           isOpen={true}
           onClose={onClose}
           visTypesRegistry={visTypes}
-          editorParams={['foo=true', 'bar=42', 'embeddableOriginatingApp=notAnApp']}
+          editorParams={['foo=true', 'bar=42']}
+          originatingApp={'coolJestTestApp'}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
           application={({ navigateToApp } as unknown) as ApplicationStart}
+          stateTransfer={stateTransfer}
           savedObjects={{} as SavedObjectsStart}
         />
       );
       const visButton = wrapper.find('button[data-test-subj="visType-visWithAliasUrl"]');
       visButton.simulate('click');
-      expect(navigateToApp).toBeCalledWith('otherApp', {
-        path: '#/aliasUrl?embeddableOriginatingApp=notAnApp',
+      expect(stateTransfer.navigateToEditor).toBeCalledWith('otherApp', {
+        path: '#/aliasUrl',
+        state: { originatingApp: 'coolJestTestApp' },
       });
       expect(onClose).toHaveBeenCalled();
     });
 
-    it('closes and redirects properly if visualization with aliasApp and without addToDashboard in editorParams', () => {
+    it('closes and redirects properly if visualization with aliasApp and without originatingApp in props', () => {
       const onClose = jest.fn();
       const navigateToApp = jest.fn();
       const wrapper = mountWithIntl(

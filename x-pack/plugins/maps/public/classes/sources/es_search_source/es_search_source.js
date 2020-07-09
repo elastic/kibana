@@ -7,7 +7,6 @@
 import _ from 'lodash';
 import React from 'react';
 
-import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { AbstractESSource } from '../es_source';
 import { getSearchService } from '../../../kibana_services';
 import { hitsToGeoJson } from '../../../elasticsearch_geo_utils';
@@ -18,6 +17,7 @@ import {
   DEFAULT_MAX_BUCKETS_LIMIT,
   SORT_ORDER,
   SCALING_TYPES,
+  VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
@@ -471,10 +471,10 @@ export class ESSearchSource extends AbstractESSource {
     }
 
     if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT) {
-      return [VECTOR_SHAPE_TYPES.POINT];
+      return [VECTOR_SHAPE_TYPE.POINT];
     }
 
-    return [VECTOR_SHAPE_TYPES.POINT, VECTOR_SHAPE_TYPES.LINE, VECTOR_SHAPE_TYPES.POLYGON];
+    return [VECTOR_SHAPE_TYPE.POINT, VECTOR_SHAPE_TYPE.LINE, VECTOR_SHAPE_TYPE.POLYGON];
   }
 
   getSourceTooltipContent(sourceDataRequest) {

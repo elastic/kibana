@@ -89,6 +89,9 @@ export const timelineQuery = gql`
                 timezone
                 type
               }
+              agent {
+                type
+              }
               auditd {
                 result
                 session
@@ -207,6 +210,7 @@ export const timelineQuery = gql`
                   to
                   filters
                   note
+                  exceptions_list
                 }
               }
               suricata {
@@ -285,6 +289,7 @@ export const timelineQuery = gql`
                 name
                 ppid
                 args
+                entity_id
                 executable
                 title
                 working_directory

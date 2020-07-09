@@ -33,7 +33,7 @@ import {
 } from '../tasks/hosts/events';
 import { clearSearchBar, kqlSearch } from '../tasks/security_header';
 
-import { HOSTS_PAGE } from '../urls/navigation';
+import { HOSTS_URL } from '../urls/navigation';
 import { resetFields } from '../tasks/timeline';
 
 const defaultHeadersInDefaultEcsCategory = [
@@ -46,10 +46,11 @@ const defaultHeadersInDefaultEcsCategory = [
   { id: 'destination.ip' },
 ];
 
-describe('Events Viewer', () => {
+// Flakky: https://github.com/elastic/kibana/issues/70757
+describe.skip('Events Viewer', () => {
   context('Fields rendering', () => {
     before(() => {
-      loginAndWaitForPage(HOSTS_PAGE);
+      loginAndWaitForPage(HOSTS_URL);
       openEvents();
     });
 
@@ -75,7 +76,7 @@ describe('Events Viewer', () => {
 
   context('Events viewer query modal', () => {
     before(() => {
-      loginAndWaitForPage(HOSTS_PAGE);
+      loginAndWaitForPage(HOSTS_URL);
       openEvents();
     });
 
@@ -93,7 +94,7 @@ describe('Events Viewer', () => {
 
   context('Events viewer fields behaviour', () => {
     before(() => {
-      loginAndWaitForPage(HOSTS_PAGE);
+      loginAndWaitForPage(HOSTS_URL);
       openEvents();
     });
 
@@ -124,7 +125,7 @@ describe('Events Viewer', () => {
 
   context('Events behaviour', () => {
     before(() => {
-      loginAndWaitForPage(HOSTS_PAGE);
+      loginAndWaitForPage(HOSTS_URL);
       openEvents();
       waitsForEventsToBeLoaded();
     });
@@ -153,9 +154,9 @@ describe('Events Viewer', () => {
     });
   });
 
-  context.skip('Events columns', () => {
+  context('Events columns', () => {
     before(() => {
-      loginAndWaitForPage(HOSTS_PAGE);
+      loginAndWaitForPage(HOSTS_URL);
       openEvents();
       waitsForEventsToBeLoaded();
     });

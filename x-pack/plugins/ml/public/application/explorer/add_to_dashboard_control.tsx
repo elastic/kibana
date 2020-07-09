@@ -52,18 +52,16 @@ function getDefaultEmbeddablepaPanelConfig(jobIds: JobId[]) {
 interface AddToDashboardControlProps {
   jobIds: JobId[];
   viewBy: string;
-  limit: number;
   onClose: (callback?: () => Promise<any>) => void;
 }
 
 /**
- * Component for attaching anomaly swimlane embeddable to dashboards.
+ * Component for attaching anomaly swim lane embeddable to dashboards.
  */
 export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
   onClose,
   jobIds,
   viewBy,
-  limit,
 }) => {
   const {
     notifications: { toasts },
@@ -141,7 +139,6 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
               jobIds,
               swimlaneType,
               viewBy,
-              limit,
             },
           };
         }
@@ -206,8 +203,8 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
     {
       id: SWIMLANE_TYPE.VIEW_BY,
       label: i18n.translate('xpack.ml.explorer.viewByFieldLabel', {
-        defaultMessage: 'View by {viewByField}, up to {limit} rows',
-        values: { viewByField: viewBy, limit },
+        defaultMessage: 'View by {viewByField}',
+        values: { viewByField: viewBy },
       }),
     },
   ];
@@ -225,7 +222,7 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
           <EuiModalHeaderTitle>
             <FormattedMessage
               id="xpack.ml.explorer.dashboardsTitle"
-              defaultMessage="Add swimlanes to dashboards"
+              defaultMessage="Add swim lanes to dashboards"
             />
           </EuiModalHeaderTitle>
         </EuiModalHeader>
@@ -234,7 +231,7 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
             label={
               <FormattedMessage
                 id="xpack.ml.explorer.addToDashboard.selectSwimlanesLabel"
-                defaultMessage="Select swimlane view:"
+                defaultMessage="Select swim lane view:"
               />
             }
           >

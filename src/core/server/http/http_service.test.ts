@@ -25,12 +25,12 @@ import { HttpService } from '.';
 import { HttpConfigType, config } from './http_config';
 import { httpServerMock } from './http_server.mocks';
 import { ConfigService, Env } from '../config';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import { contextServiceMock } from '../context/context_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { config as cspConfig } from '../csp';
 
-const logger = loggingServiceMock.create();
+const logger = loggingSystemMock.create();
 const env = Env.createDefault(getEnvOptions());
 const coreId = Symbol();
 
@@ -159,7 +159,7 @@ test('logs error if already set up', async () => {
 
   await service.setup(setupDeps);
 
-  expect(loggingServiceMock.collect(logger).warn).toMatchSnapshot();
+  expect(loggingSystemMock.collect(logger).warn).toMatchSnapshot();
 });
 
 test('stops http server', async () => {

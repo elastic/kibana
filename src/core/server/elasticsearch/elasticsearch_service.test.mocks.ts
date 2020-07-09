@@ -17,5 +17,8 @@
  * under the License.
  */
 
+export const MockLegacyClusterClient = jest.fn();
+jest.mock('./legacy/cluster_client', () => ({ LegacyClusterClient: MockLegacyClusterClient }));
+
 export const MockClusterClient = jest.fn();
-jest.mock('./cluster_client', () => ({ ClusterClient: MockClusterClient }));
+jest.mock('./client/cluster_client', () => ({ ClusterClient: MockClusterClient }));

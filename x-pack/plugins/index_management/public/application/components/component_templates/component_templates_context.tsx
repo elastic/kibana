@@ -5,9 +5,10 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { HttpSetup, DocLinksSetup, NotificationsSetup } from 'src/core/public';
+import { HttpSetup, DocLinksStart, NotificationsSetup } from 'src/core/public';
 
-import { getApi, getUseRequest, getSendRequest, getDocumentation } from './lib';
+import { ManagementAppMountParams } from 'src/plugins/management/public';
+import { getApi, getUseRequest, getSendRequest, getDocumentation, getBreadcrumbs } from './lib';
 
 const ComponentTemplatesContext = createContext<Context | undefined>(undefined);
 
@@ -15,8 +16,9 @@ interface Props {
   httpClient: HttpSetup;
   apiBasePath: string;
   trackMetric: (type: 'loaded' | 'click' | 'count', eventName: string) => void;
-  docLinks: DocLinksSetup;
+  docLinks: DocLinksStart;
   toasts: NotificationsSetup['toasts'];
+  setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
 }
 
 interface Context {
@@ -24,6 +26,7 @@ interface Context {
   apiBasePath: string;
   api: ReturnType<typeof getApi>;
   documentation: ReturnType<typeof getDocumentation>;
+  breadcrumbs: ReturnType<typeof getBreadcrumbs>;
   trackMetric: (type: 'loaded' | 'click' | 'count', eventName: string) => void;
   toasts: NotificationsSetup['toasts'];
 }
@@ -35,17 +38,18 @@ export const ComponentTemplatesProvider = ({
   value: Props;
   children: React.ReactNode;
 }) => {
-  const { httpClient, apiBasePath, trackMetric, docLinks, toasts } = value;
+  const { httpClient, apiBasePath, trackMetric, docLinks, toasts, setBreadcrumbs } = value;
 
   const useRequest = getUseRequest(httpClient);
   const sendRequest = getSendRequest(httpClient);
 
   const api = getApi(useRequest, sendRequest, apiBasePath, trackMetric);
   const documentation = getDocumentation(docLinks);
+  const breadcrumbs = getBreadcrumbs(setBreadcrumbs);
 
   return (
     <ComponentTemplatesContext.Provider
-      value={{ api, documentation, trackMetric, toasts, httpClient, apiBasePath }}
+      value={{ api, documentation, trackMetric, toasts, httpClient, apiBasePath, breadcrumbs }}
     >
       {children}
     </ComponentTemplatesContext.Provider>
@@ -61,3 +65,5 @@ export const useComponentTemplatesContext = () => {
   }
   return ctx;
 };
+
+export const useApi = () => useComponentTemplatesContext().api;

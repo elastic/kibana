@@ -81,6 +81,7 @@ describe('SIEM Navigation', () => {
       [CONSTANTS.timeline]: {
         id: '',
         isOpen: false,
+        graphEventId: '',
       },
     },
   };
@@ -91,12 +92,12 @@ describe('SIEM Navigation', () => {
       {
         detailName: undefined,
         navTabs: {
-          alerts: {
+          detections: {
             disabled: false,
-            href: '/app/security/alerts',
-            id: 'alerts',
-            name: 'Alerts',
-            urlKey: 'alerts',
+            href: '/app/security/detections',
+            id: 'detections',
+            name: 'Detections',
+            urlKey: 'detections',
           },
           case: {
             disabled: false,
@@ -107,9 +108,9 @@ describe('SIEM Navigation', () => {
           },
           management: {
             disabled: false,
-            href: '/app/security/management',
+            href: '/app/security/administration',
             id: 'management',
-            name: 'Management',
+            name: 'Administration',
             urlKey: 'management',
           },
           hosts: {
@@ -153,6 +154,7 @@ describe('SIEM Navigation', () => {
         timeline: {
           id: '',
           isOpen: false,
+          graphEventId: '',
         },
         timerange: {
           global: {
@@ -185,7 +187,7 @@ describe('SIEM Navigation', () => {
     wrapper.setProps({
       pageName: 'network',
       pathName: '/',
-      tabName: undefined,
+      tabName: 'authentications',
     });
     wrapper.update();
     expect(setBreadcrumbs).toHaveBeenNthCalledWith(
@@ -195,12 +197,12 @@ describe('SIEM Navigation', () => {
         filters: [],
         flowTarget: undefined,
         navTabs: {
-          alerts: {
+          detections: {
             disabled: false,
-            href: '/app/security/alerts',
-            id: 'alerts',
-            name: 'Alerts',
-            urlKey: 'alerts',
+            href: '/app/security/detections',
+            id: 'detections',
+            name: 'Detections',
+            urlKey: 'detections',
           },
           case: {
             disabled: false,
@@ -209,7 +211,6 @@ describe('SIEM Navigation', () => {
             name: 'Cases',
             urlKey: 'case',
           },
-
           hosts: {
             disabled: false,
             href: '/app/security/hosts',
@@ -219,9 +220,9 @@ describe('SIEM Navigation', () => {
           },
           management: {
             disabled: false,
-            href: '/app/security/management',
+            href: '/app/security/administration',
             id: 'management',
-            name: 'Management',
+            name: 'Administration',
             urlKey: 'management',
           },
           network: {
@@ -252,8 +253,8 @@ describe('SIEM Navigation', () => {
         savedQuery: undefined,
         search: '',
         state: undefined,
-        tabName: undefined,
-        timeline: { id: '', isOpen: false },
+        tabName: 'authentications',
+        timeline: { id: '', isOpen: false, graphEventId: '' },
         timerange: {
           global: {
             linkTo: ['timeline'],

@@ -6,7 +6,7 @@
 
 import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
 import { getMonitorStatus } from '../get_monitor_status';
-import { ScopedClusterClient } from 'src/core/server';
+import { LegacyScopedClusterClient } from 'src/core/server';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 
 interface BucketItemCriteria {
@@ -50,8 +50,8 @@ type MockCallES = (method: any, params: any) => Promise<any>;
 
 const setupMock = (
   criteria: MultiPageCriteria[]
-): [MockCallES, jest.Mocked<Pick<ScopedClusterClient, 'callAsCurrentUser'>>] => {
-  const esMock = elasticsearchServiceMock.createScopedClusterClient();
+): [MockCallES, jest.Mocked<Pick<LegacyScopedClusterClient, 'callAsCurrentUser'>>] => {
+  const esMock = elasticsearchServiceMock.createLegacyScopedClusterClient();
 
   criteria.forEach(({ after_key, bucketCriteria }) => {
     const mockResponse = {

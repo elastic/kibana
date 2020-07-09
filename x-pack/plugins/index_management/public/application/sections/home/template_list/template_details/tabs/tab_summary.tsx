@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiDescriptionList,
@@ -13,92 +14,206 @@ import {
   EuiLink,
   EuiText,
   EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiCodeBlock,
 } from '@elastic/eui';
+import { useAppContext } from '../../../../../app_context';
 import { TemplateDeserialized } from '../../../../../../../common';
-import { getILMPolicyPath } from '../../../../../services/navigation';
+import { getILMPolicyPath } from '../../../../../services/routing';
 
 interface Props {
   templateDetails: TemplateDeserialized;
 }
 
-const NoneDescriptionText = () => (
-  <FormattedMessage
-    id="xpack.idxMgmt.templateDetails.summaryTab.noneDescriptionText"
-    defaultMessage="None"
-  />
-);
+const i18nTexts = {
+  yes: i18n.translate('xpack.idxMgmt.templateDetails.summaryTab.yesDescriptionText', {
+    defaultMessage: 'Yes',
+  }),
+  no: i18n.translate('xpack.idxMgmt.templateDetails.summaryTab.noDescriptionText', {
+    defaultMessage: 'No',
+  }),
+  none: i18n.translate('xpack.idxMgmt.templateDetails.summaryTab.noneDescriptionText', {
+    defaultMessage: 'None',
+  }),
+};
 
 export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) => {
-  const { version, order, indexPatterns = [], ilmPolicy } = templateDetails;
+  const {
+    version,
+    priority,
+    composedOf,
+    order,
+    indexPatterns = [],
+    ilmPolicy,
+    _meta,
+    _kbnMeta: { isLegacy, hasDatastream },
+  } = templateDetails;
 
   const numIndexPatterns = indexPatterns.length;
 
+  const {
+    core: { getUrlForApp },
+  } = useAppContext();
+
   return (
-    <EuiDescriptionList textStyle="reverse" data-test-subj="summaryTab">
-      {/* Index patterns */}
-      <EuiDescriptionListTitle>
-        <FormattedMessage
-          id="xpack.idxMgmt.templateDetails.summaryTab.indexPatternsDescriptionListTitle"
-          defaultMessage="Index {numIndexPatterns, plural, one {pattern} other {patterns}}"
-          values={{ numIndexPatterns }}
-        />
-      </EuiDescriptionListTitle>
-      <EuiDescriptionListDescription>
-        {numIndexPatterns > 1 ? (
-          <EuiText>
-            <ul>
-              {indexPatterns.map((indexName: string, i: number) => {
-                return (
-                  <li key={`${indexName}-${i}`}>
-                    <EuiTitle size="xs">
-                      <span>{indexName}</span>
-                    </EuiTitle>
-                  </li>
-                );
-              })}
-            </ul>
-          </EuiText>
-        ) : (
-          indexPatterns.toString()
-        )}
-      </EuiDescriptionListDescription>
+    <EuiFlexGroup data-test-subj="summaryTab">
+      <EuiFlexItem>
+        <EuiDescriptionList textStyle="reverse">
+          {/* Index patterns */}
+          <EuiDescriptionListTitle>
+            <FormattedMessage
+              id="xpack.idxMgmt.templateDetails.summaryTab.indexPatternsDescriptionListTitle"
+              defaultMessage="Index {numIndexPatterns, plural, one {pattern} other {patterns}}"
+              values={{ numIndexPatterns }}
+            />
+          </EuiDescriptionListTitle>
+          <EuiDescriptionListDescription>
+            {numIndexPatterns > 1 ? (
+              <EuiText>
+                <ul>
+                  {indexPatterns.map((indexName: string, i: number) => {
+                    return (
+                      <li key={`${indexName}-${i}`}>
+                        <EuiTitle size="xs">
+                          <span>{indexName}</span>
+                        </EuiTitle>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </EuiText>
+            ) : (
+              indexPatterns.toString()
+            )}
+          </EuiDescriptionListDescription>
 
-      {/* // ILM Policy */}
-      <EuiDescriptionListTitle>
-        <FormattedMessage
-          id="xpack.idxMgmt.templateDetails.summaryTab.ilmPolicyDescriptionListTitle"
-          defaultMessage="ILM policy"
-        />
-      </EuiDescriptionListTitle>
-      <EuiDescriptionListDescription>
-        {ilmPolicy && ilmPolicy.name ? (
-          <EuiLink href={getILMPolicyPath(ilmPolicy.name)}>{ilmPolicy.name}</EuiLink>
-        ) : (
-          <NoneDescriptionText />
-        )}
-      </EuiDescriptionListDescription>
+          {/* Priority / Order */}
+          {isLegacy !== true ? (
+            <>
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.idxMgmt.templateDetails.summaryTab.priorityDescriptionListTitle"
+                  defaultMessage="Priority"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                {priority || priority === 0 ? priority : i18nTexts.none}
+              </EuiDescriptionListDescription>
+            </>
+          ) : (
+            <>
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.idxMgmt.templateDetails.summaryTab.orderDescriptionListTitle"
+                  defaultMessage="Order"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                {order || order === 0 ? order : i18nTexts.none}
+              </EuiDescriptionListDescription>
+            </>
+          )}
 
-      {/* // Order */}
-      <EuiDescriptionListTitle>
-        <FormattedMessage
-          id="xpack.idxMgmt.templateDetails.summaryTab.orderDescriptionListTitle"
-          defaultMessage="Order"
-        />
-      </EuiDescriptionListTitle>
-      <EuiDescriptionListDescription>
-        {order || order === 0 ? order : <NoneDescriptionText />}
-      </EuiDescriptionListDescription>
+          {/* Components */}
+          {isLegacy !== true && (
+            <>
+              <EuiDescriptionListTitle data-test-subj="componentsTitle">
+                <FormattedMessage
+                  id="xpack.idxMgmt.templateDetails.summaryTab.componentsDescriptionListTitle"
+                  defaultMessage="Components"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                {composedOf && composedOf.length > 0 ? (
+                  <ul>
+                    {composedOf.map((component) => (
+                      <li key={component}>
+                        <EuiTitle size="xs">
+                          <span>{component}</span>
+                        </EuiTitle>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  i18nTexts.none
+                )}
+              </EuiDescriptionListDescription>
+            </>
+          )}
+        </EuiDescriptionList>
+      </EuiFlexItem>
 
-      {/* // Version */}
-      <EuiDescriptionListTitle>
-        <FormattedMessage
-          id="xpack.idxMgmt.templateDetails.summaryTab.versionDescriptionListTitle"
-          defaultMessage="Version"
-        />
-      </EuiDescriptionListTitle>
-      <EuiDescriptionListDescription>
-        {version || version === 0 ? version : <NoneDescriptionText />}
-      </EuiDescriptionListDescription>
-    </EuiDescriptionList>
+      <EuiFlexItem>
+        <EuiDescriptionList textStyle="reverse">
+          {/* ILM Policy (only for legacy as composable template could have ILM policy
+              inside one of their components) */}
+          {isLegacy && (
+            <>
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.idxMgmt.templateDetails.summaryTab.ilmPolicyDescriptionListTitle"
+                  defaultMessage="ILM policy"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                {ilmPolicy && ilmPolicy.name ? (
+                  <EuiLink
+                    href={getUrlForApp('management', {
+                      path: getILMPolicyPath(ilmPolicy.name),
+                    })}
+                  >
+                    {ilmPolicy.name}
+                  </EuiLink>
+                ) : (
+                  i18nTexts.none
+                )}
+              </EuiDescriptionListDescription>
+            </>
+          )}
+
+          {/* Has data stream? (only for composable template) */}
+          {isLegacy !== true && (
+            <>
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.idxMgmt.templateDetails.summaryTab.dataStreamDescriptionListTitle"
+                  defaultMessage="Data stream"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                {hasDatastream ? i18nTexts.yes : i18nTexts.no}
+              </EuiDescriptionListDescription>
+            </>
+          )}
+
+          {/* Version */}
+          <EuiDescriptionListTitle>
+            <FormattedMessage
+              id="xpack.idxMgmt.templateDetails.summaryTab.versionDescriptionListTitle"
+              defaultMessage="Version"
+            />
+          </EuiDescriptionListTitle>
+          <EuiDescriptionListDescription>
+            {version || version === 0 ? version : i18nTexts.none}
+          </EuiDescriptionListDescription>
+
+          {/* Metadata (optional) */}
+          {isLegacy !== true && _meta && (
+            <>
+              <EuiDescriptionListTitle data-test-subj="metaTitle">
+                <FormattedMessage
+                  id="xpack.idxMgmt.templateDetails.summaryTab.metaDescriptionListTitle"
+                  defaultMessage="Metadata"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                <EuiCodeBlock lang="json">{JSON.stringify(_meta, null, 2)}</EuiCodeBlock>
+              </EuiDescriptionListDescription>
+            </>
+          )}
+        </EuiDescriptionList>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

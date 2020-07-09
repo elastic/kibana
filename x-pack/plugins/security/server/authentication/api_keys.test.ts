@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IClusterClient, IScopedClusterClient } from '../../../../../src/core/server';
+import { ILegacyClusterClient, ILegacyScopedClusterClient } from '../../../../../src/core/server';
 import { SecurityLicense } from '../../common/licensing';
 import { APIKeys } from './api_keys';
 
 import {
   httpServerMock,
-  loggingServiceMock,
+  loggingSystemMock,
   elasticsearchServiceMock,
 } from '../../../../../src/core/server/mocks';
 import { licenseMock } from '../../common/licensing/index.mock';
@@ -19,15 +19,15 @@ const encodeToBase64 = (str: string) => Buffer.from(str).toString('base64');
 
 describe('API Keys', () => {
   let apiKeys: APIKeys;
-  let mockClusterClient: jest.Mocked<IClusterClient>;
-  let mockScopedClusterClient: jest.Mocked<IScopedClusterClient>;
+  let mockClusterClient: jest.Mocked<ILegacyClusterClient>;
+  let mockScopedClusterClient: jest.Mocked<ILegacyScopedClusterClient>;
   let mockLicense: jest.Mocked<SecurityLicense>;
 
   beforeEach(() => {
-    mockClusterClient = elasticsearchServiceMock.createClusterClient();
-    mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
+    mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
     mockClusterClient.asScoped.mockReturnValue(
-      (mockScopedClusterClient as unknown) as jest.Mocked<IScopedClusterClient>
+      (mockScopedClusterClient as unknown) as jest.Mocked<ILegacyScopedClusterClient>
     );
 
     mockLicense = licenseMock.create();
@@ -35,7 +35,7 @@ describe('API Keys', () => {
 
     apiKeys = new APIKeys({
       clusterClient: mockClusterClient,
-      logger: loggingServiceMock.create().get('api-keys'),
+      logger: loggingSystemMock.create().get('api-keys'),
       license: mockLicense,
     });
   });

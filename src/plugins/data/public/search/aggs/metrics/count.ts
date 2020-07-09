@@ -20,39 +20,28 @@
 import { i18n } from '@kbn/i18n';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../common';
-import { GetInternalStartServicesFn } from '../../../types';
 
-export interface CountMetricAggDependencies {
-  getInternalStartServices: GetInternalStartServicesFn;
-}
-
-export const getCountMetricAgg = ({ getInternalStartServices }: CountMetricAggDependencies) =>
-  new MetricAggType(
-    {
-      name: METRIC_TYPES.COUNT,
-      title: i18n.translate('data.search.aggs.metrics.countTitle', {
+export const getCountMetricAgg = () =>
+  new MetricAggType({
+    name: METRIC_TYPES.COUNT,
+    title: i18n.translate('data.search.aggs.metrics.countTitle', {
+      defaultMessage: 'Count',
+    }),
+    hasNoDsl: true,
+    makeLabel() {
+      return i18n.translate('data.search.aggs.metrics.countLabel', {
         defaultMessage: 'Count',
-      }),
-      hasNoDsl: true,
-      makeLabel() {
-        return i18n.translate('data.search.aggs.metrics.countLabel', {
-          defaultMessage: 'Count',
-        });
-      },
-      getFormat() {
-        const { fieldFormats } = getInternalStartServices();
-
-        return fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
-      },
-      getValue(agg, bucket) {
-        return bucket.doc_count;
-      },
-      isScalable() {
-        return true;
-      },
+      });
     },
-    {
-      getInternalStartServices,
-    }
-  );
+    getSerializedFormat(agg) {
+      return {
+        id: 'number',
+      };
+    },
+    getValue(agg, bucket) {
+      return bucket.doc_count;
+    },
+    isScalable() {
+      return true;
+    },
+  });

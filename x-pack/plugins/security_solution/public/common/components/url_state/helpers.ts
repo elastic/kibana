@@ -90,8 +90,8 @@ export const getUrlType = (pageName: string): UrlStateType => {
     return 'host';
   } else if (pageName === SecurityPageName.network) {
     return 'network';
-  } else if (pageName === SecurityPageName.alerts) {
-    return 'alerts';
+  } else if (pageName === SecurityPageName.detections) {
+    return 'detections';
   } else if (pageName === SecurityPageName.timelines) {
     return 'timeline';
   } else if (pageName === SecurityPageName.case) {
@@ -126,8 +126,9 @@ export const makeMapStateToProps = () => {
         ? {
             id: flyoutTimeline.savedObjectId != null ? flyoutTimeline.savedObjectId : '',
             isOpen: flyoutTimeline.show,
+            graphEventId: flyoutTimeline.graphEventId ?? '',
           }
-        : { id: '', isOpen: false };
+        : { id: '', isOpen: false, graphEventId: '' };
 
     let searchAttr: {
       [CONSTANTS.appQuery]?: Query;

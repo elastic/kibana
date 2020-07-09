@@ -11,12 +11,7 @@ import {
   SavedObjectAttribute,
 } from 'kibana/server';
 import { IFieldType, IIndexPattern } from 'src/plugins/data/public';
-import {
-  SOURCE_TYPES,
-  ES_GEO_FIELD_TYPE,
-  MAP_SAVED_OBJECT_TYPE,
-  TELEMETRY_TYPE,
-} from '../../common/constants';
+import { SOURCE_TYPES, ES_GEO_FIELD_TYPE, MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { MapSavedObject } from '../../common/map_saved_object_type';
 // @ts-ignore
@@ -50,8 +45,8 @@ function getUniqueLayerCounts(layerCountsList: ILayerTypeCount[], mapsCount: num
     );
     const typeCountsSum = _.sum(typeCounts);
     accu[type] = {
-      min: typeCounts.length ? _.min(typeCounts) : 0,
-      max: typeCounts.length ? _.max(typeCounts) : 0,
+      min: typeCounts.length ? (_.min(typeCounts) as number) : 0,
+      max: typeCounts.length ? (_.max(typeCounts) as number) : 0,
       avg: typeCountsSum ? typeCountsSum / mapsCount : 0,
     };
     return accu;
@@ -120,9 +115,9 @@ export function buildMapsTelemetry({
         const isEmsFile = _.get(layer, 'sourceDescriptor.type') === SOURCE_TYPES.EMS_FILE;
         return isEmsFile && _.get(layer, 'sourceDescriptor.id');
       })
-      .pick((val, key) => key !== 'false')
+      .pickBy((val, key) => key !== 'false')
       .value()
-  );
+  ) as ILayerTypeCount[];
 
   const dataSourcesCountSum = _.sum(dataSourcesCount);
   const layersCountSum = _.sum(layersCount);
@@ -179,16 +174,12 @@ export async function getMapsTelemetry(config: MapsConfigType) {
   const savedObjectsClient = getInternalRepository();
   // @ts-ignore
   const mapSavedObjects: MapSavedObject[] = await getMapSavedObjects(savedObjectsClient);
-  const indexPatternSavedObjects: IIndexPattern[] = await getIndexPatternSavedObjects(
+  const indexPatternSavedObjects: IIndexPattern[] = (await getIndexPatternSavedObjects(
     // @ts-ignore
     savedObjectsClient
-  );
+  )) as IIndexPattern[];
   const settings: SavedObjectAttribute = {
     showMapVisualizationTypes: config.showMapVisualizationTypes,
   };
-  const mapsTelemetry = buildMapsTelemetry({ mapSavedObjects, indexPatternSavedObjects, settings });
-  return await savedObjectsClient.create(TELEMETRY_TYPE, mapsTelemetry, {
-    id: TELEMETRY_TYPE,
-    overwrite: true,
-  });
+  return buildMapsTelemetry({ mapSavedObjects, indexPatternSavedObjects, settings });
 }

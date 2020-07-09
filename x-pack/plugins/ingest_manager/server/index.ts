@@ -11,6 +11,7 @@ export {
   IngestManagerSetupContract,
   IngestManagerSetupDeps,
   IngestManagerStartContract,
+  ExternalCallback,
 } from './plugin';
 
 export const config = {
@@ -36,11 +37,15 @@ export const config = {
         host: schema.maybe(schema.string()),
         ca_sha256: schema.maybe(schema.string()),
       }),
+      agentConfigRollupRateLimitIntervalMs: schema.number({ defaultValue: 5000 }),
+      agentConfigRollupRateLimitRequestPerInterval: schema.number({ defaultValue: 50 }),
     }),
   }),
 };
 
 export type IngestManagerConfigType = TypeOf<typeof config.schema>;
+
+export { PackageConfigServiceInterface } from './services/package_config';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new IngestManagerPlugin(initializerContext);

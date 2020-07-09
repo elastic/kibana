@@ -89,6 +89,7 @@ export function uiRenderMixin(kbnServer, server, config) {
         const isCore = !app;
 
         const uiSettings = request.getUiSettingsService();
+
         const darkMode =
           !authEnabled || request.auth.isAuthenticated
             ? await uiSettings.get('theme:darkMode')
@@ -98,6 +99,8 @@ export function uiRenderMixin(kbnServer, server, config) {
           !authEnabled || request.auth.isAuthenticated
             ? await uiSettings.get('theme:version')
             : 'v7';
+
+        const themeTag = `${themeVersion === 'v7' ? 'v7' : 'v8'}${darkMode ? 'dark' : 'light'}`;
 
         const buildHash = server.newPlatform.env.packageInfo.buildNum;
         const basePath = config.get('server.basePath');
@@ -130,7 +133,6 @@ export function uiRenderMixin(kbnServer, server, config) {
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
                 `${regularBundlePath}/light_theme.style.css`,
               ]),
-          `${regularBundlePath}/commons.style.css`,
           ...(isCore
             ? []
             : [
@@ -155,13 +157,7 @@ export function uiRenderMixin(kbnServer, server, config) {
             (filename) => `${regularBundlePath}/kbn-ui-shared-deps/${filename}`
           ),
           `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.jsFilename}`,
-          ...(isCore
-            ? []
-            : [
-                `${dllBundlePath}/vendors_runtime.bundle.dll.js`,
-                ...dllJsChunks,
-                `${regularBundlePath}/commons.bundle.js`,
-              ]),
+          ...(isCore ? [] : [`${dllBundlePath}/vendors_runtime.bundle.dll.js`, ...dllJsChunks]),
 
           `${regularBundlePath}/core/core.entry.js`,
           ...kpPluginIds.map(
@@ -185,8 +181,7 @@ export function uiRenderMixin(kbnServer, server, config) {
 
         const bootstrap = new AppBootstrap({
           templateData: {
-            darkMode,
-            themeVersion,
+            themeTag,
             jsDependencyPaths,
             styleSheetPaths,
             publicPathMap,

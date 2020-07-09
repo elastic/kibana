@@ -20,14 +20,16 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign, Ensure } from '@kbn/utility-types';
-import { ExpressionAstFunction, ExpressionAstArgument } from 'src/plugins/expressions/public';
+import {
+  ExpressionAstFunction,
+  ExpressionAstArgument,
+  SerializedFieldFormat,
+} from 'src/plugins/expressions/common';
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
 import { IAggConfigs } from './agg_configs';
 import { FetchOptions } from '../fetch';
 import { ISearchSource } from '../search_source';
-import { FieldFormatsContentType, KBN_FIELD_TYPES } from '../../../common';
-import { FieldFormatsStart } from '../../field_formats';
 
 type State = string | number | boolean | null | undefined | SerializableState;
 
@@ -42,15 +44,11 @@ export type AggConfigSerialized = Ensure<
     type: string;
     enabled?: boolean;
     id?: string;
-    params?: SerializableState;
+    params?: {} | SerializableState;
     schema?: string;
   },
   SerializableState
 >;
-
-export interface AggConfigDependencies {
-  fieldFormats: FieldFormatsStart;
-}
 
 export type AggConfigOptions = Assign<AggConfigSerialized, { type: IAggType }>;
 
@@ -112,13 +110,8 @@ export class AggConfig {
   private __type: IAggType;
   private __typeDecorations: any;
   private subAggs: AggConfig[] = [];
-  private readonly fieldFormats: FieldFormatsStart;
 
-  constructor(
-    aggConfigs: IAggConfigs,
-    opts: AggConfigOptions,
-    { fieldFormats }: AggConfigDependencies
-  ) {
+  constructor(aggConfigs: IAggConfigs, opts: AggConfigOptions) {
     this.aggConfigs = aggConfigs;
     this.id = String(opts.id || AggConfig.nextId(aggConfigs.aggs as any));
     this.enabled = typeof opts.enabled === 'boolean' ? opts.enabled : true;
@@ -139,8 +132,6 @@ export class AggConfig {
 
     // @ts-ignore
     this.__type = this.__type;
-
-    this.fieldFormats = fieldFormats;
   }
 
   /**
@@ -280,7 +271,7 @@ export class AggConfig {
 
     const outParams = _.transform(
       this.getAggParams(),
-      (out, aggParam) => {
+      (out: any, aggParam) => {
         let val = params[aggParam.name];
 
         // don't serialize undefined/null values
@@ -298,8 +289,8 @@ export class AggConfig {
       id: this.id,
       enabled: this.enabled,
       type: this.type && this.type.name,
-      schema: this.schema,
       params: outParams as SerializableState,
+      ...(this.schema && { schema: this.schema }),
     };
   }
 
@@ -308,6 +299,19 @@ export class AggConfig {
    */
   toJSON(): AggConfigSerialized {
     return this.serialize();
+  }
+
+  /**
+   * Returns a serialized field format for the field used in this agg.
+   * This can be passed to fieldFormats.deserialize to get the field
+   * format instance.
+   *
+   * @public
+   */
+  toSerializedFieldFormat():
+    | {}
+    | Ensure<SerializedFieldFormat<SerializableState>, SerializableState> {
+    return this.type ? this.type.getSerializedFormat(this) : {};
   }
 
   /**
@@ -361,7 +365,7 @@ export class AggConfig {
   }
 
   getAggParams() {
-    return [...(_.has(this, 'type.params') ? this.type.params : [])];
+    return [...(_.hasIn(this, 'type.params') ? this.type.params : [])];
   }
 
   getRequestAggs() {
@@ -416,24 +420,6 @@ export class AggConfig {
     return this.aggConfigs.timeRange;
   }
 
-  fieldFormatter(contentType?: FieldFormatsContentType, defaultFormat?: any) {
-    const format = this.type && this.type.getFormat(this);
-
-    if (format) {
-      return format.getConverterFor(contentType);
-    }
-
-    return this.fieldOwnFormatter(contentType, defaultFormat);
-  }
-
-  fieldOwnFormatter(contentType?: FieldFormatsContentType, defaultFormat?: any) {
-    const field = this.getField();
-    let format = field && field.format;
-    if (!format) format = defaultFormat;
-    if (!format) format = this.fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING);
-    return format.getConverterFor(contentType);
-  }
-
   fieldName() {
     const field = this.getField();
     return field ? field.name : '';
@@ -452,14 +438,10 @@ export class AggConfig {
 
   public set type(type) {
     if (this.__typeDecorations) {
-      _.forOwn(
-        this.__typeDecorations,
-        function (prop, name: string | undefined) {
-          // @ts-ignore
-          delete this[name];
-        },
-        this
-      );
+      _.forOwn(this.__typeDecorations, (prop, name: string | undefined) => {
+        // @ts-ignore
+        delete this[name];
+      });
     }
 
     if (type && _.isFunction(type.decorateAggConfig)) {

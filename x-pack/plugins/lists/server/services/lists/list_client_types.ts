@@ -6,20 +6,23 @@
 
 import { PassThrough, Readable } from 'stream';
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import {
   Description,
   DescriptionOrUndefined,
+  DeserializerOrUndefined,
   Filter,
   Id,
   IdOrUndefined,
   ListId,
+  ListIdOrUndefined,
   MetaOrUndefined,
   Name,
   NameOrUndefined,
   Page,
   PerPage,
+  SerializerOrUndefined,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
   Type,
@@ -27,7 +30,7 @@ import {
 import { ConfigType } from '../../config';
 
 export interface ConstructorOptions {
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   config: ConfigType;
   spaceId: string;
   user: string;
@@ -47,6 +50,8 @@ export interface DeleteListItemOptions {
 
 export interface CreateListOptions {
   id: IdOrUndefined;
+  deserializer: DeserializerOrUndefined;
+  serializer: SerializerOrUndefined;
   name: Name;
   description: Description;
   type: Type;
@@ -55,6 +60,8 @@ export interface CreateListOptions {
 
 export interface CreateListIfItDoesNotExistOptions {
   id: Id;
+  deserializer: DeserializerOrUndefined;
+  serializer: SerializerOrUndefined;
   name: Name;
   description: Description;
   type: Type;
@@ -80,7 +87,9 @@ export interface ExportListItemsToStreamOptions {
 }
 
 export interface ImportListItemsToStreamOptions {
-  listId: string;
+  listId: ListIdOrUndefined;
+  deserializer: DeserializerOrUndefined;
+  serializer: SerializerOrUndefined;
   type: Type;
   stream: Readable;
   meta: MetaOrUndefined;
@@ -88,6 +97,8 @@ export interface ImportListItemsToStreamOptions {
 
 export interface CreateListItemOptions {
   id: IdOrUndefined;
+  deserializer: DeserializerOrUndefined;
+  serializer: SerializerOrUndefined;
   listId: string;
   type: Type;
   value: string;

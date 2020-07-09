@@ -133,7 +133,7 @@ export class MonitoringMainController {
       this.pipelineHashShort = shortenPipelineHash(this.pipelineHash);
       this.onChangePipelineHash = () => {
         window.location.hash = getSafeForExternalLink(
-          `/logstash/pipelines/${this.pipelineId}/${this.pipelineHash}`
+          `#/logstash/pipelines/${this.pipelineId}/${this.pipelineHash}`
         );
       };
     }
