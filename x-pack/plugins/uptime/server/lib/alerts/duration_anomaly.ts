@@ -24,7 +24,7 @@ const { DURATION_ANOMALY } = ACTION_GROUP_DEFINITIONS;
 export const getAnomalySummary = (anomaly: AnomaliesTableRecord, monitorInfo: Ping) => {
   return {
     severity: getSeverityType(anomaly.severity),
-    severityScore: anomaly.severity.toFixed(2),
+    severityScore: Math.round(anomaly.severity),
     anomalyStartTimestamp: moment(anomaly.source.timestamp).toISOString(),
     monitor: anomaly.source['monitor.id'],
     monitorUrl: monitorInfo.url?.full,
