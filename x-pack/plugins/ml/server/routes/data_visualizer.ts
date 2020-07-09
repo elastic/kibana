@@ -7,7 +7,7 @@
 import { RequestHandlerContext } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { DataVisualizer } from '../models/data_visualizer';
-import { Field } from '../models/data_visualizer/data_visualizer';
+import { Field, HistogramField } from '../models/data_visualizer/data_visualizer';
 import {
   dataVisualizerFieldHistogramsSchema,
   dataVisualizerFieldStatsSchema,
@@ -70,7 +70,7 @@ function getHistogramsForFields(
   context: RequestHandlerContext,
   indexPatternTitle: string,
   query: any,
-  fields: Field[],
+  fields: HistogramField[],
   samplerShardSize: number
 ) {
   const dv = new DataVisualizer(context.ml!.mlClient.callAsCurrentUser);
@@ -84,14 +84,14 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
   /**
    * @apiGroup DataVisualizer
    *
-   * @api {post} /api/ml/data_visualizer/get_field_stats/:indexPatternTitle Get stats for fields
-   * @apiName GetStatsForFields
-   * @apiDescription Returns the stats on individual fields in the specified index pattern.
+   * @api {post} /api/ml/data_visualizer/get_field_stats/:indexPatternTitle Get histograms for fields
+   * @apiName GetHistogramsForFields
+   * @apiDescription Returns the histograms on a list fields in the specified index pattern.
    *
    * @apiSchema (params) indexPatternTitleSchema
    * @apiSchema (body) dataVisualizerFieldHistogramsSchema
    *
-   * @apiSuccess {Object} fieldName stats by field, keyed on the name of the field.
+   * @apiSuccess {Object} fieldName histograms by field, keyed on the name of the field.
    */
   router.post(
     {

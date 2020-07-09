@@ -39,7 +39,7 @@ export interface Field {
   cardinality: number;
 }
 
-interface HistogramField {
+export interface HistogramField {
   fieldName: string;
   type: string;
 }
@@ -308,7 +308,8 @@ export class DataVisualizer {
     });
 
     const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
-    const aggregations = _.get(respStats.aggregations, aggsPath);
+    const aggregations =
+      aggsPath.length > 0 ? _.get(respStats.aggregations, aggsPath) : respStats.aggregations;
 
     return Object.keys(aggregations).reduce((p, aggName) => {
       const stats = [aggregations[aggName].min, aggregations[aggName].max];
@@ -317,12 +318,8 @@ export class DataVisualizer {
 
         let aggInterval = 1;
 
-        if (delta > MAX_CHART_COLUMNS) {
-          aggInterval = Math.round(delta / MAX_CHART_COLUMNS);
-        }
-
-        if (delta <= 1) {
-          aggInterval = delta / MAX_CHART_COLUMNS;
+        if (delta > MAX_CHART_COLUMNS || delta <= 1) {
+          aggInterval = delta / (MAX_CHART_COLUMNS - 1);
         }
 
         p[aggName] = { interval: aggInterval, min: stats[0], max: stats[1] };
@@ -394,7 +391,10 @@ export class DataVisualizer {
     });
 
     const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
-    const aggregations = _.get(respChartsData.aggregations, aggsPath);
+    const aggregations =
+      aggsPath.length > 0
+        ? _.get(respChartsData.aggregations, aggsPath)
+        : respChartsData.aggregations;
 
     const chartsData: ChartData[] = fields.map(
       (field): ChartData => {
