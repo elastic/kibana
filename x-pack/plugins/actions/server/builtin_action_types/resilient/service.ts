@@ -68,14 +68,15 @@ export const createExternalService = ({
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
   }
 
-  const incidentUrl = `${url}/${BASE_URL}/orgs/${orgId}/${INCIDENT_URL}`;
+  const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
+  const incidentUrl = `${urlWithoutTrailingSlash}/${BASE_URL}/orgs/${orgId}/${INCIDENT_URL}`;
   const commentUrl = `${incidentUrl}/{inc_id}/${COMMENT_URL}`;
   const axiosInstance = axios.create({
     auth: { username: apiKeyId, password: apiKeySecret },
   });
 
   const getIncidentViewURL = (key: string) => {
-    return `${url}/${VIEW_INCIDENT_URL}/${key}`;
+    return `${urlWithoutTrailingSlash}/${VIEW_INCIDENT_URL}/${key}`;
   };
 
   const getCommentsURL = (incidentId: string) => {
