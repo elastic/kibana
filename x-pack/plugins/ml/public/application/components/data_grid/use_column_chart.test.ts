@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-
 import { getFieldType } from './use_column_chart';
 
-describe('getFieldType', () => {
+describe('getFieldType()', () => {
   it('should return the Kibana field type for a given EUI data grid schema', () => {
     expect(getFieldType('text')).toBe('string');
     expect(getFieldType('datetime')).toBe('date');
