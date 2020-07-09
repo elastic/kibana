@@ -11,7 +11,16 @@ export type AgentType =
   | typeof AGENT_TYPE_PERMANENT
   | typeof AGENT_TYPE_TEMPORARY;
 
-export type AgentStatus = 'offline' | 'error' | 'online' | 'inactive' | 'warning' | 'unenrolling';
+export type AgentStatus =
+  | 'offline'
+  | 'error'
+  | 'online'
+  | 'inactive'
+  | 'warning'
+  | 'enrolling'
+  | 'unenrolling'
+  | 'degraded';
+
 export type AgentActionType = 'CONFIG_CHANGE' | 'DATA_DUMP' | 'RESUME' | 'PAUSE' | 'UNENROLL';
 export interface NewAgentAction {
   type: AgentActionType;
@@ -82,6 +91,7 @@ interface AgentBase {
   config_id?: string;
   config_revision?: number | null;
   last_checkin?: string;
+  last_checkin_status?: 'error' | 'online' | 'degraded';
   user_provided_metadata: AgentMetadata;
   local_metadata: AgentMetadata;
 }
