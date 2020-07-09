@@ -73,9 +73,10 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       validate: {
         query: schema.object({
           id: schema.maybe(schema.string()),
-          x: schema.maybe(schema.number()),
-          y: schema.maybe(schema.number()),
-          z: schema.maybe(schema.number()),
+          elastic_tile_service_tos: schema.maybe(schema.string()),
+          my_app_name: schema.maybe(schema.string()),
+          my_app_version: schema.maybe(schema.string()),
+          license: schema.maybe(schema.string()),
         }),
       },
     },
@@ -203,7 +204,9 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       });
       //rewrite
       return ok({
-        body: layers,
+        body: {
+          layers,
+        },
       });
     }
   );
@@ -293,7 +296,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_VECTOR_STYLE_PATH}`,
       validate: {
         query: schema.object({
-          id: schema.maybe(schema.string()),
+          id: schema.string(),
           elastic_tile_service_tos: schema.maybe(schema.string()),
           my_app_name: schema.maybe(schema.string()),
           my_app_version: schema.maybe(schema.string()),
@@ -304,11 +307,6 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
     async (context, request, { ok, badRequest }) => {
       if (!checkEMSProxyEnabled()) {
         return badRequest('map.proxyElasticMapsServiceInMaps disabled');
-      }
-
-      if (!request.query.id) {
-        logger.warn('Must supply id parameter to retrieve EMS vector style');
-        return null;
       }
 
       const tmsServices = await emsClient.getTMSServices();
@@ -346,7 +344,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_VECTOR_SOURCE_PATH}`,
       validate: {
         query: schema.object({
-          id: schema.maybe(schema.string()),
+          id: schema.string(),
           sourceId: schema.maybe(schema.string()),
           elastic_tile_service_tos: schema.maybe(schema.string()),
           my_app_name: schema.maybe(schema.string()),
@@ -358,11 +356,6 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
     async (context, request, { ok, badRequest }) => {
       if (!checkEMSProxyEnabled()) {
         return badRequest('map.proxyElasticMapsServiceInMaps disabled');
-      }
-
-      if (!request.query.id || !request.query.sourceId) {
-        logger.warn('Must supply id and sourceId parameter to retrieve EMS vector source');
-        return null;
       }
 
       const tmsServices = await emsClient.getTMSServices();
