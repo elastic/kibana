@@ -1,0 +1,42 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "An adversary may attempt to get detailed information about the operating system and hardware. This rule identifies common locations used to discover virtual machine hardware by a non-root user. This technique has been used by the Pupy RAT and other malware.",
+  "false_positives": [
+    "Certain tools or automated software may enumerate hardware information. These tools can be exempted via user name or process arguments to eliminate potential noise."
+  ],
+  "index": [
+    "auditbeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Virtual Machine Fingerprinting",
+  "query": "event.category:process and event.type:(start or process_started) and process.args:(\"/sys/class/dmi/id/bios_version\" or \"/sys/class/dmi/id/product_name\" or \"/sys/class/dmi/id/chassis_vendor\" or \"/proc/scsi/scsi\" or \"/proc/ide/hd0/model\") and not user.name:root",
+  "risk_score": 73,
+  "rule_id": "5b03c9fb-9945-4d2f-9568-fd690fee3fba",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Linux"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0007",
+        "name": "Discovery",
+        "reference": "https://attack.mitre.org/tactics/TA0007/"
+      },
+      "technique": [
+        {
+          "id": "T1082",
+          "name": "System Information Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1082/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 2
+}

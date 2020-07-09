@@ -1,0 +1,47 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies attempts to login to AWS as the root user without using multi-factor authentication (MFA). Amazon AWS best practices indicate that the root user should be protected by MFA.",
+  "false_positives": [
+    "Some organizations allow login with the root user without MFA, however this is not considered best practice by AWS and increases the risk of compromised credentials."
+  ],
+  "from": "now-60m",
+  "index": [
+    "filebeat-*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "AWS Root Login Without MFA",
+  "query": "event.module:aws and event.dataset:aws.cloudtrail and event.provider:signin.amazonaws.com and event.action:ConsoleLogin and aws.cloudtrail.user_identity.type:Root and aws.cloudtrail.console_login.additional_eventdata.mfa_used:false and event.outcome:success",
+  "references": [
+    "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "bc0c6f0d-dab0-47a3-b135-0925f0a333bc",
+  "severity": "low",
+  "tags": [
+    "AWS",
+    "Elastic"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1078",
+          "name": "Valid Accounts",
+          "reference": "https://attack.mitre.org/techniques/T1078/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

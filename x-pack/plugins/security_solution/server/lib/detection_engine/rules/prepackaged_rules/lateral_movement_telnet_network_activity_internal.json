@@ -1,0 +1,42 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Telnet provides a command line interface for communication with a remote device or server. This rule identifies Telnet network connections to non-publicly routable IP addresses.",
+  "false_positives": [
+    "Telnet can be used for both benign or malicious purposes. Telnet is included by default in some Linux distributions, so its presence is not inherently suspicious. The use of Telnet to manage devices remotely has declined in recent years in favor of more secure protocols such as SSH. Telnet usage by non-automated tools or frameworks may be suspicious."
+  ],
+  "index": [
+    "auditbeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Connection to Internal Network via Telnet",
+  "query": "event.category:network and event.type:(connection or start) and process.name:telnet and destination.ip:((10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16 or \"FE80::/10\") and not (127.0.0.0/8 or \"::1/128\"))",
+  "risk_score": 47,
+  "rule_id": "1b21abcc-4d9f-4b08-a7f5-316f5f94b973",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Linux"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0008",
+        "name": "Lateral Movement",
+        "reference": "https://attack.mitre.org/tactics/TA0008/"
+      },
+      "technique": [
+        {
+          "id": "T1021",
+          "name": "Remote Services",
+          "reference": "https://attack.mitre.org/techniques/T1021/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 2
+}

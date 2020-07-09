@@ -1,4 +1,7 @@
 {
+  "author": [
+    "Elastic"
+  ],
   "description": "Nmap was executed on a Linux host. Nmap is a FOSS tool for network scanning and security testing. It can map and discover networks, and identify listening services and operating systems. It is sometimes used to gather information in support of exploitation, execution or lateral movement.",
   "false_positives": [
     "Security testing tools and frameworks may run `Nmap` in the course of security auditing. Some normal use of this command may originate from security engineers and network or server administrators. Use of nmap by ordinary users is uncommon."
@@ -7,8 +10,9 @@
     "auditbeat-*"
   ],
   "language": "kuery",
+  "license": "Elastic License",
   "name": "Nmap Process Activity",
-  "query": "process.name:nmap",
+  "query": "event.category:process and event.type:(start or process_started) and process.name:nmap",
   "references": [
     "https://en.wikipedia.org/wiki/Nmap"
   ],
@@ -20,5 +24,5 @@
     "Linux"
   ],
   "type": "query",
-  "version": 2
+  "version": 3
 }

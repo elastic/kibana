@@ -1,0 +1,46 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "An adversary may attempt to deactivate an Okta policy in order to weaken an organization's security controls. For example, an adversary may attempt to deactivate an Okta multi-factor authentication (MFA) policy in order to weaken the authentication requirements for user accounts.",
+  "false_positives": [
+    "If the behavior of deactivating Okta policies is expected, consider adding exceptions to this rule to filter false positives."
+  ],
+  "index": [
+    "filebeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Attempt to Deactivate Okta Policy",
+  "query": "event.module:okta and event.dataset:okta.system and event.action:policy.lifecycle.deactivate",
+  "references": [
+    "https://developer.okta.com/docs/reference/api/system-log/",
+    "https://developer.okta.com/docs/reference/api/event-types/"
+  ],
+  "risk_score": 21,
+  "rule_id": "b719a170-3bdb-4141-b0e3-13e3cf627bfe",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Okta"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1098",
+          "name": "Account Manipulation",
+          "reference": "https://attack.mitre.org/techniques/T1098/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

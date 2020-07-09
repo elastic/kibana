@@ -1,0 +1,63 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the deletion of an AWS CloudWatch log stream, which permanently deletes all associated archived log events with the stream.",
+  "false_positives": [
+    "A log stream may be deleted by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Log stream deletions from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "from": "now-60m",
+  "index": [
+    "filebeat-*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "AWS CloudWatch Log Stream Deletion",
+  "query": "event.action:DeleteLogStream and event.dataset:aws.cloudtrail and event.provider:logs.amazonaws.com and event.outcome:success",
+  "references": [
+    "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/logs/delete-log-stream.html",
+    "https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_DeleteLogStream.html"
+  ],
+  "risk_score": 47,
+  "rule_id": "d624f0ae-3dd1-4856-9aad-ccfe4d4bfa17",
+  "severity": "medium",
+  "tags": [
+    "AWS",
+    "Elastic"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0040",
+        "name": "Impact",
+        "reference": "https://attack.mitre.org/tactics/TA0040/"
+      },
+      "technique": [
+        {
+          "id": "T1485",
+          "name": "Data Destruction",
+          "reference": "https://attack.mitre.org/techniques/T1485/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1089",
+          "name": "Disabling Security Tools",
+          "reference": "https://attack.mitre.org/techniques/T1089/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

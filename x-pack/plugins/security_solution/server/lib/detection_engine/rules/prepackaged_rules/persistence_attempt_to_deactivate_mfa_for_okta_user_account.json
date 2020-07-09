@@ -1,0 +1,46 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "An adversary may deactivate multi-factor authentication (MFA) for an Okta user account in order to weaken the authentication requirements for the account.",
+  "false_positives": [
+    "If the behavior of deactivating MFA for Okta user accounts is expected, consider adding exceptions to this rule to filter false positives."
+  ],
+  "index": [
+    "filebeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Attempt to Deactivate MFA for Okta User Account",
+  "query": "event.module:okta and event.dataset:okta.system and event.action:user.mfa.factor.deactivate",
+  "references": [
+    "https://developer.okta.com/docs/reference/api/system-log/",
+    "https://developer.okta.com/docs/reference/api/event-types/"
+  ],
+  "risk_score": 21,
+  "rule_id": "cd89602e-9db0-48e3-9391-ae3bf241acd8",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Okta"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1098",
+          "name": "Account Manipulation",
+          "reference": "https://attack.mitre.org/techniques/T1098/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

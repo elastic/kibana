@@ -1,0 +1,48 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "An adversary may attempt to disrupt an organization's business operations by performing a denial of service (DoS) attack against its Okta infrastructure.",
+  "index": [
+    "filebeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Possible Okta DoS Attack",
+  "query": "event.module:okta and event.dataset:okta.system and event.action:(application.integration.rate_limit_exceeded or system.org.rate_limit.warning or system.org.rate_limit.violation or core.concurrency.org.limit.violation)",
+  "references": [
+    "https://developer.okta.com/docs/reference/api/system-log/",
+    "https://developer.okta.com/docs/reference/api/event-types/"
+  ],
+  "risk_score": 47,
+  "rule_id": "e6e3ecff-03dd-48ec-acbd-54a04de10c68",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Okta"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0040",
+        "name": "Impact",
+        "reference": "https://attack.mitre.org/tactics/TA0040/"
+      },
+      "technique": [
+        {
+          "id": "T1498",
+          "name": "Network Denial of Service",
+          "reference": "https://attack.mitre.org/techniques/T1498/"
+        },
+        {
+          "id": "T1499",
+          "name": "Endpoint Denial of Service",
+          "reference": "https://attack.mitre.org/techniques/T1499/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

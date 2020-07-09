@@ -1,0 +1,39 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Adversaries may attempt to clear the bash command line history in an attempt to evade detection or forensic investigations.",
+  "index": [
+    "auditbeat-*"
+  ],
+  "language": "lucene",
+  "license": "Elastic License",
+  "name": "Deletion of Bash Command Line History",
+  "query": "event.category:process AND event.type:(start or process_started) AND process.name:rm AND process.args:/\\/(home\\/.{1,255}|root)\\/\\.bash_history/",
+  "risk_score": 47,
+  "rule_id": "7bcbb3ac-e533-41ad-a612-d6c3bf666aba",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Linux"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1146",
+          "name": "Clear Command History",
+          "reference": "https://attack.mitre.org/techniques/T1146/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

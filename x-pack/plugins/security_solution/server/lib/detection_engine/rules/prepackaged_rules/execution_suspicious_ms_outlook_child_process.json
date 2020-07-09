@@ -1,0 +1,39 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies suspicious child processes of Microsoft Outlook. These child processes are often associated with spear phishing activity.",
+  "index": [
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Suspicious MS Outlook Child Process",
+  "query": "event.category:process and event.type:(start or process_started) and process.parent.name:outlook.exe and process.name:(Microsoft.Workflow.Compiler.exe or arp.exe or atbroker.exe or  bginfo.exe or bitsadmin.exe or cdb.exe or certutil.exe or cmd.exe or cmstp.exe or cscript.exe or csi.exe or dnx.exe or dsget.exe or dsquery.exe or forfiles.exe or fsi.exe or ftp.exe or gpresult.exe or hostname.exe or ieexec.exe or iexpress.exe or installutil.exe or ipconfig.exe or mshta.exe or msxsl.exe or nbtstat.exe or net.exe or net1.exe or netsh.exe or netstat.exe or nltest.exe or odbcconf.exe or ping.exe or powershell.exe or pwsh.exe or qprocess.exe or quser.exe or qwinsta.exe or rcsi.exe or reg.exe or regasm.exe or regsvcs.exe or regsvr32.exe or sc.exe or schtasks.exe or systeminfo.exe or tasklist.exe or tracert.exe or whoami.exe or wmic.exe or wscript.exe or xwizard.exe)",
+  "risk_score": 21,
+  "rule_id": "32f4675e-6c49-4ace-80f9-97c9259dca2e",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Windows"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1193",
+          "name": "Spearphishing Attachment",
+          "reference": "https://attack.mitre.org/techniques/T1193/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 3
+}

@@ -1,0 +1,39 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "A sudoers file specifies the commands that users or groups can run and from which terminals. Adversaries can take advantage of these configurations to execute commands as other users or spawn processes with higher privileges.",
+  "index": [
+    "auditbeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Sudoers File Modification",
+  "query": "event.category:file and event.type:change and file.path:/etc/sudoers",
+  "risk_score": 21,
+  "rule_id": "931e25a5-0f5e-4ae0-ba0d-9e94eff7e3a4",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Linux"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1169",
+          "name": "Sudo",
+          "reference": "https://attack.mitre.org/techniques/T1169/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 2
+}
