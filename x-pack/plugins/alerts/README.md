@@ -476,7 +476,7 @@ Params:
 |---|---|---|
 |id|The id of the alert you're trying to update the API key for. System will use user in request context to generate an API key for.|string|
 
-## Schedule Format
+## Schedule Formats
 A schedule is structured such that the key specifies the format you wish to use and its value specifies the schedule.
 
 We currently support the _Interval format_ which specifies the interval in seconds, minutes, hours or days at which the alert should execute.
