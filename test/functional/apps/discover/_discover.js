@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }) {
     defaultIndex: 'logstash-*',
   };
 
-  describe.only('discover test', function describeIndexTests() {
+  describe('discover test', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('discover');
