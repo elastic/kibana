@@ -46,7 +46,7 @@ export function RumOverview() {
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          pathname: '/api/apm/services',
+          pathname: '/api/apm/rum-client/services',
           params: {
             query: {
               start,
@@ -68,11 +68,7 @@ export function RumOverview() {
           <LocalUIFilters {...localUIFiltersConfig} showCount={true}>
             {!isRumServiceRoute && (
               <>
-                <ServiceNameFilter
-                  serviceNames={
-                    data?.items?.map((service) => service.serviceName) ?? []
-                  }
-                />
+                <ServiceNameFilter serviceNames={data ?? []} />
                 <EuiSpacer size="xl" />
                 <EuiHorizontalRule margin="none" />{' '}
               </>
