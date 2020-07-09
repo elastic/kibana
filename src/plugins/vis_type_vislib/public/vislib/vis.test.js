@@ -19,17 +19,24 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
-import expect from '@kbn/expect';
-
-import series from '../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series';
-import columns from '../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_columns';
-import rows from '../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_rows';
-import stackedSeries from '../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_stacked_series';
-import { getMockUiState } from '../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
-import { getVis } from './_vis_fixture';
+import {
+  setHTMLElementClientSizes,
+  setSVGElementGetBBox,
+  setSVGElementGetComputedTextLength,
+} from '../../../../test_utils/public';
+import series from '../fixtures/mock_data/date_histogram/_series';
+import columns from '../fixtures/mock_data/date_histogram/_columns';
+import rows from '../fixtures/mock_data/date_histogram/_rows';
+import stackedSeries from '../fixtures/mock_data/date_histogram/_stacked_series';
+import { getMockUiState } from '../fixtures/mocks';
+import { getVis } from './visualizations/_vis_fixture';
 
 const dataArray = [series, columns, rows, stackedSeries];
 const names = ['series', 'columns', 'rows', 'stackedSeries'];
+
+let mockedHTMLElementClientSizes;
+let mockedSVGElementGetBBox;
+let mockedSVGElementGetComputedTextLength;
 
 dataArray.forEach(function (data, i) {
   describe('Vislib Vis Test Suite for ' + names[i] + ' Data', function () {
@@ -39,6 +46,12 @@ dataArray.forEach(function (data, i) {
     let mockUiState;
     let secondVis;
     let numberOfCharts;
+
+    beforeAll(() => {
+      mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
+      mockedSVGElementGetBBox = setSVGElementGetBBox(100);
+      mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
+    });
 
     beforeEach(() => {
       vis = getVis();
@@ -51,34 +64,40 @@ dataArray.forEach(function (data, i) {
       secondVis.destroy();
     });
 
+    afterAll(() => {
+      mockedHTMLElementClientSizes.mockRestore();
+      mockedSVGElementGetBBox.mockRestore();
+      mockedSVGElementGetComputedTextLength.mockRestore();
+    });
+
     describe('render Method', function () {
       beforeEach(function () {
         vis.render(data, mockUiState);
         numberOfCharts = vis.handler.charts.length;
       });
 
-      it('should bind data to this object', function () {
-        expect(_.isObject(vis.data)).to.be(true);
+      test('should bind data to this object', function () {
+        expect(_.isObject(vis.data)).toBe(true);
       });
 
-      it('should instantiate a handler object', function () {
-        expect(_.isObject(vis.handler)).to.be(true);
+      test('should instantiate a handler object', function () {
+        expect(_.isObject(vis.handler)).toBe(true);
       });
 
-      it('should append a chart', function () {
-        expect($('.chart').length).to.be(numberOfCharts);
+      test('should append a chart', function () {
+        expect($('.chart').length).toBe(numberOfCharts);
       });
 
-      it('should throw an error if no data is provided', function () {
+      test('should throw an error if no data is provided', function () {
         expect(function () {
           vis.render(null, mockUiState);
-        }).to.throwError();
+        }).toThrowError();
       });
     });
 
     describe('getLegendColors method', () => {
-      it('should return null if no colors are defined', () => {
-        expect(vis.getLegendColors()).to.equal(null);
+      test('should return null if no colors are defined', () => {
+        expect(vis.getLegendColors()).toEqual(null);
       });
     });
 
@@ -89,12 +108,12 @@ dataArray.forEach(function (data, i) {
         secondVis.destroy();
       });
 
-      it('should remove all DOM elements from el', function () {
-        expect($(secondVis.el).find('.visWrapper').length).to.be(0);
+      test('should remove all DOM elements from el', function () {
+        expect($(secondVis.el).find('.visWrapper').length).toBe(0);
       });
 
-      it('should not remove visualizations that have not been destroyed', function () {
-        expect($(vis.element).find('.visWrapper').length).to.be(1);
+      test('should not remove visualizations that have not been destroyed', function () {
+        expect($(vis.element).find('.visWrapper').length).toBe(1);
       });
     });
 
@@ -105,9 +124,9 @@ dataArray.forEach(function (data, i) {
         vis.set('offset', 'wiggle');
       });
 
-      it('should set an attribute', function () {
-        expect(vis.get('addLegend')).to.be(false);
-        expect(vis.get('offset')).to.be('wiggle');
+      test('should set an attribute', function () {
+        expect(vis.get('addLegend')).toBe(false);
+        expect(vis.get('offset')).toBe('wiggle');
       });
     });
 
@@ -116,10 +135,10 @@ dataArray.forEach(function (data, i) {
         vis.render(data, mockUiState);
       });
 
-      it('should get attribute values', function () {
-        expect(vis.get('addLegend')).to.be(true);
-        expect(vis.get('addTooltip')).to.be(true);
-        expect(vis.get('type')).to.be('point_series');
+      test('should get attribute values', function () {
+        expect(vis.get('addLegend')).toBe(true);
+        expect(vis.get('addTooltip')).toBe(true);
+        expect(vis.get('type')).toBe('point_series');
       });
     });
 
@@ -148,22 +167,22 @@ dataArray.forEach(function (data, i) {
         vis.removeAllListeners(afterEvent);
       });
 
-      it('should add an event and its listeners', function () {
+      test('should add an event and its listeners', function () {
         listeners.forEach(function (listener) {
-          expect(vis.listeners(beforeEvent)).to.contain(listener);
+          expect(vis.listeners(beforeEvent)).toContain(listener);
         });
 
         listeners.forEach(function (listener) {
-          expect(vis.listeners(afterEvent)).to.contain(listener);
+          expect(vis.listeners(afterEvent)).toContain(listener);
         });
       });
 
-      it('should cause a listener for each event to be attached to each chart', function () {
+      test('should cause a listener for each event to be attached to each chart', function () {
         const charts = vis.handler.charts;
 
         charts.forEach(function (chart) {
-          expect(chart.events.listenerCount(beforeEvent)).to.be.above(0);
-          expect(chart.events.listenerCount(afterEvent)).to.be.above(0);
+          expect(chart.events.listenerCount(beforeEvent)).toBeGreaterThan(0);
+          expect(chart.events.listenerCount(afterEvent)).toBeGreaterThan(0);
         });
       });
     });
@@ -205,45 +224,45 @@ dataArray.forEach(function (data, i) {
         vis.removeAllListeners(afterEvent);
       });
 
-      it('should remove a listener', function () {
+      test('should remove a listener', function () {
         const charts = vis.handler.charts;
 
-        expect(vis.listeners(beforeEvent)).to.not.contain(listener1);
-        expect(vis.listeners(beforeEvent)).to.contain(listener2);
+        expect(vis.listeners(beforeEvent)).not.toContain(listener1);
+        expect(vis.listeners(beforeEvent)).toContain(listener2);
 
-        expect(vis.listeners(afterEvent)).to.not.contain(listener1);
-        expect(vis.listeners(afterEvent)).to.contain(listener2);
+        expect(vis.listeners(afterEvent)).not.toContain(listener1);
+        expect(vis.listeners(afterEvent)).toContain(listener2);
 
         // Events should still be attached to charts
         charts.forEach(function (chart) {
-          expect(chart.events.listenerCount(beforeEvent)).to.be.above(0);
-          expect(chart.events.listenerCount(afterEvent)).to.be.above(0);
+          expect(chart.events.listenerCount(beforeEvent)).toBeGreaterThan(0);
+          expect(chart.events.listenerCount(afterEvent)).toBeGreaterThan(0);
         });
       });
 
-      it('should remove the event and all listeners when only event passed an argument', function () {
+      test('should remove the event and all listeners when only event passed an argument', function () {
         const charts = vis.handler.charts;
         vis.removeAllListeners(afterEvent);
 
         // should remove 'brush' event
-        expect(vis.listeners(beforeEvent)).to.contain(listener2);
-        expect(vis.listeners(afterEvent)).to.not.contain(listener2);
+        expect(vis.listeners(beforeEvent)).toContain(listener2);
+        expect(vis.listeners(afterEvent)).not.toContain(listener2);
 
         // should remove the event from the charts
         charts.forEach(function (chart) {
-          expect(chart.events.listenerCount(beforeEvent)).to.be.above(0);
-          expect(chart.events.listenerCount(afterEvent)).to.be(0);
+          expect(chart.events.listenerCount(beforeEvent)).toBeGreaterThan(0);
+          expect(chart.events.listenerCount(afterEvent)).toBe(0);
         });
       });
 
-      it('should remove the event from the chart when the last listener is removed', function () {
+      test('should remove the event from the chart when the last listener is removed', function () {
         const charts = vis.handler.charts;
         vis.off(afterEvent, listener2);
 
-        expect(vis.listenerCount(afterEvent)).to.be(0);
+        expect(vis.listenerCount(afterEvent)).toBe(0);
 
         charts.forEach(function (chart) {
-          expect(chart.events.listenerCount(afterEvent)).to.be(0);
+          expect(chart.events.listenerCount(afterEvent)).toBe(0);
         });
       });
     });

@@ -19,11 +19,15 @@
 
 import d3 from 'd3';
 import _ from 'lodash';
-import expect from '@kbn/expect';
+import {
+  setHTMLElementClientSizes,
+  setSVGElementGetBBox,
+  setSVGElementGetComputedTextLength,
+} from '../../../../../test_utils/public';
 
-import { ChartTitle } from '../../../../../../../plugins/vis_type_vislib/public/vislib/lib/chart_title';
-import { VisConfig } from '../../../../../../../plugins/vis_type_vislib/public/vislib/lib/vis_config';
-import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
+import { ChartTitle } from './chart_title';
+import { VisConfig } from './vis_config';
+import { getMockUiState } from '../../fixtures/mocks';
 
 describe('Vislib ChartTitle Class Test Suite', function () {
   let mockUiState;
@@ -88,6 +92,16 @@ describe('Vislib ChartTitle Class Test Suite', function () {
     yAxisLabel: 'Count',
   };
 
+  let mockedHTMLElementClientSizes;
+  let mockedSVGElementGetBBox;
+  let mockedSVGElementGetComputedTextLength;
+
+  beforeAll(() => {
+    mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
+    mockedSVGElementGetBBox = setSVGElementGetBBox(100);
+    mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
+  });
+
   beforeEach(() => {
     mockUiState = getMockUiState();
     el = d3.select('body').append('div').attr('class', 'visWrapper').datum(data);
@@ -113,23 +127,29 @@ describe('Vislib ChartTitle Class Test Suite', function () {
     el.remove();
   });
 
+  afterAll(() => {
+    mockedHTMLElementClientSizes.mockRestore();
+    mockedSVGElementGetBBox.mockRestore();
+    mockedSVGElementGetComputedTextLength.mockRestore();
+  });
+
   describe('render Method', function () {
     beforeEach(function () {
       chartTitle.render();
     });
 
-    it('should append an svg to div', function () {
-      expect(el.select('.chart-title').selectAll('svg').length).to.be(1);
+    test('should append an svg to div', function () {
+      expect(el.select('.chart-title').selectAll('svg').length).toBe(1);
     });
 
-    it('should append text', function () {
-      expect(!!el.select('.chart-title').selectAll('svg').selectAll('text')).to.be(true);
+    test('should append text', function () {
+      expect(!!el.select('.chart-title').selectAll('svg').selectAll('text')).toBe(true);
     });
   });
 
   describe('draw Method', function () {
-    it('should be a function', function () {
-      expect(_.isFunction(chartTitle.draw())).to.be(true);
+    test('should be a function', function () {
+      expect(_.isFunction(chartTitle.draw())).toBe(true);
     });
   });
 });

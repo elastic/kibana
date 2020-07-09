@@ -19,13 +19,21 @@
 
 import _ from 'lodash';
 import d3 from 'd3';
-import expect from '@kbn/expect';
+import {
+  setHTMLElementClientSizes,
+  setSVGElementGetBBox,
+  setSVGElementGetComputedTextLength,
+} from '../../../../../test_utils/public';
 
 // Data
-import data from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series';
+import data from '../../fixtures/mock_data/date_histogram/_series';
 
-import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
-import { getVis } from '../_vis_fixture';
+import { getMockUiState } from '../../fixtures/mocks';
+import { getVis } from '../visualizations/_vis_fixture';
+
+let mockedHTMLElementClientSizes;
+let mockedSVGElementGetBBox;
+let mockedSVGElementGetComputedTextLength;
 
 describe('Vislib Dispatch Class Test Suite', function () {
   function destroyVis(vis) {
@@ -35,6 +43,18 @@ describe('Vislib Dispatch Class Test Suite', function () {
   function getEls(element, n, type) {
     return d3.select(element).data(new Array(n)).enter().append(type);
   }
+
+  beforeAll(() => {
+    mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
+    mockedSVGElementGetBBox = setSVGElementGetBBox(100);
+    mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
+  });
+
+  afterAll(() => {
+    mockedHTMLElementClientSizes.mockRestore();
+    mockedSVGElementGetBBox.mockRestore();
+    mockedSVGElementGetComputedTextLength.mockRestore();
+  });
 
   describe('', function () {
     let vis;
@@ -50,13 +70,13 @@ describe('Vislib Dispatch Class Test Suite', function () {
       destroyVis(vis);
     });
 
-    it('implements on, off, emit methods', function () {
+    test('implements on, off, emit methods', function () {
       const events = _.map(vis.handler.charts, 'events');
-      expect(events.length).to.be.above(0);
+      expect(events.length).toBeGreaterThan(0);
       events.forEach(function (dispatch) {
-        expect(dispatch).to.have.property('on');
-        expect(dispatch).to.have.property('off');
-        expect(dispatch).to.have.property('emit');
+        expect(dispatch).toHaveProperty('on');
+        expect(dispatch).toHaveProperty('off');
+        expect(dispatch).toHaveProperty('emit');
       });
     });
   });
@@ -77,15 +97,15 @@ describe('Vislib Dispatch Class Test Suite', function () {
     });
 
     describe('addEvent method', function () {
-      it('returns a function that binds the passed event to a selection', function () {
+      test('returns a function that binds the passed event to a selection', function () {
         const chart = _.first(vis.handler.charts);
         const apply = chart.events.addEvent('event', _.noop);
-        expect(apply).to.be.a('function');
+        expect(apply).toBeInstanceOf(Function);
 
         const els = getEls(vis.element, 3, 'div');
         apply(els);
         els.each(function () {
-          expect(d3.select(this).on('event')).to.be(_.noop);
+          expect(d3.select(this).on('event')).toBe(_.noop);
         });
       });
     });
@@ -94,21 +114,21 @@ describe('Vislib Dispatch Class Test Suite', function () {
     // checking that they return function which bind the events expected
     function checkBoundAddMethod(name, event) {
       describe(name + ' method', function () {
-        it('should be a function', function () {
+        test('should be a function', function () {
           vis.handler.charts.forEach(function (chart) {
-            expect(chart.events[name]).to.be.a('function');
+            expect(chart.events[name]).toBeInstanceOf(Function);
           });
         });
 
-        it('returns a function that binds ' + event + ' events to a selection', function () {
+        test('returns a function that binds ' + event + ' events to a selection', function () {
           const chart = _.first(vis.handler.charts);
           const apply = chart.events[name](chart.series[0].chartEl);
-          expect(apply).to.be.a('function');
+          expect(apply).toBeInstanceOf(Function);
 
           const els = getEls(vis.element, 3, 'div');
           apply(els);
           els.each(function () {
-            expect(d3.select(this).on(event)).to.be.a('function');
+            expect(d3.select(this).on(event)).toBeInstanceOf(Function);
           });
         });
       });
@@ -119,26 +139,26 @@ describe('Vislib Dispatch Class Test Suite', function () {
     checkBoundAddMethod('addClickEvent', 'click');
 
     describe('addMousePointer method', function () {
-      it('should be a function', function () {
+      test('should be a function', function () {
         vis.handler.charts.forEach(function (chart) {
           const pointer = chart.events.addMousePointer;
 
-          expect(_.isFunction(pointer)).to.be(true);
+          expect(_.isFunction(pointer)).toBe(true);
         });
       });
     });
 
     describe('clickEvent handler', () => {
       describe('for pie chart', () => {
-        it('prepares data points', () => {
+        test('prepares data points', () => {
           const expectedResponse = [{ column: 0, row: 0, table: {}, value: 0 }];
           const d = { rawData: { column: 0, row: 0, table: {}, value: 0 } };
           const chart = _.first(vis.handler.charts);
           const response = chart.events.clickEventResponse(d, { isSlices: true });
-          expect(response.data).to.eql(expectedResponse);
+          expect(response.data).toEqual(expectedResponse);
         });
 
-        it('remove invalid points', () => {
+        test('remove invalid points', () => {
           const expectedResponse = [{ column: 0, row: 0, table: {}, value: 0 }];
           const d = {
             rawData: { column: 0, row: 0, table: {}, value: 0 },
@@ -146,20 +166,20 @@ describe('Vislib Dispatch Class Test Suite', function () {
           };
           const chart = _.first(vis.handler.charts);
           const response = chart.events.clickEventResponse(d, { isSlices: true });
-          expect(response.data).to.eql(expectedResponse);
+          expect(response.data).toEqual(expectedResponse);
         });
       });
 
       describe('for xy charts', () => {
-        it('prepares data points', () => {
+        test('prepares data points', () => {
           const expectedResponse = [{ column: 0, row: 0, table: {}, value: 0 }];
           const d = { xRaw: { column: 0, row: 0, table: {}, value: 0 } };
           const chart = _.first(vis.handler.charts);
           const response = chart.events.clickEventResponse(d, { isSlices: false });
-          expect(response.data).to.eql(expectedResponse);
+          expect(response.data).toEqual(expectedResponse);
         });
 
-        it('remove invalid points', () => {
+        test('remove invalid points', () => {
           const expectedResponse = [{ column: 0, row: 0, table: {}, value: 0 }];
           const d = {
             xRaw: { column: 0, row: 0, table: {}, value: 0 },
@@ -167,35 +187,35 @@ describe('Vislib Dispatch Class Test Suite', function () {
           };
           const chart = _.first(vis.handler.charts);
           const response = chart.events.clickEventResponse(d, { isSlices: false });
-          expect(response.data).to.eql(expectedResponse);
+          expect(response.data).toEqual(expectedResponse);
         });
       });
     });
   });
 
   describe('Custom event handlers', function () {
-    it('should attach whatever gets passed on vis.on() to chart.events', function (done) {
+    test('should attach whatever gets passed on vis.on() to chart.events', function (done) {
       const vis = getVis();
       const mockUiState = getMockUiState();
       vis.on('someEvent', _.noop);
       vis.render(data, mockUiState);
 
       vis.handler.charts.forEach(function (chart) {
-        expect(chart.events.listenerCount('someEvent')).to.be(1);
+        expect(chart.events.listenerCount('someEvent')).toBe(1);
       });
 
       destroyVis(vis);
       done();
     });
 
-    it('can be added after rendering', function () {
+    test('can be added after rendering', function () {
       const vis = getVis();
       const mockUiState = getMockUiState();
       vis.render(data, mockUiState);
       vis.on('someEvent', _.noop);
 
       vis.handler.charts.forEach(function (chart) {
-        expect(chart.events.listenerCount('someEvent')).to.be(1);
+        expect(chart.events.listenerCount('someEvent')).toBe(1);
       });
 
       destroyVis(vis);
