@@ -77,7 +77,7 @@ archive = zipfile.ZipFile(zip_filename, mode='w', compression=zipfile.ZIP_DEFLAT
 def archive_file(name):
   """A little helper function to write individual files to the zip file"""
   from_path = os.path.join('out/headless', name)
-  to_path = os.path.join('headless_shell-' + platform.system().lower(), '_', arch_name, name)
+  to_path = os.path.join('headless_shell-' + platform.system().lower() + '_' + arch_name, name)
   archive.write(from_path, to_path)
 
 # Each platform has slightly different requirements for what dependencies
