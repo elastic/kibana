@@ -26,6 +26,9 @@ import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analy
 import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { LogEntryRateResultsContent } from './page_results_content';
 import { LogEntryRateSetupContent } from './page_setup_content';
+import { useInterval } from '../../../hooks/use_interval';
+
+const JOB_STATUS_POLLING_INTERVAL = 30000;
 
 export const LogEntryRatePageContent = memo(() => {
   const {
@@ -44,27 +47,50 @@ export const LogEntryRatePageContent = memo(() => {
 
   const {
     fetchJobStatus: fetchLogEntryCategoriesJobStatus,
-    setupStatus: logEntryCategoriesSetupStatus,
+    fetchModuleDefinition: fetchLogEntryCategoriesModuleDefinition,
     jobStatus: logEntryCategoriesJobStatus,
+    setupStatus: logEntryCategoriesSetupStatus,
   } = useLogEntryCategoriesModuleContext();
   const {
     fetchJobStatus: fetchLogEntryRateJobStatus,
-    setupStatus: logEntryRateSetupStatus,
+    fetchModuleDefinition: fetchLogEntryRateModuleDefinition,
     jobStatus: logEntryRateJobStatus,
+    setupStatus: logEntryRateSetupStatus,
   } = useLogEntryRateModuleContext();
 
   const { showModuleList } = useLogAnalysisSetupFlyoutStateContext();
 
-  const fetchJobStatus = useCallback(
+  const fetchAllJobStatuses = useCallback(
     () => Promise.all([fetchLogEntryCategoriesJobStatus(), fetchLogEntryRateJobStatus()]),
     [fetchLogEntryCategoriesJobStatus, fetchLogEntryRateJobStatus]
   );
 
   useEffect(() => {
     if (hasLogAnalysisReadCapabilities) {
-      fetchJobStatus();
+      fetchAllJobStatuses();
     }
-  }, [fetchJobStatus, hasLogAnalysisReadCapabilities]);
+  }, [fetchAllJobStatuses, hasLogAnalysisReadCapabilities]);
+
+  useEffect(() => {
+    if (hasLogAnalysisReadCapabilities) {
+      fetchLogEntryCategoriesModuleDefinition();
+    }
+  }, [fetchLogEntryCategoriesModuleDefinition, hasLogAnalysisReadCapabilities]);
+
+  useEffect(() => {
+    if (hasLogAnalysisReadCapabilities) {
+      fetchLogEntryRateModuleDefinition();
+    }
+  }, [fetchLogEntryRateModuleDefinition, hasLogAnalysisReadCapabilities]);
+
+  useInterval(() => {
+    if (logEntryCategoriesSetupStatus.type !== 'pending' && hasLogAnalysisReadCapabilities) {
+      fetchLogEntryCategoriesJobStatus();
+    }
+    if (logEntryRateSetupStatus.type !== 'pending' && hasLogAnalysisReadCapabilities) {
+      fetchLogEntryRateJobStatus();
+    }
+  }, JOB_STATUS_POLLING_INTERVAL);
 
   if (isLoading || isUninitialized) {
     return <SourceLoadingPage />;
@@ -89,7 +115,7 @@ export const LogEntryRatePageContent = memo(() => {
     logEntryCategoriesSetupStatus.type === 'unknown' ||
     logEntryRateSetupStatus.type === 'unknown'
   ) {
-    return <LogAnalysisSetupStatusUnknownPrompt retry={fetchJobStatus} />;
+    return <LogAnalysisSetupStatusUnknownPrompt retry={fetchAllJobStatuses} />;
   } else if (
     isJobStatusWithResults(logEntryCategoriesJobStatus['log-entry-categories-count']) ||
     isJobStatusWithResults(logEntryRateJobStatus['log-entry-rate'])

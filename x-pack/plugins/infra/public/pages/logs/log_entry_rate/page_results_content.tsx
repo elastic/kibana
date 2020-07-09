@@ -23,8 +23,6 @@ import {
   useLogAnalysisResultsUrlState,
 } from './use_log_entry_rate_results_url_state';
 
-const JOB_STATUS_POLLING_INTERVAL = 30000;
-
 export const SORT_DEFAULTS = {
   direction: 'desc' as const,
   field: 'anomalyScore' as const,
@@ -45,8 +43,6 @@ export const LogEntryRateResultsContent: React.FunctionComponent<LogEntryRateRes
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results', delay: 15000 });
 
   const {
-    fetchJobStatus,
-    fetchModuleDefinition,
     setupStatus,
     viewSetupForReconfiguration,
     viewSetupForUpdate,
@@ -174,14 +170,6 @@ export const LogEntryRateResultsContent: React.FunctionComponent<LogEntryRateRes
   useEffect(() => {
     getLogEntryRate();
   }, [getLogEntryRate, queryTimeRange.lastChangedTime]);
-
-  useEffect(() => {
-    fetchModuleDefinition();
-  }, [fetchModuleDefinition]);
-
-  useInterval(() => {
-    fetchJobStatus();
-  }, JOB_STATUS_POLLING_INTERVAL);
 
   useInterval(
     () => {
