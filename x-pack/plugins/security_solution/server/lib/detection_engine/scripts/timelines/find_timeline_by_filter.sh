@@ -7,7 +7,7 @@
 #
 
 set -e
-./check_env_variables.sh
+../check_env_variables.sh
 
 # Uses a default if no argument is specified
 STATUS=${1:-active}

@@ -7,15 +7,12 @@
 #
 
 set -e
-./check_env_variables.sh
+../check_env_variables.sh
+# Example: ./get_timeline_by_template_timeline_id.sh {template_timeline_id}
 
-# Uses a defaults if no argument is specified
-TIMELINES=${1:-../rules/prepackaged_timelines/index.ndjson}
-
-# Example to import and overwrite everything from ./rules/prepackaged_timelines/index.ndjson
-# ./add_prepackaged_timelines.sh
 curl -s -k \
+  -H "Content-Type: application/json" \
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -X POST "${KIBANA_URL}${SPACE_URL}/api/timeline/_prepackaged" \
+  -X GET "${KIBANA_URL}${SPACE_URL}/api/timeline?template_timeline_id=$1" \
   | jq .

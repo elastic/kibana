@@ -7,7 +7,7 @@
 #
 
 set -e
-./check_env_variables.sh
+../check_env_variables.sh
 
 
 # Example: ./delete_all_alerts.sh {timeline_id}

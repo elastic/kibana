@@ -7,7 +7,7 @@
 #
 
 set -e
-./check_env_variables.sh
+../check_env_variables.sh
 
 # Example: ./get_all_timelines.sh
 curl -s -k \
