@@ -34,20 +34,20 @@ export interface SchemaField {
   type: string;
 }
 
-type Purify<T extends string> = { [P in T]: T }[T];
+export type RecursiveMakeSchemaFrom<U> = U extends object
+  ? MakeSchemaFrom<U>
+  : { type: AllowedSchemaTypes };
 
 export type MakeSchemaFrom<Base> = {
-  [Key in Purify<Extract<keyof Base, string>>]: Base[Key] extends Array<infer U>
-    ? { type: AllowedSchemaTypes }
-    : Base[Key] extends object
-    ? MakeSchemaFrom<Base[Key]>
-    : { type: AllowedSchemaTypes };
+  [Key in keyof Base]: Base[Key] extends Array<infer U>
+    ? RecursiveMakeSchemaFrom<U>
+    : RecursiveMakeSchemaFrom<Base[Key]>;
 };
 
 export interface CollectorOptions<T = unknown, U = T> {
   type: string;
   init?: Function;
-  schema?: MakeSchemaFrom<T>;
+  schema?: MakeSchemaFrom<Required<T>>; // Using Required to enforce all optional keys in the object
   fetch: (callCluster: LegacyAPICaller) => Promise<T> | T;
   /*
    * A hook for allowing the fetched data payload to be organized into a typed

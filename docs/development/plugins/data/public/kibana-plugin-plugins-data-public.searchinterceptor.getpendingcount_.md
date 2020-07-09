@@ -9,5 +9,5 @@ Returns an `Observable` over the current number of pending searches. This could 
 <b>Signature:</b>
 
 ```typescript
-getPendingCount$: () => import("rxjs").Observable<number>;
+getPendingCount$: () => Observable<number>;
 ```

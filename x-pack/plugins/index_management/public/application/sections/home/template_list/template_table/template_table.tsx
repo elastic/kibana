@@ -7,27 +7,41 @@
 import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton } from '@elastic/eui';
+import {
+  EuiInMemoryTable,
+  EuiBasicTableColumn,
+  EuiButton,
+  EuiLink,
+  EuiBadge,
+  EuiIcon,
+} from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 
 import { TemplateListItem } from '../../../../../../common';
-import { TemplateDeleteModal } from '../../../../components';
+import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
 import { SendRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
+import { encodePathForReactRouter } from '../../../../services/routing';
+import { useServices } from '../../../../app_context';
+import { TemplateDeleteModal } from '../../../../components';
 import { TemplateContentIndicator } from '../../../../components/shared';
 
 interface Props {
   templates: TemplateListItem[];
   reload: () => Promise<SendRequestResponse>;
   editTemplate: (name: string) => void;
+  cloneTemplate: (name: string) => void;
   history: ScopedHistory;
 }
 
 export const TemplateTable: React.FunctionComponent<Props> = ({
   templates,
   reload,
-  history,
   editTemplate,
+  cloneTemplate,
+  history,
 }) => {
+  const { uiMetricService } = useServices();
+  const [selection, setSelection] = useState<TemplateListItem[]>([]);
   const [templatesToDelete, setTemplatesToDelete] = useState<
     Array<{ name: string; isLegacy?: boolean }>
   >([]);
@@ -40,6 +54,32 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       }),
       truncateText: true,
       sortable: true,
+      render: (name: TemplateListItem['name'], item: TemplateListItem) => {
+        return (
+          <>
+            <EuiLink
+              {...reactRouterNavigate(
+                history,
+                {
+                  pathname: `/templates/${encodePathForReactRouter(name)}`,
+                },
+                () => uiMetricService.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)
+              )}
+              data-test-subj="templateDetailsLink"
+            >
+              {name}
+            </EuiLink>
+            &nbsp;
+            {item._kbnMeta.isManaged ? (
+              <EuiBadge color="hollow" data-test-subj="isManagedBadge">
+                Managed
+              </EuiBadge>
+            ) : (
+              ''
+            )}
+          </>
+        );
+      },
     },
     {
       field: 'indexPatterns',
@@ -49,27 +89,6 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       truncateText: true,
       sortable: true,
       render: (indexPatterns: string[]) => <strong>{indexPatterns.join(', ')}</strong>,
-    },
-    {
-      field: 'ilmPolicy',
-      name: i18n.translate('xpack.idxMgmt.templateList.table.ilmPolicyColumnTitle', {
-        defaultMessage: 'ILM policy',
-      }),
-      truncateText: true,
-      sortable: true,
-      render: (ilmPolicy: { name: string }) =>
-        ilmPolicy && ilmPolicy.name ? (
-          <span
-            title={i18n.translate('xpack.idxMgmt.templateList.table.ilmPolicyColumnDescription', {
-              defaultMessage: "'{policyName}' index lifecycle policy",
-              values: {
-                policyName: ilmPolicy.name,
-              },
-            })}
-          >
-            {ilmPolicy.name}
-          </span>
-        ) : null,
     },
     {
       field: 'composedOf',
@@ -89,8 +108,16 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       sortable: true,
     },
     {
-      name: i18n.translate('xpack.idxMgmt.templateList.table.overridesColumnTitle', {
-        defaultMessage: 'Overrides',
+      name: i18n.translate('xpack.idxMgmt.templateList.table.dataStreamColumnTitle', {
+        defaultMessage: 'Data stream',
+      }),
+      truncateText: true,
+      render: (template: TemplateListItem) =>
+        template._kbnMeta.hasDatastream ? <EuiIcon type="check" /> : null,
+    },
+    {
+      name: i18n.translate('xpack.idxMgmt.templateList.table.contentColumnTitle', {
+        defaultMessage: 'Content',
       }),
       truncateText: true,
       render: (item: TemplateListItem) => (
@@ -98,6 +125,13 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           mappings={item.hasMappings}
           settings={item.hasSettings}
           aliases={item.hasAliases}
+          contentWhenEmpty={
+            <em>
+              {i18n.translate('xpack.idxMgmt.templateList.table.noneDescriptionText', {
+                defaultMessage: 'None',
+              })}
+            </em>
+          }
         />
       ),
     },
@@ -119,7 +153,36 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           onClick: ({ name }: TemplateListItem) => {
             editTemplate(name);
           },
-          enabled: ({ _kbnMeta: { isManaged } }: TemplateListItem) => !isManaged,
+          enabled: ({ _kbnMeta: { isCloudManaged } }: TemplateListItem) => !isCloudManaged,
+        },
+        {
+          type: 'icon',
+          name: i18n.translate('xpack.idxMgmt.templateList.table.actionCloneTitle', {
+            defaultMessage: 'Clone',
+          }),
+          description: i18n.translate('xpack.idxMgmt.templateList.table.actionCloneDescription', {
+            defaultMessage: 'Clone this template',
+          }),
+          icon: 'copy',
+          onClick: ({ name }: TemplateListItem) => {
+            cloneTemplate(name);
+          },
+        },
+        {
+          name: i18n.translate('xpack.idxMgmt.templateList.table.actionDeleteText', {
+            defaultMessage: 'Delete',
+          }),
+          description: i18n.translate('xpack.idxMgmt.templateList.table.actionDeleteDecription', {
+            defaultMessage: 'Delete this template',
+          }),
+          icon: 'trash',
+          color: 'danger',
+          type: 'icon',
+          onClick: ({ name, _kbnMeta: { isLegacy } }: TemplateListItem) => {
+            setTemplatesToDelete([{ name, isLegacy }]);
+          },
+          isPrimary: true,
+          enabled: ({ _kbnMeta: { isCloudManaged } }: TemplateListItem) => !isCloudManaged,
         },
       ],
     },
@@ -137,10 +200,47 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     },
   } as const;
 
+  const selectionConfig = {
+    onSelectionChange: setSelection,
+    selectable: ({ _kbnMeta: { isCloudManaged } }: TemplateListItem) => !isCloudManaged,
+    selectableMessage: (selectable: boolean) => {
+      if (!selectable) {
+        return i18n.translate(
+          'xpack.idxMgmt.templateList.legacyTable.deleteManagedTemplateTooltip',
+          {
+            defaultMessage: 'You cannot delete a managed template.',
+          }
+        );
+      }
+      return '';
+    },
+  };
+
   const searchConfig = {
     box: {
       incremental: true,
     },
+    toolsLeft:
+      selection.length > 0 ? (
+        <EuiButton
+          data-test-subj="deleteTemplatesButton"
+          onClick={() =>
+            setTemplatesToDelete(
+              selection.map(({ name, _kbnMeta: { isLegacy } }: TemplateListItem) => ({
+                name,
+                isLegacy,
+              }))
+            )
+          }
+          color="danger"
+        >
+          <FormattedMessage
+            id="xpack.idxMgmt.templateList.table.deleteTemplatesButtonLabel"
+            defaultMessage="Delete {count, plural, one {template} other {templates} }"
+            values={{ count: selection.length }}
+          />
+        </EuiButton>
+      ) : undefined,
     toolsRight: [
       <EuiButton
         iconType="plusInCircle"
@@ -157,6 +257,10 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     ],
   };
 
+  const goToList = () => {
+    return history.push('templates');
+  };
+
   return (
     <Fragment>
       {templatesToDelete && templatesToDelete.length > 0 ? (
@@ -164,9 +268,10 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           callback={(data) => {
             if (data && data.hasDeletedTemplates) {
               reload();
-            } else {
-              setTemplatesToDelete([]);
+              // Close the flyout if it is opened
+              goToList();
             }
+            setTemplatesToDelete([]);
           }}
           templatesToDelete={templatesToDelete}
         />
@@ -177,7 +282,8 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         columns={columns}
         search={searchConfig}
         sorting={sorting}
-        isSelectable={false}
+        isSelectable={true}
+        selection={selectionConfig}
         pagination={pagination}
         rowProps={() => ({
           'data-test-subj': 'row',

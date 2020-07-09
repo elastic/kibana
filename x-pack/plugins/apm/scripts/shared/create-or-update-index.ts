@@ -30,6 +30,11 @@ export async function createOrUpdateIndex({
     }
   }
 
+  // Some settings are non-updateable and need to be removed.
+  const settings = { ...template.settings };
+  delete settings?.index?.number_of_shards;
+  delete settings?.index?.sort;
+
   const indexExists = (
     await client.indices.exists({
       index: indexName,
@@ -42,6 +47,7 @@ export async function createOrUpdateIndex({
       body: template,
     });
   } else {
+    await client.indices.close({ index: indexName });
     await Promise.all([
       template.mappings
         ? client.indices.putMapping({
@@ -49,12 +55,13 @@ export async function createOrUpdateIndex({
             body: template.mappings,
           })
         : Promise.resolve(undefined as any),
-      template.settings
+      settings
         ? client.indices.putSettings({
             index: indexName,
-            body: template.settings,
+            body: settings,
           })
         : Promise.resolve(undefined as any),
     ]);
+    await client.indices.open({ index: indexName });
   }
 }

@@ -69,7 +69,7 @@ export async function setupIngestManager(
           const flagsUrl = appContextService.getConfig()?.fleet?.kibana?.host;
           const defaultUrl = url.format({
             protocol: serverInfo.protocol,
-            hostname: serverInfo.host,
+            hostname: serverInfo.hostname,
             port: serverInfo.port,
             pathname: basePath.serverBasePath,
           });
@@ -113,6 +113,7 @@ export async function setupIngestManager(
       if (!isInstalled) {
         await addPackageToConfig(
           soClient,
+          callCluster,
           installedPackage,
           configWithPackageConfigs,
           defaultOutput
@@ -192,6 +193,7 @@ function generateRandomPassword() {
 
 async function addPackageToConfig(
   soClient: SavedObjectsClientContract,
+  callCluster: CallESAsCurrentUser,
   packageToInstall: Installation,
   config: AgentConfig,
   defaultOutput: Output
@@ -208,10 +210,6 @@ async function addPackageToConfig(
     defaultOutput.id,
     config.namespace
   );
-  newPackageConfig.inputs = await packageConfigService.assignPackageStream(
-    packageInfo,
-    newPackageConfig.inputs
-  );
 
-  await packageConfigService.create(soClient, newPackageConfig);
+  await packageConfigService.create(soClient, callCluster, newPackageConfig);
 }
