@@ -17,40 +17,81 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { ManagementSectionId } from '../types';
+
+const injestTitle = i18n.translate('management.sections.ingestTitle', {
+  defaultMessage: 'Ingest',
+});
+
+const injestTip = i18n.translate('management.sections.ingestTip', {
+  defaultMessage: 'Manage how to transform data and load it into the cluster',
+});
+
+const dataTitle = i18n.translate('management.sections.dataTitle', {
+  defaultMessage: 'Data',
+});
+
+const dataTip = i18n.translate('management.sections.dataTip', {
+  defaultMessage: 'Manage your cluster data and backups',
+});
+
+const insightsAndAlertingTitle = i18n.translate('management.sections.insightsAndAlertingTitle', {
+  defaultMessage: 'Alerts and Insights',
+});
+
+const insightsAndAlertingTip = i18n.translate('management.sections.insightsAndAlertingTip', {
+  defaultMessage: 'Manage how to detect changes in your data',
+});
+
+const kibanaTitle = i18n.translate('management.sections.kibanaTitle', {
+  defaultMessage: 'Kibana',
+});
+
+const kibanaTip = i18n.translate('management.sections.kibanaTip', {
+  defaultMessage: 'Customize Kibana and manage saved objects',
+});
+
+const stackTitle = i18n.translate('management.sections.stackTitle', {
+  defaultMessage: 'Kibana',
+});
+
+const stackTip = i18n.translate('management.sections.stackTip', {
+  defaultMessage: 'Customize Kibana and manage saved objects',
+});
 
 export const IngestSection = {
   id: ManagementSectionId.Ingest,
-  title: 'Ingest',
-  tip: 'Manage how to transform data and load it into the cluster.',
+  title: injestTitle,
+  tip: injestTip,
   order: 0,
 };
 
 export const DataSection = {
   id: ManagementSectionId.Data,
-  title: 'Data',
-  tip: 'Manage your cluster data and backups',
+  title: dataTitle,
+  tip: dataTip,
   order: 1,
 };
 
 export const InsightsAndAlertingSection = {
   id: ManagementSectionId.InsightsAndAlerting,
-  title: 'Alerts and Insights',
-  tip: 'Manage how to detect changes in your data',
+  title: insightsAndAlertingTitle,
+  tip: insightsAndAlertingTip,
   order: 2,
 };
 
 export const KibanaSection = {
   id: ManagementSectionId.Kibana,
-  title: 'Kibana',
-  tip: 'Customize Kibana and manage saved objects',
+  title: kibanaTitle,
+  tip: kibanaTip,
   order: 4,
 };
 
 export const StackSection = {
   id: ManagementSectionId.Stack,
-  title: 'Stack',
-  tip: 'Manage your license and upgrade the Stack',
+  title: stackTitle,
+  tip: stackTip,
   order: 4,
 };
 

@@ -112,7 +112,7 @@ export const ManagementSidebarNav = ({
 
     return {
       id: item.id,
-      name: <ManagementSectionTitle text={item.title} tip={item.tip} />,
+      name: item.tip ? <ManagementSectionTitle text={item.title} tip={item.tip} /> : item.title,
       isSelected: item.id === selectedId,
       icon: iconType ? <EuiIcon type={iconType} size="m" /> : undefined,
       'data-test-subj': item.id,

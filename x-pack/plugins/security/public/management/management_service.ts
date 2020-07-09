@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { Subscription } from 'rxjs';
 import { StartServicesAccessor, FatalErrorsSetup } from 'src/core/public';
 import {
@@ -35,10 +36,18 @@ export class ManagementService {
   setup({ getStartServices, management, authc, license, fatalErrors }: SetupParams) {
     this.license = license;
 
+    const sectionTitle = i18n.translate('xpack.security.management.section.title', {
+      defaultMessage: 'Section',
+    });
+
+    const sectionTip = i18n.translate('xpack.security.management.section.tip', {
+      defaultMessage: 'Control access to features and data',
+    });
+
     this.securitySection = management.sections.register({
       id: 'security',
-      title: 'Security',
-      tip: 'Control access to features and data',
+      title: sectionTitle,
+      tip: sectionTip,
       order: 3,
     });
 
