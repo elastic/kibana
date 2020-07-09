@@ -6,7 +6,6 @@
 
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
-import styled from 'styled-components';
 
 import { setFieldValue } from '../../../pages/detection_engine/rules/helpers';
 import {
