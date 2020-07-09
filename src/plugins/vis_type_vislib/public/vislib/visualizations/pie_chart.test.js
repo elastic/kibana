@@ -20,15 +20,24 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import expect from '@kbn/expect';
-
-import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
-import { getVis } from '../_vis_fixture';
+import {
+  setHTMLElementClientSizes,
+  setSVGElementGetBBox,
+  setSVGElementGetComputedTextLength,
+} from '../../../../../test_utils/public';
+import { getMockUiState } from '../../fixtures/mocks';
+import { getVis } from './_vis_fixture';
 import { pieChartMockData } from './pie_chart_mock_data';
 
 const names = ['rows', 'columns', 'slices'];
 
 const sizes = [0, 5, 15, 30, 60, 120];
+
+let mockedHTMLElementClientSizes = {};
+let mockWidth;
+let mockHeight;
+let mockedSVGElementGetBBox;
+let mockedSVGElementGetComputedTextLength;
 
 describe('No global chart settings', function () {
   const visLibParams1 = {
@@ -39,6 +48,14 @@ describe('No global chart settings', function () {
   };
   let chart1;
   let mockUiState;
+
+  beforeAll(() => {
+    mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
+    mockedSVGElementGetBBox = setSVGElementGetBBox(100);
+    mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
+    mockWidth = jest.spyOn($.prototype, 'width').mockReturnValue(120);
+    mockHeight = jest.spyOn($.prototype, 'height').mockReturnValue(120);
+  });
 
   beforeEach(() => {
     chart1 = getVis(visLibParams1);
@@ -53,8 +70,16 @@ describe('No global chart settings', function () {
     chart1.destroy();
   });
 
-  it('should render chart titles for all charts', function () {
-    expect($(chart1.element).find('.visAxis__splitTitles--y').length).to.be(1);
+  afterAll(() => {
+    mockedHTMLElementClientSizes.mockRestore();
+    mockedSVGElementGetBBox.mockRestore();
+    mockedSVGElementGetComputedTextLength.mockRestore();
+    mockWidth.mockRestore();
+    mockHeight.mockRestore();
+  });
+
+  test('should render chart titles for all charts', function () {
+    expect($(chart1.element).find('.visAxis__splitTitles--y').length).toBe(1);
   });
 
   describe('_validatePieData method', function () {
@@ -76,24 +101,54 @@ describe('No global chart settings', function () {
       { slices: { children: [{}] } },
     ];
 
-    it('should throw an error when all charts contain zeros', function () {
+    test('should throw an error when all charts contain zeros', function () {
       expect(function () {
         chart1.handler.ChartClass.prototype._validatePieData(allZeros);
-      }).to.throwError();
+      }).toThrowError();
     });
 
-    it('should not throw an error when only some or no charts contain zeros', function () {
+    test('should not throw an error when only some or no charts contain zeros', function () {
       expect(function () {
         chart1.handler.ChartClass.prototype._validatePieData(someZeros);
-      }).to.not.throwError();
+      }).not.toThrowError();
       expect(function () {
         chart1.handler.ChartClass.prototype._validatePieData(noZeros);
-      }).to.not.throwError();
+      }).not.toThrowError();
     });
   });
 });
 
 describe('Vislib PieChart Class Test Suite', function () {
+  beforeAll(() => {
+    mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
+    mockedSVGElementGetBBox = setSVGElementGetBBox(100);
+    mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
+    let width = 120;
+    let height = 120;
+    const mockWidth = jest.spyOn($.prototype, 'width');
+    mockWidth.mockImplementation((size) => {
+      if (size === undefined) {
+        return width;
+      }
+      width = size;
+    });
+    const mockHeight = jest.spyOn($.prototype, 'height');
+    mockHeight.mockImplementation((size) => {
+      if (size === undefined) {
+        return height;
+      }
+      height = size;
+    });
+  });
+
+  afterAll(() => {
+    mockedHTMLElementClientSizes.mockRestore();
+    mockedSVGElementGetBBox.mockRestore();
+    mockedSVGElementGetComputedTextLength.mockRestore();
+    mockWidth.mockRestore();
+    mockHeight.mockRestore();
+  });
+
   ['rowData', 'columnData', 'sliceData'].forEach(function (aggItem, i) {
     describe('Vislib PieChart Class Test Suite for ' + names[i] + ' data', function () {
       const mockPieData = pieChartMockData[aggItem];
@@ -132,15 +187,15 @@ describe('Vislib PieChart Class Test Suite', function () {
           });
         });
 
-        it('should attach a click event', function () {
+        test('should attach a click event', function () {
           vis.handler.charts.forEach(function () {
-            expect(onClick).to.be(true);
+            expect(onClick).toBe(true);
           });
         });
 
-        it('should attach a hover event', function () {
+        test('should attach a hover event', function () {
           vis.handler.charts.forEach(function () {
-            expect(onMouseOver).to.be(true);
+            expect(onMouseOver).toBe(true);
           });
         });
       });
@@ -151,25 +206,25 @@ describe('Vislib PieChart Class Test Suite', function () {
         let svg;
         let slices;
 
-        it('should return an SVG object', function () {
+        test('should return an SVG object', function () {
           vis.handler.charts.forEach(function (chart) {
             $(chart.chartEl).find('svg').empty();
             width = $(chart.chartEl).width();
             height = $(chart.chartEl).height();
             svg = d3.select($(chart.chartEl).find('svg')[0]);
             slices = chart.chartData.slices;
-            expect(_.isObject(chart.addPath(width, height, svg, slices))).to.be(true);
+            expect(_.isObject(chart.addPath(width, height, svg, slices))).toBe(true);
           });
         });
 
-        it('should draw path elements', function () {
+        test('should draw path elements', function () {
           vis.handler.charts.forEach(function (chart) {
             // test whether path elements are drawn
-            expect($(chart.chartEl).find('path').length).to.be.greaterThan(0);
+            expect($(chart.chartEl).find('path').length).toBeGreaterThan(0);
           });
         });
 
-        it('should draw labels', function () {
+        test('should draw labels', function () {
           vis.handler.charts.forEach(function (chart) {
             $(chart.chartEl).find('svg').empty();
             width = $(chart.chartEl).width();
@@ -178,22 +233,22 @@ describe('Vislib PieChart Class Test Suite', function () {
             slices = chart.chartData.slices;
             chart._attr.labels.show = true;
             chart.addPath(width, height, svg, slices);
-            expect($(chart.chartEl).find('text.label-text').length).to.be.greaterThan(0);
+            expect($(chart.chartEl).find('text.label-text').length).toBeGreaterThan(0);
           });
         });
       });
 
       describe('draw method', function () {
-        it('should return a function', function () {
+        test('should return a function', function () {
           vis.handler.charts.forEach(function (chart) {
-            expect(_.isFunction(chart.draw())).to.be(true);
+            expect(_.isFunction(chart.draw())).toBe(true);
           });
         });
       });
 
       sizes.forEach(function (size) {
         describe('containerTooSmall error', function () {
-          it('should throw an error', function () {
+          test('should throw an error', function () {
             // 20px is the minimum height and width
             vis.handler.charts.forEach(function (chart) {
               $(chart.chartEl).height(size);
@@ -202,12 +257,12 @@ describe('Vislib PieChart Class Test Suite', function () {
               if (size < 20) {
                 expect(function () {
                   chart.render();
-                }).to.throwError();
+                }).toThrowError();
               }
             });
           });
 
-          it('should not throw an error', function () {
+          test('should not throw an error', function () {
             vis.handler.charts.forEach(function (chart) {
               $(chart.chartEl).height(size);
               $(chart.chartEl).width(size);
@@ -215,7 +270,7 @@ describe('Vislib PieChart Class Test Suite', function () {
               if (size > 20) {
                 expect(function () {
                   chart.render();
-                }).to.not.throwError();
+                }).not.toThrowError();
               }
             });
           });

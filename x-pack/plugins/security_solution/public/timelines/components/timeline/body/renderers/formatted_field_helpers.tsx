@@ -150,7 +150,7 @@ export const renderEventModule = ({
   );
 };
 
-export const renderRulReference = ({
+export const renderUrl = ({
   contextId,
   eventId,
   fieldName,
@@ -165,23 +165,23 @@ export const renderRulReference = ({
   truncate?: boolean;
   value: string | number | null | undefined;
 }) => {
-  const referenceUrlName = `${value}`;
+  const urlName = `${value}`;
 
   const content = truncate ? <TruncatableText>{value}</TruncatableText> : value;
 
-  return isString(value) && referenceUrlName.length > 0 ? (
+  return isString(value) && urlName.length > 0 ? (
     <DefaultDraggable
       field={fieldName}
-      id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${referenceUrlName}`}
+      id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${urlName}`}
       tooltipContent={value}
       value={value}
     >
-      {!isUrlInvalid(referenceUrlName) && (
-        <EuiLink target="_blank" href={referenceUrlName}>
+      {!isUrlInvalid(urlName) && (
+        <EuiLink target="_blank" href={urlName}>
           {content}
         </EuiLink>
       )}
-      {isUrlInvalid(referenceUrlName) && <>{content}</>}
+      {isUrlInvalid(urlName) && <>{content}</>}
     </DefaultDraggable>
   ) : (
     getEmptyTagValue()
