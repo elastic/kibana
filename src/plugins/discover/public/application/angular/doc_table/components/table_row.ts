@@ -151,11 +151,7 @@ export function createTableRowDirective($compile: ng.ICompileService, $httpParam
         }
 
         $scope.columns.forEach(function (column: any) {
-          const isFilterable =
-            $scope.flattenedRow[column] !== undefined &&
-            mapping(column) &&
-            mapping(column).filterable &&
-            $scope.filter;
+          const isFilterable = mapping(column) && mapping(column).filterable && $scope.filter;
 
           newHtmls.push(
             cellTemplate({
