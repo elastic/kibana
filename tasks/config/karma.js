@@ -110,7 +110,7 @@ module.exports = function (grunt) {
       customLaunchers: {
         Chrome_Headless: {
           base: 'Chrome',
-          flags: ['--headless', '--disable-gpu', '--remote-debugging-port=9222', '--no-sandbox'],
+          flags: ['--headless', '--disable-gpu', '--remote-debugging-port=9222'],
         },
       },
 
