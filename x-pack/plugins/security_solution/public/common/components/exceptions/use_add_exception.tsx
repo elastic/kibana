@@ -116,7 +116,6 @@ export const useAddOrUpdateException = ({
           });
         }
 
-        console.log(shouldBulkClose);
         if (shouldBulkClose === true) {
           const filter = getQueryFilter(
             '',
@@ -126,23 +125,15 @@ export const useAddOrUpdateException = ({
             exceptionItemsToAddOrUpdate,
             false
           );
-          const queries = buildQueryExceptions({
-            query: '',
-            language: 'kuery',
-            lists: exceptionItemsToAddOrUpdate,
-            exclude: false,
-          });
-          console.log(queries);
-          console.log(filter);
-          /*
           await updateAlertStatus({
-            query: queries,
+            query: {
+              query: filter,
+            },
             status: 'closed',
           });
-           */
         }
 
-        // await addOrUpdateItems(exceptionItemsToAddOrUpdate);
+        await addOrUpdateItems(exceptionItemsToAddOrUpdate);
 
         if (isSubscribed) {
           setIsLoading(false);
