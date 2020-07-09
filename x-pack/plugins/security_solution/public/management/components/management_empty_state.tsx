@@ -103,7 +103,7 @@ const PolicyEmptyState = React.memo<{
   );
 });
 
-const EndpointsEmptyState = React.memo<{
+const HostsEmptyState = React.memo<{
   loading: boolean;
   onActionClick: (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
   actionDisabled: boolean;
@@ -113,14 +113,14 @@ const EndpointsEmptyState = React.memo<{
   const policySteps = useMemo(
     () => [
       {
-        title: i18n.translate('xpack.securitySolution.endpoint.endpointList.stepOneTitle', {
+        title: i18n.translate('xpack.securitySolution.endpoint.hostList.stepOneTitle', {
           defaultMessage: 'Select a policy you created from the list below.',
         }),
         children: (
           <>
             <EuiText color="subdued" size="xs">
               <FormattedMessage
-                id="xpack.securitySolution.endpoint.endpointList.stepOne"
+                id="xpack.securitySolution.endpoint.hostList.stepOne"
                 defaultMessage="These are existing policies."
               />
             </EuiText>
@@ -138,7 +138,7 @@ const EndpointsEmptyState = React.memo<{
                 return loading ? (
                   <EuiSelectableMessage>
                     <FormattedMessage
-                      id="xpack.securitySolution.endpoint.endpointList.loadingPolicies"
+                      id="xpack.securitySolution.endpoint.hostList.loadingPolicies"
                       defaultMessage="Loading policy configs"
                     />
                   </EuiSelectableMessage>
@@ -146,7 +146,7 @@ const EndpointsEmptyState = React.memo<{
                   list
                 ) : (
                   <FormattedMessage
-                    id="xpack.securitySolution.endpoint.endpointList.noPolicies"
+                    id="xpack.securitySolution.endpoint.hostList.noPolicies"
                     defaultMessage="There are no policies."
                   />
                 );
@@ -156,14 +156,14 @@ const EndpointsEmptyState = React.memo<{
         ),
       },
       {
-        title: i18n.translate('xpack.securitySolution.endpoint.endpointList.stepTwoTitle', {
+        title: i18n.translate('xpack.securitySolution.endpoint.hostList.stepTwoTitle', {
           defaultMessage:
             'Head over to Ingest to deploy your Agent with Endpoint Security enabled.',
         }),
         children: (
           <EuiText color="subdued" size="xs">
             <FormattedMessage
-              id="xpack.securitySolution.endpoint.endpointList.stepTwo"
+              id="xpack.securitySolution.endpoint.hostList.stepTwo"
               defaultMessage="You'll be given a command in Ingest to get you started."
             />
           </EuiText>
@@ -178,18 +178,18 @@ const EndpointsEmptyState = React.memo<{
       loading={loading}
       onActionClick={onActionClick}
       actionDisabled={actionDisabled}
-      dataTestSubj="emptyEndpointsTable"
+      dataTestSubj="emptyHostsTable"
       steps={policySteps}
       headerComponent={
         <FormattedMessage
-          id="xpack.securitySolution.endpoint.endpointList.noEndpointsPrompt"
-          defaultMessage="You have a policy, but no Endpoints are deployed!"
+          id="xpack.securitySolution.endpoint.hostList.noHostsPrompt"
+          defaultMessage="You have a policy, but no hosts are deployed!"
         />
       }
       bodyComponent={
         <FormattedMessage
-          id="xpack.securitySolution.endpoint.endpointList.noEndpointsInstructions"
-          defaultMessage="Elastic Endpoint Security gives you the power to keep your endpoints safe from attack, as well as unparalleled visibility into any threat in your environment."
+          id="xpack.securitySolution.endpoint.hostList.noHostsInstructions"
+          defaultMessage="Elastic Endpoint Security gives you the power to keep your hosts safe from attack, as well as unparalleled visibility into any threat in your environment."
         />
       }
     />
@@ -271,7 +271,7 @@ const ManagementEmptyState = React.memo<{
 );
 
 PolicyEmptyState.displayName = 'PolicyEmptyState';
-EndpointsEmptyState.displayName = 'EndpointsEmptyState';
+HostsEmptyState.displayName = 'HostsEmptyState';
 ManagementEmptyState.displayName = 'ManagementEmptyState';
 
-export { PolicyEmptyState, EndpointsEmptyState, ManagementEmptyState };
+export { PolicyEmptyState, HostsEmptyState, ManagementEmptyState };

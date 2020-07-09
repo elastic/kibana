@@ -9,7 +9,7 @@ exports[`Ip Details it matches the snapshot 1`] = `
       border={true}
       title="123.456.78.90"
     />
-    <NetworkEmptyPage />
+    <Memo(OverviewEmptyComponent) />
   </Memo(WrapperPageComponent)>
   <withRouter(undefined)
     pageName="network"

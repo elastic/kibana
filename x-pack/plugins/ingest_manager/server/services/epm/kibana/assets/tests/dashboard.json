@@ -1,0 +1,129 @@
+{
+    "attributes": {
+        "description": "Overview dashboard for the Nginx integration in Metrics",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+            "searchSourceJSON": {
+                "filter": [],
+                "highlightAll": true,
+                "query": {
+                    "language": "kuery",
+                    "query": ""
+                },
+                "version": true
+            }
+        },
+        "optionsJSON": {
+            "darkTheme": false,
+            "hidePanelTitles": false,
+            "useMargins": true
+        },
+        "panelsJSON": [
+            {
+                "embeddableConfig": {},
+                "gridData": {
+                    "h": 12,
+                    "i": "1",
+                    "w": 24,
+                    "x": 24,
+                    "y": 0
+                },
+                "panelIndex": "1",
+                "panelRefName": "panel_0",
+                "version": "7.3.0"
+            },
+            {
+                "embeddableConfig": {},
+                "gridData": {
+                    "h": 12,
+                    "i": "2",
+                    "w": 24,
+                    "x": 24,
+                    "y": 12
+                },
+                "panelIndex": "2",
+                "panelRefName": "panel_1",
+                "version": "7.3.0"
+            },
+            {
+                "embeddableConfig": {},
+                "gridData": {
+                    "h": 12,
+                    "i": "3",
+                    "w": 24,
+                    "x": 0,
+                    "y": 12
+                },
+                "panelIndex": "3",
+                "panelRefName": "panel_2",
+                "version": "7.3.0"
+            },
+            {
+                "embeddableConfig": {},
+                "gridData": {
+                    "h": 12,
+                    "i": "4",
+                    "w": 24,
+                    "x": 0,
+                    "y": 0
+                },
+                "panelIndex": "4",
+                "panelRefName": "panel_3",
+                "version": "7.3.0"
+            },
+            {
+                "embeddableConfig": {},
+                "gridData": {
+                    "h": 12,
+                    "i": "5",
+                    "w": 48,
+                    "x": 0,
+                    "y": 24
+                },
+                "panelIndex": "5",
+                "panelRefName": "panel_4",
+                "version": "7.3.0"
+            }
+        ],
+        "timeRestore": false,
+        "title": "[Metrics Nginx] Overview ECS",
+        "version": 1
+    },
+    "id": "023d2930-f1a5-11e7-a9ef-93c69af7b129-ecs",
+    "migrationVersion": {
+        "dashboard": "7.3.0"
+    },
+    "references": [
+        {
+            "id": "metrics-*",
+            "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+            "type": "index-pattern"
+        },
+        {
+            "id": "555df8a0-f1a1-11e7-a9ef-93c69af7b129-ecs",
+            "name": "panel_0",
+            "type": "search"
+        },
+        {
+            "id": "a1d92240-f1a1-11e7-a9ef-93c69af7b129-ecs",
+            "name": "panel_1",
+            "type": "map"
+        },
+        {
+            "id": "d763a570-f1a1-11e7-a9ef-93c69af7b129-ecs",
+            "name": "panel_2",
+            "type": "dashboard"
+        },
+        {
+            "id": "47a8e0f0-f1a4-11e7-a9ef-93c69af7b129-ecs",
+            "name": "panel_3",
+            "type": "visualization"
+        },
+        {
+            "id": "dcbffe30-f1a4-11e7-a9ef-93c69af7b129-ecs",
+            "name": "panel_4",
+            "type": "visualization"
+        }
+    ],
+    "type": "dashboard"
+}

@@ -17,12 +17,14 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiButton,
+  EuiLink,
 } from '@elastic/eui';
 
 import { UIM_TEMPLATE_LIST_LOAD } from '../../../../../common/constants';
 import { TemplateListItem } from '../../../../../common';
 import { SectionError, SectionLoading, Error } from '../../../components';
 import { useLoadIndexTemplates } from '../../../services/api';
+import { documentationService } from '../../../services/documentation';
 import { useServices } from '../../../app_context';
 import {
   getTemplateEditLink,
@@ -31,8 +33,8 @@ import {
 } from '../../../services/routing';
 import { getIsLegacyFromQueryParams } from '../../../lib/index_templates';
 import { TemplateTable } from './template_table';
+import { TemplateDetails } from './template_details';
 import { LegacyTemplateTable } from './legacy_templates/template_table';
-import { LegacyTemplateDetails } from './legacy_templates/template_details';
 import { FilterListButton, Filters } from './components';
 
 type FilterName = 'composable' | 'system';
@@ -90,7 +92,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
       }
     : null;
 
-  const isLegacyTemplateDetailsVisible = selectedTemplate !== null && selectedTemplate.isLegacy;
+  const isTemplateDetailsVisible = selectedTemplate !== null;
   const hasTemplates =
     allTemplates && (allTemplates.legacyTemplates.length > 0 || allTemplates.templates.length > 0);
 
@@ -109,14 +111,28 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
   const renderHeader = () => (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={true}>
-        <EuiTitle size="s">
-          <EuiText color="subdued">
-            <FormattedMessage
-              id="xpack.idxMgmt.home.indexTemplatesDescription"
-              defaultMessage="Use index templates to automatically apply settings, mappings, and aliases to indices."
-            />
-          </EuiText>
-        </EuiTitle>
+        <EuiText color="subdued">
+          <FormattedMessage
+            id="xpack.idxMgmt.home.indexTemplatesDescription"
+            defaultMessage="Use index templates to automatically apply settings, mappings, and aliases to indices. {learnMoreLink}"
+            values={{
+              learnMoreLink: (
+                <EuiLink
+                  href={documentationService.getTemplatesDocumentationLink()}
+                  target="_blank"
+                  external
+                >
+                  {i18n.translate(
+                    'xpack.idxMgmt.home.indexTemplatesDescription.learnMoreLinkText',
+                    {
+                      defaultMessage: 'Learn more.',
+                    }
+                  )}
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <FilterListButton<FilterName> filters={filters} onChange={setFilters} />
@@ -146,6 +162,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
           templates={filteredTemplates.templates}
           reload={reload}
           editTemplate={editTemplate}
+          cloneTemplate={cloneTemplate}
           history={history as ScopedHistory}
         />
       </>
@@ -235,8 +252,8 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
     <div data-test-subj="templateList">
       {renderContent()}
 
-      {isLegacyTemplateDetailsVisible && (
-        <LegacyTemplateDetails
+      {isTemplateDetailsVisible && (
+        <TemplateDetails
           template={selectedTemplate!}
           onClose={closeTemplateDetails}
           editTemplate={editTemplate}

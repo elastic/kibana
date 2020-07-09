@@ -41,7 +41,7 @@ describe('useExceptionList', () => {
         useExceptionList({
           filterOptions: { filter: '', tags: [] },
           http: mockKibanaHttpService,
-          lists: [{ id: 'myListId', namespaceType: 'single' }],
+          lists: [{ id: 'myListId', namespaceType: 'single', type: 'detection' }],
           onError: onErrorMock,
           pagination: {
             page: 1,
@@ -76,7 +76,7 @@ describe('useExceptionList', () => {
         useExceptionList({
           filterOptions: { filter: '', tags: [] },
           http: mockKibanaHttpService,
-          lists: [{ id: 'myListId', namespaceType: 'single' }],
+          lists: [{ id: 'myListId', namespaceType: 'single', type: 'detection' }],
           onError: onErrorMock,
           onSuccess: onSuccessMock,
           pagination: {
@@ -131,7 +131,7 @@ describe('useExceptionList', () => {
           initialProps: {
             filterOptions: { filter: '', tags: [] },
             http: mockKibanaHttpService,
-            lists: [{ id: 'myListId', namespaceType: 'single' }],
+            lists: [{ id: 'myListId', namespaceType: 'single', type: 'detection' }],
             onError: onErrorMock,
             onSuccess: onSuccessMock,
             pagination: {
@@ -146,7 +146,7 @@ describe('useExceptionList', () => {
       rerender({
         filterOptions: { filter: '', tags: [] },
         http: mockKibanaHttpService,
-        lists: [{ id: 'newListId', namespaceType: 'single' }],
+        lists: [{ id: 'newListId', namespaceType: 'single', type: 'detection' }],
         onError: onErrorMock,
         onSuccess: onSuccessMock,
         pagination: {
@@ -173,7 +173,7 @@ describe('useExceptionList', () => {
         useExceptionList({
           filterOptions: { filter: '', tags: [] },
           http: mockKibanaHttpService,
-          lists: [{ id: 'myListId', namespaceType: 'single' }],
+          lists: [{ id: 'myListId', namespaceType: 'single', type: 'detection' }],
           onError: onErrorMock,
           pagination: {
             page: 1,
@@ -210,7 +210,7 @@ describe('useExceptionList', () => {
           useExceptionList({
             filterOptions: { filter: '', tags: [] },
             http: mockKibanaHttpService,
-            lists: [{ id: 'myListId', namespaceType: 'single' }],
+            lists: [{ id: 'myListId', namespaceType: 'single', type: 'detection' }],
             onError: onErrorMock,
             pagination: {
               page: 1,
@@ -238,7 +238,7 @@ describe('useExceptionList', () => {
           useExceptionList({
             filterOptions: { filter: '', tags: [] },
             http: mockKibanaHttpService,
-            lists: [{ id: 'myListId', namespaceType: 'single' }],
+            lists: [{ id: 'myListId', namespaceType: 'single', type: 'detection' }],
             onError: onErrorMock,
             pagination: {
               page: 1,

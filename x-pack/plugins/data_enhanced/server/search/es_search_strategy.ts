@@ -64,9 +64,10 @@ async function asyncSearch(
   options?: ISearchOptions
 ) {
   const { timeout = undefined, restTotalHitsAsInt = undefined, ...params } = {
-    trackTotalHits: true, // Get the exact count of hits
     ...request.params,
   };
+
+  params.trackTotalHits = true; // Get the exact count of hits
 
   // If we have an ID, then just poll for that ID, otherwise send the entire request body
   const { body = undefined, index = undefined, ...queryParams } = request.id ? {} : params;
@@ -75,7 +76,7 @@ async function asyncSearch(
   const path = encodeURI(request.id ? `/_async_search/${request.id}` : `/${index}/_async_search`);
 
   // Wait up to 1s for the response to return
-  const query = toSnakeCase({ waitForCompletionTimeout: '1s', ...queryParams });
+  const query = toSnakeCase({ waitForCompletionTimeout: '100ms', ...queryParams });
 
   const { id, response, is_partial, is_running } = (await caller(
     'transport.request',
@@ -97,7 +98,7 @@ async function rollupSearch(
   request: IEnhancedEsSearchRequest,
   options?: ISearchOptions
 ) {
-  const { body, index, ...params } = request.params;
+  const { body, index, ...params } = request.params!;
   const method = 'POST';
   const path = encodeURI(`/${index}/_rollup_search`);
   const query = toSnakeCase(params);
