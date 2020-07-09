@@ -90,7 +90,7 @@ const paginationRT = rt.intersection([
     pageSize: rt.number,
   }),
   rt.partial({
-    cursor: rt.union([paginationPreviousPageCursor, paginationNextPageCursor]),
+    cursor: rt.union([paginationPreviousPageCursorRT, paginationNextPageCursorRT]),
   }),
 ]);
 
