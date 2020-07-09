@@ -39,6 +39,13 @@ const ThemedBreadcrumbs = styled(EuiBreadcrumbs)<{ background: string; text: str
   }
 `;
 
+const betaBadgeLabel = i18n.translate(
+  'xpack.securitySolution.enpdoint.resolver.panelutils.betaBadgeLabel',
+  {
+    defaultMessage: 'BETA',
+  }
+);
+
 /**
  * Breadcrumb menu with adjustments per direction from UX team
  */
@@ -55,7 +62,7 @@ export const StyledBreadcrumbs = memo(function StyledBreadcrumbs({
   return (
     <>
       <BetaHeader>
-        <EuiBetaBadge label="BETA" />
+        <EuiBetaBadge label={betaBadgeLabel} />
       </BetaHeader>
       <ThemedBreadcrumbs
         background={resolverEdge}
