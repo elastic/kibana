@@ -59,6 +59,27 @@ const features = ([
       },
     },
   },
+  {
+    // feature 4 intentionally delcares the same items as feature 3
+    id: 'feature_4',
+    name: 'Feature 4',
+    navLinkId: 'feature3',
+    app: ['feature3', 'feature3_app'],
+    catalogue: ['feature3Entry'],
+    management: {
+      kibana: ['indices'],
+    },
+    privileges: {
+      all: {
+        app: [],
+        ui: [],
+        savedObject: {
+          all: [],
+          read: [],
+        },
+      },
+    },
+  },
 ] as unknown) as Feature[];
 
 const buildCapabilities = () =>
@@ -73,6 +94,7 @@ const buildCapabilities = () =>
     catalogue: {
       discover: true,
       visualize: false,
+      feature3Entry: true,
     },
     management: {
       kibana: {
@@ -217,11 +239,38 @@ describe('capabilitiesSwitcher', () => {
     expect(result).toEqual(expectedCapabilities);
   });
 
+  it('does not disable catalogue, management, or app entries when they are shared with an enabled feature', async () => {
+    const space: Space = {
+      id: 'space',
+      name: '',
+      disabledFeatures: ['feature_3'],
+    };
+
+    const capabilities = buildCapabilities();
+
+    const { switcher } = setup(space);
+    const request = httpServerMock.createKibanaRequest();
+    const result = await switcher(request, capabilities);
+
+    const expectedCapabilities = buildCapabilities();
+
+    // These capabilities are shared by feature_4, which is enabled
+    expectedCapabilities.navLinks.feature3 = true;
+    expectedCapabilities.navLinks.feature3_app = true;
+    expectedCapabilities.catalogue.feature3Entry = true;
+    expectedCapabilities.management.kibana.indices = true;
+    // These capabilities are only exposed by feature_3, which is disabled
+    expectedCapabilities.feature_3.bar = false;
+    expectedCapabilities.feature_3.foo = false;
+
+    expect(result).toEqual(expectedCapabilities);
+  });
+
   it('can disable everything', async () => {
     const space: Space = {
       id: 'space',
       name: '',
-      disabledFeatures: ['feature_1', 'feature_2', 'feature_3'],
+      disabledFeatures: ['feature_1', 'feature_2', 'feature_3', 'feature_4'],
     };
 
     const capabilities = buildCapabilities();
