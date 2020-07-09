@@ -202,10 +202,12 @@ export const buildOtherBucketAgg = (
       return;
     }
 
-    if (
-      !aggWithOtherBucket.params.missingBucket ||
-      agg.buckets.some((bucket: { key: string }) => bucket.key === '__missing__')
-    ) {
+    const hasScriptedField = !!aggWithOtherBucket.params.field.scripted;
+    const hasMissingBucket = !!aggWithOtherBucket.params.missingBucket;
+    const hasMissingBucketKey = agg.buckets.some(
+      (bucket: { key: string }) => bucket.key === '__missing__'
+    );
+    if (!hasScriptedField && (!hasMissingBucket || hasMissingBucketKey)) {
       filters.push(
         buildExistsFilter(
           aggWithOtherBucket.params.field,
