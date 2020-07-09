@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -25,7 +25,6 @@ import {
   ANALYSIS_CONFIG_TYPE,
 } from '../../../../common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
-import { getTaskStateBadge, getJobTypeBadge } from './columns';
 
 import {
   DataFrameAnalyticsListColumn,
@@ -38,8 +37,9 @@ import {
   FieldClause,
 } from './common';
 import { getAnalyticsFactory } from '../../services/analytics_service';
-import { getColumns } from './columns';
+import { getTaskStateBadge, getJobTypeBadge, useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
+import { stringMatch } from '../../../../../util/string_utils';
 import {
   ProgressBar,
   mlInMemoryTableFactory,
@@ -64,14 +64,6 @@ function getItemIdToExpandedRowMap(
     }
     return m;
   }, {} as ItemIdToExpandedRowMap);
-}
-
-function stringMatch(str: string | undefined, substr: any) {
-  return (
-    typeof str === 'string' &&
-    typeof substr === 'string' &&
-    (str.toLowerCase().match(substr.toLowerCase()) === null) === false
-  );
 }
 
 const MlInMemoryTable = mlInMemoryTableFactory<DataFrameAnalyticsListRow>();
@@ -232,6 +224,14 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     setIsLoading(false);
   };
 
+  const { columns, modals } = useColumns(
+    expandedRowItemIds,
+    setExpandedRowItemIds,
+    isManagementTable,
+    isMlEnabledInSpace,
+    createAnalyticsForm
+  );
+
   // Before the analytics have been loaded for the first time, display the loading indicator only.
   // Otherwise a user would see 'No data frame analytics found' during the initial loading.
   if (!isInitialized) {
@@ -240,7 +240,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
 
   if (typeof errorMessage !== 'undefined') {
     return (
-      <Fragment>
+      <>
         <ProgressBar isLoading={isLoading} />
         <EuiCallOut
           title={i18n.translate('xpack.ml.dataFrame.analyticsList.errorPromptTitle', {
@@ -251,13 +251,13 @@ export const DataFrameAnalyticsList: FC<Props> = ({
         >
           <pre>{JSON.stringify(errorMessage)}</pre>
         </EuiCallOut>
-      </Fragment>
+      </>
     );
   }
 
   if (analytics.length === 0) {
     return (
-      <Fragment>
+      <>
         <ProgressBar isLoading={isLoading} />
         <EuiEmptyPrompt
           title={
@@ -287,17 +287,9 @@ export const DataFrameAnalyticsList: FC<Props> = ({
         {isSourceIndexModalVisible === true && (
           <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
         )}
-      </Fragment>
+      </>
     );
   }
-
-  const columns = getColumns(
-    expandedRowItemIds,
-    setExpandedRowItemIds,
-    isManagementTable,
-    isMlEnabledInSpace,
-    createAnalyticsForm
-  );
 
   const sorting = {
     sort: {
@@ -349,26 +341,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
           view: getTaskStateBadge(val),
         })),
       },
-      // For now analytics jobs are batch only
-      /*
-      {
-        type: 'field_value_selection',
-        field: 'mode',
-        name: i18n.translate('xpack.ml.dataframe.analyticsList.modeFilter', {
-          defaultMessage: 'Mode',
-        }),
-        multiSelect: false,
-        options: Object.values(DATA_FRAME_MODE).map(val => ({
-          value: val,
-          name: val,
-          view: (
-            <EuiBadge className="mlTaskModeBadge" color="hollow">
-              {val}
-            </EuiBadge>
-          ),
-        })),
-      },
-      */
     ],
   };
 
@@ -386,7 +358,8 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   };
 
   return (
-    <Fragment>
+    <>
+      {modals}
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           {analyticsStats && (
@@ -435,6 +408,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       {isSourceIndexModalVisible === true && (
         <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
       )}
-    </Fragment>
+    </>
   );
 };

@@ -9,7 +9,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { rangeFilter } from '../../../common/utils/range_filter';
-import { Coordinates } from '../../../../observability/public/typings/fetch_data_response';
+import { Coordinates } from '../../../../observability/public';
 import { PROCESSOR_EVENT } from '../../../common/elasticsearch_fieldnames';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { ProcessorEvent } from '../../../common/processor_event';
@@ -41,17 +41,18 @@ export async function getTransactionCoordinates({
             field: '@timestamp',
             fixed_interval: bucketSize,
             min_doc_count: 0,
-            extended_bounds: { min: start, max: end },
           },
         },
       },
     },
   });
 
+  const deltaAsMinutes = (end - start) / 1000 / 60;
+
   return (
     aggregations?.distribution.buckets.map((bucket) => ({
       x: bucket.key,
-      y: bucket.doc_count,
+      y: bucket.doc_count / deltaAsMinutes,
     })) || []
   );
 }

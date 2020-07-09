@@ -8,7 +8,6 @@ import React, { useMemo, memo } from 'react';
 import { EuiFlexItem, EuiToolTip, EuiButton, EuiForm } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Visualization } from '../../../types';
-import { ChartSwitch } from './chart_switch';
 import { LayerPanel } from './layer_panel';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { generateId } from '../../../id_generator';
@@ -20,21 +19,8 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
   const { visualizationState } = props;
 
   return (
-    <>
-      <ChartSwitch
-        data-test-subj="lnsChartSwitcher"
-        visualizationMap={props.visualizationMap}
-        visualizationId={props.activeVisualizationId}
-        visualizationState={props.visualizationState}
-        datasourceMap={props.datasourceMap}
-        datasourceStates={props.datasourceStates}
-        dispatch={props.dispatch}
-        framePublicAPI={props.framePublicAPI}
-      />
-      {activeVisualization && visualizationState && (
-        <LayerPanels {...props} activeVisualization={activeVisualization} />
-      )}
-    </>
+    activeVisualization &&
+    visualizationState && <LayerPanels {...props} activeVisualization={activeVisualization} />
   );
 });
 

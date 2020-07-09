@@ -92,12 +92,12 @@ describe('SIEM Navigation', () => {
       {
         detailName: undefined,
         navTabs: {
-          alerts: {
+          detections: {
             disabled: false,
-            href: '/app/security/alerts',
-            id: 'alerts',
-            name: 'Alerts',
-            urlKey: 'alerts',
+            href: '/app/security/detections',
+            id: 'detections',
+            name: 'Detections',
+            urlKey: 'detections',
           },
           case: {
             disabled: false,
@@ -108,9 +108,9 @@ describe('SIEM Navigation', () => {
           },
           management: {
             disabled: false,
-            href: '/app/security/management',
+            href: '/app/security/administration',
             id: 'management',
-            name: 'Management',
+            name: 'Administration',
             urlKey: 'management',
           },
           hosts: {
@@ -140,13 +140,6 @@ describe('SIEM Navigation', () => {
             id: 'timelines',
             name: 'Timelines',
             urlKey: 'timeline',
-          },
-          endpointAlerts: {
-            disabled: false,
-            href: '/app/security/endpoint-alerts',
-            id: 'endpointAlerts',
-            name: 'Endpoint Alerts',
-            urlKey: 'management',
           },
         },
         pageName: 'hosts',
@@ -204,12 +197,12 @@ describe('SIEM Navigation', () => {
         filters: [],
         flowTarget: undefined,
         navTabs: {
-          alerts: {
+          detections: {
             disabled: false,
-            href: '/app/security/alerts',
-            id: 'alerts',
-            name: 'Alerts',
-            urlKey: 'alerts',
+            href: '/app/security/detections',
+            id: 'detections',
+            name: 'Detections',
+            urlKey: 'detections',
           },
           case: {
             disabled: false,
@@ -217,13 +210,6 @@ describe('SIEM Navigation', () => {
             id: 'case',
             name: 'Cases',
             urlKey: 'case',
-          },
-          endpointAlerts: {
-            disabled: false,
-            href: '/app/security/endpoint-alerts',
-            id: 'endpointAlerts',
-            name: 'Endpoint Alerts',
-            urlKey: 'management',
           },
           hosts: {
             disabled: false,
@@ -234,9 +220,9 @@ describe('SIEM Navigation', () => {
           },
           management: {
             disabled: false,
-            href: '/app/security/management',
+            href: '/app/security/administration',
             id: 'management',
-            name: 'Management',
+            name: 'Administration',
             urlKey: 'management',
           },
           network: {

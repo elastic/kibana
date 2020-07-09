@@ -27,7 +27,7 @@ export interface PercentileRange {
 export const PageLoadDistribution = () => {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end } = urlParams;
+  const { start, end, serviceName } = urlParams;
 
   const [percentileRange, setPercentileRange] = useState<PercentileRange>({
     min: null,
@@ -38,7 +38,7 @@ export const PageLoadDistribution = () => {
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (start && end) {
+      if (start && end && serviceName) {
         return callApmApi({
           pathname: '/api/apm/rum-client/page-load-distribution',
           params: {
@@ -57,11 +57,18 @@ export const PageLoadDistribution = () => {
         });
       }
     },
-    [end, start, uiFilters, percentileRange.min, percentileRange.max]
+    [
+      end,
+      start,
+      serviceName,
+      uiFilters,
+      percentileRange.min,
+      percentileRange.max,
+    ]
   );
 
   const onPercentileChange = (min: number, max: number) => {
-    setPercentileRange({ min: min * 1000, max: max * 1000 });
+    setPercentileRange({ min, max });
   };
 
   return (
