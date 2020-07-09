@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, Fragment, memo } from 'react';
+import React, { useState, Fragment, memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGrid,
@@ -54,6 +54,14 @@ export const PackageConfigInputConfig: React.FunctionComponent<{
         }
       });
     }
+
+    const advancedVarsWithErrorsCount: number = useMemo(
+      () =>
+        advancedVars.filter(
+          ({ name: varName }) => inputVarsValidationResults.vars?.[varName]?.length
+        ).length,
+      [advancedVars, inputVarsValidationResults.vars]
+    );
 
     return (
       <EuiFlexGrid columns={2}>
@@ -131,19 +139,32 @@ export const PackageConfigInputConfig: React.FunctionComponent<{
               <Fragment>
                 <EuiFlexItem>
                   {/* Wrapper div to prevent button from going full width */}
-                  <div>
-                    <EuiButtonEmpty
-                      size="xs"
-                      iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
-                      onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
-                      flush="left"
-                    >
-                      <FormattedMessage
-                        id="xpack.ingestManager.createPackageConfig.stepConfigure.toggleAdvancedOptionsButtonText"
-                        defaultMessage="Advanced options"
-                      />
-                    </EuiButtonEmpty>
-                  </div>
+                  <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        size="xs"
+                        iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
+                        onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
+                        flush="left"
+                      >
+                        <FormattedMessage
+                          id="xpack.ingestManager.createPackageConfig.stepConfigure.toggleAdvancedOptionsButtonText"
+                          defaultMessage="Advanced options"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                    {!isShowingAdvanced && hasErrors && advancedVarsWithErrorsCount ? (
+                      <EuiFlexItem grow={false}>
+                        <EuiText color="danger" size="s">
+                          <FormattedMessage
+                            id="xpack.ingestManager.createPackageConfig.stepConfigure.errorCountText"
+                            defaultMessage="{count, plural, one {# error} other {# errors}}"
+                            values={{ count: advancedVarsWithErrorsCount }}
+                          />
+                        </EuiText>
+                      </EuiFlexItem>
+                    ) : null}
+                  </EuiFlexGroup>
                 </EuiFlexItem>
                 {isShowingAdvanced
                   ? advancedVars.map((varDef) => {

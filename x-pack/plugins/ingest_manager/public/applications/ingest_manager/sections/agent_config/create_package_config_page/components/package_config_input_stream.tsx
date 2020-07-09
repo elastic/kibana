@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, Fragment, memo } from 'react';
+import React, { useState, Fragment, memo, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -14,8 +14,6 @@ import {
   EuiText,
   EuiSpacer,
   EuiButtonEmpty,
-  EuiTextColor,
-  EuiIconTip,
 } from '@elastic/eui';
 import { PackageConfigInputStream, RegistryStream, RegistryVarsEntry } from '../../../../types';
 import {
@@ -58,6 +56,14 @@ export const PackageConfigInputStreamConfig: React.FunctionComponent<{
       });
     }
 
+    const advancedVarsWithErrorsCount: number = useMemo(
+      () =>
+        advancedVars.filter(
+          ({ name: varName }) => inputStreamValidationResults.vars?.[varName]?.length
+        ).length,
+      [advancedVars, inputStreamValidationResults.vars]
+    );
+
     return (
       <EuiFlexGrid columns={2}>
         <EuiFlexItem>
@@ -65,30 +71,7 @@ export const PackageConfigInputStreamConfig: React.FunctionComponent<{
             <EuiFlexItem grow={1} />
             <EuiFlexItem grow={5}>
               <EuiSwitch
-                label={
-                  <EuiFlexGroup alignItems="center" gutterSize="s">
-                    <EuiFlexItem grow={false}>
-                      <EuiTextColor color={hasErrors ? 'danger' : 'default'}>
-                        {packageInputStream.title}
-                      </EuiTextColor>
-                    </EuiFlexItem>
-                    {hasErrors ? (
-                      <EuiFlexItem grow={false}>
-                        <EuiIconTip
-                          content={
-                            <FormattedMessage
-                              id="xpack.ingestManager.createPackageConfig.stepConfigure.streamLevelErrorsTooltip"
-                              defaultMessage="Fix configuration errors"
-                            />
-                          }
-                          position="right"
-                          type="alert"
-                          iconProps={{ color: 'danger' }}
-                        />
-                      </EuiFlexItem>
-                    ) : null}
-                  </EuiFlexGroup>
-                }
+                label={packageInputStream.title}
                 checked={packageConfigInputStream.enabled}
                 onChange={(e) => {
                   const enabled = e.target.checked;
@@ -138,20 +121,32 @@ export const PackageConfigInputStreamConfig: React.FunctionComponent<{
             {advancedVars.length ? (
               <Fragment>
                 <EuiFlexItem>
-                  {/* Wrapper div to prevent button from going full width */}
-                  <div>
-                    <EuiButtonEmpty
-                      size="xs"
-                      iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
-                      onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
-                      flush="left"
-                    >
-                      <FormattedMessage
-                        id="xpack.ingestManager.createPackageConfig.stepConfigure.toggleAdvancedOptionsButtonText"
-                        defaultMessage="Advanced options"
-                      />
-                    </EuiButtonEmpty>
-                  </div>
+                  <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        size="xs"
+                        iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
+                        onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
+                        flush="left"
+                      >
+                        <FormattedMessage
+                          id="xpack.ingestManager.createPackageConfig.stepConfigure.toggleAdvancedOptionsButtonText"
+                          defaultMessage="Advanced options"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                    {!isShowingAdvanced && hasErrors && advancedVarsWithErrorsCount ? (
+                      <EuiFlexItem grow={false}>
+                        <EuiText color="danger" size="s">
+                          <FormattedMessage
+                            id="xpack.ingestManager.createPackageConfig.stepConfigure.errorCountText"
+                            defaultMessage="{count, plural, one {# error} other {# errors}}"
+                            values={{ count: advancedVarsWithErrorsCount }}
+                          />
+                        </EuiText>
+                      </EuiFlexItem>
+                    ) : null}
+                  </EuiFlexGroup>
                 </EuiFlexItem>
                 {isShowingAdvanced
                   ? advancedVars.map((varDef) => {

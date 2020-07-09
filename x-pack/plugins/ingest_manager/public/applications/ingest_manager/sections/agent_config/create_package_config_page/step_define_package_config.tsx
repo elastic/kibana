@@ -13,6 +13,8 @@ import {
   EuiText,
   EuiComboBox,
   EuiDescribedFormGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { AgentConfig, PackageInfo, PackageConfig, NewPackageConfig } from '../../../types';
 import { packageToPackageConfigInputs } from '../../../services';
@@ -27,7 +29,7 @@ export const StepDefinePackageConfig: React.FunctionComponent<{
   validationResults: PackageConfigValidationResults;
 }> = ({ agentConfig, packageInfo, packageConfig, updatePackageConfig, validationResults }) => {
   // Form show/hide states
-  const [isShowingAdvancedDefine, setIsShowingAdvancedDefine] = useState<boolean>(false);
+  const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
 
   // Update package config's package and config info
   useEffect(() => {
@@ -143,23 +145,36 @@ export const StepDefinePackageConfig: React.FunctionComponent<{
         <EuiSpacer size="m" />
 
         {/* Advanced options toggle */}
-        <div>
-          <EuiButtonEmpty
-            flush="left"
-            size="xs"
-            iconType={isShowingAdvancedDefine ? 'arrowUp' : 'arrowDown'}
-            onClick={() => setIsShowingAdvancedDefine(!isShowingAdvancedDefine)}
-          >
-            <FormattedMessage
-              id="xpack.ingestManager.createPackageConfig.stepConfigure.advancedOptionsToggleLinkText"
-              defaultMessage="Advanced options"
-            />
-          </EuiButtonEmpty>
-        </div>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
+              onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
+              flush="left"
+            >
+              <FormattedMessage
+                id="xpack.ingestManager.createPackageConfig.stepConfigure.advancedOptionsToggleLinkText"
+                defaultMessage="Advanced options"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          {!isShowingAdvanced && !!validationResults.namespace ? (
+            <EuiFlexItem grow={false}>
+              <EuiText color="danger" size="s">
+                <FormattedMessage
+                  id="xpack.ingestManager.createPackageConfig.stepConfigure.errorCountText"
+                  defaultMessage="{count, plural, one {# error} other {# errors}}"
+                  values={{ count: 1 }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
 
         {/* Advanced options content */}
         {/* Todo: Populate list of existing namespaces */}
-        {isShowingAdvancedDefine || !!validationResults.namespace ? (
+        {isShowingAdvanced ? (
           <>
             <EuiSpacer size="m" />
             <EuiFormRow
