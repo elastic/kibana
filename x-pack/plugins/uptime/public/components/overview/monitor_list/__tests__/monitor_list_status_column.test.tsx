@@ -8,7 +8,7 @@ import React from 'react';
 import moment from 'moment';
 import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { getLocationStatus, MonitorListStatusColumn } from '../monitor_list_status_column';
-import { Check } from '../../../../../common/runtime_types';
+import { Ping } from '../../../../../common/runtime_types';
 import { STATUS } from '../../../../../common/constants';
 
 describe('MonitorListStatusColumn', () => {
@@ -20,19 +20,23 @@ describe('MonitorListStatusColumn', () => {
     Date.prototype.toString = jest.fn(() => 'Tue, 01 Jan 2019 00:00:00 GMT');
   });
 
-  let upChecks: Check[];
+  let upChecks: Ping[];
 
-  let downChecks: Check[];
+  let downChecks: Ping[];
 
-  let checks: Check[];
+  let summaryPings: Ping[];
 
   beforeEach(() => {
     upChecks = [
       {
+        docId: '1',
         monitor: {
           ip: '104.86.46.103',
           name: '',
           status: 'up',
+          id: 'myMonitor',
+          type: 'icmp',
+          duration: { us: 123 },
         },
         observer: {
           geo: {
@@ -43,13 +47,17 @@ describe('MonitorListStatusColumn', () => {
             },
           },
         },
-        timestamp: 1579794631464,
+        timestamp: '1579794631464',
       },
       {
+        docId: '2',
         monitor: {
           ip: '104.86.46.103',
           name: '',
           status: 'up',
+          id: 'myMonitor',
+          type: 'icmp',
+          duration: { us: 123 },
         },
         observer: {
           geo: {
@@ -60,13 +68,17 @@ describe('MonitorListStatusColumn', () => {
             },
           },
         },
-        timestamp: 1579794634220,
+        timestamp: '1579794634220',
       },
       {
+        docId: '3',
         monitor: {
           ip: '104.86.46.103',
           name: '',
           status: 'up',
+          id: 'myMonitor',
+          type: 'icmp',
+          duration: { us: 123 },
         },
         observer: {
           geo: {
@@ -77,16 +89,20 @@ describe('MonitorListStatusColumn', () => {
             },
           },
         },
-        timestamp: 1579794628368,
+        timestamp: '1579794628368',
       },
     ];
 
     downChecks = [
       {
+        docId: '4',
         monitor: {
           ip: '104.86.46.103',
           name: '',
           status: 'down',
+          id: 'myMonitor',
+          type: 'icmp',
+          duration: { us: 123 },
         },
         observer: {
           geo: {
@@ -97,13 +113,17 @@ describe('MonitorListStatusColumn', () => {
             },
           },
         },
-        timestamp: 1579794631464,
+        timestamp: '1579794631464',
       },
       {
+        docId: '5',
         monitor: {
           ip: '104.86.46.103',
           name: '',
           status: 'down',
+          id: 'myMonitor',
+          type: 'icmp',
+          duration: { us: 123 },
         },
         observer: {
           geo: {
@@ -114,13 +134,17 @@ describe('MonitorListStatusColumn', () => {
             },
           },
         },
-        timestamp: 1579794634220,
+        timestamp: '1579794634220',
       },
       {
+        docId: '6',
         monitor: {
           ip: '104.86.46.103',
           name: '',
           status: 'down',
+          id: 'myMonitor',
+          type: 'icmp',
+          duration: { us: 123 },
         },
         observer: {
           geo: {
@@ -131,16 +155,20 @@ describe('MonitorListStatusColumn', () => {
             },
           },
         },
-        timestamp: 1579794628368,
+        timestamp: '1579794628368',
       },
     ];
 
-    checks = [
+    summaryPings = [
       {
+        docId: '7',
         monitor: {
           ip: '104.86.46.103',
           name: '',
           status: 'up',
+          id: 'myMonitor',
+          type: 'icmp',
+          duration: { us: 123 },
         },
         observer: {
           geo: {
@@ -151,13 +179,17 @@ describe('MonitorListStatusColumn', () => {
             },
           },
         },
-        timestamp: 1579794631464,
+        timestamp: '1579794631464',
       },
       {
+        docId: '8',
         monitor: {
           ip: '104.86.46.103',
           name: '',
           status: 'down',
+          id: 'myMonitor',
+          type: 'icmp',
+          duration: { us: 123 },
         },
         observer: {
           geo: {
@@ -168,13 +200,17 @@ describe('MonitorListStatusColumn', () => {
             },
           },
         },
-        timestamp: 1579794634220,
+        timestamp: '1579794634220',
       },
       {
+        docId: '9',
         monitor: {
           ip: '104.86.46.103',
           name: '',
           status: 'down',
+          id: 'myMonitor',
+          type: 'icmp',
+          duration: { us: 123 },
         },
         observer: {
           geo: {
@@ -185,45 +221,53 @@ describe('MonitorListStatusColumn', () => {
             },
           },
         },
-        timestamp: 1579794628368,
+        timestamp: '1579794628368',
       },
     ];
   });
 
   it('provides expected tooltip and display times', () => {
     const component = shallowWithIntl(
-      <MonitorListStatusColumn status="up" timestamp="2314123" checks={[]} />
+      <MonitorListStatusColumn status="up" timestamp="2314123" summaryPings={[]} />
     );
     expect(component).toMatchSnapshot();
   });
 
   it('can handle a non-numeric timestamp value', () => {
     const component = shallowWithIntl(
-      <MonitorListStatusColumn status="up" timestamp={new Date().toString()} checks={[]} />
+      <MonitorListStatusColumn status="up" timestamp={new Date().toString()} summaryPings={[]} />
     );
     expect(component).toMatchSnapshot();
   });
 
   it('will display location status', () => {
     const component = shallowWithIntl(
-      <MonitorListStatusColumn status="up" timestamp={new Date().toString()} checks={checks} />
+      <MonitorListStatusColumn
+        status="up"
+        timestamp={new Date().toString()}
+        summaryPings={summaryPings}
+      />
     );
     expect(component).toMatchSnapshot();
   });
 
   it('will render display location status', () => {
     const component = renderWithIntl(
-      <MonitorListStatusColumn status="up" timestamp={new Date().toString()} checks={checks} />
+      <MonitorListStatusColumn
+        status="up"
+        timestamp={new Date().toString()}
+        summaryPings={summaryPings}
+      />
     );
     expect(component).toMatchSnapshot();
   });
 
   it(' will test getLocationStatus location', () => {
-    let statusMessage = getLocationStatus(checks, STATUS.UP);
+    let statusMessage = getLocationStatus(summaryPings, STATUS.UP);
 
     expect(statusMessage).toBe('in 1/3 Locations');
 
-    statusMessage = getLocationStatus(checks, STATUS.DOWN);
+    statusMessage = getLocationStatus(summaryPings, STATUS.DOWN);
 
     expect(statusMessage).toBe('in 2/3 Locations');
 
