@@ -34,7 +34,7 @@ import { errorToToaster, displaySuccessToast, useStateToaster } from '../../toas
 import { ExceptionBuilder } from '../builder';
 import { Loader } from '../../loader';
 import { useAddOrUpdateException } from '../use_add_exception';
-import { useSignalIndex } from '../../../../alerts/containers/detection_engine/alerts/use_signal_index';
+import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useFetchOrCreateRuleExceptionList } from '../use_fetch_or_create_rule_exception_list';
 import { AddExceptionComments } from '../add_exception_comments';
 import {
@@ -44,7 +44,7 @@ import {
   entryHasListType,
   entryHasNonEcsType,
 } from '../helpers';
-import { useFetchIndexPatterns } from '../../../../alerts/containers/detection_engine/rules';
+import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
 
 export interface AddExceptionOnClick {
   ruleName: string;

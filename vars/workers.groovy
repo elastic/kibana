@@ -13,8 +13,6 @@ def label(size) {
       return 'docker && tests-l'
     case 'xl':
       return 'docker && tests-xl'
-    case 'xl-highmem':
-      return 'docker && tests-xl-highmem'
     case 'xxl':
       return 'docker && tests-xxl'
   }
@@ -57,11 +55,6 @@ def base(Map params, Closure closure) {
       }
     }
 
-    sh(
-      script: "mkdir -p ${env.WORKSPACE}/tmp",
-      label: "Create custom temp directory"
-    )
-
     def checkoutInfo = [:]
 
     if (config.scm) {
@@ -96,7 +89,6 @@ def base(Map params, Closure closure) {
       "PR_AUTHOR=${env.ghprbPullAuthorLogin ?: ''}",
       "TEST_BROWSER_HEADLESS=1",
       "GIT_BRANCH=${checkoutInfo.branch}",
-      "TMPDIR=${env.WORKSPACE}/tmp", // For Chrome and anything else that respects it
     ]) {
       withCredentials([
         string(credentialsId: 'vault-addr', variable: 'VAULT_ADDR'),
@@ -175,9 +167,7 @@ def parallelProcesses(Map params) {
           sleep(delay)
         }
 
-        withEnv(["CI_PARALLEL_PROCESS_NUMBER=${processNumber}"]) {
-          processClosure()
-        }
+        processClosure(processNumber)
       }
     }
 

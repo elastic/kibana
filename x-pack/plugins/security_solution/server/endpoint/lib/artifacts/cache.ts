@@ -10,7 +10,7 @@ const DEFAULT_MAX_SIZE = 10;
  * FIFO cache implementation for artifact downloads.
  */
 export class ExceptionsCache {
-  private cache: Map<string, string>;
+  private cache: Map<string, Buffer>;
   private queue: string[];
   private maxSize: number;
 
@@ -20,7 +20,7 @@ export class ExceptionsCache {
     this.maxSize = maxSize || DEFAULT_MAX_SIZE;
   }
 
-  set(id: string, body: string) {
+  set(id: string, body: Buffer) {
     if (this.queue.length + 1 > this.maxSize) {
       const entry = this.queue.shift();
       if (entry !== undefined) {
@@ -31,7 +31,7 @@ export class ExceptionsCache {
     this.cache.set(id, body);
   }
 
-  get(id: string): string | undefined {
+  get(id: string): Buffer | undefined {
     return this.cache.get(id);
   }
 }
