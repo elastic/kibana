@@ -120,18 +120,19 @@ export class MonitoringViewBaseController {
       const max = bounds.max?.valueOf();
       const options = alerts.options || {};
       try {
-        return await Legacy.shims.kfetch({
-          method: 'POST',
-          pathname: `/api/monitoring/v1/alert/${globalState.cluster_uuid}/status`,
-          body: JSON.stringify({
-            alertTypeIds: options.alertTypeIds,
-            filters: options.filters,
-            timeRange: {
-              min,
-              max,
-            },
-          }),
-        });
+        return await Legacy.shims.http.post(
+          `/api/monitoring/v1/alert/${globalState.cluster_uuid}/status`,
+          {
+            body: JSON.stringify({
+              alertTypeIds: options.alertTypeIds,
+              filters: options.filters,
+              timeRange: {
+                min,
+                max,
+              },
+            }),
+          }
+        );
       } catch (err) {
         Legacy.shims.toastNotifications.addDanger({
           title: 'Error getting alert status',
