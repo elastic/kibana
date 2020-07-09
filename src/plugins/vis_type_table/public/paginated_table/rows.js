@@ -19,6 +19,7 @@
 
 import $ from 'jquery';
 import _ from 'lodash';
+import angular from 'angular';
 import tableCellFilterHtml from './table_cell_filter.html';
 
 export function KbnRows($compile) {
@@ -65,7 +66,7 @@ export function KbnRows($compile) {
 
         if (column.filterable && contentsIsDefined) {
           $cell = createFilterableCell(contents);
-          $cellContent = $cell.find('[data-cell-content]');
+          $cellContent = angular.element($cell[0].querySelector('[data-cell-content]'));
         } else {
           $cell = $cellContent = createCell();
         }
