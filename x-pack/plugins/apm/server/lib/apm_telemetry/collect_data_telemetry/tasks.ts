@@ -4,34 +4,97 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { flatten, merge, sortBy, sum } from 'lodash';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import { TelemetryTask } from '.';
 import { AGENT_NAMES } from '../../../../common/agent_name';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import {
-  PROCESSOR_EVENT,
-  SERVICE_NAME,
   AGENT_NAME,
   AGENT_VERSION,
+  CLOUD_AVAILABILITY_ZONE,
+  CLOUD_PROVIDER,
+  CLOUD_REGION,
   ERROR_GROUP_ID,
-  TRANSACTION_NAME,
   PARENT_ID,
+  PROCESSOR_EVENT,
   SERVICE_FRAMEWORK_NAME,
   SERVICE_FRAMEWORK_VERSION,
   SERVICE_LANGUAGE_NAME,
   SERVICE_LANGUAGE_VERSION,
+  SERVICE_NAME,
   SERVICE_RUNTIME_NAME,
   SERVICE_RUNTIME_VERSION,
+  TRANSACTION_NAME,
   USER_AGENT_ORIGINAL,
 } from '../../../../common/elasticsearch_fieldnames';
-import { Span } from '../../../../typings/es_schemas/ui/span';
 import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
-import { TelemetryTask } from '.';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import { Span } from '../../../../typings/es_schemas/ui/span';
+import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { APMTelemetry } from '../types';
 
 const TIME_RANGES = ['1d', 'all'] as const;
 type TimeRange = typeof TIME_RANGES[number];
 
 export const tasks: TelemetryTask[] = [
+  {
+    name: 'cloud',
+    executor: async ({ indices, search }) => {
+      function getBucketKeys({
+        buckets,
+      }: {
+        buckets: Array<{
+          doc_count: number;
+          key: string | number;
+        }>;
+      }) {
+        return buckets.map((bucket) => bucket.key as string);
+      }
+
+      const az = 'availability_zone';
+      const region = 'region';
+      const provider = 'provider';
+
+      const response = await search({
+        index: [
+          indices['apm_oss.errorIndices'],
+          indices['apm_oss.metricsIndices'],
+          indices['apm_oss.spanIndices'],
+          indices['apm_oss.transactionIndices'],
+        ],
+        body: {
+          size: 0,
+          aggs: {
+            [az]: {
+              terms: {
+                field: CLOUD_AVAILABILITY_ZONE,
+              },
+            },
+            [provider]: {
+              terms: {
+                field: CLOUD_PROVIDER,
+              },
+            },
+            [region]: {
+              terms: {
+                field: CLOUD_REGION,
+              },
+            },
+          },
+        },
+      });
+
+      const { aggregations } = response;
+
+      if (!aggregations) {
+        return { cloud: { [az]: [], [provider]: [], [region]: [] } };
+      }
+      const cloud = {
+        [az]: getBucketKeys(aggregations[az]),
+        [provider]: getBucketKeys(aggregations[provider]),
+        [region]: getBucketKeys(aggregations[region]),
+      };
+      return { cloud };
+    },
+  },
   {
     name: 'processor_events',
     executor: async ({ indices, search }) => {
@@ -402,17 +465,17 @@ export const tasks: TelemetryTask[] = [
   {
     name: 'integrations',
     executor: async ({ transportRequest }) => {
-      const apmJobs = ['*-high_mean_response_time'];
+      const apmJobs = ['apm-*', '*-high_mean_response_time'];
 
       const response = (await transportRequest({
         method: 'get',
         path: `/_ml/anomaly_detectors/${apmJobs.join(',')}`,
-      })) as { data?: { count: number } };
+      })) as { body?: { count: number } };
 
       return {
         integrations: {
           ml: {
-            all_jobs_count: response.data?.count ?? 0,
+            all_jobs_count: response.body?.count ?? 0,
           },
         },
       };
