@@ -21,6 +21,7 @@ import { useIndexPattern } from './use_index_pattern';
 
 const Container = styled.div`
   margin-bottom: 4px;
+  position: relative;
 `;
 
 interface State {

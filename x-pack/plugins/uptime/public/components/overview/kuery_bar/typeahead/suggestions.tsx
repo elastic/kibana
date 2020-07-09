@@ -21,9 +21,9 @@ const List = styled.ul`
   box-shadow: 0px ${px(units.quarter)} ${px(units.double)} ${tint(0.1, theme.euiColorFullShade)};
   background: #fff;
   z-index: 10;
-  left: 0;
   max-height: ${px(unit * 20)};
   overflow: scroll;
+  position: absolute;
 `;
 
 interface SuggestionsProps {

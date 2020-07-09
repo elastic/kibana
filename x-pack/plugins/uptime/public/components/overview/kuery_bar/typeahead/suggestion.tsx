@@ -74,11 +74,6 @@ export const Suggestion: React.FC<SuggestionProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [childNode]);
 
-  let descr: string = '';
-  if (typeof suggestion.description === 'string') {
-    descr = suggestion.description;
-  }
-
   return (
     <SuggestionItem ref={childNode} selected={selected}>
       <EuiSuggestItem
@@ -86,7 +81,8 @@ export const Suggestion: React.FC<SuggestionProps> = ({
         label={suggestion.text}
         onClick={() => onClick(suggestion)}
         onMouseEnter={onMouseEnter}
-        description={descr}
+        // @ts-ignore
+        description={suggestion.description}
       />
     </SuggestionItem>
   );

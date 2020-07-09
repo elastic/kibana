@@ -264,7 +264,7 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
 
   return (
     <EuiOutsideClickDetector onOutsideClick={onClickOutside}>
-      <div>
+      <span>
         <div data-test-subj={dataTestSubj} style={{ position: 'relative' }}>
           <EuiFieldSearch
             aria-label={ariaLabel}
@@ -312,7 +312,7 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
           onMouseEnter={onMouseEnterSuggestion}
           loadMore={loadMore}
         />
-      </div>
+      </span>
     </EuiOutsideClickDetector>
   );
 };
