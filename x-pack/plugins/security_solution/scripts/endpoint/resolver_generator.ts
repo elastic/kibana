@@ -140,6 +140,9 @@ async function main() {
 
     // build a resolver tree with related events and related alerts
     const alertEventTree: GeneratedAlertTree = generator.generatedAlertTree(treeOptions);
+    console.log(
+      `host #${hostIndex}: created 1 alert: event.id: "${alertEventTree.alertEvent.event.id}"`
+    );
 
     /**
      * Index the ancestry and the alert event itself regardless of `alertsPerHost` limit.
