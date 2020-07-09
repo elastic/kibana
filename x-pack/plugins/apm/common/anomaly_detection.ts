@@ -4,5 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { MonitorSummaryIterator } from './monitor_summary_iterator';
-export { QueryContext } from './query_context';
+export interface ServiceAnomalyStats {
+  transactionType?: string;
+  anomalyScore?: number;
+  actualValue?: number;
+  jobId?: string;
+}
