@@ -73,7 +73,7 @@ def functionalOss(Map params = [:]) {
 def functionalXpack(Map params = [:]) {
   def config = params ?: [
     ciGroups: true,
-    firefox: true,
+    firefox: false,
     accessibility: true,
     pluginFunctional: true,
     savedObjectsFieldMetrics:true,
