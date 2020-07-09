@@ -31,16 +31,13 @@ export function getResultsServiceProvider({
       const hasMlCapabilities =
         request.params !== 'DummyKibanaRequest'
           ? getHasMlCapabilities(request)
-          : (caps: string[]) => Promise.resolve();
+          : (_caps: string[]) => Promise.resolve();
 
       const { getAnomaliesTableData } = resultsServiceProvider(callAsCurrentUser);
       return {
         async getAnomaliesTableData(...args) {
           isFullLicense();
-          if (hasMlCapabilities) {
-            await hasMlCapabilities(['canGetJobs']);
-          }
-
+          await hasMlCapabilities(['canGetJobs']);
           return getAnomaliesTableData(...args);
         },
       };
