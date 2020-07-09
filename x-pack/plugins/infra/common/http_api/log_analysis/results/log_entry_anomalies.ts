@@ -97,8 +97,8 @@ const paginationRT = rt.intersection([
 export type Pagination = rt.TypeOf<typeof paginationRT>;
 
 const sortRT = rt.type({
-  field: sortOptions,
-  direction: sortDirections,
+  field: sortOptionsRT,
+  direction: sortDirectionsRT,
 });
 
 export type Sort = rt.TypeOf<typeof sortRT>;
