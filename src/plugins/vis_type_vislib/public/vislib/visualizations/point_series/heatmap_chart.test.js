@@ -20,15 +20,19 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import d3 from 'd3';
-import expect from '@kbn/expect';
+import {
+  setHTMLElementClientSizes,
+  setSVGElementGetBBox,
+  setSVGElementGetComputedTextLength,
+} from '../../../../../../test_utils/public';
 
 // Data
-import series from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series';
-import seriesPosNeg from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series_pos_neg';
-import seriesNeg from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series_neg';
-import termsColumns from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/terms/_columns';
-import stackedSeries from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_stacked_series';
-import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
+import series from '../../../fixtures/mock_data/date_histogram/_series';
+import seriesPosNeg from '../../../fixtures/mock_data/date_histogram/_series_pos_neg';
+import seriesNeg from '../../../fixtures/mock_data/date_histogram/_series_neg';
+import termsColumns from '../../../fixtures/mock_data/terms/_columns';
+import stackedSeries from '../../../fixtures/mock_data/date_histogram/_stacked_series';
+import { getMockUiState } from '../../../fixtures/mocks';
 import { getVis } from '../_vis_fixture';
 
 // tuple, with the format [description, mode, data]
@@ -40,7 +44,26 @@ const dataTypesArray = [
   ['stackedSeries', stackedSeries],
 ];
 
+let mockedHTMLElementClientSizes;
+let mockedSVGElementGetBBox;
+let mockedSVGElementGetComputedTextLength;
+let mockWidth;
+
 describe('Vislib Heatmap Chart Test Suite', function () {
+  beforeAll(() => {
+    mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
+    mockedSVGElementGetBBox = setSVGElementGetBBox(100);
+    mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
+    mockWidth = jest.spyOn($.prototype, 'width').mockReturnValue(900);
+  });
+
+  afterAll(() => {
+    mockedHTMLElementClientSizes.mockRestore();
+    mockedSVGElementGetBBox.mockRestore();
+    mockedSVGElementGetComputedTextLength.mockRestore();
+    mockWidth.mockRestore();
+  });
+
   dataTypesArray.forEach(function (dataType) {
     const name = dataType[0];
     const data = dataType[1];
@@ -76,7 +99,7 @@ describe('Vislib Heatmap Chart Test Suite', function () {
         vis.destroy();
       });
 
-      it('category axes should be rendered in reverse order', () => {
+      test('category axes should be rendered in reverse order', () => {
         const renderedCategoryAxes = vis.handler.renderArray.filter((item) => {
           return (
             item.constructor &&
@@ -84,22 +107,22 @@ describe('Vislib Heatmap Chart Test Suite', function () {
             item.axisConfig.get('type') === 'category'
           );
         });
-        expect(vis.handler.categoryAxes.length).to.equal(renderedCategoryAxes.length);
-        expect(vis.handler.categoryAxes[0].axisConfig.get('id')).to.equal(
+        expect(vis.handler.categoryAxes.length).toEqual(renderedCategoryAxes.length);
+        expect(vis.handler.categoryAxes[0].axisConfig.get('id')).toEqual(
           renderedCategoryAxes[1].axisConfig.get('id')
         );
-        expect(vis.handler.categoryAxes[1].axisConfig.get('id')).to.equal(
+        expect(vis.handler.categoryAxes[1].axisConfig.get('id')).toEqual(
           renderedCategoryAxes[0].axisConfig.get('id')
         );
       });
 
       describe('addSquares method', function () {
-        it('should append rects', function () {
+        test('should append rects', function () {
           vis.handler.charts.forEach(function (chart) {
             const numOfRects = chart.chartData.series.reduce((result, series) => {
               return result + series.values.length;
             }, 0);
-            expect($(chart.chartEl).find('.series rect')).to.have.length(numOfRects);
+            expect($(chart.chartEl).find('.series rect')).toHaveLength(numOfRects);
           });
         });
       });
@@ -120,53 +143,53 @@ describe('Vislib Heatmap Chart Test Suite', function () {
           };
         }
 
-        it('should attach the brush if data is a set of ordered dates', function () {
+        test('should attach the brush if data is a set of ordered dates', function () {
           vis.handler.charts.forEach(function (chart) {
             const has = checkChart(chart);
             const ordered = vis.handler.data.get('ordered');
             const date = Boolean(ordered && ordered.date);
-            expect(has.brush).to.be(date);
+            expect(has.brush).toBe(date);
           });
         });
 
-        it('should attach a click event', function () {
+        test('should attach a click event', function () {
           vis.handler.charts.forEach(function (chart) {
             const has = checkChart(chart);
-            expect(has.click).to.be(true);
+            expect(has.click).toBe(true);
           });
         });
 
-        it('should attach a hover event', function () {
+        test('should attach a hover event', function () {
           vis.handler.charts.forEach(function (chart) {
             const has = checkChart(chart);
-            expect(has.mouseOver).to.be(true);
+            expect(has.mouseOver).toBe(true);
           });
         });
       });
 
       describe('draw method', function () {
-        it('should return a function', function () {
+        test('should return a function', function () {
           vis.handler.charts.forEach(function (chart) {
-            expect(_.isFunction(chart.draw())).to.be(true);
+            expect(_.isFunction(chart.draw())).toBe(true);
           });
         });
 
-        it('should return a yMin and yMax', function () {
+        test('should return a yMin and yMax', function () {
           vis.handler.charts.forEach(function (chart) {
             const yAxis = chart.handler.valueAxes[0];
             const domain = yAxis.getScale().domain();
 
-            expect(domain[0]).to.not.be(undefined);
-            expect(domain[1]).to.not.be(undefined);
+            expect(domain[0]).not.toBe(undefined);
+            expect(domain[1]).not.toBe(undefined);
           });
         });
       });
 
-      it('should define default colors', function () {
-        expect(mockUiState.get('vis.defaultColors')).to.not.be(undefined);
+      test('should define default colors', function () {
+        expect(mockUiState.get('vis.defaultColors')).not.toBe(undefined);
       });
 
-      it('should set custom range', function () {
+      test('should set custom range', function () {
         vis.destroy();
         generateVis({
           setColorRange: true,
@@ -178,14 +201,14 @@ describe('Vislib Heatmap Chart Test Suite', function () {
           ],
         });
         const labels = vis.getLegendLabels();
-        expect(labels[0]).to.be('0 - 200');
-        expect(labels[1]).to.be('200 - 400');
-        expect(labels[2]).to.be('400 - 500');
-        expect(labels[3]).to.be('500 - Infinity');
+        expect(labels[0]).toBe('0 - 200');
+        expect(labels[1]).toBe('200 - 400');
+        expect(labels[2]).toBe('400 - 500');
+        expect(labels[3]).toBe('500 - Infinity');
       });
 
-      it('should show correct Y axis title', function () {
-        expect(vis.handler.categoryAxes[1].axisConfig.get('title.text')).to.equal('');
+      test('should show correct Y axis title', function () {
+        expect(vis.handler.categoryAxes[1].axisConfig.get('title.text')).toEqual('');
       });
     });
   });
