@@ -73,9 +73,6 @@ export function getLogsOverviewDataFetcher(
       (Date.parse(params.endTime).valueOf() - Date.parse(params.startTime).valueOf()) / (1000 * 60);
 
     return {
-      title: i18n.translate('xpack.infra.logs.logOverview.logOverviewTitle', {
-        defaultMessage: 'Logs',
-      }),
       appLink: `/app/logs/stream?logPosition=(end:${encode(params.endTime)},start:${encode(
         params.startTime
       )})`,

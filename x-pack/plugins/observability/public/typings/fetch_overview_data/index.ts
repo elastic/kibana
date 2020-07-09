@@ -41,7 +41,6 @@ export interface DataHandler<T extends ObservabilityApp = ObservabilityApp> {
 }
 
 export interface FetchDataResponse {
-  title: string;
   appLink: string;
 }
 

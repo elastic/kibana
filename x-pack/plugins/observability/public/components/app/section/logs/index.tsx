@@ -59,7 +59,7 @@ export const LogsSection = ({ startTime, endTime, bucketSize }: Props) => {
 
   const formatter = niceTimeFormatter([min, max]);
 
-  const { title, appLink, stats, series } = data || {};
+  const { appLink, stats, series } = data || {};
 
   const colorsPerItem = getColorPerItem(series);
 
@@ -67,8 +67,15 @@ export const LogsSection = ({ startTime, endTime, bucketSize }: Props) => {
 
   return (
     <SectionContainer
-      title={title || 'Logs'}
-      appLink={appLink}
+      title={i18n.translate('xpack.observability.overview.logs.title', {
+        defaultMessage: 'Logs',
+      })}
+      appLink={{
+        href: appLink,
+        label: i18n.translate('xpack.observability.overview.logs.appLink', {
+          defaultMessage: 'View in app',
+        }),
+      }}
       hasError={status === FETCH_STATUS.FAILURE}
     >
       <EuiTitle size="xs">

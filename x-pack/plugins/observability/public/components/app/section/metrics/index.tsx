@@ -56,7 +56,7 @@ export const MetricsSection = ({ startTime, endTime, bucketSize }: Props) => {
 
   const isLoading = status === FETCH_STATUS.LOADING;
 
-  const { title = 'Metrics', appLink, stats, series } = data || {};
+  const { appLink, stats, series } = data || {};
 
   const cpuColor = theme.eui.euiColorVis7;
   const memoryColor = theme.eui.euiColorVis0;
@@ -65,9 +65,15 @@ export const MetricsSection = ({ startTime, endTime, bucketSize }: Props) => {
 
   return (
     <SectionContainer
-      minHeight={135}
-      title={title}
-      appLink={appLink}
+      title={i18n.translate('xpack.observability.overview.metrics.title', {
+        defaultMessage: 'Metrics',
+      })}
+      appLink={{
+        href: appLink,
+        label: i18n.translate('xpack.observability.overview.metrics.appLink', {
+          defaultMessage: 'View in app',
+        }),
+      }}
       hasError={status === FETCH_STATUS.FAILURE}
     >
       <EuiFlexGroup>

@@ -104,9 +104,6 @@ export const createMetricsFetchData = (
   });
 
   return {
-    title: i18n.translate('xpack.infra.observabilityHomepage.metrics.title', {
-      defaultMessage: 'Metrics',
-    }),
     appLink: '/app/metrics',
     stats: {
       hosts: {

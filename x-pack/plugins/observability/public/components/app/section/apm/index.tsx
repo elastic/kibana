@@ -40,7 +40,7 @@ export const APMSection = ({ startTime, endTime, bucketSize }: Props) => {
     }
   }, [startTime, endTime, bucketSize]);
 
-  const { title = 'APM', appLink, stats, series } = data || {};
+  const { appLink, stats, series } = data || {};
 
   const min = moment.utc(startTime).valueOf();
   const max = moment.utc(endTime).valueOf();
@@ -53,8 +53,15 @@ export const APMSection = ({ startTime, endTime, bucketSize }: Props) => {
 
   return (
     <SectionContainer
-      title={title || 'APM'}
-      appLink={appLink}
+      title={i18n.translate('xpack.observability.overview.apm.title', {
+        defaultMessage: 'APM',
+      })}
+      appLink={{
+        href: appLink,
+        label: i18n.translate('xpack.observability.overview.apm.appLink', {
+          defaultMessage: 'View in app',
+        }),
+      }}
       hasError={status === FETCH_STATUS.FAILURE}
     >
       <EuiFlexGroup>

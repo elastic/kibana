@@ -51,16 +51,22 @@ export const UptimeSection = ({ startTime, endTime, bucketSize }: Props) => {
 
   const isLoading = status === FETCH_STATUS.LOADING;
 
-  const { title = 'Uptime', appLink, stats, series } = data || {};
+  const { appLink, stats, series } = data || {};
 
   const downColor = theme.eui.euiColorVis2;
   const upColor = theme.eui.euiColorLightShade;
 
   return (
     <SectionContainer
-      minHeight={273}
-      title={title}
-      appLink={appLink}
+      title={i18n.translate('xpack.observability.overview.uptime.title', {
+        defaultMessage: 'Uptime',
+      })}
+      appLink={{
+        href: appLink,
+        label: i18n.translate('xpack.observability.overview.uptime.appLink', {
+          defaultMessage: 'View in app',
+        }),
+      }}
       hasError={status === FETCH_STATUS.FAILURE}
     >
       <EuiFlexGroup>
