@@ -16,7 +16,6 @@ import { ClientMetrics } from './ClientMetrics';
 import { PageViewsTrend } from './PageViewsTrend';
 import { PageLoadDistribution } from './PageLoadDistribution';
 import { I18LABELS } from './translations';
-import { useUrlParams } from '../../../hooks/useUrlParams';
 import { VisitorBreakdown } from './VisitorBreakdown';
 
 export const RumDashboard = ({ filters }) => {

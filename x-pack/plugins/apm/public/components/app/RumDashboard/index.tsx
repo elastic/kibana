@@ -11,7 +11,6 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { useTrackPageview } from '../../../../../observability/public';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
@@ -21,6 +20,7 @@ import { ServiceNameFilter } from '../../shared/LocalUIFilters/ServiceNameFilter
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { RUM_AGENTS } from '../../../../common/agent_name';
+import { EnvironmentFilter } from '../../shared/EnvironmentFilter';
 
 export function RumOverview() {
   useTrackPageview({ app: 'apm', path: 'rum_overview' });
@@ -68,6 +68,8 @@ export function RumOverview() {
       <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
+          <EnvironmentFilter />
+          <EuiSpacer />
           <LocalUIFilters
             {...localUIFiltersConfig}
             showCount={true}

@@ -25,8 +25,6 @@ import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink'
 import { ServiceMap } from '../ServiceMap';
 import { ServiceOverview } from '../ServiceOverview';
 import { TraceOverview } from '../TraceOverview';
-import { RumOverview } from '../RumDashboard';
-import { RumOverviewLink } from '../../shared/Links/apm/RumOverviewLink';
 
 function getHomeTabs({
   serviceMapEnabled = true,
@@ -71,18 +69,6 @@ function getHomeTabs({
       name: 'service-map',
     });
   }
-
-  homeTabs.push({
-    link: (
-      <RumOverviewLink>
-        {i18n.translate('xpack.apm.home.rumTabLabel', {
-          defaultMessage: 'Real User Monitoring',
-        })}
-      </RumOverviewLink>
-    ),
-    render: () => <RumOverview />,
-    name: 'rum-overview',
-  });
 
   return homeTabs;
 }
