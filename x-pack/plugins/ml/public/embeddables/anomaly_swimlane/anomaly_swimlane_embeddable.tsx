@@ -69,9 +69,6 @@ export type AnomalySwimlaneEmbeddableOutput = EmbeddableOutput &
   AnomalySwimlaneEmbeddableCustomOutput;
 
 export interface AnomalySwimlaneEmbeddableCustomOutput {
-  jobIds: JobId[];
-  swimlaneType: SwimlaneType;
-  viewBy?: string;
   perPage?: number;
   fromPage?: number;
   interval?: number;
@@ -104,10 +101,7 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
     super(
       initialInput,
       {
-        jobIds: initialInput.jobIds,
-        swimlaneType: initialInput.swimlaneType,
         defaultTitle: initialInput.title,
-        ...(initialInput.viewBy ? { viewBy: initialInput.viewBy } : {}),
       },
       parent
     );

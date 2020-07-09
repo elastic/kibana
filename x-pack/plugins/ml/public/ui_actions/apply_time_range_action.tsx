@@ -13,18 +13,20 @@ import {
 } from '../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
 import { MlCoreSetup } from '../plugin';
 
-export const APPLY_TO_CURRENT_VIEW_ACTION = 'openInAnomalyExplorerAction';
+export const APPLY_TIME_RANGE_SELECTION_ACTION = 'applyTimeRangeSelectionAction';
 
-export function createApplyToCurrentViewAction(getStartServices: MlCoreSetup['getStartServices']) {
-  return createAction<typeof APPLY_TO_CURRENT_VIEW_ACTION>({
-    id: 'apply-to-current-view',
-    type: APPLY_TO_CURRENT_VIEW_ACTION,
-    getIconType(context: ActionContextMapping[typeof APPLY_TO_CURRENT_VIEW_ACTION]): string {
-      return 'filter';
+export function createApplyTimeRangeSelectionAction(
+  getStartServices: MlCoreSetup['getStartServices']
+) {
+  return createAction<typeof APPLY_TIME_RANGE_SELECTION_ACTION>({
+    id: 'apply-time-range-selection',
+    type: APPLY_TIME_RANGE_SELECTION_ACTION,
+    getIconType(context: ActionContextMapping[typeof APPLY_TIME_RANGE_SELECTION_ACTION]): string {
+      return 'timeline';
     },
     getDisplayName: () =>
-      i18n.translate('xpack.ml.actions.applyToCurrentViewTitle', {
-        defaultMessage: 'Apply to current view',
+      i18n.translate('xpack.ml.actions.applyTimeRangeSelectionTitle', {
+        defaultMessage: 'Apply time range selection',
       }),
     async execute({ embeddable, data }: SwimLaneDrilldownContext) {
       if (!data) {
@@ -32,14 +34,23 @@ export function createApplyToCurrentViewAction(getStartServices: MlCoreSetup['ge
       }
       const [, pluginStart] = await getStartServices();
       const timefilter = pluginStart.data.query.timefilter.timefilter;
+      const { interval } = embeddable.getOutput();
 
       let [from, to] = data.times;
       from = from * 1000;
       to = to * 1000;
 
+      if (from === to) {
+        // single cell from a swim lane has been selected
+        if (!interval) {
+          throw new Error('Interval is required to set a time range');
+        }
+        to = to + interval * 1000;
+      }
+
       timefilter.setTime({
         from: moment(from),
-        to: moment(from === to ? to + data.interval * 1000 : to),
+        to: moment(to),
         mode: 'absolute',
       });
     },

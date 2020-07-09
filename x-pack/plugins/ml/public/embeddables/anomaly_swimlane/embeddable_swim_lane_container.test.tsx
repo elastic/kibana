@@ -10,14 +10,15 @@ import { EmbeddableSwimLaneContainer } from './embeddable_swim_lane_container';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
+  AnomalySwimlaneEmbeddable,
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneServices,
 } from './anomaly_swimlane_embeddable';
 import { CoreStart } from 'kibana/public';
-import { MlStartDependencies } from '../../plugin';
 import { useSwimlaneInputResolver } from './swimlane_input_resolver';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 import { SwimlaneContainer } from '../../application/explorer/swimlane_container';
+import { MlDependencies } from '../../application/app';
 
 jest.mock('./swimlane_input_resolver', () => ({
   useSwimlaneInputResolver: jest.fn(() => {
@@ -37,8 +38,10 @@ const defaultOptions = { wrapper: I18nProvider };
 describe('ExplorerSwimlaneContainer', () => {
   let embeddableInput: BehaviorSubject<Partial<AnomalySwimlaneEmbeddableInput>>;
   let refresh: BehaviorSubject<any>;
-  let services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices];
+  let services: [CoreStart, MlDependencies, AnomalySwimlaneServices];
+  let embeddableContext: AnomalySwimlaneEmbeddable;
   const onInputChange = jest.fn();
+  const onOutputChange = jest.fn();
 
   beforeEach(() => {
     embeddableInput = new BehaviorSubject({
@@ -74,12 +77,14 @@ describe('ExplorerSwimlaneContainer', () => {
     render(
       <EmbeddableSwimLaneContainer
         id={'test-swimlane-embeddable'}
+        embeddableContext={embeddableContext}
         embeddableInput={
           embeddableInput.asObservable() as Observable<AnomalySwimlaneEmbeddableInput>
         }
         services={services}
         refresh={refresh}
         onInputChange={onInputChange}
+        onOutputChange={onOutputChange}
       />,
       defaultOptions
     );
@@ -110,6 +115,7 @@ describe('ExplorerSwimlaneContainer', () => {
 
     const { findByText } = render(
       <EmbeddableSwimLaneContainer
+        embeddableContext={embeddableContext}
         id={'test-swimlane-embeddable'}
         embeddableInput={
           embeddableInput.asObservable() as Observable<AnomalySwimlaneEmbeddableInput>
@@ -117,6 +123,7 @@ describe('ExplorerSwimlaneContainer', () => {
         services={services}
         refresh={refresh}
         onInputChange={onInputChange}
+        onOutputChange={onOutputChange}
       />,
       defaultOptions
     );

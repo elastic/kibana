@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
+import { OVERALL_LABEL, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
 import { AddToDashboardControl } from './add_to_dashboard_control';
 import { useMlKibana } from '../contexts/kibana';
 import { TimeBuckets } from '../util/time_buckets';
@@ -31,7 +31,7 @@ import { ExplorerState } from './reducers/explorer_reducer';
 import { hasMatchingPoints } from './has_matching_points';
 import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers_found/explorer_no_influencers_found';
 import { SwimlaneContainer } from './swimlane_container';
-import { OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
+import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { NoOverallData } from './components/no_overall_data';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
@@ -105,6 +105,19 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       }
       return items;
     }, [canEditDashboards]);
+
+    // If selecting a cell in the 'view by' swimlane, indicate the corresponding time in the Overall swimlane.
+    const overallCellSelection: AppStateSelectedCells | undefined = useMemo(() => {
+      if (!selectedCells) return;
+
+      if (selectedCells.type === SWIMLANE_TYPE.OVERALL) return selectedCells;
+
+      return {
+        type: SWIMLANE_TYPE.OVERALL,
+        lanes: [OVERALL_LABEL],
+        times: selectedCells.times,
+      };
+    }, [selectedCells]);
 
     return (
       <>
@@ -203,10 +216,10 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             maskAll={maskAll}
             timeBuckets={timeBuckets}
             swimlaneData={overallSwimlaneData as OverallSwimlaneData}
-            swimlaneType={'overall'}
-            selection={selectedCells}
+            swimlaneType={SWIMLANE_TYPE.OVERALL}
+            selection={overallCellSelection}
             onCellsSelection={setSelectedCells}
-            onResize={(width) => explorerService.setSwimlaneContainerWidth(width)}
+            onResize={explorerService.setSwimlaneContainerWidth}
             isLoading={loading}
             noDataWarning={<NoOverallData />}
           />
@@ -229,7 +242,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               swimlaneType={SWIMLANE_TYPE.VIEW_BY}
               selection={selectedCells}
               onCellsSelection={setSelectedCells}
-              onResize={(width) => explorerService.setSwimlaneContainerWidth(width)}
+              onResize={explorerService.setSwimlaneContainerWidth}
               fromPage={viewByFromPage}
               perPage={viewByPerPage}
               swimlaneLimit={swimlaneLimit}
