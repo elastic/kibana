@@ -175,9 +175,11 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { jobId } = request.params;
+        const body = request.body;
+
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.addJob', {
           jobId,
-          body: request.body,
+          body,
         });
         return response.ok({
           body: results,

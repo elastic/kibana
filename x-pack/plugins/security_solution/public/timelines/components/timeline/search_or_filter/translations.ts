@@ -84,9 +84,9 @@ export const RAW_EVENT = i18n.translate(
   }
 );
 
-export const ALERT_EVENT = i18n.translate(
-  'xpack.securitySolution.timeline.searchOrFilter.eventTypeAlertEvent',
+export const DETECTION_ALERTS_EVENT = i18n.translate(
+  'xpack.securitySolution.timeline.searchOrFilter.eventTypeDetectionAlertsEvent',
   {
-    defaultMessage: 'Alert events',
+    defaultMessage: 'Detection Alerts',
   }
 );
