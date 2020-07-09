@@ -368,6 +368,7 @@ export const IMPORT_FAILED_DETAILED = (id: string, statusCode: number, message: 
 export const TEMPLATE_CALL_OUT_MESSAGE = i18n.translate(
   'xpack.securitySolution.timelines.components.templateCallOutMessageTitle',
   {
-    defaultMessage: 'Now you can add timeline templates and link it to rules.',
+    defaultMessage:
+      'Prebuit detection rules are now packaged with Timeline templates. You can also create your own Timeline templates and associate them with any rule.',
   }
 );

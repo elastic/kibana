@@ -103,14 +103,6 @@ export const createMetricsFetchData = (
     body: JSON.stringify(snapshotRequest),
   });
 
-  const inboundLabel = i18n.translate('xpack.infra.observabilityHomepage.metrics.rxLabel', {
-    defaultMessage: 'Inbound traffic',
-  });
-
-  const outboundLabel = i18n.translate('xpack.infra.observabilityHomepage.metrics.txLabel', {
-    defaultMessage: 'Outbound traffic',
-  });
-
   return {
     title: i18n.translate('xpack.infra.observabilityHomepage.metrics.title', {
       defaultMessage: 'Metrics',
@@ -119,43 +111,30 @@ export const createMetricsFetchData = (
     stats: {
       hosts: {
         type: 'number',
-        label: i18n.translate('xpack.infra.observabilityHomepage.metrics.hostsLabel', {
-          defaultMessage: 'Hosts',
-        }),
         value: results.nodes.length,
       },
       cpu: {
         type: 'percent',
-        label: i18n.translate('xpack.infra.observabilityHomepage.metrics.cpuLabel', {
-          defaultMessage: 'CPU usage',
-        }),
         value: combineNodesBy('cpu', results.nodes, average),
       },
       memory: {
         type: 'percent',
-        label: i18n.translate('xpack.infra.observabilityHomepage.metrics.memoryLabel', {
-          defaultMessage: 'Memory usage',
-        }),
         value: combineNodesBy('memory', results.nodes, average),
       },
       inboundTraffic: {
         type: 'bytesPerSecond',
-        label: inboundLabel,
         value: combineNodesBy('rx', results.nodes, average),
       },
       outboundTraffic: {
         type: 'bytesPerSecond',
-        label: outboundLabel,
         value: combineNodesBy('tx', results.nodes, average),
       },
     },
     series: {
       inboundTraffic: {
-        label: inboundLabel,
         coordinates: combineNodeTimeseriesBy('rx', results.nodes, average),
       },
       outboundTraffic: {
-        label: outboundLabel,
         coordinates: combineNodeTimeseriesBy('tx', results.nodes, average),
       },
     },
