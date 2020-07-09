@@ -298,6 +298,7 @@ export function getCloneFormStateFromJobConfig(
       ? analyticsJobConfig.source.index.join(',')
       : analyticsJobConfig.source.index,
     modelMemoryLimit: analyticsJobConfig.model_memory_limit,
+    maxNumThreads: analyticsJobConfig.max_num_threads,
     includes: analyticsJobConfig.analyzed_fields.includes,
   };
 
