@@ -7,6 +7,7 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { EventActionOptions, SeverityActionOptions } from '.././types';
 import PagerDutyParamsFields from './pagerduty_params';
+import { DocLinksStart } from 'kibana/public';
 
 describe('PagerDutyParamsFields renders', () => {
   test('all params fields is rendered', () => {
@@ -27,6 +28,7 @@ describe('PagerDutyParamsFields renders', () => {
         errors={{ summary: [], timestamp: [] }}
         editAction={() => {}}
         index={0}
+        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
       />
     );
     expect(wrapper.find('[data-test-subj="severitySelect"]').length > 0).toBeTruthy();
