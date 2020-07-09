@@ -29,10 +29,11 @@ interface InventoryMetricThresholdParams {
   alertOnNoData?: boolean;
 }
 
-export const createInventoryMetricThresholdExecutor = (
-  libs: InfraBackendLibs,
-  alertId: string
-) => async ({ services, params }: AlertExecutorOptions) => {
+export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) => async ({
+  services,
+  params,
+  alertId,
+}: AlertExecutorOptions) => {
   const {
     criteria,
     filterQuery,

@@ -17,9 +17,9 @@ import {
 import { AlertStates } from './types';
 import { evaluateAlert } from './lib/evaluate_alert';
 
-export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: string) =>
+export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
   async function (options: AlertExecutorOptions) {
-    const { services, params } = options;
+    const { services, params, alertId } = options;
     const { criteria } = params;
     const { sourceId, alertOnNoData } = params as {
       sourceId?: string;

@@ -27,6 +27,7 @@ describe('The metric threshold alert type', () => {
     const instanceID = '*::test';
     const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
       executor({
+        alertId: 'test',
         services,
         params: {
           sourceId,
@@ -106,6 +107,7 @@ describe('The metric threshold alert type', () => {
   describe('querying with a groupBy parameter', () => {
     const execute = (comparator: Comparator, threshold: number[]) =>
       executor({
+        alertId: 'test',
         services,
         params: {
           groupBy: 'something',
@@ -156,6 +158,7 @@ describe('The metric threshold alert type', () => {
       groupBy: string = ''
     ) =>
       executor({
+        alertId: 'test',
         services,
         params: {
           groupBy,
@@ -213,6 +216,7 @@ describe('The metric threshold alert type', () => {
     const instanceID = '*::test';
     const execute = (comparator: Comparator, threshold: number[]) =>
       executor({
+        alertId: 'test',
         services,
         params: {
           criteria: [
@@ -239,6 +243,7 @@ describe('The metric threshold alert type', () => {
     const instanceID = '*::test';
     const execute = (comparator: Comparator, threshold: number[]) =>
       executor({
+        alertId: 'test',
         services,
         params: {
           criteria: [
@@ -265,6 +270,7 @@ describe('The metric threshold alert type', () => {
     const instanceID = '*::test';
     const execute = (comparator: Comparator, threshold: number[]) =>
       executor({
+        alertId: 'test',
         services,
         params: {
           criteria: [
@@ -291,6 +297,7 @@ describe('The metric threshold alert type', () => {
     const instanceID = '*::test';
     const execute = (alertOnNoData: boolean) =>
       executor({
+        alertId: 'test',
         services,
         params: {
           criteria: [
@@ -320,6 +327,7 @@ describe('The metric threshold alert type', () => {
   //   const instanceID = '*::test';
   //   const execute = (threshold: number[]) =>
   //     executor({
+  //       alertId: 'test',
   //       services,
   //       params: {
   //         criteria: [
@@ -377,9 +385,10 @@ const mockLibs: any = {
   configuration: createMockStaticConfiguration({}),
 };
 
-const executor = createMetricThresholdExecutor(mockLibs, 'test') as (opts: {
+const executor = createMetricThresholdExecutor(mockLibs) as (opts: {
   params: AlertExecutorOptions['params'];
   services: { callCluster: AlertExecutorOptions['params']['callCluster'] };
+  alertId: AlertExecutorOptions['alertId'];
 }) => Promise<void>;
 
 const services: AlertServicesMock = alertsMock.createAlertServices();
