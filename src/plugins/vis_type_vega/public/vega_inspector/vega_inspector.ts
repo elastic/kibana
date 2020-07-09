@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { i18n } from '@kbn/i18n';
 import { VegaAdapter } from './vega_adapter';
 import { VegaDataInspector } from './vega_data_inspector';
 import { Adapters, RequestAdapter, InspectorViewDescription } from '../../../inspector/public';
@@ -25,10 +26,13 @@ export interface VegaInspectorAdapters extends Adapters {
   vega: VegaAdapter;
 }
 
+const vegaDebugLabel = i18n.translate('visTypeVega.inspector.vegaDebugLabel', {
+  defaultMessage: 'Vega Debug',
+});
+
 export const getVegaInspectorView = () =>
   ({
-    title: 'Vega Debug',
-    help: `And additional help text, that will be shown in the inspector help.`,
+    title: vegaDebugLabel,
     shouldShow(adapters) {
       return Boolean(adapters.vega);
     },

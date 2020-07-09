@@ -68,25 +68,21 @@ export class SearchAPI {
         }
 
         return search({ params }, { signal: this.abortSignal }).pipe(
+          tap((data) => this.inspectSearchResult(data, requestResponders[requestId])),
           map((data) => ({
             id: requestId,
             rawResponse: data.rawResponse,
           }))
         );
       })
-    ).pipe(tap((data) => this.inspectSearchResults(data, requestResponders)));
+    );
   }
 
-  private inspectSearchResults(
-    requests: IEsSearchResponse[],
-    requestResponders: Record<string, RequestResponder>
-  ) {
-    requests.forEach((request) => {
-      if (request.id && requestResponders[request.id]) {
-        requestResponders[request.id]
-          .stats(dataPluginSearch.getResponseInspectorStats(request.rawResponse))
-          .ok({ json: request.rawResponse });
-      }
-    });
+  private inspectSearchResult(response: IEsSearchResponse, requestResponder: RequestResponder) {
+    if (requestResponder) {
+      requestResponder
+        .stats(dataPluginSearch.getResponseInspectorStats(response.rawResponse))
+        .ok({ json: response.rawResponse });
+    }
   }
 }

@@ -17,7 +17,6 @@
  * under the License.
  */
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-
 import { EuiDataGrid, EuiDataGridSorting, EuiDataGridProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 

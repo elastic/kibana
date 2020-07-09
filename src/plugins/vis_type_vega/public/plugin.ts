@@ -20,7 +20,7 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../..
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 import { VisualizationsSetup } from '../../visualizations/public';
-import { Setup, Start } from '../../inspector/public';
+import { Setup as InspectorSetup } from '../../inspector/public';
 
 import {
   setNotifications,
@@ -46,7 +46,6 @@ export interface VegaVisualizationDependencies {
   core: CoreSetup;
   plugins: {
     data: DataPublicPluginSetup;
-    inspector: Setup;
   };
   serviceSettings: IServiceSettings;
 }
@@ -55,7 +54,7 @@ export interface VegaVisualizationDependencies {
 export interface VegaPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
-  inspector: Setup;
+  inspector: InspectorSetup;
   data: DataPublicPluginSetup;
   mapsLegacy: any;
 }
@@ -63,7 +62,6 @@ export interface VegaPluginSetupDependencies {
 /** @internal */
 export interface VegaPluginStartDependencies {
   data: DataPublicPluginStart;
-  inspector: Start;
 }
 
 /** @internal */
@@ -91,7 +89,6 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
       core,
       plugins: {
         data,
-        inspector,
       },
       serviceSettings: mapsLegacy.serviceSettings,
     };
@@ -103,7 +100,7 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
     visualizations.createBaseVisualization(createVegaTypeDefinition(visualizationDependencies));
   }
 
-  public start(core: CoreStart, { data, inspector }: VegaPluginStartDependencies) {
+  public start(core: CoreStart, { data }: VegaPluginStartDependencies) {
     setNotifications(core.notifications);
     setSavedObjects(core.savedObjects);
     setData(data);

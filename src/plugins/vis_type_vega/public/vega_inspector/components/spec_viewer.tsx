@@ -47,7 +47,7 @@ export const SpecViewer = ({ vegaAdapter }: SpecViewerProps) => {
   const spec = useMemo<string>(() => vegaAdapter.getSpec(), [vegaAdapter]);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" responsive={true}>
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiSpacer size="s" />
       <EuiFlexItem className="eui-textRight">
         <EuiCopy textToCopy={spec}>
