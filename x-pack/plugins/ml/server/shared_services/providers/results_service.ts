@@ -26,13 +26,14 @@ export function getResultsServiceProvider({
 }: SharedServicesChecks): ResultsServiceProvider {
   return {
     resultsServiceProvider(callAsCurrentUser: LegacyAPICaller, request: KibanaRequest) {
-      let hasMlCapabilities: HasMlCapabilities;
       //  Uptime is using this service in anomaly alert, kibana alerting doesn't provide request object
       // So we are adding a dummy request for now
       // TODO: Remove this once kibana alerting provides request object
-      if (request.params !== 'DummyKibanaRequest') {
-        hasMlCapabilities = getHasMlCapabilities(request);
-      }
+      const hasMlCapabilities =
+        request.params !== 'DummyKibanaRequest'
+          ? getHasMlCapabilities(request)
+          : (caps: string[]) => Promise.resolve();
+
       const { getAnomaliesTableData } = resultsServiceProvider(callAsCurrentUser);
       return {
         async getAnomaliesTableData(...args) {
