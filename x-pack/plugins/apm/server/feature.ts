@@ -30,16 +30,7 @@ export const APM_FEATURE = {
       alerting: {
         all: Object.values(AlertType),
       },
-      ui: [
-        'show',
-        'save',
-        'alerting:show',
-        'actions:show',
-        'alerting:save',
-        'actions:save',
-        'alerting:delete',
-        'actions:delete',
-      ],
+      ui: ['show', 'save', 'alerting:show', 'alerting:save'],
     },
     read: {
       app: ['apm', 'kibana'],
@@ -52,15 +43,7 @@ export const APM_FEATURE = {
       alerting: {
         all: Object.values(AlertType),
       },
-      ui: [
-        'show',
-        'alerting:show',
-        'actions:show',
-        'alerting:save',
-        'actions:save',
-        'alerting:delete',
-        'actions:delete',
-      ],
+      ui: ['show', 'alerting:show', 'alerting:save'],
     },
   },
 };

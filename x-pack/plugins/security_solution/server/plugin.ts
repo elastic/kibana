@@ -176,16 +176,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           alerting: {
             all: [SIGNALS_ID, NOTIFICATIONS_ID],
           },
-          ui: [
-            'show',
-            'crud',
-            'alerting:show',
-            'actions:show',
-            'alerting:save',
-            'actions:save',
-            'alerting:delete',
-            'actions:delete',
-          ],
+          ui: ['show', 'crud', 'alerting:show'],
         },
         read: {
           app: [...securitySubPlugins, 'kibana'],
@@ -205,15 +196,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           alerting: {
             all: [SIGNALS_ID, NOTIFICATIONS_ID],
           },
-          ui: [
-            'show',
-            'alerting:show',
-            'actions:show',
-            'alerting:save',
-            'actions:save',
-            'alerting:delete',
-            'actions:delete',
-          ],
+          ui: ['show', 'alerting:show'],
         },
       },
     });
