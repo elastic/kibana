@@ -7,7 +7,6 @@ import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { CoreSetup, Logger } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { getApmTelemetryMapping } from '../../../common/apm_telemetry';
 import { APMConfig } from '../..';
 import {
   TaskManagerSetupContract,
@@ -17,6 +16,7 @@ import {
   APM_TELEMETRY_SAVED_OBJECT_ID,
   APM_TELEMETRY_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
+import { getApmTelemetryMapping } from '../../../common/apm_telemetry';
 import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import {

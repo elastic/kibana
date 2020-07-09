@@ -33,6 +33,7 @@ import { APMTelemetry } from '../types';
 
 const TIME_RANGES = ['1d', 'all'] as const;
 type TimeRange = typeof TIME_RANGES[number];
+
 const range1d = { range: { '@timestamp': { gte: 'now-1d' } } };
 const timeout = '5m';
 
@@ -112,15 +113,14 @@ export const tasks: TelemetryTask[] = [
 
       type ProcessorEvent = keyof typeof indicesByProcessorEvent;
 
-      const jobs: Array<{
+      interface Job {
         processorEvent: ProcessorEvent;
         timeRange: TimeRange;
-      }> = flatten(
-        (Object.keys(
-          indicesByProcessorEvent
-        ) as ProcessorEvent[]).map((processorEvent) =>
-          TIME_RANGES.map((timeRange) => ({ processorEvent, timeRange }))
-        )
+      }
+
+      const events = Object.keys(indicesByProcessorEvent) as ProcessorEvent[];
+      const jobs: Job[] = events.flatMap((processorEvent) =>
+        TIME_RANGES.map((timeRange) => ({ processorEvent, timeRange }))
       );
 
       const allData = await jobs.reduce((prevJob, current) => {
@@ -136,7 +136,7 @@ export const tasks: TelemetryTask[] = [
                 bool: {
                   filter: [
                     { term: { [PROCESSOR_EVENT]: processorEvent } },
-                    ...(timeRange !== 'all' ? [range1d] : []),
+                    ...(timeRange === '1d' ? [range1d] : []),
                   ],
                 },
               },
