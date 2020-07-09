@@ -28,6 +28,7 @@ export const oneTimelineQuery = gql`
         enabled
         excluded
         kqlQuery
+        type
         queryMatch {
           field
           displayField
