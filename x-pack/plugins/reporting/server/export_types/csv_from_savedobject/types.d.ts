@@ -23,10 +23,6 @@ export interface JobParamsPanelCsv {
   visType?: string;
 }
 
-export interface ScheduledTaskParamsPanelCsv extends ScheduledTaskParams<JobParamsPanelCsv> {
-  jobParams: JobParamsPanelCsv;
-}
-
 export interface SavedObjectServiceError {
   statusCode: number;
   error?: string;

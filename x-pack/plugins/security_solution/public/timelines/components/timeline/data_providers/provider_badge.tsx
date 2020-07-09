@@ -10,14 +10,20 @@ import { isString } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { TimelineType } from '../../../../../common/types/timeline';
 import { getEmptyString } from '../../../../common/components/empty_value';
 import { ProviderContainer } from '../../../../common/components/drag_and_drop/provider_container';
 
-import { EXISTS_OPERATOR, QueryOperator } from './data_provider';
+import { DataProviderType, EXISTS_OPERATOR, QueryOperator } from './data_provider';
 
 import * as i18n from './translations';
 
-const ProviderBadgeStyled = (styled(EuiBadge)`
+type ProviderBadgeStyledType = typeof EuiBadge & {
+  // https://styled-components.com/docs/api#transient-props
+  $timelineType: TimelineType;
+};
+
+const ProviderBadgeStyled = styled(EuiBadge)<ProviderBadgeStyledType>`
   .euiToolTipAnchor {
     &::after {
       font-style: normal;
@@ -25,17 +31,29 @@ const ProviderBadgeStyled = (styled(EuiBadge)`
       padding: 0px 3px;
     }
   }
+
   &.globalFilterItem {
     white-space: nowrap;
+    min-width: ${({ $timelineType }) =>
+      $timelineType === TimelineType.template ? '140px' : 'none'};
+    display: flex;
+
     &.globalFilterItem-isDisabled {
       text-decoration: line-through;
       font-weight: 400;
       font-style: italic;
     }
+
+    &.globalFilterItem-isError {
+      box-shadow: 0 1px 1px -1px rgba(152, 162, 179, 0.2), 0 3px 2px -2px rgba(152, 162, 179, 0.2),
+        inset 0 0 0 1px #bd271e;
+    }
   }
+
   .euiBadge.euiBadge--iconLeft &.euiBadge.euiBadge--iconRight .euiBadge__content {
     flex-direction: row;
   }
+
   .euiBadge.euiBadge--iconLeft
     &.euiBadge.euiBadge--iconRight
     .euiBadge__content
@@ -43,9 +61,45 @@ const ProviderBadgeStyled = (styled(EuiBadge)`
     margin-right: 0;
     margin-left: 4px;
   }
-` as unknown) as typeof EuiBadge;
+`;
 
 ProviderBadgeStyled.displayName = 'ProviderBadgeStyled';
+
+const ProviderFieldBadge = styled.div`
+  display: block;
+  color: #fff;
+  padding: 6px 8px;
+  font-size: 0.6em;
+`;
+
+const StyledTemplateFieldBadge = styled(ProviderFieldBadge)`
+  background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
+  text-transform: uppercase;
+`;
+
+interface TemplateFieldBadgeProps {
+  type: DataProviderType;
+  toggleType: () => void;
+}
+
+const ConvertFieldBadge = styled(ProviderFieldBadge)`
+  background: ${({ theme }) => theme.eui.euiColorDarkShade};
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const TemplateFieldBadge: React.FC<TemplateFieldBadgeProps> = ({ type, toggleType }) => {
+  if (type === DataProviderType.default) {
+    return (
+      <ConvertFieldBadge onClick={toggleType}>{i18n.CONVERT_TO_TEMPLATE_FIELD}</ConvertFieldBadge>
+    );
+  }
+
+  return <StyledTemplateFieldBadge>{i18n.TEMPLATE_FIELD_LABEL}</StyledTemplateFieldBadge>;
+};
 
 interface ProviderBadgeProps {
   deleteProvider: () => void;
@@ -55,8 +109,11 @@ interface ProviderBadgeProps {
   isExcluded: boolean;
   providerId: string;
   togglePopover: () => void;
+  toggleType: () => void;
   val: string | number;
   operator: QueryOperator;
+  type: DataProviderType;
+  timelineType: TimelineType;
 }
 
 const closeButtonProps = {
@@ -66,7 +123,19 @@ const closeButtonProps = {
 };
 
 export const ProviderBadge = React.memo<ProviderBadgeProps>(
-  ({ deleteProvider, field, isEnabled, isExcluded, operator, providerId, togglePopover, val }) => {
+  ({
+    deleteProvider,
+    field,
+    isEnabled,
+    isExcluded,
+    operator,
+    providerId,
+    togglePopover,
+    toggleType,
+    val,
+    type,
+    timelineType,
+  }) => {
     const deleteFilter: React.MouseEventHandler<HTMLButtonElement> = useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
         // Make sure it doesn't also trigger the onclick for the whole badge
@@ -93,34 +162,46 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
 
     const prefix = useMemo(() => (isExcluded ? <span>{i18n.NOT} </span> : null), [isExcluded]);
 
-    return (
-      <ProviderContainer>
-        <ProviderBadgeStyled
-          id={`${providerId}-${field}-${val}`}
-          className={classes}
-          color="hollow"
-          title=""
-          iconOnClick={deleteFilter}
-          iconOnClickAriaLabel={i18n.REMOVE_DATA_PROVIDER}
-          iconType="cross"
-          iconSide="right"
-          onClick={togglePopover}
-          onClickAriaLabel={`${i18n.SHOW_OPTIONS_DATA_PROVIDER} ${formattedValue}`}
-          closeButtonProps={closeButtonProps}
-          data-test-subj="providerBadge"
-        >
+    const content = useMemo(
+      () => (
+        <>
           {prefix}
           {operator !== EXISTS_OPERATOR ? (
-            <>
-              <span className="field-value">{`${field}: `}</span>
-              <span className="field-value">{`"${formattedValue}"`}</span>
-            </>
+            <span className="field-value">{`${field}: "${formattedValue}"`}</span>
           ) : (
             <span className="field-value">
               {field} {i18n.EXISTS_LABEL}
             </span>
           )}
-        </ProviderBadgeStyled>
+        </>
+      ),
+      [field, formattedValue, operator, prefix]
+    );
+
+    return (
+      <ProviderContainer id={`${providerId}-${field}-${val}`}>
+        <>
+          <ProviderBadgeStyled
+            className={classes}
+            color="hollow"
+            title=""
+            iconOnClick={deleteFilter}
+            iconOnClickAriaLabel={i18n.REMOVE_DATA_PROVIDER}
+            iconType="cross"
+            iconSide="right"
+            onClick={togglePopover}
+            onClickAriaLabel={`${i18n.SHOW_OPTIONS_DATA_PROVIDER} ${formattedValue}`}
+            closeButtonProps={closeButtonProps}
+            data-test-subj="providerBadge"
+            $timelineType={timelineType}
+          >
+            {content}
+          </ProviderBadgeStyled>
+
+          {timelineType === TimelineType.template && (
+            <TemplateFieldBadge toggleType={toggleType} type={type} />
+          )}
+        </>
       </ProviderContainer>
     );
   }
