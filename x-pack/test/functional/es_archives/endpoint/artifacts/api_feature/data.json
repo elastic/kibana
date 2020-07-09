@@ -1,23 +1,23 @@
 {
   "type": "doc",
   "value": {
-    "id": "endpoint:user-artifact:endpoint-exceptionlist-linux-1.0.0-a4e4586e895fcb46dd25a25358b446f9a425279452afa3ef9a98bca39c39122d",
+    "id": "endpoint:user-artifact:v2:endpoint-exceptionlist-linux-v1-d2a9c760005b08d43394e59a8701ae75c80881934ccf15a006944452b80f7f9f",
     "index": ".kibana",
     "source": {
       "references": [
       ],
-      "endpoint:user-artifact": {
-        "body": "eyJleGNlcHRpb25zX2xpc3QiOltdfQ==",
+      "endpoint:user-artifact:v2": {
+        "body": "eJylkM8KwjAMxl9Fci59gN29iicvMqR02QjUbiSpKGPvbiw6ETwpuX1/fh9kBszKhALNcQa9TQgNCJ2nhOA+vJ4wdWaGqJSHPY8RRXxPCb3QkJEtP07IQUe2GOWYSoedqU8qXq16ikGqeAmpPNRtCqIU3WbnDx4WN38d/WvhQqmCXzDlIlojP9CsjLC0bqWtHwhaGN/1jHVkae3u+6N6Sg==",
         "created": 1593016187465,
-        "compressionAlgorithm": "none",
+        "compressionAlgorithm": "zlib",
         "encryptionAlgorithm": "none",
-        "identifier": "endpoint-exceptionlist-linux-1.0.0",
-        "compressedSha256": "a4e4586e895fcb46dd25a25358b446f9a425279452afa3ef9a98bca39c39122d",
-        "compressedSize": 22,
-        "decompressedSha256": "a4e4586e895fcb46dd25a25358b446f9a425279452afa3ef9a98bca39c39122d",
-        "decompressedSize": 22
+        "identifier": "endpoint-exceptionlist-linux-v1",
+        "encodedSha256": "5caaeabcb7864d47157fc7c28d5a7398b4f6bbaaa565d789c02ee809253b7613",
+        "encodedSize": 160,
+        "decodedSha256": "d2a9c760005b08d43394e59a8701ae75c80881934ccf15a006944452b80f7f9f",
+        "decodedSize": 358
       },
-      "type": "endpoint:user-artifact",
+      "type": "endpoint:user-artifact:v2",
       "updated_at": "2020-06-24T16:29:47.584Z"
     }
   }
@@ -26,20 +26,20 @@
 {
   "type": "doc",
   "value": {
-    "id": "endpoint:user-artifact-manifest:endpoint-manifest-1.0.0",
+    "id": "endpoint:user-artifact-manifest:v2:endpoint-manifest-v1",
     "index": ".kibana",
     "source": {
       "references": [
       ],
-      "endpoint:user-artifact-manifest": {
+      "endpoint:user-artifact-manifest:v2": {
         "created": 1593183699663,
         "ids": [
-          "endpoint-exceptionlist-linux-1.0.0-a4e4586e895fcb46dd25a25358b446f9a425279452afa3ef9a98bca39c39122d",
-          "endpoint-exceptionlist-macos-1.0.0-a4e4586e895fcb46dd25a25358b446f9a425279452afa3ef9a98bca39c39122d",
-          "endpoint-exceptionlist-windows-1.0.0-a4e4586e895fcb46dd25a25358b446f9a425279452afa3ef9a98bca39c39122d"
+          "endpoint-exceptionlist-linux-v1-d2a9c760005b08d43394e59a8701ae75c80881934ccf15a006944452b80f7f9f",
+          "endpoint-exceptionlist-macos-v1-d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
+          "endpoint-exceptionlist-windows-v1-d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658"
         ]
       },
-      "type": "endpoint:user-artifact-manifest",
+      "type": "endpoint:user-artifact-manifest:v2",
       "updated_at": "2020-06-26T15:01:39.704Z"
     }
   }

@@ -17,6 +17,7 @@ import {
   GetCertsParams,
   GetPingsParams,
   CertResult,
+  MonitorSummariesResult,
 } from '../../../common/runtime_types';
 import { MonitorDurationResult } from '../../../common/types';
 
@@ -31,7 +32,6 @@ import {
   GetMonitorStatusParams,
   GetMonitorStatusResult,
 } from '.';
-import { GetMonitorStatesResult } from './get_monitor_states';
 import { GetSnapshotCountParams } from './get_snapshot_counts';
 import { IIndexPattern } from '../../../../../../src/plugins/data/server';
 
@@ -45,7 +45,7 @@ export interface UptimeRequests {
   getMonitorDurationChart: ESQ<GetMonitorChartsParams, MonitorDurationResult>;
   getMonitorDetails: ESQ<GetMonitorDetailsParams, MonitorDetails>;
   getMonitorLocations: ESQ<GetMonitorLocationsParams, MonitorLocations>;
-  getMonitorStates: ESQ<GetMonitorStatesParams, GetMonitorStatesResult>;
+  getMonitorStates: ESQ<GetMonitorStatesParams, MonitorSummariesResult>;
   getMonitorStatus: ESQ<GetMonitorStatusParams, GetMonitorStatusResult[]>;
   getPings: ESQ<GetPingsParams, PingsResponse>;
   getPingHistogram: ESQ<GetPingHistogramParams, HistogramResult>;
