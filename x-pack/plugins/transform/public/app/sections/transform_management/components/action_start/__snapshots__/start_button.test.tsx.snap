@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Transform: Transform List Actions <StartAction /> Minimal initialization 1`] = `
+<EuiToolTip
+  content="You do not have permission to start or stop transforms. Please contact your administrator."
+  delay="regular"
+  position="top"
+>
+  <EuiLink
+    color="subdued"
+    data-test-subj="transformActionStart"
+  >
+    <EuiIcon
+      type="play"
+    />
+     
+    Start
+  </EuiLink>
+</EuiToolTip>
+`;
