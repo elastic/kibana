@@ -17,73 +17,47 @@
  * under the License.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiIcon } from '@elastic/eui';
-
 import { ManagementSectionId } from '../types';
-
-interface ManagementSectionTitleProps {
-  text: string;
-  tip: string;
-}
-
-const ManagementSectionTitle = ({ text, tip }: ManagementSectionTitleProps) => (
-  <EuiToolTip content={tip} position="right">
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false}>{text}</EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="questionInCircle" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiToolTip>
-);
 
 export const IngestSection = {
   id: ManagementSectionId.Ingest,
-  title: (
-    <ManagementSectionTitle
-      text="Ingest"
-      tip="Manage how to transform data and load it into the cluster."
-    />
-  ),
+  title: 'Ingest',
+  tip: 'Manage how to transform data and load it into the cluster.',
+  order: 0,
 };
 
 export const DataSection = {
   id: ManagementSectionId.Data,
-  title: <ManagementSectionTitle text="Data" tip="Manage your cluster data and backups" />,
+  title: 'Data',
+  tip: 'Manage your cluster data and backups',
+  order: 1,
 };
 
 export const InsightsAndAlertingSection = {
   id: ManagementSectionId.InsightsAndAlerting,
-  title: (
-    <ManagementSectionTitle
-      text="Alerts and Insights"
-      tip="Manage how to detect changes in your data"
-    />
-  ),
-};
-
-export const SecuritySection = {
-  id: ManagementSectionId.Security,
-  title: <ManagementSectionTitle text="Security" tip="Control access to features and data" />,
+  title: 'Alerts and Insights',
+  tip: 'Manage how to detect changes in your data',
+  order: 2,
 };
 
 export const KibanaSection = {
   id: ManagementSectionId.Kibana,
-  title: <ManagementSectionTitle text="Kibana" tip="Customize Kibana and manage saved objects" />,
+  title: 'Kibana',
+  tip: 'Customize Kibana and manage saved objects',
+  order: 4,
 };
 
 export const StackSection = {
   id: ManagementSectionId.Stack,
-  title: <ManagementSectionTitle text="Stack" tip="Manage your license and upgrade the Stack" />,
+  title: 'Stack',
+  tip: 'Manage your license and upgrade the Stack',
+  order: 4,
 };
 
 export const managementSections = [
   IngestSection,
   DataSection,
   InsightsAndAlertingSection,
-  SecuritySection,
   KibanaSection,
   StackSection,
 ];

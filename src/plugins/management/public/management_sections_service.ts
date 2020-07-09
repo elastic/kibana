@@ -22,7 +22,6 @@ import {
   IngestSection,
   DataSection,
   InsightsAndAlertingSection,
-  SecuritySection,
   KibanaSection,
   StackSection,
 } from './components/management_sections';
@@ -30,7 +29,6 @@ import {
 import {
   ManagementSectionId,
   SectionsServiceSetup,
-  // SectionsServiceStart,
   SectionsServiceStartDeps,
   DefinedSections,
   ManagementSectionsStartPrivate,
@@ -50,44 +48,14 @@ export class ManagementSectionsService {
     // Note on adding sections - sections can be defined in a plugin and exported as a contract
     //     It is not necessary to define all sections here.
     this.definedSections = {
-      ingest: this.registerSection({
-        id: IngestSection.id,
-        title: IngestSection.title,
-        order: 0,
-      }),
-      data: this.registerSection({
-        id: DataSection.id,
-        title: DataSection.title,
-        order: 1,
-      }),
-      insightsAndAlerting: this.registerSection({
-        id: InsightsAndAlertingSection.id,
-        title: InsightsAndAlertingSection.title,
-        order: 2,
-      }),
-      security: this.registerSection({
-        id: SecuritySection.id,
-        title: SecuritySection.title,
-        order: 3,
-      }),
-      kibana: this.registerSection({
-        id: KibanaSection.id,
-        title: KibanaSection.title,
-        order: 4,
-      }),
-      stack: this.registerSection({
-        id: StackSection.id,
-        title: StackSection.title,
-        order: 5,
-      }),
+      ingest: this.registerSection(IngestSection),
+      data: this.registerSection(DataSection),
+      insightsAndAlerting: this.registerSection(InsightsAndAlertingSection),
+      kibana: this.registerSection(KibanaSection),
+      stack: this.registerSection(StackSection),
     };
   }
   private sections: Map<ManagementSectionId | string, ManagementSection> = new Map();
-
-  /*
-  private getSection = (sectionId: ManagementSectionId | string) =>
-    this.sections.get(sectionId) as ManagementSection;
-    */
 
   private getAllSections = () => [...this.sections.values()];
 
@@ -105,7 +73,6 @@ export class ManagementSectionsService {
   setup(): SectionsServiceSetup {
     return {
       register: this.registerSection,
-      // getSection: this.getSection,
       section: {
         ...this.definedSections,
       },
@@ -124,21 +91,10 @@ export class ManagementSectionsService {
       }
     });
 
-    // const [getSections, setSections] = createGetterSetter('Sections');
     setSectionsServiceStartPrivate({
       getSectionsEnabled: () => this.getAllSections().filter((section) => section.enabled),
     });
 
-    // wish to remove these
-    return {
-      /*
-      getSection: this.getSection,
-      getAllSections: this.getAllSections,
-      getSectionsEnabled: () => this.getAllSections().filter((section) => section.enabled),
-      section: {
-        ...this.definedSections,
-      },
-      */
-    };
+    return {};
   }
 }

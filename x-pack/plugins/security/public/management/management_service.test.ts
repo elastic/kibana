@@ -10,6 +10,7 @@ import {
   ManagementSetup,
   DefinedSections,
 } from '../../../../../src/plugins/management/public';
+import { createManagementSectionMock } from '../../../../../src/plugins/management/public/mocks';
 import { SecurityLicenseFeatures } from '../../common/licensing/license_features';
 import { ManagementService } from './management_service';
 import { usersManagementApp } from './users';
@@ -21,7 +22,7 @@ import { rolesManagementApp } from './roles';
 import { apiKeysManagementApp } from './api_keys';
 import { roleMappingsManagementApp } from './role_mappings';
 
-const mockSection = { registerApp: jest.fn() };
+const mockSection = createManagementSectionMock();
 
 describe('ManagementService', () => {
   describe('setup()', () => {
@@ -32,9 +33,8 @@ describe('ManagementService', () => {
 
       const managementSetup: ManagementSetup = {
         sections: {
-          register: jest.fn(),
+          register: jest.fn(() => mockSection),
           section: {} as DefinedSections,
-          // getSection: jest.fn().mockReturnValue(mockSection),
         },
       };
 
@@ -89,9 +89,8 @@ describe('ManagementService', () => {
 
       const managementSetup: ManagementSetup = {
         sections: {
-          register: jest.fn(),
+          register: jest.fn(() => mockSection),
           section: {} as DefinedSections,
-          // getSection: jest.fn().mockReturnValue(mockSection),
         },
       };
 
@@ -118,6 +117,7 @@ describe('ManagementService', () => {
           }),
         } as unknown) as jest.Mocked<ManagementApp>;
       };
+      mockSection.getApp = jest.fn().mockImplementation((id) => mockApps.get(id));
       const mockApps = new Map<string, jest.Mocked<ManagementApp>>([
         [usersManagementApp.id, getMockedApp()],
         [rolesManagementApp.id, getMockedApp()],

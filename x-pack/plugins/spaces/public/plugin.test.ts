@@ -44,7 +44,6 @@ describe('Spaces plugin', () => {
       const home = homePluginMock.createSetupContract();
 
       const management = managementPluginMock.createSetupContract();
-      // management.sections.getSection.mockReturnValue(kibanaSection);
 
       const plugin = new SpacesPlugin();
       plugin.setup(coreSetup, {

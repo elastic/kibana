@@ -35,7 +35,12 @@ export class ManagementService {
   setup({ getStartServices, management, authc, license, fatalErrors }: SetupParams) {
     this.license = license;
 
-    this.securitySection = management.sections.section.security;
+    this.securitySection = management.sections.register({
+      id: 'security',
+      title: 'Security',
+      tip: 'Control access to features and data',
+      order: 3,
+    });
 
     this.securitySection.registerApp(usersManagementApp.create({ authc, getStartServices }));
     this.securitySection.registerApp(

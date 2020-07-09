@@ -87,16 +87,6 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
 
   public start(core: CoreStart) {
     this.managementSections.start({ capabilities: core.application.capabilities });
-    /*
-    const service = this.managementSections.start({ capabilities: core.application.capabilities });
-
-    return {
-      sections: {
-        section: service.section,
-        getSectionsEnabled: service.getSectionsEnabled,
-      },
-    };
-    */
     return {};
   }
 }

@@ -26,13 +26,8 @@ describe('ManagementService', () => {
         spacesManager: spacesManagerMock.create(),
       };
 
-      // deps.management.sections.getSection.mockReturnValue(mockKibanaSection);
-
       const service = new ManagementService();
       service.setup(deps);
-
-      // expect(deps.management.sections.getSection).toHaveBeenCalledTimes(1);
-      // expect(deps.management.sections.getSection).toHaveBeenCalledWith('kibana');
 
       expect(mockKibanaSection.registerApp).toHaveBeenCalledTimes(1);
       expect(mockKibanaSection.registerApp).toHaveBeenCalledWith({
@@ -71,13 +66,6 @@ describe('ManagementService', () => {
         >['getStartServices'],
         spacesManager: spacesManagerMock.create(),
       };
-
-      /*
-      deps.management.sections.getSection.mockImplementation((id) => {
-        if (id === 'kibana') return mockKibanaSection;
-        throw new Error(`unexpected getSection call: ${id}`);
-      });
-      */
 
       const service = new ManagementService();
       service.setup(deps);
