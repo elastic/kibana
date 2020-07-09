@@ -203,7 +203,7 @@ describe('monitor status alert type', () => {
         "alertParamsExpression": [Function],
         "defaultActionMessage": "{{context.message}}
       Last triggered at: {{state.lastTriggeredAt}}
-      {{context.downMonitorsWithGeo}}",
+      ",
         "iconClass": "uptimeApp",
         "id": "xpack.uptime.alerts.monitorStatus",
         "name": <Provider
