@@ -20,20 +20,24 @@
 import _ from 'lodash';
 import d3 from 'd3';
 import $ from 'jquery';
-import expect from '@kbn/expect';
+import {
+  setHTMLElementClientSizes,
+  setSVGElementGetBBox,
+  setSVGElementGetComputedTextLength,
+} from '../../../../../../test_utils/public';
 
 // Data
-import series from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series';
-import seriesPosNeg from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series_pos_neg';
-import seriesNeg from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series_neg';
-import termsColumns from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/terms/_columns';
-import histogramRows from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/histogram/_rows';
-import stackedSeries from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_stacked_series';
+import series from '../../../fixtures/mock_data/date_histogram/_series';
+import seriesPosNeg from '../../../fixtures/mock_data/date_histogram/_series_pos_neg';
+import seriesNeg from '../../../fixtures/mock_data/date_histogram/_series_neg';
+import termsColumns from '../../../fixtures/mock_data/terms/_columns';
+import histogramRows from '../../../fixtures/mock_data/histogram/_rows';
+import stackedSeries from '../../../fixtures/mock_data/date_histogram/_stacked_series';
 
-import { seriesMonthlyInterval } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series_monthly_interval';
-import { rowsSeriesWithHoles } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_rows_series_with_holes';
-import rowsWithZeros from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_rows';
-import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
+import { seriesMonthlyInterval } from '../../../fixtures/mock_data/date_histogram/_series_monthly_interval';
+import { rowsSeriesWithHoles } from '../../../fixtures/mock_data/date_histogram/_rows_series_with_holes';
+import rowsWithZeros from '../../../fixtures/mock_data/date_histogram/_rows';
+import { getMockUiState } from '../../../fixtures/mocks';
 import { getVis } from '../_vis_fixture';
 
 // tuple, with the format [description, mode, data]
@@ -45,6 +49,10 @@ const dataTypesArray = [
   ['histogram rows', 'percentage', histogramRows],
   ['stackedSeries', 'stacked', stackedSeries],
 ];
+
+let mockedHTMLElementClientSizes;
+let mockedSVGElementGetBBox;
+let mockedSVGElementGetComputedTextLength;
 
 dataTypesArray.forEach(function (dataType) {
   const name = dataType[0];
@@ -66,6 +74,12 @@ dataTypesArray.forEach(function (dataType) {
       },
     };
 
+    beforeAll(() => {
+      mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
+      mockedSVGElementGetBBox = setSVGElementGetBBox(100);
+      mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
+    });
+
     beforeEach(() => {
       vis = getVis(visLibParams);
       mockUiState = getMockUiState();
@@ -75,6 +89,12 @@ dataTypesArray.forEach(function (dataType) {
 
     afterEach(function () {
       vis.destroy();
+    });
+
+    afterAll(() => {
+      mockedHTMLElementClientSizes.mockRestore();
+      mockedSVGElementGetBBox.mockRestore();
+      mockedSVGElementGetComputedTextLength.mockRestore();
     });
 
     describe('stackData method', function () {
@@ -93,21 +113,21 @@ dataTypesArray.forEach(function (dataType) {
         });
       });
 
-      it('should stack values when mode is stacked', function () {
+      test('should stack values when mode is stacked', function () {
         if (mode === 'stacked') {
-          expect(isStacked).to.be(true);
+          expect(isStacked).toBe(true);
         }
       });
 
-      it('should stack values when mode is percentage', function () {
+      test('should stack values when mode is percentage', function () {
         if (mode === 'percentage') {
-          expect(isStacked).to.be(true);
+          expect(isStacked).toBe(true);
         }
       });
     });
 
     describe('addBars method', function () {
-      it('should append rects', function () {
+      test('should append rects', function () {
         let numOfSeries;
         let numOfValues;
         let product;
@@ -116,7 +136,7 @@ dataTypesArray.forEach(function (dataType) {
           numOfSeries = chart.chartData.series.length;
           numOfValues = chart.chartData.series[0].values.length;
           product = numOfSeries * numOfValues;
-          expect($(chart.chartEl).find('.series rect')).to.have.length(product);
+          expect($(chart.chartEl).find('.series rect')).toHaveLength(product);
         });
       });
     });
@@ -138,53 +158,53 @@ dataTypesArray.forEach(function (dataType) {
         };
       }
 
-      it('should attach the brush if data is a set is ordered', function () {
+      test('should attach the brush if data is a set is ordered', function () {
         vis.handler.charts.forEach(function (chart) {
           const has = checkChart(chart);
           const ordered = vis.handler.data.get('ordered');
           const allowBrushing = Boolean(ordered);
-          expect(has.brush).to.be(allowBrushing);
+          expect(has.brush).toBe(allowBrushing);
         });
       });
 
-      it('should attach a click event', function () {
+      test('should attach a click event', function () {
         vis.handler.charts.forEach(function (chart) {
           const has = checkChart(chart);
-          expect(has.click).to.be(true);
+          expect(has.click).toBe(true);
         });
       });
 
-      it('should attach a hover event', function () {
+      test('should attach a hover event', function () {
         vis.handler.charts.forEach(function (chart) {
           const has = checkChart(chart);
-          expect(has.mouseOver).to.be(true);
+          expect(has.mouseOver).toBe(true);
         });
       });
     });
 
     describe('draw method', function () {
-      it('should return a function', function () {
+      test('should return a function', function () {
         vis.handler.charts.forEach(function (chart) {
-          expect(_.isFunction(chart.draw())).to.be(true);
+          expect(_.isFunction(chart.draw())).toBe(true);
         });
       });
 
-      it('should return a yMin and yMax', function () {
+      test('should return a yMin and yMax', function () {
         vis.handler.charts.forEach(function (chart) {
           const yAxis = chart.handler.valueAxes[0];
           const domain = yAxis.getScale().domain();
 
-          expect(domain[0]).to.not.be(undefined);
-          expect(domain[1]).to.not.be(undefined);
+          expect(domain[0]).not.toBe(undefined);
+          expect(domain[1]).not.toBe(undefined);
         });
       });
 
-      it('should render a zero axis line', function () {
+      test('should render a zero axis line', function () {
         vis.handler.charts.forEach(function (chart) {
           const yAxis = chart.handler.valueAxes[0];
 
           if (yAxis.yMin < 0 && yAxis.yMax > 0) {
-            expect($(chart.chartEl).find('line.zero-line').length).to.be(1);
+            expect($(chart.chartEl).find('line.zero-line').length).toBe(1);
           }
         });
       });
@@ -196,14 +216,14 @@ dataTypesArray.forEach(function (dataType) {
         vis.render(data, mockUiState);
       });
 
-      it('should return yAxis extents equal to data extents', function () {
+      test('should return yAxis extents equal to data extents', function () {
         vis.handler.charts.forEach(function (chart) {
           const yAxis = chart.handler.valueAxes[0];
           const min = vis.handler.valueAxes[0].axisScale.getYMin();
           const max = vis.handler.valueAxes[0].axisScale.getYMax();
           const domain = yAxis.getScale().domain();
-          expect(domain[0]).to.equal(min);
-          expect(domain[1]).to.equal(max);
+          expect(domain[0]).toEqual(min);
+          expect(domain[1]).toEqual(max);
         });
       });
     });
@@ -215,21 +235,21 @@ dataTypesArray.forEach(function (dataType) {
           vis.render(data, mockUiState);
         });
 
-        it('should return yAxis extents equal to data extents with boundsMargin', function () {
+        test('should return yAxis extents equal to data extents with boundsMargin', function () {
           vis.handler.charts.forEach(function (chart) {
             const yAxis = chart.handler.valueAxes[0];
             const min = vis.handler.valueAxes[0].axisScale.getYMin();
             const max = vis.handler.valueAxes[0].axisScale.getYMax();
             const domain = yAxis.getScale().domain();
             if (min < 0 && max < 0) {
-              expect(domain[0]).to.equal(min);
-              expect(domain[1] - boundsMarginValue).to.equal(max);
+              expect(domain[0]).toEqual(min);
+              expect(domain[1] - boundsMarginValue).toEqual(max);
             } else if (min > 0 && max > 0) {
-              expect(domain[0] + boundsMarginValue).to.equal(min);
-              expect(domain[1]).to.equal(max);
+              expect(domain[0] + boundsMarginValue).toEqual(min);
+              expect(domain[1]).toEqual(max);
             } else {
-              expect(domain[0]).to.equal(min);
-              expect(domain[1]).to.equal(max);
+              expect(domain[0]).toEqual(min);
+              expect(domain[1]).toEqual(max);
             }
           });
         });
@@ -249,6 +269,12 @@ describe('stackData method - data set with zeros in percentage mode', function (
     zeroFill: true,
   };
 
+  beforeAll(() => {
+    mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
+    mockedSVGElementGetBBox = setSVGElementGetBBox(100);
+    mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
+  });
+
   beforeEach(() => {
     vis = getVis(visLibParams);
     mockUiState = getMockUiState();
@@ -259,29 +285,35 @@ describe('stackData method - data set with zeros in percentage mode', function (
     vis.destroy();
   });
 
-  it('should not mutate the injected zeros', function () {
+  afterAll(() => {
+    mockedHTMLElementClientSizes.mockRestore();
+    mockedSVGElementGetBBox.mockRestore();
+    mockedSVGElementGetComputedTextLength.mockRestore();
+  });
+
+  test('should not mutate the injected zeros', function () {
     vis.render(seriesMonthlyInterval, mockUiState);
 
-    expect(vis.handler.charts).to.have.length(1);
+    expect(vis.handler.charts).toHaveLength(1);
     const chart = vis.handler.charts[0];
-    expect(chart.chartData.series).to.have.length(1);
+    expect(chart.chartData.series).toHaveLength(1);
     const series = chart.chartData.series[0].values;
     // with the interval set in seriesMonthlyInterval data, the point at x=1454309600000 does not exist
     const point = _.find(series, ['x', 1454309600000]);
-    expect(point).to.not.be(undefined);
-    expect(point.y).to.be(0);
+    expect(point).not.toBe(undefined);
+    expect(point.y).toBe(0);
   });
 
-  it('should not mutate zeros that exist in the data', function () {
+  test('should not mutate zeros that exist in the data', function () {
     vis.render(rowsWithZeros, mockUiState);
 
-    expect(vis.handler.charts).to.have.length(2);
+    expect(vis.handler.charts).toHaveLength(2);
     const chart = vis.handler.charts[0];
-    expect(chart.chartData.series).to.have.length(5);
+    expect(chart.chartData.series).toHaveLength(5);
     const series = chart.chartData.series[0].values;
     const point = _.find(series, ['x', 1415826240000]);
-    expect(point).to.not.be(undefined);
-    expect(point.y).to.be(0);
+    expect(point).not.toBe(undefined);
+    expect(point.y).toBe(0);
   });
 });
 
@@ -296,6 +328,12 @@ describe('datumWidth - split chart data set with holes', function () {
     zeroFill: true,
   };
 
+  beforeAll(() => {
+    mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
+    mockedSVGElementGetBBox = setSVGElementGetBBox(100);
+    mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
+  });
+
   beforeEach(() => {
     vis = getVis(visLibParams);
     mockUiState = getMockUiState();
@@ -307,14 +345,20 @@ describe('datumWidth - split chart data set with holes', function () {
     vis.destroy();
   });
 
-  it('should not have bar widths that span multiple time bins', function () {
-    expect(vis.handler.charts.length).to.equal(1);
+  afterAll(() => {
+    mockedHTMLElementClientSizes.mockRestore();
+    mockedSVGElementGetBBox.mockRestore();
+    mockedSVGElementGetComputedTextLength.mockRestore();
+  });
+
+  test('should not have bar widths that span multiple time bins', function () {
+    expect(vis.handler.charts.length).toEqual(1);
     const chart = vis.handler.charts[0];
     const rects = $(chart.chartEl).find('.series rect');
     const MAX_WIDTH_IN_PIXELS = 27;
     rects.each(function () {
-      const width = $(this).attr('width');
-      expect(width).to.be.lessThan(MAX_WIDTH_IN_PIXELS);
+      const width = parseInt($(this).attr('width'), 10);
+      expect(width).toBeLessThan(MAX_WIDTH_IN_PIXELS);
     });
   });
 });
@@ -330,6 +374,15 @@ describe('datumWidth - monthly interval', function () {
     zeroFill: true,
   };
 
+  let mockWidth;
+
+  beforeAll(() => {
+    mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
+    mockedSVGElementGetBBox = setSVGElementGetBBox(100);
+    mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
+    mockWidth = jest.spyOn($.prototype, 'width').mockReturnValue(900);
+  });
+
   beforeEach(() => {
     vis = getVis(visLibParams);
     mockUiState = getMockUiState();
@@ -341,12 +394,19 @@ describe('datumWidth - monthly interval', function () {
     vis.destroy();
   });
 
-  it('should vary bar width when date histogram intervals are not equal', function () {
-    expect(vis.handler.charts.length).to.equal(1);
+  afterAll(() => {
+    mockedHTMLElementClientSizes.mockRestore();
+    mockedSVGElementGetBBox.mockRestore();
+    mockedSVGElementGetComputedTextLength.mockRestore();
+    mockWidth.mockRestore();
+  });
+
+  test('should vary bar width when date histogram intervals are not equal', function () {
+    expect(vis.handler.charts.length).toEqual(1);
     const chart = vis.handler.charts[0];
     const rects = $(chart.chartEl).find('.series rect');
-    const januaryBarWidth = $(rects.get(0)).attr('width');
-    const februaryBarWidth = $(rects.get(1)).attr('width');
-    expect(februaryBarWidth).to.be.lessThan(januaryBarWidth);
+    const januaryBarWidth = parseInt($(rects.get(0)).attr('width'), 10);
+    const februaryBarWidth = parseInt($(rects.get(1)).attr('width'), 10);
+    expect(februaryBarWidth).toBeLessThan(januaryBarWidth);
   });
 });
