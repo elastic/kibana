@@ -11,13 +11,17 @@ import { mount } from 'enzyme';
 
 import { EuiSelect } from '@elastic/eui';
 
+import { UrlStateProvider } from '../../../util/url_state';
+
 import { SelectInterval } from './select_interval';
 
 describe('SelectInterval', () => {
   test('creates correct initial selected value', () => {
     const wrapper = mount(
       <MemoryRouter>
-        <SelectInterval />
+        <UrlStateProvider>
+          <SelectInterval />
+        </UrlStateProvider>
       </MemoryRouter>
     );
     const select = wrapper.find(EuiSelect);
@@ -29,7 +33,9 @@ describe('SelectInterval', () => {
   test('currently selected value is updated correctly on click', (done) => {
     const wrapper = mount(
       <MemoryRouter>
-        <SelectInterval />
+        <UrlStateProvider>
+          <SelectInterval />
+        </UrlStateProvider>
       </MemoryRouter>
     );
     const select = wrapper.find(EuiSelect).first();

@@ -32,6 +32,11 @@ const ThemedBreadcrumbs = styled(EuiBreadcrumbs)<{ background: string; text: str
     background-color: ${(props) => props.background};
     color: ${(props) => props.text};
     padding: 1em;
+    border-radius: 5px;
+  }
+
+  & .euiBreadcrumbSeparator {
+    background: ${(props) => props.text};
   }
 `;
 
@@ -46,11 +51,11 @@ export const StyledBreadcrumbs = memo(function StyledBreadcrumbs({
   truncate?: boolean;
 }) {
   const {
-    colorMap: { resolverEdge, resolverEdgeText },
+    colorMap: { resolverBreadcrumbBackground, resolverEdgeText },
   } = useResolverTheme();
   return (
     <ThemedBreadcrumbs
-      background={resolverEdge}
+      background={resolverBreadcrumbBackground}
       text={resolverEdgeText}
       breadcrumbs={breadcrumbs}
       truncate={truncate}
@@ -77,10 +82,13 @@ const invalidDateText = i18n.translate(
   }
 );
 /**
- * @param {ConstructorParameters<typeof Date>[0]} timestamp To be passed through Date->Intl.DateTimeFormat
  * @returns {string} A nicely formatted string for a date
  */
-export function formatDate(timestamp: ConstructorParameters<typeof Date>[0]) {
+export function formatDate(
+  /** To be passed through Date->Intl.DateTimeFormat */ timestamp: ConstructorParameters<
+    typeof Date
+  >[0]
+): string {
   const date = new Date(timestamp);
   if (isFinite(date.getTime())) {
     return formatter.format(date);
