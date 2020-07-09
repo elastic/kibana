@@ -33,10 +33,31 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
 
       describe(scenario.id, () => {
         it('should handle update alert api key request appropriately', async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'MY action',
+              actionTypeId: 'test.noop',
+              config: {},
+              secrets: {},
+            })
+            .expect(200);
+
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData())
+            .send(
+              getTestAlertData({
+                actions: [
+                  {
+                    id: createdAction.id,
+                    group: 'default',
+                    params: {},
+                  },
+                ],
+              })
+            )
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
@@ -53,6 +74,14 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
                   'test.noop',
                   'alertsFixture'
                 ),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to execute actions`,
                 statusCode: 403,
               });
               break;
@@ -99,6 +128,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
             case 'space_1_all at space2':
             case 'global_read at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
@@ -163,6 +193,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
               });
               break;
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
@@ -216,6 +247,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
             case 'space_1_all at space2':
             case 'global_read at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
@@ -289,6 +321,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
@@ -328,6 +361,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.body).to.eql({
                 statusCode: 404,

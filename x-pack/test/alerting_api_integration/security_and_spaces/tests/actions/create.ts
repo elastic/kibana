@@ -41,6 +41,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all at space2':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
@@ -91,6 +92,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all at space2':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
@@ -124,6 +126,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all at space2':
             case 'superuser at space1':
             case 'space_1_all at space1':
@@ -156,6 +159,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all at space2':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
@@ -193,6 +197,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all at space2':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({

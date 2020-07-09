@@ -13,7 +13,7 @@ import {
   SavedObjectReference,
   SavedObject,
 } from 'src/core/server';
-import { ActionsClient } from '../../actions/server';
+import { ActionsClient, ActionsAuthorization } from '../../actions/server';
 import {
   Alert,
   PartialAlert,
@@ -58,6 +58,7 @@ export interface ConstructorOptions {
   taskManager: TaskManagerStartContract;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   authorization: AlertsAuthorization;
+  actionsAuthorization: ActionsAuthorization;
   alertTypeRegistry: AlertTypeRegistry;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   spaceId?: string;
@@ -145,6 +146,7 @@ export class AlertsClient {
     params: InvalidateAPIKeyParams
   ) => Promise<InvalidateAPIKeyResult>;
   private readonly getActionsClient: () => Promise<ActionsClient>;
+  private readonly actionsAuthorization: ActionsAuthorization;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
 
   constructor({
@@ -160,6 +162,7 @@ export class AlertsClient {
     invalidateAPIKey,
     encryptedSavedObjectsClient,
     getActionsClient,
+    actionsAuthorization,
   }: ConstructorOptions) {
     this.logger = logger;
     this.getUserName = getUserName;
@@ -173,6 +176,7 @@ export class AlertsClient {
     this.invalidateAPIKey = invalidateAPIKey;
     this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
     this.getActionsClient = getActionsClient;
+    this.actionsAuthorization = actionsAuthorization;
   }
 
   public async create({ data, options }: CreateOptions): Promise<Alert> {
@@ -474,6 +478,10 @@ export class AlertsClient {
       WriteOperations.UpdateApiKey
     );
 
+    if (attributes.actions.length) {
+      await this.actionsAuthorization.ensureAuthorized('execute');
+    }
+
     const username = await this.getUserName();
     await this.unsecuredSavedObjectsClient.update(
       'alert',
@@ -536,6 +544,10 @@ export class AlertsClient {
       WriteOperations.Enable
     );
 
+    if (attributes.actions.length) {
+      await this.actionsAuthorization.ensureAuthorized('execute');
+    }
+
     if (attributes.enabled === false) {
       const username = await this.getUserName();
       await this.unsecuredSavedObjectsClient.update(
@@ -588,6 +600,10 @@ export class AlertsClient {
       WriteOperations.Disable
     );
 
+    if (attributes.actions.length) {
+      await this.actionsAuthorization.ensureAuthorized('execute');
+    }
+
     if (attributes.enabled === true) {
       await this.unsecuredSavedObjectsClient.update(
         'alert',
@@ -620,6 +636,10 @@ export class AlertsClient {
       WriteOperations.MuteAll
     );
 
+    if (attributes.actions.length) {
+      await this.actionsAuthorization.ensureAuthorized('execute');
+    }
+
     await this.unsecuredSavedObjectsClient.update('alert', id, {
       muteAll: true,
       mutedInstanceIds: [],
@@ -634,6 +654,10 @@ export class AlertsClient {
       attributes.consumer,
       WriteOperations.UnmuteAll
     );
+
+    if (attributes.actions.length) {
+      await this.actionsAuthorization.ensureAuthorized('execute');
+    }
 
     await this.unsecuredSavedObjectsClient.update('alert', id, {
       muteAll: false,
@@ -653,6 +677,10 @@ export class AlertsClient {
       attributes.consumer,
       WriteOperations.MuteInstance
     );
+
+    if (attributes.actions.length) {
+      await this.actionsAuthorization.ensureAuthorized('execute');
+    }
 
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
@@ -685,6 +713,10 @@ export class AlertsClient {
       attributes.consumer,
       WriteOperations.UnmuteInstance
     );
+    if (attributes.actions.length) {
+      await this.actionsAuthorization.ensureAuthorized('execute');
+    }
+
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
       await this.unsecuredSavedObjectsClient.update(

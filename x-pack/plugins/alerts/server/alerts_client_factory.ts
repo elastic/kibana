@@ -79,6 +79,7 @@ export class AlertsClientFactory {
         includedHiddenTypes: ['alert'],
       }),
       authorization,
+      actionsAuthorization: actions.getActionsAuthorizationWithRequest(request),
       namespace: this.spaceIdToNamespace(spaceId),
       encryptedSavedObjectsClient: this.encryptedSavedObjectsClient,
       async getUserName() {

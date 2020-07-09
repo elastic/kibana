@@ -80,6 +80,14 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 statusCode: 403,
               });
               break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to get actions`,
+                statusCode: 403,
+              });
+              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
@@ -153,6 +161,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'global_read at space1':
             case 'space_1_all at space2':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
@@ -199,6 +208,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               });
               break;
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
@@ -248,6 +258,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               });
               break;
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
@@ -282,6 +293,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
@@ -308,6 +320,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'global_read at space1':
             case 'space_1_all at space2':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
             case 'superuser at space1':
               expect(response.statusCode).to.eql(400);
@@ -335,6 +348,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
@@ -376,6 +390,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
@@ -403,6 +418,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
@@ -429,6 +445,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({

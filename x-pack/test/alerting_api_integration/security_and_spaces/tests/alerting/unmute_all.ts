@@ -33,10 +33,32 @@ export default function createUnmuteAlertTests({ getService }: FtrProviderContex
 
       describe(scenario.id, () => {
         it('should handle unmute alert request appropriately', async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'MY action',
+              actionTypeId: 'test.noop',
+              config: {},
+              secrets: {},
+            })
+            .expect(200);
+
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData({ enabled: false }))
+            .send(
+              getTestAlertData({
+                enabled: false,
+                actions: [
+                  {
+                    id: createdAction.id,
+                    group: 'default',
+                    params: {},
+                  },
+                ],
+              })
+            )
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
@@ -59,6 +81,14 @@ export default function createUnmuteAlertTests({ getService }: FtrProviderContex
                   'test.noop',
                   'alertsFixture'
                 ),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to execute actions`,
                 statusCode: 403,
               });
               break;
@@ -112,6 +142,7 @@ export default function createUnmuteAlertTests({ getService }: FtrProviderContex
             case 'space_1_all at space2':
             case 'global_read at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
@@ -183,6 +214,7 @@ export default function createUnmuteAlertTests({ getService }: FtrProviderContex
               });
               break;
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
@@ -243,6 +275,7 @@ export default function createUnmuteAlertTests({ getService }: FtrProviderContex
             case 'space_1_all at space2':
             case 'global_read at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',

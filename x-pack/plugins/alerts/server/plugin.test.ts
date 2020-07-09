@@ -82,6 +82,7 @@ describe('Alerting Plugin', () => {
             actions: {
               execute: jest.fn(),
               getActionsClientWithRequest: jest.fn(),
+              getActionsAuthorizationWithRequest: jest.fn(),
             },
             encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
             features: mockFeatures(),
@@ -127,6 +128,7 @@ describe('Alerting Plugin', () => {
             actions: {
               execute: jest.fn(),
               getActionsClientWithRequest: jest.fn(),
+              getActionsAuthorizationWithRequest: jest.fn(),
             },
             spaces: () => null,
             encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),

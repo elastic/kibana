@@ -40,6 +40,17 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
         it('should handle update alert request appropriately', async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'MY action',
+              actionTypeId: 'test.noop',
+              config: {},
+              secrets: {},
+            })
+            .expect(200);
+
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
@@ -54,7 +65,13 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               foo: true,
             },
             schedule: { interval: '12s' },
-            actions: [],
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {},
+              },
+            ],
             throttle: '1m',
           };
           const response = await supertestWithoutAuth
@@ -78,6 +95,14 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 statusCode: 403,
               });
               break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to get actions`,
+                statusCode: 403,
+              });
+              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
@@ -93,6 +118,14 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 apiKeyOwner: user.username,
                 muteAll: false,
                 mutedInstanceIds: [],
+                actions: [
+                  {
+                    id: createdAction.id,
+                    actionTypeId: 'test.noop',
+                    group: 'default',
+                    params: {},
+                  },
+                ],
                 scheduledTaskId: createdAlert.scheduledTaskId,
                 createdAt: response.body.createdAt,
                 updatedAt: response.body.updatedAt,
@@ -149,6 +182,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'global_read at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
@@ -241,6 +275,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               });
               break;
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
@@ -322,6 +357,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'global_read at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
@@ -422,6 +458,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
@@ -486,6 +523,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'global_read at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
             case 'superuser at space1':
               expect(response.body).to.eql({
@@ -529,6 +567,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
@@ -555,6 +594,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
@@ -613,6 +653,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
@@ -646,6 +687,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
@@ -711,6 +753,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               await retry.try(async () => {

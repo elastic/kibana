@@ -60,6 +60,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
               expect(response.body).to.eql([]);
               break;
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
               expect(omit(noOpAlertType, 'authorizedConsumers')).to.eql(expectedNoOpType);
               expect(restrictedNoOpAlertType).to.eql(undefined);
               expect(noOpAlertType.authorizedConsumers).to.eql({
