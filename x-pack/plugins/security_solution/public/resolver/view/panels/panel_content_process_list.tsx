@@ -185,13 +185,13 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
 
   const children = useSelector(selectors.hasMoreChildren);
   const ancestors = useSelector(selectors.hasMoreAncestors);
-
+  const showWarning = children === true || ancestors === true;
   return (
     <>
       <StyledBreadcrumbs breadcrumbs={crumbs} />
-      {children === true || ancestors === true ? (
+      {showWarning && (
         <StyledLimitWarning numberDisplayed={numberOfProcesses} />
-      ) : null}
+      )}
       <EuiSpacer size="l" />
       <EuiInMemoryTable<ProcessTableView> items={processTableView} columns={columns} sorting />
     </>
