@@ -4,6 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './jira';
-export * from './servicenow';
-export * from './resilient';
+import * as rt from 'io-ts';
+
+export const ResilientFieldsRT = rt.union([
+  rt.literal('name'),
+  rt.literal('description'),
+  rt.literal('comments'),
+]);
+
+export type ResilientFieldsType = rt.TypeOf<typeof ResilientFieldsRT>;
