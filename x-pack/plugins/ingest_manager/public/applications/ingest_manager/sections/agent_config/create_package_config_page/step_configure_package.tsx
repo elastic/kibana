@@ -4,14 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
+import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PackageInfo, RegistryStream, NewPackageConfig, PackageConfigInput } from '../../../types';
 import { Loading } from '../../../components';
 import { PackageConfigValidationResults, validationHasErrors } from './services';
 import { PackageConfigInputPanel, CustomPackageConfig } from './components';
 import { CreatePackageConfigFrom } from './types';
+
+const HorizontalRuleNoTopMargin = styled(EuiHorizontalRule)`
+  margin-top: 0;
+`;
 
 const findStreamsForInputType = (
   inputType: string,
@@ -61,47 +66,49 @@ export const StepConfigurePackage: React.FunctionComponent<{
     packageInfo.config_templates[0] &&
     packageInfo.config_templates[0].inputs &&
     packageInfo.config_templates[0].inputs.length ? (
-      <EuiFlexGroup direction="column">
-        {packageInfo.config_templates[0].inputs.map((packageInput) => {
-          const packageConfigInput = packageConfig.inputs.find(
-            (input) => input.type === packageInput.type
-          );
-          const packageInputStreams = findStreamsForInputType(packageInput.type, packageInfo);
-          return packageConfigInput ? (
-            <EuiFlexItem key={packageInput.type}>
-              <PackageConfigInputPanel
-                packageInput={packageInput}
-                packageInputStreams={packageInputStreams}
-                packageConfigInput={packageConfigInput}
-                updatePackageConfigInput={(updatedInput: Partial<PackageConfigInput>) => {
-                  const indexOfUpdatedInput = packageConfig.inputs.findIndex(
-                    (input) => input.type === packageInput.type
-                  );
-                  const newInputs = [...packageConfig.inputs];
-                  newInputs[indexOfUpdatedInput] = {
-                    ...newInputs[indexOfUpdatedInput],
-                    ...updatedInput,
-                  };
-                  updatePackageConfig({
-                    inputs: newInputs,
-                  });
-                }}
-                inputValidationResults={validationResults!.inputs![packageConfigInput.type]}
-                forceShowErrors={submitAttempted}
-              />
-            </EuiFlexItem>
-          ) : null;
-        })}
-      </EuiFlexGroup>
+      <>
+        <HorizontalRuleNoTopMargin margin="m" />
+        <EuiFlexGroup direction="column" gutterSize="none">
+          {packageInfo.config_templates[0].inputs.map((packageInput) => {
+            const packageConfigInput = packageConfig.inputs.find(
+              (input) => input.type === packageInput.type
+            );
+            const packageInputStreams = findStreamsForInputType(packageInput.type, packageInfo);
+            return packageConfigInput ? (
+              <EuiFlexItem key={packageInput.type}>
+                <PackageConfigInputPanel
+                  packageInput={packageInput}
+                  packageInputStreams={packageInputStreams}
+                  packageConfigInput={packageConfigInput}
+                  updatePackageConfigInput={(updatedInput: Partial<PackageConfigInput>) => {
+                    const indexOfUpdatedInput = packageConfig.inputs.findIndex(
+                      (input) => input.type === packageInput.type
+                    );
+                    const newInputs = [...packageConfig.inputs];
+                    newInputs[indexOfUpdatedInput] = {
+                      ...newInputs[indexOfUpdatedInput],
+                      ...updatedInput,
+                    };
+                    updatePackageConfig({
+                      inputs: newInputs,
+                    });
+                  }}
+                  inputValidationResults={validationResults!.inputs![packageConfigInput.type]}
+                  forceShowErrors={submitAttempted}
+                />
+                <EuiHorizontalRule margin="m" />
+              </EuiFlexItem>
+            ) : null;
+          })}
+        </EuiFlexGroup>
+      </>
     ) : (
-      <EuiPanel>
-        <CustomPackageConfig
-          from={from}
-          packageName={packageInfo.name}
-          packageConfig={packageConfig}
-          packageConfigId={packageConfigId}
-        />
-      </EuiPanel>
+      <CustomPackageConfig
+        from={from}
+        packageName={packageInfo.name}
+        packageConfig={packageConfig}
+        packageConfigId={packageConfigId}
+      />
     );
 
   return validationResults ? (

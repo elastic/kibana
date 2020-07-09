@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState, Fragment } from 'react';
+import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
@@ -14,6 +16,7 @@ import {
   EuiButtonEmpty,
   EuiTitle,
   EuiIconTip,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { PackageConfigInput, RegistryVarsEntry } from '../../../../types';
 import {
@@ -56,48 +59,51 @@ export const PackageConfigInputConfig: React.FunctionComponent<{
   }
 
   return (
-    <EuiFlexGroup alignItems="flexStart">
-      <EuiFlexItem grow={1}>
-        <EuiTitle size="s">
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <h4>
-                <EuiTextColor color={hasErrors ? 'danger' : 'default'}>
-                  <FormattedMessage
-                    id="xpack.ingestManager.createPackageConfig.stepConfigure.inputSettingsTitle"
-                    defaultMessage="Settings"
-                  />
-                </EuiTextColor>
-              </h4>
-            </EuiFlexItem>
-            {hasErrors ? (
+    <EuiFlexGrid columns={2}>
+      <EuiFlexItem>
+        <EuiFlexGroup gutterSize="none" alignItems="flexStart">
+          <EuiFlexItem grow={1} />
+          <EuiFlexItem grow={5}>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  content={
+                <EuiText color={hasErrors ? 'danger' : 'default'}>
+                  <h4>
                     <FormattedMessage
-                      id="xpack.ingestManager.createPackageConfig.stepConfigure.inputConfigErrorsTooltip"
-                      defaultMessage="Fix configuration errors"
+                      id="xpack.ingestManager.createPackageConfig.stepConfigure.inputSettingsTitle"
+                      defaultMessage="Settings"
                     />
-                  }
-                  position="right"
-                  type="alert"
-                  iconProps={{ color: 'danger' }}
-                />
+                  </h4>
+                </EuiText>
               </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-        <EuiText color="subdued" size="s">
-          <p>
-            <FormattedMessage
-              id="xpack.ingestManager.createPackageConfig.stepConfigure.inputSettingsDescription"
-              defaultMessage="The following settings are applicable to all streams."
-            />
-          </p>
-        </EuiText>
+              {hasErrors ? (
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.ingestManager.createPackageConfig.stepConfigure.inputConfigErrorsTooltip"
+                        defaultMessage="Fix configuration errors"
+                      />
+                    }
+                    position="right"
+                    type="alert"
+                    iconProps={{ color: 'danger' }}
+                  />
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            <EuiText color="subdued" size="s">
+              <p>
+                <FormattedMessage
+                  id="xpack.ingestManager.createPackageConfig.stepConfigure.inputSettingsDescription"
+                  defaultMessage="The following settings are applicable to all inputs below."
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={1}>
+      <EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="m">
           {requiredVars.map((varDef) => {
             const { name: varName, type: varType } = varDef;
@@ -173,6 +179,6 @@ export const PackageConfigInputConfig: React.FunctionComponent<{
           ) : null}
         </EuiFlexGroup>
       </EuiFlexItem>
-    </EuiFlexGroup>
+    </EuiFlexGrid>
   );
 };

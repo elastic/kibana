@@ -166,7 +166,7 @@ export const StepSelectConfig: React.FunctionComponent<{
               }
             ),
           }}
-          height={240}
+          height={180}
           onChange={(options) => {
             const selectedOption = options.find((option) => option.checked === 'on');
             if (selectedOption) {

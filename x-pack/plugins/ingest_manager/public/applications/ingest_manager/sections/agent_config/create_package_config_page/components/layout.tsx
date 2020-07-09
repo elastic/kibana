@@ -55,21 +55,49 @@ export const CreatePackageConfigPageLayout: React.FunctionComponent<{
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiText>
-          <h1>
-            {from === 'edit' ? (
+        {from === 'edit' ? (
+          <EuiText>
+            <h1>
               <FormattedMessage
                 id="xpack.ingestManager.editPackageConfig.pageTitle"
                 defaultMessage="Edit integration"
               />
-            ) : (
+            </h1>
+          </EuiText>
+        ) : from === 'package' && packageInfo ? (
+          <EuiFlexGroup alignItems="center" gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <PackageIcon
+                packageName={packageInfo?.name || ''}
+                version={packageInfo?.version || ''}
+                icons={packageInfo?.icons}
+                size="xl"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText>
+                <h1>
+                  <FormattedMessage
+                    id="xpack.ingestManager.createPackageConfig.pageTitleWithPackageName"
+                    defaultMessage="Add {packageName} integration"
+                    values={{
+                      packageName: packageInfo.title,
+                    }}
+                  />
+                </h1>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <EuiText>
+            <h1>
               <FormattedMessage
                 id="xpack.ingestManager.createPackageConfig.pageTitle"
                 defaultMessage="Add integration"
               />
-            )}
-          </h1>
-        </EuiText>
+            </h1>
+          </EuiText>
+        )}
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiSpacer size="s" />
@@ -77,17 +105,17 @@ export const CreatePackageConfigPageLayout: React.FunctionComponent<{
           {from === 'edit' ? (
             <FormattedMessage
               id="xpack.ingestManager.editPackageConfig.pageDescription"
-              defaultMessage="Follow the instructions below to edit this integration."
+              defaultMessage="Modify integration settings and deploy changes to the selected agent configuration."
             />
           ) : from === 'config' ? (
             <FormattedMessage
               id="xpack.ingestManager.createPackageConfig.pageDescriptionfromConfig"
-              defaultMessage="Follow the instructions below to add an integration to this agent configuration."
+              defaultMessage="Configure an integration for the selected agent configuration."
             />
           ) : (
             <FormattedMessage
               id="xpack.ingestManager.createPackageConfig.pageDescriptionfromPackage"
-              defaultMessage="Follow the instructions below to add this integration to an agent configuration."
+              defaultMessage="Follow the instructions below to add this integration to an agent configuraiton."
             />
           )}
         </EuiText>
@@ -95,44 +123,19 @@ export const CreatePackageConfigPageLayout: React.FunctionComponent<{
     </EuiFlexGroup>
   );
   const rightColumn = (
-    <EuiFlexGroup justifyContent="flexEnd" direction={'row'} gutterSize="xl">
-      <EuiFlexItem grow={false}>
+    <EuiFlexGroup justifyContent="flexEnd" direction="row">
+      <EuiFlexItem>
         <EuiSpacer size="s" />
         {agentConfig && (from === 'config' || from === 'edit') ? (
           <EuiDescriptionList style={{ textAlign: 'right' }} textStyle="reverse">
             <EuiDescriptionListTitle>
               <FormattedMessage
                 id="xpack.ingestManager.createPackageConfig.agentConfigurationNameLabel"
-                defaultMessage="Configuration"
+                defaultMessage="Agent configuration"
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
               {agentConfig?.name || '-'}
-            </EuiDescriptionListDescription>
-          </EuiDescriptionList>
-        ) : null}
-        {packageInfo && from === 'package' ? (
-          <EuiDescriptionList style={{ textAlign: 'right' }} textStyle="reverse">
-            <EuiDescriptionListTitle>
-              <FormattedMessage
-                id="xpack.ingestManager.createPackageConfig.packageNameLabel"
-                defaultMessage="Integration"
-              />
-            </EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>
-              <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <PackageIcon
-                    packageName={packageInfo?.name || ''}
-                    version={packageInfo?.version || ''}
-                    icons={packageInfo?.icons}
-                    size="m"
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  {packageInfo?.title || packageInfo?.name || '-'}
-                </EuiFlexItem>
-              </EuiFlexGroup>
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         ) : null}

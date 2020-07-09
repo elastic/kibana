@@ -7,6 +7,7 @@ import React, { useState, Fragment } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSwitch,
@@ -57,51 +58,56 @@ export const PackageConfigInputStreamConfig: React.FunctionComponent<{
   }
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={1}>
-        <EuiSwitch
-          label={
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiTextColor color={hasErrors ? 'danger' : 'default'}>
-                  {packageInputStream.title}
-                </EuiTextColor>
-              </EuiFlexItem>
-              {hasErrors ? (
-                <EuiFlexItem grow={false}>
-                  <EuiIconTip
-                    content={
-                      <FormattedMessage
-                        id="xpack.ingestManager.createPackageConfig.stepConfigure.streamLevelErrorsTooltip"
-                        defaultMessage="Fix configuration errors"
+    <EuiFlexGrid columns={2}>
+      <EuiFlexItem>
+        <EuiFlexGroup gutterSize="none" alignItems="flexStart">
+          <EuiFlexItem grow={1} />
+          <EuiFlexItem grow={5}>
+            <EuiSwitch
+              label={
+                <EuiFlexGroup alignItems="center" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiTextColor color={hasErrors ? 'danger' : 'default'}>
+                      {packageInputStream.title}
+                    </EuiTextColor>
+                  </EuiFlexItem>
+                  {hasErrors ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip
+                        content={
+                          <FormattedMessage
+                            id="xpack.ingestManager.createPackageConfig.stepConfigure.streamLevelErrorsTooltip"
+                            defaultMessage="Fix configuration errors"
+                          />
+                        }
+                        position="right"
+                        type="alert"
+                        iconProps={{ color: 'danger' }}
                       />
-                    }
-                    position="right"
-                    type="alert"
-                    iconProps={{ color: 'danger' }}
-                  />
-                </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
-          }
-          checked={packageConfigInputStream.enabled}
-          onChange={(e) => {
-            const enabled = e.target.checked;
-            updatePackageConfigInputStream({
-              enabled,
-            });
-          }}
-        />
-        {packageInputStream.description ? (
-          <Fragment>
-            <EuiSpacer size="s" />
-            <EuiText size="s" color="subdued">
-              <ReactMarkdown source={packageInputStream.description} />
-            </EuiText>
-          </Fragment>
-        ) : null}
+                    </EuiFlexItem>
+                  ) : null}
+                </EuiFlexGroup>
+              }
+              checked={packageConfigInputStream.enabled}
+              onChange={(e) => {
+                const enabled = e.target.checked;
+                updatePackageConfigInputStream({
+                  enabled,
+                });
+              }}
+            />
+            {packageInputStream.description ? (
+              <Fragment>
+                <EuiSpacer size="s" />
+                <EuiText size="s" color="subdued">
+                  <ReactMarkdown source={packageInputStream.description} />
+                </EuiText>
+              </Fragment>
+            ) : null}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={1}>
+      <EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="m">
           {requiredVars.map((varDef) => {
             const { name: varName, type: varType } = varDef;
@@ -177,6 +183,6 @@ export const PackageConfigInputStreamConfig: React.FunctionComponent<{
           ) : null}
         </EuiFlexGroup>
       </EuiFlexItem>
-    </EuiFlexGroup>
+    </EuiFlexGrid>
   );
 };

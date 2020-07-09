@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import {
@@ -312,7 +313,7 @@ export const CreatePackageConfigPage: React.FunctionComponent = () => {
         },
     {
       title: i18n.translate(
-        'xpack.ingestManager.createPackageConfig.stepDefinePackageConfigTitle',
+        'xpack.ingestManager.createPackageConfig.stepConfigurePackageConfigTitle',
         {
           defaultMessage: 'Configure integration',
         }
@@ -320,34 +321,25 @@ export const CreatePackageConfigPage: React.FunctionComponent = () => {
       status: !packageInfo || !agentConfig ? 'disabled' : undefined,
       children:
         agentConfig && packageInfo ? (
-          <StepDefinePackageConfig
-            agentConfig={agentConfig}
-            packageInfo={packageInfo}
-            packageConfig={packageConfig}
-            updatePackageConfig={updatePackageConfig}
-            validationResults={validationResults!}
-          />
-        ) : null,
-    },
-    {
-      title: i18n.translate(
-        'xpack.ingestManager.createPackageConfig.stepConfigurePackageConfigTitle',
-        {
-          defaultMessage: 'Select the data you want to collect',
-        }
-      ),
-      status: !packageInfo || !agentConfig ? 'disabled' : undefined,
-      'data-test-subj': 'dataCollectionSetupStep',
-      children:
-        agentConfig && packageInfo ? (
-          <StepConfigurePackage
-            packageInfo={packageInfo}
-            packageConfig={packageConfig}
-            updatePackageConfig={updatePackageConfig}
-            validationResults={validationResults!}
-            submitAttempted={formState === 'INVALID'}
-          />
-        ) : null,
+          <>
+            <StepDefinePackageConfig
+              agentConfig={agentConfig}
+              packageInfo={packageInfo}
+              packageConfig={packageConfig}
+              updatePackageConfig={updatePackageConfig}
+              validationResults={validationResults!}
+            />
+            <StepConfigurePackage
+              packageInfo={packageInfo}
+              packageConfig={packageConfig}
+              updatePackageConfig={updatePackageConfig}
+              validationResults={validationResults!}
+              submitAttempted={formState === 'INVALID'}
+            />
+          </>
+        ) : (
+          <div />
+        ),
     },
   ];
 

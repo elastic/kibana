@@ -29,10 +29,11 @@ import { PackageConfigInputValidationResults, validationHasErrors } from '../ser
 import { PackageConfigInputConfig } from './package_config_input_config';
 import { PackageConfigInputStreamConfig } from './package_config_input_stream';
 
-const FlushHorizontalRule = styled(EuiHorizontalRule)`
-  margin-left: -${(props) => props.theme.eui.paddingSizes.m};
-  margin-right: -${(props) => props.theme.eui.paddingSizes.m};
-  width: auto;
+const ShortenedHorizontalRule = styled(EuiHorizontalRule)`
+  &&& {
+    width: ${(11 / 12) * 100}%;
+    margin-left: auto;
+  }
 `;
 
 export const PackageConfigInputPanel: React.FunctionComponent<{
@@ -56,8 +57,19 @@ export const PackageConfigInputPanel: React.FunctionComponent<{
   // Errors state
   const hasErrors = forceShowErrors && validationHasErrors(inputValidationResults);
 
+  const inputStreams = packageInputStreams
+    .map((packageInputStream) => {
+      return {
+        packageInputStream,
+        packageConfigInputStream: packageConfigInput.streams.find(
+          (stream) => stream.dataset.name === packageInputStream.dataset.name
+        ),
+      };
+    })
+    .filter((stream) => Boolean(stream.packageConfigInputStream));
+
   return (
-    <EuiPanel>
+    <>
       {/* Header / input-level toggle */}
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
@@ -104,59 +116,37 @@ export const PackageConfigInputPanel: React.FunctionComponent<{
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem>
-              <EuiText color="subdued">
-                <FormattedMessage
-                  id="xpack.ingestManager.createPackageConfig.stepConfigure.streamsEnabledCountText"
-                  defaultMessage="{count} / {total, plural, one {# stream} other {# streams}} enabled"
-                  values={{
-                    count: (
-                      <EuiTextColor color="default">
-                        <strong>
-                          {packageConfigInput.streams.filter((stream) => stream.enabled).length}
-                        </strong>
-                      </EuiTextColor>
-                    ),
-                    total: packageInputStreams.length,
-                  }}
-                />
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType={isShowingStreams ? 'arrowUp' : 'arrowDown'}
-                onClick={() => setIsShowingStreams(!isShowingStreams)}
-                color="text"
-                aria-label={
-                  isShowingStreams
-                    ? i18n.translate(
-                        'xpack.ingestManager.createPackageConfig.stepConfigure.hideStreamsAriaLabel',
-                        {
-                          defaultMessage: 'Hide {type} streams',
-                          values: {
-                            type: packageInput.type,
-                          },
-                        }
-                      )
-                    : i18n.translate(
-                        'xpack.ingestManager.createPackageConfig.stepConfigure.showStreamsAriaLabel',
-                        {
-                          defaultMessage: 'Show {type} streams',
-                          values: {
-                            type: packageInput.type,
-                          },
-                        }
-                      )
-                }
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiButtonIcon
+            iconType={isShowingStreams ? 'arrowUp' : 'arrowDown'}
+            onClick={() => setIsShowingStreams(!isShowingStreams)}
+            color="text"
+            aria-label={
+              isShowingStreams
+                ? i18n.translate(
+                    'xpack.ingestManager.createPackageConfig.stepConfigure.hideStreamsAriaLabel',
+                    {
+                      defaultMessage: 'Hide {type} inputs',
+                      values: {
+                        type: packageInput.type,
+                      },
+                    }
+                  )
+                : i18n.translate(
+                    'xpack.ingestManager.createPackageConfig.stepConfigure.showStreamsAriaLabel',
+                    {
+                      defaultMessage: 'Show {type} inputs',
+                      values: {
+                        type: packageInput.type,
+                      },
+                    }
+                  )
+            }
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
       {/* Header rule break */}
-      {isShowingStreams ? <FlushHorizontalRule margin="m" /> : null}
+      {isShowingStreams ? <EuiSpacer size="l" /> : null}
 
       {/* Input level configuration */}
       {isShowingStreams && packageInput.vars && packageInput.vars.length ? (
@@ -168,62 +158,61 @@ export const PackageConfigInputPanel: React.FunctionComponent<{
             inputVarsValidationResults={{ vars: inputValidationResults.vars }}
             forceShowErrors={forceShowErrors}
           />
-          <EuiHorizontalRule margin="m" />
+          <ShortenedHorizontalRule margin="m" />
         </Fragment>
       ) : null}
 
       {/* Per-stream configuration */}
       {isShowingStreams ? (
         <EuiFlexGroup direction="column">
-          {packageInputStreams.map((packageInputStream) => {
-            const packageConfigInputStream = packageConfigInput.streams.find(
-              (stream) => stream.dataset.name === packageInputStream.dataset.name
-            );
-            return packageConfigInputStream ? (
-              <EuiFlexItem key={packageInputStream.dataset.name}>
-                <PackageConfigInputStreamConfig
-                  packageInputStream={packageInputStream}
-                  packageConfigInputStream={packageConfigInputStream}
-                  updatePackageConfigInputStream={(
-                    updatedStream: Partial<PackageConfigInputStream>
-                  ) => {
-                    const indexOfUpdatedStream = packageConfigInput.streams.findIndex(
-                      (stream) => stream.dataset.name === packageInputStream.dataset.name
-                    );
-                    const newStreams = [...packageConfigInput.streams];
-                    newStreams[indexOfUpdatedStream] = {
-                      ...newStreams[indexOfUpdatedStream],
-                      ...updatedStream,
-                    };
+          {inputStreams.map(({ packageInputStream, packageConfigInputStream }, index) => (
+            <EuiFlexItem key={index}>
+              <PackageConfigInputStreamConfig
+                packageInputStream={packageInputStream}
+                packageConfigInputStream={packageConfigInputStream}
+                updatePackageConfigInputStream={(
+                  updatedStream: Partial<PackageConfigInputStream>
+                ) => {
+                  const indexOfUpdatedStream = packageConfigInput.streams.findIndex(
+                    (stream) => stream.dataset.name === packageInputStream.dataset.name
+                  );
+                  const newStreams = [...packageConfigInput.streams];
+                  newStreams[indexOfUpdatedStream] = {
+                    ...newStreams[indexOfUpdatedStream],
+                    ...updatedStream,
+                  };
 
-                    const updatedInput: Partial<PackageConfigInput> = {
-                      streams: newStreams,
-                    };
+                  const updatedInput: Partial<PackageConfigInput> = {
+                    streams: newStreams,
+                  };
 
-                    // Update input enabled state if needed
-                    if (!packageConfigInput.enabled && updatedStream.enabled) {
-                      updatedInput.enabled = true;
-                    } else if (
-                      packageConfigInput.enabled &&
-                      !newStreams.find((stream) => stream.enabled)
-                    ) {
-                      updatedInput.enabled = false;
-                    }
-
-                    updatePackageConfigInput(updatedInput);
-                  }}
-                  inputStreamValidationResults={
-                    inputValidationResults.streams![packageConfigInputStream.id]
+                  // Update input enabled state if needed
+                  if (!packageConfigInput.enabled && updatedStream.enabled) {
+                    updatedInput.enabled = true;
+                  } else if (
+                    packageConfigInput.enabled &&
+                    !newStreams.find((stream) => stream.enabled)
+                  ) {
+                    updatedInput.enabled = false;
                   }
-                  forceShowErrors={forceShowErrors}
-                />
-                <EuiSpacer size="m" />
-                <EuiHorizontalRule margin="none" />
-              </EuiFlexItem>
-            ) : null;
-          })}
+
+                  updatePackageConfigInput(updatedInput);
+                }}
+                inputStreamValidationResults={
+                  inputValidationResults.streams![packageConfigInputStream.id]
+                }
+                forceShowErrors={forceShowErrors}
+              />
+              {index !== inputStreams.length - 1 ? (
+                <>
+                  <EuiSpacer size="m" />
+                  <ShortenedHorizontalRule margin="none" />
+                </>
+              ) : null}
+            </EuiFlexItem>
+          ))}
         </EuiFlexGroup>
       ) : null}
-    </EuiPanel>
+    </>
   );
 };
