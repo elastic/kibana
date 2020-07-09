@@ -9,22 +9,26 @@ import { flow } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import {
+  AcknowledgeSchema,
   DeleteListSchemaEncoded,
   ExportListItemQuerySchemaEncoded,
   FindListSchemaEncoded,
   FoundListSchema,
   ImportListItemQuerySchemaEncoded,
   ImportListItemSchemaEncoded,
+  ListItemIndexExistSchema,
   ListSchema,
+  acknowledgeSchema,
   deleteListSchema,
   exportListItemQuerySchema,
   findListSchema,
   foundListSchema,
   importListItemQuerySchema,
   importListItemSchema,
+  listItemIndexExistSchema,
   listSchema,
 } from '../../common/schemas';
-import { LIST_ITEM_URL, LIST_URL } from '../../common/constants';
+import { LIST_INDEX, LIST_ITEM_URL, LIST_URL } from '../../common/constants';
 import { validateEither } from '../../common/siem_common_deps';
 import { toPromise } from '../common/fp_utils';
 
@@ -171,3 +175,39 @@ const exportListWithValidation = async ({
   );
 
 export { exportListWithValidation as exportList };
+
+const readListIndex = async ({ http, signal }: ApiParams): Promise<ListItemIndexExistSchema> =>
+  http.fetch<ListItemIndexExistSchema>(LIST_INDEX, {
+    method: 'GET',
+    signal,
+  });
+
+const readListIndexWithValidation = async ({
+  http,
+  signal,
+}: ApiParams): Promise<ListItemIndexExistSchema> =>
+  flow(
+    () => tryCatch(() => readListIndex({ http, signal }), String),
+    chain((response) => fromEither(validateEither(listItemIndexExistSchema, response))),
+    flow(toPromise)
+  )();
+
+export { readListIndexWithValidation as readListIndex };
+
+const createListIndex = async ({ http, signal }: ApiParams): Promise<AcknowledgeSchema> =>
+  http.fetch<AcknowledgeSchema>(LIST_INDEX, {
+    method: 'POST',
+    signal,
+  });
+
+const createListIndexWithValidation = async ({
+  http,
+  signal,
+}: ApiParams): Promise<AcknowledgeSchema> =>
+  flow(
+    () => tryCatch(() => createListIndex({ http, signal }), String),
+    chain((response) => fromEither(validateEither(acknowledgeSchema, response))),
+    flow(toPromise)
+  )();
+
+export { createListIndexWithValidation as createListIndex };
