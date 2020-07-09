@@ -64,7 +64,7 @@ export class ManifestManager {
    * @param schemaVersion The schema version of the manifest.
    * @returns {ManifestClient} A ManifestClient scoped to the provided schemaVersion.
    */
-  private getManifestClient(schemaVersion: string): ManifestClient {
+  protected getManifestClient(schemaVersion: string): ManifestClient {
     return new ManifestClient(this.savedObjectsClient, schemaVersion as ManifestSchemaVersion);
   }
 
@@ -76,7 +76,7 @@ export class ManifestManager {
    * @returns {Promise<InternalArtifactSchema[]>} An array of uncompressed artifacts built from exception-list-agnostic SOs.
    * @throws Throws/rejects if there are errors building the list.
    */
-  private async buildExceptionListArtifacts(
+  protected async buildExceptionListArtifacts(
     schemaVersion: string
   ): Promise<InternalArtifactSchema[]> {
     // TODO: should wrap in try/catch?
@@ -94,42 +94,6 @@ export class ManifestManager {
       },
       Promise.resolve([])
     );
-  }
-
-  /**
-   * Returns the last dispatched manifest based on the current state of the
-   * user-artifact-manifest SO.
-   *
-   * @param schemaVersion The schema version of the manifest.
-   * @returns {Promise<Manifest | null>} The last dispatched manifest, or null if does not exist.
-   * @throws Throws/rejects if there is an unexpected error retrieving the manifest.
-   */
-  private async getLastDispatchedManifest(schemaVersion: string): Promise<Manifest | null> {
-    try {
-      const manifestClient = this.getManifestClient(schemaVersion);
-      const manifestSo = await manifestClient.getManifest();
-
-      if (manifestSo.version === undefined) {
-        throw new Error('No version returned for manifest.');
-      }
-
-      const manifest = new Manifest(
-        new Date(manifestSo.attributes.created),
-        schemaVersion,
-        manifestSo.version
-      );
-
-      for (const id of manifestSo.attributes.ids) {
-        const artifactSo = await this.artifactClient.getArtifact(id);
-        manifest.addEntry(artifactSo.attributes);
-      }
-      return manifest;
-    } catch (err) {
-      if (err.output.statusCode !== 404) {
-        throw err;
-      }
-      return null;
-    }
   }
 
   /**
@@ -184,6 +148,42 @@ export class ManifestManager {
       }
     }
     return errors;
+  }
+
+  /**
+   * Returns the last dispatched manifest based on the current state of the
+   * user-artifact-manifest SO.
+   *
+   * @param schemaVersion The schema version of the manifest.
+   * @returns {Promise<Manifest | null>} The last dispatched manifest, or null if does not exist.
+   * @throws Throws/rejects if there is an unexpected error retrieving the manifest.
+   */
+  public async getLastDispatchedManifest(schemaVersion: string): Promise<Manifest | null> {
+    try {
+      const manifestClient = this.getManifestClient(schemaVersion);
+      const manifestSo = await manifestClient.getManifest();
+
+      if (manifestSo.version === undefined) {
+        throw new Error('No version returned for manifest.');
+      }
+
+      const manifest = new Manifest(
+        new Date(manifestSo.attributes.created),
+        schemaVersion,
+        manifestSo.version
+      );
+
+      for (const id of manifestSo.attributes.ids) {
+        const artifactSo = await this.artifactClient.getArtifact(id);
+        manifest.addEntry(artifactSo.attributes);
+      }
+      return manifest;
+    } catch (err) {
+      if (err.output.statusCode !== 404) {
+        throw err;
+      }
+      return null;
+    }
   }
 
   /**
