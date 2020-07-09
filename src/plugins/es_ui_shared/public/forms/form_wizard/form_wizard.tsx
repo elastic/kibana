@@ -31,6 +31,7 @@ interface Props<T extends object> extends ProviderProps<T> {
   isSaving?: boolean;
   apiError: JSX.Element | null;
   texts?: Partial<NavTexts>;
+  rightContentNav?: JSX.Element | null;
 }
 
 export function FormWizard<T extends object = { [key: string]: any }>({
@@ -43,6 +44,7 @@ export function FormWizard<T extends object = { [key: string]: any }>({
   onSave,
   onChange,
   children,
+  rightContentNav,
 }: Props<T>) {
   return (
     <FormWizardProvider<T>
@@ -129,6 +131,7 @@ export function FormWizard<T extends object = { [key: string]: any }>({
                 onBack={onBack}
                 onNext={onNext}
                 texts={texts}
+                rightContent={rightContentNav}
               />
             </>
           );

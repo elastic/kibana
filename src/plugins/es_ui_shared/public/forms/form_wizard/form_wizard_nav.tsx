@@ -29,6 +29,7 @@ interface Props {
   isSaving?: boolean;
   isStepValid?: boolean;
   texts?: Partial<NavTexts>;
+  rightContent?: JSX.Element | null;
 }
 
 export interface NavTexts {
@@ -53,6 +54,7 @@ export const FormWizardNav = ({
   onBack,
   onNext,
   texts,
+  rightContent,
 }: Props) => {
   const isLastStep = activeStepIndex === lastStep;
   const labels = {
@@ -100,6 +102,8 @@ export const FormWizardNav = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
+
+      {rightContent && <EuiFlexItem grow={false}>{rightContent}</EuiFlexItem>}
     </EuiFlexGroup>
   );
 };
