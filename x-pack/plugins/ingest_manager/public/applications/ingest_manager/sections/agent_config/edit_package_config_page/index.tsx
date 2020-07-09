@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiButton,
-  EuiSteps,
   EuiBottomBar,
   EuiFlexGroup,
   EuiFlexItem,
@@ -301,45 +300,22 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
               onCancel={() => setFormState('VALID')}
             />
           )}
-          <EuiSteps
-            steps={[
-              {
-                title: i18n.translate(
-                  'xpack.ingestManager.editPackageConfig.stepDefinePackageConfigTitle',
-                  {
-                    defaultMessage: 'Define your integration',
-                  }
-                ),
-                children: (
-                  <StepDefinePackageConfig
-                    agentConfig={agentConfig}
-                    packageInfo={packageInfo}
-                    packageConfig={packageConfig}
-                    updatePackageConfig={updatePackageConfig}
-                    validationResults={validationResults!}
-                  />
-                ),
-              },
-              {
-                title: i18n.translate(
-                  'xpack.ingestManager.editPackageConfig.stepConfigurePackageConfigTitle',
-                  {
-                    defaultMessage: 'Select the data you want to collect',
-                  }
-                ),
-                children: (
-                  <StepConfigurePackage
-                    from={'edit'}
-                    packageInfo={packageInfo}
-                    packageConfig={packageConfig}
-                    packageConfigId={packageConfigId}
-                    updatePackageConfig={updatePackageConfig}
-                    validationResults={validationResults!}
-                    submitAttempted={formState === 'INVALID'}
-                  />
-                ),
-              },
-            ]}
+          <StepDefinePackageConfig
+            agentConfig={agentConfig}
+            packageInfo={packageInfo}
+            packageConfig={packageConfig}
+            updatePackageConfig={updatePackageConfig}
+            validationResults={validationResults!}
+          />
+
+          <StepConfigurePackage
+            from={'edit'}
+            packageInfo={packageInfo}
+            packageConfig={packageConfig}
+            packageConfigId={packageConfigId}
+            updatePackageConfig={updatePackageConfig}
+            validationResults={validationResults!}
+            submitAttempted={formState === 'INVALID'}
           />
           <EuiSpacer size="l" />
           {/* TODO #64541 - Remove classes */}
