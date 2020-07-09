@@ -68,10 +68,7 @@ export function getLogsOverviewDataFetcher(
       data
     );
 
-    const timeSpanInMinutes =
-      (Date.parse(params.absoluteTime.end).valueOf() -
-        Date.parse(params.absoluteTime.start).valueOf()) /
-      (1000 * 60);
+    const timeSpanInMinutes = (params.absoluteTime.end - params.absoluteTime.start) / (1000 * 60);
 
     return {
       appLink: `/app/logs/stream?logPosition=(end:${encode(params.relativeTime.end)},start:${encode(
@@ -120,8 +117,8 @@ function buildLogOverviewQuery(logParams: LogParams, params: FetchDataParams) {
   return {
     range: {
       [logParams.timestampField]: {
-        gt: params.absoluteTime.start,
-        lte: params.absoluteTime.end,
+        gt: new Date(params.absoluteTime.start).toISOString(),
+        lte: new Date(params.absoluteTime.end).toISOString(),
         format: 'strict_date_optional_time',
       },
     },

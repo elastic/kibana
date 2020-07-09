@@ -21,7 +21,7 @@ export interface Series {
 }
 
 export interface FetchDataParams {
-  absoluteTime: { start: string; end: string };
+  absoluteTime: { start: number; end: number };
   relativeTime: { start: string; end: string };
   bucketSize: string;
 }

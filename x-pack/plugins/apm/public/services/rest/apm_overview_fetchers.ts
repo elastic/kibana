@@ -11,15 +11,19 @@ import {
 } from '../../../../observability/public';
 import { callApmApi } from './createCallApmApi';
 
-export const fetchLandingPageData = async ({
+export const fetchOverviewPageData = async ({
   absoluteTime,
   relativeTime,
   bucketSize,
 }: FetchDataParams): Promise<ApmFetchDataResponse> => {
   const data = await callApmApi({
-    pathname: '/api/apm/observability_dashboard',
+    pathname: '/api/apm/observability_overview',
     params: {
-      query: { start: absoluteTime.start, end: absoluteTime.end, bucketSize },
+      query: {
+        start: new Date(absoluteTime.start).toISOString(),
+        end: new Date(absoluteTime.end).toISOString(),
+        bucketSize,
+      },
     },
   });
 
@@ -52,6 +56,6 @@ export const fetchLandingPageData = async ({
 
 export async function hasData() {
   return await callApmApi({
-    pathname: '/api/apm/observability_dashboard/has_data',
+    pathname: '/api/apm/observability_overview/has_data',
   });
 }

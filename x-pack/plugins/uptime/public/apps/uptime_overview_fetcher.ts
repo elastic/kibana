@@ -12,7 +12,8 @@ export async function fetchUptimeOverviewData({
   relativeTime,
   bucketSize,
 }: FetchDataParams) {
-  const { start, end } = absoluteTime;
+  const start = new Date(absoluteTime.start).toISOString();
+  const end = new Date(absoluteTime.end).toISOString();
   const snapshot = await fetchSnapshotCount({
     dateRangeStart: start,
     dateRangeEnd: end,

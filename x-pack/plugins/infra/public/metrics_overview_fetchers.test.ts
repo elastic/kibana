@@ -58,8 +58,8 @@ describe('Metrics UI Observability Homepage Functions', () => {
       const bucketSize = '300s';
       const response = await fetchData({
         absoluteTime: {
-          start: startTime.toISOString(),
-          end: endTime.toISOString(),
+          start: startTime.valueOf(),
+          end: endTime.valueOf(),
         },
         relativeTime: {
           start: 'now-15m',

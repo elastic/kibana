@@ -31,13 +31,9 @@ interface Props {
   routeParams: RouteParams<'/overview'>;
 }
 
-function calculatetBucketSize({ startTime, endTime }: { startTime?: string; endTime?: string }) {
-  if (startTime && endTime) {
-    return getBucketSize({
-      start: moment.utc(startTime).valueOf(),
-      end: moment.utc(endTime).valueOf(),
-      minInterval: '60s',
-    });
+function calculatetBucketSize({ start, end }: { start?: number; end?: number }) {
+  if (start && end) {
+    return getBucketSize({ start, end, minInterval: '60s' });
   }
 }
 
@@ -66,13 +62,13 @@ export const OverviewPage = ({ routeParams }: Props) => {
   };
 
   const absoluteTime = {
-    start: getAbsoluteTime(relativeTime.start),
-    end: getAbsoluteTime(relativeTime.end, { roundUp: true }),
+    start: moment.utc(getAbsoluteTime(relativeTime.start)).valueOf(),
+    end: moment.utc(getAbsoluteTime(relativeTime.end, { roundUp: true })).valueOf(),
   };
 
   const bucketSize = calculatetBucketSize({
-    startTime: absoluteTime.start,
-    endTime: absoluteTime.end,
+    start: absoluteTime.start,
+    end: absoluteTime.end,
   });
 
   const appEmptySections = getEmptySections({ core }).filter(({ id }) => {

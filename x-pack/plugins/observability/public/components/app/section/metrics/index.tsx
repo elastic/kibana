@@ -18,7 +18,7 @@ import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 
 interface Props {
-  absoluteTime: { start?: string; end?: string };
+  absoluteTime: { start?: number; end?: number };
   relativeTime: { start: string; end: string };
   bucketSize?: string;
 }

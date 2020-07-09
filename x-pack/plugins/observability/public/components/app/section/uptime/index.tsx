@@ -30,7 +30,7 @@ import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
 
 interface Props {
-  absoluteTime: { start?: string; end?: string };
+  absoluteTime: { start?: number; end?: number };
   relativeTime: { start: string; end: string };
   bucketSize?: string;
 }

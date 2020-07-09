@@ -80,8 +80,7 @@ export const createMetricsFetchData = (
   const [coreServices] = await getStartServices();
   const { http } = coreServices;
 
-  const from = moment(absoluteTime.start).valueOf();
-  const to = moment(absoluteTime.end).valueOf();
+  const { start, end } = absoluteTime;
 
   const snapshotRequest: SnapshotRequest = {
     sourceId: 'default',
@@ -90,8 +89,8 @@ export const createMetricsFetchData = (
     nodeType: 'host',
     includeTimeseries: true,
     timerange: {
-      from,
-      to,
+      from: start,
+      to: end,
       interval: bucketSize,
       forceInterval: true,
       ignoreLookback: true,
@@ -102,7 +101,7 @@ export const createMetricsFetchData = (
     body: JSON.stringify(snapshotRequest),
   });
   return {
-    appLink: `/app/metrics/inventory?waffleTime=(currentTime:${to},isAutoReloading:!f)`,
+    appLink: `/app/metrics/inventory?waffleTime=(currentTime:${end},isAutoReloading:!f)`,
     stats: {
       hosts: {
         type: 'number',
