@@ -7,7 +7,6 @@
 import { LegacyAPICaller, KibanaRequest } from 'kibana/server';
 import { resultsServiceProvider } from '../../models/results_service';
 import { SharedServicesChecks } from '../shared_services';
-import { HasMlCapabilities } from '../../lib/capabilities';
 
 type OrigResultsServiceProvider = ReturnType<typeof resultsServiceProvider>;
 
