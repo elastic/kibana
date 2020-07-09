@@ -9,6 +9,17 @@ import {
   mergeApmTelemetryMapping,
 } from './apm_telemetry';
 
+// Add this snapshot serializer for this test. The default snapshot serializer
+// prints "Object" next to objects in the JSON output, but we want to be able to
+// Use the output from this JSON snapshot to share with the telemetry team. When
+// new fields are added to the mapping, we'll have a diff in the snapshot.
+expect.addSnapshotSerializer({
+  print: (contents) => {
+    return JSON.stringify(contents, null, 2);
+  },
+  test: () => true,
+});
+
 describe('APM telemetry helpers', () => {
   describe('getApmTelemetry', () => {
     it('generates a JSON object with the telemetry mapping', () => {
