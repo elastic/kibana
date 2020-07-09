@@ -12,11 +12,11 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { euiStyled, useTrackPageview } from '../../../../../observability/public';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
+import { CategoryJobNoticesSection } from '../../../components/logging/log_analysis_job_status';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
 import { useInterval } from '../../../hooks/use_interval';
 import { PageViewLogInContext } from '../stream/page_view_log_in_context';
-import { CategoryJobNoticesSection } from './sections/notices/notices_section';
 import { TopCategoriesSection } from './sections/top_categories';
 import { useLogEntryCategoriesResults } from './use_log_entry_categories_results';
 import {
@@ -40,8 +40,6 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
     fetchJobStatus,
     fetchModuleDefinition,
     setupStatus,
-    viewSetupForReconfiguration,
-    viewSetupForUpdate,
     hasOutdatedJobConfigurations,
     hasOutdatedJobDefinitions,
     hasStoppedJobs,
@@ -131,16 +129,6 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
     [setAutoRefresh]
   );
 
-  const viewSetupFlyoutForReconfiguration = useCallback(() => {
-    viewSetupForReconfiguration();
-    onOpenSetup();
-  }, [onOpenSetup, viewSetupForReconfiguration]);
-
-  const viewSetupFlyoutForUpdate = useCallback(() => {
-    viewSetupForUpdate();
-    onOpenSetup();
-  }, [onOpenSetup, viewSetupForUpdate]);
-
   const hasResults = useMemo(() => topLogEntryCategories.length > 0, [
     topLogEntryCategories.length,
   ]);
@@ -210,8 +198,8 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
               hasOutdatedJobDefinitions={hasOutdatedJobDefinitions}
               hasStoppedJobs={hasStoppedJobs}
               isFirstUse={isFirstUse}
-              onRecreateMlJobForReconfiguration={viewSetupFlyoutForReconfiguration}
-              onRecreateMlJobForUpdate={viewSetupFlyoutForUpdate}
+              onRecreateMlJobForReconfiguration={onOpenSetup}
+              onRecreateMlJobForUpdate={onOpenSetup}
               qualityWarnings={categoryQualityWarnings}
             />
           </EuiFlexItem>
@@ -223,7 +211,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
                 isLoadingTopCategories={isLoadingTopLogEntryCategories}
                 jobId={jobIds['log-entry-categories-count']}
                 onChangeDatasetSelection={setCategoryQueryDatasets}
-                onRequestRecreateMlJob={viewSetupFlyoutForReconfiguration}
+                onRequestRecreateMlJob={onOpenSetup}
                 selectedDatasets={categoryQueryDatasets}
                 sourceId={sourceId}
                 timeRange={categoryQueryTimeRange.timeRange}

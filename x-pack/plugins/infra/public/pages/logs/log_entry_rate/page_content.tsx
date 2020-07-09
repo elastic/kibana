@@ -58,8 +58,6 @@ export const LogEntryRatePageContent = memo(() => {
     setupStatus: logEntryRateSetupStatus,
   } = useLogEntryRateModuleContext();
 
-  const { showModuleList } = useLogAnalysisSetupFlyoutStateContext();
-
   const fetchAllJobStatuses = useCallback(
     () => Promise.all([fetchLogEntryCategoriesJobStatus(), fetchLogEntryRateJobStatus()]),
     [fetchLogEntryCategoriesJobStatus, fetchLogEntryRateJobStatus]
@@ -122,7 +120,7 @@ export const LogEntryRatePageContent = memo(() => {
   ) {
     return (
       <>
-        <LogEntryRateResultsContent onOpenSetup={showModuleList} />
+        <LogEntryRateResultsContent />
         <LogAnalysisSetupFlyout />
         {/* <LogEntryRateSetupFlyout isOpen={isFlyoutOpen} onClose={closeFlyout} /> */}
       </>
@@ -132,7 +130,7 @@ export const LogEntryRatePageContent = memo(() => {
   } else {
     return (
       <>
-        <LogEntryRateSetupContent onOpenSetup={showModuleList} />
+        <LogEntryRateSetupContent />
         <LogAnalysisSetupFlyout />
         {/* <LogEntryRateSetupFlyout isOpen={isFlyoutOpen} onClose={closeFlyout} /> */}
       </>

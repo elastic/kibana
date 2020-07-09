@@ -11,9 +11,14 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { euiStyled, useTrackPageview } from '../../../../../observability/public';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { bucketSpan } from '../../../../common/log_analysis';
-import { LogAnalysisJobProblemIndicator } from '../../../components/logging/log_analysis_job_status';
+import {
+  CategoryJobNoticesSection,
+  LogAnalysisJobProblemIndicator,
+} from '../../../components/logging/log_analysis_job_status';
 import { useLogAnalysisSetupFlyoutStateContext } from '../../../components/logging/log_analysis_setup/setup_flyout';
+import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
+import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { useInterval } from '../../../hooks/use_interval';
 import { AnomaliesResults } from './sections/anomalies';
 import { useLogEntryAnomaliesResults } from './use_log_entry_anomalies_results';
@@ -32,27 +37,25 @@ export const PAGINATION_DEFAULTS = {
   pageSize: 25,
 };
 
-interface LogEntryRateResultsContentProps {
-  onOpenSetup: () => void;
-}
-
-export const LogEntryRateResultsContent: React.FunctionComponent<LogEntryRateResultsContentProps> = ({
-  onOpenSetup,
-}) => {
+export const LogEntryRateResultsContent: React.FunctionComponent = () => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results', delay: 15000 });
 
+  const { sourceId } = useLogSourceContext();
+
   const {
-    setupStatus,
-    viewSetupForReconfiguration,
-    viewSetupForUpdate,
-    hasOutdatedJobConfigurations,
-    hasOutdatedJobDefinitions,
-    hasStoppedJobs,
-    sourceConfiguration: { sourceId },
+    hasOutdatedJobConfigurations: hasOutdatedLogEntryRateJobConfigurations,
+    hasOutdatedJobDefinitions: hasOutdatedLogEntryRateJobDefinitions,
+    hasStoppedJobs: hasStoppedLogEntryRateJobs,
+    setupStatus: logEntryRateSetupStatus,
   } = useLogEntryRateModuleContext();
 
-  const { showModuleList } = useLogAnalysisSetupFlyoutStateContext();
+  const {
+    categoryQualityWarnings,
+    hasOutdatedJobConfigurations: hasOutdatedLogEntryCategoriesJobConfigurations,
+    hasOutdatedJobDefinitions: hasOutdatedLogEntryCategoriesJobDefinitions,
+    hasStoppedJobs: hasStoppedLogEntryCategoriesJobs,
+  } = useLogEntryCategoriesModuleContext();
 
   const {
     timeRange: selectedTimeRange,
@@ -144,27 +147,23 @@ export const LogEntryRateResultsContent: React.FunctionComponent<LogEntryRateRes
     [setAutoRefresh]
   );
 
-  const viewSetupFlyoutForReconfiguration = useCallback(() => {
-    viewSetupForReconfiguration();
-    onOpenSetup();
-  }, [viewSetupForReconfiguration, onOpenSetup]);
+  const { showModuleList, showModuleSetup } = useLogAnalysisSetupFlyoutStateContext();
 
-  const viewSetupFlyoutForUpdate = useCallback(() => {
-    viewSetupForUpdate();
-    onOpenSetup();
-  }, [viewSetupForUpdate, onOpenSetup]);
-
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const hasResults = useMemo(() => (logEntryRate?.histogramBuckets?.length ?? 0) > 0, [
-    logEntryRate,
+  const showLogEntryRateSetup = useCallback(() => showModuleSetup('logs_ui_analysis'), [
+    showModuleSetup,
   ]);
+  const showLogEntryCategoriesSetup = useCallback(() => showModuleSetup('logs_ui_categories'), [
+    showModuleSetup,
+  ]);
+
+  const hasResults = (logEntryRate?.histogramBuckets?.length ?? 0) > 0;
 
   const isFirstUse = useMemo(
     () =>
-      ((setupStatus.type === 'skipped' && !!setupStatus.newlyCreated) ||
-        setupStatus.type === 'succeeded') &&
+      ((logEntryRateSetupStatus.type === 'skipped' && !!logEntryRateSetupStatus.newlyCreated) ||
+        logEntryRateSetupStatus.type === 'succeeded') &&
       !hasResults,
-    [hasResults, setupStatus]
+    [hasResults, logEntryRateSetupStatus]
   );
 
   useEffect(() => {
@@ -200,12 +199,21 @@ export const LogEntryRateResultsContent: React.FunctionComponent<LogEntryRateRes
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <LogAnalysisJobProblemIndicator
-            hasOutdatedJobConfigurations={hasOutdatedJobConfigurations}
-            hasOutdatedJobDefinitions={hasOutdatedJobDefinitions}
-            hasStoppedJobs={hasStoppedJobs}
+            hasOutdatedJobConfigurations={hasOutdatedLogEntryRateJobConfigurations}
+            hasOutdatedJobDefinitions={hasOutdatedLogEntryRateJobDefinitions}
+            hasStoppedJobs={hasStoppedLogEntryRateJobs}
             isFirstUse={isFirstUse}
-            onRecreateMlJobForReconfiguration={viewSetupFlyoutForReconfiguration}
-            onRecreateMlJobForUpdate={viewSetupFlyoutForUpdate}
+            onRecreateMlJobForReconfiguration={showLogEntryRateSetup}
+            onRecreateMlJobForUpdate={showLogEntryRateSetup}
+          />
+          <CategoryJobNoticesSection
+            hasOutdatedJobConfigurations={hasOutdatedLogEntryCategoriesJobConfigurations}
+            hasOutdatedJobDefinitions={hasOutdatedLogEntryCategoriesJobDefinitions}
+            hasStoppedJobs={hasStoppedLogEntryCategoriesJobs}
+            isFirstUse={isFirstUse}
+            onRecreateMlJobForReconfiguration={showLogEntryCategoriesSetup}
+            onRecreateMlJobForUpdate={showLogEntryCategoriesSetup}
+            qualityWarnings={categoryQualityWarnings}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

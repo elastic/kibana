@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import { LogAnalysisJobProblemIndicator } from '../../../../../components/logging/log_analysis_job_status';
-import { QualityWarning } from '../../../../../containers/logs/log_analysis/log_analysis_module_types';
+import { QualityWarning } from '../../../containers/logs/log_analysis/log_analysis_module_types';
+import { LogAnalysisJobProblemIndicator } from './log_analysis_job_problem_indicator';
 import { CategoryQualityWarnings } from './quality_warning_notices';
 
 export const CategoryJobNoticesSection: React.FC<{
