@@ -30,6 +30,7 @@ import {
   EuiTab,
   EuiFlexItem,
   EuiFlexGrid,
+  EuiFlexGroup,
   EuiSpacer,
   EuiTitle,
   EuiPageBody,
@@ -102,6 +103,7 @@ class TutorialDirectoryUi extends React.Component {
     this.state = {
       selectedTabId: openTab,
       tutorialCards: [],
+      notices: getServices().tutorialService.getDirectoryNotices(),
     };
   }
 
@@ -227,18 +229,62 @@ class TutorialDirectoryUi extends React.Component {
     );
   };
 
+  renderNotices = () => {
+    const notices = getServices().tutorialService.getDirectoryNotices();
+    return notices.length ? (
+      <EuiFlexGroup direction="column" gutterSize="none">
+        {notices.map((DirectoryNotice, index) => (
+          <EuiFlexItem key={index}>
+            <DirectoryNotice />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    ) : null;
+  };
+
+  renderHeaderLinks = () => {
+    const headerLinks = getServices().tutorialService.getDirectoryHeaderLinks();
+    return headerLinks.length ? (
+      <EuiFlexGroup gutterSize="m" alignItems="center">
+        {headerLinks.map((HeaderLink, index) => (
+          <EuiFlexItem key={index}>
+            <HeaderLink />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    ) : null;
+  };
+
+  renderHeader = () => {
+    const notices = this.renderNotices();
+    const headerLinks = this.renderHeaderLinks();
+
+    return (
+      <>
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem>
+            <EuiTitle size="l">
+              <h1>
+                <FormattedMessage
+                  id="home.tutorial.addDataToKibanaTitle"
+                  defaultMessage="Add data"
+                />
+              </h1>
+            </EuiTitle>
+          </EuiFlexItem>
+          {headerLinks ? <EuiFlexItem grow={false}>{headerLinks}</EuiFlexItem> : null}
+        </EuiFlexGroup>
+        {notices}
+      </>
+    );
+  };
+
   render() {
     return (
       <EuiPage restrictWidth={1200}>
         <EuiPageBody>
-          <EuiTitle size="l">
-            <h1>
-              <FormattedMessage id="home.tutorial.addDataToKibanaTitle" defaultMessage="Add data" />
-            </h1>
-          </EuiTitle>
-
+          {this.renderHeader()}
           <EuiSpacer size="m" />
-
           <EuiTabs>{this.renderTabs()}</EuiTabs>
           <EuiSpacer />
           {this.renderTabContent()}
