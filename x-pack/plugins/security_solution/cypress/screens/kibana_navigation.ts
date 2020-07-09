@@ -12,8 +12,8 @@ export const HOSTS_PAGE = '[data-test-subj="collapsibleNavGroup-security"] [titl
 
 export const KIBANA_NAVIGATION_TOGGLE = '[data-test-subj="toggleNavButton"]';
 
-export const MANAGEMENT_PAGE =
-  '[data-test-subj="collapsibleNavGroup-security"] [title="Management"]';
+export const ADMINISTRATION_PAGE =
+  '[data-test-subj="collapsibleNavGroup-security"] [title="Administration"]';
 
 export const NETWORK_PAGE = '[data-test-subj="collapsibleNavGroup-security"] [title="Network"]';
 
