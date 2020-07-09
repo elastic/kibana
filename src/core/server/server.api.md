@@ -2708,8 +2708,8 @@ export const validBodyOutput: readonly ["data", "stream"];
 // src/core/server/legacy/types.ts:165:3 - (ae-forgotten-export) The symbol "LegacyNavLinkSpec" needs to be exported by the entry point index.d.ts
 // src/core/server/legacy/types.ts:166:3 - (ae-forgotten-export) The symbol "LegacyAppSpec" needs to be exported by the entry point index.d.ts
 // src/core/server/legacy/types.ts:167:16 - (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:260:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:260:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:262:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:266:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:266:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:268:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
 
 ```

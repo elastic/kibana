@@ -137,13 +137,13 @@ export interface PluginManifest {
   readonly requiredPlugins: readonly PluginName[];
 
   /**
-   * List of plugin ids that this plugin's UI code imports modules from that are 
+   * List of plugin ids that this plugin's UI code imports modules from that are
    * not in `requiredPlugins`.
    *
    * @remarks
-   * The plugins listed here will be loaded in the browser, even if the plugin is 
-   * disabled. Required by `@kbn/optimizer` to support cross-plugin imports. 
-   * "core" and plugins already listed in `requiredPlugins` do not need to be 
+   * The plugins listed here will be loaded in the browser, even if the plugin is
+   * disabled. Required by `@kbn/optimizer` to support cross-plugin imports.
+   * "core" and plugins already listed in `requiredPlugins` do not need to be
    * duplicated here.
    */
   readonly requiredBundles: readonly string[];
@@ -205,11 +205,14 @@ export interface DiscoveredPlugin {
   readonly optionalPlugins: readonly PluginName[];
 
   /**
-   * An optional list of the other plugins which are imported by the UI bundles
-   * of this plugin. If the plugins listed here are disabled their bundles will
-   * still be loaded into the browser. Required by the @kbn/optimizer to allow
-   * cross plugin imports. "core" and plugins listed in "requiredPlugins" do not
-   * need to be listed here.
+   * List of plugin ids that this plugin's UI code imports modules from that are
+   * not in `requiredPlugins`.
+   *
+   * @remarks
+   * The plugins listed here will be loaded in the browser, even if the plugin is
+   * disabled. Required by `@kbn/optimizer` to support cross-plugin imports.
+   * "core" and plugins already listed in `requiredPlugins` do not need to be
+   * duplicated here.
    */
   readonly requiredBundles: readonly PluginName[];
 }
