@@ -146,7 +146,7 @@ export const importTimelines = async (
               await compareTimelinesStatus.init();
               const isTemplateTimeline = compareTimelinesStatus.isHandlingTemplateTimeline;
               if (compareTimelinesStatus.isCreatableViaImport) {
-                // create timeline / template timeline
+                // create timeline / timeline template
                 newTimeline = await createTimelines({
                   frameworkRequest,
                   timeline: {
@@ -185,7 +185,7 @@ export const importTimelines = async (
                 );
               } else {
                 if (compareTimelinesStatus.isUpdatableViaImport) {
-                  // update template timeline
+                  // update timeline template
                   newTimeline = await createTimelines({
                     frameworkRequest,
                     timeline: parsedTimelineObject,
