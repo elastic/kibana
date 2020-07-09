@@ -19,7 +19,7 @@ import { normalize, deNormalize, stripUndefinedValues } from './lib';
 
 type Mappings = MappingsTemplates &
   MappingsConfiguration & {
-    properties: MappingsFields;
+    properties?: MappingsFields;
   };
 
 export interface Types {
@@ -31,7 +31,7 @@ export interface Types {
 
 export interface OnUpdateHandlerArg {
   isValid?: boolean;
-  getData: () => Mappings;
+  getData: () => Mappings | undefined;
   validate: () => Promise<boolean>;
 }
 
@@ -114,13 +114,18 @@ export const MappingsState = React.memo(({ children, onChange, value }: Props) =
         const configurationData = state.configuration.data.format();
         const templatesData = state.templates.data.format();
 
-        return {
+        const output = {
           ...stripUndefinedValues({
             ...configurationData,
             ...templatesData,
           }),
-          properties: fields,
         };
+
+        if (fields && Object.keys(fields).length > 0) {
+          output.properties = fields;
+        }
+
+        return Object.keys(output).length > 0 ? (output as Mappings) : undefined;
       },
       validate: async () => {
         const configurationFormValidator =
