@@ -22,16 +22,16 @@
         "agents": {
           "properties": {
             "total": {
-              "type": "number"
+              "type": "long"
             },
             "online": {
-              "type": "number"
+              "type": "long"
             },
             "error": {
-              "type": "number"
+              "type": "long"
             },
             "offline": {
-              "type": "number"
+              "type": "long"
             }
           }
         },

@@ -44,10 +44,10 @@ export function registerIngestManagerUsageCollector(
     schema: {
       fleet_enabled: { type: 'boolean' },
       agents: {
-        total: { type: 'number' },
-        online: { type: 'number' },
-        error: { type: 'number' },
-        offline: { type: 'number' },
+        total: { type: 'long' },
+        online: { type: 'long' },
+        error: { type: 'long' },
+        offline: { type: 'long' },
       },
       packages: {
         name: { type: 'keyword' },
