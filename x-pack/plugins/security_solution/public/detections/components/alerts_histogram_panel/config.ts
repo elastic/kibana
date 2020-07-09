@@ -7,8 +7,6 @@
 import { AlertsHistogramOption } from './types';
 
 export const alertsHistogramOptions: AlertsHistogramOption[] = [
-  { text: 'signal.rule.name', value: 'signal.rule.name' },
-  { text: 'signal.rule.type', value: 'signal.rule.type' },
   { text: 'signal.rule.risk_score', value: 'signal.rule.risk_score' },
   { text: 'signal.rule.severity', value: 'signal.rule.severity' },
   { text: 'signal.rule.threat.tactic.name', value: 'signal.rule.threat.tactic.name' },
@@ -16,6 +14,8 @@ export const alertsHistogramOptions: AlertsHistogramOption[] = [
   { text: 'event.action', value: 'event.action' },
   { text: 'event.category', value: 'event.category' },
   { text: 'host.name', value: 'host.name' },
+  { text: 'signal.rule.type', value: 'signal.rule.type' },
+  { text: 'signal.rule.name', value: 'signal.rule.name' },
   { text: 'source.ip', value: 'source.ip' },
   { text: 'user.name', value: 'user.name' },
 ];
