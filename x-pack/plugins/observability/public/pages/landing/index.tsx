@@ -84,7 +84,7 @@ export const LandingPage = () => {
                 size="xl"
                 alt="observability overview image"
                 url={core.http.basePath.prepend(
-                  `/plugins/observability/assets/illustration-${
+                  `/plugins/observability/assets/illustration_${
                     theme.darkMode ? 'dark' : 'light'
                   }.svg`
                 )}
