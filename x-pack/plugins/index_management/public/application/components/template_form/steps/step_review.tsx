@@ -169,7 +169,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
                   <EuiDescriptionListTitle>
                     <FormattedMessage
                       id="xpack.idxMgmt.templateForm.stepReview.summaryTab.componentsLabel"
-                      defaultMessage="Components"
+                      defaultMessage="Component templates"
                     />
                   </EuiDescriptionListTitle>
                   <EuiDescriptionListDescription>

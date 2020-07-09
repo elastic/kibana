@@ -19,7 +19,7 @@ import { normalize, deNormalize, stripUndefinedValues } from './lib';
 
 type Mappings = MappingsTemplates &
   MappingsConfiguration & {
-    properties: MappingsFields;
+    properties?: MappingsFields;
   };
 
 export interface Types {
@@ -31,7 +31,7 @@ export interface Types {
 
 export interface OnUpdateHandlerArg {
   isValid?: boolean;
-  getData: () => Mappings | { [key: string]: Mappings };
+  getData: () => Mappings | { [key: string]: Mappings } | undefined;
   validate: () => Promise<boolean>;
 }
 
@@ -115,24 +115,31 @@ export const MappingsState = React.memo(({ children, onChange, value, mappingsTy
         const configurationData = state.configuration.data.format();
         const templatesData = state.templates.data.format();
 
-        const mappings = {
+        const output = {
           ...stripUndefinedValues({
             ...configurationData,
             ...templatesData,
           }),
-          properties: fields,
-        } as Mappings;
+        };
 
-        return mappingsType === undefined
-          ? mappings
-          : {
-              [mappingsType]: mappings,
-            };
+        if (fields && Object.keys(fields).length > 0) {
+          output.properties = fields;
+        }
+
+        if (Object.keys(output).length > 0) {
+          return mappingsType === undefined
+            ? (output as Mappings)
+            : {
+                [mappingsType]: output as Mappings,
+              };
+        }
+
+        return undefined;
       },
       validate: async () => {
         const configurationFormValidator =
           state.configuration.submitForm !== undefined
-            ? new Promise(async (resolve) => {
+            ? new Promise(async resolve => {
                 const { isValid } = await state.configuration.submitForm!();
                 resolve(isValid);
               })
@@ -140,7 +147,7 @@ export const MappingsState = React.memo(({ children, onChange, value, mappingsTy
 
         const templatesFormValidator =
           state.templates.submitForm !== undefined
-            ? new Promise(async (resolve) => {
+            ? new Promise(async resolve => {
                 const { isValid } = await state.templates.submitForm!();
                 resolve(isValid);
               })
@@ -152,7 +159,7 @@ export const MappingsState = React.memo(({ children, onChange, value, mappingsTy
           promisesToValidate.push(state.fieldForm.validate());
         }
 
-        return Promise.all(promisesToValidate).then((validationArray) => {
+        return Promise.all(promisesToValidate).then(validationArray => {
           const isValid = validationArray.every(Boolean) && state.fieldsJsonEditor.isValid;
           dispatch({ type: 'validity:update', value: isValid });
           return isValid;
