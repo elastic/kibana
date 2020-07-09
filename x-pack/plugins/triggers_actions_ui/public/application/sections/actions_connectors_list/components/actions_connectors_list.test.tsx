@@ -288,7 +288,7 @@ describe('actions_connectors_list component empty with show only capability', ()
 
   it('renders no permissions to create connector', async () => {
     await setup();
-    expect(wrapper.find('[defaultMessage="No permissions to create connector"]')).toHaveLength(1);
+    expect(wrapper.find('[defaultMessage="No permissions to create connectors"]')).toHaveLength(1);
     expect(wrapper.find('[data-test-subj="createActionButton"]')).toHaveLength(0);
   });
 });
