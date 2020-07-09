@@ -10,6 +10,7 @@ import { getAnomalyDetectionJobs } from '../../lib/anomaly_detection/get_anomaly
 import { createAnomalyDetectionJobs } from '../../lib/anomaly_detection/create_anomaly_detection_jobs';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getAllEnvironments } from '../../lib/environments/get_all_environments';
+import { hasLegacyJobs } from '../../lib/anomaly_detection/has_legacy_jobs';
 
 // get ML anomaly detection jobs for each environment
 export const anomalyDetectionJobsRoute = createRoute(() => ({
@@ -17,7 +18,11 @@ export const anomalyDetectionJobsRoute = createRoute(() => ({
   path: '/api/apm/settings/anomaly-detection',
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    return await getAnomalyDetectionJobs(setup, context.logger);
+    const jobs = await getAnomalyDetectionJobs(setup, context.logger);
+    return {
+      jobs,
+      hasLegacyJobs: await hasLegacyJobs(setup),
+    };
   },
 }));
 
