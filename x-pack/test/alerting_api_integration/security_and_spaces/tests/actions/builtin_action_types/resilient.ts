@@ -32,7 +32,7 @@ const mapping = [
 ];
 
 // eslint-disable-next-line import/no-default-export
-export default function jiraTest({ getService }: FtrProviderContext) {
+export default function resilientTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
