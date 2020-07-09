@@ -73,6 +73,7 @@ export const dataAnalyticsJobUpdateSchema = schema.object({
   description: schema.maybe(schema.string()),
   model_memory_limit: schema.maybe(schema.string()),
   allow_lazy_start: schema.maybe(schema.boolean()),
+  max_num_threads: schema.maybe(schema.number()),
 });
 
 export const stopsDataFrameAnalyticsJobQuerySchema = schema.object({

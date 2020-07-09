@@ -339,6 +339,7 @@ export interface UpdateDataFrameAnalyticsConfig {
   allow_lazy_start?: string;
   description?: string;
   model_memory_limit?: string;
+  max_num_threads?: number;
 }
 
 export interface DataFrameAnalyticsConfig {

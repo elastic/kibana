@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiFieldNumber,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -52,6 +53,7 @@ export const EditButtonFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
   const [description, setDescription] = useState<string>(config.description || '');
   const [modelMemoryLimit, setModelMemoryLimit] = useState<string>(config.model_memory_limit);
   const [mmlValidationError, setMmlValidationError] = useState<string | undefined>();
+  const [maxNumThreads, setMaxNumThreads] = useState<number>(config.max_num_threads);
 
   const {
     services: { notifications },
@@ -210,7 +212,7 @@ export const EditButtonFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
               helpText={
                 state !== DATA_FRAME_TASK_STATE.STOPPED &&
                 i18n.translate('xpack.ml.dataframe.analyticsList.editFlyout.modelMemoryHelpText', {
-                  defaultMessage: 'Model memory limit cannot be edited while the job is running.',
+                  defaultMessage: 'Model memory limit cannot be edited until the job has stopped.',
                 })
               }
               label={i18n.translate(
@@ -234,6 +236,40 @@ export const EditButtonFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
                     defaultMessage: 'Update the model memory limit.',
                   }
                 )}
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              helpText={
+                state !== DATA_FRAME_TASK_STATE.STOPPED &&
+                i18n.translate(
+                  'xpack.ml.dataframe.analyticsList.editFlyout.maxNumThreadsHelpText',
+                  {
+                    defaultMessage:
+                      'Maximum number of threads cannot be edited until the job has stopped.',
+                  }
+                )
+              }
+              label={i18n.translate(
+                'xpack.ml.dataframe.analyticsList.editFlyout.maxNumThreadsLimitLabel',
+                {
+                  defaultMessage: 'Maximum number of threads',
+                }
+              )}
+            >
+              <EuiFieldNumber
+                aria-label={i18n.translate(
+                  'xpack.ml.dataframe.analyticsList.editFlyout.maxNumThreadsAriaLabel',
+                  {
+                    defaultMessage:
+                      'Update the maximum number of threads to be used by the analysis.',
+                  }
+                )}
+                data-test-subj="mlAnalyticsEditFlyoutMaxNumThreadsLimitInput"
+                onChange={(e) => setMaxNumThreads(e.target.value)}
+                step={1}
+                min={1}
+                readOnly={state !== DATA_FRAME_TASK_STATE.STOPPED}
+                value={maxNumThreads}
               />
             </EuiFormRow>
           </EuiForm>
