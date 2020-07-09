@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { chunk } from 'lodash';
+import { Logger } from 'kibana/server';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
@@ -16,11 +17,17 @@ import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { transformServiceMapResponses } from './transform_service_map_responses';
 import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
 import { getTraceSampleIds } from './get_trace_sample_ids';
+import {
+  getServiceAnomalies,
+  ServiceAnomaliesResponse,
+  DEFAULT_ANOMALIES,
+} from './get_service_anomalies';
 
 export interface IEnvOptions {
   setup: Setup & SetupTimeRange;
   serviceName?: string;
   environment?: string;
+  logger: Logger;
 }
 
 async function getConnectionData({
@@ -132,13 +139,23 @@ export type ServicesResponse = PromiseReturnType<typeof getServicesData>;
 export type ServiceMapAPIResponse = PromiseReturnType<typeof getServiceMap>;
 
 export async function getServiceMap(options: IEnvOptions) {
-  const [connectionData, servicesData] = await Promise.all([
+  const { logger } = options;
+  const anomaliesPromise: Promise<ServiceAnomaliesResponse> = getServiceAnomalies(
+    options
+  ).catch((error) => {
+    logger.warn(`Unable to retrieve anomalies for service maps.`);
+    logger.error(error);
+    return DEFAULT_ANOMALIES;
+  });
+  const [connectionData, servicesData, anomalies] = await Promise.all([
     getConnectionData(options),
     getServicesData(options),
+    anomaliesPromise,
   ]);
 
   return transformServiceMapResponses({
     ...connectionData,
     services: servicesData,
+    anomalies,
   });
 }
