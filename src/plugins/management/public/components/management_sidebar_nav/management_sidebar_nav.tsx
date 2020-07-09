@@ -87,12 +87,12 @@ export const ManagementSidebarNav = ({
       }),
     }));
 
-  interface ManagementSectionTitleProps {
+  interface TooltipWrapperProps {
     text: string;
     tip?: string;
   }
 
-  const ManagementSectionTitle = ({ text, tip }: ManagementSectionTitleProps) => (
+  const TooltipWrapper = ({ text, tip }: TooltipWrapperProps) => (
     <EuiToolTip content={tip} position="right">
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>{text}</EuiFlexItem>
@@ -112,7 +112,7 @@ export const ManagementSidebarNav = ({
 
     return {
       id: item.id,
-      name: item.tip ? <ManagementSectionTitle text={item.title} tip={item.tip} /> : item.title,
+      name: item.tip ? <TooltipWrapper text={item.title} tip={item.tip} /> : item.title,
       isSelected: item.id === selectedId,
       icon: iconType ? <EuiIcon type={iconType} size="m" /> : undefined,
       'data-test-subj': item.id,
