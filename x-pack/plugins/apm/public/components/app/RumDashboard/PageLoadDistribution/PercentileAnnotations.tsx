@@ -23,7 +23,7 @@ function generateAnnotationData(
   values?: Record<string, number>
 ): LineAnnotationDatum[] {
   return Object.entries(values ?? {}).map((value) => ({
-    dataValue: Math.round(value[1] / 1000),
+    dataValue: value[1],
     details: `${(+value[0]).toFixed(0)}`,
   }));
 }

@@ -11,13 +11,13 @@ import { EuiText, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { PolicyContainer } from './policy';
 import {
-  MANAGEMENT_ROUTING_ENDPOINTS_PATH,
+  MANAGEMENT_ROUTING_HOSTS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_ROOT_PATH,
 } from '../common/constants';
 import { NotFoundPage } from '../../app/404';
-import { EndpointsContainer } from './endpoint_hosts';
-import { getEndpointListPath } from '../common/routing';
+import { HostsContainer } from './endpoint_hosts';
+import { getHostListPath } from '../common/routing';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
 import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
@@ -63,13 +63,13 @@ export const ManagementContainer = memo(() => {
 
   return (
     <Switch>
-      <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH} component={EndpointsContainer} />
+      <Route path={MANAGEMENT_ROUTING_HOSTS_PATH} component={HostsContainer} />
       <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} component={PolicyContainer} />
       <Route
         path={MANAGEMENT_ROUTING_ROOT_PATH}
         exact
         render={() => {
-          history.replace(getEndpointListPath({ name: 'endpointList' }));
+          history.replace(getHostListPath({ name: 'hostList' }));
           return null;
         }}
       />

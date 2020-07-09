@@ -154,7 +154,7 @@ const PolicyEmptyState = React.memo<{
   );
 });
 
-const EndpointsEmptyState = React.memo<{
+const HostsEmptyState = React.memo<{
   loading: boolean;
   onActionClick: (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
   actionDisabled: boolean;
@@ -164,14 +164,14 @@ const EndpointsEmptyState = React.memo<{
   const policySteps = useMemo(
     () => [
       {
-        title: i18n.translate('xpack.securitySolution.endpoint.endpointList.stepOneTitle', {
+        title: i18n.translate('xpack.securitySolution.endpoint.hostList.stepOneTitle', {
           defaultMessage: 'Select the policy you want to use to protect your hosts',
         }),
         children: (
           <>
             <EuiText color="subdued" size="m" grow={false}>
               <FormattedMessage
-                id="xpack.securitySolution.endpoint.endpointList.stepOne"
+                id="xpack.securitySolution.endpoint.hostList.stepOne"
                 defaultMessage="Existing policies are listed below. This can be changed later."
               />
             </EuiText>
@@ -189,7 +189,7 @@ const EndpointsEmptyState = React.memo<{
                 return loading ? (
                   <EuiSelectableMessage>
                     <FormattedMessage
-                      id="xpack.securitySolution.endpoint.endpointList.loadingPolicies"
+                      id="xpack.securitySolution.endpoint.hostList.loadingPolicies"
                       defaultMessage="Loading policy configs"
                     />
                   </EuiSelectableMessage>
@@ -197,7 +197,7 @@ const EndpointsEmptyState = React.memo<{
                   list
                 ) : (
                   <FormattedMessage
-                    id="xpack.securitySolution.endpoint.endpointList.noPolicies"
+                    id="xpack.securitySolution.endpoint.hostList.noPolicies"
                     defaultMessage="There are no policies."
                   />
                 );
@@ -207,7 +207,7 @@ const EndpointsEmptyState = React.memo<{
         ),
       },
       {
-        title: i18n.translate('xpack.securitySolution.endpoint.endpointList.stepTwoTitle', {
+        title: i18n.translate('xpack.securitySolution.endpoint.hostList.stepTwoTitle', {
           defaultMessage:
             'Enroll your agents enabled with Endpoint Security through Ingest Manager',
         }),
@@ -217,7 +217,7 @@ const EndpointsEmptyState = React.memo<{
             <EuiFlexItem>
               <EuiText color="subdued" size="m" grow={false}>
                 <FormattedMessage
-                  id="xpack.securitySolution.endpoint.endpointList.stepTwo"
+                  id="xpack.securitySolution.endpoint.hostList.stepTwo"
                   defaultMessage="You’ll be provided with the necessary commands to get started."
                 />
               </EuiText>
@@ -249,13 +249,13 @@ const EndpointsEmptyState = React.memo<{
       steps={policySteps}
       headerComponent={
         <FormattedMessage
-          id="xpack.securitySolution.endpoint.endpointList.noEndpointsPrompt"
+          id="xpack.securitySolution.endpoint.hostList.noEndpointsPrompt"
           defaultMessage="Enable Elastic Endpoint Security on your agents"
         />
       }
       bodyComponent={
         <FormattedMessage
-          id="xpack.securitySolution.endpoint.endpointList.noEndpointsInstructions"
+          id="xpack.securitySolution.endpoint.hostList.noEndpointsInstructions"
           defaultMessage="You’ve created your security policy. Now you need to enable the Elastic Endpoint Security capabilities on your agents following the steps below."
         />
       }
@@ -303,7 +303,7 @@ const ManagementEmptyState = React.memo<{
 });
 
 PolicyEmptyState.displayName = 'PolicyEmptyState';
-EndpointsEmptyState.displayName = 'EndpointsEmptyState';
+HostsEmptyState.displayName = 'HostsEmptyState';
 ManagementEmptyState.displayName = 'ManagementEmptyState';
 
-export { PolicyEmptyState, EndpointsEmptyState };
+export { PolicyEmptyState, HostsEmptyState };
