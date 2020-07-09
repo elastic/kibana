@@ -1619,6 +1619,7 @@ describe('Timeline', () => {
           description: '',
           deletedEventIds: [],
           eventIdToNoteIds: {},
+          excludedRowRendererIds: [],
           highlightedDropAndProviderId: '',
           historyIds: [],
           isFavorite: false,
@@ -1639,7 +1640,6 @@ describe('Timeline', () => {
           },
           selectedEventIds: {},
           show: true,
-          showRowRenderers: true,
           showCheckboxes: false,
           sort: {
             columnId: '@timestamp',
@@ -1722,6 +1722,7 @@ describe('Timeline', () => {
           description: '',
           deletedEventIds: [],
           eventIdToNoteIds: {},
+          excludedRowRendererIds: [],
           highlightedDropAndProviderId: '',
           historyIds: [],
           isFavorite: false,
@@ -1742,7 +1743,6 @@ describe('Timeline', () => {
           },
           selectedEventIds: {},
           show: true,
-          showRowRenderers: true,
           showCheckboxes: false,
           sort: {
             columnId: '@timestamp',

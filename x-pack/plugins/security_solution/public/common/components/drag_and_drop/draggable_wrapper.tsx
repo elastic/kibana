@@ -130,7 +130,6 @@ const DraggableWrapperComponent: React.FC<Props> = ({
   const timelineIdFind = useGetTimelineId(draggableRef, goGetTimelineId);
   const [providerRegistered, setProviderRegistered] = useState(false);
   const isDisabled = dataProvider.id.includes(`-${ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID}-`);
-
   const dispatch = useDispatch();
 
   const handleClosePopOverTrigger = useCallback(
@@ -149,24 +148,24 @@ const DraggableWrapperComponent: React.FC<Props> = ({
   }, [handleClosePopOverTrigger]);
 
   const registerProvider = useCallback(() => {
-    if (!isDisabled && !providerRegistered) {
+    if (!isDisabled) {
       dispatch(dragAndDropActions.registerProvider({ provider: dataProvider }));
       setProviderRegistered(true);
     }
-  }, [isDisabled, providerRegistered, dispatch, dataProvider]);
+  }, [isDisabled, dispatch, dataProvider]);
 
   const unRegisterProvider = useCallback(
-    () => dispatch(dragAndDropActions.unRegisterProvider({ id: dataProvider.id })),
-    [dispatch, dataProvider]
+    () =>
+      providerRegistered &&
+      dispatch(dragAndDropActions.unRegisterProvider({ id: dataProvider.id })),
+    [providerRegistered, dispatch, dataProvider.id]
   );
 
   useEffect(
     () => () => {
-      if (!isDisabled) {
-        unRegisterProvider();
-      }
+      unRegisterProvider();
     },
-    [isDisabled, unRegisterProvider]
+    [unRegisterProvider]
   );
 
   const hoverContent = useMemo(
