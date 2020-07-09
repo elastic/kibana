@@ -53,7 +53,7 @@ import {
   HOSTS,
   NETWORK,
   TIMELINES,
-  ALERTS,
+  DETECTION_ENGINE,
   CASE,
   ADMINISTRATION,
 } from './app/home/translations';
@@ -146,9 +146,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     core.application.register({
       id: `${APP_ID}:${SecurityPageName.detections}`,
-      title: i18n.translate('xpack.securitySolution.detectionsPage.title', {
-        defaultMessage: 'Detections',
-      }),
+      title: DETECTION_ENGINE,
       order: 9001,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,

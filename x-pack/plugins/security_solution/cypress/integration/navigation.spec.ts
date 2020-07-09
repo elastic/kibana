@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  ALERTS,
   CASES,
+  DETECTIONS,
   HOSTS,
   MANAGEMENT,
   NETWORK,
@@ -28,8 +28,8 @@ import {
 } from '../urls/navigation';
 import { openKibanaNavigation, navigateFromKibanaCollapsibleTo } from '../tasks/kibana_navigation';
 import {
-  ALERTS_PAGE,
   CASES_PAGE,
+  DETECTIONS_PAGE,
   HOSTS_PAGE,
   ADMINISTRATION_PAGE,
   NETWORK_PAGE,
@@ -47,8 +47,8 @@ describe('top-level navigation common to all pages in the Security app', () => {
     cy.url().should('include', OVERVIEW_URL);
   });
 
-  it('navigates to the Alerts page', () => {
-    navigateFromHeaderTo(ALERTS);
+  it('navigates to the Detections page', () => {
+    navigateFromHeaderTo(DETECTIONS);
     cy.url().should('include', DETECTIONS_URL);
   });
 
@@ -90,8 +90,8 @@ describe('Kibana navigation to all pages in the Security app ', () => {
     cy.url().should('include', OVERVIEW_URL);
   });
 
-  it('navigates to the Alerts page', () => {
-    navigateFromKibanaCollapsibleTo(ALERTS_PAGE);
+  it('navigates to the Detections page', () => {
+    navigateFromKibanaCollapsibleTo(DETECTIONS_PAGE);
     cy.url().should('include', DETECTIONS_URL);
   });
 
