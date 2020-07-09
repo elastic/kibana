@@ -19,11 +19,10 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
+import { coreMock } from '../../../../../core/public/mocks';
+import { chartPluginMock } from '../../../../charts/public/mocks';
 
-import { Vis } from '../../../../../../plugins/vis_type_vislib/public/vislib/vis';
-
-// TODO: Remove when converted to jest mocks
-import { ColorsService } from '../../../../../../plugins/charts/public/services';
+import { Vis } from '../vis';
 
 const $visCanvas = $('<div>')
   .attr('id', 'vislib-vis-fixtures')
@@ -55,15 +54,12 @@ afterEach(function () {
 });
 
 const getDeps = () => {
-  const uiSettings = new Map();
-  const colors = new ColorsService();
-  colors.init(uiSettings);
+  const mockUiSettings = coreMock.createSetup().uiSettings;
+  const charts = chartPluginMock.createStartContract();
 
   return {
-    uiSettings,
-    charts: {
-      colors,
-    },
+    uiSettings: mockUiSettings,
+    charts: charts,
   };
 };
 
