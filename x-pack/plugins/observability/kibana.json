@@ -12,6 +12,8 @@
   "ui": true,
   "server": true,
   "requiredBundles": [
-    "kibanaReact"
+    "data",
+    "kibanaReact",
+    "kibanaUtils"
   ]
 }
