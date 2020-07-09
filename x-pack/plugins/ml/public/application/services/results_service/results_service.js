@@ -9,6 +9,10 @@ import _ from 'lodash';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 import { escapeForElasticsearchQuery } from '../../util/string_utils';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../common/constants/index_patterns';
+import {
+  ANOMALY_SWIM_LANE_HARD_LIMIT,
+  SWIM_LANE_DEFAULT_PAGE_SIZE,
+} from '../../explorer/explorer_constants';
 
 /**
  * Service for carrying out Elasticsearch queries to obtain data for the Ml Results dashboards.
@@ -24,7 +28,7 @@ export function resultsServiceProvider(mlApiServices) {
     // Pass an empty array or ['*'] to search over all job IDs.
     // Returned response contains a results property, with a key for job
     // which has results for the specified time range.
-    getScoresByBucket(jobIds, earliestMs, latestMs, interval, maxResults) {
+    getScoresByBucket(jobIds, earliestMs, latestMs, interval, perPage = 10, fromPage = 1) {
       return new Promise((resolve, reject) => {
         const obj = {
           success: true,
@@ -88,7 +92,7 @@ export function resultsServiceProvider(mlApiServices) {
                 jobId: {
                   terms: {
                     field: 'job_id',
-                    size: maxResults !== undefined ? maxResults : 5,
+                    size: jobIds?.length ?? 1,
                     order: {
                       anomalyScore: 'desc',
                     },
@@ -97,6 +101,12 @@ export function resultsServiceProvider(mlApiServices) {
                     anomalyScore: {
                       max: {
                         field: 'anomaly_score',
+                      },
+                    },
+                    bucketTruncate: {
+                      bucket_sort: {
+                        from: (fromPage - 1) * perPage,
+                        size: perPage === 0 ? 1 : perPage,
                       },
                     },
                     byTime: {
@@ -158,7 +168,9 @@ export function resultsServiceProvider(mlApiServices) {
       jobIds,
       earliestMs,
       latestMs,
-      maxFieldValues = 10,
+      maxFieldValues = ANOMALY_SWIM_LANE_HARD_LIMIT,
+      perPage = 10,
+      fromPage = 1,
       influencers = [],
       influencersFilterQuery
     ) {
@@ -272,6 +284,12 @@ export function resultsServiceProvider(mlApiServices) {
                         },
                       },
                       aggs: {
+                        bucketTruncate: {
+                          bucket_sort: {
+                            from: (fromPage - 1) * perPage,
+                            size: perPage,
+                          },
+                        },
                         maxAnomalyScore: {
                           max: {
                             field: 'influencer_score',
@@ -472,7 +490,9 @@ export function resultsServiceProvider(mlApiServices) {
       earliestMs,
       latestMs,
       interval,
-      maxResults,
+      maxResults = ANOMALY_SWIM_LANE_HARD_LIMIT,
+      perPage = SWIM_LANE_DEFAULT_PAGE_SIZE,
+      fromPage = 1,
       influencersFilterQuery
     ) {
       return new Promise((resolve, reject) => {
@@ -565,10 +585,15 @@ export function resultsServiceProvider(mlApiServices) {
                 },
               },
               aggs: {
+                influencerValuesCardinality: {
+                  cardinality: {
+                    field: 'influencer_field_value',
+                  },
+                },
                 influencerFieldValues: {
                   terms: {
                     field: 'influencer_field_value',
-                    size: maxResults !== undefined ? maxResults : 10,
+                    size: !!maxResults ? maxResults : ANOMALY_SWIM_LANE_HARD_LIMIT,
                     order: {
                       maxAnomalyScore: 'desc',
                     },
@@ -577,6 +602,12 @@ export function resultsServiceProvider(mlApiServices) {
                     maxAnomalyScore: {
                       max: {
                         field: 'influencer_score',
+                      },
+                    },
+                    bucketTruncate: {
+                      bucket_sort: {
+                        from: (fromPage - 1) * perPage,
+                        size: perPage,
                       },
                     },
                     byTime: {
@@ -617,6 +648,8 @@ export function resultsServiceProvider(mlApiServices) {
 
               obj.results[fieldValue] = fieldValues;
             });
+
+            obj.cardinality = resp.aggregations?.influencerValuesCardinality?.value ?? 0;
 
             resolve(obj);
           })

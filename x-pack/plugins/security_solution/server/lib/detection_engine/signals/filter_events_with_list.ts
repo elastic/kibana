@@ -8,6 +8,7 @@ import { Logger } from 'src/core/server';
 
 import { ListClient } from '../../../../../lists/server';
 import { SignalSearchResponse, SearchTypes } from './types';
+import { BuildRuleMessage } from './rule_messages';
 import {
   entriesList,
   EntryList,
@@ -19,6 +20,7 @@ interface FilterEventsAgainstList {
   exceptionsList: ExceptionListItemSchema[];
   logger: Logger;
   eventSearchResult: SignalSearchResponse;
+  buildRuleMessage: BuildRuleMessage;
 }
 
 export const filterEventsAgainstList = async ({
@@ -26,9 +28,12 @@ export const filterEventsAgainstList = async ({
   exceptionsList,
   logger,
   eventSearchResult,
+  buildRuleMessage,
 }: FilterEventsAgainstList): Promise<SignalSearchResponse> => {
   try {
+    logger.debug(buildRuleMessage(`exceptionsList: ${JSON.stringify(exceptionsList, null, 2)}`));
     if (exceptionsList == null || exceptionsList.length === 0) {
+      logger.debug(buildRuleMessage('about to return original search result'));
       return eventSearchResult;
     }
 
@@ -43,10 +48,14 @@ export const filterEventsAgainstList = async ({
         const filteredHitsEntries = entries
           .filter((t): t is EntryList => entriesList.is(t))
           .map(async (entry) => {
+            const { list, field, operator } = entry;
+            const { id, type } = list;
+
             // acquire the list values we are checking for.
             const valuesOfGivenType = eventSearchResult.hits.hits.reduce(
               (acc, searchResultItem) => {
-                const valueField = get(entry.field, searchResultItem._source);
+                const valueField = get(field, searchResultItem._source);
+
                 if (valueField != null && isStringableType(valueField)) {
                   acc.add(valueField.toString());
                 }
@@ -58,8 +67,8 @@ export const filterEventsAgainstList = async ({
             // matched will contain any list items that matched with the
             // values passed in from the Set.
             const matchedListItems = await listClient.getListItemByValues({
-              listId: entry.list.id,
-              type: entry.list.type,
+              listId: id,
+              type,
               value: [...valuesOfGivenType],
             });
 
@@ -71,7 +80,6 @@ export const filterEventsAgainstList = async ({
             // do a single search after with these values.
             // painless script to do nested query in elasticsearch
             // filter out the search results that match with the values found in the list.
-            const operator = entry.operator;
             const filteredEvents = eventSearchResult.hits.hits.filter((item) => {
               const eventItem = get(entry.field, item._source);
               if (operator === 'included') {
@@ -86,7 +94,7 @@ export const filterEventsAgainstList = async ({
               return false;
             });
             const diff = eventSearchResult.hits.hits.length - filteredEvents.length;
-            logger.debug(`Lists filtered out ${diff} events`);
+            logger.debug(buildRuleMessage(`Lists filtered out ${diff} events`));
             return filteredEvents;
           });
 

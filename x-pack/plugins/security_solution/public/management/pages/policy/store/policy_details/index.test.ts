@@ -41,6 +41,13 @@ describe('policy details: ', () => {
               enabled: true,
               streams: [],
               config: {
+                artifact_manifest: {
+                  value: {
+                    manifest_version: 'WzAsMF0=',
+                    schema_version: 'v1',
+                    artifacts: {},
+                  },
+                },
                 policy: {
                   value: policyConfigFactory(),
                 },

@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { connector as serviceNowConnectorConfig } from './servicenow/config';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ServiceNowConnectorConfiguration } from '../../../../../triggers_actions_ui/public/common';
 import { connector as jiraConnectorConfig } from './jira/config';
 import { ConnectorConfiguration } from './types';
 
 export const connectorsConfiguration: Record<string, ConnectorConfiguration> = {
-  '.servicenow': serviceNowConnectorConfig,
+  '.servicenow': ServiceNowConnectorConfiguration as ConnectorConfiguration,
   '.jira': jiraConnectorConfig,
 };

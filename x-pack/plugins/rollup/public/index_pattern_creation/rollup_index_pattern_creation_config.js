@@ -100,6 +100,7 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
           {
             key: this.type,
             name: rollupIndexPatternIndexLabel,
+            color: 'primary',
           },
         ]
       : [];
