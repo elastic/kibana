@@ -77,7 +77,7 @@ const sortDirectionsRT = rt.keyof({
   'desc': null,
 });
 
-const paginationPreviousPageCursor = rt.type({
+const paginationPreviousPageCursorRT = rt.type({
   searchBefore: paginationCursorRT,
 });
 
