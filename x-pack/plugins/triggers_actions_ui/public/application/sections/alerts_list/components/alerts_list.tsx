@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiLink,
   EuiLoadingSpinner,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 
@@ -247,6 +248,9 @@ export const AlertsList: React.FunctionComponent = () => {
   ];
 
   const authorizedAlertTypes = [...alertTypesState.data.values()];
+  const authorizedToCreateAnyAlerts = authorizedAlertTypes.some(
+    (alertType) => alertType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
+  );
 
   const toolsRight = [
     <TypeFilter
@@ -266,9 +270,7 @@ export const AlertsList: React.FunctionComponent = () => {
     />,
   ];
 
-  if (
-    authorizedAlertTypes.some((alertType) => alertType.authorizedConsumers[ALERTS_FEATURE_ID]?.all)
-  ) {
+  if (authorizedToCreateAnyAlerts) {
     toolsRight.push(
       <EuiButton
         key="create-alert"
@@ -434,8 +436,10 @@ export const AlertsList: React.FunctionComponent = () => {
             <EuiLoadingSpinner size="xl" />
           </EuiFlexItem>
         </EuiFlexGroup>
-      ) : (
+      ) : authorizedToCreateAnyAlerts ? (
         <EmptyPrompt onCTAClicked={() => setAlertFlyoutVisibility(true)} />
+      ) : (
+        noPermissionPrompt
       )}
       <AlertsContextProvider
         value={{
@@ -460,6 +464,28 @@ export const AlertsList: React.FunctionComponent = () => {
     </section>
   );
 };
+
+const noPermissionPrompt = (
+  <EuiEmptyPrompt
+    iconType="securityApp"
+    title={
+      <h1>
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.alertsList.noPermissionToCreateTitle"
+          defaultMessage="No permissions to create alerts"
+        />
+      </h1>
+    }
+    body={
+      <p data-test-subj="permissionDeniedMessage">
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.alertsList.noPermissionToCreateDescription"
+          defaultMessage="Contact your system administrator."
+        />
+      </p>
+    }
+  />
+);
 
 function filterAlertsById(alerts: Alert[], ids: string[]): Alert[] {
   return alerts.filter((alert) => ids.includes(alert.id));
