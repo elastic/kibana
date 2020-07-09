@@ -23,7 +23,6 @@ import {
   EuiGlobalToastList,
   EuiGlobalToastListToast,
   EuiPageContent,
-  EuiSwitchEvent,
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -49,7 +48,6 @@ interface CreateIndexPatternWizardState {
   allIndices: MatchedItem[];
   remoteClustersExist: boolean;
   isInitiallyLoadingIndices: boolean;
-  isIncludingSystemIndices: boolean;
   toasts: EuiGlobalToastListToast[];
   indexPatternCreationType: IndexPatternCreationConfig;
   selectedTimeField?: string;
@@ -77,7 +75,6 @@ export class CreateIndexPatternWizard extends Component<
       allIndices: [],
       remoteClustersExist: false,
       isInitiallyLoadingIndices: true,
-      isIncludingSystemIndices: false,
       toasts: [],
       indexPatternCreationType: context.services.indexPatternManagementStart.creation.getType(type),
       docLinks: context.services.docLinks,
@@ -111,12 +108,6 @@ export class CreateIndexPatternWizard extends Component<
   };
 
   fetchData = async () => {
-    this.setState({
-      allIndices: [],
-      isInitiallyLoadingIndices: true,
-      remoteClustersExist: false,
-    });
-
     const indicesFailMsg = (
       <FormattedMessage
         id="indexPatternManagement.createIndexPattern.loadIndicesFailMsg"
@@ -138,8 +129,9 @@ export class CreateIndexPatternWizard extends Component<
           this.context.services.http,
           (indexName: string) => this.state.indexPatternCreationType.getIndexTags(indexName),
           `*`,
-          this.state.isIncludingSystemIndices
+          false
         ),
+
         [],
         indicesFailMsg
       )
@@ -154,8 +146,9 @@ export class CreateIndexPatternWizard extends Component<
         this.context.services.http,
         (indexName: string) => this.state.indexPatternCreationType.getIndexTags(indexName),
         `*:*`,
-        this.state.isIncludingSystemIndices
+        false
       ),
+
       ['a'],
       clustersFailMsg
     ).then((remoteIndices: string[] | MatchedItem[]) =>
@@ -218,21 +211,28 @@ export class CreateIndexPatternWizard extends Component<
     this.setState({ step: 1 });
   };
 
+  /*
   onChangeIncludingSystemIndices = (event: EuiSwitchEvent) => {
     this.setState({ isIncludingSystemIndices: event.target.checked }, () => this.fetchData());
   };
+  */
 
   renderHeader() {
-    const { isIncludingSystemIndices, docLinks } = this.state;
+    const { docLinks } = this.state;
+    //  const { isIncludingSystemIndices, docLinks } = this.state;
 
     return (
       <Header
         prompt={this.state.indexPatternCreationType.renderPrompt()}
+        /*
         showSystemIndices={
           this.state.indexPatternCreationType.getShowSystemIndices() && this.state.step === 1
         }
-        isIncludingSystemIndices={isIncludingSystemIndices}
+
+        isIncludingSystemIndices={isIncludingSystemIndices}'
+
         onChangeIncludingSystemIndices={this.onChangeIncludingSystemIndices}
+        */
         indexPatternName={this.state.indexPatternCreationType.getIndexPatternName()}
         isBeta={this.state.indexPatternCreationType.getIsBeta()}
         docLinks={docLinks}
@@ -240,11 +240,22 @@ export class CreateIndexPatternWizard extends Component<
     );
   }
 
+  /*
+  =======
+  renderHeader() {
+    return (
+      <Header
+        prompt={this.state.indexPatternCreationType.renderPrompt()}
+        indexPatternName={this.state.indexPatternCreationType.getIndexPatternName()}
+        isBeta={this.state.indexPatternCreationType.getIsBeta()}
+        docLinks={this.state.docLinks}
+>>>>>>> master
+*/
+
   renderContent() {
     const {
       allIndices,
       isInitiallyLoadingIndices,
-      isIncludingSystemIndices,
       step,
       indexPattern,
       // remoteClustersExist,
@@ -268,9 +279,11 @@ export class CreateIndexPatternWizard extends Component<
           <StepIndexPattern
             allIndices={allIndices}
             initialQuery={indexPattern || initialQuery}
-            isIncludingSystemIndices={isIncludingSystemIndices}
             indexPatternCreationType={this.state.indexPatternCreationType}
             goToNextStep={this.goToTimeFieldStep}
+            showSystemIndices={
+              this.state.indexPatternCreationType.getShowSystemIndices() && this.state.step === 1
+            }
           />
         </EuiPageContent>
       );

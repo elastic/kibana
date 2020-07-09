@@ -187,7 +187,7 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
           <EuiTableRowCell>
             {index.tags.map((tag: Tag) => {
               return (
-                <EuiBadge key={`index_${key}_tag_${tag.key}`} color="primary">
+                <EuiBadge key={`index_${key}_tag_${tag.key}`} color={tag.color}>
                   {tag.name}
                 </EuiBadge>
               );

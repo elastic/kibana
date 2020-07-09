@@ -21,11 +21,19 @@ import { sortBy } from 'lodash';
 import { HttpStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { IndexPatternCreationConfig } from '../../../../../index_pattern_management/public';
-import { MatchedItem, ResolveIndexResponse } from '../types';
+import { MatchedItem, ResolveIndexResponse, ResolveIndexResponseItemIndexAttrs } from '../types';
 
 const aliasLabel = i18n.translate('indexPatternManagement.aliasLabel', { defaultMessage: 'Alias' });
 const dataStreamLabel = i18n.translate('indexPatternManagement.dataStreamLabel', {
   defaultMessage: 'Data stream',
+});
+
+const indexLabel = i18n.translate('indexPatternManagement.indexLabel', {
+  defaultMessage: 'Index',
+});
+
+const frozenLabel = i18n.translate('indexPatternManagement.frozenLabel', {
+  defaultMessage: 'Frozen',
 });
 
 export async function getIndices(
@@ -58,7 +66,7 @@ export async function getIndices(
 
   try {
     const response = await http.get<ResolveIndexResponse>(
-      `/api/index-pattern-management/resolve_index/${pattern}`,
+      `/internal/index-pattern-management/resolve_index/${pattern}`,
       { query }
     );
     if (!response) {
@@ -78,19 +86,31 @@ export const responseToItemArray = (
   const source: MatchedItem[] = [];
 
   (response.indices || []).forEach((index) => {
+    const tags: MatchedItem['tags'] = [{ key: 'index', name: indexLabel, color: 'default' }];
+    const isFrozen = (index.attributes || []).includes(ResolveIndexResponseItemIndexAttrs.FROZEN);
+
+    tags.push(...getIndexTags(index.name));
+    if (isFrozen) {
+      tags.push({ name: frozenLabel, key: 'frozen', color: 'danger' });
+    }
+
     source.push({
       name: index.name,
-      tags: getIndexTags(index.name),
+      tags,
       item: index,
     });
   });
   (response.aliases || []).forEach((alias) => {
-    source.push({ name: alias.name, tags: [{ key: 'alias', name: aliasLabel }], item: alias });
+    source.push({
+      name: alias.name,
+      tags: [{ key: 'alias', name: aliasLabel, color: 'default' }],
+      item: alias,
+    });
   });
   (response.data_streams || []).forEach((dataStream) => {
     source.push({
       name: dataStream.name,
-      tags: [{ key: 'data_stream', name: dataStreamLabel }],
+      tags: [{ key: 'data_stream', name: dataStreamLabel, color: 'primary' }],
       item: dataStream,
     });
   });

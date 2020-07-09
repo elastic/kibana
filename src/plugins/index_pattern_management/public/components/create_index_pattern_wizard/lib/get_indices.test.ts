@@ -19,6 +19,7 @@
 
 import { getIndices, responseToItemArray } from './get_indices';
 import { httpServiceMock } from '../../../../../../core/public/mocks';
+import { ResolveIndexResponseItemIndexAttrs } from '../types';
 
 export const successfulResponse = {
   indices: [
@@ -70,6 +71,10 @@ describe('getIndices', () => {
       indices: [
         {
           name: 'test_index',
+        },
+        {
+          name: 'frozen_index',
+          attributes: ['frozen' as ResolveIndexResponseItemIndexAttrs],
         },
       ],
       aliases: [

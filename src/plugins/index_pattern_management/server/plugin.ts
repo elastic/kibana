@@ -28,7 +28,7 @@ export class IndexPatternManagementPlugin implements Plugin<void, void> {
 
     router.get(
       {
-        path: `/api/index-pattern-management/resolve_index/{query}`,
+        path: '/internal/index-pattern-management/resolve_index/{query}',
         validate: {
           params: schema.object({
             query: schema.string(),

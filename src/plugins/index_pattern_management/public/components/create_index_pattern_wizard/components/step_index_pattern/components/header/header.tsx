@@ -28,6 +28,8 @@ import {
   EuiForm,
   EuiFormRow,
   EuiFieldText,
+  EuiSwitchEvent,
+  EuiSwitch,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -41,6 +43,9 @@ interface HeaderProps {
   onQueryChanged: (e: React.ChangeEvent<HTMLInputElement>) => void;
   goToNextStep: (query: string) => void;
   isNextStepDisabled: boolean;
+  showSystemIndices?: boolean;
+  onChangeIncludingSystemIndices: (event: EuiSwitchEvent) => void;
+  isIncludingSystemIndices: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -51,6 +56,9 @@ export const Header: React.FC<HeaderProps> = ({
   onQueryChanged,
   goToNextStep,
   isNextStepDisabled,
+  showSystemIndices = false,
+  onChangeIncludingSystemIndices,
+  isIncludingSystemIndices,
   ...rest
 }) => (
   <div {...rest}>
@@ -104,8 +112,25 @@ export const Header: React.FC<HeaderProps> = ({
               isInvalid={isInputInvalid}
               onChange={onQueryChanged}
               data-test-subj="createIndexPatternNameInput"
+              fullWidth
             />
           </EuiFormRow>
+
+          {showSystemIndices ? (
+            <EuiFormRow>
+              <EuiSwitch
+                label={
+                  <FormattedMessage
+                    id="indexPatternManagement.createIndexPattern.includeSystemIndicesToggleSwitchLabel"
+                    defaultMessage="Include system and hidden indices"
+                  />
+                }
+                id="checkboxShowSystemIndices"
+                checked={isIncludingSystemIndices}
+                onChange={onChangeIncludingSystemIndices}
+              />
+            </EuiFormRow>
+          ) : null}
         </EuiForm>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

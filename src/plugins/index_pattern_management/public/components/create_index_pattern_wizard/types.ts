@@ -20,10 +20,15 @@
 export interface MatchedItem {
   name: string;
   tags: Tag[];
-  item:
-    | ResolveIndexResponseItemIndex
-    | ResolveIndexResponseItemAlias
-    | ResolveIndexResponseItemDataStream;
+  item: {
+    name: string;
+    backing_indices?: string[];
+    timestamp_field?: string;
+    indices?: string[];
+    aliases?: string[];
+    attributes?: ResolveIndexResponseItemIndexAttrs[];
+    data_stream?: string;
+  };
 }
 
 export interface ResolveIndexResponse {
@@ -51,7 +56,7 @@ export interface ResolveIndexResponseItemIndex extends ResolveIndexResponseItem 
   data_stream?: string;
 }
 
-enum ResolveIndexResponseItemIndexAttrs {
+export enum ResolveIndexResponseItemIndexAttrs {
   OPEN = 'open',
   CLOSED = 'closed',
   HIDDEN = 'hidden',
@@ -61,4 +66,5 @@ enum ResolveIndexResponseItemIndexAttrs {
 export interface Tag {
   name: string;
   key: string;
+  color: string;
 }

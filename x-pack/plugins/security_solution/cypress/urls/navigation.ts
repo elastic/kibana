@@ -16,7 +16,7 @@ export const HOSTS_PAGE_TAB_URLS = {
   uncommonProcesses: '/app/security/hosts/uncommonProcesses',
 };
 export const KIBANA_HOME = '/app/home#/';
-export const MANAGEMENT_URL = '/app/security/management';
+export const ADMINISTRATION_URL = '/app/security/administration';
 export const NETWORK_URL = '/app/security/network';
 export const OVERVIEW_URL = '/app/security/overview';
 export const TIMELINES_URL = '/app/security/timelines';

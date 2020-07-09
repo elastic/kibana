@@ -25,6 +25,7 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiLoadingSpinner,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ensureMinimumTime, extractTimeFields } from '../../lib';
@@ -252,6 +253,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
           selectedTimeField={selectedTimeField}
           onTimeFieldChanged={this.onTimeFieldChanged}
         />
+        <EuiHorizontalRule />
         <AdvancedOptions
           isVisible={isAdvancedOptionsVisible}
           indexPatternId={indexPatternId}

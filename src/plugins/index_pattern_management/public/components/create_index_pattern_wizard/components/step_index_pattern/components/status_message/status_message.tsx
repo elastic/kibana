@@ -44,7 +44,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
 }) => {
   let statusIcon: EuiIconType | undefined;
   let statusMessage;
-  let statusColor: 'primary' | 'success' | undefined;
+  let statusColor: 'primary' | 'success' | 'warning' | undefined;
 
   const allIndicesLength = allIndices.length;
 
@@ -57,7 +57,10 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
         <span>
           <FormattedMessage
             id="indexPatternManagement.createIndexPattern.step.status.matchAnyLabel.matchAnyDetail"
-            defaultMessage="Your index pattern can match any of your {sourceCount} sources below."
+            defaultMessage="Your index pattern can match {sourceCount, plural,
+              one {your # source}
+              other {any of your # sources}
+            }."
             values={{ sourceCount: allIndicesLength }}
           />
         </span>
@@ -89,7 +92,10 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
         &nbsp;
         <FormattedMessage
           id="indexPatternManagement.createIndexPattern.step.status.successLabel.successDetail"
-          defaultMessage="Your index pattern matches {sourceCount} sources."
+          defaultMessage="Your index pattern matches {sourceCount} {sourceCount, plural,
+            one {source}
+            other {sources}
+          }."
           values={{
             sourceCount: exactMatchedIndices.length,
           }}
@@ -104,14 +110,20 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
         <FormattedMessage
           id="indexPatternManagement.createIndexPattern.step.status.partialMatchLabel.partialMatchDetail"
           defaultMessage="Your index pattern doesn't match any indices, but you have {strongIndices} which
-          {matchedIndicesLength, plural, one {looks} other {look}} similar."
+          {matchedIndicesLength, plural,
+            one {looks}
+            other {look}
+          } similar."
           values={{
             matchedIndicesLength: partialMatchedIndices.length,
             strongIndices: (
               <strong>
                 <FormattedMessage
                   id="indexPatternManagement.createIndexPattern.step.status.partialMatchLabel.strongIndicesLabel"
-                  defaultMessage="{matchedIndicesLength, plural, one {# index} other {# indices}}"
+                  defaultMessage="{matchedIndicesLength, plural,
+                    one {index}
+                    other {# indices}
+                  }"
                   values={{ matchedIndicesLength: partialMatchedIndices.length }}
                 />
               </strong>
@@ -122,19 +134,25 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
     );
   } else if (allIndicesLength) {
     statusIcon = undefined;
-    statusColor = 'primary';
+    statusColor = 'warning';
     statusMessage = (
       <span>
         <FormattedMessage
           id="indexPatternManagement.createIndexPattern.step.status.notMatchLabel.notMatchDetail"
           defaultMessage="The index pattern you've entered doesn't match any indices.
-          You can match {indicesLength, plural, one {your} other {any of your}} {strongIndices}, below."
+          You can match {indicesLength, plural,
+            one {your}
+            other {any of your}
+          } {strongIndices}, below."
           values={{
             strongIndices: (
               <strong>
                 <FormattedMessage
                   id="indexPatternManagement.createIndexPattern.step.status.notMatchLabel.allIndicesLabel"
-                  defaultMessage="{indicesLength, plural, one {# index} other {# indices}}"
+                  defaultMessage="{indicesLength, plural,
+                    one {# index}
+                    other {# indices}
+                  }"
                   values={{ indicesLength: allIndicesLength }}
                 />
               </strong>

@@ -11,8 +11,10 @@ Object {
       ]
     }
     goToNextStep={[Function]}
+    isIncludingSystemIndices={false}
     isInputInvalid={true}
     isNextStepDisabled={true}
+    onChangeIncludingSystemIndices={[Function]}
     onQueryChanged={[Function]}
     query="?"
   />,
