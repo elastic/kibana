@@ -189,9 +189,7 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
   return (
     <>
       <StyledBreadcrumbs breadcrumbs={crumbs} />
-      {showWarning && (
-        <StyledLimitWarning numberDisplayed={numberOfProcesses} />
-      )}
+      {showWarning && <StyledLimitWarning numberDisplayed={numberOfProcesses} />}
       <EuiSpacer size="l" />
       <EuiInMemoryTable<ProcessTableView> items={processTableView} columns={columns} sorting />
     </>
