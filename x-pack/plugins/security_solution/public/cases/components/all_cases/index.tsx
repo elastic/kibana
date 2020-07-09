@@ -26,7 +26,7 @@ import { Case, DeleteCase, FilterOptions, SortFieldCase } from '../../containers
 import { useGetCases, UpdateCase } from '../../containers/use_get_cases';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { useDeleteCases } from '../../containers/use_delete_cases';
-import { EuiBasicTableOnChange } from '../../../alerts/pages/detection_engine/rules/types';
+import { EuiBasicTableOnChange } from '../../../detections/pages/detection_engine/rules/types';
 import { Panel } from '../../../common/components/panel';
 import {
   UtilityBar,

@@ -4,31 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { flatten, merge, sortBy, sum } from 'lodash';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import { TelemetryTask } from '.';
 import { AGENT_NAMES } from '../../../../common/agent_name';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import {
-  PROCESSOR_EVENT,
-  SERVICE_NAME,
   AGENT_NAME,
   AGENT_VERSION,
+  CLOUD_AVAILABILITY_ZONE,
+  CLOUD_PROVIDER,
+  CLOUD_REGION,
   ERROR_GROUP_ID,
-  TRANSACTION_NAME,
   PARENT_ID,
+  PROCESSOR_EVENT,
   SERVICE_FRAMEWORK_NAME,
   SERVICE_FRAMEWORK_VERSION,
   SERVICE_LANGUAGE_NAME,
   SERVICE_LANGUAGE_VERSION,
+  SERVICE_NAME,
   SERVICE_RUNTIME_NAME,
   SERVICE_RUNTIME_VERSION,
+  TRANSACTION_NAME,
   USER_AGENT_ORIGINAL,
-  CLOUD_AVAILABILITY_ZONE,
-  CLOUD_PROVIDER,
-  CLOUD_REGION,
 } from '../../../../common/elasticsearch_fieldnames';
-import { Span } from '../../../../typings/es_schemas/ui/span';
 import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
-import { TelemetryTask } from '.';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import { Span } from '../../../../typings/es_schemas/ui/span';
+import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { APMTelemetry } from '../types';
 
 const TIME_RANGES = ['1d', 'all'] as const;
@@ -465,17 +465,17 @@ export const tasks: TelemetryTask[] = [
   {
     name: 'integrations',
     executor: async ({ transportRequest }) => {
-      const apmJobs = ['*-high_mean_response_time'];
+      const apmJobs = ['apm-*', '*-high_mean_response_time'];
 
       const response = (await transportRequest({
         method: 'get',
         path: `/_ml/anomaly_detectors/${apmJobs.join(',')}`,
-      })) as { data?: { count: number } };
+      })) as { body?: { count: number } };
 
       return {
         integrations: {
           ml: {
-            all_jobs_count: response.data?.count ?? 0,
+            all_jobs_count: response.body?.count ?? 0,
           },
         },
       };
