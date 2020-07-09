@@ -23,9 +23,9 @@ import 'leaflet/dist/leaflet.js';
 import 'leaflet-vega';
 import { createVegaVisualization } from './vega_visualization';
 
-import vegaliteGraph from './vegalite_graph.json';
-import vegaGraph from './vega_graph.json';
-import vegaMapGraph from './vega_map_test.json';
+import vegaliteGraph from './__test__/vegalite_graph.json';
+import vegaGraph from './__test__/vega_graph.json';
+import vegaMapGraph from './__test__/vega_map_test.json';
 
 import { VegaParser } from './data_model/vega_parser';
 import { SearchAPI } from './data_model/search_api';
@@ -102,7 +102,6 @@ describe('VegaVisualizations', () => {
     afterEach(() => {
       mockWidth.mockRestore();
       mockHeight.mockRestore();
-      teardownDOM();
     });
 
     test('should show vegalite graph and update on resize (may fail in dev env)', async () => {
@@ -236,11 +235,5 @@ describe('VegaVisualizations', () => {
     domNode = document.createElement('div');
     mockWidth = jest.spyOn($.prototype, 'width').mockReturnValue(width);
     mockHeight = jest.spyOn($.prototype, 'height').mockReturnValue(height);
-    document.body.appendChild(domNode);
-  }
-
-  function teardownDOM() {
-    domNode.innerHTML = '';
-    document.body.removeChild(domNode);
   }
 });
