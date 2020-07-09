@@ -261,13 +261,14 @@ export default function ({ getService, getPageObjects }) {
 
     describe('invalid time range in URL', function () {
       it('should get the default timerange', async function () {
+        const prevTime = await PageObjects.timePicker.getTimeConfig();
         await PageObjects.common.navigateToUrl('discover', '#/?_g=(time:(from:now-15m,to:null))', {
           useActualUrl: true,
         });
         await PageObjects.header.awaitKibanaChrome();
         const time = await PageObjects.timePicker.getTimeConfig();
-        expect(time.start).to.be('~ 15 minutes ago');
-        expect(time.end).to.be('now');
+        expect(time.start).to.be(prevTime.start);
+        expect(time.end).to.be(prevTime.end);
       });
     });
 
