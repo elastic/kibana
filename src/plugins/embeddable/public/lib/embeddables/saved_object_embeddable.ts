@@ -26,5 +26,5 @@ export interface SavedObjectEmbeddableInput extends EmbeddableInput {
 export function isSavedObjectEmbeddableInput(
   input: EmbeddableInput | SavedObjectEmbeddableInput
 ): input is SavedObjectEmbeddableInput {
-  return (input as SavedObjectEmbeddableInput).savedObjectId !== undefined;
+  return Boolean((input as SavedObjectEmbeddableInput).savedObjectId);
 }

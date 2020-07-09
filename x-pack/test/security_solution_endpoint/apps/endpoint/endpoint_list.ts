@@ -13,14 +13,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
 
-  describe('endpoint list', function () {
+  describe('host list', function () {
     this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
 
     describe('when there is data,', () => {
       before(async () => {
         await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
-        await pageObjects.endpoint.navigateToEndpointList();
+        await pageObjects.endpoint.navigateToHostList();
       });
       after(async () => {
         await deleteMetadataStream(getService);
@@ -28,7 +28,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('finds page title', async () => {
         const title = await testSubjects.getVisibleText('pageViewHeaderLeftTitle');
-        expect(title).to.equal('Endpoints');
+        expect(title).to.equal('Hosts');
       });
 
       it('displays table data', async () => {
@@ -129,7 +129,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // This set of tests fails the flyout does not open in the before() and will be fixed in soon
       describe.skip('has a url with a host id', () => {
         before(async () => {
-          await pageObjects.endpoint.navigateToEndpointList(
+          await pageObjects.endpoint.navigateToHostList(
             'selected_host=fc0ff548-feba-41b6-8367-65e8790d0eaf'
           );
         });
@@ -178,7 +178,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         // clear out the data and reload the page
         await deleteMetadataStream(getService);
-        await pageObjects.endpoint.navigateToEndpointList();
+        await pageObjects.endpoint.navigateToHostList();
       });
       it('displays empty Policy Table page.', async () => {
         await testSubjects.existOrFail('emptyPolicyTable');
