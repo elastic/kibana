@@ -42,6 +42,8 @@ export enum AgentAssetType {
   input = 'input',
 }
 
+export type RegistryRelease = 'ga' | 'beta' | 'experimental';
+
 // from /package/{name}
 // type Package struct at https://github.com/elastic/package-registry/blob/master/util/package.go
 // https://github.com/elastic/package-registry/blob/master/docs/api/package.json
@@ -49,6 +51,7 @@ export interface RegistryPackage {
   name: string;
   title?: string;
   version: string;
+  release?: RegistryRelease;
   readme?: string;
   description: string;
   type: string;
@@ -114,6 +117,7 @@ export type RegistrySearchResult = Pick<
   | 'name'
   | 'title'
   | 'version'
+  | 'release'
   | 'description'
   | 'type'
   | 'icons'

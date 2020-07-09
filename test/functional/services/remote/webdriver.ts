@@ -88,6 +88,7 @@ async function attemptToCreateCommand(
 ) {
   const attemptId = ++attemptCounter;
   log.debug('[webdriver] Creating session');
+  const remoteSessionUrl = process.env.REMOTE_SESSION_URL;
 
   const buildDriverInstance = async () => {
     switch (browserType) {
@@ -133,11 +134,20 @@ async function attemptToCreateCommand(
         chromeCapabilities.set('goog:loggingPrefs', { browser: 'ALL' });
         chromeCapabilities.setAcceptInsecureCerts(config.acceptInsecureCerts);
 
-        const session = await new Builder()
-          .forBrowser(browserType)
-          .withCapabilities(chromeCapabilities)
-          .setChromeService(new chrome.ServiceBuilder(chromeDriver.path).enableVerboseLogging())
-          .build();
+        let session;
+        if (remoteSessionUrl) {
+          session = await new Builder()
+            .forBrowser(browserType)
+            .withCapabilities(chromeCapabilities)
+            .usingServer(remoteSessionUrl)
+            .build();
+        } else {
+          session = await new Builder()
+            .forBrowser(browserType)
+            .withCapabilities(chromeCapabilities)
+            .setChromeService(new chrome.ServiceBuilder(chromeDriver.path).enableVerboseLogging())
+            .build();
+        }
 
         return {
           session,
@@ -284,11 +294,19 @@ async function attemptToCreateCommand(
           logLevel: 'TRACE',
         });
 
-        const session = await new Builder()
-          .forBrowser(browserType)
-          .withCapabilities(ieCapabilities)
-          .build();
-
+        let session;
+        if (remoteSessionUrl) {
+          session = await new Builder()
+            .forBrowser(browserType)
+            .withCapabilities(ieCapabilities)
+            .usingServer(remoteSessionUrl)
+            .build();
+        } else {
+          session = await new Builder()
+            .forBrowser(browserType)
+            .withCapabilities(ieCapabilities)
+            .build();
+        }
         return {
           session,
           consoleLog$: Rx.EMPTY,
