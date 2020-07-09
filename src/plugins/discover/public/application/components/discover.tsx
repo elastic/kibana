@@ -86,7 +86,7 @@ export function Discover({
         <TopNavMenu
           appName="discover"
           config={topNavMenu}
-          indexPatterns={indexPatternList}
+          indexPatterns={[indexPattern]}
           onQuerySubmit={updateQuery}
           onSavedQueryIdChange={updateSavedQueryId}
           query={state.query}
