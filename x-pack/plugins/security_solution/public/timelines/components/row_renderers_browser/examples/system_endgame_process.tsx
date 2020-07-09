@@ -8,12 +8,13 @@ import React from 'react';
 
 import { createEndgameProcessRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
 import { mockEndgameCreationEvent } from '../../../../common/mock/mock_endgame_ecs_data';
+import { PROCESS_STARTED } from '../../timeline/body/renderers/system/translations';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
 const SystemEndgameProcessExampleComponent: React.FC = () => {
   const systemEndgameProcessRowRenderer = createEndgameProcessRowRenderer({
     actionName: 'creation_event',
-    text: 'started process',
+    text: PROCESS_STARTED,
   });
 
   return (

@@ -6,6 +6,7 @@
 
 import React from 'react';
 
+import { TERMINATED_PROCESS } from '../../timeline/body/renderers/system/translations';
 import { createGenericSystemRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
 import { mockEndgameTerminationEvent } from '../../../../common/mock/mock_endgame_ecs_data';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
@@ -13,7 +14,7 @@ import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 const SystemExampleComponent: React.FC = () => {
   const systemRowRenderer = createGenericSystemRowRenderer({
     actionName: 'termination_event',
-    text: 'terminated process',
+    text: TERMINATED_PROCESS,
   });
 
   return (

@@ -6,14 +6,13 @@
 
 import { EuiFlexItem, EuiInMemoryTable } from '@elastic/eui';
 import React, { useMemo, useCallback } from 'react';
-import { xorBy } from 'lodash/fp';
+import { xor, xorBy } from 'lodash/fp';
 import styled from 'styled-components';
 
 import { RowRendererId } from '../../../../common/types/timeline';
 import { renderers, RowRendererOption } from './catalog';
 
 interface RowRenderersBrowserProps {
-  // ref?: React.Ref<EuiInMemoryTable<{}>>;
   excludedRowRendererIds: RowRendererId[];
   setExcludedRowRendererIds: (excludedRowRendererIds: RowRendererId[]) => void;
 }
@@ -66,16 +65,35 @@ const search = {
  */
 const renderSearchableDescriptionNoop = () => <></>;
 
+const initialSorting = {
+  sort: {
+    field: 'name',
+    direction: 'asc',
+  },
+};
+
+const StyledNameButton = styled.button``;
+
 const RowRenderersBrowserComponent = React.forwardRef(
   ({ excludedRowRendererIds = [], setExcludedRowRendererIds }: RowRenderersBrowserProps, ref) => {
-    const sort = useMemo(
-      () => ({
-        sort: {
-          field: 'name',
-          direction: 'asc',
-        },
-      }),
-      []
+    const notExcludedRowRenderers = useMemo(() => {
+      if (excludedRowRendererIds.length === Object.keys(RowRendererId).length) return [];
+
+      return renderers.filter((renderer) => !excludedRowRendererIds.includes(renderer.id));
+    }, [excludedRowRendererIds]);
+
+    const handleNameClick = useCallback(
+      (item: RowRendererOption) => () => {
+        const newSelection = xor([item], notExcludedRowRenderers);
+        // @ts-ignore
+        ref?.current?.setSelection(newSelection); // eslint-disable-line no-unused-expressions
+      },
+      [notExcludedRowRenderers, ref]
+    );
+
+    const nameColumnRenderCallback = useCallback(
+      (value, item) => <StyledNameButton onClick={handleNameClick(item)}>{value}</StyledNameButton>,
+      [handleNameClick]
     );
 
     const columns = useMemo(
@@ -84,8 +102,8 @@ const RowRenderersBrowserComponent = React.forwardRef(
           field: 'name',
           name: 'Name',
           sortable: true,
-          truncateText: true,
           width: '10%',
+          render: nameColumnRenderCallback,
         },
         {
           field: 'description',
@@ -107,14 +125,8 @@ const RowRenderersBrowserComponent = React.forwardRef(
           render: renderSearchableDescriptionNoop,
         },
       ],
-      []
+      [nameColumnRenderCallback]
     );
-
-    const notExcludedRowRenderers = useMemo(() => {
-      if (excludedRowRendererIds.length === Object.keys(RowRendererId).length) return [];
-
-      return renderers.filter((renderer) => !excludedRowRendererIds.includes(renderer.id));
-    }, [excludedRowRendererIds]);
 
     const handleSelectable = useCallback(() => true, []);
 
@@ -146,7 +158,7 @@ const RowRenderersBrowserComponent = React.forwardRef(
         itemId="id"
         columns={columns}
         search={search}
-        sorting={sort}
+        sorting={initialSorting}
         isSelectable={true}
         selection={selectionValue}
       />

@@ -45,7 +45,7 @@ describe('StatefulFieldsBrowser', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="show-field-browser-gear"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="show-field-browser"]').exists()).toBe(true);
   });
 
   describe('toggleShow', () => {
@@ -82,7 +82,7 @@ describe('StatefulFieldsBrowser', () => {
         </TestProviders>
       );
 
-      wrapper.find('[data-test-subj="show-field-browser-gear"]').first().simulate('click');
+      wrapper.find('[data-test-subj="show-field-browser"]').first().simulate('click');
 
       expect(wrapper.find('[data-test-subj="fields-browser-container"]').exists()).toBe(true);
     });
@@ -107,7 +107,7 @@ describe('StatefulFieldsBrowser', () => {
         </TestProviders>
       );
 
-      wrapper.find('[data-test-subj="show-field-browser-gear"]').first().simulate('click');
+      wrapper.find('[data-test-subj="show-field-browser"]').first().simulate('click');
 
       wrapper.find(`.field-browser-category-pane-auditd-${timelineId}`).first().simulate('click');
 
@@ -132,7 +132,7 @@ describe('StatefulFieldsBrowser', () => {
         </TestProviders>
       );
 
-      wrapper.find('[data-test-subj="show-field-browser-gear"]').first().simulate('click');
+      wrapper.find('[data-test-subj="show-field-browser"]').first().simulate('click');
       expect(
         wrapper.find(`.field-browser-category-pane-cloud-${timelineId}`).at(1)
       ).toHaveStyleRule('font-weight', 'normal', { modifier: '.euiText' });
@@ -167,31 +167,10 @@ describe('StatefulFieldsBrowser', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="show-field-browser-gear"]').first().exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="show-field-browser"]').first().exists()).toBe(true);
   });
 
-  test('it does NOT render the default Fields Browser button when the isEventViewer prop is false', () => {
-    const isEventViewer = false;
-
-    const wrapper = mount(
-      <TestProviders>
-        <StatefulFieldsBrowserComponent
-          browserFields={mockBrowserFields}
-          columnHeaders={[]}
-          height={FIELD_BROWSER_HEIGHT}
-          isEventViewer={isEventViewer}
-          onUpdateColumns={jest.fn()}
-          timelineId={timelineId}
-          toggleColumn={jest.fn()}
-          width={FIELD_BROWSER_WIDTH}
-        />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="show-field-browser"]').first().exists()).toBe(false);
-  });
-
-  test('it does NOT render the default Fields Browser button when the isEventViewer prop is true', () => {
+  test('it renders the Fields Browser button as a settings gear when the isEventViewer prop is false', () => {
     const isEventViewer = true;
 
     const wrapper = mount(
@@ -209,6 +188,6 @@ describe('StatefulFieldsBrowser', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="show-field-browser"]').first().exists()).toBe(false);
+    expect(wrapper.find('[data-test-subj="show-field-browser"]').first().exists()).toBe(true);
   });
 });

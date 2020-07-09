@@ -14,6 +14,7 @@ import {
   SHOW_CHECK_BOXES_COLUMN_WIDTH,
   EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH,
   DEFAULT_ACTIONS_COLUMN_WIDTH,
+  MINIMUM_ACTIONS_COLUMN_WIDTH,
 } from '../constants';
 
 /** Enriches the column headers with field details from the specified browserFields */
@@ -42,7 +43,13 @@ export const getActionsColumnWidth = (
   isEventViewer: boolean,
   showCheckboxes = false,
   additionalActionWidth = 0
-): number =>
-  (showCheckboxes ? SHOW_CHECK_BOXES_COLUMN_WIDTH : 0) +
-  (isEventViewer ? EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH : DEFAULT_ACTIONS_COLUMN_WIDTH) +
-  additionalActionWidth;
+): number => {
+  const actionsColumnWidth =
+    (showCheckboxes ? SHOW_CHECK_BOXES_COLUMN_WIDTH : 0) +
+    (isEventViewer ? EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH : DEFAULT_ACTIONS_COLUMN_WIDTH) +
+    additionalActionWidth;
+
+  return actionsColumnWidth > MINIMUM_ACTIONS_COLUMN_WIDTH
+    ? actionsColumnWidth
+    : MINIMUM_ACTIONS_COLUMN_WIDTH;
+};

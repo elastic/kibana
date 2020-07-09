@@ -147,7 +147,6 @@ describe('Epic Timeline', () => {
         selectedEventIds: {},
         show: true,
         showCheckboxes: false,
-        showRowRenderers: true,
         sort: { columnId: '@timestamp', sortDirection: Direction.desc },
         status: TimelineStatus.active,
         width: 1100,

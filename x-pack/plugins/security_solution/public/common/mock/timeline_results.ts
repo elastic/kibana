@@ -2138,7 +2138,6 @@ export const mockTimelineModel: TimelineModel = {
   selectedEventIds: {},
   show: false,
   showCheckboxes: false,
-  showRowRenderers: true,
   sort: {
     columnId: '@timestamp',
     sortDirection: Direction.desc,
@@ -2243,7 +2242,6 @@ export const defaultTimelineProps: CreateTimelineProps = {
     selectedEventIds: {},
     show: false,
     showCheckboxes: false,
-    showRowRenderers: true,
     sort: { columnId: '@timestamp', sortDirection: Direction.desc },
     status: TimelineStatus.draft,
     title: '',

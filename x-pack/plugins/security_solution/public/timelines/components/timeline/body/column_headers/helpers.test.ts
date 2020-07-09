@@ -11,6 +11,7 @@ import {
   DEFAULT_ACTIONS_COLUMN_WIDTH,
   SHOW_CHECK_BOXES_COLUMN_WIDTH,
   EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH,
+  MINIMUM_ACTIONS_COLUMN_WIDTH,
 } from '../constants';
 
 describe('helpers', () => {
@@ -36,7 +37,7 @@ describe('helpers', () => {
     });
 
     test('returns the events viewer actions column width when isEventViewer is true', () => {
-      expect(getActionsColumnWidth(true)).toEqual(EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH);
+      expect(getActionsColumnWidth(true)).toEqual(MINIMUM_ACTIONS_COLUMN_WIDTH);
     });
 
     test('returns the events viewer actions column width + checkbox width when isEventViewer is true and showCheckboxes is true', () => {

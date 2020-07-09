@@ -8,12 +8,13 @@ import React from 'react';
 
 import { mockEndgameFileDeleteEvent } from '../../../../common/mock/mock_endgame_ecs_data';
 import { createGenericFileRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
+import { DELETED_FILE } from '../../timeline/body/renderers/system/translations';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
 const SystemFileExampleComponent: React.FC = () => {
   const systemFileRowRenderer = createGenericFileRowRenderer({
     actionName: 'file_delete_event',
-    text: 'deleted a file',
+    text: DELETED_FILE,
   });
 
   return (

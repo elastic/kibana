@@ -75,7 +75,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     clearSelected,
     show,
     showCheckboxes,
-    showRowRenderers,
     graphEventId,
     sort,
     toggleColumn,
@@ -176,16 +175,15 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
 
     const enabledRowRenderers = useMemo(() => {
       if (
-        !showRowRenderers ||
-        (excludedRowRendererIds &&
-          excludedRowRendererIds.length === Object.keys(RowRendererId).length)
+        excludedRowRendererIds &&
+        excludedRowRendererIds.length === Object.keys(RowRendererId).length
       )
         return [plainRowRenderer];
 
       if (!excludedRowRendererIds) return rowRenderers;
 
       return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
-    }, [excludedRowRendererIds, showRowRenderers]);
+    }, [excludedRowRendererIds]);
 
     return (
       <Body
@@ -239,7 +237,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     prevProps.show === nextProps.show &&
     prevProps.selectedEventIds === nextProps.selectedEventIds &&
     prevProps.showCheckboxes === nextProps.showCheckboxes &&
-    prevProps.showRowRenderers === nextProps.showRowRenderers &&
     prevProps.sort === nextProps.sort
 );
 
@@ -267,7 +264,6 @@ const makeMapStateToProps = () => {
       selectedEventIds,
       show,
       showCheckboxes,
-      showRowRenderers,
     } = timeline;
 
     return {
@@ -284,7 +280,6 @@ const makeMapStateToProps = () => {
       selectedEventIds,
       show,
       showCheckboxes,
-      showRowRenderers,
     };
   };
   return mapStateToProps;

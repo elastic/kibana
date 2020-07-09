@@ -80,7 +80,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toContain(
-        'Session246alice@zeek-londonconnected usingwget(1490)wget www.example.comwith resultsuccessDestination93.184.216.34:80'
+        'Session246alice@zeek-londonconnected usingwget(1490)wget www.example.comwith resultsuccessDestination192.168.216.34:80'
       );
     });
   });

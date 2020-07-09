@@ -211,7 +211,6 @@ describe('alert actions', () => {
             selectedEventIds: {},
             show: true,
             showCheckboxes: false,
-            showRowRenderers: true,
             sort: {
               columnId: '@timestamp',
               sortDirection: 'desc',

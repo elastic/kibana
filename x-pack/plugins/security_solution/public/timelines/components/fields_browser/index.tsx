@@ -149,7 +149,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
         <EuiButtonIcon
           aria-label={i18n.CUSTOMIZE_COLUMNS}
           className={fieldsButtonClassName}
-          data-test-subj="show-field-browser-gear"
+          data-test-subj="show-field-browser"
           iconType="list"
           onClick={toggleShow}
         >

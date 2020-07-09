@@ -295,7 +295,6 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        showRowRenderers: true,
         sort: {
           columnId: '@timestamp',
           sortDirection: 'desc',
@@ -394,7 +393,6 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        showRowRenderers: true,
         sort: {
           columnId: '@timestamp',
           sortDirection: 'desc',
@@ -535,7 +533,6 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        showRowRenderers: true,
         sort: {
           columnId: '@timestamp',
           sortDirection: 'desc',
@@ -705,7 +702,6 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        showRowRenderers: true,
         sort: {
           columnId: '@timestamp',
           sortDirection: 'desc',

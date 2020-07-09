@@ -133,6 +133,7 @@ interface AddNewTimelineParams {
     start: number;
     end: number;
   };
+  excludedRowRendererIds?: RowRendererId[];
   filters?: Filter[];
   id: string;
   itemsPerPage?: number;
@@ -143,7 +144,6 @@ interface AddNewTimelineParams {
   show?: boolean;
   sort?: Sort;
   showCheckboxes?: boolean;
-  showRowRenderers?: boolean;
   timelineById: TimelineById;
   timelineType: TimelineTypeLiteral;
 }
@@ -153,6 +153,7 @@ export const addNewTimeline = ({
   columns,
   dataProviders = [],
   dateRange = { start: 0, end: 0 },
+  excludedRowRendererIds = [],
   filters = timelineDefaults.filters,
   id,
   itemsPerPage = timelineDefaults.itemsPerPage,
@@ -160,7 +161,6 @@ export const addNewTimeline = ({
   sort = timelineDefaults.sort,
   show = false,
   showCheckboxes = false,
-  showRowRenderers = true,
   timelineById,
   timelineType,
 }: AddNewTimelineParams): TimelineById => {
@@ -179,6 +179,7 @@ export const addNewTimeline = ({
       columns,
       dataProviders,
       dateRange,
+      excludedRowRendererIds,
       filters,
       itemsPerPage,
       kqlQuery,
@@ -189,7 +190,6 @@ export const addNewTimeline = ({
       isSaving: false,
       isLoading: false,
       showCheckboxes,
-      showRowRenderers,
       timelineType: !disableTemplate ? timelineType : timelineDefaults.timelineType,
       ...templateTimelineInfo,
     },
@@ -1372,7 +1372,6 @@ export const updateExcludedRowRenderersIds = ({
     [id]: {
       ...timeline,
       excludedRowRendererIds,
-      showRowRenderers: excludedRowRendererIds.length !== Object.keys(RowRendererId).length,
     },
   };
 };

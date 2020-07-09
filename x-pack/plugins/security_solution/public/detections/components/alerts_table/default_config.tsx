@@ -11,6 +11,7 @@ import ApolloClient from 'apollo-client';
 import { Dispatch } from 'redux';
 
 import { EuiText } from '@elastic/eui';
+import { RowRendererId } from '../../../../common/types/timeline';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
 import {
@@ -162,7 +163,7 @@ export const alertsDefaultModel: SubsetTimelineModel = {
   ...timelineDefaults,
   columns: alertsHeaders,
   showCheckboxes: true,
-  showRowRenderers: false,
+  excludedRowRendererIds: Object.values(RowRendererId),
 };
 
 export const requiredFieldsForActions = [

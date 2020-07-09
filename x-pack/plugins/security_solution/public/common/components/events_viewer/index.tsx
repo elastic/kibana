@@ -45,6 +45,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   defaultIndices,
   deleteEventQuery,
   end,
+  excludedRowRendererIds,
   filters,
   headerFilterGroup,
   id,
@@ -57,7 +58,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   removeColumn,
   start,
   showCheckboxes,
-  showRowRenderers,
   sort,
   updateItemsPerPage,
   upsertColumn,
@@ -69,7 +69,14 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 
   useEffect(() => {
     if (createTimeline != null) {
-      createTimeline({ id, columns, sort, itemsPerPage, showCheckboxes, showRowRenderers });
+      createTimeline({
+        id,
+        columns,
+        excludedRowRendererIds,
+        sort,
+        itemsPerPage,
+        showCheckboxes,
+      });
     }
     return () => {
       deleteEventQuery({ id, inputId: 'global' });
@@ -151,7 +158,6 @@ const makeMapStateToProps = () => {
       kqlMode,
       sort,
       showCheckboxes,
-      showRowRenderers,
     } = events;
 
     return {
@@ -168,7 +174,6 @@ const makeMapStateToProps = () => {
       query: getGlobalQuerySelector(state),
       sort,
       showCheckboxes,
-      showRowRenderers,
     };
   };
   return mapStateToProps;
@@ -207,7 +212,6 @@ export const StatefulEventsViewer = connector(
       prevProps.start === nextProps.start &&
       deepEqual(prevProps.pageFilters, nextProps.pageFilters) &&
       prevProps.showCheckboxes === nextProps.showCheckboxes &&
-      prevProps.showRowRenderers === nextProps.showRowRenderers &&
       prevProps.start === nextProps.start &&
       prevProps.utilityBar === nextProps.utilityBar
   )

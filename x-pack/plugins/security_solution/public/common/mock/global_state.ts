@@ -216,7 +216,6 @@ export const mockGlobalState: State = {
         },
         selectedEventIds: {},
         show: false,
-        showRowRenderers: true,
         showCheckboxes: false,
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},

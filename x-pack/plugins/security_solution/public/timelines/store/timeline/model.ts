@@ -111,8 +111,6 @@ export interface TimelineModel {
   show: boolean;
   /** When true, shows checkboxes enabling selection. Selected events store in selectedEventIds **/
   showCheckboxes: boolean;
-  /** When true, shows additional rowRenderers below the PlainRowRenderer **/
-  showRowRenderers: boolean;
   /**  Specifies which column the timeline is sorted on, and the direction (ascending / descending) */
   sort: Sort;
   /** status: active | draft */
@@ -157,7 +155,6 @@ export type SubsetTimelineModel = Readonly<
     | 'selectedEventIds'
     | 'show'
     | 'showCheckboxes'
-    | 'showRowRenderers'
     | 'sort'
     | 'width'
     | 'isSaving'

@@ -8,12 +8,13 @@ import React from 'react';
 
 import { mockTimelineData } from '../../../../common/mock/mock_timeline_data';
 import { createGenericAuditRowRenderer } from '../../timeline/body/renderers/auditd/generic_row_renderer';
+import { CONNECTED_USING } from '../../timeline/body/renderers/auditd/translations';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
 const AuditdExampleComponent: React.FC = () => {
   const auditdRowRenderer = createGenericAuditRowRenderer({
     actionName: 'connected-to',
-    text: 'connected using',
+    text: CONNECTED_USING,
   });
 
   return (

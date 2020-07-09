@@ -96,7 +96,6 @@ const timelineByIdMock: TimelineById = {
     selectedEventIds: {},
     show: true,
     showCheckboxes: false,
-    showRowRenderers: true,
     sort: {
       columnId: '@timestamp',
       sortDirection: Direction.desc,
@@ -1131,7 +1130,6 @@ describe('Timeline', () => {
           },
           selectedEventIds: {},
           show: true,
-          showRowRenderers: true,
           showCheckboxes: false,
           sort: {
             columnId: '@timestamp',
@@ -1228,7 +1226,6 @@ describe('Timeline', () => {
           },
           selectedEventIds: {},
           show: true,
-          showRowRenderers: true,
           showCheckboxes: false,
           sort: {
             columnId: '@timestamp',
@@ -1435,7 +1432,6 @@ describe('Timeline', () => {
           },
           selectedEventIds: {},
           show: true,
-          showRowRenderers: true,
           showCheckboxes: false,
           sort: {
             columnId: '@timestamp',
@@ -1532,7 +1528,6 @@ describe('Timeline', () => {
           },
           selectedEventIds: {},
           show: true,
-          showRowRenderers: true,
           showCheckboxes: false,
           sort: {
             columnId: '@timestamp',
@@ -1728,7 +1723,6 @@ describe('Timeline', () => {
           },
           selectedEventIds: {},
           show: true,
-          showRowRenderers: true,
           showCheckboxes: false,
           sort: {
             columnId: '@timestamp',
@@ -1795,7 +1789,6 @@ describe('Timeline', () => {
           isLoading: false,
           id: 'foo',
           savedObjectId: null,
-          showRowRenderers: true,
           kqlMode: 'filter',
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           loadingEventIds: [],
@@ -1914,7 +1907,6 @@ describe('Timeline', () => {
           },
           selectedEventIds: {},
           show: true,
-          showRowRenderers: true,
           showCheckboxes: false,
           sort: {
             columnId: '@timestamp',

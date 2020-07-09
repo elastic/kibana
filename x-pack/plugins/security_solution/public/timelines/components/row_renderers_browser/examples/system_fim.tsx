@@ -8,12 +8,13 @@ import React from 'react';
 
 import { mockEndgameFileCreateEvent } from '../../../../common/mock/mock_endgame_ecs_data';
 import { createFimRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
+import { CREATED_FILE } from '../../timeline/body/renderers/system/translations';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
 const SystemFimExampleComponent: React.FC = () => {
   const systemFimRowRenderer = createFimRowRenderer({
     actionName: 'file_create_event',
-    text: 'created a file',
+    text: CREATED_FILE,
   });
 
   return (

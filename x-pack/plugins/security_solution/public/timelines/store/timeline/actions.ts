@@ -69,7 +69,6 @@ export const createTimeline = actionCreator<{
   show?: boolean;
   sort?: Sort;
   showCheckboxes?: boolean;
-  showRowRenderers?: boolean;
   timelineType?: TimelineTypeLiteral;
   templateTimelineId?: string;
   templateTimelineVersion?: number;
