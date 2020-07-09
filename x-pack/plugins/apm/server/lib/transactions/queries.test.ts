@@ -52,6 +52,7 @@ describe('transaction queries', () => {
         transactionName: undefined,
         transactionType: undefined,
         setup,
+        environment: 'test',
       })
     );
     expect(mock.params).toMatchSnapshot();
@@ -64,6 +65,7 @@ describe('transaction queries', () => {
         transactionName: 'bar',
         transactionType: undefined,
         setup,
+        environment: 'test',
       })
     );
     expect(mock.params).toMatchSnapshot();
@@ -76,6 +78,7 @@ describe('transaction queries', () => {
         transactionName: 'bar',
         transactionType: 'baz',
         setup,
+        environment: 'test',
       })
     );
 

@@ -96,17 +96,18 @@ export class TransactionCharts extends Component<TransactionChartProps> {
   };
 
   public renderMLHeader(hasValidMlLicense: boolean | undefined) {
-    const { hasMLJob } = this.props;
-    if (!hasValidMlLicense || !hasMLJob) {
+    const {
+      hasMLJob,
+      charts: { mlJobId },
+    } = this.props;
+    if (!hasValidMlLicense || !hasMLJob || !mlJobId) {
       return null;
     }
 
-    const { serviceName, kuery } = this.props.urlParams;
+    const { serviceName, kuery, transactionType } = this.props.urlParams;
     if (!serviceName) {
       return null;
     }
-
-    const linkedJobId = ''; // TODO [APM ML] link to ML job id for the selected environment
 
     const hasKuery = !isEmpty(kuery);
     const icon = hasKuery ? (
@@ -140,7 +141,13 @@ export class TransactionCharts extends Component<TransactionChartProps> {
               }
             )}{' '}
           </span>
-          <MLJobLink jobId={linkedJobId}>View Job</MLJobLink>
+          <MLJobLink
+            jobId={mlJobId}
+            serviceName={serviceName}
+            transactionType={transactionType}
+          >
+            View Job
+          </MLJobLink>
         </ShiftedEuiText>
       </EuiFlexItem>
     );

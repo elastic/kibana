@@ -3,32 +3,36 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { getBucketSize } from '../../../helpers/get_bucket_size';
 import {
   Setup,
   SetupTimeRange,
   SetupUIFilters,
 } from '../../../helpers/setup_request';
-import { Coordinate, RectCoordinate } from '../../../../../typings/timeseries';
-
-interface AnomalyTimeseries {
-  anomalyBoundaries: Coordinate[];
-  anomalyScore: RectCoordinate[];
-}
+import { anomalySeriesFetcher } from './fetcher';
+import { getMlBucketSize } from './get_ml_bucket_size';
+import { anomalySeriesTransform } from './transform';
+import { getMLJobIds } from '../../../service_map/get_service_anomalies';
+import {
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+} from '../../../../../common/elasticsearch_fieldnames';
 
 export async function getAnomalySeries({
   serviceName,
   transactionType,
   transactionName,
+  environment,
   timeSeriesDates,
   setup,
 }: {
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
+  environment: string | undefined;
   timeSeriesDates: number[];
   setup: Setup & SetupTimeRange & SetupUIFilters;
-}): Promise<void | AnomalyTimeseries> {
+}) {
   // don't fetch anomalies for transaction details page
   if (transactionName) {
     return;
@@ -39,9 +43,16 @@ export async function getAnomalySeries({
     return;
   }
 
-  // don't fetch anomalies if uiFilters are applied
   if (setup.uiFiltersES.length > 0) {
-    return;
+    // filter out known uiFilters like service.environment & service.name
+    const unknownFilters = setup.uiFiltersES.filter(
+      (uiFilter) =>
+        !uiFilter.term?.[SERVICE_ENVIRONMENT] && !uiFilter.terms?.[SERVICE_NAME]
+    );
+    // don't fetch anomalies if unknown uiFilters are applied
+    if (unknownFilters.length > 0) {
+      return;
+    }
   }
 
   // don't fetch anomalies if the ML plugin is not setup
@@ -55,6 +66,40 @@ export async function getAnomalySeries({
     return;
   }
 
-  // TODO [APM ML] return a series of anomaly scores, upper & lower bounds for the given timeSeriesDates
-  return;
+  const mlJobIds = await getMLJobIds(setup.ml, environment);
+
+  // don't fetch anomalies if there are more than 1 ML jobs for the given environment
+  if (mlJobIds.length > 1) {
+    return;
+  }
+  const jobId = mlJobIds[0];
+
+  const mlBucketSize = await getMlBucketSize({
+    serviceName,
+    transactionType,
+    setup,
+    jobId,
+  });
+
+  const { start, end } = setup;
+  const { intervalString, bucketSize } = getBucketSize(start, end, 'auto');
+
+  const esResponse = await anomalySeriesFetcher({
+    serviceName,
+    transactionType,
+    intervalString,
+    mlBucketSize,
+    setup,
+    jobId,
+  });
+
+  return esResponse
+    ? anomalySeriesTransform(
+        esResponse,
+        mlBucketSize,
+        bucketSize,
+        timeSeriesDates,
+        jobId
+      )
+    : undefined;
 }

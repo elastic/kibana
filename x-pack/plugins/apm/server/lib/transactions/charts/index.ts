@@ -25,6 +25,7 @@ export async function getTransactionCharts(options: {
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
+  environment: string | undefined;
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
   const apmTimeseries = await getApmTimeseriesData(options);
