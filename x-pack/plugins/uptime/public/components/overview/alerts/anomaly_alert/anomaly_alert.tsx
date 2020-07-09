@@ -73,6 +73,7 @@ export default function AnomalyAlertComponent({ setAlertParams }: Props) {
                 {getSeverityType(severity.val)}
               </EuiHealth>
             }
+            isEnabled={true}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
