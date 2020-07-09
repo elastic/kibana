@@ -16,6 +16,7 @@
     "xpack.data": "plugins/data_enhanced",
     "xpack.embeddableEnhanced": "plugins/embeddable_enhanced",
     "xpack.endpoint": "plugins/endpoint",
+    "xpack.enterpriseSearch": "plugins/enterprise_search",
     "xpack.features": "plugins/features",
     "xpack.fileUpload": "plugins/file_upload",
     "xpack.globalSearch": ["plugins/global_search"],
