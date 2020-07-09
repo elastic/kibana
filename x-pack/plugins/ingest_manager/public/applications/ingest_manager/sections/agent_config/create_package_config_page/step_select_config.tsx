@@ -17,7 +17,8 @@ export const StepSelectConfig: React.FunctionComponent<{
   updatePackageInfo: (packageInfo: PackageInfo | undefined) => void;
   agentConfig: AgentConfig | undefined;
   updateAgentConfig: (config: AgentConfig | undefined) => void;
-}> = ({ pkgkey, updatePackageInfo, agentConfig, updateAgentConfig }) => {
+  setIsLoadingSecondStep: (isLoading: boolean) => void;
+}> = ({ pkgkey, updatePackageInfo, agentConfig, updateAgentConfig, setIsLoadingSecondStep }) => {
   // Selected config state
   const [selectedConfigId, setSelectedConfigId] = useState<string | undefined>(
     agentConfig ? agentConfig.id : undefined
@@ -28,7 +29,7 @@ export const StepSelectConfig: React.FunctionComponent<{
   const {
     data: packageInfoData,
     error: packageInfoError,
-    isLoading: packageInfoLoading,
+    isLoading: isPackageInfoLoading,
   } = useGetPackageInfoByKey(pkgkey);
   const isLimitedPackage = (packageInfoData && isPackageLimited(packageInfoData.response)) || false;
 
@@ -64,6 +65,7 @@ export const StepSelectConfig: React.FunctionComponent<{
   useEffect(() => {
     const fetchAgentConfigInfo = async () => {
       if (selectedConfigId) {
+        setIsLoadingSecondStep(true);
         const { data, error } = await sendGetOneAgentConfig(selectedConfigId);
         if (error) {
           setSelectedConfigError(error);
@@ -76,11 +78,12 @@ export const StepSelectConfig: React.FunctionComponent<{
         setSelectedConfigError(undefined);
         updateAgentConfig(undefined);
       }
+      setIsLoadingSecondStep(false);
     };
     if (!agentConfig || selectedConfigId !== agentConfig.id) {
       fetchAgentConfigInfo();
     }
-  }, [selectedConfigId, agentConfig, updateAgentConfig]);
+  }, [selectedConfigId, agentConfig, updateAgentConfig, setIsLoadingSecondStep]);
 
   // Display package error if there is one
   if (packageInfoError) {
@@ -119,7 +122,7 @@ export const StepSelectConfig: React.FunctionComponent<{
           searchable
           allowExclusions={false}
           singleSelection={true}
-          isLoading={isAgentConfigsLoading || packageInfoLoading}
+          isLoading={isAgentConfigsLoading || isPackageInfoLoading}
           options={agentConfigs.map((agentConf) => {
             const alreadyHasLimitedPackage =
               (isLimitedPackage &&
@@ -170,7 +173,9 @@ export const StepSelectConfig: React.FunctionComponent<{
           onChange={(options) => {
             const selectedOption = options.find((option) => option.checked === 'on');
             if (selectedOption) {
-              setSelectedConfigId(selectedOption.key);
+              if (selectedOption.key !== selectedConfigId) {
+                setSelectedConfigId(selectedOption.key);
+              }
             } else {
               setSelectedConfigId(undefined);
             }

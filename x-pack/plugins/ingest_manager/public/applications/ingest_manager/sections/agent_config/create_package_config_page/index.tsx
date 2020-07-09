@@ -31,6 +31,7 @@ import {
   useConfig,
   sendGetAgentStatus,
 } from '../../../hooks';
+import { Loading } from '../../../components';
 import { ConfirmDeployConfigModal } from '../components';
 import { CreatePackageConfigPageLayout } from './components';
 import { CreatePackageConfigFrom, PackageConfigFormState } from './types';
@@ -75,6 +76,7 @@ export const CreatePackageConfigPage: React.FunctionComponent = () => {
   // Agent config and package info states
   const [agentConfig, setAgentConfig] = useState<AgentConfig>();
   const [packageInfo, setPackageInfo] = useState<PackageInfo>();
+  const [isLoadingSecondStep, setIsLoadingSecondStep] = useState<boolean>(false);
 
   const agentConfigId = agentConfig?.id;
   // Retrieve agent count
@@ -151,40 +153,47 @@ export const CreatePackageConfigPage: React.FunctionComponent = () => {
 
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
+  // Update package config validation
+  const updatePackageConfigValidation = useCallback(
+    (newPackageConfig?: NewPackageConfig) => {
+      if (packageInfo) {
+        const newValidationResult = validatePackageConfig(
+          newPackageConfig || packageConfig,
+          packageInfo
+        );
+        setValidationResults(newValidationResult);
+        // eslint-disable-next-line no-console
+        console.debug('Package config validation results', newValidationResult);
+
+        return newValidationResult;
+      }
+    },
+    [packageConfig, packageInfo]
+  );
+
   // Update package config method
-  const updatePackageConfig = (updatedFields: Partial<NewPackageConfig>) => {
-    const newPackageConfig = {
-      ...packageConfig,
-      ...updatedFields,
-    };
-    setPackageConfig(newPackageConfig);
+  const updatePackageConfig = useCallback(
+    (updatedFields: Partial<NewPackageConfig>) => {
+      const newPackageConfig = {
+        ...packageConfig,
+        ...updatedFields,
+      };
+      setPackageConfig(newPackageConfig);
 
-    // eslint-disable-next-line no-console
-    console.debug('Package config updated', newPackageConfig);
-    const newValidationResults = updatePackageConfigValidation(newPackageConfig);
-    const hasPackage = newPackageConfig.package;
-    const hasValidationErrors = newValidationResults
-      ? validationHasErrors(newValidationResults)
-      : false;
-    const hasAgentConfig = newPackageConfig.config_id && newPackageConfig.config_id !== '';
-    if (hasPackage && hasAgentConfig && !hasValidationErrors) {
-      setFormState('VALID');
-    }
-  };
-
-  const updatePackageConfigValidation = (newPackageConfig?: NewPackageConfig) => {
-    if (packageInfo) {
-      const newValidationResult = validatePackageConfig(
-        newPackageConfig || packageConfig,
-        packageInfo
-      );
-      setValidationResults(newValidationResult);
       // eslint-disable-next-line no-console
-      console.debug('Package config validation results', newValidationResult);
-
-      return newValidationResult;
-    }
-  };
+      console.debug('Package config updated', newPackageConfig);
+      const newValidationResults = updatePackageConfigValidation(newPackageConfig);
+      const hasPackage = newPackageConfig.package;
+      const hasValidationErrors = newValidationResults
+        ? validationHasErrors(newValidationResults)
+        : false;
+      const hasAgentConfig = newPackageConfig.config_id && newPackageConfig.config_id !== '';
+      if (hasPackage && hasAgentConfig && !hasValidationErrors) {
+        setFormState('VALID');
+      }
+    },
+    [packageConfig, updatePackageConfigValidation]
+  );
 
   // Cancel path
   const cancelUrl = useMemo(() => {
@@ -276,6 +285,7 @@ export const CreatePackageConfigPage: React.FunctionComponent = () => {
         updatePackageInfo={updatePackageInfo}
         agentConfig={agentConfig}
         updateAgentConfig={updateAgentConfig}
+        setIsLoadingSecondStep={setIsLoadingSecondStep}
       />
     ),
     [pkgkey, updatePackageInfo, agentConfig, updateAgentConfig]
@@ -288,9 +298,45 @@ export const CreatePackageConfigPage: React.FunctionComponent = () => {
         updateAgentConfig={updateAgentConfig}
         packageInfo={packageInfo}
         updatePackageInfo={updatePackageInfo}
+        setIsLoadingSecondStep={setIsLoadingSecondStep}
       />
     ),
     [configId, updateAgentConfig, packageInfo, updatePackageInfo]
+  );
+
+  const stepConfigurePackage = useMemo(
+    () =>
+      isLoadingSecondStep ? (
+        <Loading />
+      ) : agentConfig && packageInfo ? (
+        <>
+          <StepDefinePackageConfig
+            agentConfig={agentConfig}
+            packageInfo={packageInfo}
+            packageConfig={packageConfig}
+            updatePackageConfig={updatePackageConfig}
+            validationResults={validationResults!}
+          />
+          <StepConfigurePackage
+            packageInfo={packageInfo}
+            packageConfig={packageConfig}
+            updatePackageConfig={updatePackageConfig}
+            validationResults={validationResults!}
+            submitAttempted={formState === 'INVALID'}
+          />
+        </>
+      ) : (
+        <div />
+      ),
+    [
+      agentConfig,
+      formState,
+      isLoadingSecondStep,
+      packageConfig,
+      packageInfo,
+      updatePackageConfig,
+      validationResults,
+    ]
   );
 
   const steps: EuiStepProps[] = [
@@ -317,29 +363,9 @@ export const CreatePackageConfigPage: React.FunctionComponent = () => {
           defaultMessage: 'Configure integration',
         }
       ),
-      status: !packageInfo || !agentConfig ? 'disabled' : undefined,
+      status: !packageInfo || !agentConfig || isLoadingSecondStep ? 'disabled' : undefined,
       'data-test-subj': 'dataCollectionSetupStep',
-      children:
-        agentConfig && packageInfo ? (
-          <>
-            <StepDefinePackageConfig
-              agentConfig={agentConfig}
-              packageInfo={packageInfo}
-              packageConfig={packageConfig}
-              updatePackageConfig={updatePackageConfig}
-              validationResults={validationResults!}
-            />
-            <StepConfigurePackage
-              packageInfo={packageInfo}
-              packageConfig={packageConfig}
-              updatePackageConfig={updatePackageConfig}
-              validationResults={validationResults!}
-              submitAttempted={formState === 'INVALID'}
-            />
-          </>
-        ) : (
-          <div />
-        ),
+      children: stepConfigurePackage,
     },
   ];
 
