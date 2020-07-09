@@ -44,12 +44,13 @@ export const getActionsColumnWidth = (
   showCheckboxes = false,
   additionalActionWidth = 0
 ): number => {
+  const checkboxesWidth = showCheckboxes ? SHOW_CHECK_BOXES_COLUMN_WIDTH : 0;
   const actionsColumnWidth =
-    (showCheckboxes ? SHOW_CHECK_BOXES_COLUMN_WIDTH : 0) +
+    checkboxesWidth +
     (isEventViewer ? EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH : DEFAULT_ACTIONS_COLUMN_WIDTH) +
     additionalActionWidth;
 
-  return actionsColumnWidth > MINIMUM_ACTIONS_COLUMN_WIDTH
+  return actionsColumnWidth > MINIMUM_ACTIONS_COLUMN_WIDTH + checkboxesWidth
     ? actionsColumnWidth
-    : MINIMUM_ACTIONS_COLUMN_WIDTH;
+    : MINIMUM_ACTIONS_COLUMN_WIDTH + checkboxesWidth;
 };

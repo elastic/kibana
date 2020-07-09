@@ -198,6 +198,8 @@ export const ColumnHeadersComponent = ({
               toggleColumn={toggleColumn}
               width={FIELD_BROWSER_WIDTH}
             />
+          </EventsTh>
+          <EventsTh>
             <StatefulRowRenderersBrowser
               data-test-subj="row-renderers-browser"
               timelineId={timelineId}
