@@ -218,7 +218,7 @@ export class ManifestManager {
       const newManifest = Manifest.fromArtifacts(
         artifacts,
         ManifestConstants.SCHEMA_VERSION,
-        oldManifest.getVersion()
+        oldManifest
       );
 
       // Get diffs

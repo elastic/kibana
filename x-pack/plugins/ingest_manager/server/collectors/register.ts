@@ -41,20 +41,20 @@ export function registerIngestManagerUsageCollector(
         packages: await getPackageUsage(soClient),
       };
     },
-    // schema: { // temporarily disabled because of type errors
-    //   fleet_enabled: { type: 'boolean' },
-    //   agents: {
-    //    total: { type: 'number' },
-    //    online: { type: 'number' },
-    //    error: { type: 'number' },
-    //    offline: { type: 'number' },
-    //   },
-    //   packages: {
-    //     name: { type: 'keyword' },
-    //     version: { type: 'keyword' },
-    //     enabled: { type: boolean },
-    //   },
-    // },
+    schema: {
+      fleet_enabled: { type: 'boolean' },
+      agents: {
+        total: { type: 'long' },
+        online: { type: 'long' },
+        error: { type: 'long' },
+        offline: { type: 'long' },
+      },
+      packages: {
+        name: { type: 'keyword' },
+        version: { type: 'keyword' },
+        enabled: { type: 'boolean' },
+      },
+    },
   });
 
   // register usage collector
