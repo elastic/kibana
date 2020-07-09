@@ -220,7 +220,7 @@ export function DiscoverSidebar({
                         onAddFilter={onAddFilter}
                         onShowDetails={onShowDetails}
                         getDetails={getDetailsByField}
-                        showDetails={openFieldMap.get(field.name) || false}
+                        // showDetails={openFieldMap.get(field.name) || false}
                         selected={true}
                         useShortDots={useShortDots}
                       />

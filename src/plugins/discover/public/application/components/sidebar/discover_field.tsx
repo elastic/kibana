@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
-import { EuiButton } from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiButton, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldIcon } from '../../../../../kibana_react/public';
@@ -25,6 +25,7 @@ import { FieldDetails } from './types';
 import { IndexPatternField, IndexPattern } from '../../../../../data/public';
 import { shortenDottedString } from '../../helpers';
 import { getFieldTypeName } from './lib/get_field_type_name';
+import './discover_field.scss';
 
 export interface DiscoverFieldProps {
   /**
@@ -100,6 +101,8 @@ export function DiscoverField({
     }
   );
 
+  const [infoIsOpen, setOpen] = useState(false);
+
   const toggleDisplay = (f: IndexPatternField) => {
     if (selected) {
       onRemoveField(f.name);
@@ -107,6 +110,18 @@ export function DiscoverField({
       onAddField(f.name);
     }
   };
+
+  function togglePopover() {
+    // if (hideDetails) {
+    //   return;
+    // }
+
+    setOpen(!infoIsOpen);
+    // if (!infoIsOpen) {
+    //   trackUiEvent('indexpattern_field_info_click');
+    //   fetchData();
+    // }
+  }
 
   function wrapOnDot(str?: string) {
     // u200B is a non-width white-space character, which allows
@@ -117,61 +132,90 @@ export function DiscoverField({
 
   return (
     <>
-      <div
-        className={`dscSidebarField dscSidebarItem ${showDetails ? 'dscSidebarItem--active' : ''}`}
-        tabIndex={0}
-        onClick={() => onShowDetails(!showDetails, field)}
-        onKeyPress={() => onShowDetails(!showDetails, field)}
-        data-test-subj={`field-${field.name}-showDetails`}
+      <EuiPopover
+        display="block"
+        button={
+          <div
+            className={`dscSidebarField dscSidebarItem ${
+              showDetails ? 'dscSidebarItem--active' : ''
+            }`}
+            tabIndex={0}
+            // onClick={() => onShowDetails(!showDetails, field)}
+            // onKeyPress={() => onShowDetails(!showDetails, field)}
+            onClick={() => {
+              togglePopover();
+            }}
+            onKeyPress={(event) => {
+              if (event.key === 'ENTER') {
+                togglePopover();
+              }
+            }}
+            data-test-subj={`field-${field.name}-showDetails`}
+          >
+            <span className="dscSidebarField__fieldIcon">
+              <FieldIcon
+                type={field.type}
+                label={getFieldTypeName(field.type)}
+                scripted={field.scripted}
+              />
+            </span>
+            <span
+              data-test-subj={`field-${field.name}`}
+              title={field.name}
+              className="dscSidebarField__name"
+            >
+              {useShortDots
+                ? wrapOnDot(shortenDottedString(field.name))
+                : wrapOnDot(field.displayName)}
+            </span>
+            <span>
+              {field.name !== '_source' && !selected && (
+                <EuiButton
+                  fill
+                  size="s"
+                  className="dscSidebarItem__action"
+                  onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    toggleDisplay(field);
+                  }}
+                  data-test-subj={`fieldToggle-${field.name}`}
+                  arial-label={addLabelAria}
+                >
+                  {addLabel}
+                </EuiButton>
+              )}
+              {field.name !== '_source' && selected && (
+                <EuiButton
+                  color="danger"
+                  className="dscSidebarItem__action"
+                  onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    toggleDisplay(field);
+                  }}
+                  data-test-subj={`fieldToggle-${field.name}`}
+                  arial-label={removeLabelAria}
+                >
+                  {removeLabel}
+                </EuiButton>
+              )}
+            </span>
+          </div>
+        }
+        isOpen={infoIsOpen}
+        closePopover={() => setOpen(false)}
+        anchorPosition="rightUp"
+        panelClassName="dscSidebarItem__fieldPopoverPanel"
       >
-        <span className="dscSidebarField__fieldIcon">
-          <FieldIcon
-            type={field.type}
-            label={getFieldTypeName(field.type)}
-            scripted={field.scripted}
-          />
-        </span>
-        <span
-          data-test-subj={`field-${field.name}`}
-          title={field.name}
-          className="dscSidebarField__name"
-        >
-          {useShortDots ? wrapOnDot(shortenDottedString(field.name)) : wrapOnDot(field.displayName)}
-        </span>
-        <span>
-          {field.name !== '_source' && !selected && (
-            <EuiButton
-              fill
-              size="s"
-              className="dscSidebarItem__action"
-              onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-                ev.preventDefault();
-                ev.stopPropagation();
-                toggleDisplay(field);
-              }}
-              data-test-subj={`fieldToggle-${field.name}`}
-              arial-label={addLabelAria}
-            >
-              {addLabel}
-            </EuiButton>
-          )}
-          {field.name !== '_source' && selected && (
-            <EuiButton
-              color="danger"
-              className="dscSidebarItem__action"
-              onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-                ev.preventDefault();
-                ev.stopPropagation();
-                toggleDisplay(field);
-              }}
-              data-test-subj={`fieldToggle-${field.name}`}
-              arial-label={removeLabelAria}
-            >
-              {removeLabel}
-            </EuiButton>
-          )}
-        </span>
-      </div>
+        <DiscoverFieldDetails
+          indexPattern={indexPattern}
+          field={field}
+          details={getDetails(field)}
+          onAddFilter={onAddFilter}
+        />
+      </EuiPopover>
+
       {showDetails && (
         <DiscoverFieldDetails
           indexPattern={indexPattern}
