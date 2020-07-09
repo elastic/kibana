@@ -20,8 +20,6 @@ exports[`Empty rendering renders correctly against snapshot 1`] = `
         highlighted
       </BadgeHighlighted>
     </HighlightedBackground>
-  </NoWrap>
-  <NoWrap>
     <Text
       color="subdued"
       size="s"
@@ -38,5 +36,9 @@ exports[`Empty rendering renders correctly against snapshot 1`] = `
       query
     </Text>
   </NoWrap>
+  <AddDataProviderPopover
+    browserFields={Object {}}
+    timelineId="test"
+  />
 </EmptyContainer>
 `;

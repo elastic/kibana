@@ -24,7 +24,7 @@ import { TimelineComponent, Props as TimelineComponentProps } from './timeline';
 import { Sort } from './body/sort';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
-import { TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../common/types/timeline';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('./properties/properties_right');
@@ -82,6 +82,7 @@ describe('Timeline', () => {
       indexPattern,
       indexToAdd: [],
       isLive: false,
+      isSaving: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search' as TimelineComponentProps['kqlMode'],
@@ -93,6 +94,7 @@ describe('Timeline', () => {
       onDataProviderRemoved: jest.fn(),
       onToggleDataProviderEnabled: jest.fn(),
       onToggleDataProviderExcluded: jest.fn(),
+      onToggleDataProviderType: jest.fn(),
       show: true,
       showCallOutUnauthorizedMsg: false,
       start: startDate,
@@ -100,6 +102,7 @@ describe('Timeline', () => {
       status: TimelineStatus.active,
       toggleColumn: jest.fn(),
       usersViewing: ['elastic'],
+      timelineType: TimelineType.default,
     };
   });
 
@@ -298,9 +301,9 @@ describe('Timeline', () => {
         );
 
         const andProviderBadgesText = andProviderBadges.map((node) => node.text()).join(' ');
-        expect(andProviderBadges.length).toEqual(6);
+        expect(andProviderBadges.length).toEqual(3);
         expect(andProviderBadgesText).toEqual(
-          'name:  "Provider 1" name:  "Provider 2" name:  "Provider 3"'
+          'name: "Provider 1" name: "Provider 2" name: "Provider 3"'
         );
       });
 
