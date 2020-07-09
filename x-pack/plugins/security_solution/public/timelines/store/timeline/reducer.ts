@@ -39,6 +39,7 @@ import {
   updateDataProviderEnabled,
   updateDataProviderExcluded,
   updateDataProviderKqlQuery,
+  updateDataProviderType,
   updateDescription,
   updateEventType,
   updateHighlightedDropAndProviderId,
@@ -88,6 +89,7 @@ import {
   updateTimelineProviderExcluded,
   updateTimelineProviderProperties,
   updateTimelineProviderKqlQuery,
+  updateTimelineProviderType,
   updateTimelineProviders,
   updateTimelineRange,
   updateTimelineShowTimeline,
@@ -427,7 +429,16 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       }),
     })
   )
-
+  .case(updateDataProviderType, (state, { id, type, providerId, andProviderId }) => ({
+    ...state,
+    timelineById: updateTimelineProviderType({
+      id,
+      type,
+      providerId,
+      timelineById: state.timelineById,
+      andProviderId,
+    }),
+  }))
   .case(updateDataProviderKqlQuery, (state, { id, kqlQuery, providerId }) => ({
     ...state,
     timelineById: updateTimelineProviderKqlQuery({

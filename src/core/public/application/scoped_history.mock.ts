@@ -27,7 +27,8 @@ const createMock = ({
   hash = '',
   key,
   state,
-}: Partial<Location> = {}) => {
+  ...overrides
+}: Partial<Location & ScopedHistoryMock> = {}) => {
   const mock: ScopedHistoryMock = {
     block: jest.fn(),
     createHref: jest.fn(),
@@ -38,6 +39,7 @@ const createMock = ({
     listen: jest.fn(),
     push: jest.fn(),
     replace: jest.fn(),
+    ...overrides,
     action: 'PUSH',
     length: 1,
     location: {
