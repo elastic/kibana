@@ -22,6 +22,7 @@ import Boom from 'boom';
 
 import { isConfigSchema } from '@kbn/config-schema';
 import { Logger } from '../../logging';
+import { isUnauthorizedError as isElasticsearchNotAuthorizedError } from '../../elasticsearch/client/errors';
 import { KibanaRequest } from './request';
 import { KibanaResponseFactory, kibanaResponseFactory, IKibanaResponse } from './response';
 import { RouteConfig, RouteConfigOptions, RouteMethod, validBodyOutput } from './route';
@@ -263,6 +264,17 @@ export class Router implements IRouter {
       return hapiResponseAdapter.handle(kibanaResponse);
     } catch (e) {
       this.log.error(e);
+      if (isElasticsearchNotAuthorizedError(e)) {
+        return hapiResponseAdapter.handle(
+          kibanaResponseFactory.unauthorized({
+            body: e.message,
+            headers: {
+              'WWW-Authenticate':
+                e.headers['WWW-Authenticate'] ?? 'Basic realm="Authorization Required"',
+            },
+          })
+        );
+      }
       return hapiResponseAdapter.toInternalError();
     }
   }
