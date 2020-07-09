@@ -26,6 +26,11 @@ interface HasShouldCheckFlags {
   shouldCheckStatus?: boolean;
 }
 
+/**
+ * The alert parameters are of `unknown` type, so we must determine if those fields exist.
+ * If either field is missing, this function will return false.
+ * @param value The alert parameters value.
+ */
 function hasShouldCheckFlags(value: unknown): value is HasShouldCheckFlags {
   const types = ['boolean', 'undefined'];
   return (
@@ -50,6 +55,7 @@ export const validate = (alertParams: unknown) => {
   }
 
   if (
+    // this block should execute anytime both `shouldCheck` flags are `false`
     hasShouldCheckFlags(alertParams) &&
     alertParams.shouldCheckAvailability !== true &&
     alertParams.shouldCheckStatus !== true

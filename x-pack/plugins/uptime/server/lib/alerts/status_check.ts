@@ -408,7 +408,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
           availabilityResults,
           isRight(availabilityDecoded) ? availabilityDecoded.right.availability.threshold : '100',
           isRight(availabilityDecoded) && availabilityDecoded.right.shouldCheckAvailability,
-          isRight(verifiedParams) && !!verifiedParams.right.shouldCheckStatus
+          rawParams?.shouldCheckStatus ?? false
         ),
         downMonitorsWithGeo: fullListByIdAndLocation(monitorsByLocation),
       });
