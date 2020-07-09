@@ -30,23 +30,29 @@ import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
 
 interface Props {
-  startTime?: string;
-  endTime?: string;
+  absoluteTime: { start?: string; end?: string };
+  relativeTime: { start: string; end: string };
   bucketSize?: string;
 }
 
-export const UptimeSection = ({ startTime, endTime, bucketSize }: Props) => {
+export const UptimeSection = ({ absoluteTime, relativeTime, bucketSize }: Props) => {
   const theme = useContext(ThemeContext);
   const history = useHistory();
 
+  const { start, end } = absoluteTime;
   const { data, status } = useFetcher(() => {
-    if (startTime && endTime && bucketSize) {
-      return getDataHandler('uptime')?.fetchData({ startTime, endTime, bucketSize });
+    if (start && end && bucketSize) {
+      return getDataHandler('uptime')?.fetchData({
+        absoluteTime: { start, end },
+        relativeTime,
+        bucketSize,
+      });
     }
-  }, [startTime, endTime, bucketSize]);
+  }, [start, end, bucketSize]);
 
-  const min = moment.utc(startTime).valueOf();
-  const max = moment.utc(endTime).valueOf();
+  const min = moment.utc(absoluteTime.start).valueOf();
+  const max = moment.utc(absoluteTime.end).valueOf();
+
   const formatter = niceTimeFormatter([min, max]);
 
   const isLoading = status === FETCH_STATUS.LOADING;

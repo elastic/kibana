@@ -65,9 +65,13 @@ export const OverviewPage = ({ routeParams }: Props) => {
     refreshPaused = true,
   } = routeParams.query;
 
-  const startTime = getParsedDate(rangeFrom);
-  const endTime = getParsedDate(rangeTo, { roundUp: true });
-  const bucketSize = calculatetBucketSize({ startTime, endTime });
+  const absoluteTimeStart = getParsedDate(rangeFrom);
+  const absoluteTimeEnd = getParsedDate(rangeTo, { roundUp: true });
+
+  const bucketSize = calculatetBucketSize({
+    startTime: absoluteTimeStart,
+    endTime: absoluteTimeEnd,
+  });
 
   const appEmptySections = getEmptySections({ core }).filter(({ id }) => {
     if (id === 'alert') {
@@ -112,8 +116,8 @@ export const OverviewPage = ({ routeParams }: Props) => {
               {hasData.infra_logs && (
                 <EuiFlexItem grow={false}>
                   <LogsSection
-                    startTime={startTime}
-                    endTime={endTime}
+                    absoluteTime={{ start: absoluteTimeStart, end: absoluteTimeEnd }}
+                    relativeTime={{ start: rangeFrom, end: rangeTo }}
                     bucketSize={bucketSize?.intervalString}
                   />
                 </EuiFlexItem>
@@ -121,8 +125,8 @@ export const OverviewPage = ({ routeParams }: Props) => {
               {hasData.infra_metrics && (
                 <EuiFlexItem grow={false}>
                   <MetricsSection
-                    startTime={startTime}
-                    endTime={endTime}
+                    absoluteTime={{ start: absoluteTimeStart, end: absoluteTimeEnd }}
+                    relativeTime={{ start: rangeFrom, end: rangeTo }}
                     bucketSize={bucketSize?.intervalString}
                   />
                 </EuiFlexItem>
@@ -130,8 +134,8 @@ export const OverviewPage = ({ routeParams }: Props) => {
               {hasData.apm && (
                 <EuiFlexItem grow={false}>
                   <APMSection
-                    startTime={startTime}
-                    endTime={endTime}
+                    absoluteTime={{ start: absoluteTimeStart, end: absoluteTimeEnd }}
+                    relativeTime={{ start: rangeFrom, end: rangeTo }}
                     bucketSize={bucketSize?.intervalString}
                   />
                 </EuiFlexItem>
@@ -139,8 +143,8 @@ export const OverviewPage = ({ routeParams }: Props) => {
               {hasData.uptime && (
                 <EuiFlexItem grow={false}>
                   <UptimeSection
-                    startTime={startTime}
-                    endTime={endTime}
+                    absoluteTime={{ start: absoluteTimeStart, end: absoluteTimeEnd }}
+                    relativeTime={{ start: rangeFrom, end: rangeTo }}
                     bucketSize={bucketSize?.intervalString}
                   />
                 </EuiFlexItem>

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { mean } from 'lodash';
 import {
   ApmFetchDataResponse,
@@ -13,19 +12,21 @@ import {
 import { callApmApi } from './createCallApmApi';
 
 export const fetchLandingPageData = async ({
-  startTime,
-  endTime,
+  absoluteTime,
+  relativeTime,
   bucketSize,
 }: FetchDataParams): Promise<ApmFetchDataResponse> => {
   const data = await callApmApi({
     pathname: '/api/apm/observability_dashboard',
-    params: { query: { start: startTime, end: endTime, bucketSize } },
+    params: {
+      query: { start: absoluteTime.start, end: absoluteTime.end, bucketSize },
+    },
   });
 
   const { serviceCount, transactionCoordinates } = data;
 
   return {
-    appLink: `/app/apm#/services?rangeFrom=${startTime}&rangeTo=${endTime}`,
+    appLink: `/app/apm#/services?rangeFrom=${relativeTime.start}&rangeTo=${relativeTime.end}`,
     stats: {
       services: {
         type: 'number',

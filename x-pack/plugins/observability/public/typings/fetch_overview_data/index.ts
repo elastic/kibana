@@ -21,11 +21,8 @@ export interface Series {
 }
 
 export interface FetchDataParams {
-  // The start timestamp in milliseconds of the queried time interval
-  startTime: string;
-  // The end timestamp in milliseconds of the queried time interval
-  endTime: string;
-  // The aggregation bucket size in milliseconds if applicable to the data source
+  absoluteTime: { start: string; end: string };
+  relativeTime: { start: string; end: string };
   bucketSize: string;
 }
 

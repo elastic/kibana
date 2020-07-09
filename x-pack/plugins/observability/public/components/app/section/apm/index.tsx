@@ -21,8 +21,8 @@ import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
 
 interface Props {
-  startTime?: string;
-  endTime?: string;
+  absoluteTime: { start?: string; end?: string };
+  relativeTime: { start: string; end: string };
   bucketSize?: string;
 }
 
@@ -30,20 +30,25 @@ function formatTpm(value?: number) {
   return numeral(value).format('0.00a');
 }
 
-export const APMSection = ({ startTime, endTime, bucketSize }: Props) => {
+export const APMSection = ({ absoluteTime, relativeTime, bucketSize }: Props) => {
   const theme = useContext(ThemeContext);
   const history = useHistory();
 
+  const { start, end } = absoluteTime;
   const { data, status } = useFetcher(() => {
-    if (startTime && endTime && bucketSize) {
-      return getDataHandler('apm')?.fetchData({ startTime, endTime, bucketSize });
+    if (start && end && bucketSize) {
+      return getDataHandler('apm')?.fetchData({
+        absoluteTime: { start, end },
+        relativeTime,
+        bucketSize,
+      });
     }
-  }, [startTime, endTime, bucketSize]);
+  }, [start, end, bucketSize]);
 
   const { appLink, stats, series } = data || {};
 
-  const min = moment.utc(startTime).valueOf();
-  const max = moment.utc(endTime).valueOf();
+  const min = moment.utc(absoluteTime.start).valueOf();
+  const max = moment.utc(absoluteTime.end).valueOf();
 
   const formatter = niceTimeFormatter([min, max]);
 

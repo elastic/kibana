@@ -18,8 +18,8 @@ describe('APMSection', () => {
     });
     const { getByText, queryAllByTestId } = render(
       <APMSection
-        startTime="2020-06-29T11:38:23.747Z"
-        endTime="2020-06-29T12:08:23.748Z"
+        absoluteTime={{ start: '2020-06-29T11:38:23.747Z', end: '2020-06-29T12:08:23.748Z' }}
+        relativeTime={{ start: 'now-15m', end: 'now' }}
         bucketSize="60s"
       />
     );
@@ -38,8 +38,8 @@ describe('APMSection', () => {
     });
     const { getByText, queryAllByText, getByTestId } = render(
       <APMSection
-        startTime="2020-06-29T11:38:23.747Z"
-        endTime="2020-06-29T12:08:23.748Z"
+        absoluteTime={{ start: '2020-06-29T11:38:23.747Z', end: '2020-06-29T12:08:23.748Z' }}
+        relativeTime={{ start: 'now-15m', end: 'now' }}
         bucketSize="60s"
       />
     );

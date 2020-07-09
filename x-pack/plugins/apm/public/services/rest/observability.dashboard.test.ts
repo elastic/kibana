@@ -9,6 +9,17 @@ import * as createCallApmApi from './createCallApmApi';
 
 describe('Observability dashboard data', () => {
   const callApmApiMock = jest.spyOn(createCallApmApi, 'callApmApi');
+  const params = {
+    absoluteTime: {
+      start: '2020-07-02T13:25:11.629Z',
+      end: '2020-07-09T14:25:11.629Z',
+    },
+    relativeTime: {
+      start: 'now-15m',
+      end: 'now',
+    },
+    bucketSize: '600s',
+  };
   afterEach(() => {
     callApmApiMock.mockClear();
   });
@@ -37,14 +48,9 @@ describe('Observability dashboard data', () => {
           ],
         })
       );
-      const response = await fetchLandingPageData({
-        startTime: '1',
-        endTime: '2',
-        bucketSize: '3',
-      });
+      const response = await fetchLandingPageData(params);
       expect(response).toEqual({
-        title: 'APM',
-        appLink: '/app/apm',
+        appLink: '/app/apm#/services?rangeFrom=now-15m&rangeTo=now',
         stats: {
           services: {
             type: 'number',
@@ -73,14 +79,9 @@ describe('Observability dashboard data', () => {
           transactionCoordinates: [],
         })
       );
-      const response = await fetchLandingPageData({
-        startTime: '1',
-        endTime: '2',
-        bucketSize: '3',
-      });
+      const response = await fetchLandingPageData(params);
       expect(response).toEqual({
-        title: 'APM',
-        appLink: '/app/apm',
+        appLink: '/app/apm#/services?rangeFrom=now-15m&rangeTo=now',
         stats: {
           services: {
             type: 'number',
@@ -105,14 +106,9 @@ describe('Observability dashboard data', () => {
           transactionCoordinates: [{ x: 1 }, { x: 2 }, { x: 3 }],
         })
       );
-      const response = await fetchLandingPageData({
-        startTime: '1',
-        endTime: '2',
-        bucketSize: '3',
-      });
+      const response = await fetchLandingPageData(params);
       expect(response).toEqual({
-        title: 'APM',
-        appLink: '/app/apm',
+        appLink: '/app/apm#/services?rangeFrom=now-15m&rangeTo=now',
         stats: {
           services: {
             type: 'number',

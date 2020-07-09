@@ -11,7 +11,6 @@ export const fetchLogsData: FetchData<LogsFetchDataResponse> = () => {
 };
 
 const response: LogsFetchDataResponse = {
-  title: 'Logs',
   appLink:
     "/app/logs/stream?logPosition=(end:'2020-06-30T21:30:00.000Z',start:'2020-06-27T22:00:00.000Z')",
   stats: {
@@ -2319,7 +2318,6 @@ const response: LogsFetchDataResponse = {
 };
 
 export const emptyResponse: LogsFetchDataResponse = {
-  title: 'Logs',
   appLink: '/app/logs',
   stats: {},
   series: {},
