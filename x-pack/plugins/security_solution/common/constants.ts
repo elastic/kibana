@@ -59,9 +59,9 @@ export const DEFAULT_INDEX_PATTERN = [
   'auditbeat-*',
   'endgame-*',
   'filebeat-*',
+  'logs-*',
   'packetbeat-*',
   'winlogbeat-*',
-  'logs-*',
 ];
 
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
