@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SecurityPluginSetup } from '../../../../../../plugins/security/server';
-import { TimelineType } from '../../../../common/types/timeline';
 
 import {
   serverMock,
@@ -45,7 +44,7 @@ describe('get timeline by id', () => {
   });
 
   test('should call installPrepackagedTimelines ', async () => {
-    const response = await server.inject(installPrepackedTimelinesRequest(), context);
+    await server.inject(installPrepackedTimelinesRequest(), context);
 
     expect(installPrepackagedTimelines).toHaveBeenCalled();
   });

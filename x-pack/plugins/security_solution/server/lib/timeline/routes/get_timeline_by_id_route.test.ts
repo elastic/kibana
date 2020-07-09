@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SecurityPluginSetup } from '../../../../../../plugins/security/server';
-import { TimelineType } from '../../../../common/types/timeline';
 
 import {
   serverMock,
@@ -47,7 +46,7 @@ describe('get timeline by id', () => {
 
   test('should call getTemplateTimeline if templateTimelineId is given', async () => {
     const templateTimelineId = '123';
-    const response = await server.inject(
+    await server.inject(
       getTimelineByIdRequest({ template_timeline_id: templateTimelineId }),
       context
     );
@@ -58,7 +57,7 @@ describe('get timeline by id', () => {
   test('should call getTimeline if id is given', async () => {
     const id = '456';
 
-    const response = await server.inject(getTimelineByIdRequest({ id }), context);
+    await server.inject(getTimelineByIdRequest({ id }), context);
 
     expect((getTimeline as jest.Mock).mock.calls[0][1]).toEqual(id);
   });

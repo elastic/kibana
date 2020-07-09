@@ -19,6 +19,7 @@ import { requestMock } from '../../../detection_engine/routes/__mocks__';
 
 import { updateTimelineSchema } from '../schemas/update_timelines_schema';
 import { createTimelineSchema } from '../schemas/create_timelines_schema';
+import { GetTimelineByIdSchemaQuery } from '../schemas/get_timeline_by_id_schema';
 
 const readable = new stream.Readable();
 export const getExportTimelinesRequest = () =>
@@ -181,7 +182,7 @@ export const getTimelineByIdRequest = (query: GetTimelineByIdSchemaQuery) =>
     query,
   });
 
-export const installPrepackedTimelinesRequest = (query: GetTimelineByIdSchemaQuery) =>
+export const installPrepackedTimelinesRequest = () =>
   requestMock.create({
     method: 'post',
     path: TIMELINE_PREPACKAGED_URL,
