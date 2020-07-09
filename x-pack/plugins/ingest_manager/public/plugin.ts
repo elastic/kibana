@@ -19,7 +19,7 @@ import {
 } from '../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { PLUGIN_ID, CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
-import { BASE_PATH } from './constants';
+import { BASE_PATH } from './applications/ingest_manager/constants';
 
 import { IngestManagerConfigType } from '../common/types';
 import { setupRouteService, appRoutesService } from '../common';

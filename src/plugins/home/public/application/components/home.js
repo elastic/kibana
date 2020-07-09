@@ -139,9 +139,7 @@ export class Home extends Component {
   };
 
   renderNormal() {
-    const { addBasePath, canChangeHomeRoute = true, directories } = this.props;
-
-    console.log({ directories });
+    const { addBasePath, canChangeHomeRoute = true } = this.props;
 
     const fileDataVisualizer = this.findDirectoryById('ml_file_data_visualizer');
     const ingestManager = this.findDirectoryById('ingestManager', { isBeta: true });
@@ -149,7 +147,7 @@ export class Home extends Component {
     const monitoring = this.findDirectoryById('monitoring');
     const snapshotRestore = this.findDirectoryById('snapshot_restore');
     const indexLifecycleManagement = this.findDirectoryById('index_lifecycle_management');
-    const devTools = this.findDirectoryById('console');
+    const console = this.findDirectoryById('console');
     const stackManagement = this.findDirectoryById('stack-management');
 
     return (
@@ -188,16 +186,16 @@ export class Home extends Component {
                       onClick={createAppNavigationHandler(stackManagement.path)}
                       iconType="gear"
                     >
-                      {i18n.translate('home.pageHeader.managementButtonLabel', {
-                        defaultMessage: 'Manage',
+                      {i18n.translate('home.pageHeader.stackManagementButtonLabel', {
+                        defaultMessage: 'Manage stack',
                       })}
                     </EuiButtonEmpty>
                   </EuiFlexItem>
                 ) : null}
-                {devTools ? (
+                {console ? (
                   <EuiFlexItem>
                     <EuiButtonEmpty
-                      onClick={createAppNavigationHandler(devTools.path)}
+                      onClick={createAppNavigationHandler(console.path)}
                       iconType="wrench"
                     >
                       {i18n.translate('home.pageHeader.devToolsButtonLabel', {
