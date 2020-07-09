@@ -23,7 +23,7 @@ export async function indexHostsAndAlerts(
   eventIndex: string,
   alertIndex: string,
   alertsPerHost: number,
-  options: TreeOptions = {}
+  options: TreeOptions
 ) /** TODO, return stuff */ {
   const random = seedrandom(seed);
   for (let i = 0; i < numHosts; i++) {

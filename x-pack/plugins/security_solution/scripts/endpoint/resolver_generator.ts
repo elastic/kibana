@@ -11,7 +11,7 @@ import fetch from 'node-fetch';
 import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { indexHostsAndAlerts } from './index_data';
-import { ANCESTRY_LIMIT } from '../../common/endpoint/generate_data';
+import { ANCESTRY_LIMIT, TreeOptions } from '../../common/endpoint/generate_data';
 
 main();
 
@@ -217,6 +217,17 @@ async function main() {
     console.log(`No seed supplied, using random seed: ${seed}`);
   }
   const startTime = new Date().getTime();
+  const treeOptions: TreeOptions = {
+    ancestors: argv.ancestors,
+    generations: argv.generations,
+    children: argv.children,
+    relatedEvents: argv.relatedEvents,
+    relatedAlerts: argv.relatedAlerts,
+    percentWithRelated: argv.percentWithRelated,
+    percentTerminated: argv.percentTerminated,
+    alwaysGenMaxChildrenPerNode: argv.maxChildrenPerNode,
+    ancestryArraySize: argv.ancestryArraySize,
+  };
   await indexHostsAndAlerts(
     client,
     seed,
@@ -227,17 +238,7 @@ async function main() {
     argv.eventIndex,
     argv.alertIndex,
     argv.alertsPerHost,
-    {
-      ancestors: argv.ancestors,
-      generations: argv.generations,
-      children: argv.children,
-      relatedEvents: argv.relatedEvents,
-      relatedAlerts: argv.relatedAlerts,
-      percentWithRelated: argv.percentWithRelated,
-      percentTerminated: argv.percentTerminated,
-      alwaysGenMaxChildrenPerNode: argv.maxChildrenPerNode,
-      ancestryArraySize: argv.ancestryArraySize,
-    }
+    treeOptions
   );
   console.log(`Creating and indexing documents took: ${new Date().getTime() - startTime}ms`);
 }
