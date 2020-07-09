@@ -364,7 +364,7 @@ export class VegaBaseView {
    * Set global debug variable to simplify vega debugging in console. Show info message first time
    */
   setDebugValues(view, spec, vlspec) {
-    this._parser.searchAPI.inspectorAdapters?.vega.bindVegaView(view);
+    this._parser.searchAPI.inspectorAdapters?.vega.bindDebugValues({ view, spec: vlspec || spec });
 
     if (window) {
       if (window.VEGA_DEBUG === undefined && console) {

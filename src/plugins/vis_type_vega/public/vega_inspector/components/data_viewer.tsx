@@ -18,8 +18,7 @@
  */
 import React, { useState, useMemo, useCallback } from 'react';
 
-import { EuiComboBox, EuiSpacer, EuiFormRow, EuiComboBoxProps } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiComboBox, EuiFlexGroup, EuiComboBoxProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { VegaAdapter, InspectDataSets } from '../vega_adapter';
 import { InspectorDataGrid } from './inspector_data_grid';
 
@@ -28,7 +27,7 @@ interface DataViewerProps {
 }
 
 export const DataViewer = ({ vegaAdapter }: DataViewerProps) => {
-  const inspectDataSets = useMemo<InspectDataSets[]>(() => vegaAdapter.getInspectDataSets(), [
+  const inspectDataSets = useMemo<InspectDataSets[]>(() => vegaAdapter.getDataSets(), [
     vegaAdapter,
   ]);
   const [selectedView, setSelectedView] = useState<InspectDataSets>(inspectDataSets[0]);
@@ -45,16 +44,10 @@ export const DataViewer = ({ vegaAdapter }: DataViewerProps) => {
   );
 
   return (
-    <>
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiSpacer size="s" />
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate('visTypeVega.inspector.dataViewer.dataset', {
-          defaultMessage: 'Dataset:',
-        })}
-      >
+      <EuiFlexItem>
         <EuiComboBox
-          placeholder="Select Vega view"
           options={inspectDataSets.map((item: any) => ({
             label: item.id,
           }))}
@@ -64,9 +57,10 @@ export const DataViewer = ({ vegaAdapter }: DataViewerProps) => {
           singleSelection={{ asPlainText: true }}
           selectedOptions={[{ label: selectedView.id }]}
         />
-      </EuiFormRow>
-      <EuiSpacer size="s" />
-      <InspectorDataGrid columns={selectedView.columns} data={selectedView.data} />
-    </>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <InspectorDataGrid columns={selectedView.columns} data={selectedView.data} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

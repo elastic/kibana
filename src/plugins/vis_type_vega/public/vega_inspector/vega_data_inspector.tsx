@@ -20,25 +20,43 @@
 import React from 'react';
 import { EuiTabbedContent } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { VegaInspectorAdapters } from './vega_inspector';
-import { DataViewer, SignalViewer } from './components';
+import { DataViewer, SignalViewer, SpecViewer } from './components';
 import { InspectorViewProps } from '../../../inspector/public';
 
 interface VegaDataInspectorProps extends InspectorViewProps<VegaInspectorAdapters> {
   adapters: VegaInspectorAdapters;
 }
 
+const dataSetsLabel = i18n.translate('visTypeVega.inspector.dataSetsLabel', {
+  defaultMessage: 'Data Sets',
+});
+
+const signalValuesLabel = i18n.translate('visTypeVega.inspector.signalValuesLabel', {
+  defaultMessage: 'Signal Values',
+});
+
+const specLabel = i18n.translate('visTypeVega.inspector.specLabel', {
+  defaultMessage: 'Spec',
+});
+
 export const VegaDataInspector = ({ adapters }: VegaDataInspectorProps) => {
   const tabs = [
     {
       id: 'data-viewer--id',
-      name: 'Inspect Data Sets',
+      name: dataSetsLabel,
       content: <DataViewer vegaAdapter={adapters.vega} />,
     },
     {
       id: 'signal-viewer--id',
-      name: 'Inspect Signal Values',
+      name: signalValuesLabel,
       content: <SignalViewer vegaAdapter={adapters.vega} />,
+    },
+    {
+      id: 'spec-viewer--id',
+      name: specLabel,
+      content: <SpecViewer vegaAdapter={adapters.vega} />,
     },
   ];
 

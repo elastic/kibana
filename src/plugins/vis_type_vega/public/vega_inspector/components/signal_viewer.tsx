@@ -17,8 +17,7 @@
  * under the License.
  */
 import React, { useMemo } from 'react';
-import { EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiSpacer } from '@elastic/eui';
 import { VegaAdapter, InspectSignalsSets } from '../vega_adapter';
 import { InspectorDataGrid } from './inspector_data_grid';
 
@@ -27,22 +26,14 @@ interface SignalViewerProps {
 }
 
 export const SignalViewer = ({ vegaAdapter }: SignalViewerProps) => {
-  const inspectSignalsSets = useMemo<InspectSignalsSets>(
-    () => vegaAdapter.getInspectSignalsSets(),
-    [vegaAdapter]
-  );
+  const inspectSignalsSets = useMemo<InspectSignalsSets>(() => vegaAdapter.getSignalsSets(), [
+    vegaAdapter,
+  ]);
 
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate('visTypeVega.inspector.signalViewer.signals', {
-          defaultMessage: 'Signals:',
-        })}
-      >
-        <InspectorDataGrid columns={inspectSignalsSets.columns} data={inspectSignalsSets.data} />
-      </EuiFormRow>
+      <InspectorDataGrid columns={inspectSignalsSets.columns} data={inspectSignalsSets.data} />
     </>
   );
 };

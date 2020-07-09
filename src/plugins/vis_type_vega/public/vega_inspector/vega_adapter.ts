@@ -16,9 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { View, Runtime } from 'vega';
+import { View, Runtime, Spec } from 'vega';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
+
+interface DebugValues {
+  view: View;
+  spec: Spec;
+}
 
 export interface VegaRuntimeData {
   columns: Array<{
@@ -33,7 +38,8 @@ export type InspectSignalsSets = VegaRuntimeData;
 /** Get Runtime Scope for Vega View
  * @link https://vega.github.io/vega/docs/api/debugging/#scope
  **/
-const getVegaRuntimeScope = (view: View) => (view as any)._runtime as Runtime;
+const getVegaRuntimeScope = (debugValues: DebugValues) =>
+  (debugValues.view as any)._runtime as Runtime;
 
 const serializeColumns = (item: Record<string, unknown>, columns: string[]) => {
   const nonSerializableFieldLabel = '(..)';
@@ -51,14 +57,14 @@ const serializeColumns = (item: Record<string, unknown>, columns: string[]) => {
 const mapColumns = (columns: string[]) => columns.map((column) => ({ id: column, schema: 'json' }));
 
 export class VegaAdapter {
-  private vegaView?: View;
+  private debugValues?: DebugValues;
 
-  bindVegaView(vegaView: View) {
-    this.vegaView = vegaView;
+  bindDebugValues(debugValues: DebugValues) {
+    this.debugValues = debugValues;
   }
 
-  getInspectDataSets(): InspectDataSets[] {
-    const runtimeScope = getVegaRuntimeScope(this.vegaView!);
+  getDataSets(): InspectDataSets[] {
+    const runtimeScope = getVegaRuntimeScope(this.debugValues!);
 
     return Object.keys(runtimeScope.data || []).reduce((acc: InspectDataSets[], key) => {
       const value = runtimeScope.data[key].values.value;
@@ -75,8 +81,8 @@ export class VegaAdapter {
     }, []);
   }
 
-  getInspectSignalsSets(): InspectSignalsSets {
-    const runtimeScope = getVegaRuntimeScope(this.vegaView!);
+  getSignalsSets(): InspectSignalsSets {
+    const runtimeScope = getVegaRuntimeScope(this.debugValues!);
     const columns = [
       i18n.translate('visTypeVega.inspector.vegaAdapter.signal', {
         defaultMessage: 'Signal',
@@ -98,5 +104,9 @@ export class VegaAdapter {
         );
       }),
     };
+  }
+
+  getSpec(): string {
+    return JSON.stringify(this.debugValues!.spec, null, 2);
   }
 }
