@@ -14,6 +14,42 @@
         }
       }
     },
+    "ingest_manager": {
+      "properties": {
+        "fleet_enabled": {
+          "type": "boolean"
+        },
+        "agents": {
+          "properties": {
+            "total": {
+              "type": "number"
+            },
+            "online": {
+              "type": "number"
+            },
+            "error": {
+              "type": "number"
+            },
+            "offline": {
+              "type": "number"
+            }
+          }
+        },
+        "packages": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "keyword"
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
     "mlTelemetry": {
       "properties": {
         "file_data_visualizer": {
