@@ -6,6 +6,8 @@
 
 import { IRouter } from 'kibana/server';
 
+import { ConfigType } from '../config';
+
 import {
   createExceptionListItemRoute,
   createExceptionListRoute,
@@ -36,7 +38,7 @@ import {
   updateListRoute,
 } from '.';
 
-export const initRoutes = (router: IRouter): void => {
+export const initRoutes = (router: IRouter, config: ConfigType): void => {
   // lists
   createListRoute(router);
   readListRoute(router);
@@ -52,7 +54,7 @@ export const initRoutes = (router: IRouter): void => {
   deleteListItemRoute(router);
   patchListItemRoute(router);
   exportListItemRoute(router);
-  importListItemRoute(router);
+  importListItemRoute(router, config);
   findListItemRoute(router);
 
   // indexes of lists
