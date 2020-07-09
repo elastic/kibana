@@ -17,7 +17,6 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { updateRulesRoute } from './update_rules_route';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
@@ -29,14 +28,6 @@ describe('update_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.create>;
-
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
 
   beforeEach(() => {
     server = serverMock.create();

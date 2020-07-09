@@ -4,6 +4,7 @@
 
 ```ts
 
+import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import Boom from 'boom';
 import { BulkIndexDocumentsParams } from 'elasticsearch';
 import { CatAliasesParams } from 'elasticsearch';
@@ -21,6 +22,8 @@ import { CatTasksParams } from 'elasticsearch';
 import { CatThreadPoolParams } from 'elasticsearch';
 import { ClearScrollParams } from 'elasticsearch';
 import { Client } from 'elasticsearch';
+import { Client as Client_2 } from '@elastic/elasticsearch';
+import { ClientOptions } from '@elastic/elasticsearch';
 import { ClusterAllocationExplainParams } from 'elasticsearch';
 import { ClusterGetSettingsParams } from 'elasticsearch';
 import { ClusterHealthParams } from 'elasticsearch';
@@ -138,6 +141,8 @@ import { TasksCancelParams } from 'elasticsearch';
 import { TasksGetParams } from 'elasticsearch';
 import { TasksListParams } from 'elasticsearch';
 import { TermvectorsParams } from 'elasticsearch';
+import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
+import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UpdateDocumentByQueryParams } from 'elasticsearch';
@@ -2017,6 +2022,9 @@ export interface SavedObjectsClientWrapperOptions {
 export interface SavedObjectsComplexFieldMapping {
     // (undocumented)
     doc_values?: boolean;
+    dynamic?: false | 'strict';
+    // (undocumented)
+    enabled?: boolean;
     // (undocumented)
     properties: SavedObjectsMappingProperties;
     // (undocumented)
@@ -2027,8 +2035,6 @@ export interface SavedObjectsComplexFieldMapping {
 export interface SavedObjectsCoreFieldMapping {
     // (undocumented)
     doc_values?: boolean;
-    // (undocumented)
-    enabled?: boolean;
     // (undocumented)
     fields?: {
         [subfield: string]: {
