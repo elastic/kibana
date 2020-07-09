@@ -7,11 +7,16 @@
 import fs from 'fs';
 import Boom from 'boom';
 import numeral from '@elastic/numeral';
-import { ILegacyScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
+import {
+  KibanaRequest,
+  ILegacyScopedClusterClient,
+  SavedObjectsClientContract,
+} from 'kibana/server';
 import moment from 'moment';
 import { IndexPatternAttributes } from 'src/plugins/data/server';
 import { merge } from 'lodash';
 import { AnalysisLimits, CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
+import { getAuthorizationHeader } from '../../lib/request_authorization';
 import { MlInfoResponse } from '../../../common/types/ml_server_info';
 import {
   KibanaObjects,
@@ -107,7 +112,7 @@ export class DataRecognizer {
   private _callAsCurrentUser: ILegacyScopedClusterClient['callAsCurrentUser'];
   private _callAsInternalUser: ILegacyScopedClusterClient['callAsInternalUser'];
   private _mlClusterClient: ILegacyScopedClusterClient;
-  private _authorizationHeader: any;
+  private _authorizationHeader: object;
   private _modulesDir = `${__dirname}/modules`;
   private _indexPatternName: string = '';
   private _indexPatternId: string | undefined = undefined;
@@ -119,12 +124,12 @@ export class DataRecognizer {
   constructor(
     mlClusterClient: ILegacyScopedClusterClient,
     private savedObjectsClient: SavedObjectsClientContract,
-    authorizationHeader: string | string[] | undefined
+    request: KibanaRequest
   ) {
     this._mlClusterClient = mlClusterClient;
     this._callAsCurrentUser = mlClusterClient.callAsCurrentUser;
     this._callAsInternalUser = mlClusterClient.callAsInternalUser;
-    this._authorizationHeader = authorizationHeader;
+    this._authorizationHeader = getAuthorizationHeader(request);
   }
 
   // list all directories under the given directory
@@ -705,7 +710,7 @@ export class DataRecognizer {
     return this._callAsInternalUser('ml.addDatafeed', {
       datafeedId,
       body,
-      headers: { authorization: this._authorizationHeader },
+      ...this._authorizationHeader,
     });
   }
 

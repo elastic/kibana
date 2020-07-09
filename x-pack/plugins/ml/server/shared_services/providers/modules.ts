@@ -90,5 +90,5 @@ function dataRecognizerFactory(
   savedObjectsClient: SavedObjectsClientContract,
   request: KibanaRequest
 ) {
-  return new DataRecognizer(mlClusterClient, savedObjectsClient, request.headers.authorization);
+  return new DataRecognizer(mlClusterClient, savedObjectsClient, request);
 }

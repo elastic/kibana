@@ -6,7 +6,7 @@
 
 import { KibanaRequest } from 'kibana/server';
 
-export function authorizationHeader(request: KibanaRequest) {
+export function getAuthorizationHeader(request: KibanaRequest) {
   return {
     headers: { authorization: request.headers.authorization },
   };

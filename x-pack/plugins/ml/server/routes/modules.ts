@@ -23,20 +23,12 @@ function recognize(
   request: KibanaRequest,
   indexPatternTitle: string
 ) {
-  const dr = new DataRecognizer(
-    context.ml!.mlClient,
-    context.core.savedObjects.client,
-    request.headers.authorization
-  );
+  const dr = new DataRecognizer(context.ml!.mlClient, context.core.savedObjects.client, request);
   return dr.findMatches(indexPatternTitle);
 }
 
 function getModule(context: RequestHandlerContext, request: KibanaRequest, moduleId: string) {
-  const dr = new DataRecognizer(
-    context.ml!.mlClient,
-    context.core.savedObjects.client,
-    request.headers.authorization
-  );
+  const dr = new DataRecognizer(context.ml!.mlClient, context.core.savedObjects.client, request);
   if (moduleId === undefined) {
     return dr.listModules();
   } else {
@@ -60,11 +52,7 @@ function setup(
   datafeedOverrides?: DatafeedOverride | DatafeedOverride[],
   estimateModelMemory?: boolean
 ) {
-  const dr = new DataRecognizer(
-    context.ml!.mlClient,
-    context.core.savedObjects.client,
-    request.headers.authorization
-  );
+  const dr = new DataRecognizer(context.ml!.mlClient, context.core.savedObjects.client, request);
   return dr.setup(
     moduleId,
     prefix,
@@ -86,11 +74,7 @@ function dataRecognizerJobsExist(
   request: KibanaRequest,
   moduleId: string
 ) {
-  const dr = new DataRecognizer(
-    context.ml!.mlClient,
-    context.core.savedObjects.client,
-    request.headers.authorization
-  );
+  const dr = new DataRecognizer(context.ml!.mlClient, context.core.savedObjects.client, request);
   return dr.dataRecognizerJobsExist(moduleId);
 }
 

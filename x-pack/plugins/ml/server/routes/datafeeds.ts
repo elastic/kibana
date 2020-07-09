@@ -12,7 +12,7 @@ import {
   datafeedIdSchema,
   deleteDatafeedQuerySchema,
 } from './schemas/datafeeds_schema';
-import { authorizationHeader } from '../lib/request_authorization';
+import { getAuthorizationHeader } from '../lib/request_authorization';
 
 /**
  * Routes for datafeed service
@@ -169,7 +169,7 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         const resp = await context.ml!.mlClient.callAsInternalUser('ml.addDatafeed', {
           datafeedId,
           body: request.body,
-          ...authorizationHeader(request),
+          ...getAuthorizationHeader(request),
         });
 
         return response.ok({
@@ -208,7 +208,7 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         const resp = await context.ml!.mlClient.callAsInternalUser('ml.updateDatafeed', {
           datafeedId,
           body: request.body,
-          ...authorizationHeader(request),
+          ...getAuthorizationHeader(request),
         });
 
         return response.ok({
@@ -363,7 +363,7 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         const datafeedId = request.params.datafeedId;
         const resp = await context.ml!.mlClient.callAsInternalUser('ml.datafeedPreview', {
           datafeedId,
-          ...authorizationHeader(request),
+          ...getAuthorizationHeader(request),
         });
 
         return response.ok({

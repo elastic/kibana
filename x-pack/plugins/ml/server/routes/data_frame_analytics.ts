@@ -19,7 +19,7 @@ import {
 } from './schemas/data_analytics_schema';
 import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
 import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../common/types/data_frame_analytics';
-import { authorizationHeader } from '../lib/request_authorization';
+import { getAuthorizationHeader } from '../lib/request_authorization';
 
 function getIndexPatternId(context: RequestHandlerContext, patternName: string) {
   const iph = new IndexPatternHandler(context.core.savedObjects.client);
@@ -218,7 +218,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
           {
             body: request.body,
             analyticsId,
-            ...authorizationHeader(request),
+            ...getAuthorizationHeader(request),
           }
         );
         return response.ok({
@@ -255,7 +255,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
           'ml.evaluateDataFrameAnalytics',
           {
             body: request.body,
-            ...authorizationHeader(request),
+            ...getAuthorizationHeader(request),
           }
         );
         return response.ok({

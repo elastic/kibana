@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract, KibanaRequest } from 'kibana/server';
 import { Module } from '../../../common/types/modules';
 import { DataRecognizer } from '../data_recognizer';
 
@@ -14,8 +14,8 @@ describe('ML - data recognizer', () => {
     ({
       find: jest.fn(),
       bulkCreate: jest.fn(),
-    } as never) as SavedObjectsClientContract,
-    ''
+    } as unknown) as SavedObjectsClientContract,
+    { headers: { authorization: '' } } as KibanaRequest
   );
 
   describe('jobOverrides', () => {
