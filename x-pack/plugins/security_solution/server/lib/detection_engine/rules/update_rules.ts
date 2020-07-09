@@ -10,7 +10,6 @@ import { readRules } from './read_rules';
 import { UpdateRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { calculateVersion } from './utils';
-import { hasListsFeature } from '../feature_flags';
 import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
 
 export const updateRules = async ({
@@ -97,9 +96,6 @@ export const updateRules = async ({
     exceptionsList,
   });
 
-  // TODO: Remove this and use regular exceptions_list once the feature is stable for a release
-  const exceptionsListParam = hasListsFeature() ? { exceptionsList } : {};
-
   const update = await alertsClient.update({
     id: rule.id,
     data: {
@@ -141,7 +137,7 @@ export const updateRules = async ({
         version: calculatedVersion,
         anomalyThreshold,
         machineLearningJobId,
-        ...exceptionsListParam,
+        exceptionsList,
       },
     },
   });

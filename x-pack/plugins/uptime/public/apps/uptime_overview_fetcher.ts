@@ -29,29 +29,24 @@ export async function fetchUptimeOverviewData({
     stats: {
       monitors: {
         type: 'number',
-        label: 'Monitors',
         value: snapshot.total,
       },
       up: {
         type: 'number',
-        label: 'Up',
         value: snapshot.up,
       },
       down: {
         type: 'number',
-        label: 'Down',
         value: snapshot.down,
       },
     },
     series: {
       up: {
-        label: 'Up',
         coordinates: pings.histogram.map((p) => {
           return { x: p.x!, y: p.upCount || 0 };
         }),
       },
       down: {
-        label: 'Down',
         coordinates: pings.histogram.map((p) => {
           return { x: p.x!, y: p.downCount || 0 };
         }),
