@@ -86,7 +86,7 @@ export class ClusterClient implements ICustomClusterClient {
     });
     const internalClient = this.asInternalUser.child({ name: id });
 
-    this.integrateAuditor(internalClient, scopedClient, request, name);
+    this.integrateAuditor(internalClient, scopedClient, request, id);
     return new ScopedClusterClient(internalClient, scopedClient);
   }
 
