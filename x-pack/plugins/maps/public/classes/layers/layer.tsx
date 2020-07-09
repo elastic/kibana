@@ -395,7 +395,6 @@ export class AbstractLayer implements ILayer {
     const requestTokens = this._dataRequests.map((dataRequest) => dataRequest.getRequestToken());
 
     // Compact removes all the undefineds
-    // @ts-expect-error
     return _.compact(requestTokens);
   }
 
