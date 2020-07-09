@@ -75,7 +75,67 @@ async function doIngestSetup(kibanaURL: string) {
 }
 
 async function main() {
-  const argv = yargs.help().options({
+  const argv = argvFromCLI();
+  await doIngestSetup(argv.kibana);
+
+  const clientOptions: ClientOptions = {
+    node: argv.node,
+  };
+
+  const client = new Client(clientOptions);
+  if (argv.delete) {
+    await deleteIndices(
+      [argv.eventIndex, argv.metadataIndex, argv.policyIndex, argv.alertIndex],
+      client
+    );
+  }
+
+  let seed = argv.seed;
+  if (!seed) {
+    seed = Math.random().toString();
+    console.log(`No seed supplied, using random seed: ${seed}`);
+  }
+
+  const startTime = Date.now();
+
+  const treeOptions: TreeOptions = {
+    ancestors: argv.ancestors,
+    generations: argv.generations,
+    children: argv.children,
+    relatedEvents: argv.relatedEvents,
+    relatedAlerts: argv.relatedAlerts,
+    percentWithRelated: argv.percentWithRelated,
+    percentTerminated: argv.percentTerminated,
+    alwaysGenMaxChildrenPerNode: argv.maxChildrenPerNode,
+    ancestryArraySize: argv.ancestryArraySize,
+  };
+
+  const {
+    numHosts,
+    numDocs,
+    metadataIndex,
+    policyIndex,
+    eventIndex,
+    alertIndex,
+    alertsPerHost,
+  } = argv;
+  await indexHostsAndAlerts(
+    client,
+    seed,
+    numHosts,
+    numDocs,
+    metadataIndex,
+    policyIndex,
+    eventIndex,
+    alertIndex,
+    alertsPerHost,
+    treeOptions
+  );
+  console.log(`Creating and indexing documents took: ${Date.now() - startTime}ms`);
+}
+
+function argvFromCLI() {
+  return yargs.help().options({
     seed: {
       alias: 's',
       describe: 'random seed to use for document generator',
@@ -197,57 +257,4 @@ async function main() {
       default: false,
     },
   }).argv;
-  await doIngestSetup(argv.kibana);
-
-  const clientOptions: ClientOptions = {
-    node: argv.node,
-  };
-
-  const client = new Client(clientOptions);
-  if (argv.delete) {
-    await deleteIndices(
-      [argv.eventIndex, argv.metadataIndex, argv.policyIndex, argv.alertIndex],
-      client
-    );
-  }
-
-  let seed = argv.seed;
-  if (!seed) {
-    seed = Math.random().toString();
-    console.log(`No seed supplied, using random seed: ${seed}`);
-  }
-  const startTime = new Date().getTime();
-  const treeOptions: TreeOptions = {
-    ancestors: argv.ancestors,
-    generations: argv.generations,
-    children: argv.children,
-    relatedEvents: argv.relatedEvents,
-    relatedAlerts: argv.relatedAlerts,
-    percentWithRelated: argv.percentWithRelated,
-    percentTerminated: argv.percentTerminated,
-    alwaysGenMaxChildrenPerNode: argv.maxChildrenPerNode,
-    ancestryArraySize: argv.ancestryArraySize,
-  };
-  const {
-    numHosts,
-    numDocs,
-    metadataIndex,
-    policyIndex,
-    eventIndex,
-    alertIndex,
-    alertsPerHost,
-  } = argv;
-  await indexHostsAndAlerts(
-    client,
-    seed,
-    numHosts,
-    numDocs,
-    metadataIndex,
-    policyIndex,
-    eventIndex,
-    alertIndex,
-    alertsPerHost,
-    treeOptions
-  );
-  console.log(`Creating and indexing documents took: ${new Date().getTime() - startTime}ms`);
 }
