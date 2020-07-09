@@ -2024,6 +2024,9 @@ export interface SavedObjectsClientWrapperOptions {
 export interface SavedObjectsComplexFieldMapping {
     // (undocumented)
     doc_values?: boolean;
+    dynamic?: false | 'strict';
+    // (undocumented)
+    enabled?: boolean;
     // (undocumented)
     properties: SavedObjectsMappingProperties;
     // (undocumented)
@@ -2034,8 +2037,6 @@ export interface SavedObjectsComplexFieldMapping {
 export interface SavedObjectsCoreFieldMapping {
     // (undocumented)
     doc_values?: boolean;
-    // (undocumented)
-    enabled?: boolean;
     // (undocumented)
     fields?: {
         [subfield: string]: {

@@ -29,7 +29,7 @@ import { EventType } from '../../timelines/store/timeline/model';
 import { timelineQuery } from './index.gql_query';
 import { timelineActions } from '../../timelines/store/timeline';
 
-const timelineIds = [TimelineId.alertsPage, TimelineId.alertsRulesDetailsPage];
+const timelineIds = [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage];
 
 export interface TimelineArgs {
   events: TimelineItem[];

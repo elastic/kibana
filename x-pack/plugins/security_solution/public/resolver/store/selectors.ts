@@ -128,11 +128,6 @@ export const uiSelectedDescendantProcessId = composeSelectors(
 );
 
 /**
- * The current panel to display
- */
-export const currentPanelView = composeSelectors(uiStateSelector, uiSelectors.currentPanelView);
-
-/**
  * Returns the camera state from within ResolverState
  */
 function cameraStateSelector(state: ResolverState) {
