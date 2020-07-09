@@ -82,7 +82,7 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
       await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.rawAlert.id}/_unmute_all`);
     } catch (err) {
       Legacy.shims.toastNotifications.addDanger({
-        title: i18n.translate('xpack.monitoring.alerts.panel.muteAlert.errorTitle', {
+        title: i18n.translate('xpack.monitoring.alerts.panel.ummuteAlert.errorTitle', {
           defaultMessage: `Unable to unmute alert`,
         }),
         text: err.message,
