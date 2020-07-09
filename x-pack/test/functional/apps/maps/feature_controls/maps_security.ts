@@ -16,7 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
 
-  describe('security feature controls', () => {
+  describe('maps security feature controls', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('maps/data');
       await esArchiver.load('maps/kibana');
@@ -149,6 +149,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             expectSpaceSelector: false,
           }
         );
+
+        await PageObjects.maps.gotoMapListingPage();
       });
 
       after(async () => {
@@ -162,16 +164,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`does not show create new button`, async () => {
-        await PageObjects.maps.gotoMapListingPage();
         await PageObjects.maps.expectMissingCreateNewButton();
       });
 
       it(`does not allow a map to be deleted`, async () => {
-        await PageObjects.maps.gotoMapListingPage();
         await testSubjects.missingOrFail('checkboxSelectAll');
       });
 
-      it(`shows read-only badge`, async () => {
+      // This behavior was removed when the Maps app was migrated to NP
+      it.skip(`shows read-only badge`, async () => {
         await globalNav.badgeExistsOrFail('Read only');
       });
 
@@ -253,7 +254,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('does not show Maps navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Discover', 'Stack Management']);
+        expect(navLinks).to.not.contain('Maps');
       });
 
       it(`returns a 404`, async () => {
