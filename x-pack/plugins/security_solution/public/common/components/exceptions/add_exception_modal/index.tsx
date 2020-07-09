@@ -221,6 +221,17 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     [setShouldBulkCloseAlert]
   );
 
+  const retrieveAlertOsTypes = useCallback(() => {
+    const osTypes = getMappedNonEcsValue({
+      data: alertData.nonEcsData,
+      fieldName: 'host.os.family',
+    });
+    if (osTypes.length === 0) {
+      return ['windows', 'macos', 'linux'];
+    }
+    return osTypes;
+  }, [alertData]);
+
   const enrichExceptionItems = useCallback(() => {
     let enriched: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> = [];
     enriched =
@@ -228,13 +239,11 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         ? enrichExceptionItemsWithComments(exceptionItemsToAdd, [{ comment }])
         : exceptionItemsToAdd;
     if (exceptionListType === 'endpoint') {
-      const osTypes = alertData
-        ? getMappedNonEcsValue({ data: alertData.nonEcsData, fieldName: 'host.os.family' })
-        : ['windows', 'macos', 'linux'];
+      const osTypes = alertData ? retrieveAlertOsTypes() : ['windows', 'macos', 'linux'];
       enriched = enrichExceptionItemsWithOS(enriched, osTypes);
     }
     return enriched;
-  }, [comment, exceptionItemsToAdd, exceptionListType, alertData]);
+  }, [comment, exceptionItemsToAdd, exceptionListType, alertData, retrieveAlertOsTypes]);
 
   const onAddExceptionConfirm = useCallback(() => {
     if (addOrUpdateExceptionItems !== null) {

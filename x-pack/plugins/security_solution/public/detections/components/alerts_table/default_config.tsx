@@ -36,7 +36,7 @@ import {
   SetEventsLoadingProps,
   UpdateTimelineLoading,
 } from './types';
-import { Ecs } from '../../../graphql/types';
+import { Ecs, TimelineNonEcsData } from '../../../graphql/types';
 import { AddExceptionOnClick } from '../../../common/components/exceptions/add_exception_modal';
 import { getMappedNonEcsValue } from '../../../common/components/exceptions/helpers';
 
@@ -174,6 +174,8 @@ export const requiredFieldsForActions = [
   'signal.rule.query',
   'signal.rule.to',
   'signal.rule.id',
+  'signal.original_event.kind',
+  'signal.original_event.module',
 
   // Endpoint exception fields
   'file.path',
@@ -189,6 +191,7 @@ interface AlertActionArgs {
   createTimeline: CreateTimeline;
   dispatch: Dispatch;
   ecsRowData: Ecs;
+  nonEcsRowData: TimelineNonEcsData[];
   hasIndexWrite: boolean;
   onAlertStatusUpdateFailure: (status: Status, error: Error) => void;
   onAlertStatusUpdateSuccess: (count: number, status: Status) => void;
@@ -211,6 +214,7 @@ export const getAlertActions = ({
   createTimeline,
   dispatch,
   ecsRowData,
+  nonEcsRowData,
   hasIndexWrite,
   onAlertStatusUpdateFailure,
   onAlertStatusUpdateSuccess,
@@ -281,6 +285,18 @@ export const getAlertActions = ({
     width: DEFAULT_ICON_BUTTON_WIDTH,
   };
 
+  const isEndpointAlert = () => {
+    const [module] = getMappedNonEcsValue({
+      data: nonEcsRowData,
+      fieldName: 'signal.original_event.module',
+    });
+    const [kind] = getMappedNonEcsValue({
+      data: nonEcsRowData,
+      fieldName: 'signal.original_event.kind',
+    });
+    return module === 'endpoint' && kind === 'alert';
+  };
+
   return [
     {
       ...getInvestigateInResolverAction({ dispatch, timelineId }),
@@ -305,7 +321,6 @@ export const getAlertActions = ({
     ...(FILTER_OPEN !== status ? [openAlertActionComponent] : []),
     ...(FILTER_CLOSED !== status ? [closeAlertActionComponent] : []),
     ...(FILTER_IN_PROGRESS !== status ? [inProgressAlertActionComponent] : []),
-    // TODO: disable this option if the alert is not an Endpoint alert
     {
       onClick: ({ ecsData, data }: TimelineRowActionOnClick) => {
         const [ruleName] = getMappedNonEcsValue({ data, fieldName: 'signal.rule.name' });
@@ -323,7 +338,7 @@ export const getAlertActions = ({
         }
       },
       id: 'addEndpointException',
-      isActionDisabled: () => !canUserCRUD || !hasIndexWrite,
+      isActionDisabled: () => !canUserCRUD || !hasIndexWrite || isEndpointAlert() === false,
       dataTestSubj: 'add-endpoint-exception-menu-item',
       ariaLabel: 'Add Endpoint Exception',
       content: <EuiText size="m">{i18n.ACTION_ADD_ENDPOINT_EXCEPTION}</EuiText>,
