@@ -10,4 +10,5 @@ export {
   PackageConfigInputValidationResults,
   validatePackageConfig,
   validationHasErrors,
+  countValidationErrors,
 } from './validate_package_config';

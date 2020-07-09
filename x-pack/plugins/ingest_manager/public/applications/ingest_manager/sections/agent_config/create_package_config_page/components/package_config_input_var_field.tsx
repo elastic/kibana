@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState } from 'react';
+import React, { useState, memo, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormRow, EuiFieldText, EuiComboBox, EuiText, EuiCodeEditor } from '@elastic/eui';
@@ -18,13 +18,13 @@ export const PackageConfigInputVarField: React.FunctionComponent<{
   onChange: (newValue: any) => void;
   errors?: string[] | null;
   forceShowErrors?: boolean;
-}> = ({ varDef, value, onChange, errors: varErrors, forceShowErrors }) => {
+}> = memo(({ varDef, value, onChange, errors: varErrors, forceShowErrors }) => {
   const [isDirty, setIsDirty] = useState<boolean>(false);
   const { multi, required, type, title, name, description } = varDef;
   const isInvalid = (isDirty || forceShowErrors) && !!varErrors;
   const errors = isInvalid ? varErrors : null;
 
-  const renderField = () => {
+  const field = useMemo(() => {
     if (multi) {
       return (
         <EuiComboBox
@@ -67,7 +67,7 @@ export const PackageConfigInputVarField: React.FunctionComponent<{
         onBlur={() => setIsDirty(true)}
       />
     );
-  };
+  }, [isInvalid, multi, onChange, type, value]);
 
   return (
     <EuiFormRow
@@ -86,7 +86,7 @@ export const PackageConfigInputVarField: React.FunctionComponent<{
       }
       helpText={<ReactMarkdown source={description} />}
     >
-      {renderField()}
+      {field}
     </EuiFormRow>
   );
-};
+});
