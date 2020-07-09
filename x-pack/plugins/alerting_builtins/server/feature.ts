@@ -27,8 +27,8 @@ export const BUILT_IN_ALERTS_FEATURE = {
         all: [],
         read: [],
       },
-      api: ['actions-read', 'actions-all'],
-      ui: ['alerting:show', 'actions:show', 'actions:save', 'actions:delete'],
+      api: [],
+      ui: ['alerting:show'],
     },
     read: {
       app: [],
@@ -41,8 +41,8 @@ export const BUILT_IN_ALERTS_FEATURE = {
         all: [],
         read: [],
       },
-      api: ['actions-read'],
-      ui: ['alerting:show', 'actions:show'],
+      api: [],
+      ui: ['alerting:show'],
     },
   },
 };
