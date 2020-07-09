@@ -56,12 +56,7 @@ export const ProcessDetails = memo(function ProcessDetails({
     const dateTime = eventTime ? formatDate(eventTime) : '';
 
     const createdEntry = {
-      title: i18n.translate(
-        'xpack.securitySolution.endpoint.resolver.panel.processDescList.created',
-        {
-          defaultMessage: 'Created',
-        }
-      ),
+      title: '@timestamp',
       description: dateTime,
     };
 
