@@ -582,6 +582,12 @@ export const DEFAULT_APP_CATEGORIES: Readonly<{
         euiIconType: string;
         order: number;
     };
+    enterpriseSearch: {
+        id: string;
+        label: string;
+        order: number;
+        euiIconType: string;
+    };
     observability: {
         id: string;
         label: string;

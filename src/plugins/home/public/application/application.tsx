@@ -20,14 +20,19 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { ScopedHistory } from 'kibana/public';
+import { ScopedHistory, CoreStart } from 'kibana/public';
+import { KibanaContextProvider } from '../../../kibana_react/public';
 // @ts-ignore
 import { HomeApp } from './components/home_app';
 import { getServices } from './kibana_services';
 
 import './index.scss';
 
-export const renderApp = async (element: HTMLElement, history: ScopedHistory) => {
+export const renderApp = async (
+  element: HTMLElement,
+  coreStart: CoreStart,
+  history: ScopedHistory
+) => {
   const homeTitle = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
   const { featureCatalogue, chrome } = getServices();
 
@@ -36,7 +41,12 @@ export const renderApp = async (element: HTMLElement, history: ScopedHistory) =>
 
   chrome.setBreadcrumbs([{ text: homeTitle }]);
 
-  render(<HomeApp directories={directories} />, element);
+  render(
+    <KibanaContextProvider services={{ ...coreStart }}>
+      <HomeApp directories={directories} />
+    </KibanaContextProvider>,
+    element
+  );
 
   // dispatch synthetic hash change event to update hash history objects
   // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
