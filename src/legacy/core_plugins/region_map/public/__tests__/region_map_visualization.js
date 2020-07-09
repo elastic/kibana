@@ -115,6 +115,15 @@ describe('RegionMapsVisualizationTests', function () {
         }
       });
       const serviceSettings = new ServiceSettings();
+      serviceSettings.loadFileLayerConfig = async (fl) => {
+        // Region-maps visualization calls EMS to dynamically load attribution iso grabbing it from visState
+        // Mock this call to avoid network-roundtrip
+        return {
+          attribution: fl.attribution + '_sanitized',
+          name: fl.name,
+        };
+      };
+
       const regionmapsConfig = {
         includeElasticMapsService: true,
         layers: [],
