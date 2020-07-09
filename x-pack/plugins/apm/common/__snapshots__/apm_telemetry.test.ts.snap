@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`APM telemetry helpers getApmTelemetryFullPath generates a JSON object with the full path telemetry mapping 1`] = `
+exports[`APM telemetry helpers getApmTelemetryFullPath generates a JSON object with the telemetry mapping 1`] = `
 {
   "properties": {
     "stack_stats": {
