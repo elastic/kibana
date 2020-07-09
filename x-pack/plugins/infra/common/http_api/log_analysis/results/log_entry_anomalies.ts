@@ -72,7 +72,10 @@ const sortOptionsRT = rt.keyof({
   'startTime': null,
 });
 
-const sortDirections = rt.union([rt.literal('asc'), rt.literal('desc')]);
+const sortDirectionsRT = rt.keyof({
+  'asc': null,
+  'desc': null,
+});
 
 const paginationPreviousPageCursor = rt.type({
   searchBefore: paginationCursorRT,
