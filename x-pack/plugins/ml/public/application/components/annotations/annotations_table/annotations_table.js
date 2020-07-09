@@ -69,6 +69,7 @@ export class AnnotationsTable extends Component {
     super(props);
     this.state = {
       annotations: [],
+      aggregations: null,
       isLoading: false,
       queryText: `event:(${ANNOTATION_EVENT_USER} or ${ANNOTATION_EVENT_DELAYED_DATA})`,
       searchError: undefined,
@@ -111,6 +112,7 @@ export class AnnotationsTable extends Component {
         .then((resp) => {
           this.setState((prevState, props) => ({
             annotations: resp.annotations[props.jobs[0].job_id] || [],
+            aggregations: resp.aggregations,
             errorMessage: undefined,
             isLoading: false,
             jobId: props.jobs[0].job_id,
@@ -518,8 +520,9 @@ export class AnnotationsTable extends Component {
       };
     };
     let filterOptions = [];
-    if (this.props.aggregations?.event?.buckets) {
-      const buckets = this.props.aggregations.event.buckets;
+    const aggregations = this.props.aggregations ?? this.state.aggregations;
+    if (aggregations) {
+      const buckets = aggregations.event.buckets;
       const foundUser = buckets.findIndex((d) => d.key === ANNOTATION_EVENT_USER) > -1;
       filterOptions = foundUser
         ? buckets

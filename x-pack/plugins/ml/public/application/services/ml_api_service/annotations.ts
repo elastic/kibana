@@ -6,7 +6,6 @@
 
 import {
   Annotation,
-  EsAggregationResult,
   FieldToBucket,
   GetAnnotationsResponse,
 } from '../../../../common/types/annotations';
@@ -24,19 +23,6 @@ export const annotations = {
     const body = JSON.stringify(obj);
     return http$<GetAnnotationsResponse>({
       path: `${basePath()}/annotations`,
-      method: 'POST',
-      body,
-    });
-  },
-  getUniqueAnnotationTerms(obj: {
-    jobIds: string[];
-    earliestMs: number;
-    latestMs: number;
-    fields: FieldToBucket[];
-  }) {
-    const body = JSON.stringify(obj);
-    return http$<{ annotationTerms: Record<string, EsAggregationResult> }>({
-      path: `${basePath()}/annotations/terms`,
       method: 'POST',
       body,
     });

@@ -15,3 +15,4 @@ export const ANNOTATION_USER_UNKNOWN = '<user unknown>';
 export const ANNOTATION_MAX_LENGTH_CHARS = 1000;
 
 export const ANNOTATION_EVENT_USER = 'user';
+export const ANNOTATION_EVENT_DELAYED_DATA = 'delayed_data';
