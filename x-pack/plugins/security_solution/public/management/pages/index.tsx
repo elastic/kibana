@@ -8,6 +8,7 @@ import { isEmpty } from 'lodash/fp';
 import React, { memo } from 'react';
 import { useHistory, Route, Switch } from 'react-router-dom';
 
+import { ChromeBreadcrumb } from 'kibana/public';
 import { PolicyContainer } from './policy';
 import {
   MANAGEMENT_ROUTING_HOSTS_PATH,
@@ -17,13 +18,16 @@ import {
 import { NotFoundPage } from '../../app/404';
 import { HostsContainer } from './endpoint_hosts';
 import { getHostListPath } from '../common/routing';
-import {ChromeBreadcrumb} from 'kibana/public';
-import {APP_ID} from 'x-pack/plugins/security_solution/common/constants';
-import {GetUrlForApp} from '../../common/components/navigation/types';
-import {AdministrationRouteSpyState} from '../../common/utils/route/types';
+import { APP_ID, SecurityPageName } from '../../../common/constants';
+import { GetUrlForApp } from '../../common/components/navigation/types';
+import { AdministrationRouteSpyState } from '../../common/utils/route/types';
+import { ADMINISTRATION } from '../../app/home/translations';
+import { AdministrationSubTab } from '../types';
+import { HOSTS_TAB, POLICIES_TAB } from '../common/translations';
 
 const TabNameMappedToI18nKey: Record<string, string> = {
-  
+  [AdministrationSubTab.hosts]: HOSTS_TAB,
+  [AdministrationSubTab.policies]: POLICIES_TAB,
 };
 
 export const getBreadcrumbs = (
@@ -33,7 +37,7 @@ export const getBreadcrumbs = (
 ): ChromeBreadcrumb[] => {
   let breadcrumb = [
     {
-      text: PAGE_TITLE,
+      text: ADMINISTRATION,
       href: getUrlForApp(`${APP_ID}:${SecurityPageName.management}`, {
         path: !isEmpty(search[0]) ? search[0] : '',
       }),
