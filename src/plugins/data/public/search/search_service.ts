@@ -37,9 +37,12 @@ import {
   getCalculateAutoTimeExpression,
 } from './aggs';
 import { ISearchGeneric } from './types';
+import { SearchUsageCollector, createUsageCollector } from './telemetry';
+import { UsageCollectionSetup } from '../../../usage_collection/public';
 
 interface SearchServiceSetupDependencies {
   expressions: ExpressionsSetup;
+  usageCollection: UsageCollectionSetup;
   getInternalStartServices: GetInternalStartServicesFn;
   packageInfo: PackageInfo;
 }

@@ -31,4 +31,6 @@ export interface SearchUsageCollector {
   trackLongQueryPopupShown: () => Promise<void>;
   trackLongQueryDialogDismissed: () => Promise<void>;
   trackLongQueryRunBeyondTimeout: () => Promise<void>;
+  trackError: (duration: number) => Promise<void>;
+  trackSuccess: (duration: number) => Promise<void>;
 }

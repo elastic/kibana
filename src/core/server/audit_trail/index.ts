@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { querySavedObjectType } from './query';
-export { indexPatternSavedObjectType } from './index_patterns';
-export { kqlTelemetry } from './kql_telemetry';
-export { searchTelemetry } from './search_telemetry';
+
+export { AuditTrailService } from './audit_trail_service';
+export { AuditableEvent, Auditor, AuditorFactory, AuditTrailSetup, AuditTrailStart } from './types';

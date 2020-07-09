@@ -20,6 +20,7 @@
 import { RequestHandlerContext } from '../../../../core/server';
 import { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
 import { ES_SEARCH_STRATEGY, IEsSearchRequest, IEsSearchResponse } from './es_search';
+import { SearchUsage } from './collectors/usage';
 
 export interface ISearchSetup {
   /**
@@ -27,6 +28,11 @@ export interface ISearchSetup {
    * strategies.
    */
   registerSearchStrategy: TRegisterSearchStrategy;
+
+  /**
+   * Used internally for telemetry
+   */
+  usage: SearchUsage;
 }
 
 export interface ISearchStart {
