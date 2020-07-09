@@ -136,7 +136,7 @@ export const ComponentTemplatesSelector = ({
                 }}
               />
             </div>
-            <div className="eui-yScrollWithShadows">
+            <div className="eui-yScrollWithShadows componentTemplatesSelector__selection__content">
               <ComponentTemplatesSelection
                 components={componentsSelected}
                 onReorder={onSelectionReorder}
