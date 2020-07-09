@@ -33,21 +33,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
-import { METRIC_TYPES } from '../../../../../../plugins/vis_type_timeseries/common/metric_types';
-
-function getSupportedFieldsByMetricType(type) {
-  switch (type) {
-    case METRIC_TYPES.CARDINALITY:
-      return Object.values(KBN_FIELD_TYPES).filter((type) => type !== KBN_FIELD_TYPES.HISTOGRAM);
-    case METRIC_TYPES.VALUE_COUNT:
-    case METRIC_TYPES.AVERAGE:
-    case METRIC_TYPES.SUM:
-      return [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.HISTOGRAM];
-    default:
-      return [KBN_FIELD_TYPES.NUMBER];
-  }
-}
+import { getSupportedFieldsByMetricType } from '../lib/get_supported_fields_by_metric_type';
 
 export function StandardAgg(props) {
   const { model, panel, series, fields, uiRestrictions } = props;
