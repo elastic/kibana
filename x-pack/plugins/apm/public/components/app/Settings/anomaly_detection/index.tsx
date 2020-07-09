@@ -15,7 +15,11 @@ import { LicensePrompt } from '../../../shared/LicensePrompt';
 import { useLicense } from '../../../../hooks/useLicense';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
-const DEFAULT_VALUE: APIReturnType<'/api/apm/settings/anomaly-detection'> = {
+export type AnomalyDetectionApiResponse = APIReturnType<
+  '/api/apm/settings/anomaly-detection'
+>;
+
+const DEFAULT_VALUE: AnomalyDetectionApiResponse = {
   jobs: [],
   hasLegacyJobs: false,
 };
@@ -80,7 +84,7 @@ export const AnomalyDetection = () => {
       ) : (
         <JobsList
           status={status}
-          anomalyDetectionJobsByEnv={data.jobs}
+          jobs={data.jobs}
           hasLegacyJobs={data.hasLegacyJobs}
           onAddEnvironments={() => {
             setViewAddEnvironments(true);
