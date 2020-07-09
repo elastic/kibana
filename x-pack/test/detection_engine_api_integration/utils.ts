@@ -235,30 +235,44 @@ export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =
 
 /**
  * Remove all alerts from the .kibana index
+ * This will retry 20 times before giving up and hopefully still not interfere with other tests
  * @param es The ElasticSearch handle
  */
-export const deleteAllAlerts = async (es: Client): Promise<void> => {
-  await es.deleteByQuery({
-    index: '.kibana',
-    q: 'type:alert',
-    wait_for_completion: true,
-    refresh: true,
-    body: {},
-  });
+export const deleteAllAlerts = async (es: Client, retryCount = 20): Promise<void> => {
+  if (retryCount > 0) {
+    try {
+      await es.deleteByQuery({
+        index: '.kibana',
+        q: 'type:alert',
+        wait_for_completion: true,
+        refresh: true,
+        body: {},
+      });
+    } catch (err) {
+      await deleteAllAlerts(es, retryCount - 1);
+    }
+  }
 };
 
 /**
  * Remove all rules statuses from the .kibana index
+ * This will retry 20 times before giving up and hopefully still not interfere with other tests
  * @param es The ElasticSearch handle
  */
-export const deleteAllRulesStatuses = async (es: Client): Promise<void> => {
-  await es.deleteByQuery({
-    index: '.kibana',
-    q: 'type:siem-detection-engine-rule-status',
-    wait_for_completion: true,
-    refresh: true,
-    body: {},
-  });
+export const deleteAllRulesStatuses = async (es: Client, retryCount = 20): Promise<void> => {
+  if (retryCount > 0) {
+    try {
+      await es.deleteByQuery({
+        index: '.kibana',
+        q: 'type:siem-detection-engine-rule-status',
+        wait_for_completion: true,
+        refresh: true,
+        body: {},
+      });
+    } catch (err) {
+      await deleteAllRulesStatuses(es, retryCount - 1);
+    }
+  }
 };
 
 /**
@@ -276,9 +290,16 @@ export const createSignalsIndex = async (
  * @param supertest The supertest client library
  */
 export const deleteSignalsIndex = async (
-  supertest: SuperTest<supertestAsPromised.Test>
+  supertest: SuperTest<supertestAsPromised.Test>,
+  retryCount = 20
 ): Promise<void> => {
-  await supertest.delete(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send().expect(200);
+  if (retryCount > 0) {
+    try {
+      await supertest.delete(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
+    } catch (err) {
+      await deleteSignalsIndex(supertest, retryCount - 1);
+    }
+  }
 };
 
 /**
