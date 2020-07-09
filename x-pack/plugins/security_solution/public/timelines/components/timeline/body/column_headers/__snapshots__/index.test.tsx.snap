@@ -477,6 +477,8 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
           toggleColumn={[MockFunction]}
           width={900}
         />
+      </styled.div>
+      <styled.div>
         <Memo(StatefulRowRenderersBrowserComponent)
           data-test-subj="row-renderers-browser"
           timelineId="test"
