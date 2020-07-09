@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiBreadcrumbs, Breadcrumb, EuiCode } from '@elastic/eui';
+import { EuiBreadcrumbs, Breadcrumb, EuiCode, EuiBetaBadge } from '@elastic/eui';
 import styled from 'styled-components';
 import React, { memo } from 'react';
 import { useResolverTheme } from '../assets';
@@ -17,6 +17,10 @@ export const BoldCode = styled(EuiCode)`
   &.euiCodeBlock code.euiCodeBlock__code {
     font-weight: 900;
   }
+`;
+
+const BetaHeader = styled(`header`)`
+  margin-bottom: 1em;
 `;
 
 /**
@@ -49,12 +53,17 @@ export const StyledBreadcrumbs = memo(function StyledBreadcrumbs({
     colorMap: { resolverEdge, resolverEdgeText },
   } = useResolverTheme();
   return (
-    <ThemedBreadcrumbs
-      background={resolverEdge}
-      text={resolverEdgeText}
-      breadcrumbs={breadcrumbs}
-      truncate={truncate}
-    />
+    <>
+      <BetaHeader>
+        <EuiBetaBadge label="BETA" />
+      </BetaHeader>
+      <ThemedBreadcrumbs
+        background={resolverEdge}
+        text={resolverEdgeText}
+        breadcrumbs={breadcrumbs}
+        truncate={truncate}
+      />
+    </>
   );
 });
 
