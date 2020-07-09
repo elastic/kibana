@@ -16,6 +16,7 @@ import {
   EuiCallOut,
   EuiAccordion,
   EuiCodeBlock,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -271,13 +272,18 @@ export const AlertPreview: React.FC<Props> = (props) => {
                     <EuiSpacer size={'s'} />
                     <EuiAccordion
                       id="alertErrorDetailsAccordion"
-                      buttonContent={i18n.translate(
-                        'xpack.infra.metrics.alertFlyout.errorDetails',
-                        {
-                          defaultMessage: 'Details',
-                        }
-                      )}
+                      buttonContent={
+                        <>
+                          <EuiText size="s">
+                            <FormattedMessage
+                              id="xpack.infra.metrics.alertFlyout.errorDetails"
+                              defaultMessage="Details"
+                            />
+                          </EuiText>
+                        </>
+                      }
                     >
+                      <EuiSpacer size={'s'} />
                       <EuiCodeBlock>{previewError.body.message}</EuiCodeBlock>
                     </EuiAccordion>
                   </>
