@@ -566,6 +566,12 @@ export const DEFAULT_APP_CATEGORIES: Readonly<{
         euiIconType: string;
         order: number;
     };
+    enterpriseSearch: {
+        id: string;
+        label: string;
+        order: number;
+        euiIconType: string;
+    };
     observability: {
         id: string;
         label: string;
@@ -2022,6 +2028,9 @@ export interface SavedObjectsClientWrapperOptions {
 export interface SavedObjectsComplexFieldMapping {
     // (undocumented)
     doc_values?: boolean;
+    dynamic?: false | 'strict';
+    // (undocumented)
+    enabled?: boolean;
     // (undocumented)
     properties: SavedObjectsMappingProperties;
     // (undocumented)
@@ -2032,8 +2041,6 @@ export interface SavedObjectsComplexFieldMapping {
 export interface SavedObjectsCoreFieldMapping {
     // (undocumented)
     doc_values?: boolean;
-    // (undocumented)
-    enabled?: boolean;
     // (undocumented)
     fields?: {
         [subfield: string]: {

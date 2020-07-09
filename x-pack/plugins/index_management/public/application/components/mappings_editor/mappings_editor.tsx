@@ -39,14 +39,14 @@ export const MappingsEditor = React.memo(({ onChange, value, indexSettings }: Pr
     }
 
     const {
-      _source = {},
-      _meta = {},
+      _source,
+      _meta,
       _routing,
       dynamic,
       numeric_detection,
       date_detection,
       dynamic_date_formats,
-      properties = {},
+      properties,
       dynamic_templates,
     } = mappingsDefinition;
 

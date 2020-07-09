@@ -55,6 +55,7 @@ export const updateList = async ({
       body: { doc },
       id,
       index: listIndex,
+      refresh: 'wait_for',
     });
     return {
       created_at: list.created_at,
