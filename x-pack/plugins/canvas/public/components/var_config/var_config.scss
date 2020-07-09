@@ -4,7 +4,7 @@
 
   &.canvasVarConfig-isEditMode {
     .canvasVarConfig__innerContainer {
-      left: calc(-100% - 24px); // Account for the extra padding
+      transform: translateX(-50%);
     }
   }
 }
@@ -38,10 +38,10 @@
   width: calc(200% + 48px); // Account for the extra padding
 
   position: relative;
-  left: 0;
 
-  transition-property: left;
-  transition-duration: $euiAnimSpeedNormal;
+  transition-property: transform;
+  transition-duration: $euiAnimSpeedFast;
+  transition-timing-function: $euiAnimSlightResistance;
 
   display: flex;
   flex-direction: row;
