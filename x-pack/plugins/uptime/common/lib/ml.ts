@@ -6,7 +6,7 @@
 
 import { ML_JOB_ID } from '../constants';
 
-const getJobPrefix = (monitorId: string) => {
+export const getJobPrefix = (monitorId: string) => {
   // ML App doesn't support upper case characters in job name
   // Also Spaces and the characters / ? , " < > | * are not allowed
   // so we will replace all special chars with _

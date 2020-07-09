@@ -19,7 +19,7 @@ import {
   HeartbeatIndicesParam,
   MonitorIdParam,
 } from '../actions/types';
-import { getMLJobId } from '../../../common/lib/ml';
+import { getJobPrefix, getMLJobId } from '../../../common/lib/ml';
 
 export const getMLCapabilities = async (): Promise<MlCapabilitiesResponse> => {
   return await apiService.get(API_URLS.ML_CAPABILITIES);

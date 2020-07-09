@@ -13,7 +13,12 @@ import {
   isMLJobCreatingSelector,
   selectDynamicSettings,
 } from '../../../state/selectors';
-import { createMLJobAction, getExistingMLJobAction } from '../../../state/actions';
+import {
+  createMLJobAction,
+  getExistingMLJobAction,
+  setAlertFlyoutType,
+  setAlertFlyoutVisible,
+} from '../../../state/actions';
 import { MLJobLink } from './ml_job_link';
 import * as labels from './translations';
 import {
@@ -21,7 +26,7 @@ import {
   KibanaReactNotifications,
 } from '../../../../../../../src/plugins/kibana_react/public';
 import { MLFlyoutView } from './ml_flyout';
-import { ML_JOB_ID } from '../../../../common/constants';
+import { CLIENT_ALERT_TYPES, ML_JOB_ID } from '../../../../common/constants';
 import { UptimeRefreshContext, UptimeSettingsContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
 import { getDynamicSettings } from '../../../state/actions/dynamic_settings';
@@ -112,6 +117,8 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
         loadMLJob(ML_JOB_ID);
 
         refreshApp();
+        dispatch(setAlertFlyoutType(CLIENT_ALERT_TYPES.DURATION_ANOMALY));
+        dispatch(setAlertFlyoutVisible(true));
       } else {
         showMLJobNotification(
           notifications,
