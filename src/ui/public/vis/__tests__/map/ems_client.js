@@ -79,7 +79,7 @@ describe('ems_client', () => {
   it('.getFileLayers', async () => {
     const emsClient = getEMSClient();
     const layers = await emsClient.getFileLayers();
-    expect(layers.length).to.be(18);
+    expect(layers.length).to.be(19);
   });
 
   it('.getFileLayers[0]', async () => {
