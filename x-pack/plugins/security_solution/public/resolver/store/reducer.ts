@@ -24,7 +24,6 @@ const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
     activeDescendantId: null,
     selectedDescendantId: null,
     processEntityIdOfSelectedDescendant: null,
-    panelToDisplay: null,
   },
   action
 ) => {
@@ -38,11 +37,6 @@ const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
       ...uiState,
       selectedDescendantId: action.payload.nodeId,
       processEntityIdOfSelectedDescendant: action.payload.selectedProcessId,
-    };
-  } else if (action.type === 'appDisplayedDifferentPanel') {
-    return {
-      ...uiState,
-      panelToDisplay: action.payload,
     };
   } else if (
     action.type === 'userBroughtProcessIntoView' ||
