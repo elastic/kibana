@@ -8,6 +8,7 @@ import { IRouter } from '../../../../../../../src/core/server';
 
 import { TIMELINE_URL } from '../../../../common/constants';
 
+import { ConfigType } from '../../..';
 import { SetupPlugins } from '../../../plugin';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 

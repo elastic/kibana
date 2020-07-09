@@ -10,4 +10,4 @@ export const getTimelineByIdSchemaQuery = rt.partial({
   id: rt.string,
 });
 
-export type GetTimelineByIdSchemaQuery = rt.typeof<typeof getTimelineByIdSchemaQuery>;
+export type GetTimelineByIdSchemaQuery = rt.TypeOf<typeof getTimelineByIdSchemaQuery>;
