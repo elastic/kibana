@@ -31,7 +31,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('visual builder', function describeIndexTests() {
     this.tags('includeFirefox');
     beforeEach(async () => {
-      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
+      await security.testUser.setRoles([
+        'kibana_admin',
+        'test_logstash_reader',
+        'kibana_sample_admin',
+      ]);
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisualBuilder();
       await PageObjects.visualBuilder.checkVisualBuilderIsPresent();
@@ -105,15 +109,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/43150
-    describe.skip('switch index patterns', () => {
+    describe('switch index patterns', () => {
       beforeEach(async () => {
         log.debug('Load kibana_sample_data_flights data');
         await esArchiver.loadIfNeeded('kibana_sample_data_flights');
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
         await PageObjects.visualBuilder.checkMetricTabIsPresent();
-        await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin']);
       });
       after(async () => {
         await security.testUser.restoreDefaults();

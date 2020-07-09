@@ -5,6 +5,7 @@
  */
 
 import React, { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import { TimelineId } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
 import { HostsComponentsQueryProps } from './types';
@@ -18,6 +19,7 @@ import { MatrixHistogramContainer } from '../../../common/components/matrix_hist
 import * as i18n from '../translations';
 import { HistogramType } from '../../../graphql/types';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
+import { getInvestigateInResolverAction } from '../../../timelines/components/timeline/body/helpers';
 
 const EVENTS_HISTOGRAM_ID = 'eventsOverTimeQuery';
 
@@ -57,13 +59,17 @@ export const EventsQueryTabBody = ({
   startDate,
 }: HostsComponentsQueryProps) => {
   const { initializeTimeline } = useManageTimeline();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     initializeTimeline({
       id: TimelineId.hostsPageEvents,
       defaultModel: eventsDefaultModel,
+      timelineRowActions: () => [
+        getInvestigateInResolverAction({ dispatch, timelineId: TimelineId.hostsPageEvents }),
+      ],
     });
-  }, [initializeTimeline]);
+  }, [dispatch, initializeTimeline]);
 
   useEffect(() => {
     return () => {
