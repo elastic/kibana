@@ -453,6 +453,10 @@ export const entryHasNonEcsType = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
   indexPatterns: IIndexPattern
 ): boolean => {
+  const doesFieldNameExist = (exceptionEntry: Entry): boolean => {
+    return indexPatterns.fields.some(({ name }) => name === exceptionEntry.field);
+  };
+
   if (exceptionItems.length === 0) {
     return false;
   }
@@ -460,20 +464,16 @@ export const entryHasNonEcsType = (
     for (const exceptionEntry of entries ?? []) {
       if (exceptionEntry.type === 'nested') {
         for (const nestedExceptionEntry of exceptionEntry.entries) {
-          if (doesFieldNameExist(nestedExceptionEntry) === true) {
+          if (doesFieldNameExist(nestedExceptionEntry) === false) {
             return true;
           }
         }
-      } else if (doesFieldNameExist(exceptionEntry) === true) {
+      } else if (doesFieldNameExist(exceptionEntry) === false) {
         return true;
       }
     }
   }
   return false;
-
-  function doesFieldNameExist(exceptionEntry: Entry) {
-    return indexPatterns.fields.find(({ name }) => name === exceptionEntry.field) === undefined;
-  }
 };
 
 /**

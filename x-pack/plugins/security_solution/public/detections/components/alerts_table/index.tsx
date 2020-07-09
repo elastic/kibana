@@ -405,7 +405,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   }, [closeAddExceptionModal]);
 
   const onAddExceptionConfirm = useCallback(
-    (didCloseAlert?: boolean) => {
+    (didCloseAlert: boolean) => {
       closeAddExceptionModal();
     },
     [closeAddExceptionModal]

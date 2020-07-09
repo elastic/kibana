@@ -338,7 +338,7 @@ export const getAlertActions = ({
         }
       },
       id: 'addEndpointException',
-      isActionDisabled: () => !canUserCRUD || !hasIndexWrite || isEndpointAlert() === false,
+      isActionDisabled: () => !canUserCRUD || !hasIndexWrite || !isEndpointAlert(),
       dataTestSubj: 'add-endpoint-exception-menu-item',
       ariaLabel: 'Add Endpoint Exception',
       content: <EuiText size="m">{i18n.ACTION_ADD_ENDPOINT_EXCEPTION}</EuiText>,

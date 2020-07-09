@@ -66,7 +66,7 @@ interface AddExceptionModalProps {
     nonEcsData: TimelineNonEcsData[];
   };
   onCancel: () => void;
-  onConfirm: (didCloseAlert?: boolean) => void;
+  onConfirm: (didCloseAlert: boolean) => void;
 }
 
 const Modal = styled(EuiModal)`
@@ -222,14 +222,18 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   );
 
   const retrieveAlertOsTypes = useCallback(() => {
-    const osTypes = getMappedNonEcsValue({
-      data: alertData.nonEcsData,
-      fieldName: 'host.os.family',
-    });
-    if (osTypes.length === 0) {
-      return ['windows', 'macos', 'linux'];
+    const osDefaults = ['windows', 'macos', 'linux'];
+    if (alertData) {
+      const osTypes = getMappedNonEcsValue({
+        data: alertData.nonEcsData,
+        fieldName: 'host.os.family',
+      });
+      if (osTypes.length === 0) {
+        return osDefaults;
+      }
+      return osTypes;
     }
-    return osTypes;
+    return osDefaults;
   }, [alertData]);
 
   const enrichExceptionItems = useCallback(() => {
@@ -239,11 +243,11 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         ? enrichExceptionItemsWithComments(exceptionItemsToAdd, [{ comment }])
         : exceptionItemsToAdd;
     if (exceptionListType === 'endpoint') {
-      const osTypes = alertData ? retrieveAlertOsTypes() : ['windows', 'macos', 'linux'];
+      const osTypes = retrieveAlertOsTypes();
       enriched = enrichExceptionItemsWithOS(enriched, osTypes);
     }
     return enriched;
-  }, [comment, exceptionItemsToAdd, exceptionListType, alertData, retrieveAlertOsTypes]);
+  }, [comment, exceptionItemsToAdd, exceptionListType, retrieveAlertOsTypes]);
 
   const onAddExceptionConfirm = useCallback(() => {
     if (addOrUpdateExceptionItems !== null) {
