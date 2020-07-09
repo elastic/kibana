@@ -6,6 +6,7 @@
 
 import { savedObjectsClientMock, loggingSystemMock } from 'src/core/server/mocks';
 import { Logger } from 'src/core/server';
+import { createPackageConfigMock } from '../../../../../../ingest_manager/common/mocks';
 import { PackageConfigServiceInterface } from '../../../../../../ingest_manager/server';
 import { createPackageConfigServiceMock } from '../../../../../../ingest_manager/server/mocks';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
@@ -45,8 +46,6 @@ export class ManifestManagerMock extends ManifestManager {
   protected getManifestClient = jest
     .fn()
     .mockReturnValue(getManifestClientMock(this.savedObjectsClient));
-
-  public syncArtifacts = jest.fn().mockResolvedValue([]);
 }
 
 export const getManifestManagerMock = (opts?: {
@@ -63,6 +62,10 @@ export const getManifestManagerMock = (opts?: {
   if (opts?.packageConfigService !== undefined) {
     packageConfigService = opts.packageConfigService;
   }
+  packageConfigService.list = jest.fn().mockResolvedValue({
+    total: 1,
+    items: [createPackageConfigMock()],
+  });
 
   let savedObjectsClient = savedObjectsClientMock.create();
   if (opts?.savedObjectsClient !== undefined) {

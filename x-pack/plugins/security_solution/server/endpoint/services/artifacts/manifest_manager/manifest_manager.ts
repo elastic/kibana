@@ -106,6 +106,12 @@ export class ManifestManager {
     const errors: Error[] = [];
     for (const diff of snapshot.diffs) {
       const artifact = snapshot.manifest.getArtifact(diff.id);
+      if (artifact === undefined) {
+        throw new Error(
+          `Corrupted manifest detected. Diff contained artifact ${diff.id} not in manifest.`
+        );
+      }
+
       const compressedArtifact = await compressExceptionList(Buffer.from(artifact.body, 'base64'));
       artifact.body = compressedArtifact.toString('base64');
       artifact.encodedSize = compressedArtifact.byteLength;
