@@ -91,7 +91,7 @@ export function useContent<T extends object, K extends keyof T>(contentId: K) {
   }
 
   return {
-    defaultValue: defaultValue.current,
+    defaultValue: defaultValue.current!,
     updateContent,
     getData,
     getSingleContentData,
