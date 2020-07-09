@@ -50,6 +50,16 @@ const SavedDataProviderQueryMatchRuntimeType = runtimeTypes.partial({
   queryMatch: unionWithNullType(SavedDataProviderQueryMatchBasicRuntimeType),
 });
 
+export enum DataProviderType {
+  default = 'default',
+  template = 'template',
+}
+
+export const DataProviderTypeLiteralRt = runtimeTypes.union([
+  runtimeTypes.literal(DataProviderType.default),
+  runtimeTypes.literal(DataProviderType.template),
+]);
+
 const SavedDataProviderRuntimeType = runtimeTypes.partial({
   id: unionWithNullType(runtimeTypes.string),
   name: unionWithNullType(runtimeTypes.string),
@@ -58,6 +68,7 @@ const SavedDataProviderRuntimeType = runtimeTypes.partial({
   kqlQuery: unionWithNullType(runtimeTypes.string),
   queryMatch: unionWithNullType(SavedDataProviderQueryMatchBasicRuntimeType),
   and: unionWithNullType(runtimeTypes.array(SavedDataProviderQueryMatchRuntimeType)),
+  type: unionWithNullType(DataProviderTypeLiteralRt),
 });
 
 /*
@@ -172,7 +183,7 @@ export enum RowRendererId {
 export const RowRendererIdRuntimeType = stringEnum(RowRendererId, 'RowRendererId');
 
 /**
- * Template timeline type
+ * Timeline template type
  */
 
 export enum TemplateTimelineType {

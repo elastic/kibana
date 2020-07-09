@@ -84,6 +84,12 @@ export const timelineSchema = gql`
     kqlQuery: String
     queryMatch: QueryMatchInput
     and: [DataProviderInput!]
+    type: DataProviderType
+  }
+
+  enum DataProviderType {
+    default
+    template
   }
 
   input KueryFilterQueryInput {
@@ -211,6 +217,7 @@ export const timelineSchema = gql`
     excluded: Boolean
     kqlQuery: String
     queryMatch: QueryMatchResult
+    type: DataProviderType
     and: [DataProviderResult!]
   }
 
