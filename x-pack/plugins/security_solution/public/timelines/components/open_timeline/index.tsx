@@ -7,10 +7,7 @@
 import ApolloClient from 'apollo-client';
 import React, { useEffect, useState, useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-
 import { Dispatch } from 'redux';
-
-import { disableTemplate } from '../../../../common/constants';
 
 import { DeleteTimelineMutation, SortFieldTimeline, Direction } from '../../../graphql/types';
 import { State } from '../../../common/store';
@@ -267,7 +264,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     }, []);
 
     const openTimeline: OnOpenTimeline = useCallback(
-      ({ duplicate, timelineId }: { duplicate: boolean; timelineId: string }) => {
+      ({ duplicate, timelineId, timelineType: timelineTypeToOpen }) => {
         if (isModal && closeModalTimeline != null) {
           closeModalTimeline();
         }
@@ -277,6 +274,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           duplicate,
           onOpenTimeline,
           timelineId,
+          timelineType: timelineTypeToOpen,
           updateIsLoading,
           updateTimeline,
         });
@@ -318,9 +316,9 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         selectedItems={selectedItems}
         sortDirection={sortDirection}
         sortField={sortField}
-        templateTimelineFilter={!disableTemplate ? templateTimelineFilter : null}
+        templateTimelineFilter={templateTimelineFilter}
         timelineType={timelineType}
-        timelineFilter={!disableTemplate ? timelineTabs : null}
+        timelineFilter={timelineTabs}
         title={title}
         totalSearchResultsCount={totalCount}
       />
@@ -348,9 +346,9 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         selectedItems={selectedItems}
         sortDirection={sortDirection}
         sortField={sortField}
-        templateTimelineFilter={!disableTemplate ? templateTimelineFilter : null}
+        templateTimelineFilter={templateTimelineFilter}
         timelineType={timelineType}
-        timelineFilter={!disableTemplate ? timelineFilters : null}
+        timelineFilter={timelineFilters}
         title={title}
         totalSearchResultsCount={totalCount}
       />
