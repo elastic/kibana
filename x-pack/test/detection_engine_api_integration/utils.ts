@@ -293,16 +293,23 @@ export const deleteAllRulesStatuses = async (es: Client, retryCount = 20): Promi
  * @param supertest The supertest client library
  */
 export const createSignalsIndex = async (
-  supertest: SuperTest<supertestAsPromised.Test>
+  supertest: SuperTest<supertestAsPromised.Test>,
+  retryCount = 20
 ): Promise<void> => {
-  try {
-    await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
-  } catch (err) {
+  if (retryCount > 0) {
+    try {
+      await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log(
+        `Failure trying to create the signals index, retries left are: ${retryCount - 1}`,
+        err
+      );
+      await createSignalsIndex(supertest, retryCount - 1);
+    }
+  } else {
     // eslint-disable-next-line no-console
-    console.log(
-      'Warning, the create signals index did not happen correctly, this could cause test failures',
-      err
-    );
+    console.log('Could not createSignalsIndex, no retries are left');
   }
 };
 
