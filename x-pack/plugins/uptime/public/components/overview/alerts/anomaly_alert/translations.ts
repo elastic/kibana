@@ -16,10 +16,10 @@ export const AnomalyTranslations = {
       defaultMessage: 'When monitor',
     }
   ),
-  scoreAriaLabel: i18n.translate('xpack.uptime.alerts.anomaly.criteriaExpression.ariaLabel', {
+  scoreAriaLabel: i18n.translate('xpack.uptime.alerts.anomaly.scoreExpression.ariaLabel', {
     defaultMessage: 'An expression displaying the criteria for an anomaly alert threshold.',
   }),
-  scoreDescription: i18n.translate('xpack.uptime.alerts.anomaly.criteriaExpression.description', {
+  scoreDescription: i18n.translate('xpack.uptime.alerts.anomaly.scoreExpression.description', {
     defaultMessage: 'has anomaly with severity',
     description: 'An expression displaying the criteria for an anomaly alert threshold.',
   }),

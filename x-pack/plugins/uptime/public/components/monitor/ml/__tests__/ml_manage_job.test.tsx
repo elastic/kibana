@@ -12,7 +12,7 @@ import { renderWithRouter, shallowWithRouter } from '../../../../lib';
 describe('Manage ML Job', () => {
   it('shallow renders without errors', () => {
     jest.spyOn(redux, 'useSelector').mockReturnValue(true);
-    jest.spyOn(redux, 'useDispatch');
+    jest.spyOn(redux, 'useDispatch').mockReturnValue(jest.fn());
 
     const wrapper = shallowWithRouter(
       <ManageMLJobComponent hasMLJob={true} onEnableJob={jest.fn()} onJobDelete={jest.fn()} />
@@ -21,7 +21,7 @@ describe('Manage ML Job', () => {
   });
 
   it('renders without errors', () => {
-    jest.spyOn(redux, 'useDispatch');
+    jest.spyOn(redux, 'useDispatch').mockReturnValue(jest.fn());
     jest.spyOn(redux, 'useSelector').mockReturnValue(true);
 
     const wrapper = renderWithRouter(
