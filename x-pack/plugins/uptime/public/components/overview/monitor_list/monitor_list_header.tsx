@@ -12,24 +12,16 @@ import styled from 'styled-components';
 import { StatusFilter } from './status_filter';
 import { CERTIFICATES_ROUTE } from '../../../../common/constants';
 
-const TitleStyle = styled(EuiTitle)`
-  margin-left: auto;
+// Custom padding with magic numbers to make the certificate link stick to the upper right corner
+const LinkStyle = styled(Link)`
+  position: absolute;
+  right: 16px;
+  top: 16px;
 `;
 
+// position relative as the container is the reverence for the certificates link
 const FlexGroupContainer = styled(EuiFlexGroup)`
-  && {
-    @media only screen and (max-width: 768px) {
-      > :first-child {
-        flex-basis: 40% !important;
-      }
-      > :nth-child(2) {
-        order: 3;
-      }
-      > :nth-child(3) {
-        flex-basis: 60% !important;
-      }
-    }
-  }
+  position: relative;
 `;
 
 export const MonitorListHeader: React.FC = () => {
@@ -48,18 +40,12 @@ export const MonitorListHeader: React.FC = () => {
       <EuiFlexItem grow={false}>
         <StatusFilter />
       </EuiFlexItem>
-      <EuiFlexItem grow={true}>
-        <TitleStyle size="xs">
-          <h5>
-            <Link to={CERTIFICATES_ROUTE} data-test-subj="uptimeCertificatesLink">
-              <FormattedMessage
-                id="xpack.uptime.monitorList.viewCertificateTitle"
-                defaultMessage="Certificates status"
-              />
-            </Link>
-          </h5>
-        </TitleStyle>
-      </EuiFlexItem>
+      <LinkStyle to={CERTIFICATES_ROUTE} data-test-subj="uptimeCertificatesLink">
+        <FormattedMessage
+          id="xpack.uptime.monitorList.viewCertificateTitle"
+          defaultMessage="Certificates status"
+        />
+      </LinkStyle>
     </FlexGroupContainer>
   );
 };
