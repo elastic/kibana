@@ -78,10 +78,22 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
         isInvalid={errors.index.length > 0 && index !== undefined}
         error={errors.index}
         helpText={
-          <FormattedMessage
-            id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.howToBroadenSearchQueryDescription"
-            defaultMessage="Use * to broaden your query."
-          />
+          <>
+            <FormattedMessage
+              id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.howToBroadenSearchQueryDescription"
+              defaultMessage="Use * to broaden your query."
+            />
+            <EuiSpacer size="s" />
+            <EuiLink
+              href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/index-action-type.html`}
+              target="_blank"
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.configureIndexHelpLabel"
+                defaultMessage="Configuring index connector."
+              />
+            </EuiLink>
+          </>
         }
       >
         <EuiComboBox
@@ -218,32 +230,6 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           </EuiFormRow>
         </>
       ) : null}
-      <EuiSpacer size="m" />
-      <EuiLink
-        target="_blank"
-        href={'https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions#index'}
-        external
-      >
-        {i18n.translate(
-          'xpack.triggersActionsUI.sections.builtinActionTypes.indexAction.helpConfigureIndexLink',
-          {
-            defaultMessage: 'How to configure Index connector README',
-          }
-        )}
-      </EuiLink>
-      <EuiSpacer size="m" />
-      <EuiLink
-        target="_blank"
-        href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${docLinks.DOC_LINK_VERSION}/getting-started-index.html#getting-started-batch-processing`}
-        external
-      >
-        {i18n.translate(
-          'xpack.triggersActionsUI.sections.builtinActionTypes.indexAction.helpIndexDocLink',
-          {
-            defaultMessage: 'How to index some documents',
-          }
-        )}
-      </EuiLink>
     </>
   );
 };

@@ -99,6 +99,7 @@ systems, see:
 Use the following email account settings to send email from the
 https://mail.google.com[Gmail] SMTP service:
 
+[source,js]
 --------------------------------------------------
   config:
     host: smtp.gmail.com
@@ -108,6 +109,7 @@ https://mail.google.com[Gmail] SMTP service:
     user: <username>
     password: <password>
 --------------------------------------------------
+// CONSOLE
 
 If you get an authentication error that indicates that you need to continue the
 sign-in process from a web browser when Email action attempts to send email, you need
@@ -126,6 +128,7 @@ for more information.
 Use the following email account settings to send email action from the
 https://www.outlook.com/[Outlook.com] SMTP service:
 
+[source,js]
 --------------------------------------------------
 config:
     host: smtp-mail.outlook.com
@@ -135,6 +138,7 @@ secrets:
     user: <email.address>
     password: <password>
 --------------------------------------------------
+// CONSOLE
 
 When sending emails, you have to provide a from address, either a default one
 in your account configuration or as part of the email action in the watch.
@@ -150,6 +154,7 @@ NOTE:   You need to use a unique App Password if two-step verification is enable
 Use the following email account settings to send email from the
 http://aws.amazon.com/ses[Amazon Simple Email Service] (SES) SMTP service:
 
+[source,js]
 --------------------------------------------------
 config:
     host: email-smtp.us-east-1.amazonaws.com <1>
@@ -159,6 +164,7 @@ secrets:
     user: <username>
     password: <password>
 --------------------------------------------------
+// CONSOLE
 <1> `smtp.host` varies depending on the region
 
 NOTE:   You need to use your Amazon SES SMTP credentials to send email through
@@ -176,6 +182,7 @@ NOTE:   You need to use your Amazon SES SMTP credentials to send email through
 Use the following email account settings to send email action from Microsoft
 Exchange:
 
+[source,js]
 --------------------------------------------------
 config:
     host: <your exchange server>
@@ -186,6 +193,7 @@ secrets:
     user: <email address of service account> <2>
     password: <password>
 --------------------------------------------------
+// CONSOLE
 <1> Some organizations configure Exchange to validate that the `from` field is a
     valid local email account.
 <2> Many organizations support use of your email address as your username, though

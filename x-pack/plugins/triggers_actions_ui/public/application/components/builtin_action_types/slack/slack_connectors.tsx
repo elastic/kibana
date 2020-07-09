@@ -12,7 +12,7 @@ import { SlackActionConnector } from '../types';
 
 const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
   SlackActionConnector
->> = ({ action, editActionSecrets, errors }) => {
+>> = ({ action, editActionSecrets, errors, docLinks }) => {
   const { webhookUrl } = action.secrets;
 
   return (
@@ -22,7 +22,7 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
         fullWidth
         helpText={
           <EuiLink
-            href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${docLinks.DOC_LINK_VERSION}/actions-slack.html#configuring-slack`}
+            href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/slack-action-type.html#configuring-slack`}
             target="_blank"
           >
             <FormattedMessage

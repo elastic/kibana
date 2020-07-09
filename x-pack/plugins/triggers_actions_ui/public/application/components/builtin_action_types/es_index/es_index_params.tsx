@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiSpacer, EuiLink } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionParamsProps } from '../../../../types';
 import { IndexActionParams } from '.././types';
 import { JsonEditorWithMessageVariables } from '../../json_editor_with_message_variables';
@@ -15,6 +16,7 @@ export const IndexParamsFields = ({
   index,
   editAction,
   messageVariables,
+  docLinks,
 }: ActionParamsProps<IndexActionParams>) => {
   const { documents } = actionParams;
 
@@ -47,22 +49,18 @@ export const IndexParamsFields = ({
           }
         )}
         onDocumentsChange={onDocumentsChange}
-      />
-      <EuiSpacer size="m" />
-      <EuiLink
-        target="_blank"
-        href={
-          'https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui#index'
+        helpText={
+          <EuiLink
+            href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/index-action-type.html#index-action-configuration`}
+            target="_blank"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.indexDocumentHelpLabel"
+              defaultMessage="Index document example."
+            />
+          </EuiLink>
         }
-        external
-      >
-        {i18n.translate(
-          'xpack.triggersActionsUI.sections.builtinActionTypes.indexActionParams.helpIndexDocLink',
-          {
-            defaultMessage: 'Example of indexed document',
-          }
-        )}
-      </EuiLink>
+      />
     </>
   );
 };
