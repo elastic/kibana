@@ -42,11 +42,11 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
             )}
             helpText={
               <EuiLink
-                href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/pagerduty-action-type.html`}
+                href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/email-action-type.html#configuring-email`}
                 target="_blank"
               >
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.routingKeyNameHelpLabel"
+                  id="xpack.triggersActionsUI.components.builtinActionTypes.emailAction.configureAccountsHelpLabel"
                   defaultMessage="Configuring email accounts."
                 />
               </EuiLink>
