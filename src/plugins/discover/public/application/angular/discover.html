@@ -79,11 +79,11 @@
               class="dscTimechart"
               ng-if="opts.timefield"
             >
-              <timechart-header 
+              <timechart-header
                 from="toMoment(timeRange.from)"
-                to="toMoment(timeRange.to)" 
-                options="intervalOptions" 
-                on-change-interval="changeInterval" 
+                to="toMoment(timeRange.to)"
+                options="intervalOptions"
+                on-change-interval="changeInterval"
                 state-interval="state.interval"
                 show-scaled-info="bucketInterval.scaled"
                 bucket-interval-description="bucketInterval.description"

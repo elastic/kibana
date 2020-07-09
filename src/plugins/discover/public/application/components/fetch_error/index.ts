@@ -17,4 +17,4 @@
  * under the License.
  */
 
-import './fetch_error';
+export { DiscoverFetchError } from './fetch_error';

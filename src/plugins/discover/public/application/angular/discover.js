@@ -35,7 +35,6 @@ import indexTemplate from './discover.html';
 import indexTemplateGrid from './discover_datagrid.html';
 import { showOpenSearchPanel } from '../components/top_nav/show_open_search_panel';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
-import '../components/fetch_error';
 import { getPainlessError } from './get_painless_error';
 import { discoverResponseHandler } from './response_handler';
 import {
@@ -642,6 +641,7 @@ function discoverController(
     timefield: getTimeField(),
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.savedObjects.ip.list,
+    config: config,
   };
 
   const shouldSearchOnPageLoad = () => {

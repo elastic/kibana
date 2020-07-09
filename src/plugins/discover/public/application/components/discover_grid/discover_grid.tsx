@@ -81,6 +81,7 @@ const gridStyle = {
   border: 'horizontal',
   fontSize: 's',
   cellPadding: 's',
+  rowHover: 'none',
 };
 const pageSizeArr = [25, 50, 100, 500];
 const defaultPageSize = 50;

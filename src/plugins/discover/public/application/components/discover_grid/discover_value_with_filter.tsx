@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
@@ -38,88 +38,57 @@ export const DiscoverGridValueWithFilter = ({
   indexPattern: IndexPattern;
   onFilter: DocViewFilterFn;
 }) => {
-  const [hover, setHover] = useState(false);
-  if (hover) {
-    return (
-      <EuiFlexGroup
-        direction={'row'}
-        onMouseLeave={() => setHover(false)}
-        onBlur={() => setHover(false)}
-        gutterSize="none"
-        alignItems="center"
-        responsive={false}
-        className="eui-textTruncate"
-      >
-        <EuiFlexItem className="eui-textTruncate" grow={false}>
-          {value}
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <div>
-            <EuiButtonIcon
-              iconSize="s"
-              iconType="magnifyWithPlus"
-              aria-label={i18n.translate('discover.grid.ariaFilterOn', {
-                defaultMessage: 'Filter on {value}',
-                values: { value: columnId },
-              })}
-              onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-                ev.stopPropagation();
-                ev.preventDefault();
-                onFilter(
-                  indexPattern.fields.getByName(columnId),
-                  indexPattern.flattenHit(row)[columnId],
-                  '+'
-                );
-              }}
-              style={{
-                padding: 0,
-                minHeight: 'auto',
-                minWidth: 'auto',
-                paddingRight: 2,
-                paddingLeft: 2,
-                paddingTop: 0,
-                paddingBottom: 0,
-              }}
-            />
-            <EuiButtonIcon
-              iconSize="s"
-              iconType="magnifyWithMinus"
-              aria-label={i18n.translate('discover.grid.ariaFilterOn', {
-                defaultMessage: 'Filter out {value}',
-                values: { value: '' },
-              })}
-              onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-                ev.stopPropagation();
-                ev.preventDefault();
-                onFilter(
-                  indexPattern.fields.getByName(columnId),
-                  indexPattern.flattenHit(row)[columnId],
-                  '-'
-                );
-              }}
-              style={{
-                padding: 0,
-                minHeight: 'auto',
-                minWidth: 'auto',
-                paddingRight: 2,
-                paddingLeft: 2,
-                paddingTop: 0,
-                paddingBottom: 0,
-              }}
-            />
-          </div>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  } else {
-    return (
-      <div
-        className="eui-textTruncate"
-        onMouseOver={() => setHover(true)}
-        onFocus={() => setHover(true)}
-      >
+  return (
+    <EuiFlexGroup
+      direction="row"
+      gutterSize="none"
+      alignItems="center"
+      responsive={false}
+      className="eui-textTruncate dscEuiDataGridRowCellWithFilter"
+    >
+      <EuiFlexItem className="eui-textTruncate" grow={false}>
         {value}
-      </div>
-    );
-  }
+      </EuiFlexItem>
+      <EuiFlexItem className="dscEuiDataGridRowCellFilter">
+        <div>
+          <EuiButtonIcon
+            className="dscEuiDataGridRowCellBtn"
+            iconSize="s"
+            iconType="plusInCircle"
+            aria-label={i18n.translate('discover.grid.ariaFilterOn', {
+              defaultMessage: 'Filter on {value}',
+              values: { value: columnId },
+            })}
+            onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+              ev.stopPropagation();
+              ev.preventDefault();
+              onFilter(
+                indexPattern.fields.getByName(columnId),
+                indexPattern.flattenHit(row)[columnId],
+                '+'
+              );
+            }}
+          />
+          <EuiButtonIcon
+            className="dscEuiDataGridRowCellBtn"
+            iconSize="s"
+            iconType="minusInCircle"
+            aria-label={i18n.translate('discover.grid.ariaFilterOn', {
+              defaultMessage: 'Filter out {value}',
+              values: { value: columnId },
+            })}
+            onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+              ev.stopPropagation();
+              ev.preventDefault();
+              onFilter(
+                indexPattern.fields.getByName(columnId),
+                indexPattern.flattenHit(row)[columnId],
+                '-'
+              );
+            }}
+          />
+        </div>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 };

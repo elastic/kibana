@@ -9,19 +9,63 @@
   white-space: nowrap;
 }
 // this is a hack than needs to be improved
-div[data-rbd-draggable-id="Time"] {
+div[data-rbd-draggable-id='Time'] {
   display: none;
 }
 
-
 .dscEuiDataGridRowCell .euiDataGridRowCell {
   align-items: start;
+}
+
+
+.dscEuiDataGridRowCellFilter {
+  display: none;
+  text-align: right;
+}
+
+.dscEuiDataGridRowCellBtn {
+  text-align: right;
+  padding: 0 2px;
+  min-height: auto;
+  min-width: auto;
+  transition: none;
+  -webkit-transition: none;
+  -o-transition: none;
 }
 
 .dscValue {
   position: relative;
 }
 
-.dscValue .dscValueFilter{
+.dscValue .dscValueFilter {
   background: $euiColorLightShade;
+}
+
+.euiDataGridRowCell:hover .dscEuiDataGridRowCellFilter {
+  display: flex;
+}
+
+// hack to show expand icon on hover
+.euiDataGridRowCell:hover {
+  border: 1px solid transparent;
+  margin-top: -1px;
+  -webkit-box-shadow: 0 0 0 2px rgba(0, 107, 180, 0.3);
+  box-shadow: 0 0 0 2px rgba(0, 107, 180, 0.3);
+  border-radius: 1px;
+  z-index: 2;
+}
+.euiDataGridRowCell:hover .euiDataGridRowCell__expandButton {
+  margin-left: 6px;
+}
+.euiDataGridRowCell:hover .euiDataGridRowCell__expandButtonIcon {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  width: inherit;
+  visibility: visible;
+}
+.euiDataGridRowCell__expandButtonIcon {
+  transition: none;
+  -webkit-transition: none;
+  -o-transition: none;
 }

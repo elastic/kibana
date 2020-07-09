@@ -47,7 +47,7 @@ export function DiscoverGridPopover({
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
           <EuiButtonEmpty
-            iconType="magnifyWithPlus"
+            iconType="plusInCircle"
             aria-label={i18n.translate('discover.grid.ariaFilterOn', {
               defaultMessage: 'Filter on {value}',
               values: { value: text },
@@ -61,7 +61,7 @@ export function DiscoverGridPopover({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiButtonEmpty
-            iconType="magnifyWithMinus"
+            iconType="minusInCircle"
             aria-label={i18n.translate('discover.grid.ariaFilterOut', {
               defaultMessage: 'Filter without {value}',
               values: { value: text },

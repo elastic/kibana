@@ -17,6 +17,7 @@
  * under the License.
  */
 
+// @ts-ignore
 import { DiscoverNoResults } from './no_results';
 import { DiscoverUninitialized } from './uninitialized';
 import { DiscoverHistogram } from './histogram';
@@ -24,8 +25,10 @@ import { getAngularModule } from '../../../kibana_services';
 
 const app = getAngularModule();
 
-app.directive('discoverNoResults', (reactDirective) => reactDirective(DiscoverNoResults));
+app.directive('discoverNoResults', (reactDirective: any) => reactDirective(DiscoverNoResults));
 
-app.directive('discoverUninitialized', (reactDirective) => reactDirective(DiscoverUninitialized));
+app.directive('discoverUninitialized', (reactDirective: any) =>
+  reactDirective(DiscoverUninitialized)
+);
 
-app.directive('discoverHistogram', (reactDirective) => reactDirective(DiscoverHistogram));
+app.directive('discoverHistogram', (reactDirective: any) => reactDirective(DiscoverHistogram));

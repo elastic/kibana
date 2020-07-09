@@ -1,142 +1,47 @@
 <discover-app class="dscApp">
-  <h1 class="euiScreenReaderOnly">{{screenTitle}}</h1>
-
-  <!-- Local nav. -->
-  <kbn-top-nav
-    app-name="'discover'"
-    config="topNavMenu"
-    index-patterns="[indexPattern]"
-    on-query-submit="updateQuery"
-    on-saved-query-id-change="updateSavedQueryId"
-    query="state.query"
-    saved-query-id="state.savedQuery"
+  <discover
+    add-column="addColumn"
+    bucket-interval="bucketInterval"
+    columns="state.columns"
+    config="opts.config"
+    fetch="fetch"
+    fetchCounter="fetchCounter"
+    fetchError="fetchError"
+    field-counts="fieldCounts"
+    get-context-app-href="getContextAppHref"
+    hits="hits"
+    histogram-data="histogramData"
+    index-pattern-list="opts.indexPatternList"
+    index-pattern="indexPattern"
+    interval-options="intervalOptions"
+    on-add-column="addColumn"
+    on-add-filter="filterQuery"
+    on-change-interval="changeInterval"
+    on-remove-column="removeColumn"
+    on-set-columns="setColumns"
+    on-sort="setSortOrder"
+    opts="opts"
+    reset-query="resetQuery"
+    result-state="resultState"
+    rows="rows"
+    sample-size="opts.sampleSize"
+    saved-search="savedSearch"
+    search-source="searchSource"
     screen-title="screenTitle"
-    show-date-picker="indexPattern.isTimeBased()"
+    search-description="opts.savedSearch.description"
+    search-title="opts.savedSearch.lastSavedTitle"
+    selected-index-pattern="searchSource.getField('index')"
+    set-index-pattern="setIndexPattern"
+    show-time-col="showTimeCol"
     show-save-query="showSaveQuery"
-    show-search-bar="true"
-    class="dscApp__header"
-    use-default-behaviors="true"
+    sort="state.sort"
+    state="state"
+    time-range="timeRange"
+    time-filter-update-handler="timefilterUpdateHandler"
+    top-nav-menu="topNavMenu"
+    vis="vis"
+    update-query="updateQuery"
+    update-saved-query-id="updateSavedQueryId"
   >
-  </kbn-top-nav>
-
-  <main class="dscApp__frame">
-
-    <discover-sidebar
-      columns="state.columns"
-      field-counts="fieldCounts"
-      hits="rows"
-      index-pattern-list="opts.indexPatternList"
-      on-add-field="addColumn"
-      on-add-filter="filterQuery"
-      on-remove-field="removeColumn"
-      selected-index-pattern="searchSource.getField('index')"
-      set-index-pattern="setIndexPattern"
-      state="state"
-      class="dscApp__sidebar"
-    >
-    </discover-sidebar>
-
-    <div class="dscApp__content">
-      <discover-no-results
-        ng-show="resultState === 'none'"
-        shard-failures="failures"
-        time-field-name="opts.timefield"
-        query-language="state.query.language"
-        get-doc-link="getDocLink"
-      ></discover-no-results>
-
-      <discover-uninitialized
-        ng-show="resultState === 'uninitialized'"
-        on-refresh="fetch"
-      ></discover-uninitialized>
-
-      <!-- loading -->
-      <div ng-show="resultState === 'loading'">
-        <discover-fetch-error ng-show="fetchError" fetch-error="fetchError"></discover-fetch-error>
-
-        <div ng-hide="fetchError" class="dscOverlay">
-          <h2
-            i18n-id="discover.searchingTitle"
-            i18n-default-message="Searching"
-            class="euiTitle euiTitle--small"
-          ></h2>
-          <div class="euiSpacer euiSpacer--m"></div>
-          <div
-            class="euiLoadingSpinner euiLoadingSpinner--large"
-            data-test-subj="loadingSpinner"
-          ></div>
-        </div>
-      </div>
-
-      <div class="dscWrapper__content" ng-show="resultState === 'ready'">
-        <div class="dscResultCount">
-          <div class="dscResuntCount__title eui-textTruncate eui-textNoWrap">
-            <hits-counter
-              hits="hits || 0"
-              show-reset-button="opts.savedSearch.id"
-              on-reset-query="resetQuery"
-            >
-            </hits-counter>
-          </div>
-          <div class="dscResultCount__actions eui-textTruncate eui-textNoWrap">
-            <timechart-header
-              from="toMoment(timeRange.from)"
-              to="toMoment(timeRange.to)"
-              options="intervalOptions"
-              on-change-interval="changeInterval"
-              state-interval="state.interval"
-              show-scaled-info="bucketInterval.scaled"
-              bucket-interval-description="bucketInterval.description"
-              bucket-interval-scale="bucketInterval.scale"
-            ></timechart-header>
-          </div>
-        </div>
-        <!-- result -->
-        <div class="dscResults">
-          <section
-            aria-label="{{::'discover.histogramOfFoundDocumentsAriaLabel' | i18n: {defaultMessage: 'Histogram of found documents'} }}"
-            class="dscTimechart"
-            ng-if="opts.timefield"
-          >
-            <discover-histogram
-              class="dscHistogram"
-              ng-show="vis && rows.length !== 0"
-              chart-data="histogramData"
-              timefilter-update-handler="timefilterUpdateHandler"
-              watch-depth="reference"
-              data-test-subj="discoverChart"
-            ></discover-histogram>
-          </section>
-
-          <section class="dscTable" aria-labelledby="documentsAriaLabel">
-            <h2
-              class="euiScreenReaderOnly"
-              id="documentsAriaLabel"
-              i18n-id="discover.documentsAriaLabel"
-              i18n-default-message="Documents"
-            ></h2>
-            <discover-grid
-              ng-if="rows"
-              aria-labelled-by="'documentsAriaLabel'"
-              columns="state.columns"
-              index-pattern="indexPattern"
-              rows="rows"
-              sort="state.sort"
-              sample-size="opts.sampleSize"
-              search-description="opts.savedSearch.description"
-              search-title="opts.savedSearch.lastSavedTitle"
-              show-time-col="showTimeCol"
-              get-context-app-href="getContextAppHref"
-              on-add-column="addColumn"
-              on-filter="filterQuery"
-              on-remove-column="removeColumn"
-              on-set-columns="setColumns"
-              on-sort="setSortOrder"
-              class="dscDiscoverGrid"
-            ></discover-grid>
-          </section>
-        </div>
-      </div>
-    </div>
-  </main>
+  </discover>
 </discover-app>
