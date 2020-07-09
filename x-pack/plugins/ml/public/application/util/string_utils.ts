@@ -10,6 +10,9 @@
 import _ from 'lodash';
 import d3 from 'd3';
 
+import { CustomUrlAnomalyRecordDoc } from '../../../common/types/custom_urls';
+import { Detector } from '../../../common/types/anomaly_detection_jobs';
+
 // Replaces all instances of dollar delimited tokens in the specified String
 // with corresponding values from the supplied object, optionally
 // encoding the replacement for a URI component.
@@ -17,7 +20,11 @@ import d3 from 'd3';
 // and valuesByTokenName of {"airline":"AAL"}, will return
 // 'http://www.google.co.uk/#q=airline+code+AAL'.
 // If a corresponding key is not found in valuesByTokenName, then the String is not replaced.
-export function replaceStringTokens(str, valuesByTokenName, encodeForURI) {
+export function replaceStringTokens(
+  str: string,
+  valuesByTokenName: CustomUrlAnomalyRecordDoc,
+  encodeForURI: boolean
+) {
   return String(str).replace(/\$([^?&$\'"]+)\$/g, (match, name) => {
     // Use lodash get to allow nested JSON fields to be retrieved.
     let tokenValue = _.get(valuesByTokenName, name, null);
@@ -31,7 +38,7 @@ export function replaceStringTokens(str, valuesByTokenName, encodeForURI) {
 }
 
 // creates the default description for a given detector
-export function detectorToString(dtr) {
+export function detectorToString(dtr: Detector): string {
   const BY_TOKEN = ' by ';
   const OVER_TOKEN = ' over ';
   const USE_NULL_OPTION = ' use_null=';
@@ -73,7 +80,7 @@ export function detectorToString(dtr) {
 }
 
 // wrap a the inputed string in quotes if it contains non-word characters
-function quoteField(field) {
+function quoteField(field: string): string {
   if (field.match(/\W/g)) {
     return '"' + field + '"';
   } else {
@@ -81,28 +88,10 @@ function quoteField(field) {
   }
 }
 
-// re-order an object based on the value of the keys
-export function sortByKey(list, reverse, comparator) {
-  let keys = _.sortBy(_.keys(list), (key) => {
-    return comparator ? comparator(list[key], key) : key;
-  });
-
-  if (reverse) {
-    keys = keys.reverse();
-  }
-
-  return _.zipObject(
-    keys,
-    _.map(keys, (key) => {
-      return list[key];
-    })
-  );
-}
-
 // add commas to large numbers
 // Number.toLocaleString is not supported on safari
-export function toLocaleString(x) {
-  let result = x;
+export function toLocaleString(x: number): string {
+  let result = x.toString();
   if (x && typeof x === 'number') {
     const parts = x.toString().split('.');
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -112,8 +101,8 @@ export function toLocaleString(x) {
 }
 
 // escape html characters
-export function mlEscape(str) {
-  const entityMap = {
+export function mlEscape(str: string): string {
+  const entityMap: { [escapeChar: string]: string } = {
     '&': '&amp;',
     '<': '&lt;',
     '>': '&gt;',
@@ -125,7 +114,7 @@ export function mlEscape(str) {
 }
 
 // Escapes reserved characters for use in Elasticsearch query terms.
-export function escapeForElasticsearchQuery(str) {
+export function escapeForElasticsearchQuery(str: string): string {
   // Escape with a leading backslash any of the characters that
   // Elastic document may cause a syntax error when used in queries:
   // + - = && || > < ! ( ) { } [ ] ^ " ~ * ? : \ /
@@ -133,31 +122,36 @@ export function escapeForElasticsearchQuery(str) {
   return String(str).replace(/[-[\]{}()+!<>=?:\/\\^"~*&|\s]/g, '\\$&');
 }
 
-export function calculateTextWidth(txt, isNumber, elementSelection) {
-  txt = isNumber ? d3.format(',')(txt) : txt;
-  let svg = elementSelection;
-  let $el;
-  if (elementSelection === undefined) {
-    // Create a temporary selection to append the label to.
-    // Note styling of font will be inherited from CSS of page.
-    const $body = d3.select('body');
-    $el = $body.append('div');
-    svg = $el.append('svg');
-  }
+export function calculateTextWidth(txt: string | number, isNumber: boolean) {
+  txt = isNumber && typeof txt === 'number' ? d3.format(',')(txt) : txt;
+
+  // Create a temporary selection to append the label to.
+  // Note styling of font will be inherited from CSS of page.
+  const $body = d3.select('body');
+  const $el = $body.append('div');
+  const svg = $el.append('svg');
 
   const tempLabelText = svg
     .append('g')
     .attr('class', 'temp-axis-label tick')
     .selectAll('text.temp.axis')
-    .data('a')
+    .data(['a'])
     .enter()
     .append('text')
     .text(txt);
-  const width = tempLabelText[0][0].getBBox().width;
+  const width = (tempLabelText[0][0] as SVGSVGElement).getBBox().width;
 
   d3.select('.temp-axis-label').remove();
   if ($el !== undefined) {
     $el.remove();
   }
   return Math.ceil(width);
+}
+
+export function stringMatch(str: string | undefined, substr: any) {
+  return (
+    typeof str === 'string' &&
+    typeof substr === 'string' &&
+    (str.toLowerCase().match(substr.toLowerCase()) === null) === false
+  );
 }
