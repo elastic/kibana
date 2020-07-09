@@ -109,6 +109,10 @@ describe('state selectors', () => {
       },
     },
     selectedFilters: null,
+    alerts: {
+      alertDeletion: { data: null, loading: false },
+      alert: { data: null, loading: false },
+    },
   };
 
   it('selects base path from state', () => {

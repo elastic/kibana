@@ -96,6 +96,13 @@ export const ENABLE_ANOMALY_ALERT = i18n.translate(
   }
 );
 
+export const DISABLE_ANOMALY_ALERT = i18n.translate(
+  'xpack.uptime.ml.enableAnomalyDetectionPanel.disableAnomalyAlert',
+  {
+    defaultMessage: 'Disable anomaly alert',
+  }
+);
+
 export const MANAGE_ANOMALY_DETECTION = i18n.translate(
   'xpack.uptime.ml.enableAnomalyDetectionPanel.manageAnomalyDetectionTitle',
   {

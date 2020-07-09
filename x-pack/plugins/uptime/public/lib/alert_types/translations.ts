@@ -59,7 +59,7 @@ Response times as high as {slowestAnomalyResponse} have been detected from locat
       severity: '{{state.severity}}',
       anomalyStartTimestamp: '{{state.anomalyStartTimestamp}}',
       monitor: '{{state.monitor}}',
-      monitorUrl: '{{state.monitorUrl}}',
+      monitorUrl: '{{{state.monitorUrl}}}',
       slowestAnomalyResponse: '{{state.slowestAnomalyResponse}}',
       expectedResponseTime: '{{state.expectedResponseTime}}',
       severityScore: '{{state.severityScore}}',

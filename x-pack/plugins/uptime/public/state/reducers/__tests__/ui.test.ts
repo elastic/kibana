@@ -71,6 +71,7 @@ describe('ui reducer', () => {
         "basePath": "",
         "esKuery": "",
         "integrationsPopoverOpen": null,
+        "monitorId": "test",
         "searchText": "",
       }
     `);
@@ -96,6 +97,7 @@ describe('ui reducer', () => {
         "basePath": "",
         "esKuery": "",
         "integrationsPopoverOpen": null,
+        "monitorId": "test",
         "searchText": "lorem ipsum",
       }
     `);

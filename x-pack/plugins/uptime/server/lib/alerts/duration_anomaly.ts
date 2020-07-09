@@ -50,7 +50,7 @@ const getAnomalies = async (
     [],
     'auto',
     params.severity,
-    moment(lastCheckedAt).subtract(15, 'days').valueOf(),
+    moment(lastCheckedAt).valueOf(),
     moment().valueOf(),
     Intl.DateTimeFormat().resolvedOptions().timeZone,
     500,
