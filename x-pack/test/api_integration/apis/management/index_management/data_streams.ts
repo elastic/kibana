@@ -53,7 +53,8 @@ export default function ({ getService }: FtrProviderContext) {
     await deleteComposableIndexTemplate(name);
   };
 
-  describe('Data streams', function () {
+  // Failing ES Promotion: https://github.com/elastic/kibana/issues/71018
+  describe.skip('Data streams', function () {
     describe('Get', () => {
       const testDataStreamName = 'test-data-stream';
 

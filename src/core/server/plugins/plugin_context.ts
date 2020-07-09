@@ -210,7 +210,9 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     capabilities: {
       resolveCapabilities: deps.capabilities.resolveCapabilities,
     },
-    elasticsearch: deps.elasticsearch,
+    elasticsearch: {
+      legacy: deps.elasticsearch.legacy,
+    },
     http: {
       auth: deps.http.auth,
       basePath: deps.http.basePath,
