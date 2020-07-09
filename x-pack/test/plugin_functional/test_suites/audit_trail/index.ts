@@ -81,7 +81,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         (c) => c.meta.scope === 'audit_trail_test/context/as_internal_user'
       );
       expect(pingCall).to.be.ok();
-      expect(pingCall.meta.type).to.be('elasticsearch.call.internalUser');
+      expect(pingCall.meta.type).to.be('legacy.elasticsearch.call.internalUser');
       expect(pingCall.meta.user).to.be('elastic');
       expect(pingCall.meta.space).to.be('default');
     });
@@ -121,7 +121,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         (c) => c.meta.scope === 'audit_trail_test/contract/as_internal_user'
       );
       expect(pingCall).to.be.ok();
-      expect(pingCall.meta.type).to.be('elasticsearch.call.internalUser');
+      expect(pingCall.meta.type).to.be('legacy.elasticsearch.call.internalUser');
       expect(pingCall.meta.user).to.be('elastic');
       expect(pingCall.meta.space).to.be('default');
     });

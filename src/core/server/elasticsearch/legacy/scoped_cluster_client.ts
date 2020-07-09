@@ -69,7 +69,7 @@ export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
     if (this.auditor) {
       this.auditor.add({
         message: endpoint,
-        type: 'elasticsearch.call.internalUser',
+        type: 'legacy.elasticsearch.call.internalUser',
       });
     }
 
@@ -108,7 +108,7 @@ export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
     if (this.auditor) {
       this.auditor.add({
         message: endpoint,
-        type: 'elasticsearch.call.currentUser',
+        type: 'legacy.elasticsearch.call.currentUser',
       });
     }
 

@@ -102,7 +102,7 @@ describe('#callAsInternalUser', () => {
       expect(auditor.add).toHaveBeenCalledTimes(1);
       expect(auditor.add).toHaveBeenLastCalledWith({
         message: 'endpoint',
-        type: 'elasticsearch.call.internalUser',
+        type: 'legacy.elasticsearch.call.internalUser',
       });
     });
   });
@@ -247,7 +247,7 @@ describe('#callAsCurrentUser', () => {
       expect(auditor.add).toHaveBeenCalledTimes(1);
       expect(auditor.add).toHaveBeenLastCalledWith({
         message: 'endpoint',
-        type: 'elasticsearch.call.currentUser',
+        type: 'legacy.elasticsearch.call.currentUser',
       });
     });
   });
