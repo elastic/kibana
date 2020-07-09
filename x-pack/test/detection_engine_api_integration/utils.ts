@@ -249,8 +249,13 @@ export const deleteAllAlerts = async (es: Client, retryCount = 20): Promise<void
         body: {},
       });
     } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log(`Failure trying to deleteAllAlerts, retries left are: ${retryCount - 1}`);
       await deleteAllAlerts(es, retryCount - 1);
     }
+  } else {
+    // eslint-disable-next-line no-console
+    console.log('Could not deleteAllAlerts, no retries are left');
   }
 };
 
@@ -270,8 +275,13 @@ export const deleteAllRulesStatuses = async (es: Client, retryCount = 20): Promi
         body: {},
       });
     } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log(`Failure trying to deleteAllRulesStatuses, retries left are: ${retryCount - 1}`);
       await deleteAllRulesStatuses(es, retryCount - 1);
     }
+  } else {
+    // eslint-disable-next-line no-console
+    console.log('Could not deleteAllRulesStatuses, no retries are left');
   }
 };
 
@@ -297,8 +307,13 @@ export const deleteSignalsIndex = async (
     try {
       await supertest.delete(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
     } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log(`Failure trying to deleteSignalsIndex, retries left are: ${retryCount - 1}`);
       await deleteSignalsIndex(supertest, retryCount - 1);
     }
+  } else {
+    // eslint-disable-next-line no-console
+    console.log('Could not deleteSignalsIndex, no retries are left');
   }
 };
 
