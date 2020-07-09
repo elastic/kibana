@@ -245,7 +245,7 @@ const HostsEmptyState = React.memo<{
   return (
     <ManagementEmptyState
       loading={loading}
-      dataTestSubj="emptyEndpointsTable"
+      dataTestSubj="emptyHostsTable"
       steps={policySteps}
       headerComponent={
         <FormattedMessage
