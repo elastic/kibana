@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import { Client, ApiError, RequestEvent } from '@elastic/elasticsearch';
+import { AuditorFactory } from '../../audit_trail';
 import { Logger } from '../../logging';
-import { GetAuthHeaders, isRealRequest, Headers } from '../../http';
+import { GetAuthHeaders, isRealRequest, Headers, KibanaRequest } from '../../http';
 import { ensureRawRequest, filterHeaders } from '../../http/router';
 import { ScopeableRequest } from '../types';
 import { ElasticsearchClient } from './types';
@@ -59,7 +60,7 @@ export interface ICustomClusterClient extends IClusterClient {
    */
   close: () => Promise<void>;
 }
-
+let counter = 0;
 /** @internal **/
 export class ClusterClient implements ICustomClusterClient {
   public readonly asInternalUser: Client;
@@ -70,6 +71,7 @@ export class ClusterClient implements ICustomClusterClient {
   constructor(
     private readonly config: ElasticsearchClientConfig,
     logger: Logger,
+    private readonly auditorFactory: AuditorFactory,
     private readonly getAuthHeaders: GetAuthHeaders = noop
   ) {
     this.asInternalUser = configureClient(config, { logger });
@@ -77,11 +79,15 @@ export class ClusterClient implements ICustomClusterClient {
   }
 
   asScoped(request: ScopeableRequest) {
-    const scopedHeaders = this.getScopedHeaders(request);
+    const id = `scoped-client-${counter++}`;
     const scopedClient = this.rootScopedClient.child({
-      headers: scopedHeaders,
+      headers: this.getScopedHeaders(request),
+      name: id,
     });
-    return new ScopedClusterClient(this.asInternalUser, scopedClient);
+    const internalClient = this.asInternalUser.child({ name: id });
+
+    this.integrateAuditor(internalClient, scopedClient, request, name);
+    return new ScopedClusterClient(internalClient, scopedClient);
   }
 
   public async close() {
@@ -109,5 +115,44 @@ export class ClusterClient implements ICustomClusterClient {
       ...this.config.customHeaders,
       ...scopedHeaders,
     };
+  }
+
+  private getScopedAuditor(request: ScopeableRequest) {
+    // TODO: support alternative credential owners from outside of Request context in #39430
+    if (isRealRequest(request)) {
+      const kibanaRequest =
+        request instanceof KibanaRequest ? request : KibanaRequest.from(request);
+      return this.auditorFactory.asScoped(kibanaRequest);
+    }
+  }
+
+  /** All requests made by clients are written in the auditor for further analysis. */
+  private integrateAuditor(
+    internalClient: ElasticsearchClient,
+    scopedClient: ElasticsearchClient,
+    request: ScopeableRequest,
+    id: string
+  ) {
+    const auditor = this.getScopedAuditor(request);
+    if (auditor) {
+      internalClient.on('request', (err: ApiError, event: RequestEvent) => {
+        // Child clients share the event bus. The guard filters out events not related to the client.
+        if (event.meta.name === id) {
+          auditor.add({
+            message: `${event.meta.request.params.method} ${event.meta.request.params.path}`,
+            type: 'elasticsearch.call.internalUser',
+          });
+        }
+      });
+
+      scopedClient.on('request', (err: ApiError, event: RequestEvent) => {
+        if (event.meta.name === id) {
+          auditor.add({
+            message: `${event.meta.request.params.method} ${event.meta.request.params.path}`,
+            type: 'elasticsearch.call.currentUser',
+          });
+        }
+      });
+    }
   }
 }

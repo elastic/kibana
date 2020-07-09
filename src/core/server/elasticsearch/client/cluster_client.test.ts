@@ -18,6 +18,7 @@
  */
 
 import { configureClientMock } from './cluster_client.test.mocks';
+import { auditTrailServiceMock } from '../../audit_trail/audit_trail_service.mock';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { httpServerMock } from '../../http/http_server.mocks';
 import { GetAuthHeaders } from '../../http';
@@ -45,6 +46,7 @@ describe('ClusterClient', () => {
   let getAuthHeaders: jest.MockedFunction<GetAuthHeaders>;
   let internalClient: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
   let scopedClient: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
+  let auditorFactory: ReturnType<typeof auditTrailServiceMock.createAuditorFactory>;
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
@@ -54,7 +56,7 @@ describe('ClusterClient', () => {
       authorization: 'auth',
       foo: 'bar',
     }));
-
+    auditorFactory = auditTrailServiceMock.createAuditorFactory();
     configureClientMock.mockImplementation((config, { scoped = false }) => {
       return scoped ? scopedClient : internalClient;
     });
@@ -67,7 +69,7 @@ describe('ClusterClient', () => {
   it('creates a single internal and scoped client during initialization', () => {
     const config = createConfig();
 
-    new ClusterClient(config, logger, getAuthHeaders);
+    new ClusterClient(config, logger, auditorFactory, getAuthHeaders);
 
     expect(configureClientMock).toHaveBeenCalledTimes(2);
     expect(configureClientMock).toHaveBeenCalledWith(config, { logger });
@@ -76,7 +78,12 @@ describe('ClusterClient', () => {
 
   describe('#asInternalUser', () => {
     it('returns the internal client', () => {
-      const clusterClient = new ClusterClient(createConfig(), logger, getAuthHeaders);
+      const clusterClient = new ClusterClient(
+        createConfig(),
+        logger,
+        auditorFactory,
+        getAuthHeaders
+      );
 
       expect(clusterClient.asInternalUser).toBe(internalClient);
     });
@@ -84,7 +91,12 @@ describe('ClusterClient', () => {
 
   describe('#asScoped', () => {
     it('returns a scoped cluster client bound to the request', () => {
-      const clusterClient = new ClusterClient(createConfig(), logger, getAuthHeaders);
+      const clusterClient = new ClusterClient(
+        createConfig(),
+        logger,
+        auditorFactory,
+        getAuthHeaders
+      );
       const request = httpServerMock.createKibanaRequest();
 
       const scopedClusterClient = clusterClient.asScoped(request);
@@ -96,8 +108,13 @@ describe('ClusterClient', () => {
       expect(scopedClusterClient.asCurrentUser).toBe(scopedClient.child.mock.results[0].value);
     });
 
-    it('returns a distinct  scoped cluster client on each call', () => {
-      const clusterClient = new ClusterClient(createConfig(), logger, getAuthHeaders);
+    it('returns a distinct scoped cluster client on each call', () => {
+      const clusterClient = new ClusterClient(
+        createConfig(),
+        logger,
+        auditorFactory,
+        getAuthHeaders
+      );
       const request = httpServerMock.createKibanaRequest();
 
       const scopedClusterClient1 = clusterClient.asScoped(request);
@@ -115,7 +132,7 @@ describe('ClusterClient', () => {
       });
       getAuthHeaders.mockReturnValue({});
 
-      const clusterClient = new ClusterClient(config, logger, getAuthHeaders);
+      const clusterClient = new ClusterClient(config, logger, auditorFactory, getAuthHeaders);
       const request = httpServerMock.createKibanaRequest({
         headers: {
           foo: 'bar',
@@ -140,7 +157,7 @@ describe('ClusterClient', () => {
         other: 'nope',
       });
 
-      const clusterClient = new ClusterClient(config, logger, getAuthHeaders);
+      const clusterClient = new ClusterClient(config, logger, auditorFactory, getAuthHeaders);
       const request = httpServerMock.createKibanaRequest({});
 
       clusterClient.asScoped(request);
@@ -160,7 +177,7 @@ describe('ClusterClient', () => {
         other: 'nope',
       });
 
-      const clusterClient = new ClusterClient(config, logger, getAuthHeaders);
+      const clusterClient = new ClusterClient(config, logger, auditorFactory, getAuthHeaders);
       const request = httpServerMock.createKibanaRequest({
         headers: {
           authorization: 'override',
@@ -185,7 +202,7 @@ describe('ClusterClient', () => {
       });
       getAuthHeaders.mockReturnValue({});
 
-      const clusterClient = new ClusterClient(config, logger, getAuthHeaders);
+      const clusterClient = new ClusterClient(config, logger, auditorFactory, getAuthHeaders);
       const request = httpServerMock.createKibanaRequest({});
 
       clusterClient.asScoped(request);
@@ -211,7 +228,7 @@ describe('ClusterClient', () => {
         foo: 'auth',
       });
 
-      const clusterClient = new ClusterClient(config, logger, getAuthHeaders);
+      const clusterClient = new ClusterClient(config, logger, auditorFactory, getAuthHeaders);
       const request = httpServerMock.createKibanaRequest({});
 
       clusterClient.asScoped(request);
@@ -235,7 +252,7 @@ describe('ClusterClient', () => {
       });
       getAuthHeaders.mockReturnValue({});
 
-      const clusterClient = new ClusterClient(config, logger, getAuthHeaders);
+      const clusterClient = new ClusterClient(config, logger, auditorFactory, getAuthHeaders);
       const request = httpServerMock.createKibanaRequest({
         headers: { foo: 'request' },
       });
@@ -257,7 +274,7 @@ describe('ClusterClient', () => {
       });
       getAuthHeaders.mockReturnValue({});
 
-      const clusterClient = new ClusterClient(config, logger, getAuthHeaders);
+      const clusterClient = new ClusterClient(config, logger, auditorFactory, getAuthHeaders);
       const request = {
         headers: {
           authorization: 'auth',
@@ -281,7 +298,7 @@ describe('ClusterClient', () => {
         authorization: 'auth',
       });
 
-      const clusterClient = new ClusterClient(config, logger, getAuthHeaders);
+      const clusterClient = new ClusterClient(config, logger, auditorFactory, getAuthHeaders);
       const request = {
         headers: {
           foo: 'bar',
@@ -296,11 +313,67 @@ describe('ClusterClient', () => {
         headers: { foo: 'bar' },
       });
     });
+
+    describe('Audit', () => {
+      it('creates Auditor to listen to scoped client requests', () => {
+        const config = createConfig();
+        const auditor = auditTrailServiceMock.createAuditor();
+        const customAuditorFactory = { asScoped: () => auditor };
+        const scopedClientChild = elasticsearchClientMock.createInternalClient();
+        scopedClient.child.mockReturnValueOnce(scopedClientChild);
+        const clusterClient = new ClusterClient(
+          config,
+          logger,
+          customAuditorFactory,
+          getAuthHeaders
+        );
+        const request = httpServerMock.createKibanaRequest();
+
+        clusterClient.asScoped(request);
+
+        expect(scopedClientChild.on).toHaveBeenCalledTimes(1);
+        expect(scopedClientChild.on).toHaveBeenCalledWith('request', expect.any(Function));
+      });
+
+      it('creates Auditor to listen to internal client requests', () => {
+        const config = createConfig();
+        const auditor = auditTrailServiceMock.createAuditor();
+        const customAuditorFactory = { asScoped: () => auditor };
+        const internalClientChild = elasticsearchClientMock.createInternalClient();
+        internalClient.child.mockReturnValueOnce(internalClientChild);
+        const clusterClient = new ClusterClient(
+          config,
+          logger,
+          customAuditorFactory,
+          getAuthHeaders
+        );
+        const request = httpServerMock.createKibanaRequest();
+
+        clusterClient.asScoped(request);
+
+        expect(internalClientChild.on).toHaveBeenCalledTimes(1);
+        expect(internalClientChild.on).toHaveBeenCalledWith('request', expect.any(Function));
+      });
+
+      it('do not create Auditor if scoped to FakeRequest', () => {
+        const config = createConfig();
+        const clusterClient = new ClusterClient(config, logger, auditorFactory, getAuthHeaders);
+
+        clusterClient.asScoped({ headers: {} });
+
+        expect(auditorFactory.asScoped).toHaveBeenCalledTimes(0);
+      });
+    });
   });
 
   describe('#close', () => {
     it('closes both underlying clients', async () => {
-      const clusterClient = new ClusterClient(createConfig(), logger, getAuthHeaders);
+      const clusterClient = new ClusterClient(
+        createConfig(),
+        logger,
+        auditorFactory,
+        getAuthHeaders
+      );
 
       await clusterClient.close();
 
@@ -311,7 +384,12 @@ describe('ClusterClient', () => {
     it('waits for both clients to close', async (done) => {
       expect.assertions(4);
 
-      const clusterClient = new ClusterClient(createConfig(), logger, getAuthHeaders);
+      const clusterClient = new ClusterClient(
+        createConfig(),
+        logger,
+        auditorFactory,
+        getAuthHeaders
+      );
 
       let internalClientClosed = false;
       let scopedClientClosed = false;
@@ -349,7 +427,12 @@ describe('ClusterClient', () => {
     });
 
     it('return a rejected promise is any client rejects', async () => {
-      const clusterClient = new ClusterClient(createConfig(), logger, getAuthHeaders);
+      const clusterClient = new ClusterClient(
+        createConfig(),
+        logger,
+        auditorFactory,
+        getAuthHeaders
+      );
 
       internalClient.close.mockRejectedValue(new Error('error closing client'));
 
@@ -359,7 +442,12 @@ describe('ClusterClient', () => {
     });
 
     it('does nothing after the first call', async () => {
-      const clusterClient = new ClusterClient(createConfig(), logger, getAuthHeaders);
+      const clusterClient = new ClusterClient(
+        createConfig(),
+        logger,
+        auditorFactory,
+        getAuthHeaders
+      );
 
       await clusterClient.close();
 

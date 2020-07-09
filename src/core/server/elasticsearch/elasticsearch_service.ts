@@ -144,6 +144,7 @@ export class ElasticsearchService
     return new ClusterClient(
       config,
       this.coreContext.logger.get('elasticsearch', type),
+      this.auditorFactory!,
       this.getAuthHeaders
     );
   }

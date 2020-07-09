@@ -286,6 +286,7 @@ describe('#start', () => {
       expect(MockClusterClient).toHaveBeenCalledWith(
         expect.objectContaining(customConfig),
         expect.objectContaining({ context: ['elasticsearch', 'custom-type'] }),
+        expect.objectContaining({ asScoped: expect.any(Function) }),
         expect.any(Function)
       );
     });
