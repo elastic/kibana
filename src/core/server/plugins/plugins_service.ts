@@ -240,7 +240,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       .toPromise();
 
     for (const [pluginName, { plugin, isEnabled }] of pluginEnableStatuses) {
-      // validate that `requiredBundles` ids point to discovered plugins which `includesUiPlugins`
+      // validate that `requiredBundles` ids point to a discovered plugin which `includesUiPlugin`
       for (const requiredBundleId of plugin.requiredBundles) {
         if (!pluginEnableStatuses.has(requiredBundleId)) {
           throw new Error(
