@@ -178,11 +178,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   }
 
   if (selectedStatus.length) {
-    if (kuery) {
-      kuery = `(${kuery}) and`;
-    }
-
-    kuery = selectedStatus
+    const kueryStatus = selectedStatus
       .map((status) => {
         switch (status) {
           case 'online':
@@ -196,6 +192,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         return '';
       })
       .join(' or ');
+
+    if (kuery) {
+      kuery = `(${kuery}) and ${kueryStatus}`;
+    } else {
+      kuery = kueryStatus;
+    }
   }
 
   const agentsRequest = useGetAgents(
