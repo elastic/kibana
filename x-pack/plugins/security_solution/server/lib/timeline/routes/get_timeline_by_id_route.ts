@@ -15,7 +15,7 @@ import { buildRouteValidation } from '../../../utils/build_validation/route_vali
 import { buildSiemResponse, transformError } from '../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from './utils/common';
-import { getTimelineByIdSchemaQuery } from './schemas/get_timeline_by_template_timeline_id_schema';
+import { getTimelineByIdSchemaQuery } from './schemas/get_timeline_by_id_schema';
 import { getTimeline, getTemplateTimeline } from './utils/create_timelines';
 
 export const getTimelineByIdRoute = (
