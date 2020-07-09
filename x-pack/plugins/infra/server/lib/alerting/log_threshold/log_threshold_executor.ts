@@ -124,7 +124,7 @@ const processGroupByResults = (
   }, []);
 
   groupResults.forEach((group) => {
-    const alertInstance = alertInstanceFactory(`{group.name}`);
+    const alertInstance = alertInstanceFactory(group.name);
     const documentCount = group.documentCount;
 
     if (checkValueAgainstComparatorMap[count.comparator](documentCount, count.value)) {
