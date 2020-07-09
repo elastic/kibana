@@ -38,6 +38,7 @@ export const createLogEntryAnomaliesQuery = (
     ...createTimeRangeFilters(startTime, endTime),
     ...createResultTypeFilters(['record']),
   ];
+
   const sourceFields = [
     'job_id',
     'record_score',
@@ -46,6 +47,7 @@ export const createLogEntryAnomaliesQuery = (
     'partition_field_value',
     'timestamp',
     'bucket_span',
+    'by_field_value',
   ];
 
   const { querySortDirection, queryCursor } = parsePaginationCursor(sort, pagination);
@@ -75,15 +77,20 @@ export const createLogEntryAnomaliesQuery = (
 
 export const logEntryAnomalyHitRT = rt.type({
   _id: rt.string,
-  _source: rt.type({
-    job_id: rt.string,
-    record_score: rt.number,
-    typical: rt.array(rt.number),
-    actual: rt.array(rt.number),
-    partition_field_value: rt.string,
-    bucket_span: rt.number,
-    timestamp: rt.number,
-  }),
+  _source: rt.intersection([
+    rt.type({
+      job_id: rt.string,
+      record_score: rt.number,
+      typical: rt.array(rt.number),
+      actual: rt.array(rt.number),
+      partition_field_value: rt.string,
+      bucket_span: rt.number,
+      timestamp: rt.number,
+    }),
+    rt.partial({
+      by_field_value: rt.string,
+    }),
+  ]),
   sort: rt.tuple([rt.union([rt.string, rt.number]), rt.union([rt.string, rt.number])]),
 });
 

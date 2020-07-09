@@ -21,7 +21,8 @@ export const callGetLogEntryExamplesAPI = async (
   startTime: number,
   endTime: number,
   dataset: string,
-  exampleCount: number
+  exampleCount: number,
+  categoryId?: string
 ) => {
   const response = await npStart.http.fetch(LOG_ANALYSIS_GET_LOG_ENTRY_RATE_EXAMPLES_PATH, {
     method: 'POST',
@@ -35,6 +36,7 @@ export const callGetLogEntryExamplesAPI = async (
             startTime,
             endTime,
           },
+          categoryId,
         },
       })
     ),

@@ -21,16 +21,21 @@ export const LOG_ANALYSIS_GET_LOG_ENTRY_RATE_EXAMPLES_PATH =
  */
 
 export const getLogEntryExamplesRequestPayloadRT = rt.type({
-  data: rt.type({
-    // the dataset to fetch the log rate examples from
-    dataset: rt.string,
-    // the number of examples to fetch
-    exampleCount: rt.number,
-    // the id of the source configuration
-    sourceId: rt.string,
-    // the time range to fetch the log rate examples from
-    timeRange: timeRangeRT,
-  }),
+  data: rt.intersection([
+    rt.type({
+      // the dataset to fetch the log rate examples from
+      dataset: rt.string,
+      // the number of examples to fetch
+      exampleCount: rt.number,
+      // the id of the source configuration
+      sourceId: rt.string,
+      // the time range to fetch the log rate examples from
+      timeRange: timeRangeRT,
+    }),
+    rt.partial({
+      categoryId: rt.string,
+    }),
+  ]),
 });
 
 export type GetLogEntryExamplesRequestPayload = rt.TypeOf<

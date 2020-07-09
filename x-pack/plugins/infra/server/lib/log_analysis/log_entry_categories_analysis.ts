@@ -330,7 +330,7 @@ async function fetchTopLogEntryCategories(
   };
 }
 
-async function fetchLogEntryCategories(
+export async function fetchLogEntryCategories(
   context: { infra: { mlSystem: MlSystem } },
   logEntryCategoriesCountJobId: string,
   categoryIds: number[]

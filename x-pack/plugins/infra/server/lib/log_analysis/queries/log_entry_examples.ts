@@ -17,7 +17,8 @@ export const createLogEntryExamplesQuery = (
   startTime: number,
   endTime: number,
   dataset: string,
-  exampleCount: number
+  exampleCount: number,
+  categoryQuery?: string
 ) => ({
   ...defaultRequestParameters,
   body: {
@@ -37,6 +38,18 @@ export const createLogEntryExamplesQuery = (
               [partitionField]: dataset,
             },
           },
+          ...(categoryQuery
+            ? [
+                {
+                  match: {
+                    message: {
+                      query: categoryQuery,
+                      operator: 'AND',
+                    },
+                  },
+                },
+              ]
+            : []),
         ],
       },
     },

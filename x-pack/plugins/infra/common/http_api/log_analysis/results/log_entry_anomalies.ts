@@ -20,11 +20,11 @@ const paginationCursorRT = rt.tuple([
 export type PaginationCursor = rt.TypeOf<typeof paginationCursorRT>;
 
 export const anomalyTypeRT = rt.keyof({
-  'logRate': null,
-  'logCategory': null,
+  logRate: null,
+  logCategory: null,
 });
 
-const logEntryAnomalyRT = rt.type({
+const logEntryAnomalyCommonFieldsRT = rt.type({
   id: rt.string,
   anomalyScore: rt.number,
   dataset: rt.string,
@@ -34,6 +34,15 @@ const logEntryAnomalyRT = rt.type({
   duration: rt.number,
   startTime: rt.number,
 });
+const logEntrylogRateAnomalyRT = logEntryAnomalyCommonFieldsRT;
+const logEntrylogCategoryAnomalyRT = rt.partial({
+  categoryId: rt.string,
+});
+const logEntryAnomalyRT = rt.intersection([
+  logEntryAnomalyCommonFieldsRT,
+  logEntrylogRateAnomalyRT,
+  logEntrylogCategoryAnomalyRT,
+]);
 
 export type LogEntryAnomaly = rt.TypeOf<typeof logEntryAnomalyRT>;
 
@@ -67,14 +76,14 @@ export type GetLogEntryAnomaliesSuccessResponsePayload = rt.TypeOf<
 >;
 
 const sortOptionsRT = rt.keyof({
-  'anomalyScore': null,
-  'dataset': null,
-  'startTime': null,
+  anomalyScore: null,
+  dataset: null,
+  startTime: null,
 });
 
 const sortDirectionsRT = rt.keyof({
-  'asc': null,
-  'desc': null,
+  asc: null,
+  desc: null,
 });
 
 const paginationPreviousPageCursorRT = rt.type({

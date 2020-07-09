@@ -43,6 +43,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
     exampleCount: EXAMPLE_COUNT,
     sourceId,
     startTime: anomaly.startTime,
+    categoryId: anomaly.categoryId,
   });
 
   useMount(() => {

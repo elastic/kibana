@@ -84,7 +84,6 @@ export const LogEntryRateResultsContent: React.FunctionComponent<LogEntryRateRes
   });
 
   const {
-    getLogEntryAnomalies,
     isLoadingLogEntryAnomalies,
     logEntryAnomalies,
     page,
