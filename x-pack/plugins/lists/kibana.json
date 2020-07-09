@@ -5,6 +5,6 @@
   "requiredPlugins": [],
   "optionalPlugins": ["spaces", "security"],
   "server": true,
-  "ui": false,
+  "ui": true,
   "version": "8.0.0"
 }
