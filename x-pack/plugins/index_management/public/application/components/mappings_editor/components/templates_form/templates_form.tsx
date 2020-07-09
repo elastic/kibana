@@ -55,7 +55,7 @@ const formDeserializer = (formData: { [key: string]: any }) => {
 export const TemplatesForm = React.memo(({ value }: Props) => {
   const isMounted = useRef<boolean | undefined>(undefined);
 
-  const { form } = useForm<MappingsTemplates>({
+  const { form } = useForm<any>({
     schema: templatesFormSchema,
     serializer: formSerializer,
     deserializer: formDeserializer,

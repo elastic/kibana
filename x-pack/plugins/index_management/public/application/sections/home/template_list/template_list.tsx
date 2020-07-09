@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { UIM_TEMPLATE_LIST_LOAD } from '../../../../../common/constants';
-import { TemplateListItem, TemplateType } from '../../../../../common';
+import { TemplateListItem } from '../../../../../common';
 import { SectionError, SectionLoading, Error } from '../../../components';
 import { useLoadIndexTemplates } from '../../../services/api';
 import { documentationService } from '../../../services/documentation';
