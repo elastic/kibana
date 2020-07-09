@@ -19,7 +19,7 @@ Fields to hightlight for on boarding a new prepackaged timeline:
 - timelineType: `template`
 - status: `immutable`
 
-2. ```cd x-pack/plugins/security_solution/server/lib/detection_engine/scripts```
+2. ```cd x-pack/plugins/security_solution/server/lib/detection_engine/scripts/timelines```
 3. ```sh ./run regen_prepackage_timelines_index.sh```
 (this will update `x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_timelines/index.ndjson`)
 
@@ -57,7 +57,7 @@ sh find_timeline_by_filter.sh immutable template elastic
 
 ### Get timeline by id:
 ```
-cd x-pack/plugins/security_solution/server/lib/detection_engine/scripts
+cd x-pack/plugins/security_solution/server/lib/detection_engine/scripts/timelines
 
 sh get_timeline_by_id.sh {id}
 ```
@@ -65,7 +65,7 @@ sh get_timeline_by_id.sh {id}
 
 ### Get timeline by templateTimelineId:
 ```
-cd x-pack/plugins/security_solution/server/lib/detection_engine/scripts
+cd x-pack/plugins/security_solution/server/lib/detection_engine/scripts/timelines
 
 sh get_timeline_by_template_timeline_id.sh {template_timeline_id}
 ```
@@ -73,7 +73,7 @@ sh get_timeline_by_template_timeline_id.sh {template_timeline_id}
 
 ### Get all custom timelines:
 ```
-cd x-pack/plugins/security_solution/server/lib/detection_engine/scripts
+cd x-pack/plugins/security_solution/server/lib/detection_engine/scripts/timelines
 
 sh ./get_all_timelines.sh
 ```
@@ -81,14 +81,14 @@ sh ./get_all_timelines.sh
 
 ### Delete all timelines:
 ```
-cd x-pack/plugins/security_solution/server/lib/detection_engine/scripts
+cd x-pack/plugins/security_solution/server/lib/detection_engine/scripts/timelines
 
 sh delete_all_timelines.sh
 ```
 
 ### Delete timeline by timeline id:
 ```
-cd x-pack/plugins/security_solution/server/lib/detection_engine/scripts
+cd x-pack/plugins/security_solution/server/lib/detection_engine/scripts/timelines
 
 ./delete_all_alerts.sh {timeline_id}
 
