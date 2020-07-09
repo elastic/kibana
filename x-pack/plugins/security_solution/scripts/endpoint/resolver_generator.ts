@@ -228,16 +228,25 @@ async function main() {
     alwaysGenMaxChildrenPerNode: argv.maxChildrenPerNode,
     ancestryArraySize: argv.ancestryArraySize,
   };
+  const {
+    numHosts,
+    numDocs,
+    metadataIndex,
+    policyIndex,
+    eventIndex,
+    alertIndex,
+    alertsPerHost,
+  } = argv;
   await indexHostsAndAlerts(
     client,
     seed,
-    argv.numHosts,
-    argv.numDocs,
-    argv.metadataIndex,
-    argv.policyIndex,
-    argv.eventIndex,
-    argv.alertIndex,
-    argv.alertsPerHost,
+    numHosts,
+    numDocs,
+    metadataIndex,
+    policyIndex,
+    eventIndex,
+    alertIndex,
+    alertsPerHost,
     treeOptions
   );
   console.log(`Creating and indexing documents took: ${new Date().getTime() - startTime}ms`);
