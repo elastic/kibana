@@ -228,8 +228,8 @@ export interface SavedTimelineNote extends runtimeTypes.TypeOf<typeof SavedTimel
 export enum TimelineId {
   hostsPageEvents = 'hosts-page-events',
   hostsPageExternalAlerts = 'hosts-page-external-alerts',
-  alertsRulesDetailsPage = 'alerts-rules-details-page',
-  alertsPage = 'alerts-page',
+  detectionsRulesDetailsPage = 'detections-rules-details-page',
+  detectionsPage = 'detections-page',
   networkPageExternalAlerts = 'network-page-external-alerts',
   active = 'timeline-1',
   test = 'test', // Reserved for testing purposes
@@ -238,8 +238,8 @@ export enum TimelineId {
 export const TimelineIdLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TimelineId.hostsPageEvents),
   runtimeTypes.literal(TimelineId.hostsPageExternalAlerts),
-  runtimeTypes.literal(TimelineId.alertsRulesDetailsPage),
-  runtimeTypes.literal(TimelineId.alertsPage),
+  runtimeTypes.literal(TimelineId.detectionsRulesDetailsPage),
+  runtimeTypes.literal(TimelineId.detectionsPage),
   runtimeTypes.literal(TimelineId.networkPageExternalAlerts),
   runtimeTypes.literal(TimelineId.active),
   runtimeTypes.literal(TimelineId.test),
