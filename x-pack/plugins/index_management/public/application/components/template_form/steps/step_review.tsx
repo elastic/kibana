@@ -24,6 +24,7 @@ import { serializers } from '../../../../shared_imports';
 
 import { serializeLegacyTemplate, serializeTemplate } from '../../../../../common/lib';
 import { TemplateDeserialized, getTemplateParameter } from '../../../../../common';
+import { SimulateTemplate } from '../../index_templates';
 import { WizardSection } from '../template_form';
 
 const { stripEmptyFields } = serializers;
@@ -254,6 +255,27 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
       </div>
     );
 
+    const PreviewTab = () => {
+      return (
+        <div data-test-subj="previewTab">
+          <EuiSpacer size="m" />
+
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.idxMgmt.templateForm.stepReview.previewTab.descriptionText"
+                defaultMessage="This is the final template that will be applied to your indices."
+              />
+            </p>
+          </EuiText>
+
+          <EuiSpacer size="m" />
+
+          <SimulateTemplate template={template} />
+        </div>
+      );
+    };
+
     const RequestTab = () => {
       const esApiEndpoint = isLegacy ? '_template' : '_index_template';
       const endpoint = `PUT ${esApiEndpoint}/${name || '<templateName>'}`;
@@ -285,6 +307,33 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
         </div>
       );
     };
+
+    const tabs = [
+      {
+        id: 'summary',
+        name: i18n.translate('xpack.idxMgmt.templateForm.stepReview.summaryTabTitle', {
+          defaultMessage: 'Summary',
+        }),
+        content: <SummaryTab />,
+      },
+      {
+        id: 'request',
+        name: i18n.translate('xpack.idxMgmt.templateForm.stepReview.requestTabTitle', {
+          defaultMessage: 'Request',
+        }),
+        content: <RequestTab />,
+      },
+    ];
+
+    if (!isLegacy) {
+      tabs.splice(1, 0, {
+        id: 'preview',
+        name: i18n.translate('xpack.idxMgmt.templateForm.stepReview.previewTabTitle', {
+          defaultMessage: 'Preview',
+        }),
+        content: <PreviewTab />,
+      });
+    }
 
     return (
       <div data-test-subj="stepSummary">
@@ -331,25 +380,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
           </Fragment>
         ) : null}
 
-        <EuiTabbedContent
-          data-test-subj="summaryTabContent"
-          tabs={[
-            {
-              id: 'summary',
-              name: i18n.translate('xpack.idxMgmt.templateForm.stepReview.summaryTabTitle', {
-                defaultMessage: 'Summary',
-              }),
-              content: <SummaryTab />,
-            },
-            {
-              id: 'request',
-              name: i18n.translate('xpack.idxMgmt.templateForm.stepReview.requestTabTitle', {
-                defaultMessage: 'Request',
-              }),
-              content: <RequestTab />,
-            },
-          ]}
-        />
+        <EuiTabbedContent data-test-subj="summaryTabContent" tabs={tabs} />
       </div>
     );
   }
