@@ -16374,7 +16374,7 @@
     "xpack.uptime.alerts.monitorStatus.addFilter.tag": "タグ",
     "xpack.uptime.alerts.monitorStatus.addFilter.type": "タイプ",
     "xpack.uptime.alerts.monitorStatus.clientName": "稼働状況の監視ステータス",
-    "xpack.uptime.alerts.monitorStatus.defaultActionMessage": "{contextMessage}\n前回トリガー日時：{lastTriggered}\n{downMonitors}",
+    "xpack.uptime.alerts.monitorStatus.defaultActionMessage": "{contextMessage}\n前回トリガー日時：{lastTriggered}\n",
     "xpack.uptime.alerts.monitorStatus.filterBar.ariaLabel": "監視状態アラートのフィルター基準を許可するインプット",
     "xpack.uptime.alerts.monitorStatus.filters.anyLocation": "任意の場所",
     "xpack.uptime.alerts.monitorStatus.filters.anyPort": "任意のポート",
