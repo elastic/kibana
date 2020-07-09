@@ -25,10 +25,6 @@ interface StepScheduleRuleProps extends RuleStepProps {
   defaultValues?: ScheduleStepRule | null;
 }
 
-const RestrictedWidthContainer = styled.div`
-  max-width: 300px;
-`;
-
 const stepScheduleDefaultValue = {
   interval: '5m',
   isNew: true,
@@ -93,29 +89,25 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
         <Form form={form} data-test-subj="stepScheduleRule">
-          <RestrictedWidthContainer>
-            <UseField
-              path="interval"
-              component={ScheduleItem}
-              componentProps={{
-                idAria: 'detectionEngineStepScheduleRuleInterval',
-                isDisabled: isLoading,
-                dataTestSubj: 'detectionEngineStepScheduleRuleInterval',
-              }}
-            />
-          </RestrictedWidthContainer>
-          <RestrictedWidthContainer>
-            <UseField
-              path="from"
-              component={ScheduleItem}
-              componentProps={{
-                idAria: 'detectionEngineStepScheduleRuleFrom',
-                isDisabled: isLoading,
-                dataTestSubj: 'detectionEngineStepScheduleRuleFrom',
-                minimumValue: 1,
-              }}
-            />
-          </RestrictedWidthContainer>
+          <UseField
+            path="interval"
+            component={ScheduleItem}
+            componentProps={{
+              idAria: 'detectionEngineStepScheduleRuleInterval',
+              isDisabled: isLoading,
+              dataTestSubj: 'detectionEngineStepScheduleRuleInterval',
+            }}
+          />
+          <UseField
+            path="from"
+            component={ScheduleItem}
+            componentProps={{
+              idAria: 'detectionEngineStepScheduleRuleFrom',
+              isDisabled: isLoading,
+              dataTestSubj: 'detectionEngineStepScheduleRuleFrom',
+              minimumValue: 1,
+            }}
+          />
         </Form>
       </StepContentWrapper>
 
