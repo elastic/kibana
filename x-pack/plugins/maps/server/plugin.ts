@@ -129,9 +129,10 @@ export class MapsPlugin implements Plugin {
 
   // @ts-ignore
   async setup(core: CoreSetup, plugins: SetupDeps) {
-    const { usageCollection, home, licensing, features } = plugins;
+    const { usageCollection, home, licensing, features, mapsLegacy } = plugins;
     // @ts-ignore
     const config$ = this._initializerContext.config.create();
+    const mapsLegacyConfig = await mapsLegacy.config.pipe(take(1)).toPromise();
     const currentConfig = await config$.pipe(take(1)).toPromise();
 
     // @ts-ignore
@@ -150,7 +151,7 @@ export class MapsPlugin implements Plugin {
         initRoutes(
           core.http.createRouter(),
           license.uid,
-          currentConfig,
+          mapsLegacyConfig,
           this.kibanaVersion,
           this._logger
         );
