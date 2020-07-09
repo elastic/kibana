@@ -10,7 +10,6 @@ import { randomBytes, createHash } from 'crypto';
 import { Duration } from 'moment';
 import { KibanaRequest, Logger } from '../../../../../src/core/server';
 import { AuthenticationProvider } from '../../common/types';
-import { SecurityAuditLogger } from '../audit';
 import { ConfigType } from '../config';
 import { SessionIndex, SessionIndexValue } from './session_index';
 import { SessionCookie } from './session_cookie';
@@ -70,7 +69,6 @@ export interface SessionValue {
 }
 
 export interface SessionOptions {
-  auditLogger: SecurityAuditLogger;
   serverBasePath: string;
   logger: Logger;
   sessionIndex: SessionIndex;

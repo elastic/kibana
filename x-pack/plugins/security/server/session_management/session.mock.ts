@@ -7,6 +7,7 @@
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { Session, SessionValue } from './session';
 import { SessionIndexValue } from './session_index';
+import { SessionCookieValue } from './session_cookie';
 
 const createSessionIndexValue = (
   sessionValue: Partial<SessionIndexValue> = {}
@@ -19,6 +20,17 @@ const createSessionIndexValue = (
   path: '/',
   content: 'some-encrypted-content',
   metadata: { primaryTerm: 1, sequenceNumber: 1 },
+  ...sessionValue,
+});
+
+const createSessionCookieValue = (
+  sessionValue: Partial<SessionCookieValue> = {}
+): SessionCookieValue => ({
+  sid: 'some-long-sid',
+  aad: 'some-aad',
+  idleTimeoutExpiration: null,
+  lifespanExpiration: null,
+  path: '/',
   ...sessionValue,
 });
 
@@ -44,4 +56,5 @@ export const sessionMock = {
   }),
 
   createSessionIndexValue,
+  createSessionCookieValue,
 };

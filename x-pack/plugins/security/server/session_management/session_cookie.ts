@@ -60,26 +60,31 @@ export class SessionCookie {
   readonly #cookieSessionValueStorage: Promise<SessionStorageFactory<Readonly<SessionCookieValue>>>;
 
   /**
-   * Options used to create Session Cookie.
+   * Session cookie logger.
    */
-  readonly #options: Readonly<SessionCookieOptions>;
+  readonly #logger: Logger;
 
-  constructor(options: Readonly<SessionCookieOptions>) {
-    this.#options = options;
-    this.#cookieSessionValueStorage = this.#options.createCookieSessionStorageFactory({
-      encryptionKey: options.config.encryptionKey,
-      isSecure: options.config.secureCookies,
-      name: options.config.cookieName,
-      sameSite: options.config.sameSiteCookies,
+  constructor({
+    config,
+    createCookieSessionStorageFactory,
+    logger,
+    serverBasePath,
+  }: Readonly<SessionCookieOptions>) {
+    this.#logger = logger;
+    this.#cookieSessionValueStorage = createCookieSessionStorageFactory({
+      encryptionKey: config.encryptionKey,
+      isSecure: config.secureCookies,
+      name: config.cookieName,
+      sameSite: config.sameSiteCookies,
       validate: (sessionValue: SessionCookieValue | SessionCookieValue[]) => {
         // ensure that this cookie was created with the current Kibana configuration
         const invalidSessionValue = (Array.isArray(sessionValue)
           ? sessionValue
           : [sessionValue]
-        ).find((sess) => sess.path !== undefined && sess.path !== this.#options.serverBasePath);
+        ).find((sess) => sess.path !== undefined && sess.path !== serverBasePath);
 
         if (invalidSessionValue) {
-          options.logger.debug(`Outdated session value with path "${invalidSessionValue.path}"`);
+          this.#logger.debug(`Outdated session value with path "${invalidSessionValue.path}"`);
           return { isValid: false, path: invalidSessionValue.path };
         }
 

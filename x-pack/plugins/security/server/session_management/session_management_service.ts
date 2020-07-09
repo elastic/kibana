@@ -6,7 +6,6 @@
 
 import { Observable, Subscription } from 'rxjs';
 import { HttpServiceSetup, ILegacyClusterClient, Logger } from '../../../../../src/core/server';
-import { SecurityAuditLogger } from '../audit';
 import { ConfigType } from '../config';
 import { OnlineStatusRetryScheduler } from '../elasticsearch';
 import { SessionCookie } from './session_cookie';
@@ -14,7 +13,6 @@ import { SessionIndex } from './session_index';
 import { Session } from './session';
 
 export interface SessionManagementServiceSetupParams {
-  readonly auditLogger: SecurityAuditLogger;
   readonly http: Pick<HttpServiceSetup, 'basePath' | 'createCookieSessionStorageFactory'>;
   readonly config: ConfigType;
   readonly clusterClient: ILegacyClusterClient;
@@ -41,7 +39,6 @@ export class SessionManagementService {
   }
 
   setup({
-    auditLogger,
     config,
     clusterClient,
     http,
@@ -64,7 +61,6 @@ export class SessionManagementService {
 
     return {
       session: new Session({
-        auditLogger,
         serverBasePath,
         logger: this.#logger,
         sessionCookie,

@@ -149,7 +149,6 @@ export class Plugin {
     const auditLogger = new SecurityAuditLogger(audit.getLogger());
 
     const { session } = this.sessionManagementService.setup({
-      auditLogger,
       config,
       clusterClient,
       http: core.http,

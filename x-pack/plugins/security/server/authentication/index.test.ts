@@ -88,6 +88,15 @@ describe('setupAuthentication()', () => {
 
   afterEach(() => jest.clearAllMocks());
 
+  it('properly registers auth handler', async () => {
+    await setupAuthentication(mockSetupAuthenticationParams);
+
+    expect(mockSetupAuthenticationParams.http.registerAuth).toHaveBeenCalledTimes(1);
+    expect(mockSetupAuthenticationParams.http.registerAuth).toHaveBeenCalledWith(
+      expect.any(Function)
+    );
+  });
+
   describe('authentication handler', () => {
     let authHandler: AuthenticationHandler;
     let authenticate: jest.SpyInstance<Promise<AuthenticationResult>, [KibanaRequest]>;

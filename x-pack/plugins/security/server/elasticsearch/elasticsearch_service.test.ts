@@ -29,7 +29,7 @@ describe('ElasticsearchService', () => {
   });
 
   describe('setup()', () => {
-    it('exposes proper contract', async () => {
+    it('exposes proper contract', () => {
       const mockCoreSetup = coreMock.createSetup();
       const mockClusterClient = elasticsearchServiceMock.createLegacyCustomClusterClient();
       mockCoreSetup.elasticsearch.legacy.createClient.mockReturnValue(mockClusterClient);
@@ -80,14 +80,14 @@ describe('ElasticsearchService', () => {
       });
     });
 
-    it('exposes proper contract', async () => {
+    it('exposes proper contract', () => {
       expect(service.start()).toEqual({
         clusterClient: mockClusterClient,
         watchOnlineStatus$: expect.any(Function),
       });
     });
 
-    it('`watchOnlineStatus$` allows tracking of Elasticsearch status', async () => {
+    it('`watchOnlineStatus$` allows tracking of Elasticsearch status', () => {
       const mockHandler = jest.fn();
       service.start().watchOnlineStatus$().subscribe(mockHandler);
 
@@ -201,7 +201,7 @@ describe('ElasticsearchService', () => {
   });
 
   describe('stop()', () => {
-    it('properly closes cluster client instance', async () => {
+    it('properly closes cluster client instance', () => {
       const mockCoreSetup = coreMock.createSetup();
       const mockClusterClient = elasticsearchServiceMock.createLegacyCustomClusterClient();
       mockCoreSetup.elasticsearch.legacy.createClient.mockReturnValue(mockClusterClient);
@@ -214,7 +214,7 @@ describe('ElasticsearchService', () => {
 
       expect(mockClusterClient.close).not.toHaveBeenCalled();
 
-      await service.stop();
+      service.stop();
 
       expect(mockClusterClient.close).toHaveBeenCalledTimes(1);
     });
