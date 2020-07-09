@@ -19,5 +19,5 @@ yarn percy exec -t 10000 -- -- \
     --kibana-install-dir "$installDir" \
     --config test/visual_regression/config.ts;
 
-cd "$XPACK_DIR"
-source "$KIBANA_DIR/test/scripts/jenkins_xpack_saved_objects_field_metrics.sh"
+cd "$KIBANA_DIR"
+source "test/scripts/jenkins_xpack_saved_objects_field_metrics.sh"
