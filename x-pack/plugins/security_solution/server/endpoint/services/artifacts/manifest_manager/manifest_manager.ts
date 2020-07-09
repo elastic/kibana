@@ -154,7 +154,7 @@ export class ManifestManager {
       const newManifest = Manifest.fromArtifacts(
         artifacts,
         ManifestConstants.SCHEMA_VERSION,
-        oldManifest.getVersion()
+        oldManifest
       );
 
       // Get diffs
@@ -202,6 +202,11 @@ export class ManifestManager {
 
     for (const diff of adds) {
       const artifact = snapshot.manifest.getArtifact(diff.id);
+      if (artifact === undefined) {
+        throw new Error(
+          `Corrupted manifest detected. Diff contained artifact ${diff.id} not in manifest.`
+        );
+      }
       const compressedArtifact = await compressExceptionList(Buffer.from(artifact.body, 'base64'));
       artifact.body = compressedArtifact.toString('base64');
       artifact.encodedSize = compressedArtifact.byteLength;
