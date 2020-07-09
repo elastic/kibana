@@ -17,6 +17,5 @@
  * under the License.
  */
 
-export { RequestStatus } from './types';
-
+export { RequestStatistic, RequestStatistics, RequestStatus } from './types';
 export { RequestAdapter } from './request_adapter';

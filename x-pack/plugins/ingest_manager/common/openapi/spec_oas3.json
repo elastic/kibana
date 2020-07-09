@@ -60,7 +60,7 @@
                           "namespace": "default",
                           "description": "Default agent configuration created by Kibana",
                           "status": "active",
-                          "datasources": ["8a5679b0-8fbf-11ea-b2ce-01c4a6127154"],
+                          "packageConfigs": ["8a5679b0-8fbf-11ea-b2ce-01c4a6127154"],
                           "is_default": true,
                           "monitoring_enabled": ["logs", "metrics"],
                           "revision": 2,
@@ -175,7 +175,7 @@
                         "namespace": "default",
                         "description": "Default agent configuration created by Kibana",
                         "status": "active",
-                        "datasources": [
+                        "packageConfigs": [
                           {
                             "id": "8a5679b0-8fbf-11ea-b2ce-01c4a6127154",
                             "name": "system-1",
@@ -750,7 +750,7 @@
                         "namespace": "UPDATED namespace",
                         "updated_on": "Fri Feb 28 2020 16:22:31 GMT-0500 (Eastern Standard Time)",
                         "updated_by": "elastic",
-                        "datasources": []
+                        "packageConfigs": []
                       },
                       "success": true
                     }
@@ -922,9 +922,9 @@
       },
       "parameters": []
     },
-    "/datasources": {
+    "/packageConfigs": {
       "get": {
-        "summary": "Datasources - List",
+        "summary": "PackageConfigs - List",
         "tags": [],
         "responses": {
           "200": {
@@ -937,7 +937,7 @@
                     "items": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/Datasource"
+                        "$ref": "#/components/schemas/PackageConfig"
                       }
                     },
                     "total": {
@@ -1166,14 +1166,14 @@
             }
           }
         },
-        "operationId": "get-datasources",
+        "operationId": "get-packageConfigs",
         "security": [],
         "parameters": []
       },
       "parameters": [],
       "post": {
-        "summary": "Datasources - Create",
-        "operationId": "post-datasources",
+        "summary": "PackageConfigs - Create",
+        "operationId": "post-packageConfigs",
         "responses": {
           "200": {
             "description": "OK"
@@ -1183,7 +1183,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewDatasource"
+                "$ref": "#/components/schemas/NewPackageConfig"
               },
               "examples": {
                 "example-1": {
@@ -1237,9 +1237,9 @@
         ]
       }
     },
-    "/datasources/{datasourceId}": {
+    "/packageConfigs/{packageConfigId}": {
       "get": {
-        "summary": "Datasources - Info",
+        "summary": "PackageConfigs - Info",
         "tags": [],
         "responses": {
           "200": {
@@ -1250,7 +1250,7 @@
                   "type": "object",
                   "properties": {
                     "item": {
-                      "$ref": "#/components/schemas/Datasource"
+                      "$ref": "#/components/schemas/PackageConfig"
                     },
                     "success": {
                       "type": "boolean"
@@ -1262,21 +1262,21 @@
             }
           }
         },
-        "operationId": "get-datasources-datasourceId"
+        "operationId": "get-packageConfigs-packageConfigId"
       },
       "parameters": [
         {
           "schema": {
             "type": "string"
           },
-          "name": "datasourceId",
+          "name": "packageConfigId",
           "in": "path",
           "required": true
         }
       ],
       "put": {
-        "summary": "Datasources - Update",
-        "operationId": "put-datasources-datasourceId",
+        "summary": "PackageConfigs - Update",
+        "operationId": "put-packageConfigs-packageConfigId",
         "responses": {
           "200": {
             "description": "OK",
@@ -1286,7 +1286,7 @@
                   "type": "object",
                   "properties": {
                     "item": {
-                      "$ref": "#/components/schemas/Datasource"
+                      "$ref": "#/components/schemas/PackageConfig"
                     },
                     "sucess": {
                       "type": "boolean"
@@ -1724,9 +1724,7 @@
                         "license": "basic",
                         "description": "This is the Elastic Endpoint package.",
                         "type": "solution",
-                        "categories": [
-                          "security"
-                        ],
+                        "categories": ["security"],
                         "release": "beta",
                         "requirement": {
                           "kibana": {
@@ -1826,10 +1824,10 @@
                             "path": "telemetry"
                           }
                         ],
-                        "datasources": [
+                        "packageConfigs": [
                           {
                             "name": "endpoint",
-                            "title": "Endpoint data source",
+                            "title": "Endpoint package config",
                             "description": "Interact with the endpoint.",
                             "inputs": null,
                             "multiple": false
@@ -2121,7 +2119,7 @@
                           }
                         },
                         {
-                          "description": "The log package should be used to create data sources for all type of logs for which an package doesn't exist yet.\n",
+                          "description": "The log package should be used to create package configs for all type of logs for which an package doesn't exist yet.\n",
                           "download": "/epr/log/log-0.9.0.tar.gz",
                           "icons": [
                             {
@@ -2782,7 +2780,7 @@
                           },
                           "actions": [
                             {
-                              "data": "{\"config\":{\"id\":\"ae556400-5e39-11ea-8b49-f9747e466f7b\",\"outputs\":{\"default\":{\"type\":\"elasticsearch\",\"hosts\":[\"http://localhost:9200\"],\"api_key\":\"\",\"api_token\":\"6ckkp3ABz7e_XRqr3LM8:gQuDfUNSRgmY0iziYqP9Hw\"}},\"datasources\":[]}}",
+                              "data": "{\"config\":{\"id\":\"ae556400-5e39-11ea-8b49-f9747e466f7b\",\"outputs\":{\"default\":{\"type\":\"elasticsearch\",\"hosts\":[\"http://localhost:9200\"],\"api_key\":\"\",\"api_token\":\"6ckkp3ABz7e_XRqr3LM8:gQuDfUNSRgmY0iziYqP9Hw\"}},\"packageConfigs\":[]}}",
                               "created_at": "2020-03-04T20:02:56.149Z",
                               "id": "6a95c00a-d76d-4931-97c3-0bf935272d7d",
                               "type": "CONFIG_CHANGE"
@@ -2967,7 +2965,7 @@
                                   "api_key": "Z-XkgHIBvwtjzIKtSCTh:AejRqdKpQx6z-6dqSI1LHg"
                                 }
                               },
-                              "datasources": [
+                              "packageConfigs": [
                                 {
                                   "id": "33d6bd70-a5e0-11ea-a587-5f886c8a849f",
                                   "name": "system-1",
@@ -3522,7 +3520,17 @@
         ]
       }
     },
-    "/fleet/agents/unenroll": {
+    "/fleet/agents/{agentId}/unenroll": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentId",
+          "in": "path",
+          "required": true
+        }
+      ],
       "post": {
         "summary": "Fleet - Agent - Unenroll",
         "tags": [],
@@ -3532,7 +3540,26 @@
           {
             "$ref": "#/components/parameters/xsrfHeader"
           }
-        ]
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "force": { "type": "boolean" }
+                }
+              },
+              "examples": {
+                "example-1": {
+                  "value": {
+                    "force": true
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/fleet/config/{configId}/agent-status": {
@@ -3690,7 +3717,7 @@
                 "type": "string",
                 "enum": ["active", "inactive"]
               },
-              "datasources": {
+              "packageConfigs": {
                 "oneOf": [
                   {
                     "items": {
@@ -3699,7 +3726,7 @@
                   },
                   {
                     "items": {
-                      "$ref": "#/components/schemas/Datasource"
+                      "$ref": "#/components/schemas/PackageConfig"
                     }
                   }
                 ],
@@ -3723,8 +3750,8 @@
           }
         ]
       },
-      "Datasource": {
-        "title": "Datasource",
+      "PackageConfig": {
+        "title": "PackageConfig",
         "allOf": [
           {
             "type": "object",
@@ -3743,7 +3770,7 @@
             "required": ["id", "revision"]
           },
           {
-            "$ref": "#/components/schemas/NewDatasource"
+            "$ref": "#/components/schemas/NewPackageConfig"
           }
         ],
         "x-examples": {
@@ -3765,8 +3792,8 @@
           }
         }
       },
-      "NewDatasource": {
-        "title": "NewDatasource",
+      "NewPackageConfig": {
+        "title": "NewPackageConfig",
         "type": "object",
         "x-examples": {
           "example-1": {
@@ -4098,6 +4125,12 @@
           "enrolled_at": {
             "type": "string"
           },
+          "unenrolled_at": {
+            "type": "string"
+          },
+          "unenrollment_started_at": {
+            "type": "string"
+          },
           "shared_id": {
             "type": "string"
           },
@@ -4112,9 +4145,6 @@
           },
           "config_revision": {
             "type": ["number", "null"]
-          },
-          "config_newest_revision": {
-            "type": "number"
           },
           "last_checkin": {
             "type": "string"

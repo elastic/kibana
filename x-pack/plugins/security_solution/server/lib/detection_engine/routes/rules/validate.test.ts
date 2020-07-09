@@ -12,12 +12,12 @@ import {
 import { getResult } from '../__mocks__/request_responses';
 import { FindResult } from '../../../../../../alerts/server';
 import { BulkError } from '../utils';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 
 export const ruleOutput: RulesSchema = {
   actions: [],
+  author: ['Elastic'],
   created_at: '2019-12-13T16:40:33.400Z',
   updated_at: '2019-12-13T16:40:33.400Z',
   created_by: 'elastic',
@@ -30,13 +30,16 @@ export const ruleOutput: RulesSchema = {
   interval: '5m',
   rule_id: 'rule-1',
   language: 'kuery',
+  license: 'Elastic License',
   output_index: '.siem-signals',
   max_signals: 100,
   risk_score: 50,
+  risk_score_mapping: [],
   name: 'Detect Root/Admin Users',
   query: 'user.name: root or user.name: admin',
   references: ['http://www.example.com', 'https://ww.example.com'],
   severity: 'high',
+  severity_mapping: [],
   updated_by: 'elastic',
   tags: [],
   to: 'now',
@@ -80,14 +83,6 @@ export const ruleOutput: RulesSchema = {
 };
 
 describe('validate', () => {
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
-
   describe('transformValidate', () => {
     test('it should do a validation correctly of a partial alert', () => {
       const ruleAlert = getResult();
