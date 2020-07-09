@@ -4,8 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PackageConfig, NewPackageConfig } from '../../../ingest_manager/common';
+import { ApplicationStart } from 'kibana/public';
+import { NewPackageConfig, PackageConfig } from '../../../ingest_manager/common';
 import { ManifestSchema } from './schema/manifest';
+
+/**
+ * Supported React-Router state for the Policy Details page
+ */
+export interface PolicyDetailsRouteState {
+  /**
+   * Where the user should be redirected to when the `Save` button is clicked and the update was successful
+   */
+  onSaveNavigateTo?: Parameters<ApplicationStart['navigateToApp']>;
+  /**
+   * Where the user should be redirected to when the `Cancel` button is clicked
+   */
+  onCancelNavigateTo?: Parameters<ApplicationStart['navigateToApp']>;
+}
 
 /**
  * Object that allows you to maintain stateful information in the location object across navigation events
@@ -17,9 +32,11 @@ export interface AppLocation {
   search: string;
   hash: string;
   key?: string;
-  state?: {
-    isTabChange?: boolean;
-  };
+  state?:
+    | {
+        isTabChange?: boolean;
+      }
+    | PolicyDetailsRouteState;
 }
 
 /**

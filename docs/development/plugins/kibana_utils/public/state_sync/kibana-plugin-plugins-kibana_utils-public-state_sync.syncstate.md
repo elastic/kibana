@@ -4,7 +4,9 @@
 
 ## syncState() function
 
-Utility for syncing application state wrapped in state container with some kind of storage (e.g. URL) Refer [here](https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_sync) for a complete guide and examples
+Utility for syncing application state wrapped in state container with some kind of storage (e.g. URL)
+
+Go [here](https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_sync) for a complete guide and examples.
 
 <b>Signature:</b>
 
@@ -24,13 +26,9 @@ export declare function syncState<State extends BaseState, StateStorage extends 
 
 - [ISyncStateRef](./kibana-plugin-plugins-kibana_utils-public-state_sync.isyncstateref.md)
 
-## Remarks
-
-1. It is responsibility of consumer to make sure that initial app state and storage are in sync before starting syncing No initial sync happens when syncState() is called
-
 ## Example 1
 
-1. the simplest use case
+the simplest use case
 
 ```ts
 const stateStorage = createKbnUrlStateStorage();
@@ -44,7 +42,7 @@ syncState({
 
 ## Example 2
 
-2. conditionally configuring sync strategy
+conditionally configuring sync strategy
 
 ```ts
 const stateStorage = createKbnUrlStateStorage({useHash: config.get('state:stateContainerInSessionStorage')})
@@ -58,7 +56,7 @@ syncState({
 
 ## Example 3
 
-3. implementing custom sync strategy
+implementing custom sync strategy
 
 ```ts
 const localStorageStateStorage = {
@@ -75,7 +73,7 @@ syncState({
 
 ## Example 4
 
-4. Transform state before serialising Useful for: \* Migration / backward compatibility \* Syncing part of state \* Providing default values
+transforming state before serialising Useful for: \* Migration / backward compatibility \* Syncing part of state \* Providing default values
 
 ```ts
 const stateToStorage = (s) => ({ tab: s.tab });

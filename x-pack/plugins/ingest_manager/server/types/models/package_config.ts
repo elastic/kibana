@@ -66,7 +66,13 @@ export const NewPackageConfigSchema = schema.object({
   ...PackageConfigBaseSchema,
 });
 
+export const UpdatePackageConfigSchema = schema.object({
+  ...PackageConfigBaseSchema,
+  version: schema.maybe(schema.string()),
+});
+
 export const PackageConfigSchema = schema.object({
   ...PackageConfigBaseSchema,
   id: schema.string(),
+  version: schema.maybe(schema.string()),
 });

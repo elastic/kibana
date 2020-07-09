@@ -20,15 +20,20 @@
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
+  const log = getService('log');
   const docTable = getService('docTable');
+  const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'context']);
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
 
   describe('doc link in discover', function contextSize() {
-    before(async function () {
+    beforeEach(async function () {
+      log.debug('load kibana index with default index pattern');
+      await esArchiver.loadIfNeeded('discover');
+
       await esArchiver.loadIfNeeded('logstash_functional');
       await kibanaServer.uiSettings.replace({ 'doc_table:legacyTable': true });
       await PageObjects.common.navigateToApp('discover');
@@ -51,6 +56,28 @@ export default function ({ getService, getPageObjects }) {
 
       const hasDocHit = await testSubjects.exists('doc-hit');
       expect(hasDocHit).to.be(true);
+    });
+
+    it('add filter should create an exists filter if value is null (#7189)', async function () {
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      // Filter special document
+      await filterBar.addFilter('agent', 'is', 'Missing/Fields');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      // navigate to the doc view
+      await docTable.clickRowToggle({ rowIndex: 0 });
+
+      const details = await docTable.getDetailsRow();
+      await docTable.addInclusiveFilter(details, 'referer');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      const hasInclusiveFilter = await filterBar.hasFilter('referer', 'exists', true, false, true);
+      expect(hasInclusiveFilter).to.be(true);
+
+      await docTable.removeInclusiveFilter(details, 'referer');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      const hasExcludeFilter = await filterBar.hasFilter('referer', 'exists', true, false, false);
+      expect(hasExcludeFilter).to.be(true);
     });
   });
 }
