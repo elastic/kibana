@@ -4,29 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
+  HTTP_RESPONSE_STATUS_CODE,
   PROCESSOR_EVENT,
   SERVICE_NAME,
-  HTTP_RESPONSE_STATUS_CODE,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
+import { rangeFilter } from '../../../common/utils/range_filter';
 import { getMetricsDateHistogramParams } from '../helpers/metrics';
 import {
   Setup,
   SetupTimeRange,
   SetupUIFilters,
 } from '../helpers/setup_request';
-import { rangeFilter } from '../../../common/utils/range_filter';
-
-// Regex for 5xx and 4xx
-const errorStatusCodeRegex = /5\d{2}|4\d{2}/;
 
 export async function getErrorRate({
   serviceName,
-  groupId,
   setup,
 }: {
   serviceName: string;
-  groupId?: string;
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
   const { start, end, uiFiltersES, client, indices } = setup;
@@ -38,44 +33,81 @@ export async function getErrorRate({
     ...uiFiltersES,
   ];
 
-  const params = {
-    index: indices['apm_oss.transactionIndices'],
-    body: {
-      size: 0,
-      query: {
-        bool: { filter },
-      },
-      aggs: {
-        histogram: {
-          date_histogram: getMetricsDateHistogramParams(start, end),
-          aggs: {
-            statusAggregation: {
-              terms: {
-                field: HTTP_RESPONSE_STATUS_CODE,
-                size: 10,
-              },
-            },
-          },
-        },
-      },
+  const must = [{ exists: { field: HTTP_RESPONSE_STATUS_CODE } }];
+
+  const dateHistogramAggs = {
+    histogram: {
+      date_histogram: getMetricsDateHistogramParams(start, end),
     },
   };
-  const resp = await client.search(params);
-  const noHits = resp.hits.total.value === 0;
 
-  const errorRates = resp.aggregations?.histogram.buckets.map((bucket) => {
-    let errorCount = 0;
-    let total = 0;
-    bucket.statusAggregation.buckets.forEach(({ key, doc_count: count }) => {
-      if (errorStatusCodeRegex.test(key.toString())) {
-        errorCount += count;
-      }
-      total += count;
-    });
-    return {
-      x: bucket.key,
-      y: noHits ? null : errorCount / total,
+  const getTransactionsCount = async () => {
+    const transactionsCountParams = {
+      index: indices['apm_oss.transactionIndices'],
+      body: {
+        size: 0,
+        query: { bool: { must, filter } },
+        aggs: dateHistogramAggs,
+      },
     };
-  });
+
+    const resp = await client.search(transactionsCountParams);
+    const transactionsCountByTimestamp: Record<number, number> = {};
+    if (resp.aggregations) {
+      resp.aggregations.histogram.buckets.forEach(
+        (bucket) =>
+          (transactionsCountByTimestamp[bucket.key] = bucket.doc_count)
+      );
+    }
+    return {
+      transactionsCountByTimestamp,
+      noHits: resp.hits.total.value === 0,
+    };
+  };
+
+  const getErroneousTransactionsCount = async () => {
+    const erroneousTransactionsCountParams = {
+      index: indices['apm_oss.transactionIndices'],
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            must,
+            filter: [
+              ...filter,
+              {
+                range: {
+                  [HTTP_RESPONSE_STATUS_CODE]: {
+                    gte: 400, // everything equals or above 400 should be treated as an error
+                  },
+                },
+              },
+            ],
+          },
+        },
+        aggs: dateHistogramAggs,
+      },
+    };
+    const resp = await client.search(erroneousTransactionsCountParams);
+
+    return resp.aggregations?.histogram.buckets;
+  };
+
+  const [transactionsCount, erroneousTransactionsCount] = await Promise.all([
+    getTransactionsCount(),
+    getErroneousTransactionsCount(),
+  ]);
+
+  const { transactionsCountByTimestamp, noHits } = transactionsCount;
+
+  const errorRates =
+    erroneousTransactionsCount?.map(({ key, doc_count: errorCount }) => {
+      const transactionsTotalCount = transactionsCountByTimestamp[key];
+      return {
+        x: key,
+        y: errorCount / transactionsTotalCount,
+      };
+    }) || [];
+
   return { noHits, errorRates };
 }

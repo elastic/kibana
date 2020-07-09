@@ -88,19 +88,12 @@ export const errorRateRoute = createRoute(() => ({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([
-      t.partial({
-        groupId: t.string,
-      }),
-      uiFiltersRt,
-      rangeRt,
-    ]),
+    query: t.intersection([uiFiltersRt, rangeRt]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { params } = context;
     const { serviceName } = params.path;
-    const { groupId } = params.query;
-    return getErrorRate({ serviceName, groupId, setup });
+    return getErrorRate({ serviceName, setup });
   },
 }));
