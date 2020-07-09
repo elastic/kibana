@@ -9,7 +9,13 @@ import { i18n } from '@kbn/i18n';
 import { EuiTitle, EuiSpacer, EuiText, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
-import { CrumbInfo, formatDate, StyledBreadcrumbs, BoldCode } from './panel_content_utilities';
+import {
+  CrumbInfo,
+  formatDate,
+  StyledBreadcrumbs,
+  BoldCode,
+  StyledTime,
+} from './panel_content_utilities';
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
@@ -61,11 +67,13 @@ const DisplayList = memo(function DisplayList({
                     defaultMessage="{category} {eventType}"
                   />
                 </BoldCode>
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.atTime"
-                  values={{ date: eventView.formattedDate }}
-                  defaultMessage="@ {date}"
-                />
+                <StyledTime dateTime={eventView.formattedDate}>
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.atTime"
+                    values={{ date: eventView.formattedDate }}
+                    defaultMessage="@ {date}"
+                  />
+                </StyledTime>
               </EuiText>
               <EuiSpacer size="xs" />
               <EuiButtonEmpty onClick={eventView.setQueryParams}>

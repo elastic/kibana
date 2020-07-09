@@ -41,6 +41,15 @@ const ThemedBreadcrumbs = styled(EuiBreadcrumbs)<{ background: string; text: str
 `;
 
 /**
+ * A component to keep time representations in blocks so they don't wrap
+ * and look bad.
+ */
+export const StyledTime = memo(styled('time')`
+  display: inline-block;
+  text-align: start;
+`);
+
+/**
  * Breadcrumb menu with adjustments per direction from UX team
  */
 export const StyledBreadcrumbs = memo(function StyledBreadcrumbs({
