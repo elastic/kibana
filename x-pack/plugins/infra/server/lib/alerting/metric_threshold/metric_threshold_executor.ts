@@ -19,7 +19,7 @@ import { evaluateAlert } from './lib/evaluate_alert';
 
 export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
   async function (options: AlertExecutorOptions) {
-    const { services, params, alertId } = options;
+    const { services, params } = options;
     const { criteria } = params;
     const { sourceId, alertOnNoData } = params as {
       sourceId?: string;
@@ -36,7 +36,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     // Because each alert result has the same group definitions, just grap the groups from the first one.
     const groups = Object.keys(first(alertResults) as any);
     for (const group of groups) {
-      const alertInstance = services.alertInstanceFactory(`${group}::${alertId}`);
+      const alertInstance = services.alertInstanceFactory(`${group}`);
 
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = alertResults.every((result) =>

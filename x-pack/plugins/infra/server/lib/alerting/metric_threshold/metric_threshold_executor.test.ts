@@ -24,10 +24,9 @@ let persistAlertInstances = false; // eslint-disable-line
 
 describe('The metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
-    const instanceID = '*::test';
+    const instanceID = '*';
     const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
       executor({
-        alertId: 'test',
         services,
         params: {
           sourceId,
@@ -107,7 +106,6 @@ describe('The metric threshold alert type', () => {
   describe('querying with a groupBy parameter', () => {
     const execute = (comparator: Comparator, threshold: number[]) =>
       executor({
-        alertId: 'test',
         services,
         params: {
           groupBy: 'something',
@@ -120,8 +118,8 @@ describe('The metric threshold alert type', () => {
           ],
         },
       });
-    const instanceIdA = 'a::test';
-    const instanceIdB = 'b::test';
+    const instanceIdA = 'a';
+    const instanceIdB = 'b';
     test('sends an alert when all groups pass the threshold', async () => {
       await execute(Comparator.GT, [0.75]);
       expect(mostRecentAction(instanceIdA).id).toBe(FIRED_ACTIONS.id);
@@ -158,7 +156,6 @@ describe('The metric threshold alert type', () => {
       groupBy: string = ''
     ) =>
       executor({
-        alertId: 'test',
         services,
         params: {
           groupBy,
@@ -178,20 +175,20 @@ describe('The metric threshold alert type', () => {
         },
       });
     test('sends an alert when all criteria cross the threshold', async () => {
-      const instanceID = '*::test';
+      const instanceID = '*';
       await execute(Comparator.GT_OR_EQ, [1.0], [3.0]);
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
       expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
     });
     test('sends no alert when some, but not all, criteria cross the threshold', async () => {
-      const instanceID = '*::test';
+      const instanceID = '*';
       await execute(Comparator.LT_OR_EQ, [1.0], [3.0]);
       expect(mostRecentAction(instanceID)).toBe(undefined);
       expect(getState(instanceID).alertState).toBe(AlertStates.OK);
     });
     test('alerts only on groups that meet all criteria when querying with a groupBy parameter', async () => {
-      const instanceIdA = 'a::test';
-      const instanceIdB = 'b::test';
+      const instanceIdA = 'a';
+      const instanceIdB = 'b';
       await execute(Comparator.GT_OR_EQ, [1.0], [3.0], 'something');
       expect(mostRecentAction(instanceIdA).id).toBe(FIRED_ACTIONS.id);
       expect(getState(instanceIdA).alertState).toBe(AlertStates.ALERT);
@@ -199,7 +196,7 @@ describe('The metric threshold alert type', () => {
       expect(getState(instanceIdB).alertState).toBe(AlertStates.OK);
     });
     test('sends all criteria to the action context', async () => {
-      const instanceID = '*::test';
+      const instanceID = '*';
       await execute(Comparator.GT_OR_EQ, [1.0], [3.0]);
       const { action } = mostRecentAction(instanceID);
       const reasons = action.reason.split('\n');
@@ -213,10 +210,9 @@ describe('The metric threshold alert type', () => {
     });
   });
   describe('querying with the count aggregator', () => {
-    const instanceID = '*::test';
+    const instanceID = '*';
     const execute = (comparator: Comparator, threshold: number[]) =>
       executor({
-        alertId: 'test',
         services,
         params: {
           criteria: [
@@ -240,10 +236,9 @@ describe('The metric threshold alert type', () => {
     });
   });
   describe('querying with the p99 aggregator', () => {
-    const instanceID = '*::test';
+    const instanceID = '*';
     const execute = (comparator: Comparator, threshold: number[]) =>
       executor({
-        alertId: 'test',
         services,
         params: {
           criteria: [
@@ -267,10 +262,9 @@ describe('The metric threshold alert type', () => {
     });
   });
   describe('querying with the p95 aggregator', () => {
-    const instanceID = '*::test';
+    const instanceID = '*';
     const execute = (comparator: Comparator, threshold: number[]) =>
       executor({
-        alertId: 'test',
         services,
         params: {
           criteria: [
@@ -294,10 +288,9 @@ describe('The metric threshold alert type', () => {
     });
   });
   describe("querying a metric that hasn't reported data", () => {
-    const instanceID = '*::test';
+    const instanceID = '*';
     const execute = (alertOnNoData: boolean) =>
       executor({
-        alertId: 'test',
         services,
         params: {
           criteria: [
@@ -324,10 +317,10 @@ describe('The metric threshold alert type', () => {
   });
 
   // describe('querying a metric that later recovers', () => {
-  //   const instanceID = '*::test';
+  //   const instanceID = '*';
   //   const execute = (threshold: number[]) =>
   //     executor({
-  //       alertId: 'test',
+  //
   //       services,
   //       params: {
   //         criteria: [

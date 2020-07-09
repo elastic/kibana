@@ -32,7 +32,6 @@ interface InventoryMetricThresholdParams {
 export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) => async ({
   services,
   params,
-  alertId,
 }: AlertExecutorOptions) => {
   const {
     criteria,
@@ -55,7 +54,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
 
   const inventoryItems = Object.keys(first(results) as any);
   for (const item of inventoryItems) {
-    const alertInstance = services.alertInstanceFactory(`${item}::${alertId}`);
+    const alertInstance = services.alertInstanceFactory(`${item}`);
     // AND logic; all criteria must be across the threshold
     const shouldAlertFire = results.every((result) => result[item].shouldFire);
 
