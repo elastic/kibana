@@ -19,12 +19,27 @@ export async function indexHostsAndAlerts(
   alertIndex: string,
   alertsPerHost: number,
   options: TreeOptions = {}
-) {
+) /** TODO, return stuff */ {
   const random = seedrandom(seed);
   for (let i = 0; i < numHosts; i++) {
     const generator = new EndpointDocGenerator(random);
     await indexHostDocs(numDocs, client, metadataIndex, policyIndex, generator);
-    await indexAlerts(client, eventIndex, alertIndex, generator, alertsPerHost, options);
+
+    // build a resolver tree
+    const resolverTree = generator.alertsGenerator(options);
+
+    // Index the ancestry and the alert event itself regardless of `alertsPerHost` limit
+    const alertEvents = [...resolverTree.ancestry, resolverTree.alertEvent];
+
+    // index additional events until `alertsPerHost` limit is reached
+    for (const event of resolverTree.descendants) {
+      if (alertEvents.length === alertsPerHost) {
+        break;
+      }
+      alertEvents.push(event);
+    }
+
+    await indexAlerts(client, eventIndex, alertIndex, alertEvents);
   }
   await client.indices.refresh({
     index: eventIndex,
@@ -68,32 +83,20 @@ async function indexAlerts(
   client: Client,
   eventIndex: string,
   alertIndex: string,
-  generator: EndpointDocGenerator,
-  numAlerts: number,
-  options: TreeOptions = {}
+  alertEvents: Event[]
 ) {
-  const alertGenerator = generator.alertsGenerator(numAlerts, options);
-  let result = alertGenerator.next();
-  while (!result.done) {
-    let k = 0;
-    const resolverDocs: Event[] = [];
-    while (k < 1000 && !result.done) {
-      resolverDocs.push(result.value);
-      result = alertGenerator.next();
-      k++;
-    }
-    const body = resolverDocs.reduce(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (array: Array<Record<string, any>>, doc) => {
-        let index = eventIndex;
-        if (doc.event.kind === 'alert') {
-          index = alertIndex;
-        }
-        array.push({ create: { _index: index } }, doc);
-        return array;
-      },
-      []
-    );
-    await client.bulk({ body, refresh: 'true' });
-  }
+  const body = alertEvents.reduce(
+    // TODO fix
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (array: Array<Record<string, any>>, doc) => {
+      let index = eventIndex;
+      if (doc.event.kind === 'alert') {
+        index = alertIndex;
+      }
+      array.push({ create: { _index: index } }, doc);
+      return array;
+    },
+    []
+  );
+  await client.bulk({ body, refresh: 'true' });
 }

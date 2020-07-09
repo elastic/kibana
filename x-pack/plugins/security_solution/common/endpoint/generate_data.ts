@@ -306,7 +306,7 @@ type TreeOptionDefaults = Required<TreeOptions>;
  *
  * @param options tree options for defining the structure of the tree
  */
-export function getTreeOptionsWithDef(options?: TreeOptions): TreeOptionDefaults {
+function getTreeOptionsWithDef(options?: TreeOptions): TreeOptionDefaults {
   return {
     ancestors: options?.ancestors ?? 3,
     generations: options?.generations ?? 2,
@@ -723,11 +723,8 @@ export class EndpointDocGenerator {
    * @param percentTerminated - percent of nodes which will have process termination events
    * @param alwaysGenMaxChildrenPerNode - flag to always return the max children per node instead of it being a random number of children
    */
-  public *alertsGenerator(numAlerts: number, options: TreeOptions = {}) {
-    const opts = getTreeOptionsWithDef(options);
-    for (let i = 0; i < numAlerts; i++) {
-      yield* this.fullResolverTreeGenerator(opts);
-    }
+  public alertsGenerator(options: TreeOptions = {}) {
+    return this.fullResolverTreeGenerator(getTreeOptionsWithDef(options));
   }
 
   /**
