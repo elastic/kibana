@@ -8,7 +8,6 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSwitch,
@@ -169,7 +168,7 @@ export const PackageConfigInputPanel: React.FunctionComponent<{
             <EuiFlexItem key={index}>
               <PackageConfigInputStreamConfig
                 packageInputStream={packageInputStream}
-                packageConfigInputStream={packageConfigInputStream}
+                packageConfigInputStream={packageConfigInputStream!}
                 updatePackageConfigInputStream={(
                   updatedStream: Partial<PackageConfigInputStream>
                 ) => {
@@ -199,7 +198,7 @@ export const PackageConfigInputPanel: React.FunctionComponent<{
                   updatePackageConfigInput(updatedInput);
                 }}
                 inputStreamValidationResults={
-                  inputValidationResults.streams![packageConfigInputStream.id]
+                  inputValidationResults.streams![packageConfigInputStream!.id]
                 }
                 forceShowErrors={forceShowErrors}
               />

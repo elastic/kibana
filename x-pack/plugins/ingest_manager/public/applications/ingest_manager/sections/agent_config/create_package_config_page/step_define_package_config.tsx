@@ -6,8 +6,6 @@
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiFlexGrid,
-  EuiFlexItem,
   EuiFormRow,
   EuiFieldText,
   EuiButtonEmpty,

@@ -4,19 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState, Fragment } from 'react';
-import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiTextColor,
   EuiSpacer,
   EuiButtonEmpty,
-  EuiTitle,
   EuiIconTip,
-  EuiHorizontalRule,
 } from '@elastic/eui';
 import { PackageConfigInput, RegistryVarsEntry } from '../../../../types';
 import {

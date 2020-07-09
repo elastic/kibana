@@ -16,7 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { WithHeaderLayout } from '../../../../layouts';
-import { AgentConfig, PackageConfig, PackageInfo } from '../../../../types';
+import { AgentConfig, PackageInfo } from '../../../../types';
 import { PackageIcon } from '../../../../components/package_icon';
 import { CreatePackageConfigFrom } from '../types';
 
@@ -143,6 +143,7 @@ export const CreatePackageConfigPageLayout: React.FunctionComponent<{
         </EuiFlexItem>
       </EuiFlexGroup>
     );
+
     const rightColumn =
       agentConfig && (from === 'config' || from === 'edit') ? (
         <EuiDescriptionList className="eui-textRight" textStyle="reverse">
@@ -154,7 +155,7 @@ export const CreatePackageConfigPageLayout: React.FunctionComponent<{
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription>{agentConfig?.name || '-'}</EuiDescriptionListDescription>
         </EuiDescriptionList>
-      ) : null;
+      ) : undefined;
 
     const maxWidth = 770;
     return (
