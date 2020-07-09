@@ -19,9 +19,10 @@ const paginationCursorRT = rt.tuple([
 
 export type PaginationCursor = rt.TypeOf<typeof paginationCursorRT>;
 
-const logRateAnomalyTypeRT = rt.literal('logRate');
-const logCategorisationAnomalyTypeRT = rt.literal('logCategory');
-export const anomalyTypeRT = rt.union([logRateAnomalyTypeRT, logCategorisationAnomalyTypeRT]);
+export const anomalyTypeRT = rt.keyof({
+  'logRate': null,
+  'logCategory': null,
+});
 
 const logEntryAnomalyRT = rt.type({
   id: rt.string,
