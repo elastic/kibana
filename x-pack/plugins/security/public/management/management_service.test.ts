@@ -8,7 +8,6 @@ import { BehaviorSubject } from 'rxjs';
 import {
   ManagementApp,
   ManagementSetup,
-  ManagementStart,
   DefinedSections,
 } from '../../../../../src/plugins/management/public';
 import { SecurityLicenseFeatures } from '../../common/licensing/license_features';
@@ -35,7 +34,7 @@ describe('ManagementService', () => {
         sections: {
           register: jest.fn(),
           section: {} as DefinedSections,
-          getSection: jest.fn().mockReturnValue(mockSection),
+          // getSection: jest.fn().mockReturnValue(mockSection),
         },
       };
 
@@ -92,7 +91,7 @@ describe('ManagementService', () => {
         sections: {
           register: jest.fn(),
           section: {} as DefinedSections,
-          getSection: jest.fn().mockReturnValue(mockSection),
+          // getSection: jest.fn().mockReturnValue(mockSection),
         },
       };
 
@@ -126,16 +125,7 @@ describe('ManagementService', () => {
         [roleMappingsManagementApp.id, getMockedApp()],
       ] as Array<[string, jest.Mocked<ManagementApp>]>);
 
-      const managementStart: ManagementStart = {
-        sections: {
-          section: {} as DefinedSections,
-          getSectionsEnabled: jest.fn(),
-        },
-      };
-
-      service.start({
-        management: managementStart,
-      });
+      service.start();
 
       return {
         mockApps,

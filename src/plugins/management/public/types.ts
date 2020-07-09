@@ -35,11 +35,12 @@ export interface DefinedSections {
   stack: ManagementSection;
 }
 
-export interface ManagementStart {
-  sections: {
-    section: DefinedSections;
-    getSectionsEnabled: () => ManagementSection[];
-  };
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ManagementStart {}
+
+export interface ManagementSectionsStartPrivate {
+  // section: DefinedSections;
+  getSectionsEnabled: () => ManagementSection[];
 }
 
 export interface SectionsServiceStartDeps {
@@ -49,15 +50,14 @@ export interface SectionsServiceStartDeps {
 export interface SectionsServiceSetup {
   register: (args: Omit<RegisterManagementSectionArgs, 'capabilities'>) => ManagementSection;
   section: DefinedSections;
-  getSection: (sectionId: ManagementSectionId | string) => ManagementSection;
+  // getSection: (sectionId: ManagementSectionId | string) => ManagementSection;
 }
 
 export interface SectionsServiceStart {
-  getSection: (sectionId: ManagementSectionId | string) => ManagementSection;
-  getAllSections: () => ManagementSection[];
+  // getSection: (sectionId: ManagementSectionId | string) => ManagementSection;
+  // getAllSections: () => ManagementSection[];
   getSectionsEnabled: () => ManagementSection[];
-
-  section: DefinedSections;
+  // section: DefinedSections;
 }
 
 export enum ManagementSectionId {

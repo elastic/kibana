@@ -20,12 +20,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import { EuiPage } from '@elastic/eui';
-import { ManagementStart } from '../../types';
 import { ManagementSection, MANAGEMENT_BREADCRUMB } from '../../utils';
 
 import { ManagementRouter } from './management_router';
 import { ManagementSidebarNav } from '../management_sidebar_nav';
 import { reactRouterNavigate } from '../../../../kibana_react/public';
+import { SectionsServiceStart } from '../../types';
 
 import './management_app.scss';
 
@@ -36,7 +36,7 @@ interface ManagementAppProps {
 }
 
 export interface ManagementAppDependencies {
-  management: ManagementStart;
+  sections: SectionsServiceStart;
   kibanaVersion: string;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
 }
@@ -67,8 +67,8 @@ export const ManagementApp = ({ dependencies, history }: ManagementAppProps) => 
   );
 
   useEffect(() => {
-    setSections(dependencies.management.sections.getSectionsEnabled());
-  }, [dependencies.management.sections]);
+    setSections(dependencies.sections.getSectionsEnabled());
+  }, [dependencies.sections]);
 
   if (!sections) {
     return null;

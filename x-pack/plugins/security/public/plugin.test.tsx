@@ -7,7 +7,6 @@
 import { Observable } from 'rxjs';
 import BroadcastChannel from 'broadcast-channel';
 import { CoreSetup } from 'src/core/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { SessionTimeout } from './session';
 import { PluginStartDependencies, SecurityPlugin } from './plugin';
 
@@ -15,7 +14,6 @@ import { coreMock } from '../../../../src/core/public/mocks';
 import { managementPluginMock } from '../../../../src/plugins/management/public/mocks';
 import { licensingMock } from '../../licensing/public/mocks';
 import { ManagementService } from './management';
-import { FeaturesPluginStart } from '../../features/public';
 
 describe('Security Plugin', () => {
   beforeAll(() => {
@@ -84,12 +82,7 @@ describe('Security Plugin', () => {
         { licensing: licensingMock.createSetup() }
       );
 
-      expect(
-        plugin.start(coreMock.createStart({ basePath: '/some-base-path' }), {
-          data: {} as DataPublicPluginStart,
-          features: {} as FeaturesPluginStart,
-        })
-      ).toBeUndefined();
+      expect(plugin.start(coreMock.createStart({ basePath: '/some-base-path' }))).toBeUndefined();
     });
 
     it('starts Management Service if `management` plugin is available', () => {
@@ -110,11 +103,7 @@ describe('Security Plugin', () => {
         }
       );
 
-      plugin.start(coreMock.createStart({ basePath: '/some-base-path' }), {
-        data: {} as DataPublicPluginStart,
-        features: {} as FeaturesPluginStart,
-        management: managementStartMock,
-      });
+      plugin.start(coreMock.createStart({ basePath: '/some-base-path' }));
 
       expect(startManagementServiceMock).toHaveBeenCalledTimes(1);
       expect(startManagementServiceMock).toHaveBeenCalledWith({ management: managementStartMock });
@@ -140,10 +129,7 @@ describe('Security Plugin', () => {
         { licensing: licensingMock.createSetup() }
       );
 
-      plugin.start(coreMock.createStart({ basePath: '/some-base-path' }), {
-        data: {} as DataPublicPluginStart,
-        features: {} as FeaturesPluginStart,
-      });
+      plugin.start(coreMock.createStart({ basePath: '/some-base-path' }));
 
       expect(() => plugin.stop()).not.toThrow();
     });

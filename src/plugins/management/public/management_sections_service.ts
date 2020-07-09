@@ -30,15 +30,25 @@ import {
 import {
   ManagementSectionId,
   SectionsServiceSetup,
-  SectionsServiceStart,
+  // SectionsServiceStart,
   SectionsServiceStartDeps,
   DefinedSections,
+  ManagementSectionsStartPrivate,
 } from './types';
+import { createGetterSetter } from '../../kibana_utils/public';
+
+const [getSectionsServiceStartPrivate, setSectionsServiceStartPrivate] = createGetterSetter<
+  ManagementSectionsStartPrivate
+>('SectionsServiceStartPrivate');
+
+export { getSectionsServiceStartPrivate };
 
 export class ManagementSectionsService {
   definedSections: DefinedSections;
 
   constructor() {
+    // Note on adding sections - sections can be defined in a plugin and exported as a contract
+    //     It is not necessary to define all sections here.
     this.definedSections = {
       ingest: this.registerSection({
         id: IngestSection.id,
@@ -74,8 +84,10 @@ export class ManagementSectionsService {
   }
   private sections: Map<ManagementSectionId | string, ManagementSection> = new Map();
 
+  /*
   private getSection = (sectionId: ManagementSectionId | string) =>
     this.sections.get(sectionId) as ManagementSection;
+    */
 
   private getAllSections = () => [...this.sections.values()];
 
@@ -93,14 +105,14 @@ export class ManagementSectionsService {
   setup(): SectionsServiceSetup {
     return {
       register: this.registerSection,
-      getSection: this.getSection,
+      // getSection: this.getSection,
       section: {
         ...this.definedSections,
       },
     };
   }
 
-  start({ capabilities }: SectionsServiceStartDeps): SectionsServiceStart {
+  start({ capabilities }: SectionsServiceStartDeps) {
     this.getAllSections().forEach((section) => {
       if (capabilities.management.hasOwnProperty(section.id)) {
         const sectionCapabilities = capabilities.management[section.id];
@@ -112,13 +124,21 @@ export class ManagementSectionsService {
       }
     });
 
+    // const [getSections, setSections] = createGetterSetter('Sections');
+    setSectionsServiceStartPrivate({
+      getSectionsEnabled: () => this.getAllSections().filter((section) => section.enabled),
+    });
+
+    // wish to remove these
     return {
+      /*
       getSection: this.getSection,
       getAllSections: this.getAllSections,
       getSectionsEnabled: () => this.getAllSections().filter((section) => section.enabled),
       section: {
         ...this.definedSections,
       },
+      */
     };
   }
 }

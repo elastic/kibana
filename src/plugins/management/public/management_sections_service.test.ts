@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import { ManagementSectionsService } from './management_sections_service';
+import {
+  ManagementSectionsService,
+  getSectionsServiceStartPrivate,
+} from './management_sections_service';
 
 describe('ManagementService', () => {
   let managementService: ManagementSectionsService;
@@ -34,15 +37,10 @@ describe('ManagementService', () => {
 
   test('Provides default sections', () => {
     managementService.setup();
-    const start = managementService.start({ capabilities });
+    managementService.start({ capabilities });
+    const start = getSectionsServiceStartPrivate();
 
-    expect(start.getAllSections().length).toEqual(6);
-    expect(start.section.ingest).toBeDefined();
-    expect(start.section.data).toBeDefined();
-    expect(start.section.insightsAndAlerting).toBeDefined();
-    expect(start.section.security).toBeDefined();
-    expect(start.section.kibana).toBeDefined();
-    expect(start.section.stack).toBeDefined();
+    expect(start.getSectionsEnabled().length).toEqual(6);
   });
 
   test('Register section, enable and disable', () => {
@@ -50,10 +48,11 @@ describe('ManagementService', () => {
     const setup = managementService.setup();
     const testSection = setup.register({ id: 'test-section', title: 'Test Section' });
 
-    expect(setup.getSection('test-section')).not.toBeUndefined();
+    expect(testSection).not.toBeUndefined();
 
     // Start phase:
-    const start = managementService.start({ capabilities });
+    managementService.start({ capabilities });
+    const start = getSectionsServiceStartPrivate();
 
     expect(start.getSectionsEnabled().length).toEqual(7);
 
@@ -70,7 +69,7 @@ describe('ManagementService', () => {
     testSection.registerApp({ id: 'test-app-2', title: 'Test App 2', mount: jest.fn() });
     testSection.registerApp({ id: 'test-app-3', title: 'Test App 3', mount: jest.fn() });
 
-    expect(setup.getSection('test-section')).not.toBeUndefined();
+    expect(testSection).not.toBeUndefined();
 
     // Start phase:
     managementService.start({

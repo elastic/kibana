@@ -18,8 +18,9 @@
  */
 
 import { ManagementSetup, ManagementStart, DefinedSections } from '../types';
-import { ManagementSection } from '../index';
+// import { ManagementSection } from '../index';
 
+/*
 const createManagementSectionMock = () =>
   (({
     disable: jest.fn(),
@@ -28,11 +29,12 @@ const createManagementSectionMock = () =>
     getApp: jest.fn(),
     getEnabledItems: jest.fn().mockReturnValue([]),
   } as unknown) as ManagementSection);
+  */
 
 const createSetupContract = (): ManagementSetup => ({
   sections: {
     register: jest.fn(),
-    getSection: jest.fn().mockReturnValue(createManagementSectionMock()),
+    // getSection: jest.fn().mockReturnValue(createManagementSectionMock()),
     section: ({} as unknown) as DefinedSections,
   },
 });

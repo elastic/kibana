@@ -29,7 +29,10 @@ import {
   AppMountParameters,
 } from '../../../core/public';
 
-import { ManagementSectionsService } from './management_sections_service';
+import {
+  ManagementSectionsService,
+  getSectionsServiceStartPrivate,
+} from './management_sections_service';
 
 interface ManagementSetupDependencies {
   home: HomePublicPluginSetup;
@@ -67,11 +70,11 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
       category: DEFAULT_APP_CATEGORIES.management,
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');
-        const [coreStart, , selfStart] = await core.getStartServices();
+        const [coreStart] = await core.getStartServices();
 
         return renderApp(params, {
+          sections: getSectionsServiceStartPrivate(),
           kibanaVersion,
-          management: selfStart as ManagementStart,
           setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
         });
       },
@@ -83,6 +86,8 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
   }
 
   public start(core: CoreStart) {
+    this.managementSections.start({ capabilities: core.application.capabilities });
+    /*
     const service = this.managementSections.start({ capabilities: core.application.capabilities });
 
     return {
@@ -91,5 +96,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
         getSectionsEnabled: service.getSectionsEnabled,
       },
     };
+    */
+    return {};
   }
 }
