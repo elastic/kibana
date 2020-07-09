@@ -22,6 +22,7 @@ import {
   TRANSACTION_REQUEST,
   TRANSACTION_PAGE_LOAD,
 } from '../../../common/transaction_types';
+import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 
 interface Options {
   setup: Setup & SetupTimeRange;
@@ -42,11 +43,22 @@ export async function getServiceMapServiceNodeInfo({
 }: Options & { serviceName: string; environment?: string }) {
   const { start, end } = setup;
 
+  const environmentNotDefinedFilter = {
+    bool: { must_not: [{ exists: { field: SERVICE_ENVIRONMENT } }] },
+  };
+
   const filter: ESFilter[] = [
     { range: rangeFilter(start, end) },
     { term: { [SERVICE_NAME]: serviceName } },
-    ...(environment ? [{ term: { [SERVICE_ENVIRONMENT]: environment } }] : []),
   ];
+
+  if (environment) {
+    filter.push(
+      environment === ENVIRONMENT_NOT_DEFINED
+        ? environmentNotDefinedFilter
+        : { term: { [SERVICE_ENVIRONMENT]: environment } }
+    );
+  }
 
   const minutes = Math.abs((end - start) / (1000 * 60));
 
