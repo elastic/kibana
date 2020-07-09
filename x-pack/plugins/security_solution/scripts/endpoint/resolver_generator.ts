@@ -129,14 +129,22 @@ async function main() {
   } = argv;
 
   const random = seedrandom(seed);
-  for (let i = 0; i < numHosts; i++) {
+
+  // For each host
+  for (let hostIndex = 0; hostIndex < numHosts; hostIndex++) {
+    // create a new generator instance
     const generator = new EndpointDocGenerator(random);
+
+    // generate and index host and policy documents
     await indexHostDocs(numDocs, client, metadataIndex, policyIndex, generator);
 
-    // build a resolver tree
+    // build a resolver tree with related events and related alerts
     const alertEventTree: GeneratedAlertTree = generator.generatedAlertTree(treeOptions);
 
-    // Index the ancestry and the alert event itself regardless of `alertsPerHost` limit
+    /**
+     * Index the ancestry and the alert event itself regardless of `alertsPerHost` limit.
+     * Otherwise the origin (aka trigger) alert event might not be indexed.
+     */
     const alertEvents = [...alertEventTree.ancestry, alertEventTree.alertEvent];
 
     // index additional events until `alertsPerHost` limit is reached
@@ -147,8 +155,11 @@ async function main() {
       alertEvents.push(event);
     }
 
+    // Index the alerts
     await indexAlerts(client, eventIndex, alertIndex, alertEvents);
   }
+
+  // refresh indices
   await client.indices.refresh({
     index: eventIndex,
   });
