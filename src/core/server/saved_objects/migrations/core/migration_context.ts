@@ -149,7 +149,7 @@ function createDestContext(
  * @param sourceMappings The mappings of index used as the migration source.
  * @returns The mappings that should be applied to the target index.
  */
-function disableUnknownTypeMappingFields(
+export function disableUnknownTypeMappingFields(
   activeMappings: IndexMapping,
   sourceMappings: IndexMapping
 ): IndexMapping {
