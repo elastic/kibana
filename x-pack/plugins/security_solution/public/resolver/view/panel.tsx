@@ -4,15 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, {
-  memo,
-  useCallback,
-  useMemo,
-  useContext,
-  useLayoutEffect,
-  useState,
-  useEffect,
-} from 'react';
+import React, { memo, useCallback, useMemo, useContext, useLayoutEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
 // eslint-disable-next-line import/no-nodejs-modules
@@ -205,21 +197,12 @@ const PanelContent = memo(function PanelContent() {
     return 'processListWithCounts';
   }, [uiSelectedEvent, crumbEvent, crumbId, graphableProcessEntityIds]);
 
-  useEffect(() => {
-    // dispatch `appDisplayedDifferentPanel` to sync state with which panel gets displayed
-    dispatch({
-      type: 'appDisplayedDifferentPanel',
-      payload: panelToShow,
-    });
-  }, [panelToShow, dispatch]);
-
-  const currentPanelView = useSelector(selectors.currentPanelView);
   const terminatedProcesses = useSelector(selectors.terminatedProcesses);
   const processEntityId = uiSelectedEvent ? event.entityId(uiSelectedEvent) : undefined;
   const isProcessTerminated = processEntityId ? terminatedProcesses.has(processEntityId) : false;
 
   const panelInstance = useMemo(() => {
-    if (currentPanelView === 'processDetails') {
+    if (panelToShow === 'processDetails') {
       return (
         <ProcessDetails
           processEvent={uiSelectedEvent!}
@@ -230,7 +213,7 @@ const PanelContent = memo(function PanelContent() {
       );
     }
 
-    if (currentPanelView === 'eventCountsForProcess') {
+    if (panelToShow === 'eventCountsForProcess') {
       return (
         <EventCountsForProcess
           processEvent={uiSelectedEvent!}
@@ -240,7 +223,7 @@ const PanelContent = memo(function PanelContent() {
       );
     }
 
-    if (currentPanelView === 'processEventListNarrowedByType') {
+    if (panelToShow === 'processEventListNarrowedByType') {
       return (
         <ProcessEventListNarrowedByType
           processEvent={uiSelectedEvent!}
@@ -251,7 +234,7 @@ const PanelContent = memo(function PanelContent() {
       );
     }
 
-    if (currentPanelView === 'relatedEventDetail') {
+    if (panelToShow === 'relatedEventDetail') {
       const parentCount: number = Object.values(
         relatedStatsForIdFromParams?.events.byCategory || {}
       ).reduce((sum, val) => sum + val, 0);
@@ -278,7 +261,7 @@ const PanelContent = memo(function PanelContent() {
     crumbId,
     pushToQueryParams,
     relatedStatsForIdFromParams,
-    currentPanelView,
+    panelToShow,
     isProcessTerminated,
   ]);
 

@@ -182,6 +182,11 @@ export const addProviderToTimeline = ({
   }
 };
 
+const linkFields: Record<string, string> = {
+  'signal.rule.name': 'signal.rule.id',
+  'event.module': 'rule.reference',
+};
+
 export const addFieldToTimelineColumns = ({
   upsertColumn = timelineActions.upsertColumn,
   browserFields,
@@ -202,6 +207,7 @@ export const addFieldToTimelineColumns = ({
           description: isString(column.description) ? column.description : undefined,
           example: isString(column.example) ? column.example : undefined,
           id: fieldId,
+          linkField: linkFields[fieldId] ?? undefined,
           type: column.type,
           aggregatable: column.aggregatable,
           width: DEFAULT_COLUMN_MIN_WIDTH,
