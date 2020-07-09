@@ -173,7 +173,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<LogEntryRateRes
 
   useEffect(() => {
     getLogEntryRate();
-  }, [getLogEntryRate, getLogEntryAnomalies, queryTimeRange.lastChangedTime]);
+  }, [getLogEntryRate, queryTimeRange.lastChangedTime]);
 
   useEffect(() => {
     fetchModuleDefinition();

@@ -7,7 +7,7 @@
 import * as rt from 'io-ts';
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 import {
-  createJobIdFilters,
+  createJobIdsFilters,
   createTimeRangeFilters,
   createResultTypeFilters,
   defaultRequestParameters,
@@ -34,7 +34,7 @@ export const createLogEntryAnomaliesQuery = (
   const { pageSize } = pagination;
 
   const filters = [
-    ...createJobIdFilters(jobIds),
+    ...createJobIdsFilters(jobIds),
     ...createTimeRangeFilters(startTime, endTime),
     ...createResultTypeFilters(['record']),
   ];
