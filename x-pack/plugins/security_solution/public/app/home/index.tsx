@@ -18,7 +18,6 @@ import { useWithSource } from '../../common/containers/source';
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 import { navTabs } from './home_navigations';
 import { useSignalIndex } from '../../alerts/containers/detection_engine/alerts/use_signal_index';
-import { NO_ALERT_INDEX } from '../../../common/constants';
 
 const WrappedByAutoSizer = styled.div`
   height: 100%;
@@ -59,11 +58,11 @@ export const HomePage: React.FC<HomePageProps> = ({ children }) => {
   );
   const { signalIndexExists, signalIndexName } = useSignalIndex();
 
-  const indexToAdd = useMemo<string[]>(() => {
+  const indexToAdd = useMemo<string[] | null>(() => {
     if (signalIndexExists && signalIndexName != null) {
       return [signalIndexName];
     }
-    return [NO_ALERT_INDEX]; // Following index does not exist so we won't show any events;
+    return null;
   }, [signalIndexExists, signalIndexName]);
 
   const [showTimeline] = useShowTimeline();
