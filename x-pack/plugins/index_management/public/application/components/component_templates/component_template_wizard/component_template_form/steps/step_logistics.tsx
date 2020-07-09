@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -44,26 +44,28 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       options: { stripEmptyFields: false },
     });
 
+    const { isValid: isFormValid, submit, getFormData, subscribe } = form;
+
     const { documentation } = useComponentTemplatesContext();
 
     const [isMetaVisible, setIsMetaVisible] = useState<boolean>(
       Boolean(defaultValue._meta && Object.keys(defaultValue._meta).length)
     );
 
-    const validate = async () => {
-      return (await form.submit()).isValid;
-    };
+    const validate = useCallback(async () => {
+      return (await submit()).isValid;
+    }, [submit]);
 
     useEffect(() => {
       onChange({
-        isValid: form.isValid,
+        isValid: isFormValid,
         validate,
-        getData: form.getFormData,
+        getData: getFormData,
       });
-    }, [form.isValid, onChange]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [isFormValid, getFormData, validate, onChange]);
 
     useEffect(() => {
-      const subscription = form.subscribe(({ data, isValid }) => {
+      const subscription = subscribe(({ data, isValid }) => {
         onChange({
           isValid,
           validate,
@@ -71,7 +73,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
         });
       });
       return subscription.unsubscribe;
-    }, [onChange]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [subscribe, validate, onChange]);
 
     return (
       <Form form={form} data-test-subj="stepLogistics">
