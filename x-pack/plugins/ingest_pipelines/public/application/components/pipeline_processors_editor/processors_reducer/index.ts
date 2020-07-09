@@ -12,6 +12,6 @@ export {
   Action,
 } from './processors_reducer';
 
-export { ON_FAILURE_STATE_SCOPE, PROCESSOR_STATE_SCOPE } from './constants';
+export * from './constants';
 
 export { isChildPath, isOnFailureSelector } from './utils';
