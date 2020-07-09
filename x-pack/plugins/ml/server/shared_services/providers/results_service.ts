@@ -7,6 +7,7 @@
 import { LegacyAPICaller, KibanaRequest } from 'kibana/server';
 import { resultsServiceProvider } from '../../models/results_service';
 import { SharedServicesChecks } from '../shared_services';
+import { HasMlCapabilities } from '../../lib/capabilities';
 
 type OrigResultsServiceProvider = ReturnType<typeof resultsServiceProvider>;
 
@@ -25,12 +26,21 @@ export function getResultsServiceProvider({
 }: SharedServicesChecks): ResultsServiceProvider {
   return {
     resultsServiceProvider(callAsCurrentUser: LegacyAPICaller, request: KibanaRequest) {
-      // const hasMlCapabilities = getHasMlCapabilities(request);
+      let hasMlCapabilities: HasMlCapabilities;
+      //  Uptime is using this service in anomaly alert, kibana alerting doesn't provide request object
+      // So we are adding a dummy request for now
+      // TODO: Remove this once kibana alerting provides request object
+      if (request.params !== 'DummyKibanaRequest') {
+        hasMlCapabilities = getHasMlCapabilities(request);
+      }
       const { getAnomaliesTableData } = resultsServiceProvider(callAsCurrentUser);
       return {
         async getAnomaliesTableData(...args) {
           isFullLicense();
-          // await hasMlCapabilities(['canGetJobs']);
+          if (hasMlCapabilities) {
+            await hasMlCapabilities(['canGetJobs']);
+          }
+
           return getAnomaliesTableData(...args);
         },
       };

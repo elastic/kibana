@@ -40,7 +40,9 @@ const getAnomalies = async (
   params: Record<any, any>,
   lastCheckedAt: string
 ) => {
-  const { getAnomaliesTableData } = plugins.ml.resultsServiceProvider(callCluster, {} as any);
+  const { getAnomaliesTableData } = plugins.ml.resultsServiceProvider(callCluster, {
+    params: 'DummyKibanaRequest',
+  } as any);
 
   return await getAnomaliesTableData(
     [getMLJobId(params.monitorId)],
@@ -48,7 +50,7 @@ const getAnomalies = async (
     [],
     'auto',
     params.severity,
-    moment(lastCheckedAt).valueOf(),
+    moment(lastCheckedAt).subtract(15, 'days').valueOf(),
     moment().valueOf(),
     Intl.DateTimeFormat().resolvedOptions().timeZone,
     500,
