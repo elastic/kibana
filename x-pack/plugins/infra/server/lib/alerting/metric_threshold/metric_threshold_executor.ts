@@ -77,7 +77,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
       }
       if (reason) {
         const firstResult = first(alertResults);
-        const timestamp = firstResult ? firstResult[group].timestamp : moment().toISOString();
+        const timestamp = (firstResult && firstResult[group].timestamp) ?? moment().toISOString();
         alertInstance.scheduleActions(FIRED_ACTIONS.id, {
           group,
           alertState: stateToAlertMessage[nextState],
