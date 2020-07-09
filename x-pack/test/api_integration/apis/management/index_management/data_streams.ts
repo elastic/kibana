@@ -53,16 +53,14 @@ export default function ({ getService }: FtrProviderContext) {
     await deleteComposableIndexTemplate(name);
   };
 
-  // Failing ES Promotion: https://github.com/elastic/kibana/issues/71018
-  describe.skip('Data streams', function () {
+  describe('Data streams', function () {
     describe('Get', () => {
       const testDataStreamName = 'test-data-stream';
 
       before(async () => await createDataStream(testDataStreamName));
       after(async () => await deleteDataStream(testDataStreamName));
 
-      // TODO: Unskip once promotion issue has been resolved: https://github.com/elastic/kibana/issues/71018
-      it.skip('returns an array of all data streams', async () => {
+      it('returns an array of all data streams', async () => {
         const { body: dataStreams } = await supertest
           .get(`${API_BASE_PATH}/data_streams`)
           .set('kbn-xsrf', 'xxx')
@@ -85,8 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
       });
 
-      // TODO: Unskip once promotion issue has been resolved: https://github.com/elastic/kibana/issues/71018
-      it.skip('returns a single data stream by ID', async () => {
+      it('returns a single data stream by ID', async () => {
         const { body: dataStream } = await supertest
           .get(`${API_BASE_PATH}/data_streams/${testDataStreamName}`)
           .set('kbn-xsrf', 'xxx')
