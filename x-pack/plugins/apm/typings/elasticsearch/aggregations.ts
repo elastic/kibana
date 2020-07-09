@@ -150,6 +150,7 @@ export interface AggregationOptionsByType {
     field: string;
     values: string[];
     keyed?: boolean;
+    hdr?: { number_of_significant_value_digits: number };
   };
 }
 
