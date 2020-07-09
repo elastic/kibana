@@ -48,7 +48,10 @@ import {
   annotationsRefresh$,
   annotationsRefreshed,
 } from '../../../services/annotations_service';
-import { ANNOTATION_EVENT_USER } from '../../../../../common/constants/annotations';
+import {
+  ANNOTATION_EVENT_USER,
+  ANNOTATION_EVENT_DELAYED_DATA,
+} from '../../../../../common/constants/annotations';
 
 const CURRENT_SERIES = 'current_series';
 /**
@@ -67,7 +70,7 @@ export class AnnotationsTable extends Component {
     this.state = {
       annotations: [],
       isLoading: false,
-      queryText: `event:(${ANNOTATION_EVENT_USER})`,
+      queryText: `event:(${ANNOTATION_EVENT_USER} or ${ANNOTATION_EVENT_DELAYED_DATA})`,
       searchError: undefined,
       jobId:
         Array.isArray(this.props.jobs) &&
@@ -551,39 +554,70 @@ export class AnnotationsTable extends Component {
       });
     }
 
-    columns.push({
-      field: 'partition_field_value',
-      name: i18n.translate('xpack.ml.annotationsTable.partitionColumnName', {
-        defaultMessage: 'Partition',
-      }),
-      sortable: true,
-    });
-    columns.push({
-      field: 'over_field_value',
-      name: i18n.translate('xpack.ml.annotationsTable.overColumnName', {
-        defaultMessage: 'Over',
-      }),
-      sortable: true,
-    });
-
-    columns.push({
-      field: 'by_field_value',
-      name: i18n.translate('xpack.ml.annotationsTable.byColumnName', {
-        defaultMessage: 'By',
-      }),
-      sortable: true,
-    });
-
     if (
       this.props.chartDetails?.entityData?.entities &&
       this.props.chartDetails?.entityData?.entities.length > 0
     ) {
+      // only show the column if the field exists in that job in SMV
+      this.props.chartDetails?.entityData?.entities.forEach((entity) => {
+        if (entity.fieldType === 'partition_field') {
+          columns.push({
+            field: 'partition_field_value',
+            name: i18n.translate('xpack.ml.annotationsTable.partitionSMVColumnName', {
+              defaultMessage: 'Partition',
+            }),
+            sortable: true,
+          });
+        }
+        if (entity.fieldType === 'over_field') {
+          columns.push({
+            field: 'over_field_value',
+            name: i18n.translate('xpack.ml.annotationsTable.overColumnSMVName', {
+              defaultMessage: 'Over',
+            }),
+            sortable: true,
+          });
+        }
+        if (entity.fieldType === 'by_field') {
+          columns.push({
+            field: 'over_field_value',
+            name: i18n.translate('xpack.ml.annotationsTable.byColumnSMVName', {
+              defaultMessage: 'By',
+            }),
+            sortable: true,
+          });
+        }
+      });
       filters.push({
         type: 'is',
         field: CURRENT_SERIES,
         name: i18n.translate('xpack.ml.annotationsTable.seriesOnlyFilterName', {
           defaultMessage: 'Filter to series',
         }),
+      });
+    } else {
+      // else show all the partition columns in AE because there might be multiple jobs
+      columns.push({
+        field: 'partition_field_value',
+        name: i18n.translate('xpack.ml.annotationsTable.partitionAEColumnName', {
+          defaultMessage: 'Partition',
+        }),
+        sortable: true,
+      });
+      columns.push({
+        field: 'over_field_value',
+        name: i18n.translate('xpack.ml.annotationsTable.overAEColumnName', {
+          defaultMessage: 'Over',
+        }),
+        sortable: true,
+      });
+
+      columns.push({
+        field: 'by_field_value',
+        name: i18n.translate('xpack.ml.annotationsTable.byAEColumnName', {
+          defaultMessage: 'By',
+        }),
+        sortable: true,
       });
     }
     const search = {
