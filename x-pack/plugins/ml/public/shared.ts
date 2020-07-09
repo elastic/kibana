@@ -22,3 +22,4 @@ export * from './application/data_frame_analytics/common';
 export * from './application/util/date_utils';
 
 export { DataLoader } from './application/datavisualizer/index_based/data_loader';
+export { clearCache, setDependencyCache } from './application/util/dependency_cache';
