@@ -39,6 +39,7 @@ import {
 import { getAnalyticsFactory } from '../../services/analytics_service';
 import { getTaskStateBadge, getJobTypeBadge, useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
+import { stringMatch } from '../../../../../util/string_utils';
 import {
   ProgressBar,
   mlInMemoryTableFactory,
@@ -63,14 +64,6 @@ function getItemIdToExpandedRowMap(
     }
     return m;
   }, {} as ItemIdToExpandedRowMap);
-}
-
-function stringMatch(str: string | undefined, substr: any) {
-  return (
-    typeof str === 'string' &&
-    typeof substr === 'string' &&
-    (str.toLowerCase().match(substr.toLowerCase()) === null) === false
-  );
 }
 
 const MlInMemoryTable = mlInMemoryTableFactory<DataFrameAnalyticsListRow>();
