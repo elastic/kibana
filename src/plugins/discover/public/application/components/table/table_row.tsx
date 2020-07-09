@@ -90,7 +90,6 @@ export function DocViewTableRow({
         <FieldName
           fieldName={field}
           fieldType={fieldType}
-          useShortDots={true}
           fieldIconProps={{ fill: 'none', color: 'gray' }}
           scripted={Boolean(fieldMapping?.scripted)}
         />
