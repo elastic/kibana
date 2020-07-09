@@ -31,7 +31,7 @@ export const createManagementSectionMock = () =>
 
 const createSetupContract = (): ManagementSetup => ({
   sections: {
-    register: jest.fn(),
+    register: jest.fn(() => createManagementSectionMock()),
     section: ({
       kibana: createManagementSectionMock(),
     } as unknown) as DefinedSections,

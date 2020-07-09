@@ -7,6 +7,7 @@
 import { Observable } from 'rxjs';
 import BroadcastChannel from 'broadcast-channel';
 import { CoreSetup } from 'src/core/public';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { SessionTimeout } from './session';
 import { PluginStartDependencies, SecurityPlugin } from './plugin';
 
@@ -14,6 +15,7 @@ import { coreMock } from '../../../../src/core/public/mocks';
 import { managementPluginMock } from '../../../../src/plugins/management/public/mocks';
 import { licensingMock } from '../../licensing/public/mocks';
 import { ManagementService } from './management';
+import { FeaturesPluginStart } from '../../features/public';
 
 describe('Security Plugin', () => {
   beforeAll(() => {
@@ -31,7 +33,10 @@ describe('Security Plugin', () => {
           coreMock.createSetup({ basePath: '/some-base-path' }) as CoreSetup<
             PluginStartDependencies
           >,
-          { licensing: licensingMock.createSetup() }
+          {
+            licensing: licensingMock.createSetup(),
+            // management: managementPluginMock.createSetupContract(),
+          }
         )
       ).toEqual({
         __legacyCompat: { logoutUrl: '/some-base-path/logout', tenant: '/some-base-path' },
@@ -82,7 +87,12 @@ describe('Security Plugin', () => {
         { licensing: licensingMock.createSetup() }
       );
 
-      expect(plugin.start(coreMock.createStart({ basePath: '/some-base-path' }))).toBeUndefined();
+      expect(
+        plugin.start(coreMock.createStart({ basePath: '/some-base-path' }), {
+          data: {} as DataPublicPluginStart,
+          features: {} as FeaturesPluginStart,
+        })
+      ).toBeUndefined();
     });
 
     it('starts Management Service if `management` plugin is available', () => {
@@ -103,10 +113,13 @@ describe('Security Plugin', () => {
         }
       );
 
-      plugin.start(coreMock.createStart({ basePath: '/some-base-path' }));
+      plugin.start(coreMock.createStart({ basePath: '/some-base-path' }), {
+        data: {} as DataPublicPluginStart,
+        features: {} as FeaturesPluginStart,
+        management: managementStartMock,
+      });
 
       expect(startManagementServiceMock).toHaveBeenCalledTimes(1);
-      expect(startManagementServiceMock).toHaveBeenCalledWith({ management: managementStartMock });
     });
   });
 
@@ -129,7 +142,10 @@ describe('Security Plugin', () => {
         { licensing: licensingMock.createSetup() }
       );
 
-      plugin.start(coreMock.createStart({ basePath: '/some-base-path' }));
+      plugin.start(coreMock.createStart({ basePath: '/some-base-path' }), {
+        data: {} as DataPublicPluginStart,
+        features: {} as FeaturesPluginStart,
+      });
 
       expect(() => plugin.stop()).not.toThrow();
     });

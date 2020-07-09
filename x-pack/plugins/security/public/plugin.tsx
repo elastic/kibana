@@ -18,7 +18,7 @@ import {
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../licensing/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
+import { ManagementSetup, ManagementStart } from '../../../../src/plugins/management/public';
 import {
   ISessionTimeout,
   SessionExpired,
@@ -42,6 +42,7 @@ export interface PluginSetupDependencies {
 export interface PluginStartDependencies {
   data: DataPublicPluginStart;
   features: FeaturesPluginStart;
+  management?: ManagementStart;
 }
 
 export class SecurityPlugin
@@ -135,11 +136,12 @@ export class SecurityPlugin
     };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, { management }: PluginStartDependencies) {
     this.sessionTimeout.start();
     this.navControlService.start({ core });
-
-    this.managementService.start();
+    if (management) {
+      this.managementService.start();
+    }
   }
 
   public stop() {
