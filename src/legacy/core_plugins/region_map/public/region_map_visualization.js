@@ -88,6 +88,9 @@ export function RegionMapsVisualizationProvider(Private, config, i18n, regionmap
       // Load the selected layer from the metadata-service.
       // Do not use the selectedLayer from the visState.
       // These settings are stored in the URL and can be used to inject dirty display content.
+      if (!fileLayerConfig) {
+        return;
+      }
 
       if (
         fileLayerConfig.isEMS || //Hosted by EMS. Metadata needs to be resolved through EMS
