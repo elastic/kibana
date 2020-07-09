@@ -66,11 +66,11 @@ export type GetLogEntryAnomaliesSuccessResponsePayload = rt.TypeOf<
   typeof getLogEntryAnomaliesSuccessReponsePayloadRT
 >;
 
-const sortOptions = rt.union([
-  rt.literal('anomalyScore'),
-  rt.literal('dataset'),
-  rt.literal('startTime'),
-]);
+const sortOptionsRT = rt.keyof({
+  'anomalyScore': null,
+  'dataset': null,
+  'startTime': null,
+});
 
 const sortDirections = rt.union([rt.literal('asc'), rt.literal('desc')]);
 
