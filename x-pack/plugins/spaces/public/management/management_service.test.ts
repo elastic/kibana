@@ -18,8 +18,10 @@ describe('ManagementService', () => {
       const mockKibanaSection = ({
         registerApp: jest.fn(),
       } as unknown) as ManagementSection;
+      const managementMockSetup = managementPluginMock.createSetupContract();
+      managementMockSetup.sections.section.kibana = mockKibanaSection;
       const deps = {
-        management: managementPluginMock.createSetupContract(),
+        management: managementMockSetup,
         getStartServices: coreMock.createSetup().getStartServices as CoreSetup<
           PluginsStart
         >['getStartServices'],
@@ -58,9 +60,11 @@ describe('ManagementService', () => {
       const mockKibanaSection = ({
         registerApp: jest.fn().mockReturnValue(mockSpacesManagementPage),
       } as unknown) as ManagementSection;
+      const managementMockSetup = managementPluginMock.createSetupContract();
+      managementMockSetup.sections.section.kibana = mockKibanaSection;
 
       const deps = {
-        management: managementPluginMock.createSetupContract(),
+        management: managementMockSetup,
         getStartServices: coreMock.createSetup().getStartServices as CoreSetup<
           PluginsStart
         >['getStartServices'],

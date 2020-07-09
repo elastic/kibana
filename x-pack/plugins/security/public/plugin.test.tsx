@@ -35,7 +35,6 @@ describe('Security Plugin', () => {
           >,
           {
             licensing: licensingMock.createSetup(),
-            // management: managementPluginMock.createSetupContract(),
           }
         )
       ).toEqual({
