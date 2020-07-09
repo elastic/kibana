@@ -208,7 +208,7 @@ export const MinAgeInput = (props) => {
           />
         </ErrableFormRow>
       </EuiFlexItem>
-      <EuiFlexItem style={{ maxWidth: 220 }}>
+      <EuiFlexItem style={{ maxWidth: 188 }}>
         <EuiFormRow hasEmptyLabelSpace>
           <EuiSelect
             aria-label={getUnitsAriaLabelForPhase(phase)}
