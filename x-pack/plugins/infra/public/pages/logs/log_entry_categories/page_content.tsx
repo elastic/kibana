@@ -50,13 +50,6 @@ export const LogEntryCategoriesPageContent = () => {
     }
   }, [fetchJobStatus, hasLogAnalysisReadCapabilities]);
 
-  // Open flyout if there are no ML jobs
-  useEffect(() => {
-    if (setupStatus.type === 'required' && setupStatus.reason === 'missing') {
-      openFlyout();
-    }
-  }, [setupStatus, openFlyout]);
-
   if (isLoading || isUninitialized) {
     return <SourceLoadingPage />;
   } else if (hasFailedLoadingSource) {
