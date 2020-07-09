@@ -199,7 +199,7 @@ export function getApmTelemetryMapping() {
           agent_configuration: tookProperties,
           agents: tookProperties,
           cardinality: tookProperties,
-          // cloud: tookProperties,
+          cloud: tookProperties,
           groupings: tookProperties,
           indices_stats: tookProperties,
           integrations: tookProperties,

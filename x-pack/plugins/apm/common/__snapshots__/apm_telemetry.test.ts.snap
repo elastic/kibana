@@ -847,6 +847,17 @@ exports[`APM telemetry helpers getApmTelemetryFullPath generates a JSON object w
                             }
                           }
                         },
+                        "cloud": {
+                          "properties": {
+                            "took": {
+                              "properties": {
+                                "ms": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
                         "groupings": {
                           "properties": {
                             "took": {
