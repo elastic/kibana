@@ -33,3 +33,17 @@ export const SIGNAL_POST_FAILURE = i18n.translate(
     defaultMessage: 'Failed to create signal index',
   }
 );
+
+export const LISTS_INDEX_FETCH_FAILURE = i18n.translate(
+  'xpack.securitySolution.containers.detectionEngine.alerts.fetchListsIndex.errorDescription',
+  {
+    defaultMessage: 'Failed to retrieve the lists index',
+  }
+);
+
+export const LISTS_INDEX_CREATE_FAILURE = i18n.translate(
+  'xpack.securitySolution.containers.detectionEngine.alerts.createListsIndex.errorDescription',
+  {
+    defaultMessage: 'Failed to create the lists index',
+  }
+);

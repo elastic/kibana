@@ -13,6 +13,7 @@ import { useUiSetting, useKibana } from './kibana_react';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { AuthenticatedUser } from '../../../../../security/common/model';
 import { convertToCamelCase } from '../../../cases/containers/utils';
+import { StartServices } from '../../../types';
 
 export const useDateFormat = (): string => useUiSetting<string>(DEFAULT_DATE_FORMAT);
 
@@ -124,3 +125,8 @@ export const useGetUserSavedObjectPermissions = () => {
 
   return savedObjectsPermissions;
 };
+
+export const useToasts = (): StartServices['notifications']['toasts'] =>
+  useKibana().services.notifications.toasts;
+
+export const useHttp = (): StartServices['http'] => useKibana().services.http;
