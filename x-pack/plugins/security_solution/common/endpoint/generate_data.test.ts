@@ -435,7 +435,7 @@ describe('data generator', () => {
       ancestors: alertAncestors,
       generations,
     });
-    const events = [...tree.ancestry, tree.alertEvent, ...generations];
+    const events = [...tree.ancestry, tree.alertEvent, ...tree.descendants];
     const rootNode = buildResolverTree(events);
     const visitedEvents = countResolverEvents(rootNode, alertAncestors + generations);
     expect(visitedEvents).toEqual(events.length);
