@@ -68,7 +68,7 @@ const DisplayList = memo(function DisplayList({
   processEntityId: string;
 }) {
   const relatedLookupsByCategory = useSelector(selectors.relatedEventInfoByEntityId);
-  const lookupsForThisNode = relatedLookupsByCategory.get(processEntityId);
+  const lookupsForThisNode = relatedLookupsByCategory(processEntityId);
   const shouldShowLimitWarning = lookupsForThisNode?.shouldShowLimitForCategory(eventType);
   const numberDisplayed = lookupsForThisNode?.numberActuallyDisplayedForCategory(eventType);
   const numberMissing = lookupsForThisNode?.numberNotDisplayedForCategory(eventType);

@@ -180,7 +180,7 @@ interface RelatedInfoFunctions {
 }
 export const relatedEventInfoByEntityId: (
   state: DataState
-) => Map<string, RelatedInfoFunctions> = createSelector(
+) => (entityID: string) => RelatedInfoFunctions | null = createSelector(
   relatedEventsByEntityId,
   relatedEventsStats,
   function selectLineageLimitInfo(
@@ -191,9 +191,13 @@ export const relatedEventInfoByEntityId: (
   ) {
     if (!relatedEventsStats) {
       // If there are no related event stats, there are no related event info objects
-      return new Map();
+      return (entityId: string) => null;
     }
-    const relatedEventInfoEntries = [...relatedEventsStats.entries()].map(([entityId, stats]) => {
+    return (entityId) => {
+      const stats = relatedEventsStats.get(entityId);
+      if (!stats) {
+        return null;
+      }
       const eventsResponseForThisEntry = relatedEventsByEntityId.get(entityId);
       const hasMoreEvents =
         eventsResponseForThisEntry && eventsResponseForThisEntry.nextEvent !== null;
@@ -268,13 +272,8 @@ export const relatedEventInfoByEntityId: (
         numberNotDisplayedForCategory,
         numberActuallyDisplayedForCategory,
       };
-
-      const entry: [string, typeof entryValue] = [entityId, entryValue];
-
-      return entry;
-    });
-
-    return new Map(relatedEventInfoEntries);
+      return entryValue;
+    };
   }
 );
 
