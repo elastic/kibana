@@ -210,7 +210,10 @@ export const importTimelines = async (
 
                   resolve(
                     createBulkErrorObject({
-                      id: savedObjectId ?? 'unknown',
+                      id:
+                        savedObjectId ?? templateTimelineId
+                          ? `(template_timeline_id) ${templateTimelineId}`
+                          : 'unknown',
                       statusCode: 409,
                       message,
                     })
@@ -220,7 +223,10 @@ export const importTimelines = async (
             } catch (err) {
               resolve(
                 createBulkErrorObject({
-                  id: savedObjectId ?? 'unknown',
+                  id:
+                    savedObjectId ?? templateTimelineId
+                      ? `(template_timeline_id) ${templateTimelineId}`
+                      : 'unknown',
                   statusCode: 400,
                   message: err.message,
                 })
