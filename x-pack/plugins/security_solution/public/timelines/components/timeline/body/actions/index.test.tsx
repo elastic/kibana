@@ -12,6 +12,7 @@ import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../constants';
 import * as i18n from '../translations';
 
 import { Actions } from '.';
+import { TimelineType } from '../../../../../../common/types/timeline';
 
 jest.mock('react-redux', () => {
   const origin = jest.requireActual('react-redux');
@@ -203,7 +204,7 @@ describe('Actions', () => {
     expect(toggleShowNotes).toBeCalled();
   });
 
-  test('it renders correct tooltip for NotesButton', () => {
+  test('it renders correct tooltip for NotesButton - timeline', () => {
     const toggleShowNotes = jest.fn();
 
     const wrapper = mount(
@@ -231,6 +232,43 @@ describe('Actions', () => {
     );
 
     expect(wrapper.find('[data-test-subj="add-note"]').prop('toolTip')).toEqual(i18n.NOTES_TOOLTIP);
+  });
+
+  test('it renders correct tooltip for NotesButton - timeline template', () => {
+    (useSelector as jest.Mock).mockReturnValue({
+      ...mockTimelineModel,
+      timelineType: TimelineType.template,
+    });
+    const toggleShowNotes = jest.fn();
+
+    const wrapper = mount(
+      <TestProviders>
+        <Actions
+          actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+          associateNote={jest.fn()}
+          checked={false}
+          expanded={false}
+          eventId="abc"
+          eventIsPinned={false}
+          getNotesByIds={jest.fn()}
+          loading={false}
+          loadingEventIds={[]}
+          noteIds={[]}
+          onEventToggled={jest.fn()}
+          onPinClicked={jest.fn()}
+          onRowSelected={jest.fn()}
+          showCheckboxes={false}
+          showNotes={false}
+          toggleShowNotes={toggleShowNotes}
+          updateNote={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="add-note"]').prop('toolTip')).toEqual(
+      i18n.NOTES_DISABLE_TOOLTIP
+    );
+    (useSelector as jest.Mock).mockReturnValue(mockTimelineModel);
   });
 
   test('it does NOT render a pin button when isEventViewer is true', () => {
