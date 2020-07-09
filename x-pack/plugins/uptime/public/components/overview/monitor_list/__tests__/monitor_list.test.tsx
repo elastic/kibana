@@ -104,6 +104,9 @@ describe('MonitorList component', () => {
     if (timestamp) {
       testBarSummary.state.timestamp = timestamp;
       testFooSummary.state.timestamp = timestamp;
+    } else {
+      testBarSummary.state.timestamp = '125';
+      testFooSummary.state.timestamp = '123';
     }
     return {
       nextPagePagination: null,
