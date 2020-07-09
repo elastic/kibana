@@ -14,7 +14,7 @@ import { EndpointAppContext } from '../../types';
 
 export const ManifestTaskConstants = {
   TIMEOUT: '1m',
-  TYPE: 'securitySolution:endpoint:exceptions-packager',
+  TYPE: 'endpoint:user-artifact-packager',
   VERSION: '1.0.0',
 };
 
@@ -88,20 +88,22 @@ export class ManifestTask {
       return;
     }
 
-    manifestManager
-      .refresh()
-      .then((wrappedManifest) => {
-        if (wrappedManifest) {
-          return manifestManager.dispatch(wrappedManifest);
-        }
-      })
-      .then((wrappedManifest) => {
-        if (wrappedManifest) {
-          return manifestManager.commit(wrappedManifest);
-        }
-      })
-      .catch((err) => {
-        this.logger.error(err);
-      });
+    try {
+      // get snapshot based on exception-list-agnostic SOs
+      // with diffs from last dispatched manifest
+      const snapshot = await manifestManager.getSnapshot();
+      if (snapshot && snapshot.diffs.length > 0) {
+        // create new artifacts
+        await manifestManager.syncArtifacts(snapshot, 'add');
+        // write to ingest-manager package config
+        await manifestManager.dispatch(snapshot.manifest);
+        // commit latest manifest state to user-artifact-manifest SO
+        await manifestManager.commit(snapshot.manifest);
+        // clean up old artifacts
+        await manifestManager.syncArtifacts(snapshot, 'delete');
+      }
+    } catch (err) {
+      this.logger.error(err);
+    }
   };
 }

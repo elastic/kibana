@@ -54,6 +54,8 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         type: { type: 'keyword' },
         active: { type: 'boolean' },
         enrolled_at: { type: 'date' },
+        unenrolled_at: { type: 'date' },
+        unenrollment_started_at: { type: 'date' },
         access_api_key_id: { type: 'keyword' },
         version: { type: 'keyword' },
         user_provided_metadata: { type: 'flattened' },
@@ -61,8 +63,8 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         config_id: { type: 'keyword' },
         last_updated: { type: 'date' },
         last_checkin: { type: 'date' },
+        last_checkin_status: { type: 'keyword' },
         config_revision: { type: 'integer' },
-        config_newest_revision: { type: 'integer' },
         default_api_key_id: { type: 'keyword' },
         default_api_key: { type: 'binary', index: false },
         updated_at: { type: 'date' },
@@ -119,8 +121,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
     },
     mappings: {
       properties: {
-        id: { type: 'keyword' },
-        name: { type: 'text' },
+        name: { type: 'keyword' },
         description: { type: 'text' },
         namespace: { type: 'keyword' },
         is_default: { type: 'boolean' },
@@ -310,10 +311,14 @@ export function registerEncryptedSavedObjects(
       'config_id',
       'last_updated',
       'last_checkin',
+      'last_checkin_status',
       'config_revision',
       'config_newest_revision',
       'updated_at',
       'current_error_events',
+      'unenrolled_at',
+      'unenrollment_started_at',
+      'packages',
     ]),
   });
   encryptedSavedObjects.registerType({
