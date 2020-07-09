@@ -99,6 +99,6 @@ describe('Cases', () => {
 
     cy.get(TIMELINE_TITLE).should('have.attr', 'value', case1.timeline.title);
     cy.get(TIMELINE_DESCRIPTION).should('have.attr', 'value', case1.timeline.description);
-    cy.get(TIMELINE_QUERY).should('have.attr', 'value', case1.timeline.query);
+    cy.get(TIMELINE_QUERY).invoke('text').should('eq', case1.timeline.query);
   });
 });

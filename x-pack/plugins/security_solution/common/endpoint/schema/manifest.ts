@@ -19,10 +19,10 @@ import {
 export const manifestEntrySchema = t.exact(
   t.type({
     relative_url: relativeUrl,
-    precompress_sha256: sha256,
-    precompress_size: size,
-    postcompress_sha256: sha256,
-    postcompress_size: size,
+    decoded_sha256: sha256,
+    decoded_size: size,
+    encoded_sha256: sha256,
+    encoded_size: size,
     compression_algorithm: compressionAlgorithm,
     encryption_algorithm: encryptionAlgorithm,
   })
