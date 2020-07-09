@@ -254,7 +254,7 @@ describe('monitor availability', () => {
             },
             "size": 0,
           },
-          "index": "heartbeat-8*",
+          "index": "heartbeat-7*",
         }
       `);
     });
@@ -406,7 +406,7 @@ describe('monitor availability', () => {
             },
             "size": 0,
           },
-          "index": "heartbeat-8*",
+          "index": "heartbeat-7*",
         }
       `);
 
@@ -644,7 +644,7 @@ describe('monitor availability', () => {
             },
             "size": 0,
           },
-          "index": "heartbeat-8*",
+          "index": "heartbeat-7*",
         }
       `);
       expect(esMock.callAsCurrentUser.mock.calls[1]).toMatchInlineSnapshot(`
@@ -746,7 +746,7 @@ describe('monitor availability', () => {
               },
               "size": 0,
             },
-            "index": "heartbeat-8*",
+            "index": "heartbeat-7*",
           },
         ]
       `);
