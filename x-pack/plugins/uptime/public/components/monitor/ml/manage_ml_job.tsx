@@ -85,7 +85,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
         {
           name: anomalyAlert ? labels.DISABLE_ANOMALY_ALERT : labels.ENABLE_ANOMALY_ALERT,
           'data-test-subj': 'uptimeEnableAnomalyAlertBtn',
-          icon: <EuiIcon type="bell" size="m" />,
+          icon: <EuiIcon type={anomalyAlert ? 'bellSlash' : 'bell'} size="m" />,
           onClick: () => {
             if (anomalyAlert) {
               setIsConfirmAlertDeleteOpen(true);
