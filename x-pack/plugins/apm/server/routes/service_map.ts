@@ -37,11 +37,12 @@ export const serviceMapRoute = createRoute(() => ({
     }
     context.licensing.featureUsage.notifyUsage(APM_SERVICE_MAPS_FEATURE_NAME);
 
+    const logger = context.logger;
     const setup = await setupRequest(context, request);
     const {
       query: { serviceName, environment },
     } = context.params;
-    return getServiceMap({ setup, serviceName, environment });
+    return getServiceMap({ setup, serviceName, environment, logger });
   },
 }));
 

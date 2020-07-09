@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Logger } from '../../../../../src/core/server';
 import { NewPackageConfig } from '../../../ingest_manager/common/types/models';
 import { factory as policyConfigFactory } from '../../common/endpoint/models/policy_config';
 import { NewPolicyData } from '../../common/endpoint/types';
@@ -13,6 +14,7 @@ import { ManifestManager } from './services/artifacts';
  * Callback to handle creation of PackageConfigs in Ingest Manager
  */
 export const getPackageConfigCreateCallback = (
+  logger: Logger,
   manifestManager: ManifestManager
 ): ((newPackageConfig: NewPackageConfig) => Promise<NewPackageConfig>) => {
   const handlePackageConfigCreate = async (
@@ -27,8 +29,19 @@ export const getPackageConfigCreateCallback = (
     // follow the types/schema expected
     let updatedPackageConfig = newPackageConfig as NewPolicyData;
 
-    const wrappedManifest = await manifestManager.refresh({ initialize: true });
-    if (wrappedManifest !== null) {
+    // get snapshot based on exception-list-agnostic SOs
+    // with diffs from last dispatched manifest, if it exists
+    const snapshot = await manifestManager.getSnapshot({ initialize: true });
+
+    if (snapshot === null) {
+      logger.warn('No manifest snapshot available.');
+      return updatedPackageConfig;
+    }
+
+    if (snapshot.diffs.length > 0) {
+      // create new artifacts
+      await manifestManager.syncArtifacts(snapshot, 'add');
+
       // Until we get the Default Policy Configuration in the Endpoint package,
       // we will add it here manually at creation time.
       // @ts-ignore
@@ -42,7 +55,7 @@ export const getPackageConfigCreateCallback = (
               streams: [],
               config: {
                 artifact_manifest: {
-                  value: wrappedManifest.manifest.toEndpointFormat(),
+                  value: snapshot.manifest.toEndpointFormat(),
                 },
                 policy: {
                   value: policyConfigFactory(),
@@ -57,9 +70,18 @@ export const getPackageConfigCreateCallback = (
     try {
       return updatedPackageConfig;
     } finally {
-      // TODO: confirm creation of package config
-      // then commit.
-      await manifestManager.commit(wrappedManifest);
+      if (snapshot.diffs.length > 0) {
+        // TODO: let's revisit the way this callback happens... use promises?
+        // only commit when we know the package config was created
+        try {
+          await manifestManager.commit(snapshot.manifest);
+
+          // clean up old artifacts
+          await manifestManager.syncArtifacts(snapshot, 'delete');
+        } catch (err) {
+          logger.error(err);
+        }
+      }
     }
   };
 

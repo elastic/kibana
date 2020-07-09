@@ -62,6 +62,7 @@ export const updateListItem = async ({
         },
         id: listItem.id,
         index: listItemIndex,
+        refresh: 'wait_for',
       });
       return {
         created_at: listItem.created_at,
