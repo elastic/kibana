@@ -5,6 +5,7 @@
  */
 
 import { InternalArtifactSchema } from '../../schemas/artifacts';
+import { CompressionAlgorithm } from '../../../../common/endpoint/schema/common';
 import { ManifestEntrySchema } from '../../../../common/endpoint/schema/manifest';
 
 export class ManifestEntry {
@@ -15,11 +16,15 @@ export class ManifestEntry {
   }
 
   public getDocId(): string {
-    return `${this.getIdentifier()}-${this.getEncodedSha256()}`;
+    return `${this.getIdentifier()}-${this.getDecodedSha256()}`;
   }
 
   public getIdentifier(): string {
     return this.artifact.identifier;
+  }
+
+  public getCompressionAlgorithm(): CompressionAlgorithm {
+    return this.artifact.compressionAlgorithm;
   }
 
   public getEncodedSha256(): string {
@@ -39,7 +44,7 @@ export class ManifestEntry {
   }
 
   public getUrl(): string {
-    return `/api/endpoint/artifacts/download/${this.getIdentifier()}/${this.getEncodedSha256()}`;
+    return `/api/endpoint/artifacts/download/${this.getIdentifier()}/${this.getDecodedSha256()}`;
   }
 
   public getArtifact(): InternalArtifactSchema {
@@ -48,7 +53,7 @@ export class ManifestEntry {
 
   public getRecord(): ManifestEntrySchema {
     return {
-      compression_algorithm: 'none',
+      compression_algorithm: this.getCompressionAlgorithm(),
       encryption_algorithm: 'none',
       decoded_sha256: this.getDecodedSha256(),
       decoded_size: this.getDecodedSize(),
