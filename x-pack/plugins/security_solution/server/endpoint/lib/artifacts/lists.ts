@@ -100,12 +100,12 @@ export function translateToEndpointExceptions(
   const entrySet = new Set();
   const entriesFiltered: TranslatedExceptionListItem[] = [];
   if (schemaVersion === 'v1') {
-    exc.data.forEach((item) => {
-      const translatedItem = translateItem(schemaVersion, item);
-      const itemHash = createHash('sha256').update(JSON.stringify(translatedItem)).digest('hex');
-      if (!entrySet.has(itemHash)) {
+    exc.data.forEach((entry) => {
+      const translatedItem = translateItem(schemaVersion, entry);
+      const entryHash = createHash('sha256').update(JSON.stringify(translatedItem)).digest('hex');
+      if (!entrySet.has(entryHash)) {
         entriesFiltered.push(translatedItem);
-        entrySet.add(itemHash);
+        entrySet.add(entryHash);
       }
     });
     return entriesFiltered;
