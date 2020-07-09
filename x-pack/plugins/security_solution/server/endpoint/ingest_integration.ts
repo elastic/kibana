@@ -9,6 +9,7 @@ import { NewPackageConfig } from '../../../ingest_manager/common/types/models';
 import { factory as policyConfigFactory } from '../../common/endpoint/models/policy_config';
 import { NewPolicyData } from '../../common/endpoint/types';
 import { ManifestManager } from './services/artifacts';
+import { reportErrors } from './lib/artifacts/common';
 
 /**
  * Callback to handle creation of PackageConfigs in Ingest Manager
@@ -33,54 +34,62 @@ export const getPackageConfigCreateCallback = (
     // with diffs from last dispatched manifest, if it exists
     const snapshot = await manifestManager.getSnapshot({ initialize: true });
 
-    if (snapshot === null) {
-      logger.warn('No manifest snapshot available.');
-      return updatedPackageConfig;
-    }
+    let success = true;
+    try {
+      if (snapshot && snapshot.diffs.length > 0) {
+        // create new artifacts
+        const errors = await manifestManager.syncArtifacts(snapshot, 'add');
+        if (errors.length) {
+          reportErrors(logger, errors);
+          throw new Error('Error writing new artifacts.');
+        }
 
-    if (snapshot.diffs.length > 0) {
-      // create new artifacts
-      await manifestManager.syncArtifacts(snapshot, 'add');
-
-      // Until we get the Default Policy Configuration in the Endpoint package,
-      // we will add it here manually at creation time.
-      // @ts-ignore
-      if (newPackageConfig.inputs.length === 0) {
-        updatedPackageConfig = {
-          ...newPackageConfig,
-          inputs: [
-            {
-              type: 'endpoint',
-              enabled: true,
-              streams: [],
-              config: {
-                artifact_manifest: {
-                  value: snapshot.manifest.toEndpointFormat(),
-                },
-                policy: {
-                  value: policyConfigFactory(),
+        // Until we get the Default Policy Configuration in the Endpoint package,
+        // we will add it here manually at creation time.
+        // @ts-ignore
+        if (newPackageConfig.inputs.length === 0) {
+          updatedPackageConfig = {
+            ...newPackageConfig,
+            inputs: [
+              {
+                type: 'endpoint',
+                enabled: true,
+                streams: [],
+                config: {
+                  artifact_manifest: {
+                    value: snapshot.manifest.toEndpointFormat(),
+                  },
+                  policy: {
+                    value: policyConfigFactory(),
+                  },
                 },
               },
-            },
-          ],
-        };
+            ],
+          };
+        }
       }
-    }
 
-    try {
+      return updatedPackageConfig;
+    } catch (err) {
+      success = false;
+      logger.error(err);
       return updatedPackageConfig;
     } finally {
-      if (snapshot.diffs.length > 0) {
-        // TODO: let's revisit the way this callback happens... use promises?
-        // only commit when we know the package config was created
+      if (success && snapshot !== null) {
         try {
-          await manifestManager.commit(snapshot.manifest);
+          if (snapshot.diffs.length > 0) {
+            // TODO: let's revisit the way this callback happens... use promises?
+            // only commit when we know the package config was created
+            await manifestManager.commit(snapshot.manifest);
 
-          // clean up old artifacts
-          await manifestManager.syncArtifacts(snapshot, 'delete');
+            // clean up old artifacts
+            await manifestManager.syncArtifacts(snapshot, 'delete');
+          }
         } catch (err) {
           logger.error(err);
         }
+      } else if (snapshot === null) {
+        logger.error('No manifest snapshot available.');
       }
     }
   };

@@ -77,7 +77,7 @@ describe('manifest_manager', () => {
       const manifestManager = getManifestManagerMock({ packageConfigService });
       const snapshot = await manifestManager.getSnapshot();
       const dispatched = await manifestManager.dispatch(snapshot!.manifest);
-      expect(dispatched).toEqual(true);
+      expect(dispatched).toEqual([]);
       const entries = snapshot!.manifest.getEntries();
       const artifact = Object.values(entries)[0].getArtifact();
       expect(
@@ -115,7 +115,7 @@ describe('manifest_manager', () => {
       snapshot!.diffs.push(diff);
 
       const dispatched = await manifestManager.dispatch(snapshot!.manifest);
-      expect(dispatched).toEqual(true);
+      expect(dispatched).toEqual([]);
 
       await manifestManager.commit(snapshot!.manifest);
 
