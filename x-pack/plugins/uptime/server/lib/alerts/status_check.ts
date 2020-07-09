@@ -41,48 +41,76 @@ export const uniqueMonitorIds = (items: GetMonitorStatusResult[]): Set<string> =
     return acc;
   }, new Set<string>());
 
+const sortAvailabilityResultByRatioAsc = (
+  a: GetMonitorAvailabilityResult,
+  b: GetMonitorAvailabilityResult
+): number => (a.availabilityRatio ?? 100) - (b.availabilityRatio ?? 100);
+
+/**
+ * Map an availability result object to a descriptive string.
+ */
+const mapAvailabilityResultToString = ({
+  availabilityRatio,
+  name,
+  monitorId,
+  url,
+}: GetMonitorAvailabilityResult) =>
+  i18n.translate('xpack.uptime.alerts.availability.monitorSummary', {
+    defaultMessage: '{nameOrId}({url}): {availabilityRatio}%',
+    values: {
+      nameOrId: name || monitorId,
+      url,
+      availabilityRatio: ((availabilityRatio ?? 1.0) * 100).toPrecision(5),
+    },
+  });
+
+const reduceAvailabilityStringsToMessage = (threshold: string) => (
+  prev: string,
+  cur: string,
+  _ind: number,
+  array: string[]
+) => {
+  let prefix: string = '';
+  if (prev !== '') {
+    prefix = prev;
+  } else if (array.length > 1) {
+    prefix = i18n.translate('xpack.uptime.alerts.availability.multiItemTitle', {
+      defaultMessage: `Top {monitorCount} Monitors Below Availability Threshold ({threshold} %):\n`,
+      values: {
+        monitorCount: Math.min(array.length, MESSAGE_AVAILABILITY_MAX),
+        threshold,
+      },
+    });
+  } else {
+    prefix = i18n.translate('xpack.uptime.alerts.availability.singleItemTitle', {
+      defaultMessage: `Monitor Below Availability Threshold ({threshold} %):\n`,
+      values: { threshold },
+    });
+  }
+  return prefix + `${cur}\n`;
+};
+
 const MESSAGE_AVAILABILITY_MAX = 3;
 
+/**
+ * Creates a summary message from a list of availability check result objects.
+ * @param availabilityResult the list of results
+ * @param threshold the threshold used by the check
+ */
 export const availabilityMessage = (
   availabilityResult: GetMonitorAvailabilityResult[],
-  threshold: string
+  threshold: string,
+  max: number = MESSAGE_AVAILABILITY_MAX
 ): string => {
   return availabilityResult.length > 0
-    ? availabilityResult
-        .sort((a, b) => (a.availabilityRatio ?? 100) - (b.availabilityRatio ?? 100))
-        .slice(0, MESSAGE_AVAILABILITY_MAX)
-        .map(({ availabilityRatio, name, monitorId, url }) =>
-          i18n.translate('xpack.uptime.alerts.availability.monitorSummary', {
-            defaultMessage: '{nameOrId}({url}): {availabilityRatio}%',
-            values: {
-              nameOrId: name || monitorId,
-              url,
-              availabilityRatio: ((availabilityRatio ?? 1.0) * 100).toPrecision(5),
-            },
-          })
-        )
-        .reduce((prev: string, cur: string, _ind: number, array: string[]) => {
-          let next = '';
-          if (prev === '') {
-            if (array.length > 1) {
-              next = i18n.translate('xpack.uptime.alerts.availability.multiItemTitle', {
-                defaultMessage: `Top {monitorCount} Monitors Below Availability Threshold ({threshold} %):\n`,
-                values: {
-                  monitorCount: Math.min(array.length, MESSAGE_AVAILABILITY_MAX),
-                  threshold,
-                },
-              });
-            } else {
-              next = i18n.translate('xpack.uptime.alerts.availability.singleItemTitle', {
-                defaultMessage: `Monitor Below Availability Threshold ({threshold} %):\n`,
-                values: { threshold },
-              });
-            }
-          }
-          next += `${cur}\n`;
-          return prev + next;
-        }, '')
-    : i18n.translate('xpack.uptime.alerts.availability.emptyMessage', {
+    ? // if there are results, map each item to a descriptive string, and reduce the list
+      availabilityResult
+        .sort(sortAvailabilityResultByRatioAsc)
+        .slice(0, max)
+        .map(mapAvailabilityResultToString)
+        .reduce(reduceAvailabilityStringsToMessage(threshold), '')
+    : // if there are no results, return an empty list default string
+      i18n.translate('xpack.uptime.alerts.availability.emptyMessage', {
         defaultMessage: `No monitors were below Availability Threshold ({threshold} %)`,
         values: {
           threshold,
