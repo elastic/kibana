@@ -8,11 +8,10 @@ import { i18n } from '@kbn/i18n';
 
 export const MonitorStatusTranslations = {
   defaultActionMessage: i18n.translate('xpack.uptime.alerts.monitorStatus.defaultActionMessage', {
-    defaultMessage: '{contextMessage}\nLast triggered at: {lastTriggered}\n{downMonitors}',
+    defaultMessage: '{contextMessage}\nLast triggered at: {lastTriggered}\n',
     values: {
       contextMessage: '{{context.message}}',
       lastTriggered: '{{state.lastTriggeredAt}}',
-      downMonitors: '{{context.downMonitorsWithGeo}}',
     },
   }),
   name: i18n.translate('xpack.uptime.alerts.monitorStatus.clientName', {

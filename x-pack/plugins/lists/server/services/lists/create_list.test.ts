@@ -52,6 +52,7 @@ describe('crete_list', () => {
       body,
       id: LIST_ID,
       index: LIST_INDEX,
+      refresh: 'wait_for',
     };
     expect(options.callCluster).toBeCalledWith('index', expected);
   });
