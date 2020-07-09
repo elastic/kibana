@@ -11,6 +11,7 @@
     "embeddable",
     "features",
     "home",
+    "ingestManager",
     "taskManager",
     "inspector",
     "licensing",
@@ -20,7 +21,6 @@
   ],
   "optionalPlugins": [
     "encryptedSavedObjects",
-    "ingestManager",
     "ml",
     "newsfeed",
     "security",
