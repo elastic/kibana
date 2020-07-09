@@ -22,6 +22,7 @@ export const AssetTitleMap: Record<AssetType, string> = {
   'index-pattern': 'Index Pattern',
   index_template: 'Index Template',
   component_template: 'Component Template',
+  'canvas-workpad-template': 'Canvas Template',
   search: 'Saved Search',
   visualization: 'Visualization',
   input: 'Agent input',
@@ -39,6 +40,7 @@ export const AssetIcons: Record<KibanaAssetType, IconType> = {
   search: 'searchProfilerApp',
   visualization: 'visualizeApp',
   map: 'mapApp',
+  'canvas-workpad-template': 'canvasApp',
 };
 
 export const ServiceIcons: Record<ServiceName, IconType> = {

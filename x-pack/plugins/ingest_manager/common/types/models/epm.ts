@@ -29,6 +29,7 @@ export enum KibanaAssetType {
   search = 'search',
   indexPattern = 'index-pattern',
   map = 'map',
+  'canvas-workpad-template' = 'canvas-workpad-template',
 }
 
 export enum ElasticsearchAssetType {

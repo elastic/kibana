@@ -26,6 +26,7 @@ describe('Ingest Manager - packageToConfig', () => {
         search: [],
         'index-pattern': [],
         map: [],
+        'canvas-workpad-template': [],
       },
     },
     status: InstallationStatus.notInstalled,
