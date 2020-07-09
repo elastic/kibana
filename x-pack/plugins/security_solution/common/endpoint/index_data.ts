@@ -6,7 +6,7 @@
 
 import { Client } from '@elastic/elasticsearch';
 import seedrandom from 'seedrandom';
-import { EndpointDocGenerator, TreeOptions, Event } from './generate_data';
+import { EndpointDocGenerator, TreeOptions, Event, GeneratedAlertTree } from './generate_data';
 
 export async function indexHostsAndAlerts(
   client: Client,
@@ -26,13 +26,13 @@ export async function indexHostsAndAlerts(
     await indexHostDocs(numDocs, client, metadataIndex, policyIndex, generator);
 
     // build a resolver tree
-    const resolverTree = generator.alertsGenerator(options);
+    const alertEventTree: GeneratedAlertTree = generator.generatedAlertTree(options);
 
     // Index the ancestry and the alert event itself regardless of `alertsPerHost` limit
-    const alertEvents = [...resolverTree.ancestry, resolverTree.alertEvent];
+    const alertEvents = [...alertEventTree.ancestry, alertEventTree.alertEvent];
 
     // index additional events until `alertsPerHost` limit is reached
-    for (const event of resolverTree.descendants) {
+    for (const event of alertEventTree.descendants) {
       if (alertEvents.length === alertsPerHost) {
         break;
       }
