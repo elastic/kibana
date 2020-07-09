@@ -290,6 +290,7 @@ export const deleteAllRulesStatuses = async (es: Client, retryCount = 20): Promi
 
 /**
  * Creates the signals index for use inside of beforeEach blocks of tests
+ * This will retry 20 times before giving up and hopefully still not interfere with other tests
  * @param supertest The supertest client library
  */
 export const createSignalsIndex = async (
