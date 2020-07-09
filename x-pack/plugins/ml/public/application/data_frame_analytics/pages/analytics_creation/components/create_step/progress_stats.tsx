@@ -15,14 +15,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../../../../contexts/kibana';
-import { getDataFrameAnalyticsProgressPhase } from '../../../analytics_management/components/analytics_list/common';
+import {
+  getDataFrameAnalyticsProgressPhase,
+  DATA_FRAME_TASK_STATE,
+} from '../../../analytics_management/components/analytics_list/common';
 import { isGetDataFrameAnalyticsStatsResponseOk } from '../../../analytics_management/services/analytics_service/get_analytics';
 import { ml } from '../../../../../services/ml_api_service';
 import { DataFrameAnalyticsId } from '../../../../common/analytics';
 
 export const PROGRESS_REFRESH_INTERVAL_MS = 1000;
-const FAILED = 'failed';
-const STOPPED = 'stopped';
 
 export const ProgressStats: FC<{ jobId: DataFrameAnalyticsId }> = ({ jobId }) => {
   const [initialized, setInitialized] = useState<boolean>(false);
@@ -55,7 +56,7 @@ export const ProgressStats: FC<{ jobId: DataFrameAnalyticsId }> = ({ jobId }) =>
         if (jobStats !== undefined) {
           const progressStats = getDataFrameAnalyticsProgressPhase(jobStats);
 
-          if (jobStats.state === FAILED) {
+          if (jobStats.state === DATA_FRAME_TASK_STATE.FAILED) {
             clearInterval(interval);
             setFailedJobMessage(
               jobStats.failure_reason ||
@@ -73,7 +74,7 @@ export const ProgressStats: FC<{ jobId: DataFrameAnalyticsId }> = ({ jobId }) =>
           if (
             (progressStats.currentPhase === progressStats.totalPhases &&
               progressStats.progress === 100) ||
-            jobStats.state === STOPPED
+            jobStats.state === DATA_FRAME_TASK_STATE.STOPPED
           ) {
             clearInterval(interval);
           }
