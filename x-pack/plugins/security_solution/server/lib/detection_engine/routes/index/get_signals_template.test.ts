@@ -19,7 +19,6 @@ describe('get_signals_template', () => {
       mapping: {
         total_fields: { limit: 10000 },
       },
-      version: 1,
     });
   });
 
