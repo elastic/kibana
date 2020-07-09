@@ -23,7 +23,7 @@ import './component_templates_selector.scss';
 interface Props {
   onChange: (components: string[]) => void;
   onComponentsLoaded: (components: ComponentTemplateListItem[]) => void;
-  defaultValue: string[];
+  defaultValue?: string[];
   docUri: string;
   emptyPrompt?: {
     text?: string | JSX.Element;
@@ -63,6 +63,7 @@ export const ComponentTemplatesSelector = ({
   useEffect(() => {
     if (components) {
       if (
+        defaultValue &&
         defaultValue.length > 0 &&
         componentsSelected.length === 0 &&
         isInitialized.current === false

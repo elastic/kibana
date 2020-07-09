@@ -39,7 +39,7 @@ const i18nTexts = {
   ),
 };
 
-export const StepComponents = ({ defaultValue = [], onChange, esDocsBase }: Props) => {
+export const StepComponents = ({ defaultValue, onChange, esDocsBase }: Props) => {
   const [state, setState] = useState<{
     isLoadingComponents: boolean;
     components: ComponentTemplateListItem[];

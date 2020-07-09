@@ -3,14 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiButton } from '@elastic/eui';
 
 import { TemplateDeserialized } from '../../../../common';
 import { serializers, Forms } from '../../../shared_imports';
 import { SectionError } from '../section_error';
+import { SimulateTemplateFlyout } from '../index_templates';
 import { StepLogisticsContainer, StepComponentContainer, StepReviewContainer } from './steps';
 import {
   CommonWizardSteps,
@@ -24,6 +25,7 @@ const { stripEmptyFields } = serializers;
 const { FormWizard, FormWizardStep } = Forms;
 
 interface Props {
+  title: string | JSX.Element;
   onSave: (template: TemplateDeserialized) => void;
   clearSaveError: () => void;
   isSaving: boolean;
@@ -80,6 +82,7 @@ const wizardSections: { [id: string]: { id: WizardSection; label: string } } = {
 };
 
 export const TemplateForm = ({
+  title,
   defaultValue,
   isEditing,
   isSaving,
@@ -88,6 +91,9 @@ export const TemplateForm = ({
   clearSaveError,
   onSave,
 }: Props) => {
+  const [isSimulateVisible, setIsSimulateVisible] = useState(false);
+  const [wizardContent, setWizardContent] = useState<Forms.Content<WizardContent> | null>(null);
+
   const indexTemplate = defaultValue ?? {
     name: '',
     indexPatterns: [],
@@ -144,6 +150,15 @@ export const TemplateForm = ({
     </>
   ) : null;
 
+  const rightContentWizardNav = isLegacy ? null : (
+    <EuiButton size="s" onClick={() => setIsSimulateVisible(true)}>
+      <FormattedMessage
+        id="xpack.idxMgmt.templateForm.previewIndexTemplateButtonLabel"
+        defaultMessage="Preview index template"
+      />
+    </EuiButton>
+  );
+
   /**
    * If no mappings, settings or aliases are defined, it is better to not send empty
    * object for those values.
@@ -189,6 +204,10 @@ export const TemplateForm = ({
     []
   );
 
+  const onWizardContentChange = useCallback((content: Forms.Content<WizardContent>) => {
+    setWizardContent(content);
+  }, []);
+
   const onSaveTemplate = useCallback(
     async (wizardData: WizardContent) => {
       const template = buildTemplateObject(indexTemplate)(wizardData);
@@ -206,44 +225,77 @@ export const TemplateForm = ({
     [indexTemplate, buildTemplateObject, onSave, clearSaveError]
   );
 
+  const getTemplateSimulate = useCallback(async () => {
+    if (!wizardContent) {
+      return;
+    }
+    const isValid = await wizardContent.validate();
+    if (!isValid) {
+      return;
+    }
+    const wizardData = wizardContent.getData();
+    const template = buildTemplateObject(indexTemplate)(wizardData);
+    return template;
+  }, [buildTemplateObject, indexTemplate, wizardContent]);
+
   return (
-    <FormWizard<WizardContent>
-      defaultValue={wizardDefaultValue}
-      onSave={onSaveTemplate}
-      isEditing={isEditing}
-      isSaving={isSaving}
-      apiError={apiError}
-      texts={i18nTexts}
-    >
-      <FormWizardStep
-        id={wizardSections.logistics.id}
-        label={wizardSections.logistics.label}
-        isRequired
+    <>
+      {/* Form header */}
+      {title}
+
+      <EuiSpacer size="l" />
+
+      <FormWizard<WizardContent>
+        defaultValue={wizardDefaultValue}
+        onSave={onSaveTemplate}
+        isEditing={isEditing}
+        isSaving={isSaving}
+        apiError={apiError}
+        texts={i18nTexts}
+        onChange={onWizardContentChange}
+        rightContentNav={rightContentWizardNav}
       >
-        <StepLogisticsContainer isEditing={isEditing} isLegacy={indexTemplate._kbnMeta.isLegacy} />
-      </FormWizardStep>
-
-      {indexTemplate._kbnMeta.isLegacy !== true && (
-        <FormWizardStep id={wizardSections.components.id} label={wizardSections.components.label}>
-          <StepComponentContainer />
+        <FormWizardStep
+          id={wizardSections.logistics.id}
+          label={wizardSections.logistics.label}
+          isRequired
+        >
+          <StepLogisticsContainer
+            isEditing={isEditing}
+            isLegacy={indexTemplate._kbnMeta.isLegacy}
+          />
         </FormWizardStep>
+
+        {indexTemplate._kbnMeta.isLegacy !== true && (
+          <FormWizardStep id={wizardSections.components.id} label={wizardSections.components.label}>
+            <StepComponentContainer />
+          </FormWizardStep>
+        )}
+
+        <FormWizardStep id={wizardSections.settings.id} label={wizardSections.settings.label}>
+          <StepSettingsContainer esDocsBase={documentationService.getEsDocsBase()} />
+        </FormWizardStep>
+
+        <FormWizardStep id={wizardSections.mappings.id} label={wizardSections.mappings.label}>
+          <StepMappingsContainer esDocsBase={documentationService.getEsDocsBase()} />
+        </FormWizardStep>
+
+        <FormWizardStep id={wizardSections.aliases.id} label={wizardSections.aliases.label}>
+          <StepAliasesContainer esDocsBase={documentationService.getEsDocsBase()} />
+        </FormWizardStep>
+
+        <FormWizardStep id={wizardSections.review.id} label={wizardSections.review.label}>
+          <StepReviewContainer getTemplateData={buildTemplateObject(indexTemplate)} />
+        </FormWizardStep>
+      </FormWizard>
+
+      {/* Simulate index template */}
+      {isSimulateVisible && (
+        <SimulateTemplateFlyout
+          getTemplate={getTemplateSimulate}
+          onClose={() => setIsSimulateVisible(false)}
+        />
       )}
-
-      <FormWizardStep id={wizardSections.settings.id} label={wizardSections.settings.label}>
-        <StepSettingsContainer esDocsBase={documentationService.getEsDocsBase()} />
-      </FormWizardStep>
-
-      <FormWizardStep id={wizardSections.mappings.id} label={wizardSections.mappings.label}>
-        <StepMappingsContainer esDocsBase={documentationService.getEsDocsBase()} />
-      </FormWizardStep>
-
-      <FormWizardStep id={wizardSections.aliases.id} label={wizardSections.aliases.label}>
-        <StepAliasesContainer esDocsBase={documentationService.getEsDocsBase()} />
-      </FormWizardStep>
-
-      <FormWizardStep id={wizardSections.review.id} label={wizardSections.review.label}>
-        <StepReviewContainer getTemplateData={buildTemplateObject(indexTemplate)} />
-      </FormWizardStep>
-    </FormWizard>
+    </>
   );
 };

@@ -44,3 +44,4 @@ export const UIM_TEMPLATE_DETAIL_PANEL_ALIASES_TAB = 'template_details_aliases_t
 export const UIM_TEMPLATE_CREATE = 'template_create';
 export const UIM_TEMPLATE_UPDATE = 'template_update';
 export const UIM_TEMPLATE_CLONE = 'template_clone';
+export const UIM_TEMPLATE_SIMULATE = 'template_simulate';

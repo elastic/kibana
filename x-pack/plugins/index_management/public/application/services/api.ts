@@ -30,6 +30,7 @@ import {
   UIM_TEMPLATE_CREATE,
   UIM_TEMPLATE_UPDATE,
   UIM_TEMPLATE_CLONE,
+  UIM_TEMPLATE_SIMULATE,
 } from '../../../common/constants';
 import { TemplateDeserialized, TemplateListItem, DataStream } from '../../../common';
 import { IndexMgmtMetricsType } from '../../types';
@@ -285,4 +286,15 @@ export async function updateTemplate(template: TemplateDeserialized) {
   uiMetricService.trackMetric('count', UIM_TEMPLATE_UPDATE);
 
   return result;
+}
+
+export function simulateIndexTemplate(template: { [key: string]: any }) {
+  return sendRequest({
+    path: `${API_BASE_PATH}/index_templates/simulate`,
+    method: 'post',
+    body: JSON.stringify(template),
+  }).then((result) => {
+    uiMetricService.trackMetric('count', UIM_TEMPLATE_SIMULATE);
+    return result;
+  });
 }
