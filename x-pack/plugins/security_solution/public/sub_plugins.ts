@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Alerts } from './alerts';
+import { Detections } from './detections';
 import { Cases } from './cases';
 import { Hosts } from './hosts';
 import { Network } from './network';
@@ -12,7 +12,7 @@ import { Overview } from './overview';
 import { Timelines } from './timelines';
 import { Management } from './management';
 
-const alertsSubPlugin = new Alerts();
+const detectionsSubPlugin = new Detections();
 const casesSubPlugin = new Cases();
 const hostsSubPlugin = new Hosts();
 const networkSubPlugin = new Network();
@@ -21,7 +21,7 @@ const timelinesSubPlugin = new Timelines();
 const managementSubPlugin = new Management();
 
 export {
-  alertsSubPlugin,
+  detectionsSubPlugin,
   casesSubPlugin,
   hostsSubPlugin,
   networkSubPlugin,

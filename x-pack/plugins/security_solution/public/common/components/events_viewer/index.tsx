@@ -21,7 +21,7 @@ import { OnChangeItemsPerPage } from '../../../timelines/components/timeline/eve
 import { Filter } from '../../../../../../../src/plugins/data/public';
 import { useUiSetting } from '../../lib/kibana';
 import { EventsViewer } from './events_viewer';
-import { useFetchIndexPatterns } from '../../../alerts/containers/detection_engine/rules/fetch_index_patterns';
+import { useFetchIndexPatterns } from '../../../detections/containers/detection_engine/rules/fetch_index_patterns';
 import { InspectButtonContainer } from '../inspect';
 
 export interface OwnProps {

@@ -12,7 +12,7 @@ import {
 import { policyListMiddlewareFactory } from '../pages/policy/store/policy_list';
 import { policyDetailsMiddlewareFactory } from '../pages/policy/store/policy_details';
 import {
-  MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
+  MANAGEMENT_STORE_HOSTS_NAMESPACE,
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,
   MANAGEMENT_STORE_POLICY_LIST_NAMESPACE,
@@ -24,7 +24,7 @@ const policyListSelector = (state: State) =>
 const policyDetailsSelector = (state: State) =>
   state[MANAGEMENT_STORE_GLOBAL_NAMESPACE][MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE];
 const endpointsSelector = (state: State) =>
-  state[MANAGEMENT_STORE_GLOBAL_NAMESPACE][MANAGEMENT_STORE_ENDPOINTS_NAMESPACE];
+  state[MANAGEMENT_STORE_GLOBAL_NAMESPACE][MANAGEMENT_STORE_HOSTS_NAMESPACE];
 
 export const managementMiddlewareFactory: SecuritySubPluginMiddlewareFactory = (
   coreStart,

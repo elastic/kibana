@@ -17,12 +17,14 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiButton,
+  EuiLink,
 } from '@elastic/eui';
 
 import { UIM_TEMPLATE_LIST_LOAD } from '../../../../../common/constants';
 import { TemplateListItem, TemplateType } from '../../../../../common';
 import { SectionError, SectionLoading, Error } from '../../../components';
 import { useLoadIndexTemplates } from '../../../services/api';
+import { documentationService } from '../../../services/documentation';
 import { useServices } from '../../../app_context';
 import {
   getTemplateEditLink,
@@ -122,14 +124,28 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
   const renderHeader = () => (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={true}>
-        <EuiTitle size="s">
-          <EuiText color="subdued">
-            <FormattedMessage
-              id="xpack.idxMgmt.home.indexTemplatesDescription"
-              defaultMessage="Use index templates to automatically apply settings, mappings, and aliases to indices."
-            />
-          </EuiText>
-        </EuiTitle>
+        <EuiText color="subdued">
+          <FormattedMessage
+            id="xpack.idxMgmt.home.indexTemplatesDescription"
+            defaultMessage="Use index templates to automatically apply settings, mappings, and aliases to indices. {learnMoreLink}"
+            values={{
+              learnMoreLink: (
+                <EuiLink
+                  href={documentationService.getTemplatesDocumentationLink()}
+                  target="_blank"
+                  external
+                >
+                  {i18n.translate(
+                    'xpack.idxMgmt.home.indexTemplatesDescription.learnMoreLinkText',
+                    {
+                      defaultMessage: 'Learn more.',
+                    }
+                  )}
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <FilterListButton<FilterName> filters={filters} onChange={setFilters} />

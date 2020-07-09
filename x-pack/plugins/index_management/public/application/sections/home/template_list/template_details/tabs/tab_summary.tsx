@@ -19,8 +19,9 @@ import {
   EuiCodeBlock,
   EuiSpacer,
 } from '@elastic/eui';
+import { useAppContext } from '../../../../../app_context';
 import { TemplateDeserialized } from '../../../../../../../common';
-import { getILMPolicyPath } from '../../../../../services/navigation';
+import { getILMPolicyPath } from '../../../../../services/routing';
 
 interface Props {
   templateDetails: TemplateDeserialized;
@@ -51,6 +52,10 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
   } = templateDetails;
 
   const numIndexPatterns = indexPatterns.length;
+
+  const {
+    core: { getUrlForApp },
+  } = useAppContext();
 
   return (
     <>
@@ -155,7 +160,13 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
                   {ilmPolicy && ilmPolicy.name ? (
-                    <EuiLink href={getILMPolicyPath(ilmPolicy.name)}>{ilmPolicy.name}</EuiLink>
+                    <EuiLink
+                      href={getUrlForApp('management', {
+                        path: getILMPolicyPath(ilmPolicy.name),
+                      })}
+                    >
+                      {ilmPolicy.name}
+                    </EuiLink>
                   ) : (
                     i18nTexts.none
                   )}
