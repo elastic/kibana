@@ -22,7 +22,10 @@ import { Type } from '@kbn/config-schema';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { ConfigDeprecationProvider } from './config';
 import { ContextSetup } from './context';
-import { InternalElasticsearchServiceSetup, ElasticsearchServiceStart } from './elasticsearch';
+import {
+  InternalElasticsearchServiceSetup,
+  InternalElasticsearchServiceStart,
+} from './elasticsearch';
 import { InternalHttpServiceSetup, InternalHttpServiceStart } from './http';
 import {
   InternalSavedObjectsServiceSetup,
@@ -58,7 +61,7 @@ export interface InternalCoreSetup {
  */
 export interface InternalCoreStart {
   capabilities: CapabilitiesStart;
-  elasticsearch: ElasticsearchServiceStart;
+  elasticsearch: InternalElasticsearchServiceStart;
   http: InternalHttpServiceStart;
   metrics: InternalMetricsServiceStart;
   savedObjects: InternalSavedObjectsServiceStart;

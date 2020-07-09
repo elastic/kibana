@@ -177,7 +177,7 @@ function createInternalCoreSetupMock() {
 function createInternalCoreStartMock() {
   const startDeps: InternalCoreStart = {
     capabilities: capabilitiesServiceMock.createStartContract(),
-    elasticsearch: elasticsearchServiceMock.createStart(),
+    elasticsearch: elasticsearchServiceMock.createInternalStart(),
     http: httpServiceMock.createInternalStartContract(),
     metrics: metricsServiceMock.createStartContract(),
     savedObjects: savedObjectsServiceMock.createInternalStartContract(),
