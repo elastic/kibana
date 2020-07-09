@@ -13,8 +13,14 @@ describe('MlUrlGenerator', () => {
   });
 
   it('should generate valid URL for the Anomaly Explorer page', async () => {
-    const url = await urlGenerator.createUrl({ page: 'explorer', jobIds: ['test-job'] });
-    expect(url).toBe('/app/ml#/explorer?_g=(ml:(jobIds:!(test-job)))&_a=()');
+    const url = await urlGenerator.createUrl({
+      page: 'explorer',
+      jobIds: ['test-job'],
+      mlExplorerSwimlane: { viewByFromPage: 2, viewByPerPage: 20 },
+    });
+    expect(url).toBe(
+      '/app/ml#/explorer?_g=(ml:(jobIds:!(test-job)))&_a=(mlExplorerFilter:(),mlExplorerSwimlane:(viewByFromPage:2,viewByPerPage:20))'
+    );
   });
 
   it('should throw an error in case the page is not provided', async () => {

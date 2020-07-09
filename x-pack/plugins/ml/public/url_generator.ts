@@ -5,14 +5,7 @@
  */
 
 import { UrlGeneratorsDefinition } from '../../../../src/plugins/share/public';
-import {
-  TimeRange,
-  Filter,
-  Query,
-  esFilters,
-  QueryState,
-  RefreshInterval,
-} from '../../../../src/plugins/data/public';
+import { TimeRange } from '../../../../src/plugins/data/public';
 import { setStateToKbnUrl } from '../../../../src/plugins/kibana_utils/public';
 import { JobId } from '../../reporting/common/types';
 import { ExplorerAppState } from './application/explorer/explorer_dashboard_service';
@@ -36,26 +29,6 @@ export interface ExplorerUrlState {
    * Optional state for the swim lane
    */
   mlExplorerSwimlane?: ExplorerAppState['mlExplorerSwimlane'];
-  /**
-   * Optionally set the refresh interval.
-   */
-  refreshInterval?: RefreshInterval;
-
-  /**
-   * Optionally apply filers.
-   */
-  filters?: Filter[];
-
-  /**
-   * Optionally set a query.
-   */
-  query?: Query;
-
-  /**
-   * If not given, will use the uiSettings configuration for `storeInSessionStorage`. useHash determines
-   * whether to hash the data in the url to avoid url length issues.
-   */
-  useHash?: boolean;
 }
 
 /**
@@ -63,7 +36,10 @@ export interface ExplorerUrlState {
  */
 export type MlUrlGeneratorState = ExplorerUrlState;
 
-export type ExplorerQueryState = QueryState & { ml: { jobIds: JobId[] } };
+export interface ExplorerQueryState {
+  ml: { jobIds: JobId[] };
+  time?: TimeRange;
+}
 
 interface Params {
   appBasePath: string;
@@ -88,15 +64,13 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
   private createExplorerUrl({
     timeRange,
     jobIds,
-    query,
-    filters,
-    refreshInterval,
     useHash = false,
     mlExplorerSwimlane = {},
+    mlExplorerFilter = {},
   }: Omit<ExplorerUrlState, 'page'>): string {
     const appState: ExplorerAppState = {
       mlExplorerSwimlane,
-      mlExplorerFilter: {},
+      mlExplorerFilter,
     };
 
     const queryState: ExplorerQueryState = {
@@ -106,12 +80,9 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
     };
 
     if (timeRange) queryState.time = timeRange;
-    if (filters && filters.length)
-      queryState.filters = filters?.filter((f) => esFilters.isFilterPinned(f));
-    if (refreshInterval) queryState.refreshInterval = refreshInterval;
 
     let url = `${this.params.appBasePath}#/explorer`;
-    url = setStateToKbnUrl<QueryState>('_g', queryState, { useHash }, url);
+    url = setStateToKbnUrl<ExplorerQueryState>('_g', queryState, { useHash }, url);
     url = setStateToKbnUrl('_a', appState, { useHash }, url);
 
     return url;
