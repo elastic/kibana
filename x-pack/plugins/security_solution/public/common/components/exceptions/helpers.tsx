@@ -519,7 +519,7 @@ export const defaultEndpointExceptionItems = (
           value: signatureSigner ?? '',
         },
         {
-          field: 'file.code_signature.trusted',
+          field: 'file.Ext.code_signature.trusted',
           operator: 'included',
           type: 'match',
           value: signatureTrusted ?? '',
