@@ -46,6 +46,8 @@ describe('RegionMapsVisualizationTests', function () {
   let Vis;
   let indexPattern;
   let vis;
+  let serviceSettings;
+  let loadFileLayerConfig;
 
   let imageComparator;
 
@@ -77,7 +79,7 @@ describe('RegionMapsVisualizationTests', function () {
 
   beforeEach(ngMock.module('kibana'));
 
-  beforeEach(ngMock.inject((Private) => {
+  beforeEach(ngMock.inject((Private, $injector) => {
 
     Vis = Private(visModule.VisProvider);
     RegionMapsVisualization = Private(RegionMapsVisualizationProvider);
@@ -92,11 +94,24 @@ describe('RegionMapsVisualizationTests', function () {
       });
     };
 
+    serviceSettings = $injector.get('serviceSettings');
+    loadFileLayerConfig = serviceSettings.loadFileLayerConfig;
+    serviceSettings.loadFileLayerConfig = async (fl) => {
+      // Region-maps visualization calls EMS to dynamically load attribution iso grabbing it from visState
+      // Mock this call to avoid network-roundtrip
+      return {
+        attribution: fl.attribution + '_sanitized',
+        name: fl.name,
+      };
+    };
+
+
   }));
 
 
   afterEach(function () {
     ChoroplethLayer.prototype._makeJsonAjaxCall = _makeJsonAjaxCallOld;
+    loadFileLayerConfig.loadFileLayerConfig = loadFileLayerConfig;
   });
 
 
