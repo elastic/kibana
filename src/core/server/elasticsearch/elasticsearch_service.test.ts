@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import { first } from 'rxjs/operators';
-
 import { MockLegacyClusterClient, MockClusterClient } from './elasticsearch_service.test.mocks';
-
 import { BehaviorSubject } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { Env } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { CoreContext } from '../core_context';
@@ -227,28 +225,34 @@ describe('#setup', () => {
   });
 
   it('esNodeVersionCompatibility$ only starts polling when subscribed to', async (done) => {
-    mockLegacyClusterClientInstance.callAsInternalUser.mockRejectedValue(new Error());
+    const mockedClient = mockClusterClientInstance.asInternalUser;
+    mockedClient.nodes.info.mockImplementation(() =>
+      elasticsearchClientMock.createClientError(new Error())
+    );
 
     const setupContract = await elasticsearchService.setup(setupDeps);
     await delay(10);
 
-    expect(mockLegacyClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(0);
+    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
     setupContract.esNodesCompatibility$.subscribe(() => {
-      expect(mockLegacyClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
       done();
     });
   });
 
   it('esNodeVersionCompatibility$ stops polling when unsubscribed from', async (done) => {
-    mockLegacyClusterClientInstance.callAsInternalUser.mockRejectedValue(new Error());
+    const mockedClient = mockClusterClientInstance.asInternalUser;
+    mockedClient.nodes.info.mockImplementation(() =>
+      elasticsearchClientMock.createClientError(new Error())
+    );
 
     const setupContract = await elasticsearchService.setup(setupDeps);
 
-    expect(mockLegacyClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(0);
+    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
     const sub = setupContract.esNodesCompatibility$.subscribe(async () => {
       sub.unsubscribe();
       await delay(100);
-      expect(mockLegacyClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
       done();
     });
   });
@@ -353,16 +357,19 @@ describe('#stop', () => {
   it('stops pollEsNodeVersions even if there are active subscriptions', async (done) => {
     expect.assertions(2);
 
-    mockLegacyClusterClientInstance.callAsInternalUser.mockRejectedValue(new Error());
+    const mockedClient = mockClusterClientInstance.asInternalUser;
+    mockedClient.nodes.info.mockImplementation(() =>
+      elasticsearchClientMock.createClientError(new Error())
+    );
 
     const setupContract = await elasticsearchService.setup(setupDeps);
 
     setupContract.esNodesCompatibility$.subscribe(async () => {
-      expect(mockLegacyClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
 
       await elasticsearchService.stop();
       await delay(100);
-      expect(mockLegacyClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
       done();
     });
   });

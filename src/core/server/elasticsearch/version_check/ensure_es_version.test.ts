@@ -18,6 +18,7 @@
  */
 import { mapNodesVersionCompatibility, pollEsNodesVersion, NodesInfo } from './ensure_es_version';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
+import { elasticsearchClientMock } from '../client/mocks';
 import { take, delay } from 'rxjs/operators';
 import { TestScheduler } from 'rxjs/testing';
 import { of } from 'rxjs';
@@ -26,6 +27,9 @@ const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
 
 const KIBANA_VERSION = '5.1.0';
+
+const createEsSuccess = elasticsearchClientMock.createClientResponse;
+const createEsError = elasticsearchClientMock.createClientError;
 
 function createNodes(...versions: string[]): NodesInfo {
   const nodes = {} as any;
@@ -111,25 +115,34 @@ describe('mapNodesVersionCompatibility', () => {
 });
 
 describe('pollEsNodesVersion', () => {
-  const callWithInternalUser = jest.fn();
+  let internalClient: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
   const getTestScheduler = () =>
     new TestScheduler((actual, expected) => {
       expect(actual).toEqual(expected);
     });
 
   beforeEach(() => {
-    callWithInternalUser.mockReset();
+    internalClient = elasticsearchClientMock.createInternalClient();
   });
+
+  const nodeInfosSuccessOnce = (infos: NodesInfo) => {
+    internalClient.nodes.info.mockImplementationOnce(() => createEsSuccess(infos));
+  };
+  const nodeInfosErrorOnce = (error: any) => {
+    internalClient.nodes.info.mockImplementationOnce(() => createEsError(error));
+  };
 
   it('returns iscCompatible=false and keeps polling when a poll request throws', (done) => {
     expect.assertions(3);
     const expectedCompatibilityResults = [false, false, true];
     jest.clearAllMocks();
-    callWithInternalUser.mockResolvedValueOnce(createNodes('5.1.0', '5.2.0', '5.0.0'));
-    callWithInternalUser.mockRejectedValueOnce(new Error('mock request error'));
-    callWithInternalUser.mockResolvedValueOnce(createNodes('5.1.0', '5.2.0', '5.1.1-Beta1'));
+
+    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.0.0'));
+    nodeInfosErrorOnce('mock request error');
+    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.1.1-Beta1'));
+
     pollEsNodesVersion({
-      callWithInternalUser,
+      internalClient,
       esVersionCheckInterval: 1,
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
@@ -148,9 +161,11 @@ describe('pollEsNodesVersion', () => {
   it('returns compatibility results', (done) => {
     expect.assertions(1);
     const nodes = createNodes('5.1.0', '5.2.0', '5.0.0');
-    callWithInternalUser.mockResolvedValueOnce(nodes);
+
+    nodeInfosSuccessOnce(nodes);
+
     pollEsNodesVersion({
-      callWithInternalUser,
+      internalClient,
       esVersionCheckInterval: 1,
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
@@ -168,15 +183,15 @@ describe('pollEsNodesVersion', () => {
 
   it('only emits if the node versions changed since the previous poll', (done) => {
     expect.assertions(4);
-    callWithInternalUser.mockResolvedValueOnce(createNodes('5.1.0', '5.2.0', '5.0.0')); // emit
-    callWithInternalUser.mockResolvedValueOnce(createNodes('5.0.0', '5.1.0', '5.2.0')); // ignore, same versions, different ordering
-    callWithInternalUser.mockResolvedValueOnce(createNodes('5.1.1', '5.2.0', '5.0.0')); // emit
-    callWithInternalUser.mockResolvedValueOnce(createNodes('5.1.1', '5.1.2', '5.1.3')); // emit
-    callWithInternalUser.mockResolvedValueOnce(createNodes('5.1.1', '5.1.2', '5.1.3')); // ignore
-    callWithInternalUser.mockResolvedValueOnce(createNodes('5.0.0', '5.1.0', '5.2.0')); // emit, different from previous version
+    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.0.0')); // emit
+    nodeInfosSuccessOnce(createNodes('5.0.0', '5.1.0', '5.2.0')); // ignore, same versions, different ordering
+    nodeInfosSuccessOnce(createNodes('5.1.1', '5.2.0', '5.0.0')); // emit
+    nodeInfosSuccessOnce(createNodes('5.1.1', '5.1.2', '5.1.3')); // emit
+    nodeInfosSuccessOnce(createNodes('5.1.1', '5.1.2', '5.1.3')); // ignore
+    nodeInfosSuccessOnce(createNodes('5.0.0', '5.1.0', '5.2.0')); // emit, different from previous version
 
     pollEsNodesVersion({
-      callWithInternalUser,
+      internalClient,
       esVersionCheckInterval: 1,
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
@@ -192,14 +207,21 @@ describe('pollEsNodesVersion', () => {
 
   it('starts polling immediately and then every esVersionCheckInterval', () => {
     expect.assertions(1);
-    callWithInternalUser.mockReturnValueOnce([createNodes('5.1.0', '5.2.0', '5.0.0')]);
-    callWithInternalUser.mockReturnValueOnce([createNodes('5.1.1', '5.2.0', '5.0.0')]);
+
+    // @ts-expect-error we need to return an incompatible type to use the testScheduler here
+    internalClient.nodes.info.mockReturnValueOnce([
+      { body: createNodes('5.1.0', '5.2.0', '5.0.0') },
+    ]);
+    // @ts-expect-error we need to return an incompatible type to use the testScheduler here
+    internalClient.nodes.info.mockReturnValueOnce([
+      { body: createNodes('5.1.1', '5.2.0', '5.0.0') },
+    ]);
 
     getTestScheduler().run(({ expectObservable }) => {
       const expected = 'a 99ms (b|)';
 
       const esNodesCompatibility$ = pollEsNodesVersion({
-        callWithInternalUser,
+        internalClient,
         esVersionCheckInterval: 100,
         ignoreVersionMismatch: false,
         kibanaVersion: KIBANA_VERSION,
@@ -227,15 +249,17 @@ describe('pollEsNodesVersion', () => {
     getTestScheduler().run(({ expectObservable }) => {
       const expected = '100ms a 99ms (b|)';
 
-      callWithInternalUser.mockReturnValueOnce(
-        of(createNodes('5.1.0', '5.2.0', '5.0.0')).pipe(delay(100))
+      internalClient.nodes.info.mockReturnValueOnce(
+        // @ts-expect-error we need to return an incompatible type to use the testScheduler here
+        of({ body: createNodes('5.1.0', '5.2.0', '5.0.0') }).pipe(delay(100))
       );
-      callWithInternalUser.mockReturnValueOnce(
-        of(createNodes('5.1.1', '5.2.0', '5.0.0')).pipe(delay(100))
+      internalClient.nodes.info.mockReturnValueOnce(
+        // @ts-expect-error we need to return an incompatible type to use the testScheduler here
+        of({ body: createNodes('5.1.1', '5.2.0', '5.0.0') }).pipe(delay(100))
       );
 
       const esNodesCompatibility$ = pollEsNodesVersion({
-        callWithInternalUser,
+        internalClient,
         esVersionCheckInterval: 10,
         ignoreVersionMismatch: false,
         kibanaVersion: KIBANA_VERSION,
@@ -256,6 +280,6 @@ describe('pollEsNodesVersion', () => {
       });
     });
 
-    expect(callWithInternalUser).toHaveBeenCalledTimes(2);
+    expect(internalClient.nodes.info).toHaveBeenCalledTimes(2);
   });
 });
