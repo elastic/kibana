@@ -5,7 +5,6 @@
  */
 
 import { LegacyAPICaller } from '../../../../../src/core/server';
-import { MakeSchemaFrom } from '../../../../../src/plugins/usage_collection/server';
 import { buildRuleUsage, buildMlJobUsage, fetchRules, fetchJobs } from './detections_helpers';
 import { MlPluginSetup } from '../../../ml/server';
 
@@ -23,18 +22,7 @@ export interface MlJobsUsage {
   ml_jobs_elastic_disabled: number;
 }
 
-export type DetectionsUsage = DetectionRulesUsage & MlJobsUsage;
-
-export const getDetectionsSchema = (): MakeSchemaFrom<DetectionsUsage> => ({
-  detection_rules_custom_enabled: { type: 'number' },
-  detection_rules_custom_disabled: { type: 'number' },
-  detection_rules_elastic_enabled: { type: 'number' },
-  detection_rules_elastic_disabled: { type: 'number' },
-  ml_jobs_custom_enabled: { type: 'number' },
-  ml_jobs_custom_disabled: { type: 'number' },
-  ml_jobs_elastic_enabled: { type: 'number' },
-  ml_jobs_elastic_disabled: { type: 'number' },
-});
+export interface DetectionsUsage extends MlJobsUsage, DetectionRulesUsage {}
 
 export const fetchDetectionsUsage = async (
   kibanaIndex: string,

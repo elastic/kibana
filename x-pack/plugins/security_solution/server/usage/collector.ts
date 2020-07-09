@@ -5,10 +5,8 @@
  */
 
 import { LegacyAPICaller } from '../../../../../src/core/server';
-import { CollectorOptions } from '../../../../../src/plugins/usage_collection/server';
-import { SERVER_APP_ID } from '../../common/constants';
 import { CollectorDependencies } from './types';
-import { DetectionsUsage, getDetectionsSchema, fetchDetectionsUsage } from './detections';
+import { DetectionsUsage, fetchDetectionsUsage } from './detections';
 
 export type RegisterCollector = (deps: CollectorDependencies) => void;
 export interface UsageData {
@@ -20,25 +18,25 @@ export const registerCollector: RegisterCollector = ({ kibanaIndex, ml, usageCol
     return;
   }
 
-  const collector = usageCollection.makeUsageCollector<UsageData>(
-    buildCollectorOptions(kibanaIndex, ml)
-  );
+  const collector = usageCollection.makeUsageCollector<UsageData>({
+    type: 'security_solution',
+    schema: {
+      detections: {
+        detection_rules_custom_enabled: { type: 'number' },
+        detection_rules_custom_disabled: { type: 'number' },
+        detection_rules_elastic_enabled: { type: 'number' },
+        detection_rules_elastic_disabled: { type: 'number' },
+        ml_jobs_custom_enabled: { type: 'number' },
+        ml_jobs_custom_disabled: { type: 'number' },
+        ml_jobs_elastic_enabled: { type: 'number' },
+        ml_jobs_elastic_disabled: { type: 'number' },
+      },
+    },
+    isReady: () => kibanaIndex.length > 0,
+    fetch: async (callCluster: LegacyAPICaller): Promise<UsageData> => ({
+      detections: await fetchDetectionsUsage(kibanaIndex, callCluster, ml),
+    }),
+  });
 
   usageCollection.registerCollector(collector);
 };
-
-export const buildCollectorOptions = (
-  kibanaIndex: string,
-  ml: CollectorDependencies['ml']
-): CollectorOptions<UsageData> => ({
-  type: SERVER_APP_ID,
-  schema: {
-    detections: getDetectionsSchema(),
-  },
-  isReady: () => kibanaIndex.length > 0,
-  fetch: async (callCluster: LegacyAPICaller) => {
-    return {
-      detections: await fetchDetectionsUsage(kibanaIndex, callCluster, ml),
-    };
-  },
-});
