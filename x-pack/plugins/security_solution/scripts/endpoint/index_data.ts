@@ -5,67 +5,34 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import seedrandom from 'seedrandom';
-import {
-  EndpointDocGenerator,
-  TreeOptions,
-  Event,
-  GeneratedAlertTree,
-} from '../../common/endpoint/generate_data';
+import { EndpointDocGenerator, Event } from '../../common/endpoint/generate_data';
 
-export async function indexHostsAndAlerts(
-  client: Client,
-  seed: string,
-  numHosts: number,
+/**
+ * Generate and index 'host' documents.
+ */
+export async function indexHostDocs(
+  /**
+   * Limits the amount of data that will be generated and indexed.
+   * Generates and indexes policy documents as well.
+   */
   numDocs: number,
-  metadataIndex: string,
-  policyIndex: string,
-  eventIndex: string,
-  alertIndex: string,
-  alertsPerHost: number,
-  options: TreeOptions
-) /** TODO, return stuff */ {
-  const random = seedrandom(seed);
-  for (let i = 0; i < numHosts; i++) {
-    const generator = new EndpointDocGenerator(random);
-    await indexHostDocs(numDocs, client, metadataIndex, policyIndex, generator);
-
-    // build a resolver tree
-    const alertEventTree: GeneratedAlertTree = generator.generatedAlertTree(options);
-
-    // Index the ancestry and the alert event itself regardless of `alertsPerHost` limit
-    const alertEvents = [...alertEventTree.ancestry, alertEventTree.alertEvent];
-
-    // index additional events until `alertsPerHost` limit is reached
-    for (const event of alertEventTree.descendants) {
-      if (alertEvents.length === alertsPerHost) {
-        break;
-      }
-      alertEvents.push(event);
-    }
-
-    await indexAlerts(client, eventIndex, alertIndex, alertEvents);
-  }
-  await client.indices.refresh({
-    index: eventIndex,
-  });
-  // TODO: Unclear why the documents are not showing up after the call to refresh.
-  // Waiting 5 seconds allows the indices to refresh automatically and
-  // the documents become available in API/integration tests.
-  await delay(5000);
-}
-
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function indexHostDocs(
-  numDocs: number,
+  /**
+   * ES client to use when indexing.
+   */
   client: Client,
+  /**
+   * Index for 'host' documents.
+   */
   metadataIndex: string,
+  /**
+   * Index for 'policy' documents.
+   */
   policyIndex: string,
+  /**
+   * A generator instance to use.
+   */
   generator: EndpointDocGenerator
-) {
+): Promise<void> {
   const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
   const timestamp = new Date().getTime();
   for (let j = 0; j < numDocs; j++) {
@@ -84,13 +51,28 @@ async function indexHostDocs(
   }
 }
 
-async function indexAlerts(
+/**
+ * Indexes alert, and alert-related events.
+ */
+export async function indexAlerts(
+  /**
+   * ES client to use when indexing.
+   */
   client: Client,
+  /**
+   * Index to put the non-alert documents.
+   */
   eventIndex: string,
+  /**
+   * Index for alert documents.
+   */
   alertIndex: string,
-  alertEvents: Event[]
+  /**
+   * events to index.
+   */
+  events: Event[]
 ) {
-  const body = alertEvents.reduce(
+  const body = events.reduce(
     // TODO fix
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (array: Array<Record<string, any>>, doc) => {

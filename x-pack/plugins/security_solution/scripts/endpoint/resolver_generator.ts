@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import seedrandom from 'seedrandom';
+
 /* eslint-disable no-console */
 import * as path from 'path';
 import yargs from 'yargs';
@@ -10,8 +13,13 @@ import * as url from 'url';
 import fetch from 'node-fetch';
 import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import { indexHostsAndAlerts } from './index_data';
-import { ANCESTRY_LIMIT, TreeOptions } from '../../common/endpoint/generate_data';
+import { indexAlerts, indexHostDocs } from './index_data';
+import {
+  ANCESTRY_LIMIT,
+  TreeOptions,
+  EndpointDocGenerator,
+  GeneratedAlertTree,
+} from '../../common/endpoint/generate_data';
 
 main();
 
@@ -119,18 +127,35 @@ async function main() {
     alertIndex,
     alertsPerHost,
   } = argv;
-  await indexHostsAndAlerts(
-    client,
-    seed,
-    numHosts,
-    numDocs,
-    metadataIndex,
-    policyIndex,
-    eventIndex,
-    alertIndex,
-    alertsPerHost,
-    treeOptions
-  );
+
+  const random = seedrandom(seed);
+  for (let i = 0; i < numHosts; i++) {
+    const generator = new EndpointDocGenerator(random);
+    await indexHostDocs(numDocs, client, metadataIndex, policyIndex, generator);
+
+    // build a resolver tree
+    const alertEventTree: GeneratedAlertTree = generator.generatedAlertTree(treeOptions);
+
+    // Index the ancestry and the alert event itself regardless of `alertsPerHost` limit
+    const alertEvents = [...alertEventTree.ancestry, alertEventTree.alertEvent];
+
+    // index additional events until `alertsPerHost` limit is reached
+    for (const event of alertEventTree.descendants) {
+      if (alertEvents.length === alertsPerHost) {
+        break;
+      }
+      alertEvents.push(event);
+    }
+
+    await indexAlerts(client, eventIndex, alertIndex, alertEvents);
+  }
+  await client.indices.refresh({
+    index: eventIndex,
+  });
+  // TODO: Unclear why the documents are not showing up after the call to refresh.
+  // Waiting 5 seconds allows the indices to refresh automatically and
+  // the documents become available in API/integration tests.
+  await delay(5000);
   console.log(`Creating and indexing documents took: ${Date.now() - startTime}ms`);
 }
 
@@ -257,4 +282,8 @@ function argvFromCLI() {
       default: false,
     },
   }).argv;
+}
+
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
