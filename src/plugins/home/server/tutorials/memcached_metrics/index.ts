@@ -36,6 +36,7 @@ export function memcachedMetricsSpecProvider(context: TutorialContext): Tutorial
     name: i18n.translate('home.tutorials.memcachedMetrics.nameTitle', {
       defaultMessage: 'Memcached metrics',
     }),
+    moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.memcachedMetrics.shortDescription', {
