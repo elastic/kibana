@@ -78,7 +78,12 @@ function decorateFlattenedWrapper(hit: Record<string, any>, metaFields: Record<s
     // unwrap computed fields
     _.forOwn(hit.fields, function (val, key: any) {
       if (key[0] === '_' && !_.includes(metaFields, key)) return;
-      flattened[key] = Array.isArray(val) && val.length === 1 ? val[0] : val;
+      // Flatten an array with 0 or 1 elements to a single value.
+      if (Array.isArray(val) && val.length <= 1) {
+        flattened[key] = val[0];
+      } else {
+        flattened[key] = val;
+      }
     });
 
     return flattened;
