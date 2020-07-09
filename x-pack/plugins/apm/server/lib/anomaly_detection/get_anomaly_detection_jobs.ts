@@ -42,14 +42,16 @@ export async function getAnomalyDetectionJobs(
   try {
     const { jobs } = await ml.anomalyDetectors.jobs(ML_GROUP_NAME_APM);
     return jobs
+      .filter(
+        (job) => (job.custom_settings?.job_tags?.apm_ml_version ?? 0) >= 2
+      )
       .map((job) => {
         const environment = job.custom_settings?.job_tags?.environment ?? '';
         return {
           job_id: job.job_id,
           environment,
         };
-      })
-      .filter((job) => job.environment);
+      });
   } catch (error) {
     if (error.statusCode !== 404) {
       logger.warn('Unable to get APM ML jobs.');
