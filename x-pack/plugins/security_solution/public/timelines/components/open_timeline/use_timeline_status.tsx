@@ -17,7 +17,6 @@ import {
 
 import * as i18n from './translations';
 import { TemplateTimelineFilter } from './types';
-import { disableTemplate } from '../../../../common/constants';
 
 export const useTimelineStatus = ({
   timelineType,
@@ -33,16 +32,16 @@ export const useTimelineStatus = ({
   templateTimelineFilter: JSX.Element[] | null;
 } => {
   const [selectedTab, setSelectedTab] = useState<TemplateTimelineTypeLiteralWithNull>(
-    disableTemplate ? null : TemplateTimelineType.elastic
+    TemplateTimelineType.elastic
   );
   const isTemplateFilterEnabled = useMemo(() => timelineType === TimelineType.template, [
     timelineType,
   ]);
 
-  const templateTimelineType = useMemo(
-    () => (disableTemplate || !isTemplateFilterEnabled ? null : selectedTab),
-    [selectedTab, isTemplateFilterEnabled]
-  );
+  const templateTimelineType = useMemo(() => (!isTemplateFilterEnabled ? null : selectedTab), [
+    selectedTab,
+    isTemplateFilterEnabled,
+  ]);
 
   const timelineStatus = useMemo(
     () =>
