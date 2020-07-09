@@ -45,18 +45,9 @@ This section summarizes the changes in each release.
 See also <<breaking-changes-7.8,breaking changes in 7.8>>.
 
 [float]
-[[enhancement-7.8.1]]
-=== Enhancements
-Monitoring::
-* Addresses a few longstanding issues with APM Stack Monitoring {pull}69052[#69052]
-SIEM::
-* Eliminates Superfluous Untitled Timelines {pull}65783[#65783]
-
-[float]
 [[bug-v7.8.1]]
 === Bug fixes
 Alerting::
-* Hides ServiceNow and Jira from alert actions {pull}69303[#69303]
 * Disables multiple select for preconfigured connectors to avoid requesting bulk delete on them {pull}69459[#69459]
 * Fixes adding an extra space character on selecting alert variable in action text fields {pull}70028[#70028]
 APM::
@@ -87,6 +78,7 @@ Metrics::
 * Fixes fatal error when no data is available for Metric Threshold Alerts {pull}68678[#68678]
 * Fixes EuiTheme type issue {pull}69735[#69735]
 Monitoring::
+* Addresses a few longstanding issues with APM Stack Monitoring {pull}69052[#69052]
 * Makes sure we fetch all collection status {pull}67172[#67172]
 * Adds Cloud as an optional dependency {pull}69050[#69050]
 * Fixes links missing a hash {pull}69861[#69861]
@@ -97,6 +89,7 @@ Platform::
 Reporting::
 * Don't set a min-length on encryption key for reporting {pull}69827[#69827]
 SIEM::
+* Eliminates Superfluous Untitled Timelines {pull}65783[#65783]
 * Fixes 7.8 upgrade issue within rules where you can get the error "params invalid: [lists]: definition for this key is missing" {pull}69434[#69434]
 * Excludes glob-only (*) Index Pattern from map layers {pull}69736[#69736]
 
