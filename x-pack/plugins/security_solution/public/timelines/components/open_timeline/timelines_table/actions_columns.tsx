@@ -16,6 +16,7 @@ import {
   TimelineActionsOverflowColumns,
 } from '../types';
 import * as i18n from '../translations';
+import { TimelineStatus } from '../../../../../common/types/timeline';
 
 /**
  * Returns the action columns (e.g. delete, open duplicate timeline)
@@ -54,7 +55,9 @@ export const getActionsColumns = ({
     onClick: (selectedTimeline: OpenTimelineResult) => {
       if (enableExportTimelineDownloader != null) enableExportTimelineDownloader(selectedTimeline);
     },
-    enabled: ({ savedObjectId }: OpenTimelineResult) => savedObjectId != null,
+    enabled: (timeline: OpenTimelineResult) => {
+      return timeline.savedObjectId != null && timeline.status !== TimelineStatus.immutable;
+    },
     description: i18n.EXPORT_SELECTED,
     'data-test-subj': 'export-timeline',
   };
@@ -65,7 +68,8 @@ export const getActionsColumns = ({
     onClick: (selectedTimeline: OpenTimelineResult) => {
       if (onOpenDeleteTimelineModal != null) onOpenDeleteTimelineModal(selectedTimeline);
     },
-    enabled: ({ savedObjectId }: OpenTimelineResult) => savedObjectId != null,
+    enabled: ({ savedObjectId, status }: OpenTimelineResult) =>
+      savedObjectId != null && status !== TimelineStatus.immutable,
     description: i18n.DELETE_SELECTED,
     'data-test-subj': 'delete-timeline',
   };

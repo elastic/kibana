@@ -29,10 +29,10 @@ import {
   esVersionEqualsKibana,
 } from './es_kibana_version_compatability';
 import { Logger } from '../../logging';
-import { APICaller } from '..';
+import { LegacyAPICaller } from '../legacy';
 
 export interface PollEsNodesVersionOptions {
-  callWithInternalUser: APICaller;
+  callWithInternalUser: LegacyAPICaller;
   log: Logger;
   kibanaVersion: string;
   ignoreVersionMismatch: boolean;

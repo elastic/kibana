@@ -5,7 +5,7 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { FeatureCollection } from 'geojson';
+import { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
 import { Filter, TimeRange } from 'src/plugins/data/public';
 import { AbstractSource, ISource } from '../source';
 import { IField } from '../../fields/field';
@@ -16,7 +16,7 @@ import {
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
-import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
+import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 
 export type GeoJsonFetchMeta = ESSearchSourceResponseMeta;
@@ -35,7 +35,7 @@ export type BoundsFilters = {
 };
 
 export interface IVectorSource extends ISource {
-  filterAndFormatPropertiesToHtml(properties: unknown): Promise<ITooltipProperty[]>;
+  filterAndFormatPropertiesToHtml(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   getBoundsForFilters(
     boundsFilters: BoundsFilters,
     registerCancelCallback: (requestToken: symbol, callback: () => void) => void
@@ -51,10 +51,12 @@ export interface IVectorSource extends ISource {
   getSyncMeta(): VectorSourceSyncMeta;
   getFieldNames(): string[];
   getApplyGlobalQuery(): boolean;
+  createField({ fieldName }: { fieldName: string }): IField;
+  canFormatFeatureProperties(): boolean;
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
-  filterAndFormatPropertiesToHtml(properties: unknown): Promise<ITooltipProperty[]>;
+  filterAndFormatPropertiesToHtml(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   getBoundsForFilters(
     boundsFilters: BoundsFilters,
     registerCancelCallback: (requestToken: symbol, callback: () => void) => void
@@ -68,10 +70,11 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   getFields(): Promise<IField[]>;
   getFieldByName(fieldName: string): IField | null;
   getSyncMeta(): VectorSourceSyncMeta;
-  getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPES[]>;
+  getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
   canFormatFeatureProperties(): boolean;
   getApplyGlobalQuery(): boolean;
   getFieldNames(): string[];
+  createField({ fieldName }: { fieldName: string }): IField;
 }
 
 export interface ITiledSingleLayerVectorSource extends IVectorSource {
@@ -83,4 +86,5 @@ export interface ITiledSingleLayerVectorSource extends IVectorSource {
   }>;
   getMinZoom(): number;
   getMaxZoom(): number;
+  getLayerName(): string;
 }

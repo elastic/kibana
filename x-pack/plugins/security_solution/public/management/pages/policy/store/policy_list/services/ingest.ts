@@ -6,92 +6,92 @@
 
 import { HttpFetchOptions, HttpStart } from 'kibana/public';
 import {
-  GetDatasourcesRequest,
+  GetPackageConfigsRequest,
   GetAgentStatusResponse,
-  DeleteDatasourcesResponse,
-  DeleteDatasourcesRequest,
-  DATASOURCE_SAVED_OBJECT_TYPE,
+  DeletePackageConfigsResponse,
+  DeletePackageConfigsRequest,
+  PACKAGE_CONFIG_SAVED_OBJECT_TYPE,
   GetPackagesResponse,
 } from '../../../../../../../../ingest_manager/common';
 import { GetPolicyListResponse, GetPolicyResponse, UpdatePolicyResponse } from '../../../types';
 import { NewPolicyData } from '../../../../../../../common/endpoint/types';
 
 const INGEST_API_ROOT = `/api/ingest_manager`;
-export const INGEST_API_DATASOURCES = `${INGEST_API_ROOT}/datasources`;
+export const INGEST_API_PACKAGE_CONFIGS = `${INGEST_API_ROOT}/package_configs`;
 const INGEST_API_FLEET = `${INGEST_API_ROOT}/fleet`;
 const INGEST_API_FLEET_AGENT_STATUS = `${INGEST_API_FLEET}/agent-status`;
-const INGEST_API_EPM_PACKAGES = `${INGEST_API_ROOT}/epm/packages`;
-const INGEST_API_DELETE_DATASOURCE = `${INGEST_API_DATASOURCES}/delete`;
+export const INGEST_API_EPM_PACKAGES = `${INGEST_API_ROOT}/epm/packages`;
+const INGEST_API_DELETE_PACKAGE_CONFIG = `${INGEST_API_PACKAGE_CONFIGS}/delete`;
 
 /**
- * Retrieves a list of endpoint specific datasources (those created with a `package.name` of
+ * Retrieves a list of endpoint specific package configs (those created with a `package.name` of
  * `endpoint`) from Ingest
  * @param http
  * @param options
  */
-export const sendGetEndpointSpecificDatasources = (
+export const sendGetEndpointSpecificPackageConfigs = (
   http: HttpStart,
-  options: HttpFetchOptions & Partial<GetDatasourcesRequest> = {}
+  options: HttpFetchOptions & Partial<GetPackageConfigsRequest> = {}
 ): Promise<GetPolicyListResponse> => {
-  return http.get<GetPolicyListResponse>(INGEST_API_DATASOURCES, {
+  return http.get<GetPolicyListResponse>(INGEST_API_PACKAGE_CONFIGS, {
     ...options,
     query: {
       ...options.query,
       kuery: `${
         options?.query?.kuery ? `${options.query.kuery} and ` : ''
-      }${DATASOURCE_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+      }${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name: endpoint`,
     },
   });
 };
 
 /**
- * Retrieves a single datasource based on ID from ingest
+ * Retrieves a single package config based on ID from ingest
  * @param http
- * @param datasourceId
+ * @param packageConfigId
  * @param options
  */
-export const sendGetDatasource = (
+export const sendGetPackageConfig = (
   http: HttpStart,
-  datasourceId: string,
+  packageConfigId: string,
   options?: HttpFetchOptions
 ) => {
-  return http.get<GetPolicyResponse>(`${INGEST_API_DATASOURCES}/${datasourceId}`, options);
+  return http.get<GetPolicyResponse>(`${INGEST_API_PACKAGE_CONFIGS}/${packageConfigId}`, options);
 };
 
 /**
- * Retrieves a single datasource based on ID from ingest
+ * Retrieves a single package config based on ID from ingest
  * @param http
- * @param datasourceId
+ * @param body
  * @param options
  */
-export const sendDeleteDatasource = (
+export const sendDeletePackageConfig = (
   http: HttpStart,
-  body: DeleteDatasourcesRequest,
+  body: DeletePackageConfigsRequest,
   options?: HttpFetchOptions
 ) => {
-  return http.post<DeleteDatasourcesResponse>(INGEST_API_DELETE_DATASOURCE, {
+  return http.post<DeletePackageConfigsResponse>(INGEST_API_DELETE_PACKAGE_CONFIG, {
     ...options,
     body: JSON.stringify(body.body),
   });
 };
 
 /**
- * Updates a datasources
+ * Updates a package config
  *
  * @param http
- * @param datasourceId
- * @param datasource
+ * @param packageConfigId
+ * @param packageConfig
  * @param options
  */
-export const sendPutDatasource = (
+export const sendPutPackageConfig = (
   http: HttpStart,
-  datasourceId: string,
-  datasource: NewPolicyData,
+  packageConfigId: string,
+  packageConfig: NewPolicyData,
   options: Exclude<HttpFetchOptions, 'body'> = {}
 ): Promise<UpdatePolicyResponse> => {
-  return http.put(`${INGEST_API_DATASOURCES}/${datasourceId}`, {
+  return http.put(`${INGEST_API_PACKAGE_CONFIGS}/${packageConfigId}`, {
     ...options,
-    body: JSON.stringify(datasource),
+    body: JSON.stringify(packageConfig),
   });
 };
 

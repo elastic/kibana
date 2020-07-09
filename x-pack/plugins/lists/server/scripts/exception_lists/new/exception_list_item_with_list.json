@@ -1,0 +1,24 @@
+{
+  "list_id": "endpoint_list",
+  "item_id": "endpoint_list_item_lg_val_list",
+  "_tags": ["endpoint", "process", "malware", "os:windows"],
+  "tags": ["user added string for a tag", "malware"],
+  "type": "simple",
+  "description": "This is a sample exception list item with a large value list included",
+  "name": "Sample Endpoint Exception List Item with large value list",
+  "comments": [],
+  "entries": [
+    {
+      "field": "event.module",
+      "operator": "excluded",
+      "type": "match_any",
+      "value": ["suricata"]
+    },
+    {
+      "field": "source.ip",
+      "operator": "excluded",
+      "type": "list",
+      "list": { "id": "list-ip", "type": "ip" }
+    }
+  ]
+}

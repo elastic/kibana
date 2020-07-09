@@ -24,5 +24,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./dashboard_drilldowns'));
     loadTestFile(require.resolve('./explore_data_panel_action'));
+    loadTestFile(require.resolve('./explore_data_chart_action'));
   });
 }

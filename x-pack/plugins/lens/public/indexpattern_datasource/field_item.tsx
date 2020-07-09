@@ -20,7 +20,6 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import {
   Axis,
   BarSeries,
@@ -41,6 +40,7 @@ import {
   esQuery,
   IIndexPattern,
 } from '../../../../../src/plugins/data/public';
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { DraggedField } from './indexpattern';
 import { DragDrop } from '../drag_drop';
 import { DatasourceDataPanelProps, DataType } from '../types';
@@ -48,6 +48,8 @@ import { BucketedAggregation, FieldStatsResponse } from '../../common';
 import { IndexPattern, IndexPatternField } from './types';
 import { LensFieldIcon } from './lens_field_icon';
 import { trackUiEvent } from '../lens_ui_telemetry';
+
+import { debouncedComponent } from '../debounced_component';
 
 export interface FieldItemProps {
   core: DatasourceDataPanelProps['core'];
@@ -58,6 +60,7 @@ export interface FieldItemProps {
   exists: boolean;
   query: Query;
   dateRange: DatasourceDataPanelProps['dateRange'];
+  chartsThemeService: ChartsPluginSetup['theme'];
   filters: Filter[];
   hideDetails?: boolean;
 }
@@ -78,7 +81,7 @@ function wrapOnDot(str?: string) {
   return str ? str.replace(/\./g, '.\u200B') : '';
 }
 
-export const FieldItem = React.memo(function FieldItem(props: FieldItemProps) {
+export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   const {
     core,
     field,
@@ -195,10 +198,12 @@ export const FieldItem = React.memo(function FieldItem(props: FieldItemProps) {
               className={`lnsFieldItem__info ${infoIsOpen ? 'lnsFieldItem__info-isOpen' : ''}`}
               data-test-subj={`lnsFieldListPanelField-${field.name}`}
               onClick={() => {
-                togglePopover();
+                if (exists) {
+                  togglePopover();
+                }
               }}
               onKeyPress={(event) => {
-                if (event.key === 'ENTER') {
+                if (exists && event.key === 'ENTER') {
                   togglePopover();
                 }
               }}
@@ -239,7 +244,9 @@ export const FieldItem = React.memo(function FieldItem(props: FieldItemProps) {
       <FieldItemPopoverContents {...state} {...props} />
     </EuiPopover>
   );
-});
+};
+
+export const FieldItem = debouncedComponent(InnerFieldItem);
 
 function FieldItemPopoverContents(props: State & FieldItemProps) {
   const {
@@ -250,11 +257,12 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     dateRange,
     core,
     sampledValues,
+    chartsThemeService,
     data: { fieldFormats },
   } = props;
 
-  const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');
-  const chartTheme = IS_DARK_THEME ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme;
+  const chartTheme = chartsThemeService.useChartsTheme();
+  const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   let histogramDefault = !!props.histogram;
 
   const totalValuesCount =
@@ -406,6 +414,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
           <Settings
             tooltip={{ type: TooltipType.None }}
             theme={chartTheme}
+            baseTheme={chartBaseTheme}
             xDomain={
               fromDate && toDate
                 ? {
@@ -442,7 +451,12 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     } else if (showingHistogram || !topValues || !topValues.buckets.length) {
       return wrapInPopover(
         <Chart data-test-subj="lnsFieldListPanel-histogram" size={{ height: 200, width: '100%' }}>
-          <Settings rotation={90} tooltip={{ type: TooltipType.None }} theme={chartTheme} />
+          <Settings
+            rotation={90}
+            tooltip={{ type: TooltipType.None }}
+            theme={chartTheme}
+            baseTheme={chartBaseTheme}
+          />
 
           <Axis
             id="key"

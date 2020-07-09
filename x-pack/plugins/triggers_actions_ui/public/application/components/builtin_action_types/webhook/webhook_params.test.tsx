@@ -20,10 +20,10 @@ describe('WebhookParamsFields renders', () => {
         index={0}
       />
     );
-    expect(wrapper.find('[data-test-subj="webhookBodyEditor"]').length > 0).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="webhookBodyEditor"]').first().prop('value')
-    ).toStrictEqual('test message');
+    expect(wrapper.find('[data-test-subj="bodyJsonEditor"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="bodyJsonEditor"]').first().prop('value')).toStrictEqual(
+      'test message'
+    );
     expect(wrapper.find('[data-test-subj="bodyAddVariableButton"]').length > 0).toBeTruthy();
   });
 });

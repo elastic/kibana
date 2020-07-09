@@ -15,11 +15,13 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
 } from './elasticsearch_fieldnames';
+import { ServiceAnomalyStats } from './anomaly_detection';
 
 export interface ServiceConnectionNode extends cytoscape.NodeDataDefinition {
   [SERVICE_NAME]: string;
   [SERVICE_ENVIRONMENT]: string | null;
   [AGENT_NAME]: string;
+  serviceAnomalyStats?: ServiceAnomalyStats;
 }
 export interface ExternalConnectionNode extends cytoscape.NodeDataDefinition {
   [SPAN_DESTINATION_SERVICE_RESOURCE]: string;
@@ -34,21 +36,13 @@ export interface Connection {
   destination: ConnectionNode;
 }
 
-export interface ServiceAnomaly {
-  anomaly_score: number;
-  anomaly_severity: string;
-  actual_value: number;
-  typical_value: number;
-  ml_job_id: string;
-}
-
-export type ServiceNode = ConnectionNode & Partial<ServiceAnomaly>;
-
 export interface ServiceNodeMetrics {
   avgMemoryUsage: number | null;
   avgCpuUsage: number | null;
-  avgTransactionDuration: number | null;
-  avgRequestsPerMinute: number | null;
+  transactionStats: {
+    avgTransactionDuration: number | null;
+    avgRequestsPerMinute: number | null;
+  };
   avgErrorsPerMinute: number | null;
 }
 

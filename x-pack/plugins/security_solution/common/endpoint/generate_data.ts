@@ -14,8 +14,10 @@ import {
   HostPolicyResponse,
   HostPolicyResponseActionStatus,
   PolicyData,
+  EndpointStatus,
 } from './types';
 import { factory as policyFactory } from './models/policy_config';
+import { parentEntityId } from './models/event';
 
 export type Event = AlertEvent | EndpointEvent;
 /**
@@ -37,6 +39,7 @@ interface EventOptions {
   eventCategory?: string | string[];
   processName?: string;
   ancestry?: string[];
+  ancestryArrayLimit?: number;
   pid?: number;
   parentPid?: number;
   extensions?: object;
@@ -47,6 +50,8 @@ const Windows: OSFields[] = [
     name: 'windows 10.0',
     full: 'Windows 10',
     version: '10.0',
+    platform: 'Windows',
+    family: 'Windows',
     Ext: {
       variant: 'Windows Pro',
     },
@@ -55,6 +60,8 @@ const Windows: OSFields[] = [
     name: 'windows 10.0',
     full: 'Windows Server 2016',
     version: '10.0',
+    platform: 'Windows',
+    family: 'Windows',
     Ext: {
       variant: 'Windows Server',
     },
@@ -63,6 +70,8 @@ const Windows: OSFields[] = [
     name: 'windows 6.2',
     full: 'Windows Server 2012',
     version: '6.2',
+    platform: 'Windows',
+    family: 'Windows',
     Ext: {
       variant: 'Windows Server',
     },
@@ -71,6 +80,8 @@ const Windows: OSFields[] = [
     name: 'windows 6.3',
     full: 'Windows Server 2012R2',
     version: '6.3',
+    platform: 'Windows',
+    family: 'Windows',
     Ext: {
       variant: 'Windows Server Release 2',
     },
@@ -209,6 +220,7 @@ interface HostInfo {
   };
   host: Host;
   Endpoint: {
+    status: EndpointStatus;
     policy: {
       applied: {
         id: string;
@@ -257,6 +269,11 @@ export interface Tree {
    */
   children: Map<string, TreeNode>;
   /**
+   * An array of levels of the children, that doesn't include the origin or any ancestors
+   * childrenLevels[0] are the direct children of the origin node. The next level would be those children's descendants
+   */
+  childrenLevels: Array<Map<string, TreeNode>>;
+  /**
    * Map of entity_id to node
    */
   ancestry: Map<string, TreeNode>;
@@ -279,12 +296,33 @@ export interface TreeOptions {
   percentWithRelated?: number;
   percentTerminated?: number;
   alwaysGenMaxChildrenPerNode?: boolean;
+  ancestryArraySize?: number;
+}
+
+type TreeOptionDefaults = Required<TreeOptions>;
+
+/**
+ * This function provides defaults for fields that are not specified in the options
+ *
+ * @param options tree options for defining the structure of the tree
+ */
+export function getTreeOptionsWithDef(options?: TreeOptions): TreeOptionDefaults {
+  return {
+    ancestors: options?.ancestors ?? 3,
+    generations: options?.generations ?? 2,
+    children: options?.children ?? 2,
+    relatedEvents: options?.relatedEvents ?? 5,
+    relatedAlerts: options?.relatedAlerts ?? 3,
+    percentWithRelated: options?.percentWithRelated ?? 30,
+    percentTerminated: options?.percentTerminated ?? 100,
+    alwaysGenMaxChildrenPerNode: options?.alwaysGenMaxChildrenPerNode ?? false,
+    ancestryArraySize: options?.ancestryArraySize ?? ANCESTRY_LIMIT,
+  };
 }
 
 export class EndpointDocGenerator {
   commonInfo: HostInfo;
   random: seedrandom.prng;
-
   constructor(seed: string | seedrandom.prng = Math.random().toString()) {
     if (typeof seed === 'string') {
       this.random = seedrandom(seed);
@@ -305,7 +343,7 @@ export class EndpointDocGenerator {
    * Creates new random policy id for the host to simulate new policy application
    */
   public updatePolicyId() {
-    this.commonInfo.Endpoint.policy.applied = this.randomChoice(APPLIED_POLICIES);
+    this.commonInfo.Endpoint.policy.applied.id = this.randomChoice(APPLIED_POLICIES).id;
     this.commonInfo.Endpoint.policy.applied.status = this.randomChoice([
       HostPolicyResponseActionStatus.success,
       HostPolicyResponseActionStatus.failure,
@@ -314,6 +352,7 @@ export class EndpointDocGenerator {
   }
 
   private createHostData(): HostInfo {
+    const hostName = this.randomHostname();
     return {
       agent: {
         version: this.randomVersion(),
@@ -327,12 +366,15 @@ export class EndpointDocGenerator {
       },
       host: {
         id: this.seededUUIDv4(),
-        hostname: this.randomHostname(),
+        hostname: hostName,
+        name: hostName,
+        architecture: this.randomString(10),
         ip: this.randomArray(3, () => this.randomIP()),
         mac: this.randomArray(3, () => this.randomMac()),
         os: this.randomChoice(OS),
       },
       Endpoint: {
+        status: EndpointStatus.enrolled,
         policy: {
           applied: this.randomChoice(APPLIED_POLICIES),
         },
@@ -349,6 +391,13 @@ export class EndpointDocGenerator {
       '@timestamp': ts,
       event: {
         created: ts,
+        id: this.seededUUIDv4(),
+        kind: 'metric',
+        category: ['host'],
+        type: ['info'],
+        module: 'endpoint',
+        action: 'endpoint_metadata',
+        dataset: 'endpoint.metadata',
       },
       ...this.commonInfo,
     };
@@ -359,6 +408,7 @@ export class EndpointDocGenerator {
    * @param ts - Timestamp to put in the event
    * @param entityID - entityID of the originating process
    * @param parentEntityID - optional entityID of the parent process, if it exists
+   * @param ancestryArray - an array of ancestors for the generated alert
    */
   public generateAlert(
     ts = new Date().getTime(),
@@ -424,9 +474,7 @@ export class EndpointDocGenerator {
           sha256: 'fake sha256',
         },
         Ext: {
-          // simulate a finite ancestry array size, the endpoint limits the ancestry array to 20 entries we'll use
-          // 2 so that the backend can handle that case
-          ancestry: ancestryArray.slice(0, ANCESTRY_LIMIT),
+          ancestry: ancestryArray,
           code_signature: [
             {
               trusted: false,
@@ -489,6 +537,10 @@ export class EndpointDocGenerator {
    * @param options - Allows event field values to be specified
    */
   public generateEvent(options: EventOptions = {}): EndpointEvent {
+    // this will default to an empty array for the ancestry field if options.ancestry isn't included
+    const ancestry: string[] =
+      options.ancestry?.slice(0, options?.ancestryArrayLimit ?? ANCESTRY_LIMIT) ?? [];
+
     const processName = options.processName ? options.processName : randomProcessName();
     const detailRecordForEventType =
       options.extensions ||
@@ -549,7 +601,9 @@ export class EndpointDocGenerator {
         name: processName,
         // simulate a finite ancestry array size, the endpoint limits the ancestry array to 20 entries we'll use
         // 2 so that the backend can handle that case
-        Ext: { ancestry: options.ancestry?.slice(0, ANCESTRY_LIMIT) || [] },
+        Ext: {
+          ancestry,
+        },
       },
       user: {
         domain: this.randomString(10),
@@ -567,6 +621,7 @@ export class EndpointDocGenerator {
    * @returns a Tree structure that makes accessing specific events easier
    */
   public generateTree(options: TreeOptions = {}): Tree {
+    const optionsWithDef = getTreeOptionsWithDef(options);
     const addEventToMap = (nodeMap: Map<string, TreeNode>, event: Event) => {
       const nodeId = event.process.entity_id;
       // if a node already exists for the entity_id we'll use that one, otherwise let's create a new empty node
@@ -590,13 +645,46 @@ export class EndpointDocGenerator {
       return nodeMap.set(nodeId, node);
     };
 
-    const ancestry = this.createAlertEventAncestry(
-      options.ancestors,
-      options.relatedEvents,
-      options.relatedAlerts,
-      options.percentWithRelated,
-      options.percentTerminated
-    );
+    const groupNodesByParent = (children: Map<string, TreeNode>) => {
+      const nodesByParent: Map<string, Map<string, TreeNode>> = new Map();
+      for (const node of children.values()) {
+        const parentID = parentEntityId(node.lifecycle[0]);
+        if (parentID) {
+          let groupedNodes = nodesByParent.get(parentID);
+
+          if (!groupedNodes) {
+            groupedNodes = new Map();
+            nodesByParent.set(parentID, groupedNodes);
+          }
+          groupedNodes.set(node.id, node);
+        }
+      }
+
+      return nodesByParent;
+    };
+
+    const createLevels = (
+      childrenByParent: Map<string, Map<string, TreeNode>>,
+      levels: Array<Map<string, TreeNode>>,
+      currentNodes: Map<string, TreeNode> | undefined
+    ): Array<Map<string, TreeNode>> => {
+      if (!currentNodes || currentNodes.size === 0) {
+        return levels;
+      }
+      levels.push(currentNodes);
+      const nextLevel: Map<string, TreeNode> = new Map();
+      for (const node of currentNodes.values()) {
+        const children = childrenByParent.get(node.id);
+        if (children) {
+          for (const child of children.values()) {
+            nextLevel.set(child.id, child);
+          }
+        }
+      }
+      return createLevels(childrenByParent, levels, nextLevel);
+    };
+
+    const ancestry = this.createAlertEventAncestry(optionsWithDef);
 
     // create a mapping of entity_id -> {lifecycle, related events, and related alerts}
     const ancestryNodes: Map<string, TreeNode> = ancestry.reduce(addEventToMap, new Map());
@@ -607,26 +695,18 @@ export class EndpointDocGenerator {
       throw Error(`could not find origin while building tree: ${alert.process.entity_id}`);
     }
 
-    const children = Array.from(
-      this.descendantsTreeGenerator(
-        alert,
-        options.generations,
-        options.children,
-        options.relatedEvents,
-        options.relatedAlerts,
-        options.percentWithRelated,
-        options.percentTerminated,
-        options.alwaysGenMaxChildrenPerNode
-      )
-    );
+    const children = Array.from(this.descendantsTreeGenerator(alert, optionsWithDef));
 
     const childrenNodes: Map<string, TreeNode> = children.reduce(addEventToMap, new Map());
+    const childrenByParent = groupNodesByParent(childrenNodes);
+    const levels = createLevels(childrenByParent, [], childrenByParent.get(origin.id));
 
     return {
       children: childrenNodes,
       ancestry: ancestryNodes,
       allEvents: [...ancestry, ...children],
       origin,
+      childrenLevels: levels,
     };
   }
 
@@ -644,8 +724,9 @@ export class EndpointDocGenerator {
    * @param alwaysGenMaxChildrenPerNode - flag to always return the max children per node instead of it being a random number of children
    */
   public *alertsGenerator(numAlerts: number, options: TreeOptions = {}) {
+    const opts = getTreeOptionsWithDef(options);
     for (let i = 0; i < numAlerts; i++) {
-      yield* this.fullResolverTreeGenerator(options);
+      yield* this.fullResolverTreeGenerator(opts);
     }
   }
 
@@ -664,27 +745,14 @@ export class EndpointDocGenerator {
    * @param alwaysGenMaxChildrenPerNode - flag to always return the max children per node instead of it being a random number of children
    */
   public *fullResolverTreeGenerator(options: TreeOptions = {}) {
-    const ancestry = this.createAlertEventAncestry(
-      options.ancestors,
-      options.relatedEvents,
-      options.relatedAlerts,
-      options.percentWithRelated,
-      options.percentTerminated
-    );
+    const opts = getTreeOptionsWithDef(options);
+
+    const ancestry = this.createAlertEventAncestry(opts);
     for (let i = 0; i < ancestry.length; i++) {
       yield ancestry[i];
     }
     // ancestry will always have at least 2 elements, and the last element will be the alert
-    yield* this.descendantsTreeGenerator(
-      ancestry[ancestry.length - 1],
-      options.generations,
-      options.children,
-      options.relatedEvents,
-      options.relatedAlerts,
-      options.percentWithRelated,
-      options.percentTerminated,
-      options.alwaysGenMaxChildrenPerNode
-    );
+    yield* this.descendantsTreeGenerator(ancestry[ancestry.length - 1], opts);
   }
 
   /**
@@ -696,16 +764,14 @@ export class EndpointDocGenerator {
    * @param pctWithRelated - percent of ancestors that will have related events and alerts
    * @param pctWithTerminated - percent of ancestors that will have termination events
    */
-  public createAlertEventAncestry(
-    alertAncestors = 3,
-    relatedEventsPerNode: RelatedEventInfo[] | number = 5,
-    relatedAlertsPerNode: number = 3,
-    pctWithRelated = 30,
-    pctWithTerminated = 100
-  ): Event[] {
+  public createAlertEventAncestry(options: TreeOptions = {}): Event[] {
+    const opts = getTreeOptionsWithDef(options);
+
     const events = [];
     const startDate = new Date().getTime();
-    const root = this.generateEvent({ timestamp: startDate + 1000 });
+    const root = this.generateEvent({
+      timestamp: startDate + 1000,
+    });
     events.push(root);
     let ancestor = root;
     let timestamp = root['@timestamp'] + 1000;
@@ -724,7 +790,7 @@ export class EndpointDocGenerator {
     const addRelatedEvents = (node: Event, secBeforeEvent: number, eventList: Event[]) => {
       for (const relatedEvent of this.relatedEventsGenerator(
         node,
-        relatedEventsPerNode,
+        opts.relatedEvents,
         secBeforeEvent
       )) {
         eventList.push(relatedEvent);
@@ -733,13 +799,13 @@ export class EndpointDocGenerator {
 
     // generate related alerts for root
     const processDuration: number = 6 * 3600;
-    if (this.randomN(100) < pctWithRelated) {
+    if (this.randomN(100) < opts.percentWithRelated) {
       addRelatedEvents(ancestor, processDuration, events);
-      addRelatedAlerts(ancestor, relatedAlertsPerNode, processDuration, events);
+      addRelatedAlerts(ancestor, opts.relatedAlerts, processDuration, events);
     }
 
     // generate the termination event for the root
-    if (this.randomN(100) < pctWithTerminated) {
+    if (this.randomN(100) < opts.percentTerminated) {
       const termProcessDuration = this.randomN(1000000); // This lets termination events be up to 1 million seconds after the creation event (~11 days)
       events.push(
         this.generateEvent({
@@ -752,19 +818,20 @@ export class EndpointDocGenerator {
       );
     }
 
-    for (let i = 0; i < alertAncestors; i++) {
+    for (let i = 0; i < opts.ancestors; i++) {
       ancestor = this.generateEvent({
         timestamp,
         parentEntityID: ancestor.process.entity_id,
         // add the parent to the ancestry array
-        ancestry: [ancestor.process.entity_id, ...ancestor.process.Ext.ancestry],
+        ancestry: [ancestor.process.entity_id, ...(ancestor.process.Ext.ancestry ?? [])],
+        ancestryArrayLimit: opts.ancestryArraySize,
         parentPid: ancestor.process.pid,
         pid: this.randomN(5000),
       });
       events.push(ancestor);
       timestamp = timestamp + 1000;
 
-      if (this.randomN(100) < pctWithTerminated) {
+      if (this.randomN(100) < opts.percentTerminated) {
         const termProcessDuration = this.randomN(1000000); // This lets termination events be up to 1 million seconds after the creation event (~11 days)
         events.push(
           this.generateEvent({
@@ -774,18 +841,19 @@ export class EndpointDocGenerator {
             eventCategory: 'process',
             eventType: 'end',
             ancestry: ancestor.process.Ext.ancestry,
+            ancestryArrayLimit: opts.ancestryArraySize,
           })
         );
       }
 
       // generate related alerts for ancestor
-      if (this.randomN(100) < pctWithRelated) {
+      if (this.randomN(100) < opts.percentWithRelated) {
         addRelatedEvents(ancestor, processDuration, events);
-        let numAlertsPerNode = relatedAlertsPerNode;
+        let numAlertsPerNode = opts.relatedAlerts;
         // if this is the last ancestor, create one less related alert so that we have a uniform amount of related alerts
         // for each node. The last alert at the end of this function should always be created even if the related alerts
         // amount is 0
-        if (i === alertAncestors - 1) {
+        if (i === opts.ancestors - 1) {
           numAlertsPerNode -= 1;
         }
         addRelatedAlerts(ancestor, numAlertsPerNode, processDuration, events);
@@ -813,19 +881,11 @@ export class EndpointDocGenerator {
    * @param percentChildrenTerminated - percent of nodes which will have process termination events
    * @param alwaysGenMaxChildrenPerNode - flag to always return the max children per node instead of it being a random number of children
    */
-  public *descendantsTreeGenerator(
-    root: Event,
-    generations = 2,
-    maxChildrenPerNode = 2,
-    relatedEventsPerNode: RelatedEventInfo[] | number = 3,
-    relatedAlertsPerNode: number = 3,
-    percentNodesWithRelated = 100,
-    percentChildrenTerminated = 100,
-    alwaysGenMaxChildrenPerNode = false
-  ) {
-    let maxChildren = this.randomN(maxChildrenPerNode + 1);
-    if (alwaysGenMaxChildrenPerNode) {
-      maxChildren = maxChildrenPerNode;
+  public *descendantsTreeGenerator(root: Event, options: TreeOptions = {}) {
+    const opts = getTreeOptionsWithDef(options);
+    let maxChildren = this.randomN(opts.children + 1);
+    if (opts.alwaysGenMaxChildrenPerNode) {
+      maxChildren = opts.children;
     }
 
     const rootState: NodeState = {
@@ -840,7 +900,7 @@ export class EndpointDocGenerator {
       // If we get to a state node and it has made all the children, move back up a level
       if (
         currentState.childrenCreated === currentState.maxChildren ||
-        lineage.length === generations + 1
+        lineage.length === opts.generations + 1
       ) {
         lineage.pop();
         // eslint-disable-next-line no-continue
@@ -854,13 +914,14 @@ export class EndpointDocGenerator {
         parentEntityID: currentState.event.process.entity_id,
         ancestry: [
           currentState.event.process.entity_id,
-          ...currentState.event.process.Ext.ancestry,
+          ...(currentState.event.process.Ext.ancestry ?? []),
         ],
+        ancestryArrayLimit: opts.ancestryArraySize,
       });
 
-      maxChildren = this.randomN(maxChildrenPerNode + 1);
-      if (alwaysGenMaxChildrenPerNode) {
-        maxChildren = maxChildrenPerNode;
+      maxChildren = this.randomN(opts.children + 1);
+      if (opts.alwaysGenMaxChildrenPerNode) {
+        maxChildren = opts.children;
       }
       lineage.push({
         event: child,
@@ -869,7 +930,7 @@ export class EndpointDocGenerator {
       });
       yield child;
       let processDuration: number = 6 * 3600;
-      if (this.randomN(100) < percentChildrenTerminated) {
+      if (this.randomN(100) < opts.percentTerminated) {
         processDuration = this.randomN(1000000); // This lets termination events be up to 1 million seconds after the creation event (~11 days)
         yield this.generateEvent({
           timestamp: timestamp + processDuration * 1000,
@@ -878,11 +939,12 @@ export class EndpointDocGenerator {
           eventCategory: 'process',
           eventType: 'end',
           ancestry: child.process.Ext.ancestry,
+          ancestryArrayLimit: opts.ancestryArraySize,
         });
       }
-      if (this.randomN(100) < percentNodesWithRelated) {
-        yield* this.relatedEventsGenerator(child, relatedEventsPerNode, processDuration);
-        yield* this.relatedAlertsGenerator(child, relatedAlertsPerNode, processDuration);
+      if (this.randomN(100) < opts.percentWithRelated) {
+        yield* this.relatedEventsGenerator(child, opts.relatedEvents, processDuration);
+        yield* this.relatedAlertsGenerator(child, opts.relatedAlerts, processDuration);
       }
     }
   }
@@ -951,9 +1013,9 @@ export class EndpointDocGenerator {
   }
 
   /**
-   * Generates an Ingest `datasource` that includes the Endpoint Policy data
+   * Generates an Ingest `package config` that includes the Endpoint Policy data
    */
-  public generatePolicyDatasource(): PolicyData {
+  public generatePolicyPackageConfig(): PolicyData {
     const created = new Date(Date.now() - 8.64e7).toISOString(); // 24h ago
     return {
       id: this.seededUUIDv4(),
@@ -972,6 +1034,13 @@ export class EndpointDocGenerator {
           enabled: true,
           streams: [],
           config: {
+            artifact_manifest: {
+              value: {
+                manifest_version: 'WzAsMF0=',
+                schema_version: 'v1',
+                artifacts: {},
+              },
+            },
             policy: {
               value: policyFactory(),
             },
@@ -1013,9 +1082,7 @@ export class EndpointDocGenerator {
       ecs: {
         version: '1.4.0',
       },
-      host: {
-        id: this.commonInfo.host.id,
-      },
+      host: this.commonInfo.host,
       Endpoint: {
         policy: {
           applied: {
@@ -1172,8 +1239,8 @@ export class EndpointDocGenerator {
         created: ts,
         id: this.seededUUIDv4(),
         kind: 'state',
-        category: 'host',
-        type: 'change',
+        category: ['host'],
+        type: ['change'],
         module: 'endpoint',
         action: 'endpoint_policy_response',
         dataset: 'endpoint.policy',

@@ -60,7 +60,7 @@
                           "namespace": "default",
                           "description": "Default agent configuration created by Kibana",
                           "status": "active",
-                          "datasources": ["8a5679b0-8fbf-11ea-b2ce-01c4a6127154"],
+                          "packageConfigs": ["8a5679b0-8fbf-11ea-b2ce-01c4a6127154"],
                           "is_default": true,
                           "monitoring_enabled": ["logs", "metrics"],
                           "revision": 2,
@@ -175,7 +175,7 @@
                         "namespace": "default",
                         "description": "Default agent configuration created by Kibana",
                         "status": "active",
-                        "datasources": [
+                        "packageConfigs": [
                           {
                             "id": "8a5679b0-8fbf-11ea-b2ce-01c4a6127154",
                             "name": "system-1",
@@ -750,7 +750,7 @@
                         "namespace": "UPDATED namespace",
                         "updated_on": "Fri Feb 28 2020 16:22:31 GMT-0500 (Eastern Standard Time)",
                         "updated_by": "elastic",
-                        "datasources": []
+                        "packageConfigs": []
                       },
                       "success": true
                     }
@@ -922,9 +922,9 @@
       },
       "parameters": []
     },
-    "/datasources": {
+    "/packageConfigs": {
       "get": {
-        "summary": "Datasources - List",
+        "summary": "PackageConfigs - List",
         "tags": [],
         "responses": {
           "200": {
@@ -937,7 +937,7 @@
                     "items": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/Datasource"
+                        "$ref": "#/components/schemas/PackageConfig"
                       }
                     },
                     "total": {
@@ -1166,14 +1166,14 @@
             }
           }
         },
-        "operationId": "get-datasources",
+        "operationId": "get-packageConfigs",
         "security": [],
         "parameters": []
       },
       "parameters": [],
       "post": {
-        "summary": "Datasources - Create",
-        "operationId": "post-datasources",
+        "summary": "PackageConfigs - Create",
+        "operationId": "post-packageConfigs",
         "responses": {
           "200": {
             "description": "OK"
@@ -1183,7 +1183,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewDatasource"
+                "$ref": "#/components/schemas/NewPackageConfig"
               },
               "examples": {
                 "example-1": {
@@ -1237,9 +1237,9 @@
         ]
       }
     },
-    "/datasources/{datasourceId}": {
+    "/packageConfigs/{packageConfigId}": {
       "get": {
-        "summary": "Datasources - Info",
+        "summary": "PackageConfigs - Info",
         "tags": [],
         "responses": {
           "200": {
@@ -1250,7 +1250,7 @@
                   "type": "object",
                   "properties": {
                     "item": {
-                      "$ref": "#/components/schemas/Datasource"
+                      "$ref": "#/components/schemas/PackageConfig"
                     },
                     "success": {
                       "type": "boolean"
@@ -1262,21 +1262,21 @@
             }
           }
         },
-        "operationId": "get-datasources-datasourceId"
+        "operationId": "get-packageConfigs-packageConfigId"
       },
       "parameters": [
         {
           "schema": {
             "type": "string"
           },
-          "name": "datasourceId",
+          "name": "packageConfigId",
           "in": "path",
           "required": true
         }
       ],
       "put": {
-        "summary": "Datasources - Update",
-        "operationId": "put-datasources-datasourceId",
+        "summary": "PackageConfigs - Update",
+        "operationId": "put-packageConfigs-packageConfigId",
         "responses": {
           "200": {
             "description": "OK",
@@ -1286,7 +1286,7 @@
                   "type": "object",
                   "properties": {
                     "item": {
-                      "$ref": "#/components/schemas/Datasource"
+                      "$ref": "#/components/schemas/PackageConfig"
                     },
                     "sucess": {
                       "type": "boolean"
@@ -1712,6 +1712,196 @@
                       },
                       "success": true
                     }
+                  },
+                  "required-package": {
+                    "value": {
+                      "response": {
+                        "format_version": "1.0.0",
+                        "name": "endpoint",
+                        "title": "Elastic Endpoint",
+                        "version": "0.3.0",
+                        "readme": "/package/endpoint/0.3.0/docs/README.md",
+                        "license": "basic",
+                        "description": "This is the Elastic Endpoint package.",
+                        "type": "solution",
+                        "categories": ["security"],
+                        "release": "beta",
+                        "requirement": {
+                          "kibana": {
+                            "versions": ">7.4.0"
+                          }
+                        },
+                        "icons": [
+                          {
+                            "src": "/package/endpoint/0.3.0/img/logo-endpoint-64-color.svg",
+                            "size": "16x16",
+                            "type": "image/svg+xml"
+                          }
+                        ],
+                        "assets": {
+                          "kibana": {
+                            "dashboard": [
+                              {
+                                "pkgkey": "endpoint-0.3.0",
+                                "service": "kibana",
+                                "type": "dashboard",
+                                "file": "826759f0-7074-11ea-9bc8-6b38f4d29a16.json",
+                                "path": "endpoint-0.3.0/kibana/dashboard/826759f0-7074-11ea-9bc8-6b38f4d29a16.json"
+                              }
+                            ],
+                            "map": [
+                              {
+                                "pkgkey": "endpoint-0.3.0",
+                                "service": "kibana",
+                                "type": "map",
+                                "file": "a3a3bd10-706b-11ea-9bc8-6b38f4d29a16.json",
+                                "path": "endpoint-0.3.0/kibana/map/a3a3bd10-706b-11ea-9bc8-6b38f4d29a16.json"
+                              }
+                            ],
+                            "visualization": [
+                              {
+                                "pkgkey": "endpoint-0.3.0",
+                                "service": "kibana",
+                                "type": "visualization",
+                                "file": "1cfceda0-728b-11ea-9bc8-6b38f4d29a16.json",
+                                "path": "endpoint-0.3.0/kibana/visualization/1cfceda0-728b-11ea-9bc8-6b38f4d29a16.json"
+                              },
+                              {
+                                "pkgkey": "endpoint-0.3.0",
+                                "service": "kibana",
+                                "type": "visualization",
+                                "file": "1e525190-7074-11ea-9bc8-6b38f4d29a16.json",
+                                "path": "endpoint-0.3.0/kibana/visualization/1e525190-7074-11ea-9bc8-6b38f4d29a16.json"
+                              },
+                              {
+                                "pkgkey": "endpoint-0.3.0",
+                                "service": "kibana",
+                                "type": "visualization",
+                                "file": "55387750-729c-11ea-9bc8-6b38f4d29a16.json",
+                                "path": "endpoint-0.3.0/kibana/visualization/55387750-729c-11ea-9bc8-6b38f4d29a16.json"
+                              },
+                              {
+                                "pkgkey": "endpoint-0.3.0",
+                                "service": "kibana",
+                                "type": "visualization",
+                                "file": "92b1edc0-706a-11ea-9bc8-6b38f4d29a16.json",
+                                "path": "endpoint-0.3.0/kibana/visualization/92b1edc0-706a-11ea-9bc8-6b38f4d29a16.json"
+                              }
+                            ]
+                          }
+                        },
+                        "datasets": [
+                          {
+                            "id": "endpoint",
+                            "title": "Endpoint Events",
+                            "release": "experimental",
+                            "type": "events",
+                            "package": "endpoint",
+                            "path": "events"
+                          },
+                          {
+                            "id": "endpoint.metadata",
+                            "title": "Endpoint Metadata",
+                            "release": "experimental",
+                            "type": "metrics",
+                            "package": "endpoint",
+                            "path": "metadata"
+                          },
+                          {
+                            "id": "endpoint.policy",
+                            "title": "Endpoint Policy Response",
+                            "release": "experimental",
+                            "type": "metrics",
+                            "package": "endpoint",
+                            "path": "policy"
+                          },
+                          {
+                            "id": "endpoint.telemetry",
+                            "title": "Endpoint Telemetry",
+                            "release": "experimental",
+                            "type": "metrics",
+                            "package": "endpoint",
+                            "path": "telemetry"
+                          }
+                        ],
+                        "packageConfigs": [
+                          {
+                            "name": "endpoint",
+                            "title": "Endpoint package config",
+                            "description": "Interact with the endpoint.",
+                            "inputs": null,
+                            "multiple": false
+                          }
+                        ],
+                        "download": "/epr/endpoint/endpoint-0.3.0.tar.gz",
+                        "path": "/package/endpoint/0.3.0",
+                        "latestVersion": "0.3.0",
+                        "removable": false,
+                        "status": "installed",
+                        "savedObject": {
+                          "id": "endpoint",
+                          "type": "epm-packages",
+                          "updated_at": "2020-06-23T21:44:59.319Z",
+                          "version": "Wzk4LDFd",
+                          "attributes": {
+                            "installed": [
+                              {
+                                "id": "826759f0-7074-11ea-9bc8-6b38f4d29a16",
+                                "type": "dashboard"
+                              },
+                              {
+                                "id": "1cfceda0-728b-11ea-9bc8-6b38f4d29a16",
+                                "type": "visualization"
+                              },
+                              {
+                                "id": "1e525190-7074-11ea-9bc8-6b38f4d29a16",
+                                "type": "visualization"
+                              },
+                              {
+                                "id": "55387750-729c-11ea-9bc8-6b38f4d29a16",
+                                "type": "visualization"
+                              },
+                              {
+                                "id": "92b1edc0-706a-11ea-9bc8-6b38f4d29a16",
+                                "type": "visualization"
+                              },
+                              {
+                                "id": "a3a3bd10-706b-11ea-9bc8-6b38f4d29a16",
+                                "type": "map"
+                              },
+                              {
+                                "id": "events-endpoint",
+                                "type": "index-template"
+                              },
+                              {
+                                "id": "metrics-endpoint.metadata",
+                                "type": "index-template"
+                              },
+                              {
+                                "id": "metrics-endpoint.policy",
+                                "type": "index-template"
+                              },
+                              {
+                                "id": "metrics-endpoint.telemetry",
+                                "type": "index-template"
+                              }
+                            ],
+                            "es_index_patterns": {
+                              "events": "events-endpoint-*",
+                              "metadata": "metrics-endpoint.metadata-*",
+                              "policy": "metrics-endpoint.policy-*",
+                              "telemetry": "metrics-endpoint.telemetry-*"
+                            },
+                            "name": "endpoint",
+                            "version": "0.3.0",
+                            "internal": false,
+                            "removable": false
+                          },
+                          "references": []
+                        }
+                      },
+                      "success": true
+                    }
                   }
                 }
               }
@@ -1929,7 +2119,7 @@
                           }
                         },
                         {
-                          "description": "The log package should be used to create data sources for all type of logs for which an package doesn't exist yet.\n",
+                          "description": "The log package should be used to create package configs for all type of logs for which an package doesn't exist yet.\n",
                           "download": "/epr/log/log-0.9.0.tar.gz",
                           "icons": [
                             {
@@ -2590,7 +2780,7 @@
                           },
                           "actions": [
                             {
-                              "data": "{\"config\":{\"id\":\"ae556400-5e39-11ea-8b49-f9747e466f7b\",\"outputs\":{\"default\":{\"type\":\"elasticsearch\",\"hosts\":[\"http://localhost:9200\"],\"api_key\":\"\",\"api_token\":\"6ckkp3ABz7e_XRqr3LM8:gQuDfUNSRgmY0iziYqP9Hw\"}},\"datasources\":[]}}",
+                              "data": "{\"config\":{\"id\":\"ae556400-5e39-11ea-8b49-f9747e466f7b\",\"outputs\":{\"default\":{\"type\":\"elasticsearch\",\"hosts\":[\"http://localhost:9200\"],\"api_key\":\"\",\"api_token\":\"6ckkp3ABz7e_XRqr3LM8:gQuDfUNSRgmY0iziYqP9Hw\"}},\"packageConfigs\":[]}}",
                               "created_at": "2020-03-04T20:02:56.149Z",
                               "id": "6a95c00a-d76d-4931-97c3-0bf935272d7d",
                               "type": "CONFIG_CHANGE"
@@ -2775,7 +2965,7 @@
                                   "api_key": "Z-XkgHIBvwtjzIKtSCTh:AejRqdKpQx6z-6dqSI1LHg"
                                 }
                               },
-                              "datasources": [
+                              "packageConfigs": [
                                 {
                                   "id": "33d6bd70-a5e0-11ea-a587-5f886c8a849f",
                                   "name": "system-1",
@@ -3330,7 +3520,17 @@
         ]
       }
     },
-    "/fleet/agents/unenroll": {
+    "/fleet/agents/{agentId}/unenroll": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentId",
+          "in": "path",
+          "required": true
+        }
+      ],
       "post": {
         "summary": "Fleet - Agent - Unenroll",
         "tags": [],
@@ -3340,7 +3540,26 @@
           {
             "$ref": "#/components/parameters/xsrfHeader"
           }
-        ]
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "force": { "type": "boolean" }
+                }
+              },
+              "examples": {
+                "example-1": {
+                  "value": {
+                    "force": true
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/fleet/config/{configId}/agent-status": {
@@ -3498,7 +3717,7 @@
                 "type": "string",
                 "enum": ["active", "inactive"]
               },
-              "datasources": {
+              "packageConfigs": {
                 "oneOf": [
                   {
                     "items": {
@@ -3507,7 +3726,7 @@
                   },
                   {
                     "items": {
-                      "$ref": "#/components/schemas/Datasource"
+                      "$ref": "#/components/schemas/PackageConfig"
                     }
                   }
                 ],
@@ -3531,8 +3750,8 @@
           }
         ]
       },
-      "Datasource": {
-        "title": "Datasource",
+      "PackageConfig": {
+        "title": "PackageConfig",
         "allOf": [
           {
             "type": "object",
@@ -3551,7 +3770,7 @@
             "required": ["id", "revision"]
           },
           {
-            "$ref": "#/components/schemas/NewDatasource"
+            "$ref": "#/components/schemas/NewPackageConfig"
           }
         ],
         "x-examples": {
@@ -3573,8 +3792,8 @@
           }
         }
       },
-      "NewDatasource": {
-        "title": "NewDatasource",
+      "NewPackageConfig": {
+        "title": "NewPackageConfig",
         "type": "object",
         "x-examples": {
           "example-1": {
@@ -3822,6 +4041,9 @@
           },
           "path": {
             "type": "string"
+          },
+          "removable": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -3903,6 +4125,12 @@
           "enrolled_at": {
             "type": "string"
           },
+          "unenrolled_at": {
+            "type": "string"
+          },
+          "unenrollment_started_at": {
+            "type": "string"
+          },
           "shared_id": {
             "type": "string"
           },
@@ -3917,9 +4145,6 @@
           },
           "config_revision": {
             "type": ["number", "null"]
-          },
-          "config_newest_revision": {
-            "type": "number"
           },
           "last_checkin": {
             "type": "string"

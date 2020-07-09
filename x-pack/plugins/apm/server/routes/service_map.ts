@@ -35,16 +35,14 @@ export const serviceMapRoute = createRoute(() => ({
     if (!isValidPlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(invalidLicenseMessage);
     }
+    context.licensing.featureUsage.notifyUsage(APM_SERVICE_MAPS_FEATURE_NAME);
 
-    context.plugins.licensing.featureUsage.notifyUsage(
-      APM_SERVICE_MAPS_FEATURE_NAME
-    );
-
+    const logger = context.logger;
     const setup = await setupRequest(context, request);
     const {
       query: { serviceName, environment },
     } = context.params;
-    return getServiceMap({ setup, serviceName, environment });
+    return getServiceMap({ setup, serviceName, environment, logger });
   },
 }));
 

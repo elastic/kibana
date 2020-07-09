@@ -18,10 +18,10 @@ import {
   KibanaRequest,
   KibanaResponseFactory,
   CoreSetup,
-  ICustomClusterClient,
+  ILegacyCustomClusterClient,
   CoreStart,
   IRouter,
-  IClusterClient,
+  ILegacyClusterClient,
   CustomHttpResponseOptions,
   ResponseError,
 } from 'kibana/server';
@@ -83,7 +83,7 @@ interface MonitoringCore {
 interface LegacyShimDependencies {
   router: IRouter;
   instanceUuid: string;
-  esDataClient: IClusterClient;
+  esDataClient: ILegacyClusterClient;
   kibanaStatsCollector: any;
 }
 
@@ -109,7 +109,7 @@ export class Plugin {
   private readonly initializerContext: PluginInitializerContext;
   private readonly log: Logger;
   private readonly getLogger: (...scopes: string[]) => Logger;
-  private cluster = {} as ICustomClusterClient;
+  private cluster = {} as ILegacyCustomClusterClient;
   private licenseService = {} as MonitoringLicenseService;
   private monitoringCore = {} as MonitoringCore;
   private legacyShimDependencies = {} as LegacyShimDependencies;
@@ -209,10 +209,10 @@ export class Plugin {
           uuid: core.uuid.getInstanceUuid(),
           name: serverInfo.name,
           index: get(legacyConfig, 'kibana.index'),
-          host: serverInfo.host,
+          host: serverInfo.hostname,
           locale: i18n.getLocale(),
           port: serverInfo.port.toString(),
-          transport_address: `${serverInfo.host}:${serverInfo.port}`,
+          transport_address: `${serverInfo.hostname}:${serverInfo.port}`,
           version: this.initializerContext.env.packageInfo.version,
           snapshot: snapshotRegex.test(this.initializerContext.env.packageInfo.version),
         },
@@ -322,7 +322,7 @@ export class Plugin {
     legacyConfig: any,
     getCoreServices: () => Promise<[CoreStart, PluginsStart, {}]>,
     licenseService: MonitoringLicenseService,
-    cluster: ICustomClusterClient
+    cluster: ILegacyCustomClusterClient
   ): MonitoringCore {
     const router = this.legacyShimDependencies.router;
     const legacyConfigWrapper = () => ({

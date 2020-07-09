@@ -46,6 +46,7 @@ export const url: SavedObjectsType = {
         fields: {
           keyword: {
             type: 'keyword',
+            ignore_above: 2048,
           },
         },
       },

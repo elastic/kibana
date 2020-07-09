@@ -93,22 +93,14 @@ const EventsViewerComponent: React.FC<Props> = ({
 }) => {
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const kibana = useKibana();
-  const { filterManager } = useKibana().services.data.query;
   const [isQueryLoading, setIsQueryLoading] = useState(false);
 
-  const {
-    getManageTimelineById,
-    setIsTimelineLoading,
-    setTimelineFilterManager,
-  } = useManageTimeline();
+  const { getManageTimelineById, setIsTimelineLoading } = useManageTimeline();
+
   useEffect(() => {
     setIsTimelineLoading({ id, isLoading: isQueryLoading });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isQueryLoading]);
-  useEffect(() => {
-    setTimelineFilterManager({ id, filterManager });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterManager]);
 
   const { queryFields, title, unit } = useMemo(() => getManageTimelineById(id), [
     getManageTimelineById,
@@ -179,9 +171,7 @@ const EventsViewerComponent: React.FC<Props> = ({
                   <HeaderSection id={id} subtitle={utilityBar ? undefined : subtitle} title={title}>
                     {headerFilterGroup}
                   </HeaderSection>
-
                   {utilityBar?.(refetch, totalCountMinusDeleted)}
-
                   <EventsContainerLoading data-test-subj={`events-container-loading-${loading}`}>
                     <TimelineRefetch
                       id={id}

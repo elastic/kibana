@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 import _, { countBy, groupBy, mapValues } from 'lodash';
 import { first } from 'rxjs/operators';
 
-import { APICaller, IClusterClient } from 'src/core/server';
+import { LegacyAPICaller, ILegacyClusterClient } from 'src/core/server';
 import { getNextMidnight } from '../../get_next_midnight';
 import { getPastDays } from '../../get_past_days';
 import { TaskInstance } from '../../../../../task_manager/server';
@@ -23,7 +23,7 @@ interface VisSummary {
 /*
  * Parse the response data into telemetry payload
  */
-async function getStats(callCluster: APICaller, index: string) {
+async function getStats(callCluster: LegacyAPICaller, index: string) {
   const searchParams = {
     size: 10000, // elasticsearch index.max_result_window default value
     index,
@@ -40,7 +40,7 @@ async function getStats(callCluster: APICaller, index: string) {
     },
   };
   const esResponse = await callCluster('search', searchParams);
-  const size = _.get<number>(esResponse, 'hits.hits.length');
+  const size = _.get(esResponse, 'hits.hits.length') as number;
   if (size < 1) {
     return;
   }
@@ -85,7 +85,7 @@ async function getStats(callCluster: APICaller, index: string) {
 export function visualizationsTaskRunner(
   taskInstance: TaskInstance,
   config: Observable<{ kibana: { index: string } }>,
-  esClientPromise: Promise<IClusterClient>
+  esClientPromise: Promise<ILegacyClusterClient>
 ) {
   return async () => {
     let stats;

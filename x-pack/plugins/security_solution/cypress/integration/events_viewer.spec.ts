@@ -46,7 +46,8 @@ const defaultHeadersInDefaultEcsCategory = [
   { id: 'destination.ip' },
 ];
 
-describe('Events Viewer', () => {
+// Flakky: https://github.com/elastic/kibana/issues/70757
+describe.skip('Events Viewer', () => {
   context('Fields rendering', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_URL);
@@ -153,7 +154,7 @@ describe('Events Viewer', () => {
     });
   });
 
-  context.skip('Events columns', () => {
+  context('Events columns', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_URL);
       openEvents();

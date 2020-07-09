@@ -249,8 +249,6 @@ export {
   IndexPattern,
   IIndexPatternFieldList,
   Field as IndexPatternField,
-  TypeMeta as IndexPatternTypeMeta,
-  AggregationRestrictions as IndexPatternAggRestrictions,
   // TODO: exported only in stub_index_pattern test. Move into data plugin and remove export.
   getIndexPatternFieldListCreator,
 } from './index_patterns';
@@ -263,6 +261,8 @@ export {
   KBN_FIELD_TYPES,
   IndexPatternAttributes,
   UI_SETTINGS,
+  TypeMeta as IndexPatternTypeMeta,
+  AggregationRestrictions as IndexPatternAggRestrictions,
 } from '../common';
 
 /*
@@ -306,6 +306,7 @@ import {
   dateHistogramInterval,
   InvalidEsCalendarIntervalError,
   InvalidEsIntervalFormatError,
+  Ipv4Address,
   isValidEsInterval,
   isValidInterval,
   parseEsInterval,
@@ -335,18 +336,13 @@ export {
   OptionedValueProp,
   // search
   ES_SEARCH_STRATEGY,
-  SYNC_SEARCH_STRATEGY,
   getEsPreference,
   getSearchErrorType,
-  ISearchStrategy,
   ISearch,
   ISearchOptions,
-  IRequestTypesMap,
-  IResponseTypesMap,
   ISearchGeneric,
   IEsSearchResponse,
   IEsSearchRequest,
-  ISyncSearchRequest,
   IKibanaSearchResponse,
   IKibanaSearchRequest,
   SearchRequest,
@@ -366,6 +362,7 @@ export {
   TabbedAggRow,
   TabbedTable,
   SearchInterceptor,
+  SearchInterceptorDeps,
   RequestTimeoutError,
 } from './search';
 
@@ -377,6 +374,7 @@ export const search = {
     intervalOptions,
     InvalidEsCalendarIntervalError,
     InvalidEsIntervalFormatError,
+    Ipv4Address,
     isDateHistogramBucketAggConfig, // TODO: remove in build_pipeline refactor
     isNumberType,
     isStringType,
@@ -421,8 +419,6 @@ export {
   connectToQueryState,
   syncQueryStateWithUrl,
   QueryState,
-  getTime,
-  getQueryLog,
   getDefaultQuery,
   FilterManager,
   SavedQuery,
@@ -435,10 +431,13 @@ export {
 } from './query';
 
 export {
+  getTime,
   // kbn field types
   castEsToKbnFieldTypeName,
   getKbnTypeNames,
 } from '../common';
+
+export { isTimeRange, isQuery, isFilter, isFilters } from '../common';
 
 export * from '../common/field_mapping';
 

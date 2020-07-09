@@ -11,7 +11,7 @@ export * from '../translations';
 export const JIRA_DESC = i18n.translate(
   'xpack.securitySolution.case.connectors.jira.selectMessageText',
   {
-    defaultMessage: 'Push or update SIEM case data to a new issue in Jira',
+    defaultMessage: 'Push or update Security case data to a new issue in Jira',
   }
 );
 
@@ -33,6 +33,34 @@ export const JIRA_PROJECT_KEY_REQUIRED = i18n.translate(
   'xpack.securitySolution.case.connectors.jira.requiredProjectKeyTextField',
   {
     defaultMessage: 'Project key is required',
+  }
+);
+
+export const JIRA_EMAIL_LABEL = i18n.translate(
+  'xpack.securitySolution.case.connectors.jira.emailTextFieldLabel',
+  {
+    defaultMessage: 'Email or Username',
+  }
+);
+
+export const JIRA_EMAIL_REQUIRED = i18n.translate(
+  'xpack.securitySolution.case.connectors.jira.requiredEmailTextField',
+  {
+    defaultMessage: 'Email or Username is required',
+  }
+);
+
+export const JIRA_API_TOKEN_LABEL = i18n.translate(
+  'xpack.securitySolution.case.connectors.jira.apiTokenTextFieldLabel',
+  {
+    defaultMessage: 'API token or Password',
+  }
+);
+
+export const JIRA_API_TOKEN_REQUIRED = i18n.translate(
+  'xpack.securitySolution.case.connectors.jira.requiredApiTokenTextField',
+  {
+    defaultMessage: 'API token or Password is required',
   }
 );
 

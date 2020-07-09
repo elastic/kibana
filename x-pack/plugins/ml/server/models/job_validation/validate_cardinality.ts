@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { DataVisualizer } from '../data_visualizer';
 
 import { validateJobObject } from './validate_job_object';
@@ -43,7 +43,7 @@ type Validator = (obj: {
   messages: Messages;
 }>;
 
-const validateFactory = (callWithRequest: APICaller, job: CombinedJob): Validator => {
+const validateFactory = (callWithRequest: LegacyAPICaller, job: CombinedJob): Validator => {
   const dv = new DataVisualizer(callWithRequest);
 
   const modelPlotConfigTerms = job?.model_plot_config?.terms ?? '';
@@ -150,7 +150,7 @@ const validateFactory = (callWithRequest: APICaller, job: CombinedJob): Validato
 };
 
 export async function validateCardinality(
-  callWithRequest: APICaller,
+  callWithRequest: LegacyAPICaller,
   job?: CombinedJob
 ): Promise<Messages> | never {
   const messages: Messages = [];

@@ -20,6 +20,8 @@ import {
 } from '../browsers';
 import { ReportingInternalSetup, ReportingInternalStart } from '../core';
 import { ReportingStartDeps } from '../types';
+import { ReportingStore } from '../lib';
+import { createMockLevelLogger } from './create_mock_levellogger';
 
 (initializeBrowserDriverFactory as jest.Mock<
   Promise<HeadlessChromiumDriverFactory>
@@ -37,13 +39,19 @@ const createMockPluginSetup = (setupMock?: any): ReportingInternalSetup => {
   };
 };
 
-const createMockPluginStart = (startMock?: any): ReportingInternalStart => {
+const createMockPluginStart = (
+  mockReportingCore: ReportingCore,
+  startMock?: any
+): ReportingInternalStart => {
+  const logger = createMockLevelLogger();
+  const store = new ReportingStore(mockReportingCore, logger);
   return {
     browserDriverFactory: startMock.browserDriverFactory,
     enqueueJob: startMock.enqueueJob,
     esqueue: startMock.esqueue,
     savedObjects: startMock.savedObjects || { getScopedClient: jest.fn() },
     uiSettings: startMock.uiSettings || { asScopedToClient: () => ({ get: jest.fn() }) },
+    store,
   };
 };
 
@@ -60,9 +68,22 @@ export const createMockStartDeps = (startMock?: any): ReportingStartDeps => ({
 
 export const createMockReportingCore = async (
   config: ReportingConfig,
-  setupDepsMock: ReportingInternalSetup | undefined = createMockPluginSetup({}),
-  startDepsMock: ReportingInternalStart | undefined = createMockPluginStart({})
+  setupDepsMock: ReportingInternalSetup | undefined = undefined,
+  startDepsMock: ReportingInternalStart | undefined = undefined
 ) => {
+  if (!setupDepsMock) {
+    setupDepsMock = createMockPluginSetup({});
+  }
+
+  const mockReportingCore = {
+    getConfig: () => config,
+    getElasticsearchService: () => setupDepsMock?.elasticsearch,
+  } as ReportingCore;
+
+  if (!startDepsMock) {
+    startDepsMock = createMockPluginStart(mockReportingCore, {});
+  }
+
   config = config || {};
   const core = new ReportingCore();
 
