@@ -409,7 +409,7 @@ describe('import timelines', () => {
   });
 });
 
-describe('import template timelines', () => {
+describe('import timeline templates', () => {
   let server: ReturnType<typeof serverMock.create>;
   let request: ReturnType<typeof requestMock.create>;
   let securitySetup: SecurityPluginSetup;
@@ -473,7 +473,7 @@ describe('import template timelines', () => {
     }));
   });
 
-  describe('Import a new template timeline', () => {
+  describe('Import a new timeline template', () => {
     beforeEach(() => {
       jest.doMock('../saved_object', () => {
         return {
@@ -596,7 +596,7 @@ describe('import template timelines', () => {
     });
   });
 
-  describe('Import a template timeline already exist', () => {
+  describe('Import a timeline template already exist', () => {
     beforeEach(() => {
       jest.doMock('../saved_object', () => {
         return {
@@ -704,7 +704,7 @@ describe('import template timelines', () => {
       expect(response.status).toEqual(200);
     });
 
-    test('should throw error if with given template timeline version conflict', async () => {
+    test('should throw error if with given timeline template version conflict', async () => {
       mockGetTupleDuplicateErrorsAndUniqueTimeline.mockReturnValue([
         mockDuplicateIdErrors,
         [
