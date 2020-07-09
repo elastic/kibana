@@ -157,7 +157,7 @@ describe('IBM Resilient service', () => {
     test('throws without username', () => {
       expect(() =>
         createExternalService({
-          config: { apiUrl: 'test.com' },
+          config: { apiUrl: 'test.com', orgId: '201' },
           secrets: { apiKeyId: '', apiKeySecret: 'secret' },
         })
       ).toThrow();
@@ -166,7 +166,7 @@ describe('IBM Resilient service', () => {
     test('throws without password', () => {
       expect(() =>
         createExternalService({
-          config: { apiUrl: 'test.com' },
+          config: { apiUrl: 'test.com', orgId: '201' },
           secrets: { apiKeyId: '', apiKeySecret: undefined },
         })
       ).toThrow();
