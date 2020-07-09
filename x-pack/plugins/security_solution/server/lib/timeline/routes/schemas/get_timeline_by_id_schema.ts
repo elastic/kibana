@@ -9,3 +9,5 @@ export const getTimelineByIdSchemaQuery = rt.partial({
   template_timeline_id: rt.string,
   id: rt.string,
 });
+
+export type GetTimelineByIdSchemaQuery = rt.typeof<typeof getTimelineByIdSchemaQuery>;

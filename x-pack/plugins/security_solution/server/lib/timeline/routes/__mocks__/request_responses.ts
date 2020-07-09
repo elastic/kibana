@@ -11,6 +11,7 @@ import {
   TIMELINE_EXPORT_URL,
   TIMELINE_IMPORT_URL,
   TIMELINE_URL,
+  TIMELINE_PREPACKAGED_URL,
 } from '../../../../../common/constants';
 import { SavedTimeline, TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
 
@@ -171,6 +172,19 @@ export const cleanDraftTimelinesRequest = (timelineType: TimelineType) =>
     body: {
       timelineType,
     },
+  });
+
+export const getTimelineByIdRequest = (query: GetTimelineByIdSchemaQuery) =>
+  requestMock.create({
+    method: 'get',
+    path: TIMELINE_URL,
+    query,
+  });
+
+export const installPrepackedTimelinesRequest = (query: GetTimelineByIdSchemaQuery) =>
+  requestMock.create({
+    method: 'post',
+    path: TIMELINE_PREPACKAGED_URL,
   });
 
 export const mockTimelinesSavedObjects = () => ({

@@ -9,7 +9,6 @@ import { IRouter } from '../../../../../../../src/core/server';
 import { TIMELINE_URL } from '../../../../common/constants';
 
 import { SetupPlugins } from '../../../plugin';
-import { ConfigType } from '../../../config';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 
 import { buildSiemResponse, transformError } from '../../detection_engine/routes/utils';
