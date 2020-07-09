@@ -214,11 +214,11 @@ describe('status check alert', () => {
           status: 'down',
         },
       ]);
-      const { server, libs } = bootstrapDependencies({
+      const { server, libs, plugins } = bootstrapDependencies({
         getMonitorStatus: mockGetter,
         getIndexPattern: jest.fn(),
       });
-      const alert = statusCheckAlertFactory(server, libs);
+      const alert = statusCheckAlertFactory(server, libs, plugins);
       const options = mockOptions({
         numTimes: 4,
         timerange: { from: 'now-14h', to: 'now' },
@@ -287,11 +287,11 @@ describe('status check alert', () => {
           status: 'down',
         },
       ]);
-      const { server, libs } = bootstrapDependencies({
+      const { server, libs, plugins } = bootstrapDependencies({
         getMonitorStatus: mockGetter,
         getIndexPattern: jest.fn(),
       });
-      const alert = statusCheckAlertFactory(server, libs);
+      const alert = statusCheckAlertFactory(server, libs, plugins);
       const options = mockOptions({
         numTimes: 3,
         timerangeUnit: 'm',
@@ -372,11 +372,11 @@ describe('status check alert', () => {
       toISOStringSpy.mockImplementation(() => 'search test');
       const mockGetter = jest.fn();
       mockGetter.mockReturnValue([]);
-      const { server, libs } = bootstrapDependencies({
+      const { server, libs, plugins } = bootstrapDependencies({
         getIndexPattern: jest.fn(),
         getMonitorStatus: mockGetter,
       });
-      const alert = statusCheckAlertFactory(server, libs);
+      const alert = statusCheckAlertFactory(server, libs, plugins);
       const options = mockOptions({
         numTimes: 20,
         timerangeCount: 30,
@@ -468,12 +468,12 @@ describe('status check alert', () => {
           availabilityRatio: 0.909245845760545,
         },
       ]);
-      const { server, libs } = bootstrapDependencies({
+      const { server, libs, plugins } = bootstrapDependencies({
         getMonitorAvailability: mockAvailability,
         getMonitorStatus: mockGetter,
         getIndexPattern: jest.fn(),
       });
-      const alert = statusCheckAlertFactory(server, libs);
+      const alert = statusCheckAlertFactory(server, libs, plugins);
       const options = mockOptions({
         availability: {
           range: 35,
@@ -560,11 +560,11 @@ describe('status check alert', () => {
       mockGetter.mockReturnValue([]);
       const mockAvailability = jest.fn();
       mockAvailability.mockReturnValue([]);
-      const { server, libs } = bootstrapDependencies({
+      const { server, libs, plugins } = bootstrapDependencies({
         getMonitorAvailability: mockAvailability,
         getIndexPattern: jest.fn(),
       });
-      const alert = statusCheckAlertFactory(server, libs);
+      const alert = statusCheckAlertFactory(server, libs, plugins);
       const options = mockOptions({
         availability: {
           range: 23,
@@ -601,11 +601,11 @@ describe('status check alert', () => {
       mockGetter.mockReturnValue([]);
       const mockAvailability = jest.fn();
       mockAvailability.mockReturnValue([]);
-      const { server, libs } = bootstrapDependencies({
+      const { server, libs, plugins } = bootstrapDependencies({
         getMonitorAvailability: mockAvailability,
         getIndexPattern: jest.fn(),
       });
-      const alert = statusCheckAlertFactory(server, libs);
+      const alert = statusCheckAlertFactory(server, libs, plugins);
       const options = mockOptions({
         availability: {
           range: 23,
