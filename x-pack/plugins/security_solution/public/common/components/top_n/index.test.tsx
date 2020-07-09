@@ -25,7 +25,7 @@ import { Props } from './top_n';
 import { StatefulTopN } from '.';
 import {
   ManageGlobalTimeline,
-  timelineDefaults,
+  getTimelineDefaults,
 } from '../../../timelines/components/manage_timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 
@@ -272,8 +272,7 @@ describe('StatefulTopN', () => {
       filterManager = new FilterManager(mockUiSettingsForFilterManager);
       const manageTimelineForTesting = {
         [TimelineId.active]: {
-          ...timelineDefaults,
-          id: TimelineId.active,
+          ...getTimelineDefaults(TimelineId.active),
           filterManager,
         },
       };
@@ -351,8 +350,7 @@ describe('StatefulTopN', () => {
 
     const manageTimelineForTesting = {
       [TimelineId.active]: {
-        ...timelineDefaults,
-        id: TimelineId.active,
+        ...getTimelineDefaults(TimelineId.active),
         filterManager,
         documentType: 'alerts',
       },
@@ -366,7 +364,7 @@ describe('StatefulTopN', () => {
             field={field}
             indexPattern={mockIndexPattern}
             indexToAdd={null}
-            timelineId={TimelineId.alertsPage}
+            timelineId={TimelineId.detectionsPage}
             toggleTopN={jest.fn()}
             onFilterAdded={jest.fn()}
             value={value}
