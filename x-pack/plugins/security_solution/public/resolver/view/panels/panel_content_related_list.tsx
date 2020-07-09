@@ -76,7 +76,7 @@ const DisplayList = memo(function DisplayList({
   return (
     <>
       <StyledBreadcrumbs breadcrumbs={crumbs} />
-      {shouldShowLimitWarning && numberDisplayed && numberMissing ? (
+      {shouldShowLimitWarning && typeof numberDisplayed !== 'undefined' && numberMissing ? (
         <StyledRelatedLimitWarning
           eventType={eventType}
           numberActuallyDisplayed={numberDisplayed}
