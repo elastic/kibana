@@ -318,6 +318,7 @@ export const CreatePackageConfigPage: React.FunctionComponent = () => {
         }
       ),
       status: !packageInfo || !agentConfig ? 'disabled' : undefined,
+      'data-test-subj': 'dataCollectionSetupStep',
       children:
         agentConfig && packageInfo ? (
           <>
