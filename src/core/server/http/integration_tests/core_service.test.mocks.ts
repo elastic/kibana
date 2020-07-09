@@ -19,10 +19,9 @@
 import { elasticsearchServiceMock } from '../../elasticsearch/elasticsearch_service.mock';
 
 export const clusterClientMock = jest.fn();
+export const clusterClientInstanceMock = elasticsearchServiceMock.createLegacyScopedClusterClient();
 jest.doMock('../../elasticsearch/legacy/scoped_cluster_client', () => ({
-  LegacyScopedClusterClient: clusterClientMock.mockImplementation(function () {
-    return elasticsearchServiceMock.createLegacyScopedClusterClient();
-  }),
+  LegacyScopedClusterClient: clusterClientMock.mockImplementation(() => clusterClientInstanceMock),
 }));
 
 jest.doMock('elasticsearch', () => {

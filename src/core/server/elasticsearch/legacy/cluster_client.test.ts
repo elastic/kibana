@@ -130,7 +130,7 @@ describe('#callAsInternalUser', () => {
     expect(mockEsClientInstance.security.authenticate).toHaveBeenLastCalledWith(mockParams);
   });
 
-  test('does not wrap errors if `wrap401Errors` is not set', async () => {
+  test('does not wrap errors if `wrap401Errors` is set to `false`', async () => {
     const mockError = { message: 'some error' };
     mockEsClientInstance.ping.mockRejectedValue(mockError);
 
@@ -146,7 +146,7 @@ describe('#callAsInternalUser', () => {
     ).rejects.toBe(mockAuthenticationError);
   });
 
-  test('wraps only 401 errors by default or when `wrap401Errors` is set', async () => {
+  test('wraps 401 errors when `wrap401Errors` is set to `true` or unspecified', async () => {
     const mockError = { message: 'some error' };
     mockEsClientInstance.ping.mockRejectedValue(mockError);
 
