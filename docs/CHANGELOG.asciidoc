@@ -71,7 +71,7 @@ Logs::
 * Avoids CCS-incompatible index name resolution {pull}70179[#70179]
 Machine Learning::
 * Fixes expanded row bug when job has no datafeed {pull}68074[#68074]
-* Fixes forever loading indicators in expanded DF Analytics list row {pull}69422[#69422]
+* Fixes forever loading indicators in expanded data frame analytics list {pull}69422[#69422]
 Management::
 * Updates the "Learn about timing" documentation link when creating a policy in Index Lifecycle Management {pull}68923[#68923]
 * Adds AggConfig.toSerializedFieldFormat {pull}69114[#69114]
