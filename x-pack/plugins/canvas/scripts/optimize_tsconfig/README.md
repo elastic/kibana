@@ -15,5 +15,4 @@ To run the optimization:
 
 To undo the optimization:
 
-`$ node x-pack/plugins/canvas/scripts/unoptimize_tsconfig`
-
+`$ node x-pack/plugins/canvas/scripts/optimize_tsconfig --revert`
