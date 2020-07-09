@@ -10,7 +10,7 @@ import * as url from 'url';
 import fetch from 'node-fetch';
 import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
+import { indexHostsAndAlerts } from './index_data';
 import { ANCESTRY_LIMIT } from '../../common/endpoint/generate_data';
 
 main();

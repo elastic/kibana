@@ -6,7 +6,12 @@
 
 import { Client } from '@elastic/elasticsearch';
 import seedrandom from 'seedrandom';
-import { EndpointDocGenerator, TreeOptions, Event, GeneratedAlertTree } from './generate_data';
+import {
+  EndpointDocGenerator,
+  TreeOptions,
+  Event,
+  GeneratedAlertTree,
+} from '../../common/endpoint/generate_data';
 
 export async function indexHostsAndAlerts(
   client: Client,
