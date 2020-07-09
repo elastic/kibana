@@ -120,57 +120,59 @@ export const AvailabilityExpressionSelect: React.FC<Props> = ({
           value={labels.ENTER_AVAILABILITY_THRESHOLD_VALUE(threshold)}
         />
       </EuiFlexItem>
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <AlertExpressionPopover
-            aria-label={labels.ENTER_AVAILABILITY_RANGE_POPOVER_ARIA_LABEL}
-            content={
-              <AlertFieldNumber
-                aria-label={labels.ENTER_AVAILABILITY_RANGE_UNITS_ARIA_LABEL}
-                data-test-subj="xpack.uptime.alerts.monitorStatus.availability.timerangeValueField"
-                disabled={false}
-                fieldValue={range}
-                setFieldValue={setRange}
-              />
-            }
-            data-test-subj="xpack.uptime.alerts.monitorStatus.availability.timerangeExpression"
-            description={labels.ENTER_AVAILABILITY_RANGE_UNITS_DESCRIPTION}
-            id="range"
-            isEnabled={isEnabled}
-            value={`${range}`}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <AlertExpressionPopover
-            aria-label="xpack.uptime.alerts.monitorStatus.availability.timerangeUnit"
-            content={
-              <TimeUnitSelectable
-                aria-label={labels.ENTER_AVAILABILITY_RANGE_SELECT_ARIA}
-                data-test-subj="xpack.uptime.alerts.monitorStatus.availability.timerangeUnit.select"
-                headlineText={labels.ENTER_AVAILABILITY_RANGE_SELECT_HEADLINE}
-                // TODO: this should not be `any`
-                onChange={(newOptions: any) => {
+      <EuiFlexItem>
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <AlertExpressionPopover
+              aria-label={labels.ENTER_AVAILABILITY_RANGE_POPOVER_ARIA_LABEL}
+              content={
+                <AlertFieldNumber
+                  aria-label={labels.ENTER_AVAILABILITY_RANGE_UNITS_ARIA_LABEL}
+                  data-test-subj="xpack.uptime.alerts.monitorStatus.availability.timerangeValueField"
+                  disabled={false}
+                  fieldValue={range}
+                  setFieldValue={setRange}
+                />
+              }
+              data-test-subj="xpack.uptime.alerts.monitorStatus.availability.timerangeExpression"
+              description={labels.ENTER_AVAILABILITY_RANGE_UNITS_DESCRIPTION}
+              id="range"
+              isEnabled={isEnabled}
+              value={`${range}`}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <AlertExpressionPopover
+              aria-label="xpack.uptime.alerts.monitorStatus.availability.timerangeUnit"
+              content={
+                <TimeUnitSelectable
+                  aria-label={labels.ENTER_AVAILABILITY_RANGE_SELECT_ARIA}
+                  data-test-subj="xpack.uptime.alerts.monitorStatus.availability.timerangeUnit.select"
+                  headlineText={labels.ENTER_AVAILABILITY_RANGE_SELECT_HEADLINE}
                   // TODO: this should not be `any`
-                  const checkedOption = newOptions.find(({ checked }: any) => checked === 'on');
-                  if (checkedOption) {
-                    setTimerangeUnitOptions(newOptions);
-                    setRangeUnit(checkedOption.key);
-                  }
-                }}
-                timeRangeOptions={timerangeUnitOptions}
-              />
-            }
-            data-test-subj="xpack.uptime.alerts.monitorStatus.availability.timerangeUnit"
-            description=""
-            id="availability-unit"
-            isEnabled={isEnabled}
-            value={
-              timerangeUnitOptions.find(({ checked }) => checked === 'on')?.label.toLowerCase() ??
-              ''
-            }
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+                  onChange={(newOptions: any) => {
+                    // TODO: this should not be `any`
+                    const checkedOption = newOptions.find(({ checked }: any) => checked === 'on');
+                    if (checkedOption) {
+                      setTimerangeUnitOptions(newOptions);
+                      setRangeUnit(checkedOption.key);
+                    }
+                  }}
+                  timeRangeOptions={timerangeUnitOptions}
+                />
+              }
+              data-test-subj="xpack.uptime.alerts.monitorStatus.availability.timerangeUnit"
+              description=""
+              id="availability-unit"
+              isEnabled={isEnabled}
+              value={
+                timerangeUnitOptions.find(({ checked }) => checked === 'on')?.label.toLowerCase() ??
+                ''
+              }
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
