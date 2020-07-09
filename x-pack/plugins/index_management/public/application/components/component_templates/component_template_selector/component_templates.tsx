@@ -26,8 +26,15 @@ interface Filters {
   [key: string]: { name: string; checked: 'on' | 'off' };
 }
 
+/**
+ * Copied from https://stackoverflow.com/a/9310752
+ */
+function escapeRegExp(text: string) {
+  return text.replace(/[-\[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+}
+
 function fuzzyMatch(searchValue: string, text: string) {
-  const pattern = `.*${searchValue.split('').join('.*')}.*`;
+  const pattern = `.*${searchValue.split('').map(escapeRegExp).join('.*')}.*`;
   const regex = new RegExp(pattern);
   return regex.test(text);
 }
