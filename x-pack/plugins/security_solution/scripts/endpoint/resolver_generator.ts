@@ -152,10 +152,6 @@ async function main() {
   await client.indices.refresh({
     index: eventIndex,
   });
-  // TODO: Unclear why the documents are not showing up after the call to refresh.
-  // Waiting 5 seconds allows the indices to refresh automatically and
-  // the documents become available in API/integration tests.
-  await delay(5000);
   console.log(`Creating and indexing documents took: ${Date.now() - startTime}ms`);
 }
 
@@ -282,8 +278,4 @@ function argvFromCLI() {
       default: false,
     },
   }).argv;
-}
-
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
