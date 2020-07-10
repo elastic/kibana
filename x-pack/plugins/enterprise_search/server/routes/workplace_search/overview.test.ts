@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { MockRouter, mockConfig } from '../__mocks__';
+import { MockRouter, mockConfig, mockLogger } from '../__mocks__';
 
 import { registerWSOverviewRoute } from './overview';
 
@@ -27,7 +26,6 @@ describe('engine routes', () => {
     };
 
     const mockRouter = new MockRouter({ method: 'get', payload: 'query' });
-    const mockLogger = loggingSystemMock.create().get();
 
     beforeEach(() => {
       jest.clearAllMocks();
