@@ -5,7 +5,6 @@
  */
 
 import { isFinite, isNumber, sum } from 'lodash';
-import moment from 'moment';
 import { FetchDataParams, MetricsFetchDataResponse } from '../../observability/public';
 import {
   SnapshotMetricInput,

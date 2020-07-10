@@ -8,6 +8,7 @@ import * as fetcherHook from '../../../../hooks/use_fetcher';
 import { render } from '../../../../utils/test_helper';
 import { APMSection } from './';
 import { response } from './mock_data/apm.mock';
+import moment from 'moment';
 
 describe('APMSection', () => {
   it('renders with transaction series and stats', () => {
@@ -18,7 +19,10 @@ describe('APMSection', () => {
     });
     const { getByText, queryAllByTestId } = render(
       <APMSection
-        absoluteTime={{ start: '2020-06-29T11:38:23.747Z', end: '2020-06-29T12:08:23.748Z' }}
+        absoluteTime={{
+          start: moment('2020-06-29T11:38:23.747Z').valueOf(),
+          end: moment('2020-06-29T12:08:23.748Z').valueOf(),
+        }}
         relativeTime={{ start: 'now-15m', end: 'now' }}
         bucketSize="60s"
       />
@@ -38,7 +42,10 @@ describe('APMSection', () => {
     });
     const { getByText, queryAllByText, getByTestId } = render(
       <APMSection
-        absoluteTime={{ start: '2020-06-29T11:38:23.747Z', end: '2020-06-29T12:08:23.748Z' }}
+        absoluteTime={{
+          start: moment('2020-06-29T11:38:23.747Z').valueOf(),
+          end: moment('2020-06-29T12:08:23.748Z').valueOf(),
+        }}
         relativeTime={{ start: 'now-15m', end: 'now' }}
         bucketSize="60s"
       />

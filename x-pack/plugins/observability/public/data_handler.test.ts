@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { registerDataHandler, getDataHandler } from './data_handler';
+import moment from 'moment';
 
 const params = {
   absoluteTime: {
-    start: '2020-07-02T13:25:11.629Z',
-    end: '2020-07-09T13:25:11.629Z',
+    start: moment('2020-07-02T13:25:11.629Z').valueOf(),
+    end: moment('2020-07-09T13:25:11.629Z').valueOf(),
   },
   relativeTime: {
     start: 'now-15m',
