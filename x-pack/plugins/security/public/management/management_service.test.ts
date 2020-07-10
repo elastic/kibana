@@ -34,7 +34,9 @@ describe('ManagementService', () => {
       const managementSetup: ManagementSetup = {
         sections: {
           register: jest.fn(() => mockSection),
-          section: {} as DefinedSections,
+          section: {
+            security: mockSection,
+          } as DefinedSections,
         },
       };
 
@@ -90,7 +92,9 @@ describe('ManagementService', () => {
       const managementSetup: ManagementSetup = {
         sections: {
           register: jest.fn(() => mockSection),
-          section: {} as DefinedSections,
+          section: {
+            security: mockSection,
+          } as DefinedSections,
         },
       };
 

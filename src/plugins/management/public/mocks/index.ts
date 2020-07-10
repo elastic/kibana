@@ -33,7 +33,12 @@ const createSetupContract = (): ManagementSetup => ({
   sections: {
     register: jest.fn(() => createManagementSectionMock()),
     section: ({
+      ingest: createManagementSectionMock(),
+      data: createManagementSectionMock(),
+      insightsAndAlerting: createManagementSectionMock(),
+      security: createManagementSectionMock(),
       kibana: createManagementSectionMock(),
+      stack: createManagementSectionMock(),
     } as unknown) as DefinedSections,
   },
 });
