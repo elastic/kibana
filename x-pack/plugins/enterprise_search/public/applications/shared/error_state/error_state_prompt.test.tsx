@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../../__mocks__/shallow_usecontext.mock';
+import '../../__mocks__/shallow_usecontext.mock';
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { EuiEmptyPrompt } from '@elastic/eui';
 
-import { ErrorStatePrompt } from '../../../shared/error_state';
-import { ErrorState } from './';
+import { ErrorStatePrompt } from './';
 
 describe('ErrorState', () => {
   it('renders', () => {
-    const wrapper = shallow(<ErrorState />);
+    const wrapper = shallow(<ErrorStatePrompt />);
 
-    expect(wrapper.find(ErrorStatePrompt)).toHaveLength(1);
+    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
   });
 });
