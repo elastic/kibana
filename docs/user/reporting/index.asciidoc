@@ -19,7 +19,7 @@ image::user/reporting/images/share-button.png["Share"]
 [float]
 == Setup
 
-{reporting} is automatically enabled in {kib}. The first time {kib} runs, it extracts a custom build for the Chromium web browser, which
+{reporting} is automatically enabled in {kib}. It runs a custom build of the Chromium web browser, which
 runs on the server in headless mode to load {kib} and capture the rendered {kib} charts as images.
 
 Chromium is an open-source project not related to Elastic, but the Chromium binary for {kib} has been custom-built by Elastic to ensure it

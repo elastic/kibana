@@ -139,7 +139,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
     <Portal
       containerInfo={
         <div
-          class="euiOverlayMask"
+          class="euiOverlayMask euiOverlayMask--aboveHeader"
         >
           <div
             data-focus-guard="true"
@@ -251,121 +251,126 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                           >
                             2 types found
                           </span>
-                          <div
+                          <ul
                             class="euiKeyPadMenu visNewVisDialog__types"
                             data-test-subj="visNewDialogTypes"
-                            role="menu"
                           >
-                            <button
-                              aria-describedby="visTypeDescription-visWithAliasUrl"
-                              class="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
-                              data-test-subj="visType-visWithAliasUrl"
-                              data-vis-stage="alias"
-                              role="menuitem"
-                              type="button"
-                            >
-                              <div
-                                class="euiKeyPadMenuItem__inner"
+                            <li>
+                              <button
+                                aria-describedby="visTypeDescription-visWithAliasUrl"
+                                class="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
+                                data-test-subj="visType-visWithAliasUrl"
+                                data-vis-stage="alias"
+                                role="menuitem"
+                                type="button"
                               >
-                                <span
-                                  class="euiKeyPadMenuItem__betaBadgeWrapper"
+                                <div
+                                  class="euiKeyPadMenuItem__inner"
                                 >
                                   <span
-                                    class="euiToolTipAnchor"
+                                    class="euiKeyPadMenuItem__betaBadgeWrapper"
                                   >
                                     <span
-                                      class="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
-                                      tabindex="0"
+                                      class="euiToolTipAnchor"
                                     >
-                                      <div
-                                        aria-hidden="true"
-                                        class="euiBetaBadge__icon"
-                                        data-euiicon-type="popout"
-                                      />
+                                      <span
+                                        class="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
+                                        tabindex="0"
+                                      >
+                                        <div
+                                          aria-hidden="true"
+                                          class="euiBetaBadge__icon"
+                                          data-euiicon-type="popout"
+                                        />
+                                      </span>
                                     </span>
                                   </span>
-                                </span>
-                                <div
-                                  class="euiKeyPadMenuItem__icon"
-                                >
                                   <div
-                                    color="secondary"
-                                    data-euiicon-type="empty"
-                                  />
-                                </div>
-                                <p
-                                  class="euiKeyPadMenuItem__label"
-                                >
-                                  <span
-                                    data-test-subj="visTypeTitle"
+                                    class="euiKeyPadMenuItem__icon"
                                   >
-                                    Vis with alias Url
-                                  </span>
-                                </p>
-                              </div>
-                            </button>
-                            <button
-                              aria-describedby="visTypeDescription-visWithSearch"
-                              class="euiKeyPadMenuItem visNewVisDialog__type"
-                              data-test-subj="visType-visWithSearch"
-                              data-vis-stage="production"
-                              role="menuitem"
-                              type="button"
-                            >
-                              <div
-                                class="euiKeyPadMenuItem__inner"
+                                    <div
+                                      color="secondary"
+                                      data-euiicon-type="empty"
+                                    />
+                                  </div>
+                                  <p
+                                    class="euiKeyPadMenuItem__label"
+                                  >
+                                    <span
+                                      data-test-subj="visTypeTitle"
+                                    >
+                                      Vis with alias Url
+                                    </span>
+                                  </p>
+                                </div>
+                              </button>
+                            </li>
+                            <li>
+                              <button
+                                aria-describedby="visTypeDescription-visWithSearch"
+                                class="euiKeyPadMenuItem visNewVisDialog__type"
+                                data-test-subj="visType-visWithSearch"
+                                data-vis-stage="production"
+                                role="menuitem"
+                                type="button"
                               >
                                 <div
-                                  class="euiKeyPadMenuItem__icon"
+                                  class="euiKeyPadMenuItem__inner"
                                 >
                                   <div
-                                    color="secondary"
-                                    data-euiicon-type="empty"
-                                  />
-                                </div>
-                                <p
-                                  class="euiKeyPadMenuItem__label"
-                                >
-                                  <span
-                                    data-test-subj="visTypeTitle"
+                                    class="euiKeyPadMenuItem__icon"
                                   >
-                                    Vis with search
-                                  </span>
-                                </p>
-                              </div>
-                            </button>
-                            <button
-                              aria-describedby="visTypeDescription-vis"
-                              class="euiKeyPadMenuItem visNewVisDialog__type"
-                              data-test-subj="visType-vis"
-                              data-vis-stage="production"
-                              disabled=""
-                              role="menuitem"
-                              type="button"
-                            >
-                              <div
-                                class="euiKeyPadMenuItem__inner"
+                                    <div
+                                      color="secondary"
+                                      data-euiicon-type="empty"
+                                    />
+                                  </div>
+                                  <p
+                                    class="euiKeyPadMenuItem__label"
+                                  >
+                                    <span
+                                      data-test-subj="visTypeTitle"
+                                    >
+                                      Vis with search
+                                    </span>
+                                  </p>
+                                </div>
+                              </button>
+                            </li>
+                            <li>
+                              <button
+                                aria-describedby="visTypeDescription-vis"
+                                class="euiKeyPadMenuItem visNewVisDialog__type"
+                                data-test-subj="visType-vis"
+                                data-vis-stage="production"
+                                disabled=""
+                                role="menuitem"
+                                type="button"
                               >
                                 <div
-                                  class="euiKeyPadMenuItem__icon"
+                                  class="euiKeyPadMenuItem__inner"
                                 >
                                   <div
-                                    color="secondary"
-                                    data-euiicon-type="empty"
-                                  />
-                                </div>
-                                <p
-                                  class="euiKeyPadMenuItem__label"
-                                >
-                                  <span
-                                    data-test-subj="visTypeTitle"
+                                    class="euiKeyPadMenuItem__icon"
                                   >
-                                    Vis Type 1
-                                  </span>
-                                </p>
-                              </div>
-                            </button>
-                          </div>
+                                    <div
+                                      color="secondary"
+                                      data-euiicon-type="empty"
+                                    />
+                                  </div>
+                                  <p
+                                    class="euiKeyPadMenuItem__label"
+                                  >
+                                    <span
+                                      data-test-subj="visTypeTitle"
+                                    >
+                                      Vis Type 1
+                                    </span>
+                                  </p>
+                                </div>
+                              </button>
+                            </li>
+                          </ul>
                         </div>
                       </div>
                     </div>
@@ -562,121 +567,126 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                   >
                                     2 types found
                                   </span>
-                                  <div
+                                  <ul
                                     class="euiKeyPadMenu visNewVisDialog__types"
                                     data-test-subj="visNewDialogTypes"
-                                    role="menu"
                                   >
-                                    <button
-                                      aria-describedby="visTypeDescription-visWithAliasUrl"
-                                      class="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
-                                      data-test-subj="visType-visWithAliasUrl"
-                                      data-vis-stage="alias"
-                                      role="menuitem"
-                                      type="button"
-                                    >
-                                      <div
-                                        class="euiKeyPadMenuItem__inner"
+                                    <li>
+                                      <button
+                                        aria-describedby="visTypeDescription-visWithAliasUrl"
+                                        class="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
+                                        data-test-subj="visType-visWithAliasUrl"
+                                        data-vis-stage="alias"
+                                        role="menuitem"
+                                        type="button"
                                       >
-                                        <span
-                                          class="euiKeyPadMenuItem__betaBadgeWrapper"
+                                        <div
+                                          class="euiKeyPadMenuItem__inner"
                                         >
                                           <span
-                                            class="euiToolTipAnchor"
+                                            class="euiKeyPadMenuItem__betaBadgeWrapper"
                                           >
                                             <span
-                                              class="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
-                                              tabindex="0"
+                                              class="euiToolTipAnchor"
                                             >
-                                              <div
-                                                aria-hidden="true"
-                                                class="euiBetaBadge__icon"
-                                                data-euiicon-type="popout"
-                                              />
+                                              <span
+                                                class="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
+                                                tabindex="0"
+                                              >
+                                                <div
+                                                  aria-hidden="true"
+                                                  class="euiBetaBadge__icon"
+                                                  data-euiicon-type="popout"
+                                                />
+                                              </span>
                                             </span>
                                           </span>
-                                        </span>
-                                        <div
-                                          class="euiKeyPadMenuItem__icon"
-                                        >
                                           <div
-                                            color="secondary"
-                                            data-euiicon-type="empty"
-                                          />
-                                        </div>
-                                        <p
-                                          class="euiKeyPadMenuItem__label"
-                                        >
-                                          <span
-                                            data-test-subj="visTypeTitle"
+                                            class="euiKeyPadMenuItem__icon"
                                           >
-                                            Vis with alias Url
-                                          </span>
-                                        </p>
-                                      </div>
-                                    </button>
-                                    <button
-                                      aria-describedby="visTypeDescription-visWithSearch"
-                                      class="euiKeyPadMenuItem visNewVisDialog__type"
-                                      data-test-subj="visType-visWithSearch"
-                                      data-vis-stage="production"
-                                      role="menuitem"
-                                      type="button"
-                                    >
-                                      <div
-                                        class="euiKeyPadMenuItem__inner"
+                                            <div
+                                              color="secondary"
+                                              data-euiicon-type="empty"
+                                            />
+                                          </div>
+                                          <p
+                                            class="euiKeyPadMenuItem__label"
+                                          >
+                                            <span
+                                              data-test-subj="visTypeTitle"
+                                            >
+                                              Vis with alias Url
+                                            </span>
+                                          </p>
+                                        </div>
+                                      </button>
+                                    </li>
+                                    <li>
+                                      <button
+                                        aria-describedby="visTypeDescription-visWithSearch"
+                                        class="euiKeyPadMenuItem visNewVisDialog__type"
+                                        data-test-subj="visType-visWithSearch"
+                                        data-vis-stage="production"
+                                        role="menuitem"
+                                        type="button"
                                       >
                                         <div
-                                          class="euiKeyPadMenuItem__icon"
+                                          class="euiKeyPadMenuItem__inner"
                                         >
                                           <div
-                                            color="secondary"
-                                            data-euiicon-type="empty"
-                                          />
-                                        </div>
-                                        <p
-                                          class="euiKeyPadMenuItem__label"
-                                        >
-                                          <span
-                                            data-test-subj="visTypeTitle"
+                                            class="euiKeyPadMenuItem__icon"
                                           >
-                                            Vis with search
-                                          </span>
-                                        </p>
-                                      </div>
-                                    </button>
-                                    <button
-                                      aria-describedby="visTypeDescription-vis"
-                                      class="euiKeyPadMenuItem visNewVisDialog__type"
-                                      data-test-subj="visType-vis"
-                                      data-vis-stage="production"
-                                      disabled=""
-                                      role="menuitem"
-                                      type="button"
-                                    >
-                                      <div
-                                        class="euiKeyPadMenuItem__inner"
+                                            <div
+                                              color="secondary"
+                                              data-euiicon-type="empty"
+                                            />
+                                          </div>
+                                          <p
+                                            class="euiKeyPadMenuItem__label"
+                                          >
+                                            <span
+                                              data-test-subj="visTypeTitle"
+                                            >
+                                              Vis with search
+                                            </span>
+                                          </p>
+                                        </div>
+                                      </button>
+                                    </li>
+                                    <li>
+                                      <button
+                                        aria-describedby="visTypeDescription-vis"
+                                        class="euiKeyPadMenuItem visNewVisDialog__type"
+                                        data-test-subj="visType-vis"
+                                        data-vis-stage="production"
+                                        disabled=""
+                                        role="menuitem"
+                                        type="button"
                                       >
                                         <div
-                                          class="euiKeyPadMenuItem__icon"
+                                          class="euiKeyPadMenuItem__inner"
                                         >
                                           <div
-                                            color="secondary"
-                                            data-euiicon-type="empty"
-                                          />
-                                        </div>
-                                        <p
-                                          class="euiKeyPadMenuItem__label"
-                                        >
-                                          <span
-                                            data-test-subj="visTypeTitle"
+                                            class="euiKeyPadMenuItem__icon"
                                           >
-                                            Vis Type 1
-                                          </span>
-                                        </p>
-                                      </div>
-                                    </button>
-                                  </div>
+                                            <div
+                                              color="secondary"
+                                              data-euiicon-type="empty"
+                                            />
+                                          </div>
+                                          <p
+                                            class="euiKeyPadMenuItem__label"
+                                          >
+                                            <span
+                                              data-test-subj="visTypeTitle"
+                                            >
+                                              Vis Type 1
+                                            </span>
+                                          </p>
+                                        </div>
+                                      </button>
+                                    </li>
+                                  </ul>
                                 </div>
                               </div>
                             </div>
@@ -813,121 +823,126 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                     >
                                       2 types found
                                     </span>
-                                    <div
+                                    <ul
                                       class="euiKeyPadMenu visNewVisDialog__types"
                                       data-test-subj="visNewDialogTypes"
-                                      role="menu"
                                     >
-                                      <button
-                                        aria-describedby="visTypeDescription-visWithAliasUrl"
-                                        class="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
-                                        data-test-subj="visType-visWithAliasUrl"
-                                        data-vis-stage="alias"
-                                        role="menuitem"
-                                        type="button"
-                                      >
-                                        <div
-                                          class="euiKeyPadMenuItem__inner"
+                                      <li>
+                                        <button
+                                          aria-describedby="visTypeDescription-visWithAliasUrl"
+                                          class="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
+                                          data-test-subj="visType-visWithAliasUrl"
+                                          data-vis-stage="alias"
+                                          role="menuitem"
+                                          type="button"
                                         >
-                                          <span
-                                            class="euiKeyPadMenuItem__betaBadgeWrapper"
+                                          <div
+                                            class="euiKeyPadMenuItem__inner"
                                           >
                                             <span
-                                              class="euiToolTipAnchor"
+                                              class="euiKeyPadMenuItem__betaBadgeWrapper"
                                             >
                                               <span
-                                                class="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
-                                                tabindex="0"
+                                                class="euiToolTipAnchor"
                                               >
-                                                <div
-                                                  aria-hidden="true"
-                                                  class="euiBetaBadge__icon"
-                                                  data-euiicon-type="popout"
-                                                />
+                                                <span
+                                                  class="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
+                                                  tabindex="0"
+                                                >
+                                                  <div
+                                                    aria-hidden="true"
+                                                    class="euiBetaBadge__icon"
+                                                    data-euiicon-type="popout"
+                                                  />
+                                                </span>
                                               </span>
                                             </span>
-                                          </span>
-                                          <div
-                                            class="euiKeyPadMenuItem__icon"
-                                          >
                                             <div
-                                              color="secondary"
-                                              data-euiicon-type="empty"
-                                            />
-                                          </div>
-                                          <p
-                                            class="euiKeyPadMenuItem__label"
-                                          >
-                                            <span
-                                              data-test-subj="visTypeTitle"
+                                              class="euiKeyPadMenuItem__icon"
                                             >
-                                              Vis with alias Url
-                                            </span>
-                                          </p>
-                                        </div>
-                                      </button>
-                                      <button
-                                        aria-describedby="visTypeDescription-visWithSearch"
-                                        class="euiKeyPadMenuItem visNewVisDialog__type"
-                                        data-test-subj="visType-visWithSearch"
-                                        data-vis-stage="production"
-                                        role="menuitem"
-                                        type="button"
-                                      >
-                                        <div
-                                          class="euiKeyPadMenuItem__inner"
+                                              <div
+                                                color="secondary"
+                                                data-euiicon-type="empty"
+                                              />
+                                            </div>
+                                            <p
+                                              class="euiKeyPadMenuItem__label"
+                                            >
+                                              <span
+                                                data-test-subj="visTypeTitle"
+                                              >
+                                                Vis with alias Url
+                                              </span>
+                                            </p>
+                                          </div>
+                                        </button>
+                                      </li>
+                                      <li>
+                                        <button
+                                          aria-describedby="visTypeDescription-visWithSearch"
+                                          class="euiKeyPadMenuItem visNewVisDialog__type"
+                                          data-test-subj="visType-visWithSearch"
+                                          data-vis-stage="production"
+                                          role="menuitem"
+                                          type="button"
                                         >
                                           <div
-                                            class="euiKeyPadMenuItem__icon"
+                                            class="euiKeyPadMenuItem__inner"
                                           >
                                             <div
-                                              color="secondary"
-                                              data-euiicon-type="empty"
-                                            />
-                                          </div>
-                                          <p
-                                            class="euiKeyPadMenuItem__label"
-                                          >
-                                            <span
-                                              data-test-subj="visTypeTitle"
+                                              class="euiKeyPadMenuItem__icon"
                                             >
-                                              Vis with search
-                                            </span>
-                                          </p>
-                                        </div>
-                                      </button>
-                                      <button
-                                        aria-describedby="visTypeDescription-vis"
-                                        class="euiKeyPadMenuItem visNewVisDialog__type"
-                                        data-test-subj="visType-vis"
-                                        data-vis-stage="production"
-                                        disabled=""
-                                        role="menuitem"
-                                        type="button"
-                                      >
-                                        <div
-                                          class="euiKeyPadMenuItem__inner"
+                                              <div
+                                                color="secondary"
+                                                data-euiicon-type="empty"
+                                              />
+                                            </div>
+                                            <p
+                                              class="euiKeyPadMenuItem__label"
+                                            >
+                                              <span
+                                                data-test-subj="visTypeTitle"
+                                              >
+                                                Vis with search
+                                              </span>
+                                            </p>
+                                          </div>
+                                        </button>
+                                      </li>
+                                      <li>
+                                        <button
+                                          aria-describedby="visTypeDescription-vis"
+                                          class="euiKeyPadMenuItem visNewVisDialog__type"
+                                          data-test-subj="visType-vis"
+                                          data-vis-stage="production"
+                                          disabled=""
+                                          role="menuitem"
+                                          type="button"
                                         >
                                           <div
-                                            class="euiKeyPadMenuItem__icon"
+                                            class="euiKeyPadMenuItem__inner"
                                           >
                                             <div
-                                              color="secondary"
-                                              data-euiicon-type="empty"
-                                            />
-                                          </div>
-                                          <p
-                                            class="euiKeyPadMenuItem__label"
-                                          >
-                                            <span
-                                              data-test-subj="visTypeTitle"
+                                              class="euiKeyPadMenuItem__icon"
                                             >
-                                              Vis Type 1
-                                            </span>
-                                          </p>
-                                        </div>
-                                      </button>
-                                    </div>
+                                              <div
+                                                color="secondary"
+                                                data-euiicon-type="empty"
+                                              />
+                                            </div>
+                                            <p
+                                              class="euiKeyPadMenuItem__label"
+                                            >
+                                              <span
+                                                data-test-subj="visTypeTitle"
+                                              >
+                                                Vis Type 1
+                                              </span>
+                                            </p>
+                                          </div>
+                                        </button>
+                                      </li>
+                                    </ul>
                                   </div>
                                 </div>
                               </div>
@@ -1201,261 +1216,272 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                         className="visNewVisDialog__types"
                                         data-test-subj="visNewDialogTypes"
                                       >
-                                        <div
+                                        <ul
                                           className="euiKeyPadMenu visNewVisDialog__types"
                                           data-test-subj="visNewDialogTypes"
-                                          role="menu"
                                         >
-                                          <EuiKeyPadMenuItem
-                                            aria-describedby="visTypeDescription-visWithAliasUrl"
-                                            betaBadgeIconType="popout"
-                                            betaBadgeLabel="Kibana application"
-                                            betaBadgeTooltipContent="Opens a Kibana application that is outside of Visualize."
-                                            className="visNewVisDialog__type"
-                                            data-test-subj="visType-visWithAliasUrl"
-                                            data-vis-stage="alias"
-                                            disabled={false}
-                                            key="visWithAliasUrl"
-                                            label={
-                                              <span
-                                                data-test-subj="visTypeTitle"
-                                              >
-                                                Vis with alias Url
-                                              </span>
-                                            }
-                                            onBlur={[Function]}
-                                            onClick={[Function]}
-                                            onFocus={[Function]}
-                                            onMouseEnter={[Function]}
-                                            onMouseLeave={[Function]}
-                                            role="menuitem"
+                                          <li
+                                            key=".$visWithAliasUrl"
                                           >
-                                            <button
+                                            <EuiKeyPadMenuItem
                                               aria-describedby="visTypeDescription-visWithAliasUrl"
-                                              className="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
+                                              betaBadgeIconType="popout"
+                                              betaBadgeLabel="Kibana application"
+                                              betaBadgeTooltipContent="Opens a Kibana application that is outside of Visualize."
+                                              className="visNewVisDialog__type"
                                               data-test-subj="visType-visWithAliasUrl"
                                               data-vis-stage="alias"
                                               disabled={false}
+                                              key="visWithAliasUrl"
+                                              label={
+                                                <span
+                                                  data-test-subj="visTypeTitle"
+                                                >
+                                                  Vis with alias Url
+                                                </span>
+                                              }
                                               onBlur={[Function]}
                                               onClick={[Function]}
                                               onFocus={[Function]}
                                               onMouseEnter={[Function]}
                                               onMouseLeave={[Function]}
                                               role="menuitem"
-                                              type="button"
                                             >
-                                              <div
-                                                className="euiKeyPadMenuItem__inner"
+                                              <button
+                                                aria-describedby="visTypeDescription-visWithAliasUrl"
+                                                className="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
+                                                data-test-subj="visType-visWithAliasUrl"
+                                                data-vis-stage="alias"
+                                                disabled={false}
+                                                onBlur={[Function]}
+                                                onClick={[Function]}
+                                                onFocus={[Function]}
+                                                onMouseEnter={[Function]}
+                                                onMouseLeave={[Function]}
+                                                role="menuitem"
+                                                type="button"
                                               >
-                                                <span
-                                                  className="euiKeyPadMenuItem__betaBadgeWrapper"
-                                                >
-                                                  <EuiBetaBadge
-                                                    className="euiKeyPadMenuItem__betaBadge"
-                                                    iconType="popout"
-                                                    label="Kibana application"
-                                                    tooltipContent="Opens a Kibana application that is outside of Visualize."
-                                                  >
-                                                    <EuiToolTip
-                                                      content="Opens a Kibana application that is outside of Visualize."
-                                                      delay="regular"
-                                                      position="top"
-                                                      title="Kibana application"
-                                                    >
-                                                      <span
-                                                        className="euiToolTipAnchor"
-                                                        onKeyUp={[Function]}
-                                                        onMouseOut={[Function]}
-                                                        onMouseOver={[Function]}
-                                                      >
-                                                        <span
-                                                          className="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
-                                                          onBlur={[Function]}
-                                                          onFocus={[Function]}
-                                                          tabIndex={0}
-                                                        >
-                                                          <EuiIcon
-                                                            aria-hidden="true"
-                                                            className="euiBetaBadge__icon"
-                                                            size="m"
-                                                            type="popout"
-                                                          >
-                                                            <div
-                                                              aria-hidden="true"
-                                                              className="euiBetaBadge__icon"
-                                                              data-euiicon-type="popout"
-                                                              size="m"
-                                                            />
-                                                          </EuiIcon>
-                                                        </span>
-                                                      </span>
-                                                    </EuiToolTip>
-                                                  </EuiBetaBadge>
-                                                </span>
                                                 <div
-                                                  className="euiKeyPadMenuItem__icon"
-                                                >
-                                                  <VisTypeIcon>
-                                                    <EuiIcon
-                                                      color="secondary"
-                                                      size="l"
-                                                      type="empty"
-                                                    >
-                                                      <div
-                                                        color="secondary"
-                                                        data-euiicon-type="empty"
-                                                        size="l"
-                                                      />
-                                                    </EuiIcon>
-                                                  </VisTypeIcon>
-                                                </div>
-                                                <p
-                                                  className="euiKeyPadMenuItem__label"
+                                                  className="euiKeyPadMenuItem__inner"
                                                 >
                                                   <span
-                                                    data-test-subj="visTypeTitle"
+                                                    className="euiKeyPadMenuItem__betaBadgeWrapper"
                                                   >
-                                                    Vis with alias Url
+                                                    <EuiBetaBadge
+                                                      className="euiKeyPadMenuItem__betaBadge"
+                                                      iconType="popout"
+                                                      label="Kibana application"
+                                                      tooltipContent="Opens a Kibana application that is outside of Visualize."
+                                                    >
+                                                      <EuiToolTip
+                                                        content="Opens a Kibana application that is outside of Visualize."
+                                                        delay="regular"
+                                                        position="top"
+                                                        title="Kibana application"
+                                                      >
+                                                        <span
+                                                          className="euiToolTipAnchor"
+                                                          onKeyUp={[Function]}
+                                                          onMouseOut={[Function]}
+                                                          onMouseOver={[Function]}
+                                                        >
+                                                          <span
+                                                            className="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
+                                                            onBlur={[Function]}
+                                                            onFocus={[Function]}
+                                                            tabIndex={0}
+                                                          >
+                                                            <EuiIcon
+                                                              aria-hidden="true"
+                                                              className="euiBetaBadge__icon"
+                                                              size="m"
+                                                              type="popout"
+                                                            >
+                                                              <div
+                                                                aria-hidden="true"
+                                                                className="euiBetaBadge__icon"
+                                                                data-euiicon-type="popout"
+                                                                size="m"
+                                                              />
+                                                            </EuiIcon>
+                                                          </span>
+                                                        </span>
+                                                      </EuiToolTip>
+                                                    </EuiBetaBadge>
                                                   </span>
-                                                </p>
-                                              </div>
-                                            </button>
-                                          </EuiKeyPadMenuItem>
-                                          <EuiKeyPadMenuItem
-                                            aria-describedby="visTypeDescription-visWithSearch"
-                                            className="visNewVisDialog__type"
-                                            data-test-subj="visType-visWithSearch"
-                                            data-vis-stage="production"
-                                            disabled={false}
-                                            key="visWithSearch"
-                                            label={
-                                              <span
-                                                data-test-subj="visTypeTitle"
-                                              >
-                                                Vis with search
-                                              </span>
-                                            }
-                                            onBlur={[Function]}
-                                            onClick={[Function]}
-                                            onFocus={[Function]}
-                                            onMouseEnter={[Function]}
-                                            onMouseLeave={[Function]}
-                                            role="menuitem"
+                                                  <div
+                                                    className="euiKeyPadMenuItem__icon"
+                                                  >
+                                                    <VisTypeIcon>
+                                                      <EuiIcon
+                                                        color="secondary"
+                                                        size="l"
+                                                        type="empty"
+                                                      >
+                                                        <div
+                                                          color="secondary"
+                                                          data-euiicon-type="empty"
+                                                          size="l"
+                                                        />
+                                                      </EuiIcon>
+                                                    </VisTypeIcon>
+                                                  </div>
+                                                  <p
+                                                    className="euiKeyPadMenuItem__label"
+                                                  >
+                                                    <span
+                                                      data-test-subj="visTypeTitle"
+                                                    >
+                                                      Vis with alias Url
+                                                    </span>
+                                                  </p>
+                                                </div>
+                                              </button>
+                                            </EuiKeyPadMenuItem>
+                                          </li>
+                                          <li
+                                            key=".$visWithSearch"
                                           >
-                                            <button
+                                            <EuiKeyPadMenuItem
                                               aria-describedby="visTypeDescription-visWithSearch"
-                                              className="euiKeyPadMenuItem visNewVisDialog__type"
+                                              className="visNewVisDialog__type"
                                               data-test-subj="visType-visWithSearch"
                                               data-vis-stage="production"
                                               disabled={false}
+                                              key="visWithSearch"
+                                              label={
+                                                <span
+                                                  data-test-subj="visTypeTitle"
+                                                >
+                                                  Vis with search
+                                                </span>
+                                              }
                                               onBlur={[Function]}
                                               onClick={[Function]}
                                               onFocus={[Function]}
                                               onMouseEnter={[Function]}
                                               onMouseLeave={[Function]}
                                               role="menuitem"
-                                              type="button"
                                             >
-                                              <div
-                                                className="euiKeyPadMenuItem__inner"
+                                              <button
+                                                aria-describedby="visTypeDescription-visWithSearch"
+                                                className="euiKeyPadMenuItem visNewVisDialog__type"
+                                                data-test-subj="visType-visWithSearch"
+                                                data-vis-stage="production"
+                                                disabled={false}
+                                                onBlur={[Function]}
+                                                onClick={[Function]}
+                                                onFocus={[Function]}
+                                                onMouseEnter={[Function]}
+                                                onMouseLeave={[Function]}
+                                                role="menuitem"
+                                                type="button"
                                               >
                                                 <div
-                                                  className="euiKeyPadMenuItem__icon"
+                                                  className="euiKeyPadMenuItem__inner"
                                                 >
-                                                  <VisTypeIcon>
-                                                    <EuiIcon
-                                                      color="secondary"
-                                                      size="l"
-                                                      type="empty"
-                                                    >
-                                                      <div
-                                                        color="secondary"
-                                                        data-euiicon-type="empty"
-                                                        size="l"
-                                                      />
-                                                    </EuiIcon>
-                                                  </VisTypeIcon>
-                                                </div>
-                                                <p
-                                                  className="euiKeyPadMenuItem__label"
-                                                >
-                                                  <span
-                                                    data-test-subj="visTypeTitle"
+                                                  <div
+                                                    className="euiKeyPadMenuItem__icon"
                                                   >
-                                                    Vis with search
-                                                  </span>
-                                                </p>
-                                              </div>
-                                            </button>
-                                          </EuiKeyPadMenuItem>
-                                          <EuiKeyPadMenuItem
-                                            aria-describedby="visTypeDescription-vis"
-                                            className="visNewVisDialog__type"
-                                            data-test-subj="visType-vis"
-                                            data-vis-stage="production"
-                                            disabled={true}
-                                            key="vis"
-                                            label={
-                                              <span
-                                                data-test-subj="visTypeTitle"
-                                              >
-                                                Vis Type 1
-                                              </span>
-                                            }
-                                            onBlur={[Function]}
-                                            onClick={[Function]}
-                                            onFocus={[Function]}
-                                            onMouseEnter={[Function]}
-                                            onMouseLeave={[Function]}
-                                            role="menuitem"
+                                                    <VisTypeIcon>
+                                                      <EuiIcon
+                                                        color="secondary"
+                                                        size="l"
+                                                        type="empty"
+                                                      >
+                                                        <div
+                                                          color="secondary"
+                                                          data-euiicon-type="empty"
+                                                          size="l"
+                                                        />
+                                                      </EuiIcon>
+                                                    </VisTypeIcon>
+                                                  </div>
+                                                  <p
+                                                    className="euiKeyPadMenuItem__label"
+                                                  >
+                                                    <span
+                                                      data-test-subj="visTypeTitle"
+                                                    >
+                                                      Vis with search
+                                                    </span>
+                                                  </p>
+                                                </div>
+                                              </button>
+                                            </EuiKeyPadMenuItem>
+                                          </li>
+                                          <li
+                                            key=".$vis"
                                           >
-                                            <button
+                                            <EuiKeyPadMenuItem
                                               aria-describedby="visTypeDescription-vis"
-                                              className="euiKeyPadMenuItem visNewVisDialog__type"
+                                              className="visNewVisDialog__type"
                                               data-test-subj="visType-vis"
                                               data-vis-stage="production"
                                               disabled={true}
+                                              key="vis"
+                                              label={
+                                                <span
+                                                  data-test-subj="visTypeTitle"
+                                                >
+                                                  Vis Type 1
+                                                </span>
+                                              }
                                               onBlur={[Function]}
                                               onClick={[Function]}
                                               onFocus={[Function]}
                                               onMouseEnter={[Function]}
                                               onMouseLeave={[Function]}
                                               role="menuitem"
-                                              type="button"
                                             >
-                                              <div
-                                                className="euiKeyPadMenuItem__inner"
+                                              <button
+                                                aria-describedby="visTypeDescription-vis"
+                                                className="euiKeyPadMenuItem visNewVisDialog__type"
+                                                data-test-subj="visType-vis"
+                                                data-vis-stage="production"
+                                                disabled={true}
+                                                onBlur={[Function]}
+                                                onClick={[Function]}
+                                                onFocus={[Function]}
+                                                onMouseEnter={[Function]}
+                                                onMouseLeave={[Function]}
+                                                role="menuitem"
+                                                type="button"
                                               >
                                                 <div
-                                                  className="euiKeyPadMenuItem__icon"
+                                                  className="euiKeyPadMenuItem__inner"
                                                 >
-                                                  <VisTypeIcon>
-                                                    <EuiIcon
-                                                      color="secondary"
-                                                      size="l"
-                                                      type="empty"
-                                                    >
-                                                      <div
-                                                        color="secondary"
-                                                        data-euiicon-type="empty"
-                                                        size="l"
-                                                      />
-                                                    </EuiIcon>
-                                                  </VisTypeIcon>
-                                                </div>
-                                                <p
-                                                  className="euiKeyPadMenuItem__label"
-                                                >
-                                                  <span
-                                                    data-test-subj="visTypeTitle"
+                                                  <div
+                                                    className="euiKeyPadMenuItem__icon"
                                                   >
-                                                    Vis Type 1
-                                                  </span>
-                                                </p>
-                                              </div>
-                                            </button>
-                                          </EuiKeyPadMenuItem>
-                                        </div>
+                                                    <VisTypeIcon>
+                                                      <EuiIcon
+                                                        color="secondary"
+                                                        size="l"
+                                                        type="empty"
+                                                      >
+                                                        <div
+                                                          color="secondary"
+                                                          data-euiicon-type="empty"
+                                                          size="l"
+                                                        />
+                                                      </EuiIcon>
+                                                    </VisTypeIcon>
+                                                  </div>
+                                                  <p
+                                                    className="euiKeyPadMenuItem__label"
+                                                  >
+                                                    <span
+                                                      data-test-subj="visTypeTitle"
+                                                    >
+                                                      Vis Type 1
+                                                    </span>
+                                                  </p>
+                                                </div>
+                                              </button>
+                                            </EuiKeyPadMenuItem>
+                                          </li>
+                                        </ul>
                                       </EuiKeyPadMenu>
                                     </div>
                                   </EuiFlexItem>
@@ -1683,7 +1709,7 @@ exports[`NewVisModal should render as expected 1`] = `
     <Portal
       containerInfo={
         <div
-          class="euiOverlayMask"
+          class="euiOverlayMask euiOverlayMask--aboveHeader"
         >
           <div
             data-focus-guard="true"
@@ -1779,120 +1805,125 @@ exports[`NewVisModal should render as expected 1`] = `
                             aria-live="polite"
                             class="euiScreenReaderOnly"
                           />
-                          <div
+                          <ul
                             class="euiKeyPadMenu visNewVisDialog__types"
                             data-test-subj="visNewDialogTypes"
-                            role="menu"
                           >
-                            <button
-                              aria-describedby="visTypeDescription-vis"
-                              class="euiKeyPadMenuItem visNewVisDialog__type"
-                              data-test-subj="visType-vis"
-                              data-vis-stage="production"
-                              role="menuitem"
-                              type="button"
-                            >
-                              <div
-                                class="euiKeyPadMenuItem__inner"
+                            <li>
+                              <button
+                                aria-describedby="visTypeDescription-vis"
+                                class="euiKeyPadMenuItem visNewVisDialog__type"
+                                data-test-subj="visType-vis"
+                                data-vis-stage="production"
+                                role="menuitem"
+                                type="button"
                               >
                                 <div
-                                  class="euiKeyPadMenuItem__icon"
+                                  class="euiKeyPadMenuItem__inner"
                                 >
                                   <div
-                                    color="secondary"
-                                    data-euiicon-type="empty"
-                                  />
-                                </div>
-                                <p
-                                  class="euiKeyPadMenuItem__label"
-                                >
-                                  <span
-                                    data-test-subj="visTypeTitle"
+                                    class="euiKeyPadMenuItem__icon"
                                   >
-                                    Vis Type 1
-                                  </span>
-                                </p>
-                              </div>
-                            </button>
-                            <button
-                              aria-describedby="visTypeDescription-visWithAliasUrl"
-                              class="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
-                              data-test-subj="visType-visWithAliasUrl"
-                              data-vis-stage="alias"
-                              role="menuitem"
-                              type="button"
-                            >
-                              <div
-                                class="euiKeyPadMenuItem__inner"
-                              >
-                                <span
-                                  class="euiKeyPadMenuItem__betaBadgeWrapper"
-                                >
-                                  <span
-                                    class="euiToolTipAnchor"
+                                    <div
+                                      color="secondary"
+                                      data-euiicon-type="empty"
+                                    />
+                                  </div>
+                                  <p
+                                    class="euiKeyPadMenuItem__label"
                                   >
                                     <span
-                                      class="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
-                                      tabindex="0"
+                                      data-test-subj="visTypeTitle"
                                     >
-                                      <div
-                                        aria-hidden="true"
-                                        class="euiBetaBadge__icon"
-                                        data-euiicon-type="popout"
-                                      />
+                                      Vis Type 1
                                     </span>
-                                  </span>
-                                </span>
-                                <div
-                                  class="euiKeyPadMenuItem__icon"
-                                >
-                                  <div
-                                    color="secondary"
-                                    data-euiicon-type="empty"
-                                  />
+                                  </p>
                                 </div>
-                                <p
-                                  class="euiKeyPadMenuItem__label"
-                                >
-                                  <span
-                                    data-test-subj="visTypeTitle"
-                                  >
-                                    Vis with alias Url
-                                  </span>
-                                </p>
-                              </div>
-                            </button>
-                            <button
-                              aria-describedby="visTypeDescription-visWithSearch"
-                              class="euiKeyPadMenuItem visNewVisDialog__type"
-                              data-test-subj="visType-visWithSearch"
-                              data-vis-stage="production"
-                              role="menuitem"
-                              type="button"
-                            >
-                              <div
-                                class="euiKeyPadMenuItem__inner"
+                              </button>
+                            </li>
+                            <li>
+                              <button
+                                aria-describedby="visTypeDescription-visWithAliasUrl"
+                                class="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
+                                data-test-subj="visType-visWithAliasUrl"
+                                data-vis-stage="alias"
+                                role="menuitem"
+                                type="button"
                               >
                                 <div
-                                  class="euiKeyPadMenuItem__icon"
-                                >
-                                  <div
-                                    color="secondary"
-                                    data-euiicon-type="empty"
-                                  />
-                                </div>
-                                <p
-                                  class="euiKeyPadMenuItem__label"
+                                  class="euiKeyPadMenuItem__inner"
                                 >
                                   <span
-                                    data-test-subj="visTypeTitle"
+                                    class="euiKeyPadMenuItem__betaBadgeWrapper"
                                   >
-                                    Vis with search
+                                    <span
+                                      class="euiToolTipAnchor"
+                                    >
+                                      <span
+                                        class="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
+                                        tabindex="0"
+                                      >
+                                        <div
+                                          aria-hidden="true"
+                                          class="euiBetaBadge__icon"
+                                          data-euiicon-type="popout"
+                                        />
+                                      </span>
+                                    </span>
                                   </span>
-                                </p>
-                              </div>
-                            </button>
-                          </div>
+                                  <div
+                                    class="euiKeyPadMenuItem__icon"
+                                  >
+                                    <div
+                                      color="secondary"
+                                      data-euiicon-type="empty"
+                                    />
+                                  </div>
+                                  <p
+                                    class="euiKeyPadMenuItem__label"
+                                  >
+                                    <span
+                                      data-test-subj="visTypeTitle"
+                                    >
+                                      Vis with alias Url
+                                    </span>
+                                  </p>
+                                </div>
+                              </button>
+                            </li>
+                            <li>
+                              <button
+                                aria-describedby="visTypeDescription-visWithSearch"
+                                class="euiKeyPadMenuItem visNewVisDialog__type"
+                                data-test-subj="visType-visWithSearch"
+                                data-vis-stage="production"
+                                role="menuitem"
+                                type="button"
+                              >
+                                <div
+                                  class="euiKeyPadMenuItem__inner"
+                                >
+                                  <div
+                                    class="euiKeyPadMenuItem__icon"
+                                  >
+                                    <div
+                                      color="secondary"
+                                      data-euiicon-type="empty"
+                                    />
+                                  </div>
+                                  <p
+                                    class="euiKeyPadMenuItem__label"
+                                  >
+                                    <span
+                                      data-test-subj="visTypeTitle"
+                                    >
+                                      Vis with search
+                                    </span>
+                                  </p>
+                                </div>
+                              </button>
+                            </li>
+                          </ul>
                         </div>
                       </div>
                     </div>
@@ -2073,120 +2104,125 @@ exports[`NewVisModal should render as expected 1`] = `
                                     aria-live="polite"
                                     class="euiScreenReaderOnly"
                                   />
-                                  <div
+                                  <ul
                                     class="euiKeyPadMenu visNewVisDialog__types"
                                     data-test-subj="visNewDialogTypes"
-                                    role="menu"
                                   >
-                                    <button
-                                      aria-describedby="visTypeDescription-vis"
-                                      class="euiKeyPadMenuItem visNewVisDialog__type"
-                                      data-test-subj="visType-vis"
-                                      data-vis-stage="production"
-                                      role="menuitem"
-                                      type="button"
-                                    >
-                                      <div
-                                        class="euiKeyPadMenuItem__inner"
+                                    <li>
+                                      <button
+                                        aria-describedby="visTypeDescription-vis"
+                                        class="euiKeyPadMenuItem visNewVisDialog__type"
+                                        data-test-subj="visType-vis"
+                                        data-vis-stage="production"
+                                        role="menuitem"
+                                        type="button"
                                       >
                                         <div
-                                          class="euiKeyPadMenuItem__icon"
+                                          class="euiKeyPadMenuItem__inner"
                                         >
                                           <div
-                                            color="secondary"
-                                            data-euiicon-type="empty"
-                                          />
-                                        </div>
-                                        <p
-                                          class="euiKeyPadMenuItem__label"
-                                        >
-                                          <span
-                                            data-test-subj="visTypeTitle"
+                                            class="euiKeyPadMenuItem__icon"
                                           >
-                                            Vis Type 1
-                                          </span>
-                                        </p>
-                                      </div>
-                                    </button>
-                                    <button
-                                      aria-describedby="visTypeDescription-visWithAliasUrl"
-                                      class="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
-                                      data-test-subj="visType-visWithAliasUrl"
-                                      data-vis-stage="alias"
-                                      role="menuitem"
-                                      type="button"
-                                    >
-                                      <div
-                                        class="euiKeyPadMenuItem__inner"
-                                      >
-                                        <span
-                                          class="euiKeyPadMenuItem__betaBadgeWrapper"
-                                        >
-                                          <span
-                                            class="euiToolTipAnchor"
+                                            <div
+                                              color="secondary"
+                                              data-euiicon-type="empty"
+                                            />
+                                          </div>
+                                          <p
+                                            class="euiKeyPadMenuItem__label"
                                           >
                                             <span
-                                              class="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
-                                              tabindex="0"
+                                              data-test-subj="visTypeTitle"
                                             >
-                                              <div
-                                                aria-hidden="true"
-                                                class="euiBetaBadge__icon"
-                                                data-euiicon-type="popout"
-                                              />
+                                              Vis Type 1
                                             </span>
-                                          </span>
-                                        </span>
-                                        <div
-                                          class="euiKeyPadMenuItem__icon"
-                                        >
-                                          <div
-                                            color="secondary"
-                                            data-euiicon-type="empty"
-                                          />
+                                          </p>
                                         </div>
-                                        <p
-                                          class="euiKeyPadMenuItem__label"
-                                        >
-                                          <span
-                                            data-test-subj="visTypeTitle"
-                                          >
-                                            Vis with alias Url
-                                          </span>
-                                        </p>
-                                      </div>
-                                    </button>
-                                    <button
-                                      aria-describedby="visTypeDescription-visWithSearch"
-                                      class="euiKeyPadMenuItem visNewVisDialog__type"
-                                      data-test-subj="visType-visWithSearch"
-                                      data-vis-stage="production"
-                                      role="menuitem"
-                                      type="button"
-                                    >
-                                      <div
-                                        class="euiKeyPadMenuItem__inner"
+                                      </button>
+                                    </li>
+                                    <li>
+                                      <button
+                                        aria-describedby="visTypeDescription-visWithAliasUrl"
+                                        class="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
+                                        data-test-subj="visType-visWithAliasUrl"
+                                        data-vis-stage="alias"
+                                        role="menuitem"
+                                        type="button"
                                       >
                                         <div
-                                          class="euiKeyPadMenuItem__icon"
-                                        >
-                                          <div
-                                            color="secondary"
-                                            data-euiicon-type="empty"
-                                          />
-                                        </div>
-                                        <p
-                                          class="euiKeyPadMenuItem__label"
+                                          class="euiKeyPadMenuItem__inner"
                                         >
                                           <span
-                                            data-test-subj="visTypeTitle"
+                                            class="euiKeyPadMenuItem__betaBadgeWrapper"
                                           >
-                                            Vis with search
+                                            <span
+                                              class="euiToolTipAnchor"
+                                            >
+                                              <span
+                                                class="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
+                                                tabindex="0"
+                                              >
+                                                <div
+                                                  aria-hidden="true"
+                                                  class="euiBetaBadge__icon"
+                                                  data-euiicon-type="popout"
+                                                />
+                                              </span>
+                                            </span>
                                           </span>
-                                        </p>
-                                      </div>
-                                    </button>
-                                  </div>
+                                          <div
+                                            class="euiKeyPadMenuItem__icon"
+                                          >
+                                            <div
+                                              color="secondary"
+                                              data-euiicon-type="empty"
+                                            />
+                                          </div>
+                                          <p
+                                            class="euiKeyPadMenuItem__label"
+                                          >
+                                            <span
+                                              data-test-subj="visTypeTitle"
+                                            >
+                                              Vis with alias Url
+                                            </span>
+                                          </p>
+                                        </div>
+                                      </button>
+                                    </li>
+                                    <li>
+                                      <button
+                                        aria-describedby="visTypeDescription-visWithSearch"
+                                        class="euiKeyPadMenuItem visNewVisDialog__type"
+                                        data-test-subj="visType-visWithSearch"
+                                        data-vis-stage="production"
+                                        role="menuitem"
+                                        type="button"
+                                      >
+                                        <div
+                                          class="euiKeyPadMenuItem__inner"
+                                        >
+                                          <div
+                                            class="euiKeyPadMenuItem__icon"
+                                          >
+                                            <div
+                                              color="secondary"
+                                              data-euiicon-type="empty"
+                                            />
+                                          </div>
+                                          <p
+                                            class="euiKeyPadMenuItem__label"
+                                          >
+                                            <span
+                                              data-test-subj="visTypeTitle"
+                                            >
+                                              Vis with search
+                                            </span>
+                                          </p>
+                                        </div>
+                                      </button>
+                                    </li>
+                                  </ul>
                                 </div>
                               </div>
                             </div>
@@ -2307,120 +2343,125 @@ exports[`NewVisModal should render as expected 1`] = `
                                       aria-live="polite"
                                       class="euiScreenReaderOnly"
                                     />
-                                    <div
+                                    <ul
                                       class="euiKeyPadMenu visNewVisDialog__types"
                                       data-test-subj="visNewDialogTypes"
-                                      role="menu"
                                     >
-                                      <button
-                                        aria-describedby="visTypeDescription-vis"
-                                        class="euiKeyPadMenuItem visNewVisDialog__type"
-                                        data-test-subj="visType-vis"
-                                        data-vis-stage="production"
-                                        role="menuitem"
-                                        type="button"
-                                      >
-                                        <div
-                                          class="euiKeyPadMenuItem__inner"
+                                      <li>
+                                        <button
+                                          aria-describedby="visTypeDescription-vis"
+                                          class="euiKeyPadMenuItem visNewVisDialog__type"
+                                          data-test-subj="visType-vis"
+                                          data-vis-stage="production"
+                                          role="menuitem"
+                                          type="button"
                                         >
                                           <div
-                                            class="euiKeyPadMenuItem__icon"
+                                            class="euiKeyPadMenuItem__inner"
                                           >
                                             <div
-                                              color="secondary"
-                                              data-euiicon-type="empty"
-                                            />
-                                          </div>
-                                          <p
-                                            class="euiKeyPadMenuItem__label"
-                                          >
-                                            <span
-                                              data-test-subj="visTypeTitle"
+                                              class="euiKeyPadMenuItem__icon"
                                             >
-                                              Vis Type 1
-                                            </span>
-                                          </p>
-                                        </div>
-                                      </button>
-                                      <button
-                                        aria-describedby="visTypeDescription-visWithAliasUrl"
-                                        class="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
-                                        data-test-subj="visType-visWithAliasUrl"
-                                        data-vis-stage="alias"
-                                        role="menuitem"
-                                        type="button"
-                                      >
-                                        <div
-                                          class="euiKeyPadMenuItem__inner"
-                                        >
-                                          <span
-                                            class="euiKeyPadMenuItem__betaBadgeWrapper"
-                                          >
-                                            <span
-                                              class="euiToolTipAnchor"
+                                              <div
+                                                color="secondary"
+                                                data-euiicon-type="empty"
+                                              />
+                                            </div>
+                                            <p
+                                              class="euiKeyPadMenuItem__label"
                                             >
                                               <span
-                                                class="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
-                                                tabindex="0"
+                                                data-test-subj="visTypeTitle"
                                               >
-                                                <div
-                                                  aria-hidden="true"
-                                                  class="euiBetaBadge__icon"
-                                                  data-euiicon-type="popout"
-                                                />
+                                                Vis Type 1
                                               </span>
-                                            </span>
-                                          </span>
-                                          <div
-                                            class="euiKeyPadMenuItem__icon"
-                                          >
-                                            <div
-                                              color="secondary"
-                                              data-euiicon-type="empty"
-                                            />
+                                            </p>
                                           </div>
-                                          <p
-                                            class="euiKeyPadMenuItem__label"
-                                          >
-                                            <span
-                                              data-test-subj="visTypeTitle"
-                                            >
-                                              Vis with alias Url
-                                            </span>
-                                          </p>
-                                        </div>
-                                      </button>
-                                      <button
-                                        aria-describedby="visTypeDescription-visWithSearch"
-                                        class="euiKeyPadMenuItem visNewVisDialog__type"
-                                        data-test-subj="visType-visWithSearch"
-                                        data-vis-stage="production"
-                                        role="menuitem"
-                                        type="button"
-                                      >
-                                        <div
-                                          class="euiKeyPadMenuItem__inner"
+                                        </button>
+                                      </li>
+                                      <li>
+                                        <button
+                                          aria-describedby="visTypeDescription-visWithAliasUrl"
+                                          class="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
+                                          data-test-subj="visType-visWithAliasUrl"
+                                          data-vis-stage="alias"
+                                          role="menuitem"
+                                          type="button"
                                         >
                                           <div
-                                            class="euiKeyPadMenuItem__icon"
-                                          >
-                                            <div
-                                              color="secondary"
-                                              data-euiicon-type="empty"
-                                            />
-                                          </div>
-                                          <p
-                                            class="euiKeyPadMenuItem__label"
+                                            class="euiKeyPadMenuItem__inner"
                                           >
                                             <span
-                                              data-test-subj="visTypeTitle"
+                                              class="euiKeyPadMenuItem__betaBadgeWrapper"
                                             >
-                                              Vis with search
+                                              <span
+                                                class="euiToolTipAnchor"
+                                              >
+                                                <span
+                                                  class="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
+                                                  tabindex="0"
+                                                >
+                                                  <div
+                                                    aria-hidden="true"
+                                                    class="euiBetaBadge__icon"
+                                                    data-euiicon-type="popout"
+                                                  />
+                                                </span>
+                                              </span>
                                             </span>
-                                          </p>
-                                        </div>
-                                      </button>
-                                    </div>
+                                            <div
+                                              class="euiKeyPadMenuItem__icon"
+                                            >
+                                              <div
+                                                color="secondary"
+                                                data-euiicon-type="empty"
+                                              />
+                                            </div>
+                                            <p
+                                              class="euiKeyPadMenuItem__label"
+                                            >
+                                              <span
+                                                data-test-subj="visTypeTitle"
+                                              >
+                                                Vis with alias Url
+                                              </span>
+                                            </p>
+                                          </div>
+                                        </button>
+                                      </li>
+                                      <li>
+                                        <button
+                                          aria-describedby="visTypeDescription-visWithSearch"
+                                          class="euiKeyPadMenuItem visNewVisDialog__type"
+                                          data-test-subj="visType-visWithSearch"
+                                          data-vis-stage="production"
+                                          role="menuitem"
+                                          type="button"
+                                        >
+                                          <div
+                                            class="euiKeyPadMenuItem__inner"
+                                          >
+                                            <div
+                                              class="euiKeyPadMenuItem__icon"
+                                            >
+                                              <div
+                                                color="secondary"
+                                                data-euiicon-type="empty"
+                                              />
+                                            </div>
+                                            <p
+                                              class="euiKeyPadMenuItem__label"
+                                            >
+                                              <span
+                                                data-test-subj="visTypeTitle"
+                                              >
+                                                Vis with search
+                                              </span>
+                                            </p>
+                                          </div>
+                                        </button>
+                                      </li>
+                                    </ul>
                                   </div>
                                 </div>
                               </div>
@@ -2643,261 +2684,272 @@ exports[`NewVisModal should render as expected 1`] = `
                                         className="visNewVisDialog__types"
                                         data-test-subj="visNewDialogTypes"
                                       >
-                                        <div
+                                        <ul
                                           className="euiKeyPadMenu visNewVisDialog__types"
                                           data-test-subj="visNewDialogTypes"
-                                          role="menu"
                                         >
-                                          <EuiKeyPadMenuItem
-                                            aria-describedby="visTypeDescription-vis"
-                                            className="visNewVisDialog__type"
-                                            data-test-subj="visType-vis"
-                                            data-vis-stage="production"
-                                            disabled={false}
-                                            key="vis"
-                                            label={
-                                              <span
-                                                data-test-subj="visTypeTitle"
-                                              >
-                                                Vis Type 1
-                                              </span>
-                                            }
-                                            onBlur={[Function]}
-                                            onClick={[Function]}
-                                            onFocus={[Function]}
-                                            onMouseEnter={[Function]}
-                                            onMouseLeave={[Function]}
-                                            role="menuitem"
+                                          <li
+                                            key=".$vis"
                                           >
-                                            <button
+                                            <EuiKeyPadMenuItem
                                               aria-describedby="visTypeDescription-vis"
-                                              className="euiKeyPadMenuItem visNewVisDialog__type"
+                                              className="visNewVisDialog__type"
                                               data-test-subj="visType-vis"
                                               data-vis-stage="production"
                                               disabled={false}
+                                              key="vis"
+                                              label={
+                                                <span
+                                                  data-test-subj="visTypeTitle"
+                                                >
+                                                  Vis Type 1
+                                                </span>
+                                              }
                                               onBlur={[Function]}
                                               onClick={[Function]}
                                               onFocus={[Function]}
                                               onMouseEnter={[Function]}
                                               onMouseLeave={[Function]}
                                               role="menuitem"
-                                              type="button"
                                             >
-                                              <div
-                                                className="euiKeyPadMenuItem__inner"
+                                              <button
+                                                aria-describedby="visTypeDescription-vis"
+                                                className="euiKeyPadMenuItem visNewVisDialog__type"
+                                                data-test-subj="visType-vis"
+                                                data-vis-stage="production"
+                                                disabled={false}
+                                                onBlur={[Function]}
+                                                onClick={[Function]}
+                                                onFocus={[Function]}
+                                                onMouseEnter={[Function]}
+                                                onMouseLeave={[Function]}
+                                                role="menuitem"
+                                                type="button"
                                               >
                                                 <div
-                                                  className="euiKeyPadMenuItem__icon"
+                                                  className="euiKeyPadMenuItem__inner"
                                                 >
-                                                  <VisTypeIcon>
-                                                    <EuiIcon
-                                                      color="secondary"
-                                                      size="l"
-                                                      type="empty"
-                                                    >
-                                                      <div
-                                                        color="secondary"
-                                                        data-euiicon-type="empty"
-                                                        size="l"
-                                                      />
-                                                    </EuiIcon>
-                                                  </VisTypeIcon>
-                                                </div>
-                                                <p
-                                                  className="euiKeyPadMenuItem__label"
-                                                >
-                                                  <span
-                                                    data-test-subj="visTypeTitle"
+                                                  <div
+                                                    className="euiKeyPadMenuItem__icon"
                                                   >
-                                                    Vis Type 1
-                                                  </span>
-                                                </p>
-                                              </div>
-                                            </button>
-                                          </EuiKeyPadMenuItem>
-                                          <EuiKeyPadMenuItem
-                                            aria-describedby="visTypeDescription-visWithAliasUrl"
-                                            betaBadgeIconType="popout"
-                                            betaBadgeLabel="Kibana application"
-                                            betaBadgeTooltipContent="Opens a Kibana application that is outside of Visualize."
-                                            className="visNewVisDialog__type"
-                                            data-test-subj="visType-visWithAliasUrl"
-                                            data-vis-stage="alias"
-                                            disabled={false}
-                                            key="visWithAliasUrl"
-                                            label={
-                                              <span
-                                                data-test-subj="visTypeTitle"
-                                              >
-                                                Vis with alias Url
-                                              </span>
-                                            }
-                                            onBlur={[Function]}
-                                            onClick={[Function]}
-                                            onFocus={[Function]}
-                                            onMouseEnter={[Function]}
-                                            onMouseLeave={[Function]}
-                                            role="menuitem"
+                                                    <VisTypeIcon>
+                                                      <EuiIcon
+                                                        color="secondary"
+                                                        size="l"
+                                                        type="empty"
+                                                      >
+                                                        <div
+                                                          color="secondary"
+                                                          data-euiicon-type="empty"
+                                                          size="l"
+                                                        />
+                                                      </EuiIcon>
+                                                    </VisTypeIcon>
+                                                  </div>
+                                                  <p
+                                                    className="euiKeyPadMenuItem__label"
+                                                  >
+                                                    <span
+                                                      data-test-subj="visTypeTitle"
+                                                    >
+                                                      Vis Type 1
+                                                    </span>
+                                                  </p>
+                                                </div>
+                                              </button>
+                                            </EuiKeyPadMenuItem>
+                                          </li>
+                                          <li
+                                            key=".$visWithAliasUrl"
                                           >
-                                            <button
+                                            <EuiKeyPadMenuItem
                                               aria-describedby="visTypeDescription-visWithAliasUrl"
-                                              className="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
+                                              betaBadgeIconType="popout"
+                                              betaBadgeLabel="Kibana application"
+                                              betaBadgeTooltipContent="Opens a Kibana application that is outside of Visualize."
+                                              className="visNewVisDialog__type"
                                               data-test-subj="visType-visWithAliasUrl"
                                               data-vis-stage="alias"
                                               disabled={false}
+                                              key="visWithAliasUrl"
+                                              label={
+                                                <span
+                                                  data-test-subj="visTypeTitle"
+                                                >
+                                                  Vis with alias Url
+                                                </span>
+                                              }
                                               onBlur={[Function]}
                                               onClick={[Function]}
                                               onFocus={[Function]}
                                               onMouseEnter={[Function]}
                                               onMouseLeave={[Function]}
                                               role="menuitem"
-                                              type="button"
                                             >
-                                              <div
-                                                className="euiKeyPadMenuItem__inner"
+                                              <button
+                                                aria-describedby="visTypeDescription-visWithAliasUrl"
+                                                className="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
+                                                data-test-subj="visType-visWithAliasUrl"
+                                                data-vis-stage="alias"
+                                                disabled={false}
+                                                onBlur={[Function]}
+                                                onClick={[Function]}
+                                                onFocus={[Function]}
+                                                onMouseEnter={[Function]}
+                                                onMouseLeave={[Function]}
+                                                role="menuitem"
+                                                type="button"
                                               >
-                                                <span
-                                                  className="euiKeyPadMenuItem__betaBadgeWrapper"
-                                                >
-                                                  <EuiBetaBadge
-                                                    className="euiKeyPadMenuItem__betaBadge"
-                                                    iconType="popout"
-                                                    label="Kibana application"
-                                                    tooltipContent="Opens a Kibana application that is outside of Visualize."
-                                                  >
-                                                    <EuiToolTip
-                                                      content="Opens a Kibana application that is outside of Visualize."
-                                                      delay="regular"
-                                                      position="top"
-                                                      title="Kibana application"
-                                                    >
-                                                      <span
-                                                        className="euiToolTipAnchor"
-                                                        onKeyUp={[Function]}
-                                                        onMouseOut={[Function]}
-                                                        onMouseOver={[Function]}
-                                                      >
-                                                        <span
-                                                          className="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
-                                                          onBlur={[Function]}
-                                                          onFocus={[Function]}
-                                                          tabIndex={0}
-                                                        >
-                                                          <EuiIcon
-                                                            aria-hidden="true"
-                                                            className="euiBetaBadge__icon"
-                                                            size="m"
-                                                            type="popout"
-                                                          >
-                                                            <div
-                                                              aria-hidden="true"
-                                                              className="euiBetaBadge__icon"
-                                                              data-euiicon-type="popout"
-                                                              size="m"
-                                                            />
-                                                          </EuiIcon>
-                                                        </span>
-                                                      </span>
-                                                    </EuiToolTip>
-                                                  </EuiBetaBadge>
-                                                </span>
                                                 <div
-                                                  className="euiKeyPadMenuItem__icon"
-                                                >
-                                                  <VisTypeIcon>
-                                                    <EuiIcon
-                                                      color="secondary"
-                                                      size="l"
-                                                      type="empty"
-                                                    >
-                                                      <div
-                                                        color="secondary"
-                                                        data-euiicon-type="empty"
-                                                        size="l"
-                                                      />
-                                                    </EuiIcon>
-                                                  </VisTypeIcon>
-                                                </div>
-                                                <p
-                                                  className="euiKeyPadMenuItem__label"
+                                                  className="euiKeyPadMenuItem__inner"
                                                 >
                                                   <span
-                                                    data-test-subj="visTypeTitle"
+                                                    className="euiKeyPadMenuItem__betaBadgeWrapper"
                                                   >
-                                                    Vis with alias Url
+                                                    <EuiBetaBadge
+                                                      className="euiKeyPadMenuItem__betaBadge"
+                                                      iconType="popout"
+                                                      label="Kibana application"
+                                                      tooltipContent="Opens a Kibana application that is outside of Visualize."
+                                                    >
+                                                      <EuiToolTip
+                                                        content="Opens a Kibana application that is outside of Visualize."
+                                                        delay="regular"
+                                                        position="top"
+                                                        title="Kibana application"
+                                                      >
+                                                        <span
+                                                          className="euiToolTipAnchor"
+                                                          onKeyUp={[Function]}
+                                                          onMouseOut={[Function]}
+                                                          onMouseOver={[Function]}
+                                                        >
+                                                          <span
+                                                            className="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
+                                                            onBlur={[Function]}
+                                                            onFocus={[Function]}
+                                                            tabIndex={0}
+                                                          >
+                                                            <EuiIcon
+                                                              aria-hidden="true"
+                                                              className="euiBetaBadge__icon"
+                                                              size="m"
+                                                              type="popout"
+                                                            >
+                                                              <div
+                                                                aria-hidden="true"
+                                                                className="euiBetaBadge__icon"
+                                                                data-euiicon-type="popout"
+                                                                size="m"
+                                                              />
+                                                            </EuiIcon>
+                                                          </span>
+                                                        </span>
+                                                      </EuiToolTip>
+                                                    </EuiBetaBadge>
                                                   </span>
-                                                </p>
-                                              </div>
-                                            </button>
-                                          </EuiKeyPadMenuItem>
-                                          <EuiKeyPadMenuItem
-                                            aria-describedby="visTypeDescription-visWithSearch"
-                                            className="visNewVisDialog__type"
-                                            data-test-subj="visType-visWithSearch"
-                                            data-vis-stage="production"
-                                            disabled={false}
-                                            key="visWithSearch"
-                                            label={
-                                              <span
-                                                data-test-subj="visTypeTitle"
-                                              >
-                                                Vis with search
-                                              </span>
-                                            }
-                                            onBlur={[Function]}
-                                            onClick={[Function]}
-                                            onFocus={[Function]}
-                                            onMouseEnter={[Function]}
-                                            onMouseLeave={[Function]}
-                                            role="menuitem"
+                                                  <div
+                                                    className="euiKeyPadMenuItem__icon"
+                                                  >
+                                                    <VisTypeIcon>
+                                                      <EuiIcon
+                                                        color="secondary"
+                                                        size="l"
+                                                        type="empty"
+                                                      >
+                                                        <div
+                                                          color="secondary"
+                                                          data-euiicon-type="empty"
+                                                          size="l"
+                                                        />
+                                                      </EuiIcon>
+                                                    </VisTypeIcon>
+                                                  </div>
+                                                  <p
+                                                    className="euiKeyPadMenuItem__label"
+                                                  >
+                                                    <span
+                                                      data-test-subj="visTypeTitle"
+                                                    >
+                                                      Vis with alias Url
+                                                    </span>
+                                                  </p>
+                                                </div>
+                                              </button>
+                                            </EuiKeyPadMenuItem>
+                                          </li>
+                                          <li
+                                            key=".$visWithSearch"
                                           >
-                                            <button
+                                            <EuiKeyPadMenuItem
                                               aria-describedby="visTypeDescription-visWithSearch"
-                                              className="euiKeyPadMenuItem visNewVisDialog__type"
+                                              className="visNewVisDialog__type"
                                               data-test-subj="visType-visWithSearch"
                                               data-vis-stage="production"
                                               disabled={false}
+                                              key="visWithSearch"
+                                              label={
+                                                <span
+                                                  data-test-subj="visTypeTitle"
+                                                >
+                                                  Vis with search
+                                                </span>
+                                              }
                                               onBlur={[Function]}
                                               onClick={[Function]}
                                               onFocus={[Function]}
                                               onMouseEnter={[Function]}
                                               onMouseLeave={[Function]}
                                               role="menuitem"
-                                              type="button"
                                             >
-                                              <div
-                                                className="euiKeyPadMenuItem__inner"
+                                              <button
+                                                aria-describedby="visTypeDescription-visWithSearch"
+                                                className="euiKeyPadMenuItem visNewVisDialog__type"
+                                                data-test-subj="visType-visWithSearch"
+                                                data-vis-stage="production"
+                                                disabled={false}
+                                                onBlur={[Function]}
+                                                onClick={[Function]}
+                                                onFocus={[Function]}
+                                                onMouseEnter={[Function]}
+                                                onMouseLeave={[Function]}
+                                                role="menuitem"
+                                                type="button"
                                               >
                                                 <div
-                                                  className="euiKeyPadMenuItem__icon"
+                                                  className="euiKeyPadMenuItem__inner"
                                                 >
-                                                  <VisTypeIcon>
-                                                    <EuiIcon
-                                                      color="secondary"
-                                                      size="l"
-                                                      type="empty"
-                                                    >
-                                                      <div
-                                                        color="secondary"
-                                                        data-euiicon-type="empty"
-                                                        size="l"
-                                                      />
-                                                    </EuiIcon>
-                                                  </VisTypeIcon>
-                                                </div>
-                                                <p
-                                                  className="euiKeyPadMenuItem__label"
-                                                >
-                                                  <span
-                                                    data-test-subj="visTypeTitle"
+                                                  <div
+                                                    className="euiKeyPadMenuItem__icon"
                                                   >
-                                                    Vis with search
-                                                  </span>
-                                                </p>
-                                              </div>
-                                            </button>
-                                          </EuiKeyPadMenuItem>
-                                        </div>
+                                                    <VisTypeIcon>
+                                                      <EuiIcon
+                                                        color="secondary"
+                                                        size="l"
+                                                        type="empty"
+                                                      >
+                                                        <div
+                                                          color="secondary"
+                                                          data-euiicon-type="empty"
+                                                          size="l"
+                                                        />
+                                                      </EuiIcon>
+                                                    </VisTypeIcon>
+                                                  </div>
+                                                  <p
+                                                    className="euiKeyPadMenuItem__label"
+                                                  >
+                                                    <span
+                                                      data-test-subj="visTypeTitle"
+                                                    >
+                                                      Vis with search
+                                                    </span>
+                                                  </p>
+                                                </div>
+                                              </button>
+                                            </EuiKeyPadMenuItem>
+                                          </li>
+                                        </ul>
                                       </EuiKeyPadMenu>
                                     </div>
                                   </EuiFlexItem>
