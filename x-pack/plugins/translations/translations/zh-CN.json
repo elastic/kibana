@@ -16381,7 +16381,7 @@
     "xpack.uptime.alerts.monitorStatus.addFilter.tag": "标记",
     "xpack.uptime.alerts.monitorStatus.addFilter.type": "类型",
     "xpack.uptime.alerts.monitorStatus.clientName": "运行时间监测状态",
-    "xpack.uptime.alerts.monitorStatus.defaultActionMessage": "{contextMessage}\n上次触发时间：{lastTriggered}\n{downMonitors}",
+    "xpack.uptime.alerts.monitorStatus.defaultActionMessage": "{contextMessage}\n上次触发时间：{lastTriggered}\n",
     "xpack.uptime.alerts.monitorStatus.filterBar.ariaLabel": "允许对监测状态告警使用筛选条件的输入",
     "xpack.uptime.alerts.monitorStatus.filters.anyLocation": "任意位置",
     "xpack.uptime.alerts.monitorStatus.filters.anyPort": "任意端口",
