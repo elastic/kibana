@@ -31,9 +31,5 @@
   ],
   "server": true,
   "ui": true,
-  "requiredBundles": [
-    "kibanaUtils",
-    "esUiShared",
-    "kibanaReact"
-  ]
+  "requiredBundles": ["esUiShared", "kibanaUtils", "kibanaReact", "lists"]
 }
