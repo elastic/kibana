@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Logger } from 'kibana/server';
+import { isNumber } from 'lodash';
 import { getBucketSize } from '../../../helpers/get_bucket_size';
 import {
   Setup,
@@ -13,25 +15,24 @@ import { anomalySeriesFetcher } from './fetcher';
 import { getMlBucketSize } from './get_ml_bucket_size';
 import { anomalySeriesTransform } from './transform';
 import { getMLJobIds } from '../../../service_map/get_service_anomalies';
-import {
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-} from '../../../../../common/elasticsearch_fieldnames';
+import { UIFilters } from '../../../../../typings/ui_filters';
 
 export async function getAnomalySeries({
   serviceName,
   transactionType,
   transactionName,
-  environment,
   timeSeriesDates,
   setup,
+  logger,
+  uiFilters,
 }: {
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
-  environment: string | undefined;
   timeSeriesDates: number[];
   setup: Setup & SetupTimeRange & SetupUIFilters;
+  logger: Logger;
+  uiFilters: UIFilters;
 }) {
   // don't fetch anomalies for transaction details page
   if (transactionName) {
@@ -43,16 +44,13 @@ export async function getAnomalySeries({
     return;
   }
 
-  if (setup.uiFiltersES.length > 0) {
-    // filter out known uiFilters like service.environment & service.name
-    const unknownFilters = setup.uiFiltersES.filter(
-      (uiFilter) =>
-        !uiFilter.term?.[SERVICE_ENVIRONMENT] && !uiFilter.terms?.[SERVICE_NAME]
-    );
-    // don't fetch anomalies if unknown uiFilters are applied
-    if (unknownFilters.length > 0) {
-      return;
-    }
+  // don't fetch anomalies if unknown uiFilters are applied
+  const knownFilters = ['environment', 'serviceName'];
+  const uiFilterNames = Object.keys(uiFilters);
+  if (
+    uiFilterNames.some((uiFilterName) => !knownFilters.includes(uiFilterName))
+  ) {
+    return;
   }
 
   // don't fetch anomalies if the ML plugin is not setup
@@ -66,7 +64,7 @@ export async function getAnomalySeries({
     return;
   }
 
-  const mlJobIds = await getMLJobIds(setup.ml, environment);
+  const mlJobIds = await getMLJobIds(setup.ml, uiFilters.environment);
 
   // don't fetch anomalies if there are more than 1 ML jobs for the given environment
   if (mlJobIds.length > 1) {
@@ -74,12 +72,10 @@ export async function getAnomalySeries({
   }
   const jobId = mlJobIds[0];
 
-  const mlBucketSize = await getMlBucketSize({
-    serviceName,
-    transactionType,
-    setup,
-    jobId,
-  });
+  const mlBucketSize = await getMlBucketSize({ setup, jobId, logger });
+  if (!isNumber(mlBucketSize)) {
+    return;
+  }
 
   const { start, end } = setup;
   const { intervalString, bucketSize } = getBucketSize(start, end, 'auto');
@@ -91,15 +87,16 @@ export async function getAnomalySeries({
     mlBucketSize,
     setup,
     jobId,
+    logger,
   });
 
-  return esResponse
-    ? anomalySeriesTransform(
-        esResponse,
-        mlBucketSize,
-        bucketSize,
-        timeSeriesDates,
-        jobId
-      )
-    : undefined;
+  if (esResponse && mlBucketSize > 0) {
+    return anomalySeriesTransform(
+      esResponse,
+      mlBucketSize,
+      bucketSize,
+      timeSeriesDates,
+      jobId
+    );
+  }
 }

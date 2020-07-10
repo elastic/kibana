@@ -42,7 +42,6 @@ import {
 } from '../../../../../common/transaction_types';
 
 interface TransactionChartProps {
-  hasMLJob: boolean;
   charts: ITransactionChartData;
   location: Location;
   urlParams: IUrlParams;
@@ -97,10 +96,10 @@ export class TransactionCharts extends Component<TransactionChartProps> {
 
   public renderMLHeader(hasValidMlLicense: boolean | undefined) {
     const {
-      hasMLJob,
       charts: { mlJobId },
     } = this.props;
-    if (!hasValidMlLicense || !hasMLJob || !mlJobId) {
+
+    if (!hasValidMlLicense || !mlJobId) {
       return null;
     }
 

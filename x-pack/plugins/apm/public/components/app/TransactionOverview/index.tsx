@@ -130,7 +130,6 @@ export function TransactionOverview() {
             <EuiSpacer size="s" />
 
             <TransactionCharts
-              hasMLJob={transactionCharts.mlJobId !== undefined}
               charts={transactionCharts}
               location={location}
               urlParams={urlParams}

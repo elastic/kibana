@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Logger } from 'kibana/server';
 import { PromiseReturnType } from '../../../../../../observability/typings/common';
 import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 
@@ -19,6 +20,7 @@ export async function anomalySeriesFetcher({
   mlBucketSize,
   setup,
   jobId,
+  logger,
 }: {
   serviceName: string;
   transactionType: string;
@@ -26,6 +28,7 @@ export async function anomalySeriesFetcher({
   mlBucketSize: number;
   setup: Setup & SetupTimeRange;
   jobId: string;
+  logger: Logger;
 }) {
   const { ml, start, end } = setup;
   if (!ml) {
@@ -44,28 +47,12 @@ export async function anomalySeriesFetcher({
           filter: [
             { term: { job_id: jobId } },
             { exists: { field: 'bucket_span' } },
-            {
-              term: {
-                result_type: 'model_plot',
-              },
-            },
-            {
-              term: {
-                partition_field_value: serviceName,
-              },
-            },
-            {
-              term: {
-                by_field_value: transactionType,
-              },
-            },
+            { term: { result_type: 'model_plot' } },
+            { term: { partition_field_value: serviceName } },
+            { term: { by_field_value: transactionType } },
             {
               range: {
-                timestamp: {
-                  gte: newStart,
-                  lte: end,
-                  format: 'epoch_millis',
-                },
+                timestamp: { gte: newStart, lte: end, format: 'epoch_millis' },
               },
             },
           ],
@@ -77,10 +64,7 @@ export async function anomalySeriesFetcher({
             field: 'timestamp',
             fixed_interval: intervalString,
             min_doc_count: 0,
-            extended_bounds: {
-              min: newStart,
-              max: end,
-            },
+            extended_bounds: { min: newStart, max: end },
           },
           aggs: {
             anomaly_score: { max: { field: 'anomaly_score' } },
@@ -98,8 +82,12 @@ export async function anomalySeriesFetcher({
   } catch (err) {
     const isHttpError = 'statusCode' in err;
     if (isHttpError) {
+      logger.info(
+        `Status code "${err.statusCode}" while retrieving ML anomalies for APM`
+      );
       return;
     }
-    throw err;
+    logger.error('An error occurred while retrieving ML anomalies for APM');
+    logger.error(err);
   }
 }

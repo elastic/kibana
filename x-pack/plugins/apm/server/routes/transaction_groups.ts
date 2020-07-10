@@ -63,6 +63,7 @@ export const transactionGroupsChartsRoute = createRoute(() => ({
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
+    const logger = context.logger;
     const { serviceName } = context.params.path;
     const {
       transactionType,
@@ -73,7 +74,7 @@ export const transactionGroupsChartsRoute = createRoute(() => ({
     try {
       uiFilters = JSON.parse(uiFiltersJson);
     } catch (error) {
-      context.logger.error(error);
+      logger.error(error);
     }
 
     return getTransactionCharts({
@@ -81,7 +82,8 @@ export const transactionGroupsChartsRoute = createRoute(() => ({
       transactionType,
       transactionName,
       setup,
-      environment: uiFilters.environment,
+      logger,
+      uiFilters,
     });
   },
 }));
