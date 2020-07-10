@@ -32,9 +32,7 @@ import './recent_activity.scss';
 
 const DEFAULT_EMPTY_FEED_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.activityFeedEmptyDefault.title',
-  {
-    defaultMessage: 'Your organization has no recent activity',
-  }
+  { defaultMessage: 'Your organization has no recent activity' }
 );
 
 export const RecentActivity: React.FC<IAppServerData> = ({

@@ -37,18 +37,41 @@ export const OrganizationStats: React.FC<IAppServerData> = ({
         isFederatedAuth ? 'halves' : 'fourths'
       }`}
     >
-      <StatisticCard title="Shared sources" count={sourcesCount} actionPath={ORG_SOURCES_PATH} />
+      <StatisticCard
+        title={i18n.translate(
+          'xpack.enterpriseSearch.workplaceSearch.organizationStats.sharedSources',
+          { defaultMessage: 'Shared sources' }
+        )}
+        count={sourcesCount}
+        actionPath={ORG_SOURCES_PATH}
+      />
       {!isFederatedAuth && (
         <>
           <StatisticCard
-            title="Invitations"
+            title={i18n.translate(
+              'xpack.enterpriseSearch.workplaceSearch.organizationStats.invitations',
+              { defaultMessage: 'Invitations' }
+            )}
             count={pendingInvitationsCount}
             actionPath={USERS_PATH}
           />
-          <StatisticCard title="Active users" count={accountsCount} actionPath={USERS_PATH} />
+          <StatisticCard
+            title={i18n.translate(
+              'xpack.enterpriseSearch.workplaceSearch.organizationStats.activeUsers',
+              { defaultMessage: 'Active users' }
+            )}
+            count={accountsCount}
+            actionPath={USERS_PATH}
+          />
         </>
       )}
-      <StatisticCard title="Private sources" count={personalSourcesCount} />
+      <StatisticCard
+        title={i18n.translate(
+          'xpack.enterpriseSearch.workplaceSearch.organizationStats.privateSources',
+          { defaultMessage: 'Private sources' }
+        )}
+        count={personalSourcesCount}
+      />
     </div>
   </ContentSection>
 );
