@@ -18,14 +18,16 @@ export interface UseListsConfigReturn extends UseListsConfigState {
 
 export const useListsConfig = (): UseListsConfigReturn => {
   const { loading, indexExists, createIndex } = useListsIndex();
+  const needsConfiguration = indexExists === false;
 
   const isAuthenticated = true; // TODO check user's authentication
   const canManageIndex = true; // TODO check user's list index privileges
+
   useEffect(() => {
-    if (isAuthenticated && canManageIndex && indexExists != null && !indexExists) {
+    if (isAuthenticated && canManageIndex && needsConfiguration) {
       createIndex();
     }
-  }, [canManageIndex, createIndex, indexExists, isAuthenticated]);
+  }, [canManageIndex, createIndex, needsConfiguration, isAuthenticated]);
 
-  return { loading, needsConfiguration: indexExists };
+  return { loading, needsConfiguration };
 };
