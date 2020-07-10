@@ -29,14 +29,14 @@ export interface CrumbInfo {
 
 const ThemedBreadcrumbs = styled(EuiBreadcrumbs)<{ background: string; text: string }>`
   &.euiBreadcrumbs.euiBreadcrumbs--responsive {
-    background-color: ${props => props.background};
-    color: ${props => props.text};
+    background-color: ${(props) => props.background};
+    color: ${(props) => props.text};
     padding: 1em;
     border-radius: 5px;
   }
 
   & .euiBreadcrumbSeparator {
-    background: ${props => props.text};
+    background: ${(props) => props.text};
   }
 `;
 

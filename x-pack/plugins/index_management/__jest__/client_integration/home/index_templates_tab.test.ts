@@ -13,7 +13,7 @@ import { setupEnvironment, getRandomString } from '../helpers';
 import { IndexTemplatesTabTestBed, setup } from './index_templates_tab.helpers';
 
 const removeWhiteSpaceOnArrayValues = (array: any[]) =>
-  array.map(value => {
+  array.map((value) => {
     if (typeof value !== 'string') {
       return value;
     }
@@ -193,7 +193,7 @@ describe('Index Templates tab', () => {
       const { rows } = table.getMetaData('legacyTemplateTable');
 
       expect(rows.length).toEqual(
-        legacyTemplates.filter(template => !template.name.startsWith('.')).length
+        legacyTemplates.filter((template) => !template.name.startsWith('.')).length
       );
 
       expect(exists('viewButton')).toBe(true);
@@ -522,7 +522,7 @@ describe('Index Templates tab', () => {
           await actions.clickTemplateAt(0);
 
           expect(find('templateDetails.tab').length).toBe(4);
-          expect(find('templateDetails.tab').map(t => t.text())).toEqual([
+          expect(find('templateDetails.tab').map((t) => t.text())).toEqual([
             'Summary',
             'Settings',
             'Mappings',
