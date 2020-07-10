@@ -23,6 +23,7 @@ import {
   EuiConfirmModal,
   EuiCallOut,
   EuiButton,
+  EuiBetaBadge,
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -395,14 +396,25 @@ export const PolicyList = React.memo(() => {
         data-test-subj="policyListPage"
         headerLeft={
           <>
-            <EuiTitle size="l">
-              <h1 data-test-subj="pageViewHeaderLeftTitle">
-                <FormattedMessage
-                  id="xpack.securitySolution.policyList.pageTitle"
-                  defaultMessage="Policies"
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="l">
+                  <h1 data-test-subj="pageViewHeaderLeftTitle">
+                    <FormattedMessage
+                      id="xpack.securitySolution.policyList.pageTitle"
+                      defaultMessage="Policies"
+                    />
+                  </h1>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  label={i18n.translate('xpack.securitySolution.endpoint.policyList.beta', {
+                    defaultMessage: 'Beta',
+                  })}
                 />
-              </h1>
-            </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <EuiSpacer size="s" />
             <EuiText size="s" color="subdued">
               <p>

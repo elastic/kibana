@@ -138,7 +138,7 @@ describe('SearchRow', () => {
 
       wrapper
         .find('[data-test-subj="search-bar"] input')
-        .simulate('keyup', { keyCode: 13, target: { value: 'abcd' } });
+        .simulate('keyup', { key: 'Enter', target: { value: 'abcd' } });
 
       expect(onQueryChange).toHaveBeenCalled();
     });
