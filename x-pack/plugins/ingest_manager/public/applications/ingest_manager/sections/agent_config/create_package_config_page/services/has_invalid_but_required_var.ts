@@ -11,7 +11,7 @@ export const hasInvalidButRequiredVar = (
   packageConfigVars?: PackageConfigConfigRecord
 ): boolean => {
   return (
-    !packageConfigVars ||
+    (registryVars && !packageConfigVars) ||
     Boolean(
       registryVars &&
         registryVars.find(
