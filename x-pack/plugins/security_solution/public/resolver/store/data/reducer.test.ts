@@ -24,13 +24,12 @@ function generateBaseTree() {
 }
 
 function compileStatsForChild(node: TreeNode) {
-  let totalRelatedEvents = 0;
+  const totalRelatedEvents = node.relatedEvents.length;
   // For the purposes of testing, we pick one category to fake an extra event for
   // so we can test if the event limit selectors do the right thing.
   let categoryToOverCount: string = '';
   const compiledStats = node.relatedEvents.reduce(
     (counts: Record<string, number>, relatedEvent) => {
-      totalRelatedEvents++;
       for (const category of [relatedEvent.event.category].flat()) {
         if (!categoryToOverCount) {
           categoryToOverCount = category;
