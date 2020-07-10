@@ -33,6 +33,7 @@
   "requiredBundles": [
     "kibanaUtils",
     "esUiShared",
-    "kibanaReact"
+    "kibanaReact",
+    "ingestManager"
   ]
 }

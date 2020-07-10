@@ -280,32 +280,32 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     });
 
-    // core.application.register({
-    //   id: `${APP_ID}:${SecurityPageName.management}`,
-    //   title: ADMINISTRATION,
-    //   order: 9002,
-    //   euiIconType: APP_ICON,
-    //   category: DEFAULT_APP_CATEGORIES.security,
-    //   appRoute: APP_MANAGEMENT_PATH,
-    //   mount: async (params: AppMountParameters) => {
-    //     const [
-    //       { coreStart, startPlugins, store, services },
-    //       { renderApp, composeLibs },
-    //       { managementSubPlugin },
-    //     ] = await Promise.all([
-    //       mountSecurityFactory(),
-    //       this.downloadAssets(),
-    //       this.downloadSubPlugins(),
-    //     ]);
-    //     return renderApp({
-    //       ...composeLibs(coreStart),
-    //       ...params,
-    //       services,
-    //       store,
-    //       SubPluginRoutes: managementSubPlugin.start(coreStart, startPlugins).SubPluginRoutes,
-    //     });
-    //   },
-    // });
+    core.application.register({
+      id: `${APP_ID}:${SecurityPageName.management}`,
+      title: ADMINISTRATION,
+      order: 9002,
+      euiIconType: APP_ICON,
+      category: DEFAULT_APP_CATEGORIES.security,
+      appRoute: APP_MANAGEMENT_PATH,
+      mount: async (params: AppMountParameters) => {
+        const [
+          { coreStart, startPlugins, store, services },
+          { renderApp, composeLibs },
+          { managementSubPlugin },
+        ] = await Promise.all([
+          mountSecurityFactory(),
+          this.downloadAssets(),
+          this.downloadSubPlugins(),
+        ]);
+        return renderApp({
+          ...composeLibs(coreStart),
+          ...params,
+          services,
+          store,
+          SubPluginRoutes: managementSubPlugin.start(coreStart, startPlugins).SubPluginRoutes,
+        });
+      },
+    });
 
     core.application.register({
       id: 'siem',
@@ -358,7 +358,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       networkSubPlugin,
       overviewSubPlugin,
       timelinesSubPlugin,
-      // managementSubPlugin,
+      managementSubPlugin,
     } = await import('./sub_plugins');
 
     return {
@@ -368,7 +368,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       networkSubPlugin,
       overviewSubPlugin,
       timelinesSubPlugin,
-      // managementSubPlugin,
+      managementSubPlugin,
     };
   }
 
@@ -380,7 +380,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       hostsSubPlugin,
       networkSubPlugin,
       timelinesSubPlugin,
-      // managementSubPlugin,
+      managementSubPlugin,
     } = await this.downloadSubPlugins();
     const { apolloClient } = composeLibs(coreStart);
     const appLibs: AppObservableLibs = { apolloClient, kibana: coreStart };
@@ -390,7 +390,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const hostsStart = hostsSubPlugin.start(storage);
     const networkStart = networkSubPlugin.start(storage);
     const timelinesStart = timelinesSubPlugin.start();
-    // const managementSubPluginStart = managementSubPlugin.start(coreStart, startPlugins);
+    const managementSubPluginStart = managementSubPlugin.start(coreStart, startPlugins);
 
     const timelineInitialState = {
       timeline: {
@@ -409,18 +409,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ...hostsStart.store.initialState,
         ...networkStart.store.initialState,
         ...timelineInitialState,
-        // ...managementSubPluginStart.store.initialState,
+        ...managementSubPluginStart.store.initialState,
       }),
       {
         ...hostsStart.store.reducer,
         ...networkStart.store.reducer,
         ...timelinesStart.store.reducer,
-        // ...managementSubPluginStart.store.reducer,
+        ...managementSubPluginStart.store.reducer,
       },
       libs$.pipe(pluck('apolloClient')),
       libs$.pipe(pluck('kibana')),
-      storage
-      // [...(managementSubPluginStart.store.middleware ?? [])]
+      storage,
+      [...(managementSubPluginStart.store.middleware ?? [])]
     );
   }
 }
