@@ -37,6 +37,9 @@ export const createPackageConfigMock = (): PackageConfig => {
     inputs: [
       {
         config: {},
+        enabled: true,
+        type: 'endpoint',
+        streams: [],
       },
     ],
   };
