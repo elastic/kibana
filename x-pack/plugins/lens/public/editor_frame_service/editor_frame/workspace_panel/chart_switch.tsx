@@ -19,7 +19,7 @@ import { Visualization, FramePublicAPI, Datasource } from '../../../types';
 import { Action } from '../state_management';
 import { getSuggestions, switchToSuggestion, Suggestion } from '../suggestion_helpers';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
-import { ToolbarButton } from '../toolbar_button/toolbar_button';
+import { ToolbarButton } from '../../../toolbar_button';
 
 interface VisualizationSelection {
   visualizationId: string;
