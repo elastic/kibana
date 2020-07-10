@@ -16,16 +16,20 @@ import {
   APM_TELEMETRY_SAVED_OBJECT_ID,
   APM_TELEMETRY_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
-import { getApmTelemetryMapping } from '../../../common/apm_telemetry';
+import { apmSchema } from '../../../common/apm_telemetry_schema';
 import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import {
   collectDataTelemetry,
   CollectTelemetryParams,
 } from './collect_data_telemetry';
+import { APMTelemetry } from './types';
 
 const APM_TELEMETRY_TASK_NAME = 'apm-telemetry-task';
 
+interface ITelemetry {
+  apm: APMTelemetry;
+}
 export async function createApmTelemetry({
   core,
   config$,
@@ -96,9 +100,9 @@ export async function createApmTelemetry({
     );
   };
 
-  const collector = usageCollector.makeUsageCollector({
+  const collector = usageCollector.makeUsageCollector<ITelemetry>({
     type: 'apm',
-    schema: getApmTelemetryMapping(),
+    schema: apmSchema,
     fetch: async () => {
       try {
         const data = (
