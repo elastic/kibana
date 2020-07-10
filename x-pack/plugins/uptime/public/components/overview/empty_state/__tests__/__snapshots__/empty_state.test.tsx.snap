@@ -288,7 +288,9 @@ exports[`EmptyState component does not render empty state with appropriate base 
                         <span
                           className="euiTextColor euiTextColor--subdued"
                         >
-                          <EuiTitle>
+                          <EuiTitle
+                            size="m"
+                          >
                             <EuiTitle
                               className="euiTitle euiTitle--medium"
                               size="l"
@@ -725,7 +727,9 @@ exports[`EmptyState component doesn't render child components when count is fals
                         <span
                           className="euiTextColor euiTextColor--subdued"
                         >
-                          <EuiTitle>
+                          <EuiTitle
+                            size="m"
+                          >
                             <EuiTitle
                               className="euiTitle euiTitle--medium"
                               size="l"
@@ -1167,7 +1171,9 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                         <span
                           className="euiTextColor euiTextColor--subdued"
                         >
-                          <EuiTitle>
+                          <EuiTitle
+                            size="m"
+                          >
                             <EuiTitle
                               className="euiTitle euiTitle--medium"
                               size="l"
@@ -1645,7 +1651,9 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
                         <span
                           className="euiTextColor euiTextColor--subdued"
                         >
-                          <EuiTitle>
+                          <EuiTitle
+                            size="m"
+                          >
                             <EuiTitle
                               className="euiTitle euiTitle--medium"
                               size="m"

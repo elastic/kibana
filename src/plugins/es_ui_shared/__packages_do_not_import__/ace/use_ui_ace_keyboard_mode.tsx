@@ -19,7 +19,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import * as ReactDOM from 'react-dom';
-import { keyCodes, EuiText } from '@elastic/eui';
+import { keys, EuiText } from '@elastic/eui';
 
 import './_ui_ace_keyboard_mode.scss';
 
@@ -40,7 +40,7 @@ export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | n
 
   useEffect(() => {
     function onDismissOverlay(event: KeyboardEvent) {
-      if (event.keyCode === keyCodes.ENTER) {
+      if (event.key === keys.ENTER) {
         event.preventDefault();
         aceTextAreaElement!.focus();
       }
@@ -66,7 +66,7 @@ export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | n
     };
 
     const aceKeydownListener = (event: KeyboardEvent) => {
-      if (event.keyCode === keyCodes.ESCAPE && !autoCompleteVisibleRef.current) {
+      if (event.key === keys.ESCAPE && !autoCompleteVisibleRef.current) {
         event.preventDefault();
         event.stopPropagation();
         enableOverlay();
