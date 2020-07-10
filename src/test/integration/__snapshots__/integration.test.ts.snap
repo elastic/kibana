@@ -180,6 +180,7 @@ Array [
       "author": "sqren",
       "autoFixConflicts": undefined,
       "branchLabelMapping": undefined,
+      "ci": false,
       "dryRun": false,
       "editor": undefined,
       "fork": true,
@@ -194,9 +195,11 @@ Array [
       "prDescription": undefined,
       "prFilter": undefined,
       "prTitle": "[{targetBranch}] {commitMessages}",
+      "pullNumber": undefined,
       "repoName": "backport-demo",
       "repoOwner": "elastic",
       "resetAuthor": false,
+      "sha": undefined,
       "sourceBranch": "master",
       "sourcePRLabels": Array [],
       "targetBranchChoices": Array [
@@ -522,7 +525,7 @@ fatal: No such remote: 'elastic'
     "",
   ],
   Array [
-    "[INFO] Backporting [{\\"sourceBranch\\":\\"master\\",\\"selectedTargetBranches\\":[],\\"sha\\":\\"f3b618b9421fdecdb36862f907afbdd6344b361d\\",\\"formattedMessage\\":\\"Add witch (#85)\\",\\"pullNumber\\":85,\\"existingTargetPullRequests\\":[]}] to 6.0",
+    "[INFO] Backporting [{\\"sourceBranch\\":\\"master\\",\\"targetBranchesFromLabels\\":[],\\"sha\\":\\"f3b618b9421fdecdb36862f907afbdd6344b361d\\",\\"formattedMessage\\":\\"Add witch (#85)\\",\\"pullNumber\\":85,\\"existingTargetPullRequests\\":[]}] to 6.0",
     undefined,
   ],
   Array [

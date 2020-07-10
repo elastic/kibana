@@ -50,6 +50,12 @@ export function getOptionsFromCliArgs(
       type: 'boolean',
     })
 
+    .option('ci', {
+      default: configOptions.ci ?? false,
+      description: 'Disable interactive prompts',
+      type: 'boolean',
+    })
+
     .option('dryRun', {
       default: false,
       description: 'Perform backport without pushing to Github',
@@ -173,23 +179,22 @@ export function getOptionsFromCliArgs(
       type: 'string',
     })
 
-    // cli-only
     .option('pullNumber', {
+      default: configOptions.pullNumber,
       conflicts: ['sha', 'prFilter'],
       description: 'Pull request to backport',
       alias: 'pr',
       type: 'number',
     })
 
-    // cli-only
     .option('resetAuthor', {
-      default: false,
+      default: configOptions.resetAuthor ?? false,
       description: 'Set yourself as commit author',
       type: 'boolean',
     })
 
-    // cli-only
     .option('sha', {
+      default: configOptions.sha,
       conflicts: ['pullNumber', 'prFilter'],
       description: 'Commit sha to backport',
       alias: 'commit',
@@ -254,7 +259,7 @@ export function getOptionsFromCliArgs(
     })
 
     .option('verbose', {
-      default: false,
+      default: configOptions.verbose ?? false,
       description: 'Show additional debug information',
       type: 'boolean',
     })

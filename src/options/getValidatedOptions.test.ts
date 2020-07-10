@@ -9,6 +9,7 @@ describe('getValidatedOptions', () => {
     author: undefined,
     autoFixConflicts: undefined,
     branchLabelMapping: undefined,
+    ci: false,
     dryRun: false,
     editor: 'code',
     fork: true,

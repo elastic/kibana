@@ -111,13 +111,12 @@ describe('yargs', () => {
 
     expect(output).toMatchInlineSnapshot(`
       "? Select commit (Use arrow keys)
-      ❯ 1. Create \\"conflicting-file.txt\\" in master (f8bb8b70)
-        2. Update romeo-and-juliet.txt (91eee967)
-        3. Add 👻 (2e63475c)
-        4. Add witch (#85)
-        5. Add SF mention (#80) 6.3
-        6. Add backport config (3827bbba)
-        ──────────────"
+      ❯ 1. Add branch label mapping (#225)
+        2. Create \\"conflicting-file.txt\\" in master (f8bb8b70)
+        3. Update romeo-and-juliet.txt (91eee967)
+        4. Add 👻 (2e63475c)
+        5. Add witch (#85)
+        6. Add SF mention (#80) 6.3"
     `);
   });
 
@@ -146,8 +145,7 @@ describe('yargs', () => {
         3. Update romeo-and-juliet.txt (91eee967)
         4. Add 👻 (2e63475c)
         5. Add witch (#85)
-        6. Add SF mention (#80) 6.3
-        ──────────────"
+        6. Add SF mention (#80) 6.3"
     `);
   });
 });

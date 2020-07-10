@@ -1,4 +1,5 @@
 import axios from 'axios';
+import * as logger from '../services/logger';
 import { getOptions } from './options';
 
 function setupSpy({
@@ -86,6 +87,12 @@ describe('getOptions', () => {
     expect(options.autoFixConflicts).toBe(myFn);
   });
 
+  it('should call setLogLevel', async () => {
+    setupSpy({ defaultBranch: 'my-default-branch' });
+    await getOptions(defaultArgs);
+    expect(logger.setLogLevel).toHaveBeenCalledWith({ verbose: false });
+  });
+
   it('should return options', async () => {
     setupSpy({ defaultBranch: 'some-branch-name' });
     const options = await getOptions(defaultArgs);
@@ -95,6 +102,7 @@ describe('getOptions', () => {
       all: false,
       author: 'sqren',
       assignees: [],
+      ci: false,
       dryRun: false,
       fork: true,
       gitHostname: 'github.com',

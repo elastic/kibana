@@ -175,7 +175,7 @@ describe('cherrypick', () => {
     sourceBranch: '7.x',
     formattedMessage: '',
     sha: 'abcd',
-    selectedTargetBranches: [],
+    targetBranchesFromLabels: [],
   };
 
   it('should return `needsResolving: false` when no errors are encountered', async () => {

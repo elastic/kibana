@@ -40,6 +40,7 @@ describe('getOptionsFromCliArgs', () => {
       accessToken: 'myAccessToken',
       all: true,
       assignees: [],
+      ci: false,
       dryRun: false,
       fork: true,
       gitHostname: 'github.com',

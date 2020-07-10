@@ -90,6 +90,7 @@ jest.mock('../../services/logger', () => {
   const spy = jest.fn();
   return {
     consoleLog: jest.fn(),
+    setLogLevel: jest.fn(),
     logger: {
       spy: spy,
       info: (msg: string, meta: unknown) => spy(`[INFO] ${msg}`, meta),

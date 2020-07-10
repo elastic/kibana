@@ -31,7 +31,7 @@ describe('fetchCommitBySha', () => {
       formattedMessage: 'myMessage (sha12345)',
       pullNumber: undefined,
       sha: 'sha123456789',
-      selectedTargetBranches: [],
+      targetBranchesFromLabels: [],
     });
 
     expect(axiosSpy.mock.calls).toMatchSnapshot();
@@ -57,7 +57,7 @@ describe('fetchCommitBySha', () => {
         '[Chrome] Bootstrap Angular into document.body (myCommit)',
       sha: 'myCommitSha',
       pullNumber: undefined,
-      selectedTargetBranches: [],
+      targetBranchesFromLabels: [],
     };
 
     expect(commit).toEqual(expectedCommit);

@@ -16,7 +16,7 @@ describe('getTargetBranches', () => {
       .mockResolvedValueOnce(['branchA']);
   });
 
-  describe('when `selectedTargetBranches=["7.x"]`', () => {
+  describe('when `targetBranchesFromLabels=["7.x"]`', () => {
     let targetBranchChoices: BranchChoice[];
     beforeEach(async () => {
       const options = ({
@@ -35,7 +35,7 @@ describe('getTargetBranches', () => {
       const commits = [
         {
           sourceBranch: 'master',
-          selectedTargetBranches: ['7.x'],
+          targetBranchesFromLabels: ['7.x'],
           sha: 'my-sha',
           formattedMessage: '[backport] Bump to 5.1.3 (#62286)',
           pullNumber: 62286,
@@ -70,7 +70,7 @@ describe('getTargetBranches', () => {
     });
   });
 
-  describe('when `selectedTargetBranches=["8.0.0"]`', () => {
+  describe('when `targetBranchesFromLabels=["8.0.0"]`', () => {
     let targetBranchChoices: BranchChoice[];
     beforeEach(async () => {
       const options = ({
@@ -88,7 +88,7 @@ describe('getTargetBranches', () => {
       const commits = [
         {
           sourceBranch: 'master',
-          selectedTargetBranches: ['8.0.0'],
+          targetBranchesFromLabels: ['8.0.0'],
           sha: 'my-sha',
           formattedMessage: '[backport] Bump to 5.1.3 (#62286)',
           pullNumber: 62286,
@@ -123,7 +123,7 @@ describe('getTargetBranches', () => {
       const commits: CommitSelected[] = [
         {
           formattedMessage: 'hey',
-          selectedTargetBranches: [],
+          targetBranchesFromLabels: [],
           sha: 'abcd',
           sourceBranch: '7.x',
           pullNumber: 1337,

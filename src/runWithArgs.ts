@@ -16,7 +16,7 @@ export async function runWithArgs(
 
   try {
     const options = await getOptions(argv, optionsFromModule);
-    await runWithOptions(options);
+    return await runWithOptions(options);
   } catch (e) {
     if (e instanceof HandledError) {
       consoleLog(e.message);

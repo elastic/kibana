@@ -8,6 +8,8 @@ import { getCommits } from './ui/getCommits';
 import { getTargetBranches } from './ui/getTargetBranches';
 import { maybeSetupRepo } from './ui/maybeSetupRepo';
 
+type Result = { targetBranch: string; success: boolean; message?: string };
+
 export async function runWithOptions(options: BackportOptions) {
   logger.verbose('Backport options', options);
   if (options.dryRun) {
@@ -19,6 +21,7 @@ export async function runWithOptions(options: BackportOptions) {
 
   await maybeSetupRepo(options);
 
+  const results = [] as Result[];
   await sequentially(targetBranches, async (targetBranch) => {
     logger.info(`Backporting ${JSON.stringify(commits)} to ${targetBranch}`);
     try {
@@ -27,7 +30,9 @@ export async function runWithOptions(options: BackportOptions) {
         commits,
         targetBranch,
       });
+      results.push({ targetBranch, success: true });
     } catch (e) {
+      results.push({ targetBranch, success: false, message: e.message });
       if (e instanceof HandledError) {
         consoleLog(e.message);
       } else {
@@ -35,4 +40,7 @@ export async function runWithOptions(options: BackportOptions) {
       }
     }
   });
+
+  // return the results for consumers to programatically read
+  return results;
 }

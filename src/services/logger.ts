@@ -2,10 +2,11 @@ import dedent from 'dedent';
 import isString from 'lodash.isstring';
 import safeJsonStringify from 'safe-json-stringify';
 import winston, { format } from 'winston';
-import yargs from 'yargs';
 import { getLogfilePath } from './env';
 
 const { combine } = format;
+
+let winstonInstance: winston.Logger;
 
 // wrapper around console.log
 export function consoleLog(message: string) {
@@ -14,14 +15,9 @@ export function consoleLog(message: string) {
   //process.stdout.write(message);
 }
 
-const { argv } = yargs.help(false);
-export const logLevel = argv.verbose
-  ? 'verbose'
-  : argv.debug
-  ? 'debug'
-  : 'info';
-
-let winstonInstance: winston.Logger;
+export function setLogLevel({ verbose }: { verbose: boolean }) {
+  winstonInstance.level = verbose ? 'verbose' : 'info';
+}
 
 export type Logger = typeof logger;
 export const logger = {
@@ -52,7 +48,6 @@ export function initLogger(accessToken?: string) {
     transports: [
       // log to file
       new winston.transports.File({
-        level: logLevel,
         format: combine(
           format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
           winston.format.metadata({
@@ -94,7 +89,7 @@ export function initLogger(accessToken?: string) {
     process.exit(1);
   });
 
-  return winstonInstance;
+  return logger;
 }
 
 // log levels:

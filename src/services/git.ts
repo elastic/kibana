@@ -131,6 +131,12 @@ export async function cherrypick(
       );
     }
 
+    if (e.message.includes(`bad object ${commit.sha}`)) {
+      throw new HandledError(
+        `Backport failed because commit "${commit.sha}" was not found`
+      );
+    }
+
     const isCherryPickError = e.cmd === cmd;
     const hasConflicts = !isEmpty(await getFilesWithConflicts(options));
     const hasUnmergedFiles = !isEmpty(await getUnmergedFiles(options));

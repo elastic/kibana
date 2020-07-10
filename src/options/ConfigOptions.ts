@@ -26,6 +26,7 @@ export interface ConfigOptions {
   autoAssign?: boolean;
   autoFixConflicts?: AutoFixConflictsHandler;
   branchLabelMapping?: Record<string, string>;
+  ci?: boolean;
   editor?: string;
   fork?: boolean;
   gitHostname?: string;
@@ -41,6 +42,8 @@ export interface ConfigOptions {
   prFilter?: string;
   prTitle?: string;
   pullNumber?: number;
+  resetAuthor?: boolean;
+  sha?: string;
   sourceBranch?: string;
   sourcePRLabels?: string[];
   targetBranchChoices?: BranchChoiceRaw[];
@@ -48,6 +51,7 @@ export interface ConfigOptions {
   targetPRLabels?: string[];
   upstream?: string;
   username?: string;
+  verbose?: boolean;
 
   // deprecated: renamed to `targetBranchChoices`
   branches?: BranchChoiceRaw[];

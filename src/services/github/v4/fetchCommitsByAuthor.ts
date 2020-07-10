@@ -170,14 +170,14 @@ export async function fetchCommitsByAuthor(
     const labels = sourcePullRequest?.node.labels.nodes.map(
       (node) => node.name
     );
-    const selectedTargetBranches = getTargetBranchesFromLabels({
+    const targetBranchesFromLabels = getTargetBranchesFromLabels({
       labels,
       branchLabelMapping,
     });
 
     return {
       sourceBranch,
-      selectedTargetBranches,
+      targetBranchesFromLabels,
       sha,
       formattedMessage,
       pullNumber,

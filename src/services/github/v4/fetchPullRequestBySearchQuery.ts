@@ -66,7 +66,7 @@ export async function fetchPullRequestBySearchQuery(
   const commits = res.search.nodes.map((searchNode) => {
     const labels = searchNode.labels.nodes.map((labelNode) => labelNode.name);
 
-    const selectedTargetBranches = getTargetBranchesFromLabels({
+    const targetBranchesFromLabels = getTargetBranchesFromLabels({
       labels,
       branchLabelMapping,
     });
@@ -80,7 +80,7 @@ export async function fetchPullRequestBySearchQuery(
 
     const choice: CommitChoice = {
       sourceBranch,
-      selectedTargetBranches,
+      targetBranchesFromLabels,
       sha,
       formattedMessage,
       pullNumber,

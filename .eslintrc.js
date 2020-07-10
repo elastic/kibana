@@ -36,10 +36,11 @@ module.exports = {
     ],
     'no-console': 'error',
     '@typescript-eslint/no-unnecessary-condition': 'error',
-    '@typescript-eslint/ban-ts-ignore': 'off',
+    '@typescript-eslint/prefer-ts-expect-error': 'error',
+
+    // disabled rules
     '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/camelcase': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-use-before-define': 'off',

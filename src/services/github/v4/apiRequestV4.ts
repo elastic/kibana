@@ -45,7 +45,7 @@ export async function apiRequestV4<DataResponse>({
 
     if (response.data.errors) {
       const newError = new Error();
-      //@ts-ignore
+      //@ts-expect-error
       newError.response = response;
       throw newError;
     }
