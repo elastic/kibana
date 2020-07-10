@@ -18,12 +18,12 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { Ipv4Address } from '../../../../../../kibana_utils/public';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
 import {
   isFilterable,
   IIndexPattern,
   IFieldType,
+  Ipv4Address,
   Filter,
   FieldFilter,
 } from '../../../../../common';
