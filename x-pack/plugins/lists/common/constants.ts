@@ -10,6 +10,7 @@
 export const LIST_URL = '/api/lists';
 export const LIST_INDEX = `${LIST_URL}/index`;
 export const LIST_ITEM_URL = `${LIST_URL}/items`;
+export const LIST_PRIVILEGES_URL = `${LIST_URL}/privileges`;
 
 /**
  * Exception list routes
