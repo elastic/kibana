@@ -11,7 +11,7 @@ import deepEqual from 'fast-deep-equal';
 
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import { useWithSource } from '../../../common/containers/source';
-import { useSignalIndex } from '../../../alerts/containers/detection_engine/alerts/use_signal_index';
+import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { inputsModel, inputsSelectors, State } from '../../../common/store';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { ColumnHeaderOptions, TimelineModel } from '../../../timelines/store/timeline/model';

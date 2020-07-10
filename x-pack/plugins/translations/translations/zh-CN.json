@@ -14514,7 +14514,6 @@
     "xpack.securitySolution.open.timeline.untitledTimelineLabel": "未命名时间线",
     "xpack.securitySolution.open.timeline.withLabel": "具有",
     "xpack.securitySolution.open.timeline.zeroTimelinesMatchLabel": "0 个时间线匹配搜索条件",
-    "xpack.securitySolution.overview.alertsGraphTitle": "外部告警计数",
     "xpack.securitySolution.overview.auditBeatAuditTitle": "审计",
     "xpack.securitySolution.overview.auditBeatFimTitle": "文件完整性模块",
     "xpack.securitySolution.overview.auditBeatLoginTitle": "登录",

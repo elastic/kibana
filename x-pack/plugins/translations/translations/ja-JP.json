@@ -14508,7 +14508,6 @@
     "xpack.securitySolution.open.timeline.untitledTimelineLabel": "無題のタイムライン",
     "xpack.securitySolution.open.timeline.withLabel": "With",
     "xpack.securitySolution.open.timeline.zeroTimelinesMatchLabel": "0 件のタイムラインが検索条件に一致",
-    "xpack.securitySolution.overview.alertsGraphTitle": "外部アラート数",
     "xpack.securitySolution.overview.auditBeatAuditTitle": "監査",
     "xpack.securitySolution.overview.auditBeatFimTitle": "File Integrityモジュール",
     "xpack.securitySolution.overview.auditBeatLoginTitle": "ログイン",

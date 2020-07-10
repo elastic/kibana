@@ -21,8 +21,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { alertsIndexPattern } from '../../../../../common/endpoint/constants';
-import { useFetchIndexPatterns } from '../../../../alerts/containers/detection_engine/rules';
-import { useSignalIndex } from '../../../../alerts/containers/detection_engine/alerts/use_signal_index';
+import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
+import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
