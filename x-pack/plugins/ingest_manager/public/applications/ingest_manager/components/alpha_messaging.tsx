@@ -28,14 +28,14 @@ export const AlphaMessaging: React.FC<{}> = () => {
           <strong>
             <FormattedMessage
               id="xpack.ingestManager.alphaMessageTitle"
-              defaultMessage="Experimental"
+              defaultMessage="Beta release"
             />
           </strong>
           {' – '}
           <FormattedMessage
             id="xpack.ingestManager.alphaMessageDescription"
             defaultMessage="Ingest Manager is under active development and is not
-          intended for production purposes."
+          intended for use in production environments."
           />{' '}
           <EuiLink color="subdued" onClick={() => setIsAlphaFlyoutOpen(true)}>
             View more details.
