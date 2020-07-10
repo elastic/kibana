@@ -7,16 +7,16 @@ import React from 'react';
 import { EuiButtonEmpty, EuiToolTip, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { APMLink } from './APMLink';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
+import { getEnvironmentLabel } from '../../../../../common/environment_filter_values';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/useFetcher';
 
 export function AnomalyDetectionSetupLink() {
-  const { uiFilters, urlParams } = useUrlParams();
+  const { uiFilters } = useUrlParams();
   // check both uiFilters and urlParams for selected environment
-  const environment = uiFilters.environment || urlParams.environment;
+  const environment = uiFilters.environment;
 
-  const { data = [], status } = useFetcher(
+  const { data = { jobs: [], hasLegacyJobs: false }, status } = useFetcher(
     (callApmApi) =>
       callApmApi({ pathname: `/api/apm/settings/anomaly-detection` }),
     [],
@@ -24,12 +24,9 @@ export function AnomalyDetectionSetupLink() {
   );
   const isFetchSuccess = status === FETCH_STATUS.SUCCESS;
 
-  const hasJobs = data.length > 0;
-  const hasJobForEnv = environment
-    ? data.some(({ environment: env }) => environment === env)
-    : true;
-
-  const showAlert = isFetchSuccess && (!hasJobs || !hasJobForEnv);
+  // Show alert if there are no jobs OR if no job matches the current environment
+  const showAlert =
+    isFetchSuccess && !data.jobs.some((job) => environment === job.environment);
   const toolTipText = environment
     ? getNotEnabledForEnvironmentText(environment)
     : NOT_ENABLED_TEXT;
@@ -46,15 +43,6 @@ export function AnomalyDetectionSetupLink() {
       )}
     </APMLink>
   );
-}
-
-function getEnvironmentLabel(environment: string) {
-  if (environment === ENVIRONMENT_NOT_DEFINED) {
-    return i18n.translate('xpack.apm.filter.environment.notDefinedLabel', {
-      defaultMessage: 'Not defined',
-    });
-  }
-  return environment;
 }
 
 function getNotEnabledForEnvironmentText(environment: string) {

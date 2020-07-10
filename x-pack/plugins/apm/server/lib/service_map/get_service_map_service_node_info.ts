@@ -9,7 +9,6 @@ import { ESFilter } from '../../../typings/elasticsearch';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import {
   PROCESSOR_EVENT,
-  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_DURATION,
   TRANSACTION_TYPE,
@@ -22,7 +21,7 @@ import {
   TRANSACTION_REQUEST,
   TRANSACTION_PAGE_LOAD,
 } from '../../../common/transaction_types';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
+import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 
 interface Options {
   setup: Setup & SetupTimeRange;
@@ -43,21 +42,14 @@ export async function getServiceMapServiceNodeInfo({
 }: Options & { serviceName: string; environment?: string }) {
   const { start, end } = setup;
 
-  const environmentNotDefinedFilter = {
-    bool: { must_not: [{ exists: { field: SERVICE_ENVIRONMENT } }] },
-  };
-
   const filter: ESFilter[] = [
     { range: rangeFilter(start, end) },
     { term: { [SERVICE_NAME]: serviceName } },
   ];
 
-  if (environment) {
-    filter.push(
-      environment === ENVIRONMENT_NOT_DEFINED
-        ? environmentNotDefinedFilter
-        : { term: { [SERVICE_ENVIRONMENT]: environment } }
-    );
+  const environmentFilter = getEnvironmentUiFilterES(environment);
+  if (environmentFilter) {
+    filter.push(environmentFilter);
   }
 
   const minutes = Math.abs((end - start) / (1000 * 60));

@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 import { createJobs } from './create_jobs';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
+import { getEnvironmentLabel } from '../../../../../common/environment_filter_values';
 
 interface Props {
   currentEnvironments: string[];
@@ -45,7 +45,7 @@ export const AddEnvironments = ({
   );
 
   const environmentOptions = data.map((env) => ({
-    label: env === ENVIRONMENT_NOT_DEFINED ? NOT_DEFINED_OPTION_LABEL : env,
+    label: getEnvironmentLabel(env),
     value: env,
     disabled: currentEnvironments.includes(env),
   }));
@@ -155,10 +155,3 @@ export const AddEnvironments = ({
     </EuiPanel>
   );
 };
-
-const NOT_DEFINED_OPTION_LABEL = i18n.translate(
-  'xpack.apm.filter.environment.notDefinedLabel',
-  {
-    defaultMessage: 'Not defined',
-  }
-);
