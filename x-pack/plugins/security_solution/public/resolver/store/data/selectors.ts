@@ -168,16 +168,16 @@ export function hasMoreAncestors(state: DataState): boolean {
   return tree ? resolverTreeModel.hasMoreAncestors(tree) : false;
 }
 
-/**
- * A map of `entity_id`s to functions that provide information about
- * related events by ECS `.category` Primarily to avoid having business logic
- * in UI components.
- */
 interface RelatedInfoFunctions {
   shouldShowLimitForCategory: (category: string) => boolean;
   numberNotDisplayedForCategory: (category: string) => number;
   numberActuallyDisplayedForCategory: (category: string) => number;
 }
+/**
+ * A map of `entity_id`s to functions that provide information about
+ * related events by ECS `.category` Primarily to avoid having business logic
+ * in UI components.
+ */
 export const relatedEventInfoByEntityId: (
   state: DataState
 ) => (entityID: string) => RelatedInfoFunctions | null = createSelector(
