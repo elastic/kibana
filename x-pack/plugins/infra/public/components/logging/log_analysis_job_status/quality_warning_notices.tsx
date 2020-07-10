@@ -11,7 +11,7 @@ import React from 'react';
 import type {
   CategoryQualityWarningReason,
   QualityWarning,
-} from '../../../../../containers/logs/log_analysis/log_analysis_module_types';
+} from '../../../containers/logs/log_analysis/log_analysis_module_types';
 
 export const CategoryQualityWarnings: React.FC<{ qualityWarnings: QualityWarning[] }> = ({
   qualityWarnings,
