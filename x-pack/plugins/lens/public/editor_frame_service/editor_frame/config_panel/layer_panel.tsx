@@ -103,7 +103,7 @@ export function LayerPanel(
           </EuiFlexItem>
 
           {layerDatasource && (
-            <EuiFlexItem className="eui-textTruncate">
+            <EuiFlexItem className="lnsLayerPanel__sourceFlexItem">
               <NativeRenderer
                 render={layerDatasource.renderLayerPanel}
                 nativeProps={{

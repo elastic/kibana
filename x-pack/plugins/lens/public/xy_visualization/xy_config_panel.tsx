@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './xy_config_panel.scss';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import {
-  EuiButtonEmpty,
   EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
@@ -32,8 +32,7 @@ import { State, SeriesType, visualizationTypes, YAxisMode } from './types';
 import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { fittingFunctionDefinitions } from './fitting_functions';
-
-import './xy_config_panel.scss';
+import { ToolbarButton } from '../toolbar_button';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
@@ -102,16 +101,14 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
         <EuiPopover
           panelClassName="lnsXyToolbar__popover"
           button={
-            <EuiButtonEmpty
-              color="text"
-              iconType="arrowDown"
-              iconSide="right"
+            <ToolbarButton
+              fontWeight="normal"
               onClick={() => {
                 setOpen(!open);
               }}
             >
               {i18n.translate('xpack.lens.xyChart.settingsLabel', { defaultMessage: 'Settings' })}
-            </EuiButtonEmpty>
+            </ToolbarButton>
           }
           isOpen={open}
           closePopover={() => {
