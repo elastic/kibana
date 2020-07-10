@@ -22,7 +22,11 @@ import {
   RegistryInput,
   RegistryStream,
 } from '../../../../types';
-import { PackageConfigInputValidationResults, countValidationErrors } from '../services';
+import {
+  PackageConfigInputValidationResults,
+  hasInvalidButRequiredVar,
+  countValidationErrors,
+} from '../services';
 import { PackageConfigInputConfig } from './package_config_input_config';
 import { PackageConfigInputStreamConfig } from './package_config_input_stream';
 
@@ -32,6 +36,29 @@ const ShortenedHorizontalRule = styled(EuiHorizontalRule)`
     margin-left: auto;
   }
 `;
+
+const shouldShowStreamsByDefault = (
+  packageInput: RegistryInput,
+  packageInputStreams: Array<RegistryStream & { dataset: { name: string } }>,
+  packageConfigInput: PackageConfigInput
+): boolean => {
+  return (
+    packageConfigInput.enabled &&
+    (hasInvalidButRequiredVar(packageInput.vars, packageConfigInput.vars) ||
+      Boolean(
+        packageInputStreams.find(
+          (stream) =>
+            stream.enabled &&
+            hasInvalidButRequiredVar(
+              stream.vars,
+              packageConfigInput.streams.find(
+                (pkgStream) => stream.dataset.name === pkgStream.dataset.name
+              )?.vars
+            )
+        )
+      ))
+  );
+};
 
 export const PackageConfigInputPanel: React.FunctionComponent<{
   packageInput: RegistryInput;
@@ -50,7 +77,9 @@ export const PackageConfigInputPanel: React.FunctionComponent<{
     forceShowErrors,
   }) => {
     // Showing streams toggle state
-    const [isShowingStreams, setIsShowingStreams] = useState<boolean>(false);
+    const [isShowingStreams, setIsShowingStreams] = useState<boolean>(
+      shouldShowStreamsByDefault(packageInput, packageInputStreams, packageConfigInput)
+    );
 
     // Errors state
     const errorCount = countValidationErrors(inputValidationResults);

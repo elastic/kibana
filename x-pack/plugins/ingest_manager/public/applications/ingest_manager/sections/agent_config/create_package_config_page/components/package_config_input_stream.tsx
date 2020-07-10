@@ -38,7 +38,7 @@ export const PackageConfigInputStreamConfig: React.FunctionComponent<{
     forceShowErrors,
   }) => {
     // Showing advanced options toggle state
-    const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
+    const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>();
 
     // Errors state
     const hasErrors = forceShowErrors && validationHasErrors(inputStreamValidationResults);

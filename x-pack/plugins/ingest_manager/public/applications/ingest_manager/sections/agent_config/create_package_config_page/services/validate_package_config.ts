@@ -171,7 +171,7 @@ export const validatePackageConfig = (
   return validationResults;
 };
 
-const validatePackageConfigConfig = (
+export const validatePackageConfigConfig = (
   configEntry: PackageConfigConfigRecordEntry,
   varDef: RegistryVarsEntry
 ): string[] | null => {
