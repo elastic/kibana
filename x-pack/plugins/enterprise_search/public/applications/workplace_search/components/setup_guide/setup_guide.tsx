@@ -15,8 +15,6 @@ import { SetWorkplaceSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import GettingStarted from '../../assets/getting_started.png';
 
-import './setup_guide.scss';
-
 const GETTING_STARTED_LINK_URL =
   'https://www.elastic.co/guide/en/workplace-search/current/workplace-search-getting-started.html';
 
@@ -27,8 +25,8 @@ export const SetupGuide: React.FC = () => {
         defaultMessage: 'Workplace Search',
       })}
       productEuiIcon="logoWorkplaceSearch"
-      standardAuthLink="https://swiftype.com/documentation/app-search/self-managed/security#standard"
-      elasticsearchNativeAuthLink="https://swiftype.com/documentation/app-search/self-managed/security#elasticsearch-native-realm"
+      standardAuthLink="https://www.elastic.co/guide/en/workplace-search/current/workplace-search-security.html#standard"
+      elasticsearchNativeAuthLink="https://www.elastic.co/guide/en/workplace-search/current/workplace-search-security.html#elasticsearch-native-realm"
     >
       <SetBreadcrumbs text="Setup Guide" />
       <SendTelemetry action="viewed" metric="setup_guide" />
@@ -37,7 +35,7 @@ export const SetupGuide: React.FC = () => {
         <img
           className="setup-guide__thumbnail"
           src={GettingStarted}
-          alt={i18n.translate('xpack.enterpriseSearch.workplaceSearch.setupGuide.videoAlt', {
+          alt={i18n.translate('xpack.enterpriseSearch.workplaceSearch.setupGuide.imageAlt', {
             defaultMessage:
               'Getting started with Workplace Search - a guide to show you how to get Workplace Search up and running',
           })}
