@@ -14,7 +14,7 @@ import { SubsetTimelineModel } from '../../store/timeline/model';
 import * as i18n from '../../../common/components/events_viewer/translations';
 import * as i18nF from '../timeline/footer/translations';
 import { timelineDefaults as timelineDefaultModel } from '../../store/timeline/defaults';
-import { Ecs } from '../../../graphql/types';
+import { Ecs, TimelineNonEcsData } from '../../../graphql/types';
 
 interface ManageTimelineInit {
   documentType?: string;
@@ -25,9 +25,14 @@ interface ManageTimelineInit {
   indexToAdd?: string[] | null;
   loadingText?: string;
   selectAll?: boolean;
-  timelineRowActions: (ecsData: Ecs) => TimelineRowAction[];
+  timelineRowActions: ({ ecsData, nonEcsData }: TimelineRowActionArgs) => TimelineRowAction[];
   title?: string;
   unit?: (totalCount: number) => string;
+}
+
+export interface TimelineRowActionArgs {
+  ecsData: Ecs;
+  nonEcsData: TimelineNonEcsData[];
 }
 
 interface ManageTimeline {
@@ -41,7 +46,7 @@ interface ManageTimeline {
   loadingText: string;
   queryFields: string[];
   selectAll: boolean;
-  timelineRowActions: (ecsData: Ecs) => TimelineRowAction[];
+  timelineRowActions: ({ ecsData, nonEcsData }: TimelineRowActionArgs) => TimelineRowAction[];
   title: string;
   unit: (totalCount: number) => string;
 }
@@ -71,7 +76,7 @@ type ActionManageTimeline =
       id: string;
       payload: {
         queryFields?: string[];
-        timelineRowActions: (ecsData: Ecs) => TimelineRowAction[];
+        timelineRowActions: ({ ecsData, nonEcsData }: TimelineRowActionArgs) => TimelineRowAction[];
       };
     };
 
@@ -142,7 +147,7 @@ interface UseTimelineManager {
   setTimelineRowActions: (actionsArgs: {
     id: string;
     queryFields?: string[];
-    timelineRowActions: (ecsData: Ecs) => TimelineRowAction[];
+    timelineRowActions: ({ ecsData, nonEcsData }: TimelineRowActionArgs) => TimelineRowAction[];
   }) => void;
 }
 
@@ -167,7 +172,7 @@ const useTimelineManager = (manageTimelineForTesting?: ManageTimelineById): UseT
     }: {
       id: string;
       queryFields?: string[];
-      timelineRowActions: (ecsData: Ecs) => TimelineRowAction[];
+      timelineRowActions: ({ ecsData, nonEcsData }: TimelineRowActionArgs) => TimelineRowAction[];
     }) => {
       dispatch({
         type: 'SET_TIMELINE_ACTIONS',

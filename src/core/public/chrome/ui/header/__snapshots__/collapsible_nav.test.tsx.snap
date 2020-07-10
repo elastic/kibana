@@ -372,12 +372,13 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
       handler={[Function]}
     />
     <EuiOverlayMask
+      headerZindexLocation="below"
       onClick={[Function]}
     >
       <Portal
         containerInfo={
           <div
-            class="euiOverlayMask"
+            class="euiOverlayMask euiOverlayMask--belowHeader"
           />
         }
       />
@@ -3908,16 +3909,9 @@ exports[`CollapsibleNav renders the default nav 2`] = `
       handler={[Function]}
     />
     <EuiOverlayMask
+      headerZindexLocation="below"
       onClick={[Function]}
-    >
-      <Portal
-        containerInfo={
-          <div
-            class="euiOverlayMask"
-          />
-        }
-      />
-    </EuiOverlayMask>
+    />
     <EuiFocusTrap
       clickOutsideDisables={true}
       disabled={false}
