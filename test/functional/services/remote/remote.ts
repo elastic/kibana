@@ -44,17 +44,9 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   };
 
   const { driver, consoleLog$ } = await initWebDriver(log, browserType, lifecycle, browserConfig);
-
-  const isW3CEnabled = (driver as any).executor_.w3c;
-
   const caps = await driver.getCapabilities();
-  const browserVersion = caps.get(isW3CEnabled ? 'browserVersion' : 'version');
 
-  log.info(
-    `Remote initialized: ${caps.get(
-      'browserName'
-    )} ${browserVersion}, w3c compliance=${isW3CEnabled}`
-  );
+  log.info(`Remote initialized: ${caps.get('browserName')} ${caps.get('browserVersion')}`);
 
   if ([Browsers.Chrome, Browsers.ChromiumEdge].includes(browserType)) {
     log.info(
