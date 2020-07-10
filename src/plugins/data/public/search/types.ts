@@ -23,7 +23,7 @@ import { SearchAggsSetup, SearchAggsStart } from './aggs';
 import { LegacyApiCaller } from './legacy/es_client';
 import { SearchInterceptor } from './search_interceptor';
 import { ISearchSource, SearchSourceFields } from './search_source';
-import { SearchUsageCollector } from './telemetry';
+import { SearchUsageCollector } from './collectors';
 import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
@@ -78,7 +78,7 @@ export interface ISearchStart {
   __LEGACY: ISearchStartLegacy;
 }
 
-export { SEARCH_EVENT_TYPE } from './telemetry';
+export { SEARCH_EVENT_TYPE } from './collectors';
 
 export interface SearchServiceSetupDependencies {
   expressions: ExpressionsSetup;
