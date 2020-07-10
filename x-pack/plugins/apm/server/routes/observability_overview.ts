@@ -19,7 +19,7 @@ export const observabilityOverviewHasDataRoute = createRoute(() => ({
   },
 }));
 
-export const observabilityOverviewDataRoute = createRoute(() => ({
+export const observabilityOverviewRoute = createRoute(() => ({
   path: '/api/apm/observability_overview',
   params: {
     query: t.intersection([rangeRt, t.type({ bucketSize: t.string })]),

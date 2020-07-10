@@ -9,7 +9,7 @@ export function getAbsoluteTime(range?: string, opts = {}) {
   if (range) {
     const parsed = datemath.parse(range, opts);
     if (parsed) {
-      return parsed.toISOString();
+      return parsed.valueOf();
     }
   }
 }

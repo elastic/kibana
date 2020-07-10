@@ -80,7 +80,7 @@ import {
 } from './rum_client';
 import {
   observabilityOverviewHasDataRoute,
-  observabilityOverviewDataRoute,
+  observabilityOverviewRoute,
 } from './observability_overview';
 import {
   anomalyDetectionJobsRoute,
@@ -177,7 +177,7 @@ const createApmApi = () => {
 
     // Observability dashboard
     .add(observabilityOverviewHasDataRoute)
-    .add(observabilityOverviewDataRoute)
+    .add(observabilityOverviewRoute)
 
     // Anomaly detection
     .add(anomalyDetectionJobsRoute)

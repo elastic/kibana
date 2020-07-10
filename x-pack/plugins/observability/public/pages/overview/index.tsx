@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import moment from 'moment';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 import { EmptySection } from '../../components/app/empty_section';
@@ -66,8 +65,8 @@ export const OverviewPage = ({ routeParams }: Props) => {
   };
 
   const absoluteTime = {
-    start: moment.utc(getAbsoluteTime(relativeTime.start)).valueOf(),
-    end: moment.utc(getAbsoluteTime(relativeTime.end, { roundUp: true })).valueOf(),
+    start: getAbsoluteTime(relativeTime.start),
+    end: getAbsoluteTime(relativeTime.end, { roundUp: true }),
   };
 
   const bucketSize = calculatetBucketSize({
