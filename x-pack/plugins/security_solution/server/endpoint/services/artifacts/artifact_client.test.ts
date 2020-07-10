@@ -27,7 +27,7 @@ describe('artifact_client', () => {
     test('can create artifact', async () => {
       const savedObjectsClient = savedObjectsClientMock.create();
       const artifactClient = getArtifactClientMock(savedObjectsClient);
-      const artifact = await getInternalArtifactMock('linux', '1.0.0');
+      const artifact = await getInternalArtifactMock('linux', 'v1');
       await artifactClient.createArtifact(artifact);
       expect(savedObjectsClient.create).toHaveBeenCalledWith(
         ArtifactConstants.SAVED_OBJECT_TYPE,

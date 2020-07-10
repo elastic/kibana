@@ -24,7 +24,7 @@ import { ListPluginSetup } from '../../lists/server';
 import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../encrypted_saved_objects/server';
 import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { IngestManagerStartContract } from '../../ingest_manager/server';
+import { IngestManagerStartContract, ExternalCallback } from '../../ingest_manager/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
@@ -54,14 +54,14 @@ export interface SetupPlugins {
   licensing: LicensingPluginSetup;
   security?: SecuritySetup;
   spaces?: SpacesSetup;
-  taskManager: TaskManagerSetupContract;
+  taskManager?: TaskManagerSetupContract;
   ml?: MlSetup;
   lists?: ListPluginSetup;
 }
 
 export interface StartPlugins {
-  ingestManager: IngestManagerStartContract;
-  taskManager: TaskManagerStartContract;
+  ingestManager?: IngestManagerStartContract;
+  taskManager?: TaskManagerStartContract;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -72,7 +72,7 @@ export interface PluginStart {}
 const securitySubPlugins = [
   APP_ID,
   `${APP_ID}:${SecurityPageName.overview}`,
-  `${APP_ID}:${SecurityPageName.alerts}`,
+  `${APP_ID}:${SecurityPageName.detections}`,
   `${APP_ID}:${SecurityPageName.hosts}`,
   `${APP_ID}:${SecurityPageName.network}`,
   `${APP_ID}:${SecurityPageName.timelines}`,
@@ -227,11 +227,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }
     }
 
-    if (plugins.taskManager && plugins.lists) {
+    const exceptionListsSetupEnabled = () => {
+      return plugins.taskManager && plugins.lists;
+    };
+
+    if (exceptionListsSetupEnabled()) {
       this.lists = plugins.lists;
       this.manifestTask = new ManifestTask({
         endpointAppContext: endpointContext,
-        taskManager: plugins.taskManager,
+        taskManager: plugins.taskManager!,
       });
     }
 
@@ -245,32 +249,41 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const savedObjectsClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
 
     let manifestManager: ManifestManager | undefined;
-    if (this.lists) {
-      const exceptionListClient = this.lists.getExceptionListClient(savedObjectsClient, 'kibana');
+    let registerIngestCallback: ((...args: ExternalCallback) => void) | undefined;
+
+    const exceptionListsStartEnabled = () => {
+      return this.lists && plugins.taskManager && plugins.ingestManager;
+    };
+
+    if (exceptionListsStartEnabled()) {
+      const exceptionListClient = this.lists!.getExceptionListClient(savedObjectsClient, 'kibana');
       const artifactClient = new ArtifactClient(savedObjectsClient);
+
+      registerIngestCallback = plugins.ingestManager!.registerExternalCallback;
       manifestManager = new ManifestManager({
         savedObjectsClient,
         artifactClient,
         exceptionListClient,
-        packageConfigService: plugins.ingestManager.packageConfigService,
+        packageConfigService: plugins.ingestManager!.packageConfigService,
         logger: this.logger,
         cache: this.exceptionsCache,
       });
     }
 
     this.endpointAppContextService.start({
-      agentService: plugins.ingestManager.agentService,
+      agentService: plugins.ingestManager?.agentService,
+      logger: this.logger,
       manifestManager,
-      registerIngestCallback: plugins.ingestManager.registerExternalCallback,
+      registerIngestCallback,
       savedObjectsStart: core.savedObjects,
     });
 
-    if (this.manifestTask) {
+    if (exceptionListsStartEnabled() && this.manifestTask) {
       this.manifestTask.start({
-        taskManager: plugins.taskManager,
+        taskManager: plugins.taskManager!,
       });
     } else {
-      this.logger.debug('Manifest task not available.');
+      this.logger.debug('User artifacts task not available.');
     }
 
     return {};
