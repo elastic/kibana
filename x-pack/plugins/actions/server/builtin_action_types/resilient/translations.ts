@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './jira';
-export * from './servicenow';
-export * from './resilient';
+import { i18n } from '@kbn/i18n';
+
+export const NAME = i18n.translate('xpack.actions.builtin.case.resilientTitle', {
+  defaultMessage: 'IBM Resilient',
+});
