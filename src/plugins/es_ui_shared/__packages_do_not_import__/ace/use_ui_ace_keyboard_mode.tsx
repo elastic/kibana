@@ -16,9 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import React, { useEffect, useRef } from 'react';
 import * as ReactDOM from 'react-dom';
 import { keys, EuiText } from '@elastic/eui';
+
+import './_ui_ace_keyboard_mode.scss';
 
 const OverlayText = () => (
   // The point of this element is for accessibility purposes, so ignore eslint error
