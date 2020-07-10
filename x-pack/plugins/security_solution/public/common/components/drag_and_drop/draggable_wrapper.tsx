@@ -77,7 +77,6 @@ Wrapper.displayName = 'Wrapper';
 const ProviderContentWrapper = styled.span`
   > span.euiToolTipAnchor {
     display: block; /* allow EuiTooltip content to be truncatable */
-    white-space: nowrap;
   }
 `;
 

@@ -72,7 +72,9 @@ const initialSorting = {
   },
 };
 
-const StyledNameButton = styled.button``;
+const StyledNameButton = styled.button`
+  text-align: left;
+`;
 
 const RowRenderersBrowserComponent = React.forwardRef(
   ({ excludedRowRendererIds = [], setExcludedRowRendererIds }: RowRenderersBrowserProps, ref) => {
@@ -92,7 +94,11 @@ const RowRenderersBrowserComponent = React.forwardRef(
     );
 
     const nameColumnRenderCallback = useCallback(
-      (value, item) => <StyledNameButton onClick={handleNameClick(item)}>{value}</StyledNameButton>,
+      (value, item) => (
+        <StyledNameButton className="kbn-resetFocusState" onClick={handleNameClick(item)}>
+          {value}
+        </StyledNameButton>
+      ),
       [handleNameClick]
     );
 
