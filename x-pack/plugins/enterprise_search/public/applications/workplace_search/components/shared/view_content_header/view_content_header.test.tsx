@@ -8,31 +8,32 @@ import '../../../../__mocks__/shallow_usecontext.mock';
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { EuiText, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 
 import { ViewContentHeader } from './';
 
 const props = {
   title: 'Header',
+  alignItems: 'flexStart' as any,
 };
 
 describe('ViewContentHeader', () => {
-  it('renders, without description', () => {
+  it('renders with title and alignItems', () => {
     const wrapper = shallow(<ViewContentHeader {...props} />);
 
-    expect(wrapper.find('.view-content-header')).toHaveLength(1);
-    expect(wrapper.find(EuiText)).toHaveLength(0);
+    expect(wrapper.find('h2').text()).toEqual('Header');
+    expect(wrapper.find(EuiFlexGroup).prop('alignItems')).toEqual('flexStart');
   });
 
   it('shows description, when present', () => {
-    const wrapper = shallow(<ViewContentHeader {...props} description="foo" />);
+    const wrapper = shallow(<ViewContentHeader {...props} description="Hello World" />);
 
-    expect(wrapper.find(EuiText)).toHaveLength(1);
+    expect(wrapper.find('p').text()).toEqual('Hello World');
   });
 
   it('shows action, when present', () => {
-    const wrapper = shallow(<ViewContentHeader {...props} action={<div />} />);
+    const wrapper = shallow(<ViewContentHeader {...props} action={<div className="action" />} />);
 
-    expect(wrapper.find(EuiFlexItem)).toHaveLength(2);
+    expect(wrapper.find('.action')).toHaveLength(1);
   });
 });

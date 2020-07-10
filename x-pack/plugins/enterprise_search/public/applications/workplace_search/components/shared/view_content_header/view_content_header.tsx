@@ -19,11 +19,11 @@ interface IViewContentHeaderProps {
 
 export const ViewContentHeader: React.FC<IViewContentHeaderProps> = ({
   title,
-  description = null,
-  action = null,
+  description,
+  action,
   alignItems = 'center',
 }) => (
-  <div className="view-content-header">
+  <>
     <EuiFlexGroup alignItems={alignItems} justifyContent="spaceBetween">
       <EuiFlexItem>
         <EuiTitle size="m">
@@ -31,12 +31,12 @@ export const ViewContentHeader: React.FC<IViewContentHeaderProps> = ({
         </EuiTitle>
         {description && (
           <EuiText grow={false}>
-            <p className="view-content-header__description">{description}</p>
+            <p>{description}</p>
           </EuiText>
         )}
       </EuiFlexItem>
       {action && <EuiFlexItem grow={false}>{action}</EuiFlexItem>}
     </EuiFlexGroup>
     <EuiSpacer />
-  </div>
+  </>
 );
