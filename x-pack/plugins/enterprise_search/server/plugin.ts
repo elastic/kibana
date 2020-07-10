@@ -22,15 +22,15 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../features/serve
 import { ConfigType } from './';
 import { checkAccess } from './lib/check_access';
 import { registerPublicUrlRoute } from './routes/enterprise_search/public_url';
-import { registerEnginesRoute } from './routes/app_search/engines';
-import { registerTelemetryRoute as registerASTelemetryRoute } from './routes/app_search/telemetry';
-import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
-import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
+import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 
-import { registerWSOverviewRoute } from './routes/workplace_search/overview';
-import { registerTelemetryRoute as registerWSTelemetryRoute } from './routes/workplace_search/telemetry';
-import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
+import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
+import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
+import { registerEnginesRoute } from './routes/app_search/engines';
+
 import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/telemetry';
+import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
+import { registerWSOverviewRoute } from './routes/workplace_search/overview';
 
 export interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
@@ -119,13 +119,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         registerWSTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
       }
     });
-
-    const telemetryRouteDependencies = {
-      ...dependencies,
-      getSavedObjectsService: () => savedObjectsStarted,
-    };
-    registerASTelemetryRoute(telemetryRouteDependencies);
-    registerWSTelemetryRoute(telemetryRouteDependencies);
+    registerTelemetryRoute({ ...dependencies, getSavedObjectsService: () => savedObjectsStarted });
   }
 
   public start() {}

@@ -7,7 +7,15 @@
 import { schema } from '@kbn/config-schema';
 
 import { IRouteDependencies } from '../../plugin';
-import { incrementUICounter } from '../../collectors/app_search/telemetry';
+import { incrementUICounter } from '../../collectors/lib/telemetry';
+
+import { AS_TELEMETRY_NAME } from '../../collectors/app_search/telemetry';
+import { WS_TELEMETRY_NAME } from '../../collectors/workplace_search/telemetry';
+const productToTelemetryMap = {
+  app_search: AS_TELEMETRY_NAME,
+  workplace_search: WS_TELEMETRY_NAME,
+  enterprise_search: 'TODO',
+};
 
 export function registerTelemetryRoute({
   router,
@@ -16,9 +24,14 @@ export function registerTelemetryRoute({
 }: IRouteDependencies) {
   router.put(
     {
-      path: '/api/app_search/telemetry',
+      path: '/api/enterprise_search/telemetry',
       validate: {
         body: schema.object({
+          product: schema.oneOf([
+            schema.literal('app_search'),
+            schema.literal('workplace_search'),
+            schema.literal('enterprise_search'),
+          ]),
           action: schema.oneOf([
             schema.literal('viewed'),
             schema.literal('clicked'),
@@ -29,21 +42,24 @@ export function registerTelemetryRoute({
       },
     },
     async (ctx, request, response) => {
-      const { action, metric } = request.body;
+      const { product, action, metric } = request.body;
 
       try {
         if (!getSavedObjectsService) throw new Error('Could not find Saved Objects service');
 
         return response.ok({
           body: await incrementUICounter({
+            id: productToTelemetryMap[product],
             savedObjects: getSavedObjectsService(),
             uiAction: `ui_${action}`,
             metric,
           }),
         });
       } catch (e) {
-        log.error(`App Search UI telemetry error: ${e instanceof Error ? e.stack : e.toString()}`);
-        return response.internalError({ body: 'App Search UI telemetry failed' });
+        log.error(
+          `Enterprise Search UI telemetry error: ${e instanceof Error ? e.stack : e.toString()}`
+        );
+        return response.internalError({ body: 'Enterprise Search UI telemetry failed' });
       }
     }
   );

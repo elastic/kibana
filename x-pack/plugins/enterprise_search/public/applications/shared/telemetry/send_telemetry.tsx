@@ -7,6 +7,7 @@
 import React, { useContext, useEffect } from 'react';
 
 import { HttpSetup } from 'src/core/public';
+import { JSON_HEADER as headers } from '../../../../common/constants';
 import { KibanaContext, IKibanaContext } from '../../index';
 
 interface ISendTelemetryProps {
@@ -25,10 +26,8 @@ interface ISendTelemetry extends ISendTelemetryProps {
 
 export const sendTelemetry = async ({ http, product, action, metric }: ISendTelemetry) => {
   try {
-    await http.put(`/api/${product}/telemetry`, {
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action, metric }),
-    });
+    const body = JSON.stringify({ product, action, metric });
+    await http.put('/api/enterprise_search/telemetry', { headers, body });
   } catch (error) {
     throw new Error('Unable to send telemetry');
   }

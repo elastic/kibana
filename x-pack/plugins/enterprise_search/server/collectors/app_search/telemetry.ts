@@ -5,16 +5,10 @@
  */
 
 import { get } from 'lodash';
-import {
-  ISavedObjectsRepository,
-  SavedObjectsServiceStart,
-  SavedObjectAttributes,
-  Logger,
-} from 'src/core/server';
+import { SavedObjectsServiceStart, Logger } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
-// This throws `Error: Cannot find module 'src/core/server'` if I import it via alias ¯\_(ツ)_/¯
-import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+import { getSavedObjectAttributesFromRepo } from '../lib/telemetry';
 
 interface ITelemetry {
   ui_viewed: {
@@ -70,10 +64,11 @@ export const registerTelemetryUsageCollector = (
 
 const fetchTelemetryMetrics = async (savedObjects: SavedObjectsServiceStart, log: Logger) => {
   const savedObjectsRepository = savedObjects.createInternalRepository();
-  const savedObjectAttributes = (await getSavedObjectAttributesFromRepo(
+  const savedObjectAttributes = await getSavedObjectAttributesFromRepo(
+    AS_TELEMETRY_NAME,
     savedObjectsRepository,
     log
-  )) as SavedObjectAttributes;
+  );
 
   const defaultTelemetrySavedObject: ITelemetry = {
     ui_viewed: {
@@ -114,43 +109,3 @@ const fetchTelemetryMetrics = async (savedObjects: SavedObjectsServiceStart, log
     },
   } as ITelemetry;
 };
-
-/**
- * Helper function - fetches saved objects attributes
- */
-
-const getSavedObjectAttributesFromRepo = async (
-  savedObjectsRepository: ISavedObjectsRepository,
-  log: Logger
-) => {
-  try {
-    return (await savedObjectsRepository.get(AS_TELEMETRY_NAME, AS_TELEMETRY_NAME)).attributes;
-  } catch (e) {
-    if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
-      log.warn(`Failed to retrieve App Search telemetry data: ${e}`);
-    }
-    return null;
-  }
-};
-
-/**
- * Set saved objection attributes - used by telemetry route
- */
-
-interface IIncrementUICounter {
-  savedObjects: SavedObjectsServiceStart;
-  uiAction: string;
-  metric: string;
-}
-
-export async function incrementUICounter({ savedObjects, uiAction, metric }: IIncrementUICounter) {
-  const internalRepository = savedObjects.createInternalRepository();
-
-  await internalRepository.incrementCounter(
-    AS_TELEMETRY_NAME,
-    AS_TELEMETRY_NAME,
-    `${uiAction}.${metric}` // e.g., ui_viewed.setup_guide
-  );
-
-  return { success: true };
-}
