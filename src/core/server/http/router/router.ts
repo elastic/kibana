@@ -22,9 +22,17 @@ import Boom from 'boom';
 
 import { isConfigSchema } from '@kbn/config-schema';
 import { Logger } from '../../logging';
-import { isUnauthorizedError as isElasticsearchNotAuthorizedError } from '../../elasticsearch/client/errors';
+import {
+  isUnauthorizedError as isElasticsearchUnauthorizedError,
+  UnauthorizedError as EsNotAuthorizedError,
+} from '../../elasticsearch/client/errors';
 import { KibanaRequest } from './request';
-import { KibanaResponseFactory, kibanaResponseFactory, IKibanaResponse } from './response';
+import {
+  KibanaResponseFactory,
+  kibanaResponseFactory,
+  IKibanaResponse,
+  ErrorHttpResponseOptions,
+} from './response';
 import { RouteConfig, RouteConfigOptions, RouteMethod, validBodyOutput } from './route';
 import { HapiResponseAdapter } from './response_adapter';
 import { RequestHandlerContext } from '../../../server';
@@ -264,21 +272,30 @@ export class Router implements IRouter {
       return hapiResponseAdapter.handle(kibanaResponse);
     } catch (e) {
       this.log.error(e);
-      if (isElasticsearchNotAuthorizedError(e)) {
+      if (isElasticsearchUnauthorizedError(e)) {
         return hapiResponseAdapter.handle(
-          kibanaResponseFactory.unauthorized({
-            body: e.message,
-            headers: {
-              'WWW-Authenticate':
-                e.headers['WWW-Authenticate'] ?? 'Basic realm="Authorization Required"',
-            },
-          })
+          kibanaResponseFactory.unauthorized(convertEsUnauthorized(e))
         );
       }
       return hapiResponseAdapter.toInternalError();
     }
   }
 }
+
+const convertEsUnauthorized = (e: EsNotAuthorizedError): ErrorHttpResponseOptions => {
+  return {
+    body: e.message,
+    headers: Object.entries(e.headers).reduce((headers, [key, value]) => {
+      if (key.toLowerCase() === 'www-authenticate') {
+        return {
+          ...headers,
+          'www-authenticate': value,
+        };
+      }
+      return headers;
+    }, {} as Record<string, string>),
+  };
+};
 
 type WithoutHeadArgument<T> = T extends (first: any, ...rest: infer Params) => infer Return
   ? (...rest: Params) => Return

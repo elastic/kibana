@@ -59,6 +59,9 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
   };
   client.close = jest.fn().mockReturnValue(Promise.resolve());
   client.child = jest.fn().mockImplementation(() => createInternalClientMock());
+  client.on = jest.fn();
+  client.off = jest.fn();
+  client.once = jest.fn();
 
   return (client as unknown) as DeeplyMockedKeys<Client>;
 };

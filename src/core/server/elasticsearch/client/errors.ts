@@ -19,7 +19,7 @@
 
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 
-export type NotAuthorizedError = ResponseError & {
+export type UnauthorizedError = ResponseError & {
   statusCode: 401;
 };
 
@@ -27,6 +27,6 @@ export function isResponseError(error: any): error is ResponseError {
   return !!(error.body && error.statusCode && error.headers);
 }
 
-export function isUnauthorizedError(error: any): error is NotAuthorizedError {
+export function isUnauthorizedError(error: any): error is UnauthorizedError {
   return isResponseError(error) && error.statusCode === 401;
 }

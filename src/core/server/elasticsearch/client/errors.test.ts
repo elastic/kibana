@@ -62,16 +62,16 @@ describe('isUnauthorizedError', () => {
     ).toBe(true);
   });
 
-  it('returns true when the input is a `ResponseError` and statusCode !== 401', () => {
+  it('returns false when the input is a `ResponseError` and statusCode !== 401', () => {
     expect(
       isUnauthorizedError(new ResponseError(createApiResponseError({ statusCode: 200 })))
-    ).toBe(true);
+    ).toBe(false);
     expect(
       isUnauthorizedError(new ResponseError(createApiResponseError({ statusCode: 403 })))
-    ).toBe(true);
+    ).toBe(false);
     expect(
       isUnauthorizedError(new ResponseError(createApiResponseError({ statusCode: 500 })))
-    ).toBe(true);
+    ).toBe(false);
   });
 
   it('returns `false` when the input is not a `ResponseError`', () => {
