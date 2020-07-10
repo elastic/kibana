@@ -6,8 +6,8 @@
 
 import { useEffect, useState, useCallback } from 'react';
 
-import { useReadListIndex, useCreateListIndex, useIsMounted } from '../../../../lists_plugin_deps';
-import { useHttp, useToasts } from '../../../../common/lib/kibana';
+import { useReadListIndex, useCreateListIndex } from '../../../../shared_imports';
+import { useHttp, useToasts, useKibana } from '../../../../common/lib/kibana';
 import { isApiError } from '../../../../common/utils/api';
 import * as i18n from './translations';
 
@@ -24,7 +24,7 @@ export const useListsIndex = (): UseListsIndexReturn => {
   const [state, setState] = useState<UseListsIndexState>({
     indexExists: null,
   });
-  const isMounted = useIsMounted();
+  const { lists } = useKibana().services;
   const http = useHttp();
   const toasts = useToasts();
   const { loading: readLoading, start: readListIndex, ...readListIndexState } = useReadListIndex();
@@ -34,38 +34,46 @@ export const useListsIndex = (): UseListsIndexReturn => {
     ...createListIndexState
   } = useCreateListIndex();
 
+  const readIndex = useCallback(() => {
+    if (lists) {
+      readListIndex({ http });
+    }
+  }, [http, lists, readListIndex]);
+
   const createIndex = useCallback(() => {
-    createListIndex({ http });
-  }, [createListIndex, http]);
+    if (lists) {
+      createListIndex({ http });
+    }
+  }, [createListIndex, http, lists]);
 
   // initial read list
   useEffect(() => {
     if (!readLoading && state.indexExists === null) {
-      readListIndex({ http });
+      readIndex();
     }
-  }, [http, readListIndex, readLoading, state.indexExists]);
+  }, [readIndex, readLoading, state.indexExists]);
 
   // handle read result
   useEffect(() => {
-    if (isMounted() && readListIndexState.result != null) {
+    if (readListIndexState.result != null) {
       setState({
         indexExists:
           readListIndexState.result.list_index && readListIndexState.result.list_item_index,
       });
     }
-  }, [isMounted, readListIndexState.result]);
+  }, [readListIndexState.result]);
 
   // refetch index after creation
   useEffect(() => {
-    if (isMounted() && createListIndexState.result != null) {
-      readListIndex({ http });
+    if (createListIndexState.result != null) {
+      readIndex();
     }
-  }, [createListIndexState.result, http, isMounted, readListIndex]);
+  }, [createListIndexState.result, readIndex]);
 
   // handle read error
   useEffect(() => {
     const error = readListIndexState.error;
-    if (isMounted() && isApiError(error)) {
+    if (isApiError(error)) {
       setState({ indexExists: false });
       if (error.body.status_code !== 404) {
         toasts.addError(error, {
@@ -74,18 +82,18 @@ export const useListsIndex = (): UseListsIndexReturn => {
         });
       }
     }
-  }, [isMounted, readListIndexState.error, toasts]);
+  }, [readListIndexState.error, toasts]);
 
   // handle create error
   useEffect(() => {
     const error = createListIndexState.error;
-    if (isMounted() && isApiError(error)) {
+    if (isApiError(error)) {
       toasts.addError(error, {
         title: i18n.LISTS_INDEX_CREATE_FAILURE,
         toastMessage: error.body.message,
       });
     }
-  }, [createListIndexState.error, isMounted, toasts]);
+  }, [createListIndexState.error, toasts]);
 
   return { loading: readLoading || createLoading, createIndex, ...state };
 };
