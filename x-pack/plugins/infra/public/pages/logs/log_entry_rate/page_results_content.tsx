@@ -57,6 +57,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
     hasOutdatedJobDefinitions: hasOutdatedLogEntryCategoriesJobDefinitions,
     hasStoppedJobs: hasStoppedLogEntryCategoriesJobs,
     moduleDescriptor: logEntryCategoriesModuleDescriptor,
+    setupStatus: logEntryCategoriesSetupStatus,
   } = useLogEntryCategoriesModuleContext();
 
   const {
@@ -162,10 +163,13 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
 
   const isFirstUse = useMemo(
     () =>
+      ((logEntryCategoriesSetupStatus.type === 'skipped' &&
+        !!logEntryCategoriesSetupStatus.newlyCreated) ||
+        logEntryCategoriesSetupStatus.type === 'succeeded') &&
       ((logEntryRateSetupStatus.type === 'skipped' && !!logEntryRateSetupStatus.newlyCreated) ||
         logEntryRateSetupStatus.type === 'succeeded') &&
       !hasResults,
-    [hasResults, logEntryRateSetupStatus]
+    [hasResults, logEntryCategoriesSetupStatus, logEntryRateSetupStatus]
   );
 
   useEffect(() => {
@@ -204,7 +208,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
             hasOutdatedJobConfigurations={hasOutdatedLogEntryRateJobConfigurations}
             hasOutdatedJobDefinitions={hasOutdatedLogEntryRateJobDefinitions}
             hasStoppedJobs={hasStoppedLogEntryRateJobs}
-            isFirstUse={isFirstUse}
+            isFirstUse={false /* the first use message is already shown by the section below */}
             moduleName={logEntryRateModuleDescriptor.moduleName}
             onRecreateMlJobForReconfiguration={showLogEntryRateSetup}
             onRecreateMlJobForUpdate={showLogEntryRateSetup}
