@@ -143,8 +143,8 @@ export const StepSelectConfig: React.FunctionComponent<{
           <CreateAgentConfigFlyout
             onClose={(newAgentConfig?: AgentConfig) => {
               setIsCreateAgentConfigFlyoutOpen(false);
-              refreshAgentConfigs();
               if (newAgentConfig) {
+                refreshAgentConfigs();
                 setSelectedConfigId(newAgentConfig.id);
               }
             }}
