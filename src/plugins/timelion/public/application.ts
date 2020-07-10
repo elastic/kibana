@@ -71,8 +71,7 @@ export const renderApp = (deps: RenderDeps) => {
     configureAppAngularModule(
       angularModuleInstance,
       { core: deps.core, env: deps.pluginInitializerContext.env },
-      true,
-      () => deps.mountParams.history
+      true
     );
     initTimelionApp(angularModuleInstance, deps);
   }
