@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiBreadcrumbs, Breadcrumb, EuiCode } from '@elastic/eui';
+import { EuiBreadcrumbs, EuiBreadcrumb, EuiCode } from '@elastic/eui';
 import styled from 'styled-components';
 import React, { memo } from 'react';
 import { useResolverTheme } from '../assets';
@@ -29,14 +29,14 @@ export interface CrumbInfo {
 
 const ThemedBreadcrumbs = styled(EuiBreadcrumbs)<{ background: string; text: string }>`
   &.euiBreadcrumbs.euiBreadcrumbs--responsive {
-    background-color: ${(props) => props.background};
-    color: ${(props) => props.text};
+    background-color: ${props => props.background};
+    color: ${props => props.text};
     padding: 1em;
     border-radius: 5px;
   }
 
   & .euiBreadcrumbSeparator {
-    background: ${(props) => props.text};
+    background: ${props => props.text};
   }
 `;
 
@@ -47,7 +47,7 @@ export const StyledBreadcrumbs = memo(function StyledBreadcrumbs({
   breadcrumbs,
   truncate,
 }: {
-  breadcrumbs: Breadcrumb[];
+  breadcrumbs: EuiBreadcrumb[];
   truncate?: boolean;
 }) {
   const {
