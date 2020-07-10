@@ -77,8 +77,36 @@ describe('manifest_manager', () => {
       const packageConfigService = createPackageConfigServiceMock();
       const manifestManager = getManifestManagerMock({ packageConfigService });
       const snapshot = await manifestManager.getSnapshot();
-      const dispatched = await manifestManager.dispatch(snapshot!.manifest);
-      expect(dispatched).toEqual([]);
+      const dispatchErrors = await manifestManager.dispatch(snapshot!.manifest);
+      expect(dispatchErrors).toEqual([]);
+      const entries = snapshot!.manifest.getEntries();
+      const artifact = Object.values(entries)[0].getArtifact();
+      expect(
+        packageConfigService.update.mock.calls[0][2].inputs[0].config!.artifact_manifest.value
+      ).toEqual({
+        manifest_version: ManifestConstants.INITIAL_VERSION,
+        schema_version: 'v1',
+        artifacts: {
+          [artifact.identifier]: {
+            compression_algorithm: 'none',
+            encryption_algorithm: 'none',
+            decoded_sha256: artifact.decodedSha256,
+            encoded_sha256: artifact.encodedSha256,
+            decoded_size: artifact.decodedSize,
+            encoded_size: artifact.encodedSize,
+            relative_url: `/api/endpoint/artifacts/download/${artifact.identifier}/${artifact.decodedSha256}`,
+          },
+        },
+      });
+    });
+
+    test('ManifestManager fails to dispatch on conflict', async () => {
+      const packageConfigService = createPackageConfigServiceMock();
+      const manifestManager = getManifestManagerMock({ packageConfigService });
+      const snapshot = await manifestManager.getSnapshot();
+      packageConfigService.update.mockRejectedValue({ status: 409 });
+      const dispatchErrors = await manifestManager.dispatch(snapshot!.manifest);
+      expect(dispatchErrors).toEqual([{ status: 409 }]);
       const entries = snapshot!.manifest.getEntries();
       const artifact = Object.values(entries)[0].getArtifact();
       expect(
