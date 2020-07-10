@@ -16,6 +16,11 @@ export const sharedSchema = gql`
     from: String!
   }
 
+  input docValueFieldsInput {
+    field: String!
+    format: String!
+  }
+
   type CursorType {
     value: String
     tiebreaker: String

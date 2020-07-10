@@ -95,12 +95,17 @@ const getHostAggs = (ip: string) => {
   };
 };
 
-export const buildOverviewQuery = ({ defaultIndex, ip }: IpOverviewRequestOptions) => {
+export const buildOverviewQuery = ({
+  defaultIndex,
+  docValueFields,
+  ip,
+}: IpOverviewRequestOptions) => {
   const dslQuery = {
     allowNoIndices: true,
     index: defaultIndex,
     ignoreUnavailable: true,
     body: {
+      docvalue_fields: docValueFields ?? [],
       aggs: {
         ...getAggs('source', ip),
         ...getAggs('destination', ip),

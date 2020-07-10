@@ -61,6 +61,7 @@ const histogramConfigs: MatrixHisrogramConfigs = {
 
 export const AuthenticationsQueryTabBody = ({
   deleteQuery,
+  docValueFields,
   endDate,
   filterQuery,
   skip,
@@ -89,6 +90,7 @@ export const AuthenticationsQueryTabBody = ({
         {...histogramConfigs}
       />
       <AuthenticationsQuery
+        docValueFields={docValueFields}
         endDate={endDate}
         filterQuery={filterQuery}
         skip={skip}

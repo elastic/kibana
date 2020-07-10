@@ -13,7 +13,7 @@ import { useUiSetting$ } from '../../../../common/lib/kibana';
 import { GetHostFirstLastSeenQuery } from '../../../../graphql/types';
 import { inputsModel } from '../../../../common/store';
 import { QueryTemplateProps } from '../../../../common/containers/query_template';
-
+import { useWithSource } from '../../../../common/containers/source';
 import { HostFirstLastSeenGqlQuery } from './first_last_seen.gql_query';
 
 export interface FirstLastSeenHostArgs {
@@ -40,6 +40,7 @@ export function useFirstLastSeenHostQuery<TCache = object>(
   const [lastSeen, updateLastSeen] = useState<Date | null>(null);
   const [errorMessage, updateErrorMessage] = useState<string | null>(null);
   const [defaultIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
+  const { docValueFields } = useWithSource(sourceId);
 
   async function fetchFirstLastSeenHost(signal: AbortSignal) {
     updateLoading(true);
@@ -51,6 +52,7 @@ export function useFirstLastSeenHostQuery<TCache = object>(
           sourceId,
           hostName,
           defaultIndex,
+          docValueFields,
         },
         context: {
           fetchOptions: {

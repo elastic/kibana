@@ -9,6 +9,7 @@ import { HostLastFirstSeenRequestOptions } from './types';
 export const buildLastFirstSeenHostQuery = ({
   hostName,
   defaultIndex,
+  docValueFields,
 }: HostLastFirstSeenRequestOptions) => {
   const filter = [{ term: { 'host.name': hostName } }];
 
@@ -17,6 +18,7 @@ export const buildLastFirstSeenHostQuery = ({
     index: defaultIndex,
     ignoreUnavailable: true,
     body: {
+      docvalue_fields: docValueFields ?? [],
       aggregations: {
         firstSeen: { min: { field: '@timestamp' } },
         lastSeen: { max: { field: '@timestamp' } },

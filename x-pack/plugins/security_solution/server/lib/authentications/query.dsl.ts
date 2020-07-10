@@ -26,6 +26,7 @@ export const buildQuery = ({
   timerange: { from, to },
   pagination: { querySize },
   defaultIndex,
+  docValueFields,
   sourceConfiguration: {
     fields: { timestamp },
   },
@@ -59,6 +60,7 @@ export const buildQuery = ({
     index: defaultIndex,
     ignoreUnavailable: true,
     body: {
+      docvalue_fields: docValueFields ?? [],
       aggregations: {
         ...agg,
         group_by_users: {

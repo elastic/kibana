@@ -57,6 +57,7 @@ const createIncludePTRFilter = (isPtrIncluded: boolean) =>
 
 export const buildDnsQuery = ({
   defaultIndex,
+  docValueFields,
   filterQuery,
   isPtrIncluded,
   networkDnsSortField,
@@ -85,6 +86,7 @@ export const buildDnsQuery = ({
     index: defaultIndex,
     ignoreUnavailable: true,
     body: {
+      docvalue_fields: docValueFields ?? [],
       aggregations: {
         ...getCountAgg(),
         dns_name_query_count: {

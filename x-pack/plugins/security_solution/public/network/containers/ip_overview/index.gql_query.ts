@@ -13,10 +13,16 @@ export const ipOverviewQuery = gql`
     $ip: String!
     $defaultIndex: [String!]!
     $inspect: Boolean!
+    $docValueFields: [docValueFieldsInput!]!
   ) {
     source(id: $sourceId) {
       id
-      IpOverview(filterQuery: $filterQuery, ip: $ip, defaultIndex: $defaultIndex) {
+      IpOverview(
+        filterQuery: $filterQuery
+        ip: $ip
+        defaultIndex: $defaultIndex
+        docValueFields: $docValueFields
+      ) {
         source {
           firstSeen
           lastSeen

@@ -70,7 +70,7 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
       },
       [setAbsoluteRangeDatePicker]
     );
-    const { indicesExist, indexPattern } = useWithSource();
+    const { docValueFields, indicesExist, indexPattern } = useWithSource();
     const filterQuery = convertToBuildEsQuery({
       config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
@@ -129,6 +129,7 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
 
               <HostsTabs
                 deleteQuery={deleteQuery}
+                docValueFields={docValueFields}
                 to={to}
                 filterQuery={tabsFilterQuery}
                 isInitializing={isInitializing}

@@ -77,6 +77,7 @@ class TimelineQueryComponent extends QueryTemplate<
     const {
       children,
       clearSignalsState,
+      docValueFields,
       eventType = 'raw',
       id,
       indexPattern,
@@ -104,6 +105,7 @@ class TimelineQueryComponent extends QueryTemplate<
       pagination: { limit, cursor: null, tiebreaker: null },
       sortField,
       defaultIndex,
+      docValueFields: docValueFields ?? [],
       inspect: isInspected,
     };
 

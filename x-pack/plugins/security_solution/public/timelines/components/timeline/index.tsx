@@ -171,13 +171,14 @@ const StatefulTimelineComponent = React.memo<Props>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const { indexPattern, browserFields } = useWithSource('default', indexToAdd);
+    const { docValueFields, indexPattern, browserFields } = useWithSource('default', indexToAdd);
 
     return (
       <Timeline
         browserFields={browserFields}
         columns={columns}
         dataProviders={dataProviders!}
+        docValueFields={docValueFields}
         end={end}
         eventType={eventType}
         filters={filters}

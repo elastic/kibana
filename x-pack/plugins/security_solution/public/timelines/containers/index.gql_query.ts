@@ -15,6 +15,7 @@ export const timelineQuery = gql`
     $filterQuery: String
     $defaultIndex: [String!]!
     $inspect: Boolean!
+    $docValueFields: [docValueFieldsInput!]!
   ) {
     source(id: $sourceId) {
       id
@@ -24,6 +25,7 @@ export const timelineQuery = gql`
         sortField: $sortField
         filterQuery: $filterQuery
         defaultIndex: $defaultIndex
+        docValueFields: $docValueFields
       ) {
         totalCount
         inspect @include(if: $inspect) {

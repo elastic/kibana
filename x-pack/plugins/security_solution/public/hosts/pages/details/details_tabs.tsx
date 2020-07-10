@@ -28,6 +28,7 @@ import {
 
 export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
   ({
+    docValueFields,
     pageFilters,
     filterQuery,
     detailName,
@@ -80,7 +81,7 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
     return (
       <Switch>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.authentications})`}>
-          <AuthenticationsQueryTabBody {...tabProps} />
+          <AuthenticationsQueryTabBody docValueFields={docValueFields} {...tabProps} />
         </Route>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.hosts})`}>
           <HostsQueryTabBody {...tabProps} />

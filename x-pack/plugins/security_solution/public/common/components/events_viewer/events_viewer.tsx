@@ -10,7 +10,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
-import { BrowserFields } from '../../containers/source';
+import { BrowserFields, DocValueFields } from '../../containers/source';
 import { TimelineQuery } from '../../../timelines/containers';
 import { Direction } from '../../../graphql/types';
 import { useKibana } from '../../lib/kibana';
@@ -51,6 +51,7 @@ interface Props {
   columns: ColumnHeaderOptions[];
   dataProviders: DataProvider[];
   deletedEventIds: Readonly<string[]>;
+  docValueFields: DocValueFields[];
   end: string;
   filters: Filter[];
   headerFilterGroup?: React.ReactNode;
@@ -74,6 +75,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   columns,
   dataProviders,
   deletedEventIds,
+  docValueFields,
   end,
   filters,
   headerFilterGroup,
@@ -140,6 +142,7 @@ const EventsViewerComponent: React.FC<Props> = ({
       {combinedQueries != null ? (
         <EventDetailsWidthProvider>
           <TimelineQuery
+            docValueFields={docValueFields}
             fields={fields}
             filterQuery={combinedQueries.filterQuery}
             id={id}
@@ -184,6 +187,7 @@ const EventsViewerComponent: React.FC<Props> = ({
                     <StatefulBody
                       browserFields={browserFields}
                       data={events.filter((e) => !deletedEventIds.includes(e._id))}
+                      docValueFields={docValueFields}
                       id={id}
                       isEventViewer={true}
                       height={height}
@@ -223,6 +227,7 @@ export const EventsViewer = React.memo(
   (prevProps, nextProps) =>
     deepEqual(prevProps.browserFields, nextProps.browserFields) &&
     prevProps.columns === nextProps.columns &&
+    deepEqual(prevProps.docValueFields, nextProps.docValueFields) &&
     prevProps.dataProviders === nextProps.dataProviders &&
     prevProps.deletedEventIds === nextProps.deletedEventIds &&
     prevProps.end === nextProps.end &&

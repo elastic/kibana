@@ -44,6 +44,7 @@ export const mockLastEventTimeQuery: MockLastEventTimeQuery[] = [
         indexKey: LastEventIndexKey.hosts,
         details: {},
         defaultIndex: DEFAULT_INDEX_PATTERN,
+        docValueFields: [],
       },
     },
     result: {

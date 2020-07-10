@@ -16,6 +16,7 @@ export const buildLastEventTimeQuery = ({
   indexKey,
   details,
   defaultIndex,
+  docValueFields,
 }: LastEventTimeRequestOptions) => {
   const indicesToQuery: EventIndices = {
     hosts: defaultIndex,
@@ -35,6 +36,7 @@ export const buildLastEventTimeQuery = ({
             index: indicesToQuery.network,
             ignoreUnavailable: true,
             body: {
+              docvalue_fields: docValueFields ?? [],
               aggregations: {
                 last_seen_event: { max: { field: '@timestamp' } },
               },
@@ -52,6 +54,7 @@ export const buildLastEventTimeQuery = ({
             index: indicesToQuery.hosts,
             ignoreUnavailable: true,
             body: {
+              docvalue_fields: docValueFields ?? [],
               aggregations: {
                 last_seen_event: { max: { field: '@timestamp' } },
               },
@@ -69,6 +72,7 @@ export const buildLastEventTimeQuery = ({
           index: indicesToQuery[indexKey],
           ignoreUnavailable: true,
           body: {
+            docvalue_fields: docValueFields ?? [],
             aggregations: {
               last_seen_event: { max: { field: '@timestamp' } },
             },

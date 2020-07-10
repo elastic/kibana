@@ -11,6 +11,7 @@ import { HostsRequestOptions } from '.';
 
 export const buildHostsQuery = ({
   defaultIndex,
+  docValueFields,
   fields,
   filterQuery,
   pagination: { querySize },
@@ -40,6 +41,7 @@ export const buildHostsQuery = ({
     index: defaultIndex,
     ignoreUnavailable: true,
     body: {
+      docvalue_fields: docValueFields ?? [],
       aggregations: {
         ...agg,
         host_data: {

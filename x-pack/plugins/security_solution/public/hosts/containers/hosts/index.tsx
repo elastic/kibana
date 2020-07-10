@@ -81,6 +81,7 @@ class HostsComponentQuery extends QueryTemplatePaginated<
   public render() {
     const {
       activePage,
+      docValueFields,
       id = ID,
       isInspected,
       children,
@@ -110,6 +111,7 @@ class HostsComponentQuery extends QueryTemplatePaginated<
       pagination: generateTablePaginationOptions(activePage, limit),
       filterQuery: createFilter(filterQuery),
       defaultIndex,
+      docValueFields: docValueFields ?? [],
       inspect: isInspected,
     };
     return (

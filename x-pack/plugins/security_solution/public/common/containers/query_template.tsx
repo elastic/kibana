@@ -9,8 +9,12 @@ import React from 'react';
 import { FetchMoreOptions, FetchMoreQueryOptions, OperationVariables } from 'react-apollo';
 
 import { ESQuery } from '../../../common/typed_json';
+import { DocValueFields } from './source';
+
+export { DocValueFields };
 
 export interface QueryTemplateProps {
+  docValueFields?: DocValueFields[];
   id?: string;
   endDate?: string;
   filterQuery?: ESQuery | string;

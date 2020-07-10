@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux';
 import uuid from 'uuid';
 import VisibilitySensor from 'react-visibility-sensor';
 
-import { BrowserFields } from '../../../../../common/containers/source';
+import { BrowserFields, DocValueFields } from '../../../../../common/containers/source';
 import { TimelineDetailsQuery } from '../../../../containers/details';
 import { TimelineItem, DetailItem, TimelineNonEcsData } from '../../../../../graphql/types';
 import { requestIdleCallbackViaScheduler } from '../../../../../common/lib/helpers/scheduler';
@@ -43,6 +43,7 @@ interface Props {
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
+  docValueFields: DocValueFields[];
   event: TimelineItem;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   getNotesByIds: (noteIds: string[]) => Note[];
@@ -108,6 +109,7 @@ const StatefulEventComponent: React.FC<Props> = ({
   containerElementRef,
   columnHeaders,
   columnRenderers,
+  docValueFields,
   event,
   eventIdToNoteIds,
   getNotesByIds,
@@ -202,6 +204,7 @@ const StatefulEventComponent: React.FC<Props> = ({
         if (isVisible) {
           return (
             <TimelineDetailsQuery
+              docValueFields={docValueFields}
               sourceId="default"
               indexName={event._index!}
               eventId={event._id}

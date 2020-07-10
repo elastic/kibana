@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { FlyoutHeaderWithCloseButton } from '../flyout/header_with_close_button';
-import { BrowserFields } from '../../../common/containers/source';
+import { BrowserFields, DocValueFields } from '../../../common/containers/source';
 import { TimelineQuery } from '../../containers/index';
 import { Direction } from '../../../graphql/types';
 import { useKibana } from '../../../common/lib/kibana';
@@ -98,6 +98,7 @@ export interface Props {
   browserFields: BrowserFields;
   columns: ColumnHeaderOptions[];
   dataProviders: DataProvider[];
+  docValueFields: DocValueFields[];
   end: string;
   eventType?: EventType;
   filters: Filter[];
@@ -134,6 +135,7 @@ export const TimelineComponent: React.FC<Props> = ({
   browserFields,
   columns,
   dataProviders,
+  docValueFields,
   end,
   eventType,
   filters,
@@ -241,6 +243,7 @@ export const TimelineComponent: React.FC<Props> = ({
       <TimelineKqlFetch id={id} indexPattern={indexPattern} inputId="timeline" />
       {combinedQueries != null ? (
         <TimelineQuery
+          docValueFields={docValueFields}
           eventType={eventType}
           id={id}
           indexToAdd={indexToAdd}
@@ -277,6 +280,7 @@ export const TimelineComponent: React.FC<Props> = ({
                   <StatefulBody
                     browserFields={browserFields}
                     data={events}
+                    docValueFields={docValueFields}
                     id={id}
                     sort={sort}
                     toggleColumn={toggleColumn}
