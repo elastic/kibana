@@ -86,7 +86,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
     <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+          <EuiButtonEmpty iconType="cross" onClick={() => onClose()} flush="left">
             <FormattedMessage
               id="xpack.ingestManager.createAgentConfig.cancelButtonLabel"
               defaultMessage="Cancel"
