@@ -10,7 +10,7 @@ import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
 import { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
 import { GetAllTimeline, SortFieldTimeline, TimelineResult, Direction } from '../../graphql/types';
 import { allTimelinesQuery } from '../../timelines/containers/all/index.gql_query';
-import { CreateTimelineProps } from '../../alerts/components/alerts_table/types';
+import { CreateTimelineProps } from '../../detections/components/alerts_table/types';
 import { TimelineModel } from '../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 export interface MockedProvidedQuery {
