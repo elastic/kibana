@@ -19,12 +19,13 @@ import { EventsLoading, EventsTd, EventsTdContent, EventsTdGroupActions } from '
 import { eventHasNotes, getPinTooltip } from '../helpers';
 import * as i18n from '../translations';
 import { OnRowSelected } from '../../events';
-import { Ecs } from '../../../../../graphql/types';
+import { Ecs, TimelineNonEcsData } from '../../../../../graphql/types';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 
 export interface TimelineRowActionOnClick {
   eventId: string;
   ecsData: Ecs;
+  data: TimelineNonEcsData[];
 }
 
 export interface TimelineRowAction {

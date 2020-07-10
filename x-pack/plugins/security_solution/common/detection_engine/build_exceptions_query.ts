@@ -16,7 +16,6 @@ import {
   entriesExists,
   entriesMatch,
   entriesNested,
-  entriesList,
   ExceptionListItemSchema,
 } from '../../../lists/common/schemas';
 import { Language, Query } from './schemas/common/schemas';
@@ -182,7 +181,7 @@ export const buildExceptionItemEntries = ({
 }): string => {
   const and = getLanguageBooleanOperator({ language, value: 'and' });
   const exceptionItem = lists
-    .filter((t) => !entriesList.is(t))
+    .filter(({ type }) => type !== 'list')
     .reduce<string[]>((accum, listItem) => {
       const exceptionSegment = evaluateValues({ item: listItem, language });
       return [...accum, exceptionSegment];
@@ -200,7 +199,7 @@ export const buildQueryExceptions = ({
   language: Language;
   lists: ExceptionListItemSchema[] | undefined;
 }): DataQuery[] => {
-  if (lists && lists !== null) {
+  if (lists != null) {
     const exceptions = lists.map((exceptionItem) =>
       buildExceptionItemEntries({ lists: exceptionItem.entries, language })
     );

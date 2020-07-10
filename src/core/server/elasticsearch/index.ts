@@ -25,7 +25,15 @@ export {
   ElasticsearchServiceStart,
   ElasticsearchStatusMeta,
   InternalElasticsearchServiceSetup,
+  InternalElasticsearchServiceStart,
   FakeRequest,
   ScopeableRequest,
 } from './types';
 export * from './legacy';
+export {
+  IClusterClient,
+  ICustomClusterClient,
+  ElasticsearchClientConfig,
+  ElasticsearchClient,
+  IScopedClusterClient,
+} from './client';
