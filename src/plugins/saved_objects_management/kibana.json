@@ -5,5 +5,6 @@
   "ui": true,
   "requiredPlugins": ["home", "management", "data"],
   "optionalPlugins": ["dashboard", "visualizations", "discover"],
-  "extraPublicDirs": ["public/lib"]
+  "extraPublicDirs": ["public/lib"],
+  "requiredBundles": ["kibanaReact"]
 }
