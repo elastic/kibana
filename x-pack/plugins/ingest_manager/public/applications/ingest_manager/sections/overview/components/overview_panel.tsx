@@ -71,23 +71,3 @@ export const OverviewPanel = ({
     </StyledPanel>
   );
 };
-
-// export const OverviewPanel = styled(EuiPanel).attrs((props) => ({
-//   paddingSize: 'm',
-// }))`
-//   header {
-//     display: flex;
-//     align-items: center;
-//     justify-content: space-between;
-//     border-bottom: 1px solid ${(props) => props.theme.eui.euiColorLightShade};
-//     margin: -${(props) => props.theme.eui.paddingSizes.m} -${(props) =>
-//         props.theme.eui.paddingSizes.m}
-//       ${(props) => props.theme.eui.paddingSizes.m};
-//     padding: ${(props) => props.theme.eui.paddingSizes.s}
-//       ${(props) => props.theme.eui.paddingSizes.m};
-//   }
-
-//   h2 {
-//     padding: ${(props) => props.theme.eui.paddingSizes.xs} 0;
-//   }
-// `;
