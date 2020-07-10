@@ -11,9 +11,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import './loading.scss';
 
 export const Loading: React.FC = () => (
-  <div className="loadingSpinner-wrapper">
-    <div className="app-loading">
-      <EuiLoadingSpinner size="xl" />
-    </div>
+  <div className="loadingSpinnerWrapper">
+    <EuiLoadingSpinner size="xl" className="loadingSpinner" />
   </div>
 );

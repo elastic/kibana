@@ -7,6 +7,7 @@
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import { ContentSection } from '../shared/content_section';
 import { ORG_SOURCES_PATH, USERS_PATH } from '../../routes';
