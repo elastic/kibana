@@ -22,21 +22,20 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
     getIconType(context: ActionContextMapping[typeof OPEN_IN_ANOMALY_EXPLORER_ACTION]): string {
       return 'tableOfContents';
     },
-    getDisplayName: () =>
-      i18n.translate('xpack.ml.actions.openInAnomalyExplorerTitle', {
+    getDisplayName() {
+      return i18n.translate('xpack.ml.actions.openInAnomalyExplorerTitle', {
         defaultMessage: 'Open in Anomaly Explorer',
-      }),
+      });
+    },
     async getHref({ embeddable, data }: SwimLaneDrilldownContext): Promise<string> {
       const [, pluginsStart] = await getStartServices();
       const urlGenerator = pluginsStart.share.urlGenerators.getUrlGenerator(ML_APP_URL_GENERATOR);
-      const { jobIds, query, filters, timeRange } = embeddable.getInput();
+      const { jobIds, timeRange } = embeddable.getInput();
       const { perPage, fromPage } = embeddable.getOutput();
 
       return urlGenerator.createUrl({
         page: 'explorer',
         jobIds,
-        query,
-        filters,
         timeRange,
         mlExplorerSwimlane: {
           viewByFromPage: fromPage,

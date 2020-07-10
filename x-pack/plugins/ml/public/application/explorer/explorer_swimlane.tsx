@@ -121,6 +121,8 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
       this.disableDragSelectOnMouseLeave = true;
     },
     onDragStart: (e) => {
+      // make sure we don't trigger text selection on label
+      e.preventDefault();
       let target = e.target as HTMLElement;
       while (target && target !== document.body && !target.classList.contains('sl-cell')) {
         target = target.parentNode as HTMLElement;
@@ -295,6 +297,10 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
     });
   }
 
+  /**
+   * TODO should happen with props instead of imperative check
+   * @param maskAll
+   */
   maskIrrelevantSwimlanes(maskAll: boolean) {
     if (maskAll === true) {
       // This selects both overall and viewby swimlane
@@ -627,10 +633,6 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
 
     this.swimlaneRenderDoneListener();
 
-    // if (this.props.swimlaneRenderDoneListener) {
-    //   this.props.swimlaneRenderDoneListener();
-    // }
-
     if (
       (swimlaneType !== selectedType ||
         (swimlaneData.fieldName !== undefined &&
@@ -653,10 +655,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
         selectedTimeExtent[1] <= endTime
       ) {
         // Locate matching cell - look for exact time, otherwise closest before.
-        const swimlaneElements = element.select('.ml-swimlanes');
-        const laneCells = swimlaneElements.selectAll(
-          `div[data-lane-label="${mlEscape(selectedLane)}"]`
-        );
+        const laneCells = element.selectAll(`div[data-lane-label="${mlEscape(selectedLane)}"]`);
 
         laneCells.each(function (this: HTMLElement) {
           const cell = d3.select(this);
