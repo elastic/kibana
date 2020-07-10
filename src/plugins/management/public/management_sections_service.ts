@@ -22,6 +22,7 @@ import {
   IngestSection,
   DataSection,
   InsightsAndAlertingSection,
+  SecuritySection,
   KibanaSection,
   StackSection,
 } from './components/management_sections';
@@ -51,6 +52,7 @@ export class ManagementSectionsService {
       ingest: this.registerSection(IngestSection),
       data: this.registerSection(DataSection),
       insightsAndAlerting: this.registerSection(InsightsAndAlertingSection),
+      security: this.registerSection(SecuritySection),
       kibana: this.registerSection(KibanaSection),
       stack: this.registerSection(StackSection),
     };

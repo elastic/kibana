@@ -29,6 +29,7 @@ export interface DefinedSections {
   ingest: ManagementSection;
   data: ManagementSection;
   insightsAndAlerting: ManagementSection;
+  security: ManagementSection;
   kibana: ManagementSection;
   stack: ManagementSection;
 }

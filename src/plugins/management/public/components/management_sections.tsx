@@ -44,6 +44,14 @@ const insightsAndAlertingTip = i18n.translate('management.sections.insightsAndAl
   defaultMessage: 'Manage how to detect changes in your data',
 });
 
+const sectionTitle = i18n.translate('management.sections.section.title', {
+  defaultMessage: 'Security',
+});
+
+const sectionTip = i18n.translate('management.sections.section.tip', {
+  defaultMessage: 'Control access to features and data',
+});
+
 const kibanaTitle = i18n.translate('management.sections.kibanaTitle', {
   defaultMessage: 'Kibana',
 });
@@ -81,6 +89,13 @@ export const InsightsAndAlertingSection = {
   order: 2,
 };
 
+export const SecuritySection = {
+  id: 'security',
+  title: sectionTitle,
+  tip: sectionTip,
+  order: 3,
+};
+
 export const KibanaSection = {
   id: ManagementSectionId.Kibana,
   title: kibanaTitle,
@@ -99,6 +114,7 @@ export const managementSections = [
   IngestSection,
   DataSection,
   InsightsAndAlertingSection,
+  SecuritySection,
   KibanaSection,
   StackSection,
 ];
