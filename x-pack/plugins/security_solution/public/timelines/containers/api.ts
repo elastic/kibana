@@ -30,7 +30,7 @@ import { createToasterPlainError } from '../../cases/containers/utils';
 import {
   ImportDataProps,
   ImportDataResponse,
-} from '../../alerts/containers/detection_engine/rules';
+} from '../../detections/containers/detection_engine/rules';
 
 interface RequestPostTimeline {
   timeline: TimelineInput;

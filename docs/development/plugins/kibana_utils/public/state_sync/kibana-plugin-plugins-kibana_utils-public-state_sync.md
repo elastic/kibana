@@ -4,28 +4,28 @@
 
 ## kibana-plugin-plugins-kibana\_utils-public-state\_sync package
 
-State syncing utilities are a set of helpers for syncing your application state with URL or browser storage.
+State syncing utilities are a set of helpers for syncing your application state with browser URL or browser storage.
 
-They are designed to work together with state containers (<!-- -->). But state containers are not required.
+They are designed to work together with [state containers](https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_containers)<!-- -->. But state containers are not required.
 
 State syncing utilities include:
 
-- [syncState()](./kibana-plugin-plugins-kibana_utils-public-state_sync.syncstate.md) util which: - Subscribes to state changes and pushes them to state storage. - Optionally subscribes to state storage changes and pushes them to state. - Two types of storage compatible with `syncState`<!-- -->: - [IKbnUrlStateStorage](./kibana-plugin-plugins-kibana_utils-public-state_sync.ikbnurlstatestorage.md) - Serializes state and persists it to URL's query param in rison or hashed format. Listens for state updates in the URL and pushes them back to state. - [ISessionStorageStateStorage](./kibana-plugin-plugins-kibana_utils-public-state_sync.isessionstoragestatestorage.md) - Serializes state and persists it to browser storage.
+\*[syncState()](./kibana-plugin-plugins-kibana_utils-public-state_sync.syncstate.md) util which: \* Subscribes to state changes and pushes them to state storage. \* Optionally subscribes to state storage changes and pushes them to state. \* Two types of storages compatible with `syncState`<!-- -->: \* [IKbnUrlStateStorage](./kibana-plugin-plugins-kibana_utils-public-state_sync.ikbnurlstatestorage.md) - Serializes state and persists it to URL's query param in rison or hashed format. Listens for state updates in the URL and pushes them back to state. \* [ISessionStorageStateStorage](./kibana-plugin-plugins-kibana_utils-public-state_sync.isessionstoragestatestorage.md) - Serializes state and persists it to browser storage.
 
-Refer [here](https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_sync) for a complete guide and examples
+Refer [here](https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_sync) for a complete guide and examples.
 
 ## Functions
 
 |  Function | Description |
 |  --- | --- |
-|  [syncState({ storageKey, stateStorage, stateContainer, })](./kibana-plugin-plugins-kibana_utils-public-state_sync.syncstate.md) | Utility for syncing application state wrapped in state container with some kind of storage (e.g. URL) Refer [here](https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_sync) for a complete guide and examples |
+|  [syncState({ storageKey, stateStorage, stateContainer, })](./kibana-plugin-plugins-kibana_utils-public-state_sync.syncstate.md) | Utility for syncing application state wrapped in state container with some kind of storage (e.g. URL)<!-- -->Go [here](https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_sync) for a complete guide and examples. |
 |  [syncStates(stateSyncConfigs)](./kibana-plugin-plugins-kibana_utils-public-state_sync.syncstates.md) |  |
 
 ## Interfaces
 
 |  Interface | Description |
 |  --- | --- |
-|  [IKbnUrlStateStorage](./kibana-plugin-plugins-kibana_utils-public-state_sync.ikbnurlstatestorage.md) | KbnUrlStateStorage is a state storage for [syncState()](./kibana-plugin-plugins-kibana_utils-public-state_sync.syncstate.md) utility which: 1. Keeps state in sync with the URL. 2. Serializes data and stores it in the URL in one of the supported formats: \* Rison encoded. \* Hashed URL: In URL we store only the hash from the serialized state, but the state itself is stored in sessionStorage. See kibana's advanced option for more context state:storeInSessionStorage 3. Takes care of listening to the URL updates and notifies state about the updates. 4. Takes care of batching URL updates to prevent redundant browser history records. [GUIDE](https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/kbn_url_storage.md) |
+|  [IKbnUrlStateStorage](./kibana-plugin-plugins-kibana_utils-public-state_sync.ikbnurlstatestorage.md) | KbnUrlStateStorage is a state storage for [syncState()](./kibana-plugin-plugins-kibana_utils-public-state_sync.syncstate.md) utility which:<!-- -->1. Keeps state in sync with the URL. 2. Serializes data and stores it in the URL in one of the supported formats: \* Rison encoded. \* Hashed URL: In URL we store only the hash from the serialized state, but the state itself is stored in sessionStorage. See Kibana's <code>state:storeInSessionStorage</code> advanced option for more context. 3. Takes care of listening to the URL updates and notifies state about the updates. 4. Takes care of batching URL updates to prevent redundant browser history records.[Refer to this guide for more info](https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/kbn_url_storage.md) |
 |  [INullableBaseStateContainer](./kibana-plugin-plugins-kibana_utils-public-state_sync.inullablebasestatecontainer.md) | Extension of  with one constraint: set state should handle <code>null</code> as incoming state |
 |  [ISessionStorageStateStorage](./kibana-plugin-plugins-kibana_utils-public-state_sync.isessionstoragestatestorage.md) | [IStateStorage](./kibana-plugin-plugins-kibana_utils-public-state_sync.istatestorage.md) for storing state in browser  [guide](https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md) |
 |  [IStateStorage](./kibana-plugin-plugins-kibana_utils-public-state_sync.istatestorage.md) | Any StateStorage have to implement IStateStorage interface StateStorage is responsible for: \* state serialisation / deserialization \* persisting to and retrieving from storage<!-- -->For an example take a look at already implemented [IKbnUrlStateStorage](./kibana-plugin-plugins-kibana_utils-public-state_sync.ikbnurlstatestorage.md) and [ISessionStorageStateStorage](./kibana-plugin-plugins-kibana_utils-public-state_sync.isessionstoragestatestorage.md) state storages |

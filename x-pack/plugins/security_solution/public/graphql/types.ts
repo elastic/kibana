@@ -185,6 +185,8 @@ export interface DataProviderInput {
   queryMatch?: Maybe<QueryMatchInput>;
 
   and?: Maybe<DataProviderInput[]>;
+
+  type?: Maybe<DataProviderType>;
 }
 
 export interface QueryMatchInput {
@@ -340,6 +342,11 @@ export enum NetworkDnsFields {
 
 export enum TlsFields {
   _id = '_id',
+}
+
+export enum DataProviderType {
+  default = 'default',
+  template = 'template',
 }
 
 export enum TimelineStatus {
@@ -1044,6 +1051,8 @@ export interface RuleField {
   version?: Maybe<string[]>;
 
   note?: Maybe<string[]>;
+
+  exceptions_list?: Maybe<ToAny>;
 }
 
 export interface SuricataEcsFields {
@@ -2027,6 +2036,8 @@ export interface DataProviderResult {
   kqlQuery?: Maybe<string>;
 
   queryMatch?: Maybe<QueryMatchResult>;
+
+  type?: Maybe<DataProviderType>;
 
   and?: Maybe<DataProviderResult[]>;
 }
@@ -5032,6 +5043,8 @@ export namespace GetTimelineQuery {
     filters: Maybe<ToAny>;
 
     note: Maybe<string[]>;
+
+    exceptions_list: Maybe<ToAny>;
   };
 
   export type Suricata = {
@@ -5518,6 +5531,8 @@ export namespace GetOneTimeline {
     excluded: Maybe<boolean>;
 
     kqlQuery: Maybe<string>;
+
+    type: Maybe<DataProviderType>;
 
     queryMatch: Maybe<QueryMatch>;
 
