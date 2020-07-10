@@ -176,7 +176,124 @@ export default function (providerContext: FtrProviderContext) {
         });
     });
 
-    it('should fail on invalid api key', async () => {
+    it('should download an artifact with unicode characters', async () => {
+      await supertestWithoutAuth
+        .get(
+          '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-v1/8d2bcc37e82fad5d06e2c9e4bd96793ea8905ace1d528a57d0d0579ecc8c647e'
+        )
+        .set('kbn-xsrf', 'xxx')
+        .set('authorization', `ApiKey ${agentAccessAPIKey}`)
+        .send()
+        .expect(200)
+        .expect((response) => {
+          JSON.parse(inflateSync(response.body).toString());
+        })
+        .then(async () => {
+          await supertestWithoutAuth
+            .get(
+              '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-v1/8d2bcc37e82fad5d06e2c9e4bd96793ea8905ace1d528a57d0d0579ecc8c647e'
+            )
+            .set('kbn-xsrf', 'xxx')
+            .set('authorization', `ApiKey ${agentAccessAPIKey}`)
+            .send()
+            .expect(200)
+            .expect((response) => {
+              const artifactJson = JSON.parse(inflateSync(response.body).toString());
+              expect(artifactJson).to.eql({
+                entries: [
+                  {
+                    type: 'simple',
+                    entries: [
+                      {
+                        field: 'actingProcess.file.signer',
+                        operator: 'included',
+                        type: 'exact_cased',
+                        value: 'Elastic, N.V.',
+                      },
+                      {
+                        entries: [
+                          {
+                            field: 'signer',
+                            operator: 'included',
+                            type: 'exact_cased',
+                            value: '😈',
+                          },
+                          {
+                            field: 'trusted',
+                            operator: 'included',
+                            type: 'exact_cased',
+                            value: 'true',
+                          },
+                        ],
+                        field: 'file.signature',
+                        type: 'nested',
+                      },
+                    ],
+                  },
+                  {
+                    type: 'simple',
+                    entries: [
+                      {
+                        field: 'actingProcess.file.signer',
+                        operator: 'included',
+                        type: 'exact_cased',
+                        value: 'Another signer',
+                      },
+                      {
+                        entries: [
+                          {
+                            field: 'signer',
+                            operator: 'included',
+                            type: 'exact_cased',
+                            value: 'Evil',
+                          },
+                          {
+                            field: 'trusted',
+                            operator: 'included',
+                            type: 'exact_cased',
+                            value: 'true',
+                          },
+                        ],
+                        field: 'file.signature',
+                        type: 'nested',
+                      },
+                    ],
+                  },
+                ],
+              });
+            });
+        });
+    });
+
+    it('should download an artifact with empty exception list', async () => {
+      await supertestWithoutAuth
+        .get(
+          '/api/endpoint/artifacts/download/endpoint-exceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658'
+        )
+        .set('kbn-xsrf', 'xxx')
+        .set('authorization', `ApiKey ${agentAccessAPIKey}`)
+        .send()
+        .expect(200)
+        .expect((response) => {
+          JSON.parse(inflateSync(response.body).toString());
+        })
+        .then(async () => {
+          await supertestWithoutAuth
+            .get(
+              '/api/endpoint/artifacts/download/endpoint-exceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658'
+            )
+            .set('kbn-xsrf', 'xxx')
+            .set('authorization', `ApiKey ${agentAccessAPIKey}`)
+            .send()
+            .expect(200)
+            .expect((response) => {
+              const artifactJson = JSON.parse(inflateSync(response.body).toString());
+              expect(artifactJson.entries.length).to.equal(0);
+            });
+        });
+    });
+
+    it('should fail on invalid api key with 401', async () => {
       await supertestWithoutAuth
         .get(
           '/api/endpoint/artifacts/download/endpoint-exceptionlist-macos-v1/1825fb19fcc6dc391cae0bc4a2e96dd7f728a0c3ae9e1469251ada67f9e1b975'
