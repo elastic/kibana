@@ -3,25 +3,26 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CoreSetup, Logger } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { CoreSetup, Logger } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { APMConfig } from '../..';
 import {
-  TaskManagerStartContract,
   TaskManagerSetupContract,
+  TaskManagerStartContract,
 } from '../../../../task_manager/server';
-import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import {
   APM_TELEMETRY_SAVED_OBJECT_ID,
   APM_TELEMETRY_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
+import { getApmTelemetryMapping } from '../../../common/apm_telemetry';
+import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
+import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import {
   collectDataTelemetry,
   CollectTelemetryParams,
 } from './collect_data_telemetry';
-import { APMConfig } from '../..';
-import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
 
 const APM_TELEMETRY_TASK_NAME = 'apm-telemetry-task';
 
@@ -97,6 +98,7 @@ export async function createApmTelemetry({
 
   const collector = usageCollector.makeUsageCollector({
     type: 'apm',
+    schema: getApmTelemetryMapping(),
     fetch: async () => {
       try {
         const data = (

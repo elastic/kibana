@@ -34,6 +34,9 @@ import { APMTelemetry } from '../types';
 const TIME_RANGES = ['1d', 'all'] as const;
 type TimeRange = typeof TIME_RANGES[number];
 
+const range1d = { range: { '@timestamp': { gte: 'now-1d' } } };
+const timeout = '5m';
+
 export const tasks: TelemetryTask[] = [
   {
     name: 'cloud',
@@ -62,6 +65,7 @@ export const tasks: TelemetryTask[] = [
         ],
         body: {
           size: 0,
+          timeout,
           aggs: {
             [az]: {
               terms: {
@@ -109,15 +113,14 @@ export const tasks: TelemetryTask[] = [
 
       type ProcessorEvent = keyof typeof indicesByProcessorEvent;
 
-      const jobs: Array<{
+      interface Job {
         processorEvent: ProcessorEvent;
         timeRange: TimeRange;
-      }> = flatten(
-        (Object.keys(
-          indicesByProcessorEvent
-        ) as ProcessorEvent[]).map((processorEvent) =>
-          TIME_RANGES.map((timeRange) => ({ processorEvent, timeRange }))
-        )
+      }
+
+      const events = Object.keys(indicesByProcessorEvent) as ProcessorEvent[];
+      const jobs: Job[] = events.flatMap((processorEvent) =>
+        TIME_RANGES.map((timeRange) => ({ processorEvent, timeRange }))
       );
 
       const allData = await jobs.reduce((prevJob, current) => {
@@ -128,21 +131,12 @@ export const tasks: TelemetryTask[] = [
             index: indicesByProcessorEvent[processorEvent],
             body: {
               size: 0,
+              timeout,
               query: {
                 bool: {
                   filter: [
                     { term: { [PROCESSOR_EVENT]: processorEvent } },
-                    ...(timeRange !== 'all'
-                      ? [
-                          {
-                            range: {
-                              '@timestamp': {
-                                gte: `now-${timeRange}`,
-                              },
-                            },
-                          },
-                        ]
-                      : []),
+                    ...(timeRange === '1d' ? [range1d] : []),
                   ],
                 },
               },
@@ -155,6 +149,7 @@ export const tasks: TelemetryTask[] = [
               ? await search({
                   index: indicesByProcessorEvent[processorEvent],
                   body: {
+                    timeout,
                     query: {
                       bool: {
                         filter: [
@@ -208,6 +203,7 @@ export const tasks: TelemetryTask[] = [
           index: indices.apmAgentConfigurationIndex,
           body: {
             size: 0,
+            timeout,
             track_total_hits: true,
           },
         })
@@ -237,6 +233,7 @@ export const tasks: TelemetryTask[] = [
               ],
               body: {
                 size: 0,
+                timeout,
                 query: {
                   bool: {
                     filter: [
@@ -245,13 +242,7 @@ export const tasks: TelemetryTask[] = [
                           [AGENT_NAME]: agentName,
                         },
                       },
-                      {
-                        range: {
-                          '@timestamp': {
-                            gte: 'now-1d',
-                          },
-                        },
-                      },
+                      range1d,
                     ],
                   },
                 },
@@ -297,6 +288,7 @@ export const tasks: TelemetryTask[] = [
             },
           },
           size: 1,
+          timeout,
           sort: {
             '@timestamp': 'desc',
           },
@@ -330,12 +322,12 @@ export const tasks: TelemetryTask[] = [
   {
     name: 'groupings',
     executor: async ({ search, indices }) => {
-      const range1d = { range: { '@timestamp': { gte: 'now-1d' } } };
       const errorGroupsCount = (
         await search({
           index: indices['apm_oss.errorIndices'],
           body: {
             size: 0,
+            timeout,
             query: {
               bool: {
                 filter: [{ term: { [PROCESSOR_EVENT]: 'error' } }, range1d],
@@ -368,6 +360,7 @@ export const tasks: TelemetryTask[] = [
           index: indices['apm_oss.transactionIndices'],
           body: {
             size: 0,
+            timeout,
             query: {
               bool: {
                 filter: [
@@ -415,6 +408,7 @@ export const tasks: TelemetryTask[] = [
             },
             track_total_hits: true,
             size: 0,
+            timeout,
           },
         })
       ).hits.total.value;
@@ -428,6 +422,7 @@ export const tasks: TelemetryTask[] = [
           ],
           body: {
             size: 0,
+            timeout,
             query: {
               bool: {
                 filter: [range1d],
@@ -497,12 +492,10 @@ export const tasks: TelemetryTask[] = [
           ],
           body: {
             size: 0,
+            timeout,
             query: {
               bool: {
-                filter: [
-                  { term: { [AGENT_NAME]: agentName } },
-                  { range: { '@timestamp': { gte: 'now-1d' } } },
-                ],
+                filter: [{ term: { [AGENT_NAME]: agentName } }, range1d],
               },
             },
             sort: {
@@ -699,15 +692,15 @@ export const tasks: TelemetryTask[] = [
       return {
         indices: {
           shards: {
-            total: response._shards.total,
+            total: response._shards?.total ?? 0,
           },
           all: {
             total: {
               docs: {
-                count: response._all.total.docs.count,
+                count: response._all?.total?.docs?.count ?? 0,
               },
               store: {
-                size_in_bytes: response._all.total.store.size_in_bytes,
+                size_in_bytes: response._all?.total?.store?.size_in_bytes ?? 0,
               },
             },
           },
@@ -721,9 +714,10 @@ export const tasks: TelemetryTask[] = [
       const allAgentsCardinalityResponse = await search({
         body: {
           size: 0,
+          timeout,
           query: {
             bool: {
-              filter: [{ range: { '@timestamp': { gte: 'now-1d' } } }],
+              filter: [range1d],
             },
           },
           aggs: {
@@ -744,10 +738,11 @@ export const tasks: TelemetryTask[] = [
       const rumAgentCardinalityResponse = await search({
         body: {
           size: 0,
+          timeout,
           query: {
             bool: {
               filter: [
-                { range: { '@timestamp': { gte: 'now-1d' } } },
+                range1d,
                 { terms: { [AGENT_NAME]: ['rum-js', 'js-base'] } },
               ],
             },
