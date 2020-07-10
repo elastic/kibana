@@ -116,7 +116,7 @@ export const validateNumTopFeatureImportanceValues = (
 };
 
 export const validateAdvancedEditor = (state: State): State => {
-  const { jobIdEmpty, jobIdValid, jobIdExists, jobType, createIndexPattern, excludes } = state.form;
+  const { jobIdEmpty, jobIdValid, jobIdExists, jobType, createIndexPattern, includes } = state.form;
   const { jobConfig } = state;
 
   state.advancedEditorMessages = [];
@@ -144,6 +144,11 @@ export const validateAdvancedEditor = (state: State): State => {
   const destinationIndexNameValid = isValidIndexName(destinationIndexName);
   const destinationIndexPatternTitleExists =
     state.indexPatternsMap[destinationIndexName] !== undefined;
+
+  const resultsFieldEmptyString =
+    typeof jobConfig?.dest?.results_field === 'string' &&
+    jobConfig?.dest?.results_field.trim() === '';
+
   const mml = jobConfig.model_memory_limit;
   const modelMemoryLimitEmpty = mml === '' || mml === undefined;
   if (!modelMemoryLimitEmpty && mml !== undefined) {
@@ -152,7 +157,7 @@ export const validateAdvancedEditor = (state: State): State => {
   }
 
   let dependentVariableEmpty = false;
-  let excludesValid = true;
+  let includesValid = true;
   let trainingPercentValid = true;
   let numTopFeatureImportanceValuesValid = true;
 
@@ -170,14 +175,19 @@ export const validateAdvancedEditor = (state: State): State => {
     const dependentVariableName = getDependentVar(jobConfig.analysis) || '';
     dependentVariableEmpty = dependentVariableName === '';
 
-    if (!dependentVariableEmpty && excludes.includes(dependentVariableName)) {
-      excludesValid = false;
+    if (
+      !dependentVariableEmpty &&
+      includes !== undefined &&
+      includes.length > 0 &&
+      !includes.includes(dependentVariableName)
+    ) {
+      includesValid = false;
 
       state.advancedEditorMessages.push({
         error: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.advancedEditorMessage.excludesInvalid',
+          'xpack.ml.dataframe.analytics.create.advancedEditorMessage.includesInvalid',
           {
-            defaultMessage: 'The dependent variable cannot be excluded.',
+            defaultMessage: 'The dependent variable must be included.',
           }
         ),
         message: '',
@@ -287,6 +297,18 @@ export const validateAdvancedEditor = (state: State): State => {
     });
   }
 
+  if (resultsFieldEmptyString) {
+    state.advancedEditorMessages.push({
+      error: i18n.translate(
+        'xpack.ml.dataframe.analytics.create.advancedEditorMessage.resultsFieldEmptyString',
+        {
+          defaultMessage: 'The results field must not be an empty string.',
+        }
+      ),
+      message: '',
+    });
+  }
+
   if (dependentVariableEmpty) {
     state.advancedEditorMessages.push({
       error: i18n.translate(
@@ -321,7 +343,7 @@ export const validateAdvancedEditor = (state: State): State => {
   state.form.destinationIndexPatternTitleExists = destinationIndexPatternTitleExists;
 
   state.isValid =
-    excludesValid &&
+    includesValid &&
     trainingPercentValid &&
     state.form.modelMemoryLimitUnitValid &&
     !jobIdEmpty &&
@@ -331,6 +353,7 @@ export const validateAdvancedEditor = (state: State): State => {
     sourceIndexNameValid &&
     !destinationIndexNameEmpty &&
     destinationIndexNameValid &&
+    !resultsFieldEmptyString &&
     !dependentVariableEmpty &&
     !modelMemoryLimitEmpty &&
     numTopFeatureImportanceValuesValid &&

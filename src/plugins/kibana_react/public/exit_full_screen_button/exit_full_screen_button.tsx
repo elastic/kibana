@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { PureComponent } from 'react';
-import { EuiScreenReaderOnly, keyCodes } from '@elastic/eui';
+import { EuiScreenReaderOnly, keys } from '@elastic/eui';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 export interface ExitFullScreenButtonProps {
@@ -30,7 +30,7 @@ import './index.scss';
 
 class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
   public onKeyDown = (e: KeyboardEvent) => {
-    if (e.keyCode === keyCodes.ESCAPE) {
+    if (e.key === keys.ESCAPE) {
       this.props.onExitFullScreenMode();
     }
   };

@@ -101,6 +101,7 @@ export function privilegesFactory(
             actions.space.manage,
             actions.ui.get('spaces', 'manage'),
             actions.ui.get('management', 'kibana', 'spaces'),
+            actions.ui.get('enterpriseSearch', 'all'),
             ...allActions,
           ],
           read: [actions.login, actions.version, ...readActions],
