@@ -53,7 +53,7 @@ export const OverviewPanel = ({
   return (
     <StyledPanel>
       <header>
-        <EuiFlexGroup gutterSize="xs" alignItems="center">
+        <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
               <h2>{title}</h2>

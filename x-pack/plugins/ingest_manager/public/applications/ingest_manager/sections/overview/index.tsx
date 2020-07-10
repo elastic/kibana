@@ -42,7 +42,7 @@ export const IngestManagerOverview: React.FunctionComponent = () => {
       leftColumn={
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem>
-            <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="l">
                   <h1>
