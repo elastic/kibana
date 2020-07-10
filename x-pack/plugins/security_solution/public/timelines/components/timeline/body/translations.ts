@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const NOTES_TOOLTIP = i18n.translate(
   'xpack.securitySolution.timeline.body.notes.addOrViewNotesForThisEventTooltip',
   {
-    defaultMessage: 'Add or view notes for this event',
+    defaultMessage: 'Add notes for this event',
   }
 );
 
