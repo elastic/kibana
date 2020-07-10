@@ -9,9 +9,9 @@ import '../../../__mocks__/shallow_usecontext.mock';
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 
-import { RecentActivity } from './recent_activity';
+import { RecentActivity, RecentActivityItem } from './recent_activity';
 import { defaultServerData } from './overview';
 
 jest.mock('../../../shared/telemetry', () => ({ sendTelemetry: jest.fn() }));
@@ -34,35 +34,28 @@ describe('RecentActivity', () => {
     const wrapper = shallow(<RecentActivity {...defaultServerData} activityFeed={[]} />);
 
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
-  });
 
-  it('renders name when changed', () => {
-    const wrapper = shallow(
-      <RecentActivity {...defaultServerData} organization={org} activityFeed={[]} />
-    );
-
-    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
+    // Branch coverage - renders without error for custom org name
+    shallow(<RecentActivity {...defaultServerData} organization={org} activityFeed={[]} />);
   });
 
   it('renders an activity feed with links', () => {
     const wrapper = shallow(<RecentActivity {...defaultServerData} activityFeed={feed} />);
+    const activity = wrapper.find(RecentActivityItem).dive();
 
-    expect(wrapper.find('.activity')).toHaveLength(1);
+    expect(activity).toHaveLength(1);
 
-    const link = wrapper.find('[data-test-subj="viewSourceDetailsLink"]');
+    const link = activity.find('[data-test-subj="viewSourceDetailsLink"]');
     link.simulate('click');
     expect(sendTelemetry).toHaveBeenCalled();
   });
 
-  it('renders feed item with error', () => {
-    const feedWithError = [
-      {
-        ...feed[0],
-        status: 'error',
-      },
-    ];
-    const wrapper = shallow(<RecentActivity {...defaultServerData} activityFeed={feedWithError} />);
+  it('renders activity item error state', () => {
+    const props = { ...feed[0], status: 'error' };
+    const wrapper = shallow(<RecentActivityItem {...props} />);
 
     expect(wrapper.find('.activity--error')).toHaveLength(1);
+    expect(wrapper.find('.activity--error__label')).toHaveLength(1);
+    expect(wrapper.find(EuiLink).prop('color')).toEqual('danger');
   });
 });

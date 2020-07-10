@@ -13,12 +13,4 @@ export interface IAccount {
   supportEligible: boolean;
 }
 
-export interface IFeedActivity {
-  status?: string;
-  id: string;
-  message: string;
-  timestamp: string;
-  sourceId: string;
-}
-
 export type TSpacerSize = 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl';

@@ -12,7 +12,7 @@ import { SetWorkplaceSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { KibanaContext, IKibanaContext } from '../../../index';
 
-import { IAccount, IFeedActivity } from '../../types';
+import { IAccount } from '../../types';
 
 import { ErrorState } from '../error_state';
 
@@ -22,7 +22,7 @@ import { ViewContentHeader } from '../shared/view_content_header';
 
 import { OnboardingSteps } from './onboarding_steps';
 import { OrganizationStats } from './organization_stats';
-import { RecentActivity } from './recent_activity';
+import { RecentActivity, IFeedActivity } from './recent_activity';
 
 export interface IAppServerData {
   hasUsers: boolean;
