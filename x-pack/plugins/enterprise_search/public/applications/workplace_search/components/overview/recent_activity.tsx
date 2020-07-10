@@ -8,14 +8,7 @@ import React, { useContext } from 'react';
 
 import moment from 'moment';
 
-import {
-  EuiEmptyPrompt,
-  EuiLink,
-  EuiPanel,
-  EuiSpacer,
-  EuiButtonProps,
-  EuiLinkProps,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink, EuiPanel, EuiSpacer, EuiLinkProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -50,14 +43,15 @@ export const RecentActivity: React.FC<IAppServerData> = ({
       metric: 'recent_activity_source_details_link',
     });
 
-  const buttonProps = (sourceId: string) =>
+  const linkProps = (sourceId: string, status?: string) =>
     ({
       onClick,
       target: '_blank',
       href: getWSRoute(getSourcePath(sourceId)),
       external: true,
-      'data-test-subj': 'viewSourceDetailsButton',
-    } as EuiButtonProps & EuiLinkProps);
+      color: status === 'error' ? 'danger' : 'primary',
+      'data-test-subj': 'viewSourceDetailsLink',
+    } as EuiLinkProps);
 
   const NAMED_EMPTY_FEED_TITLE = (
     <FormattedMessage
@@ -67,8 +61,8 @@ export const RecentActivity: React.FC<IAppServerData> = ({
     />
   );
 
-  const viewSourceLabel = (
-    <span>
+  const viewErrorLabel = (
+    <span className="activity--error__label">
       <FormattedMessage
         id="xpack.enterpriseSearch.workplaceSearch.recentActivitySourceLink.linkLabel"
         defaultMessage="View Source"
@@ -77,8 +71,8 @@ export const RecentActivity: React.FC<IAppServerData> = ({
   );
 
   const EmptyFeed = (
-    <EuiPanel paddingSize="none" className="euiPanel--inset">
-      <EuiSpacer size="xxl" />
+    <>
+      <EuiSpacer size="xl" />
       <EuiEmptyPrompt
         iconType="clock"
         iconColor="subdued"
@@ -87,24 +81,22 @@ export const RecentActivity: React.FC<IAppServerData> = ({
           <h3>{name === defaultOrgName ? DEFAULT_EMPTY_FEED_TITLE : NAMED_EMPTY_FEED_TITLE}</h3>
         }
       />
-      <EuiSpacer size="xxl" />
-    </EuiPanel>
+      <EuiSpacer size="xl" />
+    </>
   );
-  const FeedTable = (
-    <table className="table">
-      <tbody className="table__body">
-        {activityFeed.map(({ id, status, message, timestamp, sourceId }: IFeedActivity, index) => (
-          <tr key={index} className={`activity ${status ? `activity__${status}` : ''}`}>
-            <td>
-              <EuiLink {...buttonProps(sourceId)}>
-                {id} {message} {status === 'error' && viewSourceLabel}
-              </EuiLink>
-            </td>
-            <td>{moment.utc(timestamp).fromNow()}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+  const FeedList = (
+    <>
+      {activityFeed.map(({ id, status, message, timestamp, sourceId }: IFeedActivity, index) => (
+        <div key={index} className={`activity ${status ? `activity--${status}` : ''}`}>
+          <div className="activity__message">
+            <EuiLink {...linkProps(sourceId, status)}>
+              {id} {message} {status === 'error' && viewErrorLabel}
+            </EuiLink>
+          </div>
+          <div className="activity__date">{moment.utc(timestamp).fromNow()}</div>
+        </div>
+      ))}
+    </>
   );
   return (
     <ContentSection
@@ -114,10 +106,9 @@ export const RecentActivity: React.FC<IAppServerData> = ({
           defaultMessage="Recent activity"
         />
       }
-      className="activity-feed"
       headerSpacer="m"
     >
-      {activityFeed.length > 0 ? FeedTable : EmptyFeed}
+      <EuiPanel>{activityFeed.length > 0 ? FeedList : EmptyFeed}</EuiPanel>
     </ContentSection>
   );
 };

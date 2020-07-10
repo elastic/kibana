@@ -44,10 +44,14 @@ describe('RecentActivity', () => {
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
   });
 
-  it('renders additional cards for federated auth', () => {
+  it('renders an activity feed with links', () => {
     const wrapper = shallow(<RecentActivity {...defaultServerData} activityFeed={feed} />);
 
-    expect(wrapper.find('table')).toHaveLength(1);
+    expect(wrapper.find('.activity')).toHaveLength(1);
+
+    const link = wrapper.find('[data-test-subj="viewSourceDetailsLink"]');
+    link.simulate('click');
+    expect(sendTelemetry).toHaveBeenCalled();
   });
 
   it('renders feed item with error', () => {
@@ -59,10 +63,6 @@ describe('RecentActivity', () => {
     ];
     const wrapper = shallow(<RecentActivity {...defaultServerData} activityFeed={feedWithError} />);
 
-    expect(wrapper.find('tr.activity__error')).toHaveLength(1);
-    const button = wrapper.find('[data-test-subj="viewSourceDetailsButton"]');
-
-    button.simulate('click');
-    expect(sendTelemetry).toHaveBeenCalled();
+    expect(wrapper.find('.activity--error')).toHaveLength(1);
   });
 });
