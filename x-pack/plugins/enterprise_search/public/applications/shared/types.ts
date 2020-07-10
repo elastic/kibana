@@ -12,11 +12,3 @@ export interface IFlashMessagesProps {
   isWrapped?: boolean;
   children?: React.ReactNode;
 }
-
-export interface ITelemetryStatus {
-  canSendTelemetryData: boolean;
-  telemetryOptedIn: boolean;
-  showTelemetryOptOutCallout: boolean;
-  telemetryLastSentAt: string;
-  telemetrySendIntervalHours: number;
-}
