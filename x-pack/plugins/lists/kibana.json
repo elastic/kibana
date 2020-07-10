@@ -1,5 +1,6 @@
 {
   "configPath": ["xpack", "lists"],
+  "extraPublicDirs": ["common"],
   "id": "lists",
   "kibanaVersion": "kibana",
   "requiredPlugins": [],
