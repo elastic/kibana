@@ -183,12 +183,12 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
         })}
       >
         <EuiButtonGroup
+          isFullWidth
           legend={i18n.translate('xpack.lens.xyChart.axisSide.label', {
             defaultMessage: 'Axis side',
           })}
           name="axisSide"
           buttonSize="compressed"
-          className="eui-displayInlineBlock"
           options={[
             {
               id: `${idPrefix}auto`,
@@ -241,7 +241,7 @@ const tooltipContent = {
   }),
   disabled: i18n.translate('xpack.lens.configPanel.color.tooltip.disabled', {
     defaultMessage:
-      'Individual series cannot be custom colored when the layer includes a “Break down by“',
+      'Individual series cannot be custom colored when the layer includes a “Break down by.“',
   }),
 };
 
@@ -286,6 +286,22 @@ const ColorPicker = ({
     [state, layer, accessor, index]
   );
 
+  const colorPicker = (
+    <EuiColorPicker
+      compressed
+      isClearable
+      onChange={handleColor}
+      color={disabled ? '' : color}
+      disabled={disabled}
+      placeholder={i18n.translate('xpack.lens.xyChart.seriesColor.auto', {
+        defaultMessage: 'Auto',
+      })}
+      aria-label={i18n.translate('xpack.lens.xyChart.seriesColor.label', {
+        defaultMessage: 'Series color',
+      })}
+    />
+  );
+
   return (
     <EuiFormRow
       display="columnCompressed"
@@ -312,25 +328,10 @@ const ColorPicker = ({
           delay="long"
           anchorClassName="eui-displayBlock"
         >
-          <EuiColorPicker
-            compressed
-            onChange={handleColor}
-            color=""
-            disabled
-            aria-label={i18n.translate('xpack.lens.xyChart.seriesColor.label', {
-              defaultMessage: 'Series color',
-            })}
-          />
+          {colorPicker}
         </EuiToolTip>
       ) : (
-        <EuiColorPicker
-          compressed
-          onChange={handleColor}
-          color={color}
-          aria-label={i18n.translate('xpack.lens.xyChart.seriesColor.label', {
-            defaultMessage: 'Series color',
-          })}
-        />
+        colorPicker
       )}
     </EuiFormRow>
   );
