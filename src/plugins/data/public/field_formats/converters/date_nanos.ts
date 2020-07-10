@@ -79,9 +79,9 @@ export class DateNanosFormat extends FieldFormat {
   });
   static fieldType = KBN_FIELD_TYPES.DATE;
 
-  private memoizedConverter: Function = noop;
-  private memoizedPattern: string = '';
-  private timeZone: string = '';
+  protected memoizedConverter: Function = noop;
+  protected memoizedPattern: string = '';
+  protected timeZone: string = '';
 
   getParamDefaults() {
     return {
