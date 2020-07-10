@@ -15,7 +15,7 @@ Note: You cannot access this endpoint via the Console in Kibana.
 
 [source,js]
 --------------------------------------------------
-GET /api/upgrade_assistant/add_query_default_field/myIndex
+POST /api/upgrade_assistant/add_query_default_field/myIndex
 {
   "fieldTypes": ["text", "keyword"], <1>
   "otherFields": ["myField.*"] <2>
