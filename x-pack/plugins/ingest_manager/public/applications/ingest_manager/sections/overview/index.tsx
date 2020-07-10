@@ -9,6 +9,7 @@ import {
   EuiButton,
   EuiBetaBadge,
   EuiText,
+  EuiTitle,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,11 +23,6 @@ import { OverviewAgentSection } from './components/agent_section';
 import { OverviewConfigurationSection } from './components/configuration_section';
 import { OverviewIntegrationSection } from './components/integration_section';
 import { OverviewDatastreamSection } from './components/datastream_section';
-
-const AlphaBadge = styled(EuiBetaBadge)`
-  vertical-align: top;
-  margin-left: ${(props) => props.theme.eui.paddingSizes.s};
-`;
 
 export const IngestManagerOverview: React.FunctionComponent = () => {
   useBreadcrumbs('overview');
@@ -46,26 +42,30 @@ export const IngestManagerOverview: React.FunctionComponent = () => {
       leftColumn={
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem>
-            <EuiText>
-              <h1>
-                <FormattedMessage
-                  id="xpack.ingestManager.overviewPageTitle"
-                  defaultMessage="Ingest Manager"
-                />
-                <AlphaBadge
-                  label={i18n.translate('xpack.ingestManager.alphaBadge.labelText', {
-                    defaultMessage: 'Experimental',
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="l">
+                  <h1>
+                    <FormattedMessage
+                      id="xpack.ingestManager.overviewPageTitle"
+                      defaultMessage="Ingest Manager"
+                    />
+                  </h1>
+                </EuiTitle>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  label={i18n.translate('xpack.ingestManager.betaBadge.labelText', {
+                    defaultMessage: 'Beta',
                   })}
-                  title={i18n.translate('xpack.ingestManager.alphaBadge.titleText', {
-                    defaultMessage: 'Experimental',
-                  })}
-                  tooltipContent={i18n.translate('xpack.ingestManager.alphaBadge.tooltipText', {
+                  tooltipContent={i18n.translate('xpack.ingestManager.betaBadge.tooltipText', {
                     defaultMessage:
-                      'This plugin might change or be removed in a future release and is not subject to the support SLA.',
+                      'This plugin is not recommended for use in production environments. Please help by reporting bugs and sending feedback.',
                   })}
                 />
-              </h1>
-            </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText color="subdued">
@@ -102,9 +102,7 @@ export const IngestManagerOverview: React.FunctionComponent = () => {
       <EuiFlexGrid gutterSize="l" columns={2}>
         <OverviewIntegrationSection />
         <OverviewConfigurationSection agentConfigs={agentConfigs} />
-
         <OverviewAgentSection />
-
         <OverviewDatastreamSection />
       </EuiFlexGrid>
     </WithHeaderLayout>
