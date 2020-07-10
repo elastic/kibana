@@ -109,11 +109,6 @@ describe('<ComponentTemplateEdit />', () => {
         ...COMPONENT_TEMPLATE_TO_EDIT,
         template: {
           ...COMPONENT_TEMPLATE_TO_EDIT.template,
-          mappings: {
-            _meta: {},
-            _source: {},
-            properties: {},
-          },
         },
       };
 
