@@ -5,7 +5,7 @@
  */
 
 import { LegacyAPICaller } from '../../../../../src/core/server';
-import { buildRuleUsage, buildMlJobUsage, fetchRules, fetchJobs } from './detections_helpers';
+import { getMlJobsUsage, getRulesUsage } from './detections_helpers';
 import { MlPluginSetup } from '../../../ml/server';
 
 export interface DetectionRulesUsage {
@@ -29,7 +29,7 @@ export const fetchDetectionsUsage = async (
   callCluster: LegacyAPICaller,
   ml: MlPluginSetup | undefined
 ): Promise<DetectionsUsage> => {
-  const rules = await fetchRules(kibanaIndex, callCluster);
-  const jobs = await fetchJobs(ml);
-  return { ...buildRuleUsage(rules), ...buildMlJobUsage(jobs) };
+  const rulesUsage = await getRulesUsage(kibanaIndex, callCluster);
+  const mlJobsUsage = await getMlJobsUsage(ml);
+  return { ...rulesUsage, ...mlJobsUsage };
 };

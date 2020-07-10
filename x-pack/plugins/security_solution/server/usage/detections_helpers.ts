@@ -23,79 +23,82 @@ interface DetectionsMetric {
 
 const isElasticRule = (tags: string[]) => tags.includes(`${INTERNAL_IMMUTABLE_KEY}:true`);
 
-const initialRuleUsage: DetectionRulesUsage = {
+const initialRulesUsage: DetectionRulesUsage = {
   detection_rules_custom_enabled: 0,
   detection_rules_custom_disabled: 0,
   detection_rules_elastic_enabled: 0,
   detection_rules_elastic_disabled: 0,
 };
 
-const initialMlJobUsage: MlJobsUsage = {
+const initialMlJobsUsage: MlJobsUsage = {
   ml_jobs_custom_enabled: 0,
   ml_jobs_custom_disabled: 0,
   ml_jobs_elastic_enabled: 0,
   ml_jobs_elastic_disabled: 0,
 };
 
-export const buildRuleUsage = (rulesMetrics: DetectionsMetric[]): DetectionRulesUsage =>
-  rulesMetrics.reduce((stats, { isEnabled, isElastic }) => {
-    if (isEnabled && isElastic) {
-      return {
-        ...stats,
-        detection_rules_elastic_enabled: stats.detection_rules_elastic_enabled + 1,
-      };
-    } else if (!isEnabled && isElastic) {
-      return {
-        ...stats,
-        detection_rules_elastic_disabled: stats.detection_rules_elastic_disabled + 1,
-      };
-    } else if (isEnabled && !isElastic) {
-      return {
-        ...stats,
-        detection_rules_custom_enabled: stats.detection_rules_custom_enabled + 1,
-      };
-    } else if (!isEnabled && !isElastic) {
-      return {
-        ...stats,
-        detection_rules_custom_disabled: stats.detection_rules_custom_disabled + 1,
-      };
-    } else {
-      return stats;
-    }
-  }, initialRuleUsage);
+const updateRulesUsage = (
+  ruleMetric: DetectionsMetric,
+  usage: DetectionRulesUsage
+): DetectionRulesUsage => {
+  const { isEnabled, isElastic } = ruleMetric;
+  if (isEnabled && isElastic) {
+    return {
+      ...usage,
+      detection_rules_elastic_enabled: usage.detection_rules_elastic_enabled + 1,
+    };
+  } else if (!isEnabled && isElastic) {
+    return {
+      ...usage,
+      detection_rules_elastic_disabled: usage.detection_rules_elastic_disabled + 1,
+    };
+  } else if (isEnabled && !isElastic) {
+    return {
+      ...usage,
+      detection_rules_custom_enabled: usage.detection_rules_custom_enabled + 1,
+    };
+  } else if (!isEnabled && !isElastic) {
+    return {
+      ...usage,
+      detection_rules_custom_disabled: usage.detection_rules_custom_disabled + 1,
+    };
+  } else {
+    return usage;
+  }
+};
 
-export const buildMlJobUsage = (jobMetrics: DetectionsMetric[]): MlJobsUsage =>
-  jobMetrics.reduce((stats, { isEnabled, isElastic }) => {
-    if (isEnabled && isElastic) {
-      return {
-        ...stats,
-        ml_jobs_elastic_enabled: stats.ml_jobs_elastic_enabled + 1,
-      };
-    } else if (!isEnabled && isElastic) {
-      return {
-        ...stats,
-        ml_jobs_elastic_disabled: stats.ml_jobs_elastic_disabled + 1,
-      };
-    } else if (isEnabled && !isElastic) {
-      return {
-        ...stats,
-        ml_jobs_custom_enabled: stats.ml_jobs_custom_enabled + 1,
-      };
-    } else if (!isEnabled && !isElastic) {
-      return {
-        ...stats,
-        ml_jobs_custom_disabled: stats.ml_jobs_custom_disabled + 1,
-      };
-    } else {
-      return stats;
-    }
-  }, initialMlJobUsage);
+const updateMlJobsUsage = (jobMetric: DetectionsMetric, usage: MlJobsUsage): MlJobsUsage => {
+  const { isEnabled, isElastic } = jobMetric;
+  if (isEnabled && isElastic) {
+    return {
+      ...usage,
+      ml_jobs_elastic_enabled: usage.ml_jobs_elastic_enabled + 1,
+    };
+  } else if (!isEnabled && isElastic) {
+    return {
+      ...usage,
+      ml_jobs_elastic_disabled: usage.ml_jobs_elastic_disabled + 1,
+    };
+  } else if (isEnabled && !isElastic) {
+    return {
+      ...usage,
+      ml_jobs_custom_enabled: usage.ml_jobs_custom_enabled + 1,
+    };
+  } else if (!isEnabled && !isElastic) {
+    return {
+      ...usage,
+      ml_jobs_custom_disabled: usage.ml_jobs_custom_disabled + 1,
+    };
+  } else {
+    return usage;
+  }
+};
 
-export const fetchRules = async (
+export const getRulesUsage = async (
   index: string,
   callCluster: LegacyAPICaller
-): Promise<DetectionsMetric[]> => {
-  let ruleMetrics: DetectionsMetric[] = [];
+): Promise<DetectionRulesUsage> => {
+  let rulesUsage: DetectionRulesUsage = initialRulesUsage;
   const ruleSearchOptions: SearchParams = {
     body: { query: { bool: { filter: { term: { 'alert.alertTypeId': SIGNALS_ID } } } } },
     filterPath: ['hits.hits._source.alert.enabled', 'hits.hits._source.alert.tags'],
@@ -103,6 +106,7 @@ export const fetchRules = async (
     index,
     size: 10000, // elasticsearch index.max_result_window default value
   };
+
   try {
     const ruleResults = await callCluster<{ alert: { enabled: boolean; tags: string[] } }>(
       'search',
@@ -110,20 +114,22 @@ export const fetchRules = async (
     );
 
     if (ruleResults.hits?.hits?.length > 0) {
-      ruleMetrics = ruleResults.hits.hits.map((hit) => ({
-        isElastic: isElasticRule(hit._source.alert.tags),
-        isEnabled: hit._source.alert.enabled,
-      }));
+      rulesUsage = ruleResults.hits.hits.reduce((usage, hit) => {
+        const isElastic = isElasticRule(hit._source.alert.tags);
+        const isEnabled = hit._source.alert.enabled;
+
+        return updateRulesUsage({ isElastic, isEnabled }, usage);
+      }, initialRulesUsage);
     }
   } catch (e) {
-    // ignore failure, rules will be empty
+    // ignore failure, usage will be zeroed
   }
 
-  return ruleMetrics;
+  return rulesUsage;
 };
 
-export const fetchJobs = async (ml: MlPluginSetup | undefined): Promise<DetectionsMetric[]> => {
-  let jobMetrics: DetectionsMetric[] = [];
+export const getMlJobsUsage = async (ml: MlPluginSetup | undefined): Promise<MlJobsUsage> => {
+  let jobsUsage: MlJobsUsage = initialMlJobsUsage;
 
   if (ml) {
     try {
@@ -135,14 +141,16 @@ export const fetchJobs = async (ml: MlPluginSetup | undefined): Promise<Detectio
       const moduleJobs = modules.flatMap((module) => module.jobs);
       const jobs = await jobServiceProvider(mlCaller).jobsSummary(['siem']);
 
-      jobMetrics = jobs.map((job) => ({
-        isElastic: moduleJobs.some((moduleJob) => moduleJob.id === job.id),
-        isEnabled: isJobStarted(job.jobState, job.datafeedState),
-      }));
+      jobsUsage = jobs.reduce((usage, job) => {
+        const isElastic = moduleJobs.some((moduleJob) => moduleJob.id === job.id);
+        const isEnabled = isJobStarted(job.jobState, job.datafeedState);
+
+        return updateMlJobsUsage({ isElastic, isEnabled }, usage);
+      }, initialMlJobsUsage);
     } catch (e) {
-      // ignore failure, jobs will be empty
+      // ignore failure, usage will be zeroed
     }
   }
 
-  return jobMetrics;
+  return jobsUsage;
 };
