@@ -91,7 +91,6 @@ Object {
           "y": 3.5,
         },
       ],
-      "label": "Inbound traffic",
     },
     "outboundTraffic": Object {
       "coordinates": Array [
@@ -180,32 +179,26 @@ Object {
           "y": 4,
         },
       ],
-      "label": "Outbound traffic",
     },
   },
   "stats": Object {
     "cpu": Object {
-      "label": "CPU usage",
       "type": "percent",
       "value": 0.0015,
     },
     "hosts": Object {
-      "label": "Hosts",
       "type": "number",
       "value": 2,
     },
     "inboundTraffic": Object {
-      "label": "Inbound traffic",
       "type": "bytesPerSecond",
       "value": 3.5,
     },
     "memory": Object {
-      "label": "Memory usage",
       "type": "percent",
       "value": 0.0015,
     },
     "outboundTraffic": Object {
-      "label": "Outbound traffic",
       "type": "bytesPerSecond",
       "value": 3,
     },

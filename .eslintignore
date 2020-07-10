@@ -1,6 +1,7 @@
 **/*.js.snap
 **/graphql/types.ts
 /.es
+/.chromium
 /build
 /built_assets
 /config/apm.dev.js

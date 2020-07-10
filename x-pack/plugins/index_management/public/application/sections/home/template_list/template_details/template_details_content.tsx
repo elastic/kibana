@@ -36,6 +36,7 @@ import { useLoadIndexTemplate } from '../../../../services/api';
 import { decodePathFromReactRouter } from '../../../../services/routing';
 import { useServices } from '../../../../app_context';
 import { TabAliases, TabMappings, TabSettings } from '../../../../components/shared';
+import { TemplateTypeIndicator } from '../components';
 import { TabSummary } from './tabs';
 
 const SUMMARY_TAB_ID = 'summary';
@@ -98,7 +99,7 @@ export const TemplateDetailsContent = ({
     decodedTemplateName,
     isLegacy
   );
-  const isCloudManaged = templateDetails?._kbnMeta.isCloudManaged ?? false;
+  const isCloudManaged = templateDetails?._kbnMeta.type === 'cloudManaged';
   const [templateToDelete, setTemplateToDelete] = useState<
     Array<{ name: string; isLegacy?: boolean }>
   >([]);
@@ -111,6 +112,12 @@ export const TemplateDetailsContent = ({
         <EuiTitle size="m">
           <h2 id="templateDetailsFlyoutTitle" data-test-subj="title">
             {decodedTemplateName}
+            {templateDetails && (
+              <>
+                &nbsp;
+                <TemplateTypeIndicator templateType={templateDetails._kbnMeta.type} />
+              </>
+            )}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -163,16 +170,16 @@ export const TemplateDetailsContent = ({
           <EuiCallOut
             title={
               <FormattedMessage
-                id="xpack.idxMgmt.templateDetails.managedTemplateInfoTitle"
-                defaultMessage="Editing a managed template is not permitted"
+                id="xpack.idxMgmt.templateDetails.cloudManagedTemplateInfoTitle"
+                defaultMessage="Editing a cloud-managed template is not permitted."
               />
             }
             color="primary"
             size="s"
           >
             <FormattedMessage
-              id="xpack.idxMgmt.templateDetails.managedTemplateInfoDescription"
-              defaultMessage="Managed templates are critical for internal operations."
+              id="xpack.idxMgmt.templateDetails.cloudManagedTemplateInfoDescription"
+              defaultMessage="Cloud-managed templates are critical for internal operations."
             />
           </EuiCallOut>
           <EuiSpacer size="m" />
