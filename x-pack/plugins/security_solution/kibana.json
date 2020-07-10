@@ -29,5 +29,10 @@
     "lists"
   ],
   "server": true,
-  "ui": true
+  "ui": true,
+  "requiredBundles": [
+    "kibanaUtils",
+    "esUiShared",
+    "kibanaReact"
+  ]
 }

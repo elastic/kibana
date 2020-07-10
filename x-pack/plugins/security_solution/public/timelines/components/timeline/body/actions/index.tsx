@@ -9,6 +9,7 @@ import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elas
 
 import { Note } from '../../../../../common/lib/note';
 import { StoreState } from '../../../../../common/store/types';
+import { TimelineType } from '../../../../../../common/types/timeline';
 
 import { TimelineModel } from '../../../../store/timeline/model';
 
@@ -170,7 +171,11 @@ export const Actions = React.memo<Props>(
                   status={timeline.status}
                   timelineType={timeline.timelineType}
                   toggleShowNotes={toggleShowNotes}
-                  toolTip={timeline.timelineType ? i18n.NOTES_DISABLE_TOOLTIP : i18n.NOTES_TOOLTIP}
+                  toolTip={
+                    timeline.timelineType === TimelineType.template
+                      ? i18n.NOTES_DISABLE_TOOLTIP
+                      : i18n.NOTES_TOOLTIP
+                  }
                   updateNote={updateNote}
                 />
               </EventsTdContent>
