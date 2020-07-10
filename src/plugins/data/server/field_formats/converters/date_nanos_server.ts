@@ -24,7 +24,7 @@ import {
   DateNanosFormat,
   formatWithNanos,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from 'src/plugins/data/public/field_formats/converters/date_nanos';
+} from '../../../public/field_formats/converters/date_nanos';
 import { TextContextTypeConvert } from '../../../common';
 
 class DateNanosFormatServer extends DateNanosFormat {
