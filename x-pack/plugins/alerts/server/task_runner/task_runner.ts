@@ -104,7 +104,8 @@ export class TaskRunner {
     spaceId: string,
     apiKey: string | null,
     actions: RawAlert['actions'],
-    references: SavedObject['references']
+    references: SavedObject['references'],
+    alertParams: RawAlert['params']
   ) {
     // Inject ids into actions
     const actionsWithIds = actions.map((action) => {
@@ -130,6 +131,7 @@ export class TaskRunner {
       alertType: this.alertType,
       eventLogger: this.context.eventLogger,
       request: this.getFakeKibanaRequest(spaceId, apiKey),
+      alertParams,
     });
   }
 
@@ -281,7 +283,8 @@ export class TaskRunner {
       spaceId,
       apiKey,
       attributes.actions,
-      references
+      references,
+      attributes.params
     );
     return this.executeAlertInstances(
       services,

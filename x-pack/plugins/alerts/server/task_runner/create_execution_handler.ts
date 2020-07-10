@@ -24,6 +24,7 @@ interface CreateExecutionHandlerOptions {
   logger: Logger;
   eventLogger: IEventLogger;
   request: KibanaRequest;
+  alertParams: Context;
 }
 
 interface ExecutionHandlerOptions {
@@ -45,6 +46,7 @@ export function createExecutionHandler({
   alertType,
   eventLogger,
   request,
+  alertParams,
 }: CreateExecutionHandlerOptions) {
   const alertTypeActionGroups = new Set(map(alertType.actionGroups, 'id'));
   return async ({ actionGroup, context, state, alertInstanceId }: ExecutionHandlerOptions) => {
@@ -66,6 +68,7 @@ export function createExecutionHandler({
             context,
             actionParams: action.params,
             state,
+            alertParams,
           }),
         };
       });

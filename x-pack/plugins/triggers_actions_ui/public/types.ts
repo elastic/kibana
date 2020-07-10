@@ -92,6 +92,7 @@ export interface ActionVariable {
 export interface ActionVariables {
   context: ActionVariable[];
   state: ActionVariable[];
+  params: ActionVariable[];
 }
 
 export interface AlertType {

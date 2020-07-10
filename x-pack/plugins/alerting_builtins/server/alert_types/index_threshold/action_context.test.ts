@@ -25,7 +25,6 @@ describe('ActionContext', () => {
       date: '2020-01-01T00:00:00.000Z',
       group: '[group]',
       value: 42,
-      ...params,
     };
     const context = addMessages({ name: '[alert-name]' }, base, params);
     expect(context.title).toMatchInlineSnapshot(
@@ -54,7 +53,6 @@ describe('ActionContext', () => {
       date: '2020-01-01T00:00:00.000Z',
       group: '[group]',
       value: 42,
-      ...params,
     };
     const context = addMessages({ name: '[alert-name]' }, base, params);
     expect(context.title).toMatchInlineSnapshot(
@@ -82,7 +80,6 @@ describe('ActionContext', () => {
       date: '2020-01-01T00:00:00.000Z',
       group: '[group]',
       value: 4,
-      ...params,
     };
     const context = addMessages({ name: '[alert-name]' }, base, params);
     expect(context.title).toMatchInlineSnapshot(

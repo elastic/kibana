@@ -104,6 +104,8 @@ export function getAlertType(service: Service): AlertType {
         { name: 'group', description: actionVariableContextGroupLabel },
         { name: 'date', description: actionVariableContextDateLabel },
         { name: 'value', description: actionVariableContextValueLabel },
+      ],
+      params: [
         { name: 'threshold', description: actionVariableContextThresholdLabel },
         { name: 'thresholdComparator', description: actionVariableContextThresholdComparatorLabel },
         ...alertParamsVariables,
@@ -160,7 +162,6 @@ export function getAlertType(service: Service): AlertType {
         date,
         group: instanceId,
         value,
-        ...params,
       };
       const actionContext = addMessages(options, baseContext, params);
       const alertInstance = options.services.alertInstanceFactory(instanceId);

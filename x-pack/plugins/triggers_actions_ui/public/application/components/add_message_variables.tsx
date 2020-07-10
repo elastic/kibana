@@ -5,7 +5,14 @@
  */
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  EuiPopover,
+  EuiButtonIcon,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiSpacer,
+} from '@elastic/eui';
 import './add_message_variables.scss';
 import { ActionVariable } from '../../types';
 
@@ -28,14 +35,22 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
         key={variable.name}
         data-test-subj={`variableMenuButton-${i}`}
         icon="empty"
-        toolTipContent={variable.description}
-        toolTipPosition={'left'}
         onClick={() => {
           onSelectEventHandler(variable.name);
           setIsVariablesPopoverOpen(false);
         }}
       >
-        {`{{${variable.name}}}`}
+        <>
+          {`{{${variable.name}}}`}
+          <EuiSpacer size="m" />
+          <FormattedMessage
+            id="xpack.triggersActionsUI.components.builtinActionTypes.slackAction.webhookUrlHelpLabel"
+            defaultMessage="{description}"
+            values={{
+              description: variable.description,
+            }}
+          />
+        </>
       </EuiContextMenuItem>
     ));
 

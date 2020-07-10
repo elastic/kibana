@@ -263,17 +263,9 @@ export const AlertForm = ({
           setHasActionsDisabled={setHasActionsDisabled}
           messageVariables={
             alertTypesIndex && alertTypesIndex[alert.alertTypeId]
-              ? actionVariablesFromAlertType(alertTypesIndex[alert.alertTypeId]).sort((a, b) => {
-                  const nameA = a.name.toUpperCase();
-                  const nameB = b.name.toUpperCase();
-                  if (nameA < nameB) {
-                    return -1;
-                  }
-                  if (nameA > nameB) {
-                    return 1;
-                  }
-                  return 0;
-                })
+              ? actionVariablesFromAlertType(alertTypesIndex[alert.alertTypeId]).sort((a, b) =>
+                  a.name.toUpperCase().localeCompare(b.name.toUpperCase())
+                )
               : undefined
           }
           defaultActionGroupId={defaultActionGroupId}

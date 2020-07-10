@@ -17,6 +17,7 @@ interface TransformActionParamsOptions {
   actionParams: AlertActionParams;
   state: State;
   context: Context;
+  alertParams: Context;
 }
 
 export function transformActionParams({
@@ -28,6 +29,7 @@ export function transformActionParams({
   context,
   actionParams,
   state,
+  alertParams,
 }: TransformActionParamsOptions): AlertActionParams {
   const result = cloneDeepWith(actionParams, (value: unknown) => {
     if (!isString(value)) return;
@@ -43,6 +45,7 @@ export function transformActionParams({
       alertInstanceId,
       context,
       state,
+      alertParams,
     };
     return Mustache.render(value, variables);
   });

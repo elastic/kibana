@@ -19,7 +19,7 @@ export interface ActionContext extends BaseActionContext {
   message: string;
 }
 
-export interface BaseActionContext extends Params {
+export interface BaseActionContext {
   // the aggType used in the alert
   // the value of the aggField, if used, otherwise 'all documents'
   group: string;
