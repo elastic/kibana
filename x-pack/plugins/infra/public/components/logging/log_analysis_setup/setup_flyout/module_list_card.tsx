@@ -18,7 +18,7 @@ export const LogAnalysisModuleListCard: React.FC<{
   onViewSetup: () => void;
 }> = ({ moduleDescription, moduleName, moduleStatus, onViewSetup }) => {
   const icon =
-    moduleStatus.type === 'required' && moduleStatus.reason === 'missing' ? (
+    moduleStatus.type === 'required' ? (
       <EuiIcon size="xxl" type="machineLearningApp" />
     ) : (
       <EuiIcon color="secondary" size="xxl" type="check" />
