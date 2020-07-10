@@ -26,6 +26,7 @@ import { APM_STATIC_INDEX_PATTERN_ID } from '../../common/index_pattern_constant
 const apmIntro = i18n.translate('apmOss.tutorial.introduction', {
   defaultMessage: 'Collect in-depth performance metrics and errors from inside your applications.',
 });
+const moduleName = 'apm';
 
 export const tutorialProvider = ({
   indexPatternTitle,
@@ -68,6 +69,7 @@ export const tutorialProvider = ({
     name: i18n.translate('apmOss.tutorial.specProvider.name', {
       defaultMessage: 'APM',
     }),
+    moduleName,
     category: TutorialsCategory.OTHER,
     shortDescription: apmIntro,
     longDescription: i18n.translate('apmOss.tutorial.specProvider.longDescription', {

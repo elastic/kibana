@@ -16,6 +16,7 @@ import { LogsSection } from '../../components/app/section/logs';
 import { MetricsSection } from '../../components/app/section/metrics';
 import { UptimeSection } from '../../components/app/section/uptime';
 import { DatePicker, TimePickerTime } from '../../components/shared/data_picker';
+import { NewsFeed } from '../../components/app/news_feed';
 import { fetchHasData } from '../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
 import { UI_SETTINGS, useKibanaUISettings } from '../../hooks/use_kibana_ui_settings';
@@ -26,6 +27,7 @@ import { getParsedDate } from '../../utils/date';
 import { getBucketSize } from '../../utils/get_bucket_size';
 import { getEmptySections } from './empty_section';
 import { LoadingObservability } from './loading_observability';
+import { getNewsFeed } from '../../services/get_news_feed';
 
 interface Props {
   routeParams: RouteParams<'/overview'>;
@@ -47,6 +49,8 @@ export const OverviewPage = ({ routeParams }: Props) => {
   const { data: alerts = [], status: alertStatus } = useFetcher(() => {
     return getObservabilityAlerts({ core });
   }, []);
+
+  const { data: newsFeed } = useFetcher(() => getNewsFeed({ core }), []);
 
   const theme = useContext(ThemeContext);
   const timePickerTime = useKibanaUISettings<TimePickerTime>(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
@@ -190,6 +194,12 @@ export const OverviewPage = ({ routeParams }: Props) => {
             <EuiFlexItem grow={false}>
               <Resources />
             </EuiFlexItem>
+
+            {!!newsFeed?.items?.length && (
+              <EuiFlexItem grow={false}>
+                <NewsFeed items={newsFeed.items.slice(0, 3)} />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
