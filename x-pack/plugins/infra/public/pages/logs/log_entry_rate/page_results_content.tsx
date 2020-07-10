@@ -47,6 +47,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
     hasOutdatedJobConfigurations: hasOutdatedLogEntryRateJobConfigurations,
     hasOutdatedJobDefinitions: hasOutdatedLogEntryRateJobDefinitions,
     hasStoppedJobs: hasStoppedLogEntryRateJobs,
+    moduleDescriptor: logEntryRateModuleDescriptor,
     setupStatus: logEntryRateSetupStatus,
   } = useLogEntryRateModuleContext();
 
@@ -55,6 +56,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
     hasOutdatedJobConfigurations: hasOutdatedLogEntryCategoriesJobConfigurations,
     hasOutdatedJobDefinitions: hasOutdatedLogEntryCategoriesJobDefinitions,
     hasStoppedJobs: hasStoppedLogEntryCategoriesJobs,
+    moduleDescriptor: logEntryCategoriesModuleDescriptor,
   } = useLogEntryCategoriesModuleContext();
 
   const {
@@ -203,6 +205,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
             hasOutdatedJobDefinitions={hasOutdatedLogEntryRateJobDefinitions}
             hasStoppedJobs={hasStoppedLogEntryRateJobs}
             isFirstUse={isFirstUse}
+            moduleName={logEntryRateModuleDescriptor.moduleName}
             onRecreateMlJobForReconfiguration={showLogEntryRateSetup}
             onRecreateMlJobForUpdate={showLogEntryRateSetup}
           />
@@ -211,6 +214,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
             hasOutdatedJobDefinitions={hasOutdatedLogEntryCategoriesJobDefinitions}
             hasStoppedJobs={hasStoppedLogEntryCategoriesJobs}
             isFirstUse={isFirstUse}
+            moduleName={logEntryCategoriesModuleDescriptor.moduleName}
             onRecreateMlJobForReconfiguration={showLogEntryCategoriesSetup}
             onRecreateMlJobForUpdate={showLogEntryCategoriesSetup}
             qualityWarnings={categoryQualityWarnings}

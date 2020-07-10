@@ -39,6 +39,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
   const {
     fetchJobStatus,
     fetchModuleDefinition,
+    moduleDescriptor,
     setupStatus,
     hasOutdatedJobConfigurations,
     hasOutdatedJobDefinitions,
@@ -198,6 +199,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
               hasOutdatedJobDefinitions={hasOutdatedJobDefinitions}
               hasStoppedJobs={hasStoppedJobs}
               isFirstUse={isFirstUse}
+              moduleName={moduleDescriptor.moduleName}
               onRecreateMlJobForReconfiguration={onOpenSetup}
               onRecreateMlJobForUpdate={onOpenSetup}
               qualityWarnings={categoryQualityWarnings}

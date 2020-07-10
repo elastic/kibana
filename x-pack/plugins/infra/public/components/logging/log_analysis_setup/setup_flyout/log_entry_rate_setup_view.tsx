@@ -76,7 +76,7 @@ export const LogEntryRateSetupView: React.FC<{
 
   return (
     <>
-      <EuiTitle size="m">
+      <EuiTitle size="s">
         <h3>{moduleDescriptor.moduleName} </h3>
       </EuiTitle>
       <EuiText size="s">{moduleDescriptor.moduleDescription}</EuiText>

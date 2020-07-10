@@ -14,6 +14,7 @@ export const CategoryJobNoticesSection: React.FC<{
   hasOutdatedJobDefinitions: boolean;
   hasStoppedJobs: boolean;
   isFirstUse: boolean;
+  moduleName: string;
   onRecreateMlJobForReconfiguration: () => void;
   onRecreateMlJobForUpdate: () => void;
   qualityWarnings: QualityWarning[];
@@ -22,6 +23,7 @@ export const CategoryJobNoticesSection: React.FC<{
   hasOutdatedJobDefinitions,
   hasStoppedJobs,
   isFirstUse,
+  moduleName,
   onRecreateMlJobForReconfiguration,
   onRecreateMlJobForUpdate,
   qualityWarnings,
@@ -32,6 +34,7 @@ export const CategoryJobNoticesSection: React.FC<{
       hasOutdatedJobDefinitions={hasOutdatedJobDefinitions}
       hasStoppedJobs={hasStoppedJobs}
       isFirstUse={isFirstUse}
+      moduleName={moduleName}
       onRecreateMlJobForReconfiguration={onRecreateMlJobForReconfiguration}
       onRecreateMlJobForUpdate={onRecreateMlJobForUpdate}
     />
