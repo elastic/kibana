@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
+
 import { EuiSpacer } from '@elastic/eui';
 import { VegaAdapter, InspectSignalsSets } from '../vega_adapter';
 import { InspectorDataGrid } from './inspector_data_grid';
@@ -26,9 +27,23 @@ interface SignalViewerProps {
 }
 
 export const SignalViewer = ({ vegaAdapter }: SignalViewerProps) => {
-  const inspectSignalsSets = useMemo<InspectSignalsSets>(() => vegaAdapter.getSignalsSets(), [
-    vegaAdapter,
-  ]);
+  const [inspectSignalsSets, setInspectSignalsSets] = useState<InspectSignalsSets>();
+
+  useEffect(() => {
+    const subscription = vegaAdapter.getSignalsSetsSubscription().subscribe((signalSets) => {
+      if (signalSets) {
+        setInspectSignalsSets(signalSets);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [vegaAdapter]);
+
+  if (!inspectSignalsSets) {
+    return null;
+  }
 
   return (
     <>

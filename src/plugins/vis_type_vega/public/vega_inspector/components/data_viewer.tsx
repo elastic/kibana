@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 
 import { EuiComboBox, EuiFlexGroup, EuiComboBoxProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { VegaAdapter, InspectDataSets } from '../vega_adapter';
@@ -27,14 +27,12 @@ interface DataViewerProps {
 }
 
 export const DataViewer = ({ vegaAdapter }: DataViewerProps) => {
-  const inspectDataSets = useMemo<InspectDataSets[]>(() => vegaAdapter.getDataSets(), [
-    vegaAdapter,
-  ]);
-  const [selectedView, setSelectedView] = useState<InspectDataSets>(inspectDataSets[0]);
+  const [inspectDataSets, setInspectDataSets] = useState<InspectDataSets[]>();
+  const [selectedView, setSelectedView] = useState<InspectDataSets>();
 
   const onViewChange: EuiComboBoxProps<unknown>['onChange'] = useCallback(
     (selectedOptions) => {
-      const newView = inspectDataSets.find((view) => view.id === selectedOptions[0].label);
+      const newView = inspectDataSets!.find((view) => view.id === selectedOptions[0].label);
 
       if (newView) {
         setSelectedView(newView);
@@ -42,6 +40,21 @@ export const DataViewer = ({ vegaAdapter }: DataViewerProps) => {
     },
     [inspectDataSets]
   );
+
+  useEffect(() => {
+    const subscription = vegaAdapter.getDataSetsSubscription().subscribe((dataSets) => {
+      setInspectDataSets(dataSets);
+      setSelectedView(dataSets[0]);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [vegaAdapter]);
+
+  if (!selectedView || !inspectDataSets) {
+    return null;
+  }
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">

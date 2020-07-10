@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import 'brace/mode/json';
@@ -44,7 +44,22 @@ const copyToClipboardLabel = i18n.translate(
 );
 
 export const SpecViewer = ({ vegaAdapter }: SpecViewerProps) => {
-  const spec = useMemo<string>(() => vegaAdapter.getSpec(), [vegaAdapter]);
+  const [spec, setSpec] = useState<string>();
+
+  useEffect(() => {
+    const subscription = vegaAdapter.getSpecSubscription().subscribe((data) => {
+      if (data) {
+        setSpec(data);
+      }
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [vegaAdapter]);
+
+  if (!spec) {
+    return null;
+  }
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">

@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Observable, BehaviorSubject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { View, Runtime, Spec } from 'vega';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
@@ -57,56 +59,79 @@ const serializeColumns = (item: Record<string, unknown>, columns: string[]) => {
 const mapColumns = (columns: string[]) => columns.map((column) => ({ id: column, schema: 'json' }));
 
 export class VegaAdapter {
-  private debugValues?: DebugValues;
+  private debugValuesSubject = new BehaviorSubject<DebugValues | null>(null);
 
-  bindDebugValues(debugValues: DebugValues) {
-    this.debugValues = debugValues;
+  bindInspectValues(debugValues: DebugValues) {
+    this.debugValuesSubject.next(debugValues);
   }
 
-  getDataSets(): InspectDataSets[] {
-    const runtimeScope = getVegaRuntimeScope(this.debugValues!);
+  getDataSetsSubscription(): Observable<InspectDataSets[]> {
+    return this.debugValuesSubject.pipe(
+      map((debugValues) => {
+        if (!debugValues) {
+          return [];
+        }
 
-    return Object.keys(runtimeScope.data || []).reduce((acc: InspectDataSets[], key) => {
-      const value = runtimeScope.data[key].values.value;
+        const runtimeScope = getVegaRuntimeScope(debugValues);
 
-      if (value && value[0]) {
-        const columns = Object.keys(value[0]);
-        acc.push({
-          id: key,
+        return Object.keys(runtimeScope.data || []).reduce((acc: InspectDataSets[], key) => {
+          const value = runtimeScope.data[key].values.value;
+
+          if (value && value[0]) {
+            const columns = Object.keys(value[0]);
+            acc.push({
+              id: key,
+              columns: mapColumns(columns),
+              data: value.map((item: Record<string, unknown>) => serializeColumns(item, columns)),
+            });
+          }
+          return acc;
+        }, []);
+      })
+    );
+  }
+
+  getSignalsSetsSubscription(): Observable<InspectSignalsSets | undefined> {
+    return this.debugValuesSubject.pipe(
+      map((debugValues) => {
+        if (!debugValues) {
+          return undefined;
+        }
+
+        const runtimeScope = getVegaRuntimeScope(debugValues);
+        const columns = [
+          i18n.translate('visTypeVega.inspector.vegaAdapter.signal', {
+            defaultMessage: 'Signal',
+          }),
+          i18n.translate('visTypeVega.inspector.vegaAdapter.value', {
+            defaultMessage: 'Value',
+          }),
+        ];
+
+        return {
           columns: mapColumns(columns),
-          data: value.map((item: Record<string, unknown>) => serializeColumns(item, columns)),
-        });
-      }
-      return acc;
-    }, []);
+          data: Object.keys(runtimeScope.signals).map((key: string) => {
+            return serializeColumns(
+              {
+                [columns[0]]: key,
+                [columns[1]]: runtimeScope.signals[key].value,
+              },
+              columns
+            );
+          }),
+        };
+      })
+    );
   }
 
-  getSignalsSets(): InspectSignalsSets {
-    const runtimeScope = getVegaRuntimeScope(this.debugValues!);
-    const columns = [
-      i18n.translate('visTypeVega.inspector.vegaAdapter.signal', {
-        defaultMessage: 'Signal',
-      }),
-      i18n.translate('visTypeVega.inspector.vegaAdapter.value', {
-        defaultMessage: 'Value',
-      }),
-    ];
-
-    return {
-      columns: mapColumns(columns),
-      data: Object.keys(runtimeScope.signals).map((key: string) => {
-        return serializeColumns(
-          {
-            [columns[0]]: key,
-            [columns[1]]: runtimeScope.signals[key].value,
-          },
-          columns
-        );
-      }),
-    };
-  }
-
-  getSpec(): string {
-    return JSON.stringify(this.debugValues!.spec, null, 2);
+  getSpecSubscription(): Observable<string | undefined> {
+    return this.debugValuesSubject.pipe(
+      map((debugValues) => {
+        if (!debugValues) {
+          return undefined;
+        }
+        return JSON.stringify(debugValues.spec, null, 2);
+      })
+    );
   }
 }
