@@ -126,5 +126,48 @@ export default function ({ getService }: FtrProviderContext) {
         warnAndSkipTest(this, log);
       }
     });
+
+    it('should return a 500 if there is another package config with the same name', async function () {
+      if (server.enabled) {
+        await supertest
+          .post(`/api/ingest_manager/package_configs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'same-name-test-1',
+            description: '',
+            namespace: 'default',
+            config_id: agentConfigId,
+            enabled: true,
+            output_id: '',
+            inputs: [],
+            package: {
+              name: 'filetest',
+              title: 'For File Tests',
+              version: '0.1.0',
+            },
+          })
+          .expect(200);
+        await supertest
+          .post(`/api/ingest_manager/package_configs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'same-name-test-1',
+            description: '',
+            namespace: 'default',
+            config_id: agentConfigId,
+            enabled: true,
+            output_id: '',
+            inputs: [],
+            package: {
+              name: 'filetest',
+              title: 'For File Tests',
+              version: '0.1.0',
+            },
+          })
+          .expect(500);
+      } else {
+        warnAndSkipTest(this, log);
+      }
+    });
   });
 }
