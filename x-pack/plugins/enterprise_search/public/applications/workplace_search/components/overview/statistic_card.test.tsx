@@ -25,8 +25,8 @@ describe('StatisticCard', () => {
   });
 
   it('renders clickable card', () => {
-    const wrapper = shallow(<StatisticCard {...props} actionPath="foo" />);
+    const wrapper = shallow(<StatisticCard {...props} actionPath="/foo" />);
 
-    expect(wrapper.find(EuiCard).prop('className')).toBe('euiCard--isClickable');
+    expect(wrapper.find(EuiCard).prop('href')).toBe('http://localhost:3002/ws/foo');
   });
 });

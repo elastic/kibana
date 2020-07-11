@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { EuiCard, EuiFlexItem, EuiLink, EuiTitle } from '@elastic/eui';
+import { EuiCard, EuiFlexItem, EuiTitle, EuiTextColor } from '@elastic/eui';
 
 import { useRoutes } from '../shared/use_routes';
 
@@ -19,35 +19,28 @@ interface IStatisticCardProps {
 export const StatisticCard: React.FC<IStatisticCardProps> = ({ title, count = 0, actionPath }) => {
   const { getWSRoute } = useRoutes();
 
-  const card = (
+  const linkProps = actionPath
+    ? {
+        href: getWSRoute(actionPath),
+        target: '_blank',
+        rel: 'noopener',
+      }
+    : {};
+  // TODO: When we port this destination to Kibana, we'll want to create a EuiReactRouterCard component (see shared/react_router_helpers/eui_link.tsx)
+
+  return (
     <EuiFlexItem>
       <EuiCard
-        className={actionPath ? 'euiCard--isClickable' : ''}
+        {...linkProps}
         layout="horizontal"
         title={title}
         titleSize="xs"
         description={
           <EuiTitle size="l">
-            <span>
-              <span className={`euiTextColor euiTextColor--${actionPath ? 'primary' : 'subdued'}`}>
-                {count}
-              </span>
-            </span>
+            <EuiTextColor color={actionPath ? 'default' : 'subdued'}>{count}</EuiTextColor>
           </EuiTitle>
         }
       />
-    </EuiFlexItem>
-  );
-
-  return (
-    <EuiFlexItem>
-      {actionPath ? (
-        <EuiLink target="_blank" href={getWSRoute(actionPath)}>
-          {card}
-        </EuiLink>
-      ) : (
-        card
-      )}
     </EuiFlexItem>
   );
 };
