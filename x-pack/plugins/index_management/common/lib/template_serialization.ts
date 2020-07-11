@@ -8,18 +8,28 @@ import {
   LegacyTemplateSerialized,
   TemplateSerialized,
   TemplateListItem,
+  TemplateType,
 } from '../types';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
 export function serializeTemplate(templateDeserialized: TemplateDeserialized): TemplateSerialized {
-  const { version, priority, indexPatterns, template, composedOf, _meta } = templateDeserialized;
+  const {
+    version,
+    priority,
+    indexPatterns,
+    template,
+    composedOf,
+    dataStream,
+    _meta,
+  } = templateDeserialized;
 
   return {
     version,
     priority,
     template,
     index_patterns: indexPatterns,
+    data_stream: dataStream,
     composed_of: composedOf,
     _meta,
   };
@@ -41,6 +51,15 @@ export function deserializeTemplate(
   } = templateEs;
   const { settings } = template;
 
+  let type: TemplateType = 'default';
+  if (Boolean(cloudManagedTemplatePrefix && name.startsWith(cloudManagedTemplatePrefix))) {
+    type = 'cloudManaged';
+  } else if (name.startsWith('.')) {
+    type = 'system';
+  } else if (Boolean(_meta?.managed === true)) {
+    type = 'managed';
+  }
+
   const deserializedTemplate: TemplateDeserialized = {
     name,
     version,
@@ -52,10 +71,7 @@ export function deserializeTemplate(
     dataStream,
     _meta,
     _kbnMeta: {
-      isManaged: Boolean(_meta?.managed === true),
-      isCloudManaged: Boolean(
-        cloudManagedTemplatePrefix && name.startsWith(cloudManagedTemplatePrefix)
-      ),
+      type,
       hasDatastream: Boolean(dataStream),
     },
   };
