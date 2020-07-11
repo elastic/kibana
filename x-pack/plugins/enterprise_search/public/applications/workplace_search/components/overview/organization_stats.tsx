@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { EuiFlexGrid } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -32,11 +33,7 @@ export const OrganizationStats: React.FC<IAppServerData> = ({
     }
     headerSpacer="m"
   >
-    <div
-      className={`euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--${
-        isFederatedAuth ? 'halves' : 'fourths'
-      }`}
-    >
+    <EuiFlexGrid columns={isFederatedAuth ? 2 : 4}>
       <StatisticCard
         title={i18n.translate(
           'xpack.enterpriseSearch.workplaceSearch.organizationStats.sharedSources',
@@ -72,6 +69,6 @@ export const OrganizationStats: React.FC<IAppServerData> = ({
         )}
         count={personalSourcesCount}
       />
-    </div>
+    </EuiFlexGrid>
   </ContentSection>
 );
