@@ -64,10 +64,16 @@ export async function getAnomalySeries({
     return;
   }
 
-  const mlJobIds = await getMLJobIds(setup.ml, uiFilters.environment);
+  let mlJobIds: string[] = [];
+  try {
+    mlJobIds = await getMLJobIds(setup.ml, uiFilters.environment);
+  } catch (error) {
+    logger.error(error);
+    return;
+  }
 
-  // don't fetch anomalies if there are more than 1 ML jobs for the given environment
-  if (mlJobIds.length > 1) {
+  // don't fetch anomalies if there are isn't exaclty 1 ML job match for the given environment
+  if (mlJobIds.length !== 1) {
     return;
   }
   const jobId = mlJobIds[0];
