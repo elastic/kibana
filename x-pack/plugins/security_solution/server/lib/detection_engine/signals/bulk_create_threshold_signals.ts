@@ -135,7 +135,7 @@ const transformThresholdResultsToEcs = (
   results: ThresholdResults,
   filter: unknown,
   threshold: Threshold
-): SearchResponse<EcsAnomaly> => {
+): SearchResponse<object> => {
   console.log(
     'transformThresholdResultsToEcs',
     // JSON.stringify(results),
@@ -169,7 +169,7 @@ export const bulkCreateThresholdSignals = async (
   const ecsResults = transformThresholdResultsToEcs(
     thresholdResults,
     params.filter,
-    params.ruleParams.threshold
+    params.ruleParams.threshold!
   );
 
   console.log('ruleParams', JSON.stringify(params.ruleParams, null, 2));

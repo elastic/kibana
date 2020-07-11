@@ -39,7 +39,6 @@ import { getCategorizedFieldNames } from '../../../../timelines/components/edit_
 import {
   Field,
   Form,
-  FormDataProvider,
   getUseField,
   UseField,
   useForm,
@@ -156,6 +155,27 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form]);
+
+  useEffect(() => {
+    const subscription = form.subscribe(({ data, isValid, ...rest }) => {
+      const { index, ruleType } = data.raw;
+
+      if (index != null) {
+        if (deepEqual(index, indicesConfig) && indexModified) {
+          setIndexModified(false);
+        } else if (!deepEqual(index, indicesConfig) && !indexModified) {
+          setMyStepData((currentValue) => ({ ...currentValue, index }));
+          setIndexModified(true);
+        }
+      }
+
+      if (ruleType !== localRuleType) {
+        setLocalRuleType(ruleType);
+        clearErrors();
+      }
+    });
+    return subscription.unsubscribe;
+  }, [clearErrors, form, indexModified, indicesConfig, localRuleType]);
 
   const handleResetIndices = useCallback(() => {
     const indexField = form.getFields().index;
@@ -313,26 +333,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               dataTestSubj: 'detectionEngineStepDefineRuleTimeline',
             }}
           />
-          <FormDataProvider pathsToWatch={['index', 'ruleType']}>
-            {({ index, ruleType }) => {
-              if (index != null) {
-                if (deepEqual(index, indicesConfig) && indexModified) {
-                  setIndexModified(false);
-                } else if (!deepEqual(index, indicesConfig) && !indexModified) {
-                  // TODO: refactor to form.subscribe()
-                  setMyStepData((currentValue) => ({ ...currentValue, index }));
-                  setIndexModified(true);
-                }
-              }
-
-              if (ruleType !== localRuleType) {
-                setLocalRuleType(ruleType);
-                clearErrors();
-              }
-
-              return null;
-            }}
-          </FormDataProvider>
         </Form>
       </StepContentWrapper>
 

@@ -29,7 +29,6 @@ import {
   type,
   Threat,
   threshold,
-  Threshold,
   ThrottleOrNull,
   note,
   Version,

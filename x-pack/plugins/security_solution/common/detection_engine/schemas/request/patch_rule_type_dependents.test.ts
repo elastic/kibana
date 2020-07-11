@@ -78,4 +78,26 @@ describe('patch_rules_type_dependents', () => {
     const errors = patchRuleValidateTypeDependents(schema);
     expect(errors).toEqual(['either "id" or "rule_id" must be set']);
   });
+
+  test('threshold is required when type is threshold and validates with it', () => {
+    const schema: PatchRulesSchema = {
+      ...getPatchRulesSchemaMock(),
+      type: 'threshold',
+    };
+    const errors = patchRuleValidateTypeDependents(schema);
+    expect(errors).toEqual(['when "type" is "threshold", "threshold" is required']);
+  });
+
+  test('threshold.value is required and has to be bigger than 0 when type is threshold and validates with it', () => {
+    const schema: PatchRulesSchema = {
+      ...getPatchRulesSchemaMock(),
+      type: 'threshold',
+      threshold: {
+        field: '',
+        value: -1,
+      },
+    };
+    const errors = patchRuleValidateTypeDependents(schema);
+    expect(errors).toEqual(['"threshold.value" has to be bigger than 0']);
+  });
 });

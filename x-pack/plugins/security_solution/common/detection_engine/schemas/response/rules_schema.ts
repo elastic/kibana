@@ -233,6 +233,7 @@ export const addMlFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[]
 export const addThresholdFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
   if (typeAndTimelineOnly.type === 'threshold') {
     return [
+      // t.exact(t.type({ saved_id: dependentRulesSchema.props.saved_id })),
       t.exact(t.type({ query: dependentRulesSchema.props.query })),
       t.exact(t.type({ language: dependentRulesSchema.props.language })),
       t.exact(t.type({ threshold: dependentRulesSchema.props.threshold })),

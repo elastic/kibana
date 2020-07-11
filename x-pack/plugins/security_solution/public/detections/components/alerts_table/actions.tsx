@@ -32,6 +32,7 @@ import {
   replaceTemplateFieldFromMatchFilters,
   replaceTemplateFieldFromDataProviders,
 } from './helpers';
+import { KueryFilterQueryKind } from '../../../common/store';
 
 export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
   return {
@@ -238,7 +239,7 @@ export const sendAlertToTimelineAction = async ({
           filterQuery: {
             kuery: {
               kind: ecsData.signal?.rule?.language?.length
-                ? ecsData.signal?.rule?.language[0]
+                ? (ecsData.signal?.rule?.language[0] as KueryFilterQueryKind)
                 : 'kuery',
               expression: ecsData.signal?.rule?.query?.length ? ecsData.signal?.rule?.query[0] : '',
             },
@@ -248,7 +249,7 @@ export const sendAlertToTimelineAction = async ({
           },
           filterQueryDraft: {
             kind: ecsData.signal?.rule?.language?.length
-              ? ecsData.signal?.rule?.language[0]
+              ? (ecsData.signal?.rule?.language[0] as KueryFilterQueryKind)
               : 'kuery',
             expression: ecsData.signal?.rule?.query?.length ? ecsData.signal?.rule?.query[0] : '',
           },

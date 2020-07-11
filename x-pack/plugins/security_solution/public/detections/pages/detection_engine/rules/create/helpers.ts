@@ -95,8 +95,8 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
           ruleFields.queryBar?.saved_id && { type: 'saved_query' as RuleType }),
         ...(ruleType === 'threshold' && {
           threshold: {
-            field: ruleFields.threshold.field[0] ?? '',
-            value: parseInt(ruleFields.threshold.value, 10) ?? 100,
+            field: ruleFields.threshold?.field[0] ?? '',
+            value: parseInt(ruleFields.threshold?.value, 10) ?? 100,
           },
         }),
       };
