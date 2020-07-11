@@ -29,16 +29,14 @@ export const ContentSection: React.FC<IContentSectionProps> = ({
   headerSpacer,
   testSubj,
 }) => (
-  <div className={`content-section ${className}`} data-test-subj={testSubj}>
+  <div className={className} data-test-subj={testSubj}>
     {title && (
       <>
-        <div className="section-header">
-          <EuiTitle size="s">
-            <h3>{title}</h3>
-          </EuiTitle>
-          {description && <p className="section-header__description">{description}</p>}
-          {headerChildren}
-        </div>
+        <EuiTitle size="s">
+          <h3>{title}</h3>
+        </EuiTitle>
+        {description && <p>{description}</p>}
+        {headerChildren}
         {headerSpacer && <EuiSpacer size={headerSpacer} />}
       </>
     )}
