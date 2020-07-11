@@ -21,14 +21,17 @@ import { monitorIdSelector } from '../../../../state/selectors';
 import { getSeverityColor, getSeverityType } from '../../../../../../ml/public';
 
 interface Props {
+  alertParams: { [key: string]: any };
   setAlertParams: (key: string, value: any) => void;
 }
 
 // eslint-disable-next-line import/no-default-export
-export default function AnomalyAlertComponent({ setAlertParams }: Props) {
+export default function AnomalyAlertComponent({ setAlertParams, alertParams }: Props) {
   const [severity, setSeverity] = useState(DEFAULT_SEVERITY);
 
-  const monitorId = useSelector(monitorIdSelector);
+  const monitorIdStore = useSelector(monitorIdSelector);
+
+  const monitorId = monitorIdStore || alertParams?.monitorId;
 
   useEffect(() => {
     setAlertParams('monitorId', monitorId);
