@@ -10,10 +10,5 @@
     "licensing"
   ],
   "ui": true,
-  "server": true,
-  "requiredBundles": [
-    "data",
-    "kibanaReact",
-    "kibanaUtils"
-  ]
+  "server": true
 }

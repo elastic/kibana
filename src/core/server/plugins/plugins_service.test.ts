@@ -64,7 +64,6 @@ const createPlugin = (
     disabled = false,
     version = 'some-version',
     requiredPlugins = [],
-    requiredBundles = [],
     optionalPlugins = [],
     kibanaVersion = '7.0.0',
     configPath = [path],
@@ -75,7 +74,6 @@ const createPlugin = (
     disabled?: boolean;
     version?: string;
     requiredPlugins?: string[];
-    requiredBundles?: string[];
     optionalPlugins?: string[];
     kibanaVersion?: string;
     configPath?: ConfigPath;
@@ -91,7 +89,6 @@ const createPlugin = (
       configPath: `${configPath}${disabled ? '-disabled' : ''}`,
       kibanaVersion,
       requiredPlugins,
-      requiredBundles,
       optionalPlugins,
       server,
       ui,
@@ -463,7 +460,6 @@ describe('PluginsService', () => {
         id: plugin.name,
         configPath: plugin.manifest.configPath,
         requiredPlugins: [],
-        requiredBundles: [],
         optionalPlugins: [],
       },
     ];
@@ -567,12 +563,10 @@ describe('PluginsService', () => {
             "plugin-1" => Object {
               "publicAssetsDir": <absolute path>/path-1/public/assets,
               "publicTargetDir": <absolute path>/path-1/target/public,
-              "requiredBundles": Array [],
             },
             "plugin-2" => Object {
               "publicAssetsDir": <absolute path>/path-2/public/assets,
               "publicTargetDir": <absolute path>/path-2/target/public,
-              "requiredBundles": Array [],
             },
           }
         `);

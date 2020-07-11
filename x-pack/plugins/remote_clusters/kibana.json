@@ -15,9 +15,5 @@
     "cloud"
   ],
   "server": true,
-  "ui": true,
-  "requiredBundles": [
-    "kibanaReact",
-    "esUiShared"
-  ]
+  "ui": true
 }

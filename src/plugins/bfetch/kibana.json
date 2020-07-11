@@ -2,6 +2,5 @@
   "id": "bfetch",
   "version": "kibana",
   "server": true,
-  "ui": true,
-  "requiredBundles": ["kibanaUtils"]
+  "ui": true
 }

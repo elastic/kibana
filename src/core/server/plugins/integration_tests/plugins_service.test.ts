@@ -43,7 +43,6 @@ describe('PluginsService', () => {
       disabled = false,
       version = 'some-version',
       requiredPlugins = [],
-      requiredBundles = [],
       optionalPlugins = [],
       kibanaVersion = '7.0.0',
       configPath = [path],
@@ -54,7 +53,6 @@ describe('PluginsService', () => {
       disabled?: boolean;
       version?: string;
       requiredPlugins?: string[];
-      requiredBundles?: string[];
       optionalPlugins?: string[];
       kibanaVersion?: string;
       configPath?: ConfigPath;
@@ -70,7 +68,6 @@ describe('PluginsService', () => {
         configPath: `${configPath}${disabled ? '-disabled' : ''}`,
         kibanaVersion,
         requiredPlugins,
-        requiredBundles,
         optionalPlugins,
         server,
         ui,

@@ -13,13 +13,5 @@
     "security",
     "usageCollection"
   ],
-  "configPath": ["xpack", "transform"],
-  "requiredBundles": [
-    "ml",
-    "esUiShared",
-    "discover",
-    "kibanaUtils",
-    "kibanaReact",
-    "savedObjects"
-  ]
+  "configPath": ["xpack", "transform"]
 }

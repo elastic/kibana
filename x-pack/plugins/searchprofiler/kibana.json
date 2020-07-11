@@ -5,6 +5,5 @@
   "requiredPlugins": ["devTools", "home", "licensing"],
   "configPath": ["xpack", "searchprofiler"],
   "server": true,
-  "ui": true,
-  "requiredBundles": ["esUiShared"]
+  "ui": true
 }

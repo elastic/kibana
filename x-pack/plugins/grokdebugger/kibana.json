@@ -9,8 +9,5 @@
   ],
   "server": true,
   "ui": true,
-  "configPath": ["xpack", "grokdebugger"],
-  "requiredBundles": [
-    "kibanaReact"
-  ]
+  "configPath": ["xpack", "grokdebugger"]
 }

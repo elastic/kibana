@@ -20,18 +20,19 @@
 import { Bundle, descending, ascending } from '../common';
 
 // helper types used inside getWorkerConfigs so we don't have
-// to calculate workUnits over and over
+// to calculate moduleCounts over and over
+
 export interface Assignments {
-  workUnits: number;
+  moduleCount: number;
   newBundles: number;
   bundles: Bundle[];
 }
 
 /** assign a wrapped bundle to a worker */
 const assignBundle = (worker: Assignments, bundle: Bundle) => {
-  const workUnits = bundle.cache.getWorkUnits();
-  if (workUnits !== undefined) {
-    worker.workUnits += workUnits;
+  const moduleCount = bundle.cache.getModuleCount();
+  if (moduleCount !== undefined) {
+    worker.moduleCount += moduleCount;
   } else {
     worker.newBundles += 1;
   }
@@ -58,7 +59,7 @@ export function assignBundlesToWorkers(bundles: Bundle[], maxWorkerCount: number
   const workers: Assignments[] = [];
   for (let i = 0; i < workerCount; i++) {
     workers.push({
-      workUnits: 0,
+      moduleCount: 0,
       newBundles: 0,
       bundles: [],
     });
@@ -66,18 +67,18 @@ export function assignBundlesToWorkers(bundles: Bundle[], maxWorkerCount: number
 
   /**
    * separate the bundles which do and don't have module
-   * counts and sort them by [workUnits, id]
+   * counts and sort them by [moduleCount, id]
    */
   const bundlesWithCountsDesc = bundles
-    .filter((b) => b.cache.getWorkUnits() !== undefined)
+    .filter((b) => b.cache.getModuleCount() !== undefined)
     .sort(
       descending(
-        (b) => b.cache.getWorkUnits(),
+        (b) => b.cache.getModuleCount(),
         (b) => b.id
       )
     );
   const bundlesWithoutModuleCounts = bundles
-    .filter((b) => b.cache.getWorkUnits() === undefined)
+    .filter((b) => b.cache.getModuleCount() === undefined)
     .sort(descending((b) => b.id));
 
   /**
@@ -86,9 +87,9 @@ export function assignBundlesToWorkers(bundles: Bundle[], maxWorkerCount: number
    * with module counts are assigned
    */
   while (bundlesWithCountsDesc.length) {
-    const [smallestWorker, nextSmallestWorker] = workers.sort(ascending((w) => w.workUnits));
+    const [smallestWorker, nextSmallestWorker] = workers.sort(ascending((w) => w.moduleCount));
 
-    while (!nextSmallestWorker || smallestWorker.workUnits <= nextSmallestWorker.workUnits) {
+    while (!nextSmallestWorker || smallestWorker.moduleCount <= nextSmallestWorker.moduleCount) {
       const bundle = bundlesWithCountsDesc.shift();
 
       if (!bundle) {
@@ -103,7 +104,7 @@ export function assignBundlesToWorkers(bundles: Bundle[], maxWorkerCount: number
    * assign bundles without module counts to workers round-robin
    * starting with the smallest workers
    */
-  workers.sort(ascending((w) => w.workUnits));
+  workers.sort(ascending((w) => w.moduleCount));
   while (bundlesWithoutModuleCounts.length) {
     for (const worker of workers) {
       const bundle = bundlesWithoutModuleCounts.shift();

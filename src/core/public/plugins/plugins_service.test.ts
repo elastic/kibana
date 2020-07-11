@@ -73,7 +73,6 @@ function createManifest(
     configPath: ['path'],
     requiredPlugins: required,
     optionalPlugins: optional,
-    requiredBundles: [],
   };
 }
 

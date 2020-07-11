@@ -13,14 +13,5 @@
   ],
   "server": true,
   "ui": true,
-  "version": "8.0.0",
-  "requiredBundles": [
-    "observability",
-    "kibanaReact",
-    "home",
-    "data",
-    "ml",
-    "apm",
-    "maps"
-  ]
+  "version": "8.0.0"
 }

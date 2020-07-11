@@ -2,6 +2,5 @@
   "id": "charts",
   "version": "kibana",
   "server": true,
-  "ui": true,
-  "requiredBundles": ["kibanaUtils", "kibanaReact", "data"]
+  "ui": true
 }

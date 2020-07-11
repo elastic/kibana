@@ -21,7 +21,6 @@ jest.mock('./assign_bundles_to_workers.ts');
 jest.mock('./kibana_platform_plugins.ts');
 jest.mock('./get_plugin_bundles.ts');
 jest.mock('../common/theme_tags.ts');
-jest.mock('./filter_by_id.ts');
 
 import Path from 'path';
 import Os from 'os';
@@ -114,7 +113,6 @@ describe('OptimizerConfig::parseOptions()', () => {
       Object {
         "cache": true,
         "dist": false,
-        "filters": Array [],
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 2,
@@ -141,7 +139,6 @@ describe('OptimizerConfig::parseOptions()', () => {
       Object {
         "cache": false,
         "dist": false,
-        "filters": Array [],
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 2,
@@ -168,7 +165,6 @@ describe('OptimizerConfig::parseOptions()', () => {
       Object {
         "cache": true,
         "dist": false,
-        "filters": Array [],
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 2,
@@ -197,7 +193,6 @@ describe('OptimizerConfig::parseOptions()', () => {
       Object {
         "cache": true,
         "dist": false,
-        "filters": Array [],
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 2,
@@ -223,7 +218,6 @@ describe('OptimizerConfig::parseOptions()', () => {
       Object {
         "cache": true,
         "dist": false,
-        "filters": Array [],
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 2,
@@ -249,7 +243,6 @@ describe('OptimizerConfig::parseOptions()', () => {
       Object {
         "cache": true,
         "dist": false,
-        "filters": Array [],
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 100,
@@ -272,7 +265,6 @@ describe('OptimizerConfig::parseOptions()', () => {
       Object {
         "cache": false,
         "dist": false,
-        "filters": Array [],
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 100,
@@ -295,7 +287,6 @@ describe('OptimizerConfig::parseOptions()', () => {
       Object {
         "cache": false,
         "dist": false,
-        "filters": Array [],
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 100,
@@ -319,7 +310,6 @@ describe('OptimizerConfig::parseOptions()', () => {
       Object {
         "cache": false,
         "dist": false,
-        "filters": Array [],
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 100,
@@ -343,7 +333,6 @@ describe('OptimizerConfig::parseOptions()', () => {
       Object {
         "cache": true,
         "dist": false,
-        "filters": Array [],
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 100,
@@ -369,7 +358,6 @@ describe('OptimizerConfig::create()', () => {
   const findKibanaPlatformPlugins: jest.Mock = jest.requireMock('./kibana_platform_plugins.ts')
     .findKibanaPlatformPlugins;
   const getPluginBundles: jest.Mock = jest.requireMock('./get_plugin_bundles.ts').getPluginBundles;
-  const filterById: jest.Mock = jest.requireMock('./filter_by_id.ts').filterById;
 
   beforeEach(() => {
     if ('mock' in OptimizerConfig.parseOptions) {
@@ -382,7 +370,6 @@ describe('OptimizerConfig::create()', () => {
     ]);
     findKibanaPlatformPlugins.mockReturnValue(Symbol('new platform plugins'));
     getPluginBundles.mockReturnValue([Symbol('bundle1'), Symbol('bundle2')]);
-    filterById.mockReturnValue(Symbol('filtered bundles'));
 
     jest.spyOn(OptimizerConfig, 'parseOptions').mockImplementation((): any => ({
       cache: Symbol('parsed cache'),
@@ -395,7 +382,6 @@ describe('OptimizerConfig::create()', () => {
       themeTags: Symbol('theme tags'),
       inspectWorkers: Symbol('parsed inspect workers'),
       profileWebpack: Symbol('parsed profile webpack'),
-      filters: [],
     }));
   });
 
@@ -406,7 +392,10 @@ describe('OptimizerConfig::create()', () => {
 
     expect(config).toMatchInlineSnapshot(`
       OptimizerConfig {
-        "bundles": Symbol(filtered bundles),
+        "bundles": Array [
+          Symbol(bundle1),
+          Symbol(bundle2),
+        ],
         "cache": Symbol(parsed cache),
         "dist": Symbol(parsed dist),
         "inspectWorkers": Symbol(parsed inspect workers),
@@ -437,32 +426,6 @@ describe('OptimizerConfig::create()', () => {
           Object {
             "type": "return",
             "value": Symbol(new platform plugins),
-          },
-        ],
-      }
-    `);
-
-    expect(filterById.mock).toMatchInlineSnapshot(`
-      Object {
-        "calls": Array [
-          Array [
-            Array [],
-            Array [
-              Symbol(bundle1),
-              Symbol(bundle2),
-            ],
-          ],
-        ],
-        "instances": Array [
-          [Window],
-        ],
-        "invocationCallOrder": Array [
-          23,
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Symbol(filtered bundles),
           },
         ],
       }

@@ -24,7 +24,6 @@ import loadJsonFile from 'load-json-file';
 
 export interface KibanaPlatformPlugin {
   readonly directory: string;
-  readonly manifestPath: string;
   readonly id: string;
   readonly isUiPlugin: boolean;
   readonly extraPublicDirs: string[];
@@ -93,7 +92,6 @@ function readKibanaPlatformPlugin(manifestPath: string): KibanaPlatformPlugin {
 
   return {
     directory: Path.dirname(manifestPath),
-    manifestPath,
     id: manifest.id,
     isUiPlugin: !!manifest.ui,
     extraPublicDirs: extraPublicDirs || [],

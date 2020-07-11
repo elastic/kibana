@@ -7,9 +7,5 @@
     "data",
     "inspector",
     "uiActions"
-  ],
-  "requiredBundles": [
-    "savedObjects",
-    "kibanaReact"
   ]
 }

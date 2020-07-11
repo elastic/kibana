@@ -7,9 +7,5 @@
     "telemetryCollectionManager",
     "usageCollection"
   ],
-  "extraPublicDirs": ["common/constants"],
-  "requiredBundles": [
-    "kibanaUtils",
-    "kibanaReact"
-  ]
+  "extraPublicDirs": ["common/constants"]
 }

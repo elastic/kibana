@@ -5,6 +5,5 @@
   "configPath": ["kbn_sample_panel_action"],
   "server": false,
   "ui": true,
-  "requiredPlugins": ["uiActions", "embeddable"],
-  "requiredBundles": ["kibanaReact"]
+  "requiredPlugins": ["uiActions", "embeddable"]
 }

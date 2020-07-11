@@ -5,6 +5,5 @@
   "server": false,
   "ui": true,
   "requiredPlugins": ["embeddable", "embeddableExamples", "dashboard", "developerExamples"],
-  "optionalPlugins": [],
-  "requiredBundles": ["esUiShared"]
+  "optionalPlugins": []
 }
