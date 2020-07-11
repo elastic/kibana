@@ -53,12 +53,7 @@ export async function getServiceMapServiceNodeInfo({
   }
 
   const minutes = Math.abs((end - start) / (1000 * 60));
-
-  const taskParams = {
-    setup,
-    minutes,
-    filter,
-  };
+  const taskParams = { setup, minutes, filter };
 
   const [
     errorMetrics,
@@ -89,11 +84,7 @@ async function getErrorMetrics({ setup, minutes, filter }: TaskParameters) {
       size: 0,
       query: {
         bool: {
-          filter: filter.concat({
-            term: {
-              [PROCESSOR_EVENT]: 'error',
-            },
-          }),
+          filter: filter.concat({ term: { [PROCESSOR_EVENT]: 'error' } }),
         },
       },
       track_total_hits: true,
@@ -126,11 +117,7 @@ async function getTransactionStats({
         bool: {
           filter: [
             ...filter,
-            {
-              term: {
-                [PROCESSOR_EVENT]: 'transaction',
-              },
-            },
+            { term: { [PROCESSOR_EVENT]: 'transaction' } },
             {
               terms: {
                 [TRANSACTION_TYPE]: [
@@ -143,13 +130,7 @@ async function getTransactionStats({
         },
       },
       track_total_hits: true,
-      aggs: {
-        duration: {
-          avg: {
-            field: TRANSACTION_DURATION,
-          },
-        },
-      },
+      aggs: { duration: { avg: { field: TRANSACTION_DURATION } } },
     },
   };
   const response = await client.search(params);
@@ -173,32 +154,16 @@ async function getCpuMetrics({
       query: {
         bool: {
           filter: filter.concat([
-            {
-              term: {
-                [PROCESSOR_EVENT]: 'metric',
-              },
-            },
-            {
-              exists: {
-                field: METRIC_SYSTEM_CPU_PERCENT,
-              },
-            },
+            { term: { [PROCESSOR_EVENT]: 'metric' } },
+            { exists: { field: METRIC_SYSTEM_CPU_PERCENT } },
           ]),
         },
       },
-      aggs: {
-        avgCpuUsage: {
-          avg: {
-            field: METRIC_SYSTEM_CPU_PERCENT,
-          },
-        },
-      },
+      aggs: { avgCpuUsage: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } } },
     },
   });
 
-  return {
-    avgCpuUsage: response.aggregations?.avgCpuUsage.value ?? null,
-  };
+  return { avgCpuUsage: response.aggregations?.avgCpuUsage.value ?? null };
 }
 
 async function getMemoryMetrics({
@@ -212,31 +177,13 @@ async function getMemoryMetrics({
       query: {
         bool: {
           filter: filter.concat([
-            {
-              term: {
-                [PROCESSOR_EVENT]: 'metric',
-              },
-            },
-            {
-              exists: {
-                field: METRIC_SYSTEM_FREE_MEMORY,
-              },
-            },
-            {
-              exists: {
-                field: METRIC_SYSTEM_TOTAL_MEMORY,
-              },
-            },
+            { term: { [PROCESSOR_EVENT]: 'metric' } },
+            { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
+            { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
           ]),
         },
       },
-      aggs: {
-        avgMemoryUsage: {
-          avg: {
-            script: percentMemoryUsedScript,
-          },
-        },
-      },
+      aggs: { avgMemoryUsage: { avg: { script: percentMemoryUsedScript } } },
     },
   });
 

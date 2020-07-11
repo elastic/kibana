@@ -13,7 +13,6 @@ import { useFetcher, FETCH_STATUS } from '../../../../hooks/useFetcher';
 
 export function AnomalyDetectionSetupLink() {
   const { uiFilters } = useUrlParams();
-  // check both uiFilters and urlParams for selected environment
   const environment = uiFilters.environment;
 
   const { data = { jobs: [], hasLegacyJobs: false }, status } = useFetcher(
@@ -27,9 +26,6 @@ export function AnomalyDetectionSetupLink() {
   // Show alert if there are no jobs OR if no job matches the current environment
   const showAlert =
     isFetchSuccess && !data.jobs.some((job) => environment === job.environment);
-  const toolTipText = environment
-    ? getNotEnabledForEnvironmentText(environment)
-    : NOT_ENABLED_TEXT;
 
   return (
     <APMLink path="/settings/anomaly-detection">
@@ -37,7 +33,7 @@ export function AnomalyDetectionSetupLink() {
         {ANOMALY_DETECTION_LINK_LABEL}
       </EuiButtonEmpty>
       {showAlert && (
-        <EuiToolTip position="bottom" content={toolTipText}>
+        <EuiToolTip position="bottom" content={getTooltipText(environment)}>
           <EuiIcon type="alert" color="danger" />
         </EuiToolTip>
       )}
@@ -45,7 +41,13 @@ export function AnomalyDetectionSetupLink() {
   );
 }
 
-function getNotEnabledForEnvironmentText(environment: string) {
+function getTooltipText(environment?: string) {
+  if (!environment) {
+    return i18n.translate('xpack.apm.anomalyDetectionSetup.notEnabledText', {
+      defaultMessage: `Anomaly detection is not yet enabled. Click to continue setup.`,
+    });
+  }
+
   return i18n.translate(
     'xpack.apm.anomalyDetectionSetup.notEnabledForEnvironmentText',
     {
@@ -58,10 +60,4 @@ function getNotEnabledForEnvironmentText(environment: string) {
 const ANOMALY_DETECTION_LINK_LABEL = i18n.translate(
   'xpack.apm.anomalyDetectionSetup.linkLabel',
   { defaultMessage: `Anomaly detection` }
-);
-const NOT_ENABLED_TEXT = i18n.translate(
-  'xpack.apm.anomalyDetectionSetup.notEnabledText',
-  {
-    defaultMessage: `Anomaly detection is not yet enabled. Click to continue setup.`,
-  }
 );
