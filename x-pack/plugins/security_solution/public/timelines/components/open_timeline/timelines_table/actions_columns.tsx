@@ -16,7 +16,7 @@ import {
   TimelineActionsOverflowColumns,
 } from '../types';
 import * as i18n from '../translations';
-import { TimelineStatus } from '../../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 
 /**
  * Returns the action columns (e.g. delete, open duplicate timeline)
@@ -34,6 +34,42 @@ export const getActionsColumns = ({
   onOpenDeleteTimelineModal?: OnOpenDeleteTimelineModal;
   onOpenTimeline: OnOpenTimeline;
 }): [TimelineActionsOverflowColumns] => {
+  const createTimelineFromTemplate = {
+    name: i18n.CREATE_TIMELINE_FROM_TEMPLATE,
+    icon: 'timeline',
+    onClick: ({ savedObjectId }: OpenTimelineResult) => {
+      onOpenTimeline({
+        duplicate: true,
+        timelineType: TimelineType.default,
+        timelineId: savedObjectId!,
+      });
+    },
+    type: 'icon',
+    enabled: ({ savedObjectId }: OpenTimelineResult) => savedObjectId != null,
+    description: i18n.CREATE_TIMELINE_FROM_TEMPLATE,
+    'data-test-subj': 'create-from-template',
+    available: (item: OpenTimelineResult) =>
+      item.timelineType === TimelineType.template && actionTimelineToShow.includes('createFrom'),
+  };
+
+  const createTemplateFromTimeline = {
+    name: i18n.CREATE_TEMPLATE_FROM_TIMELINE,
+    icon: 'visText',
+    onClick: ({ savedObjectId }: OpenTimelineResult) => {
+      onOpenTimeline({
+        duplicate: true,
+        timelineType: TimelineType.template,
+        timelineId: savedObjectId!,
+      });
+    },
+    type: 'icon',
+    enabled: ({ savedObjectId }: OpenTimelineResult) => savedObjectId != null,
+    description: i18n.CREATE_TEMPLATE_FROM_TIMELINE,
+    'data-test-subj': 'create-template-from-timeline',
+    available: (item: OpenTimelineResult) =>
+      item.timelineType !== TimelineType.template && actionTimelineToShow.includes('createFrom'),
+  };
+
   const openAsDuplicateColumn = {
     name: i18n.OPEN_AS_DUPLICATE,
     icon: 'copy',
@@ -47,6 +83,25 @@ export const getActionsColumns = ({
     enabled: ({ savedObjectId }: OpenTimelineResult) => savedObjectId != null,
     description: i18n.OPEN_AS_DUPLICATE,
     'data-test-subj': 'open-duplicate',
+    available: (item: OpenTimelineResult) =>
+      item.timelineType !== TimelineType.template && actionTimelineToShow.includes('duplicate'),
+  };
+
+  const openAsDuplicateTemplateColumn = {
+    name: i18n.OPEN_AS_DUPLICATE_TEMPLATE,
+    icon: 'copy',
+    onClick: ({ savedObjectId }: OpenTimelineResult) => {
+      onOpenTimeline({
+        duplicate: true,
+        timelineId: savedObjectId ?? '',
+      });
+    },
+    type: 'icon',
+    enabled: ({ savedObjectId }: OpenTimelineResult) => savedObjectId != null,
+    description: i18n.OPEN_AS_DUPLICATE_TEMPLATE,
+    'data-test-subj': 'open-duplicate-template',
+    available: (item: OpenTimelineResult) =>
+      item.timelineType === TimelineType.template && actionTimelineToShow.includes('duplicate'),
   };
 
   const exportTimelineAction = {
@@ -60,6 +115,7 @@ export const getActionsColumns = ({
     },
     description: i18n.EXPORT_SELECTED,
     'data-test-subj': 'export-timeline',
+    available: () => actionTimelineToShow.includes('export'),
   };
 
   const deleteTimelineColumn = {
@@ -72,18 +128,20 @@ export const getActionsColumns = ({
       savedObjectId != null && status !== TimelineStatus.immutable,
     description: i18n.DELETE_SELECTED,
     'data-test-subj': 'delete-timeline',
+    available: () => actionTimelineToShow.includes('delete') && deleteTimelines != null,
   };
 
   return [
     {
-      width: '40px',
+      width: '80px',
       actions: [
-        actionTimelineToShow.includes('duplicate') ? openAsDuplicateColumn : null,
-        actionTimelineToShow.includes('export') ? exportTimelineAction : null,
-        actionTimelineToShow.includes('delete') && deleteTimelines != null
-          ? deleteTimelineColumn
-          : null,
-      ].filter((action) => action != null),
+        createTimelineFromTemplate,
+        createTemplateFromTimeline,
+        openAsDuplicateColumn,
+        openAsDuplicateTemplateColumn,
+        exportTimelineAction,
+        deleteTimelineColumn,
+      ],
     },
   ];
 };

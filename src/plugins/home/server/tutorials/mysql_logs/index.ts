@@ -37,6 +37,7 @@ export function mysqlLogsSpecProvider(context: TutorialContext): TutorialSchema 
     name: i18n.translate('home.tutorials.mysqlLogs.nameTitle', {
       defaultMessage: 'MySQL logs',
     }),
+    moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.mysqlLogs.shortDescription', {
       defaultMessage: 'Collect and parse error and slow logs created by MySQL.',
