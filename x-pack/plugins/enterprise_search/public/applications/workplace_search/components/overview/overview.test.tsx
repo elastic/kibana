@@ -8,14 +8,12 @@ import '../../../__mocks__/react_router_history.mock';
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { render, ReactWrapper } from 'enzyme';
+import { shallow, ReactWrapper } from 'enzyme';
 
-import { I18nProvider } from '@kbn/i18n/react';
-import { KibanaContext } from '../../../';
 import { mountWithContext, mockKibanaContext } from '../../../__mocks__';
 
 import { ErrorState } from '../error_state';
-
+import { Loading } from '../shared/loading';
 import { ViewContentHeader } from '../shared/view_content_header';
 
 import { OnboardingSteps } from './onboarding_steps';
@@ -26,18 +24,9 @@ import { Overview, defaultServerData } from './overview';
 describe('Overview', () => {
   describe('non-happy-path states', () => {
     it('isLoading', () => {
-      // We use render() instead of mount() here to not trigger lifecycle methods (i.e., useEffect)
-      // TODO: Consider pulling this out to a renderWithContext mock/helper
-      const wrapper: Cheerio = render(
-        <I18nProvider>
-          <KibanaContext.Provider value={{ http: {} }}>
-            <Overview />
-          </KibanaContext.Provider>
-        </I18nProvider>
-      );
+      const wrapper = shallow(<Overview />);
 
-      // render() directly renders HTML which means we have to look for selectors instead of for Loading directly
-      expect(wrapper.find('.euiLoadingSpinner')).toHaveLength(1);
+      expect(wrapper.find(Loading)).toHaveLength(1);
     });
 
     it('hasErrorConnecting', async () => {
