@@ -7,9 +7,9 @@
 import '../../../__mocks__/shallow_usecontext.mock';
 
 import React from 'react';
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 
-import { EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
 import { OnboardingCard } from './onboarding_card';
 
@@ -22,35 +22,33 @@ const cardProps = {
   description: 'this is a card',
   actionTitle: 'action',
   testSubj: 'actionButton',
-  actionPath: '/foo_path',
 };
 
 describe('OnboardingCard', () => {
   it('renders', () => {
     const wrapper = shallow(<OnboardingCard {...cardProps} />);
-    expect(wrapper.find(EuiFlexItem)).toHaveLength(1);
+    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
   });
 
   it('renders an action button', () => {
-    const wrapper = mount(<OnboardingCard {...cardProps} />);
-    const button = wrapper.find('a[data-test-subj="actionButton"]');
-    expect(button.prop('href')).toBe(`http://localhost:3002/ws${cardProps.actionPath}`);
-    expect(wrapper.find(EuiButton)).toHaveLength(1);
-    expect(wrapper.find(EuiButtonEmpty)).toHaveLength(0);
+    const wrapper = shallow(<OnboardingCard {...cardProps} actionPath="/some_path" />);
+    const prompt = wrapper.find(EuiEmptyPrompt).dive();
+
+    expect(prompt.find(EuiButton)).toHaveLength(1);
+    expect(prompt.find(EuiButtonEmpty)).toHaveLength(0);
+
+    const button = prompt.find('[data-test-subj="actionButton"]');
+    expect(button.prop('href')).toBe('http://localhost:3002/ws/some_path');
 
     button.simulate('click');
     expect(sendTelemetry).toHaveBeenCalled();
   });
 
-  it('renders an empty button when complete is true', () => {
-    const wrapper = mount(<OnboardingCard {...cardProps} complete />);
-    const button = wrapper.find('a[data-test-subj="actionButton"]');
+  it('renders an empty button when onboarding is completed', () => {
+    const wrapper = shallow(<OnboardingCard {...cardProps} complete />);
+    const prompt = wrapper.find(EuiEmptyPrompt).dive();
 
-    expect(button.prop('href')).toBe(`http://localhost:3002/ws${cardProps.actionPath}`);
-    expect(wrapper.find(EuiButton)).toHaveLength(0);
-    expect(wrapper.find(EuiButtonEmpty)).toHaveLength(1);
-
-    button.simulate('click');
-    expect(sendTelemetry).toHaveBeenCalled();
+    expect(prompt.find(EuiButton)).toHaveLength(0);
+    expect(prompt.find(EuiButtonEmpty)).toHaveLength(1);
   });
 });

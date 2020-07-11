@@ -77,10 +77,10 @@ export const OnboardingCard: React.FC<IOnboardingCardProps> = ({
 
   return (
     <EuiFlexItem>
-      <EuiPanel className={`euiPanel ${complete ? '' : 'euiPanel--inset'}`}>
+      <EuiPanel>
         <EuiEmptyPrompt
           iconType={complete ? 'checkInCircleFilled' : (icon as IconType)}
-          iconColor={`${complete ? 'secondary' : 'subdued'}`}
+          iconColor={complete ? 'secondary' : 'subdued'}
           title={<h3>{title}</h3>}
           body={description}
           className={cardClass}
