@@ -36,6 +36,7 @@ const defaultIntegrateOptions = {
   sourceFileName: localePath,
   dryRun: false,
   ignoreIncompatible: false,
+  ignoreMalformed: false,
   ignoreMissing: false,
   ignoreUnused: false,
   config: {
