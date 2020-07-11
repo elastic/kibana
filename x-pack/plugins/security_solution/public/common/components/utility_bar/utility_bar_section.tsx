@@ -6,14 +6,14 @@
 
 import React from 'react';
 
-import { BarSection } from './styles';
+import { BarSection, BarSectionProps } from './styles';
 
-export interface UtilityBarSectionProps {
+export interface UtilityBarSectionProps extends BarSectionProps {
   children: React.ReactNode;
 }
 
-export const UtilityBarSection = React.memo<UtilityBarSectionProps>(({ children }) => (
-  <BarSection>{children}</BarSection>
+export const UtilityBarSection = React.memo<UtilityBarSectionProps>(({ grow, children }) => (
+  <BarSection grow={grow}>{children}</BarSection>
 ));
 
 UtilityBarSection.displayName = 'UtilityBarSection';
