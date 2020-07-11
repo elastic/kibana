@@ -8,17 +8,13 @@ import '../../../__mocks__/shallow_usecontext.mock';
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { FormattedMessage } from '@kbn/i18n/react';
-
-import { EuiPanel } from '@elastic/eui';
 
 import { ORG_SOURCES_PATH, USERS_PATH } from '../../routes';
 
 jest.mock('../../../shared/telemetry', () => ({ sendTelemetry: jest.fn() }));
 import { sendTelemetry } from '../../../shared/telemetry';
 
-import { ContentSection } from '../shared/content_section';
-import { OnboardingSteps } from './onboarding_steps';
+import { OnboardingSteps, OrgNameOnboarding } from './onboarding_steps';
 import { OnboardingCard } from './onboarding_card';
 import { defaultServerData } from './overview';
 
@@ -32,81 +28,109 @@ const account = {
 };
 
 describe('OnboardingSteps', () => {
-  it('renders', () => {
-    const wrapper = shallow(<OnboardingSteps {...defaultServerData} />);
+  describe('Shared Sources', () => {
+    it('renders 0 sources state', () => {
+      const wrapper = shallow(<OnboardingSteps {...defaultServerData} />);
 
-    expect(wrapper.find(ContentSection)).toHaveLength(1);
-    expect(wrapper.find(OnboardingCard).prop('actionPath')).toBe(ORG_SOURCES_PATH);
-    expect(wrapper.find(EuiPanel)).toHaveLength(1);
-    expect(wrapper.find(OnboardingCard).prop('description')).toBe(
-      'Add shared sources for your organization to start searching.'
-    );
+      expect(wrapper.find(OnboardingCard)).toHaveLength(1);
+      expect(wrapper.find(OnboardingCard).prop('actionPath')).toBe(ORG_SOURCES_PATH);
+      expect(wrapper.find(OnboardingCard).prop('description')).toBe(
+        'Add shared sources for your organization to start searching.'
+      );
+    });
+
+    it('renders completed sources state', () => {
+      const wrapper = shallow(
+        <OnboardingSteps {...defaultServerData} sourcesCount={2} hasOrgSources />
+      );
+
+      expect(wrapper.find(OnboardingCard).prop('description')).toEqual(
+        'You have added 2 shared sources. Happy searching.'
+      );
+    });
+
+    it('disables link when the user cannot create sources', () => {
+      const wrapper = shallow(
+        <OnboardingSteps {...defaultServerData} canCreateContentSources={false} />
+      );
+
+      expect(wrapper.find(OnboardingCard).prop('actionPath')).toBe(undefined);
+    });
   });
 
-  it('renders non-federated card with props', () => {
-    const wrapper = shallow(
-      <OnboardingSteps
-        {...defaultServerData}
-        hasUsers
-        hasOrgSources
-        sourcesCount={2}
-        isFederatedAuth={false}
-        canCreateContentSources={false}
-        fpAccount={account}
-      />
-    );
+  describe('Users & Invitations', () => {
+    it('renders 0 users when not on federated auth', () => {
+      const wrapper = shallow(
+        <OnboardingSteps
+          {...defaultServerData}
+          isFederatedAuth={false}
+          fpAccount={account}
+          accountsCount={0}
+          hasUsers={false}
+        />
+      );
 
-    expect(wrapper.find(OnboardingCard)).toHaveLength(2);
-    expect(wrapper.find(OnboardingCard).first().prop('actionPath')).toBe(undefined);
-    expect(wrapper.find(OnboardingCard).last().prop('actionPath')).toBe(USERS_PATH);
+      expect(wrapper.find(OnboardingCard)).toHaveLength(2);
+      expect(wrapper.find(OnboardingCard).last().prop('actionPath')).toBe(USERS_PATH);
+      expect(wrapper.find(OnboardingCard).last().prop('description')).toEqual(
+        'Invite your colleagues into this organization to search with you.'
+      );
+    });
+
+    it('renders completed users state', () => {
+      const wrapper = shallow(
+        <OnboardingSteps
+          {...defaultServerData}
+          isFederatedAuth={false}
+          fpAccount={account}
+          accountsCount={1}
+          hasUsers
+        />
+      );
+
+      expect(wrapper.find(OnboardingCard).last().prop('description')).toEqual(
+        'Nice, you’ve invited colleagues to search with you.'
+      );
+    });
+
+    it('disables link when the user cannot create invitations', () => {
+      const wrapper = shallow(
+        <OnboardingSteps
+          {...defaultServerData}
+          isFederatedAuth={false}
+          canCreateInvitations={false}
+        />
+      );
+
+      expect(wrapper.find(OnboardingCard).last().prop('actionPath')).toBe(undefined);
+    });
   });
 
-  it('disables acounts path when props false', () => {
-    const wrapper = shallow(
-      <OnboardingSteps
-        {...defaultServerData}
-        isFederatedAuth={false}
-        canCreateInvitations={false}
-      />
-    );
+  describe('Org Name', () => {
+    it('renders button to change name', () => {
+      const wrapper = shallow(<OnboardingSteps {...defaultServerData} />);
 
-    expect(wrapper.find(OnboardingCard).last().prop('actionPath')).toBe(undefined);
-  });
+      const button = wrapper
+        .find(OrgNameOnboarding)
+        .dive()
+        .find('[data-test-subj="orgNameChangeButton"]');
 
-  it('sets description when org sources present', () => {
-    const wrapper = shallow(
-      <OnboardingSteps {...defaultServerData} sourcesCount={1} hasOrgSources />
-    );
+      button.simulate('click');
+      expect(sendTelemetry).toHaveBeenCalled();
+    });
 
-    expect(wrapper.find(OnboardingCard).prop('description')).toStrictEqual(
-      <FormattedMessage
-        defaultMessage="You have added {sourcesCount} shared {sourcesCount, number} {sourcesCount, plural, one {source} other {sources} }. Happy searching."
-        id="xpack.enterpriseSearch.workplaceSearch.sourcesOnboardingCard.description"
-        values={{ sourcesCount: 1 }}
-      />
-    );
-  });
+    it('hides card when name has been changed', () => {
+      const wrapper = shallow(
+        <OnboardingSteps
+          {...defaultServerData}
+          organization={{
+            name: 'foo',
+            defaultOrgName: 'bar',
+          }}
+        />
+      );
 
-  it('renders button to change name', () => {
-    const wrapper = shallow(<OnboardingSteps {...defaultServerData} />);
-
-    const button = wrapper.find('[data-test-subj="orgNameChangeButton"]');
-
-    button.simulate('click');
-    expect(sendTelemetry).toHaveBeenCalled();
-  });
-
-  it('hides org name card when name has been changed', () => {
-    const wrapper = shallow(
-      <OnboardingSteps
-        {...defaultServerData}
-        organization={{
-          name: 'foo',
-          defaultOrgName: 'bar',
-        }}
-      />
-    );
-
-    expect(wrapper.find(EuiPanel)).toHaveLength(0);
+      expect(wrapper.find(OrgNameOnboarding)).toHaveLength(0);
+    });
   });
 });
