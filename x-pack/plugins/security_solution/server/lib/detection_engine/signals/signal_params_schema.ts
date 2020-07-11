@@ -37,7 +37,7 @@ const signalSchema = schema.object({
   severity: schema.string(),
   severityMapping: schema.nullable(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
   threat: schema.nullable(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
-  threshold: schema.nullable(
+  threshold: schema.maybe(
     schema.object({ field: schema.nullable(schema.string()), value: schema.number() })
   ),
   timestampOverride: schema.nullable(schema.string()),

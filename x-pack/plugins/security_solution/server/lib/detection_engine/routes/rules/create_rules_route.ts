@@ -130,8 +130,6 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           }
         }
 
-        console.log('aaa');
-
         const createdRule = await createRules({
           alertsClient,
           anomalyThreshold,

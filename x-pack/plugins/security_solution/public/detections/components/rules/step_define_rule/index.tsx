@@ -67,8 +67,8 @@ const stepDefineDefaultValue: DefineStepRule = {
     saved_id: undefined,
   },
   threshold: {
-    field: ['host.name'],
-    value: 1000,
+    field: [''],
+    value: 100,
   },
   timeline: {
     id: null,
@@ -89,6 +89,12 @@ const MyLabelButton = styled(EuiButtonEmpty)`
 MyLabelButton.defaultProps = {
   flush: 'right',
 };
+
+const RuleTypeEuiFormRow = styled(EuiFormRow).attrs<{ isVisible: boolean }>(({ isVisible }) => ({
+  style: {
+    display: isVisible ? 'flex' : 'none',
+  },
+}))<{ isVisible: boolean }>``;
 
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   addPadding = false,
@@ -236,7 +242,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               />
             </>
           </EuiFormRow>
-          <EuiFormRow fullWidth style={{ display: isMlRule(localRuleType) ? 'flex' : 'none' }}>
+          <RuleTypeEuiFormRow isVisible={isMlRule(localRuleType)} fullWidth>
             <>
               <UseField
                 path="machineLearningJobId"
@@ -253,10 +259,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 }}
               />
             </>
-          </EuiFormRow>
-          <EuiFormRow
+          </RuleTypeEuiFormRow>
+          <RuleTypeEuiFormRow
+            isVisible={localRuleType === 'threshold'}
             data-test-subj="thresholdInput"
-            style={{ display: localRuleType === 'threshold' ? 'flex' : 'none' }}
           >
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem>
@@ -265,6 +271,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   componentProps={{
                     idAria: 'detectionEngineStepAboutRuleName',
                     'data-test-subj': 'detectionEngineStepAboutRuleName',
+                    describedByIds: ['detectionEngineStepDefineRuleThresholdField'],
                     euiFieldProps: {
                       fullWidth: true,
                       disabled: isLoading,
@@ -285,6 +292,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   componentProps={{
                     idAria: 'detectionEngineStepAboutRuleName',
                     'data-test-subj': 'detectionEngineStepAboutRuleName',
+                    describedByIds: ['detectionEngineStepDefineRuleThresholdValue'],
                     type: 'number',
                     euiFieldProps: {
                       fullWidth: true,
@@ -295,7 +303,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiFormRow>
+          </RuleTypeEuiFormRow>
           <UseField
             path="timeline"
             component={PickTimeline}

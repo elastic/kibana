@@ -80,10 +80,7 @@ export const findRulesRoute = (router: IRouter) => {
           })
         );
 
-        console.log('aaa');
-
         const [validated, errors] = transformValidateFindAlerts(rules, ruleActions, ruleStatuses);
-        console.log('bbb', errors);
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
         } else {

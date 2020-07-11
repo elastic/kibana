@@ -89,7 +89,10 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
         field: [rule.threshold.field],
         value: parseInt(rule.threshold.value, 10),
       }
-    : undefined,
+    : {
+        field: [''],
+        value: 100,
+      },
 });
 
 export const getScheduleStepsData = (rule: Rule): ScheduleStepRule => {

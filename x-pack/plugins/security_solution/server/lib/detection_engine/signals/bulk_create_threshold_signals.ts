@@ -15,10 +15,11 @@ import { AlertServices } from '../../../../../alerts/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
+import { SignalSearchResponse } from './types';
 
 interface BulkCreateThresholdSignalsParams {
   actions: RuleAlertAction[];
-  someResult: SingleSearchResponse;
+  someResult: SignalSearchResponse;
   ruleParams: RuleTypeParams;
   services: AlertServices;
   logger: Logger;
