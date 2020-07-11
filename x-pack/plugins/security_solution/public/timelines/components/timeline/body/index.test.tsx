@@ -56,6 +56,7 @@ describe('Body', () => {
     columnHeaders: defaultHeaders,
     columnRenderers,
     data: mockTimelineData,
+    docValueFields: [],
     eventIdToNoteIds: {},
     height: testBodyHeight,
     id: 'timeline-test',

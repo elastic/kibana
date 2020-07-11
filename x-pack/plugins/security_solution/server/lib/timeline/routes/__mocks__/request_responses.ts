@@ -63,7 +63,7 @@ export const inputTimeline: SavedTimeline = {
   timelineType: TimelineType.default,
   templateTimelineId: null,
   templateTimelineVersion: 1,
-  dateRange: { start: 1585227005527, end: 1585313405527 },
+  dateRange: { start: '2020-03-26T12:50:05.527Z', end: '2020-03-27T12:50:05.527Z' },
   savedQueryId: null,
   sort: { columnId: '@timestamp', sortDirection: 'desc' },
 };
