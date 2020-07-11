@@ -10,14 +10,16 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { shallow, ReactWrapper } from 'enzyme';
 
-import { mountWithContext, mockKibanaContext } from '../../../__mocks__';
+import { mountWithAsyncContext, mockKibanaContext } from '../../../__mocks__';
 
 import { LoadingState, EmptyState, ErrorState } from '../empty_states';
-import { EngineTable, IEngineTablePagination } from './engine_table';
+import { EngineTable } from './engine_table';
 
 import { EngineOverview } from './';
 
 describe('EngineOverview', () => {
+  const mockHttp = mockKibanaContext.http;
+
   describe('non-happy-path states', () => {
     it('isLoading', () => {
       const wrapper = shallow(<EngineOverview />);
@@ -26,19 +28,25 @@ describe('EngineOverview', () => {
     });
 
     it('isEmpty', async () => {
-      const wrapper = await mountWithApiMock({
-        get: () => ({
-          results: [],
-          meta: { page: { total_results: 0 } },
-        }),
+      const wrapper = await mountWithAsyncContext(<EngineOverview />, {
+        http: {
+          ...mockHttp,
+          get: () => ({
+            results: [],
+            meta: { page: { total_results: 0 } },
+          }),
+        },
       });
 
       expect(wrapper.find(EmptyState)).toHaveLength(1);
     });
 
     it('hasErrorConnecting', async () => {
-      const wrapper = await mountWithApiMock({
-        get: () => ({ invalidPayload: true }),
+      const wrapper = await mountWithAsyncContext(<EngineOverview />, {
+        http: {
+          ...mockHttp,
+          get: () => ({ invalidPayload: true }),
+        },
       });
       expect(wrapper.find(ErrorState)).toHaveLength(1);
     });
@@ -64,17 +72,17 @@ describe('EngineOverview', () => {
       },
     };
     const mockApi = jest.fn(() => mockedApiResponse);
-    let wrapper: ReactWrapper;
 
-    beforeAll(async () => {
-      wrapper = await mountWithApiMock({ get: mockApi });
+    beforeEach(() => {
+      jest.clearAllMocks();
     });
 
-    it('renders', () => {
+    it('renders and calls the engines API', async () => {
+      const wrapper = await mountWithAsyncContext(<EngineOverview />, {
+        http: { ...mockHttp, get: mockApi },
+      });
+
       expect(wrapper.find(EngineTable)).toHaveLength(1);
-    });
-
-    it('calls the engines API', () => {
       expect(mockApi).toHaveBeenNthCalledWith(1, '/api/app_search/engines', {
         query: {
           type: 'indexed',
@@ -83,45 +91,14 @@ describe('EngineOverview', () => {
       });
     });
 
-    describe('pagination', () => {
-      const getTablePagination: () => IEngineTablePagination = () =>
-        wrapper.find(EngineTable).first().prop('pagination');
-
-      it('passes down page data from the API', () => {
-        const pagination = getTablePagination();
-
-        expect(pagination.totalEngines).toEqual(100);
-        expect(pagination.pageIndex).toEqual(0);
-      });
-
-      it('re-polls the API on page change', async () => {
-        await act(async () => getTablePagination().onPaginate(5));
-        wrapper.update();
-
-        expect(mockApi).toHaveBeenLastCalledWith('/api/app_search/engines', {
-          query: {
-            type: 'indexed',
-            pageIndex: 5,
-          },
-        });
-        expect(getTablePagination().pageIndex).toEqual(4);
-      });
-    });
-
     describe('when on a platinum license', () => {
-      beforeAll(async () => {
-        mockApi.mockClear();
-        wrapper = await mountWithApiMock({
+      it('renders a 2nd meta engines table & makes a 2nd meta engines API call', async () => {
+        const wrapper = await mountWithAsyncContext(<EngineOverview />, {
+          http: { ...mockHttp, get: mockApi },
           license: { type: 'platinum', isActive: true },
-          get: mockApi,
         });
-      });
 
-      it('renders a 2nd meta engines table', () => {
         expect(wrapper.find(EngineTable)).toHaveLength(2);
-      });
-
-      it('makes a 2nd call to the engines API with type meta', () => {
         expect(mockApi).toHaveBeenNthCalledWith(2, '/api/app_search/engines', {
           query: {
             type: 'meta',
@@ -130,28 +107,36 @@ describe('EngineOverview', () => {
         });
       });
     });
-  });
 
-  /**
-   * Test helpers
-   */
+    describe('pagination', () => {
+      const getTablePagination = (wrapper: ReactWrapper) =>
+        wrapper.find(EngineTable).prop('pagination');
 
-  const mountWithApiMock = async ({ get, license }: { get(): any; license?: object }) => {
-    let wrapper: ReactWrapper | undefined;
-    const httpMock = { ...mockKibanaContext.http, get };
+      it('passes down page data from the API', async () => {
+        const wrapper = await mountWithAsyncContext(<EngineOverview />, {
+          http: { ...mockHttp, get: mockApi },
+        });
+        const pagination = getTablePagination(wrapper);
 
-    // We get a lot of act() warning/errors in the terminal without this.
-    // TBH, I don't fully understand why since Enzyme's mount is supposed to
-    // have act() baked in - could be because of the wrapping context provider?
-    await act(async () => {
-      wrapper = mountWithContext(<EngineOverview />, { http: httpMock, license });
+        expect(pagination.totalEngines).toEqual(100);
+        expect(pagination.pageIndex).toEqual(0);
+      });
+
+      it('re-polls the API on page change', async () => {
+        const wrapper = await mountWithAsyncContext(<EngineOverview />, {
+          http: { ...mockHttp, get: mockApi },
+        });
+        await act(async () => getTablePagination(wrapper).onPaginate(5));
+        wrapper.update();
+
+        expect(mockApi).toHaveBeenLastCalledWith('/api/app_search/engines', {
+          query: {
+            type: 'indexed',
+            pageIndex: 5,
+          },
+        });
+        expect(getTablePagination(wrapper).pageIndex).toEqual(4);
+      });
     });
-    if (wrapper) {
-      wrapper.update(); // This seems to be required for the DOM to actually update
-
-      return wrapper;
-    } else {
-      throw new Error('Could not mount wrapper');
-    }
-  };
+  });
 });

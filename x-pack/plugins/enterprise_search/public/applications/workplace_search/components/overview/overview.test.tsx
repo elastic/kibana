@@ -7,10 +7,9 @@
 import '../../../__mocks__/react_router_history.mock';
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { shallow, ReactWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 
-import { mountWithContext, mockKibanaContext } from '../../../__mocks__';
+import { mountWithAsyncContext, mockKibanaContext } from '../../../__mocks__';
 
 import { ErrorState } from '../error_state';
 import { Loading } from '../shared/loading';
@@ -22,6 +21,8 @@ import { RecentActivity } from './recent_activity';
 import { Overview, defaultServerData } from './overview';
 
 describe('Overview', () => {
+  const mockHttp = mockKibanaContext.http;
+
   describe('non-happy-path states', () => {
     it('isLoading', () => {
       const wrapper = shallow(<Overview />);
@@ -30,8 +31,11 @@ describe('Overview', () => {
     });
 
     it('hasErrorConnecting', async () => {
-      const wrapper = await mountWithApiMock({
-        get: () => Promise.reject({ invalidPayload: true }),
+      const wrapper = await mountWithAsyncContext(<Overview />, {
+        http: {
+          ...mockHttp,
+          get: () => Promise.reject({ invalidPayload: true }),
+        },
       });
 
       expect(wrapper.find(ErrorState)).toHaveLength(1);
@@ -41,7 +45,9 @@ describe('Overview', () => {
   describe('happy-path states', () => {
     it('renders onboarding state', async () => {
       const mockApi = jest.fn(() => defaultServerData);
-      const wrapper = await mountWithApiMock({ get: mockApi });
+      const wrapper = await mountWithAsyncContext(<Overview />, {
+        http: { ...mockHttp, get: mockApi },
+      });
 
       expect(wrapper.find(ViewContentHeader)).toHaveLength(1);
       expect(wrapper.find(OnboardingSteps)).toHaveLength(1);
@@ -60,34 +66,12 @@ describe('Overview', () => {
           defaultOrgName: 'bar',
         },
       };
-
       const mockApi = jest.fn(() => obCompleteData);
-      const wrapper = await mountWithApiMock({ get: mockApi });
+      const wrapper = await mountWithAsyncContext(<Overview />, {
+        http: { ...mockHttp, get: mockApi },
+      });
 
       expect(wrapper.find(OnboardingSteps)).toHaveLength(0);
     });
   });
 });
-
-/**
- * Test helpers
- */
-
-const mountWithApiMock = async ({ get }: { get(): any }) => {
-  let wrapper: ReactWrapper | undefined;
-  const httpMock = { ...mockKibanaContext.http, get };
-
-  // We get a lot of act() warning/errors in the terminal without this.
-  // TBH, I don't fully understand why since Enzyme's mount is supposed to
-  // have act() baked in - could be because of the wrapping context provider?
-  await act(async () => {
-    wrapper = mountWithContext(<Overview />, { http: httpMock });
-  });
-  if (wrapper) {
-    wrapper.update(); // This seems to be required for the DOM to actually update
-
-    return wrapper;
-  } else {
-    throw new Error('Could not mount wrapper');
-  }
-};
