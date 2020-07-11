@@ -95,9 +95,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
   };
 
   public renderMLHeader(hasValidMlLicense: boolean | undefined) {
-    const {
-      charts: { mlJobId },
-    } = this.props;
+    const { mlJobId } = this.props.charts;
 
     if (!hasValidMlLicense || !mlJobId) {
       return null;

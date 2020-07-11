@@ -31,6 +31,7 @@ export async function getMlBucketSize({
     body: {
       _source: 'bucket_span',
       size: 1,
+      terminateAfter: 1,
       query: {
         bool: {
           filter: [
