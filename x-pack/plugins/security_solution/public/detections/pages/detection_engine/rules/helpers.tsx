@@ -253,15 +253,17 @@ export const redirectToDetections = (
   (!isSignalIndexExists || !isAuthenticated || !hasEncryptionKey);
 
 const getRuleSpecificRuleParamKeys = (ruleType: RuleType) => {
+  const queryRuleParams = ['index', 'filters', 'language', 'query', 'saved_id'];
+
   if (isMlRule(ruleType)) {
     return ['anomaly_threshold', 'machine_learning_job_id'];
   }
 
   if (ruleType === 'threshold') {
-    return ['index', 'filters', 'language', 'query', 'saved_id', 'threshold'];
+    return ['threshold', ...queryRuleParams];
   }
 
-  return ['index', 'filters', 'language', 'query', 'saved_id'];
+  return queryRuleParams;
 };
 
 export const getActionMessageRuleParams = (ruleType: RuleType): string[] => {
