@@ -2230,10 +2230,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@24.1.0":
-  version "24.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-24.1.0.tgz#40593cc474237e8c464d182faa50c748b3f66822"
-  integrity sha512-Y7s327h0Z8dsO6MY7Sn1k5pOrf9ZjWH/ZE2gVtfBn2He5aFahS/+A434EBqFG0YV5W1VZtYiXtSj0AE1gjtrrw==
+"@elastic/eui@26.3.1":
+  version "26.3.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-26.3.1.tgz#c05cac2d0b246adb2aab7df54f34ecc6ad4f48e1"
+  integrity sha512-bNCMJIqdx7TrhXtbnYN6nxR4fjfTmdpB1ptVDThpt8+1rMSL7ZvxcVL4xg9Fjf6sKLcEQyXfDhr3u4+N3Sa4FA==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/enzyme" "^3.1.13"
@@ -2258,6 +2258,7 @@
     react-virtualized "^9.21.2"
     resize-observer-polyfill "^1.5.0"
     tabbable "^3.0.0"
+    text-diff "^1.0.1"
     uuid "^3.1.0"
 
 "@elastic/filesaver@1.1.2":
@@ -29948,6 +29949,11 @@ test-exclude@^6.0.0:
     "@istanbuljs/schema" "^0.1.2"
     glob "^7.1.4"
     minimatch "^3.0.4"
+
+text-diff@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/text-diff/-/text-diff-1.0.1.tgz#6c105905435e337857375c9d2f6ca63e453ff565"
+  integrity sha1-bBBZBUNeM3hXN1ydL2ymPkU/9WU=
 
 text-hex@1.0.x:
   version "1.0.0"

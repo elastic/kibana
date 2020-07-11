@@ -7,7 +7,6 @@
     "plugins/apm/server/lib/apm_telemetry/index.ts",
     "plugins/canvas/server/collectors/collector.ts",
     "plugins/infra/server/usage/usage_collector.ts",
-    "plugins/ingest_manager/server/collectors/register.ts",
     "plugins/lens/server/usage/collectors.ts",
     "plugins/reporting/server/usage/reporting_usage_collector.ts",
     "plugins/maps/server/maps_telemetry/collectors/register.ts"

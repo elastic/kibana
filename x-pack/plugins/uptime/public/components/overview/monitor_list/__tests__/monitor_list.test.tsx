@@ -16,6 +16,13 @@ import {
 import { MonitorListComponent, noItemsMessage } from '../monitor_list';
 import { renderWithRouter, shallowWithRouter } from '../../../../lib';
 import * as redux from 'react-redux';
+import moment from 'moment';
+
+jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
+  return {
+    htmlIdGenerator: () => () => `generated-id`,
+  };
+});
 
 const testFooPings: Ping[] = [
   makePing({
@@ -96,10 +103,24 @@ const testBarSummary: MonitorSummary = {
   },
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/70386
-describe.skip('MonitorList component', () => {
-  let result: MonitorSummariesResult;
+describe('MonitorList component', () => {
   let localStorageMock: any;
+
+  const getMonitorList = (timestamp?: string): MonitorSummariesResult => {
+    if (timestamp) {
+      testBarSummary.state.timestamp = timestamp;
+      testFooSummary.state.timestamp = timestamp;
+    } else {
+      testBarSummary.state.timestamp = '125';
+      testFooSummary.state.timestamp = '123';
+    }
+    return {
+      nextPagePagination: null,
+      prevPagePagination: null,
+      summaries: [testFooSummary, testBarSummary],
+      totalSummaryCount: 2,
+    };
+  };
 
   beforeEach(() => {
     const useDispatchSpy = jest.spyOn(redux, 'useDispatch');
@@ -113,20 +134,14 @@ describe.skip('MonitorList component', () => {
       setItem: jest.fn(),
     };
 
-    // @ts-ignore replacing a call to localStorage we use for monitor list size
+    //  @ts-expect-error replacing a call to localStorage we use for monitor list size
     global.localStorage = localStorageMock;
-    result = {
-      nextPagePagination: null,
-      prevPagePagination: null,
-      summaries: [testFooSummary, testBarSummary],
-      totalSummaryCount: 2,
-    };
   });
 
   it('shallow renders the monitor list', () => {
     const component = shallowWithRouter(
       <MonitorListComponent
-        monitorList={{ list: result, loading: false }}
+        monitorList={{ list: getMonitorList(), loading: false }}
         pageSize={10}
         setPageSize={jest.fn()}
       />
@@ -157,7 +172,10 @@ describe.skip('MonitorList component', () => {
   it('renders the monitor list', () => {
     const component = renderWithRouter(
       <MonitorListComponent
-        monitorList={{ list: result, loading: false }}
+        monitorList={{
+          list: getMonitorList(moment().subtract(5, 'minute').toISOString()),
+          loading: false,
+        }}
         pageSize={10}
         setPageSize={jest.fn()}
       />
@@ -169,7 +187,7 @@ describe.skip('MonitorList component', () => {
   it('renders error list', () => {
     const component = shallowWithRouter(
       <MonitorListComponent
-        monitorList={{ list: result, error: new Error('foo message'), loading: false }}
+        monitorList={{ list: getMonitorList(), error: new Error('foo message'), loading: false }}
         pageSize={10}
         setPageSize={jest.fn()}
       />
@@ -181,7 +199,7 @@ describe.skip('MonitorList component', () => {
   it('renders loading state', () => {
     const component = shallowWithRouter(
       <MonitorListComponent
-        monitorList={{ list: result, loading: true }}
+        monitorList={{ list: getMonitorList(), loading: true }}
         pageSize={10}
         setPageSize={jest.fn()}
       />

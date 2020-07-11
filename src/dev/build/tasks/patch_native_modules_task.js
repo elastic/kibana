@@ -38,7 +38,7 @@ const packages = [
         url: 'https://github.com/uhop/node-re2/releases/download/1.14.0/linux-x64-64.gz',
         sha256: 'f54f059035e71a7ccb3fa201080e260c41d228d13a8247974b4bb157691b6757',
       },
-      windows: {
+      win32: {
         url: 'https://github.com/uhop/node-re2/releases/download/1.14.0/win32-x64-64.gz',
         sha256: 'de708446a8b802f4634c2cfef097c2625a2811fdcd8133dfd7b7c485f966caa9',
       },
