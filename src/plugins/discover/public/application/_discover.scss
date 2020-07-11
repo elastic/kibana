@@ -48,11 +48,6 @@ discover-app {
   overflow: hidden;
 }
 
-
-.dscDiscoverGrid {
-  width: 100%;
-  max-width: 100%;
-}
 .dscHistogram {
   display: flex;
   height: $euiSize * 8;
@@ -139,6 +134,7 @@ discover-app {
 
 .dscTable {
   overflow: auto;
+  //will-change: transform;
 
   // SASSTODO: add a monospace modifier to the doc-table component
   .kbnDocTable__row {
