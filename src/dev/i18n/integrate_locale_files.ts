@@ -32,7 +32,7 @@ import {
   readFileAsync,
   writeFileAsync,
   verifyICUMessage,
-  // @ts-expect-error
+  // @ts-ignore
 } from './utils';
 
 import { I18nConfig } from './config';
