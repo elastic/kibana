@@ -36,7 +36,7 @@ export const renderApp = (
     docLinks,
     toasts: notifications.toasts,
     setBreadcrumbs,
-    navigateToApp: application.navigateToApp,
+    getUrlForApp: application.getUrlForApp,
   };
 
   render(

@@ -29,7 +29,7 @@ const appDependencies = {
   docLinks: docLinksServiceMock.createStartContract(),
   toasts: notificationServiceMock.createSetupContract().toasts,
   setBreadcrumbs: () => {},
-  navigateToApp: applicationServiceMock.createStartContract().navigateToApp,
+  getUrlForApp: applicationServiceMock.createStartContract().getUrlForApp,
 };
 
 export const setupEnvironment = () => {

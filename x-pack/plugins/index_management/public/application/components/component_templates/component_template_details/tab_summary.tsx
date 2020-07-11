@@ -30,7 +30,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({
   componentTemplateDetails,
   showCallToAction,
 }) => {
-  const { navigateToApp } = useComponentTemplatesContext();
+  const { getUrlForApp } = useComponentTemplatesContext();
 
   const { version, _meta, _kbnMeta } = componentTemplateDetails;
 
@@ -61,11 +61,9 @@ export const TabSummary: React.FunctionComponent<Props> = ({
                   values={{
                     createLink: (
                       <EuiLink
-                        onClick={() =>
-                          navigateToApp('management', {
-                            path: '/data/index_management/create_template',
-                          })
-                        }
+                        href={getUrlForApp('management', {
+                          path: '/data/index_management/create_template',
+                        })}
                       >
                         <FormattedMessage
                           id="xpack.idxMgmt.componentTemplateDetails.summaryTab.createTemplateLink"
@@ -75,9 +73,9 @@ export const TabSummary: React.FunctionComponent<Props> = ({
                     ),
                     editLink: (
                       <EuiLink
-                        onClick={() =>
-                          navigateToApp('management', { path: '/data/index_management/templates' })
-                        }
+                        href={getUrlForApp('management', {
+                          path: '/data/index_management/templates',
+                        })}
                       >
                         <FormattedMessage
                           id="xpack.idxMgmt.componentTemplateDetails.summaryTab.updateTemplateLink"

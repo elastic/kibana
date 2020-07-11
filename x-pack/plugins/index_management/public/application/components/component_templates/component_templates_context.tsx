@@ -19,7 +19,7 @@ interface Props {
   docLinks: DocLinksStart;
   toasts: NotificationsSetup['toasts'];
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
-  navigateToApp: CoreStart['application']['navigateToApp'];
+  getUrlForApp: CoreStart['application']['getUrlForApp'];
 }
 
 interface Context {
@@ -30,7 +30,7 @@ interface Context {
   breadcrumbs: ReturnType<typeof getBreadcrumbs>;
   trackMetric: (type: 'loaded' | 'click' | 'count', eventName: string) => void;
   toasts: NotificationsSetup['toasts'];
-  navigateToApp: CoreStart['application']['navigateToApp'];
+  getUrlForApp: CoreStart['application']['getUrlForApp'];
 }
 
 export const ComponentTemplatesProvider = ({
@@ -47,7 +47,7 @@ export const ComponentTemplatesProvider = ({
     docLinks,
     toasts,
     setBreadcrumbs,
-    navigateToApp,
+    getUrlForApp,
   } = value;
 
   const useRequest = getUseRequest(httpClient);
@@ -67,7 +67,7 @@ export const ComponentTemplatesProvider = ({
         httpClient,
         apiBasePath,
         breadcrumbs,
-        navigateToApp,
+        getUrlForApp,
       }}
     >
       {children}
