@@ -5,7 +5,7 @@
  */
 
 import uuid from 'uuid';
-import { flow, omit } from 'lodash/fp';
+import { flow, omit, reduce, get, isEmpty } from 'lodash/fp';
 import set from 'set-value';
 import { SearchResponse } from 'elasticsearch';
 
@@ -16,7 +16,7 @@ import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
 import { AnomalyResults, Anomaly } from '../../machine_learning';
 
-interface BulkCreateMlSignalsParams {
+interface BulkCreateThresholdSignalsParams {
   actions: RuleAlertAction[];
   someResult: AnomalyResults;
   ruleParams: RuleTypeParams;
@@ -36,34 +36,93 @@ interface BulkCreateMlSignalsParams {
   throttle: string;
 }
 
-interface EcsAnomaly extends Anomaly {
-  '@timestamp': string;
-}
+interface ThresholdResults {}
 
-export const transformAnomalyFieldsToEcs = (anomaly: Anomaly): EcsAnomaly => {
-  const {
-    by_field_name: entityName,
-    by_field_value: entityValue,
-    influencers,
-    timestamp,
-  } = anomaly;
-  let errantFields = (influencers ?? []).map((influencer) => ({
-    name: influencer.influencer_field_name,
-    value: influencer.influencer_field_values,
-  }));
+const getNestedQueryFilters = (filtersObj) => {
+  if (Array.isArray(filtersObj.bool?.filter)) {
+    return reduce(
+      (acc, filterItem) => {
+        const nestedFilter = getNestedQueryFilters(filterItem);
 
-  if (entityName && entityValue) {
-    errantFields = [...errantFields, { name: entityName, value: [entityValue] }];
+        if (nestedFilter) {
+          return { ...acc, ...nestedFilter };
+        }
+
+        return acc;
+      },
+      {},
+      filtersObj.bool.filter
+    );
+  } else {
+    return filtersObj.bool.should && filtersObj.bool.should[0].match;
+  }
+};
+
+const getThresholdSignalQueryFields = (filter) => {
+  const filters = get('bool.filter', filter);
+
+  return reduce(
+    (acc, item) => {
+      if (item.match_phrase) {
+        return { ...acc, ...item.match_phrase };
+      }
+
+      if (item.bool.should && item.bool.should[0].match) {
+        return { ...acc, ...item.bool.should[0].match };
+      }
+
+      if (item.bool?.filter) {
+        return { ...acc, ...getNestedQueryFilters(item) };
+      }
+
+      return acc;
+    },
+    {},
+    filters
+  );
+};
+
+const getTransformedHits = (results, threshold, signalQueryFields) => {
+  if (isEmpty(threshold.field)) {
+    if (results.hits.total.value < threshold.value) {
+      return [];
+    }
+
+    const source = {
+      '@timestamp': new Date().toISOString(),
+      ...signalQueryFields,
+    };
+
+    return [
+      {
+        _index: '',
+        _id: uuid.v4(),
+        _source: source,
+        threshold_count: results.hits.total.value,
+      },
+    ];
   }
 
-  const omitDottedFields = omit(errantFields.map((field) => field.name));
-  const setNestedFields = errantFields.map((field) => (_anomaly: Anomaly) =>
-    set(_anomaly, field.name, field.value)
-  );
-  const setTimestamp = (_anomaly: Anomaly) =>
-    set(_anomaly, '@timestamp', new Date(timestamp).toISOString());
+  if (!results.aggregations?.threshold) {
+    return [];
+  }
 
-  return flow(omitDottedFields, setNestedFields, setTimestamp)(anomaly);
+  return results.aggregations.threshold.buckets.map(({ key, doc_count }) => {
+    const source = {
+      '@timestamp': new Date().toISOString(),
+      ...signalQueryFields,
+    };
+
+    set(source, threshold.field, key);
+
+    return {
+      // ...rest,
+      _index: '',
+      _id: uuid.v4(),
+      _source: source,
+      threshold_count: doc_count,
+    };
+  });
 };
 
 const transformThresholdResultsToEcs = (
@@ -71,37 +130,34 @@ const transformThresholdResultsToEcs = (
   filter,
   threshold
 ): SearchResponse<EcsAnomaly> => {
-  // console.log(
-  //   'transformThresholdResultsToEcs',
-  //   JSON.stringify(results),
-  //   JSON.stringify(filter),
-  //   JSON.stringify(threshold)
-  // );
+  console.log(
+    'transformThresholdResultsToEcs',
+    // JSON.stringify(results),
+    JSON.stringify(filter)
+    // JSON.stringify(threshold)
+  );
 
-  const transformedHits = results.aggregations.threshold.buckets.map(({ key, doc_count }) => ({
-    // ...rest,
-    _index: '',
-    _id: uuid.v4(),
-    _source: {
-      '@timestamp': new Date().toISOString(),
-      [threshold.field.split('.')[0]]: {
-        [threshold.field.split('.')[1]]: key,
-      },
-      threshold_count: doc_count,
-    },
-  }));
+  const signalQueryFields = getThresholdSignalQueryFields(filter);
 
-  return {
+  console.log('signalQueryFields', JSON.stringify(signalQueryFields, null, 2));
+
+  const transformedHits = getTransformedHits(results, threshold, signalQueryFields);
+
+  const thresholdResults = {
     ...results,
     hits: {
       ...results.hits,
       hits: transformedHits,
     },
   };
+
+  set(thresholdResults, 'this.total.value', transformedHits.length);
+
+  return thresholdResults;
 };
 
 export const bulkCreateThresholdSignals = async (
-  params: BulkCreateMlSignalsParams
+  params: BulkCreateThresholdSignalsParams
 ): Promise<SingleBulkCreateResponse> => {
   const thresholdResults = params.someResult;
   const ecsResults = transformThresholdResultsToEcs(
@@ -110,7 +166,7 @@ export const bulkCreateThresholdSignals = async (
     params.threshold
   );
 
-  // console.log('ecsResults', JSON.stringify(ecsResults, null, 2));
+  console.log('ruleParams', JSON.stringify(params.ruleParams, null, 2));
 
   return singleBulkCreate({ ...params, filteredEvents: ecsResults });
 };

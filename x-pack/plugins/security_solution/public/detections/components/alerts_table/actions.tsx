@@ -107,8 +107,6 @@ export const sendAlertToTimelineAction = async ({
   ecsData,
   updateTimelineIsLoading,
 }: SendAlertToTimelineActionProps) => {
-  console.error('sendAlertToTimelineAction', ecsData);
-
   let openAlertInBasicTimeline = true;
   const noteContent = ecsData.signal?.rule?.note != null ? ecsData.signal?.rule?.note[0] : '';
   const timelineId =
@@ -150,7 +148,7 @@ export const sendAlertToTimelineAction = async ({
           timeline.timelineType
         );
 
-        createTimeline({
+        return createTimeline({
           from,
           timeline: {
             ...timeline,
@@ -195,7 +193,7 @@ export const sendAlertToTimelineAction = async ({
     ecsData.signal?.rule?.type[0] === 'threshold' &&
     openAlertInBasicTimeline
   ) {
-    createTimeline({
+    return createTimeline({
       from,
       timeline: {
         ...timelineDefaults,
@@ -260,7 +258,7 @@ export const sendAlertToTimelineAction = async ({
       ruleNote: noteContent,
     });
   } else {
-    createTimeline({
+    return createTimeline({
       from,
       timeline: {
         ...timelineDefaults,

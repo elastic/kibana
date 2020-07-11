@@ -7,7 +7,6 @@
 /* eslint-disable complexity */
 
 import { Logger, KibanaRequest } from 'src/core/server';
-import deepMerge from 'deepmerge';
 
 import {
   SIGNALS_ID,
@@ -228,8 +227,7 @@ export const signalRulesAlertType = ({
           if (bulkCreateDuration) {
             result.bulkCreateTimes.push(bulkCreateDuration);
           }
-        } else if (type === 'threshold') {
-          // console.log('ruleTytpe', 'threshold');
+        } else if (type === 'threshold' && threshold) {
           const inputIndex = await getInputIndex(services, version, index);
           const esFilter = await getFilter({
             type,

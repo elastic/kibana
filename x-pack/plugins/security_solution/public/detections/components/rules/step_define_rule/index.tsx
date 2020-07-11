@@ -103,7 +103,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
-  const [localRuleType, setLocalRuleType] = useState(defaultValues.ruleType);
+  const [localRuleType, setLocalRuleType] = useState(
+    defaultValues?.ruleType || stepDefineDefaultValue.ruleType
+  );
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [myStepData, setMyStepData] = useState<DefineStepRule>({
     ...stepDefineDefaultValue,

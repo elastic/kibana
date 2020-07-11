@@ -100,7 +100,10 @@ export interface DefineStepRule extends StepRuleData {
   queryBar: FieldValueQueryBar;
   ruleType: RuleType;
   timeline: FieldValueTimeline;
-  threshold: Threshold;
+  threshold?: {
+    field: string[];
+    value: number;
+  };
 }
 
 export interface ScheduleStepRule extends StepRuleData {

@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash/fp';
-
 interface BuildEventsSearchQuery {
+  aggregations: unknown;
   index: string[];
   from: string;
   to: string;
@@ -16,13 +15,13 @@ interface BuildEventsSearchQuery {
 }
 
 export const buildEventsSearchQuery = ({
+  aggregations,
   index,
   from,
   to,
   filter,
   size,
   searchAfterSortId,
-  threshold,
 }: BuildEventsSearchQuery) => {
   const filterWithTime = [
     filter,
@@ -61,19 +60,6 @@ export const buildEventsSearchQuery = ({
       },
     },
   ];
-  const aggregations =
-    threshold && !isEmpty(threshold.field)
-      ? {
-          aggs: {
-            threshold: {
-              terms: {
-                field: threshold.field,
-                min_doc_count: threshold.value,
-              },
-            },
-          },
-        }
-      : {};
   const searchQuery = {
     allowNoIndices: true,
     index,
@@ -90,7 +76,7 @@ export const buildEventsSearchQuery = ({
           ],
         },
       },
-      ...aggregations,
+      ...(aggregations ? { aggregations } : {}),
       sort: [
         {
           '@timestamp': {
