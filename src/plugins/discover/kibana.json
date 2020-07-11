@@ -1,6 +1,7 @@
 {
   "id": "discover",
   "version": "kibana",
+  "optionalPlugins": ["share"],
   "server": true,
   "ui": true,
   "requiredPlugins": [
@@ -13,11 +14,5 @@
     "uiActions",
     "visualizations"
   ],
-  "optionalPlugins": ["home", "share"],
-  "requiredBundles": [
-    "kibanaUtils",
-    "home",
-    "savedObjects",
-    "kibanaReact"
-  ]
+  "optionalPlugins": ["home", "share"]
 }

@@ -58,7 +58,6 @@ const KNOWN_MANIFEST_FIELDS = (() => {
     ui: true,
     server: true,
     extraPublicDirs: true,
-    requiredBundles: true,
   };
 
   return new Set(Object.keys(manifestFields));
@@ -192,7 +191,6 @@ export async function parseManifest(
     configPath: manifest.configPath || snakeCase(manifest.id),
     requiredPlugins: Array.isArray(manifest.requiredPlugins) ? manifest.requiredPlugins : [],
     optionalPlugins: Array.isArray(manifest.optionalPlugins) ? manifest.optionalPlugins : [],
-    requiredBundles: Array.isArray(manifest.requiredBundles) ? manifest.requiredBundles : [],
     ui: includesUiPlugin,
     server: includesServerPlugin,
     extraPublicDirs: manifest.extraPublicDirs,

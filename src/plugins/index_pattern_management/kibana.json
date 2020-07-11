@@ -3,6 +3,5 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["management", "data", "kibanaLegacy"],
-  "requiredBundles": ["kibanaReact", "kibanaUtils"]
+  "requiredPlugins": ["management", "data", "kibanaLegacy"]
 }

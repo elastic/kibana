@@ -6,13 +6,5 @@
   "requiredPlugins": ["data", "features", "licensing"],
   "optionalPlugins": ["home", "management"],
   "server": true,
-  "ui": true,
-  "requiredBundles": [
-    "home",
-    "management",
-    "kibanaReact",
-    "spaces",
-    "esUiShared",
-    "management"
-  ]
+  "ui": true
 }

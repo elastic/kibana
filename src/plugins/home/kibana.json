@@ -4,8 +4,5 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["data", "kibanaLegacy"],
-  "optionalPlugins": ["usageCollection", "telemetry"],
-  "requiredBundles": [
-    "kibanaReact"
-  ]
+  "optionalPlugins": ["usageCollection", "telemetry"]
 }

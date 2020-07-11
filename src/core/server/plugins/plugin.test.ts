@@ -54,7 +54,6 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     kibanaVersion: '7.0.0',
     requiredPlugins: ['some-required-dep'],
     optionalPlugins: ['some-optional-dep'],
-    requiredBundles: [],
     server: true,
     ui: true,
     ...manifestProps,

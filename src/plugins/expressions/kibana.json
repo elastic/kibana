@@ -6,10 +6,5 @@
   "requiredPlugins": [
     "bfetch"
   ],
-  "extraPublicDirs": ["common", "common/fonts"],
-  "requiredBundles": [
-    "kibanaUtils",
-    "inspector",
-    "data"
-  ]
+  "extraPublicDirs": ["common", "common/fonts"]
 }

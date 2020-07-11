@@ -8,11 +8,5 @@
     "uiActions"
   ],
   "optionalPlugins": ["usageCollection"],
-  "extraPublicDirs": ["common", "common/utils/abort_utils"],
-  "requiredBundles": [
-    "kibanaUtils",
-    "kibanaReact",
-    "kibanaLegacy",
-    "inspector"
-  ]
+  "extraPublicDirs": ["common", "common/utils/abort_utils"]
 }

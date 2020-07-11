@@ -10,8 +10,5 @@
     "static/forms/hook_form_lib",
     "static/validators/string",
     "static/forms/helpers/field_validators/types"
-  ],
-  "requiredBundles": [
-    "data"
   ]
 }

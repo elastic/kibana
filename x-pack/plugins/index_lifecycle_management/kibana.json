@@ -12,9 +12,5 @@
     "usageCollection",
     "indexManagement"
   ],
-  "configPath": ["xpack", "ilm"],
-  "requiredBundles": [
-    "indexManagement",
-    "kibanaReact"
-  ]
+  "configPath": ["xpack", "ilm"]
 }

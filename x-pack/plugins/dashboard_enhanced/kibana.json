@@ -4,10 +4,5 @@
   "server": false,
   "ui": true,
   "requiredPlugins": ["data", "uiActionsEnhanced", "embeddable", "dashboard", "share"],
-  "configPath": ["xpack", "dashboardEnhanced"],
-  "requiredBundles": [
-    "kibanaUtils",
-    "embeddableEnhanced",
-    "kibanaReact"
-  ]
+  "configPath": ["xpack", "dashboardEnhanced"]
 }

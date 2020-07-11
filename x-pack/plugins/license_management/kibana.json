@@ -6,9 +6,5 @@
   "requiredPlugins": ["home", "licensing", "management"],
   "optionalPlugins": ["telemetry"],
   "configPath": ["xpack", "license_management"],
-  "extraPublicDirs": ["common/constants"],
-  "requiredBundles": [
-    "telemetryManagementSection",
-    "kibanaReact"
-  ]
+  "extraPublicDirs": ["common/constants"]
 }

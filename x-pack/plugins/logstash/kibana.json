@@ -13,6 +13,5 @@
     "security"
   ],
   "server": true,
-  "ui": true,
-  "requiredBundles": ["home"]
+  "ui": true
 }

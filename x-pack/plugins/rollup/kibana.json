@@ -15,12 +15,5 @@
     "usageCollection",
     "visTypeTimeseries"
   ],
-  "configPath": ["xpack", "rollup"],
-  "requiredBundles": [
-    "kibanaUtils",
-    "kibanaReact",
-    "home",
-    "esUiShared",
-    "data"
-  ]
+  "configPath": ["xpack", "rollup"]
 }

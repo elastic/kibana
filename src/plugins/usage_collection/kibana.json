@@ -3,8 +3,5 @@
   "configPath": ["usageCollection"],
   "version": "kibana",
   "server": true,
-  "ui": true,
-  "requiredBundles": [
-    "kibanaUtils"
-  ]
+  "ui": true
 }

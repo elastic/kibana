@@ -9,8 +9,5 @@
     "expressions"
   ],
   "server": false,
-  "ui": true,
-  "requiredBundles": [
-    "inspector"
-  ]
+  "ui": true
 }

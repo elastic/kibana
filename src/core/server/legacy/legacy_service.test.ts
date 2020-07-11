@@ -109,7 +109,6 @@ beforeEach(() => {
         [
           'plugin-id',
           {
-            requiredBundles: [],
             publicTargetDir: 'path/to/target/public',
             publicAssetsDir: '/plugins/name/assets/',
           },

@@ -11,11 +11,5 @@
     "visualizations",
     "embeddable"
   ],
-  "optionalPlugins": ["home", "share"],
-  "requiredBundles": [
-    "kibanaUtils",
-    "kibanaReact",
-    "home",
-    "discover"
-  ]
+  "optionalPlugins": ["home", "share"]
 }

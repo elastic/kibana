@@ -13,9 +13,5 @@
     "security",
     "cloud"
   ],
-  "configPath": ["xpack", "snapshot_restore"],
-  "requiredBundles": [
-    "esUiShared",
-    "kibanaReact"
-  ]
+  "configPath": ["xpack", "snapshot_restore"]
 }

@@ -5,6 +5,5 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["bfetch", "developerExamples"],
-  "optionalPlugins": [],
-  "requiredBundles": ["kibanaReact"]
+  "optionalPlugins": []
 }

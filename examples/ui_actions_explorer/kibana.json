@@ -5,6 +5,5 @@
   "server": false,
   "ui": true,
   "requiredPlugins": ["uiActions", "uiActionsExamples", "developerExamples"],
-  "optionalPlugins": [],
-  "requiredBundles": ["kibanaReact"]
+  "optionalPlugins": []
 }
