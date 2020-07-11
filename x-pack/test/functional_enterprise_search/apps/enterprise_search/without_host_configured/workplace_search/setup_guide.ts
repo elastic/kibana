@@ -15,7 +15,7 @@ export default function enterpriseSearchSetupGuideTests({
   const browser = getService('browser');
   const retry = getService('retry');
 
-  const PageObjects = getPageObjects(['appSearch']);
+  const PageObjects = getPageObjects(['workplaceSearch']);
 
   describe('Setup Guide', function () {
     before(async () => await esArchiver.load('empty_kibana'));
@@ -25,10 +25,10 @@ export default function enterpriseSearchSetupGuideTests({
 
     describe('when no enterpriseSearch.host is configured', () => {
       it('navigating to the plugin will redirect a user to the setup guide', async () => {
-        await PageObjects.appSearch.navigateToPage();
+        await PageObjects.workplaceSearch.navigateToPage();
         await retry.try(async function () {
           const currentUrl = await browser.getCurrentUrl();
-          expect(currentUrl).to.contain('/app_search/setup_guide');
+          expect(currentUrl).to.contain('/workplace_search/setup_guide');
         });
       });
     });
