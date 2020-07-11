@@ -12,7 +12,6 @@ import { render, ReactWrapper } from 'enzyme';
 
 import { I18nProvider } from '@kbn/i18n/react';
 import { KibanaContext } from '../../../';
-import { LicenseContext } from '../../../shared/licensing';
 import { mountWithContext, mockKibanaContext } from '../../../__mocks__';
 
 import { ErrorState } from '../error_state';
@@ -32,14 +31,12 @@ describe('Overview', () => {
       const wrapper: Cheerio = render(
         <I18nProvider>
           <KibanaContext.Provider value={{ http: {} }}>
-            <LicenseContext.Provider value={{ license: {} }}>
-              <Overview />
-            </LicenseContext.Provider>
+            <Overview />
           </KibanaContext.Provider>
         </I18nProvider>
       );
 
-      // render() directly renders HTML which means we have to look for selectors instead of for LoadingState directly
+      // render() directly renders HTML which means we have to look for selectors instead of for Loading directly
       expect(wrapper.find('.euiLoadingSpinner')).toHaveLength(1);
     });
 
@@ -87,7 +84,7 @@ describe('Overview', () => {
  * Test helpers
  */
 
-const mountWithApiMock = async ({ get, license }: { get(): any; license?: object }) => {
+const mountWithApiMock = async ({ get }: { get(): any }) => {
   let wrapper: ReactWrapper | undefined;
   const httpMock = { ...mockKibanaContext.http, get };
 
@@ -95,7 +92,7 @@ const mountWithApiMock = async ({ get, license }: { get(): any; license?: object
   // TBH, I don't fully understand why since Enzyme's mount is supposed to
   // have act() baked in - could be because of the wrapping context provider?
   await act(async () => {
-    wrapper = mountWithContext(<Overview />, { http: httpMock, license });
+    wrapper = mountWithContext(<Overview />, { http: httpMock });
   });
   if (wrapper) {
     wrapper.update(); // This seems to be required for the DOM to actually update

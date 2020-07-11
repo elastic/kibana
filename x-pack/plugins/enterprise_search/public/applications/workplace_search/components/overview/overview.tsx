@@ -72,7 +72,6 @@ export const defaultServerData = {
   pendingInvitationsCount: 0,
   personalSourcesCount: 0,
   sourcesCount: 0,
-  telemetryStatus: {},
 } as IAppServerData;
 
 const ONBOARDING_HEADER_TITLE = i18n.translate(
@@ -105,9 +104,9 @@ export const Overview: React.FC = () => {
     try {
       const response = await http.get('/api/workplace_search/overview');
       setAppData(response);
-      setIsLoading(false);
     } catch (error) {
       setHasErrorConnecting(true);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -131,7 +130,7 @@ export const Overview: React.FC = () => {
   const headerDescription = hideOnboarding ? HEADER_DESCRIPTION : ONBOARDING_HEADER_DESCRIPTION;
 
   return (
-    <EuiPage restrictWidth className="overview">
+    <EuiPage restrictWidth>
       <SetBreadcrumbs isRoot />
       <SendTelemetry action="viewed" metric="overview" />
 
