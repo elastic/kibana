@@ -31,7 +31,10 @@ export const findThresholdSignals = async ({
   logger,
   filter,
   threshold,
-}: FindThresholdSignalsParams) => {
+}: FindThresholdSignalsParams): Promise<{
+  searchResult: SignalSearchResponse;
+  searchDuration: string;
+}> => {
   const aggregations =
     threshold && !isEmpty(threshold.field)
       ? {
@@ -44,13 +47,7 @@ export const findThresholdSignals = async ({
         }
       : {};
 
-  const {
-    searchResult,
-    searchDuration,
-  }: {
-    searchResult: SignalSearchResponse;
-    searchDuration: string;
-  } = await singleSearchAfter({
+  return singleSearchAfter({
     aggregations,
     searchAfterSortId: undefined,
     index: inputIndexPattern,
@@ -61,5 +58,4 @@ export const findThresholdSignals = async ({
     filter,
     pageSize: 0,
   });
-  return searchResult;
 };

@@ -5,7 +5,7 @@
  */
 
 interface BuildEventsSearchQuery {
-  aggregations: unknown;
+  aggregations?: unknown;
   index: string[];
   from: string;
   to: string;

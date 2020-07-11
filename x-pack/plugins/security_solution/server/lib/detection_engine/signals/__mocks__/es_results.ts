@@ -46,6 +46,7 @@ export const sampleRuleAlertParams = (
   machineLearningJobId: undefined,
   filters: undefined,
   savedId: undefined,
+  threshold: undefined,
   timelineId: undefined,
   timelineTitle: undefined,
   timestampOverride: undefined,

@@ -240,7 +240,7 @@ export const signalRulesAlertType = ({
             lists: exceptionItems ?? [],
           });
 
-          const thresholdResults = await findThresholdSignals({
+          const { searchResult: thresholdResults } = await findThresholdSignals({
             inputIndexPattern: inputIndex,
             from,
             to,
@@ -269,7 +269,6 @@ export const signalRulesAlertType = ({
           } = await bulkCreateThresholdSignals({
             actions,
             throttle,
-            threshold,
             someResult: thresholdResults,
             ruleParams: params,
             filter: esFilter,

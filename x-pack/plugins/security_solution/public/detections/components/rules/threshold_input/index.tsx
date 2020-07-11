@@ -42,15 +42,6 @@ export const ThresholdInput = ({ field }: ThresholdInputProps) => {
               },
             }}
           />
-          {/* <EuiRange
-            value={threshold}
-            onChange={onThresholdChange}
-            fullWidth
-            showInput
-            showRange
-            showTicks
-            tickInterval={25}
-          /> */}
         </EuiFlexItem>
         <EuiFlexItem>{'>='}</EuiFlexItem>
         <EuiFlexItem>

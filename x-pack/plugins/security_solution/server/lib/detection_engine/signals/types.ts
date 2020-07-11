@@ -121,6 +121,7 @@ export interface Signal {
   original_time: string;
   original_event?: SearchTypes;
   status: Status;
+  threshold_count?: SearchTypes;
 }
 
 export interface SignalHit {

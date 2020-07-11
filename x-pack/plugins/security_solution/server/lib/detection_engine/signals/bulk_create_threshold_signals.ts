@@ -5,24 +5,25 @@
  */
 
 import uuid from 'uuid';
-import { flow, omit, reduce, get, isEmpty } from 'lodash/fp';
+import { reduce, get, isEmpty } from 'lodash/fp';
 import set from 'set-value';
 import { SearchResponse } from 'elasticsearch';
 
+import { Threshold } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Logger } from '../../../../../../../src/core/server';
 import { AlertServices } from '../../../../../alerts/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
-import { AnomalyResults, Anomaly } from '../../machine_learning';
 
 interface BulkCreateThresholdSignalsParams {
   actions: RuleAlertAction[];
-  someResult: AnomalyResults;
+  someResult: SingleSearchResponse;
   ruleParams: RuleTypeParams;
   services: AlertServices;
   logger: Logger;
   id: string;
+  filter: unknown;
   signalsIndex: string;
   name: string;
   createdAt: string;
@@ -38,7 +39,7 @@ interface BulkCreateThresholdSignalsParams {
 
 interface ThresholdResults {}
 
-const getNestedQueryFilters = (filtersObj) => {
+const getNestedQueryFilters = (filtersObj: unknown) => {
   if (Array.isArray(filtersObj.bool?.filter)) {
     return reduce(
       (acc, filterItem) => {
@@ -58,7 +59,7 @@ const getNestedQueryFilters = (filtersObj) => {
   }
 };
 
-const getThresholdSignalQueryFields = (filter) => {
+const getThresholdSignalQueryFields = (filter: unknown) => {
   const filters = get('bool.filter', filter);
 
   return reduce(
@@ -82,7 +83,11 @@ const getThresholdSignalQueryFields = (filter) => {
   );
 };
 
-const getTransformedHits = (results, threshold, signalQueryFields) => {
+const getTransformedHits = (
+  results,
+  threshold: Threshold,
+  signalQueryFields: Record<string, string>
+) => {
   if (isEmpty(threshold.field)) {
     if (results.hits.total.value < threshold.value) {
       return [];
@@ -110,6 +115,7 @@ const getTransformedHits = (results, threshold, signalQueryFields) => {
   return results.aggregations.threshold.buckets.map(({ key, doc_count }) => {
     const source = {
       '@timestamp': new Date().toISOString(),
+      threshold_count: doc_count,
       ...signalQueryFields,
     };
 
@@ -120,15 +126,14 @@ const getTransformedHits = (results, threshold, signalQueryFields) => {
       _index: '',
       _id: uuid.v4(),
       _source: source,
-      threshold_count: doc_count,
     };
   });
 };
 
 const transformThresholdResultsToEcs = (
   results: ThresholdResults,
-  filter,
-  threshold
+  filter: unknown,
+  threshold: Threshold
 ): SearchResponse<EcsAnomaly> => {
   console.log(
     'transformThresholdResultsToEcs',
@@ -163,7 +168,7 @@ export const bulkCreateThresholdSignals = async (
   const ecsResults = transformThresholdResultsToEcs(
     thresholdResults,
     params.filter,
-    params.threshold
+    params.ruleParams.threshold
   );
 
   console.log('ruleParams', JSON.stringify(params.ruleParams, null, 2));

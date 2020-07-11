@@ -56,8 +56,8 @@ export const buildSignal = (doc: SignalSourceHit, rule: Partial<RulesSchema>): S
   if (doc._source.event != null) {
     return { ...signal, original_event: doc._source.event };
   }
-  if (doc.threshold_count != null) {
-    return { ...signal, threshold_count: doc.threshold_count };
+  if (doc._source.threshold_count != null) {
+    return { ...signal, threshold_count: doc._source.threshold_count };
   }
   return signal;
 };

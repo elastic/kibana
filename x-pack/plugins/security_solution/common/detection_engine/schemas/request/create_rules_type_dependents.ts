@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash/fp';
 import { CreateRulesSchema } from './create_rules_schema';
 
 export const validateAnomalyThreshold = (rule: CreateRulesSchema): string[] => {
@@ -96,7 +95,7 @@ export const validateTimelineTitle = (rule: CreateRulesSchema): string[] => {
 export const validateThreshold = (rule: CreateRulesSchema): string[] => {
   if (rule.type === 'threshold') {
     if (!rule.threshold) {
-      return ['when "type" is "threshold", "threshold" ois required'];
+      return ['when "type" is "threshold", "threshold" is required'];
     } else if (rule.threshold.value <= 0) {
       return ['"threshold.value" has to be bigger than 0'];
     } else {
