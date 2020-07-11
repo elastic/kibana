@@ -533,7 +533,8 @@ export const buildPipeline = async (
     pipeline += `visualization type='${vis.type.name}'
     ${prepareJson('visConfig', visConfig)}
     metricsAtAllLevels=${vis.isHierarchical()}
-    partialRows=${vis.type.requiresPartialRows || vis.params.showPartialRows || false} `;
+    partialRows=${vis.type.requiresPartialRows || vis.params.showPartialRows || false}
+    ${prepareJson('aggConfigs', vis.data.aggs!.aggs)} `;
     if (indexPattern) {
       pipeline += `${prepareString('index', indexPattern.id)}`;
     }
