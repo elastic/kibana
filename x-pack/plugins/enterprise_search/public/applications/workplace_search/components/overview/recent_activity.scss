@@ -33,9 +33,5 @@
 
   & + & {
     border-top: $euiBorderThin;
-
-    &--error {
-      border-color: transparent;
-    }
   }
 }

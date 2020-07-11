@@ -33,7 +33,7 @@ export const SetupGuide: React.FC = () => {
 
       <a href={GETTING_STARTED_LINK_URL} target="_blank" rel="noopener noreferrer">
         <img
-          className="setup-guide__thumbnail"
+          className="setupGuide__thumbnail"
           src={GettingStarted}
           alt={i18n.translate('xpack.enterpriseSearch.workplaceSearch.setupGuide.imageAlt', {
             defaultMessage:
