@@ -1,28 +1,27 @@
 [[managing-licenses]]
 == License Management
 
-When you install the default distribution of {kib}, you receive a basic license
-with no expiration date. For the full list of free features that are included in
-the basic license, refer to https://www.elastic.co/subscriptions[the subscription page].
+When you install the default distribution of {kib}, you receive free features
+with no expiration date. For the full list of features, refer to
+{subscriptions}.
 
-If you want to try out the full set of platinum features, you can activate a
-30-day trial license. To view the
-status of your license, start a trial, or install a new license, open the menu, then go to *Stack Management > {es} > License Management*.
+If you want to try out the full set of features, you can activate a free 30-day
+trial. To view the status of your license, start a trial, or install a new
+license, open the menu, then go to *Stack Management > {es} > License Management*.
 
 NOTE: You can start a trial only if your cluster has not already activated a
 trial license for the current major product version. For example, if you have
 already activated a trial for 6.0, you cannot start a new trial until
-7.0. You can, however, contact `info@elastic.co` to request an extended trial
-license.
+7.0. You can, however, request an extended trial at {extendtrial}.
 
 When you activate a new license level, new features appear in *Stack Management*.
 
 [role="screenshot"]
 image::images/management-license.png[]
 
-At the end of the trial period, the platinum features operate in a
-<<license-expiration,degraded mode>>. You can revert to a basic license,
-extend the trial, or purchase a subscription.
+At the end of the trial period, some features operate in a
+<<license-expiration,degraded mode>>. You can revert to Basic, extend the trial,
+or purchase a subscription.
 
 TIP: If {security-features} are enabled, unless you have a trial license,
 you must configure Transport Layer Security (TLS) in {es}.
