@@ -88,7 +88,7 @@ async function createAnomalyDetectionJob({
         filter: [
           { term: { [PROCESSOR_EVENT]: 'transaction' } },
           { exists: { field: TRANSACTION_DURATION } },
-          ...[getEnvironmentUiFilterES(environment)],
+          ...getEnvironmentUiFilterES(environment),
         ],
       },
     },

@@ -45,12 +45,8 @@ export async function getServiceMapServiceNodeInfo({
   const filter: ESFilter[] = [
     { range: rangeFilter(start, end) },
     { term: { [SERVICE_NAME]: serviceName } },
+    ...getEnvironmentUiFilterES(environment),
   ];
-
-  const environmentFilter = getEnvironmentUiFilterES(environment);
-  if (environmentFilter) {
-    filter.push(environmentFilter);
-  }
 
   const minutes = Math.abs((end - start) / (1000 * 60));
   const taskParams = { setup, minutes, filter };
