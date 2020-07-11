@@ -16,6 +16,7 @@ export {
   FormHook,
   FormSchema,
   UseField,
+  UseMultiFields,
   useForm,
   ValidationFunc,
   VALIDATION_TYPES,

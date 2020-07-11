@@ -4,60 +4,72 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiRange, EuiFormRow } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import styled from 'styled-components';
 
-import { FieldHook, getUseField, Field } from '../../../../shared_imports';
+import { BrowserFields } from '../../../../common/containers/source';
+import { getCategorizedFieldNames } from '../../../../timelines/components/edit_data_provider/helpers';
+import { FieldHook, Field } from '../../../../shared_imports';
+import { THRESHOLD_FIELD_PLACEHOLDER } from './translations';
+
+const FIELD_COMBO_BOX_WIDTH = 460;
 
 interface ThresholdInputProps {
-  field: FieldHook;
+  thresholdField: FieldHook;
+  thresholdValue: FieldHook;
+  browserFields: BrowserFields;
 }
-// type Event = React.ChangeEvent<HTMLInputElement>;
-// type EventArg = Event | React.MouseEvent<HTMLButtonElement>;
 
-const CommonUseField = getUseField({ component: Field });
+const OperatorWrapper = styled(EuiFlexItem)`
+  align-self: center;
+`;
 
-export const ThresholdInput = ({ field }: ThresholdInputProps) => {
-  // const threshold = field.value as number;
-  // const onThresholdChange = useCallback(
-  //   (event: EventArg) => {
-  //     const thresholdValue = Number((event as Event).target.value);
-  //     field.setValue(thresholdValue);
-  //   },
-  //   [field]
-  // );
+const fieldDescribedByIds = ['detectionEngineStepDefineRuleThresholdField'];
+const valueDescribedByIds = ['detectionEngineStepDefineRuleThresholdValue'];
+
+const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
+  thresholdField,
+  thresholdValue,
+  browserFields,
+}: ThresholdInputProps) => {
+  const fieldEuiFieldProps = useMemo(
+    () => ({
+      fullWidth: true,
+      singleSelection: { asPlainText: true },
+      noSuggestions: false,
+      options: getCategorizedFieldNames(browserFields),
+      placeholder: THRESHOLD_FIELD_PLACEHOLDER,
+      onCreateOption: undefined,
+      style: { width: `${FIELD_COMBO_BOX_WIDTH}px` },
+    }),
+    [browserFields]
+  );
 
   return (
-    <EuiFormRow label={field.label} data-test-subj="thresholdInput">
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <CommonUseField
-            path="threshold.field"
-            componentProps={{
-              idAria: 'detectionEngineStepAboutRuleName',
-              'data-test-subj': 'detectionEngineStepAboutRuleName',
-              euiFieldProps: {
-                fullWidth: true,
-                // disabled: isLoading,
-              },
-            }}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>{'>='}</EuiFlexItem>
-        <EuiFlexItem>
-          <CommonUseField
-            path="threshold.value"
-            componentProps={{
-              idAria: 'detectionEngineStepAboutRuleName',
-              'data-test-subj': 'detectionEngineStepAboutRuleName',
-              euiFieldProps: {
-                fullWidth: true,
-                // disabled: isLoading,
-              },
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFormRow>
+    <EuiFlexGroup>
+      <EuiFlexItem grow={false}>
+        <Field
+          field={thresholdField}
+          idAria="detectionEngineStepDefineRuleThresholdField"
+          data-test-subj="detectionEngineStepDefineRuleThresholdField"
+          describedByIds={fieldDescribedByIds}
+          type={thresholdField.type}
+          euiFieldProps={fieldEuiFieldProps}
+        />
+      </EuiFlexItem>
+      <OperatorWrapper grow={false}>{'>='}</OperatorWrapper>
+      <EuiFlexItem grow={false}>
+        <Field
+          field={thresholdValue}
+          idAria="detectionEngineStepDefineRuleThresholdValue"
+          data-test-subj="detectionEngineStepDefineRuleThresholdValue"
+          describedByIds={valueDescribedByIds}
+          type={thresholdValue.type}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
+
+export const ThresholdInput = React.memo(ThresholdInputComponent);

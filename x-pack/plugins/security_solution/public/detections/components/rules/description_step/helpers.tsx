@@ -304,3 +304,12 @@ export const buildRuleTypeDescription = (label: string, ruleType: RuleType): Lis
       return assertUnreachable(ruleType);
   }
 };
+
+export const buildThresholdDescription = (label: string, threshold: Threshold): ListItems[] => [
+  {
+    title: label,
+    description: isEmpty(threshold.field[0])
+      ? `${i18n.THRESHOLD_RESULTS_ALL} >= ${threshold.value}`
+      : `${i18n.THRESHOLD_RESULTS_AGGREGATED_BY} ${threshold.field[0]} >= ${threshold.value}`,
+  },
+];

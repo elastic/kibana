@@ -61,3 +61,17 @@ export const ML_JOB_STOPPED = i18n.translate(
     defaultMessage: 'Stopped',
   }
 );
+
+export const THRESHOLD_RESULTS_ALL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.thresholdResultsAllDescription',
+  {
+    defaultMessage: 'All results',
+  }
+);
+
+export const THRESHOLD_RESULTS_AGGREGATED_BY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.thresholdResultsAggregatedByDescription',
+  {
+    defaultMessage: 'Results aggregated by',
+  }
+);

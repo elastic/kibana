@@ -35,6 +35,7 @@ import {
   buildUrlsDescription,
   buildNoteDescription,
   buildRuleTypeDescription,
+  buildThresholdDescription,
 } from './helpers';
 import { useSiemJobs } from '../../../../common/components/ml_popover/hooks/use_siem_jobs';
 import { buildMlJobDescription } from './ml_job_description';
@@ -180,9 +181,9 @@ export const getDescriptionItem = (
     );
     return buildThreatDescription({ label, threat });
   } else if (field === 'threshold') {
-    console.error('thresholffi', field);
+    const threshold = get(field, data);
 
-    return [];
+    return buildThresholdDescription(label, threshold);
   } else if (field === 'references') {
     const urls: string[] = get(field, data);
     return buildUrlsDescription(label, urls);

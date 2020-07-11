@@ -173,6 +173,12 @@ export const schema: FormSchema = {
     ),
   },
   threshold: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdLabel',
+      {
+        defaultMessage: 'Threshold',
+      }
+    ),
     field: {
       type: FIELD_TYPES.COMBO_BOX,
       label: i18n.translate(
@@ -189,6 +195,7 @@ export const schema: FormSchema = {
       ),
     },
     value: {
+      type: FIELD_TYPES.NUMBER,
       label: i18n.translate(
         'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdValueLabel',
         {

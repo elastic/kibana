@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty, EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import React, { FC, memo, useCallback, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
@@ -35,12 +35,14 @@ import { MlJobSelect } from '../ml_job_select';
 import { PickTimeline } from '../pick_timeline';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { NextStep } from '../next_step';
-import { getCategorizedFieldNames } from '../../../../timelines/components/edit_data_provider/helpers';
+import { ThresholdInput } from '../threshold_input';
 import {
   Field,
   Form,
   getUseField,
   UseField,
+  UseMultiFields,
+  FormDataProvider,
   useForm,
   FormSchema,
 } from '../../../../shared_imports';
@@ -52,7 +54,6 @@ const CommonUseField = getUseField({ component: Field });
 interface StepDefineRuleProps extends RuleStepProps {
   defaultValues?: DefineStepRule | null;
 }
-const FIELD_COMBO_BOX_WIDTH = 195;
 
 const stepDefineDefaultValue: DefineStepRule = {
   anomalyThreshold: 50,
@@ -66,8 +67,8 @@ const stepDefineDefaultValue: DefineStepRule = {
     saved_id: undefined,
   },
   threshold: {
-    field: [''],
-    value: 100,
+    field: [],
+    value: 200,
   },
   timeline: {
     id: null,
@@ -89,11 +90,11 @@ MyLabelButton.defaultProps = {
   flush: 'right',
 };
 
-const RuleTypeEuiFormRow = styled(EuiFormRow).attrs<{ isVisible: boolean }>(({ isVisible }) => ({
+const RuleTypeEuiFormRow = styled(EuiFormRow).attrs<{ $isVisible: boolean }>(({ $isVisible }) => ({
   style: {
-    display: isVisible ? 'flex' : 'none',
+    display: $isVisible ? 'flex' : 'none',
   },
-}))<{ isVisible: boolean }>``;
+}))<{ $isVisible: boolean }>``;
 
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   addPadding = false,
@@ -156,27 +157,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form]);
 
-  useEffect(() => {
-    const subscription = form.subscribe(({ data, isValid, ...rest }) => {
-      const { index, ruleType } = data.raw;
-
-      if (index != null) {
-        if (deepEqual(index, indicesConfig) && indexModified) {
-          setIndexModified(false);
-        } else if (!deepEqual(index, indicesConfig) && !indexModified) {
-          setMyStepData((currentValue) => ({ ...currentValue, index }));
-          setIndexModified(true);
-        }
-      }
-
-      if (ruleType !== localRuleType) {
-        setLocalRuleType(ruleType);
-        clearErrors();
-      }
-    });
-    return subscription.unsubscribe;
-  }, [clearErrors, form, indexModified, indicesConfig, localRuleType]);
-
   const handleResetIndices = useCallback(() => {
     const indexField = form.getFields().index;
     indexField.setValue(indicesConfig);
@@ -189,6 +169,17 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const handleCloseTimelineSearch = useCallback(() => {
     setOpenTimelineSearch(false);
   }, []);
+
+  const ThresholdInputChildren = useCallback(
+    ({ thresholdField, thresholdValue }) => (
+      <ThresholdInput
+        browserFields={browserFields}
+        thresholdField={thresholdField}
+        thresholdValue={thresholdValue}
+      />
+    ),
+    [browserFields]
+  );
 
   return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
@@ -213,7 +204,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               isMlAdmin: hasMlAdminPermissions(mlCapabilities),
             }}
           />
-          <EuiFormRow fullWidth style={{ display: isMlRule(localRuleType) ? 'none' : 'flex' }}>
+          <RuleTypeEuiFormRow $isVisible={!isMlRule(localRuleType)} fullWidth>
             <>
               <CommonUseField
                 path="index"
@@ -261,8 +252,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 }}
               />
             </>
-          </EuiFormRow>
-          <RuleTypeEuiFormRow isVisible={isMlRule(localRuleType)} fullWidth>
+          </RuleTypeEuiFormRow>
+          <RuleTypeEuiFormRow $isVisible={isMlRule(localRuleType)} fullWidth>
             <>
               <UseField
                 path="machineLearningJobId"
@@ -281,48 +272,26 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </>
           </RuleTypeEuiFormRow>
           <RuleTypeEuiFormRow
-            isVisible={localRuleType === 'threshold'}
+            $isVisible={localRuleType === 'threshold'}
             data-test-subj="thresholdInput"
+            fullWidth
           >
-            <EuiFlexGroup alignItems="center">
-              <EuiFlexItem>
-                <CommonUseField
-                  path="threshold.field"
-                  componentProps={{
-                    idAria: 'detectionEngineStepAboutRuleName',
-                    'data-test-subj': 'detectionEngineStepAboutRuleName',
-                    describedByIds: ['detectionEngineStepDefineRuleThresholdField'],
-                    euiFieldProps: {
-                      fullWidth: true,
-                      disabled: isLoading,
-                      singleSelection: { asPlainText: true },
-                      noSuggestions: false,
-                      options: getCategorizedFieldNames(browserFields),
-                      placeholder: 'All results',
-                      onCreateOption: undefined,
-                      style: { width: `${FIELD_COMBO_BOX_WIDTH}px` },
-                    },
-                  }}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>{'>='}</EuiFlexItem>
-              <EuiFlexItem>
-                <CommonUseField
-                  path="threshold.value"
-                  componentProps={{
-                    idAria: 'detectionEngineStepAboutRuleName',
-                    'data-test-subj': 'detectionEngineStepAboutRuleName',
-                    describedByIds: ['detectionEngineStepDefineRuleThresholdValue'],
-                    type: 'number',
-                    euiFieldProps: {
-                      fullWidth: true,
-                      type: 'number',
-                      disabled: isLoading,
-                    },
-                  }}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <>
+              <UseMultiFields
+                fields={{
+                  thresholdField: {
+                    path: 'threshold.field',
+                    defaultValue: defaultValues?.threshold?.field,
+                  },
+                  thresholdValue: {
+                    path: 'threshold.value',
+                    defaultValue: defaultValues?.threshold?.value,
+                  },
+                }}
+              >
+                {ThresholdInputChildren}
+              </UseMultiFields>
+            </>
           </RuleTypeEuiFormRow>
           <UseField
             path="timeline"
@@ -333,6 +302,24 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               dataTestSubj: 'detectionEngineStepDefineRuleTimeline',
             }}
           />
+          <FormDataProvider pathsToWatch={['index', 'ruleType']}>
+            {({ index, ruleType }) => {
+              if (index != null) {
+                if (deepEqual(index, indicesConfig) && indexModified) {
+                  setIndexModified(false);
+                } else if (!deepEqual(index, indicesConfig) && !indexModified) {
+                  setMyStepData((currentValue) => ({ ...currentValue, index }));
+                  setIndexModified(true);
+                }
+              }
+
+              if (ruleType !== localRuleType) {
+                setLocalRuleType(ruleType);
+                clearErrors();
+              }
+              return null;
+            }}
+          </FormDataProvider>
         </Form>
       </StepContentWrapper>
 

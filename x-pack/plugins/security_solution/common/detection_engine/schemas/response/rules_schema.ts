@@ -207,7 +207,7 @@ export const addTimelineTitle = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mi
 };
 
 export const addQueryFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
-  if (typeAndTimelineOnly.type === 'query' || typeAndTimelineOnly.type === 'saved_query') {
+  if (['query', 'saved_query', 'threshold'].includes(typeAndTimelineOnly.type)) {
     return [
       t.exact(t.type({ query: dependentRulesSchema.props.query })),
       t.exact(t.type({ language: dependentRulesSchema.props.language })),
@@ -233,10 +233,8 @@ export const addMlFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[]
 export const addThresholdFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
   if (typeAndTimelineOnly.type === 'threshold') {
     return [
-      // t.exact(t.type({ saved_id: dependentRulesSchema.props.saved_id })),
-      t.exact(t.type({ query: dependentRulesSchema.props.query })),
-      t.exact(t.type({ language: dependentRulesSchema.props.language })),
       t.exact(t.type({ threshold: dependentRulesSchema.props.threshold })),
+      t.exact(t.partial({ saved_id: dependentRulesSchema.props.saved_id })),
     ];
   } else {
     return [];

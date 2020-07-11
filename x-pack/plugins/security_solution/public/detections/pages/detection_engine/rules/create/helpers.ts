@@ -70,6 +70,7 @@ export const filterRuleFieldsForType = <T extends RuleFields>(fields: T, type: R
 
 export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
   const ruleFields = filterRuleFieldsForType(defineStepData, defineStepData.ruleType);
+  console.error('formatDefineStepData', ruleFields);
   const { ruleType, timeline } = ruleFields;
   const baseFields = {
     type: ruleType,
@@ -95,8 +96,8 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
           ruleFields.queryBar?.saved_id && { type: 'saved_query' as RuleType }),
         ...(ruleType === 'threshold' && {
           threshold: {
-            field: ruleFields.threshold?.field[0] ?? '',
-            value: parseInt(ruleFields.threshold?.value, 10) ?? 100,
+            field: ruleFields.threshold?.field,
+            value: ruleFields.threshold?.value,
           },
         }),
       };
