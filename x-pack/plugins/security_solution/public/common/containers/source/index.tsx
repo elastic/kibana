@@ -85,7 +85,13 @@ export const getdocValueFields = memoizeOne(
     fields && fields.length > 0
       ? fields.reduce<DocValueFields[]>((accumulator: DocValueFields[], field: IndexField) => {
           if (field.type === 'date' && accumulator.length < 100) {
-            return [...accumulator, { field: field.name, format: field.format ?? 'date_time' }];
+            return [
+              ...accumulator,
+              {
+                field: field.name,
+                format: !isEmpty(field.format) ? field.format : 'date_time',
+              },
+            ];
           }
           return accumulator;
         }, [])

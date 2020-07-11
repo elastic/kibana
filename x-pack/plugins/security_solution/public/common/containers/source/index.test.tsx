@@ -25,6 +25,7 @@ describe('Index Fields & Browser Fields', () => {
 
     return expect(initialResult).toEqual({
       browserFields: {},
+      docValueFields: [],
       errorMessage: null,
       indexPattern: {
         fields: [],
@@ -56,6 +57,16 @@ describe('Index Fields & Browser Fields', () => {
       current: {
         indicesExist: true,
         browserFields: mockBrowserFields,
+        docValueFields: [
+          {
+            field: '@timestamp',
+            format: 'date_time',
+          },
+          {
+            field: 'event.end',
+            format: 'date_time',
+          },
+        ],
         indexPattern: {
           fields: mockIndexFields,
           title:

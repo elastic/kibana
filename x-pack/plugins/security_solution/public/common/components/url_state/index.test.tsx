@@ -53,11 +53,14 @@ jest.mock('../../lib/kibana', () => ({
       },
     },
   }),
+  KibanaServices: {
+    get: jest.fn(() => ({ uiSettings: { get: () => ({ from: 'now-24h', to: 'now' }) } })),
+  },
 }));
 
 describe('UrlStateContainer', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
   describe('handleInitialize', () => {
     describe('URL state updates redux', () => {

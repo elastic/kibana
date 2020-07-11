@@ -15,7 +15,7 @@ import { mockEventViewerResponse } from './mock';
 import { StatefulEventsViewer } from '.';
 import { defaultHeaders } from './default_headers';
 import { useFetchIndexPatterns } from '../../../detections/containers/detection_engine/rules/fetch_index_patterns';
-import { mockBrowserFields } from '../../containers/source/mock';
+import { mockBrowserFields, mockDocValueFields } from '../../containers/source/mock';
 import { eventsDefaultModel } from './default_model';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
@@ -25,6 +25,7 @@ mockUseFetchIndexPatterns.mockImplementation(() => [
   {
     browserFields: mockBrowserFields,
     indexPatterns: mockIndexPattern,
+    docValueFields: mockDocValueFields,
   },
 ]);
 

@@ -153,7 +153,8 @@ interface AddNewTimelineParams {
 export const addNewTimeline = ({
   columns,
   dataProviders = [],
-  dateRange = { start: 'now-24', end: 'now' },
+  dateRange = { start: 'now-24h', end: 'now' },
+  excludedRowRendererIds = [],
   filters = timelineDefaults.filters,
   id,
   itemsPerPage = timelineDefaults.itemsPerPage,

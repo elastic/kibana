@@ -14,7 +14,7 @@ import { SubsetTimelineModel, TimelineModel } from './model';
 export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filters'> = {
   columns: defaultHeaders,
   dataProviders: [],
-  dateRange: { start: 'now-24', end: 'now' },
+  dateRange: { start: 'now-24h', end: 'now' },
   deletedEventIds: [],
   description: '',
   eventType: 'all',

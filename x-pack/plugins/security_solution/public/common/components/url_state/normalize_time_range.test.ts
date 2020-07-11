@@ -13,6 +13,11 @@ import {
   isRelativeTimeRange,
 } from '../../store/inputs/model';
 
+import { getTimeRangeSettings } from '../../utils/default_date_settings';
+
+const getTimeRangeSettingsMock = getTimeRangeSettings as jest.Mock;
+
+jest.mock('../../utils/default_date_settings');
 jest.mock('@elastic/datemath', () => ({
   parse: (date: string) => {
     if (date === 'now') {
@@ -25,8 +30,15 @@ jest.mock('@elastic/datemath', () => ({
   },
 }));
 
+getTimeRangeSettingsMock.mockImplementation(() => ({
+  from: '2020-07-04T08:20:18.966Z',
+  to: '2020-07-05T08:20:18.966Z',
+  fromStr: 'now-24h',
+  toStr: 'now',
+}));
+
 describe('#normalizeTimeRange', () => {
-  test('Absolute time range returns empty strings as empty strings', () => {
+  test('Absolute time range returns defaults for empty strings', () => {
     const dateTimeRange: URLTimeRange = {
       kind: 'absolute',
       fromStr: undefined,
@@ -37,8 +49,8 @@ describe('#normalizeTimeRange', () => {
     if (isAbsoluteTimeRange(dateTimeRange)) {
       const expected: AbsoluteTimeRange = {
         kind: 'absolute',
-        from: '2020-07-07T08:20:18.966Z',
-        to: '2020-07-08T08:20:18.966Z',
+        from: '2020-07-04T08:20:18.966Z',
+        to: '2020-07-05T08:20:18.966Z',
         fromStr: undefined,
         toStr: undefined,
       };
@@ -120,7 +132,7 @@ describe('#normalizeTimeRange', () => {
     }
   });
 
-  test('Absolute time range returns empty string with from and to when garbage is sent in', () => {
+  test('Absolute time range returns defaults when garbage is sent in', () => {
     const to = 'garbage';
     const from = 'garbage';
     const dateTimeRange: URLTimeRange = {
@@ -133,8 +145,8 @@ describe('#normalizeTimeRange', () => {
     if (isAbsoluteTimeRange(dateTimeRange)) {
       const expected: AbsoluteTimeRange = {
         kind: 'absolute',
-        from: '2020-07-07T08:20:18.966Z',
-        to: '2020-07-08T08:20:18.966Z',
+        from: '2020-07-04T08:20:18.966Z',
+        to: '2020-07-05T08:20:18.966Z',
         fromStr: undefined,
         toStr: undefined,
       };
@@ -144,7 +156,7 @@ describe('#normalizeTimeRange', () => {
     }
   });
 
-  test('Relative time range returns empty strings as empty strings', () => {
+  test('Relative time range returns defaults fro empty strings', () => {
     const dateTimeRange: URLTimeRange = {
       kind: 'relative',
       fromStr: '',
@@ -155,8 +167,8 @@ describe('#normalizeTimeRange', () => {
     if (isRelativeTimeRange(dateTimeRange)) {
       const expected: RelativeTimeRange = {
         kind: 'relative',
-        from: '2020-07-07T08:20:18.966Z',
-        to: '2020-07-08T08:20:18.966Z',
+        from: '2020-07-04T08:20:18.966Z',
+        to: '2020-07-05T08:20:18.966Z',
         fromStr: '',
         toStr: '',
       };
@@ -238,7 +250,7 @@ describe('#normalizeTimeRange', () => {
     }
   });
 
-  test('Relative time range returns empty string with from and to when garbage is sent in', () => {
+  test('Relative time range returns defaults when garbage is sent in', () => {
     const to = 'garbage';
     const from = 'garbage';
     const dateTimeRange: URLTimeRange = {
@@ -251,8 +263,8 @@ describe('#normalizeTimeRange', () => {
     if (isRelativeTimeRange(dateTimeRange)) {
       const expected: RelativeTimeRange = {
         kind: 'relative',
-        from: '2020-07-07T08:20:18.966Z',
-        to: '2020-07-08T08:20:18.966Z',
+        from: '2020-07-04T08:20:18.966Z',
+        to: '2020-07-05T08:20:18.966Z',
         fromStr: '',
         toStr: '',
       };
