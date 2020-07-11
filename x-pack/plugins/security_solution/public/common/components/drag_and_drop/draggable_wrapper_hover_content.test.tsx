@@ -18,7 +18,7 @@ import { useAddToTimeline } from '../../hooks/use_add_to_timeline';
 import { DraggableWrapperHoverContent } from './draggable_wrapper_hover_content';
 import {
   ManageGlobalTimeline,
-  timelineDefaults,
+  getTimelineDefaults,
 } from '../../../timelines/components/manage_timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 
@@ -52,6 +52,7 @@ jest.mock('../../../timelines/components/manage_timeline', () => {
   return {
     ...original,
     useManageTimeline: () => ({
+      getManageTimelineById: jest.fn().mockReturnValue({ indexToAdd: [] }),
       getTimelineFilterManager: mockGetTimelineFilterManager,
       isManagedTimeline: jest.fn().mockReturnValue(false),
     }),
@@ -63,8 +64,10 @@ const timelineId = TimelineId.active;
 const field = 'process.name';
 const value = 'nice';
 const toggleTopN = jest.fn();
+const goGetTimelineId = jest.fn();
 const defaultProps = {
   field,
+  goGetTimelineId,
   showTopN: false,
   timelineId,
   toggleTopN,
@@ -130,6 +133,18 @@ describe('DraggableWrapperHoverContent', () => {
           wrapper.find(`[data-test-subj="filter-${hoverAction}-value"]`).first().exists()
         ).toBe(false);
       });
+
+      test(`it should call goGetTimelineId when user is over the 'Filter ${hoverAction} value' button`, () => {
+        const wrapper = mount(
+          <TestProviders>
+            <DraggableWrapperHoverContent {...{ ...defaultProps, timelineId: undefined }} />
+          </TestProviders>
+        );
+        const button = wrapper.find(`[data-test-subj="filter-${hoverAction}-value"]`).first();
+        button.simulate('mouseenter');
+        expect(goGetTimelineId).toHaveBeenCalledWith(true);
+      });
+
       describe('when run in the context of a timeline', () => {
         let wrapper: ReactWrapper;
         let onFilterAdded: () => void;
@@ -137,10 +152,7 @@ describe('DraggableWrapperHoverContent', () => {
         beforeEach(() => {
           onFilterAdded = jest.fn();
           const manageTimelineForTesting = {
-            [timelineId]: {
-              ...timelineDefaults,
-              id: timelineId,
-            },
+            [timelineId]: getTimelineDefaults(timelineId),
           };
 
           wrapper = mount(
@@ -151,6 +163,7 @@ describe('DraggableWrapperHoverContent', () => {
             </TestProviders>
           );
         });
+
         test('when clicked, it adds a filter to the timeline when running in the context of a timeline', () => {
           wrapper.find(`[data-test-subj="filter-${hoverAction}-value"]`).first().simulate('click');
           wrapper.update();
@@ -233,8 +246,7 @@ describe('DraggableWrapperHoverContent', () => {
 
           const manageTimelineForTesting = {
             [timelineId]: {
-              ...timelineDefaults,
-              id: timelineId,
+              ...getTimelineDefaults(timelineId),
               filterManager,
             },
           };
@@ -457,6 +469,24 @@ describe('DraggableWrapperHoverContent', () => {
       wrapper.update();
 
       expect(wrapper.find('[data-test-subj="show-top-field"]').first().exists()).toBe(false);
+    });
+
+    test(`it should invokes goGetTimelineId when user is over the 'Show top field' button`, () => {
+      const whitelistedField = 'signal.rule.name';
+      const wrapper = mount(
+        <TestProviders>
+          <DraggableWrapperHoverContent
+            {...{
+              ...defaultProps,
+              field: whitelistedField,
+              timelineId: undefined,
+            }}
+          />
+        </TestProviders>
+      );
+      const button = wrapper.find(`[data-test-subj="show-top-field"]`).first();
+      button.simulate('mouseenter');
+      expect(goGetTimelineId).toHaveBeenCalledWith(true);
     });
 
     test(`invokes the toggleTopN function when the 'Show top field' button is clicked`, async () => {

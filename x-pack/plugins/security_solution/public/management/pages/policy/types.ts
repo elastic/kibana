@@ -5,17 +5,17 @@
  */
 
 import {
-  PolicyData,
+  AppLocation,
   Immutable,
   MalwareFields,
+  PolicyData,
   UIPolicyConfig,
-  AppLocation,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
 import {
   GetAgentStatusResponse,
-  GetPackageConfigsResponse,
   GetOnePackageConfigResponse,
+  GetPackageConfigsResponse,
   GetPackagesResponse,
   UpdatePackageConfigResponse,
 } from '../../../../../ingest_manager/common';

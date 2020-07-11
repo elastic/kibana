@@ -7,7 +7,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { CREATE_LEGACY_TEMPLATE_BY_DEFAULT } from '../../../common';
 import { setupEnvironment, nextTick } from '../helpers';
 
 import {
@@ -369,8 +368,8 @@ describe.skip('<TemplateCreate />', () => {
           aliases: ALIASES,
         },
         _kbnMeta: {
-          isLegacy: CREATE_LEGACY_TEMPLATE_BY_DEFAULT,
-          isManaged: false,
+          type: 'default',
+          isLegacy: false,
         },
       };
 

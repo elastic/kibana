@@ -5,7 +5,7 @@
  */
 
 import './datapanel.scss';
-import { uniq, indexBy, groupBy, throttle } from 'lodash';
+import { uniq, keyBy, groupBy, throttle } from 'lodash';
 import React, { useState, useEffect, memo, useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataPublicPluginStart, EsQueryConfig, Query, Filter } from 'src/plugins/data/public';
 import { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import { FieldItem } from './field_item';
@@ -74,6 +74,27 @@ const fieldTypeNames: Record<DataType, string> = {
   ip: i18n.translate('xpack.lens.datatypes.ipAddress', { defaultMessage: 'IP' }),
 };
 
+// Wrapper around esQuery.buildEsQuery, handling errors (e.g. because a query can't be parsed) by
+// returning a query dsl object not matching anything
+function buildSafeEsQuery(
+  indexPattern: IIndexPattern,
+  query: Query,
+  filters: Filter[],
+  queryConfig: EsQueryConfig
+) {
+  try {
+    return esQuery.buildEsQuery(indexPattern, query, filters, queryConfig);
+  } catch (e) {
+    return {
+      bool: {
+        must_not: {
+          match_all: {},
+        },
+      },
+    };
+  }
+}
+
 export function IndexPatternDataPanel({
   setState,
   state,
@@ -106,7 +127,7 @@ export function IndexPatternDataPanel({
       timeFieldName: indexPatterns[id].timeFieldName,
     }));
 
-  const dslQuery = esQuery.buildEsQuery(
+  const dslQuery = buildSafeEsQuery(
     indexPatterns[currentIndexPatternId] as IIndexPattern,
     query,
     filters,
@@ -256,7 +277,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
 
   const fieldGroups: FieldsGroup = useMemo(() => {
     const containsData = (field: IndexPatternField) => {
-      const fieldByName = indexBy(allFields, 'name');
+      const fieldByName = keyBy(allFields, 'name');
       const overallField = fieldByName[field.name];
 
       return (

@@ -13,7 +13,7 @@ tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 
 echo " -> running visual regression tests from x-pack directory"
 cd "$XPACK_DIR"
-yarn percy exec -t 500 -- -- \
+yarn percy exec -t 10000 -- -- \
   node scripts/functional_tests \
     --debug --bail \
     --kibana-install-dir "$installDir" \
@@ -21,3 +21,6 @@ yarn percy exec -t 500 -- -- \
 
 # cd "$KIBANA_DIR"
 # source "test/scripts/jenkins_xpack_page_load_metrics.sh"
+
+cd "$KIBANA_DIR"
+source "test/scripts/jenkins_xpack_saved_objects_field_metrics.sh"
