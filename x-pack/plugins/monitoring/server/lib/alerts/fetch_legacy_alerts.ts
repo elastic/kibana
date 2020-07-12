@@ -18,6 +18,7 @@ export async function fetchLegacyAlerts(
     filterPath: [
       'hits.hits._source.prefix',
       'hits.hits._source.message',
+      'hits.hits._source.resolved_timestamp',
       'hits.hits._source.nodes',
       'hits.hits._source.metadata.*',
     ],
@@ -54,6 +55,13 @@ export async function fetchLegacyAlerts(
               },
             },
             {
+              range: {
+                resolved_timestamp: {
+                  gte: 'now-2m',
+                },
+              },
+            },
+            {
               bool: {
                 must_not: {
                   exists: {
@@ -76,6 +84,7 @@ export async function fetchLegacyAlerts(
     const legacyAlert: LegacyAlert = {
       prefix: get(hit, '_source.prefix'),
       message: get(hit, '_source.message'),
+      resolved_timestamp: get(hit, '_source.resolved_timestamp'),
       nodes: get(hit, '_source.nodes'),
       metadata: get(hit, '_source.metadata') as LegacyAlertMetadata,
     };

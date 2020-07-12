@@ -161,21 +161,13 @@ export class CpuUsageAlert extends BaseAlert {
     return true;
   }
 
-  protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertCpuUsageState {
-    const stat = item.meta as AlertCpuUsageNodeStats;
+  protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {
+    const base = super.getDefaultAlertState(cluster, item);
     return {
-      cluster,
-      ccs: item.ccs,
-      cpuUsage: stat.cpuUsage,
-      nodeId: stat.nodeId,
-      nodeName: stat.nodeName,
+      ...base,
       ui: {
-        isFiring: false,
-        message: null,
+        ...base.ui,
         severity: AlertSeverity.Danger,
-        resolvedMS: 0,
-        triggeredMS: 0,
-        lastCheckedMS: 0,
       },
     };
   }
@@ -317,13 +309,32 @@ export class CpuUsageAlert extends BaseAlert {
         continue;
       }
 
-      const alertInstanceState: AlertInstanceState = { alertStates: [] };
       const instance = services.alertInstanceFactory(`${this.type}:${cluster.clusterUuid}`);
+      const state = (instance.getState() as unknown) as AlertInstanceState;
+      const alertInstanceState: AlertInstanceState = { alertStates: state?.alertStates || [] };
       let shouldExecuteActions = false;
       for (const node of nodes) {
-        const nodeState: AlertCpuUsageState = this.getDefaultAlertState(cluster, node);
+        const stat = node.meta as AlertCpuUsageNodeStats;
+        let nodeState: AlertCpuUsageState;
+        const indexInState = alertInstanceState.alertStates.findIndex((alertState) => {
+          const nodeAlertState = alertState as AlertCpuUsageState;
+          return (
+            nodeAlertState.cluster.clusterUuid === cluster.clusterUuid &&
+            nodeAlertState.nodeId === (node.meta as AlertCpuUsageNodeStats).nodeId
+          );
+        });
+        if (indexInState > -1) {
+          nodeState = alertInstanceState.alertStates[indexInState] as AlertCpuUsageState;
+        } else {
+          nodeState = this.getDefaultAlertState(cluster, node) as AlertCpuUsageState;
+        }
+
+        nodeState.cpuUsage = stat.cpuUsage;
+        nodeState.nodeId = stat.nodeId;
+        nodeState.nodeName = stat.nodeName;
+
         if (node.shouldFire) {
-          nodeState.ui.triggeredMS = +new Date();
+          nodeState.ui.triggeredMS = new Date().valueOf();
           nodeState.ui.isFiring = true;
           nodeState.ui.message = this.getUiMessage(nodeState, node);
           nodeState.ui.severity = node.severity;
@@ -331,11 +342,20 @@ export class CpuUsageAlert extends BaseAlert {
           shouldExecuteActions = true;
         } else if (!node.shouldFire && nodeState.ui.isFiring) {
           nodeState.ui.isFiring = false;
-          nodeState.ui.resolvedMS = +new Date();
+          nodeState.ui.resolvedMS = new Date().valueOf();
           nodeState.ui.message = this.getUiMessage(nodeState, node);
           shouldExecuteActions = true;
         }
-        alertInstanceState.alertStates.push(nodeState);
+
+        if (indexInState === -1) {
+          alertInstanceState.alertStates.push(nodeState);
+        } else {
+          alertInstanceState.alertStates = [
+            ...alertInstanceState.alertStates.slice(0, indexInState),
+            nodeState,
+            ...alertInstanceState.alertStates.slice(indexInState + 1),
+          ];
+        }
       }
 
       instance.replaceState(alertInstanceState);
@@ -350,9 +370,9 @@ export class CpuUsageAlert extends BaseAlert {
       case ALERT_ACTION_TYPE_EMAIL:
         return {
           subject: i18n.translate('xpack.monitoring.alerts.cpuUsage.emailSubject', {
-            defaultMessage: `CPU usage alert is firing for {count} node(s) in cluster: {clusterName}`,
-            // defaultMessage: `CPU usage alert is {state} for {nodeName} in {clusterName}. CPU usage is {cpuUsage}`,
+            defaultMessage: `CPU usage alert is {state} for {count} node(s) in cluster: {clusterName}`,
             values: {
+              state: '{{context.state}}',
               count: '{{context.count}}',
               clusterName: '{{context.clusterName}}',
             },
@@ -368,8 +388,9 @@ export class CpuUsageAlert extends BaseAlert {
         // Want to get other notifiations for this kind of issue? Visit the Stack Monitoring UI in Kibana to find out more.s
         return {
           message: i18n.translate('xpack.monitoring.alerts.cpuUsage.serverLog', {
-            defaultMessage: `CPU usage alert is firing for {count} node(s) in cluster: {clusterName}`,
+            defaultMessage: `CPU usage alert is {state} for {count} node(s) in cluster: {clusterName}`,
             values: {
+              state: '{{context.state}}',
               count: '{{context.count}}',
               clusterName: '{{context.clusterName}}',
             },

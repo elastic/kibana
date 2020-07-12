@@ -74,7 +74,7 @@ export class LicenseExpirationAlert extends BaseAlert {
       accum.push({
         instanceKey: `${legacyAlert.metadata.cluster_uuid}`,
         clusterUuid: legacyAlert.metadata.cluster_uuid,
-        shouldFire: true,
+        shouldFire: !legacyAlert.resolved_timestamp,
         severity: mapLegacySeverity(legacyAlert.metadata.severity),
         meta: legacyAlert,
         ccs: null,

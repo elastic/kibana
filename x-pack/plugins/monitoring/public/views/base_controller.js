@@ -135,7 +135,7 @@ export class MonitoringViewBaseController {
         );
       } catch (err) {
         Legacy.shims.toastNotifications.addDanger({
-          title: 'Error getting alert status',
+          title: 'Error fetching alert status',
           text: err.message,
         });
       }

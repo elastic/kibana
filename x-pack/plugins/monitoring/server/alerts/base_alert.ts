@@ -43,8 +43,8 @@ import { CommonAlertFilter, CommonAlertParams, CommonBaseAlert } from '../../com
 export class BaseAlert {
   public type!: string;
   public label!: string;
-  public defaultThrottle: string = '30s';
-  public defaultInterval: string = '30s';
+  public defaultThrottle: string = '1m';
+  public defaultInterval: string = '1m';
   public rawAlert: Alert | undefined;
   public isLegacy: boolean = false;
 
@@ -231,6 +231,7 @@ export class BaseAlert {
     const uiSettings = (await this.getUiSettingsService()).asScopedToClient(
       services.savedObjectsClient
     );
+
     const data = await this.fetchData(params, callCluster, clusters, uiSettings, availableCcs);
     this.processData(data, clusters, services, logger);
   }
@@ -259,10 +260,16 @@ export class BaseAlert {
         continue;
       }
 
-      const alertInstanceState: AlertInstanceState = { alertStates: [] };
       const instance = services.alertInstanceFactory(`${this.type}:${item.instanceKey}`);
-      const alertState: AlertState = this.getDefaultAlertState(cluster, item);
-      alertInstanceState.alertStates.push(alertState);
+      const state = (instance.getState() as unknown) as AlertInstanceState;
+      const alertInstanceState: AlertInstanceState = { alertStates: state?.alertStates || [] };
+      let alertState: AlertState;
+      const indexInState = this.findIndexInInstanceState(alertInstanceState, cluster);
+      if (indexInState > -1) {
+        alertState = state.alertStates[indexInState];
+      } else {
+        alertState = this.getDefaultAlertState(cluster, item);
+      }
 
       let shouldExecuteActions = false;
       if (item.shouldFire) {
@@ -279,6 +286,16 @@ export class BaseAlert {
         alertState.ui.resolvedMS = +new Date();
         alertState.ui.message = this.getUiMessage(alertState, item);
         shouldExecuteActions = true;
+      }
+
+      if (indexInState === -1) {
+        alertInstanceState.alertStates.push(alertState);
+      } else {
+        alertInstanceState.alertStates = [
+          ...alertInstanceState.alertStates.slice(0, indexInState),
+          alertState,
+          ...alertInstanceState.alertStates.slice(indexInState + 1),
+        ];
       }
 
       instance.replaceState(alertInstanceState);
@@ -298,6 +315,12 @@ export class BaseAlert {
         };
     }
     return null;
+  }
+
+  protected findIndexInInstanceState(stateInstance: AlertInstanceState, cluster: AlertCluster) {
+    return stateInstance.alertStates.findIndex(
+      (alertState) => alertState.cluster.clusterUuid === cluster.clusterUuid
+    );
   }
 
   protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {

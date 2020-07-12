@@ -55,7 +55,11 @@ export function monitoringClustersProvider($injector) {
     }
 
     function ensureAlertsEnabled() {
-      return $http.post('../api/monitoring/v1/alerts/enable', {});
+      return $http.post('../api/monitoring/v1/alerts/enable', {}).catch((err) => {
+        const Private = $injector.get('Private');
+        const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
+        return ajaxErrorHandlers(err);
+      });
     }
 
     if (!once) {

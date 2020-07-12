@@ -89,6 +89,7 @@ export interface AlertData {
 export interface LegacyAlert {
   prefix: string;
   message: string;
+  resolved_timestamp: string;
   metadata: LegacyAlertMetadata;
   nodes?: LegacyAlertNodesChangedList;
 }

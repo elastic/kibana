@@ -70,7 +70,7 @@ export class LogstashVersionMismatchAlert extends BaseAlert {
       accum.push({
         instanceKey: `${legacyAlert.metadata.cluster_uuid}`,
         clusterUuid: legacyAlert.metadata.cluster_uuid,
-        shouldFire: true,
+        shouldFire: !legacyAlert.resolved_timestamp,
         severity,
         meta: legacyAlert,
         ccs: null,
