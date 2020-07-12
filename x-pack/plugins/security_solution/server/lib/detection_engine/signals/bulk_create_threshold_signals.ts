@@ -62,13 +62,15 @@ const getNestedQueryFilters = (filtersObj: FilterObject): Record<string, string>
     );
   } else {
     return (
-      (filtersObj.bool?.should && filtersObj.bool?.should[0] && filtersObj.bool.should[0].match) ??
+      (filtersObj.bool?.should &&
+        filtersObj.bool?.should[0] &&
+        (filtersObj.bool.should[0].match || filtersObj.bool.should[0].match_phrase)) ??
       {}
     );
   }
 };
 
-const getThresholdSignalQueryFields = (filter: unknown) => {
+export const getThresholdSignalQueryFields = (filter: unknown) => {
   const filters = get('bool.filter', filter);
 
   return reduce(
@@ -77,8 +79,8 @@ const getThresholdSignalQueryFields = (filter: unknown) => {
         return { ...acc, ...item.match_phrase };
       }
 
-      if (item.bool.should && item.bool.should[0].match) {
-        return { ...acc, ...item.bool.should[0].match };
+      if (item.bool.should && (item.bool.should[0].match || item.bool.should[0].match_phrase)) {
+        return { ...acc, ...(item.bool.should[0].match || item.bool.should[0].match_phrase) };
       }
 
       if (item.bool?.filter) {
@@ -99,7 +101,7 @@ const getTransformedHits = (
   signalQueryFields: Record<string, string>
 ) => {
   if (isEmpty(threshold.field)) {
-    const totalResults = results.hits.total;
+    const totalResults = results.hits.total.value;
 
     if (totalResults < threshold.value) {
       return [];
@@ -150,11 +152,7 @@ const transformThresholdResultsToEcs = (
   threshold: Threshold
 ): SignalSearchResponse => {
   const signalQueryFields = getThresholdSignalQueryFields(filter);
-
-  // console.log('signalQueryFields', JSON.stringify(signalQueryFields, null, 2));
-
   const transformedHits = getTransformedHits(results, inputIndex, threshold, signalQueryFields);
-
   const thresholdResults = {
     ...results,
     hits: {
@@ -178,8 +176,6 @@ export const bulkCreateThresholdSignals = async (
     params.filter,
     params.ruleParams.threshold!
   );
-
-  // console.log('ruleParams', JSON.stringify(params.ruleParams, null, 2));
 
   return singleBulkCreate({ ...params, filteredEvents: ecsResults });
 };
