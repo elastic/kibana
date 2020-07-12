@@ -36,6 +36,7 @@ export function redisenterpriseMetricsSpecProvider(context: TutorialContext): Tu
     name: i18n.translate('home.tutorials.redisenterpriseMetrics.nameTitle', {
       defaultMessage: 'Redis Enterprise metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.redisenterpriseMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from Redis Enterprise Server.',

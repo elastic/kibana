@@ -22,6 +22,8 @@ export async function getObservabilityAlerts({ core }: { core: AppMountContext['
       );
     });
   } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error('Error while fetching alerts', e);
     return [];
   }
 }
