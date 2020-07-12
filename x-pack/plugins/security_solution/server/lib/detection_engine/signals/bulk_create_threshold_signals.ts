@@ -15,7 +15,6 @@ import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
 import { SignalSearchResponse } from './types';
-import { SearchResponse } from '../../types';
 
 interface BulkCreateThresholdSignalsParams {
   actions: RuleAlertAction[];
@@ -37,10 +36,6 @@ interface BulkCreateThresholdSignalsParams {
   refresh: RefreshTypes;
   tags: string[];
   throttle: string;
-}
-
-interface ThresholdResults extends SignalSearchResponse {
-  '@timestamp': string;
 }
 
 interface FilterObject {
@@ -98,7 +93,7 @@ const getThresholdSignalQueryFields = (filter: unknown) => {
 };
 
 const getTransformedHits = (
-  results: ThresholdResults,
+  results: SignalSearchResponse,
   inputIndex: string,
   threshold: Threshold,
   signalQueryFields: Record<string, string>
@@ -149,11 +144,11 @@ const getTransformedHits = (
 };
 
 const transformThresholdResultsToEcs = (
-  results: ThresholdResults,
+  results: SignalSearchResponse,
   inputIndex: string,
   filter: unknown,
   threshold: Threshold
-): SearchResponse<object> => {
+): SignalSearchResponse => {
   const signalQueryFields = getThresholdSignalQueryFields(filter);
 
   console.log('signalQueryFields', JSON.stringify(signalQueryFields, null, 2));
