@@ -89,6 +89,7 @@ describe('Epic Timeline', () => {
         description: '',
         eventIdToNoteIds: {},
         eventType: 'all',
+        excludedRowRendererIds: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
         filters: [
@@ -146,7 +147,6 @@ describe('Epic Timeline', () => {
         selectedEventIds: {},
         show: true,
         showCheckboxes: false,
-        showRowRenderers: true,
         sort: { columnId: '@timestamp', sortDirection: Direction.desc },
         status: TimelineStatus.active,
         width: 1100,
@@ -233,6 +233,7 @@ describe('Epic Timeline', () => {
         },
         description: '',
         eventType: 'all',
+        excludedRowRendererIds: [],
         filters: [
           {
             exists: null,
