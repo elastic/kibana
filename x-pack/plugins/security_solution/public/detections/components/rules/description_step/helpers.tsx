@@ -19,6 +19,7 @@ import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
+import { Threshold } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { RuleType } from '../../../../../common/detection_engine/types';
 import { esFilters } from '../../../../../../../../src/plugins/data/public';
 

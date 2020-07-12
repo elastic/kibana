@@ -76,7 +76,7 @@ describe('rule helpers', () => {
         },
         threshold: {
           field: [],
-          value: 100,
+          value: undefined,
         },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
@@ -210,6 +210,10 @@ describe('rule helpers', () => {
           filters: [],
           saved_id: "Garrett's IP",
         },
+        threshold: {
+          field: [],
+          value: undefined,
+        },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
           title: 'Untitled timeline',
@@ -238,6 +242,10 @@ describe('rule helpers', () => {
           },
           filters: [],
           saved_id: undefined,
+        },
+        threshold: {
+          field: [],
+          value: undefined,
         },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',

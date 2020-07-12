@@ -394,6 +394,7 @@ export const getResult = (): RuleAlertType => ({
         ],
       },
     ],
+    threshold: undefined,
     timestampOverride: undefined,
     references: ['http://www.example.com', 'https://ww.example.com'],
     note: '# Investigative notes',

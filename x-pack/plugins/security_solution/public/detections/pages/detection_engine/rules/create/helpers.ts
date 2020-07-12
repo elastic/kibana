@@ -51,26 +51,35 @@ export interface RuleFields {
   queryBar: unknown;
   index: unknown;
   ruleType: unknown;
+  threshold?: unknown;
 }
-type QueryRuleFields<T> = Omit<T, 'anomalyThreshold' | 'machineLearningJobId'>;
+type QueryRuleFields<T> = Omit<T, 'anomalyThreshold' | 'machineLearningJobId' | 'threshold'>;
+type ThresholdRuleFields<T> = Omit<T, 'anomalyThreshold' | 'machineLearningJobId'>;
 type MlRuleFields<T> = Omit<T, 'queryBar' | 'index'>;
 
-const isMlFields = <T>(fields: QueryRuleFields<T> | MlRuleFields<T>): fields is MlRuleFields<T> =>
-  has('anomalyThreshold', fields);
+const isMlFields = <T>(
+  fields: QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T>
+): fields is MlRuleFields<T> => has('anomalyThreshold', fields);
+
+const isThresholdFields = <T>(
+  fields: QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T>
+): fields is ThresholdRuleFields<T> => has('threshold', fields);
 
 export const filterRuleFieldsForType = <T extends RuleFields>(fields: T, type: RuleType) => {
   if (isMlRule(type)) {
     const { index, queryBar, ...mlRuleFields } = fields;
     return mlRuleFields;
+  } else if (type === 'threshold') {
+    const { anomalyThreshold, machineLearningJobId, ...thresholdRuleFields } = fields;
+    return thresholdRuleFields;
   } else {
-    const { anomalyThreshold, machineLearningJobId, ...queryRuleFields } = fields;
+    const { anomalyThreshold, machineLearningJobId, threshold, ...queryRuleFields } = fields;
     return queryRuleFields;
   }
 };
 
 export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
   const ruleFields = filterRuleFieldsForType(defineStepData, defineStepData.ruleType);
-  console.error('formatDefineStepData', ruleFields);
   const { ruleType, timeline } = ruleFields;
   const baseFields = {
     type: ruleType,
@@ -86,6 +95,20 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         anomaly_threshold: ruleFields.anomalyThreshold,
         machine_learning_job_id: ruleFields.machineLearningJobId,
       }
+    : isThresholdFields(ruleFields)
+    ? {
+        index: ruleFields.index,
+        filters: ruleFields.queryBar?.filters,
+        language: ruleFields.queryBar?.query?.language,
+        query: ruleFields.queryBar?.query?.query as string,
+        saved_id: ruleFields.queryBar?.saved_id,
+        ...(ruleType === 'threshold' && {
+          threshold: {
+            field: ruleFields.threshold?.field ?? [],
+            value: ruleFields.threshold?.value ?? 0,
+          },
+        }),
+      }
     : {
         index: ruleFields.index,
         filters: ruleFields.queryBar?.filters,
@@ -94,12 +117,6 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         saved_id: ruleFields.queryBar?.saved_id,
         ...(ruleType === 'query' &&
           ruleFields.queryBar?.saved_id && { type: 'saved_query' as RuleType }),
-        ...(ruleType === 'threshold' && {
-          threshold: {
-            field: ruleFields.threshold?.field,
-            value: ruleFields.threshold?.value,
-          },
-        }),
       };
 
   return {

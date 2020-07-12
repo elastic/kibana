@@ -84,15 +84,10 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
     id: rule.timeline_id ?? null,
     title: rule.timeline_title ?? null,
   },
-  threshold: rule.threshold
-    ? {
-        field: [rule.threshold.field],
-        value: parseInt(rule.threshold.value, 10),
-      }
-    : {
-        field: [],
-        value: 100,
-      },
+  threshold: {
+    field: rule.threshold?.field ? [rule.threshold.field] : [],
+    value: rule.threshold?.value,
+  },
 });
 
 export const getScheduleStepsData = (rule: Rule): ScheduleStepRule => {

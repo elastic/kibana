@@ -291,7 +291,6 @@ export const signalRulesAlertType = ({
           if (bulkCreateDuration) {
             result.bulkCreateTimes.push(bulkCreateDuration);
           }
-          // console.log('resulttttt', result);
         } else {
           const inputIndex = await getInputIndex(services, version, index);
           const esFilter = await getFilter({

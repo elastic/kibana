@@ -45,7 +45,6 @@ import {
   type,
   threat,
   threshold,
-  thresholdOrUndefined,
   throttle,
   job_status,
   status_date,
@@ -127,7 +126,7 @@ export const dependentRulesSchema = t.partial({
   machine_learning_job_id,
 
   // Threshold fields
-  threshold: thresholdOrUndefined,
+  threshold,
 });
 
 /**

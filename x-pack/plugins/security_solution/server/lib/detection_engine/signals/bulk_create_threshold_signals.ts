@@ -7,7 +7,6 @@
 import uuid from 'uuid';
 import { reduce, get, isEmpty } from 'lodash/fp';
 import set from 'set-value';
-import { SearchResponse } from 'elasticsearch';
 
 import { Threshold } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Logger } from '../../../../../../../src/core/server';
@@ -16,6 +15,7 @@ import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
 import { SignalSearchResponse } from './types';
+import { SearchResponse } from '../../types';
 
 interface BulkCreateThresholdSignalsParams {
   actions: RuleAlertAction[];
@@ -38,9 +38,16 @@ interface BulkCreateThresholdSignalsParams {
   throttle: string;
 }
 
-interface ThresholdResults {}
+type ThresholdResults = SignalSearchResponse;
 
-const getNestedQueryFilters = (filtersObj: unknown) => {
+interface FilterObject {
+  bool?: {
+    filter?: FilterObject | FilterObject[];
+    should?: Array<Record<string, Record<string, string>>>;
+  };
+}
+
+const getNestedQueryFilters = (filtersObj: FilterObject): Record<string, string> => {
   if (Array.isArray(filtersObj.bool?.filter)) {
     return reduce(
       (acc, filterItem) => {
@@ -53,10 +60,13 @@ const getNestedQueryFilters = (filtersObj: unknown) => {
         return acc;
       },
       {},
-      filtersObj.bool.filter
+      filtersObj.bool?.filter
     );
   } else {
-    return filtersObj.bool.should && filtersObj.bool.should[0].match;
+    return (
+      (filtersObj.bool?.should && filtersObj.bool?.should[0] && filtersObj.bool.should[0].match) ??
+      {}
+    );
   }
 };
 
@@ -85,12 +95,14 @@ const getThresholdSignalQueryFields = (filter: unknown) => {
 };
 
 const getTransformedHits = (
-  results,
+  results: ThresholdResults,
   threshold: Threshold,
   signalQueryFields: Record<string, string>
 ) => {
   if (isEmpty(threshold.field)) {
-    if (results.hits.total.value < threshold.value) {
+    const totalResults = results.hits.total;
+
+    if (totalResults < threshold.value) {
       return [];
     }
 
@@ -104,7 +116,7 @@ const getTransformedHits = (
         _index: '',
         _id: uuid.v4(),
         _source: source,
-        threshold_count: results.hits.total.value,
+        threshold_count: totalResults,
       },
     ];
   }
@@ -113,22 +125,23 @@ const getTransformedHits = (
     return [];
   }
 
-  return results.aggregations.threshold.buckets.map(({ key, doc_count }) => {
-    const source = {
-      '@timestamp': new Date().toISOString(),
-      threshold_count: doc_count,
-      ...signalQueryFields,
-    };
+  return results.aggregations.threshold.buckets.map(
+    ({ key, doc_count }: { key: string; doc_count: number }) => {
+      const source = {
+        '@timestamp': new Date().toISOString(),
+        threshold_count: doc_count,
+        ...signalQueryFields,
+      };
 
-    set(source, threshold.field, key);
+      set(source, threshold.field, key);
 
-    return {
-      // ...rest,
-      _index: '',
-      _id: uuid.v4(),
-      _source: source,
-    };
-  });
+      return {
+        _index: '',
+        _id: uuid.v4(),
+        _source: source,
+      };
+    }
+  );
 };
 
 const transformThresholdResultsToEcs = (
@@ -157,7 +170,7 @@ const transformThresholdResultsToEcs = (
     },
   };
 
-  set(thresholdResults, 'this.total.value', transformedHits.length);
+  set(thresholdResults, 'results.hits.total', transformedHits.length);
 
   return thresholdResults;
 };

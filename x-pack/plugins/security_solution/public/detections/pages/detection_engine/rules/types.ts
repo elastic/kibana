@@ -102,7 +102,7 @@ export interface DefineStepRule extends StepRuleData {
   timeline: FieldValueTimeline;
   threshold?: {
     field: string[];
-    value: number;
+    value?: number;
   };
 }
 
@@ -127,7 +127,10 @@ export interface DefineStepRuleJson {
   saved_id?: string;
   query?: string;
   language?: string;
-  threshold?: Threshold;
+  threshold?: {
+    field: string;
+    value: number;
+  };
   timeline_id?: string;
   timeline_title?: string;
   type: RuleType;
