@@ -8,12 +8,17 @@ import { getCommits } from './ui/getCommits';
 import { getTargetBranches } from './ui/getTargetBranches';
 import { maybeSetupRepo } from './ui/maybeSetupRepo';
 
-export type Result = {
-  targetBranch: string;
-  success: boolean;
-  message?: string;
-  url?: string;
-};
+export type Result =
+  | {
+      success: true;
+      targetBranch: string;
+      pullRequestUrl: string;
+    }
+  | {
+      success: false;
+      targetBranch: string;
+      errorMessage: string;
+    };
 
 export async function runWithOptions(options: BackportOptions) {
   logger.verbose('Backport options', options);
@@ -35,9 +40,13 @@ export async function runWithOptions(options: BackportOptions) {
         commits,
         targetBranch,
       });
-      results.push({ targetBranch, success: true, url: pullRequest.html_url });
+      results.push({
+        targetBranch,
+        success: true,
+        pullRequestUrl: pullRequest.html_url,
+      });
     } catch (e) {
-      results.push({ targetBranch, success: false, message: e.message });
+      results.push({ targetBranch, success: false, errorMessage: e.message });
       if (e instanceof HandledError) {
         consoleLog(e.message);
       } else {

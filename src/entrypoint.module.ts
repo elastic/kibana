@@ -12,7 +12,7 @@ export function run(
   // const args = process.argv.slice(2);
   // run(options, args)
   //
-  args = []
+  args: string[] = []
 ) {
   return main(args, options);
 }

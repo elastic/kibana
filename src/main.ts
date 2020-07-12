@@ -6,13 +6,18 @@ import { HandledError } from './services/HandledError';
 import { getLogfilePath } from './services/env';
 import { initLogger, consoleLog } from './services/logger';
 
-export type BackportResponse = {
-  success: boolean;
-  results: Result[];
-  isUnhandledError?: boolean;
-  message?: string;
-  error?: Error;
-};
+export type BackportResponse =
+  | {
+      success: boolean;
+      results: Result[];
+    }
+  | {
+      success: boolean;
+      results: Result[];
+      isUnhandledError: boolean;
+      errorMessage: string;
+      error: Error;
+    };
 
 export async function main(
   argv: string[],
@@ -53,7 +58,7 @@ export async function main(
       success: false,
       results: [],
       isUnhandledError,
-      message: isUnhandledError
+      errorMessage: isUnhandledError
         ? 'An unhandled error occurred. Please see the logs for additional details'
         : e.message,
       error: e,
