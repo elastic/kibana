@@ -218,14 +218,14 @@ export const buildQueryExceptions = ({
   exclude?: boolean;
 }): DataQuery[] => {
   if (lists != null) {
-    const exceptions = lists.reduce((acc, exceptionItem) => {
+    const exceptions = lists.reduce<string[]>((acc, exceptionItem) => {
       return [
         ...acc,
         ...(exceptionItem.entries !== undefined
           ? [buildExceptionItemEntries({ lists: exceptionItem.entries, language, exclude })]
           : []),
       ];
-    }, [] as string[]);
+    }, []);
     const formattedQuery = formatQuery({ exceptions, language, query });
     return [
       {
