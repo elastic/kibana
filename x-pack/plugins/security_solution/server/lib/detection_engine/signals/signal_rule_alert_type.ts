@@ -250,11 +250,11 @@ export const signalRulesAlertType = ({
             threshold,
           });
 
-          console.log(
-            'thresholdResults',
-            thresholdResults
-            // JSON.stringify(thresholdResults.aggregations?.threshold.buckets, null, 2)
-          );
+          // console.log(
+          //   'thresholdResults',
+          //   thresholdResults
+          //   // JSON.stringify(thresholdResults.aggregations?.threshold.buckets, null, 2)
+          // );
 
           const {
             success,
