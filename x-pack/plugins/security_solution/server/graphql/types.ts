@@ -126,6 +126,8 @@ export interface TimelineInput {
 
   eventType?: Maybe<string>;
 
+  excludedRowRendererIds?: Maybe<RowRendererId[]>;
+
   filters?: Maybe<FilterTimelineInput[]>;
 
   kqlMode?: Maybe<string>;
@@ -349,6 +351,22 @@ export enum TlsFields {
 export enum DataProviderType {
   default = 'default',
   template = 'template',
+}
+
+export enum RowRendererId {
+  auditd = 'auditd',
+  auditd_file = 'auditd_file',
+  netflow = 'netflow',
+  plain = 'plain',
+  suricata = 'suricata',
+  system = 'system',
+  system_dns = 'system_dns',
+  system_endgame_process = 'system_endgame_process',
+  system_file = 'system_file',
+  system_fim = 'system_fim',
+  system_security_event = 'system_security_event',
+  system_socket = 'system_socket',
+  zeek = 'zeek',
 }
 
 export enum TimelineStatus {
@@ -1962,6 +1980,8 @@ export interface TimelineResult {
   eventIdToNoteIds?: Maybe<NoteResult[]>;
 
   eventType?: Maybe<string>;
+
+  excludedRowRendererIds?: Maybe<RowRendererId[]>;
 
   favorite?: Maybe<FavoriteTimelineResult[]>;
 
@@ -8101,6 +8121,12 @@ export namespace TimelineResultResolvers {
 
     eventType?: EventTypeResolver<Maybe<string>, TypeParent, TContext>;
 
+    excludedRowRendererIds?: ExcludedRowRendererIdsResolver<
+      Maybe<RowRendererId[]>,
+      TypeParent,
+      TContext
+    >;
+
     favorite?: FavoriteResolver<Maybe<FavoriteTimelineResult[]>, TypeParent, TContext>;
 
     filters?: FiltersResolver<Maybe<FilterTimelineResult[]>, TypeParent, TContext>;
@@ -8181,6 +8207,11 @@ export namespace TimelineResultResolvers {
   > = Resolver<R, Parent, TContext>;
   export type EventTypeResolver<
     R = Maybe<string>,
+    Parent = TimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ExcludedRowRendererIdsResolver<
+    R = Maybe<RowRendererId[]>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;

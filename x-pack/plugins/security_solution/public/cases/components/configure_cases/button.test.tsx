@@ -95,7 +95,11 @@ describe('Configuration button', () => {
     );
 
     newWrapper.find('[data-test-subj="configure-case-button"]').first().simulate('mouseOver');
-
-    expect(newWrapper.find('.euiToolTipPopover').text()).toBe(`${titleTooltip}${msgTooltip}`);
+    // EuiToolTip mounts children after a 250ms delay
+    setTimeout(
+      () =>
+        expect(newWrapper.find('.euiToolTipPopover').text()).toBe(`${titleTooltip}${msgTooltip}`),
+      250
+    );
   });
 });

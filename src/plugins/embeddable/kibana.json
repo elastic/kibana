@@ -10,5 +10,9 @@
   ],
   "extraPublicDirs": [
     "public/lib/test_samples"
+  ],
+  "requiredBundles": [
+    "savedObjects",
+    "kibanaReact"
   ]
 }
