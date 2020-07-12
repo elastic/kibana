@@ -15,6 +15,7 @@ import {
   TimelineStatus,
 } from '../../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/types';
+import type { RowRendererId } from '../../../../common/types/timeline';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
@@ -54,6 +55,8 @@ export interface TimelineModel {
   eventType?: EventType;
   /** A map of events in this timeline to the chronologically ordered notes (in this timeline) associated with the event */
   eventIdToNoteIds: Record<string, string[]>;
+  /** A list of Ids of excluded Row Renderers */
+  excludedRowRendererIds: RowRendererId[];
   filters?: Filter[];
   /** When non-empty, display a graph view for this event */
   graphEventId?: string;
@@ -108,8 +111,6 @@ export interface TimelineModel {
   show: boolean;
   /** When true, shows checkboxes enabling selection. Selected events store in selectedEventIds **/
   showCheckboxes: boolean;
-  /** When true, shows additional rowRenderers below the PlainRowRenderer **/
-  showRowRenderers: boolean;
   /**  Specifies which column the timeline is sorted on, and the direction (ascending / descending) */
   sort: Sort;
   /** status: active | draft */
@@ -131,6 +132,7 @@ export type SubsetTimelineModel = Readonly<
     | 'description'
     | 'eventType'
     | 'eventIdToNoteIds'
+    | 'excludedRowRendererIds'
     | 'graphEventId'
     | 'highlightedDropAndProviderId'
     | 'historyIds'
@@ -153,7 +155,6 @@ export type SubsetTimelineModel = Readonly<
     | 'selectedEventIds'
     | 'show'
     | 'showCheckboxes'
-    | 'showRowRenderers'
     | 'sort'
     | 'width'
     | 'isSaving'
