@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiBreadcrumbs, Breadcrumb, EuiCode, EuiBetaBadge } from '@elastic/eui';
+import { EuiBreadcrumbs, EuiCode, EuiBetaBadge, Breadcrumb } from '@elastic/eui';
 import styled from 'styled-components';
 import React, { memo } from 'react';
 import { useResolverTheme } from '../assets';
