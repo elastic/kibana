@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DynamicSettings } from '../runtime_types';
+import { API_URLS } from '../../../common/constants';
+import { apiService } from './utils';
 
-export const DYNAMIC_SETTINGS_DEFAULTS: DynamicSettings = {
-  heartbeatIndices: 'heartbeat-8*',
-  certAgeThreshold: 730,
-  certExpirationThreshold: 30,
-  defaultConnectors: [],
+export const fetchConnectors = async () => {
+  return await apiService.get(API_URLS.ALERT_ACTIONS);
 };

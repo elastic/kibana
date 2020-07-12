@@ -35,6 +35,7 @@ import {
   VALUE_MUST_BE_GREATER_THAN_ZERO,
   VALUE_MUST_BE_AN_INTEGER,
 } from '../../common/translations';
+import { AlertDefaultsForm } from '../components/settings/alert_defaults_form';
 
 interface SettingsPageFieldErrors {
   heartbeatIndices: string | '';
@@ -155,6 +156,13 @@ export const SettingsPage: React.FC = () => {
                   loading={dss.loading}
                   onChange={onChangeFormField}
                   formFields={formFields}
+                  fieldErrors={fieldErrors}
+                  isDisabled={isFormDisabled}
+                />
+                <AlertDefaultsForm
+                  loading={dss.loading}
+                  formFields={formFields}
+                  onChange={onChangeFormField}
                   fieldErrors={fieldErrors}
                   isDisabled={isFormDisabled}
                 />

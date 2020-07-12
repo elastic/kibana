@@ -14,6 +14,7 @@ describe('dynamic settings', () => {
           certAgeThreshold: -1,
           certExpirationThreshold: 2,
           heartbeatIndices: 'foo',
+          defaultConnectors: [],
         })
       ).toMatchInlineSnapshot(`
         Object {
@@ -28,6 +29,7 @@ describe('dynamic settings', () => {
           certAgeThreshold: 10.2,
           certExpirationThreshold: 2,
           heartbeatIndices: 'foo',
+          defaultConnectors: [],
         })
       ).toMatchInlineSnapshot(`
         Object {
@@ -42,6 +44,7 @@ describe('dynamic settings', () => {
           certAgeThreshold: 2,
           certExpirationThreshold: -1,
           heartbeatIndices: 'foo',
+          defaultConnectors: [],
         })
       ).toMatchInlineSnapshot(`
         Object {
@@ -56,6 +59,7 @@ describe('dynamic settings', () => {
           certAgeThreshold: 2,
           certExpirationThreshold: 1.23,
           heartbeatIndices: 'foo',
+          defaultConnectors: [],
         })
       ).toMatchInlineSnapshot(`
         Object {
@@ -70,6 +74,7 @@ describe('dynamic settings', () => {
           certAgeThreshold: 2,
           certExpirationThreshold: 13,
           heartbeatIndices: 'foo',
+          defaultConnectors: [],
         })
       ).toBeUndefined();
     });

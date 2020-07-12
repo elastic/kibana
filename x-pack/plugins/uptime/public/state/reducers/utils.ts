@@ -8,7 +8,7 @@ import { Action } from 'redux-actions';
 import { AsyncAction } from '../actions/types';
 
 export function handleAsyncAction<ReducerState>(
-  storeKey: string,
+  storeKey: keyof ReducerState,
   asyncAction: AsyncAction<any, any>
 ) {
   return {

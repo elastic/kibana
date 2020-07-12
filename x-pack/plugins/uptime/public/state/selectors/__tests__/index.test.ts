@@ -108,6 +108,12 @@ describe('state selectors', () => {
       },
     },
     selectedFilters: null,
+    alerts: {
+      connectors: {
+        data: null,
+        loading: false,
+      },
+    },
   };
 
   it('selects base path from state', () => {

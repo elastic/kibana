@@ -32,6 +32,9 @@ export const umDynamicSettings: SavedObjectsType = {
       certExpirationThreshold: {
         type: 'long',
       },
+      defaultConnectors: {
+        type: 'keyword',
+      },
     },
   },
 };

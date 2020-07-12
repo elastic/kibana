@@ -31,6 +31,7 @@ export function plugin(ctx: PluginInitializerContext) {
 
 export { Plugin };
 export * from './plugin';
+export * from './types';
 
 export { TIME_UNITS } from './application/constants';
 export { getTimeUnitLabel } from './common/lib/get_time_unit_label';
