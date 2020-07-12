@@ -16,8 +16,9 @@ import {
 } from '../../../lists_plugin_deps';
 import { updateAlertStatus } from '../../../detections/containers/detection_engine/alerts/api';
 import { getUpdateAlertsQuery } from '../../../detections/components/alerts_table/actions';
-import { buildQueryExceptions } from '../../../../common/detection_engine/build_exceptions_query';
+import { buildAlertStatusFilter } from '../../../detections/components/alerts_table/default_config';
 import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
+import { Index } from '../../../../common/detection_engine/schemas/common/schemas';
 import { formatExceptionItemForUpdate } from './helpers';
 
 /**
@@ -25,13 +26,13 @@ import { formatExceptionItemForUpdate } from './helpers';
  *
  * @param exceptionItemsToAddOrUpdate array of ExceptionListItemSchema to add or update
  * @param alertIdToClose - optional string representing alert to close
- * @param shouldBulkClose - optional boolean for whether to close alerts matching the exceptions query
+ * @param bulkCloseIndex - optional index used to create bulk close query
  *
  */
 export type AddOrUpdateExceptionItemsFunc = (
   exceptionItemsToAddOrUpdate: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
   alertIdToClose?: string,
-  shouldBulkClose?: boolean
+  bulkCloseIndex?: Index
 ) => Promise<void>;
 
 export type ReturnUseAddOrUpdateException = [
@@ -105,7 +106,7 @@ export const useAddOrUpdateException = ({
     const addOrUpdateExceptionItems: AddOrUpdateExceptionItemsFunc = async (
       exceptionItemsToAddOrUpdate,
       alertIdToClose,
-      shouldBulkClose
+      bulkCloseIndex
     ) => {
       try {
         setIsLoading(true);
@@ -116,12 +117,12 @@ export const useAddOrUpdateException = ({
           });
         }
 
-        if (shouldBulkClose === true) {
+        if (bulkCloseIndex != null) {
           const filter = getQueryFilter(
             '',
             'kuery',
-            [],
-            ['.siem-signals'],
+            buildAlertStatusFilter('open'),
+            bulkCloseIndex,
             exceptionItemsToAddOrUpdate,
             false
           );
