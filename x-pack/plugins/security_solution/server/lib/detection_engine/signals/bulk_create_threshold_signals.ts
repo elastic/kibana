@@ -101,7 +101,8 @@ const getTransformedHits = (
   signalQueryFields: Record<string, string>
 ) => {
   if (isEmpty(threshold.field)) {
-    const totalResults = results.hits.total.value;
+    const totalResults =
+      typeof results.hits.total === 'number' ? results.hits.total : results.hits.total.value;
 
     if (totalResults < threshold.value) {
       return [];

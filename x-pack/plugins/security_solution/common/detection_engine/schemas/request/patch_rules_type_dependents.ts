@@ -66,7 +66,7 @@ export const validateId = (rule: PatchRulesSchema): string[] => {
   }
 };
 
-export const validateThreshold = (rule: ImportRulesSchema): string[] => {
+export const validateThreshold = (rule: PatchRulesSchema): string[] => {
   if (rule.type === 'threshold') {
     if (!rule.threshold) {
       return ['when "type" is "threshold", "threshold" is required'];
