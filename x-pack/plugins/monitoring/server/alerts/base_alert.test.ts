@@ -58,10 +58,10 @@ describe('BaseAlert', () => {
           name: undefined,
           params: {},
           schedule: {
-            interval: '30s',
+            interval: '1m',
           },
           tags: [],
-          throttle: '30s',
+          throttle: '1m',
         },
       });
     });
