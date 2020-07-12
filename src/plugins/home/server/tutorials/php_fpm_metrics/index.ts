@@ -36,6 +36,7 @@ export function phpfpmMetricsSpecProvider(context: TutorialContext): TutorialSch
     name: i18n.translate('home.tutorials.phpFpmMetrics.nameTitle', {
       defaultMessage: 'PHP-FPM metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     isBeta: false,
     shortDescription: i18n.translate('home.tutorials.phpFpmMetrics.shortDescription', {
