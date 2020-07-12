@@ -10,6 +10,7 @@ import { Filter } from '../../../../../../../../src/plugins/data/common';
 import { FormData, FormHook } from '../../../../shared_imports';
 import { FieldValueQueryBar } from '../../../components/rules/query_bar';
 import { FieldValueTimeline } from '../../../components/rules/pick_timeline';
+import { FieldValueThreshold } from '../../../components/rules/threshold_input';
 import {
   Author,
   BuildingBlockType,
@@ -17,7 +18,6 @@ import {
   RiskScoreMapping,
   RuleNameOverride,
   SeverityMapping,
-  Threshold,
   TimestampOverride,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 
@@ -100,10 +100,7 @@ export interface DefineStepRule extends StepRuleData {
   queryBar: FieldValueQueryBar;
   ruleType: RuleType;
   timeline: FieldValueTimeline;
-  threshold?: {
-    field: string[];
-    value?: number;
-  };
+  threshold: FieldValueThreshold;
 }
 
 export interface ScheduleStepRule extends StepRuleData {

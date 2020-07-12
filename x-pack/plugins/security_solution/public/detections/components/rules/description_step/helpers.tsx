@@ -133,10 +133,10 @@ export const buildThreatDescription = ({ label, threat }: BuildThreatDescription
                     {tactic != null ? tactic.text : ''}
                   </EuiLink>
                   <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
-                    {singleThreat.technique.map((technique) => {
+                    {singleThreat.technique.map((technique, listIndex) => {
                       const myTechnique = techniquesOptions.find((t) => t.id === technique.id);
                       return (
-                        <EuiFlexItem>
+                        <EuiFlexItem key={myTechnique?.id ?? listIndex}>
                           <TechniqueLinkItem
                             data-test-subj="threatTechniqueLink"
                             href={technique.reference}
@@ -309,8 +309,12 @@ export const buildRuleTypeDescription = (label: string, ruleType: RuleType): Lis
 export const buildThresholdDescription = (label: string, threshold: Threshold): ListItems[] => [
   {
     title: label,
-    description: isEmpty(threshold.field[0])
-      ? `${i18n.THRESHOLD_RESULTS_ALL} >= ${threshold.value}`
-      : `${i18n.THRESHOLD_RESULTS_AGGREGATED_BY} ${threshold.field[0]} >= ${threshold.value}`,
+    description: (
+      <>
+        {isEmpty(threshold.field[0])
+          ? `${i18n.THRESHOLD_RESULTS_ALL} >= ${threshold.value}`
+          : `${i18n.THRESHOLD_RESULTS_AGGREGATED_BY} ${threshold.field[0]} >= ${threshold.value}`}
+      </>
+    ),
   },
 ];

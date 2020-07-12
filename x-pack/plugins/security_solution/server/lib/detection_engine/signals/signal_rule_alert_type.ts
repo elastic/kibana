@@ -256,12 +256,6 @@ export const signalRulesAlertType = ({
             // JSON.stringify(thresholdResults.aggregations?.threshold.buckets, null, 2)
           );
 
-          const thresholdCount = 0;
-          // const thresholdCount = thresholdResults.aggregations.threshold.buckets.length;
-          if (thresholdCount) {
-            logger.info(buildRuleMessage(`Found ${thresholdCount} signals from Threshold aggs.`));
-          }
-
           const {
             success,
             bulkCreateDuration,
@@ -275,6 +269,7 @@ export const signalRulesAlertType = ({
             services,
             logger,
             id: alertId,
+            inputIndexPattern: inputIndex,
             signalsIndex: outputIndex,
             name,
             createdBy,

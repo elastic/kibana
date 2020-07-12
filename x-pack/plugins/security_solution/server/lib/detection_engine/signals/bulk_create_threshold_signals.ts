@@ -22,6 +22,7 @@ interface BulkCreateThresholdSignalsParams {
   someResult: SignalSearchResponse;
   ruleParams: RuleTypeParams;
   services: AlertServices;
+  inputIndexPattern: string[];
   logger: Logger;
   id: string;
   filter: unknown;
@@ -38,7 +39,9 @@ interface BulkCreateThresholdSignalsParams {
   throttle: string;
 }
 
-type ThresholdResults = SignalSearchResponse;
+interface ThresholdResults extends SignalSearchResponse {
+  '@timestamp': string;
+}
 
 interface FilterObject {
   bool?: {
@@ -96,6 +99,7 @@ const getThresholdSignalQueryFields = (filter: unknown) => {
 
 const getTransformedHits = (
   results: ThresholdResults,
+  inputIndex: string,
   threshold: Threshold,
   signalQueryFields: Record<string, string>
 ) => {
@@ -108,15 +112,15 @@ const getTransformedHits = (
 
     const source = {
       '@timestamp': new Date().toISOString(),
+      threshold_count: totalResults,
       ...signalQueryFields,
     };
 
     return [
       {
-        _index: '',
+        _index: inputIndex,
         _id: uuid.v4(),
         _source: source,
-        threshold_count: totalResults,
       },
     ];
   }
@@ -136,7 +140,7 @@ const getTransformedHits = (
       set(source, threshold.field, key);
 
       return {
-        _index: '',
+        _index: inputIndex,
         _id: uuid.v4(),
         _source: source,
       };
@@ -146,21 +150,15 @@ const getTransformedHits = (
 
 const transformThresholdResultsToEcs = (
   results: ThresholdResults,
+  inputIndex: string,
   filter: unknown,
   threshold: Threshold
 ): SearchResponse<object> => {
-  console.log(
-    'transformThresholdResultsToEcs',
-    // JSON.stringify(results),
-    JSON.stringify(filter)
-    // JSON.stringify(threshold)
-  );
-
   const signalQueryFields = getThresholdSignalQueryFields(filter);
 
   console.log('signalQueryFields', JSON.stringify(signalQueryFields, null, 2));
 
-  const transformedHits = getTransformedHits(results, threshold, signalQueryFields);
+  const transformedHits = getTransformedHits(results, inputIndex, threshold, signalQueryFields);
 
   const thresholdResults = {
     ...results,
@@ -181,9 +179,12 @@ export const bulkCreateThresholdSignals = async (
   const thresholdResults = params.someResult;
   const ecsResults = transformThresholdResultsToEcs(
     thresholdResults,
+    params.inputIndexPattern.join(','),
     params.filter,
     params.ruleParams.threshold!
   );
+
+  console.log('inputIndexPattern', params.inputIndexPattern.join(','));
 
   console.log('ruleParams', JSON.stringify(params.ruleParams, null, 2));
 

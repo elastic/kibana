@@ -95,14 +95,17 @@ export const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = 
   if (columns === 'multi') {
     return (
       <EuiFlexGroup>
-        {chunk(Math.ceil(listItems.length / 2), listItems).map((chunkListItems, index) => (
-          <EuiFlexItem
-            data-test-subj="listItemColumnStepRuleDescription"
-            key={`description-step-rule-${index}`}
-          >
-            <EuiDescriptionList listItems={chunkListItems} />
-          </EuiFlexItem>
-        ))}
+        {chunk(Math.ceil(listItems.length / 2), listItems).map((chunkListItems, index) => {
+          console.log('chunkListItems', chunkListItems);
+          return (
+            <EuiFlexItem
+              data-test-subj="listItemColumnStepRuleDescription"
+              key={`description-step-rule-${index}`}
+            >
+              <EuiDescriptionList listItems={chunkListItems} />
+            </EuiFlexItem>
+          );
+        })}
       </EuiFlexGroup>
     );
   }
@@ -182,7 +185,6 @@ export const getDescriptionItem = (
     return buildThreatDescription({ label, threat });
   } else if (field === 'threshold') {
     const threshold = get(field, data);
-
     return buildThresholdDescription(label, threshold);
   } else if (field === 'references') {
     const urls: string[] = get(field, data);

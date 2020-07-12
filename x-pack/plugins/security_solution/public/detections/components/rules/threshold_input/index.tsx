@@ -15,6 +15,11 @@ import { THRESHOLD_FIELD_PLACEHOLDER } from './translations';
 
 const FIELD_COMBO_BOX_WIDTH = 460;
 
+export interface FieldValueThreshold {
+  field: string[];
+  value: number;
+}
+
 interface ThresholdInputProps {
   thresholdField: FieldHook;
   thresholdValue: FieldHook;

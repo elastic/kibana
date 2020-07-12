@@ -403,5 +403,17 @@ describe('helpers', () => {
 
       expect(result.description).toEqual('Query');
     });
+
+    it('returns the label for a threshold type', () => {
+      const [result]: ListItems[] = buildRuleTypeDescription('Test label', 'threshold');
+
+      expect(result.title).toEqual('Test label');
+    });
+
+    it('returns a humanized description for a threshold type', () => {
+      const [result]: ListItems[] = buildRuleTypeDescription('Test label', 'threshold');
+
+      expect(result.description).toEqual('Threshold');
+    });
   });
 });

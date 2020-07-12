@@ -87,8 +87,6 @@ export const buildEventsSearchQuery = ({
     },
   };
 
-  console.log('searchQuery', JSON.stringify(searchQuery, null, 2));
-
   if (searchAfterSortId) {
     return {
       ...searchQuery,
