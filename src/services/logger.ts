@@ -32,18 +32,19 @@ export const logger = {
   },
 };
 
-function createRedactor(accessToken?: string) {
-  return (str: string) => {
-    if (!accessToken) {
-      return str;
-    }
-    return str.replace(new RegExp(accessToken, 'g'), '<REDACTED>');
-  };
+let redactedAccessToken: string;
+
+export function setRedactedAccessToken(accessToken?: string) {
+  if (accessToken) {
+    redactedAccessToken = accessToken;
+  }
 }
 
-export function initLogger(accessToken?: string) {
-  const redact = createRedactor(accessToken);
+function redact(str: string) {
+  return str.replace(new RegExp(redactedAccessToken, 'g'), '<REDACTED>');
+}
 
+export function initLogger() {
   winstonInstance = winston.createLogger({
     transports: [
       // log to file

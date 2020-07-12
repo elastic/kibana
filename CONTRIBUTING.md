@@ -13,7 +13,7 @@ or
 yarn tsc
 
 # Run
-node dist/index.js --branch 6.1 --upstream sqren/backport-demo --all
+node dist/entrypoint.cli.js --branch 6.1 --upstream sqren/backport-demo --all
 ```
 
 **Run `backport` CLI globally**
@@ -24,7 +24,7 @@ npm -g uninstall backport
 yarn unlink backport
 yarn unlink
 yarn link
-sudo chmod +x dist/index.js
+sudo chmod +x dist/entrypoint.cli.js
 yarn tsc --watch
 ```
 

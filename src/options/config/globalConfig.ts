@@ -3,7 +3,12 @@ import { getGlobalConfigPath, getReposPath } from '../../services/env';
 import { chmod, writeFile } from '../../services/fs-promisified';
 import { readConfigFile } from './readConfigFile';
 
-export async function getGlobalConfig() {
+export async function getGlobalConfig(ci?: boolean) {
+  // don't attempt to fetch global config in ci environment
+  if (ci) {
+    return;
+  }
+
   await createGlobalConfigAndFolderIfNotExist();
   const globalConfigPath = getGlobalConfigPath();
   return readConfigFile(globalConfigPath);

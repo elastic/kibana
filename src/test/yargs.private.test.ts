@@ -151,14 +151,14 @@ describe('yargs', () => {
 });
 
 function runBackport(args: string) {
-  const cmd = `./node_modules/.bin/ts-node --transpile-only ./src/index.ts ${args}`;
+  const cmd = `./node_modules/.bin/ts-node --transpile-only ./src/entrypoint.cli.ts ${args}`;
   return execSync(cmd, execOptions);
 }
 
 function runBackportAsync(options: string[]) {
   const proc = spawn('./node_modules/.bin/ts-node', [
     '--transpile-only',
-    './src/index.ts',
+    './src/entrypoint.cli.ts',
     ...options,
   ]);
 

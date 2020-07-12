@@ -1,24 +1,35 @@
 import chalk from 'chalk';
 import { ConfigOptions } from './options/ConfigOptions';
-import { getGlobalConfig } from './options/config/globalConfig';
 import { getOptions } from './options/options';
-import { runWithOptions } from './runWithOptions';
+import { runWithOptions, Result } from './runWithOptions';
 import { HandledError } from './services/HandledError';
 import { getLogfilePath } from './services/env';
 import { initLogger, consoleLog } from './services/logger';
 
-export async function runWithArgs(
+export type BackportResponse = {
+  success: boolean;
+  results: Result[];
+  isUnhandledError?: boolean;
+  message?: string;
+  error?: Error;
+};
+
+export async function main(
   argv: string[],
   optionsFromModule?: ConfigOptions
-) {
-  const globalConfig = await getGlobalConfig();
-  const logger = initLogger(globalConfig.accessToken);
+): Promise<BackportResponse> {
+  const logger = initLogger();
 
   try {
     const options = await getOptions(argv, optionsFromModule);
-    return await runWithOptions(options);
+    const results = await runWithOptions(options);
+    return {
+      success: results.every((res) => res.success),
+      results,
+    };
   } catch (e) {
-    if (e instanceof HandledError) {
+    const isUnhandledError = !(e instanceof HandledError);
+    if (!isUnhandledError) {
       consoleLog(e.message);
     } else {
       // output
@@ -37,5 +48,15 @@ export async function runWithArgs(
       // log file
       logger.info('Unknown error:', e);
     }
+
+    return {
+      success: false,
+      results: [],
+      isUnhandledError,
+      message: isUnhandledError
+        ? 'An unhandled error occurred. Please see the logs for additional details'
+        : e.message,
+      error: e,
+    };
   }
 }

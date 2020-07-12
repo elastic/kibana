@@ -33,9 +33,19 @@ export function getTargetBranches(
 
   // automatically select the pre-checked branches
   if (options.ci) {
-    return targetBranchChoices
+    const branches = targetBranchChoices
       .filter((branch) => branch.checked)
       .map((branch) => branch.name);
+
+    if (isEmpty(branches)) {
+      throw new HandledError(
+        `There are no branches to backport to. Aborting.
+Branches: ${JSON.stringify(options.targetBranchChoices.map((b) => b.name))}
+Labels: ${JSON.stringify(targetBranchesFromLabels)}`
+      );
+    }
+
+    return branches;
   }
 
   // render interactive list of branches

@@ -15,10 +15,10 @@
     "branching"
   ],
   "version": "5.4.8",
-  "main": "./dist/runAsModule.js",
-  "types": "dist/runAsModule.d.ts",
+  "main": "./dist/entrypoint.module.js",
+  "types": "dist/entrypoint.module.d.ts",
   "bin": {
-    "backport": "./dist/index.js"
+    "backport": "./dist/entrypoint.cli.js"
   },
   "husky": {
     "hooks": {
@@ -34,7 +34,7 @@
     "test": "jest",
     "test-private": "jest --config ./jest.config.private.js",
     "test-all": "yarn test && yarn test-private",
-    "start": "ts-node --transpile-only ./src/index.ts"
+    "start": "ts-node --transpile-only ./src/entrypoint.cli.ts"
   },
   "lint-staged": {
     "*.ts": [
@@ -67,7 +67,7 @@
     "dedent": "^0.7.0",
     "del": "^5.1.0",
     "find-up": "^4.1.0",
-    "inquirer": "^7.3.0",
+    "inquirer": "^7.3.1",
     "lodash.flatmap": "^4.5.0",
     "lodash.isempty": "^4.4.0",
     "lodash.isstring": "^4.0.1",
@@ -83,28 +83,28 @@
     "@types/core-js": "^2.5.2",
     "@types/dedent": "^0.7.0",
     "@types/inquirer": "^6.5.0",
-    "@types/jest": "^26.0.3",
+    "@types/jest": "^26.0.4",
     "@types/lodash": "^4.14.157",
     "@types/lodash.flatmap": "^4.5.6",
     "@types/lodash.isempty": "^4.4.6",
     "@types/lodash.isstring": "^4.0.6",
     "@types/lodash.uniq": "^4.5.6",
-    "@types/node": "^14.0.14",
+    "@types/node": "^14.0.22",
     "@types/safe-json-stringify": "^1.1.1",
     "@types/yargs": "^15.0.5",
     "@types/yargs-parser": "^15.0.0",
-    "@typescript-eslint/eslint-plugin": "^3.5.0",
-    "@typescript-eslint/parser": "^3.5.0",
-    "eslint": "^7.3.1",
+    "@typescript-eslint/eslint-plugin": "^3.6.0",
+    "@typescript-eslint/parser": "^3.6.0",
+    "eslint": "^7.4.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-import": "^2.22.0",
-    "eslint-plugin-jest": "^23.17.1",
+    "eslint-plugin-jest": "^23.18.0",
     "eslint-plugin-prettier": "^3.1.4",
     "husky": "^4.2.3",
     "jest": "^26.1.0",
     "jest-snapshot-serializer-ansi": "^1.0.0",
     "lint-staged": "^10.2.11",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "prettier": "^2.0.5",
     "strip-ansi": "^6.0.0",
     "ts-jest": "^26.1.1",
