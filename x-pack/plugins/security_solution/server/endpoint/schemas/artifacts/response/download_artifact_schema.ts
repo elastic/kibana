@@ -5,9 +5,8 @@
  */
 
 import * as t from 'io-ts';
-import { encoding } from '../common';
+import { buffer, encoding } from '../common';
 
-const body = t.string;
 const headers = t.exact(
   t.type({
     'content-encoding': encoding,
@@ -17,7 +16,7 @@ const headers = t.exact(
 
 export const downloadArtifactResponseSchema = t.exact(
   t.type({
-    body,
+    body: buffer,
     headers,
   })
 );

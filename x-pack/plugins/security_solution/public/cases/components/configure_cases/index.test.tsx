@@ -166,6 +166,9 @@ describe('ConfigureCases', () => {
         expect.objectContaining({
           id: '.jira',
         }),
+        expect.objectContaining({
+          id: '.resilient',
+        }),
       ]);
 
       expect(wrapper.find(ConnectorEditFlyout).prop('editFlyoutVisible')).toBe(false);

@@ -5,7 +5,7 @@
  */
 import classNames from 'classnames';
 import React, { FunctionComponent, useState, useEffect, useCallback } from 'react';
-import { EuiFieldText, EuiText, keyCodes } from '@elastic/eui';
+import { EuiFieldText, EuiText, keys } from '@elastic/eui';
 
 export interface Props {
   placeholder: string;
@@ -40,10 +40,10 @@ export const InlineTextInput: FunctionComponent<Props> = ({
 
   useEffect(() => {
     const keyboardListener = (event: KeyboardEvent) => {
-      if (event.keyCode === keyCodes.ESCAPE || event.code === 'Escape') {
+      if (event.key === keys.ESCAPE || event.code === 'Escape') {
         setIsShowingTextInput(false);
       }
-      if (event.keyCode === keyCodes.ENTER || event.code === 'Enter') {
+      if (event.key === keys.ENTER || event.code === 'Enter') {
         submitChange();
       }
     };

@@ -6,10 +6,10 @@
 
 import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
 
-import * as rulesApi from '../../../alerts/containers/detection_engine/rules/api';
+import * as rulesApi from '../../../detections/containers/detection_engine/rules/api';
 import * as listsApi from '../../../../../lists/public/exceptions/api';
 import { getExceptionListSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_schema.mock';
-import { savedRuleMock } from '../../../alerts/containers/detection_engine/rules/mock';
+import { savedRuleMock } from '../../../detections/containers/detection_engine/rules/mock';
 import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { ExceptionListType } from '../../../lists_plugin_deps';
 import { ListArray } from '../../../../common/detection_engine/schemas/types';
@@ -21,7 +21,7 @@ import {
 } from './use_fetch_or_create_rule_exception_list';
 
 const mockKibanaHttpService = createKibanaCoreStartMock().http;
-jest.mock('../../../alerts/containers/detection_engine/rules/api');
+jest.mock('../../../detections/containers/detection_engine/rules/api');
 
 describe('useFetchOrCreateRuleExceptionList', () => {
   let fetchRuleById: jest.SpyInstance<ReturnType<typeof rulesApi.fetchRuleById>>;
