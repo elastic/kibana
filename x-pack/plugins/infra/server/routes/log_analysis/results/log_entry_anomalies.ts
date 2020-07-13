@@ -89,7 +89,6 @@ const getSortAndPagination = (
   sort: Sort;
   pagination: Pagination;
 } => {
-
   const sortDefaults = {
     field: 'anomalyScore' as const,
     direction: 'desc' as const,
