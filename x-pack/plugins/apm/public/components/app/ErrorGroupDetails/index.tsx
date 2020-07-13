@@ -16,18 +16,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
+import { useTrackPageview } from '../../../../../observability/public';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useFetcher } from '../../../hooks/useFetcher';
+import { useLocation } from '../../../hooks/useLocation';
+import { useUrlParams } from '../../../hooks/useUrlParams';
+import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { fontFamilyCode, fontSizes, px, units } from '../../../style/variables';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { DetailView } from './DetailView';
 import { ErrorDistribution } from './Distribution';
-import { useLocation } from '../../../hooks/useLocation';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useTrackPageview } from '../../../../../observability/public';
-import { callApmApi } from '../../../services/rest/createCallApmApi';
-import { ErrorRateChart } from '../../shared/charts/ErrorRateChart';
-import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 
 const Titles = styled.div`
   margin-bottom: ${px(units.plus)};

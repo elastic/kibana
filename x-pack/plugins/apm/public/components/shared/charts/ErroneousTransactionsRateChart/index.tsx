@@ -93,7 +93,6 @@ export const ErroneousTransactionsRateChart = () => {
         formatTooltipValue={({ y }: { y?: number }) =>
           Number.isFinite(y) ? tickFormatY(y) : 'N/A'
         }
-        // height={unit * 10}
       />
     </EuiPanel>
   );

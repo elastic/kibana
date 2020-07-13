@@ -18,11 +18,9 @@ import { PROJECTION } from '../../../../common/projections/typings';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
-import { ErrorRateChart } from '../../shared/charts/ErrorRateChart';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
 import { ErrorGroupList } from './List';
-import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 
 const ErrorGroupOverview: React.FC = () => {
   const { urlParams, uiFilters } = useUrlParams();
