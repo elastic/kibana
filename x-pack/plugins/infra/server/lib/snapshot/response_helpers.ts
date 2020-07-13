@@ -62,6 +62,9 @@ export interface InfraSnapshotNodeGroupByBucket {
       hits: InfraSnapshotIpHit[];
     };
   };
+  histogram: {
+    buckets: InfraSnapshotMetricsBucket[];
+  };
 }
 
 export const isIPv4 = (subject: string) => /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(subject);

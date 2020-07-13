@@ -10,16 +10,9 @@ import { SNAPSHOT_COMPOSITE_REQUEST_SIZE } from './constants';
 import {
   getGroupedNodesSources,
   getMetricsAggregations,
-  getMetricsSources,
   getDateHistogramOffset,
 } from './query_helpers';
-import {
-  getNodeMetrics,
-  getNodeMetricsForLookup,
-  getNodePath,
-  InfraSnapshotNodeGroupByBucket,
-  InfraSnapshotNodeMetricsBucket,
-} from './response_helpers';
+import { getNodeMetrics, getNodePath, InfraSnapshotNodeGroupByBucket } from './response_helpers';
 import { getAllCompositeData } from '../../utils/get_all_composite_data';
 import { createAfterKeyHandler } from '../../utils/create_afterkey_handler';
 import { findInventoryModel } from '../../../common/inventory_models';
@@ -41,15 +34,10 @@ export class InfraSnapshot {
     // when they have both been completed.
     const timeRangeWithIntervalApplied = await createTimeRangeWithInterval(client, options);
     const optionsWithTimerange = { ...options, timerange: timeRangeWithIntervalApplied };
+    const nodeBuckets = await requestNodes(client, optionsWithTimerange);
 
-    const groupedNodesPromise = requestGroupedNodes(client, optionsWithTimerange);
-    const nodeMetricsPromise = requestNodeMetrics(client, optionsWithTimerange);
-    const [groupedNodeBuckets, nodeMetricBuckets] = await Promise.all([
-      groupedNodesPromise,
-      nodeMetricsPromise,
-    ]);
     return {
-      nodes: mergeNodeBuckets(groupedNodeBuckets, nodeMetricBuckets, options),
+      nodes: mapNodeBuckets(nodeBuckets, options),
       interval: timeRangeWithIntervalApplied.interval,
     };
   }
@@ -67,14 +55,15 @@ const handleAfterKey = createAfterKeyHandler(
 const callClusterFactory = (search: ESSearchClient) => (opts: any) =>
   search<{}, InfraSnapshotAggregationResponse>(opts);
 
-const requestGroupedNodes = async (
+const requestNodes = async (
   client: ESSearchClient,
   options: InfraSnapshotRequestOptions
 ): Promise<InfraSnapshotNodeGroupByBucket[]> => {
   const inventoryModel = findInventoryModel(options.nodeType);
+  const index = calculateIndexPatterBasedOnMetrics(options);
   const query = {
     allowNoIndices: true,
-    index: `${options.sourceConfiguration.logAlias},${options.sourceConfiguration.metricAlias}`,
+    index,
     ignoreUnavailable: true,
     body: {
       query: {
@@ -98,6 +87,18 @@ const requestGroupedNodes = async (
                 },
                 size: 1,
               },
+            },
+            histogram: {
+              date_histogram: {
+                field: options.sourceConfiguration.fields.timestamp,
+                interval: options.timerange.interval || '1m',
+                offset: getDateHistogramOffset(options.timerange.from, options.timerange.interval),
+                extended_bounds: {
+                  min: options.timerange.from,
+                  max: options.timerange.to,
+                },
+              },
+              aggregations: getMetricsAggregations(options),
             },
           },
         },
@@ -123,54 +124,6 @@ const calculateIndexPatterBasedOnMetrics = (options: InfraSnapshotRequestOptions
   return options.sourceConfiguration.metricAlias;
 };
 
-const requestNodeMetrics = async (
-  client: ESSearchClient,
-  options: InfraSnapshotRequestOptions
-): Promise<InfraSnapshotNodeMetricsBucket[]> => {
-  const index = calculateIndexPatterBasedOnMetrics(options);
-  const query = {
-    allowNoIndices: true,
-    index,
-    ignoreUnavailable: true,
-    body: {
-      query: {
-        bool: {
-          filter: buildFilters(options, false),
-        },
-      },
-      size: 0,
-      aggregations: {
-        nodes: {
-          composite: {
-            size: options.overrideCompositeSize || SNAPSHOT_COMPOSITE_REQUEST_SIZE,
-            sources: getMetricsSources(options),
-          },
-          aggregations: {
-            histogram: {
-              date_histogram: {
-                field: options.sourceConfiguration.fields.timestamp,
-                interval: options.timerange.interval || '1m',
-                offset: getDateHistogramOffset(options.timerange.from, options.timerange.interval),
-                extended_bounds: {
-                  min: options.timerange.from,
-                  max: options.timerange.to,
-                },
-              },
-              aggregations: getMetricsAggregations(options),
-            },
-          },
-        },
-      },
-    },
-  };
-  return getAllCompositeData<InfraSnapshotAggregationResponse, InfraSnapshotNodeMetricsBucket>(
-    callClusterFactory(client),
-    query,
-    bucketSelector,
-    handleAfterKey
-  );
-};
-
 // buckets can be InfraSnapshotNodeGroupByBucket[] or InfraSnapshotNodeMetricsBucket[]
 // but typing this in a way that makes TypeScript happy is unreadable (if possible at all)
 interface InfraSnapshotAggregationResponse {
@@ -180,17 +133,14 @@ interface InfraSnapshotAggregationResponse {
   };
 }
 
-const mergeNodeBuckets = (
+const mapNodeBuckets = (
   nodeGroupByBuckets: InfraSnapshotNodeGroupByBucket[],
-  nodeMetricsBuckets: InfraSnapshotNodeMetricsBucket[],
   options: InfraSnapshotRequestOptions
 ): SnapshotNode[] => {
-  const nodeMetricsForLookup = getNodeMetricsForLookup(nodeMetricsBuckets);
-
   return nodeGroupByBuckets.map((node) => {
     return {
       path: getNodePath(node, options),
-      metrics: getNodeMetrics(nodeMetricsForLookup[node.key.id], options),
+      metrics: getNodeMetrics(node.histogram.buckets, options),
     };
   });
 };
