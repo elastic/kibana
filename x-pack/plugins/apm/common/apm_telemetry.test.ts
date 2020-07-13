@@ -18,7 +18,7 @@ expect.addSnapshotSerializer({
 });
 
 describe('APM telemetry helpers', () => {
-  describe('getApmTelemetryFullPath', () => {
+  describe('getApmTelemetry', () => {
     // This test creates a snapshot with the JSON of our full telemetry mapping
     // that can be PUT in a query to the index on the telemetry cluster. Sharing
     // the contents of the snapshot with the telemetry team can provide them with

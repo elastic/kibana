@@ -229,4 +229,40 @@ describe('data telemetry collection tasks', () => {
       });
     });
   });
+
+  describe('cardinality', () => {
+    const task = tasks.find((t) => t.name === 'cardinality');
+
+    it('returns cardinalities', async () => {
+      const search = jest.fn().mockImplementation((params: any) => {
+        const isRumQuery = params.body.query.bool.filter.length === 2;
+        if (isRumQuery) {
+          return Promise.resolve({
+            aggregations: {
+              'client.geo.country_iso_code': { value: 5 },
+              'transaction.name': { value: 1 },
+              'user_agent.original': { value: 2 },
+            },
+          });
+        } else {
+          return Promise.resolve({
+            aggregations: {
+              'transaction.name': { value: 3 },
+              'user_agent.original': { value: 4 },
+            },
+          });
+        }
+      });
+
+      expect(await task?.executor({ search } as any)).toEqual({
+        cardinality: {
+          client: { geo: { country_iso_code: { rum: { '1d': 5 } } } },
+          transaction: { name: { all_agents: { '1d': 3 }, rum: { '1d': 1 } } },
+          user_agent: {
+            original: { all_agents: { '1d': 4 }, rum: { '1d': 2 } },
+          },
+        },
+      });
+    });
+  });
 });

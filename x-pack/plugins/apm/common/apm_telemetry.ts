@@ -114,6 +114,15 @@ export function getApmTelemetryMapping() {
       },
       cardinality: {
         properties: {
+          client: {
+            properties: {
+              geo: {
+                properites: {
+                  country_iso_code: oneDayProperties,
+                },
+              },
+            },
+          },
           user_agent: {
             properties: {
               original: {

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`APM telemetry helpers getApmTelemetryFullPath generates a JSON object with the telemetry mapping 1`] = `
+exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the telemetry mapping 1`] = `
 {
   "properties": {
     "stack_stats": {
@@ -644,6 +644,21 @@ exports[`APM telemetry helpers getApmTelemetryFullPath generates a JSON object w
                     },
                     "cardinality": {
                       "properties": {
+                        "client": {
+                          "properties": {
+                            "geo": {
+                              "properites": {
+                                "country_iso_code": {
+                                  "properties": {
+                                    "1d": {
+                                      "type": "long"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
                         "user_agent": {
                           "properties": {
                             "original": {

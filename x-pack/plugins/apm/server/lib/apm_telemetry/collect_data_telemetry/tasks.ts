@@ -9,6 +9,7 @@ import { AGENT_NAMES } from '../../../../common/agent_name';
 import {
   AGENT_NAME,
   AGENT_VERSION,
+  CLIENT_GEO_COUNTRY_ISO_CODE,
   CLOUD_AVAILABILITY_ZONE,
   CLOUD_PROVIDER,
   CLOUD_REGION,
@@ -748,6 +749,9 @@ export const tasks: TelemetryTask[] = [
             },
           },
           aggs: {
+            [CLIENT_GEO_COUNTRY_ISO_CODE]: {
+              cardinality: { field: CLIENT_GEO_COUNTRY_ISO_CODE },
+            },
             [TRANSACTION_NAME]: {
               cardinality: {
                 field: TRANSACTION_NAME,
@@ -764,6 +768,18 @@ export const tasks: TelemetryTask[] = [
 
       return {
         cardinality: {
+          client: {
+            geo: {
+              country_iso_code: {
+                rum: {
+                  '1d':
+                    rumAgentCardinalityResponse.aggregations?.[
+                      CLIENT_GEO_COUNTRY_ISO_CODE
+                    ].value,
+                },
+              },
+            },
+          },
           transaction: {
             name: {
               all_agents: {
