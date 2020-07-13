@@ -20,7 +20,8 @@
 import { Location } from 'history';
 import { ScopedHistory } from './scoped_history';
 
-type ScopedHistoryMock = jest.Mocked<Pick<ScopedHistory, keyof ScopedHistory>>;
+export type ScopedHistoryMock = jest.Mocked<ScopedHistory>;
+
 const createMock = ({
   pathname = '/',
   search = '',
@@ -29,7 +30,7 @@ const createMock = ({
   state,
   ...overrides
 }: Partial<Location & ScopedHistoryMock> = {}) => {
-  const mock: ScopedHistoryMock = {
+  const mock: jest.Mocked<Pick<ScopedHistory, keyof ScopedHistory>> = {
     block: jest.fn(),
     createHref: jest.fn(),
     createSubHistory: jest.fn(),
@@ -51,7 +52,7 @@ const createMock = ({
     },
   };
 
-  return mock;
+  return mock as ScopedHistoryMock;
 };
 
 export const scopedHistoryMock = {

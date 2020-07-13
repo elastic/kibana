@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { ScopedHistory } from 'kibana/public';
 import { mountWithIntl, shallowWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { SpaceAvatar } from '../../space_avatar';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
@@ -54,7 +53,7 @@ featuresStart.getFeatures.mockResolvedValue([
 
 describe('SpacesGridPage', () => {
   const getUrlForApp = (appId: string) => appId;
-  const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+  const history = scopedHistoryMock.create();
 
   it('renders as expected', () => {
     const httpStart = httpServiceMock.createStartContract();

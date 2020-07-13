@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
-import { ScopedHistory } from 'kibana/public';
 
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { coreMock, scopedHistoryMock } from '../../../../../../../../src/core/public/mocks';
@@ -103,7 +102,7 @@ describe('alerts_list component empty', () => {
           'alerting:delete': true,
         },
       },
-      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+      history: scopedHistoryMock.create(),
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: alertTypeRegistry as any,
@@ -222,7 +221,7 @@ describe('alerts_list component with items', () => {
           'alerting:delete': true,
         },
       },
-      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+      history: scopedHistoryMock.create(),
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: alertTypeRegistry as any,
@@ -304,7 +303,7 @@ describe('alerts_list component empty with show only capability', () => {
           'alerting:delete': false,
         },
       },
-      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+      history: scopedHistoryMock.create(),
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: {
         get() {
@@ -419,7 +418,7 @@ describe('alerts_list with show only capability', () => {
           'alerting:delete': false,
         },
       },
-      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+      history: scopedHistoryMock.create(),
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: alertTypeRegistry as any,

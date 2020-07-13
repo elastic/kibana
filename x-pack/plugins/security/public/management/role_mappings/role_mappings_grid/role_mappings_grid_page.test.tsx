@@ -24,7 +24,7 @@ describe('RoleMappingsGridPage', () => {
   let coreStart: CoreStart;
 
   beforeEach(() => {
-    history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+    history = scopedHistoryMock.create();
     coreStart = coreMock.createStart();
   });
 
@@ -295,7 +295,7 @@ describe('RoleMappingsGridPage', () => {
       Object {
         "children": <div>
           kibana_user
-           
+
           <EuiIcon
             className="eui-alignTop"
             color="warning"
