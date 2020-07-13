@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { EntriesArray, exceptionListType, namespaceType } from '../../../lists/common/schemas';
+export const useListsConfig = jest.fn().mockReturnValue({});
