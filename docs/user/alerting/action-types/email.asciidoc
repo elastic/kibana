@@ -85,7 +85,7 @@ The email action can send email using many popular SMTP email services.
 
 You configure the accounts Email action can use to send emails using the connector form.
 For more information about configuring the email connector to work with different email
-systems, see:
+systems, refer to:
 
 * <<gmail>>
 * <<outlook>>
