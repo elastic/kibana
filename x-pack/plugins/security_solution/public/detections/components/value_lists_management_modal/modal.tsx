@@ -115,8 +115,7 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
     pageIndex,
     pageSize,
     totalItemCount: lists.result?.total ?? 0,
-    pageSizeOptions: [5, 10, 20],
-    hidePerPageOptions: false,
+    hidePerPageOptions: true,
   };
 
   return (
