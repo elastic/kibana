@@ -52,6 +52,8 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
   if (kibanaVersion) {
     url.searchParams.set('kibana.version', kibanaVersion);
   }
+  const logger = appContextService.getLogger();
+  logger.warn(`fetchList connecting to ${url.toString()}`);
 
   return fetchUrl(url.toString()).then(JSON.parse);
 }
@@ -65,6 +67,8 @@ export async function fetchFindLatestPackage(packageName: string): Promise<Regis
   if (kibanaVersion) {
     url.searchParams.set('kibana.version', kibanaVersion);
   }
+  const logger = appContextService.getLogger();
+  logger.warn(`fetchFindLatestPackage connecting to ${url.toString()}`);
   const res = await fetchUrl(url.toString());
   const searchResults = JSON.parse(res);
   if (searchResults.length) {
