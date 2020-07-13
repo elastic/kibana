@@ -975,6 +975,8 @@ exports[`MonitorList component renders the monitor list 1`] = `
       </div>
       <table
         class="euiTable euiTable--responsive"
+        id="generated-id"
+        tabindex="-1"
       >
         <caption
           class="euiScreenReaderOnly euiTableCaption"

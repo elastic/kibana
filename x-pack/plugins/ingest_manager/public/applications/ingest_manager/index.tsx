@@ -22,7 +22,7 @@ import { PAGE_ROUTING_PATHS } from './constants';
 import { DefaultLayout, WithoutHeaderLayout } from './layouts';
 import { Loading, Error } from './components';
 import { IngestManagerOverview, EPMApp, AgentConfigApp, FleetApp, DataStreamApp } from './sections';
-import { DepsContext, ConfigContext, setHttpClient, useConfig } from './hooks';
+import { DepsContext, ConfigContext, useConfig } from './hooks';
 import { PackageInstallProvider } from './sections/epm/hooks';
 import { useCore, sendSetup, sendGetPermissionsCheck } from './hooks';
 import { FleetStatusProvider } from './hooks/use_fleet_status';
@@ -260,7 +260,6 @@ export function renderApp(
   startDeps: IngestManagerStartDeps,
   config: IngestManagerConfigType
 ) {
-  setHttpClient(coreStart.http);
   ReactDOM.render(
     <IngestManagerApp
       basepath={appBasePath}
