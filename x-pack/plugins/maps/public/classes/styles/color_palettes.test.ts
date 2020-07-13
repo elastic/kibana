@@ -9,8 +9,6 @@ import {
   getColorPalette,
 } from './color_palettes';
 
-jest.mock('ui/new_platform');
-
 describe('getColorPalette', () => {
   it('Should create RGB color ramp', () => {
     expect(getColorPalette('Blues')).toEqual([
