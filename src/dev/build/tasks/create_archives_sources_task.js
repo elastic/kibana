@@ -33,7 +33,7 @@ export const CreateArchivesSourcesTask = {
 
         log.debug(
           'Generic build source copied into',
-          platform.getName(),
+          platform.getNodeArch(),
           'specific build directory'
         );
 
@@ -43,7 +43,7 @@ export const CreateArchivesSourcesTask = {
           destination: build.resolvePathForPlatform(platform, 'node'),
         });
 
-        log.debug('Node.js copied into', platform.getName(), 'specific build directory');
+        log.debug('Node.js copied into', platform.getNodeArch(), 'specific build directory');
       })
     );
   },

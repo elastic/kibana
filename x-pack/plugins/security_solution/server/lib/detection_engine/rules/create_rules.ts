@@ -9,7 +9,6 @@ import { Alert } from '../../../../../alerts/common';
 import { APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { CreateRulesOptions } from './types';
 import { addTags } from './add_tags';
-import { hasListsFeature } from '../feature_flags';
 
 export const createRules = async ({
   alertsClient,
@@ -52,8 +51,6 @@ export const createRules = async ({
   exceptionsList,
   actions,
 }: CreateRulesOptions): Promise<Alert> => {
-  // TODO: Remove this and use regular exceptions_list once the feature is stable for a release
-  const exceptionsListParam = hasListsFeature() ? { exceptionsList } : {};
   return alertsClient.create({
     data: {
       name,
@@ -93,7 +90,7 @@ export const createRules = async ({
         references,
         note,
         version,
-        ...exceptionsListParam,
+        exceptionsList,
       },
       schedule: { interval },
       enabled,
