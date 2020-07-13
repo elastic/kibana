@@ -52,6 +52,8 @@ const createMock = ({
     },
   };
 
+  // jest.Mocked still expects private methods and properties to be present, even
+  // if not part of the public contract.
   return mock as ScopedHistoryMock;
 };
 
