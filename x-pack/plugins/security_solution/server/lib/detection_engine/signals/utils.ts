@@ -64,7 +64,12 @@ export const getGapMaxCatchupRatio = ({
     };
   }
   if (!isValidUnit(unit)) {
-    throw new Error(`previousStartedAt: ${previousStartedAt} and isValidUnit: ${isValidUnit}`);
+    logger.error(buildRuleMessage(`unit: ${unit} failed isValidUnit check`));
+    return {
+      maxCatchup: null,
+      ratio: null,
+      gapDiffInUnits: null,
+    };
   }
   /*
       we need the total duration from now until the last time the rule ran.
@@ -103,7 +108,12 @@ export const getGapMaxCatchupRatio = ({
     const maxCatchup = ratio < MAX_RULE_GAP_RATIO ? ratio : MAX_RULE_GAP_RATIO;
     return { maxCatchup, ratio, gapDiffInUnits };
   }
-  throw new Error('failed to parse calculatedFrom and intervalMoment');
+  logger.error(buildRuleMessage('failed to parse calculatedFrom and intervalMoment'));
+  return {
+    maxCatchup: null,
+    ratio: null,
+    gapDiffInUnits: null,
+  };
 };
 
 export const getListsClient = async ({
