@@ -16,6 +16,7 @@ import {
   removeColumn,
   upsertColumn,
   applyDeltaToColumnWidth,
+  setExcludedRowRendererIds,
   updateColumns,
   updateItemsPerPage,
   updateSort,
@@ -30,6 +31,7 @@ const timelineActionTypes = [
   updateColumns.type,
   updateItemsPerPage.type,
   updateSort.type,
+  setExcludedRowRendererIds.type,
 ];
 
 export const isPageTimeline = (timelineId: string | undefined): boolean =>

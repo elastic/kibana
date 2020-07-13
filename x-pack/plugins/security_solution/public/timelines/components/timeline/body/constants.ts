@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/** The minimum (fixed) width of the Actions column */
+export const MINIMUM_ACTIONS_COLUMN_WIDTH = 50; // px;
+
 /** The (fixed) width of the Actions column */
 export const DEFAULT_ACTIONS_COLUMN_WIDTH = 76; // px;
 /**
