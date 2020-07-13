@@ -62,20 +62,21 @@ function getFieldsMeta(esDocsBase: string) {
       description: (
         <FormattedMessage
           id="xpack.idxMgmt.templateForm.stepLogistics.dataStreamDescription"
-          defaultMessage="Wheter indices that match the index patterns should automatically create a data stream. {docsLink}"
+          defaultMessage="Create a data stream instead of an index. {docsLink}"
           values={{
             docsLink: (
-              <>
-                <br />
-                <EuiLink href={`${esDocsBase}/data-streams.html`} target="_blank">
-                  {i18n.translate(
-                    'xpack.idxMgmt.templateForm.stepLogistics.dataStreamDocumentionLink',
-                    {
-                      defaultMessage: 'Learn more about data streams.',
-                    }
-                  )}
-                </EuiLink>
-              </>
+              <EuiLink
+                href={documentationService.getDataStreamsDocumentationLink()}
+                target="_blank"
+                external
+              >
+                {i18n.translate(
+                  'xpack.idxMgmt.templateForm.stepLogistics.dataStreamDocumentionLink',
+                  {
+                    defaultMessage: 'Learn more about data streams.',
+                  }
+                )}
+              </EuiLink>
             ),
           }}
         />
