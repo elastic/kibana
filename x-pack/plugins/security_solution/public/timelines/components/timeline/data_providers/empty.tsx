@@ -8,7 +8,9 @@ import { EuiBadge, EuiText } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
+import { BrowserFields } from '../../../../common/containers/source';
 import { AndOrBadge } from '../../../../common/components/and_or_badge';
+import { AddDataProviderPopover } from './add_data_provider_popover';
 
 import * as i18n from './translations';
 
@@ -42,7 +44,7 @@ const EmptyContainer = styled.div<{ showSmallMsg: boolean }>`
   width: ${(props) => (props.showSmallMsg ? '60px' : 'auto')};
   align-items: center;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   flex-wrap: wrap;
   justify-content: center;
   user-select: none;
@@ -72,12 +74,14 @@ const NoWrap = styled.div`
 
 NoWrap.displayName = 'NoWrap';
 interface Props {
+  browserFields: BrowserFields;
   showSmallMsg?: boolean;
+  timelineId: string;
 }
 /**
  * Prompts the user to drop anything with a facet count into the data providers section.
  */
-export const Empty = React.memo<Props>(({ showSmallMsg = false }) => (
+export const Empty = React.memo<Props>(({ showSmallMsg = false, browserFields, timelineId }) => (
   <EmptyContainer
     className="timeline-drop-area-empty"
     data-test-subj="empty"
@@ -94,9 +98,6 @@ export const Empty = React.memo<Props>(({ showSmallMsg = false }) => (
               {i18n.HIGHLIGHTED}
             </BadgeHighlighted>
           </HighlightedBackground>
-        </NoWrap>
-
-        <NoWrap>
           <Text color="subdued" size="s">
             {i18n.HERE_TO_BUILD_AN}
           </Text>
@@ -105,6 +106,8 @@ export const Empty = React.memo<Props>(({ showSmallMsg = false }) => (
             {i18n.QUERY}
           </Text>
         </NoWrap>
+
+        <AddDataProviderPopover browserFields={browserFields} timelineId={timelineId} />
       </>
     )}
     {showSmallMsg && <AndOrBadge type="or" />}
