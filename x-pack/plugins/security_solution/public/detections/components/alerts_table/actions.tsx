@@ -7,7 +7,7 @@
 /* eslint-disable complexity */
 
 import dateMath from '@elastic/datemath';
-import { get, getOr, isEmpty } from 'lodash/fp';
+import { get, getOr, isEmpty, find } from 'lodash/fp';
 import moment from 'moment';
 
 import { updateAlertStatus } from '../../containers/detection_engine/alerts/api';
@@ -102,11 +102,16 @@ export const determineToAndFrom = ({ ecsData }: { ecsData: Ecs }) => {
   return { to, from };
 };
 
-export const getThresholdAggregationDataProvider = (ecsData: Ecs) => {
+export const getThresholdAggregationDataProvider = (
+  ecsData: Ecs,
+  nonEcsData: TimelineNonEcsData[]
+) => {
   const aggregationField = ecsData.signal?.rule?.threshold.field;
-  const aggregationValue = get(aggregationField, ecsData);
-  const dataProviderValue =
-    (Array.isArray(aggregationValue) && aggregationValue[0]) ?? aggregationValue;
+  const aggregationValue =
+    get(aggregationField, ecsData) ?? find(['field', aggregationField], nonEcsData)?.value;
+  const dataProviderValue = Array.isArray(aggregationValue)
+    ? aggregationValue[0]
+    : aggregationValue;
 
   if (!dataProviderValue) {
     return [];
@@ -135,6 +140,7 @@ export const sendAlertToTimelineAction = async ({
   apolloClient,
   createTimeline,
   ecsData,
+  nonEcsData,
   updateTimelineIsLoading,
 }: SendAlertToTimelineActionProps) => {
   let openAlertInBasicTimeline = true;
@@ -241,7 +247,7 @@ export const sendAlertToTimelineAction = async ({
               operator: ':',
             },
           },
-          ...getThresholdAggregationDataProvider(ecsData),
+          ...getThresholdAggregationDataProvider(ecsData, nonEcsData),
         ],
         id: 'timeline-1',
         dateRange: {
