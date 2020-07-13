@@ -27,9 +27,9 @@ interface IntegrationGroupProps {
 
 export const extractSummaryValues = (summary: Pick<MonitorSummary, 'state'>) => {
   const domain = summary.state.url?.domain ?? '';
-  const podUid = summary.state.checks?.[0]?.kubernetes?.pod.uid ?? undefined;
-  const containerId = summary.state.checks?.[0]?.container?.id ?? undefined;
-  const ip = summary.state.checks?.[0]?.monitor.ip ?? undefined;
+  const podUid = summary.state.summaryPings?.[0]?.kubernetes?.pod?.uid ?? undefined;
+  const containerId = summary.state.summaryPings?.[0]?.container?.id ?? undefined;
+  const ip = summary.state.summaryPings?.[0]?.monitor.ip ?? undefined;
 
   return {
     domain,
