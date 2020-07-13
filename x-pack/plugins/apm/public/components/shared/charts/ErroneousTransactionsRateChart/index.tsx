@@ -68,7 +68,7 @@ export const ErroneousTransactionsRateChart = () => {
       <EuiTitle size="xs">
         <span>
           {i18n.translate('xpack.apm.errorRateChart.title', {
-            defaultMessage: 'Erroneous Transactions Rate',
+            defaultMessage: 'Transaction error rate',
           })}
         </span>
       </EuiTitle>
