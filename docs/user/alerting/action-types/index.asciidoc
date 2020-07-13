@@ -53,7 +53,7 @@ Execution time field::  This field will be automatically set to the time the ale
 
 Index actions have the following properties:
 
-Document::  The document to index in json format.
+Document::  The document to index in JSON format.
 
 Example of the index document for Index Threshold Alert:
 
