@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  HTTP_RESPONSE_STATUS_CODE,
   PROCESSOR_EVENT,
-  SERVICE_NAME,
+  HTTP_RESPONSE_STATUS_CODE,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeFilter } from '../../../common/utils/range_filter';
@@ -19,18 +20,30 @@ import {
 
 export async function getErrorRate({
   serviceName,
+  transactionType,
+  transactionName,
   setup,
 }: {
   serviceName: string;
+  transactionType?: string;
+  transactionName?: string;
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
   const { start, end, uiFiltersES, client, indices } = setup;
 
+  const transactionNamefilter = transactionName
+    ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
+    : [];
+  const transactionTypefilter = transactionType
+    ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
+    : [];
+
   const filter = [
-    { term: { [SERVICE_NAME]: serviceName } },
     { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
     { range: rangeFilter(start, end) },
     { exists: { field: HTTP_RESPONSE_STATUS_CODE } },
+    ...transactionNamefilter,
+    ...transactionTypefilter,
     ...uiFiltersES,
   ];
 

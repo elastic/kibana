@@ -13,7 +13,6 @@ import {
   errorDistributionRoute,
   errorGroupsRoute,
   errorsRoute,
-  errorRateRoute,
 } from './errors';
 import {
   serviceAgentNameRoute,
@@ -49,6 +48,7 @@ import {
   transactionGroupsRoute,
   transactionGroupsAvgDurationByCountry,
   transactionGroupsAvgDurationByBrowser,
+  transactionGroupsErrorRateRoute,
 } from './transaction_groups';
 import {
   errorGroupsLocalFiltersRoute,
@@ -99,7 +99,6 @@ const createApmApi = () => {
     .add(errorDistributionRoute)
     .add(errorGroupsRoute)
     .add(errorsRoute)
-    .add(errorRateRoute)
 
     // Services
     .add(serviceAgentNameRoute)
@@ -139,6 +138,7 @@ const createApmApi = () => {
     .add(transactionGroupsRoute)
     .add(transactionGroupsAvgDurationByBrowser)
     .add(transactionGroupsAvgDurationByCountry)
+    .add(transactionGroupsErrorRateRoute)
 
     // UI filters
     .add(errorGroupsLocalFiltersRoute)

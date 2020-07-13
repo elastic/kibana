@@ -25,11 +25,19 @@ export const ErroneousTransactionsRateChart = () => {
   const { urlParams, uiFilters } = useUrlParams();
   const syncedChartsProps = useChartsSync();
 
-  const { serviceName, start, end, errorGroupId } = urlParams;
+  const {
+    serviceName,
+    start,
+    end,
+    transactionType,
+    transactionName,
+  } = urlParams;
+
   const { data } = useFetcher(() => {
     if (serviceName && start && end) {
       return callApmApi({
-        pathname: '/api/apm/services/{serviceName}/errors/rate',
+        pathname:
+          '/api/apm/services/{serviceName}/transaction_groups/error_rate',
         params: {
           path: {
             serviceName,
@@ -37,13 +45,14 @@ export const ErroneousTransactionsRateChart = () => {
           query: {
             start,
             end,
+            transactionType,
+            transactionName,
             uiFilters: JSON.stringify(uiFilters),
-            groupId: errorGroupId,
           },
         },
       });
     }
-  }, [serviceName, start, end, uiFilters, errorGroupId]);
+  }, [serviceName, start, end, uiFilters, transactionType, transactionName]);
 
   const combinedOnHover = useCallback(
     (hoverX: number) => {
