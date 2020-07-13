@@ -75,10 +75,9 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
     [setPageIndex, setPageSize]
   );
   const handleUploadError = useCallback(
-    (error: unknown) => {
-      if (!String(error).includes('AbortError')) {
-        const reportedError = error instanceof Error ? error : new Error(String(error));
-        toasts.addError(reportedError, { title: i18n.UPLOAD_ERROR });
+    (error: Error) => {
+      if (error.name !== 'AbortError') {
+        toasts.addError(error, { title: i18n.UPLOAD_ERROR });
       }
     },
     [toasts]

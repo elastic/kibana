@@ -48,7 +48,7 @@ const options: ListTypeOptions[] = [
 const defaultListType: Type = 'keyword';
 
 export interface ValueListsFormProps {
-  onError: (reason: unknown) => void;
+  onError: (error: Error) => void;
   onSuccess: (response: ListSchema) => void;
 }
 
@@ -84,8 +84,8 @@ export const ValueListsFormComponent: React.FC<ValueListsFormProps> = ({ onError
     [resetForm, onSuccess]
   );
   const handleError = useCallback(
-    (reason: unknown) => {
-      onError(reason);
+    (error: Error) => {
+      onError(error);
     },
     [onError]
   );
