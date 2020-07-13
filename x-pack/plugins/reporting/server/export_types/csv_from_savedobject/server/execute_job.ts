@@ -7,39 +7,43 @@
 import { i18n } from '@kbn/i18n';
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { CONTENT_TYPE_CSV, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
-import { cryptoFactory } from '../../../lib';
 import { RunTaskFnFactory, ScheduledTaskParams, TaskRunResult } from '../../../types';
 import { CsvResultFromSearch } from '../../csv/types';
-import { FakeRequest, JobParamsPanelCsv, SearchPanel } from '../types';
+import { JobParamsPanelCsv, SearchPanel } from '../types';
 import { createGenerateCsv } from './lib';
+
+/*
+ * The run function receives the full request which provides the un-encrypted
+ * headers, so encrypted headers are not part of these kind of job params
+ */
+type ImmediateJobParams = Omit<ScheduledTaskParams<JobParamsPanelCsv>, 'headers'>;
 
 /*
  * ImmediateExecuteFn receives the job doc payload because the payload was
  * generated in the ScheduleFn
  */
-export type ImmediateExecuteFn<JobParamsType> = (
+export type ImmediateExecuteFn = (
   jobId: null,
-  job: ScheduledTaskParams<JobParamsType>,
+  job: ImmediateJobParams,
   context: RequestHandlerContext,
   req: KibanaRequest
 ) => Promise<TaskRunResult>;
 
-export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn<
-  JobParamsPanelCsv
->> = function executeJobFactoryFn(reporting, parentLogger) {
-  const config = reporting.getConfig();
-  const crypto = cryptoFactory(config.get('encryptionKey'));
+export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function executeJobFactoryFn(
+  reporting,
+  parentLogger
+) {
   const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'execute-job']);
   const generateCsv = createGenerateCsv(reporting, parentLogger);
 
-  return async function runTask(jobId: string | null, job, context, req) {
+  return async function runTask(jobId: string | null, job, context, request) {
     // There will not be a jobID for "immediate" generation.
     // jobID is only for "queued" jobs
     // Use the jobID as a logging tag or "immediate"
     const jobLogger = logger.clone([jobId === null ? 'immediate' : jobId]);
 
     const { jobParams } = job;
-    const { isImmediate, panel, visType } = jobParams as JobParamsPanelCsv & { panel: SearchPanel };
+    const { panel, visType } = jobParams as JobParamsPanelCsv & { panel: SearchPanel };
 
     if (!panel) {
       i18n.translate(
@@ -50,54 +54,13 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn<
 
     jobLogger.debug(`Execute job generating [${visType}] csv`);
 
-    let requestObject: KibanaRequest | FakeRequest;
-
-    if (isImmediate && req) {
-      jobLogger.info(`Executing job from Immediate API using request context`);
-      requestObject = req;
-    } else {
-      jobLogger.info(`Executing job async using encrypted headers`);
-      let decryptedHeaders: Record<string, unknown>;
-      const serializedEncryptedHeaders = job.headers;
-      try {
-        if (typeof serializedEncryptedHeaders !== 'string') {
-          throw new Error(
-            i18n.translate(
-              'xpack.reporting.exportTypes.csv_from_savedobject.executeJob.missingJobHeadersErrorMessage',
-              {
-                defaultMessage: 'Job headers are missing',
-              }
-            )
-          );
-        }
-        decryptedHeaders = (await crypto.decrypt(serializedEncryptedHeaders)) as Record<
-          string,
-          unknown
-        >;
-      } catch (err) {
-        jobLogger.error(err);
-        throw new Error(
-          i18n.translate(
-            'xpack.reporting.exportTypes.csv_from_savedobject.executeJob.failedToDecryptReportJobDataErrorMessage',
-            {
-              defaultMessage:
-                'Failed to decrypt report job data. Please ensure that {encryptionKey} is set and re-generate this report. {err}',
-              values: { encryptionKey: 'xpack.reporting.encryptionKey', err },
-            }
-          )
-        );
-      }
-
-      requestObject = { headers: decryptedHeaders };
-    }
-
     let content: string;
     let maxSizeReached = false;
     let size = 0;
     try {
       const generateResults: CsvResultFromSearch = await generateCsv(
         context,
-        requestObject,
+        request,
         visType as string,
         panel,
         jobParams

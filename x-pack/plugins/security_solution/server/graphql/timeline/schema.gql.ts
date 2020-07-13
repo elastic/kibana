@@ -84,6 +84,12 @@ export const timelineSchema = gql`
     kqlQuery: String
     queryMatch: QueryMatchInput
     and: [DataProviderInput!]
+    type: DataProviderType
+  }
+
+  enum DataProviderType {
+    default
+    template
   }
 
   input KueryFilterQueryInput {
@@ -141,11 +147,28 @@ export const timelineSchema = gql`
     custom
   }
 
+  enum RowRendererId {
+    auditd
+    auditd_file
+    netflow
+    plain
+    suricata
+    system
+    system_dns
+    system_endgame_process
+    system_file
+    system_fim
+    system_security_event
+    system_socket
+    zeek
+  }
+
   input TimelineInput {
     columns: [ColumnHeaderInput!]
     dataProviders: [DataProviderInput!]
     description: String
     eventType: String
+    excludedRowRendererIds: [RowRendererId!]
     filters: [FilterTimelineInput!]
     kqlMode: String
     kqlQuery: SerializedFilterQueryInput
@@ -194,6 +217,7 @@ export const timelineSchema = gql`
     excluded: Boolean
     kqlQuery: String
     queryMatch: QueryMatchResult
+    type: DataProviderType
     and: [DataProviderResult!]
   }
 
@@ -245,6 +269,7 @@ export const timelineSchema = gql`
     description: String
     eventIdToNoteIds: [NoteResult!]
     eventType: String
+    excludedRowRendererIds: [RowRendererId!]
     favorite: [FavoriteTimelineResult!]
     filters: [FilterTimelineResult!]
     kqlMode: String
