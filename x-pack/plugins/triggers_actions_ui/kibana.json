@@ -6,5 +6,6 @@
   "optionalPlugins": ["alerts", "alertingBuiltins"],
   "requiredPlugins": ["management", "charts", "data"],
   "configPath": ["xpack", "trigger_actions_ui"],
-  "extraPublicDirs": ["public/common", "public/common/constants"]
+  "extraPublicDirs": ["public/common", "public/common/constants"],
+  "requiredBundles": ["alerts", "esUiShared"]
 }

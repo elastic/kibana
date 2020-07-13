@@ -22,7 +22,7 @@ export const LeftColumn: FunctionComponent<ColumnProps> = ({ children, ...rest }
 
 export const CenterColumn: FunctionComponent<ColumnProps> = ({ children, ...rest }) => {
   return (
-    <EuiFlexItem grow={7} {...rest}>
+    <EuiFlexItem grow={9} {...rest}>
       {children}
     </EuiFlexItem>
   );

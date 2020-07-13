@@ -14,13 +14,13 @@ import { wait } from '../../lib/helpers';
 import { mockEventViewerResponse } from './mock';
 import { StatefulEventsViewer } from '.';
 import { defaultHeaders } from './default_headers';
-import { useFetchIndexPatterns } from '../../../alerts/containers/detection_engine/rules/fetch_index_patterns';
+import { useFetchIndexPatterns } from '../../../detections/containers/detection_engine/rules/fetch_index_patterns';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { eventsDefaultModel } from './default_model';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
 const mockUseFetchIndexPatterns: jest.Mock = useFetchIndexPatterns as jest.Mock;
-jest.mock('../../../alerts/containers/detection_engine/rules/fetch_index_patterns');
+jest.mock('../../../detections/containers/detection_engine/rules/fetch_index_patterns');
 mockUseFetchIndexPatterns.mockImplementation(() => [
   {
     browserFields: mockBrowserFields,
@@ -77,7 +77,7 @@ describe('EventsViewer', () => {
     await wait();
     wrapper.update();
 
-    expect(wrapper.find(`[data-test-subj="show-field-browser-gear"]`).first().exists()).toBe(true);
+    expect(wrapper.find(`[data-test-subj="show-field-browser"]`).first().exists()).toBe(true);
   });
 
   test('it renders the footer containing the Load More button', async () => {
