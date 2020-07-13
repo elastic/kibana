@@ -11,7 +11,7 @@ import { ResolverAction } from '../actions';
 const initialState: DataState = {
   relatedEvents: new Map(),
   relatedEventsReady: new Map(),
-  resolverComponentInstanceID: '',
+  resolverComponentInstanceID: undefined,
 };
 
 export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialState, action) => {

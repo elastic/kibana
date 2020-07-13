@@ -193,7 +193,7 @@ describe('data state', () => {
       expect(selectors.isLoading(state())).toBe(true);
     });
     it('should need to fetch the second databaseDocumentID', () => {
-      expect(selectors.databaseDocumentIDToFetch(state())).toBe(secondDatabaseDocumentID);
+      expect(selectors.databaseDocumentIDToFetch(state())).toBe(firstDatabaseDocumentID);
     });
     it('should need to abort the request for the databaseDocumentID', () => {
       expect(selectors.databaseDocumentIDToFetch(state())).toBe(secondDatabaseDocumentID);
