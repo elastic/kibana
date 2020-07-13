@@ -14,9 +14,7 @@ import { DetectionEnginePageComponent } from './detection_engine';
 import { useUserInfo } from '../../components/user_info';
 import { useWithSource } from '../../../common/containers/source';
 
-jest.mock('../../containers/detection_engine/alerts/use_lists_config', () => ({
-  useListsConfig: jest.fn().mockReturnValue({}),
-}));
+jest.mock('../../containers/detection_engine/lists/use_lists_config');
 jest.mock('../../components/user_info');
 jest.mock('../../../common/containers/source');
 jest.mock('../../../common/components/link_to');
