@@ -72,11 +72,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
           id: index + 1,
           title: alertStatus.alert.label,
           width: 400,
-          content: (
-            <div style={{ padding: '1rem' }}>
-              <AlertPanel alert={alertStatus} />
-            </div>
-          ),
+          content: <AlertPanel alert={alertStatus} />,
         };
       }),
     ];
@@ -149,11 +145,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
             id: index + 1,
             title: getDateFromState(alertStatus.states),
             width: 400,
-            content: (
-              <div style={{ padding: '1rem' }}>
-                <AlertPanel alert={alertStatus} />
-              </div>
-            ),
+            content: <AlertPanel alert={alertStatus} />,
           };
         }),
       ];

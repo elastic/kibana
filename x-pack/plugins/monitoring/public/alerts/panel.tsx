@@ -13,6 +13,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSwitch,
+  EuiTitle,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 
 import { CommonAlertStatus } from '../../common/types';
@@ -111,7 +113,10 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
 
   const configurationUi = (
     <Fragment>
-      <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <EuiButton onClick={() => setShowFlyout(true)}>Edit alert</EuiButton>
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSwitch
             name="disable"
@@ -156,8 +161,6 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer />
-      <EuiButton onClick={() => setShowFlyout(true)}>Edit alert</EuiButton>
       {flyoutUi}
     </Fragment>
   );
@@ -183,14 +186,15 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
 
   return (
     <Fragment>
-      <EuiCallOut
-        title={replaceTokens(firingState.state.ui.message)}
-        color={firingState.state.ui.severity}
-      >
+      <div style={{ padding: '1rem' }}>
+        <EuiTitle size="xs">
+          <h5>{replaceTokens(firingState.state.ui.message)}</h5>
+        </EuiTitle>
+        {nextStepsUi ? <EuiSpacer size="s" /> : null}
         {nextStepsUi}
-      </EuiCallOut>
-      <EuiSpacer size="m" />
-      {configurationUi}
+      </div>
+      <EuiHorizontalRule margin="s" />
+      <div style={{ padding: '0 1rem 1rem 1rem' }}>{configurationUi}</div>
     </Fragment>
   );
 };
