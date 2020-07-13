@@ -9,6 +9,7 @@ import { FrameworkAdapter, FrameworkRequest } from '../framework';
 
 import { ElasticsearchHostsAdapter, formatHostEdgesData } from './elasticsearch_adapter';
 import {
+  mockEndpointMetadata,
   mockGetHostOverviewOptions,
   mockGetHostOverviewRequest,
   mockGetHostOverviewResponse,
@@ -29,6 +30,7 @@ import { HostAggEsItem } from './types';
 import { EndpointAppContext } from '../../endpoint/types';
 import { mockLogger } from '../detection_engine/signals/__mocks__/es_results';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
+import { createMockEndpointAppContextServiceStartContract } from '../../endpoint/mocks';
 
 jest.mock('./query.hosts.dsl', () => {
   return {
@@ -45,6 +47,11 @@ jest.mock('./query.detail_host.dsl', () => {
 jest.mock('./query.last_first_seen_host.dsl', () => {
   return {
     buildLastFirstSeenHostQuery: jest.fn(() => mockGetHostLastFirstSeenDsl),
+  };
+});
+jest.mock('../../endpoint/routes/metadata', () => {
+  return {
+    getHostData: jest.fn(() => mockEndpointMetadata),
   };
 });
 
@@ -158,9 +165,13 @@ describe('hosts elasticsearch_adapter', () => {
     });
   });
 
+  const endpointAppContextService = new EndpointAppContextService();
+  const startContract = createMockEndpointAppContextServiceStartContract();
+  endpointAppContextService.start(startContract);
+
   const endpointContext: EndpointAppContext = {
     logFactory: mockLogger,
-    service: new EndpointAppContextService(),
+    service: endpointAppContextService,
     config: jest.fn(),
   };
   describe('#getHosts', () => {

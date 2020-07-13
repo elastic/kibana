@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, EuiHealth } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 
 import { DescriptionList } from '../../../../../common/utility_types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/field_renderers';
-import { EndpointFields } from '../../../../graphql/types';
+import { EndpointFields, HostPolicyResponseActionStatus } from '../../../../graphql/types';
 import { DescriptionListStyled } from '../../../../common/components/page';
 
 import * as i18n from './translations';
@@ -22,7 +22,7 @@ interface Props {
 
 const getDescriptionList = (descriptionList: DescriptionList[], key: number) => (
   <EuiFlexItem key={key}>
-    <DescriptionListStyled listItems={descriptionList} />
+    <DescriptionListStyled data-test-subj="endpoint-overview" listItems={descriptionList} />
   </EuiFlexItem>
 );
 
@@ -39,18 +39,27 @@ export const EndpointOverview = React.memo<Props>(({ data }) => {
       {
         title: i18n.ENDPOINT_POLICY,
         description:
-          data != null && data.endpointPolicy != null
-            ? getDefaultRenderer('endpointPolicy', data, 'Endpoint.policy.applied.name')
-            : getEmptyTagValue(),
+          data != null && data.endpointPolicy != null ? data.endpointPolicy : getEmptyTagValue(),
       },
     ],
     [
       {
         title: i18n.POLICY_STATUS,
         description:
-          data != null && data.policyStatus != null
-            ? getDefaultRenderer('policyStatus', data, 'Endpoint.policy.applied.status')
-            : getEmptyTagValue(),
+          data != null && data.policyStatus != null ? (
+            <EuiHealth
+              aria-label={data.policyStatus}
+              color={
+                data.policyStatus === HostPolicyResponseActionStatus.failure
+                  ? 'danger'
+                  : data.policyStatus
+              }
+            >
+              {data.policyStatus}
+            </EuiHealth>
+          ) : (
+            getEmptyTagValue()
+          ),
       },
     ],
     [
