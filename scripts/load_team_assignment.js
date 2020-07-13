@@ -17,10 +17,5 @@
  * under the License.
  */
 
-/*
-How to run the loader?
-
-I guess from ci, so that means groovy + shell prolly.
-
-
- */
+require('../src/setup_node_env');
+require('../src/dev/code_coverage/ingest_coverage/team_assignment').uploadTeamAssignmentJson();
