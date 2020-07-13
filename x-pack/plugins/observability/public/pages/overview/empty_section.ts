@@ -77,7 +77,7 @@ export const getEmptySections = ({ core }: { core: AppMountContext['core'] }): I
       icon: 'watchesApp',
       description: i18n.translate('xpack.observability.emptySection.apps.alert.description', {
         defaultMessage:
-          '503 errors stacking up. Applications not responding. CPU and RAM utilization jumping. See these warnings as they happen - not as part of the post-mortem.',
+          'Are 503 errors stacking up? Are services responding? Is CPU and RAM utilization jumping? See warnings as they happen—not as part of the post-mortem.',
       }),
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.alert.link', {
         defaultMessage: 'Create alert',
