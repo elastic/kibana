@@ -26,10 +26,6 @@ import { TimelineNonEcsData } from '../../../../graphql/types';
 import { UpdateAlertsStatus } from '../types';
 import { FILTER_CLOSED, FILTER_IN_PROGRESS, FILTER_OPEN } from '../alerts_filter_group';
 
-const UtilityBarFlexGroup = styled(EuiFlexGroup)`
-  min-width: 175px;
-`;
-
 interface AlertsUtilityBarProps {
   canUserCRUD: boolean;
   hasIndexWrite: boolean;
