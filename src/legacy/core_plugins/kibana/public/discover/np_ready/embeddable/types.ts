@@ -17,7 +17,12 @@
  * under the License.
  */
 
-import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from 'src/plugins/embeddable/public';
+import {
+  EmbeddableInput,
+  EmbeddableOutput,
+  IEmbeddable,
+  Embeddable,
+} from 'src/plugins/embeddable/public';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 import { Filter, IIndexPattern, TimeRange, Query } from '../../../../../../../plugins/data/public';
 import { SavedSearch } from '../../../../../../../plugins/discover/public';
@@ -39,4 +44,8 @@ export interface SearchOutput extends EmbeddableOutput {
 
 export interface ISearchEmbeddable extends IEmbeddable<SearchInput, SearchOutput> {
   getSavedSearch(): SavedSearch;
+}
+
+export interface SearchEmbeddable extends Embeddable<SearchInput, SearchOutput> {
+  type: string;
 }
