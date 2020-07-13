@@ -35,7 +35,7 @@ const tabs = [
   {
     id: 'blocklist',
     title: i18n.translate('xpack.graph.settings.blocklistTitle', { defaultMessage: 'Block list' }),
-    component: blocklistForm,
+    component: BlocklistForm,
   },
   {
     id: 'drillDowns',
