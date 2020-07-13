@@ -195,7 +195,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             },
           },
           revision: 3,
-          settings: {
+          agent: {
             monitoring: {
               enabled: false,
               logs: false,
