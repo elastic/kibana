@@ -17,9 +17,10 @@ import {
   SavedObjectsSerializer,
   SavedObjectsRawDoc,
   ISavedObjectsRepository,
+  SavedObjectsUpdateResponse,
 } from '../../../../src/core/server';
 
-import { asOk, asErr } from './lib/result_type';
+import { asOk, asErr, Result } from './lib/result_type';
 
 import {
   ConcreteTaskInstance,
@@ -333,6 +334,50 @@ export class TaskStore {
   }
 
   /**
+   * Updates the specified docs in the index, returning the docs
+   * with their versions up to date.
+   *
+   * @param {Array<TaskDoc>} docs
+   * @returns {Promise<Array<TaskDoc>>}
+   */
+  public async bulkUpdate(
+    docs: ConcreteTaskInstance[]
+  ): Promise<Array<Result<ConcreteTaskInstance, Error>>> {
+    const attributesByDocId = docs.reduce((attrsById, doc) => {
+      attrsById.set(doc.id, taskInstanceToAttributes(doc));
+      return attrsById;
+    }, new Map());
+
+    const updatedSavedObjects: Array<SavedObjectsUpdateResponse | Error> = (
+      await this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
+        docs.map((doc) => ({
+          type: 'task',
+          id: doc.id,
+          options: { version: doc.version },
+          attributes: attributesByDocId.get(doc.id)!,
+        })),
+        {
+          refresh: false,
+        }
+      )
+    ).saved_objects;
+
+    return updatedSavedObjects.map<Result<ConcreteTaskInstance, Error>>((updatedSavedObject) =>
+      isSavedObjectsUpdateResponse(updatedSavedObject)
+        ? asOk(
+            savedObjectToConcreteTaskInstance({
+              ...updatedSavedObject,
+              attributes: defaults(
+                updatedSavedObject.attributes,
+                attributesByDocId.get(updatedSavedObject.id)!
+              ),
+            })
+          )
+        : asErr(updatedSavedObject)
+    );
+  }
+
+  /**
    * Removes the specified task from the index.
    *
    * @param {string} id
@@ -467,4 +512,10 @@ function ensureQueryOnlyReturnsTaskObjects(opts: SearchOpts): SearchOpts {
     ...opts,
     query,
   };
+}
+
+function isSavedObjectsUpdateResponse(
+  result: SavedObjectsUpdateResponse | Error
+): result is SavedObjectsUpdateResponse {
+  return result && typeof (result as SavedObjectsUpdateResponse).id === 'string';
 }

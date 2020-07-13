@@ -47,6 +47,14 @@ export async function promiseResult<T, E>(future: Promise<T>): Promise<Result<T,
   }
 }
 
+export async function unwrapPromise<T, E>(future: Promise<Result<T, E>>): Promise<T> {
+  return map(
+    await future,
+    (value: T) => Promise.resolve(value),
+    (err: E) => Promise.reject(err)
+  );
+}
+
 export function unwrap<T, E>(result: Result<T, E>): T | E {
   return isOk(result) ? result.value : result.error;
 }
