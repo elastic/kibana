@@ -35,8 +35,14 @@ export function createInteractionPositionTracker() {
   let lastMouseX = 0;
   let lastMouseY = 0;
   const lastClicks: Array<{ el?: Element; mouseX: number; mouseY: number }> = [];
-  const MAX_LAST_CLICKS = 5;
+  const MAX_LAST_CLICKS = 10;
 
+  /**
+   * Track both `mouseup` and `click`
+   * `mouseup` is for clicks and brushes with mouse
+   * `click` is a fallback for keyboard interactions
+   */
+  document.addEventListener('mouseup', onClick, true);
   document.addEventListener('click', onClick, true);
   document.addEventListener('mousemove', onMouseUpdate, { passive: true });
   document.addEventListener('mouseenter', onMouseUpdate, { passive: true });
