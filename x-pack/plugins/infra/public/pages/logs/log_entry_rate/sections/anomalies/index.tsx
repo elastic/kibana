@@ -24,6 +24,7 @@ import {
   PaginationOptions,
   LogEntryAnomalies,
 } from '../../use_log_entry_anomalies_results';
+import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 
 export const AnomaliesResults: React.FunctionComponent<{
   isLoadingLogRateResults: boolean;
@@ -96,23 +97,25 @@ export const AnomaliesResults: React.FunctionComponent<{
           logEntryRateResults.histogramBuckets &&
           !logEntryRateResults.histogramBuckets.length)) &&
       (!anomalies || anomalies.length === 0) ? (
-        <EuiEmptyPrompt
-          title={
-            <h2>
-              {i18n.translate('xpack.infra.logs.analysis.anomalySectionNoDataTitle', {
-                defaultMessage: 'There is no data to display.',
-              })}
-            </h2>
-          }
-          titleSize="m"
-          body={
-            <p>
-              {i18n.translate('xpack.infra.logs.analysis.anomalySectionNoDataBody', {
-                defaultMessage: 'You may want to adjust your time range.',
-              })}
-            </p>
-          }
-        />
+        <LoadingOverlayWrapper isLoading={isLoadingLogRateResults || isLoadingAnomaliesResults}>
+          <EuiEmptyPrompt
+            title={
+              <h2>
+                {i18n.translate('xpack.infra.logs.analysis.anomalySectionNoDataTitle', {
+                  defaultMessage: 'There is no data to display.',
+                })}
+              </h2>
+            }
+            titleSize="m"
+            body={
+              <p>
+                {i18n.translate('xpack.infra.logs.analysis.anomalySectionNoDataBody', {
+                  defaultMessage: 'You may want to adjust your time range.',
+                })}
+              </p>
+            }
+          />
+        </LoadingOverlayWrapper>
       ) : (
         <>
           <EuiFlexGroup>
