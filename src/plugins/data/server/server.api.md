@@ -561,6 +561,8 @@ export interface ISearchOptions {
 export interface ISearchSetup {
     // Warning: (ae-forgotten-export) The symbol "TRegisterSearchStrategy" needs to be exported by the entry point index.d.ts
     registerSearchStrategy: TRegisterSearchStrategy;
+    // Warning: (ae-forgotten-export) The symbol "SearchUsage" needs to be exported by the entry point index.d.ts
+    usage: SearchUsage;
 }
 
 // Warning: (ae-missing-release-tag) "ISearchStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

@@ -42,7 +42,7 @@ import { UsageCollectionSetup } from '../../../usage_collection/public';
 
 interface SearchServiceSetupDependencies {
   expressions: ExpressionsSetup;
-  usageCollection: UsageCollectionSetup;
+  usageCollection?: UsageCollectionSetup;
   getInternalStartServices: GetInternalStartServicesFn;
   packageInfo: PackageInfo;
 }

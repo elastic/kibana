@@ -33,7 +33,7 @@ export interface SearchInterceptorDeps {
   application: ApplicationStart;
   http: CoreStart['http'];
   uiSettings: CoreStart['uiSettings'];
-  usageCollector: SearchUsageCollector;
+  usageCollector?: SearchUsageCollector;
 }
 
 export class SearchInterceptor {
@@ -125,7 +125,9 @@ export class SearchInterceptor {
       return this.runSearch(request, combinedSignal).pipe(
         tap({
           next: (e) => {
-            this.deps.usageCollector.trackSuccess(e.rawResponse.took);
+            if (this.deps.usageCollector) {
+              this.deps.usageCollector.trackSuccess(e.rawResponse.took);
+            }
           },
         }),
         finalize(() => {
@@ -192,7 +194,9 @@ export class SearchInterceptor {
     if (this.longRunningToast) {
       this.deps.toasts.remove(this.longRunningToast);
       delete this.longRunningToast;
-      this.deps.usageCollector.trackLongQueryDialogDismissed();
+      if (this.deps.usageCollector) {
+        this.deps.usageCollector.trackLongQueryDialogDismissed();
+      }
     }
   };
 }
