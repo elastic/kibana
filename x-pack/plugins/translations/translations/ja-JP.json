@@ -8073,7 +8073,6 @@
     "xpack.ingestManager.agentDetails.viewAgentListTitle": "すべてのエージェント構成を表示",
     "xpack.ingestManager.agentEnrollment.cancelButtonLabel": "キャンセル",
     "xpack.ingestManager.agentEnrollment.continueButtonLabel": "続行",
-    "xpack.ingestManager.agentEnrollment.downloadDescription": "ホストのコンピューターでElasticエージェントをダウンロードします。エージェントバイナリをダウンロードできます。検証署名はElasticの{downloadLink}にあります。",
     "xpack.ingestManager.agentEnrollment.downloadLink": "ダウンロードページ",
     "xpack.ingestManager.agentEnrollment.fleetNotInitializedText": "エージェントを登録する前に、フリートを設定する必要があります。{link}",
     "xpack.ingestManager.agentEnrollment.flyoutTitle": "新しいエージェントを登録",
