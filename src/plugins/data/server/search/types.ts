@@ -26,6 +26,7 @@ export interface ISearchOptions {
    * An `AbortSignal` that allows the caller of `search` to abort a search request.
    */
   signal?: AbortSignal;
+  strategy?: string;
 }
 
 export interface ISearchSetup {
