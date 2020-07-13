@@ -118,7 +118,7 @@ export function getApmTelemetryMapping() {
             properties: {
               geo: {
                 properites: {
-                  country_iso_code: oneDayProperties,
+                  country_iso_code: { rum: oneDayProperties },
                 },
               },
             },
