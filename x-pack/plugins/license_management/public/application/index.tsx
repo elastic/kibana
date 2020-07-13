@@ -25,6 +25,7 @@ export const renderApp = (element: Element, dependencies: AppDependencies) => {
       <AppWithRouter
         telemetry={dependencies.plugins.telemetry}
         history={dependencies.services.history}
+        docTitle={dependencies.core.chrome.docTitle}
       />
     </AppProviders>,
     element

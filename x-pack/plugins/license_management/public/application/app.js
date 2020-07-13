@@ -8,13 +8,18 @@ import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { LicenseDashboard, UploadLicense } from './sections';
 import { Switch, Route } from 'react-router-dom';
-import { APP_PERMISSION } from '../../common/constants';
+import { APP_PERMISSION, PLUGIN } from '../../common/constants';
 import { EuiPageBody, EuiEmptyPrompt, EuiText, EuiLoadingSpinner, EuiCallOut } from '@elastic/eui';
 
 export class App extends Component {
   componentDidMount() {
-    const { loadPermissions } = this.props;
+    const { loadPermissions, docTitle } = this.props;
+    docTitle.change(PLUGIN.title);
     loadPermissions();
+  }
+
+  componentWillUnmount() {
+    this.props.docTitle.reset();
   }
 
   render() {
