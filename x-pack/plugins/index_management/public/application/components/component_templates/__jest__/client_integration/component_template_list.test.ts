@@ -67,7 +67,7 @@ describe('<ComponentTemplateList />', () => {
         const { name, usedBy } = componentTemplates[i];
         const usedByText = usedBy.length === 0 ? 'Not in use' : usedBy.length.toString();
 
-        expect(row).toEqual(['', name, usedByText, '', '', '', '']);
+        expect(row).toEqual(['', name, usedByText, '', '', '', 'EditDelete']);
       });
     });
 

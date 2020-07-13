@@ -20,7 +20,8 @@ You'll need access to our GCP account, which is where we have two machines provi
 Chromium is built via a build tool called "ninja". The build can be configured by specifying build flags either in an "args.gn" file or via commandline args. We have an "args.gn" file per platform:
 
 - mac: darwin/args.gn
-- linux: linux/args.gn
+- linux 64bit: linux-x64/args.gn
+- ARM 64bit: linux-aarch64/args.gn
 - windows: windows/args.gn
 
 The various build flags are not well documented. Some are documented [here](https://www.chromium.org/developers/gn-build-configuration). Some, such as `enable_basic_printing = false`, I only found by poking through 3rd party build scripts.
@@ -65,15 +66,16 @@ Create the build folder:
 
 Copy the `x-pack/build-chromium` folder to each. Replace `you@your-machine` with the correct username and VM name:
 
-- Mac: `cp -r ~/dev/elastic/kibana/x-pack/build_chromium ~/chromium/build_chromium`
-- Linux: `gcloud compute scp --recurse ~/dev/elastic/kibana/x-pack/build_chromium you@your-machine:~/chromium/build_chromium --zone=us-east1-b`
+- Mac: `cp -r x-pack/build_chromium ~/chromium/build_chromium`
+- Linux: `gcloud compute scp --recurse x-pack/build_chromium you@your-machine:~/chromium/ --zone=us-east1-b --project "XXXXXXXX"`
 - Windows: Copy the `build_chromium` folder via the RDP GUI into `c:\chromium\build_chromium`
 
 There is an init script for each platform. This downloads and installs the necessary prerequisites, sets environment variables, etc.
 
-- Mac: `~/chromium/build_chromium/darwin/init.sh`
-- Linux: `~/chromium/build_chromium/linux/init.sh`
-- Windows `c:\chromium\build_chromium\windows\init.bat`
+- Mac x64: `~/chromium/build_chromium/darwin/init.sh`
+- Linux x64: `~/chromium/build_chromium/linux/init.sh`
+- Linux arm64: `~/chromium/build_chromium/linux/init.sh arm64`
+- Windows x64: `c:\chromium\build_chromium\windows\init.bat`
 
 In windows, at least, you will need to do a number of extra steps:
 
@@ -102,15 +104,16 @@ Note: In Linux, you should run the build command in tmux so that if your ssh ses
 
 To run the build, replace the sha in the following commands with the sha that you wish to build:
 
-- Mac: `python ~/chromium/build_chromium/build.py 312d84c8ce62810976feda0d3457108a6dfff9e6`
-- Linux: `python ~/chromium/build_chromium/build.py 312d84c8ce62810976feda0d3457108a6dfff9e6`
-- Windows: `python c:\chromium\build_chromium\build.py 312d84c8ce62810976feda0d3457108a6dfff9e6`
+- Mac x64: `python ~/chromium/build_chromium/build.py 312d84c8ce62810976feda0d3457108a6dfff9e6`
+- Linux x64: `python ~/chromium/build_chromium/build.py 312d84c8ce62810976feda0d3457108a6dfff9e6`
+- Linux arm64: `python ~/chromium/build_chromium/build.py 312d84c8ce62810976feda0d3457108a6dfff9e6 arm64`
+- Windows x64: `python c:\chromium\build_chromium\build.py 312d84c8ce62810976feda0d3457108a6dfff9e6`
 
 ## Artifacts
 
-After the build completes, there will be a .zip file and a .md5 file in `~/chromium/chromium/src/out/headless`. These are named like so: `chromium-{first_7_of_SHA}-{platform}`, for example: `chromium-4747cc2-linux`.
+After the build completes, there will be a .zip file and a .md5 file in `~/chromium/chromium/src/out/headless`. These are named like so: `chromium-{first_7_of_SHA}-{platform}-{arch}`, for example: `chromium-4747cc2-linux-x64`.
 
-The zip files need to be deployed to s3. For testing, I drop them into `headless-shell-dev`, but for production, they need to be in `headless-shell`. And the `x-pack/plugins/reporting/server/browsers/chromium/paths.ts` file needs to be upated to have the correct `archiveChecksum`, `archiveFilename`, `binaryChecksum` and `baseUrl`. Below is a list of what the archive's are:
+The zip files need to be deployed to GCP Storage. For testing, I drop them into `headless-shell-dev`, but for production, they need to be in `headless-shell`. And the `x-pack/plugins/reporting/server/browsers/chromium/paths.ts` file needs to be upated to have the correct `archiveChecksum`, `archiveFilename`, `binaryChecksum` and `baseUrl`. Below is a list of what the archive's are:
 
 - `archiveChecksum`: The contents of the `.md5` file, which is the `md5` checksum of the zip file.
 - `binaryChecksum`: The `md5` checksum of the `headless_shell` binary itself.
@@ -139,8 +142,8 @@ In the case of Windows, you can use IE to open `http://localhost:9221` and see i
 The following links provide helpful context about how the Chromium build works, and its prerequisites:
 
 - https://www.chromium.org/developers/how-tos/get-the-code/working-with-release-branches
-- https://chromium.googlesource.com/chromium/src/+/master/docs/windows_build_instructions.md
-- https://chromium.googlesource.com/chromium/src/+/master/docs/mac_build_instructions.md
-- https://chromium.googlesource.com/chromium/src/+/master/docs/linux_build_instructions.md
+- https://chromium.googlesource.com/chromium/src/+/HEAD/docs/windows_build_instructions.md
+- https://chromium.googlesource.com/chromium/src/+/HEAD/docs/mac_build_instructions.md
+- https://chromium.googlesource.com/chromium/src/+/HEAD/docs/linux/build_instructions.md
 - Some build-flag descriptions: https://www.chromium.org/developers/gn-build-configuration
 - The serverless Chromium project was indispensable: https://github.com/adieuadieu/serverless-chrome/blob/b29445aa5a96d031be2edd5d1fc8651683bf262c/packages/lambda/builds/chromium/build/build.sh
