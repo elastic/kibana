@@ -39,10 +39,7 @@ export const EndpointOverview = React.memo<Props>(({ data }) => {
       {
         title: i18n.ENDPOINT_POLICY,
         description:
-          data != null &&
-          data.endpointPolicy != null &&
-          data.endpointPolicy &&
-          data.endpointPolicy.length
+          data != null && data.endpointPolicy != null
             ? getDefaultRenderer('endpointPolicy', data, 'Endpoint.policy.applied.name')
             : getEmptyTagValue(),
       },
@@ -51,7 +48,7 @@ export const EndpointOverview = React.memo<Props>(({ data }) => {
       {
         title: i18n.POLICY_STATUS,
         description:
-          data != null && data.policyStatus != null && data.policyStatus && data.policyStatus.length
+          data != null && data.policyStatus != null
             ? getDefaultRenderer('policyStatus', data, 'Endpoint.policy.applied.status')
             : getEmptyTagValue(),
       },
@@ -60,10 +57,7 @@ export const EndpointOverview = React.memo<Props>(({ data }) => {
       {
         title: i18n.SENSORVERSION,
         description:
-          data != null &&
-          data.sensorVersion != null &&
-          data.sensorVersion &&
-          data.sensorVersion.length
+          data != null && data.sensorVersion != null
             ? getDefaultRenderer('sensorVersion', data, 'agent.version')
             : getEmptyTagValue(),
       },
