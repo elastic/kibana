@@ -106,7 +106,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
     path: agentDetailsWithFlyoutPath,
     state: {
       onDoneNavigateTo: [
-        'securitySolution:management',
+        'securitySolution:administration',
         {
           path: getHostDetailsPath({ name: 'hostDetails', selected_host: details.host.id }),
         },

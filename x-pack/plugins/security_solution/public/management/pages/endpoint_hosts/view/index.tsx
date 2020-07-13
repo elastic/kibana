@@ -127,12 +127,12 @@ export const HostList = () => {
       }`,
       state: {
         onCancelNavigateTo: [
-          'securitySolution:management',
+          'securitySolution:administration',
           { path: getHostListPath({ name: 'hostList' }) },
         ],
         onCancelUrl: formatUrl(getHostListPath({ name: 'hostList' })),
         onSaveNavigateTo: [
-          'securitySolution:management',
+          'securitySolution:administration',
           { path: getHostListPath({ name: 'hostList' }) },
         ],
       },
@@ -145,7 +145,7 @@ export const HostList = () => {
     path: `#/configs/${selectedPolicyId}?openEnrollmentFlyout=true`,
     state: {
       onDoneNavigateTo: [
-        'securitySolution:management',
+        'securitySolution:administration',
         { path: getHostListPath({ name: 'hostList' }) },
       ],
     },
