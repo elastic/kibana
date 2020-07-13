@@ -21,6 +21,13 @@ import {
 } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 
+export type SlackActionType = ActionType<{}, ActionTypeSecretsType, ActionParamsType>;
+export type SlackActionTypeExecutorOptions = ActionTypeExecutorOptions<
+  {},
+  ActionTypeSecretsType,
+  ActionParamsType
+>;
+
 // secrets definition
 
 export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
@@ -46,8 +53,8 @@ export function getActionType({
   executor = slackExecutor,
 }: {
   configurationUtilities: ActionsConfigurationUtilities;
-  executor?: ExecutorType;
-}): ActionType {
+  executor?: ExecutorType<{}, ActionTypeSecretsType, ActionParamsType>;
+}): SlackActionType {
   return {
     id: '.slack',
     minimumLicenseRequired: 'gold',
@@ -92,11 +99,11 @@ function valdiateActionTypeConfig(
 // action executor
 
 async function slackExecutor(
-  execOptions: ActionTypeExecutorOptions
+  execOptions: SlackActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult> {
   const actionId = execOptions.actionId;
-  const secrets = execOptions.secrets as ActionTypeSecretsType;
-  const params = execOptions.params as ActionParamsType;
+  const secrets = execOptions.secrets;
+  const params = execOptions.params;
 
   let result: IncomingWebhookResult;
   const { webhookUrl } = secrets;

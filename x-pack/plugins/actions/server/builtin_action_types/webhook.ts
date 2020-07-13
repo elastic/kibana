@@ -22,6 +22,17 @@ enum WebhookMethods {
   PUT = 'put',
 }
 
+export type WebhookActionType = ActionType<
+  ActionTypeConfigType,
+  ActionTypeSecretsType,
+  ActionParamsType
+>;
+export type WebhookActionTypeExecutorOptions = ActionTypeExecutorOptions<
+  ActionTypeConfigType,
+  ActionTypeSecretsType,
+  ActionParamsType
+>;
+
 const HeadersSchema = schema.recordOf(schema.string(), schema.string());
 const configSchemaProps = {
   url: schema.string(),
@@ -31,7 +42,7 @@ const configSchemaProps = {
   headers: nullableType(HeadersSchema),
 };
 const ConfigSchema = schema.object(configSchemaProps);
-type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
+export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
 // secrets definition
 export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
@@ -63,7 +74,7 @@ export function getActionType({
 }: {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
-}): ActionType {
+}): WebhookActionType {
   return {
     id: '.webhook',
     minimumLicenseRequired: 'gold',
@@ -112,13 +123,13 @@ function validateActionTypeConfig(
 // action executor
 export async function executor(
   { logger }: { logger: Logger },
-  execOptions: ActionTypeExecutorOptions
+  execOptions: WebhookActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult> {
   const actionId = execOptions.actionId;
-  const { method, url, headers = {} } = execOptions.config as ActionTypeConfigType;
-  const { body: data } = execOptions.params as ActionParamsType;
+  const { method, url, headers = {} } = execOptions.config;
+  const { body: data } = execOptions.params;
 
-  const secrets: ActionTypeSecretsType = execOptions.secrets as ActionTypeSecretsType;
+  const secrets: ActionTypeSecretsType = execOptions.secrets;
   const basicAuth =
     isString(secrets.user) && isString(secrets.password)
       ? { auth: { username: secrets.user, password: secrets.password } }

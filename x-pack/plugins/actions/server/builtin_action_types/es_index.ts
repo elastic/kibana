@@ -11,6 +11,13 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 
+export type ESIndexActionType = ActionType<ActionTypeConfigType, {}, ActionParamsType>;
+export type ESIndexActionTypeExecutorOptions = ActionTypeExecutorOptions<
+  ActionTypeConfigType,
+  {},
+  ActionParamsType
+>;
+
 // config definition
 
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
@@ -33,7 +40,7 @@ const ParamsSchema = schema.object({
 });
 
 // action type definition
-export function getActionType({ logger }: { logger: Logger }): ActionType {
+export function getActionType({ logger }: { logger: Logger }): ESIndexActionType {
   return {
     id: '.index',
     minimumLicenseRequired: 'basic',
@@ -52,11 +59,11 @@ export function getActionType({ logger }: { logger: Logger }): ActionType {
 
 async function executor(
   { logger }: { logger: Logger },
-  execOptions: ActionTypeExecutorOptions
+  execOptions: ESIndexActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult> {
   const actionId = execOptions.actionId;
-  const config = execOptions.config as ActionTypeConfigType;
-  const params = execOptions.params as ActionParamsType;
+  const config = execOptions.config;
+  const params = execOptions.params;
   const services = execOptions.services;
 
   const index = config.index;

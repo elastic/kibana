@@ -8,14 +8,19 @@ jest.mock('./lib/post_pagerduty', () => ({
   postPagerduty: jest.fn(),
 }));
 
-import { getActionType } from './pagerduty';
-import { ActionType, Services, ActionTypeExecutorOptions } from '../types';
+import { Services } from '../types';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
 import { postPagerduty } from './lib/post_pagerduty';
 import { createActionTypeRegistry } from './index.test';
 import { Logger } from '../../../../../src/core/server';
 import { actionsConfigMock } from '../actions_config.mock';
 import { actionsMock } from '../mocks';
+import {
+  ActionParamsType,
+  getActionType,
+  PagerDutyActionType,
+  PagerDutyActionTypeExecutorOptions,
+} from './pagerduty';
 
 const postPagerdutyMock = postPagerduty as jest.Mock;
 
@@ -23,12 +28,12 @@ const ACTION_TYPE_ID = '.pagerduty';
 
 const services: Services = actionsMock.createServices();
 
-let actionType: ActionType;
+let actionType: PagerDutyActionType;
 let mockedLogger: jest.Mocked<Logger>;
 
 beforeAll(() => {
   const { logger, actionTypeRegistry } = createActionTypeRegistry();
-  actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
+  actionType = (actionTypeRegistry.get(ACTION_TYPE_ID) as unknown) as PagerDutyActionType;
   mockedLogger = logger;
 });
 
@@ -167,7 +172,7 @@ describe('execute()', () => {
 
   test('should succeed with minimal valid params', async () => {
     const secrets = { routingKey: 'super-secret' };
-    const config = {};
+    const config = { apiUrl: null };
     const params = {};
 
     postPagerdutyMock.mockImplementation(() => {
@@ -175,7 +180,7 @@ describe('execute()', () => {
     });
 
     const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
       actionId,
       config,
       params,
@@ -219,7 +224,7 @@ describe('execute()', () => {
     const config = {
       apiUrl: 'the-api-url',
     };
-    const params = {
+    const params: ActionParamsType = {
       eventAction: 'trigger',
       dedupKey: 'a-dedup-key',
       summary: 'the summary',
@@ -236,7 +241,7 @@ describe('execute()', () => {
     });
 
     const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
       actionId,
       config,
       params,
@@ -284,7 +289,7 @@ describe('execute()', () => {
     const config = {
       apiUrl: 'the-api-url',
     };
-    const params = {
+    const params: ActionParamsType = {
       eventAction: 'acknowledge',
       dedupKey: 'a-dedup-key',
       summary: 'the summary',
@@ -301,7 +306,7 @@ describe('execute()', () => {
     });
 
     const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
       actionId,
       config,
       params,
@@ -340,7 +345,7 @@ describe('execute()', () => {
     const config = {
       apiUrl: 'the-api-url',
     };
-    const params = {
+    const params: ActionParamsType = {
       eventAction: 'resolve',
       dedupKey: 'a-dedup-key',
       summary: 'the summary',
@@ -357,7 +362,7 @@ describe('execute()', () => {
     });
 
     const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
       actionId,
       config,
       params,
@@ -390,7 +395,7 @@ describe('execute()', () => {
 
   test('should fail when sendPagerdury throws', async () => {
     const secrets = { routingKey: 'super-secret' };
-    const config = {};
+    const config = { apiUrl: null };
     const params = {};
 
     postPagerdutyMock.mockImplementation(() => {
@@ -398,7 +403,7 @@ describe('execute()', () => {
     });
 
     const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
       actionId,
       config,
       params,
@@ -418,7 +423,7 @@ describe('execute()', () => {
 
   test('should fail when sendPagerdury returns 429', async () => {
     const secrets = { routingKey: 'super-secret' };
-    const config = {};
+    const config = { apiUrl: null };
     const params = {};
 
     postPagerdutyMock.mockImplementation(() => {
@@ -426,7 +431,7 @@ describe('execute()', () => {
     });
 
     const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
       actionId,
       config,
       params,
@@ -446,7 +451,7 @@ describe('execute()', () => {
 
   test('should fail when sendPagerdury returns 501', async () => {
     const secrets = { routingKey: 'super-secret' };
-    const config = {};
+    const config = { apiUrl: null };
     const params = {};
 
     postPagerdutyMock.mockImplementation(() => {
@@ -454,7 +459,7 @@ describe('execute()', () => {
     });
 
     const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
       actionId,
       config,
       params,
@@ -474,7 +479,7 @@ describe('execute()', () => {
 
   test('should fail when sendPagerdury returns 418', async () => {
     const secrets = { routingKey: 'super-secret' };
-    const config = {};
+    const config = { apiUrl: null };
     const params = {};
 
     postPagerdutyMock.mockImplementation(() => {
@@ -482,7 +487,7 @@ describe('execute()', () => {
     });
 
     const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
       actionId,
       config,
       params,

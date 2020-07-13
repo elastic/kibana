@@ -7,22 +7,22 @@
 import Boom from 'boom';
 import { ActionType } from '../types';
 
-export function validateParams(actionType: ActionType, value: unknown) {
+export function validateParams(actionType: ActionType<any, any, any>, value: unknown) {
   return validateWithSchema(actionType, 'params', value);
 }
 
-export function validateConfig(actionType: ActionType, value: unknown) {
+export function validateConfig(actionType: ActionType<any, any, any>, value: unknown) {
   return validateWithSchema(actionType, 'config', value);
 }
 
-export function validateSecrets(actionType: ActionType, value: unknown) {
+export function validateSecrets(actionType: ActionType<any, any, any>, value: unknown) {
   return validateWithSchema(actionType, 'secrets', value);
 }
 
 type ValidKeys = 'params' | 'config' | 'secrets';
 
 function validateWithSchema(
-  actionType: ActionType,
+  actionType: ActionType<any, any, any>,
   key: ValidKeys,
   value: unknown
 ): Record<string, unknown> {
