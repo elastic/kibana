@@ -13,7 +13,7 @@ import { getCategorizedFieldNames } from '../../../../timelines/components/edit_
 import { FieldHook, Field } from '../../../../shared_imports';
 import { THRESHOLD_FIELD_PLACEHOLDER } from './translations';
 
-const FIELD_COMBO_BOX_WIDTH = 460;
+const FIELD_COMBO_BOX_WIDTH = 410;
 
 export interface FieldValueThreshold {
   field: string[];
