@@ -92,6 +92,42 @@ describe('get_data_telemetry', () => {
             docCount: 1000,
             sizeInBytes: 60,
           },
+          {
+            name: 'traces-something-default-000002',
+            datasetName: 'something',
+            datasetType: 'traces',
+            packageName: 'some-package',
+            isECS: true,
+            docCount: 1000,
+            sizeInBytes: 60,
+          },
+          {
+            name: 'metrics-something.else-default-000002',
+            datasetName: 'something.else',
+            datasetType: 'metrics',
+            managedBy: 'ingest-manager',
+            isECS: true,
+            docCount: 1000,
+            sizeInBytes: 60,
+          },
+          // Filter out if it has datasetName and datasetType but none of the shipper, packageName or managedBy === 'ingest-manager'
+          {
+            name: 'some-index-that-should-not-show',
+            datasetName: 'should-not-show',
+            datasetType: 'logs',
+            isECS: true,
+            docCount: 1000,
+            sizeInBytes: 60,
+          },
+          {
+            name: 'other-index-that-should-not-show',
+            datasetName: 'should-not-show-either',
+            datasetType: 'metrics',
+            managedBy: 'me',
+            isECS: true,
+            docCount: 1000,
+            sizeInBytes: 60,
+          },
         ])
       ).toStrictEqual([
         {
@@ -137,6 +173,21 @@ describe('get_data_telemetry', () => {
           ecs_index_count: 2,
           doc_count: 2000,
           size_in_bytes: 1060,
+        },
+        {
+          dataset: { name: 'something', type: 'traces' },
+          package: { name: 'some-package' },
+          index_count: 1,
+          ecs_index_count: 1,
+          doc_count: 1000,
+          size_in_bytes: 60,
+        },
+        {
+          dataset: { name: 'something.else', type: 'metrics' },
+          index_count: 1,
+          ecs_index_count: 1,
+          doc_count: 1000,
+          size_in_bytes: 60,
         },
       ]);
     });
