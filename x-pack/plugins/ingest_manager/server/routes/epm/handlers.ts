@@ -30,6 +30,7 @@ import {
   removeInstallation,
   getLimitedPackages,
 } from '../../services/epm/packages';
+import { appContextService } from '../../services';
 
 export const getCategoriesHandler: RequestHandler<
   undefined,
@@ -54,6 +55,7 @@ export const getListHandler: RequestHandler<
   undefined,
   TypeOf<typeof GetPackagesRequestSchema.query>
 > = async (context, request, response) => {
+  const logger = appContextService.getLogger();
   try {
     const savedObjectsClient = context.core.savedObjects.client;
     const res = await getPackages({
@@ -68,6 +70,8 @@ export const getListHandler: RequestHandler<
       body,
     });
   } catch (e) {
+    logger.error(e.message);
+    logger.error(e.stack);
     return response.customError({
       statusCode: 500,
       body: { message: e.message },
