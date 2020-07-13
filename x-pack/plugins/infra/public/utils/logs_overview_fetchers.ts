@@ -6,6 +6,7 @@
 
 import { encode } from 'rison-node';
 import { i18n } from '@kbn/i18n';
+import { SearchResponse } from 'src/plugins/data/public';
 import { DEFAULT_SOURCE_ID } from '../../common/constants';
 import { InfraClientCoreSetup, InfraClientStartDeps } from '../types';
 import {
@@ -90,6 +91,8 @@ async function fetchLogsOverview(
   dataPlugin: InfraClientStartDeps['data']
 ): Promise<StatsAndSeries> {
   return new Promise((resolve, reject) => {
+    let esResponse: SearchResponse = {};
+
     dataPlugin.search
       .search({
         params: {
@@ -102,14 +105,15 @@ async function fetchLogsOverview(
         },
       })
       .subscribe(
-        (response) => {
-          if (response.rawResponse.aggregations) {
-            resolve(processLogsOverviewAggregations(response.rawResponse.aggregations));
+        (response) => (esResponse = response.rawResponse),
+        (error) => reject(error),
+        () => {
+          if (esResponse.aggregations) {
+            resolve(processLogsOverviewAggregations(esResponse.aggregations));
           } else {
             resolve({ stats: {}, series: {} });
           }
-        },
-        (error) => reject(error)
+        }
       );
   });
 }

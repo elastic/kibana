@@ -20,7 +20,7 @@ export const getInternalArtifactMockWithDiffs = async (
   schemaVersion: string
 ): Promise<InternalArtifactSchema> => {
   const mock = getTranslatedExceptionListMock();
-  mock.exceptions_list.pop();
+  mock.entries.pop();
   return buildArtifact(mock, os, schemaVersion);
 };
 
