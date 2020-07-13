@@ -74,7 +74,7 @@ export interface ISearchStart {
     create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
     createEmpty: () => ISearchSource;
   };
-  usageCollector: SearchUsageCollector;
+  usageCollector?: SearchUsageCollector;
   __LEGACY: ISearchStartLegacy;
 }
 

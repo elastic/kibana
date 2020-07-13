@@ -34,7 +34,7 @@ describe('Search service', () => {
 
   describe('setup()', () => {
     it('exposes proper contract', async () => {
-      const setup = plugin.setup(mockCoreSetup);
+      const setup = plugin.setup(mockCoreSetup, {});
       expect(setup).toHaveProperty('registerSearchStrategy');
     });
   });
