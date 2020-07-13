@@ -10,10 +10,12 @@ import { registerIndexRoutes } from './api/index';
 import { registerNodesRoutes } from './api/nodes';
 import { registerPoliciesRoutes } from './api/policies';
 import { registerTemplatesRoutes } from './api/templates';
+import { registerSnapshotPoliciesRoutes } from './api/snapshot_policies';
 
 export function registerApiRoutes(dependencies: RouteDependencies) {
   registerIndexRoutes(dependencies);
   registerNodesRoutes(dependencies);
   registerPoliciesRoutes(dependencies);
   registerTemplatesRoutes(dependencies);
+  registerSnapshotPoliciesRoutes(dependencies);
 }

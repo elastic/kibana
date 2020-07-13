@@ -11,7 +11,6 @@ import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
 import { LevelLogger as Logger } from '../lib';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
-import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
 import { HandlerFunction } from './types';
 
@@ -43,24 +42,32 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
       return res.forbidden({ body: licenseResults.message });
     }
 
-    const enqueueJob = await reporting.getEnqueueJob();
-    const job = await enqueueJob(exportTypeId, jobParams, user, context, req);
+    try {
+      const enqueueJob = await reporting.getEnqueueJob();
+      const job = await enqueueJob(exportTypeId, jobParams, user, context, req);
 
-    // return the queue's job information
-    const jobJson = job.toJSON();
-    const downloadBaseUrl = getDownloadBaseUrl(reporting);
+      // return the queue's job information
+      const jobJson = job.toJSON();
+      const downloadBaseUrl = getDownloadBaseUrl(reporting);
 
-    return res.ok({
-      headers: {
-        'content-type': 'application/json',
-      },
-      body: {
-        path: `${downloadBaseUrl}/${jobJson.id}`,
-        job: jobJson,
-      },
-    });
+      return res.ok({
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: {
+          path: `${downloadBaseUrl}/${jobJson.id}`,
+          job: jobJson,
+        },
+      });
+    } catch (err) {
+      logger.error(err);
+      throw err;
+    }
   };
 
+  /*
+   * Error should already have been logged by the time we get here
+   */
   function handleError(res: typeof kibanaResponseFactory, err: Error | Boom) {
     if (err instanceof Boom) {
       return res.customError({
@@ -87,12 +94,10 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
       });
     }
 
-    return res.badRequest({
-      body: err.message,
-    });
+    // unknown error, can't convert to 4xx
+    throw err;
   }
 
   registerGenerateFromJobParams(reporting, handler, handleError);
-  registerGenerateCsvFromSavedObject(reporting, handler, handleError); // FIXME: remove this https://github.com/elastic/kibana/issues/62986
   registerGenerateCsvFromSavedObjectImmediate(reporting, handleError, logger);
 }

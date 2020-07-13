@@ -44,6 +44,7 @@ export class BundleRefsPlugin {
   private readonly resolvedRefEntryCache = new Map<BundleRef, Promise<string>>();
   private readonly resolvedRequestCache = new Map<string, Promise<string | undefined>>();
   private readonly ignorePrefix = Path.resolve(this.bundle.contextDir) + Path.sep;
+  private allowedBundleIds = new Set<string>();
 
   constructor(private readonly bundle: Bundle, private readonly bundleRefs: BundleRefs) {}
 
@@ -78,6 +79,45 @@ export class BundleRefsPlugin {
             },
             (error) => callback(error)
           );
+        }
+      );
+    });
+
+    compiler.hooks.compilation.tap('BundleRefsPlugin/getRequiredBundles', (compilation) => {
+      this.allowedBundleIds.clear();
+
+      const manifestPath = this.bundle.manifestPath;
+      if (!manifestPath) {
+        return;
+      }
+
+      const deps = this.bundle.readBundleDeps();
+      for (const ref of this.bundleRefs.forBundleIds([...deps.explicit, ...deps.implicit])) {
+        this.allowedBundleIds.add(ref.bundleId);
+      }
+
+      compilation.hooks.additionalAssets.tap('BundleRefsPlugin/watchManifest', () => {
+        compilation.fileDependencies.add(manifestPath);
+      });
+
+      compilation.hooks.finishModules.tapPromise(
+        'BundleRefsPlugin/finishModules',
+        async (modules) => {
+          const usedBundleIds = (modules as any[])
+            .filter((m: any): m is BundleRefModule => m instanceof BundleRefModule)
+            .map((m) => m.ref.bundleId);
+
+          const unusedBundleIds = deps.explicit
+            .filter((id) => !usedBundleIds.includes(id))
+            .join(', ');
+
+          if (unusedBundleIds) {
+            const error = new Error(
+              `Bundle for [${this.bundle.id}] lists [${unusedBundleIds}] as a required bundle, but does not use it. Please remove it.`
+            );
+            (error as any).file = manifestPath;
+            compilation.errors.push(error);
+          }
         }
       );
     });
@@ -170,21 +210,29 @@ export class BundleRefsPlugin {
       return;
     }
 
-    const eligibleRefs = this.bundleRefs.filterByContextPrefix(this.bundle, resolved);
-    if (!eligibleRefs.length) {
+    const possibleRefs = this.bundleRefs.filterByContextPrefix(this.bundle, resolved);
+    if (!possibleRefs.length) {
       // import doesn't match a bundle context
       return;
     }
 
-    for (const ref of eligibleRefs) {
+    for (const ref of possibleRefs) {
       const resolvedEntry = await this.cachedResolveRefEntry(ref);
-      if (resolved === resolvedEntry) {
-        return new BundleRefModule(ref.exportId);
+      if (resolved !== resolvedEntry) {
+        continue;
       }
+
+      if (!this.allowedBundleIds.has(ref.bundleId)) {
+        throw new Error(
+          `import [${request}] references a public export of the [${ref.bundleId}] bundle, but that bundle is not in the "requiredPlugins" or "requiredBundles" list in the plugin manifest [${this.bundle.manifestPath}]`
+        );
+      }
+
+      return new BundleRefModule(ref);
     }
 
-    const bundleId = Array.from(new Set(eligibleRefs.map((r) => r.bundleId))).join(', ');
-    const publicDir = eligibleRefs.map((r) => r.entry).join(', ');
+    const bundleId = Array.from(new Set(possibleRefs.map((r) => r.bundleId))).join(', ');
+    const publicDir = possibleRefs.map((r) => r.entry).join(', ');
     throw new Error(
       `import [${request}] references a non-public export of the [${bundleId}] bundle and must point to one of the public directories: [${publicDir}]`
     );
