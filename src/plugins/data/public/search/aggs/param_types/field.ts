@@ -19,12 +19,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { IAggConfig } from '../agg_config';
-import { SavedObjectNotFound } from '../../../../../../plugins/kibana_utils/public';
+import { SavedObjectNotFound } from '../../../../../../plugins/kibana_utils/common';
 import { BaseParamType } from './base';
 import { propFilter } from '../utils';
 import { isNestedField, KBN_FIELD_TYPES } from '../../../../common';
 import { Field as IndexPatternField } from '../../../index_patterns';
-import { GetInternalStartServicesFn } from '../../../types';
 
 const filterByType = propFilter('type');
 
@@ -32,20 +31,13 @@ export type FieldTypes = KBN_FIELD_TYPES | KBN_FIELD_TYPES[] | '*';
 // TODO need to make a more explicit interface for this
 export type IFieldParamType = FieldParamType;
 
-export interface FieldParamTypeDependencies {
-  getInternalStartServices: GetInternalStartServicesFn;
-}
-
 export class FieldParamType extends BaseParamType {
   required = true;
   scriptable = true;
   filterFieldTypes: FieldTypes;
   onlyAggregatable: boolean;
 
-  constructor(
-    config: Record<string, any>,
-    { getInternalStartServices }: FieldParamTypeDependencies
-  ) {
+  constructor(config: Record<string, any>) {
     super(config);
 
     this.filterFieldTypes = config.filterFieldTypes || '*';
@@ -91,10 +83,9 @@ export class FieldParamType extends BaseParamType {
         throw new SavedObjectNotFound('index-pattern-field', fieldName);
       }
 
-      // @ts-ignore
       const validField = this.getAvailableFields(aggConfig).find((f: any) => f.name === fieldName);
       if (!validField) {
-        getInternalStartServices().notifications.toasts.addDanger(
+        throw new Error(
           i18n.translate(
             'data.search.aggs.paramTypes.field.invalidSavedFieldParameterErrorMessage',
             {

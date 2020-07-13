@@ -96,7 +96,7 @@ export const ComponentTemplatesSelector = ({
     <SectionLoading>
       <FormattedMessage
         id="xpack.idxMgmt.componentTemplatesSelector.loadingComponentsDescription"
-        defaultMessage="Loading components…"
+        defaultMessage="Loading component templates…"
       />
     </SectionLoading>
   );
@@ -136,7 +136,7 @@ export const ComponentTemplatesSelector = ({
                 }}
               />
             </div>
-            <div className="eui-yScrollWithShadows">
+            <div className="eui-yScrollWithShadows componentTemplatesSelector__selection__content">
               <ComponentTemplatesSelection
                 components={componentsSelected}
                 onReorder={onSelectionReorder}
@@ -163,7 +163,7 @@ export const ComponentTemplatesSelector = ({
           <div>
             <FormattedMessage
               id="xpack.idxMgmt.componentTemplatesSelector.noComponentSelectedLabel"
-              defaultMessage="No component selected."
+              defaultMessage="No component template selected."
             />
           </div>
         )}
