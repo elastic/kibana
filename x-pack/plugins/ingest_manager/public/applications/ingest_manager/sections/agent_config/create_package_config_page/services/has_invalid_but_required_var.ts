@@ -17,7 +17,8 @@ export const hasInvalidButRequiredVar = (
         registryVars.find(
           (registryVar) =>
             registryVar.required &&
-            (!packageConfigVars[registryVar.name] ||
+            (!packageConfigVars ||
+              !packageConfigVars[registryVar.name] ||
               validatePackageConfigConfig(packageConfigVars[registryVar.name], registryVar)?.length)
         )
     )

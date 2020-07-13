@@ -278,27 +278,28 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
   };
 
   const configurePackage = useMemo(
-    () => (
-      <>
-        <StepDefinePackageConfig
-          agentConfig={agentConfig}
-          packageInfo={packageInfo}
-          packageConfig={packageConfig}
-          updatePackageConfig={updatePackageConfig}
-          validationResults={validationResults!}
-        />
+    () =>
+      agentConfig && packageInfo ? (
+        <>
+          <StepDefinePackageConfig
+            agentConfig={agentConfig}
+            packageInfo={packageInfo}
+            packageConfig={packageConfig}
+            updatePackageConfig={updatePackageConfig}
+            validationResults={validationResults!}
+          />
 
-        <StepConfigurePackage
-          from={'edit'}
-          packageInfo={packageInfo}
-          packageConfig={packageConfig}
-          packageConfigId={packageConfigId}
-          updatePackageConfig={updatePackageConfig}
-          validationResults={validationResults!}
-          submitAttempted={formState === 'INVALID'}
-        />
-      </>
-    ),
+          <StepConfigurePackage
+            from={'edit'}
+            packageInfo={packageInfo}
+            packageConfig={packageConfig}
+            packageConfigId={packageConfigId}
+            updatePackageConfig={updatePackageConfig}
+            validationResults={validationResults!}
+            submitAttempted={formState === 'INVALID'}
+          />
+        </>
+      ) : null,
     [
       agentConfig,
       formState,
