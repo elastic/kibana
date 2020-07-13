@@ -4,17 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { identity } from 'fp-ts/lib/function';
 import { npStart } from '../../../../legacy_singletons';
-
+import { decodeOrThrow } from '../../../../../common/runtime_types';
 import {
   getLogEntryAnomaliesDatasetsRequestPayloadRT,
   getLogEntryAnomaliesDatasetsSuccessReponsePayloadRT,
   LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_DATASETS_PATH,
 } from '../../../../../common/http_api/log_analysis';
-import { createPlainError, throwErrors } from '../../../../../common/runtime_types';
 
 export const callGetLogEntryAnomaliesDatasetsAPI = async (
   sourceId: string,
@@ -36,8 +32,5 @@ export const callGetLogEntryAnomaliesDatasetsAPI = async (
     ),
   });
 
-  return pipe(
-    getLogEntryAnomaliesDatasetsSuccessReponsePayloadRT.decode(response),
-    fold(throwErrors(createPlainError), identity)
-  );
+  return decodeOrThrow(getLogEntryAnomaliesDatasetsSuccessReponsePayloadRT)(response);
 };

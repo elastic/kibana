@@ -18,7 +18,6 @@ import {
   Sort,
   Pagination,
   GetLogEntryAnomaliesRequestPayload,
-  AnomalyType,
 } from '../../../common/http_api/log_analysis';
 import type { MlSystem, MlAnomalyDetectors } from '../../types';
 import { createLogEntryAnomaliesQuery, logEntryAnomaliesResponseRT } from './queries';
