@@ -34,7 +34,6 @@ import {
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 import { EndpointAppContext } from '../../endpoint/types';
 import { getHostData, MetadataRequestContext } from '../../endpoint/routes/metadata';
-import { HostPolicyResponseActionStatus } from '../../../common/endpoint/types';
 
 export class ElasticsearchHostsAdapter implements HostsAdapter {
   constructor(
@@ -108,7 +107,7 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
   public async getHostEndpoint(
     request: FrameworkRequest,
     hostId: string | null
-  ): Promise<EndpointFields> {
+  ): Promise<EndpointFields | null> {
     const logger = this.endpointContext.logFactory.get('metadata');
     try {
       const agentService = this.endpointContext.service.getAgentService();

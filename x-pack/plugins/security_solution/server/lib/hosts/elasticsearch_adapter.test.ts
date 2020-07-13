@@ -26,6 +26,9 @@ import {
   mockGetHostsQueryDsl,
 } from './mock';
 import { HostAggEsItem } from './types';
+import { EndpointAppContext } from '../../endpoint/types';
+import { mockLogger } from '../detection_engine/signals/__mocks__/es_results';
+import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 
 jest.mock('./query.hosts.dsl', () => {
   return {
@@ -155,6 +158,11 @@ describe('hosts elasticsearch_adapter', () => {
     });
   });
 
+  const endpointContext: EndpointAppContext = {
+    logFactory: mockLogger,
+    service: new EndpointAppContextService(),
+    config: jest.fn(),
+  };
   describe('#getHosts', () => {
     const mockCallWithRequest = jest.fn();
     mockCallWithRequest.mockResolvedValue(mockGetHostsResponse);
@@ -166,7 +174,7 @@ describe('hosts elasticsearch_adapter', () => {
     jest.doMock('../framework', () => ({ callWithRequest: mockCallWithRequest }));
 
     test('Happy Path', async () => {
-      const EsHosts = new ElasticsearchHostsAdapter(mockFramework);
+      const EsHosts = new ElasticsearchHostsAdapter(mockFramework, endpointContext);
       const data: HostsData = await EsHosts.getHosts(
         mockGetHostsRequest as FrameworkRequest,
         mockGetHostsOptions
@@ -186,7 +194,7 @@ describe('hosts elasticsearch_adapter', () => {
     jest.doMock('../framework', () => ({ callWithRequest: mockCallWithRequest }));
 
     test('Happy Path', async () => {
-      const EsHosts = new ElasticsearchHostsAdapter(mockFramework);
+      const EsHosts = new ElasticsearchHostsAdapter(mockFramework, endpointContext);
       const data: HostItem = await EsHosts.getHostOverview(
         mockGetHostOverviewRequest as FrameworkRequest,
         mockGetHostOverviewOptions
@@ -206,7 +214,7 @@ describe('hosts elasticsearch_adapter', () => {
     jest.doMock('../framework', () => ({ callWithRequest: mockCallWithRequest }));
 
     test('Happy Path', async () => {
-      const EsHosts = new ElasticsearchHostsAdapter(mockFramework);
+      const EsHosts = new ElasticsearchHostsAdapter(mockFramework, endpointContext);
       const data: FirstLastSeenHost = await EsHosts.getHostFirstLastSeen(
         mockGetHostLastFirstSeenRequest as FrameworkRequest,
         mockGetHostLastFirstSeenOptions

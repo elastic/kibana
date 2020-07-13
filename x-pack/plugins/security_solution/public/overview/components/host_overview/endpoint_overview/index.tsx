@@ -17,9 +17,7 @@ import { DescriptionListStyled } from '../../../../common/components/page';
 import * as i18n from './translations';
 
 interface Props {
-  data: EndpointFields;
-  id: string;
-  loading: boolean;
+  data: EndpointFields | null;
 }
 
 const getDescriptionList = (descriptionList: DescriptionList[], key: number) => (

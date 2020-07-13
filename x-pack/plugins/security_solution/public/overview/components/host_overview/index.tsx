@@ -197,7 +197,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <OverviewWrapper>
-              <EndpointOverview data={data.endpoint} />
+              <EndpointOverview data={data.endpoint != null ? data.endpoint : null} />
 
               {loading && (
                 <Loader
