@@ -152,7 +152,7 @@ export class Join extends Component {
           applyGlobalQuery={right.applyGlobalQuery}
           setApplyGlobalQuery={this._onApplyGlobalQueryChange}
           label={i18n.translate('xpack.maps.layerPanel.join.applyGlobalQueryCheckboxLabel', {
-            defaultMessage: `Apply global filter to join`,
+            defaultMessage: `Apply global filter to joins`,
           })}
         />
       );
@@ -192,8 +192,7 @@ export class Join extends Component {
           {metricsExpression}
 
           {whereExpression}
-
-          {globalFilterCheckbox}
+          <EuiFlexItem>{globalFilterCheckbox}</EuiFlexItem>
 
           <EuiButtonIcon
             className="mapJoinItem__delete"
