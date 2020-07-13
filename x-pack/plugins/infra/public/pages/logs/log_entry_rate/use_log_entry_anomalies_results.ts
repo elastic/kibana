@@ -42,6 +42,7 @@ interface ReducerState {
     start: number;
     end: number;
   };
+  filteredDatasets?: string[];
 }
 
 type ReducerStateDefaults = Pick<
@@ -56,7 +57,8 @@ type ReducerAction =
   | { type: 'fetchPreviousPage' }
   | { type: 'changeHasNextPage'; payload: { hasNextPage: boolean } }
   | { type: 'changeLastReceivedCursors'; payload: { lastReceivedCursors: PaginationCursors } }
-  | { type: 'changeTimeRange'; payload: { timeRange: { start: number; end: number } } };
+  | { type: 'changeTimeRange'; payload: { timeRange: { start: number; end: number } } }
+  | { type: 'changeFilteredDatasets'; payload: { filteredDatasets?: string[] } };
 
 const stateReducer = (state: ReducerState, action: ReducerAction): ReducerState => {
   const resetPagination = {
@@ -108,6 +110,12 @@ const stateReducer = (state: ReducerState, action: ReducerAction): ReducerState 
         ...resetPagination,
         ...action.payload,
       };
+    case 'changeFilteredDatasets':
+      return {
+        ...state,
+        ...resetPagination,
+        ...action.payload,
+      };
     default:
       return state;
   }
@@ -145,6 +153,7 @@ export const useLogEntryAnomaliesResults = ({
       ...stateDefaults,
       paginationOptions: defaultPaginationOptions,
       sortOptions: defaultSortOptions,
+      filteredDatasets,
       timeRange: {
         start: startTime,
         end: endTime,
@@ -165,6 +174,7 @@ export const useLogEntryAnomaliesResults = ({
           sortOptions,
           paginationOptions,
           paginationCursor,
+          filteredDatasets: queryFilteredDatasets,
         } = reducerState;
         return await callGetLogEntryAnomaliesAPI(
           sourceId,
@@ -174,7 +184,8 @@ export const useLogEntryAnomaliesResults = ({
           {
             ...paginationOptions,
             cursor: paginationCursor,
-          }
+          },
+          queryFilteredDatasets
         );
       },
       onResolve: ({ data: { anomalies, paginationCursors: requestCursors, hasMoreEntries } }) => {
@@ -203,6 +214,7 @@ export const useLogEntryAnomaliesResults = ({
       reducerState.sortOptions,
       reducerState.paginationOptions,
       reducerState.paginationCursor,
+      reducerState.filteredDatasets,
     ]
   );
 
@@ -230,6 +242,14 @@ export const useLogEntryAnomaliesResults = ({
       payload: { timeRange: { start: startTime, end: endTime } },
     });
   }, [startTime, endTime]);
+
+  // Selected datasets have changed
+  useEffect(() => {
+    dispatch({
+      type: 'changeFilteredDatasets',
+      payload: { filteredDatasets },
+    });
+  }, [filteredDatasets]);
 
   useEffect(() => {
     getLogEntryAnomalies();
