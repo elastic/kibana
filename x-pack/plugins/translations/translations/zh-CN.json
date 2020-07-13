@@ -677,7 +677,6 @@
     "data.filter.filterEditor.cancelButtonLabel": "取消",
     "data.filter.filterEditor.createCustomLabelInputLabel": "定制标签",
     "data.filter.filterEditor.createCustomLabelSwitchLabel": "创建定制标签？",
-    "data.filter.filterEditor.dateFormatHelpLinkLabel": "已接受日期格式",
     "data.filter.filterEditor.doesNotExistOperatorOptionLabel": "不存在",
     "data.filter.filterEditor.editFilterPopupTitle": "编辑筛选",
     "data.filter.filterEditor.editFilterValuesButtonLabel": "编辑筛选值",
