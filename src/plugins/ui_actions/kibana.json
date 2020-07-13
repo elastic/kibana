@@ -2,5 +2,8 @@
   "id": "uiActions",
   "version": "kibana",
   "server": false,
-  "ui": true
+  "ui": true,
+  "requiredBundles": [
+    "kibanaReact"
+  ]
 }

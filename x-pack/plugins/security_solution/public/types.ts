@@ -32,7 +32,7 @@ export interface StartPlugins {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
-  ingestManager: IngestManagerStart;
+  ingestManager?: IngestManagerStart;
   newsfeed?: NewsfeedStart;
   triggers_actions_ui: TriggersActionsStart;
   uiActions: UiActionsStart;
