@@ -6,8 +6,6 @@
 
 import React, { useContext } from 'react';
 
-import classNames from 'classnames';
-
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -43,9 +41,6 @@ export const OnboardingCard: React.FC<IOnboardingCardProps> = ({
   complete,
 }) => {
   const { http } = useContext(KibanaContext) as IKibanaContext;
-  const cardClass = classNames('euiCard--isSelectable', {
-    'euiCard-isSelected euiCard--isSelectable--success': complete,
-  });
   const { getWSRoute } = useRoutes();
 
   const onClick = () =>
@@ -83,7 +78,6 @@ export const OnboardingCard: React.FC<IOnboardingCardProps> = ({
           iconColor={complete ? 'secondary' : 'subdued'}
           title={<h3>{title}</h3>}
           body={description}
-          className={cardClass}
           actions={
             complete ? (
               <EuiButtonEmpty {...emptyButtonProps}>{actionTitle}</EuiButtonEmpty>
