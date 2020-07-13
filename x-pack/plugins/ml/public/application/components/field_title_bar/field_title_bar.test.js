@@ -62,7 +62,7 @@ describe('FieldTitleBar', () => {
     expect(hasClassName).toBeTruthy();
   });
 
-  test(`tooltip hovering`, () => {
+  test(`tooltip hovering`, (done) => {
     const props = { card: { fieldName: 'foo', type: 'bar' } };
     const wrapper = mountWithIntl(<FieldTitleBar {...props} />);
     const container = wrapper.find({ className: 'field-name' });
@@ -70,9 +70,14 @@ describe('FieldTitleBar', () => {
     expect(wrapper.find('EuiToolTip').children()).toHaveLength(1);
 
     container.simulate('mouseover');
-    expect(wrapper.find('EuiToolTip').children()).toHaveLength(2);
-
-    container.simulate('mouseout');
-    expect(wrapper.find('EuiToolTip').children()).toHaveLength(1);
+    // EuiToolTip mounts children after a 250ms delay
+    setTimeout(() => {
+      wrapper.update();
+      expect(wrapper.find('EuiToolTip').children()).toHaveLength(2);
+      container.simulate('mouseout');
+      wrapper.update();
+      expect(wrapper.find('EuiToolTip').children()).toHaveLength(1);
+      done();
+    }, 250);
   });
 });

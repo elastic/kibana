@@ -32,17 +32,27 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
             break;
           }
           case 'global_all at everything_space':
-          case 'dual_privileges_all at everything_space':
-          case 'everything_space_all at everything_space':
-          case 'global_read at everything_space':
-          case 'dual_privileges_read at everything_space':
-          case 'everything_space_read at everything_space': {
+          case 'dual_privileges_all at everything_space': {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('catalogue');
             // everything except ml and monitoring is enabled
             const expected = mapValues(
               uiCapabilities.value!.catalogue,
               (enabled, catalogueId) => catalogueId !== 'ml' && catalogueId !== 'monitoring'
+            );
+            expect(uiCapabilities.value!.catalogue).to.eql(expected);
+            break;
+          }
+          case 'everything_space_all at everything_space':
+          case 'global_read at everything_space':
+          case 'dual_privileges_read at everything_space':
+          case 'everything_space_read at everything_space': {
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('catalogue');
+            // everything except ml and monitoring and enterprise search is enabled
+            const expected = mapValues(
+              uiCapabilities.value!.catalogue,
+              (enabled, catalogueId) => !['ml', 'monitoring', 'appSearch'].includes(catalogueId)
             );
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
