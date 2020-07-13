@@ -63,6 +63,7 @@ describe('fetchLegacyAlerts', () => {
       filterPath: [
         'hits.hits._source.prefix',
         'hits.hits._source.message',
+        'hits.hits._source.resolved_timestamp',
         'hits.hits._source.nodes',
         'hits.hits._source.metadata.*',
       ],
@@ -80,6 +81,7 @@ describe('fetchLegacyAlerts', () => {
             ],
             should: [
               { range: { timestamp: { gte: 'now-2m' } } },
+              { range: { resolved_timestamp: { gte: 'now-2m' } } },
               { bool: { must_not: { exists: { field: 'resolved_timestamp' } } } },
             ],
           },

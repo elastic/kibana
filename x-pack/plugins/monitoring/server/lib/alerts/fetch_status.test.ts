@@ -7,7 +7,7 @@
 import { fetchStatus } from './fetch_status';
 import { AlertUiState, AlertState } from '../../alerts/types';
 import { AlertSeverity } from '../../../common/enums';
-import { ALERT_CPU_USAGE } from '../../../common/constants';
+import { ALERT_CPU_USAGE, ALERT_CLUSTER_HEALTH } from '../../../common/constants';
 
 describe('fetchStatus', () => {
   const alertType = ALERT_CPU_USAGE;
@@ -29,6 +29,7 @@ describe('fetchStatus', () => {
     triggeredMS: 0,
   };
   let alertStates: AlertState[] = [];
+  const licenseService = null;
   const alertsClient = {
     find: jest.fn(() => ({
       total: 1,
@@ -57,6 +58,7 @@ describe('fetchStatus', () => {
   it('should fetch from the alerts client', async () => {
     const status = await fetchStatus(
       alertsClient as any,
+      licenseService,
       alertTypes,
       defaultClusterState.clusterUuid,
       start,
@@ -93,6 +95,7 @@ describe('fetchStatus', () => {
 
     const status = await fetchStatus(
       alertsClient as any,
+      licenseService,
       alertTypes,
       defaultClusterState.clusterUuid,
       start,
@@ -121,6 +124,7 @@ describe('fetchStatus', () => {
 
     const status = await fetchStatus(
       alertsClient as any,
+      licenseService,
       alertTypes,
       defaultClusterState.clusterUuid,
       customStart,
@@ -135,6 +139,7 @@ describe('fetchStatus', () => {
   it('should pass in the right filter to the alerts client', async () => {
     await fetchStatus(
       alertsClient as any,
+      licenseService,
       alertTypes,
       defaultClusterState.clusterUuid,
       start,
@@ -153,6 +158,7 @@ describe('fetchStatus', () => {
 
     const status = await fetchStatus(
       alertsClient as any,
+      licenseService,
       alertTypes,
       defaultClusterState.clusterUuid,
       start,
@@ -170,6 +176,7 @@ describe('fetchStatus', () => {
 
     const status = await fetchStatus(
       alertsClient as any,
+      licenseService,
       alertTypes,
       defaultClusterState.clusterUuid,
       start,
@@ -177,5 +184,23 @@ describe('fetchStatus', () => {
       log as any
     );
     expect(status).toEqual({});
+  });
+
+  it('should pass along the license service', async () => {
+    const customLicenseService = {
+      getWatcherFeature: jest.fn().mockImplementation(() => ({
+        isAvailable: true,
+        isEnabled: true,
+      })),
+    };
+    const status = await fetchStatus(
+      alertsClient as any,
+      customLicenseService,
+      [ALERT_CLUSTER_HEALTH],
+      defaultClusterState.clusterUuid,
+      start,
+      end,
+      log as any
+    );
   });
 });
