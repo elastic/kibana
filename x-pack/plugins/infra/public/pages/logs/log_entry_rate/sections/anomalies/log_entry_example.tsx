@@ -110,7 +110,7 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
   const viewAnomalyInMachineLearningLinkProps = useLinkProps(
     getEntitySpecificSingleMetricViewerLink(anomaly.jobId, timeRange, {
       [partitionField]: dataset,
-      ...(anomaly.categoryId ? { mlcategory: anomaly.categoryId } : {})
+      ...(anomaly.categoryId ? { mlcategory: anomaly.categoryId } : {}),
     })
   );
 
