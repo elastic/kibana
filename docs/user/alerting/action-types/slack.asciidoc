@@ -47,7 +47,7 @@ connector form.
 
 You need a https://api.slack.com/incoming-webhooks[Slack webhook URL] to 
 configure a Slack account. To create a webhook
-URL, set up an an _Incoming Webhook Integration_ through the Slack console:
+URL, set up an an **Incoming Webhook Integration** through the Slack console:
 
 . Log in to http://slack.com[slack.com] as a team administrator.
 . Go to https://my.slack.com/services/new/incoming-webhook.
