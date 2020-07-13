@@ -139,16 +139,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await queryBar.setQuery('response:404');
         await savedQueryManagementComponent.updateCurrentlyLoadedQuery(
           'new description',
-          false,
+          true,
           false
         );
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
         await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
         const queryString = await queryBar.getQueryString();
-        expect(queryString).to.eql('response:200');
+        expect(queryString).to.eql('response:404');
+
+        // Reset after changing
+        await queryBar.setQuery('response:200');
+        await savedQueryManagementComponent.updateCurrentlyLoadedQuery(
+          'Ok responses for jpg files',
+          true,
+          false
+        );
       });
 
-      it('allow saving changes to a currently loaded query via the saved query management component 2', async () => {
+      it('allow saving currently loaded query as a copy', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
         await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
           'ok2',

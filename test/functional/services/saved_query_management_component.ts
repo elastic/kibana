@@ -20,11 +20,15 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function SavedQueryManagementComponentProvider({ getService }: FtrProviderContext) {
+export function SavedQueryManagementComponentProvider({
+  getService,
+  getPageObjects,
+}: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const queryBar = getService('queryBar');
   const retry = getService('retry');
   const config = getService('config');
+  const PageObjects = getPageObjects(['common']);
 
   class SavedQueryManagementComponent {
     public async getCurrentlyLoadedQueryID() {
@@ -105,7 +109,7 @@ export function SavedQueryManagementComponentProvider({ getService }: FtrProvide
     public async deleteSavedQuery(title: string) {
       await this.openSavedQueryManagementComponent();
       await testSubjects.click(`~delete-saved-query-${title}-button`);
-      await testSubjects.click('confirmModalConfirmButton');
+      await PageObjects.common.clickConfirmOnModal();
     }
 
     async clearCurrentlyLoadedQuery() {
