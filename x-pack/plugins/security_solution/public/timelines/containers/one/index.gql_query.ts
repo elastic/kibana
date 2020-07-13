@@ -69,6 +69,7 @@ export const oneTimelineQuery = gql`
         updatedBy
         version
       }
+      excludedRowRendererIds
       favorite {
         fullName
         userName
