@@ -119,9 +119,9 @@ export const Actions = React.memo<Props>(
 
         <EventsTd>
           <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
-            {loading && <EventsLoading />}
-
-            {!loading && (
+            {loading ? (
+              <EventsLoading />
+            ) : (
               <EuiButtonIcon
                 aria-label={expanded ? i18n.COLLAPSE : i18n.EXPAND}
                 data-test-subj="expand-event"
