@@ -17,30 +17,18 @@
  * under the License.
  */
 
-import { run, createFlagError } from '@kbn/dev-utils';
-import { resolve } from 'path';
+import { run } from '@kbn/dev-utils';
+import { prokTeamAssignment } from './fetch_and_xform';
 
-const ROOT = resolve(__dirname, '../../../../..');
-const resolveRoot = resolve.bind(null, ROOT);
-const flags = {
-  string: ['jsonPath', 'verbose'],
-  help: `
---jsonPath         Required, path to the canonical definition of team assignment ingest pipeline.
-        `,
+const execute = ({ flags, log }) => {
+  if (flags.verbose) log.verbose(`### Verbose logging enabled`);
+  prokTeamAssignment(log);
 };
 
-export const uploadTeamAssignmentJson = () => {
-  run(
-    ({ flags, log }) => {
-      if (flags.jsonPath === '') throw createFlagError('please provide a single --jsonPath flag');
-      if (flags.verbose) log.verbose(`### Verbose logging enabled`);
+export const uploadTeamAssignmentJson = () => run(execute, { description });
 
-      const resolveRoot = resolve.bind(null, ROOT);
-      const pipelineDefintionPath = resolveRoot(flags.jsonPath);
-      prok({ jsonSummaryPath, vcsInfoFilePath }, log);
-    },
-    {
-      description: `
+function description() {
+  return `
 
 Upload the latest team assignment pipeline def from src,
 to the cluster.
@@ -48,17 +36,7 @@ to the cluster.
 
 Examples:
 
-node scripts/load_team_assignment.js --verbose --jsonPath CURRENT_TEAM_ASSIGN_PATH
+node scripts/load_team_assignment.js --verbose
 
-      `,
-      flags,
-    }
-  );
-
-  // get current
-
-  // push updated
-};
-
-const current = (_) => {};
-const upload = (_) => {};
+      `;
+}
