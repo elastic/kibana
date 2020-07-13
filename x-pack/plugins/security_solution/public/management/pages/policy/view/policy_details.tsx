@@ -168,7 +168,7 @@ export const PolicyDetails = React.memo(() => {
           defaultMessage="Back to policy list"
         />
       </EuiButtonEmpty>
-      <PageViewHeaderTitle>{policyItem.name}</PageViewHeaderTitle>
+      <PageViewHeaderTitle className="eui-textTruncate">{policyItem.name}</PageViewHeaderTitle>
     </div>
   );
 
