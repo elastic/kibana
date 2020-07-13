@@ -46,7 +46,7 @@ describe('buildEventTypeSignal', () => {
 
     const first = getFoundExceptionListItemSchemaMock();
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
-    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', '1.0.0');
+    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
     expect(resp).toEqual({
       entries: [expectedEndpointExceptions],
     });
@@ -87,7 +87,7 @@ describe('buildEventTypeSignal', () => {
     first.data[0].entries = testEntries;
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', '1.0.0');
+    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
     expect(resp).toEqual({
       entries: [expectedEndpointExceptions],
     });
@@ -133,7 +133,140 @@ describe('buildEventTypeSignal', () => {
     first.data[0].entries = testEntries;
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', '1.0.0');
+    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
+    expect(resp).toEqual({
+      entries: [expectedEndpointExceptions],
+    });
+  });
+
+  test('it should deduplicate exception entries', async () => {
+    const testEntries: EntriesArray = [
+      { field: 'server.domain.text', operator: 'included', type: 'match', value: 'DOMAIN' },
+      { field: 'server.domain.text', operator: 'included', type: 'match', value: 'DOMAIN' },
+      { field: 'server.domain.text', operator: 'included', type: 'match', value: 'DOMAIN' },
+      { field: 'server.ip', operator: 'included', type: 'match', value: '192.168.1.1' },
+      {
+        field: 'host.hostname.text',
+        operator: 'included',
+        type: 'match_any',
+        value: ['estc', 'kibana'],
+      },
+    ];
+
+    const expectedEndpointExceptions = {
+      type: 'simple',
+      entries: [
+        {
+          field: 'server.domain',
+          operator: 'included',
+          type: 'exact_caseless',
+          value: 'DOMAIN',
+        },
+        {
+          field: 'server.ip',
+          operator: 'included',
+          type: 'exact_cased',
+          value: '192.168.1.1',
+        },
+        {
+          field: 'host.hostname',
+          operator: 'included',
+          type: 'exact_caseless_any',
+          value: ['estc', 'kibana'],
+        },
+      ],
+    };
+
+    const first = getFoundExceptionListItemSchemaMock();
+    first.data[0].entries = testEntries;
+    mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
+
+    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
+    expect(resp).toEqual({
+      entries: [expectedEndpointExceptions],
+    });
+  });
+
+  test('it should not deduplicate exception entries across nested boundaries', async () => {
+    const testEntries: EntriesArray = [
+      {
+        entries: [
+          { field: 'nested.field', operator: 'included', type: 'match', value: 'some value' },
+        ],
+        field: 'some.parentField',
+        type: 'nested',
+      },
+      // Same as above but not inside the nest
+      { field: 'nested.field', operator: 'included', type: 'match', value: 'some value' },
+    ];
+
+    const expectedEndpointExceptions = {
+      type: 'simple',
+      entries: [
+        {
+          entries: [
+            {
+              field: 'nested.field',
+              operator: 'included',
+              type: 'exact_cased',
+              value: 'some value',
+            },
+          ],
+          field: 'some.parentField',
+          type: 'nested',
+        },
+        {
+          field: 'nested.field',
+          operator: 'included',
+          type: 'exact_cased',
+          value: 'some value',
+        },
+      ],
+    };
+
+    const first = getFoundExceptionListItemSchemaMock();
+    first.data[0].entries = testEntries;
+    mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
+
+    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
+    expect(resp).toEqual({
+      entries: [expectedEndpointExceptions],
+    });
+  });
+
+  test('it should deduplicate exception items', async () => {
+    const testEntries: EntriesArray = [
+      { field: 'server.domain.text', operator: 'included', type: 'match', value: 'DOMAIN' },
+      { field: 'server.ip', operator: 'included', type: 'match', value: '192.168.1.1' },
+    ];
+
+    const expectedEndpointExceptions = {
+      type: 'simple',
+      entries: [
+        {
+          field: 'server.domain',
+          operator: 'included',
+          type: 'exact_caseless',
+          value: 'DOMAIN',
+        },
+        {
+          field: 'server.ip',
+          operator: 'included',
+          type: 'exact_cased',
+          value: '192.168.1.1',
+        },
+      ],
+    };
+
+    const first = getFoundExceptionListItemSchemaMock();
+    first.data[0].entries = testEntries;
+
+    // Create a second exception item with the same entries
+    first.data[1] = getExceptionListItemSchemaMock();
+    first.data[1].entries = testEntries;
+    mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
+
+    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
     expect(resp).toEqual({
       entries: [expectedEndpointExceptions],
     });
@@ -171,15 +304,16 @@ describe('buildEventTypeSignal', () => {
     first.data[0].entries = testEntries;
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', '1.0.0');
+    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
     expect(resp).toEqual({
       entries: [expectedEndpointExceptions],
     });
   });
 
   test('it should convert the exception lists response to the proper endpoint format while paging', async () => {
-    // The first call returns one exception
+    // The first call returns two exceptions
     const first = getFoundExceptionListItemSchemaMock();
+    first.data.push(getExceptionListItemSchemaMock());
 
     // The second call returns two exceptions
     const second = getFoundExceptionListItemSchemaMock();
@@ -193,8 +327,9 @@ describe('buildEventTypeSignal', () => {
       .mockReturnValueOnce(first)
       .mockReturnValueOnce(second)
       .mockReturnValueOnce(third);
-    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', '1.0.0');
-    expect(resp.entries.length).toEqual(3);
+    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
+    // Expect 2 exceptions, the first two calls returned the same exception list items
+    expect(resp.entries.length).toEqual(2);
   });
 
   test('it should handle no exceptions', async () => {
@@ -202,7 +337,7 @@ describe('buildEventTypeSignal', () => {
     exceptionsResponse.data = [];
     exceptionsResponse.total = 0;
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionsResponse);
-    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', '1.0.0');
+    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
     expect(resp.entries.length).toEqual(0);
   });
 });

@@ -23,7 +23,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     apps: {
       ...xpackFunctionalConfig.get('apps'),
       ['securitySolutionManagement']: {
-        pathname: '/app/security/management',
+        pathname: '/app/security/administration',
       },
     },
     kbnTestServer: {

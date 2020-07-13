@@ -9,5 +9,9 @@
   ],
   "extraPublicDirs": [
     "common/constants"
+  ],
+  "requiredBundles": [
+    "kibanaUtils",
+    "kibanaReact"
   ]
 }
