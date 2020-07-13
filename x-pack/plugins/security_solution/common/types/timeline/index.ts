@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/no-empty-interface */
+/* eslint-disable @typescript-eslint/camelcase, @typescript-eslint/no-empty-interface */
 
 import * as runtimeTypes from 'io-ts';
 import { SavedObjectsClient } from 'kibana/server';
 
-import { unionWithNullType } from '../../utility_types';
+import { stringEnum, unionWithNullType } from '../../utility_types';
 import { NoteSavedObject, NoteSavedObjectToReturnRuntimeType } from './note';
 import { PinnedEventToReturnSavedObjectRuntimeType, PinnedEventSavedObject } from './pinned_event';
 
@@ -50,6 +50,16 @@ const SavedDataProviderQueryMatchRuntimeType = runtimeTypes.partial({
   queryMatch: unionWithNullType(SavedDataProviderQueryMatchBasicRuntimeType),
 });
 
+export enum DataProviderType {
+  default = 'default',
+  template = 'template',
+}
+
+export const DataProviderTypeLiteralRt = runtimeTypes.union([
+  runtimeTypes.literal(DataProviderType.default),
+  runtimeTypes.literal(DataProviderType.template),
+]);
+
 const SavedDataProviderRuntimeType = runtimeTypes.partial({
   id: unionWithNullType(runtimeTypes.string),
   name: unionWithNullType(runtimeTypes.string),
@@ -58,6 +68,7 @@ const SavedDataProviderRuntimeType = runtimeTypes.partial({
   kqlQuery: unionWithNullType(runtimeTypes.string),
   queryMatch: unionWithNullType(SavedDataProviderQueryMatchBasicRuntimeType),
   and: unionWithNullType(runtimeTypes.array(SavedDataProviderQueryMatchRuntimeType)),
+  type: unionWithNullType(DataProviderTypeLiteralRt),
 });
 
 /*
@@ -153,8 +164,26 @@ export type TimelineStatusLiteralWithNull = runtimeTypes.TypeOf<
   typeof TimelineStatusLiteralWithNullRt
 >;
 
+export enum RowRendererId {
+  auditd = 'auditd',
+  auditd_file = 'auditd_file',
+  netflow = 'netflow',
+  plain = 'plain',
+  suricata = 'suricata',
+  system = 'system',
+  system_dns = 'system_dns',
+  system_endgame_process = 'system_endgame_process',
+  system_file = 'system_file',
+  system_fim = 'system_fim',
+  system_security_event = 'system_security_event',
+  system_socket = 'system_socket',
+  zeek = 'zeek',
+}
+
+export const RowRendererIdRuntimeType = stringEnum(RowRendererId, 'RowRendererId');
+
 /**
- * Template timeline type
+ * Timeline template type
  */
 
 export enum TemplateTimelineType {
@@ -200,6 +229,7 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   dataProviders: unionWithNullType(runtimeTypes.array(SavedDataProviderRuntimeType)),
   description: unionWithNullType(runtimeTypes.string),
   eventType: unionWithNullType(runtimeTypes.string),
+  excludedRowRendererIds: unionWithNullType(runtimeTypes.array(RowRendererIdRuntimeType)),
   favorite: unionWithNullType(runtimeTypes.array(SavedFavoriteRuntimeType)),
   filters: unionWithNullType(runtimeTypes.array(SavedFilterRuntimeType)),
   kqlMode: unionWithNullType(runtimeTypes.string),
