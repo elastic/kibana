@@ -39,10 +39,6 @@
 
   position: relative;
 
-  transition-property: transform;
-  transition-duration: $euiAnimSpeedNormal;
-  transition-timing-function: $euiAnimSlightResistance;
-
   display: flex;
   flex-direction: row;
   align-content: stretch;
