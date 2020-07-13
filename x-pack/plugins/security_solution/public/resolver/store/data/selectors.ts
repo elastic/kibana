@@ -235,6 +235,7 @@ export const relatedEventInfoByEntityId: (
 
       /**
        * The number of events that occurred before the API limit was reached.
+       * The number of events that came back form the API that have `eventCategory` in their list of categories.
        *
        * @param eventCategory {string} The ECS category like 'file','dns',etc.
        */
