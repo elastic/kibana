@@ -6,6 +6,8 @@
 
 import { ILegacyScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { loggerMock } from 'src/core/server/logging/logger.mock';
 import { xpackMocks } from '../../../../mocks';
 import {
   AgentService,
@@ -63,8 +65,8 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
 > => {
   return {
     agentService: createMockAgentService(),
+    logger: loggerMock.create(),
     savedObjectsStart: savedObjectsServiceMock.createStartContract(),
-    // @ts-ignore
     manifestManager: getManifestManagerMock(),
     registerIngestCallback: jest.fn<
       ReturnType<IngestManagerStartContract['registerExternalCallback']>,
