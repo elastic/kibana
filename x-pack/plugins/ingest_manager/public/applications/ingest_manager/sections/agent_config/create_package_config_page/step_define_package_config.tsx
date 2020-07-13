@@ -3,17 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiFlexGrid,
-  EuiFlexItem,
   EuiFormRow,
   EuiFieldText,
   EuiButtonEmpty,
   EuiSpacer,
   EuiText,
   EuiComboBox,
+  EuiDescribedFormGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { AgentConfig, PackageInfo, PackageConfig, NewPackageConfig } from '../../../types';
 import { packageToPackageConfigInputs } from '../../../services';
@@ -28,7 +29,7 @@ export const StepDefinePackageConfig: React.FunctionComponent<{
   validationResults: PackageConfigValidationResults;
 }> = ({ agentConfig, packageInfo, packageConfig, updatePackageConfig, validationResults }) => {
   // Form show/hide states
-  const [isShowingAdvancedDefine, setIsShowingAdvancedDefine] = useState<boolean>(false);
+  const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
 
   // Update package config's package and config info
   useEffect(() => {
@@ -74,111 +75,140 @@ export const StepDefinePackageConfig: React.FunctionComponent<{
   ]);
 
   return validationResults ? (
-    <>
-      <EuiFlexGrid columns={2}>
-        <EuiFlexItem>
-          <EuiFormRow
-            isInvalid={!!validationResults.name}
-            error={validationResults.name}
-            label={
-              <FormattedMessage
-                id="xpack.ingestManager.createPackageConfig.stepConfigure.packageConfigNameInputLabel"
-                defaultMessage="Integration name"
-              />
-            }
-          >
-            <EuiFieldText
-              value={packageConfig.name}
-              onChange={(e) =>
-                updatePackageConfig({
-                  name: e.target.value,
-                })
-              }
-              data-test-subj="packageConfigNameInput"
+    <EuiDescribedFormGroup
+      title={
+        <h4>
+          <FormattedMessage
+            id="xpack.ingestManager.createPackageConfig.stepConfigure.integrationSettingsSectionTitle"
+            defaultMessage="Integration settings"
+          />
+        </h4>
+      }
+      description={
+        <FormattedMessage
+          id="xpack.ingestManager.createPackageConfig.stepConfigure.integrationSettingsSectionDescription"
+          defaultMessage="Choose a name and description to help identify how this integration will be used."
+        />
+      }
+    >
+      <>
+        {/* Name */}
+        <EuiFormRow
+          isInvalid={!!validationResults.name}
+          error={validationResults.name}
+          label={
+            <FormattedMessage
+              id="xpack.ingestManager.createPackageConfig.stepConfigure.packageConfigNameInputLabel"
+              defaultMessage="Integration name"
             />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.ingestManager.createPackageConfig.stepConfigure.packageConfigDescriptionInputLabel"
-                defaultMessage="Description"
-              />
+          }
+        >
+          <EuiFieldText
+            value={packageConfig.name}
+            onChange={(e) =>
+              updatePackageConfig({
+                name: e.target.value,
+              })
             }
-            labelAppend={
-              <EuiText size="xs" color="subdued">
+            data-test-subj="packageConfigNameInput"
+          />
+        </EuiFormRow>
+
+        {/* Description */}
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.ingestManager.createPackageConfig.stepConfigure.packageConfigDescriptionInputLabel"
+              defaultMessage="Description"
+            />
+          }
+          labelAppend={
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.ingestManager.createPackageConfig.stepConfigure.inputVarFieldOptionalLabel"
+                defaultMessage="Optional"
+              />
+            </EuiText>
+          }
+          isInvalid={!!validationResults.description}
+          error={validationResults.description}
+        >
+          <EuiFieldText
+            value={packageConfig.description}
+            onChange={(e) =>
+              updatePackageConfig({
+                description: e.target.value,
+              })
+            }
+          />
+        </EuiFormRow>
+        <EuiSpacer size="m" />
+
+        {/* Advanced options toggle */}
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
+              onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
+              flush="left"
+            >
+              <FormattedMessage
+                id="xpack.ingestManager.createPackageConfig.stepConfigure.advancedOptionsToggleLinkText"
+                defaultMessage="Advanced options"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          {!isShowingAdvanced && !!validationResults.namespace ? (
+            <EuiFlexItem grow={false}>
+              <EuiText color="danger" size="s">
                 <FormattedMessage
-                  id="xpack.ingestManager.createPackageConfig.stepConfigure.inputVarFieldOptionalLabel"
-                  defaultMessage="Optional"
+                  id="xpack.ingestManager.createPackageConfig.stepConfigure.errorCountText"
+                  defaultMessage="{count, plural, one {# error} other {# errors}}"
+                  values={{ count: 1 }}
                 />
               </EuiText>
-            }
-            isInvalid={!!validationResults.description}
-            error={validationResults.description}
-          >
-            <EuiFieldText
-              value={packageConfig.description}
-              onChange={(e) =>
-                updatePackageConfig({
-                  description: e.target.value,
-                })
-              }
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGrid>
-      <EuiSpacer size="m" />
-      <EuiButtonEmpty
-        flush="left"
-        size="xs"
-        iconType={isShowingAdvancedDefine ? 'arrowUp' : 'arrowDown'}
-        onClick={() => setIsShowingAdvancedDefine(!isShowingAdvancedDefine)}
-      >
-        <FormattedMessage
-          id="xpack.ingestManager.createPackageConfig.stepConfigure.advancedOptionsToggleLinkText"
-          defaultMessage="Advanced options"
-        />
-      </EuiButtonEmpty>
-      {/* Todo: Populate list of existing namespaces */}
-      {isShowingAdvancedDefine || !!validationResults.namespace ? (
-        <Fragment>
-          <EuiSpacer size="m" />
-          <EuiFlexGrid columns={2}>
-            <EuiFlexItem>
-              <EuiFormRow
-                isInvalid={!!validationResults.namespace}
-                error={validationResults.namespace}
-                label={
-                  <FormattedMessage
-                    id="xpack.ingestManager.createPackageConfig.stepConfigure.packageConfigNamespaceInputLabel"
-                    defaultMessage="Namespace"
-                  />
-                }
-              >
-                <EuiComboBox
-                  noSuggestions
-                  singleSelection={true}
-                  selectedOptions={
-                    packageConfig.namespace ? [{ label: packageConfig.namespace }] : []
-                  }
-                  onCreateOption={(newNamespace: string) => {
-                    updatePackageConfig({
-                      namespace: newNamespace,
-                    });
-                  }}
-                  onChange={(newNamespaces: Array<{ label: string }>) => {
-                    updatePackageConfig({
-                      namespace: newNamespaces.length ? newNamespaces[0].label : '',
-                    });
-                  }}
-                />
-              </EuiFormRow>
             </EuiFlexItem>
-          </EuiFlexGrid>
-        </Fragment>
-      ) : null}
-    </>
+          ) : null}
+        </EuiFlexGroup>
+
+        {/* Advanced options content */}
+        {/* Todo: Populate list of existing namespaces */}
+        {isShowingAdvanced ? (
+          <>
+            <EuiSpacer size="m" />
+            <EuiFormRow
+              isInvalid={!!validationResults.namespace}
+              error={validationResults.namespace}
+              label={
+                <FormattedMessage
+                  id="xpack.ingestManager.createPackageConfig.stepConfigure.packageConfigNamespaceInputLabel"
+                  defaultMessage="Namespace"
+                />
+              }
+            >
+              <EuiComboBox
+                noSuggestions
+                singleSelection={true}
+                selectedOptions={
+                  packageConfig.namespace ? [{ label: packageConfig.namespace }] : []
+                }
+                onCreateOption={(newNamespace: string) => {
+                  updatePackageConfig({
+                    namespace: newNamespace,
+                  });
+                }}
+                onChange={(newNamespaces: Array<{ label: string }>) => {
+                  updatePackageConfig({
+                    namespace: newNamespaces.length ? newNamespaces[0].label : '',
+                  });
+                }}
+              />
+            </EuiFormRow>
+          </>
+        ) : null}
+      </>
+    </EuiDescribedFormGroup>
   ) : (
     <Loading />
   );

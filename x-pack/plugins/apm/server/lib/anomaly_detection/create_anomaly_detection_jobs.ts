@@ -10,12 +10,11 @@ import { snakeCase } from 'lodash';
 import { PromiseReturnType } from '../../../../observability/typings/common';
 import { Setup } from '../helpers/setup_request';
 import {
-  SERVICE_ENVIRONMENT,
   TRANSACTION_DURATION,
   PROCESSOR_EVENT,
 } from '../../../common/elasticsearch_fieldnames';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { APM_ML_JOB_GROUP, ML_MODULE_ID_APM_TRANSACTION } from './constants';
+import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 
 export type CreateAnomalyDetectionJobsAPIResponse = PromiseReturnType<
   typeof createAnomalyDetectionJobs
@@ -89,9 +88,7 @@ async function createAnomalyDetectionJob({
         filter: [
           { term: { [PROCESSOR_EVENT]: 'transaction' } },
           { exists: { field: TRANSACTION_DURATION } },
-          environment === ENVIRONMENT_NOT_DEFINED
-            ? ENVIRONMENT_NOT_DEFINED_FILTER
-            : { term: { [SERVICE_ENVIRONMENT]: environment } },
+          ...getEnvironmentUiFilterES(environment),
         ],
       },
     },
@@ -109,13 +106,3 @@ async function createAnomalyDetectionJob({
     ],
   });
 }
-
-const ENVIRONMENT_NOT_DEFINED_FILTER = {
-  bool: {
-    must_not: {
-      exists: {
-        field: SERVICE_ENVIRONMENT,
-      },
-    },
-  },
-};
