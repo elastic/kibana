@@ -36,17 +36,14 @@ export function createApplyTimeRangeSelectionAction(
       const timefilter = pluginStart.data.query.timefilter.timefilter;
       const { interval } = embeddable.getOutput();
 
+      if (!interval) {
+        throw new Error('Interval is required to set a time range');
+      }
+
       let [from, to] = data.times;
       from = from * 1000;
-      to = to * 1000;
-
-      if (from === to) {
-        // single cell from a swim lane has been selected
-        if (!interval) {
-          throw new Error('Interval is required to set a time range');
-        }
-        to = to + interval * 1000;
-      }
+      // extend bounds with the interval
+      to = to * 1000 + interval * 1000;
 
       timefilter.setTime({
         from: moment(from),
