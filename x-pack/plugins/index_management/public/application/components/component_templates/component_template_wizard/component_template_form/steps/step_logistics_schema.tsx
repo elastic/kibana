@@ -65,7 +65,7 @@ export const logisticsFormSchema: FormSchema = {
   },
   _meta: {
     label: i18n.translate('xpack.idxMgmt.componentTemplateForm.stepLogistics.metaFieldLabel', {
-      defaultMessage: 'Metadata (optional)',
+      defaultMessage: '_meta field data (optional)',
     }),
     helpText: (
       <FormattedMessage

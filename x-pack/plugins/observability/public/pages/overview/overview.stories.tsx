@@ -17,6 +17,7 @@ import { fetchUptimeData, emptyResponse as emptyUptimeResponse } from './mock/up
 import { EuiThemeProvider } from '../../typings';
 import { OverviewPage } from './';
 import { alertsFetchData } from './mock/alerts.mock';
+import { newsFeedFetchData } from './mock/news_feed.mock';
 
 const core = {
   http: {
@@ -99,6 +100,14 @@ const coreWithAlerts = ({
   http: {
     ...core.http,
     get: alertsFetchData,
+  },
+} as unknown) as AppMountContext['core'];
+
+const coreWithNewsFeed = ({
+  ...core,
+  http: {
+    ...core.http,
+    get: newsFeedFetchData,
   },
 } as unknown) as AppMountContext['core'];
 
@@ -307,6 +316,45 @@ storiesOf('app/Overview', module)
     </MemoryRouter>
   ))
   .add('logs, metrics, APM, Uptime and Alerts', () => {
+    unregisterAll();
+    registerDataHandler({
+      appName: 'apm',
+      fetchData: fetchApmData,
+      hasData: async () => true,
+    });
+    registerDataHandler({
+      appName: 'infra_logs',
+      fetchData: fetchLogsData,
+      hasData: async () => true,
+    });
+    registerDataHandler({
+      appName: 'infra_metrics',
+      fetchData: fetchMetricsData,
+      hasData: async () => true,
+    });
+    registerDataHandler({
+      appName: 'uptime',
+      fetchData: fetchUptimeData,
+      hasData: async () => true,
+    });
+    return (
+      <OverviewPage
+        routeParams={{
+          query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
+        }}
+      />
+    );
+  });
+
+storiesOf('app/Overview', module)
+  .addDecorator((storyFn) => (
+    <MemoryRouter>
+      <PluginContext.Provider value={{ core: coreWithNewsFeed }}>
+        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
+      </PluginContext.Provider>
+    </MemoryRouter>
+  ))
+  .add('logs, metrics, APM, Uptime and News feed', () => {
     unregisterAll();
     registerDataHandler({
       appName: 'apm',
