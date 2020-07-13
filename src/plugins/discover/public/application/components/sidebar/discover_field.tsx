@@ -17,7 +17,7 @@
  * under the License.
  */
 import React, { useState } from 'react';
-import { EuiButton, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldIcon } from '../../../../../kibana_react/public';
@@ -208,6 +208,12 @@ export function DiscoverField({
         anchorPosition="rightUp"
         panelClassName="dscSidebarItem__fieldPopoverPanel"
       >
+        <EuiPopoverTitle>
+          {' '}
+          {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
+            defaultMessage: 'Top values',
+          })}
+        </EuiPopoverTitle>
         <DiscoverFieldDetails
           indexPattern={indexPattern}
           field={field}
