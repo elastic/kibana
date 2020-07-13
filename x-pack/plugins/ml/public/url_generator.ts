@@ -29,6 +29,7 @@ export interface ExplorerUrlState {
    * Optional state for the swim lane
    */
   mlExplorerSwimlane?: ExplorerAppState['mlExplorerSwimlane'];
+  mlExplorerFilter?: ExplorerAppState['mlExplorerFilter'];
 }
 
 /**
@@ -64,7 +65,6 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
   private createExplorerUrl({
     timeRange,
     jobIds,
-    useHash = false,
     mlExplorerSwimlane = {},
     mlExplorerFilter = {},
   }: Omit<ExplorerUrlState, 'page'>): string {
@@ -82,8 +82,8 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
     if (timeRange) queryState.time = timeRange;
 
     let url = `${this.params.appBasePath}#/explorer`;
-    url = setStateToKbnUrl<ExplorerQueryState>('_g', queryState, { useHash }, url);
-    url = setStateToKbnUrl('_a', appState, { useHash }, url);
+    url = setStateToKbnUrl<ExplorerQueryState>('_g', queryState, { useHash: false }, url);
+    url = setStateToKbnUrl('_a', appState, { useHash: false }, url);
 
     return url;
   }

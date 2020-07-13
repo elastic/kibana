@@ -43,6 +43,7 @@ function getExplorerSwimlaneMocks() {
     timeBuckets,
     swimlaneData,
     tooltipService,
+    parentRef: {} as React.RefObject<HTMLDivElement>,
   };
 }
 
@@ -70,10 +71,11 @@ describe('ExplorerSwimlane', () => {
       <ExplorerSwimlane
         chartWidth={mockChartWidth}
         timeBuckets={mocks.timeBuckets}
-        setSelectedCells={jest.fn()}
+        onCellsSelection={jest.fn()}
         swimlaneData={mocks.swimlaneData}
         swimlaneType="overall"
         tooltipService={mocks.tooltipService}
+        parentRef={mocks.parentRef}
       />
     );
 
@@ -98,10 +100,11 @@ describe('ExplorerSwimlane', () => {
       <ExplorerSwimlane
         chartWidth={mockChartWidth}
         timeBuckets={mocks.timeBuckets}
-        setSelectedCells={jest.fn()}
+        onCellsSelection={jest.fn()}
         swimlaneData={mockOverallSwimlaneData}
         swimlaneType="overall"
         tooltipService={mocks.tooltipService}
+        parentRef={mocks.parentRef}
       />
     );
 
