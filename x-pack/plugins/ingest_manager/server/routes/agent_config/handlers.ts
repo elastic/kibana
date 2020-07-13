@@ -232,15 +232,17 @@ export const deleteAgentConfigsHandler: RequestHandler<
   }
 };
 
-export const getFullAgentConfig: RequestHandler<TypeOf<
-  typeof GetFullAgentConfigRequestSchema.params
->> = async (context, request, response) => {
+export const getFullAgentConfig: RequestHandler<
+  TypeOf<typeof GetFullAgentConfigRequestSchema.params>,
+  TypeOf<typeof GetFullAgentConfigRequestSchema.query>
+> = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
 
   try {
     const fullAgentConfig = await agentConfigService.getFullConfig(
       soClient,
-      request.params.agentConfigId
+      request.params.agentConfigId,
+      { standalone: request.query.standalone === true }
     );
     if (fullAgentConfig) {
       const body: GetFullAgentConfigResponse = {
@@ -264,16 +266,19 @@ export const getFullAgentConfig: RequestHandler<TypeOf<
   }
 };
 
-export const downloadFullAgentConfig: RequestHandler<TypeOf<
-  typeof GetFullAgentConfigRequestSchema.params
->> = async (context, request, response) => {
+export const downloadFullAgentConfig: RequestHandler<
+  TypeOf<typeof GetFullAgentConfigRequestSchema.params>,
+  TypeOf<typeof GetFullAgentConfigRequestSchema.query>
+> = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const {
     params: { agentConfigId },
   } = request;
 
   try {
-    const fullAgentConfig = await agentConfigService.getFullConfig(soClient, agentConfigId);
+    const fullAgentConfig = await agentConfigService.getFullConfig(soClient, agentConfigId, {
+      standalone: request.query.standalone === true,
+    });
     if (fullAgentConfig) {
       const body = configToYaml(fullAgentConfig);
       const headers: ResponseHeaders = {

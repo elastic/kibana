@@ -8047,7 +8047,6 @@
     "xpack.ingestManager.agentDetails.viewAgentListTitle": "查看所有代理配置",
     "xpack.ingestManager.agentEnrollment.cancelButtonLabel": "取消",
     "xpack.ingestManager.agentEnrollment.continueButtonLabel": "继续",
-    "xpack.ingestManager.agentEnrollment.downloadDescription": "在主机计算机上下载 Elastic 代理。可以从 Elastic 的{downloadLink}下载代理二进制文件及其验证签名。",
     "xpack.ingestManager.agentEnrollment.downloadLink": "下载页面",
     "xpack.ingestManager.agentEnrollment.fleetNotInitializedText": "注册代理前需要设置 Fleet。{link}",
     "xpack.ingestManager.agentEnrollment.flyoutTitle": "注册新代理",
