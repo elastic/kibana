@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import moment from 'moment';
+
 import { createQueryFilterClauses, calculateTimeSeriesInterval } from '../../utils/build_query';
 import { MatrixHistogramRequestOptions } from '../framework';
 
@@ -48,8 +50,8 @@ export const buildAuthenticationsOverTimeQuery = ({
         fixed_interval: interval,
         min_doc_count: 0,
         extended_bounds: {
-          min: from,
-          max: to,
+          min: moment(from).valueOf(),
+          max: moment(to).valueOf(),
         },
       },
     };

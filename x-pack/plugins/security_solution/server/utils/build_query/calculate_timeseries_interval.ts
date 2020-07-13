@@ -90,5 +90,5 @@ export const calculateAuto = {
 };
 
 export const calculateTimeSeriesInterval = (from: string, to: string) => {
-  return `${Math.floor(moment(to).diff(from) / 32)}ms`;
+  return `${Math.floor(moment(to).diff(moment(from)) / 32)}ms`;
 };

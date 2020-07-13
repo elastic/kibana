@@ -241,9 +241,10 @@ export const TimelineComponent: React.FC<Props> = ({
         </TimelineHeaderContainer>
       </StyledEuiFlyoutHeader>
       <TimelineKqlFetch id={id} indexPattern={indexPattern} inputId="timeline" />
-      {combinedQueries != null ? (
+      {combinedQueries != null && docValueFields.length > 0 ? (
         <TimelineQuery
           docValueFields={docValueFields}
+          endDate={end}
           eventType={eventType}
           id={id}
           indexToAdd={indexToAdd}
@@ -252,6 +253,7 @@ export const TimelineComponent: React.FC<Props> = ({
           limit={itemsPerPage}
           filterQuery={combinedQueries.filterQuery}
           sortField={timelineQuerySortField}
+          startDate={start}
         >
           {({
             events,

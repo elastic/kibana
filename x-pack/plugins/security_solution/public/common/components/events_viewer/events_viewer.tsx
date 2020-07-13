@@ -139,7 +139,7 @@ const EventsViewerComponent: React.FC<Props> = ({
 
   return (
     <StyledEuiPanel data-test-subj="events-viewer-panel">
-      {combinedQueries != null ? (
+      {combinedQueries != null && docValueFields.length > 0 ? (
         <EventDetailsWidthProvider>
           <TimelineQuery
             docValueFields={docValueFields}
