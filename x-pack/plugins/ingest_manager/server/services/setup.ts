@@ -180,11 +180,18 @@ export async function setupFleet(
     fleet_enroll_password: password,
   });
 
-  // Generate default enrollment key
-  await generateEnrollmentAPIKey(soClient, {
-    name: 'Default',
-    configId: await agentConfigService.getDefaultAgentConfigId(soClient),
+  const { items: agentConfigs } = await agentConfigService.list(soClient, {
+    perPage: 10000,
   });
+
+  await Promise.all(
+    agentConfigs.map((agentConfig) => {
+      return generateEnrollmentAPIKey(soClient, {
+        name: `Default`,
+        configId: agentConfig.id,
+      });
+    })
+  );
 }
 
 function generateRandomPassword() {

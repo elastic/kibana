@@ -270,6 +270,7 @@ describe('helpers', () => {
         deletedEventIds: [],
         eventIdToNoteIds: {},
         eventType: 'all',
+        excludedRowRendererIds: [],
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -294,7 +295,6 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        showRowRenderers: true,
         sort: {
           columnId: '@timestamp',
           sortDirection: 'desc',
@@ -368,6 +368,7 @@ describe('helpers', () => {
         deletedEventIds: [],
         eventIdToNoteIds: {},
         eventType: 'all',
+        excludedRowRendererIds: [],
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -392,7 +393,6 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        showRowRenderers: true,
         sort: {
           columnId: '@timestamp',
           sortDirection: 'desc',
@@ -502,6 +502,7 @@ describe('helpers', () => {
         deletedEventIds: [],
         eventIdToNoteIds: {},
         eventType: 'all',
+        excludedRowRendererIds: [],
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -532,7 +533,6 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        showRowRenderers: true,
         sort: {
           columnId: '@timestamp',
           sortDirection: 'desc',
@@ -628,6 +628,7 @@ describe('helpers', () => {
         deletedEventIds: [],
         eventIdToNoteIds: {},
         eventType: 'all',
+        excludedRowRendererIds: [],
         filters: [
           {
             $state: {
@@ -701,7 +702,6 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        showRowRenderers: true,
         sort: {
           columnId: '@timestamp',
           sortDirection: 'desc',
