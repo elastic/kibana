@@ -1,6 +1,6 @@
 @echo off
 
-SETLOCAL
+SETLOCAL ENABLEDELAYEDEXPANSION
 
 set SCRIPT_DIR=%~dp0
 for %%I in ("%SCRIPT_DIR%..") do set DIR=%%~dpfI
@@ -13,9 +13,26 @@ If Not Exist "%NODE%" (
   Exit /B 1
 )
 
-TITLE Kibana Server
+set CONFIG_DIR=%KIBANA_PATH_CONF%
+If [%KIBANA_PATH_CONF%] == [] (
+  set CONFIG_DIR=%DIR%\config
+)
 
-set "NODE_OPTIONS=--no-warnings %NODE_OPTIONS%" && "%NODE%" "%DIR%\src\cli_plugin" %*
+IF EXIST "%CONFIG_DIR%\node.options" (
+  for /F "eol=# tokens=*" %%i in (%CONFIG_DIR%\node.options) do (
+    If [!NODE_OPTIONS!] == [] (
+      set "NODE_OPTIONS=%%i"
+    )	Else (
+      set "NODE_OPTIONS=!NODE_OPTIONS! %%i"
+    )
+  )
+)
+
+:: Include pre-defined node option
+set "NODE_OPTIONS=--no-warnings %NODE_OPTIONS%"
+
+TITLE Kibana Server
+"%NODE%" "%DIR%\src\cli_plugin" %*
 
 :finally
 

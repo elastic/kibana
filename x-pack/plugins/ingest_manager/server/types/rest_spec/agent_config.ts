@@ -51,5 +51,6 @@ export const GetFullAgentConfigRequestSchema = {
   }),
   query: schema.object({
     download: schema.maybe(schema.boolean()),
+    standalone: schema.maybe(schema.boolean()),
   }),
 };
