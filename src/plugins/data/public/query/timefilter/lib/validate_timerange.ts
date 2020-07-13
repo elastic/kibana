@@ -17,11 +17,12 @@
  * under the License.
  */
 
-export { TimefilterService, TimefilterSetup } from './timefilter_service';
+import dateMath from '@elastic/datemath';
+import { TimeRange } from '../../../../common';
 
-export * from './types';
-export { Timefilter, TimefilterContract } from './timefilter';
-export { TimeHistory, TimeHistoryContract } from './time_history';
-export { changeTimeFilter, convertRangeFilterToTimeRangeString } from './lib/change_time_filter';
-export { extractTimeFilter } from './lib/extract_time_filter';
-export { validateTimeRange } from './lib/validate_timerange';
+export function validateTimeRange(time?: TimeRange): boolean {
+  if (!time) return false;
+  const momentDateFrom = dateMath.parse(time.from);
+  const momentDateTo = dateMath.parse(time.to);
+  return !!(momentDateFrom && momentDateFrom.isValid() && momentDateTo && momentDateTo.isValid());
+}
