@@ -93,10 +93,8 @@ export const AnomaliesChart: React.FunctionComponent<{
         />
       ) : (
         <LoadingOverlayWrapper isLoading={isLoading}>
-          {!series.length ? (
-            <div style={{ height: 160, width: '100%' }} />
-          ) : (
-            <div style={{ height: 160, width: '100%' }}>
+          <div style={{ height: 160, width: '100%' }}>
+            {series.length ? (
               <Chart className="log-entry-rate-chart">
                 <Axis
                   id="timestamp"
@@ -129,8 +127,8 @@ export const AnomaliesChart: React.FunctionComponent<{
                   xDomain={{ min: timeRange.startTime, max: timeRange.endTime }}
                 />
               </Chart>
-            </div>
-          )}
+            ) : null}
+          </div>
         </LoadingOverlayWrapper>
       )}
     </>
