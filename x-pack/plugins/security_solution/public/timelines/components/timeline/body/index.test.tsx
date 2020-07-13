@@ -33,7 +33,10 @@ jest.mock('react-redux', () => {
     useSelector: jest.fn(),
   };
 });
+
 jest.mock('../../../../common/components/link_to');
+
+// Prevent Resolver from rendering
 jest.mock('../../graph_overlay');
 
 jest.mock(
