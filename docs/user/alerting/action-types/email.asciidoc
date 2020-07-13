@@ -194,5 +194,5 @@ secrets:
 <1> Some organizations configure Exchange to validate that the `from` field is a
     valid local email account.
 <2> Many organizations support use of your email address as your username.
-    it is a good idea to check with your system administrator if you receive
+    Check with your system administrator if you receive
     authentication-related failures.
