@@ -12,6 +12,7 @@ import {
   ElasticsearchAssetType,
   TemplateRef,
   RegistryElasticsearch,
+  IngestAssetType,
 } from '../../../../types';
 import { CallESAsCurrentUser } from '../../../../types';
 import { Field, loadFieldsFromYaml, processFields } from '../../fields/field';
