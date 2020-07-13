@@ -35,7 +35,6 @@ import * as I18n from './translations';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { NextStep } from '../next_step';
 import { MarkdownEditorForm } from '../../../../common/components/markdown_editor/form';
-import { setFieldValue } from '../../../pages/detection_engine/rules/helpers';
 import { SeverityField } from '../severity_mapping';
 import { RiskScoreField } from '../risk_score_mapping';
 
@@ -96,38 +95,37 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     options: { stripEmptyFields: false },
     schema,
   });
+  const { submit } = form;
 
   const onSubmit = useCallback(async () => {
     if (setStepData) {
       setStepData(RuleStep.aboutRule, null, false);
-      const { isValid, data } = await form.submit();
+      const { isValid, data } = await submit();
       if (isValid) {
         setStepData(RuleStep.aboutRule, data, isValid);
         setMyStepData({ ...data, isNew: false } as AboutStepRule);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form]);
+  }, [setStepData, submit]);
 
   useEffect(() => {
-    const { isNew, ...initDefaultValue } = myStepData;
-    if (defaultValues != null && !deepEqual(initDefaultValue, defaultValues)) {
-      const myDefaultValues = {
-        ...defaultValues,
-        isNew: false,
-      };
-      setMyStepData(myDefaultValues);
-      setFieldValue(form, schema, myDefaultValues);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setMyStepData((prev) => {
+      const { isNew, ...initDefaultValue } = prev;
+      if (defaultValues != null && !deepEqual(initDefaultValue, defaultValues)) {
+        return {
+          ...defaultValues,
+          isNew: false,
+        };
+      }
+      return prev;
+    });
   }, [defaultValues]);
 
   useEffect(() => {
-    if (setForm != null) {
+    if (setForm) {
       setForm(RuleStep.aboutRule, form);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form]);
+  }, [setForm, form]);
 
   return isReadOnlyView && myStepData.name != null ? (
     <StepContentWrapper data-test-subj="aboutStep" addPadding={addPadding}>
