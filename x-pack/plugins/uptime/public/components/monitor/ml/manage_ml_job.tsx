@@ -6,7 +6,7 @@
 
 import React, { useContext, useState } from 'react';
 
-import { EuiButton, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import {
   canDeleteMLJobSelector,
