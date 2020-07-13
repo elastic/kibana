@@ -36,22 +36,18 @@ interface UseFormReturn<T extends FormData> {
 export function useForm<T extends FormData = FormData>(
   formConfig?: FormConfig<T>
 ): UseFormReturn<T> {
-  const { onSubmit, schema, serializer, deserializer, options, id = 'default' } = formConfig ?? {};
+  const { onSubmit, schema, serializer, deserializer, options, id = 'default', defaultValue } =
+    formConfig ?? {};
 
   const formDefaultValue = useMemo(() => {
-    if (formConfig === undefined) {
+    if (defaultValue === undefined || Object.keys(defaultValue).length === 0) {
       return {};
     }
 
-    const hasDefaultValue =
-      formConfig.defaultValue !== undefined && Object.keys(formConfig.defaultValue).length > 0;
-
-    return hasDefaultValue
-      ? Object.entries(formConfig!.defaultValue as object)
-          .filter(({ 1: value }) => value !== undefined)
-          .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {})
-      : {};
-  }, [formConfig]);
+    return Object.entries(defaultValue as object)
+      .filter(({ 1: value }) => value !== undefined)
+      .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+  }, [defaultValue]);
 
   const { errorDisplayDelay, stripEmptyFields: doStripEmptyFields } = options ?? {};
   const formOptions = useMemo(
