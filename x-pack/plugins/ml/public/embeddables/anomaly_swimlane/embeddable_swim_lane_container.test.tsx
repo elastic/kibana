@@ -52,7 +52,7 @@ describe('ExplorerSwimlaneContainer', () => {
   const onOutputChange = jest.fn();
 
   beforeEach(() => {
-    embeddableContext = { id: 'test-id' };
+    embeddableContext = { id: 'test-id' } as AnomalySwimlaneEmbeddable;
     embeddableInput = new BehaviorSubject({
       id: 'test-swimlane-embeddable',
     } as Partial<AnomalySwimlaneEmbeddableInput>);

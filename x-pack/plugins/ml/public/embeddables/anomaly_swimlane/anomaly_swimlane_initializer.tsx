@@ -81,7 +81,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
       (swimlaneType === SWIMLANE_TYPE.VIEW_BY && !!viewBySwimlaneFieldName));
 
   return (
-    <EuiModal initialFocus="[name=panelTitle]">
+    <EuiModal initialFocus="[name=panelTitle]" onClose={onCancel}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <FormattedMessage
