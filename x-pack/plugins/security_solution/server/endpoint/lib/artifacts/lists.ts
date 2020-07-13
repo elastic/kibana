@@ -97,10 +97,18 @@ export function translateToEndpointExceptions(
   exc: FoundExceptionListItemSchema,
   schemaVersion: string
 ): TranslatedExceptionListItem[] {
+  const entrySet = new Set();
+  const entriesFiltered: TranslatedExceptionListItem[] = [];
   if (schemaVersion === 'v1') {
-    return exc.data.map((item) => {
-      return translateItem(schemaVersion, item);
+    exc.data.forEach((entry) => {
+      const translatedItem = translateItem(schemaVersion, entry);
+      const entryHash = createHash('sha256').update(JSON.stringify(translatedItem)).digest('hex');
+      if (!entrySet.has(entryHash)) {
+        entriesFiltered.push(translatedItem);
+        entrySet.add(entryHash);
+      }
     });
+    return entriesFiltered;
   } else {
     throw new Error('unsupported schemaVersion');
   }
@@ -124,12 +132,17 @@ function translateItem(
   schemaVersion: string,
   item: ExceptionListItemSchema
 ): TranslatedExceptionListItem {
+  const itemSet = new Set();
   return {
     type: item.type,
     entries: item.entries.reduce((translatedEntries: TranslatedEntry[], entry) => {
       const translatedEntry = translateEntry(schemaVersion, entry);
       if (translatedEntry !== undefined && translatedEntryType.is(translatedEntry)) {
-        translatedEntries.push(translatedEntry);
+        const itemHash = createHash('sha256').update(JSON.stringify(translatedEntry)).digest('hex');
+        if (!itemSet.has(itemHash)) {
+          translatedEntries.push(translatedEntry);
+          itemSet.add(itemHash);
+        }
       }
       return translatedEntries;
     }, []),

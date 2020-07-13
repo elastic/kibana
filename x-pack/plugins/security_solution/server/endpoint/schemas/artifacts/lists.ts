@@ -7,37 +7,37 @@
 import * as t from 'io-ts';
 import { operator } from '../../../../../lists/common/schemas';
 
+export const translatedEntryMatchAnyMatcher = t.keyof({
+  exact_cased_any: null,
+  exact_caseless_any: null,
+});
+export type TranslatedEntryMatchAnyMatcher = t.TypeOf<typeof translatedEntryMatchAnyMatcher>;
+
 export const translatedEntryMatchAny = t.exact(
   t.type({
     field: t.string,
     operator,
-    type: t.keyof({
-      exact_cased_any: null,
-      exact_caseless_any: null,
-    }),
+    type: translatedEntryMatchAnyMatcher,
     value: t.array(t.string),
   })
 );
 export type TranslatedEntryMatchAny = t.TypeOf<typeof translatedEntryMatchAny>;
 
-export const translatedEntryMatchAnyMatcher = translatedEntryMatchAny.type.props.type;
-export type TranslatedEntryMatchAnyMatcher = t.TypeOf<typeof translatedEntryMatchAnyMatcher>;
+export const translatedEntryMatchMatcher = t.keyof({
+  exact_cased: null,
+  exact_caseless: null,
+});
+export type TranslatedEntryMatchMatcher = t.TypeOf<typeof translatedEntryMatchMatcher>;
 
 export const translatedEntryMatch = t.exact(
   t.type({
     field: t.string,
     operator,
-    type: t.keyof({
-      exact_cased: null,
-      exact_caseless: null,
-    }),
+    type: translatedEntryMatchMatcher,
     value: t.string,
   })
 );
 export type TranslatedEntryMatch = t.TypeOf<typeof translatedEntryMatch>;
-
-export const translatedEntryMatchMatcher = translatedEntryMatch.type.props.type;
-export type TranslatedEntryMatchMatcher = t.TypeOf<typeof translatedEntryMatchMatcher>;
 
 export const translatedEntryMatcher = t.union([
   translatedEntryMatchMatcher,
