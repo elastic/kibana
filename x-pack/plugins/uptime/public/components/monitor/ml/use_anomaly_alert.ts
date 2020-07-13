@@ -7,7 +7,7 @@
 import { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getExistingAlertAction } from '../../../state/actions/alerts';
-import { alertSelector } from '../../../state/selectors';
+import { alertSelector, selectAlertFlyoutVisibility } from '../../../state/selectors';
 import { UptimeRefreshContext } from '../../../contexts';
 import { useMonitorId } from '../../../hooks';
 
@@ -20,9 +20,11 @@ export const useAnomalyAlert = () => {
 
   const { data: anomalyAlert } = useSelector(alertSelector);
 
+  const alertFlyoutVisible = useSelector(selectAlertFlyoutVisibility);
+
   useEffect(() => {
     dispatch(getExistingAlertAction.get({ monitorId }));
-  }, [monitorId, lastRefresh, dispatch]);
+  }, [monitorId, lastRefresh, dispatch, alertFlyoutVisible]);
 
   return anomalyAlert;
 };

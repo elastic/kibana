@@ -52,7 +52,7 @@ Aging Certificates: {agingCommonNameAndDate}
 
 export const DurationAnomalyTranslations = {
   defaultActionMessage: i18n.translate('xpack.uptime.alerts.durationAnomaly.defaultActionMessage', {
-    defaultMessage: `A {severity} level anomaly with score {severityScore} was detected at {anomalyStartTimestamp} on {monitor} response duration in Uptime at url {monitorUrl}.
+    defaultMessage: `Abnormal ({severity} level) response time detected on {monitor} with url {monitorUrl} at {anomalyStartTimestamp}. Anomaly severity score is {severityScore}.
 Response times as high as {slowestAnomalyResponse} have been detected from location {observerLocation}. Expected response time is {expectedResponseTime}.`,
     values: {
       severity: '{{state.severity}}',
