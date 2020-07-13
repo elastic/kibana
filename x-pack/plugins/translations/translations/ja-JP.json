@@ -7041,8 +7041,6 @@
     "xpack.idxMgmt.templateDetails.loadingIndexTemplateErrorMessage": "テンプレートの読み込み中にエラーが発生",
     "xpack.idxMgmt.templateDetails.manageButtonLabel": "管理",
     "xpack.idxMgmt.templateDetails.manageContextMenuPanelTitle": "テンプレートオプション",
-    "xpack.idxMgmt.templateDetails.managedTemplateInfoDescription": "マネージドテンプレートは内部オペレーションに不可欠です。",
-    "xpack.idxMgmt.templateDetails.managedTemplateInfoTitle": "マネジドテンプレートの編集は許可されていません。",
     "xpack.idxMgmt.templateDetails.mappingsTabTitle": "マッピング",
     "xpack.idxMgmt.templateDetails.settingsTabTitle": "設定",
     "xpack.idxMgmt.templateDetails.summaryTab.ilmPolicyDescriptionListTitle": "ILM ポリシー",
