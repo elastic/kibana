@@ -9,13 +9,13 @@ import React, { useEffect } from 'react';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
 import { ScopedHistory } from 'kibana/public';
 
-import { UIM_APP_LOAD } from '../../common/constants';
+import { UIM_APP_LOAD, PLUGIN } from '../../common/constants';
 import { IndexManagementHome, homeSections } from './sections/home';
 import { TemplateCreate } from './sections/template_create';
 import { TemplateClone } from './sections/template_clone';
 import { TemplateEdit } from './sections/template_edit';
 
-import { useServices } from './app_context';
+import { useAppContext } from './app_context';
 import {
   ComponentTemplateCreate,
   ComponentTemplateEdit,
@@ -23,8 +23,16 @@ import {
 } from './components';
 
 export const App = ({ history }: { history: ScopedHistory }) => {
-  const { uiMetricService } = useServices();
+  const {
+    services: { uiMetricService },
+    core: { docTitle },
+  } = useAppContext();
+
   useEffect(() => uiMetricService.trackMetric('loaded', UIM_APP_LOAD), [uiMetricService]);
+  useEffect(() => {
+    docTitle.change(PLUGIN.i18nName);
+    return () => docTitle.reset();
+  }, [docTitle]);
 
   return (
     <Router history={history}>
