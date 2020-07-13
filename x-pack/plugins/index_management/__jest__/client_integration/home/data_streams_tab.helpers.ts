@@ -166,7 +166,7 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
 
 export const createDataStreamPayload = (name: string): DataStream => ({
   name,
-  timeStampField: { name: '@timestamp', mapping: { type: 'date' } },
+  timeStampField: { name: '@timestamp' },
   indices: [
     {
       name: 'indexName',

@@ -33,6 +33,7 @@ import { Sort } from './sort';
 import { useManageTimeline } from '../../manage_timeline';
 import { GraphOverlay } from '../../graph_overlay';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
+import { TimelineRowAction } from './actions';
 
 export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
@@ -103,10 +104,21 @@ export const Body = React.memo<BodyProps>(
   }) => {
     const containerElementRef = useRef<HTMLDivElement>(null);
     const { getManageTimelineById } = useManageTimeline();
-    const timelineActions = useMemo(() => getManageTimelineById(id).timelineRowActions, [
-      getManageTimelineById,
-      id,
-    ]);
+    const timelineActions = useMemo(
+      () =>
+        data.reduce((acc: TimelineRowAction[], rowData) => {
+          const rowActions = getManageTimelineById(id).timelineRowActions({
+            ecsData: rowData.ecs,
+            nonEcsData: rowData.data,
+          });
+          return rowActions &&
+            rowActions.filter((v) => v.displayType === 'icon').length >
+              acc.filter((v) => v.displayType === 'icon').length
+            ? rowActions
+            : acc;
+        }, []),
+      [data, getManageTimelineById, id]
+    );
 
     const additionalActionWidth = useMemo(() => {
       let hasContextMenu = false;
