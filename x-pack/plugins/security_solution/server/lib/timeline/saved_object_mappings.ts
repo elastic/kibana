@@ -135,6 +135,9 @@ export const timelineSavedObjectMappings: SavedObjectsType['mappings'] = {
     eventType: {
       type: 'keyword',
     },
+    excludedRowRendererIds: {
+      type: 'text',
+    },
     favorite: {
       properties: {
         keySearch: {
