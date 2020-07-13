@@ -40,6 +40,10 @@ import { IVectorSource } from '../../sources/vector_source';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
 
+interface CountData {
+  isSyncClustered: boolean;
+}
+
 function getAggType(dynamicProperty: IDynamicStyleProperty): AGG_TYPE {
   return dynamicProperty.isOrdinal() ? AGG_TYPE.AVG : AGG_TYPE.TERMS;
 }
@@ -188,7 +192,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     let isClustered = false;
     const countDataRequest = this.getDataRequest(ACTIVE_COUNT_DATA_ID);
     if (countDataRequest) {
-      const requestData = countDataRequest.getData();
+      const requestData = countDataRequest.getData() as CountData;
       if (requestData && requestData.isSyncClustered) {
         isClustered = true;
       }
