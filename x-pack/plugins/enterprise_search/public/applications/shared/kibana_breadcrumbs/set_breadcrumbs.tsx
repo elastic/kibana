@@ -6,7 +6,7 @@
 
 import React, { useContext, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { Breadcrumb as EuiBreadcrumb } from '@elastic/eui';
+import { EuiBreadcrumb } from '@elastic/eui';
 import { KibanaContext, IKibanaContext } from '../../index';
 import { appSearchBreadcrumbs, TBreadcrumbs } from './generate_breadcrumbs';
 
