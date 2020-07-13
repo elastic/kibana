@@ -8,6 +8,7 @@ import { SavedObjectsClientContract } from 'kibana/server';
 
 import { NamespaceTypeArray } from '../../../common/schemas/types/default_namespace_array';
 import { NonEmptyStringArrayDecoded } from '../../../common/schemas/types/non_empty_string_array';
+import { EmptyStringArrayDecoded } from '../../../common/schemas/types/empty_string_array';
 import {
   CreateCommentsArray,
   Description,
@@ -132,7 +133,7 @@ export interface FindExceptionListItemOptions {
 export interface FindExceptionListsItemOptions {
   listId: NonEmptyStringArrayDecoded;
   namespaceType: NamespaceTypeArray;
-  filter: FilterOrUndefined;
+  filter: EmptyStringArrayDecoded;
   perPage: PerPageOrUndefined;
   page: PageOrUndefined;
   sortField: SortFieldOrUndefined;

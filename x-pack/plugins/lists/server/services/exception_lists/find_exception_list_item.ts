@@ -41,7 +41,7 @@ export const findExceptionListItem = async ({
   sortOrder,
 }: FindExceptionListItemOptions): Promise<FoundExceptionListItemSchema | null> => {
   return findExceptionListsItem({
-    filter,
+    filter: filter != null ? [filter] : [],
     listId: [listId],
     namespaceType: [namespaceType],
     page,

@@ -5,11 +5,11 @@
  */
 import { SavedObjectsClientContract } from 'kibana/server';
 
+import { EmptyStringArrayDecoded } from '../../../common/schemas/types/empty_string_array';
 import { NamespaceTypeArray } from '../../../common/schemas/types/default_namespace_array';
 import { NonEmptyStringArrayDecoded } from '../../../common/schemas/types/non_empty_string_array';
 import {
   ExceptionListSoSchema,
-  FilterOrUndefined,
   FoundExceptionListItemSchema,
   PageOrUndefined,
   PerPageOrUndefined,
@@ -25,7 +25,7 @@ interface FindExceptionListItemsOptions {
   listId: NonEmptyStringArrayDecoded;
   namespaceType: NamespaceTypeArray;
   savedObjectsClient: SavedObjectsClientContract;
-  filter: FilterOrUndefined;
+  filter: EmptyStringArrayDecoded;
   perPage: PerPageOrUndefined;
   page: PageOrUndefined;
   sortField: SortFieldOrUndefined;
@@ -78,19 +78,17 @@ export const getExceptionListsItemFilter = ({
   savedObjectType,
 }: {
   listId: NonEmptyStringArrayDecoded;
-  filter: FilterOrUndefined;
+  filter: EmptyStringArrayDecoded;
   savedObjectType: SavedObjectType[];
 }): string => {
-  const listIdsFilter = listId.reduce((accum, singleListId, index) => {
+  return listId.reduce((accum, singleListId, index) => {
+    const listItemAppend = `(${savedObjectType[index]}.attributes.list_type: item AND ${savedObjectType[index]}.attributes.list_id: ${singleListId})`;
+    const listItemAppendWithFilter =
+      filter[index] != null ? `(${listItemAppend} AND ${filter[index]})` : listItemAppend;
     if (accum === '') {
-      return `(${savedObjectType[index]}.attributes.list_type: item AND ${savedObjectType[index]}.attributes.list_id: ${singleListId})`;
+      return listItemAppendWithFilter;
     } else {
-      return `${accum} OR (${savedObjectType[index]}.attributes.list_type: item AND ${savedObjectType[index]}.attributes.list_id: ${singleListId})`;
+      return `${accum} OR ${listItemAppendWithFilter}`;
     }
   }, '');
-  if (filter == null) {
-    return listIdsFilter;
-  } else {
-    return `${listIdsFilter} AND ${filter}`;
-  }
 };

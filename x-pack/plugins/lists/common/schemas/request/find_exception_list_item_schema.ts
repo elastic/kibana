@@ -8,7 +8,7 @@
 
 import * as t from 'io-ts';
 
-import { filter, sort_field, sort_order } from '../common/schemas';
+import { sort_field, sort_order } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
 import { StringToPositiveNumber } from '../types/string_to_positive_number';
 import {
@@ -16,6 +16,7 @@ import {
   DefaultNamespaceArrayTypeDecoded,
 } from '../types/default_namespace_array';
 import { NonEmptyStringArray } from '../types/non_empty_string_array';
+import { EmptyStringArray, EmptyStringArrayDecoded } from '../types/empty_string_array';
 
 export const findExceptionListItemSchema = t.intersection([
   t.exact(
@@ -25,7 +26,7 @@ export const findExceptionListItemSchema = t.intersection([
   ),
   t.exact(
     t.partial({
-      filter, // defaults to undefined if not set during decode
+      filter: EmptyStringArray, // defaults to undefined if not set during decode
       namespace_type: DefaultNamespaceArray, // defaults to ['single'] if not set during decode
       page: StringToPositiveNumber, // defaults to undefined if not set during decode
       per_page: StringToPositiveNumber, // defaults to undefined if not set during decode
@@ -40,8 +41,9 @@ export type FindExceptionListItemSchemaPartial = t.OutputOf<typeof findException
 // This type is used after a decode since some things are defaults after a decode.
 export type FindExceptionListItemSchemaPartialDecoded = Omit<
   t.TypeOf<typeof findExceptionListItemSchema>,
-  'namespace_type'
+  'namespace_type' | 'filter'
 > & {
+  filter: EmptyStringArrayDecoded;
   namespace_type: DefaultNamespaceArrayTypeDecoded;
 };
 

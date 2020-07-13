@@ -8,16 +8,20 @@ import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
 /**
- * Types the NonEmptyStringArray as:
- *   - A string that is not empty (which will be turned into an array of size 1)
+ * Types the EmptyStringArray as:
+ *   - A value that can be undefined, or null (which will be turned into an empty array)
  *   - A comma separated string that can turn into an array by splitting on it
+ *   - Example input converted to output: undefined -> []
+ *   - Example input converted to output: null -> []
  *   - Example input converted to output: "a,b,c" -> ["a", "b", "c"]
  */
-export const NonEmptyStringArray = new t.Type<string[], string, unknown>(
-  'NonEmptyStringArray',
+export const EmptyStringArray = new t.Type<string[], string | undefined | null, unknown>(
+  'EmptyStringArray',
   t.array(t.string).is,
   (input, context): Either<t.Errors, string[]> => {
-    if (typeof input === 'string' && input.trim() !== '') {
+    if (input == null) {
+      return t.success([]);
+    } else if (typeof input === 'string' && input.trim() !== '') {
       const arrayValues = input
         .trim()
         .split(',')
@@ -35,7 +39,7 @@ export const NonEmptyStringArray = new t.Type<string[], string, unknown>(
   String
 );
 
-export type NonEmptyStringArrayC = typeof NonEmptyStringArray;
+export type EmptyStringArrayC = typeof EmptyStringArray;
 
-export type NonEmptyStringArrayEncoded = t.OutputOf<typeof NonEmptyStringArray>;
-export type NonEmptyStringArrayDecoded = t.TypeOf<typeof NonEmptyStringArray>;
+export type EmptyStringArrayEncoded = t.OutputOf<typeof EmptyStringArray>;
+export type EmptyStringArrayDecoded = t.TypeOf<typeof EmptyStringArray>;

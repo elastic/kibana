@@ -26,11 +26,14 @@ NAMESPACE_TYPE=${3-single}
 
 # Example: ./find_exception_list_items_by_filter.sh simple_list exception-list.attributes.name:%20Sample%20Endpoint%20Exception%20List
 # Example: ./find_exception_list_items_by_filter.sh simple_list exception-list.attributes.name:%20Sample%20Endpoint%20Exception%20List single
-# Example: ./find_exception_list_items_by_filter.sh simple_list exception-list.attributes.name:%20Sample%20Endpoint%20Exception%20List agnostic
+# Example: ./find_exception_list_items_by_filter.sh endpoint_list exception-list-agnostic.attributes.name:%20Sample%20Endpoint%20Exception%20List agnostic
 #
 # Example: ./find_exception_list_items_by_filter.sh simple_list exception-list.attributes.entries.field:actingProcess.file.signer
 # Example: ./find_exception_list_items_by_filter.sh simple_list "exception-list.attributes.entries.field:actingProcess.file.signe*"
-# Example: ./find_exception_list_items_by_filter.sh simple_list "exception-list.attributes.entries.match:Elastic*%20AND%20simple_list.attributes.entries.field:actingProcess.file.signe*"
+# Example: ./find_exception_list_items_by_filter.sh simple_list "exception-list.attributes.entries.field:actingProcess.file.signe*%20AND%20exception-list.attributes.entries.field:actingProcess.file.signe*"
+#
+# Example with multiplie lists, and multiple filters
+# Example: ./find_exception_list_items_by_filter.sh simple_list,endpoint_list "exception-list.attributes.name:%20Sample%20Endpoint%20Exception%20List,exception-list-agnostic.attributes.name:%20Sample%20Endpoint%20Exception%20List" single,agnostic
 curl -s -k \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
  -X GET "${KIBANA_URL}${SPACE_URL}/api/exception_lists/items/_find?list_id=${LIST_ID}&filter=${FILTER}&namespace_type=${NAMESPACE_TYPE}" | jq .
