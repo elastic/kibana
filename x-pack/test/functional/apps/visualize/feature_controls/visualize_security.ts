@@ -34,6 +34,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       await esArchiver.unload('visualize/default');
+      // logout, so the other tests don't accidentally run as the custom users we're testing below
+      await PageObjects.security.forceLogout();
     });
 
     describe('global visualize all privileges', () => {
