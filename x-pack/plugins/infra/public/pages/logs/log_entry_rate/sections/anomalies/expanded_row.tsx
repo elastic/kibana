@@ -73,7 +73,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
                     timestamp={example.timestamp}
                     tiebreaker={example.tiebreaker}
                     timeRange={timeRange}
-                    jobId={anomaly.jobId}
+                    anomaly={anomaly}
                   />
                 ))}
               </>
