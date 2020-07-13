@@ -165,7 +165,7 @@ secrets:
 --------------------------------------------------
 <1> `smtp.host` varies depending on the region
 
-NOTE:   You need to use your Amazon SES SMTP credentials to send email through
+NOTE:   You must use your Amazon SES SMTP credentials to send email through
         Amazon SES. For more information, see
         http://docs.aws.amazon.com/ses/latest/DeveloperGuide/smtp-credentials.html[Obtaining
         Your Amazon SES SMTP Credentials]. You might also need to verify
