@@ -18,38 +18,50 @@
  */
 
 import $ from 'jquery';
-import ngMock from 'ng_mock';
+import angular from 'angular';
+import 'angular-mocks';
 import expect from '@kbn/expect';
-import './legacy';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getInnerAngular } from '../../../../../../plugins/vis_type_table/public/get_inner_angular';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { initTableVisLegacyModule } from '../../../../../../plugins/vis_type_table/public/table_vis_legacy_module';
+
+import { getFieldFormatsRegistry } from '../../../../test_utils/public/stub_field_formats';
+import { coreMock } from '../../../../core/public/mocks';
+import { initAngularBootstrap } from '../../../kibana_legacy/public';
+import { setUiSettings } from '../../../data/public/services';
+import { setFormatService } from '../services';
+import { getInnerAngular } from '../get_inner_angular';
+import { initTableVisLegacyModule } from '../table_vis_legacy_module';
 import { tabifiedData } from './tabified_data';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { npStart } from 'ui/new_platform';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { configureAppAngularModule } from '../../../../../../plugins/kibana_legacy/public/angular';
+
+const uiSettings = new Map();
 
 describe('Table Vis - AggTableGroup Directive', function () {
+  const core = coreMock.createStart();
   let $rootScope;
   let $compile;
 
+  core.uiSettings.set = jest.fn((key, value) => {
+    uiSettings.set(key, value);
+  });
+
+  core.uiSettings.get = jest.fn((key) => {
+    return uiSettings.get(key);
+  });
+
   const initLocalAngular = () => {
-    const tableVisModule = getInnerAngular('kibana/table_vis', npStart.core);
-    configureAppAngularModule(tableVisModule, npStart.core, true);
+    const tableVisModule = getInnerAngular('kibana/table_vis', core);
     initTableVisLegacyModule(tableVisModule);
   };
 
-  beforeEach(initLocalAngular);
-
-  beforeEach(ngMock.module('kibana/table_vis'));
-  beforeEach(
-    ngMock.inject(function ($injector) {
+  beforeEach(() => {
+    setUiSettings(core.uiSettings);
+    setFormatService(getFieldFormatsRegistry(core));
+    initAngularBootstrap();
+    initLocalAngular();
+    angular.mock.module('kibana/table_vis');
+    angular.mock.inject(($injector) => {
       $rootScope = $injector.get('$rootScope');
       $compile = $injector.get('$compile');
-    })
-  );
+    });
+  });
 
   let $scope;
   beforeEach(function () {
