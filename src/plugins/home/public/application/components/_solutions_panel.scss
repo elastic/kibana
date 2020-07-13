@@ -10,7 +10,6 @@
     }
   }
 
-
   .homSolutionsPanel__appSearch {
     .homSolutionsPanel__appSearchHeader {
       background-color: #017d73;
@@ -80,6 +79,8 @@
   }
 
   .homSolutionsPanel__kibana {
+    max-width: 50%;
+
     .homSolutionsPanel__kibanaHeader {
       background-color: #006bb4;
       color: $euiColorEmptyShade;

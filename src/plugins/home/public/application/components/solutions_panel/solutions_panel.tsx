@@ -224,7 +224,7 @@ export const SolutionsPanel: FunctionComponent<Props> = ({
   observability,
   securitySolution,
 }) => (
-  <EuiFlexGroup>
+  <EuiFlexGroup justifyContent="spaceAround">
     {appSearch || observability || securitySolution ? (
       <EuiFlexItem>
         <EuiFlexGroup direction="column">
