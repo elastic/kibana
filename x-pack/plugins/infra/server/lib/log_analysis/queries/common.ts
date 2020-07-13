@@ -21,6 +21,14 @@ export const createJobIdFilters = (jobId: string) => [
   },
 ];
 
+export const createJobIdsFilters = (jobIds: string[]) => [
+  {
+    terms: {
+      job_id: jobIds,
+    },
+  },
+];
+
 export const createTimeRangeFilters = (startTime: number, endTime: number) => [
   {
     range: {
