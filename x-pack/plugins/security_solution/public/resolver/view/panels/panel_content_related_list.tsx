@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiTitle, EuiSpacer, EuiText, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
+import styled from 'styled-components';
 import {
   CrumbInfo,
   formatDate,
