@@ -6,7 +6,6 @@
 
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
-import styled from 'styled-components';
 
 import { setFieldValue } from '../../../pages/detection_engine/rules/helpers';
 import {
@@ -24,10 +23,6 @@ import { schema } from './schema';
 interface StepScheduleRuleProps extends RuleStepProps {
   defaultValues?: ScheduleStepRule | null;
 }
-
-const RestrictedWidthContainer = styled.div`
-  max-width: 300px;
-`;
 
 const stepScheduleDefaultValue = {
   interval: '5m',
@@ -93,29 +88,25 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
         <Form form={form} data-test-subj="stepScheduleRule">
-          <RestrictedWidthContainer>
-            <UseField
-              path="interval"
-              component={ScheduleItem}
-              componentProps={{
-                idAria: 'detectionEngineStepScheduleRuleInterval',
-                isDisabled: isLoading,
-                dataTestSubj: 'detectionEngineStepScheduleRuleInterval',
-              }}
-            />
-          </RestrictedWidthContainer>
-          <RestrictedWidthContainer>
-            <UseField
-              path="from"
-              component={ScheduleItem}
-              componentProps={{
-                idAria: 'detectionEngineStepScheduleRuleFrom',
-                isDisabled: isLoading,
-                dataTestSubj: 'detectionEngineStepScheduleRuleFrom',
-                minimumValue: 1,
-              }}
-            />
-          </RestrictedWidthContainer>
+          <UseField
+            path="interval"
+            component={ScheduleItem}
+            componentProps={{
+              idAria: 'detectionEngineStepScheduleRuleInterval',
+              isDisabled: isLoading,
+              dataTestSubj: 'detectionEngineStepScheduleRuleInterval',
+            }}
+          />
+          <UseField
+            path="from"
+            component={ScheduleItem}
+            componentProps={{
+              idAria: 'detectionEngineStepScheduleRuleFrom',
+              isDisabled: isLoading,
+              dataTestSubj: 'detectionEngineStepScheduleRuleFrom',
+              minimumValue: 1,
+            }}
+          />
         </Form>
       </StepContentWrapper>
 
