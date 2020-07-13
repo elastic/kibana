@@ -40,11 +40,11 @@ export default function upgradeAssistantFunctionalTests({
       await PageObjects.upgradeAssistant.expectDeprecationLoggingLabel('On');
       log.debug('Now toggle to off');
       await PageObjects.upgradeAssistant.toggleDeprecationLogging();
-      // await PageObjects.common.sleep(5000);
+      await PageObjects.common.sleep(2000);
       log.debug('expect state to be OFF after toggle');
       await PageObjects.upgradeAssistant.expectDeprecationLoggingLabel('Off');
       await PageObjects.upgradeAssistant.toggleDeprecationLogging();
-      // await PageObjects.common.sleep(5000);
+      await PageObjects.common.sleep(2000);
       log.debug('expect state to be ON after toggle');
       await PageObjects.upgradeAssistant.expectDeprecationLoggingLabel('On');
     });
