@@ -199,7 +199,7 @@ export const getTypeMetaFromSource = (
  *
  * @param fieldsToNormalize The "properties" object from the mappings (or "fields" object for `text` and `keyword` types)
  */
-export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
+export const normalize = (fieldsToNormalize: Fields = {}): NormalizedFields => {
   let maxNestedDepth = 0;
 
   const normalizeFields = (
