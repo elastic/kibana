@@ -17,7 +17,7 @@ import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
 import { wait } from '../../../../common/lib/helpers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
-import { SELECTOR_TIMELINE_BODY_CLASS_NAME } from '../styles';
+import { SELECTOR_TIMELINE_BODY_CLASS_NAME, TimelineBody } from '../styles';
 
 const testBodyHeight = 700;
 const mockGetNotesByIds = (eventId: string[]) => [];
@@ -34,6 +34,7 @@ jest.mock('react-redux', () => {
   };
 });
 jest.mock('../../../../common/components/link_to');
+jest.mock('../../graph_overlay');
 
 jest.mock(
   'react-visibility-sensor',
@@ -158,7 +159,7 @@ describe('Body', () => {
             <Body {...props} />
           </TestProviders>
         );
-        expect(wrapper.find('[data-test-subj="timeline-body"]').exists()).toEqual(false);
+        expect(wrapper.find(TimelineBody).props().visible).toBe(false);
       });
     });
   });
