@@ -475,17 +475,6 @@ describe('Execution', () => {
         }
       });
 
-      test('sets duration to 10 milliseconds when function executes 10 milliseconds', async () => {
-        const execution = createExecution('sleep 10', {}, true);
-        execution.start(-1);
-        await execution.result;
-
-        const node = execution.state.get().ast.chain[0];
-        expect(typeof node.debug?.duration).toBe('number');
-        expect(node.debug?.duration).toBeLessThan(50);
-        expect(node.debug?.duration).toBeGreaterThanOrEqual(5);
-      });
-
       test('adds .debug field in expression AST on each executed function', async () => {
         const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
         execution.start(-1);

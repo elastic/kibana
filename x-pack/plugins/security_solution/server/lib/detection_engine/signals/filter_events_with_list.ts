@@ -48,10 +48,14 @@ export const filterEventsAgainstList = async ({
         const filteredHitsEntries = entries
           .filter((t): t is EntryList => entriesList.is(t))
           .map(async (entry) => {
+            const { list, field, operator } = entry;
+            const { id, type } = list;
+
             // acquire the list values we are checking for.
             const valuesOfGivenType = eventSearchResult.hits.hits.reduce(
               (acc, searchResultItem) => {
-                const valueField = get(entry.field, searchResultItem._source);
+                const valueField = get(field, searchResultItem._source);
+
                 if (valueField != null && isStringableType(valueField)) {
                   acc.add(valueField.toString());
                 }
@@ -63,8 +67,8 @@ export const filterEventsAgainstList = async ({
             // matched will contain any list items that matched with the
             // values passed in from the Set.
             const matchedListItems = await listClient.getListItemByValues({
-              listId: entry.list.id,
-              type: entry.list.type,
+              listId: id,
+              type,
               value: [...valuesOfGivenType],
             });
 
@@ -76,7 +80,6 @@ export const filterEventsAgainstList = async ({
             // do a single search after with these values.
             // painless script to do nested query in elasticsearch
             // filter out the search results that match with the values found in the list.
-            const operator = entry.operator;
             const filteredEvents = eventSearchResult.hits.hits.filter((item) => {
               const eventItem = get(entry.field, item._source);
               if (operator === 'included') {

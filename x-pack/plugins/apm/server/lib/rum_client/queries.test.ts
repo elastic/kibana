@@ -11,6 +11,7 @@ import {
 import { getClientMetrics } from './get_client_metrics';
 import { getPageViewTrends } from './get_page_view_trends';
 import { getPageLoadDistribution } from './get_page_load_distribution';
+import { getRumServices } from './get_rum_services';
 
 describe('rum client dashboard queries', () => {
   let mock: SearchParamsMock;
@@ -45,6 +46,15 @@ describe('rum client dashboard queries', () => {
         setup,
         minPercentile: '0',
         maxPercentile: '99',
+      })
+    );
+    expect(mock.params).toMatchSnapshot();
+  });
+
+  it('fetches rum services', async () => {
+    mock = await inspectSearchParams((setup) =>
+      getRumServices({
+        setup,
       })
     );
     expect(mock.params).toMatchSnapshot();

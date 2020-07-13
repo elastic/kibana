@@ -7,23 +7,27 @@ import { SavedObjectsClientContract } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/server';
 import {
   DeletePackageConfigsResponse,
-  packageToPackageConfig,
   PackageConfigInput,
   PackageConfigInputStream,
   PackageInfo,
+  ListWithKuery,
+  packageToPackageConfig,
+  isPackageLimited,
+  doesAgentConfigAlreadyIncludePackage,
 } from '../../common';
 import { PACKAGE_CONFIG_SAVED_OBJECT_TYPE } from '../constants';
 import {
   NewPackageConfig,
+  UpdatePackageConfig,
   PackageConfig,
-  ListWithKuery,
   PackageConfigSOAttributes,
   RegistryPackage,
+  CallESAsCurrentUser,
 } from '../types';
 import { agentConfigService } from './agent_config';
 import { outputService } from './output';
 import * as Registry from './epm/registry';
-import { getPackageInfo, getInstallation } from './epm/packages';
+import { getPackageInfo, getInstallation, ensureInstalledPackage } from './epm/packages';
 import { getAssetsData } from './epm/packages/assets';
 import { createStream } from './epm/agent/agent';
 
@@ -36,9 +40,39 @@ function getDataset(st: string) {
 class PackageConfigService {
   public async create(
     soClient: SavedObjectsClientContract,
+    callCluster: CallESAsCurrentUser,
     packageConfig: NewPackageConfig,
     options?: { id?: string; user?: AuthenticatedUser }
   ): Promise<PackageConfig> {
+    // Make sure the associated package is installed
+    if (packageConfig.package?.name) {
+      const [, pkgInfo] = await Promise.all([
+        ensureInstalledPackage({
+          savedObjectsClient: soClient,
+          pkgName: packageConfig.package.name,
+          callCluster,
+        }),
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: packageConfig.package.name,
+          pkgVersion: packageConfig.package.version,
+        }),
+      ]);
+
+      // Check if it is a limited package, and if so, check that the corresponding agent config does not
+      // already contain a package config for this package
+      if (isPackageLimited(pkgInfo)) {
+        const agentConfig = await agentConfigService.get(soClient, packageConfig.config_id, true);
+        if (agentConfig && doesAgentConfigAlreadyIncludePackage(agentConfig, pkgInfo.name)) {
+          throw new Error(
+            `Unable to create package config. Package '${pkgInfo.name}' already exists on this agent config.`
+          );
+        }
+      }
+
+      packageConfig.inputs = await this.assignPackageStream(pkgInfo, packageConfig.inputs);
+    }
+
     const isoDate = new Date().toISOString();
     const newSo = await soClient.create<PackageConfigSOAttributes>(
       SAVED_OBJECT_TYPE,
@@ -60,6 +94,7 @@ class PackageConfigService {
 
     return {
       id: newSo.id,
+      version: newSo.version,
       ...newSo.attributes,
     };
   }
@@ -71,7 +106,7 @@ class PackageConfigService {
     options?: { user?: AuthenticatedUser }
   ): Promise<PackageConfig[]> {
     const isoDate = new Date().toISOString();
-    const { saved_objects: newSos } = await soClient.bulkCreate<Omit<PackageConfig, 'id'>>(
+    const { saved_objects: newSos } = await soClient.bulkCreate<PackageConfigSOAttributes>(
       packageConfigs.map((packageConfig) => ({
         type: SAVED_OBJECT_TYPE,
         attributes: {
@@ -98,6 +133,7 @@ class PackageConfigService {
 
     return newSos.map((newSo) => ({
       id: newSo.id,
+      version: newSo.version,
       ...newSo.attributes,
     }));
   }
@@ -117,6 +153,7 @@ class PackageConfigService {
 
     return {
       id: packageConfigSO.id,
+      version: packageConfigSO.version,
       ...packageConfigSO.attributes,
     };
   }
@@ -137,6 +174,7 @@ class PackageConfigService {
 
     return packageConfigSO.saved_objects.map((so) => ({
       id: so.id,
+      version: so.version,
       ...so.attributes,
     }));
   }
@@ -145,10 +183,12 @@ class PackageConfigService {
     soClient: SavedObjectsClientContract,
     options: ListWithKuery
   ): Promise<{ items: PackageConfig[]; total: number; page: number; perPage: number }> {
-    const { page = 1, perPage = 20, kuery } = options;
+    const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
 
     const packageConfigs = await soClient.find<PackageConfigSOAttributes>({
       type: SAVED_OBJECT_TYPE,
+      sortField,
+      sortOrder,
       page,
       perPage,
       // To ensure users don't need to know about SO data structure...
@@ -161,8 +201,9 @@ class PackageConfigService {
     });
 
     return {
-      items: packageConfigs.saved_objects.map<PackageConfig>((packageConfigSO) => ({
+      items: packageConfigs.saved_objects.map((packageConfigSO) => ({
         id: packageConfigSO.id,
+        version: packageConfigSO.version,
         ...packageConfigSO.attributes,
       })),
       total: packageConfigs.total,
@@ -174,21 +215,29 @@ class PackageConfigService {
   public async update(
     soClient: SavedObjectsClientContract,
     id: string,
-    packageConfig: NewPackageConfig,
+    packageConfig: UpdatePackageConfig,
     options?: { user?: AuthenticatedUser }
   ): Promise<PackageConfig> {
     const oldPackageConfig = await this.get(soClient, id);
+    const { version, ...restOfPackageConfig } = packageConfig;
 
     if (!oldPackageConfig) {
       throw new Error('Package config not found');
     }
 
-    await soClient.update<PackageConfigSOAttributes>(SAVED_OBJECT_TYPE, id, {
-      ...packageConfig,
-      revision: oldPackageConfig.revision + 1,
-      updated_at: new Date().toISOString(),
-      updated_by: options?.user?.username ?? 'system',
-    });
+    await soClient.update<PackageConfigSOAttributes>(
+      SAVED_OBJECT_TYPE,
+      id,
+      {
+        ...restOfPackageConfig,
+        revision: oldPackageConfig.revision + 1,
+        updated_at: new Date().toISOString(),
+        updated_by: options?.user?.username ?? 'system',
+      },
+      {
+        version,
+      }
+    );
 
     // Bump revision of associated agent config
     await agentConfigService.bumpRevision(soClient, packageConfig.config_id, {

@@ -52,7 +52,6 @@ function getDefaultEmbeddablepaPanelConfig(jobIds: JobId[]) {
 interface AddToDashboardControlProps {
   jobIds: JobId[];
   viewBy: string;
-  limit: number;
   onClose: (callback?: () => Promise<any>) => void;
 }
 
@@ -63,7 +62,6 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
   onClose,
   jobIds,
   viewBy,
-  limit,
 }) => {
   const {
     notifications: { toasts },
@@ -141,7 +139,6 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
               jobIds,
               swimlaneType,
               viewBy,
-              limit,
             },
           };
         }
@@ -206,8 +203,8 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
     {
       id: SWIMLANE_TYPE.VIEW_BY,
       label: i18n.translate('xpack.ml.explorer.viewByFieldLabel', {
-        defaultMessage: 'View by {viewByField}, up to {limit} rows',
-        values: { viewByField: viewBy, limit },
+        defaultMessage: 'View by {viewByField}',
+        values: { viewByField: viewBy },
       }),
     },
   ];

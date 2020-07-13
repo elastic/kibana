@@ -69,6 +69,12 @@ export const deleteDataFrameAnalyticsJobSchema = schema.object({
   deleteDestIndexPattern: schema.maybe(schema.boolean()),
 });
 
+export const dataAnalyticsJobUpdateSchema = schema.object({
+  description: schema.maybe(schema.string()),
+  model_memory_limit: schema.maybe(schema.string()),
+  allow_lazy_start: schema.maybe(schema.boolean()),
+});
+
 export const stopsDataFrameAnalyticsJobQuerySchema = schema.object({
   force: schema.maybe(schema.boolean()),
 });

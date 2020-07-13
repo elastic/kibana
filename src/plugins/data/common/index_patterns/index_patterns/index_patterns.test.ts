@@ -53,6 +53,7 @@ describe('IndexPatterns', () => {
           Array<SavedObject<any>>
         >
     );
+    savedObjectsClient.delete = jest.fn(() => Promise.resolve({}) as Promise<any>);
 
     indexPatterns = new IndexPatternsService({
       uiSettings: ({
@@ -97,5 +98,14 @@ describe('IndexPatterns', () => {
     await indexPatterns.getTitles(true);
     await indexPatterns.getFields(['id', 'title'], true);
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(3);
+  });
+
+  test('deletes the index pattern', async () => {
+    const id = '1';
+    const indexPattern = await indexPatterns.get(id);
+
+    expect(indexPattern).toBeDefined();
+    await indexPatterns.delete(id);
+    expect(indexPattern).not.toBe(await indexPatterns.get(id));
   });
 });

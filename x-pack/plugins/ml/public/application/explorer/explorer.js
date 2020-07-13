@@ -12,8 +12,6 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 
 import {
   EuiFlexGroup,
@@ -27,6 +25,7 @@ import {
   EuiPageHeaderSection,
   EuiSpacer,
   EuiTitle,
+  EuiLoadingContent,
 } from '@elastic/eui';
 
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
@@ -36,12 +35,10 @@ import { DatePickerWrapper } from '../components/navigation_menu/date_picker_wra
 import { InfluencersList } from '../components/influencers_list';
 import { explorerService } from './explorer_dashboard_service';
 import { AnomalyResultsViewSelector } from '../components/anomaly_results_view_selector';
-import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 import { NavigationMenu } from '../components/navigation_menu';
 import { CheckboxShowCharts } from '../components/controls/checkbox_showcharts';
 import { JobSelector } from '../components/job_selector';
 import { SelectInterval } from '../components/controls/select_interval/select_interval';
-import { limit$ } from './select_limit/select_limit';
 import { SelectSeverity } from '../components/controls/select_severity/select_severity';
 import {
   ExplorerQueryBar,
@@ -142,19 +139,6 @@ export class Explorer extends React.Component {
 
   state = { filterIconTriggeredQuery: undefined, language: DEFAULT_QUERY_LANG };
 
-  _unsubscribeAll = new Subject();
-
-  componentDidMount() {
-    limit$.pipe(takeUntil(this._unsubscribeAll)).subscribe(explorerService.setSwimlaneLimit);
-  }
-
-  componentWillUnmount() {
-    this._unsubscribeAll.next();
-    this._unsubscribeAll.complete();
-  }
-
-  viewByChangeHandler = (e) => explorerService.setViewBySwimlaneFieldName(e.target.value);
-
   // Escape regular parens from fieldName as that portion of the query is not wrapped in double quotes
   // and will cause a syntax error when called with getKqlQueryValues
   applyFilter = (fieldName, fieldValue, action) => {
@@ -240,29 +224,7 @@ export class Explorer extends React.Component {
     const noJobsFound = selectedJobs === null || selectedJobs.length === 0;
     const hasResults = overallSwimlaneData.points && overallSwimlaneData.points.length > 0;
 
-    if (loading === true) {
-      return (
-        <ExplorerPage
-          jobSelectorProps={jobSelectorProps}
-          noInfluencersConfigured={noInfluencersConfigured}
-          influencers={influencers}
-          filterActive={filterActive}
-          filterPlaceHolder={filterPlaceHolder}
-          filterIconTriggeredQuery={this.state.filterIconTriggeredQuery}
-          indexPattern={indexPattern}
-          queryString={queryString}
-          updateLanguage={this.updateLanguage}
-        >
-          <LoadingIndicator
-            label={i18n.translate('xpack.ml.explorer.loadingLabel', {
-              defaultMessage: 'Loading',
-            })}
-          />
-        </ExplorerPage>
-      );
-    }
-
-    if (noJobsFound) {
+    if (noJobsFound && !loading) {
       return (
         <ExplorerPage jobSelectorProps={jobSelectorProps}>
           <ExplorerNoJobsFound />
@@ -270,7 +232,7 @@ export class Explorer extends React.Component {
       );
     }
 
-    if (noJobsFound && hasResults === false) {
+    if (noJobsFound && hasResults === false && !loading) {
       return (
         <ExplorerPage jobSelectorProps={jobSelectorProps}>
           <ExplorerNoResultsFound />
@@ -320,7 +282,11 @@ export class Explorer extends React.Component {
                   />
                 </h2>
               </EuiTitle>
-              <InfluencersList influencers={influencers} influencerFilter={this.applyFilter} />
+              {loading ? (
+                <EuiLoadingContent lines={10} />
+              ) : (
+                <InfluencersList influencers={influencers} influencerFilter={this.applyFilter} />
+              )}
             </div>
           )}
 
@@ -352,59 +318,59 @@ export class Explorer extends React.Component {
               </>
             )}
 
-            <EuiTitle className="panel-title">
-              <h2>
-                <FormattedMessage
-                  id="xpack.ml.explorer.anomaliesTitle"
-                  defaultMessage="Anomalies"
+            {loading === false && (
+              <>
+                <EuiTitle className="panel-title">
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.ml.explorer.anomaliesTitle"
+                      defaultMessage="Anomalies"
+                    />
+                  </h2>
+                </EuiTitle>
+                <EuiFlexGroup
+                  direction="row"
+                  gutterSize="l"
+                  responsive={true}
+                  className="ml-anomalies-controls"
+                >
+                  <EuiFlexItem grow={false} style={{ width: '170px' }}>
+                    <EuiFormRow
+                      label={i18n.translate('xpack.ml.explorer.severityThresholdLabel', {
+                        defaultMessage: 'Severity threshold',
+                      })}
+                    >
+                      <SelectSeverity />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false} style={{ width: '170px' }}>
+                    <EuiFormRow
+                      label={i18n.translate('xpack.ml.explorer.intervalLabel', {
+                        defaultMessage: 'Interval',
+                      })}
+                    >
+                      <SelectInterval />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                  {chartsData.seriesToPlot.length > 0 && selectedCells !== undefined && (
+                    <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
+                      <EuiFormRow label="&#8203;">
+                        <CheckboxShowCharts />
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+                <EuiSpacer size="m" />
+                <div className="euiText explorer-charts">
+                  {showCharts && <ExplorerChartsContainer {...{ ...chartsData, severity }} />}
+                </div>
+                <AnomaliesTable
+                  bounds={bounds}
+                  tableData={tableData}
+                  influencerFilter={this.applyFilter}
                 />
-              </h2>
-            </EuiTitle>
-
-            <EuiFlexGroup
-              direction="row"
-              gutterSize="l"
-              responsive={true}
-              className="ml-anomalies-controls"
-            >
-              <EuiFlexItem grow={false} style={{ width: '170px' }}>
-                <EuiFormRow
-                  label={i18n.translate('xpack.ml.explorer.severityThresholdLabel', {
-                    defaultMessage: 'Severity threshold',
-                  })}
-                >
-                  <SelectSeverity />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} style={{ width: '170px' }}>
-                <EuiFormRow
-                  label={i18n.translate('xpack.ml.explorer.intervalLabel', {
-                    defaultMessage: 'Interval',
-                  })}
-                >
-                  <SelectInterval />
-                </EuiFormRow>
-              </EuiFlexItem>
-              {chartsData.seriesToPlot.length > 0 && selectedCells !== undefined && (
-                <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
-                  <EuiFormRow label="&#8203;">
-                    <CheckboxShowCharts />
-                  </EuiFormRow>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-
-            <EuiSpacer size="m" />
-
-            <div className="euiText explorer-charts">
-              {showCharts && <ExplorerChartsContainer {...{ ...chartsData, severity }} />}
-            </div>
-
-            <AnomaliesTable
-              bounds={bounds}
-              tableData={tableData}
-              influencerFilter={this.applyFilter}
-            />
+              </>
+            )}
           </div>
         </div>
       </ExplorerPage>

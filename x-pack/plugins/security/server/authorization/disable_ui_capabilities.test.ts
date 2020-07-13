@@ -50,7 +50,7 @@ describe('usingPrivileges', () => {
           new Feature({
             id: 'fooFeature',
             name: 'Foo Feature',
-            app: [],
+            app: ['fooApp'],
             navLinkId: 'foo',
             privileges: null,
           }),
@@ -63,6 +63,7 @@ describe('usingPrivileges', () => {
         Object.freeze({
           navLinks: {
             foo: true,
+            fooApp: true,
             bar: true,
           },
           management: {
@@ -85,6 +86,7 @@ describe('usingPrivileges', () => {
       expect(result).toEqual({
         navLinks: {
           foo: false,
+          fooApp: false,
           bar: true,
         },
         management: {

@@ -12,6 +12,7 @@ import { ScopedHistory } from 'kibana/public';
 
 import { SectionLoading, ComponentTemplateDeserialized } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_LIST_LOAD } from '../constants';
+import { attemptToDecodeURI } from '../lib';
 import { useComponentTemplatesContext } from '../component_templates_context';
 import { ComponentTemplateDetailsFlyout } from '../component_template_details';
 import { EmptyPrompt } from './empty_prompt';
@@ -34,18 +35,28 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
 
   const [componentTemplatesToDelete, setComponentTemplatesToDelete] = useState<string[]>([]);
 
-  const goToList = () => {
-    return history.push('component_templates');
+  const goToComponentTemplateList = () => {
+    return history.push({
+      pathname: 'component_templates',
+    });
+  };
+
+  const goToEditComponentTemplate = (name: string) => {
+    return history.push({
+      pathname: encodeURI(`edit_component_template/${encodeURIComponent(name)}`),
+    });
+  };
+
+  const goToCloneComponentTemplate = (name: string) => {
+    return history.push({
+      pathname: encodeURI(`create_component_template/${encodeURIComponent(name)}`),
+    });
   };
 
   // Track component loaded
   useEffect(() => {
     trackMetric('loaded', UIM_COMPONENT_TEMPLATE_LIST_LOAD);
   }, [trackMetric]);
-
-  if (data && data.length === 0) {
-    return <EmptyPrompt />;
-  }
 
   let content: React.ReactNode;
 
@@ -64,9 +75,13 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
         componentTemplates={data}
         onReloadClick={sendRequest}
         onDeleteClick={setComponentTemplatesToDelete}
+        onEditClick={goToEditComponentTemplate}
+        onCloneClick={goToCloneComponentTemplate}
         history={history as ScopedHistory}
       />
     );
+  } else if (data && data.length === 0) {
+    content = <EmptyPrompt history={history} />;
   } else if (error) {
     content = <LoadError onReloadClick={sendRequest} />;
   }
@@ -83,7 +98,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
               // refetch the component templates
               sendRequest();
               // go back to list view (if deleted from details flyout)
-              goToList();
+              goToComponentTemplateList();
             }
             setComponentTemplatesToDelete([]);
           }}
@@ -94,9 +109,25 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
       {/* details flyout */}
       {componentTemplateName && (
         <ComponentTemplateDetailsFlyout
-          onClose={goToList}
+          onClose={goToComponentTemplateList}
           componentTemplateName={componentTemplateName}
           actions={[
+            {
+              name: i18n.translate('xpack.idxMgmt.componentTemplateDetails.editButtonLabel', {
+                defaultMessage: 'Edit',
+              }),
+              icon: 'pencil',
+              handleActionClick: () =>
+                goToEditComponentTemplate(attemptToDecodeURI(componentTemplateName)),
+            },
+            {
+              name: i18n.translate('xpack.idxMgmt.componentTemplateDetails.cloneActionLabel', {
+                defaultMessage: 'Clone',
+              }),
+              icon: 'copy',
+              handleActionClick: () =>
+                goToCloneComponentTemplate(attemptToDecodeURI(componentTemplateName)),
+            },
             {
               name: i18n.translate('xpack.idxMgmt.componentTemplateDetails.deleteButtonLabel', {
                 defaultMessage: 'Delete',
@@ -106,7 +137,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
                 details._kbnMeta.usedBy.length > 0,
               closePopoverOnClick: true,
               handleActionClick: () => {
-                setComponentTemplatesToDelete([componentTemplateName]);
+                setComponentTemplatesToDelete([attemptToDecodeURI(componentTemplateName)]);
               },
             },
           ]}

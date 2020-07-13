@@ -560,7 +560,7 @@ function calculateChartRange(
   // Calculate the time range for the charts.
   // Fit in as many points in the available container width plotted at the job bucket span.
   const midpointMs = Math.ceil((earliestMs + latestMs) / 2);
-  const maxBucketSpanMs = Math.max.apply(null, _.pluck(seriesConfigs, 'bucketSpanSeconds')) * 1000;
+  const maxBucketSpanMs = Math.max.apply(null, _.map(seriesConfigs, 'bucketSpanSeconds')) * 1000;
 
   const pointsToPlotFullSelection = Math.ceil((latestMs - earliestMs) / maxBucketSpanMs);
 

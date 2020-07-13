@@ -51,14 +51,14 @@ export const OverviewDatastreamSection: React.FC = () => {
             <h2>
               <FormattedMessage
                 id="xpack.ingestManager.overviewPageDataStreamsPanelTitle"
-                defaultMessage="Data streams"
+                defaultMessage="Datasets"
               />
             </h2>
           </EuiTitle>
           <EuiButtonEmpty size="xs" flush="right" href={getHref('data_streams')}>
             <FormattedMessage
               id="xpack.ingestManager.overviewPageDataStreamsPanelAction"
-              defaultMessage="View data streams"
+              defaultMessage="View datasets"
             />
           </EuiButtonEmpty>
         </header>
@@ -70,7 +70,7 @@ export const OverviewDatastreamSection: React.FC = () => {
               <EuiDescriptionListTitle>
                 <FormattedMessage
                   id="xpack.ingestManager.overviewDatastreamTotalTitle"
-                  defaultMessage="Data streams"
+                  defaultMessage="Datasets"
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>

@@ -436,7 +436,7 @@ We are still to develop a proper process to accept any contributed translations.
 
 When writing a new component, create a sibling SASS file of the same name and import directly into the JS/TS component file. Doing so ensures the styles are never separated or lost on import and allows for better modularization (smaller individual plugin asset footprint).
 
-Any JavaScript (or TypeScript) file that imports SASS (.scss) files will automatically build with the [EUI](https://elastic.github.io/eui/#/guidelines/sass) & Kibana invisibles (SASS variables, mixins, functions) from the [`styling_constants.scss` file](https://github.com/elastic/kibana/blob/master/src/legacy/ui/public/styles/_styling_constants.scss). However, any Legacy (file path includes `/legacy`) files will not.
+All SASS (.scss) files will automatically build with the [EUI](https://elastic.github.io/eui/#/guidelines/sass) & Kibana invisibles (SASS variables, mixins, functions) from the [`globals_[theme].scss` file](src/legacy/ui/public/styles/_globals_v7light.scss).
 
 **Example:**
 
@@ -679,15 +679,15 @@ Part of this process only applies to maintainers, since it requires access to Gi
 Kibana publishes [Release Notes](https://www.elastic.co/guide/en/kibana/current/release-notes.html) for major and minor releases. The Release Notes summarize what the PRs accomplish in language that is meaningful to users. To generate the Release Notes, the team runs a script against this repo to collect the merged PRs against the release.
 
 #### Create the Release Notes text
-The text that appears in the Release Notes is pulled directly from your PR title, or a single paragraph of text that you specify in the PR description. 
+The text that appears in the Release Notes is pulled directly from your PR title, or a single paragraph of text that you specify in the PR description.
 
 To use a single paragraph of text, enter `Release note:` or a `## Release note` header in the PR description, followed by your text. For example, refer to this [PR](https://github.com/elastic/kibana/pull/65796) that uses the `## Release note` header.
 
 When you create the Release Notes text, use the following best practices:
-* Use present tense. 
+* Use present tense.
 * Use sentence case.
 * When you create a feature PR, start with `Adds`.
-* When you create an enhancement PR, start with `Improves`. 
+* When you create an enhancement PR, start with `Improves`.
 * When you create a bug fix PR, start with `Fixes`.
 * When you create a deprecation PR, start with `Deprecates`.
 

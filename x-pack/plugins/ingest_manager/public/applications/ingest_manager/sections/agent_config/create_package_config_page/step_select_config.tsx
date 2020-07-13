@@ -9,6 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSelectable, EuiSpacer, EuiTextColor } from '@elastic/eui';
 import { Error } from '../../../components';
 import { AgentConfig, PackageInfo, GetAgentConfigsResponseItem } from '../../../types';
+import { isPackageLimited, doesAgentConfigAlreadyIncludePackage } from '../../../services';
 import { useGetPackageInfoByKey, useGetAgentConfigs, sendGetOneAgentConfig } from '../../../hooks';
 
 export const StepSelectConfig: React.FunctionComponent<{
@@ -24,14 +25,25 @@ export const StepSelectConfig: React.FunctionComponent<{
   const [selectedConfigError, setSelectedConfigError] = useState<Error>();
 
   // Fetch package info
-  const { data: packageInfoData, error: packageInfoError } = useGetPackageInfoByKey(pkgkey);
+  const {
+    data: packageInfoData,
+    error: packageInfoError,
+    isLoading: packageInfoLoading,
+  } = useGetPackageInfoByKey(pkgkey);
+  const isLimitedPackage = (packageInfoData && isPackageLimited(packageInfoData.response)) || false;
 
   // Fetch agent configs info
   const {
     data: agentConfigsData,
     error: agentConfigsError,
     isLoading: isAgentConfigsLoading,
-  } = useGetAgentConfigs();
+  } = useGetAgentConfigs({
+    page: 1,
+    perPage: 1000,
+    sortField: 'name',
+    sortOrder: 'asc',
+    full: true,
+  });
   const agentConfigs = agentConfigsData?.items || [];
   const agentConfigsById = agentConfigs.reduce(
     (acc: { [key: string]: GetAgentConfigsResponseItem }, config) => {
@@ -107,12 +119,18 @@ export const StepSelectConfig: React.FunctionComponent<{
           searchable
           allowExclusions={false}
           singleSelection={true}
-          isLoading={isAgentConfigsLoading}
-          options={agentConfigs.map(({ id, name, description }) => {
+          isLoading={isAgentConfigsLoading || packageInfoLoading}
+          options={agentConfigs.map((agentConf) => {
+            const alreadyHasLimitedPackage =
+              (isLimitedPackage &&
+                packageInfoData &&
+                doesAgentConfigAlreadyIncludePackage(agentConf, packageInfoData.response.name)) ||
+              false;
             return {
-              label: name,
-              key: id,
-              checked: selectedConfigId === id ? 'on' : undefined,
+              label: agentConf.name,
+              key: agentConf.id,
+              checked: selectedConfigId === agentConf.id ? 'on' : undefined,
+              disabled: alreadyHasLimitedPackage,
               'data-test-subj': 'agentConfigItem',
             };
           })}

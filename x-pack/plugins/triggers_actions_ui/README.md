@@ -1295,6 +1295,7 @@ Then this dependencies will be used to embed Actions form or register your own a
           defaultActionMessage={'Alert [{{ctx.metadata.name}}] has exceeded the threshold'}
           actionTypes={ALOWED_BY_PLUGIN_ACTION_TYPES}
           toastNotifications={toastNotifications}
+          consumer={initialAlert.consumer}
         />
    );
  };
@@ -1317,6 +1318,7 @@ interface ActionAccordionFormProps {
   actionTypes?: ActionType[];
   messageVariables?: string[];
   defaultActionMessage?: string;
+  consumer: string;
 }
 
 ```
@@ -1334,6 +1336,7 @@ interface ActionAccordionFormProps {
 |actionTypes|Optional property, which allowes to define a list of available actions specific for a current plugin.|
 |actionTypes|Optional property, which allowes to define a list of variables for action 'message' property.|
 |defaultActionMessage|Optional property, which allowes to define a message value for action with 'message' property.|
+|consumer|Name of the plugin that creates an action.|
 
 
 AlertsContextProvider value options:
@@ -1425,7 +1428,7 @@ const connector = {
           toastNotifications: toastNotifications,
           actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
           capabilities: capabilities,
-          docLinks, 
+          docLinks,
         }}
       >
         <ConnectorAddFlyout
@@ -1469,6 +1472,7 @@ export interface ActionsConnectorsContextValue {
   capabilities: ApplicationStart['capabilities'];
   docLinks: DocLinksStart;
   reloadConnectors?: () => Promise<void>;
+  consumer: string;
 }
 ```
 
@@ -1479,6 +1483,7 @@ export interface ActionsConnectorsContextValue {
 |capabilities|Property, which is defining action current user usage capabilities like canSave or canDelete.|
 |toastNotifications|Toast messages.|
 |reloadConnectors|Optional function, which will be executed if connector was saved sucsessfuly, like reload list of connecotrs.|
+|consumer|Optional name of the plugin that creates an action.|
 
 
 ## Embed the Edit Connector flyout within any Kibana plugin

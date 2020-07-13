@@ -113,76 +113,244 @@ Object {
 `;
 
 exports[`services queries fetches the service items 1`] = `
-Object {
-  "body": Object {
-    "aggs": Object {
-      "services": Object {
-        "aggs": Object {
-          "agents": Object {
-            "terms": Object {
-              "field": "agent.name",
-              "size": 1,
-            },
-          },
-          "avg": Object {
-            "avg": Object {
-              "field": "transaction.duration.us",
-            },
-          },
-          "environments": Object {
-            "terms": Object {
-              "field": "service.environment",
-            },
-          },
-          "events": Object {
-            "terms": Object {
-              "field": "processor.event",
-            },
-          },
-        },
-        "terms": Object {
-          "field": "service.name",
-          "size": 500,
-        },
-      },
-    },
-    "query": Object {
-      "bool": Object {
-        "filter": Array [
-          Object {
-            "terms": Object {
-              "processor.event": Array [
-                "transaction",
-                "error",
-                "metric",
-              ],
-            },
-          },
-          Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+Array [
+  Object {
+    "body": Object {
+      "aggs": Object {
+        "services": Object {
+          "aggs": Object {
+            "average": Object {
+              "avg": Object {
+                "field": "transaction.duration.us",
               },
             },
           },
-          Object {
-            "term": Object {
-              "my.custom.ui.filter": "foo-bar",
-            },
+          "terms": Object {
+            "field": "service.name",
+            "size": 500,
           },
-        ],
+        },
       },
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
+              },
+            },
+            Object {
+              "term": Object {
+                "my.custom.ui.filter": "foo-bar",
+              },
+            },
+            Object {
+              "term": Object {
+                "processor.event": "transaction",
+              },
+            },
+          ],
+        },
+      },
+      "size": 0,
     },
+    "index": "myIndex",
     "size": 0,
   },
-  "index": Array [
-    "myIndex",
-    "myIndex",
-    "myIndex",
-  ],
-}
+  Object {
+    "body": Object {
+      "aggs": Object {
+        "services": Object {
+          "aggs": Object {
+            "agent_name": Object {
+              "top_hits": Object {
+                "_source": Array [
+                  "agent.name",
+                ],
+                "size": 1,
+              },
+            },
+          },
+          "terms": Object {
+            "field": "service.name",
+            "size": 500,
+          },
+        },
+      },
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
+              },
+            },
+            Object {
+              "term": Object {
+                "my.custom.ui.filter": "foo-bar",
+              },
+            },
+            Object {
+              "terms": Object {
+                "processor.event": Array [
+                  "metric",
+                  "error",
+                  "transaction",
+                ],
+              },
+            },
+          ],
+        },
+      },
+      "size": 0,
+    },
+    "index": Array [
+      "myIndex",
+      "myIndex",
+      "myIndex",
+    ],
+  },
+  Object {
+    "body": Object {
+      "aggs": Object {
+        "services": Object {
+          "terms": Object {
+            "field": "service.name",
+            "size": 500,
+          },
+        },
+      },
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
+              },
+            },
+            Object {
+              "term": Object {
+                "my.custom.ui.filter": "foo-bar",
+              },
+            },
+            Object {
+              "term": Object {
+                "processor.event": "transaction",
+              },
+            },
+          ],
+        },
+      },
+      "size": 0,
+    },
+    "index": "myIndex",
+  },
+  Object {
+    "body": Object {
+      "aggs": Object {
+        "services": Object {
+          "terms": Object {
+            "field": "service.name",
+            "size": 500,
+          },
+        },
+      },
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
+              },
+            },
+            Object {
+              "term": Object {
+                "my.custom.ui.filter": "foo-bar",
+              },
+            },
+            Object {
+              "term": Object {
+                "processor.event": "error",
+              },
+            },
+          ],
+        },
+      },
+      "size": 0,
+    },
+    "index": "myIndex",
+  },
+  Object {
+    "body": Object {
+      "aggs": Object {
+        "services": Object {
+          "aggs": Object {
+            "environments": Object {
+              "terms": Object {
+                "field": "service.environment",
+              },
+            },
+          },
+          "terms": Object {
+            "field": "service.name",
+            "size": 500,
+          },
+        },
+      },
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
+              },
+            },
+            Object {
+              "term": Object {
+                "my.custom.ui.filter": "foo-bar",
+              },
+            },
+            Object {
+              "terms": Object {
+                "processor.event": Array [
+                  "transaction",
+                  "error",
+                  "metric",
+                ],
+              },
+            },
+          ],
+        },
+      },
+      "size": 0,
+    },
+    "index": Array [
+      "myIndex",
+      "myIndex",
+      "myIndex",
+    ],
+  },
+]
 `;
 
 exports[`services queries fetches the service transaction types 1`] = `

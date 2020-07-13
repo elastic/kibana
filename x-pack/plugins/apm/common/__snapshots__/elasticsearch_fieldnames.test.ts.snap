@@ -8,6 +8,12 @@ exports[`Error CLIENT_GEO 1`] = `undefined`;
 
 exports[`Error CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
+exports[`Error CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
+
+exports[`Error CLOUD_PROVIDER 1`] = `"gcp"`;
+
+exports[`Error CLOUD_REGION 1`] = `"europe-west1"`;
+
 exports[`Error CONTAINER_ID 1`] = `undefined`;
 
 exports[`Error DESTINATION_ADDRESS 1`] = `undefined`;
@@ -146,6 +152,12 @@ exports[`Span CLIENT_GEO 1`] = `undefined`;
 
 exports[`Span CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
+exports[`Span CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
+
+exports[`Span CLOUD_PROVIDER 1`] = `"gcp"`;
+
+exports[`Span CLOUD_REGION 1`] = `"europe-west1"`;
+
 exports[`Span CONTAINER_ID 1`] = `undefined`;
 
 exports[`Span DESTINATION_ADDRESS 1`] = `undefined`;
@@ -283,6 +295,12 @@ exports[`Transaction AGENT_VERSION 1`] = `"agent version"`;
 exports[`Transaction CLIENT_GEO 1`] = `undefined`;
 
 exports[`Transaction CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
+
+exports[`Transaction CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
+
+exports[`Transaction CLOUD_PROVIDER 1`] = `"gcp"`;
+
+exports[`Transaction CLOUD_REGION 1`] = `"europe-west1"`;
 
 exports[`Transaction CONTAINER_ID 1`] = `"container1234567890abcdef"`;
 

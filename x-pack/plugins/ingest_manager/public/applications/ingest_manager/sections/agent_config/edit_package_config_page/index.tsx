@@ -16,7 +16,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { AgentConfig, PackageInfo, NewPackageConfig } from '../../../types';
+import { AgentConfig, PackageInfo, UpdatePackageConfig } from '../../../types';
 import {
   useLink,
   useBreadcrumbs,
@@ -72,7 +72,7 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
   const [loadingError, setLoadingError] = useState<Error>();
   const [agentConfig, setAgentConfig] = useState<AgentConfig>();
   const [packageInfo, setPackageInfo] = useState<PackageInfo>();
-  const [packageConfig, setPackageConfig] = useState<NewPackageConfig>({
+  const [packageConfig, setPackageConfig] = useState<UpdatePackageConfig>({
     name: '',
     description: '',
     namespace: '',
@@ -80,6 +80,7 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
     enabled: true,
     output_id: '',
     inputs: [],
+    version: '',
   });
 
   // Retrieve agent config, package, and package config info
@@ -160,7 +161,7 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
   // Update package config method
-  const updatePackageConfig = (updatedFields: Partial<NewPackageConfig>) => {
+  const updatePackageConfig = (updatedFields: Partial<UpdatePackageConfig>) => {
     const newPackageConfig = {
       ...packageConfig,
       ...updatedFields,
@@ -178,7 +179,7 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
     }
   };
 
-  const updatePackageConfigValidation = (newPackageConfig?: NewPackageConfig) => {
+  const updatePackageConfigValidation = (newPackageConfig?: UpdatePackageConfig) => {
     if (packageInfo) {
       const newValidationResult = validatePackageConfig(
         newPackageConfig || packageConfig,
@@ -234,9 +235,31 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
             : undefined,
       });
     } else {
-      notifications.toasts.addError(error, {
-        title: 'Error',
-      });
+      if (error.statusCode === 409) {
+        notifications.toasts.addError(error, {
+          title: i18n.translate('xpack.ingestManager.editPackageConfig.failedNotificationTitle', {
+            defaultMessage: `Error updating '{packageConfigName}'`,
+            values: {
+              packageConfigName: packageConfig.name,
+            },
+          }),
+          toastMessage: i18n.translate(
+            'xpack.ingestManager.editPackageConfig.failedConflictNotificationMessage',
+            {
+              defaultMessage: `Data is out of date. Refresh the page to get the latest configuration.`,
+            }
+          ),
+        });
+      } else {
+        notifications.toasts.addError(error, {
+          title: i18n.translate('xpack.ingestManager.editPackageConfig.failedNotificationTitle', {
+            defaultMessage: `Error updating '{packageConfigName}'`,
+            values: {
+              packageConfigName: packageConfig.name,
+            },
+          }),
+        });
+      }
       setFormState('VALID');
     }
   };

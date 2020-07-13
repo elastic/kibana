@@ -27,6 +27,7 @@ const appDependencies = {
   trackMetric: () => {},
   docLinks: docLinksServiceMock.createStartContract(),
   toasts: notificationServiceMock.createSetupContract().toasts,
+  setBreadcrumbs: () => {},
 };
 
 export const setupEnvironment = () => {

@@ -14,6 +14,12 @@ export { useImportList } from './lists/hooks/use_import_list';
 export { useDeleteList } from './lists/hooks/use_delete_list';
 export { useExportList } from './lists/hooks/use_export_list';
 export {
+  addExceptionListItem,
+  updateExceptionListItem,
+  fetchExceptionListById,
+  addExceptionList,
+} from './exceptions/api';
+export {
   ExceptionList,
   ExceptionIdentifiers,
   Pagination,

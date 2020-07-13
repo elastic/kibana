@@ -27,15 +27,6 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { APP_ID } from '../../../../../common/constants';
 import { getCaseDetailsUrl } from '../../../../common/components/link_to';
 
-type CreateTimeline = ({
-  id,
-  show,
-  timelineType,
-}: {
-  id: string;
-  show?: boolean;
-  timelineType?: TimelineTypeLiteral;
-}) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
 type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
@@ -43,7 +34,6 @@ type ToggleLock = ({ linkToId }: { linkToId: InputsModelId }) => void;
 
 interface Props {
   associateNote: AssociateNote;
-  createTimeline: CreateTimeline;
   description: string;
   getNotesByIds: (noteIds: string[]) => Note[];
   graphEventId?: string;
@@ -78,7 +68,6 @@ const settingsWidth = 55;
 export const Properties = React.memo<Props>(
   ({
     associateNote,
-    createTimeline,
     description,
     getNotesByIds,
     graphEventId,

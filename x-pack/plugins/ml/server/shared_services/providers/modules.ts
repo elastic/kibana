@@ -5,8 +5,13 @@
  */
 
 import { LegacyAPICaller, KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import { TypeOf } from '@kbn/config-schema';
 import { DataRecognizer } from '../../models/data_recognizer';
 import { SharedServicesChecks } from '../shared_services';
+import { moduleIdParamSchema, setupModuleBodySchema } from '../../routes/schemas/modules';
+
+export type ModuleSetupPayload = TypeOf<typeof moduleIdParamSchema> &
+  TypeOf<typeof setupModuleBodySchema>;
 
 export interface ModulesProvider {
   modulesProvider(
@@ -17,7 +22,7 @@ export interface ModulesProvider {
     recognize: DataRecognizer['findMatches'];
     getModule: DataRecognizer['getModule'];
     listModules: DataRecognizer['listModules'];
-    setupModuleItems: DataRecognizer['setupModuleItems'];
+    setup(payload: ModuleSetupPayload): ReturnType<DataRecognizer['setup']>;
   };
 }
 
@@ -52,11 +57,24 @@ export function getModulesProvider({
 
           return dr.listModules();
         },
-        async setupModuleItems(...args) {
+        async setup(payload: ModuleSetupPayload) {
           isFullLicense();
           await hasMlCapabilities(['canCreateJob']);
 
-          return dr.setupModuleItems(...args);
+          return dr.setup(
+            payload.moduleId,
+            payload.prefix,
+            payload.groups,
+            payload.indexPatternName,
+            payload.query,
+            payload.useDedicatedIndex,
+            payload.startDatafeed,
+            payload.start,
+            payload.end,
+            payload.jobOverrides,
+            payload.datafeedOverrides,
+            payload.estimateModelMemory
+          );
         },
       };
     },

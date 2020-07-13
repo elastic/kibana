@@ -8,6 +8,7 @@ import {
   ComponentTemplateFromEs,
   ComponentTemplateDeserialized,
   ComponentTemplateListItem,
+  ComponentTemplateSerialized,
 } from '../types';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
@@ -83,4 +84,16 @@ export function deserializeComponenTemplateList(
   };
 
   return componentTemplateListItem;
+}
+
+export function serializeComponentTemplate(
+  componentTemplateDeserialized: ComponentTemplateDeserialized
+): ComponentTemplateSerialized {
+  const { version, template, _meta } = componentTemplateDeserialized;
+
+  return {
+    version,
+    template,
+    _meta,
+  };
 }

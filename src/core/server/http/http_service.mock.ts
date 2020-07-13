@@ -104,7 +104,7 @@ const createInternalSetupContractMock = () => {
   mock.createRouter.mockImplementation(() => mockRouter.create());
   mock.getAuthHeaders.mockReturnValue({ authorization: 'authorization-header' });
   mock.getServerInfo.mockReturnValue({
-    host: 'localhost',
+    hostname: 'localhost',
     name: 'kibana',
     port: 80,
     protocol: 'http',

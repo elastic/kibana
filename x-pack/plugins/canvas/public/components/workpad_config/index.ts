@@ -17,12 +17,12 @@ const mapStateToProps = (state: State) => {
   const workpad = getWorkpad(state);
 
   return {
-    name: get<string>(workpad, 'name'),
+    name: get(workpad, 'name'),
     size: {
-      width: get<number>(workpad, 'width'),
-      height: get<number>(workpad, 'height'),
+      width: get(workpad, 'width'),
+      height: get(workpad, 'height'),
     },
-    css: get<string>(workpad, 'css', DEFAULT_WORKPAD_CSS),
+    css: get(workpad, 'css', DEFAULT_WORKPAD_CSS),
   };
 };
 

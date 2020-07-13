@@ -314,7 +314,7 @@ export const CreatePackageConfigPage: React.FunctionComponent = () => {
       title: i18n.translate(
         'xpack.ingestManager.createPackageConfig.stepDefinePackageConfigTitle',
         {
-          defaultMessage: 'Define your integration',
+          defaultMessage: 'Configure integration',
         }
       ),
       status: !packageInfo || !agentConfig ? 'disabled' : undefined,

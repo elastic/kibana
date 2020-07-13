@@ -47,7 +47,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
   const [advancedParamErrors, setAdvancedParamErrors] = useState<AdvancedParamErrors>({});
   const [fetchingAdvancedParamErrors, setFetchingAdvancedParamErrors] = useState<boolean>(false);
 
-  const { setFormState } = actions;
+  const { setEstimatedModelMemoryLimit, setFormState } = actions;
   const { form, isJobCreated } = state;
   const {
     computeFeatureInfluence,
@@ -87,10 +87,15 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
   useEffect(() => {
     setFetchingAdvancedParamErrors(true);
     (async function () {
-      const { success, errorMessage } = await fetchExplainData(form);
+      const { success, errorMessage, expectedMemory } = await fetchExplainData(form);
       const paramErrors: AdvancedParamErrors = {};
 
-      if (!success) {
+      if (success) {
+        if (modelMemoryLimit !== expectedMemory) {
+          setEstimatedModelMemoryLimit(expectedMemory);
+          setFormState({ modelMemoryLimit: expectedMemory });
+        }
+      } else {
         // Check which field is invalid
         Object.values(ANALYSIS_ADVANCED_FIELDS).forEach((param) => {
           if (errorMessage.includes(`[${param}]`)) {

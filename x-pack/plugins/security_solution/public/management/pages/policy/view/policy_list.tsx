@@ -8,6 +8,8 @@ import React, { useCallback, useEffect, useMemo, CSSProperties, useState } from 
 import {
   EuiBasicTable,
   EuiText,
+  EuiTitle,
+  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTableFieldDataColumnType,
@@ -20,8 +22,9 @@ import {
   EuiOverlayMask,
   EuiConfirmModal,
   EuiCallOut,
-  EuiSpacer,
   EuiButton,
+  EuiBetaBadge,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -92,6 +95,7 @@ export const TableRowActions = React.memo<{ items: EuiContextMenuPanelProps['ite
         }
         isOpen={isOpen}
         closePopover={handleCloseMenu}
+        repositionOnScroll
       >
         <EuiContextMenuPanel items={items} data-test-subj="policyActionsMenu" />
       </EuiPopover>
@@ -390,9 +394,38 @@ export const PolicyList = React.memo(() => {
       <ManagementPageView
         viewType="list"
         data-test-subj="policyListPage"
-        headerLeft={i18n.translate('xpack.securitySolution.endpoint.policyList.viewTitle', {
-          defaultMessage: 'Policies',
-        })}
+        headerLeft={
+          <>
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="l">
+                  <h1 data-test-subj="pageViewHeaderLeftTitle">
+                    <FormattedMessage
+                      id="xpack.securitySolution.policyList.pageTitle"
+                      defaultMessage="Policies"
+                    />
+                  </h1>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  label={i18n.translate('xpack.securitySolution.endpoint.policyList.beta', {
+                    defaultMessage: 'Beta',
+                  })}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued">
+              <p>
+                <FormattedMessage
+                  id="xpack.securitySolution.policyList.pageSubTitle"
+                  defaultMessage="View and configure protections"
+                />
+              </p>
+            </EuiText>
+          </>
+        }
         headerRight={
           <EuiButton
             iconType="plusInCircle"
@@ -405,19 +438,19 @@ export const PolicyList = React.memo(() => {
             />
           </EuiButton>
         }
-        bodyHeader={
-          policyItems &&
-          policyItems.length > 0 && (
-            <EuiText color="subdued" data-test-subj="policyTotalCount">
+      >
+        {policyItems && policyItems.length > 0 && (
+          <>
+            <EuiText color="subdued" data-test-subj="policyTotalCount" size="xs">
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policyList.viewTitleTotalCount"
                 defaultMessage="{totalItemCount, plural, one {# Policy} other {# Policies}}"
                 values={{ totalItemCount }}
               />
             </EuiText>
-          )
-        }
-      >
+            <EuiHorizontalRule margin="xs" />
+          </>
+        )}
         {useMemo(() => {
           return (
             <>

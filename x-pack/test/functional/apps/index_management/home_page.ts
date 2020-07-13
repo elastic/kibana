@@ -13,8 +13,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const browser = getService('browser');
 
-  // blocking es snapshot promotion: https://github.com/elastic/kibana/issues/70532
-  describe.skip('Home page', function () {
+  describe('Home page', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('indexManagement');
     });
@@ -82,9 +81,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const url = await browser.getCurrentUrl();
         expect(url).to.contain(`/component_templates`);
 
-        // There should be no component templates by default, so we verify the empty prompt displays
-        const componentTemplateEmptyPrompt = await testSubjects.exists('emptyList');
-        expect(componentTemplateEmptyPrompt).to.be(true);
+        // Verify content. Component templates may have been created by other apps, e.g. Ingest Manager,
+        // so we don't make any assertion about the presence or absence of component templates.
+        const componentTemplateList = await testSubjects.exists('componentTemplateList');
+        expect(componentTemplateList).to.be(true);
       });
     });
   });

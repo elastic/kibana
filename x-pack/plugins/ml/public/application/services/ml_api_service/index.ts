@@ -12,7 +12,7 @@ import { annotations } from './annotations';
 import { dataFrameAnalytics } from './data_frame_analytics';
 import { filters } from './filters';
 import { resultsApiProvider } from './results';
-import { jobs } from './jobs';
+import { jobsApiProvider } from './jobs';
 import { fileDatavisualizer } from './datavisualizer';
 import { MlServerDefaults, MlServerLimits } from '../../../../common/types/ml_server_info';
 
@@ -726,7 +726,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
     dataFrameAnalytics,
     filters,
     results: resultsApiProvider(httpService),
-    jobs,
+    jobs: jobsApiProvider(httpService),
     fileDatavisualizer,
   };
 }

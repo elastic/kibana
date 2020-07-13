@@ -15,7 +15,6 @@ import {
   AreaSeries,
   BarSeries,
   Position,
-  PartialTheme,
   GeometryValue,
   XYChartSeriesIdentifier,
 } from '@elastic/charts';
@@ -36,10 +35,12 @@ import {
 } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
-import { isHorizontalChart } from './state_helpers';
+import { isHorizontalChart, getSeriesColor } from './state_helpers';
 import { parseInterval } from '../../../../../src/plugins/data/common';
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { EmptyPlaceholder } from '../shared_components';
 import { desanitizeFilterContext } from '../utils';
+import { fittingFunctionDefinitions, getFitOptions } from './fitting_functions';
 import { getAxesConfiguration } from './axes_configuration';
 
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
@@ -59,7 +60,7 @@ export interface XYRender {
 }
 
 type XYChartRenderProps = XYChartProps & {
-  chartTheme: PartialTheme;
+  chartsThemeService: ChartsPluginSetup['theme'];
   formatFactory: FormatFactory;
   timeZone: string;
   histogramBarTarget: number;
@@ -94,6 +95,13 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Configure the chart legend.',
       }),
     },
+    fittingFunction: {
+      types: ['string'],
+      options: [...fittingFunctionDefinitions.map(({ id }) => id)],
+      help: i18n.translate('xpack.lens.xyChart.fittingFunction.help', {
+        defaultMessage: 'Define how missing values are treated',
+      }),
+    },
     layers: {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       types: ['lens_xy_layer'] as any,
@@ -115,7 +123,7 @@ export const xyChart: ExpressionFunctionDefinition<
 
 export const getXyChartRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
-  chartTheme: PartialTheme;
+  chartsThemeService: ChartsPluginSetup['theme'];
   histogramBarTarget: number;
   timeZone: string;
 }): ExpressionRenderDefinition<XYChartProps> => ({
@@ -144,7 +152,7 @@ export const getXyChartRenderer = (dependencies: {
         <XYChartReportable
           {...config}
           formatFactory={formatFactory}
-          chartTheme={dependencies.chartTheme}
+          chartsThemeService={dependencies.chartsThemeService}
           timeZone={dependencies.timeZone}
           histogramBarTarget={dependencies.histogramBarTarget}
           onClickValue={onClickValue}
@@ -186,12 +194,14 @@ export function XYChart({
   args,
   formatFactory,
   timeZone,
-  chartTheme,
+  chartsThemeService,
   histogramBarTarget,
   onClickValue,
   onSelectRange,
 }: XYChartRenderProps) {
-  const { legend, layers } = args;
+  const { legend, layers, fittingFunction } = args;
+  const chartTheme = chartsThemeService.useChartsTheme();
+  const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
 
   const filteredLayers = layers.filter(({ layerId, xAccessor, accessors }) => {
     return !(
@@ -276,6 +286,7 @@ export function XYChart({
         legendPosition={legend.position}
         showLegendExtra={false}
         theme={chartTheme}
+        baseTheme={chartBaseTheme}
         tooltip={{
           headerFormatter: (d) => xAxisFormatter.convert(d.value),
         }}
@@ -430,6 +441,7 @@ export function XYChart({
             data: rows,
             xScaleType,
             yScaleType,
+            color: () => getSeriesColor(layer, accessor),
             groupId: yAxesConfiguration.find((axisConfiguration) =>
               axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
             )?.groupId,
@@ -459,7 +471,7 @@ export function XYChart({
               }
               // This handles both split and single-y cases:
               // * If split series without formatting, show the value literally
-              // * If single Y, the seriesKey will be the acccessor, so we show the human-readable name
+              // * If single Y, the seriesKey will be the accessor, so we show the human-readable name
               return splitAccessor ? d.seriesKeys[0] : columnToLabelMap[d.seriesKeys[0]] ?? '';
             },
           };
@@ -468,17 +480,29 @@ export function XYChart({
 
           switch (seriesType) {
             case 'line':
-              return <LineSeries key={index} {...seriesProps} />;
+              return (
+                <LineSeries key={index} {...seriesProps} fit={getFitOptions(fittingFunction)} />
+              );
             case 'bar':
             case 'bar_stacked':
             case 'bar_horizontal':
             case 'bar_horizontal_stacked':
               return <BarSeries key={index} {...seriesProps} />;
-            default:
+            case 'area_stacked':
               return <AreaSeries key={index} {...seriesProps} />;
+            case 'area':
+              return (
+                <AreaSeries key={index} {...seriesProps} fit={getFitOptions(fittingFunction)} />
+              );
+            default:
+              return assertNever(seriesType);
           }
         })
       )}
     </Chart>
   );
+}
+
+function assertNever(x: never): never {
+  throw new Error('Unexpected series type: ' + x);
 }

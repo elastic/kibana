@@ -9,7 +9,12 @@ import { getFoundListSchemaMock } from '../../../common/schemas/response/found_l
 import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
 import { getListResponseMock } from '../../../common/schemas/response/list_schema.mock';
 import { getCallClusterMock } from '../../../common/get_call_cluster.mock';
-import { LIST_INDEX, LIST_ITEM_INDEX } from '../../../common/constants.mock';
+import {
+  IMPORT_BUFFER_SIZE,
+  LIST_INDEX,
+  LIST_ITEM_INDEX,
+  MAX_IMPORT_PAYLOAD_BYTES,
+} from '../../../common/constants.mock';
 
 import { ListClient } from './list_client';
 
@@ -59,8 +64,10 @@ export const getListClientMock = (): ListClient => {
     callCluster: getCallClusterMock(),
     config: {
       enabled: true,
+      importBufferSize: IMPORT_BUFFER_SIZE,
       listIndex: LIST_INDEX,
       listItemIndex: LIST_ITEM_INDEX,
+      maxImportPayloadBytes: MAX_IMPORT_PAYLOAD_BYTES,
     },
     spaceId: 'default',
     user: 'elastic',

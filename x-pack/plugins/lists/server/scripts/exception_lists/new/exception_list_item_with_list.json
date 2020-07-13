@@ -12,7 +12,7 @@
       "field": "event.module",
       "operator": "excluded",
       "type": "match_any",
-      "value": ["zeek"]
+      "value": ["suricata"]
     },
     {
       "field": "source.ip",

@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
-import { AbstractESAggSource } from '../es_agg_source';
+import { AbstractESAggSource, DEFAULT_METRIC } from '../es_agg_source';
 import { indexPatterns } from '../../../../../../../src/plugins/data/public';
 import { registerSource } from '../source_registry';
 
@@ -32,7 +32,7 @@ export class ESPewPewSource extends AbstractESAggSource {
       indexPatternId: indexPatternId,
       sourceGeoField,
       destGeoField,
-      metrics: metrics ? metrics : [],
+      metrics: metrics ? metrics : [DEFAULT_METRIC],
     };
   }
 

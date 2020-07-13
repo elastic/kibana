@@ -67,7 +67,7 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/ingest_manager/fleet/agents/agent1/unenroll`)
         .set('kbn-xsrf', 'xxx')
         .send({
-          ids: ['agent1'],
+          force: true,
         })
         .expect(200);
 
@@ -80,7 +80,7 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/ingest_manager/fleet/agents/agent1/unenroll`)
         .set('kbn-xsrf', 'xxx')
         .send({
-          ids: ['agent1'],
+          force: true,
         })
         .expect(200);
 

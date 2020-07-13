@@ -37,3 +37,6 @@ Feature: RUM Dashboard
     When the user selected the breakdown
     Then breakdown series should appear in chart
 
+  Scenario: Service name filter
+    When a user changes the selected service name
+    Then it displays relevant client metrics

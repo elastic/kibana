@@ -60,6 +60,7 @@ const ServiceNameFilter = ({ serviceNames }: Props) => {
       <EuiHorizontalRule margin="none" />
       <EuiSpacer size="s" />
       <EuiSelect
+        data-cy="serviceNameFilter"
         options={options}
         value={serviceName}
         compressed={true}

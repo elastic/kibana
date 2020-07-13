@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useState } from 'react';
+import React, { FC, useState } from 'react';
 import {
   EuiButton,
   EuiCheckbox,
@@ -45,7 +45,7 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
   };
 
   return (
-    <Fragment>
+    <div data-test-subj="mlAnalyticsCreateJobWizardCreateStep active">
       {!isJobCreated && !isJobStarted && (
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>
@@ -88,6 +88,6 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
       <Messages messages={requestMessages} />
       {isJobCreated === true && showProgress && <ProgressStats jobId={jobId} />}
       {isJobCreated === true && <BackToListPanel />}
-    </Fragment>
+    </div>
   );
 };

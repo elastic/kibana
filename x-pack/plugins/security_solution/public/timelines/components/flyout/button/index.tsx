@@ -124,12 +124,13 @@ export const FlyoutButton = React.memo<FlyoutButtonProps>(
         <DataProvidersPanel paddingSize="none">
           <DataProviders
             browserFields={browserFields}
-            id={timelineId}
+            timelineId={timelineId}
             dataProviders={dataProviders}
             onDataProviderEdited={noop}
             onDataProviderRemoved={noop}
             onToggleDataProviderEnabled={noop}
             onToggleDataProviderExcluded={noop}
+            onToggleDataProviderType={noop}
           />
         </DataProvidersPanel>
       </Container>

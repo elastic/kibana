@@ -13,7 +13,7 @@ import { StartServices } from '../../../../types';
 import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../../hosts/pages/details/utils';
 import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../network/pages/ip_details';
 import { getBreadcrumbs as getCaseDetailsBreadcrumbs } from '../../../../cases/pages/utils';
-import { getBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../alerts/pages/detection_engine/rules/utils';
+import { getBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../detections/pages/detection_engine/rules/utils';
 import { getBreadcrumbs as getTimelinesBreadcrumbs } from '../../../../timelines/pages';
 import { SecurityPageName } from '../../../../app/types';
 import {
@@ -59,7 +59,7 @@ const isCaseRoutes = (spyState: RouteSpyState): spyState is RouteSpyState =>
   spyState != null && spyState.pageName === SecurityPageName.case;
 
 const isAlertsRoutes = (spyState: RouteSpyState) =>
-  spyState != null && spyState.pageName === SecurityPageName.alerts;
+  spyState != null && spyState.pageName === SecurityPageName.detections;
 
 export const getBreadcrumbsForRoute = (
   object: RouteSpyState & TabNavigationProps,
@@ -103,7 +103,7 @@ export const getBreadcrumbsForRoute = (
     ];
   }
   if (isAlertsRoutes(spyState) && object.navTabs) {
-    const tempNav: SearchNavTab = { urlKey: 'alerts', isDetailPage: false };
+    const tempNav: SearchNavTab = { urlKey: 'detections', isDetailPage: false };
     let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
     if (spyState.tabName != null) {
       urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];

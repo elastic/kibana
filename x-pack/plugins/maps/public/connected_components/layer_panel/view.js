@@ -205,7 +205,7 @@ export class LayerPanel extends React.Component {
             <div className="mapLayerPanel__bodyOverflow">
               <LayerErrors />
 
-              <LayerSettings />
+              <LayerSettings layer={selectedLayer} />
 
               {this.props.selectedLayer.renderSourceSettingsEditor({
                 onChange: this._onSourceChange,

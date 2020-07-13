@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { forOwn, indexBy, isNumber, isBoolean, isPlainObject, isString } from 'lodash';
+import { forOwn, keyBy, isNumber, isBoolean, isPlainObject, isString } from 'lodash';
 import { SimpleSavedObject } from '../../../../core/public';
 import { castEsToKbnFieldTypeName } from '../../../data/public';
 import { ObjectField } from '../management_section/types';
@@ -93,9 +93,9 @@ const addFieldsFromClass = function (
   Class: { mapping: Record<string, string>; searchSource: any },
   fields: ObjectField[]
 ) {
-  const fieldMap = indexBy(fields, 'name');
+  const fieldMap = keyBy(fields, 'name');
 
-  _.forOwn(Class.mapping, (esType, name) => {
+  forOwn(Class.mapping, (esType, name) => {
     if (!name || fieldMap[name]) {
       return;
     }

@@ -16,11 +16,27 @@ export const exceptionsArtifactSavedObjectMappings: SavedObjectsType['mappings']
     identifier: {
       type: 'keyword',
     },
-    sha256: {
+    compressionAlgorithm: {
+      type: 'keyword',
+      index: false,
+    },
+    encryptionAlgorithm: {
+      type: 'keyword',
+      index: false,
+    },
+    encodedSha256: {
       type: 'keyword',
     },
-    encoding: {
+    encodedSize: {
+      type: 'long',
+      index: false,
+    },
+    decodedSha256: {
       type: 'keyword',
+      index: false,
+    },
+    decodedSize: {
+      type: 'long',
       index: false,
     },
     created: {
@@ -29,10 +45,6 @@ export const exceptionsArtifactSavedObjectMappings: SavedObjectsType['mappings']
     },
     body: {
       type: 'binary',
-      index: false,
-    },
-    size: {
-      type: 'long',
       index: false,
     },
   },

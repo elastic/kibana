@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { HttpFetchQuery } from 'src/core/public';
 import {
   useRequest,
   sendRequest,
@@ -12,6 +11,7 @@ import {
 } from './use_request';
 import { agentConfigRouteService } from '../../services';
 import {
+  GetAgentConfigsRequest,
   GetAgentConfigsResponse,
   GetOneAgentConfigResponse,
   GetFullAgentConfigResponse,
@@ -25,7 +25,7 @@ import {
   DeleteAgentConfigResponse,
 } from '../../types';
 
-export const useGetAgentConfigs = (query: HttpFetchQuery = {}) => {
+export const useGetAgentConfigs = (query?: GetAgentConfigsRequest['query']) => {
   return useRequest<GetAgentConfigsResponse>({
     path: agentConfigRouteService.getListPath(),
     method: 'get',
