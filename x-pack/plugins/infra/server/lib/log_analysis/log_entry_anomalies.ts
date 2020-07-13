@@ -269,7 +269,11 @@ export async function getLogEntryExamples(
 ) {
   const finalizeLogEntryExamplesSpan = startTracingSpan('get log entry rate example log entries');
 
-  const jobId = getJobId(context.infra.spaceId, sourceId, 'log-entry-rate');
+  const jobId = getJobId(
+    context.infra.spaceId,
+    sourceId,
+    categoryId != null ? logEntryCategoriesJobTypes[0] : logEntryRateJobTypes[0]
+  );
 
   const {
     mlJob,
