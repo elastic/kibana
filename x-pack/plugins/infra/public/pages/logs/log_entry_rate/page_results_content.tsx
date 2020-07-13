@@ -97,7 +97,6 @@ export const LogEntryRateResultsContent: React.FunctionComponent<LogEntryRateRes
     sourceId,
     startTime: queryTimeRange.value.startTime,
     endTime: queryTimeRange.value.endTime,
-    lastChangedTime: queryTimeRange.lastChangedTime,
     defaultSortOptions: SORT_DEFAULTS,
     defaultPaginationOptions: PAGINATION_DEFAULTS,
   });

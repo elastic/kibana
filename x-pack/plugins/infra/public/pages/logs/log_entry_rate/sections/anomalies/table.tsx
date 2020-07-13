@@ -24,6 +24,7 @@ import {
   getFriendlyNameForPartitionId,
   formatOneDecimalPlace,
 } from '../../../../../../common/log_analysis';
+import { AnomalyType } from '../../../../../../common/http_api/log_analysis';
 import { RowExpansionButton } from '../../../../../components/basic_table';
 import { AnomaliesTableExpandedRow } from './expanded_row';
 import { AnomalySeverityIndicator } from '../../../../../components/logging/log_analysis_results/anomaly_severity_indicator';
@@ -48,7 +49,7 @@ interface TableItem {
   startTime: number;
   typical: number;
   actual: number;
-  type: string;
+  type: AnomalyType;
 }
 
 const anomalyScoreColumnName = i18n.translate(
@@ -239,7 +240,8 @@ const AnomalyMessage = ({
   const moreThanExpectedAnomalyMessage = i18n.translate(
     'xpack.infra.logs.analysis.anomaliesTableMoreThanExpectedAnomalyMessage',
     {
-      defaultMessage: 'higher log messages in this {type, select, logRate {dataset}, logCategory {category}} than expected',
+      defaultMessage:
+        'more log messages in this {type, select, logRate {dataset}, logCategory {category}} than expected',
       values: { type },
     }
   );
@@ -248,7 +250,7 @@ const AnomalyMessage = ({
     'xpack.infra.logs.analysis.anomaliesTableFewerThanExpectedAnomalyMessage',
     {
       defaultMessage: 'fewer log messages in this {messageType} than expected',
-      values: { messageType },
+      values: { type },
     }
   );
   const isMore = actual > typical;

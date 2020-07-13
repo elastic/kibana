@@ -24,6 +24,8 @@ export const anomalyTypeRT = rt.keyof({
   logCategory: null,
 });
 
+export type AnomalyType = rt.TypeOf<typeof anomalyTypeRT>;
+
 const logEntryAnomalyCommonFieldsRT = rt.type({
   id: rt.string,
   anomalyScore: rt.number,
