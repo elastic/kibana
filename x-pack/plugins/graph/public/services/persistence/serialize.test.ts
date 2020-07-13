@@ -118,7 +118,7 @@ describe('serialize', () => {
             parent: null,
           },
         ],
-        blacklistedNodes: [
+        blocklistedNodes: [
           {
             color: 'black',
             data: { field: 'field1', term: 'Z' },
@@ -165,7 +165,7 @@ describe('serialize', () => {
     const workspaceState = JSON.parse(savedWorkspace.wsState);
     expect(workspaceState).toMatchInlineSnapshot(`
       Object {
-        "blacklist": Array [
+        "blocklist": Array [
           Object {
             "color": "black",
             "field": "field1",
