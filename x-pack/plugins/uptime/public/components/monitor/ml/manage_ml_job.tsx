@@ -84,7 +84,9 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
         },
         {
           name: anomalyAlert ? labels.DISABLE_ANOMALY_ALERT : labels.ENABLE_ANOMALY_ALERT,
-          'data-test-subj': 'uptimeEnableAnomalyAlertBtn',
+          'data-test-subj': anomalyAlert
+            ? 'uptimeDisableAnomalyAlertBtn'
+            : 'uptimeEnableAnomalyAlertBtn',
           icon: <EuiIcon type={anomalyAlert ? 'bellSlash' : 'bell'} size="m" />,
           onClick: () => {
             if (anomalyAlert) {

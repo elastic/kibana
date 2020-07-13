@@ -76,6 +76,7 @@ export const DEFAULT_SEVERITY = SEVERITY_OPTIONS[3];
 
 const getSeverityOptions = () =>
   SEVERITY_OPTIONS.map(({ color, display, val }) => ({
+    'data-test-subj': `alertAnomaly${display}`,
     value: display,
     inputDisplay: (
       <Fragment>
@@ -128,6 +129,7 @@ export const SelectSeverity: FC<Props> = ({ onChange, value }) => {
       options={getSeverityOptions()}
       valueOfSelected={severity.display}
       onChange={onSeverityChange}
+      data-test-subj={'anomalySeveritySelect'}
     />
   );
 };

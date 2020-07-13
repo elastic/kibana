@@ -28,7 +28,8 @@ export function UptimeMLAnomalyProvider({ getService }: FtrProviderContext) {
     },
 
     async cancelAlertFlyout() {
-      await testSubjects.click('euiFlyoutCloseButton', 60 * 1000);
+      if (await testSubjects.exists('euiFlyoutCloseButton'))
+        await testSubjects.click('euiFlyoutCloseButton', 60 * 1000);
     },
 
     async alreadyHasJob() {
@@ -59,6 +60,20 @@ export function UptimeMLAnomalyProvider({ getService }: FtrProviderContext) {
 
     async hasNoLicenseInfo() {
       return await testSubjects.missingOrFail('uptimeMLLicenseInfo', { timeout: 1000 });
+    },
+
+    async openAlertFlyout() {
+      return await testSubjects.click('uptimeEnableAnomalyAlertBtn');
+    },
+
+    async disableAnomalyAlertIsVisible() {
+      return await testSubjects.exists('uptimeDisableAnomalyAlertBtn');
+    },
+
+    async changeAlertThreshold(level: string) {
+      await testSubjects.click('uptimeAnomalySeverity');
+      await testSubjects.click('anomalySeveritySelect');
+      await testSubjects.click(`alertAnomaly${level}`);
     },
   };
 }
