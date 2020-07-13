@@ -241,7 +241,6 @@ const UnstyledProcessEventDot = React.memo(
     isProcessTerminated,
     isProcessOrigin,
     relatedEventsStatsForProcess,
-    documentLocation,
   }: {
     /**
      * A `className` string provided by `styled`
@@ -277,7 +276,6 @@ const UnstyledProcessEventDot = React.memo(
      * Statistics for the number of related events and alerts for this process node
      */
     relatedEventsStatsForProcess?: ResolverNodeStats;
-    documentLocation: string;
   }) => {
     /**
      * Convert the position, which is in 'world' coordinates, to screen coordinates.
@@ -402,7 +400,7 @@ const UnstyledProcessEventDot = React.memo(
       });
     }, [dispatch, selfId]);
 
-    const { pushToQueryParams } = useResolverQueryParams(documentLocation);
+    const { pushToQueryParams } = useResolverQueryParams();
 
     const handleClick = useCallback(() => {
       if (animationTarget.current !== null) {

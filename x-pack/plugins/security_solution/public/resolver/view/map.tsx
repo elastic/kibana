@@ -40,13 +40,17 @@ export const ResolverMap = React.memo(function ({
    * Used as the origin of the Resolver graph.
    */
   databaseDocumentID?: string;
+  /**
+   * A string literal describing where in the app resolver is located,
+   * used to prevent collisions in things like query params
+   */
   documentLocation: string;
 }) {
   /**
    * This is responsible for dispatching actions that include any external data.
    * `databaseDocumentID`
    */
-  useStateSyncingActions({ databaseDocumentID });
+  useStateSyncingActions({ databaseDocumentID, documentLocation });
 
   const { timestamp } = useContext(SideEffectContext);
   const { processNodePositions, connectingEdgeLineSegments } = useSelector(
@@ -113,14 +117,13 @@ export const ResolverMap = React.memo(function ({
                   relatedEventsStats ? relatedEventsStats.get(entityId(processEvent)) : undefined
                 }
                 isProcessTerminated={terminatedProcesses.has(processEntityId)}
-                documentLocation={documentLocation}
                 isProcessOrigin={false}
               />
             );
           })}
         </GraphContainer>
       )}
-      <StyledPanel documentLocation={documentLocation} />
+      <StyledPanel />
       <GraphControls />
       <SymbolDefinitions />
     </StyledMapContainer>

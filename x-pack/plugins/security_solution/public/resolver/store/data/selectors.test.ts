@@ -53,11 +53,12 @@ describe('data state', () => {
 
   describe('when there is a databaseDocumentID but no pending request', () => {
     const databaseDocumentID = 'databaseDocumentID';
+    const documentLocation = 'location';
     beforeEach(() => {
       actions = [
         {
           type: 'appReceivedNewExternalProperties',
-          payload: { databaseDocumentID },
+          payload: { databaseDocumentID, documentLocation },
         },
       ];
     });
@@ -104,11 +105,12 @@ describe('data state', () => {
   });
   describe('when there is a pending request for the current databaseDocumentID', () => {
     const databaseDocumentID = 'databaseDocumentID';
+    const documentLocation = 'location';
     beforeEach(() => {
       actions = [
         {
           type: 'appReceivedNewExternalProperties',
-          payload: { databaseDocumentID },
+          payload: { databaseDocumentID, documentLocation },
         },
         {
           type: 'appRequestedResolverData',
@@ -160,12 +162,14 @@ describe('data state', () => {
   describe('when there is a pending request for a different databaseDocumentID than the current one', () => {
     const firstDatabaseDocumentID = 'first databaseDocumentID';
     const secondDatabaseDocumentID = 'second databaseDocumentID';
+    const firstLocation = 'firstLocation';
+    const secondLocation = 'secondLocation';
     beforeEach(() => {
       actions = [
         // receive the document ID, this would cause the middleware to starts the request
         {
           type: 'appReceivedNewExternalProperties',
-          payload: { databaseDocumentID: firstDatabaseDocumentID },
+          payload: { databaseDocumentID: firstDatabaseDocumentID, documentLocation: firstLocation },
         },
         // this happens when the middleware starts the request
         {
@@ -175,7 +179,10 @@ describe('data state', () => {
         // receive a different databaseDocumentID. this should cause the middleware to abort the existing request and start a new one
         {
           type: 'appReceivedNewExternalProperties',
-          payload: { databaseDocumentID: secondDatabaseDocumentID },
+          payload: {
+            databaseDocumentID: secondDatabaseDocumentID,
+            documentLocation: secondLocation,
+          },
         },
       ];
     });
@@ -187,6 +194,12 @@ describe('data state', () => {
     });
     it('should need to abort the request for the databaseDocumentID', () => {
       expect(selectors.databaseDocumentIDToFetch(state())).toBe(secondDatabaseDocumentID);
+    });
+    it('should use the correct location for the first resolver', () => {
+      expect(selectors.documentLocation(state())).toBe(firstLocation);
+    });
+    it('should use the correct location for the second resolver', () => {
+      expect(selectors.documentLocation(state())).toBe(secondLocation);
     });
     it('should not have an error, more children, or more ancestors.', () => {
       expect(viewAsAString(state())).toMatchInlineSnapshot(`

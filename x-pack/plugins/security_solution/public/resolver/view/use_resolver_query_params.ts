@@ -7,18 +7,21 @@
 import { useCallback, useMemo } from 'react';
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
+import { useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
+import * as selectors from '../store/selectors';
 import { CrumbInfo } from './panels/panel_content_utilities';
 
-export function useResolverQueryParams(documentLocation: string) {
+export function useResolverQueryParams() {
   /**
    * This updates the breadcrumb nav and the panel view. It's supplied to each
    * panel content view to allow them to dispatch transitions to each other.
    */
   const history = useHistory();
   const urlSearch = useLocation().search;
-  const uniqueCrumbIdKey = `${documentLocation}CrumbId`;
-  const uniqueCrumbEventKey = `${documentLocation}CrumbEvent`;
+  const documentLocation = useSelector(selectors.documentLocation);
+  const uniqueCrumbIdKey: string = `${documentLocation}CrumbId`;
+  const uniqueCrumbEventKey: string = `${documentLocation}CrumbEvent`;
   const pushToQueryParams = useCallback(
     (newCrumbs: CrumbInfo) => {
       // Construct a new set of params from the current set (minus empty params)
@@ -30,11 +33,11 @@ export function useResolverQueryParams(documentLocation: string) {
       };
 
       // If either was passed in as empty, remove it from the record
-      if (crumbsToPass.uniqueCrumbIdKey === '') {
-        delete crumbsToPass.uniqueCrumbIdKey;
+      if (newCrumbs.crumbId === '') {
+        delete crumbsToPass[uniqueCrumbIdKey];
       }
-      if (crumbsToPass.uniqueCrumbEventKey === '') {
-        delete crumbsToPass.uniqueCrumbEventKey;
+      if (newCrumbs.crumbEvent === '') {
+        delete crumbsToPass[uniqueCrumbEventKey];
       }
 
       const relativeURL = { search: querystring.stringify(crumbsToPass) };
@@ -45,14 +48,13 @@ export function useResolverQueryParams(documentLocation: string) {
     [history, urlSearch, uniqueCrumbIdKey, uniqueCrumbEventKey]
   );
   const queryParams: CrumbInfo = useMemo(() => {
-    const newParams = {
-      [uniqueCrumbIdKey]: '',
-      [uniqueCrumbEventKey]: '',
-      ...querystring.parse(urlSearch.slice(1)),
+    const parsed = querystring.parse(urlSearch.slice(1));
+    const crumbEvent = parsed[uniqueCrumbEventKey];
+    const crumbId = parsed[uniqueCrumbIdKey];
+    return {
+      crumbEvent: Array.isArray(crumbEvent) ? crumbEvent[0] : crumbEvent,
+      crumbId: Array.isArray(crumbId) ? crumbId[0] : crumbId,
     };
-    newParams.crumbId = newParams[uniqueCrumbIdKey];
-    newParams.crumbEvent = newParams[uniqueCrumbEventKey];
-    return newParams;
   }, [urlSearch, uniqueCrumbIdKey, uniqueCrumbEventKey]);
 
   return {

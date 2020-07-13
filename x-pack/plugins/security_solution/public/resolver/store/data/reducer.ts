@@ -11,6 +11,7 @@ import { ResolverAction } from '../actions';
 const initialState: DataState = {
   relatedEvents: new Map(),
   relatedEventsReady: new Map(),
+  documentLocation: '',
 };
 
 export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialState, action) => {
@@ -18,6 +19,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     const nextState: DataState = {
       ...state,
       databaseDocumentID: action.payload.databaseDocumentID,
+      documentLocation: action.payload.documentLocation,
     };
     return nextState;
   } else if (action.type === 'appRequestedResolverData') {

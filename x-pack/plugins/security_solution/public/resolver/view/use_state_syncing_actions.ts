@@ -13,17 +13,19 @@ import { useResolverDispatch } from './use_resolver_dispatch';
  */
 export function useStateSyncingActions({
   databaseDocumentID,
+  documentLocation,
 }: {
   /**
    * The `_id` of an event in ES. Used to determine the origin of the Resolver graph.
    */
   databaseDocumentID?: string;
+  documentLocation: string;
 }) {
   const dispatch = useResolverDispatch();
   useLayoutEffect(() => {
     dispatch({
       type: 'appReceivedNewExternalProperties',
-      payload: { databaseDocumentID },
+      payload: { databaseDocumentID, documentLocation },
     });
-  }, [dispatch, databaseDocumentID]);
+  }, [dispatch, databaseDocumentID, documentLocation]);
 }

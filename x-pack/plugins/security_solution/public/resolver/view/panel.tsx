@@ -35,16 +35,12 @@ import { useResolverQueryParams } from './use_resolver_query_params';
  *
  * @returns {JSX.Element} The "right" table content to show based on the query params as described above
  */
-const PanelContent = memo(function PanelContent({
-  documentLocation,
-}: {
-  documentLocation: string;
-}) {
+const PanelContent = memo(function PanelContent() {
   const dispatch = useResolverDispatch();
 
   const { timestamp } = useContext(SideEffectContext);
 
-  const { pushToQueryParams, queryParams } = useResolverQueryParams(documentLocation);
+  const { pushToQueryParams, queryParams } = useResolverQueryParams();
 
   const graphableProcesses = useSelector(selectors.graphableProcesses);
   const graphableProcessEntityIds = useMemo(() => {
@@ -238,16 +234,10 @@ const PanelContent = memo(function PanelContent({
 });
 PanelContent.displayName = 'PanelContent';
 
-export const Panel = memo(function Event({
-  className,
-  documentLocation,
-}: {
-  className?: string;
-  documentLocation: string;
-}) {
+export const Panel = memo(function Event({ className }: { className?: string }) {
   return (
     <EuiPanel className={className}>
-      <PanelContent documentLocation={documentLocation} />
+      <PanelContent />
     </EuiPanel>
   );
 });

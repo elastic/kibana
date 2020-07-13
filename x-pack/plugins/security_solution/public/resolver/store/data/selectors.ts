@@ -40,6 +40,10 @@ export function isLoading(state: DataState): boolean {
   return state.pendingRequestDatabaseDocumentID !== undefined;
 }
 
+export function documentLocation(state: DataState): string {
+  return state.documentLocation;
+}
+
 /**
  * If a request was made and it threw an error or returned a failure response code.
  */
