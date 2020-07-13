@@ -87,6 +87,9 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
       navLinkId: PLUGIN_ID,
       app: [PLUGIN_ID, 'kibana'],
       catalogue: [PLUGIN_ID],
+      management: {
+        insightsAndAlerting: ['jobsListLink'],
+      },
       privileges: {
         all: admin,
         read: user,
