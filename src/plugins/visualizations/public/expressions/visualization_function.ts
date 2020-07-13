@@ -100,8 +100,10 @@ export const visualization = (): ExpressionFunctionVisualization => ({
     const uiStateParams = args.uiState ? JSON.parse(args.uiState) : {};
     const uiState = new PersistedState(uiStateParams);
 
-    const aggConfigsState = args.aggConfigs ? JSON.parse(args.aggConfigs) : {};
-    const aggConfigs = indexPattern ? getSearch().aggs.createAggConfigs(indexPattern, aggConfigsState) : null;
+    const aggConfigsState = args.aggConfigs ? JSON.parse(args.aggConfigs) : [];
+    const aggs = indexPattern
+      ? getSearch().aggs.createAggConfigs(indexPattern, aggConfigsState)
+      : undefined;
 
     if (typeof visType.requestHandler === 'function') {
       input = await visType.requestHandler({
@@ -116,7 +118,7 @@ export const visualization = (): ExpressionFunctionVisualization => ({
         inspectorAdapters,
         queryFilter: getFilterManager(),
         forceFetch: true,
-        aggConfigs,
+        aggs,
       });
     }
 
