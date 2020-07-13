@@ -17,7 +17,7 @@ import { UseUrlState } from '../../common/components/url_state';
 import { useWithSource } from '../../common/containers/source';
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 import { navTabs } from './home_navigations';
-import { useSignalIndex } from '../../alerts/containers/detection_engine/alerts/use_signal_index';
+import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 
 const WrappedByAutoSizer = styled.div`
   height: 100%;

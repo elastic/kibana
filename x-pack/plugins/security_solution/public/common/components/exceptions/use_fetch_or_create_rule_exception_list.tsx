@@ -11,9 +11,12 @@ import {
   ExceptionListSchema,
   CreateExceptionListSchema,
 } from '../../../../../lists/common/schemas';
-import { Rule } from '../../../alerts/containers/detection_engine/rules/types';
+import { Rule } from '../../../detections/containers/detection_engine/rules/types';
 import { List, ListArray } from '../../../../common/detection_engine/schemas/types';
-import { fetchRuleById, patchRule } from '../../../alerts/containers/detection_engine/rules/api';
+import {
+  fetchRuleById,
+  patchRule,
+} from '../../../detections/containers/detection_engine/rules/api';
 import { fetchExceptionListById, addExceptionList } from '../../../lists_plugin_deps';
 
 export type ReturnUseFetchOrCreateRuleExceptionList = [boolean, ExceptionListSchema | null];

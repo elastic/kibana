@@ -47,11 +47,17 @@ export class Manifest {
   public static fromArtifacts(
     artifacts: InternalArtifactSchema[],
     schemaVersion: string,
-    version: string
+    oldManifest: Manifest
   ): Manifest {
-    const manifest = new Manifest(new Date(), schemaVersion, version);
+    const manifest = new Manifest(new Date(), schemaVersion, oldManifest.getVersion());
     artifacts.forEach((artifact) => {
-      manifest.addEntry(artifact);
+      const id = `${artifact.identifier}-${artifact.decodedSha256}`;
+      const existingArtifact = oldManifest.getArtifact(id);
+      if (existingArtifact) {
+        manifest.addEntry(existingArtifact);
+      } else {
+        manifest.addEntry(artifact);
+      }
     });
     return manifest;
   }
@@ -81,8 +87,8 @@ export class Manifest {
     return this.entries;
   }
 
-  public getArtifact(artifactId: string): InternalArtifactSchema {
-    return this.entries[artifactId].getArtifact();
+  public getArtifact(artifactId: string): InternalArtifactSchema | undefined {
+    return this.entries[artifactId]?.getArtifact();
   }
 
   public diff(manifest: Manifest): ManifestDiff[] {

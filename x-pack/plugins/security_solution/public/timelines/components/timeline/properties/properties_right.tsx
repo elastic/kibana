@@ -16,9 +16,11 @@ import {
 } from '@elastic/eui';
 import { NewTimeline, Description, NotesButton, NewCase, ExistingCase } from './helpers';
 
-import { disableTemplate } from '../../../../../common/constants';
-import { TimelineStatusLiteral, TimelineTypeLiteral } from '../../../../../common/types/timeline';
-
+import {
+  TimelineStatusLiteral,
+  TimelineTypeLiteral,
+  TimelineType,
+} from '../../../../../common/types/timeline';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import { useKibana } from '../../../../common/lib/kibana';
 import { Note } from '../../../../common/lib/note';
@@ -151,40 +153,38 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
                 </EuiFlexItem>
               )}
 
-              {/*
-               * CreateTemplateTimelineBtn
-               * Remove the comment here to enable CreateTemplateTimelineBtn
-               */}
-              {!disableTemplate && (
-                <EuiFlexItem grow={false}>
-                  <NewTemplateTimeline
-                    closeGearMenu={onClosePopover}
-                    timelineId={timelineId}
-                    title={i18n.NEW_TEMPLATE_TIMELINE}
-                  />
-                </EuiFlexItem>
-              )}
+              <EuiFlexItem grow={false}>
+                <NewTemplateTimeline
+                  closeGearMenu={onClosePopover}
+                  timelineId={timelineId}
+                  title={i18n.NEW_TEMPLATE_TIMELINE}
+                />
+              </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
                 <OpenTimelineModalButton onClick={onOpenTimelineModal} />
               </EuiFlexItem>
 
-              <EuiFlexItem grow={false}>
-                <NewCase
-                  graphEventId={graphEventId}
-                  onClosePopover={onClosePopover}
-                  timelineId={timelineId}
-                  timelineTitle={title}
-                  timelineStatus={status}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <ExistingCase
-                  onClosePopover={onClosePopover}
-                  onOpenCaseModal={onOpenCaseModal}
-                  timelineStatus={status}
-                />
-              </EuiFlexItem>
+              {timelineType === TimelineType.default && (
+                <>
+                  <EuiFlexItem grow={false}>
+                    <NewCase
+                      graphEventId={graphEventId}
+                      onClosePopover={onClosePopover}
+                      timelineId={timelineId}
+                      timelineTitle={title}
+                      timelineStatus={status}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <ExistingCase
+                      onClosePopover={onClosePopover}
+                      onOpenCaseModal={onOpenCaseModal}
+                      timelineStatus={status}
+                    />
+                  </EuiFlexItem>
+                </>
+              )}
 
               <EuiFlexItem grow={false}>
                 <InspectButton
