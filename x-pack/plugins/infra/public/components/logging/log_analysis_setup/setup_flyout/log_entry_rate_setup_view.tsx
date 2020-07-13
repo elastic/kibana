@@ -5,37 +5,20 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiTitle,
-  EuiText,
-  EuiSpacer,
-  EuiSteps,
-} from '@elastic/eui';
+import { EuiTitle, EuiText, EuiSpacer, EuiSteps } from '@elastic/eui';
+import { createInitialConfigurationStep } from '../initial_configuration_step';
+import { createProcessStep } from '../process_step';
+import { useLogEntryRateSetup } from '../../../../containers/logs/log_analysis/modules/log_entry_rate';
 
-import {
-  createInitialConfigurationStep,
-  createProcessStep,
-} from '../../../components/logging/log_analysis_setup';
-import { useLogEntryRateSetup } from './use_log_entry_rate_setup';
-
-interface LogEntryRateSetupFlyoutProps {
-  isOpen: boolean;
+export const LogEntryRateSetupView: React.FC<{
   onClose: () => void;
-}
-
-export const LogEntryRateSetupFlyout: React.FC<LogEntryRateSetupFlyoutProps> = ({
-  isOpen,
-  onClose,
-}) => {
+}> = ({ onClose }) => {
   const {
     cleanUpAndSetUp,
     endTime,
     isValidating,
     lastSetupErrorMessages,
+    moduleDescriptor,
     setEndTime,
     setStartTime,
     setValidatedIndices,
@@ -91,39 +74,14 @@ export const LogEntryRateSetupFlyout: React.FC<LogEntryRateSetupFlyoutProps> = (
     ]
   );
 
-  if (!isOpen) {
-    return null;
-  }
   return (
-    <EuiFlyout onClose={onClose}>
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
-          <h3>
-            <FormattedMessage
-              id="xpack.infra.logs.setupFlyout.setupFlyoutTitle"
-              defaultMessage="Anomaly detection with Machine Learning"
-            />
-          </h3>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiTitle size="s">
-          <h3>
-            <FormattedMessage
-              id="xpack.infra.logs.setupFlyout.logRateTitle"
-              defaultMessage="Log rate"
-            />
-          </h3>
-        </EuiTitle>
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.infra.logs.setupFlyout.logRateDescription"
-            defaultMessage="Use Machine Learning to automatically detect anomalous log rate counts."
-          />
-        </EuiText>
-        <EuiSpacer />
-        <EuiSteps steps={steps} />
-      </EuiFlyoutBody>
-    </EuiFlyout>
+    <>
+      <EuiTitle size="s">
+        <h3>{moduleDescriptor.moduleName} </h3>
+      </EuiTitle>
+      <EuiText size="s">{moduleDescriptor.moduleDescription}</EuiText>
+      <EuiSpacer />
+      <EuiSteps steps={steps} />
+    </>
   );
 };

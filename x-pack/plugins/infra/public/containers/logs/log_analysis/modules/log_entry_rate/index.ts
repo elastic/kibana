@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './log_analysis_job_problem_indicator';
-export * from './notices_section';
-export * from './recreate_job_button';
+export * from './module_descriptor';
+export * from './use_log_entry_rate_module';
+export * from './use_log_entry_rate_setup';

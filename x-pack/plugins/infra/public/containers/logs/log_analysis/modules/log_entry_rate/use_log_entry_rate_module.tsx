@@ -6,16 +6,13 @@
 
 import createContainer from 'constate';
 import { useMemo } from 'react';
-import {
-  ModuleSourceConfiguration,
-  useLogAnalysisModule,
-  useLogAnalysisModuleConfiguration,
-  useLogAnalysisModuleDefinition,
-} from '../../../containers/logs/log_analysis';
-import { logEntryCategoriesModule } from './module_descriptor';
-import { useLogEntryCategoriesQuality } from './use_log_entry_categories_quality';
+import { ModuleSourceConfiguration } from '../../log_analysis_module_types';
+import { useLogAnalysisModule } from '../../log_analysis_module';
+import { useLogAnalysisModuleConfiguration } from '../../log_analysis_module_configuration';
+import { useLogAnalysisModuleDefinition } from '../../log_analysis_module_definition';
+import { logEntryRateModule } from './module_descriptor';
 
-export const useLogEntryCategoriesModule = ({
+export const useLogEntryRateModule = ({
   indexPattern,
   sourceId,
   spaceId,
@@ -37,22 +34,18 @@ export const useLogEntryCategoriesModule = ({
   );
 
   const logAnalysisModule = useLogAnalysisModule({
-    moduleDescriptor: logEntryCategoriesModule,
+    moduleDescriptor: logEntryRateModule,
     sourceConfiguration,
   });
 
   const { getIsJobConfigurationOutdated } = useLogAnalysisModuleConfiguration({
     sourceConfiguration,
-    moduleDescriptor: logEntryCategoriesModule,
+    moduleDescriptor: logEntryRateModule,
   });
 
   const { fetchModuleDefinition, getIsJobDefinitionOutdated } = useLogAnalysisModuleDefinition({
     sourceConfiguration,
-    moduleDescriptor: logEntryCategoriesModule,
-  });
-
-  const { categoryQualityWarnings } = useLogEntryCategoriesQuality({
-    jobSummaries: logAnalysisModule.jobSummaries,
+    moduleDescriptor: logEntryRateModule,
   });
 
   const hasOutdatedJobConfigurations = useMemo(
@@ -75,7 +68,6 @@ export const useLogEntryCategoriesModule = ({
 
   return {
     ...logAnalysisModule,
-    categoryQualityWarnings,
     fetchModuleDefinition,
     hasOutdatedJobConfigurations,
     hasOutdatedJobDefinitions,
@@ -83,7 +75,6 @@ export const useLogEntryCategoriesModule = ({
   };
 };
 
-export const [
-  LogEntryCategoriesModuleProvider,
-  useLogEntryCategoriesModuleContext,
-] = createContainer(useLogEntryCategoriesModule);
+export const [LogEntryRateModuleProvider, useLogEntryRateModuleContext] = createContainer(
+  useLogEntryRateModule
+);
