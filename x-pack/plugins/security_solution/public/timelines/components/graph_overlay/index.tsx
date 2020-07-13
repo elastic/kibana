@@ -118,7 +118,7 @@ const GraphOverlayComponent = ({
       </EuiFlexGroup>
 
       <EuiHorizontalRule margin="none" />
-      <StyledResolver databaseDocumentID={graphEventId} />
+      <StyledResolver databaseDocumentID={graphEventId} documentLocation={currentTimeline.id} />
       <AllCasesModal
         onCloseCaseModal={onCloseCaseModal}
         showCaseModal={showCaseModal}

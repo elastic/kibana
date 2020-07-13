@@ -27,8 +27,7 @@ const BetaHeader = styled(`header`)`
  * The two query parameters we read/write on to control which view the table presents:
  */
 export interface CrumbInfo {
-  readonly crumbId: string;
-  readonly crumbEvent: string;
+  readonly [x: string]: string;
 }
 
 const ThemedBreadcrumbs = styled(EuiBreadcrumbs)<{ background: string; text: string }>`

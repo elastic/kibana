@@ -29,6 +29,7 @@ import { SideEffectContext } from './side_effect_context';
 export const ResolverMap = React.memo(function ({
   className,
   databaseDocumentID,
+  documentLocation,
 }: {
   /**
    * Used by `styled-components`.
@@ -39,6 +40,7 @@ export const ResolverMap = React.memo(function ({
    * Used as the origin of the Resolver graph.
    */
   databaseDocumentID?: string;
+  documentLocation: string;
 }) {
   /**
    * This is responsible for dispatching actions that include any external data.
@@ -111,13 +113,14 @@ export const ResolverMap = React.memo(function ({
                   relatedEventsStats ? relatedEventsStats.get(entityId(processEvent)) : undefined
                 }
                 isProcessTerminated={terminatedProcesses.has(processEntityId)}
+                documentLocation={documentLocation}
                 isProcessOrigin={false}
               />
             );
           })}
         </GraphContainer>
       )}
-      <StyledPanel />
+      <StyledPanel documentLocation={documentLocation} />
       <GraphControls />
       <SymbolDefinitions />
     </StyledMapContainer>
