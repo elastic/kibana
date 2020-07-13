@@ -16,24 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PluginInitializerContext } from 'kibana/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { npStart, npSetup } from 'ui/new_platform';
-import {
-  TableVisPlugin,
-  TablePluginSetupDependencies,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../plugins/vis_type_table/public/plugin';
 
-const plugins: Readonly<TablePluginSetupDependencies> = {
-  expressions: npSetup.plugins.expressions,
-  visualizations: npSetup.plugins.visualizations,
-};
-
-const pluginInstance = new TableVisPlugin({} as PluginInitializerContext);
-
-export const setup = pluginInstance.setup(npSetup.core, plugins);
-export const start = pluginInstance.start(npStart.core, {
-  data: npStart.plugins.data,
-  kibanaLegacy: npStart.plugins.kibanaLegacy,
-});
+export { useUIAceKeyboardMode } from './use_ui_ace_keyboard_mode';

@@ -6,13 +6,14 @@
 
 import { inflateSync } from 'zlib';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { createPackageConfigServiceMock } from '../../../../../../ingest_manager/server/mocks';
 import {
   ArtifactConstants,
   ManifestConstants,
   Manifest,
   ExceptionsCache,
 } from '../../../lib/artifacts';
-import { getPackageConfigServiceMock, getManifestManagerMock } from './manifest_manager.mock';
+import { getManifestManagerMock } from './manifest_manager.mock';
 
 describe('manifest_manager', () => {
   describe('ManifestManager sanity checks', () => {
@@ -73,15 +74,15 @@ describe('manifest_manager', () => {
     });
 
     test('ManifestManager can dispatch manifest', async () => {
-      const packageConfigService = getPackageConfigServiceMock();
+      const packageConfigService = createPackageConfigServiceMock();
       const manifestManager = getManifestManagerMock({ packageConfigService });
       const snapshot = await manifestManager.getSnapshot();
       const dispatched = await manifestManager.dispatch(snapshot!.manifest);
-      expect(dispatched).toEqual(true);
+      expect(dispatched).toEqual([]);
       const entries = snapshot!.manifest.getEntries();
       const artifact = Object.values(entries)[0].getArtifact();
       expect(
-        packageConfigService.update.mock.calls[0][2].inputs[0].config.artifact_manifest.value
+        packageConfigService.update.mock.calls[0][2].inputs[0].config!.artifact_manifest.value
       ).toEqual({
         manifest_version: ManifestConstants.INITIAL_VERSION,
         schema_version: 'v1',
@@ -115,7 +116,7 @@ describe('manifest_manager', () => {
       snapshot!.diffs.push(diff);
 
       const dispatched = await manifestManager.dispatch(snapshot!.manifest);
-      expect(dispatched).toEqual(true);
+      expect(dispatched).toEqual([]);
 
       await manifestManager.commit(snapshot!.manifest);
 
