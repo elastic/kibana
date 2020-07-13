@@ -14,7 +14,12 @@ export const registerHelpers = ({ supertest }) => {
   const getOneTemplate = (name, isLegacy = false) =>
     supertest.get(`${API_BASE_PATH}/index_templates/${name}?legacy=${isLegacy}`);
 
-  const getTemplatePayload = (name, indexPatterns = INDEX_PATTERNS, isLegacy = false) => {
+  const getTemplatePayload = (
+    name,
+    indexPatterns = INDEX_PATTERNS,
+    isLegacy = false,
+    type = 'default'
+  ) => {
     const baseTemplate = {
       name,
       indexPatterns,
@@ -48,6 +53,7 @@ export const registerHelpers = ({ supertest }) => {
       },
       _kbnMeta: {
         isLegacy,
+        type,
       },
     };
 

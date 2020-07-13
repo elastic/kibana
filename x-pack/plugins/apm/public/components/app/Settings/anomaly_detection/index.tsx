@@ -62,7 +62,7 @@ export const AnomalyDetection = () => {
       <EuiText>
         {i18n.translate('xpack.apm.settings.anomalyDetection.descriptionText', {
           defaultMessage:
-            'The Machine Learning anomaly detection integration enables application health status indicators in the Service map by identifying transaction duration anomalies.',
+            'The Machine Learning anomaly detection integration enables application health status indicators for each configured environment in the Service map by identifying transaction duration anomalies.',
         })}
       </EuiText>
       <EuiSpacer size="l" />

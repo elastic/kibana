@@ -85,16 +85,27 @@ export const AnalysisFieldsTable: FC<{
   includes: string[];
   loadingItems: boolean;
   setFormState: React.Dispatch<React.SetStateAction<any>>;
+  minimumFieldsRequiredMessage?: string;
+  setMinimumFieldsRequiredMessage: React.Dispatch<React.SetStateAction<any>>;
   tableItems: FieldSelectionItem[];
-}> = ({ dependentVariable, includes, loadingItems, setFormState, tableItems }) => {
+  unsupportedFieldsError?: string;
+  setUnsupportedFieldsError: React.Dispatch<React.SetStateAction<any>>;
+}> = ({
+  dependentVariable,
+  includes,
+  loadingItems,
+  setFormState,
+  minimumFieldsRequiredMessage,
+  setMinimumFieldsRequiredMessage,
+  tableItems,
+  unsupportedFieldsError,
+  setUnsupportedFieldsError,
+}) => {
   const [sortableProperties, setSortableProperties] = useState();
   const [currentPaginationData, setCurrentPaginationData] = useState<{
     pageIndex: number;
     itemsPerPage: number;
   }>({ pageIndex: 0, itemsPerPage: 5 });
-  const [minimumFieldsRequiredMessage, setMinimumFieldsRequiredMessage] = useState<
-    undefined | string
-  >(undefined);
 
   useEffect(() => {
     if (includes.length === 0 && tableItems.length > 0) {
@@ -164,8 +175,21 @@ export const AnalysisFieldsTable: FC<{
         label={i18n.translate('xpack.ml.dataframe.analytics.create.includedFieldsLabel', {
           defaultMessage: 'Included fields',
         })}
-        isInvalid={minimumFieldsRequiredMessage !== undefined}
-        error={minimumFieldsRequiredMessage}
+        fullWidth
+        isInvalid={
+          minimumFieldsRequiredMessage !== undefined || unsupportedFieldsError !== undefined
+        }
+        error={[
+          ...(minimumFieldsRequiredMessage !== undefined ? [minimumFieldsRequiredMessage] : []),
+          ...(unsupportedFieldsError !== undefined
+            ? [
+                i18n.translate('xpack.ml.dataframe.analytics.create.unsupportedFieldsError', {
+                  defaultMessage: 'Invalid. {message}',
+                  values: { message: unsupportedFieldsError },
+                }),
+              ]
+            : []),
+        ]}
       >
         <Fragment />
       </EuiFormRow>
@@ -209,9 +233,10 @@ export const AnalysisFieldsTable: FC<{
               ) {
                 selection = [dependentVariable];
               }
-              // If nothing selected show minimum fields required message and don't update form yet
+              // If includes is empty show minimum fields required message and don't update form yet
               if (selection.length === 0) {
                 setMinimumFieldsRequiredMessage(minimumFieldsMessage);
+                setUnsupportedFieldsError(undefined);
               } else {
                 setMinimumFieldsRequiredMessage(undefined);
                 setFormState({ includes: selection });

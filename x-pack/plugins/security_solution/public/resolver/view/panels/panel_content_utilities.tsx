@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiBreadcrumbs, Breadcrumb, EuiCode } from '@elastic/eui';
+import { EuiBreadcrumbs, EuiBreadcrumb, EuiCode, EuiBetaBadge } from '@elastic/eui';
 import styled from 'styled-components';
 import React, { memo } from 'react';
 import { useResolverTheme } from '../assets';
@@ -17,6 +17,10 @@ export const BoldCode = styled(EuiCode)`
   &.euiCodeBlock code.euiCodeBlock__code {
     font-weight: 900;
   }
+`;
+
+const BetaHeader = styled(`header`)`
+  margin-bottom: 1em;
 `;
 
 /**
@@ -40,6 +44,13 @@ const ThemedBreadcrumbs = styled(EuiBreadcrumbs)<{ background: string; text: str
   }
 `;
 
+const betaBadgeLabel = i18n.translate(
+  'xpack.securitySolution.enpdoint.resolver.panelutils.betaBadgeLabel',
+  {
+    defaultMessage: 'BETA',
+  }
+);
+
 /**
  * Breadcrumb menu with adjustments per direction from UX team
  */
@@ -47,19 +58,24 @@ export const StyledBreadcrumbs = memo(function StyledBreadcrumbs({
   breadcrumbs,
   truncate,
 }: {
-  breadcrumbs: Breadcrumb[];
+  breadcrumbs: EuiBreadcrumb[];
   truncate?: boolean;
 }) {
   const {
     colorMap: { resolverBreadcrumbBackground, resolverEdgeText },
   } = useResolverTheme();
   return (
-    <ThemedBreadcrumbs
-      background={resolverBreadcrumbBackground}
-      text={resolverEdgeText}
-      breadcrumbs={breadcrumbs}
-      truncate={truncate}
-    />
+    <>
+      <BetaHeader>
+        <EuiBetaBadge label={betaBadgeLabel} />
+      </BetaHeader>
+      <ThemedBreadcrumbs
+        background={resolverBreadcrumbBackground}
+        text={resolverEdgeText}
+        breadcrumbs={breadcrumbs}
+        truncate={truncate}
+      />
+    </>
   );
 });
 

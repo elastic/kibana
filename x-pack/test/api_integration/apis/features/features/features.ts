@@ -97,6 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
             'visualize',
             'dashboard',
             'dev_tools',
+            'enterpriseSearch',
             'advancedSettings',
             'indexPatterns',
             'timelion',
