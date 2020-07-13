@@ -225,3 +225,31 @@ test('format() meta can merge override logs', () => {
     },
   });
 });
+
+test('format() meta can override log level objects', () => {
+  const layout = new JsonLayout();
+  expect(
+    JSON.parse(
+      layout.format({
+        timestamp,
+        message: 'foo',
+        level: LogLevel.Error,
+        pid: 3,
+        meta: {
+          log: {
+            level: 'FATAL',
+          },
+        },
+      })
+    )
+  ).toStrictEqual({
+    '@timestamp': '2012-02-01T09:30:22.011-05:00',
+    message: 'foo',
+    log: {
+      level: 'FATAL',
+    },
+    process: {
+      pid: 3,
+    },
+  });
+});
