@@ -84,7 +84,6 @@ export const AnomaliesTable: React.FunctionComponent<{
   results: LogEntryAnomalies;
   setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange;
-  jobId: string;
   changeSortOptions: ChangeSortOptions;
   changePaginationOptions: ChangePaginationOptions;
   sortOptions: SortOptions;
@@ -97,7 +96,6 @@ export const AnomaliesTable: React.FunctionComponent<{
   results,
   timeRange,
   setTimeRange,
-  jobId,
   changeSortOptions,
   sortOptions,
   changePaginationOptions,
@@ -140,11 +138,11 @@ export const AnomaliesTable: React.FunctionComponent<{
         return {
           ...aggregatedDatasetRows,
           [id]: anomaly ? (
-            <AnomaliesTableExpandedRow anomaly={anomaly} timeRange={timeRange} jobId={jobId} />
+            <AnomaliesTableExpandedRow anomaly={anomaly} timeRange={timeRange} />
           ) : null,
         };
       }, {}),
-    [expandedIds, results, timeRange, jobId]
+    [expandedIds, results, timeRange]
   );
 
   const handleTableChange = useCallback(

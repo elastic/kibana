@@ -107,9 +107,9 @@ export async function getLogEntryAnomalies(
     const { jobId } = anomaly;
 
     if (jobId === logRateJobId) {
-      return parseLogRateAnomalyResult(anomaly);
+      return parseLogRateAnomalyResult(anomaly, logRateJobId);
     } else {
-      return parseCategoryAnomalyResult(anomaly);
+      return parseCategoryAnomalyResult(anomaly, logCategoriesJobId);
     }
   });
 
@@ -125,7 +125,7 @@ export async function getLogEntryAnomalies(
   };
 }
 
-const parseLogRateAnomalyResult = (anomaly: MappedAnomalyHit) => {
+const parseLogRateAnomalyResult = (anomaly: MappedAnomalyHit, jobId: string) => {
   const {
     id,
     anomalyScore,
@@ -145,10 +145,11 @@ const parseLogRateAnomalyResult = (anomaly: MappedAnomalyHit) => {
     duration,
     startTime: anomalyStartTime,
     type: 'logRate' as const,
+    jobId,
   };
 };
 
-const parseCategoryAnomalyResult = (anomaly: MappedAnomalyHit) => {
+const parseCategoryAnomalyResult = (anomaly: MappedAnomalyHit, jobId: string) => {
   const {
     id,
     anomalyScore,
@@ -170,6 +171,7 @@ const parseCategoryAnomalyResult = (anomaly: MappedAnomalyHit) => {
     startTime: anomalyStartTime,
     categoryId,
     type: 'logCategory' as const,
+    jobId,
   };
 };
 

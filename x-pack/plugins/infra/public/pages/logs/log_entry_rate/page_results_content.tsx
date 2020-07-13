@@ -52,7 +52,6 @@ export const LogEntryRateResultsContent: React.FunctionComponent<LogEntryRateRes
     hasOutdatedJobConfigurations,
     hasOutdatedJobDefinitions,
     hasStoppedJobs,
-    jobIds,
     sourceConfiguration: { sourceId },
   } = useLogEntryRateModuleContext();
 
@@ -228,7 +227,6 @@ export const LogEntryRateResultsContent: React.FunctionComponent<LogEntryRateRes
               anomalies={logEntryAnomalies}
               setTimeRange={handleChartTimeRangeChange}
               timeRange={queryTimeRange.value}
-              jobId={jobIds['log-entry-rate']}
               page={page}
               fetchNextPage={fetchNextPage}
               fetchPreviousPage={fetchPreviousPage}

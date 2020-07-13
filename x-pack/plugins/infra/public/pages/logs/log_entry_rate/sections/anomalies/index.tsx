@@ -34,7 +34,6 @@ export const AnomaliesResults: React.FunctionComponent<{
   setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange;
   viewSetupForReconfiguration: () => void;
-  jobId: string;
   page: Page;
   fetchNextPage?: FetchNextPage;
   fetchPreviousPage?: FetchPreviousPage;
@@ -49,7 +48,6 @@ export const AnomaliesResults: React.FunctionComponent<{
   setTimeRange,
   timeRange,
   viewSetupForReconfiguration,
-  jobId,
   anomalies,
   changeSortOptions,
   sortOptions,
@@ -136,7 +134,6 @@ export const AnomaliesResults: React.FunctionComponent<{
             results={anomalies}
             setTimeRange={setTimeRange}
             timeRange={timeRange}
-            jobId={jobId}
             changeSortOptions={changeSortOptions}
             changePaginationOptions={changePaginationOptions}
             sortOptions={sortOptions}

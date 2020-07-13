@@ -35,6 +35,7 @@ const logEntryAnomalyCommonFieldsRT = rt.type({
   type: anomalyTypeRT,
   duration: rt.number,
   startTime: rt.number,
+  jobId: rt.string,
 });
 const logEntrylogRateAnomalyRT = logEntryAnomalyCommonFieldsRT;
 const logEntrylogCategoryAnomalyRT = rt.partial({
