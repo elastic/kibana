@@ -30,11 +30,13 @@ import {
 } from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function cloudwatchLogsSpecProvider(context: TutorialContext): TutorialSchema {
+  const moduleName = 'aws';
   return {
     id: 'cloudwatchLogs',
     name: i18n.translate('home.tutorials.cloudwatchLogs.nameTitle', {
       defaultMessage: 'AWS Cloudwatch logs',
     }),
+    moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.cloudwatchLogs.shortDescription', {
       defaultMessage: 'Collect Cloudwatch logs with Functionbeat.',
