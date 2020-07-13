@@ -124,6 +124,8 @@ export interface TimelineInput {
 
   eventType?: Maybe<string>;
 
+  excludedRowRendererIds?: Maybe<RowRendererId[]>;
+
   filters?: Maybe<FilterTimelineInput[]>;
 
   kqlMode?: Maybe<string>;
@@ -347,6 +349,22 @@ export enum TlsFields {
 export enum DataProviderType {
   default = 'default',
   template = 'template',
+}
+
+export enum RowRendererId {
+  auditd = 'auditd',
+  auditd_file = 'auditd_file',
+  netflow = 'netflow',
+  plain = 'plain',
+  suricata = 'suricata',
+  system = 'system',
+  system_dns = 'system_dns',
+  system_endgame_process = 'system_endgame_process',
+  system_file = 'system_file',
+  system_fim = 'system_fim',
+  system_security_event = 'system_security_event',
+  system_socket = 'system_socket',
+  zeek = 'zeek',
 }
 
 export enum TimelineStatus {
@@ -1960,6 +1978,8 @@ export interface TimelineResult {
   eventIdToNoteIds?: Maybe<NoteResult[]>;
 
   eventType?: Maybe<string>;
+
+  excludedRowRendererIds?: Maybe<RowRendererId[]>;
 
   favorite?: Maybe<FavoriteTimelineResult[]>;
 
@@ -4385,6 +4405,8 @@ export namespace GetAllTimeline {
 
     eventIdToNoteIds: Maybe<EventIdToNoteIds[]>;
 
+    excludedRowRendererIds: Maybe<RowRendererId[]>;
+
     notes: Maybe<Notes[]>;
 
     noteIds: Maybe<string[]>;
@@ -5453,6 +5475,8 @@ export namespace GetOneTimeline {
     eventType: Maybe<string>;
 
     eventIdToNoteIds: Maybe<EventIdToNoteIds[]>;
+
+    excludedRowRendererIds: Maybe<RowRendererId[]>;
 
     favorite: Maybe<Favorite[]>;
 
