@@ -108,6 +108,7 @@ describe('Overview', () => {
 
       const mockuseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<UseMessagesStorage>;
       mockuseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
+      (useIngestEnabledCheck as jest.Mock).mockReturnValue({ allEnabled: true });
 
       const wrapper = mount(
         <TestProviders>
@@ -134,6 +135,7 @@ describe('Overview', () => {
 
       const mockuseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<UseMessagesStorage>;
       mockuseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
+      (useIngestEnabledCheck as jest.Mock).mockReturnValue({ allEnabled: true });
 
       const wrapper = mount(
         <TestProviders>
@@ -160,6 +162,7 @@ describe('Overview', () => {
 
       const mockuseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<UseMessagesStorage>;
       mockuseMessagesStorage.mockImplementation(() => endpointNoticeMessage(true));
+      (useIngestEnabledCheck as jest.Mock).mockReturnValue({ allEnabled: true });
 
       const wrapper = mount(
         <TestProviders>
@@ -181,6 +184,7 @@ describe('Overview', () => {
 
       const mockuseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<UseMessagesStorage>;
       mockuseMessagesStorage.mockImplementation(() => endpointNoticeMessage(true));
+      (useIngestEnabledCheck as jest.Mock).mockReturnValue({ allEnabled: true });
 
       const wrapper = mount(
         <TestProviders>
@@ -202,6 +206,27 @@ describe('Overview', () => {
 
       const mockuseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<UseMessagesStorage>;
       mockuseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
+      (useIngestEnabledCheck as jest.Mock).mockReturnValue({ allEnabled: true });
+
+      const wrapper = mount(
+        <TestProviders>
+          <MemoryRouter>
+            <Overview />
+          </MemoryRouter>
+        </TestProviders>
+      );
+      expect(wrapper.find('[data-test-subj="endpoint-prompt-banner"]').exists()).toBe(false);
+    });
+
+    test('it does NOT render the Endpoint banner when Ingest is NOT available', async () => {
+      (useWithSource as jest.Mock).mockReturnValue({
+        indicesExist: true,
+        indexPattern: {},
+      });
+
+      const mockuseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<UseMessagesStorage>;
+      mockuseMessagesStorage.mockImplementation(() => endpointNoticeMessage(true));
+      (useIngestEnabledCheck as jest.Mock).mockReturnValue({ allEnabled: false });
 
       const wrapper = mount(
         <TestProviders>

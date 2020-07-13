@@ -4,53 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  exportList,
-  useApi,
-  useExceptionList,
-  usePersistExceptionItem,
-  usePersistExceptionList,
-  useFindLists,
-  useDeleteList,
-  useImportList,
-  useCursor,
-  addExceptionListItem,
-  updateExceptionListItem,
-  fetchExceptionListById,
-  addExceptionList,
-  ExceptionIdentifiers,
-  ExceptionList,
-  Pagination,
-  UseExceptionListSuccess,
-} from '../../lists/public';
-export {
-  ListSchema,
-  CommentsArray,
-  CreateCommentsArray,
-  Comments,
-  CreateComments,
-  ExceptionListSchema,
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-  UpdateExceptionListItemSchema,
-  Entry,
-  EntryExists,
-  EntryNested,
-  EntryList,
-  EntriesArray,
-  NamespaceType,
-  Operator,
-  OperatorEnum,
-  OperatorType,
-  OperatorTypeEnum,
-  Type,
-  ExceptionListTypeEnum,
-  exceptionListItemSchema,
-  createExceptionListItemSchema,
-  listSchema,
-  entry,
-  entriesNested,
-  entriesExists,
-  entriesList,
-  ExceptionListType,
-} from '../../lists/common/schemas';
+// DEPRECATED: Do not add exports to this file; please import from shared_imports instead
+
+export * from './shared_imports';

@@ -8,6 +8,7 @@ import { EuiPanel, EuiBasicTable, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { TimelineType } from '../../../../common/types/timeline';
 import { ImportDataModal } from '../../../common/components/import_data_modal';
 import {
   UtilityBarGroup,
@@ -36,7 +37,6 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     isLoading,
     itemIdToExpandedNotesRowMap,
     importDataModalToggle,
-    onAddTimelinesToFavorites,
     onDeleteSelected,
     onlyFavorites,
     onOpenTimeline,
@@ -54,7 +54,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     sortDirection,
     setImportDataModalToggle,
     sortField,
-    timelineType,
+    timelineType = TimelineType.default,
     timelineFilter,
     templateTimelineFilter,
     totalSearchResultsCount,
@@ -73,7 +73,26 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       deleteTimelines,
       selectedItems,
       tableRef,
+      timelineType,
     });
+
+    const nTemplates = useMemo(
+      () => (
+        <FormattedMessage
+          id="xpack.securitySolution.open.timeline.showingNTemplatesLabel"
+          defaultMessage="{totalSearchResultsCount} {totalSearchResultsCount, plural, one {template} other {templates}} {with}"
+          values={{
+            totalSearchResultsCount,
+            with: (
+              <span data-test-subj="selectable-query-text">
+                {query.trim().length ? `${i18n.WITH} "${query.trim()}"` : ''}
+              </span>
+            ),
+          }}
+        />
+      ),
+      [totalSearchResultsCount, query]
+    );
 
     const nTimelines = useMemo(
       () => (
@@ -120,13 +139,20 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       }
     }, [setImportDataModalToggle, refetch, searchResults, totalSearchResultsCount]);
 
-    const actionTimelineToShow = useMemo<ActionTimelineToShow[]>(
-      () =>
-        onDeleteSelected != null && deleteTimelines != null
-          ? ['delete', 'duplicate', 'export', 'selectable']
-          : ['duplicate', 'export', 'selectable'],
-      [onDeleteSelected, deleteTimelines]
-    );
+    const actionTimelineToShow = useMemo<ActionTimelineToShow[]>(() => {
+      const timelineActions: ActionTimelineToShow[] = [
+        'createFrom',
+        'duplicate',
+        'export',
+        'selectable',
+      ];
+
+      if (onDeleteSelected != null && deleteTimelines != null) {
+        timelineActions.push('delete');
+      }
+
+      return timelineActions;
+    }, [onDeleteSelected, deleteTimelines]);
 
     const SearchRowContent = useMemo(() => <>{templateTimelineFilter}</>, [templateTimelineFilter]);
 
@@ -167,7 +193,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
             onQueryChange={onQueryChange}
             onToggleOnlyFavorites={onToggleOnlyFavorites}
             query={query}
-            totalSearchResultsCount={totalSearchResultsCount}
+            timelineType={timelineType}
           >
             {SearchRowContent}
           </SearchRow>
@@ -177,13 +203,18 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
               <UtilityBarGroup>
                 <UtilityBarText data-test-subj="query-message">
                   <>
-                    {i18n.SHOWING} {nTimelines}
+                    {i18n.SHOWING}{' '}
+                    {timelineType === TimelineType.template ? nTemplates : nTimelines}
                   </>
                 </UtilityBarText>
               </UtilityBarGroup>
 
               <UtilityBarGroup>
-                <UtilityBarText>{i18n.SELECTED_TIMELINES(selectedItems.length)}</UtilityBarText>
+                <UtilityBarText>
+                  {timelineType === TimelineType.template
+                    ? i18n.SELECTED_TEMPLATES(selectedItems.length)
+                    : i18n.SELECTED_TIMELINES(selectedItems.length)}
+                </UtilityBarText>
                 <UtilityBarAction
                   iconSide="right"
                   iconType="arrowDown"

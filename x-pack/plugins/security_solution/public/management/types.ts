@@ -18,14 +18,14 @@ export type ManagementStoreGlobalNamespace = 'management';
 export type ManagementState = CombinedState<{
   policyList: PolicyListState;
   policyDetails: PolicyDetailsState;
-  endpoints: HostState;
+  hosts: HostState;
 }>;
 
 /**
  * The management list of sub-tabs. Changes to these will impact the Router routes.
  */
 export enum ManagementSubTab {
-  endpoints = 'endpoints',
+  hosts = 'hosts',
   policies = 'policy',
 }
 
