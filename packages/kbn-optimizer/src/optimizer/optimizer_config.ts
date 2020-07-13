@@ -31,6 +31,7 @@ import {
 
 import { findKibanaPlatformPlugins, KibanaPlatformPlugin } from './kibana_platform_plugins';
 import { getPluginBundles } from './get_plugin_bundles';
+import { filterById } from './filter_by_id';
 
 function pickMaxWorkerCount(dist: boolean) {
   // don't break if cpus() returns nothing, or an empty array
@@ -77,6 +78,18 @@ interface Options {
   pluginScanDirs?: string[];
   /** absolute paths that should be added to the default scan dirs */
   extraPluginScanDirs?: string[];
+  /**
+   * array of comma separated patterns that will be matched against bundle ids.
+   * bundles will only be built if they match one of the specified patterns.
+   * `*` can exist anywhere in each pattern and will match anything, `!` inverts the pattern
+   *
+   * examples:
+   *  --filter foo --filter bar # [foo, bar], excludes [foobar]
+   *  --filter foo,bar # [foo, bar], excludes [foobar]
+   *  --filter foo* # [foo, foobar], excludes [bar]
+   *  --filter f*r # [foobar], excludes [foo, bar]
+   */
+  filter?: string[];
 
   /** flag that causes the core bundle to be built along with plugins */
   includeCoreBundle?: boolean;
@@ -103,6 +116,7 @@ interface ParsedOptions {
   dist: boolean;
   pluginPaths: string[];
   pluginScanDirs: string[];
+  filters: string[];
   inspectWorkers: boolean;
   includeCoreBundle: boolean;
   themeTags: ThemeTags;
@@ -118,6 +132,7 @@ export class OptimizerConfig {
     const inspectWorkers = !!options.inspectWorkers;
     const cache = options.cache !== false && !process.env.KBN_OPTIMIZER_NO_CACHE;
     const includeCoreBundle = !!options.includeCoreBundle;
+    const filters = options.filter || [];
 
     const repoRoot = options.repoRoot;
     if (!Path.isAbsolute(repoRoot)) {
@@ -172,6 +187,7 @@ export class OptimizerConfig {
       cache,
       pluginScanDirs,
       pluginPaths,
+      filters,
       inspectWorkers,
       includeCoreBundle,
       themeTags,
@@ -198,7 +214,7 @@ export class OptimizerConfig {
     ];
 
     return new OptimizerConfig(
-      bundles,
+      filterById(options.filters, bundles),
       options.cache,
       options.watch,
       options.inspectWorkers,

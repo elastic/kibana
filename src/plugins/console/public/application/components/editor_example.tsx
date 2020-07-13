@@ -18,14 +18,23 @@
  */
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import exampleText from 'raw-loader!../constants/help_example.txt';
 import React, { useEffect } from 'react';
 import { createReadOnlyAceEditor } from '../models/legacy_core_editor';
 
 interface EditorExampleProps {
   panel: string;
 }
+
+const exampleText = `
+# index a doc
+PUT index/1
+{
+  "body": "here"
+}
+
+# and get it ...
+GET index/1
+`;
 
 export function EditorExample(props: EditorExampleProps) {
   const elemId = `help-example-${props.panel}`;

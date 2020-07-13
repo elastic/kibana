@@ -177,8 +177,6 @@ describe('<ComponentTemplateCreate />', () => {
           template: {
             settings: SETTINGS,
             mappings: {
-              _source: {},
-              _meta: {},
               properties: {
                 [BOOLEAN_MAPPING_FIELD.name]: {
                   type: BOOLEAN_MAPPING_FIELD.type,
