@@ -12,6 +12,7 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import './add_message_variables.scss';
 import { ActionVariable } from '../../types';
@@ -42,14 +43,17 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
       >
         <>
           {`{{${variable.name}}}`}
-          <EuiSpacer size="m" />
-          <FormattedMessage
-            id="xpack.triggersActionsUI.components.builtinActionTypes.slackAction.webhookUrlHelpLabel"
-            defaultMessage="{description}"
-            values={{
-              description: variable.description,
-            }}
-          />
+          <EuiText size="s" color="subdued">
+            <p className="euiTextColor--subdued">
+              <FormattedMessage
+                id="xpack.triggersActionsUI.components.addMessageVariable.variableDescriptionLabel"
+                defaultMessage="{description}"
+                values={{
+                  description: variable.description,
+                }}
+              />
+            </p>
+          </EuiText>
         </>
       </EuiContextMenuItem>
     ));
