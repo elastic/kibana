@@ -48,7 +48,11 @@ export const AlphaFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
               defaultMessage="We encourage you to read our {docsLink} or to ask questions and send feedback in our {forumLink}."
               values={{
                 docsLink: (
-                  <EuiLink href="https://ela.st/ingest-manager-docs" external target="_blank">
+                  <EuiLink
+                    href="https://www.elastic.co/guide/en/ingest-management/current/index.html"
+                    external
+                    target="_blank"
+                  >
                     <FormattedMessage
                       id="xpack.ingestManager.alphaMessaging.docsLink"
                       defaultMessage="documentation"
