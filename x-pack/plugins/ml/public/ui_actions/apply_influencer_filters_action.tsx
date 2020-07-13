@@ -29,7 +29,7 @@ export function createApplyInfluencerFiltersAction(
     },
     getDisplayName() {
       return i18n.translate('xpack.ml.actions.applyInfluencersFiltersTitle', {
-        defaultMessage: 'Apply influencer filters',
+        defaultMessage: 'Filer for value',
       });
     },
     async execute({ data }: SwimLaneDrilldownContext) {
@@ -71,12 +71,13 @@ export function createApplyInfluencerFiltersAction(
       );
     },
     async isCompatible({ embeddable, data }: SwimLaneDrilldownContext) {
-      // Only compatible with view by influencer swim lanes
+      // Only compatible with view by influencer swim lanes and single selection
       return (
         embeddable instanceof AnomalySwimlaneEmbeddable &&
         data !== undefined &&
         data.type === SWIMLANE_TYPE.VIEW_BY &&
-        data.viewByFieldName !== VIEW_BY_JOB_LABEL
+        data.viewByFieldName !== VIEW_BY_JOB_LABEL &&
+        data.lanes.length === 1
       );
     },
   });
