@@ -48,7 +48,6 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
 
       loadTestFile(require.resolve('./_embedding_chart'));
       loadTestFile(require.resolve('./_chart_types'));
-      loadTestFile(require.resolve('./_area_chart'));
       loadTestFile(require.resolve('./_data_table'));
       loadTestFile(require.resolve('./_data_table_nontimeindex'));
       loadTestFile(require.resolve('./_data_table_notimeindex_filters'));
@@ -69,7 +68,6 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     describe('', function () {
       this.tags('ciGroup11');
 
-      loadTestFile(require.resolve('./_line_chart'));
       loadTestFile(require.resolve('./_pie_chart'));
       loadTestFile(require.resolve('./_point_series_options'));
       loadTestFile(require.resolve('./_markdown_vis'));
@@ -83,17 +81,20 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       }
     });
 
-    describe('', function () {
+    // eslint-disable-next-line ban/ban
+    describe.only('', function () {
       this.tags('ciGroup12');
 
-      loadTestFile(require.resolve('./_tag_cloud'));
+      loadTestFile(require.resolve('./_area_chart'));
+      loadTestFile(require.resolve('./_line_chart'));
+      // loadTestFile(require.resolve('./_tag_cloud'));
       loadTestFile(require.resolve('./_vertical_bar_chart'));
       loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
-      loadTestFile(require.resolve('./_tsvb_chart'));
-      loadTestFile(require.resolve('./_tsvb_time_series'));
-      loadTestFile(require.resolve('./_tsvb_markdown'));
-      loadTestFile(require.resolve('./_tsvb_table'));
-      loadTestFile(require.resolve('./_vega_chart'));
+      // loadTestFile(require.resolve('./_tsvb_chart'));
+      // loadTestFile(require.resolve('./_tsvb_time_series'));
+      // loadTestFile(require.resolve('./_tsvb_markdown'));
+      // loadTestFile(require.resolve('./_tsvb_table'));
+      // loadTestFile(require.resolve('./_vega_chart'));
     });
   });
 }

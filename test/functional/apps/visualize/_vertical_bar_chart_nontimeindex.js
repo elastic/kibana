@@ -25,8 +25,7 @@ export default function ({ getService, getPageObjects }) {
   const inspector = getService('inspector');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'visEditor', 'visChart']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/22322
-  describe.skip('vertical bar chart with index without time filter', function () {
+  describe('vertical bar chart with index without time filter', function () {
     const vizName1 = 'Visualization VerticalBarChart without time filter';
 
     const initBarChart = async () => {
@@ -129,7 +128,7 @@ export default function ({ getService, getPageObjects }) {
       await inspector.expectTableData(expectedChartData);
     });
 
-    describe.skip('switch between Y axis scale types', () => {
+    describe('switch between Y axis scale types', () => {
       before(initBarChart);
       const axisId = 'ValueAxis-1';
 
