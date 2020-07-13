@@ -61,19 +61,25 @@ export class ManifestManager {
   /**
    * Gets a ManifestClient for the provided schemaVersion.
    *
-   * @param schemaVersion
+   * @param schemaVersion The schema version of the manifest.
+   * @returns {ManifestClient} A ManifestClient scoped to the provided schemaVersion.
    */
-  private getManifestClient(schemaVersion: string) {
+  protected getManifestClient(schemaVersion: string): ManifestClient {
     return new ManifestClient(this.savedObjectsClient, schemaVersion as ManifestSchemaVersion);
   }
 
   /**
    * Builds an array of artifacts (one per supported OS) based on the current
-   * state of exception-list-agnostic SO's.
+   * state of exception-list-agnostic SOs.
    *
-   * @param schemaVersion
+   * @param schemaVersion The schema version of the artifact
+   * @returns {Promise<InternalArtifactSchema[]>} An array of uncompressed artifacts built from exception-list-agnostic SOs.
+   * @throws Throws/rejects if there are errors building the list.
    */
-  private async buildExceptionListArtifacts(schemaVersion: string) {
+  protected async buildExceptionListArtifacts(
+    schemaVersion: string
+  ): Promise<InternalArtifactSchema[]> {
+    // TODO: should wrap in try/catch?
     return ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.reduce(
       async (acc: Promise<InternalArtifactSchema[]>, os) => {
         const exceptionList = await getFullEndpointExceptionList(
@@ -91,12 +97,74 @@ export class ManifestManager {
   }
 
   /**
+   * Writes new artifact SOs based on provided snapshot.
+   *
+   * @param snapshot A ManifestSnapshot to use for writing the artifacts.
+   * @returns {Promise<Error[]>} Any errors encountered.
+   */
+  private async writeArtifacts(snapshot: ManifestSnapshot): Promise<Error[]> {
+    const errors: Error[] = [];
+    for (const diff of snapshot.diffs) {
+      const artifact = snapshot.manifest.getArtifact(diff.id);
+      if (artifact === undefined) {
+        throw new Error(
+          `Corrupted manifest detected. Diff contained artifact ${diff.id} not in manifest.`
+        );
+      }
+
+      const compressedArtifact = await compressExceptionList(Buffer.from(artifact.body, 'base64'));
+      artifact.body = compressedArtifact.toString('base64');
+      artifact.encodedSize = compressedArtifact.byteLength;
+      artifact.compressionAlgorithm = 'zlib';
+      artifact.encodedSha256 = createHash('sha256').update(compressedArtifact).digest('hex');
+
+      try {
+        // Write the artifact SO
+        await this.artifactClient.createArtifact(artifact);
+        // Cache the compressed body of the artifact
+        this.cache.set(diff.id, Buffer.from(artifact.body, 'base64'));
+      } catch (err) {
+        if (err.status === 409) {
+          this.logger.debug(`Tried to create artifact ${diff.id}, but it already exists.`);
+        } else {
+          // TODO: log error here?
+          errors.push(err);
+        }
+      }
+    }
+    return errors;
+  }
+
+  /**
+   * Deletes old artifact SOs based on provided snapshot.
+   *
+   * @param snapshot A ManifestSnapshot to use for deleting the artifacts.
+   * @returns {Promise<Error[]>} Any errors encountered.
+   */
+  private async deleteArtifacts(snapshot: ManifestSnapshot): Promise<Error[]> {
+    const errors: Error[] = [];
+    for (const diff of snapshot.diffs) {
+      try {
+        // Delete the artifact SO
+        await this.artifactClient.deleteArtifact(diff.id);
+        // TODO: should we delete the cache entry here?
+        this.logger.info(`Cleaned up artifact ${diff.id}`);
+      } catch (err) {
+        errors.push(err);
+      }
+    }
+    return errors;
+  }
+
+  /**
    * Returns the last dispatched manifest based on the current state of the
    * user-artifact-manifest SO.
    *
-   * @param schemaVersion
+   * @param schemaVersion The schema version of the manifest.
+   * @returns {Promise<Manifest | null>} The last dispatched manifest, or null if does not exist.
+   * @throws Throws/rejects if there is an unexpected error retrieving the manifest.
    */
-  private async getLastDispatchedManifest(schemaVersion: string) {
+  public async getLastDispatchedManifest(schemaVersion: string): Promise<Manifest | null> {
     try {
       const manifestClient = this.getManifestClient(schemaVersion);
       const manifestSo = await manifestClient.getManifest();
@@ -127,9 +195,11 @@ export class ManifestManager {
   /**
    * Snapshots a manifest based on current state of exception-list-agnostic SOs.
    *
-   * @param opts TODO
+   * @param opts Optional parameters for snapshot retrieval.
+   * @param opts.initialize Initialize a new Manifest when no manifest SO can be retrieved.
+   * @returns {Promise<ManifestSnapshot | null>} A snapshot of the manifest, or null if not initialized.
    */
-  public async getSnapshot(opts?: ManifestSnapshotOpts) {
+  public async getSnapshot(opts?: ManifestSnapshotOpts): Promise<ManifestSnapshot | null> {
     try {
       let oldManifest: Manifest | null;
 
@@ -154,7 +224,7 @@ export class ManifestManager {
       const newManifest = Manifest.fromArtifacts(
         artifacts,
         ManifestConstants.SCHEMA_VERSION,
-        oldManifest.getVersion()
+        oldManifest
       );
 
       // Get diffs
@@ -176,66 +246,39 @@ export class ManifestManager {
    * Creates artifacts that do not yet exist and cleans up old artifacts that have been
    * superceded by this snapshot.
    *
-   * Can be filtered to apply one or both operations.
-   *
-   * @param snapshot
-   * @param diffType
+   * @param snapshot A ManifestSnapshot to use for sync.
+   * @returns {Promise<Error[]>} Any errors encountered.
    */
-  public async syncArtifacts(snapshot: ManifestSnapshot, diffType?: 'add' | 'delete') {
-    const filteredDiffs = snapshot.diffs.reduce((diffs: ManifestDiff[], diff) => {
-      if (diff.type === diffType || diffType === undefined) {
-        diffs.push(diff);
-      } else if (!['add', 'delete'].includes(diff.type)) {
-        // TODO: replace with io-ts schema
-        throw new Error(`Unsupported diff type: ${diff.type}`);
-      }
-      return diffs;
-    }, []);
-
-    const adds = filteredDiffs.filter((diff) => {
-      return diff.type === 'add';
+  public async syncArtifacts(
+    snapshot: ManifestSnapshot,
+    diffType: 'add' | 'delete'
+  ): Promise<Error[]> {
+    const filteredDiffs = snapshot.diffs.filter((diff) => {
+      return diff.type === diffType;
     });
 
-    const deletes = filteredDiffs.filter((diff) => {
-      return diff.type === 'delete';
-    });
+    const tmpSnapshot = { ...snapshot };
+    tmpSnapshot.diffs = filteredDiffs;
 
-    for (const diff of adds) {
-      const artifact = snapshot.manifest.getArtifact(diff.id);
-      const compressedArtifact = await compressExceptionList(Buffer.from(artifact.body, 'base64'));
-      artifact.body = compressedArtifact.toString('base64');
-      artifact.encodedSize = compressedArtifact.byteLength;
-      artifact.compressionAlgorithm = 'zlib';
-      artifact.encodedSha256 = createHash('sha256').update(compressedArtifact).digest('hex');
-
-      try {
-        await this.artifactClient.createArtifact(artifact);
-      } catch (err) {
-        if (err.status === 409) {
-          this.logger.debug(`Tried to create artifact ${diff.id}, but it already exists.`);
-        } else {
-          throw err;
-        }
-      }
-      // Cache the body of the artifact
-      this.cache.set(diff.id, Buffer.from(artifact.body, 'base64'));
+    if (diffType === 'add') {
+      return this.writeArtifacts(tmpSnapshot);
+    } else if (diffType === 'delete') {
+      return this.deleteArtifacts(tmpSnapshot);
     }
 
-    for (const diff of deletes) {
-      await this.artifactClient.deleteArtifact(diff.id);
-      // TODO: should we delete the cache entry here?
-      this.logger.info(`Cleaned up artifact ${diff.id}`);
-    }
+    return [new Error(`Unsupported diff type: ${diffType}`)];
   }
 
   /**
    * Dispatches the manifest by writing it to the endpoint package config.
    *
+   * @param manifest The Manifest to dispatch.
+   * @returns {Promise<Error[]>} Any errors encountered.
    */
-  public async dispatch(manifest: Manifest) {
+  public async dispatch(manifest: Manifest): Promise<Error[]> {
     let paging = true;
     let page = 1;
-    let success = true;
+    const errors: Error[] = [];
 
     while (paging) {
       const { items, total } = await this.packageConfigService.list(this.savedObjectsClient, {
@@ -259,13 +302,10 @@ export class ManifestManager {
               `Updated package config ${id} with manifest version ${manifest.getVersion()}`
             );
           } catch (err) {
-            success = false;
-            this.logger.debug(`Error updating package config ${id}`);
-            this.logger.error(err);
+            errors.push(err);
           }
         } else {
-          success = false;
-          this.logger.debug(`Package config ${id} has no config.`);
+          errors.push(new Error(`Package config ${id} has no config.`));
         }
       }
 
@@ -273,32 +313,38 @@ export class ManifestManager {
       page++;
     }
 
-    // TODO: revisit success logic
-    return success;
+    return errors;
   }
 
   /**
    * Commits a manifest to indicate that it has been dispatched.
    *
-   * @param manifest
+   * @param manifest The Manifest to commit.
+   * @returns {Promise<Error | null>} An error if encountered, or null if successful.
    */
-  public async commit(manifest: Manifest) {
-    const manifestClient = this.getManifestClient(manifest.getSchemaVersion());
+  public async commit(manifest: Manifest): Promise<Error | null> {
+    try {
+      const manifestClient = this.getManifestClient(manifest.getSchemaVersion());
 
-    // Commit the new manifest
-    if (manifest.getVersion() === ManifestConstants.INITIAL_VERSION) {
-      await manifestClient.createManifest(manifest.toSavedObject());
-    } else {
-      const version = manifest.getVersion();
-      if (version === ManifestConstants.INITIAL_VERSION) {
-        throw new Error('Updating existing manifest with baseline version. Bad state.');
+      // Commit the new manifest
+      if (manifest.getVersion() === ManifestConstants.INITIAL_VERSION) {
+        await manifestClient.createManifest(manifest.toSavedObject());
+      } else {
+        const version = manifest.getVersion();
+        if (version === ManifestConstants.INITIAL_VERSION) {
+          throw new Error('Updating existing manifest with baseline version. Bad state.');
+        }
+        await manifestClient.updateManifest(manifest.toSavedObject(), {
+          version,
+        });
       }
-      await manifestClient.updateManifest(manifest.toSavedObject(), {
-        version,
-      });
+
+      this.logger.info(`Committed manifest ${manifest.getVersion()}`);
+    } catch (err) {
+      return err;
     }
 
-    this.logger.info(`Committed manifest ${manifest.getVersion()}`);
+    return null;
   }
 
   /**
