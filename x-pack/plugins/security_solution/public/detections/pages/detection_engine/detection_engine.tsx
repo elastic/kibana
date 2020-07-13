@@ -34,7 +34,7 @@ import { useUserInfo } from '../../components/user_info';
 import { OverviewEmpty } from '../../../overview/components/overview_empty';
 import { DetectionEngineNoIndex } from './detection_engine_no_signal_index';
 import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
-import { useListsConfig } from '../../containers/detection_engine/alerts/use_lists_config';
+import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
 import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
 import * as i18n from './translations';
 import { LinkButton } from '../../../common/components/links';

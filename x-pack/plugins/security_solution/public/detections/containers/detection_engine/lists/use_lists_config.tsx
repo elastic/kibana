@@ -9,25 +9,24 @@ import { useEffect } from 'react';
 import { useListsIndex } from './use_lists_index';
 import { useListsPrivileges } from './use_lists_privileges';
 
-export interface UseListsConfigState {
+export interface UseListsConfigReturn {
+  canManageIndex: boolean | null;
+  canWriteIndex: boolean | null;
+  loading: boolean;
   needsConfiguration: boolean | null;
 }
 
-export interface UseListsConfigReturn extends UseListsConfigState {
-  loading: boolean;
-}
-
 export const useListsConfig = (): UseListsConfigReturn => {
-  const { loading: indexLoading, indexExists, createIndex } = useListsIndex();
-  const { loading: privilegesLoading, canManageIndex, isAuthenticated } = useListsPrivileges();
+  const { createIndex, indexExists, loading: indexLoading } = useListsIndex();
+  const { canManageIndex, canWriteIndex, loading: privilegesLoading } = useListsPrivileges();
   const loading = indexLoading || privilegesLoading;
   const needsConfiguration = indexExists === false;
 
   useEffect(() => {
-    if (isAuthenticated && canManageIndex && needsConfiguration) {
+    if (canManageIndex && needsConfiguration) {
       createIndex();
     }
-  }, [canManageIndex, createIndex, needsConfiguration, isAuthenticated]);
+  }, [canManageIndex, createIndex, needsConfiguration]);
 
-  return { loading, needsConfiguration };
+  return { canManageIndex, canWriteIndex, loading, needsConfiguration };
 };

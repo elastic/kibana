@@ -88,14 +88,14 @@ export const useListsPrivileges = (): UseListsPrivilegesReturn => {
     }
   }, [http, lists, readListPrivileges]);
 
-  // initial read
+  // initRead
   useEffect(() => {
     if (!loading && state.isAuthenticated === null) {
       readPrivileges();
     }
   }, [loading, readPrivileges, state.isAuthenticated]);
 
-  // handle read result
+  // handleReadResult
   useEffect(() => {
     if (privilegesState.result != null) {
       try {
@@ -116,7 +116,7 @@ export const useListsPrivileges = (): UseListsPrivilegesReturn => {
     }
   }, [privilegesState.result]);
 
-  // handle read error
+  // handleReadError
   useEffect(() => {
     const error = privilegesState.error;
     if (isApiError(error)) {

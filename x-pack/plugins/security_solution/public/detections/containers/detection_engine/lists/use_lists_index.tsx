@@ -33,6 +33,7 @@ export const useListsIndex = (): UseListsIndexReturn => {
     start: createListIndex,
     ...createListIndexState
   } = useCreateListIndex();
+  const loading = readLoading || createLoading;
 
   const readIndex = useCallback(() => {
     if (lists) {
@@ -95,5 +96,5 @@ export const useListsIndex = (): UseListsIndexReturn => {
     }
   }, [createListIndexState.error, toasts]);
 
-  return { loading: readLoading || createLoading, createIndex, ...state };
+  return { loading, createIndex, ...state };
 };
