@@ -124,7 +124,6 @@ export const LogEntryRatePageContent = memo(() => {
       <>
         <LogEntryRateResultsContent />
         <LogAnalysisSetupFlyout />
-        {/* <LogEntryRateSetupFlyout isOpen={isFlyoutOpen} onClose={closeFlyout} /> */}
       </>
     );
   } else if (!hasLogAnalysisSetupCapabilities) {
@@ -134,7 +133,6 @@ export const LogEntryRatePageContent = memo(() => {
       <>
         <LogEntryRateSetupContent onOpenSetup={showModuleList} />
         <LogAnalysisSetupFlyout />
-        {/* <LogEntryRateSetupFlyout isOpen={isFlyoutOpen} onClose={closeFlyout} /> */}
       </>
     );
   }
