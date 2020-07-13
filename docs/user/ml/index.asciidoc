@@ -47,14 +47,14 @@ create {anomaly-jobs} and manage jobs and {dfeeds} from the *Job Management*
 pane: 
 
 [role="screenshot"]
-image::user/ml/images/ml-job-management.jpg[Job Management]
+image::user/ml/images/ml-job-management.png[Job Management]
 
 You can use the *Settings* pane to create and edit 
 {ml-docs}/ml-calendars.html[calendars] and the filters that are used in 
 {ml-docs}/ml-rules.html[custom rules]:
 
 [role="screenshot"]
-image::user/ml/images/ml-settings.jpg[Calendar Management]
+image::user/ml/images/ml-settings.png[Calendar Management]
 
 The *Anomaly Explorer* and *Single Metric Viewer* display the results of your
 {anomaly-jobs}. For example:
