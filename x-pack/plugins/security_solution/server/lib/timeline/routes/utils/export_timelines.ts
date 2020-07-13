@@ -181,7 +181,7 @@ const getTimelinesFromObjects = async (
     if (myTimeline != null) {
       const timelineNotes = myNotes.filter((n) => n.timelineId === timelineId);
       const timelinePinnedEventIds = myPinnedEventIds.filter((p) => p.timelineId === timelineId);
-      const exportedTimeline = omit('status', myTimeline);
+      const exportedTimeline = omit(['status', 'excludedRowRendererIds'], myTimeline);
       return [
         ...acc,
         {
