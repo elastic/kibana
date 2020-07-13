@@ -21,6 +21,13 @@ import { RequestHandlerContext } from '../../../../core/server';
 import { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search';
 
+export interface ISearchOptions {
+  /**
+   * An `AbortSignal` that allows the caller of `search` to abort a search request.
+   */
+  signal?: AbortSignal;
+}
+
 export interface ISearchSetup {
   /**
    * Extension point exposed for other plugins to register their own search
@@ -38,15 +45,8 @@ export interface ISearchStart {
   search: (
     context: RequestHandlerContext,
     request: IKibanaSearchRequest,
-    options: any
+    options: ISearchOptions
   ) => Promise<IKibanaSearchResponse>;
-}
-
-export interface ISearchOptions {
-  /**
-   * An `AbortSignal` that allows the caller of `search` to abort a search request.
-   */
-  signal?: AbortSignal;
 }
 
 /**
