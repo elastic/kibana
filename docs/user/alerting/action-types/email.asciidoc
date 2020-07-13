@@ -139,7 +139,7 @@ secrets:
     password: <password>
 --------------------------------------------------
 
-When sending emails, you have to provide a from address, either a default one
+When sending emails, you must provide a from address, either as the default 
 in your account configuration or as part of the email action in the watch.
 
 NOTE:   You need to use a unique App Password if two-step verification is enabled.
