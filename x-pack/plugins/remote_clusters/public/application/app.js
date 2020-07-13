@@ -8,12 +8,18 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Switch, Route, Redirect, Router } from 'react-router-dom';
 
+import { PLUGIN } from '../../common/constants';
+
 import { UIM_APP_LOAD } from './constants';
 import { registerRouter, setUserHasLeftApp, trackUiMetric, METRIC_TYPE } from './services';
 import { RemoteClusterList, RemoteClusterAdd, RemoteClusterEdit } from './sections';
 
 class AppComponent extends Component {
   static propTypes = {
+    docTitle: PropTypes.shape({
+      change: PropTypes.func.isRequired,
+      reset: PropTypes.func.isRequired,
+    }),
     history: PropTypes.shape({
       push: PropTypes.func.isRequired,
       createHref: PropTypes.func.isRequired,
@@ -36,10 +42,12 @@ class AppComponent extends Component {
   }
 
   componentDidMount() {
+    this.props.docTitle.change(PLUGIN.getI18nName());
     trackUiMetric(METRIC_TYPE.LOADED, UIM_APP_LOAD);
   }
 
   componentWillUnmount() {
+    this.props.docTitle.reset();
     // Set internal flag so we can prevent reacting to route changes internally.
     setUserHasLeftApp(true);
   }

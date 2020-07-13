@@ -47,6 +47,7 @@ export class RemoteClustersUIPlugin
             i18n: { Context: i18nContext },
             docLinks,
             fatalErrors,
+            chrome: { docTitle },
           } = core;
 
           // Initialize services
@@ -59,7 +60,7 @@ export class RemoteClustersUIPlugin
           const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
 
           const { renderApp } = await import('./application');
-          return renderApp(element, i18nContext, { isCloudEnabled }, history);
+          return renderApp(element, i18nContext, { isCloudEnabled, docTitle }, history);
         },
       });
     }

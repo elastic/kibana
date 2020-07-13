@@ -19,7 +19,7 @@ export const renderApp = (elem, I18nContext, appDependencies, history) => {
     <I18nContext>
       <Provider store={remoteClustersStore}>
         <AppContextProvider context={appDependencies}>
-          <App history={history} />
+          <App history={history} docTitle={appDependencies.docTitle} />
         </AppContextProvider>
       </Provider>
     </I18nContext>,
