@@ -98,7 +98,6 @@ export function TransactionDetails() {
             <EuiSpacer size="s" />
 
             <TransactionCharts
-              hasMLJob={false}
               charts={transactionChartsData}
               urlParams={urlParams}
               location={location}

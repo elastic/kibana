@@ -18,12 +18,12 @@ import {
   EuiButton,
   EuiText,
 } from '@elastic/eui';
-import { NewAgentConfig } from '../../../../types';
+import { NewAgentConfig, AgentConfig } from '../../../../types';
 import { useCapabilities, useCore, sendCreateAgentConfig } from '../../../../hooks';
 import { AgentConfigForm, agentConfigFormValidation } from '../../components';
 
 interface Props {
-  onClose: () => void;
+  onClose: (createdAgentConfig?: AgentConfig) => void;
 }
 
 export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
@@ -86,7 +86,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
     <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+          <EuiButtonEmpty iconType="cross" onClick={() => onClose()} flush="left">
             <FormattedMessage
               id="xpack.ingestManager.createAgentConfig.cancelButtonLabel"
               defaultMessage="Cancel"
@@ -113,7 +113,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
                       }
                     )
                   );
-                  onClose();
+                  onClose(data.item);
                 } else {
                   notifications.toasts.addDanger(
                     error
