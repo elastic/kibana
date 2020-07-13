@@ -7,6 +7,7 @@
 import { useEffect } from 'react';
 
 import { useListsIndex } from './use_lists_index';
+import { useListsPrivileges } from './use_lists_privileges';
 
 export interface UseListsConfigState {
   needsConfiguration: boolean | null;
@@ -17,11 +18,10 @@ export interface UseListsConfigReturn extends UseListsConfigState {
 }
 
 export const useListsConfig = (): UseListsConfigReturn => {
-  const { loading, indexExists, createIndex } = useListsIndex();
+  const { loading: indexLoading, indexExists, createIndex } = useListsIndex();
+  const { loading: privilegesLoading, canManageIndex, isAuthenticated } = useListsPrivileges();
+  const loading = indexLoading || privilegesLoading;
   const needsConfiguration = indexExists === false;
-
-  const isAuthenticated = true; // TODO check user's authentication
-  const canManageIndex = true; // TODO check user's list index privileges
 
   useEffect(() => {
     if (isAuthenticated && canManageIndex && needsConfiguration) {

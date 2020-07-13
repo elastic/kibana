@@ -35,6 +35,7 @@ export {
   useFindLists,
   useCreateListIndex,
   useReadListIndex,
+  useReadListPrivileges,
   addExceptionListItem,
   updateExceptionListItem,
   fetchExceptionListById,

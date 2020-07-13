@@ -16,6 +16,7 @@ export { useDeleteList } from './lists/hooks/use_delete_list';
 export { useExportList } from './lists/hooks/use_export_list';
 export { useReadListIndex } from './lists/hooks/use_read_list_index';
 export { useCreateListIndex } from './lists/hooks/use_create_list_index';
+export { useReadListPrivileges } from './lists/hooks/use_read_list_privileges';
 export {
   addExceptionListItem,
   updateExceptionListItem,
