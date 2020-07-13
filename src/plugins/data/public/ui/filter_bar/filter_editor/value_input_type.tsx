@@ -27,7 +27,7 @@ interface Props {
   value?: string | number;
   type: string;
   onChange: (value: string | number | boolean) => void;
-  onBlur: (value: string | number | boolean) => void;
+  onBlur?: (value: string | number | boolean) => void;
   placeholder: string;
   intl: InjectedIntl;
   controlOnly?: boolean;
@@ -130,8 +130,10 @@ class ValueInputTypeUI extends Component<Props> {
   };
 
   private onBlur = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const params = event.target.value;
-    this.props.onBlur(params);
+    if (this.props.onBlur) {
+      const params = event.target.value;
+      this.props.onBlur(params);
+    }
   };
 }
 
