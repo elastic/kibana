@@ -52,7 +52,7 @@ describe('EventLogger', () => {
     eventLogger = service.getLogger({
       event: { provider: 'test-provider', action: 'test-action-1' },
     });
-    esContext.waitTillReady.mockImplementation(async () => Promise.resolve(false));
+    esContext.waitTillReady.mockImplementation(async () => false);
 
     eventLogger.logEvent({});
     await waitForLogEvent(systemLogger);
