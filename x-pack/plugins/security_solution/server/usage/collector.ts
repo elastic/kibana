@@ -78,7 +78,7 @@ export const registerCollector: RegisterCollector = ({
       const savedObjectsClient = await getInternalSavedObjectsClient(core);
       return {
         detections: await fetchDetectionsUsage(kibanaIndex, callCluster, ml),
-        endpoint: await getEndpointTelemetryFromFleet(savedObjectsClient),
+        endpoints: await getEndpointTelemetryFromFleet(savedObjectsClient),
       };
     },
   });
