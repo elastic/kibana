@@ -474,9 +474,9 @@ exports[`Timeline rendering renders correctly against snapshot 1`] = `
                           "auditbeat-*",
                           "endgame-*",
                           "filebeat-*",
+                          "logs-*",
                           "packetbeat-*",
                           "winlogbeat-*",
-                          "logs-*",
                         ],
                         "name": "event.end",
                         "searchable": true,
@@ -901,6 +901,7 @@ In other use cases the message field can be used to concatenate different values
               }
               indexToAdd={Array []}
               isLive={false}
+              isSaving={false}
               itemsPerPage={5}
               itemsPerPageOptions={
                 Array [
@@ -918,6 +919,7 @@ In other use cases the message field can be used to concatenate different values
               onDataProviderRemoved={[MockFunction]}
               onToggleDataProviderEnabled={[MockFunction]}
               onToggleDataProviderExcluded={[MockFunction]}
+              onToggleDataProviderType={[MockFunction]}
               show={true}
               showCallOutUnauthorizedMsg={false}
               sort={
@@ -928,6 +930,7 @@ In other use cases the message field can be used to concatenate different values
               }
               start={1521830963132}
               status="active"
+              timelineType="default"
               toggleColumn={[MockFunction]}
               usersViewing={
                 Array [

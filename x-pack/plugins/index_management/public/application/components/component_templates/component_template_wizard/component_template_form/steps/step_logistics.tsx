@@ -200,7 +200,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
             </>
           }
         >
-          {isMetaVisible ? (
+          {isMetaVisible && (
             <UseField
               path="_meta"
               component={JsonEditorField}
@@ -211,16 +211,12 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                   'aria-label': i18n.translate(
                     'xpack.idxMgmt.componentTemplateForm.stepLogistics.metaAriaLabel',
                     {
-                      defaultMessage: 'Metadata JSON editor',
+                      defaultMessage: '_meta field data editor',
                     }
                   ),
                 },
               }}
             />
-          ) : (
-            // <FormRow/> requires children or a field
-            // For now, we return an empty <div> if the editor is not visible
-            <div />
           )}
         </FormRow>
       </Form>

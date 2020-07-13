@@ -76,11 +76,13 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
         }
       }
       if (reason) {
+        const firstResult = first(alertResults);
+        const timestamp = (firstResult && firstResult[group].timestamp) ?? moment().toISOString();
         alertInstance.scheduleActions(FIRED_ACTIONS.id, {
           group,
           alertState: stateToAlertMessage[nextState],
           reason,
-          timestamp: moment().toISOString(),
+          timestamp,
           value: mapToConditionsLookup(alertResults, (result) => result[group].currentValue),
           threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
           metric: mapToConditionsLookup(criteria, (c) => c.metric),

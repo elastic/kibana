@@ -17,5 +17,9 @@
     "share"
   ],
   "server": true,
-  "ui": true
+  "ui": true,
+  "requiredBundles": [
+    "kibanaReact",
+    "discover"
+  ]
 }
