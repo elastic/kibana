@@ -5,7 +5,7 @@
  */
 
 import { Location } from 'history';
-import { TIMEPICKER_DEFAULTS } from '../../../context/UrlParamsContext/constants';
+import { getTimePickerQueryParam } from '../../../context/UrlParamsContext/constants';
 import { toQuery } from './url_helpers';
 
 export interface TimepickerRisonData {
@@ -22,7 +22,7 @@ export interface TimepickerRisonData {
 export function getTimepickerRisonData(currentSearch: Location['search']) {
   const currentQuery = toQuery(currentSearch);
   const nextQuery = {
-    ...TIMEPICKER_DEFAULTS,
+    ...getTimePickerQueryParam(),
     ...currentQuery,
   };
   return {
