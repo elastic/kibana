@@ -11,7 +11,7 @@ import { PageView, PageViewProps } from '../../common/components/endpoint/page_v
 import { ManagementSubTab } from '../types';
 import { SecurityPageName } from '../../app/types';
 import { useFormatUrl } from '../../common/components/link_to';
-import { getEndpointListPath, getPoliciesPath } from '../common/routing';
+import { getHostListPath, getPoliciesPath } from '../common/routing';
 import { useNavigateByRouterEventHandler } from '../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 
 export const ManagementPageView = memo<Omit<PageViewProps, 'tabs'>>((options) => {
@@ -19,7 +19,7 @@ export const ManagementPageView = memo<Omit<PageViewProps, 'tabs'>>((options) =>
   const { tabName } = useParams<{ tabName: ManagementSubTab }>();
 
   const goToEndpoint = useNavigateByRouterEventHandler(
-    getEndpointListPath({ name: 'endpointList' }, search)
+    getHostListPath({ name: 'hostList' }, search)
   );
 
   const goToPolicies = useNavigateByRouterEventHandler(getPoliciesPath(search));
@@ -31,11 +31,11 @@ export const ManagementPageView = memo<Omit<PageViewProps, 'tabs'>>((options) =>
     return [
       {
         name: i18n.translate('xpack.securitySolution.managementTabs.endpoints', {
-          defaultMessage: 'Endpoints',
+          defaultMessage: 'Hosts',
         }),
-        id: ManagementSubTab.endpoints,
-        isSelected: tabName === ManagementSubTab.endpoints,
-        href: formatUrl(getEndpointListPath({ name: 'endpointList' })),
+        id: ManagementSubTab.hosts,
+        isSelected: tabName === ManagementSubTab.hosts,
+        href: formatUrl(getHostListPath({ name: 'hostList' })),
         onClick: goToEndpoint,
       },
       {

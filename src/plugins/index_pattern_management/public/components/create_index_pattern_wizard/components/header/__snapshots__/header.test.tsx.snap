@@ -49,7 +49,7 @@ exports[`Header should render a different name, prompt, and beta tag if provided
       >
         <p>
           <FormattedMessage
-            defaultMessage="An index pattern can match a single source, for example, {single}, or {multiple} data souces, {star}."
+            defaultMessage="An index pattern can match a single source, for example, {single}, or {multiple} data sources, {star}."
             id="indexPatternManagement.createIndexPattern.description"
             values={
               Object {
@@ -82,7 +82,7 @@ exports[`Header should render a different name, prompt, and beta tag if provided
               <strong>
                 multiple
               </strong>
-               data souces, 
+               data sources, 
               <EuiCode>
                 <EuiCodeBlockImpl
                   inline={true}
@@ -166,7 +166,7 @@ exports[`Header should render normally 1`] = `
       >
         <p>
           <FormattedMessage
-            defaultMessage="An index pattern can match a single source, for example, {single}, or {multiple} data souces, {star}."
+            defaultMessage="An index pattern can match a single source, for example, {single}, or {multiple} data sources, {star}."
             id="indexPatternManagement.createIndexPattern.description"
             values={
               Object {
@@ -199,7 +199,7 @@ exports[`Header should render normally 1`] = `
               <strong>
                 multiple
               </strong>
-               data souces, 
+               data sources, 
               <EuiCode>
                 <EuiCodeBlockImpl
                   inline={true}
@@ -273,7 +273,7 @@ exports[`Header should render without including system indices 1`] = `
       >
         <p>
           <FormattedMessage
-            defaultMessage="An index pattern can match a single source, for example, {single}, or {multiple} data souces, {star}."
+            defaultMessage="An index pattern can match a single source, for example, {single}, or {multiple} data sources, {star}."
             id="indexPatternManagement.createIndexPattern.description"
             values={
               Object {
@@ -306,7 +306,7 @@ exports[`Header should render without including system indices 1`] = `
               <strong>
                 multiple
               </strong>
-               data souces, 
+               data sources, 
               <EuiCode>
                 <EuiCodeBlockImpl
                   inline={true}

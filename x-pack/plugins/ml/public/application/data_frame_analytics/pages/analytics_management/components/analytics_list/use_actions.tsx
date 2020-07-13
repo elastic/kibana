@@ -30,17 +30,21 @@ export const useActions = (
   actions: EuiTableActionsColumnType<DataFrameAnalyticsListRow>['actions'];
   modals: JSX.Element | null;
 } => {
-  const deleteAction = useDeleteAction();
-  const editAction = useEditAction();
-  const startAction = useStartAction();
-
   let modals: JSX.Element | null = null;
 
   const actions: EuiTableActionsColumnType<DataFrameAnalyticsListRow>['actions'] = [
     getViewAction(isManagementTable),
   ];
 
+  // isManagementTable will be the same for the lifecycle of the component
+  // Disabling lint error to fix console error in management list due to action hooks using deps not initialized in management
   if (isManagementTable === false) {
+    /* eslint-disable react-hooks/rules-of-hooks */
+    const deleteAction = useDeleteAction();
+    const editAction = useEditAction();
+    const startAction = useStartAction();
+    /* eslint-disable react-hooks/rules-of-hooks */
+
     modals = (
       <>
         {startAction.isModalVisible && <StartButtonModal {...startAction} />}

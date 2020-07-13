@@ -14,8 +14,8 @@ import {
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '../../../lists_plugin_deps';
-import { updateAlertStatus } from '../../../alerts/containers/detection_engine/alerts/api';
-import { getUpdateAlertsQuery } from '../../../alerts/components/alerts_table/actions';
+import { updateAlertStatus } from '../../../detections/containers/detection_engine/alerts/api';
+import { getUpdateAlertsQuery } from '../../../detections/components/alerts_table/actions';
 import { formatExceptionItemForUpdate } from './helpers';
 
 /**

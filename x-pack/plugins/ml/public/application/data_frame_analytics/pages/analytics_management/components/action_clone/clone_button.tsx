@@ -247,6 +247,7 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
     },
     results_field: {
       optional: true,
+      formKey: 'resultsField',
       defaultValue: DEFAULT_RESULTS_FIELD,
     },
   },
