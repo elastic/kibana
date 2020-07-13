@@ -22,18 +22,20 @@ import { Header } from '../header';
 import { mount } from 'enzyme';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { mockManagementPlugin } from '../../../../mocks';
+import { DocLinksStart } from 'kibana/public';
 
 describe('Header', () => {
   const indexPatternName = 'test index pattern';
   const mockedContext = mockManagementPlugin.createIndexPatternManagmentContext();
+  const mockedDocLinks = {
+    links: {
+      indexPatterns: {},
+    },
+  } as DocLinksStart;
 
   it('should render normally', () => {
     const component = mount(
-      <Header
-        indexPatternName={indexPatternName}
-        isIncludingSystemIndices={true}
-        onChangeIncludingSystemIndices={() => {}}
-      />,
+      <Header indexPatternName={indexPatternName} docLinks={mockedDocLinks} />,
       {
         wrappingComponent: KibanaContextProvider,
         wrappingComponentProps: {
@@ -47,11 +49,7 @@ describe('Header', () => {
 
   it('should render without including system indices', () => {
     const component = mount(
-      <Header
-        indexPatternName={indexPatternName}
-        isIncludingSystemIndices={false}
-        onChangeIncludingSystemIndices={() => {}}
-      />,
+      <Header indexPatternName={indexPatternName} docLinks={mockedDocLinks} />,
       {
         wrappingComponent: KibanaContextProvider,
         wrappingComponentProps: {
@@ -66,11 +64,10 @@ describe('Header', () => {
   it('should render a different name, prompt, and beta tag if provided', () => {
     const component = mount(
       <Header
-        isIncludingSystemIndices={false}
-        onChangeIncludingSystemIndices={() => {}}
         prompt={<div>Test prompt</div>}
         indexPatternName={indexPatternName}
         isBeta={true}
+        docLinks={mockedDocLinks}
       />,
       {
         wrappingComponent: KibanaContextProvider,

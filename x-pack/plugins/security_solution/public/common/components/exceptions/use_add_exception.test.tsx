@@ -7,7 +7,7 @@
 import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
 import { KibanaServices } from '../../../common/lib/kibana';
 
-import * as alertsApi from '../../../alerts/containers/detection_engine/alerts/api';
+import * as alertsApi from '../../../detections/containers/detection_engine/alerts/api';
 import * as listsApi from '../../../../../lists/public/exceptions/api';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getCreateExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/request/create_exception_list_item_schema.mock';

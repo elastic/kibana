@@ -7,14 +7,7 @@
 import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiInMemoryTable,
-  EuiBasicTableColumn,
-  EuiButton,
-  EuiLink,
-  EuiBadge,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink, EuiIcon } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 
 import { TemplateListItem } from '../../../../../../common';
@@ -24,6 +17,7 @@ import { encodePathForReactRouter } from '../../../../services/routing';
 import { useServices } from '../../../../app_context';
 import { TemplateDeleteModal } from '../../../../components';
 import { TemplateContentIndicator } from '../../../../components/shared';
+import { TemplateTypeIndicator } from '../components';
 
 interface Props {
   templates: TemplateListItem[];
@@ -70,13 +64,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
               {name}
             </EuiLink>
             &nbsp;
-            {item._kbnMeta.isManaged ? (
-              <EuiBadge color="hollow" data-test-subj="isManagedBadge">
-                Managed
-              </EuiBadge>
-            ) : (
-              ''
-            )}
+            <TemplateTypeIndicator templateType={item._kbnMeta.type} />
           </>
         );
       },
@@ -100,14 +88,6 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       render: (composedOf: string[] = []) => <span>{composedOf.join(', ')}</span>,
     },
     {
-      field: 'priority',
-      name: i18n.translate('xpack.idxMgmt.templateList.table.priorityColumnTitle', {
-        defaultMessage: 'Priority',
-      }),
-      truncateText: true,
-      sortable: true,
-    },
-    {
       name: i18n.translate('xpack.idxMgmt.templateList.table.dataStreamColumnTitle', {
         defaultMessage: 'Data stream',
       }),
@@ -119,7 +99,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       name: i18n.translate('xpack.idxMgmt.templateList.table.contentColumnTitle', {
         defaultMessage: 'Content',
       }),
-      truncateText: true,
+      width: '120px',
       render: (item: TemplateListItem) => (
         <TemplateContentIndicator
           mappings={item.hasMappings}
@@ -139,6 +119,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       name: i18n.translate('xpack.idxMgmt.templateList.table.actionColumnTitle', {
         defaultMessage: 'Actions',
       }),
+      width: '120px',
       actions: [
         {
           name: i18n.translate('xpack.idxMgmt.templateList.table.actionEditText', {
@@ -153,7 +134,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           onClick: ({ name }: TemplateListItem) => {
             editTemplate(name);
           },
-          enabled: ({ _kbnMeta: { isCloudManaged } }: TemplateListItem) => !isCloudManaged,
+          enabled: ({ _kbnMeta: { type } }: TemplateListItem) => type !== 'cloudManaged',
         },
         {
           type: 'icon',
@@ -182,7 +163,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
             setTemplatesToDelete([{ name, isLegacy }]);
           },
           isPrimary: true,
-          enabled: ({ _kbnMeta: { isCloudManaged } }: TemplateListItem) => !isCloudManaged,
+          enabled: ({ _kbnMeta: { type } }: TemplateListItem) => type !== 'cloudManaged',
         },
       ],
     },
@@ -202,13 +183,13 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
 
   const selectionConfig = {
     onSelectionChange: setSelection,
-    selectable: ({ _kbnMeta: { isCloudManaged } }: TemplateListItem) => !isCloudManaged,
+    selectable: ({ _kbnMeta: { type } }: TemplateListItem) => type !== 'cloudManaged',
     selectableMessage: (selectable: boolean) => {
       if (!selectable) {
         return i18n.translate(
-          'xpack.idxMgmt.templateList.legacyTable.deleteManagedTemplateTooltip',
+          'xpack.idxMgmt.templateList.table.deleteCloudManagedTemplateTooltip',
           {
-            defaultMessage: 'You cannot delete a managed template.',
+            defaultMessage: 'You cannot delete a cloud-managed template.',
           }
         );
       }

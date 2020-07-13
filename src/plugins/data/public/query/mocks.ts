@@ -20,12 +20,13 @@
 import { Observable } from 'rxjs';
 import { QueryService, QuerySetup, QueryStart } from '.';
 import { timefilterServiceMock } from './timefilter/timefilter_service.mock';
+import { createFilterManagerMock } from './filter_manager/filter_manager.mock';
 
 type QueryServiceClientContract = PublicMethodsOf<QueryService>;
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<QuerySetup> = {
-    filterManager: jest.fn() as any,
+    filterManager: createFilterManagerMock(),
     timefilter: timefilterServiceMock.createSetupContract(),
     state$: new Observable(),
   };
@@ -36,7 +37,7 @@ const createSetupContractMock = () => {
 const createStartContractMock = () => {
   const startContract: jest.Mocked<QueryStart> = {
     addToQueryLog: jest.fn(),
-    filterManager: jest.fn() as any,
+    filterManager: createFilterManagerMock(),
     savedQueries: jest.fn() as any,
     state$: new Observable(),
     timefilter: timefilterServiceMock.createStartContract(),

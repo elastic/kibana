@@ -10,6 +10,7 @@ export const compressionAlgorithm = t.keyof({
   none: null,
   zlib: null,
 });
+export type CompressionAlgorithm = t.TypeOf<typeof compressionAlgorithm>;
 
 export const encryptionAlgorithm = t.keyof({
   none: null,
@@ -20,7 +21,7 @@ export const identifier = t.string;
 export const manifestVersion = t.string;
 
 export const manifestSchemaVersion = t.keyof({
-  '1.0.0': null,
+  v1: null,
 });
 export type ManifestSchemaVersion = t.TypeOf<typeof manifestSchemaVersion>;
 

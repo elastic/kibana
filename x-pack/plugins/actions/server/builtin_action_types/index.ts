@@ -16,6 +16,7 @@ import { getActionType as getSlackActionType } from './slack';
 import { getActionType as getWebhookActionType } from './webhook';
 import { getActionType as getServiceNowActionType } from './servicenow';
 import { getActionType as getJiraActionType } from './jira';
+import { getActionType as getResilientActionType } from './resilient';
 
 export function registerBuiltInActionTypes({
   actionsConfigUtils: configurationUtilities,
@@ -34,4 +35,5 @@ export function registerBuiltInActionTypes({
   actionTypeRegistry.register(getWebhookActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getServiceNowActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getJiraActionType({ configurationUtilities }));
+  actionTypeRegistry.register(getResilientActionType({ configurationUtilities }));
 }
