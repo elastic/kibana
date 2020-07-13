@@ -171,7 +171,7 @@ export const validatePackageConfig = (
   return validationResults;
 };
 
-const validatePackageConfigConfig = (
+export const validatePackageConfigConfig = (
   configEntry: PackageConfigConfigRecordEntry,
   varDef: RegistryVarsEntry
 ): string[] | null => {
@@ -237,13 +237,22 @@ const validatePackageConfigConfig = (
   return errors.length ? errors : null;
 };
 
+export const countValidationErrors = (
+  validationResults:
+    | PackageConfigValidationResults
+    | PackageConfigInputValidationResults
+    | PackageConfigConfigValidationResults
+): number => {
+  const flattenedValidation = getFlattenedObject(validationResults);
+  const errors = Object.values(flattenedValidation).filter((value) => Boolean(value)) || [];
+  return errors.length;
+};
+
 export const validationHasErrors = (
   validationResults:
     | PackageConfigValidationResults
     | PackageConfigInputValidationResults
     | PackageConfigConfigValidationResults
-) => {
-  const flattenedValidation = getFlattenedObject(validationResults);
-
-  return !!Object.entries(flattenedValidation).find(([, value]) => !!value);
+): boolean => {
+  return countValidationErrors(validationResults) > 0;
 };
