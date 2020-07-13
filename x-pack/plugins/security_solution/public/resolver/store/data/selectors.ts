@@ -40,8 +40,11 @@ export function isLoading(state: DataState): boolean {
   return state.pendingRequestDatabaseDocumentID !== undefined;
 }
 
-export function documentLocation(state: DataState): string {
-  return state.documentLocation;
+/**
+ * A string for uniquely identifying the instance of resolver within the app.
+ */
+export function resolverComponentInstanceID(state: DataState): string {
+  return state.resolverComponentInstanceID;
 }
 
 /**

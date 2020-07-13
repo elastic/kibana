@@ -18,7 +18,7 @@ import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 export const Resolver = React.memo(function ({
   className,
   databaseDocumentID,
-  documentLocation,
+  resolverComponentInstanceID,
 }: {
   /**
    * Used by `styled-components`.
@@ -33,7 +33,7 @@ export const Resolver = React.memo(function ({
    * A string literal describing where in the app resolver is located,
    * used to prevent collisions in things like query params
    */
-  documentLocation: string;
+  resolverComponentInstanceID: string;
 }) {
   const context = useKibana<StartServices>();
   const store = useMemo(() => {
@@ -49,7 +49,7 @@ export const Resolver = React.memo(function ({
       <ResolverMap
         className={className}
         databaseDocumentID={databaseDocumentID}
-        documentLocation={documentLocation}
+        resolverComponentInstanceID={resolverComponentInstanceID}
       />
     </Provider>
   );

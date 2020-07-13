@@ -53,12 +53,12 @@ describe('data state', () => {
 
   describe('when there is a databaseDocumentID but no pending request', () => {
     const databaseDocumentID = 'databaseDocumentID';
-    const documentLocation = 'location';
+    const resolverComponentInstanceID = 'resolverComponentInstanceID';
     beforeEach(() => {
       actions = [
         {
           type: 'appReceivedNewExternalProperties',
-          payload: { databaseDocumentID, documentLocation },
+          payload: { databaseDocumentID, resolverComponentInstanceID },
         },
       ];
     });
@@ -105,12 +105,12 @@ describe('data state', () => {
   });
   describe('when there is a pending request for the current databaseDocumentID', () => {
     const databaseDocumentID = 'databaseDocumentID';
-    const documentLocation = 'location';
+    const resolverComponentInstanceID = 'resolverComponentInstanceID';
     beforeEach(() => {
       actions = [
         {
           type: 'appReceivedNewExternalProperties',
-          payload: { databaseDocumentID, documentLocation },
+          payload: { databaseDocumentID, resolverComponentInstanceID },
         },
         {
           type: 'appRequestedResolverData',
@@ -162,14 +162,17 @@ describe('data state', () => {
   describe('when there is a pending request for a different databaseDocumentID than the current one', () => {
     const firstDatabaseDocumentID = 'first databaseDocumentID';
     const secondDatabaseDocumentID = 'second databaseDocumentID';
-    const firstLocation = 'firstLocation';
-    const secondLocation = 'secondLocation';
+    const resolverComponentInstanceID1 = 'resolverComponentInstanceID1';
+    const resolverComponentInstanceID2 = 'resolverComponentInstanceID2';
     beforeEach(() => {
       actions = [
         // receive the document ID, this would cause the middleware to starts the request
         {
           type: 'appReceivedNewExternalProperties',
-          payload: { databaseDocumentID: firstDatabaseDocumentID, documentLocation: firstLocation },
+          payload: {
+            databaseDocumentID: firstDatabaseDocumentID,
+            resolverComponentInstanceID: resolverComponentInstanceID1,
+          },
         },
         // this happens when the middleware starts the request
         {
@@ -181,7 +184,7 @@ describe('data state', () => {
           type: 'appReceivedNewExternalProperties',
           payload: {
             databaseDocumentID: secondDatabaseDocumentID,
-            documentLocation: secondLocation,
+            resolverComponentInstanceID: resolverComponentInstanceID2,
           },
         },
       ];
@@ -196,10 +199,10 @@ describe('data state', () => {
       expect(selectors.databaseDocumentIDToFetch(state())).toBe(secondDatabaseDocumentID);
     });
     it('should use the correct location for the first resolver', () => {
-      expect(selectors.documentLocation(state())).toBe(firstLocation);
+      expect(selectors.resolverComponentInstanceID(state())).toBe(resolverComponentInstanceID1);
     });
     it('should use the correct location for the second resolver', () => {
-      expect(selectors.documentLocation(state())).toBe(secondLocation);
+      expect(selectors.resolverComponentInstanceID(state())).toBe(resolverComponentInstanceID2);
     });
     it('should not have an error, more children, or more ancestors.', () => {
       expect(viewAsAString(state())).toMatchInlineSnapshot(`

@@ -69,7 +69,10 @@ export const databaseDocumentIDToAbort = composeSelectors(
   dataSelectors.databaseDocumentIDToAbort
 );
 
-export const documentLocation = composeSelectors(dataStateSelector, dataSelectors.documentLocation);
+export const resolverComponentInstanceID = composeSelectors(
+  dataStateSelector,
+  dataSelectors.resolverComponentInstanceID
+);
 
 export const processAdjacencies = composeSelectors(
   dataStateSelector,
