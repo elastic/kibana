@@ -11,6 +11,13 @@ import * as runtimeTypes from 'io-ts';
 import { stringEnum, unionWithNullType } from '../../utility_types';
 import { NoteSavedObject, NoteSavedObjectToReturnRuntimeType } from './note';
 import { PinnedEventToReturnSavedObjectRuntimeType, PinnedEventSavedObject } from './pinned_event';
+import {
+  success,
+  // eslint-disable-next-line @typescript-eslint/camelcase
+  success_count,
+} from '../../detection_engine/schemas/common/schemas';
+import { PositiveInteger } from '../../detection_engine/schemas/types';
+import { errorSchema } from '../../detection_engine/schemas/response/error_schema';
 
 /*
  *  ColumnHeader Types
@@ -379,3 +386,15 @@ export type NotesAndPinnedEventsByTimelineId = Record<
   string,
   { notes: NoteSavedObject[]; pinnedEvents: PinnedEventSavedObject[] }
 >;
+
+export const importTimelineResultSchema = runtimeTypes.exact(
+  runtimeTypes.type({
+    success,
+    success_count,
+    timelines_installed: PositiveInteger,
+    timelines_updated: PositiveInteger,
+    errors: runtimeTypes.array(errorSchema),
+  })
+);
+
+export type ImportTimelineResultSchema = runtimeTypes.TypeOf<typeof importTimelineResultSchema>;

@@ -124,7 +124,12 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       defaultTimelineCount,
       templateTimelineCount,
     });
-    const { timelineStatus, templateTimelineType, templateTimelineFilter } = useTimelineStatus({
+    const {
+      timelineStatus,
+      templateTimelineType,
+      templateTimelineFilter,
+      installPrepackagedTimelines,
+    } = useTimelineStatus({
       timelineType,
       customTemplateTimelineCount,
       elasticTemplateTimelineCount,
@@ -287,7 +292,13 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       focusInput();
     }, []);
 
-    useEffect(() => refetch(), [refetch]);
+    useEffect(() => {
+      const fetchData = async () => {
+        await installPrepackagedTimelines();
+        refetch();
+      };
+      fetchData();
+    }, [refetch, installPrepackagedTimelines]);
 
     return !isModal ? (
       <OpenTimeline

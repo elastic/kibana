@@ -1,6 +1,7 @@
 #!/bin/sh
 
 set -e
+./check_env_variables.sh
 
 # Regenerates the index.ts that contains all of the timelines that are read in from json
 PREPACKAGED_TIMELINES_INDEX=../../rules/prepackaged_timelines/index.ndjson

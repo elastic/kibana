@@ -20,11 +20,10 @@ import {
   getFindResultWithSingleHit,
 } from '../../../detection_engine/routes/__mocks__/request_responses';
 
-import { ImportTimelineResultSchema } from '../schemas/import_timelines_schema';
-
 import * as lib from './install_prepacked_timelines';
 import { importTimelines } from './import_timelines';
 import { buildFrameworkRequest } from './common';
+import { ImportTimelineResultSchema } from '../../../../../common/types/timeline';
 
 jest.mock('./import_timelines');
 

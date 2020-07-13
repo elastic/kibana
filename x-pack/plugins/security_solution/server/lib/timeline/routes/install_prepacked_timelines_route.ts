@@ -10,9 +10,15 @@ import { TIMELINE_PREPACKAGED_URL } from '../../../../common/constants';
 
 import { SetupPlugins } from '../../../plugin';
 import { ConfigType } from '../../../config';
+import { validate } from '../../../../common/validate';
+
 import { buildSiemResponse, transformError } from '../../detection_engine/routes/utils';
 
 import { installPrepackagedTimelines } from './utils/install_prepacked_timelines';
+
+import { checkTimelinesStatus } from './utils/check_timelines_status';
+
+import { checkTimelineStatusRt } from './schemas/check_timelines_status_schema';
 import { buildFrameworkRequest } from './utils/common';
 
 export const installPrepackedTimelinesRoute = (
@@ -35,14 +41,37 @@ export const installPrepackedTimelinesRoute = (
     async (context, request, response) => {
       try {
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
+        const prepackagedTimelineStatus = await checkTimelinesStatus(frameworkRequest);
 
-        const res = await installPrepackagedTimelines(
-          config.maxTimelineImportExportSize,
-          frameworkRequest,
-          true
+        const [validatedprepackagedTimelineStatus, prepackagedTimelineStatusError] = validate(
+          prepackagedTimelineStatus,
+          checkTimelineStatusRt
         );
-        if (typeof res !== 'string') return response.ok({ body: res ?? {} });
-        else throw res;
+
+        if (prepackagedTimelineStatusError != null) {
+          throw prepackagedTimelineStatusError;
+        }
+
+        const timelinesToInstalled =
+          validatedprepackagedTimelineStatus?.timelinesToInstall.length ?? 0;
+        const timelinesNotUpdated =
+          validatedprepackagedTimelineStatus?.timelinesToUpdate.length ?? 0;
+        let res = null;
+
+        if (timelinesToInstalled > 0 || timelinesNotUpdated > 0) {
+          res = await installPrepackagedTimelines(
+            config.maxTimelineImportExportSize,
+            frameworkRequest,
+            true
+          );
+          if (typeof res !== 'string') {
+            return response.ok({ body: res ?? {} });
+          } else {
+            throw res;
+          }
+        } else {
+          return response.ok({ body: validatedprepackagedTimelineStatus ?? {} });
+        }
       } catch (err) {
         const error = transformError(err);
         const siemResponse = buildSiemResponse(response);

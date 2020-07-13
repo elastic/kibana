@@ -8,7 +8,12 @@ import { has, chunk, omit } from 'lodash/fp';
 import { Readable } from 'stream';
 import uuid from 'uuid';
 
-import { TimelineStatus, SavedTimeline } from '../../../../../common/types/timeline';
+import {
+  TimelineStatus,
+  SavedTimeline,
+  ImportTimelineResultSchema,
+  importTimelineResultSchema,
+} from '../../../../../common/types/timeline';
 import { validate } from '../../../../../common/validate';
 import { NoteResult } from '../../../../graphql/types';
 import { HapiReadableStream } from '../../../detection_engine/rules/types';
@@ -17,10 +22,7 @@ import { createTimelines } from './create_timelines';
 import { FrameworkRequest } from '../../../framework';
 import { createTimelinesStreamFromNdJson } from '../../create_timelines_stream_from_ndjson';
 import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils';
-import {
-  ImportTimelineResultSchema,
-  importTimelineResultSchema,
-} from '../schemas/import_timelines_schema';
+
 import { getTupleDuplicateErrorsAndUniqueTimeline } from './get_timelines_from_stream';
 import { CompareTimelinesStatus } from './compare_timelines_status';
 import { TimelineStatusActions } from './common';

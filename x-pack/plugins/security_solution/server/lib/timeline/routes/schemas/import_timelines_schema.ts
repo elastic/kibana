@@ -9,15 +9,9 @@ import { Readable } from 'stream';
 import { either } from 'fp-ts/lib/Either';
 
 import { SavedTimelineRuntimeType } from '../../../../../common/types/timeline';
-import {
-  success,
-  // eslint-disable-next-line @typescript-eslint/camelcase
-  success_count,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
-import { errorSchema } from '../../../../../common/detection_engine/schemas/response/error_schema';
+
 import { eventNotes, globalNotes, pinnedEventIds } from './schemas';
 import { unionWithNullType } from '../../../../../common/utility_types';
-import { PositiveInteger } from '../../../../../common/detection_engine/schemas/types/positive_integer';
 
 export const ImportTimelinesSchemaRt = rt.intersection([
   SavedTimelineRuntimeType,
@@ -58,15 +52,3 @@ export const ImportTimelinesPayloadSchemaRt = rt.intersection([
   }),
   rt.partial({ isImmutable: booleanInString }),
 ]);
-
-export const importTimelineResultSchema = rt.exact(
-  rt.type({
-    success,
-    success_count,
-    timelines_installed: PositiveInteger,
-    timelines_updated: PositiveInteger,
-    errors: rt.array(errorSchema),
-  })
-);
-
-export type ImportTimelineResultSchema = rt.TypeOf<typeof importTimelineResultSchema>;

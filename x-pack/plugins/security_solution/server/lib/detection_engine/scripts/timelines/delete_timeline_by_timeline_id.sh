@@ -7,10 +7,10 @@
 #
 
 set -e
-../check_env_variables.sh
+./check_env_variables.sh
 
 
-# Example: ./delete_all_alerts.sh {timeline_id}
+# Example: ./timelines/delete_timeline_by_id.sh {timeline_id}
 
 curl -s -k \
   -H "Content-Type: application/json" \

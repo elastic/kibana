@@ -11,17 +11,27 @@ import {
   createMockConfig,
 } from '../../detection_engine/routes/__mocks__';
 
-import { mockGetCurrentUser } from './__mocks__/import_timelines';
+import {
+  mockGetCurrentUser,
+  mockCheckTimelinesStatusBeforeInstallResult,
+  mockCheckTimelinesStatusAfterInstallResult,
+} from './__mocks__/import_timelines';
 import { installPrepackedTimelinesRequest } from './__mocks__/request_responses';
 
 import { installPrepackagedTimelines } from './utils/install_prepacked_timelines';
+import { checkTimelinesStatus } from './utils/check_timelines_status';
+
 import { installPrepackedTimelinesRoute } from './install_prepacked_timelines_route';
 
 jest.mock('./utils/install_prepacked_timelines', () => ({
   installPrepackagedTimelines: jest.fn(),
 }));
 
-describe('get timeline by id', () => {
+jest.mock('./utils/check_timelines_status', () => ({
+  checkTimelinesStatus: jest.fn(),
+}));
+
+describe('installPrepackagedTimelines', () => {
   let server: ReturnType<typeof serverMock.create>;
   let securitySetup: SecurityPluginSetup;
   let { context } = requestContextMock.createTools();
@@ -44,8 +54,20 @@ describe('get timeline by id', () => {
   });
 
   test('should call installPrepackagedTimelines ', async () => {
+    (checkTimelinesStatus as jest.Mock).mockReturnValue(
+      mockCheckTimelinesStatusBeforeInstallResult
+    );
+
     await server.inject(installPrepackedTimelinesRequest(), context);
 
     expect(installPrepackagedTimelines).toHaveBeenCalled();
+  });
+
+  test('should not call installPrepackagedTimelines if it has nothing to install or update', async () => {
+    (checkTimelinesStatus as jest.Mock).mockReturnValue(mockCheckTimelinesStatusAfterInstallResult);
+
+    await server.inject(installPrepackedTimelinesRequest(), context);
+
+    expect(installPrepackagedTimelines).not.toHaveBeenCalled();
   });
 });

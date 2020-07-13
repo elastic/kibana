@@ -17,6 +17,7 @@ import {
 
 import * as i18n from './translations';
 import { TemplateTimelineFilter } from './types';
+import { installPrepackedTimelines } from '../../containers/api';
 
 export const useTimelineStatus = ({
   timelineType,
@@ -30,6 +31,7 @@ export const useTimelineStatus = ({
   timelineStatus: TimelineStatusLiteralWithNull;
   templateTimelineType: TemplateTimelineTypeLiteralWithNull;
   templateTimelineFilter: JSX.Element[] | null;
+  installPrepackagedTimelines: () => void;
 } => {
   const [selectedTab, setSelectedTab] = useState<TemplateTimelineTypeLiteralWithNull>(
     TemplateTimelineType.elastic
@@ -101,9 +103,16 @@ export const useTimelineStatus = ({
       : null;
   }, [templateTimelineType, filters, isTemplateFilterEnabled, onFilterClicked]);
 
+  const installPrepackagedTimelines = useCallback(async () => {
+    if (templateTimelineType === TemplateTimelineType.elastic) {
+      await installPrepackedTimelines();
+    }
+  }, [templateTimelineType]);
+
   return {
     timelineStatus,
     templateTimelineType,
     templateTimelineFilter,
+    installPrepackagedTimelines,
   };
 };

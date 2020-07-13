@@ -4,26 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IRouter } from '../../../../../../../../src/core/server';
+
 import { validate } from '../../../../../common/validate';
 import {
   PrePackagedRulesAndTimelinesSchema,
   prePackagedRulesAndTimelinesSchema,
 } from '../../../../../common/detection_engine/schemas/response/prepackaged_rules_schema';
-import { IRouter } from '../../../../../../../../src/core/server';
+import { importTimelineResultSchema } from '../../../../../common/types/timeline';
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
+
+import { ConfigType } from '../../../../config';
+import { SetupPlugins } from '../../../../plugin';
+import { buildFrameworkRequest } from '../../../timeline/routes/utils/common';
+import { installPrepackagedTimelines } from '../../../timeline/routes/utils/install_prepacked_timelines';
+
 import { getIndexExists } from '../../index/get_index_exists';
-import { transformError, buildSiemResponse } from '../utils';
 import { getPrepackagedRules } from '../../rules/get_prepackaged_rules';
 import { installPrepackagedRules } from '../../rules/install_prepacked_rules';
 import { updatePrepackagedRules } from '../../rules/update_prepacked_rules';
 import { getRulesToInstall } from '../../rules/get_rules_to_install';
 import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
-import { ConfigType } from '../../../../config';
-import { SetupPlugins } from '../../../../plugin';
-import { buildFrameworkRequest } from '../../../timeline/routes/utils/common';
-import { importTimelineResultSchema } from '../../../timeline/routes/schemas/import_timelines_schema';
-import { installPrepackagedTimelines } from '../../../timeline/routes/utils/install_prepacked_timelines';
+
+import { transformError, buildSiemResponse } from '../utils';
 
 export const addPrepackedRulesRoute = (
   router: IRouter,

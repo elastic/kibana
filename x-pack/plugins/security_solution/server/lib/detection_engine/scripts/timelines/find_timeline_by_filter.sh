@@ -7,7 +7,7 @@
 #
 
 set -e
-../check_env_variables.sh
+./check_env_variables.sh
 
 # Uses a default if no argument is specified
 STATUS=${1:-active}
@@ -15,13 +15,13 @@ TIMELINE_TYPE=${2:-default}
 TEMPLATE_TIMELINE_TYPE=${3:-custom}
 
 # Example get all timelines:
-# ./find_timeline_by_filter.sh active
+# ./timelines/find_timeline_by_filter.sh active
 
 # Example get all prepackaged timeline templates:
-# ./find_timeline_by_filter.sh immutable template elastic
+# ./timelines/find_timeline_by_filter.sh immutable template elastic
 
 # Example get all custom timeline templates:
-# ./find_timeline_by_filter.sh active template custom
+# ./timelines/find_timeline_by_filter.sh active template custom
 
 curl -s -k \
   -H "Content-Type: application/json" \

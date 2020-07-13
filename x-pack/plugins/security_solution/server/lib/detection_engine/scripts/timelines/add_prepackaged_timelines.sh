@@ -7,13 +7,13 @@
 #
 
 set -e
-../check_env_variables.sh
+./check_env_variables.sh
 
 # Uses a defaults if no argument is specified
 TIMELINES=${1:-../../rules/prepackaged_timelines/index.ndjson}
 
 # Example to import and overwrite everything from ../rules/prepackaged_timelines/index.ndjson
-# ./add_prepackaged_timelines.sh
+# ./timelines/add_prepackaged_timelines.sh
 curl -s -k \
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \

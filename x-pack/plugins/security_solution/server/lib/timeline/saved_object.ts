@@ -164,20 +164,21 @@ const getTimelineTypeFilter = (
 
 export const getExistingPrepackagedTimelines = async (
   request: FrameworkRequest,
-  countsOnly?: boolean
+  countsOnly?: boolean,
+  pageInfo?: PageInfoTimeline | null
 ): Promise<{
   totalCount: number;
   timeline: TimelineSavedObject[];
 }> => {
-  const pageInfo = countsOnly
+  const queryPageInfo = countsOnly
     ? {
         perPage: 1,
         page: 1,
       }
-    : {};
+    : pageInfo ?? {};
   const elasticTemplateTimelineOptions = {
     type: timelineSavedObjectType,
-    ...pageInfo,
+    ...queryPageInfo,
     filter: getTimelineTypeFilter(
       TimelineType.template,
       TemplateTimelineType.elastic,

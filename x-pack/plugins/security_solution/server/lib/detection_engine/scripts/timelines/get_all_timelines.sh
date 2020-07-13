@@ -7,9 +7,9 @@
 #
 
 set -e
-../check_env_variables.sh
+./check_env_variables.sh
 
-# Example: ./get_all_timelines.sh
+# Example: ./timelines/get_all_timelines.sh
 curl -s -k \
   -H "Content-Type: application/json" \
   -H 'kbn-xsrf: 123' \

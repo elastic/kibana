@@ -20,10 +20,8 @@ import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackage
 import { buildFrameworkRequest } from '../../../timeline/routes/utils/common';
 import { ConfigType } from '../../../../config';
 import { SetupPlugins } from '../../../../plugin';
-import {
-  checkTimelinesStatus,
-  checkTimelineStatusRt,
-} from '../../../timeline/routes/utils/install_prepacked_timelines';
+import { checkTimelinesStatus } from '../../../timeline/routes/utils/check_timelines_status';
+import { checkTimelineStatusRt } from '../../../timeline/routes/schemas/check_timelines_status_schema';
 
 export const getPrepackagedRulesStatusRoute = (
   router: IRouter,
