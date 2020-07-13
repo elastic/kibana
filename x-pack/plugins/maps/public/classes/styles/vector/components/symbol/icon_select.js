@@ -15,10 +15,14 @@ import {
   EuiSelectable,
 } from '@elastic/eui';
 import { SymbolIcon } from '../legend/symbol_icon';
+import { SYMBOL_OPTIONS } from '../../symbol_utils';
+import { getUiSettings } from '../../../../../kibana_services';
 
 function isKeyboardEvent(event) {
   return typeof event === 'object' && 'keyCode' in event;
 }
+
+const isDarkMode = getUiSettings().get('theme:darkMode', false);
 
 export class IconSelect extends Component {
   state = {
@@ -62,7 +66,6 @@ export class IconSelect extends Component {
   };
 
   _renderPopoverButton() {
-    const { isDarkMode, value } = this.props;
     return (
       <EuiFormControlLayout
         icon={{ type: 'arrowDown', side: 'right' }}
@@ -75,15 +78,15 @@ export class IconSelect extends Component {
         <EuiFieldText
           onClick={this._togglePopover}
           onKeyDown={this._handleKeyboardActivity}
-          value={value}
+          value={this.props.value}
           compressed
           readOnly
           fullWidth
           prepend={
             <SymbolIcon
-              key={value}
+              key={this.props.value}
               className="mapIconSelectSymbol__inputButton"
-              symbolId={value}
+              symbolId={this.props.value}
               fill={isDarkMode ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
             />
           }
@@ -93,8 +96,7 @@ export class IconSelect extends Component {
   }
 
   _renderIconSelectable() {
-    const { isDarkMode } = this.props;
-    const options = this.props.symbolOptions.map(({ value, label }) => {
+    const options = SYMBOL_OPTIONS.map(({ value, label }) => {
       return {
         value,
         label,

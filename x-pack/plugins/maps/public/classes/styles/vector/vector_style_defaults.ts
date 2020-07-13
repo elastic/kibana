@@ -139,6 +139,7 @@ export function getDefaultDynamicProperties(): VectorStylePropertiesDescriptor {
       type: STYLE_TYPE.DYNAMIC,
       options: {
         iconPaletteId: 'filledShapes',
+        useCustomIconMap: false,
         field: undefined,
         fieldMetaOptions: {
           isEnabled: true,
