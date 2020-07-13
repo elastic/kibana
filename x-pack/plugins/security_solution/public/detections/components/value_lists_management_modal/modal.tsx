@@ -43,7 +43,7 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
   const [cursor, setCursor] = useCursor({ pageIndex, pageSize });
   const { http } = useKibana().services;
   const { start: findLists, ...lists } = useFindLists();
-  const { start: deleteList } = useDeleteList();
+  const { start: deleteList, result: deleteResult } = useDeleteList();
   const [exportListId, setExportListId] = useState<string>();
   const toasts = useToasts();
 
@@ -52,12 +52,17 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
   }, [cursor, http, findLists, pageIndex, pageSize]);
 
   const handleDelete = useCallback(
-    async ({ id }: { id: string }) => {
-      await deleteList({ http, id });
-      fetchLists();
+    ({ id }: { id: string }) => {
+      deleteList({ http, id });
     },
-    [deleteList, http, fetchLists]
+    [deleteList, http]
   );
+
+  useEffect(() => {
+    if (deleteResult != null) {
+      fetchLists();
+    }
+  }, [deleteResult, fetchLists]);
 
   const handleExport = useCallback(
     async ({ ids }: { ids: string[] }) =>
