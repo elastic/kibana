@@ -13,7 +13,7 @@
   "machine_learning_job_id": "packetbeat_rare_server_domain",
   "name": "Unusual Network Destination Domain Name",
   "references": [
-    "https://www.elastic.co/guide/en/siem/guide/current/prebuilt-ml-jobs.html"
+    "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
   ],
   "risk_score": 21,
   "rule_id": "17e68559-b274-4948-ad0b-f8415bb31126",

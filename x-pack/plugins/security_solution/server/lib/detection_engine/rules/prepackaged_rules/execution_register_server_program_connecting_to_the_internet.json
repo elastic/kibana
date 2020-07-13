@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Identifies the native Windows tools regsvr32.exe and regsvr64.exe making a network connection. This may be indicative of an attacker bypassing whitelisting or running arbitrary scripts via a signed Microsoft binary.",
+  "description": "Identifies the native Windows tools regsvr32.exe and regsvr64.exe making a network connection. This may be indicative of an attacker bypassing allowlists or running arbitrary scripts via a signed Microsoft binary.",
   "false_positives": [
     "Security testing may produce events like this. Activity of this kind performed by non-engineers and ordinary users is unusual."
   ],
