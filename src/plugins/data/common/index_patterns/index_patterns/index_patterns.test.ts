@@ -19,12 +19,14 @@
 
 // eslint-disable-next-line max-classes-per-file
 import { IndexPatternsService } from './index_patterns';
-import { SavedObjectsClientContract, SavedObjectsFindResponsePublic } from 'kibana/public';
-import { coreMock, httpServiceMock } from '../../../../../core/public/mocks';
 import { fieldFormatsMock } from '../../field_formats/mocks';
+import {
+  UiSettingsCommon,
+  IIndexPatternsApiClient,
+  SavedObjectsClientCommon,
+  SavedObject,
+} from '../types';
 
-const core = coreMock.createStart();
-const http = httpServiceMock.createStartContract();
 const fieldFormats = fieldFormatsMock;
 
 jest.mock('./index_pattern', () => {
@@ -39,33 +41,27 @@ jest.mock('./index_pattern', () => {
   };
 });
 
-jest.mock('./index_patterns_api_client', () => {
-  class IndexPatternsApiClient {
-    getFieldsForWildcard = async () => ({});
-  }
-
-  return {
-    IndexPatternsApiClient,
-  };
-});
-
 describe('IndexPatterns', () => {
   let indexPatterns: IndexPatternsService;
-  let savedObjectsClient: SavedObjectsClientContract;
+  let savedObjectsClient: SavedObjectsClientCommon;
 
   beforeEach(() => {
-    savedObjectsClient = {} as SavedObjectsClientContract;
+    savedObjectsClient = {} as SavedObjectsClientCommon;
     savedObjectsClient.find = jest.fn(
       () =>
-        Promise.resolve({
-          savedObjects: [{ id: 'id', attributes: { title: 'title' } }],
-        }) as Promise<SavedObjectsFindResponsePublic<any>>
+        Promise.resolve([{ id: 'id', attributes: { title: 'title' } }]) as Promise<
+          Array<SavedObject<any>>
+        >
     );
+    savedObjectsClient.delete = jest.fn(() => Promise.resolve({}) as Promise<any>);
 
     indexPatterns = new IndexPatternsService({
-      uiSettings: core.uiSettings,
-      savedObjectsClient,
-      http,
+      uiSettings: ({
+        get: () => Promise.resolve(false),
+        getAll: () => {},
+      } as any) as UiSettingsCommon,
+      savedObjectsClient: (savedObjectsClient as unknown) as SavedObjectsClientCommon,
+      apiClient: {} as IIndexPatternsApiClient,
       fieldFormats,
       onNotification: () => {},
       onError: () => {},
@@ -102,5 +98,14 @@ describe('IndexPatterns', () => {
     await indexPatterns.getTitles(true);
     await indexPatterns.getFields(['id', 'title'], true);
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(3);
+  });
+
+  test('deletes the index pattern', async () => {
+    const id = '1';
+    const indexPattern = await indexPatterns.get(id);
+
+    expect(indexPattern).toBeDefined();
+    await indexPatterns.delete(id);
+    expect(indexPattern).not.toBe(await indexPatterns.get(id));
   });
 });

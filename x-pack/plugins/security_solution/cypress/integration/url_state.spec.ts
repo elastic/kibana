@@ -154,12 +154,12 @@ describe('url state', () => {
 
   it('sets kql on network page', () => {
     loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.urlKqlNetworkNetwork);
-    cy.get(KQL_INPUT).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
+    cy.get(KQL_INPUT).invoke('text').should('eq', 'source.ip: "10.142.0.9"');
   });
 
   it('sets kql on hosts page', () => {
     loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
-    cy.get(KQL_INPUT).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
+    cy.get(KQL_INPUT).invoke('text').should('eq', 'source.ip: "10.142.0.9"');
   });
 
   it('sets the url state when kql is set', () => {
@@ -230,8 +230,7 @@ describe('url state', () => {
   it('Do not clears kql when navigating to a new page', () => {
     loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
     navigateFromHeaderTo(NETWORK);
-
-    cy.get(KQL_INPUT).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
+    cy.get(KQL_INPUT).invoke('text').should('eq', 'source.ip: "10.142.0.9"');
   });
 
   it.skip('sets and reads the url state for timeline by id', () => {
@@ -258,7 +257,7 @@ describe('url state', () => {
       expect(matched).to.have.lengthOf(1);
       closeTimeline();
       cy.visit('/app/home');
-      cy.visit(`/app/security/timelines?timeline=(id:'${newTimelineId}',isOpen:!t)`);
+      cy.visit(`/app/security/timelines?timeline=(id:%27${newTimelineId}%27,isOpen:!t)`);
       cy.contains('a', 'Security');
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).invoke('text').should('not.equal', 'Updating');
       cy.get(TIMELINE_TITLE).should('be.visible');

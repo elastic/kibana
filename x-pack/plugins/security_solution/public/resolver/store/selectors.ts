@@ -128,11 +128,6 @@ export const uiSelectedDescendantProcessId = composeSelectors(
 );
 
 /**
- * The current panel to display
- */
-export const currentPanelView = composeSelectors(uiStateSelector, uiSelectors.currentPanelView);
-
-/**
  * Returns the camera state from within ResolverState
  */
 function cameraStateSelector(state: ResolverState) {
@@ -186,6 +181,14 @@ const boundingBox = composeSelectors(cameraStateSelector, cameraSelectors.viewab
 const indexedProcessNodesAndEdgeLineSegments = composeSelectors(
   dataStateSelector,
   dataSelectors.visibleProcessNodePositionsAndEdgeLineSegments
+);
+
+/**
+ * Total count of related events for a process.
+ */
+export const relatedEventTotalForProcess = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventTotalForProcess
 );
 
 /**

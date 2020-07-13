@@ -24,6 +24,7 @@ import loadJsonFile from 'load-json-file';
 
 export interface KibanaPlatformPlugin {
   readonly directory: string;
+  readonly manifestPath: string;
   readonly id: string;
   readonly isUiPlugin: boolean;
   readonly extraPublicDirs: string[];
@@ -37,7 +38,7 @@ export function findKibanaPlatformPlugins(scanDirs: string[], paths: string[]) {
     .sync(
       Array.from(
         new Set([
-          ...scanDirs.map((dir) => `${dir}/*/kibana.json`),
+          ...scanDirs.map(nestedScanDirPaths).reduce((dirs, current) => [...dirs, ...current], []),
           ...paths.map((path) => `${path}/kibana.json`),
         ])
       ),
@@ -49,6 +50,17 @@ export function findKibanaPlatformPlugins(scanDirs: string[], paths: string[]) {
       // absolute paths returned from globby are using normalize or something so the path separators are `/` even on windows, Path.resolve solves this
       readKibanaPlatformPlugin(Path.resolve(path))
     );
+}
+
+function nestedScanDirPaths(dir: string): string[] {
+  // down to 5 level max
+  return [
+    `${dir}/*/kibana.json`,
+    `${dir}/*/*/kibana.json`,
+    `${dir}/*/*/*/kibana.json`,
+    `${dir}/*/*/*/*/kibana.json`,
+    `${dir}/*/*/*/*/*/kibana.json`,
+  ];
 }
 
 function readKibanaPlatformPlugin(manifestPath: string): KibanaPlatformPlugin {
@@ -81,6 +93,7 @@ function readKibanaPlatformPlugin(manifestPath: string): KibanaPlatformPlugin {
 
   return {
     directory: Path.dirname(manifestPath),
+    manifestPath,
     id: manifest.id,
     isUiPlugin: !!manifest.ui,
     extraPublicDirs: extraPublicDirs || [],

@@ -242,7 +242,6 @@ export const getTopNavConfig = (
                 if (!originatingApp) {
                   return;
                 }
-                debugger;
                 const input = {
                   ...vis.serialize(),
                   id: uuid.v4(),

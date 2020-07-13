@@ -119,22 +119,32 @@ Description.displayName = 'Description';
 
 interface NameProps {
   timelineId: string;
+  timelineType: TimelineType;
   title: string;
   updateTitle: UpdateTitle;
 }
 
-export const Name = React.memo<NameProps>(({ timelineId, title, updateTitle }) => (
-  <EuiToolTip data-test-subj="timeline-title-tool-tip" content={i18n.TITLE}>
-    <NameField
-      aria-label={i18n.TIMELINE_TITLE}
-      data-test-subj="timeline-title"
-      onChange={(e) => updateTitle({ id: timelineId, title: e.target.value })}
-      placeholder={i18n.UNTITLED_TIMELINE}
-      spellCheck={true}
-      value={title}
-    />
-  </EuiToolTip>
-));
+export const Name = React.memo<NameProps>(({ timelineId, timelineType, title, updateTitle }) => {
+  const handleChange = useCallback((e) => updateTitle({ id: timelineId, title: e.target.value }), [
+    timelineId,
+    updateTitle,
+  ]);
+
+  return (
+    <EuiToolTip data-test-subj="timeline-title-tool-tip" content={i18n.TITLE}>
+      <NameField
+        aria-label={i18n.TIMELINE_TITLE}
+        data-test-subj="timeline-title"
+        onChange={handleChange}
+        placeholder={
+          timelineType === TimelineType.template ? i18n.UNTITLED_TEMPLATE : i18n.UNTITLED_TIMELINE
+        }
+        spellCheck={true}
+        value={title}
+      />
+    </EuiToolTip>
+  );
+});
 Name.displayName = 'Name';
 
 interface NewCaseProps {
@@ -157,19 +167,21 @@ export const NewCase = React.memo<NewCaseProps>(
 
     const handleClick = useCallback(() => {
       onClosePopover();
-      dispatch(
-        setInsertTimeline({
-          graphEventId,
-          timelineId,
-          timelineSavedObjectId: savedObjectId,
-          timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
-        })
-      );
+
       dispatch(showTimeline({ id: TimelineId.active, show: false }));
 
       navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
         path: getCreateCaseUrl(),
-      });
+      }).then(() =>
+        dispatch(
+          setInsertTimeline({
+            graphEventId,
+            timelineId,
+            timelineSavedObjectId: savedObjectId,
+            timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
+          })
+        )
+      );
     }, [
       dispatch,
       graphEventId,

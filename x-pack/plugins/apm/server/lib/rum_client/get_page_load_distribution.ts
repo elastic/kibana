@@ -12,6 +12,12 @@ import {
   SetupUIFilters,
 } from '../helpers/setup_request';
 
+export const MICRO_TO_SEC = 1000000;
+
+export function microToSec(val: number) {
+  return Math.round((val / MICRO_TO_SEC + Number.EPSILON) * 100) / 100;
+}
+
 export async function getPageLoadDistribution({
   setup,
   minPercentile,
@@ -32,22 +38,18 @@ export async function getPageLoadDistribution({
         bool: projection.body.query.bool,
       },
       aggs: {
-        durationMinMax: {
+        minDuration: {
           min: {
             field: 'transaction.duration.us',
             missing: 0,
           },
         },
-        durationPercentiles: {
+        durPercentiles: {
           percentiles: {
             field: 'transaction.duration.us',
             percents: [50, 75, 90, 95, 99],
-            script: {
-              lang: 'painless',
-              source: "doc['transaction.duration.us'].value / params.timeUnit",
-              params: {
-                timeUnit: 1000,
-              },
+            hdr: {
+              number_of_significant_value_digits: 3,
             },
           },
         },
@@ -66,31 +68,41 @@ export async function getPageLoadDistribution({
     return null;
   }
 
-  const minDuration = (aggregations?.durationMinMax.value ?? 0) / 1000;
+  const { durPercentiles, minDuration } = aggregations ?? {};
 
-  const minPerc = minPercentile ? +minPercentile : minDuration;
+  const minPerc = minPercentile
+    ? +minPercentile * MICRO_TO_SEC
+    : minDuration?.value ?? 0;
 
-  const maxPercentileQuery =
-    aggregations?.durationPercentiles.values['99.0'] ?? 100;
+  const maxPercQuery = durPercentiles?.values['99.0'] ?? 10000;
 
-  const maxPerc = maxPercentile ? +maxPercentile : maxPercentileQuery;
+  const maxPerc = maxPercentile ? +maxPercentile * MICRO_TO_SEC : maxPercQuery;
 
   const pageDist = await getPercentilesDistribution(setup, minPerc, maxPerc);
+
+  Object.entries(durPercentiles?.values ?? {}).forEach(([key, val]) => {
+    if (durPercentiles?.values?.[key]) {
+      durPercentiles.values[key] = microToSec(val as number);
+    }
+  });
+
   return {
     pageLoadDistribution: pageDist,
-    percentiles: aggregations?.durationPercentiles.values,
+    percentiles: durPercentiles?.values,
+    minDuration: microToSec(minPerc),
+    maxDuration: microToSec(maxPerc),
   };
 }
 
 const getPercentilesDistribution = async (
   setup: Setup & SetupTimeRange & SetupUIFilters,
-  minPercentiles: number,
-  maxPercentile: number
+  minDuration: number,
+  maxDuration: number
 ) => {
-  const stepValue = (maxPercentile - minPercentiles) / 50;
+  const stepValue = (maxDuration - minDuration) / 100;
   const stepValues = [];
-  for (let i = 1; i < 50; i++) {
-    stepValues.push((stepValue * i + minPercentiles).toFixed(2));
+  for (let i = 1; i < 101; i++) {
+    stepValues.push((stepValue * i + minDuration).toFixed(2));
   }
 
   const projection = getRumOverviewProjection({
@@ -109,12 +121,8 @@ const getPercentilesDistribution = async (
             field: 'transaction.duration.us',
             values: stepValues,
             keyed: false,
-            script: {
-              lang: 'painless',
-              source: "doc['transaction.duration.us'].value / params.timeUnit",
-              params: {
-                timeUnit: 1000,
-              },
+            hdr: {
+              number_of_significant_value_digits: 3,
             },
           },
         },
@@ -126,14 +134,11 @@ const getPercentilesDistribution = async (
 
   const { aggregations } = await client.search(params);
 
-  const pageDist = (aggregations?.loadDistribution.values ?? []) as Array<{
-    key: number;
-    value: number;
-  }>;
+  const pageDist = aggregations?.loadDistribution.values ?? [];
 
   return pageDist.map(({ key, value }, index: number, arr) => {
     return {
-      x: key,
+      x: microToSec(key),
       y: index === 0 ? value : value - arr[index - 1].value,
     };
   });

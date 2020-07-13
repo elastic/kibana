@@ -5,7 +5,7 @@
  */
 
 import './datapanel.scss';
-import { uniq, indexBy, groupBy, throttle } from 'lodash';
+import { uniq, keyBy, groupBy, throttle } from 'lodash';
 import React, { useState, useEffect, memo, useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataPublicPluginStart, EsQueryConfig, Query, Filter } from 'src/plugins/data/public';
 import { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import { FieldItem } from './field_item';
@@ -47,9 +47,11 @@ export type Props = DatasourceDataPanelProps<IndexPatternPrivateState> & {
     state: IndexPatternPrivateState,
     setState: StateSetter<IndexPatternPrivateState>
   ) => void;
+  charts: ChartsPluginSetup;
 };
 import { LensFieldIcon } from './lens_field_icon';
 import { ChangeIndexPattern } from './change_indexpattern';
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 
 // TODO the typings for EuiContextMenuPanel are incorrect - watchedItemProps is missing. This can be removed when the types are adjusted
 const FixedEuiContextMenuPanel = (EuiContextMenuPanel as unknown) as React.FunctionComponent<
@@ -72,6 +74,27 @@ const fieldTypeNames: Record<DataType, string> = {
   ip: i18n.translate('xpack.lens.datatypes.ipAddress', { defaultMessage: 'IP' }),
 };
 
+// Wrapper around esQuery.buildEsQuery, handling errors (e.g. because a query can't be parsed) by
+// returning a query dsl object not matching anything
+function buildSafeEsQuery(
+  indexPattern: IIndexPattern,
+  query: Query,
+  filters: Filter[],
+  queryConfig: EsQueryConfig
+) {
+  try {
+    return esQuery.buildEsQuery(indexPattern, query, filters, queryConfig);
+  } catch (e) {
+    return {
+      bool: {
+        must_not: {
+          match_all: {},
+        },
+      },
+    };
+  }
+}
+
 export function IndexPatternDataPanel({
   setState,
   state,
@@ -82,6 +105,8 @@ export function IndexPatternDataPanel({
   filters,
   dateRange,
   changeIndexPattern,
+  charts,
+  showNoDataPopover,
 }: Props) {
   const { indexPatternRefs, indexPatterns, currentIndexPatternId } = state;
   const onChangeIndexPattern = useCallback(
@@ -102,7 +127,7 @@ export function IndexPatternDataPanel({
       timeFieldName: indexPatterns[id].timeFieldName,
     }));
 
-  const dslQuery = esQuery.buildEsQuery(
+  const dslQuery = buildSafeEsQuery(
     indexPatterns[currentIndexPatternId] as IIndexPattern,
     query,
     filters,
@@ -116,6 +141,9 @@ export function IndexPatternDataPanel({
           syncExistingFields({
             dateRange,
             setState,
+            isFirstExistenceFetch: state.isFirstExistenceFetch,
+            currentIndexPatternTitle: indexPatterns[currentIndexPatternId].title,
+            showNoDataPopover,
             indexPatterns: indexPatternList,
             fetchJson: core.http.post,
             dslQuery,
@@ -166,6 +194,7 @@ export function IndexPatternDataPanel({
           dragDropContext={dragDropContext}
           core={core}
           data={data}
+          charts={charts}
           onChangeIndexPattern={onChangeIndexPattern}
           existingFields={state.existingFields}
         />
@@ -210,7 +239,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   core,
   data,
   existingFields,
-}: Pick<DatasourceDataPanelProps, Exclude<keyof DatasourceDataPanelProps, 'state' | 'setState'>> & {
+  charts,
+}: Omit<DatasourceDataPanelProps, 'state' | 'setState' | 'showNoDataPopover'> & {
   data: DataPublicPluginStart;
   currentIndexPatternId: string;
   indexPatternRefs: IndexPatternRef[];
@@ -218,6 +248,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   dragDropContext: DragContextState;
   onChangeIndexPattern: (newId: string) => void;
   existingFields: IndexPatternPrivateState['existingFields'];
+  charts: ChartsPluginSetup;
 }) {
   const [localState, setLocalState] = useState<DataPanelState>({
     nameFilter: '',
@@ -246,7 +277,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
 
   const fieldGroups: FieldsGroup = useMemo(() => {
     const containsData = (field: IndexPatternField) => {
-      const fieldByName = indexBy(allFields, 'name');
+      const fieldByName = keyBy(allFields, 'name');
       const overallField = fieldByName[field.name];
 
       return (
@@ -372,6 +403,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       dateRange,
       query,
       filters,
+      chartsThemeService: charts.theme,
     }),
     [core, data, currentIndexPattern, dateRange, query, filters, localState.nameFilter]
   );

@@ -89,14 +89,18 @@ interface UseWithSourceState {
   loading: boolean;
 }
 
-export const useWithSource = (sourceId = 'default', indexToAdd?: string[] | null) => {
+export const useWithSource = (
+  sourceId = 'default',
+  indexToAdd?: string[] | null,
+  onlyCheckIndexToAdd?: boolean
+) => {
   const [configIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const defaultIndex = useMemo<string[]>(() => {
     if (indexToAdd != null && !isEmpty(indexToAdd)) {
-      return [...configIndex, ...indexToAdd];
+      return onlyCheckIndexToAdd ? indexToAdd : [...configIndex, ...indexToAdd];
     }
     return configIndex;
-  }, [configIndex, indexToAdd]);
+  }, [configIndex, indexToAdd, onlyCheckIndexToAdd]);
 
   const [state, setState] = useState<UseWithSourceState>({
     browserFields: EMPTY_BROWSER_FIELDS,
@@ -131,41 +135,32 @@ export const useWithSource = (sourceId = 'default', indexToAdd?: string[] | null
             },
           },
         });
-        if (!isSubscribed) {
-          return setState((prevState) => ({
-            ...prevState,
-            loading: false,
-          }));
-        }
 
-        setState({
-          loading: false,
-          indicesExist: indicesExistOrDataTemporarilyUnavailable(
-            get('data.source.status.indicesExist', result)
-          ),
-          browserFields: getBrowserFields(
-            defaultIndex.join(),
-            get('data.source.status.indexFields', result)
-          ),
-          indexPattern: getIndexFields(
-            defaultIndex.join(),
-            get('data.source.status.indexFields', result)
-          ),
-          errorMessage: null,
-        });
+        if (isSubscribed) {
+          setState({
+            loading: false,
+            indicesExist: indicesExistOrDataTemporarilyUnavailable(
+              get('data.source.status.indicesExist', result)
+            ),
+            browserFields: getBrowserFields(
+              defaultIndex.join(),
+              get('data.source.status.indexFields', result)
+            ),
+            indexPattern: getIndexFields(
+              defaultIndex.join(),
+              get('data.source.status.indexFields', result)
+            ),
+            errorMessage: null,
+          });
+        }
       } catch (error) {
-        if (!isSubscribed) {
-          return setState((prevState) => ({
+        if (isSubscribed) {
+          setState((prevState) => ({
             ...prevState,
             loading: false,
+            errorMessage: error.message,
           }));
         }
-
-        setState((prevState) => ({
-          ...prevState,
-          loading: false,
-          errorMessage: error.message,
-        }));
       }
     }
 

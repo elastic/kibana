@@ -371,6 +371,7 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
               "filebeat-*",
               "packetbeat-*",
               "winlogbeat-*",
+              "logs-*",
             ],
             "name": "event.end",
             "searchable": true,

@@ -1,0 +1,208 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Metrics UI Observability Homepage Functions createMetricsFetchData() should just work 1`] = `
+Object {
+  "appLink": "/app/metrics",
+  "series": Object {
+    "inboundTraffic": Object {
+      "coordinates": Array [
+        Object {
+          "x": 1593630455000,
+          "y": 0,
+        },
+        Object {
+          "x": 1593630755000,
+          "y": 3.5,
+        },
+        Object {
+          "x": 1593631055000,
+          "y": 3.5,
+        },
+        Object {
+          "x": 1593631355000,
+          "y": 8.5,
+        },
+        Object {
+          "x": 1593631655000,
+          "y": 3.5,
+        },
+        Object {
+          "x": 1593631955000,
+          "y": 2.5,
+        },
+        Object {
+          "x": 1593632255000,
+          "y": 1.5,
+        },
+        Object {
+          "x": 1593632555000,
+          "y": 1.5,
+        },
+        Object {
+          "x": 1593632855000,
+          "y": 3.5,
+        },
+        Object {
+          "x": 1593633155000,
+          "y": 2.5,
+        },
+        Object {
+          "x": 1593633455000,
+          "y": 1.5,
+        },
+        Object {
+          "x": 1593633755000,
+          "y": 1.5,
+        },
+        Object {
+          "x": 1593634055000,
+          "y": 2.5,
+        },
+        Object {
+          "x": 1593634355000,
+          "y": 0,
+        },
+        Object {
+          "x": 1593634655000,
+          "y": 10.5,
+        },
+        Object {
+          "x": 1593634955000,
+          "y": 5.5,
+        },
+        Object {
+          "x": 1593635255000,
+          "y": 13.5,
+        },
+        Object {
+          "x": 1593635555000,
+          "y": 9.5,
+        },
+        Object {
+          "x": 1593635855000,
+          "y": 7.5,
+        },
+        Object {
+          "x": 1593636155000,
+          "y": 3,
+        },
+        Object {
+          "x": 1593636455000,
+          "y": 3.5,
+        },
+      ],
+    },
+    "outboundTraffic": Object {
+      "coordinates": Array [
+        Object {
+          "x": 1593630455000,
+          "y": 0,
+        },
+        Object {
+          "x": 1593630755000,
+          "y": 4,
+        },
+        Object {
+          "x": 1593631055000,
+          "y": 4,
+        },
+        Object {
+          "x": 1593631355000,
+          "y": 9,
+        },
+        Object {
+          "x": 1593631655000,
+          "y": 4,
+        },
+        Object {
+          "x": 1593631955000,
+          "y": 2.5,
+        },
+        Object {
+          "x": 1593632255000,
+          "y": 2,
+        },
+        Object {
+          "x": 1593632555000,
+          "y": 2,
+        },
+        Object {
+          "x": 1593632855000,
+          "y": 4,
+        },
+        Object {
+          "x": 1593633155000,
+          "y": 3,
+        },
+        Object {
+          "x": 1593633455000,
+          "y": 2,
+        },
+        Object {
+          "x": 1593633755000,
+          "y": 2,
+        },
+        Object {
+          "x": 1593634055000,
+          "y": 2.5,
+        },
+        Object {
+          "x": 1593634355000,
+          "y": 1,
+        },
+        Object {
+          "x": 1593634655000,
+          "y": 11,
+        },
+        Object {
+          "x": 1593634955000,
+          "y": 6,
+        },
+        Object {
+          "x": 1593635255000,
+          "y": 14,
+        },
+        Object {
+          "x": 1593635555000,
+          "y": 10,
+        },
+        Object {
+          "x": 1593635855000,
+          "y": 8,
+        },
+        Object {
+          "x": 1593636155000,
+          "y": 3,
+        },
+        Object {
+          "x": 1593636455000,
+          "y": 4,
+        },
+      ],
+    },
+  },
+  "stats": Object {
+    "cpu": Object {
+      "type": "percent",
+      "value": 0.0015,
+    },
+    "hosts": Object {
+      "type": "number",
+      "value": 2,
+    },
+    "inboundTraffic": Object {
+      "type": "bytesPerSecond",
+      "value": 3.5,
+    },
+    "memory": Object {
+      "type": "percent",
+      "value": 0.0015,
+    },
+    "outboundTraffic": Object {
+      "type": "bytesPerSecond",
+      "value": 3,
+    },
+  },
+  "title": "Metrics",
+}
+`;

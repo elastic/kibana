@@ -5,10 +5,20 @@
  */
 
 import React, { FC, useState, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiProgress,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../../../../contexts/kibana';
-import { getDataFrameAnalyticsProgressPhase } from '../../../analytics_management/components/analytics_list/common';
+import {
+  getDataFrameAnalyticsProgressPhase,
+  DATA_FRAME_TASK_STATE,
+} from '../../../analytics_management/components/analytics_list/common';
 import { isGetDataFrameAnalyticsStatsResponseOk } from '../../../analytics_management/services/analytics_service/get_analytics';
 import { ml } from '../../../../../services/ml_api_service';
 import { DataFrameAnalyticsId } from '../../../../common/analytics';
@@ -17,6 +27,7 @@ export const PROGRESS_REFRESH_INTERVAL_MS = 1000;
 
 export const ProgressStats: FC<{ jobId: DataFrameAnalyticsId }> = ({ jobId }) => {
   const [initialized, setInitialized] = useState<boolean>(false);
+  const [failedJobMessage, setFailedJobMessage] = useState<string | undefined>(undefined);
   const [currentProgress, setCurrentProgress] = useState<
     | {
         currentPhase: number;
@@ -44,10 +55,26 @@ export const ProgressStats: FC<{ jobId: DataFrameAnalyticsId }> = ({ jobId }) =>
 
         if (jobStats !== undefined) {
           const progressStats = getDataFrameAnalyticsProgressPhase(jobStats);
+
+          if (jobStats.state === DATA_FRAME_TASK_STATE.FAILED) {
+            clearInterval(interval);
+            setFailedJobMessage(
+              jobStats.failure_reason ||
+                i18n.translate(
+                  'xpack.ml.dataframe.analytics.create.analyticsProgressCalloutMessage',
+                  {
+                    defaultMessage: 'Analytics job {jobId} has failed.',
+                    values: { jobId },
+                  }
+                )
+            );
+          }
+
           setCurrentProgress(progressStats);
           if (
-            progressStats.currentPhase === progressStats.totalPhases &&
-            progressStats.progress === 100
+            (progressStats.currentPhase === progressStats.totalPhases &&
+              progressStats.progress === 100) ||
+            jobStats.state === DATA_FRAME_TASK_STATE.STOPPED
           ) {
             clearInterval(interval);
           }
@@ -73,6 +100,25 @@ export const ProgressStats: FC<{ jobId: DataFrameAnalyticsId }> = ({ jobId }) =>
   return (
     <>
       <EuiSpacer />
+      {failedJobMessage !== undefined && (
+        <>
+          <EuiCallOut
+            data-test-subj="analyticsWizardProgressCallout"
+            title={i18n.translate(
+              'xpack.ml.dataframe.analytics.create.analyticsProgressCalloutTitle',
+              {
+                defaultMessage: 'Job failed',
+              }
+            )}
+            color={'danger'}
+            iconType={'alert'}
+            size="s"
+          >
+            <p>{failedJobMessage}</p>
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      )}
       <EuiText size="m">
         <strong>
           {i18n.translate('xpack.ml.dataframe.analytics.create.analyticsProgressTitle', {

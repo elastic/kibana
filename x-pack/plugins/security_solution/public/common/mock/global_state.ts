@@ -25,9 +25,7 @@ import {
 } from '../../../common/constants';
 import { networkModel } from '../../network/store';
 import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
-import { initialAlertListState } from '../../endpoint_alerts/store/reducer';
 import { mockManagementState } from '../../management/store/reducer';
-import { AlertListState } from '../../../common/endpoint_alerts/types';
 import { ManagementState } from '../../management/types';
 
 export const mockGlobalState: State = {
@@ -197,6 +195,7 @@ export const mockGlobalState: State = {
         dataProviders: [],
         description: '',
         eventIdToNoteIds: {},
+        excludedRowRendererIds: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
         isFavorite: false,
@@ -217,7 +216,6 @@ export const mockGlobalState: State = {
         },
         selectedEventIds: {},
         show: false,
-        showRowRenderers: true,
         showCheckboxes: false,
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
@@ -235,6 +233,5 @@ export const mockGlobalState: State = {
    * These state's are wrapped in `Immutable`, but for compatibility with the overall app architecture,
    * they are cast to mutable versions here.
    */
-  alertList: initialAlertListState as AlertListState,
   management: mockManagementState as ManagementState,
 };

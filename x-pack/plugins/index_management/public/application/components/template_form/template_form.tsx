@@ -8,10 +8,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer } from '@elastic/eui';
 
-import { TemplateDeserialized, CREATE_LEGACY_TEMPLATE_BY_DEFAULT } from '../../../../common';
+import { TemplateDeserialized } from '../../../../common';
 import { serializers, Forms } from '../../../shared_imports';
 import { SectionError } from '../section_error';
-import { StepLogisticsContainer, StepReviewContainer } from './steps';
+import { StepLogisticsContainer, StepComponentContainer, StepReviewContainer } from './steps';
 import {
   CommonWizardSteps,
   StepSettingsContainer,
@@ -28,12 +28,14 @@ interface Props {
   clearSaveError: () => void;
   isSaving: boolean;
   saveError: any;
+  isLegacy?: boolean;
   defaultValue?: TemplateDeserialized;
   isEditing?: boolean;
 }
 
 export interface WizardContent extends CommonWizardSteps {
   logistics: Omit<TemplateDeserialized, '_kbnMeta' | 'template'>;
+  components: TemplateDeserialized['composedOf'];
 }
 
 export type WizardSection = keyof WizardContent | 'review';
@@ -43,6 +45,12 @@ const wizardSections: { [id: string]: { id: WizardSection; label: string } } = {
     id: 'logistics',
     label: i18n.translate('xpack.idxMgmt.templateForm.steps.logisticsStepName', {
       defaultMessage: 'Logistics',
+    }),
+  },
+  components: {
+    id: 'components',
+    label: i18n.translate('xpack.idxMgmt.templateForm.steps.componentsStepName', {
+      defaultMessage: 'Component templates',
     }),
   },
   settings: {
@@ -72,36 +80,38 @@ const wizardSections: { [id: string]: { id: WizardSection; label: string } } = {
 };
 
 export const TemplateForm = ({
-  defaultValue = {
-    name: '',
-    indexPatterns: [],
-    template: {
-      settings: {},
-      mappings: {},
-      aliases: {},
-    },
-    _kbnMeta: {
-      isManaged: false,
-      isLegacy: CREATE_LEGACY_TEMPLATE_BY_DEFAULT,
-    },
-  },
+  defaultValue,
   isEditing,
   isSaving,
+  isLegacy = false,
   saveError,
   clearSaveError,
   onSave,
 }: Props) => {
+  const indexTemplate = defaultValue ?? {
+    name: '',
+    indexPatterns: [],
+    template: {},
+    _kbnMeta: {
+      type: 'default',
+      hasDatastream: false,
+      isLegacy,
+    },
+  };
+
   const {
     template: { settings, mappings, aliases },
+    composedOf,
     _kbnMeta,
     ...logistics
-  } = defaultValue;
+  } = indexTemplate;
 
   const wizardDefaultValue: WizardContent = {
     logistics,
     settings,
     mappings,
     aliases,
+    components: indexTemplate.composedOf,
   };
 
   const i18nTexts = {
@@ -134,21 +144,54 @@ export const TemplateForm = ({
     </>
   ) : null;
 
-  const buildTemplateObject = (initialTemplate: TemplateDeserialized) => (
-    wizardData: WizardContent
-  ): TemplateDeserialized => ({
-    ...initialTemplate,
-    ...wizardData.logistics,
-    template: {
-      settings: wizardData.settings,
-      mappings: wizardData.mappings,
-      aliases: wizardData.aliases,
+  /**
+   * If no mappings, settings or aliases are defined, it is better to not send empty
+   * object for those values.
+   * This method takes care of that and other cleanup of empty fields.
+   * @param template The template object to clean up
+   */
+  const cleanupTemplateObject = (template: TemplateDeserialized) => {
+    const outputTemplate = { ...template };
+
+    if (outputTemplate.template.settings === undefined) {
+      delete outputTemplate.template.settings;
+    }
+    if (outputTemplate.template.mappings === undefined) {
+      delete outputTemplate.template.mappings;
+    }
+    if (outputTemplate.template.aliases === undefined) {
+      delete outputTemplate.template.aliases;
+    }
+    if (Object.keys(outputTemplate.template).length === 0) {
+      delete outputTemplate.template;
+    }
+
+    return outputTemplate;
+  };
+
+  const buildTemplateObject = useCallback(
+    (initialTemplate: TemplateDeserialized) => (
+      wizardData: WizardContent
+    ): TemplateDeserialized => {
+      const outputTemplate = {
+        ...initialTemplate,
+        ...wizardData.logistics,
+        composedOf: wizardData.components,
+        template: {
+          settings: wizardData.settings,
+          mappings: wizardData.mappings,
+          aliases: wizardData.aliases,
+        },
+      };
+
+      return cleanupTemplateObject(outputTemplate);
     },
-  });
+    []
+  );
 
   const onSaveTemplate = useCallback(
     async (wizardData: WizardContent) => {
-      const template = buildTemplateObject(defaultValue)(wizardData);
+      const template = buildTemplateObject(indexTemplate)(wizardData);
 
       // We need to strip empty string, otherwise if the "order" or "version"
       // are not set, they will be empty string and ES expect a number for those parameters.
@@ -160,7 +203,7 @@ export const TemplateForm = ({
 
       clearSaveError();
     },
-    [defaultValue, onSave, clearSaveError]
+    [indexTemplate, buildTemplateObject, onSave, clearSaveError]
   );
 
   return (
@@ -177,8 +220,14 @@ export const TemplateForm = ({
         label={wizardSections.logistics.label}
         isRequired
       >
-        <StepLogisticsContainer isEditing={isEditing} />
+        <StepLogisticsContainer isEditing={isEditing} isLegacy={indexTemplate._kbnMeta.isLegacy} />
       </FormWizardStep>
+
+      {indexTemplate._kbnMeta.isLegacy !== true && (
+        <FormWizardStep id={wizardSections.components.id} label={wizardSections.components.label}>
+          <StepComponentContainer />
+        </FormWizardStep>
+      )}
 
       <FormWizardStep id={wizardSections.settings.id} label={wizardSections.settings.label}>
         <StepSettingsContainer esDocsBase={documentationService.getEsDocsBase()} />
@@ -193,7 +242,7 @@ export const TemplateForm = ({
       </FormWizardStep>
 
       <FormWizardStep id={wizardSections.review.id} label={wizardSections.review.label}>
-        <StepReviewContainer getTemplateData={buildTemplateObject(defaultValue)} />
+        <StepReviewContainer getTemplateData={buildTemplateObject(indexTemplate)} />
       </FormWizardStep>
     </FormWizard>
   );

@@ -18,7 +18,8 @@
  */
 
 import { IUiSettingsClient } from 'src/core/public';
-import { QuerySetup } from '../../query/query_service';
+import { TimeRange, TimeRangeBounds } from '../../../common';
+import { GetInternalStartServicesFn } from '../../types';
 
 import { getCountMetricAgg } from './metrics/count';
 import { getAvgMetricAgg } from './metrics/avg';
@@ -54,54 +55,52 @@ import { getBucketAvgMetricAgg } from './metrics/bucket_avg';
 import { getBucketMinMetricAgg } from './metrics/bucket_min';
 import { getBucketMaxMetricAgg } from './metrics/bucket_max';
 
-import { GetInternalStartServicesFn } from '../../types';
-
 export interface AggTypesDependencies {
-  uiSettings: IUiSettingsClient;
-  query: QuerySetup;
+  calculateBounds: (timeRange: TimeRange) => TimeRangeBounds;
   getInternalStartServices: GetInternalStartServicesFn;
+  uiSettings: IUiSettingsClient;
 }
 
 export const getAggTypes = ({
-  uiSettings,
-  query,
+  calculateBounds,
   getInternalStartServices,
+  uiSettings,
 }: AggTypesDependencies) => ({
   metrics: [
-    getCountMetricAgg({ getInternalStartServices }),
-    getAvgMetricAgg({ getInternalStartServices }),
-    getSumMetricAgg({ getInternalStartServices }),
-    getMedianMetricAgg({ getInternalStartServices }),
-    getMinMetricAgg({ getInternalStartServices }),
-    getMaxMetricAgg({ getInternalStartServices }),
-    getStdDeviationMetricAgg({ getInternalStartServices }),
-    getCardinalityMetricAgg({ getInternalStartServices }),
-    getPercentilesMetricAgg({ getInternalStartServices }),
+    getCountMetricAgg(),
+    getAvgMetricAgg(),
+    getSumMetricAgg(),
+    getMedianMetricAgg(),
+    getMinMetricAgg(),
+    getMaxMetricAgg(),
+    getStdDeviationMetricAgg(),
+    getCardinalityMetricAgg(),
+    getPercentilesMetricAgg(),
     getPercentileRanksMetricAgg({ getInternalStartServices }),
-    getTopHitMetricAgg({ getInternalStartServices }),
-    getDerivativeMetricAgg({ getInternalStartServices }),
-    getCumulativeSumMetricAgg({ getInternalStartServices }),
-    getMovingAvgMetricAgg({ getInternalStartServices }),
-    getSerialDiffMetricAgg({ getInternalStartServices }),
-    getBucketAvgMetricAgg({ getInternalStartServices }),
-    getBucketSumMetricAgg({ getInternalStartServices }),
-    getBucketMinMetricAgg({ getInternalStartServices }),
-    getBucketMaxMetricAgg({ getInternalStartServices }),
-    getGeoBoundsMetricAgg({ getInternalStartServices }),
-    getGeoCentroidMetricAgg({ getInternalStartServices }),
+    getTopHitMetricAgg(),
+    getDerivativeMetricAgg(),
+    getCumulativeSumMetricAgg(),
+    getMovingAvgMetricAgg(),
+    getSerialDiffMetricAgg(),
+    getBucketAvgMetricAgg(),
+    getBucketSumMetricAgg(),
+    getBucketMinMetricAgg(),
+    getBucketMaxMetricAgg(),
+    getGeoBoundsMetricAgg(),
+    getGeoCentroidMetricAgg(),
   ],
   buckets: [
-    getDateHistogramBucketAgg({ uiSettings, query, getInternalStartServices }),
+    getDateHistogramBucketAgg({ calculateBounds, uiSettings }),
     getHistogramBucketAgg({ uiSettings, getInternalStartServices }),
     getRangeBucketAgg({ getInternalStartServices }),
-    getDateRangeBucketAgg({ uiSettings, getInternalStartServices }),
-    getIpRangeBucketAgg({ getInternalStartServices }),
-    getTermsBucketAgg({ getInternalStartServices }),
-    getFilterBucketAgg({ getInternalStartServices }),
-    getFiltersBucketAgg({ uiSettings, getInternalStartServices }),
-    getSignificantTermsBucketAgg({ getInternalStartServices }),
-    getGeoHashBucketAgg({ getInternalStartServices }),
-    getGeoTitleBucketAgg({ getInternalStartServices }),
+    getDateRangeBucketAgg({ uiSettings }),
+    getIpRangeBucketAgg(),
+    getTermsBucketAgg(),
+    getFilterBucketAgg(),
+    getFiltersBucketAgg({ uiSettings }),
+    getSignificantTermsBucketAgg(),
+    getGeoHashBucketAgg(),
+    getGeoTitleBucketAgg(),
   ],
 });
 
