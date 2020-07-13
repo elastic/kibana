@@ -28,7 +28,8 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  describe('dashboard snapshots', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/52854
+  describe.skip('dashboard snapshots', function describeIndexTests() {
     before(async function () {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({

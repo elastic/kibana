@@ -5,7 +5,6 @@
  */
 
 import rison from 'rison-node';
-// @ts-ignore Untyped local.
 import { IBasePath } from 'kibana/public';
 import { fetch } from '../../../../common/lib/fetch';
 import { CanvasWorkpad } from '../../../../types';

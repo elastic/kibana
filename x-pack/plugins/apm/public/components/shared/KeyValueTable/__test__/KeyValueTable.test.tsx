@@ -7,6 +7,7 @@
 import React from 'react';
 import { KeyValueTable } from '..';
 import { render } from '@testing-library/react';
+import { renderWithTheme } from '../../../../utils/testHelpers';
 
 function getKeys(output: ReturnType<typeof render>) {
   const keys = output.getAllByTestId('dot-key');
@@ -31,7 +32,7 @@ describe('KeyValueTable', () => {
       { key: 'nested.b.c', value: 'ccc' },
       { key: 'nested.a', value: 'aaa' },
     ];
-    const output = render(<KeyValueTable keyValuePairs={data} />);
+    const output = renderWithTheme(<KeyValueTable keyValuePairs={data} />);
     const rows = output.container.querySelectorAll('tr');
     expect(rows.length).toEqual(9);
 

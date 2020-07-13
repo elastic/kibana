@@ -9,17 +9,17 @@ import { compose, withHandlers, withProps } from 'recompose';
 import { Dispatch } from 'redux';
 import { State, PositionedElement } from '../../../../types';
 import { getClipboardData } from '../../../lib/clipboard';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { flatten } from '../../../lib/aeroelastic/functional';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { globalStateUpdater } from '../../workpad_page/integration_utils';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { crawlTree } from '../../workpad_page/integration_utils';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { insertNodes, elementLayer, removeElements } from '../../../state/actions/elements';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { undoHistory, redoHistory } from '../../../state/actions/history';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { selectToplevelNodes } from '../../../state/actions/transient';
 import {
   getSelectedPage,

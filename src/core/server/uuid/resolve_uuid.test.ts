@@ -21,7 +21,7 @@ import { join } from 'path';
 import { readFile, writeFile } from './fs';
 import { resolveInstanceUuid, UUID_7_6_0_BUG } from './resolve_uuid';
 import { configServiceMock } from '../config/config_service.mock';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import { BehaviorSubject } from 'rxjs';
 import { Logger } from '../logging';
 
@@ -93,7 +93,7 @@ describe('resolveInstanceUuid', () => {
     mockReadFile({ uuid: DEFAULT_FILE_UUID });
     mockWriteFile();
     configService = getConfigService(DEFAULT_CONFIG_UUID);
-    logger = loggingServiceMock.create().get() as any;
+    logger = loggingSystemMock.create().get() as any;
   });
 
   describe('when file is present and config property is set', () => {

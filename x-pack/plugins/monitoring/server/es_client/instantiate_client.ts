@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ConfigOptions } from 'elasticsearch';
-import { Logger, ICustomClusterClient } from 'kibana/server';
+import { Logger, ILegacyCustomClusterClient } from 'kibana/server';
 // @ts-ignore
 import { monitoringBulk } from '../kibana_monitoring/lib/monitoring_bulk';
 import { MonitoringElasticsearchConfig } from '../config';
@@ -20,7 +20,10 @@ type ESClusterConfig = MonitoringElasticsearchConfig & Pick<ConfigOptions, 'plug
 export function instantiateClient(
   elasticsearchConfig: MonitoringElasticsearchConfig,
   log: Logger,
-  createClient: (type: string, clientConfig?: Partial<ESClusterConfig>) => ICustomClusterClient
+  createClient: (
+    type: string,
+    clientConfig?: Partial<ESClusterConfig>
+  ) => ILegacyCustomClusterClient
 ) {
   const isMonitoringCluster = hasMonitoringCluster(elasticsearchConfig);
   const cluster = createClient('monitoring', {

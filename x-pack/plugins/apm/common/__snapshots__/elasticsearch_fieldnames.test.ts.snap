@@ -4,7 +4,15 @@ exports[`Error AGENT_NAME 1`] = `"java"`;
 
 exports[`Error AGENT_VERSION 1`] = `"agent version"`;
 
+exports[`Error CLIENT_GEO 1`] = `undefined`;
+
 exports[`Error CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
+
+exports[`Error CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
+
+exports[`Error CLOUD_PROVIDER 1`] = `"gcp"`;
+
+exports[`Error CLOUD_REGION 1`] = `"europe-west1"`;
 
 exports[`Error CONTAINER_ID 1`] = `undefined`;
 
@@ -122,11 +130,17 @@ exports[`Error TRANSACTION_SAMPLED 1`] = `undefined`;
 
 exports[`Error TRANSACTION_TYPE 1`] = `"request"`;
 
+exports[`Error TRANSACTION_URL 1`] = `undefined`;
+
 exports[`Error URL_FULL 1`] = `undefined`;
+
+exports[`Error USER_AGENT_DEVICE 1`] = `undefined`;
 
 exports[`Error USER_AGENT_NAME 1`] = `undefined`;
 
 exports[`Error USER_AGENT_ORIGINAL 1`] = `undefined`;
+
+exports[`Error USER_AGENT_OS 1`] = `undefined`;
 
 exports[`Error USER_ID 1`] = `undefined`;
 
@@ -134,7 +148,15 @@ exports[`Span AGENT_NAME 1`] = `"java"`;
 
 exports[`Span AGENT_VERSION 1`] = `"agent version"`;
 
+exports[`Span CLIENT_GEO 1`] = `undefined`;
+
 exports[`Span CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
+
+exports[`Span CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
+
+exports[`Span CLOUD_PROVIDER 1`] = `"gcp"`;
+
+exports[`Span CLOUD_REGION 1`] = `"europe-west1"`;
 
 exports[`Span CONTAINER_ID 1`] = `undefined`;
 
@@ -252,11 +274,17 @@ exports[`Span TRANSACTION_SAMPLED 1`] = `undefined`;
 
 exports[`Span TRANSACTION_TYPE 1`] = `undefined`;
 
+exports[`Span TRANSACTION_URL 1`] = `undefined`;
+
 exports[`Span URL_FULL 1`] = `undefined`;
+
+exports[`Span USER_AGENT_DEVICE 1`] = `undefined`;
 
 exports[`Span USER_AGENT_NAME 1`] = `undefined`;
 
 exports[`Span USER_AGENT_ORIGINAL 1`] = `undefined`;
+
+exports[`Span USER_AGENT_OS 1`] = `undefined`;
 
 exports[`Span USER_ID 1`] = `undefined`;
 
@@ -264,7 +292,15 @@ exports[`Transaction AGENT_NAME 1`] = `"java"`;
 
 exports[`Transaction AGENT_VERSION 1`] = `"agent version"`;
 
+exports[`Transaction CLIENT_GEO 1`] = `undefined`;
+
 exports[`Transaction CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
+
+exports[`Transaction CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
+
+exports[`Transaction CLOUD_PROVIDER 1`] = `"gcp"`;
+
+exports[`Transaction CLOUD_REGION 1`] = `"europe-west1"`;
 
 exports[`Transaction CONTAINER_ID 1`] = `"container1234567890abcdef"`;
 
@@ -382,10 +418,16 @@ exports[`Transaction TRANSACTION_SAMPLED 1`] = `true`;
 
 exports[`Transaction TRANSACTION_TYPE 1`] = `"transaction type"`;
 
+exports[`Transaction TRANSACTION_URL 1`] = `undefined`;
+
 exports[`Transaction URL_FULL 1`] = `"http://www.elastic.co"`;
+
+exports[`Transaction USER_AGENT_DEVICE 1`] = `undefined`;
 
 exports[`Transaction USER_AGENT_NAME 1`] = `"Other"`;
 
 exports[`Transaction USER_AGENT_ORIGINAL 1`] = `"test original"`;
+
+exports[`Transaction USER_AGENT_OS 1`] = `undefined`;
 
 exports[`Transaction USER_ID 1`] = `"1337"`;

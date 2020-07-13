@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RenderTooltipContentParams } from '../../../../../../legacy/plugins/maps/public';
-import { inputsModel } from '../../../common/store/inputs';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { RenderTooltipContentParams } from '../../../../../maps/public/classes/tooltips/tooltip_property';
 
 export interface IndexPatternMapping {
   title: string;
@@ -27,13 +27,6 @@ export interface LayerMapping {
 export interface LayerMappingCollection {
   [indexPatternTitle: string]: LayerMapping;
 }
-
-export type SetQuery = (params: {
-  id: string;
-  inspect: inputsModel.InspectQuery | null;
-  loading: boolean;
-  refetch: inputsModel.Refetch;
-}) => void;
 
 export interface MapFeature {
   id: number;

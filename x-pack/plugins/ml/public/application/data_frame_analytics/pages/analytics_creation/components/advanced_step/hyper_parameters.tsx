@@ -8,18 +8,23 @@ import React, { FC, Fragment } from 'react';
 import { EuiFieldNumber, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
-import { getNumberValue } from './advanced_step_form';
+import { AdvancedParamErrors, getNumberValue } from './advanced_step_form';
+import { ANALYSIS_ADVANCED_FIELDS } from '../../../../common/analytics';
 
 const MAX_TREES_LIMIT = 2000;
 
-export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
+interface Props extends CreateAnalyticsFormProps {
+  advancedParamErrors: AdvancedParamErrors;
+}
+
+export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors }) => {
   const { setFormState } = actions;
 
   const { eta, featureBagFraction, gamma, lambda, maxTrees, randomizeSeed } = state.form;
 
   return (
     <Fragment>
-      <EuiFlexItem style={{ minWidth: '30%' }}>
+      <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate('xpack.ml.dataframe.analytics.create.lambdaLabel', {
             defaultMessage: 'Lambda',
@@ -28,6 +33,8 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
             defaultMessage:
               'Regularization parameter to prevent overfitting on the training data set. Must be a non negative value.',
           })}
+          isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.LAMBDA] !== undefined}
+          error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.LAMBDA]}
         >
           <EuiFieldNumber
             aria-label={i18n.translate('xpack.ml.dataframe.analytics.create.lambdaInputAriaLabel', {
@@ -44,7 +51,7 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: '30%' }}>
+      <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate('xpack.ml.dataframe.analytics.create.maxTreesLabel', {
             defaultMessage: 'Max trees',
@@ -52,6 +59,8 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
           helpText={i18n.translate('xpack.ml.dataframe.analytics.create.maxTreesText', {
             defaultMessage: 'The maximum number of trees the forest is allowed to contain.',
           })}
+          isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.MAX_TREES] !== undefined}
+          error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.MAX_TREES]}
         >
           <EuiFieldNumber
             aria-label={i18n.translate(
@@ -72,7 +81,7 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: '30%' }}>
+      <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate('xpack.ml.dataframe.analytics.create.gammaLabel', {
             defaultMessage: 'Gamma',
@@ -81,6 +90,8 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
             defaultMessage:
               'Multiplies a linear penalty associated with the size of individual trees in the forest. Must be non-negative value.',
           })}
+          isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.GAMMA] !== undefined}
+          error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.GAMMA]}
         >
           <EuiFieldNumber
             aria-label={i18n.translate('xpack.ml.dataframe.analytics.create.gammaInputAriaLabel', {
@@ -97,7 +108,7 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: '30%' }}>
+      <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate('xpack.ml.dataframe.analytics.create.etaLabel', {
             defaultMessage: 'Eta',
@@ -105,6 +116,8 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
           helpText={i18n.translate('xpack.ml.dataframe.analytics.create.etaText', {
             defaultMessage: 'The shrinkage applied to the weights. Must be between 0.001 and 1.',
           })}
+          isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.ETA] !== undefined}
+          error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.ETA]}
         >
           <EuiFieldNumber
             aria-label={i18n.translate('xpack.ml.dataframe.analytics.create.etaInputAriaLabel', {
@@ -121,7 +134,7 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: '30%' }}>
+      <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate('xpack.ml.dataframe.analytics.create.featureBagFractionLabel', {
             defaultMessage: 'Feature bag fraction',
@@ -130,6 +143,10 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
             defaultMessage:
               'The fraction of features used when selecting a random bag for each candidate split.',
           })}
+          isInvalid={
+            advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.FEATURE_BAG_FRACTION] !== undefined
+          }
+          error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.FEATURE_BAG_FRACTION]}
         >
           <EuiFieldNumber
             aria-label={i18n.translate(
@@ -155,15 +172,17 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: '30%' }}>
+      <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate('xpack.ml.dataframe.analytics.create.randomizeSeedLabel', {
-            defaultMessage: 'Randomized seed',
+            defaultMessage: 'Randomize seed',
           })}
           helpText={i18n.translate('xpack.ml.dataframe.analytics.create.randomizeSeedText', {
             defaultMessage:
               'The seed to the random generator that is used to pick which documents will be used for training.',
           })}
+          isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.RANDOMIZE_SEED] !== undefined}
+          error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.RANDOMIZE_SEED]}
         >
           <EuiFieldNumber
             aria-label={i18n.translate(

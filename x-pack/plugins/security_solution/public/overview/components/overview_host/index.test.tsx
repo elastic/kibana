@@ -14,6 +14,7 @@ import {
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
+  kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 
@@ -25,6 +26,7 @@ import { GetOverviewHostQuery } from '../../../graphql/types';
 import { wait } from '../../../common/lib/helpers';
 
 jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/components/link_to');
 
 const startDate = 1579553397080;
 const endDate = 1579639797080;
@@ -56,6 +58,7 @@ const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
           'auditbeat-*',
           'endgame-*',
           'filebeat-*',
+          'logs-*',
           'packetbeat-*',
           'winlogbeat-*',
         ],
@@ -94,11 +97,23 @@ describe('OverviewHost', () => {
   const state: State = mockGlobalState;
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    storage
+  );
 
   beforeEach(() => {
     const myState = cloneDeep(state);
-    store = createStore(myState, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+    store = createStore(
+      myState,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      kibanaObservable,
+      storage
+    );
   });
 
   test('it renders the expected widget title', () => {

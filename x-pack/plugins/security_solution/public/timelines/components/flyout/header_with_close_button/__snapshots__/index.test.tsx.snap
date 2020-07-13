@@ -4,6 +4,7 @@ exports[`FlyoutHeaderWithCloseButton renders correctly against snapshot 1`] = `
 <FlyoutHeaderWithCloseButton
   onClose={[MockFunction]}
   timelineId="test"
+  timelineType="default"
   usersViewing={
     Array [
       "elastic",

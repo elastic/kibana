@@ -18,7 +18,7 @@ const onSaveContent = jest.fn();
 
 const timelineId = '1e10f150-949b-11ea-b63c-2bc51864784c';
 const defaultProps = {
-  content: `A link to a timeline [timeline](http://localhost:5601/app/security#/timelines?timeline=(id:'${timelineId}',isOpen:!t))`,
+  content: `A link to a timeline [timeline](http://localhost:5601/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t))`,
   id: 'markdown-id',
   isEditable: false,
   onChangeEditable,

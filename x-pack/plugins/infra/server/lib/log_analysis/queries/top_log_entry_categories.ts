@@ -5,13 +5,12 @@
  */
 
 import * as rt from 'io-ts';
-
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 import {
+  createJobIdFilters,
   createResultTypeFilters,
   createTimeRangeFilters,
   defaultRequestParameters,
-  getMlResultIndex,
 } from './common';
 
 export const createTopLogEntryCategoriesQuery = (
@@ -27,6 +26,7 @@ export const createTopLogEntryCategoriesQuery = (
     query: {
       bool: {
         filter: [
+          ...createJobIdFilters(logEntryCategoriesJobId),
           ...createTimeRangeFilters(startTime, endTime),
           ...createDatasetsFilters(datasets),
           {
@@ -35,7 +35,7 @@ export const createTopLogEntryCategoriesQuery = (
                 {
                   bool: {
                     filter: [
-                      ...createResultTypeFilters('model_plot'),
+                      ...createResultTypeFilters(['model_plot']),
                       {
                         range: {
                           actual: {
@@ -48,7 +48,7 @@ export const createTopLogEntryCategoriesQuery = (
                 },
                 {
                   bool: {
-                    filter: createResultTypeFilters('record'),
+                    filter: createResultTypeFilters(['record']),
                   },
                 },
               ],
@@ -119,7 +119,6 @@ export const createTopLogEntryCategoriesQuery = (
       },
     },
   },
-  index: getMlResultIndex(logEntryCategoriesJobId),
   size: 0,
 });
 

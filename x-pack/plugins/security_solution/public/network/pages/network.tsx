@@ -11,6 +11,7 @@ import { useParams } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
 
 import { esQuery } from '../../../../../../src/plugins/data/public';
+import { SecurityPageName } from '../../app/types';
 import { UpdateDateRange } from '../../common/components/charts/common';
 import { EmbeddedMap } from '../components/embeddables/embedded_map';
 import { FiltersGlobal } from '../../common/components/filters_global';
@@ -22,10 +23,8 @@ import { KpiNetworkComponent } from '..//components/kpi_network';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { KpiNetworkQuery } from '../../network/containers/kpi_network';
-import {
-  indicesExistOrDataTemporarilyUnavailable,
-  WithSource,
-} from '../../common/containers/source';
+import { useGlobalTime } from '../../common/containers/use_global_time';
+import { useWithSource } from '../../common/containers/source';
 import { LastEventIndexKey } from '../../graphql/types';
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
@@ -35,7 +34,7 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { networkModel } from '../store';
 import { navTabsNetwork, NetworkRoutes, NetworkRoutesLoading } from './navigation';
 import { filterNetworkData } from './navigation/alerts_query_tab_body';
-import { NetworkEmptyPage } from './network_empty_page';
+import { OverviewEmpty } from '../../overview/components/overview_empty';
 import * as i18n from './translations';
 import { NetworkComponentProps } from './types';
 import { NetworkRouteType } from './navigation/types';
@@ -49,13 +48,10 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
     query,
     setAbsoluteRangeDatePicker,
     networkPagePath,
-    to,
-    from,
-    setQuery,
-    isInitializing,
     hasMlUserPermissions,
     capabilitiesFetched,
   }) => {
+    const { to, from, setQuery, isInitializing } = useGlobalTime();
     const kibana = useKibana();
     const { tabName } = useParams();
 
@@ -77,105 +73,102 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
       [setAbsoluteRangeDatePicker]
     );
 
+    const { indicesExist, indexPattern } = useWithSource(sourceId);
+    const filterQuery = convertToBuildEsQuery({
+      config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+      indexPattern,
+      queries: [query],
+      filters,
+    });
+    const tabsFilterQuery = convertToBuildEsQuery({
+      config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+      indexPattern,
+      queries: [query],
+      filters: tabsFilters,
+    });
+
     return (
       <>
-        <WithSource sourceId={sourceId}>
-          {({ indicesExist, indexPattern }) => {
-            const filterQuery = convertToBuildEsQuery({
-              config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-              indexPattern,
-              queries: [query],
-              filters,
-            });
-            const tabsFilterQuery = convertToBuildEsQuery({
-              config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-              indexPattern,
-              queries: [query],
-              filters: tabsFilters,
-            });
+        {indicesExist ? (
+          <StickyContainer>
+            <FiltersGlobal>
+              <SiemSearchBar indexPattern={indexPattern} id="global" />
+            </FiltersGlobal>
 
-            return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-              <StickyContainer>
-                <FiltersGlobal>
-                  <SiemSearchBar indexPattern={indexPattern} id="global" />
-                </FiltersGlobal>
+            <WrapperPage>
+              <HeaderPage
+                border
+                subtitle={<LastEventTime indexKey={LastEventIndexKey.network} />}
+                title={i18n.PAGE_TITLE}
+              />
 
-                <WrapperPage>
-                  <HeaderPage
-                    border
-                    subtitle={<LastEventTime indexKey={LastEventIndexKey.network} />}
-                    title={i18n.PAGE_TITLE}
-                  />
+              <EmbeddedMap
+                query={query}
+                filters={filters}
+                startDate={from}
+                endDate={to}
+                setQuery={setQuery}
+              />
 
-                  <EmbeddedMap
-                    query={query}
-                    filters={filters}
-                    startDate={from}
-                    endDate={to}
+              <EuiSpacer />
+
+              <KpiNetworkQuery
+                endDate={to}
+                filterQuery={filterQuery}
+                skip={isInitializing}
+                sourceId={sourceId}
+                startDate={from}
+              >
+                {({ kpiNetwork, loading, id, inspect, refetch }) => (
+                  <KpiNetworkComponentManage
+                    id={id}
+                    inspect={inspect}
                     setQuery={setQuery}
+                    refetch={refetch}
+                    data={kpiNetwork}
+                    loading={loading}
+                    from={from}
+                    to={to}
+                    narrowDateRange={narrowDateRange}
                   />
+                )}
+              </KpiNetworkQuery>
+
+              {capabilitiesFetched && !isInitializing ? (
+                <>
+                  <EuiSpacer />
+
+                  <SiemNavigation navTabs={navTabsNetwork(hasMlUserPermissions)} />
 
                   <EuiSpacer />
 
-                  <KpiNetworkQuery
-                    endDate={to}
-                    filterQuery={filterQuery}
-                    skip={isInitializing}
-                    sourceId={sourceId}
-                    startDate={from}
-                  >
-                    {({ kpiNetwork, loading, id, inspect, refetch }) => (
-                      <KpiNetworkComponentManage
-                        id={id}
-                        inspect={inspect}
-                        setQuery={setQuery}
-                        refetch={refetch}
-                        data={kpiNetwork}
-                        loading={loading}
-                        from={from}
-                        to={to}
-                        narrowDateRange={narrowDateRange}
-                      />
-                    )}
-                  </KpiNetworkQuery>
+                  <NetworkRoutes
+                    filterQuery={tabsFilterQuery}
+                    from={from}
+                    isInitializing={isInitializing}
+                    indexPattern={indexPattern}
+                    setQuery={setQuery}
+                    setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+                    type={networkModel.NetworkType.page}
+                    to={to}
+                    networkPagePath={networkPagePath}
+                  />
+                </>
+              ) : (
+                <NetworkRoutesLoading />
+              )}
 
-                  {capabilitiesFetched && !isInitializing ? (
-                    <>
-                      <EuiSpacer />
+              <EuiSpacer />
+            </WrapperPage>
+          </StickyContainer>
+        ) : (
+          <WrapperPage>
+            <HeaderPage border title={i18n.PAGE_TITLE} />
+            <OverviewEmpty />
+          </WrapperPage>
+        )}
 
-                      <SiemNavigation navTabs={navTabsNetwork(hasMlUserPermissions)} />
-
-                      <EuiSpacer />
-
-                      <NetworkRoutes
-                        filterQuery={tabsFilterQuery}
-                        from={from}
-                        isInitializing={isInitializing}
-                        indexPattern={indexPattern}
-                        setQuery={setQuery}
-                        setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-                        type={networkModel.NetworkType.page}
-                        to={to}
-                        networkPagePath={networkPagePath}
-                      />
-                    </>
-                  ) : (
-                    <NetworkRoutesLoading />
-                  )}
-
-                  <EuiSpacer />
-                </WrapperPage>
-              </StickyContainer>
-            ) : (
-              <WrapperPage>
-                <HeaderPage border title={i18n.PAGE_TITLE} />
-                <NetworkEmptyPage />
-              </WrapperPage>
-            );
-          }}
-        </WithSource>
-
-        <SpyRoute />
+        <SpyRoute pageName={SecurityPageName.network} />
       </>
     );
   }

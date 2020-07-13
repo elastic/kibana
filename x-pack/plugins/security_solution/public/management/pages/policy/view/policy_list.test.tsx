@@ -12,6 +12,8 @@ import { mockPolicyResultList } from '../store/policy_list/mock_policy_result_li
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { AppAction } from '../../../../common/store/actions';
 
+jest.mock('../../../../common/components/link_to');
+
 describe('when on the policies page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
@@ -23,17 +25,29 @@ describe('when on the policies page', () => {
     render = () => mockedContext.render(<PolicyList />);
   });
 
-  it('should show a table', async () => {
+  it('should NOT display timeline', async () => {
     const renderResult = render();
-    const table = await renderResult.findByTestId('policyTable');
+    const timelineFlyout = await renderResult.queryByTestId('flyoutOverlay');
+    expect(timelineFlyout).toBeNull();
+  });
+
+  it('should show the empty state', async () => {
+    const renderResult = render();
+    const table = await renderResult.findByTestId('emptyPolicyTable');
     expect(table).not.toBeNull();
+  });
+
+  it('should display the instructions', async () => {
+    const renderResult = render();
+    const onboardingSteps = await renderResult.findByTestId('policyOnboardingInstructions');
+    expect(onboardingSteps).not.toBeNull();
   });
 
   describe('when list data loads', () => {
     let firstPolicyID: string;
     beforeEach(() => {
       reactTestingLibrary.act(() => {
-        history.push('/management/policy');
+        history.push('/policy');
         reactTestingLibrary.act(() => {
           const policyListData = mockPolicyResultList({ total: 3 });
           firstPolicyID = policyListData.items[0].id;
@@ -50,11 +64,13 @@ describe('when on the policies page', () => {
         });
       });
     });
+
     it('should display rows in the table', async () => {
       const renderResult = render();
       const rows = await renderResult.findAllByRole('row');
       expect(rows).toHaveLength(4);
     });
+
     it('should display policy name value as a link', async () => {
       const renderResult = render();
       const policyNameLink = (await renderResult.findAllByTestId('policyNameLink'))[0];

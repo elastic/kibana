@@ -383,8 +383,8 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "$$typeof": Symbol(react.forward_ref),
                                   "attrs": Array [],
                                   "componentStyle": ComponentStyle {
-                                    "baseHash": 1280172402,
-                                    "componentId": "sc-fzozJi",
+                                    "baseHash": -2021127760,
+                                    "componentId": "sc-fzoLsD",
                                     "isStatic": false,
                                     "rules": Array [
                                       "
@@ -401,7 +401,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "foldedComponentIds": Array [],
                                   "render": [Function],
                                   "shouldForwardProp": undefined,
-                                  "styledComponentId": "sc-fzozJi",
+                                  "styledComponentId": "sc-fzoLsD",
                                   "target": "code",
                                   "toString": [Function],
                                   "warnTooManyClasses": [Function],
@@ -413,8 +413,8 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "$$typeof": Symbol(react.forward_ref),
                                   "attrs": Array [],
                                   "componentStyle": ComponentStyle {
-                                    "baseHash": -1923298833,
-                                    "componentId": "sc-AxmLO",
+                                    "baseHash": 1280172402,
+                                    "componentId": "sc-fzozJi",
                                     "isStatic": false,
                                     "rules": Array [
                                       "
@@ -439,7 +439,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "foldedComponentIds": Array [],
                                   "render": [Function],
                                   "shouldForwardProp": undefined,
-                                  "styledComponentId": "sc-AxmLO",
+                                  "styledComponentId": "sc-fzozJi",
                                   "target": "pre",
                                   "toString": [Function],
                                   "warnTooManyClasses": [Function],
@@ -608,8 +608,8 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "$$typeof": Symbol(react.forward_ref),
                                   "attrs": Array [],
                                   "componentStyle": ComponentStyle {
-                                    "baseHash": 1280172402,
-                                    "componentId": "sc-fzozJi",
+                                    "baseHash": -2021127760,
+                                    "componentId": "sc-fzoLsD",
                                     "isStatic": false,
                                     "rules": Array [
                                       "
@@ -626,7 +626,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "foldedComponentIds": Array [],
                                   "render": [Function],
                                   "shouldForwardProp": undefined,
-                                  "styledComponentId": "sc-fzozJi",
+                                  "styledComponentId": "sc-fzoLsD",
                                   "target": "code",
                                   "toString": [Function],
                                   "warnTooManyClasses": [Function],
@@ -638,8 +638,8 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "$$typeof": Symbol(react.forward_ref),
                                   "attrs": Array [],
                                   "componentStyle": ComponentStyle {
-                                    "baseHash": -1923298833,
-                                    "componentId": "sc-AxmLO",
+                                    "baseHash": 1280172402,
+                                    "componentId": "sc-fzozJi",
                                     "isStatic": false,
                                     "rules": Array [
                                       "
@@ -664,7 +664,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "foldedComponentIds": Array [],
                                   "render": [Function],
                                   "shouldForwardProp": undefined,
-                                  "styledComponentId": "sc-AxmLO",
+                                  "styledComponentId": "sc-fzozJi",
                                   "target": "pre",
                                   "toString": [Function],
                                   "warnTooManyClasses": [Function],
@@ -834,8 +834,8 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "$$typeof": Symbol(react.forward_ref),
                                   "attrs": Array [],
                                   "componentStyle": ComponentStyle {
-                                    "baseHash": 1280172402,
-                                    "componentId": "sc-fzozJi",
+                                    "baseHash": -2021127760,
+                                    "componentId": "sc-fzoLsD",
                                     "isStatic": false,
                                     "rules": Array [
                                       "
@@ -852,7 +852,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "foldedComponentIds": Array [],
                                   "render": [Function],
                                   "shouldForwardProp": undefined,
-                                  "styledComponentId": "sc-fzozJi",
+                                  "styledComponentId": "sc-fzoLsD",
                                   "target": "code",
                                   "toString": [Function],
                                   "warnTooManyClasses": [Function],
@@ -864,8 +864,8 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "$$typeof": Symbol(react.forward_ref),
                                   "attrs": Array [],
                                   "componentStyle": ComponentStyle {
-                                    "baseHash": -1923298833,
-                                    "componentId": "sc-AxmLO",
+                                    "baseHash": 1280172402,
+                                    "componentId": "sc-fzozJi",
                                     "isStatic": false,
                                     "rules": Array [
                                       "
@@ -890,7 +890,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "foldedComponentIds": Array [],
                                   "render": [Function],
                                   "shouldForwardProp": undefined,
-                                  "styledComponentId": "sc-AxmLO",
+                                  "styledComponentId": "sc-fzozJi",
                                   "target": "pre",
                                   "toString": [Function],
                                   "warnTooManyClasses": [Function],
@@ -1070,8 +1070,8 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "$$typeof": Symbol(react.forward_ref),
                                   "attrs": Array [],
                                   "componentStyle": ComponentStyle {
-                                    "baseHash": 1280172402,
-                                    "componentId": "sc-fzozJi",
+                                    "baseHash": -2021127760,
+                                    "componentId": "sc-fzoLsD",
                                     "isStatic": false,
                                     "rules": Array [
                                       "
@@ -1088,7 +1088,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "foldedComponentIds": Array [],
                                   "render": [Function],
                                   "shouldForwardProp": undefined,
-                                  "styledComponentId": "sc-fzozJi",
+                                  "styledComponentId": "sc-fzoLsD",
                                   "target": "code",
                                   "toString": [Function],
                                   "warnTooManyClasses": [Function],
@@ -1100,8 +1100,8 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "$$typeof": Symbol(react.forward_ref),
                                   "attrs": Array [],
                                   "componentStyle": ComponentStyle {
-                                    "baseHash": -1923298833,
-                                    "componentId": "sc-AxmLO",
+                                    "baseHash": 1280172402,
+                                    "componentId": "sc-fzozJi",
                                     "isStatic": false,
                                     "rules": Array [
                                       "
@@ -1126,7 +1126,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "foldedComponentIds": Array [],
                                   "render": [Function],
                                   "shouldForwardProp": undefined,
-                                  "styledComponentId": "sc-AxmLO",
+                                  "styledComponentId": "sc-fzozJi",
                                   "target": "pre",
                                   "toString": [Function],
                                   "warnTooManyClasses": [Function],
@@ -1323,8 +1323,8 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "$$typeof": Symbol(react.forward_ref),
                                   "attrs": Array [],
                                   "componentStyle": ComponentStyle {
-                                    "baseHash": 1280172402,
-                                    "componentId": "sc-fzozJi",
+                                    "baseHash": -2021127760,
+                                    "componentId": "sc-fzoLsD",
                                     "isStatic": false,
                                     "rules": Array [
                                       "
@@ -1341,7 +1341,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "foldedComponentIds": Array [],
                                   "render": [Function],
                                   "shouldForwardProp": undefined,
-                                  "styledComponentId": "sc-fzozJi",
+                                  "styledComponentId": "sc-fzoLsD",
                                   "target": "code",
                                   "toString": [Function],
                                   "warnTooManyClasses": [Function],
@@ -1353,8 +1353,8 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "$$typeof": Symbol(react.forward_ref),
                                   "attrs": Array [],
                                   "componentStyle": ComponentStyle {
-                                    "baseHash": -1923298833,
-                                    "componentId": "sc-AxmLO",
+                                    "baseHash": 1280172402,
+                                    "componentId": "sc-fzozJi",
                                     "isStatic": false,
                                     "rules": Array [
                                       "
@@ -1379,7 +1379,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "foldedComponentIds": Array [],
                                   "render": [Function],
                                   "shouldForwardProp": undefined,
-                                  "styledComponentId": "sc-AxmLO",
+                                  "styledComponentId": "sc-fzozJi",
                                   "target": "pre",
                                   "toString": [Function],
                                   "warnTooManyClasses": [Function],

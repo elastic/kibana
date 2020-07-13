@@ -21,6 +21,7 @@ def functionalTestProcess(String name, Closure closure) {
     def kibanaPort = "61${processNumber}1"
     def esPort = "61${processNumber}2"
     def esTransportPort = "61${processNumber}3"
+    def ingestManagementPackageRegistryPort = "61${processNumber}4"
 
     withEnv([
       "CI_PARALLEL_PROCESS_NUMBER=${processNumber}",
@@ -29,6 +30,7 @@ def functionalTestProcess(String name, Closure closure) {
       "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
       "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
       "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
+      "INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=${ingestManagementPackageRegistryPort}",
       "IS_PIPELINE_JOB=1",
       "JOB=${name}",
       "KBN_NP_PLUGINS_BUILT=true",
@@ -98,7 +100,7 @@ def withGcsArtifactUpload(workerName, closure) {
   def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
   def ARTIFACT_PATTERNS = [
     'target/kibana-*',
-    'target/kibana-siem/**/*.png',
+    'target/kibana-security-solution/**/*.png',
     'target/junit/**/*',
     'test/**/screenshots/**/*.png',
     'test/functional/failure_debug/html/*.html',
@@ -207,19 +209,22 @@ def runErrorReporter() {
   bash(
     """
       source src/dev/ci_setup/setup_env.sh
-      node scripts/report_failed_tests ${dryRun}
+      node scripts/report_failed_tests ${dryRun} target/junit/**/*.xml
     """,
     "Report failed tests, if necessary"
   )
 }
 
 def call(Map params = [:], Closure closure) {
-  def config = [timeoutMinutes: 135, checkPrChanges: false] + params
+  def config = [timeoutMinutes: 135, checkPrChanges: false, setCommitStatus: false] + params
 
   stage("Kibana Pipeline") {
     timeout(time: config.timeoutMinutes, unit: 'MINUTES') {
       timestamps {
         ansiColor('xterm') {
+          if (config.setCommitStatus) {
+            buildState.set('shouldSetCommitStatus', true)
+          }
           if (config.checkPrChanges && githubPr.isPr()) {
             pipelineLibraryTests()
 
@@ -230,7 +235,13 @@ def call(Map params = [:], Closure closure) {
               return
             }
           }
-          closure()
+          try {
+            closure()
+          } finally {
+            if (config.setCommitStatus) {
+              githubCommitStatus.onFinish()
+            }
+          }
         }
       }
     }

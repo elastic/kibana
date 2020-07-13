@@ -9,44 +9,63 @@ import { mount } from 'enzyme';
 
 import { PolicyDetails } from './policy_details';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
-import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import { getManagementUrl } from '../../../common/routing';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
+import { getPolicyDetailPath, getPoliciesPath } from '../../../common/routing';
+import { apiPathMockResponseProviders } from '../store/policy_list/test_mock_utils';
+
+jest.mock('../../../../common/components/link_to');
 
 describe('Policy Details', () => {
   type FindReactWrapperResponse = ReturnType<ReturnType<typeof render>['find']>;
 
-  const policyDetailsPathUrl = getManagementUrl({
-    name: 'policyDetails',
-    policyId: '1',
-    excludePrefix: true,
-  });
-  const policyListPathUrl = getManagementUrl({ name: 'policyList', excludePrefix: true });
-  const policyListPathUrlWithPrefix = getManagementUrl({ name: 'policyList' });
+  const policyDetailsPathUrl = getPolicyDetailPath('1');
+  const policyListPathUrl = getPoliciesPath();
   const sleep = (ms = 100) => new Promise((wakeup) => setTimeout(wakeup, ms));
   const generator = new EndpointDocGenerator();
-  const { history, AppWrapper, coreStart } = createAppRootMockRenderer();
-  const http = coreStart.http;
-  const render = (ui: Parameters<typeof mount>[0]) => mount(ui, { wrappingComponent: AppWrapper });
-  let policyDatasource: ReturnType<typeof generator.generatePolicyDatasource>;
+  let history: AppContextTestRender['history'];
+  let coreStart: AppContextTestRender['coreStart'];
+  let middlewareSpy: AppContextTestRender['middlewareSpy'];
+  let http: typeof coreStart.http;
+  let render: (ui: Parameters<typeof mount>[0]) => ReturnType<typeof mount>;
+  let policyPackageConfig: ReturnType<typeof generator.generatePolicyPackageConfig>;
   let policyView: ReturnType<typeof render>;
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    const appContextMockRenderer = createAppRootMockRenderer();
+    const AppWrapper = appContextMockRenderer.AppWrapper;
+
+    ({ history, coreStart, middlewareSpy } = appContextMockRenderer);
+    render = (ui) => mount(ui, { wrappingComponent: AppWrapper });
+    http = coreStart.http;
+  });
 
   afterEach(() => {
     if (policyView) {
       policyView.unmount();
     }
+    jest.clearAllMocks();
   });
 
   describe('when displayed with invalid id', () => {
+    let releaseApiFailure: () => void;
     beforeEach(() => {
-      http.get.mockReturnValue(Promise.reject(new Error('policy not found')));
+      http.get.mockImplementationOnce(async () => {
+        await new Promise((_, reject) => {
+          releaseApiFailure = reject.bind(null, new Error('policy not found'));
+        });
+      });
       history.push(policyDetailsPathUrl);
       policyView = render(<PolicyDetails />);
     });
 
-    it('should show loader followed by error message', () => {
+    it('should NOT display timeline', async () => {
+      expect(policyView.find('flyoutOverlay')).toHaveLength(0);
+    });
+
+    it('should show loader followed by error message', async () => {
       expect(policyView.find('EuiLoadingSpinner').length).toBe(1);
+      releaseApiFailure();
+      await middlewareSpy.waitForAction('serverFailedToReturnPolicyDetailsData');
       policyView.update();
       const callout = policyView.find('EuiCallOut');
       expect(callout).toHaveLength(1);
@@ -58,17 +77,17 @@ describe('Policy Details', () => {
     let asyncActions: Promise<unknown> = Promise.resolve();
 
     beforeEach(() => {
-      policyDatasource = generator.generatePolicyDatasource();
-      policyDatasource.id = '1';
+      policyPackageConfig = generator.generatePolicyPackageConfig();
+      policyPackageConfig.id = '1';
 
       http.get.mockImplementation((...args) => {
         const [path] = args;
         if (typeof path === 'string') {
           // GET datasouce
-          if (path === '/api/ingest_manager/datasources/1') {
+          if (path === '/api/ingest_manager/package_configs/1') {
             asyncActions = asyncActions.then<unknown>(async (): Promise<unknown> => sleep());
             return Promise.resolve({
-              item: policyDatasource,
+              item: policyPackageConfig,
               success: true,
             });
           }
@@ -81,12 +100,23 @@ describe('Policy Details', () => {
               success: true,
             });
           }
+
+          // Get package data
+          // Used in tests that route back to the list
+          if (apiPathMockResponseProviders[path]) {
+            asyncActions = asyncActions.then(async () => sleep());
+            return apiPathMockResponseProviders[path]();
+          }
         }
 
-        return Promise.reject(new Error('unknown API call!'));
+        return Promise.reject(new Error(`unknown API call (not MOCKED): ${path}`));
       });
       history.push(policyDetailsPathUrl);
       policyView = render(<PolicyDetails />);
+    });
+
+    it('should NOT display timeline', async () => {
+      expect(policyView.find('flyoutOverlay')).toHaveLength(0);
     });
 
     it('should display back to list button and policy title', () => {
@@ -97,12 +127,12 @@ describe('Policy Details', () => {
 
       const backToListButton = pageHeaderLeft.find('EuiButtonEmpty');
       expect(backToListButton.prop('iconType')).toBe('arrowLeft');
-      expect(backToListButton.prop('href')).toBe(policyListPathUrlWithPrefix);
+      expect(backToListButton.prop('href')).toBe(policyListPathUrl);
       expect(backToListButton.text()).toBe('Back to policy list');
 
       const pageTitle = pageHeaderLeft.find('[data-test-subj="pageViewHeaderLeftTitle"]');
       expect(pageTitle).toHaveLength(1);
-      expect(pageTitle.text()).toEqual(policyDatasource.name);
+      expect(pageTitle.text()).toEqual(policyPackageConfig.name);
     });
     it('should navigate to list if back to link is clicked', async () => {
       policyView.update();
@@ -140,7 +170,11 @@ describe('Policy Details', () => {
       );
       expect(history.location.pathname).toEqual(policyDetailsPathUrl);
       cancelbutton.simulate('click', { button: 0 });
-      expect(history.location.pathname).toEqual(policyListPathUrl);
+      const navigateToAppMockedCalls = coreStart.application.navigateToApp.mock.calls;
+      expect(navigateToAppMockedCalls[navigateToAppMockedCalls.length - 1]).toEqual([
+        'securitySolution:management',
+        { path: policyListPathUrl },
+      ]);
     });
     it('should display save button', async () => {
       await asyncActions;
@@ -172,9 +206,9 @@ describe('Policy Details', () => {
           asyncActions = asyncActions.then(async () => sleep());
           const [path] = args;
           if (typeof path === 'string') {
-            if (path === '/api/ingest_manager/datasources/1') {
+            if (path === '/api/ingest_manager/package_configs/1') {
               return Promise.resolve({
-                item: policyDatasource,
+                item: policyPackageConfig,
                 success: true,
               });
             }
@@ -217,7 +251,7 @@ describe('Policy Details', () => {
 
         // API should be called
         await asyncActions;
-        expect(http.put.mock.calls[0][0]).toEqual(`/api/ingest_manager/datasources/1`);
+        expect(http.put.mock.calls[0][0]).toEqual(`/api/ingest_manager/package_configs/1`);
         policyView.update();
 
         // Toast notification should be shown
@@ -229,7 +263,7 @@ describe('Policy Details', () => {
         });
       });
       it('should show an error notification toast if update fails', async () => {
-        policyDatasource.id = 'invalid';
+        policyPackageConfig.id = 'invalid';
         modalConfirmButton.simulate('click');
 
         await asyncActions;

@@ -55,6 +55,7 @@ describe('AppContainer', () => {
     appRoute: '/some-route',
     unmountBeforeMounting: false,
     legacy: false,
+    exactRoute: false,
     mount: async ({ element }: AppMountParameters) => {
       await promise;
       const container = document.createElement('div');
@@ -143,6 +144,7 @@ describe('AppContainer', () => {
       appRoute: '/some-route',
       unmountBeforeMounting: false,
       legacy: false,
+      exactRoute: false,
       mount: async ({ element }: AppMountParameters) => {
         await waitPromise;
         throw new Error(`Mounting failed!`);

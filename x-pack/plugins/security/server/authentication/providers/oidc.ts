@@ -433,9 +433,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
         return DeauthenticationResult.redirectTo(redirect);
       }
 
-      return DeauthenticationResult.redirectTo(
-        `${this.options.basePath.serverBasePath}/security/logged_out`
-      );
+      return DeauthenticationResult.redirectTo(this.options.urls.loggedOut);
     } catch (err) {
       this.logger.debug(`Failed to deauthenticate user: ${err.message}`);
       return DeauthenticationResult.failed(err);

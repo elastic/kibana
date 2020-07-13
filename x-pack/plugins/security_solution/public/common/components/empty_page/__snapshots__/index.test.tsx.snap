@@ -3,7 +3,7 @@
 exports[`renders correctly 1`] = `
 <EmptyPrompt
   actions={
-    <ForwardRef
+    <EuiFlexGroup
       justifyContent="center"
     >
       <EuiFlexItem
@@ -16,9 +16,9 @@ exports[`renders correctly 1`] = `
           Do Something
         </EuiButton>
       </EuiFlexItem>
-    </ForwardRef>
+    </EuiFlexGroup>
   }
-  iconType="securityAnalyticsApp"
+  iconType="logoSecurity"
   title={
     <h2>
       My Super Title

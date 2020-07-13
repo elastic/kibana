@@ -61,7 +61,7 @@ describe('SavedObjectsService', () => {
   const createSetupDeps = () => {
     const elasticsearchMock = elasticsearchServiceMock.createInternalSetup();
     return {
-      http: httpServiceMock.createSetupContract(),
+      http: httpServiceMock.createInternalSetupContract(),
       elasticsearch: elasticsearchMock,
       legacyPlugins: legacyServiceMock.createDiscoverPlugins(),
     };

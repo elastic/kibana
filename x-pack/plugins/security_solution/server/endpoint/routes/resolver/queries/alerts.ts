@@ -6,16 +6,16 @@
 import { SearchResponse } from 'elasticsearch';
 import { ResolverEvent } from '../../../../../common/endpoint/types';
 import { ResolverQuery } from './base';
-import { PaginationBuilder, PaginatedResults } from '../utils/pagination';
+import { PaginationBuilder } from '../utils/pagination';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 
 /**
  * Builds a query for retrieving alerts for a node.
  */
-export class AlertsQuery extends ResolverQuery<PaginatedResults> {
+export class AlertsQuery extends ResolverQuery<ResolverEvent[]> {
   constructor(
     private readonly pagination: PaginationBuilder,
-    indexPattern: string,
+    indexPattern: string | string[],
     endpointID?: string
   ) {
     super(indexPattern, endpointID);
@@ -38,11 +38,7 @@ export class AlertsQuery extends ResolverQuery<PaginatedResults> {
           ],
         },
       },
-      ...this.pagination.buildQueryFields(
-        uniquePIDs.length,
-        'endgame.serial_event_id',
-        'endgame.unique_pid'
-      ),
+      ...this.pagination.buildQueryFields('endgame.serial_event_id'),
     };
   }
 
@@ -60,14 +56,11 @@ export class AlertsQuery extends ResolverQuery<PaginatedResults> {
           ],
         },
       },
-      ...this.pagination.buildQueryFields(entityIDs.length, 'event.id', 'process.entity_id'),
+      ...this.pagination.buildQueryFields('event.id'),
     };
   }
 
-  formatResponse(response: SearchResponse<ResolverEvent>): PaginatedResults {
-    return {
-      results: ResolverQuery.getResults(response),
-      totals: PaginationBuilder.getTotals(response.aggregations),
-    };
+  formatResponse(response: SearchResponse<ResolverEvent>): ResolverEvent[] {
+    return this.getResults(response);
   }
 }

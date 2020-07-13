@@ -6,7 +6,7 @@
 
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { SecuritySubPluginWithStore } from '../app/types';
-import { getNetworkRoutes } from './routes';
+import { NetworkRoutes } from './routes';
 import { initialNetworkState, networkReducer, NetworkState } from './store';
 import { TimelineId } from '../../common/types/timeline';
 import { getTimelinesInStorageByIds } from '../timelines/containers/local_storage';
@@ -16,7 +16,7 @@ export class Network {
 
   public start(storage: Storage): SecuritySubPluginWithStore<'network', NetworkState> {
     return {
-      routes: getNetworkRoutes(),
+      SubPluginRoutes: NetworkRoutes,
       storageTimelines: {
         timelineById: getTimelinesInStorageByIds(storage, [TimelineId.networkPageExternalAlerts]),
       },

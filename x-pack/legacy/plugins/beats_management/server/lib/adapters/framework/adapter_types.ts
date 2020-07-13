@@ -8,6 +8,7 @@
 
 import { Lifecycle, ResponseToolkit } from 'hapi';
 import * as t from 'io-ts';
+import { CoreSetup, CoreStart } from 'src/core/server';
 import { SecurityPluginSetup } from '../../../../../../../plugins/security/server';
 import { LicenseType } from '../../../../common/constants/security';
 
@@ -33,7 +34,6 @@ export interface BackendFrameworkAdapter {
   log(text: string): void;
   on(event: 'xpack.status.green' | 'elasticsearch.status.green', cb: () => void): void;
   getSetting(settingPath: string): any;
-  exposeStaticDir(urlPath: string, dir: string): void;
   registerRoute<RouteRequest extends FrameworkRequest, RouteResponse extends FrameworkResponse>(
     route: FrameworkRouteOptions<RouteRequest, RouteResponse>
   ): void;
@@ -42,7 +42,11 @@ export interface BackendFrameworkAdapter {
 export interface KibanaLegacyServer {
   newPlatform: {
     setup: {
+      core: CoreSetup;
       plugins: { security: SecurityPluginSetup };
+    };
+    start: {
+      core: CoreStart;
     };
   };
   plugins: {
@@ -122,7 +126,7 @@ export interface KibanaServerRequest extends t.TypeOf<typeof RuntimeKibanaServer
 export const RuntimeKibanaUser = t.interface(
   {
     username: t.string,
-    roles: t.array(t.string),
+    roles: t.readonlyArray(t.string),
     full_name: t.union([t.null, t.string]),
     email: t.union([t.null, t.string]),
     enabled: t.boolean,
@@ -135,7 +139,7 @@ export interface FrameworkAuthenticatedUser<AuthDataType = any> {
   kind: 'authenticated';
   [internalAuthData]: AuthDataType;
   username: string;
-  roles: string[];
+  roles: readonly string[];
   full_name: string | null;
   email: string | null;
   enabled: boolean;

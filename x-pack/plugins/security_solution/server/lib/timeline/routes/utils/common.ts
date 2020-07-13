@@ -5,9 +5,10 @@
  */
 import { set } from 'lodash/fp';
 
-import { RequestHandlerContext } from 'src/core/server';
+import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
+
 import { SetupPlugins } from '../../../../plugin';
-import { KibanaRequest } from '../../../../../../../../src/core/server';
+
 import { FrameworkRequest } from '../../../framework';
 
 export const buildFrameworkRequest = async (
@@ -28,3 +29,19 @@ export const buildFrameworkRequest = async (
     )
   );
 };
+
+export enum TimelineStatusActions {
+  create = 'create',
+  createViaImport = 'createViaImport',
+  update = 'update',
+  updateViaImport = 'updateViaImport',
+}
+
+export type TimelineStatusAction =
+  | TimelineStatusActions.create
+  | TimelineStatusActions.createViaImport
+  | TimelineStatusActions.update
+  | TimelineStatusActions.updateViaImport;
+
+export * from './compare_timelines_status';
+export * from './timeline_object';

@@ -28,6 +28,7 @@ interface FlyoutPaneComponentProps {
 
 const EuiFlyoutContainer = styled.div`
   .timeline-flyout {
+    z-index: 4001;
     min-width: 150px;
     width: auto;
   }

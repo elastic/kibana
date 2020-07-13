@@ -7,8 +7,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
-import { TimelineStatus, TimelineTypeLiteral } from '../../../../../common/types/timeline';
+import { TimelineStatusLiteral, TimelineTypeLiteral } from '../../../../../common/types/timeline';
 import { useThrottledResizeObserver } from '../../../../common/components/utils';
 import { Note } from '../../../../common/lib/note';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -19,21 +18,15 @@ import { TimelineProperties } from './styles';
 import { PropertiesRight } from './properties_right';
 import { PropertiesLeft } from './properties_left';
 import { AllCasesModal } from '../../../../cases/components/all_cases_modal';
-import { SiemPageName } from '../../../../app/types';
+import { SecurityPageName } from '../../../../app/types';
 import * as i18n from './translations';
 import { State } from '../../../../common/store';
 import { timelineSelectors } from '../../../store/timeline';
 import { setInsertTimeline } from '../../../store/timeline/actions';
+import { useKibana } from '../../../../common/lib/kibana';
+import { APP_ID } from '../../../../../common/constants';
+import { getCaseDetailsUrl } from '../../../../common/components/link_to';
 
-type CreateTimeline = ({
-  id,
-  show,
-  timelineType,
-}: {
-  id: string;
-  show?: boolean;
-  timelineType?: TimelineTypeLiteral;
-}) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
 type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
@@ -41,15 +34,16 @@ type ToggleLock = ({ linkToId }: { linkToId: InputsModelId }) => void;
 
 interface Props {
   associateNote: AssociateNote;
-  createTimeline: CreateTimeline;
   description: string;
   getNotesByIds: (noteIds: string[]) => Note[];
+  graphEventId?: string;
   isDataInTimeline: boolean;
   isDatepickerLocked: boolean;
   isFavorite: boolean;
   noteIds: string[];
   timelineId: string;
-  status: TimelineStatus;
+  timelineType: TimelineTypeLiteral;
+  status: TimelineStatusLiteral;
   title: string;
   toggleLock: ToggleLock;
   updateDescription: UpdateDescription;
@@ -74,15 +68,16 @@ const settingsWidth = 55;
 export const Properties = React.memo<Props>(
   ({
     associateNote,
-    createTimeline,
     description,
     getNotesByIds,
+    graphEventId,
     isDataInTimeline,
     isDatepickerLocked,
     isFavorite,
     noteIds,
     status,
     timelineId,
+    timelineType,
     title,
     toggleLock,
     updateDescription,
@@ -91,6 +86,7 @@ export const Properties = React.memo<Props>(
     updateTitle,
     usersViewing,
   }) => {
+    const { navigateToApp } = useKibana().services.application;
     const { ref, width = 0 } = useThrottledResizeObserver(300);
     const [showActions, setShowActions] = useState(false);
     const [showNotes, setShowNotes] = useState(false);
@@ -110,7 +106,6 @@ export const Properties = React.memo<Props>(
     const [showCaseModal, setShowCaseModal] = useState(false);
     const onCloseCaseModal = useCallback(() => setShowCaseModal(false), []);
     const onOpenCaseModal = useCallback(() => setShowCaseModal(true), []);
-    const history = useHistory();
     const currentTimeline = useSelector((state: State) =>
       timelineSelectors.selectTimeline(state, timelineId)
     );
@@ -118,18 +113,21 @@ export const Properties = React.memo<Props>(
     const onRowClick = useCallback(
       (id: string) => {
         onCloseCaseModal();
-        history.push({
-          pathname: `/${SiemPageName.case}/${id}`,
-        });
-        dispatch(
-          setInsertTimeline({
-            timelineId,
-            timelineSavedObjectId: currentTimeline.savedObjectId,
-            timelineTitle: title.length > 0 ? title : i18n.UNTITLED_TIMELINE,
-          })
+
+        navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+          path: getCaseDetailsUrl({ id }),
+        }).then(() =>
+          dispatch(
+            setInsertTimeline({
+              graphEventId,
+              timelineId,
+              timelineSavedObjectId: currentTimeline.savedObjectId,
+              timelineTitle: title.length > 0 ? title : i18n.UNTITLED_TIMELINE,
+            })
+          )
         );
       },
-      [onCloseCaseModal, currentTimeline, dispatch, history, timelineId, title]
+      [currentTimeline, dispatch, graphEventId, navigateToApp, onCloseCaseModal, timelineId, title]
     );
 
     const datePickerWidth = useMemo(
@@ -157,10 +155,12 @@ export const Properties = React.memo<Props>(
           isFavorite={isFavorite}
           noteIds={noteIds}
           onToggleShowNotes={onToggleShowNotes}
+          status={status}
           showDescription={width >= showDescriptionThreshold}
           showNotes={showNotes}
           showNotesFromWidth={width >= showNotesThreshold}
           timelineId={timelineId}
+          timelineType={timelineType}
           title={title}
           toggleLock={onToggleLock}
           updateDescription={updateDescription}
@@ -172,6 +172,7 @@ export const Properties = React.memo<Props>(
           associateNote={associateNote}
           description={description}
           getNotesByIds={getNotesByIds}
+          graphEventId={graphEventId}
           isDataInTimeline={isDataInTimeline}
           noteIds={noteIds}
           onButtonClick={onButtonClick}
@@ -188,6 +189,7 @@ export const Properties = React.memo<Props>(
           showUsersView={title.length > 0}
           status={status}
           timelineId={timelineId}
+          timelineType={timelineType}
           title={title}
           updateDescription={updateDescription}
           updateNote={updateNote}

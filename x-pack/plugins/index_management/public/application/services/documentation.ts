@@ -20,6 +20,10 @@ class DocumentationService {
     this.kibanaDocsBase = `${docsBase}/kibana/${DOC_LINK_VERSION}`;
   }
 
+  public getEsDocsBase() {
+    return this.esDocsBase;
+  }
+
   public getSettingsDocumentationLink() {
     return `${this.esDocsBase}/index-modules.html#index-modules-settings`;
   }
@@ -30,6 +34,10 @@ class DocumentationService {
 
   public getRoutingLink() {
     return `${this.esDocsBase}/mapping-routing-field.html`;
+  }
+
+  public getDataStreamsDocumentationLink() {
+    return `${this.esDocsBase}/data-streams.html`;
   }
 
   public getTemplatesDocumentationLink() {

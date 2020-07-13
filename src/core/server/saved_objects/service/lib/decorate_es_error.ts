@@ -26,11 +26,11 @@ const {
   NoConnections,
   RequestTimeout,
   Conflict,
-  // @ts-ignore
+  // @ts-expect-error
   401: NotAuthorized,
-  // @ts-ignore
+  // @ts-expect-error
   403: Forbidden,
-  // @ts-ignore
+  // @ts-expect-error
   413: RequestEntityTooLarge,
   NotFound,
   BadRequest,

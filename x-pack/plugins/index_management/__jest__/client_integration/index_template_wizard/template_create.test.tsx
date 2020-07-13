@@ -7,7 +7,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { CREATE_LEGACY_TEMPLATE_BY_DEFAULT } from '../../../common';
 import { setupEnvironment, nextTick } from '../helpers';
 
 import {
@@ -20,28 +19,32 @@ import {
 import { setup } from './template_create.helpers';
 import { TemplateFormTestBed } from './template_form.helpers';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
-  // which does not produce a valid component wrapper
-  EuiComboBox: (props: any) => (
-    <input
-      data-test-subj="mockComboBox"
-      onChange={(syntheticEvent: any) => {
-        props.onChange([syntheticEvent['0']]);
-      }}
-    />
-  ),
-  // Mocking EuiCodeEditor, which uses React Ace under the hood
-  EuiCodeEditor: (props: any) => (
-    <input
-      data-test-subj="mockCodeEditor"
-      onChange={(syntheticEvent: any) => {
-        props.onChange(syntheticEvent.jsonString);
-      }}
-    />
-  ),
-}));
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
+    // which does not produce a valid component wrapper
+    EuiComboBox: (props: any) => (
+      <input
+        data-test-subj="mockComboBox"
+        onChange={(syntheticEvent: any) => {
+          props.onChange([syntheticEvent['0']]);
+        }}
+      />
+    ),
+    // Mocking EuiCodeEditor, which uses React Ace under the hood
+    EuiCodeEditor: (props: any) => (
+      <input
+        data-test-subj="mockCodeEditor"
+        onChange={(syntheticEvent: any) => {
+          props.onChange(syntheticEvent.jsonString);
+        }}
+      />
+    ),
+  };
+});
 
 const TEXT_MAPPING_FIELD = {
   name: 'text_datatype',
@@ -365,8 +368,8 @@ describe.skip('<TemplateCreate />', () => {
           aliases: ALIASES,
         },
         _kbnMeta: {
-          isLegacy: CREATE_LEGACY_TEMPLATE_BY_DEFAULT,
-          isManaged: false,
+          type: 'default',
+          isLegacy: false,
         },
       };
 

@@ -126,6 +126,8 @@ export interface TimelineInput {
 
   eventType?: Maybe<string>;
 
+  excludedRowRendererIds?: Maybe<RowRendererId[]>;
+
   filters?: Maybe<FilterTimelineInput[]>;
 
   kqlMode?: Maybe<string>;
@@ -187,6 +189,8 @@ export interface DataProviderInput {
   queryMatch?: Maybe<QueryMatchInput>;
 
   and?: Maybe<DataProviderInput[]>;
+
+  type?: Maybe<DataProviderType>;
 }
 
 export interface QueryMatchInput {
@@ -344,9 +348,31 @@ export enum TlsFields {
   _id = '_id',
 }
 
+export enum DataProviderType {
+  default = 'default',
+  template = 'template',
+}
+
+export enum RowRendererId {
+  auditd = 'auditd',
+  auditd_file = 'auditd_file',
+  netflow = 'netflow',
+  plain = 'plain',
+  suricata = 'suricata',
+  system = 'system',
+  system_dns = 'system_dns',
+  system_endgame_process = 'system_endgame_process',
+  system_file = 'system_file',
+  system_fim = 'system_fim',
+  system_security_event = 'system_security_event',
+  system_socket = 'system_socket',
+  zeek = 'zeek',
+}
+
 export enum TimelineStatus {
   active = 'active',
   draft = 'draft',
+  immutable = 'immutable',
 }
 
 export enum TimelineType {
@@ -359,6 +385,11 @@ export enum SortFieldTimeline {
   description = 'description',
   updated = 'updated',
   created = 'created',
+}
+
+export enum TemplateTimelineType {
+  elastic = 'elastic',
+  custom = 'custom',
 }
 
 export enum NetworkDirectionEcs {
@@ -765,6 +796,8 @@ export interface Ecs {
 
   _index?: Maybe<string>;
 
+  agent?: Maybe<AgentEcsField>;
+
   auditd?: Maybe<AuditdEcsFields>;
 
   destination?: Maybe<DestinationEcsFields>;
@@ -810,6 +843,10 @@ export interface Ecs {
   file?: Maybe<FileFields>;
 
   system?: Maybe<SystemEcsField>;
+}
+
+export interface AgentEcsField {
+  type?: Maybe<string[] | string>;
 }
 
 export interface AuditdEcsFields {
@@ -1034,6 +1071,8 @@ export interface RuleField {
   version?: Maybe<string[] | string>;
 
   note?: Maybe<string[] | string>;
+
+  exceptions_list?: Maybe<ToAny>;
 }
 
 export interface SuricataEcsFields {
@@ -1266,6 +1305,8 @@ export interface ProcessEcsFields {
   ppid?: Maybe<number[] | number>;
 
   args?: Maybe<string[] | string>;
+
+  entity_id?: Maybe<string[] | string>;
 
   executable?: Maybe<string[] | string>;
 
@@ -1940,6 +1981,8 @@ export interface TimelineResult {
 
   eventType?: Maybe<string>;
 
+  excludedRowRendererIds?: Maybe<RowRendererId[]>;
+
   favorite?: Maybe<FavoriteTimelineResult[]>;
 
   filters?: Maybe<FilterTimelineResult[]>;
@@ -2015,6 +2058,8 @@ export interface DataProviderResult {
   kqlQuery?: Maybe<string>;
 
   queryMatch?: Maybe<QueryMatchResult>;
+
+  type?: Maybe<DataProviderType>;
 
   and?: Maybe<DataProviderResult[]>;
 }
@@ -2111,6 +2156,16 @@ export interface ResponseTimelines {
   timeline: (Maybe<TimelineResult>)[];
 
   totalCount?: Maybe<number>;
+
+  defaultTimelineCount?: Maybe<number>;
+
+  templateTimelineCount?: Maybe<number>;
+
+  elasticTemplateTimelineCount?: Maybe<number>;
+
+  customTemplateTimelineCount?: Maybe<number>;
+
+  favoriteCount?: Maybe<number>;
 }
 
 export interface Mutation {
@@ -2248,6 +2303,10 @@ export interface GetAllTimelineQueryArgs {
   onlyUserFavorite?: Maybe<boolean>;
 
   timelineType?: Maybe<TimelineType>;
+
+  templateTimelineType?: Maybe<TemplateTimelineType>;
+
+  status?: Maybe<TimelineStatus>;
 }
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
@@ -2706,6 +2765,10 @@ export namespace QueryResolvers {
     onlyUserFavorite?: Maybe<boolean>;
 
     timelineType?: Maybe<TimelineType>;
+
+    templateTimelineType?: Maybe<TemplateTimelineType>;
+
+    status?: Maybe<TimelineStatus>;
   }
 }
 
@@ -4083,6 +4146,8 @@ export namespace EcsResolvers {
 
     _index?: _IndexResolver<Maybe<string>, TypeParent, TContext>;
 
+    agent?: AgentResolver<Maybe<AgentEcsField>, TypeParent, TContext>;
+
     auditd?: AuditdResolver<Maybe<AuditdEcsFields>, TypeParent, TContext>;
 
     destination?: DestinationResolver<Maybe<DestinationEcsFields>, TypeParent, TContext>;
@@ -4140,6 +4205,11 @@ export namespace EcsResolvers {
     Parent,
     TContext
   >;
+  export type AgentResolver<
+    R = Maybe<AgentEcsField>,
+    Parent = Ecs,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
   export type AuditdResolver<
     R = Maybe<AuditdEcsFields>,
     Parent = Ecs,
@@ -4253,6 +4323,18 @@ export namespace EcsResolvers {
   export type SystemResolver<
     R = Maybe<SystemEcsField>,
     Parent = Ecs,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace AgentEcsFieldResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = AgentEcsField> {
+    type?: TypeResolver<Maybe<string[] | string>, TypeParent, TContext>;
+  }
+
+  export type TypeResolver<
+    R = Maybe<string[] | string>,
+    Parent = AgentEcsField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -4856,6 +4938,8 @@ export namespace RuleFieldResolvers {
     version?: VersionResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
     note?: NoteResolver<Maybe<string[] | string>, TypeParent, TContext>;
+
+    exceptions_list?: ExceptionsListResolver<Maybe<ToAny>, TypeParent, TContext>;
   }
 
   export type IdResolver<
@@ -5010,6 +5094,11 @@ export namespace RuleFieldResolvers {
   > = Resolver<R, Parent, TContext>;
   export type NoteResolver<
     R = Maybe<string[] | string>,
+    Parent = RuleField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ExceptionsListResolver<
+    R = Maybe<ToAny>,
     Parent = RuleField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -5761,6 +5850,8 @@ export namespace ProcessEcsFieldsResolvers {
 
     args?: ArgsResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
+    entity_id?: EntityIdResolver<Maybe<string[] | string>, TypeParent, TContext>;
+
     executable?: ExecutableResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
     title?: TitleResolver<Maybe<string[] | string>, TypeParent, TContext>;
@@ -5791,6 +5882,11 @@ export namespace ProcessEcsFieldsResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type ArgsResolver<
+    R = Maybe<string[] | string>,
+    Parent = ProcessEcsFields,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type EntityIdResolver<
     R = Maybe<string[] | string>,
     Parent = ProcessEcsFields,
     TContext = SiemContext
@@ -8025,6 +8121,12 @@ export namespace TimelineResultResolvers {
 
     eventType?: EventTypeResolver<Maybe<string>, TypeParent, TContext>;
 
+    excludedRowRendererIds?: ExcludedRowRendererIdsResolver<
+      Maybe<RowRendererId[]>,
+      TypeParent,
+      TContext
+    >;
+
     favorite?: FavoriteResolver<Maybe<FavoriteTimelineResult[]>, TypeParent, TContext>;
 
     filters?: FiltersResolver<Maybe<FilterTimelineResult[]>, TypeParent, TContext>;
@@ -8105,6 +8207,11 @@ export namespace TimelineResultResolvers {
   > = Resolver<R, Parent, TContext>;
   export type EventTypeResolver<
     R = Maybe<string>,
+    Parent = TimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ExcludedRowRendererIdsResolver<
+    R = Maybe<RowRendererId[]>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -8301,6 +8408,8 @@ export namespace DataProviderResultResolvers {
 
     queryMatch?: QueryMatchResolver<Maybe<QueryMatchResult>, TypeParent, TContext>;
 
+    type?: TypeResolver<Maybe<DataProviderType>, TypeParent, TContext>;
+
     and?: AndResolver<Maybe<DataProviderResult[]>, TypeParent, TContext>;
   }
 
@@ -8331,6 +8440,11 @@ export namespace DataProviderResultResolvers {
   > = Resolver<R, Parent, TContext>;
   export type QueryMatchResolver<
     R = Maybe<QueryMatchResult>,
+    Parent = DataProviderResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TypeResolver<
+    R = Maybe<DataProviderType>,
     Parent = DataProviderResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -8636,6 +8750,24 @@ export namespace ResponseTimelinesResolvers {
     timeline?: TimelineResolver<(Maybe<TimelineResult>)[], TypeParent, TContext>;
 
     totalCount?: TotalCountResolver<Maybe<number>, TypeParent, TContext>;
+
+    defaultTimelineCount?: DefaultTimelineCountResolver<Maybe<number>, TypeParent, TContext>;
+
+    templateTimelineCount?: TemplateTimelineCountResolver<Maybe<number>, TypeParent, TContext>;
+
+    elasticTemplateTimelineCount?: ElasticTemplateTimelineCountResolver<
+      Maybe<number>,
+      TypeParent,
+      TContext
+    >;
+
+    customTemplateTimelineCount?: CustomTemplateTimelineCountResolver<
+      Maybe<number>,
+      TypeParent,
+      TContext
+    >;
+
+    favoriteCount?: FavoriteCountResolver<Maybe<number>, TypeParent, TContext>;
   }
 
   export type TimelineResolver<
@@ -8644,6 +8776,31 @@ export namespace ResponseTimelinesResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type TotalCountResolver<
+    R = Maybe<number>,
+    Parent = ResponseTimelines,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type DefaultTimelineCountResolver<
+    R = Maybe<number>,
+    Parent = ResponseTimelines,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TemplateTimelineCountResolver<
+    R = Maybe<number>,
+    Parent = ResponseTimelines,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ElasticTemplateTimelineCountResolver<
+    R = Maybe<number>,
+    Parent = ResponseTimelines,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type CustomTemplateTimelineCountResolver<
+    R = Maybe<number>,
+    Parent = ResponseTimelines,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type FavoriteCountResolver<
     R = Maybe<number>,
     Parent = ResponseTimelines,
     TContext = SiemContext
@@ -9110,6 +9267,7 @@ export type IResolvers<TContext = SiemContext> = {
   TimelineItem?: TimelineItemResolvers.Resolvers<TContext>;
   TimelineNonEcsData?: TimelineNonEcsDataResolvers.Resolvers<TContext>;
   Ecs?: EcsResolvers.Resolvers<TContext>;
+  AgentEcsField?: AgentEcsFieldResolvers.Resolvers<TContext>;
   AuditdEcsFields?: AuditdEcsFieldsResolvers.Resolvers<TContext>;
   AuditdData?: AuditdDataResolvers.Resolvers<TContext>;
   Summary?: SummaryResolvers.Resolvers<TContext>;

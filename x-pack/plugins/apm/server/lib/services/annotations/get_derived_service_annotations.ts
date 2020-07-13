@@ -7,7 +7,7 @@ import { isNumber } from 'lodash';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
 import { SetupTimeRange, Setup } from '../../helpers/setup_request';
 import { ESFilter } from '../../../../typings/elasticsearch';
-import { rangeFilter } from '../../helpers/range_filter';
+import { rangeFilter } from '../../../../common/utils/range_filter';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -29,13 +29,8 @@ export async function getDerivedServiceAnnotations({
   const filter: ESFilter[] = [
     { term: { [PROCESSOR_EVENT]: 'transaction' } },
     { term: { [SERVICE_NAME]: serviceName } },
+    ...getEnvironmentUiFilterES(environment),
   ];
-
-  const environmentFilter = getEnvironmentUiFilterES(environment);
-
-  if (environmentFilter) {
-    filter.push(environmentFilter);
-  }
 
   const versions =
     (

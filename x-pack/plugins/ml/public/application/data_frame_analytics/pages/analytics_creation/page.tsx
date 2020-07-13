@@ -109,7 +109,6 @@ export const Page: FC<Props> = ({ jobId }) => {
         />
       ),
       status: currentStep >= ANALYTICS_STEPS.ADVANCED ? undefined : ('incomplete' as EuiStepStatus),
-      'data-test-subj': 'mlAnalyticsCreateJobWizardAdvancedStep',
     },
     {
       title: i18n.translate('xpack.ml.dataframe.analytics.creation.detailsStepTitle', {
@@ -124,7 +123,6 @@ export const Page: FC<Props> = ({ jobId }) => {
         />
       ),
       status: currentStep >= ANALYTICS_STEPS.DETAILS ? undefined : ('incomplete' as EuiStepStatus),
-      'data-test-subj': 'mlAnalyticsCreateJobWizardDetailsStep',
     },
     {
       title: i18n.translate('xpack.ml.dataframe.analytics.creation.createStepTitle', {
@@ -132,7 +130,6 @@ export const Page: FC<Props> = ({ jobId }) => {
       }),
       children: <CreateStep {...createAnalyticsForm} step={currentStep} />,
       status: currentStep >= ANALYTICS_STEPS.CREATE ? undefined : ('incomplete' as EuiStepStatus),
-      'data-test-subj': 'mlAnalyticsCreateJobWizardCreateStep',
     },
   ];
 
@@ -144,18 +141,18 @@ export const Page: FC<Props> = ({ jobId }) => {
             <EuiFlexItem>
               <EuiFlexGroup direction="column" gutterSize="none">
                 <EuiFlexItem grow={false}>
-                  <EuiTitle size="m">
+                  <EuiTitle size="m" data-test-subj="mlDataFrameAnalyticsWizardHeaderTitle">
                     <h1>
                       {jobId === undefined && (
                         <FormattedMessage
                           id="xpack.ml.dataframe.analytics.creationPageTitle"
-                          defaultMessage="Create analytics job"
+                          defaultMessage="Create job"
                         />
                       )}
                       {jobId !== undefined && (
                         <FormattedMessage
                           id="xpack.ml.dataframe.analytics.clone.creationPageTitle"
-                          defaultMessage="Clone analytics job from {jobId}"
+                          defaultMessage="Clone job from {jobId}"
                           values={{ jobId }}
                         />
                       )}

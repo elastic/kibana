@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getMlJobId } from '../../../../../common/ml_job_constants';
+import { Logger } from 'kibana/server';
 import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 
 interface IOptions {
-  serviceName: string;
-  transactionType: string;
   setup: Setup & SetupTimeRange;
+  jobId: string;
+  logger: Logger;
 }
 
 interface ESResponse {
@@ -18,20 +18,20 @@ interface ESResponse {
 }
 
 export async function getMlBucketSize({
-  serviceName,
-  transactionType,
   setup,
-}: IOptions): Promise<number> {
+  jobId,
+  logger,
+}: IOptions): Promise<number | undefined> {
   const { ml, start, end } = setup;
   if (!ml) {
-    return 0;
+    return;
   }
-  const jobId = getMlJobId(serviceName, transactionType);
 
   const params = {
     body: {
       _source: 'bucket_span',
       size: 1,
+      terminateAfter: 1,
       query: {
         bool: {
           filter: [
@@ -39,11 +39,7 @@ export async function getMlBucketSize({
             { exists: { field: 'bucket_span' } },
             {
               range: {
-                timestamp: {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis',
-                },
+                timestamp: { gte: start, lte: end, format: 'epoch_millis' },
               },
             },
           ],
@@ -54,12 +50,12 @@ export async function getMlBucketSize({
 
   try {
     const resp = await ml.mlSystem.mlAnomalySearch<ESResponse>(params);
-    return resp.hits.hits[0]?._source.bucket_span || 0;
+    return resp.hits.hits[0]?._source.bucket_span;
   } catch (err) {
     const isHttpError = 'statusCode' in err;
     if (isHttpError) {
-      return 0;
+      return;
     }
-    throw err;
+    logger.error(err);
   }
 }

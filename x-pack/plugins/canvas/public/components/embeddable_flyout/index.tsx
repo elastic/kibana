@@ -10,7 +10,7 @@ import { compose } from 'recompose';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { AddEmbeddableFlyout, Props } from './flyout';
-// @ts-ignore Untyped Local
+// @ts-expect-error untyped local
 import { addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
 import { EmbeddableTypes } from '../../../canvas_plugin_src/expression_types/embeddable';

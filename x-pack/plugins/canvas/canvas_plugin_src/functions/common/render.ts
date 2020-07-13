@@ -7,7 +7,6 @@
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { Render, ContainerStyle } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
-// @ts-ignore unconverted local file
 import { DEFAULT_ELEMENT_CSS } from '../../../common/lib/constants';
 
 interface ContainerStyleArgument extends ContainerStyle {

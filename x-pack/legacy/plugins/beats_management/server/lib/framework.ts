@@ -16,7 +16,6 @@ import {
 export class BackendFrameworkLib {
   public log = this.adapter.log;
   public on = this.adapter.on.bind(this.adapter);
-  public exposeStaticDir = this.adapter.exposeStaticDir;
   public internalUser = this.adapter.internalUser;
   constructor(private readonly adapter: BackendFrameworkAdapter) {
     this.validateConfig();

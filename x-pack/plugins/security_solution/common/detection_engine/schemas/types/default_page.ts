@@ -17,13 +17,13 @@ import { PositiveIntegerGreaterThanZero } from './positive_integer_greater_than_
 export const DefaultPage = new t.Type<number, number, unknown>(
   'DefaultPerPage',
   t.number.is,
-  (input): Either<t.Errors, number> => {
+  (input, context): Either<t.Errors, number> => {
     if (input == null) {
       return t.success(1);
     } else if (typeof input === 'string') {
-      return PositiveIntegerGreaterThanZero.decode(parseInt(input, 10));
+      return PositiveIntegerGreaterThanZero.validate(parseInt(input, 10), context);
     } else {
-      return PositiveIntegerGreaterThanZero.decode(input);
+      return PositiveIntegerGreaterThanZero.validate(input, context);
     }
   },
   t.identity

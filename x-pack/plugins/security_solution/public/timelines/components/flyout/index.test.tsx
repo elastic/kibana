@@ -14,6 +14,7 @@ import {
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
+  kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { createStore, State } from '../../../common/store';
@@ -62,6 +63,7 @@ describe('Flyout', () => {
         stateShowIsTrue,
         SUB_PLUGINS_REDUCER,
         apolloClientObservable,
+        kibanaObservable,
         storage
       );
 
@@ -86,6 +88,7 @@ describe('Flyout', () => {
         stateWithDataProviders,
         SUB_PLUGINS_REDUCER,
         apolloClientObservable,
+        kibanaObservable,
         storage
       );
 
@@ -108,6 +111,7 @@ describe('Flyout', () => {
         stateWithDataProviders,
         SUB_PLUGINS_REDUCER,
         apolloClientObservable,
+        kibanaObservable,
         storage
       );
 
@@ -142,6 +146,7 @@ describe('Flyout', () => {
         stateWithDataProviders,
         SUB_PLUGINS_REDUCER,
         apolloClientObservable,
+        kibanaObservable,
         storage
       );
 

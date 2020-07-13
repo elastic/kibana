@@ -8,7 +8,7 @@ import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { TimelineIdLiteral, TimelineId } from '../../common/types/timeline';
 import { SecuritySubPluginWithStore } from '../app/types';
 import { getTimelinesInStorageByIds } from '../timelines/containers/local_storage';
-import { getHostsRoutes } from './routes';
+import { HostsRoutes } from './routes';
 import { initialHostsState, hostsReducer, HostsState } from './store';
 
 const HOST_TIMELINE_IDS: TimelineIdLiteral[] = [
@@ -21,7 +21,7 @@ export class Hosts {
 
   public start(storage: Storage): SecuritySubPluginWithStore<'hosts', HostsState> {
     return {
-      routes: getHostsRoutes(),
+      SubPluginRoutes: HostsRoutes,
       storageTimelines: {
         timelineById: getTimelinesInStorageByIds(storage, HOST_TIMELINE_IDS),
       },

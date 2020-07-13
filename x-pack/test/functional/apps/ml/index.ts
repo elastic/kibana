@@ -22,6 +22,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.securityCommon.cleanMlRoles();
 
       await ml.testResources.deleteSavedSearches();
+      await ml.testResources.deleteDashboards();
 
       await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
       await ml.testResources.deleteIndexPatternByTitle('ft_ecommerce');

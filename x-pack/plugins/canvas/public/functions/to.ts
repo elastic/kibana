@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore untyped Elastic library
+// @ts-expect-error untyped Elastic library
 import { castProvider } from '@kbn/interpreter/common';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/public';
 import { getFunctionHelp, getFunctionErrors } from '../../i18n';

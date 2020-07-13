@@ -10,7 +10,7 @@ import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { NavTab } from '../../../common/components/navigation/types';
 import { FlowTargetSourceDest } from '../../../graphql/types';
 import { networkModel } from '../../store';
-import { GlobalTimeArgs } from '../../../common/containers/global_time';
+import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 import { SetAbsoluteRangeDatePicker } from '../types';
 import { NarrowDateRange } from '../../../common/components/ml/types';
@@ -67,11 +67,10 @@ export enum NetworkRouteType {
   anomalies = 'anomalies',
   tls = 'tls',
   http = 'http',
-  alerts = 'alerts',
+  alerts = 'external-alerts',
 }
 
 export type GetNetworkRoutePath = (
-  pagePath: string,
   capabilitiesFetched: boolean,
   hasMlUserPermission: boolean
 ) => string;

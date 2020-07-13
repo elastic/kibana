@@ -21,11 +21,15 @@ import { IKibanaSearchRequest, IKibanaSearchResponse } from '../types';
 
 export const ES_SEARCH_STRATEGY = 'es';
 
+export type ISearchRequestParams = {
+  trackTotalHits?: boolean;
+} & SearchParams;
+
 export interface IEsSearchRequest extends IKibanaSearchRequest {
-  params: SearchParams;
+  params?: ISearchRequestParams;
   indexType?: string;
 }
 
-export interface IEsSearchResponse<Hits = unknown> extends IKibanaSearchResponse {
-  rawResponse: SearchResponse<Hits>;
+export interface IEsSearchResponse extends IKibanaSearchResponse {
+  rawResponse: SearchResponse<any>;
 }

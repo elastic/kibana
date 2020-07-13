@@ -40,6 +40,7 @@ describe('#toExpression', () => {
         {
           legend: { position: Position.Bottom, isVisible: true },
           preferredSeriesType: 'bar',
+          fittingFunction: 'Carry',
           layers: [
             {
               layerId: 'first',
@@ -53,6 +54,27 @@ describe('#toExpression', () => {
         frame
       )
     ).toMatchSnapshot();
+  });
+
+  it('should default the fitting function to None', () => {
+    expect(
+      (xyVisualization.toExpression(
+        {
+          legend: { position: Position.Bottom, isVisible: true },
+          preferredSeriesType: 'bar',
+          layers: [
+            {
+              layerId: 'first',
+              seriesType: 'area',
+              splitAccessor: 'd',
+              xAccessor: 'a',
+              accessors: ['b', 'c'],
+            },
+          ],
+        },
+        frame
+      ) as Ast).chain[0].arguments.fittingFunction[0]
+    ).toEqual('None');
   });
 
   it('should not generate an expression when missing x', () => {

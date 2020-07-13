@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { FunctionComponent, memo, useRef, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, keyCodes } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, keys } from '@elastic/eui';
 import { List, WindowScroller } from 'react-virtualized';
 
 import { ProcessorInternal, ProcessorSelector } from '../../types';
+import { selectorToDataTestSubject } from '../../utils';
 
 import './processors_tree.scss';
 import { AddProcessorButton } from '../add_processor_button';
@@ -51,7 +52,7 @@ export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
   useEffect(() => {
     const cancelMoveKbListener = (event: KeyboardEvent) => {
       // x-browser support per https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode
-      if (event.keyCode === keyCodes.ESCAPE || event.code === 'Escape') {
+      if (event.key === keys.ESCAPE || event.code === 'Escape') {
         onAction({ type: 'cancelMove' });
       }
     };
@@ -96,7 +97,7 @@ export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup responsive={false} justifyContent="flexStart" gutterSize="none">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem data-test-subj={selectorToDataTestSubject(baseSelector)} grow={false}>
             <AddProcessorButton
               onClick={() => {
                 onAction({ type: 'addProcessor', payload: { target: baseSelector } });

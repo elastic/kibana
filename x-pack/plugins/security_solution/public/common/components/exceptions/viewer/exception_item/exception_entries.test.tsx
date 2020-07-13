@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { ExceptionEntries } from './exception_entries';
-import { getFormattedEntryMock } from '../../mocks';
+import { getFormattedEntryMock } from '../../exceptions.mock';
 import { getEmptyValue } from '../../../empty_value';
 
 describe('ExceptionEntries', () => {
@@ -115,8 +115,8 @@ describe('ExceptionEntries', () => {
 
   test('it renders nested entry', () => {
     const parentEntry = getFormattedEntryMock();
-    parentEntry.operator = null;
-    parentEntry.value = null;
+    parentEntry.operator = undefined;
+    parentEntry.value = undefined;
 
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>

@@ -1,0 +1,10 @@
+{
+  "id": "globalSearchProviders",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["globalSearch"],
+  "optionalPlugins": [],
+  "configPath": ["xpack", "global_search_providers"]
+}

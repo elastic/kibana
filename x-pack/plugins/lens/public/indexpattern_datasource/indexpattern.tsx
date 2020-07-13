@@ -46,6 +46,7 @@ import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/p
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { deleteColumn } from './state_helpers';
 import { Datasource, StateSetter } from '../index';
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 
 export { OperationType, IndexPatternColumn } from './operations';
 
@@ -102,10 +103,12 @@ export function getIndexPatternDatasource({
   core,
   storage,
   data,
+  charts,
 }: {
   core: CoreStart;
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
+  charts: ChartsPluginSetup;
 }) {
   const savedObjectsClient = core.savedObjects.client;
   const uiSettings = core.uiSettings;
@@ -125,6 +128,7 @@ export function getIndexPatternDatasource({
         state,
         savedObjectsClient: await savedObjectsClient,
         defaultIndexPatternId: core.uiSettings.get('defaultIndex'),
+        storage,
       });
     },
 
@@ -207,9 +211,11 @@ export function getIndexPatternDatasource({
                 setState,
                 savedObjectsClient,
                 onError: onIndexPatternLoadError,
+                storage,
               });
             }}
             data={data}
+            charts={charts}
             {...props}
           />
         </I18nProvider>,
@@ -290,6 +296,7 @@ export function getIndexPatternDatasource({
               layerId: props.layerId,
               onError: onIndexPatternLoadError,
               replaceIfPossible: true,
+              storage,
             });
           }}
           {...props}

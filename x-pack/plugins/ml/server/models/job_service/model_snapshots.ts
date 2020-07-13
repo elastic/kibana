@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { ModelSnapshot } from '../../../common/types/anomaly_detection_jobs';
 import { datafeedsProvider, MlDatafeedsResponse } from './datafeeds';
 import { MlJobsResponse } from './jobs';
@@ -20,7 +20,7 @@ export interface RevertModelSnapshotResponse {
   model: ModelSnapshot;
 }
 
-export function modelSnapshotProvider(callAsCurrentUser: APICaller) {
+export function modelSnapshotProvider(callAsCurrentUser: LegacyAPICaller) {
   const { forceStartDatafeeds, getDatafeedIdsByJobId } = datafeedsProvider(callAsCurrentUser);
 
   async function revertModelSnapshot(

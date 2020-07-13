@@ -52,5 +52,11 @@ export function DashboardPanelTimeRangeProvider({ getService }: FtrProviderConte
       const button = await this.findModalTestSubject('addPerPanelTimeRangeButton');
       await button.click();
     }
+
+    public async clickRemovePerPanelTimeRangeButton() {
+      log.debug('clickRemovePerPanelTimeRangeButton');
+      const button = await this.findModalTestSubject('removePerPanelTimeRangeButton');
+      await button.click();
+    }
   })();
 }

@@ -8,3 +8,4 @@ export * from './repository';
 export * from './snapshot';
 export * from './restore';
 export * from './policy';
+export * from './indices';

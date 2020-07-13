@@ -8,7 +8,8 @@ import { htmlIdGenerator } from '@elastic/eui';
 import { animateProcessIntoView } from './methods';
 import { cameraReducer } from './camera/reducer';
 import { dataReducer } from './data/reducer';
-import { ResolverState, ResolverAction, ResolverUIState } from '../types';
+import { ResolverAction } from './actions';
+import { ResolverState, ResolverUIState } from '../types';
 import { uniquePidForProcess } from '../models/process_event';
 
 /**
@@ -19,7 +20,11 @@ import { uniquePidForProcess } from '../models/process_event';
 const resolverNodeIdGenerator = htmlIdGenerator('resolverNode');
 
 const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
-  uiState = { activeDescendantId: null, selectedDescendantId: null },
+  uiState = {
+    activeDescendantId: null,
+    selectedDescendantId: null,
+    processEntityIdOfSelectedDescendant: null,
+  },
   action
 ) => {
   if (action.type === 'userFocusedOnResolverNode') {
@@ -31,17 +36,24 @@ const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
     return {
       ...uiState,
       selectedDescendantId: action.payload.nodeId,
+      processEntityIdOfSelectedDescendant: action.payload.selectedProcessId,
     };
-  } else if (action.type === 'userBroughtProcessIntoView') {
+  } else if (
+    action.type === 'userBroughtProcessIntoView' ||
+    action.type === 'appDetectedNewIdFromQueryParams'
+  ) {
     /**
      * This action has a process payload (instead of a processId), so we use
      * `uniquePidForProcess` and `resolverNodeIdGenerator` to resolve the determinant
      * html id of the node being brought into view.
      */
-    const processNodeId = resolverNodeIdGenerator(uniquePidForProcess(action.payload.process));
+    const processEntityId = uniquePidForProcess(action.payload.process);
+    const processNodeId = resolverNodeIdGenerator(processEntityId);
     return {
       ...uiState,
       activeDescendantId: processNodeId,
+      selectedDescendantId: processNodeId,
+      processEntityIdOfSelectedDescendant: processEntityId,
     };
   } else {
     return uiState;
@@ -56,7 +68,10 @@ const concernReducers = combineReducers({
 
 export const resolverReducer: Reducer<ResolverState, ResolverAction> = (state, action) => {
   const nextState = concernReducers(state, action);
-  if (action.type === 'userBroughtProcessIntoView') {
+  if (
+    action.type === 'userBroughtProcessIntoView' ||
+    action.type === 'appDetectedNewIdFromQueryParams'
+  ) {
     return animateProcessIntoView(nextState, action.payload.time, action.payload.process);
   } else {
     return nextState;

@@ -8,7 +8,6 @@ import React, { useReducer, useEffect, createContext, useContext, useMemo, useRe
 
 import {
   reducer,
-  addFieldToState,
   MappingsConfiguration,
   MappingsFields,
   MappingsTemplates,
@@ -20,7 +19,7 @@ import { normalize, deNormalize, stripUndefinedValues } from './lib';
 
 type Mappings = MappingsTemplates &
   MappingsConfiguration & {
-    properties: MappingsFields;
+    properties?: MappingsFields;
   };
 
 export interface Types {
@@ -32,7 +31,7 @@ export interface Types {
 
 export interface OnUpdateHandlerArg {
   isValid?: boolean;
-  getData: (isValid: boolean) => Mappings;
+  getData: () => Mappings | undefined;
   validate: () => Promise<boolean>;
 }
 
@@ -57,7 +56,7 @@ export const MappingsState = React.memo(({ children, onChange, value }: Props) =
   const parsedFieldsDefaultValue = useMemo(() => normalize(value.fields), [value.fields]);
 
   const initialState: State = {
-    isValid: undefined,
+    isValid: true,
     configuration: {
       defaultValue: value.configuration,
       data: {
@@ -76,7 +75,7 @@ export const MappingsState = React.memo(({ children, onChange, value }: Props) =
     },
     fields: parsedFieldsDefaultValue,
     documentFields: {
-      status: 'idle',
+      status: parsedFieldsDefaultValue.rootLevelFields.length === 0 ? 'creatingField' : 'idle',
       editor: 'default',
     },
     fieldsJsonEditor: {
@@ -105,40 +104,28 @@ export const MappingsState = React.memo(({ children, onChange, value }: Props) =
 
     onChange({
       // Output a mappings object from the user's input.
-      getData: (isValid: boolean) => {
-        let nextState = state;
-
-        if (
-          state.fieldForm &&
-          state.documentFields.status === 'creatingField' &&
-          isValid &&
-          !bypassFieldFormValidation
-        ) {
-          // If the form field is valid and we are creating a new field that has some data
-          // we automatically add the field to our state.
-          const fieldFormData = state.fieldForm.data.format() as Field;
-          if (Object.keys(fieldFormData).length !== 0) {
-            nextState = addFieldToState(fieldFormData, state);
-            dispatch({ type: 'field.add', value: fieldFormData });
-          }
-        }
-
+      getData: () => {
         // Pull the mappings properties from the current editor
         const fields =
-          nextState.documentFields.editor === 'json'
-            ? nextState.fieldsJsonEditor.format()
-            : deNormalize(nextState.fields);
+          state.documentFields.editor === 'json'
+            ? state.fieldsJsonEditor.format()
+            : deNormalize(state.fields);
 
-        const configurationData = nextState.configuration.data.format();
-        const templatesData = nextState.templates.data.format();
+        const configurationData = state.configuration.data.format();
+        const templatesData = state.templates.data.format();
 
-        return {
+        const output = {
           ...stripUndefinedValues({
             ...configurationData,
             ...templatesData,
           }),
-          properties: fields,
         };
+
+        if (fields && Object.keys(fields).length > 0) {
+          output.properties = fields;
+        }
+
+        return Object.keys(output).length > 0 ? (output as Mappings) : undefined;
       },
       validate: async () => {
         const configurationFormValidator =
@@ -163,9 +150,11 @@ export const MappingsState = React.memo(({ children, onChange, value }: Props) =
           promisesToValidate.push(state.fieldForm.validate());
         }
 
-        return Promise.all(promisesToValidate).then(
-          (validationArray) => validationArray.every(Boolean) && state.fieldsJsonEditor.isValid
-        );
+        return Promise.all(promisesToValidate).then((validationArray) => {
+          const isValid = validationArray.every(Boolean) && state.fieldsJsonEditor.isValid;
+          dispatch({ type: 'validity:update', value: isValid });
+          return isValid;
+        });
       },
       isValid: state.isValid,
     });

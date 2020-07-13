@@ -4,51 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ReactNode } from 'react';
-
+import { IFieldType } from '../../../../../../../src/plugins/data/common';
+import { OperatorOption } from '../autocomplete/types';
 import {
+  EntryNested,
+  Entry,
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
   NamespaceType,
-  ExceptionList,
-  ExceptionListItemSchema as ExceptionItem,
+  OperatorTypeEnum,
+  OperatorEnum,
 } from '../../../lists_plugin_deps';
-
-export interface OperatorOption {
-  message: string;
-  value: string;
-  operator: Operator;
-  type: OperatorType;
-}
-
-export enum Operator {
-  INCLUSION = 'included',
-  EXCLUSION = 'excluded',
-}
-
-export enum OperatorType {
-  NESTED = 'nested',
-  PHRASE = 'match',
-  PHRASES = 'match_any',
-  EXISTS = 'exists',
-  LIST = 'list',
-}
 
 export interface FormattedEntry {
   fieldName: string;
-  operator: string | null;
-  value: string | null;
+  operator: string | undefined;
+  value: string | string[] | undefined;
   isNested: boolean;
-}
-
-export interface NestedExceptionEntry {
-  field: string;
-  type: string;
-  entries: ExceptionEntry[];
-}
-
-export interface ExceptionEntry {
-  field: string;
-  type: string;
-  operator: Operator;
-  value: string;
 }
 
 export interface DescriptionListItem {
@@ -56,15 +28,9 @@ export interface DescriptionListItem {
   description: NonNullable<ReactNode>;
 }
 
-export interface Comment {
-  created_by: string;
-  created_at: string;
-  comment: string;
-}
-
-export enum ExceptionListType {
-  DETECTION_ENGINE = 'detection',
-  ENDPOINT = 'endpoint',
+export interface ExceptionListItemIdentifiers {
+  id: string;
+  namespaceType: NamespaceType;
 }
 
 export interface FilterOptions {
@@ -79,23 +45,6 @@ export interface Filter {
   pagination: Partial<ExceptionsPagination>;
 }
 
-export interface SetExceptionsProps {
-  lists: ExceptionList[];
-  exceptions: ExceptionItem[];
-  pagination: Pagination;
-}
-
-export interface ApiProps {
-  id: string;
-  namespaceType: NamespaceType;
-}
-
-export interface Pagination {
-  page: number;
-  perPage: number;
-  total: number;
-}
-
 export interface ExceptionsPagination {
   pageIndex: number;
   pageSize: number;
@@ -103,23 +52,45 @@ export interface ExceptionsPagination {
   pageSizeOptions: number[];
 }
 
-// TODO: Delete once types are updated
-export interface ExceptionListItemSchema {
-  _tags: string[];
-  comments: Comment[];
-  created_at: string;
-  created_by: string;
-  description?: string;
-  entries: Array<ExceptionEntry | NestedExceptionEntry>;
-  id: string;
-  item_id: string;
-  list_id: string;
-  meta?: unknown;
-  name: string;
-  namespace_type: 'single' | 'agnostic';
-  tags: string[];
-  tie_breaker_id: string;
-  type: string;
-  updated_at: string;
-  updated_by: string;
+export interface FormattedBuilderEntryBase {
+  field: IFieldType | undefined;
+  operator: OperatorOption;
+  value: string | string[] | undefined;
 }
+
+export interface FormattedBuilderEntry extends FormattedBuilderEntryBase {
+  parent?: string;
+  nested?: FormattedBuilderEntryBase[];
+}
+
+export interface EmptyEntry {
+  field: string | undefined;
+  operator: OperatorEnum;
+  type: OperatorTypeEnum.MATCH | OperatorTypeEnum.MATCH_ANY;
+  value: string | string[] | undefined;
+}
+
+export interface EmptyListEntry {
+  field: string | undefined;
+  operator: OperatorEnum;
+  type: OperatorTypeEnum.LIST;
+  list: { id: string | undefined; type: string | undefined };
+}
+
+export type BuilderEntry = Entry | EmptyListEntry | EmptyEntry | EntryNested;
+
+export type ExceptionListItemBuilderSchema = Omit<ExceptionListItemSchema, 'entries'> & {
+  entries: BuilderEntry[];
+};
+
+export type CreateExceptionListItemBuilderSchema = Omit<
+  CreateExceptionListItemSchema,
+  'meta' | 'entries'
+> & {
+  meta: { temporaryUuid: string };
+  entries: BuilderEntry[];
+};
+
+export type ExceptionsBuilderExceptionItem =
+  | ExceptionListItemBuilderSchema
+  | CreateExceptionListItemBuilderSchema;

@@ -15,7 +15,8 @@ import { version, Version } from '../common/schemas';
 export const DefaultVersionNumber = new t.Type<Version, Version, unknown>(
   'DefaultVersionNumber',
   version.is,
-  (input): Either<t.Errors, Version> => (input == null ? t.success(1) : version.decode(input)),
+  (input, context): Either<t.Errors, Version> =>
+    input == null ? t.success(1) : version.validate(input, context),
   t.identity
 );
 

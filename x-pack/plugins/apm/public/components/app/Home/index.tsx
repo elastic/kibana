@@ -20,11 +20,14 @@ import { EuiTabLink } from '../../shared/EuiTabLink';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
 import { ServiceOverviewLink } from '../../shared/Links/apm/ServiceOverviewLink';
 import { SettingsLink } from '../../shared/Links/apm/SettingsLink';
+import { AnomalyDetectionSetupLink } from '../../shared/Links/apm/AnomalyDetectionSetupLink';
 import { TraceOverviewLink } from '../../shared/Links/apm/TraceOverviewLink';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 import { ServiceMap } from '../ServiceMap';
 import { ServiceOverview } from '../ServiceOverview';
 import { TraceOverview } from '../TraceOverview';
+import { RumOverview } from '../RumDashboard';
+import { RumOverviewLink } from '../../shared/Links/apm/RumOverviewLink';
 
 function getHomeTabs({
   serviceMapEnabled = true,
@@ -70,14 +73,27 @@ function getHomeTabs({
     });
   }
 
+  homeTabs.push({
+    link: (
+      <RumOverviewLink>
+        {i18n.translate('xpack.apm.home.rumTabLabel', {
+          defaultMessage: 'Real User Monitoring',
+        })}
+      </RumOverviewLink>
+    ),
+    render: () => <RumOverview />,
+    name: 'rum-overview',
+  });
+
   return homeTabs;
 }
+
 const SETTINGS_LINK_LABEL = i18n.translate('xpack.apm.settingsLinkLabel', {
   defaultMessage: 'Settings',
 });
 
 interface Props {
-  tab: 'traces' | 'services' | 'service-map';
+  tab: 'traces' | 'services' | 'service-map' | 'rum-overview';
 }
 
 export function Home({ tab }: Props) {
@@ -102,6 +118,9 @@ export function Home({ tab }: Props) {
                 {SETTINGS_LINK_LABEL}
               </EuiButtonEmpty>
             </SettingsLink>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <AnomalyDetectionSetupLink />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <SetupInstructionsLink />

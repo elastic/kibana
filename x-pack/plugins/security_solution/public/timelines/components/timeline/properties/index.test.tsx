@@ -6,28 +6,33 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { TimelineStatus } from '../../../../../common/types/timeline';
+
+import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 import {
   mockGlobalState,
   apolloClientObservable,
   SUB_PLUGINS_REDUCER,
   createSecuritySolutionStorageMock,
   TestProviders,
+  kibanaObservable,
 } from '../../../../common/mock';
 import { createStore, State } from '../../../../common/store';
 import { useThrottledResizeObserver } from '../../../../common/components/utils';
 import { Properties, showDescriptionThreshold, showNotesThreshold } from '.';
-import { SiemPageName } from '../../../../app/types';
 import { setInsertTimeline } from '../../../store/timeline/actions';
 export { nextTick } from '../../../../../../../test_utils';
 
 import { act } from 'react-dom/test-utils';
 
+jest.mock('../../../../common/components/link_to');
+
+const mockNavigateToApp = jest.fn().mockImplementation(() => Promise.resolve());
 jest.mock('../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../common/lib/kibana');
+  const original = jest.requireActual('../../../../common/lib/kibana');
+
   return {
-    ...originalModule,
-    useKibana: jest.fn().mockReturnValue({
+    ...original,
+    useKibana: () => ({
       services: {
         application: {
           capabilities: {
@@ -35,6 +40,7 @@ jest.mock('../../../../common/lib/kibana', () => {
               crud: true,
             },
           },
+          navigateToApp: mockNavigateToApp,
         },
       },
     }),
@@ -51,27 +57,25 @@ jest.mock('../../../../common/components/utils', () => {
 });
 
 jest.mock('react-redux', () => {
-  const originalModule = jest.requireActual('react-redux');
+  const original = jest.requireActual('react-redux');
 
   return {
-    ...originalModule,
-    useSelector: jest.fn().mockReturnValue({ savedObjectId: '1' }),
+    ...original,
+    useDispatch: () => mockDispatch,
+    useSelector: jest.fn().mockReturnValue({ savedObjectId: '1', urlState: {} }),
   };
 });
 
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
-  useDispatch: () => mockDispatch,
-  useSelector: jest.fn().mockReturnValue({ savedObjectId: '1', urlState: {} }),
-}));
-const mockHistoryPush = jest.fn();
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({
-    push: mockHistoryPush,
-  }),
-}));
+  return {
+    ...original,
+    useHistory: () => ({
+      push: jest.fn(),
+    }),
+  };
+});
 
 jest.mock('./use_create_timeline', () => ({
   useCreateTimelineButton: jest.fn().mockReturnValue({ getButton: jest.fn() }),
@@ -84,6 +88,7 @@ const defaultProps = {
   isDatepickerLocked: false,
   isFavorite: false,
   title: '',
+  timelineType: TimelineType.default,
   description: '',
   getNotesByIds: jest.fn(),
   noteIds: [],
@@ -101,11 +106,23 @@ describe('Properties', () => {
   const { storage } = createSecuritySolutionStorageMock();
   let mockedWidth = 1000;
 
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    storage
+  );
 
   beforeEach(() => {
     jest.clearAllMocks();
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+    store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      kibanaObservable,
+      storage
+    );
     (useThrottledResizeObserver as jest.Mock).mockReturnValue({ width: mockedWidth });
   });
 
@@ -128,9 +145,10 @@ describe('Properties', () => {
   });
 
   test('renders correctly draft timeline', () => {
+    const testProps = { ...defaultProps, status: TimelineStatus.draft };
     const wrapper = mount(
       <TestProviders store={store}>
-        <Properties {...{ ...defaultProps, status: TimelineStatus.draft }} />
+        <Properties {...testProps} />
       </TestProviders>
     );
 
@@ -155,9 +173,11 @@ describe('Properties', () => {
   });
 
   test('it renders a filled star icon when it is a favorite', () => {
+    const testProps = { ...defaultProps, isFavorite: true };
+
     const wrapper = mount(
       <TestProviders store={store}>
-        <Properties {...{ ...defaultProps, isFavorite: true }} />
+        <Properties {...testProps} />
       </TestProviders>
     );
 
@@ -166,10 +186,10 @@ describe('Properties', () => {
 
   test('it renders the title of the timeline', () => {
     const title = 'foozle';
-
+    const testProps = { ...defaultProps, title };
     const wrapper = mount(
       <TestProviders store={store}>
-        <Properties {...{ ...defaultProps, title }} />
+        <Properties {...testProps} />
       </TestProviders>
     );
 
@@ -192,9 +212,11 @@ describe('Properties', () => {
   });
 
   test('it renders the lock icon when isDatepickerLocked is true', () => {
+    const testProps = { ...defaultProps, isDatepickerLocked: true };
+
     const wrapper = mount(
       <TestProviders store={store}>
-        <Properties {...{ ...defaultProps, isDatepickerLocked: true }} />
+        <Properties {...testProps} />
       </TestProviders>
     );
     expect(
@@ -221,13 +243,16 @@ describe('Properties', () => {
 
   test('it renders a description on the left when the width is at least as wide as the threshold', () => {
     const description = 'strange';
+    const testProps = { ...defaultProps, description };
+
+    // mockedWidth = showDescriptionThreshold;
 
     (useThrottledResizeObserver as jest.Mock).mockReset();
     (useThrottledResizeObserver as jest.Mock).mockReturnValue({ width: showDescriptionThreshold });
 
     const wrapper = mount(
       <TestProviders store={store}>
-        <Properties {...{ ...defaultProps, description }} />
+        <Properties {...testProps} />
       </TestProviders>
     );
 
@@ -242,6 +267,9 @@ describe('Properties', () => {
 
   test('it does NOT render a description on the left when the width is less than the threshold', () => {
     const description = 'strange';
+    const testProps = { ...defaultProps, description };
+
+    // mockedWidth = showDescriptionThreshold - 1;
 
     (useThrottledResizeObserver as jest.Mock).mockReset();
     (useThrottledResizeObserver as jest.Mock).mockReturnValue({
@@ -250,7 +278,7 @@ describe('Properties', () => {
 
     const wrapper = mount(
       <TestProviders store={store}>
-        <Properties {...{ ...defaultProps, description }} />
+        <Properties {...testProps} />
       </TestProviders>
     );
 
@@ -311,10 +339,11 @@ describe('Properties', () => {
 
   test('it renders an avatar for the current user viewing the timeline when it has a title', () => {
     const title = 'port scan';
+    const testProps = { ...defaultProps, title };
 
     const wrapper = mount(
       <TestProviders store={store}>
-        <Properties {...{ ...defaultProps, title }} />
+        <Properties {...testProps} />
       </TestProviders>
     );
 
@@ -331,16 +360,22 @@ describe('Properties', () => {
     expect(wrapper.find('[data-test-subj="avatar"]').exists()).toEqual(false);
   });
 
-  test('insert timeline - new case', () => {
+  test('insert timeline - new case', async () => {
+    const testProps = { ...defaultProps, title: 'coolness' };
+
     const wrapper = mount(
       <TestProviders store={store}>
-        <Properties {...{ ...defaultProps, title: 'coolness' }} />
+        <Properties {...testProps} />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="settings-gear"]').at(0).simulate('click');
     wrapper.find('[data-test-subj="attach-timeline-case"]').first().simulate('click');
 
-    expect(mockHistoryPush).toBeCalledWith({ pathname: `/${SiemPageName.case}/create` });
+    await act(async () => {
+      await Promise.resolve({});
+    });
+
+    expect(mockNavigateToApp).toBeCalledWith('securitySolution:case', { path: '/create' });
     expect(mockDispatch).toBeCalledWith(
       setInsertTimeline({
         timelineId: defaultProps.timelineId,
@@ -351,9 +386,11 @@ describe('Properties', () => {
   });
 
   test('insert timeline - existing case', async () => {
+    const testProps = { ...defaultProps, title: 'coolness' };
+
     const wrapper = mount(
       <TestProviders store={store}>
-        <Properties {...{ ...defaultProps, title: 'coolness' }} />
+        <Properties {...testProps} />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="settings-gear"]').at(0).simulate('click');

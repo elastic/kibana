@@ -36,10 +36,12 @@ export class DomPreview extends React.Component {
 
     const currentOriginal = document.querySelector(`#${this.props.elementId}`);
     const originalChanged = currentOriginal !== this._original;
+
     if (originalChanged) {
       this._observer && this._observer.disconnect();
       this._original = currentOriginal;
-      if (currentOriginal) {
+
+      if (this._original) {
         const slowUpdate = debounce(this.update, 100);
         this._observer = new MutationObserver(slowUpdate);
         // configuration of the observer
@@ -54,6 +56,7 @@ export class DomPreview extends React.Component {
     }
 
     const thumb = this._original.cloneNode(true);
+    thumb.id += '-thumb';
 
     const originalStyle = window.getComputedStyle(this._original, null);
     const originalWidth = parseInt(originalStyle.getPropertyValue('width'), 10);

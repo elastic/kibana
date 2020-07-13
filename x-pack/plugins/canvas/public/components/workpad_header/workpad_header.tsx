@@ -6,14 +6,13 @@
 
 import React, { FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
-// @ts-ignore no @types definition
+// @ts-expect-error no @types definition
 import { Shortcuts } from 'react-shortcuts';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { ComponentStrings } from '../../../i18n';
 import { ToolTipShortcut } from '../tool_tip_shortcut/';
-// @ts-ignore untyped local
 import { RefreshControl } from './refresh_control';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { FullscreenControl } from './fullscreen_control';
 import { EditMenu } from './edit_menu';
 import { ElementMenu } from './element_menu';

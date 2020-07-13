@@ -189,6 +189,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       expect(await testSubjects.exists('deleteConnector')).to.be(false);
       expect(await testSubjects.exists('preConfiguredTitleMessage')).to.be(true);
+
+      const checkboxSelectRow = await testSubjects.find('checkboxSelectRow-my-server-log');
+      expect(await checkboxSelectRow.getAttribute('disabled')).to.be('true');
     });
 
     it('should not be able to edit a preconfigured connector', async () => {

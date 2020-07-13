@@ -22,9 +22,10 @@ import {
 import { MlStartDependencies } from '../../plugin';
 import { HttpService } from '../../application/services/http_service';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
-import { ExplorerService } from '../../application/services/explorer_service';
-import { mlResultsService } from '../../application/services/results_service';
+import { AnomalyTimelineService } from '../../application/services/anomaly_timeline_service';
+import { mlResultsServiceProvider } from '../../application/services/results_service';
 import { resolveAnomalySwimlaneUserInput } from './anomaly_swimlane_setup_flyout';
+import { mlApiServicesProvider } from '../../application/services/ml_api_service';
 
 export class AnomalySwimlaneEmbeddableFactory
   implements EmbeddableFactoryDefinition<AnomalySwimlaneEmbeddableInput> {
@@ -38,19 +39,15 @@ export class AnomalySwimlaneEmbeddableFactory
 
   public getDisplayName() {
     return i18n.translate('xpack.ml.components.jobAnomalyScoreEmbeddable.displayName', {
-      defaultMessage: 'ML Anomaly Swimlane',
+      defaultMessage: 'ML Anomaly Swim Lane',
     });
   }
 
   public async getExplicitInput(): Promise<Partial<AnomalySwimlaneEmbeddableInput>> {
-    const [{ overlays, uiSettings }, , { anomalyDetectorService }] = await this.getServices();
+    const [coreStart] = await this.getServices();
 
     try {
-      return await resolveAnomalySwimlaneUserInput({
-        anomalyDetectorService,
-        overlays,
-        uiSettings,
-      });
+      return await resolveAnomalySwimlaneUserInput(coreStart);
     } catch (e) {
       return Promise.reject();
     }
@@ -61,14 +58,13 @@ export class AnomalySwimlaneEmbeddableFactory
 
     const httpService = new HttpService(coreStart.http);
     const anomalyDetectorService = new AnomalyDetectorService(httpService);
-    const explorerService = new ExplorerService(
+    const anomalyTimelineService = new AnomalyTimelineService(
       pluginsStart.data.query.timefilter.timefilter,
       coreStart.uiSettings,
-      // TODO mlResultsService to use DI
-      mlResultsService
+      mlResultsServiceProvider(mlApiServicesProvider(httpService))
     );
 
-    return [coreStart, pluginsStart, { anomalyDetectorService, explorerService }];
+    return [coreStart, pluginsStart, { anomalyDetectorService, anomalyTimelineService }];
   }
 
   public async create(

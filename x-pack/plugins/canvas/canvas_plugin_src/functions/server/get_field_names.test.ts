@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore untyped library
+// @ts-expect-error untyped library
 import { parse } from 'tinymath';
 import { getFieldNames } from './pointseries/lib/get_field_names';
 

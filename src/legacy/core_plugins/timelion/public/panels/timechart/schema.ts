@@ -346,7 +346,7 @@ export function timechartFn(dependencies: TimelionVisualizationDependencies) {
             }
 
             if (serie._global) {
-              _.merge(options, serie._global, function (objVal, srcVal) {
+              _.mergeWith(options, serie._global, function (objVal, srcVal) {
                 // This is kind of gross, it means that you can't replace a global value with a null
                 // best you can do is an empty string. Deal with it.
                 if (objVal == null) return srcVal;

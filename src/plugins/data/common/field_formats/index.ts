@@ -40,7 +40,7 @@ export {
   TruncateFormat,
 } from './converters';
 
-export { getHighlightRequest, serializeFieldFormat } from './utils';
+export { getHighlightRequest } from './utils';
 
 export { DEFAULT_CONVERTER_COLOR } from './constants/color_default';
 export { FIELD_FORMAT_IDS } from './types';

@@ -21,7 +21,7 @@ import { listData } from './selectors';
 import { HostState } from '../types';
 import { hostListReducer } from './reducer';
 import { hostMiddlewareFactory } from './middleware';
-import { getManagementUrl } from '../../..';
+import { getHostListPath } from '../../../common/routing';
 
 describe('host list middleware', () => {
   let fakeCoreStart: jest.Mocked<CoreStart>;
@@ -60,7 +60,7 @@ describe('host list middleware', () => {
       type: 'userChangedUrl',
       payload: {
         ...history.location,
-        pathname: getManagementUrl({ name: 'endpointList', excludePrefix: true }),
+        pathname: getHostListPath({ name: 'hostList' }),
       },
     });
     await waitForAction('serverReturnedHostList');

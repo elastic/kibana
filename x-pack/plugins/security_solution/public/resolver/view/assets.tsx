@@ -12,6 +12,7 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting } from '../../common/lib/kibana';
 import { DEFAULT_DARK_MODE } from '../../../common/constants';
+import { ResolverProcessType } from '../types';
 
 type ResolverColorNames =
   | 'descriptionText'
@@ -20,7 +21,8 @@ type ResolverColorNames =
   | 'graphControlsBackground'
   | 'resolverBackground'
   | 'resolverEdge'
-  | 'resolverEdgeText';
+  | 'resolverEdgeText'
+  | 'resolverBreadcrumbBackground';
 
 type ColorMap = Record<ResolverColorNames, string>;
 interface NodeStyleConfig {
@@ -405,7 +407,23 @@ export const SymbolDefinitions = styled(SymbolDefinitionsComponent)`
   height: 0;
 `;
 
-export const useResolverTheme = (): { colorMap: ColorMap; nodeAssets: NodeStyleMap } => {
+const processTypeToCube: Record<ResolverProcessType, keyof NodeStyleMap> = {
+  processCreated: 'runningProcessCube',
+  processRan: 'runningProcessCube',
+  processTerminated: 'terminatedProcessCube',
+  unknownProcessEvent: 'runningProcessCube',
+  processCausedAlert: 'runningTriggerCube',
+  unknownEvent: 'runningProcessCube',
+};
+
+/**
+ * A hook to bring Resolver theming information into components.
+ */
+export const useResolverTheme = (): {
+  colorMap: ColorMap;
+  nodeAssets: NodeStyleMap;
+  cubeAssetsForNode: (isProcessTerimnated: boolean, isProcessOrigin: boolean) => NodeStyleConfig;
+} => {
   const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
   const theme = isDarkMode ? euiThemeAmsterdamDark : euiThemeAmsterdamLight;
 
@@ -421,6 +439,7 @@ export const useResolverTheme = (): { colorMap: ColorMap; nodeAssets: NodeStyleM
     processBackingFill: `${theme.euiColorPrimary}${getThemedOption('0F', '1F')}`, // Add opacity 0F = 6% , 1F = 12%
     resolverBackground: theme.euiColorEmptyShade,
     resolverEdge: getThemedOption(theme.euiColorLightestShade, theme.euiColorLightShade),
+    resolverBreadcrumbBackground: theme.euiColorLightestShade,
     resolverEdgeText: getThemedOption(theme.euiColorDarkShade, theme.euiColorFullShade),
     triggerBackingFill: `${theme.euiColorDanger}${getThemedOption('0F', '1F')}`,
   };
@@ -478,7 +497,17 @@ export const useResolverTheme = (): { colorMap: ColorMap; nodeAssets: NodeStyleM
     },
   };
 
-  return { colorMap, nodeAssets };
+  function cubeAssetsForNode(isProcessTerminated: boolean, isProcessOrigin: boolean) {
+    if (isProcessTerminated) {
+      return nodeAssets[processTypeToCube.processTerminated];
+    } else if (isProcessOrigin) {
+      return nodeAssets[processTypeToCube.processCausedAlert];
+    } else {
+      return nodeAssets[processTypeToCube.processRan];
+    }
+  }
+
+  return { colorMap, nodeAssets, cubeAssetsForNode };
 };
 
 export const calculateResolverFontSize = (

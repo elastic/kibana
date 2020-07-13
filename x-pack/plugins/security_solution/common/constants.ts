@@ -33,6 +33,25 @@ export const DEFAULT_INTERVAL_TYPE = 'manual';
 export const DEFAULT_INTERVAL_VALUE = 300000; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
 export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51';
+export const ENDPOINT_METADATA_INDEX = 'metrics-endpoint.metadata-*';
+
+export enum SecurityPageName {
+  detections = 'detections',
+  overview = 'overview',
+  hosts = 'hosts',
+  network = 'network',
+  timelines = 'timelines',
+  case = 'case',
+  management = 'management',
+}
+
+export const APP_OVERVIEW_PATH = `${APP_PATH}/overview`;
+export const APP_DETECTIONS_PATH = `${APP_PATH}/detections`;
+export const APP_HOSTS_PATH = `${APP_PATH}/hosts`;
+export const APP_NETWORK_PATH = `${APP_PATH}/network`;
+export const APP_TIMELINES_PATH = `${APP_PATH}/timelines`;
+export const APP_CASES_PATH = `${APP_PATH}/cases`;
+export const APP_MANAGEMENT_PATH = `${APP_PATH}/administration`;
 
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
 export const DEFAULT_INDEX_PATTERN = [
@@ -40,6 +59,7 @@ export const DEFAULT_INDEX_PATTERN = [
   'auditbeat-*',
   'endgame-*',
   'filebeat-*',
+  'logs-*',
   'packetbeat-*',
   'winlogbeat-*',
 ];
@@ -145,8 +165,7 @@ export const showAllOthersBucket: string[] = [
   'user.name',
 ];
 
-/**
- * CreateTemplateTimelineBtn
- * Remove the comment here to enable template timeline
+/*
+ * This should be set to true after https://github.com/elastic/kibana/pull/67496 is merged
  */
-export const disableTemplate = true;
+export const enableElasticFilter = false;

@@ -9,10 +9,21 @@ import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { PageView, PageViewProps } from '../../common/components/endpoint/page_view';
 import { ManagementSubTab } from '../types';
-import { getManagementUrl } from '..';
+import { SecurityPageName } from '../../app/types';
+import { useFormatUrl } from '../../common/components/link_to';
+import { getHostListPath, getPoliciesPath } from '../common/routing';
+import { useNavigateByRouterEventHandler } from '../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 
 export const ManagementPageView = memo<Omit<PageViewProps, 'tabs'>>((options) => {
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.management);
   const { tabName } = useParams<{ tabName: ManagementSubTab }>();
+
+  const goToEndpoint = useNavigateByRouterEventHandler(
+    getHostListPath({ name: 'hostList' }, search)
+  );
+
+  const goToPolicies = useNavigateByRouterEventHandler(getPoliciesPath(search));
+
   const tabs = useMemo((): PageViewProps['tabs'] | undefined => {
     if (options.viewType === 'details') {
       return undefined;
@@ -20,11 +31,12 @@ export const ManagementPageView = memo<Omit<PageViewProps, 'tabs'>>((options) =>
     return [
       {
         name: i18n.translate('xpack.securitySolution.managementTabs.endpoints', {
-          defaultMessage: 'Endpoints',
+          defaultMessage: 'Hosts',
         }),
-        id: ManagementSubTab.endpoints,
-        isSelected: tabName === ManagementSubTab.endpoints,
-        href: getManagementUrl({ name: 'endpointList' }),
+        id: ManagementSubTab.hosts,
+        isSelected: tabName === ManagementSubTab.hosts,
+        href: formatUrl(getHostListPath({ name: 'hostList' })),
+        onClick: goToEndpoint,
       },
       {
         name: i18n.translate('xpack.securitySolution.managementTabs.policies', {
@@ -32,10 +44,11 @@ export const ManagementPageView = memo<Omit<PageViewProps, 'tabs'>>((options) =>
         }),
         id: ManagementSubTab.policies,
         isSelected: tabName === ManagementSubTab.policies,
-        href: getManagementUrl({ name: 'policyList' }),
+        href: formatUrl(getPoliciesPath()),
+        onClick: goToPolicies,
       },
     ];
-  }, [options.viewType, tabName]);
+  }, [formatUrl, goToEndpoint, goToPolicies, options.viewType, tabName]);
   return <PageView {...options} tabs={tabs} />;
 });
 

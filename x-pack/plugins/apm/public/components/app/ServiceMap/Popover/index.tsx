@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPopover } from '@elastic/eui';
-import cytoscape from 'cytoscape';
 import React, {
   CSSProperties,
   MouseEvent,
@@ -15,9 +13,12 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { EuiPopover } from '@elastic/eui';
+import cytoscape from 'cytoscape';
+import { useTheme } from '../../../../hooks/useTheme';
 import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import { CytoscapeContext } from '../Cytoscape';
-import { animationOptions } from '../cytoscapeOptions';
+import { getAnimationOptions } from '../cytoscapeOptions';
 import { Contents } from './Contents';
 
 interface PopoverProps {
@@ -25,6 +26,7 @@ interface PopoverProps {
 }
 
 export function Popover({ focusedServiceName }: PopoverProps) {
+  const theme = useTheme();
   const cy = useContext(CytoscapeContext);
   const [selectedNode, setSelectedNode] = useState<
     cytoscape.NodeSingular | undefined
@@ -93,15 +95,19 @@ export function Popover({ focusedServiceName }: PopoverProps) {
       event.preventDefault();
       if (cy) {
         cy.animate({
-          ...animationOptions,
+          ...getAnimationOptions(theme),
           center: { eles: cy.getElementById(selectedNodeServiceName) },
         });
       }
     },
-    [cy, selectedNodeServiceName]
+    [cy, selectedNodeServiceName, theme]
   );
 
   const isAlreadyFocused = focusedServiceName === selectedNodeServiceName;
+
+  const onFocusClick = isAlreadyFocused
+    ? centerSelectedNode
+    : (_event: MouseEvent<HTMLAnchorElement>) => deselect();
 
   return (
     <EuiPopover
@@ -115,9 +121,7 @@ export function Popover({ focusedServiceName }: PopoverProps) {
       <Contents
         isService={isService}
         label={label}
-        onFocusClick={
-          isAlreadyFocused ? centerSelectedNode : (_event) => deselect()
-        }
+        onFocusClick={onFocusClick}
         selectedNodeData={selectedNodeData}
         selectedNodeServiceName={selectedNodeServiceName}
       />

@@ -30,15 +30,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('lnsIndexPatternFiltersToggle');
     },
 
-    /**
-     * Toggles the field existence checkbox.
-     */
-    async toggleExistenceFilter() {
-      await this.toggleIndexPatternFiltersPopover();
-      await testSubjects.click('lnsEmptyFilter');
-      await this.toggleIndexPatternFiltersPopover();
-    },
-
     async findAllFields() {
       return await testSubjects.findAll('lnsFieldListPanelField');
     },
@@ -47,10 +38,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Move the date filter to the specified time range, defaults to
      * a range that has data in our dataset.
      */
-    goToTimeRange(fromTime?: string, toTime?: string) {
+    async goToTimeRange(fromTime?: string, toTime?: string) {
+      await PageObjects.timePicker.ensureHiddenNoDataPopover();
       fromTime = fromTime || PageObjects.timePicker.defaultStartTime;
       toTime = toTime || PageObjects.timePicker.defaultEndTime;
-      return PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     },
 
     /**

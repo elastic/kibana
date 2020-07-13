@@ -15,6 +15,7 @@ import { getServiceMap } from '../lib/service_map/get_service_map';
 import { getServiceMapServiceNodeInfo } from '../lib/service_map/get_service_map_service_node_info';
 import { createRoute } from './create_route';
 import { rangeRt } from './default_api_types';
+import { APM_SERVICE_MAPS_FEATURE_NAME } from '../feature';
 
 export const serviceMapRoute = createRoute(() => ({
   path: '/api/apm/service-map',
@@ -34,12 +35,14 @@ export const serviceMapRoute = createRoute(() => ({
     if (!isValidPlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(invalidLicenseMessage);
     }
+    context.licensing.featureUsage.notifyUsage(APM_SERVICE_MAPS_FEATURE_NAME);
 
+    const logger = context.logger;
     const setup = await setupRequest(context, request);
     const {
       query: { serviceName, environment },
     } = context.params;
-    return getServiceMap({ setup, serviceName, environment });
+    return getServiceMap({ setup, serviceName, environment, logger });
   },
 }));
 

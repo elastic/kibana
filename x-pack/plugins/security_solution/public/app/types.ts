@@ -14,32 +14,11 @@ import {
   CombinedState,
 } from 'redux';
 
-import { NavTab } from '../common/components/navigation/types';
 import { State, SubPluginsInitReducer } from '../common/store';
 import { Immutable } from '../../common/endpoint/types';
 import { AppAction } from '../common/store/actions';
 import { TimelineState } from '../timelines/store/timeline/types';
-
-export enum SiemPageName {
-  overview = 'overview',
-  hosts = 'hosts',
-  network = 'network',
-  detections = 'detections',
-  timelines = 'timelines',
-  case = 'case',
-  management = 'management',
-}
-
-export type SiemNavTabKey =
-  | SiemPageName.overview
-  | SiemPageName.hosts
-  | SiemPageName.network
-  | SiemPageName.detections
-  | SiemPageName.timelines
-  | SiemPageName.case
-  | SiemPageName.management;
-
-export type SiemNavTab = Record<SiemNavTabKey, NavTab>;
+export { SecurityPageName } from '../../common/constants';
 
 export interface SecuritySubPluginStore<K extends SecuritySubPluginKeyStore, T> {
   initialState: Record<K, T | undefined>;
@@ -48,7 +27,7 @@ export interface SecuritySubPluginStore<K extends SecuritySubPluginKeyStore, T> 
 }
 
 export interface SecuritySubPlugin {
-  routes: React.ReactElement[];
+  SubPluginRoutes: React.FC;
   storageTimelines?: Pick<TimelineState, 'timelineById'>;
 }
 

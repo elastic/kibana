@@ -246,9 +246,8 @@ describe('update_rules_bulk_schema', () => {
     const decoded = updateRulesBulkSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
-    // TODO: We should change the formatter used to better print objects
     expect(formatErrors(output.errors)).toEqual([
-      'Invalid value "[object Object]" supplied to "note"',
+      'Invalid value "{"something":"some object"}" supplied to "note"',
     ]);
     expect(output.schema).toEqual({});
   });

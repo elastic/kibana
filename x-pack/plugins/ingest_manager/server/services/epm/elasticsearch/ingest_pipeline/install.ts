@@ -192,5 +192,5 @@ export const getPipelineNameForInstallation = ({
   const isPipelineEntry = pipelineName === dataset.ingest_pipeline;
   const suffix = isPipelineEntry ? '' : `-${pipelineName}`;
   // if this is the pipeline entry, don't add a suffix
-  return `${dataset.type}-${dataset.id}-${packageVersion}${suffix}`;
+  return `${dataset.type}-${dataset.name}-${packageVersion}${suffix}`;
 };

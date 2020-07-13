@@ -33,14 +33,14 @@ import {
   getAgentEventsHandler,
   postAgentCheckinHandler,
   postAgentEnrollHandler,
-  postAgentsUnenrollHandler,
   getAgentStatusForConfigHandler,
-  getInternalUserSOClient,
   putAgentsReassignHandler,
 } from './handlers';
 import { postAgentAcksHandlerBuilder } from './acks_handlers';
 import * as AgentService from '../../services/agents';
 import { postNewAgentActionHandlerBuilder } from './actions_handlers';
+import { appContextService } from '../../services';
+import { postAgentsUnenrollHandler } from './unenroll_handler';
 
 export const registerRoutes = (router: IRouter) => {
   // Get one
@@ -109,8 +109,10 @@ export const registerRoutes = (router: IRouter) => {
     },
     postAgentAcksHandlerBuilder({
       acknowledgeAgentActions: AgentService.acknowledgeAgentActions,
-      getAgentByAccessAPIKeyId: AgentService.getAgentByAccessAPIKeyId,
-      getSavedObjectsClientContract: getInternalUserSOClient,
+      authenticateAgentWithAccessToken: AgentService.authenticateAgentWithAccessToken,
+      getSavedObjectsClientContract: appContextService.getInternalUserSOClient.bind(
+        appContextService
+      ),
       saveAgentEvents: AgentService.saveAgentEvents,
     })
   );

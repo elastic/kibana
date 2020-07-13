@@ -47,7 +47,7 @@ export function updateSavedDashboard(
     'pause',
     'section',
     'value',
-  ]);
+  ]) as RefreshInterval;
   savedDashboard.refreshInterval = savedDashboard.timeRestore ? timeRestoreObj : undefined;
 
   // save only unpinned filters

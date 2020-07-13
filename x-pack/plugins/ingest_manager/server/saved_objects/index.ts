@@ -9,25 +9,24 @@ import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objec
 import {
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_CONFIG_SAVED_OBJECT_TYPE,
-  DATASOURCE_SAVED_OBJECT_TYPE,
+  PACKAGE_CONFIG_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
   AGENT_ACTION_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
-  GLOBAL_SETTINGS_SAVED_OBJET_TYPE,
+  GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../constants';
-import { migrateDatasourcesToV790 } from './migrations/datasources_v790';
-import { migrateAgentConfigToV790 } from './migrations/agent_config_v790';
+
 /*
  * Saved object types and mappings
  *
- * Please update typings in `/common/types` if mappings are updated.
+ * Please update typings in `/common/types` as well as
+ * schemas in `/server/types` if mappings are updated.
  */
-
 const savedObjectTypes: { [key: string]: SavedObjectsType } = {
-  [GLOBAL_SETTINGS_SAVED_OBJET_TYPE]: {
-    name: GLOBAL_SETTINGS_SAVED_OBJET_TYPE,
+  [GLOBAL_SETTINGS_SAVED_OBJECT_TYPE]: {
+    name: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -39,6 +38,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         package_auto_upgrade: { type: 'keyword' },
         kibana_url: { type: 'keyword' },
         kibana_ca_sha256: { type: 'keyword' },
+        has_seen_add_data_notice: { type: 'boolean', index: false },
       },
     },
   },
@@ -55,6 +55,8 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         type: { type: 'keyword' },
         active: { type: 'boolean' },
         enrolled_at: { type: 'date' },
+        unenrolled_at: { type: 'date' },
+        unenrollment_started_at: { type: 'date' },
         access_api_key_id: { type: 'keyword' },
         version: { type: 'keyword' },
         user_provided_metadata: { type: 'flattened' },
@@ -62,12 +64,13 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         config_id: { type: 'keyword' },
         last_updated: { type: 'date' },
         last_checkin: { type: 'date' },
+        last_checkin_status: { type: 'keyword' },
         config_revision: { type: 'integer' },
-        config_newest_revision: { type: 'integer' },
         default_api_key_id: { type: 'keyword' },
-        default_api_key: { type: 'keyword' },
+        default_api_key: { type: 'binary' },
         updated_at: { type: 'date' },
-        current_error_events: { type: 'text' },
+        current_error_events: { type: 'text', index: false },
+        packages: { type: 'keyword' },
       },
     },
   },
@@ -119,21 +122,17 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
     },
     mappings: {
       properties: {
-        id: { type: 'keyword' },
-        name: { type: 'text' },
-        is_default: { type: 'boolean' },
-        namespace: { type: 'keyword' },
+        name: { type: 'keyword' },
         description: { type: 'text' },
+        namespace: { type: 'keyword' },
+        is_default: { type: 'boolean' },
         status: { type: 'keyword' },
-        datasources: { type: 'keyword' },
+        package_configs: { type: 'keyword' },
         updated_at: { type: 'date' },
         updated_by: { type: 'keyword' },
         revision: { type: 'integer' },
-        monitoring_enabled: { type: 'keyword' },
+        monitoring_enabled: { type: 'keyword', index: false },
       },
-    },
-    migrations: {
-      '7.9.0': migrateAgentConfigToV790,
     },
   },
   [ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE]: {
@@ -170,15 +169,15 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         type: { type: 'keyword' },
         is_default: { type: 'boolean' },
         hosts: { type: 'keyword' },
-        ca_sha256: { type: 'keyword' },
+        ca_sha256: { type: 'keyword', index: false },
         fleet_enroll_username: { type: 'binary' },
         fleet_enroll_password: { type: 'binary' },
         config: { type: 'flattened' },
       },
     },
   },
-  [DATASOURCE_SAVED_OBJECT_TYPE]: {
-    name: DATASOURCE_SAVED_OBJECT_TYPE,
+  [PACKAGE_CONFIG_SAVED_OBJECT_TYPE]: {
+    name: PACKAGE_CONFIG_SAVED_OBJECT_TYPE,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -189,8 +188,9 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         name: { type: 'keyword' },
         description: { type: 'text' },
         namespace: { type: 'keyword' },
-        config_id: { type: 'keyword' },
         enabled: { type: 'boolean' },
+        config_id: { type: 'keyword' },
+        output_id: { type: 'keyword' },
         package: {
           properties: {
             name: { type: 'keyword' },
@@ -198,25 +198,28 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
             version: { type: 'keyword' },
           },
         },
-        output_id: { type: 'keyword' },
         inputs: {
           type: 'nested',
+          enabled: false,
           properties: {
             type: { type: 'keyword' },
             enabled: { type: 'boolean' },
-            processors: { type: 'keyword' },
-            config: { type: 'flattened' },
             vars: { type: 'flattened' },
+            config: { type: 'flattened' },
             streams: {
               type: 'nested',
               properties: {
                 id: { type: 'keyword' },
                 enabled: { type: 'boolean' },
-                dataset: { type: 'keyword' },
-                processors: { type: 'keyword' },
-                config: { type: 'flattened' },
-                agent_stream: { type: 'flattened' },
+                dataset: {
+                  properties: {
+                    name: { type: 'keyword' },
+                    type: { type: 'keyword' },
+                  },
+                },
                 vars: { type: 'flattened' },
+                config: { type: 'flattened' },
+                compiled_stream: { type: 'flattened' },
               },
             },
           },
@@ -227,9 +230,6 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         created_at: { type: 'date' },
         created_by: { type: 'keyword' },
       },
-    },
-    migrations: {
-      '7.9.0': migrateDatasourcesToV790,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {
@@ -246,7 +246,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         internal: { type: 'boolean' },
         removable: { type: 'boolean' },
         es_index_patterns: {
-          dynamic: 'false',
+          enabled: false,
           type: 'object',
         },
         installed: {
@@ -312,10 +312,14 @@ export function registerEncryptedSavedObjects(
       'config_id',
       'last_updated',
       'last_checkin',
+      'last_checkin_status',
       'config_revision',
       'config_newest_revision',
       'updated_at',
       'current_error_events',
+      'unenrolled_at',
+      'unenrollment_started_at',
+      'packages',
     ]),
   });
   encryptedSavedObjects.registerType({

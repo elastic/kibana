@@ -9,7 +9,7 @@ export function createJestConfig({ kibanaDirectory, rootDir, xPackKibanaDirector
   return {
     rootDir,
     roots: ['<rootDir>/plugins', '<rootDir>/legacy/plugins', '<rootDir>/legacy/server'],
-    moduleFileExtensions: ['js', 'json', 'ts', 'tsx', 'node'],
+    moduleFileExtensions: ['js', 'mjs', 'json', 'ts', 'tsx', 'node'],
     moduleNameMapper: {
       '@elastic/eui$': `${kibanaDirectory}/node_modules/@elastic/eui/test-env`,
       '@elastic/eui/lib/(.*)?': `${kibanaDirectory}/node_modules/@elastic/eui/test-env/$1`,
@@ -32,11 +32,11 @@ export function createJestConfig({ kibanaDirectory, rootDir, xPackKibanaDirector
       '^(!!)?file-loader!': fileMockPath,
     },
     collectCoverageFrom: [
-      'legacy/plugins/**/*.{js,jsx,ts,tsx}',
-      'legacy/server/**/*.{js,jsx,ts,tsx}',
-      'plugins/**/*.{js,jsx,ts,tsx}',
+      'legacy/plugins/**/*.{js,mjs,jsx,ts,tsx}',
+      'legacy/server/**/*.{js,mjs,jsx,ts,tsx}',
+      'plugins/**/*.{js,mjs,jsx,ts,tsx}',
       '!**/{__test__,__snapshots__,__examples__,integration_tests,tests}/**',
-      '!**/*.test.{js,ts,tsx}',
+      '!**/*.test.{js,mjs,ts,tsx}',
       '!**/flot-charts/**',
       '!**/test/**',
       '!**/build/**',
@@ -44,6 +44,7 @@ export function createJestConfig({ kibanaDirectory, rootDir, xPackKibanaDirector
       '!**/mocks/**',
       '!**/plugins/apm/e2e/**',
       '!**/plugins/siem/cypress/**',
+      '!**/plugins/**/test_helpers/**',
     ],
     coveragePathIgnorePatterns: ['.*\\.d\\.ts'],
     coverageDirectory: `${kibanaDirectory}/target/kibana-coverage/jest`,
@@ -58,7 +59,9 @@ export function createJestConfig({ kibanaDirectory, rootDir, xPackKibanaDirector
       `${kibanaDirectory}/src/dev/jest/setup/mocks.js`,
       `${kibanaDirectory}/src/dev/jest/setup/react_testing_library.js`,
     ],
-    testMatch: ['**/*.test.{js,ts,tsx}'],
+    testEnvironment: 'jest-environment-jsdom-thirteen',
+    testMatch: ['**/*.test.{js,mjs,ts,tsx}'],
+    testRunner: 'jest-circus/runner',
     transform: {
       '^.+\\.(js|tsx?)$': `${kibanaDirectory}/src/dev/jest/babel_transform.js`,
       '^.+\\.html?$': 'jest-raw-loader',

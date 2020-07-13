@@ -32,9 +32,11 @@ import 'angular-sanitize';
 import { createTileMapFn } from './tile_map_fn';
 // @ts-ignore
 import { createTileMapTypeDefinition } from './tile_map_type';
-import { getBaseMapsVis, MapsLegacyPluginSetup } from '../../maps_legacy/public';
+import { MapsLegacyPluginSetup } from '../../maps_legacy/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { setFormatService, setQueryService } from './services';
+import { setKibanaLegacy } from './services';
+import { KibanaLegacyStart } from '../../kibana_legacy/public';
 
 export interface TileMapConfigType {
   tilemap: any;
@@ -58,6 +60,7 @@ export interface TileMapPluginSetupDependencies {
 /** @internal */
 export interface TileMapPluginStartDependencies {
   data: DataPublicPluginStart;
+  kibanaLegacy: KibanaLegacyStart;
 }
 
 export interface TileMapPluginSetup {
@@ -82,7 +85,7 @@ export class TileMapPlugin implements Plugin<TileMapPluginSetup, TileMapPluginSt
     const visualizationDependencies: Readonly<TileMapVisualizationDependencies> = {
       getZoomPrecision,
       getPrecision,
-      BaseMapsVisualization: getBaseMapsVis(core, mapsLegacy.serviceSettings),
+      BaseMapsVisualization: mapsLegacy.getBaseMapsVis(),
       uiSettings: core.uiSettings,
     };
 
@@ -96,9 +99,10 @@ export class TileMapPlugin implements Plugin<TileMapPluginSetup, TileMapPluginSt
     };
   }
 
-  public start(core: CoreStart, { data }: TileMapPluginStartDependencies) {
+  public start(core: CoreStart, { data, kibanaLegacy }: TileMapPluginStartDependencies) {
     setFormatService(data.fieldFormats);
     setQueryService(data.query);
+    setKibanaLegacy(kibanaLegacy);
     return {};
   }
 }

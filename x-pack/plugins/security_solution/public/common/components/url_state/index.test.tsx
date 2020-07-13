@@ -8,7 +8,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { HookWrapper } from '../../mock';
-import { SiemPageName } from '../../../app/types';
+import { SecurityPageName } from '../../../app/types';
 import { RouteSpyState } from '../../utils/route/types';
 import { CONSTANTS } from './constants';
 import {
@@ -26,7 +26,7 @@ import { wait } from '../../lib/helpers';
 let mockProps: UrlStateContainerPropTypes;
 
 const mockRouteSpy: RouteSpyState = {
-  pageName: SiemPageName.network,
+  pageName: SecurityPageName.network,
   detailName: undefined,
   tabName: undefined,
   search: '',
@@ -186,7 +186,7 @@ describe('UrlStateContainer', () => {
             page: CONSTANTS.hostsPage,
             examplePath: '/hosts',
             namespaceLower: 'hosts',
-            pageName: SiemPageName.hosts,
+            pageName: SecurityPageName.hosts,
             detailName: undefined,
           }).relativeTimeSearch.undefinedQuery,
         });

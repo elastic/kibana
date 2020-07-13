@@ -7,12 +7,14 @@
 import moment from 'moment-timezone';
 import { useEffect, useMemo, useState } from 'react';
 
+import { EuiDataGridColumn } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
 
 import { dictionaryToArray } from '../../../common/types/common';
-import { formatHumanReadableDateTimeSeconds } from '../../../common/utils/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../shared_imports';
 import { getNestedProperty } from '../../../common/utils/object_utils';
 
 import {
@@ -76,7 +78,7 @@ export const usePivotData = (
   const api = useApi();
 
   const aggsArr = useMemo(() => dictionaryToArray(aggs), [aggs]);
-  const groupByArr = dictionaryToArray(groupBy);
+  const groupByArr = useMemo(() => dictionaryToArray(groupBy), [groupBy]);
 
   // Filters mapping properties of type `object`, which get returned for nested field parents.
   const columnKeys = Object.keys(previewMappings.properties).filter(
@@ -85,7 +87,7 @@ export const usePivotData = (
   columnKeys.sort(sortColumns(groupByArr));
 
   // EuiDataGrid State
-  const columns = columnKeys.map((id) => {
+  const columns: EuiDataGridColumn[] = columnKeys.map((id) => {
     const field = previewMappings.properties[id];
 
     // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
@@ -195,8 +197,7 @@ export const usePivotData = (
   }, [
     indexPatternTitle,
     aggsArr,
-    JSON.stringify(groupByArr),
-    JSON.stringify(query),
+    JSON.stringify([groupByArr, query]),
     /* eslint-enable react-hooks/exhaustive-deps */
   ]);
 
@@ -251,7 +252,7 @@ export const usePivotData = (
 
   return {
     ...dataGrid,
-    columns,
+    chartsButtonVisible: false,
     renderCellValue,
   };
 };

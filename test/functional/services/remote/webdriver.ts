@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { delimiter, resolve } from 'path';
+import { resolve } from 'path';
 import Fs from 'fs';
 
 import * as Rx from 'rxjs';
@@ -28,7 +28,7 @@ import { delay } from 'bluebird';
 import chromeDriver from 'chromedriver';
 // @ts-ignore types not available
 import geckoDriver from 'geckodriver';
-import { Builder, Capabilities, logging } from 'selenium-webdriver';
+import { Builder, logging } from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome';
 import firefox from 'selenium-webdriver/firefox';
 import edge from 'selenium-webdriver/edge';
@@ -47,6 +47,7 @@ import { Browsers } from './browsers';
 
 const throttleOption: string = process.env.TEST_THROTTLE_NETWORK as string;
 const headlessBrowser: string = process.env.TEST_BROWSER_HEADLESS as string;
+const browserBinaryPath: string = process.env.TEST_BROWSER_BINARY_PATH as string;
 const remoteDebug: string = process.env.TEST_REMOTE_DEBUG as string;
 const certValidation: string = process.env.NODE_TLS_REJECT_UNAUTHORIZED as string;
 const SECOND = 1000;
@@ -54,10 +55,8 @@ const MINUTE = 60 * SECOND;
 const NO_QUEUE_COMMANDS = ['getLog', 'getStatus', 'newSession', 'quit'];
 const downloadDir = resolve(REPO_ROOT, 'target/functional-tests/downloads');
 const chromiumDownloadPrefs = {
-  prefs: {
-    'download.default_directory': downloadDir,
-    'download.prompt_for_download': false,
-  },
+  'download.default_directory': downloadDir,
+  'download.prompt_for_download': false,
 };
 
 /**
@@ -73,22 +72,28 @@ Executor.prototype.execute = preventParallelCalls(
   (command: { getName: () => string }) => NO_QUEUE_COMMANDS.includes(command.getName())
 );
 
+export interface BrowserConfig {
+  logPollingMs: number;
+  acceptInsecureCerts: boolean;
+}
+
 let attemptCounter = 0;
 let edgePaths: { driverPath: string | undefined; browserPath: string | undefined };
 async function attemptToCreateCommand(
   log: ToolingLog,
   browserType: Browsers,
   lifecycle: Lifecycle,
-  logPollingMs: number
+  config: BrowserConfig
 ) {
   const attemptId = ++attemptCounter;
   log.debug('[webdriver] Creating session');
+  const remoteSessionUrl = process.env.REMOTE_SESSION_URL;
 
   const buildDriverInstance = async () => {
     switch (browserType) {
       case 'chrome': {
-        const chromeCapabilities = Capabilities.chrome();
-        const chromeOptions = [
+        const chromeOptions = new chrome.Options();
+        chromeOptions.addArguments(
           // Disables the sandbox for all process types that are normally sandboxed.
           'no-sandbox',
           // Launches URL in new browser window.
@@ -98,46 +103,65 @@ async function attemptToCreateCommand(
           // Use fake device for Media Stream to replace actual camera and microphone.
           'use-fake-device-for-media-stream',
           // Bypass the media stream infobar by selecting the default device for media streams (e.g. WebRTC). Works with --use-fake-device-for-media-stream.
-          'use-fake-ui-for-media-stream',
-        ];
+          'use-fake-ui-for-media-stream'
+        );
+
         if (process.platform === 'linux') {
           // The /dev/shm partition is too small in certain VM environments, causing
           // Chrome to fail or crash. Use this flag to work-around this issue
           // (a temporary directory will always be used to create anonymous shared memory files).
-          chromeOptions.push('disable-dev-shm-usage');
+          chromeOptions.addArguments('disable-dev-shm-usage');
         }
+
         if (headlessBrowser === '1') {
           // Use --disable-gpu to avoid an error from a missing Mesa library, as per
           // See: https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
-          chromeOptions.push('headless', 'disable-gpu');
+          chromeOptions.headless();
+          chromeOptions.addArguments('disable-gpu');
         }
+
         if (certValidation === '0') {
-          chromeOptions.push('ignore-certificate-errors');
+          chromeOptions.addArguments('ignore-certificate-errors');
         }
+
         if (remoteDebug === '1') {
           // Visit chrome://inspect in chrome to remotely view/debug
-          chromeOptions.push('headless', 'disable-gpu', 'remote-debugging-port=9222');
+          chromeOptions.headless();
+          chromeOptions.addArguments('disable-gpu', 'remote-debugging-port=9222');
         }
-        chromeCapabilities.set('goog:chromeOptions', {
-          w3c: true,
-          args: chromeOptions,
-          ...chromiumDownloadPrefs,
-        });
-        chromeCapabilities.set('unexpectedAlertBehaviour', 'accept');
-        chromeCapabilities.set('goog:loggingPrefs', { browser: 'ALL' });
 
-        const session = await new Builder()
-          .forBrowser(browserType)
-          .withCapabilities(chromeCapabilities)
-          .setChromeService(new chrome.ServiceBuilder(chromeDriver.path).enableVerboseLogging())
-          .build();
+        if (browserBinaryPath) {
+          chromeOptions.setChromeBinaryPath(browserBinaryPath);
+        }
+
+        const prefs = new logging.Preferences();
+        prefs.setLevel(logging.Type.BROWSER, logging.Level.ALL);
+        chromeOptions.setUserPreferences(chromiumDownloadPrefs);
+        chromeOptions.setLoggingPrefs(prefs);
+        chromeOptions.set('unexpectedAlertBehaviour', 'accept');
+        chromeOptions.setAcceptInsecureCerts(config.acceptInsecureCerts);
+
+        let session;
+        if (remoteSessionUrl) {
+          session = await new Builder()
+            .forBrowser(browserType)
+            .setChromeOptions(chromeOptions)
+            .usingServer(remoteSessionUrl)
+            .build();
+        } else {
+          session = await new Builder()
+            .forBrowser(browserType)
+            .setChromeOptions(chromeOptions)
+            .setChromeService(new chrome.ServiceBuilder(chromeDriver.path).enableVerboseLogging())
+            .build();
+        }
 
         return {
           session,
           consoleLog$: pollForLogEntry$(
             session,
             logging.Type.BROWSER,
-            logPollingMs,
+            config.logPollingMs,
             lifecycle.cleanup.after$
           ).pipe(
             takeUntil(lifecycle.cleanup.after$),
@@ -162,7 +186,7 @@ async function attemptToCreateCommand(
           edgeOptions.setBinaryPath(edgePaths.browserPath);
           const options = edgeOptions.get('ms:edgeOptions');
           // overriding options to include preferences
-          Object.assign(options, chromiumDownloadPrefs);
+          Object.assign(options, { prefs: chromiumDownloadPrefs });
           edgeOptions.set('ms:edgeOptions', options);
           const session = await new Builder()
             .forBrowser('MicrosoftEdge')
@@ -174,7 +198,7 @@ async function attemptToCreateCommand(
             consoleLog$: pollForLogEntry$(
               session,
               logging.Type.BROWSER,
-              logPollingMs,
+              config.logPollingMs,
               lifecycle.cleanup.after$
             ).pipe(
               takeUntil(lifecycle.cleanup.after$),
@@ -206,6 +230,7 @@ async function attemptToCreateCommand(
           'browser.helperApps.neverAsk.saveToDisk',
           'application/comma-separated-values, text/csv, text/plain'
         );
+        firefoxOptions.setAcceptInsecureCerts(config.acceptInsecureCerts);
 
         if (headlessBrowser === '1') {
           // See: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
@@ -261,32 +286,6 @@ async function attemptToCreateCommand(
         };
       }
 
-      case 'ie': {
-        // https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/ie_exports_Options.html
-        const driverPath = require.resolve('iedriver/lib/iedriver');
-        process.env.PATH = driverPath + delimiter + process.env.PATH;
-
-        const ieCapabilities = Capabilities.ie();
-        ieCapabilities.set('se:ieOptions', {
-          'ie.ensureCleanSession': true,
-          ignoreProtectedModeSettings: true,
-          ignoreZoomSetting: false, // requires us to have 100% zoom level
-          nativeEvents: true, // need this for values to stick but it requires 100% scaling and window focus
-          requireWindowFocus: true,
-          logLevel: 'TRACE',
-        });
-
-        const session = await new Builder()
-          .forBrowser(browserType)
-          .withCapabilities(ieCapabilities)
-          .build();
-
-        return {
-          session,
-          consoleLog$: Rx.EMPTY,
-        };
-      }
-
       default:
         throw new Error(`${browserType} is not supported yet`);
     }
@@ -317,7 +316,7 @@ export async function initWebDriver(
   log: ToolingLog,
   browserType: Browsers,
   lifecycle: Lifecycle,
-  logPollingMs: number
+  config: BrowserConfig
 ) {
   const logger = getLogger('webdriver.http.Executor');
   logger.setLevel(logging.Level.FINEST);
@@ -348,7 +347,7 @@ export async function initWebDriver(
       while (true) {
         const command = await Promise.race([
           delay(30 * SECOND),
-          attemptToCreateCommand(log, browserType, lifecycle, logPollingMs),
+          attemptToCreateCommand(log, browserType, lifecycle, config),
         ]);
 
         if (!command) {

@@ -14,7 +14,6 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
-import { ListsDefaultArraySchema } from '../../../../common/detection_engine/schemas/types/lists_default_array';
 import {
   FalsePositives,
   From,
@@ -62,7 +61,6 @@ import {
   ThreatOrUndefined,
   TypeOrUndefined,
   ReferencesOrUndefined,
-  ListAndOrUndefined,
   PerPageOrUndefined,
   PageOrUndefined,
   SortFieldOrUndefined,
@@ -75,11 +73,22 @@ import {
   LastSuccessMessage,
   LastFailureAt,
   LastFailureMessage,
+  Author,
+  AuthorOrUndefined,
+  LicenseOrUndefined,
+  RiskScoreMapping,
+  RiskScoreMappingOrUndefined,
+  SeverityMapping,
+  SeverityMappingOrUndefined,
+  TimestampOverrideOrUndefined,
+  BuildingBlockTypeOrUndefined,
+  RuleNameOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { AlertsClient, PartialAlert } from '../../../../../alerts/server';
 import { Alert, SanitizedAlert } from '../../../../../alerts/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { RuleTypeParams, PartialFilter } from '../types';
+import { ListArrayOrUndefined, ListArray } from '../../../../common/detection_engine/schemas/types';
 
 export interface RuleAlertType extends Alert {
   params: RuleTypeParams;
@@ -166,6 +175,8 @@ export const isRuleStatusFindTypes = (
 export interface CreateRulesOptions {
   alertsClient: AlertsClient;
   anomalyThreshold: AnomalyThresholdOrUndefined;
+  author: Author;
+  buildingBlockType: BuildingBlockTypeOrUndefined;
   description: Description;
   enabled: Enabled;
   falsePositives: FalsePositives;
@@ -182,19 +193,24 @@ export interface CreateRulesOptions {
   immutable: Immutable;
   index: IndexOrUndefined;
   interval: Interval;
+  license: LicenseOrUndefined;
   maxSignals: MaxSignals;
   riskScore: RiskScore;
+  riskScoreMapping: RiskScoreMapping;
+  ruleNameOverride: RuleNameOverrideOrUndefined;
   outputIndex: OutputIndex;
   name: Name;
   severity: Severity;
+  severityMapping: SeverityMapping;
   tags: Tags;
   threat: Threat;
+  timestampOverride: TimestampOverrideOrUndefined;
   to: To;
   type: Type;
   references: References;
   note: NoteOrUndefined;
   version: Version;
-  exceptionsList: ListsDefaultArraySchema;
+  exceptionsList: ListArray;
   actions: RuleAlertAction[];
 }
 
@@ -203,6 +219,8 @@ export interface UpdateRulesOptions {
   savedObjectsClient: SavedObjectsClientContract;
   alertsClient: AlertsClient;
   anomalyThreshold: AnomalyThresholdOrUndefined;
+  author: Author;
+  buildingBlockType: BuildingBlockTypeOrUndefined;
   description: Description;
   enabled: Enabled;
   falsePositives: FalsePositives;
@@ -218,19 +236,24 @@ export interface UpdateRulesOptions {
   ruleId: RuleIdOrUndefined;
   index: IndexOrUndefined;
   interval: Interval;
+  license: LicenseOrUndefined;
   maxSignals: MaxSignals;
   riskScore: RiskScore;
+  riskScoreMapping: RiskScoreMapping;
+  ruleNameOverride: RuleNameOverrideOrUndefined;
   outputIndex: OutputIndex;
   name: Name;
   severity: Severity;
+  severityMapping: SeverityMapping;
   tags: Tags;
   threat: Threat;
+  timestampOverride: TimestampOverrideOrUndefined;
   to: To;
   type: Type;
   references: References;
   note: NoteOrUndefined;
   version: VersionOrUndefined;
-  exceptionsList: ListsDefaultArraySchema;
+  exceptionsList: ListArray;
   actions: RuleAlertAction[];
 }
 
@@ -238,6 +261,8 @@ export interface PatchRulesOptions {
   savedObjectsClient: SavedObjectsClientContract;
   alertsClient: AlertsClient;
   anomalyThreshold: AnomalyThresholdOrUndefined;
+  author: AuthorOrUndefined;
+  buildingBlockType: BuildingBlockTypeOrUndefined;
   description: DescriptionOrUndefined;
   enabled: EnabledOrUndefined;
   falsePositives: FalsePositivesOrUndefined;
@@ -252,19 +277,24 @@ export interface PatchRulesOptions {
   filters: PartialFilter[];
   index: IndexOrUndefined;
   interval: IntervalOrUndefined;
+  license: LicenseOrUndefined;
   maxSignals: MaxSignalsOrUndefined;
   riskScore: RiskScoreOrUndefined;
+  riskScoreMapping: RiskScoreMappingOrUndefined;
+  ruleNameOverride: RuleNameOverrideOrUndefined;
   outputIndex: OutputIndexOrUndefined;
   name: NameOrUndefined;
   severity: SeverityOrUndefined;
+  severityMapping: SeverityMappingOrUndefined;
   tags: TagsOrUndefined;
   threat: ThreatOrUndefined;
+  timestampOverride: TimestampOverrideOrUndefined;
   to: ToOrUndefined;
   type: TypeOrUndefined;
   references: ReferencesOrUndefined;
   note: NoteOrUndefined;
   version: VersionOrUndefined;
-  exceptionsList: ListAndOrUndefined;
+  exceptionsList: ListArrayOrUndefined;
   actions: RuleAlertAction[] | undefined;
   rule: SanitizedAlert | null;
 }

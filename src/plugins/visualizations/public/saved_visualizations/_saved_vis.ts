@@ -62,6 +62,7 @@ export const convertFromSerializedVis = (vis: SerializedVis): ISavedVis => {
     title: vis.title,
     description: vis.description,
     visState: {
+      title: vis.title,
       type: vis.type,
       aggs: vis.data.aggs,
       params: vis.params,

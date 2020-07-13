@@ -13,19 +13,34 @@ import {
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
+  kibanaObservable,
   createSecuritySolutionStorageMock,
+  mockIndexPattern,
 } from '../../mock';
 import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { FilterManager } from '../../../../../../../src/plugins/data/public';
 import { createStore, State } from '../../store';
 
 import { Props } from './top_n';
-import { ACTIVE_TIMELINE_REDUX_ID, StatefulTopN } from '.';
+import { StatefulTopN } from '.';
 import {
   ManageGlobalTimeline,
-  timelineDefaults,
+  getTimelineDefaults,
 } from '../../../timelines/components/manage_timeline';
+import { TimelineId } from '../../../../common/types/timeline';
 
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
+  return {
+    ...original,
+    useHistory: () => ({
+      useHistory: jest.fn(),
+    }),
+  };
+});
+
+jest.mock('../link_to');
 jest.mock('../../lib/kibana');
 jest.mock('../../../timelines/store/timeline/actions');
 
@@ -81,9 +96,9 @@ const state: State = {
   timeline: {
     ...mockGlobalState.timeline,
     timelineById: {
-      [ACTIVE_TIMELINE_REDUX_ID]: {
+      [TimelineId.active]: {
         ...mockGlobalState.timeline.timelineById.test,
-        id: ACTIVE_TIMELINE_REDUX_ID,
+        id: TimelineId.active,
         dataProviders: [
           {
             id:
@@ -144,7 +159,13 @@ const state: State = {
 };
 
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+const store = createStore(
+  state,
+  SUB_PLUGINS_REDUCER,
+  apolloClientObservable,
+  kibanaObservable,
+  storage
+);
 
 describe('StatefulTopN', () => {
   // Suppress warnings about "react-beautiful-dnd"
@@ -170,6 +191,9 @@ describe('StatefulTopN', () => {
             <StatefulTopN
               browserFields={mockBrowserFields}
               field={field}
+              indexPattern={mockIndexPattern}
+              indexToAdd={null}
+              timelineId={TimelineId.hostsPageExternalAlerts}
               toggleTopN={jest.fn()}
               onFilterAdded={jest.fn()}
               value={value}
@@ -247,9 +271,8 @@ describe('StatefulTopN', () => {
     beforeEach(() => {
       filterManager = new FilterManager(mockUiSettingsForFilterManager);
       const manageTimelineForTesting = {
-        [ACTIVE_TIMELINE_REDUX_ID]: {
-          ...timelineDefaults,
-          id: ACTIVE_TIMELINE_REDUX_ID,
+        [TimelineId.active]: {
+          ...getTimelineDefaults(TimelineId.active),
           filterManager,
         },
       };
@@ -259,6 +282,9 @@ describe('StatefulTopN', () => {
             <StatefulTopN
               browserFields={mockBrowserFields}
               field={field}
+              indexPattern={mockIndexPattern}
+              indexToAdd={null}
+              timelineId={TimelineId.active}
               toggleTopN={jest.fn()}
               onFilterAdded={jest.fn()}
               value={value}
@@ -323,9 +349,8 @@ describe('StatefulTopN', () => {
     const filterManager = new FilterManager(mockUiSettingsForFilterManager);
 
     const manageTimelineForTesting = {
-      [ACTIVE_TIMELINE_REDUX_ID]: {
-        ...timelineDefaults,
-        id: ACTIVE_TIMELINE_REDUX_ID,
+      [TimelineId.active]: {
+        ...getTimelineDefaults(TimelineId.active),
         filterManager,
         documentType: 'alerts',
       },
@@ -337,6 +362,9 @@ describe('StatefulTopN', () => {
           <StatefulTopN
             browserFields={mockBrowserFields}
             field={field}
+            indexPattern={mockIndexPattern}
+            indexToAdd={null}
+            timelineId={TimelineId.detectionsPage}
             toggleTopN={jest.fn()}
             onFilterAdded={jest.fn()}
             value={value}

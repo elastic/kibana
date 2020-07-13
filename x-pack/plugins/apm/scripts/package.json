@@ -4,7 +4,10 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "@elastic/elasticsearch": "^7.6.1",
     "@octokit/rest": "^16.35.0",
-    "console-stamp": "^0.2.9"
+    "@types/console-stamp": "^0.2.32",
+    "console-stamp": "^0.2.9",
+    "hdr-histogram-js": "^1.2.0"
   }
 }

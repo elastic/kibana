@@ -7,7 +7,7 @@
 import React, { Component, KeyboardEvent } from 'react';
 
 import isEqual from 'react-fast-compare';
-// @ts-ignore no @types definition
+// @ts-expect-error no @types definition
 import { Shortcuts } from 'react-shortcuts';
 import { isTextInput } from '../../lib/is_text_input';
 

@@ -14,8 +14,8 @@ import { Either } from 'fp-ts/lib/Either';
 export const DefaultExportFileName = new t.Type<string, string, unknown>(
   'DefaultExportFileName',
   t.string.is,
-  (input): Either<t.Errors, string> =>
-    input == null ? t.success('export.ndjson') : t.string.decode(input),
+  (input, context): Either<t.Errors, string> =>
+    input == null ? t.success('export.ndjson') : t.string.validate(input, context),
   t.identity
 );
 

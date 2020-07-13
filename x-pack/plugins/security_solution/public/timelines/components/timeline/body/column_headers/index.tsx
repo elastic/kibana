@@ -18,8 +18,6 @@ import {
   DRAG_TYPE_FIELD,
   droppableTimelineColumnsPrefix,
 } from '../../../../../common/components/drag_and_drop/helpers';
-import { StatefulFieldsBrowser } from '../../../fields_browser';
-import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../../../fields_browser/helpers';
 import {
   OnColumnRemoved,
   OnColumnResized,
@@ -28,6 +26,10 @@ import {
   OnSelectAll,
   OnUpdateColumns,
 } from '../../events';
+import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
+import { StatefulFieldsBrowser } from '../../../fields_browser';
+import { StatefulRowRenderersBrowser } from '../../../row_renderers_browser';
+import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../../../fields_browser/helpers';
 import {
   EventsTh,
   EventsThContent,
@@ -168,40 +170,46 @@ export const ColumnHeadersComponent = ({
       <EventsTrHeader>
         <EventsThGroupActions
           actionsColumnWidth={actionsColumnWidth}
-          justifyContent={showSelectAllCheckbox ? 'flexStart' : 'space-between'}
           data-test-subj="actions-container"
+          isEventViewer={isEventViewer}
         >
-          <EventsTh>
-            <EventsThContent textAlign={showSelectAllCheckbox ? 'left' : 'center'}>
-              <StatefulFieldsBrowser
-                browserFields={browserFields}
-                columnHeaders={columnHeaders}
-                data-test-subj="field-browser"
-                height={FIELD_BROWSER_HEIGHT}
-                isEventViewer={isEventViewer}
-                onUpdateColumns={onUpdateColumns}
-                timelineId={timelineId}
-                toggleColumn={toggleColumn}
-                width={FIELD_BROWSER_WIDTH}
-              />
-            </EventsThContent>
-          </EventsTh>
-          {showEventsSelect && (
-            <EventsTh>
-              <EventsThContent textAlign="center">
-                <EventsSelect checkState="unchecked" timelineId={timelineId} />
-              </EventsThContent>
-            </EventsTh>
-          )}
           {showSelectAllCheckbox && (
             <EventsTh>
-              <EventsThContent textAlign="center">
+              <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
                 <EuiCheckbox
                   data-test-subj="select-all-events"
                   id={'select-all-events'}
                   checked={isSelectAllChecked}
                   onChange={handleSelectAllChange}
                 />
+              </EventsThContent>
+            </EventsTh>
+          )}
+
+          <EventsTh>
+            <StatefulFieldsBrowser
+              browserFields={browserFields}
+              columnHeaders={columnHeaders}
+              data-test-subj="field-browser"
+              height={FIELD_BROWSER_HEIGHT}
+              isEventViewer={isEventViewer}
+              onUpdateColumns={onUpdateColumns}
+              timelineId={timelineId}
+              toggleColumn={toggleColumn}
+              width={FIELD_BROWSER_WIDTH}
+            />
+          </EventsTh>
+          <EventsTh>
+            <StatefulRowRenderersBrowser
+              data-test-subj="row-renderers-browser"
+              timelineId={timelineId}
+            />
+          </EventsTh>
+
+          {showEventsSelect && (
+            <EventsTh>
+              <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+                <EventsSelect checkState="unchecked" timelineId={timelineId} />
               </EventsThContent>
             </EventsTh>
           )}

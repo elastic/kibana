@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import Boom from 'boom';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import { TypeOf } from '@kbn/config-schema';
 import { fieldsServiceProvider } from '../fields_service';
@@ -35,10 +35,10 @@ export type ValidateJobPayload = TypeOf<typeof validateJobSchema>;
  * @kbn/config-schema has checked the payload {@link validateJobSchema}.
  */
 export async function validateJob(
-  callWithRequest: APICaller,
+  callWithRequest: LegacyAPICaller,
   payload: ValidateJobPayload,
   kbnVersion = 'current',
-  callAsInternalUser?: APICaller,
+  callAsInternalUser?: LegacyAPICaller,
   isSecurityDisabled?: boolean
 ) {
   const messages = getMessages();

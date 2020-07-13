@@ -5,7 +5,7 @@
  */
 
 import React, { useCallback, useMemo, useEffect, useReducer } from 'react';
-import { EuiOverlayMask, EuiModal, EuiModalBody, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import uuid from 'uuid';
 
 import * as i18n from '../translations';
@@ -14,22 +14,21 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { Panel } from '../../../../common/components/panel';
 import { Loader } from '../../../../common/components/loader';
 import { ExceptionsViewerHeader } from './exceptions_viewer_header';
-import {
-  ExceptionListType,
-  ExceptionListItemSchema,
-  ApiProps,
-  Filter,
-  SetExceptionsProps,
-} from '../types';
-import { allExceptionItemsReducer, State } from './reducer';
+import { ExceptionListItemIdentifiers, Filter } from '../types';
+import { allExceptionItemsReducer, State, ViewerModalName } from './reducer';
 import {
   useExceptionList,
   ExceptionIdentifiers,
+  ExceptionListTypeEnum,
+  ExceptionListItemSchema,
+  UseExceptionListSuccess,
   useApi,
 } from '../../../../../public/lists_plugin_deps';
 import { ExceptionsViewerPagination } from './exceptions_pagination';
 import { ExceptionsViewerUtility } from './exceptions_utility';
 import { ExceptionsViewerItems } from './exceptions_viewer_items';
+import { EditExceptionModal } from '../edit_exception_modal';
+import { AddExceptionModal } from '../add_exception_modal';
 
 const initialState: State = {
   filterOptions: { filter: '', showEndpointList: false, showDetectionsList: false, tags: [] },
@@ -47,27 +46,23 @@ const initialState: State = {
   loadingLists: [],
   loadingItemIds: [],
   isInitLoading: true,
-  isModalOpen: false,
+  currentModal: null,
+  exceptionListTypeToEdit: null,
 };
-
-enum ModalAction {
-  CREATE = 'CREATE',
-  EDIT = 'EDIT',
-}
 
 interface ExceptionsViewerProps {
   ruleId: string;
+  ruleName: string;
   exceptionListsMeta: ExceptionIdentifiers[];
-  availableListTypes: ExceptionListType[];
+  availableListTypes: ExceptionListTypeEnum[];
   commentsAccordionId: string;
-  onAssociateList?: (listId: string) => void;
 }
 
 const ExceptionsViewerComponent = ({
   ruleId,
+  ruleName,
   exceptionListsMeta,
   availableListTypes,
-  onAssociateList,
   commentsAccordionId,
 }: ExceptionsViewerProps): JSX.Element => {
   const { services } = useKibana();
@@ -96,7 +91,9 @@ const ExceptionsViewerComponent = ({
       loadingLists,
       loadingItemIds,
       isInitLoading,
-      isModalOpen,
+      currentModal,
+      exceptionToEdit,
+      exceptionListTypeToEdit,
     },
     dispatch,
   ] = useReducer(allExceptionItemsReducer(), { ...initialState, loadingLists: exceptionListsMeta });
@@ -107,11 +104,11 @@ const ExceptionsViewerComponent = ({
       lists: newLists,
       exceptions: newExceptions,
       pagination: newPagination,
-    }: SetExceptionsProps) => {
+    }: UseExceptionListSuccess) => {
       dispatch({
         type: 'setExceptions',
         lists: newLists,
-        exceptions: (newExceptions as unknown) as ExceptionListItemSchema[],
+        exceptions: newExceptions,
         pagination: newPagination,
       });
     },
@@ -134,11 +131,11 @@ const ExceptionsViewerComponent = ({
     }),
   });
 
-  const setIsModalOpen = useCallback(
-    (isOpen: boolean): void => {
+  const setCurrentModal = useCallback(
+    (modalName: ViewerModalName): void => {
       dispatch({
         type: 'updateModalOpen',
-        isOpen,
+        modalName,
       });
     },
     [dispatch]
@@ -163,10 +160,14 @@ const ExceptionsViewerComponent = ({
   );
 
   const handleAddException = useCallback(
-    (type: ExceptionListType): void => {
-      setIsModalOpen(true);
+    (type: ExceptionListTypeEnum): void => {
+      dispatch({
+        type: 'updateExceptionListTypeToEdit',
+        exceptionListType: type,
+      });
+      setCurrentModal('addModal');
     },
-    [setIsModalOpen]
+    [setCurrentModal]
   );
 
   const handleEditException = useCallback(
@@ -178,28 +179,22 @@ const ExceptionsViewerComponent = ({
         exception,
       });
 
-      setIsModalOpen(true);
+      setCurrentModal('editModal');
     },
-    [setIsModalOpen]
+    [setCurrentModal]
   );
 
-  const onCloseExceptionModal = useCallback(
-    ({ actionType, listId }): void => {
-      setIsModalOpen(false);
+  const handleOnCancelExceptionModal = useCallback((): void => {
+    setCurrentModal(null);
+  }, [setCurrentModal]);
 
-      // TODO: This callback along with fetchList can probably get
-      // passed to the modal for it to call itself maybe
-      if (actionType === ModalAction.CREATE && listId != null && onAssociateList != null) {
-        onAssociateList(listId);
-      }
-
-      handleFetchList();
-    },
-    [setIsModalOpen, handleFetchList, onAssociateList]
-  );
+  const handleOnConfirmExceptionModal = useCallback((): void => {
+    setCurrentModal(null);
+    handleFetchList();
+  }, [setCurrentModal, handleFetchList]);
 
   const setLoadingItemIds = useCallback(
-    (items: ApiProps[]): void => {
+    (items: ExceptionListItemIdentifiers[]): void => {
       dispatch({
         type: 'updateLoadingItemIds',
         items,
@@ -209,14 +204,14 @@ const ExceptionsViewerComponent = ({
   );
 
   const handleDeleteException = useCallback(
-    ({ id, namespaceType }: ApiProps) => {
-      setLoadingItemIds([{ id, namespaceType }]);
+    ({ id: itemId, namespaceType }: ExceptionListItemIdentifiers) => {
+      setLoadingItemIds([{ id: itemId, namespaceType }]);
 
       deleteExceptionItem({
-        id,
+        id: itemId,
         namespaceType,
         onSuccess: () => {
-          setLoadingItemIds(loadingItemIds.filter((t) => t.id !== id));
+          setLoadingItemIds(loadingItemIds.filter(({ id }) => id !== itemId));
           handleFetchList();
         },
         onError: () => {
@@ -227,7 +222,7 @@ const ExceptionsViewerComponent = ({
           });
 
           dispatchToasterError();
-          setLoadingItemIds(loadingItemIds.filter((t) => t.id !== id));
+          setLoadingItemIds(loadingItemIds.filter(({ id }) => id !== itemId));
         },
       });
     },
@@ -247,7 +242,7 @@ const ExceptionsViewerComponent = ({
   // Used in utility bar info text
   const ruleSettingsUrl = useMemo((): string => {
     return services.application.getUrlForApp(
-      `security#/detections/rules/id/${encodeURI(ruleId)}/edit`
+      `security/detections/rules/id/${encodeURI(ruleId)}/edit`
     );
   }, [ruleId, services.application]);
 
@@ -257,16 +252,26 @@ const ExceptionsViewerComponent = ({
 
   return (
     <>
-      {isModalOpen && (
-        <EuiOverlayMask>
-          <EuiModal onClose={onCloseExceptionModal}>
-            <EuiModalBody>
-              <EuiCodeBlock language="json" fontSize="m" paddingSize="m" overflowHeight={300}>
-                {`Modal goes here`}
-              </EuiCodeBlock>
-            </EuiModalBody>
-          </EuiModal>
-        </EuiOverlayMask>
+      {currentModal === 'editModal' &&
+        exceptionToEdit !== null &&
+        exceptionListTypeToEdit !== null && (
+          <EditExceptionModal
+            ruleName={ruleName}
+            exceptionListType={exceptionListTypeToEdit}
+            exceptionItem={exceptionToEdit}
+            onCancel={handleOnCancelExceptionModal}
+            onConfirm={handleOnConfirmExceptionModal}
+          />
+        )}
+
+      {currentModal === 'addModal' && exceptionListTypeToEdit != null && (
+        <AddExceptionModal
+          ruleName={ruleName}
+          ruleId={ruleId}
+          exceptionListType={exceptionListTypeToEdit}
+          onCancel={handleOnCancelExceptionModal}
+          onConfirm={handleOnConfirmExceptionModal}
+        />
       )}
 
       <Panel loading={isInitLoading || loadingList}>

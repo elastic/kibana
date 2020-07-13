@@ -13,8 +13,10 @@ import { CreateSourceEditor } from './create_source_editor';
 import { KibanaTilemapSource, sourceTitle } from './kibana_tilemap_source';
 import { TileLayer } from '../../layers/tile_layer/tile_layer';
 import { getKibanaTileMap } from '../../../meta';
+import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 
 export const kibanaBasemapLayerWizardConfig: LayerWizard = {
+  categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   checkVisibility: async () => {
     const tilemap = getKibanaTileMap();
     // @ts-ignore

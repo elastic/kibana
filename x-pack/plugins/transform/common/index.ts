@@ -43,6 +43,7 @@ export interface DeleteTransformEndpointRequest {
   transformsInfo: TransformEndpointRequest[];
   deleteDestIndex?: boolean;
   deleteDestIndexPattern?: boolean;
+  forceDelete?: boolean;
 }
 
 export interface DeleteTransformStatus {

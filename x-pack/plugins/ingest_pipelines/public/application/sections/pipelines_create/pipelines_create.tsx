@@ -50,7 +50,7 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
       return;
     }
 
-    history.push(BASE_PATH + `?pipeline=${pipeline.name}`);
+    history.push(BASE_PATH + `?pipeline=${encodeURIComponent(pipeline.name)}`);
   };
 
   const onCancel = () => {

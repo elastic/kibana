@@ -31,16 +31,6 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
             .find('.euiTableCellContent')
             .text()
             .trim(),
-          sourceIndex: $tr
-            .findTestSubject('transformListColumnSourceIndex')
-            .find('.euiTableCellContent')
-            .text()
-            .trim(),
-          destinationIndex: $tr
-            .findTestSubject('transformListColumnDestinationIndex')
-            .find('.euiTableCellContent')
-            .text()
-            .trim(),
           status: $tr
             .findTestSubject('transformListColumnStatus')
             .find('.euiTableCellContent')
@@ -155,12 +145,52 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail('~transformPivotPreview');
     }
 
+    public async assertTransformExpandedRowMessages(expectedText: string) {
+      await testSubjects.click('transformListRowDetailsToggle');
+
+      // The expanded row should show the details tab content by default
+      await testSubjects.existOrFail('transformDetailsTab');
+      await testSubjects.existOrFail('~transformDetailsTabContent');
+
+      // Click on the messages tab and assert the messages
+      await testSubjects.existOrFail('transformMessagesTab');
+      await testSubjects.click('transformMessagesTab');
+      await testSubjects.existOrFail('~transformMessagesTabContent');
+      await retry.tryForTime(5000, async () => {
+        const actualText = await testSubjects.getVisibleText('~transformMessagesTabContent');
+        expect(actualText.includes(expectedText)).to.eql(
+          true,
+          `Expected transform messages text to include '${expectedText}'`
+        );
+      });
+    }
+
+    public async assertTransformRowActions(isTransformRunning = false) {
+      await testSubjects.click('euiCollapsedItemActionsButton');
+
+      await testSubjects.existOrFail('transformActionClone');
+      await testSubjects.existOrFail('transformActionDelete');
+      await testSubjects.existOrFail('transformActionEdit');
+
+      if (isTransformRunning) {
+        await testSubjects.missingOrFail('transformActionStart');
+        await testSubjects.existOrFail('transformActionStop');
+      } else {
+        await testSubjects.existOrFail('transformActionStart');
+        await testSubjects.missingOrFail('transformActionStop');
+      }
+    }
+
+    public async clickTransformRowAction(action: string) {
+      await testSubjects.click(`transformAction${action}`);
+    }
+
     public async waitForTransformsExpandedRowPreviewTabToLoad() {
       await testSubjects.existOrFail('~transformPivotPreview', { timeout: 60 * 1000 });
       await testSubjects.existOrFail('transformPivotPreview loaded', { timeout: 30 * 1000 });
     }
 
-    async assertTransformsExpandedRowPreviewColumnValues(column: number, values: string[]) {
+    public async assertTransformsExpandedRowPreviewColumnValues(column: number, values: string[]) {
       await this.waitForTransformsExpandedRowPreviewTabToLoad();
       await this.assertEuiDataGridColumnValues('transformPivotPreview', column, values);
     }

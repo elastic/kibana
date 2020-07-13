@@ -5,18 +5,19 @@
  */
 
 import {
-  PolicyData,
+  AppLocation,
   Immutable,
   MalwareFields,
+  PolicyData,
   UIPolicyConfig,
-  AppLocation,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
 import {
   GetAgentStatusResponse,
-  GetDatasourcesResponse,
-  GetOneDatasourceResponse,
-  UpdateDatasourceResponse,
+  GetOnePackageConfigResponse,
+  GetPackageConfigsResponse,
+  GetPackagesResponse,
+  UpdatePackageConfigResponse,
 } from '../../../../../ingest_manager/common';
 
 /**
@@ -25,6 +26,8 @@ import {
 export interface PolicyListState {
   /** Array of policy items  */
   policyItems: PolicyData[];
+  /** Information about the latest endpoint package */
+  endpointPackageInfo?: GetPackagesResponse['response'][0];
   /** API error if loading data failed */
   apiError?: ServerApiError;
   /** total number of policies */
@@ -166,14 +169,14 @@ export type KeysByValueCriteria<O, Criteria> = {
 /** Returns an array of the policy OSes that have a malware protection field */
 export type MalwareProtectionOSes = KeysByValueCriteria<UIPolicyConfig, { malware: MalwareFields }>;
 
-export interface GetPolicyListResponse extends GetDatasourcesResponse {
+export interface GetPolicyListResponse extends GetPackageConfigsResponse {
   items: PolicyData[];
 }
 
-export interface GetPolicyResponse extends GetOneDatasourceResponse {
+export interface GetPolicyResponse extends GetOnePackageConfigResponse {
   item: PolicyData;
 }
 
-export interface UpdatePolicyResponse extends UpdateDatasourceResponse {
+export interface UpdatePolicyResponse extends UpdatePackageConfigResponse {
   item: PolicyData;
 }

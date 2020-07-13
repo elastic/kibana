@@ -9,9 +9,10 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/e
 import styled from 'styled-components';
 
 import * as i18n from '../translations';
-import { ExceptionListItemSchema, ApiProps } from '../types';
 import { ExceptionItem } from './exception_item';
 import { AndOrBadge } from '../../and_or_badge';
+import { ExceptionListItemSchema } from '../../../../../public/lists_plugin_deps';
+import { ExceptionListItemIdentifiers } from '../types';
 
 const MyFlexItem = styled(EuiFlexItem)`
   margin: ${({ theme }) => `${theme.eui.euiSize} 0`};
@@ -34,9 +35,9 @@ interface ExceptionsViewerItemsProps {
   showEmpty: boolean;
   isInitLoading: boolean;
   exceptions: ExceptionListItemSchema[];
-  loadingItemIds: ApiProps[];
+  loadingItemIds: ExceptionListItemIdentifiers[];
   commentsAccordionId: string;
-  onDeleteException: (arg: ApiProps) => void;
+  onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditExceptionItem: (item: ExceptionListItemSchema) => void;
 }
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { assign } from 'lodash';
+import { assignIn } from 'lodash';
 import { IMetricAggConfig } from '../metric_agg_type';
 
 /**
@@ -69,7 +69,7 @@ export const create = (parentAgg: IMetricAggConfig, props: Partial<IMetricAggCon
   ResponseAggConfig.prototype = Object.create(parentAgg);
   ResponseAggConfig.prototype.constructor = ResponseAggConfig;
 
-  assign(ResponseAggConfig.prototype, props);
+  assignIn(ResponseAggConfig.prototype, props);
 
   return ResponseAggConfig;
 };

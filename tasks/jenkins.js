@@ -27,6 +27,7 @@ module.exports = function (grunt) {
     'run:checkDocApiChanges',
     'run:typeCheck',
     'run:i18nCheck',
+    'run:telemetryCheck',
     'run:checkFileCasing',
     'run:checkLockfileSymlinks',
     'run:licenses',

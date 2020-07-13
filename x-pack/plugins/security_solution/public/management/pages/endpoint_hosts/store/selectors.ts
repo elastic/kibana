@@ -15,7 +15,7 @@ import {
   HostPolicyResponseActionStatus,
 } from '../../../../../common/endpoint/types';
 import { HostState, HostIndexUIQueryParams } from '../types';
-import { MANAGEMENT_ROUTING_ENDPOINTS_PATH } from '../../../common/constants';
+import { MANAGEMENT_ROUTING_HOSTS_PATH } from '../../../common/constants';
 
 const PAGE_SIZES = Object.freeze([10, 20, 50]);
 
@@ -37,11 +37,24 @@ export const detailsLoading = (state: Immutable<HostState>): boolean => state.de
 
 export const detailsError = (state: Immutable<HostState>) => state.detailsError;
 
+export const policyItems = (state: Immutable<HostState>) => state.policyItems;
+
+export const policyItemsLoading = (state: Immutable<HostState>) => state.policyItemsLoading;
+
+export const selectedPolicyId = (state: Immutable<HostState>) => state.selectedPolicyId;
+
+export const endpointPackageInfo = (state: Immutable<HostState>) => state.endpointPackageInfo;
+
+export const endpointPackageVersion = createSelector(
+  endpointPackageInfo,
+  (info) => info?.version ?? undefined
+);
+
 /**
  * Returns the full policy response from the endpoint after a user modifies a policy.
  */
 const detailsPolicyAppliedResponse = (state: Immutable<HostState>) =>
-  state.policyResponse && state.policyResponse.endpoint.policy.applied;
+  state.policyResponse && state.policyResponse.Endpoint.policy.applied;
 
 /**
  * Returns the response configurations from the endpoint after a user modifies a policy.
@@ -101,7 +114,7 @@ export const policyResponseError = (state: Immutable<HostState>) => state.policy
 export const isOnHostPage = (state: Immutable<HostState>) => {
   return (
     matchPath(state.location?.pathname ?? '', {
-      path: MANAGEMENT_ROUTING_ENDPOINTS_PATH,
+      path: MANAGEMENT_ROUTING_HOSTS_PATH,
       exact: true,
     }) !== null
   );
@@ -179,6 +192,6 @@ export const showView: (state: HostState) => 'policy_response' | 'details' = cre
 export const policyResponseStatus: (state: Immutable<HostState>) => string = createSelector(
   (state) => state.policyResponse,
   (policyResponse) => {
-    return (policyResponse && policyResponse?.endpoint?.policy?.applied?.status) || '';
+    return (policyResponse && policyResponse?.Endpoint?.policy?.applied?.status) || '';
   }
 );

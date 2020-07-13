@@ -68,18 +68,6 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     this.server.log(text);
   }
 
-  public exposeStaticDir(urlPath: string, dir: string): void {
-    this.server.route({
-      handler: {
-        directory: {
-          path: dir,
-        },
-      },
-      method: 'GET',
-      path: urlPath,
-    });
-  }
-
   public registerRoute<
     RouteRequest extends FrameworkRequest,
     RouteResponse extends FrameworkResponse

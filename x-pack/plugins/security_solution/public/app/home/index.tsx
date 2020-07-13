@@ -5,7 +5,6 @@
  */
 
 import React, { useMemo } from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useThrottledResizeObserver } from '../../common/components/utils';
@@ -13,20 +12,12 @@ import { DragDropContextWrapper } from '../../common/components/drag_and_drop/dr
 import { Flyout } from '../../timelines/components/flyout';
 import { HeaderGlobal } from '../../common/components/header_global';
 import { HelpMenu } from '../../common/components/help_menu';
-import { LinkToPage } from '../../common/components/link_to';
-import { MlHostConditionalContainer } from '../../common/components/ml/conditional_links/ml_host_conditional_container';
-import { MlNetworkConditionalContainer } from '../../common/components/ml/conditional_links/ml_network_conditional_container';
 import { AutoSaveWarningMsg } from '../../timelines/components/timeline/auto_save_warning';
 import { UseUrlState } from '../../common/components/url_state';
-import {
-  WithSource,
-  indicesExistOrDataTemporarilyUnavailable,
-} from '../../common/containers/source';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
+import { useWithSource } from '../../common/containers/source';
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
-import { NotFoundPage } from '../404';
 import { navTabs } from './home_navigations';
-import { SiemPageName } from '../types';
+import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 
 const WrappedByAutoSizer = styled.div`
   height: 100%;
@@ -52,10 +43,10 @@ const calculateFlyoutHeight = ({
 }): number => Math.max(0, windowHeight - globalHeaderSize);
 
 interface HomePageProps {
-  subPlugins: JSX.Element[];
+  children: React.ReactNode;
 }
 
-export const HomePage: React.FC<HomePageProps> = ({ subPlugins }) => {
+export const HomePage: React.FC<HomePageProps> = ({ children }) => {
   const { ref: measureRef, height: windowHeight = 0 } = useThrottledResizeObserver();
   const flyoutHeight = useMemo(
     () =>
@@ -65,55 +56,41 @@ export const HomePage: React.FC<HomePageProps> = ({ subPlugins }) => {
       }),
     [windowHeight]
   );
+  const { signalIndexExists, signalIndexName } = useSignalIndex();
+
+  const indexToAdd = useMemo<string[] | null>(() => {
+    if (signalIndexExists && signalIndexName != null) {
+      return [signalIndexName];
+    }
+    return null;
+  }, [signalIndexExists, signalIndexName]);
 
   const [showTimeline] = useShowTimeline();
+  const { browserFields, indexPattern, indicesExist } = useWithSource('default', indexToAdd);
 
   return (
     <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" ref={measureRef}>
       <HeaderGlobal />
 
       <Main data-test-subj="pageContainer">
-        <WithSource sourceId="default">
-          {({ browserFields, indexPattern, indicesExist }) => (
-            <DragDropContextWrapper browserFields={browserFields}>
-              <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
-              {indicesExistOrDataTemporarilyUnavailable(indicesExist) && showTimeline && (
-                <>
-                  <AutoSaveWarningMsg />
-                  <Flyout
-                    flyoutHeight={flyoutHeight}
-                    timelineId="timeline-1"
-                    usersViewing={usersViewing}
-                  />
-                </>
-              )}
-
-              <Switch>
-                <Redirect exact from="/" to={`/${SiemPageName.overview}`} />
-                {subPlugins}
-                <Route path="/link-to" render={(props) => <LinkToPage {...props} />} />
-                <Route
-                  path="/ml-hosts"
-                  render={({ location, match }) => (
-                    <MlHostConditionalContainer location={location} url={match.url} />
-                  )}
-                />
-                <Route
-                  path="/ml-network"
-                  render={({ location, match }) => (
-                    <MlNetworkConditionalContainer location={location} url={match.url} />
-                  )}
-                />
-                <Route render={() => <NotFoundPage />} />
-              </Switch>
-            </DragDropContextWrapper>
+        <DragDropContextWrapper browserFields={browserFields}>
+          <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
+          {indicesExist && showTimeline && (
+            <>
+              <AutoSaveWarningMsg />
+              <Flyout
+                flyoutHeight={flyoutHeight}
+                timelineId="timeline-1"
+                usersViewing={usersViewing}
+              />
+            </>
           )}
-        </WithSource>
+
+          {children}
+        </DragDropContextWrapper>
       </Main>
 
       <HelpMenu />
-
-      <SpyRoute />
     </WrappedByAutoSizer>
   );
 };

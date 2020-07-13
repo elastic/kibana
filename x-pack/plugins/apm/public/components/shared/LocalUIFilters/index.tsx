@@ -80,6 +80,7 @@ const LocalUIFilters = ({
               iconType="cross"
               flush="left"
               onClick={clearValues}
+              data-cy="clearFilters"
             >
               {i18n.translate('xpack.apm.clearFilters', {
                 defaultMessage: 'Clear filters',

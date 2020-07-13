@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { createSelector } from 'reselect';
 import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
@@ -55,9 +56,27 @@ export const processNodePositionsAndEdgeLineSegments = composeSelectors(
   dataSelectors.processNodePositionsAndEdgeLineSegments
 );
 
+/**
+ * If we need to fetch, this is the entity ID to fetch.
+ */
+export const databaseDocumentIDToFetch = composeSelectors(
+  dataStateSelector,
+  dataSelectors.databaseDocumentIDToFetch
+);
+
+export const databaseDocumentIDToAbort = composeSelectors(
+  dataStateSelector,
+  dataSelectors.databaseDocumentIDToAbort
+);
+
 export const processAdjacencies = composeSelectors(
   dataStateSelector,
   dataSelectors.processAdjacencies
+);
+
+export const terminatedProcesses = composeSelectors(
+  dataStateSelector,
+  dataSelectors.terminatedProcesses
 );
 
 /**
@@ -66,6 +85,32 @@ export const processAdjacencies = composeSelectors(
 export const relatedEventsStats = composeSelectors(
   dataStateSelector,
   dataSelectors.relatedEventsStats
+);
+
+/**
+ * Map of related events... by entity id
+ */
+export const relatedEventsByEntityId = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventsByEntityId
+);
+
+/**
+ * Entity ids to booleans for waiting status
+ */
+export const relatedEventsReady = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventsReady
+);
+
+/**
+ * Business logic lookup functions by ECS category by entity id.
+ * Example usage:
+ * const numberOfFileEvents = infoByEntityId.get(`someEntityId`)?.getAggregateTotalForCategory(`file`);
+ */
+export const relatedEventInfoByEntityId = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventInfoByEntityId
 );
 
 /**
@@ -82,6 +127,14 @@ export const uiActiveDescendantId = composeSelectors(
 export const uiSelectedDescendantId = composeSelectors(
   uiStateSelector,
   uiSelectors.selectedDescendantId
+);
+
+/**
+ * Returns the entity_id of the "selected" tree node's process
+ */
+export const uiSelectedDescendantProcessId = composeSelectors(
+  uiStateSelector,
+  uiSelectors.selectedDescendantProcessId
 );
 
 /**
@@ -116,6 +169,24 @@ export const isLoading = composeSelectors(dataStateSelector, dataSelectors.isLoa
 export const hasError = composeSelectors(dataStateSelector, dataSelectors.hasError);
 
 /**
+ * True if the children cursor is not null
+ */
+export const hasMoreChildren = composeSelectors(dataStateSelector, dataSelectors.hasMoreChildren);
+
+/**
+ * True if the ancestor cursor is not null
+ */
+export const hasMoreAncestors = composeSelectors(dataStateSelector, dataSelectors.hasMoreAncestors);
+
+/**
+ * An array containing all the processes currently in the Resolver than can be graphed
+ */
+export const graphableProcesses = composeSelectors(
+  dataStateSelector,
+  dataSelectors.graphableProcesses
+);
+
+/**
  * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a
  * concern-specific selector. `selector` should return the concern-specific state.
  */
@@ -125,3 +196,35 @@ function composeSelectors<OuterState, InnerState, ReturnValue>(
 ): (state: OuterState) => ReturnValue {
   return (state) => secondSelector(selector(state));
 }
+
+const boundingBox = composeSelectors(cameraStateSelector, cameraSelectors.viewableBoundingBox);
+const indexedProcessNodesAndEdgeLineSegments = composeSelectors(
+  dataStateSelector,
+  dataSelectors.visibleProcessNodePositionsAndEdgeLineSegments
+);
+
+/**
+ * Total count of related events for a process.
+ */
+export const relatedEventTotalForProcess = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventTotalForProcess
+);
+
+/**
+ * Return the visible edge lines and process nodes based on the camera position at `time`.
+ * The bounding box represents what the camera can see. The camera position is a function of time because it can be
+ * animated. So in order to get the currently visible entities, we need to pass in time.
+ */
+export const visibleProcessNodePositionsAndEdgeLineSegments = createSelector(
+  indexedProcessNodesAndEdgeLineSegments,
+  boundingBox,
+  function (
+    /* eslint-disable no-shadow */
+    indexedProcessNodesAndEdgeLineSegments,
+    boundingBox
+    /* eslint-enable no-shadow */
+  ) {
+    return (time: number) => indexedProcessNodesAndEdgeLineSegments(boundingBox(time));
+  }
+);

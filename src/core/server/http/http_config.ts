@@ -23,7 +23,7 @@ import { hostname } from 'os';
 import { CspConfigType, CspConfig, ICspConfig } from '../csp';
 import { SslConfig, sslSchema } from './ssl_config';
 
-const validBasePathRegex = /(^$|^\/.*[^\/]$)/;
+const validBasePathRegex = /^\/.*[^\/]$/;
 const uuidRegexp = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const match = (regex: RegExp, errorMsg: string) => (str: string) =>

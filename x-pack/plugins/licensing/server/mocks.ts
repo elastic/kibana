@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { BehaviorSubject } from 'rxjs';
-import { LicensingPluginSetup, LicensingPluginStart } from './types';
+import {
+  LicensingPluginSetup,
+  LicensingPluginStart,
+  LicensingRequestHandlerContext,
+} from './types';
 import { licenseMock } from '../common/licensing.mock';
 import { featureUsageMock } from './services/feature_usage_service.mock';
 
@@ -43,8 +47,20 @@ const createStartMock = (): jest.Mocked<LicensingPluginStart> => {
   return mock;
 };
 
+const createRequestHandlerContextMock = (
+  ...options: Parameters<typeof licenseMock.createLicense>
+): jest.Mocked<LicensingRequestHandlerContext> => {
+  const mock: jest.Mocked<LicensingRequestHandlerContext> = {
+    license: licenseMock.createLicense(...options),
+    featureUsage: featureUsageMock.createStart(),
+  };
+
+  return mock;
+};
+
 export const licensingMock = {
   createSetup: createSetupMock,
   createStart: createStartMock,
+  createRequestHandlerContext: createRequestHandlerContextMock,
   ...licenseMock,
 };

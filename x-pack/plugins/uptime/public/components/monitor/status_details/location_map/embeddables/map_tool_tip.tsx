@@ -21,7 +21,8 @@ import { AppState } from '../../../../../state';
 import { monitorLocationsSelector } from '../../../../../state/selectors';
 import { useMonitorId } from '../../../../../hooks';
 import { MonitorLocation } from '../../../../../../common/runtime_types/monitor';
-import { RenderTooltipContentParams } from '../../../../../../../../legacy/plugins/maps/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { RenderTooltipContentParams } from '../../../../../../../maps/public/classes/tooltips/tooltip_property';
 import { formatAvailabilityValue } from '../../availability_reporting/availability_reporting';
 import { LastCheckLabel } from '../../translations';
 
@@ -63,9 +64,9 @@ export const MapToolTipComponent = ({ closeTooltip, features = [] }: MapToolTipP
       <>
         <EuiPopoverTitle>
           {layerId === 'up_points' ? (
-            <TagLabel label={locationName} color={gray} />
+            <TagLabel label={locationName} color={gray} status="up" />
           ) : (
-            <TagLabel label={locationName} color={danger} />
+            <TagLabel label={locationName} color={danger} status="down" />
           )}
         </EuiPopoverTitle>
         <EuiDescriptionList type="column" textStyle="reverse" compressed={true}>

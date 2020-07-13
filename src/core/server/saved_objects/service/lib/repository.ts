@@ -19,8 +19,8 @@
 
 import { omit } from 'lodash';
 import uuid from 'uuid';
-import { retryCallCluster } from '../../../elasticsearch/retry_call_cluster';
-import { APICaller } from '../../../elasticsearch/';
+import { retryCallCluster } from '../../../elasticsearch/legacy';
+import { LegacyAPICaller } from '../../../elasticsearch/';
 
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import { getSearchDsl } from './search_dsl';
@@ -41,6 +41,7 @@ import {
   SavedObjectsBulkUpdateResponse,
   SavedObjectsCreateOptions,
   SavedObjectsFindResponse,
+  SavedObjectsFindResult,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
   SavedObjectsBulkUpdateObject,
@@ -73,7 +74,7 @@ const isRight = (either: Either): either is Right => either.tag === 'Right';
 export interface SavedObjectsRepositoryOptions {
   index: string;
   mappings: IndexMapping;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   typeRegistry: SavedObjectTypeRegistry;
   serializer: SavedObjectsSerializer;
   migrator: KibanaMigrator;
@@ -116,7 +117,7 @@ export class SavedObjectsRepository {
   private _mappings: IndexMapping;
   private _registry: SavedObjectTypeRegistry;
   private _allowedTypes: string[];
-  private _unwrappedCallCluster: APICaller;
+  private _unwrappedCallCluster: LegacyAPICaller;
   private _serializer: SavedObjectsSerializer;
 
   /**
@@ -131,7 +132,7 @@ export class SavedObjectsRepository {
     migrator: KibanaMigrator,
     typeRegistry: SavedObjectTypeRegistry,
     indexName: string,
-    callCluster: APICaller,
+    callCluster: LegacyAPICaller,
     includedHiddenTypes: string[] = [],
     injectedConstructor: any = SavedObjectsRepository
   ): ISavedObjectsRepository {
@@ -187,7 +188,7 @@ export class SavedObjectsRepository {
     }
     this._allowedTypes = allowedTypes;
 
-    this._unwrappedCallCluster = async (...args: Parameters<APICaller>) => {
+    this._unwrappedCallCluster = async (...args: Parameters<LegacyAPICaller>) => {
       await migrator.runMigrations();
       return callCluster(...args);
     };
@@ -674,8 +675,11 @@ export class SavedObjectsRepository {
       page,
       per_page: perPage,
       total: response.hits.total,
-      saved_objects: response.hits.hits.map((hit: SavedObjectsRawDoc) =>
-        this._rawToSavedObject(hit)
+      saved_objects: response.hits.hits.map(
+        (hit: SavedObjectsRawDoc): SavedObjectsFindResult => ({
+          ...this._rawToSavedObject(hit),
+          score: (hit as any)._score,
+        })
       ),
     };
   }
@@ -1296,7 +1300,7 @@ export class SavedObjectsRepository {
     };
   }
 
-  private async _writeToCluster(...args: Parameters<APICaller>) {
+  private async _writeToCluster(...args: Parameters<LegacyAPICaller>) {
     try {
       return await this._callCluster(...args);
     } catch (err) {
@@ -1304,7 +1308,7 @@ export class SavedObjectsRepository {
     }
   }
 
-  private async _callCluster(...args: Parameters<APICaller>) {
+  private async _callCluster(...args: Parameters<LegacyAPICaller>) {
     try {
       return await this._unwrappedCallCluster(...args);
     } catch (err) {
@@ -1342,7 +1346,7 @@ export class SavedObjectsRepository {
   // method transparently to the specified namespace.
   private _rawToSavedObject<T = unknown>(raw: SavedObjectsRawDoc): SavedObject<T> {
     const savedObject = this._serializer.rawToSavedObject(raw);
-    return omit(savedObject, 'namespace');
+    return omit(savedObject, 'namespace') as SavedObject<T>;
   }
 
   /**

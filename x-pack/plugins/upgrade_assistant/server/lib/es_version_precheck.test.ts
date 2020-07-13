@@ -5,7 +5,7 @@
  */
 
 import { SemVer } from 'semver';
-import { IScopedClusterClient, kibanaResponseFactory } from 'src/core/server';
+import { ILegacyScopedClusterClient, kibanaResponseFactory } from 'src/core/server';
 import { xpackMocks } from '../../../../mocks';
 import { CURRENT_VERSION } from '../../common/version';
 import {
@@ -24,7 +24,7 @@ describe('getAllNodeVersions', () => {
           node3: { version: '6.0.0' },
         },
       }),
-    } as unknown) as IScopedClusterClient;
+    } as unknown) as ILegacyScopedClusterClient;
 
     await expect(getAllNodeVersions(adminClient)).resolves.toEqual([
       new SemVer('6.0.0'),

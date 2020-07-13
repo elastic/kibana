@@ -7,7 +7,6 @@
 import { uniq } from 'lodash';
 import moment from 'moment';
 import { CMBeat } from '../../common/domain_types';
-import { findNonExistentItems } from '../utils/find_non_existent_items';
 import {
   BeatsRemovalReturn,
   BeatsTagAssignment,
@@ -248,4 +247,13 @@ function addToResultsToResponse(key: string, response: any, assignmentResults: a
     response[key][idxInRequest].result = result;
   });
   return response;
+}
+
+export function findNonExistentItems(items: Array<{ id: string }>, requestedItems: string[]) {
+  return requestedItems.reduce((nonExistentItems: string[], requestedItem: string, idx: number) => {
+    if (items.findIndex((item) => item && item.id === requestedItem) === -1) {
+      nonExistentItems.push(requestedItems[idx]);
+    }
+    return nonExistentItems;
+  }, []);
 }

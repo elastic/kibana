@@ -4,12 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import {
+  EuiButton,
+  EuiButtonProps,
+  EuiLink,
+  EuiLinkProps,
+  EuiToolTip,
+  EuiFlexGroup,
+  EuiFlexItem,
+  PropsForAnchor,
+  PropsForButton,
+} from '@elastic/eui';
+import React, { useMemo, useCallback } from 'react';
 import { isNil } from 'lodash/fp';
 import styled from 'styled-components';
 
-import { IP_REPUTATION_LINKS_SETTING } from '../../../../common/constants';
+import { IP_REPUTATION_LINKS_SETTING, APP_ID } from '../../../../common/constants';
 import {
   DefaultFieldRendererOverflow,
   DEFAULT_MORE_MAX_HEIGHT,
@@ -20,27 +30,53 @@ import {
   getHostDetailsUrl,
   getIPDetailsUrl,
   getCreateCaseUrl,
+  useFormatUrl,
 } from '../link_to';
 import { FlowTarget, FlowTargetSourceDest } from '../../../graphql/types';
-import { useUiSetting$ } from '../../lib/kibana';
+import { useUiSetting$, useKibana } from '../../lib/kibana';
 import { isUrlInvalid } from '../../utils/validators';
 import { ExternalLinkIcon } from '../external_link_icon';
-import { navTabs } from '../../../app/home/home_navigations';
-import { useGetUrlSearch } from '../navigation/use_get_url_search';
 
 import * as i18n from './translations';
+import { SecurityPageName } from '../../../app/types';
 
 export const DEFAULT_NUMBER_OF_LINK = 5;
+
+export const LinkButton: React.FC<
+  PropsForButton<EuiButtonProps> | PropsForAnchor<EuiButtonProps>
+> = ({ children, ...props }) => <EuiButton {...props}>{children}</EuiButton>;
+
+export const LinkAnchor: React.FC<EuiLinkProps> = ({ children, ...props }) => (
+  <EuiLink {...props}>{children}</EuiLink>
+);
 
 // Internal Links
 const HostDetailsLinkComponent: React.FC<{ children?: React.ReactNode; hostName: string }> = ({
   children,
   hostName,
-}) => (
-  <EuiLink href={getHostDetailsUrl(encodeURIComponent(hostName))}>
-    {children ? children : hostName}
-  </EuiLink>
-);
+}) => {
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.hosts);
+  const { navigateToApp } = useKibana().services.application;
+  const goToHostDetails = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+        path: getHostDetailsUrl(encodeURIComponent(hostName), search),
+      });
+    },
+    [hostName, navigateToApp, search]
+  );
+
+  return (
+    <LinkAnchor
+      onClick={goToHostDetails}
+      href={formatUrl(getHostDetailsUrl(encodeURIComponent(hostName)))}
+    >
+      {children ? children : hostName}
+    </LinkAnchor>
+  );
+};
+export const HostDetailsLink = React.memo(HostDetailsLinkComponent);
 
 const whitelistUrlSchemes = ['http://', 'https://'];
 export const ExternalLink = React.memo<{
@@ -75,17 +111,32 @@ export const ExternalLink = React.memo<{
 
 ExternalLink.displayName = 'ExternalLink';
 
-export const HostDetailsLink = React.memo(HostDetailsLinkComponent);
-
 const IPDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
   ip: string;
   flowTarget?: FlowTarget | FlowTargetSourceDest;
-}> = ({ children, ip, flowTarget = FlowTarget.source }) => (
-  <EuiLink href={`${getIPDetailsUrl(encodeURIComponent(encodeIpv6(ip)), flowTarget)}`}>
-    {children ? children : ip}
-  </EuiLink>
-);
+}> = ({ children, ip, flowTarget = FlowTarget.source }) => {
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.network);
+  const { navigateToApp } = useKibana().services.application;
+  const goToNetworkDetails = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      navigateToApp(`${APP_ID}:${SecurityPageName.network}`, {
+        path: getIPDetailsUrl(encodeURIComponent(encodeIpv6(ip)), flowTarget, search),
+      });
+    },
+    [flowTarget, ip, navigateToApp, search]
+  );
+
+  return (
+    <LinkAnchor
+      onClick={goToNetworkDetails}
+      href={formatUrl(getIPDetailsUrl(encodeURIComponent(encodeIpv6(ip))))}
+    >
+      {children ? children : ip}
+    </LinkAnchor>
+  );
+};
 
 export const IPDetailsLink = React.memo(IPDetailsLinkComponent);
 
@@ -94,24 +145,49 @@ const CaseDetailsLinkComponent: React.FC<{
   detailName: string;
   title?: string;
 }> = ({ children, detailName, title }) => {
-  const search = useGetUrlSearch(navTabs.case);
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
+  const { navigateToApp } = useKibana().services.application;
+  const goToCaseDetails = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+        path: getCaseDetailsUrl({ id: detailName, search }),
+      });
+    },
+    [detailName, navigateToApp, search]
+  );
 
   return (
-    <EuiLink
-      href={getCaseDetailsUrl({ id: detailName, search })}
+    <LinkAnchor
+      onClick={goToCaseDetails}
+      href={formatUrl(getCaseDetailsUrl({ id: detailName }))}
       data-test-subj="case-details-link"
       aria-label={i18n.CASE_DETAILS_LINK_ARIA(title ?? detailName)}
     >
       {children ? children : detailName}
-    </EuiLink>
+    </LinkAnchor>
   );
 };
 export const CaseDetailsLink = React.memo(CaseDetailsLinkComponent);
 CaseDetailsLink.displayName = 'CaseDetailsLink';
 
 export const CreateCaseLink = React.memo<{ children: React.ReactNode }>(({ children }) => {
-  const search = useGetUrlSearch(navTabs.case);
-  return <EuiLink href={getCreateCaseUrl(search)}>{children}</EuiLink>;
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
+  const { navigateToApp } = useKibana().services.application;
+  const goToCreateCase = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+        path: getCreateCaseUrl(search),
+      });
+    },
+    [navigateToApp, search]
+  );
+  return (
+    <LinkAnchor onClick={goToCreateCase} href={formatUrl(getCreateCaseUrl())}>
+      {children}
+    </LinkAnchor>
+  );
 });
 
 CreateCaseLink.displayName = 'CreateCaseLink';

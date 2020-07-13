@@ -7,11 +7,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonIcon } from '@elastic/eui';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { Popover, PopoverChildrenProps } from '../popover';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { ArgAdd } from '../arg_add';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { Arg } from '../../expression_types/arg';
 
 import { ComponentStrings } from '../../../i18n';

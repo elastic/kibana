@@ -14,13 +14,17 @@ export {
 } from '../../../../src/plugins/es_ui_shared/public';
 
 export {
+  fetchChartsData,
   getErrorMessage,
   extractErrorMessage,
+  formatHumanReadableDateTimeSeconds,
   getDataGridSchemaFromKibanaFieldType,
   getFieldsFromKibanaIndexPattern,
   multiColumnSortFactory,
+  showDataGridColumnChartErrorMessageToast,
   useDataGrid,
   useRenderCellValue,
+  ChartData,
   DataGrid,
   EsSorting,
   RenderCellValue,

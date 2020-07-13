@@ -12,9 +12,10 @@ import { Either } from 'fp-ts/lib/Either';
  *   - If null or undefined, then a default of the string "now" will be used
  */
 export const DefaultToString = new t.Type<string, string, unknown>(
-  'DefaultFromString',
+  'DefaultToString',
   t.string.is,
-  (input): Either<t.Errors, string> => (input == null ? t.success('now') : t.string.decode(input)),
+  (input, context): Either<t.Errors, string> =>
+    input == null ? t.success('now') : t.string.validate(input, context),
   t.identity
 );
 

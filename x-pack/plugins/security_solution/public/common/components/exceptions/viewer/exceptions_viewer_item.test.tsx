@@ -9,7 +9,7 @@ import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
-import { getExceptionItemMock } from '../mocks';
+import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { ExceptionsViewerItems } from './exceptions_viewer_items';
 
 describe('ExceptionsViewerItems', () => {
@@ -38,7 +38,7 @@ describe('ExceptionsViewerItems', () => {
         <ExceptionsViewerItems
           showEmpty={false}
           isInitLoading={false}
-          exceptions={[getExceptionItemMock()]}
+          exceptions={[getExceptionListItemSchemaMock()]}
           loadingItemIds={[]}
           commentsAccordionId="comments-accordion-id"
           onDeleteException={jest.fn()}
@@ -71,8 +71,8 @@ describe('ExceptionsViewerItems', () => {
   });
 
   it('it does not render or badge for first exception displayed', () => {
-    const exception1 = getExceptionItemMock();
-    const exception2 = getExceptionItemMock();
+    const exception1 = getExceptionListItemSchemaMock();
+    const exception2 = getExceptionListItemSchemaMock();
     exception2.id = 'newId';
 
     const wrapper = mount(
@@ -95,8 +95,8 @@ describe('ExceptionsViewerItems', () => {
   });
 
   it('it does render or badge with exception displayed', () => {
-    const exception1 = getExceptionItemMock();
-    const exception2 = getExceptionItemMock();
+    const exception1 = getExceptionListItemSchemaMock();
+    const exception2 = getExceptionListItemSchemaMock();
     exception2.id = 'newId';
 
     const wrapper = mount(
@@ -128,7 +128,7 @@ describe('ExceptionsViewerItems', () => {
         <ExceptionsViewerItems
           showEmpty={false}
           isInitLoading={false}
-          exceptions={[getExceptionItemMock()]}
+          exceptions={[getExceptionListItemSchemaMock()]}
           loadingItemIds={[]}
           commentsAccordionId="comments-accordion-id"
           onDeleteException={mockOnDeleteException}
@@ -140,7 +140,7 @@ describe('ExceptionsViewerItems', () => {
     wrapper.find('[data-test-subj="exceptionsViewerDeleteBtn"] button').at(0).simulate('click');
 
     expect(mockOnDeleteException).toHaveBeenCalledWith({
-      id: 'uuid_here',
+      id: '1',
       namespaceType: 'single',
     });
   });

@@ -4,8 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useEffect, useRef } from 'react';
-import { EuiBadge, EuiComboBox, EuiFormRow, EuiRange, EuiSpacer, EuiText } from '@elastic/eui';
+import React, { FC, Fragment, useEffect, useRef, useState } from 'react';
+import {
+  EuiBadge,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiFormRow,
+  EuiRange,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 
@@ -13,29 +21,27 @@ import { newJobCapsService } from '../../../../../services/new_job_capabilities_
 import { useMlContext } from '../../../../../contexts/ml';
 
 import {
-  DfAnalyticsExplainResponse,
-  FieldSelectionItem,
   ANALYSIS_CONFIG_TYPE,
   TRAINING_PERCENT_MIN,
   TRAINING_PERCENT_MAX,
+  FieldSelectionItem,
 } from '../../../../common/analytics';
 import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { Messages } from '../shared';
 import {
   DEFAULT_MODEL_MEMORY_LIMIT,
-  getJobConfigFromFormState,
   State,
 } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { shouldAddAsDepVarOption } from './form_options_validation';
-import { ml } from '../../../../../services/ml_api_service';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import { ANALYTICS_STEPS } from '../../page';
 import { ContinueButton } from '../continue_button';
 import { JobType } from './job_type';
 import { SupportedFieldsMessage } from './supported_fields_message';
-import { MemoizedAnalysisFieldsTable } from './analysis_fields_table';
+import { AnalysisFieldsTable } from './analysis_fields_table';
 import { DataGrid } from '../../../../../components/data_grid';
+import { fetchExplainData } from '../shared';
 import { useIndexData } from '../../hooks';
 import { ExplorationQueryBar } from '../../../analytics_exploration/components/exploration_query_bar';
 import { useSavedSearch } from './use_saved_search';
@@ -43,7 +49,8 @@ import { useSavedSearch } from './use_saved_search';
 const requiredFieldsErrorText = i18n.translate(
   'xpack.ml.dataframe.analytics.createWizard.requiredFieldsErrorMessage',
   {
-    defaultMessage: 'At least one field must be included in the analysis.',
+    defaultMessage:
+      'At least one field must be included in the analysis in addition to the dependent variable.',
   }
 );
 
@@ -56,22 +63,29 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   const { currentSavedSearch, currentIndexPattern } = mlContext;
   const { savedSearchQuery, savedSearchQueryStr } = useSavedSearch();
 
+  const [loadingFieldOptions, setLoadingFieldOptions] = useState<boolean>(false);
+  const [fieldOptionsFetchFail, setFieldOptionsFetchFail] = useState<boolean>(false);
+  const [loadingDepVarOptions, setLoadingDepVarOptions] = useState<boolean>(false);
+  const [dependentVariableFetchFail, setDependentVariableFetchFail] = useState<boolean>(false);
+  const [dependentVariableOptions, setDependentVariableOptions] = useState<
+    EuiComboBoxOptionOption[]
+  >([]);
+  const [includesTableItems, setIncludesTableItems] = useState<FieldSelectionItem[]>([]);
+  const [maxDistinctValuesError, setMaxDistinctValuesError] = useState<string | undefined>();
+  const [unsupportedFieldsError, setUnsupportedFieldsError] = useState<string | undefined>();
+  const [minimumFieldsRequiredMessage, setMinimumFieldsRequiredMessage] = useState<
+    undefined | string
+  >();
+
   const { setEstimatedModelMemoryLimit, setFormState } = actions;
   const { estimatedModelMemoryLimit, form, isJobCreated, requestMessages } = state;
   const firstUpdate = useRef<boolean>(true);
   const {
     dependentVariable,
-    dependentVariableFetchFail,
-    dependentVariableOptions,
-    excludes,
-    excludesTableItems,
-    fieldOptionsFetchFail,
+    includes,
     jobConfigQuery,
     jobConfigQueryString,
     jobType,
-    loadingDepVarOptions,
-    loadingFieldOptions,
-    maxDistinctValuesError,
     modelMemoryLimit,
     previousJobType,
     requiredFieldsError,
@@ -87,7 +101,8 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
 
   const indexData = useIndexData(
     currentIndexPattern,
-    savedSearchQuery !== undefined ? savedSearchQuery : jobConfigQuery
+    savedSearchQuery !== undefined ? savedSearchQuery : jobConfigQuery,
+    toastNotifications
   );
 
   const indexPreviewProps = {
@@ -105,33 +120,25 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     dependentVariableEmpty ||
     jobType === undefined ||
     maxDistinctValuesError !== undefined ||
-    requiredFieldsError !== undefined;
+    minimumFieldsRequiredMessage !== undefined ||
+    requiredFieldsError !== undefined ||
+    unsupportedFieldsError !== undefined;
 
   const loadDepVarOptions = async (formState: State['form']) => {
-    setFormState({
-      loadingDepVarOptions: true,
-      maxDistinctValuesError: undefined,
-    });
+    setLoadingDepVarOptions(true);
+    setMaxDistinctValuesError(undefined);
+
     try {
       if (currentIndexPattern !== undefined) {
-        const formStateUpdate: {
-          loadingDepVarOptions: boolean;
-          dependentVariableFetchFail: boolean;
-          dependentVariableOptions: State['form']['dependentVariableOptions'];
-          dependentVariable?: State['form']['dependentVariable'];
-        } = {
-          loadingDepVarOptions: false,
-          dependentVariableFetchFail: false,
-          dependentVariableOptions: [] as State['form']['dependentVariableOptions'],
-        };
-
+        const depVarOptions = [];
+        let depVarUpdate = dependentVariable;
         // Get fields and filter for supported types for job type
         const { fields } = newJobCapsService;
 
         let resetDependentVariable = true;
         for (const field of fields) {
           if (shouldAddAsDepVarOption(field, jobType)) {
-            formStateUpdate.dependentVariableOptions.push({
+            depVarOptions.push({
               label: field.id,
             });
 
@@ -142,13 +149,16 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
         }
 
         if (resetDependentVariable) {
-          formStateUpdate.dependentVariable = '';
+          depVarUpdate = '';
         }
-
-        setFormState(formStateUpdate);
+        setDependentVariableOptions(depVarOptions);
+        setLoadingDepVarOptions(false);
+        setDependentVariableFetchFail(false);
+        setFormState({ dependentVariable: depVarUpdate });
       }
     } catch (e) {
-      setFormState({ loadingDepVarOptions: false, dependentVariableFetchFail: true });
+      setLoadingDepVarOptions(false);
+      setDependentVariableFetchFail(true);
     }
   };
 
@@ -164,72 +174,54 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     // Reset if jobType changes (jobType requires dependent_variable to be set -
     // which won't be the case if switching from outlier detection)
     if (jobTypeChanged) {
-      setFormState({
-        loadingFieldOptions: true,
-      });
+      setLoadingFieldOptions(true);
     }
 
-    try {
-      const jobConfig = getJobConfigFromFormState(form);
-      delete jobConfig.dest;
-      delete jobConfig.model_memory_limit;
-      const resp: DfAnalyticsExplainResponse = await ml.dataFrameAnalytics.explainDataFrameAnalytics(
-        jobConfig
-      );
-      const expectedMemoryWithoutDisk = resp.memory_estimation?.expected_memory_without_disk;
+    const { success, expectedMemory, fieldSelection, errorMessage } = await fetchExplainData(form);
 
+    if (success) {
       if (shouldUpdateEstimatedMml) {
-        setEstimatedModelMemoryLimit(expectedMemoryWithoutDisk);
+        setEstimatedModelMemoryLimit(expectedMemory);
       }
 
-      const fieldSelection: FieldSelectionItem[] | undefined = resp.field_selection;
+      const hasRequiredFields = fieldSelection.some(
+        (field) => field.is_included === true && field.is_required === false
+      );
 
-      let hasRequiredFields = false;
-      if (fieldSelection) {
-        for (let i = 0; i < fieldSelection.length; i++) {
-          const field = fieldSelection[i];
-          if (field.is_included === true && field.is_required === false) {
-            hasRequiredFields = true;
-            break;
-          }
-        }
-      }
-
-      // If job type has changed load analysis field options again
       if (jobTypeChanged) {
+        setLoadingFieldOptions(false);
+        setFieldOptionsFetchFail(false);
+        setMaxDistinctValuesError(undefined);
+        setUnsupportedFieldsError(undefined);
+        setIncludesTableItems(fieldSelection ? fieldSelection : []);
         setFormState({
-          ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemoryWithoutDisk } : {}),
-          excludesTableItems: fieldSelection ? fieldSelection : [],
-          loadingFieldOptions: false,
-          fieldOptionsFetchFail: false,
-          maxDistinctValuesError: undefined,
+          ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemory } : {}),
           requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
         });
       } else {
         setFormState({
-          ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemoryWithoutDisk } : {}),
+          ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemory } : {}),
           requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
         });
       }
-    } catch (e) {
+    } else {
       let maxDistinctValuesErrorMessage;
-
+      let unsupportedFieldsErrorMessage;
       if (
         jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
-        e.body &&
-        e.body.message !== undefined &&
-        e.body.message.includes('status_exception') &&
-        (e.body.message.includes('must have at most') ||
-          e.body.message.includes('must have at least'))
+        errorMessage.includes('status_exception') &&
+        (errorMessage.includes('must have at most') || errorMessage.includes('must have at least'))
       ) {
-        maxDistinctValuesErrorMessage = e.body.message;
+        maxDistinctValuesErrorMessage = errorMessage;
+      }
+
+      if (errorMessage.includes('status_exception') && errorMessage.includes('unsupported type')) {
+        unsupportedFieldsErrorMessage = errorMessage;
       }
 
       if (
-        e.body &&
-        e.body.message !== undefined &&
-        e.body.message.includes('status_exception') &&
-        e.body.message.includes('Unable to estimate memory usage as no documents')
+        errorMessage.includes('status_exception') &&
+        errorMessage.includes('Unable to estimate memory usage as no documents')
       ) {
         toastNotifications.addWarning(
           i18n.translate('xpack.ml.dataframe.analytics.create.allDocsMissingFieldsErrorMessage', {
@@ -240,15 +232,18 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
           })
         );
       }
+
       const fallbackModelMemoryLimit =
         jobType !== undefined
           ? DEFAULT_MODEL_MEMORY_LIMIT[jobType]
           : DEFAULT_MODEL_MEMORY_LIMIT.outlier_detection;
+
       setEstimatedModelMemoryLimit(fallbackModelMemoryLimit);
+      setLoadingFieldOptions(false);
+      setFieldOptionsFetchFail(true);
+      setMaxDistinctValuesError(maxDistinctValuesErrorMessage);
+      setUnsupportedFieldsError(unsupportedFieldsErrorMessage);
       setFormState({
-        fieldOptionsFetchFail: true,
-        maxDistinctValuesError: maxDistinctValuesErrorMessage,
-        loadingFieldOptions: false,
         ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: fallbackModelMemoryLimit } : {}),
       });
     }
@@ -284,7 +279,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     return () => {
       debouncedGetExplainData.cancel();
     };
-  }, [jobType, dependentVariable, trainingPercent, JSON.stringify(excludes), jobConfigQueryString]);
+  }, [jobType, dependentVariable, trainingPercent, JSON.stringify(includes), jobConfigQueryString]);
 
   return (
     <Fragment>
@@ -410,20 +405,21 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       <EuiFormRow
         fullWidth
         isInvalid={requiredFieldsError !== undefined}
-        error={
-          requiredFieldsError !== undefined && [
-            i18n.translate('xpack.ml.dataframe.analytics.create.requiredFieldsError', {
-              defaultMessage: 'Invalid. {message}',
-              values: { message: requiredFieldsError },
-            }),
-          ]
-        }
+        error={i18n.translate('xpack.ml.dataframe.analytics.create.requiredFieldsError', {
+          defaultMessage: 'Invalid. {message}',
+          values: { message: requiredFieldsError },
+        })}
       >
         <Fragment />
       </EuiFormRow>
-      <MemoizedAnalysisFieldsTable
-        excludes={excludes}
-        tableItems={excludesTableItems}
+      <AnalysisFieldsTable
+        dependentVariable={dependentVariable}
+        includes={includes}
+        minimumFieldsRequiredMessage={minimumFieldsRequiredMessage}
+        setMinimumFieldsRequiredMessage={setMinimumFieldsRequiredMessage}
+        tableItems={includesTableItems}
+        unsupportedFieldsError={unsupportedFieldsError}
+        setUnsupportedFieldsError={setUnsupportedFieldsError}
         loadingItems={loadingFieldOptions}
         setFormState={setFormState}
       />

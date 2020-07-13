@@ -73,7 +73,7 @@ export class AsciidocFormat extends Format {
         for (const pr of prsInArea) {
           const fixes = pr.fixes.length ? `[Fixes ${pr.fixes.join(', ')}] ` : '';
           const strippedTitle = pr.title.replace(/^\s*\[[^\]]+\]\s*/, '');
-          yield `* ${fixes}${strippedTitle} {pull}${pr.number}[#${pr.number}]\n`;
+          yield `* ${fixes}${strippedTitle} {kibana-pull}${pr.number}[#${pr.number}]\n`;
           if (pr.note) {
             yield `  - ${pr.note}\n`;
           }

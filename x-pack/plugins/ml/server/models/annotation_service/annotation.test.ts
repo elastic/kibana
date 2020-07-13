@@ -6,7 +6,7 @@
 
 import getAnnotationsRequestMock from './__mocks__/get_annotations_request.json';
 import getAnnotationsResponseMock from './__mocks__/get_annotations_response.json';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import { ANNOTATION_TYPE } from '../../../common/constants/annotations';
 import { ML_ANNOTATIONS_INDEX_ALIAS_WRITE } from '../../../common/constants/index_patterns';
@@ -31,7 +31,7 @@ describe('annotation_service', () => {
         case 'search':
           return Promise.resolve(getAnnotationsResponseMock);
       }
-    }) as unknown) as APICaller;
+    }) as unknown) as LegacyAPICaller;
   });
 
   describe('deleteAnnotation()', () => {
@@ -86,7 +86,7 @@ describe('annotation_service', () => {
 
       const callWithRequestSpyError = (jest.fn(() => {
         return Promise.resolve(mockEsError);
-      }) as unknown) as APICaller;
+      }) as unknown) as LegacyAPICaller;
 
       const { getAnnotations } = annotationServiceProvider(callWithRequestSpyError);
 

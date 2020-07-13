@@ -6,13 +6,11 @@
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isLeft } from 'fp-ts/lib/Either';
 import { BeatEvent, RuntimeBeatEvent } from '../../common/domain_types';
-import { BeatEventsAdapter } from './adapters/events/adapter_types';
 import { FrameworkUser } from './adapters/framework/adapter_types';
 import { CMBeatsDomain } from './beats';
 
 export class BeatEventsLib {
-  // @ts-ignore
-  constructor(private readonly adapter: BeatEventsAdapter, private readonly beats: CMBeatsDomain) {}
+  constructor(private readonly beats: CMBeatsDomain) {}
 
   public log = async (
     user: FrameworkUser,

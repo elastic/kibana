@@ -3,12 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  Datasource,
-  DatasourcePackage,
-  DatasourceInput,
-  DatasourceInputStream,
-} from './datasource';
+import { PackageConfig, PackageConfigPackage } from './package_config';
 import { Output } from './output';
 
 export enum AgentConfigStatus {
@@ -18,7 +13,7 @@ export enum AgentConfigStatus {
 
 export interface NewAgentConfig {
   name: string;
-  namespace?: string;
+  namespace: string;
   description?: string;
   is_default?: boolean;
   monitoring_enabled?: Array<'logs' | 'metrics'>;
@@ -27,7 +22,7 @@ export interface NewAgentConfig {
 export interface AgentConfig extends NewAgentConfig {
   id: string;
   status: AgentConfigStatus;
-  datasources: string[] | Datasource[];
+  package_configs: string[] | PackageConfig[];
   updated_at: string;
   updated_by: string;
   revision: number;
@@ -35,22 +30,28 @@ export interface AgentConfig extends NewAgentConfig {
 
 export type AgentConfigSOAttributes = Omit<AgentConfig, 'id'>;
 
-export type FullAgentConfigDatasource = Pick<
-  Datasource,
-  'id' | 'name' | 'namespace' | 'enabled'
-> & {
-  package?: Pick<DatasourcePackage, 'name' | 'version'>;
+export interface FullAgentConfigInputStream {
+  id: string;
+  dataset: {
+    name: string;
+    type: string;
+  };
+  [key: string]: any;
+}
+
+export interface FullAgentConfigInput {
+  id: string;
+  name: string;
+  type: string;
+  dataset: { namespace: string };
   use_output: string;
-  inputs: Array<
-    Omit<DatasourceInput, 'streams'> & {
-      streams: Array<
-        Omit<DatasourceInputStream, 'config'> & {
-          [key: string]: any;
-        }
-      >;
-    }
-  >;
-};
+  meta?: {
+    package?: Pick<PackageConfigPackage, 'name' | 'version'>;
+    [key: string]: unknown;
+  };
+  streams: FullAgentConfigInputStream[];
+  [key: string]: any;
+}
 
 export interface FullAgentConfig {
   id: string;
@@ -59,9 +60,9 @@ export interface FullAgentConfig {
       [key: string]: any;
     };
   };
-  datasources: FullAgentConfigDatasource[];
+  inputs: FullAgentConfigInput[];
   revision?: number;
-  settings?: {
+  agent?: {
     monitoring: {
       use_output?: string;
       enabled: boolean;

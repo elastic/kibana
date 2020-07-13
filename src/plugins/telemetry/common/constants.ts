@@ -57,11 +57,6 @@ export const PATH_TO_ADVANCED_SETTINGS = 'management/kibana/settings';
 export const PRIVACY_STATEMENT_URL = `https://www.elastic.co/legal/privacy-statement`;
 
 /**
- * The type name used to publish telemetry plugin stats.
- */
-export const TELEMETRY_STATS_TYPE = 'telemetry';
-
-/**
  * The endpoint version when hitting the remote telemetry service
  */
 export const ENDPOINT_VERSION = 'v2';

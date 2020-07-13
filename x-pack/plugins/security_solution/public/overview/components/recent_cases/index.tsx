@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiHorizontalRule, EuiLink, EuiText } from '@elastic/eui';
-import React, { useEffect, useMemo, useRef } from 'react';
+import { EuiHorizontalRule, EuiText } from '@elastic/eui';
+import React, { useEffect, useMemo, useRef, useCallback } from 'react';
 
 import { FilterOptions, QueryParams } from '../../../cases/containers/types';
 import { DEFAULT_QUERY_PARAMS, useGetCases } from '../../../cases/containers/use_get_cases';
-import { getCaseUrl } from '../../../common/components/link_to/redirect_to_case';
-import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
-import { navTabs } from '../../../app/home/home_navigations';
 import { LoadingPlaceholders } from '../loading_placeholders';
 import { NoCases } from './no_cases';
 import { RecentCases } from './recent_cases';
 import * as i18n from './translations';
+import { useKibana } from '../../../common/lib/kibana';
+import { APP_ID } from '../../../../common/constants';
+import { SecurityPageName } from '../../../app/types';
+import { useFormatUrl } from '../../../common/components/link_to';
+import { LinkAnchor } from '../../../common/components/links';
 
 const usePrevious = (value: FilterOptions) => {
   const ref = useRef();
@@ -34,16 +36,31 @@ const queryParams: QueryParams = {
 
 const StatefulRecentCasesComponent = React.memo(
   ({ filterOptions }: { filterOptions: FilterOptions }) => {
+    const { formatUrl } = useFormatUrl(SecurityPageName.case);
+    const { navigateToApp } = useKibana().services.application;
     const previousFilterOptions = usePrevious(filterOptions);
     const { data, loading, setFilters } = useGetCases(queryParams);
     const isLoadingCases = useMemo(
       () => loading.indexOf('cases') > -1 || loading.indexOf('caseUpdate') > -1,
       [loading]
     );
-    const search = useGetUrlSearch(navTabs.case);
+
+    const goToCases = useCallback(
+      (ev) => {
+        ev.preventDefault();
+        navigateToApp(`${APP_ID}:${SecurityPageName.case}`);
+      },
+      [navigateToApp]
+    );
+
     const allCasesLink = useMemo(
-      () => <EuiLink href={getCaseUrl(search)}>{i18n.VIEW_ALL_CASES}</EuiLink>,
-      [search]
+      () => (
+        <LinkAnchor onClick={goToCases} href={formatUrl('')}>
+          {' '}
+          {i18n.VIEW_ALL_CASES}
+        </LinkAnchor>
+      ),
+      [goToCases, formatUrl]
     );
 
     useEffect(() => {

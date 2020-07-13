@@ -12,10 +12,11 @@ const CONFIG_KEYS_ORDER = [
   'revision',
   'type',
   'outputs',
-  'settings',
-  'datasources',
+  'agent',
+  'inputs',
   'enabled',
-  'package',
+  'use_output',
+  'meta',
   'input',
 ];
 

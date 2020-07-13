@@ -15,7 +15,7 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { useTheme } from '../../../../../hooks/useTheme';
 import { FETCH_STATUS } from '../../../../../hooks/useFetcher';
 import { ITableColumn, ManagedTable } from '../../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../../shared/LoadingStatePrompt';
@@ -32,15 +32,14 @@ import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 
 type Config = AgentConfigurationListAPIResponse[0];
 
-export function AgentConfigurationList({
-  status,
-  data,
-  refetch,
-}: {
+interface Props {
   status: FETCH_STATUS;
   data: Config[];
   refetch: () => void;
-}) {
+}
+
+export const AgentConfigurationList = ({ status, data, refetch }: Props) => {
+  const theme = useTheme();
   const [configToBeDeleted, setConfigToBeDeleted] = useState<Config | null>(
     null
   );
@@ -128,7 +127,9 @@ export function AgentConfigurationList({
                 )
           }
         >
-          <EuiHealth color={isApplied ? 'success' : theme.euiColorLightShade} />
+          <EuiHealth
+            color={isApplied ? 'success' : theme.eui.euiColorLightShade}
+          />
         </EuiToolTip>
       ),
     },
@@ -218,4 +219,4 @@ export function AgentConfigurationList({
       />
     </>
   );
-}
+};

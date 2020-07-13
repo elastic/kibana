@@ -15,7 +15,10 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      * Navigates to the Endpoint Policy List
      */
     async navigateToPolicyList() {
-      await pageObjects.common.navigateToApp('securitySolution', { hash: '/management/policy' });
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
+        'securitySolutionManagement',
+        '/policy'
+      );
       await pageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -51,9 +54,10 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      * @param policyId
      */
     async navigateToPolicyDetails(policyId: string) {
-      await pageObjects.common.navigateToApp('securitySolution', {
-        hash: `/management/policy/${policyId}`,
-      });
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
+        'securitySolutionManagement',
+        `/policy/${policyId}`
+      );
       await pageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -63,6 +67,14 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
     async findSaveButton() {
       await this.ensureIsOnDetailsPage();
       return await testSubjects.find('policyDetailsSaveButton');
+    },
+
+    /**
+     * Finds and returns the Policy Details Page Cancel Button
+     */
+    async findCancelButton() {
+      await this.ensureIsOnDetailsPage();
+      return await testSubjects.find('policyDetailsCancelButton');
     },
 
     /**
@@ -94,12 +106,20 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
     },
 
     /**
-     * Used when looking a the Ingest create/edit datasource pages. Finds the endpoint
+     * Used when looking a the Ingest create/edit package config pages. Finds the endpoint
      * custom configuaration component
      * @param onEditPage
      */
-    async findDatasourceEndpointCustomConfiguration(onEditPage: boolean = false) {
-      return await testSubjects.find(`endpointDatasourceConfig_${onEditPage ? 'edit' : 'create'}`);
+    async findPackageConfigEndpointCustomConfiguration(onEditPage: boolean = false) {
+      return await testSubjects.find(`endpointPackageConfig_${onEditPage ? 'edit' : 'create'}`);
+    },
+
+    /**
+     * Finds and returns the onboarding button displayed in empty List pages
+     */
+    async findOnboardingStartButton() {
+      await testSubjects.waitForEnabled('onboardingStartButton');
+      return await testSubjects.find('onboardingStartButton');
     },
   };
 }

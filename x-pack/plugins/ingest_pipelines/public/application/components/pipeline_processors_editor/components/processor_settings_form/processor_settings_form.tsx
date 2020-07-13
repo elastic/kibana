@@ -9,41 +9,50 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FunctionComponent, memo, useEffect } from 'react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiHorizontalRule,
   EuiFlyout,
   EuiFlyoutHeader,
-  EuiTitle,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
 
-import { Form, useForm, FormDataProvider } from '../../../../../shared_imports';
-import { usePipelineProcessorsContext } from '../../context';
+import { Form, FormDataProvider, FormHook } from '../../../../../shared_imports';
 import { ProcessorInternal } from '../../types';
 
 import { DocumentationButton } from './documentation_button';
-import { ProcessorSettingsFromOnSubmitArg } from './processor_settings_form.container';
 import { getProcessorFormDescriptor } from './map_processor_type_to_form';
 import { CommonProcessorFields, ProcessorTypeField } from './processors/common_fields';
 import { Custom } from './processors/custom';
 
-export type OnSubmitHandler = (processor: ProcessorSettingsFromOnSubmitArg) => void;
-
 export interface Props {
   isOnFailure: boolean;
   processor?: ProcessorInternal;
-  form: ReturnType<typeof useForm>['form'];
+  form: FormHook;
   onClose: () => void;
   onOpen: () => void;
+  esDocsBasePath: string;
 }
 
-export const ProcessorSettingsForm: FunctionComponent<Props> = memo(
-  ({ processor, form, isOnFailure, onClose, onOpen }) => {
-    const {
-      links: { esDocsBasePath },
-    } = usePipelineProcessorsContext();
+const updateButtonLabel = i18n.translate(
+  'xpack.ingestPipelines.settingsFormOnFailureFlyout.updateButtonLabel',
+  { defaultMessage: 'Update' }
+);
+const addButtonLabel = i18n.translate(
+  'xpack.ingestPipelines.settingsFormOnFailureFlyout.addButtonLabel',
+  { defaultMessage: 'Add' }
+);
 
+const cancelButtonLabel = i18n.translate(
+  'xpack.ingestPipelines.settingsFormOnFailureFlyout.cancelButtonLabel',
+  { defaultMessage: 'Cancel' }
+);
+
+export const ProcessorSettingsForm: FunctionComponent<Props> = memo(
+  ({ processor, form, isOnFailure, onClose, onOpen, esDocsBasePath }) => {
     const flyoutTitleContent = isOnFailure ? (
       <FormattedMessage
         id="xpack.ingestPipelines.settingsFormOnFailureFlyout.title"
@@ -64,8 +73,8 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = memo(
     );
 
     return (
-      <Form form={form}>
-        <EuiFlyout onClose={onClose}>
+      <Form data-test-subj="processorSettingsForm" form={form}>
+        <EuiFlyout size="m" maxWidth={720} onClose={onClose}>
           <EuiFlyoutHeader>
             <EuiFlexGroup gutterSize="xs">
               <EuiFlexItem>
@@ -103,33 +112,19 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = memo(
             <FormDataProvider pathsToWatch="type">
               {(arg: any) => {
                 const { type } = arg;
-                let formContent: React.ReactNode | undefined;
 
                 if (type?.length) {
                   const formDescriptor = getProcessorFormDescriptor(type as any);
 
                   if (formDescriptor?.FieldsComponent) {
-                    formContent = (
+                    return (
                       <>
                         <formDescriptor.FieldsComponent />
                         <CommonProcessorFields />
                       </>
                     );
-                  } else {
-                    formContent = <Custom defaultOptions={processor?.options} />;
                   }
-
-                  return (
-                    <>
-                      {formContent}
-                      <EuiButton onClick={form.submit}>
-                        {i18n.translate(
-                          'xpack.ingestPipelines.pipelineEditor.settingsForm.submitButtonLabel',
-                          { defaultMessage: 'Submit' }
-                        )}
-                      </EuiButton>
-                    </>
-                  );
+                  return <Custom defaultOptions={processor?.options} />;
                 }
 
                 // If the user has not yet defined a type, we do not show any settings fields
@@ -137,6 +132,24 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = memo(
               }}
             </FormDataProvider>
           </EuiFlyoutBody>
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={onClose}>{cancelButtonLabel}</EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  data-test-subj="submitButton"
+                  onClick={() => {
+                    form.submit();
+                  }}
+                >
+                  {processor ? updateButtonLabel : addButtonLabel}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
         </EuiFlyout>
       </Form>
     );

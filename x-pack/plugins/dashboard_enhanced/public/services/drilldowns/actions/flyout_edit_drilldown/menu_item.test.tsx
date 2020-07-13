@@ -10,7 +10,6 @@ import { MenuItem } from './menu_item';
 import { createStateContainer } from '../../../../../../../../src/plugins/kibana_utils/public';
 import { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from '../../../../../../ui_actions_enhanced/public';
 import { EnhancedEmbeddable } from '../../../../../../embeddable_enhanced/public';
-import '@testing-library/jest-dom';
 
 afterEach(cleanup);
 

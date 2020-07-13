@@ -7,19 +7,17 @@
 import { IRouter } from '../../../../../../../src/core/server';
 
 import { TIMELINE_URL } from '../../../../common/constants';
-import { TimelineType } from '../../../../common/types/timeline';
 
 import { SetupPlugins } from '../../../plugin';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 import { ConfigType } from '../../..';
 
 import { transformError, buildSiemResponse } from '../../detection_engine/routes/utils';
-import { FrameworkRequest } from '../../framework';
 
 import { updateTimelineSchema } from './schemas/update_timelines_schema';
-import { buildFrameworkRequest } from './utils/common';
-import { createTimelines, getTimeline, getTemplateTimeline } from './utils/create_timelines';
-import { checkIsFailureCases } from './utils/update_timelines';
+import { buildFrameworkRequest, TimelineStatusActions } from './utils/common';
+import { createTimelines } from './utils/create_timelines';
+import { CompareTimelinesStatus } from './utils/compare_timelines_status';
 
 export const updateTimelinesRoute = (
   router: IRouter,
@@ -43,39 +41,54 @@ export const updateTimelinesRoute = (
       try {
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
         const { timelineId, timeline, version } = request.body;
-        const { templateTimelineId, templateTimelineVersion, timelineType } = timeline;
-        const isHandlingTemplateTimeline = timelineType === TimelineType.template;
-        const existTimeline =
-          timelineId != null ? await getTimeline(frameworkRequest, timelineId) : null;
+        const {
+          templateTimelineId,
+          templateTimelineVersion,
+          timelineType,
+          title,
+          status,
+        } = timeline;
 
-        const existTemplateTimeline =
-          templateTimelineId != null
-            ? await getTemplateTimeline(frameworkRequest, templateTimelineId)
-            : null;
-
-        const errorObj = checkIsFailureCases(
-          isHandlingTemplateTimeline,
-          version,
-          templateTimelineVersion ?? null,
-          existTimeline,
-          existTemplateTimeline
-        );
-        if (errorObj != null) {
-          return siemResponse.error(errorObj);
-        }
-        const updatedTimeline = await createTimelines(
-          (frameworkRequest as unknown) as FrameworkRequest,
-          timeline,
-          timelineId,
-          version
-        );
-        return response.ok({
-          body: {
-            data: {
-              persistTimeline: updatedTimeline,
-            },
+        const compareTimelinesStatus = new CompareTimelinesStatus({
+          status,
+          title,
+          timelineType,
+          timelineInput: {
+            id: timelineId,
+            version,
           },
+          templateTimelineInput: {
+            id: templateTimelineId,
+            version: templateTimelineVersion,
+          },
+          frameworkRequest,
         });
+
+        await compareTimelinesStatus.init();
+        if (compareTimelinesStatus.isUpdatable) {
+          const updatedTimeline = await createTimelines({
+            frameworkRequest,
+            timeline,
+            timelineSavedObjectId: timelineId,
+            timelineVersion: version,
+          });
+
+          return response.ok({
+            body: {
+              data: {
+                persistTimeline: updatedTimeline,
+              },
+            },
+          });
+        } else {
+          const error = compareTimelinesStatus.checkIsFailureCases(TimelineStatusActions.update);
+          return siemResponse.error(
+            error || {
+              statusCode: 405,
+              body: 'update timeline error',
+            }
+          );
+        }
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({

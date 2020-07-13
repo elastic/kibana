@@ -17,8 +17,8 @@ import { mockIndexPattern, TestProviders } from '../../../common/mock';
 
 import { AlertsByCategory } from '.';
 
+jest.mock('../../../common/components/link_to');
 jest.mock('../../../common/lib/kibana');
-
 jest.mock('../../../common/containers/matrix_histogram', () => {
   return {
     useQuery: jest.fn(),
@@ -62,7 +62,7 @@ describe('Alerts by category', () => {
 
     test('it renders the expected title', () => {
       expect(wrapper.find('[data-test-subj="header-section-title"]').text()).toEqual(
-        'External alert count'
+        'External alert trend'
       );
     });
 

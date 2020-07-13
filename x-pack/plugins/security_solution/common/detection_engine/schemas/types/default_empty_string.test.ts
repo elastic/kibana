@@ -24,7 +24,9 @@ describe('default_empty_string', () => {
     const decoded = DefaultEmptyString.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "5" supplied to "DefaultEmptyString"',
+    ]);
     expect(message.schema).toEqual({});
   });
 

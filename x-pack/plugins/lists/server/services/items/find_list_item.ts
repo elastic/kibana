@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import {
   Filter,
@@ -19,14 +19,14 @@ import {
 import { getList } from '../lists';
 import {
   encodeCursor,
-  getQueryFilter,
+  getQueryFilterWithListId,
   getSearchAfterWithTieBreaker,
   getSortWithTieBreaker,
   scrollToStartPage,
   transformElasticToListItem,
 } from '../utils';
 
-interface FindListItemOptions {
+export interface FindListItemOptions {
   listId: ListId;
   filter: Filter;
   currentIndexPosition: number;
@@ -35,7 +35,7 @@ interface FindListItemOptions {
   page: Page;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   listIndex: string;
   listItemIndex: string;
 }
@@ -53,11 +53,11 @@ export const findListItem = async ({
   listItemIndex,
   sortOrder,
 }: FindListItemOptions): Promise<FoundListItemSchema | null> => {
-  const query = getQueryFilter({ filter });
   const list = await getList({ callCluster, id: listId, listIndex });
   if (list == null) {
     return null;
   } else {
+    const query = getQueryFilterWithListId({ filter, listId });
     const sortField =
       sortFieldWithPossibleValue === 'value' ? list.type : sortFieldWithPossibleValue;
     const scroll = await scrollToStartPage({

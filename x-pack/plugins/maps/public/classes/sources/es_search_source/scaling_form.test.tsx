@@ -25,6 +25,7 @@ const defaultProps = {
   scalingType: SCALING_TYPES.LIMIT,
   supportsClustering: true,
   termFields: [],
+  topHitsSplitField: null,
   topHitsSize: 1,
 };
 

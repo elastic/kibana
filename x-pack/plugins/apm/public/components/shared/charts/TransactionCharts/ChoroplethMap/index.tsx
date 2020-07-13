@@ -13,8 +13,9 @@ import React, {
 } from 'react';
 import { Map, NavigationControl, Popup } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { shade, tint } from 'polished';
+import { EuiTheme } from '../../../../../../../observability/public';
+import { useTheme } from '../../../../../hooks/useTheme';
 import { ChoroplethToolTip } from './ChoroplethToolTip';
 
 interface ChoroplethItem {
@@ -47,8 +48,8 @@ const MAPBOX_STYLE =
 const GEOJSON_SOURCE =
   'https://vector.maps.elastic.co/files/world_countries_v1.geo.json?elastic_tile_service_tos=agree&my_app_name=ems-landing&my_app_version=7.2.0';
 
-export function getProgressionColor(scale: number) {
-  const baseColor = euiLightVars.euiColorPrimary;
+export function getProgressionColor(scale: number, theme: EuiTheme) {
+  const baseColor = theme.eui.euiColorPrimary;
   const adjustedScale = 0.75 * scale + 0.05; // prevents pure black & white as min/max colors.
   if (adjustedScale < 0.5) {
     return tint(adjustedScale * 2, baseColor);
@@ -66,8 +67,8 @@ const getMax = (items: ChoroplethItem[]) =>
   Math.max(...items.map((item) => item.value));
 
 export const ChoroplethMap: React.FC<Props> = (props) => {
+  const theme = useTheme();
   const { items } = props;
-
   const containerRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<Map | null>(null);
   const popupRef = useRef<Popup | null>(null);
@@ -215,7 +216,7 @@ export const ChoroplethMap: React.FC<Props> = (props) => {
 
     const stops = items.map(({ key, value }) => [
       key,
-      getProgressionColor(getValueScale(value)),
+      getProgressionColor(getValueScale(value), theme),
     ]);
 
     const fillColor: mapboxgl.FillPaint['fill-color'] = {
@@ -238,7 +239,7 @@ export const ChoroplethMap: React.FC<Props> = (props) => {
       },
       symbolLayer ? symbolLayer.id : undefined
     );
-  }, [map, items, getValueScale]);
+  }, [map, items, theme, getValueScale]);
 
   // side effect to only render the Popup when hovering a region with a matching item
   useEffect(() => {

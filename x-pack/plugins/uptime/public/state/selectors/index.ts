@@ -36,7 +36,7 @@ export const snapshotDataSelector = ({ snapshot }: AppState) => snapshot;
 
 const mlCapabilitiesSelector = (state: AppState) => state.ml.mlCapabilities.data;
 
-export const hasMLFeatureAvailable = createSelector(
+export const hasMLFeatureSelector = createSelector(
   mlCapabilitiesSelector,
   (mlCapabilities) =>
     mlCapabilities?.isPlatinumOrTrialLicense && mlCapabilities?.mlFeatureEnabledInSpace

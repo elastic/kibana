@@ -6,7 +6,7 @@
 import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { AlertsClient, CreateOptions } from './alerts_client';
-import { savedObjectsClientMock, loggingServiceMock } from '../../../../src/core/server/mocks';
+import { savedObjectsClientMock, loggingSystemMock } from '../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
 import { TaskStatus } from '../../task_manager/server';
@@ -29,7 +29,7 @@ const alertsClientParams = {
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   invalidateAPIKey: jest.fn(),
-  logger: loggingServiceMock.create().get(),
+  logger: loggingSystemMock.create().get(),
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
 };
@@ -1667,6 +1667,7 @@ describe('find()', () => {
               },
             ],
           },
+          score: 1,
           references: [
             {
               name: 'action_0',
