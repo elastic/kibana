@@ -30,7 +30,7 @@ import {
 } from '../types';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
-const whitelistUrlSchemes = ['http://', 'https://'];
+const allowedUrlSchemes = ['http://', 'https://'];
 
 const URL_TYPES = [
   {
@@ -161,7 +161,7 @@ export class UrlFormat extends FieldFormat {
 
         return this.generateImgHtml(url, imageLabel);
       default:
-        const inWhitelist = whitelistUrlSchemes.some((scheme) => url.indexOf(scheme) === 0);
+        const inWhitelist = allowedUrlSchemes.some((scheme) => url.indexOf(scheme) === 0);
         if (!inWhitelist && !parsedUrl) {
           return url;
         }
