@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiBreadcrumbs, EuiCode, EuiBetaBadge, Breadcrumb } from '@elastic/eui';
+import { EuiBreadcrumbs, EuiCode, EuiBetaBadge } from '@elastic/eui';
 import styled from 'styled-components';
 import React, { memo } from 'react';
 import { useResolverTheme } from '../assets';
@@ -60,13 +60,14 @@ export const StyledTime = memo(styled('time')`
   text-align: start;
 `);
 
+type Breadcrumbs = Parameters<typeof EuiBreadcrumbs>[0]['breadcrumbs'];
 /**
  * Breadcrumb menu with adjustments per direction from UX team
  */
 export const StyledBreadcrumbs = memo(function StyledBreadcrumbs({
   breadcrumbs,
 }: {
-  breadcrumbs: Breadcrumb[];
+  breadcrumbs: Breadcrumbs;
 }) {
   const {
     colorMap: { resolverBreadcrumbBackground, resolverEdgeText },
