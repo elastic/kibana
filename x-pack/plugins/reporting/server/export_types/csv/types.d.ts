@@ -48,7 +48,6 @@ export interface ScheduledTaskParamsCSV extends ScheduledTaskParams<JobParamsDis
   conflictedTypesFields: any;
 }
 
-// FIXME should be provided by serverside data access plugin
 export interface SearchRequest {
   index: string;
   body:

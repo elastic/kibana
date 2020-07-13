@@ -126,7 +126,7 @@ export const getGenerateCsvParams = async (
       docvalue_fields: docValueFields,
       query: esQuery.buildEsQuery(
         indexPatternSavedObject as IIndexPattern,
-        (searchSourceQuery as unknown) as Query, // FIXME use the types from data plugin
+        (searchSourceQuery as unknown) as Query,
         (combinedFilter as unknown) as Filter,
         esQueryConfig
       ),

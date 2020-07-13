@@ -10,9 +10,6 @@ import Hapi from 'hapi';
 import { KibanaRequest } from '../../../../../../../../src/core/server';
 import { LevelLogger } from '../../../../lib';
 
-/*
- * FIXME: remove this function. CSV From Saved Object export is only
- * synchronous - only needs to deal with a real request object */
 export const getRequest = async (
   headers: string | undefined,
   crypto: Crypto,

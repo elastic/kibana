@@ -40,6 +40,9 @@ export const csvReportingProvider = ({
     disabled = !enableLinks;
   });
 
+  // If the TZ is set to the default "Browser", it will not be useful for
+  // server-side export. We need to derive the timezone and pass it as a param
+  // to the export API.
   const browserTimezone =
     uiSettings.get('dateFormat:tz') === 'Browser'
       ? moment.tz.guess()
