@@ -385,4 +385,18 @@ describe('#getQueryParams', () => {
       });
     });
   });
+
+  describe('namespaces property', () => {
+    ALL_TYPES.forEach((type) => {
+      it(`throws for ${type} when namespaces is an empty array`, () => {
+        expect(() =>
+          getQueryParams({
+            mappings,
+            registry,
+            namespaces: [],
+          })
+        ).toThrowError('cannot specify empty namespaces array');
+      });
+    });
+  });
 });

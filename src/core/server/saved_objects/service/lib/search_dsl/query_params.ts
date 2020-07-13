@@ -66,6 +66,9 @@ function getClauseForType(
   namespaces: string[] = ['default'],
   type: string
 ) {
+  if (namespaces.length === 0) {
+    throw new Error('cannot specify empty namespaces array');
+  }
   if (registry.isMultiNamespace(type)) {
     return {
       bool: {
@@ -83,7 +86,8 @@ function getClauseForType(
       should.push({ bool: { must_not: [{ exists: { field: 'namespace' } }] } });
     }
     if (should.length === 0) {
-      throw new Error('cannot specify empty namespaces array');
+      // This is indicitive of a bug, and not user error.
+      throw new Error('unhandled search condition: expected at least 1 `should` clause.');
     }
     return {
       bool: {
@@ -136,6 +140,15 @@ export function getQueryParams({
 }: QueryParams) {
   const types = getTypes(mappings, type);
 
+  // A de-duplicated set of namespaces makes for a more effecient query.
+  //
+  // Additonally, we treat the `*` namespace as the `default` namespace.
+  // In the Default Distribution, the `*` is automatically expanded to include all available namespaces.
+  // However, the OSS distribution (and certain configurations of the Default Distribution) can allow the `*`
+  // to pass through to the SO Repository, and eventually to this module. When this happens, we translate to `default`,
+  // since that is consistent with how a single-namespace search behaves in the OSS distribution. Leaving the wildcard in place
+  // would result in no results being returned, as the wildcard is treated as a literal, and not _actually_ as a wildcard.
+  // We had a good discussion around the tradeoffs here: https://github.com/elastic/kibana/pull/67644#discussion_r441055716
   const normalizedNamespaces = namespaces
     ? Array.from(
         new Set(namespaces.map((namespace) => (namespace === '*' ? 'default' : namespace)))
