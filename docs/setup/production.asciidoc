@@ -167,9 +167,9 @@ These can be used to automatically update the list of hosts as a cluster is resi
 Kibana has a default maximum memory limit of 1.4 GB, and in most cases, we recommend leaving this unconfigured.  In some scenarios, such as large reporting jobs,
 it may make sense to tweak limits to meet more specific requirements.
 
-You can modify this limit by setting `--max-old-space-size` in the `NODE_OPTIONS` environment variable. For deb and rpm, packages this is passed in via `/etc/default/kibana` and can be appended to the bottom of the file.
+You can modify this limit by setting `--max-old-space-size` in the `node.options` config file that can be found inside `kibana/config` folder or any other configured with the environment variable `KIBANA_PATH_CONF` (for example in debian based system would be `/etc/kibana`).
 
 The option accepts a limit in MB:
 --------
-NODE_OPTIONS="--max-old-space-size=2048" bin/kibana
+--max-old-space-size=2048
 --------

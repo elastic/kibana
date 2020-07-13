@@ -126,7 +126,7 @@ function getClusterStyleDescriptor(
               ),
             }
           : undefined;
-      // @ts-ignore
+      // @ts-expect-error
       clusterStyleDescriptor.properties[styleName] = {
         type: STYLE_TYPE.DYNAMIC,
         options: {
@@ -136,7 +136,7 @@ function getClusterStyleDescriptor(
       };
     } else {
       // copy static styles to cluster style
-      // @ts-ignore
+      // @ts-expect-error
       clusterStyleDescriptor.properties[styleName] = {
         type: STYLE_TYPE.STATIC,
         options: { ...styleProperty.getOptions() },
@@ -192,8 +192,8 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
       const requestMeta = sourceDataRequest.getMeta();
       if (
         requestMeta &&
-        requestMeta.sourceType &&
-        requestMeta.sourceType === SOURCE_TYPES.ES_GEO_GRID
+        requestMeta.sourceMeta &&
+        requestMeta.sourceMeta.sourceType === SOURCE_TYPES.ES_GEO_GRID
       ) {
         isClustered = true;
       }
@@ -220,8 +220,12 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
       : displayName;
   }
 
-  isJoinable() {
-    return false;
+  showJoinEditor() {
+    return true;
+  }
+
+  getJoinsDisabledReason() {
+    return this._documentSource.getJoinsDisabledReason();
   }
 
   getJoins() {

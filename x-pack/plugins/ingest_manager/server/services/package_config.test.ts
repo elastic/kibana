@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { createPackageConfigMock } from '../../common/mocks';
 import { packageConfigService } from './package_config';
-import { PackageInfo } from '../types';
+import { PackageInfo, PackageConfigSOAttributes } from '../types';
+import { SavedObjectsUpdateResponse } from 'src/core/server';
 
 async function mockedGetAssetsData(_a: any, _b: any, dataset: string) {
   if (dataset === 'dataset1') {
@@ -159,6 +162,34 @@ describe('Package config service', () => {
           ],
         },
       ]);
+    });
+  });
+
+  describe('update', () => {
+    it('should fail to update on version conflict', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'test',
+        type: 'abcd',
+        references: [],
+        version: 'test',
+        attributes: createPackageConfigMock(),
+      });
+      savedObjectsClient.update.mockImplementation(
+        async (
+          type: string,
+          id: string
+        ): Promise<SavedObjectsUpdateResponse<PackageConfigSOAttributes>> => {
+          throw savedObjectsClient.errors.createConflictError('abc', '123');
+        }
+      );
+      await expect(
+        packageConfigService.update(
+          savedObjectsClient,
+          'the-package-config-id',
+          createPackageConfigMock()
+        )
+      ).rejects.toThrow('Saved object [abc/123] conflict');
     });
   });
 });

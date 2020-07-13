@@ -33,3 +33,10 @@ export class UnknownCategoryError extends Error {
     Object.setPrototypeOf(this, new.target.prototype);
   }
 }
+
+export class InsufficientAnomalyMlJobsConfigured extends Error {
+  constructor(message?: string) {
+    super(message);
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+}
