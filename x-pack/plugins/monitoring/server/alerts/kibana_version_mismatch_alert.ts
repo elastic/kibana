@@ -98,7 +98,7 @@ export class KibanaVersionMismatchAlert extends BaseAlert {
     }
 
     const text = i18n.translate('xpack.monitoring.alerts.kibanaVersionMismatch.ui.firingMessage', {
-      defaultMessage: `There are different versions of Kibana {versions} running in this cluster.`,
+      defaultMessage: `There are different versions of Kibana ({versions}) running in this cluster.`,
       values: {
         versions,
       },

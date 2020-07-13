@@ -162,7 +162,7 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
             }}
             label={
               <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.muteTitle"
+                id="xpack.monitoring.alerts.panel.muteTitle"
                 defaultMessage="Mute"
               />
             }

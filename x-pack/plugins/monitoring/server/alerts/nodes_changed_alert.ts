@@ -102,7 +102,7 @@ export class NodesChangedAlert extends BaseAlert {
               added: Object.values(states.added).join(','),
             },
           })
-        : '';
+        : null;
     const removedText =
       Object.values(states.removed).length > 0
         ? i18n.translate('xpack.monitoring.alerts.nodesChanged.ui.removedFiringMessage', {
@@ -111,7 +111,7 @@ export class NodesChangedAlert extends BaseAlert {
               removed: Object.values(states.removed).join(','),
             },
           })
-        : '';
+        : null;
     const restartedText =
       Object.values(states.restarted).length > 0
         ? i18n.translate('xpack.monitoring.alerts.nodesChanged.ui.restartedFiringMessage', {
@@ -120,10 +120,10 @@ export class NodesChangedAlert extends BaseAlert {
               restarted: Object.values(states.restarted).join(','),
             },
           })
-        : '';
+        : null;
 
     return {
-      text: `${addedText} ${removedText} ${restartedText}`,
+      text: [addedText, removedText, restartedText].filter(Boolean).join(' '),
     };
   }
 

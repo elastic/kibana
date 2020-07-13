@@ -105,7 +105,7 @@ export class ElasticsearchVersionMismatchAlert extends BaseAlert {
     const text = i18n.translate(
       'xpack.monitoring.alerts.elasticsearchVersionMismatch.ui.firingMessage',
       {
-        defaultMessage: `There are different versions of Elasticsearch {versions} running in this cluster.`,
+        defaultMessage: `There are different versions of Elasticsearch ({versions}) running in this cluster.`,
         values: {
           versions,
         },
