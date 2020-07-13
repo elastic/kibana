@@ -150,7 +150,6 @@ const makeMapStateToProps = () => {
   const getEvents = timelineSelectors.getEventsByIdSelector();
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const mapStateToProps = (state: State, { id, defaultModel }: OwnProps) => {
-    const { graphEventId } = getTimeline(state, id);
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const events: TimelineModel = getEvents(state, id) ?? defaultModel;
     const {
@@ -180,7 +179,10 @@ const makeMapStateToProps = () => {
       sort,
       showCheckboxes,
       // Used to determine whether the footer should show (since it is hidden if the graph is showing.)
-      graphEventId,
+      graphEventId: /** `getTimeline` actually returns `TimelineModel | undefined` */ (getTimeline(
+        state,
+        id
+      ) as TimelineModel | undefined)?.graphEventId,
     };
   };
   return mapStateToProps;
