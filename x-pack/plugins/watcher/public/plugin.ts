@@ -40,7 +40,13 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
       order: 3,
       mount: async ({ element, setBreadcrumbs, history }) => {
         const [core] = await getStartServices();
-        const { i18n: i18nDep, docLinks, savedObjects, application } = core;
+        const {
+          i18n: i18nDep,
+          docLinks,
+          savedObjects,
+          application,
+          chrome: { docTitle },
+        } = core;
         const { boot } = await import('./application/boot');
         const { TimeBuckets } = await import('./legacy');
 
@@ -52,6 +58,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
           toasts: notifications.toasts,
           http,
           uiSettings,
+          docTitle,
           docLinks,
           setBreadcrumbs,
           theme: charts.theme,

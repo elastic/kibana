@@ -12,6 +12,7 @@ import {
   ToastsSetup,
   IUiSettingsClient,
   ApplicationStart,
+  ChromeDocTitle,
 } from 'kibana/public';
 
 import { Router, Switch, Route, Redirect, withRouter, RouteComponentProps } from 'react-router-dom';
@@ -25,13 +26,15 @@ import {
   ManagementAppMountParams,
 } from '../../../../../src/plugins/management/public';
 
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+
 import { LicenseStatus } from '../../common/types/license_status';
+import { PLUGIN } from '../../common/constants';
 import { WatchStatus } from './sections/watch_status/components/watch_status';
 import { WatchEdit } from './sections/watch_edit/components/watch_edit';
 import { WatchList } from './sections/watch_list/components/watch_list';
 import { registerRouter } from './lib/navigation';
 import { AppContextProvider } from './app_context';
-import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 
 const ShareRouter = withRouter(({ children, history }: RouteComponentProps & { children: any }) => {
   registerRouter({ history });
@@ -39,6 +42,7 @@ const ShareRouter = withRouter(({ children, history }: RouteComponentProps & { c
 });
 
 export interface AppDeps {
+  docTitle: ChromeDocTitle;
   docLinks: DocLinksStart;
   toasts: ToastsSetup;
   http: HttpSetup;
@@ -53,6 +57,11 @@ export interface AppDeps {
 
 export const App = (deps: AppDeps) => {
   const [{ valid, message }, setLicenseStatus] = useState<LicenseStatus>({ valid: true });
+
+  useEffect(() => {
+    deps.docTitle.change(PLUGIN.title);
+    return () => deps.docTitle.reset();
+  });
 
   useEffect(() => {
     const s = deps.licenseStatus$.subscribe(setLicenseStatus);
