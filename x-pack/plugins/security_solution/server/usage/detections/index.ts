@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller } from '../../../../../src/core/server';
+import { LegacyAPICaller } from '../../../../../../src/core/server';
 import { getMlJobsUsage, getRulesUsage } from './detections_helpers';
-import { MlPluginSetup } from '../../../ml/server';
+import { MlPluginSetup } from '../../../../ml/server';
 
 interface FeatureUsage {
   enabled: number;

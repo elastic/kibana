@@ -12,9 +12,9 @@ import {
   MockOSVersion,
 } from './endpoint.mocks';
 import { ISavedObjectsRepository, SavedObjectsFindResponse } from 'src/core/server';
-import { AgentEventSOAttributes } from './../../../../ingest_manager/common/types/models/agent';
+import { AgentEventSOAttributes } from '../../../../ingest_manager/common/types/models/agent';
 import { Agent } from '../../../../ingest_manager/common';
-import * as endpointTelemetry from './endpoint';
+import * as endpointTelemetry from './index';
 import * as fleetSavedObjects from './fleet_saved_objects';
 
 describe('test security solution endpoint telemetry', () => {

@@ -8,7 +8,7 @@ import { AgentEventSOAttributes } from './../../../../ingest_manager/common/type
 import {
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
-} from './../../../../ingest_manager/common/constants/agent';
+} from '../../../../ingest_manager/common/constants/agent';
 import { Agent } from '../../../../ingest_manager/common';
 import { FLEET_ENDPOINT_PACKAGE_CONSTANT } from './fleet_saved_objects';
 

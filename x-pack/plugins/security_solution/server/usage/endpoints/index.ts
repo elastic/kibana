@@ -90,7 +90,7 @@ export const trackEndpointOSTelemetry = (
  */
 export const getEndpointTelemetryFromFleet = async (
   savedObjectsClient: ISavedObjectsRepository
-) => {
+): Promise<EndpointUsage> => {
   // Retrieve every agent that references the endpoint as an installed package. It will not be listed if it was never installed
   const { saved_objects: endpointAgents } = await getFleetSavedObjectsMetadata(savedObjectsClient);
   const endpointTelemetry = getDefaultEndpointTelemetry();
@@ -100,13 +100,11 @@ export const getEndpointTelemetryFromFleet = async (
 
   // Use unique hosts to prevent any potential duplicates
   const uniqueHostIds: Set<string> = new Set();
-
   // Need unique agents to get events data for those that have run in last 24 hours
   const uniqueAgentIds: Set<string> = new Set();
 
   const aDayAgo = new Date();
   aDayAgo.setDate(aDayAgo.getDate() - 1);
-
   let osTracker: OSTracker = {};
 
   const endpointMetadataTelemetry = endpointAgents.reduce(
@@ -130,7 +128,7 @@ export const getEndpointTelemetryFromFleet = async (
     endpointTelemetry
   );
 
-  // All agents in the unique host.
+  // All unique agents with an endpoint installed. You can technically install a new agent on a host, so relying on most recently installed.
   endpointTelemetry.total_installed = uniqueHostIds.size;
 
   // Get the objects to populate our OS Telemetry
