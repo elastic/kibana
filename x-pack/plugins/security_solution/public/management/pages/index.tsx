@@ -27,7 +27,6 @@ import { ADMINISTRATION } from '../../app/home/translations';
 import { AdministrationSubTab } from '../types';
 import { HOSTS_TAB, POLICIES_TAB } from '../common/translations';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { SecurityPageName } from '../../app/types';
 import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
 
 const TabNameMappedToI18nKey: Record<string, string> = {
@@ -87,7 +86,7 @@ const NoPermissions = memo(() => {
           </p>
         }
       />
-      <SpyRoute pageName={SecurityPageName.management} />
+      <SpyRoute pageName={SecurityPageName.administration} />
     </>
   );
 });
