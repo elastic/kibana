@@ -12,7 +12,9 @@ import {
   sha256,
   size,
 } from '../../../../common/endpoint/schema/common';
-import { body, created } from './common';
+import { created } from './common';
+
+export const body = t.string; // base64
 
 export const internalArtifactSchema = t.exact(
   t.type({

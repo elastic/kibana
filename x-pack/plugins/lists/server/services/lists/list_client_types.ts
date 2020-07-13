@@ -16,6 +16,7 @@ import {
   Id,
   IdOrUndefined,
   ListId,
+  ListIdOrUndefined,
   MetaOrUndefined,
   Name,
   NameOrUndefined,
@@ -86,9 +87,9 @@ export interface ExportListItemsToStreamOptions {
 }
 
 export interface ImportListItemsToStreamOptions {
+  listId: ListIdOrUndefined;
   deserializer: DeserializerOrUndefined;
   serializer: SerializerOrUndefined;
-  listId: string;
   type: Type;
   stream: Readable;
   meta: MetaOrUndefined;

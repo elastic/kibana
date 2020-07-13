@@ -6,6 +6,11 @@
 
 import { IRouter } from 'kibana/server';
 
+import { SecurityPluginSetup } from '../../../security/server';
+import { ConfigType } from '../config';
+
+import { readPrivilegesRoute } from './read_privileges_route';
+
 import {
   createExceptionListItemRoute,
   createExceptionListRoute,
@@ -36,7 +41,11 @@ import {
   updateListRoute,
 } from '.';
 
-export const initRoutes = (router: IRouter): void => {
+export const initRoutes = (
+  router: IRouter,
+  config: ConfigType,
+  security: SecurityPluginSetup | null | undefined
+): void => {
   // lists
   createListRoute(router);
   readListRoute(router);
@@ -44,6 +53,7 @@ export const initRoutes = (router: IRouter): void => {
   deleteListRoute(router);
   patchListRoute(router);
   findListRoute(router);
+  readPrivilegesRoute(router, security);
 
   // list items
   createListItemRoute(router);
@@ -52,7 +62,7 @@ export const initRoutes = (router: IRouter): void => {
   deleteListItemRoute(router);
   patchListItemRoute(router);
   exportListItemRoute(router);
-  importListItemRoute(router);
+  importListItemRoute(router, config);
   findListItemRoute(router);
 
   // indexes of lists
