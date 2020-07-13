@@ -17,4 +17,11 @@
  * under the License.
  */
 
-export { TutorialService, TutorialVariables, TutorialServiceSetup } from './tutorial_service';
+export {
+  TutorialService,
+  TutorialVariables,
+  TutorialServiceSetup,
+  TutorialDirectoryNoticeComponent,
+  TutorialDirectoryHeaderLinkComponent,
+  TutorialModuleNoticeComponent,
+} from './tutorial_service';

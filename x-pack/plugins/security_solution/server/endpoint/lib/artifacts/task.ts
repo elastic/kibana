@@ -11,6 +11,7 @@ import {
   TaskManagerStartContract,
 } from '../../../../../task_manager/server';
 import { EndpointAppContext } from '../../types';
+import { reportErrors } from './common';
 
 export const ManifestTaskConstants = {
   TIMEOUT: '1m',
@@ -88,19 +89,36 @@ export class ManifestTask {
       return;
     }
 
+    let errors: Error[] = [];
     try {
       // get snapshot based on exception-list-agnostic SOs
       // with diffs from last dispatched manifest
       const snapshot = await manifestManager.getSnapshot();
       if (snapshot && snapshot.diffs.length > 0) {
         // create new artifacts
-        await manifestManager.syncArtifacts(snapshot, 'add');
+        errors = await manifestManager.syncArtifacts(snapshot, 'add');
+        if (errors.length) {
+          reportErrors(this.logger, errors);
+          throw new Error('Error writing new artifacts.');
+        }
         // write to ingest-manager package config
-        await manifestManager.dispatch(snapshot.manifest);
+        errors = await manifestManager.dispatch(snapshot.manifest);
+        if (errors.length) {
+          reportErrors(this.logger, errors);
+          throw new Error('Error dispatching manifest.');
+        }
         // commit latest manifest state to user-artifact-manifest SO
-        await manifestManager.commit(snapshot.manifest);
+        const error = await manifestManager.commit(snapshot.manifest);
+        if (error) {
+          reportErrors(this.logger, [error]);
+          throw new Error('Error committing manifest.');
+        }
         // clean up old artifacts
-        await manifestManager.syncArtifacts(snapshot, 'delete');
+        errors = await manifestManager.syncArtifacts(snapshot, 'delete');
+        if (errors.length) {
+          reportErrors(this.logger, errors);
+          throw new Error('Error cleaning up outdated artifacts.');
+        }
       }
     } catch (err) {
       this.logger.error(err);
