@@ -641,7 +641,6 @@
     "data.filter.filterEditor.cancelButtonLabel": "キャンセル",
     "data.filter.filterEditor.createCustomLabelInputLabel": "カスタムラベル",
     "data.filter.filterEditor.createCustomLabelSwitchLabel": "カスタムラベルを作成しますか？",
-    "data.filter.filterEditor.dateFormatHelpLinkLabel": "対応データフォーマット",
     "data.filter.filterEditor.doesNotExistOperatorOptionLabel": "存在しません",
     "data.filter.filterEditor.editFilterPopupTitle": "フィルターを編集",
     "data.filter.filterEditor.editFilterValuesButtonLabel": "フィルター値を編集",
