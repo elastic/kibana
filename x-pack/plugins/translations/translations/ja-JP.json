@@ -7531,7 +7531,6 @@
     "xpack.infra.logs.logEntryCategories.categoryQUalityWarningCalloutTitle": "品質に関する警告",
     "xpack.infra.logs.logEntryCategories.countColumnTitle": "メッセージ数",
     "xpack.infra.logs.logEntryCategories.datasetColumnTitle": "データセット",
-    "xpack.infra.logs.logEntryCategories.datasetFilterPlaceholder": "データセットでフィルター",
     "xpack.infra.logs.logEntryCategories.jobStatusLoadingMessage": "分類ジョブのステータスを確認中...",
     "xpack.infra.logs.logEntryCategories.loadDataErrorTitle": "カテゴリーデータを読み込めませんでした",
     "xpack.infra.logs.logEntryCategories.manyCategoriesWarningReasonDescription": "分析されたドキュメントごとのカテゴリ比率が{categoriesDocumentRatio, number }で、非常に高い値です。",
