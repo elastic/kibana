@@ -133,8 +133,6 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
       </div>
       <table
         className="euiTable euiTable--responsive"
-        id="generated-id"
-        tabIndex={-1}
       >
         <caption
           className="euiScreenReaderOnly euiTableCaption"
@@ -550,8 +548,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
       </div>
       <table
         className="euiTable euiTable--responsive"
-        id="generated-id"
-        tabIndex={-1}
       >
         <caption
           className="euiScreenReaderOnly euiTableCaption"
@@ -1699,8 +1695,9 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           <div
             className="euiFlexItem euiFlexItem--flexGrowZero"
           >
-            <nav
+            <div
               className="euiPagination"
+              role="group"
             >
               <button
                 aria-label="Previous page"
@@ -1717,34 +1714,23 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   size="m"
                 />
               </button>
-              <ul
-                className="euiPagination__list"
+              <button
+                aria-label="Page 1 of 1"
+                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                data-test-subj="pagination-button-0"
+                onClick={[Function]}
+                type="button"
               >
-                <li
-                  className="euiPagination__item"
+                <span
+                  className="euiButtonEmpty__content"
                 >
-                  <button
-                    aria-controls="generated-id"
-                    aria-current={true}
-                    aria-label="Page 1 of 1"
-                    className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
-                    data-test-subj="pagination-button-0"
-                    disabled={true}
-                    onClick={[Function]}
-                    type="button"
+                  <span
+                    className="euiButtonEmpty__text"
                   >
-                    <span
-                      className="euiButtonEmpty__content"
-                    >
-                      <span
-                        className="euiButtonEmpty__text"
-                      >
-                        1
-                      </span>
-                    </span>
-                  </button>
-                </li>
-              </ul>
+                    1
+                  </span>
+                </span>
+              </button>
               <button
                 aria-label="Next page"
                 className="euiButtonIcon euiButtonIcon--text"
@@ -1760,7 +1746,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   size="m"
                 />
               </button>
-            </nav>
+            </div>
           </div>
         </div>
       </EuiFlexGroup>
