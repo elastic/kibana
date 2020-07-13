@@ -60,6 +60,7 @@ export const signalRulesAlertType = ({
     producer: SERVER_APP_ID,
     async executor({
       previousStartedAt,
+      startedAt,
       alertId,
       services,
       params,
@@ -271,6 +272,7 @@ export const signalRulesAlertType = ({
             id: alertId,
             inputIndexPattern: inputIndex,
             signalsIndex: outputIndex,
+            startedAt,
             name,
             createdBy,
             createdAt,

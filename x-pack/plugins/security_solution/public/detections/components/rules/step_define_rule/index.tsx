@@ -68,7 +68,7 @@ const stepDefineDefaultValue: DefineStepRule = {
   },
   threshold: {
     field: [],
-    value: 200,
+    value: '200',
   },
   timeline: {
     id: null,

@@ -86,7 +86,7 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
   },
   threshold: {
     field: rule.threshold?.field ? [rule.threshold.field] : [],
-    value: `${rule.threshold?.value}` ?? '100',
+    value: `${rule.threshold?.value || 100}`,
   },
 });
 

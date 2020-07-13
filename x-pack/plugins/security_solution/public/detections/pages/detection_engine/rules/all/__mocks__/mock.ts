@@ -153,6 +153,10 @@ export const mockRuleWithEverything = (id: string): Rule => ({
       ],
     },
   ],
+  threshold: {
+    field: 'host.name',
+    value: 50,
+  },
   throttle: 'no_actions',
   timestamp_override: 'event.ingested',
   note: '# this is some markdown documentation',
@@ -215,7 +219,7 @@ export const mockDefineStepRule = (isNew = false): DefineStepRule => ({
   },
   threshold: {
     field: [''],
-    value: 100,
+    value: '100',
   },
 });
 

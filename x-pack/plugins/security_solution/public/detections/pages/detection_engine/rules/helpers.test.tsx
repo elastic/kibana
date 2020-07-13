@@ -75,8 +75,8 @@ describe('rule helpers', () => {
           saved_id: 'test123',
         },
         threshold: {
-          field: [],
-          value: 100,
+          field: ['host.name'],
+          value: '50',
         },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
@@ -212,7 +212,7 @@ describe('rule helpers', () => {
         },
         threshold: {
           field: [],
-          value: 100,
+          value: '100',
         },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
@@ -245,7 +245,7 @@ describe('rule helpers', () => {
         },
         threshold: {
           field: [],
-          value: 100,
+          value: '100',
         },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
