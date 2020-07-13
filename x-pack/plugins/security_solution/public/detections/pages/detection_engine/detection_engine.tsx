@@ -97,7 +97,6 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
     );
   }
 
-  // TODO: Display distinct message if lists is not configured
   if (!loading && (isSignalIndexExists === false || needsListsConfiguration)) {
     return (
       <WrapperPage>
