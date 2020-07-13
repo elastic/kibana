@@ -17,6 +17,7 @@ import {
   EuiTableFieldDataColumnType,
   EuiTextColor,
 } from '@elastic/eui';
+import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import { useHistory } from 'react-router-dom';
@@ -27,6 +28,7 @@ import {
   useCapabilities,
   useGetAgentConfigs,
   usePagination,
+  useSorting,
   useLink,
   useConfig,
   useUrlParams,
@@ -84,6 +86,10 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
       : urlParams.kuery ?? ''
   );
   const { pagination, pageSizeOptions, setPagination } = usePagination();
+  const { sorting, setSorting } = useSorting<AgentConfig>({
+    field: 'updated_at',
+    direction: 'desc',
+  });
   const history = useHistory();
   const isCreateAgentConfigFlyoutOpen = 'create' in urlParams;
   const setIsCreateAgentConfigFlyoutOpen = useCallback(
@@ -106,6 +112,8 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
   const { isLoading, data: agentConfigData, sendRequest } = useGetAgentConfigs({
     page: pagination.currentPage,
     perPage: pagination.pageSize,
+    sortField: sorting?.field,
+    sortOrder: sorting?.direction,
     kuery: search,
   });
 
@@ -116,6 +124,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
     > = [
       {
         field: 'name',
+        sortable: true,
         name: i18n.translate('xpack.ingestManager.agentConfigList.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
@@ -158,6 +167,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
       },
       {
         field: 'updated_at',
+        sortable: true,
         name: i18n.translate('xpack.ingestManager.agentConfigList.updatedOnColumnTitle', {
           defaultMessage: 'Last updated on',
         }),
@@ -240,6 +250,16 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
     [createAgentConfigButton]
   );
 
+  const onTableChange = (criteria: CriteriaWithPagination<AgentConfig>) => {
+    const newPagination = {
+      ...pagination,
+      currentPage: criteria.page.index + 1,
+      pageSize: criteria.page.size,
+    };
+    setPagination(newPagination);
+    setSorting(criteria.sort);
+  };
+
   return (
     <AgentConfigListPageLayout>
       {isCreateAgentConfigFlyoutOpen ? (
@@ -276,7 +296,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
-      <EuiBasicTable
+      <EuiBasicTable<AgentConfig>
         loading={isLoading}
         hasActions={true}
         noItemsMessage={
@@ -314,14 +334,8 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
           totalItemCount: agentConfigData ? agentConfigData.total : 0,
           pageSizeOptions,
         }}
-        onChange={({ page }: { page: { index: number; size: number } }) => {
-          const newPagination = {
-            ...pagination,
-            currentPage: page.index + 1,
-            pageSize: page.size,
-          };
-          setPagination(newPagination);
-        }}
+        sorting={{ sort: sorting }}
+        onChange={onTableChange}
       />
     </AgentConfigListPageLayout>
   );

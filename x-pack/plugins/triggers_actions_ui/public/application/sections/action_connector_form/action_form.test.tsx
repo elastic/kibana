@@ -149,6 +149,16 @@ describe('action_form', () => {
           config: {},
           isPreconfigured: false,
         },
+        {
+          secrets: {},
+          id: '.servicenow',
+          actionTypeId: '.servicenow',
+          name: 'Non consumer connector',
+          config: {
+            isCaseOwned: true,
+          },
+          isPreconfigured: false,
+        },
       ]);
       const mocks = coreMock.createSetup();
       const [

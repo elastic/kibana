@@ -20,9 +20,9 @@ describe('SlackParamsFields renders', () => {
         index={0}
       />
     );
-    expect(wrapper.find('[data-test-subj="slackMessageTextArea"]').length > 0).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="slackMessageTextArea"]').first().prop('value')
-    ).toStrictEqual('test message');
+    expect(wrapper.find('[data-test-subj="messageTextArea"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="messageTextArea"]').first().prop('value')).toStrictEqual(
+      'test message'
+    );
   });
 });

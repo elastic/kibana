@@ -5,8 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
-import { isSetupStatusWithResults } from '../../../../common/log_analysis';
+import React, { useEffect, useState, useCallback } from 'react';
+import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
   LogAnalysisSetupStatusUnknownPrompt,
@@ -21,6 +21,7 @@ import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { LogEntryRateResultsContent } from './page_results_content';
 import { LogEntryRateSetupContent } from './page_setup_content';
 import { useLogEntryRateModuleContext } from './use_log_entry_rate_module';
+import { LogEntryRateSetupFlyout } from './setup_flyout';
 
 export const LogEntryRatePageContent = () => {
   const {
@@ -37,13 +38,24 @@ export const LogEntryRatePageContent = () => {
     hasLogAnalysisSetupCapabilities,
   } = useLogAnalysisCapabilitiesContext();
 
-  const { fetchJobStatus, setupStatus } = useLogEntryRateModuleContext();
+  const { fetchJobStatus, setupStatus, jobStatus } = useLogEntryRateModuleContext();
+
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
+  const openFlyout = useCallback(() => setIsFlyoutOpen(true), []);
+  const closeFlyout = useCallback(() => setIsFlyoutOpen(false), []);
 
   useEffect(() => {
     if (hasLogAnalysisReadCapabilities) {
       fetchJobStatus();
     }
   }, [fetchJobStatus, hasLogAnalysisReadCapabilities]);
+
+  // Open flyout if there are no ML jobs
+  useEffect(() => {
+    if (setupStatus.type === 'required' && setupStatus.reason === 'missing') {
+      openFlyout();
+    }
+  }, [setupStatus, openFlyout]);
 
   if (isLoading || isUninitialized) {
     return <SourceLoadingPage />;
@@ -63,11 +75,21 @@ export const LogEntryRatePageContent = () => {
     );
   } else if (setupStatus.type === 'unknown') {
     return <LogAnalysisSetupStatusUnknownPrompt retry={fetchJobStatus} />;
-  } else if (isSetupStatusWithResults(setupStatus)) {
-    return <LogEntryRateResultsContent />;
+  } else if (isJobStatusWithResults(jobStatus['log-entry-rate'])) {
+    return (
+      <>
+        <LogEntryRateResultsContent onOpenSetup={openFlyout} />
+        <LogEntryRateSetupFlyout isOpen={isFlyoutOpen} onClose={closeFlyout} />
+      </>
+    );
   } else if (!hasLogAnalysisSetupCapabilities) {
     return <MissingSetupPrivilegesPrompt />;
   } else {
-    return <LogEntryRateSetupContent />;
+    return (
+      <>
+        <LogEntryRateSetupContent onOpenSetup={openFlyout} />
+        <LogEntryRateSetupFlyout isOpen={isFlyoutOpen} onClose={closeFlyout} />
+      </>
+    );
   }
 };

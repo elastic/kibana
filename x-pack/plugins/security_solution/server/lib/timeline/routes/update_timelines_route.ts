@@ -31,7 +31,7 @@ export const updateTimelinesRoute = (
         body: buildRouteValidation(updateTimelineSchema),
       },
       options: {
-        tags: ['access:siem'],
+        tags: ['access:securitySolution'],
       },
     },
     // eslint-disable-next-line complexity

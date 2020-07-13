@@ -7,13 +7,13 @@
 import React, { memo } from 'react';
 import { EuiCallOut, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getEndpointListPath } from '../../../management/common/routing';
+import { getHostListPath } from '../../../management/common/routing';
 import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { useManagementFormatUrl } from '../../../management/components/hooks/use_management_format_url';
 import { MANAGEMENT_APP_ID } from '../../../management/common/constants';
 
 export const EndpointNotice = memo<{ onDismiss: () => void }>(({ onDismiss }) => {
-  const endpointsPath = getEndpointListPath({ name: 'endpointList' });
+  const endpointsPath = getHostListPath({ name: 'hostList' });
   const endpointsLink = useManagementFormatUrl(endpointsPath);
   const handleGetStartedClick = useNavigateToAppEventHandler(MANAGEMENT_APP_ID, {
     path: endpointsPath,

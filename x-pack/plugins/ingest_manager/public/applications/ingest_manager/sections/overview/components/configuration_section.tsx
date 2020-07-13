@@ -36,7 +36,7 @@ export const OverviewConfigurationSection: React.FC<{ agentConfigs: AgentConfig[
             <h2>
               <FormattedMessage
                 id="xpack.ingestManager.overviewPageConfigurationsPanelTitle"
-                defaultMessage="Configurations"
+                defaultMessage="Agent configurations"
               />
             </h2>
           </EuiTitle>
@@ -55,7 +55,7 @@ export const OverviewConfigurationSection: React.FC<{ agentConfigs: AgentConfig[
               <EuiDescriptionListTitle>
                 <FormattedMessage
                   id="xpack.ingestManager.overviewConfigTotalTitle"
-                  defaultMessage="Total configs"
+                  defaultMessage="Total available"
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
@@ -64,7 +64,7 @@ export const OverviewConfigurationSection: React.FC<{ agentConfigs: AgentConfig[
               <EuiDescriptionListTitle>
                 <FormattedMessage
                   id="xpack.ingestManager.overviewPackageConfigTitle"
-                  defaultMessage="Total integrations used"
+                  defaultMessage="Configured integrations"
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>

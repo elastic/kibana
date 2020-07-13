@@ -26,7 +26,6 @@ import { BaseParamType } from './param_types/base';
 
 import { AggConfig } from './agg_config';
 import { IAggConfigs } from './agg_configs';
-import { AggTypeDependencies } from './agg_type';
 
 const paramTypeMap = {
   field: FieldParamType,
@@ -46,13 +45,12 @@ export interface AggParamOption {
 }
 
 export const initParams = <TAggParam extends AggParamType = AggParamType>(
-  params: TAggParam[],
-  { getInternalStartServices }: AggTypeDependencies
+  params: TAggParam[]
 ): TAggParam[] =>
   params.map((config: TAggParam) => {
     const Class = paramTypeMap[config.type] || paramTypeMap._default;
 
-    return new Class(config, { getInternalStartServices });
+    return new Class(config);
   }) as TAggParam[];
 
 /**

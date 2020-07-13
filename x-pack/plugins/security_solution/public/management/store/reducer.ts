@@ -14,7 +14,7 @@ import {
   initialPolicyListState,
 } from '../pages/policy/store/policy_list/reducer';
 import {
-  MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
+  MANAGEMENT_STORE_HOSTS_NAMESPACE,
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,
   MANAGEMENT_STORE_POLICY_LIST_NAMESPACE,
 } from '../common/constants';
@@ -31,7 +31,7 @@ const immutableCombineReducers: ImmutableCombineReducers = combineReducers;
 export const mockManagementState: Immutable<ManagementState> = {
   [MANAGEMENT_STORE_POLICY_LIST_NAMESPACE]: initialPolicyListState(),
   [MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE]: initialPolicyDetailsState(),
-  [MANAGEMENT_STORE_ENDPOINTS_NAMESPACE]: initialHostListState,
+  [MANAGEMENT_STORE_HOSTS_NAMESPACE]: initialHostListState,
 };
 
 /**
@@ -40,5 +40,5 @@ export const mockManagementState: Immutable<ManagementState> = {
 export const managementReducer = immutableCombineReducers({
   [MANAGEMENT_STORE_POLICY_LIST_NAMESPACE]: policyListReducer,
   [MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE]: policyDetailsReducer,
-  [MANAGEMENT_STORE_ENDPOINTS_NAMESPACE]: hostListReducer,
+  [MANAGEMENT_STORE_HOSTS_NAMESPACE]: hostListReducer,
 });

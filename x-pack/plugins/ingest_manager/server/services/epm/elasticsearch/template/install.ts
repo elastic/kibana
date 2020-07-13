@@ -5,7 +5,13 @@
  */
 
 import Boom from 'boom';
-import { Dataset, RegistryPackage, ElasticsearchAssetType, TemplateRef } from '../../../../types';
+import {
+  Dataset,
+  RegistryPackage,
+  ElasticsearchAssetType,
+  TemplateRef,
+  RegistryElasticsearch,
+} from '../../../../types';
 import { CallESAsCurrentUser } from '../../../../types';
 import { Field, loadFieldsFromYaml, processFields } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
@@ -157,6 +163,98 @@ export async function installTemplateForDataset({
   });
 }
 
+function putComponentTemplate(
+  body: object | undefined,
+  name: string,
+  callCluster: CallESAsCurrentUser
+): { clusterPromise: Promise<any>; name: string } | undefined {
+  if (body) {
+    const callClusterParams: {
+      method: string;
+      path: string;
+      ignore: number[];
+      body: any;
+    } = {
+      method: 'PUT',
+      path: `/_component_template/${name}`,
+      ignore: [404],
+      body,
+    };
+
+    return { clusterPromise: callCluster('transport.request', callClusterParams), name };
+  }
+}
+
+function buildComponentTemplates(registryElasticsearch: RegistryElasticsearch | undefined) {
+  let mappingsTemplate;
+  let settingsTemplate;
+
+  if (registryElasticsearch && registryElasticsearch['index_template.mappings']) {
+    mappingsTemplate = {
+      template: {
+        mappings: {
+          ...registryElasticsearch['index_template.mappings'],
+          // temporary change until https://github.com/elastic/elasticsearch/issues/58956 is resolved
+          // hopefully we'll be able to remove the entire properties section once that issue is resolved
+          properties: {
+            // if the timestamp_field changes here: https://github.com/elastic/kibana/blob/master/x-pack/plugins/ingest_manager/server/services/epm/elasticsearch/template/template.ts#L309
+            // we'll need to update this as well
+            '@timestamp': {
+              type: 'date',
+            },
+          },
+        },
+      },
+    };
+  }
+
+  if (registryElasticsearch && registryElasticsearch['index_template.settings']) {
+    settingsTemplate = {
+      template: {
+        settings: registryElasticsearch['index_template.settings'],
+      },
+    };
+  }
+  return { settingsTemplate, mappingsTemplate };
+}
+
+async function installDatasetComponentTemplates(
+  templateName: string,
+  registryElasticsearch: RegistryElasticsearch | undefined,
+  callCluster: CallESAsCurrentUser
+) {
+  const templates: string[] = [];
+  const componentPromises: Array<Promise<any>> = [];
+
+  const compTemplates = buildComponentTemplates(registryElasticsearch);
+
+  const mappings = putComponentTemplate(
+    compTemplates.mappingsTemplate,
+    `${templateName}-mappings`,
+    callCluster
+  );
+
+  const settings = putComponentTemplate(
+    compTemplates.settingsTemplate,
+    `${templateName}-settings`,
+    callCluster
+  );
+
+  if (mappings) {
+    templates.push(mappings.name);
+    componentPromises.push(mappings.clusterPromise);
+  }
+
+  if (settings) {
+    templates.push(settings.name);
+    componentPromises.push(settings.clusterPromise);
+  }
+
+  // TODO: Check return values for errors
+  await Promise.all(componentPromises);
+  return templates;
+}
+
 export async function installTemplate({
   callCluster,
   fields,
@@ -180,13 +278,22 @@ export async function installTemplate({
       packageVersion,
     });
   }
+
+  const composedOfTemplates = await installDatasetComponentTemplates(
+    templateName,
+    dataset.elasticsearch,
+    callCluster
+  );
+
   const template = getTemplate({
     type: dataset.type,
     templateName,
     mappings,
     pipelineName,
     packageName,
+    composedOfTemplates,
   });
+
   // TODO: Check return values for errors
   const callClusterParams: {
     method: string;

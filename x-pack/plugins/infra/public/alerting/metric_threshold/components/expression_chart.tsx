@@ -86,7 +86,10 @@ export const ExpressionChart: React.FC<Props> = ({
   const dateFormatter = useMemo(() => {
     const firstSeries = data ? first(data.series) : null;
     return firstSeries && firstSeries.rows.length > 0
-      ? niceTimeFormatter([first(firstSeries.rows).timestamp, last(firstSeries.rows).timestamp])
+      ? niceTimeFormatter([
+          (first(firstSeries.rows) as any).timestamp,
+          (last(firstSeries.rows) as any).timestamp,
+        ])
       : (value: number) => `${value}`;
   }, [data]);
 
@@ -135,8 +138,8 @@ export const ExpressionChart: React.FC<Props> = ({
     }),
   };
 
-  const firstTimestamp = first(firstSeries.rows).timestamp;
-  const lastTimestamp = last(firstSeries.rows).timestamp;
+  const firstTimestamp = (first(firstSeries.rows) as any).timestamp;
+  const lastTimestamp = (last(firstSeries.rows) as any).timestamp;
   const dataDomain = calculateDomain(series, [metric], false);
   const domain = {
     max: Math.max(dataDomain.max, last(thresholds) || dataDomain.max) * 1.1, // add 10% headroom.

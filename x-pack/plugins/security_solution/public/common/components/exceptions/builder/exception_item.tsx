@@ -29,6 +29,7 @@ interface ExceptionListItemProps {
   isLoading: boolean;
   indexPattern: IIndexPattern;
   andLogicIncluded: boolean;
+  onCheckAndLogic: (item: ExceptionsBuilderExceptionItem[]) => void;
   onDeleteExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   onExceptionItemChange: (item: ExceptionsBuilderExceptionItem, index: number) => void;
 }
@@ -41,6 +42,7 @@ export const ExceptionListItemComponent = React.memo<ExceptionListItemProps>(
     indexPattern,
     isLoading,
     andLogicIncluded,
+    onCheckAndLogic,
     onDeleteExceptionItem,
     onExceptionItemChange,
   }) => {
@@ -70,11 +72,12 @@ export const ExceptionListItemComponent = React.memo<ExceptionListItemProps>(
       onDeleteExceptionItem(updatedExceptionItem, exceptionItemIndex);
     };
 
-    const entries = useMemo(
-      (): FormattedBuilderEntry[] =>
-        indexPattern != null ? getFormattedBuilderEntries(indexPattern, exceptionItem.entries) : [],
-      [indexPattern, exceptionItem.entries]
-    );
+    const entries = useMemo((): FormattedBuilderEntry[] => {
+      onCheckAndLogic([exceptionItem]);
+      return indexPattern != null
+        ? getFormattedBuilderEntries(indexPattern, exceptionItem.entries)
+        : [];
+    }, [indexPattern, exceptionItem, onCheckAndLogic]);
 
     const andBadge = useMemo((): JSX.Element => {
       const badge = <AndOrBadge includeAntennas type="and" />;

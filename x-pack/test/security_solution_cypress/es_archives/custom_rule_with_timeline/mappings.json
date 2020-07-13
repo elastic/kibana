@@ -14,36 +14,39 @@
           "alert": "7b44fba6773e37c806ce290ea9b7024e",
           "apm-indices": "9bb9b2bf1fa636ed8619cbab5ce6a1dd",
           "apm-telemetry": "3525d7c22c42bc80f5e6e9cb3f2b26a2",
-          "application_usage_totals": "c897e4310c5f24b07caaff3db53ae2c1",
-          "application_usage_transactional": "965839e75f809fefe04f92dc4d99722a",
+          "application_usage_totals": "3d1b76c39bfb2cc8296b024d73854724",
+          "application_usage_transactional": "43b8830d5d0df85a6823d290885fc9fd",
           "canvas-element": "7390014e1091044523666d97247392fc",
           "canvas-workpad": "b0a1706d356228dbdcb4a17e6b9eb231",
+          "canvas-workpad-template": "ae2673f678281e2c055d764b153e9715",
           "cases": "32aa96a6d3855ddda53010ae2048ac22",
           "cases-comments": "c2061fb929f585df57425102fa928b4b",
           "cases-configure": "42711cbb311976c0687853f4c1354572",
           "cases-user-actions": "32277330ec6b721abe3b846cfd939a71",
-          "config": "ae24d22d5986d04124cc6568f771066f",
+          "config": "c63748b75f39d0c54de12d12c1ccbc20",
           "dashboard": "d00f614b29a80360e1190193fd333bab",
-          "epm-packages": "92b4b1899b887b090d01c033f3118a85",
+          "endpoint:exceptions-artifact": "053713a6b91811c7de078ead17384914",
+          "endpoint:exceptions-manifest": "67c28185da541c1404e7852d30498cd6",
+          "epm-packages": "04696e7dba1b9597f7d6ed78a4a76658",
           "file-upload-telemetry": "0ed4d3e1983d1217a30982630897092e",
-          "fleet-agent-actions": "e520c855577170c24481be05c3ae14ec",
+          "fleet-agent-actions": "00fe5651ed2da16b7f8159bbf0f7d910",
           "fleet-agent-events": "3231653fafe4ef3196fe3b32ab774bf2",
-          "fleet-agents": "864760267df6c970f629bd4458506c53",
-          "fleet-enrollment-api-keys": "28b91e20b105b6f928e2012600085d8f",
+          "fleet-agents": "578bbfa81650206927683ebde0c85409",
+          "fleet-enrollment-api-keys": "451e5c329b3ae9722dc7bc8f5921e05d",
           "graph-workspace": "cd7ba1330e6682e9cc00b78850874be1",
           "index-pattern": "66eccb05066c5a89924f48a9e9736499",
-          "infrastructure-ui-source": "ddc0ecb18383f6b26101a2fadb2dab0c",
-          "ingest-agent-configs": "d9a5cbdce8e937f674a7b376c47a34a1",
-          "ingest-package-configs": "c0fe6347b0eebcbf421841669e3acd31",
-          "ingest-outputs": "0e57221778a7153c8292edf154099036",
+          "infrastructure-ui-source": "2b2809653635caf490c93f090502d04c",
+          "ingest-agent-configs": "f1e09bc73462386a8c07e9d1997d0688",
+          "ingest-outputs": "87da6a0e27b3a61ad389fb7a7e2da293",
+          "ingest-package-configs": "48e8bd97e488008e21c0b5a2367b83ad",
           "ingest_manager_settings": "c5b0749b4ab03c582efd4c14cb8f132c",
           "inventory-view": "88fc7e12fd1b45b6f0787323ce4f18d2",
           "kql-telemetry": "d12a98a6f19a2d273696597547e064ee",
-          "lens": "21c3ea0763beb1ecb0162529706b88c5",
+          "lens": "d33c68a69ff1e78c9888dedd2164ac22",
           "lens-ui-telemetry": "509bfa5978586998e05f9e303c07a327",
-          "map": "23d7aa4a720d4938ccde3983f87bd58d",
-          "maps-telemetry": "bfd39d88aadadb4be597ea984d433dbe",
-          "metrics-explorer-view": "428e319af3e822c80a84cf87123ca35c",
+          "map": "4a05b35c3a3a58fbc72dd0202dc3487f",
+          "maps-telemetry": "5ef305b18111b77789afefbd36b66171",
+          "metrics-explorer-view": "a8df1d270ee48c969d22d23812d08187",
           "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
           "ml-telemetry": "257fd1d4b4fdbb9cb4b8a3b27da201e9",
           "namespace": "2f4316de49999235636386fe51dc06c1",
@@ -67,7 +70,7 @@
           "upgrade-assistant-reindex-operation": "296a89039fc4260292be36b1b005d8f2",
           "upgrade-assistant-telemetry": "56702cec857e0a9dacfb696655b4ff7b",
           "uptime-dynamic-settings": "fcdb453a30092f022f2642db29523d80",
-          "url": "b675c3be8d76ecf029294d51dc7ec65d",
+          "url": "c7f66a0df8b1b52f17c28c4adb111105",
           "visualization": "52d7a13ad68a150c4525b292d23e12cc"
         }
       },
@@ -106,145 +109,6 @@
             "params": {
               "enabled": false,
               "type": "object"
-            }
-          }
-        },
-        "agent_actions": {
-          "properties": {
-            "agent_id": {
-              "type": "keyword"
-            },
-            "created_at": {
-              "type": "date"
-            },
-            "data": {
-              "type": "flattened"
-            },
-            "sent_at": {
-              "type": "date"
-            },
-            "type": {
-              "type": "keyword"
-            }
-          }
-        },
-        "agent_configs": {
-          "properties": {
-            "datasources": {
-              "type": "keyword"
-            },
-            "description": {
-              "type": "text"
-            },
-            "id": {
-              "type": "keyword"
-            },
-            "is_default": {
-              "type": "boolean"
-            },
-            "name": {
-              "type": "text"
-            },
-            "namespace": {
-              "type": "keyword"
-            },
-            "revision": {
-              "type": "integer"
-            },
-            "status": {
-              "type": "keyword"
-            },
-            "updated_by": {
-              "type": "keyword"
-            },
-            "updated_on": {
-              "type": "keyword"
-            }
-          }
-        },
-        "agent_events": {
-          "properties": {
-            "action_id": {
-              "type": "keyword"
-            },
-            "agent_id": {
-              "type": "keyword"
-            },
-            "config_id": {
-              "type": "keyword"
-            },
-            "data": {
-              "type": "text"
-            },
-            "message": {
-              "type": "text"
-            },
-            "payload": {
-              "type": "text"
-            },
-            "stream_id": {
-              "type": "keyword"
-            },
-            "subtype": {
-              "type": "keyword"
-            },
-            "timestamp": {
-              "type": "date"
-            },
-            "type": {
-              "type": "keyword"
-            }
-          }
-        },
-        "agents": {
-          "properties": {
-            "access_api_key_id": {
-              "type": "keyword"
-            },
-            "active": {
-              "type": "boolean"
-            },
-            "config_id": {
-              "type": "keyword"
-            },
-            "config_newest_revision": {
-              "type": "integer"
-            },
-            "config_revision": {
-              "type": "integer"
-            },
-            "current_error_events": {
-              "type": "text"
-            },
-            "default_api_key": {
-              "type": "keyword"
-            },
-            "enrolled_at": {
-              "type": "date"
-            },
-            "last_checkin": {
-              "type": "date"
-            },
-            "last_updated": {
-              "type": "date"
-            },
-            "local_metadata": {
-              "type": "text"
-            },
-            "shared_id": {
-              "type": "keyword"
-            },
-            "type": {
-              "type": "keyword"
-            },
-            "updated_at": {
-              "type": "date"
-            },
-            "user_provided_metadata": {
-              "type": "text"
-            },
-            "version": {
-              "type": "keyword"
             }
           }
         },
@@ -1264,29 +1128,12 @@
           }
         },
         "application_usage_totals": {
-          "properties": {
-            "appId": {
-              "type": "keyword"
-            },
-            "minutesOnScreen": {
-              "type": "float"
-            },
-            "numberOfClicks": {
-              "type": "long"
-            }
-          }
+          "dynamic": "false",
+          "type": "object"
         },
         "application_usage_transactional": {
+          "dynamic": "false",
           "properties": {
-            "appId": {
-              "type": "keyword"
-            },
-            "minutesOnScreen": {
-              "type": "float"
-            },
-            "numberOfClicks": {
-              "type": "long"
-            },
             "timestamp": {
               "type": "date"
             }
@@ -1336,6 +1183,38 @@
                 }
               },
               "type": "text"
+            }
+          }
+        },
+        "canvas-workpad-template": {
+          "dynamic": "false",
+          "properties": {
+            "help": {
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "name": {
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "tags": {
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "template_key": {
+              "type": "keyword"
             }
           }
         },
@@ -1574,7 +1453,7 @@
           }
         },
         "config": {
-          "dynamic": "true",
+          "dynamic": "false",
           "properties": {
             "buildNum": {
               "type": "keyword"
@@ -1635,132 +1514,39 @@
             }
           }
         },
-        "datasources": {
+        "endpoint:exceptions-artifact": {
           "properties": {
-            "config_id": {
-              "type": "keyword"
-            },
-            "description": {
-              "type": "text"
-            },
-            "enabled": {
-              "type": "boolean"
-            },
-            "inputs": {
-              "properties": {
-                "config": {
-                  "type": "flattened"
-                },
-                "enabled": {
-                  "type": "boolean"
-                },
-                "processors": {
-                  "type": "keyword"
-                },
-                "streams": {
-                  "properties": {
-                    "config": {
-                      "type": "flattened"
-                    },
-                    "dataset": {
-                      "type": "keyword"
-                    },
-                    "enabled": {
-                      "type": "boolean"
-                    },
-                    "id": {
-                      "type": "keyword"
-                    },
-                    "processors": {
-                      "type": "keyword"
-                    }
-                  },
-                  "type": "nested"
-                },
-                "type": {
-                  "type": "keyword"
-                }
-              },
-              "type": "nested"
-            },
-            "name": {
-              "type": "keyword"
-            },
-            "namespace": {
-              "type": "keyword"
-            },
-            "output_id": {
-              "type": "keyword"
-            },
-            "package": {
-              "properties": {
-                "name": {
-                  "type": "keyword"
-                },
-                "title": {
-                  "type": "keyword"
-                },
-                "version": {
-                  "type": "keyword"
-                }
-              }
-            },
-            "revision": {
-              "type": "integer"
-            }
-          }
-        },
-        "enrollment_api_keys": {
-          "properties": {
-            "active": {
-              "type": "boolean"
-            },
-            "api_key": {
+            "body": {
               "type": "binary"
             },
-            "api_key_id": {
-              "type": "keyword"
-            },
-            "config_id": {
-              "type": "keyword"
-            },
-            "created_at": {
+            "created": {
+              "index": false,
               "type": "date"
             },
-            "expire_at": {
-              "type": "date"
-            },
-            "name": {
+            "encoding": {
+              "index": false,
               "type": "keyword"
             },
-            "type": {
+            "identifier": {
               "type": "keyword"
             },
-            "updated_at": {
-              "type": "date"
+            "sha256": {
+              "type": "keyword"
+            },
+            "size": {
+              "index": false,
+              "type": "long"
             }
           }
         },
-        "epm-package": {
+        "endpoint:exceptions-manifest": {
           "properties": {
-            "installed": {
-              "properties": {
-                "id": {
-                  "type": "keyword"
-                },
-                "type": {
-                  "type": "keyword"
-                }
-              },
-              "type": "nested"
+            "created": {
+              "index": false,
+              "type": "date"
             },
-            "internal": {
-              "type": "boolean"
-            },
-            "name": {
-              "type": "keyword"
-            },
-            "version": {
+            "ids": {
+              "index": false,
               "type": "keyword"
             }
           }
@@ -1768,7 +1554,7 @@
         "epm-packages": {
           "properties": {
             "es_index_patterns": {
-              "dynamic": "false",
+              "enabled": false,
               "type": "object"
             },
             "installed": {
@@ -1874,10 +1660,11 @@
               "type": "integer"
             },
             "current_error_events": {
+              "index": false,
               "type": "text"
             },
             "default_api_key": {
-              "type": "keyword"
+              "type": "binary"
             },
             "default_api_key_id": {
               "type": "keyword"
@@ -1893,6 +1680,9 @@
             },
             "local_metadata": {
               "type": "flattened"
+            },
+            "packages": {
+              "type": "keyword"
             },
             "shared_id": {
               "type": "keyword"
@@ -2026,6 +1816,9 @@
                 }
               }
             },
+            "inventoryDefaultView": {
+              "type": "keyword"
+            },
             "logAlias": {
               "type": "keyword"
             },
@@ -2061,6 +1854,9 @@
             "metricAlias": {
               "type": "keyword"
             },
+            "metricsExplorerDefaultView": {
+              "type": "keyword"
+            },
             "name": {
               "type": "text"
             }
@@ -2068,9 +1864,6 @@
         },
         "ingest-agent-configs": {
           "properties": {
-            "datasources": {
-              "type": "keyword"
-            },
             "description": {
               "type": "text"
             },
@@ -2081,12 +1874,16 @@
               "type": "boolean"
             },
             "monitoring_enabled": {
+              "index": false,
               "type": "keyword"
             },
             "name": {
               "type": "text"
             },
             "namespace": {
+              "type": "keyword"
+            },
+            "package_configs": {
               "type": "keyword"
             },
             "revision": {
@@ -2099,6 +1896,35 @@
               "type": "date"
             },
             "updated_by": {
+              "type": "keyword"
+            }
+          }
+        },
+        "ingest-outputs": {
+          "properties": {
+            "ca_sha256": {
+              "index": false,
+              "type": "keyword"
+            },
+            "config": {
+              "type": "flattened"
+            },
+            "fleet_enroll_password": {
+              "type": "binary"
+            },
+            "fleet_enroll_username": {
+              "type": "binary"
+            },
+            "hosts": {
+              "type": "keyword"
+            },
+            "is_default": {
+              "type": "boolean"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "type": {
               "type": "keyword"
             }
           }
@@ -2121,6 +1947,7 @@
               "type": "boolean"
             },
             "inputs": {
+              "enabled": false,
               "properties": {
                 "config": {
                   "type": "flattened"
@@ -2128,27 +1955,28 @@
                 "enabled": {
                   "type": "boolean"
                 },
-                "processors": {
-                  "type": "keyword"
-                },
                 "streams": {
                   "properties": {
-                    "agent_stream": {
+                    "compiled_stream": {
                       "type": "flattened"
                     },
                     "config": {
                       "type": "flattened"
                     },
                     "dataset": {
-                      "type": "keyword"
+                      "properties": {
+                        "name": {
+                          "type": "keyword"
+                        },
+                        "type": {
+                          "type": "keyword"
+                        }
+                      }
                     },
                     "enabled": {
                       "type": "boolean"
                     },
                     "id": {
-                      "type": "keyword"
-                    },
-                    "processors": {
                       "type": "keyword"
                     },
                     "vars": {
@@ -2195,34 +2023,6 @@
               "type": "date"
             },
             "updated_by": {
-              "type": "keyword"
-            }
-          }
-        },
-        "ingest-outputs": {
-          "properties": {
-            "ca_sha256": {
-              "type": "keyword"
-            },
-            "config": {
-              "type": "flattened"
-            },
-            "fleet_enroll_password": {
-              "type": "binary"
-            },
-            "fleet_enroll_username": {
-              "type": "binary"
-            },
-            "hosts": {
-              "type": "keyword"
-            },
-            "is_default": {
-              "type": "boolean"
-            },
-            "name": {
-              "type": "keyword"
-            },
-            "type": {
               "type": "keyword"
             }
           }
@@ -2387,6 +2187,9 @@
         },
         "lens": {
           "properties": {
+            "description": {
+              "type": "text"
+            },
             "expression": {
               "index": false,
               "type": "keyword"
@@ -2420,9 +2223,6 @@
         },
         "map": {
           "properties": {
-            "bounds": {
-              "type": "geo_shape"
-            },
             "description": {
               "type": "text"
             },
@@ -2444,68 +2244,8 @@
           }
         },
         "maps-telemetry": {
-          "properties": {
-            "attributesPerMap": {
-              "properties": {
-                "dataSourcesCount": {
-                  "properties": {
-                    "avg": {
-                      "type": "long"
-                    },
-                    "max": {
-                      "type": "long"
-                    },
-                    "min": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "emsVectorLayersCount": {
-                  "dynamic": "true",
-                  "type": "object"
-                },
-                "layerTypesCount": {
-                  "dynamic": "true",
-                  "type": "object"
-                },
-                "layersCount": {
-                  "properties": {
-                    "avg": {
-                      "type": "long"
-                    },
-                    "max": {
-                      "type": "long"
-                    },
-                    "min": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "indexPatternsWithGeoFieldCount": {
-              "type": "long"
-            },
-            "indexPatternsWithGeoPointFieldCount": {
-              "type": "long"
-            },
-            "indexPatternsWithGeoShapeFieldCount": {
-              "type": "long"
-            },
-            "mapsTotalCount": {
-              "type": "long"
-            },
-            "settings": {
-              "properties": {
-                "showMapVisualizationTypes": {
-                  "type": "boolean"
-                }
-              }
-            },
-            "timeCaptured": {
-              "type": "date"
-            }
-          }
+          "enabled": false,
+          "type": "object"
         },
         "metrics-explorer-view": {
           "properties": {
@@ -2571,6 +2311,9 @@
                     }
                   },
                   "type": "nested"
+                },
+                "source": {
+                  "type": "keyword"
                 }
               }
             }
@@ -2579,6 +2322,24 @@
         "migrationVersion": {
           "dynamic": "true",
           "properties": {
+            "alert": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "config": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
             "dashboard": {
               "fields": {
                 "keyword": {
@@ -2589,24 +2350,6 @@
               "type": "text"
             },
             "index-pattern": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "ingest-agent-configs": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "ingest-package-configs": {
               "fields": {
                 "keyword": {
                   "ignore_above": 256,
@@ -2669,37 +2412,6 @@
         },
         "namespaces": {
           "type": "keyword"
-        },
-        "outputs": {
-          "properties": {
-            "api_key": {
-              "type": "keyword"
-            },
-            "ca_sha256": {
-              "type": "keyword"
-            },
-            "config": {
-              "type": "flattened"
-            },
-            "fleet_enroll_password": {
-              "type": "binary"
-            },
-            "fleet_enroll_username": {
-              "type": "binary"
-            },
-            "hosts": {
-              "type": "keyword"
-            },
-            "is_default": {
-              "type": "boolean"
-            },
-            "name": {
-              "type": "keyword"
-            },
-            "type": {
-              "type": "keyword"
-            }
-          }
         },
         "query": {
           "properties": {
@@ -2784,6 +2496,7 @@
           }
         },
         "server": {
+          "dynamic": "strict",
           "properties": {
             "uuid": {
               "type": "keyword"
@@ -3208,6 +2921,9 @@
             }
           }
         },
+        "spaceId": {
+          "type": "keyword"
+        },
         "telemetry": {
           "properties": {
             "allowChangingOptInStatus": {
@@ -3424,6 +3140,7 @@
             "url": {
               "fields": {
                 "keyword": {
+                  "ignore_above": 2048,
                   "type": "keyword"
                 }
               },
@@ -3489,14 +3206,6 @@
         },
         "agent": {
           "properties": {
-            "build": {
-              "properties": {
-                "original": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                }
-              }
-            },
             "ephemeral_id": {
               "ignore_above": 1024,
               "type": "keyword"
@@ -3516,6 +3225,27 @@
             "version": {
               "ignore_above": 1024,
               "type": "keyword"
+            }
+          }
+        },
+        "as": {
+          "properties": {
+            "number": {
+              "type": "long"
+            },
+            "organization": {
+              "properties": {
+                "name": {
+                  "fields": {
+                    "text": {
+                      "norms": false,
+                      "type": "text"
+                    }
+                  },
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
             }
           }
         },
@@ -3684,10 +3414,6 @@
                 "id": {
                   "ignore_above": 1024,
                   "type": "keyword"
-                },
-                "name": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
                 }
               }
             },
@@ -3715,18 +3441,6 @@
                 }
               }
             },
-            "project": {
-              "properties": {
-                "id": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "name": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                }
-              }
-            },
             "provider": {
               "ignore_above": 1024,
               "type": "keyword"
@@ -3734,6 +3448,27 @@
             "region": {
               "ignore_above": 1024,
               "type": "keyword"
+            }
+          }
+        },
+        "code_signature": {
+          "properties": {
+            "exists": {
+              "type": "boolean"
+            },
+            "status": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "subject_name": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "trusted": {
+              "type": "boolean"
+            },
+            "valid": {
+              "type": "boolean"
             }
           }
         },
@@ -3949,9 +3684,6 @@
                 }
               }
             },
-            "compile_time": {
-              "type": "date"
-            },
             "hash": {
               "properties": {
                 "md5": {
@@ -3972,53 +3704,6 @@
                 }
               }
             },
-            "malware_classification": {
-              "properties": {
-                "features": {
-                  "properties": {
-                    "data": {
-                      "properties": {
-                        "buffer": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "decompressed_size": {
-                          "type": "integer"
-                        },
-                        "encoding": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        }
-                      }
-                    }
-                  }
-                },
-                "identifier": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "score": {
-                  "type": "double"
-                },
-                "threshold": {
-                  "type": "double"
-                },
-                "upx_packed": {
-                  "type": "boolean"
-                },
-                "version": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                }
-              }
-            },
-            "mapped_address": {
-              "ignore_above": 1024,
-              "type": "keyword"
-            },
-            "mapped_size": {
-              "type": "long"
-            },
             "name": {
               "ignore_above": 1024,
               "type": "keyword"
@@ -4029,10 +3714,6 @@
             },
             "pe": {
               "properties": {
-                "architecture": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
                 "company": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -4042,10 +3723,6 @@
                   "type": "keyword"
                 },
                 "file_version": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "imphash": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
@@ -4144,46 +3821,6 @@
             "version": {
               "ignore_above": 1024,
               "type": "keyword"
-            }
-          }
-        },
-        "endpoint": {
-          "properties": {
-            "artifact": {
-              "properties": {
-                "hash": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "name": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "version": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                }
-              }
-            },
-            "event": {
-              "properties": {
-                "process": {
-                  "properties": {
-                    "ancestry": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    }
-                  }
-                }
-              }
-            },
-            "policy": {
-              "properties": {
-                "id": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                }
-              }
             }
           }
         },
@@ -4360,9 +3997,6 @@
               "ignore_above": 1,
               "type": "keyword"
             },
-            "entry_modified": {
-              "type": "double"
-            },
             "extension": {
               "ignore_above": 1024,
               "type": "keyword"
@@ -4399,154 +4033,6 @@
               "ignore_above": 1024,
               "type": "keyword"
             },
-            "macro": {
-              "properties": {
-                "code_page": {
-                  "type": "long"
-                },
-                "collection": {
-                  "properties": {
-                    "hash": {
-                      "properties": {
-                        "md5": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "sha1": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "sha256": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "sha512": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        }
-                      }
-                    }
-                  }
-                },
-                "errors": {
-                  "properties": {
-                    "count": {
-                      "type": "long"
-                    },
-                    "error_type": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    }
-                  },
-                  "type": "nested"
-                },
-                "file_extension": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "project_file": {
-                  "properties": {
-                    "hash": {
-                      "properties": {
-                        "md5": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "sha1": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "sha256": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "sha512": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        }
-                      }
-                    }
-                  }
-                },
-                "stream": {
-                  "properties": {
-                    "hash": {
-                      "properties": {
-                        "md5": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "sha1": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "sha256": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "sha512": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        }
-                      }
-                    },
-                    "name": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "raw_code": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "raw_code_size": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    }
-                  },
-                  "type": "nested"
-                }
-              }
-            },
-            "malware_classification": {
-              "properties": {
-                "features": {
-                  "properties": {
-                    "data": {
-                      "properties": {
-                        "buffer": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "decompressed_size": {
-                          "type": "integer"
-                        },
-                        "encoding": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        }
-                      }
-                    }
-                  }
-                },
-                "identifier": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "score": {
-                  "type": "double"
-                },
-                "threshold": {
-                  "type": "double"
-                },
-                "upx_packed": {
-                  "type": "boolean"
-                },
-                "version": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                }
-              }
-            },
             "mime_type": {
               "ignore_above": 1024,
               "type": "keyword"
@@ -4578,10 +4064,6 @@
             },
             "pe": {
               "properties": {
-                "architecture": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
                 "company": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -4594,10 +4076,6 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
-                "imphash": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
                 "original_file_name": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -4607,13 +4085,6 @@
                   "type": "keyword"
                 }
               }
-            },
-            "quarantine_path": {
-              "ignore_above": 1024,
-              "type": "keyword"
-            },
-            "quarantine_result": {
-              "type": "boolean"
             },
             "size": {
               "type": "long"
@@ -4628,10 +4099,6 @@
               "ignore_above": 1024,
               "type": "keyword"
             },
-            "temp_file_path": {
-              "ignore_above": 1024,
-              "type": "keyword"
-            },
             "type": {
               "ignore_above": 1024,
               "type": "keyword"
@@ -4639,112 +4106,41 @@
             "uid": {
               "ignore_above": 1024,
               "type": "keyword"
+            }
+          }
+        },
+        "geo": {
+          "properties": {
+            "city_name": {
+              "ignore_above": 1024,
+              "type": "keyword"
             },
-            "x509": {
-              "properties": {
-                "alternative_names": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "issuer": {
-                  "properties": {
-                    "common_name": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "country": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "distinguished_name": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "locality": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "organization": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "organizational_unit": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "state_or_province": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    }
-                  }
-                },
-                "not_after": {
-                  "type": "date"
-                },
-                "not_before": {
-                  "type": "date"
-                },
-                "public_key_algorithm": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "public_key_curve": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "public_key_exponent": {
-                  "doc_values": false,
-                  "index": false,
-                  "type": "long"
-                },
-                "public_key_size": {
-                  "type": "long"
-                },
-                "serial_number": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "signature_algorithm": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "subject": {
-                  "properties": {
-                    "common_name": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "country": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "distinguished_name": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "locality": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "organization": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "organizational_unit": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "state_or_province": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    }
-                  }
-                },
-                "version_number": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                }
-              }
+            "continent_name": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "country_iso_code": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "country_name": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "location": {
+              "type": "geo_point"
+            },
+            "name": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "region_iso_code": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "region_name": {
+              "ignore_above": 1024,
+              "type": "keyword"
             }
           }
         },
@@ -4759,6 +4155,26 @@
               "type": "keyword"
             },
             "name": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        },
+        "hash": {
+          "properties": {
+            "md5": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "sha1": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "sha256": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "sha512": {
               "ignore_above": 1024,
               "type": "keyword"
             }
@@ -4859,10 +4275,6 @@
                   "type": "keyword"
                 },
                 "platform": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "variant": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
@@ -4995,14 +4407,26 @@
                 },
                 "status_code": {
                   "type": "long"
-                },
-                "version": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
                 }
               }
             },
             "version": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        },
+        "interface": {
+          "properties": {
+            "alias": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "id": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "name": {
               "ignore_above": 1024,
               "type": "keyword"
             }
@@ -5013,14 +4437,6 @@
         },
         "log": {
           "properties": {
-            "file": {
-              "properties": {
-                "path": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                }
-              }
-            },
             "level": {
               "ignore_above": 1024,
               "type": "keyword"
@@ -5320,10 +4736,6 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
-                "variant": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
                 "version": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -5365,6 +4777,46 @@
                   "type": "text"
                 }
               },
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        },
+        "os": {
+          "properties": {
+            "family": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "full": {
+              "fields": {
+                "text": {
+                  "norms": false,
+                  "type": "text"
+                }
+              },
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "kernel": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "name": {
+              "fields": {
+                "text": {
+                  "norms": false,
+                  "type": "text"
+                }
+              },
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "platform": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "version": {
               "ignore_above": 1024,
               "type": "keyword"
             }
@@ -5419,6 +4871,30 @@
               "type": "keyword"
             },
             "version": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        },
+        "pe": {
+          "properties": {
+            "company": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "description": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "file_version": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "original_file_name": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "product": {
               "ignore_above": 1024,
               "type": "keyword"
             }
@@ -5496,46 +4972,6 @@
                   "type": "keyword"
                 },
                 "sha512": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                }
-              }
-            },
-            "malware_classification": {
-              "properties": {
-                "features": {
-                  "properties": {
-                    "data": {
-                      "properties": {
-                        "buffer": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "decompressed_size": {
-                          "type": "integer"
-                        },
-                        "encoding": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        }
-                      }
-                    }
-                  }
-                },
-                "identifier": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "score": {
-                  "type": "double"
-                },
-                "threshold": {
-                  "type": "double"
-                },
-                "upx_packed": {
-                  "type": "boolean"
-                },
-                "version": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 }
@@ -5688,10 +5124,6 @@
             },
             "pe": {
               "properties": {
-                "architecture": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
                 "company": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -5701,10 +5133,6 @@
                   "type": "keyword"
                 },
                 "file_version": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "imphash": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
@@ -5727,132 +5155,17 @@
             "ppid": {
               "type": "long"
             },
-            "services": {
-              "ignore_above": 1024,
-              "type": "keyword"
-            },
             "start": {
               "type": "date"
             },
             "thread": {
               "properties": {
-                "call_stack": {
-                  "properties": {
-                    "instruction_pointer": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "memory_section": {
-                      "properties": {
-                        "address": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "protection": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "size": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        }
-                      }
-                    },
-                    "module_path": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "rva": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "symbol_info": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    }
-                  }
-                },
                 "id": {
                   "type": "long"
                 },
                 "name": {
                   "ignore_above": 1024,
                   "type": "keyword"
-                },
-                "service": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "start": {
-                  "type": "date"
-                },
-                "start_address": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "start_address_module": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "token": {
-                  "properties": {
-                    "domain": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "elevation": {
-                      "type": "boolean"
-                    },
-                    "elevation_type": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "impersonation_level": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "integrity_level": {
-                      "type": "long"
-                    },
-                    "integrity_level_name": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "is_appcontainer": {
-                      "type": "boolean"
-                    },
-                    "privileges": {
-                      "properties": {
-                        "description": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "enabled": {
-                          "type": "boolean"
-                        },
-                        "name": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        }
-                      },
-                      "type": "nested"
-                    },
-                    "sid": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "type": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "user": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    }
-                  }
-                },
-                "uptime": {
-                  "type": "long"
                 }
               }
             },
@@ -5866,69 +5179,8 @@
               "ignore_above": 1024,
               "type": "keyword"
             },
-            "token": {
-              "properties": {
-                "domain": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "elevation": {
-                  "type": "boolean"
-                },
-                "elevation_type": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "impersonation_level": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "integrity_level": {
-                  "type": "long"
-                },
-                "integrity_level_name": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "is_appcontainer": {
-                  "type": "boolean"
-                },
-                "privileges": {
-                  "properties": {
-                    "description": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "enabled": {
-                      "type": "boolean"
-                    },
-                    "name": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    }
-                  },
-                  "type": "nested"
-                },
-                "sid": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "type": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "user": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                }
-              }
-            },
             "uptime": {
               "type": "long"
-            },
-            "user": {
-              "ignore_above": 1024,
-              "type": "keyword"
             },
             "working_directory": {
               "fields": {
@@ -6342,6 +5594,12 @@
             },
             "rule": {
               "properties": {
+                "author": {
+                  "type": "keyword"
+                },
+                "building_block_type": {
+                  "type": "keyword"
+                },
                 "created_at": {
                   "type": "date"
                 },
@@ -6378,6 +5636,9 @@
                 "language": {
                   "type": "keyword"
                 },
+                "license": {
+                  "type": "keyword"
+                },
                 "max_signals": {
                   "type": "keyword"
                 },
@@ -6399,7 +5660,23 @@
                 "risk_score": {
                   "type": "keyword"
                 },
+                "risk_score_mapping": {
+                  "properties": {
+                    "field": {
+                      "type": "keyword"
+                    },
+                    "operator": {
+                      "type": "keyword"
+                    },
+                    "value": {
+                      "type": "keyword"
+                    }
+                  }
+                },
                 "rule_id": {
+                  "type": "keyword"
+                },
+                "rule_name_override": {
                   "type": "keyword"
                 },
                 "saved_id": {
@@ -6407,6 +5684,22 @@
                 },
                 "severity": {
                   "type": "keyword"
+                },
+                "severity_mapping": {
+                  "properties": {
+                    "field": {
+                      "type": "keyword"
+                    },
+                    "operator": {
+                      "type": "keyword"
+                    },
+                    "severity": {
+                      "type": "keyword"
+                    },
+                    "value": {
+                      "type": "keyword"
+                    }
+                  }
                 },
                 "size": {
                   "type": "keyword"
@@ -6451,6 +5744,9 @@
                   "type": "keyword"
                 },
                 "timeline_title": {
+                  "type": "keyword"
+                },
+                "timestamp_override": {
                   "type": "keyword"
                 },
                 "to": {
@@ -6637,663 +5933,6 @@
           "ignore_above": 1024,
           "type": "keyword"
         },
-        "target": {
-          "properties": {
-            "dll": {
-              "properties": {
-                "code_signature": {
-                  "properties": {
-                    "exists": {
-                      "type": "boolean"
-                    },
-                    "status": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "subject_name": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "trusted": {
-                      "type": "boolean"
-                    },
-                    "valid": {
-                      "type": "boolean"
-                    }
-                  }
-                },
-                "compile_time": {
-                  "type": "date"
-                },
-                "hash": {
-                  "properties": {
-                    "md5": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "sha1": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "sha256": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "sha512": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    }
-                  }
-                },
-                "malware_classification": {
-                  "properties": {
-                    "features": {
-                      "properties": {
-                        "data": {
-                          "properties": {
-                            "buffer": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "decompressed_size": {
-                              "type": "integer"
-                            },
-                            "encoding": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          }
-                        }
-                      }
-                    },
-                    "identifier": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "score": {
-                      "type": "double"
-                    },
-                    "threshold": {
-                      "type": "double"
-                    },
-                    "upx_packed": {
-                      "type": "boolean"
-                    },
-                    "version": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    }
-                  }
-                },
-                "mapped_address": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "mapped_size": {
-                  "type": "long"
-                },
-                "name": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "path": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "pe": {
-                  "properties": {
-                    "architecture": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "company": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "description": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "file_version": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "imphash": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "original_file_name": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "product": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    }
-                  }
-                }
-              }
-            },
-            "process": {
-              "properties": {
-                "args": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "args_count": {
-                  "type": "long"
-                },
-                "code_signature": {
-                  "properties": {
-                    "exists": {
-                      "type": "boolean"
-                    },
-                    "status": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "subject_name": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "trusted": {
-                      "type": "boolean"
-                    },
-                    "valid": {
-                      "type": "boolean"
-                    }
-                  }
-                },
-                "command_line": {
-                  "fields": {
-                    "text": {
-                      "norms": false,
-                      "type": "text"
-                    }
-                  },
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "entity_id": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "executable": {
-                  "fields": {
-                    "text": {
-                      "norms": false,
-                      "type": "text"
-                    }
-                  },
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "exit_code": {
-                  "type": "long"
-                },
-                "hash": {
-                  "properties": {
-                    "md5": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "sha1": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "sha256": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "sha512": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    }
-                  }
-                },
-                "malware_classification": {
-                  "properties": {
-                    "features": {
-                      "properties": {
-                        "data": {
-                          "properties": {
-                            "buffer": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "decompressed_size": {
-                              "type": "integer"
-                            },
-                            "encoding": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          }
-                        }
-                      }
-                    },
-                    "identifier": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "score": {
-                      "type": "double"
-                    },
-                    "threshold": {
-                      "type": "double"
-                    },
-                    "upx_packed": {
-                      "type": "boolean"
-                    },
-                    "version": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    }
-                  }
-                },
-                "name": {
-                  "fields": {
-                    "text": {
-                      "norms": false,
-                      "type": "text"
-                    }
-                  },
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "parent": {
-                  "properties": {
-                    "args": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "args_count": {
-                      "type": "long"
-                    },
-                    "code_signature": {
-                      "properties": {
-                        "exists": {
-                          "type": "boolean"
-                        },
-                        "status": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "subject_name": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "trusted": {
-                          "type": "boolean"
-                        },
-                        "valid": {
-                          "type": "boolean"
-                        }
-                      }
-                    },
-                    "command_line": {
-                      "fields": {
-                        "text": {
-                          "norms": false,
-                          "type": "text"
-                        }
-                      },
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "entity_id": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "executable": {
-                      "fields": {
-                        "text": {
-                          "norms": false,
-                          "type": "text"
-                        }
-                      },
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "exit_code": {
-                      "type": "long"
-                    },
-                    "hash": {
-                      "properties": {
-                        "md5": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "sha1": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "sha256": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "sha512": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        }
-                      }
-                    },
-                    "name": {
-                      "fields": {
-                        "text": {
-                          "norms": false,
-                          "type": "text"
-                        }
-                      },
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "pgid": {
-                      "type": "long"
-                    },
-                    "pid": {
-                      "type": "long"
-                    },
-                    "ppid": {
-                      "type": "long"
-                    },
-                    "start": {
-                      "type": "date"
-                    },
-                    "thread": {
-                      "properties": {
-                        "id": {
-                          "type": "long"
-                        },
-                        "name": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        }
-                      }
-                    },
-                    "title": {
-                      "fields": {
-                        "text": {
-                          "norms": false,
-                          "type": "text"
-                        }
-                      },
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "uptime": {
-                      "type": "long"
-                    },
-                    "working_directory": {
-                      "fields": {
-                        "text": {
-                          "norms": false,
-                          "type": "text"
-                        }
-                      },
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    }
-                  }
-                },
-                "pe": {
-                  "properties": {
-                    "architecture": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "company": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "description": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "file_version": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "imphash": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "original_file_name": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "product": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    }
-                  }
-                },
-                "pgid": {
-                  "type": "long"
-                },
-                "pid": {
-                  "type": "long"
-                },
-                "ppid": {
-                  "type": "long"
-                },
-                "services": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "start": {
-                  "type": "date"
-                },
-                "thread": {
-                  "properties": {
-                    "call_stack": {
-                      "properties": {
-                        "instruction_pointer": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "memory_section": {
-                          "properties": {
-                            "address": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "protection": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "size": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          }
-                        },
-                        "module_path": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "rva": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "symbol_info": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        }
-                      }
-                    },
-                    "id": {
-                      "type": "long"
-                    },
-                    "name": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "service": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "start": {
-                      "type": "date"
-                    },
-                    "start_address": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "start_address_module": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "token": {
-                      "properties": {
-                        "domain": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "elevation": {
-                          "type": "boolean"
-                        },
-                        "elevation_type": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "impersonation_level": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "integrity_level": {
-                          "type": "long"
-                        },
-                        "integrity_level_name": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "is_appcontainer": {
-                          "type": "boolean"
-                        },
-                        "privileges": {
-                          "properties": {
-                            "description": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "enabled": {
-                              "type": "boolean"
-                            },
-                            "name": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          },
-                          "type": "nested"
-                        },
-                        "sid": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "type": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "user": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        }
-                      }
-                    },
-                    "uptime": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "title": {
-                  "fields": {
-                    "text": {
-                      "norms": false,
-                      "type": "text"
-                    }
-                  },
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "token": {
-                  "properties": {
-                    "domain": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "elevation": {
-                      "type": "boolean"
-                    },
-                    "elevation_type": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "impersonation_level": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "integrity_level": {
-                      "type": "long"
-                    },
-                    "integrity_level_name": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "is_appcontainer": {
-                      "type": "boolean"
-                    },
-                    "privileges": {
-                      "properties": {
-                        "description": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "enabled": {
-                          "type": "boolean"
-                        },
-                        "name": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        }
-                      },
-                      "type": "nested"
-                    },
-                    "sid": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "type": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "user": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    }
-                  }
-                },
-                "uptime": {
-                  "type": "long"
-                },
-                "user": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "working_directory": {
-                  "fields": {
-                    "text": {
-                      "norms": false,
-                      "type": "text"
-                    }
-                  },
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                }
-              }
-            }
-          }
-        },
         "threat": {
           "properties": {
             "framework": {
@@ -7397,112 +6036,6 @@
                 "supported_ciphers": {
                   "ignore_above": 1024,
                   "type": "keyword"
-                },
-                "x509": {
-                  "properties": {
-                    "alternative_names": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "issuer": {
-                      "properties": {
-                        "common_name": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "country": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "distinguished_name": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "locality": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "organization": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "organizational_unit": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "state_or_province": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        }
-                      }
-                    },
-                    "not_after": {
-                      "type": "date"
-                    },
-                    "not_before": {
-                      "type": "date"
-                    },
-                    "public_key_algorithm": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "public_key_curve": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "public_key_exponent": {
-                      "doc_values": false,
-                      "index": false,
-                      "type": "long"
-                    },
-                    "public_key_size": {
-                      "type": "long"
-                    },
-                    "serial_number": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "signature_algorithm": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "subject": {
-                      "properties": {
-                        "common_name": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "country": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "distinguished_name": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "locality": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "organization": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "organizational_unit": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "state_or_province": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        }
-                      }
-                    },
-                    "version_number": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    }
-                  }
                 }
               }
             },
@@ -7563,112 +6096,6 @@
                 "subject": {
                   "ignore_above": 1024,
                   "type": "keyword"
-                },
-                "x509": {
-                  "properties": {
-                    "alternative_names": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "issuer": {
-                      "properties": {
-                        "common_name": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "country": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "distinguished_name": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "locality": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "organization": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "organizational_unit": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "state_or_province": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        }
-                      }
-                    },
-                    "not_after": {
-                      "type": "date"
-                    },
-                    "not_before": {
-                      "type": "date"
-                    },
-                    "public_key_algorithm": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "public_key_curve": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "public_key_exponent": {
-                      "doc_values": false,
-                      "index": false,
-                      "type": "long"
-                    },
-                    "public_key_size": {
-                      "type": "long"
-                    },
-                    "serial_number": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "signature_algorithm": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "subject": {
-                      "properties": {
-                        "common_name": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "country": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "distinguished_name": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "locality": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "organization": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "organizational_unit": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "state_or_province": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        }
-                      }
-                    },
-                    "version_number": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    }
-                  }
                 }
               }
             },
@@ -7879,10 +6306,6 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
-                "variant": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
                 "version": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -7890,6 +6313,18 @@
               }
             },
             "version": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        },
+        "vlan": {
+          "properties": {
+            "id": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "name": {
               "ignore_above": 1024,
               "type": "keyword"
             }

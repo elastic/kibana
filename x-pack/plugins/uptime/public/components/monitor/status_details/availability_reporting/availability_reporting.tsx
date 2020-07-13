@@ -30,7 +30,7 @@ export const AvailabilityReporting: React.FC<Props> = ({ allLocations }) => {
       name: LocationLabel,
       truncateText: true,
       render: (val: string, item: StatusTag) => {
-        return <TagLabel color={item.color} label={item.label} />;
+        return <TagLabel {...item} />;
       },
     },
     {

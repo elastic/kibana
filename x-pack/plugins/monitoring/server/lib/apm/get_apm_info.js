@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, capitalize } from 'lodash';
+import { get, upperFirst } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { createQuery } from '../create_query';
 import { getDiffCalculation } from '../beats/_beats_stats';
@@ -33,8 +33,8 @@ export function handleResponse(response, apmUuid) {
     transportAddress: get(stats, 'beat.host', null),
     version: get(stats, 'beat.version', null),
     name: get(stats, 'beat.name', null),
-    type: capitalize(get(stats, 'beat.type')) || null,
-    output: capitalize(get(stats, 'metrics.libbeat.output.type')) || null,
+    type: upperFirst(get(stats, 'beat.type')) || null,
+    output: upperFirst(get(stats, 'metrics.libbeat.output.type')) || null,
     configReloads: get(stats, 'metrics.libbeat.config.reloads', null),
     uptime: get(stats, 'metrics.beat.info.uptime.ms', null),
     eventsTotal: getDiffCalculation(eventsTotalLast, eventsTotalFirst),

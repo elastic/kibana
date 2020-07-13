@@ -558,22 +558,6 @@
         ],
       },
       {
-        groupSlug: 'lodash.clonedeep',
-        groupName: 'lodash.clonedeep related packages',
-        packageNames: [
-          'lodash.clonedeep',
-          '@types/lodash.clonedeep',
-        ],
-      },
-      {
-        groupSlug: 'lodash.clonedeepwith',
-        groupName: 'lodash.clonedeepwith related packages',
-        packageNames: [
-          'lodash.clonedeepwith',
-          '@types/lodash.clonedeepwith',
-        ],
-      },
-      {
         groupSlug: 'log-symbols',
         groupName: 'log-symbols related packages',
         packageNames: [
