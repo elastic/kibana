@@ -97,7 +97,7 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
 
     useEffect(() => {
       // optionally register the provider if provided
-      if (!providerRegistered && register != null) {
+      if (register != null) {
         dispatch(dragAndDropActions.registerProvider({ provider: { ...register, and: [] } }));
         setProviderRegistered(true);
       }
