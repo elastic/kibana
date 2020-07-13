@@ -47,7 +47,7 @@ export const ENDPOINT_QUARANTINE_TEXT = i18n.translate(
 );
 
 export const EXCEPTION_BUILDER_INFO = i18n.translate(
-  'xpack.securitySolution.exceptions.addException.infoLabel',
+  'xpack.securitySolution.exceptions.editException.infoLabel',
   {
     defaultMessage: "Alerts are generated when the rule's conditions are met, except when:",
   }

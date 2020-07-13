@@ -25,6 +25,7 @@ const enabledActionTypes = [
   '.server-log',
   '.servicenow',
   '.jira',
+  '.resilient',
   '.slack',
   '.webhook',
   'test.authorization',

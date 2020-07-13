@@ -1,0 +1,12 @@
+[[advanced]]
+== Advanced
+
+* <<running-elasticsearch>>
+* <<development-es-snapshots>>
+* <<development-basepath>>
+
+include::development-es-snapshots.asciidoc[]
+
+include::running-elasticsearch.asciidoc[]
+
+include::development-basepath.asciidoc[]

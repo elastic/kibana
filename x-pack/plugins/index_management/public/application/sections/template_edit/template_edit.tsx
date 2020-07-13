@@ -85,11 +85,11 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
   } else if (template) {
     const {
       name: templateName,
-      _kbnMeta: { isCloudManaged },
+      _kbnMeta: { type },
     } = template;
     const isSystemTemplate = templateName && templateName.startsWith('.');
 
-    if (isCloudManaged) {
+    if (type === 'cloudManaged') {
       content = (
         <EuiCallOut
           title={
