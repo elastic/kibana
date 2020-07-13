@@ -5,4 +5,5 @@
  */
 
 export * from './log_analysis_job_problem_indicator';
+export * from './notices_section';
 export * from './recreate_job_button';
