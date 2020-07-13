@@ -33,7 +33,7 @@ describe('ValueListsTable', () => {
   });
 
   it('calls onChange when pagination is modified', () => {
-    const lists = Array<ListSchema>(3).fill(getListResponseMock());
+    const lists = Array<ListSchema>(6).fill(getListResponseMock());
     const onChange = jest.fn();
     const container = mount(
       <TestProviders>
@@ -49,7 +49,7 @@ describe('ValueListsTable', () => {
     );
 
     act(() => {
-      container.find('button[data-test-subj="pagination-button-next"]').simulate('click');
+      container.find('a[data-test-subj="pagination-button-next"]').simulate('click');
     });
 
     expect(onChange).toHaveBeenCalledWith(
