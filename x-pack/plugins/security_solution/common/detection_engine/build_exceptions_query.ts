@@ -18,7 +18,7 @@ import {
   entriesNested,
   ExceptionListItemSchema,
 } from '../../../lists/common/schemas';
-import { Language, Query } from './schemas/common/schemas';
+import { Language } from './schemas/common/schemas';
 
 type Operators = 'and' | 'or' | 'not';
 type LuceneOperators = 'AND' | 'OR' | 'NOT';
@@ -92,7 +92,7 @@ export const buildMatch = ({
   const { value, operator, field } = item;
   const exceptionOperator = operatorBuilder({ operator, language });
 
-  return `${exceptionOperator}${field}:${value}`;
+  return `${exceptionOperator}${field}:"${value}"`;
 };
 
 export const buildMatchAny = ({
@@ -110,7 +110,7 @@ export const buildMatchAny = ({
     default:
       const or = getLanguageBooleanOperator({ language, value: 'or' });
       const exceptionOperator = operatorBuilder({ operator, language });
-      const matchAnyValues = value.map((v) => v);
+      const matchAnyValues = value.map((v) => `"${v}"`);
 
       return `${exceptionOperator}${field}:(${matchAnyValues.join(` ${or} `)})`;
   }
@@ -125,7 +125,7 @@ export const buildNested = ({
 }): string => {
   const { field, entries } = item;
   const and = getLanguageBooleanOperator({ language, value: 'and' });
-  const values = entries.map((entry) => `${entry.field}:${entry.value}`);
+  const values = entries.map((entry) => `${entry.field}:"${entry.value}"`);
 
   return `${field}:{ ${values.join(` ${and} `)} }`;
 };
@@ -152,24 +152,21 @@ export const evaluateValues = ({
 
 export const formatQuery = ({
   exceptions,
-  query,
   language,
 }: {
   exceptions: string[];
-  query: string;
   language: Language;
 }): string => {
-  if (exceptions.length > 0) {
-    const or = getLanguageBooleanOperator({ language, value: 'or' });
-    const and = getLanguageBooleanOperator({ language, value: 'and' });
-    const formattedExceptions = exceptions.map((exception) => {
-      return `(${query} ${and} ${exception})`;
-    });
+  const and = getLanguageBooleanOperator({ language, value: 'and' });
+  const formattedExceptions = exceptions.map((exception, index) => {
+    if (index === 0) {
+      return exception;
+    }
 
-    return formattedExceptions.join(` ${or} `);
-  } else {
-    return query;
-  }
+    return `${and} ${exception}`;
+  });
+
+  return formattedExceptions.join(' ');
 };
 
 export const buildExceptionItemEntries = ({
@@ -191,19 +188,18 @@ export const buildExceptionItemEntries = ({
 };
 
 export const buildQueryExceptions = ({
-  query,
   language,
   lists,
 }: {
-  query: Query;
   language: Language;
   lists: ExceptionListItemSchema[] | undefined;
 }): DataQuery[] => {
-  if (lists != null) {
+  if (lists != null && lists.length > 0) {
     const exceptions = lists.map((exceptionItem) =>
       buildExceptionItemEntries({ lists: exceptionItem.entries, language })
     );
-    const formattedQuery = formatQuery({ exceptions, language, query });
+    const formattedQuery = formatQuery({ exceptions, language });
+
     return [
       {
         query: formattedQuery,
@@ -211,6 +207,6 @@ export const buildQueryExceptions = ({
       },
     ];
   } else {
-    return [{ query, language }];
+    return [];
   }
 };

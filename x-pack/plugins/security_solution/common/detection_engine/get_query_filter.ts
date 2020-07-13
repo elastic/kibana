@@ -27,7 +27,9 @@ export const getQueryFilter = (
     title: index.join(),
   };
 
-  const queries: DataQuery[] = buildQueryExceptions({ query, language, lists });
+  const initialQuery = [{ query, language }];
+  const exceptions = buildQueryExceptions({ language, lists });
+  const queries: DataQuery[] = [...initialQuery, ...exceptions];
 
   const config = {
     allowLeadingWildcards: true,

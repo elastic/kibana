@@ -45,6 +45,7 @@ export const singleSearchAfter = async ({
       size: pageSize,
       searchAfterSortId,
     });
+
     const start = performance.now();
     const nextSearchAfterResult: SignalSearchResponse = await services.callCluster(
       'search',
