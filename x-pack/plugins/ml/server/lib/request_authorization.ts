@@ -8,6 +8,6 @@ import { KibanaRequest } from 'kibana/server';
 
 export function getAuthorizationHeader(request: KibanaRequest) {
   return {
-    headers: { authorization: request.headers.authorization },
+    headers: { 'es-secondary-authorization': request.headers.authorization },
   };
 }
