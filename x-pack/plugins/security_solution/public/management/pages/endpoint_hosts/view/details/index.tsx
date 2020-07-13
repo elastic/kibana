@@ -38,7 +38,7 @@ import { PolicyResponse } from './policy_response';
 import { HostMetadata } from '../../../../../../common/endpoint/types';
 import { FlyoutSubHeader, FlyoutSubHeaderProps } from './components/flyout_sub_header';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
-import { getEndpointListPath } from '../../../../common/routing';
+import { getHostListPath } from '../../../../common/routing';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 
@@ -122,14 +122,14 @@ const PolicyResponseFlyoutPanel = memo<{
   const [detailsUri, detailsRoutePath] = useMemo(
     () => [
       formatUrl(
-        getEndpointListPath({
-          name: 'endpointList',
+        getHostListPath({
+          name: 'hostList',
           ...queryParams,
           selected_host: hostMeta.host.id,
         })
       ),
-      getEndpointListPath({
-        name: 'endpointList',
+      getHostListPath({
+        name: 'hostList',
         ...queryParams,
         selected_host: hostMeta.host.id,
       }),

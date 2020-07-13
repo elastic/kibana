@@ -144,6 +144,7 @@
 /x-pack/plugins/licensing/  @elastic/kibana-platform
 /x-pack/plugins/global_search/  @elastic/kibana-platform
 /x-pack/plugins/cloud/ @elastic/kibana-platform
+/x-pack/test/saved_objects_field_count/ @elastic/kibana-platform
 /packages/kbn-config-schema/ @elastic/kibana-platform
 /src/legacy/server/config/ @elastic/kibana-platform
 /src/legacy/server/http/ @elastic/kibana-platform
@@ -199,6 +200,11 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 
 # Design
 **/*.scss  @elastic/kibana-design
+
+# Enterprise Search
+/x-pack/plugins/enterprise_search/ @elastic/app-search-frontend @elastic/workplace-search-frontend
+/x-pack/test/functional_enterprise_search/ @elastic/app-search-frontend @elastic/workplace-search-frontend
+/x-pack/plugins/enterprise_search/**/*.scss @elastic/ent-search-design
 
 # Elasticsearch UI
 /src/plugins/dev_tools/ @elastic/es-ui

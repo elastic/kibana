@@ -16,6 +16,7 @@ import chartBarHorizontalStackedSVG from '../assets/chart_bar_horizontal_stacked
 import chartLineSVG from '../assets/chart_line.svg';
 
 import { VisualizationType } from '../index';
+import { FittingFunction } from './fitting_functions';
 
 export interface LegendConfig {
   isVisible: boolean;
@@ -99,6 +100,10 @@ export const yAxisConfig: ExpressionFunctionDefinition<
       types: ['string'],
       options: ['auto', 'left', 'right'],
       help: 'The axis mode of the metric',
+    },
+    color: {
+      types: ['string'],
+      help: 'The color of the series',
     },
   },
   fn: function fn(input: unknown, args: YConfig) {
@@ -206,6 +211,7 @@ export type YAxisMode = 'auto' | 'left' | 'right';
 export interface YConfig {
   forAccessor: string;
   axisMode?: YAxisMode;
+  color?: string;
 }
 
 export interface LayerConfig {
@@ -231,12 +237,14 @@ export interface XYArgs {
   yTitle: string;
   legend: LegendConfig & { type: 'lens_xy_legendConfig' };
   layers: LayerArgs[];
+  fittingFunction?: FittingFunction;
 }
 
 // Persisted parts of the state
 export interface XYState {
   preferredSeriesType: SeriesType;
   legend: LegendConfig;
+  fittingFunction?: FittingFunction;
   layers: LayerConfig[];
 }
 

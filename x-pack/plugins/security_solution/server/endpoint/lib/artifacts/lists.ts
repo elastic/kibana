@@ -5,24 +5,25 @@
  */
 
 import { createHash } from 'crypto';
+import { deflate } from 'zlib';
+import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { validate } from '../../../../common/validate';
 
-import {
-  Entry,
-  EntryNested,
-  EntryMatch,
-  EntryMatchAny,
-} from '../../../../../lists/common/schemas/types/entries';
+import { Entry, EntryNested } from '../../../../../lists/common/schemas/types/entries';
 import { FoundExceptionListItemSchema } from '../../../../../lists/common/schemas/response/found_exception_list_item_schema';
 import { ExceptionListClient } from '../../../../../lists/server';
 import {
   InternalArtifactSchema,
   TranslatedEntry,
-  TranslatedEntryMatch,
-  TranslatedEntryMatchAny,
-  TranslatedEntryNested,
   WrappedTranslatedExceptionList,
-  wrappedExceptionList,
+  wrappedTranslatedExceptionList,
+  TranslatedEntryNestedEntry,
+  translatedEntryNestedEntry,
+  translatedEntry as translatedEntryType,
+  TranslatedEntryMatcher,
+  translatedEntryMatchMatcher,
+  translatedEntryMatchAnyMatcher,
+  TranslatedExceptionListItem,
 } from '../../schemas';
 import { ArtifactConstants } from './common';
 
@@ -34,13 +35,17 @@ export async function buildArtifact(
   const exceptionsBuffer = Buffer.from(JSON.stringify(exceptions));
   const sha256 = createHash('sha256').update(exceptionsBuffer.toString()).digest('hex');
 
+  // Keep compression info empty in case its a duplicate. Lazily compress before committing if needed.
   return {
     identifier: `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-${os}-${schemaVersion}`,
-    sha256,
-    encoding: 'application/json',
+    compressionAlgorithm: 'none',
+    encryptionAlgorithm: 'none',
+    decodedSha256: sha256,
+    encodedSha256: sha256,
+    decodedSize: exceptionsBuffer.byteLength,
+    encodedSize: exceptionsBuffer.byteLength,
     created: Date.now(),
     body: exceptionsBuffer.toString('base64'),
-    size: exceptionsBuffer.byteLength,
   };
 }
 
@@ -49,7 +54,7 @@ export async function getFullEndpointExceptionList(
   os: string,
   schemaVersion: string
 ): Promise<WrappedTranslatedExceptionList> {
-  const exceptions: WrappedTranslatedExceptionList = { exceptions_list: [] };
+  const exceptions: WrappedTranslatedExceptionList = { entries: [] };
   let numResponses = 0;
   let page = 1;
 
@@ -67,7 +72,7 @@ export async function getFullEndpointExceptionList(
     if (response?.data !== undefined) {
       numResponses = response.data.length;
 
-      exceptions.exceptions_list = exceptions.exceptions_list.concat(
+      exceptions.entries = exceptions.entries.concat(
         translateToEndpointExceptions(response, schemaVersion)
       );
 
@@ -77,7 +82,7 @@ export async function getFullEndpointExceptionList(
     }
   } while (numResponses > 0);
 
-  const [validated, errors] = validate(exceptions, wrappedExceptionList);
+  const [validated, errors] = validate(exceptions, wrappedTranslatedExceptionList);
   if (errors != null) {
     throw new Error(errors);
   }
@@ -91,67 +96,114 @@ export async function getFullEndpointExceptionList(
 export function translateToEndpointExceptions(
   exc: FoundExceptionListItemSchema,
   schemaVersion: string
-): TranslatedEntry[] {
-  const translatedList: TranslatedEntry[] = [];
-
-  if (schemaVersion === '1.0.0') {
-    exc.data.forEach((list) => {
-      list.entries.forEach((entry) => {
-        const tEntry = translateEntry(schemaVersion, entry);
-        if (tEntry !== undefined) {
-          translatedList.push(tEntry);
-        }
-      });
+): TranslatedExceptionListItem[] {
+  const entrySet = new Set();
+  const entriesFiltered: TranslatedExceptionListItem[] = [];
+  if (schemaVersion === 'v1') {
+    exc.data.forEach((entry) => {
+      const translatedItem = translateItem(schemaVersion, entry);
+      const entryHash = createHash('sha256').update(JSON.stringify(translatedItem)).digest('hex');
+      if (!entrySet.has(entryHash)) {
+        entriesFiltered.push(translatedItem);
+        entrySet.add(entryHash);
+      }
     });
+    return entriesFiltered;
   } else {
     throw new Error('unsupported schemaVersion');
   }
-  return translatedList;
+}
+
+function getMatcherFunction(field: string, matchAny?: boolean): TranslatedEntryMatcher {
+  return matchAny
+    ? field.endsWith('.text')
+      ? 'exact_caseless_any'
+      : 'exact_cased_any'
+    : field.endsWith('.text')
+    ? 'exact_caseless'
+    : 'exact_cased';
+}
+
+function normalizeFieldName(field: string): string {
+  return field.endsWith('.text') ? field.substring(0, field.length - 5) : field;
+}
+
+function translateItem(
+  schemaVersion: string,
+  item: ExceptionListItemSchema
+): TranslatedExceptionListItem {
+  const itemSet = new Set();
+  return {
+    type: item.type,
+    entries: item.entries.reduce((translatedEntries: TranslatedEntry[], entry) => {
+      const translatedEntry = translateEntry(schemaVersion, entry);
+      if (translatedEntry !== undefined && translatedEntryType.is(translatedEntry)) {
+        const itemHash = createHash('sha256').update(JSON.stringify(translatedEntry)).digest('hex');
+        if (!itemSet.has(itemHash)) {
+          translatedEntries.push(translatedEntry);
+          itemSet.add(itemHash);
+        }
+      }
+      return translatedEntries;
+    }, []),
+  };
 }
 
 function translateEntry(
   schemaVersion: string,
   entry: Entry | EntryNested
 ): TranslatedEntry | undefined {
-  let translatedEntry;
   switch (entry.type) {
     case 'nested': {
-      const e = (entry as unknown) as EntryNested;
-      const nestedEntries: TranslatedEntry[] = [];
-      for (const nestedEntry of e.entries) {
-        const translation = translateEntry(schemaVersion, nestedEntry);
-        if (translation !== undefined) {
-          nestedEntries.push(translation);
-        }
-      }
-      translatedEntry = {
+      const nestedEntries = entry.entries.reduce(
+        (entries: TranslatedEntryNestedEntry[], nestedEntry) => {
+          const translatedEntry = translateEntry(schemaVersion, nestedEntry);
+          if (nestedEntry !== undefined && translatedEntryNestedEntry.is(translatedEntry)) {
+            entries.push(translatedEntry);
+          }
+          return entries;
+        },
+        []
+      );
+      return {
         entries: nestedEntries,
-        field: e.field,
+        field: entry.field,
         type: 'nested',
-      } as TranslatedEntryNested;
-      break;
+      };
     }
     case 'match': {
-      const e = (entry as unknown) as EntryMatch;
-      translatedEntry = {
-        field: e.field.endsWith('.text') ? e.field.substring(0, e.field.length - 5) : e.field,
-        operator: e.operator,
-        type: e.field.endsWith('.text') ? 'exact_caseless' : 'exact_cased',
-        value: e.value,
-      } as TranslatedEntryMatch;
-      break;
+      const matcher = getMatcherFunction(entry.field);
+      return translatedEntryMatchMatcher.is(matcher)
+        ? {
+            field: normalizeFieldName(entry.field),
+            operator: entry.operator,
+            type: matcher,
+            value: entry.value,
+          }
+        : undefined;
     }
-    case 'match_any':
-      {
-        const e = (entry as unknown) as EntryMatchAny;
-        translatedEntry = {
-          field: e.field.endsWith('.text') ? e.field.substring(0, e.field.length - 5) : e.field,
-          operator: e.operator,
-          type: e.field.endsWith('.text') ? 'exact_caseless_any' : 'exact_cased_any',
-          value: e.value,
-        } as TranslatedEntryMatchAny;
-      }
-      break;
+    case 'match_any': {
+      const matcher = getMatcherFunction(entry.field, true);
+      return translatedEntryMatchAnyMatcher.is(matcher)
+        ? {
+            field: normalizeFieldName(entry.field),
+            operator: entry.operator,
+            type: matcher,
+            value: entry.value,
+          }
+        : undefined;
+    }
   }
-  return translatedEntry || undefined;
+}
+
+export async function compressExceptionList(buffer: Buffer): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    deflate(buffer, function (err, buf) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(buf);
+      }
+    });
+  });
 }

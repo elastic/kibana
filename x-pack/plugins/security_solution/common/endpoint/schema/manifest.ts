@@ -5,13 +5,26 @@
  */
 
 import * as t from 'io-ts';
-import { identifier, manifestSchemaVersion, manifestVersion, sha256, size, url } from './common';
+import {
+  compressionAlgorithm,
+  encryptionAlgorithm,
+  identifier,
+  manifestSchemaVersion,
+  manifestVersion,
+  relativeUrl,
+  sha256,
+  size,
+} from './common';
 
 export const manifestEntrySchema = t.exact(
   t.type({
-    url,
-    sha256,
-    size,
+    relative_url: relativeUrl,
+    decoded_sha256: sha256,
+    decoded_size: size,
+    encoded_sha256: sha256,
+    encoded_size: size,
+    compression_algorithm: compressionAlgorithm,
+    encryption_algorithm: encryptionAlgorithm,
   })
 );
 

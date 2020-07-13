@@ -25,7 +25,8 @@ simply click *Load Kibana objects* at the bottom of the Setup Instructions.
 [role="screenshot"]
 image::apm/images/apm-index-pattern.png[Setup index pattern for APM in Kibana]
 
-To use a custom index pattern, see <<apm-settings-in-kibana>>.
+TIP: To use a custom index pattern,
+adjust Kibana's <<apm-settings-in-kibana,settings>> or use the <<api-create-apm-index-pattern,Kibana API>>.
 
 [float]
 [[apm-getting-started-next]]
