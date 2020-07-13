@@ -5,7 +5,7 @@
  */
 
 import { AssetParts } from '../../../types';
-import { pathParts } from './index';
+import { pathParts, groupPathsByService } from './index';
 
 const testPaths = [
   {
@@ -47,4 +47,35 @@ test('testPathParts', () => {
   for (const value of testPaths) {
     expect(pathParts(value.path)).toStrictEqual(value.assetParts as AssetParts);
   }
+});
+
+test('groupPathsByService', () => {
+  const dashboardPaths = [
+    'foo-1.1.0/kibana/dashboard/a.json',
+    'foo-1.1.0/kibana/dashboard/b.json',
+    'foo-1.1.0/kibana/dashboard/c.json',
+  ];
+
+  const visualizationPaths = [
+    'foo-1.1.0/kibana/visualization/a.json',
+    'foo-1.1.0/kibana/visualization/b.json',
+  ];
+
+  const canvasTemplatePaths = ['foo-1.1.0/kibana/canvas-workpad-template/a.json'];
+
+  const unknownAssetPaths = ['foo-1.1.0/kibana/unkown/a.json'];
+
+  const pathsByService = groupPathsByService([
+    ...dashboardPaths,
+    ...visualizationPaths,
+    ...canvasTemplatePaths,
+    ...unknownAssetPaths,
+  ]);
+
+  expect(pathsByService.kibana.dashboard).toHaveLength(dashboardPaths.length);
+  expect(pathsByService.kibana.visualization).toHaveLength(visualizationPaths.length);
+  expect(pathsByService.kibana['canvas-workpad-template']).toHaveLength(canvasTemplatePaths.length);
+  // TS-Ingore to make sure this unkown value does not end up on the result
+  // @ts-ignore
+  expect(pathsByService.kibana.unknown).toBeUndefined();
 });
