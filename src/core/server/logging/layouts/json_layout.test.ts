@@ -174,6 +174,7 @@ test('format() meta can override @timestamp', () => {
     JSON.parse(
       layout.format({
         message: 'foo',
+        timestamp,
         level: LogLevel.Debug,
         context: 'bar',
         pid: 3,
@@ -232,6 +233,7 @@ test('format() meta can override log level objects', () => {
     JSON.parse(
       layout.format({
         timestamp,
+        context: '123',
         message: 'foo',
         level: LogLevel.Error,
         pid: 3,
@@ -247,6 +249,7 @@ test('format() meta can override log level objects', () => {
     message: 'foo',
     log: {
       level: 'FATAL',
+      logger: '123',
     },
     process: {
       pid: 3,
