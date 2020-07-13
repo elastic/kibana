@@ -14,5 +14,11 @@
   ],
   "server": true,
   "ui": true,
-  "extraPublicDirs": ["common"]
+  "extraPublicDirs": ["common"],
+  "requiredBundles": [
+    "kibanaReact",
+    "savedObjectsManagement",
+    "management",
+    "home"
+  ]
 }
