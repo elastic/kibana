@@ -26,6 +26,7 @@ const retryMigrationStatusCodes = [
   503, // ServiceUnavailable
   401, // AuthorizationException
   403, // AuthenticationException
+  408, // RequestTimeout
   410, // Gone
 ];
 

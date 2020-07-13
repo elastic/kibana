@@ -168,6 +168,17 @@ describe('migrationRetryCallCluster', () => {
     expect(result.body).toEqual(dummyBody);
   });
 
+  it('retries ES API calls that rejects with 408 `ResponseError`', async () => {
+    mockClientPingWithErrorBeforeSuccess(
+      new errors.ResponseError({
+        statusCode: 408,
+      } as any)
+    );
+
+    const result = await migrationRetryCallCluster(() => client.ping(), logger, 1);
+    expect(result.body).toEqual(dummyBody);
+  });
+
   it('retries ES API calls that rejects with 410 `ResponseError`', async () => {
     mockClientPingWithErrorBeforeSuccess(
       new errors.ResponseError({
