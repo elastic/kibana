@@ -94,15 +94,6 @@ export class CollectorSet {
     ).filter((collectorType): collectorType is string => !!collectorType);
     const allReady = collectorTypesNotReady.length === 0;
 
-    // const collectorTypesNotReady: string[] = [];
-    // let allReady = true;
-    // for (const collector of collectorSet.collectors.values()) {
-    //   if (!(await collector.isReady())) {
-    //     allReady = false;
-    //     collectorTypesNotReady.push(collector.type);
-    //   }
-    // }
-
     if (!allReady && this.maximumWaitTimeForAllCollectorsInS >= 0) {
       const nowTimestamp = +new Date();
       this._waitingForAllCollectorsTimestamp =
