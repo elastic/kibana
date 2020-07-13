@@ -59,9 +59,9 @@ const isStringOrNumber = /(string|number)/;
  * title component
  */
 export const PageViewHeaderTitle = memo<Omit<EuiTitleProps, 'children'> & { children: ReactNode }>(
-  ({ children, ...otherProps }) => {
+  ({ children, size = 'l', ...otherProps }) => {
     return (
-      <EuiTitle {...otherProps}>
+      <EuiTitle {...otherProps} size={size}>
         <h1 data-test-subj="pageViewHeaderLeftTitle">{children}</h1>
       </EuiTitle>
     );
