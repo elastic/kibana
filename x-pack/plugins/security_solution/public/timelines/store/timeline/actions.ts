@@ -17,7 +17,7 @@ import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/t
 
 import { EventType, KqlMode, TimelineModel, ColumnHeaderOptions } from './model';
 import { TimelineNonEcsData } from '../../../graphql/types';
-import { TimelineTypeLiteral } from '../../../../common/types/timeline';
+import { TimelineTypeLiteral, RowRendererId } from '../../../../common/types/timeline';
 import { InsertTimeline } from './types';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
@@ -59,6 +59,7 @@ export const createTimeline = actionCreator<{
     start: number;
     end: number;
   };
+  excludedRowRendererIds?: RowRendererId[];
   filters?: Filter[];
   columns: ColumnHeaderOptions[];
   itemsPerPage?: number;
@@ -69,7 +70,6 @@ export const createTimeline = actionCreator<{
   show?: boolean;
   sort?: Sort;
   showCheckboxes?: boolean;
-  showRowRenderers?: boolean;
   timelineType?: TimelineTypeLiteral;
   templateTimelineId?: string;
   templateTimelineVersion?: number;
@@ -266,3 +266,8 @@ export const clearEventsDeleted = actionCreator<{
 export const updateEventType = actionCreator<{ id: string; eventType: EventType }>(
   'UPDATE_EVENT_TYPE'
 );
+
+export const setExcludedRowRendererIds = actionCreator<{
+  id: string;
+  excludedRowRendererIds: RowRendererId[];
+}>('SET_TIMELINE_EXCLUDED_ROW_RENDERER_IDS');
