@@ -46,6 +46,8 @@ describe('alertType', () => {
             "description": "The value that exceeded the threshold.",
             "name": "value",
           },
+        ],
+        "params": Array [
           Object {
             "description": "A values to use as the threshold; 'between' and 'notBetween' require two values, the others require one.",
             "name": "threshold",

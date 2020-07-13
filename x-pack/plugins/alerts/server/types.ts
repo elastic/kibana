@@ -23,6 +23,8 @@ import {
 export type State = Record<string, any>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Context = Record<string, any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AlertParams = Record<string, any>;
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
 export type GetBasePathFunction = (spaceId?: string) => string;

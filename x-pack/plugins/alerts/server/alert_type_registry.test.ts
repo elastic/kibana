@@ -154,6 +154,7 @@ describe('get()', () => {
         ],
         "actionVariables": Object {
           "context": Array [],
+          "params": Array [],
           "state": Array [],
         },
         "defaultActionGroupId": "default",
@@ -207,6 +208,7 @@ describe('list()', () => {
           ],
           "actionVariables": Object {
             "context": Array [],
+            "params": Array [],
             "state": Array [],
           },
           "defaultActionGroupId": "testActionGroup",

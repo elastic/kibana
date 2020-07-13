@@ -168,7 +168,7 @@ describe('actionVariablesFromAlertType', () => {
         },
         Object {
           "description": "fooP-description",
-          "name": "state.fooP",
+          "name": "params.fooP",
         },
         Object {
           "description": "fooS-description",

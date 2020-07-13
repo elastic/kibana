@@ -46,6 +46,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
                 name: 'Test: Noop',
                 actionVariables: {
                   state: [],
+                  params: [],
                   context: [],
                 },
                 producer: 'alerting',

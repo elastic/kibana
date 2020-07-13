@@ -87,7 +87,7 @@ describe('alert_details', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
       producer: 'alerting',
     };
@@ -125,7 +125,7 @@ describe('alert_details', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
       producer: 'alerting',
     };
@@ -154,7 +154,7 @@ describe('alert_details', () => {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
-        actionVariables: { context: [], state: [] },
+        actionVariables: { context: [], state: [], params: [] },
         defaultActionGroupId: 'default',
         producer: 'alerting',
       };
@@ -207,7 +207,7 @@ describe('alert_details', () => {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
-        actionVariables: { context: [], state: [] },
+        actionVariables: { context: [], state: [], params: [] },
         defaultActionGroupId: 'default',
         producer: 'alerting',
       };
@@ -265,7 +265,7 @@ describe('alert_details', () => {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
-        actionVariables: { context: [], state: [] },
+        actionVariables: { context: [], state: [], params: [] },
         defaultActionGroupId: 'default',
         producer: 'alerting',
       };
@@ -284,7 +284,7 @@ describe('alert_details', () => {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
-        actionVariables: { context: [], state: [] },
+        actionVariables: { context: [], state: [], params: [] },
         defaultActionGroupId: 'default',
         producer: 'alerting',
       };
@@ -312,7 +312,7 @@ describe('disable button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
       producer: 'alerting',
     };
@@ -339,7 +339,7 @@ describe('disable button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
       producer: 'alerting',
     };
@@ -366,7 +366,7 @@ describe('disable button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
       producer: 'alerting',
     };
@@ -402,7 +402,7 @@ describe('disable button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
       producer: 'alerting',
     };
@@ -441,7 +441,7 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
       producer: 'alerting',
     };
@@ -469,7 +469,7 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
       producer: 'alerting',
     };
@@ -497,7 +497,7 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
       producer: 'alerting',
     };
@@ -534,7 +534,7 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
       producer: 'alerting',
     };
@@ -571,7 +571,7 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
       producer: 'alerting',
     };

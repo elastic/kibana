@@ -23,6 +23,11 @@ test('skips non string parameters', () => {
     tags: ['tag-A', 'tag-B'],
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
+    alertParams: {
+      foo: true,
+      contextVal: 'My other {{context.value}} goes here',
+      stateVal: 'My other {{state.value}} goes here',
+    },
   });
   expect(result).toMatchInlineSnapshot(`
         Object {
@@ -49,6 +54,7 @@ test('missing parameters get emptied out', () => {
     tags: ['tag-A', 'tag-B'],
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
+    alertParams: {},
   });
   expect(result).toMatchInlineSnapshot(`
         Object {
@@ -71,6 +77,7 @@ test('context parameters are passed to templates', () => {
     tags: ['tag-A', 'tag-B'],
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
+    alertParams: {},
   });
   expect(result).toMatchInlineSnapshot(`
         Object {
@@ -92,6 +99,7 @@ test('state parameters are passed to templates', () => {
     tags: ['tag-A', 'tag-B'],
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
+    alertParams: {},
   });
   expect(result).toMatchInlineSnapshot(`
         Object {
@@ -113,6 +121,7 @@ test('alertId is passed to templates', () => {
     tags: ['tag-A', 'tag-B'],
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
+    alertParams: {},
   });
   expect(result).toMatchInlineSnapshot(`
     Object {
@@ -134,6 +143,7 @@ test('alertName is passed to templates', () => {
     tags: ['tag-A', 'tag-B'],
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
+    alertParams: {},
   });
   expect(result).toMatchInlineSnapshot(`
     Object {
@@ -155,6 +165,7 @@ test('tags is passed to templates', () => {
     tags: ['tag-A', 'tag-B'],
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
+    alertParams: {},
   });
   expect(result).toMatchInlineSnapshot(`
     Object {
@@ -175,6 +186,7 @@ test('undefined tags is passed to templates', () => {
     alertName: 'alert-name',
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
+    alertParams: {},
   });
   expect(result).toMatchInlineSnapshot(`
     Object {
@@ -196,6 +208,7 @@ test('empty tags is passed to templates', () => {
     tags: [],
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
+    alertParams: {},
   });
   expect(result).toMatchInlineSnapshot(`
     Object {
@@ -217,6 +230,7 @@ test('spaceId is passed to templates', () => {
     tags: ['tag-A', 'tag-B'],
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
+    alertParams: {},
   });
   expect(result).toMatchInlineSnapshot(`
     Object {
@@ -238,6 +252,7 @@ test('alertInstanceId is passed to templates', () => {
     tags: ['tag-A', 'tag-B'],
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
+    alertParams: {},
   });
   expect(result).toMatchInlineSnapshot(`
     Object {
@@ -261,6 +276,7 @@ test('works recursively', () => {
     tags: ['tag-A', 'tag-B'],
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
+    alertParams: {},
   });
   expect(result).toMatchInlineSnapshot(`
         Object {
@@ -286,6 +302,7 @@ test('works recursively with arrays', () => {
     tags: ['tag-A', 'tag-B'],
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
+    alertParams: {},
   });
   expect(result).toMatchInlineSnapshot(`
         Object {
