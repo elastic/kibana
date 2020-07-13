@@ -30,84 +30,44 @@ export async function getErrorRate({
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
     { range: rangeFilter(start, end) },
+    { exists: { field: HTTP_RESPONSE_STATUS_CODE } },
     ...uiFiltersES,
   ];
 
-  const must = [{ exists: { field: HTTP_RESPONSE_STATUS_CODE } }];
-
-  const dateHistogramAggs = {
-    histogram: {
-      date_histogram: getMetricsDateHistogramParams(start, end),
+  const params = {
+    index: indices['apm_oss.transactionIndices'],
+    body: {
+      size: 0,
+      query: { bool: { filter } },
+      aggs: {
+        total_transactions: {
+          date_histogram: getMetricsDateHistogramParams(start, end),
+          aggs: {
+            erroneous_transactions: {
+              filter: { range: { [HTTP_RESPONSE_STATUS_CODE]: { gte: 400 } } },
+            },
+          },
+        },
+      },
     },
   };
 
-  const getTransactionsCount = async () => {
-    const transactionsCountParams = {
-      index: indices['apm_oss.transactionIndices'],
-      body: {
-        size: 0,
-        query: { bool: { must, filter } },
-        aggs: dateHistogramAggs,
-      },
-    };
+  const resp = await client.search(params);
 
-    const resp = await client.search(transactionsCountParams);
-    const transactionsCountByTimestamp: Record<number, number> = {};
-    if (resp.aggregations) {
-      resp.aggregations.histogram.buckets.forEach(
-        (bucket) =>
-          (transactionsCountByTimestamp[bucket.key] = bucket.doc_count)
-      );
-    }
-    return {
-      transactionsCountByTimestamp,
-      noHits: resp.hits.total.value === 0,
-    };
-  };
+  const noHits = resp.hits.total.value === 0;
 
-  const getErroneousTransactionsCount = async () => {
-    const erroneousTransactionsCountParams = {
-      index: indices['apm_oss.transactionIndices'],
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            must,
-            filter: [
-              ...filter,
-              {
-                range: {
-                  [HTTP_RESPONSE_STATUS_CODE]: {
-                    gte: 400, // everything equals or above 400 should be treated as an error
-                  },
-                },
-              },
-            ],
-          },
-        },
-        aggs: dateHistogramAggs,
-      },
-    };
-    const resp = await client.search(erroneousTransactionsCountParams);
+  const erroneousTransactionsRate =
+    resp.aggregations?.total_transactions.buckets.map(
+      ({ key, doc_count: totalTransactions, erroneous_transactions }) => {
+        const errornousTransactionsCount =
+          // @ts-ignore
+          erroneous_transactions.doc_count;
+        return {
+          x: key,
+          y: errornousTransactionsCount / totalTransactions,
+        };
+      }
+    ) || [];
 
-    return resp.aggregations?.histogram.buckets;
-  };
-
-  const [transactionsCount, erroneousTransactionsCount] = await Promise.all([
-    getTransactionsCount(),
-    getErroneousTransactionsCount(),
-  ]);
-
-  const { transactionsCountByTimestamp, noHits } = transactionsCount;
-
-  const errorRates =
-    erroneousTransactionsCount?.map(({ key, doc_count: errorCount }) => {
-      const transactionsTotalCount = transactionsCountByTimestamp[key];
-      return {
-        x: key,
-        y: errorCount / transactionsTotalCount,
-      };
-    }) || [];
-
-  return { noHits, errorRates };
+  return { noHits, erroneousTransactionsRate };
 }

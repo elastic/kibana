@@ -99,28 +99,17 @@ const ErrorGroupOverview: React.FC = () => {
           <LocalUIFilters {...localUIFiltersConfig} />
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
-          <EuiFlexGroup gutterSize="s">
-            <ChartsSyncContextProvider>
-              <EuiFlexItem>
-                <EuiPanel>
-                  <ErrorDistribution
-                    distribution={errorDistributionData}
-                    title={i18n.translate(
-                      'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
-                      {
-                        defaultMessage: 'Error occurrences',
-                      }
-                    )}
-                  />
-                </EuiPanel>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiPanel>
-                  <ErrorRateChart />
-                </EuiPanel>
-              </EuiFlexItem>
-            </ChartsSyncContextProvider>
-          </EuiFlexGroup>
+          <EuiPanel>
+            <ErrorDistribution
+              distribution={errorDistributionData}
+              title={i18n.translate(
+                'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
+                {
+                  defaultMessage: 'Error occurrences',
+                }
+              )}
+            />
+          </EuiPanel>
 
           <EuiSpacer size="s" />
 

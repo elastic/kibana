@@ -181,24 +181,15 @@ export function ErrorGroupDetails() {
             </EuiText>
           </Titles>
         )}
-        <EuiFlexGroup gutterSize="s">
-          <ChartsSyncContextProvider>
-            <EuiFlexItem>
-              <ErrorDistribution
-                distribution={errorDistributionData}
-                title={i18n.translate(
-                  'xpack.apm.errorGroupDetails.occurrencesChartLabel',
-                  {
-                    defaultMessage: 'Occurrences',
-                  }
-                )}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <ErrorRateChart />
-            </EuiFlexItem>
-          </ChartsSyncContextProvider>
-        </EuiFlexGroup>
+        <ErrorDistribution
+          distribution={errorDistributionData}
+          title={i18n.translate(
+            'xpack.apm.errorGroupDetails.occurrencesChartLabel',
+            {
+              defaultMessage: 'Occurrences',
+            }
+          )}
+        />
       </EuiPanel>
       <EuiSpacer size="s" />
       {showDetails && (
