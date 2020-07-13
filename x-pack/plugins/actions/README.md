@@ -442,7 +442,7 @@ The config and params properties are modelled after the [Watcher Index Action](h
 | index                | The Elasticsearch index to index into.                     | string _(optional)_  |
 | doc_id               | The optional \_id of the document.                         | string _(optional)_  |
 | execution_time_field | The field that will store/index the action execution time. | string _(optional)_  |
-| refresh              | Setting of the refresh policy for the write request        | boolean _(optional)_ |
+| refresh              | Setting of the refresh policy for the write request.        | boolean _(optional)_ |
 
 ### `secrets`
 
