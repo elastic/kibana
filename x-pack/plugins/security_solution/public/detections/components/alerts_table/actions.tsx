@@ -102,6 +102,35 @@ export const determineToAndFrom = ({ ecsData }: { ecsData: Ecs }) => {
   return { to, from };
 };
 
+export const getThresholdAggregationDataProvider = (ecsData: Ecs) => {
+  const aggregationField = ecsData.signal?.rule?.threshold.field;
+  const aggregationValue = get(aggregationField, ecsData);
+  const dataProviderValue =
+    (Array.isArray(aggregationValue) && aggregationValue[0]) ?? aggregationValue;
+
+  if (!dataProviderValue) {
+    return [];
+  }
+
+  const aggregationFieldId = aggregationField.replace('.', '-');
+
+  return [
+    {
+      and: [],
+      id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-${aggregationFieldId}-${dataProviderValue}`,
+      name: ecsData.signal?.rule?.threshold.field,
+      enabled: true,
+      excluded: false,
+      kqlQuery: '',
+      queryMatch: {
+        field: aggregationField,
+        value: dataProviderValue,
+        operator: ':',
+      },
+    },
+  ];
+};
+
 export const sendAlertToTimelineAction = async ({
   apolloClient,
   createTimeline,
@@ -212,22 +241,7 @@ export const sendAlertToTimelineAction = async ({
               operator: ':',
             },
           },
-          {
-            and: [],
-            id: `event-details-value-default-draggable-plain-column-renderer-formatted-field-value-timeline-1-cc2e514d80f3d7abad5b167f6a9efb2761efea2bae4a54834ef807d69daefefd-host_name-${get(
-              ecsData.signal?.rule?.threshold.field,
-              ecsData
-            )}`,
-            name: ecsData.signal?.rule?.threshold.field,
-            enabled: true,
-            excluded: false,
-            kqlQuery: '',
-            queryMatch: {
-              field: ecsData.signal?.rule?.threshold.field,
-              value: get(ecsData.signal?.rule?.threshold.field, ecsData),
-              operator: ':',
-            },
-          },
+          ...getThresholdAggregationDataProvider(ecsData),
         ],
         id: 'timeline-1',
         dateRange: {

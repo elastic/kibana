@@ -201,6 +201,18 @@ export const EventColumnView = React.memo<Props>(
         : grouped.icon;
     }, [button, closePopover, id, onClickCb, data, ecsData, timelineActions, isPopoverOpen]);
 
+    const handlePinClicked = useCallback(
+      () =>
+        getPinOnClick({
+          allowUnpinning: !eventHasNotes(eventIdToNoteIds[id]),
+          eventId: id,
+          onPinEvent,
+          onUnPinEvent,
+          isEventPinned,
+        }),
+      [eventIdToNoteIds, id, isEventPinned, onPinEvent, onUnPinEvent]
+    );
+
     return (
       <EventsTrData data-test-subj="event-column-view">
         <Actions
@@ -219,13 +231,7 @@ export const EventColumnView = React.memo<Props>(
           loadingEventIds={loadingEventIds}
           noteIds={eventIdToNoteIds[id] || emptyNotes}
           onEventToggled={onEventToggled}
-          onPinClicked={getPinOnClick({
-            allowUnpinning: !eventHasNotes(eventIdToNoteIds[id]),
-            eventId: id,
-            onPinEvent,
-            onUnPinEvent,
-            isEventPinned,
-          })}
+          onPinClicked={handlePinClicked}
           showCheckboxes={showCheckboxes}
           showNotes={showNotes}
           toggleShowNotes={toggleShowNotes}
