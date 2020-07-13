@@ -38,8 +38,8 @@ export const AlphaFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
           <p>
             <FormattedMessage
               id="xpack.ingestManager.alphaMessaging.introText"
-              defaultMessage="This beta release is not subject to the support SLA. It is designed for users to test and offer feedback about Ingest
-            Manager and the new Elastic Agent. It is not intended for use in production environments."
+              defaultMessage="Ingest Manager is under active development and is not intended for use in production environments. This beta release is designed for users to test and offer feedback about Ingest
+            Manager and the new Elastic Agent. This plugin is not subject to the support SLA."
             />
           </p>
           <p>

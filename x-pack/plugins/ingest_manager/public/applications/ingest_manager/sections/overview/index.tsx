@@ -60,7 +60,7 @@ export const IngestManagerOverview: React.FunctionComponent = () => {
                   })}
                   tooltipContent={i18n.translate('xpack.ingestManager.betaBadge.tooltipText', {
                     defaultMessage:
-                      'This plugin is not recommended for use in production environments. Please help by reporting bugs and sending feedback.',
+                      'This plugin is not recommended for production environments. Please report bugs in our Discuss forum.',
                   })}
                 />
               </EuiFlexItem>

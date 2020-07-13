@@ -50,8 +50,7 @@ export const OverviewDatastreamSection: React.FC = () => {
           defaultMessage: 'Datasets',
         })}
         tooltip={i18n.translate('xpack.ingestManager.overviewPageDataStreamsPanelTooltip', {
-          defaultMessage:
-            'Data that your agents collect are organized into various datasets. You can access links to view this data in other applications.',
+          defaultMessage: 'Data that your agents collect are organized into various datasets.',
         })}
         linkTo={getHref('data_streams')}
         linkToText={i18n.translate('xpack.ingestManager.overviewPageDataStreamsPanelAction', {
