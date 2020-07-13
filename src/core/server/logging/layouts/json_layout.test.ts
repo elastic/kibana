@@ -167,3 +167,30 @@ test('`format()` correctly formats error record with meta-data', () => {
     },
   });
 });
+
+test('format() meta can override @timestamp', () => {
+  const layout = new JsonLayout();
+  expect(
+    JSON.parse(
+      layout.format({
+        message: 'foo',
+        level: LogLevel.Debug,
+        context: 'bar',
+        pid: 3,
+        meta: {
+          '@timestamp': '2099-05-01T09:30:22.011-05:00',
+        },
+      })
+    )
+  ).toStrictEqual({
+    '@timestamp': '2099-05-01T09:30:22.011-05:00',
+    message: 'foo',
+    log: {
+      level: 'DEBUG',
+      logger: 'bar',
+    },
+    process: {
+      pid: 3,
+    },
+  });
+});
