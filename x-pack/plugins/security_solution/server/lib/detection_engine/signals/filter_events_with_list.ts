@@ -63,7 +63,7 @@ export const filterEventsAgainstList = async ({
       async (exceptionItem: ExceptionListItemSchema) => {
         const { entries } = exceptionItem;
 
-        const filteredHitsEntries = entries
+        const filteredHitsEntries = await entries
           .filter((t): t is EntryList => entriesList.is(t))
           .map(async (entry) => {
             const { list, field, operator } = entry;
@@ -73,14 +73,17 @@ export const filterEventsAgainstList = async ({
             const valuesOfGivenType = eventSearchResult.hits.hits.reduce(
               (acc, searchResultItem) => {
                 const valueField = get(field, searchResultItem._source);
-
+                logger.debug(`valueField: ${valueField}`);
+                logger.debug(`isStringableType(valueField): ${isStringableType(valueField)}`);
                 if (valueField != null && isStringableType(valueField)) {
+                  logger.debug(`valueField.toString(): ${valueField.toString()}`);
                   acc.add(valueField.toString());
                 }
                 return acc;
               },
               new Set<string>()
             );
+            logger.debug(`valuesOfGivenType: ${JSON.stringify([...valuesOfGivenType], null, 2)}`);
 
             // matched will contain any list items that matched with the
             // values passed in from the Set.
@@ -90,6 +93,7 @@ export const filterEventsAgainstList = async ({
               value: [...valuesOfGivenType],
             });
 
+            logger.debug(`matchedListItems: ${JSON.stringify(matchedListItems, null, 2)}`);
             // create a set of list values that were a hit - easier to work with
             const matchedListItemsSet = new Set<SearchTypes>(
               matchedListItems.map((item) => item.value)
@@ -117,12 +121,13 @@ export const filterEventsAgainstList = async ({
             logger.debug(buildRuleMessage(`Lists filtered out ${diff} events`));
             return filteredEvents;
           });
-
+        logger.debug(`filteredHitsEntries: ${JSON.stringify(filteredHitsEntries, null, 2)}`);
         return (await Promise.all(filteredHitsEntries)).flat();
       }
     );
 
     const filteredHits = await Promise.all(filteredHitsPromises);
+    // logger.debug(`filteredHits FINAL: ${JSON.stringify(filteredHits, null, 2)}`);
     const toReturn: SignalSearchResponse = {
       took: eventSearchResult.took,
       timed_out: eventSearchResult.timed_out,

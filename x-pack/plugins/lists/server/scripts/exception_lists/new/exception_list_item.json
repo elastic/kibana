@@ -8,15 +8,10 @@
   "name": "Sample Endpoint Exception List",
   "entries": [
     {
-      "field": "host.ip",
-      "operator": "excluded",
-      "type": "exists"
-    },
-    {
-      "field": "host.name",
+      "field": "process.name",
       "operator": "included",
       "type": "match_any",
-      "value": ["some host", "another host"]
+      "value": ["bash"]
     }
   ]
 }

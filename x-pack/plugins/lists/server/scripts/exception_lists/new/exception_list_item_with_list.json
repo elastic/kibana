@@ -12,11 +12,13 @@
       "field": "event.module",
       "operator": "excluded",
       "type": "match_any",
-      "value": ["suricata"]
+      "value": [
+        "traefik"
+      ]
     },
     {
       "field": "source.ip",
-      "operator": "excluded",
+      "operator": "included",
       "type": "list",
       "list": { "id": "ip_list", "type": "ip" }
     }
