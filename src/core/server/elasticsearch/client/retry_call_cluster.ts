@@ -20,12 +20,7 @@
 import { defer, throwError, iif, timer } from 'rxjs';
 import { concatMap, retryWhen } from 'rxjs/operators';
 import { errors as esErrors } from '@elastic/elasticsearch';
-import { ApiResponse, TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { Logger } from '../../logging';
-
-type ApiCaller = <TResponse, TContext>() => TransportRequestPromise<
-  ApiResponse<TResponse, TContext>
->;
 
 const retryMigrationStatusCodes = [
   503, // ServiceUnavailable
@@ -46,14 +41,12 @@ const retryMigrationStatusCodes = [
  *
  * @internal
  */
-export const retryCallCluster = <TResponse, TContext>(
-  apiCaller: ApiCaller<TResponse, TContext>
-): TransportRequestPromise<ApiResponse<TResponse, TContext>> => {
+export const retryCallCluster = <T extends Promise<unknown>>(apiCaller: () => T): T => {
   return defer(() => apiCaller())
     .pipe(
       retryWhen((errors) =>
         errors.pipe(
-          concatMap((error, i) =>
+          concatMap((error) =>
             iif(
               () => error instanceof esErrors.NoLivingConnectionsError,
               timer(1000),
@@ -63,7 +56,7 @@ export const retryCallCluster = <TResponse, TContext>(
         )
       )
     )
-    .toPromise();
+    .toPromise() as T;
 };
 
 /**
@@ -80,17 +73,17 @@ export const retryCallCluster = <TResponse, TContext>(
  *
  * @internal
  */
-export const migrationRetryCallCluster = <TResponse, TContext>(
-  apiCaller: ApiCaller<TResponse, TContext>,
+export const migrationRetryCallCluster = <T extends Promise<unknown>>(
+  apiCaller: () => T,
   log: Logger,
   delay: number = 2500
-): TransportRequestPromise<ApiResponse<TResponse, TContext>> => {
+): T => {
   const previousErrors: string[] = [];
   return defer(() => apiCaller())
     .pipe(
       retryWhen((errors) =>
         errors.pipe(
-          concatMap((error, i) => {
+          concatMap((error) => {
             if (!previousErrors.includes(error.message)) {
               log.warn(`Unable to connect to Elasticsearch. Error: ${error.message}`);
               previousErrors.push(error.message);
@@ -109,5 +102,5 @@ export const migrationRetryCallCluster = <TResponse, TContext>(
         )
       )
     )
-    .toPromise();
+    .toPromise() as T;
 };

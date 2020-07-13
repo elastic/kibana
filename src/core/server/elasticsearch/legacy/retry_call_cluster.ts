@@ -53,7 +53,7 @@ export function migrationsRetryCallCluster(
       .pipe(
         retryWhen((error$) =>
           error$.pipe(
-            concatMap((error, i) => {
+            concatMap((error) => {
               if (!previousErrors.includes(error.message)) {
                 log.warn(`Unable to connect to Elasticsearch. Error: ${error.message}`);
                 previousErrors.push(error.message);
@@ -100,7 +100,7 @@ export function retryCallCluster(apiCaller: LegacyAPICaller) {
       .pipe(
         retryWhen((errors) =>
           errors.pipe(
-            concatMap((error, i) =>
+            concatMap((error) =>
               iif(
                 () => error instanceof legacyElasticsearch.errors.NoConnections,
                 timer(1000),
