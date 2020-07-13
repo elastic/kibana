@@ -239,7 +239,7 @@ const AnomalyMessage = ({
     'xpack.infra.logs.analysis.anomaliesTableMoreThanExpectedAnomalyMessage',
     {
       defaultMessage:
-        'more log messages in this {type, select, logRate {dataset}, logCategory {category}} than expected',
+        'more log messages in this {type, select, logRate {dataset} logCategory {category}} than expected',
       values: { type },
     }
   );
@@ -247,10 +247,12 @@ const AnomalyMessage = ({
   const fewerThanExpectedAnomalyMessage = i18n.translate(
     'xpack.infra.logs.analysis.anomaliesTableFewerThanExpectedAnomalyMessage',
     {
-      defaultMessage: 'fewer log messages in this {messageType} than expected',
+      defaultMessage:
+        'fewer log messages in this {type, select, logRate {dataset} logCategory {category}} than expected',
       values: { type },
     }
   );
+
   const isMore = actual > typical;
   const message = isMore ? moreThanExpectedAnomalyMessage : fewerThanExpectedAnomalyMessage;
   const ratio = isMore ? actual / typical : typical / actual;
