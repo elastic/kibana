@@ -87,6 +87,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
             title={i18n.QUERY_TYPE_TITLE}
             description={i18n.QUERY_TYPE_DESCRIPTION}
             icon={<EuiIcon size="l" type="search" />}
+            isDisabled={querySelectableConfig.isDisabled && !querySelectableConfig.isSelected}
             selectable={querySelectableConfig}
           />
         </EuiFlexItem>
@@ -98,7 +99,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
               <MlCardDescription subscriptionUrl={licensingUrl} hasValidLicense={hasValidLicense} />
             }
             icon={<EuiIcon size="l" type="machineLearningApp" />}
-            isDisabled={mlCardDisabled}
+            isDisabled={mlSelectableConfig.isDisabled && !mlSelectableConfig.isSelected}
             selectable={mlSelectableConfig}
           />
         </EuiFlexItem>
@@ -108,6 +109,9 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
             title={i18n.THRESHOLD_TYPE_TITLE}
             description={i18n.THRESHOLD_TYPE_DESCRIPTION}
             icon={<EuiIcon size="l" type="indexFlush" />}
+            isDisabled={
+              thresholdSelectableConfig.isDisabled && !thresholdSelectableConfig.isSelected
+            }
             selectable={thresholdSelectableConfig}
           />
         </EuiFlexItem>

@@ -6,7 +6,7 @@
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText, EuiLink } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { ML_TYPE_DESCRIPTION } from './translations';
 
@@ -18,28 +18,35 @@ interface MlCardDescriptionProps {
 const MlCardDescriptionComponent: React.FC<MlCardDescriptionProps> = ({
   subscriptionUrl,
   hasValidLicense = false,
-}) => (
-  <EuiText size="s">
-    {hasValidLicense ? (
-      ML_TYPE_DESCRIPTION
-    ) : (
-      <FormattedMessage
-        id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.mlTypeDisabledDescription"
-        defaultMessage="Access to ML requires a {subscriptionsLink}."
-        values={{
-          subscriptionsLink: (
-            <EuiLink href={subscriptionUrl} target="_blank">
-              <FormattedMessage
-                id="xpack.securitySolution.components.stepDefineRule.ruleTypeField.subscriptionsLink"
-                defaultMessage="Platinum subscription"
-              />
-            </EuiLink>
-          ),
-        }}
-      />
-    )}
-  </EuiText>
-);
+}) => {
+  const subscriptionsLinkConfig = useMemo(
+    () => ({
+      subscriptionsLink: (
+        <EuiLink href={subscriptionUrl} target="_blank">
+          <FormattedMessage
+            id="xpack.securitySolution.components.stepDefineRule.ruleTypeField.subscriptionsLink"
+            defaultMessage="Platinum subscription"
+          />
+        </EuiLink>
+      ),
+    }),
+    [subscriptionUrl]
+  );
+
+  return (
+    <EuiText size="s">
+      {hasValidLicense ? (
+        ML_TYPE_DESCRIPTION
+      ) : (
+        <FormattedMessage
+          id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.mlTypeDisabledDescription"
+          defaultMessage="Access to ML requires a {subscriptionsLink}."
+          values={subscriptionsLinkConfig}
+        />
+      )}
+    </EuiText>
+  );
+};
 
 MlCardDescriptionComponent.displayName = 'MlCardDescriptionComponent';
 

@@ -308,8 +308,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 if (deepEqual(index, indicesConfig) && indexModified) {
                   setIndexModified(false);
                 } else if (!deepEqual(index, indicesConfig) && !indexModified) {
-                  setMyStepData((currentValue) => ({ ...currentValue, index }));
                   setIndexModified(true);
+                }
+                if (myStepData.index !== index) {
+                  setMyStepData((prevValue) => ({ ...prevValue, index }));
                 }
               }
 
