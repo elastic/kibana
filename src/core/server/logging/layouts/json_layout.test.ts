@@ -194,3 +194,34 @@ test('format() meta can override @timestamp', () => {
     },
   });
 });
+
+test('format() meta can merge override logs', () => {
+  const layout = new JsonLayout();
+  expect(
+    JSON.parse(
+      layout.format({
+        timestamp,
+        message: 'foo',
+        level: LogLevel.Error,
+        context: 'bar',
+        pid: 3,
+        meta: {
+          log: {
+            kbn_custom_field: 'hello',
+          },
+        },
+      })
+    )
+  ).toStrictEqual({
+    '@timestamp': '2012-02-01T09:30:22.011-05:00',
+    message: 'foo',
+    log: {
+      level: 'ERROR',
+      logger: 'bar',
+      kbn_custom_field: 'hello',
+    },
+    process: {
+      pid: 3,
+    },
+  });
+});
