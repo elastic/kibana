@@ -10,7 +10,7 @@ import { TimelineIdLiteral, TimelineId } from '../../common/types/timeline';
 import { AlertsRoutes } from './routes';
 import { SecuritySubPlugin } from '../app/types';
 
-const ALERTS_TIMELINE_IDS: TimelineIdLiteral[] = [
+const DETECTIONS_TIMELINE_IDS: TimelineIdLiteral[] = [
   TimelineId.detectionsRulesDetailsPage,
   TimelineId.detectionsPage,
 ];
@@ -22,7 +22,7 @@ export class Detections {
     return {
       SubPluginRoutes: AlertsRoutes,
       storageTimelines: {
-        timelineById: getTimelinesInStorageByIds(storage, ALERTS_TIMELINE_IDS),
+        timelineById: getTimelinesInStorageByIds(storage, DETECTIONS_TIMELINE_IDS),
       },
     };
   }

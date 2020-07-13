@@ -6,9 +6,13 @@
 
 import React, { useContext, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { Breadcrumb as EuiBreadcrumb } from '@elastic/eui';
+import { EuiBreadcrumb } from '@elastic/eui';
 import { KibanaContext, IKibanaContext } from '../../index';
-import { appSearchBreadcrumbs, TBreadcrumbs } from './generate_breadcrumbs';
+import {
+  appSearchBreadcrumbs,
+  workplaceSearchBreadcrumbs,
+  TBreadcrumbs,
+} from './generate_breadcrumbs';
 
 /**
  * Small on-mount helper for setting Kibana's chrome breadcrumbs on any App Search view
@@ -17,19 +21,17 @@ import { appSearchBreadcrumbs, TBreadcrumbs } from './generate_breadcrumbs';
 
 export type TSetBreadcrumbs = (breadcrumbs: EuiBreadcrumb[]) => void;
 
-interface IBreadcrumbProps {
+interface IBreadcrumbsProps {
   text: string;
   isRoot?: never;
 }
-interface IRootBreadcrumbProps {
+interface IRootBreadcrumbsProps {
   isRoot: true;
   text?: never;
 }
+type TBreadcrumbsProps = IBreadcrumbsProps | IRootBreadcrumbsProps;
 
-export const SetAppSearchBreadcrumbs: React.FC<IBreadcrumbProps | IRootBreadcrumbProps> = ({
-  text,
-  isRoot,
-}) => {
+export const SetAppSearchBreadcrumbs: React.FC<TBreadcrumbsProps> = ({ text, isRoot }) => {
   const history = useHistory();
   const { setBreadcrumbs } = useContext(KibanaContext) as IKibanaContext;
 
@@ -37,6 +39,19 @@ export const SetAppSearchBreadcrumbs: React.FC<IBreadcrumbProps | IRootBreadcrum
 
   useEffect(() => {
     setBreadcrumbs(appSearchBreadcrumbs(history)(crumb as TBreadcrumbs | []));
+  }, []);
+
+  return null;
+};
+
+export const SetWorkplaceSearchBreadcrumbs: React.FC<TBreadcrumbsProps> = ({ text, isRoot }) => {
+  const history = useHistory();
+  const { setBreadcrumbs } = useContext(KibanaContext) as IKibanaContext;
+
+  const crumb = isRoot ? [] : [{ text, path: history.location.pathname }];
+
+  useEffect(() => {
+    setBreadcrumbs(workplaceSearchBreadcrumbs(history)(crumb as TBreadcrumbs | []));
   }, []);
 
   return null;
