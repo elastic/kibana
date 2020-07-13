@@ -10,6 +10,7 @@
   "optionalPlugins": ["usageCollection"],
   "extraPublicDirs": ["common", "common/utils/abort_utils"],
   "requiredBundles": [
+    "usageCollection",
     "kibanaUtils",
     "kibanaReact",
     "kibanaLegacy",
