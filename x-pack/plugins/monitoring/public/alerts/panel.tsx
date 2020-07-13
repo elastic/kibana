@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiSpacer,
-  EuiCallOut,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
@@ -37,6 +36,7 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
   const [showFlyout, setShowFlyout] = React.useState(false);
   const [isEnabled, setIsEnabled] = React.useState(alert.rawAlert.enabled);
   const [isMuted, setIsMuted] = React.useState(alert.rawAlert.muteAll);
+  const [isSaving, setIsSaving] = React.useState(false);
   const inSetupMode = isInSetupMode();
 
   if (!alert.rawAlert) {
@@ -44,6 +44,7 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
   }
 
   async function disableAlert() {
+    setIsSaving(true);
     try {
       await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.rawAlert.id}/_disable`);
     } catch (err) {
@@ -54,8 +55,10 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
         text: err.message,
       });
     }
+    setIsSaving(false);
   }
   async function enableAlert() {
+    setIsSaving(true);
     try {
       await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.rawAlert.id}/_enable`);
     } catch (err) {
@@ -66,8 +69,10 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
         text: err.message,
       });
     }
+    setIsSaving(false);
   }
   async function muteAlert() {
+    setIsSaving(true);
     try {
       await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.rawAlert.id}/_mute_all`);
     } catch (err) {
@@ -78,8 +83,10 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
         text: err.message,
       });
     }
+    setIsSaving(false);
   }
   async function unmuteAlert() {
+    setIsSaving(true);
     try {
       await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.rawAlert.id}/_unmute_all`);
     } catch (err) {
@@ -90,6 +97,7 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
         text: err.message,
       });
     }
+    setIsSaving(false);
   }
 
   const flyoutUi = showFlyout ? (
@@ -101,8 +109,6 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
         toastNotifications: Legacy.shims.toastNotifications,
         uiSettings: Legacy.shims.uiSettings,
         docLinks: Legacy.shims.docLinks,
-        charts: undefined,
-        dataFieldsFormats: undefined,
         reloadAlerts: async () => {},
         capabilities: Legacy.shims.capabilities,
       }}
@@ -120,6 +126,7 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
         <EuiFlexItem grow={false}>
           <EuiSwitch
             name="disable"
+            disabled={isSaving}
             checked={!isEnabled}
             onChange={async () => {
               if (isEnabled) {
@@ -141,6 +148,7 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
         <EuiFlexItem grow={false}>
           <EuiSwitch
             name="mute"
+            disabled={isSaving}
             checked={isMuted}
             data-test-subj="muteSwitch"
             onChange={async () => {

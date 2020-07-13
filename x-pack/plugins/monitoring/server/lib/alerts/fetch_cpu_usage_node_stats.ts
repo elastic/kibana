@@ -5,9 +5,6 @@
  */
 import { get } from 'lodash';
 import { AlertCluster, AlertCpuUsageNodeStats } from '../../alerts/types';
-import { MonitoringConfig } from '../../config';
-
-// interface
 
 interface NodeBucketESResponse {
   key: string;

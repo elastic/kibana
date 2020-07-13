@@ -6,7 +6,6 @@
 import React from 'react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
-// import { Expressions } from './components/expression';
 import { validate } from './validation';
 import { ALERT_CPU_USAGE } from '../../../common/constants';
 import { Expression } from './expression';

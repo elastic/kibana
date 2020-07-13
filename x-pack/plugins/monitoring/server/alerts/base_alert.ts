@@ -143,15 +143,6 @@ export class BaseAlert {
 
     if (existingAlertData.total === 1) {
       const existingAlert = existingAlertData.data[0] as Alert;
-
-      // const defaultServerLogAction = existingAlert.actions.find(
-      //   (action) => action.actionTypeId === ALERT_ACTION_TYPE_LOG
-      // );
-      // if (defaultServerLogAction) {
-      //   console.log(defaultServerLogAction.params);
-      //   console.log(this.getDefaultActionParams(ALERT_ACTION_TYPE_LOG));
-      // }
-
       return existingAlert;
     }
 
@@ -220,9 +211,6 @@ export class BaseAlert {
     logger.debug(
       `Executing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
     );
-    // console.log(
-    //   `Executing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
-    // );
 
     const callCluster = this.monitoringCluster
       ? this.monitoringCluster.callAsInternalUser

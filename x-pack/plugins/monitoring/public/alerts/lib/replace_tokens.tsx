@@ -18,20 +18,13 @@ import { CALCULATE_DURATION_UNTIL } from '../../../common/constants';
 import { AlertMessageTokenType } from '../../../common/enums';
 import { Legacy } from '../../legacy_shims';
 
-// interface Props {
-//   alertMessage: AlertMessage;
-// }
-// export const Tokenize: React.FC<Props> = (props: Props) => {
-
-// }
-
 export function replaceTokens(alertMessage: AlertMessage): JSX.Element | string | null {
   if (!alertMessage) {
     return null;
   }
 
   let text = alertMessage.text;
-  if (!alertMessage.tokens) {
+  if (!alertMessage.tokens || !alertMessage.tokens.length) {
     return text;
   }
 

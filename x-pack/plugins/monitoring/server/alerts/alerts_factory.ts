@@ -40,7 +40,7 @@ export class AlertsFactory {
     type: string,
     alertsClient: AlertsClient | undefined
   ): Promise<BaseAlert | null> {
-    const alertCls = (BY_TYPE[type] as unknown) as any;
+    const alertCls = BY_TYPE[type];
     if (!alertCls) {
       return null;
     }
@@ -52,14 +52,14 @@ export class AlertsFactory {
       });
 
       if (alertClientAlerts.total === 0) {
-        return new alertCls() as BaseAlert;
+        return new alertCls();
       }
 
       const rawAlert = alertClientAlerts.data[0];
-      return new alertCls(rawAlert) as BaseAlert;
+      return new alertCls(rawAlert as BaseAlert['rawAlert']);
     }
 
-    return new alertCls() as BaseAlert;
+    return new alertCls();
   }
 
   public static getAll() {

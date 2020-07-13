@@ -28,6 +28,8 @@ function getDateFromState(states: CommonAlertState[]) {
   return formatDateTimeLocal(timestamp, false, tz === 'Browser' ? null : tz);
 }
 
+export const numberOfAlertsLabel = (count: number) => `${count} alert${count > 1 ? 's' : ''}`;
+
 interface Props {
   alerts: { [alertTypeId: string]: CommonAlertStatus };
 }
@@ -46,10 +48,10 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
     const button = (
       <EuiBadge
         iconType="bell"
-        onClickAriaLabel={`${alerts.length} alert(s)`}
+        onClickAriaLabel={numberOfAlertsLabel(alerts.length)}
         onClick={() => setShowPopover(true)}
       >
-        {alerts.length} alert(s)
+        {numberOfAlertsLabel(alerts.length)}
       </EuiBadge>
     );
     const panels = [
@@ -115,10 +117,10 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
         <EuiBadge
           iconType="bell"
           color={type}
-          onClickAriaLabel={`${list.length} alert(s)`}
+          onClickAriaLabel={numberOfAlertsLabel(list.length)}
           onClick={() => setShowPopover(type)}
         >
-          {list.length} alert(s)
+          {numberOfAlertsLabel(list.length)}
         </EuiBadge>
       );
 

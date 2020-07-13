@@ -385,7 +385,6 @@ export class CpuUsageAlert extends BaseAlert {
           }),
         };
       case ALERT_ACTION_TYPE_LOG:
-        // Want to get other notifiations for this kind of issue? Visit the Stack Monitoring UI in Kibana to find out more.s
         return {
           message: i18n.translate('xpack.monitoring.alerts.cpuUsage.serverLog', {
             defaultMessage: `CPU usage alert is {state} for {count} node(s) in cluster: {clusterName}`,

@@ -58,7 +58,7 @@ describe('fetchStatus', () => {
   it('should fetch from the alerts client', async () => {
     const status = await fetchStatus(
       alertsClient as any,
-      licenseService,
+      licenseService as any,
       alertTypes,
       defaultClusterState.clusterUuid,
       start,
@@ -95,7 +95,7 @@ describe('fetchStatus', () => {
 
     const status = await fetchStatus(
       alertsClient as any,
-      licenseService,
+      licenseService as any,
       alertTypes,
       defaultClusterState.clusterUuid,
       start,
@@ -124,7 +124,7 @@ describe('fetchStatus', () => {
 
     const status = await fetchStatus(
       alertsClient as any,
-      licenseService,
+      licenseService as any,
       alertTypes,
       defaultClusterState.clusterUuid,
       customStart,
@@ -139,7 +139,7 @@ describe('fetchStatus', () => {
   it('should pass in the right filter to the alerts client', async () => {
     await fetchStatus(
       alertsClient as any,
-      licenseService,
+      licenseService as any,
       alertTypes,
       defaultClusterState.clusterUuid,
       start,
@@ -158,7 +158,7 @@ describe('fetchStatus', () => {
 
     const status = await fetchStatus(
       alertsClient as any,
-      licenseService,
+      licenseService as any,
       alertTypes,
       defaultClusterState.clusterUuid,
       start,
@@ -176,7 +176,7 @@ describe('fetchStatus', () => {
 
     const status = await fetchStatus(
       alertsClient as any,
-      licenseService,
+      licenseService as any,
       alertTypes,
       defaultClusterState.clusterUuid,
       start,
@@ -193,14 +193,15 @@ describe('fetchStatus', () => {
         isEnabled: true,
       })),
     };
-    const status = await fetchStatus(
+    await fetchStatus(
       alertsClient as any,
-      customLicenseService,
+      customLicenseService as any,
       [ALERT_CLUSTER_HEALTH],
       defaultClusterState.clusterUuid,
       start,
       end,
       log as any
     );
+    expect(customLicenseService.getWatcherFeature).toHaveBeenCalled();
   });
 });

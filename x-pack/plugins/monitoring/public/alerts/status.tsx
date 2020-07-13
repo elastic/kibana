@@ -23,9 +23,12 @@ export const AlertsStatus: React.FC<Props> = (props: Props) => {
   let atLeastOneDanger = false;
   const count = Object.values(alerts).reduce((cnt, alertStatus) => {
     if (alertStatus.states.length) {
-      for (const state of alertStatus.states) {
-        if ((state.state as AlertState).ui.severity === AlertSeverity.Danger) {
-          atLeastOneDanger = true;
+      if (!atLeastOneDanger) {
+        for (const state of alertStatus.states) {
+          if ((state.state as AlertState).ui.severity === AlertSeverity.Danger) {
+            atLeastOneDanger = true;
+            break;
+          }
         }
       }
       cnt++;
