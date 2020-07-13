@@ -12,7 +12,6 @@ import { HeadlessChromiumDriverFactory } from './chromium/driver_factory';
 import { installBrowser } from './install';
 import { ReportingConfig } from '..';
 
-export { ensureAllBrowsersDownloaded } from './download';
 export { HeadlessChromiumDriver } from './chromium/driver';
 export { HeadlessChromiumDriverFactory } from './chromium/driver_factory';
 export { chromium } from './chromium';
@@ -42,7 +41,7 @@ export const initializeBrowserDriverFactory = async (
   config: ReportingConfig,
   logger: LevelLogger
 ) => {
-  const { binaryPath$ } = installBrowser(chromium, config, logger);
+  const { binaryPath$ } = installBrowser(logger);
   const binaryPath = await binaryPath$.pipe(first()).toPromise();
   const captureConfig = config.get('capture');
   return chromium.createDriverFactory(binaryPath, captureConfig, logger);

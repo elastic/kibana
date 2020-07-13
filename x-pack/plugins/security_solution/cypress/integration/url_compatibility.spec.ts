@@ -9,9 +9,9 @@ import { loginAndWaitForPage } from '../tasks/login';
 import { DETECTIONS } from '../urls/navigation';
 
 describe('URL compatibility', () => {
-  it('Redirects to Alerts from old Detections URL', () => {
+  it('Redirects to Detection alerts from old Detections URL', () => {
     loginAndWaitForPage(DETECTIONS);
 
-    cy.url().should('include', '/security/alerts');
+    cy.url().should('include', '/security/detections');
   });
 });
