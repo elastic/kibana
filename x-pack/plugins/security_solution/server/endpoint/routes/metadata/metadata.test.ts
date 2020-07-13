@@ -187,8 +187,19 @@ describe('test endpoint route', () => {
           {
             bool: {
               must_not: {
+                terms: {
+                  'elastic.agent.id': [
+                    '00000000-0000-0000-0000-000000000000',
+                    '11111111-1111-1111-1111-111111111111',
+                  ],
+                },
+              },
+            },
+          },
+          {
+            bool: {
+              must_not: {
                 bool: {
-                  minimum_should_match: 1,
                   should: [
                     {
                       match: {
@@ -196,6 +207,7 @@ describe('test endpoint route', () => {
                       },
                     },
                   ],
+                  minimum_should_match: 1,
                 },
               },
             },
