@@ -115,7 +115,6 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     signalIndexName,
   } = useUserInfo();
   const {
-    canWriteIndex: canWriteListsIndex,
     loading: listsConfigLoading,
     needsConfiguration: needsListsConfiguration,
   } = useListsConfig();
@@ -294,8 +293,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
       isSignalIndexExists,
       isAuthenticated,
       hasEncryptionKey,
-      needsListsConfiguration,
-      canWriteListsIndex
+      needsListsConfiguration
     )
   ) {
     history.replace(getDetectionEngineUrl());

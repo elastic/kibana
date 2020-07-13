@@ -92,7 +92,6 @@ const CreateRulePageComponent: React.FC = () => {
     canUserCRUD,
   } = useUserInfo();
   const {
-    canWriteIndex: canWriteListsIndex,
     loading: listsConfigLoading,
     needsConfiguration: needsListsConfiguration,
   } = useListsConfig();
@@ -290,8 +289,7 @@ const CreateRulePageComponent: React.FC = () => {
       isSignalIndexExists,
       isAuthenticated,
       hasEncryptionKey,
-      needsListsConfiguration,
-      canWriteListsIndex
+      needsListsConfiguration
     )
   ) {
     history.replace(getDetectionEngineUrl());

@@ -237,14 +237,12 @@ export const redirectToDetections = (
   isSignalIndexExists: boolean | null,
   isAuthenticated: boolean | null,
   hasEncryptionKey: boolean | null,
-  needsListsConfiguration: boolean | null,
-  canWriteListsIndex: boolean | null
+  needsListsConfiguration: boolean
 ) =>
   isSignalIndexExists === false ||
   isAuthenticated === false ||
   hasEncryptionKey === false ||
-  needsListsConfiguration === true ||
-  canWriteListsIndex === false;
+  needsListsConfiguration;
 
 export const getActionMessageRuleParams = (ruleType: RuleType): string[] => {
   const commonRuleParamsKeys = [

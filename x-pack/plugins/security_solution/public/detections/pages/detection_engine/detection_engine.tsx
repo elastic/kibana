@@ -57,7 +57,6 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
     hasIndexWrite,
   } = useUserInfo();
   const {
-    canWriteIndex: canWriteListsIndex,
     loading: listsConfigLoading,
     needsConfiguration: needsListsConfiguration,
   } = useListsConfig();
@@ -100,12 +99,7 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
   }
 
   // TODO: Display distinct message if lists is not configured
-  if (
-    !loading &&
-    (isSignalIndexExists === false ||
-      needsListsConfiguration === true ||
-      canWriteListsIndex === false)
-  ) {
+  if (!loading && (isSignalIndexExists === false || needsListsConfiguration)) {
     return (
       <WrapperPage>
         <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />

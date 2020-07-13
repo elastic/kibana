@@ -82,7 +82,6 @@ const EditRulePageComponent: FC = () => {
     canUserCRUD,
   } = useUserInfo();
   const {
-    canWriteIndex: canWriteListsIndex,
     loading: listsConfigLoading,
     needsConfiguration: needsListsConfiguration,
   } = useListsConfig();
@@ -377,8 +376,7 @@ const EditRulePageComponent: FC = () => {
       isSignalIndexExists,
       isAuthenticated,
       hasEncryptionKey,
-      needsListsConfiguration,
-      canWriteListsIndex
+      needsListsConfiguration
     )
   ) {
     history.replace(getDetectionEngineUrl());

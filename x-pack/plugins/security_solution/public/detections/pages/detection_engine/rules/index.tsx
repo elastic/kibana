@@ -44,7 +44,6 @@ const RulesPageComponent: React.FC = () => {
     hasIndexWrite,
   } = useUserInfo();
   const {
-    canWriteIndex: canWriteListsIndex,
     loading: listsConfigLoading,
     needsConfiguration: needsListsConfiguration,
   } = useListsConfig();
@@ -108,8 +107,7 @@ const RulesPageComponent: React.FC = () => {
       isSignalIndexExists,
       isAuthenticated,
       hasEncryptionKey,
-      needsListsConfiguration,
-      canWriteListsIndex
+      needsListsConfiguration
     )
   ) {
     history.replace(getDetectionEngineUrl());

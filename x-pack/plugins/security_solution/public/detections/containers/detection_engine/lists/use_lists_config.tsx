@@ -6,27 +6,33 @@
 
 import { useEffect } from 'react';
 
+import { useKibana } from '../../../../common/lib/kibana';
 import { useListsIndex } from './use_lists_index';
 import { useListsPrivileges } from './use_lists_privileges';
 
 export interface UseListsConfigReturn {
   canManageIndex: boolean | null;
   canWriteIndex: boolean | null;
+  enabled: boolean;
   loading: boolean;
-  needsConfiguration: boolean | null;
+  needsConfiguration: boolean;
 }
 
 export const useListsConfig = (): UseListsConfigReturn => {
   const { createIndex, indexExists, loading: indexLoading } = useListsIndex();
   const { canManageIndex, canWriteIndex, loading: privilegesLoading } = useListsPrivileges();
+  const { lists } = useKibana().services;
+
+  const enabled = lists != null;
   const loading = indexLoading || privilegesLoading;
-  const needsConfiguration = indexExists === false;
+  const needsIndex = indexExists === false;
+  const needsConfiguration = !enabled || needsIndex || canWriteIndex === false;
 
   useEffect(() => {
-    if (canManageIndex && needsConfiguration) {
+    if (canManageIndex && needsIndex) {
       createIndex();
     }
-  }, [canManageIndex, createIndex, needsConfiguration]);
+  }, [canManageIndex, createIndex, needsIndex]);
 
-  return { canManageIndex, canWriteIndex, loading, needsConfiguration };
+  return { canManageIndex, canWriteIndex, enabled, loading, needsConfiguration };
 };
