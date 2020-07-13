@@ -17,7 +17,7 @@ import { Direction } from '../../../graphql/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { ColumnHeaderOptions, KqlMode, EventType } from '../../../timelines/store/timeline/model';
 import { defaultHeaders } from './body/column_headers/default_headers';
-import { getInvestigateInResolverAction } from './body/helpers';
+import { getInvestigateInResolverAction, showGraphView } from './body/helpers';
 import { Sort } from './body/sort';
 import { StatefulBody } from './body/stateful_body';
 import { DataProvider } from './data_providers/data_provider';
@@ -282,27 +282,32 @@ export const TimelineComponent: React.FC<Props> = ({
                     toggleColumn={toggleColumn}
                   />
                 </StyledEuiFlyoutBody>
-                <StyledEuiFlyoutFooter
-                  data-test-subj="eui-flyout-footer"
-                  className="timeline-flyout-footer"
-                >
-                  <Footer
-                    getUpdatedAt={getUpdatedAt}
-                    hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                    height={footerHeight}
-                    id={id}
-                    isLive={isLive}
-                    isLoading={loading || loadingIndexName}
-                    itemsCount={events.length}
-                    itemsPerPage={itemsPerPage}
-                    itemsPerPageOptions={itemsPerPageOptions}
-                    nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                    onChangeItemsPerPage={onChangeItemsPerPage}
-                    onLoadMore={loadMore}
-                    serverSideEventCount={totalCount}
-                    tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
-                  />
-                </StyledEuiFlyoutFooter>
+                {
+                  /** Hide the footer if Resolver is showing. */
+                  !showGraphView(graphEventId) && (
+                    <StyledEuiFlyoutFooter
+                      data-test-subj="eui-flyout-footer"
+                      className="timeline-flyout-footer"
+                    >
+                      <Footer
+                        getUpdatedAt={getUpdatedAt}
+                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                        height={footerHeight}
+                        id={id}
+                        isLive={isLive}
+                        isLoading={loading || loadingIndexName}
+                        itemsCount={events.length}
+                        itemsPerPage={itemsPerPage}
+                        itemsPerPageOptions={itemsPerPageOptions}
+                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                        onChangeItemsPerPage={onChangeItemsPerPage}
+                        onLoadMore={loadMore}
+                        serverSideEventCount={totalCount}
+                        tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
+                      />
+                    </StyledEuiFlyoutFooter>
+                  )
+                }
               </>
             );
           }}
