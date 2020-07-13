@@ -17,7 +17,7 @@ export const CaseSavedObjectNoPermissions = React.memo(() => {
     <EmptyPage
       actionPrimaryIcon="documents"
       actionPrimaryLabel={i18n.GO_TO_DOCUMENTATION}
-      actionPrimaryUrl={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/siem/guide/${docLinks.DOC_LINK_VERSION}s`}
+      actionPrimaryUrl={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/security/${docLinks.DOC_LINK_VERSION}s`}
       actionPrimaryTarget="_blank"
       message={i18n.SAVED_OBJECT_NO_PERMISSIONS_MSG}
       data-test-subj="no_saved_objects_permissions"

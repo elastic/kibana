@@ -16,7 +16,7 @@ export const DetectionEngineNoIndex = React.memo(() => {
     <EmptyPage
       actionPrimaryIcon="documents"
       actionPrimaryLabel={i18n.GO_TO_DOCUMENTATION}
-      actionPrimaryUrl={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/siem/guide/${docLinks.DOC_LINK_VERSION}/detection-engine-overview.html#detections-permissions`}
+      actionPrimaryUrl={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/security/${docLinks.DOC_LINK_VERSION}/detection-engine-overview.html#detections-permissions`}
       actionPrimaryTarget="_blank"
       message={i18n.NO_INDEX_MSG_BODY}
       data-test-subj="no_index"
