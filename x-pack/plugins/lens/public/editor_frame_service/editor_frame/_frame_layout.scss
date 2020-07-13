@@ -40,7 +40,7 @@
 
 .lnsFrameLayout__sidebar--right {
   @include euiScrollBar;
-  background-color: $euiColorLightestShade;
+  background-color: lightOrDarkTheme($euiColorLightestShade, $euiColorInk);
   min-width: $lnsPanelMinWidth + $euiSizeXL;
   overflow-x: hidden;
   overflow-y: scroll;
