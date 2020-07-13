@@ -72,6 +72,7 @@ export interface Action<Context extends {} = {}, T = ActionType>
   /**
    * Determines if action should be executed automatically,
    * without first showing up in context menu.
+   * false by default.
    */
   shouldAutoExecute?(context: Context): Promise<boolean>;
 }
@@ -98,7 +99,8 @@ export interface ActionDefinition<Context extends object = object>
 
   /**
    * Determines if action should be executed automatically,
-   * without first showing up in context menu
+   * without first showing up in context menu.
+   * false by default.
    */
   shouldAutoExecute?(context: Context): Promise<boolean>;
 }

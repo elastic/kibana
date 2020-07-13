@@ -24,10 +24,5 @@ export {
 } from './apply_filter_action';
 export { createFiltersFromValueClickAction } from './filters/create_filters_from_value_click';
 export { createFiltersFromRangeSelectAction } from './filters/create_filters_from_range_select';
-export {
-  EmitApplyFilterTriggerActionContext,
-  ACTION_EMIT_APPLY_FILTER_TRIGGER,
-  createEmitApplyFilterTriggerAction,
-  isValueClickTriggerContext,
-  isRangeSelectTriggerContext,
-} from './emit_apply_filter_trigger_action';
+export * from './select_range_action';
+export * from './value_click_action';

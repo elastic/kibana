@@ -42,7 +42,7 @@ export class UiActionsExecutionService {
     context,
     trigger,
   }: {
-    action: Action<any>;
+    action: Action<BaseContext>;
     context: BaseContext;
     trigger: Trigger;
   }): Promise<void> {
@@ -106,6 +106,7 @@ export class UiActionsExecutionService {
   }
 
   private async executeMultipleActions(tasks: ExecuteActionTask[]) {
+    debugger;
     const panel = await buildContextMenuForActions({
       actions: tasks.map(({ action, context }) => [action, context]),
       title: tasks[0].trigger.title, // title of context menu is title of trigger which originated the chain

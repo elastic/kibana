@@ -23,41 +23,23 @@ import {
   createAction,
   UiActionsStart,
 } from '../../../../plugins/ui_actions/public';
-import { createFiltersFromRangeSelectAction } from './filters/create_filters_from_range_select';
 import { createFiltersFromValueClickAction } from './filters/create_filters_from_value_click';
 import type { Filter } from '../../common/es_query/filters';
-import type {
-  ChartActionContext,
-  RangeSelectContext,
-  ValueClickContext,
-} from '../../../embeddable/public';
+import type { ValueClickContext } from '../../../embeddable/public';
 
-export const ACTION_EMIT_APPLY_FILTER_TRIGGER = 'ACTION_EMIT_APPLY_FILTER_TRIGGER';
+export type ValueClickActionContext = ValueClickContext;
+export const ACTION_VALUE_CLICK = 'ACTION_VALUE_CLICK';
 
-export type EmitApplyFilterTriggerActionContext = RangeSelectContext | ValueClickContext;
-
-export const isValueClickTriggerContext = (
-  context: ChartActionContext
-): context is ValueClickContext => context.data && 'data' in context.data;
-
-export const isRangeSelectTriggerContext = (
-  context: ChartActionContext
-): context is RangeSelectContext => context.data && 'range' in context.data;
-
-export function createEmitApplyFilterTriggerAction(
+export function createValueClickAction(
   getStartServices: () => { uiActions: UiActionsStart }
-): ActionByType<typeof ACTION_EMIT_APPLY_FILTER_TRIGGER> {
-  return createAction<typeof ACTION_EMIT_APPLY_FILTER_TRIGGER>({
-    type: ACTION_EMIT_APPLY_FILTER_TRIGGER,
-    id: ACTION_EMIT_APPLY_FILTER_TRIGGER,
+): ActionByType<typeof ACTION_VALUE_CLICK> {
+  return createAction<typeof ACTION_VALUE_CLICK>({
+    type: ACTION_VALUE_CLICK,
+    id: ACTION_VALUE_CLICK,
     shouldAutoExecute: async () => true,
-    execute: async (context: EmitApplyFilterTriggerActionContext) => {
+    execute: async (context: ValueClickActionContext) => {
       try {
-        let filters: Filter[] = [];
-        if (isValueClickTriggerContext(context))
-          filters = await createFiltersFromValueClickAction(context.data);
-        if (isRangeSelectTriggerContext(context))
-          filters = await createFiltersFromRangeSelectAction(context.data);
+        const filters: Filter[] = await createFiltersFromValueClickAction(context.data);
         if (filters.length > 0) {
           await getStartServices().uiActions.getTrigger(APPLY_FILTER_TRIGGER).exec({
             filters,

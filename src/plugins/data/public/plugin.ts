@@ -70,9 +70,12 @@ import {
   createFiltersFromValueClickAction,
   createFiltersFromRangeSelectAction,
   ApplyGlobalFilterActionContext,
-  ACTION_EMIT_APPLY_FILTER_TRIGGER,
-  EmitApplyFilterTriggerActionContext,
-  createEmitApplyFilterTriggerAction,
+  ACTION_SELECT_RANGE,
+  ACTION_VALUE_CLICK,
+  SelectRangeActionContext,
+  ValueClickActionContext,
+  createValueClickAction,
+  createSelectRangeAction,
 } from './actions';
 
 import { SavedObjectsClientPublicToCommon } from './index_patterns';
@@ -81,7 +84,8 @@ import { indexPatternLoad } from './index_patterns/expressions/load_index_patter
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
     [ACTION_GLOBAL_APPLY_FILTER]: ApplyGlobalFilterActionContext;
-    [ACTION_EMIT_APPLY_FILTER_TRIGGER]: EmitApplyFilterTriggerActionContext;
+    [ACTION_SELECT_RANGE]: SelectRangeActionContext;
+    [ACTION_VALUE_CLICK]: ValueClickActionContext;
   }
 }
 
@@ -138,12 +142,19 @@ export class DataPublicPlugin
       createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
 
-    const emitApplyFilterTriggerAction = createEmitApplyFilterTriggerAction(() => ({
-      uiActions: startServices().plugins.uiActions,
-    }));
+    uiActions.addTriggerAction(
+      SELECT_RANGE_TRIGGER,
+      createSelectRangeAction(() => ({
+        uiActions: startServices().plugins.uiActions,
+      }))
+    );
 
-    uiActions.addTriggerAction(SELECT_RANGE_TRIGGER, emitApplyFilterTriggerAction);
-    uiActions.addTriggerAction(VALUE_CLICK_TRIGGER, emitApplyFilterTriggerAction);
+    uiActions.addTriggerAction(
+      VALUE_CLICK_TRIGGER,
+      createValueClickAction(() => ({
+        uiActions: startServices().plugins.uiActions,
+      }))
+    );
 
     return {
       autocomplete: this.autocomplete.setup(core),
