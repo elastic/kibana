@@ -119,8 +119,12 @@ const SavedFilterQueryQueryRuntimeType = runtimeTypes.partial({
  *  DatePicker Range Types
  */
 const SavedDateRangePickerRuntimeType = runtimeTypes.partial({
-  start: unionWithNullType(runtimeTypes.string),
-  end: unionWithNullType(runtimeTypes.string),
+  /* Before the change of all timestamp to ISO string the values of start and from
+   * attributes where a number. Specifically UNIX timestamps.
+   * To support old timeline's saved object we need to add the number io-ts type
+   */
+  start: unionWithNullType(runtimeTypes.union([runtimeTypes.string, runtimeTypes.number])),
+  end: unionWithNullType(runtimeTypes.union([runtimeTypes.string, runtimeTypes.number])),
 });
 
 /*
