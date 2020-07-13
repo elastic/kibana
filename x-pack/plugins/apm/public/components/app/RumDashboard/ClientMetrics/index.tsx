@@ -34,7 +34,7 @@ export function ClientMetrics() {
           },
         });
       }
-      return Promise.resolve();
+      return Promise.resolve(null);
     },
     [start, end, serviceName, uiFilters]
   );

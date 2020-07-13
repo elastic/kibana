@@ -39,7 +39,7 @@ export const PageViewsTrend = () => {
           },
         });
       }
-      return Promise.resolve();
+      return Promise.resolve(undefined);
     },
     [end, start, serviceName, uiFilters, breakdowns]
   );

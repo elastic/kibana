@@ -56,7 +56,7 @@ export const PageLoadDistribution = () => {
           },
         });
       }
-      return Promise.resolve();
+      return Promise.resolve(null);
     },
     [
       end,
