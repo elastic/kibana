@@ -13,7 +13,7 @@ import { sendGetEnrollmentAPIKeys, useCore } from '../../../../hooks';
 import { AgentConfigPackageBadges } from '../agent_config_package_badges';
 
 type Props = {
-  agentConfigs: AgentConfig[];
+  agentConfigs?: AgentConfig[];
   onConfigChange?: (key: string) => void;
 } & (
   | {
@@ -37,9 +37,16 @@ export const EnrollmentStepAgentConfig: React.FC<Props> = (props) => {
   const [selectedState, setSelectedState] = useState<{
     agentConfigId?: string;
     enrollmentAPIKeyId?: string;
-  }>({
-    agentConfigId: agentConfigs.length ? agentConfigs[0].id : undefined,
-  });
+  }>({});
+
+  useEffect(() => {
+    if (agentConfigs && agentConfigs.length && !selectedState.agentConfigId) {
+      setSelectedState({
+        ...selectedState,
+        agentConfigId: agentConfigs[0].id,
+      });
+    }
+  }, [agentConfigs, selectedState]);
 
   useEffect(() => {
     if (onConfigChange && selectedState.agentConfigId) {
@@ -110,7 +117,8 @@ export const EnrollmentStepAgentConfig: React.FC<Props> = (props) => {
             />
           </EuiText>
         }
-        options={agentConfigs.map((config) => ({
+        isLoading={!agentConfigs}
+        options={(agentConfigs || []).map((config) => ({
           value: config.id,
           text: config.name,
         }))}

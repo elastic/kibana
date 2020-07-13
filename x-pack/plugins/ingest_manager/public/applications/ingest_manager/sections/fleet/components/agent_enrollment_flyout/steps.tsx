@@ -46,7 +46,7 @@ export const AgentConfigSelectionStep = ({
   setSelectedAPIKeyId,
   setSelectedConfigId,
 }: {
-  agentConfigs: AgentConfig[];
+  agentConfigs?: AgentConfig[];
   setSelectedAPIKeyId?: (key: string) => void;
   setSelectedConfigId?: (configId: string) => void;
 }) => {
