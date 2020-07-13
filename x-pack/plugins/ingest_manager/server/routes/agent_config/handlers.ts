@@ -278,7 +278,7 @@ export const downloadFullAgentConfig: RequestHandler<TypeOf<
       const body = configToYaml(fullAgentConfig);
       const headers: ResponseHeaders = {
         'content-type': 'text/x-yaml',
-        'content-disposition': `attachment; filename="elastic-agent-config-${fullAgentConfig.id}.yml"`,
+        'content-disposition': `attachment; filename="elastic-agent.yml"`,
       };
       return response.ok({
         body,

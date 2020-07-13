@@ -11,7 +11,7 @@ const CONFIG_KEYS_ORDER = [
   'name',
   'revision',
   'type',
-  'settings',
+  'agent',
   'outputs',
   'inputs',
   'enabled',

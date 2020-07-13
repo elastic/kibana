@@ -409,7 +409,7 @@ class AgentConfigService {
       revision: config.revision,
       ...(config.monitoring_enabled && config.monitoring_enabled.length > 0
         ? {
-            settings: {
+            agent: {
               monitoring: {
                 use_output: defaultOutput.name,
                 enabled: true,
@@ -419,7 +419,7 @@ class AgentConfigService {
             },
           }
         : {
-            settings: {
+            agent: {
               monitoring: { enabled: false, logs: false, metrics: false },
             },
           }),
