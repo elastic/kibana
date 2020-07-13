@@ -7045,8 +7045,6 @@
     "xpack.idxMgmt.templateDetails.loadingIndexTemplateErrorMessage": "加载模板时出错",
     "xpack.idxMgmt.templateDetails.manageButtonLabel": "管理",
     "xpack.idxMgmt.templateDetails.manageContextMenuPanelTitle": "模板选项",
-    "xpack.idxMgmt.templateDetails.managedTemplateInfoDescription": "托管模板对内部操作至关重要。",
-    "xpack.idxMgmt.templateDetails.managedTemplateInfoTitle": "不允许编辑托管模板",
     "xpack.idxMgmt.templateDetails.mappingsTabTitle": "映射",
     "xpack.idxMgmt.templateDetails.settingsTabTitle": "设置",
     "xpack.idxMgmt.templateDetails.summaryTab.ilmPolicyDescriptionListTitle": "ILM 策略",
