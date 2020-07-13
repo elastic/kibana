@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getHistogramsForFields, DataVisualizer } from './data_visualizer';
+export { getHistogramsForFields } from '../../ml/server';
