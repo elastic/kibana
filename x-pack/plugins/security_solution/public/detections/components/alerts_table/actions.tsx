@@ -10,7 +10,14 @@ import moment from 'moment';
 
 import { updateAlertStatus } from '../../containers/detection_engine/alerts/api';
 import { SendAlertToTimelineActionProps, UpdateAlertStatusActionProps } from './types';
-import { TimelineNonEcsData, GetOneTimeline, TimelineResult, Ecs } from '../../../graphql/types';
+import {
+  TimelineNonEcsData,
+  GetOneTimeline,
+  TimelineResult,
+  Ecs,
+  TimelineStatus,
+  TimelineType,
+} from '../../../graphql/types';
 import { oneTimelineQuery } from '../../../timelines/containers/one/index.gql_query';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import {
@@ -122,20 +129,31 @@ export const sendAlertToTimelineAction = async ({
       if (!isEmpty(resultingTimeline)) {
         const timelineTemplate: TimelineResult = omitTypenameInTimeline(resultingTimeline);
         openAlertInBasicTimeline = false;
-        const { timeline } = formatTimelineResultToModel(timelineTemplate, true);
+        const { timeline } = formatTimelineResultToModel(
+          timelineTemplate,
+          true,
+          timelineTemplate.timelineType ?? TimelineType.default
+        );
         const query = replaceTemplateFieldFromQuery(
           timeline.kqlQuery?.filterQuery?.kuery?.expression ?? '',
-          ecsData
+          ecsData,
+          timeline.timelineType
         );
         const filters = replaceTemplateFieldFromMatchFilters(timeline.filters ?? [], ecsData);
         const dataProviders = replaceTemplateFieldFromDataProviders(
           timeline.dataProviders ?? [],
-          ecsData
+          ecsData,
+          timeline.timelineType
         );
+
         createTimeline({
           from,
           timeline: {
             ...timeline,
+            title: '',
+            timelineType: TimelineType.default,
+            templateTimelineId: null,
+            status: TimelineStatus.draft,
             dataProviders,
             eventType: 'all',
             filters,

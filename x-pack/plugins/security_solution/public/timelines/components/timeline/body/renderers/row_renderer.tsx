@@ -7,6 +7,7 @@
 import React from 'react';
 
 import { BrowserFields } from '../../../../../common/containers/source';
+import type { RowRendererId } from '../../../../../../common/types/timeline';
 import { Ecs } from '../../../../../graphql/types';
 import { EventsTrSupplement } from '../../styles';
 
@@ -22,6 +23,7 @@ export const RowRendererContainer = React.memo<RowRendererContainerProps>(({ chi
 RowRendererContainer.displayName = 'RowRendererContainer';
 
 export interface RowRenderer {
+  id: RowRendererId;
   isInstance: (data: Ecs) => boolean;
   renderRow: ({
     browserFields,

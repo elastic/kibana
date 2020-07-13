@@ -146,7 +146,12 @@ describe('manifest', () => {
     });
 
     test('Manifest can be created from list of artifacts', async () => {
-      const manifest = Manifest.fromArtifacts(artifacts, 'v1', ManifestConstants.INITIAL_VERSION);
+      const oldManifest = new Manifest(
+        new Date(),
+        ManifestConstants.SCHEMA_VERSION,
+        ManifestConstants.INITIAL_VERSION
+      );
+      const manifest = Manifest.fromArtifacts(artifacts, 'v1', oldManifest);
       expect(
         manifest.contains(
           'endpoint-exceptionlist-linux-v1-5f16e5e338c53e77cfa945c17c11b175c3967bf109aa87131de41fb93b149735'

@@ -16,6 +16,9 @@ import {
   EuiHealth,
   EuiToolTip,
   EuiSelectableProps,
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -374,14 +377,25 @@ export const HostList = () => {
       data-test-subj="hostPage"
       headerLeft={
         <>
-          <EuiTitle size="l">
-            <h1 data-test-subj="pageViewHeaderLeftTitle">
-              <FormattedMessage
-                id="xpack.securitySolution.hostList.pageTitle"
-                defaultMessage="Hosts"
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="l">
+                <h1 data-test-subj="pageViewHeaderLeftTitle">
+                  <FormattedMessage
+                    id="xpack.securitySolution.hostList.pageTitle"
+                    defaultMessage="Hosts"
+                  />
+                </h1>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                label={i18n.translate('xpack.securitySolution.endpoint.hostList.beta', {
+                  defaultMessage: 'Beta',
+                })}
               />
-            </h1>
-          </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
             <p>
