@@ -80,7 +80,7 @@ Plugin code can be written in [TypeScript](http://www.typescriptlang.org/) if de
 ```js
 {
   // extend Kibana's tsconfig, or use your own settings
-  "extends": "../../kibana/tsconfig.json",
+  "extends": "../../kibana/tsconfig.base.json",
 
   // tell the TypeScript compiler where to find your source files
   "include": [

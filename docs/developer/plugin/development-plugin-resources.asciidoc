@@ -53,7 +53,7 @@ To enable TypeScript support, create a `tsconfig.json` file at the root of your 
 -----------
 {
   // extend Kibana's tsconfig, or use your own settings
-  "extends": "../../kibana/tsconfig.json",
+  "extends": "../../kibana/tsconfig.base.json",
 
   // tell the TypeScript compiler where to find your source files
   "include": [

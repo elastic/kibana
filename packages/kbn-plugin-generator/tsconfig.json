@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "include": ["**/*", "index.js.d.ts"],
   "exclude": ["sao_template/template/*"]
 }

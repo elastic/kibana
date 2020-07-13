@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.json",
+  "extends": "../../../tsconfig.base.json",
   "exclude": ["**/node_modules/**"],
   "paths": {
     "react": ["../../../node_modules/@types/react"]
