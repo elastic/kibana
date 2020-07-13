@@ -13695,7 +13695,6 @@
     "xpack.snapshotRestore.repositoryForm.typeReadonly.urlLabel": "パス (必須)",
     "xpack.snapshotRestore.repositoryForm.typeReadonly.urlSchemeLabel": "スキーム",
     "xpack.snapshotRestore.repositoryForm.typeReadonly.urlTitle": "URL",
-    "xpack.snapshotRestore.repositoryForm.typeReadonly.urlWhitelistDescription": "この URL は {settingKey} 設定で登録する必要があります。",
     "xpack.snapshotRestore.repositoryForm.typeS3.basePathDescription": "レポジトリデータへのバケットパスです。",
     "xpack.snapshotRestore.repositoryForm.typeS3.basePathLabel": "ベースパス",
     "xpack.snapshotRestore.repositoryForm.typeS3.basePathTitle": "ベースパス",
