@@ -82,4 +82,3 @@ export function LoginPageProvider({ getService }: FtrProviderContext) {
 
   return new LoginPage();
 }
-
