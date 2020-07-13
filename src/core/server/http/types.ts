@@ -162,8 +162,8 @@ export interface HttpServiceSetup {
    * the Auth interceptor performs a check that user has access to requested resources.
    *
    * @remarks
-   * Can register any number of registerOnPostAuth, which are called in sequence
-   * (from the first registered to the last). See {@link OnPreRoutingHandler}.
+   * Can register any number of registerOnPreAuth, which are called in sequence
+   * (from the first registered to the last). See {@link OnPreAuthHandler}.
    *
    * @param handler {@link OnPreRoutingHandler} - function to call.
    */
@@ -186,7 +186,7 @@ export interface HttpServiceSetup {
    *
    * @remarks
    * The auth state is available at stage via http.auth.get(..)
-   * Can register any number of registerOnPreRouting, which are called in sequence
+   * Can register any number of registerOnPostAuth, which are called in sequence
    * (from the first registered to the last). See {@link OnPostAuthHandler}.
    *
    * @param handler {@link OnPostAuthHandler} - function to call.

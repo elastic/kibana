@@ -64,7 +64,7 @@ const preResponseResult = {
 };
 
 /**
- * A tool set defining an outcome of OnPreRouting interceptor for incoming request.
+ * A tool set defining an outcome of OnPreResponse interceptor for incoming request.
  * @public
  */
 export interface OnPreResponseToolkit {
