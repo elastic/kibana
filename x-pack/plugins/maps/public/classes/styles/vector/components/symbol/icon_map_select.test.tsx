@@ -35,7 +35,7 @@ class MockField extends AbstractField {}
 
 class MockDynamicStyleProperty {
   getField() {
-    return new MockField('myField', FIELD_ORIGIN.SOURCE);
+    return new MockField({ fieldName: 'myField', origin: FIELD_ORIGIN.SOURCE });
   }
 
   getValueSuggestions() {

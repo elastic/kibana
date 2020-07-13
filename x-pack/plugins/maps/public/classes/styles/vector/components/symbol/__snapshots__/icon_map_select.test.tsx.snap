@@ -5,7 +5,7 @@ exports[`Should not render icon map select when isCustomOnly 1`] = `
   <IconStops
     field={
       MockField {
-        "_fieldName": undefined,
+        "_fieldName": "myField",
         "_origin": "source",
       }
     }
@@ -64,7 +64,7 @@ exports[`Should render custom stops input when useCustomIconMap 1`] = `
   <IconStops
     field={
       MockField {
-        "_fieldName": undefined,
+        "_fieldName": "myField",
         "_origin": "source",
       }
     }
