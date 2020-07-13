@@ -23,8 +23,7 @@ import {
   analysePatternForFract,
   DateNanosFormat,
   formatWithNanos,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../public/field_formats/converters/date_nanos';
+} from '../../../common/field_formats/converters/date_nanos_shared';
 import { TextContextTypeConvert } from '../../../common';
 
 class DateNanosFormatServer extends DateNanosFormat {
