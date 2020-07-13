@@ -22,7 +22,14 @@ import {
 } from './search_after_bulk_create';
 import { getFilter } from './get_filter';
 import { SignalRuleAlertTypeDefinition, RuleAlertAttributes } from './types';
-import { getGapBetweenRuns, parseScheduleDates, getListsClient, getExceptions } from './utils';
+import {
+  getGapBetweenRuns,
+  parseScheduleDates,
+  getListsClient,
+  getExceptions,
+  getGapMaxCatchupRatio,
+  MAX_RULE_GAP_RATIO,
+} from './utils';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
 import { findMlSignals } from './find_ml_signals';
@@ -126,15 +133,26 @@ export const signalRulesAlertType = ({
 
       const gap = getGapBetweenRuns({ previousStartedAt, interval, from, to });
       if (gap != null && gap.asMilliseconds() > 0) {
-        const gapString = gap.humanize();
-        const gapMessage = buildRuleMessage(
-          `${gapString} (${gap.asMilliseconds()}ms) has passed since last rule execution, and signals may have been missed.`,
-          'Consider increasing your look behind time or adding more Kibana instances.'
-        );
-        logger.warn(gapMessage);
+        const fromUnit = from[from.length - 1];
+        const { ratio } = getGapMaxCatchupRatio({
+          logger,
+          buildRuleMessage,
+          previousStartedAt,
+          ruleParamsFrom: from,
+          interval,
+          unit: fromUnit,
+        });
+        if (ratio && ratio >= MAX_RULE_GAP_RATIO) {
+          const gapString = gap.humanize();
+          const gapMessage = buildRuleMessage(
+            `${gapString} (${gap.asMilliseconds()}ms) has passed since last rule execution, and signals may have been missed.`,
+            'Consider increasing your look behind time or adding more Kibana instances.'
+          );
+          logger.warn(gapMessage);
 
-        hasError = true;
-        await ruleStatusService.error(gapMessage, { gap: gapString });
+          hasError = true;
+          await ruleStatusService.error(gapMessage, { gap: gapString });
+        }
       }
       try {
         const { listClient, exceptionsClient } = await getListsClient({

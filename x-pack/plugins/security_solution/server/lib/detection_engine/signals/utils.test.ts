@@ -21,6 +21,7 @@ import {
   parseScheduleDates,
   getDriftTolerance,
   getGapBetweenRuns,
+  getGapMaxCatchupRatio,
   errorAggregator,
   getListsClient,
   hasLargeValueList,
@@ -713,6 +714,52 @@ describe('utils', () => {
       expect(someTuples.length).toEqual(1);
       const someTuple = someTuples[0];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(13);
+    });
+  });
+
+  describe('getMaxCatchupRatio', () => {
+    test('should return null if rule has never run before', () => {
+      const { maxCatchup, ratio, gapDiffInUnits } = getGapMaxCatchupRatio({
+        logger: mockLogger,
+        previousStartedAt: null,
+        interval: '30s',
+        ruleParamsFrom: 'now-30s',
+        buildRuleMessage,
+        unit: 's',
+      });
+      expect(maxCatchup).toBeNull();
+      expect(ratio).toBeNull();
+      expect(gapDiffInUnits).toBeNull();
+    });
+
+    test('should should have non-null values when gap is present', () => {
+      const { maxCatchup, ratio, gapDiffInUnits } = getGapMaxCatchupRatio({
+        logger: mockLogger,
+        previousStartedAt: moment().subtract(65, 's').toDate(),
+        interval: '50s',
+        ruleParamsFrom: 'now-55s',
+        buildRuleMessage,
+        unit: 's',
+      });
+      expect(maxCatchup).toEqual(0.2);
+      expect(ratio).toEqual(0.2);
+      expect(gapDiffInUnits).toEqual(10);
+    });
+
+    // when a rule runs sooner than expected we don't
+    // consider that a gap as that is a very rare circumstance
+    test('should return null when given a negative gap (rule ran sooner than expected)', () => {
+      const { maxCatchup, ratio, gapDiffInUnits } = getGapMaxCatchupRatio({
+        logger: mockLogger,
+        previousStartedAt: moment().subtract(-15, 's').toDate(),
+        interval: '10s',
+        ruleParamsFrom: 'now-13s',
+        buildRuleMessage,
+        unit: 's',
+      });
+      expect(maxCatchup).toBeNull();
+      expect(ratio).toBeNull();
+      expect(gapDiffInUnits).toBeNull();
     });
   });
 
