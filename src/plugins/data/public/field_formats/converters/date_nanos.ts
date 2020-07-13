@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { DateFormat } from './date_server';
-export { DateNanosFormat } from './date_nanos_server';
+export { DateNanosFormat } from '../../../common/field_formats/converters/date_nanos_shared';
