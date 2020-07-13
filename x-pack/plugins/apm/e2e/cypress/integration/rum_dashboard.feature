@@ -1,10 +1,8 @@
 Feature: RUM Dashboard
 
   Scenario: Client metrics
-    Given a user browses the APM UI application for RUM Data
-    When the user inspects the real user monitoring tab
-    Then should redirect to rum dashboard
-      And should have correct client metrics
+    When a user browses the APM UI application for RUM Data
+    Then should have correct client metrics
 
   Scenario Outline: Rum page filters
     When the user filters by "<filterName>"
@@ -15,22 +13,16 @@ Feature: RUM Dashboard
       | location   |
 
   Scenario: Page load distribution percentiles
-    Given a user browses the APM UI application for RUM Data
-    When the user inspects the real user monitoring tab
-    Then should redirect to rum dashboard
-      And should display percentile for page load chart
+    When a user browses the APM UI application for RUM Data
+    Then should display percentile for page load chart
 
   Scenario: Page load distribution chart tooltip
-    Given a user browses the APM UI application for RUM Data
-    When the user inspects the real user monitoring tab
-    Then should redirect to rum dashboard
-    And should display tooltip on hover
+    When a user browses the APM UI application for RUM Data
+    Then should display tooltip on hover
 
   Scenario: Page load distribution chart legends
-    Given a user browses the APM UI application for RUM Data
-    When the user inspects the real user monitoring tab
-    Then should redirect to rum dashboard
-    And should display chart legend
+    When a user browses the APM UI application for RUM Data
+    Then should display chart legend
 
   Scenario: Breakdown filter
     Given a user click page load breakdown filter

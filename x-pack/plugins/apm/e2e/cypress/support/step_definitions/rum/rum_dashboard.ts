@@ -14,18 +14,10 @@ Given(`a user browses the APM UI application for RUM Data`, () => {
   // open service overview page
   const RANGE_FROM = 'now-24h';
   const RANGE_TO = 'now';
-  loginAndWaitForPage(`/app/apm#/services`, { from: RANGE_FROM, to: RANGE_TO });
-});
-
-When(`the user inspects the real user monitoring tab`, () => {
-  // click rum tab
-  cy.get(':contains(Real User Monitoring)', { timeout: DEFAULT_TIMEOUT })
-    .last()
-    .click({ force: true });
-});
-
-Then(`should redirect to rum dashboard`, () => {
-  cy.url().should('contain', `/app/apm#/rum-overview`);
+  loginAndWaitForPage(`/app/apm#/rum-preview`, {
+    from: RANGE_FROM,
+    to: RANGE_TO,
+  });
 });
 
 Then(`should have correct client metrics`, () => {

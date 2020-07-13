@@ -17,8 +17,13 @@ import { PageViewsTrend } from './PageViewsTrend';
 import { PageLoadDistribution } from './PageLoadDistribution';
 import { I18LABELS } from './translations';
 import { VisitorBreakdown } from './VisitorBreakdown';
+import { LocalUIFilter } from '../../../../typings/ui_filters';
 
-export const RumDashboard = ({ filters }) => {
+interface Props {
+  filters: LocalUIFilter[];
+}
+
+export const RumDashboard = ({ filters }: Props) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>

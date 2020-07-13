@@ -8,9 +8,10 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { VisitorBreakdownChart } from '../Charts/VisitorBreakdownChart';
 import { VisitorBreakdownLabel } from '../translations';
+import { LocalUIFilter } from '../../../../../typings/ui_filters';
 
 interface Props {
-  filters: any;
+  filters: LocalUIFilter[];
 }
 
 export const VisitorBreakdown = ({ filters = [] }: Props) => {

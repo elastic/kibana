@@ -254,7 +254,7 @@ export const routes: BreadcrumbRoute[] = [
   },
   {
     exact: true,
-    path: '/rum-overview',
+    path: '/rum-preview',
     component: () => <RumHome />,
     breadcrumb: i18n.translate('xpack.apm.home.rumOverview.title', {
       defaultMessage: 'Real User Monitoring',

@@ -104,7 +104,6 @@ export function getPathParams(pathname: string = ''): PathParams {
             serviceName,
           };
         case 'service-map':
-        case 'rum-overview':
           return {
             serviceName,
           };

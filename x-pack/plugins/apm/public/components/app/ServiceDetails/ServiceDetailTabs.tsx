@@ -22,8 +22,6 @@ import { ServiceMap } from '../ServiceMap';
 import { ServiceMetrics } from '../ServiceMetrics';
 import { ServiceNodeOverview } from '../ServiceNodeOverview';
 import { TransactionOverview } from '../TransactionOverview';
-import { RumOverview } from '../RumDashboard';
-import { RumOverviewLink } from '../../shared/Links/apm/RumOverviewLink';
 
 interface Props {
   tab: 'transactions' | 'errors' | 'metrics' | 'nodes' | 'service-map';

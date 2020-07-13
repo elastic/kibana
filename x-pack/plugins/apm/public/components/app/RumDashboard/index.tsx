@@ -11,7 +11,6 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
 } from '@elastic/eui';
-import { useRouteMatch } from 'react-router-dom';
 import { useTrackPageview } from '../../../../../observability/public';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { PROJECTION } from '../../../../common/projections/typings';
@@ -21,6 +20,7 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { RUM_AGENTS } from '../../../../common/agent_name';
 import { EnvironmentFilter } from '../../shared/EnvironmentFilter';
+import { LocalUIFilter } from '../../../../typings/ui_filters';
 
 export function RumOverview() {
   useTrackPageview({ app: 'apm', path: 'rum_overview' });
@@ -35,15 +35,11 @@ export function RumOverview() {
     return config;
   }, []);
 
-  const [filters, setFilters] = useState(null);
+  const [filters, setFilters] = useState<LocalUIFilter[]>([]);
 
   const {
     urlParams: { start, end },
   } = useUrlParams();
-
-  const isRumServiceRoute = useRouteMatch(
-    '/services/:serviceName/rum-overview'
-  );
 
   const { data } = useFetcher(
     (callApmApi) => {
@@ -75,13 +71,11 @@ export function RumOverview() {
             showCount={true}
             onFiltersLoad={setFilters}
           >
-            {!isRumServiceRoute && (
-              <>
-                <ServiceNameFilter serviceNames={data ?? []} />
-                <EuiSpacer size="xl" />
-                <EuiHorizontalRule margin="none" />{' '}
-              </>
-            )}
+            <>
+              <ServiceNameFilter serviceNames={data ?? []} />
+              <EuiSpacer size="xl" />
+              <EuiHorizontalRule margin="none" />{' '}
+            </>
           </LocalUIFilters>
         </EuiFlexItem>
         <EuiFlexItem grow={7}>

@@ -21,8 +21,13 @@ import {
 } from '@elastic/eui/dist/eui_charts_theme';
 import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ChartWrapper } from '../ChartWrapper';
+import { LocalUIFilter } from '../../../../../typings/ui_filters';
 
-export const VisitorBreakdownChart = ({ data }) => {
+interface Props {
+  data?: LocalUIFilter;
+}
+
+export const VisitorBreakdownChart = ({ data }: Props) => {
   const options = data?.options;
 
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');

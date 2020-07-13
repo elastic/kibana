@@ -78,7 +78,7 @@ const SETTINGS_LINK_LABEL = i18n.translate('xpack.apm.settingsLinkLabel', {
 });
 
 interface Props {
-  tab: 'traces' | 'services' | 'service-map' | 'rum-overview';
+  tab: 'traces' | 'services' | 'service-map';
 }
 
 export function Home({ tab }: Props) {
