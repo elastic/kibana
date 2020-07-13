@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { ExceptionListItemComponent } from './exception_item';
-import { useFetchIndexPatterns } from '../../../../alerts/containers/detection_engine/rules/fetch_index_patterns';
+import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules/fetch_index_patterns';
 import {
   ExceptionListItemSchema,
   NamespaceType,

@@ -47,14 +47,14 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
 }) => {
   const ruleName = `${value}`;
   const ruleId = linkValue;
-  const { search } = useFormatUrl(SecurityPageName.alerts);
+  const { search } = useFormatUrl(SecurityPageName.detections);
   const { navigateToApp, getUrlForApp } = useKibana().services.application;
   const content = truncate ? <TruncatableText>{value}</TruncatableText> : value;
 
   const goToRuleDetails = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.alerts}`, {
+      navigateToApp(`${APP_ID}:${SecurityPageName.detections}`, {
         path: getRuleDetailsUrl(ruleId ?? '', search),
       });
     },
@@ -70,7 +70,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
     >
       <LinkAnchor
         onClick={goToRuleDetails}
-        href={getUrlForApp(`${APP_ID}:${SecurityPageName.alerts}`, {
+        href={getUrlForApp(`${APP_ID}:${SecurityPageName.detections}`, {
           path: getRuleDetailsUrl(ruleId, search),
         })}
       >

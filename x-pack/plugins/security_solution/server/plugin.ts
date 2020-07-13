@@ -72,7 +72,7 @@ export interface PluginStart {}
 const securitySubPlugins = [
   APP_ID,
   `${APP_ID}:${SecurityPageName.overview}`,
-  `${APP_ID}:${SecurityPageName.alerts}`,
+  `${APP_ID}:${SecurityPageName.detections}`,
   `${APP_ID}:${SecurityPageName.hosts}`,
   `${APP_ID}:${SecurityPageName.network}`,
   `${APP_ID}:${SecurityPageName.timelines}`,
