@@ -39,6 +39,10 @@ interface AlertsUtilityBarProps {
   updateAlertsStatus: UpdateAlertsStatus;
 }
 
+const UtilityBarFlexGroup = styled(EuiFlexGroup)`
+  min-width: 175px;
+`;
+
 const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
   canUserCRUD,
   hasIndexWrite,
@@ -68,10 +72,6 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
   const formattedSelectedEventsCount = numeral(Object.keys(selectedEventIds).length).format(
     defaultNumberFormat
   );
-
-  const UtilityBarFlexGroup = styled(EuiFlexGroup)`
-    min-width: 175px;
-  `;
 
   const UtilityBarPopoverContent = (closePopover: () => void) => (
     <UtilityBarFlexGroup direction="column">

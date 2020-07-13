@@ -77,7 +77,7 @@ describe('EventsViewer', () => {
     await wait();
     wrapper.update();
 
-    expect(wrapper.find(`[data-test-subj="show-field-browser-gear"]`).first().exists()).toBe(true);
+    expect(wrapper.find(`[data-test-subj="show-field-browser"]`).first().exists()).toBe(true);
   });
 
   test('it renders the footer containing the Load More button', async () => {

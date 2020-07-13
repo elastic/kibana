@@ -16,24 +16,37 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PluginInitializerContext } from 'kibana/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { npStart, npSetup } from 'ui/new_platform';
-import {
-  TableVisPlugin,
-  TablePluginSetupDependencies,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../plugins/vis_type_table/public/plugin';
 
-const plugins: Readonly<TablePluginSetupDependencies> = {
-  expressions: npSetup.plugins.expressions,
-  visualizations: npSetup.plugins.visualizations,
-};
+import { validateTimeRange } from './validate_timerange';
 
-const pluginInstance = new TableVisPlugin({} as PluginInitializerContext);
+describe('Validate timerange', () => {
+  test('Validate no range', () => {
+    const ok = validateTimeRange();
 
-export const setup = pluginInstance.setup(npSetup.core, plugins);
-export const start = pluginInstance.start(npStart.core, {
-  data: npStart.plugins.data,
-  kibanaLegacy: npStart.plugins.kibanaLegacy,
+    expect(ok).toBe(false);
+  });
+  test('normal range', () => {
+    const ok = validateTimeRange({
+      to: 'now',
+      from: 'now-7d',
+    });
+
+    expect(ok).toBe(true);
+  });
+  test('bad from time', () => {
+    const ok = validateTimeRange({
+      to: 'nowa',
+      from: 'now-7d',
+    });
+
+    expect(ok).toBe(false);
+  });
+  test('bad to time', () => {
+    const ok = validateTimeRange({
+      to: 'now',
+      from: 'nowa-7d',
+    });
+
+    expect(ok).toBe(false);
+  });
 });
