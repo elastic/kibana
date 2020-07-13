@@ -92,9 +92,9 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.continueToAdditionalOptionsStep();
         });
 
-        it('inputs the model memory limit', async () => {
+        it('accepts the suggested model memory limit', async () => {
           await ml.dataFrameAnalyticsCreation.assertModelMemoryInputExists();
-          await ml.dataFrameAnalyticsCreation.setModelMemory(testData.modelMemory);
+          await ml.dataFrameAnalyticsCreation.assertModelMemoryInputPopulated();
         });
 
         it('continues to the details step', async () => {

@@ -10,4 +10,10 @@ export { ComponentTemplateList } from './component_template_list';
 
 export { ComponentTemplateDetailsFlyout } from './component_template_details';
 
+export {
+  ComponentTemplateCreate,
+  ComponentTemplateEdit,
+  ComponentTemplateClone,
+} from './component_template_wizard';
+
 export * from './component_template_selector';

@@ -27,7 +27,7 @@ export const renderApp = (
 
   const { i18n, docLinks, notifications } = core;
   const { Context: I18nContext } = i18n;
-  const { services, history } = dependencies;
+  const { services, history, setBreadcrumbs } = dependencies;
 
   const componentTemplateProviderValues = {
     httpClient: services.httpService.httpClient,
@@ -35,6 +35,7 @@ export const renderApp = (
     trackMetric: services.uiMetricService.trackMetric.bind(services.uiMetricService),
     docLinks,
     toasts: notifications.toasts,
+    setBreadcrumbs,
   };
 
   render(

@@ -128,7 +128,7 @@ export class HttpServer {
       getAuthHeaders: this.authRequestHeaders.get,
       getServerInfo: () => ({
         name: config.name,
-        host: config.host,
+        hostname: config.host,
         port: config.port,
         protocol: this.server!.info.protocol,
       }),

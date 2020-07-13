@@ -37,6 +37,8 @@ export const config = {
         host: schema.maybe(schema.string()),
         ca_sha256: schema.maybe(schema.string()),
       }),
+      agentConfigRollupRateLimitIntervalMs: schema.number({ defaultValue: 5000 }),
+      agentConfigRollupRateLimitRequestPerInterval: schema.number({ defaultValue: 50 }),
     }),
   }),
 };

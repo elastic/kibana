@@ -518,7 +518,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
 }`,
       type: 'json',
       description: i18n.translate('data.advancedSettings.timepicker.refreshIntervalDefaultsText', {
-        defaultMessage: `The timefilter's default refresh interval`,
+        defaultMessage: `The timefilter's default refresh interval. The "value" needs to be specified in milliseconds.`,
       }),
       requiresPageReload: true,
       schema: schema.object({

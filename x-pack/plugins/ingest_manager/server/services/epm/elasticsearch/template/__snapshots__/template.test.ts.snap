@@ -99,7 +99,8 @@ exports[`tests loading base.yml: base.yml 1`] = `
     "package": {
       "name": "nginx"
     },
-    "managed_by": "ingest-manager"
+    "managed_by": "ingest-manager",
+    "managed": true
   }
 }
 `;
@@ -203,7 +204,8 @@ exports[`tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
     "package": {
       "name": "coredns"
     },
-    "managed_by": "ingest-manager"
+    "managed_by": "ingest-manager",
+    "managed": true
   }
 }
 `;
@@ -1691,7 +1693,8 @@ exports[`tests loading system.yml: system.yml 1`] = `
     "package": {
       "name": "system"
     },
-    "managed_by": "ingest-manager"
+    "managed_by": "ingest-manager",
+    "managed": true
   }
 }
 `;

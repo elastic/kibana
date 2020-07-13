@@ -25,6 +25,12 @@ interface Props {
 }
 
 const i18nTexts = {
+  title: (
+    <FormattedMessage
+      id="xpack.idxMgmt.formWizard.stepComponents.stepTitle"
+      defaultMessage="Component templates (optional)"
+    />
+  ),
   description: (
     <FormattedMessage
       id="xpack.idxMgmt.formWizard.stepComponents.componentsDescription"
@@ -45,7 +51,11 @@ export const StepComponents = ({ defaultValue = [], onChange, esDocsBase }: Prop
 
   const onComponentSelectionChange = useCallback(
     (components: string[]) => {
-      onChange({ isValid: true, validate: async () => true, getData: () => components });
+      onChange({
+        isValid: true,
+        validate: async () => true,
+        getData: () => (components.length > 0 ? components : undefined),
+      });
     },
     [onChange]
   );
@@ -63,12 +73,7 @@ export const StepComponents = ({ defaultValue = [], onChange, esDocsBase }: Prop
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiTitle>
-              <h2 data-test-subj="stepTitle">
-                <FormattedMessage
-                  id="xpack.idxMgmt.formWizard.stepComponents.stepTitle"
-                  defaultMessage="Components (optional)"
-                />
-              </h2>
+              <h2 data-test-subj="stepTitle">{i18nTexts.title}</h2>
             </EuiTitle>
 
             <EuiSpacer size="s" />

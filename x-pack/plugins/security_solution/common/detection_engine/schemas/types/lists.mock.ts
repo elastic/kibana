@@ -8,11 +8,13 @@ import { List, ListArray } from './lists';
 export const getListMock = (): List => ({
   id: 'some_uuid',
   namespace_type: 'single',
+  type: 'detection',
 });
 
 export const getListAgnosticMock = (): List => ({
   id: 'some_uuid',
   namespace_type: 'agnostic',
+  type: 'endpoint',
 });
 
 export const getListArrayMock = (): ListArray => [getListMock(), getListAgnosticMock()];

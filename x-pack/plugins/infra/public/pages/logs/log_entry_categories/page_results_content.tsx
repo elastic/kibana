@@ -21,6 +21,8 @@ import {
   StringTimeRange,
   useLogEntryCategoriesResultsUrlState,
 } from './use_log_entry_categories_results_url_state';
+import { PageViewLogInContext } from '../stream/page_view_log_in_context';
+import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
@@ -178,54 +180,61 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
   );
 
   return (
-    <ResultsContentPage>
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem grow={false}>
-          <EuiPanel paddingSize="m">
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem />
-              <EuiFlexItem grow={false}>
-                <EuiSuperDatePicker
-                  start={selectedTimeRange.startTime}
-                  end={selectedTimeRange.endTime}
-                  onTimeChange={handleSelectedTimeRangeChange}
-                  isPaused={autoRefresh.isPaused}
-                  refreshInterval={autoRefresh.interval}
-                  onRefreshChange={handleAutoRefreshChange}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <CategoryJobNoticesSection
-            hasOutdatedJobConfigurations={hasOutdatedJobConfigurations}
-            hasOutdatedJobDefinitions={hasOutdatedJobDefinitions}
-            hasStoppedJobs={hasStoppedJobs}
-            isFirstUse={isFirstUse}
-            onRecreateMlJobForReconfiguration={viewSetupFlyoutForReconfiguration}
-            onRecreateMlJobForUpdate={viewSetupFlyoutForUpdate}
-            qualityWarnings={categoryQualityWarnings}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiPanel paddingSize="m">
-            <TopCategoriesSection
-              availableDatasets={logEntryCategoryDatasets}
-              isLoadingDatasets={isLoadingLogEntryCategoryDatasets}
-              isLoadingTopCategories={isLoadingTopLogEntryCategories}
-              jobId={jobIds['log-entry-categories-count']}
-              onChangeDatasetSelection={setCategoryQueryDatasets}
-              onRequestRecreateMlJob={viewSetupFlyoutForReconfiguration}
-              selectedDatasets={categoryQueryDatasets}
-              sourceId={sourceId}
-              timeRange={categoryQueryTimeRange.timeRange}
-              topCategories={topLogEntryCategories}
+    <ViewLogInContext.Provider
+      sourceId={sourceId}
+      startTimestamp={categoryQueryTimeRange.timeRange.startTime}
+      endTimestamp={categoryQueryTimeRange.timeRange.endTime}
+    >
+      <ResultsContentPage>
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem grow={false}>
+            <EuiPanel paddingSize="m">
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexItem />
+                <EuiFlexItem grow={false}>
+                  <EuiSuperDatePicker
+                    start={selectedTimeRange.startTime}
+                    end={selectedTimeRange.endTime}
+                    onTimeChange={handleSelectedTimeRangeChange}
+                    isPaused={autoRefresh.isPaused}
+                    refreshInterval={autoRefresh.interval}
+                    onRefreshChange={handleAutoRefreshChange}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <CategoryJobNoticesSection
+              hasOutdatedJobConfigurations={hasOutdatedJobConfigurations}
+              hasOutdatedJobDefinitions={hasOutdatedJobDefinitions}
+              hasStoppedJobs={hasStoppedJobs}
+              isFirstUse={isFirstUse}
+              onRecreateMlJobForReconfiguration={viewSetupFlyoutForReconfiguration}
+              onRecreateMlJobForUpdate={viewSetupFlyoutForUpdate}
+              qualityWarnings={categoryQualityWarnings}
             />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </ResultsContentPage>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiPanel paddingSize="m">
+              <TopCategoriesSection
+                availableDatasets={logEntryCategoryDatasets}
+                isLoadingDatasets={isLoadingLogEntryCategoryDatasets}
+                isLoadingTopCategories={isLoadingTopLogEntryCategories}
+                jobId={jobIds['log-entry-categories-count']}
+                onChangeDatasetSelection={setCategoryQueryDatasets}
+                onRequestRecreateMlJob={viewSetupFlyoutForReconfiguration}
+                selectedDatasets={categoryQueryDatasets}
+                sourceId={sourceId}
+                timeRange={categoryQueryTimeRange.timeRange}
+                topCategories={topLogEntryCategories}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </ResultsContentPage>
+      <PageViewLogInContext />
+    </ViewLogInContext.Provider>
   );
 };
 

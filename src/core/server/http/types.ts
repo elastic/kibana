@@ -311,7 +311,7 @@ export interface HttpServerInfo {
   /** The name of the Kibana server */
   name: string;
   /** The hostname of the server */
-  host: string;
+  hostname: string;
   /** The port the server is listening on */
   port: number;
   /** The protocol used by the server */

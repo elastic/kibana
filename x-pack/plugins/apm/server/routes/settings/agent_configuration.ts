@@ -136,15 +136,19 @@ export const createOrUpdateAgentConfigurationRoute = createRoute(() => ({
   },
 }));
 
+const searchParamsRt = t.intersection([
+  t.type({ service: serviceRt }),
+  t.partial({ etag: t.string, mark_as_applied_by_agent: t.boolean }),
+]);
+
+export type AgentConfigSearchParams = t.TypeOf<typeof searchParamsRt>;
+
 // Lookup single configuration (used by APM Server)
 export const agentConfigurationSearchRoute = createRoute(() => ({
   method: 'POST',
   path: '/api/apm/settings/agent-configuration/search',
   params: {
-    body: t.intersection([
-      t.type({ service: serviceRt }),
-      t.partial({ etag: t.string, mark_as_applied_by_agent: t.boolean }),
-    ]),
+    body: searchParamsRt,
   },
   handler: async ({ context, request }) => {
     const {

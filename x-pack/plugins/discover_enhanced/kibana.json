@@ -6,5 +6,6 @@
   "ui": true,
   "requiredPlugins": ["uiActions", "embeddable", "discover"],
   "optionalPlugins": ["share"],
-  "configPath": ["xpack", "discoverEnhanced"]
+  "configPath": ["xpack", "discoverEnhanced"],
+  "requiredBundles": ["kibanaUtils", "data"]
 }

@@ -13,7 +13,7 @@ import {
   DataFrameAnalyticsConfig,
   ANALYSIS_CONFIG_TYPE,
 } from '../../../../common/analytics';
-import { CloneDataFrameAnalyticsConfig } from '../../components/analytics_list/action_clone';
+import { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';
 
 export enum DEFAULT_MODEL_MEMORY_LIMIT {
   regression = '100mb',
@@ -82,6 +82,7 @@ export interface State {
     previousJobType: null | AnalyticsJobType;
     requiredFieldsError: string | undefined;
     randomizeSeed: undefined | number;
+    resultsField: undefined | string;
     sourceIndex: EsIndexName;
     sourceIndexNameEmpty: boolean;
     sourceIndexNameValid: boolean;
@@ -147,6 +148,7 @@ export const getInitialState = (): State => ({
     previousJobType: null,
     requiredFieldsError: undefined,
     randomizeSeed: undefined,
+    resultsField: undefined,
     sourceIndex: '',
     sourceIndexNameEmpty: true,
     sourceIndexNameValid: false,
@@ -197,6 +199,13 @@ export const getJobConfigFromFormState = (
     },
     model_memory_limit: formState.modelMemoryLimit,
   };
+
+  const resultsFieldEmpty =
+    typeof formState?.resultsField === 'string' && formState?.resultsField.trim() === '';
+
+  if (jobConfig.dest && !resultsFieldEmpty) {
+    jobConfig.dest.results_field = formState.resultsField;
+  }
 
   if (
     formState.jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
@@ -277,6 +286,7 @@ export function getCloneFormStateFromJobConfig(
   const resultState: Partial<State['form']> = {
     jobType,
     description: analyticsJobConfig.description ?? '',
+    resultsField: analyticsJobConfig.dest.results_field,
     sourceIndex: Array.isArray(analyticsJobConfig.source.index)
       ? analyticsJobConfig.source.index.join(',')
       : analyticsJobConfig.source.index,
