@@ -21,7 +21,11 @@ import {
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/model';
 import { TimelineNonEcsData } from '../../../graphql/types';
-import { TimelineTypeLiteral, TimelineType } from '../../../../common/types/timeline';
+import {
+  TimelineTypeLiteral,
+  TimelineType,
+  RowRendererId,
+} from '../../../../common/types/timeline';
 
 import { timelineDefaults } from './defaults';
 import { ColumnHeaderOptions, KqlMode, TimelineModel, EventType } from './model';
@@ -130,6 +134,7 @@ interface AddNewTimelineParams {
     start: number;
     end: number;
   };
+  excludedRowRendererIds?: RowRendererId[];
   filters?: Filter[];
   id: string;
   itemsPerPage?: number;
@@ -140,7 +145,6 @@ interface AddNewTimelineParams {
   show?: boolean;
   sort?: Sort;
   showCheckboxes?: boolean;
-  showRowRenderers?: boolean;
   timelineById: TimelineById;
   timelineType: TimelineTypeLiteral;
 }
@@ -150,6 +154,7 @@ export const addNewTimeline = ({
   columns,
   dataProviders = [],
   dateRange = { start: 0, end: 0 },
+  excludedRowRendererIds = [],
   filters = timelineDefaults.filters,
   id,
   itemsPerPage = timelineDefaults.itemsPerPage,
@@ -157,7 +162,6 @@ export const addNewTimeline = ({
   sort = timelineDefaults.sort,
   show = false,
   showCheckboxes = false,
-  showRowRenderers = true,
   timelineById,
   timelineType,
 }: AddNewTimelineParams): TimelineById => {
@@ -176,6 +180,7 @@ export const addNewTimeline = ({
       columns,
       dataProviders,
       dateRange,
+      excludedRowRendererIds,
       filters,
       itemsPerPage,
       kqlQuery,
@@ -186,7 +191,6 @@ export const addNewTimeline = ({
       isSaving: false,
       isLoading: false,
       showCheckboxes,
-      showRowRenderers,
       timelineType,
       ...templateTimelineInfo,
     },
@@ -1433,6 +1437,28 @@ export const updateFilters = ({ id, filters, timelineById }: UpdateFiltersParams
     [id]: {
       ...timeline,
       filters,
+    },
+  };
+};
+
+interface UpdateExcludedRowRenderersIds {
+  id: string;
+  excludedRowRendererIds: RowRendererId[];
+  timelineById: TimelineById;
+}
+
+export const updateExcludedRowRenderersIds = ({
+  id,
+  excludedRowRendererIds,
+  timelineById,
+}: UpdateExcludedRowRenderersIds): TimelineById => {
+  const timeline = timelineById[id];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      excludedRowRendererIds,
     },
   };
 };

@@ -2,6 +2,7 @@
 .signing-config.json
 .ackrc
 /.es
+/.chromium
 .DS_Store
 .node_binaries
 .native_modules

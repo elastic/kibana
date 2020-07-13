@@ -98,7 +98,7 @@ export const JobsList = ({
             {i18n.translate(
               'xpack.apm.settings.anomalyDetection.jobList.addEnvironments',
               {
-                defaultMessage: 'Add environments',
+                defaultMessage: 'Create ML Job',
               }
             )}
           </EuiButton>
@@ -108,7 +108,7 @@ export const JobsList = ({
       <EuiText>
         <FormattedMessage
           id="xpack.apm.settings.anomalyDetection.jobList.mlDescriptionText"
-          defaultMessage="Manage existing anomaly detection jobs in {mlJobsLink}."
+          defaultMessage="To add anomaly detection to a new environment, create a machine learning job. Existing machine learning jobs can be managed in {mlJobsLink}."
           values={{
             mlJobsLink: (
               <MLLink path="jobs">
