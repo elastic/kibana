@@ -35,6 +35,8 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
+jest.mock('../../../common/components/url_state/normalize_time_range.ts');
+
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));

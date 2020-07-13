@@ -39,6 +39,7 @@ import sinon from 'sinon';
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 
 jest.mock('../../../common/store/inputs/actions');
+jest.mock('../../../common/components/url_state/normalize_time_range.ts');
 jest.mock('../../store/timeline/actions');
 jest.mock('../../../common/store/app/actions');
 jest.mock('uuid', () => {
@@ -262,7 +263,7 @@ describe('helpers', () => {
           },
         ],
         dataProviders: [],
-        dateRange: { start: 'now-24h', end: 'now' },
+        dateRange: { start: '2020-07-07T08:20:18.966Z', end: '2020-07-08T08:20:18.966Z' },
         description: '',
         deletedEventIds: [],
         eventIdToNoteIds: {},
@@ -357,7 +358,7 @@ describe('helpers', () => {
           },
         ],
         dataProviders: [],
-        dateRange: { start: 'now-24h', end: 'now' },
+        dateRange: { start: '2020-07-07T08:20:18.966Z', end: '2020-07-08T08:20:18.966Z' },
         description: '',
         deletedEventIds: [],
         eventIdToNoteIds: {},
@@ -492,7 +493,7 @@ describe('helpers', () => {
         ],
         version: '1',
         dataProviders: [],
-        dateRange: { start: 'now-24h', end: 'now' },
+        dateRange: { start: '2020-07-07T08:20:18.966Z', end: '2020-07-08T08:20:18.966Z' },
         description: '',
         deletedEventIds: [],
         eventIdToNoteIds: {},
@@ -614,7 +615,7 @@ describe('helpers', () => {
           },
         ],
         version: '1',
-        dateRange: { start: 'now-24h', end: 'now' },
+        dateRange: { start: '2020-07-07T08:20:18.966Z', end: '2020-07-08T08:20:18.966Z' },
         dataProviders: [],
         description: '',
         deletedEventIds: [],

@@ -18,6 +18,8 @@ import { useFetchIndexPatterns } from '../../../detections/containers/detection_
 import { mockBrowserFields } from '../../containers/source/mock';
 import { eventsDefaultModel } from './default_model';
 
+jest.mock('../../components/url_state/normalize_time_range.ts');
+
 const mockUseFetchIndexPatterns: jest.Mock = useFetchIndexPatterns as jest.Mock;
 jest.mock('../../../detections/containers/detection_engine/rules/fetch_index_patterns');
 mockUseFetchIndexPatterns.mockImplementation(() => [

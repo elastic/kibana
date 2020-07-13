@@ -26,6 +26,7 @@ import {
   TimelineType,
   RowRendererId,
 } from '../../../../common/types/timeline';
+import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
 
 import { timelineDefaults } from './defaults';
 import { ColumnHeaderOptions, KqlMode, TimelineModel, EventType } from './model';
@@ -153,7 +154,7 @@ interface AddNewTimelineParams {
 export const addNewTimeline = ({
   columns,
   dataProviders = [],
-  dateRange = { start: 'now-24h', end: 'now' },
+  dateRange: mayDateRange,
   excludedRowRendererIds = [],
   filters = timelineDefaults.filters,
   id,
@@ -165,6 +166,8 @@ export const addNewTimeline = ({
   timelineById,
   timelineType,
 }: AddNewTimelineParams): TimelineById => {
+  const { from: startDateRange, to: endDateRange } = normalizeTimeRange({ from: '', to: '' });
+  const dateRange = mayDateRange ?? { start: startDateRange, end: endDateRange };
   const templateTimelineInfo =
     timelineType === TimelineType.template
       ? {
