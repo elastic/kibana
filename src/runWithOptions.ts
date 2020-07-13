@@ -18,6 +18,7 @@ export type Result =
       success: false;
       targetBranch: string;
       errorMessage: string;
+      error: Error;
     };
 
 export async function runWithOptions(options: BackportOptions) {
@@ -35,23 +36,20 @@ export async function runWithOptions(options: BackportOptions) {
   await sequentially(targetBranches, async (targetBranch) => {
     logger.info(`Backporting ${JSON.stringify(commits)} to ${targetBranch}`);
     try {
-      const pullRequest = await cherrypickAndCreateTargetPullRequest({
+      const { html_url } = await cherrypickAndCreateTargetPullRequest({
         options,
         commits,
         targetBranch,
       });
-      results.push({
-        targetBranch,
-        success: true,
-        pullRequestUrl: pullRequest.html_url,
-      });
+      results.push({ targetBranch, success: true, pullRequestUrl: html_url });
     } catch (e) {
-      results.push({
-        targetBranch,
-        success: false,
-        errorMessage: redact(e.message),
-      });
-      if (e instanceof HandledError) {
+      const isHandledError = e instanceof HandledError;
+      const errorMessage = isHandledError
+        ? redact(e.message)
+        : 'An unhandled error occurred. Please consult the logs';
+      results.push({ targetBranch, success: false, errorMessage, error: e });
+
+      if (isHandledError) {
         consoleLog(e.message);
       } else {
         throw e;

@@ -171,6 +171,10 @@ async function waitForCherrypick(
     autoResolveSpinner.fail();
   }
 
+  if (options.ci) {
+    throw new HandledError('Commit could not be cherrypicked due to conflicts');
+  }
+
   /*
    * Commit could not be cleanly cherrypicked: Initiating conflict resolution
    */

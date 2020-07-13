@@ -12,9 +12,8 @@ export type BackportResponse =
       results: Result[];
     }
   | {
-      success: boolean;
+      success: false;
       results: Result[];
-      isUnhandledError: boolean;
       errorMessage: string;
       error: Error;
     };
@@ -33,8 +32,8 @@ export async function main(
       results,
     };
   } catch (e) {
-    const isUnhandledError = !(e instanceof HandledError);
-    if (!isUnhandledError) {
+    const isHandledError = e instanceof HandledError;
+    if (isHandledError) {
       consoleLog(e.message);
     } else {
       // output
@@ -57,10 +56,9 @@ export async function main(
     return {
       success: false,
       results: [],
-      isUnhandledError,
-      errorMessage: isUnhandledError
-        ? 'An unhandled error occurred. Please see the logs for additional details'
-        : redact(e.message),
+      errorMessage: isHandledError
+        ? redact(e.message)
+        : 'An unhandled error occurred. Please see the logs for additional details',
       error: e,
     };
   }
