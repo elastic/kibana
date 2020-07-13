@@ -100,6 +100,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
       <EuiFlexItem grow={false}>
         <EuiPopover
           panelClassName="lnsXyToolbar__popover"
+          ownFocus
           button={
             <ToolbarButton
               fontWeight="normal"
