@@ -13,6 +13,7 @@ describe('monitor status alert type', () => {
     beforeEach(() => {
       params = {
         numTimes: 5,
+        shouldCheckStatus: true,
         timerangeCount: 15,
         timerangeUnit: 'm',
       };
@@ -24,9 +25,9 @@ describe('monitor status alert type', () => {
           "errors": Object {
             "typeCheckFailure": "Provided parameters do not conform to the expected type.",
             "typeCheckParsingMessage": Array [
-              "Invalid value undefined supplied to : ({ numTimes: number, timerangeCount: number, timerangeUnit: string } & Partial<{ search: string, filters: { monitor.type: Array<string>, observer.geo.name: Array<string>, tags: Array<string>, url.port: Array<string> } }>)/0: { numTimes: number, timerangeCount: number, timerangeUnit: string }/numTimes: number",
-              "Invalid value undefined supplied to : ({ numTimes: number, timerangeCount: number, timerangeUnit: string } & Partial<{ search: string, filters: { monitor.type: Array<string>, observer.geo.name: Array<string>, tags: Array<string>, url.port: Array<string> } }>)/0: { numTimes: number, timerangeCount: number, timerangeUnit: string }/timerangeCount: number",
-              "Invalid value undefined supplied to : ({ numTimes: number, timerangeCount: number, timerangeUnit: string } & Partial<{ search: string, filters: { monitor.type: Array<string>, observer.geo.name: Array<string>, tags: Array<string>, url.port: Array<string> } }>)/0: { numTimes: number, timerangeCount: number, timerangeUnit: string }/timerangeUnit: string",
+              "Invalid value undefined supplied to : ({ numTimes: number, timerangeCount: number, timerangeUnit: string } & Partial<{ search: string, filters: { monitor.type: Array<string>, observer.geo.name: Array<string>, tags: Array<string>, url.port: Array<string> }, shouldCheckStatus: boolean }>)/0: { numTimes: number, timerangeCount: number, timerangeUnit: string }/numTimes: number",
+              "Invalid value undefined supplied to : ({ numTimes: number, timerangeCount: number, timerangeUnit: string } & Partial<{ search: string, filters: { monitor.type: Array<string>, observer.geo.name: Array<string>, tags: Array<string>, url.port: Array<string> }, shouldCheckStatus: boolean }>)/0: { numTimes: number, timerangeCount: number, timerangeUnit: string }/timerangeCount: number",
+              "Invalid value undefined supplied to : ({ numTimes: number, timerangeCount: number, timerangeUnit: string } & Partial<{ search: string, filters: { monitor.type: Array<string>, observer.geo.name: Array<string>, tags: Array<string>, url.port: Array<string> }, shouldCheckStatus: boolean }>)/0: { numTimes: number, timerangeCount: number, timerangeUnit: string }/timerangeUnit: string",
             ],
           },
         }
@@ -43,12 +44,80 @@ describe('monitor status alert type', () => {
             to: 'now',
           },
           filters: '{foo: "bar"}',
+          shouldCheckStatus: true,
         })
       ).toMatchInlineSnapshot(`
         Object {
           "errors": Object {},
         }
       `);
+    });
+
+    describe('should check flags', () => {
+      it('does not pass without one or more should check flags', () => {
+        params.shouldCheckStatus = false;
+        expect(validate(params)).toMatchInlineSnapshot(`
+          Object {
+            "errors": Object {
+              "noAlertSelected": "Alert must check for monitor status or monitor availability.",
+            },
+          }
+        `);
+      });
+
+      it('does not pass when availability is defined, but both check flags are false', () => {
+        params.shouldCheckStatus = false;
+        params.shouldCheckAvailability = false;
+        params.availability = {
+          range: 3,
+          rangeUnit: 'w',
+          threshold: 98.3,
+        };
+        expect(validate(params)).toMatchInlineSnapshot(`
+          Object {
+            "errors": Object {
+              "noAlertSelected": "Alert must check for monitor status or monitor availability.",
+            },
+          }
+        `);
+      });
+
+      it('passes when status check is defined and flag is set to true', () => {
+        params.shouldCheckStatus = false;
+        params.shouldCheckAvailability = true;
+        params.availability = {
+          range: 3,
+          rangeUnit: 'w',
+          threshold: 98.3,
+        };
+        expect(validate(params)).toMatchInlineSnapshot(`
+          Object {
+            "errors": Object {},
+          }
+        `);
+      });
+
+      it('passes when status check and availability check flags are both true', () => {
+        params.shouldCheckAvailability = true;
+        params.availability = {
+          range: 3,
+          rangeUnit: 'w',
+          threshold: 98.3,
+        };
+        expect(validate(params)).toMatchInlineSnapshot(`
+          Object {
+            "errors": Object {},
+          }
+        `);
+      });
+
+      it('passes when availability check is defined and flag is set to true', () => {
+        expect(validate(params)).toMatchInlineSnapshot(`
+          Object {
+            "errors": Object {},
+          }
+        `);
+      });
     });
 
     describe('timerange', () => {
@@ -81,7 +150,7 @@ describe('monitor status alert type', () => {
             "errors": Object {
               "typeCheckFailure": "Provided parameters do not conform to the expected type.",
               "typeCheckParsingMessage": Array [
-                "Invalid value undefined supplied to : ({ numTimes: number, timerangeCount: number, timerangeUnit: string } & Partial<{ search: string, filters: { monitor.type: Array<string>, observer.geo.name: Array<string>, tags: Array<string>, url.port: Array<string> } }>)/0: { numTimes: number, timerangeCount: number, timerangeUnit: string }/numTimes: number",
+                "Invalid value undefined supplied to : ({ numTimes: number, timerangeCount: number, timerangeUnit: string } & Partial<{ search: string, filters: { monitor.type: Array<string>, observer.geo.name: Array<string>, tags: Array<string>, url.port: Array<string> }, shouldCheckStatus: boolean }>)/0: { numTimes: number, timerangeCount: number, timerangeUnit: string }/numTimes: number",
               ],
             },
           }
@@ -94,7 +163,7 @@ describe('monitor status alert type', () => {
             "errors": Object {
               "typeCheckFailure": "Provided parameters do not conform to the expected type.",
               "typeCheckParsingMessage": Array [
-                "Invalid value \\"this isn't a number\\" supplied to : ({ numTimes: number, timerangeCount: number, timerangeUnit: string } & Partial<{ search: string, filters: { monitor.type: Array<string>, observer.geo.name: Array<string>, tags: Array<string>, url.port: Array<string> } }>)/0: { numTimes: number, timerangeCount: number, timerangeUnit: string }/numTimes: number",
+                "Invalid value \\"this isn't a number\\" supplied to : ({ numTimes: number, timerangeCount: number, timerangeUnit: string } & Partial<{ search: string, filters: { monitor.type: Array<string>, observer.geo.name: Array<string>, tags: Array<string>, url.port: Array<string> }, shouldCheckStatus: boolean }>)/0: { numTimes: number, timerangeCount: number, timerangeUnit: string }/numTimes: number",
               ],
             },
           }
@@ -134,7 +203,7 @@ describe('monitor status alert type', () => {
         "alertParamsExpression": [Function],
         "defaultActionMessage": "{{context.message}}
       Last triggered at: {{state.lastTriggeredAt}}
-      {{context.downMonitorsWithGeo}}",
+      ",
         "iconClass": "uptimeApp",
         "id": "xpack.uptime.alerts.monitorStatus",
         "name": <Provider

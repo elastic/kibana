@@ -48,7 +48,7 @@ type BUTTON_ICON_COLORS = any;
 type ButtonIconColorsFunc<T> = (item: T) => BUTTON_ICON_COLORS; // (item) => oneOf(ICON_BUTTON_COLORS)
 interface DefaultItemActionType<T> {
   type?: 'icon' | 'button';
-  name: string;
+  name: ReactNode;
   description: string;
   onClick?(item: T): void;
   href?: string;

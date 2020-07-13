@@ -33,11 +33,44 @@ describe('Agent status service', () => {
       type: AGENT_TYPE_PERMANENT,
       attributes: {
         active: true,
+        last_checkin: new Date().toISOString(),
         local_metadata: {},
         user_provided_metadata: {},
       },
     } as SavedObject<AgentSOAttributes>);
     const status = await getAgentStatusById(mockSavedObjectsClient, 'id');
     expect(status).toEqual('online');
+  });
+
+  it('should return enrolling when agent is active but never checkin', async () => {
+    const mockSavedObjectsClient = savedObjectsClientMock.create();
+    mockSavedObjectsClient.get = jest.fn().mockReturnValue({
+      id: 'id',
+      type: AGENT_TYPE_PERMANENT,
+      attributes: {
+        active: true,
+        local_metadata: {},
+        user_provided_metadata: {},
+      },
+    } as SavedObject<AgentSOAttributes>);
+    const status = await getAgentStatusById(mockSavedObjectsClient, 'id');
+    expect(status).toEqual('enrolling');
+  });
+
+  it('should return unenrolling when agent is unenrolling', async () => {
+    const mockSavedObjectsClient = savedObjectsClientMock.create();
+    mockSavedObjectsClient.get = jest.fn().mockReturnValue({
+      id: 'id',
+      type: AGENT_TYPE_PERMANENT,
+      attributes: {
+        active: true,
+        last_checkin: new Date().toISOString(),
+        unenrollment_started_at: new Date().toISOString(),
+        local_metadata: {},
+        user_provided_metadata: {},
+      },
+    } as SavedObject<AgentSOAttributes>);
+    const status = await getAgentStatusById(mockSavedObjectsClient, 'id');
+    expect(status).toEqual('unenrolling');
   });
 });
