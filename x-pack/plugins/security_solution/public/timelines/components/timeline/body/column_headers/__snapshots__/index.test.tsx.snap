@@ -120,27 +120,6 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
                     "type": "string",
                   },
                 },
-                "event": Object {
-                  "fields": Object {
-                    "event.end": Object {
-                      "aggregatable": true,
-                      "category": "event",
-                      "description": "event.end contains the date when the event ended or when the activity was last observed.",
-                      "example": null,
-                      "format": "",
-                      "indexes": Array [
-                        "apm-*-transaction*",
-                        "auditbeat-*",
-                        "endgame-*",
-                        "filebeat-*",
-                        "logs-*",
-                        "packetbeat-*",
-                        "winlogbeat-*",
-                      ],
-                      "name": "event.end",
-                      "searchable": true,
-                      "type": "date",
-                    },
               },
               "base": Object {
                 "fields": Object {
@@ -400,9 +379,9 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
                       "auditbeat-*",
                       "endgame-*",
                       "filebeat-*",
+                      "logs-*",
                       "packetbeat-*",
                       "winlogbeat-*",
-                      "logs-*",
                     ],
                     "name": "event.end",
                     "searchable": true,
