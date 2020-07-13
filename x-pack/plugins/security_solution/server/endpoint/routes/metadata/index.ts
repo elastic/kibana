@@ -103,6 +103,8 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
           context.core.savedObjects.client
         );
 
+        // placeholder: host status filter
+
         const queryParams = await kibanaRequestToMetadataListESQuery(
           req,
           endpointAppContext,
