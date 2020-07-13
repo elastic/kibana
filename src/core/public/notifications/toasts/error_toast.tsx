@@ -46,8 +46,12 @@ interface RequestError extends Error {
   body?: { attributes?: { error: { caused_by: { type: string; reason: string } } } };
 }
 
-const isRequestError = (e: any): e is RequestError =>
-  e.body?.attributes?.error?.caused_by !== undefined;
+const isRequestError = (e: Error | RequestError): e is RequestError => {
+  if ('body' in e) {
+    return e.body?.attributes?.error?.caused_by !== undefined;
+  }
+  return false;
+};
 
 /**
  * This should instead be replaced by the overlay service once it's available.
