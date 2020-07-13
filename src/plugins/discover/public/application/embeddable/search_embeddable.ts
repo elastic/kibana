@@ -39,7 +39,7 @@ import searchTemplate from './search_template.html';
 import searchTemplateGrid from './search_template_datagrid.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
-import { getSortForSearchSource } from '../angular/doc_table/lib/get_sort_for_search_source';
+import { getSortForSearchSource } from '../angular/doc_table';
 import {
   getRequestInspectorStats,
   getResponseInspectorStats,

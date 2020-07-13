@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
 
   // Flaky: https://github.com/elastic/kibana/issues/71216
-  describe.skip('doc link in discover', function contextSize() {
+  describe('doc link in discover', function contextSize() {
     beforeEach(async function () {
       log.debug('load kibana index with default index pattern');
       await esArchiver.loadIfNeeded('discover');
@@ -65,20 +65,28 @@ export default function ({ getService, getPageObjects }) {
       await filterBar.addFilter('agent', 'is', 'Missing/Fields');
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
-      // navigate to the doc view
-      await docTable.clickRowToggle({ rowIndex: 0 });
+      await retry.try(async () => {
+        // navigate to the doc view
+        await docTable.clickRowToggle({ rowIndex: 0 });
 
-      const details = await docTable.getDetailsRow();
-      await docTable.addInclusiveFilter(details, 'referer');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+        const details = await docTable.getDetailsRow();
+        await docTable.addInclusiveFilter(details, 'referer');
+        await PageObjects.discover.waitUntilSearchingHasFinished();
 
-      const hasInclusiveFilter = await filterBar.hasFilter('referer', 'exists', true, false, true);
-      expect(hasInclusiveFilter).to.be(true);
+        const hasInclusiveFilter = await filterBar.hasFilter(
+          'referer',
+          'exists',
+          true,
+          false,
+          true
+        );
+        expect(hasInclusiveFilter).to.be(true);
 
-      await docTable.removeInclusiveFilter(details, 'referer');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
-      const hasExcludeFilter = await filterBar.hasFilter('referer', 'exists', true, false, false);
-      expect(hasExcludeFilter).to.be(true);
+        await docTable.removeInclusiveFilter(details, 'referer');
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        const hasExcludeFilter = await filterBar.hasFilter('referer', 'exists', true, false, false);
+        expect(hasExcludeFilter).to.be(true);
+      });
     });
   });
 }
