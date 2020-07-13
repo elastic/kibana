@@ -4,22 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { I18nStart } from 'src/core/public';
+import React, { useEffect } from 'react';
+import { ChromeDocTitle, I18nStart } from 'src/core/public';
 import { EuiPageHeader, EuiPageHeaderSection, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import { NEXT_MAJOR_VERSION } from '../../common/version';
+import { PLUGIN } from '../../common/constants';
+
 import { UpgradeAssistantTabs } from './components/tabs';
 import { AppContextProvider, ContextValue, AppContext } from './app_context';
 
 export interface AppDependencies extends ContextValue {
+  docTitle: ChromeDocTitle;
   i18n: I18nStart;
 }
 
-export const RootComponent = ({ i18n, ...contexValue }: AppDependencies) => {
+export const RootComponent = ({ i18n, docTitle, ...contextValue }: AppDependencies) => {
+  useEffect(() => {
+    docTitle.change(PLUGIN.title);
+    return () => docTitle.reset();
+  }, [docTitle]);
   return (
     <i18n.Context>
-      <AppContextProvider value={contexValue}>
+      <AppContextProvider value={contextValue}>
         <div data-test-subj="upgradeAssistantRoot">
           <EuiPageHeader>
             <EuiPageHeaderSection>

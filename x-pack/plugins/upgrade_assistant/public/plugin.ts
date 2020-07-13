@@ -3,14 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/public';
 
 import { CloudSetup } from '../../cloud/public';
 import { ManagementSetup, ManagementSectionId } from '../../../../src/plugins/management/public';
 
-import { NEXT_MAJOR_VERSION } from '../common/version';
 import { Config } from '../common/config';
+import { PLUGIN } from '../common/constants';
 
 interface Dependencies {
   cloud: CloudSetup;
@@ -29,10 +28,7 @@ export class UpgradeAssistantUIPlugin implements Plugin {
 
     appRegistrar.registerApp({
       id: 'upgrade_assistant',
-      title: i18n.translate('xpack.upgradeAssistant.appTitle', {
-        defaultMessage: '{version} Upgrade Assistant',
-        values: { version: `${NEXT_MAJOR_VERSION}.0` },
-      }),
+      title: PLUGIN.title,
       order: 1,
       async mount(params) {
         const { mountManagementSection } = await import('./application/mount_management_section');
