@@ -19,7 +19,7 @@ export default ({ getService, loadTestFile }: FtrProviderContext) => {
         await esArchiver.load(ARCHIVE);
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
       });
-      // after(async () => await esArchiver.unload(ARCHIVE));
+      after(async () => await esArchiver.unload(ARCHIVE));
 
       loadTestFile(require.resolve('./alert_flyout'));
       loadTestFile(require.resolve('./anomaly_alert'));
