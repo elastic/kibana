@@ -8,8 +8,7 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const es = getService('legacyEs');
   const PageObjects = getPageObjects(['settings', 'common']);
-
-  // Flaky: https://github.com/elastic/kibana/issues/71501
+  
   describe('"Create Index Pattern" wizard', function () {
     before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
