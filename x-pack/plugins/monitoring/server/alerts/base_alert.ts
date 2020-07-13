@@ -39,6 +39,7 @@ import {
 import { MonitoringConfig } from '../config';
 import { AlertSeverity } from '../../common/enums';
 import { CommonAlertFilter, CommonAlertParams, CommonBaseAlert } from '../../common/types';
+import { MonitoringLicenseService } from '../types';
 
 export class BaseAlert {
   public type!: string;
@@ -115,7 +116,13 @@ export class BaseAlert {
     };
   }
 
-  public isEnabled() {
+  public isEnabled(licenseService: MonitoringLicenseService) {
+    if (this.isLegacy) {
+      const watcherFeature = licenseService.getWatcherFeature();
+      if (!watcherFeature.isAvailable || !watcherFeature.isEnabled) {
+        return false;
+      }
+    }
     return true;
   }
 

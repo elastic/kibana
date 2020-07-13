@@ -9,9 +9,11 @@ import { AlertsClient } from '../../../../alerts/server';
 import { AlertsFactory } from '../../alerts';
 import { CommonAlertStatus, CommonAlertState, CommonAlertFilter } from '../../../common/types';
 import { ALERTS } from '../../../common/constants';
+import { MonitoringLicenseService } from '../../types';
 
 export async function fetchStatus(
   alertsClient: AlertsClient,
+  licenseService: MonitoringLicenseService,
   alertTypes: string[] | undefined,
   clusterUuid: string,
   start: number,
@@ -22,7 +24,7 @@ export async function fetchStatus(
   await Promise.all(
     (alertTypes || ALERTS).map(async (type) => {
       const alert = await AlertsFactory.getByType(type, alertsClient);
-      if (!alert) {
+      if (!alert || !alert.isEnabled(licenseService)) {
         return;
       }
       const serialized = alert.serialize();

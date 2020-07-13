@@ -55,6 +55,7 @@ export interface MonitoringCoreConfig {
 
 export interface RouteDependencies {
   router: IRouter;
+  licenseService: MonitoringLicenseService;
 }
 
 export interface MonitoringCore {

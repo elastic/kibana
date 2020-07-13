@@ -128,10 +128,8 @@ export class Plugin {
 
     const alerts = AlertsFactory.getAll();
     for (const alert of alerts) {
-      if (alert.isEnabled()) {
-        alert.initializeAlertType(getUiSettingsService, cluster, this.getLogger, config, kibanaUrl);
-        plugins.alerts.registerType(alert.getAlertType());
-      }
+      alert.initializeAlertType(getUiSettingsService, cluster, this.getLogger, config, kibanaUrl);
+      plugins.alerts.registerType(alert.getAlertType());
     }
 
     // Initialize telemetry
@@ -204,6 +202,7 @@ export class Plugin {
       this.registerPluginInUI(plugins);
       requireUIRoutes(this.monitoringCore, {
         router,
+        licenseService: this.licenseService,
       });
       initInfraSource(config, plugins.infra);
     }

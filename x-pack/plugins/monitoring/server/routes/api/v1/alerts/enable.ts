@@ -71,7 +71,7 @@ export function enableAlertsRoute(server: any, npRoute: RouteDependencies) {
           });
         }
 
-        const alerts = AlertsFactory.getAll().filter((a) => a.isEnabled());
+        const alerts = AlertsFactory.getAll().filter((a) => a.isEnabled(npRoute.licenseService));
         const createdAlerts = await Promise.all(
           alerts.map(
             async (alert) => await alert.createIfDoesNotExist(alertsClient, actionsClient, actions)

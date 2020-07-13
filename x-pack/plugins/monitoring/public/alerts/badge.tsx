@@ -36,6 +36,10 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
   const inSetupMode = isInSetupMode();
   const alerts = Object.values(props.alerts).filter(Boolean);
 
+  if (alerts.length === 0) {
+    return null;
+  }
+
   const badges = [];
 
   if (inSetupMode) {

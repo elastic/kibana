@@ -141,7 +141,15 @@ export async function getClustersFromRequest(
         );
         if (prodLicenseInfo.clusterAlerts.enabled) {
           cluster.alerts = {
-            list: await fetchStatus(alertsClient, undefined, cluster.cluster_uuid, start, end, []),
+            list: await fetchStatus(
+              alertsClient,
+              req.server.plugins.monitoring.info,
+              undefined,
+              cluster.cluster_uuid,
+              start,
+              end,
+              []
+            ),
             alertsMeta: {
               enabled: true,
             },
