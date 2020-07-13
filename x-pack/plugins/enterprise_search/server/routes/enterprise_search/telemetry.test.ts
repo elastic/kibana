@@ -7,20 +7,21 @@
 import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
 import { MockRouter, mockConfig, mockLogger } from '../__mocks__';
 
-import { registerTelemetryRoute } from './telemetry';
-
-jest.mock('../../collectors/app_search/telemetry', () => ({
+jest.mock('../../collectors/lib/telemetry', () => ({
   incrementUICounter: jest.fn(),
 }));
-import { incrementUICounter } from '../../collectors/app_search/telemetry';
+import { incrementUICounter } from '../../collectors/lib/telemetry';
+
+import { registerTelemetryRoute } from './telemetry';
 
 /**
  * Since these route callbacks are so thin, these serve simply as integration tests
  * to ensure they're wired up to the collector functions correctly. Business logic
  * is tested more thoroughly in the collectors/telemetry tests.
  */
-describe('App Search Telemetry API', () => {
+describe('Enterprise Search Telemetry API', () => {
   let mockRouter: MockRouter;
+  const successResponse = { success: true };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -34,14 +35,20 @@ describe('App Search Telemetry API', () => {
     });
   });
 
-  describe('PUT /api/app_search/telemetry', () => {
-    it('increments the saved objects counter', async () => {
-      const successResponse = { success: true };
+  describe('PUT /api/enterprise_search/telemetry', () => {
+    it('increments the saved objects counter for App Search', async () => {
       (incrementUICounter as jest.Mock).mockImplementation(jest.fn(() => successResponse));
 
-      await mockRouter.callRoute({ body: { action: 'viewed', metric: 'setup_guide' } });
+      await mockRouter.callRoute({
+        body: {
+          product: 'app_search',
+          action: 'viewed',
+          metric: 'setup_guide',
+        },
+      });
 
       expect(incrementUICounter).toHaveBeenCalledWith({
+        id: 'app_search_telemetry',
         savedObjects: expect.any(Object),
         uiAction: 'ui_viewed',
         metric: 'setup_guide',
@@ -49,10 +56,36 @@ describe('App Search Telemetry API', () => {
       expect(mockRouter.response.ok).toHaveBeenCalledWith({ body: successResponse });
     });
 
+    it('increments the saved objects counter for Workplace Search', async () => {
+      (incrementUICounter as jest.Mock).mockImplementation(jest.fn(() => successResponse));
+
+      await mockRouter.callRoute({
+        body: {
+          product: 'workplace_search',
+          action: 'clicked',
+          metric: 'onboarding_card_button',
+        },
+      });
+
+      expect(incrementUICounter).toHaveBeenCalledWith({
+        id: 'workplace_search_telemetry',
+        savedObjects: expect.any(Object),
+        uiAction: 'ui_clicked',
+        metric: 'onboarding_card_button',
+      });
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({ body: successResponse });
+    });
+
     it('throws an error when incrementing fails', async () => {
       (incrementUICounter as jest.Mock).mockImplementation(jest.fn(() => Promise.reject('Failed')));
 
-      await mockRouter.callRoute({ body: { action: 'error', metric: 'error' } });
+      await mockRouter.callRoute({
+        body: {
+          product: 'enterprise_search',
+          action: 'error',
+          metric: 'error',
+        },
+      });
 
       expect(incrementUICounter).toHaveBeenCalled();
       expect(mockLogger.error).toHaveBeenCalled();
@@ -73,34 +106,50 @@ describe('App Search Telemetry API', () => {
       expect(mockRouter.response.internalError).toHaveBeenCalled();
       expect(loggingSystemMock.collect(mockLogger).error[0][0]).toEqual(
         expect.stringContaining(
-          'App Search UI telemetry error: Error: Could not find Saved Objects service'
+          'Enterprise Search UI telemetry error: Error: Could not find Saved Objects service'
         )
       );
     });
 
     describe('validates', () => {
       it('correctly', () => {
-        const request = { body: { action: 'viewed', metric: 'setup_guide' } };
+        const request = {
+          body: { product: 'workplace_search', action: 'viewed', metric: 'setup_guide' },
+        };
         mockRouter.shouldValidate(request);
       });
 
+      it('wrong product string', () => {
+        const request = {
+          body: { product: 'workspace_space_search', action: 'viewed', metric: 'setup_guide' },
+        };
+        mockRouter.shouldThrow(request);
+      });
+
       it('wrong action string', () => {
-        const request = { body: { action: 'invalid', metric: 'setup_guide' } };
+        const request = {
+          body: { product: 'app_search', action: 'invalid', metric: 'setup_guide' },
+        };
         mockRouter.shouldThrow(request);
       });
 
       it('wrong metric type', () => {
-        const request = { body: { action: 'clicked', metric: true } };
+        const request = { body: { product: 'enterprise_search', action: 'clicked', metric: true } };
+        mockRouter.shouldThrow(request);
+      });
+
+      it('product is missing string', () => {
+        const request = { body: { action: 'viewed', metric: 'setup_guide' } };
         mockRouter.shouldThrow(request);
       });
 
       it('action is missing', () => {
-        const request = { body: { metric: 'engines_overview' } };
+        const request = { body: { product: 'app_search', metric: 'engines_overview' } };
         mockRouter.shouldThrow(request);
       });
 
       it('metric is missing', () => {
-        const request = { body: { action: 'error' } };
+        const request = { body: { product: 'app_search', action: 'error' } };
         mockRouter.shouldThrow(request);
       });
     });
