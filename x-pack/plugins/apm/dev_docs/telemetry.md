@@ -40,6 +40,9 @@ and/or config/kibana.dev.yml files.
 
 Running the script with `--clear` will delete the index first.
 
+If you're using an Elasticsearch instance without TLS verification (if you have `elasticsearch.ssl.verificationMode: none` set in your kibana.yml)
+you can run the script with `env NODE_TLS_REJECT_UNAUTHORIZED=0` to avoid TLS connection errors.
+
 After running the script you should see sample telemetry data in the "xpack-phone-home" index.
 
 ### Updating Data Telemetry Mappings
@@ -61,6 +64,10 @@ node ./scripts/merge-telemetry-mapping.js ../../../../telemetry/config/templates
 ```
 
 this will replace the contents of the mapping in the repository checkout with the updated mapping. You can then [follow the telemetry team's instructions](https://github.com/elastic/telemetry#mappings) for opening a pull request with the mapping changes.
+
+The queries for the stats are in the [collect data telemetry tasks](../server/lib/apm_telemetry/collect_data_telemetry/tasks.ts).
+
+The collection tasks also use the [`APMDataTelemetry` type](../server/lib/apm_telemetry/types.ts) which also needs to be updated with any changes to the fields.
 
 ## Behavioral Telemetry
 

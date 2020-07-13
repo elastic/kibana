@@ -15,5 +15,6 @@
   ],
   "optionalPlugins": ["infra", "telemetryCollectionManager", "usageCollection", "home", "cloud"],
   "server": true,
-  "ui": true
+  "ui": true,
+  "requiredBundles": ["kibanaUtils", "home", "alerts", "kibanaReact", "licenseManagement"]
 }

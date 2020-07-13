@@ -44,7 +44,7 @@ describe('when on the hosts page', () => {
 
   it('should show the empty state when there are no hosts or polices', async () => {
     const renderResult = render();
-    // Initially, there are no endpoints or policies, so we prompt to add policies first.
+    // Initially, there are no hosts or policies, so we prompt to add policies first.
     const table = await renderResult.findByTestId('emptyPolicyTable');
     expect(table).not.toBeNull();
   });
@@ -79,8 +79,8 @@ describe('when on the hosts page', () => {
 
     it('should show the no hosts empty state', async () => {
       const renderResult = render();
-      const emptyEndpointsTable = await renderResult.findByTestId('emptyEndpointsTable');
-      expect(emptyEndpointsTable).not.toBeNull();
+      const emptyHostsTable = await renderResult.findByTestId('emptyHostsTable');
+      expect(emptyHostsTable).not.toBeNull();
     });
 
     it('should display the onboarding steps', async () => {
@@ -335,7 +335,7 @@ describe('when on the hosts page', () => {
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusLink).not.toBeNull();
       expect(policyStatusLink.getAttribute('href')).toEqual(
-        '/endpoints?page_index=0&page_size=10&selected_host=1&show=policy_response'
+        '/hosts?page_index=0&page_size=10&selected_host=1&show=policy_response'
       );
     });
 
@@ -549,7 +549,7 @@ describe('when on the hosts page', () => {
         const subHeaderBackLink = await renderResult.findByTestId('flyoutSubHeaderBackButton');
         expect(subHeaderBackLink.textContent).toBe('Endpoint Details');
         expect(subHeaderBackLink.getAttribute('href')).toBe(
-          '/endpoints?page_index=0&page_size=10&selected_host=1'
+          '/hosts?page_index=0&page_size=10&selected_host=1'
         );
       });
 

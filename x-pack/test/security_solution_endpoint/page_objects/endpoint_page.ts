@@ -14,12 +14,12 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
 
   return {
     /**
-     * Navigate to the Endpoints list page
+     * Navigate to the Hosts list page
      */
-    async navigateToEndpointList(searchParams?: string) {
+    async navigateToHostList(searchParams?: string) {
       await pageObjects.common.navigateToUrlWithBrowserHistory(
         'securitySolutionManagement',
-        `/endpoints${searchParams ? `?${searchParams}` : ''}`
+        `/hosts${searchParams ? `?${searchParams}` : ''}`
       );
       await pageObjects.header.waitUntilLoadingHasFinished();
     },

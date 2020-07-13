@@ -144,6 +144,11 @@ export const validateAdvancedEditor = (state: State): State => {
   const destinationIndexNameValid = isValidIndexName(destinationIndexName);
   const destinationIndexPatternTitleExists =
     state.indexPatternsMap[destinationIndexName] !== undefined;
+
+  const resultsFieldEmptyString =
+    typeof jobConfig?.dest?.results_field === 'string' &&
+    jobConfig?.dest?.results_field.trim() === '';
+
   const mml = jobConfig.model_memory_limit;
   const modelMemoryLimitEmpty = mml === '' || mml === undefined;
   if (!modelMemoryLimitEmpty && mml !== undefined) {
@@ -292,6 +297,18 @@ export const validateAdvancedEditor = (state: State): State => {
     });
   }
 
+  if (resultsFieldEmptyString) {
+    state.advancedEditorMessages.push({
+      error: i18n.translate(
+        'xpack.ml.dataframe.analytics.create.advancedEditorMessage.resultsFieldEmptyString',
+        {
+          defaultMessage: 'The results field must not be an empty string.',
+        }
+      ),
+      message: '',
+    });
+  }
+
   if (dependentVariableEmpty) {
     state.advancedEditorMessages.push({
       error: i18n.translate(
@@ -336,6 +353,7 @@ export const validateAdvancedEditor = (state: State): State => {
     sourceIndexNameValid &&
     !destinationIndexNameEmpty &&
     destinationIndexNameValid &&
+    !resultsFieldEmptyString &&
     !dependentVariableEmpty &&
     !modelMemoryLimitEmpty &&
     numTopFeatureImportanceValuesValid &&

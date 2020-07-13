@@ -91,6 +91,13 @@ export function getApmTelemetryMapping() {
           {}
         ),
       },
+      cloud: {
+        properties: {
+          availability_zone: keyword,
+          provider: keyword,
+          region: keyword,
+        },
+      },
       counts: {
         properties: {
           agent_configuration: allProperties,

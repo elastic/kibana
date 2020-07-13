@@ -29,11 +29,7 @@ describe('Metrics UI Observability Homepage Functions', () => {
     it('should return true when true', async () => {
       const { core, mockedGetStartServices } = setup();
       core.http.get.mockResolvedValue({
-        status: {
-          indexFields: [],
-          logIndicesExist: false,
-          metricIndicesExist: true,
-        },
+        hasData: true,
       });
       const hasData = createMetricsHasData(mockedGetStartServices);
       const response = await hasData();
@@ -43,11 +39,7 @@ describe('Metrics UI Observability Homepage Functions', () => {
     it('should return false when false', async () => {
       const { core, mockedGetStartServices } = setup();
       core.http.get.mockResolvedValue({
-        status: {
-          indexFields: [],
-          logIndicesExist: false,
-          metricIndicesExist: false,
-        },
+        hasData: false,
       });
       const hasData = createMetricsHasData(mockedGetStartServices);
       const response = await hasData();

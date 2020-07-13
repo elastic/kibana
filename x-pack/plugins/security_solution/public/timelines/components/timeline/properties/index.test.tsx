@@ -6,6 +6,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
+
 import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 import {
   mockGlobalState,

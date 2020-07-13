@@ -567,6 +567,22 @@ Object {
         },
       },
     },
+    "cloud": Object {
+      "properties": Object {
+        "availability_zone": Object {
+          "ignore_above": 1024,
+          "type": "keyword",
+        },
+        "provider": Object {
+          "ignore_above": 1024,
+          "type": "keyword",
+        },
+        "region": Object {
+          "ignore_above": 1024,
+          "type": "keyword",
+        },
+      },
+    },
     "counts": Object {
       "properties": Object {
         "agent_configuration": Object {

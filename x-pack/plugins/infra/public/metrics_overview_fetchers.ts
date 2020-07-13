@@ -16,15 +16,16 @@ import {
 } from '../common/http_api/snapshot_api';
 import { SnapshotMetricType } from '../common/inventory_models/types';
 import { InfraClientCoreSetup } from './types';
-import { SourceResponse } from '../common/http_api/source_api';
 
 export const createMetricsHasData = (
   getStartServices: InfraClientCoreSetup['getStartServices']
 ) => async () => {
   const [coreServices] = await getStartServices();
   const { http } = coreServices;
-  const results = await http.get<SourceResponse>('/api/metrics/source/default/metrics');
-  return results.status.metricIndicesExist;
+  const results = await http.get<{ hasData: boolean }>(
+    '/api/metrics/source/default/metrics/hasData'
+  );
+  return results.hasData;
 };
 
 export const average = (values: number[]) => (values.length ? sum(values) / values.length : 0);
@@ -102,14 +103,6 @@ export const createMetricsFetchData = (
     body: JSON.stringify(snapshotRequest),
   });
 
-  const inboundLabel = i18n.translate('xpack.infra.observabilityHomepage.metrics.rxLabel', {
-    defaultMessage: 'Inbound traffic',
-  });
-
-  const outboundLabel = i18n.translate('xpack.infra.observabilityHomepage.metrics.txLabel', {
-    defaultMessage: 'Outbound traffic',
-  });
-
   return {
     title: i18n.translate('xpack.infra.observabilityHomepage.metrics.title', {
       defaultMessage: 'Metrics',
@@ -118,43 +111,30 @@ export const createMetricsFetchData = (
     stats: {
       hosts: {
         type: 'number',
-        label: i18n.translate('xpack.infra.observabilityHomepage.metrics.hostsLabel', {
-          defaultMessage: 'Hosts',
-        }),
         value: results.nodes.length,
       },
       cpu: {
         type: 'percent',
-        label: i18n.translate('xpack.infra.observabilityHomepage.metrics.cpuLabel', {
-          defaultMessage: 'CPU usage',
-        }),
         value: combineNodesBy('cpu', results.nodes, average),
       },
       memory: {
         type: 'percent',
-        label: i18n.translate('xpack.infra.observabilityHomepage.metrics.memoryLabel', {
-          defaultMessage: 'Memory usage',
-        }),
         value: combineNodesBy('memory', results.nodes, average),
       },
       inboundTraffic: {
         type: 'bytesPerSecond',
-        label: inboundLabel,
         value: combineNodesBy('rx', results.nodes, average),
       },
       outboundTraffic: {
         type: 'bytesPerSecond',
-        label: outboundLabel,
         value: combineNodesBy('tx', results.nodes, average),
       },
     },
     series: {
       inboundTraffic: {
-        label: inboundLabel,
         coordinates: combineNodeTimeseriesBy('rx', results.nodes, average),
       },
       outboundTraffic: {
-        label: outboundLabel,
         coordinates: combineNodeTimeseriesBy('tx', results.nodes, average),
       },
     },

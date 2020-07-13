@@ -12,7 +12,6 @@ import { AlertServices, parseDuration } from '../../../../../alerts/server';
 import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
 import { EntriesArray, ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { ListArrayOrUndefined } from '../../../../common/detection_engine/schemas/types/lists';
-import { hasListsFeature } from '../feature_flags';
 import { BulkResponse, BulkResponseErrorAggregation } from './types';
 import { BuildRuleMessage } from './rule_messages';
 
@@ -37,26 +36,21 @@ export const getListsClient = async ({
   listClient: ListClient | undefined;
   exceptionsClient: ExceptionListClient | undefined;
 }> => {
-  // TODO Remove check once feature is no longer behind flag
-  if (hasListsFeature()) {
-    if (lists == null) {
-      throw new Error('lists plugin unavailable during rule execution');
-    }
-
-    const listClient = await lists.getListClient(
-      services.callCluster,
-      spaceId,
-      updatedByUser ?? 'elastic'
-    );
-    const exceptionsClient = await lists.getExceptionListClient(
-      savedObjectClient,
-      updatedByUser ?? 'elastic'
-    );
-
-    return { listClient, exceptionsClient };
-  } else {
-    return { listClient: undefined, exceptionsClient: undefined };
+  if (lists == null) {
+    throw new Error('lists plugin unavailable during rule execution');
   }
+
+  const listClient = await lists.getListClient(
+    services.callCluster,
+    spaceId,
+    updatedByUser ?? 'elastic'
+  );
+  const exceptionsClient = await lists.getExceptionListClient(
+    savedObjectClient,
+    updatedByUser ?? 'elastic'
+  );
+
+  return { listClient, exceptionsClient };
 };
 
 export const hasLargeValueList = (entries: EntriesArray): boolean => {
@@ -71,37 +65,52 @@ export const getExceptions = async ({
   client: ExceptionListClient | undefined;
   lists: ListArrayOrUndefined;
 }): Promise<ExceptionListItemSchema[] | undefined> => {
-  // TODO Remove check once feature is no longer behind flag
-  if (hasListsFeature()) {
-    if (client == null) {
-      throw new Error('lists plugin unavailable during rule execution');
-    }
+  if (client == null) {
+    throw new Error('lists plugin unavailable during rule execution');
+  }
 
-    if (lists != null) {
-      try {
-        // Gather all exception items of all exception lists linked to rule
-        const exceptions = await Promise.all(
-          lists
-            .map(async (list) => {
-              const { id, namespace_type: namespaceType } = list;
-              const items = await client.findExceptionListItem({
-                listId: id,
+  if (lists != null) {
+    try {
+      // Gather all exception items of all exception lists linked to rule
+      const exceptions = await Promise.all(
+        lists
+          .map(async (list) => {
+            const { id, namespace_type: namespaceType } = list;
+            try {
+              // TODO update once exceptions client `findExceptionListItem`
+              // accepts an array of list ids
+              const foundList = await client.getExceptionList({
+                id,
                 namespaceType,
-                page: 1,
-                perPage: 5000,
-                filter: undefined,
-                sortOrder: undefined,
-                sortField: undefined,
+                listId: undefined,
               });
-              return items != null ? items.data : [];
-            })
-            .flat()
-        );
-        return exceptions.flat();
-      } catch {
-        return [];
-      }
+
+              if (foundList == null) {
+                return [];
+              } else {
+                const items = await client.findExceptionListItem({
+                  listId: foundList.list_id,
+                  namespaceType,
+                  page: 1,
+                  perPage: 5000,
+                  filter: undefined,
+                  sortOrder: undefined,
+                  sortField: undefined,
+                });
+                return items != null ? items.data : [];
+              }
+            } catch {
+              throw new Error('unable to fetch exception list items');
+            }
+          })
+          .flat()
+      );
+      return exceptions.flat();
+    } catch {
+      throw new Error('unable to fetch exception list items');
     }
+  } else {
+    return [];
   }
 };
 

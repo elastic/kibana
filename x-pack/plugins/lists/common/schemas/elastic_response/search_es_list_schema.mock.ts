@@ -24,8 +24,10 @@ export const getSearchEsListMock = (): SearchEsListSchema => ({
   created_at: DATE_NOW,
   created_by: USER,
   description: DESCRIPTION,
+  deserializer: undefined,
   meta: META,
   name: NAME,
+  serializer: undefined,
   tie_breaker_id: TIE_BREAKER,
   type: TYPE,
   updated_at: DATE_NOW,
@@ -47,6 +49,18 @@ export const getSearchListMock = (): SearchResponse<SearchEsListSchema> => ({
     ],
     max_score: 0,
     total: 1,
+  },
+  timed_out: false,
+  took: 10,
+});
+
+export const getEmptySearchListMock = (): SearchResponse<SearchEsListSchema> => ({
+  _scroll_id: '123',
+  _shards: getShardMock(),
+  hits: {
+    hits: [],
+    max_score: 0,
+    total: 0,
   },
   timed_out: false,
   took: 10,

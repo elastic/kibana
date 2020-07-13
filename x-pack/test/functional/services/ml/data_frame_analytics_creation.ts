@@ -306,6 +306,15 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       );
     },
 
+    async assertModelMemoryInputPopulated() {
+      const actualModelMemory = await testSubjects.getAttribute(
+        'mlAnalyticsCreateJobWizardModelMemoryInput',
+        'value'
+      );
+
+      expect(actualModelMemory).not.to.be('');
+    },
+
     async assertPredictionFieldNameValue(expectedValue: string) {
       const actualPredictedFieldName = await testSubjects.getAttribute(
         'mlAnalyticsCreateJobWizardPredictionFieldNameInput',

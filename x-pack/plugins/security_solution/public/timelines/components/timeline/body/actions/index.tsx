@@ -9,6 +9,7 @@ import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elas
 
 import { Note } from '../../../../../common/lib/note';
 import { StoreState } from '../../../../../common/store/types';
+import { TimelineType } from '../../../../../../common/types/timeline';
 
 import { TimelineModel } from '../../../../store/timeline/model';
 
@@ -19,12 +20,13 @@ import { EventsLoading, EventsTd, EventsTdContent, EventsTdGroupActions } from '
 import { eventHasNotes, getPinTooltip } from '../helpers';
 import * as i18n from '../translations';
 import { OnRowSelected } from '../../events';
-import { Ecs } from '../../../../../graphql/types';
+import { Ecs, TimelineNonEcsData } from '../../../../../graphql/types';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 
 export interface TimelineRowActionOnClick {
   eventId: string;
   ecsData: Ecs;
+  data: TimelineNonEcsData[];
 }
 
 export interface TimelineRowAction {
@@ -117,9 +119,9 @@ export const Actions = React.memo<Props>(
 
         <EventsTd>
           <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
-            {loading && <EventsLoading />}
-
-            {!loading && (
+            {loading ? (
+              <EventsLoading />
+            ) : (
               <EuiButtonIcon
                 aria-label={expanded ? i18n.COLLAPSE : i18n.EXPAND}
                 data-test-subj="expand-event"
@@ -169,7 +171,11 @@ export const Actions = React.memo<Props>(
                   status={timeline.status}
                   timelineType={timeline.timelineType}
                   toggleShowNotes={toggleShowNotes}
-                  toolTip={timeline.timelineType ? i18n.NOTES_DISABLE_TOOLTIP : i18n.NOTES_TOOLTIP}
+                  toolTip={
+                    timeline.timelineType === TimelineType.template
+                      ? i18n.NOTES_DISABLE_TOOLTIP
+                      : i18n.NOTES_TOOLTIP
+                  }
                   updateNote={updateNote}
                 />
               </EventsTdContent>

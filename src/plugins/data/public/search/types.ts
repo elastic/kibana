@@ -17,38 +17,37 @@
  * under the License.
  */
 
+import { Observable } from 'rxjs';
 import { SearchAggsSetup, SearchAggsStart } from './aggs';
-import { ISearch, ISearchGeneric } from './i_search';
-import { TStrategyTypes } from './strategy_types';
 import { LegacyApiCaller } from './legacy/es_client';
 import { SearchInterceptor } from './search_interceptor';
 import { ISearchSource, SearchSourceFields } from './search_source';
 
-/**
- * Search strategy interface contains a search method that takes in
- * a request and returns a promise that resolves to a response.
- */
-export interface ISearchStrategy<T extends TStrategyTypes> {
-  search: ISearch<T>;
+import {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  IEsSearchRequest,
+  IEsSearchResponse,
+} from '../../common/search';
+
+export interface ISearchOptions {
+  signal?: AbortSignal;
 }
 
-export type TSearchStrategiesMap = {
-  [K in TStrategyTypes]?: ISearchStrategy<any>;
-};
+export type ISearch = (
+  request: IKibanaSearchRequest,
+  options?: ISearchOptions
+) => Observable<IKibanaSearchResponse>;
 
-/**
- * Extension point exposed for other plugins to register their own search
- * strategies.
- */
-export type TRegisterSearchStrategy = <T extends TStrategyTypes>(
-  name: T,
-  searchStrategy: ISearchStrategy<T>
-) => void;
+// Service API types
+export interface IStrategyOptions extends ISearchOptions {
+  strategy?: string;
+}
 
-/**
- * Used if a plugin needs access to an already registered search strategy.
- */
-export type TGetSearchStrategy = <T extends TStrategyTypes>(name: T) => ISearchStrategy<T>;
+export type ISearchGeneric = (
+  request: IEsSearchRequest,
+  options?: IStrategyOptions
+) => Observable<IEsSearchResponse>;
 
 export interface ISearchStartLegacy {
   esClient: LegacyApiCaller;
@@ -60,22 +59,11 @@ export interface ISearchStartLegacy {
  */
 export interface ISearchSetup {
   aggs: SearchAggsSetup;
-  /**
-   * Extension point exposed for other plugins to register their own search
-   * strategies.
-   */
-  registerSearchStrategy: TRegisterSearchStrategy;
 }
 
 export interface ISearchStart {
   aggs: SearchAggsStart;
   setInterceptor: (searchInterceptor: SearchInterceptor) => void;
-
-  /**
-   * Used if a plugin needs access to an already registered search strategy.
-   */
-  getSearchStrategy: TGetSearchStrategy;
-
   search: ISearchGeneric;
   searchSource: {
     create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
