@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { euiStyled } from '../../../../../../../observability/public';
@@ -95,7 +102,10 @@ export const AnomaliesResults: React.FunctionComponent<{
           logEntryRateResults.histogramBuckets &&
           !logEntryRateResults.histogramBuckets.length)) &&
       (!anomalies || anomalies.length === 0) ? (
-        <LoadingOverlayWrapper isLoading={isLoadingLogRateResults || isLoadingAnomaliesResults}>
+        <LoadingOverlayWrapper
+          isLoading={isLoadingLogRateResults || isLoadingAnomaliesResults}
+          loadingChildren={<LoadingOverlayContent />}
+        >
           <EuiEmptyPrompt
             title={
               <h2>
@@ -198,3 +208,10 @@ const renderAnnotationTooltip = (details?: string) => {
 const TooltipWrapper = euiStyled('div')`
   white-space: nowrap;
 `;
+
+const loadingAriaLabel = i18n.translate(
+  'xpack.infra.logs.analysis.anomaliesSectionLoadingAriaLabel',
+  { defaultMessage: 'Loading anomalies' }
+);
+
+const LoadingOverlayContent = () => <EuiLoadingSpinner size="xl" aria-label={loadingAriaLabel} />;
