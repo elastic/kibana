@@ -6,6 +6,8 @@
 
 import { SavedObjectsClientContract } from 'kibana/server';
 
+import { NamespaceTypeArray } from '../../../common/schemas/types/default_namespace_array';
+import { NonEmptyStringArrayDecoded } from '../../../common/schemas/types/non_empty_string_array';
 import {
   CreateCommentsArray,
   Description,
@@ -120,6 +122,16 @@ export interface UpdateExceptionListItemOptions {
 export interface FindExceptionListItemOptions {
   listId: ListId;
   namespaceType: NamespaceType;
+  filter: FilterOrUndefined;
+  perPage: PerPageOrUndefined;
+  page: PageOrUndefined;
+  sortField: SortFieldOrUndefined;
+  sortOrder: SortOrderOrUndefined;
+}
+
+export interface FindExceptionListsItemOptions {
+  listId: NonEmptyStringArrayDecoded;
+  namespaceType: NamespaceTypeArray;
   filter: FilterOrUndefined;
   perPage: PerPageOrUndefined;
   page: PageOrUndefined;
