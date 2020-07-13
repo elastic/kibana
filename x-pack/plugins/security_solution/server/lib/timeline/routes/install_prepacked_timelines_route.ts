@@ -42,7 +42,6 @@ export const installPrepackedTimelinesRoute = (
       try {
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
         const prepackagedTimelineStatus = await checkTimelinesStatus(frameworkRequest);
-
         const [validatedprepackagedTimelineStatus, prepackagedTimelineStatusError] = validate(
           prepackagedTimelineStatus,
           checkTimelineStatusRt
@@ -64,13 +63,19 @@ export const installPrepackedTimelinesRoute = (
             frameworkRequest,
             true
           );
-          if (typeof res !== 'string') {
-            return response.ok({ body: res ?? {} });
-          } else {
-            throw res;
-          }
+        }
+        if (res instanceof Error) {
+          throw res;
         } else {
-          return response.ok({ body: validatedprepackagedTimelineStatus ?? {} });
+          return response.ok({
+            body: res ?? {
+              success: true,
+              success_count: 0,
+              timelines_installed: 0,
+              timelines_updated: 0,
+              errors: [],
+            },
+          });
         }
       } catch (err) {
         const error = transformError(err);

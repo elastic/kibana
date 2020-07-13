@@ -52,7 +52,6 @@ export const checkTimelinesStatus = async (
           JSON.parse(t)
         );
         const prepackagedTimelines = timeline.timeline ?? [];
-
         const timelinesToInstall = getTimelinesToInstall(
           parsedTimelinesFromFileSystem,
           prepackagedTimelines

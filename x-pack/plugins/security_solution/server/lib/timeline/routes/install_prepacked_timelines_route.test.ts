@@ -63,11 +63,48 @@ describe('installPrepackagedTimelines', () => {
     expect(installPrepackagedTimelines).toHaveBeenCalled();
   });
 
+  test('should return installPrepackagedTimelines result ', async () => {
+    (checkTimelinesStatus as jest.Mock).mockReturnValue(
+      mockCheckTimelinesStatusBeforeInstallResult
+    );
+    (installPrepackagedTimelines as jest.Mock).mockReturnValue({
+      errors: [],
+      success: true,
+      success_count: 3,
+      timelines_installed: 3,
+      timelines_updated: 0,
+    });
+
+    const result = await server.inject(installPrepackedTimelinesRequest(), context);
+
+    expect(result.body).toEqual({
+      errors: [],
+      success: true,
+      success_count: 3,
+      timelines_installed: 3,
+      timelines_updated: 0,
+    });
+  });
+
   test('should not call installPrepackagedTimelines if it has nothing to install or update', async () => {
     (checkTimelinesStatus as jest.Mock).mockReturnValue(mockCheckTimelinesStatusAfterInstallResult);
 
     await server.inject(installPrepackedTimelinesRequest(), context);
 
     expect(installPrepackagedTimelines).not.toHaveBeenCalled();
+  });
+
+  test('should return success if it has nothing to install or update', async () => {
+    (checkTimelinesStatus as jest.Mock).mockReturnValue(mockCheckTimelinesStatusAfterInstallResult);
+
+    const result = await server.inject(installPrepackedTimelinesRequest(), context);
+
+    expect(result.body).toEqual({
+      errors: [],
+      success: true,
+      success_count: 0,
+      timelines_installed: 0,
+      timelines_updated: 0,
+    });
   });
 });
