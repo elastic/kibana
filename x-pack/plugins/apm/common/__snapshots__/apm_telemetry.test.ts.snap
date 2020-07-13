@@ -649,9 +649,11 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "geo": {
                               "properites": {
                                 "country_iso_code": {
-                                  "properties": {
-                                    "1d": {
-                                      "type": "long"
+                                  "rum": {
+                                    "properties": {
+                                      "1d": {
+                                        "type": "long"
+                                      }
                                     }
                                   }
                                 }
