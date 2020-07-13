@@ -5,25 +5,28 @@
  */
 
 import Boom from 'boom';
+import { SavedObjectsClientContract } from 'src/core/server';
 import {
   Dataset,
   RegistryPackage,
   ElasticsearchAssetType,
   TemplateRef,
   RegistryElasticsearch,
+  IngestAssetType,
 } from '../../../../types';
 import { CallESAsCurrentUser } from '../../../../types';
 import { Field, loadFieldsFromYaml, processFields } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
 import { generateMappings, generateTemplateName, getTemplate } from './template';
 import * as Registry from '../../registry';
+import { removeAssetsFromInstalledEsByType, saveInstalledEsRefs } from '../../packages/install';
 
 export const installTemplates = async (
   registryPackage: RegistryPackage,
+  isUpdate: boolean,
   callCluster: CallESAsCurrentUser,
-  pkgName: string,
-  pkgVersion: string,
-  paths: string[]
+  paths: string[],
+  savedObjectsClient: SavedObjectsClientContract
 ): Promise<TemplateRef[]> => {
   // install any pre-built index template assets,
   // atm, this is only the base package's global index templates
@@ -31,6 +34,12 @@ export const installTemplates = async (
   await installPreBuiltComponentTemplates(paths, callCluster);
   await installPreBuiltTemplates(paths, callCluster);
 
+  // remove package installation's references to index templates
+  await removeAssetsFromInstalledEsByType(
+    savedObjectsClient,
+    registryPackage.name,
+    ElasticsearchAssetType.indexTemplate
+  );
   // build templates per dataset from yml files
   const datasets = registryPackage.datasets;
   if (datasets) {
@@ -46,7 +55,17 @@ export const installTemplates = async (
     }, []);
 
     const res = await Promise.all(installTemplatePromises);
-    return res.flat();
+    const installedTemplates = res.flat();
+    // get template refs to save
+    const installedTemplateRefs = installedTemplates.map((template) => ({
+      id: template.templateName,
+      type: IngestAssetType.IndexTemplate,
+    }));
+
+    // add package installation's references to index templates
+    await saveInstalledEsRefs(savedObjectsClient, registryPackage.name, installedTemplateRefs);
+
+    return installedTemplates;
   }
   return [];
 };

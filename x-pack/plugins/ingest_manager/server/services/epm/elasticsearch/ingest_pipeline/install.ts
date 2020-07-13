@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObjectsClientContract } from 'src/core/server';
 import {
   AssetReference,
   Dataset,
@@ -13,6 +14,7 @@ import {
 } from '../../../../types';
 import * as Registry from '../../registry';
 import { CallESAsCurrentUser } from '../../../../types';
+import { saveInstalledEsRefs } from '../../packages/install';
 
 interface RewriteSubstitution {
   source: string;
@@ -23,8 +25,12 @@ interface RewriteSubstitution {
 export const installPipelines = async (
   registryPackage: RegistryPackage,
   paths: string[],
-  callCluster: CallESAsCurrentUser
+  callCluster: CallESAsCurrentUser,
+  savedObjectsClient: SavedObjectsClientContract
 ) => {
+  // unlike other ES assets, pipeline names are versioned so after a template is updated
+  // it can be created pointing to the new template, without removing the old one and effecting data
+  // so do not remove the currently installed pipelines here
   const datasets = registryPackage.datasets;
   const pipelinePaths = paths.filter((path) => isPipeline(path));
   if (datasets) {
@@ -41,7 +47,8 @@ export const installPipelines = async (
       }
       return acc;
     }, []);
-    return Promise.all(pipelines).then((results) => results.flat());
+    const pipelinesToSave = await Promise.all(pipelines).then((results) => results.flat());
+    return saveInstalledEsRefs(savedObjectsClient, registryPackage.name, pipelinesToSave);
   }
   return [];
 };

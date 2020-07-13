@@ -229,7 +229,8 @@ export type PackageInfo = Installable<
 >;
 
 export interface Installation extends SavedObjectAttributes {
-  installed: AssetReference[];
+  installed_kibana: AssetReference[];
+  installed_es: AssetReference[];
   es_index_patterns: Record<string, string>;
   name: string;
   version: string;
