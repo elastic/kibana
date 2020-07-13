@@ -150,7 +150,23 @@ export function uiRenderMixin(kbnServer, server, config) {
               ]),
         ];
 
-        const kpPluginIds = Array.from(kbnServer.newPlatform.__internals.uiPlugins.public.keys());
+        const kpUiPlugins = kbnServer.newPlatform.__internals.uiPlugins;
+        const kpPluginPublicPaths = new Map();
+        const kpPluginBundlePaths = new Set();
+
+        // recursively iterate over the kpUiPlugin ids and their required bundles
+        // to populate kpPluginPublicPaths and kpPluginBundlePaths
+        (function readKpPlugins(ids) {
+          for (const id of ids) {
+            if (kpPluginPublicPaths.has(id)) {
+              continue;
+            }
+
+            kpPluginPublicPaths.set(id, `${regularBundlePath}/plugin/${id}/`);
+            kpPluginBundlePaths.add(`${regularBundlePath}/plugin/${id}/${id}.plugin.js`);
+            readKpPlugins(kpUiPlugins.internal.get(id).requiredBundles);
+          }
+        })(kpUiPlugins.public.keys());
 
         const jsDependencyPaths = [
           ...UiSharedDeps.jsDepFilenames.map(
@@ -160,9 +176,7 @@ export function uiRenderMixin(kbnServer, server, config) {
           ...(isCore ? [] : [`${dllBundlePath}/vendors_runtime.bundle.dll.js`, ...dllJsChunks]),
 
           `${regularBundlePath}/core/core.entry.js`,
-          ...kpPluginIds.map(
-            (pluginId) => `${regularBundlePath}/plugin/${pluginId}/${pluginId}.plugin.js`
-          ),
+          ...kpPluginBundlePaths,
         ];
 
         // These paths should align with the bundle routes configured in
@@ -170,13 +184,7 @@ export function uiRenderMixin(kbnServer, server, config) {
         const publicPathMap = JSON.stringify({
           core: `${regularBundlePath}/core/`,
           'kbn-ui-shared-deps': `${regularBundlePath}/kbn-ui-shared-deps/`,
-          ...kpPluginIds.reduce(
-            (acc, pluginId) => ({
-              ...acc,
-              [pluginId]: `${regularBundlePath}/plugin/${pluginId}/`,
-            }),
-            {}
-          ),
+          ...Object.fromEntries(kpPluginPublicPaths),
         });
 
         const bootstrap = new AppBootstrap({

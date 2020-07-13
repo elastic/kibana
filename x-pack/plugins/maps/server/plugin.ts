@@ -28,6 +28,7 @@ import { LicensingPluginSetup } from '../../licensing/server';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import { PluginSetupContract as AlertingSetup } from '../../alerts/server';
 import { alertType as peopleInSpaceAlert } from './alert_types/astros';
+import { MapsLegacyPluginSetup } from '../../../../src/plugins/maps_legacy/server';
 
 interface SetupDeps {
   features: FeaturesPluginSetupContract;
@@ -35,6 +36,7 @@ interface SetupDeps {
   home: HomeServerPluginSetup;
   licensing: LicensingPluginSetup;
   alerts: AlertingSetup;
+  mapsLegacy: MapsLegacyPluginSetup;
 }
 
 export class MapsPlugin implements Plugin {
@@ -132,9 +134,10 @@ export class MapsPlugin implements Plugin {
 
   // @ts-ignore
   async setup(core: CoreSetup, plugins: SetupDeps) {
-    const { alerts, usageCollection, home, licensing, features } = plugins;
+    const { alerts, usageCollection, home, licensing, features, mapsLegacy } = plugins;
     // @ts-ignore
     const config$ = this._initializerContext.config.create();
+    const mapsLegacyConfig = await mapsLegacy.config$.pipe(take(1)).toPromise();
     const currentConfig = await config$.pipe(take(1)).toPromise();
 
     // @ts-ignore
@@ -153,7 +156,7 @@ export class MapsPlugin implements Plugin {
         initRoutes(
           core.http.createRouter(),
           license.uid,
-          currentConfig,
+          mapsLegacyConfig,
           this.kibanaVersion,
           this._logger
         );

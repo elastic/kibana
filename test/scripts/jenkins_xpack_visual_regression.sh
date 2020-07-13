@@ -5,7 +5,7 @@ source "$KIBANA_DIR/src/dev/ci_setup/setup_percy.sh"
 
 echo " -> building and extracting default Kibana distributable"
 cd "$KIBANA_DIR"
-node scripts/build --debug
+node scripts/build --debug --no-oss
 linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
 installDir="$PARENT_DIR/install/kibana"
 mkdir -p "$installDir"
@@ -22,5 +22,5 @@ yarn percy exec -t 10000 -- -- \
 # cd "$KIBANA_DIR"
 # source "test/scripts/jenkins_xpack_page_load_metrics.sh"
 
-cd "$XPACK_DIR"
-source "$KIBANA_DIR/test/scripts/jenkins_xpack_saved_objects_field_metrics.sh"
+cd "$KIBANA_DIR"
+source "test/scripts/jenkins_xpack_saved_objects_field_metrics.sh"

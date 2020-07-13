@@ -2098,6 +2098,7 @@ export const mockTimelineModel: TimelineModel = {
   description: 'This is a sample rule description',
   eventIdToNoteIds: {},
   eventType: 'all',
+  excludedRowRendererIds: [],
   filters: [
     {
       $state: {
@@ -2137,7 +2138,6 @@ export const mockTimelineModel: TimelineModel = {
   selectedEventIds: {},
   show: false,
   showCheckboxes: false,
-  showRowRenderers: true,
   sort: {
     columnId: '@timestamp',
     sortDirection: Direction.desc,
@@ -2217,6 +2217,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
     description: '',
     eventIdToNoteIds: {},
     eventType: 'all',
+    excludedRowRendererIds: [],
     filters: [],
     highlightedDropAndProviderId: '',
     historyIds: [],
@@ -2241,7 +2242,6 @@ export const defaultTimelineProps: CreateTimelineProps = {
     selectedEventIds: {},
     show: false,
     showCheckboxes: false,
-    showRowRenderers: true,
     sort: { columnId: '@timestamp', sortDirection: Direction.desc },
     status: TimelineStatus.draft,
     title: '',
