@@ -3,7 +3,7 @@
 
 [IMPORTANT]
 ==============================================
-The Kibana plugin interfaces are in a state of constant development.  We cannot provide backwards compatibility for plugin due to the high rate of change.  Kibana enforces that the installed plugins match the version of Kibana itself.  Plugin developers will have to release a new version of their plugin for each new Kibana release as a result.
+The Kibana plugin interfaces are in a state of constant development.  We cannot provide backwards compatibility for plugins due to the high rate of change.  Kibana enforces that the installed plugins match the version of Kibana itself.  Plugin developers will have to release a new version of their plugin for each new Kibana release as a result.
 ==============================================
 
 * <<development-plugin-resources>>
