@@ -54,13 +54,13 @@ const migrate = (state: unknown, version: string) => {
 const inject = (state: MyState, savedObjectReferences: SavedObjectReference[]) => {
   return {
     ...state,
-    objectId: savedObjectReferences.find(ref => ref.name = state.objectId)?.id;
+    objectId: savedObjectReferences.find(ref => ref.name = 'mystate.objectId')?.id;
   }
 }
 
 const extract = (state: MyState) => {
   const references = [{ name: 'objectId', id: state.objectId, type: 'savedObject' }];
-  return [{ ...state, objectId: 'objectId' }, references];
+  return [{ ...state, objectId: 'mystate.objectId' }, references];
 }
 
 export const persistableStateDefinition = { migrate, inject, extract };
@@ -83,7 +83,7 @@ We also need to make sure that all the persited state containing references to s
 
 # Detailed design
 
-We plan to implement `PersistableStateRegistry ` which will be exposed under `share` plugin
+We plan to implement `PersistableStateRegistry ` which will be exposed under `PersitableState` plugin
 
 ```ts
 export interface PersistableState extends Serializable {}
@@ -264,6 +264,13 @@ interface EmbeddableInputV2 {
 ```
 
 It's probably a rare occurrence, but it's also very risky. EmbeddableInput thinks it owns defaultTitle. Let's say it decides to change the name yet again, so in V3 changes it to customPanelTitle and removes defaultTitle. Let's also say VisualizeEmbeddable author doesn't add a migration for V2 or V3. A user migrates to V3, VisualizeEmbeddable just had its defaultTitle state wiped out unknowingly (types will still say it's a required parameters). This has the potential to permanently break saved objects with no way to undo the migration.
+
+# What saved object migrations 
+
+With saved object migrations (or any other migration of potentially high amount of state objects) currently we try to detect when a migration needs to be performed. For example if there was no change in specific saved object between minors we will not try to read or write those objects from/to elasticsearch.
+
+With extention points to which 3rd party developers might register their own items which expose state that is not possible. For example dashboard saved object might contain state from any embeddable. As we don't know about all those embeddables we need to always fetch all saved objects and run migrations on all of them. 
+If expecting to handle large amount of state objects you should always deep compare input and output state and filter out objects without changes to avoid to many updates in the database.
 
 # Drawbacks
 
