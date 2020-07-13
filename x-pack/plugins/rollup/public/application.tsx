@@ -26,7 +26,11 @@ export const renderApp = async (
   { history, element, setBreadcrumbs }: ManagementAppMountParams
 ) => {
   const [coreStart] = await core.getStartServices();
-  const I18nContext = coreStart.i18n.Context;
+  const {
+    i18n,
+    chrome: { docTitle },
+  } = coreStart;
+  const I18nContext = i18n.Context;
 
   const services = {
     history,
@@ -37,7 +41,7 @@ export const renderApp = async (
     <I18nContext>
       <KibanaContextProvider services={services}>
         <Provider store={rollupJobsStore}>
-          <App history={history} />
+          <App history={history} docTitle={docTitle} />
         </Provider>
       </KibanaContextProvider>
     </I18nContext>,
