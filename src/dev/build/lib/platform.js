@@ -17,22 +17,26 @@
  * under the License.
  */
 
-export function createPlatform(name) {
+export function createPlatform(name, architecture, buildName) {
   return new (class Platform {
     getName() {
       return name;
     }
 
-    getNodeArch() {
-      return `${name}-x64`;
+    getArchitecture() {
+      return architecture;
     }
 
     getBuildName() {
-      return `${name}-x86_64`;
+      return buildName;
+    }
+
+    getNodeArch() {
+      return `${name}-${architecture}`;
     }
 
     isWindows() {
-      return name === 'windows';
+      return name === 'win32';
     }
 
     isMac() {
