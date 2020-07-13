@@ -138,7 +138,16 @@ describe('test endpoint route', () => {
 
     expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
     expect(mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.body?.query).toEqual({
-      match_all: {},
+      bool: {
+        must_not: {
+          terms: {
+            'elastic.agent.id': [
+              '00000000-0000-0000-0000-000000000000',
+              '11111111-1111-1111-1111-111111111111',
+            ],
+          },
+        },
+      },
     });
     expect(routeConfig.options).toEqual({ authRequired: true, tags: ['access:securitySolution'] });
     expect(mockResponse.ok).toBeCalled();
