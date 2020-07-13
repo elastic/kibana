@@ -229,8 +229,8 @@ export type PackageInfo = Installable<
 >;
 
 export interface Installation extends SavedObjectAttributes {
-  installed_kibana: AssetReference[];
-  installed_es: AssetReference[];
+  installed_kibana: KibanaAssetReference[];
+  installed_es: EsAssetReference[];
   es_index_patterns: Record<string, string>;
   name: string;
   version: string;
@@ -247,19 +247,14 @@ export type NotInstalled<T = {}> = T & {
   status: InstallationStatus.notInstalled;
 };
 
-export type AssetReference = Pick<SavedObjectReference, 'id'> & {
-  type: AssetType | IngestAssetType;
-};
+export type AssetReference = KibanaAssetReference | EsAssetReference;
 
-/**
- * Types of assets which can be installed/removed
- */
-export enum IngestAssetType {
-  IlmPolicy = 'ilm_policy',
-  IndexTemplate = 'index_template',
-  ComponentTemplate = 'component_template',
-  IngestPipeline = 'ingest_pipeline',
-}
+export type KibanaAssetReference = Pick<SavedObjectReference, 'id'> & {
+  type: KibanaAssetType;
+};
+export type EsAssetReference = Pick<SavedObjectReference, 'id'> & {
+  type: ElasticsearchAssetType;
+};
 
 export enum DefaultPackages {
   system = 'system',

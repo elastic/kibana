@@ -12,7 +12,6 @@ import {
   ElasticsearchAssetType,
   TemplateRef,
   RegistryElasticsearch,
-  IngestAssetType,
 } from '../../../../types';
 import { CallESAsCurrentUser } from '../../../../types';
 import { Field, loadFieldsFromYaml, processFields } from '../../fields/field';
@@ -59,7 +58,7 @@ export const installTemplates = async (
     // get template refs to save
     const installedTemplateRefs = installedTemplates.map((template) => ({
       id: template.templateName,
-      type: IngestAssetType.IndexTemplate,
+      type: ElasticsearchAssetType.indexTemplate,
     }));
 
     // add package installation's references to index templates

@@ -42,7 +42,7 @@ export async function removeInstallation(options: {
   await installIndexPatterns(savedObjectsClient);
 
   // Delete the installed assets
-  const installedAssets = installation.installed_kibana.concat(installation.installed_es);
+  const installedAssets = [...installation.installed_kibana, ...installation.installed_es];
   await deleteAssets(installedAssets, savedObjectsClient, callCluster);
 
   // Delete the manager saved object with references to the asset objects

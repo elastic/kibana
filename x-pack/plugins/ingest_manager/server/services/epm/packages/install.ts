@@ -12,8 +12,10 @@ import {
   Installation,
   CallESAsCurrentUser,
   DefaultPackages,
-  IngestAssetType,
   AssetType,
+  KibanaAssetReference,
+  EsAssetReference,
+  ElasticsearchAssetType,
 } from '../../../types';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import * as Registry from '../registry';
@@ -172,7 +174,7 @@ export async function installPackage(options: {
   // get template refs to save
   const installedTemplateRefs = installedTemplates.map((template) => ({
     id: template.templateName,
-    type: IngestAssetType.IndexTemplate,
+    type: ElasticsearchAssetType.indexTemplate,
   }));
   const [installedKibanaAssets] = await Promise.all([
     installKibanaAssetsPromise,
@@ -195,8 +197,8 @@ export async function createInstallation(options: {
   pkgVersion: string;
   internal: boolean;
   removable: boolean;
-  installed_kibana: AssetReference[];
-  installed_es: AssetReference[];
+  installed_kibana: KibanaAssetReference[];
+  installed_es: EsAssetReference[];
   toSaveESIndexPatterns: Record<string, string>;
 }) {
   const {
@@ -205,15 +207,15 @@ export async function createInstallation(options: {
     pkgVersion,
     internal,
     removable,
-    installed_kibana,
-    installed_es,
+    installed_kibana: installedKibana,
+    installed_es: installedEs,
     toSaveESIndexPatterns,
   } = options;
   await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
     {
-      installed_kibana,
-      installed_es,
+      installed_kibana: installedKibana,
+      installed_es: installedEs,
       es_index_patterns: toSaveESIndexPatterns,
       name: pkgName,
       version: pkgVersion,
@@ -222,8 +224,7 @@ export async function createInstallation(options: {
     },
     { id: pkgName, overwrite: true }
   );
-
-  return installed_kibana.concat(installed_es);
+  return [...installedKibana, ...installedEs];
 }
 
 export const saveInstalledKibanaRefs = async (
@@ -240,7 +241,7 @@ export const saveInstalledKibanaRefs = async (
 export const saveInstalledEsRefs = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
-  installedAssets: AssetReference[]
+  installedAssets: EsAssetReference[]
 ) => {
   const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
   const installedAssetsToSave = installedPkg?.attributes.installed_es.concat(installedAssets);
