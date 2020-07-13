@@ -11,6 +11,7 @@ import { fetchMlJob } from './common';
 import {
   getJobId,
   logEntryCategoriesJobTypes,
+  logEntryRateJobTypes,
   jobCustomSettingsRT,
 } from '../../../common/log_analysis';
 import { Sort, Pagination } from '../../../common/http_api/log_analysis';
@@ -52,7 +53,7 @@ export async function getLogEntryAnomalies(
 ) {
   const finalizeLogEntryAnomaliesSpan = startTracingSpan('get log entry anomalies');
 
-  const logRateJobId = getJobId(context.infra.spaceId, sourceId, 'log-entry-rate');
+  const logRateJobId = getJobId(context.infra.spaceId, sourceId, logEntryRateJobTypes[0]);
   const logCategoriesJobId = getJobId(
     context.infra.spaceId,
     sourceId,
