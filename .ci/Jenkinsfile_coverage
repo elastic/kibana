@@ -16,7 +16,7 @@ kibanaPipeline(timeoutMinutes: 240) {
           kibanaTeamAssign.load("### Upload Team Assignment JSON")
 //          handleIngestion(TIME_STAMP)
         }
-        handleFail()
+//        handleFail()
       }
     }
     kibanaPipeline.sendMail()
