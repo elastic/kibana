@@ -31,6 +31,7 @@ import { MonitorList } from '../../../state/reducers/monitor_list';
 import { CertStatusColumn } from './cert_status_column';
 import { MonitorListHeader } from './monitor_list_header';
 import { URL_LABEL } from '../../common/translations';
+import { EnableMonitorAlert } from './enable_alert';
 
 interface Props extends MonitorListProps {
   pageSize: number;
@@ -49,7 +50,19 @@ export const noItemsMessage = (loading: boolean, filters?: string) => {
   return !!filters ? labels.NO_MONITOR_ITEM_SELECTED : labels.NO_DATA_MESSAGE;
 };
 
-export const MonitorListComponent: React.FC<Props> = ({
+export const MonitorListComponent: ({
+  filters,
+  monitorList: { list, error, loading },
+  linkParameters,
+  pageSize,
+  setPageSize,
+}: {
+  filters: any;
+  monitorList: { list: any; error: any; loading: any };
+  linkParameters: any;
+  pageSize: any;
+  setPageSize: any;
+}) => any = ({
   filters,
   monitorList: { list, error, loading },
   linkParameters,
@@ -134,6 +147,16 @@ export const MonitorListComponent: React.FC<Props> = ({
       render: (histogramSeries: HistogramPoint[] | null) => (
         <MonitorBarSeries histogramSeries={histogramSeries} />
       ),
+    },
+    {
+      name: 'Actions',
+      actions: [
+        {
+          name: 'Alert',
+          description: 'Enable an alert',
+          render: (item: MonitorSummary) => <EnableMonitorAlert monitor={item} />,
+        },
+      ],
     },
     {
       align: 'right' as const,
