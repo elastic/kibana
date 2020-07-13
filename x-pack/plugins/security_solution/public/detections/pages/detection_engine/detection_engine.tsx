@@ -40,7 +40,6 @@ import * as i18n from './translations';
 import { LinkButton } from '../../../common/components/links';
 import { useFormatUrl } from '../../../common/components/link_to';
 
-// eslint-disable-next-line complexity
 export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
   filters,
   query,
