@@ -408,7 +408,7 @@
     "babel-eslint": "^10.0.3",
     "babel-jest": "^25.5.1",
     "babel-plugin-istanbul": "^6.0.0",
-    "backport": "5.4.6",
+    "backport": "5.5.1",
     "chai": "3.5.0",
     "chance": "1.0.18",
     "cheerio": "0.22.0",

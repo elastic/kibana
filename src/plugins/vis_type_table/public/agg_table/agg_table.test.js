@@ -19,44 +19,71 @@
 
 import $ from 'jquery';
 import moment from 'moment';
-import ngMock from 'ng_mock';
-import expect from '@kbn/expect';
+import angular from 'angular';
+import 'angular-mocks';
 import sinon from 'sinon';
-import './legacy';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { npStart } from 'ui/new_platform';
 import { round } from 'lodash';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getInnerAngular } from '../../../../../../plugins/vis_type_table/public/get_inner_angular';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { initTableVisLegacyModule } from '../../../../../../plugins/vis_type_table/public/table_vis_legacy_module';
+import { getFieldFormatsRegistry } from '../../../../test_utils/public/stub_field_formats';
+import { coreMock } from '../../../../core/public/mocks';
+import { initAngularBootstrap } from '../../../kibana_legacy/public';
+import { setUiSettings } from '../../../data/public/services';
+import { UI_SETTINGS } from '../../../data/public/';
+import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../../../share/public';
+
+import { setFormatService } from '../services';
+import { getInnerAngular } from '../get_inner_angular';
+import { initTableVisLegacyModule } from '../table_vis_legacy_module';
 import { tabifiedData } from './tabified_data';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { configureAppAngularModule } from '../../../../../../plugins/kibana_legacy/public/angular';
+
+const uiSettings = new Map();
 
 describe('Table Vis - AggTable Directive', function () {
+  const core = coreMock.createStart();
+
+  core.uiSettings.set = jest.fn((key, value) => {
+    uiSettings.set(key, value);
+  });
+
+  core.uiSettings.get = jest.fn((key) => {
+    const defaultValues = {
+      dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
+      'dateFormat:tz': 'UTC',
+      [UI_SETTINGS.SHORT_DOTS_ENABLE]: true,
+      [UI_SETTINGS.FORMAT_CURRENCY_DEFAULT_PATTERN]: '($0,0.[00])',
+      [UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN]: '0,0.[000]',
+      [UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN]: '0,0.[000]%',
+      [UI_SETTINGS.FORMAT_NUMBER_DEFAULT_LOCALE]: 'en',
+      [UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP]: {},
+      [CSV_SEPARATOR_SETTING]: ',',
+      [CSV_QUOTE_VALUES_SETTING]: true,
+    };
+
+    return defaultValues[key] || uiSettings.get(key);
+  });
+
   let $rootScope;
   let $compile;
   let settings;
 
   const initLocalAngular = () => {
-    const tableVisModule = getInnerAngular('kibana/table_vis', npStart.core);
-    configureAppAngularModule(tableVisModule, npStart.core, true);
+    const tableVisModule = getInnerAngular('kibana/table_vis', core);
     initTableVisLegacyModule(tableVisModule);
   };
 
-  beforeEach(initLocalAngular);
-
-  beforeEach(ngMock.module('kibana/table_vis'));
-  beforeEach(
-    ngMock.inject(function ($injector, config) {
+  beforeEach(() => {
+    setUiSettings(core.uiSettings);
+    setFormatService(getFieldFormatsRegistry(core));
+    initAngularBootstrap();
+    initLocalAngular();
+    angular.mock.module('kibana/table_vis');
+    angular.mock.inject(($injector, config) => {
       settings = config;
 
       $rootScope = $injector.get('$rootScope');
       $compile = $injector.get('$compile');
-    })
-  );
+    });
+  });
 
   let $scope;
   beforeEach(function () {
@@ -66,7 +93,7 @@ describe('Table Vis - AggTable Directive', function () {
     $scope.$destroy();
   });
 
-  it('renders a simple response properly', function () {
+  test('renders a simple response properly', function () {
     $scope.dimensions = {
       metrics: [{ accessor: 0, format: { id: 'number' }, params: {} }],
       buckets: [],
@@ -78,12 +105,12 @@ describe('Table Vis - AggTable Directive', function () {
     );
     $scope.$digest();
 
-    expect($el.find('tbody').length).to.be(1);
-    expect($el.find('td').length).to.be(1);
-    expect($el.find('td').text()).to.eql('1,000');
+    expect($el.find('tbody').length).toBe(1);
+    expect($el.find('td').length).toBe(1);
+    expect($el.find('td').text()).toEqual('1,000');
   });
 
-  it('renders nothing if the table is empty', function () {
+  test('renders nothing if the table is empty', function () {
     $scope.dimensions = {};
     $scope.table = null;
     const $el = $compile('<kbn-agg-table table="table" dimensions="dimensions"></kbn-agg-table>')(
@@ -91,10 +118,10 @@ describe('Table Vis - AggTable Directive', function () {
     );
     $scope.$digest();
 
-    expect($el.find('tbody').length).to.be(0);
+    expect($el.find('tbody').length).toBe(0);
   });
 
-  it('renders a complex response properly', async function () {
+  test('renders a complex response properly', async function () {
     $scope.dimensions = {
       buckets: [
         { accessor: 0, params: {} },
@@ -112,37 +139,37 @@ describe('Table Vis - AggTable Directive', function () {
     $compile($el)($scope);
     $scope.$digest();
 
-    expect($el.find('tbody').length).to.be(1);
+    expect($el.find('tbody').length).toBe(1);
 
     const $rows = $el.find('tbody tr');
-    expect($rows.length).to.be.greaterThan(0);
+    expect($rows.length).toBeGreaterThan(0);
 
     function validBytes(str) {
       const num = str.replace(/,/g, '');
       if (num !== '-') {
-        expect(num).to.match(/^\d+$/);
+        expect(num).toMatch(/^\d+$/);
       }
     }
 
     $rows.each(function () {
       // 6 cells in every row
       const $cells = $(this).find('td');
-      expect($cells.length).to.be(6);
+      expect($cells.length).toBe(6);
 
       const txts = $cells.map(function () {
         return $(this).text().trim();
       });
 
       // two character country code
-      expect(txts[0]).to.match(/^(png|jpg|gif|html|css)$/);
+      expect(txts[0]).toMatch(/^(png|jpg|gif|html|css)$/);
       validBytes(txts[1]);
 
       // country
-      expect(txts[2]).to.match(/^\w\w$/);
+      expect(txts[2]).toMatch(/^\w\w$/);
       validBytes(txts[3]);
 
       // os
-      expect(txts[4]).to.match(/^(win|mac|linux)$/);
+      expect(txts[4]).toMatch(/^(win|mac|linux)$/);
       validBytes(txts[5]);
     });
   });
@@ -153,9 +180,9 @@ describe('Table Vis - AggTable Directive', function () {
         moment.tz.setDefault(settings.get('dateFormat:tz'));
       }
 
-      const off = $scope.$on('change:config.dateFormat:tz', setDefaultTimezone);
       const oldTimezoneSetting = settings.get('dateFormat:tz');
       settings.set('dateFormat:tz', 'UTC');
+      setDefaultTimezone();
 
       $scope.dimensions = {
         buckets: [
@@ -181,24 +208,24 @@ describe('Table Vis - AggTable Directive', function () {
       $compile($el)($scope);
       $scope.$digest();
 
-      expect($el.find('tfoot').length).to.be(1);
+      expect($el.find('tfoot').length).toBe(1);
 
       const $rows = $el.find('tfoot tr');
-      expect($rows.length).to.be(1);
+      expect($rows.length).toBe(1);
 
       const $cells = $($rows[0]).find('th');
-      expect($cells.length).to.be(6);
+      expect($cells.length).toBe(6);
 
       for (let i = 0; i < 6; i++) {
-        expect($($cells[i]).text().trim()).to.be(expected[i]);
+        expect($($cells[i]).text().trim()).toBe(expected[i]);
       }
       settings.set('dateFormat:tz', oldTimezoneSetting);
-      off();
+      setDefaultTimezone();
     }
-    it('as count', async function () {
+    test('as count', async function () {
       await totalsRowTest('count', ['18', '18', '18', '18', '18', '18']);
     });
-    it('as min', async function () {
+    test('as min', async function () {
       await totalsRowTest('min', [
         '',
         '2014-09-28',
@@ -208,7 +235,7 @@ describe('Table Vis - AggTable Directive', function () {
         '11',
       ]);
     });
-    it('as max', async function () {
+    test('as max', async function () {
       await totalsRowTest('max', [
         '',
         '2014-10-03',
@@ -218,16 +245,16 @@ describe('Table Vis - AggTable Directive', function () {
         '837',
       ]);
     });
-    it('as avg', async function () {
+    test('as avg', async function () {
       await totalsRowTest('avg', ['', '', '87,221.5', '', '64.667', '206.833']);
     });
-    it('as sum', async function () {
+    test('as sum', async function () {
       await totalsRowTest('sum', ['', '', '1,569,987', '', '1,164', '3,723']);
     });
   });
 
   describe('aggTable.toCsv()', function () {
-    it('escapes rows and columns properly', function () {
+    test('escapes rows and columns properly', function () {
       const $el = $compile('<kbn-agg-table table="table" dimensions="dimensions"></kbn-agg-table>')(
         $scope
       );
@@ -244,12 +271,12 @@ describe('Table Vis - AggTable Directive', function () {
         rows: [{ a: 1, b: 2, c: '"foobar"' }],
       };
 
-      expect(aggTable.toCsv()).to.be(
+      expect(aggTable.toCsv()).toBe(
         'one,two,"with double-quotes("")"' + '\r\n' + '1,2,"""foobar"""' + '\r\n'
       );
     });
 
-    it('exports rows and columns properly', async function () {
+    test('exports rows and columns properly', async function () {
       $scope.dimensions = {
         buckets: [
           { accessor: 0, params: {} },
@@ -274,7 +301,7 @@ describe('Table Vis - AggTable Directive', function () {
       $tableScope.table = $scope.table;
 
       const raw = aggTable.toCsv(false);
-      expect(raw).to.be(
+      expect(raw).toBe(
         '"extension: Descending","Average bytes","geo.src: Descending","Average bytes","machine.os: Descending","Average bytes"' +
           '\r\n' +
           'png,412032,IT,9299,win,0' +
@@ -304,7 +331,7 @@ describe('Table Vis - AggTable Directive', function () {
       );
     });
 
-    it('exports formatted rows and columns properly', async function () {
+    test('exports formatted rows and columns properly', async function () {
       $scope.dimensions = {
         buckets: [
           { accessor: 0, params: {} },
@@ -332,7 +359,7 @@ describe('Table Vis - AggTable Directive', function () {
       $tableScope.formattedColumns[0].formatter.convert = (v) => `${v}_formatted`;
 
       const formatted = aggTable.toCsv(true);
-      expect(formatted).to.be(
+      expect(formatted).toBe(
         '"extension: Descending","Average bytes","geo.src: Descending","Average bytes","machine.os: Descending","Average bytes"' +
           '\r\n' +
           '"png_formatted",412032,IT,9299,win,0' +
@@ -363,7 +390,7 @@ describe('Table Vis - AggTable Directive', function () {
     });
   });
 
-  it('renders percentage columns', async function () {
+  test('renders percentage columns', async function () {
     $scope.dimensions = {
       buckets: [
         { accessor: 0, params: {} },
@@ -390,8 +417,8 @@ describe('Table Vis - AggTable Directive', function () {
     $scope.$digest();
 
     const $headings = $el.find('th');
-    expect($headings.length).to.be(7);
-    expect($headings.eq(3).text().trim()).to.be('Average bytes percentages');
+    expect($headings.length).toBe(7);
+    expect($headings.eq(3).text().trim()).toBe('Average bytes percentages');
 
     const countColId = $scope.table.columns.find((col) => col.name === $scope.percentageCol).id;
     const counts = $scope.table.rows.map((row) => row[countColId]);
@@ -400,7 +427,7 @@ describe('Table Vis - AggTable Directive', function () {
 
     $percentageColValues.each((i, value) => {
       const percentage = `${round((counts[i] / total) * 100, 3)}%`;
-      expect(value).to.be(percentage);
+      expect(value).toBe(percentage);
     });
   });
 
@@ -420,7 +447,7 @@ describe('Table Vis - AggTable Directive', function () {
       window.Blob = origBlob;
     });
 
-    it('calls _saveAs properly', function () {
+    test('calls _saveAs properly', function () {
       const $el = $compile('<kbn-agg-table table="table"  dimensions="dimensions">')($scope);
       $scope.$digest();
 
@@ -440,19 +467,19 @@ describe('Table Vis - AggTable Directive', function () {
       aggTable.csv.filename = 'somefilename.csv';
       aggTable.exportAsCsv();
 
-      expect(saveAs.callCount).to.be(1);
+      expect(saveAs.callCount).toBe(1);
       const call = saveAs.getCall(0);
-      expect(call.args[0]).to.be.a(FakeBlob);
-      expect(call.args[0].slices).to.eql([
+      expect(call.args[0]).toBeInstanceOf(FakeBlob);
+      expect(call.args[0].slices).toEqual([
         'one,two,"with double-quotes("")"' + '\r\n' + '1,2,"""foobar"""' + '\r\n',
       ]);
-      expect(call.args[0].opts).to.eql({
+      expect(call.args[0].opts).toEqual({
         type: 'text/plain;charset=utf-8',
       });
-      expect(call.args[1]).to.be('somefilename.csv');
+      expect(call.args[1]).toBe('somefilename.csv');
     });
 
-    it('should use the export-title attribute', function () {
+    test('should use the export-title attribute', function () {
       const expected = 'export file name';
       const $el = $compile(
         `<kbn-agg-table table="table"  dimensions="dimensions" export-title="exportTitle">`
@@ -468,7 +495,7 @@ describe('Table Vis - AggTable Directive', function () {
       $tableScope.exportTitle = expected;
       $scope.$digest();
 
-      expect(aggTable.csv.filename).to.equal(`${expected}.csv`);
+      expect(aggTable.csv.filename).toEqual(`${expected}.csv`);
     });
   });
 });
