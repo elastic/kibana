@@ -246,7 +246,7 @@ export class AggParamType<TAggConfig extends IAggConfig = IAggConfig> extends Ba
     makeAgg: (agg: TAggConfig, state?: AggConfigSerialized) => TAggConfig;
 }
 
-// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ACTION_GLOBAL_APPLY_FILTER"
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ActionGlobalApplyFilterFilterType"
 //
 // @public
 export interface ApplyGlobalFilterActionContext {
