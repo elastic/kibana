@@ -180,4 +180,5 @@ type TestSubject =
   | 'processorSettingsFormFlyout'
   | 'processorTypeSelector'
   | 'pipelineEditorOnFailureTree'
+  | 'ifBadge'
   | string;

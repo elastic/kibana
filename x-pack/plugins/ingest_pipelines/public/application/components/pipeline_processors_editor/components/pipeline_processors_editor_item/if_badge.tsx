@@ -17,7 +17,7 @@ const i18nTexts = {
     defaultMessage: 'if',
   }),
   toolTip: i18n.translate('xpack.ingestPipelines.pipelineEditor.item.ifBadgeToolTipContent', {
-    defaultMessage: 'Copy to clipboard',
+    defaultMessage: 'Copy condition to clipboard',
   }),
 };
 
@@ -25,6 +25,7 @@ export const IfBadge: FunctionComponent<Props> = ({ onClick }) => {
   return (
     <EuiToolTip delay="long" content={i18nTexts.toolTip}>
       <EuiNotificationBadge
+        data-test-subj="ifBadge"
         className="pipelineProcessorsEditor__item__ifBadge"
         size="s"
         color="subdued"

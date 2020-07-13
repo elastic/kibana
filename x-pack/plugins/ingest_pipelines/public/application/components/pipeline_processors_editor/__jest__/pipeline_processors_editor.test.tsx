@@ -20,6 +20,7 @@ const testProcessors: Pick<Pipeline, 'processors'> = {
         field: '_index',
         pattern: '(.monitoring-\\w+-)6(-.+)',
         replacement: '$17$2',
+        if: 'ctx._type == null',
       },
     },
   ],
@@ -83,11 +84,7 @@ describe('Pipeline Editor', () => {
       const { processors } = onUpdateResult.getData();
       expect(processors.length).toBe(1);
       expect(processors[0]).toEqual({
-        gsub: {
-          field: '_index',
-          pattern: '(.monitoring-\\w+-)6(-.+)',
-          replacement: '$17$2',
-        },
+        ...testProcessors.processors[1],
       });
     });
 
@@ -182,6 +179,11 @@ describe('Pipeline Editor', () => {
       expect(data2.on_failure.length).toBe(1);
       expect(data2.processors).toEqual(testProcessors.processors);
       expect(data2.on_failure).toEqual([{ test: { if: '1 == 5' } }]);
+    });
+
+    it('renders an if badge for processors that have an if condition', () => {
+      const { find } = testBed;
+      expect(find('ifBadge').length).toBe(1);
     });
   });
 });
