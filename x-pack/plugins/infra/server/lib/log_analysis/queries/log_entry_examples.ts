@@ -33,11 +33,15 @@ export const createLogEntryExamplesQuery = (
               },
             },
           },
-          {
-            term: {
-              [partitionField]: dataset,
-            },
-          },
+          ...(!!dataset
+            ? [
+                {
+                  term: {
+                    [partitionField]: dataset,
+                  },
+                },
+              ]
+            : []),
           ...(categoryQuery
             ? [
                 {
