@@ -14,9 +14,7 @@ import {
   PROCESSOR_EVENT,
 } from '../../../common/elasticsearch_fieldnames';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
-
-const ML_MODULE_ID_APM_TRANSACTION = 'apm_transaction';
-export const ML_GROUP_NAME_APM = 'apm';
+import { APM_ML_JOB_GROUP, ML_MODULE_ID_APM_TRANSACTION } from './constants';
 
 export type CreateAnomalyDetectionJobsAPIResponse = PromiseReturnType<
   typeof createAnomalyDetectionJobs
@@ -83,8 +81,8 @@ async function createAnomalyDetectionJob({
 
   return ml.modules.setup({
     moduleId: ML_MODULE_ID_APM_TRANSACTION,
-    prefix: `${ML_GROUP_NAME_APM}-${convertedEnvironmentName}-${randomToken}-`,
-    groups: [ML_GROUP_NAME_APM, convertedEnvironmentName],
+    prefix: `${APM_ML_JOB_GROUP}-${convertedEnvironmentName}-${randomToken}-`,
+    groups: [APM_ML_JOB_GROUP, convertedEnvironmentName],
     indexPatternName,
     query: {
       bool: {

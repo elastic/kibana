@@ -13,7 +13,7 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 import {
   useSignalIndex,
   ReturnSignalIndex,
-} from '../../../alerts/containers/detection_engine/alerts/use_signal_index';
+} from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { mocksSource } from '../../../common/containers/source/mock';
 import { wait } from '../../../common/lib/helpers';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../common/mock';
@@ -40,7 +40,7 @@ jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
 const mockUseSignalIndex: jest.Mock = useSignalIndex as jest.Mock<ReturnSignalIndex>;
-jest.mock('../../../alerts/containers/detection_engine/alerts/use_signal_index');
+jest.mock('../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
 

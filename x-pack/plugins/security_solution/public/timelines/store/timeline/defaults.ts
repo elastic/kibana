@@ -18,6 +18,7 @@ export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filter
   description: '',
   eventType: 'all',
   eventIdToNoteIds: {},
+  excludedRowRendererIds: [],
   highlightedDropAndProviderId: '',
   historyIds: [],
   filters: [],
@@ -49,7 +50,6 @@ export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filter
   selectedEventIds: {},
   show: false,
   showCheckboxes: false,
-  showRowRenderers: true,
   sort: {
     columnId: '@timestamp',
     sortDirection: Direction.desc,
