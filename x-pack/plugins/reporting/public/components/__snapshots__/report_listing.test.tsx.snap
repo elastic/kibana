@@ -129,11 +129,14 @@ Array [
           </div>
         </EuiTableHeaderMobile>
         <EuiTable
+          id="generated-id"
           responsive={true}
           tableLayout="fixed"
         >
           <table
             className="euiTable euiTable--responsive"
+            id="generated-id"
+            tabIndex={-1}
           >
             <EuiScreenReaderOnly>
               <caption
@@ -436,11 +439,14 @@ Array [
         </div>
       </EuiTableHeaderMobile>
       <EuiTable
+        id="generated-id"
         responsive={true}
         tableLayout="fixed"
       >
         <table
           className="euiTable euiTable--responsive"
+          id="generated-id"
+          tabIndex={-1}
         >
           <EuiScreenReaderOnly>
             <caption

@@ -37,7 +37,7 @@ import { AddExceptionComments } from '../add_exception_comments';
 import {
   enrichExceptionItemsWithComments,
   enrichExceptionItemsWithOS,
-  getOsTagValues,
+  getOperatingSystems,
   entryHasListType,
   entryHasNonEcsType,
 } from '../helpers';
@@ -135,6 +135,12 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     indexPatterns,
   ]);
 
+  useEffect(() => {
+    if (shouldDisableBulkClose === true) {
+      setShouldBulkCloseAlert(false);
+    }
+  }, [shouldDisableBulkClose]);
+
   const handleBuilderOnChange = useCallback(
     ({
       exceptionItems,
@@ -167,7 +173,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
       ...(comment !== '' ? [{ comment }] : []),
     ]);
     if (exceptionListType === 'endpoint') {
-      const osTypes = exceptionItem._tags ? getOsTagValues(exceptionItem._tags) : ['windows'];
+      const osTypes = exceptionItem._tags ? getOperatingSystems(exceptionItem._tags) : [];
       enriched = enrichExceptionItemsWithOS(enriched, osTypes);
     }
     return enriched;
@@ -199,6 +205,8 @@ export const EditExceptionModal = memo(function EditExceptionModal({
         {!isSignalIndexLoading && (
           <>
             <ModalBodySection className="builder-section">
+              <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
+              <EuiSpacer />
               <ExceptionBuilder
                 exceptionListItems={[exceptionItem]}
                 listType={exceptionListType}

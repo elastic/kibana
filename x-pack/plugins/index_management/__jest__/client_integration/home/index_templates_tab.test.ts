@@ -139,7 +139,7 @@ describe('Index Templates tab', () => {
             ilmPolicyName,
             composedOfString,
             hasContent ? 'M S A' : 'None', // M S A -> Mappings Settings Aliases badges
-            '', // Column of actions
+            'EditDelete', // Column of actions
           ]);
         } catch (e) {
           console.error(`Error in index template at row ${i}`); // eslint-disable-line no-console
@@ -162,7 +162,7 @@ describe('Index Templates tab', () => {
             indexPatterns.join(', '),
             ilmPolicyName,
             hasContent ? 'M S A' : 'None', // M S A -> Mappings Settings Aliases badges
-            '', // Column of actions
+            'EditDelete', // Column of actions
           ]);
         } catch (e) {
           console.error(`Error in legacy template at row ${i}`); // eslint-disable-line no-console
