@@ -9,7 +9,6 @@ import React from 'react';
 import { BrowserFields } from '../../../../../common/containers/source';
 import { TimelineItem, TimelineNonEcsData } from '../../../../../graphql/types';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
-import { maxDelay } from '../../../../../common/lib/helpers/scheduler';
 import { Note } from '../../../../../common/lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import {
@@ -92,7 +91,6 @@ const EventsComponent: React.FC<Props> = ({
         isEventViewer={isEventViewer}
         key={`${event._id}_${event._index}`}
         loadingEventIds={loadingEventIds}
-        maxDelay={maxDelay(i)}
         onColumnResized={onColumnResized}
         onPinEvent={onPinEvent}
         onRowSelected={onRowSelected}
