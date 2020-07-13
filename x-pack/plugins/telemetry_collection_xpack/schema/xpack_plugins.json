@@ -85,6 +85,42 @@
         }
       }
     },
+    "ingest_manager": {
+      "properties": {
+        "fleet_enabled": {
+          "type": "boolean"
+        },
+        "agents": {
+          "properties": {
+            "total": {
+              "type": "long"
+            },
+            "online": {
+              "type": "long"
+            },
+            "error": {
+              "type": "long"
+            },
+            "offline": {
+              "type": "long"
+            }
+          }
+        },
+        "packages": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "keyword"
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
     "mlTelemetry": {
       "properties": {
         "file_data_visualizer": {

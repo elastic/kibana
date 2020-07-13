@@ -5,6 +5,7 @@
  */
 import React, { useState, useEffect, useMemo, useCallback, ReactEventHandler } from 'react';
 import { useRouteMatch, useHistory } from 'react-router-dom';
+import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -31,6 +32,7 @@ import {
   useConfig,
   sendGetAgentStatus,
 } from '../../../hooks';
+import { Loading } from '../../../components';
 import { ConfirmDeployConfigModal } from '../components';
 import { CreatePackageConfigPageLayout } from './components';
 import { CreatePackageConfigFrom, PackageConfigFormState } from './types';
@@ -44,6 +46,12 @@ import { StepSelectConfig } from './step_select_config';
 import { StepConfigurePackage } from './step_configure_package';
 import { StepDefinePackageConfig } from './step_define_package_config';
 import { useIntraAppState } from '../../../hooks/use_intra_app_state';
+
+const StepsWithLessPadding = styled(EuiSteps)`
+  .euiStep__content {
+    padding-bottom: ${(props) => props.theme.eui.paddingSizes.m};
+  }
+`;
 
 export const CreatePackageConfigPage: React.FunctionComponent = () => {
   const {
@@ -75,6 +83,7 @@ export const CreatePackageConfigPage: React.FunctionComponent = () => {
   // Agent config and package info states
   const [agentConfig, setAgentConfig] = useState<AgentConfig>();
   const [packageInfo, setPackageInfo] = useState<PackageInfo>();
+  const [isLoadingSecondStep, setIsLoadingSecondStep] = useState<boolean>(false);
 
   const agentConfigId = agentConfig?.id;
   // Retrieve agent count
@@ -151,40 +160,47 @@ export const CreatePackageConfigPage: React.FunctionComponent = () => {
 
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
+  // Update package config validation
+  const updatePackageConfigValidation = useCallback(
+    (newPackageConfig?: NewPackageConfig) => {
+      if (packageInfo) {
+        const newValidationResult = validatePackageConfig(
+          newPackageConfig || packageConfig,
+          packageInfo
+        );
+        setValidationResults(newValidationResult);
+        // eslint-disable-next-line no-console
+        console.debug('Package config validation results', newValidationResult);
+
+        return newValidationResult;
+      }
+    },
+    [packageConfig, packageInfo]
+  );
+
   // Update package config method
-  const updatePackageConfig = (updatedFields: Partial<NewPackageConfig>) => {
-    const newPackageConfig = {
-      ...packageConfig,
-      ...updatedFields,
-    };
-    setPackageConfig(newPackageConfig);
+  const updatePackageConfig = useCallback(
+    (updatedFields: Partial<NewPackageConfig>) => {
+      const newPackageConfig = {
+        ...packageConfig,
+        ...updatedFields,
+      };
+      setPackageConfig(newPackageConfig);
 
-    // eslint-disable-next-line no-console
-    console.debug('Package config updated', newPackageConfig);
-    const newValidationResults = updatePackageConfigValidation(newPackageConfig);
-    const hasPackage = newPackageConfig.package;
-    const hasValidationErrors = newValidationResults
-      ? validationHasErrors(newValidationResults)
-      : false;
-    const hasAgentConfig = newPackageConfig.config_id && newPackageConfig.config_id !== '';
-    if (hasPackage && hasAgentConfig && !hasValidationErrors) {
-      setFormState('VALID');
-    }
-  };
-
-  const updatePackageConfigValidation = (newPackageConfig?: NewPackageConfig) => {
-    if (packageInfo) {
-      const newValidationResult = validatePackageConfig(
-        newPackageConfig || packageConfig,
-        packageInfo
-      );
-      setValidationResults(newValidationResult);
       // eslint-disable-next-line no-console
-      console.debug('Package config validation results', newValidationResult);
-
-      return newValidationResult;
-    }
-  };
+      console.debug('Package config updated', newPackageConfig);
+      const newValidationResults = updatePackageConfigValidation(newPackageConfig);
+      const hasPackage = newPackageConfig.package;
+      const hasValidationErrors = newValidationResults
+        ? validationHasErrors(newValidationResults)
+        : false;
+      const hasAgentConfig = newPackageConfig.config_id && newPackageConfig.config_id !== '';
+      if (hasPackage && hasAgentConfig && !hasValidationErrors) {
+        setFormState('VALID');
+      }
+    },
+    [packageConfig, updatePackageConfigValidation]
+  );
 
   // Cancel path
   const cancelUrl = useMemo(() => {
@@ -276,6 +292,7 @@ export const CreatePackageConfigPage: React.FunctionComponent = () => {
         updatePackageInfo={updatePackageInfo}
         agentConfig={agentConfig}
         updateAgentConfig={updateAgentConfig}
+        setIsLoadingSecondStep={setIsLoadingSecondStep}
       />
     ),
     [pkgkey, updatePackageInfo, agentConfig, updateAgentConfig]
@@ -288,9 +305,45 @@ export const CreatePackageConfigPage: React.FunctionComponent = () => {
         updateAgentConfig={updateAgentConfig}
         packageInfo={packageInfo}
         updatePackageInfo={updatePackageInfo}
+        setIsLoadingSecondStep={setIsLoadingSecondStep}
       />
     ),
     [configId, updateAgentConfig, packageInfo, updatePackageInfo]
+  );
+
+  const stepConfigurePackage = useMemo(
+    () =>
+      isLoadingSecondStep ? (
+        <Loading />
+      ) : agentConfig && packageInfo ? (
+        <>
+          <StepDefinePackageConfig
+            agentConfig={agentConfig}
+            packageInfo={packageInfo}
+            packageConfig={packageConfig}
+            updatePackageConfig={updatePackageConfig}
+            validationResults={validationResults!}
+          />
+          <StepConfigurePackage
+            packageInfo={packageInfo}
+            packageConfig={packageConfig}
+            updatePackageConfig={updatePackageConfig}
+            validationResults={validationResults!}
+            submitAttempted={formState === 'INVALID'}
+          />
+        </>
+      ) : (
+        <div />
+      ),
+    [
+      agentConfig,
+      formState,
+      isLoadingSecondStep,
+      packageConfig,
+      packageInfo,
+      updatePackageConfig,
+      validationResults,
+    ]
   );
 
   const steps: EuiStepProps[] = [
@@ -312,42 +365,14 @@ export const CreatePackageConfigPage: React.FunctionComponent = () => {
         },
     {
       title: i18n.translate(
-        'xpack.ingestManager.createPackageConfig.stepDefinePackageConfigTitle',
+        'xpack.ingestManager.createPackageConfig.stepConfigurePackageConfigTitle',
         {
           defaultMessage: 'Configure integration',
         }
       ),
-      status: !packageInfo || !agentConfig ? 'disabled' : undefined,
-      children:
-        agentConfig && packageInfo ? (
-          <StepDefinePackageConfig
-            agentConfig={agentConfig}
-            packageInfo={packageInfo}
-            packageConfig={packageConfig}
-            updatePackageConfig={updatePackageConfig}
-            validationResults={validationResults!}
-          />
-        ) : null,
-    },
-    {
-      title: i18n.translate(
-        'xpack.ingestManager.createPackageConfig.stepConfigurePackageConfigTitle',
-        {
-          defaultMessage: 'Select the data you want to collect',
-        }
-      ),
-      status: !packageInfo || !agentConfig ? 'disabled' : undefined,
+      status: !packageInfo || !agentConfig || isLoadingSecondStep ? 'disabled' : undefined,
       'data-test-subj': 'dataCollectionSetupStep',
-      children:
-        agentConfig && packageInfo ? (
-          <StepConfigurePackage
-            packageInfo={packageInfo}
-            packageConfig={packageConfig}
-            updatePackageConfig={updatePackageConfig}
-            validationResults={validationResults!}
-            submitAttempted={formState === 'INVALID'}
-          />
-        ) : null,
+      children: stepConfigurePackage,
     },
   ];
 
@@ -371,7 +396,7 @@ export const CreatePackageConfigPage: React.FunctionComponent = () => {
         : agentConfig && (
             <ConfigurationBreadcrumb configName={agentConfig.name} configId={agentConfig.id} />
           )}
-      <EuiSteps steps={steps} />
+      <StepsWithLessPadding steps={steps} />
       <EuiSpacer size="l" />
       {/* TODO #64541 - Remove classes */}
       <EuiBottomBar
@@ -383,36 +408,48 @@ export const CreatePackageConfigPage: React.FunctionComponent = () => {
             : undefined
         }
       >
-        <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
-            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-            <EuiButtonEmpty
-              color="ghost"
-              href={cancelUrl}
-              onClick={cancelClickHandler}
-              data-test-subj="createPackageConfigCancelButton"
-            >
+            {!isLoadingSecondStep && agentConfig && packageInfo && formState === 'INVALID' ? (
               <FormattedMessage
-                id="xpack.ingestManager.createPackageConfig.cancelButton"
-                defaultMessage="Cancel"
+                id="xpack.ingestManager.createPackageConfig.errorOnSaveText"
+                defaultMessage="Your integration configuration has errors. Please fix them before saving."
               />
-            </EuiButtonEmpty>
+            ) : null}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={onSubmit}
-              isLoading={formState === 'LOADING'}
-              disabled={formState !== 'VALID'}
-              iconType="save"
-              color="primary"
-              fill
-              data-test-subj="createPackageConfigSaveButton"
-            >
-              <FormattedMessage
-                id="xpack.ingestManager.createPackageConfig.saveButton"
-                defaultMessage="Save integration"
-              />
-            </EuiButton>
+            <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                <EuiButtonEmpty
+                  color="ghost"
+                  href={cancelUrl}
+                  onClick={cancelClickHandler}
+                  data-test-subj="createPackageConfigCancelButton"
+                >
+                  <FormattedMessage
+                    id="xpack.ingestManager.createPackageConfig.cancelButton"
+                    defaultMessage="Cancel"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={onSubmit}
+                  isLoading={formState === 'LOADING'}
+                  disabled={formState !== 'VALID'}
+                  iconType="save"
+                  color="primary"
+                  fill
+                  data-test-subj="createPackageConfigSaveButton"
+                >
+                  <FormattedMessage
+                    id="xpack.ingestManager.createPackageConfig.saveButton"
+                    defaultMessage="Save integration"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiBottomBar>
