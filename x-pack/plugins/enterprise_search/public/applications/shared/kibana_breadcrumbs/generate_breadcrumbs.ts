@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Breadcrumb as EuiBreadcrumb } from '@elastic/eui';
+import { EuiBreadcrumb } from '@elastic/eui';
 import { History } from 'history';
 
 import { letBrowserHandleEvent } from '../react_router_helpers';
@@ -52,3 +52,6 @@ export const enterpriseSearchBreadcrumbs = (history: History) => (
 
 export const appSearchBreadcrumbs = (history: History) => (breadcrumbs: TBreadcrumbs = []) =>
   enterpriseSearchBreadcrumbs(history)([{ text: 'App Search', path: '/' }, ...breadcrumbs]);
+
+export const workplaceSearchBreadcrumbs = (history: History) => (breadcrumbs: TBreadcrumbs = []) =>
+  enterpriseSearchBreadcrumbs(history)([{ text: 'Workplace Search', path: '/' }, ...breadcrumbs]);

@@ -41,10 +41,83 @@
         }
       }
     },
+    "workplace_search": {
+      "properties": {
+        "ui_viewed": {
+          "properties": {
+            "setup_guide": {
+              "type": "long"
+            },
+            "overview": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_error": {
+          "properties": {
+            "cannot_connect": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_clicked": {
+          "properties": {
+            "header_launch_button": {
+              "type": "long"
+            },
+            "org_name_change_button": {
+              "type": "long"
+            },
+            "onboarding_card_button": {
+              "type": "long"
+            },
+            "recent_activity_source_details_link": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
     "fileUploadTelemetry": {
       "properties": {
         "filesUploadedTotalCount": {
           "type": "long"
+        }
+      }
+    },
+    "ingest_manager": {
+      "properties": {
+        "fleet_enabled": {
+          "type": "boolean"
+        },
+        "agents": {
+          "properties": {
+            "total": {
+              "type": "long"
+            },
+            "online": {
+              "type": "long"
+            },
+            "error": {
+              "type": "long"
+            },
+            "offline": {
+              "type": "long"
+            }
+          }
+        },
+        "packages": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "keyword"
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          }
         }
       }
     },
@@ -86,6 +159,62 @@
             },
             "total": {
               "type": "long"
+            }
+          }
+        }
+      }
+    },
+    "security_solution": {
+      "properties": {
+        "detections": {
+          "properties": {
+            "detection_rules": {
+              "properties": {
+                "custom": {
+                  "properties": {
+                    "enabled": {
+                      "type": "long"
+                    },
+                    "disabled": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "elastic": {
+                  "properties": {
+                    "enabled": {
+                      "type": "long"
+                    },
+                    "disabled": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "ml_jobs": {
+              "properties": {
+                "custom": {
+                  "properties": {
+                    "enabled": {
+                      "type": "long"
+                    },
+                    "disabled": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "elastic": {
+                  "properties": {
+                    "enabled": {
+                      "type": "long"
+                    },
+                    "disabled": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
             }
           }
         }
