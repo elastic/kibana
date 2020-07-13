@@ -25,7 +25,11 @@ export function AnomalyDetectionSetupLink() {
 
   // Show alert if there are no jobs OR if no job matches the current environment
   const showAlert =
-    isFetchSuccess && !data.jobs.some((job) => environment === job.environment);
+    isFetchSuccess &&
+    !environmentIncludes(
+      data.jobs.map((job) => job.environment),
+      environment
+    );
 
   return (
     <APMLink path="/settings/anomaly-detection">
@@ -61,3 +65,15 @@ const ANOMALY_DETECTION_LINK_LABEL = i18n.translate(
   'xpack.apm.anomalyDetectionSetup.linkLabel',
   { defaultMessage: `Anomaly detection` }
 );
+
+export function environmentIncludes(
+  environments: string[],
+  selectedEnvironment?: string
+) {
+  if (selectedEnvironment) {
+    return environments.some(
+      (environment) => environment === selectedEnvironment
+    );
+  }
+  return environments.length > 0;
+}
