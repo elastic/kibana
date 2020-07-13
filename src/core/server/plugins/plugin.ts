@@ -53,6 +53,7 @@ export class PluginWrapper<
   public readonly configPath: PluginManifest['configPath'];
   public readonly requiredPlugins: PluginManifest['requiredPlugins'];
   public readonly optionalPlugins: PluginManifest['optionalPlugins'];
+  public readonly requiredBundles: PluginManifest['requiredBundles'];
   public readonly includesServerPlugin: PluginManifest['server'];
   public readonly includesUiPlugin: PluginManifest['ui'];
 
@@ -81,6 +82,7 @@ export class PluginWrapper<
     this.configPath = params.manifest.configPath;
     this.requiredPlugins = params.manifest.requiredPlugins;
     this.optionalPlugins = params.manifest.optionalPlugins;
+    this.requiredBundles = params.manifest.requiredBundles;
     this.includesServerPlugin = params.manifest.server;
     this.includesUiPlugin = params.manifest.ui;
   }

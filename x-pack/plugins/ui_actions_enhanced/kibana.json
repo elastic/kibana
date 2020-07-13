@@ -8,5 +8,10 @@
     "licensing"
   ],
   "server": false,
-  "ui": true
+  "ui": true,
+  "requiredBundles": [
+    "kibanaUtils",
+    "kibanaReact",
+    "data"
+  ]
 }
