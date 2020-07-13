@@ -14,7 +14,7 @@ describe('manifest_entry', () => {
     let manifestEntry: ManifestEntry;
 
     beforeAll(async () => {
-      artifact = await getInternalArtifactMock('windows', '1.0.0');
+      artifact = await getInternalArtifactMock('windows', 'v1');
       manifestEntry = new ManifestEntry(artifact);
     });
 
@@ -24,27 +24,31 @@ describe('manifest_entry', () => {
 
     test('Correct doc_id is returned', () => {
       expect(manifestEntry.getDocId()).toEqual(
-        'endpoint-exceptionlist-windows-1.0.0-70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c'
+        'endpoint-exceptionlist-windows-v1-5f16e5e338c53e77cfa945c17c11b175c3967bf109aa87131de41fb93b149735'
       );
     });
 
     test('Correct identifier is returned', () => {
-      expect(manifestEntry.getIdentifier()).toEqual('endpoint-exceptionlist-windows-1.0.0');
+      expect(manifestEntry.getIdentifier()).toEqual('endpoint-exceptionlist-windows-v1');
     });
 
     test('Correct sha256 is returned', () => {
-      expect(manifestEntry.getSha256()).toEqual(
-        '70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c'
+      expect(manifestEntry.getEncodedSha256()).toEqual(
+        '5f16e5e338c53e77cfa945c17c11b175c3967bf109aa87131de41fb93b149735'
+      );
+      expect(manifestEntry.getDecodedSha256()).toEqual(
+        '5f16e5e338c53e77cfa945c17c11b175c3967bf109aa87131de41fb93b149735'
       );
     });
 
     test('Correct size is returned', () => {
-      expect(manifestEntry.getSize()).toEqual(268);
+      expect(manifestEntry.getEncodedSize()).toEqual(430);
+      expect(manifestEntry.getDecodedSize()).toEqual(430);
     });
 
     test('Correct url is returned', () => {
       expect(manifestEntry.getUrl()).toEqual(
-        '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-1.0.0/70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c'
+        '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-v1/5f16e5e338c53e77cfa945c17c11b175c3967bf109aa87131de41fb93b149735'
       );
     });
 
@@ -54,11 +58,17 @@ describe('manifest_entry', () => {
 
     test('Correct record is returned', () => {
       expect(manifestEntry.getRecord()).toEqual({
-        sha256: '70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
-        size: 268,
-        url:
-          '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-1.0.0/70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
+        compression_algorithm: 'none',
+        encryption_algorithm: 'none',
+        decoded_sha256: '5f16e5e338c53e77cfa945c17c11b175c3967bf109aa87131de41fb93b149735',
+        encoded_sha256: '5f16e5e338c53e77cfa945c17c11b175c3967bf109aa87131de41fb93b149735',
+        decoded_size: 430,
+        encoded_size: 430,
+        relative_url:
+          '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-v1/5f16e5e338c53e77cfa945c17c11b175c3967bf109aa87131de41fb93b149735',
       });
     });
+
+    // TODO: add test for entry with compression
   });
 });

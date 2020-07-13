@@ -106,10 +106,12 @@ yarn &> ${TMP_DIR}/e2e-yarn.log
 echo "" # newline
 echo "${bold}Static mock data (logs: ${E2E_DIR}${TMP_DIR}/ingest-data.log)${normal}"
 
+STATIC_MOCK_FILENAME='2020-06-12.json'
+
 # Download static data if not already done
-if [ ! -e "${TMP_DIR}/events.json" ]; then
-    echo 'Downloading events.json...'
-    curl --silent https://storage.googleapis.com/apm-ui-e2e-static-data/2020-06-12.json --output ${TMP_DIR}/events.json
+if [ ! -e "${TMP_DIR}/${STATIC_MOCK_FILENAME}" ]; then
+    echo "Downloading ${STATIC_MOCK_FILENAME}..."
+    curl --silent https://storage.googleapis.com/apm-ui-e2e-static-data/${STATIC_MOCK_FILENAME} --output ${TMP_DIR}/${STATIC_MOCK_FILENAME}
 fi
 
 # echo "Deleting existing indices (apm* and .apm*)"
@@ -117,7 +119,7 @@ curl --silent --user admin:changeme -XDELETE "localhost:${ELASTICSEARCH_PORT}/.a
 curl --silent --user admin:changeme -XDELETE "localhost:${ELASTICSEARCH_PORT}/apm*" > /dev/null
 
 # Ingest data into APM Server
-node ingest-data/replay.js --server-url http://localhost:$APM_SERVER_PORT --events ${TMP_DIR}/events.json 2>> ${TMP_DIR}/ingest-data.log
+node ingest-data/replay.js --server-url http://localhost:$APM_SERVER_PORT --events ${TMP_DIR}/${STATIC_MOCK_FILENAME} 2>> ${TMP_DIR}/ingest-data.log
 
 # Abort if not all events were ingested correctly
 if [ $? -ne 0 ]; then
