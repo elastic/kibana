@@ -12,7 +12,7 @@ export const getManifestClientMock = (
   savedObjectsClient?: SavedObjectsClientContract
 ): ManifestClient => {
   if (savedObjectsClient !== undefined) {
-    return new ManifestClient(savedObjectsClient, '1.0.0');
+    return new ManifestClient(savedObjectsClient, 'v1');
   }
-  return new ManifestClient(savedObjectsClientMock.create(), '1.0.0');
+  return new ManifestClient(savedObjectsClientMock.create(), 'v1');
 };

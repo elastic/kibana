@@ -178,8 +178,11 @@ export const postAgentCheckinHandler: RequestHandler<
     const { actions } = await AgentService.agentCheckin(
       soClient,
       agent,
-      request.body.events || [],
-      request.body.local_metadata,
+      {
+        events: request.body.events || [],
+        localMetadata: request.body.local_metadata,
+        status: request.body.status,
+      },
       { signal }
     );
     const body: PostAgentCheckinResponse = {

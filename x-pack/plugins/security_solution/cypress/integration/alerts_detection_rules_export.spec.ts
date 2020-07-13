@@ -13,11 +13,12 @@ import { exportFirstRule } from '../tasks/alerts_detection_rules';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
-import { ALERTS_URL } from '../urls/navigation';
+import { DETECTIONS_URL } from '../urls/navigation';
 
 const EXPECTED_EXPORTED_RULE_FILE_PATH = 'cypress/test_files/expected_rules_export.ndjson';
 
-describe('Export rules', () => {
+// Flakky: https://github.com/elastic/kibana/issues/69849
+describe.skip('Export rules', () => {
   before(() => {
     esArchiverLoad('export_rule');
     cy.server();
@@ -32,7 +33,7 @@ describe('Export rules', () => {
   });
 
   it('Exports a custom rule', () => {
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();

@@ -69,7 +69,7 @@ export async function setupIngestManager(
           const flagsUrl = appContextService.getConfig()?.fleet?.kibana?.host;
           const defaultUrl = url.format({
             protocol: serverInfo.protocol,
-            hostname: serverInfo.host,
+            hostname: serverInfo.hostname,
             port: serverInfo.port,
             pathname: basePath.serverBasePath,
           });
