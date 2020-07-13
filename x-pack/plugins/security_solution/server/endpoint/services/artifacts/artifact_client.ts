@@ -16,7 +16,7 @@ export class ArtifactClient {
   }
 
   public getArtifactId(artifact: InternalArtifactSchema) {
-    return `${artifact.identifier}-${artifact.sha256}`;
+    return `${artifact.identifier}-${artifact.decodedSha256}`;
   }
 
   public async getArtifact(id: string): Promise<SavedObject<InternalArtifactSchema>> {

@@ -57,6 +57,26 @@ describe('import_list_item_schema', () => {
     expect(message.schema).toEqual(payload);
   });
 
+  test('it should accept an undefined for "serializer"', () => {
+    const payload = getImportListItemQuerySchemaMock();
+    delete payload.serializer;
+    const decoded = importListItemQuerySchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('it should accept an undefined for "deserializer"', () => {
+    const payload = getImportListItemQuerySchemaMock();
+    delete payload.deserializer;
+    const decoded = importListItemQuerySchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
   test('it should not allow an extra key to be sent in', () => {
     const payload: ImportListItemQuerySchema & {
       extraKey?: string;

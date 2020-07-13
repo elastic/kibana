@@ -24,6 +24,7 @@ import { useComponentTemplatesContext } from '../component_templates_context';
 import { TabSummary } from './tab_summary';
 import { ComponentTemplateTabs, TabType } from './tabs';
 import { ManageButton, ManageAction } from './manage_button';
+import { attemptToDecodeURI } from '../lib';
 
 interface Props {
   componentTemplateName: string;
@@ -39,8 +40,10 @@ export const ComponentTemplateDetailsFlyout: React.FunctionComponent<Props> = ({
 }) => {
   const { api } = useComponentTemplatesContext();
 
+  const decodedComponentTemplateName = attemptToDecodeURI(componentTemplateName);
+
   const { data: componentTemplateDetails, isLoading, error } = api.useLoadComponentTemplate(
-    componentTemplateName
+    decodedComponentTemplateName
   );
 
   const [activeTab, setActiveTab] = useState<TabType>('summary');
@@ -108,7 +111,7 @@ export const ComponentTemplateDetailsFlyout: React.FunctionComponent<Props> = ({
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h2 id="componentTemplateDetailsFlyoutTitle" data-test-subj="title">
-            {componentTemplateName}
+            {decodedComponentTemplateName}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
