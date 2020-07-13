@@ -811,6 +811,7 @@ export interface HttpServiceSetup {
     registerOnPostAuth: (handler: OnPostAuthHandler) => void;
     registerOnPreAuth: (handler: OnPreAuthHandler) => void;
     registerOnPreResponse: (handler: OnPreResponseHandler) => void;
+    registerOnPreRouting: (handler: OnPreRoutingHandler) => void;
     registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(contextName: T, provider: RequestHandlerContextProvider<T>) => RequestHandlerContextContainer;
 }
 
@@ -1536,7 +1537,6 @@ export type OnPreAuthHandler = (request: KibanaRequest, response: LifecycleRespo
 // @public
 export interface OnPreAuthToolkit {
     next: () => OnPreAuthResult;
-    rewriteUrl: (url: string) => OnPreAuthResult;
 }
 
 // @public
@@ -1558,6 +1558,17 @@ export interface OnPreResponseInfo {
 // @public
 export interface OnPreResponseToolkit {
     next: (responseExtensions?: OnPreResponseExtensions) => OnPreResponseResult;
+}
+
+// Warning: (ae-forgotten-export) The symbol "OnPreRoutingResult" needs to be exported by the entry point index.d.ts
+//
+// @public
+export type OnPreRoutingHandler = (request: KibanaRequest, response: LifecycleResponseFactory, toolkit: OnPreRoutingToolkit) => OnPreRoutingResult | KibanaResponse | Promise<OnPreRoutingResult | KibanaResponse>;
+
+// @public
+export interface OnPreRoutingToolkit {
+    next: () => OnPreRoutingResult;
+    rewriteUrl: (url: string) => OnPreRoutingResult;
 }
 
 // @public
