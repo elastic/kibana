@@ -131,29 +131,53 @@
       "properties": {
         "detections": {
           "properties": {
-            "detection_rules_custom_enabled": {
-              "type": "number"
+            "detection_rules": {
+              "properties": {
+                "custom": {
+                  "properties": {
+                    "enabled": {
+                      "type": "long"
+                    },
+                    "disabled": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "elastic": {
+                  "properties": {
+                    "enabled": {
+                      "type": "long"
+                    },
+                    "disabled": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
             },
-            "detection_rules_custom_disabled": {
-              "type": "number"
-            },
-            "detection_rules_elastic_enabled": {
-              "type": "number"
-            },
-            "detection_rules_elastic_disabled": {
-              "type": "number"
-            },
-            "ml_jobs_custom_enabled": {
-              "type": "number"
-            },
-            "ml_jobs_custom_disabled": {
-              "type": "number"
-            },
-            "ml_jobs_elastic_enabled": {
-              "type": "number"
-            },
-            "ml_jobs_elastic_disabled": {
-              "type": "number"
+            "ml_jobs": {
+              "properties": {
+                "custom": {
+                  "properties": {
+                    "enabled": {
+                      "type": "long"
+                    },
+                    "disabled": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "elastic": {
+                  "properties": {
+                    "enabled": {
+                      "type": "long"
+                    },
+                    "disabled": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
             }
           }
         }
