@@ -43,6 +43,10 @@ interface AlertsUtilityBarProps {
   updateAlertsStatus: UpdateAlertsStatus;
 }
 
+const UtilityBarFlexGroup = styled(EuiFlexGroup)`
+  min-width: 175px;
+`;
+
 const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
   canUserCRUD,
   hasIndexWrite,
