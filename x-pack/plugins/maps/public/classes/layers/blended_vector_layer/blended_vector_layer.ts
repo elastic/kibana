@@ -11,7 +11,6 @@ import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_de
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { IStyleProperty } from '../../styles/vector/properties/style_property';
 import {
-  SOURCE_TYPES,
   COUNT_PROP_LABEL,
   COUNT_PROP_NAME,
   LAYER_TYPE,
@@ -187,14 +186,10 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     this._clusterStyle = new VectorStyle(clusterStyleDescriptor, this._clusterSource, this);
 
     let isClustered = false;
-    const sourceDataRequest = this.getSourceDataRequest();
-    if (sourceDataRequest) {
-      const requestMeta = sourceDataRequest.getMeta();
-      if (
-        requestMeta &&
-        requestMeta.sourceMeta &&
-        requestMeta.sourceMeta.sourceType === SOURCE_TYPES.ES_GEO_GRID
-      ) {
+    const countDataRequest = this.getDataRequest(ACTIVE_COUNT_DATA_ID);
+    if (countDataRequest) {
+      const requestData = countDataRequest.getData();
+      if (requestData && requestData.isSyncClustered) {
         isClustered = true;
       }
     }
