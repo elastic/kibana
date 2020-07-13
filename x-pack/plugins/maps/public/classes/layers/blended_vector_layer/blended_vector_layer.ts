@@ -188,8 +188,8 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     let isClustered = false;
     const countDataRequest = this.getDataRequest(ACTIVE_COUNT_DATA_ID);
     if (countDataRequest) {
-      const countRequestData = countDataRequest.getData();
-      if (countRequestData && countRequestData.isSyncClustered) {
+      const requestData = countDataRequest.getData();
+      if (requestData && requestData.isSyncClustered) {
         isClustered = true;
       }
     }
