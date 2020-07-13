@@ -8,9 +8,10 @@ import { get, isEmpty } from 'lodash/fp';
 import { Filter, esKuery, KueryNode } from '../../../../../../../src/plugins/data/public';
 import {
   DataProvider,
+  DataProviderType,
   DataProvidersAnd,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { Ecs } from '../../../graphql/types';
+import { Ecs, TimelineType } from '../../../graphql/types';
 
 interface FindValueToChangeInQuery {
   field: string;
@@ -101,20 +102,28 @@ export const findValueToChangeInQuery = (
   );
 };
 
-export const replaceTemplateFieldFromQuery = (query: string, ecsData: Ecs): string => {
-  if (query.trim() !== '') {
-    const valueToChange = findValueToChangeInQuery(esKuery.fromKueryExpression(query));
-    return valueToChange.reduce((newQuery, vtc) => {
-      const newValue = getStringArray(vtc.field, ecsData);
-      if (newValue.length) {
-        return newQuery.replace(vtc.valueToChange, newValue[0]);
-      } else {
-        return newQuery;
-      }
-    }, query);
-  } else {
-    return '';
+export const replaceTemplateFieldFromQuery = (
+  query: string,
+  ecsData: Ecs,
+  timelineType: TimelineType = TimelineType.default
+): string => {
+  if (timelineType === TimelineType.default) {
+    if (query.trim() !== '') {
+      const valueToChange = findValueToChangeInQuery(esKuery.fromKueryExpression(query));
+      return valueToChange.reduce((newQuery, vtc) => {
+        const newValue = getStringArray(vtc.field, ecsData);
+        if (newValue.length) {
+          return newQuery.replace(vtc.valueToChange, newValue[0]);
+        } else {
+          return newQuery;
+        }
+      }, query);
+    } else {
+      return '';
+    }
   }
+
+  return query.trim();
 };
 
 export const replaceTemplateFieldFromMatchFilters = (filters: Filter[], ecsData: Ecs): Filter[] =>
@@ -135,30 +144,64 @@ export const replaceTemplateFieldFromMatchFilters = (filters: Filter[], ecsData:
 
 export const reformatDataProviderWithNewValue = <T extends DataProvider | DataProvidersAnd>(
   dataProvider: T,
-  ecsData: Ecs
+  ecsData: Ecs,
+  timelineType: TimelineType = TimelineType.default
 ): T => {
-  if (templateFields.includes(dataProvider.queryMatch.field)) {
-    const newValue = getStringArray(dataProvider.queryMatch.field, ecsData);
-    if (newValue.length) {
+  // Support for legacy "template-like" timeline behavior that is using hardcoded list of templateFields
+  if (timelineType === TimelineType.default) {
+    if (templateFields.includes(dataProvider.queryMatch.field)) {
+      const newValue = getStringArray(dataProvider.queryMatch.field, ecsData);
+      if (newValue.length) {
+        dataProvider.id = dataProvider.id.replace(dataProvider.name, newValue[0]);
+        dataProvider.name = newValue[0];
+        dataProvider.queryMatch.value = newValue[0];
+        dataProvider.queryMatch.displayField = undefined;
+        dataProvider.queryMatch.displayValue = undefined;
+      }
+    }
+    dataProvider.type = DataProviderType.default;
+    return dataProvider;
+  }
+
+  if (timelineType === TimelineType.template) {
+    if (
+      dataProvider.type === DataProviderType.template &&
+      dataProvider.queryMatch.operator === ':'
+    ) {
+      const newValue = getStringArray(dataProvider.queryMatch.field, ecsData);
+
+      if (!newValue.length) {
+        dataProvider.enabled = false;
+      }
+
       dataProvider.id = dataProvider.id.replace(dataProvider.name, newValue[0]);
       dataProvider.name = newValue[0];
       dataProvider.queryMatch.value = newValue[0];
       dataProvider.queryMatch.displayField = undefined;
       dataProvider.queryMatch.displayValue = undefined;
+      dataProvider.type = DataProviderType.default;
+
+      return dataProvider;
     }
+
+    dataProvider.type = dataProvider.type ?? DataProviderType.default;
+
+    return dataProvider;
   }
+
   return dataProvider;
 };
 
 export const replaceTemplateFieldFromDataProviders = (
   dataProviders: DataProvider[],
-  ecsData: Ecs
+  ecsData: Ecs,
+  timelineType: TimelineType = TimelineType.default
 ): DataProvider[] =>
   dataProviders.map((dataProvider) => {
-    const newDataProvider = reformatDataProviderWithNewValue(dataProvider, ecsData);
+    const newDataProvider = reformatDataProviderWithNewValue(dataProvider, ecsData, timelineType);
     if (newDataProvider.and != null && !isEmpty(newDataProvider.and)) {
       newDataProvider.and = newDataProvider.and.map((andDataProvider) =>
-        reformatDataProviderWithNewValue(andDataProvider, ecsData)
+        reformatDataProviderWithNewValue(andDataProvider, ecsData, timelineType)
       );
     }
     return newDataProvider;

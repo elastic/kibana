@@ -21,5 +21,6 @@ kibanaPipeline(timeoutMinutes: 120) {
     }
 
     kibanaPipeline.sendMail()
+    slackNotifications.onFailure()
   }
 }

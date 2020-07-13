@@ -10,13 +10,12 @@ import { getToastNotifications } from '../../../util/dependency_cache';
 import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 import { SavedSearchQuery } from '../../../contexts/ml';
+import { OMIT_FIELDS } from '../../../../../common/constants/field_types';
 import { IndexPatternTitle } from '../../../../../common/types/kibana';
 
 import { ml } from '../../../services/ml_api_service';
 import { FieldRequestConfig } from '../common';
 
-// List of system fields we don't want to display.
-const OMIT_FIELDS: string[] = ['_source', '_type', '_index', '_id', '_version', '_score'];
 // Maximum number of examples to obtain for text type fields.
 const MAX_EXAMPLES_DEFAULT: number = 10;
 

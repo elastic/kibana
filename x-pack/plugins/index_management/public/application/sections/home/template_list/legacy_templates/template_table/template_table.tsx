@@ -7,7 +7,7 @@
 import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiInMemoryTable, EuiIcon, EuiButton, EuiLink, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiInMemoryTable, EuiButton, EuiLink, EuiBasicTableColumn } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 import { SendRequestResponse, reactRouterNavigate } from '../../../../../../shared_imports';
 import { TemplateListItem } from '../../../../../../../common';
@@ -15,6 +15,8 @@ import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../../common/con
 import { TemplateDeleteModal } from '../../../../../components';
 import { encodePathForReactRouter } from '../../../../../services/routing';
 import { useServices } from '../../../../../app_context';
+import { TemplateContentIndicator } from '../../../../../components/shared';
+import { TemplateTypeIndicator } from '../../components';
 
 interface Props {
   templates: TemplateListItem[];
@@ -47,20 +49,23 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
       sortable: true,
       render: (name: TemplateListItem['name'], item: TemplateListItem) => {
         return (
-          /* eslint-disable-next-line @elastic/eui/href-or-on-click */
-          <EuiLink
-            {...reactRouterNavigate(
-              history,
-              {
-                pathname: `/templates/${encodePathForReactRouter(name)}`,
-                search: `legacy=${Boolean(item._kbnMeta.isLegacy)}`,
-              },
-              () => uiMetricService.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)
-            )}
-            data-test-subj="templateDetailsLink"
-          >
-            {name}
-          </EuiLink>
+          <>
+            <EuiLink
+              {...reactRouterNavigate(
+                history,
+                {
+                  pathname: `/templates/${encodePathForReactRouter(name)}`,
+                  search: `legacy=${Boolean(item._kbnMeta.isLegacy)}`,
+                },
+                () => uiMetricService.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)
+              )}
+              data-test-subj="templateDetailsLink"
+            >
+              {name}
+            </EuiLink>
+            &nbsp;
+            <TemplateTypeIndicator templateType={item._kbnMeta.type} />
+          </>
         );
       },
     },
@@ -98,44 +103,30 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
         ) : null,
     },
     {
-      field: 'order',
-      name: i18n.translate('xpack.idxMgmt.templateList.legacyTable.orderColumnTitle', {
-        defaultMessage: 'Order',
+      name: i18n.translate('xpack.idxMgmt.templateList.legacyTable.contentColumnTitle', {
+        defaultMessage: 'Content',
       }),
-      truncateText: true,
-      sortable: true,
-    },
-    {
-      field: 'hasMappings',
-      name: i18n.translate('xpack.idxMgmt.templateList.legacyTable.mappingsColumnTitle', {
-        defaultMessage: 'Mappings',
-      }),
-      truncateText: true,
-      sortable: true,
-      render: (hasMappings: boolean) => (hasMappings ? <EuiIcon type="check" /> : null),
-    },
-    {
-      field: 'hasSettings',
-      name: i18n.translate('xpack.idxMgmt.templateList.legacyTable.settingsColumnTitle', {
-        defaultMessage: 'Settings',
-      }),
-      truncateText: true,
-      sortable: true,
-      render: (hasSettings: boolean) => (hasSettings ? <EuiIcon type="check" /> : null),
-    },
-    {
-      field: 'hasAliases',
-      name: i18n.translate('xpack.idxMgmt.templateList.legacyTable.aliasesColumnTitle', {
-        defaultMessage: 'Aliases',
-      }),
-      truncateText: true,
-      sortable: true,
-      render: (hasAliases: boolean) => (hasAliases ? <EuiIcon type="check" /> : null),
+      width: '120px',
+      render: (item: TemplateListItem) => (
+        <TemplateContentIndicator
+          mappings={item.hasMappings}
+          settings={item.hasSettings}
+          aliases={item.hasAliases}
+          contentWhenEmpty={
+            <em>
+              {i18n.translate('xpack.idxMgmt.templateList.table.noneDescriptionText', {
+                defaultMessage: 'None',
+              })}
+            </em>
+          }
+        />
+      ),
     },
     {
       name: i18n.translate('xpack.idxMgmt.templateList.legacyTable.actionColumnTitle', {
         defaultMessage: 'Actions',
       }),
+      width: '120px',
       actions: [
         {
           name: i18n.translate('xpack.idxMgmt.templateList.legacyTable.actionEditText', {
@@ -153,7 +144,7 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
           onClick: ({ name }: TemplateListItem) => {
             editTemplate(name, true);
           },
-          enabled: ({ _kbnMeta: { isCloudManaged } }: TemplateListItem) => !isCloudManaged,
+          enabled: ({ _kbnMeta: { type } }: TemplateListItem) => type !== 'cloudManaged',
         },
         {
           type: 'icon',
@@ -188,7 +179,7 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
             setTemplatesToDelete([{ name, isLegacy }]);
           },
           isPrimary: true,
-          enabled: ({ _kbnMeta: { isCloudManaged } }: TemplateListItem) => !isCloudManaged,
+          enabled: ({ _kbnMeta: { type } }: TemplateListItem) => type !== 'cloudManaged',
         },
       ],
     },
@@ -208,13 +199,13 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
 
   const selectionConfig = {
     onSelectionChange: setSelection,
-    selectable: ({ _kbnMeta: { isCloudManaged } }: TemplateListItem) => !isCloudManaged,
+    selectable: ({ _kbnMeta: { type } }: TemplateListItem) => type !== 'cloudManaged',
     selectableMessage: (selectable: boolean) => {
       if (!selectable) {
         return i18n.translate(
-          'xpack.idxMgmt.templateList.legacyTable.deleteManagedTemplateTooltip',
+          'xpack.idxMgmt.templateList.legacyTable.deleteCloudManagedTemplateTooltip',
           {
-            defaultMessage: 'You cannot delete a managed template.',
+            defaultMessage: 'You cannot delete a cloud-managed template.',
           }
         );
       }

@@ -28,9 +28,9 @@ export { runTaskFnFactory } from './server/execute_job';
 
 export const getExportType = (): ExportTypeDefinition<
   JobParamsPanelCsv,
-  ImmediateCreateJobFn<JobParamsPanelCsv>,
+  ImmediateCreateJobFn,
   JobParamsPanelCsv,
-  ImmediateExecuteFn<JobParamsPanelCsv>
+  ImmediateExecuteFn
 > => ({
   ...metadata,
   jobType: CSV_FROM_SAVEDOBJECT_JOB_TYPE,
