@@ -46,7 +46,7 @@ interface RequestError extends Error {
   body?: { attributes?: { error: { caused_by: { type: string; reason: string } } } };
 }
 
-const isRequestError = (e: Error): e is RequestError =>
+const isRequestError = (e: any): e is RequestError =>
   e.body?.attributes?.error?.caused_by !== undefined;
 
 /**
@@ -65,8 +65,8 @@ function showErrorDialog({
   let text = '';
 
   if (isRequestError(error)) {
-    text += `${error.body.attributes.error.caused_by.type}\n`;
-    text += `${error.body.attributes.error.caused_by.reason}\n\n`;
+    text += `${error?.body?.attributes?.error?.caused_by.type}\n`;
+    text += `${error?.body?.attributes?.error?.caused_by.reason}\n\n`;
   }
 
   if (error.stack) {
