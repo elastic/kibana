@@ -150,14 +150,25 @@ export const TemplateForm = ({
     </>
   ) : null;
 
-  const rightContentWizardNav = isLegacy ? null : (
-    <EuiButton size="s" onClick={() => setIsSimulateVisible(true)}>
-      <FormattedMessage
-        id="xpack.idxMgmt.templateForm.previewIndexTemplateButtonLabel"
-        defaultMessage="Preview index template"
-      />
-    </EuiButton>
-  );
+  const getRightContentWizardNav = (stepId: WizardSection) => {
+    if (isLegacy) {
+      return null;
+    }
+
+    // Don't show "Preview template" button on logistics and review steps
+    if (stepId === 'logistics' || stepId === 'review') {
+      return null;
+    }
+
+    return (
+      <EuiButton size="s" onClick={() => setIsSimulateVisible(true)}>
+        <FormattedMessage
+          id="xpack.idxMgmt.templateForm.previewIndexTemplateButtonLabel"
+          defaultMessage="Preview index template"
+        />
+      </EuiButton>
+    );
+  };
 
   /**
    * If no mappings, settings or aliases are defined, it is better to not send empty
@@ -245,7 +256,7 @@ export const TemplateForm = ({
 
       <EuiSpacer size="l" />
 
-      <FormWizard<WizardContent>
+      <FormWizard<WizardContent, WizardSection>
         defaultValue={wizardDefaultValue}
         onSave={onSaveTemplate}
         isEditing={isEditing}
@@ -253,7 +264,7 @@ export const TemplateForm = ({
         apiError={apiError}
         texts={i18nTexts}
         onChange={onWizardContentChange}
-        rightContentNav={rightContentWizardNav}
+        rightContentNav={getRightContentWizardNav}
       >
         <FormWizardStep
           id={wizardSections.logistics.id}

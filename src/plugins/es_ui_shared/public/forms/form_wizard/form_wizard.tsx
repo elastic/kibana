@@ -27,14 +27,14 @@ import {
 } from './form_wizard_context';
 import { FormWizardNav, NavTexts } from './form_wizard_nav';
 
-interface Props<T extends object> extends ProviderProps<T> {
+interface Props<T extends object, S extends string> extends ProviderProps<T> {
   isSaving?: boolean;
   apiError: JSX.Element | null;
   texts?: Partial<NavTexts>;
-  rightContentNav?: JSX.Element | null;
+  rightContentNav?: JSX.Element | null | ((stepId: S) => JSX.Element | null);
 }
 
-export function FormWizard<T extends object = { [key: string]: any }>({
+export function FormWizard<T extends object = { [key: string]: any }, S extends string = any>({
   texts,
   defaultActiveStep,
   defaultValue,
@@ -45,7 +45,7 @@ export function FormWizard<T extends object = { [key: string]: any }>({
   onChange,
   children,
   rightContentNav,
-}: Props<T>) {
+}: Props<T, S>) {
   return (
     <FormWizardProvider<T>
       defaultValue={defaultValue}
@@ -55,7 +55,14 @@ export function FormWizard<T extends object = { [key: string]: any }>({
       defaultActiveStep={defaultActiveStep}
     >
       <FormWizardConsumer>
-        {({ activeStepIndex, lastStep, steps, isCurrentStepValid, navigateToStep }) => {
+        {({
+          activeStepIndex,
+          lastStep,
+          steps,
+          isCurrentStepValid,
+          navigateToStep,
+          activeStepId,
+        }) => {
           const stepsRequiredArray = Object.values(steps).map(
             (step) => Boolean(step.isRequired) && step.isComplete === false
           );
@@ -97,6 +104,13 @@ export function FormWizard<T extends object = { [key: string]: any }>({
             };
           });
 
+          const getRightContentNav = () => {
+            if (typeof rightContentNav === 'function') {
+              return rightContentNav(activeStepId);
+            }
+            return rightContentNav;
+          };
+
           const onBack = () => {
             const prevStep = activeStepIndex - 1;
             navigateToStep(prevStep);
@@ -131,7 +145,7 @@ export function FormWizard<T extends object = { [key: string]: any }>({
                 onBack={onBack}
                 onNext={onNext}
                 texts={texts}
-                rightContent={rightContentNav}
+                getRightContent={getRightContentNav}
               />
             </>
           );
