@@ -384,7 +384,7 @@ export async function fetchLogEntryExamples(
   return {
     examples: hits.map((hit) => ({
       id: hit._id,
-      dataset,
+      dataset: hit._source.event?.dataset ?? '',
       message: hit._source.message ?? '',
       timestamp: hit.sort[0],
       tiebreaker: hit.sort[1],
