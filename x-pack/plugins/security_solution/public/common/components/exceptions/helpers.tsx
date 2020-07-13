@@ -14,7 +14,6 @@ import * as i18n from './translations';
 import {
   FormattedEntry,
   BuilderEntry,
-  EmptyListEntry,
   DescriptionListItem,
   FormattedBuilderEntry,
   CreateExceptionListItemBuilderSchema,
@@ -39,9 +38,6 @@ import {
   ExceptionListType,
 } from '../../../lists_plugin_deps';
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
-
-export const isListType = (item: BuilderEntry): item is EmptyListEntry =>
-  item.type === OperatorTypeEnum.LIST;
 import { TimelineNonEcsData } from '../../../graphql/types';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 
@@ -80,11 +76,6 @@ export const getExceptionOperatorSelect = (item: BuilderEntry): OperatorOption =
 
     return foundOperator ?? isOperator;
   }
-};
-
-export const getExceptionOperatorFromSelect = (value: string): OperatorOption => {
-  const operator = EXCEPTION_OPERATORS.filter(({ message }) => message === value);
-  return operator[0] ?? isOperator;
 };
 
 /**
@@ -158,19 +149,32 @@ export const formatEntry = ({
   };
 };
 
-export const getOperatingSystems = (tags: string[]): string => {
-  const osMatches = tags
-    .filter((tag) => tag.startsWith('os:'))
-    .map((os) => capitalize(os.substring(3).trim()))
-    .join(', ');
-
-  return osMatches;
-};
-
-export const getOsTagValues = (tags: string[]): string[] => {
+/**
+ * Retrieves the values of tags marked as os
+ *
+ * @param tags an ExceptionItem's tags
+ */
+export const getOperatingSystems = (tags: string[]): string[] => {
   return tags.filter((tag) => tag.startsWith('os:')).map((os) => os.substring(3).trim());
 };
 
+/**
+ * Formats os value array to a displayable string
+ */
+export const formatOperatingSystems = (osTypes: string[]): string => {
+  return osTypes
+    .map((os) => {
+      if (os === 'macos') {
+        return 'macOS';
+      }
+      return capitalize(os);
+    })
+    .join(', ');
+};
+
+/**
+ * Returns all tags that match a given regex
+ */
 export const getTagsInclude = ({
   tags,
   regex,
@@ -194,7 +198,7 @@ export const getDescriptionListContent = (
   const details = [
     {
       title: i18n.OPERATING_SYSTEM,
-      value: getOperatingSystems(exceptionItem._tags),
+      value: formatOperatingSystems(getOperatingSystems(exceptionItem._tags ?? [])),
     },
     {
       title: i18n.DATE_CREATED,
@@ -376,6 +380,11 @@ export const formatExceptionItemForUpdate = (
   };
 };
 
+/**
+ * Adds new and existing comments to all new exceptionItems if not present already
+ * @param exceptionItems new or existing ExceptionItem[]
+ * @param comments new Comments
+ */
 export const enrichExceptionItemsWithComments = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
   comments: Array<Comments | CreateComments>
@@ -388,6 +397,11 @@ export const enrichExceptionItemsWithComments = (
   });
 };
 
+/**
+ * Adds provided osTypes to all exceptionItems if not present already
+ * @param exceptionItems new or existing ExceptionItem[]
+ * @param osTypes array of os values
+ */
 export const enrichExceptionItemsWithOS = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
   osTypes: string[]
@@ -402,18 +416,21 @@ export const enrichExceptionItemsWithOS = (
   });
 };
 
+/**
+ * Returns the value for the given fieldname within TimelineNonEcsData if it exists
+ */
 export const getMappedNonEcsValue = ({
   data,
   fieldName,
 }: {
   data: TimelineNonEcsData[];
   fieldName: string;
-}): string[] | undefined => {
+}): string[] => {
   const item = data.find((d) => d.field === fieldName);
   if (item != null && item.value != null) {
     return item.value;
   }
-  return undefined;
+  return [];
 };
 
 export const entryHasListType = (
@@ -421,7 +438,7 @@ export const entryHasListType = (
 ) => {
   for (const { entries } of exceptionItems) {
     for (const exceptionEntry of entries ?? []) {
-      if (getOperatorType(exceptionEntry) === 'list') {
+      if (getOperatorType(exceptionEntry) === OperatorTypeEnum.LIST) {
         return true;
       }
     }
@@ -429,16 +446,29 @@ export const entryHasListType = (
   return false;
 };
 
+/**
+ * Determines whether or not any entries within the given exceptionItems contain values not in the specified ECS mapping
+ */
 export const entryHasNonEcsType = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
   indexPatterns: IIndexPattern
 ): boolean => {
+  const doesFieldNameExist = (exceptionEntry: Entry): boolean => {
+    return indexPatterns.fields.some(({ name }) => name === exceptionEntry.field);
+  };
+
   if (exceptionItems.length === 0) {
     return false;
   }
   for (const { entries } of exceptionItems) {
     for (const exceptionEntry of entries ?? []) {
-      if (indexPatterns.fields.find(({ name }) => name === exceptionEntry.field) === undefined) {
+      if (exceptionEntry.type === 'nested') {
+        for (const nestedExceptionEntry of exceptionEntry.entries) {
+          if (doesFieldNameExist(nestedExceptionEntry) === false) {
+            return true;
+          }
+        }
+      } else if (doesFieldNameExist(exceptionEntry) === false) {
         return true;
       }
     }
@@ -446,19 +476,25 @@ export const entryHasNonEcsType = (
   return false;
 };
 
+/**
+ * Returns the default values from the alert data to autofill new endpoint exceptions
+ */
 export const defaultEndpointExceptionItems = (
   listType: ExceptionListType,
   listId: string,
   ruleName: string,
   alertData: TimelineNonEcsData[]
 ): ExceptionsBuilderExceptionItem[] => {
-  const [filePath] = getMappedNonEcsValue({ data: alertData, fieldName: 'file.path' }) ?? [];
-  const [signatureSigner] =
-    getMappedNonEcsValue({ data: alertData, fieldName: 'file.Ext.code_signature.subject_name' }) ??
-    [];
-  const [signatureTrusted] =
-    getMappedNonEcsValue({ data: alertData, fieldName: 'file.Ext.code_signature.trusted' }) ?? [];
-  const [sha1Hash] = getMappedNonEcsValue({ data: alertData, fieldName: 'file.hash.sha1' }) ?? [];
+  const [filePath] = getMappedNonEcsValue({ data: alertData, fieldName: 'file.path' });
+  const [signatureSigner] = getMappedNonEcsValue({
+    data: alertData,
+    fieldName: 'file.Ext.code_signature.subject_name',
+  });
+  const [signatureTrusted] = getMappedNonEcsValue({
+    data: alertData,
+    fieldName: 'file.Ext.code_signature.trusted',
+  });
+  const [sha1Hash] = getMappedNonEcsValue({ data: alertData, fieldName: 'file.hash.sha1' });
   const namespaceType = 'agnostic';
 
   return [
@@ -483,7 +519,7 @@ export const defaultEndpointExceptionItems = (
           value: signatureSigner ?? '',
         },
         {
-          field: 'file.code_signature.trusted',
+          field: 'file.Ext.code_signature.trusted',
           operator: 'included',
           type: 'match',
           value: signatureTrusted ?? '',
@@ -508,7 +544,7 @@ export const defaultEndpointExceptionItems = (
           field: 'event.category',
           operator: 'included',
           type: 'match_any',
-          value: getMappedNonEcsValue({ data: alertData, fieldName: 'event.category' }) ?? [],
+          value: getMappedNonEcsValue({ data: alertData, fieldName: 'event.category' }),
         },
       ],
     },

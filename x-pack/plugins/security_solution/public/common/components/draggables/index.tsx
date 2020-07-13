@@ -5,13 +5,16 @@
  */
 
 import { EuiBadge, EuiToolTip, IconType } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { getEmptyStringTag } from '../empty_value';
-import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
+import {
+  DataProvider,
+  IS_OPERATOR,
+} from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 
 export interface DefaultDraggableType {
@@ -84,36 +87,48 @@ Content.displayName = 'Content';
  * @param queryValue - defaults to `value`, this query overrides the `queryMatch.value` used by the `DataProvider` that represents the data
  */
 export const DefaultDraggable = React.memo<DefaultDraggableType>(
-  ({ id, field, value, name, children, timelineId, tooltipContent, queryValue }) =>
-    value != null ? (
+  ({ id, field, value, name, children, timelineId, tooltipContent, queryValue }) => {
+    const dataProviderProp: DataProvider = useMemo(
+      () => ({
+        and: [],
+        enabled: true,
+        id: escapeDataProviderId(id),
+        name: name ? name : value ?? '',
+        excluded: false,
+        kqlQuery: '',
+        queryMatch: {
+          field,
+          value: queryValue ? queryValue : value ?? '',
+          operator: IS_OPERATOR,
+        },
+      }),
+      [field, id, name, queryValue, value]
+    );
+
+    const renderCallback = useCallback(
+      (dataProvider, _, snapshot) =>
+        snapshot.isDragging ? (
+          <DragEffects>
+            <Provider dataProvider={dataProvider} />
+          </DragEffects>
+        ) : (
+          <Content field={field} tooltipContent={tooltipContent} value={value}>
+            {children}
+          </Content>
+        ),
+      [children, field, tooltipContent, value]
+    );
+
+    if (value == null) return null;
+
+    return (
       <DraggableWrapper
-        dataProvider={{
-          and: [],
-          enabled: true,
-          id: escapeDataProviderId(id),
-          name: name ? name : value,
-          excluded: false,
-          kqlQuery: '',
-          queryMatch: {
-            field,
-            value: queryValue ? queryValue : value,
-            operator: IS_OPERATOR,
-          },
-        }}
-        render={(dataProvider, _, snapshot) =>
-          snapshot.isDragging ? (
-            <DragEffects>
-              <Provider dataProvider={dataProvider} />
-            </DragEffects>
-          ) : (
-            <Content field={field} tooltipContent={tooltipContent} value={value}>
-              {children}
-            </Content>
-          )
-        }
+        dataProvider={dataProviderProp}
+        render={renderCallback}
         timelineId={timelineId}
       />
-    ) : null
+    );
+  }
 );
 
 DefaultDraggable.displayName = 'DefaultDraggable';
@@ -146,33 +161,34 @@ export type BadgeDraggableType = Omit<DefaultDraggableType, 'id'> & {
  * prevent a tooltip from being displayed, or pass arbitrary content
  * @param queryValue - defaults to `value`, this query overrides the `queryMatch.value` used by the `DataProvider` that represents the data
  */
-export const DraggableBadge = React.memo<BadgeDraggableType>(
-  ({
-    contextId,
-    eventId,
-    field,
-    value,
-    iconType,
-    name,
-    color = 'hollow',
-    children,
-    tooltipContent,
-    queryValue,
-  }) =>
-    value != null ? (
-      <DefaultDraggable
-        id={`draggable-badge-default-draggable-${contextId}-${eventId}-${field}-${value}`}
-        field={field}
-        name={name}
-        value={value}
-        tooltipContent={tooltipContent}
-        queryValue={queryValue}
-      >
-        <Badge iconType={iconType} color={color} title="">
-          {children ? children : value !== '' ? value : getEmptyStringTag()}
-        </Badge>
-      </DefaultDraggable>
-    ) : null
-);
+const DraggableBadgeComponent: React.FC<BadgeDraggableType> = ({
+  contextId,
+  eventId,
+  field,
+  value,
+  iconType,
+  name,
+  color = 'hollow',
+  children,
+  tooltipContent,
+  queryValue,
+}) =>
+  value != null ? (
+    <DefaultDraggable
+      id={`draggable-badge-default-draggable-${contextId}-${eventId}-${field}-${value}`}
+      field={field}
+      name={name}
+      value={value}
+      tooltipContent={tooltipContent}
+      queryValue={queryValue}
+    >
+      <Badge iconType={iconType} color={color} title="">
+        {children ? children : value !== '' ? value : getEmptyStringTag()}
+      </Badge>
+    </DefaultDraggable>
+  ) : null;
 
+DraggableBadgeComponent.displayName = 'DraggableBadgeComponent';
+
+export const DraggableBadge = React.memo(DraggableBadgeComponent);
 DraggableBadge.displayName = 'DraggableBadge';

@@ -6,6 +6,7 @@
 
 import { Logger } from 'kibana/server';
 import uuid from 'uuid/v4';
+import { snakeCase } from 'lodash';
 import { PromiseReturnType } from '../../../../observability/typings/common';
 import { Setup } from '../helpers/setup_request';
 import {
@@ -76,13 +77,12 @@ async function createAnomalyDetectionJob({
   environment: string;
   indexPatternName?: string | undefined;
 }) {
-  const convertedEnvironmentName = convertToMLIdentifier(environment);
   const randomToken = uuid().substr(-4);
 
   return ml.modules.setup({
     moduleId: ML_MODULE_ID_APM_TRANSACTION,
-    prefix: `${APM_ML_JOB_GROUP}-${convertedEnvironmentName}-${randomToken}-`,
-    groups: [APM_ML_JOB_GROUP, convertedEnvironmentName],
+    prefix: `${APM_ML_JOB_GROUP}-${snakeCase(environment)}-${randomToken}-`,
+    groups: [APM_ML_JOB_GROUP],
     indexPatternName,
     query: {
       bool: {
@@ -99,7 +99,11 @@ async function createAnomalyDetectionJob({
     jobOverrides: [
       {
         custom_settings: {
-          job_tags: { environment },
+          job_tags: {
+            environment,
+            // identifies this as an APM ML job & facilitates future migrations
+            apm_ml_version: 2,
+          },
         },
       },
     ],
@@ -115,7 +119,3 @@ const ENVIRONMENT_NOT_DEFINED_FILTER = {
     },
   },
 };
-
-export function convertToMLIdentifier(value: string) {
-  return value.replace(/\s+/g, '_').toLowerCase();
-}

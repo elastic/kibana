@@ -114,6 +114,10 @@ export class BundleRefs {
 
   constructor(private readonly refs: BundleRef[]) {}
 
+  public forBundleIds(bundleIds: string[]) {
+    return this.refs.filter((r) => bundleIds.includes(r.bundleId));
+  }
+
   public filterByExportIds(exportIds: string[]) {
     return this.refs.filter((r) => exportIds.includes(r.exportId));
   }
