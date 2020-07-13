@@ -36,12 +36,25 @@ function mockFetchImplementation(responses: any[]) {
 }
 
 describe('EnhancedSearchInterceptor', () => {
+  let mockUsageCollector: any;
+
   beforeEach(() => {
     mockCoreStart = coreMock.createStart();
 
     next.mockClear();
     error.mockClear();
     complete.mockClear();
+    jest.clearAllTimers();
+
+    mockUsageCollector = {
+      trackQueryTimedOut: jest.fn(),
+      trackQueriesCancelled: jest.fn(),
+      trackLongQueryPopupShown: jest.fn(),
+      trackLongQueryDialogDismissed: jest.fn(),
+      trackLongQueryRunBeyondTimeout: jest.fn(),
+      trackError: jest.fn(),
+      trackSuccess: jest.fn(),
+    };
 
     searchInterceptor = new EnhancedSearchInterceptor(
       {
@@ -49,6 +62,7 @@ describe('EnhancedSearchInterceptor', () => {
         application: mockCoreStart.application,
         http: mockCoreStart.http,
         uiSettings: mockCoreStart.uiSettings,
+        usageCollector: mockUsageCollector,
       },
       1000
     );
@@ -63,6 +77,9 @@ describe('EnhancedSearchInterceptor', () => {
             is_partial: false,
             is_running: false,
             id: 1,
+            rawResponse: {
+              took: 1,
+            },
           },
         },
       ];
@@ -87,6 +104,9 @@ describe('EnhancedSearchInterceptor', () => {
             is_partial: false,
             is_running: true,
             id: 1,
+            rawResponse: {
+              took: 1,
+            },
           },
         },
         {
@@ -95,6 +115,9 @@ describe('EnhancedSearchInterceptor', () => {
             is_partial: false,
             is_running: false,
             id: 1,
+            rawResponse: {
+              took: 1,
+            },
           },
         },
       ];
@@ -350,6 +373,7 @@ describe('EnhancedSearchInterceptor', () => {
         ([{ signal }]) => signal?.aborted
       );
       expect(areAllRequestsAborted).toBe(true);
+      expect(mockUsageCollector.trackQueriesCancelled).toBeCalledTimes(1);
     });
   });
 
@@ -361,6 +385,9 @@ describe('EnhancedSearchInterceptor', () => {
           is_partial: true,
           is_running: true,
           id: 1,
+          rawResponse: {
+            took: 1,
+          },
         },
       },
       {
@@ -369,6 +396,9 @@ describe('EnhancedSearchInterceptor', () => {
           is_partial: false,
           is_running: false,
           id: 1,
+          rawResponse: {
+            took: 1,
+          },
         },
       },
     ];
@@ -427,6 +457,8 @@ describe('EnhancedSearchInterceptor', () => {
       expect(next.mock.calls[0][0]).toStrictEqual(timedResponses[0].value);
       expect(next.mock.calls[1][0]).toStrictEqual(timedResponses[1].value);
       expect(error).not.toHaveBeenCalled();
+      expect(mockUsageCollector.trackLongQueryRunBeyondTimeout).toBeCalledTimes(1);
+      expect(mockUsageCollector.trackSuccess).toBeCalledTimes(1);
     });
   });
 });
