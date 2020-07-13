@@ -31,25 +31,34 @@ export function asErr<T>(error: T): Err<T> {
   };
 }
 
+export function isResult<T, E>(maybeResult: unknown): maybeResult is Result<T, E> {
+  return (
+    (maybeResult as Result<T, E>)?.tag === 'ok' || (maybeResult as Result<T, E>)?.tag === 'err'
+  );
+}
+
 export function isOk<T, E>(result: Result<T, E>): result is Ok<T> {
-  return result.tag === 'ok';
+  return result?.tag === 'ok';
 }
 
 export function isErr<T, E>(result: Result<T, E>): result is Err<E> {
   return !isOk(result);
 }
 
-export async function promiseResult<T, E>(future: Promise<T>): Promise<Result<T, E>> {
+export async function promiseResult<T, E>(
+  future: Promise<T | Result<T, E>>
+): Promise<Result<T, E>> {
   try {
-    return asOk(await future);
+    const result = await future;
+    return isResult(result) ? result : asOk(result);
   } catch (e) {
-    return asErr(e);
+    return isResult<T, E>(e) ? e : asErr(e);
   }
 }
 
 export async function unwrapPromise<T, E>(future: Promise<Result<T, E>>): Promise<T> {
   return map(
-    await future,
+    await promiseResult(future),
     (value: T) => Promise.resolve(value),
     (err: E) => Promise.reject(err)
   );

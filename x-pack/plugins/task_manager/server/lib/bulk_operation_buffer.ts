@@ -13,24 +13,31 @@ export interface Entity {
   id: string;
 }
 
-export interface OperationError<H, E> {
-  entity: H;
-  error: E;
+export interface OperationError<Input, ErrorOutput> {
+  entity: Input;
+  error: ErrorOutput;
 }
 
-export type OperationResult<H, E> = Result<H, OperationError<H, E>>;
+export type OperationResult<Input, Output, ErrorOutput> = Result<
+  Output,
+  OperationError<Input, ErrorOutput>
+>;
 
-export type Operation<H, E> = (entity: H) => Promise<Result<H, E>>;
-export type BulkOperation<H, E> = (entities: H[]) => Promise<Array<OperationResult<H, E>>>;
+export type Operation<Input, Output, ErrorOutput> = (
+  entity: Input
+) => Promise<Result<Output, ErrorOutput>>;
+export type BulkOperation<Input, Output, ErrorOutput> = (
+  entities: Input[]
+) => Promise<Array<OperationResult<Input, Output, ErrorOutput>>>;
 
-export function createBuffer<H extends Entity, E>(
-  bulkOperation: BulkOperation<H, E>
-): Operation<H, E> {
+export function createBuffer<Input extends Entity, Output extends Entity, ErrorOutput>(
+  bulkOperation: BulkOperation<Input, Output, ErrorOutput>
+): Operation<Input, Output, ErrorOutput> {
   const flushBuffer = new Subject<void>();
   const storeUpdateBuffer = new Subject<{
-    entity: H;
-    onSuccess: (entity: Ok<H>) => void;
-    onFailure: (error: Err<E>) => void;
+    entity: Input;
+    onSuccess: (entity: Ok<Output>) => void;
+    onFailure: (error: Err<ErrorOutput>) => void;
   }>();
 
   storeUpdateBuffer
@@ -48,7 +55,7 @@ export function createBuffer<H extends Entity, E>(
               (entity) => {
                 entityById[entity.id].onSuccess(asOk(entity));
               },
-              ({ entity, error }: OperationError<H, E>) => {
+              ({ entity, error }: OperationError<Input, ErrorOutput>) => {
                 entityById[entity.id].onFailure(asErr(error));
               }
             )
@@ -59,7 +66,7 @@ export function createBuffer<H extends Entity, E>(
         });
     });
 
-  return async function (entity: H) {
+  return async function (entity: Input) {
     return new Promise((resolve, reject) => {
       // ensure we flush by the end of the "current" event loop tick
       setImmediate(() => flushBuffer.next());

@@ -8,22 +8,27 @@ import { TaskStore } from './task_store';
 import { ConcreteTaskInstance } from './task';
 import { Updatable } from './task_runner';
 import { createBuffer, Operation } from './lib/bulk_operation_buffer';
-import { unwrapPromise, mapErr } from './lib/result_type';
+import { unwrapPromise, asErr, mapErr } from './lib/result_type';
 
 export class BufferedTaskStore implements Updatable {
-  private bufferedUpdate: Operation<ConcreteTaskInstance, Error>;
+  private bufferedUpdate: Operation<ConcreteTaskInstance, ConcreteTaskInstance, Error>;
   constructor(private readonly taskStore: TaskStore) {
-    this.bufferedUpdate = createBuffer<ConcreteTaskInstance, Error>(async (docs) => {
-      return (await taskStore.bulkUpdate(docs)).map((entityOrError, index) =>
-        mapErr(
-          (error: Error) => ({
-            entity: docs[index],
-            error,
-          }),
-          entityOrError
-        )
-      );
-    });
+    this.bufferedUpdate = createBuffer<ConcreteTaskInstance, ConcreteTaskInstance, Error>(
+      async (docs) => {
+        return (await taskStore.bulkUpdate(docs)).map((entityOrError, index) =>
+          mapErr(
+            (error: Error) =>
+              asErr({
+                // TaskStore's bulkUpdate maintains the order of the docs
+                // so we can rely on the index in the `docs` to match an entity with an index
+                entity: docs[index],
+                error,
+              }),
+            entityOrError
+          )
+        );
+      }
+    );
   }
 
   public get maxAttempts(): number {

@@ -33,10 +33,10 @@ function errorAttempts(task: TaskInstance): Err<OperationError<TaskInstance, Err
   });
 }
 
-describe('Task Store Buffer', () => {
+describe('Bulk Operation Buffer', () => {
   describe('createBuffer()', () => {
     test('batches up multiple Operation calls', async () => {
-      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, Error>> = jest.fn(
+      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, TaskInstance, Error>> = jest.fn(
         ([task1, task2]) => {
           return Promise.resolve([incrementAttempts(task1), incrementAttempts(task2)]);
         }
@@ -55,9 +55,11 @@ describe('Task Store Buffer', () => {
     });
 
     test('batch updates are executed at most by the next Event Loop tick', async () => {
-      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, Error>> = jest.fn((tasks) => {
-        return Promise.resolve(tasks.map(incrementAttempts));
-      });
+      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, TaskInstance, Error>> = jest.fn(
+        (tasks) => {
+          return Promise.resolve(tasks.map(incrementAttempts));
+        }
+      );
 
       const bufferedUpdate = createBuffer(bulkUpdate);
 
@@ -97,7 +99,7 @@ describe('Task Store Buffer', () => {
     });
 
     test('handles both resolutions and rejections at individual task level', async (done) => {
-      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, Error>> = jest.fn(
+      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, TaskInstance, Error>> = jest.fn(
         ([task1, task2, task3]) => {
           return Promise.resolve([
             incrementAttempts(task1),
@@ -129,9 +131,11 @@ describe('Task Store Buffer', () => {
     });
 
     test('handles bulkUpdate failure', async (done) => {
-      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, Error>> = jest.fn(() => {
-        return Promise.reject(new Error('bulkUpdate is an illusion'));
-      });
+      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, TaskInstance, Error>> = jest.fn(
+        () => {
+          return Promise.reject(new Error('bulkUpdate is an illusion'));
+        }
+      );
 
       const bufferedUpdate = createBuffer(bulkUpdate);
 
