@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import onboardingLogo from '../images/security_administration_onboarding.svg';
 
 const TEXT_ALIGN_CENTER: CSSProperties = Object.freeze({
   textAlign: 'center',
@@ -70,7 +71,7 @@ const PolicyEmptyState = React.memo<{
               />
             </EuiText>
             <EuiSpacer size="xl" />
-            <EuiFlexGroup>
+            <EuiFlexGroup alignItems="center">
               <EuiFlexItem>
                 <EuiFlexGroup>
                   <EuiFlexItem grow={false} style={{ marginRight: '10px' }}>
@@ -146,7 +147,7 @@ const PolicyEmptyState = React.memo<{
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiIcon type="logoSecurity" size="xl" />
+            <EuiIcon type={onboardingLogo} size="original" />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
