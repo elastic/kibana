@@ -35,6 +35,7 @@ export const pickSavedTimeline = (
 
   if (savedTimeline.timelineType === TimelineType.default) {
     savedTimeline.timelineType = savedTimeline.timelineType ?? TimelineType.default;
+    savedTimeline.status = savedTimeline.status ?? TimelineStatus.active;
     savedTimeline.templateTimelineId = null;
     savedTimeline.templateTimelineVersion = null;
   }
@@ -42,6 +43,8 @@ export const pickSavedTimeline = (
   if (!isEmpty(savedTimeline.title) && savedTimeline.status === TimelineStatus.draft) {
     savedTimeline.status = TimelineStatus.active;
   }
+
+  savedTimeline.excludedRowRendererIds = savedTimeline.excludedRowRendererIds ?? [];
 
   return savedTimeline;
 };

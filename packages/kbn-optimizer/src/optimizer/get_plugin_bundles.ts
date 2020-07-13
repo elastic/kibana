@@ -35,6 +35,7 @@ export function getPluginBundles(plugins: KibanaPlatformPlugin[], repoRoot: stri
           sourceRoot: repoRoot,
           contextDir: p.directory,
           outputDir: Path.resolve(p.directory, 'target/public'),
+          manifestPath: p.manifestPath,
         })
     );
 }

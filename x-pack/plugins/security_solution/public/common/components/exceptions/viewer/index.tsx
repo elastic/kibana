@@ -184,7 +184,11 @@ const ExceptionsViewerComponent = ({
     [setCurrentModal]
   );
 
-  const handleCloseExceptionModal = useCallback((): void => {
+  const handleOnCancelExceptionModal = useCallback((): void => {
+    setCurrentModal(null);
+  }, [setCurrentModal]);
+
+  const handleOnConfirmExceptionModal = useCallback((): void => {
     setCurrentModal(null);
     handleFetchList();
   }, [setCurrentModal, handleFetchList]);
@@ -255,8 +259,8 @@ const ExceptionsViewerComponent = ({
             ruleName={ruleName}
             exceptionListType={exceptionListTypeToEdit}
             exceptionItem={exceptionToEdit}
-            onCancel={handleCloseExceptionModal}
-            onConfirm={handleCloseExceptionModal}
+            onCancel={handleOnCancelExceptionModal}
+            onConfirm={handleOnConfirmExceptionModal}
           />
         )}
 
@@ -265,8 +269,8 @@ const ExceptionsViewerComponent = ({
           ruleName={ruleName}
           ruleId={ruleId}
           exceptionListType={exceptionListTypeToEdit}
-          onCancel={handleCloseExceptionModal}
-          onConfirm={handleCloseExceptionModal}
+          onCancel={handleOnCancelExceptionModal}
+          onConfirm={handleOnConfirmExceptionModal}
         />
       )}
 
