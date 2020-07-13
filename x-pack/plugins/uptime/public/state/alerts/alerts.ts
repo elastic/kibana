@@ -11,24 +11,28 @@ import { getAsyncInitialState, handleAsyncAction } from '../reducers/utils';
 import { AppState } from '../index';
 import { AsyncInitialState } from '../reducers/types';
 import { fetchEffectFactory } from '../effects/fetch_effect';
-import { fetchConnectors } from '../api/alerts';
+import { createAlert, fetchConnectors } from '../api/alerts';
 import { ActionConnector as RawActionConnector } from '../../../../triggers_actions_ui/public';
 
 export type ActionConnector = Omit<RawActionConnector, 'secrets'>;
 
+export const createAlertAction = createAsyncAction<{}, ActionConnector[]>('CREATE ALERT');
 export const getConnectorsAction = createAsyncAction<{}, ActionConnector[]>('GET CONNECTORS');
 
 interface AlertState {
   connectors: AsyncInitialState<ActionConnector[]>;
+  newAlert: AsyncInitialState<ActionConnector[]>;
 }
 
 const initialState = {
   connectors: getAsyncInitialState(),
+  newAlert: getAsyncInitialState(),
 };
 
 export const alertReducer = handleActions<AlertState>(
   {
     ...handleAsyncAction<AlertState>('connectors', getConnectorsAction),
+    ...handleAsyncAction<AlertState>('newAlert', createAlertAction),
   },
   initialState
 );
@@ -37,6 +41,10 @@ export function* fetchConnectorsEffect() {
   yield takeLatest(
     getConnectorsAction.get,
     fetchEffectFactory(fetchConnectors, getConnectorsAction.success, getConnectorsAction.fail)
+  );
+  yield takeLatest(
+    createAlertAction.get,
+    fetchEffectFactory(createAlert, createAlertAction.success, createAlertAction.fail)
   );
 }
 

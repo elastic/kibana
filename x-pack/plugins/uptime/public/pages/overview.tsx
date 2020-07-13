@@ -8,6 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
+import { useDispatch } from 'react-redux';
 import { useGetUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { PageHeader } from './page_header';
@@ -19,6 +20,7 @@ import { MonitorList } from '../components/overview/monitor_list/monitor_list_co
 import { EmptyState, FilterGroup, KueryBar, ParsingErrorCallout } from '../components/overview';
 import { StatusPanel } from '../components/overview/status_panel';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { getConnectorsAction } from '../state/alerts/alerts';
 
 interface Props {
   loading: boolean;
@@ -57,6 +59,12 @@ export const OverviewPageComponent = React.memo(
     useEffect(() => {
       setEsKueryFilters(esFilters ?? '');
     }, [esFilters, setEsKueryFilters]);
+
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+      dispatch(getConnectorsAction.get());
+    }, [dispatch]);
 
     const linkParameters = stringifyUrlParams(params, true);
 

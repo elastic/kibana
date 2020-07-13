@@ -26,4 +26,5 @@ export enum API_URLS {
   ML_ANOMALIES_RESULT = `/api/ml/results/anomalies_table_data`,
 
   ALERT_ACTIONS = '/api/actions',
+  CREATE_ALERT = '/api/alerts/alert',
 }
