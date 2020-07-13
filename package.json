@@ -252,7 +252,6 @@
     "redux-actions": "^2.6.5",
     "redux-thunk": "^2.3.0",
     "regenerator-runtime": "^0.13.3",
-    "regression": "2.0.1",
     "request": "^2.88.0",
     "require-in-the-middle": "^5.0.2",
     "reselect": "^4.0.0",
