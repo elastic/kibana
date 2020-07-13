@@ -493,5 +493,6 @@ export const summary: CanvasTemplate = {
     '@created': '2019-05-31T16:01:45.751Z',
     assets: {},
     css: 'h3 {\ncolor: #343741;\nfont-weight: 400;\n}\n\nh5 {\ncolor: #69707D;\n}',
+    variables: [],
   },
 };
