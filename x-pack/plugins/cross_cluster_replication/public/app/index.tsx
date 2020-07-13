@@ -6,7 +6,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
-import { I18nStart, ScopedHistory, ApplicationStart } from 'kibana/public';
+import { I18nStart, ScopedHistory, ApplicationStart, ChromeDocTitle } from 'kibana/public';
 import { UnmountCallback } from 'src/core/public';
 
 import { init as initBreadcrumbs, SetBreadcrumbs } from './services/breadcrumbs';
@@ -14,16 +14,21 @@ import { init as initDocumentation } from './services/documentation_links';
 import { App } from './app';
 import { ccrStore } from './store';
 
+interface AppDependencies {
+  I18nContext: I18nStart['Context'];
+  history: ScopedHistory;
+  getUrlForApp: ApplicationStart['getUrlForApp'];
+  docTitle: ChromeDocTitle;
+}
+
 const renderApp = (
   element: Element,
-  I18nContext: I18nStart['Context'],
-  history: ScopedHistory,
-  getUrlForApp: ApplicationStart['getUrlForApp']
+  { docTitle, getUrlForApp, history, I18nContext }: AppDependencies
 ): UnmountCallback => {
   render(
     <I18nContext>
       <Provider store={ccrStore}>
-        <App history={history} getUrlForApp={getUrlForApp} />
+        <App docTitle={docTitle} history={history} getUrlForApp={getUrlForApp} />
       </Provider>
     </I18nContext>,
     element
@@ -31,6 +36,17 @@ const renderApp = (
 
   return () => unmountComponentAtNode(element);
 };
+
+interface MountDependencies {
+  element: Element;
+  setBreadcrumbs: SetBreadcrumbs;
+  I18nContext: I18nStart['Context'];
+  ELASTIC_WEBSITE_URL: string;
+  DOC_LINK_VERSION: string;
+  history: ScopedHistory;
+  getUrlForApp: ApplicationStart['getUrlForApp'];
+  docTitle: ChromeDocTitle;
+}
 
 export async function mountApp({
   element,
@@ -40,19 +56,12 @@ export async function mountApp({
   DOC_LINK_VERSION,
   history,
   getUrlForApp,
-}: {
-  element: Element;
-  setBreadcrumbs: SetBreadcrumbs;
-  I18nContext: I18nStart['Context'];
-  ELASTIC_WEBSITE_URL: string;
-  DOC_LINK_VERSION: string;
-  history: ScopedHistory;
-  getUrlForApp: ApplicationStart['getUrlForApp'];
-}): Promise<UnmountCallback> {
+  docTitle,
+}: MountDependencies): Promise<UnmountCallback> {
   // Import and initialize additional services here instead of in plugin.ts to reduce the size of the
   // initial bundle as much as possible.
   initBreadcrumbs(setBreadcrumbs);
   initDocumentation(`${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`);
 
-  return renderApp(element, I18nContext, history, getUrlForApp);
+  return renderApp(element, { I18nContext, history, getUrlForApp, docTitle });
 }

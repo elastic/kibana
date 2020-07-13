@@ -6,7 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import { Route, Switch, Router, Redirect } from 'react-router-dom';
-import { ScopedHistory, ApplicationStart } from 'kibana/public';
+import { ScopedHistory, ApplicationStart, ChromeDocTitle } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -20,6 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { PLUGIN } from '../../common/constants';
 import { getFatalErrors } from './services/notifications';
 import { SectionError } from './components';
 import { routing } from './services/routing';
@@ -38,6 +39,7 @@ import {
 interface AppProps {
   history: ScopedHistory;
   getUrlForApp: ApplicationStart['getUrlForApp'];
+  docTitle: ChromeDocTitle;
 }
 
 interface AppState {
@@ -61,7 +63,12 @@ class AppComponent extends Component<AppProps, AppState> {
   }
 
   componentDidMount() {
+    this.props.docTitle.change(PLUGIN.TITLE);
     this.checkPermissions();
+  }
+
+  componentWillUnmount() {
+    this.props.docTitle.reset();
   }
 
   async checkPermissions() {
