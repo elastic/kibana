@@ -905,7 +905,7 @@ export function getActionType(): ActionTypeModel {
 and action params form available in Create Alert form:
 ![Index action form](https://i.imgur.com/mpxnPOF.png)
 
-Example of the index document for Index Threshold Alert:
+Example of the index document for Index Threshold alert:
 
 ```
 {
@@ -1595,4 +1595,3 @@ export interface ActionsConnectorsContextValue {
 |capabilities|Property, which is defining action current user usage capabilities like canSave or canDelete.|
 |toastNotifications|Toast messages.|
 |reloadConnectors|Optional function, which will be executed if connector was saved sucsessfuly, like reload list of connecotrs.|
-
