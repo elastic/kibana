@@ -78,60 +78,56 @@ export const AnomaliesChart: React.FunctionComponent<{
     [setTimeRange]
   );
 
-  return (
-    <>
-      {!isLoading && !series.length ? (
-        <EuiEmptyPrompt
-          title={
-            <h2>
-              {i18n.translate('xpack.infra.logs.analysis.anomalySectionLogRateChartNoData', {
-                defaultMessage: 'There is no log rate data to display.',
+  return !isLoading && !series.length ? (
+    <EuiEmptyPrompt
+      title={
+        <h2>
+          {i18n.translate('xpack.infra.logs.analysis.anomalySectionLogRateChartNoData', {
+            defaultMessage: 'There is no log rate data to display.',
+          })}
+        </h2>
+      }
+      titleSize="m"
+    />
+  ) : (
+    <LoadingOverlayWrapper isLoading={isLoading}>
+      <div style={{ height: 160, width: '100%' }}>
+        {series.length ? (
+          <Chart className="log-entry-rate-chart">
+            <Axis
+              id="timestamp"
+              position="bottom"
+              showOverlappingTicks
+              tickFormat={chartDateFormatter}
+            />
+            <Axis
+              id="values"
+              position="left"
+              tickFormat={(value) => numeral(value.toPrecision(3)).format('0[.][00]a')} // https://github.com/adamwdraper/Numeral-js/issues/194
+            />
+            <BarSeries
+              id={logEntryRateSpecId}
+              name={i18n.translate('xpack.infra.logs.analysis.anomaliesSectionLineSeriesName', {
+                defaultMessage: 'Log entries per 15 minutes (avg)',
               })}
-            </h2>
-          }
-          titleSize="m"
-        />
-      ) : (
-        <LoadingOverlayWrapper isLoading={isLoading}>
-          <div style={{ height: 160, width: '100%' }}>
-            {series.length ? (
-              <Chart className="log-entry-rate-chart">
-                <Axis
-                  id="timestamp"
-                  position="bottom"
-                  showOverlappingTicks
-                  tickFormat={chartDateFormatter}
-                />
-                <Axis
-                  id="values"
-                  position="left"
-                  tickFormat={(value) => numeral(value.toPrecision(3)).format('0[.][00]a')} // https://github.com/adamwdraper/Numeral-js/issues/194
-                />
-                <BarSeries
-                  id={logEntryRateSpecId}
-                  name={i18n.translate('xpack.infra.logs.analysis.anomaliesSectionLineSeriesName', {
-                    defaultMessage: 'Log entries per 15 minutes (avg)',
-                  })}
-                  xScaleType="time"
-                  yScaleType="linear"
-                  xAccessor={'time'}
-                  yAccessors={['value']}
-                  data={series}
-                  barSeriesStyle={barSeriesStyle}
-                />
-                {renderAnnotations(annotations, chartId, renderAnnotationTooltip)}
-                <Settings
-                  onBrushEnd={handleBrushEnd}
-                  tooltip={tooltipProps}
-                  baseTheme={isDarkMode ? DARK_THEME : LIGHT_THEME}
-                  xDomain={{ min: timeRange.startTime, max: timeRange.endTime }}
-                />
-              </Chart>
-            ) : null}
-          </div>
-        </LoadingOverlayWrapper>
-      )}
-    </>
+              xScaleType="time"
+              yScaleType="linear"
+              xAccessor={'time'}
+              yAccessors={['value']}
+              data={series}
+              barSeriesStyle={barSeriesStyle}
+            />
+            {renderAnnotations(annotations, chartId, renderAnnotationTooltip)}
+            <Settings
+              onBrushEnd={handleBrushEnd}
+              tooltip={tooltipProps}
+              baseTheme={isDarkMode ? DARK_THEME : LIGHT_THEME}
+              xDomain={{ min: timeRange.startTime, max: timeRange.endTime }}
+            />
+          </Chart>
+        ) : null}
+      </div>
+    </LoadingOverlayWrapper>
   );
 };
 

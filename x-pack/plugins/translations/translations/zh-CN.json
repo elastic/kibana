@@ -7477,7 +7477,6 @@
     "xpack.infra.logs.analysis.anomaliesSectionLineSeriesName": "每 15 分钟日志条目数（平均值）",
     "xpack.infra.logs.analysis.anomaliesSectionLoadingAriaLabel": "正在加载异常",
     "xpack.infra.logs.analysis.anomaliesSectionTitle": "异常",
-    "xpack.infra.logs.analysis.anomalySectionNoAnomaliesTitle": "未检测到任何异常。",
     "xpack.infra.logs.analysis.anomalySectionNoDataBody": "您可能想调整时间范围。",
     "xpack.infra.logs.analysis.anomalySectionNoDataTitle": "没有可显示的数据。",
     "xpack.infra.logs.analysis.jobConfigurationOutdatedCalloutMessage": "创建 ML 作业时所使用的源配置不同。重新创建作业以应用当前配置。这将移除以前检测到的异常。",

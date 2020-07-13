@@ -7472,7 +7472,6 @@
     "xpack.infra.logs.analysis.anomaliesSectionLineSeriesName": "15 分ごとのログエントリー (平均)",
     "xpack.infra.logs.analysis.anomaliesSectionLoadingAriaLabel": "異常を読み込み中",
     "xpack.infra.logs.analysis.anomaliesSectionTitle": "異常",
-    "xpack.infra.logs.analysis.anomalySectionNoAnomaliesTitle": "異常が検出されませんでした。",
     "xpack.infra.logs.analysis.anomalySectionNoDataBody": "時間範囲を調整する必要があるかもしれません。",
     "xpack.infra.logs.analysis.anomalySectionNoDataTitle": "表示するデータがありません。",
     "xpack.infra.logs.analysis.jobConfigurationOutdatedCalloutMessage": "異なるソース構成を使用して ML ジョブが作成されました。現在の構成を適用するにはジョブを再作成してください。これにより以前検出された異常が削除されます。",
