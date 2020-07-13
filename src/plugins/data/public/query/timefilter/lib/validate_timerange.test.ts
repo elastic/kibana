@@ -17,11 +17,36 @@
  * under the License.
  */
 
-export { TimefilterService, TimefilterSetup } from './timefilter_service';
+import { validateTimeRange } from './validate_timerange';
 
-export * from './types';
-export { Timefilter, TimefilterContract } from './timefilter';
-export { TimeHistory, TimeHistoryContract } from './time_history';
-export { changeTimeFilter, convertRangeFilterToTimeRangeString } from './lib/change_time_filter';
-export { extractTimeFilter } from './lib/extract_time_filter';
-export { validateTimeRange } from './lib/validate_timerange';
+describe('Validate timerange', () => {
+  test('Validate no range', () => {
+    const ok = validateTimeRange();
+
+    expect(ok).toBe(false);
+  });
+  test('normal range', () => {
+    const ok = validateTimeRange({
+      to: 'now',
+      from: 'now-7d',
+    });
+
+    expect(ok).toBe(true);
+  });
+  test('bad from time', () => {
+    const ok = validateTimeRange({
+      to: 'nowa',
+      from: 'now-7d',
+    });
+
+    expect(ok).toBe(false);
+  });
+  test('bad to time', () => {
+    const ok = validateTimeRange({
+      to: 'now',
+      from: 'nowa-7d',
+    });
+
+    expect(ok).toBe(false);
+  });
+});
