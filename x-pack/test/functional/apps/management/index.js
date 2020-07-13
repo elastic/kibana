@@ -8,6 +8,6 @@ export default function ({ loadTestFile }) {
   describe('management', function () {
     this.tags(['ciGroup2']);
 
-    loadTestFile(require.resolve('./create_index_patten_wizard'));
+    loadTestFile(require.resolve('./create_index_pattern_wizard'));
   });
 }
