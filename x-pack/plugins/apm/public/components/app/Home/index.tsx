@@ -20,6 +20,7 @@ import { EuiTabLink } from '../../shared/EuiTabLink';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
 import { ServiceOverviewLink } from '../../shared/Links/apm/ServiceOverviewLink';
 import { SettingsLink } from '../../shared/Links/apm/SettingsLink';
+import { AnomalyDetectionSetupLink } from '../../shared/Links/apm/AnomalyDetectionSetupLink';
 import { TraceOverviewLink } from '../../shared/Links/apm/TraceOverviewLink';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 import { ServiceMap } from '../ServiceMap';
@@ -117,6 +118,9 @@ export function Home({ tab }: Props) {
                 {SETTINGS_LINK_LABEL}
               </EuiButtonEmpty>
             </SettingsLink>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <AnomalyDetectionSetupLink />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <SetupInstructionsLink />
