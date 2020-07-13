@@ -9,7 +9,7 @@
   "machine_learning_job_id": "packetbeat_rare_dns_question",
   "name": "Unusual DNS Activity",
   "references": [
-    "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
+    "https://www.elastic.co/guide/en/siem/guide/current/prebuilt-ml-jobs.html"
   ],
   "risk_score": 21,
   "rule_id": "746edc4c-c54c-49c6-97a1-651223819448",

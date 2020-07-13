@@ -9,7 +9,7 @@
   "machine_learning_job_id": "suspicious_login_activity_ecs",
   "name": "Unusual Login Activity",
   "references": [
-    "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
+    "https://www.elastic.co/guide/en/siem/guide/current/prebuilt-ml-jobs.html"
   ],
   "risk_score": 21,
   "rule_id": "4330272b-9724-4bc6-a3ca-f1532b81e5c2",

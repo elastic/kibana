@@ -9,7 +9,7 @@
   "machine_learning_job_id": "linux_anomalous_network_url_activity_ecs",
   "name": "Unusual Linux Web Activity",
   "references": [
-    "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
+    "https://www.elastic.co/guide/en/siem/guide/current/prebuilt-ml-jobs.html"
   ],
   "risk_score": 21,
   "rule_id": "52afbdc5-db15-485e-bc35-f5707f820c4c",
