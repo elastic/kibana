@@ -16,9 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import { clusterClientMock, clusterClientInstanceMock } from './core_service.test.mocks';
+
 import Boom from 'boom';
 import { Request } from 'hapi';
-import { clusterClientMock } from './core_service.test.mocks';
+import { errors as esErrors } from 'elasticsearch';
+import { ElasticsearchErrorHelpers } from '../../elasticsearch/errors';
 
 import * as kbnTestServer from '../../../../test_utils/kbn_server';
 
@@ -352,7 +356,7 @@ describe('http service', () => {
       });
     });
   });
-  describe('elasticsearch', () => {
+  describe('legacy elasticsearch client', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
     beforeEach(async () => {
       root = kbnTestServer.createRoot({ plugins: { initialize: false } });
@@ -415,6 +419,32 @@ describe('http service', () => {
       expect(adminClientHeaders).toEqual({ authorization: authorizationHeader });
       const [, , dataClientHeaders] = dataClient;
       expect(dataClientHeaders).toEqual({ authorization: authorizationHeader });
+    });
+
+    it('forwards 401 errors returned from elasticsearch', async () => {
+      const { http } = await root.setup();
+      const { createRouter } = http;
+
+      const authenticationError = ElasticsearchErrorHelpers.decorateNotAuthorizedError(
+        new (esErrors.AuthenticationException as any)('Authentication Exception', {
+          body: { error: { header: { 'WWW-Authenticate': 'authenticate header' } } },
+          statusCode: 401,
+        })
+      );
+
+      clusterClientInstanceMock.callAsCurrentUser.mockRejectedValue(authenticationError);
+
+      const router = createRouter('/new-platform');
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
+        await context.core.elasticsearch.adminClient.callAsCurrentUser('ping');
+        return res.ok();
+      });
+
+      await root.start();
+
+      const response = await kbnTestServer.request.get(root, '/new-platform/').expect(401);
+
+      expect(response.header['www-authenticate']).toEqual('authenticate header');
     });
   });
 });
