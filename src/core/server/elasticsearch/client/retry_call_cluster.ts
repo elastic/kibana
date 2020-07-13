@@ -19,7 +19,6 @@
 
 import { defer, throwError, iif, timer } from 'rxjs';
 import { concatMap, retryWhen } from 'rxjs/operators';
-import { errors as esErrors } from '@elastic/elasticsearch';
 import { Logger } from '../../logging';
 
 const retryResponseStatuses = [
@@ -48,11 +47,7 @@ export const retryCallCluster = <T extends Promise<unknown>>(apiCaller: () => T)
       retryWhen((errors) =>
         errors.pipe(
           concatMap((error) =>
-            iif(
-              () => error instanceof esErrors.NoLivingConnectionsError,
-              timer(1000),
-              throwError(error)
-            )
+            iif(() => error.name === 'NoLivingConnectionsError', timer(1000), throwError(error))
           )
         )
       )
