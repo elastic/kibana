@@ -82,7 +82,6 @@ export function getAncestryAsArray(event: ResolverEvent | undefined): string[] {
  * @param event The event to get the category for
  */
 export function primaryEventCategory(event: ResolverEvent): string | undefined {
-  // Returning "Process" as a catch-all here because it seems pretty general
   if (isLegacyEvent(event)) {
     const legacyFullType = event.endgame.event_type_full;
     if (legacyFullType) {
@@ -93,6 +92,20 @@ export function primaryEventCategory(event: ResolverEvent): string | undefined {
     const category = typeof eventCategories === 'string' ? eventCategories : eventCategories[0];
 
     return category;
+  }
+}
+
+/**
+ * @param event The event to get the full ECS category for
+ */
+export function allEventCategories(event: ResolverEvent): string | string[] | undefined {
+  if (isLegacyEvent(event)) {
+    const legacyFullType = event.endgame.event_type_full;
+    if (legacyFullType) {
+      return legacyFullType;
+    }
+  } else {
+    return event.event.category;
   }
 }
 
