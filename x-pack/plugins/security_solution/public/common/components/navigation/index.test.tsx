@@ -92,12 +92,12 @@ describe('SIEM Navigation', () => {
       {
         detailName: undefined,
         navTabs: {
-          alerts: {
+          detections: {
             disabled: false,
-            href: '/app/security/alerts',
-            id: 'alerts',
-            name: 'Alerts',
-            urlKey: 'alerts',
+            href: '/app/security/detections',
+            id: 'detections',
+            name: 'Detections',
+            urlKey: 'detections',
           },
           case: {
             disabled: false,
@@ -108,9 +108,9 @@ describe('SIEM Navigation', () => {
           },
           management: {
             disabled: false,
-            href: '/app/security/management',
+            href: '/app/security/administration',
             id: 'management',
-            name: 'Management',
+            name: 'Administration',
             urlKey: 'management',
           },
           hosts: {
@@ -197,12 +197,12 @@ describe('SIEM Navigation', () => {
         filters: [],
         flowTarget: undefined,
         navTabs: {
-          alerts: {
+          detections: {
             disabled: false,
-            href: '/app/security/alerts',
-            id: 'alerts',
-            name: 'Alerts',
-            urlKey: 'alerts',
+            href: '/app/security/detections',
+            id: 'detections',
+            name: 'Detections',
+            urlKey: 'detections',
           },
           case: {
             disabled: false,
@@ -220,9 +220,9 @@ describe('SIEM Navigation', () => {
           },
           management: {
             disabled: false,
-            href: '/app/security/management',
+            href: '/app/security/administration',
             id: 'management',
-            name: 'Management',
+            name: 'Administration',
             urlKey: 'management',
           },
           network: {

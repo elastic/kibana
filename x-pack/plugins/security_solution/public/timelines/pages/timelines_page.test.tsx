@@ -9,12 +9,23 @@ import React from 'react';
 
 import { useKibana } from '../../common/lib/kibana';
 import { TimelinesPageComponent } from './timelines_page';
-import { disableTemplate } from '../../../common/constants';
 
-jest.mock('../../overview/components/events_by_dataset');
+jest.mock('react-router-dom', () => {
+  const originalModule = jest.requireActual('react-router-dom');
 
-jest.mock('../../common/lib/kibana', () => {
   return {
+    ...originalModule,
+    useParams: jest.fn().mockReturnValue({
+      tabName: 'default',
+    }),
+  };
+});
+jest.mock('../../overview/components/events_by_dataset');
+jest.mock('../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../common/lib/kibana');
+
+  return {
+    ...originalModule,
     useKibana: jest.fn(),
   };
 });
@@ -59,22 +70,16 @@ describe('TimelinesPageComponent', () => {
       ).toEqual(true);
     });
 
-    test('it renders create timelin btn', () => {
+    test('it renders create timeline btn', () => {
       expect(wrapper.find('[data-test-subj="create-default-btn"]').exists()).toBeTruthy();
     });
 
-    /*
-     * CreateTemplateTimelineBtn
-     * Remove the comment here to enable CreateTemplateTimelineBtn
-     */
-    test('it renders no create template timelin btn', () => {
-      expect(wrapper.find('[data-test-subj="create-template-btn"]').exists()).toEqual(
-        !disableTemplate
-      );
+    test('it renders no create timeline template btn', () => {
+      expect(wrapper.find('[data-test-subj="create-template-btn"]').exists()).toBeFalsy();
     });
   });
 
-  describe('If the user is not authorised', () => {
+  describe('If the user is not authorized', () => {
     beforeAll(() => {
       ((useKibana as unknown) as jest.Mock).mockReturnValue({
         services: {

@@ -76,6 +76,13 @@ const createInstance = async () => {
   };
 };
 
+const docLinks = {
+  links: {
+    indexPatterns: {},
+    scriptedFields: {},
+  },
+};
+
 const createIndexPatternManagmentContext = () => {
   const {
     chrome,
@@ -84,7 +91,6 @@ const createIndexPatternManagmentContext = () => {
     uiSettings,
     notifications,
     overlays,
-    docLinks,
   } = coreMock.createStart();
   const { http } = coreMock.createSetup();
   const data = dataPluginMock.createStartContract();

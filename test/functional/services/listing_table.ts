@@ -179,9 +179,12 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
      * @param promptBtnTestSubj testSubj locator for Prompt button
      */
     public async clickNewButton(promptBtnTestSubj: string): Promise<void> {
-      await retry.try(async () => {
+      await retry.tryForTime(20000, async () => {
         // newItemButton button is only visible when there are items in the listing table is displayed.
-        if (await testSubjects.exists('newItemButton')) {
+        const isnNewItemButtonPresent = await testSubjects.exists('newItemButton', {
+          timeout: 5000,
+        });
+        if (isnNewItemButtonPresent) {
           await testSubjects.click('newItemButton');
         } else {
           // no items exist, click createPromptButton to create new dashboard/visualization
