@@ -113,7 +113,7 @@ https://mail.google.com[Gmail] SMTP service:
 
 If you get an authentication error that indicates that you need to continue the
 sign-in process from a web browser when the action attempts to send email, you need
-to configure Gmail to https://support.google.com/accounts/answer/6010255?hl=en[Allow
+to configure Gmail to https://support.google.com/accounts/answer/6010255?hl=en[allow
 Less Secure Apps to access your account].
 
 If two-step verification is enabled for your account, you must generate and use
