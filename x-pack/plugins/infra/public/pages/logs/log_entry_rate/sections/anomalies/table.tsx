@@ -130,13 +130,13 @@ export const AnomaliesTable: React.FunctionComponent<{
 
   const [expandedIds, { add: expandId, remove: collapseId }] = useSet<string>(new Set());
 
-  const expandedDatasetRowContents = useMemo(
+  const expandedIdsRowContents = useMemo(
     () =>
-      [...expandedIds].reduce<Record<string, React.ReactNode>>((aggregatedDatasetRows, id) => {
+      [...expandedIds].reduce<Record<string, React.ReactNode>>((aggregatedRows, id) => {
         const anomaly = results.find((_anomaly) => _anomaly.id === id);
 
         return {
-          ...aggregatedDatasetRows,
+          ...aggregatedRows,
           [id]: anomaly ? (
             <AnomaliesTableExpandedRow anomaly={anomaly} timeRange={timeRange} />
           ) : null,
@@ -207,7 +207,7 @@ export const AnomaliesTable: React.FunctionComponent<{
         <EuiBasicTable
           items={tableItems}
           itemId="id"
-          itemIdToExpandedRowMap={expandedDatasetRowContents}
+          itemIdToExpandedRowMap={expandedIdsRowContents}
           isExpandable={true}
           hasActions={true}
           columns={columns}
