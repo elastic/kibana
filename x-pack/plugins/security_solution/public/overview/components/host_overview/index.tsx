@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { getOr } from 'lodash/fp';
@@ -170,29 +170,47 @@ export const HostOverview = React.memo<HostSummaryProps>(
         },
       ],
     ];
-
     return (
       <InspectButtonContainer>
-        <OverviewWrapper>
-          <InspectButton queryId={id} title={i18n.INSPECT_TITLE} inspectIndex={0} />
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem grow={false}>
+            <OverviewWrapper>
+              <InspectButton queryId={id} title={i18n.INSPECT_TITLE} inspectIndex={0} />
 
-          {descriptionLists.map((descriptionList, index) =>
-            getDescriptionList(descriptionList, index)
-          )}
+              {descriptionLists.map((descriptionList, index) =>
+                getDescriptionList(descriptionList, index)
+              )}
 
-          <EuiHorizontalRule />
-          <EndpointOverview data={data} />
+              {loading && (
+                <Loader
+                  overlay
+                  overlayBackground={
+                    darkMode ? darkTheme.euiPageBackgroundColor : lightTheme.euiPageBackgroundColor
+                  }
+                  size="xl"
+                />
+              )}
+            </OverviewWrapper>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiHorizontalRule />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <OverviewWrapper>
+              <EndpointOverview data={data.endpoint} />
 
-          {loading && (
-            <Loader
-              overlay
-              overlayBackground={
-                darkMode ? darkTheme.euiPageBackgroundColor : lightTheme.euiPageBackgroundColor
-              }
-              size="xl"
-            />
-          )}
-        </OverviewWrapper>
+              {loading && (
+                <Loader
+                  overlay
+                  overlayBackground={
+                    darkMode ? darkTheme.euiPageBackgroundColor : lightTheme.euiPageBackgroundColor
+                  }
+                  size="xl"
+                />
+              )}
+            </OverviewWrapper>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </InspectButtonContainer>
     );
   }

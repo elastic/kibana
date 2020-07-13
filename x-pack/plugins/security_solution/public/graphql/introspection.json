@@ -6517,10 +6517,18 @@
             "deprecationReason": null
           },
           {
-            "name": "lastSeen",
+            "name": "cloud",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "Date", "ofType": null },
+            "type": { "kind": "OBJECT", "name": "CloudFields", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "endpoint",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "EndpointFields", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -6533,18 +6541,18 @@
             "deprecationReason": null
           },
           {
-            "name": "cloud",
-            "description": "",
-            "args": [],
-            "type": { "kind": "OBJECT", "name": "CloudFields", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "inspect",
             "description": "",
             "args": [],
             "type": { "kind": "OBJECT", "name": "Inspect", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "lastSeen",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Date", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -6649,6 +6657,65 @@
         "inputFields": null,
         "interfaces": [],
         "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "EndpointFields",
+        "description": "",
+        "fields": [
+          {
+            "name": "endpointPolicy",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sensorVersion",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "policyStatus",
+            "description": "",
+            "args": [],
+            "type": { "kind": "ENUM", "name": "HostPolicyResponseActionStatus", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "HostPolicyResponseActionStatus",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "success",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "failure",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          { "name": "warning", "description": "", "isDeprecated": false, "deprecationReason": null }
+        ],
         "possibleTypes": null
       },
       {

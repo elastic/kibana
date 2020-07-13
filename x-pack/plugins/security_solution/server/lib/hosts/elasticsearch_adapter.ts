@@ -6,8 +6,13 @@
 
 import { get, getOr, has, head, set } from 'lodash/fp';
 
-import { LoggerFactory } from 'kibana/server';
-import { FirstLastSeenHost, HostItem, HostsData, HostsEdges } from '../../graphql/types';
+import {
+  FirstLastSeenHost,
+  HostItem,
+  HostsData,
+  HostsEdges,
+  EndpointFields,
+} from '../../graphql/types';
 import { inspectStringifyObject } from '../../utils/build_query';
 import { hostFieldsMap } from '../ecs_fields';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
@@ -28,7 +33,8 @@ import {
 } from './types';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 import { EndpointAppContext } from '../../endpoint/types';
-import { getHostData } from '../../endpoint/routes/metadata';
+import { getHostData, MetadataRequestContext } from '../../endpoint/routes/metadata';
+import { HostPolicyResponseActionStatus } from '../../../common/endpoint/types';
 
 export class ElasticsearchHostsAdapter implements HostsAdapter {
   constructor(
@@ -95,19 +101,40 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
           ? formattedHostItem.host.id[0]
           : formattedHostItem.host.id
         : null;
-    console.log('hostId', hostId);
+    const endpoint: EndpointFields | null = await this.getHostEndpoint(request, hostId);
+    return { inspect, _id: options.hostName, ...formattedHostItem, endpoint };
+  }
 
-    const metadataRequestContext: MetadataRequestContext = {
-      agentService: this.endpointContext.service.getAgentService(),
-      logger: this.endpointContext.logFactory.get('metadata'),
-      requestHandlerContext: request.context,
-    };
-    const endpointData =
-      metadataRequestContext.agentService != null
-        ? await getHostData(metadataRequestContext, hostId)
+  public async getHostEndpoint(
+    request: FrameworkRequest,
+    hostId: string | null
+  ): Promise<EndpointFields> {
+    const logger = this.endpointContext.logFactory.get('metadata');
+    try {
+      const agentService = this.endpointContext.service.getAgentService();
+      if (agentService === undefined) {
+        throw new Error('agentService not available');
+      }
+      const metadataRequestContext: MetadataRequestContext = {
+        agentService,
+        logger,
+        requestHandlerContext: request.context,
+      };
+      const endpointData =
+        hostId != null && metadataRequestContext.agentService != null
+          ? await getHostData(metadataRequestContext, hostId)
+          : null;
+      return endpointData != null && endpointData.metadata
+        ? {
+            endpointPolicy: endpointData.metadata.Endpoint.policy.applied.name,
+            policyStatus: endpointData.metadata.Endpoint.policy.applied.status,
+            sensorVersion: endpointData.metadata.agent.version,
+          }
         : null;
-    console.log('endpointData', JSON.stringify(endpointData));
-    return { inspect, _id: options.hostName, ...formattedHostItem };
+    } catch (err) {
+      logger.warn(JSON.stringify(err, null, 2));
+      return null;
+    }
   }
 
   public async getHostFirstLastSeen(

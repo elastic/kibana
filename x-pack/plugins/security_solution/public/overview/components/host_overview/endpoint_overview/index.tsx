@@ -5,25 +5,19 @@
  */
 
 import { EuiFlexItem } from '@elastic/eui';
-import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
-import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 
-import { DEFAULT_DARK_MODE } from '../../../../management/common/constants';
 import { DescriptionList } from '../../../../../common/utility_types';
-import { useUiSetting$ } from '../../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/field_renderers';
-import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
-import { HostItem } from '../../../../graphql/types';
-import { Loader } from '../../../../common/components/loader';
-import { DescriptionListStyled, OverviewWrapper } from '../../../../common/components/page';
+import { EndpointFields } from '../../../../graphql/types';
+import { DescriptionListStyled } from '../../../../common/components/page';
 
 import * as i18n from './translations';
 
 interface Props {
-  data: HostItem;
+  data: EndpointFields;
   id: string;
   loading: boolean;
 }
@@ -35,10 +29,10 @@ const getDescriptionList = (descriptionList: DescriptionList[], key: number) => 
 );
 
 export const EndpointOverview = React.memo<Props>(({ data }) => {
-  const getDefaultRenderer = (fieldName: string, fieldData: HostItem) => (
+  const getDefaultRenderer = (fieldName: string, fieldData: EndpointFields, attrName: string) => (
     <DefaultFieldRenderer
-      rowItems={getOr([], fieldName, fieldData)}
-      attrName={fieldName}
+      rowItems={[getOr('', fieldName, fieldData)]}
+      attrName={attrName}
       idPrefix="endpoint-overview"
     />
   );
@@ -46,25 +40,34 @@ export const EndpointOverview = React.memo<Props>(({ data }) => {
     [
       {
         title: i18n.ENDPOINT_POLICY,
-        description: data.endpointPolicy
-          ? getDefaultRenderer('host.endpoint.endpointPolicy', data)
-          : getEmptyTagValue(),
+        description:
+          data != null &&
+          data.endpointPolicy != null &&
+          data.endpointPolicy &&
+          data.endpointPolicy.length
+            ? getDefaultRenderer('endpointPolicy', data, 'Endpoint.policy.applied.name')
+            : getEmptyTagValue(),
       },
     ],
     [
       {
         title: i18n.POLICY_STATUS,
-        description: data.policyStatus
-          ? getDefaultRenderer('host.endpoint.policyStatus', data)
-          : getEmptyTagValue(),
+        description:
+          data != null && data.policyStatus != null && data.policyStatus && data.policyStatus.length
+            ? getDefaultRenderer('policyStatus', data, 'Endpoint.policy.applied.status')
+            : getEmptyTagValue(),
       },
     ],
     [
       {
         title: i18n.SENSORVERSION,
-        description: data.sensorversion
-          ? getDefaultRenderer('host.endpoint.sensorversion', data)
-          : getEmptyTagValue(),
+        description:
+          data != null &&
+          data.sensorVersion != null &&
+          data.sensorVersion &&
+          data.sensorVersion.length
+            ? getDefaultRenderer('sensorVersion', data, 'agent.version')
+            : getEmptyTagValue(),
       },
     ],
     [], // needs 4 columns for design

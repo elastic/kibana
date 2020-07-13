@@ -299,6 +299,12 @@ export enum HostsFields {
   lastSeen = 'lastSeen',
 }
 
+export enum HostPolicyResponseActionStatus {
+  success = 'success',
+  failure = 'failure',
+  warning = 'warning',
+}
+
 export enum UsersFields {
   name = 'name',
   count = 'count',
@@ -1417,13 +1423,15 @@ export interface HostsEdges {
 export interface HostItem {
   _id?: Maybe<string>;
 
-  lastSeen?: Maybe<string>;
+  cloud?: Maybe<CloudFields>;
+
+  endpoint?: Maybe<EndpointFields>;
 
   host?: Maybe<HostEcsFields>;
 
-  cloud?: Maybe<CloudFields>;
-
   inspect?: Maybe<Inspect>;
+
+  lastSeen?: Maybe<string>;
 }
 
 export interface CloudFields {
@@ -1442,6 +1450,14 @@ export interface CloudInstance {
 
 export interface CloudMachine {
   type?: Maybe<(Maybe<string>)[]>;
+}
+
+export interface EndpointFields {
+  endpointPolicy?: Maybe<string>;
+
+  sensorVersion?: Maybe<string>;
+
+  policyStatus?: Maybe<HostPolicyResponseActionStatus>;
 }
 
 export interface FirstLastSeenHost {
@@ -6287,13 +6303,15 @@ export namespace HostItemResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = HostItem> {
     _id?: _IdResolver<Maybe<string>, TypeParent, TContext>;
 
-    lastSeen?: LastSeenResolver<Maybe<string>, TypeParent, TContext>;
+    cloud?: CloudResolver<Maybe<CloudFields>, TypeParent, TContext>;
+
+    endpoint?: EndpointResolver<Maybe<EndpointFields>, TypeParent, TContext>;
 
     host?: HostResolver<Maybe<HostEcsFields>, TypeParent, TContext>;
 
-    cloud?: CloudResolver<Maybe<CloudFields>, TypeParent, TContext>;
-
     inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+
+    lastSeen?: LastSeenResolver<Maybe<string>, TypeParent, TContext>;
   }
 
   export type _IdResolver<R = Maybe<string>, Parent = HostItem, TContext = SiemContext> = Resolver<
@@ -6301,8 +6319,13 @@ export namespace HostItemResolvers {
     Parent,
     TContext
   >;
-  export type LastSeenResolver<
-    R = Maybe<string>,
+  export type CloudResolver<
+    R = Maybe<CloudFields>,
+    Parent = HostItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type EndpointResolver<
+    R = Maybe<EndpointFields>,
     Parent = HostItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -6311,13 +6334,13 @@ export namespace HostItemResolvers {
     Parent = HostItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type CloudResolver<
-    R = Maybe<CloudFields>,
+  export type InspectResolver<
+    R = Maybe<Inspect>,
     Parent = HostItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type InspectResolver<
-    R = Maybe<Inspect>,
+  export type LastSeenResolver<
+    R = Maybe<string>,
     Parent = HostItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -6376,6 +6399,36 @@ export namespace CloudMachineResolvers {
   export type TypeResolver<
     R = Maybe<(Maybe<string>)[]>,
     Parent = CloudMachine,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace EndpointFieldsResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = EndpointFields> {
+    endpointPolicy?: EndpointPolicyResolver<Maybe<string>, TypeParent, TContext>;
+
+    sensorVersion?: SensorVersionResolver<Maybe<string>, TypeParent, TContext>;
+
+    policyStatus?: PolicyStatusResolver<
+      Maybe<HostPolicyResponseActionStatus>,
+      TypeParent,
+      TContext
+    >;
+  }
+
+  export type EndpointPolicyResolver<
+    R = Maybe<string>,
+    Parent = EndpointFields,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type SensorVersionResolver<
+    R = Maybe<string>,
+    Parent = EndpointFields,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type PolicyStatusResolver<
+    R = Maybe<HostPolicyResponseActionStatus>,
+    Parent = EndpointFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -9275,6 +9328,7 @@ export type IResolvers<TContext = SiemContext> = {
   CloudFields?: CloudFieldsResolvers.Resolvers<TContext>;
   CloudInstance?: CloudInstanceResolvers.Resolvers<TContext>;
   CloudMachine?: CloudMachineResolvers.Resolvers<TContext>;
+  EndpointFields?: EndpointFieldsResolvers.Resolvers<TContext>;
   FirstLastSeenHost?: FirstLastSeenHostResolvers.Resolvers<TContext>;
   IpOverviewData?: IpOverviewDataResolvers.Resolvers<TContext>;
   Overview?: OverviewResolvers.Resolvers<TContext>;

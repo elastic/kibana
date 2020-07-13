@@ -26,7 +26,7 @@ interface HitSource {
   _source: HostMetadata;
 }
 
-interface MetadataRequestContext {
+export interface MetadataRequestContext {
   agentService: AgentService;
   logger: Logger;
   requestHandlerContext: RequestHandlerContext;
