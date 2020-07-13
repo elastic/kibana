@@ -60,7 +60,7 @@ const PolicyEmptyState = React.memo<{
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policyList.onboardingSectionOne"
-                defaultMessage="Elastic Endpoint Security gives you the power to keep your endpoints safe from attack, as well as unparalleled visibility into any threat in your environment."
+                defaultMessage="Elastic Endpoint Security protects your hosts with threat prevention, detection, and deep security data visibility."
               />
             </EuiText>
             <EuiSpacer size="xl" />
@@ -75,7 +75,7 @@ const PolicyEmptyState = React.memo<{
               <EuiFlexItem>
                 <EuiFlexGroup>
                   <EuiFlexItem grow={false} style={{ marginRight: '10px' }}>
-                    <EuiIcon type="search" />
+                    <EuiIcon type="grid" />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false} style={{ marginLeft: '0' }}>
                     <EuiText>
@@ -99,7 +99,7 @@ const PolicyEmptyState = React.memo<{
               <EuiFlexItem>
                 <EuiFlexGroup>
                   <EuiFlexItem grow={false} style={{ marginRight: '10px' }}>
-                    <EuiIcon type="tableDensityExpanded" />
+                    <EuiIcon type="controlsHorizontal" />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false} style={{ marginLeft: '0' }}>
                     <EuiText>
