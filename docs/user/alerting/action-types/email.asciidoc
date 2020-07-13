@@ -138,7 +138,6 @@ secrets:
     user: <email.address>
     password: <password>
 --------------------------------------------------
-// CONSOLE
 
 When sending emails, you have to provide a from address, either a default one
 in your account configuration or as part of the email action in the watch.
@@ -164,7 +163,6 @@ secrets:
     user: <username>
     password: <password>
 --------------------------------------------------
-// CONSOLE
 <1> `smtp.host` varies depending on the region
 
 NOTE:   You need to use your Amazon SES SMTP credentials to send email through
@@ -193,7 +191,6 @@ secrets:
     user: <email address of service account> <2>
     password: <password>
 --------------------------------------------------
-// CONSOLE
 <1> Some organizations configure Exchange to validate that the `from` field is a
     valid local email account.
 <2> Many organizations support use of your email address as your username, though

@@ -55,7 +55,19 @@ Index actions have the following properties:
 
 Document::  The document to index in json format.
 
-The create test index using index API:
+Example of the index document for Index Threshold Alert:
+
+[source,js]
+--------------------------------------------------
+{
+    "alert_id": "{{alertId}}",
+    "alert_name": "{{alertName}}",
+    "alert_instance_id": "{{alertInstanceId}}",
+    "context_message": "{{context.message}}"
+} 
+--------------------------------------------------
+
+Example of create test index using index API.
 
 [source,js]
 --------------------------------------------------
@@ -76,18 +88,3 @@ PUT test
     }
 }
 --------------------------------------------------
-// CONSOLE
-
-
-Example of the index document for Index Threshold Alert:
-
-[source,js]
---------------------------------------------------
-{
-    "alert_id": "{{alertId}}",
-    "alert_name": "{{alertName}}",
-    "alert_instance_id": "{{alertInstanceId}}",
-    "context_message": "{{context.message}}"
-} 
---------------------------------------------------
-// CONSOLE
