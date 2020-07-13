@@ -158,6 +158,7 @@ describe('alert actions', () => {
             description: 'This is a sample rule description',
             eventIdToNoteIds: {},
             eventType: 'all',
+            excludedRowRendererIds: [],
             filters: [
               {
                 $state: {
@@ -210,7 +211,6 @@ describe('alert actions', () => {
             selectedEventIds: {},
             show: true,
             showCheckboxes: false,
-            showRowRenderers: true,
             sort: {
               columnId: '@timestamp',
               sortDirection: 'desc',

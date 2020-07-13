@@ -6,5 +6,6 @@
   "configPath": ["xpack", "ingestManager"],
   "requiredPlugins": ["licensing", "data", "encryptedSavedObjects"],
   "optionalPlugins": ["security", "features", "cloud", "usageCollection", "home"],
-  "extraPublicDirs": ["common"]
+  "extraPublicDirs": ["common"],
+  "requiredBundles": ["kibanaReact", "esUiShared"]
 }
