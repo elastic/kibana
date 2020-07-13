@@ -3,5 +3,17 @@
   "version": "kibana",
   "ui": true,
   "server": true,
-  "requiredPlugins": ["visualizations", "data", "navigation", "visTypeTimelion", "kibanaLegacy"]
+  "requiredBundles": [
+    "kibanaLegacy",
+    "kibanaUtils",
+    "savedObjects",
+    "visTypeTimelion"
+  ],
+  "requiredPlugins": [
+    "visualizations",
+    "data",
+    "navigation",
+    "visTypeTimelion",
+    "kibanaLegacy"
+  ]
 }
