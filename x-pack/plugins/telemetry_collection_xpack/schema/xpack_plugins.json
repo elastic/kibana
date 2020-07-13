@@ -164,6 +164,62 @@
         }
       }
     },
+    "security_solution": {
+      "properties": {
+        "detections": {
+          "properties": {
+            "detection_rules": {
+              "properties": {
+                "custom": {
+                  "properties": {
+                    "enabled": {
+                      "type": "long"
+                    },
+                    "disabled": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "elastic": {
+                  "properties": {
+                    "enabled": {
+                      "type": "long"
+                    },
+                    "disabled": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "ml_jobs": {
+              "properties": {
+                "custom": {
+                  "properties": {
+                    "enabled": {
+                      "type": "long"
+                    },
+                    "disabled": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "elastic": {
+                  "properties": {
+                    "enabled": {
+                      "type": "long"
+                    },
+                    "disabled": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "spaces": {
       "properties": {
         "usesFeatureControls": {
