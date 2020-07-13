@@ -16,7 +16,7 @@ export const JobDefinitionOutdatedCallout: React.FC<{
 }> = ({ moduleName, onRecreateMlJob }) => (
   <RecreateJobCallout
     title={i18n.translate('xpack.infra.logs.analysis.jobDefinitionOutdatedCalloutTitle', {
-      defaultMessage: '{moduleName} ML job definition outdated',
+      defaultMessage: 'The {moduleName} ML job definition is outdated',
       values: {
         moduleName,
       },
