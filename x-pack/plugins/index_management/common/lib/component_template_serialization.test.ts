@@ -92,6 +92,7 @@ describe('Component template serialization', () => {
         },
         _kbnMeta: {
           usedBy: ['my_index_template'],
+          isManaged: false,
         },
       });
     });
@@ -105,6 +106,7 @@ describe('Component template serialization', () => {
           version: 1,
           _kbnMeta: {
             usedBy: [],
+            isManaged: false,
           },
           _meta: {
             serialization: {
