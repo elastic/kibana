@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { ExceptionListItemComponent } from './exception_item';
-import { useFetchIndexPatterns } from '../../../../alerts/containers/detection_engine/rules/fetch_index_patterns';
+import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules/fetch_index_patterns';
 import {
   ExceptionListItemSchema,
   NamespaceType,
@@ -16,6 +16,7 @@ import {
   OperatorTypeEnum,
   OperatorEnum,
   CreateExceptionListItemSchema,
+  ExceptionListType,
 } from '../../../../../public/lists_plugin_deps';
 import { AndOrBadge } from '../../and_or_badge';
 import { BuilderButtonOptions } from './builder_button_options';
@@ -43,8 +44,8 @@ interface OnChangeProps {
 }
 
 interface ExceptionBuilderProps {
-  exceptionListItems: ExceptionListItemSchema[];
-  listType: 'detection' | 'endpoint';
+  exceptionListItems: ExceptionsBuilderExceptionItem[];
+  listType: ExceptionListType;
   listId: string;
   listNamespaceType: NamespaceType;
   ruleName: string;
@@ -76,14 +77,20 @@ export const ExceptionBuilder = ({
     indexPatternConfig ?? []
   );
 
+  const handleCheckAndLogic = (items: ExceptionsBuilderExceptionItem[]): void => {
+    setAndLogicIncluded((includesAnd: boolean): boolean => {
+      if (includesAnd) {
+        return true;
+      } else {
+        return items.filter(({ entries }) => entries.length > 1).length > 0;
+      }
+    });
+  };
+
   // Bubble up changes to parent
   useEffect(() => {
     onChange({ exceptionItems: filterExceptionItems(exceptions), exceptionsToDelete });
   }, [onChange, exceptionsToDelete, exceptions]);
-
-  const checkAndLogic = (items: ExceptionsBuilderExceptionItem[]): void => {
-    setAndLogicIncluded(items.filter(({ entries }) => entries.length > 1).length > 0);
-  };
 
   const handleDeleteExceptionItem = (
     item: ExceptionsBuilderExceptionItem,
@@ -99,7 +106,7 @@ export const ExceptionBuilder = ({
           ...existingExceptions.slice(0, itemIndex),
           ...existingExceptions.slice(itemIndex + 1),
         ];
-        checkAndLogic(updatedExceptions);
+        handleCheckAndLogic(updatedExceptions);
 
         return updatedExceptions;
       });
@@ -117,7 +124,7 @@ export const ExceptionBuilder = ({
       ...exceptions.slice(index + 1),
     ];
 
-    checkAndLogic(updatedExceptions);
+    handleCheckAndLogic(updatedExceptions);
     setExceptions(updatedExceptions);
   };
 
@@ -213,6 +220,7 @@ export const ExceptionBuilder = ({
                 isLoading={indexPatternLoading}
                 exceptionItemIndex={index}
                 andLogicIncluded={andLogicIncluded}
+                onCheckAndLogic={handleCheckAndLogic}
                 onDeleteExceptionItem={handleDeleteExceptionItem}
                 onExceptionItemChange={handleExceptionItemChange}
               />

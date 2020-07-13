@@ -39,7 +39,7 @@ import { ANALYTICS_STEPS } from '../../page';
 import { ContinueButton } from '../continue_button';
 import { JobType } from './job_type';
 import { SupportedFieldsMessage } from './supported_fields_message';
-import { MemoizedAnalysisFieldsTable } from './analysis_fields_table';
+import { AnalysisFieldsTable } from './analysis_fields_table';
 import { DataGrid } from '../../../../../components/data_grid';
 import { fetchExplainData } from '../shared';
 import { useIndexData } from '../../hooks';
@@ -49,7 +49,8 @@ import { useSavedSearch } from './use_saved_search';
 const requiredFieldsErrorText = i18n.translate(
   'xpack.ml.dataframe.analytics.createWizard.requiredFieldsErrorMessage',
   {
-    defaultMessage: 'At least one field must be included in the analysis.',
+    defaultMessage:
+      'At least one field must be included in the analysis in addition to the dependent variable.',
   }
 );
 
@@ -69,17 +70,19 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   const [dependentVariableOptions, setDependentVariableOptions] = useState<
     EuiComboBoxOptionOption[]
   >([]);
-  const [excludesTableItems, setExcludesTableItems] = useState<FieldSelectionItem[]>([]);
-  const [maxDistinctValuesError, setMaxDistinctValuesError] = useState<string | undefined>(
-    undefined
-  );
+  const [includesTableItems, setIncludesTableItems] = useState<FieldSelectionItem[]>([]);
+  const [maxDistinctValuesError, setMaxDistinctValuesError] = useState<string | undefined>();
+  const [unsupportedFieldsError, setUnsupportedFieldsError] = useState<string | undefined>();
+  const [minimumFieldsRequiredMessage, setMinimumFieldsRequiredMessage] = useState<
+    undefined | string
+  >();
 
   const { setEstimatedModelMemoryLimit, setFormState } = actions;
   const { estimatedModelMemoryLimit, form, isJobCreated, requestMessages } = state;
   const firstUpdate = useRef<boolean>(true);
   const {
     dependentVariable,
-    excludes,
+    includes,
     jobConfigQuery,
     jobConfigQueryString,
     jobType,
@@ -117,7 +120,9 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     dependentVariableEmpty ||
     jobType === undefined ||
     maxDistinctValuesError !== undefined ||
-    requiredFieldsError !== undefined;
+    minimumFieldsRequiredMessage !== undefined ||
+    requiredFieldsError !== undefined ||
+    unsupportedFieldsError !== undefined;
 
   const loadDepVarOptions = async (formState: State['form']) => {
     setLoadingDepVarOptions(true);
@@ -187,7 +192,8 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
         setLoadingFieldOptions(false);
         setFieldOptionsFetchFail(false);
         setMaxDistinctValuesError(undefined);
-        setExcludesTableItems(fieldSelection ? fieldSelection : []);
+        setUnsupportedFieldsError(undefined);
+        setIncludesTableItems(fieldSelection ? fieldSelection : []);
         setFormState({
           ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemory } : {}),
           requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
@@ -200,12 +206,17 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       }
     } else {
       let maxDistinctValuesErrorMessage;
+      let unsupportedFieldsErrorMessage;
       if (
         jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
         errorMessage.includes('status_exception') &&
         (errorMessage.includes('must have at most') || errorMessage.includes('must have at least'))
       ) {
         maxDistinctValuesErrorMessage = errorMessage;
+      }
+
+      if (errorMessage.includes('status_exception') && errorMessage.includes('unsupported type')) {
+        unsupportedFieldsErrorMessage = errorMessage;
       }
 
       if (
@@ -231,6 +242,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       setLoadingFieldOptions(false);
       setFieldOptionsFetchFail(true);
       setMaxDistinctValuesError(maxDistinctValuesErrorMessage);
+      setUnsupportedFieldsError(unsupportedFieldsErrorMessage);
       setFormState({
         ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: fallbackModelMemoryLimit } : {}),
       });
@@ -267,7 +279,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     return () => {
       debouncedGetExplainData.cancel();
     };
-  }, [jobType, dependentVariable, trainingPercent, JSON.stringify(excludes), jobConfigQueryString]);
+  }, [jobType, dependentVariable, trainingPercent, JSON.stringify(includes), jobConfigQueryString]);
 
   return (
     <Fragment>
@@ -393,20 +405,21 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       <EuiFormRow
         fullWidth
         isInvalid={requiredFieldsError !== undefined}
-        error={
-          requiredFieldsError !== undefined && [
-            i18n.translate('xpack.ml.dataframe.analytics.create.requiredFieldsError', {
-              defaultMessage: 'Invalid. {message}',
-              values: { message: requiredFieldsError },
-            }),
-          ]
-        }
+        error={i18n.translate('xpack.ml.dataframe.analytics.create.requiredFieldsError', {
+          defaultMessage: 'Invalid. {message}',
+          values: { message: requiredFieldsError },
+        })}
       >
         <Fragment />
       </EuiFormRow>
-      <MemoizedAnalysisFieldsTable
-        excludes={excludes}
-        tableItems={excludesTableItems}
+      <AnalysisFieldsTable
+        dependentVariable={dependentVariable}
+        includes={includes}
+        minimumFieldsRequiredMessage={minimumFieldsRequiredMessage}
+        setMinimumFieldsRequiredMessage={setMinimumFieldsRequiredMessage}
+        tableItems={includesTableItems}
+        unsupportedFieldsError={unsupportedFieldsError}
+        setUnsupportedFieldsError={setUnsupportedFieldsError}
         loadingItems={loadingFieldOptions}
         setFormState={setFormState}
       />

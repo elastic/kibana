@@ -124,6 +124,8 @@ export interface TimelineInput {
 
   eventType?: Maybe<string>;
 
+  excludedRowRendererIds?: Maybe<RowRendererId[]>;
+
   filters?: Maybe<FilterTimelineInput[]>;
 
   kqlMode?: Maybe<string>;
@@ -185,6 +187,8 @@ export interface DataProviderInput {
   queryMatch?: Maybe<QueryMatchInput>;
 
   and?: Maybe<DataProviderInput[]>;
+
+  type?: Maybe<DataProviderType>;
 }
 
 export interface QueryMatchInput {
@@ -340,6 +344,27 @@ export enum NetworkDnsFields {
 
 export enum TlsFields {
   _id = '_id',
+}
+
+export enum DataProviderType {
+  default = 'default',
+  template = 'template',
+}
+
+export enum RowRendererId {
+  auditd = 'auditd',
+  auditd_file = 'auditd_file',
+  netflow = 'netflow',
+  plain = 'plain',
+  suricata = 'suricata',
+  system = 'system',
+  system_dns = 'system_dns',
+  system_endgame_process = 'system_endgame_process',
+  system_file = 'system_file',
+  system_fim = 'system_fim',
+  system_security_event = 'system_security_event',
+  system_socket = 'system_socket',
+  zeek = 'zeek',
 }
 
 export enum TimelineStatus {
@@ -1044,6 +1069,8 @@ export interface RuleField {
   version?: Maybe<string[]>;
 
   note?: Maybe<string[]>;
+
+  exceptions_list?: Maybe<ToAny>;
 }
 
 export interface SuricataEcsFields {
@@ -1952,6 +1979,8 @@ export interface TimelineResult {
 
   eventType?: Maybe<string>;
 
+  excludedRowRendererIds?: Maybe<RowRendererId[]>;
+
   favorite?: Maybe<FavoriteTimelineResult[]>;
 
   filters?: Maybe<FilterTimelineResult[]>;
@@ -2027,6 +2056,8 @@ export interface DataProviderResult {
   kqlQuery?: Maybe<string>;
 
   queryMatch?: Maybe<QueryMatchResult>;
+
+  type?: Maybe<DataProviderType>;
 
   and?: Maybe<DataProviderResult[]>;
 }
@@ -4374,6 +4405,8 @@ export namespace GetAllTimeline {
 
     eventIdToNoteIds: Maybe<EventIdToNoteIds[]>;
 
+    excludedRowRendererIds: Maybe<RowRendererId[]>;
+
     notes: Maybe<Notes[]>;
 
     noteIds: Maybe<string[]>;
@@ -5032,6 +5065,8 @@ export namespace GetTimelineQuery {
     filters: Maybe<ToAny>;
 
     note: Maybe<string[]>;
+
+    exceptions_list: Maybe<ToAny>;
   };
 
   export type Suricata = {
@@ -5441,6 +5476,8 @@ export namespace GetOneTimeline {
 
     eventIdToNoteIds: Maybe<EventIdToNoteIds[]>;
 
+    excludedRowRendererIds: Maybe<RowRendererId[]>;
+
     favorite: Maybe<Favorite[]>;
 
     filters: Maybe<Filters[]>;
@@ -5518,6 +5555,8 @@ export namespace GetOneTimeline {
     excluded: Maybe<boolean>;
 
     kqlQuery: Maybe<string>;
+
+    type: Maybe<DataProviderType>;
 
     queryMatch: Maybe<QueryMatch>;
 

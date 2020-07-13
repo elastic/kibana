@@ -14,16 +14,17 @@ import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '../../../common/component
 /**
  * TIMELINE BODY
  */
+export const SELECTOR_TIMELINE_BODY_CLASS_NAME = 'securitySolutionTimeline__body';
 
 // SIDE EFFECT: the following creates a global class selector
 export const TimelineBodyGlobalStyle = createGlobalStyle`
-  body.${IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME} .siemTimeline__body {
+  body.${IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME} .${SELECTOR_TIMELINE_BODY_CLASS_NAME} {
     overflow: hidden;
   }
 `;
 
 export const TimelineBody = styled.div.attrs(({ className = '' }) => ({
-  className: `siemTimeline__body ${className}`,
+  className: `${SELECTOR_TIMELINE_BODY_CLASS_NAME} ${className}`,
 }))<{ bodyHeight?: number; visible: boolean }>`
   height: ${({ bodyHeight }) => (bodyHeight ? `${bodyHeight}px` : 'auto')};
   overflow: auto;
@@ -90,10 +91,14 @@ export const EventsTrHeader = styled.div.attrs(({ className }) => ({
 
 export const EventsThGroupActions = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__thGroupActions ${className}`,
-}))<{ actionsColumnWidth: number }>`
+}))<{ actionsColumnWidth: number; isEventViewer: boolean }>`
   display: flex;
-  flex: 0 0 ${({ actionsColumnWidth }) => `${actionsColumnWidth}px`};
+  flex: 0 0
+    ${({ actionsColumnWidth, isEventViewer }) =>
+      `${!isEventViewer ? actionsColumnWidth + 4 : actionsColumnWidth}px`};
   min-width: 0;
+  padding-left: ${({ isEventViewer }) =>
+    !isEventViewer ? '4px;' : '0;'}; // match timeline event border
 `;
 
 export const EventsThGroupData = styled.div.attrs(({ className = '' }) => ({
@@ -150,6 +155,11 @@ export const EventsThContent = styled.div.attrs(({ className = '' }) => ({
     width != null
       ? `${width}px`
       : '100%'}; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
+
+  > button.euiButtonIcon,
+  > .euiToolTipAnchor > button.euiButtonIcon {
+    margin-left: ${({ theme }) => `-${theme.eui.paddingSizes.xs}`};
+  }
 `;
 
 /* EVENTS BODY */
@@ -197,8 +207,7 @@ export const EventsTrSupplement = styled.div.attrs(({ className = '' }) => ({
 }))<{ className: string }>`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
-  padding: 0 ${({ theme }) => theme.eui.paddingSizes.xs} 0
-    ${({ theme }) => theme.eui.paddingSizes.xl};
+  padding: 0 ${({ theme }) => theme.eui.paddingSizes.xs} 0 52px;
 `;
 
 export const EventsTdGroupActions = styled.div.attrs(({ className = '' }) => ({
@@ -248,6 +257,11 @@ export const EventsTdContent = styled.div.attrs(({ className }) => ({
     width != null
       ? `${width}px`
       : '100%'}; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
+
+  > button.euiButtonIcon,
+  > .euiToolTipAnchor > button.euiButtonIcon {
+    margin-left: ${({ theme }) => `-${theme.eui.paddingSizes.xs}`};
+  }
 `;
 
 /**
@@ -333,6 +347,5 @@ export const EventsHeadingHandle = styled.div.attrs(({ className = '' }) => ({
  */
 
 export const EventsLoading = styled(EuiLoadingSpinner)`
-  margin: ${({ theme }) => theme.eui.euiSizeXS};
-  vertical-align: top;
+  vertical-align: middle;
 `;

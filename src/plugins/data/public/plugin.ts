@@ -185,7 +185,11 @@ export class DataPublicPlugin
     });
     setIndexPatterns(indexPatterns);
 
-    const query = this.queryService.start(savedObjects);
+    const query = this.queryService.start({
+      storage: this.storage,
+      savedObjectsClient: savedObjects.client,
+      uiSettings,
+    });
     setQueryService(query);
 
     const search = this.searchService.start(core, { indexPatterns });
