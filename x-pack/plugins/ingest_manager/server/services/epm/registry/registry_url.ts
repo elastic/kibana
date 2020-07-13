@@ -21,7 +21,7 @@ export const getRegistryUrl = (): string => {
   }
 
   if (customUrl) {
-    appContextService.getLogger().warn('Gold licence is needed to use a custom registryUrl.');
+    appContextService.getLogger().warn('Gold license is required to use a custom registry url.');
   }
 
   return DEFAULT_REGISTRY_URL;
