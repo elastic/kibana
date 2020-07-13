@@ -38,11 +38,7 @@ export function getTargetBranches(
       .map((branch) => branch.name);
 
     if (isEmpty(branches)) {
-      throw new HandledError(
-        `There are no branches to backport to. Aborting.
-Branches: ${JSON.stringify(options.targetBranchChoices.map((b) => b.name))}
-Labels: ${JSON.stringify(targetBranchesFromLabels)}`
-      );
+      throw new HandledError(`There are no branches to backport to. Aborting.`);
     }
 
     return branches;
@@ -55,7 +51,7 @@ Labels: ${JSON.stringify(targetBranchesFromLabels)}`
   });
 }
 
-function getTargetBranchChoices(
+export function getTargetBranchChoices(
   options: BackportOptions,
   targetBranchesFromLabels: string[],
   sourceBranch: string
@@ -77,7 +73,7 @@ function getTargetBranchChoices(
 
   // if none of the choices are pre-selected (via PR labels) use the default selection (given via config options)
   const hasAnySelections = preSelectedBranches.some((branch) => branch.checked);
-  if (!hasAnySelections) {
+  if (!hasAnySelections && !options.ci) {
     return targetBranchesFromOptions;
   }
 

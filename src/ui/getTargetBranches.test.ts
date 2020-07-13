@@ -3,7 +3,7 @@ import { BackportOptions } from '../options/options';
 import * as prompts from '../services/prompts';
 import { CommitSelected } from '../types/Commit';
 import { SpyHelper } from '../types/SpyHelper';
-import { getTargetBranches } from './getTargetBranches';
+import { getTargetBranches, getTargetBranchChoices } from './getTargetBranches';
 
 describe('getTargetBranches', () => {
   let promptSpy: SpyHelper<typeof prompts.promptForTargetBranches>;
@@ -166,5 +166,48 @@ describe('getTargetBranches', () => {
     it('should not call prompt', () => {
       expect(promptSpy).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('getTargetBranchChoices', () => {
+  const options = ({
+    ci: false,
+    targetBranchChoices: [
+      { name: 'master', checked: true },
+      { name: '7.x', checked: true },
+      { name: '7.8', checked: false },
+      { name: '7.7', checked: false },
+    ],
+  } as unknown) as BackportOptions;
+
+  const targetBranchesFromLabels = [] as string[];
+  const sourceBranch = 'master';
+
+  it('should return default branches if none are preselected via labels ', () => {
+    const branches = getTargetBranchChoices(
+      options,
+      targetBranchesFromLabels,
+      sourceBranch
+    );
+
+    expect(branches).toEqual([
+      { checked: true, name: '7.x' },
+      { checked: false, name: '7.8' },
+      { checked: false, name: '7.7' },
+    ]);
+  });
+
+  it('should not return default branches when running in "--ci" mode', () => {
+    const branches = getTargetBranchChoices(
+      { ...options, ci: true },
+      targetBranchesFromLabels,
+      sourceBranch
+    );
+
+    expect(branches).toEqual([
+      { checked: false, name: '7.x' },
+      { checked: false, name: '7.8' },
+      { checked: false, name: '7.7' },
+    ]);
   });
 });
