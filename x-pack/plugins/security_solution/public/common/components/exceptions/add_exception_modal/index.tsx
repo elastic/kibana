@@ -34,7 +34,7 @@ import { errorToToaster, displaySuccessToast, useStateToaster } from '../../toas
 import { ExceptionBuilder } from '../builder';
 import { Loader } from '../../loader';
 import { useAddOrUpdateException } from '../use_add_exception';
-import { useSignalIndex } from '../../../../alerts/containers/detection_engine/alerts/use_signal_index';
+import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useFetchOrCreateRuleExceptionList } from '../use_fetch_or_create_rule_exception_list';
 import { AddExceptionComments } from '../add_exception_comments';
 import {
@@ -43,8 +43,9 @@ import {
   defaultEndpointExceptionItems,
   entryHasListType,
   entryHasNonEcsType,
+  getMappedNonEcsValue,
 } from '../helpers';
-import { useFetchIndexPatterns } from '../../../../alerts/containers/detection_engine/rules';
+import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
 
 export interface AddExceptionOnClick {
   ruleName: string;
@@ -65,7 +66,7 @@ interface AddExceptionModalProps {
     nonEcsData: TimelineNonEcsData[];
   };
   onCancel: () => void;
-  onConfirm: () => void;
+  onConfirm: (didCloseAlert: boolean) => void;
 }
 
 const Modal = styled(EuiModal)`
@@ -130,8 +131,8 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   );
   const onSuccess = useCallback(() => {
     displaySuccessToast(i18n.ADD_EXCEPTION_SUCCESS, dispatchToaster);
-    onConfirm();
-  }, [dispatchToaster, onConfirm]);
+    onConfirm(shouldCloseAlert);
+  }, [dispatchToaster, onConfirm, shouldCloseAlert]);
 
   const [{ isLoading: addExceptionIsLoading }, addOrUpdateExceptionItems] = useAddOrUpdateException(
     {
@@ -193,6 +194,12 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     indexPatterns,
   ]);
 
+  useEffect(() => {
+    if (shouldDisableBulkClose === true) {
+      setShouldBulkCloseAlert(false);
+    }
+  }, [shouldDisableBulkClose]);
+
   const onCommentChange = useCallback(
     (value: string) => {
       setComment(value);
@@ -214,6 +221,21 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     [setShouldBulkCloseAlert]
   );
 
+  const retrieveAlertOsTypes = useCallback(() => {
+    const osDefaults = ['windows', 'macos', 'linux'];
+    if (alertData) {
+      const osTypes = getMappedNonEcsValue({
+        data: alertData.nonEcsData,
+        fieldName: 'host.os.family',
+      });
+      if (osTypes.length === 0) {
+        return osDefaults;
+      }
+      return osTypes;
+    }
+    return osDefaults;
+  }, [alertData]);
+
   const enrichExceptionItems = useCallback(() => {
     let enriched: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> = [];
     enriched =
@@ -221,11 +243,11 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         ? enrichExceptionItemsWithComments(exceptionItemsToAdd, [{ comment }])
         : exceptionItemsToAdd;
     if (exceptionListType === 'endpoint') {
-      const osTypes = alertData ? ['windows'] : ['windows', 'macos', 'linux'];
+      const osTypes = retrieveAlertOsTypes();
       enriched = enrichExceptionItemsWithOS(enriched, osTypes);
     }
     return enriched;
-  }, [comment, exceptionItemsToAdd, exceptionListType, alertData]);
+  }, [comment, exceptionItemsToAdd, exceptionListType, retrieveAlertOsTypes]);
 
   const onAddExceptionConfirm = useCallback(() => {
     if (addOrUpdateExceptionItems !== null) {

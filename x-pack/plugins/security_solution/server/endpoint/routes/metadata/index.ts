@@ -18,6 +18,7 @@ import {
   HostStatus,
 } from '../../../../common/endpoint/types';
 import { EndpointAppContext } from '../../types';
+import { AgentService } from '../../../../../ingest_manager/server';
 import { Agent, AgentStatus } from '../../../../../ingest_manager/common/types/models';
 import { findAllUnenrolledAgentIds } from './support/unenroll';
 
@@ -26,8 +27,9 @@ interface HitSource {
 }
 
 interface MetadataRequestContext {
+  agentService: AgentService;
+  logger: Logger;
   requestHandlerContext: RequestHandlerContext;
-  endpointAppContext: EndpointAppContext;
 }
 
 const HOST_STATUS_MAPPING = new Map<AgentStatus, HostStatus>([
@@ -35,8 +37,22 @@ const HOST_STATUS_MAPPING = new Map<AgentStatus, HostStatus>([
   ['offline', HostStatus.OFFLINE],
 ]);
 
+/**
+ * 00000000-0000-0000-0000-000000000000 is initial Elastic Agent id sent by Endpoint before policy is configured
+ * 11111111-1111-1111-1111-111111111111 is Elastic Agent id sent by Endpoint when policy does not contain an id
+ */
+
+const IGNORED_ELASTIC_AGENT_IDS = [
+  '00000000-0000-0000-0000-000000000000',
+  '11111111-1111-1111-1111-111111111111',
+];
+
+const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
+  return endpointAppContext.logFactory.get('metadata');
+};
+
 export function registerEndpointRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
-  const logger = endpointAppContext.logFactory.get('metadata');
+  const logger = getLogger(endpointAppContext);
   router.post(
     {
       path: '/api/endpoint/metadata',
@@ -66,12 +82,23 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
           })
         ),
       },
-      options: { authRequired: true },
+      options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     async (context, req, res) => {
       try {
+        const agentService = endpointAppContext.service.getAgentService();
+        if (agentService === undefined) {
+          throw new Error('agentService not available');
+        }
+
+        const metadataRequestContext: MetadataRequestContext = {
+          agentService,
+          logger,
+          requestHandlerContext: context,
+        };
+
         const unenrolledAgentIds = await findAllUnenrolledAgentIds(
-          endpointAppContext.service.getAgentService(),
+          agentService,
           context.core.savedObjects.client
         );
 
@@ -80,7 +107,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
           endpointAppContext,
           metadataIndexPattern,
           {
-            unenrolledAgentIds,
+            unenrolledAgentIds: unenrolledAgentIds.concat(IGNORED_ELASTIC_AGENT_IDS),
           }
         );
 
@@ -88,11 +115,9 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
           'search',
           queryParams
         )) as SearchResponse<HostMetadata>;
+
         return res.ok({
-          body: await mapToHostResultList(queryParams, response, {
-            endpointAppContext,
-            requestHandlerContext: context,
-          }),
+          body: await mapToHostResultList(queryParams, response, metadataRequestContext),
         });
       } catch (err) {
         logger.warn(JSON.stringify(err, null, 2));
@@ -107,17 +132,22 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
       validate: {
         params: schema.object({ id: schema.string() }),
       },
-      options: { authRequired: true },
+      options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     async (context, req, res) => {
+      const agentService = endpointAppContext.service.getAgentService();
+      if (agentService === undefined) {
+        return res.internalError({ body: 'agentService not available' });
+      }
+
+      const metadataRequestContext: MetadataRequestContext = {
+        agentService,
+        logger,
+        requestHandlerContext: context,
+      };
+
       try {
-        const doc = await getHostData(
-          {
-            endpointAppContext,
-            requestHandlerContext: context,
-          },
-          req.params.id
-        );
+        const doc = await getHostData(metadataRequestContext, req.params.id);
         if (doc) {
           return res.ok({ body: doc });
         }
@@ -164,17 +194,16 @@ async function findAgent(
   metadataRequestContext: MetadataRequestContext,
   hostMetadata: HostMetadata
 ): Promise<Agent | undefined> {
-  const logger = metadataRequestContext.endpointAppContext.logFactory.get('metadata');
   try {
-    return await metadataRequestContext.endpointAppContext.service
-      .getAgentService()
-      .getAgent(
-        metadataRequestContext.requestHandlerContext.core.savedObjects.client,
-        hostMetadata.elastic.agent.id
-      );
+    return await metadataRequestContext.agentService.getAgent(
+      metadataRequestContext.requestHandlerContext.core.savedObjects.client,
+      hostMetadata.elastic.agent.id
+    );
   } catch (e) {
     if (e.isBoom && e.output.statusCode === 404) {
-      logger.warn(`agent with id ${hostMetadata.elastic.agent.id} not found`);
+      metadataRequestContext.logger.warn(
+        `agent with id ${hostMetadata.elastic.agent.id} not found`
+      );
       return undefined;
     } else {
       throw e;
@@ -217,7 +246,7 @@ async function enrichHostMetadata(
 ): Promise<HostInfo> {
   let hostStatus = HostStatus.ERROR;
   let elasticAgentId = hostMetadata?.elastic?.agent?.id;
-  const log = logger(metadataRequestContext.endpointAppContext);
+  const log = metadataRequestContext.logger;
   try {
     /**
      * Get agent status by elastic agent id if available or use the host id.
@@ -228,12 +257,10 @@ async function enrichHostMetadata(
       log.warn(`Missing elastic agent id, using host id instead ${elasticAgentId}`);
     }
 
-    const status = await metadataRequestContext.endpointAppContext.service
-      .getAgentService()
-      .getAgentStatusById(
-        metadataRequestContext.requestHandlerContext.core.savedObjects.client,
-        elasticAgentId
-      );
+    const status = await metadataRequestContext.agentService.getAgentStatusById(
+      metadataRequestContext.requestHandlerContext.core.savedObjects.client,
+      elasticAgentId
+    );
     hostStatus = HOST_STATUS_MAPPING.get(status) || HostStatus.ERROR;
   } catch (e) {
     if (e.isBoom && e.output.statusCode === 404) {
@@ -248,7 +275,3 @@ async function enrichHostMetadata(
     host_status: hostStatus,
   };
 }
-
-const logger = (endpointAppContext: EndpointAppContext): Logger => {
-  return endpointAppContext.logFactory.get('metadata');
-};

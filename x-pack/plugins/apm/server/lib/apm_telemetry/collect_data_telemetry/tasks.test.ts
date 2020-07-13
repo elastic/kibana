@@ -65,4 +65,40 @@ describe('data telemetry collection tasks', () => {
       });
     });
   });
+
+  describe('integrations', () => {
+    const integrationsTask = tasks.find((task) => task.name === 'integrations');
+
+    it('returns the count of ML jobs', async () => {
+      const transportRequest = jest
+        .fn()
+        .mockResolvedValueOnce({ body: { count: 1 } });
+
+      expect(
+        await integrationsTask?.executor({ indices, transportRequest } as any)
+      ).toEqual({
+        integrations: {
+          ml: {
+            all_jobs_count: 1,
+          },
+        },
+      });
+    });
+
+    describe('with no data', () => {
+      it('returns a count of 0', async () => {
+        const transportRequest = jest.fn().mockResolvedValueOnce({});
+
+        expect(
+          await integrationsTask?.executor({ indices, transportRequest } as any)
+        ).toEqual({
+          integrations: {
+            ml: {
+              all_jobs_count: 0,
+            },
+          },
+        });
+      });
+    });
+  });
 });

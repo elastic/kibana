@@ -15,12 +15,13 @@ import {
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPage } from '../tasks/login';
 
-import { ALERTS_URL } from '../urls/navigation';
+import { DETECTIONS_URL } from '../urls/navigation';
 
-describe('Alerts timeline', () => {
+// Flakky: https://github.com/elastic/kibana/issues/71220
+describe.skip('Alerts timeline', () => {
   beforeEach(() => {
     esArchiverLoad('timeline_alerts');
-    loginAndWaitForPage(ALERTS_URL);
+    loginAndWaitForPage(DETECTIONS_URL);
   });
 
   afterEach(() => {

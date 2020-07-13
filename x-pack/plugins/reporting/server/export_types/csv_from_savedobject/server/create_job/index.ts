@@ -20,15 +20,15 @@ import {
 } from '../../types';
 import { createJobSearch } from './create_job_search';
 
-export type ImmediateCreateJobFn<JobParamsType> = (
-  jobParams: JobParamsType,
+export type ImmediateCreateJobFn = (
+  jobParams: JobParamsPanelCsv,
   headers: KibanaRequest['headers'],
   context: RequestHandlerContext,
   req: KibanaRequest
 ) => Promise<{
   type: string | null;
   title: string;
-  jobParams: JobParamsType;
+  jobParams: JobParamsPanelCsv;
 }>;
 
 interface VisData {
@@ -37,9 +37,10 @@ interface VisData {
   panel: SearchPanel;
 }
 
-export const scheduleTaskFnFactory: ScheduleTaskFnFactory<ImmediateCreateJobFn<
-  JobParamsPanelCsv
->> = function createJobFactoryFn(reporting, parentLogger) {
+export const scheduleTaskFnFactory: ScheduleTaskFnFactory<ImmediateCreateJobFn> = function createJobFactoryFn(
+  reporting,
+  parentLogger
+) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
   const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'create-job']);

@@ -317,6 +317,7 @@ function getBaseTemplate(
         name: packageName,
       },
       managed_by: 'ingest-manager',
+      managed: true,
     },
   };
 }
