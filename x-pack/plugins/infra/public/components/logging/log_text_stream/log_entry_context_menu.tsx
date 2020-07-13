@@ -55,15 +55,17 @@ export const LogEntryContextMenu: React.FC<LogEntryContextMenuProps> = ({
   }, [onClose]);
 
   const button = (
-    <EuiButton
-      size="s"
-      fill
-      aria-label={ariaLabel || DEFAULT_MENU_LABEL}
-      onClick={onOpen}
-      style={{ minWidth: 'auto', transform: 'translate(-6px, -6px)' }}
-    >
-      <EuiIcon type="boxesHorizontal" />
-    </EuiButton>
+    <ButtonWrapper>
+      <EuiButton
+        size="s"
+        fill
+        aria-label={ariaLabel || DEFAULT_MENU_LABEL}
+        onClick={onOpen}
+        style={{ minWidth: 'auto' }}
+      >
+        <EuiIcon type="boxesHorizontal" />
+      </EuiButton>
+    </ButtonWrapper>
   );
 
   const wrappedItems = useMemo(() => {
@@ -92,4 +94,8 @@ const LogEntryContextMenuContent = euiStyled(LogEntryColumnContent)`
 
 const AbsoluteWrapper = euiStyled.div`
   position: absolute;
+`;
+
+const ButtonWrapper = euiStyled.div`
+  transform: translate(-6px, -6px);
 `;
