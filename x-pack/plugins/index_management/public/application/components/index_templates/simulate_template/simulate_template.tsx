@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState, useCallback, useEffect } from 'react';
+import uuid from 'uuid';
 import { EuiCodeBlock } from '@elastic/eui';
 
 import { serializers } from '../../../../shared_imports';
@@ -22,7 +23,16 @@ export const SimulateTemplate = ({ template, minHeightCodeBlock }: Props) => {
   const [templatePreview, setTemplatePreview] = useState('{}');
 
   const updatePreview = useCallback(async () => {
+    if (!template || Object.keys(template).length === 0) {
+      return;
+    }
+
     const indexTemplate = serializeTemplate(stripEmptyFields(template) as TemplateDeserialized);
+
+    // Until ES fixes a bug on their side we will send a random index pattern to the simulate API.
+    // Issue: https://github.com/elastic/elasticsearch/issues/59152
+    indexTemplate.index_patterns = [uuid.v4()];
+
     const { data, error } = await simulateIndexTemplate(indexTemplate);
 
     if (data) {
