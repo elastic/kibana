@@ -60,6 +60,12 @@ describe('VegaVisualizations', () => {
   const coreStart = coreMock.createStart();
   const dataPluginStart = dataPluginMock.createStartContract();
 
+  const setupDOM = (width, height) => {
+    domNode = document.createElement('div');
+    mockWidth = jest.spyOn($.prototype, 'width').mockReturnValue(width);
+    mockHeight = jest.spyOn($.prototype, 'height').mockReturnValue(height);
+  };
+
   setKibanaMapFactory((...args) => new KibanaMap(...args));
   setInjectedVars({
     emsTileLayerId: {},
@@ -127,8 +133,8 @@ describe('VegaVisualizations', () => {
         mockHeight.mockRestore();
         mockHeight = jest.spyOn($.prototype, 'height').mockReturnValue(256);
 
-        vegaVis._vegaView.resize();
-        await vegaVis.render(vegaParser);
+        await vegaVis._vegaView.resize();
+
         expect(domNode.innerHTML).toMatchSnapshot();
       } finally {
         vegaVis.destroy();
@@ -230,10 +236,4 @@ describe('VegaVisualizations', () => {
       }
     });
   });
-
-  function setupDOM(width, height) {
-    domNode = document.createElement('div');
-    mockWidth = jest.spyOn($.prototype, 'width').mockReturnValue(width);
-    mockHeight = jest.spyOn($.prototype, 'height').mockReturnValue(height);
-  }
 });
