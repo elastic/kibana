@@ -148,6 +148,19 @@ describe('Body', () => {
           .exists()
       ).toEqual(true);
     });
+    describe('when there is a graphEventId', () => {
+      beforeEach(() => {
+        props.graphEventId = 'graphEventId'; // any string w/ length > 0 works
+      });
+      it('should not render the timeline body', () => {
+        const wrapper = mount(
+          <TestProviders>
+            <Body {...props} />
+          </TestProviders>
+        );
+        expect(wrapper.find('[data-test-subj="timeline-body"]').exists()).toEqual(false);
+      });
+    });
   });
 
   describe('action on event', () => {

@@ -2,7 +2,6 @@
 
 exports[`Footer Timeline Component rendering it renders the default timeline footer 1`] = `
 <FooterContainer
-  data-test-subj="timeline-footer"
   direction="column"
   gutterSize="none"
   height={100}

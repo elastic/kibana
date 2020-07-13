@@ -34,7 +34,6 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../store';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
-import { showGraphView } from '../../../timelines/components/timeline/body/helpers';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 500;
 
@@ -197,8 +196,9 @@ const EventsViewerComponent: React.FC<Props> = ({
 
                     {
                       /** Hide the footer if Resolver is showing. */
-                      !showGraphView(graphEventId) && (
+                      !graphEventId && (
                         <Footer
+                          data-test-subj="events-viewer-footer"
                           getUpdatedAt={getUpdatedAt}
                           hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                           height={footerHeight}
