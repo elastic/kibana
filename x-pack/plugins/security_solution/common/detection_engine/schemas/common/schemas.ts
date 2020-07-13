@@ -255,6 +255,7 @@ export const severity_mapping_item = t.exact(
     severity,
   })
 );
+export type SeverityMappingItem = t.TypeOf<typeof severity_mapping_item>;
 
 export const severity_mapping = t.array(severity_mapping_item);
 export type SeverityMapping = t.TypeOf<typeof severity_mapping>;

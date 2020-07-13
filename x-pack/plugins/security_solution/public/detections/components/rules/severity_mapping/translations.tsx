@@ -13,6 +13,13 @@ export const SEVERITY = i18n.translate(
   }
 );
 
+export const DEFAULT_SEVERITY = i18n.translate(
+  'xpack.securitySolution.alerts.severityMapping.defaultSeverityTitle',
+  {
+    defaultMessage: 'Severity',
+  }
+);
+
 export const SOURCE_FIELD = i18n.translate(
   'xpack.securitySolution.alerts.severityMapping.sourceFieldTitle',
   {

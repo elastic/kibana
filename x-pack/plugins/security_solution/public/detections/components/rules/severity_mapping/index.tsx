@@ -15,13 +15,14 @@ import {
   EuiIcon,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import * as i18n from './translations';
 import { FieldHook } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 import { SeverityOptionItem } from '../step_about_rule/data';
 import { CommonUseField } from '../../../../cases/components/create';
 import { AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
 
 const NestedContent = styled.div`
   margin-left: 24px;
@@ -39,7 +40,7 @@ interface SeverityFieldProps {
   dataTestSubj: string;
   field: FieldHook;
   idAria: string;
-  indices: string[];
+  indices: IIndexPattern;
   options: SeverityOptionItem[];
 }
 
@@ -47,10 +48,28 @@ export const SeverityField = ({
   dataTestSubj,
   field,
   idAria,
-  indices, // TODO: To be used with autocomplete fields once https://github.com/elastic/kibana/pull/67013 is merged
+  indices,
   options,
 }: SeverityFieldProps) => {
   const [isSeverityMappingChecked, setIsSeverityMappingChecked] = useState(false);
+  const [initialFieldCheck, setInitialFieldCheck] = useState(true);
+
+  useEffect(() => {
+    if (
+      !isSeverityMappingChecked &&
+      initialFieldCheck &&
+      (field.value as AboutStepSeverity).mapping?.length > 0
+    ) {
+      setIsSeverityMappingChecked(true);
+      setInitialFieldCheck(false);
+    }
+  }, [
+    field,
+    initialFieldCheck,
+    isSeverityMappingChecked,
+    setIsSeverityMappingChecked,
+    setInitialFieldCheck,
+  ]);
 
   const updateSeverityMapping = useCallback(
     (index: number, severity: string, mappingField: string, event) => {
@@ -168,7 +187,7 @@ export const SeverityField = ({
                     </EuiFlexItem>
                     <EuiFlexItemIconColumn grow={false} />
                     <EuiFlexItemSeverityColumn grow={false}>
-                      <EuiFormLabel>{i18n.SEVERITY}</EuiFormLabel>
+                      <EuiFormLabel>{i18n.DEFAULT_SEVERITY}</EuiFormLabel>
                     </EuiFlexItemSeverityColumn>
                   </EuiFlexGroup>
                 </EuiFlexItem>

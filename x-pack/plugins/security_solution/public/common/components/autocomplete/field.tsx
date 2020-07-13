@@ -17,6 +17,7 @@ interface OperatorProps {
   isLoading: boolean;
   isDisabled: boolean;
   isClearable: boolean;
+  fieldTypeFilter?: string[];
   fieldInputWidth?: number;
   onChange: (a: IFieldType[]) => void;
 }
@@ -28,13 +29,22 @@ export const FieldComponent: React.FC<OperatorProps> = ({
   isLoading = false,
   isDisabled = false,
   isClearable = false,
+  fieldTypeFilter = [],
   fieldInputWidth = 190,
   onChange,
 }): JSX.Element => {
   const getLabel = useCallback((field): string => field.name, []);
-  const optionsMemo = useMemo((): IFieldType[] => (indexPattern ? indexPattern.fields : []), [
-    indexPattern,
-  ]);
+  const optionsMemo = useMemo((): IFieldType[] => {
+    if (indexPattern != null) {
+      if (fieldTypeFilter.length > 0) {
+        return indexPattern.fields.filter((f) => fieldTypeFilter.includes(f.type));
+      } else {
+        return indexPattern.fields;
+      }
+    } else {
+      return [];
+    }
+  }, [fieldTypeFilter, indexPattern]);
   const selectedOptionsMemo = useMemo((): IFieldType[] => (selectedField ? [selectedField] : []), [
     selectedField,
   ]);
