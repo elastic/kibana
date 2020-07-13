@@ -15,5 +15,5 @@ export interface ISearchStart
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [getSearchStrategy](./kibana-plugin-plugins-data-server.isearchstart.getsearchstrategy.md) | <code>(name: string) =&gt; ISearchStrategy</code> | Get other registered search strategies. For example, if a new strategy needs to use the already-registered ES search strategy, it can use this function to accomplish that. |
-|  [search](./kibana-plugin-plugins-data-server.isearchstart.search.md) | <code>(context: RequestHandlerContext, request: IKibanaSearchRequest, options: any) =&gt; Promise&lt;IKibanaSearchResponse&gt;</code> |  |
+|  [search](./kibana-plugin-plugins-data-server.isearchstart.search.md) | <code>(context: RequestHandlerContext, request: IKibanaSearchRequest, options: ISearchOptions) =&gt; Promise&lt;IKibanaSearchResponse&gt;</code> |  |
 

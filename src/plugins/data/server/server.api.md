@@ -513,6 +513,8 @@ export class IndexPatternsFetcher {
 // @public (undocumented)
 export interface ISearchOptions {
     signal?: AbortSignal;
+    // (undocumented)
+    strategy?: string;
 }
 
 // Warning: (ae-missing-release-tag) "ISearchSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -532,7 +534,7 @@ export interface ISearchStart {
     // Warning: (ae-forgotten-export) The symbol "IKibanaSearchResponse" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    search: (context: RequestHandlerContext, request: IKibanaSearchRequest, options: any) => Promise<IKibanaSearchResponse>;
+    search: (context: RequestHandlerContext, request: IKibanaSearchRequest, options: ISearchOptions) => Promise<IKibanaSearchResponse>;
 }
 
 // Warning: (ae-missing-release-tag) "ISearchStrategy" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
