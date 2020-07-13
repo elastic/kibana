@@ -10,14 +10,15 @@ import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearc
 import { defaultRequestParameters } from './common';
 import { partitionField } from '../../../../common/log_analysis';
 
-export const createLogEntryRateExamplesQuery = (
+export const createLogEntryExamplesQuery = (
   indices: string,
   timestampField: string,
   tiebreakerField: string,
   startTime: number,
   endTime: number,
   dataset: string,
-  exampleCount: number
+  exampleCount: number,
+  categoryQuery?: string
 ) => ({
   ...defaultRequestParameters,
   body: {
@@ -32,11 +33,27 @@ export const createLogEntryRateExamplesQuery = (
               },
             },
           },
-          {
-            term: {
-              [partitionField]: dataset,
-            },
-          },
+          ...(!!dataset
+            ? [
+                {
+                  term: {
+                    [partitionField]: dataset,
+                  },
+                },
+              ]
+            : []),
+          ...(categoryQuery
+            ? [
+                {
+                  match: {
+                    message: {
+                      query: categoryQuery,
+                      operator: 'AND',
+                    },
+                  },
+                },
+              ]
+            : []),
         ],
       },
     },
@@ -47,7 +64,7 @@ export const createLogEntryRateExamplesQuery = (
   size: exampleCount,
 });
 
-export const logEntryRateExampleHitRT = rt.type({
+export const logEntryExampleHitRT = rt.type({
   _id: rt.string,
   _source: rt.partial({
     event: rt.partial({
@@ -58,15 +75,15 @@ export const logEntryRateExampleHitRT = rt.type({
   sort: rt.tuple([rt.number, rt.number]),
 });
 
-export type LogEntryRateExampleHit = rt.TypeOf<typeof logEntryRateExampleHitRT>;
+export type LogEntryExampleHit = rt.TypeOf<typeof logEntryExampleHitRT>;
 
-export const logEntryRateExamplesResponseRT = rt.intersection([
+export const logEntryExamplesResponseRT = rt.intersection([
   commonSearchSuccessResponseFieldsRT,
   rt.type({
     hits: rt.type({
-      hits: rt.array(logEntryRateExampleHitRT),
+      hits: rt.array(logEntryExampleHitRT),
     }),
   }),
 ]);
 
-export type LogEntryRateExamplesResponse = rt.TypeOf<typeof logEntryRateExamplesResponseRT>;
+export type LogEntryExamplesResponse = rt.TypeOf<typeof logEntryExamplesResponseRT>;

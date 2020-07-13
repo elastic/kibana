@@ -17,23 +17,18 @@
  * under the License.
  */
 
-export const METRIC_TYPES = {
-  PERCENTILE: 'percentile',
-  PERCENTILE_RANK: 'percentile_rank',
-  TOP_HIT: 'top_hit',
-  COUNT: 'count',
-  DERIVATIVE: 'derivative',
-  STD_DEVIATION: 'std_deviation',
-  VARIANCE: 'variance',
-  SUM_OF_SQUARES: 'sum_of_squares',
-  CARDINALITY: 'cardinality',
-  VALUE_COUNT: 'value_count',
-  AVERAGE: 'avg',
-  SUM: 'sum',
-};
+import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
+import { METRIC_TYPES } from '../../../../../../plugins/vis_type_timeseries/common/metric_types';
 
-export const EXTENDED_STATS_TYPES = [
-  METRIC_TYPES.STD_DEVIATION,
-  METRIC_TYPES.VARIANCE,
-  METRIC_TYPES.SUM_OF_SQUARES,
-];
+export function getSupportedFieldsByMetricType(type) {
+  switch (type) {
+    case METRIC_TYPES.CARDINALITY:
+      return Object.values(KBN_FIELD_TYPES).filter((t) => t !== KBN_FIELD_TYPES.HISTOGRAM);
+    case METRIC_TYPES.VALUE_COUNT:
+    case METRIC_TYPES.AVERAGE:
+    case METRIC_TYPES.SUM:
+      return [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.HISTOGRAM];
+    default:
+      return [KBN_FIELD_TYPES.NUMBER];
+  }
+}

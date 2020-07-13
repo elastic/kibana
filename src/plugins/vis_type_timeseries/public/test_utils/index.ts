@@ -17,23 +17,34 @@
  * under the License.
  */
 
-export const METRIC_TYPES = {
-  PERCENTILE: 'percentile',
-  PERCENTILE_RANK: 'percentile_rank',
-  TOP_HIT: 'top_hit',
-  COUNT: 'count',
-  DERIVATIVE: 'derivative',
-  STD_DEVIATION: 'std_deviation',
-  VARIANCE: 'variance',
-  SUM_OF_SQUARES: 'sum_of_squares',
-  CARDINALITY: 'cardinality',
-  VALUE_COUNT: 'value_count',
-  AVERAGE: 'avg',
-  SUM: 'sum',
+export const UI_RESTRICTIONS = { '*': true };
+export const INDEX_PATTERN = 'some-pattern';
+export const FIELDS = {
+  [INDEX_PATTERN]: [
+    {
+      type: 'date',
+      name: '@timestamp',
+    },
+    {
+      type: 'number',
+      name: 'system.cpu.user.pct',
+    },
+    {
+      type: 'histogram',
+      name: 'histogram_value',
+    },
+  ],
 };
-
-export const EXTENDED_STATS_TYPES = [
-  METRIC_TYPES.STD_DEVIATION,
-  METRIC_TYPES.VARIANCE,
-  METRIC_TYPES.SUM_OF_SQUARES,
-];
+export const METRIC = {
+  id: 'sample_metric',
+  type: 'avg',
+  field: 'system.cpu.user.pct',
+};
+export const SERIES = {
+  metrics: [METRIC],
+};
+export const PANEL = {
+  type: 'timeseries',
+  index_pattern: INDEX_PATTERN,
+  series: SERIES,
+};
