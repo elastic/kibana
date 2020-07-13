@@ -159,17 +159,18 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
     showModuleSetup,
   ]);
 
-  const hasResults = (logEntryRate?.histogramBuckets?.length ?? 0) > 0;
+  const hasLogRateResults = (logEntryRate?.histogramBuckets?.length ?? 0) > 0;
+  const hasAnomalyResults = logEntryAnomalies.length > 0;
 
   const isFirstUse = useMemo(
     () =>
       ((logEntryCategoriesSetupStatus.type === 'skipped' &&
         !!logEntryCategoriesSetupStatus.newlyCreated) ||
-        logEntryCategoriesSetupStatus.type === 'succeeded') &&
-      ((logEntryRateSetupStatus.type === 'skipped' && !!logEntryRateSetupStatus.newlyCreated) ||
+        logEntryCategoriesSetupStatus.type === 'succeeded' ||
+        (logEntryRateSetupStatus.type === 'skipped' && !!logEntryRateSetupStatus.newlyCreated) ||
         logEntryRateSetupStatus.type === 'succeeded') &&
-      !hasResults,
-    [hasResults, logEntryCategoriesSetupStatus, logEntryRateSetupStatus]
+      !(hasLogRateResults || hasAnomalyResults),
+    [hasAnomalyResults, hasLogRateResults, logEntryCategoriesSetupStatus, logEntryRateSetupStatus]
   );
 
   useEffect(() => {
