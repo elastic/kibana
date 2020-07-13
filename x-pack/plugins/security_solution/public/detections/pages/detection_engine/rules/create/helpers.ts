@@ -105,7 +105,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         ...(ruleType === 'threshold' && {
           threshold: {
             field: ruleFields.threshold?.field[0] ?? '',
-            value: ruleFields.threshold?.value ?? 0,
+            value: parseInt(ruleFields.threshold?.value, 10) ?? 0,
           },
         }),
       }

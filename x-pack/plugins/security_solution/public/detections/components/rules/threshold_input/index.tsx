@@ -17,7 +17,7 @@ const FIELD_COMBO_BOX_WIDTH = 460;
 
 export interface FieldValueThreshold {
   field: string[];
-  value: number;
+  value: string;
 }
 
 interface ThresholdInputProps {
