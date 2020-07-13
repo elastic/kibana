@@ -67,7 +67,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         last_checkin_status: { type: 'keyword' },
         config_revision: { type: 'integer' },
         default_api_key_id: { type: 'keyword' },
-        default_api_key: { type: 'binary', index: false },
+        default_api_key: { type: 'binary' },
         updated_at: { type: 'date' },
         current_error_events: { type: 'text', index: false },
         packages: { type: 'keyword' },
@@ -85,7 +85,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
       properties: {
         agent_id: { type: 'keyword' },
         type: { type: 'keyword' },
-        data: { type: 'binary', index: false },
+        data: { type: 'binary' },
         sent_at: { type: 'date' },
         created_at: { type: 'date' },
       },
