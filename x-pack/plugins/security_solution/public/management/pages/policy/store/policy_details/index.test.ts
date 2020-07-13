@@ -43,8 +43,8 @@ describe('policy details: ', () => {
               config: {
                 artifact_manifest: {
                   value: {
-                    manifest_version: 'v0',
-                    schema_version: '1.0.0',
+                    manifest_version: 'WzAsMF0=',
+                    schema_version: 'v1',
                     artifacts: {},
                   },
                 },

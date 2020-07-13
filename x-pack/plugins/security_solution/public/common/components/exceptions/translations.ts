@@ -200,3 +200,17 @@ export const ADD_NESTED_DESCRIPTION = i18n.translate(
     defaultMessage: 'Add nested condition',
   }
 );
+
+export const ADD_COMMENT_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.exceptions.viewer.addCommentPlaceholder',
+  {
+    defaultMessage: 'Add a new comment...',
+  }
+);
+
+export const ADD_TO_CLIPBOARD = i18n.translate(
+  'xpack.securitySolution.exceptions.viewer.addToClipboard',
+  {
+    defaultMessage: 'Add to clipboard',
+  }
+);

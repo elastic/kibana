@@ -19,11 +19,14 @@ const paginationCursorRT = rt.tuple([
 
 export type PaginationCursor = rt.TypeOf<typeof paginationCursorRT>;
 
-const logRateAnomalyTypeRT = rt.literal('logRate');
-const logCategorisationAnomalyTypeRT = rt.literal('logCategory');
-export const anomalyTypeRT = rt.union([logRateAnomalyTypeRT, logCategorisationAnomalyTypeRT]);
+export const anomalyTypeRT = rt.keyof({
+  logRate: null,
+  logCategory: null,
+});
 
-const logEntryAnomalyRT = rt.type({
+export type AnomalyType = rt.TypeOf<typeof anomalyTypeRT>;
+
+const logEntryAnomalyCommonFieldsRT = rt.type({
   id: rt.string,
   anomalyScore: rt.number,
   dataset: rt.string,
@@ -32,7 +35,17 @@ const logEntryAnomalyRT = rt.type({
   type: anomalyTypeRT,
   duration: rt.number,
   startTime: rt.number,
+  jobId: rt.string,
 });
+const logEntrylogRateAnomalyRT = logEntryAnomalyCommonFieldsRT;
+const logEntrylogCategoryAnomalyRT = rt.partial({
+  categoryId: rt.string,
+});
+const logEntryAnomalyRT = rt.intersection([
+  logEntryAnomalyCommonFieldsRT,
+  logEntrylogRateAnomalyRT,
+  logEntrylogCategoryAnomalyRT,
+]);
 
 export type LogEntryAnomaly = rt.TypeOf<typeof logEntryAnomalyRT>;
 
@@ -65,19 +78,22 @@ export type GetLogEntryAnomaliesSuccessResponsePayload = rt.TypeOf<
   typeof getLogEntryAnomaliesSuccessReponsePayloadRT
 >;
 
-const sortOptions = rt.union([
-  rt.literal('anomalyScore'),
-  rt.literal('dataset'),
-  rt.literal('startTime'),
-]);
+const sortOptionsRT = rt.keyof({
+  anomalyScore: null,
+  dataset: null,
+  startTime: null,
+});
 
-const sortDirections = rt.union([rt.literal('asc'), rt.literal('desc')]);
+const sortDirectionsRT = rt.keyof({
+  asc: null,
+  desc: null,
+});
 
-const paginationPreviousPageCursor = rt.type({
+const paginationPreviousPageCursorRT = rt.type({
   searchBefore: paginationCursorRT,
 });
 
-const paginationNextPageCursor = rt.type({
+const paginationNextPageCursorRT = rt.type({
   searchAfter: paginationCursorRT,
 });
 
@@ -86,15 +102,15 @@ const paginationRT = rt.intersection([
     pageSize: rt.number,
   }),
   rt.partial({
-    cursor: rt.union([paginationPreviousPageCursor, paginationNextPageCursor]),
+    cursor: rt.union([paginationPreviousPageCursorRT, paginationNextPageCursorRT]),
   }),
 ]);
 
 export type Pagination = rt.TypeOf<typeof paginationRT>;
 
 const sortRT = rt.type({
-  field: sortOptions,
-  direction: sortDirections,
+  field: sortOptionsRT,
+  direction: sortDirectionsRT,
 });
 
 export type Sort = rt.TypeOf<typeof sortRT>;

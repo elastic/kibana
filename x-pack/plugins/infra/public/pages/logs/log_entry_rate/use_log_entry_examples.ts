@@ -16,12 +16,14 @@ export const useLogEntryExamples = ({
   exampleCount,
   sourceId,
   startTime,
+  categoryId,
 }: {
   dataset: string;
   endTime: number;
   exampleCount: number;
   sourceId: string;
   startTime: number;
+  categoryId?: string;
 }) => {
   const [logEntryExamples, setLogEntryExamples] = useState<LogEntryExample[]>([]);
 
@@ -34,7 +36,8 @@ export const useLogEntryExamples = ({
           startTime,
           endTime,
           dataset,
-          exampleCount
+          exampleCount,
+          categoryId
         );
       },
       onResolve: ({ data: { examples } }) => {

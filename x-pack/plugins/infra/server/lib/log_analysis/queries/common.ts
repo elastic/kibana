@@ -11,7 +11,7 @@ export const defaultRequestParameters = {
   trackTotalHits: false,
 };
 
-export const createJobIdFilter = (jobId: string) => [
+export const createJobIdFilters = (jobId: string) => [
   {
     term: {
       job_id: {
@@ -21,7 +21,7 @@ export const createJobIdFilter = (jobId: string) => [
   },
 ];
 
-export const createJobIdFilters = (jobIds: string[]) => [
+export const createJobIdsFilters = (jobIds: string[]) => [
   {
     terms: {
       job_id: jobIds,

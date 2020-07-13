@@ -22,7 +22,7 @@ export const getInfraContainerHref = (
       `/app/metrics/link-to/container-detail/${encodeURIComponent(ret)}`
     );
   };
-  return buildHref(summary.state.checks || [], 'container.id', getHref);
+  return buildHref(summary.state.summaryPings || [], 'container.id', getHref);
 };
 
 export const getInfraKubernetesHref = (
@@ -37,7 +37,7 @@ export const getInfraKubernetesHref = (
     return addBasePath(basePath, `/app/metrics/link-to/pod-detail/${encodeURIComponent(ret)}`);
   };
 
-  return buildHref(summary.state.checks || [], 'kubernetes.pod.uid', getHref);
+  return buildHref(summary.state.summaryPings || [], 'kubernetes.pod.uid', getHref);
 };
 
 export const getInfraIpHref = (summary: MonitorSummary, basePath: string) => {
@@ -63,5 +63,5 @@ export const getInfraIpHref = (summary: MonitorSummary, basePath: string) => {
           `/app/metrics/inventory?waffleFilter=(expression:'${encodeURIComponent(ips)}',kind:kuery)`
         );
   };
-  return buildHref(summary.state.checks || [], 'monitor.ip', getHref);
+  return buildHref(summary.state.summaryPings || [], 'monitor.ip', getHref);
 };

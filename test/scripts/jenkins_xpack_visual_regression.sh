@@ -21,3 +21,6 @@ yarn percy exec -t 10000 -- -- \
 
 # cd "$KIBANA_DIR"
 # source "test/scripts/jenkins_xpack_page_load_metrics.sh"
+
+cd "$KIBANA_DIR"
+source "test/scripts/jenkins_xpack_saved_objects_field_metrics.sh"

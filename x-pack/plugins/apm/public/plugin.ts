@@ -6,7 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
-import { euiThemeVars as theme } from '@kbn/ui-shared-deps/theme';
 import { ConfigSchema } from '.';
 import { ObservabilityPluginSetup } from '../../observability/public';
 import {
@@ -66,8 +65,9 @@ export interface ApmPluginStartDeps {
 }
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
-  private readonly initializerContext: PluginInitializerContext<ConfigSchema>;
-  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
+  constructor(
+    private readonly initializerContext: PluginInitializerContext<ConfigSchema>
+  ) {
     this.initializerContext = initializerContext;
   }
   public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
@@ -82,7 +82,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       plugins.observability.dashboard.register({
         appName: 'apm',
         fetchData: async (params) => {
-          return fetchLandingPageData(params, { theme });
+          return fetchLandingPageData(params);
         },
         hasData,
       });

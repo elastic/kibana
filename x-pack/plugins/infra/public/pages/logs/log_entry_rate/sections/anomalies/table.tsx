@@ -24,6 +24,7 @@ import {
   getFriendlyNameForPartitionId,
   formatOneDecimalPlace,
 } from '../../../../../../common/log_analysis';
+import { AnomalyType } from '../../../../../../common/http_api/log_analysis';
 import { RowExpansionButton } from '../../../../../components/basic_table';
 import { AnomaliesTableExpandedRow } from './expanded_row';
 import { AnomalySeverityIndicator } from '../../../../../components/logging/log_analysis_results/anomaly_severity_indicator';
@@ -38,6 +39,7 @@ import {
   PaginationOptions,
   LogEntryAnomalies,
 } from '../../use_log_entry_anomalies_results';
+import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 
 interface TableItem {
   id: string;
@@ -47,7 +49,7 @@ interface TableItem {
   startTime: number;
   typical: number;
   actual: number;
-  type: string;
+  type: AnomalyType;
 }
 
 const anomalyScoreColumnName = i18n.translate(
@@ -82,7 +84,6 @@ export const AnomaliesTable: React.FunctionComponent<{
   results: LogEntryAnomalies;
   setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange;
-  jobId: string;
   changeSortOptions: ChangeSortOptions;
   changePaginationOptions: ChangePaginationOptions;
   sortOptions: SortOptions;
@@ -95,7 +96,6 @@ export const AnomaliesTable: React.FunctionComponent<{
   results,
   timeRange,
   setTimeRange,
-  jobId,
   changeSortOptions,
   sortOptions,
   changePaginationOptions,
@@ -130,19 +130,19 @@ export const AnomaliesTable: React.FunctionComponent<{
 
   const [expandedIds, { add: expandId, remove: collapseId }] = useSet<string>(new Set());
 
-  const expandedDatasetRowContents = useMemo(
+  const expandedIdsRowContents = useMemo(
     () =>
-      [...expandedIds].reduce<Record<string, React.ReactNode>>((aggregatedDatasetRows, id) => {
+      [...expandedIds].reduce<Record<string, React.ReactNode>>((aggregatedRows, id) => {
         const anomaly = results.find((_anomaly) => _anomaly.id === id);
 
         return {
-          ...aggregatedDatasetRows,
+          ...aggregatedRows,
           [id]: anomaly ? (
-            <AnomaliesTableExpandedRow anomaly={anomaly} timeRange={timeRange} jobId={jobId} />
+            <AnomaliesTableExpandedRow anomaly={anomaly} timeRange={timeRange} />
           ) : null,
         };
       }, {}),
-    [expandedIds, results, timeRange, jobId]
+    [expandedIds, results, timeRange]
   );
 
   const handleTableChange = useCallback(
@@ -203,23 +203,25 @@ export const AnomaliesTable: React.FunctionComponent<{
   );
   return (
     <>
-      <EuiBasicTable
-        items={tableItems}
-        itemId="id"
-        itemIdToExpandedRowMap={expandedDatasetRowContents}
-        isExpandable={true}
-        hasActions={true}
-        columns={columns}
-        sorting={tableSortOptions}
-        onChange={handleTableChange}
-      />
-      <EuiSpacer size="l" />
-      <PaginationControls
-        fetchNextPage={fetchNextPage}
-        fetchPreviousPage={fetchPreviousPage}
-        page={page}
-        isLoading={isLoading}
-      />
+      <LoadingOverlayWrapper isLoading={isLoading}>
+        <EuiBasicTable
+          items={tableItems}
+          itemId="id"
+          itemIdToExpandedRowMap={expandedIdsRowContents}
+          isExpandable={true}
+          hasActions={true}
+          columns={columns}
+          sorting={tableSortOptions}
+          onChange={handleTableChange}
+        />
+        <EuiSpacer size="l" />
+        <PaginationControls
+          fetchNextPage={fetchNextPage}
+          fetchPreviousPage={fetchPreviousPage}
+          page={page}
+          isLoading={isLoading}
+        />
+      </LoadingOverlayWrapper>
     </>
   );
 };
@@ -231,24 +233,26 @@ const AnomalyMessage = ({
 }: {
   actual: number;
   typical: number;
-  type: string;
+  type: AnomalyType;
 }) => {
-  const messageType = type === 'logRate' ? 'dataset' : 'category';
   const moreThanExpectedAnomalyMessage = i18n.translate(
     'xpack.infra.logs.analysis.anomaliesTableMoreThanExpectedAnomalyMessage',
     {
-      defaultMessage: 'higher log messages in this {messageType} than expected',
-      values: { messageType },
+      defaultMessage:
+        'more log messages in this {type, select, logRate {dataset} logCategory {category}} than expected',
+      values: { type },
     }
   );
 
   const fewerThanExpectedAnomalyMessage = i18n.translate(
     'xpack.infra.logs.analysis.anomaliesTableFewerThanExpectedAnomalyMessage',
     {
-      defaultMessage: 'fewer log messages in this {messageType} than expected',
-      values: { messageType },
+      defaultMessage:
+        'fewer log messages in this {type, select, logRate {dataset} logCategory {category}} than expected',
+      values: { type },
     }
   );
+
   const isMore = actual > typical;
   const message = isMore ? moreThanExpectedAnomalyMessage : fewerThanExpectedAnomalyMessage;
   const ratio = isMore ? actual / typical : typical / actual;
@@ -263,6 +267,17 @@ const AnomalyMessage = ({
     </span>
   );
 };
+
+const previousPageLabel = i18n.translate(
+  'xpack.infra.logs.analysis.anomaliesTablePreviousPageLabel',
+  {
+    defaultMessage: 'Previous page',
+  }
+);
+
+const nextPageLabel = i18n.translate('xpack.infra.logs.analysis.anomaliesTableNextPageLabel', {
+  defaultMessage: 'Next page',
+});
 
 const PaginationControls = ({
   fetchPreviousPage,
@@ -283,6 +298,7 @@ const PaginationControls = ({
             iconType="arrowLeft"
             isDisabled={!fetchPreviousPage || isLoading}
             onClick={fetchPreviousPage}
+            aria-label={previousPageLabel}
           />
           <span>
             <strong>{page}</strong>
@@ -291,6 +307,7 @@ const PaginationControls = ({
             iconType="arrowRight"
             isDisabled={!fetchNextPage || isLoading}
             onClick={fetchNextPage}
+            aria-label={nextPageLabel}
           />
         </EuiFlexGroup>
       </EuiFlexItem>

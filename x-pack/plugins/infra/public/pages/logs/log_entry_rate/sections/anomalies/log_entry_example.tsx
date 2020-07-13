@@ -36,6 +36,7 @@ import {
   isMessageLogColumnConfiguration,
 } from '../../../../../utils/source_configuration';
 import { localizedDate } from '../../../../../../common/formatters/datetime';
+import { LogEntryAnomaly } from '../../../../../../common/http_api';
 
 export const exampleMessageScale = 'medium' as const;
 export const exampleTimestampFormat = 'time' as const;
@@ -60,7 +61,7 @@ const VIEW_ANOMALY_IN_ML_LABEL = i18n.translate(
 
 type Props = LogEntryExample & {
   timeRange: TimeRange;
-  jobId: string;
+  anomaly: LogEntryAnomaly;
 };
 
 export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
@@ -70,7 +71,7 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
   timestamp,
   tiebreaker,
   timeRange,
-  jobId,
+  anomaly,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -107,8 +108,9 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
   });
 
   const viewAnomalyInMachineLearningLinkProps = useLinkProps(
-    getEntitySpecificSingleMetricViewerLink(jobId, timeRange, {
+    getEntitySpecificSingleMetricViewerLink(anomaly.jobId, timeRange, {
       [partitionField]: dataset,
+      ...(anomaly.categoryId ? { mlcategory: anomaly.categoryId } : {}),
     })
   );
 

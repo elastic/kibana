@@ -8,10 +8,12 @@
 
 import * as t from 'io-ts';
 
-import { list_id, type } from '../common/schemas';
+import { deserializer, list_id, serializer, type } from '../common/schemas';
 import { Identity } from '../../types';
 
-export const importListItemQuerySchema = t.exact(t.partial({ list_id, type }));
+export const importListItemQuerySchema = t.exact(
+  t.partial({ deserializer, list_id, serializer, type })
+);
 
 export type ImportListItemQuerySchemaPartial = Identity<t.TypeOf<typeof importListItemQuerySchema>>;
 

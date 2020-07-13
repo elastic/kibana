@@ -11,11 +11,11 @@ import React from 'react';
 import { useMount } from 'react-use';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { LogEntryAnomaly } from '../../../../../../common/http_api';
-import { useLogEntryRateModuleContext } from '../../use_log_entry_rate_module';
 import { useLogEntryExamples } from '../../use_log_entry_examples';
 import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
 import { LogEntryExampleMessage, LogEntryExampleMessageHeaders } from './log_entry_example';
 import { euiStyled } from '../../../../../../../observability/public';
+import { useLogSourceContext } from '../../../../../containers/logs/log_source';
 
 const EXAMPLE_COUNT = 5;
 
@@ -26,11 +26,8 @@ const examplesTitle = i18n.translate('xpack.infra.logs.analysis.anomaliesTableEx
 export const AnomaliesTableExpandedRow: React.FunctionComponent<{
   anomaly: LogEntryAnomaly;
   timeRange: TimeRange;
-  jobId: string;
-}> = ({ anomaly, timeRange, jobId }) => {
-  const {
-    sourceConfiguration: { sourceId },
-  } = useLogEntryRateModuleContext();
+}> = ({ anomaly, timeRange }) => {
+  const { sourceId } = useLogSourceContext();
 
   const {
     getLogEntryExamples,
@@ -43,6 +40,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
     exampleCount: EXAMPLE_COUNT,
     sourceId,
     startTime: anomaly.startTime,
+    categoryId: anomaly.categoryId,
   });
 
   useMount(() => {
@@ -75,7 +73,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
                     timestamp={example.timestamp}
                     tiebreaker={example.tiebreaker}
                     timeRange={timeRange}
-                    jobId={jobId}
+                    anomaly={anomaly}
                   />
                 ))}
               </>

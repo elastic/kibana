@@ -19,6 +19,7 @@
 
 import supertest from 'supertest';
 import request from 'request';
+import { schema } from '@kbn/config-schema';
 
 import { ensureRawRequest } from '../router';
 import { HttpService } from '../http_service';
@@ -222,6 +223,39 @@ describe('OnPreAuth', () => {
 
     await supertest(innerServer.listener).get('/').expect(200, { customField: 'undefined' });
   });
+
+  it('has no access to request body', async () => {
+    const { registerOnPreAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+    let requestBody = null;
+    registerOnPreAuth((req, res, t) => {
+      requestBody = req.body;
+      return t.next();
+    });
+
+    router.post(
+      {
+        path: '/',
+        validate: {
+          body: schema.object({
+            term: schema.string(),
+          }),
+        },
+      },
+      (context, req, res) => res.ok({ body: req.body.term })
+    );
+
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .post('/')
+      .send({
+        term: 'foo',
+      })
+      .expect(200, 'foo');
+
+    expect(requestBody).toStrictEqual({});
+  });
 });
 
 describe('OnPostAuth', () => {
@@ -355,6 +389,39 @@ describe('OnPostAuth', () => {
     await server.start();
 
     await supertest(innerServer.listener).get('/').expect(200, { customField: 'undefined' });
+  });
+
+  it('has no access to request body', async () => {
+    const { registerOnPostAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+    let requestBody = null;
+    registerOnPostAuth((req, res, t) => {
+      requestBody = req.body;
+      return t.next();
+    });
+
+    router.post(
+      {
+        path: '/',
+        validate: {
+          body: schema.object({
+            term: schema.string(),
+          }),
+        },
+      },
+      (context, req, res) => res.ok({ body: req.body.term })
+    );
+
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .post('/')
+      .send({
+        term: 'foo',
+      })
+      .expect(200, 'foo');
+
+    expect(requestBody).toStrictEqual({});
   });
 });
 
@@ -852,10 +919,43 @@ describe('Auth', () => {
 
     await supertest(innerServer.listener).get('/').expect(200, { customField: 'undefined' });
   });
+
+  it('has no access to request body', async () => {
+    const { registerAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+    let requestBody = null;
+    registerAuth((req, res, t) => {
+      requestBody = req.body;
+      return t.authenticated({});
+    });
+
+    router.post(
+      {
+        path: '/',
+        validate: {
+          body: schema.object({
+            term: schema.string(),
+          }),
+        },
+      },
+      (context, req, res) => res.ok({ body: req.body.term })
+    );
+
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .post('/')
+      .send({
+        term: 'foo',
+      })
+      .expect(200, 'foo');
+
+    expect(requestBody).toStrictEqual({});
+  });
 });
 
 describe('OnPreResponse', () => {
-  it('supports registering response inceptors', async () => {
+  it('supports registering response interceptors', async () => {
     const { registerOnPreResponse, server: innerServer, createRouter } = await server.setup(
       setupDeps
     );
@@ -1000,5 +1100,40 @@ describe('OnPreResponse', () => {
     await server.start();
 
     await supertest(innerServer.listener).get('/').expect(200);
+  });
+
+  it('has no access to request body', async () => {
+    const { registerOnPreResponse, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
+    const router = createRouter('/');
+    let requestBody = null;
+    registerOnPreResponse((req, res, t) => {
+      requestBody = req.body;
+      return t.next();
+    });
+
+    router.post(
+      {
+        path: '/',
+        validate: {
+          body: schema.object({
+            term: schema.string(),
+          }),
+        },
+      },
+      (context, req, res) => res.ok({ body: req.body.term })
+    );
+
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .post('/')
+      .send({
+        term: 'foo',
+      })
+      .expect(200, 'foo');
+
+    expect(requestBody).toStrictEqual({});
   });
 });

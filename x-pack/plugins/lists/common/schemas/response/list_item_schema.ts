@@ -11,9 +11,11 @@ import * as t from 'io-ts';
 import {
   created_at,
   created_by,
+  deserializerOrUndefined,
   id,
   list_id,
   metaOrUndefined,
+  serializerOrUndefined,
   tie_breaker_id,
   type,
   updated_at,
@@ -25,9 +27,11 @@ export const listItemSchema = t.exact(
   t.type({
     created_at,
     created_by,
+    deserializer: deserializerOrUndefined,
     id,
     list_id,
     meta: metaOrUndefined,
+    serializer: serializerOrUndefined,
     tie_breaker_id,
     type,
     updated_at,

@@ -7,7 +7,6 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-import { RequestHandlerContext } from 'src/core/server';
 import { throwErrors, createPlainError } from '../../../common/runtime_types';
 import {
   logRateModelPlotResponseRT,
@@ -15,22 +14,9 @@ import {
   LogRateModelPlotBucket,
   CompositeTimestampPartitionKey,
 } from './queries';
-import { startTracingSpan } from '../../../common/performance_tracing';
-import { decodeOrThrow } from '../../../common/runtime_types';
-import { getJobId, jobCustomSettingsRT } from '../../../common/log_analysis';
-import {
-  createLogEntryExamplesQuery,
-  logEntryExamplesResponseRT,
-} from './queries/log_entry_examples';
-import {
-  InsufficientLogAnalysisMlJobConfigurationError,
-  NoLogAnalysisResultsIndexError,
-} from './errors';
-import { InfraSource } from '../sources';
+import { getJobId } from '../../../common/log_analysis';
+import { NoLogAnalysisResultsIndexError } from './errors';
 import type { MlSystem } from '../../types';
-import { InfraRequestHandlerContext } from '../../types';
-import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
-import { fetchMlJob } from './common';
 
 const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
 
@@ -144,106 +130,4 @@ export async function getLogEntryRateBuckets(
       ];
     }
   }, []);
-}
-
-export async function getLogEntryExamples(
-  context: RequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
-  sourceId: string,
-  startTime: number,
-  endTime: number,
-  dataset: string,
-  exampleCount: number,
-  sourceConfiguration: InfraSource,
-  callWithRequest: KibanaFramework['callWithRequest']
-) {
-  const finalizeLogEntryExamplesSpan = startTracingSpan('get log entry rate example log entries');
-
-  const jobId = getJobId(context.infra.spaceId, sourceId, 'log-entry-rate');
-
-  const {
-    mlJob,
-    timing: { spans: fetchMlJobSpans },
-  } = await fetchMlJob(context.infra.mlAnomalyDetectors, jobId);
-
-  const customSettings = decodeOrThrow(jobCustomSettingsRT)(mlJob.custom_settings);
-  const indices = customSettings?.logs_source_config?.indexPattern;
-  const timestampField = customSettings?.logs_source_config?.timestampField;
-  const tiebreakerField = sourceConfiguration.configuration.fields.tiebreaker;
-
-  if (indices == null || timestampField == null) {
-    throw new InsufficientLogAnalysisMlJobConfigurationError(
-      `Failed to find index configuration for ml job ${jobId}`
-    );
-  }
-
-  const {
-    examples,
-    timing: { spans: fetchLogEntryExamplesSpans },
-  } = await fetchLogEntryExamples(
-    context,
-    indices,
-    timestampField,
-    tiebreakerField,
-    startTime,
-    endTime,
-    dataset,
-    exampleCount,
-    callWithRequest
-  );
-
-  const logEntryExamplesSpan = finalizeLogEntryExamplesSpan();
-
-  return {
-    data: examples,
-    timing: {
-      spans: [logEntryExamplesSpan, ...fetchMlJobSpans, ...fetchLogEntryExamplesSpans],
-    },
-  };
-}
-
-export async function fetchLogEntryExamples(
-  context: RequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
-  indices: string,
-  timestampField: string,
-  tiebreakerField: string,
-  startTime: number,
-  endTime: number,
-  dataset: string,
-  exampleCount: number,
-  callWithRequest: KibanaFramework['callWithRequest']
-) {
-  const finalizeEsSearchSpan = startTracingSpan('Fetch log rate examples from ES');
-
-  const {
-    hits: { hits },
-  } = decodeOrThrow(logEntryExamplesResponseRT)(
-    await callWithRequest(
-      context,
-      'search',
-      createLogEntryExamplesQuery(
-        indices,
-        timestampField,
-        tiebreakerField,
-        startTime,
-        endTime,
-        dataset,
-        exampleCount
-      )
-    )
-  );
-
-  const esSearchSpan = finalizeEsSearchSpan();
-
-  return {
-    examples: hits.map((hit) => ({
-      id: hit._id,
-      dataset,
-      message: hit._source.message ?? '',
-      timestamp: hit.sort[0],
-      tiebreaker: hit.sort[1],
-    })),
-    timing: {
-      spans: [esSearchSpan],
-    },
-  };
 }

@@ -11,7 +11,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiFocusTrap,
-  keyCodes,
+  keys,
   EuiSelectable,
 } from '@elastic/eui';
 import { SymbolIcon } from '../legend/symbol_icon';
@@ -41,10 +41,10 @@ export class IconSelect extends Component {
 
   _handleKeyboardActivity = (e) => {
     if (isKeyboardEvent(e)) {
-      if (e.keyCode === keyCodes.ENTER) {
+      if (e.key === keys.ENTER) {
         e.preventDefault();
         this._togglePopover();
-      } else if (e.keyCode === keyCodes.DOWN) {
+      } else if (e.key === keys.ARROW_DOWN) {
         this._openPopover();
       }
     }

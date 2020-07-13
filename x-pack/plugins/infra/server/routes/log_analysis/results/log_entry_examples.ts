@@ -31,6 +31,7 @@ export const initGetLogEntryExamplesRoute = ({ framework, sources }: InfraBacken
           exampleCount,
           sourceId,
           timeRange: { startTime, endTime },
+          categoryId,
         },
       } = request.body;
 
@@ -50,7 +51,8 @@ export const initGetLogEntryExamplesRoute = ({ framework, sources }: InfraBacken
           dataset,
           exampleCount,
           sourceConfiguration,
-          framework.callWithRequest
+          framework.callWithRequest,
+          categoryId
         );
 
         return response.ok({

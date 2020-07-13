@@ -6,7 +6,7 @@
 
 import * as rt from 'io-ts';
 import {
-  createJobIdFilter,
+  createJobIdFilters,
   createResultTypeFilters,
   createTimeRangeFilters,
   defaultRequestParameters,
@@ -27,7 +27,7 @@ export const createLogEntryRateQuery = (
     query: {
       bool: {
         filter: [
-          ...createJobIdFilter(logRateJobId),
+          ...createJobIdFilters(logRateJobId),
           ...createTimeRangeFilters(startTime, endTime),
           ...createResultTypeFilters(['model_plot', 'record']),
           ...createDatasetsFilters(datasets),

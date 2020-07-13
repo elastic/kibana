@@ -7,7 +7,7 @@
 import * as rt from 'io-ts';
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 import {
-  createJobIdFilter,
+  createJobIdFilters,
   createResultTypeFilters,
   createTimeRangeFilters,
   defaultRequestParameters,
@@ -25,7 +25,7 @@ export const createLogEntryCategoryHistogramsQuery = (
     query: {
       bool: {
         filter: [
-          ...createJobIdFilter(logEntryCategoriesJobId),
+          ...createJobIdFilters(logEntryCategoriesJobId),
           ...createTimeRangeFilters(startTime, endTime),
           ...createResultTypeFilters(['model_plot']),
           ...createCategoryFilters(categoryIds),

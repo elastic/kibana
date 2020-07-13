@@ -85,15 +85,12 @@ export const initGetLogEntryAnomaliesRoute = ({ framework }: InfraBackendLibs) =
 };
 
 const getSortAndPagination = (
-  sortParam: GetLogEntryAnomaliesRequestPayload['data']['sort'],
-  paginationParam: GetLogEntryAnomaliesRequestPayload['data']['pagination']
+  sort: Partial<GetLogEntryAnomaliesRequestPayload['data']['sort']> = {},
+  pagination: Partial<GetLogEntryAnomaliesRequestPayload['data']['pagination']> = {}
 ): {
   sort: Sort;
   pagination: Pagination;
 } => {
-  const sort = sortParam ?? {};
-  const pagination = paginationParam ?? {};
-
   const sortDefaults = {
     field: 'anomalyScore' as const,
     direction: 'desc' as const,

@@ -4,14 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { euiStyled } from '../../../../../../../observability/public';
@@ -21,7 +14,6 @@ import { getAnnotationsForAll, getLogEntryRateCombinedSeries } from '../helpers/
 import { AnomaliesChart } from './chart';
 import { AnomaliesTable } from './table';
 import { RecreateJobButton } from '../../../../../components/logging/log_analysis_job_status';
-import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 import {
   Page,
   FetchNextPage,
@@ -32,15 +24,16 @@ import {
   PaginationOptions,
   LogEntryAnomalies,
 } from '../../use_log_entry_anomalies_results';
+import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 
 export const AnomaliesResults: React.FunctionComponent<{
-  isLoading: boolean;
-  results: LogEntryRateResults | null;
+  isLoadingLogRateResults: boolean;
+  isLoadingAnomaliesResults: boolean;
+  logEntryRateResults: LogEntryRateResults | null;
   anomalies: LogEntryAnomalies;
   setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange;
   viewSetupForReconfiguration: () => void;
-  jobId: string;
   page: Page;
   fetchNextPage?: FetchNextPage;
   fetchPreviousPage?: FetchPreviousPage;
@@ -49,12 +42,12 @@ export const AnomaliesResults: React.FunctionComponent<{
   sortOptions: SortOptions;
   paginationOptions: PaginationOptions;
 }> = ({
-  isLoading,
-  results,
+  isLoadingLogRateResults,
+  isLoadingAnomaliesResults,
+  logEntryRateResults,
   setTimeRange,
   timeRange,
   viewSetupForReconfiguration,
-  jobId,
   anomalies,
   changeSortOptions,
   sortOptions,
@@ -64,31 +57,24 @@ export const AnomaliesResults: React.FunctionComponent<{
   fetchPreviousPage,
   page,
 }) => {
-  const hasAnomalies = useMemo(() => {
-    return results && results.histogramBuckets
-      ? results.histogramBuckets.some((bucket) => {
-          return bucket.partitions.some((partition) => {
-            return partition.anomalies.length > 0;
-          });
-        })
-      : false;
-  }, [results]);
-
   const logEntryRateSeries = useMemo(
-    () => (results && results.histogramBuckets ? getLogEntryRateCombinedSeries(results) : []),
-    [results]
+    () =>
+      logEntryRateResults && logEntryRateResults.histogramBuckets
+        ? getLogEntryRateCombinedSeries(logEntryRateResults)
+        : [],
+    [logEntryRateResults]
   );
   const anomalyAnnotations = useMemo(
     () =>
-      results && results.histogramBuckets
-        ? getAnnotationsForAll(results)
+      logEntryRateResults && logEntryRateResults.histogramBuckets
+        ? getAnnotationsForAll(logEntryRateResults)
         : {
             warning: [],
             minor: [],
             major: [],
             critical: [],
           },
-    [results]
+    [logEntryRateResults]
   );
 
   return (
@@ -104,11 +90,12 @@ export const AnomaliesResults: React.FunctionComponent<{
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <LoadingOverlayWrapper isLoading={isLoading} loadingChildren={<LoadingOverlayContent />}>
-        {!results ||
-        (results && results.histogramBuckets && !results.histogramBuckets.length) ||
-        !anomalies ||
-        anomalies.length === 0 ? (
+      {(!logEntryRateResults ||
+        (logEntryRateResults &&
+          logEntryRateResults.histogramBuckets &&
+          !logEntryRateResults.histogramBuckets.length)) &&
+      (!anomalies || anomalies.length === 0) ? (
+        <LoadingOverlayWrapper isLoading={isLoadingLogRateResults || isLoadingAnomaliesResults}>
           <EuiEmptyPrompt
             title={
               <h2>
@@ -126,49 +113,38 @@ export const AnomaliesResults: React.FunctionComponent<{
               </p>
             }
           />
-        ) : !hasAnomalies ? (
-          <EuiEmptyPrompt
-            title={
-              <h2>
-                {i18n.translate('xpack.infra.logs.analysis.anomalySectionNoAnomaliesTitle', {
-                  defaultMessage: 'No anomalies were detected.',
-                })}
-              </h2>
-            }
-            titleSize="m"
+        </LoadingOverlayWrapper>
+      ) : (
+        <>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <AnomaliesChart
+                chartId="overall"
+                isLoading={isLoadingLogRateResults}
+                setTimeRange={setTimeRange}
+                timeRange={timeRange}
+                series={logEntryRateSeries}
+                annotations={anomalyAnnotations}
+                renderAnnotationTooltip={renderAnnotationTooltip}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="l" />
+          <AnomaliesTable
+            results={anomalies}
+            setTimeRange={setTimeRange}
+            timeRange={timeRange}
+            changeSortOptions={changeSortOptions}
+            changePaginationOptions={changePaginationOptions}
+            sortOptions={sortOptions}
+            paginationOptions={paginationOptions}
+            fetchNextPage={fetchNextPage}
+            fetchPreviousPage={fetchPreviousPage}
+            page={page}
+            isLoading={isLoadingAnomaliesResults}
           />
-        ) : (
-          <>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <AnomaliesChart
-                  chartId="overall"
-                  setTimeRange={setTimeRange}
-                  timeRange={timeRange}
-                  series={logEntryRateSeries}
-                  annotations={anomalyAnnotations}
-                  renderAnnotationTooltip={renderAnnotationTooltip}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="l" />
-            <AnomaliesTable
-              results={anomalies}
-              setTimeRange={setTimeRange}
-              timeRange={timeRange}
-              jobId={jobId}
-              changeSortOptions={changeSortOptions}
-              changePaginationOptions={changePaginationOptions}
-              sortOptions={sortOptions}
-              paginationOptions={paginationOptions}
-              fetchNextPage={fetchNextPage}
-              fetchPreviousPage={fetchPreviousPage}
-              page={page}
-              isLoading={isLoading}
-            />
-          </>
-        )}
-      </LoadingOverlayWrapper>
+        </>
+      )}
     </>
   );
 };
@@ -176,13 +152,6 @@ export const AnomaliesResults: React.FunctionComponent<{
 const title = i18n.translate('xpack.infra.logs.analysis.anomaliesSectionTitle', {
   defaultMessage: 'Anomalies',
 });
-
-const loadingAriaLabel = i18n.translate(
-  'xpack.infra.logs.analysis.anomaliesSectionLoadingAriaLabel',
-  { defaultMessage: 'Loading anomalies' }
-);
-
-const LoadingOverlayContent = () => <EuiLoadingSpinner size="xl" aria-label={loadingAriaLabel} />;
 
 interface ParsedAnnotationDetails {
   anomalyScoresByPartition: Array<{ partitionName: string; maximumAnomalyScore: number }>;

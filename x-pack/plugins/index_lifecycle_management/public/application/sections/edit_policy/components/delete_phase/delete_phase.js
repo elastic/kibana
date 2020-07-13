@@ -7,17 +7,12 @@
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiDescribedFormGroup,
-  EuiSwitch,
-  EuiFieldText,
-  EuiTextColor,
-  EuiFormRow,
-} from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiSwitch, EuiTextColor, EuiFormRow } from '@elastic/eui';
 
 import { PHASE_DELETE, PHASE_ENABLED, PHASE_WAIT_FOR_SNAPSHOT_POLICY } from '../../../../constants';
 import { ActiveBadge, LearnMoreLink, OptionalLabel, PhaseErrorMessage } from '../../../components';
 import { MinAgeInput } from '../min_age_input';
+import { SnapshotPolicies } from '../snapshot_policies';
 
 export class DeletePhase extends PureComponent {
   static propTypes = {
@@ -125,10 +120,9 @@ export class DeletePhase extends PureComponent {
                 </Fragment>
               }
             >
-              <EuiFieldText
-                data-test-subj="waitForSnapshotField"
+              <SnapshotPolicies
                 value={phaseData[PHASE_WAIT_FOR_SNAPSHOT_POLICY]}
-                onChange={(e) => setPhaseData(PHASE_WAIT_FOR_SNAPSHOT_POLICY, e.target.value)}
+                onChange={(value) => setPhaseData(PHASE_WAIT_FOR_SNAPSHOT_POLICY, value)}
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>

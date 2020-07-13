@@ -53,7 +53,6 @@ export const LogEntryRateResultsContent: React.FunctionComponent<LogEntryRateRes
     hasOutdatedJobConfigurations,
     hasOutdatedJobDefinitions,
     hasStoppedJobs,
-    jobIds,
     sourceConfiguration: { sourceId },
   } = useLogEntryRateModuleContext();
 
@@ -103,7 +102,6 @@ export const LogEntryRateResultsContent: React.FunctionComponent<LogEntryRateRes
     sourceId,
     startTime: queryTimeRange.value.startTime,
     endTime: queryTimeRange.value.endTime,
-    lastChangedTime: queryTimeRange.lastChangedTime,
     defaultSortOptions: SORT_DEFAULTS,
     defaultPaginationOptions: PAGINATION_DEFAULTS,
     filteredDatasets: selectedDatasets,
@@ -237,13 +235,13 @@ export const LogEntryRateResultsContent: React.FunctionComponent<LogEntryRateRes
         <EuiFlexItem grow={false}>
           <EuiPanel paddingSize="m">
             <AnomaliesResults
-              isLoading={isLoading || isLoadingLogEntryAnomalies}
+              isLoadingLogRateResults={isLoading}
+              isLoadingAnomaliesResults={isLoadingLogEntryAnomalies}
               viewSetupForReconfiguration={viewSetupFlyoutForReconfiguration}
-              results={logEntryRate}
+              logEntryRateResults={logEntryRate}
               anomalies={logEntryAnomalies}
               setTimeRange={handleChartTimeRangeChange}
               timeRange={queryTimeRange.value}
-              jobId={jobIds['log-entry-rate']}
               page={page}
               fetchNextPage={fetchNextPage}
               fetchPreviousPage={fetchPreviousPage}

@@ -24,7 +24,7 @@ import {
   KibanaDatatable,
   ExpressionFunctionDefinition,
   KibanaDatatableColumn,
-} from '../../../../../plugins/expressions/public';
+} from 'src/plugins/expressions/public';
 import { calculateObjectHash } from '../../../../../plugins/kibana_utils/public';
 import { PersistedState } from '../../../../../plugins/visualizations/public';
 import { Adapters } from '../../../../../plugins/inspector/public';
@@ -201,7 +201,7 @@ const handleCourierRequest = async ({
         aggs,
         agg,
         requestSearchSource,
-        inspectorAdapters,
+        inspectorAdapters.requests,
         abortSignal
       );
     }

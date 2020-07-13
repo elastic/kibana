@@ -324,8 +324,11 @@ describe('IndexPattern Data Panel', () => {
       };
     }
 
-    async function testExistenceLoading(stateChanges?: unknown, propChanges?: unknown) {
-      const props = testProps();
+    async function testExistenceLoading(
+      stateChanges?: unknown,
+      propChanges?: unknown,
+      props = testProps()
+    ) {
       const inst = mountWithIntl(<IndexPatternDataPanel {...props} />);
 
       await act(async () => {
@@ -535,6 +538,25 @@ describe('IndexPattern Data Panel', () => {
 
       expect(core.http.post).toHaveBeenCalledTimes(2);
       expect(overlapCount).toEqual(0);
+    });
+
+    it("should default to empty dsl if query can't be parsed", async () => {
+      const props = {
+        ...testProps(),
+        query: {
+          language: 'kuery',
+          query: '@timestamp : NOT *',
+        },
+      };
+      await testExistenceLoading(undefined, undefined, props);
+
+      expect((props.core.http.post as jest.Mock).mock.calls[0][1].body).toContain(
+        JSON.stringify({
+          must_not: {
+            match_all: {},
+          },
+        })
+      );
     });
   });
 

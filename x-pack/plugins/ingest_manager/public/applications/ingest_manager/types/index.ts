@@ -91,7 +91,9 @@ export {
   RequirementVersion,
   ScreenshotItem,
   ServiceName,
+  GetCategoriesRequest,
   GetCategoriesResponse,
+  GetPackagesRequest,
   GetPackagesResponse,
   GetLimitedPackagesResponse,
   GetInfoResponse,
@@ -101,6 +103,7 @@ export {
   InstallStatus,
   InstallationStatus,
   Installable,
+  RegistryRelease,
 } from '../../../../common';
 
 export * from './intra_app_route_state';
