@@ -18,6 +18,7 @@ import {
   EuiSelectableProps,
   EuiIcon,
   EuiLoadingSpinner,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -130,8 +131,14 @@ const PolicyEmptyState = React.memo<{
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policyList.onboardingSectionThree"
-                defaultMessage="To get started, add the Elastic Endpoint Security integration to your Agents."
+                defaultMessage="To get started, add the Elastic Endpoint Security integration to your Agents. For more information, "
               />
+              <EuiLink external href="https://www.elastic.co/guide/en/security/current/index.html">
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policyList.onboardingDocsLink"
+                  defaultMessage="view the Security app documentation"
+                />
+              </EuiLink>
             </EuiText>
             <EuiSpacer size="l" />
             <EuiFlexGroup>
