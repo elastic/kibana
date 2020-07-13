@@ -301,5 +301,13 @@ export function formatResponse(responseString: string) {
   if (responseMap.has(responseString)) {
     return responseMap.get(responseString);
   }
-  return responseString;
+
+  // Its possible for the UI to receive an Action name that it does not yet have a translation,
+  // thus we generate a label for it here by making it more user fiendly
+  responseMap.set(
+    responseString,
+    responseString.replace(/_/g, ' ').replace(/\b(\w)/g, (m) => m.toUpperCase())
+  );
+
+  return responseMap.get(responseString);
 }
