@@ -97,7 +97,6 @@ export const getGapMaxCatchupRatio = ({
   const dateMathRuleParamsFrom = dateMath.parse(ruleParamsFrom);
   if (dateMathRuleParamsFrom != null && intervalMoment != null) {
     const momentUnit = shorthandMap[unit].momentString as moment.DurationInputArg2;
-    // const gapDiffInUnits = calculatedFromAsMoment.diff(dateMathRuleParamsFrom, momentUnit);
     const gapDiffInUnits = dateMathRuleParamsFrom.diff(calculatedFromAsMoment, momentUnit);
 
     const ratio = Math.abs(gapDiffInUnits / shorthandMap[unit].asFn(intervalMoment));
