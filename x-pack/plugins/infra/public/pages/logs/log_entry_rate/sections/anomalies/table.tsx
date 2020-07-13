@@ -234,14 +234,13 @@ const AnomalyMessage = ({
 }: {
   actual: number;
   typical: number;
-  type: string;
+  type: AnomalyType;
 }) => {
-  const messageType = type === 'logRate' ? 'dataset' : 'category';
   const moreThanExpectedAnomalyMessage = i18n.translate(
     'xpack.infra.logs.analysis.anomaliesTableMoreThanExpectedAnomalyMessage',
     {
-      defaultMessage: 'higher log messages in this {messageType} than expected',
-      values: { messageType },
+      defaultMessage: 'higher log messages in this {type, select, logRate {dataset}, logCategory {category}} than expected',
+      values: { type },
     }
   );
 
