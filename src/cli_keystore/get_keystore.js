@@ -17,22 +17,24 @@
  * under the License.
  */
 
-import { accessSync, constants } from 'fs';
-import { getConfigPath, getDataPath, getConfigDirectory } from './';
+import { existsSync } from 'fs';
+import { join } from 'path';
 
-describe('Default path finder', () => {
-  it('should find a kibana.yml', () => {
-    const configPath = getConfigPath();
-    expect(() => accessSync(configPath, constants.R_OK)).not.toThrow();
-  });
+import Logger from '../cli_plugin/lib/logger';
+import { getConfigDirectory, getDataPath } from '../core/server/path';
 
-  it('should find a data directory', () => {
-    const dataPath = getDataPath();
-    expect(() => accessSync(dataPath, constants.R_OK)).not.toThrow();
-  });
-
-  it('should find a config directory', () => {
-    const configDirectory = getConfigDirectory();
-    expect(() => accessSync(configDirectory, constants.R_OK)).not.toThrow();
-  });
-});
+export function getKeystore() {
+  const configKeystore = join(getConfigDirectory(), 'kibana.keystore');
+  const dataKeystore = join(getDataPath(), 'kibana.keystore');
+  let keystorePath = null;
+  if (existsSync(dataKeystore)) {
+    const logger = new Logger();
+    logger.log(
+      `kibana.keystore located in the data folder is deprecated.  Future versions will use the config folder.`
+    );
+    keystorePath = dataKeystore;
+  } else {
+    keystorePath = configKeystore;
+  }
+  return keystorePath;
+}
