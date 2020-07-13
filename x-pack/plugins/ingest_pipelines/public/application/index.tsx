@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpSetup } from 'kibana/public';
 import React, { ReactNode } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { NotificationsSetup, IUiSettingsClient } from 'kibana/public';
+import { HttpSetup, NotificationsSetup, IUiSettingsClient, ChromeDocTitle } from 'kibana/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
@@ -26,6 +25,7 @@ export interface AppServices {
   notifications: NotificationsSetup;
   history: ManagementAppMountParams['history'];
   uiSettings: IUiSettingsClient;
+  docTitle: ChromeDocTitle;
 }
 
 export interface CoreServices {

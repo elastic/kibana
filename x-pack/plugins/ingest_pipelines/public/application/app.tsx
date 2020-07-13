@@ -5,12 +5,12 @@
  */
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageContent } from '@elastic/eui';
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useEffect } from 'react';
 import { Router, Switch, Route } from 'react-router-dom';
 
 import { useKibana } from '../shared_imports';
 
-import { APP_CLUSTER_REQUIRED_PRIVILEGES } from '../../common/constants';
+import { APP_CLUSTER_REQUIRED_PRIVILEGES, PLUGIN_I18N_NAME } from '../../common/constants';
 
 import {
   SectionError,
@@ -35,7 +35,12 @@ export const AppWithoutRouter = () => (
 
 export const App: FunctionComponent = () => {
   const { apiError } = useAuthorizationContext();
-  const { history } = useKibana().services;
+  const { history, docTitle } = useKibana().services;
+
+  useEffect(() => {
+    docTitle.change(PLUGIN_I18N_NAME);
+    return () => docTitle.reset();
+  }, [docTitle]);
 
   if (apiError) {
     return (

@@ -18,6 +18,7 @@ export async function mountManagementSection(
   const {
     docLinks,
     i18n: { Context: I18nContext },
+    chrome,
   } = coreStart;
 
   documentationService.setup(docLinks);
@@ -31,6 +32,7 @@ export async function mountManagementSection(
     notifications,
     history,
     uiSettings: coreStart.uiSettings,
+    docTitle: chrome.docTitle,
   };
 
   return renderApp(element, I18nContext, services, { http });

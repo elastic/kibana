@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin } from 'src/core/public';
 
 import { ManagementSectionId } from '../../../../src/plugins/management/public';
-import { PLUGIN_ID } from '../common/constants';
+import { PLUGIN_ID, PLUGIN_I18N_NAME } from '../common/constants';
 import { uiMetricService, apiService } from './application/services';
 import { Dependencies } from './types';
 
@@ -24,9 +23,7 @@ export class IngestPipelinesPlugin implements Plugin {
     management.sections.getSection(ManagementSectionId.Ingest).registerApp({
       id: PLUGIN_ID,
       order: 1,
-      title: i18n.translate('xpack.ingestPipelines.appTitle', {
-        defaultMessage: 'Ingest Node Pipelines',
-      }),
+      title: PLUGIN_I18N_NAME,
       mount: async (params) => {
         const { mountManagementSection } = await import('./application/mount_management_section');
 
