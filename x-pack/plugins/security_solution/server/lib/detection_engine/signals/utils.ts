@@ -99,7 +99,7 @@ export const getGapMaxCatchupRatio = ({
     const momentUnit = shorthandMap[unit].momentString as moment.DurationInputArg2;
     const gapDiffInUnits = dateMathRuleParamsFrom.diff(calculatedFromAsMoment, momentUnit);
 
-    const ratio = Math.abs(gapDiffInUnits / shorthandMap[unit].asFn(intervalMoment));
+    const ratio = gapDiffInUnits / shorthandMap[unit].asFn(intervalMoment);
 
     // maxCatchup is to ensure we are not trying to catch up too far back.
     // This allows for a maximum of 4 consecutive rule execution misses
@@ -444,7 +444,7 @@ export const getSignalTimeTuples = ({
         if (maxCatchup > 0 && maxCatchup < 1) {
           totalToFromTuples.push({
             to: tempTo.clone(),
-            from: tempTo.clone().subtract(Math.abs(gapDiffInUnits), momentUnit),
+            from: tempTo.clone().subtract(gapDiffInUnits, momentUnit),
             maxSignals: ruleParamsMaxSignals * maxCatchup,
           });
           break;
