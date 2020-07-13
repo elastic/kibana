@@ -4,7 +4,7 @@ import { getOptions } from './options/options';
 import { runWithOptions, Result } from './runWithOptions';
 import { HandledError } from './services/HandledError';
 import { getLogfilePath } from './services/env';
-import { initLogger, consoleLog } from './services/logger';
+import { initLogger, consoleLog, redact } from './services/logger';
 
 export type BackportResponse =
   | {
@@ -60,7 +60,7 @@ export async function main(
       isUnhandledError,
       errorMessage: isUnhandledError
         ? 'An unhandled error occurred. Please see the logs for additional details'
-        : e.message,
+        : redact(e.message),
       error: e,
     };
   }

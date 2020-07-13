@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import { BackportOptions } from './options/options';
 import { HandledError } from './services/HandledError';
-import { logger, consoleLog } from './services/logger';
+import { logger, consoleLog, redact } from './services/logger';
 import { sequentially } from './services/sequentially';
 import { cherrypickAndCreateTargetPullRequest } from './ui/cherrypickAndCreateTargetPullRequest';
 import { getCommits } from './ui/getCommits';
@@ -46,7 +46,11 @@ export async function runWithOptions(options: BackportOptions) {
         pullRequestUrl: pullRequest.html_url,
       });
     } catch (e) {
-      results.push({ targetBranch, success: false, errorMessage: e.message });
+      results.push({
+        targetBranch,
+        success: false,
+        errorMessage: redact(e.message),
+      });
       if (e instanceof HandledError) {
         consoleLog(e.message);
       } else {

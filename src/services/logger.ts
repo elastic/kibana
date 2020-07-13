@@ -11,7 +11,7 @@ let winstonInstance: winston.Logger;
 // wrapper around console.log
 export function consoleLog(message: string) {
   // eslint-disable-next-line no-console
-  console.log(message);
+  console.log(redact(message));
   //process.stdout.write(message);
 }
 
@@ -32,16 +32,18 @@ export const logger = {
   },
 };
 
-let redactedAccessToken: string;
+let redactedAccessToken: string | undefined;
 
 export function setRedactedAccessToken(accessToken?: string) {
-  if (accessToken) {
-    redactedAccessToken = accessToken;
-  }
+  redactedAccessToken = accessToken;
 }
 
-function redact(str: string) {
-  return str.replace(new RegExp(redactedAccessToken, 'g'), '<REDACTED>');
+export function redact(str: string) {
+  if (redactedAccessToken) {
+    return str.replace(new RegExp(redactedAccessToken, 'g'), '<REDACTED>');
+  }
+
+  return str;
 }
 
 export function initLogger() {
