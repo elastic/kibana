@@ -22,7 +22,9 @@ function isKeyboardEvent(event) {
   return typeof event === 'object' && 'keyCode' in event;
 }
 
-const isDarkMode = getUiSettings().get('theme:darkMode', false);
+function getIsDarkMode() {
+  return getUiSettings().get('theme:darkMode', false);
+}
 
 export class IconSelect extends Component {
   state = {
@@ -87,7 +89,7 @@ export class IconSelect extends Component {
               key={this.props.value}
               className="mapIconSelectSymbol__inputButton"
               symbolId={this.props.value}
-              fill={isDarkMode ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
+              fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
             />
           }
         />
@@ -104,7 +106,7 @@ export class IconSelect extends Component {
           <SymbolIcon
             key={value}
             symbolId={value}
-            fill={isDarkMode ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
+            fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
           />
         ),
       };
