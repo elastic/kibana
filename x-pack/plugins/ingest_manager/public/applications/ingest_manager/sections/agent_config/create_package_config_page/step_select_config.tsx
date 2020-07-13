@@ -148,6 +148,7 @@ export const StepSelectConfig: React.FunctionComponent<{
                 setSelectedConfigId(newAgentConfig.id);
               }
             }}
+            ownFocus={true}
           />
         </EuiPortal>
       ) : null}
