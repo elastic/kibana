@@ -59,6 +59,9 @@ export const depsStartMock: () => DepsStartMock = () => {
 
   return {
     data: dataMock,
-    ingestManager: { success: Promise.resolve(true), registerPackageConfigComponent },
+    ingestManager: {
+      waitForInitialization: () => Promise.resolve(true),
+      registerPackageConfigComponent,
+    },
   };
 };
