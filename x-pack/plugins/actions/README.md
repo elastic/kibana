@@ -452,7 +452,7 @@ This action type has no `secrets` properties.
 
 | Property  | Description                              | Type                |
 | --------- | ---------------------------------------- | ------------------- |
-| documents | JSON object which describe the [document](https://www.elastic.co/guide/en/elasticsearch/reference/current/getting-started-index.html#getting-started-batch-processing). | object[]            |
+| documents | JSON object that describes the [document](https://www.elastic.co/guide/en/elasticsearch/reference/current/getting-started-index.html#getting-started-batch-processing). | object[]            |
 
 ---
 
