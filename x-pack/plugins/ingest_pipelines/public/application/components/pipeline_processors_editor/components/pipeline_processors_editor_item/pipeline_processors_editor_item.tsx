@@ -189,7 +189,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
               </EuiFlexItem>
 
               {processor.options.if ? (
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem className={actionElementClasses} grow={false}>
                   <IfBadge
                     onClick={() => {
                       copyToClipboard(processor.options.if);
