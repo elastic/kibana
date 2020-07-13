@@ -7,9 +7,9 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
+import { useParams } from 'react-router-dom';
 
-import { disableTemplate } from '../../../common/constants';
-
+import { TimelineType } from '../../../common/types/timeline';
 import { HeaderPage } from '../../common/components/header_page';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { useKibana } from '../../common/lib/kibana';
@@ -31,6 +31,7 @@ const TimelinesContainer = styled.div`
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
 export const TimelinesPageComponent: React.FC = () => {
+  const { tabName } = useParams();
   const [importDataModalToggle, setImportDataModalToggle] = useState<boolean>(false);
   const onImportTimelineBtnClick = useCallback(() => {
     setImportDataModalToggle(true);
@@ -56,20 +57,17 @@ export const TimelinesPageComponent: React.FC = () => {
                 </EuiButton>
               )}
             </EuiFlexItem>
-            <EuiFlexItem>
-              {capabilitiesCanUserCRUD && (
-                <NewTimeline
-                  timelineId="timeline-1"
-                  outline={true}
-                  data-test-subj="create-default-btn"
-                />
-              )}
-            </EuiFlexItem>
-            {/**
-             * CreateTemplateTimelineBtn
-             * Remove the comment here to enable CreateTemplateTimelineBtn
-             */}
-            {!disableTemplate && (
+            {tabName === TimelineType.default ? (
+              <EuiFlexItem>
+                {capabilitiesCanUserCRUD && (
+                  <NewTimeline
+                    timelineId="timeline-1"
+                    outline={true}
+                    data-test-subj="create-default-btn"
+                  />
+                )}
+              </EuiFlexItem>
+            ) : (
               <EuiFlexItem>
                 <NewTemplateTimeline
                   outline={true}

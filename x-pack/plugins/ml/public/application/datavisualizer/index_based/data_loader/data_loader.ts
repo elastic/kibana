@@ -11,14 +11,13 @@ import { CoreSetup } from 'src/core/public';
 import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 import { SavedSearchQuery } from '../../../contexts/ml';
+import { OMIT_FIELDS } from '../../../../../common/constants/field_types';
 import { IndexPatternTitle } from '../../../../../common/types/kibana';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../common/constants/field_histograms';
 
 import { ml } from '../../../services/ml_api_service';
 import { FieldHistogramRequestConfig, FieldRequestConfig } from '../common';
 
-// List of system fields we don't want to display.
-const OMIT_FIELDS: string[] = ['_source', '_type', '_index', '_id', '_version', '_score'];
 // Maximum number of examples to obtain for text type fields.
 const MAX_EXAMPLES_DEFAULT: number = 10;
 

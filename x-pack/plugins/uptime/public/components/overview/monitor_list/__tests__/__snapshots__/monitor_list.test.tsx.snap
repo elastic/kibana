@@ -975,6 +975,8 @@ exports[`MonitorList component renders the monitor list 1`] = `
       </div>
       <table
         class="euiTable euiTable--responsive"
+        id="generated-id"
+        tabindex="-1"
       >
         <caption
           class="euiScreenReaderOnly euiTableCaption"
@@ -1132,7 +1134,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                           <div
                             class="euiTextColor euiTextColor--subdued"
                           >
-                            1898 Yr ago
+                            5m ago
                           </div>
                         </div>
                       </span>
@@ -1309,7 +1311,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                           <div
                             class="euiTextColor euiTextColor--subdued"
                           >
-                            1896 Yr ago
+                            5m ago
                           </div>
                         </div>
                       </span>
