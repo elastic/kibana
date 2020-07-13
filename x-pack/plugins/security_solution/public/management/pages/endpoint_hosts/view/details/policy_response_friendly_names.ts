@@ -8,20 +8,6 @@ import { i18n } from '@kbn/i18n';
 
 const policyResponses: Array<[string, string]> = [
   [
-    'configure_api_events',
-    i18n.translate(
-      'xpack.securitySolution.endpoint.hostDetails.policyResponse.configure_api_events',
-      { defaultMessage: 'Configure API Events' }
-    ),
-  ],
-  [
-    'configure_clr_events',
-    i18n.translate(
-      'xpack.securitySolution.endpoint.hostDetails.policyResponse.configure_clr_events',
-      { defaultMessage: 'Configure CLR Events' }
-    ),
-  ],
-  [
     'configure_dns_events',
     i18n.translate(
       'xpack.securitySolution.endpoint.hostDetails.policyResponse.configure_dns_events',
@@ -33,13 +19,6 @@ const policyResponses: Array<[string, string]> = [
     i18n.translate(
       'xpack.securitySolution.endpoint.hostDetails.policyResponse.configure_elasticsearch_connection',
       { defaultMessage: 'Configure Elastic Search Connection' }
-    ),
-  ],
-  [
-    'configure_etw_events',
-    i18n.translate(
-      'xpack.securitySolution.endpoint.hostDetails.policyResponse.configure_etw_events',
-      { defaultMessage: 'Configure ETW Events' }
     ),
   ],
   [
@@ -82,13 +61,6 @@ const policyResponses: Array<[string, string]> = [
     ),
   ],
   [
-    'configure_powershell_events',
-    i18n.translate(
-      'xpack.securitySolution.endpoint.hostDetails.policyResponse.configure_powershell_events',
-      { defaultMessage: 'Configure ' }
-    ),
-  ],
-  [
     'configure_process_events',
     i18n.translate(
       'xpack.securitySolution.endpoint.hostDetails.policyResponse.configure_process_events',
@@ -100,20 +72,6 @@ const policyResponses: Array<[string, string]> = [
     i18n.translate(
       'xpack.securitySolution.endpoint.hostDetails.policyResponse.configure_registry_events',
       { defaultMessage: 'Configure Registry Events' }
-    ),
-  ],
-  [
-    'configure_removabledevice_events',
-    i18n.translate(
-      'xpack.securitySolution.endpoint.hostDetails.policyResponse.configure_removabledevice_events',
-      { defaultMessage: 'Configure Removable Device Events' }
-    ),
-  ],
-  [
-    'configure_security_auditing_events',
-    i18n.translate(
-      'xpack.securitySolution.endpoint.hostDetails.policyResponse.configure_security_auditing_events',
-      { defaultMessage: 'Configure Security Auditing Events' }
     ),
   ],
   [
