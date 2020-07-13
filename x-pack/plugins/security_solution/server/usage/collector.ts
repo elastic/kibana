@@ -22,14 +22,26 @@ export const registerCollector: RegisterCollector = ({ kibanaIndex, ml, usageCol
     type: 'security_solution',
     schema: {
       detections: {
-        detection_rules_custom_enabled: { type: 'number' },
-        detection_rules_custom_disabled: { type: 'number' },
-        detection_rules_elastic_enabled: { type: 'number' },
-        detection_rules_elastic_disabled: { type: 'number' },
-        ml_jobs_custom_enabled: { type: 'number' },
-        ml_jobs_custom_disabled: { type: 'number' },
-        ml_jobs_elastic_enabled: { type: 'number' },
-        ml_jobs_elastic_disabled: { type: 'number' },
+        detection_rules: {
+          custom: {
+            enabled: { type: 'long' },
+            disabled: { type: 'long' },
+          },
+          elastic: {
+            enabled: { type: 'long' },
+            disabled: { type: 'long' },
+          },
+        },
+        ml_jobs: {
+          custom: {
+            enabled: { type: 'long' },
+            disabled: { type: 'long' },
+          },
+          elastic: {
+            enabled: { type: 'long' },
+            disabled: { type: 'long' },
+          },
+        },
       },
     },
     isReady: () => kibanaIndex.length > 0,

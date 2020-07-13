@@ -33,14 +33,26 @@ describe('Detections Usage', () => {
       const result = await fetchDetectionsUsage('', callClusterMock, mlMock);
 
       expect(result).toEqual({
-        detection_rules_custom_enabled: 0,
-        detection_rules_custom_disabled: 0,
-        detection_rules_elastic_enabled: 0,
-        detection_rules_elastic_disabled: 0,
-        ml_jobs_custom_enabled: 0,
-        ml_jobs_custom_disabled: 0,
-        ml_jobs_elastic_enabled: 0,
-        ml_jobs_elastic_disabled: 0,
+        detection_rules: {
+          custom: {
+            enabled: 0,
+            disabled: 0,
+          },
+          elastic: {
+            enabled: 0,
+            disabled: 0,
+          },
+        },
+        ml_jobs: {
+          custom: {
+            enabled: 0,
+            disabled: 0,
+          },
+          elastic: {
+            enabled: 0,
+            disabled: 0,
+          },
+        },
       });
     });
 
@@ -50,10 +62,16 @@ describe('Detections Usage', () => {
 
       expect(result).toEqual(
         expect.objectContaining({
-          detection_rules_custom_enabled: 1,
-          detection_rules_custom_disabled: 1,
-          detection_rules_elastic_enabled: 2,
-          detection_rules_elastic_disabled: 3,
+          detection_rules: {
+            custom: {
+              enabled: 1,
+              disabled: 1,
+            },
+            elastic: {
+              enabled: 2,
+              disabled: 3,
+            },
+          },
         })
       );
     });
@@ -72,10 +90,16 @@ describe('Detections Usage', () => {
 
       expect(result).toEqual(
         expect.objectContaining({
-          ml_jobs_custom_enabled: 1,
-          ml_jobs_custom_disabled: 1,
-          ml_jobs_elastic_enabled: 1,
-          ml_jobs_elastic_disabled: 1,
+          ml_jobs: {
+            custom: {
+              enabled: 1,
+              disabled: 1,
+            },
+            elastic: {
+              enabled: 1,
+              disabled: 1,
+            },
+          },
         })
       );
     });

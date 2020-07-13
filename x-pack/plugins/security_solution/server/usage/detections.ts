@@ -8,21 +8,25 @@ import { LegacyAPICaller } from '../../../../../src/core/server';
 import { getMlJobsUsage, getRulesUsage } from './detections_helpers';
 import { MlPluginSetup } from '../../../ml/server';
 
+interface FeatureUsage {
+  enabled: number;
+  disabled: number;
+}
+
 export interface DetectionRulesUsage {
-  detection_rules_custom_enabled: number;
-  detection_rules_custom_disabled: number;
-  detection_rules_elastic_enabled: number;
-  detection_rules_elastic_disabled: number;
+  custom: FeatureUsage;
+  elastic: FeatureUsage;
 }
 
 export interface MlJobsUsage {
-  ml_jobs_custom_enabled: number;
-  ml_jobs_custom_disabled: number;
-  ml_jobs_elastic_enabled: number;
-  ml_jobs_elastic_disabled: number;
+  custom: FeatureUsage;
+  elastic: FeatureUsage;
 }
 
-export interface DetectionsUsage extends MlJobsUsage, DetectionRulesUsage {}
+export interface DetectionsUsage {
+  detection_rules: DetectionRulesUsage;
+  ml_jobs: MlJobsUsage;
+}
 
 export const fetchDetectionsUsage = async (
   kibanaIndex: string,
@@ -31,5 +35,5 @@ export const fetchDetectionsUsage = async (
 ): Promise<DetectionsUsage> => {
   const rulesUsage = await getRulesUsage(kibanaIndex, callCluster);
   const mlJobsUsage = await getMlJobsUsage(ml);
-  return { ...rulesUsage, ...mlJobsUsage };
+  return { detection_rules: rulesUsage, ml_jobs: mlJobsUsage };
 };

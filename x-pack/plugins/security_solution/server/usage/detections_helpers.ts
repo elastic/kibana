@@ -24,17 +24,25 @@ interface DetectionsMetric {
 const isElasticRule = (tags: string[]) => tags.includes(`${INTERNAL_IMMUTABLE_KEY}:true`);
 
 const initialRulesUsage: DetectionRulesUsage = {
-  detection_rules_custom_enabled: 0,
-  detection_rules_custom_disabled: 0,
-  detection_rules_elastic_enabled: 0,
-  detection_rules_elastic_disabled: 0,
+  custom: {
+    enabled: 0,
+    disabled: 0,
+  },
+  elastic: {
+    enabled: 0,
+    disabled: 0,
+  },
 };
 
 const initialMlJobsUsage: MlJobsUsage = {
-  ml_jobs_custom_enabled: 0,
-  ml_jobs_custom_disabled: 0,
-  ml_jobs_elastic_enabled: 0,
-  ml_jobs_elastic_disabled: 0,
+  custom: {
+    enabled: 0,
+    disabled: 0,
+  },
+  elastic: {
+    enabled: 0,
+    disabled: 0,
+  },
 };
 
 const updateRulesUsage = (
@@ -45,22 +53,34 @@ const updateRulesUsage = (
   if (isEnabled && isElastic) {
     return {
       ...usage,
-      detection_rules_elastic_enabled: usage.detection_rules_elastic_enabled + 1,
+      elastic: {
+        ...usage.elastic,
+        enabled: usage.elastic.enabled + 1,
+      },
     };
   } else if (!isEnabled && isElastic) {
     return {
       ...usage,
-      detection_rules_elastic_disabled: usage.detection_rules_elastic_disabled + 1,
+      elastic: {
+        ...usage.elastic,
+        disabled: usage.elastic.disabled + 1,
+      },
     };
   } else if (isEnabled && !isElastic) {
     return {
       ...usage,
-      detection_rules_custom_enabled: usage.detection_rules_custom_enabled + 1,
+      custom: {
+        ...usage.custom,
+        enabled: usage.custom.enabled + 1,
+      },
     };
   } else if (!isEnabled && !isElastic) {
     return {
       ...usage,
-      detection_rules_custom_disabled: usage.detection_rules_custom_disabled + 1,
+      custom: {
+        ...usage.custom,
+        disabled: usage.custom.disabled + 1,
+      },
     };
   } else {
     return usage;
@@ -72,22 +92,34 @@ const updateMlJobsUsage = (jobMetric: DetectionsMetric, usage: MlJobsUsage): MlJ
   if (isEnabled && isElastic) {
     return {
       ...usage,
-      ml_jobs_elastic_enabled: usage.ml_jobs_elastic_enabled + 1,
+      elastic: {
+        ...usage.elastic,
+        enabled: usage.elastic.enabled + 1,
+      },
     };
   } else if (!isEnabled && isElastic) {
     return {
       ...usage,
-      ml_jobs_elastic_disabled: usage.ml_jobs_elastic_disabled + 1,
+      elastic: {
+        ...usage.elastic,
+        disabled: usage.elastic.disabled + 1,
+      },
     };
   } else if (isEnabled && !isElastic) {
     return {
       ...usage,
-      ml_jobs_custom_enabled: usage.ml_jobs_custom_enabled + 1,
+      custom: {
+        ...usage.custom,
+        enabled: usage.custom.enabled + 1,
+      },
     };
   } else if (!isEnabled && !isElastic) {
     return {
       ...usage,
-      ml_jobs_custom_disabled: usage.ml_jobs_custom_disabled + 1,
+      custom: {
+        ...usage.custom,
+        disabled: usage.custom.disabled + 1,
+      },
     };
   } else {
     return usage;
