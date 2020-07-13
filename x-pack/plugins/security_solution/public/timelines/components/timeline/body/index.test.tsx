@@ -162,6 +162,7 @@ describe('Body', () => {
             <Body {...props} />
           </TestProviders>
         );
+        // the timeline body still renders, but it gets a `display: none` style via `styled-components`.
         expect(wrapper.find(TimelineBody).props().visible).toBe(false);
       });
     });
