@@ -54,16 +54,22 @@ describe('VegaVisualizations', () => {
   let vis;
   let vegaVisualizationDependencies;
   let vegaVisType;
+
   let mockWidth;
+  let mockedWidthValue;
   let mockHeight;
+  let mockedHeightValue;
 
   const coreStart = coreMock.createStart();
   const dataPluginStart = dataPluginMock.createStartContract();
 
-  const setupDOM = (width, height) => {
+  const setupDOM = (width = 512, height = 512) => {
+    mockedWidthValue = width;
+    mockedHeightValue = height;
     domNode = document.createElement('div');
-    mockWidth = jest.spyOn($.prototype, 'width').mockReturnValue(width);
-    mockHeight = jest.spyOn($.prototype, 'height').mockReturnValue(height);
+
+    mockWidth = jest.spyOn($.prototype, 'width').mockImplementation(() => mockedWidthValue);
+    mockHeight = jest.spyOn($.prototype, 'height').mockImplementation(() => mockedHeightValue);
   };
 
   setKibanaMapFactory((...args) => new KibanaMap(...args));
@@ -98,7 +104,7 @@ describe('VegaVisualizations', () => {
 
   describe('VegaVisualization - basics', () => {
     beforeEach(async () => {
-      setupDOM(512, 512);
+      setupDOM();
 
       vis = {
         type: vegaVisType,
@@ -127,11 +133,8 @@ describe('VegaVisualizations', () => {
         await vegaVis.render(vegaParser);
         expect(domNode.innerHTML).toMatchSnapshot();
 
-        mockWidth.mockRestore();
-        mockWidth = jest.spyOn($.prototype, 'width').mockReturnValue(256);
-
-        mockHeight.mockRestore();
-        mockHeight = jest.spyOn($.prototype, 'height').mockReturnValue(256);
+        mockedWidthValue = 256;
+        mockedHeightValue = 256;
 
         await vegaVis._vegaView.resize();
 
@@ -176,11 +179,8 @@ describe('VegaVisualizations', () => {
         );
         await vegaParser.parseAsync();
 
-        mockWidth.mockRestore();
-        mockWidth = jest.spyOn($.prototype, 'width').mockReturnValue(256);
-
-        mockHeight.mockRestore();
-        mockHeight = jest.spyOn($.prototype, 'height').mockReturnValue(256);
+        mockedWidthValue = 256;
+        mockedHeightValue = 256;
 
         await vegaVis.render(vegaParser);
         expect(domNode.innerHTML).toMatchSnapshot();
@@ -222,11 +222,8 @@ describe('VegaVisualizations', () => {
         );
         await vegaParser.parseAsync();
 
-        mockWidth.mockRestore();
-        mockWidth = jest.spyOn($.prototype, 'width').mockReturnValue(256);
-
-        mockHeight.mockRestore();
-        mockHeight = jest.spyOn($.prototype, 'height').mockReturnValue(256);
+        mockedWidthValue = 256;
+        mockedHeightValue = 256;
 
         await vegaVis.render(vegaParser);
         const vegaView = vegaVis._vegaView._view;
