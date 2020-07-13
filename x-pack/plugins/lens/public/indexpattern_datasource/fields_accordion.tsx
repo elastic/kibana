@@ -90,7 +90,7 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
             type="alert"
             color="warning"
             content={i18n.translate('xpack.lens.indexPattern.existenceErrorLabel', {
-              defaultMessage: "Field availability couldn't be loaded",
+              defaultMessage: "Field information can't be loaded",
             })}
           />
         ) : hasLoaded ? (
