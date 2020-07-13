@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useAnalysisSetupState } from '../../../containers/logs/log_analysis';
-import { useLogEntryCategoriesModuleContext } from './use_log_entry_categories_module';
+import createContainer from 'constate';
+import { useAnalysisSetupState } from '../../log_analysis_setup_state';
+import { useLogEntryRateModuleContext } from './use_log_entry_rate_module';
 
-export const useLogEntryCategoriesSetup = () => {
+export const useLogEntryRateSetup = () => {
   const {
     cleanUpAndSetUpModule,
     lastSetupErrorMessages,
@@ -16,7 +17,7 @@ export const useLogEntryCategoriesSetup = () => {
     setupStatus,
     sourceConfiguration,
     viewResults,
-  } = useLogEntryCategoriesModuleContext();
+  } = useLogEntryRateModuleContext();
 
   const {
     cleanUpAndSetUp,
@@ -41,6 +42,7 @@ export const useLogEntryCategoriesSetup = () => {
     endTime,
     isValidating,
     lastSetupErrorMessages,
+    moduleDescriptor,
     setEndTime,
     setStartTime,
     setValidatedIndices,
@@ -52,3 +54,7 @@ export const useLogEntryCategoriesSetup = () => {
     viewResults,
   };
 };
+
+export const [LogEntryRateSetupProvider, useLogEntryRateSetupContext] = createContainer(
+  useLogEntryRateSetup
+);

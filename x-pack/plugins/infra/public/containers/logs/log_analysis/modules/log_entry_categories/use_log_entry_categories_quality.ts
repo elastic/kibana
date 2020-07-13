@@ -5,9 +5,12 @@
  */
 
 import { useMemo } from 'react';
-
-import { JobModelSizeStats, JobSummary } from '../../../containers/logs/log_analysis';
-import { QualityWarning, CategoryQualityWarningReason } from './sections/notices/quality_warnings';
+import {
+  JobModelSizeStats,
+  JobSummary,
+  QualityWarning,
+  CategoryQualityWarningReason,
+} from '../../log_analysis_module_types';
 
 export const useLogEntryCategoriesQuality = ({ jobSummaries }: { jobSummaries: JobSummary[] }) => {
   const categoryQualityWarnings: QualityWarning[] = useMemo(

@@ -4,6 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './log_analysis_job_problem_indicator';
-export * from './notices_section';
-export * from './recreate_job_button';
+export * from './setup_flyout';
+export * from './setup_flyout_state';
