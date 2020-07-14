@@ -10,6 +10,8 @@ import { Provider } from 'react-redux';
 import { I18nStart, ScopedHistory, ApplicationStart, ChromeDocTitle } from 'kibana/public';
 import { UnmountCallback } from 'src/core/public';
 
+import { PLUGIN } from '../../common/constants';
+
 import { App } from './app';
 import { indexLifecycleManagementStore } from './store';
 
@@ -24,14 +26,18 @@ export const renderApp = (
   element: Element,
   { history, I18nContext, navigateToApp, docTitle }: AppDendencies
 ): UnmountCallback => {
+  docTitle.change(PLUGIN.TITLE);
   render(
     <I18nContext>
       <Provider store={indexLifecycleManagementStore()}>
-        <App history={history} navigateToApp={navigateToApp} docTitle={docTitle} />
+        <App history={history} navigateToApp={navigateToApp} />
       </Provider>
     </I18nContext>,
     element
   );
 
-  return () => unmountComponentAtNode(element);
+  return () => {
+    docTitle.reset();
+    unmountComponentAtNode(element);
+  };
 };
