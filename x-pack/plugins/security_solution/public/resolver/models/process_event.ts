@@ -29,6 +29,16 @@ export function isTerminatedProcess(passedEvent: ResolverEvent) {
 }
 
 /**
+ * ms since unix epoc, based on timestamp.
+ * may return NaN if the timestamp wasn't present or was invalid.
+ */
+export function datetime(passedEvent: ResolverEvent): number {
+  const timestamp = event.eventTimestamp(passedEvent);
+
+  return timestamp === undefined ? 0 : new Date(timestamp).getTime();
+}
+
+/**
  * Returns a custom event type for a process event based on the event's metadata.
  */
 export function eventType(passedEvent: ResolverEvent): ResolverProcessType {

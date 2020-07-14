@@ -53,7 +53,7 @@ export const isAnimating = composeSelectors(cameraStateSelector, cameraSelectors
 
 export const processNodePositionsAndEdgeLineSegments = composeSelectors(
   dataStateSelector,
-  dataSelectors.processNodePositionsAndEdgeLineSegments
+  dataSelectors.layout
 );
 
 /**
@@ -72,11 +72,6 @@ export const databaseDocumentIDToAbort = composeSelectors(
 export const resolverComponentInstanceID = composeSelectors(
   dataStateSelector,
   dataSelectors.resolverComponentInstanceID
-);
-
-export const processAdjacencies = composeSelectors(
-  dataStateSelector,
-  dataSelectors.processAdjacencies
 );
 
 export const terminatedProcesses = composeSelectors(
@@ -203,10 +198,8 @@ function composeSelectors<OuterState, InnerState, ReturnValue>(
 }
 
 const boundingBox = composeSelectors(cameraStateSelector, cameraSelectors.viewableBoundingBox);
-const indexedProcessNodesAndEdgeLineSegments = composeSelectors(
-  dataStateSelector,
-  dataSelectors.visibleProcessNodePositionsAndEdgeLineSegments
-);
+
+const nodesAndEdgelines = composeSelectors(dataStateSelector, dataSelectors.nodesAndEdgelines);
 
 /**
  * Total count of related events for a process.
@@ -221,15 +214,32 @@ export const relatedEventTotalForProcess = composeSelectors(
  * The bounding box represents what the camera can see. The camera position is a function of time because it can be
  * animated. So in order to get the currently visible entities, we need to pass in time.
  */
-export const visibleProcessNodePositionsAndEdgeLineSegments = createSelector(
-  indexedProcessNodesAndEdgeLineSegments,
-  boundingBox,
-  function (
-    /* eslint-disable no-shadow */
-    indexedProcessNodesAndEdgeLineSegments,
-    boundingBox
-    /* eslint-enable no-shadow */
-  ) {
-    return (time: number) => indexedProcessNodesAndEdgeLineSegments(boundingBox(time));
-  }
+export const visibleNodesAndEdgeLines = createSelector(nodesAndEdgelines, boundingBox, function (
+  /* eslint-disable no-shadow */
+  nodesAndEdgelines,
+  boundingBox
+  /* eslint-enable no-shadow */
+) {
+  return (time: number) => nodesAndEdgelines(boundingBox(time));
+});
+
+/**
+ * Takes a nodeID (aka entity_id) and returns the associated aria level as a number or null if the node ID isn't in the tree.
+ */
+export const ariaLevel: (
+  state: ResolverState
+) => (nodeID: string) => number | null = composeSelectors(
+  dataStateSelector,
+  dataSelectors.ariaLevel
 );
+
+/**
+ * Takes a nodeID (aka entity_id) and returns the node ID of the node that aria should 'flowto' or null
+ */
+export const ariaFlowtoNodeID: (
+  state: ResolverState
+) => (nodeID: string) => string | null = composeSelectors(
+  dataStateSelector,
+  dataSelectors.ariaFlowtoNodeID
+);
+

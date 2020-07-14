@@ -13,11 +13,12 @@ import { htmlIdGenerator, EuiButton, EuiI18nNumber, EuiFlexGroup, EuiFlexItem } 
 import { useSelector } from 'react-redux';
 import { NodeSubMenu, subMenuAssets } from './submenu';
 import { applyMatrix3 } from '../models/vector2';
-import { Vector2, Matrix3, AdjacentProcessMap } from '../types';
+import { Vector2, Matrix3 } from '../types';
 import { SymbolIds, useResolverTheme, calculateResolverFontSize } from './assets';
 import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../common/endpoint/models/event';
+import * as processEventModel from '../models/process_event';
 import * as selectors from '../store/selectors';
 import { useResolverQueryParams } from './use_resolver_query_params';
 
@@ -237,7 +238,6 @@ const UnstyledProcessEventDot = React.memo(
     position,
     event,
     projectionMatrix,
-    adjacentNodeMap,
     isProcessTerminated,
     isProcessOrigin,
     relatedEventsStatsForProcess,
@@ -259,10 +259,6 @@ const UnstyledProcessEventDot = React.memo(
      */
     projectionMatrix: Matrix3;
     /**
-     * map of what nodes are "adjacent" to this one in "up, down, previous, next" directions
-     */
-    adjacentNodeMap: AdjacentProcessMap;
-    /**
      * Whether or not to show the process as terminated.
      */
     isProcessTerminated: boolean;
@@ -277,6 +273,8 @@ const UnstyledProcessEventDot = React.memo(
      */
     relatedEventsStatsForProcess?: ResolverNodeStats;
   }) => {
+    // This should be unique to each instance of Resolver TODO
+    const htmlIDPrefix = 'resolver';
     /**
      * Convert the position, which is in 'world' coordinates, to screen coordinates.
      */
@@ -285,12 +283,19 @@ const UnstyledProcessEventDot = React.memo(
     const [xScale] = projectionMatrix;
 
     // Node (html id=) IDs
-    const selfId = adjacentNodeMap.self;
     const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
     const selectedDescendantId = useSelector(selectors.uiSelectedDescendantId);
+    const nodeID = processEventModel.uniquePidForProcess(event);
 
-    // Entity ID of self
-    const selfEntityId = eventModel.entityId(event);
+    // define a standard way of giving HTML IDs to nodes based on their entity_id/nodeID.
+    // this is used to link nodes via aria attributes
+    const nodeHTMLID = useCallback((id: string) => htmlIdGenerator(htmlIDPrefix)(`${id}:node`), []);
+
+    const ariaLevel: number | null = useSelector(selectors.ariaLevel)(nodeID);
+
+    // the node ID to 'flowto'
+    const ariaFlowtoNodeID: string | null = useSelector(selectors.ariaFlowtoNodeID)(nodeID);
+
 
     const isShowingEventActions = xScale > 0.8;
     const isShowingDescriptionText = xScale >= 0.55;
@@ -371,14 +376,8 @@ const UnstyledProcessEventDot = React.memo(
       strokeColor,
     } = cubeAssetsForNode(isProcessTerminated, isProcessOrigin);
 
-    const resolverNodeIdGenerator = useMemo(() => htmlIdGenerator('resolverNode'), []);
+    const labelHTMLID = htmlIdGenerator('resolver')(`${nodeID}:label`);
 
-    const nodeId = useMemo(() => resolverNodeIdGenerator(selfId), [
-      resolverNodeIdGenerator,
-      selfId,
-    ]);
-    const labelId = useMemo(() => resolverNodeIdGenerator(), [resolverNodeIdGenerator]);
-    const descriptionId = useMemo(() => resolverNodeIdGenerator(), [resolverNodeIdGenerator]);
     const isActiveDescendant = nodeId === activeDescendantId;
     const isSelectedDescendant = nodeId === selectedDescendantId;
 
@@ -388,17 +387,17 @@ const UnstyledProcessEventDot = React.memo(
       dispatch({
         type: 'userFocusedOnResolverNode',
         payload: {
-          nodeId,
+          nodeId: nodeHTMLID(nodeID),
         },
       });
-    }, [dispatch, nodeId]);
+    }, [dispatch, nodeHTMLID, nodeID]);
 
     const handleRelatedEventRequest = useCallback(() => {
       dispatch({
         type: 'userRequestedRelatedEventData',
-        payload: selfId,
+        payload: nodeID,
       });
-    }, [dispatch, selfId]);
+    }, [dispatch, nodeID]);
 
     const { pushToQueryParams } = useResolverQueryParams();
 
@@ -409,13 +408,10 @@ const UnstyledProcessEventDot = React.memo(
       }
       dispatch({
         type: 'userSelectedResolverNode',
-        payload: {
-          nodeId,
-          selectedProcessId: selfId,
-        },
+        payload: nodeID,
       });
-      pushToQueryParams({ crumbId: selfEntityId, crumbEvent: 'all' });
-    }, [animationTarget, dispatch, nodeId, selfEntityId, pushToQueryParams, selfId]);
+      pushToQueryParams({ crumbId: nodeID, crumbEvent: 'all' });
+    }, [animationTarget, dispatch, pushToQueryParams, nodeID]);
 
     /**
      * Enumerates the stats for related events to display with the node as options,
@@ -447,12 +443,12 @@ const UnstyledProcessEventDot = React.memo(
               },
             });
 
-            pushToQueryParams({ crumbId: selfEntityId, crumbEvent: category });
+            pushToQueryParams({ crumbId: nodeID, crumbEvent: category });
           },
         });
       }
       return relatedStatsList;
-    }, [relatedEventsStatsForProcess, dispatch, event, pushToQueryParams, selfEntityId]);
+    }, [relatedEventsStatsForProcess, dispatch, event, pushToQueryParams, nodeID]);
 
     const relatedEventStatusOrOptions = !relatedEventsStatsForProcess
       ? subMenuAssets.initialMenuStatus
@@ -469,15 +465,14 @@ const UnstyledProcessEventDot = React.memo(
         data-test-subj={'resolverNode'}
         className={`${className} kbn-resetFocusState`}
         role="treeitem"
-        aria-level={adjacentNodeMap.level}
-        aria-flowto={adjacentNodeMap.nextSibling === null ? undefined : adjacentNodeMap.nextSibling}
-        aria-labelledby={labelId}
-        aria-describedby={descriptionId}
-        aria-haspopup={'true'}
-        aria-current={isActiveDescendant ? 'true' : undefined}
-        aria-selected={isSelectedDescendant ? 'true' : undefined}
+        aria-level={ariaLevel === null ? undefined : ariaLevel}
+        aria-flowto={ariaFlowtoNodeID === null ? undefined : nodeHTMLID(ariaFlowtoNodeID)}
+        aria-labelledby={labelHTMLID}
+        aria-haspopup="true"
+        aria-current={isAriaCurrent ? 'true' : undefined}
+        aria-selected={isAriaSelected ? 'true' : undefined}
         style={nodeViewportStyle}
-        id={nodeId}
+        id={nodeHTMLID(nodeID)}
         tabIndex={-1}
       >
         <svg
@@ -540,8 +535,7 @@ const UnstyledProcessEventDot = React.memo(
           </StyledDescriptionText>
           <div
             className={xScale >= 2 ? 'euiButton' : 'euiButton euiButton--small'}
-            data-test-subject="nodeLabel"
-            id={labelId}
+            id={labelHTMLID}
             onClick={handleClick}
             onFocus={handleFocus}
             tabIndex={-1}
@@ -553,9 +547,7 @@ const UnstyledProcessEventDot = React.memo(
           >
             <EuiButton
               color={labelButtonFill}
-              data-test-subject="nodeLabel"
               fill={isLabelFilled}
-              id={labelId}
               size="s"
               style={{
                 maxHeight: `${Math.min(26 + xScale * 3, 32)}px`,
