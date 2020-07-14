@@ -3,13 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import { EuiNotificationBadge, EuiToolTip } from '@elastic/eui';
 
 interface Props {
   onClick: () => void;
+  isDisabled: boolean;
 }
 
 const i18nTexts = {
@@ -21,15 +22,18 @@ const i18nTexts = {
   }),
 };
 
-export const IfBadge: FunctionComponent<Props> = ({ onClick }) => {
+export const IfBadge: FunctionComponent<Props> = ({ onClick, isDisabled }) => {
+  const classes = classNames('pipelineProcessorsEditor__item__ifBadge', {
+    'pipelineProcessorsEditor__item__ifBadge--disabled': isDisabled,
+  });
   return (
     <EuiToolTip delay="long" content={i18nTexts.toolTip}>
       <EuiNotificationBadge
         data-test-subj="ifBadge"
-        className="pipelineProcessorsEditor__item__ifBadge"
+        className={classes}
         size="s"
         color="subdued"
-        onClick={onClick}
+        onClick={isDisabled ? onClick : undefined}
       >
         {i18nTexts.badgeBody}
       </EuiNotificationBadge>

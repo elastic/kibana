@@ -157,6 +157,19 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                   <b>{processor.type}</b>
                 </EuiText>
               </EuiFlexItem>
+
+              {processor.options.if ? (
+                <EuiFlexItem grow={false}>
+                  <IfBadge
+                    isDisabled={isInMoveMode}
+                    onClick={() => {
+                      copyToClipboard(processor.options.if);
+                      notifications.addInfo(i18nTexts.copiedIfToClipboardNotificationBody);
+                    }}
+                  />
+                </EuiFlexItem>
+              ) : undefined}
+
               <EuiFlexItem className={inlineTextInputContainerClasses} grow={false}>
                 <InlineTextInput
                   disabled={isDisabled}
@@ -187,18 +200,6 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                   placeholder={i18nTexts.descriptionPlaceholder}
                 />
               </EuiFlexItem>
-
-              {processor.options.if ? (
-                <EuiFlexItem className={actionElementClasses} grow={false}>
-                  <IfBadge
-                    onClick={() => {
-                      copyToClipboard(processor.options.if);
-                      notifications.addInfo(i18nTexts.copiedIfToClipboardNotificationBody);
-                    }}
-                  />
-                </EuiFlexItem>
-              ) : undefined}
-
               <EuiFlexItem className={actionElementClasses} grow={false}>
                 {!isInMoveMode && renderEditButton()}
               </EuiFlexItem>

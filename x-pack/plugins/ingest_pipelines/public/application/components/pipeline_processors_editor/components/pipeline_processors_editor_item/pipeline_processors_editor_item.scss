@@ -24,6 +24,10 @@
 
   &__ifBadge {
     cursor: pointer;
+
+    &--disabled {
+      background-color: $euiButtonColorDisabled;
+    }
   }
 
   &__processorTypeLabel {
