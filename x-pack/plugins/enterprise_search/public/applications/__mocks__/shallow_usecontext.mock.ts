@@ -19,7 +19,7 @@ jest.mock('react', () => ({
 /**
  * Example usage within a component test using shallow():
  *
- * import '../../../test_utils/mock_shallow_usecontext'; // Must come before React's import, adjust relative path as needed
+ * import '../../../__mocks__/shallow_usecontext'; // Must come before React's import, adjust relative path as needed
  *
  * import React from 'react';
  * import { shallow } from 'enzyme';
