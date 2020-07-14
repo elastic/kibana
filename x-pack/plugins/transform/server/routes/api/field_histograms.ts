@@ -34,7 +34,7 @@ export function registerFieldHistogramsRoutes({ router, license }: RouteDependen
 
       try {
         const resp = await getHistogramsForFields(
-          ctx.transform!.dataClient.callAsCurrentUser,
+          ctx.transform!.dataClient,
           indexPatternTitle,
           query,
           fields,
