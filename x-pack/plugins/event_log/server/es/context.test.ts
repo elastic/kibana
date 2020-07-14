@@ -4,13 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { createEsContext } from './context';
 import { LegacyClusterClient, Logger } from 'src/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
-
-import { createEsContext } from './context';
-jest.mock('../lib/../../../../package.json', () => ({
-  version: '1.2.3',
-}));
+jest.mock('../lib/../../../../package.json', () => ({ version: '1.2.3' }));
 type EsClusterClient = Pick<jest.Mocked<LegacyClusterClient>, 'callAsInternalUser' | 'asScoped'>;
 
 let logger: Logger;

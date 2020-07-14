@@ -41,7 +41,7 @@ const ACTIONS = {
 };
 
 interface PluginSetupDeps {
-  spaces: SpacesPluginSetup;
+  spaces?: SpacesPluginSetup;
 }
 
 export class Plugin implements CorePlugin<IEventLogService, IEventLogClientService> {

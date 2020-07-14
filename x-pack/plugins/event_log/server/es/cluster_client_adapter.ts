@@ -130,7 +130,7 @@ export class ClusterClientAdapter {
 
   public async queryEventsBySavedObject(
     index: string,
-    namespace: string | undefined, // TODO - add term clause for namespace
+    namespace: string | undefined,
     type: string,
     id: string,
     { page, per_page: perPage, start, end, sort_field, sort_order }: FindOptionsType

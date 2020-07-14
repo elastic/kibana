@@ -73,7 +73,6 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           actions: ['execute', 'execute-action', 'new-instance', 'resolved-instance'],
         });
       });
-      // console.log(JSON.stringify(events, null, 4));
 
       // make sure the counts of the # of events per type are as expected
       const executeEvents = getEventsByAction(events, 'execute');

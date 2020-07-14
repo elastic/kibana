@@ -90,7 +90,7 @@ export class EventLogClient implements IEventLogClient {
     const findOptions = findOptionsSchema.validate(options ?? {});
 
     const space = await this.spacesService?.getActiveSpace(this.request);
-    const namespace = space?.id === 'default' ? undefined : space?.id;
+    const namespace = space && this.spacesService?.spaceIdToNamespace(space.id);
 
     // verify the user has the required permissions to view this saved object
     await this.savedObjectsClient.get(type, id);
