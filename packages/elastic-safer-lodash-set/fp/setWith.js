@@ -5,8 +5,9 @@
  * See `packages/elastic-safer-lodash-set/LICENSE` for more information.
  */
 
-const convert = require('lodash/fp/convert');
-const func = convert('setWith', require('../setWith'));
+/*eslint no-var:0 */
+var convert = require('lodash/fp/convert');
+var func = convert('setWith', require('../setWith'));
 
 func.placeholder = require('lodash/fp/placeholder');
 module.exports = func;
