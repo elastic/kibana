@@ -74,6 +74,7 @@ exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
           "width": "60px",
         },
         Object {
+          "dataType": "boolean",
           "field": "current_series",
           "name": "current_series",
           "width": "0px",
