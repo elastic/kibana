@@ -216,7 +216,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           <>
             <EuiHorizontalRule />
             <OverviewWrapper>
-              <EndpointOverview data={data.endpoint != null ? data.endpoint : null} />
+              <EndpointOverview data={data.endpoint} />
 
               {loading && (
                 <Loader
