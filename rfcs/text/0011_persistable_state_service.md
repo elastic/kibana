@@ -276,7 +276,7 @@ If expecting to handle large amount of state objects you should always deep comp
 # Full look into a complex example: saved dashboards
 
 saved dashboard state looks something like this:
-```json
+```ts
 {
   panels: [{
    ...embeddable,
