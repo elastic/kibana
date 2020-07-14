@@ -68,7 +68,7 @@
                 "type": "keyword"
               },
               "risk_score": {
-                "type": "keyword"
+                "type": "float"
               },
               "risk_score_mapping": {
                 "properties": {

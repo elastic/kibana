@@ -59,6 +59,7 @@ const findLists = async ({
 };
 
 const findListsWithValidation = async ({
+  cursor,
   http,
   pageIndex,
   pageSize,
@@ -66,8 +67,9 @@ const findListsWithValidation = async ({
 }: FindListsParams): Promise<FoundListSchema> =>
   pipe(
     {
-      page: String(pageIndex),
-      per_page: String(pageSize),
+      cursor: cursor?.toString(),
+      page: pageIndex?.toString(),
+      per_page: pageSize?.toString(),
     },
     (payload) => fromEither(validateEither(findListSchema, payload)),
     chain((payload) => tryCatch(() => findLists({ http, signal, ...payload }), toError)),
@@ -170,7 +172,6 @@ const exportListWithValidation = async ({
     { list_id: listId },
     (payload) => fromEither(validateEither(exportListItemQuerySchema, payload)),
     chain((payload) => tryCatch(() => exportList({ http, signal, ...payload }), toError)),
-    chain((response) => fromEither(validateEither(listSchema, response))),
     flow(toPromise)
   );
 

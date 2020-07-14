@@ -11,7 +11,10 @@ import {
   buildEsQuery,
   Query as DataQuery,
 } from '../../../../../src/plugins/data/common';
-import { ExceptionListItemSchema } from '../../../lists/common/schemas';
+import {
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+} from '../../../lists/common/schemas';
 import { buildQueryExceptions } from './build_exceptions_query';
 import { Query, Language, Index } from './schemas/common/schemas';
 
@@ -20,7 +23,8 @@ export const getQueryFilter = (
   language: Language,
   filters: Array<Partial<Filter>>,
   index: Index,
-  lists: ExceptionListItemSchema[]
+  lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
+  excludeExceptions: boolean = true
 ) => {
   const indexPattern: IIndexPattern = {
     fields: [],
@@ -28,7 +32,7 @@ export const getQueryFilter = (
   };
 
   const initialQuery = [{ query, language }];
-  const exceptions = buildQueryExceptions({ language, lists });
+  const exceptions = buildQueryExceptions({ language, lists, exclude: excludeExceptions });
   const queries: DataQuery[] = [...initialQuery, ...exceptions];
 
   const config = {

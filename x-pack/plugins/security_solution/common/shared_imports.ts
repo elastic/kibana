@@ -39,4 +39,5 @@ export {
   entriesList,
   namespaceType,
   ExceptionListType,
+  Type,
 } from '../../lists/common';

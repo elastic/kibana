@@ -55,7 +55,7 @@ export const PolicyDetails = React.memo(() => {
       application: { navigateToApp },
     },
   } = useKibana();
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.management);
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
   const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
 
   // Store values
@@ -149,7 +149,7 @@ export const PolicyDetails = React.memo(() => {
             <span data-test-subj="policyDetailsIdNotFoundMessage">{policyApiError?.message}</span>
           </EuiCallOut>
         ) : null}
-        <SpyRoute pageName={SecurityPageName.management} />
+        <SpyRoute pageName={SecurityPageName.administration} />
       </ManagementPageView>
     );
   }
@@ -251,7 +251,7 @@ export const PolicyDetails = React.memo(() => {
         <EuiSpacer size="l" />
         <LinuxEvents />
       </ManagementPageView>
-      <SpyRoute pageName={SecurityPageName.management} />
+      <SpyRoute pageName={SecurityPageName.administration} />
     </>
   );
 });

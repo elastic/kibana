@@ -8,11 +8,11 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { mean } from 'lodash';
 import React, { useCallback } from 'react';
+import { EuiPanel } from '@elastic/eui';
 import { useChartsSync } from '../../../../hooks/useChartsSync';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
-import { unit } from '../../../../style/variables';
 import { asPercent } from '../../../../utils/formatters';
 // @ts-ignore
 import CustomPlot from '../CustomPlot';
@@ -21,15 +21,23 @@ const tickFormatY = (y?: number) => {
   return asPercent(y || 0, 1);
 };
 
-export const ErrorRateChart = () => {
+export const ErroneousTransactionsRateChart = () => {
   const { urlParams, uiFilters } = useUrlParams();
   const syncedChartsProps = useChartsSync();
 
-  const { serviceName, start, end, errorGroupId } = urlParams;
-  const { data: errorRateData } = useFetcher(() => {
+  const {
+    serviceName,
+    start,
+    end,
+    transactionType,
+    transactionName,
+  } = urlParams;
+
+  const { data } = useFetcher(() => {
     if (serviceName && start && end) {
       return callApmApi({
-        pathname: '/api/apm/services/{serviceName}/errors/rate',
+        pathname:
+          '/api/apm/services/{serviceName}/transaction_groups/error_rate',
         params: {
           path: {
             serviceName,
@@ -37,13 +45,14 @@ export const ErrorRateChart = () => {
           query: {
             start,
             end,
+            transactionType,
+            transactionName,
             uiFilters: JSON.stringify(uiFilters),
-            groupId: errorGroupId,
           },
         },
       });
     }
-  }, [serviceName, start, end, uiFilters, errorGroupId]);
+  }, [serviceName, start, end, uiFilters, transactionType, transactionName]);
 
   const combinedOnHover = useCallback(
     (hoverX: number) => {
@@ -52,20 +61,20 @@ export const ErrorRateChart = () => {
     [syncedChartsProps]
   );
 
-  const errorRates = errorRateData?.errorRates || [];
+  const errorRates = data?.erroneousTransactionsRate || [];
 
   return (
-    <>
+    <EuiPanel>
       <EuiTitle size="xs">
         <span>
           {i18n.translate('xpack.apm.errorRateChart.title', {
-            defaultMessage: 'Error Rate',
+            defaultMessage: 'Transaction error rate',
           })}
         </span>
       </EuiTitle>
       <CustomPlot
         {...syncedChartsProps}
-        noHits={errorRateData?.noHits}
+        noHits={data?.noHits}
         series={[
           {
             color: theme.euiColorVis7,
@@ -93,8 +102,7 @@ export const ErrorRateChart = () => {
         formatTooltipValue={({ y }: { y?: number }) =>
           Number.isFinite(y) ? tickFormatY(y) : 'N/A'
         }
-        height={unit * 10}
       />
-    </>
+    </EuiPanel>
   );
 };
