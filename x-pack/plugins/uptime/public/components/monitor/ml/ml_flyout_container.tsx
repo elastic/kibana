@@ -28,6 +28,7 @@ import { useGetUrlParams } from '../../../hooks';
 import { getDynamicSettings } from '../../../state/actions/dynamic_settings';
 import { useMonitorId } from '../../../hooks';
 import { kibanaService } from '../../../state/kibana_service';
+import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   onClose: () => void;
@@ -38,15 +39,15 @@ const showMLJobNotification = (
   basePath: string,
   range: { to: string; from: string },
   success: boolean,
-  error: Error
+  error?: Error
 ) => {
   if (success) {
     kibanaService.toasts.addSuccess(
       {
-        title: (
+        title: toMountPoint(
           <p data-test-subj="uptimeMLJobSuccessfullyCreated">{labels.JOB_CREATED_SUCCESS_TITLE}</p>
         ),
-        text: (
+        text: toMountPoint(
           <p>
             {labels.JOB_CREATED_SUCCESS_MESSAGE}
             <MLJobLink monitorId={monitorId} basePath={basePath} dateRange={range}>
@@ -58,7 +59,7 @@ const showMLJobNotification = (
       { toastLifeTimeMs: 10000 }
     );
   } else {
-    kibanaService.toasts.addError(error, {
+    kibanaService.toasts.addError(error!, {
       title: labels.JOB_CREATION_FAILED,
       toastMessage: labels.JOB_CREATION_FAILED_MESSAGE,
       toastLifeTimeMs: 10000,
@@ -120,7 +121,7 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
           basePath,
           { to: dateRangeEnd, from: dateRangeStart },
           false,
-          error
+          error as Error
         );
       }
       setIsCreatingJob(false);
