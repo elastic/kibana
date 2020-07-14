@@ -12,7 +12,7 @@ import {
 } from 'kibana/server';
 import { IFieldType, IIndexPattern } from 'src/plugins/data/public';
 import { SOURCE_TYPES, ES_GEO_FIELD_TYPE, MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { LayerDescriptor } from '../../common/descriptor_types';
+import { AbstractSourceDescriptor, LayerDescriptor } from '../../common/descriptor_types';
 import { MapSavedObject } from '../../common/map_saved_object_type';
 // @ts-ignore
 import { getInternalRepository } from '../kibana_server_services';
@@ -82,6 +82,33 @@ function getIndexPatternsWithGeoFieldCount(indexPatterns: IIndexPattern[]) {
   };
 }
 
+function getEMSLayerCount(layerLists: LayerDescriptor[][]): ILayerTypeCount[] {
+  return layerLists.map((layerList: LayerDescriptor[]) => {
+    const countsById = _(layerList).countBy((layer: LayerDescriptor) => {
+      const isEmsFile =
+        layer.sourceDescriptor !== null
+          ? layer.sourceDescriptor.type === SOURCE_TYPES.EMS_FILE
+          : false;
+      const id = (layer.sourceDescriptor as AbstractSourceDescriptor).id;
+      return isEmsFile && id ? id : 'false';
+    });
+
+    const emsCountsById = countsById.pickBy((val, key) => key !== 'false');
+    const layerTypeCount = emsCountsById.value();
+    return layerTypeCount as ILayerTypeCount;
+  }) as ILayerTypeCount[];
+}
+
+export function getLayerLists(mapSavedObjects: MapSavedObject[]): LayerDescriptor[][] {
+  return mapSavedObjects.map((savedMapObject) => {
+    const layerList =
+      savedMapObject.attributes && savedMapObject.attributes.layerListJSON
+        ? JSON.parse(savedMapObject.attributes.layerListJSON)
+        : [];
+    return layerList as LayerDescriptor[];
+  });
+}
+
 export function buildMapsTelemetry({
   mapSavedObjects,
   indexPatternSavedObjects,
@@ -91,17 +118,13 @@ export function buildMapsTelemetry({
   indexPatternSavedObjects: IIndexPattern[];
   settings: SavedObjectAttribute;
 }): SavedObjectAttributes {
-  const layerLists = mapSavedObjects.map((savedMapObject) =>
-    savedMapObject.attributes && savedMapObject.attributes.layerListJSON
-      ? JSON.parse(savedMapObject.attributes.layerListJSON)
-      : []
-  );
+  const layerLists: LayerDescriptor[][] = getLayerLists(mapSavedObjects);
   const mapsCount = layerLists.length;
 
-  const dataSourcesCount = layerLists.map((lList) => {
+  const dataSourcesCount = layerLists.map((layerList: LayerDescriptor[]) => {
     // todo: not every source-descriptor has an id
     // @ts-ignore
-    const sourceIdList = lList.map((layer: LayerDescriptor) => layer.sourceDescriptor.id);
+    const sourceIdList = layerList.map((layer: LayerDescriptor) => layer.sourceDescriptor.id);
     return _.uniq(sourceIdList).length;
   });
 
@@ -109,15 +132,7 @@ export function buildMapsTelemetry({
   const layerTypesCount = layerLists.map((lList) => _.countBy(lList, 'type'));
 
   // Count of EMS Vector layers used
-  const emsLayersCount = layerLists.map((lList) =>
-    _(lList)
-      .countBy((layer: LayerDescriptor) => {
-        const isEmsFile = _.get(layer, 'sourceDescriptor.type') === SOURCE_TYPES.EMS_FILE;
-        return isEmsFile && _.get(layer, 'sourceDescriptor.id');
-      })
-      .pickBy((val, key) => key !== 'false')
-      .value()
-  ) as ILayerTypeCount[];
+  const emsLayersCount = getEMSLayerCount(layerLists);
 
   const dataSourcesCountSum = _.sum(dataSourcesCount);
   const layersCountSum = _.sum(layersCount);
