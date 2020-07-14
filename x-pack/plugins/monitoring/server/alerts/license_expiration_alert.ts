@@ -49,7 +49,6 @@ export class LicenseExpirationAlert extends BaseAlert {
     { name: 'expiredDate', description: 'The date when the license expires.' },
     { name: 'action', description: 'The recommended action to take based on this alert firing.' },
     { name: 'clusterName', description: 'The name of the cluster to which the nodes belong.' },
-    { name: 'versionList', description: 'The list of unique versions.' },
   ];
 
   protected async fetchData(
