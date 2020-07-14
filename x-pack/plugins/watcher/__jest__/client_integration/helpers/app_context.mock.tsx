@@ -14,7 +14,6 @@ import {
   notificationServiceMock,
   httpServiceMock,
   scopedHistoryMock,
-  chromeServiceMock,
 } from '../../../../../../src/core/public/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AppContextProvider } from '../../../public/application/app_context';
@@ -50,7 +49,6 @@ export const mockContextValue = {
   http: httpServiceMock.createSetupContract(),
   history,
   getUrlForApp: jest.fn(),
-  docTitle: chromeServiceMock.createStartContract().docTitle,
 };
 
 export const withAppContext = (Component: ComponentType<any>) => (props: any) => {
