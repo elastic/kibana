@@ -1,10 +1,10 @@
 [[development-functional-tests]]
-=== Functional Testing
+== Functional Testing
 
 We use functional tests to make sure the {kib} UI works as expected. It replaces hours of manual testing by automating user interaction. To have better control over our functional test environment, and to make it more accessible to plugin authors, {kib} uses a tool called the `FunctionalTestRunner`.
 
 [discrete]
-==== Running functional tests
+=== Running functional tests
 
 The `FunctionalTestRunner` is very bare bones and gets most of its functionality from its config file, located at {blob}test/functional/config.js[test/functional/config.js]. If you’re writing a plugin outside the {kib} repo, you will have your own config file.
  See <<external-plugin-functional-tests>> for more info.
@@ -92,7 +92,7 @@ node scripts/functional_test_runner --exclude-tag skipCloud
 ----------
 
 [discrete]
-===== More about `node scripts/functional_test_runner`
+==== More about `node scripts/functional_test_runner`
 
 When run without any arguments the `FunctionalTestRunner` automatically loads the configuration in the standard location, but you can override that behavior with the `--config` flag. List configs with multiple --config arguments.
 
@@ -109,10 +109,10 @@ Use the `--help` flag for more options.
 
 
 [discrete]
-==== Writing functional tests
+=== Writing functional tests
 
 [discrete]
-===== Environment
+==== Environment
 
 The tests are written in https://mochajs.org[mocha] using https://github.com/elastic/kibana/tree/master/packages/kbn-expect[@kbn/expect] for assertions.
 
@@ -121,7 +121,7 @@ We use https://www.w3.org/TR/webdriver1/[WebDriver Protocol] to run tests in bot
 The `FunctionalTestRunner` automatically transpiles functional tests using babel, so that tests can use the same ECMAScript features that {kib} source code uses. See {blob}style_guides/js_style_guide.md[style_guides/js_style_guide.md].
 
 [discrete]
-===== Definitions
+==== Definitions
 
 **Provider:**
 
@@ -180,7 +180,7 @@ node scripts/functional_test_runner --config test/functional/config.firefox.js
 -----------
 
 [discrete]
-===== Using the test_user service
+==== Using the test_user service
 
 Tests should run at the positive security boundry condition, meaning that they should be run with the mimimum privileges required (and documented) and not as the superuser.
  This prevents the type of regression where additional privleges accidentally become required to perform the same action. 
@@ -199,7 +199,7 @@ Tests should normally setRoles() in the before() and restoreDefaults() in the af
 
 
 [discrete]
-===== Anatomy of a test file
+==== Anatomy of a test file
 
 This annotated example file shows the basic structure every test suite uses. It starts by importing https://github.com/elastic/kibana/tree/master/packages/kbn-expect[`@kbn/expect`] and defining its default export: an anonymous Test Provider. The test provider then destructures the Provider API for the `getService()` and `getPageObjects()` functions. It uses these functions to collect the dependencies of this suite. The rest of the test file will look pretty normal to mocha.js users. `describe()`, `it()`, `before()` and the lot are used to define suites that happen to automate a browser via services and objects of type `PageObject`.
 
@@ -259,7 +259,7 @@ export default function ({ getService, getPageObject }) {
 
 [discrete]
 [[functional_test_runner_provider_api]]
-==== Provider API
+=== Provider API
 
 The first and only argument to all providers is a Provider API Object. This object can be used to load service/page objects and config/test files.
 
@@ -281,10 +281,10 @@ Within a test Provider the API is exactly the same as the service providers API 
 `loadTestFile(path)`::: Load the test file at path in place. Use this method to nest suites from other files into a higher-level suite
 
 [discrete]
-==== Service Index
+=== Service Index
 
 [discrete]
-===== Built-in Services
+==== Built-in Services
 
 The `FunctionalTestRunner` comes with three built-in services:
 
@@ -305,7 +305,7 @@ The `FunctionalTestRunner` comes with three built-in services:
 * Phases include: `beforeLoadTests`, `beforeTests`, `beforeEachTest`, `cleanup`
 
 [discrete]
-===== {kib} Services
+==== {kib} Services
 
 The {kib} functional tests define the vast majority of the actual functionality used by tests.
 
@@ -388,7 +388,7 @@ Full list of services that are used in functional tests can be found here: {blob
 ** See the https://seleniumhq.github.io/selenium/docs/api/javascript/[selenium-webdriver docs] for the full API.
 
 [discrete]
-===== Custom Services
+==== Custom Services
 
 Services are intentionally generic. They can be literally anything (even nothing). Some services have helpers for interacting with a specific types of UI elements, like `pointSeriesVis`, and others are more foundational, like `log` or `config`. Whenever you want to provide some functionality in a reusable package, consider making a custom service.
 
@@ -428,7 +428,7 @@ export default function () {
 -----------
 
 [discrete]
-==== PageObjects
+=== PageObjects
 
 The purpose for each PageObject is pretty self-explanatory. The visualize PageObject provides helpers for interacting with the visualize app, dashboard is the same for the dashboard app, and so on.
 
@@ -437,12 +437,12 @@ One exception is the "common" PageObject. A holdover from the intern implementat
 Please add new methods to existing or new services rather than further expanding the CommonPage class.
 
 [discrete]
-==== Gotchas
+=== Gotchas
 
 Remember that you can’t run an individual test in the file (`it` block) because the whole `describe` needs to be run in order. There should only be one top level `describe` in a file.
 
 [discrete]
-===== Functional Test Timing
+==== Functional Test Timing
 
 Another important gotcha is writing stable tests by being mindful of timing. All methods on `remote` run asynchronously. It’s better to write interactions that wait for changes on the UI to appear before moving onto the next step.
 
@@ -481,7 +481,7 @@ class AppPage {
 Writing in this way will ensure your test timings are not flaky or based on assumptions about UI updates after interactions.
 
 [discrete]
-==== Debugging
+=== Debugging
 
 From the command line run:
 
@@ -504,7 +504,7 @@ log.debug(‘done clicking menu’);
 -----------
 
 [discrete]
-==== MacOS testing performance tip
+=== MacOS testing performance tip
 
 macOS users on a machine with a discrete graphics card may see significant speedups (up to 2x) when running tests by changing your terminal emulator's GPU settings. In iTerm2:
 * Open Preferences (Command + ,)

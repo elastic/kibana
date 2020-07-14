@@ -129,12 +129,12 @@ cause the {kib} server to reboot.
 
 * <<development-plugin-resources>>
 
-include::running-kibana-advanced.asciidoc[]
+include::running-kibana-advanced.asciidoc[leveloffset=+1]
 
-include::sample-data.asciidoc[]
+include::sample-data.asciidoc[leveloffset=+1]
 
-include::debugging.asciidoc[]
+include::debugging.asciidoc[leveloffset=+1]
 
-include::building-kibana.asciidoc[]
+include::building-kibana.asciidoc[leveloffset=+1]
 
-include::development-plugin-resources.asciidoc[]
+include::development-plugin-resources.asciidoc[leveloffset=+1]

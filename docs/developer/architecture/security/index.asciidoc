@@ -1,5 +1,5 @@
 [[development-security]]
-=== Security
+== Security
 
 {kib} has generally been able to implement security transparently to core and plugin developers, and this largely remains the case. {kib} on two methods that the elasticsearch `Cluster` provides: `callWithRequest` and `callWithInternalUser`. 
 
@@ -9,4 +9,6 @@
 
 However, with the changes that role-based access control (RBAC) introduces, this is no longer cut and dry. {kib} now requires all access to the `.kibana` index goes through the `SavedObjectsClient`. This used to be a best practice, as the `SavedObjectsClient` was responsible for translating the documents stored in Elasticsearch to and from Saved Objects, but RBAC is now taking advantage of this abstraction to implement access control and determine when to use `callWithRequest` versus `callWithInternalUser`.
 
-include::rbac.asciidoc[]
+include::rbac.asciidoc[leveloffset=+1]
+
+include::feature-registration.asciidoc[leveloffset=+1]

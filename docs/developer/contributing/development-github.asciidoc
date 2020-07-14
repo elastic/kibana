@@ -1,8 +1,8 @@
 [[development-github]]
-=== How we use git and github
+== How we use git and github
 
 [discrete]
-==== Forking
+=== Forking
 
 We follow the https://help.github.com/articles/fork-a-repo/[GitHub
 forking model] for collaborating on {kib} code. This model assumes that
@@ -10,7 +10,7 @@ you have a remote called `upstream` which points to the official {kib}
 repo, which we'll refer to in later code snippets.
 
 [discrete]
-==== Branching
+=== Branching
 
 * All work on the next major release goes into master.
 * Past major release branches are named `{majorVersion}.x`. They contain
@@ -25,7 +25,7 @@ branches.
 * Where appropriate, we'll backport changes into older release branches.
 
 [discrete]
-==== Commits and Merging
+=== Commits and Merging
 
 * Feel free to make as many commits as you want, while working on a
 branch.
@@ -39,7 +39,7 @@ feature branch, and force-pushing (see below for instructions).
 * When merging, we'll squash your commits into a single commit.
 
 [discrete]
-===== Rebasing and fixing merge conflicts
+==== Rebasing and fixing merge conflicts
 
 Rebasing can be tricky, and fixing merge conflicts can be even trickier
 because it involves force pushing. This is all compounded by the fact
@@ -107,6 +107,6 @@ hint: See the 'Note about fast-forwards' in 'git push --help' for details.
 Assuming you've successfully rebased and you're happy with the code, you should force push instead.
 
 [discrete]
-==== Creating a pull request
+=== Creating a pull request
 
 See <<development-pull-request>> for the next steps on getting your code changes merged into {kib}.

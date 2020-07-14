@@ -131,6 +131,6 @@ Review:
 * <<stability>>
 * <<security-best-practices>>
 
-include::stability.asciidoc[]
+include::stability.asciidoc[leveloffset=+1]
 
-include::security.asciidoc[]
+include::security.asciidoc[leveloffset=+1]

@@ -1,10 +1,10 @@
 [[development-tests]]
-=== Testing
+== Testing
 
 To ensure that your changes will not break other functionality, please run the test suite and build (<<building-kibana>>) before submitting your Pull Request.
 
 [discrete]
-==== Running specific {kib} tests
+=== Running specific {kib} tests
 
 The following table outlines possible test file locations and how to
 invoke them:
@@ -48,7 +48,7 @@ string: ``` yarn test:ftr:server –config test/api_integration/config.js
 yarn test:ftr:runner –config test/api_integration/config
 
 [discrete]
-==== Cross-browser compatibility
+=== Cross-browser compatibility
 
 **Testing IE on OS X**
 
@@ -72,7 +72,7 @@ your computer name).
 * Alternatively you can use browserstack
 
 [discrete]
-==== Running browser automation tests
+=== Running browser automation tests
 
 Check out <<development-functional-tests>> to learn more about how you can run
 and develop functional tests for {kib} core and plugins.
@@ -89,8 +89,8 @@ Elasticsearch while you develop.
 * <<development-unit-tests>>
 * <<development-accessibility-tests>>
 
-include::development-functional-tests.asciidoc[]
+include::development-functional-tests.asciidoc[leveloffset=+1]
 
-include::development-unit-tests.asciidoc[]
+include::development-unit-tests.asciidoc[leveloffset=+1]
 
-include::development-accessibility-tests.asciidoc[]
+include::development-accessibility-tests.asciidoc[leveloffset=+1]

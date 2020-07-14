@@ -1,5 +1,5 @@
 [[kibana-linting]]
-=== Linting
+== Linting
 
 A note about linting: We use http://eslint.org[eslint] to check that the
 link:STYLEGUIDE.md[styleguide] is being followed. It runs in a
@@ -35,7 +35,7 @@ https://github.com/elastic/kibana/blob/master/.editorconfig[`.editorconfig`]
 file to see what config rules we set up.
 
 [discrete]
-==== Setup Guide for VS Code Users
+== Setup Guide for VS Code Users
 
 Note that for VSCode, to enable "`live`" linting of TypeScript (and
 other) file types, you will need to modify your local settings, as shown

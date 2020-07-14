@@ -1,5 +1,5 @@
 [[running-kibana-advanced]]
-=== Running {kib}
+== Running {kib}
 
 Change to your local {kib} directory. Start the development server.
 
@@ -24,7 +24,7 @@ By default, you can log in with username `elastic` and password
 you’d like to configure a different password.
 
 [discrete]
-==== Running {kib} in Open-Source mode
+=== Running {kib} in Open-Source mode
 
 If you’re looking to only work with the open-source software, supply the
 license type to `yarn es`:
@@ -42,7 +42,7 @@ yarn start --oss
 ----
 
 [discrete]
-==== Unsupported URL Type
+=== Unsupported URL Type
 
 If you’re installing dependencies and seeing an error that looks
 something like
@@ -58,7 +58,7 @@ Development Environment] above.
 
 [discrete]
 [[customize-kibana-yml]]
-==== Customizing `config/kibana.dev.yml`
+=== Customizing `config/kibana.dev.yml`
 
 The `config/kibana.yml` file stores user configuration directives.
 Since this file is checked into source control, however, developer
@@ -71,7 +71,7 @@ https://www.elastic.co/guide/en/kibana/current/settings.html[standard
 settings].
 
 [discrete]
-==== Potential Optimization Pitfalls
+=== Potential Optimization Pitfalls
 
 * Webpack is trying to include a file in the bundle that I deleted and
 is now complaining about it is missing
@@ -80,7 +80,7 @@ directory, but webpack isn’t adapting
 * (if you discover other scenarios, please send a PR!)
 
 [discrete]
-==== Setting Up SSL
+=== Setting Up SSL
 
 {kib} includes self-signed certificates that can be used for
 development purposes in the browser and for communicating with

@@ -1,10 +1,10 @@
 [[stability]]
-=== Stability
+== Stability
 
 Ensure your feature will work under all possible {kib} scenarios.
 
 [discrete]
-==== Environmental configuration scenarios
+=== Environmental configuration scenarios
 
 * Cloud
 ** Does the feature work on *cloud environment*?
@@ -33,7 +33,7 @@ sessions. (we have had many discuss/SDH tickets around this)
 * If a proxy/loadbalancer is running between ES and {kib}
 
 [discrete]
-==== Kibana.yml settings
+=== Kibana.yml settings
 
 * Using a custom {kib} index alias
 * When optional dependencies are disabled
@@ -41,7 +41,7 @@ sessions. (we have had many discuss/SDH tickets around this)
 dependency list!
 
 [discrete]
-==== Test coverage
+=== Test coverage
 
 * Does the feature have sufficient unit test coverage? (does it handle
 storeinSessions?)
@@ -50,7 +50,7 @@ storeinSessions?)
 * Does the feature have sufficient Integration test coverage?
 
 [discrete]
-==== Browser coverage
+=== Browser coverage
 
 Refer to the list of browsers and OS {kib} supports
 https://www.elastic.co/support/matrix
@@ -58,7 +58,7 @@ https://www.elastic.co/support/matrix
 Does the feature work efficiently on the list of supported browsers? 
 
 [discrete]
-==== Upgrade Scenarios - Migration scenarios- 
+=== Upgrade Scenarios - Migration scenarios- 
 
 Does the feature affect old
 indices, saved objects ? - Has the feature been tested with {kib}

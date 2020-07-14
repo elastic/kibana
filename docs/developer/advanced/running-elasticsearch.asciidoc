@@ -1,11 +1,11 @@
 [[running-elasticsearch]]
-=== Running elasticsearch during development
+== Running elasticsearch during development
 
 There are many ways to run Elasticsearch while you are developing.
 
 [discrete]
 
-==== By snapshot
+=== By snapshot
 
 This will run a snapshot of elasticsearch that is usually built nightly. Read more about <<development-es-snapshots>>.
 
@@ -32,7 +32,7 @@ If you want to keep the data inside your Elasticsearch between usages of this co
 yarn es snapshot -E path.data=../data
 ----
 
-==== By source
+=== By source
 
 If you have the Elasticsearch repo checked out locally and wish to run against that, use `source`. By default, it will reference an elasticsearch checkout which is a sibling to the {kib} directory named elasticsearch. If you wish to use a checkout in another location you can provide that by supplying --source-path 
 
@@ -41,7 +41,7 @@ If you have the Elasticsearch repo checked out locally and wish to run against t
 yarn es source
 ----
 
-==== From an archive
+=== From an archive
 
 Use this if you already have a distributable. For released versions, one can be obtained on the Elasticsearch downloads page.
 
@@ -52,7 +52,7 @@ yarn es archive <full_path_to_archive>
 
 Each of these will run Elasticsearch with a basic license. Additional options are available, pass --help for more information.
 
-==== From a remote host
+=== From a remote host
 
 You can save some system resources, and the effort of generating sample data, if you have a remote Elasticsearch cluster to connect to. (Elasticians: you do! Check with your team about where to find credentials)
 
@@ -75,7 +75,7 @@ kibana.index: '.{YourGitHubHandle}-kibana'
 xpack.task_manager.index: '.{YourGitHubHandle}-task-manager-kibana'
 ----
 
-===== Running remote clusters
+==== Running remote clusters
 
 Setup remote clusters for cross cluster search (CCS) and cross cluster replication (CCR).
 

@@ -1,8 +1,8 @@
 [[kibana-issue-reporting]]
-=== Effective issue reporting in {kib}
+== Effective issue reporting in {kib}
 
 [discrete]
-==== Voicing the importance of an issue
+=== Voicing the importance of an issue
 
 We seriously appreciate thoughtful comments. If an issue is important to
 you, add a comment with a solid write up of your use case and explain
@@ -18,7 +18,7 @@ thumbs up reaction] on the issue itself and on the comment which best
 summarizes your thoughts.
 
 [discrete]
-==== "`My issue isn’t getting enough attention`"
+=== "`My issue isn’t getting enough attention`"
 
 First of all, *sorry about that!* We want you to have a great time with
 {kib}.
@@ -32,7 +32,7 @@ Feel free to bump your issues if you think they’ve been neglected for a
 prolonged period.
 
 [discrete]
-==== "`I want to help!`"
+=== "`I want to help!`"
 
 *Now we’re talking*. If you have a bug fix or new feature that you would
 like to contribute to {kib}, please *find or open an issue about it

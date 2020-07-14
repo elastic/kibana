@@ -1,5 +1,5 @@
 [[security-best-practices]]
-=== Security best practices
+== Security best practices
 
 * XSS
 ** Check for usages of `dangerouslySetInnerHtml`, `Element.innerHTML`,

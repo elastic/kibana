@@ -72,18 +72,18 @@ When you create the Release Notes text, use the following best practices:
   * To **NOT** include your changes in the Release Notes, use `release_note:skip`.
 
 
-include::development-github.asciidoc[]
+include::development-github.asciidoc[leveloffset=+1]
 
-include::development-tests.asciidoc[]
+include::development-tests.asciidoc[leveloffset=+1]
 
-include::interpreting-ci-failures.asciidoc[]
+include::interpreting-ci-failures.asciidoc[leveloffset=+1]
 
-include::development-documentation.asciidoc[]
+include::development-documentation.asciidoc[leveloffset=+1]
 
-include::development-pull-request.asciidoc[]
+include::development-pull-request.asciidoc[leveloffset=+1]
 
-include::kibana-issue-reporting.asciidoc[]
+include::kibana-issue-reporting.asciidoc[leveloffset=+1]
 
-include::pr-review.asciidoc[]
+include::pr-review.asciidoc[leveloffset=+1]
 
-include::linting.asciidoc[]
+include::linting.asciidoc[leveloffset=+1]

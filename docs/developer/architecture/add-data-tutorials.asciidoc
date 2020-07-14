@@ -1,5 +1,5 @@
 [[add-data-tutorials]]
-=== Add data tutorials
+== Add data tutorials
 
 `Add Data` in the {kib} Home application contains tutorials for setting up data flows in the Elastic stack.
 
@@ -10,7 +10,7 @@ Each tutorial contains three sets of instructions:
 * `Elastic Cloud.` Set up a data flow when both {kib} and Elasticsearch are running on Elastic Cloud.
 
 [discrete]
-==== Creating a new tutorial
+=== Creating a new tutorial
 1. Create a new directory in the link:https://github.com/elastic/kibana/tree/master/src/plugins/home/server/tutorials[tutorials directory].
 2. In the new directory, create a file called `index.ts` that exports a function.
 The function must return a function object that conforms to the `TutorialSchema` interface link:{kib-repo}tree/{branch}/src/plugins/home/server/services/tutorials/lib/tutorial_schema.ts[tutorial schema].
@@ -24,14 +24,14 @@ If you are creating a new plugin and the tutorial is only related to that plugin
 Then register the tutorial object by calling `home.tutorials.registerTutorial(tutorialObject)` in the `setup` lifecycle of your server plugin.
 
 [discrete]
-===== Variables
+==== Variables
 String values can contain variables that are substituted when rendered. Variables are specified by `{}`.
 For example: `{config.docs.version}` is rendered as `6.2` when running the tutorial in {kib} 6.2.
 
 link:{kib-repo}tree/{branch}/src/legacy/core_plugins/kibana/public/home/np_ready/components/tutorial/replace_template_strings.js#L23[Provided variables]
 
 [discrete]
-===== Markdown
+==== Markdown
 String values can contain limited Markdown syntax.
 
 link:{kib-repo}tree/{branch}/src/legacy/core_plugins/kibana/public/home/components/tutorial/content.js#L8[Enabled Markdown grammars]
