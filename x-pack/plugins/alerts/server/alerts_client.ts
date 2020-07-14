@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { omit, isEqual, map } from 'lodash';
+import { omit, isEqual, map, truncate } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   Logger,
@@ -13,7 +13,6 @@ import {
   SavedObjectReference,
   SavedObject,
 } from 'src/core/server';
-import _ from 'lodash';
 import { ActionsClient } from '../../actions/server';
 import {
   Alert,
@@ -713,6 +712,6 @@ export class AlertsClient {
   }
 
   private generateAPIKeyName(alertTypeId: string, alertName: string) {
-    return _.truncate(`Alerting: ${alertTypeId}/${alertName}`, { length: 256 });
+    return truncate(`Alerting: ${alertTypeId}/${alertName}`, { length: 256 });
   }
 }
