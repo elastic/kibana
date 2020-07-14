@@ -18,7 +18,7 @@
  */
 
 import { Url } from 'url';
-import { Request, ApplicationState } from 'hapi';
+import { Request, RouteOptionsApp, ApplicationState } from 'hapi';
 import { Observable, fromEvent, merge } from 'rxjs';
 import { shareReplay, first, takeUntil } from 'rxjs/operators';
 import { RecursiveReadonly } from '@kbn/utility-types';
@@ -34,9 +34,17 @@ const requestSymbol = Symbol('request');
 /**
  * @internal
  */
-export interface KibanaRouteState extends ApplicationState {
+export interface KibanaRouteOptions extends RouteOptionsApp {
   xsrfRequired: boolean;
 }
+
+/**
+ * @internal
+ */
+export interface KibanaRequestState extends ApplicationState {
+  requestId: string;
+}
+
 /**
  * Route options: If 'GET' or 'OPTIONS' method, body options won't be returned.
  * @public
@@ -124,6 +132,15 @@ export class KibanaRequest<
 
     return { query, params, body };
   }
+  /**
+   * A identifier to identify this request.
+   *
+   * @remarks
+   * Depending on the user's configuration, this value may be sourced from the
+   * incoming request's `X-Opaque-Id` header which is not guaranteed to be unique
+   * per request.
+   */
+  public readonly id: string;
   /** a WHATWG URL standard object. */
   public readonly url: Url;
   /** matched route details */
@@ -161,6 +178,7 @@ export class KibanaRequest<
     // until that time we have to expose all the headers
     private readonly withoutSecretHeaders: boolean
   ) {
+    this.id = (request.app as KibanaRequestState).requestId;
     this.url = request.url;
     this.headers = deepFreeze({ ...request.headers });
     this.isSystemRequest =
@@ -201,7 +219,7 @@ export class KibanaRequest<
     const options = ({
       authRequired: this.getAuthRequired(request),
       // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
-      xsrfRequired: (request.route.settings.app as KibanaRouteState)?.xsrfRequired ?? true,
+      xsrfRequired: (request.route.settings.app as KibanaRouteOptions)?.xsrfRequired ?? true,
       tags: request.route.settings.tags || [],
       body: isSafeMethod(method)
         ? undefined

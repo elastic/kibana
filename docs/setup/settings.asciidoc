@@ -476,6 +476,12 @@ identifies this {kib} instance. *Default: `"your-hostname"`*
  | {kib} is served by a back end server. This
 setting specifies the port to use. *Default: `5601`*
 
+| `server.requestOpaqueId.allowFromAnyIp:`
+ | Sets whether or not the X-Opaque-Id header should be trusted from any IP address for identifying requests in logs and forwarded to Elasticsearch.
+
+| `server.requestOpaqueId.ipAllowlist:`
+ | A list of IPv4 and IPv6 address which the `X-Opaque-Id` header should be trusted from. Normally this would be set to the IP addresses of the load balancers or reverse-proxy that end users use to access Kibana. If any are set, `server.requestOpaqueId.allowFromAnyIp` must also be set to `false.`
+
 | `server.rewriteBasePath:`
  | Specifies whether {kib} should
 rewrite requests that are prefixed with `server.basePath` or require that they

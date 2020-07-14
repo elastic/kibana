@@ -68,7 +68,11 @@ beforeEach(() => {
     port: 10002,
     ssl: { enabled: false },
     compression: { enabled: true },
-  } as HttpConfig;
+    requestOpaqueId: {
+      allowFromAnyIp: true,
+      ipAllowlist: [],
+    },
+  } as any;
 
   configWithSSL = {
     ...config,

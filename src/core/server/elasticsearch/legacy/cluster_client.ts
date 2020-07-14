@@ -205,7 +205,10 @@ export class LegacyClusterClient implements ILegacyClusterClient {
     return new LegacyScopedClusterClient(
       this.callAsInternalUser,
       this.callAsCurrentUser,
-      filterHeaders(this.getHeaders(request), this.config.requestHeadersWhitelist),
+      filterHeaders(this.getHeaders(request), [
+        'x-opaque-id',
+        ...this.config.requestHeadersWhitelist,
+      ]),
       this.getScopedAuditor(request)
     );
   }
@@ -255,7 +258,8 @@ export class LegacyClusterClient implements ILegacyClusterClient {
     }
     const authHeaders = this.getAuthHeaders(request);
     const headers = ensureRawRequest(request).headers;
+    const requestIdHeaders = request instanceof KibanaRequest ? { 'x-opaque-id': request.id } : {};
 
-    return { ...headers, ...authHeaders };
+    return { ...headers, ...authHeaders, ...requestIdHeaders };
   }
 }

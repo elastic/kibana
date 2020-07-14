@@ -101,6 +101,19 @@ export const config = {
           { defaultValue: [] }
         ),
       }),
+      requestOpaqueId: schema.object(
+        {
+          allowFromAnyIp: schema.boolean({ defaultValue: true }),
+          ipAllowlist: schema.arrayOf(schema.ip(), { defaultValue: [] }),
+        },
+        {
+          validate(value) {
+            if (value.allowFromAnyIp === true && value.ipAllowlist?.length > 0) {
+              return `allowFromAnyIp must be set to 'false' if any values are specified in ipAllowlist`;
+            }
+          },
+        }
+      ),
     },
     {
       validate: (rawConfig) => {
@@ -144,6 +157,7 @@ export class HttpConfig {
   public compression: { enabled: boolean; referrerWhitelist?: string[] };
   public csp: ICspConfig;
   public xsrf: { disableProtection: boolean; whitelist: string[] };
+  public requestOpaqueId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
 
   /**
    * @internal
@@ -172,6 +186,7 @@ export class HttpConfig {
     this.compression = rawHttpConfig.compression;
     this.csp = new CspConfig(rawCspConfig);
     this.xsrf = rawHttpConfig.xsrf;
+    this.requestOpaqueId = rawHttpConfig.requestOpaqueId;
   }
 }
 

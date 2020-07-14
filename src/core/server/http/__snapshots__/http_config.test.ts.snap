@@ -39,6 +39,10 @@ Object {
   },
   "name": "kibana-hostname",
   "port": 5601,
+  "requestOpaqueId": Object {
+    "allowFromAnyIp": true,
+    "ipAllowlist": Array [],
+  },
   "rewriteBasePath": false,
   "socketTimeout": 120000,
   "ssl": Object {

@@ -63,6 +63,10 @@ configService.atPath.mockReturnValue(
       whitelist: [],
     },
     customResponseHeaders: {},
+    requestOpaqueId: {
+      allowFromAnyIp: true,
+      ipAllowlist: [],
+    },
   } as any)
 );
 
