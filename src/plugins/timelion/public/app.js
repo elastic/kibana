@@ -175,6 +175,7 @@ export function initTimelionApp(app, deps) {
         }),
         run: function () {
           history.push('/');
+          $route.reload();
         },
         testId: 'timelionNewButton',
       };

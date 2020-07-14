@@ -27,6 +27,7 @@ import {
   DEFAULT_APP_CATEGORIES,
   AppMountParameters,
   AppUpdater,
+  ScopedHistory,
 } from '../../../core/public';
 import { Panel } from './panels/panel';
 import { initAngularBootstrap, KibanaLegacyStart } from '../../kibana_legacy/public';
@@ -44,16 +45,17 @@ export interface TimelionPluginDependencies {
 }
 
 /** @internal */
-export class TimelionPlugin implements Plugin<Promise<void>, void> {
+export class TimelionPlugin implements Plugin<void, void> {
   initializerContext: PluginInitializerContext;
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
+  private currentHistory: ScopedHistory | undefined = undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
   }
 
-  public async setup(core: CoreSetup, { data }: { data: DataPublicPluginSetup }) {
+  public setup(core: CoreSetup, { data }: { data: DataPublicPluginSetup }) {
     const timelionPanels: Map<string, Panel> = new Map();
 
     const { appMounted, appUnMounted, stop: stopUrlTracker } = createKbnUrlTracker({
@@ -76,6 +78,7 @@ export class TimelionPlugin implements Plugin<Promise<void>, void> {
           ),
         },
       ],
+      getHistory: () => this.currentHistory!,
     });
 
     this.stopUrlTracking = () => {
@@ -93,8 +96,13 @@ export class TimelionPlugin implements Plugin<Promise<void>, void> {
       updater$: this.appStateUpdater.asObservable(),
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
+        this.currentHistory = params.history;
 
         appMounted();
+
+        const unlistenParentHistory = params.history.listen(() => {
+          window.dispatchEvent(new HashChangeEvent('hashchange'));
+        });
 
         const { renderApp } = await import('./application');
         params.element.classList.add('timelionAppContainer');
@@ -106,6 +114,7 @@ export class TimelionPlugin implements Plugin<Promise<void>, void> {
           plugins: pluginsStart as TimelionPluginDependencies,
         });
         return () => {
+          unlistenParentHistory();
           unmount();
           appUnMounted();
         };
