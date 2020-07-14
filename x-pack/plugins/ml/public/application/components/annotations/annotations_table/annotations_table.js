@@ -557,10 +557,7 @@ export class AnnotationsTable extends Component {
       });
     }
 
-    if (
-      this.props.chartDetails?.entityData?.entities &&
-      this.props.chartDetails?.entityData?.entities.length > 0
-    ) {
+    if (Array.isArray(this.props.chartDetails?.entityData?.entities)) {
       // only show the column if the field exists in that job in SMV
       this.props.chartDetails?.entityData?.entities.forEach((entity) => {
         if (entity.fieldType === 'partition_field') {
@@ -583,7 +580,7 @@ export class AnnotationsTable extends Component {
         }
         if (entity.fieldType === 'by_field') {
           columns.push({
-            field: 'over_field_value',
+            field: 'by_field_value',
             name: i18n.translate('xpack.ml.annotationsTable.byColumnSMVName', {
               defaultMessage: 'By',
             }),
@@ -645,10 +642,10 @@ export class AnnotationsTable extends Component {
         // hidden column, for search only
         field: CURRENT_SERIES,
         name: CURRENT_SERIES,
+        dataType: 'boolean',
         width: '0px',
       }
     );
-
     return (
       <Fragment>
         <EuiInMemoryTable
