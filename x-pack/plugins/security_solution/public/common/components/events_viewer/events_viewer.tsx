@@ -10,7 +10,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
-import { BrowserFields } from '../../containers/source';
+import { BrowserFields, DocValueFields } from '../../containers/source';
 import { TimelineQuery } from '../../../timelines/containers';
 import { Direction } from '../../../graphql/types';
 import { useKibana } from '../../lib/kibana';
@@ -51,19 +51,21 @@ interface Props {
   columns: ColumnHeaderOptions[];
   dataProviders: DataProvider[];
   deletedEventIds: Readonly<string[]>;
-  end: number;
+  docValueFields: DocValueFields[];
+  end: string;
   filters: Filter[];
   headerFilterGroup?: React.ReactNode;
   height?: number;
   id: string;
   indexPattern: IIndexPattern;
   isLive: boolean;
+  isLoadingIndexPattern: boolean;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
   kqlMode: KqlMode;
   onChangeItemsPerPage: OnChangeItemsPerPage;
   query: Query;
-  start: number;
+  start: string;
   sort: Sort;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
@@ -76,6 +78,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   columns,
   dataProviders,
   deletedEventIds,
+  docValueFields,
   end,
   filters,
   headerFilterGroup,
@@ -83,6 +86,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   id,
   indexPattern,
   isLive,
+  isLoadingIndexPattern,
   itemsPerPage,
   itemsPerPageOptions,
   kqlMode,
@@ -122,6 +126,17 @@ const EventsViewerComponent: React.FC<Props> = ({
     end,
     isEventViewer: true,
   });
+
+  const canQueryTimeline = useMemo(
+    () =>
+      combinedQueries != null &&
+      isLoadingIndexPattern != null &&
+      !isLoadingIndexPattern &&
+      !isEmpty(start) &&
+      !isEmpty(end),
+    [isLoadingIndexPattern, combinedQueries, start, end]
+  );
+
   const fields = useMemo(
     () =>
       union(
@@ -140,16 +155,19 @@ const EventsViewerComponent: React.FC<Props> = ({
 
   return (
     <StyledEuiPanel data-test-subj="events-viewer-panel">
-      {combinedQueries != null ? (
+      {canQueryTimeline ? (
         <EventDetailsWidthProvider>
           <TimelineQuery
+            docValueFields={docValueFields}
             fields={fields}
-            filterQuery={combinedQueries.filterQuery}
+            filterQuery={combinedQueries!.filterQuery}
             id={id}
             indexPattern={indexPattern}
             limit={itemsPerPage}
             sortField={sortField}
             sourceId="default"
+            startDate={start}
+            endDate={end}
           >
             {({
               events,
@@ -187,6 +205,7 @@ const EventsViewerComponent: React.FC<Props> = ({
                     <StatefulBody
                       browserFields={browserFields}
                       data={events.filter((e) => !deletedEventIds.includes(e._id))}
+                      docValueFields={docValueFields}
                       id={id}
                       isEventViewer={true}
                       height={height}
@@ -232,6 +251,7 @@ export const EventsViewer = React.memo(
   (prevProps, nextProps) =>
     deepEqual(prevProps.browserFields, nextProps.browserFields) &&
     prevProps.columns === nextProps.columns &&
+    deepEqual(prevProps.docValueFields, nextProps.docValueFields) &&
     prevProps.dataProviders === nextProps.dataProviders &&
     prevProps.deletedEventIds === nextProps.deletedEventIds &&
     prevProps.end === nextProps.end &&

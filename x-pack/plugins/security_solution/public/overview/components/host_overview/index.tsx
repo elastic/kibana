@@ -40,8 +40,8 @@ interface HostSummaryProps {
   loading: boolean;
   isLoadingAnomaliesData: boolean;
   anomaliesData: Anomalies | null;
-  startDate: number;
-  endDate: number;
+  startDate: string;
+  endDate: string;
   narrowDateRange: NarrowDateRange;
 }
 

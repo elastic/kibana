@@ -34,8 +34,8 @@ const kueryFilterQuery = `
 `;
 
 const dateRange = `
-  start: Float
-  end: Float
+  start: ToAny
+  end: ToAny
 `;
 
 const favoriteTimeline = `
