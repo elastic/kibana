@@ -2,6 +2,10 @@
   margin-bottom: $euiSizeS;
 }
 
+.lnsLayerPanel__sourceFlexItem {
+  max-width: calc(100% - #{$euiSize * 3.625});
+}
+
 .lnsLayerPanel__row {
   background: $euiColorLightestShade;
   padding: $euiSizeS;
@@ -32,5 +36,6 @@
 }
 
 .lnsLayerPanel__styleEditor {
-  width: $euiSize * 28;
+  width: $euiSize * 30;
+  padding: $euiSizeS;
 }

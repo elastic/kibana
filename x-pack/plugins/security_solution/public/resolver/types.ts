@@ -177,6 +177,7 @@ export interface DataState {
    * The id used for the pending request, if there is one.
    */
   readonly pendingRequestDatabaseDocumentID?: string;
+  readonly resolverComponentInstanceID: string | undefined;
 
   /**
    * The parameters and response from the last successful request.

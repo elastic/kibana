@@ -10,6 +10,7 @@ import { useHistory } from 'react-router-dom';
 import styled, { StyledComponent } from 'styled-components';
 
 import { usePersistRule } from '../../../../containers/detection_engine/rules';
+import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 
 import {
   getRulesUrl,
@@ -84,12 +85,17 @@ StepDefineRuleAccordion.displayName = 'StepDefineRuleAccordion';
 
 const CreateRulePageComponent: React.FC = () => {
   const {
-    loading,
+    loading: userInfoLoading,
     isSignalIndexExists,
     isAuthenticated,
     hasEncryptionKey,
     canUserCRUD,
   } = useUserInfo();
+  const {
+    loading: listsConfigLoading,
+    needsConfiguration: needsListsConfiguration,
+  } = useListsConfig();
+  const loading = userInfoLoading || listsConfigLoading;
   const [, dispatchToaster] = useStateToaster();
   const [openAccordionId, setOpenAccordionId] = useState<RuleStep>(RuleStep.defineRule);
   const defineRuleRef = useRef<EuiAccordion | null>(null);
@@ -278,7 +284,14 @@ const CreateRulePageComponent: React.FC = () => {
     return null;
   }
 
-  if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
+  if (
+    redirectToDetections(
+      isSignalIndexExists,
+      isAuthenticated,
+      hasEncryptionKey,
+      needsListsConfiguration
+    )
+  ) {
     history.replace(getDetectionEngineUrl());
     return null;
   } else if (userHasNoPermissions(canUserCRUD)) {

@@ -25,6 +25,7 @@ import {
   enrichExceptionItemsWithOS,
   entryHasListType,
   entryHasNonEcsType,
+  prepareExceptionItemsForBulkClose,
 } from './helpers';
 import { FormattedEntry, DescriptionListItem, EmptyEntry } from './types';
 import {
@@ -681,6 +682,67 @@ describe('Exception helpers', () => {
       ];
       const result = entryHasNonEcsType(payload, mockEcsIndexPattern);
       expect(result).toEqual(true);
+    });
+  });
+
+  describe('#prepareExceptionItemsForBulkClose', () => {
+    test('it should return no exceptionw when passed in an empty array', () => {
+      const payload: ExceptionListItemSchema[] = [];
+      const result = prepareExceptionItemsForBulkClose(payload);
+      expect(result).toEqual([]);
+    });
+
+    test("should not make any updates when the exception entries don't contain 'event.'", () => {
+      const payload = [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()];
+      const result = prepareExceptionItemsForBulkClose(payload);
+      expect(result).toEqual(payload);
+    });
+
+    test("should update entry fields when they start with 'event.'", () => {
+      const payload = [
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [
+            {
+              ...getEntryMatchMock(),
+              field: 'event.kind',
+            },
+            getEntryMatchMock(),
+          ],
+        },
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [
+            {
+              ...getEntryMatchMock(),
+              field: 'event.module',
+            },
+          ],
+        },
+      ];
+      const expected = [
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [
+            {
+              ...getEntryMatchMock(),
+              field: 'signal.original_event.kind',
+            },
+            getEntryMatchMock(),
+          ],
+        },
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [
+            {
+              ...getEntryMatchMock(),
+              field: 'signal.original_event.module',
+            },
+          ],
+        },
+      ];
+      const result = prepareExceptionItemsForBulkClose(payload);
+      expect(result).toEqual(expected);
     });
   });
 });
