@@ -308,7 +308,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
 
   return (
     <>
-      <StyledBreadcrumbs truncate={false} breadcrumbs={crumbs} />
+      <StyledBreadcrumbs breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
       <EuiText size="s">
         <BoldCode>
