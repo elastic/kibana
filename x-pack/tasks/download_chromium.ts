@@ -7,7 +7,6 @@
 import { LevelLogger } from '../plugins/reporting/server/lib';
 import { ensureBrowserDownloaded } from '../plugins/reporting/server/browsers/download';
 
-
 export const downloadChromium = async () => {
   // eslint-disable-next-line no-console
   const consoleLogger = (tag: string) => (message: unknown) => console.log(tag, message);
