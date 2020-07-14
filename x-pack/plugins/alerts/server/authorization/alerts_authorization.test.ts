@@ -48,6 +48,7 @@ function mockFeature(appName: string, typeName?: string) {
     id: appName,
     name: appName,
     app: [],
+    category: { id: 'foo', label: 'foo' },
     ...(typeName
       ? {
           alerting: [typeName],
@@ -91,6 +92,7 @@ function mockFeatureWithSubFeature(appName: string, typeName: string) {
     id: appName,
     name: appName,
     app: [],
+    category: { id: 'foo', label: 'foo' },
     ...(typeName
       ? {
           alerting: [typeName],

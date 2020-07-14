@@ -477,6 +477,7 @@ export const DEFAULT_APP_CATEGORIES: Readonly<{
         id: string;
         label: string;
         order: number;
+        euiIconType: string;
     };
 }>;
 

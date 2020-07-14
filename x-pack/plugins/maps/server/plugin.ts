@@ -6,6 +6,7 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
 import { take } from 'rxjs/operators';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 // @ts-ignore
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
@@ -169,6 +170,7 @@ export class MapsPlugin implements Plugin {
         defaultMessage: 'Maps',
       }),
       order: 600,
+      category: DEFAULT_APP_CATEGORIES.kibana,
       icon: APP_ICON,
       navLinkId: APP_ID,
       app: [APP_ID, 'kibana'],

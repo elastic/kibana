@@ -59,5 +59,6 @@ export const DEFAULT_APP_CATEGORIES = Object.freeze({
       defaultMessage: 'Management',
     }),
     order: 5000,
+    euiIconType: 'managementApp',
   },
 });

@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { AlertType } from '../common/alert_types';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 
 export const APM_FEATURE = {
   id: 'apm',
@@ -13,6 +14,7 @@ export const APM_FEATURE = {
     defaultMessage: 'APM',
   }),
   order: 900,
+  category: DEFAULT_APP_CATEGORIES.observability,
   icon: 'apmApp',
   navLinkId: 'apm',
   app: ['apm', 'csm', 'kibana'],

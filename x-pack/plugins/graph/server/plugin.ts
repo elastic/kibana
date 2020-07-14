@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, CoreStart } from 'src/core/server';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 import { LicenseState } from './lib/license_state';
 import { registerSearchRoute } from './routes/search';
@@ -47,6 +48,7 @@ export class GraphPlugin implements Plugin {
           defaultMessage: 'Graph',
         }),
         order: 1200,
+        category: DEFAULT_APP_CATEGORIES.kibana,
         icon: 'graphApp',
         navLinkId: 'graph',
         app: ['graph', 'kibana'],
