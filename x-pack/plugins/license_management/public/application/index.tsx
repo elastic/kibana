@@ -8,6 +8,8 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router } from 'react-router-dom';
 
+import { PLUGIN } from '../../common/constants';
+
 import { AppDependencies } from './app_context';
 import { AppProviders } from './app_providers';
 // @ts-ignore
@@ -20,18 +22,19 @@ const AppWithRouter = (props: { [key: string]: any }) => (
 );
 
 export const renderApp = (element: Element, dependencies: AppDependencies) => {
+  dependencies.core.chrome.docTitle.change(PLUGIN.title);
   render(
     <AppProviders appDependencies={dependencies}>
       <AppWithRouter
         telemetry={dependencies.plugins.telemetry}
         history={dependencies.services.history}
-        docTitle={dependencies.core.chrome.docTitle}
       />
     </AppProviders>,
     element
   );
 
   return () => {
+    dependencies.core.chrome.docTitle.reset();
     unmountComponentAtNode(element);
   };
 };
