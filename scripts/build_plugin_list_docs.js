@@ -17,5 +17,5 @@
  * under the License.
  */
 
-exports.run = require('./cli').run;
-exports.Cluster = require('./cluster').Cluster;
+require('../src/setup_node_env/prebuilt_dev_only_entry');
+require('@kbn/dev-utils').runPluginListCli();
