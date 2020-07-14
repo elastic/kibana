@@ -166,7 +166,7 @@ export class LayerWizardSelect extends Component<Props, State> {
 
     return (
       <>
-        <EuiFlexItem> {this._renderCategoryFacets()}</EuiFlexItem>
+        {this._renderCategoryFacets()}
 
         <EuiSpacer size="s" />
         <EuiFlexGrid columns={2} gutterSize="m">
