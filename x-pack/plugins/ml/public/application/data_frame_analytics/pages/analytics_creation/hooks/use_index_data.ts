@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { EuiDataGridColumn } from '@elastic/eui';
 
@@ -106,9 +106,12 @@ export const useIndexData = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indexPattern.title, JSON.stringify([query, pagination, sortingColumns])]);
 
+  const dataLoader = useMemo(() => new DataLoader(indexPattern, toastNotifications), [
+    indexPattern,
+  ]);
+
   const fetchColumnChartsData = async function () {
     try {
-      const dataLoader = new DataLoader(indexPattern, toastNotifications);
       const columnChartsData = await dataLoader.loadFieldHistograms(
         columns
           .filter((cT) => dataGrid.visibleColumns.includes(cT.id))

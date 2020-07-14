@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useEffect, useState } from 'react';
+import React, { FC, Fragment, useEffect, useMemo, useState } from 'react';
 import { merge } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 
@@ -108,7 +108,10 @@ export const Page: FC = () => {
     autoRefreshSelector: true,
   });
 
-  const dataLoader = new DataLoader(currentIndexPattern, getToastNotifications());
+  const dataLoader = useMemo(() => new DataLoader(currentIndexPattern, getToastNotifications()), [
+    currentIndexPattern,
+  ]);
+
   const [globalState, setGlobalState] = useUrlState('_g');
   useEffect(() => {
     if (globalState?.time !== undefined) {

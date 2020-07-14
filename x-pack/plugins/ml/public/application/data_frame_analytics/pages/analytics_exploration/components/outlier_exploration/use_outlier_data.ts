@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { EuiDataGridColumn } from '@elastic/eui';
 
@@ -80,10 +80,17 @@ export const useOutlierData = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
 
+  const dataLoader = useMemo(
+    () =>
+      indexPattern !== undefined
+        ? new DataLoader(indexPattern, getToastNotifications())
+        : undefined,
+    [indexPattern]
+  );
+
   const fetchColumnChartsData = async function () {
     try {
-      if (jobConfig !== undefined && indexPattern !== undefined) {
-        const dataLoader = new DataLoader(indexPattern, getToastNotifications());
+      if (jobConfig !== undefined && dataLoader !== undefined) {
         const columnChartsData = await dataLoader.loadFieldHistograms(
           columns
             .filter((cT) => dataGrid.visibleColumns.includes(cT.id))
