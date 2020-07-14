@@ -16,7 +16,8 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const esClient = getService('es');
 
-  // SKIPPED as it is failing on ES PROMOTION: https://github.com/elastic/kibana/issues/68587
+  // Temporarily skipped to promote snapshot: https://github.com/elastic/kibana/issues/68587
+  // Re-enabled in https://github.com/elastic/kibana/pull/71727
   describe.skip('fleet_unenroll_agent', () => {
     let accessAPIKeyId: string;
     let outputAPIKeyId: string;

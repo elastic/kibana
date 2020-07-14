@@ -301,6 +301,12 @@ export enum HostsFields {
   lastSeen = 'lastSeen',
 }
 
+export enum HostPolicyResponseActionStatus {
+  success = 'success',
+  failure = 'failure',
+  warning = 'warning',
+}
+
 export enum UsersFields {
   name = 'name',
   count = 'count',
@@ -1442,13 +1448,15 @@ export interface HostsEdges {
 export interface HostItem {
   _id?: Maybe<string>;
 
-  lastSeen?: Maybe<string>;
+  cloud?: Maybe<CloudFields>;
+
+  endpoint?: Maybe<EndpointFields>;
 
   host?: Maybe<HostEcsFields>;
 
-  cloud?: Maybe<CloudFields>;
-
   inspect?: Maybe<Inspect>;
+
+  lastSeen?: Maybe<string>;
 }
 
 export interface CloudFields {
@@ -1467,6 +1475,14 @@ export interface CloudInstance {
 
 export interface CloudMachine {
   type?: Maybe<(Maybe<string>)[]>;
+}
+
+export interface EndpointFields {
+  endpointPolicy?: Maybe<string>;
+
+  sensorVersion?: Maybe<string>;
+
+  policyStatus?: Maybe<HostPolicyResponseActionStatus>;
 }
 
 export interface FirstLastSeenHost {
@@ -3044,6 +3060,8 @@ export namespace GetHostOverviewQuery {
     cloud: Maybe<Cloud>;
 
     inspect: Maybe<Inspect>;
+
+    endpoint: Maybe<Endpoint>;
   };
 
   export type Host = {
@@ -3106,6 +3124,16 @@ export namespace GetHostOverviewQuery {
     dsl: string[];
 
     response: string[];
+  };
+
+  export type Endpoint = {
+    __typename?: 'EndpointFields';
+
+    endpointPolicy: Maybe<string>;
+
+    policyStatus: Maybe<HostPolicyResponseActionStatus>;
+
+    sensorVersion: Maybe<string>;
   };
 }
 
