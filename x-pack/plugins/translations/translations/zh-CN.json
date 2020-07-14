@@ -7551,7 +7551,6 @@
     "xpack.infra.logs.logEntryCategories.categoryQUalityWarningCalloutTitle": "质量警告",
     "xpack.infra.logs.logEntryCategories.countColumnTitle": "消息计数",
     "xpack.infra.logs.logEntryCategories.datasetColumnTitle": "数据集",
-    "xpack.infra.logs.logEntryCategories.datasetFilterPlaceholder": "按数据集筛选",
     "xpack.infra.logs.logEntryCategories.jobStatusLoadingMessage": "正在检查归类作业的状态......",
     "xpack.infra.logs.logEntryCategories.loadDataErrorTitle": "无法加载类别数据",
     "xpack.infra.logs.logEntryCategories.manyCategoriesWarningReasonDescription": "每个分析文档的类别比率非常高，达到 {categoriesDocumentRatio, number }。",
