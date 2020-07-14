@@ -17,14 +17,4 @@
  * under the License.
  */
 
-import { ExpressionAstExpression } from './types';
-import { parse } from './parse';
-
-/**
- * Given expression pipeline string, returns parsed AST.
- *
- * @param expression Expression pipeline string.
- */
-export function parseExpression(expression: string): ExpressionAstExpression {
-  return parse(expression, 'expression');
-}
+export * from './esaggs';

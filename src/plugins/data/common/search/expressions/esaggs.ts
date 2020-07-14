@@ -17,14 +17,27 @@
  * under the License.
  */
 
-import { ExpressionAstExpression } from './types';
-import { parse } from './parse';
+import {
+  KibanaContext,
+  KibanaDatatable,
+  ExpressionFunctionDefinition,
+} from '../../../../../plugins/expressions/common';
 
-/**
- * Given expression pipeline string, returns parsed AST.
- *
- * @param expression Expression pipeline string.
- */
-export function parseExpression(expression: string): ExpressionAstExpression {
-  return parse(expression, 'expression');
+type Input = KibanaContext | null;
+type Output = Promise<KibanaDatatable>;
+
+interface Arguments {
+  index: string;
+  metricsAtAllLevels: boolean;
+  partialRows: boolean;
+  includeFormatHints: boolean;
+  aggConfigs: string;
+  timeFields?: string[];
 }
+
+export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  'esaggs',
+  Input,
+  Arguments,
+  Output
+>;
