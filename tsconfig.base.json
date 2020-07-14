@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "noEmit": true,
     "baseUrl": ".",
     "paths": {
       // Allows for importing from `kibana` package for the exported types.

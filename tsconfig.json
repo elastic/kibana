@@ -1,6 +1,13 @@
 {
   "extends": "./tsconfig.base.json",
-  // "compilerOptions": {
-  //   "incremental": true,
-  // },
+  "compilerOptions": {
+    "incremental": true,
+    "tsBuildInfoFile": "./build/tsconfig.tsbuildinfo",
+    "noEmit": false,
+    "declarationDir": "./build",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true,
+    "preserveSymlinks": true
+  },
 }
