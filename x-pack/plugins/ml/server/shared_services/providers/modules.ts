@@ -43,8 +43,7 @@ export function getModulesProvider({
     ) {
       let hasMlCapabilities: HasMlCapabilities;
       if (request.params === 'DummyKibanaRequest') {
-        const hasMlCapabilitiesStub = () => Promise.resolve();
-        hasMlCapabilities = hasMlCapabilitiesStub;
+        hasMlCapabilities = () => Promise.resolve();
       } else {
         hasMlCapabilities = getHasMlCapabilities(request);
       }
