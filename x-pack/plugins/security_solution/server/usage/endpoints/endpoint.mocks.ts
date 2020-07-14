@@ -76,6 +76,47 @@ export const mockFleetObjectsResponse = (
   ],
 });
 
+const mockPolicyPayload = (malwareStatus: 'success' | 'warning' | 'failure') =>
+  JSON.stringify({
+    'endpoint-security': {
+      Endpoint: {
+        policy: {
+          applied: {
+            id: '0d466df0-c60f-11ea-a5c5-151665e785c4',
+            response: {
+              configurations: {
+                malware: {
+                  concerned_actions: [
+                    'load_config',
+                    'workflow',
+                    'download_global_artifacts',
+                    'download_user_artifacts',
+                    'configure_malware',
+                    'read_malware_config',
+                    'load_malware_model',
+                    'read_kernel_config',
+                    'configure_kernel',
+                    'detect_process_events',
+                    'detect_file_write_events',
+                    'connect_kernel',
+                    'detect_file_open_events',
+                    'detect_sync_image_load_events',
+                  ],
+                  status: `${malwareStatus}`,
+                },
+              },
+            },
+            status: `${malwareStatus}`,
+          },
+        },
+      },
+      agent: {
+        id: 'testAgentId',
+        version: '8.0.0-SNAPSHOT',
+      },
+    },
+  });
+
 /**
  *
  * @param running - allows us to set whether the mocked endpoint is in an active or disabled/failed state
@@ -102,6 +143,7 @@ export const mockFleetEventsObjectsResponse = (
           message: `Application: endpoint-security--8.0.0[d8f7f6e8-9375-483c-b456-b479f1d7a4f2]: State changed to ${
             running ? 'RUNNING' : 'FAILED'
           }: `,
+          payload: mockPolicyPayload(running ? 'success' : 'failure'),
           config_id: testConfigId,
         },
         references: [],
