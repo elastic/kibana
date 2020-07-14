@@ -52,9 +52,9 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
     },
   ];
 
-  const editSubActionProperty = (key: string, value: {}, indexVal?: number) => {
+  const editSubActionProperty = (key: string, value: {}) => {
     const newProps = { ...actionParams.subActionParams, [key]: value };
-    editAction('subActionParams', newProps, indexVal ?? index);
+    editAction('subActionParams', newProps, index);
   };
 
   useEffect(() => {
