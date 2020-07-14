@@ -54,7 +54,7 @@ export function toastNotificationServiceProvider(toastNotifications: ToastsStart
         typeof error === 'object' &&
         'response' in error &&
         typeof error.response === 'string' &&
-        'statusCode' in error
+        error.statusCode !== undefined
       ) {
         // MLResponseError which has been received back as part of a 'successful' response
         // where the error was passed in a separate property in the response.
