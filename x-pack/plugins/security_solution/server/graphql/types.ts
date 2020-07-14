@@ -1072,6 +1072,8 @@ export interface RuleField {
 
   note?: Maybe<string[] | string>;
 
+  threshold?: Maybe<ToAny>;
+
   exceptions_list?: Maybe<ToAny>;
 }
 
@@ -4939,6 +4941,8 @@ export namespace RuleFieldResolvers {
 
     note?: NoteResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
+    threshold?: ThresholdResolver<Maybe<ToAny>, TypeParent, TContext>;
+
     exceptions_list?: ExceptionsListResolver<Maybe<ToAny>, TypeParent, TContext>;
   }
 
@@ -5094,6 +5098,11 @@ export namespace RuleFieldResolvers {
   > = Resolver<R, Parent, TContext>;
   export type NoteResolver<
     R = Maybe<string[] | string>,
+    Parent = RuleField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ThresholdResolver<
+    R = Maybe<ToAny>,
     Parent = RuleField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
