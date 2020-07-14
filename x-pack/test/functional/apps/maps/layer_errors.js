@@ -10,7 +10,7 @@ export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['maps', 'header']);
 
   // Failing: See https://github.com/elastic/kibana/issues/69617
-  describe.skip('layer errors', () => {
+  describe('layer errors', () => {
     before(async () => {
       await PageObjects.maps.loadSavedMap('layer with errors');
     });
@@ -66,7 +66,7 @@ export default function ({ getPageObjects }) {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/36011
-    describe.skip('EMSFileSource with missing EMS id', () => {
+    describe('EMSFileSource with missing EMS id', () => {
       const MISSING_EMS_ID = 'idThatDoesNotExitForEMSFileSource';
       const LAYER_NAME = 'EMS_vector_shapes';
 
