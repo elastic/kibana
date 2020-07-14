@@ -11,6 +11,7 @@ import rison from 'rison-node';
 import { mlJobService } from '../../../services/job_service';
 import { ml } from '../../../services/ml_api_service';
 import { getToastNotifications } from '../../../util/dependency_cache';
+import { stringMatch } from '../../../util/string_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { i18n } from '@kbn/i18n';
@@ -348,14 +349,6 @@ export function checkForAutoStartDatafeed() {
       datafeedId,
     };
   }
-}
-
-function stringMatch(str, substr) {
-  return (
-    typeof str === 'string' &&
-    typeof substr === 'string' &&
-    (str.toLowerCase().match(substr.toLowerCase()) === null) === false
-  );
 }
 
 function jobProperty(job, prop) {

@@ -223,7 +223,7 @@ describe('helpers', () => {
           eventHasNotes: false,
           timelineType: TimelineType.template,
         })
-      ).toEqual('This event cannot be pinned because it is filtered by a timeline template');
+      ).toEqual('This event may not be pinned while editing a template timeline');
     });
   });
 

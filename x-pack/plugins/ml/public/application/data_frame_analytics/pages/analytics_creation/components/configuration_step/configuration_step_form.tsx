@@ -73,6 +73,9 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   const [includesTableItems, setIncludesTableItems] = useState<FieldSelectionItem[]>([]);
   const [maxDistinctValuesError, setMaxDistinctValuesError] = useState<string | undefined>();
   const [unsupportedFieldsError, setUnsupportedFieldsError] = useState<string | undefined>();
+  const [minimumFieldsRequiredMessage, setMinimumFieldsRequiredMessage] = useState<
+    undefined | string
+  >();
 
   const { setEstimatedModelMemoryLimit, setFormState } = actions;
   const { estimatedModelMemoryLimit, form, isJobCreated, requestMessages } = state;
@@ -117,6 +120,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     dependentVariableEmpty ||
     jobType === undefined ||
     maxDistinctValuesError !== undefined ||
+    minimumFieldsRequiredMessage !== undefined ||
     requiredFieldsError !== undefined ||
     unsupportedFieldsError !== undefined;
 
@@ -400,32 +404,22 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       )}
       <EuiFormRow
         fullWidth
-        isInvalid={requiredFieldsError !== undefined || unsupportedFieldsError !== undefined}
-        error={[
-          ...(requiredFieldsError !== undefined
-            ? [
-                i18n.translate('xpack.ml.dataframe.analytics.create.requiredFieldsError', {
-                  defaultMessage: 'Invalid. {message}',
-                  values: { message: requiredFieldsError },
-                }),
-              ]
-            : []),
-          ...(unsupportedFieldsError !== undefined
-            ? [
-                i18n.translate('xpack.ml.dataframe.analytics.create.unsupportedFieldsError', {
-                  defaultMessage: 'Invalid. {message}',
-                  values: { message: unsupportedFieldsError },
-                }),
-              ]
-            : []),
-        ]}
+        isInvalid={requiredFieldsError !== undefined}
+        error={i18n.translate('xpack.ml.dataframe.analytics.create.requiredFieldsError', {
+          defaultMessage: 'Invalid. {message}',
+          values: { message: requiredFieldsError },
+        })}
       >
         <Fragment />
       </EuiFormRow>
       <AnalysisFieldsTable
         dependentVariable={dependentVariable}
         includes={includes}
+        minimumFieldsRequiredMessage={minimumFieldsRequiredMessage}
+        setMinimumFieldsRequiredMessage={setMinimumFieldsRequiredMessage}
         tableItems={includesTableItems}
+        unsupportedFieldsError={unsupportedFieldsError}
+        setUnsupportedFieldsError={setUnsupportedFieldsError}
         loadingItems={loadingFieldOptions}
         setFormState={setFormState}
       />
