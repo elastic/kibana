@@ -1,15 +1,23 @@
 {
   "id": "siem_auditbeat_auth",
-  "title": "SIEM Auditbeat Authentication",
-  "description": "Detect suspicious authentication events in Auditbeat data (beta).",
+  "title": "Security: Auditbeat Authentication",
+  "description": "Detect suspicious authentication events in Auditbeat data.",
   "type": "Auditbeat data",
   "logoFile": "logo.json",
   "defaultIndexPattern": "auditbeat-*",
   "query": {
     "bool": {
       "filter": [
-        {"term": {"event.category": "authentication"}},
-        {"term": {"agent.type": "auditbeat"}}
+        {
+          "term": {
+            "event.category": "authentication"
+          }
+        },
+        {
+          "term": {
+            "agent.type": "auditbeat"
+          }
+        }
       ]
     }
   },
