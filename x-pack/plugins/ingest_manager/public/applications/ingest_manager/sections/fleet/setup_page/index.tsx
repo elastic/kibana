@@ -175,7 +175,7 @@ xpack.security.authc.api_key.enabled: true`}
           <RequirementItem isMissing={missingRequirements.includes('tls_required')}>
             <FormattedMessage
               id="xpack.ingestManager.setupPage.tlsFlagText"
-              defaultMessage="Kibana security. Set. Set {securityFlag} to {true}. For development purposes, you can disable TLS by setting {tlsFlag} to {true} as an unsafe alternative."
+              defaultMessage="Kibana security. Set {securityFlag} to {true}. For development purposes, you can disable TLS by setting {tlsFlag} to {true} as an unsafe alternative."
               values={{
                 securityFlag: <EuiCode>xpack.security.enabled</EuiCode>,
                 tlsFlag: <EuiCode>xpack.ingestManager.fleet.tlsCheckDisabled</EuiCode>,
@@ -200,7 +200,7 @@ xpack.security.authc.api_key.enabled: true`}
           <EuiSpacer size="l" />
           <FormattedMessage
             id="xpack.ingestManager.setupPage.gettingStartedText"
-            defaultMessage="For more information, read our {link}."
+            defaultMessage="For more information, read our {link} guide."
             values={{
               link: (
                 <EuiLink
