@@ -5,18 +5,8 @@
  */
 
 import { cloneDeep } from 'lodash';
+import { fromExpression, toExpression, Ast, ExpressionFunctionAST } from '@kbn/interpreter/common';
 import { SavedObjectMigrationMap, SavedObjectMigrationFn } from 'src/core/server';
-import { EsaggsExpressionFunctionDefinition } from 'src/plugins/data/server';
-import {
-  buildExpression,
-  ExpressionAstExpression,
-  ExpressionAstExpressionBuilder,
-  ExpressionAstFunction,
-  formatExpression,
-  isExpressionAstBuilder,
-  parseExpression,
-} from '../../../../src/plugins/expressions/server';
-import { MergeTablesExpressionFunctionDefinition } from '../common';
 
 interface LensDocShape<VisualizationState = unknown> {
   id?: string;
@@ -71,40 +61,46 @@ const removeLensAutoDate: SavedObjectMigrationFn<LensDocShape, LensDocShape> = (
     return doc;
   }
   try {
-    const ast = buildExpression(expression);
-    ast.findFunction<MergeTablesExpressionFunctionDefinition>('lens_merge_tables').forEach((fn) => {
-      const arg = fn.getArgument('tables');
-      if (arg) {
-        const tables = arg.reduce((acc, table) => {
-          if (isExpressionAstBuilder(table)) {
-            const esaggs = table.findFunction<EsaggsExpressionFunctionDefinition>('esaggs')[0];
-            const aggConfigs = esaggs.getArgument('aggConfigs');
-            if (aggConfigs) {
-              aggConfigs.forEach((aggConfig) => {
-                if (isExpressionAstBuilder(aggConfig)) {
-                  const autoDateAggConfigs = aggConfig
-                    .findFunction('lens_auto_date')[0]
-                    .getArgument('aggConfigs');
-                  if (autoDateAggConfigs) {
-                    esaggs.replaceArgument('aggConfigs', autoDateAggConfigs);
-                  }
-                }
-              });
-            }
-            acc.push(table);
-          }
-          return acc;
-        }, [] as ExpressionAstExpressionBuilder[]);
-
-        fn.replaceArgument('tables', tables);
+    const ast = fromExpression(expression);
+    const newChain: ExpressionFunctionAST[] = ast.chain.map((topNode) => {
+      if (topNode.function !== 'lens_merge_tables') {
+        return topNode;
       }
+      return {
+        ...topNode,
+        arguments: {
+          ...topNode.arguments,
+          tables: (topNode.arguments.tables as Ast[]).map((middleNode) => {
+            return {
+              type: 'expression',
+              chain: middleNode.chain.map((node) => {
+                // Check for sub-expression in aggConfigs
+                if (
+                  node.function === 'esaggs' &&
+                  typeof node.arguments.aggConfigs[0] !== 'string'
+                ) {
+                  return {
+                    ...node,
+                    arguments: {
+                      ...node.arguments,
+                      aggConfigs: (node.arguments.aggConfigs[0] as Ast).chain[0].arguments
+                        .aggConfigs,
+                    },
+                  };
+                }
+                return node;
+              }),
+            };
+          }),
+        },
+      };
     });
 
     return {
       ...doc,
       attributes: {
         ...doc.attributes,
-        expression: ast.toString(),
+        expression: toExpression({ ...ast, chain: newChain }),
       },
     };
   } catch (e) {
@@ -123,8 +119,8 @@ const addTimeFieldToEsaggs: SavedObjectMigrationFn<LensDocShape, LensDocShape> =
   }
 
   try {
-    const ast = parseExpression(expression);
-    const newChain: ExpressionAstFunction[] = ast.chain.map((topNode) => {
+    const ast = fromExpression(expression);
+    const newChain: ExpressionFunctionAST[] = ast.chain.map((topNode) => {
       if (topNode.function !== 'lens_merge_tables') {
         return topNode;
       }
@@ -132,7 +128,7 @@ const addTimeFieldToEsaggs: SavedObjectMigrationFn<LensDocShape, LensDocShape> =
         ...topNode,
         arguments: {
           ...topNode.arguments,
-          tables: (topNode.arguments.tables as ExpressionAstExpression[]).map((middleNode) => {
+          tables: (topNode.arguments.tables as Ast[]).map((middleNode) => {
             return {
               type: 'expression',
               chain: middleNode.chain.map((node) => {
@@ -168,7 +164,7 @@ const addTimeFieldToEsaggs: SavedObjectMigrationFn<LensDocShape, LensDocShape> =
       ...doc,
       attributes: {
         ...doc.attributes,
-        expression: formatExpression({ ...ast, chain: newChain }),
+        expression: toExpression({ ...ast, chain: newChain }),
       },
     };
   } catch (e) {

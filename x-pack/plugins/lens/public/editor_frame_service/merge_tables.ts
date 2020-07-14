@@ -5,12 +5,27 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionValueSearchContext, KibanaDatatable } from 'src/plugins/expressions/public';
+import {
+  ExpressionFunctionDefinition,
+  ExpressionValueSearchContext,
+  KibanaDatatable,
+} from 'src/plugins/expressions/public';
 import { search } from '../../../../../src/plugins/data/public';
-import { MergeTablesExpressionFunctionDefinition } from '../../common';
 const { toAbsoluteDates } = search.aggs;
 
-export const mergeTables: MergeTablesExpressionFunctionDefinition = {
+import { LensMultiTable } from '../types';
+
+interface MergeTables {
+  layerIds: string[];
+  tables: KibanaDatatable[];
+}
+
+export const mergeTables: ExpressionFunctionDefinition<
+  'lens_merge_tables',
+  ExpressionValueSearchContext | null,
+  MergeTables,
+  LensMultiTable
+> = {
   name: 'lens_merge_tables',
   type: 'lens_multitable',
   help: i18n.translate('xpack.lens.functions.mergeTables.help', {
