@@ -58,10 +58,14 @@ export function usageProvider(core: CoreSetup<object, DataPluginStart>): SearchU
 
       const newAttributes = { ...attributes, averageDuration };
 
-      if (doesSavedObjectExist) {
-        await repository.update(SAVED_OBJECT_ID, SAVED_OBJECT_ID, newAttributes);
-      } else {
-        await repository.create(SAVED_OBJECT_ID, newAttributes, { id: SAVED_OBJECT_ID });
+      try {
+        if (doesSavedObjectExist) {
+          await repository.update(SAVED_OBJECT_ID, SAVED_OBJECT_ID, newAttributes);
+        } else {
+          await repository.create(SAVED_OBJECT_ID, newAttributes, { id: SAVED_OBJECT_ID });
+        }
+      } catch (e) {
+        // Version conflict error, swallow
       }
     };
   };
