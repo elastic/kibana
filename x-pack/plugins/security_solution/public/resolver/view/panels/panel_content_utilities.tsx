@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiBreadcrumbs, EuiCode, EuiBetaBadge } from '@elastic/eui';
+import { EuiBreadcrumbs, EuiCode, EuiBetaBadge, EuiBreadcrumbsProps } from '@elastic/eui';
 import styled from 'styled-components';
 import React, { memo } from 'react';
 import { useResolverTheme } from '../assets';
@@ -72,6 +72,10 @@ export const StyledBreadcrumbs = memo(function StyledBreadcrumbs({
   const {
     colorMap: { resolverBreadcrumbBackground, resolverEdgeText },
   } = useResolverTheme();
+  const crumbProps: EuiBreadcrumbsProps = {
+    breadcrumbs,
+    truncate: false,
+  };
   return (
     <>
       <BetaHeader>
@@ -80,8 +84,7 @@ export const StyledBreadcrumbs = memo(function StyledBreadcrumbs({
       <ThemedBreadcrumbs
         background={resolverBreadcrumbBackground}
         text={resolverEdgeText}
-        breadcrumbs={breadcrumbs}
-        truncate={false}
+        {...crumbProps}
       />
     </>
   );
