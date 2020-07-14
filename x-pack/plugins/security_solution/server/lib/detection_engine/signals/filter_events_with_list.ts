@@ -31,7 +31,6 @@ export const filterEventsAgainstList = async ({
   buildRuleMessage,
 }: FilterEventsAgainstList): Promise<SignalSearchResponse> => {
   try {
-    // logger.debug(buildRuleMessage(`exceptionsList: ${JSON.stringify(exceptionsList, null, 2)}`));
     if (exceptionsList == null || exceptionsList.length === 0) {
       logger.debug(buildRuleMessage('about to return original search result'));
       return eventSearchResult;

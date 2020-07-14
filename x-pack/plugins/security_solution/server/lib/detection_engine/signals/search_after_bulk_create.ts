@@ -179,7 +179,6 @@ export const searchAfterAndBulkCreate = async ({
                 buildRuleMessage,
               })
             : searchResult;
-        // searchResultSize += filteredEvents.hits.hits.length;
         if (filteredEvents.hits.total === 0 || filteredEvents.hits.hits.length === 0) {
           // everything in the events were allowed, so no need to generate signals
           toReturn.success = true;
@@ -242,11 +241,6 @@ export const searchAfterAndBulkCreate = async ({
             ? filteredEvents.hits.hits[0].sort[0]
             : undefined;
         }
-        logger.debug(
-          `is searchResultSize (${searchResultSize}) > maxSignals (${tuple.maxSignals})?: ${
-            searchResultSize > tuple.maxSignals
-          }`
-        );
       } catch (exc) {
         logger.error(buildRuleMessage(`[-] search_after and bulk threw an error ${exc}`));
         toReturn.success = false;
