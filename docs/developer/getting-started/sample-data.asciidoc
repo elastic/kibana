@@ -1,7 +1,7 @@
 [[sample-data]]
 == Installing sample data
 
-There are a couple ways to easily get data ingested into Elasticsearch.
+There are a couple ways to easily get data ingested into {es}.
 
 [discrete]
 === Sample data packages available for one click installation
@@ -22,7 +22,7 @@ node scripts/makelogs --auth <username>:<password>
 
 The default username and password combination are `elastic:changeme`
 
-Make sure to execute `node scripts/makelogs` *after* elasticsearch is up and running!
+Make sure to execute `node scripts/makelogs` *after* {es} is up and running!
 
 [discrete]
 === CSV upload

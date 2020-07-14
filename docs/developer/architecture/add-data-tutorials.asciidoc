@@ -5,9 +5,9 @@
 
 Each tutorial contains three sets of instructions:
 
-* `On Premise.` Set up a data flow when both {kib} and Elasticsearch are running on premise.
-* `On Premise Elastic Cloud.` Set up a data flow when {kib} is running on premise and Elasticsearch is running on Elastic Cloud.
-* `Elastic Cloud.` Set up a data flow when both {kib} and Elasticsearch are running on Elastic Cloud.
+* `On Premise.` Set up a data flow when both {kib} and {es} are running on premise.
+* `On Premise Elastic Cloud.` Set up a data flow when {kib} is running on premise and {es} is running on Elastic Cloud.
+* `Elastic Cloud.` Set up a data flow when both {kib} and {es} are running on Elastic Cloud.
 
 [discrete]
 === Creating a new tutorial

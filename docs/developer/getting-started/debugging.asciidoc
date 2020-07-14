@@ -18,7 +18,7 @@ built-in for debugging purposes.
 Its default configuration is meant to be used by core {kib} developers
 only, but it can easily be re-configured to your needs. In its default
 configuration it’s disabled and will, once enabled, send APM data to a
-centrally managed Elasticsearch cluster accessible only to Elastic
+centrally managed {es} cluster accessible only to Elastic
 employees.
 
 To change the location where data is sent, use the

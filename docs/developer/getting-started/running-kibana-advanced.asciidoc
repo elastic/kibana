@@ -84,4 +84,4 @@ directory, but webpack isn’t adapting
 
 {kib} includes self-signed certificates that can be used for
 development purposes in the browser and for communicating with
-Elasticsearch: `yarn start --ssl` & `yarn es snapshot --ssl`.
+{es}: `yarn start --ssl` & `yarn es snapshot --ssl`.

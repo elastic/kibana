@@ -82,9 +82,9 @@ the limit for all commands, simply add the following line to your shell
 config: `export NODE_OPTIONS="--max_old_space_size=2048"`.
 
 [discrete]
-=== Run Elasticsearch
+=== Run {es}
 
-Run the latest Elasticsearch snapshot. Specify an optional license with the `--license` flag.
+Run the latest {es} snapshot. Specify an optional license with the `--license` flag.
 
 [source,bash]
 ----

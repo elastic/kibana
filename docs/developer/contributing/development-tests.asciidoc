@@ -80,7 +80,7 @@ and develop functional tests for {kib} core and plugins.
 You can also look into the {kib-repo}tree/{branch}/scripts/README.md[Scripts README.md]
 to learn more about using the node scripts we provide for building
 {kib}, running integration tests, and starting up {kib} and
-Elasticsearch while you develop.
+{es} while you develop.
 
 [discrete]
 ==== More testing information:
