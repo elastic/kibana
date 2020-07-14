@@ -32,8 +32,7 @@ export async function mountManagementSection(
     notifications,
     history,
     uiSettings: coreStart.uiSettings,
-    docTitle: chrome.docTitle,
   };
 
-  return renderApp(element, I18nContext, services, { http });
+  return renderApp(element, I18nContext, services, { http, chrome });
 }

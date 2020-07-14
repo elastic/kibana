@@ -6,11 +6,11 @@
 
 import React, { ReactNode } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { HttpSetup, NotificationsSetup, IUiSettingsClient, ChromeDocTitle } from 'kibana/public';
+import { HttpSetup, NotificationsSetup, IUiSettingsClient, ChromeStart } from 'kibana/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
-import { API_BASE_PATH } from '../../common/constants';
+import { API_BASE_PATH, PLUGIN_I18N_NAME } from '../../common/constants';
 
 import { AuthorizationProvider } from '../shared_imports';
 
@@ -25,11 +25,11 @@ export interface AppServices {
   notifications: NotificationsSetup;
   history: ManagementAppMountParams['history'];
   uiSettings: IUiSettingsClient;
-  docTitle: ChromeDocTitle;
 }
 
 export interface CoreServices {
   http: HttpSetup;
+  chrome: ChromeStart;
 }
 
 export const renderApp = (
@@ -38,6 +38,7 @@ export const renderApp = (
   services: AppServices,
   coreServices: CoreServices
 ) => {
+  coreServices.chrome.docTitle.change(PLUGIN_I18N_NAME);
   render(
     <AuthorizationProvider
       privilegesEndpoint={`${API_BASE_PATH}/privileges`}
@@ -53,6 +54,7 @@ export const renderApp = (
   );
 
   return () => {
+    coreServices.chrome.docTitle.reset();
     unmountComponentAtNode(element);
   };
 };
