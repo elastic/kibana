@@ -438,6 +438,5 @@ export interface IsometricTaxiLayout {
   /**
    * defines the aria levels for nodes.
    */
-  // TODO, use string (nodeID/entity_id) instead of ResolverEvent
   ariaLevels: Map<ResolverEvent, number>;
 }
