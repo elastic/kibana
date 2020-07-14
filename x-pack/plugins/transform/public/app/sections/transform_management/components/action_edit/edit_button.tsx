@@ -8,7 +8,7 @@ import React, { useContext, FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
 import {
   createCapabilityFailureMessage,
@@ -25,16 +25,21 @@ export const EditButton: FC<EditButtonProps> = ({ onClick }) => {
     defaultMessage: 'Edit',
   });
 
+  const disabled = !canCreateTransform;
+
   const editButton = (
-    <EuiLink
-      data-test-subj="transformActionEdit"
-      color={!canCreateTransform ? 'subdued' : 'text'}
-      disabled={!canCreateTransform}
-      onClick={!canCreateTransform ? undefined : onClick}
+    <EuiButtonEmpty
       aria-label={buttonEditText}
+      color="text"
+      data-test-subj="transformActionEdit"
+      flush="left"
+      iconType="pencil"
+      isDisabled={disabled}
+      onClick={onClick}
+      size="s"
     >
-      <EuiIcon type="pencil" /> {buttonEditText}
-    </EuiLink>
+      {buttonEditText}
+    </EuiButtonEmpty>
   );
 
   if (!canCreateTransform) {

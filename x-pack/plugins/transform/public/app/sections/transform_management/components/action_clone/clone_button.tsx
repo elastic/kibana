@@ -7,7 +7,7 @@
 import React, { FC, useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
 import {
   createCapabilityFailureMessage,
@@ -33,16 +33,21 @@ export const CloneButton: FC<CloneActionProps> = ({ itemId }) => {
     history.push(`/${SECTION_SLUG.CLONE_TRANSFORM}/${itemId}`);
   }
 
+  const disabled = !canCreateTransform;
+
   const cloneButton = (
-    <EuiLink
-      data-test-subj="transformActionClone"
-      color={!canCreateTransform ? 'subdued' : 'text'}
-      disabled={!canCreateTransform}
-      onClick={!canCreateTransform ? undefined : clickHandler}
+    <EuiButtonEmpty
       aria-label={buttonCloneText}
+      color="text"
+      data-test-subj="transformActionClone"
+      flush="left"
+      iconType="copy"
+      isDisabled={disabled}
+      onClick={clickHandler}
+      size="s"
     >
-      <EuiIcon type="copy" /> {buttonCloneText}
-    </EuiLink>
+      {buttonCloneText}
+    </EuiButtonEmpty>
   );
 
   if (!canCreateTransform) {

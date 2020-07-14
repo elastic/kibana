@@ -6,7 +6,7 @@
 
 import React, { FC, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
 import { TRANSFORM_STATE } from '../../../../../../common';
 
@@ -59,14 +59,18 @@ export const StopButton: FC<StopButtonProps> = ({ items, forceDisable }) => {
   const disabled = forceDisable === true || !canStartStopTransform || stoppedTransform === true;
 
   const stopButton = (
-    <EuiLink
-      data-test-subj="transformActionStop"
-      color={disabled ? 'subdued' : 'text'}
-      onClick={handleStop}
+    <EuiButtonEmpty
       aria-label={buttonStopText}
+      color="text"
+      data-test-subj="transformActionStop"
+      flush="left"
+      iconType="stop"
+      isDisabled={disabled}
+      onClick={handleStop}
+      size="s"
     >
-      <EuiIcon type="stop" /> {buttonStopText}
-    </EuiLink>
+      {buttonStopText}
+    </EuiButtonEmpty>
   );
   if (!canStartStopTransform || stoppedTransform) {
     return (

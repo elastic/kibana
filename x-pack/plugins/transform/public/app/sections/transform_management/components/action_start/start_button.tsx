@@ -6,7 +6,7 @@
 
 import React, { FC, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
 import { TRANSFORM_STATE } from '../../../../../../common';
 
@@ -87,13 +87,18 @@ export const StartButton: FC<StartButtonProps> = ({ items, forceDisable, onClick
   const disabled = forceDisable === true || actionIsDisabled;
 
   const startButton = (
-    <EuiLink
+    <EuiButtonEmpty
+      aria-label={buttonStartText}
+      color="text"
       data-test-subj="transformActionStart"
-      color={disabled ? 'subdued' : 'text'}
-      onClick={disabled ? undefined : () => onClick(items)}
+      flush="left"
+      iconType="play"
+      isDisabled={disabled}
+      onClick={() => onClick(items)}
+      size="s"
     >
-      <EuiIcon type="play" /> {buttonStartText}
-    </EuiLink>
+      {buttonStartText}
+    </EuiButtonEmpty>
   );
   if (disabled && content !== undefined) {
     return (

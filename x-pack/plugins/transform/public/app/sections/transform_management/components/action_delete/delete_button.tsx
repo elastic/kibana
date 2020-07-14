@@ -6,7 +6,7 @@
 
 import React, { FC, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { TRANSFORM_STATE } from '../../../../../../common';
 import {
   AuthorizationContext,
@@ -47,15 +47,18 @@ export const DeleteButton: FC<DeleteButtonProps> = ({ items, forceDisable, onCli
 
   const buttonDisabled = forceDisable === true || disabled || !canDeleteTransform;
   let deleteButton = (
-    <EuiLink
-      data-test-subj="transformActionDelete"
-      color={buttonDisabled ? 'subdued' : 'text'}
-      disabled={buttonDisabled}
-      onClick={buttonDisabled ? undefined : () => onClick(items)}
+    <EuiButtonEmpty
       aria-label={buttonDeleteText}
+      color="text"
+      data-test-subj="transformActionDelete"
+      flush="left"
+      iconType="trash"
+      isDisabled={buttonDisabled}
+      onClick={() => onClick(items)}
+      size="s"
     >
-      <EuiIcon type="trash" /> {buttonDeleteText}
-    </EuiLink>
+      {buttonDeleteText}
+    </EuiButtonEmpty>
   );
 
   if (disabled || !canDeleteTransform) {
