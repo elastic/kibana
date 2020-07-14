@@ -186,10 +186,7 @@ export const searchAfterAndBulkCreate = async ({
         }
 
         // make sure we are not going to create more signals than maxSignals allows
-        if (
-          signalsCreatedCount != null &&
-          signalsCreatedCount + filteredEvents.hits.hits.length > tuple.maxSignals
-        ) {
+        if (signalsCreatedCount + filteredEvents.hits.hits.length > tuple.maxSignals) {
           filteredEvents.hits.hits = filteredEvents.hits.hits.slice(
             0,
             tuple.maxSignals - signalsCreatedCount
