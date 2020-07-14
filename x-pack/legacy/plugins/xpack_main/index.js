@@ -52,6 +52,13 @@ export const xpackMain = (kibana) => {
             defaultMessage:
               'Recipient email address for X-Pack admin operations, such as Cluster Alert email notifications from Monitoring.',
           }),
+          deprecation: {
+            message: i18n.translate('xpack.main.uiSettings.adminEmailDeprecation', {
+              defaultMessage:
+                'This setting is deprecated and will not be supported in Kibana 8.0. Please configure `monitoring.cluster_alerts.email_notifications.email_address` in your kibana.yml settings.',
+            }),
+            docLinksKey: 'kibanaGeneralSettings',
+          },
           type: 'string', // TODO: Any way of ensuring this is a valid email address?
           value: null,
         },

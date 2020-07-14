@@ -21,9 +21,6 @@ interface Props {
   value?: MappingsConfiguration;
 }
 
-const stringifyJson = (json: GenericObject) =>
-  Object.keys(json).length ? JSON.stringify(json, null, 2) : '{\n\n}';
-
 const formSerializer: SerializerFunc<MappingsConfiguration> = (formData) => {
   const {
     dynamicMapping: {
@@ -40,22 +37,17 @@ const formSerializer: SerializerFunc<MappingsConfiguration> = (formData) => {
 
   const dynamic = dynamicMappingsEnabled ? true : throwErrorsForUnmappedFields ? 'strict' : false;
 
-  let parsedMeta;
-  try {
-    parsedMeta = JSON.parse(metaField);
-  } catch {
-    parsedMeta = {};
-  }
-
-  return {
+  const serialized = {
     dynamic,
     numeric_detection,
     date_detection,
     dynamic_date_formats,
-    _source: { ...sourceField },
-    _meta: parsedMeta,
+    _source: sourceField,
+    _meta: metaField,
     _routing,
   };
+
+  return serialized;
 };
 
 const formDeserializer = (formData: GenericObject) => {
@@ -64,7 +56,11 @@ const formDeserializer = (formData: GenericObject) => {
     numeric_detection,
     date_detection,
     dynamic_date_formats,
-    _source: { enabled, includes, excludes },
+    _source: { enabled, includes, excludes } = {} as {
+      enabled?: boolean;
+      includes?: string[];
+      excludes?: string[];
+    },
     _meta,
     _routing,
   } = formData;
@@ -82,7 +78,7 @@ const formDeserializer = (formData: GenericObject) => {
       includes,
       excludes,
     },
-    metaField: stringifyJson(_meta),
+    metaField: _meta ?? {},
     _routing,
   };
 };

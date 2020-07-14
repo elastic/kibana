@@ -318,7 +318,7 @@ describe('SAMLAuthenticationProvider', () => {
       beforeEach(() => {
         mockOptions.basePath.get.mockReturnValue(mockOptions.basePath.serverBasePath);
 
-        const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
         mockScopedClusterClient.callAsCurrentUser.mockImplementation(() =>
           Promise.resolve(mockAuthenticatedUser())
         );
@@ -492,7 +492,7 @@ describe('SAMLAuthenticationProvider', () => {
         const authorization = 'Bearer some-valid-token';
 
         const user = mockAuthenticatedUser();
-        const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
         mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
         mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -533,7 +533,7 @@ describe('SAMLAuthenticationProvider', () => {
         });
 
         const user = mockAuthenticatedUser();
-        const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
         mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
         customMockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -573,7 +573,7 @@ describe('SAMLAuthenticationProvider', () => {
         };
 
         const user = mockAuthenticatedUser();
-        const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
         mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
         mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -628,7 +628,7 @@ describe('SAMLAuthenticationProvider', () => {
           };
           const authorization = `Bearer ${state.accessToken}`;
 
-          const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+          const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
           mockScopedClusterClient.callAsCurrentUser.mockImplementation(() => response);
           mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -684,7 +684,7 @@ describe('SAMLAuthenticationProvider', () => {
           };
           const authorization = `Bearer ${state.accessToken}`;
 
-          const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+          const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
           mockScopedClusterClient.callAsCurrentUser.mockImplementation(() => response);
           mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -752,13 +752,13 @@ describe('SAMLAuthenticationProvider', () => {
           const newUser = { username: 'new-user', authentication_realm: { name: 'saml1' } };
           mockOptions.client.asScoped.mockImplementation((scopeableRequest) => {
             if (scopeableRequest?.headers.authorization === `Bearer ${state.accessToken}`) {
-              const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+              const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
               mockScopedClusterClient.callAsCurrentUser.mockImplementation(() => response);
               return mockScopedClusterClient;
             }
 
             if (scopeableRequest?.headers.authorization === 'Bearer new-valid-token') {
-              const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+              const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
               mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(newUser);
               return mockScopedClusterClient;
             }
@@ -821,13 +821,13 @@ describe('SAMLAuthenticationProvider', () => {
           const newUser = { username: 'user', authentication_realm: { name: 'saml2' } };
           mockOptions.client.asScoped.mockImplementation((scopeableRequest) => {
             if (scopeableRequest?.headers.authorization === `Bearer ${state.accessToken}`) {
-              const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+              const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
               mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(existingUser);
               return mockScopedClusterClient;
             }
 
             if (scopeableRequest?.headers.authorization === 'Bearer new-valid-token') {
-              const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+              const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
               mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(newUser);
               return mockScopedClusterClient;
             }
@@ -1288,7 +1288,7 @@ describe('SAMLAuthenticationProvider', () => {
       };
       const authorization = `Bearer ${state.accessToken}`;
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -1315,7 +1315,7 @@ describe('SAMLAuthenticationProvider', () => {
       const authorization = `Bearer ${state.accessToken}`;
 
       const failureReason = { statusCode: 500, message: 'Token is not valid!' };
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -1340,7 +1340,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       mockOptions.client.asScoped.mockImplementation((scopeableRequest) => {
         if (scopeableRequest?.headers.authorization === `Bearer ${state.accessToken}`) {
-          const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+          const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
           mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
             LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
           );
@@ -1348,7 +1348,7 @@ describe('SAMLAuthenticationProvider', () => {
         }
 
         if (scopeableRequest?.headers.authorization === 'Bearer new-access-token') {
-          const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+          const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
           mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
           return mockScopedClusterClient;
         }
@@ -1392,7 +1392,7 @@ describe('SAMLAuthenticationProvider', () => {
       };
       const authorization = `Bearer ${state.accessToken}`;
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
         LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
       );
@@ -1426,7 +1426,7 @@ describe('SAMLAuthenticationProvider', () => {
       };
       const authorization = `Bearer ${state.accessToken}`;
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
         LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
       );
@@ -1458,7 +1458,7 @@ describe('SAMLAuthenticationProvider', () => {
       };
       const authorization = `Bearer ${state.accessToken}`;
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
         LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
       );
@@ -1490,7 +1490,7 @@ describe('SAMLAuthenticationProvider', () => {
       };
       const authorization = `Bearer ${state.accessToken}`;
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
         LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
       );
@@ -1532,7 +1532,7 @@ describe('SAMLAuthenticationProvider', () => {
         realm: 'test-realm',
       });
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
         LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
       );

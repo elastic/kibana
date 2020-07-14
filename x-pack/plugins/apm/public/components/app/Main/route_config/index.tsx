@@ -23,6 +23,7 @@ import { resolveUrlParams } from '../../../../context/UrlParamsContext/resolveUr
 import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../common/i18n';
 import { TraceLink } from '../../TraceLink';
 import { CustomizeUI } from '../../Settings/CustomizeUI';
+import { AnomalyDetection } from '../../Settings/anomaly_detection';
 import {
   EditAgentConfigurationRouteHandler,
   CreateAgentConfigurationRouteHandler,
@@ -267,5 +268,21 @@ export const routes: BreadcrumbRoute[] = [
       defaultMessage: 'Real User Monitoring',
     }),
     name: RouteName.RUM_OVERVIEW,
+  },
+  {
+    exact: true,
+    path: '/settings/anomaly-detection',
+    component: () => (
+      <Settings>
+        <AnomalyDetection />
+      </Settings>
+    ),
+    breadcrumb: i18n.translate(
+      'xpack.apm.breadcrumb.settings.anomalyDetection',
+      {
+        defaultMessage: 'Anomaly detection',
+      }
+    ),
+    name: RouteName.ANOMALY_DETECTION,
   },
 ];

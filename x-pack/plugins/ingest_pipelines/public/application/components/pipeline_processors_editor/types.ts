@@ -4,9 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { OnFormUpdateArg } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+import { Dispatch } from 'react';
+import { OnFormUpdateArg } from '../../../shared_imports';
 import { SerializeResult } from './serialize';
-import { ProcessorInfo } from './components/processors_tree';
+import { OnActionHandler, ProcessorInfo } from './components/processors_tree';
+import { ProcessorsDispatch, State as ProcessorsReducerState } from './processors_reducer';
+
+export interface Links {
+  esDocsBasePath: string;
+}
 
 /**
  * An array of keys that map to a value in an object
@@ -51,3 +57,24 @@ export type EditorMode =
   | { id: 'editingProcessor'; arg: { processor: ProcessorInternal; selector: ProcessorSelector } }
   | { id: 'removingProcessor'; arg: { selector: ProcessorSelector } }
   | { id: 'idle' };
+
+export interface ContextValueEditor {
+  mode: EditorMode;
+  setMode: Dispatch<EditorMode>;
+}
+
+export interface ContextValueProcessors {
+  state: ProcessorsReducerState;
+  dispatch: ProcessorsDispatch;
+}
+
+export interface ContextValueState {
+  processors: ContextValueProcessors;
+  editor: ContextValueEditor;
+}
+
+export interface ContextValue {
+  links: Links;
+  onTreeAction: OnActionHandler;
+  state: ContextValueState;
+}

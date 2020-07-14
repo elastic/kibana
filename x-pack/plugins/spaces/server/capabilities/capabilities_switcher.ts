@@ -54,22 +54,38 @@ function toggleDisabledFeatures(
 ) {
   const disabledFeatureKeys = activeSpace.disabledFeatures;
 
-  const disabledFeatures = disabledFeatureKeys
-    .map((key) => features.find((feature) => feature.id === key))
-    .filter((feature) => typeof feature !== 'undefined') as Feature[];
+  const [enabledFeatures, disabledFeatures] = features.reduce(
+    (acc, feature) => {
+      if (disabledFeatureKeys.includes(feature.id)) {
+        return [acc[0], [...acc[1], feature]];
+      }
+      return [[...acc[0], feature], acc[1]];
+    },
+    [[], []] as [Feature[], Feature[]]
+  );
 
   const navLinks = capabilities.navLinks;
   const catalogueEntries = capabilities.catalogue;
   const managementItems = capabilities.management;
 
+  const enabledAppEntries = new Set(enabledFeatures.flatMap((ef) => ef.app ?? []));
+  const enabledCatalogueEntries = new Set(enabledFeatures.flatMap((ef) => ef.catalogue ?? []));
+  const enabledManagementEntries = enabledFeatures.reduce((acc, feature) => {
+    const sections = Object.entries(feature.management ?? {});
+    sections.forEach((section) => {
+      if (!acc.has(section[0])) {
+        acc.set(section[0], []);
+      }
+      acc.get(section[0])!.push(...section[1]);
+    });
+    return acc;
+  }, new Map<string, string[]>());
+
   for (const feature of disabledFeatures) {
     // Disable associated navLink, if one exists
-    if (feature.navLinkId && navLinks.hasOwnProperty(feature.navLinkId)) {
-      navLinks[feature.navLinkId] = false;
-    }
-
-    feature.app.forEach((app) => {
-      if (navLinks.hasOwnProperty(app)) {
+    const featureNavLinks = feature.navLinkId ? [feature.navLinkId, ...feature.app] : feature.app;
+    featureNavLinks.forEach((app) => {
+      if (navLinks.hasOwnProperty(app) && !enabledAppEntries.has(app)) {
         navLinks[app] = false;
       }
     });
@@ -77,18 +93,24 @@ function toggleDisabledFeatures(
     // Disable associated catalogue entries
     const privilegeCatalogueEntries = feature.catalogue || [];
     privilegeCatalogueEntries.forEach((catalogueEntryId) => {
-      catalogueEntries[catalogueEntryId] = false;
+      if (!enabledCatalogueEntries.has(catalogueEntryId)) {
+        catalogueEntries[catalogueEntryId] = false;
+      }
     });
 
     // Disable associated management items
     const privilegeManagementSections = feature.management || {};
     Object.entries(privilegeManagementSections).forEach(([sectionId, sectionItems]) => {
       sectionItems.forEach((item) => {
+        const enabledManagementEntriesSection = enabledManagementEntries.get(sectionId);
         if (
           managementItems.hasOwnProperty(sectionId) &&
           managementItems[sectionId].hasOwnProperty(item)
         ) {
-          managementItems[sectionId][item] = false;
+          const isEnabledElsewhere = (enabledManagementEntriesSection ?? []).includes(item);
+          if (!isEnabledElsewhere) {
+            managementItems[sectionId][item] = false;
+          }
         }
       });
     });

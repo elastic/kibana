@@ -104,6 +104,16 @@ export const relatedEventsReady = composeSelectors(
 );
 
 /**
+ * Business logic lookup functions by ECS category by entity id.
+ * Example usage:
+ * const numberOfFileEvents = infoByEntityId.get(`someEntityId`)?.getAggregateTotalForCategory(`file`);
+ */
+export const relatedEventInfoByEntityId = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventInfoByEntityId
+);
+
+/**
  * Returns the id of the "current" tree node (fake-focused)
  */
 export const uiActiveDescendantId = composeSelectors(
@@ -126,11 +136,6 @@ export const uiSelectedDescendantProcessId = composeSelectors(
   uiStateSelector,
   uiSelectors.selectedDescendantProcessId
 );
-
-/**
- * The current panel to display
- */
-export const currentPanelView = composeSelectors(uiStateSelector, uiSelectors.currentPanelView);
 
 /**
  * Returns the camera state from within ResolverState
@@ -162,6 +167,16 @@ export const isLoading = composeSelectors(dataStateSelector, dataSelectors.isLoa
  * Whether or not the resolver encountered an error while fetching data
  */
 export const hasError = composeSelectors(dataStateSelector, dataSelectors.hasError);
+
+/**
+ * True if the children cursor is not null
+ */
+export const hasMoreChildren = composeSelectors(dataStateSelector, dataSelectors.hasMoreChildren);
+
+/**
+ * True if the ancestor cursor is not null
+ */
+export const hasMoreAncestors = composeSelectors(dataStateSelector, dataSelectors.hasMoreAncestors);
 
 /**
  * An array containing all the processes currently in the Resolver than can be graphed

@@ -52,6 +52,7 @@ import {
 import { getLicenseExpiration } from './alerts/license_expiration';
 import { getClusterState } from './alerts/cluster_state';
 import { InfraPluginSetup } from '../../infra/server';
+import { CoreServices } from './core_services';
 
 export interface LegacyAPI {
   getServerStatus: () => string;
@@ -131,6 +132,8 @@ export class Plugin {
       .pipe(first())
       .toPromise();
 
+    CoreServices.init(core);
+
     this.legacyShimDependencies = {
       router: core.http.createRouter(),
       instanceUuid: core.uuid.getInstanceUuid(),
@@ -209,10 +212,10 @@ export class Plugin {
           uuid: core.uuid.getInstanceUuid(),
           name: serverInfo.name,
           index: get(legacyConfig, 'kibana.index'),
-          host: serverInfo.host,
+          host: serverInfo.hostname,
           locale: i18n.getLocale(),
           port: serverInfo.port.toString(),
-          transport_address: `${serverInfo.host}:${serverInfo.port}`,
+          transport_address: `${serverInfo.hostname}:${serverInfo.port}`,
           version: this.initializerContext.env.packageInfo.version,
           snapshot: snapshotRegex.test(this.initializerContext.env.packageInfo.version),
         },
