@@ -12,7 +12,7 @@ import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
 import { EuiThemeProvider } from '../../../../legacy/common/eui_styled_components';
 import { PluginContext } from '../context/plugin_context';
-import { useUrlParams } from '../hooks/use_url_params';
+import { useRouteParams } from '../hooks/use_route_params';
 import { routes } from '../routes';
 import { usePluginContext } from '../hooks/use_plugin_context';
 
@@ -36,7 +36,7 @@ const App = () => {
               ]);
             }, [core]);
 
-            const { query, path: pathParams } = useUrlParams(route.params);
+            const { query, path: pathParams } = useRouteParams(route.params);
             return route.handler({ query, path: pathParams });
           };
           return <Route key={path} path={path} exact={true} component={Wrapper} />;
