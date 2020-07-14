@@ -240,12 +240,13 @@ export const setFieldValue = (
 export const redirectToDetections = (
   isSignalIndexExists: boolean | null,
   isAuthenticated: boolean | null,
-  hasEncryptionKey: boolean | null
+  hasEncryptionKey: boolean | null,
+  needsListsConfiguration: boolean
 ) =>
-  isSignalIndexExists != null &&
-  isAuthenticated != null &&
-  hasEncryptionKey != null &&
-  (!isSignalIndexExists || !isAuthenticated || !hasEncryptionKey);
+  isSignalIndexExists === false ||
+  isAuthenticated === false ||
+  hasEncryptionKey === false ||
+  needsListsConfiguration;
 
 const getRuleSpecificRuleParamKeys = (ruleType: RuleType) => {
   const queryRuleParams = ['index', 'filters', 'language', 'query', 'saved_id'];
