@@ -35,7 +35,6 @@ const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
   } else if (action.type === 'userSelectedResolverNode') {
     return {
       ...uiState,
-      // TODO
       selectedDescendantId: action.payload.nodeId,
       processEntityIdOfSelectedDescendant: action.payload.selectedProcessId,
     };

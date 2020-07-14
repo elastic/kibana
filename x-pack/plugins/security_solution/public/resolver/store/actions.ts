@@ -85,10 +85,16 @@ interface UserFocusedOnResolverNode {
  */
 interface UserSelectedResolverNode {
   readonly type: 'userSelectedResolverNode';
-  /**
-   * entity ID of node
-   */
-  readonly payload: string;
+  readonly payload: {
+    /**
+     * The HTML ID used to identify the process node's element that the user selected
+     */
+    readonly nodeId: string;
+    /**
+     * The process entity_id for the process the node represents
+     */
+    readonly selectedProcessId: string;
+  };
 }
 
 /**
