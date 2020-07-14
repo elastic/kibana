@@ -69,4 +69,4 @@ Additional comments::  The additional instructions or other information meant fo
 [[configuring-servicenow]]
 ==== Configuring and testing ServiceNow
 
-ServiceNow offers free https://developer.servicenow.com/dev.do#!/guides/madrid/now-platform/pdi-guide/obtaining-a-pdi[Personal Developer Instances], which can be used to test creating of the incidents.
+ServiceNow offers free https://developer.servicenow.com/dev.do#!/guides/madrid/now-platform/pdi-guide/obtaining-a-pdi[Personal Developer Instances], which you can use to test incidents.
