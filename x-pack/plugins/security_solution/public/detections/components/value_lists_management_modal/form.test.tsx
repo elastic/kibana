@@ -10,9 +10,9 @@ import { act } from 'react-dom/test-utils';
 import { waitForUpdates } from '../../../common/utils/test_utils';
 import { TestProviders } from '../../../common/mock';
 import { ValueListsForm } from './form';
-import { useImportList } from '../../../lists_plugin_deps';
+import { useImportList } from '../../../shared_imports';
 
-jest.mock('../../../lists_plugin_deps');
+jest.mock('../../../shared_imports');
 const mockUseImportList = useImportList as jest.Mock;
 
 const mockFile = ({

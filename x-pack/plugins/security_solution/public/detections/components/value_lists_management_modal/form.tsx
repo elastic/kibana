@@ -17,7 +17,7 @@ import {
   EuiRadioGroup,
 } from '@elastic/eui';
 
-import { useImportList, ListSchema, Type } from '../../../lists_plugin_deps';
+import { useImportList, ListSchema, Type } from '../../../shared_imports';
 import * as i18n from './translations';
 import { useKibana } from '../../../common/lib/kibana';
 

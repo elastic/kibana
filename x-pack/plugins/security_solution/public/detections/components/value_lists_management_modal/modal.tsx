@@ -22,7 +22,7 @@ import {
   useFindLists,
   useDeleteList,
   useCursor,
-} from '../../../lists_plugin_deps';
+} from '../../../shared_imports';
 import { useToasts, useKibana } from '../../../common/lib/kibana';
 import { GenericDownloader } from '../../../common/components/generic_downloader';
 import * as i18n from './translations';
