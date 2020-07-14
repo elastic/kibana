@@ -223,7 +223,7 @@ export class Home extends Component {
             <SolutionsPanel
               addBasePath={addBasePath}
               observability={this.findDirectoryById('observability')}
-              appSearch={this.findDirectoryById('app_search')}
+              appSearch={this.findDirectoryById('appSearch')}
               securitySolution={this.findDirectoryById('securitySolution')}
             />
 

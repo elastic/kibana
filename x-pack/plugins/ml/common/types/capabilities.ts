@@ -78,7 +78,6 @@ export function getPluginPrivileges() {
     management: {
       insightsAndAlerting: ['jobsListLink'],
     },
-    catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
     savedObject: {
       all: [],
       read: ['index-pattern', 'search'],
@@ -90,11 +89,13 @@ export function getPluginPrivileges() {
       ...privilege,
       api: allMlCapabilitiesKeys.map((k) => `ml:${k}`),
       ui: allMlCapabilitiesKeys,
+      catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
     },
     user: {
       ...privilege,
       api: userMlCapabilitiesKeys.map((k) => `ml:${k}`),
       ui: userMlCapabilitiesKeys,
+      catalogue: [PLUGIN_ID],
     },
   };
 }
