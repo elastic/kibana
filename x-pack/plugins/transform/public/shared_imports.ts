@@ -14,7 +14,6 @@ export {
 } from '../../../../src/plugins/es_ui_shared/public';
 
 export {
-  clearCache,
   getFieldType,
   getErrorMessage,
   extractErrorMessage,
@@ -22,13 +21,11 @@ export {
   getDataGridSchemaFromKibanaFieldType,
   getFieldsFromKibanaIndexPattern,
   multiColumnSortFactory,
-  setDependencyCache,
   showDataGridColumnChartErrorMessageToast,
   useDataGrid,
   useRenderCellValue,
   ChartData,
   DataGrid,
-  DataLoader,
   EsSorting,
   RenderCellValue,
   SearchResponse7,

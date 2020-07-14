@@ -20,9 +20,9 @@ import { wrapError } from './error_utils';
 import { fieldHistogramsSchema, indexPatternTitleSchema, IndexPatternTitleSchema } from './schema';
 
 export function registerFieldHistogramsRoutes({ router, license }: RouteDependencies) {
-  router.get(
+  router.post(
     {
-      path: addBasePath('transforms/field_histograms/{indexPatternTitle}'),
+      path: addBasePath('field_histograms/{indexPatternTitle}'),
       validate: {
         params: indexPatternTitleSchema,
         body: fieldHistogramsSchema,

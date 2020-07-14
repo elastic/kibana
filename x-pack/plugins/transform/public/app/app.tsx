@@ -15,8 +15,6 @@ import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/p
 
 import { API_BASE_PATH } from '../../common/constants';
 
-import { clearCache, setDependencyCache } from '../shared_imports';
-
 import { SectionError } from './components';
 import { SECTION_SLUG } from './constants';
 import { AuthorizationContext, AuthorizationProvider } from './lib/authorization';
@@ -62,11 +60,6 @@ export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
 };
 
 export const renderApp = (element: HTMLElement, appDependencies: AppDependencies) => {
-  // TODO Temporary fix to make the Data Grid Histograms in the Transforms Wizard work
-  setDependencyCache({
-    http: appDependencies.http,
-  });
-
   const I18nContext = appDependencies.i18n.Context;
 
   render(

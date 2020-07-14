@@ -16,7 +16,6 @@ import {
   showDataGridColumnChartErrorMessageToast,
   useDataGrid,
   useRenderCellValue,
-  DataLoader,
   EsSorting,
   SearchResponse7,
   UseIndexDataReturnType,
@@ -108,8 +107,8 @@ export const useIndexData = (
 
   const fetchColumnChartsData = async function () {
     try {
-      const dataLoader = new DataLoader(indexPattern, toastNotifications);
-      const columnChartsData = await dataLoader.loadFieldHistograms(
+      const columnChartsData = await api.getHistogramsForFields(
+        indexPattern.title,
         columns
           .filter((cT) => dataGrid.visibleColumns.includes(cT.id))
           .map((cT) => ({
