@@ -36,11 +36,11 @@ const OUTPUT_PATH = Path.resolve(
 export function runPluginListCli() {
   run(async ({ log }) => {
     log.info('looking for oss plugins');
-    const ossPlugins = discoverPlugins(OSS_PLUGIN_DIR);
+    const ossPlugins = discoverPlugins(OSS_PLUGIN_DIR, log);
     log.success(`found ${ossPlugins.length} plugins`);
 
     log.info('looking for x-pack plugins');
-    const xpackPlugins = discoverPlugins(XPACK_PLUGIN_DIR);
+    const xpackPlugins = discoverPlugins(XPACK_PLUGIN_DIR, log);
     log.success(`found ${xpackPlugins.length} plugins`);
 
     log.info('writing plugin list to', OUTPUT_PATH);

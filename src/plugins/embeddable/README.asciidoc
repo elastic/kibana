@@ -1,0 +1,37 @@
+[[embeddables]]
+== Embeddables
+
+Embeddables are re-usable widgets that can be rendered in any environment or plugin. Developers can embed them directly in their plugin. End users can dynamically add them to any embeddable _containers_.
+
+[discrete]
+=== Embeddable containers
+
+Containers are a special type of embeddable that can contain nested embeddables. Embeddables can be dynamically added to embeddable _containers_. Currently only dashboard uses this interface.
+
+[discrete]
+=== Examples
+
+Many example embeddables are implemented and registered {kib-reop}/tree/{branch}/examples/embeddable_examples[here]. They can be played around with and explored {kib-repo}/tree/{branch}/examples/embeddable_explorer[in the Embeddable Explorer example plugin]. Just run kibana with
+
+```
+yarn start --run-examples
+```
+
+and navigate to the Embeddable explorer app.
+
+There is also an example of rendering dashboard container outside of dashboard app {kib-repo}tree/{branch}/examples/dashboard_embeddable_examples[here].
+
+[discrete]
+=== Docs
+
+./docs/README.md[Embeddable docs, guides & caveats]
+
+[discrete]
+=== Testing
+
+Run unit tests
+
+```shell
+node scripts/jest embeddable
+```
+

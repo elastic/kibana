@@ -22,6 +22,7 @@ import Fs from 'fs';
 
 import MarkdownIt from 'markdown-it';
 import cheerio from 'cheerio';
+import Asciidoc from 'asciidoctor';
 
 import { REPO_ROOT } from '../repo_root';
 import { simpleKibanaPlatformPluginDiscovery } from '../simple_kibana_platform_plugin_discovery';
@@ -31,24 +32,30 @@ export interface Plugin {
   relativeDir?: string;
   relativeReadmePath?: string;
   readmeSnippet?: string;
+  readmeAsciidocLink?: string;
 }
 
 export type Plugins = Plugin[];
 
-const getReadmeName = (directory: string) =>
+const getReadmeMdName = (directory: string) =>
   Fs.readdirSync(directory).find((name) => name.toLowerCase() === 'readme.md');
 
-export const discoverPlugins = (pluginsRootDir: string): Plugins =>
+const getReadmeAsciidocName = (directory: string) =>
+  Fs.readdirSync(directory).find((name) => name.toLowerCase() === 'readme.asciidoc');
+
+export const discoverPlugins = (pluginsRootDir: string, log: any): Plugins =>
   simpleKibanaPlatformPluginDiscovery([pluginsRootDir], []).map(
     ({ directory, manifest: { id } }): Plugin => {
-      const readmeName = getReadmeName(directory);
+      const readmeMdName = getReadmeMdName(directory);
+      const readmeAsciidocName = getReadmeAsciidocName(directory);
 
       let relativeReadmePath: string | undefined;
       let readmeSnippet: string | undefined;
-      if (readmeName) {
-        const readmePath = Path.resolve(directory, readmeName);
-        relativeReadmePath = Path.relative(REPO_ROOT, readmePath);
+      let readmeAsciidocLink: string | undefined;
 
+      if (readmeMdName) {
+        const readmePath = Path.resolve(directory, readmeMdName);
+        relativeReadmePath = Path.relative(REPO_ROOT, readmePath);
         const md = new MarkdownIt();
         const parsed = md.render(Fs.readFileSync(readmePath, 'utf8'));
         const $ = cheerio.load(parsed);
@@ -57,6 +64,31 @@ export const discoverPlugins = (pluginsRootDir: string): Plugins =>
         if (firstParagraph) {
           readmeSnippet = $(firstParagraph).text();
         }
+      } else if (readmeAsciidocName) {
+        const readmePath = Path.resolve(directory, readmeAsciidocName);
+
+        relativeReadmePath = Path.relative(REPO_ROOT, readmePath);
+
+        const asciidoc = Asciidoc().loadFile(relativeReadmePath);
+
+        log.info(`header: ${asciidoc.getHeader()}`);
+        log.info(`id: ${asciidoc.getId()}`);
+        log.info(`title: ${asciidoc.getTitle()}`);
+        // log.info(`content: ${asciidoc.getContent()}`);
+
+        const parsed = asciidoc.getContent();
+        const $ = cheerio.load(parsed);
+
+        const firstParagraph = $('p')[0];
+        if (firstParagraph) {
+          readmeSnippet = $(firstParagraph).text();
+        }
+
+        log.info(`snippet is : ${readmeSnippet}`);
+
+        readmeAsciidocLink = $('h2')[0].attribs.id;
+
+        log.info(`readmeAsciidocLink: ${readmeAsciidocLink}`);
       }
 
       return {
@@ -64,6 +96,7 @@ export const discoverPlugins = (pluginsRootDir: string): Plugins =>
         relativeReadmePath,
         relativeDir: relativeReadmePath || Path.relative(REPO_ROOT, directory),
         readmeSnippet,
+        readmeAsciidocLink,
       };
     }
   );

@@ -23,7 +23,12 @@ function* printPlugins(plugins: Plugins) {
   for (const plugin of plugins) {
     const path = plugin.relativeReadmePath || plugin.relativeDir;
     yield '';
-    yield `- {kib-repo}blob/{branch}/${path}[${plugin.id}]`;
+    if (plugin.readmeAsciidocLink) {
+      yield `- <<${plugin.readmeAsciidocLink}>>`;
+      yield `include::../../${path}[]`;
+    } else {
+      yield `- {kib-repo}blob/{branch}/${path}[${plugin.id}]`;
+    }
 
     if (!plugin.relativeReadmePath || plugin.readmeSnippet) {
       yield '';
@@ -54,6 +59,13 @@ To that aim, we strive to:
 [discrete]
 [[kibana-services-applications]]
 ==== Services and Applications
+
+[discrete]
+===== test
+
+include::../../../src/plugins/embeddable/README.asciidoc[]
+
+- <<embeddables>>
 
 [discrete]
 ===== src/plugins
