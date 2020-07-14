@@ -43,12 +43,11 @@ describe('LicenseExpirationAlert', () => {
       { name: 'state', description: 'The current state of the alert.' },
       { name: 'expiredDate', description: 'The date when the license expires.' },
 
-      { name: 'clusterName', description: 'The name of the cluster to which the license belong.' },
-      { name: 'action', description: 'The recommended action to take based on this alert firing.' },
+      { name: 'clusterName', description: 'The cluster to which the license belong.' },
+      { name: 'action', description: 'The recommended action for this alert.' },
       {
         name: 'actionPlain',
-        description:
-          'The recommended action to take based on this alert firing, without any markdown.',
+        description: 'The recommended action for this alert, without any markdown.',
       },
     ]);
   });
@@ -61,7 +60,7 @@ describe('LicenseExpirationAlert', () => {
     const clusterName = 'testCluster';
     const legacyAlert = {
       prefix:
-        "This cluster's license is going to expire in {{#relativeTime}}metadata.time{{/relativeTime}} at {{#absoluteTime}}metadata.time{{/absoluteTime}}.",
+        'The license for this cluster expires in {{#relativeTime}}metadata.time{{/relativeTime}} at {{#absoluteTime}}metadata.time{{/absoluteTime}}.',
       message: 'Update your license.',
       metadata: {
         severity: 1000,
@@ -140,7 +139,7 @@ describe('LicenseExpirationAlert', () => {
               isFiring: true,
               message: {
                 text:
-                  "This cluster's license is going to expire in #relative at #absolute. #start_linkPlease update your license.#end_link",
+                  'The license for this cluster expires in #relative at #absolute. #start_linkPlease update your license.#end_link',
                 tokens: [
                   {
                     startToken: '#relative',
@@ -177,9 +176,9 @@ describe('LicenseExpirationAlert', () => {
           '[Please update your license.](http://localhost:5601/app/monitoring#elasticsearch/nodes?_g=(cluster_uuid:abc123))',
         actionPlain: 'Please update your license.',
         internalFullMessage:
-          'License expiration alert is firing for testCluster. Your license will expire in THE_DATE. [Please update your license.](http://localhost:5601/app/monitoring#elasticsearch/nodes?_g=(cluster_uuid:abc123))',
+          'License expiration alert is firing for testCluster. Your license expires in THE_DATE. [Please update your license.](http://localhost:5601/app/monitoring#elasticsearch/nodes?_g=(cluster_uuid:abc123))',
         internalShortMessage:
-          'License expiration alert is firing for testCluster. Your license will expire in THE_DATE. Please update your license.',
+          'License expiration alert is firing for testCluster. Your license expires in THE_DATE. Please update your license.',
         clusterName,
         expiredDate: 'THE_DATE',
         state: 'firing',
@@ -260,7 +259,7 @@ describe('LicenseExpirationAlert', () => {
             ui: {
               isFiring: false,
               message: {
-                text: "This cluster's license is active.",
+                text: 'The license for this cluster is active.',
               },
               severity: 'danger',
               resolvedMS: 1,

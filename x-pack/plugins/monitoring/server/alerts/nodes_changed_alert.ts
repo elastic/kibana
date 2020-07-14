@@ -67,7 +67,7 @@ export class NodesChangedAlert extends BaseAlert {
       description: i18n.translate(
         'xpack.monitoring.alerts.nodesChanged.actionVariables.clusterName',
         {
-          defaultMessage: 'The name of the cluster to which the nodes belong.',
+          defaultMessage: 'The cluster to which the nodes belong.',
         }
       ),
     },
@@ -95,7 +95,7 @@ export class NodesChangedAlert extends BaseAlert {
     {
       name: 'action',
       description: i18n.translate('xpack.monitoring.alerts.nodesChanged.actionVariables.action', {
-        defaultMessage: 'The recommended action to take based on this alert firing.',
+        defaultMessage: 'The recommended action for this alert.',
       }),
     },
     {
@@ -103,8 +103,7 @@ export class NodesChangedAlert extends BaseAlert {
       description: i18n.translate(
         'xpack.monitoring.alerts.nodesChanged.actionVariables.actionPlain',
         {
-          defaultMessage:
-            'The recommended action to take based on this alert firing, without any markdown.',
+          defaultMessage: 'The recommended action for this alert, without any markdown.',
         }
       ),
     },
@@ -151,7 +150,7 @@ export class NodesChangedAlert extends BaseAlert {
     if (!alertState.ui.isFiring) {
       return {
         text: i18n.translate('xpack.monitoring.alerts.nodesChanged.ui.resolvedMessage', {
-          defaultMessage: `No changes detected in Elasticsearch nodes for this cluster.`,
+          defaultMessage: `No changes in Elasticsearch nodes for this cluster.`,
         }),
       };
     }

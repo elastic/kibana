@@ -69,7 +69,7 @@ export class LogstashVersionMismatchAlert extends BaseAlert {
       description: i18n.translate(
         'xpack.monitoring.alerts.logstashVersionMismatch.actionVariables.clusterHealth',
         {
-          defaultMessage: 'The list of unique versions.',
+          defaultMessage: 'The versions of Logstash running in this cluster.',
         }
       ),
     },
@@ -78,7 +78,7 @@ export class LogstashVersionMismatchAlert extends BaseAlert {
       description: i18n.translate(
         'xpack.monitoring.alerts.logstashVersionMismatch.actionVariables.clusterName',
         {
-          defaultMessage: 'The name of the cluster to which the nodes belong.',
+          defaultMessage: 'The cluster to which the nodes belong.',
         }
       ),
     },
@@ -87,7 +87,7 @@ export class LogstashVersionMismatchAlert extends BaseAlert {
       description: i18n.translate(
         'xpack.monitoring.alerts.logstashVersionMismatch.actionVariables.action',
         {
-          defaultMessage: 'The recommended action to take based on this alert firing.',
+          defaultMessage: 'The recommended action for this alert.',
         }
       ),
     },
@@ -96,8 +96,7 @@ export class LogstashVersionMismatchAlert extends BaseAlert {
       description: i18n.translate(
         'xpack.monitoring.alerts.logstashVersionMismatch.actionVariables.actionPlain',
         {
-          defaultMessage:
-            'The recommended action to take based on this alert firing, without any markdown.',
+          defaultMessage: 'The recommended action for this alert, without any markdown.',
         }
       ),
     },
@@ -151,7 +150,7 @@ export class LogstashVersionMismatchAlert extends BaseAlert {
     if (!alertState.ui.isFiring) {
       return {
         text: i18n.translate('xpack.monitoring.alerts.logstashVersionMismatch.ui.resolvedMessage', {
-          defaultMessage: `All versions are the same for Logstash in this cluster.`,
+          defaultMessage: `All versions of Logstash are the same in this cluster.`,
         }),
       };
     }
@@ -159,7 +158,7 @@ export class LogstashVersionMismatchAlert extends BaseAlert {
     const text = i18n.translate(
       'xpack.monitoring.alerts.logstashVersionMismatch.ui.firingMessage',
       {
-        defaultMessage: `There are different versions of Logstash ({versions}) running in this cluster.`,
+        defaultMessage: `Multiple versions of Logstash ({versions}) running in this cluster.`,
         values: {
           versions,
         },

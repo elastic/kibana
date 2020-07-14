@@ -86,7 +86,7 @@ export class LicenseExpirationAlert extends BaseAlert {
       description: i18n.translate(
         'xpack.monitoring.alerts.licenseExpiration.actionVariables.clusterName',
         {
-          defaultMessage: 'The name of the cluster to which the license belong.',
+          defaultMessage: 'The cluster to which the license belong.',
         }
       ),
     },
@@ -95,7 +95,7 @@ export class LicenseExpirationAlert extends BaseAlert {
       description: i18n.translate(
         'xpack.monitoring.alerts.licenseExpiration.actionVariables.action',
         {
-          defaultMessage: 'The recommended action to take based on this alert firing.',
+          defaultMessage: 'The recommended action for this alert.',
         }
       ),
     },
@@ -104,8 +104,7 @@ export class LicenseExpirationAlert extends BaseAlert {
       description: i18n.translate(
         'xpack.monitoring.alerts.licenseExpiration.actionVariables.actionPlain',
         {
-          defaultMessage:
-            'The recommended action to take based on this alert firing, without any markdown.',
+          defaultMessage: 'The recommended action for this alert, without any markdown.',
         }
       ),
     },
@@ -147,13 +146,13 @@ export class LicenseExpirationAlert extends BaseAlert {
     if (!alertState.ui.isFiring) {
       return {
         text: i18n.translate('xpack.monitoring.alerts.licenseExpiration.ui.resolvedMessage', {
-          defaultMessage: `This cluster's license is active.`,
+          defaultMessage: `The license for this cluster is active.`,
         }),
       };
     }
     return {
       text: i18n.translate('xpack.monitoring.alerts.licenseExpiration.ui.firingMessage', {
-        defaultMessage: `This cluster's license is going to expire in #relative at #absolute. #start_linkPlease update your license.#end_link`,
+        defaultMessage: `The license for this cluster expires in #relative at #absolute. #start_linkPlease update your license.#end_link`,
       }),
       tokens: [
         {
@@ -233,7 +232,7 @@ export class LicenseExpirationAlert extends BaseAlert {
         internalShortMessage: i18n.translate(
           'xpack.monitoring.alerts.licenseExpiration.firing.internalShortMessage',
           {
-            defaultMessage: `License expiration alert is firing for {clusterName}. Your license will expire in {expiredDate}. {actionText}`,
+            defaultMessage: `License expiration alert is firing for {clusterName}. Your license expires in {expiredDate}. {actionText}`,
             values: {
               clusterName: cluster.clusterName,
               expiredDate,
@@ -244,7 +243,7 @@ export class LicenseExpirationAlert extends BaseAlert {
         internalFullMessage: i18n.translate(
           'xpack.monitoring.alerts.licenseExpiration.firing.internalFullMessage',
           {
-            defaultMessage: `License expiration alert is firing for {clusterName}. Your license will expire in {expiredDate}. {action}`,
+            defaultMessage: `License expiration alert is firing for {clusterName}. Your license expires in {expiredDate}. {action}`,
             values: {
               clusterName: cluster.clusterName,
               expiredDate,

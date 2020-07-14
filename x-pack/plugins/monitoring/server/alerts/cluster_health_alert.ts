@@ -82,14 +82,14 @@ export class ClusterHealthAlert extends BaseAlert {
       description: i18n.translate(
         'xpack.monitoring.alerts.clusterHealth.actionVariables.clusterName',
         {
-          defaultMessage: 'The name of the cluster to which the nodes belong.',
+          defaultMessage: 'The cluster to which the nodes belong.',
         }
       ),
     },
     {
       name: 'action',
       description: i18n.translate('xpack.monitoring.alerts.clusterHealth.actionVariables.action', {
-        defaultMessage: 'The recommended action to take based on this alert firing.',
+        defaultMessage: 'The recommended action for this alert.',
       }),
     },
     {
@@ -97,8 +97,7 @@ export class ClusterHealthAlert extends BaseAlert {
       description: i18n.translate(
         'xpack.monitoring.alerts.clusterHealth.actionVariables.actionPlain',
         {
-          defaultMessage:
-            'The recommended action to take based on this alert firing, without any markdown.',
+          defaultMessage: 'The recommended action for this alert, without any markdown.',
         }
       ),
     },

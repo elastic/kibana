@@ -101,32 +101,31 @@ export class CpuUsageAlert extends BaseAlert {
     {
       name: 'nodes',
       description: i18n.translate('xpack.monitoring.alerts.cpuUsage.actionVariables.nodes', {
-        defaultMessage: 'The list of nodes that are reporting high cpu usage.',
+        defaultMessage: 'The list of nodes reporting high cpu usage.',
       }),
     },
     {
       name: 'count',
       description: i18n.translate('xpack.monitoring.alerts.cpuUsage.actionVariables.count', {
-        defaultMessage: 'The number of nodes that are reporting high cpu usage.',
+        defaultMessage: 'The number of nodes reporting high cpu usage.',
       }),
     },
     {
       name: 'clusterName',
       description: i18n.translate('xpack.monitoring.alerts.cpuUsage.actionVariables.clusterName', {
-        defaultMessage: 'The name of the cluster to which the nodes belong.',
+        defaultMessage: 'The cluster to which the nodes belong.',
       }),
     },
     {
       name: 'action',
       description: i18n.translate('xpack.monitoring.alerts.cpuUsage.actionVariables.action', {
-        defaultMessage: 'The recommended action to take based on this alert firing.',
+        defaultMessage: 'The recommended action for this alert.',
       }),
     },
     {
       name: 'actionPlain',
       description: i18n.translate('xpack.monitoring.alerts.cpuUsage.actionVariables.actionPlain', {
-        defaultMessage:
-          'The recommended action to take based on this alert firing, without any markdown.',
+        defaultMessage: 'The recommended action for this alert, without any markdown.',
       }),
     },
   ];

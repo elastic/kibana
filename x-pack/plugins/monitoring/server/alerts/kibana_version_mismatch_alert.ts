@@ -69,7 +69,7 @@ export class KibanaVersionMismatchAlert extends BaseAlert {
       description: i18n.translate(
         'xpack.monitoring.alerts.kibanaVersionMismatch.actionVariables.clusterHealth',
         {
-          defaultMessage: 'The list of unique versions.',
+          defaultMessage: 'The versions of Kibana running in this cluster.',
         }
       ),
     },
@@ -78,7 +78,7 @@ export class KibanaVersionMismatchAlert extends BaseAlert {
       description: i18n.translate(
         'xpack.monitoring.alerts.kibanaVersionMismatch.actionVariables.clusterName',
         {
-          defaultMessage: 'The name of the cluster to which the instances belong.',
+          defaultMessage: 'The cluster to which the instances belong.',
         }
       ),
     },
@@ -87,7 +87,7 @@ export class KibanaVersionMismatchAlert extends BaseAlert {
       description: i18n.translate(
         'xpack.monitoring.alerts.kibanaVersionMismatch.actionVariables.action',
         {
-          defaultMessage: 'The recommended action to take based on this alert firing.',
+          defaultMessage: 'The recommended action for this alert.',
         }
       ),
     },
@@ -96,8 +96,7 @@ export class KibanaVersionMismatchAlert extends BaseAlert {
       description: i18n.translate(
         'xpack.monitoring.alerts.kibanaVersionMismatch.actionVariables.actionPlain',
         {
-          defaultMessage:
-            'The recommended action to take based on this alert firing, without any markdown.',
+          defaultMessage: 'The recommended action for this alert, without any markdown.',
         }
       ),
     },
@@ -150,13 +149,13 @@ export class KibanaVersionMismatchAlert extends BaseAlert {
     if (!alertState.ui.isFiring) {
       return {
         text: i18n.translate('xpack.monitoring.alerts.kibanaVersionMismatch.ui.resolvedMessage', {
-          defaultMessage: `All versions are the same for Kibana in this cluster.`,
+          defaultMessage: `All versions of Kibana are the same in this cluster.`,
         }),
       };
     }
 
     const text = i18n.translate('xpack.monitoring.alerts.kibanaVersionMismatch.ui.firingMessage', {
-      defaultMessage: `There are different versions of Kibana ({versions}) running in this cluster.`,
+      defaultMessage: `Multiple versions of Kibana ({versions}) running in this cluster.`,
       values: {
         versions,
       },

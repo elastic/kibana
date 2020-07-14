@@ -69,7 +69,7 @@ export class ElasticsearchVersionMismatchAlert extends BaseAlert {
       description: i18n.translate(
         'xpack.monitoring.alerts.elasticsearchVersionMismatch.actionVariables.clusterHealth',
         {
-          defaultMessage: 'The list of unique versions.',
+          defaultMessage: 'The versions of Elasticsearch running in this cluster.',
         }
       ),
     },
@@ -78,7 +78,7 @@ export class ElasticsearchVersionMismatchAlert extends BaseAlert {
       description: i18n.translate(
         'xpack.monitoring.alerts.elasticsearchVersionMismatch.actionVariables.clusterName',
         {
-          defaultMessage: 'The name of the cluster to which the nodes belong.',
+          defaultMessage: 'The cluster to which the nodes belong.',
         }
       ),
     },
@@ -87,7 +87,7 @@ export class ElasticsearchVersionMismatchAlert extends BaseAlert {
       description: i18n.translate(
         'xpack.monitoring.alerts.elasticsearchVersionMismatch.actionVariables.action',
         {
-          defaultMessage: 'The recommended action to take based on this alert firing.',
+          defaultMessage: 'The recommended action for this alert.',
         }
       ),
     },
@@ -96,8 +96,7 @@ export class ElasticsearchVersionMismatchAlert extends BaseAlert {
       description: i18n.translate(
         'xpack.monitoring.alerts.elasticsearchVersionMismatch.actionVariables.actionPlain',
         {
-          defaultMessage:
-            'The recommended action to take based on this alert firing, without any markdown.',
+          defaultMessage: 'The recommended action for this alert, without any markdown.',
         }
       ),
     },
@@ -154,7 +153,7 @@ export class ElasticsearchVersionMismatchAlert extends BaseAlert {
         text: i18n.translate(
           'xpack.monitoring.alerts.elasticsearchVersionMismatch.ui.resolvedMessage',
           {
-            defaultMessage: `All versions are the same for Elasticsearch in this cluster.`,
+            defaultMessage: `All versions of Elasticsearch are the same in this cluster.`,
           }
         ),
       };
@@ -163,7 +162,7 @@ export class ElasticsearchVersionMismatchAlert extends BaseAlert {
     const text = i18n.translate(
       'xpack.monitoring.alerts.elasticsearchVersionMismatch.ui.firingMessage',
       {
-        defaultMessage: `There are different versions of Elasticsearch ({versions}) running in this cluster.`,
+        defaultMessage: `Multiple versions of Elasticsearch ({versions}) running in this cluster.`,
         values: {
           versions,
         },

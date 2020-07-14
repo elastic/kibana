@@ -35,12 +35,11 @@ describe('ClusterHealthAlert', () => {
       },
       { name: 'state', description: 'The current state of the alert.' },
       { name: 'clusterHealth', description: 'The health of the cluster.' },
-      { name: 'clusterName', description: 'The name of the cluster to which the nodes belong.' },
-      { name: 'action', description: 'The recommended action to take based on this alert firing.' },
+      { name: 'clusterName', description: 'The cluster to which the nodes belong.' },
+      { name: 'action', description: 'The recommended action for this alert.' },
       {
         name: 'actionPlain',
-        description:
-          'The recommended action to take based on this alert firing, without any markdown.',
+        description: 'The recommended action for this alert, without any markdown.',
       },
     ]);
   });
