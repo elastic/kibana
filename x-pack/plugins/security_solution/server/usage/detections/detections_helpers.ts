@@ -5,6 +5,7 @@
  */
 
 import { SearchParams } from 'elasticsearch';
+import { ILegacyScopedClusterClient, KibanaRequest } from 'kibana/server';
 
 import { LegacyAPICaller, SavedObjectsClient } from '../../../../../../src/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -163,15 +164,25 @@ export const getRulesUsage = async (
 export const getMlJobsUsage = async (ml: MlPluginSetup | undefined): Promise<MlJobsUsage> => {
   let jobsUsage: MlJobsUsage = initialMlJobsUsage;
 
+  // Fake objects to be passed to ML functions.
+  // TODO - These ML functions should come from ML's setup contract
+  // and not be imported directly.
+  const fakeScopedClusterClient = {
+    callAsCurrentUser: ml?.mlClient.callAsInternalUser,
+    callAsInternalUser: ml?.mlClient.callAsInternalUser,
+  } as ILegacyScopedClusterClient;
+  const fakeSavedObjectsClient = {} as SavedObjectsClient;
+  const fakeRequest = {} as KibanaRequest;
+
   if (ml) {
     try {
-      const mlCaller = ml.mlClient.callAsInternalUser;
       const modules = await new DataRecognizer(
-        mlCaller,
-        ({} as unknown) as SavedObjectsClient
+        fakeScopedClusterClient,
+        fakeSavedObjectsClient,
+        fakeRequest
       ).listModules();
       const moduleJobs = modules.flatMap((module) => module.jobs);
-      const jobs = await jobServiceProvider(mlCaller).jobsSummary(['siem']);
+      const jobs = await jobServiceProvider(fakeScopedClusterClient).jobsSummary(['siem']);
 
       jobsUsage = jobs.reduce((usage, job) => {
         const isElastic = moduleJobs.some((moduleJob) => moduleJob.id === job.id);
