@@ -34,6 +34,7 @@ import {
   EmbeddableOutput,
   Embeddable,
   IContainer,
+  Adapters,
 } from '../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../plugins/kibana_utils/public';
 import {
@@ -96,6 +97,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private autoRefreshFetchSubscription: Subscription;
   private abortController?: AbortController;
   private readonly deps: VisualizeEmbeddableFactoryDeps;
+  private readonly inspectorAdapters?: Adapters;
 
   constructor(
     timefilter: TimefilterContract,
@@ -122,6 +124,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.vis.uiState.on('change', this.uiStateChangeHandler);
     this.vis.uiState.on('reload', this.reload);
 
+    this.inspectorAdapters = this.vis.type.inspectorAdapters;
+
     this.autoRefreshFetchSubscription = timefilter
       .getAutoRefreshFetch$()
       .subscribe(this.updateHandler.bind(this));
@@ -131,6 +135,13 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         this.handleChanges();
       })
     );
+
+    const inspectorAdapters = this.vis.type.inspectorAdapters;
+
+    if (inspectorAdapters) {
+      this.inspectorAdapters =
+        typeof inspectorAdapters === 'function' ? inspectorAdapters() : inspectorAdapters;
+    }
   }
   public getVisualizationDescription() {
     return this.vis.description;
@@ -349,6 +360,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         filters: this.input.filters,
       },
       uiState: this.vis.uiState,
+      inspectorAdapters: this.inspectorAdapters,
     };
     if (this.abortController) {
       this.abortController.abort();

@@ -27,7 +27,7 @@ import {
 } from '../../expressions/public';
 import { VegaVisualizationDependencies } from './plugin';
 import { createVegaRequestHandler } from './vega_request_handler';
-import { createInspectorAdapters, VegaInspectorAdapters } from './vega_inspector/index';
+import { VegaInspectorAdapters } from './vega_inspector/index';
 import { TimeRange, Query } from '../../data/public';
 
 type Input = KibanaContext | null;
@@ -68,9 +68,6 @@ export const createVegaFn = (
     },
   },
   async fn(input, args, context) {
-    // Temporary solution. we should find a more legal way to set custom adapters;
-    context.inspectorAdapters = createInspectorAdapters();
-
     const vegaRequestHandler = createVegaRequestHandler(dependencies, context);
 
     const response = await vegaRequestHandler({

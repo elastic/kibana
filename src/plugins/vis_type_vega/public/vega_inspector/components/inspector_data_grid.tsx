@@ -28,7 +28,6 @@ const inspectorDataGridAriaLabel = i18n.translate('visTypeVega.inspector.dataGri
 
 export const InspectorDataGrid = ({ columns, data }: VegaRuntimeData) => {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
-
   const onChangeItemsPerPage = useCallback(
     (pageSize) => setPagination((p) => ({ ...p, pageSize, pageIndex: 0 })),
     [setPagination]
@@ -79,7 +78,7 @@ export const InspectorDataGrid = ({ columns, data }: VegaRuntimeData) => {
       adjustedRowIndex = rowIndex - pagination.pageIndex * pagination.pageSize;
 
       return gridData.hasOwnProperty(adjustedRowIndex)
-        ? gridData[adjustedRowIndex][columnId]
+        ? gridData[adjustedRowIndex][columnId] || null
         : null;
     }) as EuiDataGridProps['renderCellValue'];
   }, [gridData, pagination.pageIndex, pagination.pageSize]);
@@ -99,7 +98,6 @@ export const InspectorDataGrid = ({ columns, data }: VegaRuntimeData) => {
         visibleColumns,
         setVisibleColumns,
       }}
-      inMemory={{ level: 'enhancements' }}
       rowCount={data.length}
       renderCellValue={renderCellValue}
       sorting={{ columns: sortingColumns, onSort }}

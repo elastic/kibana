@@ -44,13 +44,20 @@ export const DataViewer = ({ vegaAdapter }: DataViewerProps) => {
   useEffect(() => {
     const subscription = vegaAdapter.getDataSetsSubscription().subscribe((dataSets) => {
       setInspectDataSets(dataSets);
-      setSelectedView(dataSets[0]);
     });
 
     return () => {
       subscription.unsubscribe();
     };
   }, [vegaAdapter]);
+
+  useEffect(() => {
+    if (inspectDataSets) {
+      setSelectedView(
+        selectedView ? inspectDataSets.find(({ id }) => id === selectedView.id) : inspectDataSets[0]
+      );
+    }
+  }, [selectedView, inspectDataSets]);
 
   if (!selectedView || !inspectDataSets) {
     return null;

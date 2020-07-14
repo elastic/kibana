@@ -25,6 +25,9 @@ import { VegaVisEditor } from './components';
 import { createVegaRequestHandler } from './vega_request_handler';
 // @ts-expect-error
 import { createVegaVisualization } from './vega_visualization';
+
+import { createInspectorAdapters } from './vega_inspector';
+
 // @ts-expect-error
 import defaultSpec from '!!raw-loader!./default.spec.hjson';
 
@@ -55,5 +58,6 @@ export const createVegaTypeDefinition = (dependencies: VegaVisualizationDependen
       showFilterBar: true,
     },
     stage: 'experimental',
+    inspectorAdapters: createInspectorAdapters,
   };
 };
