@@ -13,6 +13,7 @@ import {
   SavedObjectReference,
   SavedObject,
 } from 'src/core/server';
+import _ from 'lodash';
 import { ActionsClient } from '../../actions/server';
 import {
   Alert,
@@ -53,7 +54,7 @@ interface ConstructorOptions {
   spaceId?: string;
   namespace?: string;
   getUserName: () => Promise<string | null>;
-  createAPIKey: () => Promise<CreateAPIKeyResult>;
+  createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
   invalidateAPIKey: (params: InvalidateAPIKeyParams) => Promise<InvalidateAPIKeyResult>;
   getActionsClient: () => Promise<ActionsClient>;
 }
@@ -129,7 +130,7 @@ export class AlertsClient {
   private readonly taskManager: TaskManagerStartContract;
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly alertTypeRegistry: AlertTypeRegistry;
-  private readonly createAPIKey: () => Promise<CreateAPIKeyResult>;
+  private readonly createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
   private readonly invalidateAPIKey: (
     params: InvalidateAPIKeyParams
   ) => Promise<InvalidateAPIKeyResult>;
@@ -167,7 +168,10 @@ export class AlertsClient {
     const alertType = this.alertTypeRegistry.get(data.alertTypeId);
     const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.params);
     const username = await this.getUserName();
-    const createdAPIKey = data.enabled ? await this.createAPIKey() : null;
+
+    const createdAPIKey = data.enabled
+      ? await this.createAPIKey(this.generateAPIKeyName(alertType.id, data.name))
+      : null;
 
     this.validateActions(alertType, data.actions);
 
@@ -334,7 +338,9 @@ export class AlertsClient {
 
     const { actions, references } = await this.denormalizeActions(data.actions);
     const username = await this.getUserName();
-    const createdAPIKey = attributes.enabled ? await this.createAPIKey() : null;
+    const createdAPIKey = attributes.enabled
+      ? await this.createAPIKey(this.generateAPIKeyName(alertType.id, data.name))
+      : null;
     const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
 
     const updatedObject = await this.savedObjectsClient.update<RawAlert>(
@@ -406,7 +412,10 @@ export class AlertsClient {
       id,
       {
         ...attributes,
-        ...this.apiKeyAsAlertAttributes(await this.createAPIKey(), username),
+        ...this.apiKeyAsAlertAttributes(
+          await this.createAPIKey(this.generateAPIKeyName(attributes.alertTypeId, attributes.name)),
+          username
+        ),
         updatedBy: username,
       },
       { version }
@@ -464,7 +473,12 @@ export class AlertsClient {
         {
           ...attributes,
           enabled: true,
-          ...this.apiKeyAsAlertAttributes(await this.createAPIKey(), username),
+          ...this.apiKeyAsAlertAttributes(
+            await this.createAPIKey(
+              this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
+            ),
+            username
+          ),
           updatedBy: username,
         },
         { version }
@@ -696,5 +710,9 @@ export class AlertsClient {
       actions,
       references,
     };
+  }
+
+  private generateAPIKeyName(alertTypeId: string, alertName: string) {
+    return `alerting:${this.spaceId ?? ''}:${alertTypeId}:${_.snakeCase(alertName)}`;
   }
 }
