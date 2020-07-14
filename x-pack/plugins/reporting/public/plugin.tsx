@@ -123,6 +123,7 @@ export class ReportingPublicPlugin implements Plugin<void, void> {
       mount: async (params) => {
         const [start] = await getStartServices();
         params.setBreadcrumbs([{ text: this.breadcrumbText }]);
+        start.chrome.docTitle.change(this.title);
         ReactDOM.render(
           <I18nProvider>
             <ReportListing
@@ -137,6 +138,7 @@ export class ReportingPublicPlugin implements Plugin<void, void> {
         );
 
         return () => {
+          start.chrome.docTitle.reset();
           ReactDOM.unmountComponentAtNode(params.element);
         };
       },
