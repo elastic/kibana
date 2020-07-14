@@ -15,7 +15,7 @@ const { downloadChromium } = require('./tasks/download_chromium');
 module.exports = {
   build: buildTask,
   dev: devTask,
-  downloadChromium: downloadChromium,
+  downloadChromium,
   test: testTask,
   'test:karma': testKarmaTask,
   'test:karma:debug': testKarmaDebugTask,
