@@ -1,0 +1,48 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies attempts to delete an AWS Config Service rule. An adversary may tamper with Config rules in order to reduce visibiltiy into the security posture of an account and / or its workload instances.",
+  "false_positives": [
+    "Privileged IAM users with security responsibilities may be expected to make changes to the Config rules in order to align with local security policies and requirements. Automation, orchestration, and security tools may also make changes to the Config service, where they are used to automate setup or configuration of AWS accounts. Other kinds of user or service contexts do not commonly make changes to this service."
+  ],
+  "from": "now-60m",
+  "index": [
+    "filebeat-*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "AWS Config Service Tampering",
+  "query": "event.dataset: aws.cloudtrail and event.action: DeleteConfigRule and event.provider: config.amazonaws.com",
+  "references": [
+    "https://docs.aws.amazon.com/config/latest/developerguide/how-does-config-work.html",
+    "https://docs.aws.amazon.com/config/latest/APIReference/API_Operations.html"
+  ],
+  "risk_score": 47,
+  "rule_id": "7024e2a0-315d-4334-bb1a-552d604f27bc",
+  "severity": "medium",
+  "tags": [
+    "AWS",
+    "Elastic"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1089",
+          "name": "Disabling Security Tools",
+          "reference": "https://attack.mitre.org/techniques/T1089/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

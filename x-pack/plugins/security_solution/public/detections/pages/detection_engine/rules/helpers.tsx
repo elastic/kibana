@@ -236,12 +236,13 @@ export const setFieldValue = (
 export const redirectToDetections = (
   isSignalIndexExists: boolean | null,
   isAuthenticated: boolean | null,
-  hasEncryptionKey: boolean | null
+  hasEncryptionKey: boolean | null,
+  needsListsConfiguration: boolean
 ) =>
-  isSignalIndexExists != null &&
-  isAuthenticated != null &&
-  hasEncryptionKey != null &&
-  (!isSignalIndexExists || !isAuthenticated || !hasEncryptionKey);
+  isSignalIndexExists === false ||
+  isAuthenticated === false ||
+  hasEncryptionKey === false ||
+  needsListsConfiguration;
 
 export const getActionMessageRuleParams = (ruleType: RuleType): string[] => {
   const commonRuleParamsKeys = [

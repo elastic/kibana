@@ -86,7 +86,6 @@ import {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateNanosFormat,
   DurationFormat,
   IpFormat,
   NumberFormat,
@@ -105,7 +104,6 @@ export const fieldFormats = {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateNanosFormat,
   DurationFormat,
   IpFormat,
   NumberFormat,
@@ -166,15 +164,10 @@ import {
 export { ParsedInterval } from '../common';
 
 export {
-  ISearch,
-  ISearchCancel,
+  ISearchStrategy,
   ISearchOptions,
-  IRequestTypesMap,
-  IResponseTypesMap,
   ISearchSetup,
   ISearchStart,
-  TStrategyTypes,
-  ISearchStrategy,
   getDefaultSearchParams,
   getTotalLoaded,
 } from './search';
