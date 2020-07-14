@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter, Logger, RequestHandlerContext } from 'kibana/server';
+import { IRouter, Logger } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
-
 import Boom from 'boom';
+import { RequestHandlerContext } from '../../../../../../../src/core/server';
+
 import { metadataIndexPattern } from '../../../../common/endpoint/constants';
 import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from './query_builders';
 import {
