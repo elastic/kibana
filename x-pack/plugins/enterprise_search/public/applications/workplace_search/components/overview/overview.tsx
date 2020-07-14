@@ -23,7 +23,7 @@ import { ViewContentHeader } from '../shared/view_content_header';
 
 import { OnboardingSteps } from './onboarding_steps';
 import { OrganizationStats } from './organization_stats';
-import { RecentActivity, IFeedActivity } from './recent_activity';
+import { RecentActivity } from './recent_activity';
 
 const ONBOARDING_HEADER_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.overviewOnboardingHeader.title',

@@ -7,11 +7,12 @@
 import React, { useContext } from 'react';
 import { Route, Redirect } from 'react-router-dom';
 import { Provider } from 'react-redux';
+import { Store } from 'redux';
 import { getContext, resetContext } from 'kea';
 
 resetContext({ createStore: true });
 
-const store = getContext().store;
+const store = getContext().store as Store;
 
 import { KibanaContext, IKibanaContext } from '../index';
 
