@@ -44,6 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
               querySize: 1,
             },
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            docValueFields: [],
             inspect: false,
           },
         })
@@ -73,6 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
               querySize: 2,
             },
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            docValueFields: [],
             inspect: false,
           },
         })

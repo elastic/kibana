@@ -13,8 +13,8 @@ import {
 } from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const LTE = new Date('3000-01-01T00:00:00.000Z').valueOf();
-const GTE = new Date('2000-01-01T00:00:00.000Z').valueOf();
+const LTE = '3000-01-01T00:00:00.000Z';
+const GTE = '2000-01-01T00:00:00.000Z';
 
 // typical values that have to change after an update from "scripts/es_archiver"
 const DATA_COUNT = 2;
@@ -80,6 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             fieldRequested: ['@timestamp', 'host.name'],
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            docValueFields: [],
             inspect: false,
           },
         })
@@ -110,6 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             fieldRequested: ['@timestamp', 'host.name'],
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            docValueFields: [],
             inspect: false,
           },
         })
