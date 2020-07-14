@@ -8,7 +8,6 @@
 
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator, EuiButton, EuiI18nNumber, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { NodeSubMenu, subMenuAssets } from './submenu';

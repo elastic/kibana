@@ -131,6 +131,35 @@ export function relatedEventsByEntityId(data: DataState): Map<string, ResolverRe
 }
 
 /**
+ * Returns a function that returns a function (when supplied with an entity id for a node)
+ * that returns related events for a node that match an event.category (when supplied with the category)
+ */
+export const relatedEventsByCategory = createSelector(
+  relatedEventsByEntityId,
+  function provideGettersByCategory(
+    /* eslint-disable no-shadow */
+    relatedEventsByEntityId
+    /* eslint-enable no-shadow */
+  ) {
+    return defaultMemoize((entityId: string) => {
+      return defaultMemoize((ecsCategory: string) => {
+        const relatedById = relatedEventsByEntityId.get(entityId);
+        // With no related events, we can't return related by category
+        if (!relatedById) {
+          return [];
+        }
+        return relatedById.events.reduce((a: ResolverEvent[], candidate: ResolverEvent) => {
+          if ([candidate && allEventCategories(candidate)].flat().includes(ecsCategory)) {
+            a.push(candidate);
+          }
+          return a;
+        }, []);
+      });
+    });
+  }
+);
+
+/**
  * returns a map of entity_ids to booleans indicating if it is waiting on related event
  * A value of `undefined` can be interpreted as `not yet requested`
  */
