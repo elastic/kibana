@@ -25,7 +25,7 @@ Then(`should have correct client metrics`, () => {
 
   // wait for all loading to finish
   cy.get('kbnLoadingIndicator').should('not.be.visible');
-  cy.get('.euiStat__title').should('be.visible');
+  cy.get('.euiStat__title', { timeout: DEFAULT_TIMEOUT }).should('be.visible');
   cy.get('.euiSelect-isLoading').should('not.be.visible');
   cy.get('.euiStat__title-isLoading').should('not.be.visible');
 
@@ -39,7 +39,7 @@ Then(`should have correct client metrics`, () => {
 Then(`should display percentile for page load chart`, () => {
   const pMarkers = '[data-cy=percentile-markers] span';
 
-  cy.get('.euiLoadingChart').should('be.visible');
+  cy.get('.euiLoadingChart', { timeout: DEFAULT_TIMEOUT }).should('be.visible');
 
   // wait for all loading to finish
   cy.get('kbnLoadingIndicator').should('not.be.visible');
