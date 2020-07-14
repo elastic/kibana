@@ -1,4 +1,4 @@
-[[embeddables]]
+[[embeddable-plugin]]
 == Embeddables
 
 Embeddables are re-usable widgets that can be rendered in any environment or plugin. Developers can embed them directly in their plugin. End users can dynamically add them to any embeddable _containers_.

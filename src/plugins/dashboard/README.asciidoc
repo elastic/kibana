@@ -1,4 +1,9 @@
-include::../../../docs/index.asciidoc[]
+ifdef::env-github[]
+:es:              Elasticsearch
+:kib:             Kibana
+include::../../../src/plugins/embeddable/README.asciidoc[]
+include::../../../examples/README.asciidoc[]
+endif::[]
 
 [[kibana-dashboard]]
 == Dashboard
@@ -8,7 +13,7 @@ Dashboard is an application inside Kibana that allows users to create and view c
 [discrete]
 === Dashboard panels
 
-Dashboard panels are extensible via the <<embeddables>> API. The dashboard plugin itself
+Dashboard panels are extensible via the <<embeddable-plugin>> API. The dashboard plugin itself
 doesn't register any panels (although it is, itself, an Embeddable). These panel types (visualizations,
 saved searches, maps, machine learning swimlanes, etc) are registered from other plugins.
 
@@ -20,7 +25,3 @@ Dashboard itself is also an Embeddable. This can be used to embed dashboards in 
 You can view an example of this inside {kib-repo}blob/{branch}/examples/dashboard_embeddable_examples.
 
 Just run Kibana with <<example-plugins>>.
-
-include::../../../examples/README.asciidoc[]
-
-include::../../../src/plugins/embeddable/README.asciidoc[]

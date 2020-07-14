@@ -26,3 +26,5 @@ include::development-visualize-index.asciidoc[]
 include::security/index.asciidoc[]
 
 include::code-exploration.asciidoc[]
+
+include::{kibana-root}/examples/README.asciidoc[]
