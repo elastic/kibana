@@ -94,8 +94,8 @@ The Elastic {ml} {dfanalytics} feature enables you to analyze your data using
 indices that contain the results alongside your source data. 
 
 If you have a license that includes the {ml-features}, you can create
-{dfanalytics-jobs} and view their results on the *Analytics* page
-in {kib}. For example:
+{dfanalytics-jobs} and view their results on the *Data Frame Analytics* page in
+{kib}. For example:
 
 [role="screenshot"]
 image::user/ml/images/outliers.png[{oldetection-cap} results in {kib}]
