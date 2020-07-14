@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiBreadcrumbs, EuiBreadcrumb, EuiCode, EuiBetaBadge } from '@elastic/eui';
+import { EuiBreadcrumbs, EuiCode, EuiBetaBadge } from '@elastic/eui';
 import styled from 'styled-components';
 import React, { memo } from 'react';
 import { useResolverTheme } from '../assets';
@@ -27,8 +27,8 @@ const BetaHeader = styled(`header`)`
  * The two query parameters we read/write on to control which view the table presents:
  */
 export interface CrumbInfo {
-  readonly crumbId: string;
-  readonly crumbEvent: string;
+  crumbId: string;
+  crumbEvent: string;
 }
 
 const ThemedBreadcrumbs = styled(EuiBreadcrumbs)<{ background: string; text: string }>`
@@ -52,14 +52,22 @@ const betaBadgeLabel = i18n.translate(
 );
 
 /**
+ * A component to keep time representations in blocks so they don't wrap
+ * and look bad.
+ */
+export const StyledTime = memo(styled('time')`
+  display: inline-block;
+  text-align: start;
+`);
+
+type Breadcrumbs = Parameters<typeof EuiBreadcrumbs>[0]['breadcrumbs'];
+/**
  * Breadcrumb menu with adjustments per direction from UX team
  */
 export const StyledBreadcrumbs = memo(function StyledBreadcrumbs({
   breadcrumbs,
-  truncate,
 }: {
-  breadcrumbs: EuiBreadcrumb[];
-  truncate?: boolean;
+  breadcrumbs: Breadcrumbs;
 }) {
   const {
     colorMap: { resolverBreadcrumbBackground, resolverEdgeText },
@@ -73,7 +81,7 @@ export const StyledBreadcrumbs = memo(function StyledBreadcrumbs({
         background={resolverBreadcrumbBackground}
         text={resolverEdgeText}
         breadcrumbs={breadcrumbs}
-        truncate={truncate}
+        truncate={false}
       />
     </>
   );

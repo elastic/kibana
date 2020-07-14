@@ -1,0 +1,46 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "An adversary may attempt to remove the multi-factor authentication (MFA) factors registered on an Okta user's account in order to register new MFA factors and abuse the account to blend in with normal activity in the victim's environment.",
+  "false_positives": [
+    "Consider adding exceptions to this rule to filter false positives if the MFA factors for Okta user accounts are regularly reset in your organization."
+  ],
+  "index": [
+    "filebeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Attempt to Reset MFA Factors for Okta User Account",
+  "query": "event.module:okta and event.dataset:okta.system and event.action:user.mfa.factor.reset_all",
+  "references": [
+    "https://developer.okta.com/docs/reference/api/system-log/",
+    "https://developer.okta.com/docs/reference/api/event-types/"
+  ],
+  "risk_score": 21,
+  "rule_id": "729aa18d-06a6-41c7-b175-b65b739b1181",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Okta"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1098",
+          "name": "Account Manipulation",
+          "reference": "https://attack.mitre.org/techniques/T1098/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}
