@@ -17,10 +17,16 @@
  * under the License.
  */
 
-import { MockLegacyScopedClusterClient, MockElasticsearchClient } from './core_service.test.mocks';
+import {
+  MockLegacyScopedClusterClient,
+  MockElasticsearchClient,
+  legacyClusterClientInstanceMock,
+} from './core_service.test.mocks';
 
 import Boom from 'boom';
 import { Request } from 'hapi';
+import { errors as esErrors } from 'elasticsearch';
+import { LegacyElasticsearchErrorHelpers } from '../../elasticsearch/legacy';
 
 import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
@@ -349,7 +355,7 @@ describe('http service', () => {
       it('basePath information for an incoming request is available in legacy server', async () => {
         const reqBasePath = '/requests-specific-base-path';
         const { http } = await root.setup();
-        http.registerOnPreAuth((req, res, toolkit) => {
+        http.registerOnPreRouting((req, res, toolkit) => {
           http.basePath.set(req, reqBasePath);
           return toolkit.next();
         });
@@ -425,6 +431,32 @@ describe('http service', () => {
       const [client] = MockLegacyScopedClusterClient.mock.calls;
       const [, , clientHeaders] = client;
       expect(clientHeaders).toEqual({ authorization: authorizationHeader });
+    });
+
+    it('forwards 401 errors returned from elasticsearch', async () => {
+      const { http } = await root.setup();
+      const { createRouter } = http;
+
+      const authenticationError = LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(
+        new (esErrors.AuthenticationException as any)('Authentication Exception', {
+          body: { error: { header: { 'WWW-Authenticate': 'authenticate header' } } },
+          statusCode: 401,
+        })
+      );
+
+      legacyClusterClientInstanceMock.callAsCurrentUser.mockRejectedValue(authenticationError);
+
+      const router = createRouter('/new-platform');
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
+        await context.core.elasticsearch.legacy.client.callAsCurrentUser('ping');
+        return res.ok();
+      });
+
+      await root.start();
+
+      const response = await kbnTestServer.request.get(root, '/new-platform/').expect(401);
+
+      expect(response.header['www-authenticate']).toEqual('authenticate header');
     });
   });
 

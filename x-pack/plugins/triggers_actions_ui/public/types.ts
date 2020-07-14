@@ -42,6 +42,7 @@ export interface ActionParamsProps<TParams> {
   errors: IErrorObject;
   messageVariables?: string[];
   defaultMessage?: string;
+  docLinks: DocLinksStart;
 }
 
 export interface Pagination {

@@ -22,6 +22,7 @@ import Boom from 'boom';
 
 import { isConfigSchema } from '@kbn/config-schema';
 import { Logger } from '../../logging';
+import { LegacyElasticsearchErrorHelpers } from '../../elasticsearch/legacy/errors';
 import {
   isUnauthorizedError as isElasticsearchUnauthorizedError,
   UnauthorizedError as EsNotAuthorizedError,
@@ -272,10 +273,15 @@ export class Router implements IRouter {
       return hapiResponseAdapter.handle(kibanaResponse);
     } catch (e) {
       this.log.error(e);
+      // forward 401 errors from ES client
       if (isElasticsearchUnauthorizedError(e)) {
         return hapiResponseAdapter.handle(
           kibanaResponseFactory.unauthorized(convertEsUnauthorized(e))
         );
+      }
+      // forward 401 (boom) errors from legacy ES client
+      if (LegacyElasticsearchErrorHelpers.isNotAuthorizedError(e)) {
+        return e;
       }
       return hapiResponseAdapter.toInternalError();
     }
