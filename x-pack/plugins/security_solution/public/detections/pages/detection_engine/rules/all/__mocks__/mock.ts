@@ -153,6 +153,10 @@ export const mockRuleWithEverything = (id: string): Rule => ({
       ],
     },
   ],
+  threshold: {
+    field: 'host.name',
+    value: 50,
+  },
   throttle: 'no_actions',
   timestamp_override: 'event.ingested',
   note: '# this is some markdown documentation',
@@ -212,6 +216,10 @@ export const mockDefineStepRule = (isNew = false): DefineStepRule => ({
   timeline: {
     id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
     title: 'Titled timeline',
+  },
+  threshold: {
+    field: [''],
+    value: '100',
   },
 });
 

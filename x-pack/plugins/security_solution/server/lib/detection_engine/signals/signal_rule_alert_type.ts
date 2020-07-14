@@ -26,7 +26,9 @@ import { getGapBetweenRuns, parseScheduleDates, getListsClient, getExceptions } 
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
 import { findMlSignals } from './find_ml_signals';
+import { findThresholdSignals } from './find_threshold_signals';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
+import { bulkCreateThresholdSignals } from './bulk_create_threshold_signals';
 import {
   scheduleNotificationActions,
   NotificationRuleTypeParams,
@@ -58,6 +60,7 @@ export const signalRulesAlertType = ({
     producer: SERVER_APP_ID,
     async executor({
       previousStartedAt,
+      startedAt,
       alertId,
       services,
       params,
@@ -78,6 +81,7 @@ export const signalRulesAlertType = ({
         savedId,
         query,
         to,
+        threshold,
         type,
         exceptionsList,
       } = params;
@@ -163,11 +167,11 @@ export const signalRulesAlertType = ({
             );
           }
 
-          const scopedMlCallCluster = services.getScopedCallCluster(ml.mlClient);
+          const scopedClusterClient = services.getLegacyScopedClusterClient(ml.mlClient);
           // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
           // currently unused by the jobsSummary function.
           const summaryJobs = await (
-            await ml.jobServiceProvider(scopedMlCallCluster, ({} as unknown) as KibanaRequest)
+            await ml.jobServiceProvider(scopedClusterClient, ({} as unknown) as KibanaRequest)
           ).jobsSummary([machineLearningJobId]);
           const jobSummary = summaryJobs.find((job) => job.id === machineLearningJobId);
 
@@ -185,7 +189,7 @@ export const signalRulesAlertType = ({
 
           const anomalyResults = await findMlSignals({
             ml,
-            callCluster: scopedMlCallCluster,
+            clusterClient: scopedClusterClient,
             // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
             // currently unused by the mlAnomalySearch function.
             request: ({} as unknown) as KibanaRequest,
@@ -209,6 +213,60 @@ export const signalRulesAlertType = ({
             logger,
             id: alertId,
             signalsIndex: outputIndex,
+            name,
+            createdBy,
+            createdAt,
+            updatedBy,
+            updatedAt,
+            interval,
+            enabled,
+            refresh,
+            tags,
+          });
+          result.success = success;
+          result.createdSignalsCount = createdItemsCount;
+          if (bulkCreateDuration) {
+            result.bulkCreateTimes.push(bulkCreateDuration);
+          }
+        } else if (type === 'threshold' && threshold) {
+          const inputIndex = await getInputIndex(services, version, index);
+          const esFilter = await getFilter({
+            type,
+            filters,
+            language,
+            query,
+            savedId,
+            services,
+            index: inputIndex,
+            lists: exceptionItems ?? [],
+          });
+
+          const { searchResult: thresholdResults } = await findThresholdSignals({
+            inputIndexPattern: inputIndex,
+            from,
+            to,
+            services,
+            logger,
+            filter: esFilter,
+            threshold,
+          });
+
+          const {
+            success,
+            bulkCreateDuration,
+            createdItemsCount,
+          } = await bulkCreateThresholdSignals({
+            actions,
+            throttle,
+            someResult: thresholdResults,
+            ruleParams: params,
+            filter: esFilter,
+            services,
+            logger,
+            id: alertId,
+            inputIndexPattern: inputIndex,
+            signalsIndex: outputIndex,
+            startedAt,
             name,
             createdBy,
             createdAt,

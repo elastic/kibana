@@ -5,6 +5,7 @@
 /test/functional/screenshots
 /test/functional/apps/reporting/reports/session
 /test/reporting/configs/failure_debug/
+/plugins/reporting/.chromium/
 /legacy/plugins/reporting/.chromium/
 /legacy/plugins/reporting/.phantom/
 /plugins/reporting/chromium/
