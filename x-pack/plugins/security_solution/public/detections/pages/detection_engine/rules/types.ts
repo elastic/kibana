@@ -139,10 +139,10 @@ export interface AboutStepRuleJson {
   risk_score_mapping: RiskScoreMapping;
   references: string[];
   false_positives: string[];
-  rule_name_override: RuleNameOverride;
+  rule_name_override?: RuleNameOverride;
   tags: string[];
   threat: IMitreEnterpriseAttack[];
-  timestamp_override: TimestampOverride;
+  timestamp_override?: TimestampOverride;
   note?: string;
 }
 

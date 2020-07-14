@@ -143,7 +143,7 @@ export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRule
     references: references.filter((item) => !isEmpty(item)),
     risk_score: riskScore.value,
     risk_score_mapping: riskScore.mapping,
-    rule_name_override: ruleNameOverride,
+    rule_name_override: ruleNameOverride !== '' ? ruleNameOverride : undefined,
     severity: severity.value,
     severity_mapping: severity.mapping,
     threat: threat
@@ -156,7 +156,7 @@ export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRule
           return { id, name, reference };
         }),
       })),
-    timestamp_override: timestampOverride,
+    timestamp_override: timestampOverride !== '' ? timestampOverride : undefined,
     ...(!isEmpty(note) ? { note } : {}),
     ...rest,
   };

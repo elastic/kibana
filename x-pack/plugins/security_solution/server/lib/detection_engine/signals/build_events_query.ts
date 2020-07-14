@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
+
 interface BuildEventsSearchQuery {
   index: string[];
   from: string;
@@ -11,6 +13,7 @@ interface BuildEventsSearchQuery {
   filter: unknown;
   size: number;
   searchAfterSortId: string | number | undefined;
+  timestampOverride: TimestampOverrideOrUndefined;
 }
 
 export const buildEventsSearchQuery = ({
@@ -20,7 +23,9 @@ export const buildEventsSearchQuery = ({
   filter,
   size,
   searchAfterSortId,
+  timestampOverride,
 }: BuildEventsSearchQuery) => {
+  const timestamp = timestampOverride ?? '@timestamp';
   const filterWithTime = [
     filter,
     {
@@ -31,7 +36,7 @@ export const buildEventsSearchQuery = ({
               should: [
                 {
                   range: {
-                    '@timestamp': {
+                    [timestamp]: {
                       gte: from,
                     },
                   },
@@ -45,7 +50,7 @@ export const buildEventsSearchQuery = ({
               should: [
                 {
                   range: {
-                    '@timestamp': {
+                    [timestamp]: {
                       lte: to,
                     },
                   },
@@ -76,7 +81,7 @@ export const buildEventsSearchQuery = ({
       },
       sort: [
         {
-          '@timestamp': {
+          [timestamp]: {
             order: 'asc',
           },
         },

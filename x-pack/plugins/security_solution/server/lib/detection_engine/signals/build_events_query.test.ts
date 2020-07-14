@@ -15,6 +15,7 @@ describe('create_signals', () => {
       filter: {},
       size: 100,
       searchAfterSortId: undefined,
+      timestampOverride: undefined,
     });
     expect(query).toEqual({
       allowNoIndices: true,
@@ -85,6 +86,7 @@ describe('create_signals', () => {
       filter: {},
       size: 100,
       searchAfterSortId: '',
+      timestampOverride: undefined,
     });
     expect(query).toEqual({
       allowNoIndices: true,
@@ -156,6 +158,7 @@ describe('create_signals', () => {
       filter: {},
       size: 100,
       searchAfterSortId: fakeSortId,
+      timestampOverride: undefined,
     });
     expect(query).toEqual({
       allowNoIndices: true,
@@ -228,6 +231,7 @@ describe('create_signals', () => {
       filter: {},
       size: 100,
       searchAfterSortId: fakeSortIdNumber,
+      timestampOverride: undefined,
     });
     expect(query).toEqual({
       allowNoIndices: true,

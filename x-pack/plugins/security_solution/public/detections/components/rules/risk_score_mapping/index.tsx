@@ -51,25 +51,25 @@ export const RiskScoreField = ({
   indices,
   placeholder,
 }: RiskScoreFieldProps) => {
-  const [isRiskScoreMappingSelected, setIsRiskScoreMappingSelected] = useState(false);
+  const [isRiskScoreMappingChecked, setIsRiskScoreMappingChecked] = useState(false);
   const [initialFieldCheck, setInitialFieldCheck] = useState(true);
 
   const fieldTypeFilter = useMemo(() => ['number'], []);
 
   useEffect(() => {
     if (
-      !isRiskScoreMappingSelected &&
+      !isRiskScoreMappingChecked &&
       initialFieldCheck &&
       (field.value as AboutStepRiskScore).mapping?.length > 0
     ) {
-      setIsRiskScoreMappingSelected(true);
+      setIsRiskScoreMappingChecked(true);
       setInitialFieldCheck(false);
     }
   }, [
     field,
     initialFieldCheck,
-    isRiskScoreMappingSelected,
-    setIsRiskScoreMappingSelected,
+    isRiskScoreMappingChecked,
+    setIsRiskScoreMappingChecked,
     setInitialFieldCheck,
   ]);
 
@@ -90,10 +90,6 @@ export const RiskScoreField = ({
     [field]
   );
 
-  const handleRiskScoreMappingSelected = useCallback(() => {
-    setIsRiskScoreMappingSelected(!isRiskScoreMappingSelected);
-  }, [isRiskScoreMappingSelected, setIsRiskScoreMappingSelected]);
-
   const selectedField = useMemo(() => {
     const existingField = (field.value as AboutStepRiskScore).mapping?.[0]?.field ?? '';
     const [newSelectedField] = indices.fields.filter(
@@ -102,11 +98,15 @@ export const RiskScoreField = ({
     return newSelectedField;
   }, [field.value, indices]);
 
+  const handleRiskScoreMappingChecked = useCallback(() => {
+    setIsRiskScoreMappingChecked(!isRiskScoreMappingChecked);
+  }, [isRiskScoreMappingChecked, setIsRiskScoreMappingChecked]);
+
   const riskScoreLabel = useMemo(() => {
     return (
       <div>
         <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem>{i18n.RISK_SCORE}</EuiFlexItem>
+          <EuiFlexItem>{i18n.DEFAULT_RISK_SCORE}</EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="xs" />
         <EuiText size={'xs'}>{i18n.RISK_SCORE_DESCRIPTION}</EuiText>
@@ -117,12 +117,12 @@ export const RiskScoreField = ({
   const riskScoreMappingLabel = useMemo(() => {
     return (
       <div>
-        <EuiFlexGroup alignItems="center" gutterSize="s" onClick={handleRiskScoreMappingSelected}>
+        <EuiFlexGroup alignItems="center" gutterSize="s" onClick={handleRiskScoreMappingChecked}>
           <EuiFlexItem grow={false}>
             <EuiCheckbox
               id={`risk_score-mapping-override`}
-              checked={isRiskScoreMappingSelected}
-              onChange={handleRiskScoreMappingSelected}
+              checked={isRiskScoreMappingChecked}
+              onChange={handleRiskScoreMappingChecked}
             />
           </EuiFlexItem>
           <EuiFlexItem>{i18n.RISK_SCORE_MAPPING}</EuiFlexItem>
@@ -133,7 +133,7 @@ export const RiskScoreField = ({
         </NestedContent>
       </div>
     );
-  }, [handleRiskScoreMappingSelected, isRiskScoreMappingSelected]);
+  }, [handleRiskScoreMappingChecked, isRiskScoreMappingChecked]);
 
   return (
     <EuiFlexGroup>
@@ -170,7 +170,7 @@ export const RiskScoreField = ({
           label={riskScoreMappingLabel}
           labelAppend={field.labelAppend}
           helpText={
-            isRiskScoreMappingSelected ? (
+            isRiskScoreMappingChecked ? (
               <NestedContent>{i18n.RISK_SCORE_MAPPING_DETAILS}</NestedContent>
             ) : (
               ''
@@ -184,7 +184,7 @@ export const RiskScoreField = ({
         >
           <NestedContent>
             <EuiSpacer size="s" />
-            {isRiskScoreMappingSelected && (
+            {isRiskScoreMappingChecked && (
               <EuiFlexGroup direction={'column'} gutterSize="s">
                 <EuiFlexItem>
                   <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -193,7 +193,7 @@ export const RiskScoreField = ({
                     </EuiFlexItem>
                     <EuiFlexItemIconColumn grow={false} />
                     <EuiFlexItemRiskScoreColumn grow={false}>
-                      <EuiFormLabel>{i18n.RISK_SCORE}</EuiFormLabel>
+                      <EuiFormLabel>{i18n.DEFAULT_RISK_SCORE}</EuiFormLabel>
                     </EuiFlexItemRiskScoreColumn>
                   </EuiFlexGroup>
                 </EuiFlexItem>
