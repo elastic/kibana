@@ -114,6 +114,30 @@ export const relatedEventInfoByEntityId = composeSelectors(
 );
 
 /**
+ * Returns the id of the "current" tree node (fake-focused)
+ */
+export const uiActiveDescendantId = composeSelectors(
+  uiStateSelector,
+  uiSelectors.activeDescendantId
+);
+
+/**
+ * Returns the id of the "selected" tree node (the node that is currently "pressed" and possibly controlling other popups / components)
+ */
+export const uiSelectedDescendantId = composeSelectors(
+  uiStateSelector,
+  uiSelectors.selectedDescendantId
+);
+
+/**
+ * Returns the entity_id of the "selected" tree node's process
+ */
+export const uiSelectedDescendantProcessId = composeSelectors(
+  uiStateSelector,
+  uiSelectors.selectedDescendantProcessId
+);
+
+/**
  * Returns the camera state from within ResolverState
  */
 function cameraStateSelector(state: ResolverState) {
@@ -219,16 +243,3 @@ export const ariaFlowtoNodeID: (
   dataSelectors.ariaFlowtoNodeID
 );
 
-/**
- * Takes a nodeID and returns true if it is the current node.
- */
-export const isAriaCurrent: (
-  state: ResolverState
-) => (nodeID: string) => boolean = composeSelectors(uiStateSelector, uiSelectors.isAriaCurrent);
-
-/**
- * Takes a nodeID and returns true if it is the selected node.
- */
-export const isAriaSelected: (
-  state: ResolverState
-) => (nodeID: string) => boolean = composeSelectors(uiStateSelector, uiSelectors.isAriaSelected);

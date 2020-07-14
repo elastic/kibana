@@ -44,7 +44,6 @@ export interface ResolverUIState {
   /**
    * The entity_id of the process for the resolver's currently selected descendant.
    */
-  // TODO
   readonly processEntityIdOfSelectedDescendant: string | null;
 }
 
@@ -430,8 +429,6 @@ export interface IsometricTaxiLayout {
   /**
    * A map of events to position. each event represents its own node.
    */
-  // TODO, rename
-  // TODO, use string (nodeID/entity_id) instead of ResolverEvent
   processNodePositions: Map<ResolverEvent, Vector2>;
   /**
    * A map of edgline segments, which graphically connect nodes.

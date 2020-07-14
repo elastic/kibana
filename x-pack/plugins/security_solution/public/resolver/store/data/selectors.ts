@@ -281,7 +281,6 @@ export function databaseDocumentIDToFetch(state: DataState): string | null {
   }
 }
 
-// TODO, don't export
 export const layout = createSelector(
   indexedProcessTree,
   function processNodePositionsAndEdgeLineSegments(
