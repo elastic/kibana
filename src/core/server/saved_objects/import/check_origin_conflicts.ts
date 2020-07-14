@@ -24,6 +24,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsImportError,
   SavedObjectsImportRetry,
+  SavedObjectsFindOptions,
 } from '../types';
 import { ISavedObjectTypeRegistry } from '..';
 
@@ -105,7 +106,7 @@ const checkOriginConflict = async (
     page: 1,
     perPage: 10,
     fields: ['title'],
-    namespace,
+    ...(namespace && { namespaces: [namespace] }),
   };
   const findResult = await savedObjectsClient.find<{ title?: string }>(findOptions);
   const { total, saved_objects: savedObjects } = findResult;

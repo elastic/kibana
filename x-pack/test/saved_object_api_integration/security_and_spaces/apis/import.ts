@@ -117,7 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
             createNewCopies,
             spaceId,
             singleRequest,
-            responseBodyOverride: expectForbidden('bulk_create')([
+            responseBodyOverride: expectForbidden([
               'dashboard',
               'globaltype',
               'isolatedtype',
@@ -145,11 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
           overwrite,
           spaceId,
           singleRequest,
-          responseBodyOverride: expectForbidden('bulk_create')([
-            'dashboard',
-            'globaltype',
-            'isolatedtype',
-          ]),
+          responseBodyOverride: expectForbidden(['dashboard', 'globaltype', 'isolatedtype']),
         }),
         createTestDefinitions(group2, true, { overwrite, spaceId, singleRequest }),
         createTestDefinitions(group3, true, { overwrite, spaceId, singleRequest }),

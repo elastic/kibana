@@ -44,12 +44,34 @@ export interface FindTestCase {
 }
 
 // additional sharedtype objects that exist but do not have common test cases defined
-const CID = 'conflict_';
-const CONFLICT_1_OBJ = Object.freeze({ type: 'sharedtype', id: `${CID}1` });
-const CONFLICT_2A_OBJ = Object.freeze({ type: 'sharedtype', id: `${CID}2a`, originId: `${CID}2` });
-const CONFLICT_2B_OBJ = Object.freeze({ type: 'sharedtype', id: `${CID}2b`, originId: `${CID}2` });
-const CONFLICT_3_OBJ = Object.freeze({ type: 'sharedtype', id: `${CID}3` });
-const CONFLICT_4A_OBJ = Object.freeze({ type: 'sharedtype', id: `${CID}4a`, originId: `${CID}4` });
+const CONFLICT_1_OBJ = Object.freeze({
+  type: 'sharedtype',
+  id: 'conflict_1',
+  namespaces: ['default', 'space_1', 'space_2'],
+});
+const CONFLICT_2A_OBJ = Object.freeze({
+  type: 'sharedtype',
+  id: 'conflict_2a',
+  originId: 'conflict_2',
+  namespaces: ['default', 'space_1', 'space_2'],
+});
+const CONFLICT_2B_OBJ = Object.freeze({
+  type: 'sharedtype',
+  id: 'conflict_2b',
+  originId: 'conflict_2',
+  namespaces: ['default', 'space_1', 'space_2'],
+});
+const CONFLICT_3_OBJ = Object.freeze({
+  type: 'sharedtype',
+  id: 'conflict_3',
+  namespaces: ['default', 'space_1', 'space_2'],
+});
+const CONFLICT_4A_OBJ = Object.freeze({
+  type: 'sharedtype',
+  id: 'conflict_4a',
+  originId: 'conflict_4',
+  namespaces: ['default', 'space_1', 'space_2'],
+});
 
 const TEST_CASES = [
   { ...CASES.SINGLE_NAMESPACE_DEFAULT_SPACE, namespaces: ['default'] },

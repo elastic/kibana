@@ -83,7 +83,7 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
     if (statusCode === 403) {
       const types = testCaseArray.map((x) => x.type);
-      await expectResponses.forbidden('bulk_create')(types)(response);
+      await expectForbidden(types)(response);
     } else {
       // permitted
       const { success, successCount, successResults, errors } = response.body;
