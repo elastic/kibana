@@ -44,6 +44,7 @@ export type APMDataTelemetry = DeepPartial<{
     services: TimeframeMap;
   };
   cardinality: {
+    client: { geo: { country_iso_code: { rum: TimeframeMap1d } } };
     user_agent: {
       original: {
         all_agents: TimeframeMap1d;
