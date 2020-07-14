@@ -25,7 +25,7 @@ export const renderApp = (
     return () => undefined;
   }
 
-  const { i18n, docLinks, notifications, chrome } = core;
+  const { i18n, docLinks, notifications, chrome, application } = core;
   const { Context: I18nContext } = i18n;
   const { services, history, setBreadcrumbs } = dependencies;
 
@@ -38,6 +38,7 @@ export const renderApp = (
     docLinks,
     toasts: notifications.toasts,
     setBreadcrumbs,
+    getUrlForApp: application.getUrlForApp,
   };
 
   render(

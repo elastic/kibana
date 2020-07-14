@@ -26,7 +26,7 @@ import {
 import { ManagementSectionId, ManagementSetup } from '../../../../src/plugins/management/public';
 import { SharePluginSetup } from '../../../../src/plugins/share/public';
 import { LicensingPluginSetup } from '../../licensing/public';
-import { ReportingConfigType, JobId, JobStatusBuckets } from '../common/types';
+import { JobId, JobStatusBuckets, ReportingConfigType } from '../common/types';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../constants';
 import { getGeneralErrorToast } from './components';
 import { ReportListing } from './components/report_listing';
@@ -146,7 +146,7 @@ export class ReportingPublicPlugin implements Plugin<void, void> {
 
     uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, action);
 
-    share.register(csvReportingProvider({ apiClient, toasts, license$ }));
+    share.register(csvReportingProvider({ apiClient, toasts, license$, uiSettings }));
     share.register(
       reportingPDFPNGProvider({
         apiClient,

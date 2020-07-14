@@ -10,7 +10,6 @@ export const fetchApmData: FetchData<ApmFetchDataResponse> = () => {
 };
 
 const response: ApmFetchDataResponse = {
-  title: 'APM',
   appLink: '/app/apm',
   stats: {
     services: {
@@ -607,7 +606,6 @@ const response: ApmFetchDataResponse = {
 };
 
 export const emptyResponse: ApmFetchDataResponse = {
-  title: 'APM',
   appLink: '/app/apm',
   stats: {
     services: {
