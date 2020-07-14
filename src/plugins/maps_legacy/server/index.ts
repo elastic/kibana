@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { PluginConfigDescriptor } from 'kibana/server';
-import { PluginInitializerContext } from 'kibana/public';
+import { Plugin, PluginConfigDescriptor } from 'kibana/server';
+import { PluginInitializerContext } from 'src/core/server';
+import { Observable } from 'rxjs';
 import { configSchema, ConfigSchema } from '../config';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
@@ -37,13 +38,27 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
 };
 
-export const plugin = (initializerContext: PluginInitializerContext) => ({
-  setup() {
+export interface MapsLegacyPluginSetup {
+  config$: Observable<ConfigSchema>;
+}
+
+export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup> {
+  readonly _initializerContext: PluginInitializerContext<ConfigSchema>;
+
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
+    this._initializerContext = initializerContext;
+  }
+
+  public setup() {
     // @ts-ignore
-    const config$ = initializerContext.config.create();
+    const config$ = this._initializerContext.config.create();
     return {
-      config: config$,
+      config$,
     };
-  },
-  start() {},
-});
+  }
+
+  public start() {}
+}
+
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new MapsLegacyPlugin(initializerContext);

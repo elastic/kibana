@@ -22,7 +22,7 @@ import { inspect } from 'util';
 // @ts-ignore @types are outdated and module is super simple
 import exitHook from 'exit-hook';
 
-import { pickLevelFromFlags, ToolingLog } from '../tooling_log';
+import { pickLevelFromFlags, ToolingLog, LogLevel } from '../tooling_log';
 import { createFlagError, isFailError } from './fail';
 import { Flags, getFlags, getHelp } from './flags';
 import { ProcRunner, withProcRunner } from '../proc_runner';
@@ -38,6 +38,9 @@ type RunFn = (args: {
 export interface Options {
   usage?: string;
   description?: string;
+  log?: {
+    defaultLevel?: LogLevel;
+  };
   flags?: {
     allowUnexpected?: boolean;
     guessTypesForUnexpectedFlags?: boolean;
@@ -58,7 +61,9 @@ export async function run(fn: RunFn, options: Options = {}) {
   }
 
   const log = new ToolingLog({
-    level: pickLevelFromFlags(flags),
+    level: pickLevelFromFlags(flags, {
+      default: options.log?.defaultLevel,
+    }),
     writeTo: process.stdout,
   });
 

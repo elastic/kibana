@@ -28,7 +28,7 @@ export async function findAll<T extends SavedObjectAttributes>(
   savedObjectsClient: ISavedObjectsRepository,
   opts: SavedObjectsFindOptions
 ): Promise<Array<SavedObject<T>>> {
-  const { page = 1, perPage = 100, ...options } = opts;
+  const { page = 1, perPage = 10000, ...options } = opts;
   const { saved_objects: savedObjects, total } = await savedObjectsClient.find<T>({
     ...options,
     page,

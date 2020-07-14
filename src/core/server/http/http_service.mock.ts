@@ -29,7 +29,7 @@ import {
 } from './types';
 import { HttpService } from './http_service';
 import { AuthStatus } from './auth_state_storage';
-import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
+import { OnPreRoutingToolkit } from './lifecycle/on_pre_routing';
 import { AuthToolkit } from './lifecycle/auth';
 import { sessionStorageMock } from './cookie_session_storage.mocks';
 import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
@@ -87,6 +87,7 @@ const createInternalSetupContractMock = () => {
       config: jest.fn().mockReturnValue(configMock.create()),
     } as unknown) as jest.MockedClass<Server>,
     createCookieSessionStorageFactory: jest.fn(),
+    registerOnPreRouting: jest.fn(),
     registerOnPreAuth: jest.fn(),
     registerAuth: jest.fn(),
     registerOnPostAuth: jest.fn(),
@@ -117,7 +118,8 @@ const createSetupContractMock = () => {
 
   const mock: HttpServiceSetupMock = {
     createCookieSessionStorageFactory: internalMock.createCookieSessionStorageFactory,
-    registerOnPreAuth: internalMock.registerOnPreAuth,
+    registerOnPreRouting: internalMock.registerOnPreRouting,
+    registerOnPreAuth: jest.fn(),
     registerAuth: internalMock.registerAuth,
     registerOnPostAuth: internalMock.registerOnPostAuth,
     registerOnPreResponse: internalMock.registerOnPreResponse,
@@ -173,7 +175,7 @@ const createHttpServiceMock = () => {
   return mocked;
 };
 
-const createOnPreAuthToolkitMock = (): jest.Mocked<OnPreAuthToolkit> => ({
+const createOnPreAuthToolkitMock = (): jest.Mocked<OnPreRoutingToolkit> => ({
   next: jest.fn(),
   rewriteUrl: jest.fn(),
 });
