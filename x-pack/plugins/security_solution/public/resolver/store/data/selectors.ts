@@ -44,7 +44,7 @@ export function isLoading(state: DataState): boolean {
  * A string for uniquely identifying the instance of resolver within the app.
  */
 export function resolverComponentInstanceID(state: DataState): string {
-  return state.resolverComponentInstanceID;
+  return state.resolverComponentInstanceID ? state.resolverComponentInstanceID : '';
 }
 
 /**

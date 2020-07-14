@@ -193,13 +193,10 @@ describe('data state', () => {
       expect(selectors.isLoading(state())).toBe(true);
     });
     it('should need to fetch the second databaseDocumentID', () => {
-      expect(selectors.databaseDocumentIDToFetch(state())).toBe(firstDatabaseDocumentID);
+      expect(selectors.databaseDocumentIDToFetch(state())).toBe(secondDatabaseDocumentID);
     });
     it('should need to abort the request for the databaseDocumentID', () => {
       expect(selectors.databaseDocumentIDToFetch(state())).toBe(secondDatabaseDocumentID);
-    });
-    it('should use the correct location for the first resolver', () => {
-      expect(selectors.resolverComponentInstanceID(state())).toBe(resolverComponentInstanceID1);
     });
     it('should use the correct location for the second resolver', () => {
       expect(selectors.resolverComponentInstanceID(state())).toBe(resolverComponentInstanceID2);
