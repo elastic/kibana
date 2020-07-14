@@ -16,8 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreStart } from 'kibana/public';
-import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '../../../src/core/public';
+import {
+  CoreStart,
+  Plugin,
+  CoreSetup,
+  AppMountParameters,
+  AppNavLinkStatus,
+} from '../../../src/core/public';
 import { DeveloperExamplesSetup } from '../../developer_examples/public';
 import { getServices } from './services';
 

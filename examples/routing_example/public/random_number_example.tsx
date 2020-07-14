@@ -19,7 +19,7 @@
 import React, { useCallback } from 'react';
 import { useState } from 'react';
 import { EuiText, EuiButton, EuiLoadingSpinner, EuiCallOut } from '@elastic/eui';
-import { HttpFetchError } from 'kibana/public';
+import { HttpFetchError } from '../../../src/core/public';
 import { Services } from './services';
 import { isError } from './is_error';
 

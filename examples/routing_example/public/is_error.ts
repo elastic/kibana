@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { HttpFetchError } from 'kibana/public';
+import { HttpFetchError } from '../../../src/core/public';
 
 export function isError<T>(error: T | HttpFetchError): error is HttpFetchError {
   return error instanceof HttpFetchError;
