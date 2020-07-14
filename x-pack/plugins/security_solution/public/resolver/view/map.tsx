@@ -53,9 +53,13 @@ export const ResolverMap = React.memo(function ({
   useStateSyncingActions({ databaseDocumentID, resolverComponentInstanceID });
 
   const { timestamp } = useContext(SideEffectContext);
+
+  // use this for the entire render in order to keep things in sync
+  const timeAtRender = timestamp();
+
   const { processNodePositions, connectingEdgeLineSegments } = useSelector(
     selectors.visibleNodesAndEdgeLines
-  )(timestamp());
+  )(timeAtRender);
   const relatedEventsStats = useSelector(selectors.relatedEventsStats);
   const terminatedProcesses = useSelector(selectors.terminatedProcesses);
   const { projectionMatrix, ref, onMouseDown } = useCamera();
@@ -111,6 +115,7 @@ export const ResolverMap = React.memo(function ({
                 }
                 isProcessTerminated={terminatedProcesses.has(processEntityId)}
                 isProcessOrigin={false}
+                timeAtRender={timeAtRender}
               />
             );
           })}

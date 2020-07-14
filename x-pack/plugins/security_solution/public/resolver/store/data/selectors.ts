@@ -316,6 +316,35 @@ export const ariaLevel: (state: DataState) => (nodeID: string) => number | null 
   }
 );
 
+/**
+ * Returns the following sibling if there is one, or `null`.
+ */
+export const followingSibling: (
+  state: DataState
+) => (nodeID: string) => string | null = createSelector(
+  indexedProcessTree,
+  processEventForID,
+  (tree, eventGetter) => {
+    return (nodeID: string) => {
+      const event = eventGetter(nodeID);
+
+      // event not found
+      if (event === null) {
+        return null;
+      }
+      const nextSibling = indexedProcessTreeModel.nextSibling(tree, event);
+
+      // next sibling not found
+      if (nextSibling === undefined) {
+        return null;
+      }
+
+      // return the node ID
+      return uniquePidForProcess(nextSibling);
+    };
+  }
+);
+
 const spatiallyIndexedLayout: (state: DataState) => rbush<IndexedEntity> = createSelector(
   layout,
   function ({
