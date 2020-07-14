@@ -20,16 +20,16 @@
 import { Location } from 'history';
 import { ScopedHistory } from './scoped_history';
 
-type ScopedHistoryMock = jest.Mocked<Pick<ScopedHistory, keyof ScopedHistory>>;
+export type ScopedHistoryMock = jest.Mocked<ScopedHistory>;
+
 const createMock = ({
   pathname = '/',
   search = '',
   hash = '',
   key,
   state,
-  ...overrides
-}: Partial<Location & ScopedHistoryMock> = {}) => {
-  const mock: ScopedHistoryMock = {
+}: Partial<Location> = {}) => {
+  const mock: jest.Mocked<Pick<ScopedHistory, keyof ScopedHistory>> = {
     block: jest.fn(),
     createHref: jest.fn(),
     createSubHistory: jest.fn(),
@@ -39,7 +39,6 @@ const createMock = ({
     listen: jest.fn(),
     push: jest.fn(),
     replace: jest.fn(),
-    ...overrides,
     action: 'PUSH',
     length: 1,
     location: {
@@ -51,7 +50,9 @@ const createMock = ({
     },
   };
 
-  return mock;
+  // jest.Mocked still expects private methods and properties to be present, even
+  // if not part of the public contract.
+  return mock as ScopedHistoryMock;
 };
 
 export const scopedHistoryMock = {

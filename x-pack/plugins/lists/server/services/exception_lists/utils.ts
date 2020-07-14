@@ -6,6 +6,7 @@
 
 import { SavedObject, SavedObjectsFindResponse, SavedObjectsUpdateResponse } from 'kibana/server';
 
+import { NamespaceTypeArray } from '../../../common/schemas/types/default_namespace_array';
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 import {
   Comments,
@@ -40,6 +41,28 @@ export const getSavedObjectType = ({
   } else {
     return exceptionListSavedObjectType;
   }
+};
+
+export const getExceptionListType = ({
+  savedObjectType,
+}: {
+  savedObjectType: string;
+}): NamespaceType => {
+  if (savedObjectType === exceptionListAgnosticSavedObjectType) {
+    return 'agnostic';
+  } else {
+    return 'single';
+  }
+};
+
+export const getSavedObjectTypes = ({
+  namespaceType,
+}: {
+  namespaceType: NamespaceTypeArray;
+}): SavedObjectType[] => {
+  return namespaceType.map((singleNamespaceType) =>
+    getSavedObjectType({ namespaceType: singleNamespaceType })
+  );
 };
 
 export const transformSavedObjectToExceptionList = ({
@@ -126,10 +149,8 @@ export const transformSavedObjectUpdateToExceptionList = ({
 
 export const transformSavedObjectToExceptionListItem = ({
   savedObject,
-  namespaceType,
 }: {
   savedObject: SavedObject<ExceptionListSoSchema>;
-  namespaceType: NamespaceType;
 }): ExceptionListItemSchema => {
   const dateNow = new Date().toISOString();
   const {
@@ -167,7 +188,7 @@ export const transformSavedObjectToExceptionListItem = ({
     list_id,
     meta,
     name,
-    namespace_type: namespaceType,
+    namespace_type: getExceptionListType({ savedObjectType: savedObject.type }),
     tags,
     tie_breaker_id,
     type: exceptionListItemType.is(type) ? type : 'simple',
@@ -229,14 +250,12 @@ export const transformSavedObjectUpdateToExceptionListItem = ({
 
 export const transformSavedObjectsToFoundExceptionListItem = ({
   savedObjectsFindResponse,
-  namespaceType,
 }: {
   savedObjectsFindResponse: SavedObjectsFindResponse<ExceptionListSoSchema>;
-  namespaceType: NamespaceType;
 }): FoundExceptionListItemSchema => {
   return {
     data: savedObjectsFindResponse.saved_objects.map((savedObject) =>
-      transformSavedObjectToExceptionListItem({ namespaceType, savedObject })
+      transformSavedObjectToExceptionListItem({ savedObject })
     ),
     page: savedObjectsFindResponse.page,
     per_page: savedObjectsFindResponse.per_page,
