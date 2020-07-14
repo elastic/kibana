@@ -32,8 +32,8 @@ export type BulkOperation<Input, ErrorOutput, Output = Input> = (
 ) => Promise<Array<OperationResult<Input, ErrorOutput, Output>>>;
 
 export function createBuffer<Input extends Entity, ErrorOutput, Output extends Entity = Input>(
-  bulkOperation: BulkOperation<Input, Output, ErrorOutput>
-): Operation<Input, Output, ErrorOutput> {
+  bulkOperation: BulkOperation<Input, ErrorOutput, Output>
+): Operation<Input, ErrorOutput, Output> {
   const flushBuffer = new Subject<void>();
   const storeUpdateBuffer = new Subject<{
     entity: Input;
