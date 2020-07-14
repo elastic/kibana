@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import _ from 'lodash';
 import React, { useState, useEffect, useRef } from 'react';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';

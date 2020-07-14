@@ -22,7 +22,7 @@ interface Props {
 const stringifyJson = (json: { [key: string]: any }) =>
   Array.isArray(json) ? JSON.stringify(json, null, 2) : '[\n\n]';
 
-const formSerializer: SerializerFunc<MappingsTemplates> = (formData) => {
+const formSerializer: SerializerFunc<MappingsTemplates | undefined> = (formData) => {
   const { dynamicTemplates } = formData;
 
   let parsedTemplates;
@@ -34,12 +34,14 @@ const formSerializer: SerializerFunc<MappingsTemplates> = (formData) => {
       parsedTemplates = [parsedTemplates];
     }
   } catch {
-    parsedTemplates = [];
+    // Silently swallow errors
   }
 
-  return {
-    dynamic_templates: parsedTemplates,
-  };
+  return Array.isArray(parsedTemplates) && parsedTemplates.length > 0
+    ? {
+        dynamic_templates: parsedTemplates,
+      }
+    : undefined;
 };
 
 const formDeserializer = (formData: { [key: string]: any }) => {
@@ -53,7 +55,7 @@ const formDeserializer = (formData: { [key: string]: any }) => {
 export const TemplatesForm = React.memo(({ value }: Props) => {
   const isMounted = useRef<boolean | undefined>(undefined);
 
-  const { form } = useForm<MappingsTemplates>({
+  const { form } = useForm<any>({
     schema: templatesFormSchema,
     serializer: formSerializer,
     deserializer: formDeserializer,

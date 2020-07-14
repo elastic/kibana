@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { get, has } from 'lodash';
+import { get, hasIn } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   KibanaContext,
   KibanaDatatable,
   ExpressionFunctionDefinition,
   KibanaDatatableColumn,
-} from '../../../../../plugins/expressions/public';
+} from 'src/plugins/expressions/public';
 import { calculateObjectHash } from '../../../../../plugins/kibana_utils/public';
 import { PersistedState } from '../../../../../plugins/visualizations/public';
 import { Adapters } from '../../../../../plugins/inspector/public';
@@ -195,13 +195,13 @@ const handleCourierRequest = async ({
   // response data incorrectly in the inspector.
   let resp = (searchSource as any).rawResponse;
   for (const agg of aggs.aggs) {
-    if (has(agg, 'type.postFlightRequest')) {
+    if (hasIn(agg, 'type.postFlightRequest')) {
       resp = await agg.type.postFlightRequest(
         resp,
         aggs,
         agg,
         requestSearchSource,
-        inspectorAdapters,
+        inspectorAdapters.requests,
         abortSignal
       );
     }
@@ -302,7 +302,7 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
       aggs,
       indexPattern,
       timeRange: get(input, 'timeRange', undefined),
-      query: get(input, 'query', undefined),
+      query: get(input, 'query', undefined) as any,
       filters: get(input, 'filters', undefined),
       timeFields: args.timeFields,
       forceFetch: true,

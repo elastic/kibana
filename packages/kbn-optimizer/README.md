@@ -42,6 +42,26 @@ When a directory is listed in the "extraPublicDirs" it will always be included i
 
 Any import in a bundle which resolves into another bundles "context" directory, ie `src/plugins/*`, must map explicitly to a "public dir" exported by that plugin. If the resolved import is not in the list of public dirs an error will be thrown and the optimizer will fail to build that bundle until the error is fixed.
 
+## Themes
+
+SASS imports in bundles are automatically converted to CSS for one or more themes. In development we build the `v7light` and `v7dark` themes by default to improve build performance. When producing distributable bundles the default shifts to `*` so that the distributable bundles will include all themes, preventing the bundles from needing to be rebuilt when users change the active theme in Kibana's advanced settings.
+
+To customize the themes that are built for development you can specify the `KBN_OPTIMIZER_THEMES` environment variable to one or more theme tags, or use `*` to build styles for all themes. Unfortunately building more than one theme significantly impacts build performance, so try to be strategic about which themes you build.
+
+Currently supported theme tags: `v7light`, `v7dark`, `v8light`, `v8dark`
+
+Examples:
+```sh
+# start Kibana with only a single theme
+KBN_OPTIMIZER_THEMES=v7light yarn start
+
+# start Kibana with dark themes for version 7 and 8
+KBN_OPTIMIZER_THEMES=v7dark,v8dark yarn start
+
+# start Kibana with all the themes
+KBN_OPTIMIZER_THEMES=* yarn start
+```
+
 ## API
 
 To run the optimizer from code, you can import the [`OptimizerConfig`][OptimizerConfig] class and [`runOptimizer`][Optimizer] function. Create an [`OptimizerConfig`][OptimizerConfig] instance by calling it's static `create()` method with some options, then pass it to the [`runOptimizer`][Optimizer] function. `runOptimizer()` returns an observable of update objects, which are summaries of the optimizer state plus an optional `event` property which describes the internal events occuring and may be of use. You can use the [`logOptimizerState()`][LogOptimizerState] helper to write the relevant bits of state to a tooling log or checkout it's implementation to see how the internal events like [`WorkerStdio`][ObserveWorker] and [`WorkerStarted`][ObserveWorker] are used.

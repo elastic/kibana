@@ -18,7 +18,7 @@ import {
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
-import { AbstractESAggSource } from '../es_agg_source';
+import { AbstractESAggSource, DEFAULT_METRIC } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
 import { registerSource } from '../source_registry';
 import { makeESBbox } from '../../../elasticsearch_geo_utils';
@@ -42,7 +42,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
       id: uuid(),
       indexPatternId,
       geoField,
-      metrics: metrics ? metrics : [],
+      metrics: metrics ? metrics : [DEFAULT_METRIC],
       requestType,
       resolution: resolution ? resolution : GRID_RESOLUTION.COARSE,
     };
@@ -103,7 +103,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
     return true;
   }
 
-  isJoinable() {
+  showJoinEditor() {
     return false;
   }
 
@@ -310,7 +310,6 @@ export class ESGeoGridSource extends AbstractESAggSource {
       },
       meta: {
         areResultsTrimmed: false,
-        sourceType: SOURCE_TYPES.ES_GEO_GRID,
       },
     };
   }

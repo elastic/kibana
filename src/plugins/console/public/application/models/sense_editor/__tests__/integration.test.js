@@ -117,7 +117,7 @@ describe('Integration', () => {
             return t;
           });
           if (terms.length !== expectedTerms.length) {
-            expect(_.pluck(terms, 'name')).toEqual(_.pluck(expectedTerms, 'name'));
+            expect(_.map(terms, 'name')).toEqual(_.map(expectedTerms, 'name'));
           } else {
             const filteredActualTerms = _.map(terms, function (actualTerm, i) {
               const expectedTerm = expectedTerms[i];

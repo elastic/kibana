@@ -17,114 +17,169 @@
  * under the License.
  */
 
-import { Observable, Subject } from 'rxjs';
 import { CoreStart } from '../../../../core/public';
 import { coreMock } from '../../../../core/public/mocks';
-import { IKibanaSearchRequest } from '../../common/search';
-import { RequestTimeoutError } from './request_timeout_error';
+import { IEsSearchRequest } from '../../common/search';
 import { SearchInterceptor } from './search_interceptor';
+import { AbortError } from '../../common';
 
-jest.useFakeTimers();
-
-const mockSearch = jest.fn();
 let searchInterceptor: SearchInterceptor;
 let mockCoreStart: MockedKeys<CoreStart>;
+
+const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+jest.useFakeTimers();
 
 describe('SearchInterceptor', () => {
   beforeEach(() => {
     mockCoreStart = coreMock.createStart();
-    mockSearch.mockClear();
     searchInterceptor = new SearchInterceptor(
-      mockCoreStart.notifications.toasts,
-      mockCoreStart.application,
+      {
+        toasts: mockCoreStart.notifications.toasts,
+        application: mockCoreStart.application,
+        uiSettings: mockCoreStart.uiSettings,
+        http: mockCoreStart.http,
+      },
       1000
     );
   });
 
   describe('search', () => {
-    test('should invoke `search` with the request', () => {
-      const mockResponse = new Subject();
-      mockSearch.mockReturnValue(mockResponse.asObservable());
-      const mockRequest: IKibanaSearchRequest = {};
-      const response = searchInterceptor.search(mockSearch, mockRequest);
-      mockResponse.complete();
+    test('Observable should resolve if fetch is successful', async () => {
+      const mockResponse: any = { result: 200 };
+      mockCoreStart.http.fetch.mockResolvedValueOnce(mockResponse);
+      const mockRequest: IEsSearchRequest = {
+        params: {},
+      };
+      const response = searchInterceptor.search(mockRequest);
 
-      response.subscribe();
-      expect(mockSearch.mock.calls[0][0]).toBe(mockRequest);
+      const result = await response.toPromise();
+      expect(result).toBe(mockResponse);
     });
 
-    test('should mirror the observable to completion if the request does not time out', () => {
-      const mockResponse = new Subject();
-      mockSearch.mockReturnValue(mockResponse.asObservable());
-      const response = searchInterceptor.search(mockSearch, {});
+    test('Observable should fail if fetch has an error', async () => {
+      const mockResponse: any = { result: 500 };
+      mockCoreStart.http.fetch.mockRejectedValueOnce(mockResponse);
+      const mockRequest: IEsSearchRequest = {
+        params: {},
+      };
+      const response = searchInterceptor.search(mockRequest);
 
-      setTimeout(() => mockResponse.next('hi'), 250);
-      setTimeout(() => mockResponse.complete(), 500);
-
-      const next = jest.fn();
-      const complete = jest.fn();
-      response.subscribe({ next, complete });
-
-      jest.advanceTimersByTime(1000);
-
-      expect(next).toHaveBeenCalledWith('hi');
-      expect(complete).toHaveBeenCalled();
+      try {
+        await response.toPromise();
+      } catch (e) {
+        expect(e).toBe(mockResponse);
+      }
     });
 
-    test('should mirror the observable to error if the request does not time out', () => {
-      const mockResponse = new Subject();
-      mockSearch.mockReturnValue(mockResponse.asObservable());
-      const response = searchInterceptor.search(mockSearch, {});
+    test('Observable should fail if fetch times out (test merged signal)', async () => {
+      mockCoreStart.http.fetch.mockImplementationOnce((options: any) => {
+        return new Promise((resolve, reject) => {
+          options.signal.addEventListener('abort', () => {
+            reject(new AbortError());
+          });
 
-      setTimeout(() => mockResponse.next('hi'), 250);
-      setTimeout(() => mockResponse.error('error'), 500);
+          setTimeout(resolve, 5000);
+        });
+      });
+      const mockRequest: IEsSearchRequest = {
+        params: {},
+      };
+      const response = searchInterceptor.search(mockRequest);
 
       const next = jest.fn();
-      const error = jest.fn();
+      const error = (e: any) => {
+        expect(next).not.toBeCalled();
+        expect(e).toBeInstanceOf(AbortError);
+      };
       response.subscribe({ next, error });
 
-      jest.advanceTimersByTime(1000);
+      jest.advanceTimersByTime(5000);
 
-      expect(next).toHaveBeenCalledWith('hi');
-      expect(error).toHaveBeenCalledWith('error');
+      await flushPromises();
     });
 
-    test('should return a `RequestTimeoutError` if the request times out', () => {
-      mockSearch.mockReturnValue(new Observable());
-      const response = searchInterceptor.search(mockSearch, {});
+    test('Observable should fail if user aborts (test merged signal)', async () => {
+      const abortController = new AbortController();
+      mockCoreStart.http.fetch.mockImplementationOnce((options: any) => {
+        return new Promise((resolve, reject) => {
+          options.signal.addEventListener('abort', () => {
+            reject(new AbortError());
+          });
 
-      const error = jest.fn();
+          setTimeout(resolve, 500);
+        });
+      });
+      const mockRequest: IEsSearchRequest = {
+        params: {},
+      };
+      const response = searchInterceptor.search(mockRequest, { signal: abortController.signal });
+
+      const next = jest.fn();
+      const error = (e: any) => {
+        expect(next).not.toBeCalled();
+        expect(e).toBeInstanceOf(AbortError);
+      };
+      response.subscribe({ next, error });
+      setTimeout(() => abortController.abort(), 200);
+      jest.advanceTimersByTime(5000);
+
+      await flushPromises();
+    });
+
+    test('Immediatelly aborts if passed an aborted abort signal', async (done) => {
+      const abort = new AbortController();
+      const mockRequest: IEsSearchRequest = {
+        params: {},
+      };
+      const response = searchInterceptor.search(mockRequest, { signal: abort.signal });
+      abort.abort();
+
+      const error = (e: any) => {
+        expect(e).toBeInstanceOf(AbortError);
+        expect(mockCoreStart.http.fetch).not.toBeCalled();
+        done();
+      };
       response.subscribe({ error });
-
-      jest.advanceTimersByTime(1000);
-
-      expect(error).toHaveBeenCalled();
-      expect(error.mock.calls[0][0] instanceof RequestTimeoutError).toBe(true);
     });
   });
 
   describe('getPendingCount$', () => {
     test('should observe the number of pending requests', () => {
-      let i = 0;
-      const mockResponses = [new Subject(), new Subject()];
-      mockSearch.mockImplementation(() => mockResponses[i++]);
-
       const pendingCount$ = searchInterceptor.getPendingCount$();
+      const pendingNext = jest.fn();
+      pendingCount$.subscribe(pendingNext);
 
-      const next = jest.fn();
-      pendingCount$.subscribe(next);
+      const mockResponse: any = { result: 200 };
+      mockCoreStart.http.fetch.mockResolvedValue(mockResponse);
+      const mockRequest: IEsSearchRequest = {
+        params: {},
+      };
+      const response = searchInterceptor.search(mockRequest);
 
-      const error = jest.fn();
-      searchInterceptor.search(mockSearch, {}).subscribe({ error });
-      searchInterceptor.search(mockSearch, {}).subscribe({ error });
+      response.subscribe({
+        complete: () => {
+          expect(pendingNext.mock.calls).toEqual([[0], [1], [0]]);
+        },
+      });
+    });
 
-      setTimeout(() => mockResponses[0].complete(), 250);
-      setTimeout(() => mockResponses[1].error('error'), 500);
+    test('should observe the number of pending requests on error', () => {
+      const pendingCount$ = searchInterceptor.getPendingCount$();
+      const pendingNext = jest.fn();
+      pendingCount$.subscribe(pendingNext);
 
-      jest.advanceTimersByTime(500);
+      const mockResponse: any = { result: 500 };
+      mockCoreStart.http.fetch.mockRejectedValue(mockResponse);
+      const mockRequest: IEsSearchRequest = {
+        params: {},
+      };
+      const response = searchInterceptor.search(mockRequest);
 
-      expect(next).toHaveBeenCalled();
-      expect(next.mock.calls).toEqual([[0], [1], [2], [1], [0]]);
+      response.subscribe({
+        complete: () => {
+          expect(pendingNext.mock.calls).toEqual([[0], [1], [0]]);
+        },
+      });
     });
   });
 });

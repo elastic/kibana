@@ -191,11 +191,11 @@ export function defineAlertTypes(
         callClusterError = e;
       }
       // Call scoped cluster
-      const callScopedCluster = services.getScopedCallCluster(clusterClient);
+      const scopedClusterClient = services.getLegacyScopedClusterClient(clusterClient);
       let callScopedClusterSuccess = false;
       let callScopedClusterError;
       try {
-        await callScopedCluster('index', {
+        await scopedClusterClient.callAsCurrentUser('index', {
           index: params.callClusterAuthorizationIndex,
           refresh: 'wait_for',
           body: {

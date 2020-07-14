@@ -4,24 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { ActionContextMapping, createAction } from '../../../../../src/plugins/ui_actions/public';
-import { IEmbeddable } from '../../../../../src/plugins/embeddable/public';
 import {
   AnomalySwimlaneEmbeddable,
-  AnomalySwimlaneEmbeddableInput,
-  AnomalySwimlaneEmbeddableOutput,
+  EditSwimlanePanelContext,
 } from '../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
 import { resolveAnomalySwimlaneUserInput } from '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout';
+import { ViewMode } from '../../../../../src/plugins/embeddable/public';
+import { MlCoreSetup } from '../plugin';
 
 export const EDIT_SWIMLANE_PANEL_ACTION = 'editSwimlanePanelAction';
 
-export interface EditSwimlanePanelContext {
-  embeddable: IEmbeddable<AnomalySwimlaneEmbeddableInput, AnomalySwimlaneEmbeddableOutput>;
-}
-
-export function createEditSwimlanePanelAction(getStartServices: CoreSetup['getStartServices']) {
+export function createEditSwimlanePanelAction(getStartServices: MlCoreSetup['getStartServices']) {
   return createAction<typeof EDIT_SWIMLANE_PANEL_ACTION>({
     id: 'edit-anomaly-swimlane',
     type: EDIT_SWIMLANE_PANEL_ACTION,
@@ -48,7 +43,8 @@ export function createEditSwimlanePanelAction(getStartServices: CoreSetup['getSt
     },
     isCompatible: async ({ embeddable }: EditSwimlanePanelContext) => {
       return (
-        embeddable instanceof AnomalySwimlaneEmbeddable && embeddable.getInput().viewMode === 'edit'
+        embeddable instanceof AnomalySwimlaneEmbeddable &&
+        embeddable.getInput().viewMode === ViewMode.EDIT
       );
     },
   });

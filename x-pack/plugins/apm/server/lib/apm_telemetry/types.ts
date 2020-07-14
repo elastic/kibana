@@ -25,6 +25,11 @@ export type APMDataTelemetry = DeepPartial<{
       patch: number;
     };
   };
+  cloud: {
+    availability_zone: string[];
+    provider: string[];
+    region: string[];
+  };
   counts: {
     transaction: TimeframeMap;
     span: TimeframeMap;
@@ -39,6 +44,7 @@ export type APMDataTelemetry = DeepPartial<{
     services: TimeframeMap;
   };
   cardinality: {
+    client: { geo: { country_iso_code: { rum: TimeframeMap1d } } };
     user_agent: {
       original: {
         all_agents: TimeframeMap1d;
@@ -102,6 +108,7 @@ export type APMDataTelemetry = DeepPartial<{
     };
   };
   tasks: Record<
+    | 'cloud'
     | 'processor_events'
     | 'agent_configuration'
     | 'services'

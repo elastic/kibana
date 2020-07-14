@@ -19,7 +19,6 @@
 
 import Fs from 'fs';
 import Url from 'url';
-import _ from 'lodash';
 import puppeteer from 'puppeteer';
 import { resolve } from 'path';
 import { ToolingLog } from '@kbn/dev-utils';

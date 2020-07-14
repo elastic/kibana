@@ -87,13 +87,15 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
 
     async waitTableIsLoaded() {
       return retry.try(async () => {
-        const exists = await find.existsByDisplayedByCssSelector(
-          '*[data-test-subj="savedObjectsTable"] .euiBasicTable-loading'
+        const isLoaded = await find.existsByDisplayedByCssSelector(
+          '*[data-test-subj="savedObjectsTable"] :not(.euiBasicTable-loading)'
         );
-        if (exists) {
+
+        if (isLoaded) {
+          return true;
+        } else {
           throw new Error('Waiting');
         }
-        return true;
       });
     }
 

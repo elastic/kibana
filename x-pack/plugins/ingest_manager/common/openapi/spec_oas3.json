@@ -3520,7 +3520,17 @@
         ]
       }
     },
-    "/fleet/agents/unenroll": {
+    "/fleet/agents/{agentId}/unenroll": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentId",
+          "in": "path",
+          "required": true
+        }
+      ],
       "post": {
         "summary": "Fleet - Agent - Unenroll",
         "tags": [],
@@ -3530,7 +3540,26 @@
           {
             "$ref": "#/components/parameters/xsrfHeader"
           }
-        ]
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "force": { "type": "boolean" }
+                }
+              },
+              "examples": {
+                "example-1": {
+                  "value": {
+                    "force": true
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/fleet/config/{configId}/agent-status": {
@@ -4096,6 +4125,12 @@
           "enrolled_at": {
             "type": "string"
           },
+          "unenrolled_at": {
+            "type": "string"
+          },
+          "unenrollment_started_at": {
+            "type": "string"
+          },
           "shared_id": {
             "type": "string"
           },
@@ -4110,9 +4145,6 @@
           },
           "config_revision": {
             "type": ["number", "null"]
-          },
-          "config_newest_revision": {
-            "type": "number"
           },
           "last_checkin": {
             "type": "string"

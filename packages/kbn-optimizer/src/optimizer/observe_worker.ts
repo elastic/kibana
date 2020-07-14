@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { Readable } from 'stream';
 import { inspect } from 'util';
 
 import execa from 'execa';
@@ -26,12 +25,13 @@ import { map, takeUntil, first, ignoreElements } from 'rxjs/operators';
 
 import { isWorkerMsg, WorkerConfig, WorkerMsg, Bundle, BundleRefs } from '../common';
 
+import { observeStdio$ } from './observe_stdio';
 import { OptimizerConfig } from './optimizer_config';
 
 export interface WorkerStdio {
   type: 'worker stdio';
   stream: 'stdout' | 'stderr';
-  chunk: Buffer;
+  line: string;
 }
 
 export interface WorkerStarted {
@@ -96,28 +96,6 @@ function usingWorkerProc<T>(
       const { proc } = resource as ProcResource;
       return fn(proc);
     }
-  );
-}
-
-function observeStdio$(stream: Readable, name: WorkerStdio['stream']) {
-  return Rx.fromEvent<Buffer>(stream, 'data').pipe(
-    takeUntil(
-      Rx.race(
-        Rx.fromEvent<void>(stream, 'end'),
-        Rx.fromEvent<Error>(stream, 'error').pipe(
-          map((error) => {
-            throw error;
-          })
-        )
-      )
-    ),
-    map(
-      (chunk): WorkerStdio => ({
-        type: 'worker stdio',
-        chunk,
-        stream: name,
-      })
-    )
   );
 }
 
@@ -186,8 +164,24 @@ export function observeWorker(
         type: 'worker started',
         bundles,
       }),
-      observeStdio$(proc.stdout, 'stdout'),
-      observeStdio$(proc.stderr, 'stderr'),
+      observeStdio$(proc.stdout).pipe(
+        map(
+          (line): WorkerStdio => ({
+            type: 'worker stdio',
+            line,
+            stream: 'stdout',
+          })
+        )
+      ),
+      observeStdio$(proc.stderr).pipe(
+        map(
+          (line): WorkerStdio => ({
+            type: 'worker stdio',
+            line,
+            stream: 'stderr',
+          })
+        )
+      ),
       Rx.fromEvent<[unknown]>(proc, 'message')
         .pipe(
           // validate the messages from the process

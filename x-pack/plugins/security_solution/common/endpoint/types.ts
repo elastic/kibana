@@ -4,8 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PackageConfig, NewPackageConfig } from '../../../ingest_manager/common';
+import { ApplicationStart } from 'kibana/public';
+import { NewPackageConfig, PackageConfig } from '../../../ingest_manager/common';
 import { ManifestSchema } from './schema/manifest';
+
+/**
+ * Supported React-Router state for the Policy Details page
+ */
+export interface PolicyDetailsRouteState {
+  /**
+   * Where the user should be redirected to when the `Save` button is clicked and the update was successful
+   */
+  onSaveNavigateTo?: Parameters<ApplicationStart['navigateToApp']>;
+  /**
+   * Where the user should be redirected to when the `Cancel` button is clicked
+   */
+  onCancelNavigateTo?: Parameters<ApplicationStart['navigateToApp']>;
+}
 
 /**
  * Object that allows you to maintain stateful information in the location object across navigation events
@@ -17,9 +32,11 @@ export interface AppLocation {
   search: string;
   hash: string;
   key?: string;
-  state?: {
-    isTabChange?: boolean;
-  };
+  state?:
+    | {
+        isTabChange?: boolean;
+      }
+    | PolicyDetailsRouteState;
 }
 
 /**
@@ -317,13 +334,13 @@ export interface AlertEvent {
     start: number;
     thread?: ThreadFields[];
     uptime: number;
-    Ext: {
+    Ext?: {
       /*
        * The array has a special format. The entity_ids towards the beginning of the array are closer ancestors and the
        * values towards the end of the array are more distant ancestors (grandparents). Therefore
        * ancestry_array[0] == process.parent.entity_id and ancestry_array[1] == process.parent.parent.entity_id
        */
-      ancestry: string[];
+      ancestry?: string[];
       code_signature: Array<{
         subject_name: string;
         trusted: boolean;
@@ -522,8 +539,8 @@ export interface EndpointEvent {
      * values towards the end of the array are more distant ancestors (grandparents). Therefore
      * ancestry_array[0] == process.parent.entity_id and ancestry_array[1] == process.parent.parent.entity_id
      */
-    Ext: {
-      ancestry: string[];
+    Ext?: {
+      ancestry?: string[];
     };
   };
   user?: {
@@ -613,10 +630,8 @@ export interface PolicyConfig {
     };
     malware: MalwareFields;
     logging: {
-      stdout: string;
       file: string;
     };
-    advanced: PolicyConfigAdvancedOptions;
   };
   mac: {
     events: {
@@ -626,10 +641,8 @@ export interface PolicyConfig {
     };
     malware: MalwareFields;
     logging: {
-      stdout: string;
       file: string;
     };
-    advanced: PolicyConfigAdvancedOptions;
   };
   linux: {
     events: {
@@ -638,10 +651,8 @@ export interface PolicyConfig {
       network: boolean;
     };
     logging: {
-      stdout: string;
       file: string;
     };
-    advanced: PolicyConfigAdvancedOptions;
   };
 }
 
@@ -663,20 +674,6 @@ export interface UIPolicyConfig {
   linux: Pick<PolicyConfig['linux'], 'events'>;
 }
 
-interface PolicyConfigAdvancedOptions {
-  elasticsearch: {
-    indices: {
-      control: string;
-      event: string;
-      logging: string;
-    };
-    kernel: {
-      connect: boolean;
-      process: boolean;
-    };
-  };
-}
-
 /** Policy: Malware protection fields */
 export interface MalwareFields {
   mode: ProtectionModes;
@@ -686,7 +683,6 @@ export interface MalwareFields {
 export enum ProtectionModes {
   detect = 'detect',
   prevent = 'prevent',
-  preventNotify = 'preventNotify',
   off = 'off',
 }
 
