@@ -411,47 +411,47 @@ describe('rules_notification_alert_type', () => {
     });
   });
 
-  describe('createSignals', () => {
-    describe('no exceptions', () => {
-      // this should be added in here for testing within executor (pronounced egg-zec-u-ter)?
-      it('should not invoke "findExceptionItems" if no exception lists exist', async () => {});
-      // we could write this test in get filter or SABC?
-      it('should not modify rule query', async () => {});
-      // this might be covered by a test in search_after_bulk_create.test.ts?
-      it('should not invoke "filterEventsWithLists" if no exception lists exist', async () => {});
-      // this is probably covered by some test in SABC.
-      it('should only conduct one search, assuming MAX_SIGNALS events are found', async () => {});
-      // extend this in a test in SABC
-      it('should conduct a second search if first search results in less than MAX_SIGNALS', async () => {});
-      // extend this in a test in SABC
-      it('should return MAX_SIGNALS events to create signals from', async () => {});
-    });
-    describe('exceptions exist, no large list values', () => {
-      // add this test case to the executor
-      it('should invoke "findExceptionItems"', async () => {});
-      it('should append exceptions to rule query', async () => {});
-      it('should not invoke "filterEventsWithLists"', async () => {});
-      // testing if we cut out of loops early or not?
-      it('should filter through all exception items while number of events remains greater than 0', async () => {});
-      // different from the test case for filter with lists.test.. add this test case to SABC
-      it('should not filter through all exception items if one of filters out all events', async () => {});
-      it('should return MAX_SIGNALS events to create signals from', async () => {});
-      it('should return less than MAX_SIGNALS events to create signals from if SOME_CONDITION is met before MAX_SIGNALS reached', async () => {});
-    });
-    describe('exceptions exist, only large list values', () => {
-      it('should invoke "findExceptionItems"', async () => {});
-      it('should not modify rule query', async () => {});
-      it('should invoke "filterEventsWithLists"', async () => {});
-      it('should filter through all exception items while number of events remains greater than 0', async () => {});
-      it('should not filter through all exception items if one of filters out all events', async () => {});
-      it('should return MAX_SIGNALS events to create signals from', async () => {});
-      it('should return less than MAX_SIGNALS events to create signals from if SOME_CONDITION is met before MAX_SIGNALS reached', async () => {});
-    });
-    describe('exceptions exist, mix', () => {
-      it('should return MAX_SIGNALS events to create signals from', async () => {});
-      it('should return less than MAX_SIGNALS events to create signals from if SOME_CONDITION is met before MAX_SIGNALS reached', async () => {});
-    });
-  });
+  // describe('createSignals', () => {
+  //   describe('no exceptions', () => {
+  //     // this should be added in here for testing within executor (pronounced egg-zec-u-ter)?
+  //     it('should not invoke "findExceptionItems" if no exception lists exist', async () => {});
+  //     // we could write this test in get filter or SABC?
+  //     it('should not modify rule query', async () => {});
+  //     // this might be covered by a test in search_after_bulk_create.test.ts?
+  //     it('should not invoke "filterEventsWithLists" if no exception lists exist', async () => {});
+  //     // this is probably covered by some test in SABC.
+  //     it('should only conduct one search, assuming MAX_SIGNALS events are found', async () => {});
+  //     // extend this in a test in SABC
+  //     it('should conduct a second search if first search results in less than MAX_SIGNALS', async () => {});
+  //     // extend this in a test in SABC
+  //     it('should return MAX_SIGNALS events to create signals from', async () => {});
+  //   });
+  //   describe('exceptions exist, no large list values', () => {
+  //     // add this test case to the executor
+  //     it('should invoke "findExceptionItems"', async () => {});
+  //     it('should append exceptions to rule query', async () => {});
+  //     it('should not invoke "filterEventsWithLists"', async () => {});
+  //     // testing if we cut out of loops early or not?
+  //     it('should filter through all exception items while number of events remains greater than 0', async () => {});
+  //     // different from the test case for filter with lists.test.. add this test case to SABC
+  //     it('should not filter through all exception items if one of filters out all events', async () => {});
+  //     it('should return MAX_SIGNALS events to create signals from', async () => {});
+  //     it('should return less than MAX_SIGNALS events to create signals from if SOME_CONDITION is met before MAX_SIGNALS reached', async () => {});
+  //   });
+  //   describe('exceptions exist, only large list values', () => {
+  //     it('should invoke "findExceptionItems"', async () => {});
+  //     it('should not modify rule query', async () => {});
+  //     it('should invoke "filterEventsWithLists"', async () => {});
+  //     it('should filter through all exception items while number of events remains greater than 0', async () => {});
+  //     it('should not filter through all exception items if one of filters out all events', async () => {});
+  //     it('should return MAX_SIGNALS events to create signals from', async () => {});
+  //     it('should return less than MAX_SIGNALS events to create signals from if SOME_CONDITION is met before MAX_SIGNALS reached', async () => {});
+  //   });
+  //   describe('exceptions exist, mix', () => {
+  //     it('should return MAX_SIGNALS events to create signals from', async () => {});
+  //     it('should return less than MAX_SIGNALS events to create signals from if SOME_CONDITION is met before MAX_SIGNALS reached', async () => {});
+  //   });
+  // });
 
   describe('exception items', () => {
     it('should filter out exceptions given two simple exception items', async () => {

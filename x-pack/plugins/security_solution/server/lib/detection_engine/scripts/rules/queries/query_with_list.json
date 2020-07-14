@@ -6,6 +6,6 @@
   "severity": "high",
   "type": "query",
   "query": "host.name: *",
-  "interval": "30s",
-  "exceptions_list": [{ "id": "ID_HERE", "namespace_type": "single", "type": "endpoint" }]
+  "interval": "20s",
+  "exceptions_list": [{ "id": "cf558f00-c229-11ea-919f-6f996cd3f0ac", "namespace_type": "single", "type": "endpoint" }]
 }
