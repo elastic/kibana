@@ -18,4 +18,5 @@
  */
 
 export { KbnClient } from './kbn_client';
+export { MigrateResponse } from './kbn_client_saved_objects';
 export { uriencode } from './kbn_client_requester';

@@ -50,7 +50,7 @@ interface ControlsTabUiState {
   type: CONTROL_TYPES;
 }
 
-interface ControlsTabUiParams {
+export interface ControlsTabUiParams {
   controls: ControlParams[];
 }
 type ControlsTabUiInjectedProps = InjectedIntlProps &

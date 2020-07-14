@@ -19,7 +19,7 @@
 
 type TimelionFunctionArgsTypes = 'seriesList' | 'number' | 'string' | 'boolean' | 'null';
 
-interface TimelionFunctionArgsSuggestion {
+export interface TimelionFunctionArgsSuggestion {
   name: string;
   help: string;
 }

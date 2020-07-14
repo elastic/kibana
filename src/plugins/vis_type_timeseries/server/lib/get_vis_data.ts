@@ -24,7 +24,7 @@ import { getPanelData } from './vis_data/get_panel_data';
 import { Framework } from '../index';
 import { ReqFacade } from './search_strategies/strategies/abstract_search_strategy';
 
-interface GetVisDataResponse {
+export interface GetVisDataResponse {
   [key: string]: GetVisDataPanel;
 }
 

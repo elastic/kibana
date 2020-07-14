@@ -31,7 +31,7 @@ import { InternalElasticsearchServiceSetup, ElasticsearchStatusMeta } from './ty
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { ServiceStatus, ServiceStatusLevels } from '../status';
 
-interface MockedElasticSearchServiceSetup {
+export interface MockedElasticSearchServiceSetup {
   legacy: {
     createClient: jest.Mock<ILegacyCustomClusterClient, any>;
     client: jest.Mocked<ILegacyClusterClient>;

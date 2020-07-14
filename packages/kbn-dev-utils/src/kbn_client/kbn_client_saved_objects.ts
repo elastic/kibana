@@ -57,7 +57,7 @@ interface UpdateOptions<Attributes> extends IndexOptions<Attributes> {
   id: string;
 }
 
-interface MigrateResponse {
+export interface MigrateResponse {
   success: boolean;
   result: Array<{ status: string }>;
 }

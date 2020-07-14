@@ -28,7 +28,7 @@ import { VegaVisualizationDependencies } from './plugin';
 import { VisParams } from './vega_fn';
 import { getData, getInjectedMetadata } from './services';
 
-interface VegaRequestHandlerParams {
+export interface VegaRequestHandlerParams {
   query: Query;
   filters: Filter;
   timeRange: TimeRange;
