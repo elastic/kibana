@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { isEmpty } from 'lodash/fp';
 
 import { SortField, TimerangeInput, DocValueFieldsInput } from '../../graphql/types';
 import { createQueryFilterClauses } from '../../utils/build_query';
@@ -57,7 +58,7 @@ export const buildTimelineQuery = (options: RequestOptions) => {
     index: defaultIndex,
     ignoreUnavailable: true,
     body: {
-      docvalue_fields: options.docValueFields ?? [],
+      ...(isEmpty(options.docValueFields) ? { docvalue_fields: options.docValueFields } : {}),
       query: {
         bool: {
           filter,

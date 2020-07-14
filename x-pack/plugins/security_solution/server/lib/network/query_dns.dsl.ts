@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
+
 import { Direction, NetworkDnsFields, NetworkDnsSortField } from '../../graphql/types';
 import { assertUnreachable, createQueryFilterClauses } from '../../utils/build_query';
 
@@ -86,7 +88,7 @@ export const buildDnsQuery = ({
     index: defaultIndex,
     ignoreUnavailable: true,
     body: {
-      docvalue_fields: docValueFields ?? [],
+      ...(isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
         ...getCountAgg(),
         dns_name_query_count: {

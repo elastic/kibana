@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
 import { HostLastFirstSeenRequestOptions } from './types';
 
 export const buildLastFirstSeenHostQuery = ({
@@ -18,7 +19,7 @@ export const buildLastFirstSeenHostQuery = ({
     index: defaultIndex,
     ignoreUnavailable: true,
     body: {
-      docvalue_fields: docValueFields ?? [],
+      ...(isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
         firstSeen: { min: { field: '@timestamp' } },
         lastSeen: { max: { field: '@timestamp' } },
