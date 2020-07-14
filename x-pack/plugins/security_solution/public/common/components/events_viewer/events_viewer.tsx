@@ -142,22 +142,18 @@ const EventsViewerComponent: React.FC<Props> = ({
     id,
   ]);
 
-  const justTitle = useMemo(() => <TitleText data-test-subj="just-title">{title}</TitleText>, [
-    title,
-  ]);
+  const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
 
   const titleWithExitFullScreen = useMemo(
     () => (
       <TitleFlexGroup alignItems="center" data-test-subj="title-flex-group" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <TitleText data-test-subj="title-with-exit-full-screen">{title}</TitleText>
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{justTitle}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ExitFullScreen />
         </EuiFlexItem>
       </TitleFlexGroup>
     ),
-    [title]
+    [justTitle]
   );
 
   const combinedQueries = combineQueries({

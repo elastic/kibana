@@ -30,6 +30,11 @@ const PopoverContainer = styled.div`
   left: -40px;
   position: relative;
   top: 10px;
+
+  .euiPopover {
+    position: fixed;
+    z-index: 10;
+  }
 `;
 
 const CollapseButton = styled(EuiButtonIcon)`
@@ -117,11 +122,8 @@ export const EventDetails = React.memo<Props>(
             button={button}
             isOpen={false}
             closePopover={noop}
-            style={popoverStyle}
             repositionOnScroll={true}
-          >
-            {null}
-          </EuiPopover>
+          />
         </PopoverContainer>
         <EuiTabbedContent
           tabs={tabs}
