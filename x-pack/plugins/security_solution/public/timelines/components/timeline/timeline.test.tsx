@@ -180,6 +180,34 @@ describe('Timeline', () => {
         'All events'
       );
     });
+
+    it('it shows the timeline footer', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mocks}>
+            <TimelineComponent {...props} />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="timeline-footer"]').exists()).toEqual(true);
+    });
+    describe('when there is a graphEventId', () => {
+      beforeEach(() => {
+        props.graphEventId = 'graphEventId'; // any string w/ length > 0 works
+      });
+      it('should not show the timeline footer', () => {
+        const wrapper = mount(
+          <TestProviders>
+            <MockedProvider mocks={mocks}>
+              <TimelineComponent {...props} />
+            </MockedProvider>
+          </TestProviders>
+        );
+
+        expect(wrapper.find('[data-test-subj="timeline-footer"]').exists()).toEqual(false);
+      });
+    });
   });
 
   describe('event wire up', () => {

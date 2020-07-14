@@ -26,7 +26,6 @@ import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
 import { getActionsColumnWidth } from './column_headers/helpers';
 import { Events } from './events';
-import { showGraphView } from './helpers';
 import { ColumnRenderer } from './renderers/column_renderer';
 import { RowRenderer } from './renderers/row_renderer';
 import { Sort } from './sort';
@@ -146,7 +145,7 @@ export const Body = React.memo<BodyProps>(
 
     return (
       <>
-        {showGraphView(graphEventId) && (
+        {graphEventId && (
           <GraphOverlay bodyHeight={height} graphEventId={graphEventId} timelineId={id} />
         )}
         <TimelineBody
@@ -154,7 +153,7 @@ export const Body = React.memo<BodyProps>(
           data-timeline-id={id}
           bodyHeight={height}
           ref={containerElementRef}
-          visible={show && !showGraphView(graphEventId)}
+          visible={show && !graphEventId}
         >
           <EventsTable data-test-subj="events-table" columnWidths={columnWidths}>
             <ColumnHeaders

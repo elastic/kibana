@@ -29,7 +29,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       .then((response: SupertestResponse) => response.body);
   }
 
-  describe('update', () => {
+  // Failing ES promotion: https://github.com/elastic/kibana/issues/71558
+  describe.skip('update', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());

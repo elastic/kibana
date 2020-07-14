@@ -62,6 +62,8 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   updateItemsPerPage,
   upsertColumn,
   utilityBar,
+  // If truthy, the graph viewer (Resolver) is showing
+  graphEventId,
 }) => {
   const [{ browserFields, indexPatterns }] = useFetchIndexPatterns(
     defaultIndices ?? useUiSetting<string[]>(DEFAULT_INDEX_KEY)
@@ -135,6 +137,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         sort={sort}
         toggleColumn={toggleColumn}
         utilityBar={utilityBar}
+        graphEventId={graphEventId}
       />
     </InspectButtonContainer>
   );
@@ -145,6 +148,7 @@ const makeMapStateToProps = () => {
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getEvents = timelineSelectors.getEventsByIdSelector();
+  const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const mapStateToProps = (state: State, { id, defaultModel }: OwnProps) => {
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const events: TimelineModel = getEvents(state, id) ?? defaultModel;
@@ -174,6 +178,9 @@ const makeMapStateToProps = () => {
       query: getGlobalQuerySelector(state),
       sort,
       showCheckboxes,
+      // Used to determine whether the footer should show (since it is hidden if the graph is showing.)
+      // `getTimeline` actually returns `TimelineModel | undefined`
+      graphEventId: (getTimeline(state, id) as TimelineModel | undefined)?.graphEventId,
     };
   };
   return mapStateToProps;
@@ -213,6 +220,7 @@ export const StatefulEventsViewer = connector(
       deepEqual(prevProps.pageFilters, nextProps.pageFilters) &&
       prevProps.showCheckboxes === nextProps.showCheckboxes &&
       prevProps.start === nextProps.start &&
-      prevProps.utilityBar === nextProps.utilityBar
+      prevProps.utilityBar === nextProps.utilityBar &&
+      prevProps.graphEventId === nextProps.graphEventId
   )
 );
