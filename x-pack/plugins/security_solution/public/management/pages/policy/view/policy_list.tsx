@@ -127,7 +127,7 @@ export const PolicyList = React.memo(() => {
   const { services, notifications } = useKibana();
   const history = useHistory();
   const location = useLocation();
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.management);
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
 
   const [showDelete, setShowDelete] = useState<boolean>(false);
   const [policyIdToDelete, setPolicyIdToDelete] = useState<string>('');
@@ -477,7 +477,7 @@ export const PolicyList = React.memo(() => {
           handleTableChange,
           paginationSetup,
         ])}
-        <SpyRoute pageName={SecurityPageName.management} />
+        <SpyRoute pageName={SecurityPageName.administration} />
       </ManagementPageView>
     </>
   );

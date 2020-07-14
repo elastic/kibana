@@ -1,0 +1,39 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies potential attempts to disable Security-Enhanced Linux (SELinux), which is a Linux kernel security feature to support access control policies. Adversaries may disable security tools to avoid possible detection of their tools and activities.",
+  "index": [
+    "auditbeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Potential Disabling of SELinux",
+  "query": "event.category:process and event.type:(start or process_started) and process.name:setenforce and process.args:0",
+  "risk_score": 47,
+  "rule_id": "eb9eb8ba-a983-41d9-9c93-a1c05112ca5e",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Linux"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1089",
+          "name": "Disabling Security Tools",
+          "reference": "https://attack.mitre.org/techniques/T1089/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 2
+}
