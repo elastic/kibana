@@ -281,7 +281,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     core.application.register({
-      id: `${APP_ID}:${SecurityPageName.management}`,
+      id: `${APP_ID}:${SecurityPageName.administration}`,
       title: ADMINISTRATION,
       order: 9002,
       euiIconType: APP_ICON,
@@ -324,10 +324,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public start(core: CoreStart, plugins: StartPlugins) {
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
-    plugins.ingestManager.registerPackageConfigComponent(
-      'endpoint',
-      ConfigureEndpointPackageConfig
-    );
+    if (plugins.ingestManager) {
+      plugins.ingestManager.registerPackageConfigComponent(
+        'endpoint',
+        ConfigureEndpointPackageConfig
+      );
+    }
 
     return {};
   }

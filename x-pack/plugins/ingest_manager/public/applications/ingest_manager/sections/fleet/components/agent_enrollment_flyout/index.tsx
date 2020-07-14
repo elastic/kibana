@@ -14,126 +14,57 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiFlyoutFooter,
-  EuiSteps,
-  EuiText,
-  EuiLink,
+  EuiTab,
+  EuiTabs,
 } from '@elastic/eui';
-import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AgentConfig } from '../../../../types';
-import { EnrollmentStepAgentConfig } from './config_selection';
-import {
-  useGetOneEnrollmentAPIKey,
-  useCore,
-  useGetSettings,
-  useLink,
-  useFleetStatus,
-} from '../../../../hooks';
-import { ManualInstructions } from '../../../../components/enrollment_instructions';
+import { ManagedInstructions } from './managed_instructions';
+import { StandaloneInstructions } from './standalone_instructions';
 
 interface Props {
   onClose: () => void;
-  agentConfigs: AgentConfig[];
+  agentConfigs?: AgentConfig[];
 }
 
 export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
   onClose,
-  agentConfigs = [],
+  agentConfigs,
 }) => {
-  const { getHref } = useLink();
-  const core = useCore();
-  const fleetStatus = useFleetStatus();
-
-  const [selectedAPIKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
-
-  const settings = useGetSettings();
-  const apiKey = useGetOneEnrollmentAPIKey(selectedAPIKeyId);
-
-  const kibanaUrl =
-    settings.data?.item?.kibana_url ?? `${window.location.origin}${core.http.basePath.get()}`;
-  const kibanaCASha256 = settings.data?.item?.kibana_ca_sha256;
-
-  const steps: EuiContainedStepProps[] = [
-    {
-      title: i18n.translate('xpack.ingestManager.agentEnrollment.stepDownloadAgentTitle', {
-        defaultMessage: 'Download the Elastic Agent',
-      }),
-      children: (
-        <EuiText>
-          <FormattedMessage
-            id="xpack.ingestManager.agentEnrollment.downloadDescription"
-            defaultMessage="Download the Elastic agent on your host’s machine. You can download the agent binary and it’s verification signature from Elastic’s {downloadLink}."
-            values={{
-              downloadLink: (
-                <EuiLink href="https://ela.st/download-elastic-agent" target="_blank">
-                  <FormattedMessage
-                    id="xpack.ingestManager.agentEnrollment.downloadLink"
-                    defaultMessage="download page"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiText>
-      ),
-    },
-    {
-      title: i18n.translate('xpack.ingestManager.agentEnrollment.stepChooseAgentConfigTitle', {
-        defaultMessage: 'Choose an agent configuration',
-      }),
-      children: (
-        <EnrollmentStepAgentConfig agentConfigs={agentConfigs} onKeyChange={setSelectedAPIKeyId} />
-      ),
-    },
-    {
-      title: i18n.translate('xpack.ingestManager.agentEnrollment.stepRunAgentTitle', {
-        defaultMessage: 'Enroll and run the Elastic Agent',
-      }),
-      children: apiKey.data && (
-        <ManualInstructions
-          apiKey={apiKey.data.item}
-          kibanaUrl={kibanaUrl}
-          kibanaCASha256={kibanaCASha256}
-        />
-      ),
-    },
-  ];
+  const [mode, setMode] = useState<'managed' | 'standalone'>('managed');
 
   return (
-    <EuiFlyout onClose={onClose} size="l" maxWidth={860}>
+    <EuiFlyout onClose={onClose} size="l" maxWidth={880}>
       <EuiFlyoutHeader hasBorder aria-labelledby="FleetAgentEnrollmentFlyoutTitle">
         <EuiTitle size="m">
           <h2 id="FleetAgentEnrollmentFlyoutTitle">
             <FormattedMessage
               id="xpack.ingestManager.agentEnrollment.flyoutTitle"
-              defaultMessage="Enroll new agent"
+              defaultMessage="Add agent"
             />
           </h2>
         </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        {fleetStatus.isReady ? (
-          <>
-            <EuiSteps steps={steps} />
-          </>
-        ) : (
-          <>
+        <EuiTabs style={{ marginBottom: '-25px' }}>
+          <EuiTab isSelected={mode === 'managed'} onClick={() => setMode('managed')}>
             <FormattedMessage
-              id="xpack.ingestManager.agentEnrollment.fleetNotInitializedText"
-              defaultMessage="Fleet needs to be set up before agents can be enrolled. {link}"
-              values={{
-                link: (
-                  <EuiLink href={getHref('fleet')}>
-                    <FormattedMessage
-                      id="xpack.ingestManager.agentEnrollment.goToFleetButton"
-                      defaultMessage="Go to Fleet."
-                    />
-                  </EuiLink>
-                ),
-              }}
+              id="xpack.ingestManager.agentEnrollment.enrollFleetTabLabel"
+              defaultMessage="Enroll with Fleet"
             />
-          </>
+          </EuiTab>
+          <EuiTab isSelected={mode === 'standalone'} onClick={() => setMode('standalone')}>
+            <FormattedMessage
+              id="xpack.ingestManager.agentEnrollment.enrollStandaloneTabLabel"
+              defaultMessage="Standalone mode"
+            />
+          </EuiTab>
+        </EuiTabs>
+      </EuiFlyoutHeader>
+
+      <EuiFlyoutBody>
+        {mode === 'managed' ? (
+          <ManagedInstructions agentConfigs={agentConfigs} />
+        ) : (
+          <StandaloneInstructions agentConfigs={agentConfigs} />
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

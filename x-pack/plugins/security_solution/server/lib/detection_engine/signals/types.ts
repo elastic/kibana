@@ -11,6 +11,11 @@ import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams } from '../types';
 import { SearchResponse } from '../../types';
 
+// used for gap detection code
+export type unitType = 's' | 'm' | 'h';
+export const isValidUnit = (unitParam: string): unitParam is unitType =>
+  ['s', 'm', 'h'].includes(unitParam);
+
 export interface SignalsParams {
   signalIds: string[] | undefined | null;
   query: object | undefined | null;
@@ -121,6 +126,7 @@ export interface Signal {
   original_time: string;
   original_event?: SearchTypes;
   status: Status;
+  threshold_count?: SearchTypes;
 }
 
 export interface SignalHit {

@@ -38,6 +38,8 @@ import { MarkdownEditorForm } from '../../../../common/components/markdown_edito
 import { setFieldValue } from '../../../pages/detection_engine/rules/helpers';
 import { SeverityField } from '../severity_mapping';
 import { RiskScoreField } from '../risk_score_mapping';
+import { useFetchIndexPatterns } from '../../../containers/detection_engine/rules';
+import { AutocompleteField } from '../autocomplete_field';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -90,6 +92,9 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   setStepData,
 }) => {
   const [myStepData, setMyStepData] = useState<AboutStepRule>(stepAboutDefaultValue);
+  const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
+    defineRuleData?.index ?? []
+  );
 
   const { form } = useForm({
     defaultValue: myStepData,
@@ -149,7 +154,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             }}
           />
           <EuiSpacer size="l" />
-
           <CommonUseField
             path="description"
             componentProps={{
@@ -170,9 +174,9 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               componentProps={{
                 'data-test-subj': 'detectionEngineStepAboutRuleSeverityField',
                 idAria: 'detectionEngineStepAboutRuleSeverityField',
-                isDisabled: isLoading,
+                isDisabled: isLoading || indexPatternLoading,
                 options: severityOptions,
-                indices: defineRuleData?.index ?? [],
+                indices: indexPatterns,
               }}
             />
           </EuiFlexItem>
@@ -184,7 +188,8 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               componentProps={{
                 'data-test-subj': 'detectionEngineStepAboutRuleRiskScore',
                 idAria: 'detectionEngineStepAboutRuleRiskScore',
-                isDisabled: isLoading,
+                isDisabled: isLoading || indexPatternLoading,
+                indices: indexPatterns,
               }}
             />
           </EuiFlexItem>
@@ -196,7 +201,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 'data-test-subj': 'detectionEngineStepAboutRuleTags',
                 euiFieldProps: {
                   fullWidth: true,
-                  isDisabled: isLoading,
+                  isDisabled: isLoading || indexPatternLoading,
                   placeholder: '',
                 },
               }}
@@ -277,7 +282,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               }}
             />
             <EuiSpacer size="l" />
-            <EuiFormRow label={'Building block'} error={'errorMessage'} isInvalid={false} fullWidth>
+            <EuiFormRow label={I18n.BUILDING_BLOCK} isInvalid={false} fullWidth>
               <CommonUseField
                 path="isBuildingBlock"
                 componentProps={{
@@ -292,35 +297,31 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               />
             </EuiFormRow>
             <EuiSpacer size="l" />
-            <EuiFlexItem>
-              <CommonUseField
-                path="ruleNameOverride"
-                componentProps={{
-                  idAria: 'detectionEngineStepAboutRuleRuleNameOverride',
-                  'data-test-subj': 'detectionEngineStepAboutRuleRuleNameOverride',
-                  euiFieldProps: {
-                    fullWidth: false,
-                    isDisabled: isLoading,
-                    placeholder: '',
-                  },
-                }}
-              />
-            </EuiFlexItem>
+            <UseField
+              path="ruleNameOverride"
+              component={AutocompleteField}
+              componentProps={{
+                dataTestSubj: 'detectionEngineStepAboutRuleRuleNameOverride',
+                fieldType: 'string',
+                idAria: 'detectionEngineStepAboutRuleRuleNameOverride',
+                indices: indexPatterns,
+                isDisabled: isLoading || indexPatternLoading,
+                placeholder: '',
+              }}
+            />
             <EuiSpacer size="l" />
-            <EuiFlexItem>
-              <CommonUseField
-                path="timestampOverride"
-                componentProps={{
-                  idAria: 'detectionEngineStepAboutRuleRuleNameOverride',
-                  'data-test-subj': 'detectionEngineStepAboutRuleLicense',
-                  euiFieldProps: {
-                    fullWidth: false,
-                    isDisabled: isLoading,
-                    placeholder: '',
-                  },
-                }}
-              />
-            </EuiFlexItem>
+            <UseField
+              path="timestampOverride"
+              component={AutocompleteField}
+              componentProps={{
+                dataTestSubj: 'detectionEngineStepAboutRuleTimestampOverride',
+                fieldType: 'date',
+                idAria: 'detectionEngineStepAboutRuleTimestampOverride',
+                indices: indexPatterns,
+                isDisabled: isLoading || indexPatternLoading,
+                placeholder: '',
+              }}
+            />
           </AdvancedSettingsAccordion>
           <FormDataProvider pathsToWatch="severity">
             {({ severity }) => {

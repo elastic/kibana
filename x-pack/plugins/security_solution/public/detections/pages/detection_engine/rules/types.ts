@@ -10,6 +10,7 @@ import { Filter } from '../../../../../../../../src/plugins/data/common';
 import { FormData, FormHook } from '../../../../shared_imports';
 import { FieldValueQueryBar } from '../../../components/rules/query_bar';
 import { FieldValueTimeline } from '../../../components/rules/pick_timeline';
+import { FieldValueThreshold } from '../../../components/rules/threshold_input';
 import {
   Author,
   BuildingBlockType,
@@ -99,6 +100,7 @@ export interface DefineStepRule extends StepRuleData {
   queryBar: FieldValueQueryBar;
   ruleType: RuleType;
   timeline: FieldValueTimeline;
+  threshold: FieldValueThreshold;
 }
 
 export interface ScheduleStepRule extends StepRuleData {
@@ -122,6 +124,10 @@ export interface DefineStepRuleJson {
   saved_id?: string;
   query?: string;
   language?: string;
+  threshold?: {
+    field: string;
+    value: number;
+  };
   timeline_id?: string;
   timeline_title?: string;
   type: RuleType;
@@ -139,10 +145,10 @@ export interface AboutStepRuleJson {
   risk_score_mapping: RiskScoreMapping;
   references: string[];
   false_positives: string[];
-  rule_name_override: RuleNameOverride;
+  rule_name_override?: RuleNameOverride;
   tags: string[];
   threat: IMitreEnterpriseAttack[];
-  timestamp_override: TimestampOverride;
+  timestamp_override?: TimestampOverride;
   note?: string;
 }
 
