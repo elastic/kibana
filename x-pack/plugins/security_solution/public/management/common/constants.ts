@@ -3,16 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ManagementStoreGlobalNamespace, ManagementSubTab } from '../types';
+import { ManagementStoreGlobalNamespace, AdministrationSubTab } from '../types';
 import { APP_ID } from '../../../common/constants';
 import { SecurityPageName } from '../../app/types';
 
 // --[ ROUTING ]---------------------------------------------------------------------------
-export const MANAGEMENT_APP_ID = `${APP_ID}:${SecurityPageName.management}`;
+export const MANAGEMENT_APP_ID = `${APP_ID}:${SecurityPageName.administration}`;
 export const MANAGEMENT_ROUTING_ROOT_PATH = '';
-export const MANAGEMENT_ROUTING_HOSTS_PATH = `${MANAGEMENT_ROUTING_ROOT_PATH}/:tabName(${ManagementSubTab.hosts})`;
-export const MANAGEMENT_ROUTING_POLICIES_PATH = `${MANAGEMENT_ROUTING_ROOT_PATH}/:tabName(${ManagementSubTab.policies})`;
-export const MANAGEMENT_ROUTING_POLICY_DETAILS_PATH = `${MANAGEMENT_ROUTING_ROOT_PATH}/:tabName(${ManagementSubTab.policies})/:policyId`;
+export const MANAGEMENT_ROUTING_HOSTS_PATH = `${MANAGEMENT_ROUTING_ROOT_PATH}/:tabName(${AdministrationSubTab.hosts})`;
+export const MANAGEMENT_ROUTING_POLICIES_PATH = `${MANAGEMENT_ROUTING_ROOT_PATH}/:tabName(${AdministrationSubTab.policies})`;
+export const MANAGEMENT_ROUTING_POLICY_DETAILS_PATH = `${MANAGEMENT_ROUTING_ROOT_PATH}/:tabName(${AdministrationSubTab.policies})/:policyId`;
 
 // --[ STORE ]---------------------------------------------------------------------------
 /** The SIEM global store namespace where the management state will be mounted */

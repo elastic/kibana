@@ -9,6 +9,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import '../../common/mock/match_media';
+import { waitForUpdates } from '../../common/utils/test_utils';
 import { TestProviders } from '../../common/mock';
 import { useWithSource } from '../../common/containers/source';
 import {
@@ -64,7 +65,7 @@ describe('Overview', () => {
         mockuseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
       });
 
-      it('renders the Setup Instructions text', () => {
+      it('renders the Setup Instructions text', async () => {
         const wrapper = mount(
           <TestProviders>
             <MemoryRouter>
@@ -72,10 +73,11 @@ describe('Overview', () => {
             </MemoryRouter>
           </TestProviders>
         );
+        await waitForUpdates(wrapper);
         expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(true);
       });
 
-      it('does not show Endpoint get ready button when ingest is not enabled', () => {
+      it('does not show Endpoint get ready button when ingest is not enabled', async () => {
         const wrapper = mount(
           <TestProviders>
             <MemoryRouter>
@@ -83,10 +85,11 @@ describe('Overview', () => {
             </MemoryRouter>
           </TestProviders>
         );
+        await waitForUpdates(wrapper);
         expect(wrapper.find('[data-test-subj="empty-page-secondary-action"]').exists()).toBe(false);
       });
 
-      it('shows Endpoint get ready button when ingest is enabled', () => {
+      it('shows Endpoint get ready button when ingest is enabled', async () => {
         (useIngestEnabledCheck as jest.Mock).mockReturnValue({ allEnabled: true });
         const wrapper = mount(
           <TestProviders>
@@ -95,11 +98,12 @@ describe('Overview', () => {
             </MemoryRouter>
           </TestProviders>
         );
+        await waitForUpdates(wrapper);
         expect(wrapper.find('[data-test-subj="empty-page-secondary-action"]').exists()).toBe(true);
       });
     });
 
-    it('it DOES NOT render the Getting started text when an index is available', () => {
+    it('it DOES NOT render the Getting started text when an index is available', async () => {
       (useWithSource as jest.Mock).mockReturnValue({
         indicesExist: true,
         indexPattern: {},
@@ -116,10 +120,12 @@ describe('Overview', () => {
           </MemoryRouter>
         </TestProviders>
       );
+      await waitForUpdates(wrapper);
+
       expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
     });
 
-    test('it DOES render the Endpoint banner when the endpoint index is NOT available AND storage is NOT set', () => {
+    test('it DOES render the Endpoint banner when the endpoint index is NOT available AND storage is NOT set', async () => {
       (useWithSource as jest.Mock).mockReturnValueOnce({
         indicesExist: true,
         indexPattern: {},
@@ -141,10 +147,12 @@ describe('Overview', () => {
           </MemoryRouter>
         </TestProviders>
       );
+      await waitForUpdates(wrapper);
+
       expect(wrapper.find('[data-test-subj="endpoint-prompt-banner"]').exists()).toBe(true);
     });
 
-    test('it does NOT render the Endpoint banner when the endpoint index is NOT available but storage is set', () => {
+    test('it does NOT render the Endpoint banner when the endpoint index is NOT available but storage is set', async () => {
       (useWithSource as jest.Mock).mockReturnValueOnce({
         indicesExist: true,
         indexPattern: {},
@@ -166,10 +174,12 @@ describe('Overview', () => {
           </MemoryRouter>
         </TestProviders>
       );
+      await waitForUpdates(wrapper);
+
       expect(wrapper.find('[data-test-subj="endpoint-prompt-banner"]').exists()).toBe(false);
     });
 
-    test('it does NOT render the Endpoint banner when the endpoint index is available AND storage is set', () => {
+    test('it does NOT render the Endpoint banner when the endpoint index is available AND storage is set', async () => {
       (useWithSource as jest.Mock).mockReturnValue({
         indicesExist: true,
         indexPattern: {},
@@ -186,10 +196,12 @@ describe('Overview', () => {
           </MemoryRouter>
         </TestProviders>
       );
+      await waitForUpdates(wrapper);
+
       expect(wrapper.find('[data-test-subj="endpoint-prompt-banner"]').exists()).toBe(false);
     });
 
-    test('it does NOT render the Endpoint banner when an index IS available but storage is NOT set', () => {
+    test('it does NOT render the Endpoint banner when an index IS available but storage is NOT set', async () => {
       (useWithSource as jest.Mock).mockReturnValue({
         indicesExist: true,
         indexPattern: {},
@@ -209,7 +221,7 @@ describe('Overview', () => {
       expect(wrapper.find('[data-test-subj="endpoint-prompt-banner"]').exists()).toBe(false);
     });
 
-    test('it does NOT render the Endpoint banner when Ingest is NOT available', () => {
+    test('it does NOT render the Endpoint banner when Ingest is NOT available', async () => {
       (useWithSource as jest.Mock).mockReturnValue({
         indicesExist: true,
         indexPattern: {},
@@ -226,6 +238,8 @@ describe('Overview', () => {
           </MemoryRouter>
         </TestProviders>
       );
+      await waitForUpdates(wrapper);
+
       expect(wrapper.find('[data-test-subj="endpoint-prompt-banner"]').exists()).toBe(false);
     });
   });

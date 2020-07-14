@@ -37,6 +37,7 @@ describe('interpreter/functions#table', () => {
     columns: [{ id: 'col-0-1', name: 'Count' }],
   };
   const visConfig = {
+    title: 'My Chart title',
     perPage: 10,
     showPartialRows: false,
     showMetricsAtAllLevels: false,

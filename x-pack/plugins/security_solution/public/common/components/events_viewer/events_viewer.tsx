@@ -69,6 +69,8 @@ interface Props {
   sort: Sort;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
+  // If truthy, the graph viewer (Resolver) is showing
+  graphEventId: string | undefined;
 }
 
 const EventsViewerComponent: React.FC<Props> = ({
@@ -94,6 +96,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   sort,
   toggleColumn,
   utilityBar,
+  graphEventId,
 }) => {
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const kibana = useKibana();
@@ -210,22 +213,28 @@ const EventsViewerComponent: React.FC<Props> = ({
                       toggleColumn={toggleColumn}
                     />
 
-                    <Footer
-                      getUpdatedAt={getUpdatedAt}
-                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                      height={footerHeight}
-                      id={id}
-                      isLive={isLive}
-                      isLoading={loading}
-                      itemsCount={events.length}
-                      itemsPerPage={itemsPerPage}
-                      itemsPerPageOptions={itemsPerPageOptions}
-                      onChangeItemsPerPage={onChangeItemsPerPage}
-                      onLoadMore={loadMore}
-                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                      serverSideEventCount={totalCountMinusDeleted}
-                      tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
-                    />
+                    {
+                      /** Hide the footer if Resolver is showing. */
+                      !graphEventId && (
+                        <Footer
+                          data-test-subj="events-viewer-footer"
+                          getUpdatedAt={getUpdatedAt}
+                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                          height={footerHeight}
+                          id={id}
+                          isLive={isLive}
+                          isLoading={loading}
+                          itemsCount={events.length}
+                          itemsPerPage={itemsPerPage}
+                          itemsPerPageOptions={itemsPerPageOptions}
+                          onChangeItemsPerPage={onChangeItemsPerPage}
+                          onLoadMore={loadMore}
+                          nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                          serverSideEventCount={totalCountMinusDeleted}
+                          tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
+                        />
+                      )
+                    }
                   </EventsContainerLoading>
                 </>
               );
@@ -257,5 +266,6 @@ export const EventsViewer = React.memo(
     deepEqual(prevProps.query, nextProps.query) &&
     prevProps.start === nextProps.start &&
     prevProps.sort === nextProps.sort &&
-    prevProps.utilityBar === nextProps.utilityBar
+    prevProps.utilityBar === nextProps.utilityBar &&
+    prevProps.graphEventId === nextProps.graphEventId
 );

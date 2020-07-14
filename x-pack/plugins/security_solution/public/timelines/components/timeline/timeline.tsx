@@ -320,27 +320,33 @@ export const TimelineComponent: React.FC<Props> = ({
                     toggleColumn={toggleColumn}
                   />
                 </StyledEuiFlyoutBody>
-                <StyledEuiFlyoutFooter
-                  data-test-subj="eui-flyout-footer"
-                  className="timeline-flyout-footer"
-                >
-                  <Footer
-                    getUpdatedAt={getUpdatedAt}
-                    hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                    height={footerHeight}
-                    id={id}
-                    isLive={isLive}
-                    isLoading={loading || loadingIndexName}
-                    itemsCount={events.length}
-                    itemsPerPage={itemsPerPage}
-                    itemsPerPageOptions={itemsPerPageOptions}
-                    nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                    onChangeItemsPerPage={onChangeItemsPerPage}
-                    onLoadMore={loadMore}
-                    serverSideEventCount={totalCount}
-                    tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
-                  />
-                </StyledEuiFlyoutFooter>
+                {
+                  /** Hide the footer if Resolver is showing. */
+                  !graphEventId && (
+                    <StyledEuiFlyoutFooter
+                      data-test-subj="eui-flyout-footer"
+                      className="timeline-flyout-footer"
+                    >
+                      <Footer
+                        data-test-subj="timeline-footer"
+                        getUpdatedAt={getUpdatedAt}
+                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                        height={footerHeight}
+                        id={id}
+                        isLive={isLive}
+                        isLoading={loading || loadingIndexName}
+                        itemsCount={events.length}
+                        itemsPerPage={itemsPerPage}
+                        itemsPerPageOptions={itemsPerPageOptions}
+                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                        onChangeItemsPerPage={onChangeItemsPerPage}
+                        onLoadMore={loadMore}
+                        serverSideEventCount={totalCount}
+                        tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
+                      />
+                    </StyledEuiFlyoutFooter>
+                  )
+                }
               </>
             );
           }}

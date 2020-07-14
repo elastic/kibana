@@ -7,7 +7,7 @@
 import ApolloClient from 'apollo-client';
 
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { Ecs } from '../../../graphql/types';
+import { Ecs, TimelineNonEcsData } from '../../../graphql/types';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { inputsModel } from '../../../common/store';
 
@@ -53,6 +53,7 @@ export interface SendAlertToTimelineActionProps {
   apolloClient?: ApolloClient<{}>;
   createTimeline: CreateTimeline;
   ecsData: Ecs;
+  nonEcsData: TimelineNonEcsData[];
   updateTimelineIsLoading: UpdateTimelineLoading;
 }
 
