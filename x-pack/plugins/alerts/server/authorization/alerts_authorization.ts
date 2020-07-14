@@ -15,6 +15,7 @@ import { RegistryAlertType } from '../alert_type_registry';
 import { FeatureKibanaPrivileges, SubFeaturePrivilegeConfig } from '../../../features/common';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { AlertsAuthorizationAuditLogger, ScopeType } from './audit_logger';
+import { SecurityLicense } from '../../../security/common/licensing';
 
 export enum ReadOperations {
   Get = 'get',
@@ -52,12 +53,14 @@ export interface ConstructorOptions {
   features: FeaturesPluginStart;
   auditLogger: AlertsAuthorizationAuditLogger;
   authorization?: SecurityPluginSetup['authz'];
+  securityLicense?: SecurityLicense;
 }
 
 export class AlertsAuthorization {
   private readonly alertTypeRegistry: AlertTypeRegistry;
   private readonly request: KibanaRequest;
   private readonly authorization?: SecurityPluginSetup['authz'];
+  private readonly securityLicense?: SecurityLicense;
   private readonly auditLogger: AlertsAuthorizationAuditLogger;
   private readonly featuresIds: string[];
   private readonly allPossibleConsumers: AuthorizedConsumers;
@@ -66,11 +69,13 @@ export class AlertsAuthorization {
     alertTypeRegistry,
     request,
     authorization,
+    securityLicense,
     features,
     auditLogger,
   }: ConstructorOptions) {
     this.request = request;
     this.authorization = authorization;
+    this.securityLicense = securityLicense;
     this.alertTypeRegistry = alertTypeRegistry;
     this.auditLogger = auditLogger;
 
@@ -98,13 +103,18 @@ export class AlertsAuthorization {
     });
   }
 
+  private shouldCheckAuthorization(): boolean {
+    const { authorization, securityLicense } = this;
+    return (authorization && securityLicense && securityLicense?.isEnabled()) ?? false;
+  }
+
   public async ensureAuthorized(
     alertTypeId: string,
     consumer: string,
     operation: ReadOperations | WriteOperations
   ) {
     const { authorization } = this;
-    if (authorization) {
+    if (authorization && this.shouldCheckAuthorization()) {
       const alertType = this.alertTypeRegistry.get(alertTypeId);
       const requiredPrivilegesByScope = {
         consumer: authorization.actions.alerting.get(alertTypeId, consumer, operation),
@@ -172,7 +182,7 @@ export class AlertsAuthorization {
     ensureAlertTypeIsAuthorized: (alertTypeId: string, consumer: string) => void;
     logSuccessfulAuthorization: () => void;
   }> {
-    if (this.authorization) {
+    if (this.authorization && this.shouldCheckAuthorization()) {
       const {
         username,
         authorizedAlertTypes,
@@ -262,15 +272,7 @@ export class AlertsAuthorization {
     hasAllRequested: boolean;
     authorizedAlertTypes: Set<RegistryAlertTypeWithAuth>;
   }> {
-    if (!this.authorization) {
-      return {
-        hasAllRequested: true,
-        authorizedAlertTypes: this.augmentWithAuthorizedConsumers(
-          alertTypes,
-          this.allPossibleConsumers
-        ),
-      };
-    } else {
+    if (this.authorization && this.shouldCheckAuthorization()) {
       const checkPrivileges = this.authorization.checkPrivilegesDynamicallyWithRequest(
         this.request
       );
@@ -337,6 +339,14 @@ export class AlertsAuthorization {
               }
               return authorizedAlertTypes;
             }, new Set<RegistryAlertTypeWithAuth>()),
+      };
+    } else {
+      return {
+        hasAllRequested: true,
+        authorizedAlertTypes: this.augmentWithAuthorizedConsumers(
+          alertTypes,
+          this.allPossibleConsumers
+        ),
       };
     }
   }

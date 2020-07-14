@@ -94,6 +94,7 @@ test('creates an alerts client with proper constructor arguments when security i
   expect(AlertsAuthorization).toHaveBeenCalledWith({
     request,
     authorization: securityPluginSetup.authz,
+    securityLicense: securityPluginSetup.license,
     alertTypeRegistry: alertsClientFactoryParams.alertTypeRegistry,
     features: alertsClientFactoryParams.features,
     auditLogger: expect.any(AlertsAuthorizationAuditLogger),

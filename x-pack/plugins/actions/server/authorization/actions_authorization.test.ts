@@ -16,13 +16,15 @@ const auditLogger = actionsAuthorizationAuditLoggerMock.create();
 const realAuditLogger = new ActionsAuthorizationAuditLogger();
 
 const mockAuthorizationAction = (type: string, operation: string) => `${type}/${operation}`;
-function mockAuthorization() {
-  const authorization = securityMock.createSetup().authz;
+function mockSecurity() {
+  const security = securityMock.createSetup();
+  const authorization = security.authz;
+  const securityLicense = security.license;
   // typescript is having trouble inferring jest's automocking
   (authorization.actions.savedObject.get as jest.MockedFunction<
     typeof authorization.actions.savedObject.get
   >).mockImplementation(mockAuthorizationAction);
-  return authorization;
+  return { authorization, securityLicense };
 }
 
 beforeEach(() => {
@@ -45,13 +47,27 @@ describe('ensureAuthorized', () => {
     await actionsAuthorization.ensureAuthorized('create', 'myType');
   });
 
+  test('is a no-op when the security license is disabled', async () => {
+    const { authorization, securityLicense } = mockSecurity();
+    securityLicense.isEnabled.mockReturnValue(false);
+    const actionsAuthorization = new ActionsAuthorization({
+      request,
+      authorization,
+      securityLicense,
+      auditLogger,
+    });
+
+    await actionsAuthorization.ensureAuthorized('create', 'myType');
+  });
+
   test('ensures the user has privileges to use the operation on the Actions Saved Object type', async () => {
-    const authorization = mockAuthorization();
+    const { authorization, securityLicense } = mockSecurity();
     const checkPrivileges: jest.MockedFunction<ReturnType<
       typeof authorization.checkPrivilegesDynamicallyWithRequest
     >> = jest.fn();
     authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
     const actionsAuthorization = new ActionsAuthorization({
+      securityLicense,
       request,
       authorization,
       auditLogger,
@@ -85,12 +101,13 @@ describe('ensureAuthorized', () => {
   });
 
   test('ensures the user has privileges to execute an Actions Saved Object type', async () => {
-    const authorization = mockAuthorization();
+    const { authorization, securityLicense } = mockSecurity();
     const checkPrivileges: jest.MockedFunction<ReturnType<
       typeof authorization.checkPrivilegesDynamicallyWithRequest
     >> = jest.fn();
     authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
     const actionsAuthorization = new ActionsAuthorization({
+      securityLicense,
       request,
       authorization,
       auditLogger,
@@ -134,12 +151,13 @@ describe('ensureAuthorized', () => {
   });
 
   test('throws if user lacks the required privieleges', async () => {
-    const authorization = mockAuthorization();
+    const { authorization, securityLicense } = mockSecurity();
     const checkPrivileges: jest.MockedFunction<ReturnType<
       typeof authorization.checkPrivilegesDynamicallyWithRequest
     >> = jest.fn();
     authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
     const actionsAuthorization = new ActionsAuthorization({
+      securityLicense,
       request,
       authorization,
       auditLogger,
