@@ -35,7 +35,7 @@ export declare class SearchInterceptor
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [runSearch(request, combinedSignal)](./kibana-plugin-plugins-data-public.searchinterceptor.runsearch.md) |  |  |
+|  [runSearch(request, signal)](./kibana-plugin-plugins-data-public.searchinterceptor.runsearch.md) |  |  |
 |  [search(request, options)](./kibana-plugin-plugins-data-public.searchinterceptor.search.md) |  | Searches using the given <code>search</code> method. Overrides the <code>AbortSignal</code> with one that will abort either when <code>cancelPending</code> is called, when the request times out, or when the original <code>AbortSignal</code> is aborted. Updates the <code>pendingCount</code> when the request is started/finalized. |
 |  [setupTimers(options)](./kibana-plugin-plugins-data-public.searchinterceptor.setuptimers.md) |  |  |
 
