@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { EmbeddableInput, SavedObjectEmbeddableInput } from '..';
 import { Optional } from '@kbn/utility-types';
+import { EmbeddableInput, SavedObjectEmbeddableInput } from '..';
 
 /**
  * Represents a state package that contains the last active app id.

@@ -312,8 +312,6 @@ export class DashboardAppController {
         embeddablesMap[panel.panelIndex] = convertSavedDashboardPanelToPanelState(panel);
       });
 
-      console.log('incomingEmbeddable', incomingEmbeddable);
-
       // If the incoming embeddable state's id already exists in the embeddables map, replace the input, retaining the existing gridData for that panel.
       if (incomingEmbeddable?.id && embeddablesMap[incomingEmbeddable.id]) {
         const originalPanelState = { ...embeddablesMap[incomingEmbeddable.id] };
