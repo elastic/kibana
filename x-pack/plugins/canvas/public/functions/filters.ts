@@ -10,7 +10,7 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions/public';
 import { interpretAst } from '../lib/run_interpreter';
 // @ts-expect-error untyped local
 import { getState } from '../state/store';
-import { getGlobalFilters } from '../state/selectors/workpad';
+import { getGlobalFilters, getWorkpadVariablesAsObject } from '../state/selectors/workpad';
 import { ExpressionValueFilter } from '../../types';
 import { getFunctionHelp } from '../../i18n';
 import { InitializeArguments } from '.';
@@ -79,7 +79,7 @@ export function filtersFunctionFactory(initialize: InitializeArguments): () => F
         if (filterList && filterList.length) {
           const filterExpression = filterList.join(' | ');
           const filterAST = fromExpression(filterExpression);
-          return interpretAst(filterAST);
+          return interpretAst(filterAST, getWorkpadVariablesAsObject(getState()));
         } else {
           const filterType = initialize.typesRegistry.get('filter');
           return filterType?.from(null, {});
