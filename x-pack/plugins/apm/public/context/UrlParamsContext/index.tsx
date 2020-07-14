@@ -24,8 +24,6 @@ import {
 } from '../../../server/lib/ui_filters/local_ui_filters/config';
 import { pickKeys } from '../../../common/utils/pick_keys';
 import { useDeepObjectIdentity } from '../../hooks/useDeepObjectIdentity';
-import { useApmPluginContext } from '../../hooks/useApmPluginContext';
-import { setTimePickerDefaultValues } from './constants';
 
 interface TimeRange {
   rangeFrom: string;
@@ -52,9 +50,6 @@ const UrlParamsContext = createContext({
 
 const UrlParamsProvider: React.ComponentClass<{}> = withRouter(
   ({ location, children }) => {
-    const { core } = useApmPluginContext();
-    setTimePickerDefaultValues({ uiSettings: core.uiSettings });
-
     const refUrlParams = useRef(resolveUrlParams(location, {}));
 
     const { start, end, rangeFrom, rangeTo } = refUrlParams.current;
