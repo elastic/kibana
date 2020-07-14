@@ -362,59 +362,42 @@ describe('get_filter', () => {
       expect(esQuery).toEqual({
         bool: {
           filter: [
+            { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
             {
               bool: {
                 filter: [
                   {
-                    bool: {
-                      minimum_should_match: 1,
-                      should: [
-                        {
-                          match: {
-                            'host.name': 'linux',
-                          },
+                    nested: {
+                      path: 'some.parentField',
+                      query: {
+                        bool: {
+                          minimum_should_match: 1,
+                          should: [
+                            {
+                              match_phrase: {
+                                'some.parentField.nested.field': 'some value',
+                              },
+                            },
+                          ],
                         },
-                      ],
+                      },
+                      score_mode: 'none',
                     },
                   },
                   {
                     bool: {
-                      filter: [
-                        {
-                          nested: {
-                            path: 'some.parentField',
-                            query: {
-                              bool: {
-                                minimum_should_match: 1,
-                                should: [
-                                  {
-                                    match: {
-                                      'some.parentField.nested.field': 'some value',
-                                    },
-                                  },
-                                ],
+                      must_not: {
+                        bool: {
+                          minimum_should_match: 1,
+                          should: [
+                            {
+                              match_phrase: {
+                                'some.not.nested.field': 'some value',
                               },
                             },
-                            score_mode: 'none',
-                          },
+                          ],
                         },
-                        {
-                          bool: {
-                            must_not: {
-                              bool: {
-                                minimum_should_match: 1,
-                                should: [
-                                  {
-                                    match: {
-                                      'some.not.nested.field': 'some value',
-                                    },
-                                  },
-                                ],
-                              },
-                            },
-                          },
-                        },
-                      ],
+                      },
                     },
                   },
                 ],
@@ -469,52 +452,35 @@ describe('get_filter', () => {
         expect(esQuery).toEqual({
           bool: {
             filter: [
+              { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
               {
                 bool: {
                   filter: [
+                    {
+                      nested: {
+                        path: 'some.parentField',
+                        query: {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                match_phrase: {
+                                  'some.parentField.nested.field': 'some value',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        score_mode: 'none',
+                      },
+                    },
                     {
                       bool: {
                         minimum_should_match: 1,
                         should: [
                           {
-                            match: {
-                              'host.name': 'linux',
-                            },
-                          },
-                        ],
-                      },
-                    },
-                    {
-                      bool: {
-                        filter: [
-                          {
-                            nested: {
-                              path: 'some.parentField',
-                              query: {
-                                bool: {
-                                  minimum_should_match: 1,
-                                  should: [
-                                    {
-                                      match: {
-                                        'some.parentField.nested.field': 'some value',
-                                      },
-                                    },
-                                  ],
-                                },
-                              },
-                              score_mode: 'none',
-                            },
-                          },
-                          {
-                            bool: {
-                              minimum_should_match: 1,
-                              should: [
-                                {
-                                  match: {
-                                    'some.not.nested.field': 'some value',
-                                  },
-                                },
-                              ],
+                            match_phrase: {
+                              'some.not.nested.field': 'some value',
                             },
                           },
                         ],
