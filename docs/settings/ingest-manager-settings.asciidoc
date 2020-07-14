@@ -19,8 +19,6 @@ See the {ingest-guide}/index.html[Ingest Management] docs for more information.
 |===
 | `xpack.ingestManager.enabled` {ess-icon}
   | Set to `true` (default) to enable {ingest-manager}. 
-| `xpack.ingestManager.epm.enabled` {ess-icon}
-  | Set to `true` (default) to enable {package-manager}. 
 | `xpack.ingestManager.fleet.enabled` {ess-icon}
   | Set to `true` (default) to enable {fleet}. 
 |===
@@ -31,7 +29,7 @@ See the {ingest-guide}/index.html[Ingest Management] docs for more information.
 
 [cols="2*<"]
 |===
-| `xpack.ingestManager.epm.registryUrl`
+| `xpack.ingestManager.registryUrl`
   | The address to use to reach {package-manager} registry.
 |===
 

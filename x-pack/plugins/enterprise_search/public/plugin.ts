@@ -22,6 +22,7 @@ import { LicensingPluginSetup } from '../../licensing/public';
 
 import { getPublicUrl } from './applications/shared/enterprise_search_url';
 import AppSearchLogo from './applications/app_search/assets/logo.svg';
+import WorkplaceSearchLogo from './applications/workplace_search/assets/logo.svg';
 
 export interface ClientConfigType {
   host?: string;
@@ -58,7 +59,21 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(AppSearch, coreStart, params, config, plugins);
       },
     });
-    // TODO: Workplace Search will need to register its own plugin.
+
+    core.application.register({
+      id: 'workplaceSearch',
+      title: 'Workplace Search',
+      appRoute: '/app/enterprise_search/workplace_search',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      mount: async (params: AppMountParameters) => {
+        const [coreStart] = await core.getStartServices();
+
+        const { renderApp } = await import('./applications');
+        const { WorkplaceSearch } = await import('./applications/workplace_search');
+
+        return renderApp(WorkplaceSearch, coreStart, params, config, plugins);
+      },
+    });
 
     plugins.home.featureCatalogue.register({
       id: 'appSearch',
@@ -70,7 +85,17 @@ export class EnterpriseSearchPlugin implements Plugin {
       category: FeatureCatalogueCategory.DATA,
       showOnHomePage: true,
     });
-    // TODO: Workplace Search will need to register its own feature catalogue section/card.
+
+    plugins.home.featureCatalogue.register({
+      id: 'workplaceSearch',
+      title: 'Workplace Search',
+      icon: WorkplaceSearchLogo,
+      description:
+        'Search all documents, files, and sources available across your virtual workplace.',
+      path: '/app/enterprise_search/workplace_search',
+      category: FeatureCatalogueCategory.DATA,
+      showOnHomePage: true,
+    });
   }
 
   public start(core: CoreStart) {}

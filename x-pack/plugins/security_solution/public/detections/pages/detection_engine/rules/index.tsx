@@ -9,6 +9,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { usePrePackagedRules, importRules } from '../../../containers/detection_engine/rules';
+import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
 import {
   getDetectionEngineUrl,
   getCreateRuleUrl,
@@ -21,6 +22,7 @@ import { useUserInfo } from '../../../components/user_info';
 import { AllRules } from './all';
 import { ImportDataModal } from '../../../../common/components/import_data_modal';
 import { ReadOnlyCallOut } from '../../../components/rules/read_only_callout';
+import { ValueListsModal } from '../../../components/value_lists_management_modal';
 import { UpdatePrePackagedRulesCallOut } from '../../../components/rules/pre_packaged_rules/update_callout';
 import { getPrePackagedRuleStatus, redirectToDetections, userHasNoPermissions } from './helpers';
 import * as i18n from './translations';
@@ -33,15 +35,23 @@ type Func = (refreshPrePackagedRule?: boolean) => void;
 const RulesPageComponent: React.FC = () => {
   const history = useHistory();
   const [showImportModal, setShowImportModal] = useState(false);
+  const [isValueListsModalShown, setIsValueListsModalShown] = useState(false);
+  const showValueListsModal = useCallback(() => setIsValueListsModalShown(true), []);
+  const hideValueListsModal = useCallback(() => setIsValueListsModalShown(false), []);
   const refreshRulesData = useRef<null | Func>(null);
   const {
-    loading,
+    loading: userInfoLoading,
     isSignalIndexExists,
     isAuthenticated,
     hasEncryptionKey,
     canUserCRUD,
     hasIndexWrite,
   } = useUserInfo();
+  const {
+    loading: listsConfigLoading,
+    needsConfiguration: needsListsConfiguration,
+  } = useListsConfig();
+  const loading = userInfoLoading || listsConfigLoading;
   const {
     createPrePackagedRules,
     loading: prePackagedRuleLoading,
@@ -58,12 +68,12 @@ const RulesPageComponent: React.FC = () => {
     isAuthenticated,
     hasEncryptionKey,
   });
+  const { formatUrl } = useFormatUrl(SecurityPageName.detections);
   const prePackagedRuleStatus = getPrePackagedRuleStatus(
     rulesInstalled,
     rulesNotInstalled,
     rulesNotUpdated
   );
-  const { formatUrl } = useFormatUrl(SecurityPageName.detections);
 
   const handleRefreshRules = useCallback(async () => {
     if (refreshRulesData.current != null) {
@@ -96,7 +106,14 @@ const RulesPageComponent: React.FC = () => {
     [history]
   );
 
-  if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
+  if (
+    redirectToDetections(
+      isSignalIndexExists,
+      isAuthenticated,
+      hasEncryptionKey,
+      needsListsConfiguration
+    )
+  ) {
     history.replace(getDetectionEngineUrl());
     return null;
   }
@@ -104,6 +121,7 @@ const RulesPageComponent: React.FC = () => {
   return (
     <>
       {userHasNoPermissions(canUserCRUD) && <ReadOnlyCallOut />}
+      <ValueListsModal showModal={isValueListsModalShown} onClose={hideValueListsModal} />
       <ImportDataModal
         checkBoxLabel={i18n.OVERWRITE_WITH_SAME_NAME}
         closeModal={() => setShowImportModal(false)}
@@ -154,6 +172,15 @@ const RulesPageComponent: React.FC = () => {
                 </EuiButton>
               </EuiFlexItem>
             )}
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconType="importAction"
+                isDisabled={userHasNoPermissions(canUserCRUD) || loading}
+                onClick={showValueListsModal}
+              >
+                {i18n.UPLOAD_VALUE_LISTS}
+              </EuiButton>
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
                 iconType="importAction"

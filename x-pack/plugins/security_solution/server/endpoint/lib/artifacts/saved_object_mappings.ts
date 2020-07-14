@@ -45,7 +45,6 @@ export const exceptionsArtifactSavedObjectMappings: SavedObjectsType['mappings']
     },
     body: {
       type: 'binary',
-      index: false,
     },
   },
 };
@@ -66,14 +65,14 @@ export const manifestSavedObjectMappings: SavedObjectsType['mappings'] = {
 
 export const exceptionsArtifactType: SavedObjectsType = {
   name: exceptionsArtifactSavedObjectType,
-  hidden: false, // TODO: should these be hidden?
+  hidden: false,
   namespaceType: 'agnostic',
   mappings: exceptionsArtifactSavedObjectMappings,
 };
 
 export const manifestType: SavedObjectsType = {
   name: manifestSavedObjectType,
-  hidden: false, // TODO: should these be hidden?
+  hidden: false,
   namespaceType: 'agnostic',
   mappings: manifestSavedObjectMappings,
 };

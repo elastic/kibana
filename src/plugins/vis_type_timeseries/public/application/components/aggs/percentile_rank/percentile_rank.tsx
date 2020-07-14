@@ -41,7 +41,7 @@ import { IFieldType, KBN_FIELD_TYPES } from '../../../../../../../plugins/data/p
 import { MetricsItemsSchema, PanelSchema, SeriesItemsSchema } from '../../../../../common/types';
 import { DragHandleProps } from '../../../../types';
 
-const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER];
+const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.HISTOGRAM];
 
 interface PercentileRankAggProps {
   disableDelete: boolean;

@@ -54,7 +54,8 @@ export interface ISource {
   isESSource(): boolean;
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null;
   supportsFitToBounds(): Promise<boolean>;
-  isJoinable(): boolean;
+  showJoinEditor(): boolean;
+  getJoinsDisabledReason(): string | null;
   cloneDescriptor(): SourceDescriptor;
   getFieldNames(): string[];
   getApplyGlobalQuery(): boolean;
@@ -80,7 +81,6 @@ export class AbstractSource implements ISource {
   destroy(): void {}
 
   cloneDescriptor(): SourceDescriptor {
-    // @ts-ignore
     return copyPersistentState(this._descriptor);
   }
 
@@ -148,8 +148,12 @@ export class AbstractSource implements ISource {
     return 0;
   }
 
-  isJoinable(): boolean {
+  showJoinEditor(): boolean {
     return false;
+  }
+
+  getJoinsDisabledReason() {
+    return null;
   }
 
   isESSource(): boolean {
