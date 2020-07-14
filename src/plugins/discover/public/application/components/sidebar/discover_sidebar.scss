@@ -33,7 +33,7 @@
 }
 
 .dscFieldChooser {
-  padding-left: $euiSize !important;
+  padding-left: $euiSize;
 }
 
 .dscFieldChooser__toggle {
@@ -65,9 +65,6 @@
 .dscSidebarItem--active {
   border-top: 1px solid $euiColorLightShade;
   color: $euiColorFullShade;
-  .euiText {
-    font-weight: bold;
-  }
 }
 
 .dscSidebarField {
