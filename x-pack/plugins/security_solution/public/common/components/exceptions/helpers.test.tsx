@@ -45,7 +45,6 @@ import {
   getEntryListMock,
   getEntryMatchMock,
   getEntryMatchAnyMock,
-  getEntryNestedMock,
   getEntriesArrayMock,
 } from '../../../../../lists/common/schemas/types/entries.mock';
 import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/comments.mock';

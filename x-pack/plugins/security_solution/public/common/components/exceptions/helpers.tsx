@@ -36,7 +36,7 @@ import {
   exceptionListItemSchema,
   UpdateExceptionListItemSchema,
   ExceptionListType,
-  EntriesArray,
+  EntryNested,
 } from '../../../lists_plugin_deps';
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { TimelineNonEcsData } from '../../../graphql/types';
@@ -392,7 +392,7 @@ export const prepareExceptionItemsForBulkClose = (
 ): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
   return exceptionItems.map((item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
     if (item.entries !== undefined) {
-      const newEntries = item.entries.map((itemEntry: EntriesArray[0]) => {
+      const newEntries = item.entries.map((itemEntry: Entry | EntryNested) => {
         return {
           ...itemEntry,
           field: itemEntry.field.startsWith('event.')
