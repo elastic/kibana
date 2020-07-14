@@ -41,9 +41,9 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
         }}
       >
         <>
-          {`{{${variable.name}}}`}
-          <EuiText size="s" color="subdued">
-            <p className="euiTextColor--subdued">
+          <EuiText size="m">{`{{${variable.name}}}`}</EuiText>
+          <EuiText size="m" color="subdued">
+            <div className="euiTextColor--subdued">
               <FormattedMessage
                 id="xpack.triggersActionsUI.components.addMessageVariable.variableDescriptionLabel"
                 defaultMessage="{description}"
@@ -51,7 +51,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
                   description: variable.description,
                 }}
               />
-            </p>
+            </div>
           </EuiText>
         </>
       </EuiContextMenuItem>
