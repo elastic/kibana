@@ -136,14 +136,14 @@ describe('#setup', () => {
       const config = MockLegacyClusterClient.mock.calls[0][0];
       expect(config).toMatchInlineSnapshot(`
         Object {
+          "allowedRequestHeaders": Array [
+            undefined,
+          ],
           "healthCheckDelay": "PT0.01S",
           "hosts": Array [
             "http://8.8.8.8",
           ],
           "logQueries": true,
-          "allowedRequestHeaders": Array [
-            undefined,
-          ],
           "ssl": Object {
             "certificate": "certificate-value",
             "verificationMode": "none",
@@ -162,12 +162,12 @@ describe('#setup', () => {
       const config = MockLegacyClusterClient.mock.calls[0][0];
       expect(config).toMatchInlineSnapshot(`
         Object {
+          "allowedRequestHeaders": Array [
+            undefined,
+          ],
           "healthCheckDelay": "PT0.01S",
           "hosts": Array [
             "http://1.2.3.4",
-          ],
-          "allowedRequestHeaders": Array [
-            undefined,
           ],
           "ssl": Object {
             "alwaysPresentCertificate": undefined,
@@ -209,14 +209,14 @@ describe('#setup', () => {
       const config = MockLegacyClusterClient.mock.calls[0][0];
       expect(config).toMatchInlineSnapshot(`
         Object {
+          "allowedRequestHeaders": Array [
+            undefined,
+          ],
           "healthCheckDelay": "PT2S",
           "hosts": Array [
             "http://8.8.8.8",
           ],
           "logQueries": true,
-          "allowedRequestHeaders": Array [
-            undefined,
-          ],
           "ssl": Object {
             "certificate": "certificate-value",
             "verificationMode": "none",
@@ -322,14 +322,14 @@ describe('#start', () => {
 
       expect(config).toMatchInlineSnapshot(`
         Object {
+          "allowedRequestHeaders": Array [
+            undefined,
+          ],
           "healthCheckDelay": "PT0.01S",
           "hosts": Array [
             "http://8.8.8.8",
           ],
           "logQueries": true,
-          "allowedRequestHeaders": Array [
-            undefined,
-          ],
           "ssl": Object {
             "certificate": "certificate-value",
             "verificationMode": "none",
