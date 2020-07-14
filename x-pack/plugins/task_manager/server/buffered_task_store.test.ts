@@ -43,7 +43,7 @@ describe('Buffered Task Store', () => {
 
       taskStore.bulkUpdate.mockResolvedValueOnce([
         asOk(tasks[0]),
-        asErr(new Error('Oh no, something went terribly wrong')),
+        asErr({ entity: tasks[1], error: new Error('Oh no, something went terribly wrong') }),
         asOk(tasks[2]),
       ]);
 

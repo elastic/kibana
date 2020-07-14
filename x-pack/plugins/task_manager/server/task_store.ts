@@ -99,10 +99,10 @@ export interface ClaimOwnershipResult {
   docs: ConcreteTaskInstance[];
 }
 
-export interface BulkUpdateTaskFailureResult {
-  error: NonNullable<SavedObject['error']>;
-  task: ConcreteTaskInstance;
-}
+export type BulkUpdateResult = Result<
+  ConcreteTaskInstance,
+  { entity: ConcreteTaskInstance; error: Error }
+>;
 
 export interface UpdateByQueryResult {
   updated: number;
@@ -340,9 +340,7 @@ export class TaskStore {
    * @param {Array<TaskDoc>} docs
    * @returns {Promise<Array<TaskDoc>>}
    */
-  public async bulkUpdate(
-    docs: ConcreteTaskInstance[]
-  ): Promise<Array<Result<ConcreteTaskInstance, Error>>> {
+  public async bulkUpdate(docs: ConcreteTaskInstance[]): Promise<BulkUpdateResult[]> {
     const attributesByDocId = docs.reduce((attrsById, doc) => {
       attrsById.set(doc.id, taskInstanceToAttributes(doc));
       return attrsById;
@@ -362,7 +360,7 @@ export class TaskStore {
       )
     ).saved_objects;
 
-    return updatedSavedObjects.map<Result<ConcreteTaskInstance, Error>>((updatedSavedObject) =>
+    return updatedSavedObjects.map<BulkUpdateResult>((updatedSavedObject, index) =>
       isSavedObjectsUpdateResponse(updatedSavedObject)
         ? asOk(
             savedObjectToConcreteTaskInstance({
@@ -373,7 +371,13 @@ export class TaskStore {
               ),
             })
           )
-        : asErr(updatedSavedObject)
+        : asErr({
+            // The SavedObjectsRepository maintains the order of the docs
+            // so we can rely on the index in the `docs` to match an error
+            // on the same index in the `bulkUpdate` result
+            entity: docs[index],
+            error: updatedSavedObject,
+          })
     );
   }
 

@@ -18,19 +18,20 @@ export interface OperationError<Input, ErrorOutput> {
   error: ErrorOutput;
 }
 
-export type OperationResult<Input, Output, ErrorOutput> = Result<
+export type OperationResult<Input, ErrorOutput, Output = Input> = Result<
   Output,
   OperationError<Input, ErrorOutput>
 >;
 
-export type Operation<Input, Output, ErrorOutput> = (
+export type Operation<Input, ErrorOutput, Output = Input> = (
   entity: Input
 ) => Promise<Result<Output, ErrorOutput>>;
-export type BulkOperation<Input, Output, ErrorOutput> = (
-  entities: Input[]
-) => Promise<Array<OperationResult<Input, Output, ErrorOutput>>>;
 
-export function createBuffer<Input extends Entity, Output extends Entity, ErrorOutput>(
+export type BulkOperation<Input, ErrorOutput, Output = Input> = (
+  entities: Input[]
+) => Promise<Array<OperationResult<Input, ErrorOutput, Output>>>;
+
+export function createBuffer<Input extends Entity, ErrorOutput, Output extends Entity = Input>(
   bulkOperation: BulkOperation<Input, Output, ErrorOutput>
 ): Operation<Input, Output, ErrorOutput> {
   const flushBuffer = new Subject<void>();
