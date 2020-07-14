@@ -1,24 +1,23 @@
 [[explore-underlying-data]]
-== Explore data underlying visualizations
+== Explore the underlying data for a visualization
 
-Dashboard panels have "Explore underlying data" actions that will redirect
-you to *Discover* narrowing down documents to ones likely used in
-the visualization.
+++++
+Explore the underlying data
+++++
 
-"Explore underlying data" actions are available for visualizations which are
-backed by a single index pattern.
+Dashboard panels have an *Explore underlying data* action that navigates you to *Discover*,
+where you can narrow your documents to the ones likely used in the visualization.
+This action is available for visualizations backed by a single index pattern.
 
-There are two "Explore underlying data" actions: (1) one which appears in the
-panel's context menu; (2) and the other which appears when user clicks or brushes
-the chart.
+You can access *Explore underlying data* in two ways: from the panel context
+menu or from the menu that appears when you interact with the chart.
 
 [float]
 [[explore-data-from-panel-context-menu]]
 === Explore data from panel context menu
 
-Context menu "Explore underlying data" action will navigate you to *Discover*,
-to the index pattern used in the visualization and will carry over all filters,
-query, and time range applied to the visualization.
+The *Explore underlying data* action in the panel menu navigates you to Discover,
+carrying over the index pattern, filters, query, and time range for the visualization.
 
 [role="screenshot"]
 image::images/explore_data_context_menu.png[Explore underlying data from panel context menu]
@@ -27,17 +26,14 @@ image::images/explore_data_context_menu.png[Explore underlying data from panel c
 [[explore-data-from-chart]]
 === Explore data from chart action
 
-In-chart "Explore underlying data" action will also navigate you to *Discover*,
-to the index pattern used in the visualization and will carry over all
-filters, query and time range, but it will also apply the filters and time range
-created from the click or brush events that triggered this action. For example,
-if you will brush a chart the time range associated
-with that brush event will be carried over to *Discover*.
+Initiating *Explore underlying data* from the chart also navigates to Discover,
+carrying over the current context for the visualization. In addition, this action
+applies the filters and time range created by the events that triggered the action.
 
 [role="screenshot"]
 image::images/explore_data_in_chart.png[Explore underlying data from chart]
 
-In-chart action can be optionally disabled by adding below line to your `kibana.yml` config.
+You can disable this action by adding the following line to your `kibana.yml` config.
 
 ["source","yml"]
 -----------
