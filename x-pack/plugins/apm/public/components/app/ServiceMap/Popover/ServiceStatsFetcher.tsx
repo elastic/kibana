@@ -27,7 +27,6 @@ interface ServiceStatsFetcherProps {
 }
 
 export function ServiceStatsFetcher({
-  environment,
   serviceName,
   serviceAnomalyStats,
 }: ServiceStatsFetcherProps) {
@@ -79,7 +78,7 @@ export function ServiceStatsFetcher({
     avgTransactionDuration,
   ].some((stat) => isNumber(stat));
 
-  if (environment && !hasServiceData) {
+  if (!hasServiceData) {
     return (
       <EuiText color="subdued">
         {i18n.translate('xpack.apm.serviceMap.popoverMetrics.noDataText', {

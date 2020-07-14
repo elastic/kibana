@@ -72,7 +72,6 @@ export function Contents({
       <FlexColumnItem>
         {isService ? (
           <ServiceStatsFetcher
-            environment={selectedNodeData[SERVICE_ENVIRONMENT]}
             serviceName={selectedNodeServiceName}
             serviceAnomalyStats={selectedNodeData.serviceAnomalyStats}
           />
