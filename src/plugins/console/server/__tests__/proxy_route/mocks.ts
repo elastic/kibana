@@ -32,7 +32,7 @@ export const getProxyRouteHandlerDeps = ({
   readLegacyESConfig = () => ({
     requestTimeout: duration(30000),
     customHeaders: {},
-    requestHeadersWhitelist: [],
+    allowedRequestHeaders: [],
     hosts: ['http://localhost:9200'],
   }),
   log = coreMock.createPluginInitializerContext().logger.get(),

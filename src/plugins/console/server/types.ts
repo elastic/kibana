@@ -33,12 +33,12 @@ export type ConsoleStart = ReturnType<ConsoleServerPlugin['start']> extends Prom
 /** @internal */
 export interface ESConfigForProxy {
   hosts: string[];
-  requestHeadersWhitelist: string[];
+  allowedRequestHeaders: string[];
   customHeaders: Record<string, any>;
   requestTimeout: Duration;
   ssl?: {
     verificationMode: 'none' | 'certificate' | 'full';
-    certificateAuthorities: string[] | string;
+    certificateAuthorities?: string[] | string;
     alwaysPresentCertificate: boolean;
     certificate?: string;
     key?: string;

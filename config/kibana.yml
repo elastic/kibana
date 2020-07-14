@@ -72,10 +72,10 @@
 
 # List of Kibana client-side headers to send to Elasticsearch. To send *no* client-side
 # headers, set this value to [] (an empty list).
-#elasticsearch.requestHeadersWhitelist: [ authorization ]
+#elasticsearch.allowedRequestHeaders: [ authorization ]
 
 # Header names and values that are sent to Elasticsearch. Any custom headers cannot be overwritten
-# by client-side headers, regardless of the elasticsearch.requestHeadersWhitelist configuration.
+# by client-side headers, regardless of the elasticsearch.allowedRequestHeaders configuration.
 #elasticsearch.customHeaders: {}
 
 # Time in milliseconds for Elasticsearch to wait for responses from shards. Set to 0 to disable.

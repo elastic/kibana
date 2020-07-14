@@ -20,9 +20,10 @@
 import { first } from 'rxjs/operators';
 import { head } from 'lodash';
 import url from 'url';
+import { ElasticsearchConfig } from '../../../../src/core/server';
 
 // TODO: Remove this hack once we can get the ES config we need for Console proxy a better way.
-let _legacyEsConfig: any;
+let _legacyEsConfig: ElasticsearchConfig;
 export const readLegacyEsConfig = () => {
   return _legacyEsConfig;
 };

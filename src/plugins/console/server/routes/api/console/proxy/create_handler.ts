@@ -77,7 +77,7 @@ function getRequestConfig(
   proxyConfigCollection: ProxyConfigCollection,
   uri: string
 ): { agent: Agent; timeout: number; headers: object; rejectUnauthorized?: boolean } {
-  const filteredHeaders = filterHeaders(headers, esConfig.requestHeadersWhitelist);
+  const filteredHeaders = filterHeaders(headers, esConfig.allowedRequestHeaders);
   const newHeaders = setHeaders(filteredHeaders, esConfig.customHeaders);
 
   if (proxyConfigCollection.hasConfig()) {

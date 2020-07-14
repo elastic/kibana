@@ -28,6 +28,9 @@ describe('config schema', () => {
           "enabled": true,
         },
         "elasticsearch": Object {
+          "allowedRequestHeaders": Array [
+            "authorization",
+          ],
           "apiVersion": "master",
           "customHeaders": Object {},
           "healthCheck": Object {
@@ -38,9 +41,6 @@ describe('config schema', () => {
           "logQueries": false,
           "pingTimeout": "PT30S",
           "preserveHost": true,
-          "requestHeadersWhitelist": Array [
-            "authorization",
-          ],
           "requestTimeout": "PT30S",
           "shardTimeout": "PT30S",
           "sniffInterval": false,
@@ -82,6 +82,9 @@ describe('config schema', () => {
             },
           },
           "elasticsearch": Object {
+            "allowedRequestHeaders": Array [
+              "authorization",
+            ],
             "apiVersion": "master",
             "customHeaders": Object {},
             "healthCheck": Object {
@@ -92,9 +95,6 @@ describe('config schema', () => {
             "logQueries": false,
             "pingTimeout": "PT30S",
             "preserveHost": true,
-            "requestHeadersWhitelist": Array [
-              "authorization",
-            ],
             "requestTimeout": "PT30S",
             "shardTimeout": "PT30S",
             "sniffInterval": false,

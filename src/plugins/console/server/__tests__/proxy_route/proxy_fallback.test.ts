@@ -41,7 +41,7 @@ describe('Console Proxy Route', () => {
           readLegacyESConfig: () => ({
             requestTimeout: duration(30000),
             customHeaders: {},
-            requestHeadersWhitelist: [],
+            allowedRequestHeaders: [],
             hosts: ['http://localhost:9201', 'http://localhost:9202', 'http://localhost:9203'],
           }),
         })

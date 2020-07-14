@@ -49,7 +49,7 @@ configuration is effectively ignored when `csp.strict` is enabled.
 | `elasticsearch.customHeaders:`
  | Header names and values to send to {es}. Any custom headers cannot be
 overwritten by client-side headers, regardless of the
-`elasticsearch.requestHeadersWhitelist` configuration. *Default: `{}`*
+`elasticsearch.allowedRequestHeaders` configuration. *Default: `{}`*
 
 | `elasticsearch.hosts:`
  | The URLs of the {es} instances to use for all your queries. All nodes
@@ -73,7 +73,7 @@ currently do not have an inspector, for example Timelion and Monitoring.
 `server.host` setting. When the value is `false`, {kib} uses
 the hostname of the host that connects to this {kib} instance. *Default: `true`*
 
-| `elasticsearch.requestHeadersWhitelist:`
+| `elasticsearch.allowedRequestHeaders:`
  | List of {kib} client-side headers to send to {es}. To send *no* client-side
 headers, set this value to [] (an empty list). Removing the `authorization`
 header from being whitelisted means that you cannot use
