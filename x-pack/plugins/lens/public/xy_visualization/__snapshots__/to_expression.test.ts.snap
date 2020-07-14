@@ -5,6 +5,9 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
+        "fittingFunction": Array [
+          "Carry",
+        ],
         "layers": Array [
           Object {
             "chain": Array [

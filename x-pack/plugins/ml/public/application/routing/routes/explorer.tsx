@@ -22,7 +22,6 @@ import { ml } from '../../services/ml_api_service';
 import { useExplorerData } from '../../explorer/actions';
 import { explorerService } from '../../explorer/explorer_dashboard_service';
 import { getDateFormatTz } from '../../explorer/explorer_utils';
-import { useSwimlaneLimit } from '../../explorer/select_limit';
 import { useJobSelection } from '../../components/job_selector/use_job_selection';
 import { useShowCharts } from '../../components/controls/checkbox_showcharts';
 import { useTableInterval } from '../../components/controls/select_interval';
@@ -30,6 +29,7 @@ import { useTableSeverity } from '../../components/controls/select_severity';
 import { useUrlState } from '../../util/url_state';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
 import { useTimefilter } from '../../contexts/kibana';
+import { isViewBySwimLaneData } from '../../explorer/swimlane_container';
 
 const breadcrumbs = [
   ML_BREADCRUMB,
@@ -151,12 +151,8 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [showCharts] = useShowCharts();
   const [tableInterval] = useTableInterval();
   const [tableSeverity] = useTableSeverity();
-  const [swimlaneLimit] = useSwimlaneLimit();
-  useEffect(() => {
-    explorerService.setSwimlaneLimit(swimlaneLimit);
-  }, [swimlaneLimit]);
 
-  const [selectedCells, setSelectedCells] = useSelectedCells();
+  const [selectedCells, setSelectedCells] = useSelectedCells(appState, setAppState);
   useEffect(() => {
     explorerService.setSelectedCells(selectedCells);
   }, [JSON.stringify(selectedCells)]);
@@ -170,14 +166,26 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       selectedCells,
       selectedJobs: explorerState.selectedJobs,
       swimlaneBucketInterval: explorerState.swimlaneBucketInterval,
-      swimlaneLimit: explorerState.swimlaneLimit,
       tableInterval: tableInterval.val,
       tableSeverity: tableSeverity.val,
       viewBySwimlaneFieldName: explorerState.viewBySwimlaneFieldName,
+      swimlaneContainerWidth: explorerState.swimlaneContainerWidth,
+      viewByPerPage: explorerState.viewByPerPage,
+      viewByFromPage: explorerState.viewByFromPage,
     }) ||
     undefined;
+
   useEffect(() => {
-    loadExplorerData(loadExplorerDataConfig);
+    if (explorerState && explorerState.swimlaneContainerWidth > 0) {
+      loadExplorerData({
+        ...loadExplorerDataConfig,
+        swimlaneLimit:
+          explorerState?.viewBySwimlaneData &&
+          isViewBySwimLaneData(explorerState?.viewBySwimlaneData)
+            ? explorerState?.viewBySwimlaneData.cardinality
+            : undefined,
+      });
+    }
   }, [JSON.stringify(loadExplorerDataConfig)]);
 
   if (explorerState === undefined || refresh === undefined || showCharts === undefined) {

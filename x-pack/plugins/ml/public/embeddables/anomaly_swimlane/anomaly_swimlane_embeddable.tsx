@@ -16,10 +16,10 @@ import {
   IContainer,
 } from '../../../../../../src/plugins/embeddable/public';
 import { MlStartDependencies } from '../../plugin';
-import { ExplorerSwimlaneContainer } from './explorer_swimlane_container';
+import { EmbeddableSwimLaneContainer } from './embeddable_swim_lane_container';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { JobId } from '../../../common/types/anomaly_detection_jobs';
-import { ExplorerService } from '../../application/services/explorer_service';
+import { AnomalyTimelineService } from '../../application/services/anomaly_timeline_service';
 import {
   Filter,
   Query,
@@ -40,7 +40,7 @@ export interface AnomalySwimlaneEmbeddableCustomInput {
   jobIds: JobId[];
   swimlaneType: SwimlaneType;
   viewBy?: string;
-  limit?: number;
+  perPage?: number;
 
   // Embeddable inputs which are not included in the default interface
   filters: Filter[];
@@ -58,12 +58,12 @@ export interface AnomalySwimlaneEmbeddableCustomOutput {
   jobIds: JobId[];
   swimlaneType: SwimlaneType;
   viewBy?: string;
-  limit?: number;
+  perPage?: number;
 }
 
 export interface AnomalySwimlaneServices {
   anomalyDetectorService: AnomalyDetectorService;
-  explorerService: ExplorerService;
+  anomalyTimelineService: AnomalyTimelineService;
 }
 
 export type AnomalySwimlaneEmbeddableServices = [
@@ -101,14 +101,20 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
     super.render(node);
     this.node = node;
 
+    const I18nContext = this.services[0].i18n.Context;
+
     ReactDOM.render(
-      <ExplorerSwimlaneContainer
-        id={this.input.id}
-        embeddableInput={this.getInput$()}
-        services={this.services}
-        refresh={this.reload$.asObservable()}
-        onOutputChange={(output) => this.updateOutput(output)}
-      />,
+      <I18nContext>
+        <EmbeddableSwimLaneContainer
+          id={this.input.id}
+          embeddableInput={this.getInput$()}
+          services={this.services}
+          refresh={this.reload$.asObservable()}
+          onInputChange={(input) => {
+            this.updateInput(input);
+          }}
+        />
+      </I18nContext>,
       node
     );
   }

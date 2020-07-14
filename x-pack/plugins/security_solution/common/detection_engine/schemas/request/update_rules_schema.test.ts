@@ -248,6 +248,9 @@ describe('update rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: UpdateRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       risk_score: 50,
       description: 'some description',
@@ -317,6 +320,9 @@ describe('update rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: UpdateRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       risk_score: 50,
       description: 'some description',
@@ -364,6 +370,9 @@ describe('update rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: UpdateRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       output_index: '.siem-signals',
       risk_score: 50,
@@ -409,6 +418,9 @@ describe('update rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: UpdateRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -452,6 +464,9 @@ describe('update rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: UpdateRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       output_index: '.siem-signals',
       risk_score: 50,
@@ -530,6 +545,9 @@ describe('update rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: UpdateRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       output_index: '.siem-signals',
       risk_score: 50,
@@ -1353,6 +1371,9 @@ describe('update rules schema', () => {
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
       const expected: UpdateRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -1401,6 +1422,9 @@ describe('update rules schema', () => {
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
       const expected: UpdateRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -1425,10 +1449,12 @@ describe('update rules schema', () => {
           {
             id: 'some_uuid',
             namespace_type: 'single',
+            type: 'detection',
           },
           {
             id: 'some_uuid',
             namespace_type: 'agnostic',
+            type: 'endpoint',
           },
         ],
       };
@@ -1457,6 +1483,9 @@ describe('update rules schema', () => {
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
       const expected: UpdateRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -1505,6 +1534,7 @@ describe('update rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "undefined" supplied to "exceptions_list,type"',
         'Invalid value "not a namespace type" supplied to "exceptions_list,namespace_type"',
       ]);
       expect(message.schema).toEqual({});
@@ -1531,6 +1561,9 @@ describe('update rules schema', () => {
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
       const expected: UpdateRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',

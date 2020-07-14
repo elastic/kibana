@@ -124,13 +124,21 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await this.assertJobDescriptionValue(jobDescription);
     },
 
-    // async assertExcludedFieldsSelection(expectedSelection: string[]) {
-    //   const actualSelection = await comboBox.getComboBoxSelectedOptions(
-    //     'mlAnalyticsCreateJobWizardExcludesSelect'
-    //   );
+    async assertSourceDataPreviewExists() {
+      await testSubjects.existOrFail('mlAnalyticsCreationDataGrid loaded', { timeout: 5000 });
+    },
+
+    async assertIncludeFieldsSelectionExists() {
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardIncludesSelect', { timeout: 5000 });
+    },
+
+    // async assertIncludedFieldsSelection(expectedSelection: string[]) {
+    //   const includesTable = await testSubjects.find('mlAnalyticsCreateJobWizardIncludesSelect');
+    //   const actualSelection = await includesTable.findByClassName('euiTableRow-isSelected');
+
     //   expect(actualSelection).to.eql(
     //     expectedSelection,
-    //     `Excluded fields should be '${expectedSelection}' (got '${actualSelection}')`
+    //     `Included fields should be '${expectedSelection}' (got '${actualSelection}')`
     //   );
     // },
 
@@ -252,19 +260,35 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await this.assertTrainingPercentValue(trainingPercent);
     },
 
+    async assertConfigurationStepActive() {
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardConfigurationStep active');
+    },
+
+    async assertAdditionalOptionsStepActive() {
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardAdvancedStep active');
+    },
+
+    async assertDetailsStepActive() {
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardDetailsStep active');
+    },
+
+    async assertCreateStepActive() {
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardCreateStep active');
+    },
+
     async continueToAdditionalOptionsStep() {
-      await testSubjects.click('mlAnalyticsCreateJobWizardContinueButton');
-      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardAdvancedStep');
+      await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+      await this.assertAdditionalOptionsStepActive();
     },
 
     async continueToDetailsStep() {
-      await testSubjects.click('mlAnalyticsCreateJobWizardContinueButton');
-      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardDetailsStep');
+      await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+      await this.assertDetailsStepActive();
     },
 
     async continueToCreateStep() {
-      await testSubjects.click('mlAnalyticsCreateJobWizardContinueButton');
-      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardCreateStep');
+      await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+      await this.assertCreateStepActive();
     },
 
     async assertModelMemoryInputExists() {
@@ -279,6 +303,26 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       expect(actualModelMemory).to.eql(
         expectedValue,
         `Model memory limit should be '${expectedValue}' (got '${actualModelMemory}')`
+      );
+    },
+
+    async assertModelMemoryInputPopulated() {
+      const actualModelMemory = await testSubjects.getAttribute(
+        'mlAnalyticsCreateJobWizardModelMemoryInput',
+        'value'
+      );
+
+      expect(actualModelMemory).not.to.be('');
+    },
+
+    async assertPredictionFieldNameValue(expectedValue: string) {
+      const actualPredictedFieldName = await testSubjects.getAttribute(
+        'mlAnalyticsCreateJobWizardPredictionFieldNameInput',
+        'value'
+      );
+      expect(actualPredictedFieldName).to.eql(
+        expectedValue,
+        `Prediction field name should be '${expectedValue}' (got '${actualPredictedFieldName}')`
       );
     },
 
@@ -372,11 +416,19 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
         await this.assertDependentVariableSelection([job.analysis[jobType].dependent_variable]);
         await this.assertTrainingPercentValue(String(job.analysis[jobType].training_percent));
       }
-      // await this.assertExcludedFieldsSelection(job.analyzed_fields.excludes);
+      await this.assertSourceDataPreviewExists();
+      await this.assertIncludeFieldsSelectionExists();
+      // await this.assertIncludedFieldsSelection(job.analyzed_fields.includes);
     },
 
-    async assertInitialCloneJobAdditionalOptionsStep(job: DataFrameAnalyticsConfig) {
-      await this.assertModelMemoryValue(job.model_memory_limit);
+    async assertInitialCloneJobAdditionalOptionsStep(
+      analysis: DataFrameAnalyticsConfig['analysis']
+    ) {
+      const jobType = Object.keys(analysis)[0];
+      if (isClassificationAnalysis(analysis) || isRegressionAnalysis(analysis)) {
+        // @ts-ignore
+        await this.assertPredictionFieldNameValue(analysis[jobType].prediction_field_name);
+      }
     },
 
     async assertInitialCloneJobDetailsStep(job: DataFrameAnalyticsConfig) {

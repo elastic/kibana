@@ -362,7 +362,7 @@ export class DataRecognizer {
   // takes a module config id, an optional jobPrefix and the request object
   // creates all of the jobs, datafeeds and savedObjects  listed in the module config.
   // if any of the savedObjects already exist, they will not be overwritten.
-  async setupModuleItems(
+  async setup(
     moduleId: string,
     jobPrefix?: string,
     groups?: string[],

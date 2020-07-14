@@ -46,19 +46,16 @@ export class StyleMapSelect extends Component {
   };
 
   _renderCustomStopsInput() {
-    if (!this.props.useCustomMap) {
+    return !this.props.isCustomOnly && !this.props.useCustomMap
+      ? null
+      : this.props.renderCustomStopsInput(this._onCustomMapChange);
+  }
+
+  _renderMapSelect() {
+    if (this.props.isCustomOnly) {
       return null;
     }
 
-    return (
-      <Fragment>
-        <EuiSpacer size="s" />
-        {this.props.renderCustomStopsInput(this._onCustomMapChange)}
-      </Fragment>
-    );
-  }
-
-  render() {
     const mapOptionsWithCustom = [
       {
         value: CUSTOM_MAP,
@@ -87,6 +84,15 @@ export class StyleMapSelect extends Component {
           hasDividers={true}
           compressed
         />
+        <EuiSpacer size="s" />
+      </Fragment>
+    );
+  }
+
+  render() {
+    return (
+      <Fragment>
+        {this._renderMapSelect()}
         {this._renderCustomStopsInput()}
       </Fragment>
     );

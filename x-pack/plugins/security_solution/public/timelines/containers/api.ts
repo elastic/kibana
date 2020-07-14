@@ -30,7 +30,7 @@ import { createToasterPlainError } from '../../cases/containers/utils';
 import {
   ImportDataProps,
   ImportDataResponse,
-} from '../../alerts/containers/detection_engine/rules';
+} from '../../detections/containers/detection_engine/rules';
 
 interface RequestPostTimeline {
   timeline: TimelineInput;
@@ -132,6 +132,7 @@ export const persistTimeline = async ({
 
 export const importTimelines = async ({
   fileToImport,
+  signal,
 }: ImportDataProps): Promise<ImportDataResponse> => {
   const formData = new FormData();
   formData.append('file', fileToImport);
@@ -140,24 +141,24 @@ export const importTimelines = async ({
     method: 'POST',
     headers: { 'Content-Type': undefined },
     body: formData,
+    signal,
   });
 };
 
-export const exportSelectedTimeline: ExportSelectedData = async ({
+export const exportSelectedTimeline: ExportSelectedData = ({
   filename = `timelines_export.ndjson`,
   ids = [],
   signal,
 }): Promise<Blob> => {
   const body = ids.length > 0 ? JSON.stringify({ ids }) : undefined;
-  const response = await KibanaServices.get().http.fetch<{ body: Blob }>(`${TIMELINE_EXPORT_URL}`, {
+  return KibanaServices.get().http.fetch<Blob>(`${TIMELINE_EXPORT_URL}`, {
     method: 'POST',
     body,
     query: {
       file_name: filename,
     },
+    signal,
   });
-
-  return response.body;
 };
 
 export const getDraftTimeline = async ({

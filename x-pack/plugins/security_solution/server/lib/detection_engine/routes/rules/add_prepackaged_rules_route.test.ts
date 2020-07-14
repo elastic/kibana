@@ -13,7 +13,6 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock } from '../__mocks__';
 import { addPrepackedRulesRoute } from './add_prepackaged_rules_route';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
@@ -21,9 +20,12 @@ jest.mock('../../rules/get_prepackaged_rules', () => {
     getPrepackagedRules: (): AddPrepackagedRulesSchemaDecoded[] => {
       return [
         {
+          author: ['Elastic'],
           tags: [],
           rule_id: 'rule-1',
           risk_score: 50,
+          risk_score_mapping: [],
+          severity_mapping: [],
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -52,14 +54,6 @@ jest.mock('../../rules/get_prepackaged_rules', () => {
 describe('add_prepackaged_rules_route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
 
   beforeEach(() => {
     server = serverMock.create();

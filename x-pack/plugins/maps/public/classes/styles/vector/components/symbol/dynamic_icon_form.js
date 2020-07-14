@@ -36,17 +36,20 @@ export function DynamicIconForm({
   };
 
   function renderIconMapSelect() {
-    if (!styleOptions.field || !styleOptions.field.name) {
+    const field = styleProperty.getField();
+    if (!field) {
       return null;
     }
 
     return (
       <IconMapSelect
         {...styleOptions}
+        useCustomIconMap={_.get(styleOptions, 'useCustomColorRamp', false)}
         styleProperty={styleProperty}
         onChange={onIconMapChange}
         isDarkMode={isDarkMode}
         symbolOptions={symbolOptions}
+        isCustomOnly={!field.supportsAutoDomain()}
       />
     );
   }

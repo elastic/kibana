@@ -55,6 +55,7 @@ function createPlugin(
       kibanaVersion: '7.0.0',
       requiredPlugins: required,
       optionalPlugins: optional,
+      requiredBundles: [],
       server,
       ui,
     },

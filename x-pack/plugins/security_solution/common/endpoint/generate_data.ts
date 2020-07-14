@@ -391,6 +391,13 @@ export class EndpointDocGenerator {
       '@timestamp': ts,
       event: {
         created: ts,
+        id: this.seededUUIDv4(),
+        kind: 'metric',
+        category: ['host'],
+        type: ['info'],
+        module: 'endpoint',
+        action: 'endpoint_metadata',
+        dataset: 'endpoint.metadata',
       },
       ...this.commonInfo,
     };
@@ -1006,9 +1013,9 @@ export class EndpointDocGenerator {
   }
 
   /**
-   * Generates an Ingest `datasource` that includes the Endpoint Policy data
+   * Generates an Ingest `package config` that includes the Endpoint Policy data
    */
-  public generatePolicyDatasource(): PolicyData {
+  public generatePolicyPackageConfig(): PolicyData {
     const created = new Date(Date.now() - 8.64e7).toISOString(); // 24h ago
     return {
       id: this.seededUUIDv4(),
@@ -1027,6 +1034,13 @@ export class EndpointDocGenerator {
           enabled: true,
           streams: [],
           config: {
+            artifact_manifest: {
+              value: {
+                manifest_version: 'WzAsMF0=',
+                schema_version: 'v1',
+                artifacts: {},
+              },
+            },
             policy: {
               value: policyFactory(),
             },
@@ -1225,8 +1239,8 @@ export class EndpointDocGenerator {
         created: ts,
         id: this.seededUUIDv4(),
         kind: 'state',
-        category: 'host',
-        type: 'change',
+        category: ['host'],
+        type: ['change'],
         module: 'endpoint',
         action: 'endpoint_policy_response',
         dataset: 'endpoint.policy',

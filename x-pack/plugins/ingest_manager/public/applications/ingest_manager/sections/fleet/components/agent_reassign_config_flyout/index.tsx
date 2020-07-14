@@ -23,7 +23,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Agent } from '../../../../types';
 import { sendPutAgentReassign, useCore, useGetAgentConfigs } from '../../../../hooks';
-import { AgentConfigDatasourceBadges } from '../agent_config_datasource_badges';
+import { AgentConfigPackageBadges } from '../agent_config_package_badges';
 
 interface Props {
   onClose: () => void;
@@ -36,7 +36,10 @@ export const AgentReassignConfigFlyout: React.FunctionComponent<Props> = ({ onCl
     agent.config_id
   );
 
-  const agentConfigsRequest = useGetAgentConfigs();
+  const agentConfigsRequest = useGetAgentConfigs({
+    page: 1,
+    perPage: 1000,
+  });
   const agentConfigs = agentConfigsRequest.data ? agentConfigsRequest.data.items : [];
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -113,7 +116,7 @@ export const AgentReassignConfigFlyout: React.FunctionComponent<Props> = ({ onCl
         <EuiSpacer size="l" />
 
         {selectedAgentConfigId && (
-          <AgentConfigDatasourceBadges agentConfigId={selectedAgentConfigId} />
+          <AgentConfigPackageBadges agentConfigId={selectedAgentConfigId} />
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

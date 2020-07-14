@@ -62,7 +62,6 @@
 
 import Boom from 'boom';
 import _ from 'lodash';
-import cloneDeep from 'lodash.clonedeep';
 import Semver from 'semver';
 import { Logger } from '../../../logging';
 import { SavedObjectUnsanitizedDoc } from '../../serialization';
@@ -151,7 +150,7 @@ export class DocumentMigrator implements VersionedTransformer {
     // Clone the document to prevent accidental mutations on the original data
     // Ex: Importing sample data that is cached at import level, migrations would
     // execute on mutated data the second time.
-    const clonedDoc = cloneDeep(doc);
+    const clonedDoc = _.cloneDeep(doc);
     return this.transformDoc(clonedDoc);
   };
 }
@@ -220,7 +219,7 @@ function buildActiveMigrations(
       return {
         ...migrations,
         [type.name]: {
-          latestVersion: _.last(transforms).version,
+          latestVersion: _.last(transforms)!.version,
           transforms,
         },
       };

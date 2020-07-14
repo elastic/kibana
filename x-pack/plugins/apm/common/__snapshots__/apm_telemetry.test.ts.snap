@@ -1,0 +1,929 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the telemetry mapping 1`] = `
+Object {
+  "properties": Object {
+    "agents": Object {
+      "properties": Object {
+        "dotnet": Object {
+          "properties": Object {
+            "agent": Object {
+              "properties": Object {
+                "version": Object {
+                  "ignore_above": 1024,
+                  "type": "keyword",
+                },
+              },
+            },
+            "service": Object {
+              "properties": Object {
+                "framework": Object {
+                  "properties": Object {
+                    "composite": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "name": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "version": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                  },
+                },
+                "language": Object {
+                  "properties": Object {
+                    "composite": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "name": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "version": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                  },
+                },
+                "runtime": Object {
+                  "properties": Object {
+                    "composite": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "name": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "version": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "go": Object {
+          "properties": Object {
+            "agent": Object {
+              "properties": Object {
+                "version": Object {
+                  "ignore_above": 1024,
+                  "type": "keyword",
+                },
+              },
+            },
+            "service": Object {
+              "properties": Object {
+                "framework": Object {
+                  "properties": Object {
+                    "composite": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "name": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "version": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                  },
+                },
+                "language": Object {
+                  "properties": Object {
+                    "composite": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "name": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "version": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                  },
+                },
+                "runtime": Object {
+                  "properties": Object {
+                    "composite": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "name": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "version": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "java": Object {
+          "properties": Object {
+            "agent": Object {
+              "properties": Object {
+                "version": Object {
+                  "ignore_above": 1024,
+                  "type": "keyword",
+                },
+              },
+            },
+            "service": Object {
+              "properties": Object {
+                "framework": Object {
+                  "properties": Object {
+                    "composite": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "name": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "version": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                  },
+                },
+                "language": Object {
+                  "properties": Object {
+                    "composite": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "name": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "version": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                  },
+                },
+                "runtime": Object {
+                  "properties": Object {
+                    "composite": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "name": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "version": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "js-base": Object {
+          "properties": Object {
+            "agent": Object {
+              "properties": Object {
+                "version": Object {
+                  "ignore_above": 1024,
+                  "type": "keyword",
+                },
+              },
+            },
+            "service": Object {
+              "properties": Object {
+                "framework": Object {
+                  "properties": Object {
+                    "composite": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "name": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "version": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                  },
+                },
+                "language": Object {
+                  "properties": Object {
+                    "composite": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "name": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "version": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                  },
+                },
+                "runtime": Object {
+                  "properties": Object {
+                    "composite": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "name": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "version": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "nodejs": Object {
+          "properties": Object {
+            "agent": Object {
+              "properties": Object {
+                "version": Object {
+                  "ignore_above": 1024,
+                  "type": "keyword",
+                },
+              },
+            },
+            "service": Object {
+              "properties": Object {
+                "framework": Object {
+                  "properties": Object {
+                    "composite": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "name": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "version": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                  },
+                },
+                "language": Object {
+                  "properties": Object {
+                    "composite": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "name": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "version": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                  },
+                },
+                "runtime": Object {
+                  "properties": Object {
+                    "composite": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "name": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "version": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "python": Object {
+          "properties": Object {
+            "agent": Object {
+              "properties": Object {
+                "version": Object {
+                  "ignore_above": 1024,
+                  "type": "keyword",
+                },
+              },
+            },
+            "service": Object {
+              "properties": Object {
+                "framework": Object {
+                  "properties": Object {
+                    "composite": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "name": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "version": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                  },
+                },
+                "language": Object {
+                  "properties": Object {
+                    "composite": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "name": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "version": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                  },
+                },
+                "runtime": Object {
+                  "properties": Object {
+                    "composite": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "name": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "version": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "ruby": Object {
+          "properties": Object {
+            "agent": Object {
+              "properties": Object {
+                "version": Object {
+                  "ignore_above": 1024,
+                  "type": "keyword",
+                },
+              },
+            },
+            "service": Object {
+              "properties": Object {
+                "framework": Object {
+                  "properties": Object {
+                    "composite": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "name": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "version": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                  },
+                },
+                "language": Object {
+                  "properties": Object {
+                    "composite": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "name": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "version": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                  },
+                },
+                "runtime": Object {
+                  "properties": Object {
+                    "composite": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "name": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "version": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "rum-js": Object {
+          "properties": Object {
+            "agent": Object {
+              "properties": Object {
+                "version": Object {
+                  "ignore_above": 1024,
+                  "type": "keyword",
+                },
+              },
+            },
+            "service": Object {
+              "properties": Object {
+                "framework": Object {
+                  "properties": Object {
+                    "composite": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "name": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "version": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                  },
+                },
+                "language": Object {
+                  "properties": Object {
+                    "composite": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "name": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "version": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                  },
+                },
+                "runtime": Object {
+                  "properties": Object {
+                    "composite": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "name": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                    "version": Object {
+                      "ignore_above": 1024,
+                      "type": "keyword",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "cardinality": Object {
+      "properties": Object {
+        "transaction": Object {
+          "properties": Object {
+            "name": Object {
+              "properties": Object {
+                "all_agents": Object {
+                  "properties": Object {
+                    "1d": Object {
+                      "type": "long",
+                    },
+                  },
+                },
+                "rum": Object {
+                  "properties": Object {
+                    "1d": Object {
+                      "type": "long",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "user_agent": Object {
+          "properties": Object {
+            "original": Object {
+              "properties": Object {
+                "all_agents": Object {
+                  "properties": Object {
+                    "1d": Object {
+                      "type": "long",
+                    },
+                  },
+                },
+                "rum": Object {
+                  "properties": Object {
+                    "1d": Object {
+                      "type": "long",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "cloud": Object {
+      "properties": Object {
+        "availability_zone": Object {
+          "ignore_above": 1024,
+          "type": "keyword",
+        },
+        "provider": Object {
+          "ignore_above": 1024,
+          "type": "keyword",
+        },
+        "region": Object {
+          "ignore_above": 1024,
+          "type": "keyword",
+        },
+      },
+    },
+    "counts": Object {
+      "properties": Object {
+        "agent_configuration": Object {
+          "properties": Object {
+            "all": Object {
+              "type": "long",
+            },
+          },
+        },
+        "error": Object {
+          "properties": Object {
+            "1d": Object {
+              "type": "long",
+            },
+            "all": Object {
+              "type": "long",
+            },
+          },
+        },
+        "max_error_groups_per_service": Object {
+          "properties": Object {
+            "1d": Object {
+              "type": "long",
+            },
+          },
+        },
+        "max_transaction_groups_per_service": Object {
+          "properties": Object {
+            "1d": Object {
+              "type": "long",
+            },
+          },
+        },
+        "metric": Object {
+          "properties": Object {
+            "1d": Object {
+              "type": "long",
+            },
+            "all": Object {
+              "type": "long",
+            },
+          },
+        },
+        "onboarding": Object {
+          "properties": Object {
+            "1d": Object {
+              "type": "long",
+            },
+            "all": Object {
+              "type": "long",
+            },
+          },
+        },
+        "services": Object {
+          "properties": Object {
+            "1d": Object {
+              "type": "long",
+            },
+          },
+        },
+        "sourcemap": Object {
+          "properties": Object {
+            "1d": Object {
+              "type": "long",
+            },
+            "all": Object {
+              "type": "long",
+            },
+          },
+        },
+        "span": Object {
+          "properties": Object {
+            "1d": Object {
+              "type": "long",
+            },
+            "all": Object {
+              "type": "long",
+            },
+          },
+        },
+        "traces": Object {
+          "properties": Object {
+            "1d": Object {
+              "type": "long",
+            },
+          },
+        },
+        "transaction": Object {
+          "properties": Object {
+            "1d": Object {
+              "type": "long",
+            },
+            "all": Object {
+              "type": "long",
+            },
+          },
+        },
+      },
+    },
+    "has_any_services": Object {
+      "type": "boolean",
+    },
+    "indices": Object {
+      "properties": Object {
+        "all": Object {
+          "properties": Object {
+            "total": Object {
+              "properties": Object {
+                "docs": Object {
+                  "properties": Object {
+                    "count": Object {
+                      "type": "long",
+                    },
+                  },
+                },
+                "store": Object {
+                  "properties": Object {
+                    "size_in_bytes": Object {
+                      "type": "long",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "shards": Object {
+          "properties": Object {
+            "total": Object {
+              "type": "long",
+            },
+          },
+        },
+      },
+    },
+    "integrations": Object {
+      "properties": Object {
+        "ml": Object {
+          "properties": Object {
+            "all_jobs_count": Object {
+              "type": "long",
+            },
+          },
+        },
+      },
+    },
+    "retainment": Object {
+      "properties": Object {
+        "error": Object {
+          "properties": Object {
+            "ms": Object {
+              "type": "long",
+            },
+          },
+        },
+        "metric": Object {
+          "properties": Object {
+            "ms": Object {
+              "type": "long",
+            },
+          },
+        },
+        "onboarding": Object {
+          "properties": Object {
+            "ms": Object {
+              "type": "long",
+            },
+          },
+        },
+        "span": Object {
+          "properties": Object {
+            "ms": Object {
+              "type": "long",
+            },
+          },
+        },
+        "transaction": Object {
+          "properties": Object {
+            "ms": Object {
+              "type": "long",
+            },
+          },
+        },
+      },
+    },
+    "services_per_agent": Object {
+      "properties": Object {
+        "dotnet": Object {
+          "null_value": 0,
+          "type": "long",
+        },
+        "go": Object {
+          "null_value": 0,
+          "type": "long",
+        },
+        "java": Object {
+          "null_value": 0,
+          "type": "long",
+        },
+        "js-base": Object {
+          "null_value": 0,
+          "type": "long",
+        },
+        "nodejs": Object {
+          "null_value": 0,
+          "type": "long",
+        },
+        "python": Object {
+          "null_value": 0,
+          "type": "long",
+        },
+        "ruby": Object {
+          "null_value": 0,
+          "type": "long",
+        },
+        "rum-js": Object {
+          "null_value": 0,
+          "type": "long",
+        },
+      },
+    },
+    "tasks": Object {
+      "properties": Object {
+        "agent_configuration": Object {
+          "properties": Object {
+            "took": Object {
+              "properties": Object {
+                "ms": Object {
+                  "type": "long",
+                },
+              },
+            },
+          },
+        },
+        "agents": Object {
+          "properties": Object {
+            "took": Object {
+              "properties": Object {
+                "ms": Object {
+                  "type": "long",
+                },
+              },
+            },
+          },
+        },
+        "cardinality": Object {
+          "properties": Object {
+            "took": Object {
+              "properties": Object {
+                "ms": Object {
+                  "type": "long",
+                },
+              },
+            },
+          },
+        },
+        "groupings": Object {
+          "properties": Object {
+            "took": Object {
+              "properties": Object {
+                "ms": Object {
+                  "type": "long",
+                },
+              },
+            },
+          },
+        },
+        "indices_stats": Object {
+          "properties": Object {
+            "took": Object {
+              "properties": Object {
+                "ms": Object {
+                  "type": "long",
+                },
+              },
+            },
+          },
+        },
+        "integrations": Object {
+          "properties": Object {
+            "took": Object {
+              "properties": Object {
+                "ms": Object {
+                  "type": "long",
+                },
+              },
+            },
+          },
+        },
+        "processor_events": Object {
+          "properties": Object {
+            "took": Object {
+              "properties": Object {
+                "ms": Object {
+                  "type": "long",
+                },
+              },
+            },
+          },
+        },
+        "services": Object {
+          "properties": Object {
+            "took": Object {
+              "properties": Object {
+                "ms": Object {
+                  "type": "long",
+                },
+              },
+            },
+          },
+        },
+        "versions": Object {
+          "properties": Object {
+            "took": Object {
+              "properties": Object {
+                "ms": Object {
+                  "type": "long",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "version": Object {
+      "properties": Object {
+        "apm_server": Object {
+          "properties": Object {
+            "major": Object {
+              "type": "long",
+            },
+            "minor": Object {
+              "type": "long",
+            },
+            "patch": Object {
+              "type": "long",
+            },
+          },
+        },
+      },
+    },
+  },
+}
+`;

@@ -58,28 +58,29 @@ describe.skip('useFetcher', () => {
     expect(hook.result.current).toEqual(true);
   });
 
-  it('is true for minimum 1000ms', () => {
-    hook = renderHook((isLoading) => useDelayedVisibility(isLoading), {
-      initialProps: false,
-    });
+  // Disabled because it's flaky: https://github.com/elastic/kibana/issues/66389
+  // it('is true for minimum 1000ms', () => {
+  //   hook = renderHook((isLoading) => useDelayedVisibility(isLoading), {
+  //     initialProps: false,
+  //   });
 
-    hook.rerender(true);
+  //   hook.rerender(true);
 
-    act(() => {
-      jest.advanceTimersByTime(100);
-    });
+  //   act(() => {
+  //     jest.advanceTimersByTime(100);
+  //   });
 
-    hook.rerender(false);
-    act(() => {
-      jest.advanceTimersByTime(900);
-    });
+  //   hook.rerender(false);
+  //   act(() => {
+  //     jest.advanceTimersByTime(900);
+  //   });
 
-    expect(hook.result.current).toEqual(true);
+  //   expect(hook.result.current).toEqual(true);
 
-    act(() => {
-      jest.advanceTimersByTime(100);
-    });
+  //   act(() => {
+  //     jest.advanceTimersByTime(100);
+  //   });
 
-    expect(hook.result.current).toEqual(false);
-  });
+  //   expect(hook.result.current).toEqual(false);
+  // });
 });

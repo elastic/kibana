@@ -11,10 +11,12 @@ import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
   CoreStart,
+  Logger,
   Plugin as IPlugin,
   PluginInitializerContext,
-  Logger,
+  SavedObjectsClient,
 } from '../../../../src/core/server';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { PluginSetupContract as AlertingSetup } from '../../alerts/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
@@ -23,7 +25,8 @@ import { ListPluginSetup } from '../../lists/server';
 import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../encrypted_saved_objects/server';
 import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { IngestManagerStartContract } from '../../ingest_manager/server';
+import { IngestManagerStartContract, ExternalCallback } from '../../ingest_manager/server';
+import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
 import { initRoutes } from './routes';
@@ -31,37 +34,54 @@ import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
 import { rulesNotificationAlertType } from './lib/detection_engine/notifications/rules_notification_alert_type';
 import { isNotificationAlertExecutor } from './lib/detection_engine/notifications/types';
-import { hasListsFeature, listsEnvFeatureFlagName } from './lib/detection_engine/feature_flags';
+import { ManifestTask, ExceptionsCache } from './endpoint/lib/artifacts';
 import { initSavedObjects, savedObjectTypes } from './saved_objects';
 import { AppClientFactory } from './client';
 import { createConfig$, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
-import { APP_ID, APP_ICON, SERVER_APP_ID } from '../common/constants';
+import { APP_ID, APP_ICON, SERVER_APP_ID, SecurityPageName } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
+import { ArtifactClient, ManifestManager } from './endpoint/services';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import { EndpointAppContext } from './endpoint/types';
+import { registerDownloadExceptionListRoute } from './endpoint/routes/artifacts';
+import { initUsageCollectors } from './usage';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
   encryptedSavedObjects?: EncryptedSavedObjectsSetup;
   features: FeaturesSetup;
   licensing: LicensingPluginSetup;
+  lists?: ListPluginSetup;
+  ml?: MlSetup;
   security?: SecuritySetup;
   spaces?: SpacesSetup;
-  ml?: MlSetup;
-  lists?: ListPluginSetup;
+  taskManager?: TaskManagerSetupContract;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface StartPlugins {
-  ingestManager: IngestManagerStartContract;
+  ingestManager?: IngestManagerStartContract;
+  taskManager?: TaskManagerStartContract;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
+
+const securitySubPlugins = [
+  APP_ID,
+  `${APP_ID}:${SecurityPageName.overview}`,
+  `${APP_ID}:${SecurityPageName.detections}`,
+  `${APP_ID}:${SecurityPageName.hosts}`,
+  `${APP_ID}:${SecurityPageName.network}`,
+  `${APP_ID}:${SecurityPageName.timelines}`,
+  `${APP_ID}:${SecurityPageName.case}`,
+  `${APP_ID}:${SecurityPageName.administration}`,
+];
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private readonly logger: Logger;
@@ -70,11 +90,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private appClientFactory: AppClientFactory;
   private readonly endpointAppContextService = new EndpointAppContextService();
 
+  private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
+
+  private manifestTask: ManifestTask | undefined;
+  private exceptionsCache: ExceptionsCache;
+
   constructor(context: PluginInitializerContext) {
     this.context = context;
     this.logger = context.logger.get('plugins', APP_ID);
     this.config$ = createConfig$(context);
     this.appClientFactory = new AppClientFactory();
+    this.exceptionsCache = new ExceptionsCache(5); // TODO
 
     this.logger.debug('plugin initialized');
   }
@@ -82,17 +108,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   public async setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
     this.logger.debug('plugin setup');
 
-    if (hasListsFeature()) {
-      // TODO: Remove this once we have the lists feature supported
-      this.logger.error(
-        `You have activated the lists feature flag which is NOT currently supported for Security Solution! You should turn this feature flag off immediately by un-setting the environment variable: ${listsEnvFeatureFlagName} and restarting Kibana`
-      );
-    }
-
     const config = await this.config$.pipe(first()).toPromise();
+    const globalConfig = await this.context.config.legacy.globalConfig$.pipe(first()).toPromise();
 
     initSavedObjects(core.savedObjects);
     initUiSettings(core.uiSettings);
+    initUsageCollectors({
+      core,
+      kibanaIndex: globalConfig.kibana.index,
+      ml: plugins.ml,
+      usageCollection: plugins.usageCollection,
+    });
+
     const endpointContext: EndpointAppContext = {
       logFactory: this.context.logger,
       service: this.endpointAppContextService,
@@ -117,9 +144,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.security,
       plugins.ml
     );
+
     registerEndpointRoutes(router, endpointContext);
     registerResolverRoutes(router, endpointContext);
     registerPolicyRoutes(router, endpointContext);
+    registerDownloadExceptionListRoute(router, endpointContext, this.exceptionsCache);
 
     plugins.features.registerFeature({
       id: SERVER_APP_ID,
@@ -128,12 +157,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }),
       order: 1100,
       icon: APP_ICON,
-      navLinkId: 'securitySolution',
-      app: ['securitySolution', 'kibana'],
+      navLinkId: APP_ID,
+      app: [...securitySubPlugins, 'kibana'],
       catalogue: ['securitySolution'],
       privileges: {
         all: {
-          app: ['securitySolution', 'kibana'],
+          app: [...securitySubPlugins, 'kibana'],
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
           savedObject: {
@@ -161,7 +190,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ],
         },
         read: {
-          app: ['securitySolution', 'kibana'],
+          app: [...securitySubPlugins, 'kibana'],
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
           savedObject: {
@@ -208,6 +237,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }
     }
 
+    const exceptionListsSetupEnabled = () => {
+      return plugins.taskManager && plugins.lists;
+    };
+
+    if (exceptionListsSetupEnabled()) {
+      this.lists = plugins.lists;
+      this.manifestTask = new ManifestTask({
+        endpointAppContext: endpointContext,
+        taskManager: plugins.taskManager!,
+      });
+    }
+
     const libs = compose(core, plugins, this.context.env.mode.prod);
     initServer(libs);
 
@@ -215,10 +256,45 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {
+    const savedObjectsClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
+
+    let manifestManager: ManifestManager | undefined;
+    let registerIngestCallback: ((...args: ExternalCallback) => void) | undefined;
+
+    const exceptionListsStartEnabled = () => {
+      return this.lists && plugins.taskManager && plugins.ingestManager;
+    };
+
+    if (exceptionListsStartEnabled()) {
+      const exceptionListClient = this.lists!.getExceptionListClient(savedObjectsClient, 'kibana');
+      const artifactClient = new ArtifactClient(savedObjectsClient);
+
+      registerIngestCallback = plugins.ingestManager!.registerExternalCallback;
+      manifestManager = new ManifestManager({
+        savedObjectsClient,
+        artifactClient,
+        exceptionListClient,
+        packageConfigService: plugins.ingestManager!.packageConfigService,
+        logger: this.logger,
+        cache: this.exceptionsCache,
+      });
+    }
+
     this.endpointAppContextService.start({
-      agentService: plugins.ingestManager.agentService,
-      registerIngestCallback: plugins.ingestManager.registerExternalCallback,
+      agentService: plugins.ingestManager?.agentService,
+      logger: this.logger,
+      manifestManager,
+      registerIngestCallback,
+      savedObjectsStart: core.savedObjects,
     });
+
+    if (exceptionListsStartEnabled() && this.manifestTask) {
+      this.manifestTask.start({
+        taskManager: plugins.taskManager!,
+      });
+    } else {
+      this.logger.debug('User artifacts task not available.');
+    }
 
     return {};
   }

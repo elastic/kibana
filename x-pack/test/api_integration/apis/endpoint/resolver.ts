@@ -246,6 +246,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
     percentWithRelated: 100,
     numTrees: 1,
     alwaysGenMaxChildrenPerNode: true,
+    ancestryArraySize: 2,
   };
 
   describe('Resolver', () => {
@@ -365,7 +366,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
 
         it('should error on invalid pagination values', async () => {
           await supertest.get(`/api/endpoint/resolver/${entityID}/events?events=0`).expect(400);
-          await supertest.get(`/api/endpoint/resolver/${entityID}/events?events=2000`).expect(400);
+          await supertest.get(`/api/endpoint/resolver/${entityID}/events?events=20000`).expect(400);
           await supertest.get(`/api/endpoint/resolver/${entityID}/events?events=-1`).expect(400);
         });
       });
@@ -443,14 +444,18 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
 
         it('should have a populated next parameter', async () => {
           const { body }: { body: ResolverAncestry } = await supertest
-            .get(`/api/endpoint/resolver/${entityID}/ancestry?legacyEndpointID=${endpointID}`)
+            .get(
+              `/api/endpoint/resolver/${entityID}/ancestry?legacyEndpointID=${endpointID}&ancestors=0`
+            )
             .expect(200);
           expect(body.nextAncestor).to.eql('94041');
         });
 
         it('should handle an ancestors param request', async () => {
           let { body }: { body: ResolverAncestry } = await supertest
-            .get(`/api/endpoint/resolver/${entityID}/ancestry?legacyEndpointID=${endpointID}`)
+            .get(
+              `/api/endpoint/resolver/${entityID}/ancestry?legacyEndpointID=${endpointID}&ancestors=0`
+            )
             .expect(200);
           const next = body.nextAncestor;
 
@@ -542,13 +547,10 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
 
         it('returns multiple levels of child process lifecycle events', async () => {
           const { body }: { body: ResolverChildren } = await supertest
-            .get(
-              `/api/endpoint/resolver/93802/children?legacyEndpointID=${endpointID}&generations=1`
-            )
+            .get(`/api/endpoint/resolver/93802/children?legacyEndpointID=${endpointID}&children=10`)
             .expect(200);
+          expect(body.childNodes.length).to.eql(10);
           expect(body.nextChild).to.be(null);
-          expect(body.childNodes[0].nextChild).to.be(null);
-          expect(body.childNodes.length).to.eql(8);
           expect(body.childNodes[0].lifecycle.length).to.eql(1);
           expect(
             // for some reason the ts server doesn't think `endgame` exists even though we're using ResolverEvent
@@ -581,7 +583,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         it('errors on invalid pagination values', async () => {
           await supertest.get(`/api/endpoint/resolver/${entityID}/children?children=0`).expect(400);
           await supertest
-            .get(`/api/endpoint/resolver/${entityID}/children?children=2000`)
+            .get(`/api/endpoint/resolver/${entityID}/children?children=20000`)
             .expect(400);
           await supertest
             .get(`/api/endpoint/resolver/${entityID}/children?children=-1`)
@@ -615,19 +617,27 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           expect(body.childNodes.length).to.eql(12);
           // there will be 4 parents, the origin of the tree, and it's 3 children
           verifyChildren(body.childNodes, tree, 4, 3);
+          expect(body.nextChild).to.eql(null);
         });
 
         it('returns a single generation of children', async () => {
+          // this gets a node should have 3 children which were created in succession so that the timestamps
+          // are ordered correctly to be retrieved in a single call
+          const distantChildEntityID = Array.from(tree.childrenLevels[0].values())[0].id;
           const { body }: { body: ResolverChildren } = await supertest
-            .get(`/api/endpoint/resolver/${tree.origin.id}/children?generations=1`)
+            .get(`/api/endpoint/resolver/${distantChildEntityID}/children?children=3`)
             .expect(200);
           expect(body.childNodes.length).to.eql(3);
           verifyChildren(body.childNodes, tree, 1, 3);
+          expect(body.nextChild).to.not.eql(null);
         });
 
-        it('paginates the children of the origin node', async () => {
+        it('paginates the children', async () => {
+          // this gets a node should have 3 children which were created in succession so that the timestamps
+          // are ordered correctly to be retrieved in a single call
+          const distantChildEntityID = Array.from(tree.childrenLevels[0].values())[0].id;
           let { body }: { body: ResolverChildren } = await supertest
-            .get(`/api/endpoint/resolver/${tree.origin.id}/children?generations=1&children=1`)
+            .get(`/api/endpoint/resolver/${distantChildEntityID}/children?children=1`)
             .expect(200);
           expect(body.childNodes.length).to.eql(1);
           verifyChildren(body.childNodes, tree, 1, 1);
@@ -635,49 +645,41 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
 
           ({ body } = await supertest
             .get(
-              `/api/endpoint/resolver/${tree.origin.id}/children?generations=1&afterChild=${body.nextChild}`
+              `/api/endpoint/resolver/${distantChildEntityID}/children?children=2&afterChild=${body.nextChild}`
             )
             .expect(200));
           expect(body.childNodes.length).to.eql(2);
           verifyChildren(body.childNodes, tree, 1, 2);
-          expect(body.childNodes[0].nextChild).to.be(null);
-          expect(body.childNodes[1].nextChild).to.be(null);
+          expect(body.nextChild).to.not.be(null);
+
+          ({ body } = await supertest
+            .get(
+              `/api/endpoint/resolver/${distantChildEntityID}/children?children=2&afterChild=${body.nextChild}`
+            )
+            .expect(200));
+          expect(body.childNodes.length).to.eql(0);
+          expect(body.nextChild).to.be(null);
         });
 
-        it('paginates the children of different nodes', async () => {
+        it('gets all children in two queries', async () => {
+          // should get all the children of the origin
           let { body }: { body: ResolverChildren } = await supertest
-            .get(`/api/endpoint/resolver/${tree.origin.id}/children?generations=2&children=2`)
+            .get(`/api/endpoint/resolver/${tree.origin.id}/children?children=3`)
             .expect(200);
-          // it should return 4 nodes total, 2 for each level
-          expect(body.childNodes.length).to.eql(4);
-          verifyChildren(body.childNodes, tree, 2);
+          expect(body.childNodes.length).to.eql(3);
+          verifyChildren(body.childNodes, tree);
           expect(body.nextChild).to.not.be(null);
-          expect(body.childNodes[0].nextChild).to.not.be(null);
-          // the second child will not have any results returned for it so it should not have pagination set (the first)
-          // request to get it's children should start at the beginning aka not passing any pagination parameter
-          expect(body.childNodes[1].nextChild).to.be(null);
+          const firstNodes = [...body.childNodes];
 
-          const firstChild = body.childNodes[0];
-
-          // get the 3rd child of the origin of the tree
           ({ body } = await supertest
             .get(
-              `/api/endpoint/resolver/${tree.origin.id}/children?generations=1&children=10&afterChild=${body.nextChild}`
+              `/api/endpoint/resolver/${tree.origin.id}/children?children=10&afterChild=${body.nextChild}`
             )
             .expect(200));
-          expect(body.childNodes.length).to.be(1);
-          verifyChildren(body.childNodes, tree, 1, 1);
-          expect(body.childNodes[0].nextChild).to.be(null);
-
-          // get the 1 child of the origin of the tree's last child
-          ({ body } = await supertest
-            .get(
-              `/api/endpoint/resolver/${firstChild.entityID}/children?generations=1&children=10&afterChild=${firstChild.nextChild}`
-            )
-            .expect(200));
-          expect(body.childNodes.length).to.be(1);
-          verifyChildren(body.childNodes, tree, 1, 1);
-          expect(body.childNodes[0].nextChild).to.be(null);
+          expect(body.childNodes.length).to.eql(9);
+          // put all the results together and we should have all the children
+          verifyChildren([...firstNodes, ...body.childNodes], tree, 4, 3);
+          expect(body.nextChild).to.be(null);
         });
       });
     });
@@ -703,7 +705,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         it('returns a tree', async () => {
           const { body }: { body: ResolverTree } = await supertest
             .get(
-              `/api/endpoint/resolver/${tree.origin.id}?children=100&generations=3&ancestors=5&events=4&alerts=4`
+              `/api/endpoint/resolver/${tree.origin.id}?children=100&ancestors=5&events=5&alerts=5`
             )
             .expect(200);
 

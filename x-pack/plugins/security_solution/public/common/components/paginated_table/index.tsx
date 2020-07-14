@@ -273,6 +273,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
                     isOpen={isPopoverOpen}
                     closePopover={closePopover}
                     panelPaddingSize="none"
+                    repositionOnScroll
                   >
                     <EuiContextMenuPanel items={rowItems} data-test-subj="loadingMorePickSizeRow" />
                   </EuiPopover>

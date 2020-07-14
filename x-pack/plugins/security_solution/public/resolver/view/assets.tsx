@@ -21,7 +21,8 @@ type ResolverColorNames =
   | 'graphControlsBackground'
   | 'resolverBackground'
   | 'resolverEdge'
-  | 'resolverEdgeText';
+  | 'resolverEdgeText'
+  | 'resolverBreadcrumbBackground';
 
 type ColorMap = Record<ResolverColorNames, string>;
 interface NodeStyleConfig {
@@ -438,6 +439,7 @@ export const useResolverTheme = (): {
     processBackingFill: `${theme.euiColorPrimary}${getThemedOption('0F', '1F')}`, // Add opacity 0F = 6% , 1F = 12%
     resolverBackground: theme.euiColorEmptyShade,
     resolverEdge: getThemedOption(theme.euiColorLightestShade, theme.euiColorLightShade),
+    resolverBreadcrumbBackground: theme.euiColorLightestShade,
     resolverEdgeText: getThemedOption(theme.euiColorDarkShade, theme.euiColorFullShade),
     triggerBackingFill: `${theme.euiColorDanger}${getThemedOption('0F', '1F')}`,
   };

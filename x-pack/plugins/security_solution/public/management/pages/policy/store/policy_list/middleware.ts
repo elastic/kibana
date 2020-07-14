@@ -6,8 +6,8 @@
 
 import { GetPolicyListResponse, PolicyListState } from '../../types';
 import {
-  sendGetEndpointSpecificDatasources,
-  sendDeleteDatasource,
+  sendGetEndpointSpecificPackageConfigs,
+  sendDeletePackageConfig,
   sendGetFleetAgentStatusForConfig,
   sendGetEndpointSecurityPackage,
 } from './services/ingest';
@@ -15,8 +15,8 @@ import { endpointPackageInfo, isOnPolicyListPage, urlSearchParams } from './sele
 import { ImmutableMiddlewareFactory } from '../../../../../common/store';
 import { initialPolicyListState } from './reducer';
 import {
-  DeleteDatasourcesResponse,
-  DeleteDatasourcesRequest,
+  DeletePackageConfigsResponse,
+  DeletePackageConfigsRequest,
   GetAgentStatusResponse,
 } from '../../../../../../../ingest_manager/common';
 
@@ -56,7 +56,7 @@ export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListS
       let response: GetPolicyListResponse;
 
       try {
-        response = await sendGetEndpointSpecificDatasources(http, {
+        response = await sendGetEndpointSpecificPackageConfigs(http, {
           query: {
             perPage: pageSize,
             page: pageIndex + 1,
@@ -81,10 +81,10 @@ export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListS
       });
     } else if (action.type === 'userClickedPolicyListDeleteButton') {
       const { policyId } = action.payload;
-      const datasourceIds: DeleteDatasourcesRequest['body']['datasourceIds'] = [policyId];
-      let apiResponse: DeleteDatasourcesResponse;
+      const packageConfigIds: DeletePackageConfigsRequest['body']['packageConfigIds'] = [policyId];
+      let apiResponse: DeletePackageConfigsResponse;
       try {
-        apiResponse = await sendDeleteDatasource(http, { body: { datasourceIds } });
+        apiResponse = await sendDeletePackageConfig(http, { body: { packageConfigIds } });
       } catch (err) {
         dispatch({
           type: 'serverDeletedPolicyFailure',

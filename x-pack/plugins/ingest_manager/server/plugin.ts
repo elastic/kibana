@@ -14,6 +14,7 @@ import {
   SavedObjectsServiceStart,
   HttpServiceSetup,
 } from 'kibana/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import {
   EncryptedSavedObjectsPluginStart,
@@ -25,7 +26,7 @@ import {
   PLUGIN_ID,
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_CONFIG_SAVED_OBJECT_TYPE,
-  DATASOURCE_SAVED_OBJECT_TYPE,
+  PACKAGE_CONFIG_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
@@ -34,7 +35,7 @@ import {
 import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
 import {
   registerEPMRoutes,
-  registerDatasourceRoutes,
+  registerPackageConfigRoutes,
   registerDataStreamRoutes,
   registerAgentConfigRoutes,
   registerSetupRoutes,
@@ -45,14 +46,14 @@ import {
   registerSettingsRoutes,
   registerAppRoutes,
 } from './routes';
-import { IngestManagerConfigType, NewDatasource } from '../common';
+import { IngestManagerConfigType, NewPackageConfig } from '../common';
 import {
   appContextService,
   licenseService,
   ESIndexPatternSavedObjectService,
   ESIndexPatternService,
   AgentService,
-  datasourceService,
+  packageConfigService,
 } from './services';
 import {
   getAgentStatusById,
@@ -62,6 +63,7 @@ import {
 } from './services/agents';
 import { CloudSetup } from '../../cloud/server';
 import { agentCheckinState } from './services/agents/checkin/state';
+import { registerIngestManagerUsageCollector } from './collectors/register';
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
@@ -69,6 +71,7 @@ export interface IngestManagerSetupDeps {
   features?: FeaturesPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   cloud?: CloudSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export type IngestManagerStartDeps = object;
@@ -91,7 +94,7 @@ export type IngestManagerSetupContract = void;
 const allSavedObjectTypes = [
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_CONFIG_SAVED_OBJECT_TYPE,
-  DATASOURCE_SAVED_OBJECT_TYPE,
+  PACKAGE_CONFIG_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
@@ -102,8 +105,8 @@ const allSavedObjectTypes = [
  * Callbacks supported by the Ingest plugin
  */
 export type ExternalCallback = [
-  'datasourceCreate',
-  (newDatasource: NewDatasource) => Promise<NewDatasource>
+  'packageConfigCreate',
+  (newPackageConfig: NewPackageConfig) => Promise<NewPackageConfig>
 ];
 
 export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;
@@ -115,9 +118,9 @@ export interface IngestManagerStartContract {
   esIndexPatternService: ESIndexPatternService;
   agentService: AgentService;
   /**
-   * Services for Ingest's Datasources
+   * Services for Ingest's package configs
    */
-  datasourceService: typeof datasourceService;
+  packageConfigService: typeof packageConfigService;
   /**
    * Register callbacks for inclusion in ingest API processing
    * @param args
@@ -198,6 +201,9 @@ export class IngestManagerPlugin
     const router = core.http.createRouter();
     const config = await this.config$.pipe(first()).toPromise();
 
+    // Register usage collection
+    registerIngestManagerUsageCollector(core, config, deps.usageCollection);
+
     // Always register app routes for permissions checking
     registerAppRoutes(router);
 
@@ -205,16 +211,13 @@ export class IngestManagerPlugin
     if (this.security) {
       registerSetupRoutes(router, config);
       registerAgentConfigRoutes(router);
-      registerDatasourceRoutes(router);
+      registerPackageConfigRoutes(router);
       registerOutputRoutes(router);
       registerSettingsRoutes(router);
       registerDataStreamRoutes(router);
+      registerEPMRoutes(router);
 
       // Conditional config routes
-      if (config.epm.enabled) {
-        registerEPMRoutes(router);
-      }
-
       if (config.fleet.enabled) {
         const isESOUsingEphemeralEncryptionKey =
           deps.encryptedSavedObjects.usingEphemeralEncryptionKey;
@@ -265,7 +268,7 @@ export class IngestManagerPlugin
         getAgentStatusById,
         authenticateAgentWithAccessToken,
       },
-      datasourceService,
+      packageConfigService,
       registerExternalCallback: (...args: ExternalCallback) => {
         return appContextService.addExternalCallback(...args);
       },

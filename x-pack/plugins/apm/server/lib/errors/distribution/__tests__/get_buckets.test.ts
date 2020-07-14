@@ -56,7 +56,6 @@ describe('timeseriesFetcher', () => {
           apmAgentConfigurationIndex: '.apm-agent-configuration',
           apmCustomLinkIndex: '.apm-custom-link',
         },
-        dynamicIndexPattern: null as any,
       },
     });
   });
