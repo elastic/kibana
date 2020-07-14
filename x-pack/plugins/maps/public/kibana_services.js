@@ -40,6 +40,9 @@ export const getFileUploadComponent = () => {
 let uiSettings;
 export const setUiSettings = (coreUiSettings) => (uiSettings = coreUiSettings);
 export const getUiSettings = () => uiSettings;
+export const getIsDarkMode = () => {
+  return getUiSettings().get('theme:darkMode', false);
+};
 
 let indexPatternSelectComponent;
 export const setIndexPatternSelect = (indexPatternSelect) =>
