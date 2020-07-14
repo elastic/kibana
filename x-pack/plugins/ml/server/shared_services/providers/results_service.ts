@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller, KibanaRequest } from 'kibana/server';
+import { ILegacyScopedClusterClient, KibanaRequest } from 'kibana/server';
 import { resultsServiceProvider } from '../../models/results_service';
 import { SharedServicesChecks } from '../shared_services';
 
@@ -12,7 +12,7 @@ type OrigResultsServiceProvider = ReturnType<typeof resultsServiceProvider>;
 
 export interface ResultsServiceProvider {
   resultsServiceProvider(
-    callAsCurrentUser: LegacyAPICaller,
+    mlClusterClient: ILegacyScopedClusterClient,
     request: KibanaRequest
   ): {
     getAnomaliesTableData: OrigResultsServiceProvider['getAnomaliesTableData'];
@@ -24,9 +24,9 @@ export function getResultsServiceProvider({
   getHasMlCapabilities,
 }: SharedServicesChecks): ResultsServiceProvider {
   return {
-    resultsServiceProvider(callAsCurrentUser: LegacyAPICaller, request: KibanaRequest) {
+    resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClient, request: KibanaRequest) {
       const hasMlCapabilities = getHasMlCapabilities(request);
-      const { getAnomaliesTableData } = resultsServiceProvider(callAsCurrentUser);
+      const { getAnomaliesTableData } = resultsServiceProvider(mlClusterClient);
       return {
         async getAnomaliesTableData(...args) {
           isFullLicense();

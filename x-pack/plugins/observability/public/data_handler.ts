@@ -31,6 +31,6 @@ export function getDataHandler<T extends ObservabilityApp>(appName: T) {
 export async function fetchHasData() {
   const apps: ObservabilityApp[] = ['apm', 'uptime', 'infra_logs', 'infra_metrics'];
   const promises = apps.map((app) => getDataHandler(app)?.hasData());
-  const [apm, uptime, logs, metrics] = await Promise.all(promises);
+  const [apm, uptime, logs, metrics] = await Promise.allSettled(promises);
   return { apm, uptime, infra_logs: logs, infra_metrics: metrics };
 }
