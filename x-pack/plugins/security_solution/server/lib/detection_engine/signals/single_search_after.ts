@@ -13,6 +13,7 @@ import { makeFloatString } from './utils';
 import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
 
 interface SingleSearchAfterParams {
+  aggregations?: unknown;
   searchAfterSortId: string | undefined;
   index: string[];
   from: string;
@@ -26,6 +27,7 @@ interface SingleSearchAfterParams {
 
 // utilize search_after for paging results into bulk.
 export const singleSearchAfter = async ({
+  aggregations,
   searchAfterSortId,
   index,
   from,
@@ -41,6 +43,7 @@ export const singleSearchAfter = async ({
 }> => {
   try {
     const searchAfterQuery = buildEventsSearchQuery({
+      aggregations,
       index,
       from,
       to,

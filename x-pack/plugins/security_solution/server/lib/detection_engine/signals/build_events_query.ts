@@ -7,6 +7,7 @@
 import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
 
 interface BuildEventsSearchQuery {
+  aggregations?: unknown;
   index: string[];
   from: string;
   to: string;
@@ -17,6 +18,7 @@ interface BuildEventsSearchQuery {
 }
 
 export const buildEventsSearchQuery = ({
+  aggregations,
   index,
   from,
   to,
@@ -79,6 +81,7 @@ export const buildEventsSearchQuery = ({
           ],
         },
       },
+      ...(aggregations ? { aggregations } : {}),
       sort: [
         {
           [timestamp]: {
@@ -88,6 +91,7 @@ export const buildEventsSearchQuery = ({
       ],
     },
   };
+
   if (searchAfterSortId) {
     return {
       ...searchQuery,

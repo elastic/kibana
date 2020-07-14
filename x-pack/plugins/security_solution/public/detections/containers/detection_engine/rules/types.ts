@@ -16,6 +16,7 @@ import {
   rule_name_override,
   severity_mapping,
   timestamp_override,
+  threshold,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 import {
@@ -65,6 +66,7 @@ export const NewRuleSchema = t.intersection([
     saved_id: t.string,
     tags: t.array(t.string),
     threat: t.array(t.unknown),
+    threshold,
     throttle: t.union([t.string, t.null]),
     to: t.string,
     updated_by: t.string,
@@ -142,6 +144,7 @@ export const RuleSchema = t.intersection([
     saved_id: t.string,
     status: t.string,
     status_date: t.string,
+    threshold,
     timeline_id: t.string,
     timeline_title: t.string,
     timestamp_override,
@@ -273,4 +276,7 @@ export interface PrePackagedRulesStatusResponse {
   rules_installed: number;
   rules_not_installed: number;
   rules_not_updated: number;
+  timelines_installed: number;
+  timelines_not_installed: number;
+  timelines_not_updated: number;
 }

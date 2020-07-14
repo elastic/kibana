@@ -96,9 +96,9 @@ export interface TlsSortField {
 }
 
 export interface PageInfoTimeline {
-  pageIndex: number;
+  pageIndex?: Maybe<number>;
 
-  pageSize: number;
+  pageSize?: Maybe<number>;
 }
 
 export interface SortTimeline {
@@ -1069,6 +1069,8 @@ export interface RuleField {
   version?: Maybe<string[]>;
 
   note?: Maybe<string[]>;
+
+  threshold?: Maybe<ToAny>;
 
   exceptions_list?: Maybe<ToAny>;
 }
@@ -5065,6 +5067,10 @@ export namespace GetTimelineQuery {
     filters: Maybe<ToAny>;
 
     note: Maybe<string[]>;
+
+    type: Maybe<string[]>;
+
+    threshold: Maybe<ToAny>;
 
     exceptions_list: Maybe<ToAny>;
   };
