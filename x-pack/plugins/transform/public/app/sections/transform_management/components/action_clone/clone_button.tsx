@@ -25,7 +25,7 @@ export const CloneButton: FC<CloneActionProps> = ({ itemId }) => {
 
   const { canCreateTransform } = useContext(AuthorizationContext).capabilities;
 
-  const buttonCloneText = i18n.translate('xpack.transform.transformList.cloneActionName', {
+  const buttonText = i18n.translate('xpack.transform.transformList.cloneActionName', {
     defaultMessage: 'Clone',
   });
 
@@ -33,32 +33,30 @@ export const CloneButton: FC<CloneActionProps> = ({ itemId }) => {
     history.push(`/${SECTION_SLUG.CLONE_TRANSFORM}/${itemId}`);
   }
 
-  const disabled = !canCreateTransform;
+  const buttonDisabled = !canCreateTransform;
 
-  const cloneButton = (
+  const button = (
     <EuiButtonEmpty
-      aria-label={buttonCloneText}
+      aria-label={buttonText}
       color="text"
       data-test-subj="transformActionClone"
       flush="left"
       iconType="copy"
-      isDisabled={disabled}
+      isDisabled={buttonDisabled}
       onClick={clickHandler}
       size="s"
     >
-      {buttonCloneText}
+      {buttonText}
     </EuiButtonEmpty>
   );
 
-  if (!canCreateTransform) {
-    const content = createCapabilityFailureMessage('canStartStopTransform');
-
+  if (buttonDisabled) {
     return (
-      <EuiToolTip position="top" content={content}>
-        {cloneButton}
+      <EuiToolTip position="top" content={createCapabilityFailureMessage('canStartStopTransform')}>
+        {button}
       </EuiToolTip>
     );
   }
 
-  return <>{cloneButton}</>;
+  return button;
 };

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import React, { FC } from 'react';
 import { isEqual, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -416,17 +416,35 @@ export const CloneButton: FC<CloneButtonProps> = ({ createAnalyticsForm, item })
     }
   };
 
-  return (
+  const buttonDisabled = !canCreateDataFrameAnalytics;
+
+  const button = (
     <EuiButtonEmpty
-      data-test-subj="mlAnalyticsJobCloneButton"
-      size="xs"
-      color="text"
-      iconType="copy"
-      onClick={onClick}
       aria-label={buttonText}
-      disabled={canCreateDataFrameAnalytics === false}
+      color="text"
+      data-test-subj="mlAnalyticsJobCloneButton"
+      flush="left"
+      iconType="copy"
+      isDisabled={buttonDisabled}
+      onClick={onClick}
+      size="s"
     >
       {buttonText}
     </EuiButtonEmpty>
   );
+
+  if (buttonDisabled) {
+    return (
+      <EuiToolTip
+        position="top"
+        content={i18n.translate('xpack.ml.dataframe.analyticsList.cloneActionPermissionTooltip', {
+          defaultMessage: 'You do not have permission to clone analytics jobs.',
+        })}
+      >
+        {button}
+      </EuiToolTip>
+    );
+  }
+
+  return button;
 };

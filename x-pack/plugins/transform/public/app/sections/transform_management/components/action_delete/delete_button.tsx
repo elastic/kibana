@@ -29,7 +29,7 @@ export const DeleteButton: FC<DeleteButtonProps> = ({ items, forceDisable, onCli
   const disabled = items.some(transformCanNotBeDeleted);
   const { canDeleteTransform } = useContext(AuthorizationContext).capabilities;
 
-  const buttonDeleteText = i18n.translate('xpack.transform.transformList.deleteActionName', {
+  const buttonText = i18n.translate('xpack.transform.transformList.deleteActionName', {
     defaultMessage: 'Delete',
   });
   const bulkDeleteButtonDisabledText = i18n.translate(
@@ -46,9 +46,10 @@ export const DeleteButton: FC<DeleteButtonProps> = ({ items, forceDisable, onCli
   );
 
   const buttonDisabled = forceDisable === true || disabled || !canDeleteTransform;
-  let deleteButton = (
+
+  const button = (
     <EuiButtonEmpty
-      aria-label={buttonDeleteText}
+      aria-label={buttonText}
       color="text"
       data-test-subj="transformActionDelete"
       flush="left"
@@ -57,7 +58,7 @@ export const DeleteButton: FC<DeleteButtonProps> = ({ items, forceDisable, onCli
       onClick={() => onClick(items)}
       size="s"
     >
-      {buttonDeleteText}
+      {buttonText}
     </EuiButtonEmpty>
   );
 
@@ -69,12 +70,12 @@ export const DeleteButton: FC<DeleteButtonProps> = ({ items, forceDisable, onCli
       content = createCapabilityFailureMessage('canDeleteTransform');
     }
 
-    deleteButton = (
+    return (
       <EuiToolTip position="top" content={content}>
-        {deleteButton}
+        {button}
       </EuiToolTip>
     );
   }
 
-  return deleteButton;
+  return button;
 };

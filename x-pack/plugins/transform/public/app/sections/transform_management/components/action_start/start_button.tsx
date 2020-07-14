@@ -25,7 +25,7 @@ export const StartButton: FC<StartButtonProps> = ({ items, forceDisable, onClick
   const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
   const isBulkAction = items.length > 1;
 
-  const buttonStartText = i18n.translate('xpack.transform.transformList.startActionName', {
+  const buttonText = i18n.translate('xpack.transform.transformList.startActionName', {
     defaultMessage: 'Start',
   });
 
@@ -84,28 +84,30 @@ export const StartButton: FC<StartButtonProps> = ({ items, forceDisable, onClick
     }
   }
 
-  const disabled = forceDisable === true || actionIsDisabled;
+  const buttonDisabled = forceDisable === true || actionIsDisabled;
 
-  const startButton = (
+  const button = (
     <EuiButtonEmpty
-      aria-label={buttonStartText}
+      aria-label={buttonText}
       color="text"
       data-test-subj="transformActionStart"
       flush="left"
       iconType="play"
-      isDisabled={disabled}
+      isDisabled={buttonDisabled}
       onClick={() => onClick(items)}
       size="s"
     >
-      {buttonStartText}
+      {buttonText}
     </EuiButtonEmpty>
   );
-  if (disabled && content !== undefined) {
+
+  if (buttonDisabled && content !== undefined) {
     return (
       <EuiToolTip position="top" content={content}>
-        {startButton}
+        {button}
       </EuiToolTip>
     );
   }
-  return startButton;
+
+  return button;
 };

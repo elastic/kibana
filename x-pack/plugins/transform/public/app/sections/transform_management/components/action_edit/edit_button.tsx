@@ -21,36 +21,34 @@ interface EditButtonProps {
 export const EditButton: FC<EditButtonProps> = ({ onClick }) => {
   const { canCreateTransform } = useContext(AuthorizationContext).capabilities;
 
-  const buttonEditText = i18n.translate('xpack.transform.transformList.editActionName', {
+  const buttonText = i18n.translate('xpack.transform.transformList.editActionName', {
     defaultMessage: 'Edit',
   });
 
-  const disabled = !canCreateTransform;
+  const buttonDisabled = !canCreateTransform;
 
-  const editButton = (
+  const button = (
     <EuiButtonEmpty
-      aria-label={buttonEditText}
+      aria-label={buttonText}
       color="text"
       data-test-subj="transformActionEdit"
       flush="left"
       iconType="pencil"
-      isDisabled={disabled}
+      isDisabled={buttonDisabled}
       onClick={onClick}
       size="s"
     >
-      {buttonEditText}
+      {buttonText}
     </EuiButtonEmpty>
   );
 
   if (!canCreateTransform) {
-    const content = createCapabilityFailureMessage('canStartStopTransform');
-
     return (
-      <EuiToolTip position="top" content={content}>
-        {editButton}
+      <EuiToolTip position="top" content={createCapabilityFailureMessage('canStartStopTransform')}>
+        {button}
       </EuiToolTip>
     );
   }
 
-  return editButton;
+  return button;
 };

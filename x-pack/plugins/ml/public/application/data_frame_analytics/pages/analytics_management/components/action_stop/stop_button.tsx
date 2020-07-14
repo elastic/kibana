@@ -18,7 +18,7 @@ import { stopAnalytics } from '../../services/analytics_service';
 
 import { DataFrameAnalyticsListRow } from '../analytics_list/common';
 
-const buttonStopText = i18n.translate('xpack.ml.dataframe.analyticsList.stopActionName', {
+const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.stopActionName', {
   defaultMessage: 'Stop',
 });
 
@@ -29,29 +29,33 @@ interface StopButtonProps {
 export const StopButton: FC<StopButtonProps> = ({ item }) => {
   const canStartStopDataFrameAnalytics: boolean = checkPermission('canStartStopDataFrameAnalytics');
 
-  const stopButton = (
+  const buttonDisabled = !canStartStopDataFrameAnalytics;
+
+  const button = (
     <EuiButtonEmpty
-      size="xs"
+      aria-label={buttonText}
       color="text"
-      disabled={!canStartStopDataFrameAnalytics}
-      iconType="stop"
-      onClick={() => stopAnalytics(item)}
-      aria-label={buttonStopText}
       data-test-subj="mlAnalyticsJobStopButton"
+      flush="left"
+      iconType="stop"
+      isDisabled={buttonDisabled}
+      onClick={() => stopAnalytics(item)}
+      size="s"
     >
-      {buttonStopText}
+      {buttonText}
     </EuiButtonEmpty>
   );
-  if (!canStartStopDataFrameAnalytics) {
+
+  if (buttonDisabled) {
     return (
       <EuiToolTip
         position="top"
         content={createPermissionFailureMessage('canStartStopDataFrameAnalytics')}
       >
-        {stopButton}
+        {button}
       </EuiToolTip>
     );
   }
 
-  return stopButton;
+  return button;
 };

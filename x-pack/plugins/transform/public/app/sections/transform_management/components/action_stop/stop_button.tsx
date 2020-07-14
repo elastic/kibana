@@ -25,7 +25,7 @@ export const StopButton: FC<StopButtonProps> = ({ items, forceDisable }) => {
   const isBulkAction = items.length > 1;
   const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
   const stopTransforms = useStopTransforms();
-  const buttonStopText = i18n.translate('xpack.transform.transformList.stopActionName', {
+  const buttonText = i18n.translate('xpack.transform.transformList.stopActionName', {
     defaultMessage: 'Stop',
   });
 
@@ -56,22 +56,24 @@ export const StopButton: FC<StopButtonProps> = ({ items, forceDisable }) => {
     stopTransforms(items);
   };
 
-  const disabled = forceDisable === true || !canStartStopTransform || stoppedTransform === true;
+  const buttonDisabled =
+    forceDisable === true || !canStartStopTransform || stoppedTransform === true;
 
-  const stopButton = (
+  const button = (
     <EuiButtonEmpty
-      aria-label={buttonStopText}
+      aria-label={buttonText}
       color="text"
       data-test-subj="transformActionStop"
       flush="left"
       iconType="stop"
-      isDisabled={disabled}
+      isDisabled={buttonDisabled}
       onClick={handleStop}
       size="s"
     >
-      {buttonStopText}
+      {buttonText}
     </EuiButtonEmpty>
   );
+
   if (!canStartStopTransform || stoppedTransform) {
     return (
       <EuiToolTip
@@ -82,10 +84,10 @@ export const StopButton: FC<StopButtonProps> = ({ items, forceDisable }) => {
             : stoppedTransformMessage
         }
       >
-        {stopButton}
+        {button}
       </EuiToolTip>
     );
   }
 
-  return stopButton;
+  return button;
 };
