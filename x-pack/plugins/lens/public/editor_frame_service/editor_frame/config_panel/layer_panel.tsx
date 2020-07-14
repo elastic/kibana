@@ -103,7 +103,7 @@ export function LayerPanel(
           </EuiFlexItem>
 
           {layerDatasource && (
-            <EuiFlexItem className="eui-textTruncate">
+            <EuiFlexItem className="lnsLayerPanel__sourceFlexItem">
               <NativeRenderer
                 render={layerDatasource.renderLayerPanel}
                 nativeProps={{
@@ -170,18 +170,15 @@ export function LayerPanel(
                         defaultMessage: 'Quick functions',
                       }),
                       content: (
-                        <>
-                          <EuiSpacer size="s" />
-                          <NativeRenderer
-                            render={props.datasourceMap[datasourceId].renderDimensionEditor}
-                            nativeProps={{
-                              ...layerDatasourceConfigProps,
-                              core: props.core,
-                              columnId: accessor,
-                              filterOperations: group.filterOperations,
-                            }}
-                          />
-                        </>
+                        <NativeRenderer
+                          render={props.datasourceMap[datasourceId].renderDimensionEditor}
+                          nativeProps={{
+                            ...layerDatasourceConfigProps,
+                            core: props.core,
+                            columnId: accessor,
+                            filterOperations: group.filterOperations,
+                          }}
+                        />
                       ),
                     },
                   ];
@@ -194,7 +191,6 @@ export function LayerPanel(
                       }),
                       content: (
                         <div className="lnsLayerPanel__styleEditor">
-                          <EuiSpacer size="s" />
                           <NativeRenderer
                             render={activeVisualization.renderDimensionEditor}
                             nativeProps={{

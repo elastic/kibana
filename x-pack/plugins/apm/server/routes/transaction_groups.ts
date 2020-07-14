@@ -14,6 +14,7 @@ import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 import { getTransactionAvgDurationByBrowser } from '../lib/transactions/avg_duration_by_browser';
 import { getTransactionAvgDurationByCountry } from '../lib/transactions/avg_duration_by_country';
+import { UIFilters } from '../../typings/ui_filters';
 
 export const transactionGroupsRoute = createRoute(() => ({
   path: '/api/apm/services/{serviceName}/transaction_groups',
@@ -62,14 +63,27 @@ export const transactionGroupsChartsRoute = createRoute(() => ({
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
+    const logger = context.logger;
     const { serviceName } = context.params.path;
-    const { transactionType, transactionName } = context.params.query;
+    const {
+      transactionType,
+      transactionName,
+      uiFilters: uiFiltersJson,
+    } = context.params.query;
+    let uiFilters: UIFilters = {};
+    try {
+      uiFilters = JSON.parse(uiFiltersJson);
+    } catch (error) {
+      logger.error(error);
+    }
 
     return getTransactionCharts({
       serviceName,
       transactionType,
       transactionName,
       setup,
+      logger,
+      uiFilters,
     });
   },
 }));
