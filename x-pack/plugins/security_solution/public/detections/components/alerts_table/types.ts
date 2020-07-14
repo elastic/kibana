@@ -60,9 +60,9 @@ export interface SendAlertToTimelineActionProps {
 export type UpdateTimelineLoading = ({ id, isLoading }: { id: string; isLoading: boolean }) => void;
 
 export interface CreateTimelineProps {
-  from: number;
+  from: string;
   timeline: TimelineModel;
-  to: number;
+  to: string;
   ruleNote?: string;
 }
 
