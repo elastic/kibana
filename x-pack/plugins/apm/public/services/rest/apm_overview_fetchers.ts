@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { mean } from 'lodash';
 import {
   ApmFetchDataResponse,
@@ -12,23 +11,26 @@ import {
 } from '../../../../observability/public';
 import { callApmApi } from './createCallApmApi';
 
-export const fetchLandingPageData = async ({
-  startTime,
-  endTime,
+export const fetchOverviewPageData = async ({
+  absoluteTime,
+  relativeTime,
   bucketSize,
 }: FetchDataParams): Promise<ApmFetchDataResponse> => {
   const data = await callApmApi({
-    pathname: '/api/apm/observability_dashboard',
-    params: { query: { start: startTime, end: endTime, bucketSize } },
+    pathname: '/api/apm/observability_overview',
+    params: {
+      query: {
+        start: new Date(absoluteTime.start).toISOString(),
+        end: new Date(absoluteTime.end).toISOString(),
+        bucketSize,
+      },
+    },
   });
 
   const { serviceCount, transactionCoordinates } = data;
 
   return {
-    title: i18n.translate('xpack.apm.observabilityDashboard.title', {
-      defaultMessage: 'APM',
-    }),
-    appLink: '/app/apm',
+    appLink: `/app/apm#/services?rangeFrom=${relativeTime.start}&rangeTo=${relativeTime.end}`,
     stats: {
       services: {
         type: 'number',
@@ -54,6 +56,6 @@ export const fetchLandingPageData = async ({
 
 export async function hasData() {
   return await callApmApi({
-    pathname: '/api/apm/observability_dashboard/has_data',
+    pathname: '/api/apm/observability_overview/has_data',
   });
 }
