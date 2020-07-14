@@ -106,12 +106,12 @@ describe('SIEM Navigation', () => {
             name: 'Cases',
             urlKey: 'case',
           },
-          management: {
+          administration: {
             disabled: false,
             href: '/app/security/administration',
-            id: 'management',
+            id: 'administration',
             name: 'Administration',
-            urlKey: 'management',
+            urlKey: 'administration',
           },
           hosts: {
             disabled: false,
@@ -218,12 +218,12 @@ describe('SIEM Navigation', () => {
             name: 'Hosts',
             urlKey: 'host',
           },
-          management: {
+          administration: {
             disabled: false,
             href: '/app/security/administration',
-            id: 'management',
+            id: 'administration',
             name: 'Administration',
-            urlKey: 'management',
+            urlKey: 'administration',
           },
           network: {
             disabled: false,

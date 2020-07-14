@@ -251,13 +251,19 @@ export const AddExceptionModal = memo(function AddExceptionModal({
 
   const onAddExceptionConfirm = useCallback(() => {
     if (addOrUpdateExceptionItems !== null) {
-      if (shouldCloseAlert && alertData) {
-        addOrUpdateExceptionItems(enrichExceptionItems(), alertData.ecsData._id);
-      } else {
-        addOrUpdateExceptionItems(enrichExceptionItems());
-      }
+      const alertIdToClose = shouldCloseAlert && alertData ? alertData.ecsData._id : undefined;
+      const bulkCloseIndex =
+        shouldBulkCloseAlert && signalIndexName !== null ? [signalIndexName] : undefined;
+      addOrUpdateExceptionItems(enrichExceptionItems(), alertIdToClose, bulkCloseIndex);
     }
-  }, [addOrUpdateExceptionItems, enrichExceptionItems, shouldCloseAlert, alertData]);
+  }, [
+    addOrUpdateExceptionItems,
+    enrichExceptionItems,
+    shouldCloseAlert,
+    shouldBulkCloseAlert,
+    alertData,
+    signalIndexName,
+  ]);
 
   const isSubmitButtonDisabled = useCallback(
     () => fetchOrCreateListError || exceptionItemsToAdd.length === 0,
@@ -330,7 +336,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               <EuiHorizontalRule />
               <ModalBodySection>
                 {alertData !== undefined && (
-                  <EuiFormRow>
+                  <EuiFormRow fullWidth>
                     <EuiCheckbox
                       id="close-alert-on-add-add-exception-checkbox"
                       label="Close this alert"
@@ -339,10 +345,14 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                     />
                   </EuiFormRow>
                 )}
-                <EuiFormRow>
+                <EuiFormRow fullWidth>
                   <EuiCheckbox
                     id="bulk-close-alert-on-add-add-exception-checkbox"
-                    label={i18n.BULK_CLOSE_LABEL}
+                    label={
+                      shouldDisableBulkClose
+                        ? i18n.BULK_CLOSE_LABEL_DISABLED
+                        : i18n.BULK_CLOSE_LABEL
+                    }
                     checked={shouldBulkCloseAlert}
                     onChange={onBulkCloseAlertCheckboxChange}
                     disabled={shouldDisableBulkClose}

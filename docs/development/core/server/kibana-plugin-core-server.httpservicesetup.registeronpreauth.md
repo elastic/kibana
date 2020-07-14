@@ -4,7 +4,7 @@
 
 ## HttpServiceSetup.registerOnPreAuth property
 
-To define custom logic to perform for incoming requests.
+To define custom logic to perform for incoming requests before the Auth interceptor performs a check that user has access to requested resources.
 
 <b>Signature:</b>
 
@@ -14,5 +14,5 @@ registerOnPreAuth: (handler: OnPreAuthHandler) => void;
 
 ## Remarks
 
-Runs the handler before Auth interceptor performs a check that user has access to requested resources, so it's the only place when you can forward a request to another URL right on the server. Can register any number of registerOnPostAuth, which are called in sequence (from the first registered to the last). See [OnPreAuthHandler](./kibana-plugin-core-server.onpreauthhandler.md)<!-- -->.
+Can register any number of registerOnPostAuth, which are called in sequence (from the first registered to the last). See [OnPreRoutingHandler](./kibana-plugin-core-server.onpreroutinghandler.md)<!-- -->.
 

@@ -17,6 +17,7 @@ export const status: CanvasTemplate = {
     height: 792,
     css:
       '.canvasPage h1, .canvasPage h2, .canvasPage h3, .canvasPage h4, .canvasPage h5, .canvasPage h6, .canvasPage li, .canvasPage p, .canvasPage th, .canvasPage td {\nfont-family: "Gill Sans" !important;\ncolor: #333333;\n}\n\n.canvasPage h1, .canvasPage h2 {\nfont-weight: 400;\n}\n\n.canvasPage h2 {\ntext-transform: uppercase;\ncolor: #1785B0;\n}\n\n.canvasMarkdown p,\n.canvasMarkdown li {\nfont-size: 18px;\n}\n\n.canvasMarkdown li {\nmargin-bottom: .75em;\n}\n\n.canvasMarkdown h3:not(:first-child) {\nmargin-top: 2em;\n}\n\n.canvasMarkdown a {\ncolor: #1785B0;\n}\n\n.canvasMarkdown th,\n.canvasMarkdown td {\npadding: .5em 1em;\n}\n\n.canvasMarkdown th {\nbackground-color: #FAFBFD;\n}\n\n.canvasMarkdown table,\n.canvasMarkdown th,\n.canvasMarkdown td {\nborder: 1px solid #e4e9f2;\n}',
+    variables: [],
     page: 0,
     pages: [
       {

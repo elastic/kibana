@@ -181,9 +181,11 @@ export const EditExceptionModal = memo(function EditExceptionModal({
 
   const onEditExceptionConfirm = useCallback(() => {
     if (addOrUpdateExceptionItems !== null) {
-      addOrUpdateExceptionItems(enrichExceptionItems());
+      const bulkCloseIndex =
+        shouldBulkCloseAlert && signalIndexName !== null ? [signalIndexName] : undefined;
+      addOrUpdateExceptionItems(enrichExceptionItems(), undefined, bulkCloseIndex);
     }
-  }, [addOrUpdateExceptionItems, enrichExceptionItems]);
+  }, [addOrUpdateExceptionItems, enrichExceptionItems, shouldBulkCloseAlert, signalIndexName]);
 
   const indexPatternConfig = useCallback(() => {
     if (exceptionListType === 'endpoint') {
@@ -239,10 +241,12 @@ export const EditExceptionModal = memo(function EditExceptionModal({
             </ModalBodySection>
             <EuiHorizontalRule />
             <ModalBodySection>
-              <EuiFormRow>
+              <EuiFormRow fullWidth>
                 <EuiCheckbox
                   id="close-alert-on-add-add-exception-checkbox"
-                  label={i18n.BULK_CLOSE_LABEL}
+                  label={
+                    shouldDisableBulkClose ? i18n.BULK_CLOSE_LABEL_DISABLED : i18n.BULK_CLOSE_LABEL
+                  }
                   checked={shouldBulkCloseAlert}
                   onChange={onBulkCloseAlertCheckboxChange}
                   disabled={shouldDisableBulkClose}
