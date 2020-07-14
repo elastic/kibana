@@ -24,9 +24,9 @@ export interface TimerangeInput {
   /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */
   interval: string;
   /** The end of the timerange */
-  to: number;
+  to: string;
   /** The beginning of the timerange */
-  from: number;
+  from: string;
 }
 
 export interface PaginationInputPaginated {
@@ -38,6 +38,12 @@ export interface PaginationInputPaginated {
   fakePossibleCount: number;
   /** The querySize parameter is the number of items to be returned */
   querySize: number;
+}
+
+export interface DocValueFieldsInput {
+  field: string;
+
+  format: string;
 }
 
 export interface PaginationInput {
@@ -260,9 +266,9 @@ export interface KueryFilterQueryInput {
 }
 
 export interface DateRangePickerInput {
-  start?: Maybe<number>;
+  start?: Maybe<ToAny>;
 
-  end?: Maybe<number>;
+  end?: Maybe<ToAny>;
 }
 
 export interface SortTimelineInput {
@@ -299,6 +305,12 @@ export enum LastEventIndexKey {
 export enum HostsFields {
   hostName = 'hostName',
   lastSeen = 'lastSeen',
+}
+
+export enum HostPolicyResponseActionStatus {
+  success = 'success',
+  failure = 'failure',
+  warning = 'warning',
 }
 
 export enum UsersFields {
@@ -1442,13 +1454,15 @@ export interface HostsEdges {
 export interface HostItem {
   _id?: Maybe<string>;
 
-  lastSeen?: Maybe<string>;
+  cloud?: Maybe<CloudFields>;
+
+  endpoint?: Maybe<EndpointFields>;
 
   host?: Maybe<HostEcsFields>;
 
-  cloud?: Maybe<CloudFields>;
-
   inspect?: Maybe<Inspect>;
+
+  lastSeen?: Maybe<string>;
 }
 
 export interface CloudFields {
@@ -1467,6 +1481,14 @@ export interface CloudInstance {
 
 export interface CloudMachine {
   type?: Maybe<(Maybe<string>)[]>;
+}
+
+export interface EndpointFields {
+  endpointPolicy?: Maybe<string>;
+
+  sensorVersion?: Maybe<string>;
+
+  policyStatus?: Maybe<HostPolicyResponseActionStatus>;
 }
 
 export interface FirstLastSeenHost {
@@ -2077,9 +2099,9 @@ export interface QueryMatchResult {
 }
 
 export interface DateRangePickerResult {
-  start?: Maybe<number>;
+  start?: Maybe<ToAny>;
 
-  end?: Maybe<number>;
+  end?: Maybe<ToAny>;
 }
 
 export interface FavoriteTimelineResult {
@@ -2316,6 +2338,8 @@ export interface AuthenticationsSourceArgs {
   filterQuery?: Maybe<string>;
 
   defaultIndex: string[];
+
+  docValueFields: DocValueFieldsInput[];
 }
 export interface TimelineSourceArgs {
   pagination: PaginationInput;
@@ -2329,6 +2353,8 @@ export interface TimelineSourceArgs {
   filterQuery?: Maybe<string>;
 
   defaultIndex: string[];
+
+  docValueFields: DocValueFieldsInput[];
 }
 export interface TimelineDetailsSourceArgs {
   eventId: string;
@@ -2336,6 +2362,8 @@ export interface TimelineDetailsSourceArgs {
   indexName: string;
 
   defaultIndex: string[];
+
+  docValueFields: DocValueFieldsInput[];
 }
 export interface LastEventTimeSourceArgs {
   id?: Maybe<string>;
@@ -2345,6 +2373,8 @@ export interface LastEventTimeSourceArgs {
   details: LastTimeDetails;
 
   defaultIndex: string[];
+
+  docValueFields: DocValueFieldsInput[];
 }
 export interface HostsSourceArgs {
   id?: Maybe<string>;
@@ -2358,6 +2388,8 @@ export interface HostsSourceArgs {
   filterQuery?: Maybe<string>;
 
   defaultIndex: string[];
+
+  docValueFields: DocValueFieldsInput[];
 }
 export interface HostOverviewSourceArgs {
   id?: Maybe<string>;
@@ -2374,6 +2406,8 @@ export interface HostFirstLastSeenSourceArgs {
   hostName: string;
 
   defaultIndex: string[];
+
+  docValueFields: DocValueFieldsInput[];
 }
 export interface IpOverviewSourceArgs {
   id?: Maybe<string>;
@@ -2383,6 +2417,8 @@ export interface IpOverviewSourceArgs {
   ip: string;
 
   defaultIndex: string[];
+
+  docValueFields: DocValueFieldsInput[];
 }
 export interface UsersSourceArgs {
   filterQuery?: Maybe<string>;
@@ -2498,6 +2534,8 @@ export interface NetworkDnsHistogramSourceArgs {
   timerange: TimerangeInput;
 
   stackByField?: Maybe<string>;
+
+  docValueFields: DocValueFieldsInput[];
 }
 export interface NetworkHttpSourceArgs {
   id?: Maybe<string>;
@@ -2616,6 +2654,7 @@ export namespace GetLastEventTimeQuery {
     indexKey: LastEventIndexKey;
     details: LastTimeDetails;
     defaultIndex: string[];
+    docValueFields: DocValueFieldsInput[];
   };
 
   export type Query = {
@@ -2752,6 +2791,7 @@ export namespace GetAuthenticationsQuery {
     filterQuery?: Maybe<string>;
     defaultIndex: string[];
     inspect: boolean;
+    docValueFields: DocValueFieldsInput[];
   };
 
   export type Query = {
@@ -2888,6 +2928,7 @@ export namespace GetHostFirstLastSeenQuery {
     sourceId: string;
     hostName: string;
     defaultIndex: string[];
+    docValueFields: DocValueFieldsInput[];
   };
 
   export type Query = {
@@ -2922,6 +2963,7 @@ export namespace GetHostsTableQuery {
     filterQuery?: Maybe<string>;
     defaultIndex: string[];
     inspect: boolean;
+    docValueFields: DocValueFieldsInput[];
   };
 
   export type Query = {
@@ -3044,6 +3086,8 @@ export namespace GetHostOverviewQuery {
     cloud: Maybe<Cloud>;
 
     inspect: Maybe<Inspect>;
+
+    endpoint: Maybe<Endpoint>;
   };
 
   export type Host = {
@@ -3106,6 +3150,16 @@ export namespace GetHostOverviewQuery {
     dsl: string[];
 
     response: string[];
+  };
+
+  export type Endpoint = {
+    __typename?: 'EndpointFields';
+
+    endpointPolicy: Maybe<string>;
+
+    policyStatus: Maybe<HostPolicyResponseActionStatus>;
+
+    sensorVersion: Maybe<string>;
   };
 }
 
@@ -3351,6 +3405,7 @@ export namespace GetIpOverviewQuery {
     ip: string;
     defaultIndex: string[];
     inspect: boolean;
+    docValueFields: DocValueFieldsInput[];
   };
 
   export type Query = {
@@ -4513,6 +4568,7 @@ export namespace GetTimelineDetailsQuery {
     eventId: string;
     indexName: string;
     defaultIndex: string[];
+    docValueFields: DocValueFieldsInput[];
   };
 
   export type Query = {
@@ -4587,6 +4643,8 @@ export namespace GetTimelineQuery {
     filterQuery?: Maybe<string>;
     defaultIndex: string[];
     inspect: boolean;
+    docValueFields: DocValueFieldsInput[];
+    timerange: TimerangeInput;
   };
 
   export type Query = {
@@ -5616,9 +5674,9 @@ export namespace GetOneTimeline {
   export type DateRange = {
     __typename?: 'DateRangePickerResult';
 
-    start: Maybe<number>;
+    start: Maybe<ToAny>;
 
-    end: Maybe<number>;
+    end: Maybe<ToAny>;
   };
 
   export type EventIdToNoteIds = {
@@ -6002,9 +6060,9 @@ export namespace PersistTimelineMutation {
   export type DateRange = {
     __typename?: 'DateRangePickerResult';
 
-    start: Maybe<number>;
+    start: Maybe<ToAny>;
 
-    end: Maybe<number>;
+    end: Maybe<ToAny>;
   };
 
   export type Sort = {

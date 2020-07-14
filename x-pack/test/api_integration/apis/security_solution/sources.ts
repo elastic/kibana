@@ -25,6 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
           variables: {
             sourceId: 'default',
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            docValueFields: [],
           },
         })
         .then((resp) => {
