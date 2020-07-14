@@ -303,6 +303,7 @@ describe('create_signals', () => {
       filter: {},
       size: 100,
       searchAfterSortId: undefined,
+      timestampOverride: undefined,
     });
     expect(query).toEqual({
       allowNoIndices: true,
@@ -381,6 +382,7 @@ describe('create_signals', () => {
       filter: {},
       size: 100,
       searchAfterSortId: undefined,
+      timestampOverride: undefined,
     });
     expect(query).toEqual({
       allowNoIndices: true,
