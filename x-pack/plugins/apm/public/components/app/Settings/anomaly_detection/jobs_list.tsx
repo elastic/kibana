@@ -19,27 +19,22 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
-import { AnomalyDetectionJobByEnv } from '../../../../../typings/anomaly_detection';
 import { MLJobLink } from '../../../shared/Links/MachineLearningLinks/MLJobLink';
 import { MLLink } from '../../../shared/Links/MachineLearningLinks/MLLink';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
+import { getEnvironmentLabel } from '../../../../../common/environment_filter_values';
 import { LegacyJobsCallout } from './legacy_jobs_callout';
+import { AnomalyDetectionApiResponse } from './index';
 
-const columns: Array<ITableColumn<AnomalyDetectionJobByEnv>> = [
+type Jobs = AnomalyDetectionApiResponse['jobs'];
+
+const columns: Array<ITableColumn<Jobs[0]>> = [
   {
     field: 'environment',
     name: i18n.translate(
       'xpack.apm.settings.anomalyDetection.jobList.environmentColumnLabel',
       { defaultMessage: 'Environment' }
     ),
-    render: (environment: string) => {
-      if (environment === ENVIRONMENT_NOT_DEFINED) {
-        return i18n.translate('xpack.apm.filter.environment.notDefinedLabel', {
-          defaultMessage: 'Not defined',
-        });
-      }
-      return environment;
-    },
+    render: getEnvironmentLabel,
   },
   {
     field: 'job_id',
@@ -64,13 +59,13 @@ const columns: Array<ITableColumn<AnomalyDetectionJobByEnv>> = [
 interface Props {
   status: FETCH_STATUS;
   onAddEnvironments: () => void;
-  anomalyDetectionJobsByEnv: AnomalyDetectionJobByEnv[];
+  jobs: Jobs;
   hasLegacyJobs: boolean;
 }
 export const JobsList = ({
   status,
   onAddEnvironments,
-  anomalyDetectionJobsByEnv,
+  jobs,
   hasLegacyJobs,
 }: Props) => {
   const isLoading =
@@ -98,7 +93,7 @@ export const JobsList = ({
             {i18n.translate(
               'xpack.apm.settings.anomalyDetection.jobList.addEnvironments',
               {
-                defaultMessage: 'Add environments',
+                defaultMessage: 'Create ML Job',
               }
             )}
           </EuiButton>
@@ -108,7 +103,7 @@ export const JobsList = ({
       <EuiText>
         <FormattedMessage
           id="xpack.apm.settings.anomalyDetection.jobList.mlDescriptionText"
-          defaultMessage="Manage existing anomaly detection jobs in {mlJobsLink}."
+          defaultMessage="To add anomaly detection to a new environment, create a machine learning job. Existing machine learning jobs can be managed in {mlJobsLink}."
           values={{
             mlJobsLink: (
               <MLLink path="jobs">
@@ -135,7 +130,7 @@ export const JobsList = ({
           )
         }
         columns={columns}
-        items={isLoading || hasFetchFailure ? [] : anomalyDetectionJobsByEnv}
+        items={jobs}
       />
       <EuiSpacer size="l" />
 

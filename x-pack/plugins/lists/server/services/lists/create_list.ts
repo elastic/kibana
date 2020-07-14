@@ -67,6 +67,7 @@ export const createList = async ({
     body,
     id,
     index: listIndex,
+    refresh: 'wait_for',
   });
   return {
     id: response._id,
