@@ -437,9 +437,12 @@ The config and params properties are modelled after the [Watcher Index Action](h
 
 ### `config`
 
-| Property | Description                            | Type                |
-| -------- | -------------------------------------- | ------------------- |
-| index    | The Elasticsearch index to index into. | string _(optional)_ |
+| Property             | Description                                                | Type                 |
+| -------------------- | ---------------------------------------------------------- | -------------------- |
+| index                | The Elasticsearch index to index into.                     | string _(optional)_  |
+| doc_id               | The optional \_id of the document.                         | string _(optional)_  |
+| execution_time_field | The field that will store/index the action execution time. | string _(optional)_  |
+| refresh              | Setting of the refresh policy for the write request.        | boolean _(optional)_ |
 
 ### `secrets`
 
@@ -447,13 +450,9 @@ This action type has no `secrets` properties.
 
 ### `params`
 
-| Property             | Description                                                | Type                 |
-| -------------------- | ---------------------------------------------------------- | -------------------- |
-| index                | The Elasticsearch index to index into.                     | string _(optional)_  |
-| doc_id               | The optional \_id of the document.                         | string _(optional)_  |
-| execution_time_field | The field that will store/index the action execution time. | string _(optional)_  |
-| refresh              | Setting of the refresh policy for the write request        | boolean _(optional)_ |
-| body                 | The documument body/bodies to index.                       | object or object[]   |
+| Property  | Description                              | Type                |
+| --------- | ---------------------------------------- | ------------------- |
+| documents | JSON object that describes the [document](https://www.elastic.co/guide/en/elasticsearch/reference/current/getting-started-index.html#getting-started-batch-processing). | object[]            |
 
 ---
 

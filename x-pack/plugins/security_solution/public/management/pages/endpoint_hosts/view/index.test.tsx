@@ -13,8 +13,9 @@ import { mockPolicyResultList } from '../../policy/store/policy_list/mock_policy
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import {
   HostInfo,
-  HostStatus,
   HostPolicyResponseActionStatus,
+  HostPolicyResponseAppliedAction,
+  HostStatus,
 } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { AppAction } from '../../../../common/store/actions';
@@ -251,6 +252,16 @@ describe('when on the hosts page', () => {
       ) {
         malwareResponseConfigurations.concerned_actions.push(downloadModelAction.name);
       }
+
+      // Add an unknown Action Name - to ensure we handle the format of it on the UI
+      const unknownAction: HostPolicyResponseAppliedAction = {
+        status: HostPolicyResponseActionStatus.success,
+        message: 'test message',
+        name: 'a_new_unknown_action',
+      };
+      policyResponse.Endpoint.policy.applied.actions.push(unknownAction);
+      malwareResponseConfigurations.concerned_actions.push(unknownAction.name);
+
       reactTestingLibrary.act(() => {
         store.dispatch({
           type: 'serverReturnedHostPolicyResponse',
@@ -563,6 +574,10 @@ describe('when on the hosts page', () => {
         expect(changedUrlAction.payload.search).toEqual(
           '?page_index=0&page_size=10&selected_host=1'
         );
+      });
+
+      it('should format unknown policy action names', async () => {
+        expect(renderResult.getByText('A New Unknown Action')).not.toBeNull();
       });
     });
   });
