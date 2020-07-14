@@ -8,7 +8,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Router, Switch, Route, Redirect, withRouter } from 'react-router-dom';
 
-import { UIM_APP_LOAD, PLUGIN } from '../../common';
+import { UIM_APP_LOAD } from '../../common';
 import { registerRouter, setUserHasLeftApp, METRIC_TYPE } from './services';
 import { trackUiMetric } from '../kibana_services';
 import { JobList, JobCreate } from './sections';
@@ -42,12 +42,10 @@ const ShareRouter = withRouter(ShareRouterComponent);
 // eslint-disable-next-line react/no-multi-comp
 export class App extends Component {
   componentDidMount() {
-    this.props.docTitle.change(PLUGIN.title);
     trackUiMetric(METRIC_TYPE.LOADED, UIM_APP_LOAD);
   }
 
   componentWillUnmount() {
-    this.props.docTitle.reset();
     // Set internal flag so we can prevent reacting to route changes internally.
     setUserHasLeftApp(true);
   }

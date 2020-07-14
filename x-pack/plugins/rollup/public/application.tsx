@@ -9,6 +9,7 @@ import { CoreSetup } from 'kibana/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
+import { PLUGIN } from '../common';
 // @ts-ignore
 import { rollupJobsStore } from './crud_app/store';
 // @ts-ignore
@@ -37,17 +38,19 @@ export const renderApp = async (
     setBreadcrumbs,
   };
 
+  docTitle.change(PLUGIN.title);
   render(
     <I18nContext>
       <KibanaContextProvider services={services}>
         <Provider store={rollupJobsStore}>
-          <App history={history} docTitle={docTitle} />
+          <App history={history} />
         </Provider>
       </KibanaContextProvider>
     </I18nContext>,
     element
   );
   return () => {
+    docTitle.reset();
     unmountComponentAtNode(element);
   };
 };
