@@ -103,7 +103,7 @@ describe('rules_notification_alert_type', () => {
       exceptionsWithValueLists: [],
     });
     (searchAfterAndBulkCreate as jest.Mock).mockClear();
-    (getGapMaxCatchupRatio as jestMock).mockClear();
+    (getGapMaxCatchupRatio as jest.Mock).mockClear();
     (searchAfterAndBulkCreate as jest.Mock).mockResolvedValue({
       success: true,
       searchAfterTimes: [],
