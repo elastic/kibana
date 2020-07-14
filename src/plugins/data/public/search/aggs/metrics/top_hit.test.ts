@@ -111,9 +111,7 @@ describe('Top hit metric', () => {
   it('requests both source and docvalues_fields for non-text aggregatable fields', () => {
     init({ fieldName: 'bytes', readFromDocValues: true });
     expect(aggDsl.top_hits._source).toBe('bytes');
-    expect(aggDsl.top_hits.docvalue_fields).toEqual([
-      { field: 'bytes', format: 'use_field_mapping' },
-    ]);
+    expect(aggDsl.top_hits.docvalue_fields).toEqual([{ field: 'bytes' }]);
   });
 
   it('requests both source and docvalues_fields for date aggregatable fields', () => {
