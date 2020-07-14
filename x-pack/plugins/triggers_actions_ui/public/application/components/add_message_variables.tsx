@@ -11,7 +11,6 @@ import {
   EuiButtonIcon,
   EuiContextMenuPanel,
   EuiContextMenuItem,
-  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import './add_message_variables.scss';
