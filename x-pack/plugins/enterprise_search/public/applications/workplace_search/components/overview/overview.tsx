@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useActions, useValues } from 'kea';
 
 import { SetWorkplaceSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared/kibana_breadcrumbs';
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { KibanaContext, IKibanaContext } from '../../../index';
 
-import { IAccount } from '../../types';
+import { OverviewLogic, IOverviewActions, IOverviewValues } from './overview_logic';
 
 import { ErrorState } from '../error_state';
 
@@ -23,56 +24,6 @@ import { ViewContentHeader } from '../shared/view_content_header';
 import { OnboardingSteps } from './onboarding_steps';
 import { OrganizationStats } from './organization_stats';
 import { RecentActivity, IFeedActivity } from './recent_activity';
-
-export interface IAppServerData {
-  hasUsers: boolean;
-  hasOrgSources: boolean;
-  canCreateContentSources: boolean;
-  canCreateInvitations: boolean;
-  isOldAccount: boolean;
-  sourcesCount: number;
-  pendingInvitationsCount: number;
-  accountsCount: number;
-  personalSourcesCount: number;
-  activityFeed: IFeedActivity[];
-  organization: {
-    name: string;
-    defaultOrgName: string;
-  };
-  isFederatedAuth: boolean;
-  currentUser: {
-    firstName: string;
-    email: string;
-    name: string;
-    color: string;
-  };
-  fpAccount: IAccount;
-}
-
-export const defaultServerData = {
-  accountsCount: 1,
-  activityFeed: [],
-  canCreateContentSources: true,
-  canCreateInvitations: true,
-  currentUser: {
-    firstName: '',
-    email: '',
-    name: '',
-    color: '',
-  },
-  fpAccount: {} as IAccount,
-  hasOrgSources: false,
-  hasUsers: false,
-  isFederatedAuth: true,
-  isOldAccount: false,
-  organization: {
-    name: '',
-    defaultOrgName: '',
-  },
-  pendingInvitationsCount: 0,
-  personalSourcesCount: 0,
-  sourcesCount: 0,
-} as IAppServerData;
 
 const ONBOARDING_HEADER_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.overviewOnboardingHeader.title',
@@ -96,34 +47,24 @@ const HEADER_DESCRIPTION = i18n.translate(
 export const Overview: React.FC = () => {
   const { http } = useContext(KibanaContext) as IKibanaContext;
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasErrorConnecting, setHasErrorConnecting] = useState(false);
-  const [appData, setAppData] = useState(defaultServerData);
-
-  const getAppData = async () => {
-    try {
-      const response = await http.get('/api/workplace_search/overview');
-      setAppData(response);
-    } catch (error) {
-      setHasErrorConnecting(true);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    getAppData();
-  }, []);
-
-  if (hasErrorConnecting) return <ErrorState />;
-  if (isLoading) return <Loading />;
+  const { initializeOverview } = useActions(OverviewLogic) as IOverviewActions;
 
   const {
+    dataLoading,
+    hasErrorConnecting,
     hasUsers,
     hasOrgSources,
     isOldAccount,
     organization: { name: orgName, defaultOrgName },
-  } = appData as IAppServerData;
+  } = useValues(OverviewLogic) as IOverviewValues;
+
+  useEffect(() => {
+    initializeOverview({ http });
+  }, [initializeOverview]);
+
+  if (hasErrorConnecting) return <ErrorState />;
+  if (dataLoading) return <Loading />;
+
   const hideOnboarding = hasUsers && hasOrgSources && isOldAccount && orgName !== defaultOrgName;
 
   const headerTitle = hideOnboarding ? HEADER_TITLE : ONBOARDING_HEADER_TITLE;
@@ -140,11 +81,11 @@ export const Overview: React.FC = () => {
           description={headerDescription}
           action={<ProductButton />}
         />
-        {!hideOnboarding && <OnboardingSteps {...appData} />}
+        {!hideOnboarding && <OnboardingSteps />}
         <EuiSpacer size="xl" />
-        <OrganizationStats {...appData} />
+        <OrganizationStats />
         <EuiSpacer size="xl" />
-        <RecentActivity {...appData} />
+        <RecentActivity />
       </EuiPageBody>
     </EuiPage>
   );

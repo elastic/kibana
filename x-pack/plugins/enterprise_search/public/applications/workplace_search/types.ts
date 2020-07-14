@@ -13,4 +13,18 @@ export interface IAccount {
   supportEligible: boolean;
 }
 
+export interface IFlashMessagesProps {
+  info?: string[];
+  warning?: string[];
+  error?: string[];
+  success?: string[];
+  isWrapped?: boolean;
+  children?: React.ReactNode;
+}
+
+export interface IOrganization {
+  name: string;
+  defaultOrgName: string;
+}
+
 export type TSpacerSize = 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl';
