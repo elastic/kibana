@@ -23,7 +23,9 @@ import { REPO_ROOT } from '../constants';
 import { Project } from './project';
 
 export const PROJECTS = [
-  new Project(resolve(REPO_ROOT, 'tsconfig.json')),
+  new Project(resolve(REPO_ROOT, 'tsconfig.json'), {
+    disableNoEmit: true,
+  }),
   new Project(resolve(REPO_ROOT, 'test/tsconfig.json'), { name: 'kibana/test' }),
   new Project(resolve(REPO_ROOT, 'x-pack/tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'x-pack/test/tsconfig.json'), { name: 'x-pack/test' }),

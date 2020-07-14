@@ -92,5 +92,6 @@ export function runTypeCheckCli() {
     require.resolve('typescript/bin/tsc'),
     ...['--project', project.tsConfigPath],
     ...tscArgs,
+    ...(project.disableNoEmit ? [] : ['--noEmit']),
   ]);
 }
