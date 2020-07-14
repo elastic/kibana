@@ -29,11 +29,11 @@ Then(`should have correct client metrics`, () => {
   cy.get('.euiSelect-isLoading').should('not.be.visible');
   cy.get('.euiStat__title-isLoading').should('not.be.visible');
 
-  cy.get(clientMetrics).eq(2).invoke('text').snapshot();
+  cy.get(clientMetrics).eq(2).should('have.text', '55 ');
 
-  cy.get(clientMetrics).eq(1).invoke('text').snapshot();
+  cy.get(clientMetrics).eq(1).should('have.text', '0.08 sec');
 
-  cy.get(clientMetrics).eq(0).invoke('text').snapshot();
+  cy.get(clientMetrics).eq(0).should('have.text', '0.01 sec');
 });
 
 Then(`should display percentile for page load chart`, () => {
@@ -45,13 +45,13 @@ Then(`should display percentile for page load chart`, () => {
   cy.get('kbnLoadingIndicator').should('not.be.visible');
   cy.get('.euiStat__title-isLoading').should('not.be.visible');
 
-  cy.get(pMarkers).eq(0).invoke('text').snapshot();
+  cy.get(pMarkers).eq(0).should('have.text', '50th');
 
-  cy.get(pMarkers).eq(1).invoke('text').snapshot();
+  cy.get(pMarkers).eq(1).should('have.text', '75th');
 
-  cy.get(pMarkers).eq(2).invoke('text').snapshot();
+  cy.get(pMarkers).eq(2).should('have.text', '90th');
 
-  cy.get(pMarkers).eq(3).invoke('text').snapshot();
+  cy.get(pMarkers).eq(3).should('have.text', '95th');
 });
 
 Then(`should display chart legend`, () => {
