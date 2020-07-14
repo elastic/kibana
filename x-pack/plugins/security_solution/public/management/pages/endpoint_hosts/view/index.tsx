@@ -89,7 +89,7 @@ export const HostList = () => {
     policyItemsLoading,
     endpointPackageVersion,
   } = useHostSelector(selector);
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.management);
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
 
   const dispatch = useDispatch<(a: HostAction) => void>();
 
@@ -127,12 +127,12 @@ export const HostList = () => {
       }`,
       state: {
         onCancelNavigateTo: [
-          'securitySolution:management',
+          'securitySolution:administration',
           { path: getHostListPath({ name: 'hostList' }) },
         ],
         onCancelUrl: formatUrl(getHostListPath({ name: 'hostList' })),
         onSaveNavigateTo: [
-          'securitySolution:management',
+          'securitySolution:administration',
           { path: getHostListPath({ name: 'hostList' }) },
         ],
       },
@@ -145,7 +145,7 @@ export const HostList = () => {
     path: `#/configs/${selectedPolicyId}?openEnrollmentFlyout=true`,
     state: {
       onDoneNavigateTo: [
-        'securitySolution:management',
+        'securitySolution:administration',
         { path: getHostListPath({ name: 'hostList' }) },
       ],
     },
@@ -401,7 +401,7 @@ export const HostList = () => {
             <p>
               <FormattedMessage
                 id="xpack.securitySolution.hostList.pageSubTitle"
-                defaultMessage="Hosts running the Elastic Endpoint"
+                defaultMessage="Hosts running Elastic Endpoint Security"
               />
             </p>
           </EuiText>
@@ -422,7 +422,7 @@ export const HostList = () => {
         </>
       )}
       {renderTableOrEmptyState}
-      <SpyRoute pageName={SecurityPageName.management} />
+      <SpyRoute pageName={SecurityPageName.administration} />
     </ManagementPageView>
   );
 };
