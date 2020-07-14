@@ -24,12 +24,12 @@ import { StandaloneInstructions } from './standalone_instructions';
 
 interface Props {
   onClose: () => void;
-  agentConfigs: AgentConfig[];
+  agentConfigs?: AgentConfig[];
 }
 
 export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
   onClose,
-  agentConfigs = [],
+  agentConfigs,
 }) => {
   const [mode, setMode] = useState<'managed' | 'standalone'>('managed');
 

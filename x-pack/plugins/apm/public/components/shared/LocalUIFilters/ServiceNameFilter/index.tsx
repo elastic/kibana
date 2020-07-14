@@ -18,9 +18,10 @@ import { fromQuery, toQuery } from '../../Links/url_helpers';
 
 interface Props {
   serviceNames: string[];
+  loading: boolean;
 }
 
-const ServiceNameFilter = ({ serviceNames }: Props) => {
+const ServiceNameFilter = ({ loading, serviceNames }: Props) => {
   const {
     urlParams: { serviceName },
   } = useUrlParams();
@@ -60,6 +61,7 @@ const ServiceNameFilter = ({ serviceNames }: Props) => {
       <EuiHorizontalRule margin="none" />
       <EuiSpacer size="s" />
       <EuiSelect
+        isLoading={loading}
         data-cy="serviceNameFilter"
         options={options}
         value={serviceName}

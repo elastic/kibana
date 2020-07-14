@@ -167,7 +167,7 @@ describe('Timeline', () => {
       expect(wrapper.find('[data-test-subj="table-pagination"]').exists()).toEqual(false);
     });
 
-    test('it defaults to showing `All events`', () => {
+    test('it defaults to showing `All`', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mocks}>
@@ -176,9 +176,35 @@ describe('Timeline', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="pick-event-type"] button').text()).toEqual(
-        'All events'
+      expect(wrapper.find('[data-test-subj="pick-event-type"] button').text()).toEqual('All');
+    });
+
+    it('it shows the timeline footer', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mocks}>
+            <TimelineComponent {...props} />
+          </MockedProvider>
+        </TestProviders>
       );
+
+      expect(wrapper.find('[data-test-subj="timeline-footer"]').exists()).toEqual(true);
+    });
+    describe('when there is a graphEventId', () => {
+      beforeEach(() => {
+        props.graphEventId = 'graphEventId'; // any string w/ length > 0 works
+      });
+      it('should not show the timeline footer', () => {
+        const wrapper = mount(
+          <TestProviders>
+            <MockedProvider mocks={mocks}>
+              <TimelineComponent {...props} />
+            </MockedProvider>
+          </TestProviders>
+        );
+
+        expect(wrapper.find('[data-test-subj="timeline-footer"]').exists()).toEqual(false);
+      });
     });
   });
 

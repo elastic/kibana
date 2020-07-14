@@ -84,6 +84,10 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
     id: rule.timeline_id ?? null,
     title: rule.timeline_title ?? null,
   },
+  threshold: {
+    field: rule.threshold?.field ? [rule.threshold.field] : [],
+    value: `${rule.threshold?.value || 100}`,
+  },
 });
 
 export const getScheduleStepsData = (rule: Rule): ScheduleStepRule => {
@@ -182,6 +186,13 @@ export type PrePackagedRuleStatus =
   | 'someRuleUninstall'
   | 'unknown';
 
+export type PrePackagedTimelineStatus =
+  | 'timelinesNotInstalled'
+  | 'timelinesInstalled'
+  | 'someTimelineUninstall'
+  | 'timelineNeedUpdate'
+  | 'unknown';
+
 export const getPrePackagedRuleStatus = (
   rulesInstalled: number | null,
   rulesNotInstalled: number | null,
@@ -221,6 +232,45 @@ export const getPrePackagedRuleStatus = (
   }
   return 'unknown';
 };
+export const getPrePackagedTimelineStatus = (
+  timelinesInstalled: number | null,
+  timelinesNotInstalled: number | null,
+  timelinesNotUpdated: number | null
+): PrePackagedTimelineStatus => {
+  if (
+    timelinesNotInstalled != null &&
+    timelinesInstalled === 0 &&
+    timelinesNotInstalled > 0 &&
+    timelinesNotUpdated === 0
+  ) {
+    return 'timelinesNotInstalled';
+  } else if (
+    timelinesInstalled != null &&
+    timelinesInstalled > 0 &&
+    timelinesNotInstalled === 0 &&
+    timelinesNotUpdated === 0
+  ) {
+    return 'timelinesInstalled';
+  } else if (
+    timelinesInstalled != null &&
+    timelinesNotInstalled != null &&
+    timelinesInstalled > 0 &&
+    timelinesNotInstalled > 0 &&
+    timelinesNotUpdated === 0
+  ) {
+    return 'someTimelineUninstall';
+  } else if (
+    timelinesInstalled != null &&
+    timelinesNotInstalled != null &&
+    timelinesNotUpdated != null &&
+    timelinesInstalled > 0 &&
+    timelinesNotInstalled >= 0 &&
+    timelinesNotUpdated > 0
+  ) {
+    return 'timelineNeedUpdate';
+  }
+  return 'unknown';
+};
 export const setFieldValue = (
   form: FormHook<FormData>,
   schema: FormSchema<FormData>,
@@ -236,12 +286,27 @@ export const setFieldValue = (
 export const redirectToDetections = (
   isSignalIndexExists: boolean | null,
   isAuthenticated: boolean | null,
-  hasEncryptionKey: boolean | null
+  hasEncryptionKey: boolean | null,
+  needsListsConfiguration: boolean
 ) =>
-  isSignalIndexExists != null &&
-  isAuthenticated != null &&
-  hasEncryptionKey != null &&
-  (!isSignalIndexExists || !isAuthenticated || !hasEncryptionKey);
+  isSignalIndexExists === false ||
+  isAuthenticated === false ||
+  hasEncryptionKey === false ||
+  needsListsConfiguration;
+
+const getRuleSpecificRuleParamKeys = (ruleType: RuleType) => {
+  const queryRuleParams = ['index', 'filters', 'language', 'query', 'saved_id'];
+
+  if (isMlRule(ruleType)) {
+    return ['anomaly_threshold', 'machine_learning_job_id'];
+  }
+
+  if (ruleType === 'threshold') {
+    return ['threshold', ...queryRuleParams];
+  }
+
+  return queryRuleParams;
+};
 
 export const getActionMessageRuleParams = (ruleType: RuleType): string[] => {
   const commonRuleParamsKeys = [
@@ -265,9 +330,7 @@ export const getActionMessageRuleParams = (ruleType: RuleType): string[] => {
 
   const ruleParamsKeys = [
     ...commonRuleParamsKeys,
-    ...(isMlRule(ruleType)
-      ? ['anomaly_threshold', 'machine_learning_job_id']
-      : ['index', 'filters', 'language', 'query', 'saved_id']),
+    ...getRuleSpecificRuleParamKeys(ruleType),
   ].sort();
 
   return ruleParamsKeys;

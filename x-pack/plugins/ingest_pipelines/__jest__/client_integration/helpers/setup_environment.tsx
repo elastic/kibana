@@ -6,7 +6,6 @@
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import React from 'react';
 import { LocationDescriptorObject } from 'history';
-import { ScopedHistory } from 'kibana/public';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import {
   notificationServiceMock,
@@ -35,10 +34,10 @@ const httpServiceSetupMock = new HttpService().setup({
   fatalErrors: fatalErrorsServiceMock.createSetupContract(),
 });
 
-const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
-history.createHref = (location: LocationDescriptorObject) => {
+const history = scopedHistoryMock.create();
+history.createHref.mockImplementation((location: LocationDescriptorObject) => {
   return `${location.pathname}?${location.search}`;
-};
+});
 
 const appServices = {
   breadcrumbs: breadcrumbService,
