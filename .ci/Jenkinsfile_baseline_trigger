@@ -26,7 +26,7 @@ withGithubCredentials {
           build(
             propagate: false,
             wait: false,
-            job: 'elastic+kibana+baseline',
+            job: 'elastic+kibana+baseline-capture',
             parameters: [
               string(name: 'branch_specifier', value: branch),
               string(name: 'commit', value: commit),
