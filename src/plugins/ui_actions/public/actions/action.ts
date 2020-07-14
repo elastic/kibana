@@ -20,11 +20,23 @@
 import { UiComponent } from 'src/plugins/kibana_utils/public';
 import { ActionType, ActionContextMapping } from '../types';
 import { Presentable } from '../util/presentable';
+import { Trigger } from '../triggers';
 
 export type ActionByType<T extends ActionType> = Action<ActionContextMapping[T], T>;
 
+/**
+ * Metadata passed into execution handlers
+ */
+export interface EventMeta {
+  /**
+   * Trigger that executed the action
+   * Could be empty for cases when actions executed directly with (no trigger)
+   */
+  trigger?: Trigger;
+}
+
 export interface Action<Context extends {} = {}, T = ActionType>
-  extends Partial<Presentable<Context>> {
+  extends Partial<Presentable<Context, EventMeta>> {
   /**
    * Determined the order when there is more than one action matched to a trigger.
    * Higher numbers are displayed first.
@@ -62,12 +74,12 @@ export interface Action<Context extends {} = {}, T = ActionType>
    * Returns a promise that resolves to true if this action is compatible given the context,
    * otherwise resolves to false.
    */
-  isCompatible(context: Context): Promise<boolean>;
+  isCompatible(context: Context, meta?: EventMeta): Promise<boolean>;
 
   /**
    * Executes the action.
    */
-  execute(context: Context): Promise<void>;
+  execute(context: Context, meta?: EventMeta): Promise<void>;
 }
 
 /**
@@ -86,9 +98,22 @@ export interface ActionDefinition<Context extends object = object>
   readonly type?: ActionType;
 
   /**
+   * Returns a promise that resolves to true if this item is compatible given
+   * the context and should be displayed to user, otherwise resolves to false.
+   */
+  isCompatible?(context: Context, meta: EventMeta): Promise<boolean>;
+
+  /**
    * Executes the action.
    */
-  execute(context: Context): Promise<void>;
+  execute(context: Context, meta: EventMeta): Promise<void>;
+
+  /**
+   * This method should return a link if this item can be clicked on. The link
+   * is used to navigate user if user middle-clicks it or Ctrl + clicks or
+   * right-clicks and selects "Open in new tab".
+   */
+  getHref?(context: Context, meta: EventMeta): Promise<string | undefined>;
 }
 
 export type ActionContext<A> = A extends ActionDefinition<infer Context> ? Context : never;

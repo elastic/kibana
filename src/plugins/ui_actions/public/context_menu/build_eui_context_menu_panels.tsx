@@ -23,6 +23,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { uiToReactComponent } from '../../../kibana_react/public';
 import { Action } from '../actions';
+import { Trigger } from '../triggers';
 
 export const defaultTitle = i18n.translate('uiActions.actionPanel.title', {
   defaultMessage: 'Options',
@@ -34,17 +35,20 @@ export const defaultTitle = i18n.translate('uiActions.actionPanel.title', {
 export async function buildContextMenuForActions<Context extends object>({
   actions,
   actionContext,
+  trigger,
   title = defaultTitle,
   closeMenu,
 }: {
   actions: Array<Action<Context>>;
   actionContext: Context;
+  trigger?: Trigger;
   title?: string;
   closeMenu: () => void;
 }): Promise<EuiContextMenuPanelDescriptor> {
   const menuItems = await buildEuiContextMenuPanelItems<Context>({
     actions,
     actionContext,
+    trigger,
     closeMenu,
   });
 
@@ -61,15 +65,17 @@ export async function buildContextMenuForActions<Context extends object>({
 async function buildEuiContextMenuPanelItems<Context extends object>({
   actions,
   actionContext,
+  trigger,
   closeMenu,
 }: {
   actions: Array<Action<Context>>;
   actionContext: Context;
+  trigger?: Trigger;
   closeMenu: () => void;
 }) {
   const items: EuiContextMenuPanelItemDescriptor[] = new Array(actions.length);
   const promises = actions.map(async (action, index) => {
-    const isCompatible = await action.isCompatible(actionContext);
+    const isCompatible = await action.isCompatible(actionContext, { trigger });
     if (!isCompatible) {
       return;
     }
@@ -77,6 +83,7 @@ async function buildEuiContextMenuPanelItems<Context extends object>({
     items[index] = await convertPanelActionToContextMenuItem({
       action,
       actionContext,
+      trigger,
       closeMenu,
     });
   });
@@ -89,10 +96,12 @@ async function buildEuiContextMenuPanelItems<Context extends object>({
 async function convertPanelActionToContextMenuItem<Context extends object>({
   action,
   actionContext,
+  trigger,
   closeMenu,
 }: {
   action: Action<Context>;
   actionContext: Context;
+  trigger?: Trigger;
   closeMenu: () => void;
 }): Promise<EuiContextMenuPanelItemDescriptor> {
   const menuPanelItem: EuiContextMenuPanelItemDescriptor = {
@@ -116,20 +125,20 @@ async function convertPanelActionToContextMenuItem<Context extends object>({
         !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) // ignore clicks with modifier keys
       ) {
         event.preventDefault();
-        action.execute(actionContext);
+        action.execute(actionContext, { trigger });
       } else {
         // let browser handle navigation
       }
     } else {
       // not a link
-      action.execute(actionContext);
+      action.execute(actionContext, { trigger });
     }
 
     closeMenu();
   };
 
   if (action.getHref) {
-    const href = await action.getHref(actionContext);
+    const href = await action.getHref(actionContext, { trigger });
     if (href) {
       menuPanelItem.href = href;
     }

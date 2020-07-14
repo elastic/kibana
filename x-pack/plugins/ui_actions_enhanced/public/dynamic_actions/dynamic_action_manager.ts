@@ -78,10 +78,10 @@ export class DynamicActionManager {
     uiActions.registerAction({
       ...actionDefinition,
       id: actionId,
-      isCompatible: async (context) => {
+      isCompatible: async (context, meta) => {
         if (!(await isCompatible(context))) return false;
         if (!actionDefinition.isCompatible) return true;
-        return actionDefinition.isCompatible(context);
+        return actionDefinition.isCompatible(context, meta);
       },
     });
     for (const trigger of triggers) uiActions.attachAction(trigger as any, actionId);

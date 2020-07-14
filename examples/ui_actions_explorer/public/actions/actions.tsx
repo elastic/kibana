@@ -37,7 +37,8 @@ export const ACTION_SHOWCASE_PLUGGABILITY = 'ACTION_SHOWCASE_PLUGGABILITY';
 export const showcasePluggability = createAction<typeof ACTION_SHOWCASE_PLUGGABILITY>({
   type: ACTION_SHOWCASE_PLUGGABILITY,
   getDisplayName: () => 'This is pluggable! Any plugin can inject their actions here.',
-  execute: async () => alert("Isn't that cool?!"),
+  execute: async (context, { trigger }) =>
+    alert(`Isn't that cool?! Triggered by ${trigger?.id} trigger`),
 });
 
 export interface PhoneContext {

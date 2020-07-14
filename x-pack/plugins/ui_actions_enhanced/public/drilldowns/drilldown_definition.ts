@@ -6,6 +6,7 @@
 
 import { ActionFactoryDefinition } from '../dynamic_actions';
 import { LicenseType } from '../../../licensing/public';
+import { EventMeta } from '../../../../../src/plugins/ui_actions/public/';
 
 /**
  * This is a convenience interface to register a drilldown. Drilldown has
@@ -92,11 +93,13 @@ export interface DrilldownDefinition<
    * @param config Config object that user configured this drilldown with.
    * @param context Object that represents context in which the underlying
    *  `UIAction` of this drilldown is being executed in.
+   * @param meta object with meta information about underlying `UiAction` execution.
+   * For example, contains `trigger` which fired corresponding `UiAction`
    */
-  execute(config: Config, context: ExecutionContext): void;
+  execute(config: Config, context: ExecutionContext, meta: EventMeta): void;
 
   /**
    * A link where drilldown should navigate on middle click or Ctrl + click.
    */
-  getHref?(config: Config, context: ExecutionContext): Promise<string | undefined>;
+  getHref?(config: Config, context: ExecutionContext, meta: EventMeta): Promise<string | undefined>;
 }

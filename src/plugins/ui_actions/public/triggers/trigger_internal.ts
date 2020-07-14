@@ -55,7 +55,7 @@ export class TriggerInternal<T extends TriggerId> {
     action: Action<TriggerContextMapping[T]>,
     context: TriggerContextMapping[T]
   ) {
-    await action.execute(context);
+    await action.execute(context, { trigger: this.trigger });
   }
 
   private async executeMultipleActions(
@@ -67,6 +67,7 @@ export class TriggerInternal<T extends TriggerId> {
       actionContext: context,
       title: this.trigger.title,
       closeMenu: () => session.close(),
+      trigger: this.trigger,
     });
     const session = openContextMenu([panel], {
       'data-test-subj': 'multipleActionsContextMenu',
