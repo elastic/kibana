@@ -64,13 +64,14 @@ export class Project {
   public name: string;
   public config: any;
   public disableTypeCheck: boolean;
+  public disableNoEmit: boolean;
 
   private readonly include: IMinimatch[];
   private readonly exclude: IMinimatch[];
 
   constructor(
     public tsConfigPath: string,
-    options: { name?: string; disableTypeCheck?: boolean } = {}
+    options: { name?: string; disableTypeCheck?: boolean; disableNoEmit?: boolean } = {}
   ) {
     this.config = parseTsConfig(tsConfigPath);
 
@@ -88,6 +89,7 @@ export class Project {
 
     this.directory = dirname(this.tsConfigPath);
     this.disableTypeCheck = options.disableTypeCheck || false;
+    this.disableNoEmit = options.disableNoEmit || false;
     this.name = options.name || relative(REPO_ROOT, this.directory) || basename(this.directory);
     this.include = makeMatchers(this.directory, include);
     this.exclude = makeMatchers(this.directory, exclude);
