@@ -26,14 +26,12 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { StartServicesAccessor } from 'src/core/public';
 
 import { AdvancedSettings } from './advanced_settings';
+import { title } from '../constants';
 import { ManagementAppMountParams } from '../../../management/public';
 import { ComponentRegistry } from '../types';
 
 import './index.scss';
 
-const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
-  defaultMessage: 'Advanced Settings',
-});
 const crumb = [{ text: title }];
 
 const readOnlyBadge = {
@@ -60,6 +58,7 @@ export async function mountManagementSection(
     chrome.setBadge(readOnlyBadge);
   }
 
+  chrome.docTitle.change(title);
   ReactDOM.render(
     <I18nProvider>
       <Router history={params.history}>
@@ -79,6 +78,7 @@ export async function mountManagementSection(
     params.element
   );
   return () => {
+    chrome.docTitle.reset();
     ReactDOM.unmountComponentAtNode(params.element);
   };
 }

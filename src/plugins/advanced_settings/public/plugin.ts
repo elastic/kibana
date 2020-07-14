@@ -16,17 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin } from 'kibana/public';
 import { ManagementSectionId } from '../../management/public';
 import { ComponentRegistry } from './component_registry';
 import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
+import { title } from './constants';
 
 const component = new ComponentRegistry();
-
-const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
-  defaultMessage: 'Advanced Settings',
-});
 
 export class AdvancedSettingsPlugin
   implements Plugin<AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup> {
