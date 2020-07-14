@@ -8,11 +8,13 @@ export class MaxSizeStringBuilder {
   private _buffer: Buffer;
   private _size: number;
   private _maxSize: number;
+  private _bom: string;
 
-  constructor(maxSizeBytes: number) {
+  constructor(maxSizeBytes: number, bom = '') {
     this._buffer = Buffer.alloc(maxSizeBytes);
     this._size = 0;
     this._maxSize = maxSizeBytes;
+    this._bom = bom;
   }
 
   tryAppend(str: string) {
@@ -31,6 +33,6 @@ export class MaxSizeStringBuilder {
   }
 
   getString() {
-    return this._buffer.slice(0, this._size).toString();
+    return this._bom + this._buffer.slice(0, this._size).toString();
   }
 }

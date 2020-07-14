@@ -10,8 +10,10 @@ import { CancellationToken } from '../../../../../common';
 import { LevelLogger } from '../../../../lib';
 import { ScrollConfig } from '../../../../types';
 
-async function parseResponse(request: SearchResponse<any>) {
-  const response = await request;
+export type EndpointCaller = (method: string, params: object) => Promise<SearchResponse<any>>;
+
+function parseResponse(request: SearchResponse<any>) {
+  const response = request;
   if (!response || !response._scroll_id) {
     throw new Error(
       i18n.translate('xpack.reporting.exportTypes.csv.hitIterator.expectedScrollIdErrorMessage', {
@@ -39,14 +41,15 @@ async function parseResponse(request: SearchResponse<any>) {
 export function createHitIterator(logger: LevelLogger) {
   return async function* hitIterator(
     scrollSettings: ScrollConfig,
-    callEndpoint: Function,
+    callEndpoint: EndpointCaller,
     searchRequest: SearchParams,
     cancellationToken: CancellationToken
   ) {
     logger.debug('executing search request');
-    function search(index: string | boolean | string[] | undefined, body: object) {
+    async function search(index: string | boolean | string[] | undefined, body: object) {
       return parseResponse(
-        callEndpoint('search', {
+        await callEndpoint('search', {
+          ignore_unavailable: true, // ignores if the index pattern contains any aliases that point to closed indices
           index,
           body,
           scroll: scrollSettings.duration,
@@ -55,10 +58,10 @@ export function createHitIterator(logger: LevelLogger) {
       );
     }
 
-    function scroll(scrollId: string | undefined) {
+    async function scroll(scrollId: string | undefined) {
       logger.debug('executing scroll request');
       return parseResponse(
-        callEndpoint('scroll', {
+        await callEndpoint('scroll', {
           scrollId,
           scroll: scrollSettings.duration,
         })
