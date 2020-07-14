@@ -10,7 +10,6 @@ import * as t from 'io-ts';
 
 import {
   ItemId,
-  NamespaceType,
   Tags,
   _Tags,
   _tags,
@@ -23,7 +22,12 @@ import {
   tags,
 } from '../common/schemas';
 import { Identity, RequiredKeepUndefined } from '../../types';
-import { CreateCommentsArray, DefaultCreateCommentsArray, DefaultEntryArray } from '../types';
+import {
+  CreateCommentsArray,
+  DefaultCreateCommentsArray,
+  DefaultEntryArray,
+  NamespaceType,
+} from '../types';
 import { EntriesArray } from '../types/entries';
 import { DefaultUuid } from '../../siem_common_deps';
 
