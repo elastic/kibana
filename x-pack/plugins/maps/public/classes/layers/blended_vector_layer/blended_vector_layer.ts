@@ -283,7 +283,8 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
         const resp = await searchSource.fetch();
         const maxResultWindow = await this._documentSource.getMaxResultWindow();
         isSyncClustered = resp.hits.total > maxResultWindow;
-        syncContext.stopLoading(dataRequestId, requestToken, { isSyncClustered }, searchFilters);
+        const countData = { isSyncClustered } as CountData;
+        syncContext.stopLoading(dataRequestId, requestToken, countData, searchFilters);
       } catch (error) {
         if (!(error instanceof DataRequestAbortError)) {
           syncContext.onLoadError(dataRequestId, requestToken, error.message);

@@ -42,7 +42,7 @@ export enum SecurityPageName {
   network = 'network',
   timelines = 'timelines',
   case = 'case',
-  management = 'management',
+  administration = 'administration',
 }
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}/overview`;
@@ -117,6 +117,7 @@ export const TIMELINE_URL = '/api/timeline';
 export const TIMELINE_DRAFT_URL = `${TIMELINE_URL}/_draft`;
 export const TIMELINE_EXPORT_URL = `${TIMELINE_URL}/_export`;
 export const TIMELINE_IMPORT_URL = `${TIMELINE_URL}/_import`;
+export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackaged`;
 
 /**
  * Default signals index key for kibana.dev.yml

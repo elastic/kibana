@@ -14,6 +14,8 @@ import {
   TimelineStatus,
   TimelineErrorResponseType,
   TimelineErrorResponse,
+  ImportTimelineResultSchema,
+  importTimelineResultSchema,
 } from '../../../common/types/timeline';
 import { TimelineInput, TimelineType } from '../../graphql/types';
 import {
@@ -21,6 +23,7 @@ import {
   TIMELINE_DRAFT_URL,
   TIMELINE_IMPORT_URL,
   TIMELINE_EXPORT_URL,
+  TIMELINE_PREPACKAGED_URL,
 } from '../../../common/constants';
 
 import { KibanaServices } from '../../common/lib/kibana';
@@ -53,6 +56,12 @@ const decodeTimelineResponse = (respTimeline?: TimelineResponse) =>
 const decodeTimelineErrorResponse = (respTimeline?: TimelineErrorResponse) =>
   pipe(
     TimelineErrorResponseType.decode(respTimeline),
+    fold(throwErrors(createToasterPlainError), identity)
+  );
+
+const decodePrepackedTimelineResponse = (respTimeline?: ImportTimelineResultSchema) =>
+  pipe(
+    importTimelineResultSchema.decode(respTimeline),
     fold(throwErrors(createToasterPlainError), identity)
   );
 
@@ -199,4 +208,13 @@ export const cleanDraftTimeline = async ({
   });
 
   return decodeTimelineResponse(response);
+};
+
+export const installPrepackedTimelines = async (): Promise<ImportTimelineResultSchema> => {
+  const response = await KibanaServices.get().http.post<ImportTimelineResultSchema>(
+    TIMELINE_PREPACKAGED_URL,
+    {}
+  );
+
+  return decodePrepackedTimelineResponse(response);
 };
