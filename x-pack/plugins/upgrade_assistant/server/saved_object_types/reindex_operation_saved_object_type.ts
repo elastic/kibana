@@ -44,6 +44,9 @@ export const reindexOperationSavedObjectType: SavedObjectsType = {
       lastCompletedStep: {
         type: 'long',
       },
+      // Note that reindex failures can result in extremely long error messages coming from ES.
+      // We need to map these errors as text and use ignore_above to prevent indexing really large
+      // messages as keyword. See https://github.com/elastic/kibana/issues/71642 for more info.
       errorMessage: {
         type: 'text',
         fields: {
