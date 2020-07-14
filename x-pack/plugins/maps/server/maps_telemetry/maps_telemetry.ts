@@ -114,8 +114,12 @@ function getEMSLayerCount(layerLists: LayerDescriptor[][]): ILayerTypeCount[] {
 function isGeoshapeIndexPattern(
   indexPatterns: IIndexPattern[],
   indexPatternId: string,
-  geoField: string
+  geoField: string | undefined
 ): boolean {
+  if (!geoField) {
+    return false;
+  }
+
   const matchIndexPattern = indexPatterns.find((indexPattern: IIndexPattern) => {
     return indexPattern.id === indexPatternId;
   });
@@ -133,7 +137,7 @@ function isGeoshapeIndexPattern(
     return field.name === geoField;
   });
 
-  return matchField && matchField.type === ES_GEO_FIELD_TYPE.GEO_SHAPE;
+  return !!matchField && matchField.type === ES_GEO_FIELD_TYPE.GEO_SHAPE;
 }
 
 function isGeoShapeAggLayer(indexPatterns: IIndexPattern[], layer: LayerDescriptor): boolean {
