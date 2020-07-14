@@ -6,13 +6,25 @@
 
 import _ from 'lodash';
 import {
-  SavedObjectsClientContract,
-  SavedObjectAttributes,
   SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectsClientContract,
 } from 'kibana/server';
 import { IFieldType, IIndexPattern } from 'src/plugins/data/public';
-import { SOURCE_TYPES, ES_GEO_FIELD_TYPE, MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { AbstractSourceDescriptor, LayerDescriptor } from '../../common/descriptor_types';
+import {
+  ES_GEO_FIELD_TYPE,
+  LAYER_TYPE,
+  MAP_SAVED_OBJECT_TYPE,
+  SCALING_TYPES,
+  SOURCE_TYPES,
+} from '../../common/constants';
+import {
+  AbstractSourceDescriptor,
+  ESGeoGridSourceDescriptor,
+  ESSearchSourceDescriptor,
+  LayerDescriptor,
+  SourceDescriptor,
+} from '../../common/descriptor_types';
 import { MapSavedObject } from '../../common/map_saved_object_type';
 // @ts-ignore
 import { getInternalRepository } from '../kibana_server_services';
@@ -99,6 +111,81 @@ function getEMSLayerCount(layerLists: LayerDescriptor[][]): ILayerTypeCount[] {
   }) as ILayerTypeCount[];
 }
 
+function isGeoshapeIndexPattern(
+  indexPatterns: IIndexPattern[],
+  indexPatternId: string,
+  geoField: string
+): boolean {
+  const matchIndexPattern = indexPatterns.find((indexPattern: IIndexPattern) => {
+    return indexPattern.id === indexPatternId;
+  });
+
+  if (!matchIndexPattern) {
+    return false;
+  }
+
+  const fieldList: IFieldType[] =
+    matchIndexPattern.attributes && matchIndexPattern.attributes.fields
+      ? JSON.parse(matchIndexPattern.attributes.fields)
+      : [];
+
+  const matchField = fieldList.find((field: IFieldType) => {
+    return field.name === geoField;
+  });
+
+  return matchField && matchField.type === ES_GEO_FIELD_TYPE.GEO_SHAPE;
+}
+
+function isGeoShapeAggLayer(indexPatterns: IIndexPattern[], layer: LayerDescriptor): boolean {
+  if (layer.sourceDescriptor === null) {
+    return false;
+  }
+
+  if (
+    layer.type !== LAYER_TYPE.VECTOR &&
+    layer.type !== LAYER_TYPE.BLENDED_VECTOR &&
+    layer.type !== LAYER_TYPE.HEATMAP
+  ) {
+    return false;
+  }
+
+  const sourceDescriptor: SourceDescriptor = layer.sourceDescriptor;
+  if (sourceDescriptor.type === SOURCE_TYPES.ES_GEO_GRID) {
+    return isGeoshapeIndexPattern(
+      indexPatterns,
+      (sourceDescriptor as ESGeoGridSourceDescriptor).indexPatternId,
+      (sourceDescriptor as ESGeoGridSourceDescriptor).geoField
+    );
+  } else if (sourceDescriptor.type === SOURCE_TYPES.ES_SEARCH) {
+    const isGeoShapeIndexPattern = isGeoshapeIndexPattern(
+      indexPatterns,
+      (sourceDescriptor as ESSearchSourceDescriptor).indexPatternId,
+      (sourceDescriptor as ESSearchSourceDescriptor).geoField
+    );
+
+    return (
+      isGeoShapeIndexPattern &&
+      (sourceDescriptor as ESSearchSourceDescriptor).scalingType === SCALING_TYPES.CLUSTERS
+    );
+  } else {
+    return false;
+  }
+}
+
+function getGeoShapeAggCount(
+  layerLists: LayerDescriptor[][],
+  indexPatterns: IIndexPattern[]
+): number {
+  const countsPerMap: number[] = layerLists.map((layerList: LayerDescriptor[]) => {
+    const geoShapeAggLayers = layerList.filter((layerDescriptor) => {
+      return isGeoShapeAggLayer(indexPatterns, layerDescriptor);
+    });
+    return geoShapeAggLayers.length;
+  });
+
+  return _.sum(countsPerMap);
+}
+
 export function getLayerLists(mapSavedObjects: MapSavedObject[]): LayerDescriptor[][] {
   return mapSavedObjects.map((savedMapObject) => {
     const layerList =
@@ -142,11 +229,16 @@ export function buildMapsTelemetry({
     indexPatternsWithGeoPointFieldCount,
     indexPatternsWithGeoShapeFieldCount,
   } = getIndexPatternsWithGeoFieldCount(indexPatternSavedObjects);
+
+  // Tracks whether user users Gold+ only functionality
+  const geoShapeAggLayersCount = getGeoShapeAggCount(layerLists, indexPatternSavedObjects);
+
   return {
     settings,
     indexPatternsWithGeoFieldCount,
     indexPatternsWithGeoPointFieldCount,
     indexPatternsWithGeoShapeFieldCount,
+    geoShapeAggLayersCount,
     // Total count of maps
     mapsTotalCount: mapsCount,
     // Time of capture
