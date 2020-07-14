@@ -18,4 +18,4 @@
  */
 
 exports.run = require('./cli').run;
-exports.Cluster = require('./cluster').cluster;
+exports.Cluster = require('./cluster').Cluster;
