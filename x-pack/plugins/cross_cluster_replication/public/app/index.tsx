@@ -9,6 +9,8 @@ import { Provider } from 'react-redux';
 import { I18nStart, ScopedHistory, ApplicationStart, ChromeDocTitle } from 'kibana/public';
 import { UnmountCallback } from 'src/core/public';
 
+import { PLUGIN } from '../../common/constants';
+
 import { init as initBreadcrumbs, SetBreadcrumbs } from './services/breadcrumbs';
 import { init as initDocumentation } from './services/documentation_links';
 import { App } from './app';
@@ -25,16 +27,20 @@ const renderApp = (
   element: Element,
   { docTitle, getUrlForApp, history, I18nContext }: AppDependencies
 ): UnmountCallback => {
+  docTitle.change(PLUGIN.TITLE);
   render(
     <I18nContext>
       <Provider store={ccrStore}>
-        <App docTitle={docTitle} history={history} getUrlForApp={getUrlForApp} />
+        <App history={history} getUrlForApp={getUrlForApp} />
       </Provider>
     </I18nContext>,
     element
   );
 
-  return () => unmountComponentAtNode(element);
+  return () => {
+    docTitle.reset();
+    unmountComponentAtNode(element);
+  };
 };
 
 interface MountDependencies {
