@@ -46,7 +46,7 @@ export class ManagementService {
 
   start() {
     this.licenseFeaturesSubscription = this.license.features$.subscribe(async (features) => {
-      const securitySection = this.securitySection as ManagementSection;
+      const securitySection = this.securitySection!;
 
       const securityManagementAppsStatuses: Array<[ManagementApp, boolean]> = [
         [securitySection.getApp(usersManagementApp.id)!, features.showLinks],
