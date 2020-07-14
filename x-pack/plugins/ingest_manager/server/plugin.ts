@@ -34,7 +34,7 @@ import {
 } from './constants';
 import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
 import {
-  preAuthHandler,
+  registerLimitedConcurrencyRoutes,
   registerEPMRoutes,
   registerPackageConfigRoutes,
   registerDataStreamRoutes,
@@ -231,7 +231,7 @@ export class IngestManagerPlugin
         } else {
           // we currently only use this global interceptor if fleet is enabled
           // since it would run this func on *every* req (other plugins, CSS, etc)
-          this.httpSetup.registerOnPreAuth(preAuthHandler);
+          registerLimitedConcurrencyRoutes(core, config);
           registerAgentRoutes(router);
           registerEnrollmentApiKeyRoutes(router);
           registerInstallScriptRoutes({
