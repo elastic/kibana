@@ -55,8 +55,7 @@ export const SetupPage: React.FunctionComponent<{
   const [isFormLoading, setIsFormLoading] = useState<boolean>(false);
   const core = useCore();
 
-  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const onSubmit = async () => {
     setIsFormLoading(true);
     try {
       await sendPostFleetSetup({ forceRecreate: true });
@@ -102,14 +101,12 @@ export const SetupPage: React.FunctionComponent<{
             </EuiText>
             <EuiSpacer size="l" />
             <EuiForm>
-              <form onSubmit={onSubmit}>
-                <EuiButton fill isLoading={isFormLoading} type="submit">
-                  <FormattedMessage
-                    id="xpack.ingestManager.setupPage.enableFleet"
-                    defaultMessage="Create user and enable Fleet"
-                  />
-                </EuiButton>
-              </form>
+              <EuiButton onClick={onSubmit} fill isLoading={isFormLoading} type="submit">
+                <FormattedMessage
+                  id="xpack.ingestManager.setupPage.enableFleet"
+                  defaultMessage="Create user and enable Fleet"
+                />
+              </EuiButton>
             </EuiForm>
             <EuiSpacer size="m" />
           </EuiPageContent>
@@ -149,6 +146,7 @@ export const SetupPage: React.FunctionComponent<{
                   <EuiLink
                     href="https://www.elastic.co/guide/en/elasticsearch/reference/current/configuring-security.html"
                     target="_blank"
+                    external
                   >
                     <FormattedMessage
                       id="xpack.ingestManager.setupPage.elasticsearchSecurityLink"
@@ -173,6 +171,7 @@ export const SetupPage: React.FunctionComponent<{
                   <EuiLink
                     href="https://www.elastic.co/guide/en/elasticsearch/reference/current/security-settings.html#api-key-service-settings"
                     target="_blank"
+                    external
                   >
                     <FormattedMessage
                       id="xpack.ingestManager.setupPage.apiKeyServiceLink"
@@ -203,6 +202,7 @@ xpack.security.authc.api_key.enabled: true`}
                   <EuiLink
                     href="https://www.elastic.co/guide/en/kibana/current/using-kibana-with-security.html"
                     target="_blank"
+                    external
                   >
                     <FormattedMessage
                       id="xpack.ingestManager.setupPage.kibanaSecurityLink"
@@ -215,6 +215,7 @@ xpack.security.authc.api_key.enabled: true`}
                   <EuiLink
                     href="https://www.elastic.co/guide/en/kibana/current/configuring-tls.html"
                     target="_blank"
+                    external
                   >
                     <FormattedMessage
                       id="xpack.ingestManager.setupPage.tlsLink"
@@ -227,7 +228,7 @@ xpack.security.authc.api_key.enabled: true`}
               }}
             />
           </RequirementItem>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
           <RequirementItem
             isMissing={missingRequirements.includes(
               'encrypted_saved_object_encryption_key_required'
@@ -235,12 +236,29 @@ xpack.security.authc.api_key.enabled: true`}
           >
             <FormattedMessage
               id="xpack.ingestManager.setupPage.encryptionKeyFlagText"
-              defaultMessage="Encryption key. Set {keyFlag} to use a secret key."
+              defaultMessage="{encryptionKeyLink}. Set {keyFlag} to any alphanumeric value of at least 32 characters."
               values={{
-                keyFlag: <EuiCode>xpack.reporting.encryptionKey</EuiCode>,
+                encryptionKeyLink: (
+                  <EuiLink
+                    href="https://www.elastic.co/guide/en/kibana/current/ingest-manager-settings-kb.html"
+                    target="_blank"
+                    external
+                  >
+                    <FormattedMessage
+                      id="xpack.ingestManager.setupPage.kibanaEncryptionLink"
+                      defaultMessage="Kibana encryption key"
+                    />
+                  </EuiLink>
+                ),
+                keyFlag: <EuiCode>xpack.encryptedSavedObjects.encryptionKey</EuiCode>,
               }}
             />
           </RequirementItem>
+          <EuiSpacer size="m" />
+          <EuiCodeBlock isCopyable={true}>
+            {`xpack.security.enabled: true
+xpack.encryptedSavedObjects.encryptionKey: "something_at_least_32_characters"`}
+          </EuiCodeBlock>
           <EuiSpacer size="l" />
           <FormattedMessage
             id="xpack.ingestManager.setupPage.gettingStartedText"
@@ -250,6 +268,7 @@ xpack.security.authc.api_key.enabled: true`}
                 <EuiLink
                   href="https://www.elastic.co/guide/en/ingest-management/current/index.html"
                   target="_blank"
+                  external
                 >
                   <FormattedMessage
                     id="xpack.ingestManager.setupPage.gettingStartedLink"
