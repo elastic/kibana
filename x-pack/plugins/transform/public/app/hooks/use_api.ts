@@ -103,16 +103,12 @@ export const useApi = () => {
         query: string | SavedSearchQuery,
         samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE
       ) {
-        const body = JSON.stringify({
-          query,
-          fields,
-          samplerShardSize,
-        });
-
-        return http.post({
-          path: `${API_BASE_PATH}field_histograms/${indexPatternTitle}`,
-          method: 'POST',
-          body,
+        return http.post(`${API_BASE_PATH}field_histograms/${indexPatternTitle}`, {
+          body: JSON.stringify({
+            query,
+            fields,
+            samplerShardSize,
+          }),
         });
       },
     }),
