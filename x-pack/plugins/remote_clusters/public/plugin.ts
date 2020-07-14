@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin, CoreStart, PluginInitializerContext } from 'kibana/public';
 
 import { ManagementSectionId } from '../../../../src/plugins/management/public';
+import { PLUGIN } from '../common/constants';
 import { init as initBreadcrumbs } from './application/services/breadcrumb';
 import { init as initDocumentation } from './application/services/documentation';
 import { init as initHttp } from './application/services/http';
@@ -37,9 +37,7 @@ export class RemoteClustersUIPlugin
 
       esSection.registerApp({
         id: 'remote_clusters',
-        title: i18n.translate('xpack.remoteClusters.appTitle', {
-          defaultMessage: 'Remote Clusters',
-        }),
+        title: PLUGIN.title,
         order: 7,
         mount: async ({ element, setBreadcrumbs, history }) => {
           const [core] = await getStartServices();

@@ -12,11 +12,9 @@ const basicLicense: LicenseType = 'basic';
 export const PLUGIN = {
   // Remote Clusters are used in both CCS and CCR, and CCS is available for all licenses.
   minimumLicenseType: basicLicense,
-  getI18nName: (): string => {
-    return i18n.translate('xpack.remoteClusters.appName', {
-      defaultMessage: 'Remote Clusters',
-    });
-  },
+  title: i18n.translate('xpack.remoteClusters.appName', {
+    defaultMessage: 'Remote Clusters',
+  }),
 };
 
 export const API_BASE_PATH = '/api/remote_clusters';

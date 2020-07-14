@@ -8,6 +8,8 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 
+import { PLUGIN } from '../../common/constants';
+
 import { App } from './app';
 import { remoteClustersStore } from './store';
 import { AppContextProvider } from './app_context';
@@ -15,15 +17,19 @@ import { AppContextProvider } from './app_context';
 import './_hacks.scss';
 
 export const renderApp = (elem, I18nContext, appDependencies, history) => {
+  appDependencies.docTitle.change(PLUGIN.title);
   render(
     <I18nContext>
       <Provider store={remoteClustersStore}>
         <AppContextProvider context={appDependencies}>
-          <App history={history} docTitle={appDependencies.docTitle} />
+          <App history={history} />
         </AppContextProvider>
       </Provider>
     </I18nContext>,
     elem
   );
-  return () => unmountComponentAtNode(elem);
+  return () => {
+    appDependencies.docTitle.reset();
+    unmountComponentAtNode(elem);
+  };
 };

@@ -54,7 +54,7 @@ export class RemoteClustersServerPlugin
     registerDeleteRoute(routeDependencies);
 
     licensing.license$.subscribe((license) => {
-      const { state, message } = license.check(PLUGIN.getI18nName(), PLUGIN.minimumLicenseType);
+      const { state, message } = license.check(PLUGIN.title, PLUGIN.minimumLicenseType);
       const hasRequiredLicense = state === 'valid';
       if (hasRequiredLicense) {
         this.licenseStatus = { valid: true };
