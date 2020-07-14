@@ -107,7 +107,7 @@ export const ValueListsFormComponent: React.FC<ValueListsFormProps> = ({ onError
     if (!importState.loading && importState.result) {
       handleSuccess(importState.result);
     } else if (!importState.loading && importState.error) {
-      handleError(importState.error);
+      handleError(importState.error as Error);
     }
   }, [handleError, handleSuccess, importState.error, importState.loading, importState.result]);
 
