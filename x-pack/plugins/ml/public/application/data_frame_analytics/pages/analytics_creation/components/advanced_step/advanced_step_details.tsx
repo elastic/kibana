@@ -45,6 +45,7 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
     jobType,
     lambda,
     method,
+    maxNumThreads,
     maxTrees,
     modelMemoryLimit,
     nNeighbors,
@@ -212,6 +213,15 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
         description: getStringValue(randomizeSeed),
       }
     );
+  }
+
+  if (maxNumThreads !== undefined) {
+    advancedFirstCol.push({
+      title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.maxNumThreads', {
+        defaultMessage: 'Maximum number of threads',
+      }),
+      description: `${maxNumThreads}`,
+    });
   }
 
   return (
