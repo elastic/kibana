@@ -160,28 +160,25 @@ export const mappings = (specService: SpecDefinitionsService) => {
 
           // dates
           format: {
-            __one_of: _.flatten([
-              _.map(
-                [
-                  'date',
-                  'date_time',
-                  'date_time_no_millis',
-                  'ordinal_date',
-                  'ordinal_date_time',
-                  'ordinal_date_time_no_millis',
-                  'time',
-                  'time_no_millis',
-                  't_time',
-                  't_time_no_millis',
-                  'week_date',
-                  'week_date_time',
-                  'week_date_time_no_millis',
-                ],
-                function (s) {
-                  return ['basic_' + s, 'strict_' + s];
-                }
-              ),
-              [
+            __one_of: [
+              ...[
+                'date',
+                'date_time',
+                'date_time_no_millis',
+                'ordinal_date',
+                'ordinal_date_time',
+                'ordinal_date_time_no_millis',
+                'time',
+                'time_no_millis',
+                't_time',
+                't_time_no_millis',
+                'week_date',
+                'week_date_time',
+                'week_date_time_no_millis',
+              ].map((s) => {
+                return ['basic_' + s, 'strict_' + s];
+              }),
+              ...[
                 'date',
                 'date_hour',
                 'date_hour_minute',
@@ -215,7 +212,7 @@ export const mappings = (specService: SpecDefinitionsService) => {
                 'epoch_millis',
                 'epoch_second',
               ],
-            ]),
+            ],
           },
 
           fielddata: {

@@ -105,10 +105,10 @@ describe('useEditorUpdates', () => {
       to: 'now',
     };
     mockFilters = ['mockFilters'];
-    // @ts-expect-error
-    mockServices.data.query.timefilter.timefilter.getTime.mockImplementation(() => timeRange);
-    // @ts-expect-error
-    mockServices.data.query.filterManager.getFilters.mockImplementation(() => mockFilters);
+    (mockServices.data.query.timefilter.timefilter.getTime as any).mockImplementation(
+      () => timeRange
+    );
+    (mockServices.data.query.filterManager.getFilters as any).mockImplementation(() => mockFilters);
   });
 
   test('should set up current app state and render the editor', () => {
