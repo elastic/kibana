@@ -272,6 +272,57 @@ With saved object migrations (or any other migration of potentially high amount 
 With extention points to which 3rd party developers might register their own items which expose state that is not possible. For example dashboard saved object might contain state from any embeddable. As we don't know about all those embeddables we need to always fetch all saved objects and run migrations on all of them. 
 If expecting to handle large amount of state objects you should always deep compare input and output state and filter out objects without changes to avoid to many updates in the database.
 
+
+# Full look into a complex example: saved dashboards
+
+saved dashboard state looks something like this:
+```json
+{
+  panels: [{
+   ...embeddable,
+   enhancements: {
+    drilldowns: {
+      ....drilldownStateForThisEmbeddable
+    }
+  } 
+}],
+}
+```
+
+where any plugin can add to enhancements a property name matching its state id with value being that state.
+also any embeddable can extend the base embeddable input type.
+
+dashboard needs to register a persistable state service with migrate function looking something like this:
+```ts
+const migrate = (state: unknown, version: string) => {
+  // do the internal state migration like state.title etc (owned by dashboard)
+  
+  // and then migrate panels (state not owned by dashboard)
+  state.panels = state.panels.map(p => baseEmbeddablePesistableStateDefinition.migrate(p, version));
+}
+```
+
+all panels extend base embeddable, which would register its baseEmbeddablePErsistableState with migrate function like this:
+
+```ts
+const migrate = (state: unknown, version: string) => {
+  // do the internal state migration like state.title etc (owned by base embeddable)
+  
+  // then migrate enhancements where every key represents a state not owned by embeddable
+  Object.keys(state.enhancements).forEach(k => {
+    state.enhancements[k] = persistableStateRegistry.get(k).migrate(state.enhancements[k], version);
+  }
+  
+  // migrate the actual embeddable type
+  // here we run into an issue as base embeddable input and specific embeddable input should not collide (thru any version) ... 
+  // this is mentioned before "We have to avoid shared persistable state" topic
+  // we should make all embeddables provide their custom inputs under a base property to prevent that
+  return persistableStateRegistry.get(state.type).migrate(state, version),  
+}
+
+```
+
+
 # Drawbacks
 
 - teaching impact: everyone storing state from belonging to another plugin will need to remember to use this service when saving and loading state.
