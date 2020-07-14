@@ -17,8 +17,5 @@
  * under the License.
  */
 
-// @ts-expect-error not TS yet
-export { run } from './run';
-
-// @ts-expect-error not TS yet
-export { Cluster } from './cluster';
+exports.run = require('./cli').run;
+exports.Cluster = require('./cluster').cluster;
