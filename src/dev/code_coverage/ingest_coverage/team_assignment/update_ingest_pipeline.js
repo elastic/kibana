@@ -16,19 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { createFailError } from '@kbn/dev-utils';
+import { RESEARCH_CLUSTER_ES_HOST } from '../constants';
+import { pretty } from '../utils';
 
 const { Client } = require('@elastic/elasticsearch');
 
-const node = process.env.ES_HOST || 'http://localhost:9200';
+const node = RESEARCH_CLUSTER_ES_HOST;
 const client = new Client({ node });
 
-export const update = (log) => async (xformed) => {
-  log.verbose(`\n### xformed: ${xformed}`);
-
+export const update = (id) => (log) => async (body) => {
   try {
-    await client.ingest.putPipeline(xformed);
+    await client.ingest.putPipeline({ id, body });
+    log.verbose(body);
   } catch (e) {
-    throw createFailError(e);
+    throw createFailError(`${pretty(e.meta)}`);
   }
 };

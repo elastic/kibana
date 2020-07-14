@@ -18,14 +18,21 @@
  */
 
 import { run } from '@kbn/dev-utils';
-import { prokTeamAssignment } from './fetch_and_xform';
-
-const execute = ({ flags, log }) => {
-  if (flags.verbose) log.verbose(`### Verbose logging enabled`);
-  prokTeamAssignment(log);
-};
+import { TEAM_ASSIGNMENT_PIPELINE_NAME } from '../constants';
+import { prokTeamAssignment } from './xform';
+import { noop } from '../utils';
+import { update } from './update_ingest_pipeline';
 
 export const uploadTeamAssignmentJson = () => run(execute, { description });
+
+const updatePipeline = update(TEAM_ASSIGNMENT_PIPELINE_NAME);
+function execute({ flags, log }) {
+  if (flags.verbose) log.verbose(`### Verbose logging enabled`);
+
+  const updatePipe = updatePipeline(log);
+
+  prokTeamAssignment().fold(noop, updatePipe);
+}
 
 function description() {
   return `

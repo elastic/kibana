@@ -19,9 +19,8 @@
 
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import { pretty, noop } from '../utils';
+import { pretty } from '../utils';
 import { fromNullable } from '../either';
-import { update } from './update_ingest_pipeline.js';
 import { default as jsonDef } from './ingestion_pipeline.json';
 
 const ROOT = resolve(__dirname, '../../../../..');
@@ -32,12 +31,8 @@ const scriptPath = resolveFromRoot(
 const getContents = (scriptPath) => readFileSync(scriptPath, 'utf8');
 const prettyJsonAndScriptContents = jsonAndScript(pretty)(jsonDef);
 
-export const prokTeamAssignment = (log) =>
-  fromNullable(scriptPath)
-    .map(getContents)
-    .map(prettyJsonAndScriptContents)
-    .map(transform)
-    .fold(noop, (xformed) => update(log)(xformed));
+export const prokTeamAssignment = () =>
+  fromNullable(scriptPath).map(getContents).map(prettyJsonAndScriptContents).map(transform);
 
 function jsonAndScript(formatter) {
   return (jsonDef) => (scriptContents) => [formatter(jsonDef.team_assignment), scriptContents];
