@@ -65,14 +65,13 @@ interface LensAppProps {
   navigation: NavigationPublicPluginStart;
   core: AppMountContext['core'];
   storage: IStorageWrapper;
-  docId?: string;
+  savedObjectId?: string;
   docStorage: SavedObjectStore;
   redirectTo: (
-    id?: string,
+    savedObjectId?: string,
     documentByValue?: Document,
     returnToOrigin?: boolean,
-    newlyCreated?: boolean,
-    embeddableIdToReplace?: string
+    newlyCreated?: boolean
   ) => void;
   embeddableEditorIncomingState?: EmbeddableEditorState;
   onAppLeave: AppMountParameters['onAppLeave'];
@@ -84,7 +83,7 @@ export function App({
   data,
   core,
   storage,
-  docId,
+  savedObjectId,
   docStorage,
   redirectTo,
   embeddableEditorIncomingState,
@@ -99,7 +98,7 @@ export function App({
   const [state, setState] = useState<State>(() => {
     const currentRange = data.query.timefilter.timefilter.getTime();
     return {
-      isLoading: !!docId,
+      isLoading: !!savedObjectId,
       isSaveModalVisible: false,
       indexPatternsForTopNav: [],
       query: { query: '', language },
@@ -183,7 +182,7 @@ export function App({
       // Confirm when the user has made any changes to an existing doc
       // or when the user has configured something without saving
       if (
-        !embeddableEditorIncomingState?.byValueMode &&
+        !embeddableEditorIncomingState?.valueInput &&
         core.application.capabilities.visualize.save &&
         (state.persistedDoc?.expression
           ? !_.isEqual(lastKnownDoc?.expression, state.persistedDoc.expression)
@@ -218,7 +217,7 @@ export function App({
       },
       {
         text: state.persistedDoc
-          ? embeddableEditorIncomingState?.byValueMode
+          ? embeddableEditorIncomingState?.valueInput
             ? i18n.translate('xpack.lens.breadcrumbsByValue', { defaultMessage: 'By Value' })
             : state.persistedDoc.title
           : i18n.translate('xpack.lens.breadcrumbsCreate', { defaultMessage: 'Create' }),
@@ -228,13 +227,13 @@ export function App({
 
   useEffect(() => {
     if (
-      !embeddableEditorIncomingState?.byValueMode &&
-      docId &&
-      (!state.persistedDoc || state.persistedDoc.id !== docId)
+      !embeddableEditorIncomingState?.valueInput &&
+      savedObjectId &&
+      (!state.persistedDoc || state.persistedDoc.id !== savedObjectId)
     ) {
       setState((s) => ({ ...s, isLoading: true }));
       docStorage
-        .load(docId)
+        .load(savedObjectId)
         .then((doc) => updateDoc(doc))
         .catch(() => {
           setState((s) => ({ ...s, isLoading: false }));
@@ -248,8 +247,8 @@ export function App({
           redirectTo();
         });
     } else if (
-      embeddableEditorIncomingState?.byValueMode &&
-      embeddableEditorIncomingState?.valueInput
+      !!embeddableEditorIncomingState?.valueInput &&
+      embeddableEditorIncomingState?.valueInput !== 'createByValue'
     ) {
       const doc = {
         ...(embeddableEditorIncomingState?.valueInput as LensByValueInput).attributes,
@@ -262,7 +261,7 @@ export function App({
     core.notifications,
     data.indexPatterns,
     data.query.filterManager,
-    docId,
+    savedObjectId,
     // TODO: These dependencies are changing too often
     // docStorage,
     // redirectTo,
@@ -327,12 +326,9 @@ export function App({
       title: saveProps.newTitle,
     };
 
-    const newlyCreated: boolean =
-      saveProps.newCopyOnSave ||
-      !lastKnownDoc?.id ||
-      (saveToLibrary && !!embeddableEditorIncomingState?.byValueMode);
+    const newlyCreated = saveProps.newCopyOnSave || !lastKnownDoc?.id || saveToLibrary;
 
-    if (embeddableEditorIncomingState?.byValueMode && !saveToLibrary) {
+    if (!!embeddableEditorIncomingState?.valueInput && !saveToLibrary) {
       redirectTo(doc.id, doc, saveProps.returnToOrigin, newlyCreated);
     } else {
       await checkForDuplicateTitle(
@@ -353,9 +349,7 @@ export function App({
           overlays: core.overlays,
         }
       );
-
-      const embeddableId = doc.id;
-      if (saveToLibrary && embeddableEditorIncomingState?.byValueMode) {
+      if (saveToLibrary && embeddableEditorIncomingState?.valueInput) {
         delete doc.id;
       }
       docStorage
@@ -369,12 +363,8 @@ export function App({
             persistedDoc: newDoc,
             lastKnownDoc: newDoc,
           }));
-          if (docId !== id || saveProps.returnToOrigin) {
-            const idToReplace =
-              saveToLibrary && embeddableEditorIncomingState?.byValueMode
-                ? embeddableId
-                : undefined;
-            redirectTo(id, undefined, saveProps.returnToOrigin, newlyCreated, idToReplace);
+          if (savedObjectId !== id || saveProps.returnToOrigin) {
+            redirectTo(id, undefined, saveProps.returnToOrigin, newlyCreated);
           }
         })
         .catch((e) => {
@@ -416,7 +406,7 @@ export function App({
             <TopNavMenu
               config={[
                 ...((!!embeddableEditorIncomingState?.originatingApp && lastKnownDoc?.id) ||
-                embeddableEditorIncomingState?.byValueMode
+                embeddableEditorIncomingState?.valueInput
                   ? [
                       {
                         label: i18n.translate('xpack.lens.app.saveAndReturn', {
@@ -442,7 +432,7 @@ export function App({
                 {
                   label:
                     lastKnownDoc?.id ||
-                    (embeddableEditorIncomingState?.byValueMode &&
+                    (embeddableEditorIncomingState?.valueInput &&
                       !!embeddableEditorIncomingState?.originatingApp)
                       ? i18n.translate('xpack.lens.app.saveAs', {
                           defaultMessage: 'Save as',
@@ -577,7 +567,7 @@ export function App({
             onSave={(props) => runSave(props, true)}
             onClose={() => setState((s) => ({ ...s, isSaveModalVisible: false }))}
             documentInfo={{
-              id: embeddableEditorIncomingState?.byValueMode ? undefined : lastKnownDoc.id,
+              id: embeddableEditorIncomingState?.valueInput ? undefined : lastKnownDoc.id,
               title: lastKnownDoc.title || '',
               description: lastKnownDoc.description || '',
             }}

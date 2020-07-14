@@ -300,6 +300,10 @@ export class DashboardAppController {
       return emptyScreenProps;
     };
 
+    const incomingEmbeddable = embeddable
+      .getStateTransfer(scopedHistory())
+      .getIncomingEmbeddablePackage({ keysToRemoveAfterFetch: ['id', 'type', 'input'] });
+
     const getDashboardInput = (): DashboardContainerInput => {
       const embeddablesMap: {
         [key: string]: DashboardPanelState;
@@ -307,6 +311,22 @@ export class DashboardAppController {
       dashboardStateManager.getPanels().forEach((panel: SavedDashboardPanel) => {
         embeddablesMap[panel.panelIndex] = convertSavedDashboardPanelToPanelState(panel);
       });
+
+      console.log('incomingEmbeddable', incomingEmbeddable);
+
+      // If the incoming embeddable state's id already exists in the embeddables map, replace the input, retaining the existing gridData for that panel.
+      if (incomingEmbeddable?.id && embeddablesMap[incomingEmbeddable.id]) {
+        const originalPanelState = { ...embeddablesMap[incomingEmbeddable.id] };
+        embeddablesMap[incomingEmbeddable.id] = {
+          gridData: originalPanelState.gridData,
+          type: incomingEmbeddable.type,
+          explicitInput: {
+            ...incomingEmbeddable.input,
+            id: incomingEmbeddable.id,
+          },
+        };
+      }
+
       let expandedPanelId;
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
         expandedPanelId = dashboardContainer.getInput().expandedPanelId;
@@ -427,26 +447,20 @@ export class DashboardAppController {
               refreshDashboardContainer();
             });
 
-            const incomingState = embeddable
-              .getStateTransfer(scopedHistory())
-              .getIncomingEmbeddablePackage({ keysToRemoveAfterFetch: ['id', 'type', 'input'] });
-            if (incomingState) {
-              if ('id' in incomingState) {
-                container.addOrUpdateEmbeddable<SavedObjectEmbeddableInput>(incomingState.type, {
-                  savedObjectId: incomingState.id,
-                  id: incomingState.embeddableIdToReplace,
-                });
-              } else if ('input' in incomingState) {
-                // TODO: Get rid of this, maybe by making the visualize embeddable also use the attributeService
-                const explicitInput =
-                  incomingState.type === 'lens'
-                    ? incomingState.input
-                    : {
-                        savedVis: incomingState.input,
-                      };
-
-                container.addOrUpdateEmbeddable<EmbeddableInput>(incomingState.type, explicitInput);
-              }
+            // If the incomingEmbeddable does not yet exist in the panels listing, create a new panel using the container's addEmbeddable method.
+            if (
+              incomingEmbeddable &&
+              (!incomingEmbeddable.id || !container.getInput().panels[incomingEmbeddable.id])
+            ) {
+              // TODO: Get rid of this, maybe by making the visualize embeddable also use the attributeService
+              const explicitInput =
+                incomingEmbeddable.type === 'lens' ||
+                (incomingEmbeddable.input as SavedObjectEmbeddableInput).savedObjectId
+                  ? incomingEmbeddable.input
+                  : {
+                      savedVis: incomingEmbeddable.input,
+                    };
+              container.addNewEmbeddable<EmbeddableInput>(incomingEmbeddable.type, explicitInput);
             }
           }
 

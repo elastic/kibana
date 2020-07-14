@@ -53,34 +53,33 @@ export async function mountApp(
   );
   const redirectTo = (
     routeProps: RouteComponentProps<{ id?: string }>,
-    id?: string,
+    savedObjectId?: string,
     documentByValue?: Document,
     returnToOrigin?: boolean,
-    newlyCreated?: boolean,
-    embeddableIdToReplace?: string
+    newlyCreated?: boolean
   ) => {
-    if (!id && !embeddableEditorIncomingState?.byValueMode) {
+    if (!savedObjectId && !embeddableEditorIncomingState?.valueInput) {
       routeProps.history.push('/');
     } else if (!embeddableEditorIncomingState?.originatingApp) {
-      routeProps.history.push(`/edit/${id}`);
+      routeProps.history.push(`/edit/${savedObjectId}`);
     } else if (!!embeddableEditorIncomingState?.originatingApp && returnToOrigin) {
-      routeProps.history.push(`/edit/${id}`);
-      if (newlyCreated && id) {
+      routeProps.history.push(`/edit/${savedObjectId}`);
+      if (newlyCreated && savedObjectId) {
         stateTransfer.navigateToWithEmbeddablePackage(
           embeddableEditorIncomingState?.originatingApp,
           {
-            state: { id, type: LENS_EMBEDDABLE_TYPE, embeddableIdToReplace },
+            state: { type: LENS_EMBEDDABLE_TYPE, input: { savedObjectId } },
           }
         );
       } else if (documentByValue) {
-        const { type, ...rest } = documentByValue;
-        const idToUse = id ? id : uuid.v4();
+        const { type, id, ...rest } = documentByValue;
         stateTransfer.navigateToWithEmbeddablePackage(
           embeddableEditorIncomingState?.originatingApp,
           {
             state: {
+              id,
               type: LENS_EMBEDDABLE_TYPE,
-              input: { id: idToUse, attributes: rest },
+              input: { attributes: rest },
             },
           }
         );
@@ -99,17 +98,10 @@ export async function mountApp(
         navigation={navigation}
         editorFrame={instance}
         storage={new Storage(localStorage)}
-        docId={routeProps.match.params.id}
+        savedObjectId={routeProps.match.params.id}
         docStorage={new SavedObjectIndexStore(savedObjectsClient)}
-        redirectTo={(id, documentByValue, returnToOrigin, newlyCreated, embeddableIdToReplace) =>
-          redirectTo(
-            routeProps,
-            id,
-            documentByValue,
-            returnToOrigin,
-            newlyCreated,
-            embeddableIdToReplace
-          )
+        redirectTo={(savedObjectId, documentByValue, returnToOrigin, newlyCreated) =>
+          redirectTo(routeProps, savedObjectId, documentByValue, returnToOrigin, newlyCreated)
         }
         embeddableEditorIncomingState={embeddableEditorIncomingState}
         onAppLeave={params.onAppLeave}

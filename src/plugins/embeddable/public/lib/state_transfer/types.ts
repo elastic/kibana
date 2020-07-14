@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { EmbeddableInput } from '..';
+import { EmbeddableInput, SavedObjectEmbeddableInput } from '..';
+import { Optional } from '@kbn/utility-types';
 
 /**
  * Represents a state package that contains the last active app id.
@@ -25,8 +26,7 @@ import { EmbeddableInput } from '..';
  */
 export interface EmbeddableEditorState {
   originatingApp: string;
-  byValueMode?: boolean;
-  valueInput?: EmbeddableInput;
+  valueInput?: EmbeddableInput | 'createByValue';
 }
 
 export function isEmbeddableEditorState(state: unknown): state is EmbeddableEditorState {
@@ -34,32 +34,18 @@ export function isEmbeddableEditorState(state: unknown): state is EmbeddableEdit
 }
 
 /**
- * Represents a state package that contains all fields necessary to create an embeddable by reference in a container.
+ * Represents a state package that contains all fields necessary to create an embeddable by reference or by value in a container.
  * @public
  */
-export interface EmbeddablePackageByReferenceState {
+export interface EmbeddablePackageState {
+  id?: string;
   type: string;
-  id: string;
-  embeddableIdToReplace?: string;
+  input: Optional<EmbeddableInput, 'id'> | Optional<SavedObjectEmbeddableInput, 'id'>;
 }
-
-/**
- * Represents a state package that contains all fields necessary to create an embeddable by value in a container.
- * @public
- */
-export interface EmbeddablePackageByValueState {
-  type: string;
-  input: EmbeddableInput;
-}
-
-export type EmbeddablePackageState =
-  | EmbeddablePackageByReferenceState
-  | EmbeddablePackageByValueState;
 
 export function isEmbeddablePackageState(state: unknown): state is EmbeddablePackageState {
   return (
-    (ensureFieldOfTypeExists('type', state, 'string') &&
-      ensureFieldOfTypeExists('id', state, 'string')) ||
+    ensureFieldOfTypeExists('type', state, 'string') &&
     ensureFieldOfTypeExists('input', state, 'object')
   );
 }
