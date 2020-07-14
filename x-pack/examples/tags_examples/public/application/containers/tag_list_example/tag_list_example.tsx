@@ -5,8 +5,8 @@
  */
 
 import React, { useState } from 'react';
-import { EuiTitle } from '@elastic/eui';
-import { Tag, TagList, TagPicker, TagListEditable } from '../../../../../../plugins/tags/public';
+import { EuiTitle, EuiCode, EuiBadge } from '@elastic/eui';
+import { TagList, TagPicker, TagListEditable } from '../../../../../../plugins/tags/public';
 
 export const TagListExample: React.FC = () => {
   const [selected, setSelected] = useState<string[]>([]);
@@ -17,33 +17,53 @@ export const TagListExample: React.FC = () => {
         <EuiTitle size="m">
           <h2>Tag</h2>
         </EuiTitle>
-        <Tag id={'8e07bc40-bc3d-11ea-ad31-378b8af727f3'} />
+        <br />
+        <EuiCode>{"<Tag id={'33333333-3333-3333-3333-333333333333'} />"}</EuiCode>
+        <br />
+        <br />
+        <EuiBadge color={'#0077ff'}>Hello world</EuiBadge>
+        <br />
+        <br />
       </div>
 
       <div>
         <EuiTitle size="m">
           <h2>TagList</h2>
         </EuiTitle>
-        <TagList kid={'kid:::so:saved_object/dashboard/722b74f0-b882-11e8-a6d9-e546fe2bba5f'} />
+        <br />
+        <EuiCode>{"<TagList kid={'123'} />"}</EuiCode>
+        <br />
+        <br />
+        <EuiBadge color={'#00ff77'}>foo</EuiBadge>
+        <EuiBadge color={'#77ff00'}>bar</EuiBadge>
+        <br />
+        <br />
       </div>
 
       <div>
         <EuiTitle size="m">
           <h2>TagPicker</h2>
         </EuiTitle>
+        <br />
+        <EuiCode>{'<TagPicker />'}</EuiCode>
+        <br />
+        <br />
         <TagPicker selected={selected} onChange={setSelected} />
+        <br />
+        <br />
       </div>
 
       <div>
         <EuiTitle size="m">
           <h2>TagListEditable</h2>
         </EuiTitle>
-        <TagListEditable
-          kid={'kid:::so:saved_object/dashboard/722b74f0-b882-11e8-a6d9-e546fe2bba5f'}
-        />
-
-        <p>Face object</p>
+        <br />
+        <EuiCode>{"<TagListEditable kid={'123'} />"}</EuiCode>
+        <br />
+        <br />
         <TagListEditable kid={'kid:::test:/test/722b74f0-b882-11e8-a6d9-xxxxxxxxx'} />
+        <br />
+        <br />
       </div>
     </div>
   );
