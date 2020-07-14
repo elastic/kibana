@@ -7,7 +7,6 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin, CoreStart } from 'kibana/public';
 import { first, map, skip } from 'rxjs/operators';
 
-import { ManagementSectionId } from '../../../../src/plugins/management/public';
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 
 import { LicenseStatus } from '../common/types/license_status';
@@ -29,7 +28,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
     { notifications, http, uiSettings, getStartServices }: CoreSetup,
     { licensing, management, data, home, charts }: Dependencies
   ) {
-    const esSection = management.sections.getSection(ManagementSectionId.InsightsAndAlerting);
+    const esSection = management.sections.section.insightsAndAlerting;
 
     const watcherESApp = esSection.registerApp({
       id: 'watcher',
