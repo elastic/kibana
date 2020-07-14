@@ -7,7 +7,6 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 
 import {
-  ExceptionListSoSchema,
   FilterOrUndefined,
   FoundExceptionListItemSchema,
   ListId,
@@ -17,10 +16,8 @@ import {
   SortFieldOrUndefined,
   SortOrderOrUndefined,
 } from '../../../common/schemas';
-import { SavedObjectType } from '../../saved_objects';
 
-import { getSavedObjectType, transformSavedObjectsToFoundExceptionListItem } from './utils';
-import { getExceptionList } from './get_exception_list';
+import { findExceptionListsItem } from './find_exception_list_items';
 
 interface FindExceptionListItemOptions {
   listId: ListId;
@@ -43,43 +40,14 @@ export const findExceptionListItem = async ({
   sortField,
   sortOrder,
 }: FindExceptionListItemOptions): Promise<FoundExceptionListItemSchema | null> => {
-  const savedObjectType = getSavedObjectType({ namespaceType });
-  const exceptionList = await getExceptionList({
-    id: undefined,
-    listId,
-    namespaceType,
+  return findExceptionListsItem({
+    filter: filter != null ? [filter] : [],
+    listId: [listId],
+    namespaceType: [namespaceType],
+    page,
+    perPage,
     savedObjectsClient,
+    sortField,
+    sortOrder,
   });
-  if (exceptionList == null) {
-    return null;
-  } else {
-    const savedObjectsFindResponse = await savedObjectsClient.find<ExceptionListSoSchema>({
-      filter: getExceptionListItemFilter({ filter, listId, savedObjectType }),
-      page,
-      perPage,
-      sortField,
-      sortOrder,
-      type: savedObjectType,
-    });
-    return transformSavedObjectsToFoundExceptionListItem({
-      namespaceType,
-      savedObjectsFindResponse,
-    });
-  }
-};
-
-export const getExceptionListItemFilter = ({
-  filter,
-  listId,
-  savedObjectType,
-}: {
-  listId: ListId;
-  filter: FilterOrUndefined;
-  savedObjectType: SavedObjectType;
-}): string => {
-  if (filter == null) {
-    return `${savedObjectType}.attributes.list_type: item AND ${savedObjectType}.attributes.list_id: ${listId}`;
-  } else {
-    return `${savedObjectType}.attributes.list_type: item AND ${savedObjectType}.attributes.list_id: ${listId} AND ${filter}`;
-  }
 };
