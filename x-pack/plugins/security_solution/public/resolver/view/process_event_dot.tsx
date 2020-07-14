@@ -282,9 +282,7 @@ const UnstyledProcessEventDot = React.memo(
 
     const [xScale] = projectionMatrix;
 
-    // Node (html id=) IDs
-    const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
-    const selectedDescendantId = useSelector(selectors.uiSelectedDescendantId);
+    // unique ID for the node
     const nodeID = processEventModel.uniquePidForProcess(event);
 
     // define a standard way of giving HTML IDs to nodes based on their entity_id/nodeID.
@@ -296,6 +294,8 @@ const UnstyledProcessEventDot = React.memo(
     // the node ID to 'flowto'
     const ariaFlowtoNodeID: string | null = useSelector(selectors.ariaFlowtoNodeID)(nodeID);
 
+    const isAriaCurrent: boolean = useSelector(selectors.isAriaCurrent)(nodeID);
+    const isAriaSelected: boolean = useSelector(selectors.isAriaSelected)(nodeID);
 
     const isShowingEventActions = xScale > 0.8;
     const isShowingDescriptionText = xScale >= 0.55;
@@ -378,8 +378,9 @@ const UnstyledProcessEventDot = React.memo(
 
     const labelHTMLID = htmlIdGenerator('resolver')(`${nodeID}:label`);
 
-    const isActiveDescendant = nodeId === activeDescendantId;
-    const isSelectedDescendant = nodeId === selectedDescendantId;
+    // TODO, can this be correct?
+    // const isActiveDescendant = nodeHTMLID === activeDescendantId;
+    // const isSelectedDescendant = nodeHTMLID === selectedDescendantId;
 
     const dispatch = useResolverDispatch();
 
