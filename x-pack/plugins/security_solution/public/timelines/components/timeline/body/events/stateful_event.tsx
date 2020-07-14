@@ -42,6 +42,7 @@ interface Props {
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
+  disableSensorVisibility: boolean;
   event: TimelineItem;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   getNotesByIds: (noteIds: string[]) => Note[];
@@ -106,6 +107,7 @@ const StatefulEventComponent: React.FC<Props> = ({
   containerElementRef,
   columnHeaders,
   columnRenderers,
+  disableSensorVisibility = true,
   event,
   eventIdToNoteIds,
   getNotesByIds,
@@ -166,7 +168,7 @@ const StatefulEventComponent: React.FC<Props> = ({
       offset={{ top: TOP_OFFSET, bottom: BOTTOM_OFFSET }}
     >
       {({ isVisible }) => {
-        if (isVisible) {
+        if (isVisible || disableSensorVisibility) {
           return (
             <TimelineDetailsQuery
               sourceId="default"
@@ -257,8 +259,8 @@ const StatefulEventComponent: React.FC<Props> = ({
         } else {
           // Height place holder for visibility detection as well as re-rendering sections.
           const height =
-            divElement.current != null && divElement.current.clientHeight
-              ? `${divElement.current.clientHeight}px`
+            divElement.current != null && divElement.current!.clientHeight
+              ? `${divElement.current!.clientHeight}px`
               : DEFAULT_ROW_HEIGHT;
 
           return <SkeletonRow cellCount={columnCount} rowHeight={height} />;

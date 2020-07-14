@@ -78,12 +78,13 @@ const EventsComponent: React.FC<Props> = ({
   <EventsTbody data-test-subj="events">
     {data.map((event, i) => (
       <StatefulEvent
-        containerElementRef={containerElementRef}
         actionsColumnWidth={actionsColumnWidth}
         addNoteToEvent={addNoteToEvent}
         browserFields={browserFields}
         columnHeaders={columnHeaders}
         columnRenderers={columnRenderers}
+        containerElementRef={containerElementRef}
+        disableSensorVisibility={data != null && data.length < 101}
         event={event}
         eventIdToNoteIds={eventIdToNoteIds}
         getNotesByIds={getNotesByIds}
