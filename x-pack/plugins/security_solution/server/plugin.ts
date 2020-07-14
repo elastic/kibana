@@ -114,6 +114,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     initSavedObjects(core.savedObjects);
     initUiSettings(core.uiSettings);
     initUsageCollectors({
+      core,
       kibanaIndex: globalConfig.kibana.index,
       ml: plugins.ml,
       usageCollection: plugins.usageCollection,
