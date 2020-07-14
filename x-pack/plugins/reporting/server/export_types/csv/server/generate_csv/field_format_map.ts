@@ -5,19 +5,9 @@
  */
 
 import _ from 'lodash';
-import {
-  FieldFormatConfig,
-  IFieldFormatsRegistry,
-} from '../../../../../../../../src/plugins/data/server';
-
-interface IndexPatternSavedObject {
-  attributes: {
-    fieldFormatMap: string;
-  };
-  id: string;
-  type: string;
-  version: string;
-}
+import { FieldFormat } from 'src/plugins/data/common';
+import { FieldFormatConfig, IFieldFormatsRegistry } from 'src/plugins/data/server';
+import { IndexPatternSavedObject } from '../../types';
 
 /**
  *  Create a map of FieldFormat instances for index pattern fields
@@ -28,30 +18,39 @@ interface IndexPatternSavedObject {
  */
 export function fieldFormatMapFactory(
   indexPatternSavedObject: IndexPatternSavedObject,
-  fieldFormatsRegistry: IFieldFormatsRegistry
+  fieldFormatsRegistry: IFieldFormatsRegistry,
+  timezone: string | undefined
 ) {
-  const formatsMap = new Map();
+  const formatsMap = new Map<string, FieldFormat>();
+
+  // From here, the browser timezone can't be determined, so we accept a
+  // timezone field from job params posted to the API. Here is where it gets used.
+  const serverDateParams = { timezone };
 
   // Add FieldFormat instances for fields with custom formatters
   if (_.has(indexPatternSavedObject, 'attributes.fieldFormatMap')) {
     const fieldFormatMap = JSON.parse(indexPatternSavedObject.attributes.fieldFormatMap);
     Object.keys(fieldFormatMap).forEach((fieldName) => {
       const formatConfig: FieldFormatConfig = fieldFormatMap[fieldName];
+      const formatParams = {
+        ...formatConfig.params,
+        ...serverDateParams,
+      };
 
       if (!_.isEmpty(formatConfig)) {
-        formatsMap.set(
-          fieldName,
-          fieldFormatsRegistry.getInstance(formatConfig.id, formatConfig.params)
-        );
+        formatsMap.set(fieldName, fieldFormatsRegistry.getInstance(formatConfig.id, formatParams));
       }
     });
   }
 
-  // Add default FieldFormat instances for all other fields
+  // Add default FieldFormat instances for non-custom formatted fields
   const indexFields = JSON.parse(_.get(indexPatternSavedObject, 'attributes.fields', '[]'));
   indexFields.forEach((field: any) => {
     if (!formatsMap.has(field.name)) {
-      formatsMap.set(field.name, fieldFormatsRegistry.getDefaultInstance(field.type));
+      formatsMap.set(
+        field.name,
+        fieldFormatsRegistry.getDefaultInstance(field.type, [], serverDateParams)
+      );
     }
   });
 

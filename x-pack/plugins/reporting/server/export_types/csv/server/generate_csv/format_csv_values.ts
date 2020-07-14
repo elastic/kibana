@@ -5,13 +5,14 @@
  */
 
 import { isNull, isObject, isUndefined } from 'lodash';
+import { FieldFormat } from 'src/plugins/data/common';
 import { RawValue } from '../../types';
 
 export function createFormatCsvValues(
   escapeValue: (value: RawValue, index: number, array: RawValue[]) => string,
   separator: string,
   fields: string[],
-  formatsMap: any
+  formatsMap: Map<string, FieldFormat>
 ) {
   return function formatCsvValues(values: Record<string, RawValue>) {
     return fields
@@ -29,7 +30,9 @@ export function createFormatCsvValues(
         let formattedValue = value;
         if (formatsMap.has(field)) {
           const formatter = formatsMap.get(field);
-          formattedValue = formatter.convert(value);
+          if (formatter) {
+            formattedValue = formatter.convert(value);
+          }
         }
 
         return formattedValue;

@@ -5,7 +5,10 @@
  */
 
 import { KibanaRequest } from 'src/core/server';
-import { JobParamsPanelCsv, JobParamsPostPayloadPanelCsv } from '../../types';
+import {
+  JobParamsPanelCsv,
+  JobParamsPostPayloadPanelCsv,
+} from '../../export_types/csv_from_savedobject/types';
 
 export function getJobParamsFromRequest(
   request: KibanaRequest,
