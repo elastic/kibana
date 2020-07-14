@@ -169,6 +169,28 @@ export const TimelineComponent: React.FC<Props> = ({
     setIsTimelineLoading,
     setTimelineFilterManager,
   } = useManageTimeline();
+
+  const {
+    events,
+    inspect,
+    loading,
+    totalCount,
+    pageInfo,
+    loadMore,
+    getUpdatedAt,
+    refetch,
+  } = useTimelineQuery({
+    eventType,
+    fields: timelineQueryFields,
+    id,
+    indexToAdd,
+    kibana,
+    sourceId: 'default',
+    limit: itemsPerPage,
+    filterQuery: combinedQueries?.filterQuery,
+    sortField: timelineQuerySortField,
+  });
+
   useEffect(() => {
     initializeTimeline({ id, indexToAdd });
     // eslint-disable-next-line react-hooks/exhaustive-deps
