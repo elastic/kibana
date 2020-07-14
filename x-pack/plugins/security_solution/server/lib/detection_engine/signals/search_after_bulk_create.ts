@@ -218,7 +218,6 @@ export const searchAfterAndBulkCreate = async ({
           refresh,
           tags,
           throttle,
-          searchResultSize,
         });
         logger.debug(buildRuleMessage(`created ${createdCount} signals`));
         toReturn.createdSignalsCount += createdCount;
