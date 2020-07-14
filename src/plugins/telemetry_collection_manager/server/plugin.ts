@@ -205,7 +205,9 @@ export class TelemetryCollectionManagerPlugin
             return usageData;
           }
 
-          return encryptTelemetry(usageData, { useProdKey: this.isDistributable });
+          return encryptTelemetry(usageData.filter(isClusterOptedIn), {
+            useProdKey: this.isDistributable,
+          });
         }
       } catch (err) {
         this.logger.debug(
@@ -240,7 +242,7 @@ export class TelemetryCollectionManagerPlugin
       collection.licenseGetter(clustersDetails, statsCollectionConfig, context),
     ]);
 
-    const clustersUsage = stats.map((stat) => {
+    return stats.map((stat) => {
       const license = licenses[stat.cluster_uuid];
       return {
         ...(license ? { license } : {}),
@@ -248,7 +250,5 @@ export class TelemetryCollectionManagerPlugin
         collectionSource: collection.title,
       };
     });
-
-    return clustersUsage.filter(isClusterOptedIn);
   }
 }
