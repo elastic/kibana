@@ -8,9 +8,10 @@
 
 import * as t from 'io-ts';
 
-import { NamespaceType, filter, namespace_type, sort_field, sort_order } from '../common/schemas';
+import { filter, namespace_type, sort_field, sort_order } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
 import { StringToPositiveNumber } from '../types/string_to_positive_number';
+import { NamespaceType } from '../types';
 
 export const findExceptionListSchema = t.exact(
   t.partial({
