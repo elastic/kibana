@@ -27,7 +27,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const taskManagerUtils = new TaskManagerUtils(es, retry);
 
-  describe('alerts', () => {
+  // Failing ES promotion: https://github.com/elastic/kibana/issues/71582
+  describe.skip('alerts', () => {
     const authorizationIndex = '.kibana-test-authorization';
     const objectRemover = new ObjectRemover(supertest);
 

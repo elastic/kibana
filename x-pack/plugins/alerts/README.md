@@ -589,13 +589,15 @@ A schedule is structured such that the key specifies the format you wish to use 
 We currently support the _Interval format_ which specifies the interval in seconds, minutes, hours or days at which the alert should execute.
 Example: `{ interval: "10s" }`, `{ interval: "5m" }`, `{ interval: "1h" }`, `{ interval: "1d" }`.
 
-There are plans to support multiple other schedule formats in the near fuiture.
+There are plans to support multiple other schedule formats in the near future.
 
 ## Alert instance factory
 
 **alertInstanceFactory(id)**
 
-One service passed in to alert types is an alert instance factory. This factory creates instances of alerts and must be used in order to execute actions. The id you give to the alert instance factory is a unique identifier to the alert instance (ex: server identifier if the instance is about the server). The instance factory will use this identifier to retrieve the state of previous instances with the same id. These instances support state persisting between alert type execution, but will clear out once the alert instance stops executing.
+One service passed in to alert types is an alert instance factory. This factory creates instances of alerts and must be used in order to execute actions. The `id` you give to the alert instance factory is a unique identifier to the alert instance (ex: server identifier if the instance is about the server). The instance factory will use this identifier to retrieve the state of previous instances with the same `id`. These instances support state persisting between alert type execution, but will clear out once the alert instance stops executing.
+
+Note that the `id` only needs to be unique **within the scope of a specific alert**, not unique across all alerts or alert types. For example, Alert 1 and Alert 2 can both create an alert instance with an `id` of `"a"` without conflicting with one another. But if Alert 1 creates 2 alert instances, then they must be differentiated with `id`s of `"a"` and `"b"`.
 
 This factory returns an instance of `AlertInstance`. The alert instance class has the following methods, note that we have removed the methods that you shouldn't touch.
 
