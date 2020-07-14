@@ -39,7 +39,7 @@ export type LegacyElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 
     | 'apiVersion'
     | 'customHeaders'
     | 'logQueries'
-    | 'requestHeadersWhitelist'
+    | 'allowedRequestHeaders'
     | 'sniffOnStart'
     | 'sniffOnConnectionFault'
     | 'hosts'

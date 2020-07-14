@@ -99,10 +99,10 @@ export class ClusterClient implements ICustomClusterClient {
       const requestHeaders = ensureRawRequest(request).headers;
       scopedHeaders = filterHeaders(
         { ...requestHeaders, ...authHeaders },
-        this.config.requestHeadersWhitelist
+        this.config.allowedRequestHeaders
       );
     } else {
-      scopedHeaders = filterHeaders(request?.headers ?? {}, this.config.requestHeadersWhitelist);
+      scopedHeaders = filterHeaders(request?.headers ?? {}, this.config.allowedRequestHeaders);
     }
 
     return {

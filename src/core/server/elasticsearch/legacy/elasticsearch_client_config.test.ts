@@ -36,7 +36,7 @@ test('parses minimally specified config', () => {
         sniffOnStart: false,
         sniffOnConnectionFault: false,
         hosts: ['http://localhost/elasticsearch'],
-        requestHeadersWhitelist: [],
+        allowedRequestHeaders: [],
       },
       logger.get()
     )
@@ -75,7 +75,7 @@ test('parses fully specified config', () => {
       'http://domain.com:1234/elasticsearch',
       'https://es.local',
     ],
-    requestHeadersWhitelist: [],
+    allowedRequestHeaders: [],
     username: 'elastic',
     password: 'changeme',
     pingTimeout: 12345,
@@ -176,7 +176,7 @@ test('parses config timeouts of moment.Duration type', () => {
         requestTimeout: duration(30, 's'),
         sniffInterval: duration(1, 'minute'),
         hosts: ['http://localhost:9200/elasticsearch'],
-        requestHeadersWhitelist: [],
+        allowedRequestHeaders: [],
       },
       logger.get()
     )
@@ -219,7 +219,7 @@ describe('#auth', () => {
           hosts: ['http://user:password@localhost/elasticsearch', 'https://es.local'],
           username: 'elastic',
           password: 'changeme',
-          requestHeadersWhitelist: [],
+          allowedRequestHeaders: [],
         },
         logger.get(),
         { auth: false }
@@ -267,7 +267,7 @@ Object {
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://es.local'],
-          requestHeadersWhitelist: [],
+          allowedRequestHeaders: [],
           password: 'changeme',
         },
         logger.get(),
@@ -306,7 +306,7 @@ Object {
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://es.local'],
-          requestHeadersWhitelist: [],
+          allowedRequestHeaders: [],
           username: 'elastic',
         },
         logger.get(),
@@ -346,7 +346,7 @@ describe('#log', () => {
         sniffOnStart: false,
         sniffOnConnectionFault: false,
         hosts: ['http://localhost/elasticsearch'],
-        requestHeadersWhitelist: [],
+        allowedRequestHeaders: [],
       },
       logger.get()
     );
@@ -390,7 +390,7 @@ Object {
         sniffOnStart: false,
         sniffOnConnectionFault: false,
         hosts: ['http://localhost/elasticsearch'],
-        requestHeadersWhitelist: [],
+        allowedRequestHeaders: [],
       },
       logger.get()
     );
@@ -449,7 +449,7 @@ METHOD /some-path
         sniffOnStart: false,
         sniffOnConnectionFault: false,
         hosts: ['http://localhost/elasticsearch'],
-        requestHeadersWhitelist: [],
+        allowedRequestHeaders: [],
         log: customLogger,
       },
       logger.get()
@@ -470,7 +470,7 @@ describe('#ssl', () => {
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://es.local'],
-          requestHeadersWhitelist: [],
+          allowedRequestHeaders: [],
           ssl: { verificationMode: 'none' },
         },
         logger.get()
@@ -509,7 +509,7 @@ Object {
         sniffOnStart: true,
         sniffOnConnectionFault: true,
         hosts: ['https://es.local'],
-        requestHeadersWhitelist: [],
+        allowedRequestHeaders: [],
         ssl: { verificationMode: 'certificate' },
       },
       logger.get()
@@ -556,7 +556,7 @@ Object {
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://es.local'],
-          requestHeadersWhitelist: [],
+          allowedRequestHeaders: [],
           ssl: { verificationMode: 'full' },
         },
         logger.get()
@@ -596,7 +596,7 @@ Object {
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://es.local'],
-          requestHeadersWhitelist: [],
+          allowedRequestHeaders: [],
           ssl: { verificationMode: 'misspelled' as any },
         },
         logger.get()
@@ -614,7 +614,7 @@ Object {
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://es.local'],
-          requestHeadersWhitelist: [],
+          allowedRequestHeaders: [],
           ssl: {
             verificationMode: 'certificate',
             certificateAuthorities: ['content-of-ca-path'],

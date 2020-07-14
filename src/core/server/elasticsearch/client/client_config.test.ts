@@ -29,7 +29,7 @@ const createConfig = (
     sniffOnStart: false,
     sniffOnConnectionFault: false,
     sniffInterval: false,
-    requestHeadersWhitelist: ['authorization'],
+    allowedRequestHeaders: ['authorization'],
     hosts: ['http://localhost:80'],
     ...parts,
   };

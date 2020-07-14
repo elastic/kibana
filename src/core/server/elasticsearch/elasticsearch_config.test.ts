@@ -51,6 +51,9 @@ test('set correct defaults', () => {
   const configValue = new ElasticsearchConfig(config.schema.validate({}));
   expect(configValue).toMatchInlineSnapshot(`
     ElasticsearchConfig {
+      "allowedRequestHeaders": Array [
+        "authorization",
+      ],
       "apiVersion": "master",
       "customHeaders": Object {},
       "healthCheckDelay": "PT2.5S",
@@ -61,9 +64,6 @@ test('set correct defaults', () => {
       "logQueries": false,
       "password": undefined,
       "pingTimeout": "PT30S",
-      "requestHeadersWhitelist": Array [
-        "authorization",
-      ],
       "requestTimeout": "PT30S",
       "shardTimeout": "PT30S",
       "sniffInterval": false,
@@ -101,23 +101,23 @@ test('#hosts accepts both string and array of strings', () => {
   expect(configValue.hosts).toEqual(['http://some.host:1234', 'https://some.another.host']);
 });
 
-test('#requestHeadersWhitelist accepts both string and array of strings', () => {
+test('#allowedRequestHeaders accepts both string and array of strings', () => {
   let configValue = new ElasticsearchConfig(
-    config.schema.validate({ requestHeadersWhitelist: 'token' })
+    config.schema.validate({ allowedRequestHeaders: 'token' })
   );
-  expect(configValue.requestHeadersWhitelist).toEqual(['token']);
+  expect(configValue.allowedRequestHeaders).toEqual(['token']);
 
   configValue = new ElasticsearchConfig(
-    config.schema.validate({ requestHeadersWhitelist: ['token'] })
+    config.schema.validate({ allowedRequestHeaders: ['token'] })
   );
-  expect(configValue.requestHeadersWhitelist).toEqual(['token']);
+  expect(configValue.allowedRequestHeaders).toEqual(['token']);
 
   configValue = new ElasticsearchConfig(
     config.schema.validate({
-      requestHeadersWhitelist: ['token', 'X-Forwarded-Proto'],
+      allowedRequestHeaders: ['token', 'X-Forwarded-Proto'],
     })
   );
-  expect(configValue.requestHeadersWhitelist).toEqual(['token', 'X-Forwarded-Proto']);
+  expect(configValue.allowedRequestHeaders).toEqual(['token', 'X-Forwarded-Proto']);
 });
 
 describe('reads files', () => {
@@ -311,11 +311,25 @@ describe('throws when config is invalid', () => {
 });
 
 describe('deprecations', () => {
+  it('logs a warning and rename `requestHeadersWhitelist` to `allowedRequestHeaders`', () => {
+    const { messages, migrated } = applyElasticsearchDeprecations({
+      requestHeadersWhitelist: ['foo', 'bar'],
+    });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"elasticsearch.requestHeadersWhitelist\\" is deprecated and has been replaced by \\"elasticsearch.allowedRequestHeaders\\"",
+      ]
+    `);
+    expect(migrated.elasticsearch).toEqual({
+      allowedRequestHeaders: ['foo', 'bar'],
+    });
+  });
+
   it('logs a warning if elasticsearch.username is set to "elastic"', () => {
     const { messages } = applyElasticsearchDeprecations({ username: 'elastic' });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting [${CONFIG_PATH}.username] to \\"elastic\\" is deprecated. You should use the \\"kibana_system\\" user instead.",
+        "Setting [elasticsearch.username] to \\"elastic\\" is deprecated. You should use the \\"kibana_system\\" user instead.",
       ]
     `);
   });
@@ -324,7 +338,7 @@ describe('deprecations', () => {
     const { messages } = applyElasticsearchDeprecations({ username: 'kibana' });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting [${CONFIG_PATH}.username] to \\"kibana\\" is deprecated. You should use the \\"kibana_system\\" user instead.",
+        "Setting [elasticsearch.username] to \\"kibana\\" is deprecated. You should use the \\"kibana_system\\" user instead.",
       ]
     `);
   });
@@ -343,7 +357,7 @@ describe('deprecations', () => {
     const { messages } = applyElasticsearchDeprecations({ ssl: { key: '' } });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting [${CONFIG_PATH}.ssl.key] without [${CONFIG_PATH}.ssl.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.",
+        "Setting [elasticsearch.ssl.key] without [elasticsearch.ssl.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.",
       ]
     `);
   });
@@ -352,7 +366,7 @@ describe('deprecations', () => {
     const { messages } = applyElasticsearchDeprecations({ ssl: { certificate: '' } });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting [${CONFIG_PATH}.ssl.certificate] without [${CONFIG_PATH}.ssl.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.",
+        "Setting [elasticsearch.ssl.certificate] without [elasticsearch.ssl.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.",
       ]
     `);
   });

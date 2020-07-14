@@ -243,7 +243,7 @@ describe('#asScoped', () => {
     mockLogger = logger.get();
     mockEsConfig = {
       apiVersion: 'es-version',
-      requestHeadersWhitelist: ['one', 'two'],
+      allowedRequestHeaders: ['one', 'two'],
     } as any;
 
     clusterClient = new LegacyClusterClient(
@@ -519,7 +519,7 @@ describe('#close', () => {
     );
 
     clusterClient = new LegacyClusterClient(
-      { apiVersion: 'es-version', requestHeadersWhitelist: [] } as any,
+      { apiVersion: 'es-version', allowedRequestHeaders: [] } as any,
       logger.get(),
       auditTrailServiceMock.createAuditorFactory
     );

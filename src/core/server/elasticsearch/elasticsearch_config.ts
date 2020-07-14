@@ -64,7 +64,7 @@ export const configSchema = schema.object({
     )
   ),
   password: schema.maybe(schema.string()),
-  requestHeadersWhitelist: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+  allowedRequestHeaders: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
     defaultValue: ['authorization'],
   }),
   customHeaders: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
@@ -123,7 +123,8 @@ export const configSchema = schema.object({
   ),
 });
 
-const deprecations: ConfigDeprecationProvider = () => [
+const deprecations: ConfigDeprecationProvider = ({ rename }) => [
+  rename('requestHeadersWhitelist', 'allowedRequestHeaders'),
   (settings, fromPath, log) => {
     const es = settings[fromPath];
     if (!es) {
@@ -194,7 +195,7 @@ export class ElasticsearchConfig {
    * scoped cluster client is used. If this is an empty array then *no* client-side
    * will be sent.
    */
-  public readonly requestHeadersWhitelist: string[];
+  public readonly allowedRequestHeaders: string[];
 
   /**
    * Timeout after which PING HTTP request will be aborted and retried.
@@ -254,7 +255,7 @@ export class ElasticsearchConfig {
   /**
    * Header names and values to send to Elasticsearch with every request. These
    * headers cannot be overwritten by client-side headers and aren't affected by
-   * `requestHeadersWhitelist` configuration.
+   * `allowedRequestHeaders` configuration.
    */
   public readonly customHeaders: ElasticsearchConfigType['customHeaders'];
 
@@ -263,9 +264,9 @@ export class ElasticsearchConfig {
     this.apiVersion = rawConfig.apiVersion;
     this.logQueries = rawConfig.logQueries;
     this.hosts = Array.isArray(rawConfig.hosts) ? rawConfig.hosts : [rawConfig.hosts];
-    this.requestHeadersWhitelist = Array.isArray(rawConfig.requestHeadersWhitelist)
-      ? rawConfig.requestHeadersWhitelist
-      : [rawConfig.requestHeadersWhitelist];
+    this.allowedRequestHeaders = Array.isArray(rawConfig.allowedRequestHeaders)
+      ? rawConfig.allowedRequestHeaders
+      : [rawConfig.allowedRequestHeaders];
     this.pingTimeout = rawConfig.pingTimeout;
     this.requestTimeout = rawConfig.requestTimeout;
     this.shardTimeout = rawConfig.shardTimeout;

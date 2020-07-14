@@ -35,7 +35,7 @@ export type ElasticsearchClientConfig = Pick<
   | 'logQueries'
   | 'sniffOnStart'
   | 'sniffOnConnectionFault'
-  | 'requestHeadersWhitelist'
+  | 'allowedRequestHeaders'
   | 'sniffInterval'
   | 'hosts'
   | 'username'

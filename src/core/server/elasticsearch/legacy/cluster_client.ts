@@ -205,7 +205,7 @@ export class LegacyClusterClient implements ILegacyClusterClient {
     return new LegacyScopedClusterClient(
       this.callAsInternalUser,
       this.callAsCurrentUser,
-      filterHeaders(this.getHeaders(request), this.config.requestHeadersWhitelist),
+      filterHeaders(this.getHeaders(request), this.config.allowedRequestHeaders),
       this.getScopedAuditor(request)
     );
   }

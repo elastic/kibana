@@ -33,7 +33,7 @@ const createConfig = (
     sniffOnStart: false,
     sniffOnConnectionFault: false,
     sniffInterval: false,
-    requestHeadersWhitelist: ['authorization'],
+    allowedRequestHeaders: ['authorization'],
     customHeaders: {},
     hosts: ['http://localhost'],
     ...parts,
@@ -111,7 +111,7 @@ describe('ClusterClient', () => {
 
     it('creates a scoped client with filtered request headers', () => {
       const config = createConfig({
-        requestHeadersWhitelist: ['foo'],
+        allowedRequestHeaders: ['foo'],
       });
       getAuthHeaders.mockReturnValue({});
 
@@ -133,7 +133,7 @@ describe('ClusterClient', () => {
 
     it('creates a scoped facade with filtered auth headers', () => {
       const config = createConfig({
-        requestHeadersWhitelist: ['authorization'],
+        allowedRequestHeaders: ['authorization'],
       });
       getAuthHeaders.mockReturnValue({
         authorization: 'auth',
@@ -153,7 +153,7 @@ describe('ClusterClient', () => {
 
     it('respects auth headers precedence', () => {
       const config = createConfig({
-        requestHeadersWhitelist: ['authorization'],
+        allowedRequestHeaders: ['authorization'],
       });
       getAuthHeaders.mockReturnValue({
         authorization: 'auth',
@@ -181,7 +181,7 @@ describe('ClusterClient', () => {
           foo: 'bar',
           hello: 'dolly',
         },
-        requestHeadersWhitelist: ['authorization'],
+        allowedRequestHeaders: ['authorization'],
       });
       getAuthHeaders.mockReturnValue({});
 
@@ -205,7 +205,7 @@ describe('ClusterClient', () => {
           foo: 'config',
           hello: 'dolly',
         },
-        requestHeadersWhitelist: ['foo'],
+        allowedRequestHeaders: ['foo'],
       });
       getAuthHeaders.mockReturnValue({
         foo: 'auth',
@@ -231,7 +231,7 @@ describe('ClusterClient', () => {
           foo: 'config',
           hello: 'dolly',
         },
-        requestHeadersWhitelist: ['foo'],
+        allowedRequestHeaders: ['foo'],
       });
       getAuthHeaders.mockReturnValue({});
 
@@ -253,7 +253,7 @@ describe('ClusterClient', () => {
 
     it('filter headers when called with a `FakeRequest`', () => {
       const config = createConfig({
-        requestHeadersWhitelist: ['authorization'],
+        allowedRequestHeaders: ['authorization'],
       });
       getAuthHeaders.mockReturnValue({});
 
@@ -275,7 +275,7 @@ describe('ClusterClient', () => {
 
     it('does not add auth headers when called with a `FakeRequest`', () => {
       const config = createConfig({
-        requestHeadersWhitelist: ['authorization', 'foo'],
+        allowedRequestHeaders: ['authorization', 'foo'],
       });
       getAuthHeaders.mockReturnValue({
         authorization: 'auth',
