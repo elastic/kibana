@@ -31,7 +31,7 @@ For information about API keys, refer to <<api-keys,API keys>>.
 [float]
 [[api-calls]]
 === API calls
-API calls are stateless. Each request that you make happens in isolation from other calls and must include all of the \necessary information for {kib} to fulfill the request. API requests return JSON output, which is a format that is machine-readable and works well for automation.
+API calls are stateless. Each request that you make happens in isolation from other calls and must include all of the necessary information for {kib} to fulfill the request. API requests return JSON output, which is a format that is machine-readable and works well for automation.
 
 Calls to the API endpoints require different operations. To interact with the {kib} APIs, use the following operations:
 
