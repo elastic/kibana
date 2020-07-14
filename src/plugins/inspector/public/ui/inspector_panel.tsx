@@ -123,7 +123,7 @@ export class InspectorPanel extends Component<InspectorPanelProps, InspectorPane
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
-        <EuiFlyoutBody>{this.renderSelectedPanel()}</EuiFlyoutBody>
+        <EuiFlyoutBody className="insFlyoutBody">{this.renderSelectedPanel()}</EuiFlyoutBody>
       </React.Fragment>
     );
   }

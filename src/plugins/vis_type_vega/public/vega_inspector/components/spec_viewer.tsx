@@ -62,9 +62,9 @@ export const SpecViewer = ({ vegaAdapter }: SpecViewerProps) => {
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiSpacer size="s" />
-      <EuiFlexItem className="eui-textRight">
+    <EuiFlexGroup direction="column" gutterSize="s" className="insVegaView" wrap={false}>
+      <EuiFlexItem className="eui-textRight" grow={false}>
+        <EuiSpacer size="s" />
         <EuiCopy textToCopy={spec}>
           {(copy) => (
             <EuiToolTip content={copyToClipboardLabel} delay="long">
@@ -73,10 +73,11 @@ export const SpecViewer = ({ vegaAdapter }: SpecViewerProps) => {
           )}
         </EuiCopy>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={true}>
         <EuiCodeEditor
           mode="json"
           width="100%"
+          height="100%"
           value={spec}
           setOptions={{
             showLineNumbers: false,

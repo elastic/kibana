@@ -1,0 +1,13 @@
+.insVegaViewWrapper {
+  height: 100%;
+  > div {
+    height: 100%;
+  }
+  [role="tabpanel"] {
+    height: 90%;
+  }
+
+  .insVegaView {
+    height: 100%;
+  }
+}

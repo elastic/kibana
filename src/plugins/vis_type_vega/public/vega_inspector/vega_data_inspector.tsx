@@ -61,6 +61,8 @@ export const VegaDataInspector = ({ adapters }: VegaDataInspectorProps) => {
   ];
 
   return (
-    <EuiTabbedContent size="s" tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
+    <div className="insVegaViewWrapper">
+      <EuiTabbedContent size="s" tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
+    </div>
   );
 };

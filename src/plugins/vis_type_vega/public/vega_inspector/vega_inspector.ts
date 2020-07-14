@@ -21,6 +21,8 @@ import { VegaAdapter } from './vega_adapter';
 import { VegaDataInspector } from './vega_data_inspector';
 import { Adapters, RequestAdapter, InspectorViewDescription } from '../../../inspector/public';
 
+import './vega_inspector.scss';
+
 export interface VegaInspectorAdapters extends Adapters {
   requests: RequestAdapter;
   vega: VegaAdapter;

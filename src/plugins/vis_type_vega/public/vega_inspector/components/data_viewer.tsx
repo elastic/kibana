@@ -64,9 +64,9 @@ export const DataViewer = ({ vegaAdapter }: DataViewerProps) => {
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiSpacer size="s" />
-      <EuiFlexItem>
+    <EuiFlexGroup direction="column" gutterSize="s" className="insVegaView" wrap={false}>
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="s" />
         <EuiComboBox
           options={inspectDataSets.map((item: any) => ({
             label: item.id,
@@ -78,7 +78,7 @@ export const DataViewer = ({ vegaAdapter }: DataViewerProps) => {
           selectedOptions={[{ label: selectedView.id }]}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={true}>
         <InspectorDataGrid columns={selectedView.columns} data={selectedView.data} />
       </EuiFlexItem>
     </EuiFlexGroup>
