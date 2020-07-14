@@ -103,9 +103,6 @@ export const getEventType = (event: Ecs): Omit<EventType, 'all'> => {
   return 'raw';
 };
 
-export const showGraphView = (graphEventId?: string) =>
-  graphEventId != null && graphEventId.length > 0;
-
 export const isInvestigateInResolverActionEnabled = (ecsData?: Ecs) => {
   return (
     get(['agent', 'type', 0], ecsData) === 'endpoint' &&

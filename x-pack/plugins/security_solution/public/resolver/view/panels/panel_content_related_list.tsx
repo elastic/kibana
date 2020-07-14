@@ -9,11 +9,19 @@ import { i18n } from '@kbn/i18n';
 import { EuiTitle, EuiSpacer, EuiText, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
-import { CrumbInfo, formatDate, StyledBreadcrumbs, BoldCode } from './panel_content_utilities';
+import styled from 'styled-components';
+import {
+  CrumbInfo,
+  formatDate,
+  StyledBreadcrumbs,
+  BoldCode,
+  StyledTime,
+} from './panel_content_utilities';
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
 import { useResolverDispatch } from '../use_resolver_dispatch';
+import { RelatedEventLimitWarning } from '../limit_warnings';
 
 /**
  * This view presents a list of related events of a given type for a given process.
@@ -34,16 +42,53 @@ interface MatchingEventEntry {
   setQueryParams: () => void;
 }
 
+const StyledRelatedLimitWarning = styled(RelatedEventLimitWarning)`
+  flex-flow: row wrap;
+  display: block;
+  align-items: baseline;
+  margin-top: 1em;
+
+  & .euiCallOutHeader {
+    display: inline;
+    margin-right: 0.25em;
+  }
+
+  & .euiText {
+    display: inline;
+  }
+
+  & .euiText p {
+    display: inline;
+  }
+`;
+
 const DisplayList = memo(function DisplayList({
   crumbs,
   matchingEventEntries,
+  eventType,
+  processEntityId,
 }: {
   crumbs: Array<{ text: string | JSX.Element; onClick: () => void }>;
   matchingEventEntries: MatchingEventEntry[];
+  eventType: string;
+  processEntityId: string;
 }) {
+  const relatedLookupsByCategory = useSelector(selectors.relatedEventInfoByEntityId);
+  const lookupsForThisNode = relatedLookupsByCategory(processEntityId);
+  const shouldShowLimitWarning = lookupsForThisNode?.shouldShowLimitForCategory(eventType);
+  const numberDisplayed = lookupsForThisNode?.numberActuallyDisplayedForCategory(eventType);
+  const numberMissing = lookupsForThisNode?.numberNotDisplayedForCategory(eventType);
+
   return (
     <>
       <StyledBreadcrumbs breadcrumbs={crumbs} />
+      {shouldShowLimitWarning && typeof numberDisplayed !== 'undefined' && numberMissing ? (
+        <StyledRelatedLimitWarning
+          eventType={eventType}
+          numberActuallyDisplayed={numberDisplayed}
+          numberMissing={numberMissing}
+        />
+      ) : null}
       <EuiSpacer size="l" />
       <>
         {matchingEventEntries.map((eventView, index) => {
@@ -61,11 +106,13 @@ const DisplayList = memo(function DisplayList({
                     defaultMessage="{category} {eventType}"
                   />
                 </BoldCode>
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.atTime"
-                  values={{ date: eventView.formattedDate }}
-                  defaultMessage="@ {date}"
-                />
+                <StyledTime dateTime={eventView.formattedDate}>
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.atTime"
+                    values={{ date: eventView.formattedDate }}
+                    defaultMessage="@ {date}"
+                  />
+                </StyledTime>
               </EuiText>
               <EuiSpacer size="xs" />
               <EuiButtonEmpty onClick={eventView.setQueryParams}>
@@ -242,6 +289,13 @@ export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarr
     );
   }
 
-  return <DisplayList crumbs={crumbs} matchingEventEntries={matchingEventEntries} />;
+  return (
+    <DisplayList
+      crumbs={crumbs}
+      processEntityId={processEntityId}
+      matchingEventEntries={matchingEventEntries}
+      eventType={eventType}
+    />
+  );
 });
 ProcessEventListNarrowedByType.displayName = 'ProcessEventListNarrowedByType';

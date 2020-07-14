@@ -96,7 +96,7 @@ export const Actions = React.memo<Props>(
         data-test-subj="event-actions-container"
       >
         {showCheckboxes && (
-          <EventsTd data-test-subj="select-event-container">
+          <EventsTd key="select-event-container" data-test-subj="select-event-container">
             <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
               {loadingEventIds.includes(eventId) ? (
                 <EuiLoadingSpinner size="m" data-test-subj="event-loader" />
@@ -117,7 +117,7 @@ export const Actions = React.memo<Props>(
           </EventsTd>
         )}
 
-        <EventsTd>
+        <EventsTd key="expand-event">
           <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
             {loading ? (
               <EventsLoading />
@@ -137,7 +137,7 @@ export const Actions = React.memo<Props>(
 
         {!isEventViewer && (
           <>
-            <EventsTd>
+            <EventsTd key="timeline-action-pin-tool-tip">
               <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
                 <EuiToolTip
                   data-test-subj="timeline-action-pin-tool-tip"
@@ -158,7 +158,7 @@ export const Actions = React.memo<Props>(
               </EventsTdContent>
             </EventsTd>
 
-            <EventsTd>
+            <EventsTd key="add-note">
               <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
                 <NotesButton
                   animate={false}

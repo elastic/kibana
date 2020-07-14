@@ -53,6 +53,7 @@ describe('alert actions', () => {
           apolloClient,
           createTimeline,
           ecsData: mockEcsDataWithAlert,
+          nonEcsData: [],
           updateTimelineIsLoading,
         });
 
@@ -65,6 +66,7 @@ describe('alert actions', () => {
           apolloClient,
           createTimeline,
           ecsData: mockEcsDataWithAlert,
+          nonEcsData: [],
           updateTimelineIsLoading,
         });
         const expected = {
@@ -250,6 +252,7 @@ describe('alert actions', () => {
           apolloClient,
           createTimeline,
           ecsData: mockEcsDataWithAlert,
+          nonEcsData: [],
           updateTimelineIsLoading,
         });
         // @ts-ignore
@@ -279,6 +282,7 @@ describe('alert actions', () => {
           apolloClient,
           createTimeline,
           ecsData: mockEcsDataWithAlert,
+          nonEcsData: [],
           updateTimelineIsLoading,
         });
         // @ts-ignore
@@ -297,6 +301,7 @@ describe('alert actions', () => {
           apolloClient,
           createTimeline,
           ecsData: mockEcsDataWithAlert,
+          nonEcsData: [],
           updateTimelineIsLoading,
         });
 
@@ -326,6 +331,7 @@ describe('alert actions', () => {
           apolloClient,
           createTimeline,
           ecsData: ecsDataMock,
+          nonEcsData: [],
           updateTimelineIsLoading,
         });
 
@@ -350,6 +356,7 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMock,
+          nonEcsData: [],
           updateTimelineIsLoading,
         });
 

@@ -490,7 +490,7 @@ export const buildPipeline = async (
   const { indexPattern, searchSource } = vis.data;
   const query = searchSource!.getField('query');
   const filters = searchSource!.getField('filter');
-  const { uiState } = vis;
+  const { uiState, title } = vis;
 
   // context
   let pipeline = `kibana | kibana_context `;
@@ -519,7 +519,7 @@ export const buildPipeline = async (
     timefilter: params.timefilter,
   });
   if (buildPipelineVisFunction[vis.type.name]) {
-    pipeline += buildPipelineVisFunction[vis.type.name](vis.params, schemas, uiState);
+    pipeline += buildPipelineVisFunction[vis.type.name]({ title, ...vis.params }, schemas, uiState);
   } else if (vislibCharts.includes(vis.type.name)) {
     const visConfig = { ...vis.params };
     visConfig.dimensions = await buildVislibDimensions(vis, params);

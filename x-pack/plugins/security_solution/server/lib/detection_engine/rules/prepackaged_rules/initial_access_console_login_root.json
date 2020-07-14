@@ -1,0 +1,62 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies a successful login to the AWS Management Console by the Root user.",
+  "false_positives": [
+    "It's strongly recommended that the root user is not used for everyday tasks, including the administrative ones. Verify whether the IP address, location, and/or hostname should be logging in as root in your environment. Unfamiliar root logins should be investigated immediately. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "from": "now-60m",
+  "index": [
+    "filebeat-*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "AWS Management Console Root Login",
+  "query": "event.action:ConsoleLogin and event.module:aws and event.dataset:aws.cloudtrail and event.provider:signin.amazonaws.com and aws.cloudtrail.user_identity.type:Root and event.outcome:success",
+  "references": [
+    "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html"
+  ],
+  "risk_score": 73,
+  "rule_id": "e2a67480-3b79-403d-96e3-fdd2992c50ef",
+  "severity": "high",
+  "tags": [
+    "AWS",
+    "Elastic"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0001",
+        "name": "Initial Access",
+        "reference": "https://attack.mitre.org/tactics/TA0001/"
+      },
+      "technique": [
+        {
+          "id": "T1078",
+          "name": "Valid Accounts",
+          "reference": "https://attack.mitre.org/techniques/T1078/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1078",
+          "name": "Valid Accounts",
+          "reference": "https://attack.mitre.org/techniques/T1078/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}
