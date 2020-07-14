@@ -10,9 +10,6 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator, EuiButton, EuiI18nNumber, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
-// eslint-disable-next-line import/no-nodejs-modules
-import querystring from 'querystring';
 import { useSelector } from 'react-redux';
 import { NodeSubMenu, subMenuAssets } from './submenu';
 import { applyMatrix3 } from '../models/vector2';
@@ -22,7 +19,7 @@ import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../common/endpoint/models/event';
 import * as selectors from '../store/selectors';
-import { CrumbInfo } from './panels/panel_content_utilities';
+import { useResolverQueryParams } from './use_resolver_query_params';
 
 /**
  * A record of all known event types (in schema format) to translations
@@ -403,35 +400,7 @@ const UnstyledProcessEventDot = React.memo(
       });
     }, [dispatch, selfId]);
 
-    const history = useHistory();
-    const urlSearch = history.location.search;
-
-    /**
-     * This updates the breadcrumb nav, the table view
-     */
-    const pushToQueryParams = useCallback(
-      (newCrumbs: CrumbInfo) => {
-        // Construct a new set of params from the current set (minus empty params)
-        // by assigning the new set of params provided in `newCrumbs`
-        const crumbsToPass = {
-          ...querystring.parse(urlSearch.slice(1)),
-          ...newCrumbs,
-        };
-
-        // If either was passed in as empty, remove it from the record
-        if (crumbsToPass.crumbId === '') {
-          delete crumbsToPass.crumbId;
-        }
-        if (crumbsToPass.crumbEvent === '') {
-          delete crumbsToPass.crumbEvent;
-        }
-
-        const relativeURL = { search: querystring.stringify(crumbsToPass) };
-
-        return history.replace(relativeURL);
-      },
-      [history, urlSearch]
-    );
+    const { pushToQueryParams } = useResolverQueryParams();
 
     const handleClick = useCallback(() => {
       if (animationTarget.current !== null) {

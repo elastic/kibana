@@ -25,12 +25,12 @@ import { DownloadStep, AgentConfigSelectionStep } from './steps';
 import { configToYaml, agentConfigRouteService } from '../../../../services';
 
 interface Props {
-  agentConfigs: AgentConfig[];
+  agentConfigs?: AgentConfig[];
 }
 
 const RUN_INSTRUCTIONS = './elastic-agent run';
 
-export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentConfigs = [] }) => {
+export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentConfigs }) => {
   const core = useCore();
   const { notifications } = core;
 

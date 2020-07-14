@@ -34,6 +34,7 @@ export const initGetLogEntryAnomaliesRoute = ({ framework }: InfraBackendLibs) =
           timeRange: { startTime, endTime },
           sort: sortParam,
           pagination: paginationParam,
+          datasets,
         },
       } = request.body;
 
@@ -53,7 +54,8 @@ export const initGetLogEntryAnomaliesRoute = ({ framework }: InfraBackendLibs) =
           startTime,
           endTime,
           sort,
-          pagination
+          pagination,
+          datasets
         );
 
         return response.ok({
