@@ -125,8 +125,13 @@ const EventsViewerComponent: React.FC<Props> = ({
   });
 
   const canQueryTimeline = useMemo(
-    () => combinedQueries != null && isLoadingIndexPattern != null && !isLoadingIndexPattern,
-    [isLoadingIndexPattern, combinedQueries]
+    () =>
+      combinedQueries != null &&
+      isLoadingIndexPattern != null &&
+      !isLoadingIndexPattern &&
+      !isEmpty(start) &&
+      !isEmpty(end),
+    [isLoadingIndexPattern, combinedQueries, start, end]
   );
 
   const fields = useMemo(
@@ -158,6 +163,8 @@ const EventsViewerComponent: React.FC<Props> = ({
             limit={itemsPerPage}
             sortField={sortField}
             sourceId="default"
+            startDate={start}
+            endDate={end}
           >
             {({
               events,

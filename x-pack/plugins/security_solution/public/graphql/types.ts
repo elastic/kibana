@@ -4614,6 +4614,7 @@ export namespace GetTimelineQuery {
     defaultIndex: string[];
     inspect: boolean;
     docValueFields: DocValueFieldsInput[];
+    timerange: TimerangeInput;
   };
 
   export type Query = {

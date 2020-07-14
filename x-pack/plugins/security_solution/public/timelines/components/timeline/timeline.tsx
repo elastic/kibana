@@ -204,8 +204,13 @@ export const TimelineComponent: React.FC<Props> = ({
   );
 
   const canQueryTimeline = useMemo(
-    () => combinedQueries != null && isLoadingSource != null && !isLoadingSource,
-    [isLoadingSource, combinedQueries]
+    () =>
+      combinedQueries != null &&
+      isLoadingSource != null &&
+      !isLoadingSource &&
+      !isEmpty(start) &&
+      !isEmpty(end),
+    [isLoadingSource, combinedQueries, start, end]
   );
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const timelineQueryFields = useMemo(() => columnsHeader.map((c) => c.id), [columnsHeader]);

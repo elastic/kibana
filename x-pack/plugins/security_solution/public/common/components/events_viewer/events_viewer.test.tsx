@@ -96,6 +96,64 @@ describe('EventsViewer', () => {
     expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().exists()).toBe(false);
   });
 
+  test('it does NOT render when start is empty', async () => {
+    mockUseFetchIndexPatterns.mockImplementation(() => [
+      {
+        browserFields: mockBrowserFields,
+        indexPatterns: mockIndexPattern,
+        docValueFields: mockDocValueFields,
+        isLoading: true,
+      },
+    ]);
+
+    const wrapper = mount(
+      <TestProviders>
+        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+          <StatefulEventsViewer
+            defaultModel={eventsDefaultModel}
+            end={to}
+            id={'test-stateful-events-viewer'}
+            start={''}
+          />
+        </MockedProvider>
+      </TestProviders>
+    );
+
+    await wait();
+    wrapper.update();
+
+    expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().exists()).toBe(false);
+  });
+
+  test('it does NOT render when end is empty', async () => {
+    mockUseFetchIndexPatterns.mockImplementation(() => [
+      {
+        browserFields: mockBrowserFields,
+        indexPatterns: mockIndexPattern,
+        docValueFields: mockDocValueFields,
+        isLoading: true,
+      },
+    ]);
+
+    const wrapper = mount(
+      <TestProviders>
+        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+          <StatefulEventsViewer
+            defaultModel={eventsDefaultModel}
+            end={''}
+            id={'test-stateful-events-viewer'}
+            start={from}
+          />
+        </MockedProvider>
+      </TestProviders>
+    );
+
+    await wait();
+    wrapper.update();
+
+    expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().exists()).toBe(false);
+  });
+
   test('it renders the Fields Browser as a settings gear', async () => {
     const wrapper = mount(
       <TestProviders>

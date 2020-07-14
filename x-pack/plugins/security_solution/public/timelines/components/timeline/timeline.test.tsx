@@ -169,6 +169,30 @@ describe('Timeline', () => {
       expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(false);
     });
 
+    test('it does NOT render the timeline table when start is empty', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mocks}>
+            <TimelineComponent {...props} start={''} />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(false);
+    });
+
+    test('it does NOT render the timeline table when end is empty', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mocks}>
+            <TimelineComponent {...props} end={''} />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(false);
+    });
+
     test('it does NOT render the paging footer when you do NOT have any data providers', () => {
       const wrapper = mount(
         <TestProviders>

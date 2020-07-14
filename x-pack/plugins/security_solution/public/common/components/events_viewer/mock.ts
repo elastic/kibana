@@ -27,6 +27,11 @@ export const mockEventViewerResponse = [
         ],
         filterQuery: '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
         sourceId: 'default',
+        timerange: {
+          interval: '12h',
+          from: '2019-08-26T22:10:56.791Z',
+          to: '2019-08-27T22:10:56.794Z',
+        },
         pagination: { limit: 25, cursor: null, tiebreaker: null },
         sortField: { sortFieldId: '@timestamp', direction: 'desc' },
         defaultIndex: ['filebeat-*', 'auditbeat-*', 'packetbeat-*'],
