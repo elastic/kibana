@@ -94,12 +94,14 @@ describe('The metric threshold alert type', () => {
       expect(getState(instanceID).alertState).toBe(AlertStates.OK);
     });
     test('reports expected values to the action context', async () => {
+      const now = 1577858400000;
       await execute(Comparator.GT, [0.75]);
       const { action } = mostRecentAction(instanceID);
       expect(action.group).toBe('*');
       expect(action.reason).toContain('current value is 1');
       expect(action.reason).toContain('threshold of 0.75');
       expect(action.reason).toContain('test.metric.1');
+      expect(action.timestamp).toBe(new Date(now).toISOString());
     });
   });
 
