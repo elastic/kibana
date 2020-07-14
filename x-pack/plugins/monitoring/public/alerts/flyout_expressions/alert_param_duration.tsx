@@ -16,22 +16,22 @@ enum TIME_UNITS {
 function getTimeUnitLabel(timeUnit = TIME_UNITS.SECOND, timeValue = '0') {
   switch (timeUnit) {
     case TIME_UNITS.SECOND:
-      return i18n.translate('xpack.monitoring.alerts.flyout_expressions.timeUnits.secondLabel', {
+      return i18n.translate('xpack.monitoring.alerts.flyoutExpressions.timeUnits.secondLabel', {
         defaultMessage: '{timeValue, plural, one {second} other {seconds}}',
         values: { timeValue },
       });
     case TIME_UNITS.MINUTE:
-      return i18n.translate('xpack.monitoring.alerts.flyout_expressions.timeUnits.minuteLabel', {
+      return i18n.translate('xpack.monitoring.alerts.flyoutExpressions.timeUnits.minuteLabel', {
         defaultMessage: '{timeValue, plural, one {minute} other {minutes}}',
         values: { timeValue },
       });
     case TIME_UNITS.HOUR:
-      return i18n.translate('xpack.monitoring.alerts.flyout_expressions.timeUnits.hourLabel', {
+      return i18n.translate('xpack.monitoring.alerts.flyoutExpressions.timeUnits.hourLabel', {
         defaultMessage: '{timeValue, plural, one {hour} other {hours}}',
         values: { timeValue },
       });
     case TIME_UNITS.DAY:
-      return i18n.translate('xpack.monitoring.alerts.flyout_expressions.timeUnits.dayLabel', {
+      return i18n.translate('xpack.monitoring.alerts.flyoutExpressions.timeUnits.dayLabel', {
         defaultMessage: '{timeValue, plural, one {day} other {days}}',
         values: { timeValue },
       });

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ValidationResult } from '../../../../triggers_actions_ui/public/types';
 
@@ -15,10 +16,18 @@ export function validate(opts: any): ValidationResult {
     threshold: [],
   };
   if (!opts.duration) {
-    errors.duration.push('A valid duration is required.');
+    errors.duration.push(
+      i18n.translate('xpack.monitoring.alerts.cpuUsage.validation.duration', {
+        defaultMessage: 'A valid duration is required.',
+      })
+    );
   }
   if (isNaN(opts.threshold)) {
-    errors.threshold.push('A valid number is required.');
+    errors.threshold.push(
+      i18n.translate('xpack.monitoring.alerts.cpuUsage.validation.threshold', {
+        defaultMessage: 'A valid number is required.',
+      })
+    );
   }
 
   validationResult.errors = errors;

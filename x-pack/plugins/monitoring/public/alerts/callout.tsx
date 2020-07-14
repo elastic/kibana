@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { CommonAlertStatus } from '../../common/types';
 import { AlertSeverity } from '../../common/enums';
@@ -15,12 +16,16 @@ const TYPES = [
   {
     severity: AlertSeverity.Warning,
     color: 'warning',
-    label: 'Warning alert(s)',
+    label: i18n.translate('xpack.monitoring.alerts.callout.warningLabel', {
+      defaultMessage: 'Warning alert(s)',
+    }),
   },
   {
     severity: AlertSeverity.Danger,
     color: 'danger',
-    label: 'Danger alert(s)',
+    label: i18n.translate('xpack.monitoring.alerts.callout.dangerLabel', {
+      defaultMessage: 'DAnger alert(s)',
+    }),
   },
 ];
 

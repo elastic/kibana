@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiTextColor, EuiSpacer } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
@@ -22,7 +23,11 @@ export function createLegacyAlertTypes(): AlertTypeModel[] {
       alertParamsExpression: (props: any) => (
         <Fragment>
           <EuiSpacer />
-          <EuiTextColor color="subdued">There is nothing to configure.</EuiTextColor>
+          <EuiTextColor color="subdued">
+            {i18n.translate('xpack.monitoring.alerts.legacyAlert.expressionText', {
+              defaultMessage: 'There is nothing to configure.',
+            })}
+          </EuiTextColor>
           <EuiSpacer />
         </Fragment>
       ),

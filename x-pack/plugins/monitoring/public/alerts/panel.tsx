@@ -135,7 +135,9 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
               hideBottomBar();
             }}
           >
-            Edit alert
+            {i18n.translate('xpack.monitoring.alerts.panel.editAlert', {
+              defaultMessage: `Edit alert`,
+            })}
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

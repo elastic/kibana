@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiContextMenu,
   EuiPopover,
@@ -57,14 +58,12 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
     const panels = [
       {
         id: 0,
-        title: `Alerts`,
+        title: i18n.translate('xpack.monitoring.alerts.badge.panelTitle', {
+          defaultMessage: 'Alerts',
+        }),
         items: alerts.map(({ alert }, index) => {
           return {
-            name: (
-              <Fragment>
-                <EuiText>{alert.label}</EuiText>
-              </Fragment>
-            ),
+            name: <EuiText>{alert.label}</EuiText>,
             panel: index + 1,
           };
         }),
