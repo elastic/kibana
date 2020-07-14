@@ -32,7 +32,7 @@ export const getQueryFilter = (
   };
 
   const initialQuery = [{ query, language }];
-  const exceptions = buildQueryExceptions({ language, lists, exclude: excludeExceptions });
+  const exceptions = buildQueryExceptions({ language: 'kuery', lists, exclude: excludeExceptions });
   const queries: DataQuery[] = [...initialQuery, ...exceptions];
 
   const config = {
