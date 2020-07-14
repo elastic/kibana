@@ -80,7 +80,9 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
 
     this.pendingCount$.next(++this.pendingCount);
 
-    return (this.runSearch(request, combinedSignal) as Observable<IAsyncSearchResponse>).pipe(
+    return (this.runSearch(request, combinedSignal, options?.strategy) as Observable<
+      IAsyncSearchResponse
+    >).pipe(
       expand((response: IAsyncSearchResponse) => {
         // If the response indicates of an error, stop polling and complete the observable
         if (!response || (!response.is_running && response.is_partial)) {
@@ -100,7 +102,9 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         return timer(pollInterval).pipe(
           // Send future requests using just the ID from the response
           mergeMap(() => {
-            return this.runSearch({ id }, combinedSignal) as Observable<IAsyncSearchResponse>;
+            return this.runSearch({ id }, combinedSignal, options?.strategy) as Observable<
+              IAsyncSearchResponse
+            >;
           })
         );
       }),

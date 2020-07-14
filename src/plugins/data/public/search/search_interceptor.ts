@@ -92,11 +92,12 @@ export class SearchInterceptor {
 
   protected runSearch(
     request: IEsSearchRequest,
-    combinedSignal: AbortSignal
+    combinedSignal: AbortSignal,
+    strategy?: string
   ): Observable<IEsSearchResponse> {
     return from(
       this.deps.http.fetch({
-        path: `/internal/search/es`,
+        path: `/internal/search/${strategy || 'es'}`,
         method: 'POST',
         body: JSON.stringify(request),
         signal: combinedSignal,
@@ -122,7 +123,7 @@ export class SearchInterceptor {
       const { combinedSignal, cleanup } = this.setupTimers(options);
       this.pendingCount$.next(++this.pendingCount);
 
-      return this.runSearch(request, combinedSignal).pipe(
+      return this.runSearch(request, combinedSignal, options?.strategy).pipe(
         tap({
           next: (e) => {
             if (this.deps.usageCollector) {
