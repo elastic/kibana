@@ -112,8 +112,9 @@ const UnstyledProcessEventDot = React.memo(
      */
     timeAtRender: number;
   }) => {
-    // This should be unique to each instance of Resolver TODO
+    // This should be unique to each instance of Resolver
     const htmlIDPrefix = 'resolver';
+
     /**
      * Convert the position, which is in 'world' coordinates, to screen coordinates.
      */
