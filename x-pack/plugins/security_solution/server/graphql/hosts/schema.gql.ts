@@ -41,12 +41,25 @@ export const hostsSchema = gql`
     region: [String]
   }
 
+  enum HostPolicyResponseActionStatus {
+    success
+    failure
+    warning
+  }
+
+  type EndpointFields {
+    endpointPolicy: String
+    sensorVersion: String
+    policyStatus: HostPolicyResponseActionStatus
+  }
+
   type HostItem {
     _id: String
-    lastSeen: Date
-    host: HostEcsFields
     cloud: CloudFields
+    endpoint: EndpointFields
+    host: HostEcsFields
     inspect: Inspect
+    lastSeen: Date
   }
 
   type HostsEdges {
