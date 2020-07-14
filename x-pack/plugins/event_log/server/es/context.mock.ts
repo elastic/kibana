@@ -17,7 +17,7 @@ const createContextMock = () => {
     logger: loggingSystemMock.createLogger(),
     esNames: namesMock.create(),
     initialize: jest.fn(),
-    waitTillReady: jest.fn(),
+    waitTillReady: jest.fn(async () => true),
     esAdapter: clusterClientAdapterMock.create(),
     initialized: true,
   };
