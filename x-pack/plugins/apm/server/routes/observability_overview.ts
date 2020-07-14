@@ -5,22 +5,22 @@
  */
 import * as t from 'io-ts';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { hasData } from '../lib/observability_dashboard/has_data';
+import { getServiceCount } from '../lib/observability_overview/get_service_count';
+import { getTransactionCoordinates } from '../lib/observability_overview/get_transaction_coordinates';
+import { hasData } from '../lib/observability_overview/has_data';
 import { createRoute } from './create_route';
 import { rangeRt } from './default_api_types';
-import { getServiceCount } from '../lib/observability_dashboard/get_service_count';
-import { getTransactionCoordinates } from '../lib/observability_dashboard/get_transaction_coordinates';
 
-export const observabilityDashboardHasDataRoute = createRoute(() => ({
-  path: '/api/apm/observability_dashboard/has_data',
+export const observabilityOverviewHasDataRoute = createRoute(() => ({
+  path: '/api/apm/observability_overview/has_data',
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     return await hasData({ setup });
   },
 }));
 
-export const observabilityDashboardDataRoute = createRoute(() => ({
-  path: '/api/apm/observability_dashboard',
+export const observabilityOverviewRoute = createRoute(() => ({
+  path: '/api/apm/observability_overview',
   params: {
     query: t.intersection([rangeRt, t.type({ bucketSize: t.string })]),
   },

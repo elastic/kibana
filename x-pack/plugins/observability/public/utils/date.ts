@@ -5,11 +5,9 @@
  */
 import datemath from '@elastic/datemath';
 
-export function getParsedDate(range?: string, opts = {}) {
-  if (range) {
-    const parsed = datemath.parse(range, opts);
-    if (parsed) {
-      return parsed.toISOString();
-    }
+export function getAbsoluteTime(range: string, opts = {}) {
+  const parsed = datemath.parse(range, opts);
+  if (parsed) {
+    return parsed.valueOf();
   }
 }
