@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { produce } from 'immer';
 import { AGENT_NAMES } from './agent_name';
 
 /**
@@ -91,6 +90,13 @@ export function getApmTelemetryMapping() {
           {}
         ),
       },
+      cloud: {
+        properties: {
+          availability_zone: keyword,
+          provider: keyword,
+          region: keyword,
+        },
+      },
       counts: {
         properties: {
           agent_configuration: allProperties,
@@ -108,6 +114,15 @@ export function getApmTelemetryMapping() {
       },
       cardinality: {
         properties: {
+          client: {
+            properties: {
+              geo: {
+                properites: {
+                  country_iso_code: { rum: oneDayProperties },
+                },
+              },
+            },
+          },
           user_agent: {
             properties: {
               original: {
@@ -192,6 +207,7 @@ export function getApmTelemetryMapping() {
           agent_configuration: tookProperties,
           agents: tookProperties,
           cardinality: tookProperties,
+          cloud: tookProperties,
           groupings: tookProperties,
           indices_stats: tookProperties,
           integrations: tookProperties,
@@ -213,17 +229,4 @@ export function getApmTelemetryMapping() {
       },
     },
   };
-}
-
-/**
- * Merge a telemetry mapping object (from https://github.com/elastic/telemetry/blob/master/config/templates/xpack-phone-home.json)
- * with the output from `getApmTelemetryMapping`.
- */
-export function mergeApmTelemetryMapping(
-  xpackPhoneHomeMapping: Record<string, any>
-) {
-  return produce(xpackPhoneHomeMapping, (draft: Record<string, any>) => {
-    draft.mappings.properties.stack_stats.properties.kibana.properties.plugins.properties.apm = getApmTelemetryMapping();
-    return draft;
-  });
 }

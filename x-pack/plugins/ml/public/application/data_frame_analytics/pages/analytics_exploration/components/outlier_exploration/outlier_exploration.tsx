@@ -29,7 +29,7 @@ import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import { defaultSearchQuery, useResultsViewConfig, INDEX_STATUS } from '../../../../common';
 
-import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
+import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/use_columns';
 
 import { ExplorationQueryBar } from '../exploration_query_bar';
 import { ExplorationTitle } from '../exploration_title';

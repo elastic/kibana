@@ -15,7 +15,7 @@ import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 
 import { TimelineHeader } from '.';
-import { TimelineStatus } from '../../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 
 const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
 
@@ -28,15 +28,17 @@ describe('Header', () => {
     browserFields: {},
     dataProviders: mockDataProviders,
     filterManager: new FilterManager(mockUiSettingsForFilterManager),
-    id: 'foo',
     indexPattern,
     onDataProviderEdited: jest.fn(),
     onDataProviderRemoved: jest.fn(),
     onToggleDataProviderEnabled: jest.fn(),
     onToggleDataProviderExcluded: jest.fn(),
+    onToggleDataProviderType: jest.fn(),
     show: true,
     showCallOutUnauthorizedMsg: false,
     status: TimelineStatus.active,
+    timelineId: 'foo',
+    timelineType: TimelineType.default,
   };
 
   describe('rendering', () => {

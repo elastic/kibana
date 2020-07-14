@@ -119,7 +119,7 @@ export function PageLoadDistChart({
             xScaleType={ScaleType.Linear}
             yScaleType={ScaleType.Linear}
             data={data?.pageLoadDistribution ?? []}
-            curve={CurveType.CURVE_NATURAL}
+            curve={CurveType.CURVE_CATMULL_ROM}
           />
           {breakdowns.map(({ name, type }) => (
             <BreakdownSeries

@@ -17,9 +17,20 @@ export function registerDataHandler<T extends ObservabilityApp>({
   dataHandlers[appName] = { fetchData, hasData };
 }
 
+export function unregisterDataHandler<T extends ObservabilityApp>({ appName }: { appName: T }) {
+  delete dataHandlers[appName];
+}
+
 export function getDataHandler<T extends ObservabilityApp>(appName: T) {
   const dataHandler = dataHandlers[appName];
   if (dataHandler) {
     return dataHandler as DataHandler<T>;
   }
+}
+
+export async function fetchHasData() {
+  const apps: ObservabilityApp[] = ['apm', 'uptime', 'infra_logs', 'infra_metrics'];
+  const promises = apps.map((app) => getDataHandler(app)?.hasData());
+  const [apm, uptime, logs, metrics] = await Promise.all(promises);
+  return { apm, uptime, infra_logs: logs, infra_metrics: metrics };
 }

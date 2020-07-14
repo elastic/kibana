@@ -1,0 +1,63 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the deletion of a specified AWS CloudWatch log group. When a log group is deleted, all the archived log events associated with the log group are also permanently deleted.",
+  "false_positives": [
+    "Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Log group deletions from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "from": "now-60m",
+  "index": [
+    "filebeat-*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "AWS CloudWatch Log Group Deletion",
+  "query": "event.action:DeleteLogGroup and event.dataset:aws.cloudtrail and event.provider:logs.amazonaws.com and event.outcome:success",
+  "references": [
+    "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/logs/delete-log-group.html",
+    "https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_DeleteLogGroup.html"
+  ],
+  "risk_score": 47,
+  "rule_id": "68a7a5a5-a2fc-4a76-ba9f-26849de881b4",
+  "severity": "medium",
+  "tags": [
+    "AWS",
+    "Elastic"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0040",
+        "name": "Impact",
+        "reference": "https://attack.mitre.org/tactics/TA0040/"
+      },
+      "technique": [
+        {
+          "id": "T1485",
+          "name": "Data Destruction",
+          "reference": "https://attack.mitre.org/techniques/T1485/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1089",
+          "name": "Disabling Security Tools",
+          "reference": "https://attack.mitre.org/techniques/T1089/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

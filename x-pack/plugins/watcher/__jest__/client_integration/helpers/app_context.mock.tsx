@@ -8,7 +8,6 @@ import React from 'react';
 import { of } from 'rxjs';
 import { ComponentType } from 'enzyme';
 import { LocationDescriptorObject } from 'history';
-import { ScopedHistory } from 'src/core/public';
 import {
   docLinksServiceMock,
   uiSettingsServiceMock,
@@ -31,10 +30,10 @@ class MockTimeBuckets {
   }
 }
 
-const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
-history.createHref = (location: LocationDescriptorObject) => {
+const history = scopedHistoryMock.create();
+history.createHref.mockImplementation((location: LocationDescriptorObject) => {
   return `${location.pathname}${location.search ? '?' + location.search : ''}`;
-};
+});
 
 export const mockContextValue = {
   licenseStatus$: of<LicenseStatus>({ valid: true }),
