@@ -61,7 +61,7 @@ export const usePrePackagedRules = ({
   hasEncryptionKey,
   isSignalIndexExists,
 }: UsePrePackagedRuleProps): ReturnPrePackagedRulesAndTimelines => {
-  const [rulesStatus, setRuleStatus] = useState<
+  const [prepackagedDataStatus, setPrepackagedDataStatus] = useState<
     Pick<
       ReturnPrePackagedRulesAndTimelines,
       | 'createPrePackagedRules'
@@ -70,6 +70,9 @@ export const usePrePackagedRules = ({
       | 'rulesInstalled'
       | 'rulesNotInstalled'
       | 'rulesNotUpdated'
+      | 'timelinesInstalled'
+      | 'timelinesNotInstalled'
+      | 'timelinesNotUpdated'
     >
   >({
     createPrePackagedRules: null,
@@ -78,18 +81,11 @@ export const usePrePackagedRules = ({
     rulesInstalled: null,
     rulesNotInstalled: null,
     rulesNotUpdated: null,
-  });
-
-  const [timelinesStatus, setTimelineStatus] = useState<
-    Pick<
-      ReturnPrePackagedRulesAndTimelines,
-      'timelinesInstalled' | 'timelinesNotInstalled' | 'timelinesNotUpdated'
-    >
-  >({
     timelinesInstalled: null,
     timelinesNotInstalled: null,
     timelinesNotUpdated: null,
   });
+
   const [loadingCreatePrePackagedRules, setLoadingCreatePrePackagedRules] = useState(false);
   const [loading, setLoading] = useState(true);
   const [, dispatchToaster] = useStateToaster();
@@ -106,15 +102,13 @@ export const usePrePackagedRules = ({
         });
 
         if (isSubscribed) {
-          setRuleStatus({
+          setPrepackagedDataStatus({
             createPrePackagedRules: createElasticRules,
             refetchPrePackagedRulesStatus: fetchPrePackagedRules,
             rulesCustomInstalled: prePackagedRuleStatusResponse.rules_custom_installed,
             rulesInstalled: prePackagedRuleStatusResponse.rules_installed,
             rulesNotInstalled: prePackagedRuleStatusResponse.rules_not_installed,
             rulesNotUpdated: prePackagedRuleStatusResponse.rules_not_updated,
-          });
-          setTimelineStatus({
             timelinesInstalled: prePackagedRuleStatusResponse.timelines_installed,
             timelinesNotInstalled: prePackagedRuleStatusResponse.timelines_not_installed,
             timelinesNotUpdated: prePackagedRuleStatusResponse.timelines_not_updated,
@@ -122,19 +116,18 @@ export const usePrePackagedRules = ({
         }
       } catch (error) {
         if (isSubscribed) {
-          setRuleStatus({
+          setPrepackagedDataStatus({
             createPrePackagedRules: null,
             refetchPrePackagedRulesStatus: null,
             rulesCustomInstalled: null,
             rulesInstalled: null,
             rulesNotInstalled: null,
             rulesNotUpdated: null,
-          });
-          setTimelineStatus({
             timelinesInstalled: null,
             timelinesNotInstalled: null,
             timelinesNotUpdated: null,
           });
+
           errorToToaster({ title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE, error, dispatchToaster });
         }
       }
@@ -180,19 +173,18 @@ export const usePrePackagedRules = ({
                       iterationTryOfFetchingPrePackagedCount > 100)
                   ) {
                     setLoadingCreatePrePackagedRules(false);
-                    setRuleStatus({
+                    setPrepackagedDataStatus({
                       createPrePackagedRules: createElasticRules,
                       refetchPrePackagedRulesStatus: fetchPrePackagedRules,
                       rulesCustomInstalled: prePackagedRuleStatusResponse.rules_custom_installed,
                       rulesInstalled: prePackagedRuleStatusResponse.rules_installed,
                       rulesNotInstalled: prePackagedRuleStatusResponse.rules_not_installed,
                       rulesNotUpdated: prePackagedRuleStatusResponse.rules_not_updated,
-                    });
-                    setTimelineStatus({
                       timelinesInstalled: prePackagedRuleStatusResponse.timelines_installed,
                       timelinesNotInstalled: prePackagedRuleStatusResponse.timelines_not_installed,
                       timelinesNotUpdated: prePackagedRuleStatusResponse.timelines_not_updated,
                     });
+
                     displaySuccessToast(
                       i18n.RULE_AND_TIMELINE_PREPACKAGED_SUCCESS,
                       dispatchToaster
@@ -234,7 +226,6 @@ export const usePrePackagedRules = ({
   return {
     loading,
     loadingCreatePrePackagedRules,
-    ...rulesStatus,
-    ...timelinesStatus,
+    ...prepackagedDataStatus,
   };
 };
