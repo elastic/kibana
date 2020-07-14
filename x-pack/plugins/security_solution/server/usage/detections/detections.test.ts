@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller } from '../../../../../src/core/server';
-import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
-import { jobServiceProvider } from '../../../ml/server/models/job_service';
-import { DataRecognizer } from '../../../ml/server/models/data_recognizer';
-import { mlServicesMock } from '../lib/machine_learning/mocks';
+import { LegacyAPICaller } from '../../../../../../src/core/server';
+import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
+import { jobServiceProvider } from '../../../../ml/server/models/job_service';
+import { DataRecognizer } from '../../../../ml/server/models/data_recognizer';
+import { mlServicesMock } from '../../lib/machine_learning/mocks';
 import {
   getMockJobSummaryResponse,
   getMockListModulesResponse,
   getMockRulesResponse,
 } from './detections.mocks';
-import { fetchDetectionsUsage } from './detections';
+import { fetchDetectionsUsage } from './index';
 
-jest.mock('../../../ml/server/models/job_service');
-jest.mock('../../../ml/server/models/data_recognizer');
+jest.mock('../../../../ml/server/models/job_service');
+jest.mock('../../../../ml/server/models/data_recognizer');
 
 describe('Detections Usage', () => {
   describe('fetchDetectionsUsage()', () => {

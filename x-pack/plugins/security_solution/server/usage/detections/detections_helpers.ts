@@ -6,15 +6,15 @@
 
 import { SearchParams } from 'elasticsearch';
 
-import { LegacyAPICaller, SavedObjectsClient } from '../../../../../src/core/server';
+import { LegacyAPICaller, SavedObjectsClient } from '../../../../../../src/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { jobServiceProvider } from '../../../ml/server/models/job_service';
+import { jobServiceProvider } from '../../../../ml/server/models/job_service';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { DataRecognizer } from '../../../ml/server/models/data_recognizer';
-import { MlPluginSetup } from '../../../ml/server';
-import { SIGNALS_ID, INTERNAL_IMMUTABLE_KEY } from '../../common/constants';
-import { DetectionRulesUsage, MlJobsUsage } from './detections';
-import { isJobStarted } from '../../common/machine_learning/helpers';
+import { DataRecognizer } from '../../../../ml/server/models/data_recognizer';
+import { MlPluginSetup } from '../../../../ml/server';
+import { SIGNALS_ID, INTERNAL_IMMUTABLE_KEY } from '../../../common/constants';
+import { DetectionRulesUsage, MlJobsUsage } from './index';
+import { isJobStarted } from '../../../common/machine_learning/helpers';
 
 interface DetectionsMetric {
   isElastic: boolean;
