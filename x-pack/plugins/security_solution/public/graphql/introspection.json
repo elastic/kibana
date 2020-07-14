@@ -4751,6 +4751,14 @@
             "deprecationReason": null
           },
           {
+            "name": "threshold",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "ToAny", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "exceptions_list",
             "description": "",
             "args": [],
@@ -9642,6 +9650,22 @@
             "deprecationReason": null
           },
           {
+            "name": "excludedRowRendererIds",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": { "kind": "ENUM", "name": "RowRendererId", "ofType": null }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "favorite",
             "description": "",
             "args": [],
@@ -10016,6 +10040,14 @@
             "deprecationReason": null
           },
           {
+            "name": "type",
+            "description": "",
+            "args": [],
+            "type": { "kind": "ENUM", "name": "DataProviderType", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "and",
             "description": "",
             "args": [],
@@ -10089,6 +10121,29 @@
         "possibleTypes": null
       },
       {
+        "kind": "ENUM",
+        "name": "DataProviderType",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "default",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "template",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "DateRangePickerResult",
         "description": "",
@@ -10113,6 +10168,75 @@
         "inputFields": null,
         "interfaces": [],
         "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "RowRendererId",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          { "name": "auditd", "description": "", "isDeprecated": false, "deprecationReason": null },
+          {
+            "name": "auditd_file",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "netflow",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          { "name": "plain", "description": "", "isDeprecated": false, "deprecationReason": null },
+          {
+            "name": "suricata",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          { "name": "system", "description": "", "isDeprecated": false, "deprecationReason": null },
+          {
+            "name": "system_dns",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "system_endgame_process",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "system_file",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "system_fim",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "system_security_event",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "system_socket",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          { "name": "zeek", "description": "", "isDeprecated": false, "deprecationReason": null }
+        ],
         "possibleTypes": null
       },
       {
@@ -10477,21 +10601,13 @@
           {
             "name": "pageIndex",
             "description": "",
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
-            },
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
             "defaultValue": null
           },
           {
             "name": "pageSize",
             "description": "",
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
-            },
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
             "defaultValue": null
           }
         ],
@@ -11031,6 +11147,20 @@
             "defaultValue": null
           },
           {
+            "name": "excludedRowRendererIds",
+            "description": "",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": { "kind": "ENUM", "name": "RowRendererId", "ofType": null }
+              }
+            },
+            "defaultValue": null
+          },
+          {
             "name": "filters",
             "description": "",
             "type": {
@@ -11252,6 +11382,12 @@
                 "ofType": { "kind": "INPUT_OBJECT", "name": "DataProviderInput", "ofType": null }
               }
             },
+            "defaultValue": null
+          },
+          {
+            "name": "type",
+            "description": "",
+            "type": { "kind": "ENUM", "name": "DataProviderType", "ofType": null },
             "defaultValue": null
           }
         ],

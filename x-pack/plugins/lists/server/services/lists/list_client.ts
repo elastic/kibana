@@ -70,6 +70,7 @@ import {
   UpdateListItemOptions,
   UpdateListOptions,
 } from './list_client_types';
+import { createListIfItDoesNotExist } from './create_list_if_it_does_not_exist';
 
 export class ListClient {
   private readonly spaceId: string;
@@ -108,6 +109,8 @@ export class ListClient {
 
   public createList = async ({
     id,
+    deserializer,
+    serializer,
     name,
     description,
     type,
@@ -115,22 +118,43 @@ export class ListClient {
   }: CreateListOptions): Promise<ListSchema> => {
     const { callCluster, user } = this;
     const listIndex = this.getListIndex();
-    return createList({ callCluster, description, id, listIndex, meta, name, type, user });
+    return createList({
+      callCluster,
+      description,
+      deserializer,
+      id,
+      listIndex,
+      meta,
+      name,
+      serializer,
+      type,
+      user,
+    });
   };
 
   public createListIfItDoesNotExist = async ({
     id,
+    deserializer,
+    serializer,
     name,
     description,
     type,
     meta,
   }: CreateListIfItDoesNotExistOptions): Promise<ListSchema> => {
-    const list = await this.getList({ id });
-    if (list == null) {
-      return this.createList({ description, id, meta, name, type });
-    } else {
-      return list;
-    }
+    const { callCluster, user } = this;
+    const listIndex = this.getListIndex();
+    return createListIfItDoesNotExist({
+      callCluster,
+      description,
+      deserializer,
+      id,
+      listIndex,
+      meta,
+      name,
+      serializer,
+      type,
+      user,
+    });
   };
 
   public getListIndexExists = async (): Promise<boolean> => {
@@ -304,18 +328,25 @@ export class ListClient {
   };
 
   public importListItemsToStream = async ({
+    deserializer,
+    serializer,
     type,
     listId,
     stream,
     meta,
-  }: ImportListItemsToStreamOptions): Promise<void> => {
-    const { callCluster, user } = this;
+  }: ImportListItemsToStreamOptions): Promise<ListSchema | null> => {
+    const { callCluster, user, config } = this;
     const listItemIndex = this.getListItemIndex();
+    const listIndex = this.getListIndex();
     return importListItemsToStream({
       callCluster,
+      config,
+      deserializer,
       listId,
+      listIndex,
       listItemIndex,
       meta,
+      serializer,
       stream,
       type,
       user,
@@ -340,19 +371,23 @@ export class ListClient {
 
   public createListItem = async ({
     id,
+    deserializer,
+    serializer,
     listId,
     value,
     type,
     meta,
-  }: CreateListItemOptions): Promise<ListItemSchema> => {
+  }: CreateListItemOptions): Promise<ListItemSchema | null> => {
     const { callCluster, user } = this;
     const listItemIndex = this.getListItemIndex();
     return createListItem({
       callCluster,
+      deserializer,
       id,
       listId,
       listItemIndex,
       meta,
+      serializer,
       type,
       user,
       value,

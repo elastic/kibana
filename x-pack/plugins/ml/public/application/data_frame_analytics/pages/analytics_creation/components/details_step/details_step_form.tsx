@@ -47,6 +47,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     jobIdExists,
     jobIdInvalidMaxLength,
     jobIdValid,
+    resultsField,
   } = form;
   const forceInput = useRef<HTMLInputElement | null>(null);
 
@@ -193,6 +194,22 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
           )}
           isInvalid={!destinationIndexNameEmpty && !destinationIndexNameValid}
           data-test-subj="mlAnalyticsCreateJobFlyoutDestinationIndexInput"
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label={i18n.translate('xpack.ml.dataframe.analytics.create.resultsFieldLabel', {
+          defaultMessage: 'Results field',
+        })}
+        helpText={i18n.translate('xpack.ml.dataframe.analytics.create.resultsFieldHelpText', {
+          defaultMessage:
+            'Defines the name of the field in which to store the results of the analysis. Defaults to ml.',
+        })}
+      >
+        <EuiFieldText
+          disabled={isJobCreated}
+          value={resultsField}
+          onChange={(e) => setFormState({ resultsField: e.target.value })}
+          data-test-subj="mlAnalyticsCreateJobWizardResultsFieldInput"
         />
       </EuiFormRow>
       <EuiFormRow

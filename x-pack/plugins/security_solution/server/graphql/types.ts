@@ -98,9 +98,9 @@ export interface TlsSortField {
 }
 
 export interface PageInfoTimeline {
-  pageIndex: number;
+  pageIndex?: Maybe<number>;
 
-  pageSize: number;
+  pageSize?: Maybe<number>;
 }
 
 export interface SortTimeline {
@@ -125,6 +125,8 @@ export interface TimelineInput {
   description?: Maybe<string>;
 
   eventType?: Maybe<string>;
+
+  excludedRowRendererIds?: Maybe<RowRendererId[]>;
 
   filters?: Maybe<FilterTimelineInput[]>;
 
@@ -187,6 +189,8 @@ export interface DataProviderInput {
   queryMatch?: Maybe<QueryMatchInput>;
 
   and?: Maybe<DataProviderInput[]>;
+
+  type?: Maybe<DataProviderType>;
 }
 
 export interface QueryMatchInput {
@@ -342,6 +346,27 @@ export enum NetworkDnsFields {
 
 export enum TlsFields {
   _id = '_id',
+}
+
+export enum DataProviderType {
+  default = 'default',
+  template = 'template',
+}
+
+export enum RowRendererId {
+  auditd = 'auditd',
+  auditd_file = 'auditd_file',
+  netflow = 'netflow',
+  plain = 'plain',
+  suricata = 'suricata',
+  system = 'system',
+  system_dns = 'system_dns',
+  system_endgame_process = 'system_endgame_process',
+  system_file = 'system_file',
+  system_fim = 'system_fim',
+  system_security_event = 'system_security_event',
+  system_socket = 'system_socket',
+  zeek = 'zeek',
 }
 
 export enum TimelineStatus {
@@ -1046,6 +1071,8 @@ export interface RuleField {
   version?: Maybe<string[] | string>;
 
   note?: Maybe<string[] | string>;
+
+  threshold?: Maybe<ToAny>;
 
   exceptions_list?: Maybe<ToAny>;
 }
@@ -1956,6 +1983,8 @@ export interface TimelineResult {
 
   eventType?: Maybe<string>;
 
+  excludedRowRendererIds?: Maybe<RowRendererId[]>;
+
   favorite?: Maybe<FavoriteTimelineResult[]>;
 
   filters?: Maybe<FilterTimelineResult[]>;
@@ -2031,6 +2060,8 @@ export interface DataProviderResult {
   kqlQuery?: Maybe<string>;
 
   queryMatch?: Maybe<QueryMatchResult>;
+
+  type?: Maybe<DataProviderType>;
 
   and?: Maybe<DataProviderResult[]>;
 }
@@ -4910,6 +4941,8 @@ export namespace RuleFieldResolvers {
 
     note?: NoteResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
+    threshold?: ThresholdResolver<Maybe<ToAny>, TypeParent, TContext>;
+
     exceptions_list?: ExceptionsListResolver<Maybe<ToAny>, TypeParent, TContext>;
   }
 
@@ -5065,6 +5098,11 @@ export namespace RuleFieldResolvers {
   > = Resolver<R, Parent, TContext>;
   export type NoteResolver<
     R = Maybe<string[] | string>,
+    Parent = RuleField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ThresholdResolver<
+    R = Maybe<ToAny>,
     Parent = RuleField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -8092,6 +8130,12 @@ export namespace TimelineResultResolvers {
 
     eventType?: EventTypeResolver<Maybe<string>, TypeParent, TContext>;
 
+    excludedRowRendererIds?: ExcludedRowRendererIdsResolver<
+      Maybe<RowRendererId[]>,
+      TypeParent,
+      TContext
+    >;
+
     favorite?: FavoriteResolver<Maybe<FavoriteTimelineResult[]>, TypeParent, TContext>;
 
     filters?: FiltersResolver<Maybe<FilterTimelineResult[]>, TypeParent, TContext>;
@@ -8172,6 +8216,11 @@ export namespace TimelineResultResolvers {
   > = Resolver<R, Parent, TContext>;
   export type EventTypeResolver<
     R = Maybe<string>,
+    Parent = TimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ExcludedRowRendererIdsResolver<
+    R = Maybe<RowRendererId[]>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -8368,6 +8417,8 @@ export namespace DataProviderResultResolvers {
 
     queryMatch?: QueryMatchResolver<Maybe<QueryMatchResult>, TypeParent, TContext>;
 
+    type?: TypeResolver<Maybe<DataProviderType>, TypeParent, TContext>;
+
     and?: AndResolver<Maybe<DataProviderResult[]>, TypeParent, TContext>;
   }
 
@@ -8398,6 +8449,11 @@ export namespace DataProviderResultResolvers {
   > = Resolver<R, Parent, TContext>;
   export type QueryMatchResolver<
     R = Maybe<QueryMatchResult>,
+    Parent = DataProviderResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TypeResolver<
+    R = Maybe<DataProviderType>,
     Parent = DataProviderResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;

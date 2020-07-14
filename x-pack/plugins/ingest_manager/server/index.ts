@@ -20,11 +20,8 @@ export const config = {
     fleet: true,
   },
   schema: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
-    epm: schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
-      registryUrl: schema.maybe(schema.uri()),
-    }),
+    enabled: schema.boolean({ defaultValue: true }),
+    registryUrl: schema.maybe(schema.uri()),
     fleet: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       tlsCheckDisabled: schema.boolean({ defaultValue: false }),

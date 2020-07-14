@@ -273,8 +273,8 @@ export class AlertingPlugin {
     return (request) => ({
       callCluster: elasticsearch.legacy.client.asScoped(request).callAsCurrentUser,
       savedObjectsClient: this.getScopedClientWithAlertSavedObjectType(savedObjects, request),
-      getScopedCallCluster(clusterClient: ILegacyClusterClient) {
-        return clusterClient.asScoped(request).callAsCurrentUser;
+      getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient) {
+        return clusterClient.asScoped(request);
       },
     });
   }
