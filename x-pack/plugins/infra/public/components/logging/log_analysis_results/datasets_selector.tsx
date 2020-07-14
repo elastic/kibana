@@ -8,7 +8,7 @@ import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
 
-import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
+import { getFriendlyNameForPartitionId } from '../../../../common/log_analysis';
 
 type DatasetOptionProps = EuiComboBoxOptionOption<string>;
 
@@ -51,7 +51,7 @@ export const DatasetsSelector: React.FunctionComponent<{
 };
 
 const datasetFilterPlaceholder = i18n.translate(
-  'xpack.infra.logs.logEntryCategories.datasetFilterPlaceholder',
+  'xpack.infra.logs.analysis.datasetFilterPlaceholder',
   {
     defaultMessage: 'Filter by datasets',
   }

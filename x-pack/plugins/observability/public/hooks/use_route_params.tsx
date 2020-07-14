@@ -23,7 +23,7 @@ function getQueryParams(location: ReturnType<typeof useLocation>) {
  * It removes any aditional item which is not declared in the type.
  * @param params
  */
-export function useUrlParams(params: Params) {
+export function useRouteParams(params: Params) {
   const location = useLocation();
   const pathParams = useParams();
   const queryParams = getQueryParams(location);
