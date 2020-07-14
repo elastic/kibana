@@ -823,7 +823,7 @@ export class EndpointDocGenerator {
         timestamp,
         parentEntityID: ancestor.process.entity_id,
         // add the parent to the ancestry array
-        ancestry: [ancestor.process.entity_id, ...(ancestor.process.Ext.ancestry ?? [])],
+        ancestry: [ancestor.process.entity_id, ...(ancestor.process.Ext?.ancestry ?? [])],
         ancestryArrayLimit: opts.ancestryArraySize,
         parentPid: ancestor.process.pid,
         pid: this.randomN(5000),
@@ -840,7 +840,7 @@ export class EndpointDocGenerator {
             parentEntityID: ancestor.process.parent?.entity_id,
             eventCategory: 'process',
             eventType: 'end',
-            ancestry: ancestor.process.Ext.ancestry,
+            ancestry: ancestor.process.Ext?.ancestry,
             ancestryArrayLimit: opts.ancestryArraySize,
           })
         );
@@ -864,7 +864,7 @@ export class EndpointDocGenerator {
         timestamp,
         ancestor.process.entity_id,
         ancestor.process.parent?.entity_id,
-        ancestor.process.Ext.ancestry
+        ancestor.process.Ext?.ancestry
       )
     );
     return events;
@@ -914,7 +914,7 @@ export class EndpointDocGenerator {
         parentEntityID: currentState.event.process.entity_id,
         ancestry: [
           currentState.event.process.entity_id,
-          ...(currentState.event.process.Ext.ancestry ?? []),
+          ...(currentState.event.process.Ext?.ancestry ?? []),
         ],
         ancestryArrayLimit: opts.ancestryArraySize,
       });
@@ -938,7 +938,7 @@ export class EndpointDocGenerator {
           parentEntityID: child.process.parent?.entity_id,
           eventCategory: 'process',
           eventType: 'end',
-          ancestry: child.process.Ext.ancestry,
+          ancestry: child.process.Ext?.ancestry,
           ancestryArrayLimit: opts.ancestryArraySize,
         });
       }
@@ -984,7 +984,7 @@ export class EndpointDocGenerator {
           parentEntityID: node.process.parent?.entity_id,
           eventCategory: eventInfo.category,
           eventType: eventInfo.creationType,
-          ancestry: node.process.Ext.ancestry,
+          ancestry: node.process.Ext?.ancestry,
         });
       }
     }
@@ -1007,7 +1007,7 @@ export class EndpointDocGenerator {
         ts,
         node.process.entity_id,
         node.process.parent?.entity_id,
-        node.process.Ext.ancestry
+        node.process.Ext?.ancestry
       );
     }
   }

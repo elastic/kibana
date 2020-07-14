@@ -27,7 +27,10 @@ import {
   ModelSnapshot,
 } from '../../../../common/types/anomaly_detection_jobs';
 import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
-import { FieldRequestConfig } from '../../datavisualizer/index_based/common';
+import {
+  FieldHistogramRequestConfig,
+  FieldRequestConfig,
+} from '../../datavisualizer/index_based/common';
 import { DataRecognizerConfigResponse, Module } from '../../../../common/types/modules';
 import { getHttp } from '../../util/dependency_cache';
 
@@ -489,6 +492,30 @@ export function mlApiServicesProvider(httpService: HttpService) {
 
       return httpService.http<any>({
         path: `${basePath()}/data_visualizer/get_field_stats/${indexPatternTitle}`,
+        method: 'POST',
+        body,
+      });
+    },
+
+    getVisualizerFieldHistograms({
+      indexPatternTitle,
+      query,
+      fields,
+      samplerShardSize,
+    }: {
+      indexPatternTitle: string;
+      query: any;
+      fields: FieldHistogramRequestConfig[];
+      samplerShardSize?: number;
+    }) {
+      const body = JSON.stringify({
+        query,
+        fields,
+        samplerShardSize,
+      });
+
+      return httpService.http<any>({
+        path: `${basePath()}/data_visualizer/get_field_histograms/${indexPatternTitle}`,
         method: 'POST',
         body,
       });

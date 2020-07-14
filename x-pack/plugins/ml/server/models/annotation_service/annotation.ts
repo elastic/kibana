@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import _ from 'lodash';
-import { LegacyAPICaller } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 
 import { ANNOTATION_TYPE } from '../../../common/constants/annotations';
 import {
@@ -61,14 +61,7 @@ export interface DeleteParams {
   id: string;
 }
 
-type annotationProviderParams = DeleteParams | GetParams | IndexParams;
-
-export type callWithRequestType = (
-  action: string,
-  params: annotationProviderParams
-) => Promise<any>;
-
-export function annotationProvider(callAsCurrentUser: LegacyAPICaller) {
+export function annotationProvider({ callAsCurrentUser }: ILegacyScopedClusterClient) {
   async function indexAnnotation(annotation: Annotation, username: string) {
     if (isAnnotation(annotation) === false) {
       // No need to translate, this will not be exposed in the UI.
