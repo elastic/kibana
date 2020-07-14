@@ -23,9 +23,9 @@ import 'leaflet/dist/leaflet.js';
 import 'leaflet-vega';
 import { createVegaVisualization } from './vega_visualization';
 
-import vegaliteGraph from './__test__/vegalite_graph.json';
-import vegaGraph from './__test__/vega_graph.json';
-import vegaMapGraph from './__test__/vega_map_test.json';
+import vegaliteGraph from './test_utils/vegalite_graph.json';
+import vegaGraph from './test_utils/vega_graph.json';
+import vegaMapGraph from './test_utils/vega_map_test.json';
 
 import { VegaParser } from './data_model/vega_parser';
 import { SearchAPI } from './data_model/search_api';
@@ -44,7 +44,7 @@ import { dataPluginMock } from '../../data/public/mocks';
 import { KibanaMap } from '../../maps_legacy/public/map/kibana_map';
 
 jest.mock('./default_spec', () => ({
-  getDefaultSpec: () => jest.requireActual('./__test__/default.spec.json'),
+  getDefaultSpec: () => jest.requireActual('./test_utils/default.spec.json'),
 }));
 
 jest.mock('./lib/vega', () => ({
@@ -88,17 +88,9 @@ describe('VegaVisualizations', () => {
 
   beforeEach(() => {
     vegaVisualizationDependencies = {
-      core: {
-        uiSettings: coreStart.uiSettings,
-      },
+      core: coreMock.createSetup(),
       plugins: {
-        data: {
-          query: {
-            timefilter: {
-              timefilter: {},
-            },
-          },
-        },
+        data: dataPluginMock.createSetupContract(),
       },
     };
 
