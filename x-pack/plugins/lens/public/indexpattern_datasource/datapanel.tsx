@@ -424,7 +424,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 label: currentIndexPattern.title,
                 title: currentIndexPattern.title,
                 'data-test-subj': 'indexPattern-switch-link',
-                className: 'lnsInnerIndexPatternDataPanel__triggerButton',
+                fontWeight: 'bold',
               }}
               indexPatternId={currentIndexPatternId}
               indexPatternRefs={indexPatternRefs}

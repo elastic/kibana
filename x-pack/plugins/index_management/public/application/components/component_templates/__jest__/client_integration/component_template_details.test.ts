@@ -26,13 +26,13 @@ const COMPONENT_TEMPLATE: ComponentTemplateDeserialized = {
   },
   version: 1,
   _meta: { description: 'component template test' },
-  _kbnMeta: { usedBy: ['template_1'] },
+  _kbnMeta: { usedBy: ['template_1'], isManaged: false },
 };
 
 const COMPONENT_TEMPLATE_ONLY_REQUIRED_FIELDS: ComponentTemplateDeserialized = {
   name: 'comp-base',
   template: {},
-  _kbnMeta: { usedBy: [] },
+  _kbnMeta: { usedBy: [], isManaged: false },
 };
 
 describe('<ComponentTemplateDetails />', () => {

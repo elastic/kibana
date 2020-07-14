@@ -9,6 +9,7 @@ import '../../../__mocks__/shallow_usecontext.mock';
 import React from 'react';
 import { shallow } from 'enzyme';
 import { EuiEmptyPrompt, EuiButton, EuiLoadingContent } from '@elastic/eui';
+import { ErrorStatePrompt } from '../../../shared/error_state';
 
 jest.mock('../../../shared/telemetry', () => ({
   sendTelemetry: jest.fn(),
@@ -22,7 +23,7 @@ describe('ErrorState', () => {
   it('renders', () => {
     const wrapper = shallow(<ErrorState />);
 
-    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
+    expect(wrapper.find(ErrorStatePrompt)).toHaveLength(1);
   });
 });
 
