@@ -17,7 +17,7 @@ import {
   entriesMatch,
   entriesNested,
   ExceptionListItemSchema,
-} from '../../../lists/common/schemas';
+} from '../shared_imports';
 import { Language, Query } from './schemas/common/schemas';
 
 type Operators = 'and' | 'or' | 'not';

@@ -4,111 +4,77 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import { CancellationToken } from '../../../../common';
 import { CONTENT_TYPE_CSV, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
-import { cryptoFactory } from '../../../lib';
 import { RunTaskFnFactory, ScheduledTaskParams, TaskRunResult } from '../../../types';
-import { CsvResultFromSearch } from '../../csv/types';
-import { FakeRequest, JobParamsPanelCsv, SearchPanel } from '../types';
-import { createGenerateCsv } from './lib';
+import { createGenerateCsv } from '../../csv/server/generate_csv';
+import { JobParamsPanelCsv, SearchPanel } from '../types';
+import { getFakeRequest } from './lib/get_fake_request';
+import { getGenerateCsvParams } from './lib/get_csv_job';
+
+/*
+ * The run function receives the full request which provides the un-encrypted
+ * headers, so encrypted headers are not part of these kind of job params
+ */
+type ImmediateJobParams = Omit<ScheduledTaskParams<JobParamsPanelCsv>, 'headers'>;
 
 /*
  * ImmediateExecuteFn receives the job doc payload because the payload was
  * generated in the ScheduleFn
  */
-export type ImmediateExecuteFn<JobParamsType> = (
+export type ImmediateExecuteFn = (
   jobId: null,
-  job: ScheduledTaskParams<JobParamsType>,
+  job: ImmediateJobParams,
   context: RequestHandlerContext,
   req: KibanaRequest
 ) => Promise<TaskRunResult>;
 
-export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn<
-  JobParamsPanelCsv
->> = function executeJobFactoryFn(reporting, parentLogger) {
+export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function executeJobFactoryFn(
+  reporting,
+  parentLogger
+) {
   const config = reporting.getConfig();
-  const crypto = cryptoFactory(config.get('encryptionKey'));
   const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'execute-job']);
-  const generateCsv = createGenerateCsv(reporting, parentLogger);
 
-  return async function runTask(jobId: string | null, job, context, req) {
+  return async function runTask(jobId: string | null, jobPayload, context, req) {
     // There will not be a jobID for "immediate" generation.
     // jobID is only for "queued" jobs
     // Use the jobID as a logging tag or "immediate"
+    const { jobParams } = jobPayload;
     const jobLogger = logger.clone([jobId === null ? 'immediate' : jobId]);
-
-    const { jobParams } = job;
-    const { isImmediate, panel, visType } = jobParams as JobParamsPanelCsv & { panel: SearchPanel };
-
-    if (!panel) {
-      i18n.translate(
-        'xpack.reporting.exportTypes.csv_from_savedobject.executeJob.failedToAccessPanel',
-        { defaultMessage: 'Failed to access panel metadata for job execution' }
-      );
-    }
+    const generateCsv = createGenerateCsv(jobLogger);
+    const { isImmediate, panel, visType } = jobParams as JobParamsPanelCsv & {
+      panel: SearchPanel;
+    };
 
     jobLogger.debug(`Execute job generating [${visType}] csv`);
 
-    let requestObject: KibanaRequest | FakeRequest;
-
     if (isImmediate && req) {
       jobLogger.info(`Executing job from Immediate API using request context`);
-      requestObject = req;
     } else {
       jobLogger.info(`Executing job async using encrypted headers`);
-      let decryptedHeaders: Record<string, unknown>;
-      const serializedEncryptedHeaders = job.headers;
-      try {
-        if (typeof serializedEncryptedHeaders !== 'string') {
-          throw new Error(
-            i18n.translate(
-              'xpack.reporting.exportTypes.csv_from_savedobject.executeJob.missingJobHeadersErrorMessage',
-              {
-                defaultMessage: 'Job headers are missing',
-              }
-            )
-          );
-        }
-        decryptedHeaders = (await crypto.decrypt(serializedEncryptedHeaders)) as Record<
-          string,
-          unknown
-        >;
-      } catch (err) {
-        jobLogger.error(err);
-        throw new Error(
-          i18n.translate(
-            'xpack.reporting.exportTypes.csv_from_savedobject.executeJob.failedToDecryptReportJobDataErrorMessage',
-            {
-              defaultMessage:
-                'Failed to decrypt report job data. Please ensure that {encryptionKey} is set and re-generate this report. {err}',
-              values: { encryptionKey: 'xpack.reporting.encryptionKey', err },
-            }
-          )
-        );
-      }
-
-      requestObject = { headers: decryptedHeaders };
+      req = await getFakeRequest(jobPayload, config.get('encryptionKey')!, jobLogger);
     }
 
-    let content: string;
-    let maxSizeReached = false;
-    let size = 0;
-    try {
-      const generateResults: CsvResultFromSearch = await generateCsv(
-        context,
-        requestObject,
-        visType as string,
-        panel,
-        jobParams
-      );
+    const savedObjectsClient = context.core.savedObjects.client;
 
-      ({
-        result: { content, maxSizeReached, size },
-      } = generateResults);
-    } catch (err) {
-      jobLogger.error(`Generate CSV Error! ${err}`);
-      throw err;
+    const uiConfig = await reporting.getUiSettingsServiceFactory(savedObjectsClient);
+    const job = await getGenerateCsvParams(jobParams, panel, savedObjectsClient, uiConfig);
+
+    const elasticsearch = reporting.getElasticsearchService();
+    const { callAsCurrentUser } = elasticsearch.legacy.client.asScoped(req);
+
+    const { content, maxSizeReached, size, csvContainsFormulas, warnings } = await generateCsv(
+      job,
+      config,
+      uiConfig,
+      callAsCurrentUser,
+      new CancellationToken() // can not be cancelled
+    );
+
+    if (csvContainsFormulas) {
+      jobLogger.warn(`CSV may contain formulas whose values have been escaped`);
     }
 
     if (maxSizeReached) {
@@ -120,6 +86,8 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn<
       content,
       max_size_reached: maxSizeReached,
       size,
+      csv_contains_formulas: csvContainsFormulas,
+      warnings,
     };
   };
 };

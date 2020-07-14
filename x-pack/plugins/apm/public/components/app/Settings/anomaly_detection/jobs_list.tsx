@@ -16,28 +16,25 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
-import { AnomalyDetectionJobByEnv } from '../../../../../typings/anomaly_detection';
 import { MLJobLink } from '../../../shared/Links/MachineLearningLinks/MLJobLink';
 import { MLLink } from '../../../shared/Links/MachineLearningLinks/MLLink';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
+import { getEnvironmentLabel } from '../../../../../common/environment_filter_values';
+import { LegacyJobsCallout } from './legacy_jobs_callout';
+import { AnomalyDetectionApiResponse } from './index';
 
-const columns: Array<ITableColumn<AnomalyDetectionJobByEnv>> = [
+type Jobs = AnomalyDetectionApiResponse['jobs'];
+
+const columns: Array<ITableColumn<Jobs[0]>> = [
   {
     field: 'environment',
     name: i18n.translate(
       'xpack.apm.settings.anomalyDetection.jobList.environmentColumnLabel',
       { defaultMessage: 'Environment' }
     ),
-    render: (environment: string) => {
-      if (environment === ENVIRONMENT_NOT_DEFINED) {
-        return i18n.translate('xpack.apm.filter.environment.notDefinedLabel', {
-          defaultMessage: 'Not defined',
-        });
-      }
-      return environment;
-    },
+    render: getEnvironmentLabel,
   },
   {
     field: 'job_id',
@@ -60,17 +57,22 @@ const columns: Array<ITableColumn<AnomalyDetectionJobByEnv>> = [
 ];
 
 interface Props {
-  isLoading: boolean;
-  hasFetchFailure: boolean;
+  status: FETCH_STATUS;
   onAddEnvironments: () => void;
-  anomalyDetectionJobsByEnv: AnomalyDetectionJobByEnv[];
+  jobs: Jobs;
+  hasLegacyJobs: boolean;
 }
 export const JobsList = ({
-  isLoading,
-  hasFetchFailure,
+  status,
   onAddEnvironments,
-  anomalyDetectionJobsByEnv,
+  jobs,
+  hasLegacyJobs,
 }: Props) => {
+  const isLoading =
+    status === FETCH_STATUS.PENDING || status === FETCH_STATUS.LOADING;
+
+  const hasFetchFailure = status === FETCH_STATUS.FAILURE;
+
   return (
     <EuiPanel>
       <EuiFlexGroup>
@@ -128,9 +130,11 @@ export const JobsList = ({
           )
         }
         columns={columns}
-        items={isLoading || hasFetchFailure ? [] : anomalyDetectionJobsByEnv}
+        items={jobs}
       />
       <EuiSpacer size="l" />
+
+      {hasLegacyJobs && <LegacyJobsCallout />}
     </EuiPanel>
   );
 };
