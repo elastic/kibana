@@ -77,7 +77,7 @@ export const IPDetailsComponent: React.FC<IPDetailsComponentProps & PropsFromRed
     setIpDetailsTablesActivePageToZero();
   }, [detailName, setIpDetailsTablesActivePageToZero]);
 
-  const { indicesExist, indexPattern } = useWithSource();
+  const { docValueFields, indicesExist, indexPattern } = useWithSource();
   const ip = decodeIpv6(detailName);
   const filterQuery = convertToBuildEsQuery({
     config: esQuery.getEsQueryConfig(uiSettings),
@@ -106,6 +106,7 @@ export const IPDetailsComponent: React.FC<IPDetailsComponentProps & PropsFromRed
             </HeaderPage>
 
             <IpOverviewQuery
+              docValueFields={docValueFields}
               skip={isInitializing}
               sourceId="default"
               filterQuery={filterQuery}

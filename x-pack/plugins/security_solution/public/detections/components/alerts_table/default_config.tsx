@@ -81,6 +81,25 @@ export const buildAlertsRuleIdFilter = (ruleId: string): Filter[] => [
   },
 ];
 
+export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): Filter[] => [
+  ...(showBuildingBlockAlerts
+    ? []
+    : [
+        {
+          meta: {
+            alias: null,
+            negate: true,
+            disabled: false,
+            type: 'exists',
+            key: 'signal.rule.building_block_type',
+            value: 'exists',
+          },
+          // @ts-ignore TODO: Rework parent typings to support ExistsFilter[]
+          exists: { field: 'signal.rule.building_block_type' },
+        },
+      ]),
+];
+
 export const alertsHeaders: ColumnHeaderOptions[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
