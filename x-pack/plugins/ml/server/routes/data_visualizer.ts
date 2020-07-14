@@ -73,7 +73,7 @@ function getHistogramsForFields(
   fields: HistogramField[],
   samplerShardSize: number
 ) {
-  const dv = new DataVisualizer(context.ml!.mlClient.callAsCurrentUser);
+  const dv = new DataVisualizer(context.ml!.mlClient);
   return dv.getHistogramsForFields(indexPatternTitle, query, fields, samplerShardSize);
 }
 
