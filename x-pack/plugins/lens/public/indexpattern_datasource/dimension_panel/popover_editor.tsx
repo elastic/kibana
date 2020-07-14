@@ -119,7 +119,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
       validOperationTypes.push(...operationByField[selectedColumn.sourceField]!);
     }
 
-    return _.uniq(
+    return _.uniqBy(
       [
         ...asOperationOptions(validOperationTypes, true),
         ...asOperationOptions(possibleOperationTypes, false),
@@ -299,25 +299,31 @@ export function PopoverEditor(props: PopoverEditorProps) {
             </EuiFlexItem>
             <EuiFlexItem grow={true} className="lnsIndexPatternDimensionEditor__right">
               {incompatibleSelectedOperationType && selectedColumn && (
-                <EuiCallOut
-                  data-test-subj="indexPattern-invalid-operation"
-                  title={i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {
-                    defaultMessage: 'To use this function, select a different field.',
-                  })}
-                  color="warning"
-                  size="s"
-                  iconType="sortUp"
-                />
+                <>
+                  <EuiCallOut
+                    data-test-subj="indexPattern-invalid-operation"
+                    title={i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {
+                      defaultMessage: 'To use this function, select a different field.',
+                    })}
+                    color="warning"
+                    size="s"
+                    iconType="sortUp"
+                  />
+                  <EuiSpacer size="m" />
+                </>
               )}
               {incompatibleSelectedOperationType && !selectedColumn && (
-                <EuiCallOut
-                  size="s"
-                  data-test-subj="indexPattern-fieldless-operation"
-                  title={i18n.translate('xpack.lens.indexPattern.fieldlessOperationLabel', {
-                    defaultMessage: 'To use this function, select a field.',
-                  })}
-                  iconType="sortUp"
-                />
+                <>
+                  <EuiCallOut
+                    size="s"
+                    data-test-subj="indexPattern-fieldless-operation"
+                    title={i18n.translate('xpack.lens.indexPattern.fieldlessOperationLabel', {
+                      defaultMessage: 'To use this function, select a field.',
+                    })}
+                    iconType="sortUp"
+                  />
+                  <EuiSpacer size="m" />
+                </>
               )}
               {!incompatibleSelectedOperationType && ParamEditor && (
                 <>

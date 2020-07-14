@@ -26,7 +26,7 @@ import { POLICY_STATUS_TO_HEALTH_COLOR } from '../host_constants';
 import { FormattedDateAndTime } from '../../../../../common/components/endpoint/formatted_date_time';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
-import { getEndpointDetailsPath, getPolicyDetailPath } from '../../../../common/routing';
+import { getHostDetailsPath, getPolicyDetailPath } from '../../../../common/routing';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { AgentDetailsReassignConfigAction } from '../../../../../../../ingest_manager/public';
@@ -61,7 +61,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
   const policyStatus = useHostSelector(
     policyResponseStatus
   ) as keyof typeof POLICY_STATUS_TO_HEALTH_COLOR;
-  const { formatUrl } = useFormatUrl(SecurityPageName.management);
+  const { formatUrl } = useFormatUrl(SecurityPageName.administration);
 
   const detailsResultsUpper = useMemo(() => {
     return [
@@ -84,14 +84,14 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
     const { selected_host, show, ...currentUrlParams } = queryParams;
     return [
       formatUrl(
-        getEndpointDetailsPath({
-          name: 'endpointPolicyResponse',
+        getHostDetailsPath({
+          name: 'hostPolicyResponse',
           ...currentUrlParams,
           selected_host: details.host.id,
         })
       ),
-      getEndpointDetailsPath({
-        name: 'endpointPolicyResponse',
+      getHostDetailsPath({
+        name: 'hostPolicyResponse',
         ...currentUrlParams,
         selected_host: details.host.id,
       }),
@@ -106,9 +106,9 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
     path: agentDetailsWithFlyoutPath,
     state: {
       onDoneNavigateTo: [
-        'securitySolution:management',
+        'securitySolution:administration',
         {
-          path: getEndpointDetailsPath({ name: 'endpointDetails', selected_host: details.host.id }),
+          path: getHostDetailsPath({ name: 'hostDetails', selected_host: details.host.id }),
         },
       ],
     },
@@ -200,8 +200,8 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         description: details.host.hostname,
       },
       {
-        title: i18n.translate('xpack.securitySolution.endpoint.host.details.sensorVersion', {
-          defaultMessage: 'Sensor Version',
+        title: i18n.translate('xpack.securitySolution.endpoint.host.details.endpointVersion', {
+          defaultMessage: 'Endpoint Version',
         }),
         description: details.agent.version,
       },

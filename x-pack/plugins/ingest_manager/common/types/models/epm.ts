@@ -42,6 +42,8 @@ export enum AgentAssetType {
   input = 'input',
 }
 
+export type RegistryRelease = 'ga' | 'beta' | 'experimental';
+
 // from /package/{name}
 // type Package struct at https://github.com/elastic/package-registry/blob/master/util/package.go
 // https://github.com/elastic/package-registry/blob/master/docs/api/package.json
@@ -49,6 +51,7 @@ export interface RegistryPackage {
   name: string;
   title?: string;
   version: string;
+  release?: RegistryRelease;
   readme?: string;
   description: string;
   type: string;
@@ -79,6 +82,7 @@ export interface RegistryConfigTemplate {
   title: string;
   description: string;
   inputs: RegistryInput[];
+  multiple?: boolean;
 }
 
 export interface RegistryInput {
@@ -113,6 +117,7 @@ export type RegistrySearchResult = Pick<
   | 'name'
   | 'title'
   | 'version'
+  | 'release'
   | 'description'
   | 'type'
   | 'icons'
@@ -175,6 +180,12 @@ export interface Dataset {
   package: string;
   path: string;
   ingest_pipeline: string;
+  elasticsearch?: RegistryElasticsearch;
+}
+
+export interface RegistryElasticsearch {
+  'index_template.settings'?: object;
+  'index_template.mappings'?: object;
 }
 
 // EPR types this as `[]map[string]interface{}`
@@ -218,7 +229,8 @@ export type PackageInfo = Installable<
 >;
 
 export interface Installation extends SavedObjectAttributes {
-  installed: AssetReference[];
+  installed_kibana: KibanaAssetReference[];
+  installed_es: EsAssetReference[];
   es_index_patterns: Record<string, string>;
   name: string;
   version: string;
@@ -235,19 +247,14 @@ export type NotInstalled<T = {}> = T & {
   status: InstallationStatus.notInstalled;
 };
 
-export type AssetReference = Pick<SavedObjectReference, 'id'> & {
-  type: AssetType | IngestAssetType;
-};
+export type AssetReference = KibanaAssetReference | EsAssetReference;
 
-/**
- * Types of assets which can be installed/removed
- */
-export enum IngestAssetType {
-  IlmPolicy = 'ilm_policy',
-  IndexTemplate = 'index_template',
-  ComponentTemplate = 'component_template',
-  IngestPipeline = 'ingest_pipeline',
-}
+export type KibanaAssetReference = Pick<SavedObjectReference, 'id'> & {
+  type: KibanaAssetType;
+};
+export type EsAssetReference = Pick<SavedObjectReference, 'id'> & {
+  type: ElasticsearchAssetType;
+};
 
 export enum DefaultPackages {
   system = 'system',
@@ -272,6 +279,7 @@ export interface IndexTemplate {
   data_stream: {
     timestamp_field: string;
   };
+  composed_of: string[];
   _meta: object;
 }
 

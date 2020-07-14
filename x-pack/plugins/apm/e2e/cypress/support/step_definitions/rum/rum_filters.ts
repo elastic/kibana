@@ -5,6 +5,7 @@
  */
 
 import { When, Then } from 'cypress-cucumber-preprocessor/steps';
+import { DEFAULT_TIMEOUT } from './rum_dashboard';
 
 When(/^the user filters by "([^"]*)"$/, (filterName) => {
   // wait for all loading to finish
@@ -13,9 +14,13 @@ When(/^the user filters by "([^"]*)"$/, (filterName) => {
   cy.get(`#local-filter-${filterName}`).click();
 
   if (filterName === 'os') {
-    cy.get('button.euiSelectableListItem[title="Mac OS X"]').click();
+    cy.get('button.euiSelectableListItem[title="Mac OS X"]', {
+      timeout: DEFAULT_TIMEOUT,
+    }).click();
   } else {
-    cy.get('button.euiSelectableListItem[title="DE"]').click();
+    cy.get('button.euiSelectableListItem[title="DE"]', {
+      timeout: DEFAULT_TIMEOUT,
+    }).click();
   }
   cy.get('[data-cy=applyFilter]').click();
 });

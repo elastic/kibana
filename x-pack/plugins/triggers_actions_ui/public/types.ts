@@ -32,6 +32,7 @@ export interface ActionConnectorFieldsProps<TActionConnector> {
   errors: IErrorObject;
   docLinks: DocLinksStart;
   http?: HttpSetup;
+  consumer?: string;
 }
 
 export interface ActionParamsProps<TParams> {
@@ -41,6 +42,7 @@ export interface ActionParamsProps<TParams> {
   errors: IErrorObject;
   messageVariables?: string[];
   defaultMessage?: string;
+  docLinks: DocLinksStart;
 }
 
 export interface Pagination {

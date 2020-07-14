@@ -60,7 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
           if (snapshot) {
             const { nodes } = snapshot;
             expect(nodes.length).to.equal(5);
-            const firstNode = first(nodes);
+            const firstNode = first(nodes) as any;
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(1);
             expect(first(firstNode.path)).to.have.property(
@@ -105,7 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
           if (snapshot) {
             const { nodes } = snapshot;
             expect(nodes.length).to.equal(65);
-            const firstNode = first(nodes);
+            const firstNode = first(nodes) as any;
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(1);
             expect(first(firstNode.path)).to.have.property(
@@ -137,7 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
           if (snapshot) {
             const { nodes } = snapshot;
             expect(nodes.length).to.equal(136);
-            const firstNode = first(nodes);
+            const firstNode = first(nodes) as any;
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(1);
             expect(first(firstNode.path)).to.have.property(
@@ -176,7 +176,7 @@ export default function ({ getService }: FtrProviderContext) {
           if (snapshot) {
             const { nodes } = snapshot;
             expect(nodes.length).to.equal(1);
-            const firstNode = first(nodes);
+            const firstNode = first(nodes) as any;
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(1);
             expect(first(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
@@ -187,7 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
                 name: 'cpu',
                 value: 0.0032,
                 max: 0.0038333333333333336,
-                avg: 0.0027944444444444444,
+                avg: 0.002794444444444445,
               },
             ]);
           }
@@ -215,7 +215,7 @@ export default function ({ getService }: FtrProviderContext) {
           if (snapshot) {
             const { nodes } = snapshot;
             expect(nodes.length).to.equal(1);
-            const firstNode = first(nodes);
+            const firstNode = first(nodes) as any;
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(1);
             expect(first(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
@@ -250,7 +250,7 @@ export default function ({ getService }: FtrProviderContext) {
           if (snapshot) {
             const { nodes } = snapshot;
             expect(nodes.length).to.equal(1);
-            const firstNode = first(nodes);
+            const firstNode = first(nodes) as any;
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(1);
             expect(first(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
@@ -287,7 +287,7 @@ export default function ({ getService }: FtrProviderContext) {
         if (snapshot) {
           const { nodes } = snapshot;
           expect(nodes.length).to.equal(1);
-          const firstNode = first(nodes);
+          const firstNode = first(nodes) as any;
           expect(firstNode).to.have.property('path');
           expect(firstNode.path.length).to.equal(1);
           expect(first(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
@@ -322,7 +322,7 @@ export default function ({ getService }: FtrProviderContext) {
           if (snapshot) {
             const { nodes } = snapshot;
             expect(nodes.length).to.equal(1);
-            const firstNode = first(nodes);
+            const firstNode = first(nodes) as any;
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(2);
             expect(first(firstNode.path)).to.have.property('value', 'virtualbox');
@@ -350,7 +350,7 @@ export default function ({ getService }: FtrProviderContext) {
           if (snapshot) {
             const { nodes } = snapshot;
             expect(nodes.length).to.equal(1);
-            const firstNode = first(nodes);
+            const firstNode = first(nodes) as any;
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(3);
             expect(first(firstNode.path)).to.have.property('value', 'vagrant');
@@ -378,7 +378,7 @@ export default function ({ getService }: FtrProviderContext) {
           if (snapshot) {
             const { nodes } = snapshot;
             expect(nodes.length).to.equal(2);
-            const firstNode = nodes[0];
+            const firstNode = nodes[0] as any;
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(2);
             expect(firstNode.path[0]).to.have.property('value', 'mysql');
@@ -389,10 +389,10 @@ export default function ({ getService }: FtrProviderContext) {
                 name: 'cpu',
                 value: 0.0032,
                 max: 0.0038333333333333336,
-                avg: 0.0027944444444444444,
+                avg: 0.002794444444444445,
               },
             ]);
-            const secondNode = nodes[1];
+            const secondNode = nodes[1] as any;
             expect(secondNode).to.have.property('path');
             expect(secondNode.path.length).to.equal(2);
             expect(secondNode.path[0]).to.have.property('value', 'system');
@@ -403,7 +403,7 @@ export default function ({ getService }: FtrProviderContext) {
                 name: 'cpu',
                 value: 0.0032,
                 max: 0.0038333333333333336,
-                avg: 0.0027944444444444444,
+                avg: 0.002794444444444445,
               },
             ]);
           }

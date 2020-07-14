@@ -110,7 +110,7 @@ function renderMustache(
 
   if (isObject(input)) {
     return Object.keys(input).reduce((acc, key) => {
-      const value = input[key];
+      const value = (input as any)[key];
 
       return { ...acc, [key]: renderMustache(value, ctx) };
     }, {});

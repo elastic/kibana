@@ -71,7 +71,7 @@ export const JobType: FC<Props> = ({ type, setFormState }) => {
             setFormState({
               previousJobType: type,
               jobType: value,
-              excludes: [],
+              includes: [],
               requiredFieldsError: undefined,
             });
           }}

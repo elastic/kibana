@@ -30,7 +30,7 @@ function findOrCreateGroupWithNodes(
    * then look for the group in it's sub groups.
    */
   if (path.length === 2) {
-    const parentId = first(path).value;
+    const parentId = (first(path) as any).value;
     const existingParentGroup = groups.find((g) => g.id === parentId);
     if (isWaffleMapGroupWithGroups(existingParentGroup)) {
       const existingSubGroup = existingParentGroup.groups.find((g) => g.id === id);

@@ -103,7 +103,7 @@ This is the primary function for an alert type. Whenever the alert needs to exec
 |---|---|
 |services.callCluster(path, opts)|Use this to do Elasticsearch queries on the cluster Kibana connects to. This function is the same as any other `callCluster` in Kibana but in the context of the user who created the alert when security is enabled.|
 |services.savedObjectsClient|This is an instance of the saved objects client. This provides the ability to do CRUD on any saved objects within the same space the alert lives in.<br><br>The scope of the saved objects client is tied to the user who created the alert (only when security isenabled).|
-|services.getScopedCallCluster|This function scopes an instance of CallCluster by returning a `callCluster(path, opts)` function that runs in the context of the user who created the alert when security is enabled. This must only be called with instances of CallCluster provided by core.|
+|services.getLegacyScopedClusterClient|This function returns an instance of the LegacyScopedClusterClient scoped to the user who created the alert when security is enabled.|
 |services.alertInstanceFactory(id)|This [alert instance factory](#alert-instance-factory) creates instances of alerts and must be used in order to execute actions. The id you give to the alert instance factory is a unique identifier to the alert instance.|
 |services.log(tags, [data], [timestamp])|Use this to create server logs. (This is the same function as server.log)|
 |startedAt|The date and time the alert type started execution.|
@@ -482,13 +482,15 @@ A schedule is structured such that the key specifies the format you wish to use 
 We currently support the _Interval format_ which specifies the interval in seconds, minutes, hours or days at which the alert should execute.
 Example: `{ interval: "10s" }`, `{ interval: "5m" }`, `{ interval: "1h" }`, `{ interval: "1d" }`.
 
-There are plans to support multiple other schedule formats in the near fuiture.
+There are plans to support multiple other schedule formats in the near future.
 
 ## Alert instance factory
 
 **alertInstanceFactory(id)**
 
-One service passed in to alert types is an alert instance factory. This factory creates instances of alerts and must be used in order to execute actions. The id you give to the alert instance factory is a unique identifier to the alert instance (ex: server identifier if the instance is about the server). The instance factory will use this identifier to retrieve the state of previous instances with the same id. These instances support state persisting between alert type execution, but will clear out once the alert instance stops executing.
+One service passed in to alert types is an alert instance factory. This factory creates instances of alerts and must be used in order to execute actions. The `id` you give to the alert instance factory is a unique identifier to the alert instance (ex: server identifier if the instance is about the server). The instance factory will use this identifier to retrieve the state of previous instances with the same `id`. These instances support state persisting between alert type execution, but will clear out once the alert instance stops executing.
+
+Note that the `id` only needs to be unique **within the scope of a specific alert**, not unique across all alerts or alert types. For example, Alert 1 and Alert 2 can both create an alert instance with an `id` of `"a"` without conflicting with one another. But if Alert 1 creates 2 alert instances, then they must be differentiated with `id`s of `"a"` and `"b"`.
 
 This factory returns an instance of `AlertInstance`. The alert instance class has the following methods, note that we have removed the methods that you shouldn't touch.
 

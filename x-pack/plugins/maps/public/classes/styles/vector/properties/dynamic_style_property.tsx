@@ -43,6 +43,7 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   supportsMbFeatureState(): boolean;
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null;
   pluckCategoricalStyleMetaFromFeatures(features: Feature[]): CategoryFieldMeta | null;
+  getValueSuggestions(query: string): Promise<string[]>;
 }
 
 type fieldFormatter = (value: string | undefined) => string;
@@ -68,10 +69,12 @@ export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
     this._getFieldFormatter = getFieldFormatter;
   }
 
+  // ignore TS error about "Type '(query: string) => Promise<string[]> | never[]' is not assignable to type '(query: string) => Promise<string[]>'."
+  // @ts-expect-error
   getValueSuggestions = (query: string) => {
-    const field = this.getField();
-    const fieldSource = this._getFieldSource();
-    return fieldSource && field ? fieldSource.getValueSuggestions(field, query) : [];
+    return this._field === null
+      ? []
+      : this._field.getSource().getValueSuggestions(this._field, query);
   };
 
   _getStyleMetaDataRequestId(fieldName: string) {
@@ -137,10 +140,6 @@ export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
 
   getField() {
     return this._field;
-  }
-
-  _getFieldSource() {
-    return this._field ? this._field.getSource() : null;
   }
 
   getFieldName() {

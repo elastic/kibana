@@ -32,7 +32,7 @@ export const ALL_URL_STATE_KEYS: KeyUrlState[] = [
 ];
 
 export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
-  alerts: [
+  detections: [
     CONSTANTS.appQuery,
     CONSTANTS.filters,
     CONSTANTS.savedQuery,
@@ -46,7 +46,7 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
     CONSTANTS.timerange,
     CONSTANTS.timeline,
   ],
-  management: [],
+  administration: [],
   network: [
     CONSTANTS.appQuery,
     CONSTANTS.filters,
@@ -80,7 +80,7 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
 export type LocationTypes =
   | CONSTANTS.caseDetails
   | CONSTANTS.casePage
-  | CONSTANTS.alertsPage
+  | CONSTANTS.detectionsPage
   | CONSTANTS.hostsDetails
   | CONSTANTS.hostsPage
   | CONSTANTS.networkDetails

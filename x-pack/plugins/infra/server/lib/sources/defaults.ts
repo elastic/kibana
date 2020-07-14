@@ -9,8 +9,8 @@ import { InfraSourceConfiguration } from '../../../common/http_api/source_api';
 export const defaultSourceConfiguration: InfraSourceConfiguration = {
   name: 'Default',
   description: '',
-  metricAlias: 'metricbeat-*',
-  logAlias: 'filebeat-*,kibana_sample_data_logs*',
+  metricAlias: 'metrics-*,metricbeat-*',
+  logAlias: 'logs-*,filebeat-*,kibana_sample_data_logs*',
   fields: {
     container: 'container.id',
     host: 'host.name',

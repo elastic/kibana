@@ -50,6 +50,39 @@ export const DAYS = i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeO
   defaultMessage: 'days',
 });
 
+export const WEEKS_TIME_RANGE = i18n.translate(
+  'xpack.uptime.alerts.timerangeUnitSelectable.weeksOption.ariaLabel',
+  {
+    defaultMessage: '"Weeks" time range select item',
+  }
+);
+
+export const WEEKS = i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.weeks', {
+  defaultMessage: 'weeks',
+});
+
+export const MONTHS_TIME_RANGE = i18n.translate(
+  'xpack.uptime.alerts.timerangeUnitSelectable.monthsOption.ariaLabel',
+  {
+    defaultMessage: '"Months" time range select item',
+  }
+);
+
+export const MONTHS = i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.months', {
+  defaultMessage: 'months',
+});
+
+export const YEARS_TIME_RANGE = i18n.translate(
+  'xpack.uptime.alerts.timerangeUnitSelectable.yearsOption.ariaLabel',
+  {
+    defaultMessage: '"Years" time range select item',
+  }
+);
+
+export const YEARS = i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.years', {
+  defaultMessage: 'years',
+});
+
 export const ALERT_KUERY_BAR_ARIA = i18n.translate(
   'xpack.uptime.alerts.monitorStatus.filterBar.ariaLabel',
   {
@@ -96,6 +129,92 @@ export const ENTER_NUMBER_OF_TIME_UNITS = i18n.translate(
   'xpack.uptime.alerts.monitorStatus.timerangeValueField.ariaLabel',
   {
     defaultMessage: `Enter the number of time units for the alert's range`,
+  }
+);
+
+export const ENTER_NUMBER_OF_TIME_UNITS_DESCRIPTION = i18n.translate(
+  'xpack.uptime.alerts.monitorStatus.timerangeValueField.expression',
+  {
+    defaultMessage: 'within',
+  }
+);
+
+export const ENTER_NUMBER_OF_TIME_UNITS_VALUE = (value: number) =>
+  i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeValueField.value', {
+    defaultMessage: 'last {value}',
+    values: { value },
+  });
+
+export const ENTER_AVAILABILITY_RANGE_ENABLED = i18n.translate(
+  'xpack.uptime.alerts.monitorStatus.availability.isEnabledCheckbox.label',
+  {
+    defaultMessage: 'Availability',
+  }
+);
+
+export const ENTER_AVAILABILITY_RANGE_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.uptime.alerts.monitorStatus.availability.timerangeValueField.popover.ariaLabel',
+  {
+    defaultMessage: 'Specify availability tracking time range',
+  }
+);
+
+export const ENTER_AVAILABILITY_RANGE_UNITS_ARIA_LABEL = i18n.translate(
+  'xpack.uptime.alerts.monitorStatus.availability.timerangeValueField.ariaLabel',
+  {
+    defaultMessage: `Enter the number of units for the alert's availability check.`,
+  }
+);
+
+export const ENTER_AVAILABILITY_RANGE_UNITS_DESCRIPTION = i18n.translate(
+  'xpack.uptime.alerts.monitorStatus.availability.timerangeValueField.expression',
+  {
+    defaultMessage: 'within the last',
+  }
+);
+
+export const ENTER_AVAILABILITY_THRESHOLD_ARIA_LABEL = i18n.translate(
+  'xpack.uptime.alerts.monitorStatus.availability.threshold.ariaLabel',
+  {
+    defaultMessage: 'Specify availability thresholds for this alert',
+  }
+);
+
+export const ENTER_AVAILABILITY_THRESHOLD_INPUT_ARIA_LABEL = i18n.translate(
+  'xpack.uptime.alerts.monitorStatus.availability.threshold.input.ariaLabel',
+  {
+    defaultMessage: 'Input an availability threshold to check for this alert',
+  }
+);
+
+export const ENTER_AVAILABILITY_THRESHOLD_DESCRIPTION = i18n.translate(
+  'xpack.uptime.alerts.monitorStatus.availability.threshold.description',
+  {
+    defaultMessage: 'matching monitors are up in',
+    description:
+      'This fragment explains that an alert will fire for monitors matching user-specified criteria',
+  }
+);
+
+export const ENTER_AVAILABILITY_THRESHOLD_VALUE = (value: string) =>
+  i18n.translate('xpack.uptime.alerts.monitorStatus.availability.threshold.value', {
+    defaultMessage: '< {value}% of checks',
+    description:
+      'This fragment specifies criteria that will cause an alert to fire for uptime monitors',
+    values: { value },
+  });
+
+export const ENTER_AVAILABILITY_RANGE_SELECT_ARIA = i18n.translate(
+  'xpack.uptime.alerts.monitorStatus.availability.unit.selectable',
+  {
+    defaultMessage: 'Use this select to set the availability range units for this alert',
+  }
+);
+
+export const ENTER_AVAILABILITY_RANGE_SELECT_HEADLINE = i18n.translate(
+  'xpack.uptime.alerts.monitorStatus.availability.unit.headline',
+  {
+    defaultMessage: 'Select time range unit',
   }
 );
 

@@ -17,6 +17,8 @@ import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
 import { wait } from '../../../../common/lib/helpers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
+import { SELECTOR_TIMELINE_BODY_CLASS_NAME, TimelineBody } from '../styles';
+import { ReactWrapper } from '@elastic/eui/node_modules/@types/enzyme';
 
 const testBodyHeight = 700;
 const mockGetNotesByIds = (eventId: string[]) => [];
@@ -32,7 +34,11 @@ jest.mock('react-redux', () => {
     useSelector: jest.fn(),
   };
 });
+
 jest.mock('../../../../common/components/link_to');
+
+// Prevent Resolver from rendering
+jest.mock('../../graph_overlay');
 
 jest.mock(
   'react-visibility-sensor',
@@ -133,6 +139,43 @@ describe('Body', () => {
         ).toEqual(true);
       });
     }, 20000);
+
+    test(`it add attribute data-timeline-id in ${SELECTOR_TIMELINE_BODY_CLASS_NAME}`, () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Body {...props} />
+        </TestProviders>
+      );
+      expect(
+        wrapper
+          .find(`[data-timeline-id="timeline-test"].${SELECTOR_TIMELINE_BODY_CLASS_NAME}`)
+          .first()
+          .exists()
+      ).toEqual(true);
+    });
+    describe('when there is a graphEventId', () => {
+      beforeEach(() => {
+        props.graphEventId = 'graphEventId'; // any string w/ length > 0 works
+      });
+      it('should not render the timeline body', () => {
+        const wrapper = mount(
+          <TestProviders>
+            <Body {...props} />
+          </TestProviders>
+        );
+
+        // The value returned if `wrapper.find` returns a `TimelineBody` instance.
+        type TimelineBodyEnzymeWrapper = ReactWrapper<React.ComponentProps<typeof TimelineBody>>;
+
+        // The first TimelineBody component
+        const timelineBody: TimelineBodyEnzymeWrapper = wrapper
+          .find('[data-test-subj="timeline-body"]')
+          .first() as TimelineBodyEnzymeWrapper;
+
+        // the timeline body still renders, but it gets a `display: none` style via `styled-components`.
+        expect(timelineBody.props().visible).toBe(false);
+      });
+    });
   });
 
   describe('action on event', () => {

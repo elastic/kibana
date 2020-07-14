@@ -6,11 +6,9 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { ActionCreator } from 'typescript-fsa';
 
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TestProviders } from '../../../common/mock';
-import { ColumnHeaderOptions } from '../../store/timeline/model';
 
 import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from './helpers';
 
@@ -29,17 +27,6 @@ afterAll(() => {
   console.warn = originalWarn;
 });
 
-const removeColumnMock = (jest.fn() as unknown) as ActionCreator<{
-  id: string;
-  columnId: string;
-}>;
-
-const upsertColumnMock = (jest.fn() as unknown) as ActionCreator<{
-  column: ColumnHeaderOptions;
-  id: string;
-  index: number;
-}>;
-
 describe('StatefulFieldsBrowser', () => {
   const timelineId = 'test';
 
@@ -54,13 +41,11 @@ describe('StatefulFieldsBrowser', () => {
           timelineId={timelineId}
           toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
-          removeColumn={removeColumnMock}
-          upsertColumn={upsertColumnMock}
         />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="show-field-browser"]').first().text()).toEqual('Columns');
+    expect(wrapper.find('[data-test-subj="show-field-browser"]').exists()).toBe(true);
   });
 
   describe('toggleShow', () => {
@@ -75,8 +60,6 @@ describe('StatefulFieldsBrowser', () => {
             timelineId={timelineId}
             toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
-            removeColumn={removeColumnMock}
-            upsertColumn={upsertColumnMock}
           />
         </TestProviders>
       );
@@ -95,8 +78,6 @@ describe('StatefulFieldsBrowser', () => {
             timelineId={timelineId}
             toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
-            removeColumn={removeColumnMock}
-            upsertColumn={upsertColumnMock}
           />
         </TestProviders>
       );
@@ -122,8 +103,6 @@ describe('StatefulFieldsBrowser', () => {
             timelineId={timelineId}
             toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
-            removeColumn={removeColumnMock}
-            upsertColumn={upsertColumnMock}
           />
         </TestProviders>
       );
@@ -149,8 +128,6 @@ describe('StatefulFieldsBrowser', () => {
             timelineId={timelineId}
             toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
-            removeColumn={removeColumnMock}
-            upsertColumn={upsertColumnMock}
           />
         </TestProviders>
       );
@@ -186,39 +163,14 @@ describe('StatefulFieldsBrowser', () => {
           timelineId={timelineId}
           toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
-          removeColumn={removeColumnMock}
-          upsertColumn={upsertColumnMock}
         />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="show-field-browser-gear"]').first().exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="show-field-browser"]').first().exists()).toBe(true);
   });
 
-  test('it does NOT render the Fields Browser button as a settings gear when the isEventViewer prop is false', () => {
-    const isEventViewer = false;
-
-    const wrapper = mount(
-      <TestProviders>
-        <StatefulFieldsBrowserComponent
-          browserFields={mockBrowserFields}
-          columnHeaders={[]}
-          height={FIELD_BROWSER_HEIGHT}
-          isEventViewer={isEventViewer}
-          onUpdateColumns={jest.fn()}
-          timelineId={timelineId}
-          toggleColumn={jest.fn()}
-          width={FIELD_BROWSER_WIDTH}
-          removeColumn={removeColumnMock}
-          upsertColumn={upsertColumnMock}
-        />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="show-field-browser-gear"]').first().exists()).toBe(false);
-  });
-
-  test('it does NOT render the default Fields Browser button when the isEventViewer prop is true', () => {
+  test('it renders the Fields Browser button as a settings gear when the isEventViewer prop is false', () => {
     const isEventViewer = true;
 
     const wrapper = mount(
@@ -232,12 +184,10 @@ describe('StatefulFieldsBrowser', () => {
           timelineId={timelineId}
           toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
-          removeColumn={removeColumnMock}
-          upsertColumn={upsertColumnMock}
         />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="show-field-browser"]').first().exists()).toBe(false);
+    expect(wrapper.find('[data-test-subj="show-field-browser"]').first().exists()).toBe(true);
   });
 });

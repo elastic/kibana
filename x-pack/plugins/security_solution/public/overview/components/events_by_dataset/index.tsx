@@ -27,9 +27,9 @@ import {
   IIndexPattern,
   Query,
 } from '../../../../../../../src/plugins/data/public';
-import { inputsModel } from '../../../common/store';
 import { HostsTableType, HostsType } from '../../../hosts/store/model';
 import { InputsModelId } from '../../../common/store/inputs/constants';
+import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 import * as i18n from '../../pages/translations';
 import { SecurityPageName } from '../../../app/types';
@@ -42,25 +42,17 @@ const DEFAULT_STACK_BY = 'event.dataset';
 
 const ID = 'eventsByDatasetOverview';
 
-interface Props {
+interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
   combinedQueries?: string;
-  deleteQuery?: ({ id }: { id: string }) => void;
   filters?: Filter[];
-  from: number;
   headerChildren?: React.ReactNode;
   indexPattern: IIndexPattern;
   indexToAdd?: string[] | null;
   onlyField?: string;
   query?: Query;
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
-  setQuery: (params: {
-    id: string;
-    inspect: inputsModel.InspectQuery | null;
-    loading: boolean;
-    refetch: inputsModel.Refetch;
-  }) => void;
   showSpacer?: boolean;
-  to: number;
+  timelineId?: string;
 }
 
 const getHistogramOption = (fieldName: string): MatrixHistogramOption => ({
@@ -81,6 +73,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   setAbsoluteRangeDatePickerTarget,
   setQuery,
   showSpacer = true,
+  timelineId,
   to,
 }) => {
   // create a unique, but stable (across re-renders) query id
@@ -177,6 +170,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       showSpacer={showSpacer}
       sourceId="default"
       startDate={from}
+      timelineId={timelineId}
       type={HostsType.page}
       {...eventsByDatasetHistogramConfigs}
       title={onlyField != null ? i18n.TOP(onlyField) : eventsByDatasetHistogramConfigs.title}

@@ -11,7 +11,6 @@ import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_de
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { IStyleProperty } from '../../styles/vector/properties/style_property';
 import {
-  SOURCE_TYPES,
   COUNT_PROP_LABEL,
   COUNT_PROP_NAME,
   LAYER_TYPE,
@@ -41,6 +40,10 @@ import { IStyle } from '../../styles/style';
 import { IVectorSource } from '../../sources/vector_source';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
+
+interface CountData {
+  isSyncClustered: boolean;
+}
 
 function getAggType(dynamicProperty: IDynamicStyleProperty<DynamicStylePropertyOptions>): AGG_TYPE {
   return dynamicProperty.isOrdinal() ? AGG_TYPE.AVG : AGG_TYPE.TERMS;
@@ -116,7 +119,7 @@ function getClusterStyleDescriptor(
       ) {
         // copy none static/dynamic styles to cluster style
         clusterStyleDescriptor.properties[styleName] = {
-          // @ts-ignore
+          // @ts-expect-error
           options: { ...styleProperty.getOptions() },
         };
       } else if (styleProperty.isDynamic()) {
@@ -127,14 +130,12 @@ function getClusterStyleDescriptor(
             ? {
                 ...options.field,
                 name: clusterSource.getAggKey(
-                  getAggType(
-                    (styleProperty as unknown) as IDynamicStyleProperty<DynamicStylePropertyOptions>
-                  ),
+                  getAggType(styleProperty as IDynamicStyleProperty<DynamicStylePropertyOptions>),
                   options.field.name
                 ),
               }
             : undefined;
-        // @ts-ignore
+        // @ts-expect-error
         clusterStyleDescriptor.properties[styleName] = {
           type: STYLE_TYPE.DYNAMIC,
           options: {
@@ -144,7 +145,7 @@ function getClusterStyleDescriptor(
         };
       } else {
         // copy static styles to cluster style
-        // @ts-ignore
+        // @ts-expect-error
         clusterStyleDescriptor.properties[styleName] = {
           type: STYLE_TYPE.STATIC,
           options: { ...styleProperty.getOptions() },
@@ -195,14 +196,10 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     this._clusterStyle = new VectorStyle(clusterStyleDescriptor, this._clusterSource, this);
 
     let isClustered = false;
-    const sourceDataRequest = this.getSourceDataRequest();
-    if (sourceDataRequest) {
-      const requestMeta = sourceDataRequest.getMeta();
-      if (
-        requestMeta &&
-        requestMeta.sourceType &&
-        requestMeta.sourceType === SOURCE_TYPES.ES_GEO_GRID
-      ) {
+    const countDataRequest = this.getDataRequest(ACTIVE_COUNT_DATA_ID);
+    if (countDataRequest) {
+      const requestData = countDataRequest.getData() as CountData;
+      if (requestData && requestData.isSyncClustered) {
         isClustered = true;
       }
     }
@@ -228,8 +225,12 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
       : displayName;
   }
 
-  isJoinable() {
-    return false;
+  showJoinEditor() {
+    return true;
+  }
+
+  getJoinsDisabledReason() {
+    return this._documentSource.getJoinsDisabledReason();
   }
 
   getJoins() {
@@ -288,7 +289,8 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
         const resp = await searchSource.fetch();
         const maxResultWindow = await this._documentSource.getMaxResultWindow();
         isSyncClustered = resp.hits.total > maxResultWindow;
-        syncContext.stopLoading(dataRequestId, requestToken, { isSyncClustered }, searchFilters);
+        const countData = { isSyncClustered } as CountData;
+        syncContext.stopLoading(dataRequestId, requestToken, countData, searchFilters);
       } catch (error) {
         if (!(error instanceof DataRequestAbortError)) {
           syncContext.onLoadError(dataRequestId, requestToken, error.message);

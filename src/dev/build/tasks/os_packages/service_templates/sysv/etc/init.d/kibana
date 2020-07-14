@@ -39,7 +39,7 @@ emit() {
 start() {
   [ ! -d "/var/log/kibana/" ] && mkdir "/var/log/kibana/"
   chown "$user":"$group" "/var/log/kibana/"
-  chmod 755 "/var/log/kibana/"
+  chmod 2750 "/var/log/kibana/"
 
   [ ! -d "/var/run/kibana/" ] && mkdir "/var/run/kibana/"
   chown "$user":"$group" "/var/run/kibana/"
