@@ -16,13 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
-import { TimelionPlugin } from './plugin';
-import { configSchema, TimelionConfigType } from './config';
 
-export const config: PluginConfigDescriptor<TimelionConfigType> = {
-  schema: configSchema.schema,
-};
-
-export const plugin = (context: PluginInitializerContext<TimelionConfigType>) =>
-  new TimelionPlugin(context);
+import './webpackShims/jquery.flot';
+import './webpackShims/jquery.flot.time';
+import './webpackShims/jquery.flot.symbol';
+import './webpackShims/jquery.flot.crosshair';
+import './webpackShims/jquery.flot.selection';
+import './webpackShims/jquery.flot.stack';
+import './webpackShims/jquery.flot.axislabels';
