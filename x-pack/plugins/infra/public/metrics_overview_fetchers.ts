@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
-import { sum, isFinite, isNumber } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { MetricsFetchDataResponse, FetchDataParams } from '../../observability/public';
+import { isFinite, isNumber, sum } from 'lodash';
+import { FetchDataParams, MetricsFetchDataResponse } from '../../observability/public';
 import {
-  SnapshotRequest,
   SnapshotMetricInput,
   SnapshotNode,
   SnapshotNodeResponse,
+  SnapshotRequest,
 } from '../common/http_api/snapshot_api';
 import { SnapshotMetricType } from '../common/inventory_models/types';
 import { InfraClientCoreSetup } from './types';
@@ -77,13 +75,12 @@ export const combineNodeTimeseriesBy = (
 
 export const createMetricsFetchData = (
   getStartServices: InfraClientCoreSetup['getStartServices']
-) => async ({
-  startTime,
-  endTime,
-  bucketSize,
-}: FetchDataParams): Promise<MetricsFetchDataResponse> => {
+) => async ({ absoluteTime, bucketSize }: FetchDataParams): Promise<MetricsFetchDataResponse> => {
   const [coreServices] = await getStartServices();
   const { http } = coreServices;
+
+  const { start, end } = absoluteTime;
+
   const snapshotRequest: SnapshotRequest = {
     sourceId: 'default',
     metrics: ['cpu', 'memory', 'rx', 'tx'].map((type) => ({ type })) as SnapshotMetricInput[],
@@ -91,8 +88,8 @@ export const createMetricsFetchData = (
     nodeType: 'host',
     includeTimeseries: true,
     timerange: {
-      from: moment(startTime).valueOf(),
-      to: moment(endTime).valueOf(),
+      from: start,
+      to: end,
       interval: bucketSize,
       forceInterval: true,
       ignoreLookback: true,
@@ -102,12 +99,8 @@ export const createMetricsFetchData = (
   const results = await http.post<SnapshotNodeResponse>('/api/metrics/snapshot', {
     body: JSON.stringify(snapshotRequest),
   });
-
   return {
-    title: i18n.translate('xpack.infra.observabilityHomepage.metrics.title', {
-      defaultMessage: 'Metrics',
-    }),
-    appLink: '/app/metrics',
+    appLink: `/app/metrics/inventory?waffleTime=(currentTime:${end},isAutoReloading:!f)`,
     stats: {
       hosts: {
         type: 'number',
