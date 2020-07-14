@@ -88,9 +88,8 @@ export function getTableVisualizationControllerClass(
           //
           // In case some prop is missing check into the top of the chain if they are available and check
           // the list above that it is passing through
-
           this.$scope.vis = this.vis;
-          this.$scope.visState = { params: visParams, title: this.vis.title };
+          this.$scope.visState = { params: visParams, title: visParams.title };
           this.$scope.esResponse = esResponse;
 
           this.$scope.visParams = visParams;
