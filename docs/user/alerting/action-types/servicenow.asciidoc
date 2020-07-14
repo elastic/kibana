@@ -64,7 +64,7 @@ Severity::             The severity value of the incident.
 Impact::               The effect an incident has on business. Can be measured by number of users affected or by the criticality of the business system in question.
 Short description::    A short text field to describe the incident. The book icon will search the knowledge base using the contents of the short description. 
 Description::          The details about the incident issue in question.
-Additional comments::  The additional instructions or other information meant for the client, and any work notes or steps shoudl be taken to troubleshoot the issue.
+Additional comments::  Additional information for the client, such as how to troubleshoot the issue.
 
 [[configuring-servicenow]]
 ==== Configuring and testing ServiceNow
