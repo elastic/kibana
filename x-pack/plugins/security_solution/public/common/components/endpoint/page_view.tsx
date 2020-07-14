@@ -25,15 +25,17 @@ import { EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 
 const StyledEuiPage = styled(EuiPage)`
   &.endpoint--isListView {
-    padding: 0 ${(props) => props.theme.eui.euiSizeL};
+    padding: 0;
+    flex: 1 1 100%;
 
     .endpoint-header {
       padding: ${(props) => props.theme.eui.euiSizeL};
       margin-bottom: 0;
     }
     .endpoint-page-content {
-      border-left: none;
-      border-right: none;
+      border: none;
+      box-shadow: none;
+      border-radius: 0;
     }
   }
   &.endpoint--isDetailsView {
@@ -44,7 +46,7 @@ const StyledEuiPage = styled(EuiPage)`
     }
   }
   .endpoint-navTabs {
-    margin-left: ${(props) => props.theme.eui.euiSizeM};
+    padding-left: ${(props) => props.theme.eui.euiSizeM};
   }
   .endpoint-header-leftSection {
     overflow: hidden;

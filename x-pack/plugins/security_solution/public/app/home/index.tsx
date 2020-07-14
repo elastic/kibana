@@ -7,6 +7,7 @@
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useThrottledResizeObserver } from '../../common/components/utils';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout } from '../../timelines/components/flyout';
@@ -20,7 +21,7 @@ import { navTabs } from './home_navigations';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 
 const WrappedByAutoSizer = styled.div`
-  height: 100%;
+  min-height: calc(100vh - 48px);
 `;
 WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
 
@@ -69,10 +70,17 @@ export const HomePage: React.FC<HomePageProps> = ({ children }) => {
   const { browserFields, indexPattern, indicesExist } = useWithSource('default', indexToAdd);
 
   return (
-    <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" ref={measureRef}>
-      <HeaderGlobal />
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="none"
+      data-test-subj="wrapped-by-auto-sizer"
+      style={{ minHeight: 'calc(100vh - 48px)' }}
+    >
+      <EuiFlexItem grow={false}>
+        <HeaderGlobal className="euiFlexItem" />
+      </EuiFlexItem>
 
-      <Main data-test-subj="pageContainer">
+      <EuiFlexItem data-test-subj="pageContainer">
         <DragDropContextWrapper browserFields={browserFields}>
           <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
           {indicesExist && showTimeline && (
@@ -88,10 +96,10 @@ export const HomePage: React.FC<HomePageProps> = ({ children }) => {
 
           {children}
         </DragDropContextWrapper>
-      </Main>
+      </EuiFlexItem>
 
       <HelpMenu />
-    </WrappedByAutoSizer>
+    </EuiFlexGroup>
   );
 };
 
