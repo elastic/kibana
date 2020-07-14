@@ -28,8 +28,5 @@ export function uniqLabels(arr) {
     throw new TypeError('UniqLabelUtil expects an array of objects');
   }
 
-  return _(arr)
-    .pluck('label')
-    .unique()
-    .value();
+  return _(arr).map('label').uniq().value();
 }

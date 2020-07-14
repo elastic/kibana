@@ -33,7 +33,7 @@ export const JobIdInput: FC = () => {
     <Description validation={validation}>
       <EuiFieldText
         value={jobId}
-        onChange={e => setJobId(e.target.value)}
+        onChange={(e) => setJobId(e.target.value)}
         isInvalid={validation.valid === false}
         data-test-subj="mlJobWizardInputJobId"
       />

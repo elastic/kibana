@@ -36,6 +36,7 @@ export function vSphereMetricsSpecProvider(context: TutorialContext): TutorialSc
     name: i18n.translate('home.tutorials.vsphereMetrics.nameTitle', {
       defaultMessage: 'vSphere metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.vsphereMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from vSphere.',
@@ -55,7 +56,7 @@ export function vSphereMetricsSpecProvider(context: TutorialContext): TutorialSc
         label: i18n.translate('home.tutorials.vsphereMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {

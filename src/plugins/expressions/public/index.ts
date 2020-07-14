@@ -30,7 +30,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 // Static exports.
-export { ExpressionExecutor, IExpressionLoaderParams } from './types';
+export { ExpressionExecutor, IExpressionLoaderParams, ExpressionRenderError } from './types';
 export {
   ExpressionRendererComponent,
   ReactExpressionRenderer,
@@ -78,7 +78,7 @@ export {
   ExpressionValueRender,
   ExpressionValueSearchContext,
   ExpressionValueUnboxed,
-  Filter,
+  ExpressionValueFilter,
   Font,
   FontLabel,
   FontStyle,

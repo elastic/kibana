@@ -40,7 +40,7 @@ const secretSchemaProps = {
   password: schema.nullable(schema.string()),
 };
 const SecretsSchema = schema.object(secretSchemaProps, {
-  validate: secrets => {
+  validate: (secrets) => {
     // user and password must be set together (or not at all)
     if (!secrets.password && !secrets.user) return;
     if (secrets.password && secrets.user) return;
@@ -85,8 +85,20 @@ function validateActionTypeConfig(
   configurationUtilities: ActionsConfigurationUtilities,
   configObject: ActionTypeConfigType
 ) {
+  let url: URL;
   try {
-    configurationUtilities.ensureWhitelistedUri(configObject.url);
+    url = new URL(configObject.url);
+  } catch (err) {
+    return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationErrorNoHostname', {
+      defaultMessage: 'error configuring webhook action: unable to parse url: {err}',
+      values: {
+        err,
+      },
+    });
+  }
+
+  try {
+    configurationUtilities.ensureWhitelistedUri(url.toString());
   } catch (whitelistError) {
     return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationError', {
       defaultMessage: 'error configuring webhook action: {message}',
@@ -147,7 +159,7 @@ export async function executor(
       if (status === 429) {
         return pipe(
           getRetryAfterIntervalFromHeaders(responseHeaders),
-          map(retry => retryResultSeconds(actionId, message, retry)),
+          map((retry) => retryResultSeconds(actionId, message, retry)),
           getOrElse(() => retryResult(actionId, message))
         );
       }

@@ -38,6 +38,7 @@ import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { inspectorPluginMock } from '../../../../inspector/public/mocks';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
 import { uiActionsPluginMock } from '../../../../ui_actions/public/mocks';
+import { applicationServiceMock } from '../../../../../core/public/mocks';
 
 test('DashboardContainer in edit mode shows edit mode actions', async () => {
   const inspector = inspectorPluginMock.createStartContract();
@@ -56,7 +57,7 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
 
   const initialInput = getSampleDashboardInput({ viewMode: ViewMode.VIEW });
   const options: DashboardContainerOptions = {
-    application: {} as any,
+    application: applicationServiceMock.createStartContract(),
     embeddable: start,
     notifications: {} as any,
     overlays: {} as any,
@@ -84,7 +85,7 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
           getAllEmbeddableFactories={(() => []) as any}
           getEmbeddableFactory={(() => null) as any}
           notifications={{} as any}
-          application={{} as any}
+          application={options.application}
           overlays={{} as any}
           inspector={inspector}
           SavedObjectFinder={() => null}

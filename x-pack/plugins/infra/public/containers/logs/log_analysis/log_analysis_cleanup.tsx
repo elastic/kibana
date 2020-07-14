@@ -39,10 +39,10 @@ const waitUntilJobsAreDeleted = async <JobType extends string>(
   sourceId: string,
   jobTypes: JobType[]
 ) => {
-  const moduleJobIds = jobTypes.map(jobType => getJobId(spaceId, sourceId, jobType));
+  const moduleJobIds = jobTypes.map((jobType) => getJobId(spaceId, sourceId, jobType));
   while (true) {
     const { jobIds: jobIdsBeingDeleted } = await callGetJobDeletionTasks();
-    const needToWait = jobIdsBeingDeleted.some(jobId => moduleJobIds.includes(jobId));
+    const needToWait = jobIdsBeingDeleted.some((jobId) => moduleJobIds.includes(jobId));
 
     if (needToWait) {
       await timeout(1000);
@@ -52,4 +52,4 @@ const waitUntilJobsAreDeleted = async <JobType extends string>(
   }
 };
 
-const timeout = (ms: number) => new Promise(res => setTimeout(res, ms));
+const timeout = (ms: number) => new Promise((res) => setTimeout(res, ms));

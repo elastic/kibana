@@ -10,7 +10,7 @@ import { createScenario } from '../scenario';
 import '../../../../test/plugin_functional/plugins/core_provider_plugin/types';
 
 // eslint-disable-next-line import/no-default-export
-export default function(ftrContext: FtrProviderContext) {
+export default function (ftrContext: FtrProviderContext) {
   const { getService } = ftrContext;
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -27,7 +27,7 @@ export default function(ftrContext: FtrProviderContext) {
       await scenario.waitForPluginToDetectLicenseUpdate();
 
       expect(
-        await browser.executeAsync(async (cb: Function) => {
+        await browser.executeAsync(async (cb) => {
           const { setup, testUtils } = window.__coreProvider;
           // this call enforces signature check to detect license update
           // and causes license re-fetch
@@ -35,7 +35,7 @@ export default function(ftrContext: FtrProviderContext) {
           await testUtils.delay(500);
 
           const licensing: LicensingPluginSetup = setup.plugins.licensing;
-          licensing.license$.subscribe(license => cb(license.type));
+          licensing.license$.subscribe((license) => cb(license.type));
         })
       ).to.be('basic');
 
@@ -43,7 +43,7 @@ export default function(ftrContext: FtrProviderContext) {
       await scenario.waitForPluginToDetectLicenseUpdate();
 
       expect(
-        await browser.executeAsync(async (cb: Function) => {
+        await browser.executeAsync(async (cb) => {
           const { setup, testUtils } = window.__coreProvider;
           // this call enforces signature check to detect license update
           // and causes license re-fetch
@@ -51,7 +51,7 @@ export default function(ftrContext: FtrProviderContext) {
           await testUtils.delay(500);
 
           const licensing: LicensingPluginSetup = setup.plugins.licensing;
-          licensing.license$.subscribe(license => cb(license.type));
+          licensing.license$.subscribe((license) => cb(license.type));
         })
       ).to.be('basic');
 
@@ -59,7 +59,7 @@ export default function(ftrContext: FtrProviderContext) {
       await scenario.waitForPluginToDetectLicenseUpdate();
 
       expect(
-        await browser.executeAsync(async (cb: Function) => {
+        await browser.executeAsync(async (cb) => {
           const { setup, testUtils } = window.__coreProvider;
           // this call enforces signature check to detect license update
           // and causes license re-fetch
@@ -67,7 +67,7 @@ export default function(ftrContext: FtrProviderContext) {
           await testUtils.delay(500);
 
           const licensing: LicensingPluginSetup = setup.plugins.licensing;
-          licensing.license$.subscribe(license => cb(license.type));
+          licensing.license$.subscribe((license) => cb(license.type));
         })
       ).to.be('trial');
 
@@ -75,7 +75,7 @@ export default function(ftrContext: FtrProviderContext) {
       await scenario.waitForPluginToDetectLicenseUpdate();
 
       expect(
-        await browser.executeAsync(async (cb: Function) => {
+        await browser.executeAsync(async (cb) => {
           const { setup, testUtils } = window.__coreProvider;
           // this call enforces signature check to detect license update
           // and causes license re-fetch
@@ -83,7 +83,7 @@ export default function(ftrContext: FtrProviderContext) {
           await testUtils.delay(500);
 
           const licensing: LicensingPluginSetup = setup.plugins.licensing;
-          licensing.license$.subscribe(license => cb(license.type));
+          licensing.license$.subscribe((license) => cb(license.type));
         })
       ).to.be('basic');
 

@@ -4,19 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
-import { curry } from 'lodash';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api/metrics_explorer';
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID, Comparator } from './types';
 import { InfraBackendLibs } from '../../infra_types';
-
-const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
-  schema.string({
-    validate: value =>
-      arrayOfLiterals.includes(value) ? undefined : `must be one of ${arrayOfLiterals.join(' | ')}`,
-  });
+import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
 
 export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
   const baseCriterion = {
@@ -60,6 +53,37 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
     }
   );
 
+  const timestampActionVariableDescription = i18n.translate(
+    'xpack.infra.metrics.alerting.threshold.alerting.timestampDescription',
+    {
+      defaultMessage: 'A timestamp of when the alert was detected.',
+    }
+  );
+
+  const valueActionVariableDescription = i18n.translate(
+    'xpack.infra.metrics.alerting.threshold.alerting.valueActionVariableDescription',
+    {
+      defaultMessage:
+        'The value of the metric in the specified condition. Usage: (ctx.value.condition0, ctx.value.condition1, etc...).',
+    }
+  );
+
+  const metricActionVariableDescription = i18n.translate(
+    'xpack.infra.metrics.alerting.threshold.alerting.metricActionVariableDescription',
+    {
+      defaultMessage:
+        'The metric name in the specified condition. Usage: (ctx.metric.condition0, ctx.metric.condition1, etc...).',
+    }
+  );
+
+  const thresholdActionVariableDescription = i18n.translate(
+    'xpack.infra.metrics.alerting.threshold.alerting.thresholdActionVariableDescription',
+    {
+      defaultMessage:
+        'The threshold value of the metric for the specified condition. Usage: (ctx.threshold.condition0, ctx.threshold.condition1, etc...).',
+    }
+  );
+
   return {
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
     name: 'Metric threshold',
@@ -67,8 +91,12 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
       params: schema.object(
         {
           criteria: schema.arrayOf(schema.oneOf([countCriterion, nonCountCriterion])),
-          groupBy: schema.maybe(schema.string()),
-          filterQuery: schema.maybe(schema.string()),
+          groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+          filterQuery: schema.maybe(
+            schema.string({
+              validate: validateIsStringElasticsearchJSONFilter,
+            })
+          ),
           sourceId: schema.string(),
           alertOnNoData: schema.maybe(schema.boolean()),
         },
@@ -77,13 +105,18 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS],
-    executor: curry(createMetricThresholdExecutor)(libs, uuid.v4()),
+    executor: createMetricThresholdExecutor(libs),
     actionVariables: {
       context: [
         { name: 'group', description: groupActionVariableDescription },
         { name: 'alertState', description: alertStateActionVariableDescription },
         { name: 'reason', description: reasonActionVariableDescription },
+        { name: 'timestamp', description: timestampActionVariableDescription },
+        { name: 'value', description: valueActionVariableDescription },
+        { name: 'metric', description: metricActionVariableDescription },
+        { name: 'threshold', description: thresholdActionVariableDescription },
       ],
     },
+    producer: 'metrics',
   };
 }

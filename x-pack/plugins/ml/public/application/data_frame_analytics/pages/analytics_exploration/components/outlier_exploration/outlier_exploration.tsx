@@ -29,10 +29,11 @@ import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import { defaultSearchQuery, useResultsViewConfig, INDEX_STATUS } from '../../../../common';
 
-import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
+import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/use_columns';
 
 import { ExplorationQueryBar } from '../exploration_query_bar';
 import { ExplorationTitle } from '../exploration_title';
+import { IndexPatternPrompt } from '../index_pattern_prompt';
 
 import { getFeatureCount } from './common';
 import { useOutlierData } from './use_outlier_data';
@@ -49,14 +50,14 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
     values: { jobId },
   });
 
-  const { indexPattern, jobConfig, jobStatus } = useResultsViewConfig(jobId);
+  const { indexPattern, jobConfig, jobStatus, needsDestIndexPattern } = useResultsViewConfig(jobId);
   const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
   const outlierData = useOutlierData(indexPattern, jobConfig, searchQuery);
 
-  const { columns, errorMessage, status, tableItems } = outlierData;
+  const { columnsWithCharts, errorMessage, status, tableItems } = outlierData;
 
   // if it's a searchBar syntax error leave the table visible so they can try again
-  if (status === INDEX_STATUS.ERROR && !errorMessage.includes('parsing_exception')) {
+  if (status === INDEX_STATUS.ERROR && !errorMessage.includes('failed to create query')) {
     return (
       <EuiPanel grow={false}>
         <ExplorationTitle title={explorationTitle} />
@@ -73,6 +74,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
     );
   }
 
+  /* eslint-disable-next-line react-hooks/rules-of-hooks */
   const colorRange = useColorRange(
     COLOR_RANGE.BLUE,
     COLOR_RANGE_SCALE.INFLUENCER,
@@ -81,6 +83,9 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
 
   return (
     <EuiPanel data-test-subj="mlDFAnalyticsOutlierExplorationTablePanel">
+      {jobConfig !== undefined && needsDestIndexPattern && (
+        <IndexPatternPrompt destIndex={jobConfig.dest.index} />
+      )}
       <EuiFlexGroup
         alignItems="center"
         justifyContent="spaceBetween"
@@ -97,35 +102,36 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
         )}
       </EuiFlexGroup>
       <EuiHorizontalRule margin="xs" />
-      {(columns.length > 0 || searchQuery !== defaultSearchQuery) && indexPattern !== undefined && (
-        <>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem>
-              <ExplorationQueryBar indexPattern={indexPattern} setSearchQuery={setSearchQuery} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiSpacer size="s" />
-              <ColorRangeLegend
-                colorRange={colorRange}
-                title={i18n.translate(
-                  'xpack.ml.dataframe.analytics.exploration.colorRangeLegendTitle',
-                  {
-                    defaultMessage: 'Feature influence score',
-                  }
-                )}
+      {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) &&
+        indexPattern !== undefined && (
+          <>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <ExplorationQueryBar indexPattern={indexPattern} setSearchQuery={setSearchQuery} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiSpacer size="s" />
+                <ColorRangeLegend
+                  colorRange={colorRange}
+                  title={i18n.translate(
+                    'xpack.ml.dataframe.analytics.exploration.colorRangeLegendTitle',
+                    {
+                      defaultMessage: 'Feature influence score',
+                    }
+                  )}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            {columnsWithCharts.length > 0 && tableItems.length > 0 && (
+              <DataGrid
+                {...outlierData}
+                dataTestSubj="mlExplorationDataGrid"
+                toastNotifications={getToastNotifications()}
               />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          {columns.length > 0 && tableItems.length > 0 && (
-            <DataGrid
-              {...outlierData}
-              dataTestSubj="mlExplorationDataGrid"
-              toastNotifications={getToastNotifications()}
-            />
-          )}
-        </>
-      )}
+            )}
+          </>
+        )}
     </EuiPanel>
   );
 });

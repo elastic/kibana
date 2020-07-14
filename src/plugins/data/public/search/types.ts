@@ -17,48 +17,37 @@
  * under the License.
  */
 
-import { CoreStart, SavedObjectReference } from 'kibana/public';
+import { Observable } from 'rxjs';
 import { SearchAggsSetup, SearchAggsStart } from './aggs';
-import { ISearch, ISearchGeneric } from './i_search';
-import { TStrategyTypes } from './strategy_types';
 import { LegacyApiCaller } from './legacy/es_client';
 import { SearchInterceptor } from './search_interceptor';
 import { ISearchSource, SearchSourceFields } from './search_source';
 
-export interface ISearchContext {
-  core: CoreStart;
-  getSearchStrategy: <T extends TStrategyTypes>(name: T) => TSearchStrategyProvider<T>;
+import {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  IEsSearchRequest,
+  IEsSearchResponse,
+} from '../../common/search';
+
+export interface ISearchOptions {
+  signal?: AbortSignal;
 }
 
-/**
- * Search strategy interface contains a search method that takes in
- * a request and returns a promise that resolves to a response.
- */
-export interface ISearchStrategy<T extends TStrategyTypes> {
-  search: ISearch<T>;
+export type ISearch = (
+  request: IKibanaSearchRequest,
+  options?: ISearchOptions
+) => Observable<IKibanaSearchResponse>;
+
+// Service API types
+export interface IStrategyOptions extends ISearchOptions {
+  strategy?: string;
 }
 
-export type TSearchStrategiesMap = {
-  [K in TStrategyTypes]?: TSearchStrategyProvider<any>;
-};
-
-/**
- * Search strategy provider creates an instance of a search strategy with the request
- * handler context bound to it. This way every search strategy can use
- * whatever information they require from the request context.
- */
-export type TSearchStrategyProvider<T extends TStrategyTypes> = (
-  context: ISearchContext
-) => ISearchStrategy<T>;
-
-/**
- * Extension point exposed for other plugins to register their own search
- * strategies.
- */
-export type TRegisterSearchStrategyProvider = <T extends TStrategyTypes>(
-  name: T,
-  searchStrategyProvider: TSearchStrategyProvider<T>
-) => void;
+export type ISearchGeneric = (
+  request: IEsSearchRequest,
+  options?: IStrategyOptions
+) => Observable<IEsSearchResponse>;
 
 export interface ISearchStartLegacy {
   esClient: LegacyApiCaller;
@@ -70,11 +59,6 @@ export interface ISearchStartLegacy {
  */
 export interface ISearchSetup {
   aggs: SearchAggsSetup;
-  /**
-   * Extension point exposed for other plugins to register their own search
-   * strategies.
-   */
-  registerSearchStrategyProvider: TRegisterSearchStrategyProvider;
 }
 
 export interface ISearchStart {
@@ -82,11 +66,8 @@ export interface ISearchStart {
   setInterceptor: (searchInterceptor: SearchInterceptor) => void;
   search: ISearchGeneric;
   searchSource: {
-    create: (fields?: SearchSourceFields) => ISearchSource;
-    fromJSON: (
-      searchSourceJson: string,
-      references: SavedObjectReference[]
-    ) => Promise<ISearchSource>;
+    create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
+    createEmpty: () => ISearchSource;
   };
   __LEGACY: ISearchStartLegacy;
 }

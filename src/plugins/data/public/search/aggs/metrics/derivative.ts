@@ -22,10 +22,12 @@ import { MetricAggType } from './metric_agg_type';
 import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { METRIC_TYPES } from './metric_agg_types';
-import { GetInternalStartServicesFn } from '../../../types';
+import { AggConfigSerialized, BaseAggParams } from '../types';
 
-export interface DerivativeMetricAggDependencies {
-  getInternalStartServices: GetInternalStartServicesFn;
+export interface AggParamsDerivative extends BaseAggParams {
+  buckets_path: string;
+  customMetric?: AggConfigSerialized;
+  metricAgg?: string;
 }
 
 const derivativeLabel = i18n.translate('data.search.aggs.metrics.derivativeLabel', {
@@ -36,22 +38,17 @@ const derivativeTitle = i18n.translate('data.search.aggs.metrics.derivativeTitle
   defaultMessage: 'Derivative',
 });
 
-export const getDerivativeMetricAgg = ({
-  getInternalStartServices,
-}: DerivativeMetricAggDependencies) => {
-  return new MetricAggType(
-    {
-      name: METRIC_TYPES.DERIVATIVE,
-      title: derivativeTitle,
-      subtype: parentPipelineAggHelper.subtype,
-      makeLabel(agg) {
-        return makeNestedLabel(agg, derivativeLabel);
-      },
-      params: [...parentPipelineAggHelper.params()],
-      getFormat: parentPipelineAggHelper.getFormat,
+export const getDerivativeMetricAgg = () => {
+  const { subtype, params, getSerializedFormat } = parentPipelineAggHelper;
+
+  return new MetricAggType({
+    name: METRIC_TYPES.DERIVATIVE,
+    title: derivativeTitle,
+    makeLabel(agg) {
+      return makeNestedLabel(agg, derivativeLabel);
     },
-    {
-      getInternalStartServices,
-    }
-  );
+    subtype,
+    params: [...params()],
+    getSerializedFormat,
+  });
 };

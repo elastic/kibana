@@ -9,14 +9,14 @@ Static code to be shared externally
 <b>Signature:</b>
 
 ```typescript
-export declare function plugin(initializerContext: PluginInitializerContext): DataServerPlugin;
+export declare function plugin(initializerContext: PluginInitializerContext<ConfigSchema>): DataServerPlugin;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  initializerContext | <code>PluginInitializerContext</code> |  |
+|  initializerContext | <code>PluginInitializerContext&lt;ConfigSchema&gt;</code> |  |
 
 <b>Returns:</b>
 

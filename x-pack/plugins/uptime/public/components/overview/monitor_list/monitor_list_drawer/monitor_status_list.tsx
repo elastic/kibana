@@ -5,38 +5,38 @@
  */
 
 import React from 'react';
-import { get, capitalize } from 'lodash';
+import { upperFirst } from 'lodash';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { LocationLink } from '../../../common/location_link';
 import { MonitorStatusRow } from './monitor_status_row';
-import { Check } from '../../../../../common/runtime_types';
+import { Ping } from '../../../../../common/runtime_types';
 import { STATUS, UNNAMED_LOCATION } from '../../../../../common/constants';
 
 interface MonitorStatusListProps {
   /**
-   * Recent List of checks performed on monitor
+   * Recent List of pings performed on monitor
    */
-  checks: Check[];
+  summaryPings: Ping[];
 }
 
-export const MonitorStatusList = ({ checks }: MonitorStatusListProps) => {
+export const MonitorStatusList = ({ summaryPings }: MonitorStatusListProps) => {
   const upChecks: Set<string> = new Set();
   const downChecks: Set<string> = new Set();
 
-  checks.forEach((check: Check) => {
+  summaryPings.forEach((ping: Ping) => {
     // Doing this way because name is either string or null, get() default value only works on undefined value
-    const location = get<string | null>(check, 'observer.geo.name', null) || UNNAMED_LOCATION;
+    const location = ping.observer?.geo?.name ?? UNNAMED_LOCATION;
 
-    if (check.monitor.status === STATUS.UP) {
-      upChecks.add(capitalize(location));
-    } else if (check.monitor.status === STATUS.DOWN) {
-      downChecks.add(capitalize(location));
+    if (ping.monitor.status === STATUS.UP) {
+      upChecks.add(upperFirst(location));
+    } else if (ping.monitor.status === STATUS.DOWN) {
+      downChecks.add(upperFirst(location));
     }
   });
 
   // if monitor is down in one dns, it will be considered down so removing it from up list
-  const absUpChecks: Set<string> = new Set([...upChecks].filter(item => !downChecks.has(item)));
+  const absUpChecks: Set<string> = new Set([...upChecks].filter((item) => !downChecks.has(item)));
 
   return (
     <>

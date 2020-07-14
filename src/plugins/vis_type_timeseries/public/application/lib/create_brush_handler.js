@@ -21,7 +21,7 @@ import moment from 'moment';
 
 const TIME_MODE = 'absolute';
 
-export const createBrushHandler = timefilter => (from, to) => {
+export const createBrushHandler = (timefilter) => (from, to) => {
   timefilter.setTime({
     from: moment(from).toISOString(),
     to: moment(to).toISOString(),

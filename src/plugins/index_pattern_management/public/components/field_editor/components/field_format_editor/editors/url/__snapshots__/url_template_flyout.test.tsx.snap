@@ -1,0 +1,113 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UrlTemplateFlyout should not render if not visible 1`] = `""`;
+
+exports[`UrlTemplateFlyout should render normally 1`] = `
+<EuiFlyout
+  onClose={[Function]}
+>
+  <EuiFlyoutBody>
+    <EuiText>
+      <h3>
+        <FormattedMessage
+          defaultMessage="Url Template"
+          id="indexPatternManagement.urlTemplateHeader"
+          values={Object {}}
+        />
+      </h3>
+      <p>
+        <FormattedMessage
+          defaultMessage="If a field only contains part of a URL then a {strongUrlTemplate} can be used to format the value as a complete URL. The format is a string which uses double curly brace notation {doubleCurlyBraces} to inject values. The following values can be accessed:"
+          id="indexPatternManagement.urlTemplateLabel.fieldDetail"
+          values={
+            Object {
+              "doubleCurlyBraces": <EuiCode>
+                {{ }}
+              </EuiCode>,
+              "strongUrlTemplate": <strong>
+                <FormattedMessage
+                  defaultMessage="Url Template"
+                  id="indexPatternManagement.urlTemplateLabel.strongUrlTemplateLabel"
+                  values={Object {}}
+                />
+              </strong>,
+            }
+          }
+        />
+      </p>
+      <ul>
+        <li>
+          <EuiCode>
+            value
+          </EuiCode>
+           — 
+          <FormattedMessage
+            defaultMessage="The URI-escaped value"
+            id="indexPatternManagement.urlTemplate.valueLabel"
+            values={Object {}}
+          />
+        </li>
+        <li>
+          <EuiCode>
+            rawValue
+          </EuiCode>
+           — 
+          <FormattedMessage
+            defaultMessage="The unescaped value"
+            id="indexPatternManagement.urlTemplate.rawValueLabel"
+            values={Object {}}
+          />
+        </li>
+      </ul>
+      <h4>
+        <FormattedMessage
+          defaultMessage="Examples"
+          id="indexPatternManagement.urlTemplate.examplesHeader"
+          values={Object {}}
+        />
+      </h4>
+      <EuiBasicTable
+        columns={
+          Array [
+            Object {
+              "field": "input",
+              "name": "Input",
+              "width": "160px",
+            },
+            Object {
+              "field": "template",
+              "name": "Template",
+            },
+            Object {
+              "field": "output",
+              "name": "Output",
+            },
+          ]
+        }
+        items={
+          Array [
+            Object {
+              "input": 1234,
+              "output": "http://company.net/profiles?user_id=1234",
+              "template": "http://company.net/profiles?user_id={{value}}",
+            },
+            Object {
+              "input": "users/admin",
+              "output": "http://company.net/groups?id=users%2Fadmin",
+              "template": "http://company.net/groups?id={{value}}",
+            },
+            Object {
+              "input": "/images/favicon.ico",
+              "output": "http://www.site.com/images/favicon.ico",
+              "template": "http://www.site.com{{rawValue}}",
+            },
+          ]
+        }
+        noItemsMessage="No items found"
+        responsive={true}
+        tableLayout="fixed"
+      />
+    </EuiText>
+  </EuiFlyoutBody>
+</EuiFlyout>
+`;

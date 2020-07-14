@@ -12,9 +12,11 @@ import {
   created_at,
   created_by,
   description,
+  deserializerOrUndefined,
   id,
   metaOrUndefined,
   name,
+  serializerOrUndefined,
   tie_breaker_id,
   type,
   updated_at,
@@ -26,9 +28,11 @@ export const listSchema = t.exact(
     created_at,
     created_by,
     description,
+    deserializer: deserializerOrUndefined,
     id,
     meta: metaOrUndefined,
     name,
+    serializer: serializerOrUndefined,
     tie_breaker_id,
     type,
     updated_at,
@@ -37,3 +41,6 @@ export const listSchema = t.exact(
 );
 
 export type ListSchema = t.TypeOf<typeof listSchema>;
+
+export const listArraySchema = t.array(listSchema);
+export type ListArraySchema = t.TypeOf<typeof listArraySchema>;

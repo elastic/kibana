@@ -58,7 +58,7 @@ export class TooltipPopover extends Component {
   // Mapbox feature geometry is from vector tile and is not the same as the original geometry.
   _loadFeatureGeometry = ({ layerId, featureId }) => {
     const tooltipLayer = this._findLayerById(layerId);
-    if (!tooltipLayer) {
+    if (!tooltipLayer || typeof featureId === 'undefined') {
       return null;
     }
 
@@ -70,22 +70,24 @@ export class TooltipPopover extends Component {
     return targetFeature.geometry;
   };
 
-  _loadFeatureProperties = async ({ layerId, featureId }) => {
+  _loadFeatureProperties = async ({ layerId, featureId, mbProperties }) => {
     const tooltipLayer = this._findLayerById(layerId);
     if (!tooltipLayer) {
       return [];
     }
 
-    const targetFeature = tooltipLayer.getFeatureById(featureId);
-    if (!targetFeature) {
-      return [];
+    let targetFeature;
+    if (typeof featureId !== 'undefined') {
+      targetFeature = tooltipLayer.getFeatureById(featureId);
     }
-    return await tooltipLayer.getPropertiesForTooltip(targetFeature.properties);
+
+    const properties = targetFeature ? targetFeature.properties : mbProperties;
+    return await tooltipLayer.getPropertiesForTooltip(properties);
   };
 
   _loadPreIndexedShape = async ({ layerId, featureId }) => {
     const tooltipLayer = this._findLayerById(layerId);
-    if (!tooltipLayer) {
+    if (!tooltipLayer || typeof featureId === 'undefined') {
       return null;
     }
 
@@ -97,13 +99,13 @@ export class TooltipPopover extends Component {
     return await tooltipLayer.getSource().getPreIndexedShape(targetFeature.properties);
   };
 
-  _findLayerById = layerId => {
-    return this.props.layerList.find(layer => {
+  _findLayerById = (layerId) => {
+    return this.props.layerList.find((layer) => {
       return layer.getId() === layerId;
     });
   };
 
-  _getLayerName = async layerId => {
+  _getLayerName = async (layerId) => {
     const layer = this._findLayerById(layerId);
     if (!layer) {
       return null;

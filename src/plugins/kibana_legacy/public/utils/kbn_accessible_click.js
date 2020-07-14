@@ -16,15 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { accessibleClickKeys, keyCodes } from '@elastic/eui';
+import { accessibleClickKeys, keys } from '@elastic/eui';
 
 export function KbnAccessibleClickProvider() {
   return {
     restrict: 'A',
-    controller: $element => {
-      $element.on('keydown', e => {
+    controller: ($element) => {
+      $element.on('keydown', (e) => {
         // Prevent a scroll from occurring if the user has hit space.
-        if (e.keyCode === keyCodes.SPACE) {
+        if (e.key === keys.SPACE) {
           e.preventDefault();
         }
       });
@@ -58,9 +58,9 @@ export function KbnAccessibleClickProvider() {
         element.attr('role', 'button');
       }
 
-      element.on('keyup', e => {
+      element.on('keyup', (e) => {
         // Support keyboard accessibility by emulating mouse click on ENTER or SPACE keypress.
-        if (accessibleClickKeys[e.keyCode]) {
+        if (accessibleClickKeys[e.key]) {
           // Delegate to the click handler on the element (assumed to be ng-click).
           element.click();
         }

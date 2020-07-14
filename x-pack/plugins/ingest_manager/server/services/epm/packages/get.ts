@@ -5,10 +5,11 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
+import { isPackageLimited } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import { Installation, InstallationStatus, PackageInfo } from '../../../types';
+import { Installation, InstallationStatus, PackageInfo, KibanaAssetType } from '../../../types';
 import * as Registry from '../registry';
-import { createInstallableFrom } from './index';
+import { createInstallableFrom, isRequiredPackage } from './index';
 
 export { fetchFile as getFile, SearchParams } from '../registry';
 
@@ -16,8 +17,8 @@ function nameAsTitle(name: string) {
   return name.charAt(0).toUpperCase() + name.substr(1).toLowerCase();
 }
 
-export async function getCategories() {
-  return Registry.fetchCategories();
+export async function getCategories(options: Registry.CategoriesParams) {
+  return Registry.fetchCategories(options);
 }
 
 export async function getPackages(
@@ -25,20 +26,21 @@ export async function getPackages(
     savedObjectsClient: SavedObjectsClientContract;
   } & Registry.SearchParams
 ) {
-  const { savedObjectsClient } = options;
-  const registryItems = await Registry.fetchList({ category: options.category }).then(items => {
-    return items.map(item =>
+  const { savedObjectsClient, experimental, category } = options;
+  const registryItems = await Registry.fetchList({ category, experimental }).then((items) => {
+    return items.map((item) =>
       Object.assign({}, item, { title: item.title || nameAsTitle(item.name) })
     );
   });
   // get the installed packages
-  const results = await savedObjectsClient.find<Installation>({
-    type: PACKAGES_SAVED_OBJECT_TYPE,
-  });
+  const packageSavedObjects = await getPackageSavedObjects(savedObjectsClient);
+
   // filter out any internal packages
-  const savedObjectsVisible = results.saved_objects.filter(o => !o.attributes.internal);
+  const savedObjectsVisible = packageSavedObjects.saved_objects.filter(
+    (o) => !o.attributes.internal
+  );
   const packageList = registryItems
-    .map(item =>
+    .map((item) =>
       createInstallableFrom(
         item,
         savedObjectsVisible.find(({ id }) => id === item.name)
@@ -46,6 +48,34 @@ export async function getPackages(
     )
     .sort(sortByName);
   return packageList;
+}
+
+// Get package names for packages which cannot have more than one package config on an agent config
+// Assume packages only export one config template for now
+export async function getLimitedPackages(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+}): Promise<string[]> {
+  const { savedObjectsClient } = options;
+  const allPackages = await getPackages({ savedObjectsClient, experimental: true });
+  const installedPackages = allPackages.filter(
+    (pkg) => (pkg.status = InstallationStatus.installed)
+  );
+  const installedPackagesInfo = await Promise.all(
+    installedPackages.map((pkgInstall) => {
+      return getPackageInfo({
+        savedObjectsClient,
+        pkgName: pkgInstall.name,
+        pkgVersion: pkgInstall.version,
+      });
+    })
+  );
+  return installedPackagesInfo.filter(isPackageLimited).map((pkgInfo) => pkgInfo.name);
+}
+
+export async function getPackageSavedObjects(savedObjectsClient: SavedObjectsClientContract) {
+  return savedObjectsClient.find<Installation>({
+    type: PACKAGES_SAVED_OBJECT_TYPE,
+  });
 }
 
 export async function getPackageKeysByStatus(
@@ -72,10 +102,7 @@ export async function getPackageInfo(options: {
     getInstallationObject({ savedObjectsClient, pkgName }),
     Registry.fetchFindLatestPackage(pkgName),
     Registry.getArchiveInfo(pkgName, pkgVersion),
-  ] as const);
-  // adding `as const` due to regression in TS 3.7.2
-  // see https://github.com/microsoft/TypeScript/issues/34925#issuecomment-550021453
-  // and https://github.com/microsoft/TypeScript/pull/33707#issuecomment-550718523
+  ]);
 
   // add properties that aren't (or aren't yet) on Registry response
   const updated = {
@@ -83,6 +110,7 @@ export async function getPackageInfo(options: {
     latestVersion: latestPackage.version,
     title: item.title || nameAsTitle(item.name),
     assets: Registry.groupPathsByService(assets || []),
+    removable: !isRequiredPackage(pkgName),
   };
   return createInstallableFrom(updated, savedObject);
 }
@@ -94,7 +122,7 @@ export async function getInstallationObject(options: {
   const { savedObjectsClient, pkgName } = options;
   return savedObjectsClient
     .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
-    .catch(e => undefined);
+    .catch((e) => undefined);
 }
 
 export async function getInstallation(options: {
@@ -113,4 +141,12 @@ function sortByName(a: { name: string }, b: { name: string }) {
   } else {
     return 0;
   }
+}
+
+export async function getKibanaSavedObject(
+  savedObjectsClient: SavedObjectsClientContract,
+  type: KibanaAssetType,
+  id: string
+) {
+  return savedObjectsClient.get(type, id);
 }

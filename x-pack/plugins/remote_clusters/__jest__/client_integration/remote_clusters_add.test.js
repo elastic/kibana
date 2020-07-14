@@ -97,7 +97,7 @@ describe('Create Remote cluster', () => {
       });
 
       test('should only allow alpha-numeric characters, "-" (dash) and "_" (underscore)', () => {
-        const expectInvalidChar = char => {
+        const expectInvalidChar = (char) => {
           if (char === '-' || char === '_') {
             return;
           }
@@ -129,9 +129,9 @@ describe('Create Remote cluster', () => {
       test('should only allow alpha-numeric characters and "-" (dash) in the node "host" part', () => {
         actions.clickSaveForm(); // display form errors
 
-        const notInArray = array => value => array.indexOf(value) < 0;
+        const notInArray = (array) => (value) => array.indexOf(value) < 0;
 
-        const expectInvalidChar = char => {
+        const expectInvalidChar = (char) => {
           form.setComboBoxValue('remoteClusterFormSeedsInput', `192.16${char}:3000`);
           expect(form.getErrorsMessages()).toContain(
             `Seed node must use host:port format. Example: 127.0.0.1:9400, localhost:9400. Hosts can only consist of letters, numbers, and dashes.`
@@ -168,9 +168,9 @@ describe('Create Remote cluster', () => {
       test('should only allow alpha-numeric characters and "-" (dash) in the proxy address "host" part', () => {
         actions.clickSaveForm(); // display form errors
 
-        const notInArray = array => value => array.indexOf(value) < 0;
+        const notInArray = (array) => (value) => array.indexOf(value) < 0;
 
-        const expectInvalidChar = char => {
+        const expectInvalidChar = (char) => {
           form.setInputValue('remoteClusterFormProxyAddressInput', `192.16${char}:3000`);
           expect(form.getErrorsMessages()).toContain(
             'Address must use host:port format. Example: 127.0.0.1:9400, localhost:9400. Hosts can only consist of letters, numbers, and dashes.'

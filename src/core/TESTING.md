@@ -29,6 +29,14 @@ This document outlines best practices and patterns for testing Kibana Plugins.
     - [Testing dependencies usages](#testing-dependencies-usages)
     - [Testing components consuming the dependencies](#testing-components-consuming-the-dependencies)
     - [Testing optional plugin dependencies](#testing-optional-plugin-dependencies)
+  - [RXJS testing](#rxjs-testing)
+    - [Testing RXJS observables with marble](#rxjs-testing-with-marble)
+    - [Precondition](#preconditions-2)
+    - [Examples](#example-5)
+      - [Testing an interval based observable](#testing-an-interval-based-observable)
+      - [Testing observable completion](#testing-observable-completion)
+      - [Testing observable errors](#testing-observable-errors)
+      - [Testing promise based observables](#testing-promise-based-observables)
 
 ## Strategy
 
@@ -475,10 +483,14 @@ The more interesting logic is in `renderApp`:
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { AppMountParams, CoreStart } from 'src/core/public';
+import { AppMountParameters, CoreStart } from 'src/core/public';
 import { AppRoot } from './components/app_root';
 
-export const renderApp = ({ element, history }: AppMountParams, core: CoreStart, plugins: MyPluginDepsStart) => {
+export const renderApp = (
+  { element, history }: AppMountParameters,
+  core: CoreStart,
+  plugins: MyPluginDepsStart
+) => {
   // Hide the chrome while this app is mounted for a full screen experience
   core.chrome.setIsVisible(false);
 
@@ -1080,6 +1092,274 @@ describe('Plugin', () => {
 
     expect(usageCollectionSetup.allowTrackUserAgent).toHaveBeenCalledTimes(1);
     expect(usageCollectionSetup.allowTrackUserAgent).toHaveBeenCalledWith(true);
+  });
+});
+```
+
+## RXJS testing
+
+### Testing RXJS observables with marble
+
+Testing observable based APIs can be challenging, specially when asynchronous operators or sources are used, 
+or when trying to assert against emission's timing.
+
+Fortunately, RXJS comes with it's own `marble` testing module to greatly facilitate that kind of testing.
+
+See [the official doc](https://rxjs-dev.firebaseapp.com/guide/testing/marble-testing) for more information about marble testing.
+
+### Preconditions
+
+The following examples all assume that the following snippet is included in every test file:
+
+```typescript
+import { TestScheduler } from 'rxjs/testing';
+
+const getTestScheduler = () =>
+  new TestScheduler((actual, expected) => {
+    expect(actual).toEqual(expected);
+  });
+```
+
+`getTestScheduler` creates a `TestScheduler` that is wired on `jest`'s `expect` statement when comparing an observable's time frame.
+
+### Examples
+
+#### Testing an interval based observable
+
+Here is a very basic example of an interval-based API:
+
+```typescript
+class FooService {
+  setup() {
+    return {
+      getUpdate$: () => {
+        return interval(100).pipe(map((count) => `update-${count + 1}`));
+      },
+    };
+  }
+}
+```
+
+If we were to be adding a test that asserts the correct behavior of this API without using marble testing, it
+would probably be something like:
+
+```typescript
+it('getUpdate$ emits updates every 100ms', async () => {
+  const service = new FooService();
+  const { getUpdate$ } = service.setup();
+  expect(await getUpdate$().pipe(take(3), toArray()).toPromise()).toEqual([
+    'update-1',
+    'update-2',
+    'update-3',
+  ]);
+});
+```
+
+Note that if we are able to test the correct value of each emission, we don't have any way to assert that
+the interval of 100ms was respected. Even using a subscription based test to try to do so would result
+in potential flakiness, as the subscription execution could trigger on the `101ms` time frame for example.
+
+It also may be important to note:
+- as we need to convert the observable to a promise and wait for the result, the test is `async`
+- we need to perform observable transformation (`take` + `toArray`) in the test to have an usable value to assert against.
+
+Marble testing would allow to get rid of these limitations. An equivalent and improved marble test could be:
+
+```typescript
+  describe('getUpdate$', () => {
+    it('emits updates every 100ms', () => {
+      getTestScheduler().run(({ expectObservable }) => {
+        const { getUpdate$ } = service.setup();
+        expectObservable(getUpdate$(), '301ms !').toBe('100ms a 99ms b 99ms c', {
+          a: 'update-1',
+          b: 'update-2',
+          c: 'update-3',
+        });
+      });
+    });
+  });
+```
+
+Notes:
+- the test is now synchronous
+- the second parameter of `expectObservable` (`'301ms !'`) is used to perform manual unsubscription to the observable, as 
+  `interval` never ends.
+- an emission is considered a time frame, meaning that after the initial `a` emission, we are at the frame `101`, not `100`
+  which is why we are then only using a `99ms` gap between a->b and b->c.
+
+#### Testing observable completion
+
+Let's 'improve' our `getUpdate$` API by allowing the consumer to manually terminate the observable chain using
+a new `abort$` option:
+
+```typescript
+class FooService {
+  setup() {
+    return {
+      // note: using an abortion observable is usually an anti-pattern, as unsubscribing from the observable
+      // is, most of the time, a better solution. This is only used for the example purpose.
+      getUpdate$: ({ abort$ = EMPTY }: { abort$?: Observable<undefined> } = {}) => {
+        return interval(100).pipe(
+            takeUntil(abort$), 
+            map((count) => `update-${count + 1}`)
+        );
+      },
+    };
+  }
+}
+```
+
+We would then add a test to assert than this new option usage is respected:
+
+```typescript
+it('getUpdate$ completes when `abort$` emits', () => {
+  const service = new FooService();
+  getTestScheduler().run(({ expectObservable, hot }) => {
+    const { getUpdate$ } = service.setup();
+    const abort$ = hot('149ms a', { a: undefined });
+    expectObservable(getUpdate$({ abort$ })).toBe('100ms a 48ms |', {
+      a: 'update-1',
+    });
+  });
+});
+```
+
+Notes:
+  - the `|` symbol represents the completion of the observable.
+  - we are here using the `hot` testing utility to create the `abort$` observable to ensure correct emission timing.
+ 
+#### Testing observable errors 
+
+Testing errors thrown by the observable is very close to the previous examples and is done using
+the third parameter of `expectObservable`.
+
+Say we have a service in charge of processing data from an observable and returning the results in a new observable:
+
+```typescript
+interface SomeDataType {
+  id: string;
+}
+
+class BarService {
+  setup() {
+    return {
+      processDataStream: (data$: Observable<SomeDataType>) => {
+        return data$.pipe(
+          map((data) => {
+            if (data.id === 'invalid') {
+              throw new Error(`invalid data: '${data.id}'`);
+            }
+            return {
+              ...data,
+              processed: 'additional-data',
+            };
+          })
+        );
+      },
+    };
+  }
+}
+```
+ 
+We could write a test that asserts the service properly emit processed results until an invalid data is encountered:
+ 
+```typescript
+it('processDataStream throw an error when processing invalid data', () => {
+  getTestScheduler().run(({ expectObservable, hot }) => {
+    const service = new BarService();
+    const { processDataStream } = service.setup();
+
+    const data = hot('--a--b--(c|)', {
+      a: { id: 'a' },
+      b: { id: 'invalid' },
+      c: { id: 'c' },
+    });
+
+    expectObservable(processDataStream(data)).toBe(
+      '--a--#',
+      {
+        a: { id: 'a', processed: 'additional-data' },
+      },
+      `'[Error: invalid data: 'invalid']'`
+    );
+  });
+});
+```
+
+Notes:
+ - the `-` symbol represents one virtual time frame.
+ - the `#` symbol represents an error.
+ - when throwing custom `Error` classes, the assertion can be against an error instance, but this doesn't work
+   with base errors.
+ 
+#### Testing promise based observables
+
+In some cases, the observable we want to test is based on a Promise (like `of(somePromise).pipe(...)`). This can occur
+when using promise-based services, such as core's `http`, for instance.
+
+```typescript
+export const callServerAPI = (
+  http: HttpStart,
+  body: Record<string, any>,
+  { abort$ }: { abort$: Observable<undefined> }
+): Observable<SomeResponse> => {
+  let controller: AbortController | undefined;
+  if (abort$) {
+    controller = new AbortController();
+    abort$.subscribe(() => {
+      controller!.abort();
+    });
+  }
+  return from(
+    http.post<SomeResponse>('/api/endpoint', {
+      body,
+      signal: controller?.signal,
+    })
+  ).pipe(
+    takeUntil(abort$ ?? EMPTY),
+    map((response) => response.results)
+  );
+};
+```
+
+Testing that kind of promise based observable does not work out of the box with marble testing, as the asynchronous promise resolution
+is not handled by the test scheduler's 'sandbox'.
+
+Fortunately, there are workarounds for this problem. The most common one being to mock the promise-returning API to return
+an observable instead for testing, as `of(observable)` also works and returns the input observable. 
+
+Note that when doing so, the test suite must also include tests using a real promise value to ensure correct behavior in real situation.
+
+```typescript
+
+// NOTE: test scheduler do not properly work with promises because of their asynchronous nature.
+// we are cheating here by having `http.post` return an observable instead of a promise.
+// this still allows more finely grained testing about timing, and asserting that the method
+// works properly when `post` returns a real promise is handled in other tests of this suite
+
+it('callServerAPI result observable emits when the response is received', () => {
+  const http = httpServiceMock.createStartContract();
+  getTestScheduler().run(({ expectObservable, hot }) => {
+    // need to cast the observable as `any` because http.post.mockReturnValue expects a promise, see previous comment
+    http.post.mockReturnValue(hot('---(a|)', { a: { someData: 'foo' } }) as any);
+
+    const results = callServerAPI(http, { query: 'term' }, {});
+
+    expectObservable(results).toBe('---(a|)', {
+      a: { someData: 'foo' },
+    });
+  });
+});
+
+it('completes without returning results if aborted$ emits before the response', () => {
+  const http = httpServiceMock.createStartContract();
+  getTestScheduler().run(({ expectObservable, hot }) => {
+    // need to cast the observable as `any` because http.post.mockReturnValue expects a promise, see previous comment
+    http.post.mockReturnValue(hot('---(a|)', { a: { someData: 'foo' } }) as any);
+    const aborted$ = hot('-(a|)', { a: undefined });
+    const results = callServerAPI(http, { query: 'term' }, { aborted$ });
+
+    expectObservable(results).toBe('-|');
   });
 });
 ```

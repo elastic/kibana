@@ -20,7 +20,7 @@ import { StartServicesGetter } from '../../../../../../../../src/plugins/kibana_
 export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
 
 export interface FlyoutEditDrilldownParams {
-  start: StartServicesGetter<Pick<StartDependencies, 'drilldowns'>>;
+  start: StartServicesGetter<Pick<StartDependencies, 'uiActionsEnhanced'>>;
 }
 
 export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOUT_EDIT_DRILLDOWN> {
@@ -58,9 +58,8 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
 
     const handle = core.overlays.openFlyout(
       toMountPoint(
-        <plugins.drilldowns.FlyoutManageDrilldowns
+        <plugins.uiActionsEnhanced.FlyoutManageDrilldowns
           onClose={() => handle.close()}
-          placeContext={context}
           viewMode={'manage'}
           dynamicActionManager={embeddable.enhancements.dynamicActions}
         />

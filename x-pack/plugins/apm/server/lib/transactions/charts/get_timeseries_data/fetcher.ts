@@ -11,15 +11,15 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_NAME,
   TRANSACTION_RESULT,
-  TRANSACTION_TYPE
+  TRANSACTION_TYPE,
 } from '../../../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../../../typings/common';
+import { PromiseReturnType } from '../../../../../../observability/typings/common';
 import { getBucketSize } from '../../../helpers/get_bucket_size';
-import { rangeFilter } from '../../../helpers/range_filter';
+import { rangeFilter } from '../../../../../common/utils/range_filter';
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../../../helpers/setup_request';
 
 export type ESResponse = PromiseReturnType<typeof timeseriesFetcher>;
@@ -27,7 +27,7 @@ export function timeseriesFetcher({
   serviceName,
   transactionType,
   transactionName,
-  setup
+  setup,
 }: {
   serviceName: string;
   transactionType: string | undefined;
@@ -41,7 +41,7 @@ export function timeseriesFetcher({
     { term: { [PROCESSOR_EVENT]: 'transaction' } },
     { term: { [SERVICE_NAME]: serviceName } },
     { range: rangeFilter(start, end) },
-    ...uiFiltersES
+    ...uiFiltersES,
   ];
 
   if (transactionName) {
@@ -64,7 +64,7 @@ export function timeseriesFetcher({
             field: '@timestamp',
             fixed_interval: intervalString,
             min_doc_count: 0,
-            extended_bounds: { min: start, max: end }
+            extended_bounds: { min: start, max: end },
           },
           aggs: {
             avg: { avg: { field: TRANSACTION_DURATION } },
@@ -72,10 +72,10 @@ export function timeseriesFetcher({
               percentiles: {
                 field: TRANSACTION_DURATION,
                 percents: [95, 99],
-                hdr: { number_of_significant_value_digits: 2 }
-              }
-            }
-          }
+                hdr: { number_of_significant_value_digits: 2 },
+              },
+            },
+          },
         },
         overall_avg_duration: { avg: { field: TRANSACTION_DURATION } },
         transaction_results: {
@@ -86,13 +86,13 @@ export function timeseriesFetcher({
                 field: '@timestamp',
                 fixed_interval: intervalString,
                 min_doc_count: 0,
-                extended_bounds: { min: start, max: end }
-              }
-            }
-          }
-        }
-      }
-    }
+                extended_bounds: { min: start, max: end },
+              },
+            },
+          },
+        },
+      },
+    },
   };
 
   return client.search(params);

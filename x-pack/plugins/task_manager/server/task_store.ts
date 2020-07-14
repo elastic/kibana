@@ -150,7 +150,7 @@ export class TaskStore {
   }
 
   private emitEvents = (events: TaskClaim[]) => {
-    events.forEach(event => this.events$.next(event));
+    events.forEach((event) => this.events$.next(event));
   };
 
   /**
@@ -204,7 +204,7 @@ export class TaskStore {
     claimTasksById = [],
     size,
   }: OwnershipClaimingOpts): Promise<ClaimOwnershipResult> => {
-    const claimTasksByIdWithRawIds = claimTasksById.map(id =>
+    const claimTasksByIdWithRawIds = claimTasksById.map((id) =>
       this.serializer.generateRawId(undefined, 'task', id)
     );
 
@@ -220,13 +220,13 @@ export class TaskStore {
 
     // emit success/fail events for claimed tasks by id
     if (claimTasksById && claimTasksById.length) {
-      this.emitEvents(docs.map(doc => asTaskClaimEvent(doc.id, asOk(doc))));
+      this.emitEvents(docs.map((doc) => asTaskClaimEvent(doc.id, asOk(doc))));
 
       this.emitEvents(
         difference(
           claimTasksById,
-          docs.map(doc => doc.id)
-        ).map(id => asTaskClaimEvent(id, asErr(new Error(`failed to claim task '${id}'`))))
+          docs.map((doc) => doc.id)
+        ).map((id) => asTaskClaimEvent(id, asErr(new Error(`failed to claim task '${id}'`))))
       );
     }
 
@@ -386,8 +386,8 @@ export class TaskStore {
 
     return {
       docs: (rawDocs as SavedObjectsRawDoc[])
-        .map(doc => this.serializer.rawToSavedObject(doc))
-        .map(doc => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
+        .map((doc) => this.serializer.rawToSavedObject(doc))
+        .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
         .map(savedObjectToConcreteTaskInstance),
     };
   }
@@ -429,7 +429,7 @@ function taskInstanceToAttributes(doc: TaskInstance): SerializedConcreteTaskInst
     retryAt: (doc.retryAt && doc.retryAt.toISOString()) || null,
     runAt: (doc.runAt || new Date()).toISOString(),
     status: (doc as ConcreteTaskInstance).status || 'idle',
-  };
+  } as SerializedConcreteTaskInstance;
 }
 
 export function savedObjectToConcreteTaskInstance(

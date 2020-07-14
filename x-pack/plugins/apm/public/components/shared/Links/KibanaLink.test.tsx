@@ -12,7 +12,7 @@ import { KibanaLink } from './KibanaLink';
 describe('KibanaLink', () => {
   it('produces the correct URL', async () => {
     const href = await getRenderedHref(() => <KibanaLink path="/some/path" />, {
-      search: '?rangeFrom=now-5h&rangeTo=now-2h'
+      search: '?rangeFrom=now-5h&rangeTo=now-2h',
     } as Location);
     expect(href).toMatchInlineSnapshot(`"/basepath/app/kibana#/some/path"`);
   });

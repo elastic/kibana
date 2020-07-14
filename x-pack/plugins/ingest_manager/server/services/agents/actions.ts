@@ -35,7 +35,7 @@ export async function getAgentActionsForCheckin(
   });
 
   return Promise.all(
-    res.saved_objects.map(async so => {
+    res.saved_objects.map(async (so) => {
       // Get decrypted actions
       return savedObjectToAgentAction(
         await appContextService
@@ -55,7 +55,7 @@ export async function getAgentActionByIds(
 ) {
   const actions = (
     await soClient.bulkGet<AgentActionSOAttributes>(
-      actionIds.map(actionId => ({
+      actionIds.map((actionId) => ({
         id: actionId,
         type: AGENT_ACTION_SAVED_OBJECT_TYPE,
       }))
@@ -63,7 +63,7 @@ export async function getAgentActionByIds(
   ).saved_objects.map(savedObjectToAgentAction);
 
   return Promise.all(
-    actions.map(async action => {
+    actions.map(async (action) => {
       // Get decrypted actions
       return savedObjectToAgentAction(
         await appContextService
@@ -75,6 +75,15 @@ export async function getAgentActionByIds(
       );
     })
   );
+}
+
+export async function getNewActionsSince(soClient: SavedObjectsClientContract, timestamp: string) {
+  const res = await soClient.find<AgentActionSOAttributes>({
+    type: AGENT_ACTION_SAVED_OBJECT_TYPE,
+    filter: `not ${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.sent_at: * AND ${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.created_at >= "${timestamp}"`,
+  });
+
+  return res.saved_objects.map(savedObjectToAgentAction);
 }
 
 export interface ActionsService {

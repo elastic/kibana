@@ -40,10 +40,8 @@ export const forceStartDatafeedSchema = schema.object({
 });
 
 export const jobIdsSchema = schema.object({
-  /** Optional list of job ID(s). */
-  jobIds: schema.maybe(
-    schema.oneOf([schema.string(), schema.arrayOf(schema.maybe(schema.string()))])
-  ),
+  /** Optional list of job IDs. */
+  jobIds: schema.maybe(schema.arrayOf(schema.maybe(schema.string()))),
 });
 
 export const jobsWithTimerangeSchema = {
@@ -68,3 +66,20 @@ export const updateGroupsSchema = {
     )
   ),
 };
+
+export const revertModelSnapshotSchema = schema.object({
+  jobId: schema.string(),
+  snapshotId: schema.string(),
+  replay: schema.boolean(),
+  end: schema.maybe(schema.number()),
+  deleteInterveningResults: schema.maybe(schema.boolean()),
+  calendarEvents: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        start: schema.number(),
+        end: schema.number(),
+        description: schema.string(),
+      })
+    )
+  ),
+});

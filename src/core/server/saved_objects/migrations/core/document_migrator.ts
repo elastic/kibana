@@ -62,7 +62,6 @@
 
 import Boom from 'boom';
 import _ from 'lodash';
-import cloneDeep from 'lodash.clonedeep';
 import Semver from 'semver';
 import { Logger } from '../../../logging';
 import { SavedObjectUnsanitizedDoc } from '../../serialization';
@@ -151,7 +150,7 @@ export class DocumentMigrator implements VersionedTransformer {
     // Clone the document to prevent accidental mutations on the original data
     // Ex: Importing sample data that is cached at import level, migrations would
     // execute on mutated data the second time.
-    const clonedDoc = cloneDeep(doc);
+    const clonedDoc = _.cloneDeep(doc);
     return this.transformDoc(clonedDoc);
   };
 }
@@ -183,7 +182,7 @@ function validateMigrationDefinition(registry: ISavedObjectTypeRegistry) {
     }
   }
 
-  registry.getAllTypes().forEach(type => {
+  registry.getAllTypes().forEach((type) => {
     if (type.migrations) {
       assertObject(
         type.migrations,
@@ -209,7 +208,7 @@ function buildActiveMigrations(
 ): ActiveMigrations {
   return typeRegistry
     .getAllTypes()
-    .filter(type => type.migrations && Object.keys(type.migrations).length > 0)
+    .filter((type) => type.migrations && Object.keys(type.migrations).length > 0)
     .reduce((migrations, type) => {
       const transforms = Object.entries(type.migrations!)
         .map(([version, transform]) => ({
@@ -220,7 +219,7 @@ function buildActiveMigrations(
       return {
         ...migrations,
         [type.name]: {
-          latestVersion: _.last(transforms).version,
+          latestVersion: _.last(transforms)!.version,
           transforms,
         },
       };
@@ -334,7 +333,7 @@ function wrapWithTry(
  * Finds the first unmigrated property in the specified document.
  */
 function nextUnmigratedProp(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMigrations) {
-  return props(doc).find(p => {
+  return props(doc).find((p) => {
     const latestVersion = propVersion(migrations, p);
     const docVersion = propVersion(doc, p);
 
@@ -350,7 +349,7 @@ function nextUnmigratedProp(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMi
     if (docVersion && (!latestVersion || Semver.gt(docVersion, latestVersion))) {
       throw Boom.badData(
         `Document "${doc.id}" has property "${p}" which belongs to a more recent` +
-          ` version of Kibana (${docVersion}).`,
+          ` version of Kibana [${docVersion}]. The last known version is [${latestVersion}]`,
         doc
       );
     }
@@ -431,7 +430,7 @@ function assertNoDowngrades(
   }
 
   const downgrade = Object.keys(migrationVersion).find(
-    k => !docVersion.hasOwnProperty(k) || Semver.lt(docVersion[k], migrationVersion[k])
+    (k) => !docVersion.hasOwnProperty(k) || Semver.lt(docVersion[k], migrationVersion[k])
   );
 
   if (downgrade) {

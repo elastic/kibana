@@ -17,8 +17,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { routing } from '../../../services/routing';
-import { extractQueryParams } from '../../../services/query_params';
+import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
+import { extractQueryParams } from '../../../../shared_imports';
 import { trackUiMetric, METRIC_TYPE } from '../../../services/track_ui_metric';
 import { API_STATUS, UIM_AUTO_FOLLOW_PATTERN_LIST_LOAD } from '../../../constants';
 import { SectionLoading, SectionError, SectionUnauthorized } from '../../../components';
@@ -103,7 +103,7 @@ export class AutoFollowPatternList extends PureComponent {
   }
 
   renderHeader() {
-    const { isAuthorized } = this.props;
+    const { isAuthorized, history } = this.props;
     return (
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
@@ -122,7 +122,7 @@ export class AutoFollowPatternList extends PureComponent {
           <EuiFlexItem grow={false}>
             {isAuthorized && (
               <EuiButton
-                {...routing.getRouterLinkProps('/auto_follow_patterns/add')}
+                {...reactRouterNavigate(history, `/auto_follow_patterns/add`)}
                 fill
                 iconType="plusInCircle"
                 data-test-subj="createAutoFollowPatternButton"
@@ -221,7 +221,7 @@ export class AutoFollowPatternList extends PureComponent {
         }
         actions={
           <EuiButton
-            {...routing.getRouterLinkProps('/auto_follow_patterns/add')}
+            {...reactRouterNavigate(this.props.history, `/auto_follow_patterns/add`)}
             fill
             iconType="plusInCircle"
             data-test-subj="createAutoFollowPatternButton"

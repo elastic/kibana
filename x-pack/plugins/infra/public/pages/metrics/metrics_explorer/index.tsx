@@ -4,17 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
+import { useTrackPageview } from '../../../../../observability/public';
+import { SourceQuery } from '../../../../common/graphql/types';
 import { DocumentTitle } from '../../../components/document_title';
+import { NoData } from '../../../components/empty_states';
 import { MetricsExplorerCharts } from './components/charts';
 import { MetricsExplorerToolbar } from './components/toolbar';
-import { SourceQuery } from '../../../../common/graphql/types';
-import { NoData } from '../../../components/empty_states';
 import { useMetricsExplorerState } from './hooks/use_metric_explorer_state';
-import { useTrackPageview } from '../../../../../observability/public';
+import { useSavedViewContext } from '../../../containers/saved_view/saved_view';
 
 interface MetricsExplorerPageProps {
   source: SourceQuery.Query['source']['configuration'];
@@ -37,15 +38,29 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
     handleTimeChange,
     handleRefresh,
     handleLoadMore,
-    defaultViewState,
     onViewStateChange,
-  } = useMetricsExplorerState(source, derivedIndexPattern);
+    loadData,
+  } = useMetricsExplorerState(source, derivedIndexPattern, false);
+  const { currentView, shouldLoadDefault } = useSavedViewContext();
 
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer' });
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer', delay: 15000 });
 
+  useEffect(() => {
+    if (currentView) {
+      onViewStateChange(currentView);
+    }
+  }, [currentView, onViewStateChange]);
+
+  useEffect(() => {
+    if (currentView != null || !shouldLoadDefault) {
+      // load metrics explorer data after default view loaded, unless we're not loading a view
+      loadData();
+    }
+  }, [loadData, currentView, shouldLoadDefault]);
+
   return (
-    <React.Fragment>
+    <EuiErrorBoundary>
       <DocumentTitle
         title={(previousTitle: string) =>
           i18n.translate('xpack.infra.infrastructureMetricsExplorerPage.documentTitle', {
@@ -68,8 +83,6 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
         onMetricsChange={handleMetricsChange}
         onAggregationChange={handleAggregationChange}
         onChartOptionsChange={setChartOptions}
-        defaultViewState={defaultViewState}
-        onViewStateChange={onViewStateChange}
       />
       {error ? (
         <NoData
@@ -95,6 +108,6 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
           onTimeChange={handleTimeChange}
         />
       )}
-    </React.Fragment>
+    </EuiErrorBoundary>
   );
 };

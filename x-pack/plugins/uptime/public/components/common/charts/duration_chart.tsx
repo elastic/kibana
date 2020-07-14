@@ -4,11 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Axis, Chart, Position, timeFormatter, Settings, SeriesIdentifier } from '@elastic/charts';
+import {
+  Axis,
+  Chart,
+  Position,
+  timeFormatter,
+  Settings,
+  SeriesIdentifier,
+  BrushEndListener,
+} from '@elastic/charts';
 import { getChartDateLabel } from '../../../lib/helper';
 import { LocationDurationLine } from '../../../../common/types';
 import { DurationLineSeriesList } from './duration_line_series_list';
@@ -18,6 +26,7 @@ import { getTickFormat } from './get_tick_format';
 import { ChartEmptyState } from './chart_empty_state';
 import { DurationAnomaliesBar } from './duration_line_bar_list';
 import { AnomalyRecords } from '../../../state/actions';
+import { UptimeThemeContext } from '../../../contexts';
 
 interface DurationChartProps {
   /**
@@ -51,7 +60,13 @@ export const DurationChartComponent = ({
 
   const [hiddenLegends, setHiddenLegends] = useState<string[]>([]);
 
-  const onBrushEnd = (minX: number, maxX: number) => {
+  const { chartTheme } = useContext(UptimeThemeContext);
+
+  const onBrushEnd: BrushEndListener = ({ x }) => {
+    if (!x) {
+      return;
+    }
+    const [minX, maxX] = x;
     updateUrlParams({
       dateRangeStart: moment(minX).toISOString(),
       dateRangeEnd: moment(maxX).toISOString(),
@@ -60,9 +75,9 @@ export const DurationChartComponent = ({
 
   const legendToggleVisibility = (legendItem: SeriesIdentifier | null) => {
     if (legendItem) {
-      setHiddenLegends(prevState => {
+      setHiddenLegends((prevState) => {
         if (prevState.includes(legendItem.specId)) {
-          return [...prevState.filter(item => item !== legendItem.specId)];
+          return [...prevState.filter((item) => item !== legendItem.specId)];
         } else {
           return [...prevState, legendItem.specId];
         }
@@ -81,6 +96,7 @@ export const DurationChartComponent = ({
             legendPosition={Position.Bottom}
             onBrushEnd={onBrushEnd}
             onLegendItemClick={legendToggleVisibility}
+            {...chartTheme}
           />
           <Axis
             id="bottom"
@@ -95,7 +111,7 @@ export const DurationChartComponent = ({
             domain={{ min: 0 }}
             id="left"
             position={Position.Left}
-            tickFormat={d => getTickFormat(d)}
+            tickFormat={(d) => getTickFormat(d)}
             title={i18n.translate('xpack.uptime.monitorCharts.durationChart.leftAxis.title', {
               defaultMessage: 'Duration ms',
             })}

@@ -8,7 +8,7 @@ import execa from 'execa';
 import { resolve } from 'path';
 import { writeFileSync } from 'fs';
 
-import pluginHelpers from '@kbn/plugin-helpers';
+import * as pluginHelpers from '@kbn/plugin-helpers';
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import gulp from 'gulp';
 import del from 'del';
@@ -16,7 +16,6 @@ import fancyLog from 'fancy-log';
 import chalk from 'chalk';
 
 import { generateNoticeFromSource } from '../../src/dev/notice';
-import { prepareTask } from './prepare';
 import { gitInfo } from './helpers/git_info';
 import { PKG_NAME } from './helpers/pkg';
 import { BUILD_VERSION } from './helpers/build_version';
@@ -30,7 +29,7 @@ async function cleanBuildTask() {
   await del(BUILD_DIR);
 
   fancyLog('[canvas] Deleting Shareable Runtime');
-  await del(resolve(XPACK_DIR, 'legacy/plugins/canvas/shareable_runtime/build'));
+  await del(resolve(XPACK_DIR, 'plugins/canvas/shareable_runtime/build'));
 }
 
 async function reportTask() {
@@ -50,7 +49,7 @@ async function pluginHelpersBuild() {
 }
 
 async function buildCanvasShareableRuntime() {
-  await execa(process.execPath, ['legacy/plugins/canvas/scripts/shareable_runtime'], {
+  await execa(process.execPath, ['plugins/canvas/scripts/shareable_runtime'], {
     cwd: XPACK_DIR,
     stdio: ['ignore', 'inherit', 'inherit'],
     // @ts-ignore Incorrect @types - execa supports `buffer`
@@ -78,7 +77,6 @@ async function generateNoticeText() {
 export const buildTask = gulp.series(
   cleanBuildTask,
   reportTask,
-  prepareTask,
   buildCanvasShareableRuntime,
   pluginHelpersBuild,
   generateNoticeText

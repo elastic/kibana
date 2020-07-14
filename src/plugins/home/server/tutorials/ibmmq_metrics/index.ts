@@ -36,6 +36,7 @@ export function ibmmqMetricsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('home.tutorials.ibmmqMetrics.nameTitle', {
       defaultMessage: 'IBM MQ metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.ibmmqMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from IBM MQ instances.',
@@ -55,7 +56,7 @@ export function ibmmqMetricsSpecProvider(context: TutorialContext): TutorialSche
         label: i18n.translate('home.tutorials.ibmmqMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {

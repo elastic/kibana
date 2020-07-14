@@ -30,7 +30,7 @@ export function ConfirmDeleteModal({ config, onCancel, onConfirm }: Props) {
     <EuiOverlayMask>
       <EuiConfirmModal
         title={i18n.translate('xpack.apm.agentConfig.deleteModal.title', {
-          defaultMessage: `Delete configuration`
+          defaultMessage: `Delete configuration`,
         })}
         onCancel={onCancel}
         onConfirm={async () => {
@@ -56,8 +56,8 @@ export function ConfirmDeleteModal({ config, onCancel, onConfirm }: Props) {
             defaultMessage: `You are about to delete the configuration for service "{serviceName}" and environment "{environment}".`,
             values: {
               serviceName: getOptionLabel(config.service.name),
-              environment: getOptionLabel(config.service.environment)
-            }
+              environment: getOptionLabel(config.service.environment),
+            },
           })}
         </p>
       </EuiConfirmModal>
@@ -77,10 +77,10 @@ async function deleteConfig(
         body: {
           service: {
             name: config.service.name,
-            environment: config.service.environment
-          }
-        }
-      }
+            environment: config.service.environment,
+          },
+        },
+      },
     });
 
     toasts.addSuccess({
@@ -93,9 +93,9 @@ async function deleteConfig(
         {
           defaultMessage:
             'You have successfully deleted a configuration for "{serviceName}". It will take some time to propagate to the agents.',
-          values: { serviceName: getOptionLabel(config.service.name) }
+          values: { serviceName: getOptionLabel(config.service.name) },
         }
-      )
+      ),
     });
   } catch (error) {
     toasts.addDanger({
@@ -110,10 +110,10 @@ async function deleteConfig(
             'Something went wrong when deleting a configuration for "{serviceName}". Error: "{errorMessage}"',
           values: {
             serviceName: getOptionLabel(config.service.name),
-            errorMessage: error.message
-          }
+            errorMessage: error.message,
+          },
         }
-      )
+      ),
     });
   }
 }

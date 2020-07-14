@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ChromeBreadcrumb, CoreStart } from 'src/core/public';
+import { CoreStart } from 'src/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { get } from 'lodash';
 import { i18n as i18nFormatter } from '@kbn/i18n';
-import { alertTypeInitializers } from '../../alert_types';
 import { UptimeApp, UptimeAppProps } from '../../../uptime_app';
 import { getIntegratedAppAvailability } from './capabilities_adapter';
 import {
@@ -34,29 +32,12 @@ export const getKibanaFrameworkAdapter = (
     i18n,
   } = core;
 
-  const {
-    data: { autocomplete },
-    triggers_actions_ui,
-  } = plugins;
-
-  alertTypeInitializers.forEach(init => {
-    const alertInitializer = init({ autocomplete });
-    if (!triggers_actions_ui.alertTypeRegistry.has(alertInitializer.id)) {
-      triggers_actions_ui.alertTypeRegistry.register(init({ autocomplete }));
-    }
-  });
-
-  let breadcrumbs: ChromeBreadcrumb[] = [];
-  core.chrome.getBreadcrumbs$().subscribe((nextBreadcrumbs?: ChromeBreadcrumb[]) => {
-    breadcrumbs = nextBreadcrumbs || [];
-  });
-
   const { apm, infrastructure, logs } = getIntegratedAppAvailability(
     capabilities,
     INTEGRATED_SOLUTIONS
   );
 
-  const canSave = get(capabilities, 'uptime.save', false);
+  const canSave = (capabilities.uptime.save ?? false) as boolean;
 
   const props: UptimeAppProps = {
     basePath: basePath.get(),
@@ -68,7 +49,6 @@ export const getKibanaFrameworkAdapter = (
     isApmAvailable: apm,
     isInfraAvailable: infrastructure,
     isLogsAvailable: logs,
-    kibanaBreadcrumbs: breadcrumbs,
     plugins,
     startPlugins,
     renderGlobalHelpControls: () =>
@@ -79,7 +59,7 @@ export const getKibanaFrameworkAdapter = (
         links: [
           {
             linkType: 'documentation',
-            href: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/xpack-uptime.html`,
+            href: `${ELASTIC_WEBSITE_URL}guide/en/uptime/${DOC_LINK_VERSION}/uptime-app-overview.html`,
           },
           {
             linkType: 'discuss',
@@ -97,6 +77,10 @@ export const getKibanaFrameworkAdapter = (
       if (element) {
         ReactDOM.render(<UptimeApp {...props} />, element);
       }
+
+      return () => {
+        ReactDOM.unmountComponentAtNode(element);
+      };
     },
   };
 };

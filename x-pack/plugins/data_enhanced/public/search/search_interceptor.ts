@@ -4,9 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ApplicationStart, ToastsStart } from 'kibana/public';
+import { Observable, throwError, EMPTY, timer, from } from 'rxjs';
+import { mergeMap, expand, takeUntil, finalize, tap } from 'rxjs/operators';
 import { getLongQueryNotification } from './long_query_notification';
-import { SearchInterceptor } from '../../../../../src/plugins/data/public';
+import {
+  SearchInterceptor,
+  SearchInterceptorDeps,
+  UI_SETTINGS,
+} from '../../../../../src/plugins/data/public';
+import { AbortError, toPromise } from '../../../../../src/plugins/data/common';
+import { IAsyncSearchOptions } from '.';
+import { IAsyncSearchRequest, IAsyncSearchResponse } from '../../common';
 
 export class EnhancedSearchInterceptor extends SearchInterceptor {
   /**
@@ -16,8 +24,8 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
    * @param application The `core.application` service
    * @param requestTimeout Usually config value `elasticsearch.requestTimeout`
    */
-  constructor(toasts: ToastsStart, application: ApplicationStart, requestTimeout?: number) {
-    super(toasts, application, requestTimeout);
+  constructor(deps: SearchInterceptorDeps, requestTimeout?: number) {
+    super(deps, requestTimeout);
   }
 
   /**
@@ -34,13 +42,12 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
    */
   public runBeyondTimeout = () => {
     this.hideToast();
-    this.timeoutSubscriptions.forEach(subscription => subscription.unsubscribe());
-    this.timeoutSubscriptions.clear();
+    this.timeoutSubscriptions.unsubscribe();
   };
 
   protected showToast = () => {
     if (this.longRunningToast) return;
-    this.longRunningToast = this.toasts.addInfo(
+    this.longRunningToast = this.deps.toasts.addInfo(
       {
         title: 'Your query is taking awhile',
         text: getLongQueryNotification({
@@ -53,4 +60,57 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       }
     );
   };
+
+  public search(
+    request: IAsyncSearchRequest,
+    { pollInterval = 1000, ...options }: IAsyncSearchOptions = {}
+  ): Observable<IAsyncSearchResponse> {
+    let { id } = request;
+
+    request.params = {
+      ignoreThrottled: !this.deps.uiSettings.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
+      ...request.params,
+    };
+
+    const { combinedSignal, cleanup } = this.setupTimers(options);
+    const aborted$ = from(toPromise(combinedSignal));
+
+    this.pendingCount$.next(++this.pendingCount);
+
+    return (this.runSearch(request, combinedSignal) as Observable<IAsyncSearchResponse>).pipe(
+      expand((response: IAsyncSearchResponse) => {
+        // If the response indicates of an error, stop polling and complete the observable
+        if (!response || (!response.is_running && response.is_partial)) {
+          return throwError(new AbortError());
+        }
+
+        // If the response indicates it is complete, stop polling and complete the observable
+        if (!response.is_running) return EMPTY;
+
+        id = response.id;
+        // Delay by the given poll interval
+        return timer(pollInterval).pipe(
+          // Send future requests using just the ID from the response
+          mergeMap(() => {
+            return this.runSearch({ id }, combinedSignal) as Observable<IAsyncSearchResponse>;
+          })
+        );
+      }),
+      takeUntil(aborted$),
+      tap({
+        error: () => {
+          // If we haven't received the response to the initial request, including the ID, then
+          // we don't need to send a follow-up request to delete this search. Otherwise, we
+          // send the follow-up request to delete this search, then throw an abort error.
+          if (id !== undefined) {
+            this.deps.http.delete(`/internal/search/es/${id}`);
+          }
+        },
+      }),
+      finalize(() => {
+        this.pendingCount$.next(--this.pendingCount);
+        cleanup();
+      })
+    );
+  }
 }

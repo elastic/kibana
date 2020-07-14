@@ -5,10 +5,11 @@
  */
 
 import React, { createContext, useContext } from 'react';
+import { ScopedHistory } from 'kibana/public';
 
 import { CoreStart } from '../../../../../src/core/public';
 import { LicensingPluginSetup, ILicense } from '../../../licensing/public';
-import { TelemetryPluginSetup } from '../../../../../src/plugins/telemetry/public';
+import { TelemetryPluginStart } from '../../../../../src/plugins/telemetry/public';
 import { ClientConfigType } from '../types';
 import { BreadcrumbService } from './breadcrumbs';
 
@@ -18,10 +19,11 @@ export interface AppDependencies {
   core: CoreStart;
   services: {
     breadcrumbService: BreadcrumbService;
+    history: ScopedHistory;
   };
   plugins: {
     licensing: LicensingPluginSetup;
-    telemetry?: TelemetryPluginSetup;
+    telemetry?: TelemetryPluginStart;
   };
   docLinks: {
     security: string;

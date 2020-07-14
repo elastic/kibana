@@ -87,16 +87,18 @@ and {ml-docs}/xpack-ml.html[{ml-cap} {anomaly-detect}].
 [[xpack-ml-dfanalytics]]
 == {dfanalytics-cap}
 
+experimental[]
+
 The Elastic {ml} {dfanalytics} feature enables you to analyze your data using
-{oldetection} and {regression} algorithms and generate new indices that contain
-the results alongside your source data. 
+{classification}, {oldetection}, and {regression} algorithms and generate new
+indices that contain the results alongside your source data. 
 
 If you have a license that includes the {ml-features}, you can create
-{oldetection} {dfanalytics-jobs} and view their results on the *Analytics* page
+{dfanalytics-jobs} and view their results on the *Analytics* page
 in {kib}. For example:
 
 [role="screenshot"]
-image::user/ml/images/outliers.jpg[{oldetection-cap} results in {kib}]
+image::user/ml/images/outliers.png[{oldetection-cap} results in {kib}]
 
 For more information about the {dfanalytics} feature, see 
 {ml-docs}/ml-dfanalytics.html[{ml-cap} {dfanalytics}].

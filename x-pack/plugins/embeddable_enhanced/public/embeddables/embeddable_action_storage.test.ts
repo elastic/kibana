@@ -9,7 +9,7 @@ import {
   EmbeddableActionStorage,
   EmbeddableWithDynamicActionsInput,
 } from './embeddable_action_storage';
-import { UiActionsEnhancedSerializedEvent } from '../../../advanced_ui_actions/public';
+import { UiActionsEnhancedSerializedEvent } from '../../../ui_actions_enhanced/public';
 import { of } from '../../../../../src/plugins/kibana_utils/public';
 
 class TestEmbeddable extends Embeddable<EmbeddableWithDynamicActionsInput> {

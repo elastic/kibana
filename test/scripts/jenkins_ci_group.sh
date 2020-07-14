@@ -31,4 +31,12 @@ else
     mkdir -p ../kibana/target/kibana-coverage/functional
     mv target/kibana-coverage/functional/* ../kibana/target/kibana-coverage/functional/
   fi
+
+  echo " -> moving junit output, silently fail in case of no report"
+  mkdir -p ../kibana/target/junit
+  mv target/junit/* ../kibana/target/junit/ || echo "copying junit failed"
+
+  echo " -> copying screenshots and html for failures"
+  cp -r test/functional/screenshots/* ../kibana/test/functional/screenshots/ || echo "copying screenshots failed"
+  cp -r test/functional/failure_debug ../kibana/test/functional/ || echo "copying html failed"
 fi

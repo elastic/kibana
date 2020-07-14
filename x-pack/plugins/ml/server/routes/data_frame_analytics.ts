@@ -4,21 +4,59 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RequestHandlerContext } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import { RouteInitialization } from '../types';
 import {
   dataAnalyticsJobConfigSchema,
+  dataAnalyticsJobUpdateSchema,
   dataAnalyticsEvaluateSchema,
   dataAnalyticsExplainSchema,
   analyticsIdSchema,
   stopsDataFrameAnalyticsJobQuerySchema,
+  deleteDataFrameAnalyticsJobSchema,
 } from './schemas/data_analytics_schema';
+import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
+import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../common/types/data_frame_analytics';
+
+function getIndexPatternId(context: RequestHandlerContext, patternName: string) {
+  const iph = new IndexPatternHandler(context.core.savedObjects.client);
+  return iph.getIndexPatternId(patternName);
+}
+
+function deleteDestIndexPatternById(context: RequestHandlerContext, indexPatternId: string) {
+  const iph = new IndexPatternHandler(context.core.savedObjects.client);
+  return iph.deleteIndexPatternById(indexPatternId);
+}
 
 /**
  * Routes for the data frame analytics
  */
 export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitialization) {
+  async function userCanDeleteIndex(
+    context: RequestHandlerContext,
+    destinationIndex: string
+  ): Promise<boolean> {
+    if (!mlLicense.isSecurityEnabled()) {
+      return true;
+    }
+    const privilege = await context.ml!.mlClient.callAsCurrentUser('ml.privilegeCheck', {
+      body: {
+        index: [
+          {
+            names: [destinationIndex], // uses wildcard
+            privileges: ['delete_index'],
+          },
+        ],
+      },
+    });
+    if (!privilege) {
+      return false;
+    }
+    return privilege.has_all_requested === true;
+  }
+
   /**
    * @apiGroup DataFrameAnalytics
    *
@@ -206,7 +244,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         body: dataAnalyticsEvaluateSchema,
       },
       options: {
-        tags: ['access:ml:canCreateDataFrameAnalytics'],
+        tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -277,6 +315,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
       path: '/api/ml/data_frame/analytics/{analyticsId}',
       validate: {
         params: analyticsIdSchema,
+        query: deleteDataFrameAnalyticsJobSchema,
       },
       options: {
         tags: ['access:ml:canDeleteDataFrameAnalytics'],
@@ -285,12 +324,78 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { analyticsId } = request.params;
-        const results = await context.ml!.mlClient.callAsCurrentUser(
-          'ml.deleteDataFrameAnalytics',
-          {
-            analyticsId,
+        const { deleteDestIndex, deleteDestIndexPattern } = request.query;
+        let destinationIndex: string | undefined;
+        const analyticsJobDeleted: DeleteDataFrameAnalyticsWithIndexStatus = { success: false };
+        const destIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus = { success: false };
+        const destIndexPatternDeleted: DeleteDataFrameAnalyticsWithIndexStatus = {
+          success: false,
+        };
+
+        // Check if analyticsId is valid and get destination index
+        if (deleteDestIndex || deleteDestIndexPattern) {
+          try {
+            const dfa = await context.ml!.mlClient.callAsCurrentUser('ml.getDataFrameAnalytics', {
+              analyticsId,
+            });
+            if (Array.isArray(dfa.data_frame_analytics) && dfa.data_frame_analytics.length > 0) {
+              destinationIndex = dfa.data_frame_analytics[0].dest.index;
+            }
+          } catch (e) {
+            return response.customError(wrapError(e));
           }
-        );
+
+          // If user checks box to delete the destinationIndex associated with the job
+          if (destinationIndex && deleteDestIndex) {
+            // Verify if user has privilege to delete the destination index
+            const userCanDeleteDestIndex = await userCanDeleteIndex(context, destinationIndex);
+            // If user does have privilege to delete the index, then delete the index
+            if (userCanDeleteDestIndex) {
+              try {
+                await context.ml!.mlClient.callAsCurrentUser('indices.delete', {
+                  index: destinationIndex,
+                });
+                destIndexDeleted.success = true;
+              } catch (deleteIndexError) {
+                destIndexDeleted.error = wrapError(deleteIndexError);
+              }
+            } else {
+              return response.forbidden();
+            }
+          }
+
+          // Delete the index pattern if there's an index pattern that matches the name of dest index
+          if (destinationIndex && deleteDestIndexPattern) {
+            try {
+              const indexPatternId = await getIndexPatternId(context, destinationIndex);
+              if (indexPatternId) {
+                await deleteDestIndexPatternById(context, indexPatternId);
+              }
+              destIndexPatternDeleted.success = true;
+            } catch (deleteDestIndexPatternError) {
+              destIndexPatternDeleted.error = wrapError(deleteDestIndexPatternError);
+            }
+          }
+        }
+        // Grab the target index from the data frame analytics job id
+        // Delete the data frame analytics
+
+        try {
+          await context.ml!.mlClient.callAsCurrentUser('ml.deleteDataFrameAnalytics', {
+            analyticsId,
+          });
+          analyticsJobDeleted.success = true;
+        } catch (deleteDFAError) {
+          analyticsJobDeleted.error = wrapError(deleteDFAError);
+          if (analyticsJobDeleted.error.statusCode === 404) {
+            return response.notFound();
+          }
+        }
+        const results = {
+          analyticsJobDeleted,
+          destIndexDeleted,
+          destIndexPatternDeleted,
+        };
         return response.ok({
           body: results,
         });
@@ -369,6 +474,45 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         const results = await context.ml!.mlClient.callAsCurrentUser(
           'ml.stopDataFrameAnalytics',
           options
+        );
+        return response.ok({
+          body: results,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup DataFrameAnalytics
+   *
+   * @api {post} /api/ml/data_frame/analytics/:analyticsId/_update Update specified analytics job
+   * @apiName UpdateDataFrameAnalyticsJob
+   * @apiDescription Updates a data frame analytics job.
+   *
+   * @apiSchema (params) analyticsIdSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/data_frame/analytics/{analyticsId}/_update',
+      validate: {
+        params: analyticsIdSchema,
+        body: dataAnalyticsJobUpdateSchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateDataFrameAnalytics'],
+      },
+    },
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+      try {
+        const { analyticsId } = request.params;
+        const results = await context.ml!.mlClient.callAsCurrentUser(
+          'ml.updateDataFrameAnalytics',
+          {
+            body: request.body,
+            analyticsId,
+          }
         );
         return response.ok({
           body: results,

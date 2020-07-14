@@ -21,7 +21,7 @@ export interface GetPingHistogramParams {
   dateEnd: string;
   filters?: string;
   monitorId?: string;
-  statusFilter?: string;
+  bucketSize?: string;
 }
 
 export interface HistogramResult {

@@ -235,6 +235,8 @@ kibana_vars=(
     xpack.security.session.lifespan
     xpack.security.loginAssistanceMessage
     xpack.security.loginHelp
+    xpack.spaces.enabled
+    xpack.spaces.maxSpaces
     telemetry.allowChangingOptInStatus
     telemetry.enabled
     telemetry.optIn

@@ -19,12 +19,12 @@ exports[`DataOrIndexMissing component renders headingMessage 1`] = `
     <EuiPanel>
       <EuiEmptyPrompt
         actions={
-          <ForwardRef>
+          <EuiFlexGroup>
             <EuiFlexItem>
               <EuiButton
                 color="primary"
                 fill={true}
-                href="/app/kibana#/home/tutorial/uptimeMonitors"
+                href="/app/home#/tutorial/uptimeMonitors"
               >
                 <FormattedMessage
                   defaultMessage="View setup instructions"
@@ -45,7 +45,7 @@ exports[`DataOrIndexMissing component renders headingMessage 1`] = `
                 />
               </EuiButton>
             </EuiFlexItem>
-          </ForwardRef>
+          </EuiFlexGroup>
         }
         body={
           <React.Fragment>

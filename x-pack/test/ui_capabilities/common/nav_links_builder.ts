@@ -15,6 +15,10 @@ export class NavLinksBuilder {
       management: {
         navLinkId: 'kibana:stack_management',
       },
+      // TODO: Temp until navLinkIds fix is merged in
+      appSearch: {
+        navLinkId: 'appSearch',
+      },
     };
   }
 
@@ -22,13 +26,13 @@ export class NavLinksBuilder {
     return this.build(() => true);
   }
   public except(...feature: string[]) {
-    return this.build(featureId => !feature.includes(featureId));
+    return this.build((featureId) => !feature.includes(featureId));
   }
   public none() {
     return this.build(() => false);
   }
   public only(...feature: string[]) {
-    return this.build(featureId => feature.includes(featureId));
+    return this.build((featureId) => feature.includes(featureId));
   }
 
   private build(callback: buildCallback): Record<string, boolean> {

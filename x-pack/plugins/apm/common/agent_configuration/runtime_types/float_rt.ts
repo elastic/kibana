@@ -11,7 +11,7 @@ export const floatRt = new t.Type<string, string, unknown>(
   'floatRt',
   t.string.is,
   (input, context) => {
-    return either.chain(t.string.validate(input, context), inputAsString => {
+    return either.chain(t.string.validate(input, context), (inputAsString) => {
       const inputAsFloat = parseFloat(inputAsString);
       const maxThreeDecimals =
         parseFloat(inputAsFloat.toFixed(3)) === inputAsFloat;

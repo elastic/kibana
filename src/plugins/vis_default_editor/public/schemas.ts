@@ -58,7 +58,8 @@ export class Schemas implements ISchemas {
     >
   ) {
     _(schemas || [])
-      .map(schema => {
+      .chain()
+      .map((schema) => {
         if (!schema.name) throw new Error('all schema must have a unique name');
 
         if (schema.name === 'split') {
@@ -95,5 +96,5 @@ export class Schemas implements ISchemas {
 }
 
 export const getSchemaByName = (schemas: Schema[], schemaName?: string) => {
-  return schemas.find(s => s.name === schemaName) || ({} as Schema);
+  return schemas.find((s) => s.name === schemaName) || ({} as Schema);
 };

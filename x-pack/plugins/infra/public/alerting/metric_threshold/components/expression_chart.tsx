@@ -12,6 +12,8 @@ import {
   Settings,
   TooltipValue,
   RectAnnotation,
+  AnnotationDomainTypes,
+  LineAnnotation,
 } from '@elastic/charts';
 import { first, last } from 'lodash';
 import moment from 'moment';
@@ -35,6 +37,7 @@ import { getChartTheme } from '../../../pages/metrics/metrics_explorer/component
 import { createFormatterForMetric } from '../../../pages/metrics/metrics_explorer/components/helpers/create_formatter_for_metric';
 import { calculateDomain } from '../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
 import { useMetricsExplorerChartData } from '../hooks/use_metrics_explorer_chart_data';
+import { getMetricId } from '../../../pages/metrics/metrics_explorer/components/helpers/get_metric_id';
 
 interface Props {
   context: AlertsContextValue<AlertContextMeta>;
@@ -83,10 +86,14 @@ export const ExpressionChart: React.FC<Props> = ({
   const dateFormatter = useMemo(() => {
     const firstSeries = data ? first(data.series) : null;
     return firstSeries && firstSeries.rows.length > 0
-      ? niceTimeFormatter([first(firstSeries.rows).timestamp, last(firstSeries.rows).timestamp])
+      ? niceTimeFormatter([
+          (first(firstSeries.rows) as any).timestamp,
+          (last(firstSeries.rows) as any).timestamp,
+        ])
       : (value: number) => `${value}`;
   }, [data]);
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const yAxisFormater = useCallback(createFormatterForMetric(metric), [expression]);
 
   if (loading || !data) {
@@ -107,30 +114,32 @@ export const ExpressionChart: React.FC<Props> = ({
   // Creating a custom series where the ID is changed to 0
   // so that we can get a proper domian
   const firstSeries = first(data.series);
-  if (!firstSeries) {
+  if (!firstSeries || !firstSeries.rows || firstSeries.rows.length === 0) {
     return (
       <EmptyContainer>
-        <EuiText color="subdued">Oops, no chart data available</EuiText>
+        <EuiText color="subdued" data-test-subj="noChartData">
+          <FormattedMessage
+            id="xpack.infra.metrics.alerts.noDataMessage"
+            defaultMessage="Oops, no chart data available"
+          />
+        </EuiText>
       </EmptyContainer>
     );
   }
 
   const series = {
     ...firstSeries,
-    rows: firstSeries.rows.map(row => {
-      const newRow: MetricsExplorerRow = {
-        timestamp: row.timestamp,
-        metric_0: row.metric_0 || null,
-      };
+    rows: firstSeries.rows.map((row) => {
+      const newRow: MetricsExplorerRow = { ...row };
       thresholds.forEach((thresholdValue, index) => {
-        newRow[`metric_threshold_${index}`] = thresholdValue;
+        newRow[getMetricId(metric, `threshold_${index}`)] = thresholdValue;
       });
       return newRow;
     }),
   };
 
-  const firstTimestamp = first(firstSeries.rows).timestamp;
-  const lastTimestamp = last(firstSeries.rows).timestamp;
+  const firstTimestamp = (first(firstSeries.rows) as any).timestamp;
+  const lastTimestamp = (last(firstSeries.rows) as any).timestamp;
   const dataDomain = calculateDomain(series, [metric], false);
   const domain = {
     max: Math.max(dataDomain.max, last(thresholds) || dataDomain.max) * 1.1, // add 10% headroom.
@@ -142,52 +151,59 @@ export const ExpressionChart: React.FC<Props> = ({
   }
 
   const isAbove = [Comparator.GT, Comparator.GT_OR_EQ].includes(expression.comparator);
+  const isBelow = [Comparator.LT, Comparator.LT_OR_EQ].includes(expression.comparator);
   const opacity = 0.3;
-  const timeLabel = TIME_LABELS[expression.timeUnit];
+  const { timeSize, timeUnit } = expression;
+  const timeLabel = TIME_LABELS[timeUnit as keyof typeof TIME_LABELS];
 
   return (
     <>
       <ChartContainer>
         <Chart>
           <MetricExplorerSeriesChart
-            type={MetricsExplorerChartType.area}
+            type={MetricsExplorerChartType.bar}
             metric={metric}
             id="0"
             series={series}
             stack={false}
           />
-          {thresholds.length ? (
-            <MetricExplorerSeriesChart
-              type={isAbove ? MetricsExplorerChartType.line : MetricsExplorerChartType.area}
-              metric={{
-                ...metric,
-                color: MetricsExplorerColor.color1,
-                label: i18n.translate('xpack.infra.metrics.alerts.thresholdLabel', {
-                  defaultMessage: 'Threshold',
-                }),
-              }}
-              id={thresholds.map((t, i) => `threshold_${i}`)}
-              series={series}
-              stack={false}
-              opacity={opacity}
-            />
-          ) : null}
-          {thresholds.length && expression.comparator === Comparator.OUTSIDE_RANGE ? (
+          <LineAnnotation
+            id={`thresholds`}
+            domainType={AnnotationDomainTypes.YDomain}
+            dataValues={thresholds.map((threshold) => ({
+              dataValue: threshold,
+            }))}
+            style={{
+              line: {
+                strokeWidth: 2,
+                stroke: colorTransformer(MetricsExplorerColor.color1),
+                opacity: 1,
+              },
+            }}
+          />
+          {thresholds.length === 2 && expression.comparator === Comparator.BETWEEN ? (
             <>
-              <MetricExplorerSeriesChart
-                type={MetricsExplorerChartType.line}
-                metric={{
-                  ...metric,
-                  color: MetricsExplorerColor.color1,
-                  label: i18n.translate('xpack.infra.metrics.alerts.thresholdLabel', {
-                    defaultMessage: 'Threshold',
-                  }),
+              <RectAnnotation
+                id="lower-threshold"
+                style={{
+                  fill: colorTransformer(MetricsExplorerColor.color1),
+                  opacity,
                 }}
-                id={thresholds.map((t, i) => `threshold_${i}`)}
-                series={series}
-                stack={false}
-                opacity={opacity}
+                dataValues={[
+                  {
+                    coordinates: {
+                      x0: firstTimestamp,
+                      x1: lastTimestamp,
+                      y0: first(expression.threshold),
+                      y1: last(expression.threshold),
+                    },
+                  },
+                ]}
               />
+            </>
+          ) : null}
+          {thresholds.length === 2 && expression.comparator === Comparator.OUTSIDE_RANGE ? (
+            <>
               <RectAnnotation
                 id="lower-threshold"
                 style={{
@@ -224,7 +240,26 @@ export const ExpressionChart: React.FC<Props> = ({
               />
             </>
           ) : null}
-          {isAbove ? (
+          {isBelow && first(expression.threshold) != null ? (
+            <RectAnnotation
+              id="upper-threshold"
+              style={{
+                fill: colorTransformer(MetricsExplorerColor.color1),
+                opacity,
+              }}
+              dataValues={[
+                {
+                  coordinates: {
+                    x0: firstTimestamp,
+                    x1: lastTimestamp,
+                    y0: domain.min,
+                    y1: first(expression.threshold),
+                  },
+                },
+              ]}
+            />
+          ) : null}
+          {isAbove && first(expression.threshold) != null ? (
             <RectAnnotation
               id="upper-threshold"
               style={{
@@ -258,16 +293,16 @@ export const ExpressionChart: React.FC<Props> = ({
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.infra.metrics.alerts.dataTimeRangeLabelWithGrouping"
-              defaultMessage="Last 20 {timeLabel} of data for {id}"
-              values={{ id: series.id, timeLabel }}
+              defaultMessage="Last {lookback} {timeLabel} of data for {id}"
+              values={{ id: series.id, timeLabel, lookback: timeSize * 20 }}
             />
           </EuiText>
         ) : (
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.infra.metrics.alerts.dataTimeRangeLabel"
-              defaultMessage="Last 20 {timeLabel}"
-              values={{ timeLabel }}
+              defaultMessage="Last {lookback} {timeLabel}"
+              values={{ timeLabel, lookback: timeSize * 20 }}
             />
           </EuiText>
         )}

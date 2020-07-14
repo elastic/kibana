@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { http } from '../http_service';
+import { HttpService } from '../http_service';
 
 import { basePath } from './index';
 import { Dictionary } from '../../../../common/types/common';
-import { MlJobWithTimeRange, MlSummaryJobs } from '../../../../common/types/anomaly_detection_jobs';
+import {
+  MlJobWithTimeRange,
+  MlSummaryJobs,
+  CombinedJobWithStats,
+} from '../../../../common/types/anomaly_detection_jobs';
 import { JobMessage } from '../../../../common/types/audit_message';
 import { AggFieldNamePair } from '../../../../common/types/fields';
 import { ExistingJobsAndGroups } from '../job_service';
@@ -20,10 +24,10 @@ import {
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../common/constants/categorization_job';
 import { Category } from '../../../../common/types/categories';
 
-export const jobs = {
+export const jobsApiProvider = (httpService: HttpService) => ({
   jobsSummary(jobIds: string[]) {
     const body = JSON.stringify({ jobIds });
-    return http<MlSummaryJobs>({
+    return httpService.http<MlSummaryJobs>({
       path: `${basePath()}/jobs/jobs_summary`,
       method: 'POST',
       body,
@@ -32,7 +36,10 @@ export const jobs = {
 
   jobsWithTimerange(dateFormatTz: string) {
     const body = JSON.stringify({ dateFormatTz });
-    return http<{ jobs: MlJobWithTimeRange[]; jobsMap: Dictionary<MlJobWithTimeRange> }>({
+    return httpService.http<{
+      jobs: MlJobWithTimeRange[];
+      jobsMap: Dictionary<MlJobWithTimeRange>;
+    }>({
       path: `${basePath()}/jobs/jobs_with_time_range`,
       method: 'POST',
       body,
@@ -41,7 +48,7 @@ export const jobs = {
 
   jobs(jobIds: string[]) {
     const body = JSON.stringify({ jobIds });
-    return http<any>({
+    return httpService.http<CombinedJobWithStats[]>({
       path: `${basePath()}/jobs/jobs`,
       method: 'POST',
       body,
@@ -49,7 +56,7 @@ export const jobs = {
   },
 
   groups() {
-    return http<any>({
+    return httpService.http<any>({
       path: `${basePath()}/jobs/groups`,
       method: 'GET',
     });
@@ -57,7 +64,7 @@ export const jobs = {
 
   updateGroups(updatedJobs: string[]) {
     const body = JSON.stringify({ jobs: updatedJobs });
-    return http<any>({
+    return httpService.http<any>({
       path: `${basePath()}/jobs/update_groups`,
       method: 'POST',
       body,
@@ -71,7 +78,7 @@ export const jobs = {
       end,
     });
 
-    return http<any>({
+    return httpService.http<any>({
       path: `${basePath()}/jobs/force_start_datafeeds`,
       method: 'POST',
       body,
@@ -80,7 +87,7 @@ export const jobs = {
 
   stopDatafeeds(datafeedIds: string[]) {
     const body = JSON.stringify({ datafeedIds });
-    return http<any>({
+    return httpService.http<any>({
       path: `${basePath()}/jobs/stop_datafeeds`,
       method: 'POST',
       body,
@@ -89,7 +96,7 @@ export const jobs = {
 
   deleteJobs(jobIds: string[]) {
     const body = JSON.stringify({ jobIds });
-    return http<any>({
+    return httpService.http<any>({
       path: `${basePath()}/jobs/delete_jobs`,
       method: 'POST',
       body,
@@ -98,8 +105,17 @@ export const jobs = {
 
   closeJobs(jobIds: string[]) {
     const body = JSON.stringify({ jobIds });
-    return http<any>({
+    return httpService.http<any>({
       path: `${basePath()}/jobs/close_jobs`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  forceStopAndCloseJob(jobId: string) {
+    const body = JSON.stringify({ jobId });
+    return httpService.http<{ success: boolean }>({
+      path: `${basePath()}/jobs/force_stop_and_close_job`,
       method: 'POST',
       body,
     });
@@ -108,7 +124,7 @@ export const jobs = {
   jobAuditMessages(jobId: string, from?: number) {
     const jobIdString = jobId !== undefined ? `/${jobId}` : '';
     const query = from !== undefined ? { from } : {};
-    return http<JobMessage[]>({
+    return httpService.http<JobMessage[]>({
       path: `${basePath()}/job_audit_messages/messages${jobIdString}`,
       method: 'GET',
       query,
@@ -116,7 +132,7 @@ export const jobs = {
   },
 
   deletingJobTasks() {
-    return http<any>({
+    return httpService.http<any>({
       path: `${basePath()}/jobs/deleting_jobs_tasks`,
       method: 'GET',
     });
@@ -124,7 +140,7 @@ export const jobs = {
 
   jobsExist(jobIds: string[]) {
     const body = JSON.stringify({ jobIds });
-    return http<any>({
+    return httpService.http<any>({
       path: `${basePath()}/jobs/jobs_exist`,
       method: 'POST',
       body,
@@ -133,7 +149,7 @@ export const jobs = {
 
   newJobCaps(indexPatternTitle: string, isRollup: boolean = false) {
     const query = isRollup === true ? { rollup: true } : {};
-    return http<any>({
+    return httpService.http<any>({
       path: `${basePath()}/jobs/new_job_caps/${indexPatternTitle}`,
       method: 'GET',
       query,
@@ -162,7 +178,7 @@ export const jobs = {
       splitFieldName,
       splitFieldValue,
     });
-    return http<any>({
+    return httpService.http<any>({
       path: `${basePath()}/jobs/new_job_line_chart`,
       method: 'POST',
       body,
@@ -189,7 +205,7 @@ export const jobs = {
       aggFieldNamePairs,
       splitFieldName,
     });
-    return http<any>({
+    return httpService.http<any>({
       path: `${basePath()}/jobs/new_job_population_chart`,
       method: 'POST',
       body,
@@ -197,7 +213,7 @@ export const jobs = {
   },
 
   getAllJobAndGroupIds() {
-    return http<ExistingJobsAndGroups>({
+    return httpService.http<ExistingJobsAndGroups>({
       path: `${basePath()}/jobs/all_jobs_and_group_ids`,
       method: 'GET',
     });
@@ -209,7 +225,7 @@ export const jobs = {
       start,
       end,
     });
-    return http<{ progress: number; isRunning: boolean; isJobClosed: boolean }>({
+    return httpService.http<{ progress: number; isRunning: boolean; isJobClosed: boolean }>({
       path: `${basePath()}/jobs/look_back_progress`,
       method: 'POST',
       body,
@@ -236,7 +252,7 @@ export const jobs = {
       end,
       analyzer,
     });
-    return http<{
+    return httpService.http<{
       examples: CategoryFieldExample[];
       sampleSize: number;
       overallValidStatus: CATEGORY_EXAMPLES_VALIDATION_STATUS;
@@ -250,10 +266,31 @@ export const jobs = {
 
   topCategories(jobId: string, count: number) {
     const body = JSON.stringify({ jobId, count });
-    return http<{ total: number; categories: Array<{ count?: number; category: Category }> }>({
+    return httpService.http<{
+      total: number;
+      categories: Array<{ count?: number; category: Category }>;
+    }>({
       path: `${basePath()}/jobs/top_categories`,
       method: 'POST',
       body,
     });
   },
-};
+
+  revertModelSnapshot(
+    jobId: string,
+    snapshotId: string,
+    replay: boolean,
+    end?: number,
+    calendarEvents?: Array<{ start: number; end: number; description: string }>
+  ) {
+    const body = JSON.stringify({ jobId, snapshotId, replay, end, calendarEvents });
+    return httpService.http<{
+      total: number;
+      categories: Array<{ count?: number; category: Category }>;
+    }>({
+      path: `${basePath()}/jobs/revert_model_snapshot`,
+      method: 'POST',
+      body,
+    });
+  },
+});

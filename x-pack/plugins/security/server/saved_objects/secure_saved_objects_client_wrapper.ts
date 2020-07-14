@@ -99,7 +99,16 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   }
 
   public async find<T = unknown>(options: SavedObjectsFindOptions) {
-    await this.ensureAuthorized(options.type, 'find', options.namespace, { options });
+    if (
+      this.getSpacesService() == null &&
+      Array.isArray(options.namespaces) &&
+      options.namespaces.length > 0
+    ) {
+      throw this.errors.createBadRequestError(
+        `_find across namespaces is not permitted when the Spaces plugin is disabled.`
+      );
+    }
+    await this.ensureAuthorized(options.type, 'find', options.namespaces, { options });
 
     const response = await this.baseClient.find<T>(options);
     return await this.redactSavedObjectsNamespaces(response);
@@ -207,14 +216,14 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   ) {
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
     const actionsToTypesMap = new Map(
-      types.map(type => [this.actions.savedObject.get(type, action), type])
+      types.map((type) => [this.actions.savedObject.get(type, action), type])
     );
     const actions = Array.from(actionsToTypesMap.keys());
     const result = await this.checkPrivileges(actions, namespaceOrNamespaces);
 
     const { hasAllRequested, username, privileges } = result;
     const spaceIds = uniq(
-      privileges.map(({ resource }) => resource).filter(x => x !== undefined)
+      privileges.map(({ resource }) => resource).filter((x) => x !== undefined)
     ).sort() as string[];
 
     const isAuthorized =
@@ -253,7 +262,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   }
 
   private getUniqueObjectTypes(objects: Array<{ type: string }>) {
-    return uniq(objects.map(o => o.type));
+    return uniq(objects.map((o) => o.type));
   }
 
   private async getNamespacesPrivilegeMap(namespaces: string[]) {
@@ -287,13 +296,17 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       }
       return 0;
     };
-    return spaceIds.map(spaceId => (privilegeMap[spaceId] ? spaceId : '?')).sort(comparator);
+    return spaceIds.map((spaceId) => (privilegeMap[spaceId] ? spaceId : '?')).sort(comparator);
   }
 
   private async redactSavedObjectNamespaces<T extends SavedObjectNamespaces>(
     savedObject: T
   ): Promise<T> {
-    if (this.getSpacesService() === undefined || savedObject.namespaces == null) {
+    if (
+      this.getSpacesService() === undefined ||
+      savedObject.namespaces == null ||
+      savedObject.namespaces.length === 0
+    ) {
       return savedObject;
     }
 
@@ -312,7 +325,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       return response;
     }
     const { saved_objects: savedObjects } = response;
-    const namespaces = uniq(savedObjects.flatMap(savedObject => savedObject.namespaces || []));
+    const namespaces = uniq(savedObjects.flatMap((savedObject) => savedObject.namespaces || []));
     if (namespaces.length === 0) {
       return response;
     }
@@ -321,7 +334,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
     return {
       ...response,
-      saved_objects: savedObjects.map(savedObject => ({
+      saved_objects: savedObjects.map((savedObject) => ({
         ...savedObject,
         namespaces:
           savedObject.namespaces &&

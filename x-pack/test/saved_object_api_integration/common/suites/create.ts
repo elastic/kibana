@@ -41,7 +41,7 @@ export const TEST_CASES = Object.freeze({
 });
 
 export function createTestSuiteFactory(es: any, esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbidden = expectResponses.forbidden('create');
+  const expectForbidden = expectResponses.forbiddenTypes('create');
   const expectResponseBody = (
     testCase: CreateTestCase,
     spaceId = SPACES.DEFAULT.spaceId
@@ -70,9 +70,9 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     let cases = Array.isArray(testCases) ? testCases : [testCases];
     if (forbidden) {
       // override the expected result in each test case
-      cases = cases.map(x => ({ ...x, failure: 403 }));
+      cases = cases.map((x) => ({ ...x, failure: 403 }));
     }
-    return cases.map(x => ({
+    return cases.map((x) => ({
       title: getTestTitle(x),
       responseStatusCode: x.failure ?? 200,
       request: createRequest(x),

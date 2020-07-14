@@ -51,15 +51,15 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       );
     }
 
-    const requests = options.metrics.map(metricId =>
+    const requests = options.metrics.map((metricId) =>
       this.makeTSVBRequest(metricId, options, nodeField, requestContext, rawRequest)
     );
 
     return Promise.all(requests)
-      .then(results => {
-        return results.map(result => {
+      .then((results) => {
+        return results.map((result) => {
           const metricIds = Object.keys(result).filter(
-            k => !['type', 'uiRestrictions'].includes(k)
+            (k) => !['type', 'uiRestrictions'].includes(k)
           );
 
           return metricIds.map((id: string) => {
@@ -76,18 +76,18 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
             const panel = result[id];
             return {
               id,
-              series: panel.series.map(series => {
+              series: panel.series.map((series) => {
                 return {
                   id: series.id,
                   label: series.label,
-                  data: series.data.map(point => ({ timestamp: point[0], value: point[1] })),
+                  data: series.data.map((point) => ({ timestamp: point[0], value: point[1] })),
                 };
               }),
             };
           });
         });
       })
-      .then(result => flatten(result));
+      .then((result) => flatten(result));
   }
 
   async makeTSVBRequest(

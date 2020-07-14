@@ -26,7 +26,7 @@ export function DimensionPopover({
   trigger: React.ReactElement;
   panel: React.ReactElement;
 }) {
-  const noMatch = popoverState.isOpen ? !groups.some(d => d.accessors.includes(accessor)) : false;
+  const noMatch = popoverState.isOpen ? !groups.some((d) => d.accessors.includes(accessor)) : false;
   return (
     <EuiPopover
       className="lnsDimensionPopover"
@@ -36,12 +36,11 @@ export function DimensionPopover({
         (popoverState.openId === accessor || (noMatch && popoverState.addingToGroupId === groupId))
       }
       closePopover={() => {
-        setPopoverState({ isOpen: false, openId: null, addingToGroupId: null });
+        setPopoverState({ isOpen: false, openId: null, addingToGroupId: null, tabId: null });
       }}
       button={trigger}
       anchorPosition="leftUp"
-      withTitle
-      panelPaddingSize="s"
+      panelPaddingSize="none"
     >
       {panel}
     </EuiPopover>

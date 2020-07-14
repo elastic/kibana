@@ -6,25 +6,34 @@
 
 import * as t from 'io-ts';
 
-export const StatusCheckAlertStateType = t.intersection([
-  t.partial({
-    currentTriggerStarted: t.string,
-    firstTriggeredAt: t.string,
-    lastTriggeredAt: t.string,
-    lastResolvedAt: t.string,
-  }),
+export const StatusCheckFiltersType = t.type({
+  'monitor.type': t.array(t.string),
+  'observer.geo.name': t.array(t.string),
+  tags: t.array(t.string),
+  'url.port': t.array(t.string),
+});
+
+export type StatusCheckFilters = t.TypeOf<typeof StatusCheckFiltersType>;
+
+export const AtomicStatusCheckParamsType = t.intersection([
   t.type({
-    firstCheckedAt: t.string,
-    lastCheckedAt: t.string,
-    isTriggered: t.boolean,
+    numTimes: t.number,
+    timerangeCount: t.number,
+    timerangeUnit: t.string,
+  }),
+  t.partial({
+    search: t.string,
+    filters: StatusCheckFiltersType,
+    shouldCheckStatus: t.boolean,
   }),
 ]);
 
-export type StatusCheckAlertState = t.TypeOf<typeof StatusCheckAlertStateType>;
+export type AtomicStatusCheckParams = t.TypeOf<typeof AtomicStatusCheckParamsType>;
 
-export const StatusCheckExecutorParamsType = t.intersection([
+export const StatusCheckParamsType = t.intersection([
   t.partial({
     filters: t.string,
+    shouldCheckStatus: t.boolean,
   }),
   t.type({
     locations: t.array(t.string),
@@ -36,4 +45,42 @@ export const StatusCheckExecutorParamsType = t.intersection([
   }),
 ]);
 
-export type StatusCheckExecutorParams = t.TypeOf<typeof StatusCheckExecutorParamsType>;
+export const RangeUnitType = t.union([
+  t.literal('s', 'Second'),
+  t.literal('m', 'Minute'),
+  t.literal('h', 'Hour'),
+  t.literal('d', 'Day'),
+  t.literal('w', 'Week'),
+  t.literal('M', 'Month'),
+  t.literal('y', 'Year'),
+]);
+
+export type RangeUnit = t.TypeOf<typeof RangeUnitType>;
+
+export type StatusCheckParams = t.TypeOf<typeof StatusCheckParamsType>;
+
+export const GetMonitorAvailabilityParamsType = t.intersection([
+  t.type({
+    range: t.number,
+    rangeUnit: RangeUnitType,
+    threshold: t.string,
+  }),
+  t.partial({
+    filters: t.string,
+  }),
+]);
+
+export type GetMonitorAvailabilityParams = t.TypeOf<typeof GetMonitorAvailabilityParamsType>;
+
+export const MonitorAvailabilityType = t.intersection([
+  t.type({
+    availability: GetMonitorAvailabilityParamsType,
+    shouldCheckAvailability: t.boolean,
+  }),
+  t.partial({
+    filters: StatusCheckFiltersType,
+    search: t.string,
+  }),
+]);
+
+export type MonitorAvailability = t.Type<typeof MonitorAvailabilityType>;

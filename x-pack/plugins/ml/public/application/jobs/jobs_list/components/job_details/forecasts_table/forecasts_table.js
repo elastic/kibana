@@ -21,6 +21,7 @@ import {
 import { formatDate, formatNumber } from '@elastic/eui/lib/services/format';
 
 import { FORECAST_REQUEST_STATE } from '../../../../../../../common/constants/states';
+import { TIME_FORMAT } from '../../../../../../../common/constants/time_format';
 import { addItemToRecentlyAccessed } from '../../../../../util/recently_accessed';
 import { mlForecastService } from '../../../../../services/forecast_service';
 import { i18n } from '@kbn/i18n';
@@ -31,7 +32,6 @@ import {
 } from '../../../../../../../common/util/job_utils';
 
 const MAX_FORECASTS = 500;
-const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 /**
  * Table component for rendering the lists of forecasts run on an ML job.
@@ -56,13 +56,13 @@ export class ForecastsTable extends Component {
           dataCounts.earliest_record_timestamp,
           MAX_FORECASTS
         )
-        .then(resp => {
+        .then((resp) => {
           this.setState({
             isLoading: false,
             forecasts: resp.forecasts,
           });
         })
-        .catch(resp => {
+        .catch((resp) => {
           console.log('Error loading list of forecasts for jobs list:', resp);
           this.setState({
             isLoading: false,
@@ -201,7 +201,7 @@ export class ForecastsTable extends Component {
           defaultMessage: 'Created',
         }),
         dataType: 'date',
-        render: date => formatDate(date, TIME_FORMAT),
+        render: (date) => formatDate(date, TIME_FORMAT),
         textOnly: true,
         sortable: true,
         scope: 'row',
@@ -212,7 +212,7 @@ export class ForecastsTable extends Component {
           defaultMessage: 'From',
         }),
         dataType: 'date',
-        render: date => formatDate(date, TIME_FORMAT),
+        render: (date) => formatDate(date, TIME_FORMAT),
         textOnly: true,
         sortable: true,
       },
@@ -222,7 +222,7 @@ export class ForecastsTable extends Component {
           defaultMessage: 'To',
         }),
         dataType: 'date',
-        render: date => formatDate(date, TIME_FORMAT),
+        render: (date) => formatDate(date, TIME_FORMAT),
         textOnly: true,
         sortable: true,
       },
@@ -238,7 +238,7 @@ export class ForecastsTable extends Component {
         name: i18n.translate('xpack.ml.jobsList.jobDetails.forecastsTable.memorySizeLabel', {
           defaultMessage: 'Memory size',
         }),
-        render: bytes => formatNumber(bytes, '0b'),
+        render: (bytes) => formatNumber(bytes, '0b'),
         sortable: true,
       },
       {
@@ -246,7 +246,7 @@ export class ForecastsTable extends Component {
         name: i18n.translate('xpack.ml.jobsList.jobDetails.forecastsTable.processingTimeLabel', {
           defaultMessage: 'Processing time',
         }),
-        render: ms =>
+        render: (ms) =>
           i18n.translate('xpack.ml.jobsList.jobDetails.forecastsTable.msTimeUnitLabel', {
             defaultMessage: '{ms} ms',
             values: {
@@ -260,7 +260,7 @@ export class ForecastsTable extends Component {
         name: i18n.translate('xpack.ml.jobsList.jobDetails.forecastsTable.expiresLabel', {
           defaultMessage: 'Expires',
         }),
-        render: date => formatDate(date, TIME_FORMAT),
+        render: (date) => formatDate(date, TIME_FORMAT),
         textOnly: true,
         sortable: true,
       },
@@ -270,7 +270,7 @@ export class ForecastsTable extends Component {
           defaultMessage: 'Messages',
         }),
         sortable: false,
-        render: messages => {
+        render: (messages) => {
           return (
             <div>
               {messages.map((message, index) => {
@@ -286,7 +286,7 @@ export class ForecastsTable extends Component {
           defaultMessage: 'View',
         }),
         width: '60px',
-        render: forecast => {
+        render: (forecast) => {
           const viewForecastAriaLabel = i18n.translate(
             'xpack.ml.jobsList.jobDetails.forecastsTable.viewAriaLabel',
             {

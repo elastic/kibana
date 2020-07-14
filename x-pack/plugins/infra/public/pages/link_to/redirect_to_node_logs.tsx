@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { compose } from 'lodash';
+import { flowRight } from 'lodash';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
@@ -65,13 +65,13 @@ export const RedirectToNodeLogs = ({
   const userFilter = getFilterFromLocation(location);
   const filter = userFilter ? `(${nodeFilter}) and (${userFilter})` : nodeFilter;
 
-  const searchString = compose(
+  const searchString = flowRight(
     replaceLogFilterInQueryString(filter),
     replaceLogPositionInQueryString(getTimeFromLocation(location)),
     replaceSourceIdInQueryString(sourceId)
   )('');
 
-  return <Redirect to={`/?${searchString}`} />;
+  return <Redirect to={`/stream?${searchString}`} />;
 };
 
 export const getNodeLogsUrl = ({

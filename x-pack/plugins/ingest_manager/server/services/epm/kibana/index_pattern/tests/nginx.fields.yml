@@ -116,3 +116,5 @@
       type: keyword
     - name: text
       type: text
+- name: nginx
+  type: group

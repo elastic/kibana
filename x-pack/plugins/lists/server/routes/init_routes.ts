@@ -6,44 +6,81 @@
 
 import { IRouter } from 'kibana/server';
 
-import { updateListRoute } from './update_list_route';
-import { updateListItemRoute } from './update_list_item_route';
+import { SecurityPluginSetup } from '../../../security/server';
+import { ConfigType } from '../config';
+
+import { readPrivilegesRoute } from './read_privileges_route';
 
 import {
+  createExceptionListItemRoute,
+  createExceptionListRoute,
   createListIndexRoute,
   createListItemRoute,
   createListRoute,
+  deleteExceptionListItemRoute,
+  deleteExceptionListRoute,
   deleteListIndexRoute,
   deleteListItemRoute,
   deleteListRoute,
   exportListItemRoute,
+  findExceptionListItemRoute,
+  findExceptionListRoute,
+  findListItemRoute,
+  findListRoute,
   importListItemRoute,
   patchListItemRoute,
   patchListRoute,
+  readExceptionListItemRoute,
+  readExceptionListRoute,
   readListIndexRoute,
   readListItemRoute,
   readListRoute,
+  updateExceptionListItemRoute,
+  updateExceptionListRoute,
+  updateListItemRoute,
+  updateListRoute,
 } from '.';
 
-export const initRoutes = (router: IRouter): void => {
+export const initRoutes = (
+  router: IRouter,
+  config: ConfigType,
+  security: SecurityPluginSetup | null | undefined
+): void => {
   // lists
   createListRoute(router);
   readListRoute(router);
   updateListRoute(router);
   deleteListRoute(router);
   patchListRoute(router);
+  findListRoute(router);
+  readPrivilegesRoute(router, security);
 
-  // lists items
+  // list items
   createListItemRoute(router);
   readListItemRoute(router);
   updateListItemRoute(router);
   deleteListItemRoute(router);
   patchListItemRoute(router);
   exportListItemRoute(router);
-  importListItemRoute(router);
+  importListItemRoute(router, config);
+  findListItemRoute(router);
 
   // indexes of lists
   createListIndexRoute(router);
   readListIndexRoute(router);
   deleteListIndexRoute(router);
+
+  // exception lists
+  createExceptionListRoute(router);
+  readExceptionListRoute(router);
+  updateExceptionListRoute(router);
+  deleteExceptionListRoute(router);
+  findExceptionListRoute(router);
+
+  // exception list items
+  createExceptionListItemRoute(router);
+  readExceptionListItemRoute(router);
+  updateExceptionListItemRoute(router);
+  deleteExceptionListItemRoute(router);
+  findExceptionListItemRoute(router);
 };

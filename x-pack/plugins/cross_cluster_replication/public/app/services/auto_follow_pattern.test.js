@@ -29,14 +29,10 @@ describe('Auto-follo pattern service', () => {
       });
 
       expect(hasMore).toBe(false);
-      expect(indicesPreview.map(preview => preview.toString)).toEqual([
+      expect(indicesPreview.map((preview) => preview.toString)).toEqual([
         `prefix_logstash-${moment().format('YYYY-MM-DD')}_suffix`,
-        `prefix_logstash-${moment()
-          .add(1, 'days')
-          .format('YYYY-MM-DD')}_suffix`,
-        `prefix_logstash-${moment()
-          .add(2, 'days')
-          .format('YYYY-MM-DD')}_suffix`,
+        `prefix_logstash-${moment().add(1, 'days').format('YYYY-MM-DD')}_suffix`,
+        `prefix_logstash-${moment().add(2, 'days').format('YYYY-MM-DD')}_suffix`,
       ]);
     });
 
@@ -50,18 +46,12 @@ describe('Auto-follo pattern service', () => {
       });
 
       expect(hasMore).toBe(true);
-      expect(indicesPreview.map(preview => preview.toString)).toEqual([
+      expect(indicesPreview.map((preview) => preview.toString)).toEqual([
         `prefix_logstash-${moment().format('YYYY-MM-DD')}_suffix`,
-        `prefix_logstash-${moment()
-          .add(1, 'days')
-          .format('YYYY-MM-DD')}_suffix`,
-        `prefix_logstash-${moment()
-          .add(2, 'days')
-          .format('YYYY-MM-DD')}_suffix`,
+        `prefix_logstash-${moment().add(1, 'days').format('YYYY-MM-DD')}_suffix`,
+        `prefix_logstash-${moment().add(2, 'days').format('YYYY-MM-DD')}_suffix`,
         `prefix_other-${moment().format('YYYY-MM-DD')}_suffix`,
-        `prefix_other-${moment()
-          .add(1, 'days')
-          .format('YYYY-MM-DD')}_suffix`,
+        `prefix_other-${moment().add(1, 'days').format('YYYY-MM-DD')}_suffix`,
       ]);
     });
 
@@ -76,7 +66,7 @@ describe('Auto-follo pattern service', () => {
         wildcardPlaceHolders,
       });
 
-      expect(indicesPreview.map(preview => preview.toString)).toEqual([
+      expect(indicesPreview.map((preview) => preview.toString)).toEqual([
         'prefix_logstash-A_suffix',
         'prefix_logstash-B_suffix',
       ]);

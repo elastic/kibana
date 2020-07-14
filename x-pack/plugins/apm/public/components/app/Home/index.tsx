@@ -9,7 +9,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTabs,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -20,14 +20,17 @@ import { EuiTabLink } from '../../shared/EuiTabLink';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
 import { ServiceOverviewLink } from '../../shared/Links/apm/ServiceOverviewLink';
 import { SettingsLink } from '../../shared/Links/apm/SettingsLink';
+import { AnomalyDetectionSetupLink } from '../../shared/Links/apm/AnomalyDetectionSetupLink';
 import { TraceOverviewLink } from '../../shared/Links/apm/TraceOverviewLink';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 import { ServiceMap } from '../ServiceMap';
 import { ServiceOverview } from '../ServiceOverview';
 import { TraceOverview } from '../TraceOverview';
+import { RumOverview } from '../RumDashboard';
+import { RumOverviewLink } from '../../shared/Links/apm/RumOverviewLink';
 
 function getHomeTabs({
-  serviceMapEnabled = true
+  serviceMapEnabled = true,
 }: {
   serviceMapEnabled: boolean;
 }) {
@@ -36,24 +39,24 @@ function getHomeTabs({
       link: (
         <ServiceOverviewLink>
           {i18n.translate('xpack.apm.home.servicesTabLabel', {
-            defaultMessage: 'Services'
+            defaultMessage: 'Services',
           })}
         </ServiceOverviewLink>
       ),
       render: () => <ServiceOverview />,
-      name: 'services'
+      name: 'services',
     },
     {
       link: (
         <TraceOverviewLink>
           {i18n.translate('xpack.apm.home.tracesTabLabel', {
-            defaultMessage: 'Traces'
+            defaultMessage: 'Traces',
           })}
         </TraceOverviewLink>
       ),
       render: () => <TraceOverview />,
-      name: 'traces'
-    }
+      name: 'traces',
+    },
   ];
 
   if (serviceMapEnabled) {
@@ -61,30 +64,43 @@ function getHomeTabs({
       link: (
         <ServiceMapLink>
           {i18n.translate('xpack.apm.home.serviceMapTabLabel', {
-            defaultMessage: 'Service Map'
+            defaultMessage: 'Service Map',
           })}
         </ServiceMapLink>
       ),
       render: () => <ServiceMap />,
-      name: 'service-map'
+      name: 'service-map',
     });
   }
 
+  homeTabs.push({
+    link: (
+      <RumOverviewLink>
+        {i18n.translate('xpack.apm.home.rumTabLabel', {
+          defaultMessage: 'Real User Monitoring',
+        })}
+      </RumOverviewLink>
+    ),
+    render: () => <RumOverview />,
+    name: 'rum-overview',
+  });
+
   return homeTabs;
 }
+
 const SETTINGS_LINK_LABEL = i18n.translate('xpack.apm.settingsLinkLabel', {
-  defaultMessage: 'Settings'
+  defaultMessage: 'Settings',
 });
 
 interface Props {
-  tab: 'traces' | 'services' | 'service-map';
+  tab: 'traces' | 'services' | 'service-map' | 'rum-overview';
 }
 
 export function Home({ tab }: Props) {
   const { config } = useApmPluginContext();
   const homeTabs = getHomeTabs(config);
   const selectedTab = homeTabs.find(
-    homeTab => homeTab.name === tab
+    (homeTab) => homeTab.name === tab
   ) as $ElementType<typeof homeTabs, number>;
 
   return (
@@ -104,12 +120,15 @@ export function Home({ tab }: Props) {
             </SettingsLink>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
+            <AnomalyDetectionSetupLink />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <SetupInstructionsLink />
           </EuiFlexItem>
         </EuiFlexGroup>
       </ApmHeader>
       <EuiTabs>
-        {homeTabs.map(homeTab => (
+        {homeTabs.map((homeTab) => (
           <EuiTabLink isSelected={homeTab === selectedTab} key={homeTab.name}>
             {homeTab.link}
           </EuiTabLink>

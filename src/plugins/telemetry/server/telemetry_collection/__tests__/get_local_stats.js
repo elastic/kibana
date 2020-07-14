@@ -19,16 +19,17 @@
 
 import expect from '@kbn/expect';
 import sinon from 'sinon';
+import { merge, omit } from 'lodash';
 
+import { TIMEOUT } from '../constants';
 import { mockGetClusterInfo } from './get_cluster_info';
 import { mockGetClusterStats } from './get_cluster_stats';
 
-import { omit } from 'lodash';
 import { getLocalStats, handleLocalStats } from '../get_local_stats';
 
 const mockUsageCollection = (kibanaUsage = {}) => ({
   bulkFetch: () => kibanaUsage,
-  toObject: data => data,
+  toObject: (data) => data,
 });
 
 const getMockServer = (getCluster = sinon.stub()) => ({
@@ -51,10 +52,26 @@ const getMockServer = (getCluster = sinon.stub()) => ({
     elasticsearch: { getCluster },
   },
 });
+function mockGetNodesUsage(callCluster, nodesUsage, req) {
+  callCluster
+    .withArgs(
+      req,
+      {
+        method: 'GET',
+        path: '/_nodes/usage',
+        query: {
+          timeout: TIMEOUT,
+        },
+      },
+      'transport.request'
+    )
+    .returns(nodesUsage);
+}
 
-function mockGetLocalStats(callCluster, clusterInfo, clusterStats, req) {
+function mockGetLocalStats(callCluster, clusterInfo, clusterStats, nodesUsage, req) {
   mockGetClusterInfo(callCluster, clusterInfo, req);
   mockGetClusterStats(callCluster, clusterStats, req);
+  mockGetNodesUsage(callCluster, nodesUsage, req);
 }
 
 describe('get_local_stats', () => {
@@ -68,6 +85,28 @@ describe('get_local_stats', () => {
       number: version,
     },
   };
+  const nodesUsage = [
+    {
+      node_id: 'some_node_id',
+      timestamp: 1588617023177,
+      since: 1588616945163,
+      rest_actions: {
+        nodes_usage_action: 1,
+        create_index_action: 1,
+        document_get_action: 1,
+        search_action: 19,
+        nodes_info_action: 36,
+      },
+      aggregations: {
+        terms: {
+          bytes: 2,
+        },
+        scripted_metric: {
+          other: 7,
+        },
+      },
+    },
+  ];
   const clusterStats = {
     _nodes: { failed: 123 },
     cluster_name: 'real-cool',
@@ -75,6 +114,7 @@ describe('get_local_stats', () => {
     nodes: { yup: 'abc' },
     random: 123,
   };
+
   const kibana = {
     kibana: {
       great: 'googlymoogly',
@@ -97,12 +137,16 @@ describe('get_local_stats', () => {
     snow: { chances: 0 },
   };
 
+  const clusterStatsWithNodesUsage = {
+    ...clusterStats,
+    nodes: merge(clusterStats.nodes, { usage: nodesUsage }),
+  };
   const combinedStatsResult = {
     collection: 'local',
     cluster_uuid: clusterUuid,
     cluster_name: clusterName,
     version,
-    cluster_stats: omit(clusterStats, '_nodes', 'cluster_name'),
+    cluster_stats: omit(clusterStatsWithNodesUsage, '_nodes', 'cluster_name'),
     stack_stats: {
       kibana: {
         great: 'googlymoogly',
@@ -135,23 +179,36 @@ describe('get_local_stats', () => {
 
   describe('handleLocalStats', () => {
     it('returns expected object without xpack and kibana data', () => {
-      const result = handleLocalStats(clusterInfo, clusterStats, void 0, context);
+      const result = handleLocalStats(
+        clusterInfo,
+        clusterStatsWithNodesUsage,
+        void 0,
+        void 0,
+        context
+      );
       expect(result.cluster_uuid).to.eql(combinedStatsResult.cluster_uuid);
       expect(result.cluster_name).to.eql(combinedStatsResult.cluster_name);
       expect(result.cluster_stats).to.eql(combinedStatsResult.cluster_stats);
       expect(result.version).to.be('2.3.4');
       expect(result.collection).to.be('local');
       expect(result.license).to.be(undefined);
-      expect(result.stack_stats).to.eql({ kibana: undefined });
+      expect(result.stack_stats).to.eql({ kibana: undefined, data: undefined });
     });
 
     it('returns expected object with xpack', () => {
-      const result = handleLocalStats(clusterInfo, clusterStats, void 0, context);
+      const result = handleLocalStats(
+        clusterInfo,
+        clusterStatsWithNodesUsage,
+        void 0,
+        void 0,
+        context
+      );
       const { stack_stats: stack, ...cluster } = result;
       expect(cluster.collection).to.be(combinedStatsResult.collection);
       expect(cluster.cluster_uuid).to.be(combinedStatsResult.cluster_uuid);
       expect(cluster.cluster_name).to.be(combinedStatsResult.cluster_name);
       expect(stack.kibana).to.be(undefined); // not mocked for this test
+      expect(stack.data).to.be(undefined); // not mocked for this test
 
       expect(cluster.version).to.eql(combinedStatsResult.version);
       expect(cluster.cluster_stats).to.eql(combinedStatsResult.cluster_stats);
@@ -167,7 +224,8 @@ describe('get_local_stats', () => {
       mockGetLocalStats(
         callClusterUsageFailed,
         Promise.resolve(clusterInfo),
-        Promise.resolve(clusterStats)
+        Promise.resolve(clusterStats),
+        Promise.resolve(nodesUsage)
       );
       const result = await getLocalStats([], {
         server: getMockServer(),
@@ -177,6 +235,7 @@ describe('get_local_stats', () => {
       expect(result.cluster_uuid).to.eql(combinedStatsResult.cluster_uuid);
       expect(result.cluster_name).to.eql(combinedStatsResult.cluster_name);
       expect(result.cluster_stats).to.eql(combinedStatsResult.cluster_stats);
+      expect(result.cluster_stats.nodes).to.eql(combinedStatsResult.cluster_stats.nodes);
       expect(result.version).to.be('2.3.4');
       expect(result.collection).to.be('local');
 
@@ -188,7 +247,12 @@ describe('get_local_stats', () => {
     it('returns expected object with xpack and kibana data', async () => {
       const callCluster = sinon.stub();
       const usageCollection = mockUsageCollection(kibana);
-      mockGetLocalStats(callCluster, Promise.resolve(clusterInfo), Promise.resolve(clusterStats));
+      mockGetLocalStats(
+        callCluster,
+        Promise.resolve(clusterInfo),
+        Promise.resolve(clusterStats),
+        Promise.resolve(nodesUsage)
+      );
 
       const result = await getLocalStats([], {
         server: getMockServer(callCluster),

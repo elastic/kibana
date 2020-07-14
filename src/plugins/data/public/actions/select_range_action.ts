@@ -24,12 +24,12 @@ import {
   ActionByType,
 } from '../../../../plugins/ui_actions/public';
 import { createFiltersFromRangeSelectAction } from './filters/create_filters_from_range_select';
-import { RangeSelectTriggerContext } from '../../../embeddable/public';
+import { RangeSelectContext } from '../../../embeddable/public';
 import { FilterManager, TimefilterContract, esFilters } from '..';
 
 export const ACTION_SELECT_RANGE = 'ACTION_SELECT_RANGE';
 
-export type SelectRangeActionContext = RangeSelectTriggerContext;
+export type SelectRangeActionContext = RangeSelectContext;
 
 async function isCompatible(context: SelectRangeActionContext) {
   try {
@@ -53,16 +53,16 @@ export function selectRangeAction(
       });
     },
     isCompatible,
-    execute: async ({ timeFieldName, data }: SelectRangeActionContext) => {
-      if (!(await isCompatible({ timeFieldName, data }))) {
+    execute: async ({ data }: SelectRangeActionContext) => {
+      if (!(await isCompatible({ data }))) {
         throw new IncompatibleActionError();
       }
 
       const selectedFilters = await createFiltersFromRangeSelectAction(data);
 
-      if (timeFieldName) {
+      if (data.timeFieldName) {
         const { timeRangeFilter, restOfFilters } = esFilters.extractTimeFilter(
-          timeFieldName,
+          data.timeFieldName,
           selectedFilters
         );
         filterManager.addFilters(restOfFilters);

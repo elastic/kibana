@@ -22,7 +22,7 @@ import { mount, shallow } from 'enzyme';
 import { requiredProps, takeMountedSnapshot } from '../../../test';
 import { KuiListingTable } from './listing_table';
 
-const getProps = customProps => {
+const getProps = (customProps) => {
   const defaultProps = {
     header: ['Breed', 'Description'],
     rows: [
@@ -59,20 +59,14 @@ test('renders KuiListingTable', () => {
 test('selecting a row calls onItemSelectionChanged', () => {
   const props = getProps();
   const component = shallow(<KuiListingTable {...props} />);
-  component
-    .find('KuiListingTableRow')
-    .at(1)
-    .prop('onSelectionChanged')('1');
+  component.find('KuiListingTableRow').at(1).prop('onSelectionChanged')('1');
   expect(props.onItemSelectionChanged).toHaveBeenCalledWith(['1']);
 });
 
 test('selectedRowIds is preserved when onItemSelectionChanged is called', () => {
   const props = getProps({ selectedRowIds: ['3'] });
   const component = shallow(<KuiListingTable {...props} />);
-  component
-    .find('KuiListingTableRow')
-    .at(0)
-    .prop('onSelectionChanged')('1');
+  component.find('KuiListingTableRow').at(0).prop('onSelectionChanged')('1');
   expect(props.onItemSelectionChanged).toHaveBeenCalledWith(expect.arrayContaining(['1', '3']));
 });
 

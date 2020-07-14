@@ -32,7 +32,7 @@ import { PagerButtons } from './pager_buttons';
 import pagerButtonsSource from '!!raw-loader!./pager_buttons'; // eslint-disable-line import/default
 const pagerButtonsHtml = renderToHtml(PagerButtons);
 
-export default props => (
+export default (props) => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="Pager"

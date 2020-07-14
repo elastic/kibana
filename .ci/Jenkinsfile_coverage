@@ -5,89 +5,47 @@ kibanaLibrary.load() // load from the Jenkins instance
 
 kibanaPipeline(timeoutMinutes: 240) {
   catchErrors {
+    def timestamp = new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
     withEnv([
-      'CODE_COVERAGE=1', // Needed for multiple ci scripts, such as remote.ts, test/scripts/*.sh, schema.js, etc.
+      "TIME_STAMP=${timestamp}",
+      'CODE_COVERAGE=1', // Enables coverage.  Needed for multiple ci scripts, such as remote.ts, test/scripts/*.sh, schema.js, etc.
     ]) {
-      parallel([
-        'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
-        'x-pack-intake-agent': {
-          withEnv([
-            'NODE_ENV=test' // Needed for jest tests only
-          ]) {
-            workers.intake('x-pack-intake', './test/scripts/jenkins_xpack.sh')()
-          }
-        },
-        'kibana-oss-agent': workers.functional('kibana-oss-tests', { kibanaPipeline.buildOss() }, [
-          'oss-ciGroup1': kibanaPipeline.ossCiGroupProcess(1),
-          'oss-ciGroup2': kibanaPipeline.ossCiGroupProcess(2),
-          'oss-ciGroup3': kibanaPipeline.ossCiGroupProcess(3),
-          'oss-ciGroup4': kibanaPipeline.ossCiGroupProcess(4),
-          'oss-ciGroup5': kibanaPipeline.ossCiGroupProcess(5),
-          'oss-ciGroup6': kibanaPipeline.ossCiGroupProcess(6),
-          'oss-ciGroup7': kibanaPipeline.ossCiGroupProcess(7),
-          'oss-ciGroup8': kibanaPipeline.ossCiGroupProcess(8),
-          'oss-ciGroup9': kibanaPipeline.ossCiGroupProcess(9),
-          'oss-ciGroup10': kibanaPipeline.ossCiGroupProcess(10),
-          'oss-ciGroup11': kibanaPipeline.ossCiGroupProcess(11),
-          'oss-ciGroup12': kibanaPipeline.ossCiGroupProcess(12),
-        ]),
-        'kibana-xpack-agent': workers.functional('kibana-xpack-tests', { kibanaPipeline.buildXpack() }, [
-          'xpack-ciGroup1': kibanaPipeline.xpackCiGroupProcess(1),
-          'xpack-ciGroup2': kibanaPipeline.xpackCiGroupProcess(2),
-          'xpack-ciGroup3': kibanaPipeline.xpackCiGroupProcess(3),
-          'xpack-ciGroup4': kibanaPipeline.xpackCiGroupProcess(4),
-          'xpack-ciGroup5': kibanaPipeline.xpackCiGroupProcess(5),
-          'xpack-ciGroup6': kibanaPipeline.xpackCiGroupProcess(6),
-          'xpack-ciGroup7': kibanaPipeline.xpackCiGroupProcess(7),
-          'xpack-ciGroup8': kibanaPipeline.xpackCiGroupProcess(8),
-          'xpack-ciGroup9': kibanaPipeline.xpackCiGroupProcess(9),
-          'xpack-ciGroup10': kibanaPipeline.xpackCiGroupProcess(10),
-        ]),
-      ])
       workers.base(name: 'coverage-worker', size: 'l', ramDisk: false, bootstrapped: false) {
-        kibanaPipeline.downloadCoverageArtifacts()
-        kibanaPipeline.bash(
-          '''
-            # bootstrap from x-pack folder
-            source src/dev/ci_setup/setup_env.sh
-            cd x-pack
-            yarn kbn bootstrap --prefer-offline
-            cd ..
-            # extract archives
-            mkdir -p /tmp/extracted_coverage
-            echo extracting intakes
-            tar -xzf /tmp/downloaded_coverage/coverage/kibana-intake/kibana-coverage.tar.gz -C /tmp/extracted_coverage
-            tar -xzf /tmp/downloaded_coverage/coverage/x-pack-intake/kibana-coverage.tar.gz -C /tmp/extracted_coverage
-            echo extracting kibana-oss-tests
-            tar -xzf /tmp/downloaded_coverage/coverage/kibana-oss-tests/kibana-coverage.tar.gz -C /tmp/extracted_coverage
-            echo extracting kibana-xpack-tests
-            tar -xzf /tmp/downloaded_coverage/coverage/kibana-xpack-tests/kibana-coverage.tar.gz -C /tmp/extracted_coverage
-            # replace path in json files to have valid html report
-            pwd=$(pwd)
-            du -sh /tmp/extracted_coverage/target/kibana-coverage/
-            echo replacing path in json files
-            for i in {1..9}; do
-              sed -i "s|/dev/shm/workspace/kibana|$pwd|g" /tmp/extracted_coverage/target/kibana-coverage/functional/${i}*.json &
-            done
-            wait
-            # merge oss & x-pack reports
-            echo merging coverage reports
-            yarn nyc report --temp-dir /tmp/extracted_coverage/target/kibana-coverage/jest --report-dir target/kibana-coverage/jest-combined --reporter=html --reporter=json-summary
-            yarn nyc report --temp-dir /tmp/extracted_coverage/target/kibana-coverage/functional --report-dir target/kibana-coverage/functional-combined --reporter=html --reporter=json-summary
-            echo copy mocha reports
-            mkdir -p target/kibana-coverage/mocha-combined
-            cp -r /tmp/extracted_coverage/target/kibana-coverage/mocha target/kibana-coverage/mocha-combined
-          ''',
-          "run `yarn kbn bootstrap && merge coverage`"
-        )
-        sh 'tar -czf kibana-jest-coverage.tar.gz target/kibana-coverage/jest-combined/*'
-        kibanaPipeline.uploadCoverageArtifacts("coverage/jest-combined", 'kibana-jest-coverage.tar.gz')
-        sh 'tar -czf kibana-functional-coverage.tar.gz target/kibana-coverage/functional-combined/*'
-        kibanaPipeline.uploadCoverageArtifacts("coverage/functional-combined", 'kibana-functional-coverage.tar.gz')
-        sh 'tar -czf kibana-mocha-coverage.tar.gz target/kibana-coverage/mocha-combined/*'
-        kibanaPipeline.uploadCoverageArtifacts("coverage/mocha-combined", 'kibana-mocha-coverage.tar.gz')
+        catchError {
+          kibanaCoverage.runTests()
+          handleIngestion(TIME_STAMP)
+        }
+        handleFail()
       }
     }
+    kibanaPipeline.sendMail()
   }
-  kibanaPipeline.sendMail()
 }
+
+def handleIngestion(timestamp) {
+  def previousSha = handlePreviousSha()
+  kibanaPipeline.downloadCoverageArtifacts()
+  kibanaCoverage.prokLinks("### Process HTML Links")
+  kibanaCoverage.collectVcsInfo("### Collect VCS Info")
+  kibanaCoverage.generateReports("### Merge coverage reports")
+  kibanaCoverage.uploadCombinedReports()
+  kibanaCoverage.ingest(env.JOB_NAME, BUILD_NUMBER, BUILD_URL, timestamp, previousSha, '### Ingest && Upload')
+  kibanaCoverage.uploadCoverageStaticSite(timestamp)
+}
+
+def handlePreviousSha() {
+  def previous = kibanaCoverage.downloadPrevious('### Download OLD Previous')
+  kibanaCoverage.uploadPrevious('### Upload NEW Previous')
+  return previous
+}
+
+def handleFail() {
+  def buildStatus = buildUtils.getBuildStatus()
+  if(params.NOTIFY_ON_FAILURE && buildStatus != 'SUCCESS' && buildStatus != 'ABORTED' && buildStatus != 'UNSTABLE') {
+    slackNotifications.sendFailedBuild(
+      channel: '#kibana-qa',
+      username: 'Kibana QA'
+    )
+  }
+}
+

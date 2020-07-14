@@ -5,6 +5,7 @@
  */
 
 import _ from 'lodash';
+import { APP_ID } from '../../../plugins/maps/common/constants';
 
 export function GisPageProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'header', 'timePicker']);
@@ -159,7 +160,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async onMapListingPage() {
       log.debug(`onMapListingPage`);
-      const exists = await testSubjects.exists('mapsListingPage');
+      const exists = await testSubjects.exists('mapsListingPage', { timeout: 3500 });
       return exists;
     }
 
@@ -197,7 +198,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       const onPage = await this.onMapListingPage();
       if (!onPage) {
         await retry.try(async () => {
-          await PageObjects.common.navigateToUrl('maps', '/', { basePath: this.basePath });
+          await PageObjects.common.navigateToUrlWithBrowserHistory(APP_ID, '/');
           const onMapListingPage = await this.onMapListingPage();
           if (!onMapListingPage) throw new Error('Not on map listing page.');
         });
@@ -209,8 +210,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
       log.debug(`getMapCountWithName: ${name}`);
       await this.searchForMapWithName(name);
-      const links = await find.allByLinkText(name);
-      return links.length;
+      const buttons = await find.allByButtonText(name);
+      return buttons.length;
     }
 
     async isSetViewPopoverOpen() {
@@ -607,7 +608,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       const STATS_ROW_NAME_INDEX = 0;
       const STATS_ROW_VALUE_INDEX = 1;
 
-      const statsRow = stats.find(statsRow => {
+      const statsRow = stats.find((statsRow) => {
         return statsRow[STATS_ROW_NAME_INDEX] === rowName;
       });
       if (!statsRow) {

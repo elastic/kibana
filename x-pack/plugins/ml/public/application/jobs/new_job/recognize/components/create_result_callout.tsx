@@ -67,7 +67,7 @@ export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
                 color="primary"
                 fill={false}
                 aria-label={i18n.translate(
-                  'xpack.ml.newJi18n(ob.recognize.jobsCreationFailed.resetButtonAriaLabel',
+                  'xpack.ml.newJob.recognize.jobsCreationFailed.resetButtonAriaLabel',
                   { defaultMessage: 'Reset' }
                 )}
                 onClick={onReset}
@@ -86,12 +86,12 @@ export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
                 fill={true}
                 href={resultsUrl}
                 aria-label={i18n.translate('xpack.ml.newJob.recognize.viewResultsAriaLabel', {
-                  defaultMessage: 'View Results',
+                  defaultMessage: 'View results',
                 })}
               >
                 <FormattedMessage
                   id="xpack.ml.newJob.recognize.viewResultsLinkText"
-                  defaultMessage="View Results"
+                  defaultMessage="View results"
                 />
               </EuiButton>
             </EuiFlexItem>

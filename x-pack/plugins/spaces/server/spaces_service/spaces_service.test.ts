@@ -5,7 +5,7 @@
  */
 import * as Rx from 'rxjs';
 import { SpacesService } from './spaces_service';
-import { coreMock, httpServerMock, loggingServiceMock } from 'src/core/server/mocks';
+import { coreMock, httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
 import { SpacesAuditLogger } from '../lib/audit_logger';
 import {
   KibanaRequest,
@@ -18,7 +18,7 @@ import { getSpaceIdFromPath } from '../../common/lib/spaces_url_parser';
 import { spacesConfig } from '../lib/__fixtures__';
 import { securityMock } from '../../../security/server/mocks';
 
-const mockLogger = loggingServiceMock.createLogger();
+const mockLogger = loggingSystemMock.createLogger();
 
 const createService = async (serverBasePath: string = '') => {
   const spacesService = new SpacesService(mockLogger);
@@ -71,7 +71,7 @@ const createService = async (serverBasePath: string = '') => {
     getStartServices: async () => [coreStart, {}, {}],
     config$: Rx.of(spacesConfig),
     authorization: securityMock.createSetup().authz,
-    getSpacesAuditLogger: () => new SpacesAuditLogger({}),
+    auditLogger: new SpacesAuditLogger(),
   });
 
   return spacesServiceSetup;

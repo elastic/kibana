@@ -12,15 +12,15 @@ export function useAgentName() {
   const { start, end, serviceName } = urlParams;
 
   const { data: agentName, error, status } = useFetcher(
-    callApmApi => {
+    (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
           pathname: '/api/apm/services/{serviceName}/agent_name',
           params: {
             path: { serviceName },
-            query: { start, end }
-          }
-        }).then(res => res.agentName);
+            query: { start, end },
+          },
+        }).then((res) => res.agentName);
       }
     },
     [serviceName, start, end]
@@ -29,6 +29,6 @@ export function useAgentName() {
   return {
     agentName,
     status,
-    error
+    error,
   };
 }

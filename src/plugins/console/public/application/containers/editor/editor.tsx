@@ -47,6 +47,7 @@ export const Editor = memo(({ loading }: Props) => {
     INITIAL_PANEL_WIDTH,
   ]);
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const onPanelWidthChange = useCallback(
     debounce((widths: number[]) => {
       storage.set(StorageKeys.WIDTH, widths);

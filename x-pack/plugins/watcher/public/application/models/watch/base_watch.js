@@ -38,7 +38,7 @@ export class BaseWatch {
     this.actions = actions.map(Action.fromUpstreamJson);
   }
 
-  updateWatchStatus = watchStatus => {
+  updateWatchStatus = (watchStatus) => {
     this.watchStatus = watchStatus;
   };
 
@@ -62,7 +62,7 @@ export class BaseWatch {
     this.addAction(action);
   };
 
-  addAction = action => {
+  addAction = (action) => {
     if (checkActionIdCollision(this.actions, action)) {
       action.id = createActionId(this.actions, action.type);
     }
@@ -70,7 +70,7 @@ export class BaseWatch {
     this.actions.push(action);
   };
 
-  deleteAction = action => {
+  deleteAction = (action) => {
     remove(this.actions, action);
   };
 
@@ -117,11 +117,11 @@ export class BaseWatch {
       type: this.type,
       isNew: this.isNew,
       isActive: this.isActive,
-      actions: map(this.actions, action => action.upstreamJson),
+      actions: map(this.actions, (action) => action.upstreamJson),
     };
   }
 
-  isEqualTo = otherWatch => {
+  isEqualTo = (otherWatch) => {
     // We need to create a POJO copies because isEqual would return false
     // because of property getters
     const cleanWatch = {

@@ -28,3 +28,8 @@ export const mockAuthorizationModeFactory = jest.fn();
 jest.mock('./mode', () => ({
   authorizationModeFactory: mockAuthorizationModeFactory,
 }));
+
+export const mockRegisterPrivilegesWithCluster = jest.fn();
+jest.mock('./register_privileges_with_cluster', () => ({
+  registerPrivilegesWithCluster: mockRegisterPrivilegesWithCluster,
+}));

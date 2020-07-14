@@ -24,6 +24,28 @@ export enum ANALYSIS_CONFIG_TYPE {
   CLASSIFICATION = 'classification',
 }
 
+export enum ANALYSIS_ADVANCED_FIELDS {
+  ETA = 'eta',
+  FEATURE_BAG_FRACTION = 'feature_bag_fraction',
+  FEATURE_INFLUENCE_THRESHOLD = 'feature_influence_threshold',
+  GAMMA = 'gamma',
+  LAMBDA = 'lambda',
+  MAX_TREES = 'max_trees',
+  METHOD = 'method',
+  N_NEIGHBORS = 'n_neighbors',
+  NUM_TOP_CLASSES = 'num_top_classes',
+  NUM_TOP_FEATURE_IMPORTANCE_VALUES = 'num_top_feature_importance_values',
+  OUTLIER_FRACTION = 'outlier_fraction',
+  RANDOMIZE_SEED = 'randomize_seed',
+}
+
+export enum OUTLIER_ANALYSIS_METHOD {
+  LOF = 'lof',
+  LDOF = 'ldof',
+  DISTANCE_KTH_NN = 'distance_kth_nn',
+  DISTANCE_KNN = 'distance_knn',
+}
+
 interface OutlierAnalysis {
   [key: string]: {};
   outlier_detection: {};
@@ -91,7 +113,7 @@ export interface FieldSelectionItem {
 }
 
 export interface DfAnalyticsExplainResponse {
-  field_selection: FieldSelectionItem[];
+  field_selection?: FieldSelectionItem[];
   memory_estimation: {
     expected_memory_without_disk: string;
     expected_memory_with_disk: string;
@@ -99,15 +121,23 @@ export interface DfAnalyticsExplainResponse {
 }
 
 export interface Eval {
-  meanSquaredError: number | string;
+  mse: number | string;
+  msle: number | string;
+  huber: number | string;
   rSquared: number | string;
   error: null | string;
 }
 
 export interface RegressionEvaluateResponse {
   regression: {
-    mean_squared_error: {
-      error: number;
+    huber: {
+      value: number;
+    };
+    mse: {
+      value: number;
+    };
+    msle: {
+      value: number;
     };
     r_squared: {
       value: number;
@@ -213,6 +243,16 @@ export const getPredictionFieldName = (
   return predictionFieldName;
 };
 
+export const getNumTopClasses = (
+  analysis: AnalysisConfig
+): ClassificationAnalysis['classification']['num_top_classes'] => {
+  let numTopClasses;
+  if (isClassificationAnalysis(analysis) && analysis.classification.num_top_classes !== undefined) {
+    numTopClasses = analysis.classification.num_top_classes;
+  }
+  return numTopClasses;
+};
+
 export const getNumTopFeatureImportanceValues = (
   analysis: AnalysisConfig
 ):
@@ -263,11 +303,13 @@ export const isClassificationAnalysis = (arg: any): arg is ClassificationAnalysi
 };
 
 export const isResultsSearchBoolQuery = (arg: any): arg is ResultsSearchBoolQuery => {
+  if (arg === undefined) return false;
   const keys = Object.keys(arg);
   return keys.length === 1 && keys[0] === 'bool';
 };
 
 export const isQueryStringQuery = (arg: any): arg is QueryStringQuery => {
+  if (arg === undefined) return false;
   const keys = Object.keys(arg);
   return keys.length === 1 && keys[0] === 'query_string';
 };
@@ -277,7 +319,7 @@ export const isRegressionEvaluateResponse = (arg: any): arg is RegressionEvaluat
   return (
     keys.length === 1 &&
     keys[0] === ANALYSIS_CONFIG_TYPE.REGRESSION &&
-    arg?.regression?.mean_squared_error !== undefined &&
+    arg?.regression?.mse !== undefined &&
     arg?.regression?.r_squared !== undefined
   );
 };
@@ -293,9 +335,15 @@ export const isClassificationEvaluateResponse = (
   );
 };
 
+export interface UpdateDataFrameAnalyticsConfig {
+  allow_lazy_start?: string;
+  description?: string;
+  model_memory_limit?: string;
+  max_num_threads?: number;
+}
+
 export interface DataFrameAnalyticsConfig {
   id: DataFrameAnalyticsId;
-  // Description attribute is not supported yet
   description?: string;
   dest: {
     index: IndexName;
@@ -311,6 +359,7 @@ export interface DataFrameAnalyticsConfig {
     excludes: string[];
   };
   model_memory_limit: string;
+  max_num_threads?: number;
   create_time: number;
   version: string;
   allow_lazy_start?: boolean;
@@ -343,7 +392,7 @@ export const useRefreshAnalyticsList = (
 
       subscriptions.push(
         distinct$
-          .pipe(filter(state => state === REFRESH_ANALYTICS_LIST_STATE.REFRESH))
+          .pipe(filter((state) => state === REFRESH_ANALYTICS_LIST_STATE.REFRESH))
           .subscribe(() => typeof callback.onRefresh === 'function' && callback.onRefresh())
       );
     }
@@ -351,7 +400,7 @@ export const useRefreshAnalyticsList = (
     if (typeof callback.isLoading === 'function') {
       subscriptions.push(
         distinct$.subscribe(
-          state =>
+          (state) =>
             typeof callback.isLoading === 'function' &&
             callback.isLoading(state === REFRESH_ANALYTICS_LIST_STATE.LOADING)
         )
@@ -359,7 +408,7 @@ export const useRefreshAnalyticsList = (
     }
 
     return () => {
-      subscriptions.map(sub => sub.unsubscribe());
+      subscriptions.map((sub) => sub.unsubscribe());
     };
   }, []);
 
@@ -375,19 +424,37 @@ export const useRefreshAnalyticsList = (
 
 const DEFAULT_SIG_FIGS = 3;
 
+interface RegressionEvaluateExtractedResponse {
+  mse: number | string;
+  msle: number | string;
+  huber: number | string;
+  r_squared: number | string;
+}
+
+export const EMPTY_STAT = '--';
+
 export function getValuesFromResponse(response: RegressionEvaluateResponse) {
-  let meanSquaredError = response?.regression?.mean_squared_error?.error;
+  const results: RegressionEvaluateExtractedResponse = {
+    mse: EMPTY_STAT,
+    msle: EMPTY_STAT,
+    huber: EMPTY_STAT,
+    r_squared: EMPTY_STAT,
+  };
 
-  if (meanSquaredError) {
-    meanSquaredError = Number(meanSquaredError.toPrecision(DEFAULT_SIG_FIGS));
+  if (response?.regression) {
+    for (const statType in response.regression) {
+      if (response.regression.hasOwnProperty(statType)) {
+        let currentStatValue =
+          response.regression[statType as keyof RegressionEvaluateResponse['regression']]?.value;
+        if (currentStatValue) {
+          currentStatValue = Number(currentStatValue.toPrecision(DEFAULT_SIG_FIGS));
+        }
+        results[statType as keyof RegressionEvaluateExtractedResponse] = currentStatValue;
+      }
+    }
   }
 
-  let rSquared = response?.regression?.r_squared?.value;
-  if (rSquared) {
-    rSquared = Number(rSquared.toPrecision(DEFAULT_SIG_FIGS));
-  }
-
-  return { meanSquaredError, rSquared };
+  return results;
 }
 interface ResultsSearchBoolQuery {
   bool: Dictionary<any>;
@@ -451,13 +518,22 @@ export function getEvalQueryBody({
   return query;
 }
 
+export enum REGRESSION_STATS {
+  MSE = 'mse',
+  MSLE = 'msle',
+  R_SQUARED = 'rSquared',
+  HUBER = 'huber',
+}
+
 interface EvaluateMetrics {
   classification: {
     multiclass_confusion_matrix: object;
   };
   regression: {
     r_squared: object;
-    mean_squared_error: object;
+    mse: object;
+    msle: object;
+    huber: object;
   };
 }
 
@@ -502,7 +578,9 @@ export const loadEvalData = async ({
     },
     regression: {
       r_squared: {},
-      mean_squared_error: {},
+      mse: {},
+      msle: {},
+      huber: {},
     },
   };
 

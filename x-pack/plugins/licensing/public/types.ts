@@ -11,6 +11,20 @@ import { ILicense } from '../common/types';
 export interface LicensingPluginSetup {
   /**
    * Steam of licensing information {@link ILicense}.
+   * @deprecated in favour of the counterpart provided from start contract
+   */
+  license$: Observable<ILicense>;
+  /**
+   * Triggers licensing information re-fetch.
+   * @deprecated in favour of the counterpart provided from start contract
+   */
+  refresh(): Promise<ILicense>;
+}
+
+/** @public */
+export interface LicensingPluginStart {
+  /**
+   * Steam of licensing information {@link ILicense}.
    */
   license$: Observable<ILicense>;
   /**

@@ -36,28 +36,38 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { Vis } from 'src/plugins/visualizations/public';
-import { SavedSearch } from 'src/plugins/discover/public';
+import { SavedObject } from 'src/plugins/saved_objects/public';
+import { useKibana } from '../../../../kibana_react/public';
 
 interface LinkedSearchProps {
-  savedSearch: SavedSearch;
+  savedSearch: SavedObject;
   eventEmitter: EventEmitter;
 }
 
 interface SidebarTitleProps {
   isLinkedSearch: boolean;
-  savedSearch?: SavedSearch;
+  savedSearch?: SavedObject;
   vis: Vis;
   eventEmitter: EventEmitter;
 }
 
 export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
   const [showPopover, setShowPopover] = useState(false);
+  const {
+    services: { application },
+  } = useKibana();
+
   const closePopover = useCallback(() => setShowPopover(false), []);
-  const onClickButtonLink = useCallback(() => setShowPopover(v => !v), []);
+  const onClickButtonLink = useCallback(() => setShowPopover((v) => !v), []);
   const onClickUnlikFromSavedSearch = useCallback(() => {
     setShowPopover(false);
     eventEmitter.emit('unlinkFromSavedSearch');
   }, [eventEmitter]);
+  const onClickViewInDiscover = useCallback(() => {
+    application.navigateToApp('discover', {
+      path: `#/${savedSearch.id}`,
+    });
+  }, [application, savedSearch.id]);
 
   const linkButtonAriaLabel = i18n.translate(
     'visDefaultEditor.sidebar.savedSearch.linkButtonAriaLabel',
@@ -118,7 +128,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
           <div style={{ width: 260 }}>
             <EuiText size="s">
               <p>
-                <EuiButtonEmpty flush="left" href={`#/discover/${savedSearch.id}`} size="xs">
+                <EuiButtonEmpty flush="left" onClick={onClickViewInDiscover} size="xs">
                   <FormattedMessage
                     id="visDefaultEditor.sidebar.savedSearch.goToDiscoverButtonText"
                     defaultMessage="View this search in Discover"

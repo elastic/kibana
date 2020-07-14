@@ -5,10 +5,11 @@
  */
 
 import React, { useState } from 'react';
-import { EuiPopover, EuiButtonIcon } from '@elastic/eui';
+import { EuiPopover, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NativeRenderer } from '../../../native_renderer';
 import { Visualization, VisualizationLayerWidgetProps } from '../../../types';
+import { ToolbarButton } from '../../../toolbar_button';
 
 export function LayerSettings({
   layerId,
@@ -25,24 +26,34 @@ export function LayerSettings({
     return null;
   }
 
+  const a11yText = i18n.translate('xpack.lens.editLayerSettings', {
+    defaultMessage: 'Edit layer settings',
+  });
+
   return (
     <EuiPopover
       id={`lnsLayerPopover_${layerId}`}
-      panelPaddingSize="s"
+      panelPaddingSize="m"
       ownFocus
       button={
-        <EuiButtonIcon
-          iconType={activeVisualization.getLayerContextMenuIcon?.(layerConfigProps) || 'gear'}
-          aria-label={i18n.translate('xpack.lens.editLayerSettings', {
+        <EuiToolTip
+          content={i18n.translate('xpack.lens.editLayerSettings', {
             defaultMessage: 'Edit layer settings',
           })}
-          onClick={() => setIsOpen(!isOpen)}
-          data-test-subj="lns_layer_settings"
-        />
+        >
+          <ToolbarButton
+            size="s"
+            iconType={activeVisualization.getLayerContextMenuIcon?.(layerConfigProps) || 'gear'}
+            aria-label={a11yText}
+            title={a11yText}
+            onClick={() => setIsOpen(!isOpen)}
+            data-test-subj="lns_layer_settings"
+          />
+        </EuiToolTip>
       }
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
-      anchorPosition="leftUp"
+      anchorPosition="downLeft"
     >
       <NativeRenderer
         render={activeVisualization.renderLayerContextMenu}

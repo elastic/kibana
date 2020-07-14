@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import './confirm_delete_modal.scss';
 
 import {
   CommonProps,
@@ -50,7 +51,7 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
   };
 
   public componentDidMount() {
-    isCurrentSpace(this.props.space, this.props.spacesManager).then(result => {
+    isCurrentSpace(this.props.space, this.props.spacesManager).then((result) => {
       this.setState({
         isDeletingCurrentSpace: result,
       });

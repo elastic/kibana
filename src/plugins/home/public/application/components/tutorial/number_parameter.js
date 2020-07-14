@@ -21,7 +21,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 export function NumberParameter({ id, label, value, setParameter }) {
-  const handleChange = evt => {
+  const handleChange = (evt) => {
     setParameter(id, parseFloat(evt.target.value));
   };
 

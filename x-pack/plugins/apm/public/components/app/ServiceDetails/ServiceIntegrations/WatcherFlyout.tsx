@@ -22,11 +22,11 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { padLeft, range } from 'lodash';
+import { padStart, range } from 'lodash';
 import moment from 'moment-timezone';
 import React, { Component } from 'react';
 import styled from 'styled-components';
@@ -84,15 +84,15 @@ export class WatcherFlyout extends Component<
     threshold: 10,
     actions: {
       slack: false,
-      email: false
+      email: false,
     },
     interval: {
       value: 10,
-      unit: 'm'
+      unit: 'm',
     },
     daily: '08:00',
     emails: '',
-    slackUrl: ''
+    slackUrl: '',
   };
 
   public onChangeSchedule = (schedule: ScheduleKey) => {
@@ -101,13 +101,13 @@ export class WatcherFlyout extends Component<
 
   public onChangeThreshold = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({
-      threshold: parseInt(event.target.value, 10)
+      threshold: parseInt(event.target.value, 10),
     });
   };
 
   public onChangeDailyUnit = (event: React.ChangeEvent<HTMLSelectElement>) => {
     this.setState({
-      daily: event.target.value
+      daily: event.target.value,
     });
   };
 
@@ -117,8 +117,8 @@ export class WatcherFlyout extends Component<
     this.setState({
       interval: {
         value: parseInt(event.target.value, 10),
-        unit: this.state.interval.unit
-      }
+        unit: this.state.interval.unit,
+      },
     });
   };
 
@@ -128,8 +128,8 @@ export class WatcherFlyout extends Component<
     this.setState({
       interval: {
         value: this.state.interval.value,
-        unit: event.target.value as IntervalUnit
-      }
+        unit: event.target.value as IntervalUnit,
+      },
     });
   };
 
@@ -137,8 +137,8 @@ export class WatcherFlyout extends Component<
     this.setState({
       actions: {
         ...this.state.actions,
-        [actionName]: !this.state.actions[actionName]
-      }
+        [actionName]: !this.state.actions[actionName],
+      },
     });
   };
 
@@ -161,8 +161,8 @@ export class WatcherFlyout extends Component<
     const emails = this.state.actions.email
       ? this.state.emails
           .split(',')
-          .map(email => email.trim())
-          .filter(email => !!email)
+          .map((email) => email.trim())
+          .filter((email) => !!email)
       : [];
 
     const slackUrl = this.state.actions.slack ? this.state.slackUrl : '';
@@ -170,25 +170,25 @@ export class WatcherFlyout extends Component<
     const schedule =
       this.state.schedule === 'interval'
         ? {
-            interval: `${this.state.interval.value}${this.state.interval.unit}`
+            interval: `${this.state.interval.value}${this.state.interval.unit}`,
           }
         : {
-            daily: { at: `${this.state.daily}` }
+            daily: { at: `${this.state.daily}` },
           };
 
     const timeRange =
       this.state.schedule === 'interval'
         ? {
             value: this.state.interval.value,
-            unit: this.state.interval.unit
+            unit: this.state.interval.unit,
           }
         : {
             value: 24,
-            unit: 'h'
+            unit: 'h',
           };
 
     return getApmIndexPatternTitle()
-      .then(indexPatternTitle => {
+      .then((indexPatternTitle) => {
         return createErrorGroupWatch({
           http: core.http,
           emails,
@@ -197,13 +197,13 @@ export class WatcherFlyout extends Component<
           slackUrl,
           threshold: this.state.threshold,
           timeRange,
-          apmIndexPatternTitle: indexPatternTitle
+          apmIndexPatternTitle: indexPatternTitle,
         }).then((id: string) => {
           this.props.onClose();
           this.addSuccessToast(id);
         });
       })
-      .catch(e => {
+      .catch((e) => {
         // eslint-disable-next-line
         console.error(e);
         this.addErrorToast();
@@ -217,7 +217,7 @@ export class WatcherFlyout extends Component<
       title: i18n.translate(
         'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreationFailedNotificationTitle',
         {
-          defaultMessage: 'Watch creation failed'
+          defaultMessage: 'Watch creation failed',
         }
       ),
       text: toMountPoint(
@@ -226,11 +226,11 @@ export class WatcherFlyout extends Component<
             'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreationFailedNotificationText',
             {
               defaultMessage:
-                'Make sure your user has permission to create watches.'
+                'Make sure your user has permission to create watches.',
             }
           )}
         </p>
-      )
+      ),
     });
   };
 
@@ -241,7 +241,7 @@ export class WatcherFlyout extends Component<
       title: i18n.translate(
         'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreatedNotificationTitle',
         {
-          defaultMessage: 'New watch created!'
+          defaultMessage: 'New watch created!',
         }
       ),
       text: toMountPoint(
@@ -252,24 +252,24 @@ export class WatcherFlyout extends Component<
               defaultMessage:
                 'The watch is now ready and will send error reports for {serviceName}.',
               values: {
-                serviceName: this.props.urlParams.serviceName
-              }
+                serviceName: this.props.urlParams.serviceName,
+              },
             }
           )}{' '}
           <ApmPluginContext.Provider value={this.context}>
             <KibanaLink
-              path={`/management/elasticsearch/watcher/watches/watch/${id}`}
+              path={`/management/insightsAndAlerting/watcher/watches/watch/${id}`}
             >
               {i18n.translate(
                 'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreatedNotificationText.viewWatchLinkText',
                 {
-                  defaultMessage: 'View watch'
+                  defaultMessage: 'View watch',
                 }
               )}
             </KibanaLink>
           </ApmPluginContext.Provider>
         </p>
-      )
+      ),
     });
   };
 
@@ -287,8 +287,8 @@ export class WatcherFlyout extends Component<
     ); // Format as 12h w. tz
 
     // Generate UTC hours for Daily Report select field
-    const intervalHours = range(24).map(i => {
-      const hour = padLeft(i.toString(), 2, '0');
+    const intervalHours = range(24).map((i) => {
+      const hour = padStart(i.toString(), 2, '0');
       return { value: `${hour}:00`, text: `${hour}:00 UTC` };
     });
 
@@ -309,11 +309,11 @@ export class WatcherFlyout extends Component<
                   {i18n.translate(
                     'xpack.apm.serviceDetails.enableErrorReportsPanel.formDescription.documentationLinkText',
                     {
-                      defaultMessage: 'documentation'
+                      defaultMessage: 'documentation',
                     }
                   )}
                 </ElasticDocsLink>
-              )
+              ),
             }}
           />
         </p>
@@ -323,7 +323,7 @@ export class WatcherFlyout extends Component<
             {i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.conditionTitle',
               {
-                defaultMessage: 'Condition'
+                defaultMessage: 'Condition',
               }
             )}
           </h4>
@@ -331,14 +331,14 @@ export class WatcherFlyout extends Component<
             label={i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.occurrencesThresholdLabel',
               {
-                defaultMessage: 'Occurrences threshold per error group'
+                defaultMessage: 'Occurrences threshold per error group',
               }
             )}
             helpText={i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.occurrencesThresholdHelpText',
               {
                 defaultMessage:
-                  'Threshold to be met for error group to be included in report.'
+                  'Threshold to be met for error group to be included in report.',
               }
             )}
             compressed
@@ -355,7 +355,7 @@ export class WatcherFlyout extends Component<
             {i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.triggerScheduleTitle',
               {
-                defaultMessage: 'Trigger schedule'
+                defaultMessage: 'Trigger schedule',
               }
             )}
           </h4>
@@ -364,7 +364,7 @@ export class WatcherFlyout extends Component<
               'xpack.apm.serviceDetails.enableErrorReportsPanel.triggerScheduleDescription',
               {
                 defaultMessage:
-                  'Choose the time interval for the report, when the threshold is exceeded.'
+                  'Choose the time interval for the report, when the threshold is exceeded.',
               }
             )}
           </EuiText>
@@ -374,7 +374,7 @@ export class WatcherFlyout extends Component<
             label={i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.dailyReportRadioButtonLabel',
               {
-                defaultMessage: 'Daily report'
+                defaultMessage: 'Daily report',
               }
             )}
             onChange={() => this.onChangeSchedule('daily')}
@@ -387,7 +387,7 @@ export class WatcherFlyout extends Component<
               {
                 defaultMessage:
                   'The daily report will be sent at {dailyTimeFormatted} / {dailyTime12HourFormatted}.',
-                values: { dailyTimeFormatted, dailyTime12HourFormatted }
+                values: { dailyTimeFormatted, dailyTime12HourFormatted },
               }
             )}
             compressed
@@ -405,7 +405,7 @@ export class WatcherFlyout extends Component<
             label={i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.intervalRadioButtonLabel',
               {
-                defaultMessage: 'Interval'
+                defaultMessage: 'Interval',
               }
             )}
             onChange={() => this.onChangeSchedule('interval')}
@@ -419,7 +419,7 @@ export class WatcherFlyout extends Component<
                   helpText={i18n.translate(
                     'xpack.apm.serviceDetails.enableErrorReportsPanel.intervalHelpText',
                     {
-                      defaultMessage: 'Time interval between reports.'
+                      defaultMessage: 'Time interval between reports.',
                     }
                   )}
                   compressed
@@ -447,19 +447,19 @@ export class WatcherFlyout extends Component<
                       text: i18n.translate(
                         'xpack.apm.serviceDetails.enableErrorReportsPanel.intervalUnit.minsLabel',
                         {
-                          defaultMessage: 'mins'
+                          defaultMessage: 'mins',
                         }
-                      )
+                      ),
                     },
                     {
                       value: 'h',
                       text: i18n.translate(
                         'xpack.apm.serviceDetails.enableErrorReportsPanel.intervalUnit.hrsLabel',
                         {
-                          defaultMessage: 'hrs'
+                          defaultMessage: 'hrs',
                         }
-                      )
-                    }
+                      ),
+                    },
                   ]}
                   disabled={this.state.schedule !== 'interval'}
                 />
@@ -470,7 +470,7 @@ export class WatcherFlyout extends Component<
             {i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.actionsTitle',
               {
-                defaultMessage: 'Actions'
+                defaultMessage: 'Actions',
               }
             )}
           </h4>
@@ -479,7 +479,7 @@ export class WatcherFlyout extends Component<
               'xpack.apm.serviceDetails.enableErrorReportsPanel.actionsDescription',
               {
                 defaultMessage:
-                  'Reports can be sent by email or posted to a Slack channel. Each report will include the top 10 errors sorted by occurrence.'
+                  'Reports can be sent by email or posted to a Slack channel. Each report will include the top 10 errors sorted by occurrence.',
               }
             )}
           </EuiText>
@@ -488,7 +488,7 @@ export class WatcherFlyout extends Component<
             label={i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.sendEmailLabel',
               {
-                defaultMessage: 'Send email'
+                defaultMessage: 'Send email',
               }
             )}
             checked={this.state.actions.email}
@@ -500,7 +500,7 @@ export class WatcherFlyout extends Component<
               label={i18n.translate(
                 'xpack.apm.serviceDetails.enableErrorReportsPanel.recipientsLabel',
                 {
-                  defaultMessage: 'Recipients (separated with comma)'
+                  defaultMessage: 'Recipients (separated with comma)',
                 }
               )}
               compressed
@@ -519,11 +519,11 @@ export class WatcherFlyout extends Component<
                           {i18n.translate(
                             'xpack.apm.serviceDetails.enableErrorReportsPanel.recipientsHelpText.documentationLinkText',
                             {
-                              defaultMessage: 'documentation'
+                              defaultMessage: 'documentation',
                             }
                           )}
                         </ElasticDocsLink>
-                      )
+                      ),
                     }}
                   />
                 </span>
@@ -542,7 +542,7 @@ export class WatcherFlyout extends Component<
             label={i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.sendSlackNotificationLabel',
               {
-                defaultMessage: 'Send Slack notification'
+                defaultMessage: 'Send Slack notification',
               }
             )}
             checked={this.state.actions.slack}
@@ -554,7 +554,7 @@ export class WatcherFlyout extends Component<
               label={i18n.translate(
                 'xpack.apm.serviceDetails.enableErrorReportsPanel.slackWebhookURLLabel',
                 {
-                  defaultMessage: 'Slack Webhook URL'
+                  defaultMessage: 'Slack Webhook URL',
                 }
               )}
               compressed
@@ -572,11 +572,11 @@ export class WatcherFlyout extends Component<
                           {i18n.translate(
                             'xpack.apm.serviceDetails.enableErrorReportsPanel.slackWebhookURLHelpText.documentationLinkText',
                             {
-                              defaultMessage: 'documentation'
+                              defaultMessage: 'documentation',
                             }
                           )}
                         </EuiLink>
-                      )
+                      ),
                     }}
                   />
                 </span>
@@ -602,7 +602,7 @@ export class WatcherFlyout extends Component<
               {i18n.translate(
                 'xpack.apm.serviceDetails.enableErrorReportsPanel.enableErrorReportsTitle',
                 {
-                  defaultMessage: 'Enable error reports'
+                  defaultMessage: 'Enable error reports',
                 }
               )}
             </h2>
@@ -622,7 +622,7 @@ export class WatcherFlyout extends Component<
                 {i18n.translate(
                   'xpack.apm.serviceDetails.enableErrorReportsPanel.createWatchButtonLabel',
                   {
-                    defaultMessage: 'Create watch'
+                    defaultMessage: 'Create watch',
                   }
                 )}
               </EuiButton>

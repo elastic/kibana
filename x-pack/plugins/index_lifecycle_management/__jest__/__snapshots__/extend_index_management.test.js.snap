@@ -92,6 +92,7 @@ Array [
 
 exports[`extend index management ilm summary extension should return extension when index has lifecycle error 1`] = `
 <IndexLifecycleSummary
+  getUrlForApp={[Function]}
   index={
     Object {
       "aliases": "none",
@@ -364,11 +365,11 @@ exports[`extend index management ilm summary extension should return extension w
                   className="euiDescriptionList__description"
                 >
                   <EuiLink
-                    href="#/management/elasticsearch/index_lifecycle_management/policies/edit/testy"
+                    href="management/data/index_lifecycle_management//policies/edit/testy"
                   >
                     <a
                       className="euiLink euiLink--primary"
-                      href="#/management/elasticsearch/index_lifecycle_management/policies/edit/testy"
+                      href="management/data/index_lifecycle_management//policies/edit/testy"
                       rel="noreferrer"
                     >
                       testy
@@ -494,7 +495,7 @@ exports[`extend index management ilm summary extension should return extension w
                   <EuiPopover
                     anchorPosition="downCenter"
                     button={
-                      <ForwardRef
+                      <EuiLink
                         onClick={[Function]}
                       >
                         <FormattedMessage
@@ -502,7 +503,7 @@ exports[`extend index management ilm summary extension should return extension w
                           id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
                           values={Object {}}
                         />
-                      </ForwardRef>
+                      </EuiLink>
                     }
                     closePopover={[Function]}
                     display="inlineBlock"
@@ -564,6 +565,7 @@ exports[`extend index management ilm summary extension should return extension w
 
 exports[`extend index management ilm summary extension should return extension when index has lifecycle policy 1`] = `
 <IndexLifecycleSummary
+  getUrlForApp={[Function]}
   index={
     Object {
       "aliases": "none",
@@ -748,11 +750,11 @@ exports[`extend index management ilm summary extension should return extension w
                   className="euiDescriptionList__description"
                 >
                   <EuiLink
-                    href="#/management/elasticsearch/index_lifecycle_management/policies/edit/testy"
+                    href="management/data/index_lifecycle_management//policies/edit/testy"
                   >
                     <a
                       className="euiLink euiLink--primary"
-                      href="#/management/elasticsearch/index_lifecycle_management/policies/edit/testy"
+                      href="management/data/index_lifecycle_management//policies/edit/testy"
                       rel="noreferrer"
                     >
                       testy

@@ -93,7 +93,7 @@ describe('CLI cluster manager', () => {
     }
 
     const football = {};
-    const messenger = sample(manager.workers);
+    const messenger = sample(manager.workers) as any;
 
     messenger.emit('broadcast', football);
     for (const worker of manager.workers) {
@@ -153,7 +153,7 @@ describe('CLI cluster manager', () => {
           const events: Array<string | Error> = [];
           delayUntil().subscribe(
             () => events.push('next'),
-            error => events.push(error),
+            (error) => events.push(error),
             () => events.push('complete')
           );
 

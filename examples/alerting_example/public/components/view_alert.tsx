@@ -36,7 +36,7 @@ import {
   Alert,
   AlertTaskState,
   BASE_ALERT_API_PATH,
-} from '../../../../x-pack/plugins/alerting/common';
+} from '../../../../x-pack/plugins/alerts/common';
 import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
 type Props = RouteComponentProps & {
@@ -49,10 +49,10 @@ export const ViewAlertPage = withRouter(({ http, id }: Props) => {
 
   useEffect(() => {
     if (!alert) {
-      http.get(`${BASE_ALERT_API_PATH}/${id}`).then(setAlert);
+      http.get(`${BASE_ALERT_API_PATH}/alert/${id}`).then(setAlert);
     }
     if (!alertState) {
-      http.get(`${BASE_ALERT_API_PATH}/${id}/state`).then(setAlertState);
+      http.get(`${BASE_ALERT_API_PATH}/alert/${id}/state`).then(setAlertState);
     }
   }, [alert, alertState, http, id]);
 

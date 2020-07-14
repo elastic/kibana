@@ -5,7 +5,6 @@
  */
 
 import { omit } from 'lodash';
-import { IIndexPattern } from 'src/plugins/data/server';
 import { mergeProjection } from '../../../../common/projections/util/merge_projection';
 import { Projection } from '../../../../common/projections/typings';
 import { UIFilters } from '../../../../typings/ui_filters';
@@ -13,18 +12,16 @@ import { getUiFiltersES } from '../../helpers/convert_ui_filters/get_ui_filters_
 import { localUIFilters, LocalUIFilterName } from './config';
 
 export const getLocalFilterQuery = ({
-  indexPattern,
   uiFilters,
   projection,
-  localUIFilterName
+  localUIFilterName,
 }: {
-  indexPattern: IIndexPattern | undefined;
   uiFilters: UIFilters;
   projection: Projection;
   localUIFilterName: LocalUIFilterName;
 }) => {
   const field = localUIFilters[localUIFilterName];
-  const filter = getUiFiltersES(indexPattern, omit(uiFilters, field.name));
+  const filter = getUiFiltersES(omit(uiFilters, field.name));
 
   const bucketCountAggregation = projection.body.aggs
     ? {
@@ -33,10 +30,10 @@ export const getLocalFilterQuery = ({
             cardinality: {
               field:
                 projection.body.aggs[Object.keys(projection.body.aggs)[0]].terms
-                  .field
-            }
-          }
-        }
+                  .field,
+            },
+          },
+        },
       }
     : {};
 
@@ -45,20 +42,20 @@ export const getLocalFilterQuery = ({
       size: 0,
       query: {
         bool: {
-          filter: filter.concat(projection.body.query?.bool?.filter || [])
-        }
+          filter: filter.concat(projection.body.query?.bool?.filter || []),
+        },
       },
       aggs: {
         by_terms: {
           terms: {
             field: field.fieldName,
             order: {
-              _count: 'desc'
-            }
+              _count: 'desc',
+            },
           },
-          ...bucketCountAggregation
-        }
-      }
-    }
+          ...bucketCountAggregation,
+        },
+      },
+    },
   });
 };

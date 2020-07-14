@@ -10,7 +10,7 @@ import { VALIDATION_STATUS } from '../constants/validation';
 const contains = (arr: string[], str: string) => arr.indexOf(str) >= 0;
 
 export function getMostSevereMessageStatus(messages: Array<{ status: string }>): VALIDATION_STATUS {
-  const statuses = messages.map(m => m.status);
+  const statuses = messages.map((m) => m.status);
   return [VALIDATION_STATUS.INFO, VALIDATION_STATUS.WARNING, VALIDATION_STATUS.ERROR].reduce(
     (previous, current) => {
       return contains(statuses, current) ? current : previous;

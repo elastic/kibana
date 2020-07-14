@@ -8,6 +8,9 @@
 
 ```typescript
 readonly links: {
+        readonly dashboard: {
+            readonly drilldowns: string;
+        };
         readonly filebeat: {
             readonly base: string;
             readonly installation: string;

@@ -66,11 +66,11 @@ interface InnerProps {
 }
 
 const Inner = euiStyled.div<InnerProps>`
-  border: 1px solid ${props => props.theme.eui.euiBorderColor};
-  background-color: ${props =>
+  border: 1px solid ${(props) => props.theme.eui.euiBorderColor};
+  background-color: ${(props) =>
     props.isChild ? props.theme.eui.euiColorLightestShade : props.theme.eui.euiColorEmptyShade};
   border-radius: 4px;
-  box-shadow: 0px 2px 0px 0px ${props => props.theme.eui.euiBorderColor};
+  box-shadow: 0px 2px 0px 0px ${(props) => props.theme.eui.euiBorderColor};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -87,7 +87,7 @@ const Name = euiStyled.div`
 
 const Count = euiStyled.div`
   flex: 0 0 auto;
-  border-left: 1px solid ${props => props.theme.eui.euiBorderColor};
+  border-left: 1px solid ${(props) => props.theme.eui.euiBorderColor};
   padding: 6px 10px;
   font-size: 0.85em;
   font-weight: normal;

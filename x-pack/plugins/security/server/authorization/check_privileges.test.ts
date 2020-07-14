@@ -21,10 +21,10 @@ const mockActions = {
 const savedObjectTypes = ['foo-type', 'bar-type'];
 
 const createMockClusterClient = (response: any) => {
-  const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+  const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
   mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(response);
 
-  const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+  const mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
   mockClusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
 
   return { mockClusterClient, mockScopedClusterClient };
@@ -333,7 +333,7 @@ describe('#atSpaces', () => {
         applications: [
           {
             application,
-            resources: options.spaceIds.map(spaceId => `space:${spaceId}`),
+            resources: options.spaceIds.map((spaceId) => `space:${spaceId}`),
             privileges: uniq([
               mockActions.version,
               mockActions.login,
@@ -737,7 +737,7 @@ describe('#atSpaces', () => {
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
                 [`saved_object:${savedObjectTypes[1]}/get`]: true,
               },
-              // @ts-ignore this is wrong on purpose
+              // @ts-expect-error this is wrong on purpose
               'space:space_1': {
                 [mockActions.login]: true,
                 [mockActions.version]: true,
@@ -765,7 +765,7 @@ describe('#atSpaces', () => {
                 [mockActions.login]: true,
                 [mockActions.version]: true,
               },
-              // @ts-ignore this is wrong on purpose
+              // @ts-expect-error this is wrong on purpose
               'space:space_1': {
                 [mockActions.login]: true,
                 [mockActions.version]: true,

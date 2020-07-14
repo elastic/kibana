@@ -24,15 +24,17 @@ export default function createFindTests({ getService }: FtrProviderContext) {
       describe(scenario.id, () => {
         it('should handle find alert request appropriately', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const response = await supertestWithoutAuth
             .get(
-              `${getUrlPrefix(space.id)}/api/alert/_find?search=test.noop&search_fields=alertTypeId`
+              `${getUrlPrefix(
+                space.id
+              )}/api/alerts/_find?search=test.noop&search_fields=alertTypeId`
             )
             .auth(user.username, user.password);
 
@@ -84,7 +86,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
         it('should handle find alert request with filter appropriately', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
@@ -95,7 +97,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             .expect(200);
 
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
@@ -110,13 +112,13 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const response = await supertestWithoutAuth
             .get(
               `${getUrlPrefix(
                 space.id
-              )}/api/alert/_find?filter=alert.attributes.actions:{ actionTypeId: test.noop }`
+              )}/api/alerts/_find?filter=alert.attributes.actions:{ actionTypeId: test.noop }`
             )
             .auth(user.username, user.password);
 
@@ -174,15 +176,15 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
         it(`shouldn't find alert from another space`, async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const response = await supertestWithoutAuth
             .get(
-              `${getUrlPrefix('other')}/api/alert/_find?search=test.noop&search_fields=alertTypeId`
+              `${getUrlPrefix('other')}/api/alerts/_find?search=test.noop&search_fields=alertTypeId`
             )
             .auth(user.username, user.password);
 

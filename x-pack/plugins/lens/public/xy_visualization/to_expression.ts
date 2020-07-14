@@ -41,10 +41,10 @@ export const toExpression = (state: State, frame: FramePublicAPI): Ast | null =>
   }
 
   const metadata: Record<string, Record<string, OperationMetadata | null>> = {};
-  state.layers.forEach(layer => {
+  state.layers.forEach((layer) => {
     metadata[layer.layerId] = {};
     const datasource = frame.datasourceLayers[layer.layerId];
-    datasource.getTableSpec().forEach(column => {
+    datasource.getTableSpec().forEach((column) => {
       const operation = frame.datasourceLayers[layer.layerId].getOperationForColumnId(
         column.columnId
       );
@@ -59,7 +59,7 @@ export function toPreviewExpression(state: State, frame: FramePublicAPI) {
   return toExpression(
     {
       ...state,
-      layers: state.layers.map(layer => ({ ...layer, hide: true })),
+      layers: state.layers.map((layer) => ({ ...layer, hide: true })),
       // hide legend for preview
       legend: {
         ...state.legend,
@@ -133,14 +133,15 @@ export const buildExpression = (
               ],
             },
           ],
-          layers: validLayers.map(layer => {
+          fittingFunction: [state.fittingFunction || 'None'],
+          layers: validLayers.map((layer) => {
             const columnToLabel: Record<string, string> = {};
 
             if (frame) {
               const datasource = frame.datasourceLayers[layer.layerId];
               layer.accessors
                 .concat(layer.splitAccessor ? [layer.splitAccessor] : [])
-                .forEach(accessor => {
+                .forEach((accessor) => {
                   const operation = datasource.getOperationForColumnId(accessor);
                   if (operation?.label) {
                     columnToLabel[accessor] = operation.label;
@@ -179,6 +180,22 @@ export const buildExpression = (
                     ],
                     isHistogram: [isHistogramDimension],
                     splitAccessor: layer.splitAccessor ? [layer.splitAccessor] : [],
+                    yConfig: layer.yConfig
+                      ? layer.yConfig.map((yConfig) => ({
+                          type: 'expression',
+                          chain: [
+                            {
+                              type: 'function',
+                              function: 'lens_xy_yConfig',
+                              arguments: {
+                                forAccessor: [yConfig.forAccessor],
+                                axisMode: yConfig.axisMode ? [yConfig.axisMode] : [],
+                                color: yConfig.color ? [yConfig.color] : [],
+                              },
+                            },
+                          ],
+                        }))
+                      : [],
                     seriesType: [layer.seriesType],
                     accessors: layer.accessors,
                     columnToLabel: [JSON.stringify(columnToLabel)],

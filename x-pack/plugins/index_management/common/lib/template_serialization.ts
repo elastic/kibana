@@ -5,24 +5,114 @@
  */
 import {
   TemplateDeserialized,
-  TemplateV1Serialized,
-  TemplateV2Serialized,
+  LegacyTemplateSerialized,
+  TemplateSerialized,
   TemplateListItem,
+  TemplateType,
 } from '../types';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
-export function serializeV1Template(template: TemplateDeserialized): TemplateV1Serialized {
+export function serializeTemplate(templateDeserialized: TemplateDeserialized): TemplateSerialized {
+  const {
+    version,
+    priority,
+    indexPatterns,
+    template,
+    composedOf,
+    dataStream,
+    _meta,
+  } = templateDeserialized;
+
+  return {
+    version,
+    priority,
+    template,
+    index_patterns: indexPatterns,
+    data_stream: dataStream,
+    composed_of: composedOf,
+    _meta,
+  };
+}
+
+export function deserializeTemplate(
+  templateEs: TemplateSerialized & { name: string },
+  cloudManagedTemplatePrefix?: string
+): TemplateDeserialized {
   const {
     name,
     version,
+    index_patterns: indexPatterns,
+    template = {},
+    priority,
+    _meta,
+    composed_of: composedOf,
+    data_stream: dataStream,
+  } = templateEs;
+  const { settings } = template;
+
+  let type: TemplateType = 'default';
+  if (Boolean(cloudManagedTemplatePrefix && name.startsWith(cloudManagedTemplatePrefix))) {
+    type = 'cloudManaged';
+  } else if (name.startsWith('.')) {
+    type = 'system';
+  } else if (Boolean(_meta?.managed === true)) {
+    type = 'managed';
+  }
+
+  const deserializedTemplate: TemplateDeserialized = {
+    name,
+    version,
+    priority,
+    indexPatterns: indexPatterns.sort(),
+    template,
+    ilmPolicy: settings?.index?.lifecycle,
+    composedOf,
+    dataStream,
+    _meta,
+    _kbnMeta: {
+      type,
+      hasDatastream: Boolean(dataStream),
+    },
+  };
+
+  return deserializedTemplate;
+}
+
+export function deserializeTemplateList(
+  indexTemplates: Array<{ name: string; index_template: TemplateSerialized }>,
+  cloudManagedTemplatePrefix?: string
+): TemplateListItem[] {
+  return indexTemplates.map(({ name, index_template: templateSerialized }) => {
+    const {
+      template: { mappings, settings, aliases },
+      ...deserializedTemplate
+    } = deserializeTemplate({ name, ...templateSerialized }, cloudManagedTemplatePrefix);
+
+    return {
+      ...deserializedTemplate,
+      hasSettings: hasEntries(settings),
+      hasAliases: hasEntries(aliases),
+      hasMappings: hasEntries(mappings),
+    };
+  });
+}
+
+/**
+ * ------------------------------------------
+ * --------- LEGACY INDEX TEMPLATES ---------
+ * ------------------------------------------
+ */
+
+export function serializeLegacyTemplate(template: TemplateDeserialized): LegacyTemplateSerialized {
+  const {
+    version,
     order,
     indexPatterns,
-    template: { settings, aliases, mappings } = {} as TemplateDeserialized['template'],
+    template: { settings, aliases, mappings },
   } = template;
 
-  const serializedTemplate: TemplateV1Serialized = {
-    name,
+  return {
     version,
     order,
     index_patterns: indexPatterns,
@@ -30,86 +120,38 @@ export function serializeV1Template(template: TemplateDeserialized): TemplateV1S
     aliases,
     mappings,
   };
-
-  return serializedTemplate;
 }
 
-export function serializeV2Template(template: TemplateDeserialized): TemplateV2Serialized {
-  const { aliases, mappings, settings, ...templateV1serialized } = serializeV1Template(template);
-
-  return {
-    ...templateV1serialized,
-    template: {
-      aliases,
-      mappings,
-      settings,
-    },
-    priority: template.priority,
-    composed_of: template.composedOf,
-  };
-}
-
-export function deserializeV2Template(
-  templateEs: TemplateV2Serialized,
-  managedTemplatePrefix?: string
-): TemplateDeserialized {
-  const {
-    name,
-    version,
-    order,
-    index_patterns: indexPatterns,
-    template,
-    priority,
-    composed_of: composedOf,
-  } = templateEs;
-  const { settings } = template;
-
-  const deserializedTemplate: TemplateDeserialized = {
-    name,
-    version,
-    order,
-    indexPatterns: indexPatterns.sort(),
-    template,
-    ilmPolicy: settings && settings.index && settings.index.lifecycle,
-    isManaged: Boolean(managedTemplatePrefix && name.startsWith(managedTemplatePrefix)),
-    priority,
-    composedOf,
-    _kbnMeta: {
-      formatVersion: 2,
-    },
-  };
-
-  return deserializedTemplate;
-}
-
-export function deserializeV1Template(
-  templateEs: TemplateV1Serialized,
-  managedTemplatePrefix?: string
+export function deserializeLegacyTemplate(
+  templateEs: LegacyTemplateSerialized & { name: string },
+  cloudManagedTemplatePrefix?: string
 ): TemplateDeserialized {
   const { settings, aliases, mappings, ...rest } = templateEs;
 
-  const deserializedTemplateV2 = deserializeV2Template(
+  const deserializedTemplate = deserializeTemplate(
     { ...rest, template: { aliases, settings, mappings } },
-    managedTemplatePrefix
+    cloudManagedTemplatePrefix
   );
 
   return {
-    ...deserializedTemplateV2,
+    ...deserializedTemplate,
+    order: templateEs.order,
     _kbnMeta: {
-      formatVersion: 1,
+      ...deserializedTemplate._kbnMeta,
+      isLegacy: true,
     },
   };
 }
 
-export function deserializeTemplateList(
-  indexTemplatesByName: { [key: string]: Omit<TemplateV1Serialized, 'name'> },
-  managedTemplatePrefix?: string
+export function deserializeLegacyTemplateList(
+  indexTemplatesByName: { [key: string]: LegacyTemplateSerialized },
+  cloudManagedTemplatePrefix?: string
 ): TemplateListItem[] {
   return Object.entries(indexTemplatesByName).map(([name, templateSerialized]) => {
     const {
       template: { mappings, settings, aliases },
       ...deserializedTemplate
-    } = deserializeV1Template({ name, ...templateSerialized }, managedTemplatePrefix);
+    } = deserializeLegacyTemplate({ name, ...templateSerialized }, cloudManagedTemplatePrefix);
 
     return {
       ...deserializedTemplate,

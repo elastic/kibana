@@ -5,47 +5,45 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiI18nNumber } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiTitle,
-  EuiButtonEmpty,
+  EuiFlexItem,
+  EuiI18nNumber,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
 import { OverviewPanel } from './overview_panel';
 import { OverviewStats } from './overview_stats';
 import { useLink, useGetPackages } from '../../../hooks';
-import { EPM_PATH } from '../../../constants';
 import { Loading } from '../../fleet/components';
 import { InstallationStatus } from '../../../types';
 
 export const OverviewIntegrationSection: React.FC = () => {
+  const { getHref } = useLink();
   const packagesRequest = useGetPackages();
-
-  const total = packagesRequest.data?.response?.length ?? 0;
-  const installed =
-    packagesRequest.data?.response?.filter(p => p.status === InstallationStatus.installed)
-      ?.length ?? 0;
+  const res = packagesRequest.data?.response;
+  const total = res?.length ?? 0;
+  const installed = res?.filter((p) => p.status === InstallationStatus.installed)?.length ?? 0;
+  const updatablePackages =
+    res?.filter(
+      (item) => 'savedObject' in item && item.version > item.savedObject.attributes.version
+    )?.length ?? 0;
   return (
     <EuiFlexItem component="section">
-      <OverviewPanel>
-        <header>
-          <EuiTitle size="xs">
-            <h2>
-              <FormattedMessage
-                id="xpack.ingestManager.overviewPageIntegrationsPanelTitle"
-                defaultMessage="Integrations"
-              />
-            </h2>
-          </EuiTitle>
-          <EuiButtonEmpty size="xs" flush="right" href={useLink(EPM_PATH)}>
-            <FormattedMessage
-              id="xpack.ingestManager.overviewPageIntegrationsPanelAction"
-              defaultMessage="View integrations"
-            />
-          </EuiButtonEmpty>
-        </header>
+      <OverviewPanel
+        title={i18n.translate('xpack.ingestManager.overviewPageIntegrationsPanelTitle', {
+          defaultMessage: 'Integrations',
+        })}
+        tooltip={i18n.translate('xpack.ingestManager.overviewPageIntegrationsPanelTooltip', {
+          defaultMessage:
+            'Browse and install integrations for the Elastic Stack. Add integrations to your agent configurations to start sending data.',
+        })}
+        linkTo={getHref('integrations_all')}
+        linkToText={i18n.translate('xpack.ingestManager.overviewPageIntegrationsPanelAction', {
+          defaultMessage: 'View integrations',
+        })}
+      >
         <OverviewStats>
           {packagesRequest.isLoading ? (
             <Loading />
@@ -68,6 +66,15 @@ export const OverviewIntegrationSection: React.FC = () => {
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
                 <EuiI18nNumber value={installed} />
+              </EuiDescriptionListDescription>
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.ingestManager.overviewIntegrationsUpdatesAvailableTitle"
+                  defaultMessage="Updates available"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                <EuiI18nNumber value={updatablePackages} />
               </EuiDescriptionListDescription>
             </>
           )}

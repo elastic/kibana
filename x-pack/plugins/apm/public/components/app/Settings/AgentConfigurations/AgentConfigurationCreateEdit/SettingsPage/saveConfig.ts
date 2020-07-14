@@ -9,14 +9,14 @@ import { NotificationsStart } from 'kibana/public';
 import { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
 import {
   getOptionLabel,
-  omitAllOption
+  omitAllOption,
 } from '../../../../../../../common/agent_configuration/all_option';
 import { callApmApi } from '../../../../../../services/rest/createCallApmApi';
 
 export async function saveConfig({
   config,
   isEditMode,
-  toasts
+  toasts,
 }: {
   config: AgentConfigurationIntake;
   agentName?: string;
@@ -33,10 +33,10 @@ export async function saveConfig({
           ...config,
           service: {
             name: omitAllOption(config.service.name),
-            environment: omitAllOption(config.service.environment)
-          }
-        }
-      }
+            environment: omitAllOption(config.service.environment),
+          },
+        },
+      },
     });
 
     toasts.addSuccess({
@@ -47,22 +47,22 @@ export async function saveConfig({
       text: i18n.translate('xpack.apm.agentConfig.saveConfig.succeeded.text', {
         defaultMessage:
           'The configuration for "{serviceName}" was saved. It will take some time to propagate to the agents.',
-        values: { serviceName: getOptionLabel(config.service.name) }
-      })
+        values: { serviceName: getOptionLabel(config.service.name) },
+      }),
     });
   } catch (error) {
     toasts.addDanger({
       title: i18n.translate('xpack.apm.agentConfig.saveConfig.failed.title', {
-        defaultMessage: 'Configuration could not be saved'
+        defaultMessage: 'Configuration could not be saved',
       }),
       text: i18n.translate('xpack.apm.agentConfig.saveConfig.failed.text', {
         defaultMessage:
           'Something went wrong when saving the configuration for "{serviceName}". Error: "{errorMessage}"',
         values: {
           serviceName: getOptionLabel(config.service.name),
-          errorMessage: error.message
-        }
-      })
+          errorMessage: error.message,
+        },
+      }),
     });
   }
 }

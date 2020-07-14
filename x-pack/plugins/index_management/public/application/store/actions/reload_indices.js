@@ -6,15 +6,13 @@
 
 import { createAction } from 'redux-actions';
 import { i18n } from '@kbn/i18n';
-import { getIndexNamesForCurrentPage } from '../selectors';
 import { reloadIndices as request } from '../../services';
 import { loadIndices } from './load_indices';
 import { notificationService } from '../../services/notification';
 
 export const reloadIndicesSuccess = createAction('INDEX_MANAGEMENT_RELOAD_INDICES_SUCCESS');
-export const reloadIndices = indexNames => async (dispatch, getState) => {
+export const reloadIndices = (indexNames) => async (dispatch) => {
   let indices;
-  indexNames = indexNames || getIndexNamesForCurrentPage(getState());
   try {
     indices = await request(indexNames);
   } catch (error) {

@@ -25,7 +25,8 @@ export const CASE_USER_ACTIONS_URL = `${CASE_DETAILS_URL}/user_actions`;
  * Action routes
  */
 
-export const ACTION_URL = '/api/action';
-export const ACTION_TYPES_URL = '/api/action/types';
+export const ACTION_URL = '/api/actions';
+export const ACTION_TYPES_URL = '/api/actions/list_action_types';
+export const SERVICENOW_ACTION_TYPE_ID = '.servicenow';
 
-export const SUPPORTED_CONNECTORS = ['.servicenow', '.jira'];
+export const SUPPORTED_CONNECTORS = ['.servicenow', '.jira', '.resilient'];

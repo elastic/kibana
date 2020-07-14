@@ -27,10 +27,11 @@ export interface MetricExplorerViewState {
 
 export const useMetricsExplorerState = (
   source: SourceQuery.Query['source']['configuration'],
-  derivedIndexPattern: IIndexPattern
+  derivedIndexPattern: IIndexPattern,
+  shouldLoadImmediately = true
 ) => {
   const [refreshSignal, setRefreshSignal] = useState(0);
-  const [afterKey, setAfterKey] = useState<string | null>(null);
+  const [afterKey, setAfterKey] = useState<string | null | Record<string, string | null>>(null);
   const {
     defaultViewState,
     options,
@@ -40,13 +41,15 @@ export const useMetricsExplorerState = (
     setTimeRange,
     setOptions,
   } = useContext(MetricsExplorerOptionsContainer.Context);
-  const { loading, error, data } = useMetricsExplorerData(
+  const { loading, error, data, loadData } = useMetricsExplorerData(
     options,
     source,
     derivedIndexPattern,
     currentTimerange,
     afterKey,
-    refreshSignal
+    refreshSignal,
+    undefined,
+    shouldLoadImmediately
   );
 
   const handleRefresh = useCallback(() => {
@@ -63,7 +66,7 @@ export const useMetricsExplorerState = (
   );
 
   const handleGroupByChange = useCallback(
-    (groupBy: string | null) => {
+    (groupBy: string | null | string[]) => {
       setAfterKey(null);
       setOptions({
         ...options,
@@ -102,8 +105,8 @@ export const useMetricsExplorerState = (
         aggregation === 'count'
           ? [{ aggregation }]
           : options.metrics
-              .filter(metric => metric.aggregation !== 'count')
-              .map(metric => ({
+              .filter((metric) => metric.aggregation !== 'count')
+              .map((metric) => ({
                 ...metric,
                 aggregation,
               }));
@@ -144,7 +147,7 @@ export const useMetricsExplorerState = (
     handleLoadMore: setAfterKey,
     defaultViewState,
     onViewStateChange,
-
+    loadData,
     refreshSignal,
     afterKey,
   };

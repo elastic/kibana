@@ -41,8 +41,8 @@ const getPageData = ($injector, _api = undefined, routeOptions = {}) => {
       },
       ...routeOptions,
     })
-    .then(response => response.data)
-    .catch(err => {
+    .then((response) => response.data)
+    .catch((err) => {
       const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
       return ajaxErrorHandlers(err);
     });
@@ -72,7 +72,6 @@ uiRoutes.when('/logstash/node/:uuid/pipelines', {
   },
   controller: class extends MonitoringViewBaseEuiTableController {
     constructor($injector, $scope) {
-      const kbnUrl = $injector.get('kbnUrl');
       const config = $injector.get('config');
 
       super({
@@ -86,7 +85,7 @@ uiRoutes.when('/logstash/node/:uuid/pipelines', {
 
       $scope.$watch(
         () => this.data,
-        data => {
+        (data) => {
           if (!data || !data.nodeSummary) {
             return;
           }
@@ -116,10 +115,6 @@ uiRoutes.when('/logstash/node/:uuid/pipelines', {
               {...this.getPaginationTableProps(pagination)}
               dateFormat={config.get('dateFormat')}
               upgradeMessage={makeUpgradeMessage(data.nodeSummary.version, i18n)}
-              angular={{
-                kbnUrl,
-                scope: $scope,
-              }}
             />
           );
         }

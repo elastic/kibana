@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getPageObjects, getService }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
 
@@ -76,7 +76,11 @@ export default function({ getPageObjects, getService }) {
         const { lat, lon, zoom } = await PageObjects.maps.getView();
         expect(Math.round(lat)).to.equal(41);
         expect(Math.round(lon)).to.equal(-102);
-        expect(Math.round(zoom)).to.equal(5);
+
+        // Centering is correct, but screen-size and dpi affect zoom level,
+        // causing this test to be brittle in different environments
+        // Expecting zoom-level to be between ]4,5]
+        expect(Math.ceil(zoom)).to.equal(5);
       });
     });
 

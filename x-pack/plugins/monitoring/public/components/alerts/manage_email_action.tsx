@@ -108,7 +108,7 @@ export const ManageEmailAction: React.FC<ManageActionModalProps> = (
     }
   }
 
-  const serviceOptions = ALERT_EMAIL_SERVICES.map(service => ({
+  const serviceOptions = ALERT_EMAIL_SERVICES.map((service) => ({
     value: service,
     inputDisplay: <EuiText>{service}</EuiText>,
     dropdownDisplay: <EuiText>{service}</EuiText>,
@@ -139,7 +139,7 @@ export const ManageEmailAction: React.FC<ManageActionModalProps> = (
         <EuiSpacer />
         <EuiFieldText
           value={newService}
-          onChange={e => setNewService(e.target.value)}
+          onChange={(e) => setNewService(e.target.value)}
           isInvalid={showErrors}
         />
       </Fragment>
@@ -166,7 +166,7 @@ export const ManageEmailAction: React.FC<ManageActionModalProps> = (
           <EuiSuperSelect
             options={serviceOptions}
             valueOfSelected={data.service}
-            onChange={id => {
+            onChange={(id) => {
               if (id === NEW_SERVICE_ID) {
                 setCreateNewService(true);
                 setData({ ...data, service: NEW_SERVICE_ID });
@@ -194,7 +194,7 @@ export const ManageEmailAction: React.FC<ManageActionModalProps> = (
       >
         <EuiFieldText
           value={data.host}
-          onChange={e => setData({ ...data, host: e.target.value })}
+          onChange={(e) => setData({ ...data, host: e.target.value })}
           isInvalid={showErrors && !!errors.host}
         />
       </EuiFormRow>
@@ -211,7 +211,7 @@ export const ManageEmailAction: React.FC<ManageActionModalProps> = (
       >
         <EuiFieldNumber
           value={data.port}
-          onChange={e => setData({ ...data, port: parseInt(e.target.value, 10) })}
+          onChange={(e) => setData({ ...data, port: parseInt(e.target.value, 10) })}
           isInvalid={showErrors && !!errors.port}
         />
       </EuiFormRow>
@@ -227,7 +227,7 @@ export const ManageEmailAction: React.FC<ManageActionModalProps> = (
         <EuiSwitch
           label=""
           checked={data.secure}
-          onChange={e => setData({ ...data, secure: e.target.checked })}
+          onChange={(e) => setData({ ...data, secure: e.target.checked })}
         />
       </EuiFormRow>
 
@@ -243,7 +243,7 @@ export const ManageEmailAction: React.FC<ManageActionModalProps> = (
       >
         <EuiFieldText
           value={data.from}
-          onChange={e => setData({ ...data, from: e.target.value })}
+          onChange={(e) => setData({ ...data, from: e.target.value })}
           isInvalid={showErrors && !!errors.from}
         />
       </EuiFormRow>
@@ -260,7 +260,7 @@ export const ManageEmailAction: React.FC<ManageActionModalProps> = (
       >
         <EuiFieldText
           value={data.user}
-          onChange={e => setData({ ...data, user: e.target.value })}
+          onChange={(e) => setData({ ...data, user: e.target.value })}
           isInvalid={showErrors && !!errors.user}
         />
       </EuiFormRow>
@@ -277,7 +277,7 @@ export const ManageEmailAction: React.FC<ManageActionModalProps> = (
       >
         <EuiFieldPassword
           value={data.password}
-          onChange={e => setData({ ...data, password: e.target.value })}
+          onChange={(e) => setData({ ...data, password: e.target.value })}
           isInvalid={showErrors && !!errors.password}
         />
       </EuiFormRow>

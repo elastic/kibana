@@ -8,7 +8,7 @@ import { Setup } from '../../helpers/setup_request';
 
 export async function deleteConfiguration({
   configurationId,
-  setup
+  setup,
 }: {
   configurationId: string;
   setup: Setup;
@@ -16,9 +16,9 @@ export async function deleteConfiguration({
   const { internalClient, indices } = setup;
 
   const params = {
-    refresh: 'wait_for',
+    refresh: 'wait_for' as const,
     index: indices.apmAgentConfigurationIndex,
-    id: configurationId
+    id: configurationId,
   };
 
   return internalClient.delete(params);

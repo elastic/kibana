@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertestWithoutAuth');
   const es = getService('legacyEs');
 
@@ -57,14 +57,14 @@ export default function({ getService }) {
         .expect(401);
     });
 
-    it('rejects expired access token via authorization Bearer header', async function() {
+    it('rejects expired access token via authorization Bearer header', async function () {
       this.timeout(40000);
 
       const token = await createToken();
 
       // Access token expiration is set to 15s for API integration tests.
       // Let's wait for 20s to make sure token expires.
-      await new Promise(resolve => setTimeout(() => resolve(), 20000));
+      await new Promise((resolve) => setTimeout(() => resolve(), 20000));
 
       await supertest
         .get('/internal/security/me')

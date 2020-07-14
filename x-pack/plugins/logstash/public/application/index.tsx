@@ -6,7 +6,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { HashRouter, Route, Switch, Redirect } from 'react-router-dom';
+import { Router, Route, Switch, Redirect } from 'react-router-dom';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 
@@ -30,29 +30,25 @@ import * as Breadcrumbs from './breadcrumbs';
 
 export const renderApp = async (
   core: CoreStart,
-  { basePath, element, setBreadcrumbs }: ManagementAppMountParams,
+  { history, element, setBreadcrumbs }: ManagementAppMountParams,
+  isMonitoringEnabled: boolean,
   licenseService$: Observable<any>
 ) => {
   const logstashLicenseService = await licenseService$.pipe(first()).toPromise();
   const clusterService = new ClusterService(core.http);
-  const monitoringService = new MonitoringService(
-    core.http,
-    // When monitoring is migrated this should be fetched from monitoring's plugin contract
-    core.injectedMetadata.getInjectedVar('monitoringUiEnabled'),
-    clusterService
-  );
+  const monitoringService = new MonitoringService(core.http, isMonitoringEnabled, clusterService);
   const pipelinesService = new PipelinesService(core.http, monitoringService);
   const pipelineService = new PipelineService(core.http, pipelinesService);
   const upgradeService = new UpgradeService(core.http);
 
   ReactDOM.render(
     <core.i18n.Context>
-      <HashRouter basename={basePath}>
+      <Router history={history}>
         <Switch>
           <Route
-            path="/"
+            path={['/', '']}
             exact
-            render={({ history }) => {
+            render={() => {
               setBreadcrumbs(Breadcrumbs.getPipelineListBreadcrumbs());
               return (
                 <PipelineList
@@ -64,7 +60,7 @@ export const renderApp = async (
                   monitoringService={monitoringService}
                   openPipeline={(id: string) => history.push(`/pipeline/${id}/edit`)}
                   clonePipeline={(id: string) => history.push(`/pipeline/${id}/edit?clone`)}
-                  createPipeline={() => history.push(`/pipeline/new-pipeline`)}
+                  createPipeline={() => history.push(`pipeline/new-pipeline`)}
                   pipelinesService={pipelinesService}
                   toastNotifications={core.notifications.toasts}
                 />
@@ -74,7 +70,7 @@ export const renderApp = async (
           <Route
             path="/pipeline/new-pipeline"
             exact
-            render={({ history }) => (
+            render={() => (
               <PipelineEditView
                 history={history}
                 setBreadcrumbs={setBreadcrumbs}
@@ -93,7 +89,7 @@ export const renderApp = async (
           <Route
             path="/pipeline/:id/edit"
             exact
-            render={({ match, history }) => (
+            render={({ match }) => (
               <PipelineEditView
                 history={history}
                 setBreadcrumbs={setBreadcrumbs}
@@ -106,7 +102,7 @@ export const renderApp = async (
             )}
           />
         </Switch>
-      </HashRouter>
+      </Router>
     </core.i18n.Context>,
     element
   );

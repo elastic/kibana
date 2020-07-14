@@ -5,15 +5,14 @@
  */
 
 import { estimateBucketSpanFactory } from '../../models/bucket_span_estimator';
-import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
+import { mlFunctionToESAggregation, parseTimeIntervalForJob } from '../../../common/util/job_utils';
 import { SKIP_BUCKET_SPAN_ESTIMATION } from '../../../common/constants/validation';
-import { parseInterval } from '../../../common/util/parse_interval';
 
 import { validateJobObject } from './validate_job_object';
 
 const BUCKET_SPAN_HIGH_THRESHOLD = 1;
 
-const wrapQuery = query => ({
+const wrapQuery = (query) => ({
   bool: {
     must: [query],
     must_not: [],
@@ -28,7 +27,7 @@ const wrapQuery = query => ({
 //   3 * (30 - 10) + 30 - 30 + 60 - 30 = 90,
 //   3 * (60 - 10) + 60 - 30 + 60 - 60 = 180]
 // 70 is the lowest so 10m would be picked
-const pickBucketSpan = bucketSpans => {
+const pickBucketSpan = (bucketSpans) => {
   if (bucketSpans.length === 1) {
     return bucketSpans[0];
   }
@@ -39,10 +38,10 @@ const pickBucketSpan = bucketSpans => {
     }, 0);
   };
 
-  const spansMs = bucketSpans.map(span => span.ms);
-  const sumDistances = spansMs.map(ms => getSumDistance(spansMs, ms));
+  const spansMs = bucketSpans.map((span) => span.ms);
+  const sumDistances = spansMs.map((ms) => getSumDistance(spansMs, ms));
   const minSumDistance = Math.min(...sumDistances);
-  const i = sumDistances.findIndex(d => d === minSumDistance);
+  const i = sumDistances.findIndex((d) => d === minSumDistance);
   return bucketSpans[i];
 };
 
@@ -65,8 +64,11 @@ export async function validateBucketSpan(
   }
 
   const messages = [];
-  const parsedBucketSpan = parseInterval(job.analysis_config.bucket_span, false);
-  if (parsedBucketSpan === null || parsedBucketSpan.asMilliseconds() === 0) {
+
+  // Bucket span must be a valid interval, greater than 0,
+  // and if specified in ms must be a multiple of 1000ms
+  const parsedBucketSpan = parseTimeIntervalForJob(job.analysis_config.bucket_span);
+  if (parsedBucketSpan === null) {
     messages.push({ id: 'bucket_span_invalid' });
     return messages;
   }
@@ -105,7 +107,7 @@ export async function validateBucketSpan(
 
   const estimatorConfigs = [];
 
-  job.analysis_config.detectors.forEach(detector => {
+  job.analysis_config.detectors.forEach((detector) => {
     const data = getRequestData();
     const aggType = mlFunctionToESAggregation(detector.function);
     const fieldName = typeof detector.field_name === 'undefined' ? null : detector.field_name;
@@ -119,8 +121,8 @@ export async function validateBucketSpan(
 
   // do the actual bucket span estimation
   try {
-    const estimations = estimatorConfigs.map(data => {
-      return new Promise(resolve => {
+    const estimations = estimatorConfigs.map((data) => {
+      return new Promise((resolve) => {
         estimateBucketSpanFactory(
           callWithRequest,
           callAsInternalUser,
@@ -131,7 +133,7 @@ export async function validateBucketSpan(
           // but isn't able to come up with a bucket span estimation.
           // this doesn't trigger a HTTP error but an object with an error message.
           // triggering a HTTP error would be too severe for this case.
-          .catch(resp => {
+          .catch((resp) => {
             resolve({
               error: true,
               message: resp,
@@ -142,7 +144,7 @@ export async function validateBucketSpan(
 
     // run the estimations, filter valid results, then pick a bucket span.
     const results = await Promise.all(estimations);
-    const bucketSpans = results.filter(result => result.name && result.ms);
+    const bucketSpans = results.filter((result) => result.name && result.ms);
 
     if (bucketSpans.length > 0) {
       const bucketSpan = pickBucketSpan(bucketSpans);

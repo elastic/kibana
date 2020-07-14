@@ -8,10 +8,14 @@
 
 import * as t from 'io-ts';
 
-import { list_idOrUndefined, typeOrUndefined } from '../common/schemas';
+import { deserializer, list_id, serializer, type } from '../common/schemas';
+import { Identity } from '../../types';
 
 export const importListItemQuerySchema = t.exact(
-  t.type({ list_id: list_idOrUndefined, type: typeOrUndefined })
+  t.partial({ deserializer, list_id, serializer, type })
 );
 
+export type ImportListItemQuerySchemaPartial = Identity<t.TypeOf<typeof importListItemQuerySchema>>;
+
 export type ImportListItemQuerySchema = t.TypeOf<typeof importListItemQuerySchema>;
+export type ImportListItemQuerySchemaEncoded = t.OutputOf<typeof importListItemQuerySchema>;

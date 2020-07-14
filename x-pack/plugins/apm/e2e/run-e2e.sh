@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # variables
 KIBANA_PORT=5701
@@ -23,23 +23,28 @@ APM_IT_DIR="./tmp/apm-integration-testing"
 
 cd ${E2E_DIR}
 
+KIBANA_VERSION=$(node -p "require('../../../package.json').version")
+
 #
 # Ask user to start Kibana
 ##################################################
-echo "\n${bold}To start Kibana please run the following command:${normal}
+echo "" # newline
+echo "${bold}To start Kibana please run the following command:${normal}
 node ./scripts/kibana --no-base-path --dev --no-dev-config --config x-pack/plugins/apm/e2e/ci/kibana.e2e.yml"
 
 #
 # Create tmp folder
 ##################################################
-echo "\n${bold}Temporary folder${normal}"
-echo "Temporary files will be stored in: ${TMP_DIR}"
+echo "" # newline
+echo "${bold}Temporary folder${normal}"
+echo "Temporary files will be stored in: ${E2E_DIR}${TMP_DIR}"
 mkdir -p ${TMP_DIR}
 
 #
 # apm-integration-testing
 ##################################################
-printf "\n${bold}apm-integration-testing (logs: ${TMP_DIR}/apm-it.log)\n${normal}"
+echo "" # newline
+echo "${bold}apm-integration-testing (logs: ${E2E_DIR}${TMP_DIR}/apm-it.log)${normal}"
 
 # pull if folder already exists
 if [ -d ${APM_IT_DIR} ]; then
@@ -54,43 +59,59 @@ fi
 
 # Stop if clone/pull failed
 if [ $? -ne 0 ]; then
-    printf "\n⚠️  Initializing apm-integration-testing failed. \n"
+    echo "⚠️  Initializing apm-integration-testing failed."
     exit 1
 fi
 
 # Start apm-integration-testing
 echo "Starting docker-compose"
-${APM_IT_DIR}/scripts/compose.py start master \
+echo "Using stack version: ${KIBANA_VERSION}"
+${APM_IT_DIR}/scripts/compose.py start $KIBANA_VERSION \
     --no-kibana \
     --elasticsearch-port $ELASTICSEARCH_PORT \
     --apm-server-port=$APM_SERVER_PORT \
     --elasticsearch-heap 4g \
+    --apm-server-opt queue.mem.events=8192 \
+    --apm-server-opt output.elasticsearch.bulk_max_size=4096 \
     &> ${TMP_DIR}/apm-it.log
 
 # Stop if apm-integration-testing failed to start correctly
 if [ $? -ne 0 ]; then
-    printf "⚠️  apm-integration-testing could not be started.\n"
-    printf "Please see the logs in ${TMP_DIR}/apm-it.log\n\n"
-    printf "As a last resort, reset docker with:\n\n cd ${APM_IT_DIR} && scripts/compose.py stop && docker system prune --all --force --volumes\n"
+    echo "⚠️  apm-integration-testing could not be started"
+    echo "" # newline
+    echo "As a last resort, reset docker with:"
+    echo "" # newline
+    echo "cd ${E2E_DIR}${APM_IT_DIR} && scripts/compose.py stop && docker system prune --all --force --volumes"
+    echo "" # newline
+
+    # output logs for excited docker containers
+    cd ${APM_IT_DIR} && docker-compose ps --filter "status=exited" -q | xargs -L1 docker logs --tail=10 && cd -
+
+    echo "" # newline
+    echo "Find the full logs in ${E2E_DIR}${TMP_DIR}/apm-it.log"
     exit 1
 fi
 
 #
 # Cypress
 ##################################################
-echo "\n${bold}Cypress (logs: ${TMP_DIR}/e2e-yarn.log)${normal}"
+echo "" # newline
+echo "${bold}Cypress (logs: ${E2E_DIR}${TMP_DIR}/e2e-yarn.log)${normal}"
 echo "Installing cypress dependencies "
 yarn &> ${TMP_DIR}/e2e-yarn.log
 
 #
 # Static mock data
 ##################################################
-printf "\n${bold}Static mock data (logs: ${TMP_DIR}/ingest-data.log)\n${normal}"
+echo "" # newline
+echo "${bold}Static mock data (logs: ${E2E_DIR}${TMP_DIR}/ingest-data.log)${normal}"
+
+STATIC_MOCK_FILENAME='2020-06-12.json'
 
 # Download static data if not already done
-if [ ! -e "${TMP_DIR}/events.json" ]; then
-    echo 'Downloading events.json...'
-    curl --silent https://storage.googleapis.com/apm-ui-e2e-static-data/events.json --output ${TMP_DIR}/events.json
+if [ ! -e "${TMP_DIR}/${STATIC_MOCK_FILENAME}" ]; then
+    echo "Downloading ${STATIC_MOCK_FILENAME}..."
+    curl --silent https://storage.googleapis.com/apm-ui-e2e-static-data/${STATIC_MOCK_FILENAME} --output ${TMP_DIR}/${STATIC_MOCK_FILENAME}
 fi
 
 # echo "Deleting existing indices (apm* and .apm*)"
@@ -98,35 +119,64 @@ curl --silent --user admin:changeme -XDELETE "localhost:${ELASTICSEARCH_PORT}/.a
 curl --silent --user admin:changeme -XDELETE "localhost:${ELASTICSEARCH_PORT}/apm*" > /dev/null
 
 # Ingest data into APM Server
-node ingest-data/replay.js --server-url http://localhost:$APM_SERVER_PORT --events ${TMP_DIR}/events.json 2> ${TMP_DIR}/ingest-data.log
+node ingest-data/replay.js --server-url http://localhost:$APM_SERVER_PORT --events ${TMP_DIR}/${STATIC_MOCK_FILENAME} 2>> ${TMP_DIR}/ingest-data.log
 
-# Stop if not all events were ingested correctly
+# Abort if not all events were ingested correctly
 if [ $? -ne 0 ]; then
-    printf "\n⚠️  Not all events were ingested correctly. This might affect test tests. \n"
+    echo "⚠️  Not all events were ingested correctly. This might affect test tests."
+    echo "Aborting. Please try again."
+    echo "" # newline
+    echo "Full logs in ${E2E_DIR}${TMP_DIR}/ingest-data.log:"
+
+    # output logs for excited docker containers
+    cd ${APM_IT_DIR} && docker-compose ps --filter "status=exited" -q | xargs -L1 docker logs --tail=3 && cd -
+
+    # stop docker containers
+    cd ${APM_IT_DIR} && ./scripts/compose.py stop > /dev/null && cd -
     exit 1
+fi
+
+# create empty snapshot file if it doesn't exist
+SNAPSHOTS_FILE=cypress/integration/snapshots.js
+if [ ! -f ${SNAPSHOTS_FILE} ]; then
+    echo "{}" > ${SNAPSHOTS_FILE}
 fi
 
 #
 # Wait for Kibana to start
 ##################################################
-echo "\n${bold}Waiting for Kibana to start...${normal}"
+echo "" # newline
+echo "${bold}Waiting for Kibana to start...${normal}"
 echo "Note: you need to start Kibana manually. Find the instructions at the top."
-yarn wait-on -i 500 -w 500 http://localhost:$KIBANA_PORT > /dev/null
+yarn wait-on -i 500 -w 500 http-get://admin:changeme@localhost:$KIBANA_PORT/api/status > /dev/null
 
-echo "\n✅ Setup completed successfully. Running tests...\n"
+## Workaround to wait for the http server running
+## See: https://github.com/elastic/kibana/issues/66326
+if [ -e kibana.log ] ; then
+    grep -m 1 "http server running" <(tail -f -n +1 kibana.log)
+    echo "✅ Kibana server running..."
+    grep -m 1 "bundles compiled successfully" <(tail -f -n +1 kibana.log)
+    echo "✅ Kibana bundles have been compiled..."
+fi
+
+
+echo "✅ Setup completed successfully. Running tests..."
 
 #
 # run cypress tests
 ##################################################
 yarn cypress run --config pageLoadTimeout=100000,watchForFileChanges=true
+e2e_status=$?
 
 #
 # Run interactively
 ##################################################
-echo "
+echo "${bold}If you want to run the test interactively, run:${normal}"
+echo "" # newline
+echo "cd ${E2E_DIR} && yarn cypress open --config pageLoadTimeout=100000,watchForFileChanges=true"
 
-${bold}If you want to run the test interactively, run:${normal}
-
-yarn cypress open --config pageLoadTimeout=100000,watchForFileChanges=true
-"
-
+# Report the e2e status at the very end
+if [ $e2e_status -ne 0 ]; then
+    echo "⚠️  Running tests failed."
+    exit 1
+fi

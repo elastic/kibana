@@ -15,7 +15,7 @@ Array [
     "text": "opbeans-node",
   },
   Object {
-    "href": "#/services/opbeans-node/errors?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "href": undefined,
     "text": "Errors",
   },
 ]
@@ -40,7 +40,7 @@ Array [
     "text": "Errors",
   },
   Object {
-    "href": "#/services/opbeans-node/errors/myGroupId?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "href": undefined,
     "text": "myGroupId",
   },
 ]
@@ -61,7 +61,7 @@ Array [
     "text": "opbeans-node",
   },
   Object {
-    "href": "#/services/opbeans-node/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "href": undefined,
     "text": "Transactions",
   },
 ]
@@ -86,7 +86,7 @@ Array [
     "text": "Transactions",
   },
   Object {
-    "href": "#/services/opbeans-node/transactions/view?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "href": undefined,
     "text": "my-transaction-name",
   },
 ]
@@ -95,7 +95,7 @@ Array [
 exports[`UpdateBreadcrumbs Homepage 1`] = `
 Array [
   Object {
-    "href": "#/?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "href": undefined,
     "text": "APM",
   },
 ]

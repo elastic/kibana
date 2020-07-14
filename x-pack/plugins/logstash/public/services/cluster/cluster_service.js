@@ -13,7 +13,7 @@ export class ClusterService {
   }
 
   loadCluster() {
-    return this.http.get(`${ROUTES.API_ROOT}/cluster`).then(response => {
+    return this.http.get(`${ROUTES.API_ROOT}/cluster`).then((response) => {
       if (!response) {
         return;
       }
@@ -23,7 +23,7 @@ export class ClusterService {
 
   isClusterInfoAvailable() {
     return this.loadCluster()
-      .then(cluster => Boolean(cluster))
+      .then((cluster) => Boolean(cluster))
       .catch(() => false);
   }
 }

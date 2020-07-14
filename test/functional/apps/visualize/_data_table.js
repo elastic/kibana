@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
@@ -30,7 +30,7 @@ export default function({ getService, getPageObjects }) {
   describe('data table', function indexPatternCreation() {
     const vizName1 = 'Visualization DataTable';
 
-    before(async function() {
+    before(async function () {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickDataTable');
@@ -63,18 +63,18 @@ export default function({ getService, getPageObjects }) {
       expect(interval).to.be('2000');
     });
 
-    it('should be able to save and load', async function() {
+    it('should be able to save and load', async function () {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visChart.waitForVisualization();
     });
 
-    it('should have inspector enabled', async function() {
+    it('should have inspector enabled', async function () {
       await inspector.expectIsEnabled();
     });
 
-    it('should show correct data', function() {
+    it('should show correct data', function () {
       const expectedChartData = [
         ['0B', '2,088'],
         ['1.953KB', '2,748'],
@@ -88,7 +88,7 @@ export default function({ getService, getPageObjects }) {
         ['17.578KB', '137'],
       ];
 
-      return retry.try(async function() {
+      return retry.try(async function () {
         await inspector.open();
         await inspector.expectTableData(expectedChartData);
         await inspector.close();
@@ -100,9 +100,9 @@ export default function({ getService, getPageObjects }) {
         const data = await PageObjects.visChart.getTableVisData();
         expect(data.trim().split('\n')).to.be.eql([
           '≥ 0B and < 1,000B',
-          '1,351 64.7%',
+          '1,351 64.703%',
           '≥ 1,000B and < 1.953KB',
-          '737 35.3%',
+          '737 35.297%',
         ]);
       }
 
@@ -174,7 +174,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visEditor.clickBucket('Split rows');
       await PageObjects.visEditor.selectAggregation('Date Histogram');
       await PageObjects.visEditor.selectField('@timestamp');
-      await PageObjects.visEditor.setInterval('Daily');
+      await PageObjects.visEditor.setInterval('Day');
       await PageObjects.visEditor.clickGo();
       const data = await PageObjects.visChart.getTableVisData();
       log.debug(data.split('\n'));
@@ -196,7 +196,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visEditor.clickBucket('Split rows');
       await PageObjects.visEditor.selectAggregation('Date Histogram');
       await PageObjects.visEditor.selectField('@timestamp');
-      await PageObjects.visEditor.setInterval('Daily');
+      await PageObjects.visEditor.setInterval('Day');
       await PageObjects.visEditor.clickGo();
       const data = await PageObjects.visChart.getTableVisData();
       expect(data.trim().split('\n')).to.be.eql([

@@ -53,6 +53,7 @@ export const adminMlCapabilities = {
 export type UserMlCapabilities = typeof userMlCapabilities;
 export type AdminMlCapabilities = typeof adminMlCapabilities;
 export type MlCapabilities = UserMlCapabilities & AdminMlCapabilities;
+export type MlCapabilitiesKey = keyof MlCapabilities;
 
 export const basicLicenseMlCapabilities = ['canAccessML', 'canFindFileStructure'] as Array<
   keyof MlCapabilities
@@ -73,11 +74,11 @@ export function getPluginPrivileges() {
   return {
     user: {
       ui: userMlCapabilitiesKeys,
-      api: userMlCapabilitiesKeys.map(k => `ml:${k}`),
+      api: userMlCapabilitiesKeys.map((k) => `ml:${k}`),
     },
     admin: {
       ui: allMlCapabilities,
-      api: allMlCapabilities.map(k => `ml:${k}`),
+      api: allMlCapabilities.map((k) => `ml:${k}`),
     },
   };
 }

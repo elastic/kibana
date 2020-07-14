@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { CustomUrlAnomalyRecordDoc } from '../../../common/types/custom_urls';
+import { Detector } from '../../../common/types/anomaly_detection_jobs';
+
 import {
   replaceStringTokens,
   detectorToString,
-  sortByKey,
   toLocaleString,
   mlEscape,
   escapeForElasticsearchQuery,
@@ -15,7 +17,7 @@ import {
 
 describe('ML - string utils', () => {
   describe('replaceStringTokens', () => {
-    const testRecord = {
+    const testRecord: CustomUrlAnomalyRecordDoc = {
       job_id: 'test_job',
       result_type: 'record',
       probability: 0.0191711,
@@ -30,6 +32,10 @@ describe('ML - string utils', () => {
       testfield1: 'test$tring=[+-?]',
       testfield2: '{<()>}',
       testfield3: 'host=\\\\test@uk.dev',
+      earliest: '0',
+      latest: '0',
+      is_interim: false,
+      initial_record_score: 0,
     };
 
     test('returns correct values without URI encoding', () => {
@@ -68,17 +74,17 @@ describe('ML - string utils', () => {
 
   describe('detectorToString', () => {
     test('returns the correct descriptions for detectors', () => {
-      const detector1 = {
+      const detector1: Detector = {
         function: 'count',
       };
 
-      const detector2 = {
+      const detector2: Detector = {
         function: 'count',
         by_field_name: 'airline',
         use_null: false,
       };
 
-      const detector3 = {
+      const detector3: Detector = {
         function: 'mean',
         field_name: 'CPUUtilization',
         partition_field_name: 'region',
@@ -92,50 +98,6 @@ describe('ML - string utils', () => {
       expect(detectorToString(detector3)).toBe(
         'mean(CPUUtilization) by host over user partition_field_name=region exclude_frequent=all'
       );
-    });
-  });
-
-  describe('sortByKey', () => {
-    const obj = {
-      zebra: 'stripes',
-      giraffe: 'neck',
-      elephant: 'trunk',
-    };
-
-    const valueComparator = function(value: string) {
-      return value;
-    };
-
-    test('returns correct ordering with default comparator', () => {
-      const result = sortByKey(obj, false);
-      const keys = Object.keys(result);
-      expect(keys[0]).toBe('elephant');
-      expect(keys[1]).toBe('giraffe');
-      expect(keys[2]).toBe('zebra');
-    });
-
-    test('returns correct ordering with default comparator and order reversed', () => {
-      const result = sortByKey(obj, true);
-      const keys = Object.keys(result);
-      expect(keys[0]).toBe('zebra');
-      expect(keys[1]).toBe('giraffe');
-      expect(keys[2]).toBe('elephant');
-    });
-
-    test('returns correct ordering with comparator', () => {
-      const result = sortByKey(obj, false, valueComparator);
-      const keys = Object.keys(result);
-      expect(keys[0]).toBe('giraffe');
-      expect(keys[1]).toBe('zebra');
-      expect(keys[2]).toBe('elephant');
-    });
-
-    test('returns correct ordering with comparator and order reversed', () => {
-      const result = sortByKey(obj, true, valueComparator);
-      const keys = Object.keys(result);
-      expect(keys[0]).toBe('elephant');
-      expect(keys[1]).toBe('zebra');
-      expect(keys[2]).toBe('giraffe');
     });
   });
 

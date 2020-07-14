@@ -6,7 +6,7 @@
 
 import { of } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { ICustomClusterClient } from '../../../../src/core/server';
+import { ILegacyCustomClusterClient } from '../../../../src/core/server';
 import { elasticsearchClientPlugin } from './elasticsearch_client_plugin';
 import { Plugin, PluginSetupDependencies } from './plugin';
 
@@ -15,7 +15,7 @@ import { coreMock, elasticsearchServiceMock } from '../../../../src/core/server/
 describe('Security Plugin', () => {
   let plugin: Plugin;
   let mockCoreSetup: ReturnType<typeof coreMock.createSetup>;
-  let mockClusterClient: jest.Mocked<ICustomClusterClient>;
+  let mockClusterClient: jest.Mocked<ILegacyCustomClusterClient>;
   let mockDependencies: PluginSetupDependencies;
   beforeEach(() => {
     plugin = new Plugin(
@@ -25,6 +25,7 @@ describe('Security Plugin', () => {
           idleTimeout: 1500,
           lifespan: null,
         },
+        audit: { enabled: false },
         authc: {
           selector: { enabled: false },
           providers: ['saml', 'token'],
@@ -35,23 +36,27 @@ describe('Security Plugin', () => {
     );
 
     mockCoreSetup = coreMock.createSetup();
-    mockCoreSetup.http.isTlsEnabled = true;
+    mockCoreSetup.http.getServerInfo.mockReturnValue({
+      hostname: 'localhost',
+      name: 'kibana',
+      port: 80,
+      protocol: 'https',
+    });
 
-    mockClusterClient = elasticsearchServiceMock.createCustomClusterClient();
-    mockCoreSetup.elasticsearch.createClient.mockReturnValue(
-      (mockClusterClient as unknown) as jest.Mocked<ICustomClusterClient>
-    );
+    mockClusterClient = elasticsearchServiceMock.createLegacyCustomClusterClient();
+    mockCoreSetup.elasticsearch.legacy.createClient.mockReturnValue(mockClusterClient);
 
-    mockDependencies = { licensing: { license$: of({}) } } as PluginSetupDependencies;
+    mockDependencies = ({
+      licensing: { license$: of({}), featureUsage: { register: jest.fn() } },
+    } as unknown) as PluginSetupDependencies;
   });
 
   describe('setup()', () => {
     it('exposes proper contract', async () => {
       await expect(plugin.setup(mockCoreSetup, mockDependencies)).resolves.toMatchInlineSnapshot(`
               Object {
-                "__legacyCompat": Object {
-                  "registerLegacyAPI": [Function],
-                  "registerPrivilegesWithCluster": [Function],
+                "audit": Object {
+                  "getLogger": [Function],
                 },
                 "authc": Object {
                   "areAPIKeysEnabled": [Function],
@@ -111,8 +116,8 @@ describe('Security Plugin', () => {
     it('properly creates cluster client instance', async () => {
       await plugin.setup(mockCoreSetup, mockDependencies);
 
-      expect(mockCoreSetup.elasticsearch.createClient).toHaveBeenCalledTimes(1);
-      expect(mockCoreSetup.elasticsearch.createClient).toHaveBeenCalledWith('security', {
+      expect(mockCoreSetup.elasticsearch.legacy.createClient).toHaveBeenCalledTimes(1);
+      expect(mockCoreSetup.elasticsearch.legacy.createClient).toHaveBeenCalledWith('security', {
         plugins: [elasticsearchClientPlugin],
       });
     });

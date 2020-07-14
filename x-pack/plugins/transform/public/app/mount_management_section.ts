@@ -21,7 +21,7 @@ export async function mountManagementSection(
   coreSetup: CoreSetup<PluginsDependencies>,
   params: ManagementAppMountParams
 ) {
-  const { element, setBreadcrumbs } = params;
+  const { element, setBreadcrumbs, history } = params;
   const { http, notifications, getStartServices } = coreSetup;
   const startServices = await getStartServices();
   const [core, plugins] = startServices;
@@ -46,6 +46,7 @@ export async function mountManagementSection(
     savedObjects,
     storage: localStorage,
     uiSettings,
+    history,
   };
 
   return renderApp(element, appDependencies);

@@ -6,6 +6,7 @@ APIs to their New Platform equivalents.
 - [Migration Examples](#migration-examples)
   - [Configuration](#configuration)
     - [Declaring config schema](#declaring-config-schema)
+    - [Using New Platform config in a new plugin](#using-new-platform-config-in-a-new-plugin)
     - [Using New Platform config from a Legacy plugin](#using-new-platform-config-from-a-legacy-plugin)
       - [Create a New Platform plugin](#create-a-new-platform-plugin)
   - [HTTP Routes](#http-routes)
@@ -15,11 +16,16 @@ APIs to their New Platform equivalents.
       - [4. New Platform plugin](#4-new-platform-plugin)
     - [Accessing Services](#accessing-services)
     - [Migrating Hapi "pre" handlers](#migrating-hapi-pre-handlers)
+      - [Simple example](#simple-example)
+      - [Full Example](#full-example)
   - [Chrome](#chrome)
-    - [Updating an application navlink](#updating-application-navlink)
+    - [Updating an application navlink](#updating-an-application-navlink)
   - [Chromeless Applications](#chromeless-applications)
   - [Render HTML Content](#render-html-content)
   - [Saved Objects types](#saved-objects-types)
+    - [Concrete example](#concrete-example)
+    - [Changes in structure compared to legacy](#changes-in-structure-compared-to-legacy)
+    - [Remarks](#remarks)
   - [UiSettings](#uisettings)
 
 ## Configuration
@@ -65,7 +71,7 @@ export type MyPluginConfig = TypeOf<typeof config.schema>;
 ### Using New Platform config in a new plugin
 
 After setting the config schema for your plugin, you might want to reach the configuration in the plugin.
-It is provided as part of the [PluginInitializerContext](../../docs/development/core/server/kibana-plugin-server.plugininitializercontext.md)
+It is provided as part of the [PluginInitializerContext](../../docs/development/core/server/kibana-plugin-core-server.plugininitializercontext.md)
 in the *constructor* of the plugin:
 
 ```ts
@@ -210,9 +216,9 @@ new kibana.Plugin({
 In the legacy platform, plugins have direct access to the Hapi `server` object
 which gives full access to all of Hapi's API. In the New Platform, plugins have
 access to the
-[HttpServiceSetup](/docs/development/core/server/kibana-plugin-server.httpservicesetup.md)
+[HttpServiceSetup](/docs/development/core/server/kibana-plugin-core-server.httpservicesetup.md)
 interface, which is exposed via the
-[CoreSetup](/docs/development/core/server/kibana-plugin-server.coresetup.md)
+[CoreSetup](/docs/development/core/server/kibana-plugin-core-server.coresetup.md)
 object injected into the `setup` method of server-side plugins.
 
 This interface has a different API with slightly different behaviors.
@@ -415,7 +421,7 @@ Services in the Legacy Platform were typically available via methods on either
 `server.plugins.*`, `server.*`, or `req.*`. In the New Platform, all services
 are available via the `context` argument to the route handler. The type of this
 argument is the
-[RequestHandlerContext](/docs/development/core/server/kibana-plugin-server.requesthandlercontext.md).
+[RequestHandlerContext](/docs/development/core/server/kibana-plugin-core-server.requesthandlercontext.md).
 The APIs available here will include all Core services and any services
 registered by plugins this plugin depends on.
 
@@ -844,7 +850,7 @@ import { SavedObjectsType } from 'src/core/server';
 export const firstType: SavedObjectsType = {
   name: 'first-type',
   hidden: false,
-  namespaceAgnostic: true,
+  namespaceType: 'agnostic',
   mappings: {
     properties: {
       someField: {
@@ -882,7 +888,7 @@ import { SavedObjectsType } from 'src/core/server';
 export const secondType: SavedObjectsType = {
   name: 'second-type',
   hidden: true,
-  namespaceAgnostic: false,
+  namespaceType: 'single',
   mappings: {
     properties: {
       textField: {
@@ -930,7 +936,7 @@ export class MyPlugin implements Plugin {
 
 The NP `registerType` expected input is very close to the legacy format. However, there are some minor changes:
 
-- The `schema.isNamespaceAgnostic` property has been renamed: `SavedObjectsType.namespaceAgnostic`
+- The `schema.isNamespaceAgnostic` property has been renamed: `SavedObjectsType.namespaceType`. It no longer accepts a boolean but instead an enum of 'single', 'multiple', or 'agnostic' (see [SavedObjectsNamespaceType](/docs/development/core/server/kibana-plugin-core-server.savedobjectsnamespacetype.md)).
 
 - The `schema.indexPattern` was accepting either a `string` or a `(config: LegacyConfig) => string`. `SavedObjectsType.indexPattern` only accepts a string, as you can access the configuration during your plugin's setup phase.
 

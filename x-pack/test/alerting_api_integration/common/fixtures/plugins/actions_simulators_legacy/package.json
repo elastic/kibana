@@ -1,0 +1,7 @@
+{
+  "name": "actions-fixtures-legacy",
+  "version": "0.0.0",
+  "kibana": {
+    "version": "kibana"
+  }
+}

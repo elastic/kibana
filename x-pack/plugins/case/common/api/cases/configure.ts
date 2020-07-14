@@ -8,10 +8,13 @@ import * as rt from 'io-ts';
 
 import { ActionResult } from '../../../../actions/common';
 import { UserRT } from '../user';
+import { JiraFieldsRT } from '../connectors/jira';
+import { ServiceNowFieldsRT } from '../connectors/servicenow';
+import { ResilientFieldsRT } from '../connectors/resilient';
 
 /*
  * This types below are related to the service now configuration
- * mapping between our case and service-now
+ * mapping between our case and [service-now, jira]
  *
  */
 
@@ -28,10 +31,10 @@ const CaseFieldRT = rt.union([
 ]);
 
 const ThirdPartyFieldRT = rt.union([
-  rt.literal('comments'),
-  rt.literal('description'),
+  JiraFieldsRT,
+  ServiceNowFieldsRT,
+  ResilientFieldsRT,
   rt.literal('not_mapped'),
-  rt.literal('short_description'),
 ]);
 
 export const CasesConfigurationMapsRT = rt.type({

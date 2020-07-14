@@ -18,7 +18,7 @@ import { createLicensedRouteHandler } from '../../lib';
 type SavedObjectIdentifier = Pick<SavedObject, 'id' | 'type'>;
 
 const areObjectsUnique = (objects: SavedObjectIdentifier[]) =>
-  _.uniq(objects, (o: SavedObjectIdentifier) => `${o.type}:${o.id}`).length === objects.length;
+  _.uniqBy(objects, (o: SavedObjectIdentifier) => `${o.type}:${o.id}`).length === objects.length;
 
 export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
   const { externalRouter, spacesService, getImportExportObjectLimit, getStartServices } = deps;
@@ -33,14 +33,14 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         body: schema.object({
           spaces: schema.arrayOf(
             schema.string({
-              validate: value => {
+              validate: (value) => {
                 if (!SPACE_ID_REGEX.test(value)) {
                   return `lower case, a-z, 0-9, "_", and "-" are allowed`;
                 }
               },
             }),
             {
-              validate: spaceIds => {
+              validate: (spaceIds) => {
                 if (_.uniq(spaceIds).length !== spaceIds.length) {
                   return 'duplicate space ids are not allowed';
                 }
@@ -53,7 +53,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
               id: schema.string(),
             }),
             {
-              validate: objects => {
+              validate: (objects) => {
                 if (!areObjectsUnique(objects)) {
                   return 'duplicate objects are not allowed';
                 }
@@ -94,7 +94,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         body: schema.object({
           retries: schema.recordOf(
             schema.string({
-              validate: spaceId => {
+              validate: (spaceId) => {
                 if (!SPACE_ID_REGEX.test(spaceId)) {
                   return `Invalid space id: ${spaceId}`;
                 }
@@ -114,7 +114,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
               id: schema.string(),
             }),
             {
-              validate: objects => {
+              validate: (objects) => {
                 if (!areObjectsUnique(objects)) {
                   return 'duplicate objects are not allowed';
                 }

@@ -18,8 +18,9 @@
  */
 
 import d3 from 'd3';
-import { get, pull, restParam, size, reduce } from 'lodash';
+import { get, pull, rest, size, reduce } from 'lodash';
 import $ from 'jquery';
+import { DIMMING_OPACITY_SETTING } from '../../../common';
 
 /**
  * Handles event responses
@@ -96,7 +97,7 @@ export class Dispatch {
    * @param  {*} [arg...] - any number of arguments that will be applied to each handler
    * @return {Dispatch} - this, for chaining
    */
-  emit = restParam(function(name, args) {
+  emit = rest(function (name, args) {
     if (!this._listeners[name]) {
       return this;
     }
@@ -154,7 +155,7 @@ export class Dispatch {
   _seriesClickResponse(data) {
     const points = [];
 
-    ['xRaw', 'yRaw', 'zRaw', 'seriesRaw', 'rawData', 'tableRaw'].forEach(val => {
+    ['xRaw', 'yRaw', 'zRaw', 'seriesRaw', 'rawData', 'tableRaw'].forEach((val) => {
       if (data[val] && data[val].column !== undefined && data[val].row !== undefined) {
         points.push(data[val]);
       }
@@ -200,20 +201,20 @@ export class Dispatch {
       return false;
     }
     //find the primary id by the rawId, that id is used in the config's seriesParams
-    const { id } = series.find(series => series.rawId === rawId);
+    const { id } = series.find((series) => series.rawId === rawId);
     if (!id) {
       return false;
     }
 
     //find the matching seriesParams of the series, to get the id of the valueAxis
     const seriesParams = visConfig.get('seriesParams', []);
-    const { valueAxis: valueAxisId } = seriesParams.find(param => param.data.id === id) || {};
+    const { valueAxis: valueAxisId } = seriesParams.find((param) => param.data.id === id) || {};
     if (!valueAxisId) {
       return false;
     }
     const usedValueAxis = visConfig
       .get('valueAxes', [])
-      .find(valueAxis => valueAxis.id === valueAxisId);
+      .find((valueAxis) => valueAxis.id === valueAxisId);
     return get(usedValueAxis, 'scale.mode') === 'percentage';
   }
 
@@ -269,8 +270,8 @@ export class Dispatch {
    * @returns {Function}
    */
   addEvent(event, callback) {
-    return function(selection) {
-      selection.each(function() {
+    return function (selection) {
+      selection.each(function () {
         const element = d3.select(this);
 
         if (typeof callback === 'function') {
@@ -333,7 +334,7 @@ export class Dispatch {
    * @returns {Function}
    */
   addClickEvent() {
-    const onClick = d => this.emit('click', this.clickEventResponse(d));
+    const onClick = (d) => this.emit('click', this.clickEventResponse(d));
 
     return this.addEvent('click', onClick);
   }
@@ -393,7 +394,7 @@ export class Dispatch {
     return function highlight(element) {
       const label = this.getAttribute('data-label');
       if (!label) return;
-      const dimming = uiSettings.get('visualization:dimmingOpacity');
+      const dimming = uiSettings.get(DIMMING_OPACITY_SETTING);
       $(element)
         .parent()
         .find('[data-label]')
@@ -443,7 +444,7 @@ export class Dispatch {
       // Allows for brushing on d3.scale.ordinal()
       const selected = xScale
         .domain()
-        .filter(d => brush.extent()[0] <= xScale(d) && xScale(d) <= brush.extent()[1]);
+        .filter((d) => brush.extent()[0] <= xScale(d) && xScale(d) <= brush.extent()[1]);
       const range = isTimeSeries ? brush.extent() : selected;
 
       return self.emit('brush', {
@@ -460,11 +461,11 @@ export class Dispatch {
         .insert('g', 'g')
         .attr('class', 'brush')
         .call(brush)
-        .call(brushG => {
+        .call((brushG) => {
           // hijack the brush start event to filter out right/middle clicks
           const brushHandler = brushG.on('mousedown.brush');
           if (!brushHandler) return; // touch events in use
-          brushG.on('mousedown.brush', function() {
+          brushG.on('mousedown.brush', function () {
             if (validBrushClick(d3.event)) brushHandler.apply(this, arguments);
           });
         })

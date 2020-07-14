@@ -6,9 +6,9 @@
 import {
   PROCESSOR_EVENT,
   AGENT_NAME,
-  SERVICE_NAME
+  SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../helpers/range_filter';
+import { rangeFilter } from '../../../common/utils/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export async function getServiceAgentName(
@@ -22,7 +22,7 @@ export async function getServiceAgentName(
     index: [
       indices['apm_oss.errorIndices'],
       indices['apm_oss.transactionIndices'],
-      indices['apm_oss.metricsIndices']
+      indices['apm_oss.metricsIndices'],
     ],
     body: {
       size: 0,
@@ -31,18 +31,18 @@ export async function getServiceAgentName(
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             {
-              terms: { [PROCESSOR_EVENT]: ['error', 'transaction', 'metric'] }
+              terms: { [PROCESSOR_EVENT]: ['error', 'transaction', 'metric'] },
             },
-            { range: rangeFilter(start, end) }
-          ]
-        }
+            { range: rangeFilter(start, end) },
+          ],
+        },
       },
       aggs: {
         agents: {
-          terms: { field: AGENT_NAME, size: 1 }
-        }
-      }
-    }
+          terms: { field: AGENT_NAME, size: 1 },
+        },
+      },
+    },
   };
 
   const { aggregations } = await client.search(params);

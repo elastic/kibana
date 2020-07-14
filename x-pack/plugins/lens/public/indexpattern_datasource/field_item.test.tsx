@@ -7,12 +7,15 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
-import { FieldItem, FieldItemProps } from './field_item';
+import { InnerFieldItem, FieldItemProps } from './field_item';
 import { coreMock } from 'src/core/public/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { IndexPattern } from './types';
+import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+
+const chartsThemeService = chartPluginMock.createSetupContract().theme;
 
 describe('IndexPattern Field Item', () => {
   let defaultProps: FieldItemProps;
@@ -80,6 +83,7 @@ describe('IndexPattern Field Item', () => {
         searchable: true,
       },
       exists: true,
+      chartsThemeService,
     };
 
     data.fieldFormats = ({
@@ -94,7 +98,7 @@ describe('IndexPattern Field Item', () => {
     core.http.post.mockImplementationOnce(() => {
       return Promise.resolve({});
     });
-    const wrapper = mountWithIntl(<FieldItem {...defaultProps} />);
+    const wrapper = mountWithIntl(<InnerFieldItem {...defaultProps} />);
 
     await act(async () => {
       wrapper.find('[data-test-subj="lnsFieldListPanelField-bytes"]').simulate('click');
@@ -114,12 +118,12 @@ describe('IndexPattern Field Item', () => {
     let resolveFunction: (arg: unknown) => void;
 
     core.http.post.mockImplementation(() => {
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         resolveFunction = resolve;
       });
     });
 
-    const wrapper = mountWithIntl(<FieldItem {...defaultProps} />);
+    const wrapper = mountWithIntl(<InnerFieldItem {...defaultProps} />);
 
     wrapper.find('[data-test-subj="lnsFieldListPanelField-bytes"]').simulate('click');
 

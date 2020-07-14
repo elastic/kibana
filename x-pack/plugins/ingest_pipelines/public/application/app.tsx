@@ -6,9 +6,11 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageContent } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
-import { HashRouter, Switch, Route } from 'react-router-dom';
+import { Router, Switch, Route } from 'react-router-dom';
 
-import { BASE_PATH, APP_CLUSTER_REQUIRED_PRIVILEGES } from '../../common/constants';
+import { useKibana } from '../shared_imports';
+
+import { APP_CLUSTER_REQUIRED_PRIVILEGES } from '../../common/constants';
 
 import {
   SectionError,
@@ -22,10 +24,10 @@ import { PipelinesList, PipelinesCreate, PipelinesEdit, PipelinesClone } from '.
 
 export const AppWithoutRouter = () => (
   <Switch>
-    <Route exact path={BASE_PATH} component={PipelinesList} />
-    <Route exact path={`${BASE_PATH}/create/:sourceName`} component={PipelinesClone} />
-    <Route exact path={`${BASE_PATH}/create`} component={PipelinesCreate} />
-    <Route exact path={`${BASE_PATH}/edit/:name`} component={PipelinesEdit} />
+    <Route exact path="/" component={PipelinesList} />
+    <Route exact path={`/create/:sourceName`} component={PipelinesClone} />
+    <Route exact path={`/create`} component={PipelinesCreate} />
+    <Route exact path={`/edit/:name`} component={PipelinesEdit} />
     {/* Catch all */}
     <Route component={PipelinesList} />
   </Switch>
@@ -33,6 +35,7 @@ export const AppWithoutRouter = () => (
 
 export const App: FunctionComponent = () => {
   const { apiError } = useAuthorizationContext();
+  const { history } = useKibana().services;
 
   if (apiError) {
     return (
@@ -50,7 +53,7 @@ export const App: FunctionComponent = () => {
 
   return (
     <WithPrivileges
-      privileges={APP_CLUSTER_REQUIRED_PRIVILEGES.map(privilege => `cluster.${privilege}`)}
+      privileges={APP_CLUSTER_REQUIRED_PRIVILEGES.map((privilege) => `cluster.${privilege}`)}
     >
       {({ isLoading, hasPrivileges, privilegesMissing }) => {
         if (isLoading) {
@@ -71,7 +74,7 @@ export const App: FunctionComponent = () => {
                 title={
                   <FormattedMessage
                     id="xpack.ingestPipelines.app.deniedPrivilegeTitle"
-                    defaultMessage="You're missing cluster privileges"
+                    defaultMessage="Cluster privileges required"
                   />
                 }
                 message={
@@ -91,9 +94,9 @@ export const App: FunctionComponent = () => {
         }
 
         return (
-          <HashRouter>
+          <Router history={history}>
             <AppWithoutRouter />
-          </HashRouter>
+          </Router>
         );
       }}
     </WithPrivileges>

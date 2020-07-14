@@ -34,6 +34,7 @@ import {
   isFilterPinned,
   compareFilters,
   COMPARE_ALL_OPTIONS,
+  UI_SETTINGS,
 } from '../../../common';
 
 export class FilterManager {
@@ -53,8 +54,8 @@ export class FilterManager {
     // existing globalFilters should be mutated by appFilters
     // ignore original appFilters which are already inside globalFilters
     const cleanedAppFilters: Filter[] = [];
-    _.each(appFilters, function(filter, i) {
-      const match = _.find(globalFilters, function(globalFilter) {
+    _.each(appFilters, function (filter, i) {
+      const match = _.find(globalFilters, function (globalFilter) {
         return compareFilters(globalFilter, filter);
       });
 
@@ -64,7 +65,7 @@ export class FilterManager {
       }
 
       // matching filter in globalState, update global and don't add from appState
-      _.assign(match.meta, filter.meta);
+      _.assignIn(match.meta, filter.meta);
     });
 
     return FilterManager.mergeFilters(cleanedAppFilters, globalFilters);
@@ -129,7 +130,7 @@ export class FilterManager {
 
   public addFilters(
     filters: Filter[] | Filter,
-    pinFilterStatus: boolean = this.uiSettings.get('filters:pinnedByDefault')
+    pinFilterStatus: boolean = this.uiSettings.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT)
   ) {
     if (!Array.isArray(filters)) {
       filters = [filters];
@@ -157,7 +158,7 @@ export class FilterManager {
 
   public setFilters(
     newFilters: Filter[],
-    pinFilterStatus: boolean = this.uiSettings.get('filters:pinnedByDefault')
+    pinFilterStatus: boolean = this.uiSettings.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT)
   ) {
     const store = pinFilterStatus ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE;
 
@@ -203,7 +204,7 @@ export class FilterManager {
   }
 
   public removeFilter(filter: Filter) {
-    const filterIndex = _.findIndex(this.filters, item => {
+    const filterIndex = _.findIndex(this.filters, (item) => {
       return _.isEqual(item.meta, filter.meta) && _.isEqual(item.query, filter.query);
     });
 

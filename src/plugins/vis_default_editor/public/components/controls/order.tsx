@@ -52,7 +52,7 @@ function OrderParamEditor({
       <EuiSelect
         options={aggParam.options}
         value={value && value.value}
-        onChange={ev =>
+        onChange={(ev) =>
           setValue(aggParam.options.find((opt: OptionedValueProp) => opt.value === ev.target.value))
         }
         fullWidth={true}

@@ -9,10 +9,10 @@ import { API_URLS } from '../../../common/constants';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
 
-const DEFAULT_INDEX = 0;
+export const DEFAULT_FROM = 'now-5m';
+export const DEFAULT_TO = 'now';
+
 const DEFAULT_SIZE = 25;
-const DEFAULT_FROM = 'now-1d';
-const DEFAULT_TO = 'now';
 const DEFAULT_SORT = 'not_after';
 const DEFAULT_DIRECTION = 'asc';
 
@@ -31,7 +31,7 @@ export const createGetCertsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =
     }),
   },
   handler: async ({ callES, dynamicSettings }, _context, request, response): Promise<any> => {
-    const index = request.query?.index ?? DEFAULT_INDEX;
+    const index = request.query?.index ?? 0;
     const size = request.query?.size ?? DEFAULT_SIZE;
     const from = request.query?.from ?? DEFAULT_FROM;
     const to = request.query?.to ?? DEFAULT_TO;

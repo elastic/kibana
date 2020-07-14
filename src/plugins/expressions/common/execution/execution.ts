@@ -18,7 +18,7 @@
  */
 
 import { keys, last, mapValues, reduce, zipObject } from 'lodash';
-import { Executor } from '../executor';
+import { Executor, ExpressionExecOptions } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
 import { Defer, now } from '../../../kibana_utils/common';
@@ -31,6 +31,7 @@ import {
   parse,
   formatExpression,
   parseExpression,
+  ExpressionAstNode,
 } from '../ast';
 import { ExecutionContext, DefaultInspectorAdapters } from './types';
 import { getType, ExpressionValue } from '../expression_types';
@@ -100,7 +101,7 @@ export class Execution<
   /**
    * Promise that rejects if/when abort controller sends "abort" signal.
    */
-  private readonly abortRejection = toPromise(this.abortController.signal, true);
+  private readonly abortRejection = toPromise(this.abortController.signal);
 
   /**
    * Races a given promise against the "abort" event of `abortController`.
@@ -193,16 +194,16 @@ export class Execution<
     const { resolve, reject } = this.firstResultFuture;
     const chainPromise = this.invokeChain(this.state.get().ast.chain, input);
 
-    this.race(chainPromise).then(resolve, error => {
+    this.race(chainPromise).then(resolve, (error) => {
       if (this.abortController.signal.aborted) resolve(createAbortErrorValue());
       else reject(error);
     });
 
     this.firstResultFuture.promise.then(
-      result => {
+      (result) => {
         this.state.transitions.setResult(result);
       },
-      error => {
+      (error) => {
         this.state.transitions.setError(error);
       }
     );
@@ -382,7 +383,7 @@ export class Execution<
     const resolveArgFns = mapValues(argAstsWithDefaults, (asts, argName) => {
       return asts.map((item: ExpressionAstExpression) => {
         return async (subInput = input) => {
-          const output = await this.params.executor.interpret(item, subInput, {
+          const output = await this.interpret(item, subInput, {
             debug: this.params.debug,
           });
           if (isExpressionValueError(output)) throw output.error;
@@ -396,7 +397,7 @@ export class Execution<
 
     // Actually resolve unless the argument definition says not to
     const resolvedArgValues = await Promise.all(
-      argNames.map(argName => {
+      argNames.map((argName) => {
         const interpretFns = resolveArgFns[argName];
         if (!argDefs[argName].resolve) return interpretFns;
         return Promise.all(interpretFns.map((fn: any) => fn()));
@@ -414,5 +415,29 @@ export class Execution<
     // Return an object here because the arguments themselves might actually have a 'then'
     // function which would be treated as a promise
     return { resolvedArgs };
+  }
+
+  public async interpret<T>(
+    ast: ExpressionAstNode,
+    input: T,
+    options?: ExpressionExecOptions
+  ): Promise<unknown> {
+    switch (getType(ast)) {
+      case 'expression':
+        const execution = this.params.executor.createExecution(
+          ast as ExpressionAstExpression,
+          this.context,
+          options
+        );
+        execution.start(input);
+        return await execution.result;
+      case 'string':
+      case 'number':
+      case 'null':
+      case 'boolean':
+        return ast;
+      default:
+        throw new Error(`Unknown AST object: ${JSON.stringify(ast)}`);
+    }
   }
 }

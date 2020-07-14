@@ -18,7 +18,7 @@ export const useStopTransforms = () => {
   const api = useApi();
 
   return async (transforms: TransformListRow[]) => {
-    const transformsInfo: TransformEndpointRequest[] = transforms.map(df => ({
+    const transformsInfo: TransformEndpointRequest[] = transforms.map((df) => ({
       id: df.config.id,
       state: df.stats.state,
     }));

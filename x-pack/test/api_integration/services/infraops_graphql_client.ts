@@ -29,7 +29,7 @@ export function InfraOpsGraphQLClientFactoryProvider({ getService }: FtrProvider
   const superAuth: string = config.get('servers.elasticsearch.auth');
   const [superUsername, superPassword] = superAuth.split(':');
 
-  return function(options?: InfraOpsGraphQLClientFactoryOptions) {
+  return function (options?: InfraOpsGraphQLClientFactoryOptions) {
     const { username = superUsername, password = superPassword, basePath = null } = options || {};
 
     const kbnURLWithoutAuth = formatUrl({ ...config.get('servers.kibana'), auth: false });

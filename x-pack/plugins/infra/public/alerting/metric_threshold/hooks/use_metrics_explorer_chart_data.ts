@@ -26,6 +26,7 @@ export const useMetricsExplorerChartData = (
     () => ({
       limit: 1,
       forceInterval: true,
+      dropLastBucket: false,
       groupBy,
       filterQuery,
       metrics: [

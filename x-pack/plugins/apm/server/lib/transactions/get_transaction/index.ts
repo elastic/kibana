@@ -7,21 +7,21 @@
 import {
   PROCESSOR_EVENT,
   TRACE_ID,
-  TRANSACTION_ID
+  TRANSACTION_ID,
 } from '../../../../common/elasticsearch_fieldnames';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { rangeFilter } from '../../helpers/range_filter';
+import { rangeFilter } from '../../../../common/utils/range_filter';
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../../helpers/setup_request';
 import { ProcessorEvent } from '../../../../common/processor_event';
 
 export async function getTransaction({
   transactionId,
   traceId,
-  setup
+  setup,
 }: {
   transactionId: string;
   traceId: string;
@@ -39,11 +39,11 @@ export async function getTransaction({
             { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
             { term: { [TRANSACTION_ID]: transactionId } },
             { term: { [TRACE_ID]: traceId } },
-            { range: rangeFilter(start, end) }
-          ]
-        }
-      }
-    }
+            { range: rangeFilter(start, end) },
+          ],
+        },
+      },
+    },
   };
 
   const resp = await client.search<Transaction>(params);

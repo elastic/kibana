@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, KibanaContext, Render } from '../../expressions/public';
 import { VegaVisualizationDependencies } from './plugin';
 import { createVegaRequestHandler } from './vega_request_handler';
+import { TimeRange, Query } from '../../data/public';
 
 type Input = KibanaContext | null;
 type Output = Promise<Render<RenderValue>>;
@@ -54,13 +55,13 @@ export const createVegaFn = (
       help: '',
     },
   },
-  async fn(input, args) {
-    const vegaRequestHandler = createVegaRequestHandler(dependencies);
+  async fn(input, args, context) {
+    const vegaRequestHandler = createVegaRequestHandler(dependencies, context.abortSignal);
 
     const response = await vegaRequestHandler({
-      timeRange: get(input, 'timeRange'),
-      query: get(input, 'query'),
-      filters: get(input, 'filters'),
+      timeRange: get(input, 'timeRange') as TimeRange,
+      query: get(input, 'query') as Query,
+      filters: get(input, 'filters') as any,
       visParams: { spec: args.spec },
     });
 

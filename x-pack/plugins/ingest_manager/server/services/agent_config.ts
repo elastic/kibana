@@ -12,16 +12,17 @@ import {
   AGENT_SAVED_OBJECT_TYPE,
 } from '../constants';
 import {
-  Datasource,
+  PackageConfig,
   NewAgentConfig,
   AgentConfig,
+  AgentConfigSOAttributes,
   FullAgentConfig,
   AgentConfigStatus,
   ListWithKuery,
 } from '../types';
-import { DeleteAgentConfigResponse, storedDatasourceToAgentDatasource } from '../../common';
+import { DeleteAgentConfigResponse, storedPackageConfigsToAgentInputs } from '../../common';
 import { listAgents } from './agents';
-import { datasourceService } from './datasource';
+import { packageConfigService } from './package_config';
 import { outputService } from './output';
 import { agentConfigUpdateEventHandler } from './agent_config_update';
 
@@ -39,7 +40,7 @@ class AgentConfigService {
   private async _update(
     soClient: SavedObjectsClientContract,
     id: string,
-    agentConfig: Partial<AgentConfig>,
+    agentConfig: Partial<AgentConfigSOAttributes>,
     user?: AuthenticatedUser
   ): Promise<AgentConfig> {
     const oldAgentConfig = await this.get(soClient, id, false);
@@ -57,22 +58,21 @@ class AgentConfigService {
       );
     }
 
-    await soClient.update<AgentConfig>(SAVED_OBJECT_TYPE, id, {
+    await soClient.update<AgentConfigSOAttributes>(SAVED_OBJECT_TYPE, id, {
       ...agentConfig,
       revision: oldAgentConfig.revision + 1,
-      updated_on: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
       updated_by: user ? user.username : 'system',
     });
-
-    await this.triggerAgentConfigUpdatedEvent(soClient, 'updated', id);
 
     return (await this.get(soClient, id)) as AgentConfig;
   }
 
   public async ensureDefaultAgentConfig(soClient: SavedObjectsClientContract) {
-    const configs = await soClient.find<AgentConfig>({
+    const configs = await soClient.find<AgentConfigSOAttributes>({
       type: AGENT_CONFIG_SAVED_OBJECT_TYPE,
-      filter: `${AGENT_CONFIG_SAVED_OBJECT_TYPE}.attributes.is_default:true`,
+      searchFields: ['is_default'],
+      search: 'true',
     });
 
     if (configs.total === 0) {
@@ -94,12 +94,12 @@ class AgentConfigService {
     agentConfig: NewAgentConfig,
     options?: { id?: string; user?: AuthenticatedUser }
   ): Promise<AgentConfig> {
-    const newSo = await soClient.create<AgentConfig>(
+    const newSo = await soClient.create<AgentConfigSOAttributes>(
       SAVED_OBJECT_TYPE,
       {
         ...agentConfig,
         revision: 1,
-        updated_on: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
         updated_by: options?.user?.username || 'system',
       } as AgentConfig,
       options
@@ -109,18 +109,15 @@ class AgentConfigService {
       await this.triggerAgentConfigUpdatedEvent(soClient, 'created', newSo.id);
     }
 
-    return {
-      id: newSo.id,
-      ...newSo.attributes,
-    };
+    return { id: newSo.id, ...newSo.attributes };
   }
 
   public async get(
     soClient: SavedObjectsClientContract,
     id: string,
-    withDatasources: boolean = true
+    withPackageConfigs: boolean = true
   ): Promise<AgentConfig | null> {
-    const agentConfigSO = await soClient.get<AgentConfig>(SAVED_OBJECT_TYPE, id);
+    const agentConfigSO = await soClient.get<AgentConfigSOAttributes>(SAVED_OBJECT_TYPE, id);
     if (!agentConfigSO) {
       return null;
     }
@@ -129,16 +126,13 @@ class AgentConfigService {
       throw new Error(agentConfigSO.error.message);
     }
 
-    const agentConfig: AgentConfig = {
-      id: agentConfigSO.id,
-      ...agentConfigSO.attributes,
-    };
+    const agentConfig = { id: agentConfigSO.id, ...agentConfigSO.attributes };
 
-    if (withDatasources) {
-      agentConfig.datasources =
-        (await datasourceService.getByIDs(
+    if (withPackageConfigs) {
+      agentConfig.package_configs =
+        (await packageConfigService.getByIDs(
           soClient,
-          (agentConfigSO.attributes.datasources as string[]) || []
+          (agentConfigSO.attributes.package_configs as string[]) || []
         )) || [];
     }
 
@@ -147,12 +141,23 @@ class AgentConfigService {
 
   public async list(
     soClient: SavedObjectsClientContract,
-    options: ListWithKuery
+    options: ListWithKuery & {
+      withPackageConfigs?: boolean;
+    }
   ): Promise<{ items: AgentConfig[]; total: number; page: number; perPage: number }> {
-    const { page = 1, perPage = 20, kuery } = options;
+    const {
+      page = 1,
+      perPage = 20,
+      sortField = 'updated_at',
+      sortOrder = 'desc',
+      kuery,
+      withPackageConfigs = false,
+    } = options;
 
-    const agentConfigs = await soClient.find<AgentConfig>({
+    const agentConfigsSO = await soClient.find<AgentConfigSOAttributes>({
       type: SAVED_OBJECT_TYPE,
+      sortField,
+      sortOrder,
       page,
       perPage,
       // To ensure users don't need to know about SO data structure...
@@ -164,14 +169,29 @@ class AgentConfigService {
         : undefined,
     });
 
-    return {
-      items: agentConfigs.saved_objects.map<AgentConfig>(agentConfigSO => {
-        return {
+    const agentConfigs = await Promise.all(
+      agentConfigsSO.saved_objects.map(async (agentConfigSO) => {
+        const agentConfig = {
           id: agentConfigSO.id,
           ...agentConfigSO.attributes,
         };
-      }),
-      total: agentConfigs.total,
+        if (withPackageConfigs) {
+          const agentConfigWithPackageConfigs = await this.get(
+            soClient,
+            agentConfigSO.id,
+            withPackageConfigs
+          );
+          if (agentConfigWithPackageConfigs) {
+            agentConfig.package_configs = agentConfigWithPackageConfigs.package_configs;
+          }
+        }
+        return agentConfig;
+      })
+    );
+
+    return {
+      items: agentConfigs,
+      total: agentConfigsSO.total,
       page,
       perPage,
     };
@@ -186,6 +206,53 @@ class AgentConfigService {
     return this._update(soClient, id, agentConfig, options?.user);
   }
 
+  public async copy(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    newAgentConfigProps: Pick<AgentConfig, 'name' | 'description'>,
+    options?: { user?: AuthenticatedUser }
+  ): Promise<AgentConfig> {
+    // Copy base config
+    const baseAgentConfig = await this.get(soClient, id, true);
+    if (!baseAgentConfig) {
+      throw new Error('Agent config not found');
+    }
+    const { namespace, monitoring_enabled } = baseAgentConfig;
+    const newAgentConfig = await this.create(
+      soClient,
+      {
+        namespace,
+        monitoring_enabled,
+        ...newAgentConfigProps,
+      },
+      options
+    );
+
+    // Copy all package configs
+    if (baseAgentConfig.package_configs.length) {
+      const newPackageConfigs = (baseAgentConfig.package_configs as PackageConfig[]).map(
+        (packageConfig: PackageConfig) => {
+          const { id: packageConfigId, ...newPackageConfig } = packageConfig;
+          return newPackageConfig;
+        }
+      );
+      await packageConfigService.bulkCreate(
+        soClient,
+        newPackageConfigs,
+        newAgentConfig.id,
+        options
+      );
+    }
+
+    // Get updated config
+    const updatedAgentConfig = await this.get(soClient, newAgentConfig.id, true);
+    if (!updatedAgentConfig) {
+      throw new Error('Copied agent config not found');
+    }
+
+    return updatedAgentConfig;
+  }
+
   public async bumpRevision(
     soClient: SavedObjectsClientContract,
     id: string,
@@ -194,10 +261,10 @@ class AgentConfigService {
     return this._update(soClient, id, {}, options?.user);
   }
 
-  public async assignDatasources(
+  public async assignPackageConfigs(
     soClient: SavedObjectsClientContract,
     id: string,
-    datasourceIds: string[],
+    packageConfigIds: string[],
     options?: { user?: AuthenticatedUser }
   ): Promise<AgentConfig> {
     const oldAgentConfig = await this.get(soClient, id, false);
@@ -210,19 +277,18 @@ class AgentConfigService {
       soClient,
       id,
       {
-        ...oldAgentConfig,
-        datasources: uniq(
-          [...((oldAgentConfig.datasources || []) as string[])].concat(datasourceIds)
+        package_configs: uniq(
+          [...((oldAgentConfig.package_configs || []) as string[])].concat(packageConfigIds)
         ),
       },
       options?.user
     );
   }
 
-  public async unassignDatasources(
+  public async unassignPackageConfigs(
     soClient: SavedObjectsClientContract,
     id: string,
-    datasourceIds: string[],
+    packageConfigIds: string[],
     options?: { user?: AuthenticatedUser }
   ): Promise<AgentConfig> {
     const oldAgentConfig = await this.get(soClient, id, false);
@@ -235,10 +301,9 @@ class AgentConfigService {
       soClient,
       id,
       {
-        ...oldAgentConfig,
-        datasources: uniq(
-          [...((oldAgentConfig.datasources || []) as string[])].filter(
-            dsId => !datasourceIds.includes(dsId)
+        package_configs: uniq(
+          [...((oldAgentConfig.package_configs || []) as string[])].filter(
+            (pkgConfigId) => !packageConfigIds.includes(pkgConfigId)
           )
         ),
       },
@@ -249,7 +314,8 @@ class AgentConfigService {
   public async getDefaultAgentConfigId(soClient: SavedObjectsClientContract) {
     const configs = await soClient.find({
       type: AGENT_CONFIG_SAVED_OBJECT_TYPE,
-      filter: `${AGENT_CONFIG_SAVED_OBJECT_TYPE}.attributes.is_default:true`,
+      searchFields: ['is_default'],
+      search: 'true',
     });
 
     if (configs.saved_objects.length === 0) {
@@ -284,8 +350,8 @@ class AgentConfigService {
       throw new Error('Cannot delete agent config that is assigned to agent(s)');
     }
 
-    if (config.datasources && config.datasources.length) {
-      await datasourceService.delete(soClient, config.datasources as string[], {
+    if (config.package_configs && config.package_configs.length) {
+      await packageConfigService.delete(soClient, config.package_configs as string[], {
         skipUnassignFromAgentConfigs: true,
       });
     }
@@ -299,7 +365,8 @@ class AgentConfigService {
 
   public async getFullConfig(
     soClient: SavedObjectsClientContract,
-    id: string
+    id: string,
+    options?: { standalone: boolean }
   ): Promise<FullAgentConfig | null> {
     let config;
 
@@ -314,10 +381,12 @@ class AgentConfigService {
     if (!config) {
       return null;
     }
-    const defaultOutput = await outputService.get(
-      soClient,
-      await outputService.getDefaultOutputId(soClient)
-    );
+
+    const defaultOutputId = await outputService.getDefaultOutputId(soClient);
+    if (!defaultOutputId) {
+      throw new Error('Default output is not setup');
+    }
+    const defaultOutput = await outputService.get(soClient, defaultOutputId);
 
     const agentConfig: FullAgentConfig = {
       id: config.id,
@@ -332,18 +401,23 @@ class AgentConfigService {
               api_key,
               ...outputConfig,
             };
+
+            if (options?.standalone) {
+              delete outputs[name].api_key;
+              outputs[name].username = 'ES_USERNAME';
+              outputs[name].password = 'ES_PASSWORD';
+            }
+
             return outputs;
           },
           {} as FullAgentConfig['outputs']
         ),
       },
-      datasources: (config.datasources as Datasource[])
-        .filter(datasource => datasource.enabled)
-        .map(ds => storedDatasourceToAgentDatasource(ds)),
+      inputs: storedPackageConfigsToAgentInputs(config.package_configs as PackageConfig[]),
       revision: config.revision,
       ...(config.monitoring_enabled && config.monitoring_enabled.length > 0
         ? {
-            settings: {
+            agent: {
               monitoring: {
                 use_output: defaultOutput.name,
                 enabled: true,
@@ -353,7 +427,7 @@ class AgentConfigService {
             },
           }
         : {
-            settings: {
+            agent: {
               monitoring: { enabled: false, logs: false, metrics: false },
             },
           }),

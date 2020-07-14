@@ -78,15 +78,12 @@ export const useLogSource = ({
     [sourceId, fetch]
   );
 
-  const logIndicesExist = useMemo(() => (sourceStatus?.logIndexNames?.length ?? 0) > 0, [
-    sourceStatus,
-  ]);
-
   const derivedIndexPattern = useMemo(
     () => ({
       fields: sourceStatus?.logIndexFields ?? [],
       title: sourceConfiguration?.configuration.name ?? 'unknown',
     }),
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [sourceConfiguration, sourceStatus]
   );
 
@@ -158,7 +155,6 @@ export const useLogSource = ({
     loadSourceFailureMessage,
     loadSourceConfiguration,
     loadSourceStatus,
-    logIndicesExist,
     sourceConfiguration,
     sourceId,
     sourceStatus,

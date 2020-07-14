@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function({ loadTestFile, getService }) {
+export default function ({ loadTestFile, getService }) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('maps app', function() {
+  describe('maps app', function () {
     this.tags(['skipFirefox']);
 
     before(async () => {
@@ -17,7 +17,7 @@ export default function({ loadTestFile, getService }) {
       await esArchiver.load('maps/data');
       await esArchiver.load('maps/kibana');
       await kibanaServer.uiSettings.replace({
-        defaultIndex: 'logstash-*',
+        defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
       });
       await browser.setWindowSize(1600, 1000);
     });
@@ -27,7 +27,7 @@ export default function({ loadTestFile, getService }) {
       await esArchiver.unload('maps/kibana');
     });
 
-    describe('', function() {
+    describe('', function () {
       this.tags('ciGroup7');
       loadTestFile(require.resolve('./documents_source'));
       loadTestFile(require.resolve('./blended_vector_layer'));
@@ -39,7 +39,7 @@ export default function({ loadTestFile, getService }) {
       loadTestFile(require.resolve('./full_screen_mode'));
     });
 
-    describe('', function() {
+    describe('', function () {
       this.tags('ciGroup10');
       loadTestFile(require.resolve('./es_geo_grid_source'));
       loadTestFile(require.resolve('./es_pew_pew_source'));

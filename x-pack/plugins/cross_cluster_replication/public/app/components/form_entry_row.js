@@ -19,7 +19,7 @@ import {
 /**
  * State transitions: fields update
  */
-export const updateFields = newValues => ({ fields }) => ({
+export const updateFields = (newValues) => ({ fields }) => ({
   fields: {
     ...fields,
     ...newValues,
@@ -44,7 +44,7 @@ export class FormEntryRow extends PureComponent {
     testSubj: PropTypes.string,
   };
 
-  onFieldChange = value => {
+  onFieldChange = (value) => {
     const { field, onValueUpdate, type } = this.props;
     const isNumber = type === 'number';
 
@@ -57,7 +57,7 @@ export class FormEntryRow extends PureComponent {
     onValueUpdate({ [field]: valueParsed });
   };
 
-  renderField = isInvalid => {
+  renderField = (isInvalid) => {
     const { value, type, disabled, isLoading, testSubj } = this.props;
     switch (type) {
       case 'number':
@@ -65,7 +65,7 @@ export class FormEntryRow extends PureComponent {
           <EuiFieldNumber
             isInvalid={isInvalid}
             value={value}
-            onChange={e => this.onFieldChange(e.target.value)}
+            onChange={(e) => this.onFieldChange(e.target.value)}
             disabled={disabled === true}
             isLoading={isLoading}
             fullWidth
@@ -77,7 +77,7 @@ export class FormEntryRow extends PureComponent {
           <EuiFieldText
             isInvalid={isInvalid}
             value={value}
-            onChange={e => this.onFieldChange(e.target.value)}
+            onChange={(e) => this.onFieldChange(e.target.value)}
             disabled={disabled === true}
             isLoading={isLoading}
             fullWidth

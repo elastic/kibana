@@ -5,13 +5,14 @@
  */
 
 import { i18n } from '@kbn/i18n/';
-import { TypeOf } from '@kbn/config-schema';
 import crypto from 'crypto';
-import { capitalize } from 'lodash';
+import { upperFirst } from 'lodash';
+import { Observable } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
-import { CoreSetup, Logger, PluginInitializerContext } from 'src/core/server';
+import { CoreSetup } from 'src/core/server';
+import { LevelLogger } from '../lib';
 import { getDefaultChromiumSandboxDisabled } from './default_chromium_sandbox_disabled';
-import { ConfigSchema } from './schema';
+import { ReportingConfigType } from './schema';
 
 /*
  * Set up dynamic config defaults
@@ -19,9 +20,14 @@ import { ConfigSchema } from './schema';
  * - xpack.kibanaServer
  * - xpack.reporting.encryptionKey
  */
-export function createConfig$(core: CoreSetup, context: PluginInitializerContext, logger: Logger) {
-  return context.config.create<TypeOf<typeof ConfigSchema>>().pipe(
-    map(config => {
+export function createConfig$(
+  core: CoreSetup,
+  config$: Observable<ReportingConfigType>,
+  parentLogger: LevelLogger
+) {
+  const logger = parentLogger.clone(['config']);
+  return config$.pipe(
+    map((config) => {
       // encryption key
       let encryptionKey = config.encryptionKey;
       if (encryptionKey === undefined) {
@@ -39,7 +45,7 @@ export function createConfig$(core: CoreSetup, context: PluginInitializerContext
       // kibanaServer.hostname, default to server.host, don't allow "0"
       let kibanaServerHostname = reportingServer.hostname
         ? reportingServer.hostname
-        : serverInfo.host;
+        : serverInfo.hostname;
       if (kibanaServerHostname === '0') {
         logger.warn(
           i18n.translate('xpack.reporting.serverConfig.invalidServerHostname', {
@@ -70,7 +76,7 @@ export function createConfig$(core: CoreSetup, context: PluginInitializerContext
         },
       };
     }),
-    mergeMap(async config => {
+    mergeMap(async (config) => {
       if (config.capture.browser.chromium.disableSandbox != null) {
         // disableSandbox was set by user
         return config;
@@ -78,10 +84,7 @@ export function createConfig$(core: CoreSetup, context: PluginInitializerContext
 
       // disableSandbox was not set by user, apply default for OS
       const { os, disableSandbox } = await getDefaultChromiumSandboxDisabled();
-      const osName = [os.os, os.dist, os.release]
-        .filter(Boolean)
-        .map(capitalize)
-        .join(' ');
+      const osName = [os.os, os.dist, os.release].filter(Boolean).map(upperFirst).join(' ');
 
       logger.debug(
         i18n.translate('xpack.reporting.serverConfig.osDetected', {

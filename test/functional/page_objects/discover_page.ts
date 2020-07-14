@@ -36,13 +36,18 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
   class DiscoverPage {
     public async getChartTimespan() {
-      const el = await find.byCssSelector('.small > label[for="dscResultsIntervalSelector"]');
+      const el = await find.byCssSelector('[data-test-subj="discoverIntervalDateRange"]');
       return await el.getVisibleText();
     }
 
     public async findFieldByName(name: string) {
       const fieldSearch = await testSubjects.find('fieldFilterSearchInput');
       await fieldSearch.type(name);
+    }
+
+    public async clearFieldSearchInput() {
+      const fieldSearch = await testSubjects.find('fieldFilterSearchInput');
+      await fieldSearch.clearValue();
     }
 
     public async saveSearch(searchName: string) {
@@ -129,6 +134,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       await testSubjects.click('discoverOpenButton');
     }
 
+    public async clickResetSavedSearchButton() {
+      await testSubjects.moveMouseTo('resetSavedSearch');
+      await testSubjects.click('resetSavedSearch');
+      await header.waitUntilLoadingHasFinished();
+    }
+
     public async closeLoadSavedSearchPanel() {
       await testSubjects.click('euiFlyoutCloseButton');
     }
@@ -136,11 +147,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     public async clickHistogramBar() {
       const el = await elasticChart.getCanvas();
 
-      await browser
-        .getActions()
-        .move({ x: 0, y: 20, origin: el._webElement })
-        .click()
-        .perform();
+      await browser.getActions().move({ x: 0, y: 20, origin: el._webElement }).click().perform();
     }
 
     public async brushHistogram() {
@@ -162,9 +169,9 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return selectedOption.getVisibleText();
     }
 
-    public async getChartIntervalScaledToDesc() {
+    public async getChartIntervalWarningIcon() {
       await header.waitUntilLoadingHasFinished();
-      return await testSubjects.getVisibleText('discoverIntervalSelectScaledToDesc');
+      return await find.existsByCssSelector('.euiToolTipAnchor');
     }
 
     public async setChartInterval(interval: string) {
@@ -183,6 +190,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return await docHeader.getVisibleText();
     }
 
+    public async getDocTableRows() {
+      await header.waitUntilLoadingHasFinished();
+      const rows = await testSubjects.findAll('docTableRow');
+      return rows;
+    }
+
     public async getDocTableIndex(index: number) {
       const row = await find.byCssSelector(`tr.kbnDocTable__row:nth-child(${index})`);
       return await row.getVisibleText();
@@ -193,6 +206,19 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
         `tr.kbnDocTable__row:nth-child(${index}) > [data-test-subj='docTableField']`
       );
       return await field.getVisibleText();
+    }
+
+    public async skipToEndOfDocTable() {
+      // add the focus to the button to make it appear
+      const skipButton = await testSubjects.find('discoverSkipTableButton');
+      // force focus on it, to make it interactable
+      skipButton.focus();
+      // now click it!
+      return skipButton.click();
+    }
+
+    public async getDocTableFooter() {
+      return await testSubjects.find('discoverDocTableFooter');
     }
 
     public async clickDocSortDown() {
@@ -208,7 +234,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       const $ = await table.parseDomContent();
       return $('mark')
         .toArray()
-        .map(mark => $(mark).text());
+        .map((mark) => $(mark).text());
     }
 
     public async toggleSidebarCollapse() {
@@ -220,11 +246,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       const $ = await sidebar.parseDomContent();
       return $('.dscSidebar__item[attr-field]')
         .toArray()
-        .map(field =>
-          $(field)
-            .find('span.eui-textTruncate')
-            .text()
-        );
+        .map((field) => $(field).find('span.eui-textTruncate').text());
     }
 
     public async getSidebarWidth() {
@@ -244,9 +266,26 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return await testSubjects.click(`field-${field}`);
     }
 
-    public async clickFieldListItemAdd(field: string) {
+    public async clickFieldSort(field: string) {
+      return await testSubjects.click(`docTableHeaderFieldSort_${field}`);
+    }
+
+    public async clickFieldListItemToggle(field: string) {
       await testSubjects.moveMouseTo(`field-${field}`);
       await testSubjects.click(`fieldToggle-${field}`);
+    }
+
+    public async clickFieldListItemAdd(field: string) {
+      // a filter check may make sense here, but it should be properly handled to make
+      // it work with the _score and _source fields as well
+      await this.clickFieldListItemToggle(field);
+    }
+
+    public async clickFieldListItemRemove(field: string) {
+      const selectedList = await testSubjects.find('fieldList-selected');
+      if (await testSubjects.descendantExists(`field-${field}`, selectedList)) {
+        await this.clickFieldListItemToggle(field);
+      }
     }
 
     public async clickFieldListItemVisualize(fieldName: string) {
@@ -325,6 +364,23 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       const el = await find.byCssSelector('[data-fetch-counter]');
       const nr = await el.getAttribute('data-fetch-counter');
       return Number(nr);
+    }
+
+    /**
+     * Check if Discover app is currently rendered on the screen.
+     */
+    public async isDiscoverAppOnScreen(): Promise<boolean> {
+      const result = await find.allByCssSelector('discover-app');
+      return result.length === 1;
+    }
+
+    /**
+     * Wait until Discover app is rendered on the screen.
+     */
+    public async waitForDiscoverAppOnScreen() {
+      await retry.waitFor('Discover app on screen', async () => {
+        return await this.isDiscoverAppOnScreen();
+      });
     }
   }
 

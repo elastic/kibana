@@ -6,7 +6,6 @@
 import React from 'react';
 import cls from 'classnames';
 import styled from 'styled-components';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { px, unit } from '../../style/variables';
 
 // TODO: replace this component with EUITab w/ a href prop
@@ -28,8 +27,8 @@ const Wrapper = styled.div<{ isSelected: boolean }>`
   a {
     display: inline-block;
     padding: ${px(unit * 0.75)} ${px(unit)};
-    ${({ isSelected }) =>
-      !isSelected ? `color: ${theme.euiTextColor} !important;` : ''}
+    ${({ isSelected, theme }) =>
+      !isSelected ? `color: ${theme.eui.euiTextColor} !important;` : ''}
   }
 `;
 
@@ -37,7 +36,7 @@ const EuiTabLink = (props: Props) => {
   const { isSelected, children } = props;
 
   const className = cls('euiTab', {
-    'euiTab-isSelected': isSelected
+    'euiTab-isSelected': isSelected,
   });
 
   return (

@@ -27,7 +27,7 @@ export function registerRefreshRoute({ router, license, lib }: RouteDependencies
       };
 
       try {
-        await ctx.core.elasticsearch.dataClient.callAsCurrentUser('indices.refresh', params);
+        await ctx.core.elasticsearch.legacy.client.callAsCurrentUser('indices.refresh', params);
         return res.ok();
       } catch (e) {
         if (lib.isEsError(e)) {

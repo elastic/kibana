@@ -23,7 +23,7 @@ import { CODE_PATH_ELASTICSEARCH } from '../../../../common/constants';
 uiRoutes.when('/elasticsearch/nodes/:node', {
   template,
   resolve: {
-    clusters: function(Private) {
+    clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
       return routeInit({ codePaths: [CODE_PATH_ELASTICSEARCH] });
     },
@@ -33,7 +33,6 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
   controller: class extends MonitoringViewBaseController {
     constructor($injector, $scope) {
       const $route = $injector.get('$route');
-      const kbnUrl = $injector.get('kbnUrl');
       const nodeName = $route.current.params.node;
 
       super({
@@ -56,18 +55,18 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
       const callPageData = partial(getPageData, $injector);
       // show/hide system indices in shard allocation view
       $scope.showSystemIndices = features.isEnabled('showSystemIndices', false);
-      $scope.toggleShowSystemIndices = isChecked => {
+      $scope.toggleShowSystemIndices = (isChecked) => {
         $scope.showSystemIndices = isChecked;
         // preserve setting in localStorage
         features.update('showSystemIndices', isChecked);
         // update the page
-        callPageData().then(data => (this.data = data));
+        callPageData().then((data) => (this.data = data));
       };
 
       const transformer = nodesByIndices();
       $scope.$watch(
         () => this.data,
-        data => {
+        (data) => {
           if (!data || !data.shards) {
             return;
           }
@@ -80,7 +79,6 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
           this.renderReact(
             <Node
               scope={$scope}
-              kbnUrl={kbnUrl}
               nodeId={this.nodeName}
               clusterUuid={$scope.cluster.cluster_uuid}
               onBrush={this.onBrush}

@@ -26,6 +26,7 @@ import {
 import { formatTimestampToDuration } from '../../../../common';
 import { CALCULATE_DURATION_SINCE, APM_SYSTEM_ID } from '../../../../common/constants';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 
 export function ApmPanel(props) {
   const { setupMode } = props;
@@ -35,15 +36,13 @@ export function ApmPanel(props) {
     return null;
   }
 
-  const goToApm = () => props.changeUrl('apm');
-  const goToInstances = () => props.changeUrl('apm/instances');
-
+  const goToInstances = () => getSafeForExternalLink('#/apm/instances');
   const setupModeData = get(setupMode.data, 'apm');
   const setupModeTooltip =
     setupMode && setupMode.enabled ? (
       <SetupModeTooltip
         setupModeData={setupModeData}
-        badgeClickAction={goToInstances}
+        badgeClickLink={goToInstances()}
         productName={APM_SYSTEM_ID}
       />
     ) : null;
@@ -64,7 +63,7 @@ export function ApmPanel(props) {
                 <DisabledIfNoDataAndInSetupModeLink
                   setupModeEnabled={setupMode.enabled}
                   setupModeData={setupModeData}
-                  onClick={goToApm}
+                  href={getSafeForExternalLink('#/apm')}
                   aria-label={i18n.translate(
                     'xpack.monitoring.cluster.overview.apmPanel.overviewLinkAriaLabel',
                     {
@@ -119,7 +118,7 @@ export function ApmPanel(props) {
                 <EuiTitle size="s">
                   <h3>
                     <EuiLink
-                      onClick={goToInstances}
+                      href={goToInstances()}
                       aria-label={i18n.translate(
                         'xpack.monitoring.cluster.overview.apmPanel.instancesTotalLinkAriaLabel',
                         {

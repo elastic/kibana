@@ -17,20 +17,19 @@
  * under the License.
  */
 
-import { CoreSetup } from 'kibana/public';
-import { bindSetupCoreAndPlugins, MapsLegacyPlugin } from './plugin';
+// @ts-ignore
+import { PluginInitializerContext } from 'kibana/public';
+// @ts-ignore
+import { L } from './leaflet';
+import { MapsLegacyPlugin } from './plugin';
 // @ts-ignore
 import * as colorUtil from './map/color_util';
-// @ts-ignore
-import { KibanaMap } from './map/kibana_map';
 // @ts-ignore
 import { KibanaMapLayer } from './map/kibana_map_layer';
 // @ts-ignore
 import { convertToGeoJson } from './map/convert_to_geojson';
 // @ts-ignore
 import { scaleBounds, getPrecision, geoContains } from './map/decode_geo_hash';
-// @ts-ignore
-import { BaseMapsVisualizationProvider } from './map/base_maps_visualization';
 import {
   VectorLayer,
   FileLayerField,
@@ -41,8 +40,18 @@ import {
 // @ts-ignore
 import { mapTooltipProvider } from './tooltip_provider';
 
-export function plugin() {
-  return new MapsLegacyPlugin();
+import './map/index.scss';
+
+export interface MapsLegacyConfigType {
+  regionmap: any;
+  emsTileLayerId: string;
+  includeElasticMapsService: boolean;
+  proxyElasticMapsServiceInMaps: boolean;
+  tilemap: any;
+}
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new MapsLegacyPlugin(initializerContext);
 }
 
 /** @public */
@@ -59,21 +68,8 @@ export {
   FileLayer,
   TmsLayer,
   mapTooltipProvider,
+  L,
 };
-
-// Due to a leaflet/leaflet-draw bug, it's not possible to consume leaflet maps w/ draw control
-// through a pipeline leveraging angular. For this reason, client plugins need to
-// init kibana map and the basemaps visualization directly rather than consume through
-// the usual plugin interface
-export function getKibanaMapFactoryProvider(core: CoreSetup) {
-  bindSetupCoreAndPlugins(core);
-  return (...args: any) => new KibanaMap(...args);
-}
-
-export function getBaseMapsVis(core: CoreSetup, serviceSettings: IServiceSettings) {
-  const getKibanaMap = getKibanaMapFactoryProvider(core);
-  return new BaseMapsVisualizationProvider(getKibanaMap, serviceSettings);
-}
 
 export * from './common/types';
 export { ORIGIN } from './common/constants/origin';

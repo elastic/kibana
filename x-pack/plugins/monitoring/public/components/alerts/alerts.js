@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Legacy } from '../../legacy_shims';
-import { capitalize, get } from 'lodash';
+import { upperFirst, get } from 'lodash';
 import { formatDateTimeLocal } from '../../../common/formatting';
 import { formatTimestampToDuration } from '../../../common';
 import {
@@ -29,14 +29,14 @@ const linkToCategories = {
   [ALERT_TYPE_LICENSE_EXPIRATION]: 'License expiration',
   [ALERT_TYPE_CLUSTER_STATE]: 'Cluster state',
 };
-const getColumns = (kbnUrl, scope, timezone) => [
+const getColumns = (timezone) => [
   {
     name: i18n.translate('xpack.monitoring.alerts.statusColumnTitle', {
       defaultMessage: 'Status',
     }),
     field: 'status',
     sortable: true,
-    render: severity => {
+    render: (severity) => {
       const severityIconDefaults = {
         title: i18n.translate('xpack.monitoring.alerts.severityTitle.unknown', {
           defaultMessage: 'Unknown',
@@ -55,7 +55,7 @@ const getColumns = (kbnUrl, scope, timezone) => [
             data-test-subj="alertIcon"
             aria-label={severityIcon.title}
           >
-            {capitalize(severityIcon.value)}
+            {upperFirst(severityIcon.value)}
           </EuiHealth>
         </EuiToolTip>
       );
@@ -67,7 +67,7 @@ const getColumns = (kbnUrl, scope, timezone) => [
     }),
     field: 'resolved_timestamp',
     sortable: true,
-    render: resolvedTimestamp => {
+    render: (resolvedTimestamp) => {
       const notResolvedLabel = i18n.translate('xpack.monitoring.alerts.notResolvedDescription', {
         defaultMessage: 'Not Resolved',
       });
@@ -109,11 +109,6 @@ const getColumns = (kbnUrl, scope, timezone) => [
           suffix={alert.suffix}
           message={message}
           metadata={alert.metadata}
-          changeUrl={target => {
-            scope.$evalAsync(() => {
-              kbnUrl.changePath(target);
-            });
-          }}
         />
       );
     },
@@ -124,7 +119,7 @@ const getColumns = (kbnUrl, scope, timezone) => [
     }),
     field: 'category',
     sortable: true,
-    render: link =>
+    render: (link) =>
       linkToCategories[link]
         ? linkToCategories[link]
         : i18n.translate('xpack.monitoring.alerts.categoryColumn.generalLabel', {
@@ -137,7 +132,7 @@ const getColumns = (kbnUrl, scope, timezone) => [
     }),
     field: 'update_timestamp',
     sortable: true,
-    render: timestamp => formatDateTimeLocal(timestamp, timezone),
+    render: (timestamp) => formatDateTimeLocal(timestamp, timezone),
   },
   {
     name: i18n.translate('xpack.monitoring.alerts.triggeredColumnTitle', {
@@ -145,7 +140,7 @@ const getColumns = (kbnUrl, scope, timezone) => [
     }),
     field: 'timestamp',
     sortable: true,
-    render: timestamp =>
+    render: (timestamp) =>
       i18n.translate('xpack.monitoring.alerts.triggeredColumnValue', {
         defaultMessage: '{timestamp} ago',
         values: {
@@ -155,8 +150,8 @@ const getColumns = (kbnUrl, scope, timezone) => [
   },
 ];
 
-export const Alerts = ({ alerts, angular, sorting, pagination, onTableChange }) => {
-  const alertsFlattened = alerts.map(alert => ({
+export const Alerts = ({ alerts, sorting, pagination, onTableChange }) => {
+  const alertsFlattened = alerts.map((alert) => ({
     ...alert,
     status: get(alert, 'metadata.severity', get(alert, 'severity', 0)),
     category: get(alert, 'metadata.link', get(alert, 'type', null)),
@@ -169,7 +164,7 @@ export const Alerts = ({ alerts, angular, sorting, pagination, onTableChange }) 
     <EuiMonitoringTable
       className="alertsTable"
       rows={alertsFlattened}
-      columns={getColumns(angular.kbnUrl, angular.scope, timezone)}
+      columns={getColumns(timezone)}
       sorting={{
         ...sorting,
         sort: {

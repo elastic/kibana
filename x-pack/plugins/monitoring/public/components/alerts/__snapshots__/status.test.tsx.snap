@@ -3,12 +3,7 @@
 exports[`Status should render a flyout when clicking the link 1`] = `
 <EuiFlyout
   aria-labelledby="flyoutTitle"
-  closeButtonAriaLabel="Closes this dialog"
-  hideCloseButton={false}
-  maxWidth={false}
   onClose={[Function]}
-  ownFocus={false}
-  size="m"
 >
   <EuiFlyoutHeader
     hasBorder={true}

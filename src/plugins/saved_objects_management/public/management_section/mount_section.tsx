@@ -19,10 +19,10 @@
 
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
-import { HashRouter, Switch, Route } from 'react-router-dom';
+import { Router, Switch, Route } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { CoreSetup, Capabilities } from 'src/core/public';
+import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from '../../../management/public';
 import { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
 import { ISavedObjectsManagementServiceRegistry } from '../services';
@@ -44,30 +44,41 @@ export const mountManagementSection = async ({
   serviceRegistry,
 }: MountParams) => {
   const [coreStart, { data }, pluginStart] = await core.getStartServices();
-  const { element, basePath, setBreadcrumbs } = mountParams;
+  const { element, history, setBreadcrumbs } = mountParams;
   if (allowedObjectTypes === undefined) {
     allowedObjectTypes = await getAllowedTypes(coreStart.http);
   }
 
   const capabilities = coreStart.application.capabilities;
 
+  const RedirectToHomeIfUnauthorized: React.FunctionComponent = ({ children }) => {
+    const allowed = capabilities?.management?.kibana?.objects ?? false;
+
+    if (!allowed) {
+      coreStart.application.navigateToApp('home');
+      return null;
+    }
+    return children! as React.ReactElement;
+  };
+
   ReactDOM.render(
     <I18nProvider>
-      <HashRouter basename={basePath}>
+      <Router history={history}>
         <Switch>
           <Route path={'/:service/:id'} exact={true}>
-            <RedirectToHomeIfUnauthorized capabilities={capabilities}>
+            <RedirectToHomeIfUnauthorized>
               <Suspense fallback={<EuiLoadingSpinner />}>
                 <SavedObjectsEditionPage
                   coreStart={coreStart}
                   serviceRegistry={serviceRegistry}
                   setBreadcrumbs={setBreadcrumbs}
+                  history={history}
                 />
               </Suspense>
             </RedirectToHomeIfUnauthorized>
           </Route>
           <Route path={'/'} exact={false}>
-            <RedirectToHomeIfUnauthorized capabilities={capabilities}>
+            <RedirectToHomeIfUnauthorized>
               <Suspense fallback={<EuiLoadingSpinner />}>
                 <SavedObjectsTablePage
                   coreStart={coreStart}
@@ -81,7 +92,7 @@ export const mountManagementSection = async ({
             </RedirectToHomeIfUnauthorized>
           </Route>
         </Switch>
-      </HashRouter>
+      </Router>
     </I18nProvider>,
     element
   );
@@ -89,15 +100,4 @@ export const mountManagementSection = async ({
   return () => {
     ReactDOM.unmountComponentAtNode(element);
   };
-};
-
-const RedirectToHomeIfUnauthorized: React.FunctionComponent<{
-  capabilities: Capabilities;
-}> = ({ children, capabilities }) => {
-  const allowed = capabilities?.management?.kibana?.objects ?? false;
-  if (!allowed) {
-    window.location.hash = '/home';
-    return null;
-  }
-  return children! as React.ReactElement;
 };

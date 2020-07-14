@@ -31,13 +31,13 @@ export const FeatureTableExpandedRow = ({
   const [isCustomizing, setIsCustomizing] = useState(() => {
     return feature
       .getMinimalFeaturePrivileges()
-      .some(p => selectedFeaturePrivileges.includes(p.id));
+      .some((p) => selectedFeaturePrivileges.includes(p.id));
   });
 
   useEffect(() => {
     const hasMinimalFeaturePrivilegeSelected = feature
       .getMinimalFeaturePrivileges()
-      .some(p => selectedFeaturePrivileges.includes(p.id));
+      .some((p) => selectedFeaturePrivileges.includes(p.id));
 
     if (!hasMinimalFeaturePrivilegeSelected && isCustomizing) {
       setIsCustomizing(false);
@@ -75,7 +75,7 @@ export const FeatureTableExpandedRow = ({
           }
         />
       </EuiFlexItem>
-      {feature.getSubFeatures().map(subFeature => {
+      {feature.getSubFeatures().map((subFeature) => {
         return (
           <EuiFlexItem key={subFeature.name}>
             <SubFeatureForm
@@ -83,7 +83,7 @@ export const FeatureTableExpandedRow = ({
               privilegeIndex={privilegeIndex}
               featureId={feature.id}
               subFeature={subFeature}
-              onChange={updatedPrivileges => onChange(feature.id, updatedPrivileges)}
+              onChange={(updatedPrivileges) => onChange(feature.id, updatedPrivileges)}
               selectedFeaturePrivileges={selectedFeaturePrivileges}
               disabled={disabled || !isCustomizing}
             />

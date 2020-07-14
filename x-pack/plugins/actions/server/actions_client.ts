@@ -3,19 +3,31 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import Boom from 'boom';
 import {
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
   SavedObjectsClientContract,
   SavedObjectAttributes,
   SavedObject,
+  KibanaRequest,
 } from 'src/core/server';
 
 import { i18n } from '@kbn/i18n';
 import { ActionTypeRegistry } from './action_type_registry';
-import { validateConfig, validateSecrets } from './lib';
-import { ActionResult, FindActionResult, RawAction, PreConfiguredAction } from './types';
+import { validateConfig, validateSecrets, ActionExecutorContract } from './lib';
+import {
+  ActionResult,
+  FindActionResult,
+  RawAction,
+  PreConfiguredAction,
+  ActionTypeExecutorResult,
+} from './types';
 import { PreconfiguredActionDisabledModificationError } from './lib/errors/preconfigured_action_disabled_modification';
+import { ExecuteOptions } from './lib/action_executor';
+import {
+  ExecutionEnqueuer,
+  ExecuteOptions as EnqueueExecutionOptions,
+} from './create_execute_function';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.
@@ -38,10 +50,13 @@ interface CreateOptions {
 
 interface ConstructorOptions {
   defaultKibanaIndex: string;
-  scopedClusterClient: IScopedClusterClient;
+  scopedClusterClient: ILegacyScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
   savedObjectsClient: SavedObjectsClientContract;
   preconfiguredActions: PreConfiguredAction[];
+  actionExecutor: ActionExecutorContract;
+  executionEnqueuer: ExecutionEnqueuer;
+  request: KibanaRequest;
 }
 
 interface UpdateOptions {
@@ -51,10 +66,13 @@ interface UpdateOptions {
 
 export class ActionsClient {
   private readonly defaultKibanaIndex: string;
-  private readonly scopedClusterClient: IScopedClusterClient;
+  private readonly scopedClusterClient: ILegacyScopedClusterClient;
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly actionTypeRegistry: ActionTypeRegistry;
   private readonly preconfiguredActions: PreConfiguredAction[];
+  private readonly actionExecutor: ActionExecutorContract;
+  private readonly request: KibanaRequest;
+  private readonly executionEnqueuer: ExecutionEnqueuer;
 
   constructor({
     actionTypeRegistry,
@@ -62,12 +80,18 @@ export class ActionsClient {
     scopedClusterClient,
     savedObjectsClient,
     preconfiguredActions,
+    actionExecutor,
+    executionEnqueuer,
+    request,
   }: ConstructorOptions) {
     this.actionTypeRegistry = actionTypeRegistry;
     this.savedObjectsClient = savedObjectsClient;
     this.scopedClusterClient = scopedClusterClient;
     this.defaultKibanaIndex = defaultKibanaIndex;
     this.preconfiguredActions = preconfiguredActions;
+    this.actionExecutor = actionExecutor;
+    this.executionEnqueuer = executionEnqueuer;
+    this.request = request;
   }
 
   /**
@@ -102,7 +126,7 @@ export class ActionsClient {
    */
   public async update({ id, action }: UpdateOptions): Promise<ActionResult> {
     if (
-      this.preconfiguredActions.find(preconfiguredAction => preconfiguredAction.id === id) !==
+      this.preconfiguredActions.find((preconfiguredAction) => preconfiguredAction.id === id) !==
       undefined
     ) {
       throw new PreconfiguredActionDisabledModificationError(
@@ -124,7 +148,7 @@ export class ActionsClient {
 
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
-    const result = await this.savedObjectsClient.update('action', id, {
+    const result = await this.savedObjectsClient.update<RawAction>('action', id, {
       actionTypeId,
       name,
       config: validatedActionTypeConfig as SavedObjectAttributes,
@@ -145,7 +169,7 @@ export class ActionsClient {
    */
   public async get({ id }: { id: string }): Promise<ActionResult> {
     const preconfiguredActionsList = this.preconfiguredActions.find(
-      preconfiguredAction => preconfiguredAction.id === id
+      (preconfiguredAction) => preconfiguredAction.id === id
     );
     if (preconfiguredActionsList !== undefined) {
       return {
@@ -179,7 +203,7 @@ export class ActionsClient {
 
     const mergedResult = [
       ...savedObjectsActions,
-      ...this.preconfiguredActions.map(preconfiguredAction => ({
+      ...this.preconfiguredActions.map((preconfiguredAction) => ({
         id: preconfiguredAction.id,
         actionTypeId: preconfiguredAction.actionTypeId,
         name: preconfiguredAction.name,
@@ -194,11 +218,49 @@ export class ActionsClient {
   }
 
   /**
+   * Get bulk actions with preconfigured list
+   */
+  public async getBulk(ids: string[]): Promise<ActionResult[]> {
+    const actionResults = new Array<ActionResult>();
+    for (const actionId of ids) {
+      const action = this.preconfiguredActions.find(
+        (preconfiguredAction) => preconfiguredAction.id === actionId
+      );
+      if (action !== undefined) {
+        actionResults.push(action);
+      }
+    }
+
+    // Fetch action objects in bulk
+    // Excluding preconfigured actions to avoid an not found error, which is already added
+    const actionSavedObjectsIds = [
+      ...new Set(
+        ids.filter(
+          (actionId) => !actionResults.find((actionResult) => actionResult.id === actionId)
+        )
+      ),
+    ];
+
+    const bulkGetOpts = actionSavedObjectsIds.map((id) => ({ id, type: 'action' }));
+    const bulkGetResult = await this.savedObjectsClient.bulkGet<RawAction>(bulkGetOpts);
+
+    for (const action of bulkGetResult.saved_objects) {
+      if (action.error) {
+        throw Boom.badRequest(
+          `Failed to load action ${action.id} (${action.error.statusCode}): ${action.error.message}`
+        );
+      }
+      actionResults.push(actionFromSavedObject(action));
+    }
+    return actionResults;
+  }
+
+  /**
    * Delete action
    */
   public async delete({ id }: { id: string }) {
     if (
-      this.preconfiguredActions.find(preconfiguredAction => preconfiguredAction.id === id) !==
+      this.preconfiguredActions.find((preconfiguredAction) => preconfiguredAction.id === id) !==
       undefined
     ) {
       throw new PreconfiguredActionDisabledModificationError(
@@ -213,6 +275,17 @@ export class ActionsClient {
     }
     return await this.savedObjectsClient.delete('action', id);
   }
+
+  public async execute({
+    actionId,
+    params,
+  }: Omit<ExecuteOptions, 'request'>): Promise<ActionTypeExecutorResult> {
+    return this.actionExecutor.execute({ actionId, params, request: this.request });
+  }
+
+  public async enqueueExecution(options: EnqueueExecutionOptions): Promise<void> {
+    return this.executionEnqueuer(this.savedObjectsClient, options);
+  }
 }
 
 function actionFromSavedObject(savedObject: SavedObject<RawAction>): ActionResult {
@@ -225,7 +298,7 @@ function actionFromSavedObject(savedObject: SavedObject<RawAction>): ActionResul
 
 async function injectExtraFindData(
   defaultKibanaIndex: string,
-  scopedClusterClient: IScopedClusterClient,
+  scopedClusterClient: ILegacyScopedClusterClient,
   actionResults: ActionResult[]
 ): Promise<FindActionResult[]> {
   const aggs: Record<string, unknown> = {};
@@ -272,7 +345,7 @@ async function injectExtraFindData(
       },
     },
   });
-  return actionResults.map(actionResult => ({
+  return actionResults.map((actionResult) => ({
     ...actionResult,
     referencedByCount: aggregationResult.aggregations[actionResult.id].doc_count,
   }));

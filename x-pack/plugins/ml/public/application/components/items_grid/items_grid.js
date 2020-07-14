@@ -62,7 +62,7 @@ export function ItemsGrid({
           id={`ml_grid_item_${index}`}
           label={item}
           checked={selectedItems.indexOf(item) >= 0}
-          onChange={e => {
+          onChange={(e) => {
             setItemSelected(item, e.target.checked);
           }}
         />

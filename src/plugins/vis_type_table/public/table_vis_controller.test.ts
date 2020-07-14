@@ -36,9 +36,9 @@ import { coreMock } from '../../../core/public/mocks';
 import { IAggConfig, search } from '../../data/public';
 // TODO: remove linting disable
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { searchStartMock } from '../../data/public/search/mocks';
+import { searchServiceMock } from '../../data/public/search/mocks';
 
-const { createAggConfigs } = searchStartMock.aggs;
+const { createAggConfigs } = searchServiceMock.createStartContract().aggs;
 
 const { tabifyAggResponse } = search;
 

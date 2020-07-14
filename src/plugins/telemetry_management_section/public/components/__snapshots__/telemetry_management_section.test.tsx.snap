@@ -65,7 +65,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                   id="telemetry.telemetryConfigAndLinkDescription"
                   values={
                     Object {
-                      "privacyStatementLink": <ForwardRef
+                      "privacyStatementLink": <EuiLink
                         href="https://www.elastic.co/legal/privacy-statement"
                         target="_blank"
                       >
@@ -74,13 +74,13 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                           id="telemetry.readOurUsageDataPrivacyStatementLinkText"
                           values={Object {}}
                         />
-                      </ForwardRef>,
+                      </EuiLink>,
                     }
                   }
                 />
               </p>
               <p>
-                <ForwardRef
+                <EuiLink
                   onClick={[Function]}
                 >
                   <FormattedMessage
@@ -88,7 +88,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                     id="telemetry.seeExampleOfWhatWeCollectLinkText"
                     values={Object {}}
                   />
-                </ForwardRef>
+                </EuiLink>
               </p>
             </React.Fragment>,
             "displayName": "Provide usage statistics",
@@ -489,4 +489,4 @@ exports[`TelemetryManagementSectionComponent renders null because query does not
 />
 `;
 
-exports[`TelemetryManagementSectionComponent test the wrapper (for coverage purposes) 1`] = `""`;
+exports[`TelemetryManagementSectionComponent test the wrapper (for coverage purposes) 1`] = `null`;

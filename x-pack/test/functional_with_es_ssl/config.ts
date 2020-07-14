@@ -26,7 +26,7 @@ const enabledActionTypes = [
 ];
 
 // eslint-disable-next-line import/no-default-export
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
 
   const servers = {
@@ -50,8 +50,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
     apps: {
       ...xpackFunctionalConfig.get('apps'),
       triggersActions: {
-        pathname: '/app/kibana',
-        hash: '/management/kibana/triggersActions',
+        pathname: '/app/management/insightsAndAlerting/triggersActions',
       },
     },
     esTestCluster: {
@@ -66,21 +65,19 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         `--plugin-path=${join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
         `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
-        `--xpack.actions.preconfigured=${JSON.stringify([
-          {
-            id: 'my-slack1',
+        `--xpack.actions.preconfigured=${JSON.stringify({
+          'my-slack1': {
             actionTypeId: '.slack',
             name: 'Slack#xyztest',
-            config: {
+            secrets: {
               webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
             },
           },
-          {
-            id: 'my-server-log',
+          'my-server-log': {
             actionTypeId: '.server-log',
             name: 'Serverlog#xyz',
           },
-        ])}`,
+        })}`,
       ],
     },
   };

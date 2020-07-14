@@ -71,7 +71,7 @@ export class AuthStateStorage {
 
     return { status, state };
   };
-  public isAuthenticated: IsAuthenticated = request => {
+  public isAuthenticated: IsAuthenticated = (request) => {
     return this.get(request).status === AuthStatus.authenticated;
   };
 }

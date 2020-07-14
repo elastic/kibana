@@ -8,6 +8,7 @@ import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Route } from 'react-router-dom';
+import qs from 'query-string';
 
 import {
   EuiButton,
@@ -32,12 +33,14 @@ import {
   EuiTableRowCell,
   EuiTableRowCellCheckbox,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 
 import { UIM_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
+import { reactRouterNavigate } from '../../../../../shared_imports';
 import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
 import { healthToColor } from '../../../../services';
+import { encodePathForReactRouter } from '../../../../services/routing';
+import { documentationService } from '../../../../services/documentation';
 import { AppContextConsumer } from '../../../../app_context';
 import { renderBadges } from '../../../../lib/render_badges';
 import { NoMatch, PageErrorForbidden } from '../../../../components';
@@ -65,21 +68,24 @@ const HEADERS = {
   size: i18n.translate('xpack.idxMgmt.indexTable.headers.storageSizeHeader', {
     defaultMessage: 'Storage size',
   }),
+  data_stream: i18n.translate('xpack.idxMgmt.indexTable.headers.dataStreamHeader', {
+    defaultMessage: 'Data stream',
+  }),
 };
 
 export class IndexTable extends Component {
   static getDerivedStateFromProps(props, state) {
-    // Deselct any indices which no longer exist, e.g. they've been deleted.
+    // Deselect any indices which no longer exist, e.g. they've been deleted.
     const { selectedIndicesMap } = state;
-    const indexNames = props.indices.map(index => index.name);
+    const indexNames = props.indices.map((index) => index.name);
     const selectedIndexNames = Object.keys(selectedIndicesMap);
-    const missingIndexNames = selectedIndexNames.filter(selectedIndexName => {
+    const missingIndexNames = selectedIndexNames.filter((selectedIndexName) => {
       return !indexNames.includes(selectedIndexName);
     });
 
     if (missingIndexNames.length) {
       const newMap = { ...selectedIndicesMap };
-      missingIndexNames.forEach(missingIndexName => delete newMap[missingIndexName]);
+      missingIndexNames.forEach((missingIndexName) => delete newMap[missingIndexName]);
       return { selectedIndicesMap: newMap };
     }
 
@@ -93,12 +99,17 @@ export class IndexTable extends Component {
       selectedIndicesMap: {},
     };
   }
+
   componentDidMount() {
     this.props.loadIndices();
-    this.interval = setInterval(this.props.reloadIndices, REFRESH_RATE_INDEX_LIST);
-    const { filterChanged, filterFromURI } = this.props;
-    if (filterFromURI) {
-      const decodedFilter = decodeURIComponent(filterFromURI);
+    this.interval = setInterval(
+      () => this.props.reloadIndices(this.props.indices.map((i) => i.name)),
+      REFRESH_RATE_INDEX_LIST
+    );
+    const { location, filterChanged } = this.props;
+    const { filter } = qs.parse((location && location.search) || '');
+    if (filter) {
+      const decodedFilter = decodeURIComponent(filter);
 
       try {
         const filter = EuiSearchBar.Query.parse(decodedFilter);
@@ -108,20 +119,49 @@ export class IndexTable extends Component {
       }
     }
   }
+
   componentWillUnmount() {
+    // When you deep-link to an index from the data streams tab, the hidden indices are toggled on.
+    // However, this state is lost when you navigate away. We need to clear the filter too, or else
+    // navigating back to this tab would just show an empty list because the backing indices
+    // would be hidden.
+    this.props.filterChanged('');
     clearInterval(this.interval);
   }
-  onSort = column => {
+
+  readURLParams() {
+    const { location } = this.props;
+    const { includeHiddenIndices } = qs.parse((location && location.search) || '');
+    return {
+      includeHiddenIndices: includeHiddenIndices === 'true',
+    };
+  }
+
+  setIncludeHiddenParam(hidden) {
+    const { pathname, search } = this.props.location;
+    const params = qs.parse(search);
+    if (hidden) {
+      params.includeHiddenIndices = 'true';
+    } else {
+      delete params.includeHiddenIndices;
+    }
+    this.props.history.push(pathname + '?' + qs.stringify(params));
+  }
+
+  onSort = (column) => {
     const { sortField, isSortAscending, sortChanged } = this.props;
 
     const newIsSortAscending = sortField === column ? !isSortAscending : true;
     sortChanged(column, newIsSortAscending);
   };
+
   renderFilterError() {
     const { filterError } = this.state;
+
     if (!filterError) {
       return;
     }
+
     return (
       <>
         <EuiSpacer />
@@ -140,6 +180,7 @@ export class IndexTable extends Component {
       </>
     );
   }
+
   onFilterChanged = ({ query, error }) => {
     if (error) {
       this.setState({ filterError: error });
@@ -148,13 +189,15 @@ export class IndexTable extends Component {
       this.setState({ filterError: null });
     }
   };
-  getFilters = extensionsService => {
+
+  getFilters = (extensionsService) => {
     const { allIndices } = this.props;
     return extensionsService.filters.reduce((accum, filterExtension) => {
       const filtersToAdd = filterExtension(allIndices);
       return [...accum, ...filtersToAdd];
     }, []);
   };
+
   toggleAll = () => {
     const allSelected = this.areAllItemsSelected();
     if (allSelected) {
@@ -170,7 +213,7 @@ export class IndexTable extends Component {
     });
   };
 
-  toggleItem = name => {
+  toggleItem = (name) => {
     this.setState(({ selectedIndicesMap }) => {
       const newMap = { ...selectedIndicesMap };
       if (newMap[name]) {
@@ -184,13 +227,13 @@ export class IndexTable extends Component {
     });
   };
 
-  isItemSelected = name => {
+  isItemSelected = (name) => {
     return !!this.state.selectedIndicesMap[name];
   };
 
   areAllItemsSelected = () => {
     const { indices } = this.props;
-    const indexOfUnselectedItem = indices.findIndex(index => !this.isItemSelected(index.name));
+    const indexOfUnselectedItem = indices.findIndex((index) => !this.isItemSelected(index.name));
     return indexOfUnselectedItem === -1;
   };
 
@@ -214,7 +257,8 @@ export class IndexTable extends Component {
   }
 
   buildRowCell(fieldName, value, index, appServices) {
-    const { openDetailPanel, filterChanged } = this.props;
+    const { openDetailPanel, filterChanged, history } = this.props;
+
     if (fieldName === 'health') {
       return <EuiHealth color={healthToColor(value)}>{value}</EuiHealth>;
     } else if (fieldName === 'name') {
@@ -232,12 +276,25 @@ export class IndexTable extends Component {
           {renderBadges(index, filterChanged, appServices.extensionsService)}
         </Fragment>
       );
+    } else if (fieldName === 'data_stream') {
+      return (
+        <EuiLink
+          data-test-subj="dataStreamLink"
+          {...reactRouterNavigate(history, {
+            pathname: `/data_streams/${encodePathForReactRouter(value)}`,
+            search: '?isDeepLink=true',
+          })}
+        >
+          {value}
+        </EuiLink>
+      );
     }
+
     return value;
   }
 
   buildRowCells(index, appServices) {
-    return Object.keys(HEADERS).map(fieldName => {
+    return Object.keys(HEADERS).map((fieldName) => {
       const { name } = index;
       const value = index[fieldName];
 
@@ -335,7 +392,7 @@ export class IndexTable extends Component {
 
   buildRows(appServices) {
     const { indices = [], detailPanelIndexName } = this.props;
-    return indices.map(index => {
+    return indices.map((index) => {
       const { name } = index;
       return (
         <EuiTableRow
@@ -378,7 +435,7 @@ export class IndexTable extends Component {
     );
   }
 
-  onItemSelectionChanged = selectedIndices => {
+  onItemSelectionChanged = (selectedIndices) => {
     this.setState({ selectedIndices });
   };
 
@@ -390,7 +447,7 @@ export class IndexTable extends Component {
           id={`checkboxToggles-${name}`}
           data-test-subj={`checkboxToggles-${name}`}
           checked={toggleNameToVisibleMap[name]}
-          onChange={event => toggleChanged(name, event.target.checked)}
+          onChange={(event) => toggleChanged(name, event.target.checked)}
           label={label}
         />
       </EuiFlexItem>
@@ -400,8 +457,6 @@ export class IndexTable extends Component {
   render() {
     const {
       filter,
-      showSystemIndices,
-      showSystemIndicesChanged,
       indices,
       loadIndices,
       indicesLoading,
@@ -409,6 +464,8 @@ export class IndexTable extends Component {
       allIndices,
       pager,
     } = this.props;
+
+    const { includeHiddenIndices } = this.readURLParams();
 
     let emptyState;
 
@@ -442,30 +499,47 @@ export class IndexTable extends Component {
             <Fragment>
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={true}>
-                  <EuiTitle size="s">
-                    <EuiText color="subdued">
-                      <FormattedMessage
-                        id="xpack.idxMgmt.home.idxMgmtDescription"
-                        defaultMessage="Update your Elasticsearch indices individually or in bulk."
-                      />
-                    </EuiText>
-                  </EuiTitle>
+                  <EuiText color="subdued">
+                    <FormattedMessage
+                      id="xpack.idxMgmt.home.idxMgmtDescription"
+                      defaultMessage="Update your Elasticsearch indices individually or in bulk. {learnMoreLink}"
+                      values={{
+                        learnMoreLink: (
+                          <EuiLink
+                            href={documentationService.getIdxMgmtDocumentationLink()}
+                            target="_blank"
+                            external
+                          >
+                            {i18n.translate(
+                              'xpack.idxMgmt.indexTableDescription.learnMoreLinkText',
+                              {
+                                defaultMessage: 'Learn more.',
+                              }
+                            )}
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  </EuiText>
                 </EuiFlexItem>
+
                 <EuiFlexItem grow={false}>
                   {(indicesLoading && allIndices.length === 0) || indicesError ? null : (
                     <EuiFlexGroup>
-                      {extensionsService.toggles.map(toggle => {
+                      {extensionsService.toggles.map((toggle) => {
                         return this.renderToggleControl(toggle);
                       })}
+
                       <EuiFlexItem grow={false}>
                         <EuiSwitch
-                          id="checkboxShowSystemIndices"
-                          checked={showSystemIndices}
-                          onChange={event => showSystemIndicesChanged(event.target.checked)}
+                          id="checkboxShowHiddenIndices"
+                          data-test-subj="indexTableIncludeHiddenIndicesToggle"
+                          checked={includeHiddenIndices}
+                          onChange={(event) => this.setIncludeHiddenParam(event.target.checked)}
                           label={
                             <FormattedMessage
-                              id="xpack.idxMgmt.indexTable.systemIndicesSwitchLabel"
-                              defaultMessage="Include system indices"
+                              id="xpack.idxMgmt.indexTable.hiddenIndicesSwitchLabel"
+                              defaultMessage="Include hidden indices"
                             />
                           }
                         />
@@ -474,9 +548,13 @@ export class IndexTable extends Component {
                   )}
                 </EuiFlexItem>
               </EuiFlexGroup>
+
               <EuiSpacer size="l" />
+
               {this.renderBanners(extensionsService)}
+
               {indicesError && this.renderError()}
+
               <EuiFlexGroup gutterSize="l" alignItems="center">
                 {atLeastOneItemSelected ? (
                   <EuiFlexItem grow={false}>
@@ -493,6 +571,7 @@ export class IndexTable extends Component {
                     />
                   </EuiFlexItem>
                 ) : null}
+
                 {(indicesLoading && allIndices.length === 0) || indicesError ? null : (
                   <Fragment>
                     <EuiFlexItem>
@@ -542,11 +621,14 @@ export class IndexTable extends Component {
                   </Fragment>
                 )}
               </EuiFlexGroup>
+
               {this.renderFilterError()}
+
               <EuiSpacer size="m" />
+
               {indices.length > 0 ? (
                 <div style={{ maxWidth: '100%', overflow: 'auto' }}>
-                  <EuiTable className="indTable">
+                  <EuiTable className="indTable" data-test-subj="indexTable">
                     <EuiScreenReaderOnly>
                       <caption role="status" aria-relevant="text" aria-live="polite">
                         <FormattedMessage
@@ -556,6 +638,7 @@ export class IndexTable extends Component {
                         />
                       </caption>
                     </EuiScreenReaderOnly>
+
                     <EuiTableHeader>
                       <EuiTableHeaderCellCheckbox>
                         <EuiCheckbox
@@ -573,13 +656,16 @@ export class IndexTable extends Component {
                       </EuiTableHeaderCellCheckbox>
                       {this.buildHeader()}
                     </EuiTableHeader>
+
                     <EuiTableBody>{this.buildRows(services)}</EuiTableBody>
                   </EuiTable>
                 </div>
               ) : (
                 emptyState
               )}
+
               <EuiSpacer size="m" />
+
               {indices.length > 0 ? this.renderPager() : null}
             </Fragment>
           );

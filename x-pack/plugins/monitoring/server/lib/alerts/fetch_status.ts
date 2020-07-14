@@ -6,7 +6,7 @@
 import moment from 'moment';
 import { Logger } from '../../../../../../src/core/server';
 import { AlertCommonPerClusterState } from '../../alerts/types';
-import { AlertsClient } from '../../../../alerting/server';
+import { AlertsClient } from '../../../../alerts/server';
 
 export async function fetchStatus(
   alertsClient: AlertsClient,
@@ -17,7 +17,7 @@ export async function fetchStatus(
 ): Promise<any[]> {
   const statuses = await Promise.all(
     alertTypes.map(
-      type =>
+      (type) =>
         new Promise(async (resolve, reject) => {
           // We need to get the id from the alertTypeId
           const alerts = await alertsClient.find({

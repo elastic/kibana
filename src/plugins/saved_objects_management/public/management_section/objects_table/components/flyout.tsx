@@ -31,7 +31,6 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSwitch,
-  // @ts-ignore
   EuiFilePicker,
   EuiInMemoryTable,
   EuiSelect,
@@ -137,7 +136,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   };
 
   changeOverwriteAll = () => {
-    this.setState(state => ({
+    this.setState((state) => ({
       isOverwriteAllChecked: !state.isOverwriteAllChecked,
     }));
   };
@@ -196,7 +195,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   getConflictResolutions = async (objects: any[]) => {
     const resolutions: Record<string, boolean> = {};
     for (const { type, id, title } of objects) {
-      const overwrite = await new Promise<boolean>(resolve => {
+      const overwrite = await new Promise<boolean>((resolve) => {
         this.setState({
           conflictingRecord: {
             id,
@@ -277,8 +276,8 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     }
 
     contents = contents
-      .filter(content => allowedTypes.includes(content._type))
-      .map(doc => ({
+      .filter((content) => allowedTypes.includes(content._type))
+      .map((doc) => ({
         ...doc,
         // The server assumes that documents with no migrationVersion are up to date.
         // That assumption enables Kibana and other API consumers to not have to build
@@ -297,7 +296,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     } = await resolveSavedObjects(
       contents,
       isOverwriteAllChecked,
-      serviceRegistry.all().map(e => e.service),
+      serviceRegistry.all().map((e) => e.service),
       indexPatterns,
       overlays.openConfirm
     );
@@ -417,7 +416,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         });
         importCount += await resolveSavedSearches(
           conflictedSearchDocs!,
-          serviceRegistry.all().map(e => e.service),
+          serviceRegistry.all().map((e) => e.service),
           indexPatterns,
           isOverwriteAllChecked
         );
@@ -446,9 +445,9 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
 
   onIndexChanged = (id: string, e: any) => {
     const value = e.target.value;
-    this.setState(state => {
+    this.setState((state) => {
       const conflictIndex = state.unmatchedReferences?.findIndex(
-        conflict => conflict.existingIndexPatternId === id
+        (conflict) => conflict.existingIndexPatternId === id
       );
       if (conflictIndex === undefined || conflictIndex === -1) {
         return state;
@@ -529,7 +528,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         ),
         render: (id: string) => {
           const options = this.state.indexPatterns!.map(
-            indexPattern =>
+            (indexPattern) =>
               ({
                 text: indexPattern.title,
                 value: indexPattern.id,
@@ -545,7 +544,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           return (
             <EuiSelect
               data-test-subj={`managementChangeIndexSelection-${id}`}
-              onChange={e => this.onIndexChanged(id, e)}
+              onChange={(e) => this.onIndexChanged(id, e)}
               options={options}
             />
           );
@@ -646,7 +645,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             {failedImports
               .map(({ error, obj }) => {
                 if (error.type === 'missing_references') {
-                  return error.references.map(reference => {
+                  return error.references.map((reference) => {
                     return i18n.translate(
                       'savedObjectsManagement.objectsTable.flyout.importFailedMissingReference',
                       {

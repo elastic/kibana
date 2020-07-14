@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compact, pick } from 'lodash';
+import { compact, pickBy } from 'lodash';
 import datemath from '@elastic/datemath';
 import { IUrlParams } from './types';
 import { ProcessorEvent } from '../../../common/processor_event';
@@ -61,8 +61,8 @@ export function getPathAsArray(pathname: string = '') {
   return compact(pathname.split('/'));
 }
 
-export function removeUndefinedProps<T>(obj: T): Partial<T> {
-  return pick(obj, value => value !== undefined);
+export function removeUndefinedProps<T extends object>(obj: T): Partial<T> {
+  return pickBy(obj, (value) => value !== undefined);
 }
 
 export function getPathParams(pathname: string = ''): PathParams {
@@ -84,28 +84,29 @@ export function getPathParams(pathname: string = ''): PathParams {
         case 'transactions':
           return {
             processorEvent: ProcessorEvent.transaction,
-            serviceName
+            serviceName,
           };
         case 'errors':
           return {
             processorEvent: ProcessorEvent.error,
             serviceName,
-            errorGroupId: paths[3]
+            errorGroupId: paths[3],
           };
         case 'metrics':
           return {
             processorEvent: ProcessorEvent.metric,
             serviceName,
-            serviceNodeName
+            serviceNodeName,
           };
         case 'nodes':
           return {
             processorEvent: ProcessorEvent.metric,
-            serviceName
+            serviceName,
           };
         case 'service-map':
+        case 'rum-overview':
           return {
-            serviceName
+            serviceName,
           };
         default:
           return {};
@@ -113,14 +114,14 @@ export function getPathParams(pathname: string = ''): PathParams {
 
     case 'traces':
       return {
-        processorEvent: ProcessorEvent.transaction
+        processorEvent: ProcessorEvent.transaction,
       };
     case 'link-to':
       const link = paths[1];
       switch (link) {
         case 'trace':
           return {
-            traceId: paths[2]
+            traceId: paths[2],
           };
         default:
           return {};

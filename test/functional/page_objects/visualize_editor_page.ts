@@ -230,6 +230,10 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       await testSubjects.click('dropPartialBucketsCheckbox');
     }
 
+    public async expectMarkdownTextArea() {
+      await testSubjects.existOrFail('markdownTextarea');
+    }
+
     public async setMarkdownTxt(markdownTxt: string) {
       const input = await testSubjects.find('markdownTextarea');
       await input.clearValue();
@@ -453,8 +457,8 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       return await comboBox.getComboBoxSelectedOptions('visEditorInterval');
     }
 
-    public async getNumericInterval(agg = 2) {
-      return await testSubjects.getAttribute(`visEditorInterval${agg}`, 'value');
+    public async getNumericInterval(aggNth = 2) {
+      return await testSubjects.getAttribute(`visEditorInterval${aggNth}`, 'value');
     }
 
     public async clickMetricEditor() {
@@ -475,7 +479,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       const $ = await selectField.parseDomContent();
       const optionsText = $('option')
         .toArray()
-        .map(option => $(option).text());
+        .map((option) => $(option).text());
       const optionIndex = optionsText.indexOf(optionText);
 
       if (optionIndex === -1) {
@@ -486,6 +490,37 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
         );
       }
       await options[optionIndex].click();
+    }
+
+    // point series
+
+    async clickAddAxis() {
+      return await testSubjects.click('visualizeAddYAxisButton');
+    }
+
+    async setAxisTitle(title: string, aggNth = 0) {
+      return await testSubjects.setValue(`valueAxisTitle${aggNth}`, title);
+    }
+
+    public async toggleGridCategoryLines() {
+      return await testSubjects.click('showCategoryLines');
+    }
+
+    public async toggleValuesOnChart() {
+      return await testSubjects.click('showValuesOnChart');
+    }
+
+    public async setGridValueAxis(axis: string) {
+      log.debug(`setGridValueAxis(${axis})`);
+      await find.selectValue('select#gridAxis', axis);
+    }
+
+    public async setSeriesAxis(seriesNth: number, axis: string) {
+      await find.selectValue(`select#seriesValueAxis${seriesNth}`, axis);
+    }
+
+    public async setSeriesType(seriesNth: number, type: string) {
+      await find.selectValue(`select#seriesType${seriesNth}`, type);
     }
   }
 

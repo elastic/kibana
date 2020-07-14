@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CallAPIOptions, IScopedClusterClient } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import _ from 'lodash';
+import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/server';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import { getSafeAggregationName } from '../../../common/util/job_utils';
+import { stringHash } from '../../../common/util/string_utils';
 import {
   buildBaseFilterCriteria,
   buildSamplerAggregation,
@@ -18,6 +20,8 @@ const SAMPLER_TOP_TERMS_THRESHOLD = 100000;
 const SAMPLER_TOP_TERMS_SHARD_SIZE = 5000;
 const AGGREGATABLE_EXISTS_REQUEST_BATCH_SIZE = 200;
 const FIELDS_REQUEST_BATCH_SIZE = 10;
+
+const MAX_CHART_COLUMNS = 20;
 
 interface FieldData {
   fieldName: string;
@@ -33,6 +37,11 @@ export interface Field {
   fieldName: string;
   type: string;
   cardinality: number;
+}
+
+export interface HistogramField {
+  fieldName: string;
+  type: string;
 }
 
 interface Distribution {
@@ -98,6 +107,70 @@ interface FieldExamples {
   examples: any[];
 }
 
+interface NumericColumnStats {
+  interval: number;
+  min: number;
+  max: number;
+}
+type NumericColumnStatsMap = Record<string, NumericColumnStats>;
+
+interface AggHistogram {
+  histogram: {
+    field: string;
+    interval: number;
+  };
+}
+
+interface AggCardinality {
+  cardinality: {
+    field: string;
+  };
+}
+
+interface AggTerms {
+  terms: {
+    field: string;
+    size: number;
+  };
+}
+
+interface NumericDataItem {
+  key: number;
+  key_as_string?: string;
+  doc_count: number;
+}
+
+interface NumericChartData {
+  data: NumericDataItem[];
+  id: string;
+  interval: number;
+  stats: [number, number];
+  type: 'numeric';
+}
+
+interface OrdinalDataItem {
+  key: string;
+  key_as_string?: string;
+  doc_count: number;
+}
+
+interface OrdinalChartData {
+  type: 'ordinal' | 'boolean';
+  cardinality: number;
+  data: OrdinalDataItem[];
+  id: string;
+}
+
+interface UnsupportedChartData {
+  id: string;
+  type: 'unsupported';
+}
+
+type ChartRequestAgg = AggHistogram | AggCardinality | AggTerms;
+
+// type ChartDataItem = NumericDataItem | OrdinalDataItem;
+type ChartData = NumericChartData | OrdinalChartData | UnsupportedChartData;
+
 type BatchStats =
   | NumericFieldStats
   | StringFieldStats
@@ -106,14 +179,178 @@ type BatchStats =
   | DocumentCountStats
   | FieldExamples;
 
-export class DataVisualizer {
-  callAsCurrentUser: (
-    endpoint: string,
-    clientParams: Record<string, any>,
-    options?: CallAPIOptions
-  ) => Promise<any>;
+const getAggIntervals = async (
+  callAsCurrentUser: LegacyAPICaller,
+  indexPatternTitle: string,
+  query: any,
+  fields: HistogramField[],
+  samplerShardSize: number
+): Promise<NumericColumnStatsMap> => {
+  const numericColumns = fields.filter((field) => {
+    return field.type === KBN_FIELD_TYPES.NUMBER || field.type === KBN_FIELD_TYPES.DATE;
+  });
 
-  constructor(callAsCurrentUser: IScopedClusterClient['callAsCurrentUser']) {
+  if (numericColumns.length === 0) {
+    return {};
+  }
+
+  const minMaxAggs = numericColumns.reduce((aggs, c) => {
+    const id = stringHash(c.fieldName);
+    aggs[id] = {
+      stats: {
+        field: c.fieldName,
+      },
+    };
+    return aggs;
+  }, {} as Record<string, object>);
+
+  const respStats = await callAsCurrentUser('search', {
+    index: indexPatternTitle,
+    size: 0,
+    body: {
+      query,
+      aggs: buildSamplerAggregation(minMaxAggs, samplerShardSize),
+      size: 0,
+    },
+  });
+
+  const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
+  const aggregations =
+    aggsPath.length > 0 ? _.get(respStats.aggregations, aggsPath) : respStats.aggregations;
+
+  return Object.keys(aggregations).reduce((p, aggName) => {
+    const stats = [aggregations[aggName].min, aggregations[aggName].max];
+    if (!stats.includes(null)) {
+      const delta = aggregations[aggName].max - aggregations[aggName].min;
+
+      let aggInterval = 1;
+
+      if (delta > MAX_CHART_COLUMNS || delta <= 1) {
+        aggInterval = delta / (MAX_CHART_COLUMNS - 1);
+      }
+
+      p[aggName] = { interval: aggInterval, min: stats[0], max: stats[1] };
+    }
+
+    return p;
+  }, {} as NumericColumnStatsMap);
+};
+
+// export for re-use by transforms plugin
+export const getHistogramsForFields = async (
+  callAsCurrentUser: LegacyAPICaller,
+  indexPatternTitle: string,
+  query: any,
+  fields: HistogramField[],
+  samplerShardSize: number
+) => {
+  const aggIntervals = await getAggIntervals(
+    callAsCurrentUser,
+    indexPatternTitle,
+    query,
+    fields,
+    samplerShardSize
+  );
+
+  const chartDataAggs = fields.reduce((aggs, field) => {
+    const fieldName = field.fieldName;
+    const fieldType = field.type;
+    const id = stringHash(fieldName);
+    if (fieldType === KBN_FIELD_TYPES.NUMBER || fieldType === KBN_FIELD_TYPES.DATE) {
+      if (aggIntervals[id] !== undefined) {
+        aggs[`${id}_histogram`] = {
+          histogram: {
+            field: fieldName,
+            interval: aggIntervals[id].interval !== 0 ? aggIntervals[id].interval : 1,
+          },
+        };
+      }
+    } else if (fieldType === KBN_FIELD_TYPES.STRING || fieldType === KBN_FIELD_TYPES.BOOLEAN) {
+      if (fieldType === KBN_FIELD_TYPES.STRING) {
+        aggs[`${id}_cardinality`] = {
+          cardinality: {
+            field: fieldName,
+          },
+        };
+      }
+      aggs[`${id}_terms`] = {
+        terms: {
+          field: fieldName,
+          size: MAX_CHART_COLUMNS,
+        },
+      };
+    }
+    return aggs;
+  }, {} as Record<string, ChartRequestAgg>);
+
+  if (Object.keys(chartDataAggs).length === 0) {
+    return [];
+  }
+
+  const respChartsData = await callAsCurrentUser('search', {
+    index: indexPatternTitle,
+    size: 0,
+    body: {
+      query,
+      aggs: buildSamplerAggregation(chartDataAggs, samplerShardSize),
+      size: 0,
+    },
+  });
+
+  const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
+  const aggregations =
+    aggsPath.length > 0
+      ? _.get(respChartsData.aggregations, aggsPath)
+      : respChartsData.aggregations;
+
+  const chartsData: ChartData[] = fields.map(
+    (field): ChartData => {
+      const fieldName = field.fieldName;
+      const fieldType = field.type;
+      const id = stringHash(field.fieldName);
+
+      if (fieldType === KBN_FIELD_TYPES.NUMBER || fieldType === KBN_FIELD_TYPES.DATE) {
+        if (aggIntervals[id] === undefined) {
+          return {
+            type: 'numeric',
+            data: [],
+            interval: 0,
+            stats: [0, 0],
+            id: fieldName,
+          };
+        }
+
+        return {
+          data: aggregations[`${id}_histogram`].buckets,
+          interval: aggIntervals[id].interval,
+          stats: [aggIntervals[id].min, aggIntervals[id].max],
+          type: 'numeric',
+          id: fieldName,
+        };
+      } else if (fieldType === KBN_FIELD_TYPES.STRING || fieldType === KBN_FIELD_TYPES.BOOLEAN) {
+        return {
+          type: fieldType === KBN_FIELD_TYPES.STRING ? 'ordinal' : 'boolean',
+          cardinality:
+            fieldType === KBN_FIELD_TYPES.STRING ? aggregations[`${id}_cardinality`].value : 2,
+          data: aggregations[`${id}_terms`].buckets,
+          id: fieldName,
+        };
+      }
+
+      return {
+        type: 'unsupported',
+        id: fieldName,
+      };
+    }
+  );
+
+  return chartsData;
+};
+
+export class DataVisualizer {
+  callAsCurrentUser: LegacyAPICaller;
+
+  constructor(callAsCurrentUser: LegacyAPICaller) {
     this.callAsCurrentUser = callAsCurrentUser;
   }
 
@@ -142,8 +379,8 @@ export class DataVisualizer {
     // To avoid checking for the existence of too many aggregatable fields in one request,
     // split the check into multiple batches (max 200 fields per request).
     const batches: string[][] = [[]];
-    _.each(aggregatableFields, field => {
-      let lastArray: string[] = _.last(batches);
+    _.each(aggregatableFields, (field) => {
+      let lastArray: string[] = _.last(batches) as string[];
       if (lastArray.length === AGGREGATABLE_EXISTS_REQUEST_BATCH_SIZE) {
         lastArray = [];
         batches.push(lastArray);
@@ -152,7 +389,7 @@ export class DataVisualizer {
     });
 
     await Promise.all(
-      batches.map(async fields => {
+      batches.map(async (fields) => {
         const batchStats = await this.checkAggregatableFieldsExist(
           indexPatternTitle,
           query,
@@ -173,7 +410,7 @@ export class DataVisualizer {
     );
 
     await Promise.all(
-      nonAggregatableFields.map(async field => {
+      nonAggregatableFields.map(async (field) => {
         const existsInDocs = await this.checkNonAggregatableFieldExists(
           indexPatternTitle,
           query,
@@ -200,6 +437,24 @@ export class DataVisualizer {
     return stats;
   }
 
+  // Obtains binned histograms for supplied list of fields. The statistics for each field in the
+  // returned array depend on the type of the field (keyword, number, date etc).
+  // Sampling will be used if supplied samplerShardSize > 0.
+  async getHistogramsForFields(
+    indexPatternTitle: string,
+    query: any,
+    fields: HistogramField[],
+    samplerShardSize: number
+  ): Promise<any> {
+    return await getHistogramsForFields(
+      this.callAsCurrentUser,
+      indexPatternTitle,
+      query,
+      fields,
+      samplerShardSize
+    );
+  }
+
   // Obtains statistics for supplied list of fields. The statistics for each field in the
   // returned array depend on the type of the field (keyword, number, date etc).
   // Sampling will be used if supplied samplerShardSize > 0.
@@ -217,7 +472,7 @@ export class DataVisualizer {
     // Batch up fields by type, getting stats for multiple fields at a time.
     const batches: Field[][] = [];
     const batchedFields: { [key: string]: Field[][] } = {};
-    _.each(fields, field => {
+    _.each(fields, (field) => {
       if (field.fieldName === undefined) {
         // undefined fieldName is used for a document count request.
         // getDocumentCountStats requires timeField - don't add to batched requests if not defined
@@ -229,7 +484,7 @@ export class DataVisualizer {
         if (batchedFields[fieldType] === undefined) {
           batchedFields[fieldType] = [[]];
         }
-        let lastArray: Field[] = _.last(batchedFields[fieldType]);
+        let lastArray: Field[] = _.last(batchedFields[fieldType]) as Field[];
         if (lastArray.length === FIELDS_REQUEST_BATCH_SIZE) {
           lastArray = [];
           batchedFields[fieldType].push(lastArray);
@@ -238,13 +493,13 @@ export class DataVisualizer {
       }
     });
 
-    _.each(batchedFields, lists => {
+    _.each(batchedFields, (lists) => {
       batches.push(...lists);
     });
 
     let results: BatchStats[] = [];
     await Promise.all(
-      batches.map(async batch => {
+      batches.map(async (batch) => {
         let batchStats: BatchStats[] = [];
         const first = batch[0];
         switch (first.type) {
@@ -313,7 +568,7 @@ export class DataVisualizer {
             // Use an exists filter on the the field name to get
             // examples of the field, so cannot batch up.
             await Promise.all(
-              batch.map(async field => {
+              batch.map(async (field) => {
                 const stats = await this.getFieldExamples(
                   indexPatternTitle,
                   query,
@@ -342,8 +597,8 @@ export class DataVisualizer {
     aggregatableFields: string[],
     samplerShardSize: number,
     timeFieldName: string,
-    earliestMs: number,
-    latestMs: number
+    earliestMs?: number,
+    latestMs?: number
   ) {
     const index = indexPatternTitle;
     const size = 0;
@@ -492,7 +747,7 @@ export class DataVisualizer {
       ['aggregations', 'eventRate', 'buckets'],
       []
     );
-    _.each(dataByTimeBucket, dataForTime => {
+    _.each(dataByTimeBucket, (dataForTime) => {
       const time = dataForTime.key;
       buckets[time] = dataForTime.doc_count;
     });
@@ -867,7 +1122,7 @@ export class DataVisualizer {
         [...aggsPath, `${safeFieldName}_values`, 'buckets'],
         []
       );
-      _.each(valueBuckets, bucket => {
+      _.forEach(valueBuckets, (bucket) => {
         stats[`${bucket.key_as_string}Count`] = bucket.doc_count;
       });
 
@@ -958,7 +1213,7 @@ export class DataVisualizer {
 
       // Look ahead to the last percentiles and process these too if
       // they don't add more than 50% to the value range.
-      const lastValue = _.last(percentileBuckets).value;
+      const lastValue = (_.last(percentileBuckets) as any).value;
       const upperBound = lowerBound + 1.5 * (lastValue - lowerBound);
       const filteredLength = percentileBuckets.length;
       for (let i = filteredLength; i < percentiles.length; i++) {
@@ -979,7 +1234,7 @@ export class DataVisualizer {
 
       // Add in 0-5 and 95-100% if they don't add more
       // than 25% to the value range at either end.
-      const lastValue: number = _.last(percentileBuckets).value;
+      const lastValue: number = (_.last(percentileBuckets) as any).value;
       const maxDiff = 0.25 * (lastValue - lowerBound);
       if (lowerBound - dataMin < maxDiff) {
         percentileBuckets.splice(0, 0, percentiles[0]);

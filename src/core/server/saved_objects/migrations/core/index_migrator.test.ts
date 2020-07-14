@@ -21,7 +21,7 @@ import _ from 'lodash';
 import { SavedObjectUnsanitizedDoc, SavedObjectsSerializer } from '../../serialization';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { IndexMigrator } from './index_migrator';
-import { loggingServiceMock } from '../../../logging/logging_service.mock';
+import { loggingSystemMock } from '../../../logging/logging_system.mock';
 
 describe('IndexMigrator', () => {
   let testOpts: any;
@@ -31,7 +31,7 @@ describe('IndexMigrator', () => {
       batchSize: 10,
       callCluster: jest.fn(),
       index: '.kibana',
-      log: loggingServiceMock.create().get(),
+      log: loggingSystemMock.create().get(),
       mappingProperties: {},
       pollInterval: 1,
       scrollDuration: '1m',
@@ -151,7 +151,7 @@ describe('IndexMigrator', () => {
     );
   });
 
-  test('retains mappings from the previous index', async () => {
+  test('retains unknown core field mappings from the previous index', async () => {
     const { callCluster } = testOpts;
 
     testOpts.mappingProperties = { foo: { type: 'text' } };
@@ -162,7 +162,7 @@ describe('IndexMigrator', () => {
           aliases: {},
           mappings: {
             properties: {
-              author: { type: 'text' },
+              unknown_core_field: { type: 'text' },
             },
           },
         },
@@ -187,7 +187,66 @@ describe('IndexMigrator', () => {
             },
           },
           properties: {
-            author: { type: 'text' },
+            unknown_core_field: { type: 'text' },
+            foo: { type: 'text' },
+            migrationVersion: { dynamic: 'true', type: 'object' },
+            namespace: { type: 'keyword' },
+            namespaces: { type: 'keyword' },
+            type: { type: 'keyword' },
+            updated_at: { type: 'date' },
+            references: {
+              type: 'nested',
+              properties: {
+                name: { type: 'keyword' },
+                type: { type: 'keyword' },
+                id: { type: 'keyword' },
+              },
+            },
+          },
+        },
+        settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
+      },
+      index: '.kibana_2',
+    });
+  });
+
+  test('disables complex field mappings from unknown types in the previous index', async () => {
+    const { callCluster } = testOpts;
+
+    testOpts.mappingProperties = { foo: { type: 'text' } };
+
+    withIndex(callCluster, {
+      index: {
+        '.kibana_1': {
+          aliases: {},
+          mappings: {
+            properties: {
+              unknown_complex_field: { properties: { description: { type: 'text' } } },
+            },
+          },
+        },
+      },
+    });
+
+    await new IndexMigrator(testOpts).migrate();
+
+    expect(callCluster).toHaveBeenCalledWith('indices.create', {
+      body: {
+        mappings: {
+          dynamic: 'strict',
+          _meta: {
+            migrationMappingPropertyHashes: {
+              foo: '625b32086eb1d1203564cf85062dd22e',
+              migrationVersion: '4a1746014a75ade3a714e1db5763276f',
+              namespace: '2f4316de49999235636386fe51dc06c1',
+              namespaces: '2f4316de49999235636386fe51dc06c1',
+              references: '7997cf5a56cc02bdc9c93361bde732b0',
+              type: '2f4316de49999235636386fe51dc06c1',
+              updated_at: '00da57df13e94e9d98437d13ace4bfe0',
+            },
+          },
+          properties: {
+            unknown_complex_field: { dynamic: false, properties: {} },
             foo: { type: 'text' },
             migrationVersion: { dynamic: 'true', type: 'object' },
             namespace: { type: 'keyword' },
@@ -341,7 +400,7 @@ function withIndex(callCluster: jest.Mock, opts: any = {}) {
 
   let scrollCallCounter = 1;
 
-  callCluster.mockImplementation(method => {
+  callCluster.mockImplementation((method) => {
     if (method === 'indices.get') {
       return Promise.resolve(index);
     } else if (method === 'indices.getAlias') {

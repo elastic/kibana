@@ -65,7 +65,6 @@ export class UiSettingsService
 
     return {
       register: this.register.bind(this),
-      asScopedToClient: this.getScopedClientFactory(),
     };
   }
 

@@ -25,7 +25,7 @@ import {
 
 import { JobTable as JobTableComponent } from './job_table';
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     jobs: getPageOfJobs(state),
     pager: getPager(state),
@@ -35,24 +35,24 @@ const mapStateToProps = state => {
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
     closeDetailPanel: () => {
       dispatch(closeDetailPanel());
     },
-    filterChanged: filter => {
+    filterChanged: (filter) => {
       dispatch(filterChanged({ filter }));
     },
-    pageChanged: pageNumber => {
+    pageChanged: (pageNumber) => {
       dispatch(pageChanged({ pageNumber }));
     },
-    pageSizeChanged: pageSize => {
+    pageSizeChanged: (pageSize) => {
       dispatch(pageSizeChanged({ pageSize }));
     },
     sortChanged: (sortField, isSortAscending) => {
       dispatch(sortChanged({ sortField, isSortAscending }));
     },
-    openDetailPanel: jobId => {
+    openDetailPanel: (jobId) => {
       dispatch(openDetailPanel({ jobId: jobId }));
     },
   };

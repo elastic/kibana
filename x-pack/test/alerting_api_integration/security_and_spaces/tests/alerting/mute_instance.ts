@@ -32,11 +32,11 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
       describe(scenario.id, () => {
         it('should handle mute alert instance request appropriately', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData({ enabled: false }))
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const response = await alertUtils.getMuteInstanceRequest(createdAlert.id, '1');
 
@@ -56,7 +56,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
+                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
@@ -76,14 +76,16 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
 
         it('should handle mute alert instance request appropriately and not duplicate mutedInstanceIds when muting an instance already muted', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData({ enabled: false }))
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}/alert_instance/1/_mute`)
+            .post(
+              `${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}/alert_instance/1/_mute`
+            )
             .set('kbn-xsrf', 'foo')
             .expect(204, '');
 
@@ -105,7 +107,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
+                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);

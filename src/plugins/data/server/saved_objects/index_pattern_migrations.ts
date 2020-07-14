@@ -20,7 +20,7 @@
 import { flow, omit } from 'lodash';
 import { SavedObjectMigrationFn } from 'kibana/server';
 
-const migrateAttributeTypeAndAttributeTypeMeta: SavedObjectMigrationFn<any, any> = doc => ({
+const migrateAttributeTypeAndAttributeTypeMeta: SavedObjectMigrationFn<any, any> = (doc) => ({
   ...doc,
   attributes: {
     ...doc.attributes,
@@ -29,12 +29,12 @@ const migrateAttributeTypeAndAttributeTypeMeta: SavedObjectMigrationFn<any, any>
   },
 });
 
-const migrateSubTypeAndParentFieldProperties: SavedObjectMigrationFn<any, any> = doc => {
+const migrateSubTypeAndParentFieldProperties: SavedObjectMigrationFn<any, any> = (doc) => {
   if (!doc.attributes.fields) return doc;
 
   const fieldsString = doc.attributes.fields;
   const fields = JSON.parse(fieldsString) as any[];
-  const migratedFields = fields.map(field => {
+  const migratedFields = fields.map((field) => {
     if (field.subType === 'multi') {
       return {
         ...omit(field, 'parent'),
@@ -55,6 +55,6 @@ const migrateSubTypeAndParentFieldProperties: SavedObjectMigrationFn<any, any> =
 };
 
 export const indexPatternSavedObjectTypeMigrations = {
-  '6.5.0': flow<SavedObjectMigrationFn>(migrateAttributeTypeAndAttributeTypeMeta),
-  '7.6.0': flow<SavedObjectMigrationFn>(migrateSubTypeAndParentFieldProperties),
+  '6.5.0': flow(migrateAttributeTypeAndAttributeTypeMeta),
+  '7.6.0': flow(migrateSubTypeAndParentFieldProperties),
 };

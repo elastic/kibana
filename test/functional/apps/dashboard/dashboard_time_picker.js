@@ -20,16 +20,17 @@
 import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
   const pieChart = getService('pieChart');
   const dashboardVisualizations = getService('dashboardVisualizations');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'timePicker']);
   const browser = getService('browser');
+  const log = getService('log');
   const kibanaServer = getService('kibanaServer');
 
   describe('dashboard time picker', function describeIndexTests() {
-    before(async function() {
+    before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
     });
@@ -67,19 +68,23 @@ export default function({ getService, getPageObjects }) {
 
     it('Timepicker start, end, interval values are set by url', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
+      log.debug('Went to landing page');
       await PageObjects.dashboard.clickNewDashboard();
+      log.debug('Clicked new dashboard');
       await dashboardVisualizations.createAndAddSavedSearch({
         name: 'saved search',
         fields: ['bytes', 'agent'],
       });
+      log.debug('added saved search');
       const currentUrl = await browser.getCurrentUrl();
       const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
       const urlQuery =
-        `/dashboard?` +
+        `/create?` +
         `_g=(refreshInterval:(pause:!t,value:2000),` +
         `time:(from:'2012-11-17T00:00:00.000Z',mode:absolute,to:'2015-11-17T18:01:36.621Z'))&` +
         `_a=(description:'',filters:!()` +
         `)`;
+      log.debug('go to url' + `${kibanaBaseUrl}#${urlQuery}`);
       await browser.get(`${kibanaBaseUrl}#${urlQuery}`, true);
       await PageObjects.header.waitUntilLoadingHasFinished();
       const time = await PageObjects.timePicker.getTimeConfig();

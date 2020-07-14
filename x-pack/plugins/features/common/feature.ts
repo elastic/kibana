@@ -49,7 +49,9 @@ export interface FeatureConfig {
    * This does not restrict access to your feature based on license.
    * Its only purpose is to inform the space and roles UIs on which features to display.
    */
-  validLicenses?: Array<'basic' | 'standard' | 'gold' | 'platinum' | 'enterprise' | 'trial'>;
+  validLicenses?: ReadonlyArray<
+    'basic' | 'standard' | 'gold' | 'platinum' | 'enterprise' | 'trial'
+  >;
 
   /**
    * An optional EUI Icon to be used when displaying your feature.
@@ -66,7 +68,7 @@ export interface FeatureConfig {
    * An array of app ids that are enabled when this feature is enabled.
    * Apps specified here will automatically cascade to the privileges defined below, unless specified differently there.
    */
-  app: string[];
+  app: readonly string[];
 
   /**
    * If this feature includes management sections, you can specify them here to control visibility of those
@@ -83,14 +85,14 @@ export interface FeatureConfig {
    * ```
    */
   management?: {
-    [sectionId: string]: string[];
+    [sectionId: string]: readonly string[];
   };
   /**
    * If this feature includes a catalogue entry, you can specify them here to control visibility based on the current space.
    *
    * Items specified here will automatically cascade to the privileges defined below, unless specified differently there.
    */
-  catalogue?: string[];
+  catalogue?: readonly string[];
 
   /**
    * Feature privilege definition.
@@ -112,7 +114,7 @@ export interface FeatureConfig {
   /**
    * Optional sub-feature privilege definitions. This can only be specified if `privileges` are are also defined.
    */
-  subFeatures?: SubFeatureConfig[];
+  subFeatures?: readonly SubFeatureConfig[];
 
   /**
    * Optional message to display on the Role Management screen when configuring permissions for this feature.
@@ -124,7 +126,7 @@ export interface FeatureConfig {
    */
   reserved?: {
     description: string;
-    privileges: ReservedKibanaPrivilege[];
+    privileges: readonly ReservedKibanaPrivilege[];
   };
 }
 
@@ -133,7 +135,7 @@ export class Feature {
 
   constructor(protected readonly config: RecursiveReadonly<FeatureConfig>) {
     this.subFeatures = (config.subFeatures ?? []).map(
-      subFeatureConfig => new SubFeature(subFeatureConfig)
+      (subFeatureConfig) => new SubFeature(subFeatureConfig)
     );
   }
 

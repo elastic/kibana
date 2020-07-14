@@ -5,25 +5,52 @@
  */
 
 import {
-  AGENT_TYPE_TEMPORARY,
   AGENT_POLLING_THRESHOLD_MS,
   AGENT_TYPE_PERMANENT,
   AGENT_SAVED_OBJECT_TYPE,
 } from '../constants';
+import { Agent, AgentStatus } from '../types';
 
-export function buildKueryForOnlineAgents() {
-  return `${AGENT_SAVED_OBJECT_TYPE}.last_checkin >= now-${(3 * AGENT_POLLING_THRESHOLD_MS) /
-    1000}s`;
+export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentStatus {
+  const { last_checkin: lastCheckIn } = agent;
+
+  if (!agent.active) {
+    return 'inactive';
+  }
+  if (!agent.last_checkin) {
+    return 'enrolling';
+  }
+  if (agent.unenrollment_started_at && !agent.unenrolled_at) {
+    return 'unenrolling';
+  }
+
+  const msLastCheckIn = new Date(lastCheckIn || 0).getTime();
+  const msSinceLastCheckIn = new Date().getTime() - msLastCheckIn;
+  const intervalsSinceLastCheckIn = Math.floor(msSinceLastCheckIn / AGENT_POLLING_THRESHOLD_MS);
+
+  if (agent.last_checkin_status === 'error') {
+    return 'error';
+  }
+  if (agent.last_checkin_status === 'degraded') {
+    return 'degraded';
+  }
+  if (intervalsSinceLastCheckIn >= 4) {
+    return 'offline';
+  }
+
+  return 'online';
 }
 
-export function buildKueryForOfflineAgents() {
-  return `${AGENT_SAVED_OBJECT_TYPE}.type:${AGENT_TYPE_TEMPORARY} AND ${AGENT_SAVED_OBJECT_TYPE}.last_checkin < now-${(3 *
-    AGENT_POLLING_THRESHOLD_MS) /
-    1000}s`;
+export function buildKueryForOnlineAgents() {
+  return `not (${buildKueryForOfflineAgents()}) AND not (${buildKueryForErrorAgents()})`;
 }
 
 export function buildKueryForErrorAgents() {
-  return `${AGENT_SAVED_OBJECT_TYPE}.type:${AGENT_TYPE_PERMANENT} AND ${AGENT_SAVED_OBJECT_TYPE}.last_checkin < now-${(4 *
-    AGENT_POLLING_THRESHOLD_MS) /
-    1000}s`;
+  return `( ${AGENT_SAVED_OBJECT_TYPE}.last_checkin_status:error or ${AGENT_SAVED_OBJECT_TYPE}.last_checkin_status:degraded )`;
+}
+
+export function buildKueryForOfflineAgents() {
+  return `((${AGENT_SAVED_OBJECT_TYPE}.type:${AGENT_TYPE_PERMANENT} AND ${AGENT_SAVED_OBJECT_TYPE}.last_checkin < now-${
+    (4 * AGENT_POLLING_THRESHOLD_MS) / 1000
+  }s) AND not ( ${buildKueryForErrorAgents()} ))`;
 }

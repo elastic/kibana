@@ -20,7 +20,7 @@
 import { overwrite } from '../../helpers';
 
 export function splitByEverything(req, panel, series) {
-  return next => doc => {
+  return (next) => (doc) => {
     if (
       series.split_mode === 'everything' ||
       (series.split_mode === 'terms' && !series.terms_field)

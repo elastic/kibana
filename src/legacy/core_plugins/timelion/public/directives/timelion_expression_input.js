@@ -51,7 +51,7 @@ import {
   suggest,
   insertAtLocation,
 } from './timelion_expression_input_helpers';
-import { comboBoxKeyCodes } from '@elastic/eui';
+import { comboBoxKeys } from '@elastic/eui';
 import { npStart } from 'ui/new_platform';
 
 const Parser = PEG.generate(grammar);
@@ -67,7 +67,7 @@ export function TimelionExpInput($http, $timeout) {
     },
     replace: true,
     template: timelionExpressionInputTemplate,
-    link: function(scope, elem) {
+    link: function (scope, elem) {
       const argValueSuggestions = npStart.plugins.visTypeTimelion.getArgValueSuggestions();
       const expressionInput = elem.find('[data-expression-input]');
       const functionReference = {};
@@ -76,9 +76,9 @@ export function TimelionExpInput($http, $timeout) {
       scope.suggestions = new Suggestions();
 
       function init() {
-        $http.get('../api/timelion/functions').then(function(resp) {
+        $http.get('../api/timelion/functions').then(function (resp) {
           Object.assign(functionReference, {
-            byName: _.indexBy(resp.data, 'name'),
+            byName: _.keyBy(resp.data, 'name'),
             list: resp.data,
           });
         });
@@ -178,9 +178,9 @@ export function TimelionExpInput($http, $timeout) {
         });
       }
 
-      function isNavigationalKey(keyCode) {
-        const keyCodes = _.values(comboBoxKeyCodes);
-        return keyCodes.includes(keyCode);
+      function isNavigationalKey(key) {
+        const keyCodes = _.values(comboBoxKeys);
+        return keyCodes.includes(key);
       }
 
       scope.onFocusInput = () => {
@@ -193,15 +193,15 @@ export function TimelionExpInput($http, $timeout) {
         scope.suggestions.hide();
       };
 
-      scope.onKeyDownInput = e => {
+      scope.onKeyDownInput = (e) => {
         // If we've pressed any non-navigational keys, then the user has typed something and we
         // can exit early without doing any navigation. The keyup handler will pull up suggestions.
-        if (!isNavigationalKey(e.keyCode)) {
+        if (!isNavigationalKey(e.key)) {
           return;
         }
 
         switch (e.keyCode) {
-          case comboBoxKeyCodes.UP:
+          case comboBoxKeys.ARROW_UP:
             if (scope.suggestions.isVisible) {
               // Up and down keys navigate through suggestions.
               e.preventDefault();
@@ -210,7 +210,7 @@ export function TimelionExpInput($http, $timeout) {
             }
             break;
 
-          case comboBoxKeyCodes.DOWN:
+          case comboBoxKeys.ARROW_DOWN:
             if (scope.suggestions.isVisible) {
               // Up and down keys navigate through suggestions.
               e.preventDefault();
@@ -219,7 +219,7 @@ export function TimelionExpInput($http, $timeout) {
             }
             break;
 
-          case comboBoxKeyCodes.TAB:
+          case comboBoxKeys.TAB:
             // If there are no suggestions or none is selected, the user tabs to the next input.
             if (scope.suggestions.isEmpty() || scope.suggestions.index < 0) {
               // Before letting the tab be handled to focus the next element
@@ -234,7 +234,7 @@ export function TimelionExpInput($http, $timeout) {
             insertSuggestionIntoExpression(scope.suggestions.index);
             break;
 
-          case comboBoxKeyCodes.ENTER:
+          case comboBoxKeys.ENTER:
             if (e.metaKey || e.ctrlKey) {
               // Re-render the chart when the user hits CMD+ENTER.
               e.preventDefault();
@@ -246,16 +246,16 @@ export function TimelionExpInput($http, $timeout) {
             }
             break;
 
-          case comboBoxKeyCodes.ESCAPE:
+          case comboBoxKeys.ESCAPE:
             e.preventDefault();
             scope.suggestions.hide();
             break;
         }
       };
 
-      scope.onKeyUpInput = e => {
+      scope.onKeyUpInput = (e) => {
         // If the user isn't navigating, then we should update the suggestions based on their input.
-        if (!isNavigationalKey(e.keyCode)) {
+        if (!isNavigationalKey(e.key)) {
           getSuggestions();
         }
       };
@@ -264,7 +264,7 @@ export function TimelionExpInput($http, $timeout) {
         getSuggestions();
       };
 
-      scope.onClickSuggestion = index => {
+      scope.onClickSuggestion = (index) => {
         insertSuggestionIntoExpression(index);
       };
 

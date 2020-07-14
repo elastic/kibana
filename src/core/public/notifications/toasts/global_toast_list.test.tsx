@@ -34,7 +34,7 @@ it('renders matching snapshot', () => {
 
 it('subscribes to toasts$ on mount and unsubscribes on unmount', () => {
   const unsubscribeSpy = jest.fn();
-  const subscribeSpy = jest.fn(observer => {
+  const subscribeSpy = jest.fn((observer) => {
     observer.next([]);
     return unsubscribeSpy;
   });

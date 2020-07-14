@@ -59,7 +59,7 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
     };
   }
 
-  public handleClick: React.MouseEventHandler<SVGSVGElement> = event => {
+  public handleClick: React.MouseEventHandler<SVGSVGElement> = (event) => {
     const minimapTop = event.currentTarget.getBoundingClientRect().top;
     const clickedYPosition = event.clientY - minimapTop;
 
@@ -80,7 +80,7 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
     return this.getYScale()(time);
   };
 
-  private updateTimeCursor: React.MouseEventHandler<SVGSVGElement> = event => {
+  private updateTimeCursor: React.MouseEventHandler<SVGSVGElement> = (event) => {
     const svgPosition = event.currentTarget.getBoundingClientRect();
     const timeCursorY = event.clientY - svgPosition.top;
 
@@ -157,14 +157,14 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
 }
 
 const MinimapBorder = euiStyled.line`
-  stroke: ${props => props.theme.eui.euiColorMediumShade};
+  stroke: ${(props) => props.theme.eui.euiColorMediumShade};
   stroke-width: 1px;
 `;
 
 const TimeCursor = euiStyled.line`
   pointer-events: none;
   stroke-width: 1px;
-  stroke: ${props =>
+  stroke: ${(props) =>
     props.theme.darkMode
       ? props.theme.eui.euiColorDarkestShade
       : props.theme.eui.euiColorDarkShade};
@@ -172,7 +172,7 @@ const TimeCursor = euiStyled.line`
 
 const MinimapWrapper = euiStyled.svg`
   cursor: pointer;
-  fill: ${props => props.theme.eui.euiColorEmptyShade};
+  fill: ${(props) => props.theme.eui.euiColorEmptyShade};
   & ${TimeCursor} {
     visibility: hidden;
   }

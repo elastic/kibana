@@ -24,7 +24,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
 
     it('should execute successfully when expected for a single body', async () => {
       const { body: result } = await supertest
-        .post(`/api/action/${ACTION_ID}/_execute`)
+        .post(`/api/actions/action/${ACTION_ID}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {

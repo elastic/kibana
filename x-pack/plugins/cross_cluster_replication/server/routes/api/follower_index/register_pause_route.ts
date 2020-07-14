@@ -47,7 +47,7 @@ export const registerPauseRoute = ({
               id: _id,
             })
             .then(() => itemsPaused.push(_id))
-            .catch(err => {
+            .catch((err) => {
               errors.push({ id: _id, error: formatError(err) });
             })
         )

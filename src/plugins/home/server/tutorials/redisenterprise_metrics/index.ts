@@ -36,6 +36,7 @@ export function redisenterpriseMetricsSpecProvider(context: TutorialContext): Tu
     name: i18n.translate('home.tutorials.redisenterpriseMetrics.nameTitle', {
       defaultMessage: 'Redis Enterprise metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.redisenterpriseMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from Redis Enterprise Server.',
@@ -55,7 +56,7 @@ export function redisenterpriseMetricsSpecProvider(context: TutorialContext): Tu
         label: i18n.translate('home.tutorials.redisenterpriseMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {

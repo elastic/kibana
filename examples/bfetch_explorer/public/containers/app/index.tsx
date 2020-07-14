@@ -30,7 +30,7 @@ export const App: React.FC = () => {
   const routeElements: React.ReactElement[] = [];
   for (const { items } of routes) {
     for (const { id, component } of items) {
-      routeElements.push(<Route key={id} path={`/${id}`} render={props => component} />);
+      routeElements.push(<Route key={id} path={`/${id}`} render={(props) => component} />);
     }
   }
 

@@ -5,11 +5,11 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiI18nNumber } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiTitle,
-  EuiButtonEmpty,
+  EuiFlexItem,
+  EuiI18nNumber,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
@@ -17,9 +17,9 @@ import { OverviewPanel } from './overview_panel';
 import { OverviewStats } from './overview_stats';
 import { useLink, useGetDataStreams, useStartDeps } from '../../../hooks';
 import { Loading } from '../../fleet/components';
-import { DATA_STREAM_PATH } from '../../../constants';
 
 export const OverviewDatastreamSection: React.FC = () => {
+  const { getHref } = useLink();
   const datastreamRequest = useGetDataStreams();
   const {
     data: { fieldFormats },
@@ -29,7 +29,7 @@ export const OverviewDatastreamSection: React.FC = () => {
   let sizeBytes = 0;
   const namespaces = new Set<string>();
   if (datastreamRequest.data) {
-    datastreamRequest.data.data_streams.forEach(val => {
+    datastreamRequest.data.data_streams.forEach((val) => {
       namespaces.add(val.namespace);
       sizeBytes += val.size_in_bytes;
     });
@@ -45,23 +45,18 @@ export const OverviewDatastreamSection: React.FC = () => {
 
   return (
     <EuiFlexItem component="section">
-      <OverviewPanel>
-        <header>
-          <EuiTitle size="xs">
-            <h2>
-              <FormattedMessage
-                id="xpack.ingestManager.overviewPageDataStreamsPanelTitle"
-                defaultMessage="Data streams"
-              />
-            </h2>
-          </EuiTitle>
-          <EuiButtonEmpty size="xs" flush="right" href={useLink(DATA_STREAM_PATH)}>
-            <FormattedMessage
-              id="xpack.ingestManager.overviewPageDataStreamsPanelAction"
-              defaultMessage="View data streams"
-            />
-          </EuiButtonEmpty>
-        </header>
+      <OverviewPanel
+        title={i18n.translate('xpack.ingestManager.overviewPageDataStreamsPanelTitle', {
+          defaultMessage: 'Datasets',
+        })}
+        tooltip={i18n.translate('xpack.ingestManager.overviewPageDataStreamsPanelTooltip', {
+          defaultMessage: 'Data that your agents collect are organized into various datasets.',
+        })}
+        linkTo={getHref('data_streams')}
+        linkToText={i18n.translate('xpack.ingestManager.overviewPageDataStreamsPanelAction', {
+          defaultMessage: 'View datasets',
+        })}
+      >
         <OverviewStats>
           {datastreamRequest.isLoading ? (
             <Loading />
@@ -70,7 +65,7 @@ export const OverviewDatastreamSection: React.FC = () => {
               <EuiDescriptionListTitle>
                 <FormattedMessage
                   id="xpack.ingestManager.overviewDatastreamTotalTitle"
-                  defaultMessage="Data streams"
+                  defaultMessage="Datasets"
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>

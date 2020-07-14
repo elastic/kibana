@@ -75,24 +75,24 @@ describe('ContextContainer', () => {
         coreId
       );
       expect.assertions(8);
-      contextContainer.registerContext(coreId, 'core1', context => {
+      contextContainer.registerContext(coreId, 'core1', (context) => {
         expect(context).toEqual({});
         return 'core';
       });
 
-      contextContainer.registerContext(pluginA, 'ctxFromA', context => {
+      contextContainer.registerContext(pluginA, 'ctxFromA', (context) => {
         expect(context).toEqual({ core1: 'core' });
         return 'aString';
       });
-      contextContainer.registerContext(pluginB, 'ctxFromB', context => {
+      contextContainer.registerContext(pluginB, 'ctxFromB', (context) => {
         expect(context).toEqual({ core1: 'core', ctxFromA: 'aString' });
         return 299;
       });
-      contextContainer.registerContext(pluginC, 'ctxFromC', context => {
+      contextContainer.registerContext(pluginC, 'ctxFromC', (context) => {
         expect(context).toEqual({ core1: 'core', ctxFromA: 'aString', ctxFromB: 299 });
         return false;
       });
-      contextContainer.registerContext(pluginD, 'ctxFromD', context => {
+      contextContainer.registerContext(pluginD, 'ctxFromD', (context) => {
         expect(context).toEqual({ core1: 'core' });
         return {};
       });
@@ -129,13 +129,13 @@ describe('ContextContainer', () => {
         coreId
       );
       contextContainer
-        .registerContext(pluginA, 'ctxFromA', context => {
+        .registerContext(pluginA, 'ctxFromA', (context) => {
           expect(context).toEqual({ core1: 'core', core2: 101 });
           return `aString ${context.core1} ${context.core2}`;
         })
         .registerContext(coreId, 'core1', () => 'core')
         .registerContext(coreId, 'core2', () => 101)
-        .registerContext(pluginB, 'ctxFromB', context => {
+        .registerContext(pluginB, 'ctxFromB', (context) => {
           expect(context).toEqual({ core1: 'core', core2: 101, ctxFromA: 'aString core 101' });
           return 277;
         });
@@ -161,11 +161,11 @@ describe('ContextContainer', () => {
       );
 
       contextContainer
-        .registerContext(coreId, 'core1', context => {
+        .registerContext(coreId, 'core1', (context) => {
           expect(context).toEqual({});
           return 'core';
         })
-        .registerContext(coreId, 'core2', context => {
+        .registerContext(coreId, 'core2', (context) => {
           expect(context).toEqual({ core1: 'core' });
           return 101;
         });
@@ -189,8 +189,8 @@ describe('ContextContainer', () => {
       );
 
       contextContainer
-        .registerContext(coreId, 'core1', context => 'core')
-        .registerContext(pluginA, 'ctxFromA', context => 'aString');
+        .registerContext(coreId, 'core1', (context) => 'core')
+        .registerContext(pluginA, 'ctxFromA', (context) => 'aString');
 
       const rawHandler1 = jest.fn<string, []>(() => 'handler1');
       const handler1 = contextContainer.createHandler(coreId, rawHandler1);

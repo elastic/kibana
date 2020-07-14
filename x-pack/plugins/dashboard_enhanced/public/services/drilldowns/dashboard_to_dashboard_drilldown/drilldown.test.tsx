@@ -5,8 +5,7 @@
  */
 
 import { DashboardToDashboardDrilldown } from './drilldown';
-import { UrlGeneratorContract } from '../../../../../../../src/plugins/share/public';
-import { savedObjectsServiceMock } from '../../../../../../../src/core/public/mocks';
+import { savedObjectsServiceMock, coreMock } from '../../../../../../../src/core/public/mocks';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { ActionContext, Config } from './types';
 import {
@@ -19,15 +18,16 @@ import {
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 // convenient to use real implementation here.
-import { createDirectAccessDashboardLinkGenerator } from '../../../../../../../src/plugins/dashboard/public/url_generator';
+import { createDashboardUrlGenerator } from '../../../../../../../src/plugins/dashboard/public/url_generator';
+import { UrlGeneratorsService } from '../../../../../../../src/plugins/share/public/url_generators';
 import { VisualizeEmbeddableContract } from '../../../../../../../src/plugins/visualizations/public';
 import {
-  RangeSelectTriggerContext,
-  ValueClickTriggerContext,
+  RangeSelectContext,
+  ValueClickContext,
 } from '../../../../../../../src/plugins/embeddable/public';
+import { StartDependencies } from '../../../plugin';
 import { SavedObjectLoader } from '../../../../../../../src/plugins/saved_objects/public';
 import { StartServicesGetter } from '../../../../../../../src/plugins/kibana_utils/public/core';
-import { StartDependencies } from '../../../plugin';
 
 describe('.isConfigValid()', () => {
   const drilldown = new DashboardToDashboardDrilldown({} as any);
@@ -101,27 +101,23 @@ describe('.execute() & getHref', () => {
           },
         },
         plugins: {
-          advancedUiActions: {},
+          uiActionsEnhanced: {},
           data: {
             actions: dataPluginActions,
           },
-          share: {
-            urlGenerators: {
-              getUrlGenerator: () =>
-                createDirectAccessDashboardLinkGenerator(() =>
-                  Promise.resolve({
-                    appBasePath: 'test',
-                    useHashedUrl: false,
-                    savedDashboardLoader: ({} as unknown) as SavedObjectLoader,
-                  })
-                ) as UrlGeneratorContract<string>,
-            },
-          },
         },
         self: {},
-      })) as unknown) as StartServicesGetter<
-        Pick<StartDependencies, 'data' | 'advancedUiActions' | 'share'>
-      >,
+      })) as unknown) as StartServicesGetter<Pick<StartDependencies, 'data' | 'uiActionsEnhanced'>>,
+      getDashboardUrlGenerator: () =>
+        new UrlGeneratorsService().setup(coreMock.createSetup()).registerUrlGenerator(
+          createDashboardUrlGenerator(() =>
+            Promise.resolve({
+              appBasePath: 'test',
+              useHashedUrl: false,
+              savedDashboardLoader: ({} as unknown) as SavedObjectLoader,
+            })
+          )
+        ),
     });
     const selectRangeFiltersSpy = jest
       .spyOn(dataPluginActions, 'createFiltersFromRangeSelectAction')
@@ -138,10 +134,12 @@ describe('.execute() & getHref', () => {
     };
 
     const context = ({
-      data: useRangeEvent
-        ? ({ range: {} } as RangeSelectTriggerContext['data'])
-        : ({ data: [] } as ValueClickTriggerContext['data']),
-      timeFieldName: 'order_date',
+      data: {
+        ...(useRangeEvent
+          ? ({ range: {} } as RangeSelectContext['data'])
+          : ({ data: [] } as ValueClickContext['data'])),
+        timeFieldName: 'order_date',
+      },
       embeddable: {
         getInput: () => ({
           filters: [],
@@ -163,7 +161,7 @@ describe('.execute() & getHref', () => {
     }
 
     expect(navigateToApp).toBeCalledTimes(1);
-    expect(navigateToApp.mock.calls[0][0]).toBe('kibana');
+    expect(navigateToApp.mock.calls[0][0]).toBe('dashboards');
 
     const executeNavigatedPath = navigateToApp.mock.calls[0][1]?.path;
     const href = await drilldown.getHref(completeConfig, context);
@@ -186,7 +184,7 @@ describe('.execute() & getHref', () => {
       false
     );
 
-    expect(href).toEqual(expect.stringContaining(`dashboard/${testDashboardId}`));
+    expect(href).toEqual(expect.stringContaining(`view/${testDashboardId}`));
   });
 
   test('query is removed if filters are disabled', async () => {

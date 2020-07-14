@@ -42,10 +42,7 @@ describe('NewEventModal', () => {
     // trigger handleChangeStart directly with startMoment
     instance.handleChangeStart(startMoment);
     // add 3 days to endMoment as it will be adjusted to be one day after startDate
-    const expected = endMoment
-      .startOf('day')
-      .add(3, 'days')
-      .format();
+    const expected = endMoment.startOf('day').add(3, 'days').format();
 
     expect(wrapper.state('endDate').format()).toBe(expected);
   });
@@ -66,10 +63,7 @@ describe('NewEventModal', () => {
     // trigger handleChangeStart directly with endMoment
     instance.handleChangeStart(endMoment);
     // subtract 3 days from startDate as it will be adjusted to be one day before endDate
-    const expected = startMoment
-      .startOf('day')
-      .subtract(2, 'days')
-      .format();
+    const expected = startMoment.startOf('day').subtract(2, 'days').format();
 
     expect(wrapper.state('startDate').format()).toBe(expected);
   });

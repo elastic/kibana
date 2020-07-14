@@ -27,12 +27,12 @@ export const EditFieldContainer = React.memo(({ field, allFields }: Props) => {
   });
 
   useEffect(() => {
-    const subscription = form.subscribe(updatedFieldForm => {
+    const subscription = form.subscribe((updatedFieldForm) => {
       dispatch({ type: 'fieldForm.update', value: updatedFieldForm });
     });
 
     return subscription.unsubscribe;
-  }, [form, dispatch]);
+  }, [dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const exitEdit = useCallback(() => {
     dispatch({ type: 'documentField.changeStatus', value: 'idle' });

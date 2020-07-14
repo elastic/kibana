@@ -23,7 +23,11 @@ import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_response_agg_config_class';
 import { KBN_FIELD_TYPES } from '../../../../common';
-import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
+
+export interface AggParamsStdDeviation extends BaseAggParams {
+  field: string;
+}
 
 interface ValProp {
   valProp: string[];
@@ -31,12 +35,8 @@ interface ValProp {
 }
 
 export interface IStdDevAggConfig extends IResponseAggConfig {
-  keyedDetails: (customLabel: string, fieldDisplayName?: string) => { [key: string]: ValProp };
-  valProp: () => ValProp;
-}
-
-export interface StdDeviationMetricAggDependencies {
-  getInternalStartServices: GetInternalStartServicesFn;
+  keyedDetails: (customLabel: string, fieldDisplayName?: string) => Record<string, ValProp>;
+  valProp: () => string[];
 }
 
 const responseAggConfigProps = {
@@ -80,42 +80,35 @@ const responseAggConfigProps = {
   },
 };
 
-export const getStdDeviationMetricAgg = ({
-  getInternalStartServices,
-}: StdDeviationMetricAggDependencies) => {
-  return new MetricAggType<IStdDevAggConfig>(
-    {
-      name: METRIC_TYPES.STD_DEV,
-      dslName: 'extended_stats',
-      title: i18n.translate('data.search.aggs.metrics.standardDeviationTitle', {
-        defaultMessage: 'Standard Deviation',
-      }),
-      makeLabel(agg) {
-        return i18n.translate('data.search.aggs.metrics.standardDeviationLabel', {
-          defaultMessage: 'Standard Deviation of {field}',
-          values: { field: agg.getFieldDisplayName() },
-        });
-      },
-      params: [
-        {
-          name: 'field',
-          type: 'field',
-          filterFieldTypes: KBN_FIELD_TYPES.NUMBER,
-        },
-      ],
-
-      getResponseAggs(agg) {
-        const ValueAggConfig = getResponseAggConfigClass(agg, responseAggConfigProps);
-
-        return [new ValueAggConfig('std_lower'), new ValueAggConfig('std_upper')];
-      },
-
-      getValue(agg, bucket) {
-        return get(bucket[agg.parentId], agg.valProp());
-      },
+export const getStdDeviationMetricAgg = () => {
+  return new MetricAggType<IStdDevAggConfig>({
+    name: METRIC_TYPES.STD_DEV,
+    dslName: 'extended_stats',
+    title: i18n.translate('data.search.aggs.metrics.standardDeviationTitle', {
+      defaultMessage: 'Standard Deviation',
+    }),
+    makeLabel(agg) {
+      return i18n.translate('data.search.aggs.metrics.standardDeviationLabel', {
+        defaultMessage: 'Standard Deviation of {field}',
+        values: { field: agg.getFieldDisplayName() },
+      });
     },
-    {
-      getInternalStartServices,
-    }
-  );
+    params: [
+      {
+        name: 'field',
+        type: 'field',
+        filterFieldTypes: KBN_FIELD_TYPES.NUMBER,
+      },
+    ],
+
+    getResponseAggs(agg) {
+      const ValueAggConfig = getResponseAggConfigClass(agg, responseAggConfigProps);
+
+      return [new ValueAggConfig('std_lower'), new ValueAggConfig('std_upper')];
+    },
+
+    getValue(agg, bucket) {
+      return get(bucket[agg.parentId], agg.valProp());
+    },
+  });
 };

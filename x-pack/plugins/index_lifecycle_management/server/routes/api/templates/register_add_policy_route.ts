@@ -6,18 +6,21 @@
 
 import { merge } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { APICaller } from 'src/core/server';
+import { LegacyAPICaller } from 'src/core/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
-async function getIndexTemplate(callAsCurrentUser: APICaller, templateName: string): Promise<any> {
+async function getIndexTemplate(
+  callAsCurrentUser: LegacyAPICaller,
+  templateName: string
+): Promise<any> {
   const response = await callAsCurrentUser('indices.getTemplate', { name: templateName });
   return response[templateName];
 }
 
 async function updateIndexTemplate(
-  callAsCurrentUser: APICaller,
+  callAsCurrentUser: LegacyAPICaller,
   templateName: string,
   policyName: string,
   aliasName?: string
@@ -60,7 +63,7 @@ export function registerAddPolicyRoute({ router, license, lib }: RouteDependenci
 
       try {
         await updateIndexTemplate(
-          context.core.elasticsearch.dataClient.callAsCurrentUser,
+          context.core.elasticsearch.legacy.client.callAsCurrentUser,
           templateName,
           policyName,
           aliasName

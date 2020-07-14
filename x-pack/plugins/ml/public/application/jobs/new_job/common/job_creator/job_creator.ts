@@ -155,7 +155,7 @@ export class JobCreator {
   }
 
   protected _setBucketSpanMs(bucketSpan: BucketSpan) {
-    const bs = parseInterval(bucketSpan);
+    const bs = parseInterval(bucketSpan, true);
     this._bucketSpanMs = bs === null ? 0 : bs.asMilliseconds();
   }
 
@@ -226,21 +226,37 @@ export class JobCreator {
     this._calendars = calendars;
   }
 
-  public set modelPlot(enable: boolean) {
-    if (enable) {
-      this._job_config.model_plot_config = {
-        enabled: true,
-      };
-    } else {
-      delete this._job_config.model_plot_config;
+  private _initModelPlotConfig() {
+    // initialize configs to false if they are missing
+    if (this._job_config.model_plot_config === undefined) {
+      this._job_config.model_plot_config = {};
+    }
+    if (this._job_config.model_plot_config.enabled === undefined) {
+      this._job_config.model_plot_config.enabled = false;
+    }
+    if (this._job_config.model_plot_config.annotations_enabled === undefined) {
+      this._job_config.model_plot_config.annotations_enabled = false;
     }
   }
 
+  public set modelPlot(enable: boolean) {
+    this._initModelPlotConfig();
+    this._job_config.model_plot_config!.enabled = enable;
+  }
   public get modelPlot() {
     return (
       this._job_config.model_plot_config !== undefined &&
       this._job_config.model_plot_config.enabled === true
     );
+  }
+
+  public set modelChangeAnnotations(enable: boolean) {
+    this._initModelPlotConfig();
+    this._job_config.model_plot_config!.annotations_enabled = enable;
+  }
+
+  public get modelChangeAnnotations() {
+    return this._job_config.model_plot_config?.annotations_enabled === true;
   }
 
   public set useDedicatedIndex(enable: boolean) {
@@ -617,7 +633,7 @@ export class JobCreator {
     }
 
     if (this._job_config.analysis_config.influencers !== undefined) {
-      this._job_config.analysis_config.influencers.forEach(i => this.addInfluencer(i));
+      this._job_config.analysis_config.influencers.forEach((i) => this.addInfluencer(i));
     }
 
     if (
@@ -630,7 +646,7 @@ export class JobCreator {
 
     this._scriptFields = [];
     if (this._datafeed_config.script_fields !== undefined) {
-      this._scriptFields = Object.keys(this._datafeed_config.script_fields).map(f => ({
+      this._scriptFields = Object.keys(this._datafeed_config.script_fields).map((f) => ({
         id: f,
         name: f,
         type: ES_FIELD_TYPES.KEYWORD,

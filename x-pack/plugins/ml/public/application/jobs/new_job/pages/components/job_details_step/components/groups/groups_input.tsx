@@ -35,7 +35,7 @@ export const GroupsInput: FC = () => {
   }));
 
   function onChange(optionsIn: EuiComboBoxOptionOption[]) {
-    setSelectedGroups(optionsIn.map(g => g.label));
+    setSelectedGroups(optionsIn.map((g) => g.label));
   }
 
   function onCreateGroup(input: string, flattenedOptions: EuiComboBoxOptionOption[]) {
@@ -52,13 +52,13 @@ export const GroupsInput: FC = () => {
 
     if (
       flattenedOptions.findIndex(
-        option => option.label.trim().toLowerCase() === normalizedSearchValue
+        (option) => option.label.trim().toLowerCase() === normalizedSearchValue
       ) === -1
     ) {
       options.push(newGroup);
     }
 
-    setSelectedGroups([...selectedOptions, newGroup].map(g => g.label));
+    setSelectedGroups([...selectedOptions, newGroup].map((g) => g.label));
   }
 
   useEffect(() => {

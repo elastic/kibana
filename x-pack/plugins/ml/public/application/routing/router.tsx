@@ -12,6 +12,7 @@ import { IUiSettingsClient, ChromeStart } from 'kibana/public';
 import { ChromeBreadcrumb } from 'kibana/public';
 import { IndexPatternsContract } from 'src/plugins/data/public';
 import { MlContext, MlContextValue } from '../contexts/ml';
+import { UrlStateProvider } from '../util/url_state';
 
 import * as routes from './routes';
 
@@ -48,21 +49,23 @@ export const MlRouter: FC<{ pageDeps: PageDependencies }> = ({ pageDeps }) => {
 
   return (
     <HashRouter>
-      <div className="ml-app">
-        {Object.entries(routes).map(([name, route]) => (
-          <Route
-            key={name}
-            path={route.path}
-            exact
-            render={props => {
-              window.setTimeout(() => {
-                setBreadcrumbs(route.breadcrumbs);
-              });
-              return route.render(props, pageDeps);
-            }}
-          />
-        ))}
-      </div>
+      <UrlStateProvider>
+        <div className="ml-app">
+          {Object.entries(routes).map(([name, route]) => (
+            <Route
+              key={name}
+              path={route.path}
+              exact
+              render={(props) => {
+                window.setTimeout(() => {
+                  setBreadcrumbs(route.breadcrumbs);
+                });
+                return route.render(props, pageDeps);
+              }}
+            />
+          ))}
+        </div>
+      </UrlStateProvider>
     </HashRouter>
   );
 };

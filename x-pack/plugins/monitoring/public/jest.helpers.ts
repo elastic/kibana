@@ -22,6 +22,6 @@ beforeAll(() => {
 export function mockUseEffects(count = 1) {
   const spy = jest.spyOn(React, 'useEffect');
   for (let i = 0; i < count; i++) {
-    spy.mockImplementationOnce(f => f());
+    spy.mockImplementationOnce((f) => f());
   }
 }

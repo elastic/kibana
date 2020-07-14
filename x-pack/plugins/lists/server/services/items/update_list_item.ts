@@ -5,7 +5,7 @@
  */
 
 import { CreateDocumentResponse } from 'elasticsearch';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import {
   Id,
@@ -20,7 +20,7 @@ import { getListItem } from './get_list_item';
 export interface UpdateListItemOptions {
   id: Id;
   value: string | null | undefined;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   listItemIndex: string;
   user: string;
   meta: MetaOrUndefined;
@@ -41,31 +41,43 @@ export const updateListItem = async ({
   if (listItem == null) {
     return null;
   } else {
-    const doc: UpdateEsListItemSchema = {
-      meta,
-      updated_at: updatedAt,
-      updated_by: user,
-      ...transformListItemToElasticQuery({ type: listItem.type, value: value ?? listItem.value }),
-    };
-
-    const response: CreateDocumentResponse = await callCluster('update', {
-      body: {
-        doc,
-      },
-      id: listItem.id,
-      index: listItemIndex,
-    });
-    return {
-      created_at: listItem.created_at,
-      created_by: listItem.created_by,
-      id: response._id,
-      list_id: listItem.list_id,
-      meta: meta ?? listItem.meta,
-      tie_breaker_id: listItem.tie_breaker_id,
+    const elasticQuery = transformListItemToElasticQuery({
+      serializer: listItem.serializer,
       type: listItem.type,
-      updated_at: updatedAt,
-      updated_by: listItem.updated_by,
       value: value ?? listItem.value,
-    };
+    });
+    if (elasticQuery == null) {
+      return null;
+    } else {
+      const doc: UpdateEsListItemSchema = {
+        meta,
+        updated_at: updatedAt,
+        updated_by: user,
+        ...elasticQuery,
+      };
+
+      const response = await callCluster<CreateDocumentResponse>('update', {
+        body: {
+          doc,
+        },
+        id: listItem.id,
+        index: listItemIndex,
+        refresh: 'wait_for',
+      });
+      return {
+        created_at: listItem.created_at,
+        created_by: listItem.created_by,
+        deserializer: listItem.deserializer,
+        id: response._id,
+        list_id: listItem.list_id,
+        meta: meta ?? listItem.meta,
+        serializer: listItem.serializer,
+        tie_breaker_id: listItem.tie_breaker_id,
+        type: listItem.type,
+        updated_at: updatedAt,
+        updated_by: listItem.updated_by,
+        value: value ?? listItem.value,
+      };
+    }
   }
 };

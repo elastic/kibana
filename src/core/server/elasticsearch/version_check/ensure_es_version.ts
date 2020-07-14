@@ -29,10 +29,10 @@ import {
   esVersionEqualsKibana,
 } from './es_kibana_version_compatability';
 import { Logger } from '../../logging';
-import { APICaller } from '..';
+import { LegacyAPICaller } from '../legacy';
 
 export interface PollEsNodesVersionOptions {
-  callWithInternalUser: APICaller;
+  callWithInternalUser: LegacyAPICaller;
   log: Logger;
   kibanaVersion: string;
   ignoreVersionMismatch: boolean;
@@ -83,32 +83,32 @@ export function mapNodesVersionCompatibility(
   }
   const nodes = Object.keys(nodesInfo.nodes)
     .sort() // Sorting ensures a stable node ordering for comparison
-    .map(key => nodesInfo.nodes[key])
-    .map(node => Object.assign({}, node, { name: getHumanizedNodeName(node) }));
+    .map((key) => nodesInfo.nodes[key])
+    .map((node) => Object.assign({}, node, { name: getHumanizedNodeName(node) }));
 
   // Aggregate incompatible ES nodes.
   const incompatibleNodes = nodes.filter(
-    node => !esVersionCompatibleWithKibana(node.version, kibanaVersion)
+    (node) => !esVersionCompatibleWithKibana(node.version, kibanaVersion)
   );
 
   // Aggregate ES nodes which should prompt a Kibana upgrade. It's acceptable
   // if ES and Kibana versions are not the same as long as they are not
   // incompatible, but we should warn about it.
   // Ignore version qualifiers https://github.com/elastic/elasticsearch/issues/36859
-  const warningNodes = nodes.filter(node => !esVersionEqualsKibana(node.version, kibanaVersion));
+  const warningNodes = nodes.filter((node) => !esVersionEqualsKibana(node.version, kibanaVersion));
 
   // Note: If incompatible and warning nodes are present `message` only contains
   // an incompatibility notice.
   let message;
   if (incompatibleNodes.length > 0) {
-    const incompatibleNodeNames = incompatibleNodes.map(node => node.name).join(', ');
+    const incompatibleNodeNames = incompatibleNodes.map((node) => node.name).join(', ');
     if (ignoreVersionMismatch) {
       message = `Ignoring version incompatibility between Kibana v${kibanaVersion} and the following Elasticsearch nodes: ${incompatibleNodeNames}`;
     } else {
       message = `This version of Kibana (v${kibanaVersion}) is incompatible with the following Elasticsearch nodes in your cluster: ${incompatibleNodeNames}`;
     }
   } else if (warningNodes.length > 0) {
-    const warningNodeNames = warningNodes.map(node => node.name).join(', ');
+    const warningNodeNames = warningNodes.map((node) => node.name).join(', ');
     message =
       `You're running Kibana ${kibanaVersion} with some different versions of ` +
       'Elasticsearch. Update Kibana or Elasticsearch to the same ' +
@@ -151,7 +151,7 @@ export const pollEsNodesVersion = ({
           filterPath: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
         })
       ).pipe(
-        catchError(_err => {
+        catchError((_err) => {
           return of({ nodes: {} });
         })
       );

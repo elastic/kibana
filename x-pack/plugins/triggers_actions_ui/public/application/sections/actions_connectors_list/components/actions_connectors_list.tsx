@@ -6,7 +6,6 @@
 
 import React, { Fragment, useState, useEffect } from 'react';
 import {
-  EuiBadge,
   EuiInMemoryTable,
   EuiSpacer,
   EuiButton,
@@ -21,9 +20,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ServiceNowConnectorConfiguration } from '../../../../common';
 import { useAppDependencies } from '../../../app_context';
 import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
-import { ConnectorAddFlyout, ConnectorEditFlyout } from '../../action_connector_form';
+import ConnectorAddFlyout from '../../action_connector_form/connector_add_flyout';
+import ConnectorEditFlyout from '../../action_connector_form/connector_edit_flyout';
+
 import { hasDeleteActionsCapability, hasSaveActionsCapability } from '../../../lib/capabilities';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { ActionsConnectorsContextProvider } from '../../../context/actions_connectors_context';
@@ -33,7 +35,13 @@ import { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../.
 import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connectors_prompt';
 
 export const ActionsConnectorsList: React.FunctionComponent = () => {
-  const { http, toastNotifications, capabilities, actionTypeRegistry } = useAppDependencies();
+  const {
+    http,
+    toastNotifications,
+    capabilities,
+    actionTypeRegistry,
+    docLinks,
+  } = useAppDependencies();
   const canDelete = hasDeleteActionsCapability(capabilities);
   const canSave = hasSaveActionsCapability(capabilities);
 
@@ -88,7 +96,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       return;
     }
     // Update the data for the table
-    const updatedData = actions.map(action => {
+    const updatedData = actions.map((action) => {
       return {
         ...action,
         actionType: actionTypesIndex[action.actionTypeId]
@@ -99,7 +107,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     setData(updatedData);
     // Update the action types list for the filter
     const actionTypes = Object.values(actionTypesIndex)
-      .map(actionType => ({
+      .map((actionType) => ({
         value: actionType.id,
         name: `${actionType.name} (${getActionsCountByActionType(actions, actionType.id)})`,
       }))
@@ -111,7 +119,14 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     setIsLoadingActions(true);
     try {
       const actionsResponse = await loadAllActions({ http });
-      setActions(actionsResponse);
+      setActions(
+        actionsResponse.filter(
+          (action) =>
+            action.actionTypeId !== ServiceNowConnectorConfiguration.id ||
+            (action.actionTypeId === ServiceNowConnectorConfiguration.id &&
+              !action.config.isCaseOwned)
+        )
+      );
     } catch (e) {
       toastNotifications.addDanger({
         title: i18n.translate(
@@ -184,23 +199,6 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       ),
       sortable: false,
       truncateText: true,
-    },
-    {
-      field: 'referencedByCount',
-      'data-test-subj': 'connectorsTableCell-referencedByCount',
-      name: i18n.translate(
-        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.referencedByCountTitle',
-        { defaultMessage: 'Actions' }
-      ),
-      sortable: false,
-      truncateText: true,
-      render: (value: number, item: ActionConnectorTableItem) => {
-        return (
-          <EuiBadge color="hollow" key={item.id}>
-            {value}
-          </EuiBadge>
-        );
-      },
     },
     {
       field: 'isPreconfigured',
@@ -287,6 +285,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
               onSelectionChange(updatedSelectedItemsList: ActionConnectorTableItem[]) {
                 setSelectedItems(updatedSelectedItemsList);
               },
+              selectable: ({ isPreconfigured }: ActionConnectorTableItem) => !isPreconfigured,
             }
           : undefined
       }
@@ -365,7 +364,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
         onDeleted={(deleted: string[]) => {
           if (selectedItems.length === 0 || selectedItems.length === deleted.length) {
             const updatedActions = actions.filter(
-              action => action.id && !connectorsToDelete.includes(action.id)
+              (action) => action.id && !connectorsToDelete.includes(action.id)
             );
             setActions(updatedActions);
             setSelectedItems([]);
@@ -412,6 +411,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
           capabilities,
           toastNotifications,
           reloadConnectors: loadActions,
+          docLinks,
         }}
       >
         <ConnectorAddFlyout
@@ -432,5 +432,5 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
 };
 
 function getActionsCountByActionType(actions: ActionConnector[], actionTypeId: string) {
-  return actions.filter(action => action.actionTypeId === actionTypeId).length;
+  return actions.filter((action) => action.actionTypeId === actionTypeId).length;
 }

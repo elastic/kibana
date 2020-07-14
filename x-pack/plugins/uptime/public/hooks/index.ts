@@ -9,3 +9,4 @@ export * from './use_url_params';
 export * from './use_telemetry';
 export * from './update_kuery_string';
 export * from './use_cert_status';
+export * from './use_search_text';

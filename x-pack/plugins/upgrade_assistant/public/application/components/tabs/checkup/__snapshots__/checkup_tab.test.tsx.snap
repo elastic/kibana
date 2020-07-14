@@ -39,7 +39,7 @@ exports[`CheckupTab render with deprecations 1`] = `
         id="xpack.upgradeAssistant.checkupTab.backUpCallout.calloutBody.calloutDetail"
         values={
           Object {
-            "snapshotRestoreDocsButton": <ForwardRef
+            "snapshotRestoreDocsButton": <EuiLink
               href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html"
               target="_blank"
             >
@@ -48,7 +48,7 @@ exports[`CheckupTab render with deprecations 1`] = `
                 id="xpack.upgradeAssistant.checkupTab.backUpCallout.calloutBody.snapshotRestoreDocsButtonLabel"
                 values={Object {}}
               />
-            </ForwardRef>,
+            </EuiLink>,
           }
         }
       />
@@ -106,7 +106,7 @@ exports[`CheckupTab render with deprecations 1`] = `
               "actions": Array [
                 Object {
                   "label": "Reindex in Console",
-                  "url": "/app/kibana#/dev_tools/console?load_from=%2Fapi%2Fupgrade_assistant%2Freindex%2Fconsole_template%2Ftwitter.json",
+                  "url": "/app/dev_tools#/console?load_from=%2Fapi%2Fupgrade_assistant%2Freindex%2Fconsole_template%2Ftwitter.json",
                 },
               ],
               "details": "Reindexing is irreversible, so always back up your index before proceeding.",
@@ -126,7 +126,7 @@ exports[`CheckupTab render with deprecations 1`] = `
               "actions": Array [
                 Object {
                   "label": "Reindex in Console",
-                  "url": "/app/kibana#/dev_tools/console?load_from=%2Fapi%2Fupgrade_assistant%2Freindex%2Fconsole_template%2F.reindex-status.json",
+                  "url": "/app/dev_tools#/console?load_from=%2Fapi%2Fupgrade_assistant%2Freindex%2Fconsole_template%2F.reindex-status.json",
                 },
               ],
               "details": "Reindexing is irreversible, so always back up your index before proceeding.",
@@ -139,7 +139,7 @@ exports[`CheckupTab render with deprecations 1`] = `
               "actions": Array [
                 Object {
                   "label": "Reindex in Console",
-                  "url": "/app/kibana#/dev_tools/console?load_from=%2Fapi%2Fupgrade_assistant%2Freindex%2Fconsole_template%2Ftwitter2.json",
+                  "url": "/app/dev_tools#/console?load_from=%2Fapi%2Fupgrade_assistant%2Freindex%2Fconsole_template%2Ftwitter2.json",
                 },
               ],
               "details": "Reindexing is irreversible, so always back up your index before proceeding.",
@@ -221,7 +221,7 @@ exports[`CheckupTab render with deprecations 1`] = `
               "actions": Array [
                 Object {
                   "label": "Reindex in Console",
-                  "url": "/app/kibana#/dev_tools/console?load_from=%2Fapi%2Fupgrade_assistant%2Freindex%2Fconsole_template%2Ftwitter.json",
+                  "url": "/app/dev_tools#/console?load_from=%2Fapi%2Fupgrade_assistant%2Freindex%2Fconsole_template%2Ftwitter.json",
                 },
               ],
               "details": "Reindexing is irreversible, so always back up your index before proceeding.",
@@ -241,7 +241,7 @@ exports[`CheckupTab render with deprecations 1`] = `
               "actions": Array [
                 Object {
                   "label": "Reindex in Console",
-                  "url": "/app/kibana#/dev_tools/console?load_from=%2Fapi%2Fupgrade_assistant%2Freindex%2Fconsole_template%2F.reindex-status.json",
+                  "url": "/app/dev_tools#/console?load_from=%2Fapi%2Fupgrade_assistant%2Freindex%2Fconsole_template%2F.reindex-status.json",
                 },
               ],
               "details": "Reindexing is irreversible, so always back up your index before proceeding.",
@@ -254,7 +254,7 @@ exports[`CheckupTab render with deprecations 1`] = `
               "actions": Array [
                 Object {
                   "label": "Reindex in Console",
-                  "url": "/app/kibana#/dev_tools/console?load_from=%2Fapi%2Fupgrade_assistant%2Freindex%2Fconsole_template%2Ftwitter2.json",
+                  "url": "/app/dev_tools#/console?load_from=%2Fapi%2Fupgrade_assistant%2Freindex%2Fconsole_template%2Ftwitter2.json",
                 },
               ],
               "details": "Reindexing is irreversible, so always back up your index before proceeding.",
@@ -320,7 +320,7 @@ exports[`CheckupTab render with error 1`] = `
         id="xpack.upgradeAssistant.checkupTab.backUpCallout.calloutBody.calloutDetail"
         values={
           Object {
-            "snapshotRestoreDocsButton": <ForwardRef
+            "snapshotRestoreDocsButton": <EuiLink
               href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html"
               target="_blank"
             >
@@ -329,7 +329,7 @@ exports[`CheckupTab render with error 1`] = `
                 id="xpack.upgradeAssistant.checkupTab.backUpCallout.calloutBody.snapshotRestoreDocsButtonLabel"
                 values={Object {}}
               />
-            </ForwardRef>,
+            </EuiLink>,
           }
         }
       />
@@ -385,7 +385,7 @@ exports[`CheckupTab render without deprecations 1`] = `
         id="xpack.upgradeAssistant.checkupTab.backUpCallout.calloutBody.calloutDetail"
         values={
           Object {
-            "snapshotRestoreDocsButton": <ForwardRef
+            "snapshotRestoreDocsButton": <EuiLink
               href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html"
               target="_blank"
             >
@@ -394,7 +394,7 @@ exports[`CheckupTab render without deprecations 1`] = `
                 id="xpack.upgradeAssistant.checkupTab.backUpCallout.calloutBody.snapshotRestoreDocsButtonLabel"
                 values={Object {}}
               />
-            </ForwardRef>,
+            </EuiLink>,
           }
         }
       />
@@ -427,7 +427,7 @@ exports[`CheckupTab render without deprecations 1`] = `
                 id="xpack.upgradeAssistant.checkupTab.noIssues.nextStepsDetail"
                 values={
                   Object {
-                    "overviewTabButton": <ForwardRef
+                    "overviewTabButton": <EuiLink
                       onClick={[Function]}
                     >
                       <FormattedMessage
@@ -435,7 +435,7 @@ exports[`CheckupTab render without deprecations 1`] = `
                         id="xpack.upgradeAssistant.checkupTab.noIssues.nextStepsDetail.overviewTabButtonLabel"
                         values={Object {}}
                       />
-                    </ForwardRef>,
+                    </EuiLink>,
                   }
                 }
               />

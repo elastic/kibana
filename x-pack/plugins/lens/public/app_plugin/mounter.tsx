@@ -9,19 +9,18 @@ import { AppMountParameters, CoreSetup } from 'kibana/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { i18n } from '@kbn/i18n';
 
-import rison from 'rison-node';
-import { DashboardConstants } from '../../../../../src/plugins/dashboard/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry';
 
 import { App } from './app';
 import { EditorFrameStart } from '../types';
-import { addEmbeddableToDashboardUrl, getUrlVars, isRisonObject } from '../helpers';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { SavedObjectIndexStore } from '../persistence';
 import { LensPluginStartDependencies } from '../plugin';
+import { LENS_EMBEDDABLE_TYPE } from '../../common';
 
 export async function mountApp(
   core: CoreSetup<LensPluginStartDependencies, void>,
@@ -29,9 +28,17 @@ export async function mountApp(
   createEditorFrame: EditorFrameStart['createInstance']
 ) {
   const [coreStart, startDependencies] = await core.getStartServices();
-  const { data: dataStart, navigation } = startDependencies;
+  const { data: dataStart, navigation, embeddable } = startDependencies;
   const savedObjectsClient = coreStart.savedObjects.client;
   addHelpMenuToAppChrome(coreStart.chrome, coreStart.docLinks);
+
+  coreStart.chrome.docTitle.change(
+    i18n.translate('xpack.lens.pageTitle', { defaultMessage: 'Lens' })
+  );
+
+  const stateTransfer = embeddable?.getStateTransfer(params.history);
+  const { originatingApp } =
+    stateTransfer?.getIncomingEditorState({ keysToRemoveAfterFetch: ['originatingApp'] }) || {};
 
   const instance = await createEditorFrame();
 
@@ -41,44 +48,32 @@ export async function mountApp(
       http: core.http,
     })
   );
-  const updateUrlTime = (urlVars: Record<string, string>): void => {
-    const decoded = rison.decode(urlVars._g);
-    if (!isRisonObject(decoded)) {
-      return;
-    }
-    // @ts-ignore
-    decoded.time = dataStart.query.timefilter.timefilter.getTime();
-    urlVars._g = rison.encode(decoded);
-  };
   const redirectTo = (
     routeProps: RouteComponentProps<{ id?: string }>,
-    addToDashboardMode: boolean,
-    id?: string
+    id?: string,
+    returnToOrigin?: boolean,
+    newlyCreated?: boolean
   ) => {
     if (!id) {
-      routeProps.history.push('/lens');
-    } else if (!addToDashboardMode) {
-      routeProps.history.push(`/lens/edit/${id}`);
-    } else if (addToDashboardMode && id) {
-      routeProps.history.push(`/lens/edit/${id}`);
-      const lastDashboardLink = coreStart.chrome.navLinks.get('kibana:dashboard');
-      if (!lastDashboardLink || !lastDashboardLink.url) {
-        throw new Error('Cannot get last dashboard url');
+      routeProps.history.push('/');
+    } else if (!originatingApp) {
+      routeProps.history.push(`/edit/${id}`);
+    } else if (!!originatingApp && id && returnToOrigin) {
+      routeProps.history.push(`/edit/${id}`);
+
+      if (newlyCreated && stateTransfer) {
+        stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
+          state: { id, type: LENS_EMBEDDABLE_TYPE },
+        });
+      } else {
+        coreStart.application.navigateToApp(originatingApp);
       }
-      const urlVars = getUrlVars(lastDashboardLink.url);
-      updateUrlTime(urlVars); // we need to pass in timerange in query params directly
-      const dashboardUrl = addEmbeddableToDashboardUrl(lastDashboardLink.url, id, urlVars);
-      window.history.pushState({}, '', dashboardUrl);
     }
   };
 
   const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
     trackUiEvent('loaded');
-    const addToDashboardMode =
-      !!routeProps.location.search &&
-      routeProps.location.search.includes(
-        DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM
-      );
+
     return (
       <App
         core={coreStart}
@@ -88,8 +83,12 @@ export async function mountApp(
         storage={new Storage(localStorage)}
         docId={routeProps.match.params.id}
         docStorage={new SavedObjectIndexStore(savedObjectsClient)}
-        redirectTo={id => redirectTo(routeProps, addToDashboardMode, id)}
-        addToDashboardMode={addToDashboardMode}
+        redirectTo={(id, returnToOrigin, newlyCreated) =>
+          redirectTo(routeProps, id, returnToOrigin, newlyCreated)
+        }
+        originatingApp={originatingApp}
+        onAppLeave={params.onAppLeave}
+        history={routeProps.history}
       />
     );
   };
@@ -99,13 +98,14 @@ export async function mountApp(
     return <FormattedMessage id="xpack.lens.app404" defaultMessage="404 Not Found" />;
   }
 
+  params.element.classList.add('lnsAppWrapper');
   render(
     <I18nProvider>
       <HashRouter>
         <Switch>
-          <Route exact path="/lens/edit/:id" render={renderEditor} />
-          <Route exact path="/lens" render={renderEditor} />
-          <Route path="/lens" component={NotFound} />
+          <Route exact path="/edit/:id" render={renderEditor} />
+          <Route exact path="/" render={renderEditor} />
+          <Route path="/" component={NotFound} />
         </Switch>
       </HashRouter>
     </I18nProvider>,

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { BASE_PATH } from '../../../common/constants';
 import { ManagementAppMountParams } from '../../../../../../src/plugins/management/public';
 
 type SetBreadcrumbs = ManagementAppMountParams['setBreadcrumbs'];
@@ -28,7 +27,7 @@ class BreadcrumbService {
         text: i18n.translate('xpack.idxMgmt.breadcrumb.homeLabel', {
           defaultMessage: 'Index Management',
         }),
-        href: `#${BASE_PATH}`,
+        href: `/`,
       },
     ];
 
@@ -38,7 +37,7 @@ class BreadcrumbService {
         text: i18n.translate('xpack.idxMgmt.breadcrumb.templatesLabel', {
           defaultMessage: 'Templates',
         }),
-        href: `#${BASE_PATH}templates`,
+        href: `/templates`,
       },
     ];
 

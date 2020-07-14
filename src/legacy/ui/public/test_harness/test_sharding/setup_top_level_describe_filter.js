@@ -87,7 +87,7 @@ export function setupTopLevelDescribeFilter(test) {
    */
   let describeCallDepth = 0;
 
-  const describeInterceptor = function(describeName, describeBody) {
+  const describeInterceptor = function (describeName, describeBody) {
     const context = this;
 
     const isTopLevelCall = describeCallDepth === 0;

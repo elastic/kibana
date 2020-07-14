@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
-import React, { PureComponent } from 'react';
+import React from 'react';
 import { VerticalGridLines, XYPlot } from 'react-vis';
+import { useTheme } from '../../../../hooks/useTheme';
 import { Mark } from '../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks';
 import { PlotValues } from './plotUtils';
 
@@ -16,54 +16,51 @@ interface VerticalLinesProps {
   topTraceDuration: number;
 }
 
-export class VerticalLines extends PureComponent<VerticalLinesProps> {
-  render() {
-    const { topTraceDuration, marks = [] } = this.props;
-    const {
-      width,
-      height,
-      margins,
-      xDomain,
-      tickValues
-    } = this.props.plotValues;
+export const VerticalLines = ({
+  topTraceDuration,
+  plotValues,
+  marks = [],
+}: VerticalLinesProps) => {
+  const { width, height, margins, xDomain, tickValues } = plotValues;
 
-    const markTimes = marks
-      .filter(mark => mark.verticalLine)
-      .map(({ offset }) => offset);
+  const markTimes = marks
+    .filter((mark) => mark.verticalLine)
+    .map(({ offset }) => offset);
 
-    return (
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0
-        }}
+  const theme = useTheme();
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+      }}
+    >
+      <XYPlot
+        dontCheckIfEmpty
+        width={width}
+        height={height + margins.top}
+        margin={margins}
+        xDomain={xDomain}
       >
-        <XYPlot
-          dontCheckIfEmpty
-          width={width}
-          height={height + margins.top}
-          margin={margins}
-          xDomain={xDomain}
-        >
-          <VerticalGridLines
-            tickValues={tickValues}
-            style={{ stroke: theme.euiColorLightestShade }}
-          />
+        <VerticalGridLines
+          tickValues={tickValues}
+          style={{ stroke: theme.eui.euiColorLightestShade }}
+        />
 
-          <VerticalGridLines
-            tickValues={markTimes}
-            style={{ stroke: theme.euiColorMediumShade }}
-          />
+        <VerticalGridLines
+          tickValues={markTimes}
+          style={{ stroke: theme.eui.euiColorMediumShade }}
+        />
 
-          {topTraceDuration > 0 && (
-            <VerticalGridLines
-              tickValues={[topTraceDuration]}
-              style={{ stroke: theme.euiColorMediumShade }}
-            />
-          )}
-        </XYPlot>
-      </div>
-    );
-  }
-}
+        {topTraceDuration > 0 && (
+          <VerticalGridLines
+            tickValues={[topTraceDuration]}
+            style={{ stroke: theme.eui.euiColorMediumShade }}
+          />
+        )}
+      </XYPlot>
+    </div>
+  );
+};

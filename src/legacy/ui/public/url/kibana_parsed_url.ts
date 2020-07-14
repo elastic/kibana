@@ -19,28 +19,28 @@
 
 import { parse } from 'url';
 
-import { modifyUrl } from '../../../../core/utils';
+import { modifyUrl } from '../../../../core/public';
 import { prependPath } from './prepend_path';
 
 interface Options {
   /**
    * An optional base path for kibana. If supplied, should start with a "/".
-   * e.g. in https://localhost:5601/gra/app/kibana#/visualize/edit/viz_id the
+   * e.g. in https://localhost:5601/gra/app/visualize#/edit/viz_id the
    * basePath is "/gra"
    */
   basePath?: string;
 
   /**
    * The app id.
-   * e.g. in https://localhost:5601/gra/app/kibana#/visualize/edit/viz_id the app id is "kibana".
+   * e.g. in https://localhost:5601/gra/app/visualize#/edit/viz_id the app id is "kibana".
    */
   appId: string;
 
   /**
    * The path for a page in the the app. Should start with a "/". Don't include the hash sign. Can
    * include all query parameters.
-   * e.g. in https://localhost:5601/gra/app/kibana#/visualize/edit/viz_id?g=state the appPath is
-   * "/visualize/edit/viz_id?g=state"
+   * e.g. in https://localhost:5601/gra/app/visualize#/edit/viz_id?g=state the appPath is
+   * "/edit/viz_id?g=state"
    */
   appPath?: string;
 
@@ -111,13 +111,13 @@ export class KibanaParsedUrl {
       return;
     }
 
-    this.appPath = modifyUrl(this.appPath, parsed => {
+    this.appPath = modifyUrl(this.appPath, (parsed) => {
       parsed.query._g = newGlobalState;
     });
   }
 
   public addQueryParameter(name: string, val: string) {
-    this.appPath = modifyUrl(this.appPath, parsed => {
+    this.appPath = modifyUrl(this.appPath, (parsed) => {
       parsed.query[name] = val;
     });
   }
@@ -139,7 +139,7 @@ export class KibanaParsedUrl {
   }
 
   public getAbsoluteUrl() {
-    return modifyUrl(this.getRootRelativePath(), parsed => {
+    return modifyUrl(this.getRootRelativePath(), (parsed) => {
       parsed.protocol = this.protocol;
       parsed.port = this.port;
       parsed.hostname = this.hostname;

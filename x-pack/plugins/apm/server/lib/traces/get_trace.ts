@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PromiseReturnType } from '../../../typings/common';
+import { PromiseReturnType } from '../../../../observability/typings/common';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getTraceItems } from './get_trace_items';
 
@@ -17,6 +17,6 @@ export async function getTrace(traceId: string, setup: Setup & SetupTimeRange) {
 
   return {
     trace,
-    errorsPerTransaction
+    errorsPerTransaction,
   };
 }

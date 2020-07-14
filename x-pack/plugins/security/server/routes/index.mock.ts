@@ -7,7 +7,7 @@
 import {
   elasticsearchServiceMock,
   httpServiceMock,
-  loggingServiceMock,
+  loggingSystemMock,
   httpResourcesMock,
 } from '../../../../../src/core/server/mocks';
 import { authenticationMock } from '../authentication/index.mock';
@@ -20,14 +20,16 @@ export const routeDefinitionParamsMock = {
     router: httpServiceMock.createRouter(),
     basePath: httpServiceMock.createBasePath(),
     csp: httpServiceMock.createSetupContract().csp,
-    logger: loggingServiceMock.create().get(),
-    clusterClient: elasticsearchServiceMock.createClusterClient(),
-    config: createConfig(ConfigSchema.validate(config), loggingServiceMock.create().get(), {
+    logger: loggingSystemMock.create().get(),
+    clusterClient: elasticsearchServiceMock.createLegacyClusterClient(),
+    config: createConfig(ConfigSchema.validate(config), loggingSystemMock.create().get(), {
       isTLSEnabled: false,
     }),
     authc: authenticationMock.create(),
     authz: authorizationMock.create(),
     license: licenseMock.create(),
     httpResources: httpResourcesMock.createRegistrar(),
+    getFeatures: jest.fn(),
+    getFeatureUsageService: jest.fn(),
   }),
 };

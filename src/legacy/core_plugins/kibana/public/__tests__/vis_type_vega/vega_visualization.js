@@ -21,6 +21,9 @@ import Bluebird from 'bluebird';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import $ from 'jquery';
+
+import 'leaflet/dist/leaflet.js';
+import 'leaflet-vega';
 // Will be replaced with new path when tests are moved
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createVegaVisualization } from '../../../../../../plugins/vis_type_vega/public/vega_visualization';
@@ -41,7 +44,7 @@ import vegaMapImage256 from './vega_map_image_256.png';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { VegaParser } from '../../../../../../plugins/vis_type_vega/public/data_model/vega_parser';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SearchCache } from '../../../../../../plugins/vis_type_vega/public/data_model/search_cache';
+import { SearchAPI } from '../../../../../../plugins/vis_type_vega/public/data_model/search_api';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createVegaTypeDefinition } from '../../../../../../plugins/vis_type_vega/public/vega_type';
@@ -63,10 +66,9 @@ import {
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../plugins/vis_type_vega/public/services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setInjectedVarFunc } from '../../../../../../plugins/maps_legacy/public/kibana_services';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ServiceSettings } from '../../../../../../plugins/maps_legacy/public/map/service_settings';
-import { getKibanaMapFactoryProvider } from '../../../../../../plugins/maps_legacy/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { KibanaMap } from '../../../../../../plugins/maps_legacy/public/map/kibana_map';
 
 const THRESHOLD = 0.1;
 const PIXEL_DIFF = 30;
@@ -79,18 +81,7 @@ describe('VegaVisualizations', () => {
   let vegaVisualizationDependencies;
   let vegaVisType;
 
-  const coreSetupMock = {
-    notifications: {
-      toasts: {},
-    },
-    uiSettings: {
-      get: () => {},
-    },
-    injectedMetadata: {
-      getInjectedVar: () => {},
-    },
-  };
-  setKibanaMapFactory(getKibanaMapFactoryProvider(coreSetupMock));
+  setKibanaMapFactory((...args) => new KibanaMap(...args));
   setInjectedVars({
     emsTileLayerId: {},
     enableExternalUrls: true,
@@ -100,34 +91,43 @@ describe('VegaVisualizations', () => {
   setSavedObjects(npStart.core.savedObjects);
   setNotifications(npStart.core.notifications);
 
+  const mockMapConfig = {
+    includeElasticMapsService: true,
+    proxyElasticMapsServiceInMaps: false,
+    tilemap: {
+      deprecated: {
+        config: {
+          options: {
+            attribution: '',
+          },
+        },
+      },
+      options: {
+        attribution: '',
+        minZoom: 0,
+        maxZoom: 10,
+      },
+    },
+    regionmap: {
+      includeElasticMapsService: true,
+      layers: [],
+    },
+    manifestServiceUrl: '',
+    emsFileApiUrl: 'https://vector.maps.elastic.co',
+    emsTileApiUrl: 'https://tiles.maps.elastic.co',
+    emsLandingPageUrl: 'https://maps.elastic.co/v7.7',
+    emsFontLibraryUrl: 'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf',
+    emsTileLayerId: {
+      bright: 'road_map',
+      desaturated: 'road_map_desaturated',
+      dark: 'dark_map',
+    },
+  };
+
   beforeEach(ngMock.module('kibana'));
   beforeEach(
     ngMock.inject(() => {
-      setInjectedVarFunc(injectedVar => {
-        switch (injectedVar) {
-          case 'mapConfig':
-            return {
-              emsFileApiUrl: '',
-              emsTileApiUrl: '',
-              emsLandingPageUrl: '',
-            };
-          case 'tilemapsConfig':
-            return {
-              deprecated: {
-                config: {
-                  options: {
-                    attribution: '123',
-                  },
-                },
-              },
-            };
-          case 'version':
-            return '123';
-          default:
-            return 'not found';
-        }
-      });
-      const serviceSettings = new ServiceSettings();
+      const serviceSettings = new ServiceSettings(mockMapConfig, mockMapConfig.tilemap);
       vegaVisualizationDependencies = {
         serviceSettings,
         core: {
@@ -150,7 +150,7 @@ describe('VegaVisualizations', () => {
   );
 
   describe('VegaVisualization - basics', () => {
-    beforeEach(async function() {
+    beforeEach(async function () {
       setupDOM('512px', '512px');
       imageComparator = new ImageComparator();
 
@@ -159,17 +159,24 @@ describe('VegaVisualizations', () => {
       });
     });
 
-    afterEach(function() {
+    afterEach(function () {
       teardownDOM();
       imageComparator.destroy();
     });
 
-    it('should show vegalite graph and update on resize (may fail in dev env)', async function() {
+    it('should show vegalite graph and update on resize (may fail in dev env)', async function () {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, vis);
 
-        const vegaParser = new VegaParser(vegaliteGraph, new SearchCache());
+        const vegaParser = new VegaParser(
+          vegaliteGraph,
+          new SearchAPI({
+            search: npStart.plugins.data.search,
+            uiSettings: npStart.core.uiSettings,
+            injectedMetadata: npStart.core.injectedMetadata,
+          })
+        );
         await vegaParser.parseAsync();
 
         await vegaVis.render(vegaParser, vis.params, { data: true });
@@ -187,11 +194,18 @@ describe('VegaVisualizations', () => {
       }
     });
 
-    it('should show vega graph (may fail in dev env)', async function() {
+    it('should show vega graph (may fail in dev env)', async function () {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, vis);
-        const vegaParser = new VegaParser(vegaGraph, new SearchCache());
+        const vegaParser = new VegaParser(
+          vegaGraph,
+          new SearchAPI({
+            search: npStart.plugins.data.search,
+            uiSettings: npStart.core.uiSettings,
+            injectedMetadata: npStart.core.injectedMetadata,
+          })
+        );
         await vegaParser.parseAsync();
 
         await vegaVis.render(vegaParser, vis.params, { data: true });
@@ -207,7 +221,14 @@ describe('VegaVisualizations', () => {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, vis);
-        const vegaParser = new VegaParser(vegaTooltipGraph, new SearchCache());
+        const vegaParser = new VegaParser(
+          vegaTooltipGraph,
+          new SearchAPI({
+            search: npStart.plugins.data.search,
+            uiSettings: npStart.core.uiSettings,
+            injectedMetadata: npStart.core.injectedMetadata,
+          })
+        );
         await vegaParser.parseAsync();
         await vegaVis.render(vegaParser, vis.params, { data: true });
 
@@ -249,7 +270,14 @@ describe('VegaVisualizations', () => {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, vis);
-        const vegaParser = new VegaParser(vegaMapGraph, new SearchCache());
+        const vegaParser = new VegaParser(
+          vegaMapGraph,
+          new SearchAPI({
+            search: npStart.plugins.data.search,
+            uiSettings: npStart.core.uiSettings,
+            injectedMetadata: npStart.core.injectedMetadata,
+          })
+        );
         await vegaParser.parseAsync();
 
         domNode.style.width = '256px';
@@ -269,7 +297,7 @@ describe('VegaVisualizations', () => {
         vegaVis = new VegaVisualization(domNode, vis);
         const vegaParser = new VegaParser(
           `{
-            "$schema": "https://vega.github.io/schema/vega/v3.json",
+            "$schema": "https://vega.github.io/schema/vega/v5.json",
             "marks": [
               {
                 "type": "text",
@@ -288,7 +316,11 @@ describe('VegaVisualizations', () => {
               }
             ]
           }`,
-          new SearchCache()
+          new SearchAPI({
+            search: npStart.plugins.data.search,
+            uiSettings: npStart.core.uiSettings,
+            injectedMetadata: npStart.core.injectedMetadata,
+          })
         );
         await vegaParser.parseAsync();
 
@@ -298,11 +330,6 @@ describe('VegaVisualizations', () => {
         await vegaVis.render(vegaParser, vis.params, { data: true });
         const vegaView = vegaVis._vegaView._view;
         expect(vegaView.height()).to.be(250.00000001);
-
-        vegaView.height(250);
-        await vegaView.runAsync();
-        // as soon as this test fails, the workaround with the subpixel value can be removed.
-        expect(vegaView.height()).to.be(0);
       } finally {
         vegaVis.destroy();
       }

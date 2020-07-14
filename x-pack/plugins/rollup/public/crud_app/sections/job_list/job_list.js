@@ -27,11 +27,9 @@ import {
 
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
-import { CRUD_APP_BASE_PATH } from '../../constants';
-import { getRouterLinkProps, extractQueryParams, listBreadcrumb } from '../../services';
-
+import { extractQueryParams } from '../../../shared_imports';
+import { getRouterLinkProps, listBreadcrumb } from '../../services';
 import { JobTable } from './job_table';
-
 import { DetailPanel } from './detail_panel';
 
 const REFRESH_RATE_MS = 30000;
@@ -166,7 +164,7 @@ export class JobListUi extends Component {
         actions={
           <EuiButton
             data-test-subj="createRollupJobButton"
-            {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/create`)}
+            {...getRouterLinkProps(`/create`)}
             fill
             iconType="plusInCircle"
           >
@@ -210,7 +208,7 @@ export class JobListUi extends Component {
           {this.getHeaderSection()}
 
           <EuiPageContentHeaderSection>
-            <EuiButton fill {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/create`)}>
+            <EuiButton fill {...getRouterLinkProps(`/create`)}>
               <FormattedMessage
                 id="xpack.rollupJobs.jobList.createButtonLabel"
                 defaultMessage="Create rollup job"

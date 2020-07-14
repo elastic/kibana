@@ -10,7 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiSpacer
+  EuiSpacer,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { CustomLink } from '../../../../../../common/custom_link/custom_link_types';
@@ -26,7 +26,7 @@ interface Props {
 
 export const CustomLinkTable = ({
   items = [],
-  onCustomLinkSelected
+  onCustomLinkSelected,
 }: Props) => {
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -37,7 +37,7 @@ export const CustomLinkTable = ({
         'xpack.apm.settings.customizeUI.customLink.table.name',
         { defaultMessage: 'Name' }
       ),
-      truncateText: true
+      truncateText: true,
     },
     {
       field: 'url',
@@ -45,7 +45,7 @@ export const CustomLinkTable = ({
         'xpack.apm.settings.customizeUI.customLink.table.url',
         { defaultMessage: 'URL' }
       ),
-      truncateText: true
+      truncateText: true,
     },
     {
       width: px(160),
@@ -58,7 +58,7 @@ export const CustomLinkTable = ({
       sortable: true,
       render: (value: number) => (
         <TimestampTooltip time={value} timeUnit="minutes" />
-      )
+      ),
     },
     {
       width: px(units.triple),
@@ -78,10 +78,10 @@ export const CustomLinkTable = ({
           type: 'icon',
           onClick: (customLink: CustomLink) => {
             onCustomLinkSelected(customLink);
-          }
-        }
-      ]
-    }
+          },
+        },
+      ],
+    },
   ];
 
   const filteredItems = items.filter(({ label, url }) => {
@@ -96,11 +96,11 @@ export const CustomLinkTable = ({
       <EuiSpacer size="m" />
       <EuiFieldSearch
         fullWidth
-        onChange={e => setSearchTerm(e.target.value)}
+        onChange={(e) => setSearchTerm(e.target.value)}
         placeholder={i18n.translate(
           'xpack.apm.settings.customizeUI.customLink.searchInput.filter',
           {
-            defaultMessage: 'Filter links by Name and URL...'
+            defaultMessage: 'Filter links by Name and URL...',
           }
         )}
       />
@@ -131,7 +131,7 @@ const NoResultFound = ({ value }: { value: string }) => (
           'xpack.apm.settings.customizeUI.customLink.table.noResultFound',
           {
             defaultMessage: `No results for "{value}".`,
-            values: { value }
+            values: { value },
           }
         )}
       </EuiText>

@@ -5,33 +5,48 @@
  */
 
 import React, { useEffect } from 'react';
-import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
-import { BASE_PATH, UIM_APP_LOAD } from '../../common/constants';
-import { IndexManagementHome } from './sections/home';
+
+import { Router, Switch, Route, Redirect } from 'react-router-dom';
+import { ScopedHistory } from 'kibana/public';
+
+import { UIM_APP_LOAD } from '../../common/constants';
+import { IndexManagementHome, homeSections } from './sections/home';
 import { TemplateCreate } from './sections/template_create';
 import { TemplateClone } from './sections/template_clone';
 import { TemplateEdit } from './sections/template_edit';
 
 import { useServices } from './app_context';
+import {
+  ComponentTemplateCreate,
+  ComponentTemplateEdit,
+  ComponentTemplateClone,
+} from './components';
 
-export const App = () => {
+export const App = ({ history }: { history: ScopedHistory }) => {
   const { uiMetricService } = useServices();
   useEffect(() => uiMetricService.trackMetric('loaded', UIM_APP_LOAD), [uiMetricService]);
 
   return (
-    <HashRouter>
+    <Router history={history}>
       <AppWithoutRouter />
-    </HashRouter>
+    </Router>
   );
 };
 
 // Export this so we can test it with a different router.
 export const AppWithoutRouter = () => (
   <Switch>
-    <Route exact path={`${BASE_PATH}create_template`} component={TemplateCreate} />
-    <Route exact path={`${BASE_PATH}clone_template/:name*`} component={TemplateClone} />
-    <Route exact path={`${BASE_PATH}edit_template/:name*`} component={TemplateEdit} />
-    <Route path={`${BASE_PATH}:section(indices|templates)`} component={IndexManagementHome} />
-    <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}indices`} />
+    <Route exact path="/create_template" component={TemplateCreate} />
+    <Route exact path="/clone_template/:name*" component={TemplateClone} />
+    <Route exact path="/edit_template/:name*" component={TemplateEdit} />
+    <Route exact path="/create_component_template" component={ComponentTemplateCreate} />
+    <Route
+      exact
+      path="/create_component_template/:sourceComponentTemplateName"
+      component={ComponentTemplateClone}
+    />
+    <Route exact path="/edit_component_template/:name*" component={ComponentTemplateEdit} />
+    <Route path={`/:section(${homeSections.join('|')})`} component={IndexManagementHome} />
+    <Redirect from={`/`} to={`/indices`} />
   </Switch>
 );

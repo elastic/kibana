@@ -68,11 +68,11 @@ Then, select the *Integrations* tab and click the *New Integration* button.
 * If you are creating a new service for your integration,
 go to
 https://support.pagerduty.com/docs/services-and-integrations#section-configuring-services-and-integrations[Configuring Services and Integrations]
-and follow the steps outlined in the *Create a New Service* section, selecting *Elastic* as the *Integration Type* in step 4.
+and follow the steps outlined in the *Create a New Service* section, selecting *Elastic Alerts* as the *Integration Type* in step 4.
 Continue with the <<pagerduty-in-elastic, In Elastic>> section once you have finished these steps.
 
 . Enter an *Integration Name* in the format Elastic-service-name (for example, Elastic-Alerting or Kibana-APM-Alerting)
-and select Elastic from the *Integration Type* menu.
+and select *Elastic Alerts* from the *Integration Type* menu.
 . Click *Add Integration* to save your new integration.
 +
 You will be redirected to the *Integrations* tab for your service. An Integration Key is generated on this screen.
@@ -134,6 +134,30 @@ PagerDuty connectors have the following configuration properties:
 Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
 API URL::   An optional PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`. If you are using the <<action-settings, `xpack.actions.whitelistedHosts`>> setting, make sure the hostname is whitelisted.
 Integration Key::   A 32 character PagerDuty Integration Key for an integration on a service, also referred to as the routing key.
+
+[float]
+[[Preconfigured-pagerduty-configuration]]
+==== Preconfigured action type
+
+[source,text]
+--
+ my-pagerduty:
+   name: preconfigured-pagerduty-action-type
+   actionTypeId: .pagerduty
+   config:
+     apiUrl: https://test.host
+   secrets:
+     routingKey: testroutingkey
+--
+
+`config` defines the action type specific to the configuration.
+`config` contains
+`apiURL`, a string that corresponds to *API URL*.
+
+`secrets` defines sensitive information for the action type.
+`secrets` contains
+`routingKey`, a string that corresponds to *Integration Key*.
+
 
 [float]
 [[pagerduty-action-configuration]]

@@ -9,7 +9,9 @@ import React from 'react';
 import { PipelineForm as PipelineFormUI, PipelineFormProps } from './pipeline_form';
 import { TestConfigContextProvider } from './test_config_context';
 
-export const PipelineFormProvider: React.FunctionComponent<PipelineFormProps> = passThroughProps => {
+export const PipelineFormProvider: React.FunctionComponent<PipelineFormProps> = (
+  passThroughProps
+) => {
   return (
     <TestConfigContextProvider>
       <PipelineFormUI {...passThroughProps} />

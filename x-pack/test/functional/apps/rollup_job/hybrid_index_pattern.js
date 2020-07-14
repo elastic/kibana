@@ -8,13 +8,13 @@ import datemath from '@elastic/datemath';
 import expect from '@kbn/expect';
 import mockRolledUpData, { mockIndices } from './hybrid_index_helper';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'settings']);
 
-  describe('hybrid index pattern', function() {
+  describe('hybrid index pattern', function () {
     //Since rollups can only be created once with the same name (even if you delete it),
     //we add the Date.now() to avoid name collision if you run the tests locally back to back.
     const rollupJobName = `hybrid-index-pattern-test-rollup-job-${Date.now()}`;
@@ -32,7 +32,7 @@ export default function({ getService, getPageObjects }) {
     it('create hybrid index pattern', async () => {
       //Create data for rollup job to recognize.
       //Index past data to be used in the test.
-      await pastDates.map(async day => {
+      await pastDates.map(async (day) => {
         await es.index(mockIndices(day, rollupSourceIndexPrefix));
       });
 
@@ -70,7 +70,7 @@ export default function({ getService, getPageObjects }) {
         });
       });
 
-      await pastDates.map(async day => {
+      await pastDates.map(async (day) => {
         await es.index(mockRolledUpData(rollupJobName, rollupTargetIndexName, day));
       });
 
@@ -81,10 +81,13 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.settings.createIndexPattern(rollupIndexPatternName, '@timestamp', false);
 
       await PageObjects.settings.clickKibanaIndexPatterns();
-      const indexPattern = (await PageObjects.settings.getIndexPatternList()).pop();
-      const indexPatternText = await indexPattern.getVisibleText();
-      expect(indexPatternText).to.contain(rollupIndexPatternName);
-      expect(indexPatternText).to.contain('Rollup');
+      const indexPatternNames = await PageObjects.settings.getAllIndexPatternNames();
+      //The assertion is going to check that the string has the right name and that the text Rollup
+      //is included (since there is a Rollup tag).
+      const filteredIndexPatternNames = indexPatternNames.filter(
+        (i) => i.includes(rollupIndexPatternName) && i.includes('Rollup')
+      );
+      expect(filteredIndexPatternNames.length).to.be(1);
     });
 
     after(async () => {

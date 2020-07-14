@@ -18,7 +18,7 @@
  */
 
 export function buildAggBody(fieldName, scriptedFields) {
-  const scriptedField = scriptedFields.find(field => {
+  const scriptedField = scriptedFields.find((field) => {
     return field.name === fieldName;
   });
 

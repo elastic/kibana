@@ -32,7 +32,7 @@ export class FeaturesTooltip extends React.Component {
     return null;
   }
 
-  _setCurrentFeature = feature => {
+  _setCurrentFeature = (feature) => {
     this.setState({ currentFeature: feature });
   };
 
@@ -132,6 +132,7 @@ export class FeaturesTooltip extends React.Component {
         <FeatureProperties
           featureId={this.state.currentFeature.id}
           layerId={this.state.currentFeature.layerId}
+          mbProperties={this.state.currentFeature.mbProperties}
           loadFeatureProperties={this.props.loadFeatureProperties}
           showFilterButtons={!!this.props.addFilters && this.props.isLocked}
           onCloseTooltip={this.props.closeTooltip}

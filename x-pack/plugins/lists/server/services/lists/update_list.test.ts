@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getListResponseMock, getUpdateListOptionsMock } from '../mocks';
+import { ListSchema } from '../../../common/schemas';
+import { getListResponseMock } from '../../../common/schemas/response/list_schema.mock';
 
 import { updateList } from './update_list';
 import { getList } from './get_list';
+import { getUpdateListOptionsMock } from './update_list.mock';
 
 jest.mock('./get_list', () => ({
   getList: jest.fn(),
@@ -27,8 +29,25 @@ describe('update_list', () => {
     ((getList as unknown) as jest.Mock).mockResolvedValueOnce(list);
     const options = getUpdateListOptionsMock();
     const updatedList = await updateList(options);
-    const expected = getListResponseMock();
-    expected.id = 'elastic-id-123';
+    const expected: ListSchema = { ...getListResponseMock(), id: 'elastic-id-123' };
+    expect(updatedList).toEqual(expected);
+  });
+
+  test('it returns a list with serializer and deserializer', async () => {
+    const list: ListSchema = {
+      ...getListResponseMock(),
+      deserializer: '{{value}}',
+      serializer: '(?<value>)',
+    };
+    ((getList as unknown) as jest.Mock).mockResolvedValueOnce(list);
+    const options = getUpdateListOptionsMock();
+    const updatedList = await updateList(options);
+    const expected: ListSchema = {
+      ...getListResponseMock(),
+      deserializer: '{{value}}',
+      id: 'elastic-id-123',
+      serializer: '(?<value>)',
+    };
     expect(updatedList).toEqual(expected);
   });
 

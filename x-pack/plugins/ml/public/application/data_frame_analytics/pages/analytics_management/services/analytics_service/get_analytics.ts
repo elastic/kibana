@@ -125,7 +125,7 @@ export const getAnalyticsFactory = (
         const tableRows = analyticsConfigs.data_frame_analytics.reduce(
           (reducedtableRows, config) => {
             const stats = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
-              ? analyticsStats.data_frame_analytics.find(d => config.id === d.id)
+              ? analyticsStats.data_frame_analytics.find((d) => config.id === d.id)
               : undefined;
 
             // A newly created analytics job might not have corresponding stats yet.

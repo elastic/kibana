@@ -6,7 +6,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
@@ -60,16 +60,16 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_advanced_settings_all_role'),
           security.user.delete('global_advanced_settings_all_user'),
-          PageObjects.security.forceLogout(),
         ]);
       });
 
       it('shows management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.contain('Stack Management');
       });
 
       it(`allows settings to be changed`, async () => {
@@ -124,8 +124,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows Management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.contain('Stack Management');
       });
 
       it(`does not allow settings to be changed`, async () => {
@@ -138,9 +138,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/57377
-    describe.skip('no advanced_settings privileges', function() {
-      this.tags(['skipCoverage']);
+    describe('no advanced_settings privileges', function () {
       before(async () => {
         await security.role.create('no_advanced_settings_privileges_role', {
           elasticsearch: {
@@ -177,14 +175,15 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows Management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Discover', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.contain('Stack Management');
       });
 
       it(`does not allow navigation to advanced settings; redirects to management home`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/settings', {
+        await PageObjects.common.navigateToUrl('management', 'kibana/settings', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
+          shouldUseHashForSubUrl: false,
         });
         await testSubjects.existOrFail('managementHome', {
           timeout: config.get('timeouts.waitFor'),

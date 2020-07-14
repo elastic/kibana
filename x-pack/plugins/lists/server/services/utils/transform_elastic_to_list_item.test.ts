@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getSearchListItemMock } from '../../../common/schemas/elastic_response/search_es_list_item_schema.mock';
+import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
 import { ListItemArraySchema } from '../../../common/schemas';
-import { getListItemResponseMock, getSearchListItemMock } from '../mocks';
 
 import { transformElasticToListItem } from './transform_elastic_to_list_item';
 
@@ -41,29 +42,5 @@ describe('transform_elastic_to_list_item', () => {
     listItemResponse.value = 'host-name-example';
     const expected: ListItemArraySchema = [listItemResponse];
     expect(queryFilter).toEqual(expected);
-  });
-
-  test('it does a throw if it cannot determine the list item type from "ip"', () => {
-    const response = getSearchListItemMock();
-    response.hits.hits[0]._source.ip = undefined;
-    response.hits.hits[0]._source.keyword = 'host-name-example';
-    expect(() =>
-      transformElasticToListItem({
-        response,
-        type: 'ip',
-      })
-    ).toThrow('Was expecting ip to not be null/undefined');
-  });
-
-  test('it does a throw if it cannot determine the list item type from "keyword"', () => {
-    const response = getSearchListItemMock();
-    response.hits.hits[0]._source.ip = '127.0.0.1';
-    response.hits.hits[0]._source.keyword = undefined;
-    expect(() =>
-      transformElasticToListItem({
-        response,
-        type: 'keyword',
-      })
-    ).toThrow('Was expecting keyword to not be null/undefined');
   });
 });

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default async function({ readConfigFile }) {
+export default async function ({ readConfigFile }) {
   const httpConfig = await readConfigFile(require.resolve('../../config'));
 
   return {

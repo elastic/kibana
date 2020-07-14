@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchResponse } from 'elasticsearch';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import { Id, ListSchema, SearchEsListSchema } from '../../../common/schemas';
+import { transformElasticToList } from '../utils/transform_elastic_to_list';
 
 interface GetListOptions {
   id: Id;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   listIndex: string;
 }
 
@@ -20,7 +20,7 @@ export const getList = async ({
   callCluster,
   listIndex,
 }: GetListOptions): Promise<ListSchema | null> => {
-  const result: SearchResponse<SearchEsListSchema> = await callCluster('search', {
+  const response = await callCluster<SearchEsListSchema>('search', {
     body: {
       query: {
         term: {
@@ -31,12 +31,6 @@ export const getList = async ({
     ignoreUnavailable: true,
     index: listIndex,
   });
-  if (result.hits.hits.length) {
-    return {
-      id: result.hits.hits[0]._id,
-      ...result.hits.hits[0]._source,
-    };
-  } else {
-    return null;
-  }
+  const list = transformElasticToList({ response });
+  return list[0] ?? null;
 };

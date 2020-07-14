@@ -18,8 +18,13 @@
  */
 import _ from 'lodash';
 import { EsResponse, SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../../types';
-import { expandShorthand, SavedObjectNotFound } from '../../../../kibana_utils/public';
-import { IndexPattern } from '../../../../data/public';
+import { SavedObjectNotFound } from '../../../../kibana_utils/public';
+import {
+  IndexPattern,
+  injectSearchSourceReferences,
+  parseSearchSourceJSON,
+  expandShorthand,
+} from '../../../../data/public';
 
 /**
  * A given response of and ElasticSearch containing a plain saved object is applied to the given
@@ -63,12 +68,21 @@ export async function applyESResp(
   _.assign(savedObject, savedObject._source);
   savedObject.lastSavedTitle = savedObject.title;
 
-  if (config.searchSource) {
+  if (meta.searchSourceJSON) {
     try {
-      savedObject.searchSource = await dependencies.search.searchSource.fromJSON(
-        meta.searchSourceJSON,
-        resp.references
-      );
+      let searchSourceValues = parseSearchSourceJSON(meta.searchSourceJSON);
+
+      if (config.searchSource) {
+        searchSourceValues = injectSearchSourceReferences(
+          searchSourceValues as any,
+          resp.references
+        );
+        savedObject.searchSource = await dependencies.search.searchSource.create(
+          searchSourceValues
+        );
+      } else {
+        savedObject.searchSourceFields = searchSourceValues;
+      }
     } catch (error) {
       if (
         error.constructor.name === 'SavedObjectNotFound' &&

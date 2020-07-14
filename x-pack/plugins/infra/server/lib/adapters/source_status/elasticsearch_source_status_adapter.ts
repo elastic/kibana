@@ -50,8 +50,8 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
         terminate_after: 1,
       })
       .then(
-        response => response._shards.total > 0,
-        err => {
+        (response) => response._shards.total > 0,
+        (err) => {
           if (err.status === 404) {
             return false;
           }

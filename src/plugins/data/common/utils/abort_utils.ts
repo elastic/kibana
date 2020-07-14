@@ -35,24 +35,16 @@ export class AbortError extends Error {
  * with any other expected errors (or completions).
  *
  * @param signal The `AbortSignal` to generate the `Promise` from
- * @param shouldReject If `false`, the promise will be resolved, otherwise it will be rejected
  */
-export function toPromise(signal: AbortSignal, shouldReject?: false): Promise<undefined | Event>;
-export function toPromise(signal: AbortSignal, shouldReject?: true): Promise<never>;
-export function toPromise(signal: AbortSignal, shouldReject: boolean = false) {
-  const promise = new Promise((resolve, reject) => {
-    const action = shouldReject ? reject : resolve;
-    if (signal.aborted) action();
-    signal.addEventListener('abort', action);
+export function toPromise(signal: AbortSignal): Promise<never> {
+  return new Promise((resolve, reject) => {
+    if (signal.aborted) reject(new AbortError());
+    const abortHandler = () => {
+      signal.removeEventListener('abort', abortHandler);
+      reject(new AbortError());
+    };
+    signal.addEventListener('abort', abortHandler);
   });
-
-  /**
-   * Below is to make sure we don't have unhandled promise rejections. Otherwise
-   * Jest tests fail.
-   */
-  promise.catch(() => {});
-
-  return promise;
 }
 
 /**
@@ -61,8 +53,12 @@ export function toPromise(signal: AbortSignal, shouldReject: boolean = false) {
  * @param signals
  */
 export function getCombinedSignal(signals: AbortSignal[]) {
-  const promises = signals.map(signal => toPromise(signal));
   const controller = new AbortController();
-  Promise.race(promises).then(() => controller.abort());
+  if (signals.some((signal) => signal.aborted)) {
+    controller.abort();
+  } else {
+    const promises = signals.map((signal) => toPromise(signal));
+    Promise.race(promises).catch(() => controller.abort());
+  }
   return controller.signal;
 }

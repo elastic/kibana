@@ -20,7 +20,7 @@
 import { PluginInitializerContext } from '../../../core/public';
 import { VisualizationsSetup, VisualizationsStart } from './';
 import { VisualizationsPlugin } from './plugin';
-import { coreMock } from '../../../core/public/mocks';
+import { coreMock, applicationServiceMock } from '../../../core/public/mocks';
 import { embeddablePluginMock } from '../../../plugins/embeddable/public/mocks';
 import { expressionsPluginMock } from '../../../plugins/expressions/public/mocks';
 import { dataPluginMock } from '../../../plugins/data/public/mocks';
@@ -39,7 +39,9 @@ const createStartContract = (): VisualizationsStart => ({
   get: jest.fn(),
   all: jest.fn(),
   getAliases: jest.fn(),
-  savedVisualizationsLoader: {} as any,
+  savedVisualizationsLoader: {
+    get: jest.fn(),
+  } as any,
   showNewVisModal: jest.fn(),
   createVis: jest.fn(),
   convertFromSerializedVis: jest.fn(),
@@ -65,6 +67,8 @@ const createInstance = async () => {
       expressions: expressionsPluginMock.createStartContract(),
       inspector: inspectorPluginMock.createStartContract(),
       uiActions: uiActionsPluginMock.createStartContract(),
+      application: applicationServiceMock.createStartContract(),
+      embeddable: embeddablePluginMock.createStartContract(),
     });
 
   return {

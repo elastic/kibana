@@ -36,6 +36,7 @@ export function haproxyMetricsSpecProvider(context: TutorialContext): TutorialSc
     name: i18n.translate('home.tutorials.haproxyMetrics.nameTitle', {
       defaultMessage: 'HAProxy metrics',
     }),
+    moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.haproxyMetrics.shortDescription', {
@@ -55,7 +56,7 @@ export function haproxyMetricsSpecProvider(context: TutorialContext): TutorialSc
         label: i18n.translate('home.tutorials.haproxyMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {

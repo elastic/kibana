@@ -17,21 +17,21 @@
  * under the License.
  */
 
-import { fork, ChildProcess } from 'child_process';
-import { Readable } from 'stream';
 import { inspect } from 'util';
 
+import execa from 'execa';
 import * as Rx from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { map, takeUntil, first, ignoreElements } from 'rxjs/operators';
 
-import { isWorkerMsg, WorkerConfig, WorkerMsg, Bundle } from '../common';
+import { isWorkerMsg, WorkerConfig, WorkerMsg, Bundle, BundleRefs } from '../common';
 
+import { observeStdio$ } from './observe_stdio';
 import { OptimizerConfig } from './optimizer_config';
 
 export interface WorkerStdio {
   type: 'worker stdio';
   stream: 'stdout' | 'stderr';
-  chunk: Buffer;
+  line: string;
 }
 
 export interface WorkerStarted {
@@ -42,12 +42,12 @@ export interface WorkerStarted {
 export type WorkerStatus = WorkerStdio | WorkerStarted;
 
 interface ProcResource extends Rx.Unsubscribable {
-  proc: ChildProcess;
+  proc: execa.ExecaChildProcess;
 }
 const isNumeric = (input: any) => String(input).match(/^[0-9]+$/);
 
 let inspectPortCounter = 9230;
-const inspectFlagIndex = process.execArgv.findIndex(flag => flag.startsWith('--inspect'));
+const inspectFlagIndex = process.execArgv.findIndex((flag) => flag.startsWith('--inspect'));
 let inspectFlag: string | undefined;
 if (inspectFlagIndex !== -1) {
   const argv = process.execArgv[inspectFlagIndex];
@@ -68,22 +68,20 @@ if (inspectFlagIndex !== -1) {
 
 function usingWorkerProc<T>(
   config: OptimizerConfig,
-  workerConfig: WorkerConfig,
-  bundles: Bundle[],
-  fn: (proc: ChildProcess) => Rx.Observable<T>
+  fn: (proc: execa.ExecaChildProcess) => Rx.Observable<T>
 ) {
   return Rx.using(
     (): ProcResource => {
-      const args = [JSON.stringify(workerConfig), JSON.stringify(bundles.map(b => b.toSpec()))];
-
-      const proc = fork(require.resolve('../worker/run_worker'), args, {
-        stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
-        execArgv: [
+      const proc = execa.node(require.resolve('../worker/run_worker'), [], {
+        nodeOptions: [
           ...(inspectFlag && config.inspectWorkers
             ? [`${inspectFlag}=${inspectPortCounter++}`]
             : []),
           ...(config.maxWorkerCount <= 3 ? ['--max-old-space-size=2048'] : []),
         ],
+        buffer: false,
+        stderr: 'pipe',
+        stdout: 'pipe',
       });
 
       return {
@@ -94,33 +92,56 @@ function usingWorkerProc<T>(
       };
     },
 
-    resource => {
+    (resource) => {
       const { proc } = resource as ProcResource;
       return fn(proc);
     }
   );
 }
 
-function observeStdio$(stream: Readable, name: WorkerStdio['stream']) {
-  return Rx.fromEvent<Buffer>(stream, 'data').pipe(
-    takeUntil(
-      Rx.race(
-        Rx.fromEvent<void>(stream, 'end'),
-        Rx.fromEvent<Error>(stream, 'error').pipe(
-          map(error => {
-            throw error;
-          })
-        )
-      )
-    ),
-    map(
-      (chunk): WorkerStdio => ({
-        type: 'worker stdio',
-        chunk,
-        stream: name,
-      })
-    )
+/**
+ * We used to pass configuration to the worker as JSON encoded arguments, but they
+ * grew too large for argv, especially on Windows, so we had to move to an async init
+ * where we send the args over IPC. To keep the logic simple we basically mock the
+ * argv behavior and don't use complicated messages or anything so that state can
+ * be initialized in the worker before most of the code is run.
+ */
+function initWorker(
+  proc: execa.ExecaChildProcess,
+  config: OptimizerConfig,
+  workerConfig: WorkerConfig,
+  bundles: Bundle[]
+) {
+  const msg$ = Rx.fromEvent<[unknown]>(proc, 'message').pipe(
+    // validate the initialization messages from the process
+    map(([msg]) => {
+      if (typeof msg === 'string') {
+        switch (msg) {
+          case 'init':
+            return 'init' as const;
+          case 'ready':
+            return 'ready' as const;
+        }
+      }
+
+      throw new Error(`unexpected message from worker while initializing: [${inspect(msg)}]`);
+    })
   );
+
+  return Rx.concat(
+    msg$.pipe(first((msg) => msg === 'init')),
+    Rx.defer(() => {
+      proc.send({
+        args: [
+          JSON.stringify(workerConfig),
+          JSON.stringify(bundles.map((b) => b.toSpec())),
+          BundleRefs.fromBundles(config.bundles).toSpecJson(),
+        ],
+      });
+      return [];
+    }),
+    msg$.pipe(first((msg) => msg === 'ready'))
+  ).pipe(ignoreElements());
 }
 
 /**
@@ -134,16 +155,33 @@ export function observeWorker(
   workerConfig: WorkerConfig,
   bundles: Bundle[]
 ): Rx.Observable<WorkerMsg | WorkerStatus> {
-  return usingWorkerProc(config, workerConfig, bundles, proc => {
-    let lastMsg: WorkerMsg;
+  return usingWorkerProc(config, (proc) => {
+    const init$ = initWorker(proc, config, workerConfig, bundles);
 
-    return Rx.merge(
+    let lastMsg: WorkerMsg;
+    const worker$: Rx.Observable<WorkerMsg | WorkerStatus> = Rx.merge(
       Rx.of({
         type: 'worker started',
         bundles,
       }),
-      observeStdio$(proc.stdout, 'stdout'),
-      observeStdio$(proc.stderr, 'stderr'),
+      observeStdio$(proc.stdout).pipe(
+        map(
+          (line): WorkerStdio => ({
+            type: 'worker stdio',
+            line,
+            stream: 'stdout',
+          })
+        )
+      ),
+      observeStdio$(proc.stderr).pipe(
+        map(
+          (line): WorkerStdio => ({
+            type: 'worker stdio',
+            line,
+            stream: 'stderr',
+          })
+        )
+      ),
       Rx.fromEvent<[unknown]>(proc, 'message')
         .pipe(
           // validate the messages from the process
@@ -161,7 +199,7 @@ export function observeWorker(
             Rx.race(
               // throw into stream on error events
               Rx.fromEvent<Error>(proc, 'error').pipe(
-                map(error => {
+                map((error) => {
                   throw new Error(`worker failed to spawn: ${error.message}`);
                 })
               ),
@@ -195,5 +233,7 @@ export function observeWorker(
           )
         )
     );
+
+    return Rx.concat(init$, worker$);
   });
 }

@@ -1,16 +1,34 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-
 module.exports = {
-  APM: {
-    'Transaction duration charts': {
-      '1': '500 ms',
-      '2': '250 ms',
-      '3': '0 ms'
+  "__version": "4.9.0",
+  "RUM Dashboard": {
+    "Client metrics": {
+      "1": "55 ",
+      "2": "0.08 sec",
+      "3": "0.01 sec"
+    },
+    "Rum page filters (example #1)": {
+      "1": "8 ",
+      "2": "0.08 sec",
+      "3": "0.01 sec"
+    },
+    "Rum page filters (example #2)": {
+      "1": "28 ",
+      "2": "0.07 sec",
+      "3": "0.01 sec"
+    },
+    "Page load distribution percentiles": {
+      "1": "50th",
+      "2": "75th",
+      "3": "90th",
+      "4": "95th"
+    },
+    "Page load distribution chart legends": {
+      "1": "Overall"
+    },
+    "Service name filter": {
+      "1": "7 ",
+      "2": "0.07 sec",
+      "3": "0.01 sec"
     }
-  },
-  __version: '4.2.0'
-};
+  }
+}

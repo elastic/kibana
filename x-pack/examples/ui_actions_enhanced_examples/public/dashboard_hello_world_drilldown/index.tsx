@@ -7,14 +7,11 @@
 import React from 'react';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { reactToUiComponent } from '../../../../../src/plugins/kibana_react/public';
-import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../plugins/advanced_ui_actions/public';
-import {
-  RangeSelectTriggerContext,
-  ValueClickTriggerContext,
-} from '../../../../../src/plugins/embeddable/public';
+import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../plugins/ui_actions_enhanced/public';
+import { ChartActionContext } from '../../../../../src/plugins/embeddable/public';
 import { CollectConfigProps } from '../../../../../src/plugins/kibana_utils/public';
 
-export type ActionContext = RangeSelectTriggerContext | ValueClickTriggerContext;
+export type ActionContext = ChartActionContext;
 
 export interface Config {
   name: string;
@@ -39,7 +36,7 @@ export class DashboardHelloWorldDrilldown implements Drilldown<Config, ActionCon
       <EuiFieldText
         fullWidth
         value={config.name}
-        onChange={event => onConfig({ ...config, name: event.target.value })}
+        onChange={(event) => onConfig({ ...config, name: event.target.value })}
       />
     </EuiFormRow>
   );

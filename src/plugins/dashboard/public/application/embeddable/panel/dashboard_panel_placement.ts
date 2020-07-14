@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import _ from 'lodash';
 import { PanelNotFoundError } from '../../../embeddable_plugin';
 import { GridData } from '../../../../common';
 import { DashboardPanelState, DASHBOARD_GRID_COLUMN_COUNT } from '..';
@@ -44,7 +45,7 @@ export function findTopLeftMostOpenSpace({
   let maxY = -1;
 
   const currentPanelsArray = Object.values(currentPanels);
-  currentPanelsArray.forEach(panel => {
+  currentPanelsArray.forEach((panel) => {
     maxY = Math.max(panel.gridData.y + panel.gridData.h, maxY);
   });
 
@@ -58,7 +59,7 @@ export function findTopLeftMostOpenSpace({
     grid[y] = new Array(DASHBOARD_GRID_COLUMN_COUNT).fill(0);
   }
 
-  currentPanelsArray.forEach(panel => {
+  currentPanelsArray.forEach((panel) => {
     for (let x = panel.gridData.x; x < panel.gridData.x + panel.gridData.w; x++) {
       for (let y = panel.gridData.y; y < panel.gridData.y + panel.gridData.h; y++) {
         const row = grid[y];
@@ -108,16 +109,32 @@ interface IplacementDirection {
   fits: boolean;
 }
 
+/**
+ * Compare grid data by an ending y coordinate. Grid data with a smaller ending y coordinate
+ * comes first.
+ * @param a
+ * @param b
+ */
+function comparePanels(a: GridData, b: GridData): number {
+  if (a.y + a.h < b.y + b.h) {
+    return -1;
+  }
+  if (a.y + a.h > b.y + b.h) {
+    return 1;
+  }
+  // a.y === b.y
+  if (a.x + a.w <= b.x + b.w) {
+    return -1;
+  }
+  return 1;
+}
+
 export function placePanelBeside({
   width,
   height,
   currentPanels,
   placeBesideId,
 }: IPanelPlacementBesideArgs): Omit<GridData, 'i'> {
-  // const clonedPanels = _.cloneDeep(currentPanels);
-  if (!placeBesideId) {
-    throw new Error('Place beside method called without placeBesideId');
-  }
   const panelToPlaceBeside = currentPanels[placeBesideId];
   if (!panelToPlaceBeside) {
     throw new PanelNotFoundError();
@@ -130,10 +147,11 @@ export function placePanelBeside({
 
   const possiblePlacementDirections: IplacementDirection[] = [
     { grid: { x: beside.x + beside.w, y: beside.y, w: width, h: height }, fits: true }, // right
-    { grid: { x: beside.x - width, y: beside.y, w: width, h: height }, fits: true }, // left
+    { grid: { x: 0, y: beside.y + beside.h, w: width, h: height }, fits: true }, // left side of next row
     { grid: { x: beside.x, y: beside.y + beside.h, w: width, h: height }, fits: true }, // bottom
   ];
 
+  // first, we check if there is place around the current panel
   for (const direction of possiblePlacementDirections) {
     if (
       direction.grid.x >= 0 &&
@@ -156,13 +174,32 @@ export function placePanelBeside({
     }
   }
   // if we get here that means there is no blank space around the panel we are placing beside. This means it's time to mess up the dashboard's groove. Fun!
-  const [, , bottomPlacement] = possiblePlacementDirections;
-  for (const currentPanelGrid of otherPanels) {
-    if (bottomPlacement.grid.y <= currentPanelGrid.y) {
-      const movedPanel = _.cloneDeep(currentPanels[currentPanelGrid.i]);
-      movedPanel.gridData.y = movedPanel.gridData.y + bottomPlacement.grid.h;
-      currentPanels[currentPanelGrid.i] = movedPanel;
+  /**
+   * 1. sort the panels in the grid
+   * 2. place the cloned panel to the bottom
+   * 3. reposition the panels after the cloned panel in the grid
+   */
+  const grid = otherPanels.sort(comparePanels);
+
+  let position = 0;
+  for (position; position < grid.length; position++) {
+    if (beside.i === grid[position].i) {
+      break;
     }
+  }
+  const bottomPlacement = possiblePlacementDirections[2];
+  // place to the bottom and move all other panels
+  let originalPositionInTheGrid = grid[position + 1].i;
+  const diff =
+    bottomPlacement.grid.y +
+    bottomPlacement.grid.h -
+    currentPanels[originalPositionInTheGrid].gridData.y;
+
+  for (let j = position + 1; j < grid.length; j++) {
+    originalPositionInTheGrid = grid[j].i;
+    const movedPanel = _.cloneDeep(currentPanels[originalPositionInTheGrid]);
+    movedPanel.gridData.y = movedPanel.gridData.y + diff;
+    currentPanels[originalPositionInTheGrid] = movedPanel;
   }
   return bottomPlacement.grid;
 }

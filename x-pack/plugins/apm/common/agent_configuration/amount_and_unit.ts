@@ -17,7 +17,7 @@ export function amountAndUnitToObject(value: string): AmountAndUnit {
 
 export function amountAndUnitToString({
   amount,
-  unit
+  unit,
 }: Omit<AmountAndUnit, 'amount'> & { amount: string | number }) {
   return `${amount}${unit}`;
 }

@@ -39,11 +39,10 @@ export const BuildKibanaPlatformPluginsTask = {
     });
 
     const reporter = CiStatsReporter.fromEnv(log);
-    const reportStatsName = build.isOss() ? 'oss distributable' : 'default distributable';
 
     await runOptimizer(optimizerConfig)
       .pipe(
-        reportOptimizerStats(reporter, reportStatsName),
+        reportOptimizerStats(reporter, optimizerConfig),
         logOptimizerState(log, optimizerConfig)
       )
       .toPromise();

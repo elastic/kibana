@@ -45,7 +45,7 @@ export interface PanelHeaderProps {
 }
 
 function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmbeddable) {
-  return badges.map(badge => (
+  return badges.map((badge) => (
     <EuiBadge
       key={badge.id}
       className="embPanel__headerBadge"
@@ -62,16 +62,34 @@ function renderNotifications(
   notifications: Array<Action<EmbeddableContext>>,
   embeddable: IEmbeddable
 ) {
-  return notifications.map(notification => (
-    <EuiNotificationBadge
-      data-test-subj={`embeddablePanelNotification-${notification.id}`}
-      key={notification.id}
-      style={{ marginTop: '4px', marginRight: '4px' }}
-      onClick={() => notification.execute({ embeddable })}
-    >
-      {notification.getDisplayName({ embeddable })}
-    </EuiNotificationBadge>
-  ));
+  return notifications.map((notification) => {
+    const context = { embeddable };
+
+    let badge = (
+      <EuiNotificationBadge
+        data-test-subj={`embeddablePanelNotification-${notification.id}`}
+        key={notification.id}
+        style={{ marginTop: '4px', marginRight: '4px' }}
+        onClick={() => notification.execute(context)}
+      >
+        {notification.getDisplayName(context)}
+      </EuiNotificationBadge>
+    );
+
+    if (notification.getDisplayNameTooltip) {
+      const tooltip = notification.getDisplayNameTooltip(context);
+
+      if (tooltip) {
+        badge = (
+          <EuiToolTip position="top" delay="regular" content={tooltip} key={notification.id}>
+            {badge}
+          </EuiToolTip>
+        );
+      }
+    }
+
+    return badge;
+  });
 }
 
 function renderTooltip(description: string) {

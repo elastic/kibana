@@ -60,7 +60,7 @@ export const initLogEntriesSummaryHighlightsRoute = ({
 
         return response.ok({
           body: logEntriesSummaryHighlightsResponseRT.encode({
-            data: bucketsPerHighlightTerm.map(buckets => ({
+            data: bucketsPerHighlightTerm.map((buckets) => ({
               start: startTimestamp,
               end: endTimestamp,
               buckets,

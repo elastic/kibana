@@ -5,7 +5,7 @@
  */
 
 import { difference } from 'lodash';
-import { IScopedClusterClient } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { EventManager, CalendarEvent } from './event_manager';
 
 interface BasicCalendar {
@@ -23,16 +23,16 @@ export interface FormCalendar extends BasicCalendar {
 }
 
 export class CalendarManager {
-  private _client: IScopedClusterClient['callAsCurrentUser'];
-  private _eventManager: any;
+  private _callAsCurrentUser: LegacyAPICaller;
+  private _eventManager: EventManager;
 
-  constructor(client: any) {
-    this._client = client;
-    this._eventManager = new EventManager(client);
+  constructor(callAsCurrentUser: LegacyAPICaller) {
+    this._callAsCurrentUser = callAsCurrentUser;
+    this._eventManager = new EventManager(callAsCurrentUser);
   }
 
   async getCalendar(calendarId: string) {
-    const resp = await this._client('ml.calendars', {
+    const resp = await this._callAsCurrentUser('ml.calendars', {
       calendarId,
     });
 
@@ -43,15 +43,15 @@ export class CalendarManager {
   }
 
   async getAllCalendars() {
-    const calendarsResp = await this._client('ml.calendars');
+    const calendarsResp = await this._callAsCurrentUser('ml.calendars');
 
     const events: CalendarEvent[] = await this._eventManager.getAllEvents();
     const calendars: Calendar[] = calendarsResp.calendars;
-    calendars.forEach(cal => (cal.events = []));
+    calendars.forEach((cal) => (cal.events = []));
 
     // loop events and combine with related calendars
-    events.forEach(event => {
-      const calendar = calendars.find(cal => cal.calendar_id === event.calendar_id);
+    events.forEach((event) => {
+      const calendar = calendars.find((cal) => cal.calendar_id === event.calendar_id);
       if (calendar) {
         calendar.events.push(event);
       }
@@ -66,7 +66,7 @@ export class CalendarManager {
    */
   async getCalendarsByIds(calendarIds: string) {
     const calendars: Calendar[] = await this.getAllCalendars();
-    return calendars.filter(calendar => calendarIds.includes(calendar.calendar_id));
+    return calendars.filter((calendar) => calendarIds.includes(calendar.calendar_id));
   }
 
   async newCalendar(calendar: FormCalendar) {
@@ -74,7 +74,7 @@ export class CalendarManager {
     const events = calendar.events;
     delete calendar.calendarId;
     delete calendar.events;
-    await this._client('ml.addCalendar', {
+    await this._callAsCurrentUser('ml.addCalendar', {
       calendarId,
       body: calendar,
     });
@@ -96,12 +96,12 @@ export class CalendarManager {
     // workout the differences between the original events list and the new one
     // if an event has no event_id, it must be new
     const eventsToAdd = calendar.events.filter(
-      event => origCalendar.events.find(e => this._eventManager.isEqual(e, event)) === undefined
+      (event) => origCalendar.events.find((e) => this._eventManager.isEqual(e, event)) === undefined
     );
 
     // if an event in the original calendar cannot be found, it must have been deleted
     const eventsToRemove: CalendarEvent[] = origCalendar.events.filter(
-      event => calendar.events.find(e => this._eventManager.isEqual(e, event)) === undefined
+      (event) => calendar.events.find((e) => this._eventManager.isEqual(e, event)) === undefined
     );
 
     // note, both of the loops below could be removed if the add and delete endpoints
@@ -109,7 +109,7 @@ export class CalendarManager {
 
     // add all new jobs
     if (jobsToAdd.length) {
-      await this._client('ml.addJobToCalendar', {
+      await this._callAsCurrentUser('ml.addJobToCalendar', {
         calendarId,
         jobId: jobsToAdd.join(','),
       });
@@ -117,7 +117,7 @@ export class CalendarManager {
 
     // remove all removed jobs
     if (jobsToRemove.length) {
-      await this._client('ml.removeJobFromCalendar', {
+      await this._callAsCurrentUser('ml.removeJobFromCalendar', {
         calendarId,
         jobId: jobsToRemove.join(','),
       });
@@ -130,8 +130,8 @@ export class CalendarManager {
 
     // remove all removed events
     await Promise.all(
-      eventsToRemove.map(async event => {
-        await this._eventManager.deleteEvent(calendarId, event.event_id);
+      eventsToRemove.map(async (event) => {
+        await this._eventManager.deleteEvent(calendarId, event.event_id!);
       })
     );
 
@@ -140,6 +140,6 @@ export class CalendarManager {
   }
 
   async deleteCalendar(calendarId: string) {
-    return this._client('ml.deleteCalendar', { calendarId });
+    return this._callAsCurrentUser('ml.deleteCalendar', { calendarId });
   }
 }

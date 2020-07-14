@@ -27,7 +27,7 @@ import expect from '@kbn/expect';
  * broke?).  The upside is that this offers very good coverage with a minimal time investment.
  */
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const find = getService('find');
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');

@@ -20,35 +20,31 @@
 import { tabifyGetColumns } from './get_columns';
 import { TabbedAggColumn } from './types';
 import { AggConfigs } from '../aggs';
-import { mockAggTypesRegistry, mockDataServices } from '../aggs/test_helpers';
-import { fieldFormatsServiceMock } from '../../field_formats/mocks';
+import { mockAggTypesRegistry } from '../aggs/test_helpers';
 
 describe('get columns', () => {
-  beforeEach(() => {
-    mockDataServices();
-  });
-
   const typesRegistry = mockAggTypesRegistry();
-  const fieldFormats = fieldFormatsServiceMock.createStartContract();
 
   const createAggConfigs = (aggs: any[] = []) => {
-    const field = {
-      name: '@timestamp',
-    };
+    const fields = [
+      {
+        name: '@timestamp',
+      },
+      {
+        name: 'bytes',
+      },
+    ];
 
     const indexPattern = {
       id: '1234',
       title: 'logstash-*',
       fields: {
-        getByName: () => field,
-        filter: () => [field],
+        getByName: (name: string) => fields.find((f) => f.name === name),
+        filter: () => fields,
       },
     } as any;
 
-    return new AggConfigs(indexPattern, aggs, {
-      typesRegistry,
-      fieldFormats,
-    });
+    return new AggConfigs(indexPattern, aggs, { typesRegistry });
   };
 
   test('should inject the metric after each bucket if the vis is hierarchical', () => {
@@ -159,11 +155,27 @@ describe('get columns', () => {
       false
     );
 
-    expect(columns.map(c => c.name)).toEqual([
+    expect(columns.map((c) => c.name)).toEqual([
       '@timestamp per 20 seconds',
       'Sum of @timestamp',
       '@timestamp per 10 seconds',
       'Sum of @timestamp',
     ]);
+  });
+
+  test('should not fail if there is no field for date histogram agg', () => {
+    const columns = tabifyGetColumns(
+      createAggConfigs([
+        {
+          type: 'date_histogram',
+          schema: 'segment',
+          params: {},
+        },
+        { type: 'sum', schema: 'metric', params: { field: '@timestamp' } },
+      ]).aggs,
+      false
+    );
+
+    expect(columns.map((c) => c.name)).toEqual(['', 'Sum of @timestamp']);
   });
 });

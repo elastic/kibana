@@ -21,7 +21,7 @@ export const ChoroplethToolTip: React.FC<{
         {i18n.translate(
           'xpack.apm.metrics.durationByCountryMap.RegionMapChart.ToolTip.avgPageLoadDuration',
           {
-            defaultMessage: 'Avg. page load duration:'
+            defaultMessage: 'Avg. page load duration:',
           }
         )}
       </div>
@@ -34,7 +34,7 @@ export const ChoroplethToolTip: React.FC<{
           'xpack.apm.metrics.durationByCountryMap.RegionMapChart.ToolTip.countPageLoads',
           {
             values: { docCount: asInteger(docCount) },
-            defaultMessage: '{docCount} page loads'
+            defaultMessage: '{docCount} page loads',
           }
         )}
         )

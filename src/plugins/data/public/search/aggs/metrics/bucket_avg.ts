@@ -23,10 +23,11 @@ import { MetricAggType } from './metric_agg_type';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { siblingPipelineAggHelper } from './lib/sibling_pipeline_agg_helper';
 import { METRIC_TYPES } from './metric_agg_types';
-import { GetInternalStartServicesFn } from '../../../types';
+import { AggConfigSerialized, BaseAggParams } from '../types';
 
-export interface BucketAvgMetricAggDependencies {
-  getInternalStartServices: GetInternalStartServicesFn;
+export interface AggParamsBucketAvg extends BaseAggParams {
+  customMetric?: AggConfigSerialized;
+  customBucket?: AggConfigSerialized;
 }
 
 const overallAverageLabel = i18n.translate('data.search.aggs.metrics.overallAverageLabel', {
@@ -37,34 +38,29 @@ const averageBucketTitle = i18n.translate('data.search.aggs.metrics.averageBucke
   defaultMessage: 'Average Bucket',
 });
 
-export const getBucketAvgMetricAgg = ({
-  getInternalStartServices,
-}: BucketAvgMetricAggDependencies) => {
-  return new MetricAggType(
-    {
-      name: METRIC_TYPES.AVG_BUCKET,
-      title: averageBucketTitle,
-      makeLabel: agg => makeNestedLabel(agg, overallAverageLabel),
-      subtype: siblingPipelineAggHelper.subtype,
-      params: [...siblingPipelineAggHelper.params()],
-      getFormat: siblingPipelineAggHelper.getFormat,
-      getValue(agg, bucket) {
-        const customMetric = agg.getParam('customMetric');
-        const customBucket = agg.getParam('customBucket');
-        const scaleMetrics = customMetric.type && customMetric.type.isScalable();
+export const getBucketAvgMetricAgg = () => {
+  const { subtype, params, getSerializedFormat } = siblingPipelineAggHelper;
 
-        let value = bucket[agg.id] && bucket[agg.id].value;
+  return new MetricAggType({
+    name: METRIC_TYPES.AVG_BUCKET,
+    title: averageBucketTitle,
+    makeLabel: (agg) => makeNestedLabel(agg, overallAverageLabel),
+    subtype,
+    params: [...params()],
+    getSerializedFormat,
+    getValue(agg, bucket) {
+      const customMetric = agg.getParam('customMetric');
+      const customBucket = agg.getParam('customBucket');
+      const scaleMetrics = customMetric.type && customMetric.type.isScalable();
 
-        if (scaleMetrics && customBucket.type.name === 'date_histogram') {
-          const aggInfo = customBucket.write();
+      let value = bucket[agg.id] && bucket[agg.id].value;
 
-          value *= get(aggInfo, 'bucketInterval.scale', 1);
-        }
-        return value;
-      },
+      if (scaleMetrics && customBucket.type.name === 'date_histogram') {
+        const aggInfo = customBucket.write();
+
+        value *= get(aggInfo, 'bucketInterval.scale', 1);
+      }
+      return value;
     },
-    {
-      getInternalStartServices,
-    }
-  );
+  });
 };

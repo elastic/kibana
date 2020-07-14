@@ -7,12 +7,8 @@
 import { IRouter } from 'kibana/server';
 
 import { LIST_ITEM_URL } from '../../common/constants';
-import {
-  buildRouteValidation,
-  buildSiemResponse,
-  transformError,
-  validate,
-} from '../siem_server_deps';
+import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
+import { validate } from '../../common/siem_common_deps';
 import { deleteListItemSchema, listItemArraySchema, listItemSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
@@ -56,7 +52,11 @@ export const deleteListItemRoute = (router: IRouter): void => {
               statusCode: 404,
             });
           } else {
-            const deleted = await lists.deleteListItemByValue({ listId, type: list.type, value });
+            const deleted = await lists.deleteListItemByValue({
+              listId,
+              type: list.type,
+              value,
+            });
             if (deleted == null || deleted.length === 0) {
               return siemResponse.error({
                 body: `list_id: "${listId}" with ${value} was not found`,
@@ -73,7 +73,7 @@ export const deleteListItemRoute = (router: IRouter): void => {
           }
         } else {
           return siemResponse.error({
-            body: `Either "list_id" or "id" needs to be defined in the request`,
+            body: 'Either "list_id" or "id" needs to be defined in the request',
             statusCode: 400,
           });
         }

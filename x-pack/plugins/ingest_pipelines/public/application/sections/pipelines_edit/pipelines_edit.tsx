@@ -22,6 +22,8 @@ import { Pipeline } from '../../../../common/types';
 import { useKibana, SectionLoading } from '../../../shared_imports';
 import { PipelineForm } from '../../components';
 
+import { attemptToURIDecode } from '../shared';
+
 interface MatchParams {
   name: string;
 }
@@ -37,7 +39,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
-  const decodedPipelineName = decodeURI(decodeURIComponent(name));
+  const decodedPipelineName = attemptToURIDecode(name);
 
   const { error, data: pipeline, isLoading } = services.api.useLoadPipeline(decodedPipelineName);
 
@@ -54,7 +56,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
       return;
     }
 
-    history.push(BASE_PATH + `?pipeline=${updatedPipeline.name}`);
+    history.push(BASE_PATH + `?pipeline=${encodeURIComponent(updatedPipeline.name)}`);
   };
 
   const onCancel = () => {
@@ -114,8 +116,8 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
         <EuiTitle size="l">
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiTitle size="l" data-test-subj="remoteClusterPageTitle">
-                <h1 data-test-subj="pageTitle">
+              <EuiTitle size="l" data-test-subj="pageTitle">
+                <h1>
                   <FormattedMessage
                     id="xpack.ingestPipelines.edit.pageTitle"
                     defaultMessage="Edit pipeline '{name}'"
@@ -132,6 +134,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
                 href={services.documentation.getPutPipelineApiUrl()}
                 target="_blank"
                 iconType="help"
+                data-test-subj="documentationLink"
               >
                 <FormattedMessage
                   id="xpack.ingestPipelines.edit.docsButtonLabel"

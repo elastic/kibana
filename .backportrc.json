@@ -3,6 +3,7 @@
   "targetBranchChoices": [
     { "name": "master", "checked": true },
     { "name": "7.x", "checked": true },
+    "7.8",
     "7.7",
     "7.6",
     "7.5",
@@ -24,7 +25,8 @@
   ],
   "targetPRLabels": ["backport"],
   "branchLabelMapping": {
-    "^v7.8.0$": "7.x",
+    "^v8.0.0$": "master",
+    "^v7.9.0$": "7.x",
     "^v(\\d+).(\\d+).\\d+$": "$1.$2"
   }
 }

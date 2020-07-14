@@ -36,6 +36,7 @@ export function corednsMetricsSpecProvider(context: TutorialContext): TutorialSc
     name: i18n.translate('home.tutorials.corednsMetrics.nameTitle', {
       defaultMessage: 'CoreDNS metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.corednsMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from the CoreDNS server.',
@@ -54,7 +55,7 @@ export function corednsMetricsSpecProvider(context: TutorialContext): TutorialSc
         label: i18n.translate('home.tutorials.corednsMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {

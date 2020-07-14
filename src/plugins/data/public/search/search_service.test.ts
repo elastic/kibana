@@ -18,7 +18,7 @@
  */
 
 import { coreMock } from '../../../../core/public/mocks';
-import { CoreSetup } from '../../../../core/public';
+import { CoreSetup, CoreStart } from '../../../../core/public';
 import { expressionsPluginMock } from '../../../../plugins/expressions/public/mocks';
 
 import { SearchService } from './search_service';
@@ -26,10 +26,12 @@ import { SearchService } from './search_service';
 describe('Search service', () => {
   let searchService: SearchService;
   let mockCoreSetup: MockedKeys<CoreSetup>;
+  let mockCoreStart: MockedKeys<CoreStart>;
 
   beforeEach(() => {
     searchService = new SearchService();
     mockCoreSetup = coreMock.createSetup();
+    mockCoreStart = coreMock.createStart();
   });
 
   describe('setup()', () => {
@@ -38,7 +40,17 @@ describe('Search service', () => {
         packageInfo: { version: '8' },
         expressions: expressionsPluginMock.createSetupContract(),
       } as any);
-      expect(setup).toHaveProperty('registerSearchStrategyProvider');
+      expect(setup).toHaveProperty('aggs');
+    });
+  });
+
+  describe('start()', () => {
+    it('exposes proper contract', async () => {
+      const start = searchService.start(mockCoreStart, {
+        indexPatterns: {},
+      } as any);
+      expect(start).toHaveProperty('setInterceptor');
+      expect(start).toHaveProperty('search');
     });
   });
 });

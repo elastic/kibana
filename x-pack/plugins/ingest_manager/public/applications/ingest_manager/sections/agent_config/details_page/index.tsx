@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, memo, useMemo, useState } from 'react';
-import { Redirect, useRouteMatch, Switch, Route } from 'react-router-dom';
+import React, { useMemo, useState, useCallback } from 'react';
+import { Redirect, useRouteMatch, Switch, Route, useHistory, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import {
@@ -13,7 +13,6 @@ import {
   EuiCallOut,
   EuiText,
   EuiSpacer,
-  EuiTitle,
   EuiButtonEmpty,
   EuiI18nNumber,
   EuiDescriptionList,
@@ -22,99 +21,92 @@ import {
 } from '@elastic/eui';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import styled from 'styled-components';
-import { useGetOneAgentConfig } from '../../../hooks';
+import { AgentConfig, AgentConfigDetailsDeployAgentAction } from '../../../types';
+import { PAGE_ROUTING_PATHS } from '../../../constants';
+import { useGetOneAgentConfig, useLink, useBreadcrumbs, useCore } from '../../../hooks';
 import { Loading } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
 import { ConfigRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
-import { LinkedAgentCount } from '../components';
-import { useAgentConfigLink } from './hooks/use_details_uri';
-import { DETAILS_ROUTER_PATH, DETAILS_ROUTER_SUB_PATH } from './constants';
-import { ConfigDatasourcesView } from './components/datasources';
-import { ConfigYamlView } from './components/yaml';
-import { ConfigSettingsView } from './components/settings';
+import { LinkedAgentCount, AgentConfigActionMenu } from '../components';
+import { ConfigPackageConfigsView, ConfigSettingsView } from './components';
+import { useIntraAppState } from '../../../hooks/use_intra_app_state';
 
 const Divider = styled.div`
   width: 0;
   height: 100%;
-  border-left: ${props => props.theme.eui.euiBorderThin};
+  border-left: ${(props) => props.theme.eui.euiBorderThin};
 `;
 
-export const AgentConfigDetailsPage = memo(() => {
-  return (
-    <Switch>
-      <Route path={DETAILS_ROUTER_SUB_PATH}>
-        <AgentConfigDetailsLayout />
-      </Route>
-      <Route path={DETAILS_ROUTER_PATH}>
-        <AgentConfigDetailsLayout />
-      </Route>
-    </Switch>
-  );
-});
-
-export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
+export const AgentConfigDetailsPage: React.FunctionComponent = () => {
   const {
     params: { configId, tabId = '' },
   } = useRouteMatch<{ configId: string; tabId?: string }>();
+  const history = useHistory();
+  const { getHref, getPath } = useLink();
   const agentConfigRequest = useGetOneAgentConfig(configId);
   const agentConfig = agentConfigRequest.data ? agentConfigRequest.data.item : null;
   const { isLoading, error, sendRequest: refreshAgentConfig } = agentConfigRequest;
   const [redirectToAgentConfigList] = useState<boolean>(false);
   const agentStatusRequest = useGetAgentStatus(configId);
   const { refreshAgentStatus } = agentStatusRequest;
+  const {
+    application: { navigateToApp },
+  } = useCore();
+  const routeState = useIntraAppState<AgentConfigDetailsDeployAgentAction>();
   const agentStatus = agentStatusRequest.data?.results;
-
-  // Links
-  const configListLink = useAgentConfigLink('list');
-  const configDetailsLink = useAgentConfigLink('details', { configId });
-  const configDetailsYamlLink = useAgentConfigLink('details-yaml', { configId });
-  const configDetailsSettingsLink = useAgentConfigLink('details-settings', { configId });
+  const queryParams = new URLSearchParams(useLocation().search);
+  const openEnrollmentFlyoutOpenByDefault = queryParams.get('openEnrollmentFlyout') === 'true';
 
   const headerLeftContent = useMemo(
     () => (
-      <React.Fragment>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <div>
-                  <EuiButtonEmpty iconType="arrowLeft" href={configListLink} flush="left" size="xs">
-                    <FormattedMessage
-                      id="xpack.ingestManager.configDetails.viewAgentListTitle"
-                      defaultMessage="View all agent configurations"
-                    />
-                  </EuiButtonEmpty>
-                </div>
-                <EuiTitle size="l">
-                  <h1>
-                    {(agentConfig && agentConfig.name) || (
-                      <FormattedMessage
-                        id="xpack.ingestManager.configDetails.configDetailsTitle"
-                        defaultMessage="Config '{id}'"
-                        values={{
-                          id: configId,
-                        }}
-                      />
-                    )}
-                  </h1>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            {agentConfig && agentConfig.description ? (
-              <Fragment>
-                <EuiSpacer size="s" />
-                <EuiText color="subdued" size="s">
-                  {agentConfig.description}
-                </EuiText>
-              </Fragment>
-            ) : null}
+      <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            iconType="arrowLeft"
+            href={getHref('configurations_list')}
+            flush="left"
+            size="xs"
+          >
+            <FormattedMessage
+              id="xpack.ingestManager.configDetails.viewAgentListTitle"
+              defaultMessage="View all agent configurations"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText>
+            <h1>
+              {(agentConfig && agentConfig.name) || (
+                <FormattedMessage
+                  id="xpack.ingestManager.configDetails.configDetailsTitle"
+                  defaultMessage="Config '{id}'"
+                  values={{
+                    id: configId,
+                  }}
+                />
+              )}
+            </h1>
+          </EuiText>
+        </EuiFlexItem>
+
+        {agentConfig && agentConfig.description ? (
+          <EuiFlexItem>
+            <EuiSpacer size="s" />
+            <EuiText color="subdued" size="s">
+              {agentConfig.description}
+            </EuiText>
           </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="l" />
-      </React.Fragment>
+        ) : null}
+      </EuiFlexGroup>
     ),
-    [configListLink, agentConfig, configId]
+    [getHref, agentConfig, configId]
   );
+
+  const enrollmentCancelClickHandler = useCallback(() => {
+    if (routeState && routeState.onDoneNavigateTo) {
+      navigateToApp(routeState.onDoneNavigateTo[0], routeState.onDoneNavigateTo[1]);
+    }
+  }, [routeState, navigateToApp]);
 
   const headerRightContent = useMemo(
     () => (
@@ -128,13 +120,16 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
           },
           { isDivider: true },
           {
-            label: i18n.translate('xpack.ingestManager.configDetails.summary.datasources', {
-              defaultMessage: 'Data sources',
+            label: i18n.translate('xpack.ingestManager.configDetails.summary.package_configs', {
+              defaultMessage: 'Integrations',
             }),
             content: (
               <EuiI18nNumber
                 value={
-                  (agentConfig && agentConfig.datasources && agentConfig.datasources.length) || 0
+                  (agentConfig &&
+                    agentConfig.package_configs &&
+                    agentConfig.package_configs.length) ||
+                  0
                 }
               />
             ),
@@ -159,7 +154,7 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
             content:
               (agentConfig && (
                 <FormattedDate
-                  value={agentConfig?.updated_on}
+                  value={agentConfig?.updated_at}
                   year="numeric"
                   month="short"
                   day="2-digit"
@@ -167,51 +162,68 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
               )) ||
               '',
           },
+          { isDivider: true },
+          {
+            content: agentConfig && (
+              <AgentConfigActionMenu
+                config={agentConfig}
+                fullButton={true}
+                onCopySuccess={(newAgentConfig: AgentConfig) => {
+                  history.push(getPath('configuration_details', { configId: newAgentConfig.id }));
+                }}
+                enrollmentFlyoutOpenByDefault={openEnrollmentFlyoutOpenByDefault}
+                onCancelEnrollment={
+                  routeState && routeState.onDoneNavigateTo
+                    ? enrollmentCancelClickHandler
+                    : undefined
+                }
+              />
+            ),
+          },
         ].map((item, index) => (
           <EuiFlexItem grow={false} key={index}>
             {item.isDivider ?? false ? (
               <Divider />
-            ) : (
+            ) : item.label ? (
               <EuiDescriptionList compressed textStyle="reverse" style={{ textAlign: 'right' }}>
-                <EuiDescriptionListTitle>{item.label}</EuiDescriptionListTitle>
-                <EuiDescriptionListDescription>{item.content}</EuiDescriptionListDescription>
+                <EuiDescriptionListTitle className="eui-textNoWrap">
+                  {item.label}
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription className="eui-textNoWrap">
+                  {item.content}
+                </EuiDescriptionListDescription>
               </EuiDescriptionList>
+            ) : (
+              item.content
             )}
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
     ),
-    [agentConfig, agentStatus]
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+    [agentConfig, configId, agentStatus]
   );
 
   const headerTabs = useMemo(() => {
     return [
       {
-        id: 'datasources',
-        name: i18n.translate('xpack.ingestManager.configDetails.subTabs.datasourcesTabText', {
-          defaultMessage: 'Data sources',
+        id: 'integrations',
+        name: i18n.translate('xpack.ingestManager.configDetails.subTabs.packageConfigsTabText', {
+          defaultMessage: 'Integrations',
         }),
-        href: configDetailsLink,
-        isSelected: tabId === '' || tabId === 'datasources',
-      },
-      {
-        id: 'yaml',
-        name: i18n.translate('xpack.ingestManager.configDetails.subTabs.yamlTabText', {
-          defaultMessage: 'YAML',
-        }),
-        href: configDetailsYamlLink,
-        isSelected: tabId === 'yaml',
+        href: getHref('configuration_details', { configId, tabId: 'integrations' }),
+        isSelected: tabId === '' || tabId === 'integrations',
       },
       {
         id: 'settings',
         name: i18n.translate('xpack.ingestManager.configDetails.subTabs.settingsTabText', {
           defaultMessage: 'Settings',
         }),
-        href: configDetailsSettingsLink,
+        href: getHref('configuration_details', { configId, tabId: 'settings' }),
         isSelected: tabId === 'settings',
       },
     ];
-  }, [configDetailsLink, configDetailsSettingsLink, configDetailsYamlLink, tabId]);
+  }, [getHref, configId, tabId]);
 
   if (redirectToAgentConfigList) {
     return <Redirect to="/" />;
@@ -261,28 +273,31 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
           rightColumn={headerRightContent}
           tabs={(headerTabs as unknown) as EuiTabProps[]}
         >
-          <Switch>
-            <Route
-              path={`${DETAILS_ROUTER_PATH}/yaml`}
-              render={() => {
-                return <ConfigYamlView config={agentConfig} />;
-              }}
-            />
-            <Route
-              path={`${DETAILS_ROUTER_PATH}/settings`}
-              render={() => {
-                return <ConfigSettingsView config={agentConfig} />;
-              }}
-            />
-            <Route
-              path={`${DETAILS_ROUTER_PATH}`}
-              render={() => {
-                return <ConfigDatasourcesView config={agentConfig} />;
-              }}
-            />
-          </Switch>
+          <AgentConfigDetailsContent agentConfig={agentConfig} />
         </WithHeaderLayout>
       </AgentStatusRefreshContext.Provider>
     </ConfigRefreshContext.Provider>
+  );
+};
+
+const AgentConfigDetailsContent: React.FunctionComponent<{ agentConfig: AgentConfig }> = ({
+  agentConfig,
+}) => {
+  useBreadcrumbs('configuration_details', { configName: agentConfig.name });
+  return (
+    <Switch>
+      <Route
+        path={PAGE_ROUTING_PATHS.configuration_details_settings}
+        render={() => {
+          return <ConfigSettingsView config={agentConfig} />;
+        }}
+      />
+      <Route
+        path={PAGE_ROUTING_PATHS.configuration_details}
+        render={() => {
+          return <ConfigPackageConfigsView config={agentConfig} />;
+        }}
+      />
+    </Switch>
   );
 };

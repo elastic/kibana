@@ -15,6 +15,8 @@ export const GetCertsParamsType = t.intersection([
   }),
   t.partial({
     search: t.string,
+    notValidBefore: t.string,
+    notValidAfter: t.string,
     from: t.string,
     to: t.string,
   }),

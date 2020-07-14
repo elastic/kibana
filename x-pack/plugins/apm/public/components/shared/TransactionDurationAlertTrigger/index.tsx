@@ -3,18 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
-import { map } from 'lodash';
 import { EuiFieldNumber, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { map } from 'lodash';
+import React from 'react';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import {
+  ALERT_TYPES_CONFIG,
   TRANSACTION_ALERT_AGGREGATION_TYPES,
-  ALERT_TYPES_CONFIG
 } from '../../../../common/alert_types';
-import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { ALL_OPTION, useEnvironments } from '../../../hooks/useEnvironments';
 import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
+import { useUrlParams } from '../../../hooks/useUrlParams';
+import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
 import { PopoverExpression } from '../ServiceAlertTrigger/PopoverExpression';
 
 interface Params {
@@ -24,6 +25,7 @@ interface Params {
   aggregationType: 'avg' | '95th' | '99th';
   serviceName: string;
   transactionType: string;
+  environment: string;
 }
 
 interface Props {
@@ -39,6 +41,9 @@ export function TransactionDurationAlertTrigger(props: Props) {
 
   const transactionTypes = useServiceTransactionTypes(urlParams);
 
+  const { serviceName, start, end } = urlParams;
+  const { environmentOptions } = useEnvironments({ serviceName, start, end });
+
   if (!transactionTypes.length) {
     return null;
   }
@@ -48,30 +53,53 @@ export function TransactionDurationAlertTrigger(props: Props) {
     aggregationType: 'avg',
     windowSize: 5,
     windowUnit: 'm',
-    transactionType: transactionTypes[0]
+    transactionType: transactionTypes[0],
+    environment: ALL_OPTION.value,
   };
 
   const params = {
     ...defaults,
-    ...alertParams
+    ...alertParams,
   };
 
   const fields = [
     <PopoverExpression
+      value={
+        params.environment === ALL_OPTION.value
+          ? ALL_OPTION.text
+          : params.environment
+      }
+      title={i18n.translate(
+        'xpack.apm.transactionDurationAlertTrigger.environment',
+        {
+          defaultMessage: 'Environment',
+        }
+      )}
+    >
+      <EuiSelect
+        value={params.environment}
+        options={environmentOptions}
+        onChange={(e) =>
+          setAlertParams('environment', e.target.value as Params['environment'])
+        }
+        compressed
+      />
+    </PopoverExpression>,
+    <PopoverExpression
       value={params.transactionType}
       title={i18n.translate('xpack.apm.transactionDurationAlertTrigger.type', {
-        defaultMessage: 'Type'
+        defaultMessage: 'Type',
       })}
     >
       <EuiSelect
         value={params.transactionType}
-        options={transactionTypes.map(key => {
+        options={transactionTypes.map((key) => {
           return {
             text: key,
-            value: key
+            value: key,
           };
         })}
-        onChange={e =>
+        onChange={(e) =>
           setAlertParams(
             'transactionType',
             e.target.value as Params['transactionType']
@@ -83,7 +111,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
     <PopoverExpression
       value={params.aggregationType}
       title={i18n.translate('xpack.apm.transactionDurationAlertTrigger.when', {
-        defaultMessage: 'When'
+        defaultMessage: 'When',
       })}
     >
       <EuiSelect
@@ -91,10 +119,10 @@ export function TransactionDurationAlertTrigger(props: Props) {
         options={map(TRANSACTION_ALERT_AGGREGATION_TYPES, (label, key) => {
           return {
             text: label,
-            value: key
+            value: key,
           };
         })}
-        onChange={e =>
+        onChange={(e) =>
           setAlertParams(
             'aggregationType',
             e.target.value as Params['aggregationType']
@@ -108,33 +136,33 @@ export function TransactionDurationAlertTrigger(props: Props) {
       title={i18n.translate(
         'xpack.apm.transactionDurationAlertTrigger.isAbove',
         {
-          defaultMessage: 'is above'
+          defaultMessage: 'is above',
         }
       )}
     >
       <EuiFieldNumber
         value={params.threshold ?? ''}
-        onChange={e => setAlertParams('threshold', e.target.value)}
+        onChange={(e) => setAlertParams('threshold', e.target.value)}
         append={i18n.translate('xpack.apm.transactionDurationAlertTrigger.ms', {
-          defaultMessage: 'ms'
+          defaultMessage: 'ms',
         })}
         compressed
       />
     </PopoverExpression>,
     <ForLastExpression
-      onChangeWindowSize={timeWindowSize =>
+      onChangeWindowSize={(timeWindowSize) =>
         setAlertParams('windowSize', timeWindowSize || '')
       }
-      onChangeWindowUnit={timeWindowUnit =>
+      onChangeWindowUnit={(timeWindowUnit) =>
         setAlertParams('windowUnit', timeWindowUnit)
       }
       timeWindowSize={params.windowSize}
       timeWindowUnit={params.windowUnit}
       errors={{
         timeWindowSize: [],
-        timeWindowUnit: []
+        timeWindowUnit: [],
       }}
-    />
+    />,
   ];
 
   return (
@@ -147,3 +175,8 @@ export function TransactionDurationAlertTrigger(props: Props) {
     />
   );
 }
+
+// Default export is required for React.lazy loading
+//
+// eslint-disable-next-line import/no-default-export
+export default TransactionDurationAlertTrigger;

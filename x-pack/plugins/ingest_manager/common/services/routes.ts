@@ -6,7 +6,7 @@
 import {
   EPM_API_ROOT,
   EPM_API_ROUTES,
-  DATASOURCE_API_ROUTES,
+  PACKAGE_CONFIG_API_ROUTES,
   AGENT_CONFIG_API_ROUTES,
   DATA_STREAM_API_ROUTES,
   FLEET_SETUP_API_ROUTES,
@@ -15,6 +15,7 @@ import {
   SETUP_API_ROUTE,
   OUTPUT_API_ROUTES,
   SETTINGS_API_ROUTES,
+  APP_API_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
@@ -24,6 +25,10 @@ export const epmRouteService = {
 
   getListPath: () => {
     return EPM_API_ROUTES.LIST_PATTERN;
+  },
+
+  getListLimitedPath: () => {
+    return EPM_API_ROUTES.LIMITED_LIST_PATTERN;
   },
 
   getInfoPath: (pkgkey: string) => {
@@ -43,25 +48,25 @@ export const epmRouteService = {
   },
 };
 
-export const datasourceRouteService = {
+export const packageConfigRouteService = {
   getListPath: () => {
-    return DATASOURCE_API_ROUTES.LIST_PATTERN;
+    return PACKAGE_CONFIG_API_ROUTES.LIST_PATTERN;
   },
 
-  getInfoPath: (datasourceId: string) => {
-    return DATASOURCE_API_ROUTES.INFO_PATTERN.replace('{datasourceId}', datasourceId);
+  getInfoPath: (packageConfigId: string) => {
+    return PACKAGE_CONFIG_API_ROUTES.INFO_PATTERN.replace('{packageConfigId}', packageConfigId);
   },
 
   getCreatePath: () => {
-    return DATASOURCE_API_ROUTES.CREATE_PATTERN;
+    return PACKAGE_CONFIG_API_ROUTES.CREATE_PATTERN;
   },
 
-  getUpdatePath: (datasourceId: string) => {
-    return DATASOURCE_API_ROUTES.UPDATE_PATTERN.replace('{datasourceId}', datasourceId);
+  getUpdatePath: (packageConfigId: string) => {
+    return PACKAGE_CONFIG_API_ROUTES.UPDATE_PATTERN.replace('{packageConfigId}', packageConfigId);
   },
 
   getDeletePath: () => {
-    return DATASOURCE_API_ROUTES.DELETE_PATTERN;
+    return PACKAGE_CONFIG_API_ROUTES.DELETE_PATTERN;
   },
 };
 
@@ -82,12 +87,23 @@ export const agentConfigRouteService = {
     return AGENT_CONFIG_API_ROUTES.UPDATE_PATTERN.replace('{agentConfigId}', agentConfigId);
   },
 
+  getCopyPath: (agentConfigId: string) => {
+    return AGENT_CONFIG_API_ROUTES.COPY_PATTERN.replace('{agentConfigId}', agentConfigId);
+  },
+
   getDeletePath: () => {
     return AGENT_CONFIG_API_ROUTES.DELETE_PATTERN;
   },
 
   getInfoFullPath: (agentConfigId: string) => {
     return AGENT_CONFIG_API_ROUTES.FULL_INFO_PATTERN.replace('{agentConfigId}', agentConfigId);
+  },
+
+  getInfoFullDownloadPath: (agentConfigId: string) => {
+    return AGENT_CONFIG_API_ROUTES.FULL_INFO_DOWNLOAD_PATTERN.replace(
+      '{agentConfigId}',
+      agentConfigId
+    );
   },
 };
 
@@ -124,6 +140,10 @@ export const outputRoutesService = {
 export const settingsRoutesService = {
   getInfoPath: () => SETTINGS_API_ROUTES.INFO_PATTERN,
   getUpdatePath: () => SETTINGS_API_ROUTES.UPDATE_PATTERN,
+};
+
+export const appRoutesService = {
+  getCheckPermissionsPath: () => APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
 };
 
 export const enrollmentAPIKeyRouteService = {

@@ -19,6 +19,7 @@
 
 import { set } from 'lodash';
 import { FormattedData } from '../../../../../plugins/inspector/public';
+import { FormatFactory } from '../../../common/field_formats/utils';
 import { TabbedTable } from '../tabify';
 import { createFilter } from './create_filter';
 
@@ -38,14 +39,30 @@ import { createFilter } from './create_filter';
  */
 export async function buildTabularInspectorData(
   table: TabbedTable,
-  queryFilter: { addFilters: (filter: any) => void }
+  {
+    queryFilter,
+    deserializeFieldFormat,
+  }: {
+    queryFilter: { addFilters: (filter: any) => void };
+    deserializeFieldFormat: FormatFactory;
+  }
 ) {
-  const aggConfigs = table.columns.map(column => column.aggConfig);
-  const rows = table.rows.map(row => {
+  const aggConfigs = table.columns.map((column) => column.aggConfig);
+  const rows = table.rows.map((row) => {
     return table.columns.reduce<Record<string, FormattedData>>((prev, cur, colIndex) => {
       const value = row[cur.id];
-      const fieldFormatter = cur.aggConfig.fieldFormatter('text');
-      prev[`col-${colIndex}-${cur.aggConfig.id}`] = new FormattedData(value, fieldFormatter(value));
+
+      let format = cur.aggConfig.toSerializedFieldFormat();
+      if (Object.keys(format).length < 1) {
+        // If no format exists, fall back to string as a default
+        format = { id: 'string' };
+      }
+      const fieldFormatter = deserializeFieldFormat(format);
+
+      prev[`col-${colIndex}-${cur.aggConfig.id}`] = new FormattedData(
+        value,
+        fieldFormatter.convert(value)
+      );
       return prev;
     }, {});
   });
@@ -60,7 +77,7 @@ export async function buildTabularInspectorData(
         isCellContentFilterable &&
         ((value: { raw: unknown }) => {
           const rowIndex = rows.findIndex(
-            row => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw
+            (row) => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw
           );
           const filter = createFilter(aggConfigs, table, colIndex, rowIndex, value.raw);
 
@@ -72,7 +89,7 @@ export async function buildTabularInspectorData(
         isCellContentFilterable &&
         ((value: { raw: unknown }) => {
           const rowIndex = rows.findIndex(
-            row => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw
+            (row) => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw
           );
           const filter = createFilter(aggConfigs, table, colIndex, rowIndex, value.raw);
 
@@ -80,7 +97,7 @@ export async function buildTabularInspectorData(
             const notOther = value.raw !== '__other__';
             const notMissing = value.raw !== '__missing__';
             if (Array.isArray(filter)) {
-              filter.forEach(f => set(f, 'meta.negate', notOther && notMissing));
+              filter.forEach((f) => set(f, 'meta.negate', notOther && notMissing));
             } else {
               set(filter, 'meta.negate', notOther && notMissing);
             }

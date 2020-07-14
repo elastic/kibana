@@ -22,10 +22,12 @@ import { MetricAggType } from './metric_agg_type';
 import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { METRIC_TYPES } from './metric_agg_types';
-import { GetInternalStartServicesFn } from '../../../types';
+import { AggConfigSerialized, BaseAggParams } from '../types';
 
-export interface SerialDiffMetricAggDependencies {
-  getInternalStartServices: GetInternalStartServicesFn;
+export interface AggParamsSerialDiff extends BaseAggParams {
+  buckets_path: string;
+  customMetric?: AggConfigSerialized;
+  metricAgg?: string;
 }
 
 const serialDiffTitle = i18n.translate('data.search.aggs.metrics.serialDiffTitle', {
@@ -36,20 +38,15 @@ const serialDiffLabel = i18n.translate('data.search.aggs.metrics.serialDiffLabel
   defaultMessage: 'serial diff',
 });
 
-export const getSerialDiffMetricAgg = ({
-  getInternalStartServices,
-}: SerialDiffMetricAggDependencies) => {
-  return new MetricAggType(
-    {
-      name: METRIC_TYPES.SERIAL_DIFF,
-      title: serialDiffTitle,
-      subtype: parentPipelineAggHelper.subtype,
-      makeLabel: agg => makeNestedLabel(agg, serialDiffLabel),
-      params: [...parentPipelineAggHelper.params()],
-      getFormat: parentPipelineAggHelper.getFormat,
-    },
-    {
-      getInternalStartServices,
-    }
-  );
+export const getSerialDiffMetricAgg = () => {
+  const { subtype, params, getSerializedFormat } = parentPipelineAggHelper;
+
+  return new MetricAggType({
+    name: METRIC_TYPES.SERIAL_DIFF,
+    title: serialDiffTitle,
+    makeLabel: (agg) => makeNestedLabel(agg, serialDiffLabel),
+    subtype,
+    params: [...params()],
+    getSerializedFormat,
+  });
 };

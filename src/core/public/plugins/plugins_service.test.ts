@@ -50,7 +50,7 @@ import { contextServiceMock } from '../context/context_service.mock';
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
 mockPluginInitializerProvider.mockImplementation(
-  pluginName => mockPluginInitializers.get(pluginName)!
+  (pluginName) => mockPluginInitializers.get(pluginName)!
 );
 
 let plugins: InjectedPluginMetadata[];
@@ -73,6 +73,7 @@ function createManifest(
     configPath: ['path'],
     requiredPlugins: required,
     optionalPlugins: optional,
+    requiredBundles: [],
   };
 }
 
@@ -91,7 +92,7 @@ describe('PluginsService', () => {
       context: contextServiceMock.createSetupContract(),
       fatalErrors: fatalErrorsServiceMock.createSetupContract(),
       http: httpServiceMock.createSetupContract(),
-      injectedMetadata: pick(injectedMetadataServiceMock.createStartContract(), 'getInjectedVar'),
+      injectedMetadata: injectedMetadataServiceMock.createStartContract(),
       notifications: notificationServiceMock.createSetupContract(),
       uiSettings: uiSettingsServiceMock.createSetupContract(),
     };
@@ -99,6 +100,7 @@ describe('PluginsService', () => {
       ...mockSetupDeps,
       application: expect.any(Object),
       getStartServices: expect.any(Function),
+      injectedMetadata: pick(mockSetupDeps.injectedMetadata, 'getInjectedVar'),
     };
     mockStartDeps = {
       application: applicationServiceMock.createInternalStartContract(),
@@ -106,7 +108,7 @@ describe('PluginsService', () => {
       http: httpServiceMock.createStartContract(),
       chrome: chromeServiceMock.createStartContract(),
       i18n: i18nServiceMock.createStartContract(),
-      injectedMetadata: pick(injectedMetadataServiceMock.createStartContract(), 'getInjectedVar'),
+      injectedMetadata: injectedMetadataServiceMock.createStartContract(),
       notifications: notificationServiceMock.createStartContract(),
       overlays: overlayServiceMock.createStartContract(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
@@ -117,6 +119,7 @@ describe('PluginsService', () => {
       ...mockStartDeps,
       application: expect.any(Object),
       chrome: omit(mockStartDeps.chrome, 'getComponent'),
+      injectedMetadata: pick(mockStartDeps.injectedMetadata, 'getInjectedVar'),
     };
 
     // Reset these for each test.
@@ -250,7 +253,7 @@ describe('PluginsService', () => {
     });
 
     describe('timeout', () => {
-      const flushPromises = () => new Promise(resolve => setImmediate(resolve));
+      const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
       beforeAll(() => {
         jest.useFakeTimers();
       });
@@ -262,7 +265,7 @@ describe('PluginsService', () => {
         mockPluginInitializers.set(
           'pluginA',
           jest.fn(() => ({
-            setup: jest.fn(() => new Promise(i => i)),
+            setup: jest.fn(() => new Promise((i) => i)),
             start: jest.fn(() => ({ value: 1 })),
             stop: jest.fn(),
           }))
@@ -343,7 +346,7 @@ describe('PluginsService', () => {
           'pluginA',
           jest.fn(() => ({
             setup: jest.fn(() => ({ value: 1 })),
-            start: jest.fn(() => new Promise(i => i)),
+            start: jest.fn(() => new Promise((i) => i)),
             stop: jest.fn(),
           }))
         );

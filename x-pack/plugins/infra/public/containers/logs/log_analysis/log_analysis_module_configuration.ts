@@ -48,5 +48,5 @@ export const isJobConfigurationOutdated = <JobType extends string>(
 };
 
 const isSubset = <T>(subset: Set<T>, superset: Set<T>) => {
-  return Array.from(subset).every(subsetElement => superset.has(subsetElement));
+  return Array.from(subset).every((subsetElement) => superset.has(subsetElement));
 };

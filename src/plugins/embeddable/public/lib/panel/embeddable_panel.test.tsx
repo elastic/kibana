@@ -44,6 +44,7 @@ import {
 import { inspectorPluginMock } from '../../../../inspector/public/mocks';
 import { EuiBadge } from '@elastic/eui';
 import { embeddablePluginMock } from '../../mocks';
+import { applicationServiceMock } from '../../../../../core/public/mocks';
 
 const actionRegistry = new Map<string, Action>();
 const triggerRegistry = new Map<string, Trigger>();
@@ -55,6 +56,7 @@ const trigger: Trigger = {
   id: CONTEXT_MENU_TRIGGER,
 };
 const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
+const applicationMock = applicationServiceMock.createStartContract();
 
 actionRegistry.set(editModeAction.id, editModeAction);
 triggerRegistry.set(trigger.id, trigger);
@@ -62,7 +64,7 @@ setup.registerEmbeddableFactory(embeddableFactory.type, embeddableFactory);
 
 const start = doStart();
 const getEmbeddableFactory = start.getEmbeddableFactory;
-test('HelloWorldContainer initializes embeddables', async done => {
+test('HelloWorldContainer initializes embeddables', async (done) => {
   const container = new HelloWorldContainer(
     {
       id: '123',
@@ -159,7 +161,7 @@ test('HelloWorldContainer in view mode hides edit mode actions', async () => {
         getAllEmbeddableFactories={start.getEmbeddableFactories}
         getEmbeddableFactory={start.getEmbeddableFactory}
         notifications={{} as any}
-        application={{} as any}
+        application={applicationMock}
         overlays={{} as any}
         inspector={inspector}
         SavedObjectFinder={() => null}
@@ -199,7 +201,7 @@ const renderInEditModeAndOpenContextMenu = async (
         getEmbeddableFactory={start.getEmbeddableFactory}
         notifications={{} as any}
         overlays={{} as any}
-        application={{} as any}
+        application={applicationMock}
         inspector={inspector}
         SavedObjectFinder={() => null}
       />
@@ -306,7 +308,7 @@ test('HelloWorldContainer in edit mode shows edit mode actions', async () => {
         getEmbeddableFactory={start.getEmbeddableFactory}
         notifications={{} as any}
         overlays={{} as any}
-        application={{} as any}
+        application={applicationMock}
         inspector={inspector}
         SavedObjectFinder={() => null}
       />
@@ -369,7 +371,7 @@ test('Updates when hidePanelTitles is toggled', async () => {
         getEmbeddableFactory={start.getEmbeddableFactory}
         notifications={{} as any}
         overlays={{} as any}
-        application={{} as any}
+        application={applicationMock}
         inspector={inspector}
         SavedObjectFinder={() => null}
       />
@@ -422,7 +424,7 @@ test('Check when hide header option is false', async () => {
         getEmbeddableFactory={start.getEmbeddableFactory}
         notifications={{} as any}
         overlays={{} as any}
-        application={{} as any}
+        application={applicationMock}
         inspector={inspector}
         SavedObjectFinder={() => null}
         hideHeader={false}

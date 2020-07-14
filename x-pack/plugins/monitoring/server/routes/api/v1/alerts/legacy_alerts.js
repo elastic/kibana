@@ -43,7 +43,7 @@ export function legacyClusterAlertsRoute(server) {
         end: req.payload.timeRange.max,
       };
 
-      return getClusterLicense(req, esIndexPattern, clusterUuid).then(license =>
+      return getClusterLicense(req, esIndexPattern, clusterUuid).then((license) =>
         alertsClusterSearch(
           req,
           alertsIndex,

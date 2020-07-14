@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const inspector = getService('inspector');
@@ -29,8 +29,13 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'visualBuilder', 'timePicker', 'visChart']);
 
   describe('visual builder', function describeIndexTests() {
+    this.tags('includeFirefox');
     beforeEach(async () => {
-      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
+      await security.testUser.setRoles([
+        'kibana_admin',
+        'test_logstash_reader',
+        'kibana_sample_admin',
+      ]);
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisualBuilder();
       await PageObjects.visualBuilder.checkVisualBuilderIsPresent();
@@ -72,7 +77,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/46677
     describe('gauge', () => {
       beforeEach(async () => {
         await PageObjects.visualBuilder.resetPage();
@@ -112,7 +116,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
         await PageObjects.visualBuilder.checkMetricTabIsPresent();
-        await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin']);
       });
       after(async () => {
         await security.testUser.restoreDefaults();

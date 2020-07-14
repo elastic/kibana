@@ -16,8 +16,8 @@ export interface SavedObjectsCoreFieldMapping
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [enabled](./kibana-plugin-core-server.savedobjectscorefieldmapping.enabled.md) | <code>boolean</code> |  |
-|  [fields](./kibana-plugin-core-server.savedobjectscorefieldmapping.fields.md) | <code>{</code><br/><code>        [subfield: string]: {</code><br/><code>            type: string;</code><br/><code>        };</code><br/><code>    }</code> |  |
+|  [doc\_values](./kibana-plugin-core-server.savedobjectscorefieldmapping.doc_values.md) | <code>boolean</code> |  |
+|  [fields](./kibana-plugin-core-server.savedobjectscorefieldmapping.fields.md) | <code>{</code><br/><code>        [subfield: string]: {</code><br/><code>            type: string;</code><br/><code>            ignore_above?: number;</code><br/><code>        };</code><br/><code>    }</code> |  |
 |  [index](./kibana-plugin-core-server.savedobjectscorefieldmapping.index.md) | <code>boolean</code> |  |
 |  [null\_value](./kibana-plugin-core-server.savedobjectscorefieldmapping.null_value.md) | <code>number &#124; boolean &#124; string</code> |  |
 |  [type](./kibana-plugin-core-server.savedobjectscorefieldmapping.type.md) | <code>string</code> |  |

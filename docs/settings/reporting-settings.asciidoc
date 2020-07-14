@@ -1,6 +1,6 @@
 [role="xpack"]
 [[reporting-settings-kb]]
-=== Reporting settings in Kibana
+=== Reporting settings in {kib}
 ++++
 <titleabbrev>Reporting settings</titleabbrev>
 ++++
@@ -126,16 +126,22 @@ control the capturing process.
 [cols="2*<"]
 |===
 | `xpack.reporting.capture.timeouts.openUrl`
-  | How long to allow the Reporting browser to wait for the initial data of the
-  {kib} page to load. Defaults to `30000` (30 seconds).
+  | Specify how long to allow the Reporting browser to wait for the "Loading..." screen
+  to dismiss and find the initial data for the Kibana page.  If the time is
+  exceeded, a page screenshot is captured showing the current state, and the download link shows a warning message.
+  Defaults to `30000` (30 seconds).
 
 | `xpack.reporting.capture.timeouts.waitForElements`
-  | How long to allow the Reporting browser to wait for the visualization panels to
-  load on the {kib} page. Defaults to `30000` (30 seconds).
+  | Specify how long to allow the Reporting browser to wait for all visualization
+  panels to load on the Kibana page. If the time is exceeded, a page screenshot
+  is captured showing the current state, and the download link shows a warning message. Defaults to `30000` (30
+  seconds).
 
 | `xpack.reporting.capture.timeouts.renderComplete`
-  | How long to allow the Reporting browser to wait for each visualization to
-  signal that it is done renderings. Defaults to `30000` (30 seconds).
+  | Specify how long to allow the Reporting browser to wait for all visualizations to
+  fetch and render the data. If the time is exceeded, a
+  page screenshot is captured showing the current state, and the download link shows a warning message. Defaults to
+  `30000` (30 seconds).
 
 |===
 
@@ -203,6 +209,25 @@ When `xpack.reporting.capture.browser.type` is set to `chromium` (default) you c
   | The maximum size of a CSV file before being truncated. This setting exists to prevent
   large exports from causing performance and storage issues.
   Defaults to `10485760` (10mB).
+
+| `xpack.reporting.csv.scroll.size`
+  | Number of documents retrieved from {es} for each scroll iteration during a CSV 
+  export.
+  Defaults to `500`.
+
+| `xpack.reporting.csv.scroll.duration`
+  | Amount of time allowed before {kib} cleans the scroll context during a CSV export.
+  Defaults to `30s`.
+  
+| `xpack.reporting.csv.checkForFormulas`
+  | Enables a check that warns you when there's a potential formula involved in the output (=, -, +, and @ chars).
+  See OWASP: https://www.owasp.org/index.php/CSV_Injection
+  Defaults to `true`.
+  
+| `xpack.reporting.csv.enablePanelActionDownload`
+  | Enables CSV export from a saved search on a dashboard. This action is available in the dashboard 
+  panel menu for the saved search.
+  Defaults to `true`.
 
 |===
 

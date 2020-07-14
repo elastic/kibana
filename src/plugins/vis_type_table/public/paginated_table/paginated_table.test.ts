@@ -100,7 +100,7 @@ describe('Table Vis - Paginated table', () => {
     let rows: Row[] = [];
 
     if (isNumber(colCount)) {
-      times(colCount, i => {
+      times(colCount, (i) => {
         columns.push({ id: `${i}`, title: `column${i}`, formatter: { convert: identity } });
       });
     } else {
@@ -115,10 +115,10 @@ describe('Table Vis - Paginated table', () => {
     }
 
     if (isNumber(rowCount)) {
-      times(rowCount, row => {
+      times(rowCount, (row) => {
         const rowItems: Row = {};
 
-        times(columns.length, col => {
+        times(columns.length, (col) => {
           rowItems[`${col}`] = `item-${col}-${row}`;
         });
 
@@ -192,34 +192,10 @@ describe('Table Vis - Paginated table', () => {
       const tableRows = $el.find('tbody tr');
 
       // should contain the row data
-      expect(
-        tableRows
-          .eq(0)
-          .find('td')
-          .eq(0)
-          .text()
-      ).toBe(rows[0][0]);
-      expect(
-        tableRows
-          .eq(0)
-          .find('td')
-          .eq(1)
-          .text()
-      ).toBe(rows[0][1]);
-      expect(
-        tableRows
-          .eq(1)
-          .find('td')
-          .eq(0)
-          .text()
-      ).toBe(rows[1][0]);
-      expect(
-        tableRows
-          .eq(1)
-          .find('td')
-          .eq(1)
-          .text()
-      ).toBe(rows[1][1]);
+      expect(tableRows.eq(0).find('td').eq(0).text()).toBe(rows[0][0]);
+      expect(tableRows.eq(0).find('td').eq(1).text()).toBe(rows[0][1]);
+      expect(tableRows.eq(1).find('td').eq(0).text()).toBe(rows[1][0]);
+      expect(tableRows.eq(1).find('td').eq(1).text()).toBe(rows[1][1]);
     });
 
     test('should paginate rows', () => {
@@ -281,20 +257,8 @@ describe('Table Vis - Paginated table', () => {
 
     test('should not sort by default', () => {
       const tableRows = $el.find('tbody tr');
-      expect(
-        tableRows
-          .eq(0)
-          .find('td')
-          .eq(0)
-          .text()
-      ).toBe(data.rows[0][0]);
-      expect(
-        tableRows
-          .eq(lastRowIndex)
-          .find('td')
-          .eq(0)
-          .text()
-      ).toBe(data.rows[lastRowIndex][0]);
+      expect(tableRows.eq(0).find('td').eq(0).text()).toBe(data.rows[0][0]);
+      expect(tableRows.eq(lastRowIndex).find('td').eq(0).text()).toBe(data.rows[lastRowIndex][0]);
     });
 
     test('should do nothing when sorting by invalid column id', () => {
@@ -303,27 +267,9 @@ describe('Table Vis - Paginated table', () => {
       $scope.$digest();
 
       const tableRows = $el.find('tbody tr');
-      expect(
-        tableRows
-          .eq(0)
-          .find('td')
-          .eq(0)
-          .text()
-      ).toBe('bbbb');
-      expect(
-        tableRows
-          .eq(0)
-          .find('td')
-          .eq(1)
-          .text()
-      ).toBe('aaaa');
-      expect(
-        tableRows
-          .eq(0)
-          .find('td')
-          .eq(2)
-          .text()
-      ).toBe('zzzz');
+      expect(tableRows.eq(0).find('td').eq(0).text()).toBe('bbbb');
+      expect(tableRows.eq(0).find('td').eq(1).text()).toBe('aaaa');
+      expect(tableRows.eq(0).find('td').eq(2).text()).toBe('zzzz');
     });
 
     test('should do nothing when sorting by non sortable column', () => {
@@ -334,27 +280,9 @@ describe('Table Vis - Paginated table', () => {
       $scope.$digest();
 
       const tableRows = $el.find('tbody tr');
-      expect(
-        tableRows
-          .eq(0)
-          .find('td')
-          .eq(0)
-          .text()
-      ).toBe('bbbb');
-      expect(
-        tableRows
-          .eq(0)
-          .find('td')
-          .eq(1)
-          .text()
-      ).toBe('aaaa');
-      expect(
-        tableRows
-          .eq(0)
-          .find('td')
-          .eq(2)
-          .text()
-      ).toBe('zzzz');
+      expect(tableRows.eq(0).find('td').eq(0).text()).toBe('bbbb');
+      expect(tableRows.eq(0).find('td').eq(1).text()).toBe('aaaa');
+      expect(tableRows.eq(0).find('td').eq(2).text()).toBe('zzzz');
     });
 
     test("should set the sort direction to asc when it's not explicitly set", () => {
@@ -362,27 +290,9 @@ describe('Table Vis - Paginated table', () => {
       $scope.$digest();
 
       const tableRows = $el.find('tbody tr');
-      expect(
-        tableRows
-          .eq(2)
-          .find('td')
-          .eq(1)
-          .text()
-      ).toBe('cccc');
-      expect(
-        tableRows
-          .eq(1)
-          .find('td')
-          .eq(1)
-          .text()
-      ).toBe('bbbb');
-      expect(
-        tableRows
-          .eq(0)
-          .find('td')
-          .eq(1)
-          .text()
-      ).toBe('aaaa');
+      expect(tableRows.eq(2).find('td').eq(1).text()).toBe('cccc');
+      expect(tableRows.eq(1).find('td').eq(1).text()).toBe('bbbb');
+      expect(tableRows.eq(0).find('td').eq(1).text()).toBe('aaaa');
     });
 
     test('should allow you to explicitly set the sort direction', () => {
@@ -390,27 +300,9 @@ describe('Table Vis - Paginated table', () => {
       $scope.$digest();
 
       const tableRows = $el.find('tbody tr');
-      expect(
-        tableRows
-          .eq(0)
-          .find('td')
-          .eq(1)
-          .text()
-      ).toBe('zzzz');
-      expect(
-        tableRows
-          .eq(1)
-          .find('td')
-          .eq(1)
-          .text()
-      ).toBe('cccc');
-      expect(
-        tableRows
-          .eq(2)
-          .find('td')
-          .eq(1)
-          .text()
-      ).toBe('bbbb');
+      expect(tableRows.eq(0).find('td').eq(1).text()).toBe('zzzz');
+      expect(tableRows.eq(1).find('td').eq(1).text()).toBe('cccc');
+      expect(tableRows.eq(2).find('td').eq(1).text()).toBe('bbbb');
     });
 
     test('should sort ascending on first invocation', () => {
@@ -419,20 +311,8 @@ describe('Table Vis - Paginated table', () => {
       $scope.$digest();
 
       const tableRows = $el.find('tbody tr');
-      expect(
-        tableRows
-          .eq(0)
-          .find('td')
-          .eq(0)
-          .text()
-      ).toBe('aaaa');
-      expect(
-        tableRows
-          .eq(lastRowIndex)
-          .find('td')
-          .eq(0)
-          .text()
-      ).toBe('zzzz');
+      expect(tableRows.eq(0).find('td').eq(0).text()).toBe('aaaa');
+      expect(tableRows.eq(lastRowIndex).find('td').eq(0).text()).toBe('zzzz');
     });
 
     test('should sort descending on second invocation', () => {
@@ -442,20 +322,8 @@ describe('Table Vis - Paginated table', () => {
       $scope.$digest();
 
       const tableRows = $el.find('tbody tr');
-      expect(
-        tableRows
-          .eq(0)
-          .find('td')
-          .eq(0)
-          .text()
-      ).toBe('zzzz');
-      expect(
-        tableRows
-          .eq(lastRowIndex)
-          .find('td')
-          .eq(0)
-          .text()
-      ).toBe('aaaa');
+      expect(tableRows.eq(0).find('td').eq(0).text()).toBe('zzzz');
+      expect(tableRows.eq(lastRowIndex).find('td').eq(0).text()).toBe('aaaa');
     });
 
     test('should clear sorting on third invocation', () => {
@@ -466,20 +334,8 @@ describe('Table Vis - Paginated table', () => {
       $scope.$digest();
 
       const tableRows = $el.find('tbody tr');
-      expect(
-        tableRows
-          .eq(0)
-          .find('td')
-          .eq(0)
-          .text()
-      ).toBe(data.rows[0][0]);
-      expect(
-        tableRows
-          .eq(lastRowIndex)
-          .find('td')
-          .eq(0)
-          .text()
-      ).toBe('aaaa');
+      expect(tableRows.eq(0).find('td').eq(0).text()).toBe(data.rows[0][0]);
+      expect(tableRows.eq(lastRowIndex).find('td').eq(0).text()).toBe('aaaa');
     });
 
     test('should sort new column ascending', () => {
@@ -492,20 +348,8 @@ describe('Table Vis - Paginated table', () => {
       $scope.$digest();
 
       const tableRows = $el.find('tbody tr');
-      expect(
-        tableRows
-          .eq(0)
-          .find('td')
-          .eq(1)
-          .text()
-      ).toBe('aaaa');
-      expect(
-        tableRows
-          .eq(lastRowIndex)
-          .find('td')
-          .eq(1)
-          .text()
-      ).toBe('zzzz');
+      expect(tableRows.eq(0).find('td').eq(1).text()).toBe('aaaa');
+      expect(tableRows.eq(lastRowIndex).find('td').eq(1).text()).toBe('zzzz');
     });
   });
 
@@ -539,48 +383,12 @@ describe('Table Vis - Paginated table', () => {
       $scope.$digest();
 
       const tableRows = $el.find('tbody tr');
-      expect(
-        tableRows
-          .eq(0)
-          .find('td')
-          .eq(0)
-          .text()
-      ).toBe('cccc');
-      expect(
-        tableRows
-          .eq(0)
-          .find('td')
-          .eq(1)
-          .text()
-      ).toBe('cccc');
-      expect(
-        tableRows
-          .eq(0)
-          .find('td')
-          .eq(2)
-          .text()
-      ).toBe('aaaa');
-      expect(
-        tableRows
-          .eq(1)
-          .find('td')
-          .eq(2)
-          .text()
-      ).toBe('bbbb');
-      expect(
-        tableRows
-          .eq(2)
-          .find('td')
-          .eq(2)
-          .text()
-      ).toBe('cccc');
-      expect(
-        tableRows
-          .eq(3)
-          .find('td')
-          .eq(2)
-          .text()
-      ).toBe('zzzz');
+      expect(tableRows.eq(0).find('td').eq(0).text()).toBe('cccc');
+      expect(tableRows.eq(0).find('td').eq(1).text()).toBe('cccc');
+      expect(tableRows.eq(0).find('td').eq(2).text()).toBe('aaaa');
+      expect(tableRows.eq(1).find('td').eq(2).text()).toBe('bbbb');
+      expect(tableRows.eq(2).find('td').eq(2).text()).toBe('cccc');
+      expect(tableRows.eq(3).find('td').eq(2).text()).toBe('zzzz');
     });
 
     test('should sort correctly between columns', () => {
@@ -589,76 +397,22 @@ describe('Table Vis - Paginated table', () => {
       $scope.$digest();
 
       let tableRows = $el.find('tbody tr');
-      expect(
-        tableRows
-          .eq(0)
-          .find('td')
-          .eq(0)
-          .text()
-      ).toBe('cccc');
-      expect(
-        tableRows
-          .eq(0)
-          .find('td')
-          .eq(1)
-          .text()
-      ).toBe('cccc');
-      expect(
-        tableRows
-          .eq(0)
-          .find('td')
-          .eq(2)
-          .text()
-      ).toBe('aaaa');
+      expect(tableRows.eq(0).find('td').eq(0).text()).toBe('cccc');
+      expect(tableRows.eq(0).find('td').eq(1).text()).toBe('cccc');
+      expect(tableRows.eq(0).find('td').eq(2).text()).toBe('aaaa');
 
       // sort by the first column
       paginatedTable.sortColumn(0);
       $scope.$digest();
 
       tableRows = $el.find('tbody tr');
-      expect(
-        tableRows
-          .eq(0)
-          .find('td')
-          .eq(0)
-          .text()
-      ).toBe('aaaa');
-      expect(
-        tableRows
-          .eq(0)
-          .find('td')
-          .eq(1)
-          .text()
-      ).toBe('zzzz');
-      expect(
-        tableRows
-          .eq(0)
-          .find('td')
-          .eq(2)
-          .text()
-      ).toBe('cccc');
+      expect(tableRows.eq(0).find('td').eq(0).text()).toBe('aaaa');
+      expect(tableRows.eq(0).find('td').eq(1).text()).toBe('zzzz');
+      expect(tableRows.eq(0).find('td').eq(2).text()).toBe('cccc');
 
-      expect(
-        tableRows
-          .eq(1)
-          .find('td')
-          .eq(0)
-          .text()
-      ).toBe('bbbb');
-      expect(
-        tableRows
-          .eq(2)
-          .find('td')
-          .eq(0)
-          .text()
-      ).toBe('cccc');
-      expect(
-        tableRows
-          .eq(3)
-          .find('td')
-          .eq(0)
-          .text()
-      ).toBe('zzzz');
+      expect(tableRows.eq(1).find('td').eq(0).text()).toBe('bbbb');
+      expect(tableRows.eq(2).find('td').eq(0).text()).toBe('cccc');
+      expect(tableRows.eq(3).find('td').eq(0).text()).toBe('zzzz');
     });
 
     test('should not sort duplicate columns', () => {
@@ -682,7 +436,7 @@ describe('Table Vis - Paginated table', () => {
           title: 'object test',
           id: '0',
           formatter: {
-            convert: val => {
+            convert: (val) => {
               return val === 'zzz' ? '<h1>hello</h1>' : val;
             },
           },

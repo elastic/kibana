@@ -10,7 +10,7 @@ export class KibanaPrivilege {
   constructor(public readonly id: string, public readonly actions: string[] = []) {}
 
   public get name() {
-    return _.capitalize(this.id);
+    return _.upperFirst(this.id);
   }
 
   public grantsPrivilege(candidatePrivilege: KibanaPrivilege) {
@@ -18,7 +18,7 @@ export class KibanaPrivilege {
   }
 
   private checkActions(knownActions: string[], candidateActions: string[]) {
-    const missing = candidateActions.filter(action => !knownActions.includes(action));
+    const missing = candidateActions.filter((action) => !knownActions.includes(action));
 
     const hasAllRequested =
       knownActions.length > 0 && candidateActions.length > 0 && missing.length === 0;

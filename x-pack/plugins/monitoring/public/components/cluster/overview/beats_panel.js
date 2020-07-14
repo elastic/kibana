@@ -24,6 +24,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
 import { BEATS_SYSTEM_ID } from '../../../../common/constants';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 
 export function BeatsPanel(props) {
   const { setupMode } = props;
@@ -33,16 +34,13 @@ export function BeatsPanel(props) {
     return null;
   }
 
-  const goToBeats = () => props.changeUrl('beats');
-  const goToInstances = () => props.changeUrl('beats/beats');
-
   const setupModeData = get(setupMode.data, 'beats');
   const setupModeTooltip =
     setupMode && setupMode.enabled ? (
       <SetupModeTooltip
         setupModeData={setupModeData}
         productName={BEATS_SYSTEM_ID}
-        badgeClickAction={goToInstances}
+        badgeClickLink={getSafeForExternalLink('#/beats/beats')}
       />
     ) : null;
 
@@ -77,7 +75,7 @@ export function BeatsPanel(props) {
                 <DisabledIfNoDataAndInSetupModeLink
                   setupModeEnabled={setupMode.enabled}
                   setupModeData={setupModeData}
-                  onClick={goToBeats}
+                  href={getSafeForExternalLink('#/beats')}
                   aria-label={i18n.translate(
                     'xpack.monitoring.cluster.overview.beatsPanel.overviewLinkAriaLabel',
                     {
@@ -123,7 +121,7 @@ export function BeatsPanel(props) {
                 <EuiTitle size="s">
                   <h3>
                     <EuiLink
-                      onClick={goToInstances}
+                      href={getSafeForExternalLink('#/beats/beats')}
                       aria-label={i18n.translate(
                         'xpack.monitoring.cluster.overview.beatsPanel.instancesTotalLinkAriaLabel',
                         {

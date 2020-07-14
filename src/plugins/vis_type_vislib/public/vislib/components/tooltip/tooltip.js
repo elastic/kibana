@@ -63,10 +63,8 @@ export function Tooltip(id, el, formatter, events) {
  *
  * @return {Object} jQuery node object
  */
-Tooltip.prototype.$get = _.once(function() {
-  return $('<div>')
-    .addClass(this.tooltipClass)
-    .appendTo(document.body);
+Tooltip.prototype.$get = _.once(function () {
+  return $('<div>').addClass(this.tooltipClass).appendTo(document.body);
 });
 
 /**
@@ -74,7 +72,7 @@ Tooltip.prototype.$get = _.once(function() {
  *
  * @return {Object} jQuery node object
  */
-Tooltip.prototype.$getSizer = _.once(function() {
+Tooltip.prototype.$getSizer = _.once(function () {
   return this.$get()
     .clone()
     .removeClass(this.tooltipClass)
@@ -85,7 +83,7 @@ Tooltip.prototype.$getSizer = _.once(function() {
 /**
  * Show the tooltip, positioning it based on the content and chart container
  */
-Tooltip.prototype.show = function() {
+Tooltip.prototype.show = function () {
   const $tooltip = this.$get();
   const $chart = this.$getChart();
   const html = $tooltip.html();
@@ -154,7 +152,7 @@ Tooltip.prototype.show = function() {
 /**
  * Hide the tooltip, clearing its contents
  */
-Tooltip.prototype.hide = function() {
+Tooltip.prototype.hide = function () {
   const $tooltip = this.$get();
   allContents = [];
   $tooltip.css({
@@ -170,7 +168,7 @@ Tooltip.prototype.hide = function() {
  *
  * @return {Object} jQuery node for the chart
  */
-Tooltip.prototype.$getChart = function() {
+Tooltip.prototype.$getChart = function () {
   const chart = $(this.container && this.container.node());
   return chart.length ? chart : false;
 };
@@ -181,7 +179,7 @@ Tooltip.prototype.$getChart = function() {
  * @method render
  * @return {Function} Renders tooltip on a D3 selection
  */
-Tooltip.prototype.render = function() {
+Tooltip.prototype.render = function () {
   const self = this;
 
   /**
@@ -189,7 +187,7 @@ Tooltip.prototype.render = function() {
    *
    * @param {Object} selection D3 selection object
    */
-  return function(selection) {
+  return function (selection) {
     const $tooltip = self.$get();
     const id = self.id;
     const order = self.order;
@@ -203,28 +201,24 @@ Tooltip.prototype.render = function() {
 
     const $chart = self.$getChart();
     if ($chart) {
-      self.binder.jqOn($chart, 'mouseleave', function() {
+      self.binder.jqOn($chart, 'mouseleave', function () {
         // only clear when we leave the chart, so that
         // moving between points doesn't make it reposition
         $chart.removeData('previousPlacement');
       });
     }
 
-    selection.each(function(d, i) {
+    selection.each(function (d, i) {
       const element = d3.select(this);
 
       function render(html) {
-        allContents = _.filter(allContents, function(content) {
+        allContents = _.filter(allContents, function (content) {
           return content.id !== id;
         });
 
         if (html) allContents.push({ id, html, order });
 
-        const allHtml = _(allContents)
-          .sortBy('order')
-          .pluck('html')
-          .compact()
-          .join('\n');
+        const allHtml = _(allContents).sortBy('order').map('html').compact().join('\n');
 
         if (allHtml) {
           $tooltip.html(allHtml);
@@ -234,7 +228,7 @@ Tooltip.prototype.render = function() {
         }
       }
 
-      self.binder.fakeD3Bind(this, 'mousemove', function() {
+      self.binder.fakeD3Bind(this, 'mousemove', function () {
         if (!self.showCondition.call(element, d, i)) {
           return render();
         }
@@ -243,14 +237,14 @@ Tooltip.prototype.render = function() {
         return render(self.formatter(events));
       });
 
-      self.binder.fakeD3Bind(this, 'mouseleave', function() {
+      self.binder.fakeD3Bind(this, 'mouseleave', function () {
         render();
       });
     });
   };
 };
 
-Tooltip.prototype.destroy = function() {
+Tooltip.prototype.destroy = function () {
   this.hide();
   this.binder.destroy();
 };

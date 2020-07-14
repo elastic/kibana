@@ -29,7 +29,7 @@ const allDoubleQuoteRE = /"/g;
 
 function escape(val: string, quoteValues: boolean) {
   if (isObject(val)) {
-    val = val.valueOf();
+    val = (val as any).valueOf();
   }
 
   val = String(val);
@@ -49,18 +49,18 @@ function buildCsv(
   valueFormatter?: Function
 ) {
   // Build the header row by its names
-  const header = columns.map(col => escape(col.name, quoteValues));
+  const header = columns.map((col) => escape(col.name, quoteValues));
 
   // Convert the array of row objects to an array of row arrays
-  const orderedFieldNames = columns.map(col => col.field);
-  const csvRows = rows.map(row => {
-    return orderedFieldNames.map(field =>
+  const orderedFieldNames = columns.map((col) => col.field);
+  const csvRows = rows.map((row) => {
+    return orderedFieldNames.map((field) =>
       escape(valueFormatter ? valueFormatter(row[field]) : row[field], quoteValues)
     );
   });
 
   return (
-    [header, ...csvRows].map(row => row.join(csvSeparator)).join(LINE_FEED_CHARACTER) +
+    [header, ...csvRows].map((row) => row.join(csvSeparator)).join(LINE_FEED_CHARACTER) +
     LINE_FEED_CHARACTER
   ); // Add \r\n after last line
 }

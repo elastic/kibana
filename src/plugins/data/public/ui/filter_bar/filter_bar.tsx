@@ -36,6 +36,7 @@ import {
   toggleFilterDisabled,
   toggleFilterNegated,
   unpinFilter,
+  UI_SETTINGS,
 } from '../../../common';
 
 interface Props {
@@ -64,8 +65,9 @@ function FilterBarUI(props: Props) {
       <EuiFlexItem key={i} grow={false} className="globalFilterBar__flexItem">
         <FilterItem
           id={`${i}`}
+          intl={props.intl}
           filter={filter}
-          onUpdate={newFilter => onUpdate(i, newFilter)}
+          onUpdate={(newFilter) => onUpdate(i, newFilter)}
           onRemove={() => onRemove(i)}
           indexPatterns={props.indexPatterns}
           uiSettings={uiSettings!}
@@ -75,7 +77,7 @@ function FilterBarUI(props: Props) {
   }
 
   function renderAddFilter() {
-    const isPinned = uiSettings!.get('filters:pinnedByDefault');
+    const isPinned = uiSettings!.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT);
     const [indexPattern] = props.indexPatterns;
     const index = indexPattern && indexPattern.id;
     const newFilter = buildEmptyFilter(isPinned, index);
@@ -107,6 +109,7 @@ function FilterBarUI(props: Props) {
           panelPaddingSize="none"
           ownFocus={true}
           initialFocus=".filterEditor__hiddenItem"
+          repositionOnScroll
         >
           <EuiFlexItem grow={false}>
             <div style={{ width: 400 }}>

@@ -35,7 +35,7 @@ jest.mock('./get_changes.ts', () => ({
 }));
 
 jest.mock('./get_mtimes.ts', () => ({
-  getMtimes: async (paths: string[]) => new Map(paths.map(path => [path, 12345])),
+  getMtimes: async (paths: string[]) => new Map(paths.map((path) => [path, 12345])),
 }));
 
 jest.mock('execa');
@@ -100,12 +100,13 @@ describe('getOptimizerCacheKey()', () => {
               },
               "workerConfig": Object {
                 "browserslistEnv": "dev",
-                "cache": true,
                 "dist": false,
                 "optimizerCacheKey": "♻",
-                "profileWebpack": false,
                 "repoRoot": <absolute path>,
-                "watch": false,
+                "themeTags": Array [
+                  "v7dark",
+                  "v7light",
+                ],
               },
             }
           `);
@@ -136,13 +137,13 @@ describe('diffCacheKey()', () => {
       "[32m- Expected[39m
       [31m+ Received[39m
 
-      [2m  Array [[22m
+      [2m  [[22m
       [2m    \\"1\\",[22m
       [2m    \\"2\\",[22m
-      [2m    Object {[22m
-      [32m-     \\"a\\": \\"b\\",[39m
-      [31m+     \\"b\\": \\"a\\",[39m
-      [2m    },[22m
+      [2m    {[22m
+      [32m-     \\"a\\": \\"b\\"[39m
+      [31m+     \\"b\\": \\"a\\"[39m
+      [2m    }[22m
       [2m  ][22m"
     `);
     expect(
@@ -160,11 +161,11 @@ describe('diffCacheKey()', () => {
       "[32m- Expected[39m
       [31m+ Received[39m
 
-      [2m  Object {[22m
+      [2m  {[22m
       [32m-   \\"a\\": \\"1\\",[39m
-      [32m-   \\"b\\": \\"1\\",[39m
+      [32m-   \\"b\\": \\"1\\"[39m
       [31m+   \\"a\\": \\"2\\",[39m
-      [31m+   \\"b\\": \\"2\\",[39m
+      [31m+   \\"b\\": \\"2\\"[39m
       [2m  }[22m"
     `);
   });

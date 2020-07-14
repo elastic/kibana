@@ -44,7 +44,7 @@ describe('SavedObjectTypeRegistry', () => {
     expect(
       registry
         .getAllTypes()
-        .map(type => type.name)
+        .map((type) => type.name)
         .sort()
     ).toEqual(['typeA', 'typeB', 'typeC']);
   });
@@ -99,10 +99,37 @@ describe('SavedObjectTypeRegistry', () => {
     });
   });
 
+  describe('#getVisibleTypes', () => {
+    it('returns only visible registered types', () => {
+      const typeA = createType({ name: 'typeA', hidden: false });
+      const typeB = createType({ name: 'typeB', hidden: true });
+      const typeC = createType({ name: 'typeC', hidden: false });
+      registry.registerType(typeA);
+      registry.registerType(typeB);
+      registry.registerType(typeC);
+
+      const registered = registry.getVisibleTypes();
+      expect(registered.length).toEqual(2);
+      expect(registered).toContainEqual(typeA);
+      expect(registered).toContainEqual(typeC);
+    });
+
+    it('does not mutate the registered types when altering the list', () => {
+      registry.registerType(createType({ name: 'typeA', hidden: false }));
+      registry.registerType(createType({ name: 'typeB', hidden: true }));
+      registry.registerType(createType({ name: 'typeC', hidden: false }));
+
+      const types = registry.getVisibleTypes();
+      types.splice(0, 2);
+
+      expect(registry.getVisibleTypes().length).toEqual(2);
+    });
+  });
+
   describe('#getAllTypes', () => {
     it('returns all registered types', () => {
       const typeA = createType({ name: 'typeA' });
-      const typeB = createType({ name: 'typeB' });
+      const typeB = createType({ name: 'typeB', hidden: true });
       const typeC = createType({ name: 'typeC' });
       registry.registerType(typeA);
       registry.registerType(typeB);
@@ -300,7 +327,7 @@ describe('SavedObjectTypeRegistry', () => {
 
       const types = registry.getImportableAndExportableTypes();
       expect(types.length).toEqual(2);
-      expect(types.map(t => t.name)).toEqual(['typeA', 'typeD']);
+      expect(types.map((t) => t.name)).toEqual(['typeA', 'typeD']);
     });
   });
 });

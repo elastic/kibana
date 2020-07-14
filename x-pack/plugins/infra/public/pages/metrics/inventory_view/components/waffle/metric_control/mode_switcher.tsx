@@ -15,7 +15,7 @@ import {
 } from '../../../../../../../../../legacy/common/eui_styled_components';
 
 interface Props {
-  theme: EuiTheme;
+  theme: EuiTheme | undefined;
   onEdit: () => void;
   onAdd: () => void;
   onSave: () => void;
@@ -32,7 +32,7 @@ export const ModeSwitcher = withTheme(
     return (
       <div
         style={{
-          borderTop: `${theme.eui.euiBorderWidthThin} solid ${theme.eui.euiBorderColor}`,
+          borderTop: `${theme?.eui.euiBorderWidthThin} solid ${theme?.eui.euiBorderColor}`,
           padding: 12,
         }}
       >

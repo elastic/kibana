@@ -28,7 +28,7 @@ import FieldGroup from './field_group';
 import fieldGroupSource from '!!raw-loader!./field_group';
 const fieldGroupHtml = renderToHtml(FieldGroup);
 
-export default props => (
+export default (props) => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="FieldGroup"

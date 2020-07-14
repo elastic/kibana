@@ -41,7 +41,7 @@ describe('GET comment', () => {
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    const myPayload = mockCaseComments.find(s => s.id === 'mock-comment-1');
+    const myPayload = mockCaseComments.find((s) => s.id === 'mock-comment-1');
     expect(myPayload).not.toBeUndefined();
     if (myPayload != null) {
       expect(response.payload).toEqual(flattenCommentSavedObject(myPayload));

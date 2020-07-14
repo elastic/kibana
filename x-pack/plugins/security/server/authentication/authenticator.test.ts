@@ -14,7 +14,7 @@ import { duration, Duration } from 'moment';
 import { SessionStorage } from '../../../../../src/core/server';
 
 import {
-  loggingServiceMock,
+  loggingSystemMock,
   httpServiceMock,
   httpServerMock,
   elasticsearchServiceMock,
@@ -29,6 +29,7 @@ import { AuthenticationResult } from './authentication_result';
 import { Authenticator, AuthenticatorOptions, ProviderSession } from './authenticator';
 import { DeauthenticationResult } from './deauthentication_result';
 import { BasicAuthenticationProvider, SAMLAuthenticationProvider } from './providers';
+import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
 
 function getMockOptions({
   session,
@@ -44,16 +45,19 @@ function getMockOptions({
   return {
     auditLogger: securityAuditLoggerMock.create(),
     getCurrentUser: jest.fn(),
-    clusterClient: elasticsearchServiceMock.createClusterClient(),
+    clusterClient: elasticsearchServiceMock.createLegacyClusterClient(),
     basePath: httpServiceMock.createSetupContract().basePath,
     license: licenseMock.create(),
-    loggers: loggingServiceMock.create(),
+    loggers: loggingSystemMock.create(),
     config: createConfig(
       ConfigSchema.validate({ session, authc: { selector, providers, http } }),
-      loggingServiceMock.create().get(),
+      loggingSystemMock.create().get(),
       { isTLSEnabled: false }
     ),
     sessionStorageFactory: sessionStorageMock.createFactory<ProviderSession>(),
+    getFeatureUsageService: jest
+      .fn()
+      .mockReturnValue(securityFeatureUsageServiceMock.createStartContract()),
   };
 }
 
@@ -106,6 +110,33 @@ describe('Authenticator', () => {
         () =>
           new Authenticator(getMockOptions({ providers: { basic: { __http__: { order: 0 } } } }))
       ).toThrowError('Provider name "__http__" is reserved.');
+    });
+
+    it('properly sets `loggedOut` URL.', () => {
+      const basicAuthenticationProviderMock = jest.requireMock('./providers/basic')
+        .BasicAuthenticationProvider;
+
+      basicAuthenticationProviderMock.mockClear();
+      new Authenticator(getMockOptions());
+      expect(basicAuthenticationProviderMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          urls: {
+            loggedOut: '/mock-server-basepath/security/logged_out',
+          },
+        }),
+        expect.anything()
+      );
+
+      basicAuthenticationProviderMock.mockClear();
+      new Authenticator(getMockOptions({ selector: { enabled: true } }));
+      expect(basicAuthenticationProviderMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          urls: {
+            loggedOut: `/mock-server-basepath/login?msg=LOGGED_OUT`,
+          },
+        }),
+        expect.anything()
+      );
     });
 
     describe('HTTP authentication provider', () => {
@@ -1451,6 +1482,9 @@ describe('Authenticator', () => {
       );
 
       expect(mockSessionStorage.set).not.toHaveBeenCalled();
+      expect(
+        mockOptions.getFeatureUsageService().recordPreAccessAgreementUsage
+      ).not.toHaveBeenCalled();
     });
 
     it('fails if cannot retrieve user session', async () => {
@@ -1463,6 +1497,9 @@ describe('Authenticator', () => {
       );
 
       expect(mockSessionStorage.set).not.toHaveBeenCalled();
+      expect(
+        mockOptions.getFeatureUsageService().recordPreAccessAgreementUsage
+      ).not.toHaveBeenCalled();
     });
 
     it('fails if license doesn allow access agreement acknowledgement', async () => {
@@ -1477,6 +1514,9 @@ describe('Authenticator', () => {
       );
 
       expect(mockSessionStorage.set).not.toHaveBeenCalled();
+      expect(
+        mockOptions.getFeatureUsageService().recordPreAccessAgreementUsage
+      ).not.toHaveBeenCalled();
     });
 
     it('properly acknowledges access agreement for the authenticated user', async () => {
@@ -1493,6 +1533,10 @@ describe('Authenticator', () => {
         type: 'basic',
         name: 'basic1',
       });
+
+      expect(
+        mockOptions.getFeatureUsageService().recordPreAccessAgreementUsage
+      ).toHaveBeenCalledTimes(1);
     });
   });
 });

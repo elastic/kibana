@@ -6,12 +6,12 @@
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import Boom from 'boom';
-import { PACKAGES_SAVED_OBJECT_TYPE, DATASOURCE_SAVED_OBJECT_TYPE } from '../../../constants';
+import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_CONFIG_SAVED_OBJECT_TYPE } from '../../../constants';
 import { AssetReference, AssetType, ElasticsearchAssetType } from '../../../types';
 import { CallESAsCurrentUser } from '../../../types';
 import { getInstallation, savedObjectTypes } from './index';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
-import { datasourceService } from '../..';
+import { packageConfigService } from '../..';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -27,15 +27,15 @@ export async function removeInstallation(options: {
     throw Boom.badRequest(`${pkgName} is installed by default and cannot be removed`);
   const installedObjects = installation.installed || [];
 
-  const { total } = await datasourceService.list(savedObjectsClient, {
-    kuery: `${DATASOURCE_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
+  const { total } = await packageConfigService.list(savedObjectsClient, {
+    kuery: `${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
     page: 0,
     perPage: 0,
   });
 
   if (total > 0)
     throw Boom.badRequest(
-      `unable to remove package with existing datasource(s) in use by agent(s)`
+      `unable to remove package with existing package config(s) in use by agent(s)`
     );
 
   // Delete the manager saved object with references to the asset objects
@@ -119,7 +119,7 @@ export async function deleteAssetsByType({
   installedObjects: AssetReference[];
   assetType: ElasticsearchAssetType;
 }) {
-  const toDelete = installedObjects.filter(asset => asset.type === assetType);
+  const toDelete = installedObjects.filter((asset) => asset.type === assetType);
   try {
     await deleteAssets(toDelete, savedObjectsClient, callCluster);
   } catch (err) {

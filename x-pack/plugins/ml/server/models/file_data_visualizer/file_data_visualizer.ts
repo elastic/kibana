@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import {
   AnalysisResult,
   FormattedOverrides,
@@ -13,7 +13,7 @@ import {
 
 export type InputData = any[];
 
-export function fileDataVisualizerProvider(callAsCurrentUser: APICaller) {
+export function fileDataVisualizerProvider(callAsCurrentUser: LegacyAPICaller) {
   async function analyzeFile(data: any, overrides: any): Promise<AnalysisResult> {
     const results = await callAsCurrentUser('ml.fileStructure', {
       body: data,

@@ -98,7 +98,7 @@ export default new Chainable('holt', {
     const beta = args.byName.beta;
     const gamma = args.byName.gamma;
 
-    _.each(newSeries.list, function(series) {
+    _.each(newSeries.list, function (series) {
       const sample = args.byName.sample || series.data.length; // If we use length it should simply never predict
 
       // Single exponential smoothing

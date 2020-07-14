@@ -23,7 +23,7 @@ export function setInfluencerFilterSettings(
 
   const { selectedCells, viewBySwimlaneOptions } = state;
   let selectedViewByFieldName = state.viewBySwimlaneFieldName;
-  const filteredViewBySwimlaneOptions = viewBySwimlaneOptions.filter(d =>
+  const filteredViewBySwimlaneOptions = viewBySwimlaneOptions.filter((d) =>
     filteredFields.includes(d)
   );
 
@@ -57,5 +57,6 @@ export function setInfluencerFilterSettings(
       filteredFields.includes(selectedViewByFieldName) === false,
     viewBySwimlaneFieldName: selectedViewByFieldName,
     viewBySwimlaneOptions: filteredViewBySwimlaneOptions,
+    viewByFromPage: 1,
   };
 }

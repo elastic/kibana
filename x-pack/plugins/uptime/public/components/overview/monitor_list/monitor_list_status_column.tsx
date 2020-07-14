@@ -7,11 +7,11 @@
 import React from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { capitalize } from 'lodash';
+import { upperFirst } from 'lodash';
 import styled from 'styled-components';
 import { EuiHealth, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { parseTimestamp } from './parse_timestamp';
-import { Check } from '../../../../common/runtime_types';
+import { Ping } from '../../../../common/runtime_types';
 import {
   STATUS,
   SHORT_TIMESPAN_LOCALE,
@@ -24,7 +24,7 @@ import * as labels from './translations';
 interface MonitorListStatusColumnProps {
   status: string;
   timestamp: string;
-  checks: Check[];
+  summaryPings: Ping[];
 }
 
 const PaddedSpan = styled.span`
@@ -75,27 +75,27 @@ const getRelativeShortTimeStamp = (timeStamp: any) => {
   return shortTimestamp;
 };
 
-export const getLocationStatus = (checks: Check[], status: string) => {
-  const upChecks: Set<string> = new Set();
-  const downChecks: Set<string> = new Set();
+export const getLocationStatus = (summaryPings: Ping[], status: string) => {
+  const upPings: Set<string> = new Set();
+  const downPings: Set<string> = new Set();
 
-  checks.forEach((check: Check) => {
-    const location = check?.observer?.geo?.name ?? UNNAMED_LOCATION;
+  summaryPings.forEach((summaryPing: Ping) => {
+    const location = summaryPing?.observer?.geo?.name ?? UNNAMED_LOCATION;
 
-    if (check.monitor.status === STATUS.UP) {
-      upChecks.add(capitalize(location));
-    } else if (check.monitor.status === STATUS.DOWN) {
-      downChecks.add(capitalize(location));
+    if (summaryPing.monitor.status === STATUS.UP) {
+      upPings.add(upperFirst(location));
+    } else if (summaryPing.monitor.status === STATUS.DOWN) {
+      downPings.add(upperFirst(location));
     }
   });
 
   // if monitor is down in one dns, it will be considered down so removing it from up list
-  const absUpChecks: Set<string> = new Set([...upChecks].filter(item => !downChecks.has(item)));
+  const absUpChecks: Set<string> = new Set([...upPings].filter((item) => !downPings.has(item)));
 
-  const totalLocations = absUpChecks.size + downChecks.size;
+  const totalLocations = absUpChecks.size + downPings.size;
   let statusMessage = '';
   if (status === STATUS.DOWN) {
-    statusMessage = `${downChecks.size}/${totalLocations}`;
+    statusMessage = `${downPings.size}/${totalLocations}`;
   } else {
     statusMessage = `${absUpChecks.size}/${totalLocations}`;
   }
@@ -115,7 +115,7 @@ export const getLocationStatus = (checks: Check[], status: string) => {
 
 export const MonitorListStatusColumn = ({
   status,
-  checks = [],
+  summaryPings = [],
   timestamp: tsString,
 }: MonitorListStatusColumnProps) => {
   const timestamp = parseTimestamp(tsString);
@@ -140,7 +140,7 @@ export const MonitorListStatusColumn = ({
         </PaddedSpan>
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
-        <EuiText size="s">{getLocationStatus(checks, status)}</EuiText>
+        <EuiText size="s">{getLocationStatus(summaryPings, status)}</EuiText>
       </EuiFlexItem>
     </StatusColumnFlexG>
   );

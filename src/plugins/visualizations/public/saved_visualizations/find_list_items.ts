@@ -40,7 +40,7 @@ export async function findListItems({
   mapSavedObjectApiHits: SavedObjectLoader['mapSavedObjectApiHits'];
 }) {
   const extensions = visTypes
-    .map(v => v.appExtensions?.visualizations)
+    .map((v) => v.appExtensions?.visualizations)
     .filter(Boolean) as VisualizationsAppExtension[];
   const extensionByType = extensions.reduce((acc, m) => {
     return m!.docTypes.reduce((_acc, type) => {
@@ -49,13 +49,7 @@ export async function findListItems({
     }, acc);
   }, {} as { [visType: string]: VisualizationsAppExtension });
   const searchOption = (field: string, ...defaults: string[]) =>
-    _(extensions)
-      .pluck(field)
-      .concat(defaults)
-      .compact()
-      .flatten()
-      .uniq()
-      .value() as string[];
+    _(extensions).map(field).concat(defaults).compact().flatten().uniq().value() as string[];
   const searchOptions = {
     type: searchOption('docTypes', 'visualization'),
     searchFields: searchOption('searchFields', 'title^3', 'description'),
@@ -71,7 +65,7 @@ export async function findListItems({
 
   return {
     total,
-    hits: savedObjects.map(savedObject => {
+    hits: savedObjects.map((savedObject) => {
       const config = extensionByType[savedObject.type];
 
       if (config) {

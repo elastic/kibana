@@ -27,13 +27,13 @@ export class SearchMarker extends React.PureComponent<SearchMarkerProps, SearchM
     hoveredPosition: null,
   };
 
-  public handleClick: React.MouseEventHandler<SVGGElement> = evt => {
+  public handleClick: React.MouseEventHandler<SVGGElement> = (evt) => {
     evt.stopPropagation();
 
     this.props.jumpToTarget(this.props.bucket.representativeKey);
   };
 
-  public handleMouseEnter: React.MouseEventHandler<SVGGElement> = evt => {
+  public handleMouseEnter: React.MouseEventHandler<SVGGElement> = (evt) => {
     this.setState({
       hoveredPosition: evt.currentTarget.getBoundingClientRect(),
     });
@@ -102,13 +102,13 @@ const fadeInAnimation = keyframes`
 `;
 
 const SearchMarkerGroup = euiStyled.g`
-  animation: ${fadeInAnimation} ${props => props.theme.eui.euiAnimSpeedExtraSlow} ease-in both;
+  animation: ${fadeInAnimation} ${(props) => props.theme.eui.euiAnimSpeedExtraSlow} ease-in both;
 `;
 
 const SearchMarkerBackgroundRect = euiStyled.rect`
-  fill: ${props => props.theme.eui.euiColorAccent};
+  fill: ${(props) => props.theme.eui.euiColorAccent};
   opacity: 0;
-  transition: opacity ${props => props.theme.eui.euiAnimSpeedNormal} ease-in;
+  transition: opacity ${(props) => props.theme.eui.euiAnimSpeedNormal} ease-in;
   cursor: pointer;
 
   ${SearchMarkerGroup}:hover & {
@@ -117,5 +117,5 @@ const SearchMarkerBackgroundRect = euiStyled.rect`
 `;
 
 const SearchMarkerForegroundRect = euiStyled.rect`
-  fill: ${props => props.theme.eui.euiColorAccent};
+  fill: ${(props) => props.theme.eui.euiColorAccent};
 `;

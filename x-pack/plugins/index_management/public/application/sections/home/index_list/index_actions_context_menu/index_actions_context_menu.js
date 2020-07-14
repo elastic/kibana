@@ -7,7 +7,7 @@
 import React, { Component, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { all } from 'lodash';
+import { every } from 'lodash';
 import {
   EuiBadge,
   EuiButton,
@@ -43,10 +43,10 @@ export class IndexActionsContextMenu extends Component {
     });
     this.props.resetSelection && this.props.resetSelection();
   };
-  confirmAction = isActionConfirmed => {
+  confirmAction = (isActionConfirmed) => {
     this.setState({ isActionConfirmed });
   };
-  panels({ services: { extensionsService } }) {
+  panels({ services: { extensionsService }, core: { getUrlForApp } }) {
     const {
       closeIndices,
       openIndices,
@@ -66,11 +66,11 @@ export class IndexActionsContextMenu extends Component {
       unfreezeIndices,
       hasSystemIndex,
     } = this.props;
-    const allOpen = all(indexNames, indexName => {
+    const allOpen = every(indexNames, (indexName) => {
       return indexStatusByName[indexName] === INDEX_OPEN;
     });
-    const allFrozen = all(indices, index => index.isFrozen);
-    const allUnfrozen = all(indices, index => !index.isFrozen);
+    const allFrozen = every(indices, (index) => index.isFrozen);
+    const allUnfrozen = every(indices, (index) => !index.isFrozen);
     const selectedIndexCount = indexNames.length;
     const items = [];
     if (!detailPanel && selectedIndexCount === 1) {
@@ -210,10 +210,11 @@ export class IndexActionsContextMenu extends Component {
         this.setState({ renderConfirmModal: this.renderConfirmDeleteModal });
       },
     });
-    extensionsService.actions.forEach(actionExtension => {
+    extensionsService.actions.forEach((actionExtension) => {
       const actionExtensionDefinition = actionExtension({
         indices,
         reloadIndices,
+        getUrlForApp,
       });
       if (actionExtensionDefinition) {
         const {
@@ -242,7 +243,7 @@ export class IndexActionsContextMenu extends Component {
         }
       }
     });
-    items.forEach(item => {
+    items.forEach((item) => {
       item['data-test-subj'] = 'indexTableContextMenuButton';
     });
     const panelTree = {
@@ -257,12 +258,12 @@ export class IndexActionsContextMenu extends Component {
   }
 
   onButtonClick = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       isPopoverOpen: !prevState.isPopoverOpen,
     }));
   };
 
-  closePopoverAndExecute = func => {
+  closePopoverAndExecute = (func) => {
     this.setState({
       isPopoverOpen: false,
       renderConfirmModal: false,
@@ -341,7 +342,7 @@ export class IndexActionsContextMenu extends Component {
           </p>
 
           <ul>
-            {indexNames.map(indexName => (
+            {indexNames.map((indexName) => (
               <li key={indexName}>{indexName}</li>
             ))}
           </ul>
@@ -384,7 +385,7 @@ export class IndexActionsContextMenu extends Component {
               helpText={helpText}
             >
               <EuiFieldNumber
-                onChange={event => {
+                onChange={(event) => {
                   this.setState({ forcemergeSegments: event.target.value });
                 }}
                 min={1}
@@ -413,7 +414,7 @@ export class IndexActionsContextMenu extends Component {
         </p>
 
         <ul>
-          {indexNames.map(indexName => (
+          {indexNames.map((indexName) => (
             <li key={indexName}>{indexName}</li>
           ))}
         </ul>
@@ -438,7 +439,7 @@ export class IndexActionsContextMenu extends Component {
         </p>
 
         <ul>
-          {indexNames.map(indexName => (
+          {indexNames.map((indexName) => (
             <li key={indexName}>
               {indexName}
               {isSystemIndexByName[indexName] ? (
@@ -484,7 +485,7 @@ export class IndexActionsContextMenu extends Component {
               />
             }
             checked={isActionConfirmed}
-            onChange={e => this.confirmAction(e.target.checked)}
+            onChange={(e) => this.confirmAction(e.target.checked)}
           />
         </EuiCallOut>
       </Fragment>
@@ -572,7 +573,7 @@ export class IndexActionsContextMenu extends Component {
           </p>
 
           <ul>
-            {indexNames.map(indexName => (
+            {indexNames.map((indexName) => (
               <li key={indexName}>
                 {indexName}
                 {isSystemIndexByName[indexName] ? (
@@ -618,7 +619,7 @@ export class IndexActionsContextMenu extends Component {
                 />
               }
               checked={isActionConfirmed}
-              onChange={e => this.confirmAction(e.target.checked)}
+              onChange={(e) => this.confirmAction(e.target.checked)}
             />
           </EuiCallOut>
         </EuiConfirmModal>
@@ -668,7 +669,7 @@ export class IndexActionsContextMenu extends Component {
           </p>
 
           <ul>
-            {indexNames.map(indexName => (
+            {indexNames.map((indexName) => (
               <li key={indexName}>{indexName}</li>
             ))}
           </ul>
@@ -701,7 +702,7 @@ export class IndexActionsContextMenu extends Component {
   render() {
     return (
       <AppContextConsumer>
-        {appDependencies => {
+        {(appDependencies) => {
           const { indexNames } = this.props;
           const selectedIndexCount = indexNames.length;
           const {

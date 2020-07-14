@@ -21,10 +21,6 @@ describe('AccessAgreementPage', () => {
     });
   });
 
-  afterAll(() => {
-    delete (window as any).location;
-  });
-
   it('renders as expected when state is available', async () => {
     const coreStartMock = coreMock.createStart();
     coreStartMock.http.get.mockResolvedValue({ accessAgreement: 'This is [link](../link)' });

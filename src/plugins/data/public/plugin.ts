@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import './index.scss';
+
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -24,6 +26,7 @@ import {
   Plugin,
   PackageInfo,
 } from 'src/core/public';
+import { ConfigSchema } from '../config';
 import { Storage, IStorageWrapper, createStartServicesGetter } from '../../kibana_utils/public';
 import {
   DataPublicPluginSetup,
@@ -37,7 +40,12 @@ import { SearchService } from './search/search_service';
 import { FieldFormatsService } from './field_formats';
 import { QueryService } from './query';
 import { createIndexPatternSelect } from './ui/index_pattern_select';
-import { IndexPatternsService } from './index_patterns';
+import {
+  IndexPatternsService,
+  onRedirectNoIndexPattern,
+  IndexPatternsApiClient,
+  UiSettingsPublicToCommon,
+} from './index_patterns';
 import {
   setFieldFormats,
   setHttp,
@@ -73,6 +81,8 @@ import {
   ACTION_VALUE_CLICK,
   ValueClickActionContext,
 } from './actions/value_click_action';
+import { SavedObjectsClientPublicToCommon } from './index_patterns';
+import { indexPatternLoad } from './index_patterns/expressions/load_index_pattern';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
@@ -83,17 +93,18 @@ declare module '../../ui_actions/public' {
 }
 
 export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPublicPluginStart> {
-  private readonly autocomplete = new AutocompleteService();
+  private readonly autocomplete: AutocompleteService;
   private readonly searchService: SearchService;
   private readonly fieldFormatsService: FieldFormatsService;
   private readonly queryService: QueryService;
   private readonly storage: IStorageWrapper;
   private readonly packageInfo: PackageInfo;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService();
     this.queryService = new QueryService();
     this.fieldFormatsService = new FieldFormatsService();
+    this.autocomplete = new AutocompleteService(initializerContext);
     this.storage = new Storage(window.localStorage);
     this.packageInfo = initializerContext.env.packageInfo;
   }
@@ -116,6 +127,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     };
 
     expressions.registerFunction(esaggs);
+    expressions.registerFunction(indexPatternLoad);
 
     const queryService = this.queryService.setup({
       uiSettings: core.uiSettings,
@@ -142,7 +154,6 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
         expressions,
         getInternalStartServices,
         packageInfo: this.packageInfo,
-        query: queryService,
       }),
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
@@ -150,7 +161,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
   }
 
   public start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginStart {
-    const { uiSettings, http, notifications, savedObjects, overlays } = core;
+    const { uiSettings, http, notifications, savedObjects, overlays, application } = core;
     setHttp(http);
     setNotifications(notifications);
     setOverlays(overlays);
@@ -160,16 +171,31 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     const fieldFormats = this.fieldFormatsService.start();
     setFieldFormats(fieldFormats);
 
-    const indexPatterns = new IndexPatternsService(core, savedObjects.client, http);
+    const indexPatterns = new IndexPatternsService({
+      uiSettings: new UiSettingsPublicToCommon(uiSettings),
+      savedObjectsClient: new SavedObjectsClientPublicToCommon(savedObjects.client),
+      apiClient: new IndexPatternsApiClient(http),
+      fieldFormats,
+      onNotification: (toastInputFields) => {
+        notifications.toasts.add(toastInputFields);
+      },
+      onError: notifications.toasts.addError,
+      onRedirectNoIndexPattern: onRedirectNoIndexPattern(
+        application.capabilities,
+        application.navigateToApp,
+        overlays
+      ),
+    });
     setIndexPatterns(indexPatterns);
 
-    const query = this.queryService.start(savedObjects);
+    const query = this.queryService.start({
+      storage: this.storage,
+      savedObjectsClient: savedObjects.client,
+      uiSettings,
+    });
     setQueryService(query);
 
-    const search = this.searchService.start(core, {
-      indexPatterns,
-      fieldFormats,
-    });
+    const search = this.searchService.start(core, { indexPatterns });
     setSearchService(search);
 
     uiActions.addTriggerAction(

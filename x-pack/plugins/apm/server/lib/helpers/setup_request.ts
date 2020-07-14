@@ -5,12 +5,12 @@
  */
 
 import moment from 'moment';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { KibanaRequest } from '../../../../../../src/core/server';
-import { IIndexPattern } from '../../../../../../src/plugins/data/common';
 import { APMConfig } from '../..';
 import {
   getApmIndices,
-  ApmIndicesConfig
+  ApmIndicesConfig,
 } from '../settings/apm_indices/get_apm_indices';
 import { ESFilter } from '../../../typings/elasticsearch';
 import { ESClient } from './es_client';
@@ -18,17 +18,13 @@ import { getUiFiltersES } from './convert_ui_filters/get_ui_filters_es';
 import { APMRequestHandlerContext } from '../../routes/typings';
 import { getESClient } from './es_client';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { getDynamicIndexPattern } from '../index_pattern/get_dynamic_index_pattern';
 
-function decodeUiFilters(
-  indexPattern: IIndexPattern | undefined,
-  uiFiltersEncoded?: string
-) {
-  if (!uiFiltersEncoded || !indexPattern) {
+function decodeUiFilters(uiFiltersEncoded?: string) {
+  if (!uiFiltersEncoded) {
     return [];
   }
   const uiFilters = JSON.parse(uiFiltersEncoded);
-  return getUiFiltersES(indexPattern, uiFilters);
+  return getUiFiltersES(uiFilters);
 }
 // Explicitly type Setup to prevent TS initialization errors
 // https://github.com/microsoft/TypeScript/issues/34933
@@ -36,9 +32,9 @@ function decodeUiFilters(
 export interface Setup {
   client: ESClient;
   internalClient: ESClient;
+  ml?: ReturnType<typeof getMlSetup>;
   config: APMConfig;
   indices: ApmIndicesConfig;
-  dynamicIndexPattern?: IIndexPattern;
 }
 
 export interface SetupTimeRange {
@@ -74,33 +70,57 @@ export async function setupRequest<TParams extends SetupRequestParams>(
   const { config } = context;
   const { query } = context.params;
 
-  const indices = await getApmIndices({
-    savedObjectsClient: context.core.savedObjects.client,
-    config
-  });
+  const [indices, includeFrozen] = await Promise.all([
+    getApmIndices({
+      savedObjectsClient: context.core.savedObjects.client,
+      config,
+    }),
+    context.core.uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
+  ]);
 
-  const dynamicIndexPattern = await getDynamicIndexPattern({
-    context,
+  const createClientOptions = {
     indices,
-    processorEvent: query.processorEvent
-  });
+    includeFrozen,
+  };
 
-  const uiFiltersES = decodeUiFilters(dynamicIndexPattern, query.uiFilters);
+  const uiFiltersES = decodeUiFilters(query.uiFilters);
 
   const coreSetupRequest = {
     indices,
-    client: getESClient(context, request, { clientAsInternalUser: false }),
-    internalClient: getESClient(context, request, {
-      clientAsInternalUser: true
+    client: getESClient(context, request, {
+      clientAsInternalUser: false,
+      ...createClientOptions,
     }),
+    internalClient: getESClient(context, request, {
+      clientAsInternalUser: true,
+      ...createClientOptions,
+    }),
+    ml: getMlSetup(context, request),
     config,
-    dynamicIndexPattern
   };
 
   return {
     ...('start' in query ? { start: moment.utc(query.start).valueOf() } : {}),
     ...('end' in query ? { end: moment.utc(query.end).valueOf() } : {}),
     ...('uiFilters' in query ? { uiFiltersES } : {}),
-    ...coreSetupRequest
+    ...coreSetupRequest,
   } as InferSetup<TParams>;
+}
+
+function getMlSetup(context: APMRequestHandlerContext, request: KibanaRequest) {
+  if (!context.plugins.ml) {
+    return;
+  }
+  const ml = context.plugins.ml;
+  const mlClient = ml.mlClient.asScoped(request).callAsCurrentUser;
+  return {
+    mlSystem: ml.mlSystemProvider(mlClient, request),
+    anomalyDetectors: ml.anomalyDetectorsProvider(mlClient, request),
+    modules: ml.modulesProvider(
+      mlClient,
+      request,
+      context.core.savedObjects.client
+    ),
+    mlClient,
+  };
 }

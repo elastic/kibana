@@ -32,6 +32,7 @@ export const useSaveCurrentTextObject = () => {
 
   const { currentTextObject } = useEditorReadContext();
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   return useCallback(
     throttle(
       (text: string) => {

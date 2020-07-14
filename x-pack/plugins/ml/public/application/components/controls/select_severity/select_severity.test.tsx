@@ -11,13 +11,17 @@ import { mount } from 'enzyme';
 
 import { EuiSuperSelect } from '@elastic/eui';
 
+import { UrlStateProvider } from '../../../util/url_state';
+
 import { SelectSeverity } from './select_severity';
 
 describe('SelectSeverity', () => {
   test('creates correct severity options and initial selected value', () => {
     const wrapper = mount(
       <MemoryRouter>
-        <SelectSeverity />
+        <UrlStateProvider>
+          <SelectSeverity />
+        </UrlStateProvider>
       </MemoryRouter>
     );
     const select = wrapper.find(EuiSuperSelect);
@@ -62,10 +66,12 @@ describe('SelectSeverity', () => {
     );
   });
 
-  test('state for currently selected value is updated correctly on click', done => {
+  test('state for currently selected value is updated correctly on click', (done) => {
     const wrapper = mount(
       <MemoryRouter>
-        <SelectSeverity />
+        <UrlStateProvider>
+          <SelectSeverity />
+        </UrlStateProvider>
       </MemoryRouter>
     );
 

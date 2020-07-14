@@ -98,8 +98,8 @@ export function openCustomUrlWindow(fullUrl: string, urlConfig: UrlConfig) {
 function isKibanaUrl(urlConfig: UrlConfig) {
   const urlValue = urlConfig.url_value;
   return (
-    urlValue.startsWith('kibana#/discover') ||
-    urlValue.startsWith('kibana#/dashboard') ||
+    urlValue.startsWith('discover#/') ||
+    urlValue.startsWith('dashboards#/') ||
     urlValue.startsWith('apm#/')
   );
 }
@@ -170,7 +170,7 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc)
             // Split query string by AND operator.
             .split(/\sand\s/i)
             // Get property name from `influencerField:$influencerField$` string.
-            .map(v => v.split(':')[0]);
+            .map((v) => v.split(':')[0]);
 
           const queryParts: string[] = [];
           const joinOperator = ' AND ';
@@ -226,7 +226,7 @@ export function isValidLabel(label: string, savedCustomUrls: any[]) {
   let isValid = label !== undefined && label.trim().length > 0;
   if (isValid === true && savedCustomUrls !== undefined) {
     // Check the label is unique.
-    const existingLabels = savedCustomUrls.map(customUrl => customUrl.url_name);
+    const existingLabels = savedCustomUrls.map((customUrl) => customUrl.url_name);
     isValid = !existingLabels.includes(label);
   }
   return isValid;

@@ -9,5 +9,5 @@ Pushes a new location onto the history stack. If there are forward entries in th
 <b>Signature:</b>
 
 ```typescript
-push: (pathOrLocation: string | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
+push: (pathOrLocation: Path | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
 ```

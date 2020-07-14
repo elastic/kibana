@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function({ loadTestFile }) {
-  describe('apis', function() {
+export default function ({ loadTestFile }) {
+  describe('apis', function () {
     this.tags('ciGroup6');
 
     loadTestFile(require.resolve('./es'));
@@ -17,19 +17,19 @@ export default function({ loadTestFile }) {
     loadTestFile(require.resolve('./telemetry'));
     loadTestFile(require.resolve('./logstash'));
     loadTestFile(require.resolve('./kibana'));
-    loadTestFile(require.resolve('./infra'));
+    loadTestFile(require.resolve('./metrics_ui'));
     loadTestFile(require.resolve('./beats'));
     loadTestFile(require.resolve('./console'));
     loadTestFile(require.resolve('./management'));
     loadTestFile(require.resolve('./uptime'));
     loadTestFile(require.resolve('./maps'));
-    loadTestFile(require.resolve('./apm'));
-    loadTestFile(require.resolve('./siem'));
+    loadTestFile(require.resolve('./security_solution'));
     loadTestFile(require.resolve('./short_urls'));
     loadTestFile(require.resolve('./lens'));
     loadTestFile(require.resolve('./fleet'));
-    loadTestFile(require.resolve('./ingest'));
-    loadTestFile(require.resolve('./endpoint'));
     loadTestFile(require.resolve('./ml'));
+    loadTestFile(require.resolve('./transform'));
+    loadTestFile(require.resolve('./endpoint'));
+    loadTestFile(require.resolve('./ingest_manager'));
   });
 }

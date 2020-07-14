@@ -9,7 +9,7 @@
         "access_api_key_id": "api-key-2",
         "active": true,
         "shared_id": "agent1_filebeat",
-        "config_id": "1",
+        "config_id": "config1",
         "type": "PERMANENT",
         "local_metadata": {},
         "user_provided_metadata": {}
@@ -195,6 +195,32 @@
         "type": "CONFIG_CHANGE",
         "created_at": "2020-03-15T03:47:15.129Z",
         "sent_at": "2020-03-04T15:03:07+0000"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "ingest-agent-configs:config1",
+    "index": ".kibana",
+    "source": {
+      "type": "ingest-agent-configs",
+      "ingest-agent-configs": {
+        "name": "Test config",
+        "namespace": "default",
+        "description": "Config 1",
+        "status": "active",
+        "package_configs": [],
+        "is_default": true,
+        "monitoring_enabled": [
+          "logs",
+          "metrics"
+        ],
+        "revision": 2,
+        "updated_at": "2020-05-07T19:34:42.533Z",
+        "updated_by": "system"
       }
     }
   }

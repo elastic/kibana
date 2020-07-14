@@ -18,8 +18,9 @@
  */
 
 import { omit } from 'lodash';
-import { retryCallCluster } from '../../../elasticsearch/retry_call_cluster';
-import { APICaller } from '../../../elasticsearch/';
+import uuid from 'uuid';
+import { retryCallCluster } from '../../../elasticsearch/legacy';
+import { LegacyAPICaller } from '../../../elasticsearch/';
 
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import { getSearchDsl } from './search_dsl';
@@ -40,6 +41,7 @@ import {
   SavedObjectsBulkUpdateResponse,
   SavedObjectsCreateOptions,
   SavedObjectsFindResponse,
+  SavedObjectsFindResult,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
   SavedObjectsBulkUpdateObject,
@@ -72,7 +74,7 @@ const isRight = (either: Either): either is Right => either.tag === 'Right';
 export interface SavedObjectsRepositoryOptions {
   index: string;
   mappings: IndexMapping;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   typeRegistry: SavedObjectTypeRegistry;
   serializer: SavedObjectsSerializer;
   migrator: KibanaMigrator;
@@ -115,7 +117,7 @@ export class SavedObjectsRepository {
   private _mappings: IndexMapping;
   private _registry: SavedObjectTypeRegistry;
   private _allowedTypes: string[];
-  private _unwrappedCallCluster: APICaller;
+  private _unwrappedCallCluster: LegacyAPICaller;
   private _serializer: SavedObjectsSerializer;
 
   /**
@@ -130,23 +132,23 @@ export class SavedObjectsRepository {
     migrator: KibanaMigrator,
     typeRegistry: SavedObjectTypeRegistry,
     indexName: string,
-    callCluster: APICaller,
-    extraTypes: string[] = [],
+    callCluster: LegacyAPICaller,
+    includedHiddenTypes: string[] = [],
     injectedConstructor: any = SavedObjectsRepository
   ): ISavedObjectsRepository {
     const mappings = migrator.getActiveMappings();
-    const allTypes = Object.keys(getRootPropertiesObjects(mappings));
+    const allTypes = typeRegistry.getAllTypes().map((t) => t.name);
     const serializer = new SavedObjectsSerializer(typeRegistry);
-    const visibleTypes = allTypes.filter(type => !typeRegistry.isHidden(type));
+    const visibleTypes = allTypes.filter((type) => !typeRegistry.isHidden(type));
 
-    const missingTypeMappings = extraTypes.filter(type => !allTypes.includes(type));
+    const missingTypeMappings = includedHiddenTypes.filter((type) => !allTypes.includes(type));
     if (missingTypeMappings.length > 0) {
       throw new Error(
         `Missing mappings for saved objects types: '${missingTypeMappings.join(', ')}'`
       );
     }
 
-    const allowedTypes = [...new Set(visibleTypes.concat(extraTypes))];
+    const allowedTypes = [...new Set(visibleTypes.concat(includedHiddenTypes))];
 
     return new injectedConstructor({
       index: indexName,
@@ -186,7 +188,7 @@ export class SavedObjectsRepository {
     }
     this._allowedTypes = allowedTypes;
 
-    this._unwrappedCallCluster = async (...args: Parameters<APICaller>) => {
+    this._unwrappedCallCluster = async (...args: Parameters<LegacyAPICaller>) => {
       await migrator.runMigrations();
       return callCluster(...args);
     };
@@ -283,7 +285,7 @@ export class SavedObjectsRepository {
     const time = this._getCurrentTime();
 
     let bulkGetRequestIndexCounter = 0;
-    const expectedResults: Either[] = objects.map(object => {
+    const expectedResults: Either[] = objects.map((object) => {
       if (!this._allowedTypes.includes(object.type)) {
         return {
           tag: 'Left' as 'Left',
@@ -298,6 +300,8 @@ export class SavedObjectsRepository {
       const method = object.id && overwrite ? 'index' : 'create';
       const requiresNamespacesCheck =
         method === 'index' && this._registry.isMultiNamespace(object.type);
+
+      if (object.id == null) object.id = uuid.v1();
 
       return {
         tag: 'Right' as 'Right',
@@ -328,7 +332,7 @@ export class SavedObjectsRepository {
 
     let bulkRequestIndexCounter = 0;
     const bulkCreateParams: object[] = [];
-    const expectedBulkResults: Either[] = expectedResults.map(expectedBulkGetResult => {
+    const expectedBulkResults: Either[] = expectedResults.map((expectedBulkGetResult) => {
       if (isLeft(expectedBulkGetResult)) {
         return expectedBulkGetResult;
       }
@@ -398,41 +402,31 @@ export class SavedObjectsRepository {
       : undefined;
 
     return {
-      saved_objects: expectedBulkResults.map(expectedResult => {
+      saved_objects: expectedBulkResults.map((expectedResult) => {
         if (isLeft(expectedResult)) {
           return expectedResult.error as any;
         }
 
         const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
-        const response = bulkResponse.items[esRequestIndex];
-        const {
-          error,
-          _id: responseId,
-          _seq_no: seqNo,
-          _primary_term: primaryTerm,
-        } = Object.values(response)[0] as any;
+        const { error, ...rawResponse } = Object.values(
+          bulkResponse.items[esRequestIndex]
+        )[0] as any;
 
-        const {
-          _source: { type, [type]: attributes, references = [], namespaces },
-        } = rawMigratedDoc;
-
-        const id = requestedId || responseId;
         if (error) {
           return {
-            id,
-            type,
-            error: getBulkOperationError(error, type, id),
+            id: requestedId,
+            type: rawMigratedDoc._source.type,
+            error: getBulkOperationError(error, rawMigratedDoc._source.type, requestedId),
           };
         }
-        return {
-          id,
-          type,
-          ...(namespaces && { namespaces }),
-          updated_at: time,
-          version: encodeVersion(seqNo, primaryTerm),
-          attributes,
-          references,
-        };
+
+        // When method == 'index' the bulkResponse doesn't include the indexed
+        // _source so we return rawMigratedDoc but have to spread the latest
+        // _seq_no and _primary_term values from the rawResponse.
+        return this._rawToSavedObject({
+          ...rawMigratedDoc,
+          ...{ _seq_no: rawResponse._seq_no, _primary_term: rawResponse._primary_term },
+        });
       }),
     };
   }
@@ -460,7 +454,7 @@ export class SavedObjectsRepository {
       preflightResult = await this.preflightCheckIncludesNamespace(type, id, namespace);
       const existingNamespaces = getSavedObjectNamespaces(undefined, preflightResult);
       const remainingNamespaces = existingNamespaces?.filter(
-        x => x !== getNamespaceString(namespace)
+        (x) => x !== getNamespaceString(namespace)
       );
 
       if (remainingNamespaces?.length) {
@@ -537,7 +531,7 @@ export class SavedObjectsRepository {
 
     const { refresh = DEFAULT_REFRESH_SETTING } = options;
     const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
-    const typesToUpdate = allTypes.filter(type => !this._registry.isNamespaceAgnostic(type));
+    const typesToUpdate = allTypes.filter((type) => !this._registry.isNamespaceAgnostic(type));
 
     const updateOptions = {
       index: this.getIndicesForTypes(typesToUpdate),
@@ -560,7 +554,7 @@ export class SavedObjectsRepository {
         },
         conflicts: 'proceed',
         ...getSearchDsl(this._mappings, this._registry, {
-          namespace,
+          namespaces: namespace ? [namespace] : undefined,
           type: typesToUpdate,
         }),
       },
@@ -583,6 +577,7 @@ export class SavedObjectsRepository {
    * @property {Array<string>} [options.fields]
    * @property {string} [options.namespace]
    * @property {object} [options.hasReference] - { type, id }
+   * @property {string} [options.preference]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   async find<T = unknown>({
@@ -595,9 +590,10 @@ export class SavedObjectsRepository {
     sortField,
     sortOrder,
     fields,
-    namespace,
+    namespaces,
     type,
     filter,
+    preference,
   }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>> {
     if (!type) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
@@ -606,7 +602,7 @@ export class SavedObjectsRepository {
     }
 
     const types = Array.isArray(type) ? type : [type];
-    const allowedTypes = types.filter(t => this._allowedTypes.includes(t));
+    const allowedTypes = types.filter((t) => this._allowedTypes.includes(t));
     if (allowedTypes.length === 0) {
       return {
         page,
@@ -645,6 +641,7 @@ export class SavedObjectsRepository {
       _source: includedFields(type, fields),
       ignore: [404],
       rest_total_hits_as_int: true,
+      preference,
       body: {
         seq_no_primary_term: true,
         ...getSearchDsl(this._mappings, this._registry, {
@@ -654,7 +651,7 @@ export class SavedObjectsRepository {
           type: allowedTypes,
           sortField,
           sortOrder,
-          namespace,
+          namespaces,
           hasReference,
           kueryNode,
         }),
@@ -678,8 +675,11 @@ export class SavedObjectsRepository {
       page,
       per_page: perPage,
       total: response.hits.total,
-      saved_objects: response.hits.hits.map((hit: SavedObjectsRawDoc) =>
-        this._rawToSavedObject(hit)
+      saved_objects: response.hits.hits.map(
+        (hit: SavedObjectsRawDoc): SavedObjectsFindResult => ({
+          ...this._rawToSavedObject(hit),
+          score: (hit as any)._score,
+        })
       ),
     };
   }
@@ -709,7 +709,7 @@ export class SavedObjectsRepository {
     }
 
     let bulkGetRequestIndexCounter = 0;
-    const expectedBulkGetResults: Either[] = objects.map(object => {
+    const expectedBulkGetResults: Either[] = objects.map((object) => {
       const { type, id, fields } = object;
 
       if (!this._allowedTypes.includes(type)) {
@@ -751,7 +751,7 @@ export class SavedObjectsRepository {
       : undefined;
 
     return {
-      saved_objects: expectedBulkGetResults.map(expectedResult => {
+      saved_objects: expectedBulkGetResults.map((expectedResult) => {
         if (isLeft(expectedResult)) {
           return expectedResult.error as any;
         }
@@ -768,10 +768,16 @@ export class SavedObjectsRepository {
         }
 
         const time = doc._source.updated_at;
+
+        let namespaces = [];
+        if (!this._registry.isNamespaceAgnostic(type)) {
+          namespaces = doc._source.namespaces ?? [getNamespaceString(doc._source.namespace)];
+        }
+
         return {
           id,
           type,
-          ...(doc._source.namespaces && { namespaces: doc._source.namespaces }),
+          namespaces,
           ...(time && { updated_at: time }),
           version: encodeHitVersion(doc),
           attributes: doc._source[type],
@@ -817,10 +823,15 @@ export class SavedObjectsRepository {
 
     const { updated_at: updatedAt } = response._source;
 
+    let namespaces = [];
+    if (!this._registry.isNamespaceAgnostic(type)) {
+      namespaces = response._source.namespaces ?? [getNamespaceString(response._source.namespace)];
+    }
+
     return {
       id,
       type,
-      ...(response._source.namespaces && { namespaces: response._source.namespaces }),
+      namespaces,
       ...(updatedAt && { updated_at: updatedAt }),
       version: encodeHitVersion(response),
       attributes: response._source[type],
@@ -874,7 +885,7 @@ export class SavedObjectsRepository {
       body: {
         doc,
       },
-      ...(this._registry.isMultiNamespace(type) && { _sourceIncludes: ['namespaces'] }),
+      _sourceIncludes: ['namespace', 'namespaces'],
     });
 
     if (updateResponse.status === 404) {
@@ -882,14 +893,19 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
+    let namespaces = [];
+    if (!this._registry.isNamespaceAgnostic(type)) {
+      namespaces = updateResponse.get._source.namespaces ?? [
+        getNamespaceString(updateResponse.get._source.namespace),
+      ];
+    }
+
     return {
       id,
       type,
       updated_at: time,
       version: encodeHitVersion(updateResponse),
-      ...(this._registry.isMultiNamespace(type) && {
-        namespaces: updateResponse.get._source.namespaces,
-      }),
+      namespaces,
       references,
       attributes,
     };
@@ -988,7 +1004,7 @@ export class SavedObjectsRepository {
     const preflightResult = await this.preflightCheckIncludesNamespace(type, id, namespace);
     const existingNamespaces = getSavedObjectNamespaces(undefined, preflightResult);
     // if there are somehow no existing namespaces, allow the operation to proceed and delete this saved object
-    const remainingNamespaces = existingNamespaces?.filter(x => !namespaces.includes(x));
+    const remainingNamespaces = existingNamespaces?.filter((x) => !namespaces.includes(x));
 
     if (remainingNamespaces?.length) {
       // if there is 1 or more namespace remaining, update the saved object
@@ -1064,7 +1080,7 @@ export class SavedObjectsRepository {
     const { namespace } = options;
 
     let bulkGetRequestIndexCounter = 0;
-    const expectedBulkGetResults: Either[] = objects.map(object => {
+    const expectedBulkGetResults: Either[] = objects.map((object) => {
       const { type, id } = object;
 
       if (!this._allowedTypes.includes(type)) {
@@ -1120,7 +1136,7 @@ export class SavedObjectsRepository {
     let bulkUpdateRequestIndexCounter = 0;
     const bulkUpdateParams: object[] = [];
     const expectedBulkUpdateResults: Either[] = expectedBulkGetResults.map(
-      expectedBulkGetResult => {
+      (expectedBulkGetResult) => {
         if (isLeft(expectedBulkGetResult)) {
           return expectedBulkGetResult;
         }
@@ -1142,9 +1158,14 @@ export class SavedObjectsRepository {
               },
             };
           }
-          namespaces = actualResult._source.namespaces;
+          namespaces = actualResult._source.namespaces ?? [
+            getNamespaceString(actualResult._source.namespace),
+          ];
           versionProperties = getExpectedVersionProperties(version, actualResult);
         } else {
+          if (this._registry.isSingleNamespace(type)) {
+            namespaces = [getNamespaceString(namespace)];
+          }
           versionProperties = getExpectedVersionProperties(version);
         }
 
@@ -1180,7 +1201,7 @@ export class SavedObjectsRepository {
       : {};
 
     return {
-      saved_objects: expectedBulkUpdateResults.map(expectedResult => {
+      saved_objects: expectedBulkUpdateResults.map((expectedResult) => {
         if (isLeft(expectedResult)) {
           return expectedResult.error as any;
         }
@@ -1300,7 +1321,7 @@ export class SavedObjectsRepository {
     };
   }
 
-  private async _writeToCluster(...args: Parameters<APICaller>) {
+  private async _writeToCluster(...args: Parameters<LegacyAPICaller>) {
     try {
       return await this._callCluster(...args);
     } catch (err) {
@@ -1308,7 +1329,7 @@ export class SavedObjectsRepository {
     }
   }
 
-  private async _callCluster(...args: Parameters<APICaller>) {
+  private async _callCluster(...args: Parameters<LegacyAPICaller>) {
     try {
       return await this._unwrappedCallCluster(...args);
     } catch (err) {
@@ -1333,20 +1354,20 @@ export class SavedObjectsRepository {
    * @param types The types whose indices should be retrieved
    */
   private getIndicesForTypes(types: string[]) {
-    return unique(types.map(t => this.getIndexForType(t)));
+    return unique(types.map((t) => this.getIndexForType(t)));
   }
 
   private _getCurrentTime() {
     return new Date().toISOString();
   }
 
-  // The internal representation of the saved object that the serializer returns
-  // includes the namespace, and we use this for migrating documents. However, we don't
-  // want the namespace to be returned from the repository, as the repository scopes each
-  // method transparently to the specified namespace.
   private _rawToSavedObject<T = unknown>(raw: SavedObjectsRawDoc): SavedObject<T> {
     const savedObject = this._serializer.rawToSavedObject(raw);
-    return omit(savedObject, 'namespace');
+    const { namespace, type } = savedObject;
+    if (this._registry.isSingleNamespace(type)) {
+      savedObject.namespaces = [getNamespaceString(namespace)];
+    }
+    return omit(savedObject, 'namespace') as SavedObject<T>;
   }
 
   /**

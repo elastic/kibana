@@ -18,9 +18,13 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { WatchContext } from '../../watch_context';
+import { useAppContext } from '../../../../app_context';
+
+import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 export const MonitoringWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
   const { watch } = useContext(WatchContext);
+  const { history } = useAppContext();
 
   const systemWatchTitle = (
     <FormattedMessage
@@ -36,7 +40,7 @@ export const MonitoringWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
       values={{
         watchName: watch.name,
         watchStatusLink: (
-          <EuiLink href={`#/management/elasticsearch/watcher/watches/watch/${watch.id}/status`}>
+          <EuiLink {...reactRouterNavigate(history, `/watches/watch/${watch.id}/status`)}>
             <FormattedMessage
               id="xpack.watcher.sections.watchEdit.monitoring.header.watchLinkTitle"
               defaultMessage="View watch status."

@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { datafeedsProvider } from './datafeeds';
 import { jobsProvider } from './jobs';
 import { groupsProvider } from './groups';
 import { newJobCapsProvider } from './new_job_caps';
 import { newJobChartsProvider, topCategoriesProvider } from './new_job';
+import { modelSnapshotProvider } from './model_snapshots';
 
-export function jobServiceProvider(callAsCurrentUser: APICaller) {
+export function jobServiceProvider(callAsCurrentUser: LegacyAPICaller) {
   return {
     ...datafeedsProvider(callAsCurrentUser),
     ...jobsProvider(callAsCurrentUser),
@@ -19,5 +20,6 @@ export function jobServiceProvider(callAsCurrentUser: APICaller) {
     ...newJobCapsProvider(callAsCurrentUser),
     ...newJobChartsProvider(callAsCurrentUser),
     ...topCategoriesProvider(callAsCurrentUser),
+    ...modelSnapshotProvider(callAsCurrentUser),
   };
 }

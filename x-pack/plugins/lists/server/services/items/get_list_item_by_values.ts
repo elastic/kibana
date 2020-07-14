@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchResponse } from 'elasticsearch';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import { ListItemArraySchema, SearchEsListItemSchema, Type } from '../../../common/schemas';
 import { getQueryFilterFromTypeValue, transformElasticToListItem } from '../utils';
 
 export interface GetListItemByValuesOptions {
   listId: string;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   listItemIndex: string;
   type: Type;
   value: string[];
@@ -25,7 +24,7 @@ export const getListItemByValues = async ({
   type,
   value,
 }: GetListItemByValuesOptions): Promise<ListItemArraySchema> => {
-  const response: SearchResponse<SearchEsListItemSchema> = await callCluster('search', {
+  const response = await callCluster<SearchEsListItemSchema>('search', {
     body: {
       query: {
         bool: {
@@ -35,7 +34,7 @@ export const getListItemByValues = async ({
     },
     ignoreUnavailable: true,
     index: listItemIndex,
-    size: value.length, // This has a limit on the number which is 10k
+    size: 10000, // TODO: This has a limit on the number which is 10,000 the default of Elastic but we might want to provide a way to increase that number
   });
   return transformElasticToListItem({ response, type });
 };

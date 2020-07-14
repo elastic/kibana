@@ -5,20 +5,20 @@
  */
 
 import expect from '@kbn/expect';
-import { indexBy } from 'lodash';
-export default function({ getService, getPageObjects }) {
+import { keyBy } from 'lodash';
+export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'accountSetting']);
   const log = getService('log');
   const esArchiver = getService('esArchiver');
 
-  describe('useremail', function() {
+  describe('useremail', function () {
     before(async () => {
       await esArchiver.load('security/discover');
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchUsers();
     });
 
-    it('should add new user', async function() {
+    it('should add new user', async function () {
       await PageObjects.security.addUser({
         username: 'newuser',
         password: 'changeme',
@@ -28,7 +28,7 @@ export default function({ getService, getPageObjects }) {
         save: true,
         roles: ['kibana_admin', 'superuser'],
       });
-      const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+      const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
       expect(users.newuser.roles).to.eql(['kibana_admin', 'superuser']);
       expect(users.newuser.fullname).to.eql('newuserFirst newuserLast');
@@ -37,23 +37,23 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.security.forceLogout();
     });
 
-    it('login as new user and verify email', async function() {
+    it('login as new user and verify email', async function () {
       await PageObjects.security.login('newuser', 'changeme');
       await PageObjects.accountSetting.verifyAccountSettings('newuser@myEmail.com', 'newuser');
     });
 
-    it('click changepassword link, change the password and re-login', async function() {
+    it('click changepassword link, change the password and re-login', async function () {
       await PageObjects.accountSetting.verifyAccountSettings('newuser@myEmail.com', 'newuser');
       await PageObjects.accountSetting.changePassword('changeme', 'mechange');
       await PageObjects.security.forceLogout();
     });
 
-    it('login as new user with changed password', async function() {
+    it('login as new user with changed password', async function () {
       await PageObjects.security.login('newuser', 'mechange');
       await PageObjects.accountSetting.verifyAccountSettings('newuser@myEmail.com', 'newuser');
     });
 
-    after(async function() {
+    after(async function () {
       await PageObjects.security.forceLogout();
     });
   });

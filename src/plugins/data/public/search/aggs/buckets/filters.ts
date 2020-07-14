@@ -25,10 +25,8 @@ import { createFilterFilters } from './create_filter/filters';
 import { toAngularJSON } from '../utils';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { Storage } from '../../../../../../plugins/kibana_utils/public';
-import { getEsQueryConfig, buildEsQuery, Query } from '../../../../common';
-import { getQueryLog } from '../../../query';
-import { GetInternalStartServicesFn } from '../../../types';
+import { getEsQueryConfig, buildEsQuery, Query, UI_SETTINGS } from '../../../../common';
+import { BaseAggParams } from '../types';
 
 const filtersTitle = i18n.translate('data.search.aggs.buckets.filtersTitle', {
   defaultMessage: 'Filters',
@@ -44,81 +42,69 @@ interface FilterValue {
 
 export interface FiltersBucketAggDependencies {
   uiSettings: IUiSettingsClient;
-  getInternalStartServices: GetInternalStartServicesFn;
 }
 
-export const getFiltersBucketAgg = ({
-  uiSettings,
-  getInternalStartServices,
-}: FiltersBucketAggDependencies) =>
-  new BucketAggType(
-    {
-      name: BUCKET_TYPES.FILTERS,
-      title: filtersTitle,
-      createFilter: createFilterFilters,
-      customLabels: false,
-      params: [
-        {
-          name: 'filters',
-          default: [
-            { input: { query: '', language: uiSettings.get('search:queryLanguage') }, label: '' },
-          ],
-          write(aggConfig, output) {
-            const inFilters: FilterValue[] = aggConfig.params.filters;
-            if (!size(inFilters)) return;
+export interface AggParamsFilters extends Omit<BaseAggParams, 'customLabel'> {
+  filters?: Array<{
+    input: Query;
+    label: string;
+  }>;
+}
 
-            inFilters.forEach(filter => {
-              const persistedLog = getQueryLog(
-                uiSettings,
-                new Storage(window.localStorage),
-                'vis_default_editor',
-                filter.input.language
-              );
-              persistedLog.add(filter.input.query);
-            });
-
-            const outFilters = transform(
-              inFilters,
-              function(filters, filter) {
-                const input = cloneDeep(filter.input);
-
-                if (!input) {
-                  console.log('malformed filter agg params, missing "input" query'); // eslint-disable-line no-console
-                  return;
-                }
-
-                const esQueryConfigs = getEsQueryConfig(uiSettings);
-                const query = buildEsQuery(
-                  aggConfig.getIndexPattern(),
-                  [input],
-                  [],
-                  esQueryConfigs
-                );
-
-                if (!query) {
-                  console.log('malformed filter agg params, missing "query" on input'); // eslint-disable-line no-console
-                  return;
-                }
-
-                const matchAllLabel = filter.input.query === '' ? '*' : '';
-                const label =
-                  filter.label ||
-                  matchAllLabel ||
-                  (typeof filter.input.query === 'string'
-                    ? filter.input.query
-                    : toAngularJSON(filter.input.query));
-                filters[label] = query;
-              },
-              {}
-            );
-
-            if (!size(outFilters)) return;
-
-            const params = output.params || (output.params = {});
-            params.filters = outFilters;
+export const getFiltersBucketAgg = ({ uiSettings }: FiltersBucketAggDependencies) =>
+  new BucketAggType({
+    name: BUCKET_TYPES.FILTERS,
+    title: filtersTitle,
+    createFilter: createFilterFilters,
+    customLabels: false,
+    params: [
+      {
+        name: 'filters',
+        default: [
+          {
+            input: { query: '', language: uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE) },
+            label: '',
           },
+        ],
+        write(aggConfig, output) {
+          const inFilters: FilterValue[] = aggConfig.params.filters;
+          if (!size(inFilters)) return;
+
+          const outFilters = transform(
+            inFilters,
+            function (filters: Record<string, any>, filter) {
+              const input = cloneDeep(filter.input);
+
+              if (!input) {
+                console.log('malformed filter agg params, missing "input" query'); // eslint-disable-line no-console
+                return;
+              }
+
+              const esQueryConfigs = getEsQueryConfig(uiSettings);
+              const query = buildEsQuery(aggConfig.getIndexPattern(), [input], [], esQueryConfigs);
+
+              if (!query) {
+                console.log('malformed filter agg params, missing "query" on input'); // eslint-disable-line no-console
+                return;
+              }
+
+              const matchAllLabel = filter.input.query === '' ? '*' : '';
+              const label =
+                filter.label ||
+                matchAllLabel ||
+                (typeof filter.input.query === 'string'
+                  ? filter.input.query
+                  : toAngularJSON(filter.input.query));
+              filters[label] = query;
+            },
+            {}
+          );
+
+          if (!size(outFilters)) return;
+
+          const params = output.params || (output.params = {});
+          params.filters = outFilters;
         },
-      ],
-    },
-    { getInternalStartServices }
-  );
+      },
+    ],
+  });

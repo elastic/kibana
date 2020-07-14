@@ -14,7 +14,7 @@ import {
 } from '../../../../../../../../../legacy/common/eui_styled_components';
 
 interface Props {
-  theme: EuiTheme;
+  theme: EuiTheme | undefined;
   customMetrics: SnapshotCustomMetricInput[];
   options: Array<{ text: string; value: string }>;
   onEdit: (metric: SnapshotCustomMetricInput) => void;
@@ -26,12 +26,12 @@ export const MetricsEditMode = withTheme(
   ({ theme, customMetrics, options, onEdit, onDelete }: Props) => {
     return (
       <div style={{ width: 256 }}>
-        {options.map(option => (
+        {options.map((option) => (
           <div key={option.value} style={{ padding: '14px 14px 13px 36px' }}>
-            <span style={{ color: theme.eui.euiButtonColorDisabled }}>{option.text}</span>
+            <span style={{ color: theme?.eui.euiButtonColorDisabled }}>{option.text}</span>
           </div>
         ))}
-        {customMetrics.map(metric => (
+        {customMetrics.map((metric) => (
           <EuiFlexGroup
             key={metric.id}
             alignItems="center"

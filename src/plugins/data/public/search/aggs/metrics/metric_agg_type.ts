@@ -22,9 +22,7 @@ import { AggType, AggTypeConfig } from '../agg_type';
 import { AggParamType } from '../param_types/agg';
 import { AggConfig } from '../agg_config';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../common';
 import { FieldTypes } from '../param_types';
-import { GetInternalStartServicesFn } from '../../../types';
 
 export interface IMetricAggConfig extends AggConfig {
   type: InstanceType<typeof MetricAggType>;
@@ -44,10 +42,6 @@ interface MetricAggTypeConfig<TMetricAggConfig extends AggConfig>
   subtype?: string;
 }
 
-interface MetricAggTypeDependencies {
-  getInternalStartServices: GetInternalStartServicesFn;
-}
-
 // TODO need to make a more explicit interface for this
 export type IMetricAggType = MetricAggType;
 
@@ -61,11 +55,8 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
 
   getKey = () => {};
 
-  constructor(
-    config: MetricAggTypeConfig<TMetricAggConfig>,
-    dependencies: MetricAggTypeDependencies
-  ) {
-    super(config, dependencies);
+  constructor(config: MetricAggTypeConfig<TMetricAggConfig>) {
+    super(config);
 
     this.getValue =
       config.getValue ||
@@ -80,14 +71,6 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
         if (!bucket[agg.id] && isSettableToZero) return 0;
 
         return bucket[agg.id] && bucket[agg.id].value;
-      });
-
-    this.getFormat =
-      config.getFormat ||
-      (agg => {
-        const { fieldFormats } = dependencies.getInternalStartServices();
-        const field = agg.getField();
-        return field ? field.format : fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
       });
 
     this.subtype =

@@ -25,19 +25,17 @@ describe('snapshot API', () => {
   });
 
   it('calls url with expected params and returns response body on 200', async () => {
-    fetchMock.mockReturnValue(new Promise(r => r(mockResponse)));
+    fetchMock.mockReturnValue(new Promise((r) => r(mockResponse)));
     const resp = await fetchSnapshotCount({
       dateRangeStart: 'now-15m',
       dateRangeEnd: 'now',
       filters: 'monitor.id:"auto-http-0X21EE76EAC459873F"',
-      statusFilter: 'up',
     });
     expect(fetchMock).toHaveBeenCalledWith('/api/uptime/snapshot/count', {
       query: {
         dateRangeEnd: 'now',
         dateRangeStart: 'now-15m',
         filters: 'monitor.id:"auto-http-0X21EE76EAC459873F"',
-        statusFilter: 'up',
       },
     });
     expect(resp).toEqual({ up: 3, down: 12, total: 15 });
@@ -45,12 +43,11 @@ describe('snapshot API', () => {
 
   it(`throws when server response doesn't correspond to expected type`, async () => {
     mockResponse = { foo: 'bar' };
-    fetchMock.mockReturnValue(new Promise(r => r(mockResponse)));
+    fetchMock.mockReturnValue(new Promise((r) => r(mockResponse)));
     const result = await fetchSnapshotCount({
       dateRangeStart: 'now-15m',
       dateRangeEnd: 'now',
       filters: 'monitor.id: baz',
-      statusFilter: 'up',
     });
 
     expect(result).toMatchSnapshot();

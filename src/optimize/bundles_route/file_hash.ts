@@ -46,15 +46,15 @@ export async function getFileHash(cache: FileHashCache, path: string, stat: Fs.S
   const promise = Rx.merge(
     Rx.fromEvent<Buffer>(read, 'data'),
     Rx.fromEvent<Error>(read, 'error').pipe(
-      map(error => {
+      map((error) => {
         throw error;
       })
     )
   )
     .pipe(takeUntil(Rx.fromEvent(read, 'end')))
-    .forEach(chunk => hash.update(chunk))
+    .forEach((chunk) => hash.update(chunk))
     .then(() => hash.digest('hex'))
-    .catch(error => {
+    .catch((error) => {
       // don't cache failed attempts
       cache.del(key);
       throw error;

@@ -46,7 +46,7 @@ function TableOptions({
         }),
       },
       ...tabifyGetColumns(aggs.getResponseAggs(), true)
-        .filter(col => get(col.aggConfig.type.getFormat(col.aggConfig), 'type.id') === 'number')
+        .filter((col) => get(col.aggConfig.toSerializedFieldFormat(), 'id') === 'number')
         .map(({ name }) => ({ value: name, text: name })),
     ],
     [aggs]
@@ -147,5 +147,6 @@ function TableOptions({
     </EuiPanel>
   );
 }
-
-export { TableOptions };
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { TableOptions as default };

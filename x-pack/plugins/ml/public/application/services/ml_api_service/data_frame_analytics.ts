@@ -8,8 +8,12 @@ import { http } from '../http_service';
 
 import { basePath } from './index';
 import { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
-import { DataFrameAnalyticsConfig } from '../../data_frame_analytics/common';
+import {
+  DataFrameAnalyticsConfig,
+  UpdateDataFrameAnalyticsConfig,
+} from '../../data_frame_analytics/common';
 import { DeepPartial } from '../../../../common/types/common';
+import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../../../common/types/data_frame_analytics';
 
 export interface GetDataFrameAnalyticsStatsResponseOk {
   node_failures?: object;
@@ -30,6 +34,13 @@ export type GetDataFrameAnalyticsStatsResponse =
 interface GetDataFrameAnalyticsResponse {
   count: number;
   data_frame_analytics: DataFrameAnalyticsConfig[];
+}
+
+interface DeleteDataFrameAnalyticsWithIndexResponse {
+  acknowledged: boolean;
+  analyticsJobDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
+  destIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
+  destIndexPatternDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
 }
 
 export const dataFrameAnalytics = {
@@ -64,6 +75,14 @@ export const dataFrameAnalytics = {
       body,
     });
   },
+  updateDataFrameAnalytics(analyticsId: string, updateConfig: UpdateDataFrameAnalyticsConfig) {
+    const body = JSON.stringify(updateConfig);
+    return http<any>({
+      path: `${basePath()}/data_frame/analytics/${analyticsId}/_update`,
+      method: 'POST',
+      body,
+    });
+  },
   evaluateDataFrameAnalytics(evaluateConfig: any) {
     const body = JSON.stringify(evaluateConfig);
     return http<any>({
@@ -83,6 +102,17 @@ export const dataFrameAnalytics = {
   deleteDataFrameAnalytics(analyticsId: string) {
     return http<any>({
       path: `${basePath()}/data_frame/analytics/${analyticsId}`,
+      method: 'DELETE',
+    });
+  },
+  deleteDataFrameAnalyticsAndDestIndex(
+    analyticsId: string,
+    deleteDestIndex: boolean,
+    deleteDestIndexPattern: boolean
+  ) {
+    return http<DeleteDataFrameAnalyticsWithIndexResponse>({
+      path: `${basePath()}/data_frame/analytics/${analyticsId}`,
+      query: { deleteDestIndex, deleteDestIndexPattern },
       method: 'DELETE',
     });
   },

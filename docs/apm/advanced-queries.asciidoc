@@ -11,7 +11,7 @@ or, to only show transactions that are slower than a specified time threshold.
 ==== Example APM app queries
 
 * Exclude response times slower than 2000 ms: `transaction.duration.us > 2000000`
-* Filter by response status code: `context.response.status_code >= 400`
+* Filter by response status code: `context.response.status_code ≥ 400`
 * Filter by single user ID: `context.user.id : 12`
 
 When querying in the APM app, you're merely searching and selecting data from fields in Elasticsearch documents.

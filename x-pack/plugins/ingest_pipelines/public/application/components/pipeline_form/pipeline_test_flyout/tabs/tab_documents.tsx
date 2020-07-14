@@ -8,7 +8,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiSpacer, EuiText, EuiButton, EuiHorizontalRule, EuiLink } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiButton, EuiLink } from '@elastic/eui';
 
 import {
   getUseField,
@@ -41,7 +41,7 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
   const { setCurrentTestConfig, testConfig } = useTestConfigContext();
   const { verbose: cachedVerbose, documents: cachedDocuments } = testConfig;
 
-  const executePipeline: FormConfig['onSubmit'] = (formData, isValid) => {
+  const executePipeline: FormConfig['onSubmit'] = async (formData, isValid) => {
     if (!isValid || !isPipelineValid) {
       return;
     }
@@ -72,14 +72,18 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
         <p>
           <FormattedMessage
             id="xpack.ingestPipelines.testPipelineFlyout.documentsTab.tabDescriptionText"
-            defaultMessage="Provide an array of documents to be ingested by the pipeline. {learnMoreLink}"
+            defaultMessage="Provide an array of documents for the pipeline to ingest. {learnMoreLink}"
             values={{
               learnMoreLink: (
-                <EuiLink href={services.documentation.getSimulatePipelineApiUrl()} target="_blank">
+                <EuiLink
+                  href={services.documentation.getSimulatePipelineApiUrl()}
+                  target="_blank"
+                  external
+                >
                   {i18n.translate(
                     'xpack.ingestPipelines.testPipelineFlyout.documentsTab.simulateDocumentionLink',
                     {
-                      defaultMessage: 'Learn more.',
+                      defaultMessage: 'Learn more',
                     }
                   )}
                 </EuiLink>
@@ -115,17 +119,6 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
           }}
         />
 
-        <EuiHorizontalRule />
-
-        <EuiText>
-          <p>
-            <FormattedMessage
-              id="xpack.ingestPipelines.testPipelineFlyout.documentsTab.runDescriptionText"
-              defaultMessage="Execute the pipeline."
-            />
-          </p>
-        </EuiText>
-
         <EuiSpacer size="m" />
 
         <EuiButton
@@ -142,7 +135,7 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
           ) : (
             <FormattedMessage
               id="xpack.ingestPipelines.testPipelineFlyout.documentsTab.runButtonLabel"
-              defaultMessage="Run"
+              defaultMessage="Run the pipeline"
             />
           )}
         </EuiButton>

@@ -26,6 +26,7 @@ interface AutocompleteFieldProps {
   placeholder?: string;
   suggestions: QuerySuggestion[];
   value: string;
+  disabled?: boolean;
   autoFocus?: boolean;
   'aria-label'?: string;
 }
@@ -55,6 +56,7 @@ export class AutocompleteField extends React.Component<
       isValid,
       placeholder,
       value,
+      disabled,
       'aria-label': ariaLabel,
     } = this.props;
     const { areSuggestionsVisible, selectedIndex } = this.state;
@@ -64,6 +66,7 @@ export class AutocompleteField extends React.Component<
         <AutocompleteContainer>
           <FixedEuiFieldSearch
             fullWidth
+            disabled={disabled}
             inputRef={this.handleChangeInputRef}
             isLoading={isLoadingSuggestions}
             isInvalid={!isValid}
@@ -301,11 +304,13 @@ const withUnfocused = (state: AutocompleteFieldState) => ({
   isFocused: false,
 });
 
-const FixedEuiFieldSearch: React.FC<React.InputHTMLAttributes<HTMLInputElement> &
-  EuiFieldSearchProps & {
-    inputRef?: (element: HTMLInputElement | null) => void;
-    onSearch: (value: string) => void;
-  }> = EuiFieldSearch as any;
+const FixedEuiFieldSearch: React.FC<
+  React.InputHTMLAttributes<HTMLInputElement> &
+    EuiFieldSearchProps & {
+      inputRef?: (element: HTMLInputElement | null) => void;
+      onSearch: (value: string) => void;
+    }
+> = EuiFieldSearch as any;
 
 const AutocompleteContainer = euiStyled.div`
   position: relative;
@@ -320,6 +325,6 @@ const SuggestionsPanel = euiStyled(EuiPanel).attrs(() => ({
   margin-top: 2px;
   overflow-x: hidden;
   overflow-y: scroll;
-  z-index: ${props => props.theme.eui.euiZLevel1};
+  z-index: ${(props) => props.theme.eui.euiZLevel1};
   max-height: 322px;
 `;

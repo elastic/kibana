@@ -14,7 +14,8 @@ import { toLocaleString } from '../../../../util/string_utils';
 import { ResultLinks, actionsMenuContent } from '../job_actions';
 import { JobDescription } from './job_description';
 import { JobIcon } from '../../../../components/job_message_icon';
-import { getJobIdUrl } from '../utils';
+import { getJobIdUrl } from '../../../../util/get_job_id_url';
+import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
 
 import { EuiBadge, EuiBasicTable, EuiButtonIcon, EuiLink, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -22,7 +23,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 const PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
-const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 // 'isManagementTable' bool prop to determine when to configure table for use in Kibana management page
 export class JobsList extends Component {
@@ -61,7 +61,7 @@ export class JobsList extends Component {
     });
   };
 
-  toggleRow = item => {
+  toggleRow = (item) => {
     this.props.toggleRow(item.id);
   };
 
@@ -71,12 +71,12 @@ export class JobsList extends Component {
       return id;
     }
 
-    return <EuiLink href={getJobIdUrl(id)}>{id}</EuiLink>;
+    return <EuiLink href={getJobIdUrl('jobs', id)}>{id}</EuiLink>;
   }
 
   getPageOfJobs(index, size, sortField, sortDirection) {
     let list = this.state.jobsSummaryList;
-    list = sortBy(this.state.jobsSummaryList, item => item[sortField]);
+    list = sortBy(this.state.jobsSummaryList, (item) => item[sortField]);
     list = sortDirection === 'asc' ? list : list.reverse();
     const listLength = list.length;
 
@@ -101,7 +101,7 @@ export class JobsList extends Component {
   render() {
     const { loading, isManagementTable } = this.props;
     const selectionControls = {
-      selectable: job => job.deleting !== true,
+      selectable: (job) => job.deleting !== true,
       selectableMessage: (selectable, rowItem) =>
         selectable === false
           ? i18n.translate('xpack.ml.jobsList.cannotSelectRowForJobMessage', {
@@ -134,7 +134,7 @@ export class JobsList extends Component {
             </p>
           </EuiScreenReaderOnly>
         ),
-        render: item => (
+        render: (item) => (
           <EuiButtonIcon
             onClick={() => this.toggleRow(item)}
             isDisabled={item.deleting === true}
@@ -166,7 +166,7 @@ export class JobsList extends Component {
         truncateText: false,
         width: '20%',
         scope: 'row',
-        render: isManagementTable ? id => this.getJobIdLink(id) : undefined,
+        render: isManagementTable ? (id) => this.getJobIdLink(id) : undefined,
       },
       {
         field: 'auditMessage',
@@ -180,7 +180,7 @@ export class JobsList extends Component {
             </p>
           </EuiScreenReaderOnly>
         ),
-        render: item => <JobIcon message={item} showTooltip={true} />,
+        render: (item) => <JobIcon message={item} showTooltip={true} />,
       },
       {
         name: i18n.translate('xpack.ml.jobsList.descriptionLabel', {
@@ -202,7 +202,7 @@ export class JobsList extends Component {
         sortable: true,
         truncateText: false,
         dataType: 'number',
-        render: count => toLocaleString(count),
+        render: (count) => toLocaleString(count),
         width: '10%',
       },
       {
@@ -239,7 +239,7 @@ export class JobsList extends Component {
         name: i18n.translate('xpack.ml.jobsList.actionsLabel', {
           defaultMessage: 'Actions',
         }),
-        render: item => <ResultLinks jobs={[item]} />,
+        render: (item) => <ResultLinks jobs={[item]} />,
       },
     ];
 
@@ -344,7 +344,7 @@ export class JobsList extends Component {
         isExpandable={true}
         sorting={sorting}
         hasActions={true}
-        rowProps={item => ({
+        rowProps={(item) => ({
           'data-test-subj': `mlJobListRow row-${item.id}`,
         })}
       />

@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient, CoreStart } from 'kibana/public';
+import { UI_SETTINGS, ISearchRequestParams } from '../../../common';
+import { SearchRequest } from './types';
 
 const sessionId = Date.now();
 
@@ -33,22 +35,37 @@ export function getSearchParams(config: IUiSettingsClient, esShardTimeout: numbe
 }
 
 export function getIgnoreThrottled(config: IUiSettingsClient) {
-  return !config.get('search:includeFrozen');
+  return !config.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
 }
 
 export function getMaxConcurrentShardRequests(config: IUiSettingsClient) {
-  const maxConcurrentShardRequests = config.get('courier:maxConcurrentShardRequests');
+  const maxConcurrentShardRequests = config.get(UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS);
   return maxConcurrentShardRequests > 0 ? maxConcurrentShardRequests : undefined;
 }
 
 export function getPreference(config: IUiSettingsClient) {
-  const setRequestPreference = config.get('courier:setRequestPreference');
+  const setRequestPreference = config.get(UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE);
   if (setRequestPreference === 'sessionId') return sessionId;
   return setRequestPreference === 'custom'
-    ? config.get('courier:customRequestPreference')
+    ? config.get(UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE)
     : undefined;
 }
 
 export function getTimeout(esShardTimeout: number) {
   return esShardTimeout > 0 ? `${esShardTimeout}ms` : undefined;
+}
+
+export function getSearchParamsFromRequest(
+  searchRequest: SearchRequest,
+  dependencies: { injectedMetadata: CoreStart['injectedMetadata']; uiSettings: IUiSettingsClient }
+): ISearchRequestParams {
+  const { injectedMetadata, uiSettings } = dependencies;
+  const esShardTimeout = injectedMetadata.getInjectedVar('esShardTimeout') as number;
+  const searchParams = getSearchParams(uiSettings, esShardTimeout);
+
+  return {
+    index: searchRequest.index.title || searchRequest.index,
+    body: searchRequest.body,
+    ...searchParams,
+  };
 }

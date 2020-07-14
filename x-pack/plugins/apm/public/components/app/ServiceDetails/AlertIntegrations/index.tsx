@@ -8,7 +8,7 @@ import {
   EuiButtonEmpty,
   EuiContextMenu,
   EuiPopover,
-  EuiContextMenuPanelDescriptor
+  EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
@@ -19,14 +19,14 @@ import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 const alertLabel = i18n.translate(
   'xpack.apm.serviceDetails.alertsMenu.alerts',
   {
-    defaultMessage: 'Alerts'
+    defaultMessage: 'Alerts',
   }
 );
 
 const createThresholdAlertLabel = i18n.translate(
   'xpack.apm.serviceDetails.alertsMenu.createThresholdAlert',
   {
-    defaultMessage: 'Create threshold alert'
+    defaultMessage: 'Create threshold alert',
   }
 );
 
@@ -53,7 +53,7 @@ export function AlertIntegrations(props: Props) {
       onClick={() => setPopoverOpen(true)}
     >
       {i18n.translate('xpack.apm.serviceDetails.alertsMenu.alerts', {
-        defaultMessage: 'Alerts'
+        defaultMessage: 'Alerts',
       })}
     </EuiButtonEmpty>
   );
@@ -68,8 +68,8 @@ export function AlertIntegrations(props: Props) {
               {
                 name: createThresholdAlertLabel,
                 panel: CREATE_THRESHOLD_ALERT_PANEL_ID,
-                icon: 'bell'
-              }
+                icon: 'bell',
+              },
             ]
           : []),
         ...(canReadAlerts
@@ -78,17 +78,17 @@ export function AlertIntegrations(props: Props) {
                 name: i18n.translate(
                   'xpack.apm.serviceDetails.alertsMenu.viewActiveAlerts',
                   {
-                    defaultMessage: 'View active alerts'
+                    defaultMessage: 'View active alerts',
                   }
                 ),
                 href: plugin.core.http.basePath.prepend(
-                  '/app/kibana#/management/kibana/triggersActions/alerts'
+                  '/app/management/insightsAndAlerting/triggersActions/alerts'
                 ),
-                icon: 'tableOfContents'
-              }
+                icon: 'tableOfContents',
+              },
             ]
-          : [])
-      ]
+          : []),
+      ],
     },
     {
       id: CREATE_THRESHOLD_ALERT_PANEL_ID,
@@ -98,26 +98,26 @@ export function AlertIntegrations(props: Props) {
           name: i18n.translate(
             'xpack.apm.serviceDetails.alertsMenu.transactionDuration',
             {
-              defaultMessage: 'Transaction duration'
+              defaultMessage: 'Transaction duration',
             }
           ),
           onClick: () => {
             setAlertType(AlertType.TransactionDuration);
-          }
+          },
         },
         {
           name: i18n.translate(
             'xpack.apm.serviceDetails.alertsMenu.errorRate',
             {
-              defaultMessage: 'Error rate'
+              defaultMessage: 'Error rate',
             }
           ),
           onClick: () => {
             setAlertType(AlertType.ErrorRate);
-          }
-        }
-      ]
-    }
+          },
+        },
+      ],
+    },
   ];
 
   return (
@@ -135,7 +135,7 @@ export function AlertIntegrations(props: Props) {
       <AlertingFlyout
         alertType={alertType}
         addFlyoutVisible={!!alertType}
-        setAddFlyoutVisibility={visible => {
+        setAddFlyoutVisibility={(visible) => {
           if (!visible) {
             setAlertType(null);
           }

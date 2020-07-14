@@ -97,7 +97,7 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     return concat(
       defer(() => of(this.get(key, defaultOverride))),
       this.update$.pipe(
-        filter(update => update.key === key),
+        filter((update) => update.key === key),
         map(() => this.get(key, defaultOverride))
       )
     );

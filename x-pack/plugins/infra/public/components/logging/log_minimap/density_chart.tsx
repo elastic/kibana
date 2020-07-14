@@ -31,20 +31,16 @@ export const DensityChart: React.FC<DensityChartProps> = ({
     return null;
   }
 
-  const yScale = scaleTime()
-    .domain([start, end])
-    .range([0, height]);
+  const yScale = scaleTime().domain([start, end]).range([0, height]);
 
-  const xMax = max(buckets.map(bucket => bucket.entriesCount)) || 0;
-  const xScale = scaleLinear()
-    .domain([0, xMax])
-    .range([0, width]);
+  const xMax = max(buckets.map((bucket) => bucket.entriesCount)) || 0;
+  const xScale = scaleLinear().domain([0, xMax]).range([0, width]);
 
   const path = area<LogEntriesSummaryBucket>()
     .x0(xScale(0))
-    .x1(bucket => xScale(bucket.entriesCount))
-    .y0(bucket => yScale(bucket.start))
-    .y1(bucket => yScale(bucket.end))
+    .x1((bucket) => xScale(bucket.entriesCount))
+    .y0((bucket) => yScale(bucket.start))
+    .y1((bucket) => yScale(bucket.end))
     .curve(curveMonotoneY);
 
   const firstBucket = buckets[0];
@@ -69,14 +65,14 @@ export const DensityChart: React.FC<DensityChartProps> = ({
 };
 
 const DensityChartPositiveBackground = euiStyled.rect`
-  fill: ${props =>
+  fill: ${(props) =>
     props.theme.darkMode
       ? props.theme.eui.euiColorLightShade
       : props.theme.eui.euiColorLightestShade};
 `;
 
 const PositiveAreaPath = euiStyled.path`
-  fill: ${props =>
+  fill: ${(props) =>
     props.theme.darkMode
       ? props.theme.eui.euiColorMediumShade
       : props.theme.eui.euiColorLightShade};

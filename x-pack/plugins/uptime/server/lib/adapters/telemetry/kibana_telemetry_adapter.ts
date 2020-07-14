@@ -7,7 +7,7 @@
 import moment from 'moment';
 import { ISavedObjectsRepository, SavedObjectsClientContract } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { PageViewParams, UptimeTelemetry } from './types';
+import { PageViewParams, UptimeTelemetry, Usage } from './types';
 import { APICaller } from '../framework';
 import { savedObjectsAdapter } from '../../saved_objects';
 
@@ -39,12 +39,40 @@ export class KibanaTelemetryAdapter {
     usageCollector: UsageCollectionSetup,
     getSavedObjectsClient: () => ISavedObjectsRepository | undefined
   ) {
-    return usageCollector.makeUsageCollector({
+    return usageCollector.makeUsageCollector<Usage>({
       type: 'uptime',
+      schema: {
+        last_24_hours: {
+          hits: {
+            autoRefreshEnabled: {
+              type: 'boolean',
+            },
+            autorefreshInterval: { type: 'long' },
+            dateRangeEnd: { type: 'date' },
+            dateRangeStart: { type: 'date' },
+            monitor_frequency: { type: 'long' },
+            monitor_name_stats: {
+              avg_length: { type: 'float' },
+              max_length: { type: 'long' },
+              min_length: { type: 'long' },
+            },
+            monitor_page: { type: 'long' },
+            no_of_unique_monitors: { type: 'long' },
+            no_of_unique_observer_locations: { type: 'long' },
+            observer_location_name_stats: {
+              avg_length: { type: 'float' },
+              max_length: { type: 'long' },
+              min_length: { type: 'long' },
+            },
+            overview_page: { type: 'long' },
+            settings_page: { type: 'long' },
+          },
+        },
+      },
       fetch: async (callCluster: APICaller) => {
         const savedObjectsClient = getSavedObjectsClient()!;
         if (savedObjectsClient) {
-          this.countNoOfUniqueMonitorAndLocations(callCluster, savedObjectsClient);
+          await this.countNoOfUniqueMonitorAndLocations(callCluster, savedObjectsClient);
         }
         const report = this.getReport();
         return { last_24_hours: { hits: { ...report } } };
@@ -53,10 +81,11 @@ export class KibanaTelemetryAdapter {
     });
   }
 
+  public static clearLocalTelemetry() {
+    this.collector = {};
+  }
+
   public static countPageView(pageView: PageViewParams) {
-    if (pageView.refreshTelemetryHistory) {
-      this.collector = {};
-    }
     const bucketId = this.getBucketToIncrement();
     const bucket = this.collector[bucketId];
     if (pageView.page === 'Overview') {
@@ -191,7 +220,7 @@ export class KibanaTelemetryAdapter {
     const frequencies: number[] = [];
     uniqueMonitors
       .map((item: any) => item!.docs.hits?.hits?.[0] ?? {})
-      .forEach(monitor => {
+      .forEach((monitor) => {
         const timespan = monitor?._source?.monitor?.timespan;
         if (timespan) {
           const timeDiffSec = moment
@@ -208,9 +237,9 @@ export class KibanaTelemetryAdapter {
   private static getReport() {
     const minBucket = this.getCollectorWindow();
     Object.keys(this.collector)
-      .map(key => parseInt(key, 10))
-      .filter(key => key < minBucket)
-      .forEach(oldBucket => {
+      .map((key) => parseInt(key, 10))
+      .filter((key) => key < minBucket)
+      .forEach((oldBucket) => {
         delete this.collector[oldBucket];
       });
 

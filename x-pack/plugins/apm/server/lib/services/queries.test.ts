@@ -11,7 +11,7 @@ import { getLegacyDataStatus } from './get_services/get_legacy_data_status';
 import { hasHistoricalAgentData } from './get_services/has_historical_agent_data';
 import {
   SearchParamsMock,
-  inspectSearchParams
+  inspectSearchParams,
 } from '../../../public/utils/testHelpers';
 
 describe('services queries', () => {
@@ -22,7 +22,7 @@ describe('services queries', () => {
   });
 
   it('fetches the service agent name', async () => {
-    mock = await inspectSearchParams(setup =>
+    mock = await inspectSearchParams((setup) =>
       getServiceAgentName('foo', setup)
     );
 
@@ -30,7 +30,7 @@ describe('services queries', () => {
   });
 
   it('fetches the service transaction types', async () => {
-    mock = await inspectSearchParams(setup =>
+    mock = await inspectSearchParams((setup) =>
       getServiceTransactionTypes('foo', setup)
     );
 
@@ -38,19 +38,21 @@ describe('services queries', () => {
   });
 
   it('fetches the service items', async () => {
-    mock = await inspectSearchParams(setup => getServicesItems(setup));
+    mock = await inspectSearchParams((setup) => getServicesItems(setup));
 
-    expect(mock.params).toMatchSnapshot();
+    const allParams = mock.spy.mock.calls.map((call) => call[0]);
+
+    expect(allParams).toMatchSnapshot();
   });
 
   it('fetches the legacy data status', async () => {
-    mock = await inspectSearchParams(setup => getLegacyDataStatus(setup));
+    mock = await inspectSearchParams((setup) => getLegacyDataStatus(setup));
 
     expect(mock.params).toMatchSnapshot();
   });
 
   it('fetches the agent status', async () => {
-    mock = await inspectSearchParams(setup => hasHistoricalAgentData(setup));
+    mock = await inspectSearchParams((setup) => hasHistoricalAgentData(setup));
 
     expect(mock.params).toMatchSnapshot();
   });

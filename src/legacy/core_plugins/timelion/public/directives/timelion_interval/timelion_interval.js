@@ -29,7 +29,7 @@ export function TimelionInterval($timeout) {
       model: '=',
     },
     template,
-    link: function($scope, $elem) {
+    link: function ($scope, $elem) {
       $scope.intervalOptions = ['auto', '1s', '1m', '1h', '1d', '1w', '1M', '1y', 'other'];
       $scope.intervalLabels = {
         auto: 'auto',
@@ -43,11 +43,11 @@ export function TimelionInterval($timeout) {
         other: 'other',
       };
 
-      $scope.$watch('model', function(newVal, oldVal) {
+      $scope.$watch('model', function (newVal, oldVal) {
         // Only run this on initialization
         if (newVal !== oldVal || oldVal == null) return;
 
-        if (_.contains($scope.intervalOptions, newVal)) {
+        if (_.includes($scope.intervalOptions, newVal)) {
           $scope.interval = newVal;
         } else {
           $scope.interval = 'other';
@@ -58,13 +58,13 @@ export function TimelionInterval($timeout) {
         }
       });
 
-      $scope.$watch('interval', function(newVal, oldVal) {
+      $scope.$watch('interval', function (newVal, oldVal) {
         if (newVal === oldVal) return;
 
         if (newVal === 'other') {
           $scope.otherInterval = oldVal;
           $scope.model = $scope.otherInterval;
-          $timeout(function() {
+          $timeout(function () {
             $('input', $elem).select();
           }, 0);
         } else {
@@ -73,7 +73,7 @@ export function TimelionInterval($timeout) {
         }
       });
 
-      $scope.$watch('otherInterval', function(newVal, oldVal) {
+      $scope.$watch('otherInterval', function (newVal, oldVal) {
         if (newVal === oldVal) return;
         $scope.model = newVal;
       });

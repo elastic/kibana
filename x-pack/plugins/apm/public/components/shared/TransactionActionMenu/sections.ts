@@ -5,7 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import { pick, isEmpty } from 'lodash';
+import { pickBy, isEmpty } from 'lodash';
 import moment from 'moment';
 import url from 'url';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
@@ -22,7 +22,7 @@ function getInfraMetricsQuery(transaction: Transaction) {
 
   return {
     from: timestamp - fiveMinutes,
-    to: timestamp + fiveMinutes
+    to: timestamp + fiveMinutes,
   };
 }
 
@@ -46,7 +46,7 @@ export const getSections = ({
   transaction,
   basePath,
   location,
-  urlParams
+  urlParams,
 }: {
   transaction: Transaction;
   basePath: AppMountContextBasePath;
@@ -62,16 +62,16 @@ export const getSections = ({
 
   const uptimeLink = url.format({
     pathname: basePath.prepend('/app/uptime'),
-    hash: `/?${fromQuery(
-      pick(
+    search: `?${fromQuery(
+      pickBy(
         {
           dateRangeStart: urlParams.rangeFrom,
           dateRangeEnd: urlParams.rangeTo,
-          search: `url.domain:"${transaction.url?.domain}"`
+          search: `url.domain:"${transaction.url?.domain}"`,
         },
-        (val: string) => !isEmpty(val)
+        (val) => !isEmpty(val)
       )
-    )}`
+    )}`,
   });
 
   const podActions: Action[] = [
@@ -85,9 +85,9 @@ export const getSections = ({
         app: 'logs',
         basePath,
         path: `/link-to/pod-logs/${podId}`,
-        query: { time }
+        query: { time },
       }),
-      condition: !!podId
+      condition: !!podId,
     },
     {
       key: 'podMetrics',
@@ -99,10 +99,10 @@ export const getSections = ({
         app: 'metrics',
         basePath,
         path: `/link-to/pod-detail/${podId}`,
-        query: infraMetricsQuery
+        query: infraMetricsQuery,
       }),
-      condition: !!podId
-    }
+      condition: !!podId,
+    },
   ];
 
   const containerActions: Action[] = [
@@ -116,9 +116,9 @@ export const getSections = ({
         app: 'logs',
         basePath,
         path: `/link-to/container-logs/${containerId}`,
-        query: { time }
+        query: { time },
       }),
-      condition: !!containerId
+      condition: !!containerId,
     },
     {
       key: 'containerMetrics',
@@ -130,10 +130,10 @@ export const getSections = ({
         app: 'metrics',
         basePath,
         path: `/link-to/container-detail/${containerId}`,
-        query: infraMetricsQuery
+        query: infraMetricsQuery,
       }),
-      condition: !!containerId
-    }
+      condition: !!containerId,
+    },
   ];
 
   const hostActions: Action[] = [
@@ -147,9 +147,9 @@ export const getSections = ({
         app: 'logs',
         basePath,
         path: `/link-to/host-logs/${hostName}`,
-        query: { time }
+        query: { time },
       }),
-      condition: !!hostName
+      condition: !!hostName,
     },
     {
       key: 'hostMetrics',
@@ -161,10 +161,10 @@ export const getSections = ({
         app: 'metrics',
         basePath,
         path: `/link-to/host-detail/${hostName}`,
-        query: infraMetricsQuery
+        query: infraMetricsQuery,
       }),
-      condition: !!hostName
-    }
+      condition: !!hostName,
+    },
   ];
 
   const logActions: Action[] = [
@@ -180,22 +180,22 @@ export const getSections = ({
         path: `/link-to/logs`,
         query: {
           time,
-          filter: `trace.id:"${transaction.trace.id}" OR ${transaction.trace.id}`
-        }
+          filter: `trace.id:"${transaction.trace.id}" OR "${transaction.trace.id}"`,
+        },
       }),
-      condition: true
-    }
+      condition: true,
+    },
   ];
 
   const uptimeActions: Action[] = [
     {
       key: 'monitorStatus',
       label: i18n.translate('xpack.apm.transactionActionMenu.viewInUptime', {
-        defaultMessage: 'Status'
+        defaultMessage: 'Status',
       }),
       href: uptimeLink,
-      condition: !!transaction.url?.domain
-    }
+      condition: !!transaction.url?.domain,
+    },
   ];
 
   const kibanaActions: Action[] = [
@@ -204,16 +204,16 @@ export const getSections = ({
       label: i18n.translate(
         'xpack.apm.transactionActionMenu.viewSampleDocumentLinkLabel',
         {
-          defaultMessage: 'View sample document'
+          defaultMessage: 'View sample document',
         }
       ),
       href: getDiscoverHref({
         basePath,
         query: getDiscoverQuery(transaction),
-        location
+        location,
       }),
-      condition: true
-    }
+      condition: true,
+    },
   ];
 
   const sectionRecord: SectionRecord = {
@@ -221,86 +221,87 @@ export const getSections = ({
       {
         key: 'podDetails',
         title: i18n.translate('xpack.apm.transactionActionMenu.pod.title', {
-          defaultMessage: 'Pod details'
+          defaultMessage: 'Pod details',
         }),
         subtitle: i18n.translate(
           'xpack.apm.transactionActionMenu.pod.subtitle',
           {
             defaultMessage:
-              'View logs and metrics for this pod to get further details.'
+              'View logs and metrics for this pod to get further details.',
           }
         ),
-        actions: podActions
+        actions: podActions,
       },
       {
         key: 'containerDetails',
         title: i18n.translate(
           'xpack.apm.transactionActionMenu.container.title',
           {
-            defaultMessage: 'Container details'
+            defaultMessage: 'Container details',
           }
         ),
         subtitle: i18n.translate(
           'xpack.apm.transactionActionMenu.container.subtitle',
           {
             defaultMessage:
-              'View logs and metrics for this container to get further details.'
+              'View logs and metrics for this container to get further details.',
           }
         ),
-        actions: containerActions
+        actions: containerActions,
       },
       {
         key: 'hostDetails',
         title: i18n.translate('xpack.apm.transactionActionMenu.host.title', {
-          defaultMessage: 'Host details'
+          defaultMessage: 'Host details',
         }),
         subtitle: i18n.translate(
           'xpack.apm.transactionActionMenu.host.subtitle',
           {
-            defaultMessage: 'View host logs and metrics to get further details.'
+            defaultMessage:
+              'View host logs and metrics to get further details.',
           }
         ),
-        actions: hostActions
+        actions: hostActions,
       },
       {
         key: 'traceDetails',
         title: i18n.translate('xpack.apm.transactionActionMenu.trace.title', {
-          defaultMessage: 'Trace details'
+          defaultMessage: 'Trace details',
         }),
         subtitle: i18n.translate(
           'xpack.apm.transactionActionMenu.trace.subtitle',
           {
-            defaultMessage: 'View trace logs to get further details.'
+            defaultMessage: 'View trace logs to get further details.',
           }
         ),
-        actions: logActions
+        actions: logActions,
       },
       {
         key: 'statusDetails',
         title: i18n.translate('xpack.apm.transactionActionMenu.status.title', {
-          defaultMessage: 'Status details'
+          defaultMessage: 'Status details',
         }),
         subtitle: i18n.translate(
           'xpack.apm.transactionActionMenu.status.subtitle',
           {
-            defaultMessage: 'View status to get further details.'
+            defaultMessage: 'View status to get further details.',
           }
         ),
-        actions: uptimeActions
-      }
+        actions: uptimeActions,
+      },
     ],
-    kibana: [{ key: 'kibana', actions: kibanaActions }]
+    kibana: [{ key: 'kibana', actions: kibanaActions }],
   };
 
   // Filter out actions that shouldnt be shown and sections without any actions.
   return Object.values(sectionRecord)
-    .map(sections =>
+    .map((sections) =>
       sections
-        .map(section => ({
+        .map((section) => ({
           ...section,
-          actions: section.actions.filter(action => action.condition)
+          actions: section.actions.filter((action) => action.condition),
         }))
-        .filter(section => !isEmpty(section.actions))
+        .filter((section) => !isEmpty(section.actions))
     )
-    .filter(sections => !isEmpty(sections));
+    .filter((sections) => !isEmpty(sections));
 };

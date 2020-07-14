@@ -32,7 +32,7 @@ image::images/vega_lite_default.png[]
 The default visualization uses Vega-Lite version 2. To use Vega version 4, edit
 the `schema`.
 
-Go to `$schema`, enter `https://vega.github.io/schema/vega/v4.json`, then click
+Go to `$schema`, enter `https://vega.github.io/schema/vega/v5.json`, then click
 *Update*.
 
 [float]
@@ -172,11 +172,18 @@ except that the time range is shifted back by 10 minutes:
           // the auto-generated "MUST-NOT" clause
           "%dashboard_context-must_not_clause%"
         ]
+        filter: [
+          // This string will be replaced
+          // with the auto-generated "FILTER" clause
+          "%dashboard_context-filter_clause%"
+        ]
       }
     }
   }
 }
 ----
+
+NOTE: When using `"%context%": true` or defining a value for "%timefield%"` the body cannot contain a query. To customize the query within the VEGA specification (e.g. add an additional filter, or shift the timefilter), define your query and use the placeholders as in the example above. The placeholders will be replaced by the actual context of the dashboard or visualization once parsed.
 
 The `"%timefilter%"` can also be used to specify a single min or max
 value. The date_histogram's `extended_bounds` can be set
@@ -206,7 +213,7 @@ url: {
 format: {property: "features"}
 ----
 
-To enable Elastic Maps, the graph must specify `type=map` in the host
+To enable Maps, the graph must specify `type=map` in the host
 configuration:
 
 [source,yaml]
@@ -299,7 +306,7 @@ to your kibana.yml file.
 [[vega-useful-links]]
 === Resources and examples
 
-experimental[] To learn more about Vega and Vega-List, refer to the resources and examples. 
+experimental[] To learn more about Vega and Vega-List, refer to the resources and examples.
 
 ==== Vega editor
 The https://vega.github.io/editor/[Vega Editor] includes examples for Vega & Vega-Lite, but does not support any

@@ -24,15 +24,15 @@ export const fetchPingHistogram: APIFn<GetPingHistogramParams, HistogramResult> 
   monitorId,
   dateStart,
   dateEnd,
-  statusFilter,
   filters,
+  bucketSize,
 }) => {
   const queryParams = {
     dateStart,
     dateEnd,
     monitorId,
-    statusFilter,
     filters,
+    bucketSize,
   };
 
   return await apiService.get(API_URLS.PING_HISTOGRAM, queryParams);

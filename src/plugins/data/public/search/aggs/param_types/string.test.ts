@@ -21,7 +21,7 @@ import { BaseParamType } from './base';
 import { StringParamType } from './string';
 import { IAggConfig } from '../agg_config';
 
-describe('String', function() {
+describe('String', function () {
   let paramName = 'json_test';
   let aggConfig: IAggConfig;
   let output: Record<string, any>;

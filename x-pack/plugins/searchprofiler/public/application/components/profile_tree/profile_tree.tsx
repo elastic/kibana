@@ -40,7 +40,7 @@ export const ProfileTree = memo(({ data, target, onHighlight, onDataInitError }:
         gutterSize="none"
         direction="column"
       >
-        {sortedIndices.map(index => (
+        {sortedIndices.map((index) => (
           <EuiFlexItem key={index.name} grow={false}>
             <EuiFlexGroup
               className="prfDevTool__profileTree__panel prfDevTool__profileTree__index"

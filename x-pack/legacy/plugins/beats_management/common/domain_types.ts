@@ -7,14 +7,12 @@ import * as t from 'io-ts';
 import { configBlockSchemas } from './config_schemas';
 import { DateFromString } from './io_ts_types';
 
-export const OutputTypesArray = ['elasticsearch', 'logstash', 'kafka', 'redis'];
-
 // Here we create the runtime check for a generic, unknown beat config type.
 // We can also pass in optional params to create spacific runtime checks that
 // can be used to validate blocs on the API and UI
 export const createConfigurationBlockInterface = (
   configType: t.LiteralType<string> | t.KeyofC<Record<string, null>> = t.keyof(
-    Object.fromEntries(configBlockSchemas.map(s => [s.id, null])) as Record<string, null>
+    Object.fromEntries(configBlockSchemas.map((s) => [s.id, null])) as Record<string, null>
   ),
   beatConfigInterface: t.Mixed = t.Dictionary
 ) =>

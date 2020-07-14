@@ -35,7 +35,7 @@ import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
 import { useMlContext } from '../../../../contexts/ml';
 import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
-import { TimeBuckets } from '../../../../util/time_buckets';
+import { getTimeBucketsFromCache } from '../../../../util/time_buckets';
 import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
 import { expandCombinedJobConfig } from '../../../../../../common/types/anomaly_detection_jobs';
 import { newJobCapsService } from '../../../../services/new_job_capabilities_service';
@@ -125,6 +125,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
     if (jobCreator.type === JOB_TYPE.SINGLE_METRIC) {
       jobCreator.modelPlot = true;
+      jobCreator.modelChangeAnnotations = true;
     }
 
     if (mlContext.currentSavedSearch !== null) {
@@ -174,7 +175,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     }
   }
 
-  const chartInterval = new TimeBuckets();
+  const chartInterval = getTimeBucketsFromCache();
   chartInterval.setBarTarget(BAR_TARGET);
   chartInterval.setMaxBars(MAX_BARS);
   chartInterval.setInterval('auto');

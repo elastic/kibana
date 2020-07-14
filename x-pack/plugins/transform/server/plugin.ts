@@ -6,8 +6,9 @@
 import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
+  ILegacyCustomClusterClient,
   Plugin,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
   Logger,
   PluginInitializerContext,
 } from 'src/core/server';
@@ -22,7 +23,7 @@ import { License } from './services';
 declare module 'kibana/server' {
   interface RequestHandlerContext {
     transform?: {
-      dataClient: IScopedClusterClient;
+      dataClient: ILegacyScopedClusterClient;
     };
   }
 }
@@ -38,10 +39,18 @@ const PLUGIN = {
     }),
 };
 
+async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
+  const [core] = await getStartServices();
+  return core.elasticsearch.legacy.createClient('transform', {
+    plugins: [elasticsearchJsPlugin],
+  });
+}
+
 export class TransformServerPlugin implements Plugin<{}, void, any, any> {
   private readonly apiRoutes: ApiRoutes;
   private readonly license: License;
   private readonly logger: Logger;
+  private transformESClient?: ILegacyCustomClusterClient;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -49,7 +58,7 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
     this.license = new License();
   }
 
-  setup({ elasticsearch, http }: CoreSetup, { licensing }: Dependencies): {} {
+  setup({ http, getStartServices }: CoreSetup, { licensing }: Dependencies): {} {
     const router = http.createRouter();
 
     this.license.setup(
@@ -72,12 +81,11 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
     });
 
     // Can access via new platform router's handler function 'context' parameter - context.transform.client
-    const transformClient = elasticsearch.createClient('transform', {
-      plugins: [elasticsearchJsPlugin],
-    });
-    http.registerRouteHandlerContext('transform', (context, request) => {
+    http.registerRouteHandlerContext('transform', async (context, request) => {
+      this.transformESClient =
+        this.transformESClient ?? (await getCustomEsClient(getStartServices));
       return {
-        dataClient: transformClient.asScoped(request),
+        dataClient: this.transformESClient.asScoped(request),
       };
     });
 
@@ -85,5 +93,10 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
   }
 
   start() {}
-  stop() {}
+
+  stop() {
+    if (this.transformESClient) {
+      this.transformESClient.close();
+    }
+  }
 }

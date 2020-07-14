@@ -5,10 +5,14 @@
  */
 
 import { EuiTitle } from '@elastic/eui';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
+import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { scaleUtc } from 'd3-scale';
 import d3 from 'd3';
+import { scaleUtc } from 'd3-scale';
+import { mean } from 'lodash';
 import React from 'react';
+import { px } from '../../../../style/variables';
 import { asRelativeDateTimeRange } from '../../../../utils/formatters';
 import { getTimezoneOffsetInMs } from '../../../shared/charts/CustomPlot/getTimezoneOffsetInMs';
 // @ts-ignore
@@ -17,7 +21,7 @@ import { EmptyMessage } from '../../../shared/EmptyMessage';
 
 interface IBucket {
   key: number;
-  count: number;
+  count: number | undefined;
 }
 
 // TODO: cleanup duplication of this in distribution/get_distribution.ts (ErrorDistributionAPIResponse) and transactions/distribution/index.ts (TransactionDistributionAPIResponse)
@@ -30,7 +34,7 @@ interface IDistribution {
 interface FormattedBucket {
   x0: number;
   x: number;
-  y: number;
+  y: number | undefined;
 }
 
 export function getFormattedBuckets(
@@ -45,7 +49,7 @@ export function getFormattedBuckets(
     return {
       x0: key,
       x: key + bucketSize,
-      y: count
+      y: count,
     };
   });
 }
@@ -64,21 +68,20 @@ export function ErrorDistribution({ distribution, title }: Props) {
     distribution.bucketSize
   );
 
-  if (!buckets || distribution.noHits) {
+  if (!buckets) {
     return (
       <EmptyMessage
         heading={i18n.translate('xpack.apm.errorGroupDetails.noErrorsLabel', {
-          defaultMessage: 'No errors were found'
+          defaultMessage: 'No errors were found',
         })}
       />
     );
   }
 
-  const xMin = d3.min(buckets, d => d.x0);
-  const xMax = d3.max(buckets, d => d.x);
-  const tickFormat = scaleUtc()
-    .domain([xMin, xMax])
-    .tickFormat();
+  const averageValue = mean(buckets.map((bucket) => bucket.y)) || 0;
+  const xMin = d3.min(buckets, (d) => d.x0);
+  const xMax = d3.max(buckets, (d) => d.x);
+  const tickFormat = scaleUtc().domain([xMin, xMax]).tickFormat();
 
   return (
     <div>
@@ -86,6 +89,8 @@ export function ErrorDistribution({ distribution, title }: Props) {
         <span>{title}</span>
       </EuiTitle>
       <Histogram
+        height={px(180)}
+        noHits={distribution.noHits}
         tooltipHeader={tooltipHeader}
         verticalLineHover={(bucket: FormattedBucket) => bucket.x}
         xType="time-utc"
@@ -98,15 +103,26 @@ export function ErrorDistribution({ distribution, title }: Props) {
         formatYShort={(value: number) =>
           i18n.translate('xpack.apm.errorGroupDetails.occurrencesShortLabel', {
             defaultMessage: '{occCount} occ.',
-            values: { occCount: value }
+            values: { occCount: value },
           })
         }
         formatYLong={(value: number) =>
           i18n.translate('xpack.apm.errorGroupDetails.occurrencesLongLabel', {
             defaultMessage: '{occCount} occurrences',
-            values: { occCount: value }
+            values: { occCount: value },
           })
         }
+        legends={[
+          {
+            color: theme.euiColorVis1,
+            // 0a abbreviates large whole numbers with metric prefixes like: 1000 = 1k, 32000 = 32k, 1000000 = 1m
+            legendValue: numeral(averageValue).format('0a'),
+            title: i18n.translate('xpack.apm.errorGroupDetails.avgLabel', {
+              defaultMessage: 'Avg.',
+            }),
+            legendClickDisabled: true,
+          },
+        ]}
       />
     </div>
   );

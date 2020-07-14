@@ -44,8 +44,8 @@ class AnomaliesTable extends Component {
     // Update the itemIdToExpandedRowMap state if a change to the table data has resulted
     // in an anomaly that was previously expanded no longer being in the data.
     const itemIdToExpandedRowMap = prevState.itemIdToExpandedRowMap;
-    const prevExpandedNotInData = Object.keys(itemIdToExpandedRowMap).find(rowId => {
-      const matching = nextProps.tableData.anomalies.find(anomaly => {
+    const prevExpandedNotInData = Object.keys(itemIdToExpandedRowMap).find((rowId) => {
+      const matching = nextProps.tableData.anomalies.find((anomaly) => {
         return anomaly.rowId === rowId;
       });
 
@@ -108,7 +108,7 @@ class AnomaliesTable extends Component {
     this.setState({ itemIdToExpandedRowMap });
   };
 
-  onMouseOverRow = record => {
+  onMouseOverRow = (record) => {
     if (this.mouseOverRecord !== undefined) {
       if (this.mouseOverRecord.rowId !== record.rowId) {
         // Mouse is over a different row, fire mouseleave on the previous record.
@@ -132,7 +132,7 @@ class AnomaliesTable extends Component {
     }
   };
 
-  setShowRuleEditorFlyoutFunction = func => {
+  setShowRuleEditorFlyoutFunction = (func) => {
     this.setState({
       showRuleEditorFlyout: func,
     });
@@ -191,7 +191,7 @@ class AnomaliesTable extends Component {
       },
     };
 
-    const getRowProps = item => {
+    const getRowProps = (item) => {
       return {
         onMouseOver: () => this.onMouseOverRow(item),
         onMouseLeave: () => this.onMouseLeaveRow(),

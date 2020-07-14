@@ -1,5 +1,7 @@
 include::introduction.asciidoc[]
 
+include::whats-new.asciidoc[]
+
 include::getting-started.asciidoc[]
 
 include::setup.asciidoc[]
@@ -10,21 +12,21 @@ include::security/securing-kibana.asciidoc[]
 
 include::discover.asciidoc[]
 
-include::visualize.asciidoc[]
-
 include::dashboard.asciidoc[]
 
 include::canvas.asciidoc[]
 
-include::graph/index.asciidoc[]
+include::{kib-repo-dir}/maps/index.asciidoc[]
 
 include::ml/index.asciidoc[]
 
-include::{kib-repo-dir}/maps/index.asciidoc[]
+include::graph/index.asciidoc[]
 
-include::{kib-repo-dir}/infrastructure/index.asciidoc[]
+include::visualize.asciidoc[]
 
 include::{kib-repo-dir}/logs/index.asciidoc[]
+
+include::{kib-repo-dir}/infrastructure/index.asciidoc[]
 
 include::{kib-repo-dir}/apm/index.asciidoc[]
 
@@ -37,6 +39,8 @@ include::dev-tools.asciidoc[]
 include::monitoring/index.asciidoc[]
 
 include::management.asciidoc[]
+
+include::{kib-repo-dir}/ingest_manager/ingest-manager.asciidoc[]
 
 include::reporting/index.asciidoc[]
 

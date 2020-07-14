@@ -8,7 +8,7 @@ import _ from 'lodash';
 import { Capabilities as UICapabilities } from '../../../../src/core/server';
 import { Feature } from '../common/feature';
 
-const ELIGIBLE_FLAT_MERGE_KEYS = ['catalogue'];
+const ELIGIBLE_FLAT_MERGE_KEYS = ['catalogue'] as const;
 
 interface FeatureCapabilities {
   [featureId: string]: Record<string, boolean>;
@@ -42,14 +42,14 @@ function getCapabilitiesFromFeature(feature: Feature): FeatureCapabilities {
   const featurePrivileges = Object.values(feature.privileges ?? {});
   if (feature.subFeatures) {
     featurePrivileges.push(
-      ...feature.subFeatures.map(sf => sf.privilegeGroups.map(pg => pg.privileges)).flat(2)
+      ...feature.subFeatures.map((sf) => sf.privilegeGroups.map((pg) => pg.privileges)).flat(2)
     );
   }
   if (feature.reserved?.privileges) {
-    featurePrivileges.push(...feature.reserved.privileges.map(rp => rp.privilege));
+    featurePrivileges.push(...feature.reserved.privileges.map((rp) => rp.privilege));
   }
 
-  featurePrivileges.forEach(privilege => {
+  featurePrivileges.forEach((privilege) => {
     UIFeatureCapabilities[feature.id] = {
       ...UIFeatureCapabilities[feature.id],
       ...privilege.ui.reduce(
@@ -67,14 +67,14 @@ function getCapabilitiesFromFeature(feature: Feature): FeatureCapabilities {
 
 function buildCapabilities(...allFeatureCapabilities: FeatureCapabilities[]): UICapabilities {
   return allFeatureCapabilities.reduce<UICapabilities>((acc, capabilities) => {
-    const mergableCapabilities: UICapabilities = _.omit(capabilities, ...ELIGIBLE_FLAT_MERGE_KEYS);
+    const mergableCapabilities = _.omit(capabilities, ...ELIGIBLE_FLAT_MERGE_KEYS);
 
     const mergedFeatureCapabilities = {
       ...mergableCapabilities,
       ...acc,
     };
 
-    ELIGIBLE_FLAT_MERGE_KEYS.forEach(key => {
+    ELIGIBLE_FLAT_MERGE_KEYS.forEach((key) => {
       mergedFeatureCapabilities[key] = {
         ...mergedFeatureCapabilities[key],
         ...capabilities[key],

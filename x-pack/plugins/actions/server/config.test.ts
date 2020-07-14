@@ -14,7 +14,7 @@ describe('config validation', () => {
         "enabledActionTypes": Array [
           "*",
         ],
-        "preconfigured": Array [],
+        "preconfigured": Object {},
         "whitelistedHosts": Array [
           "*",
         ],
@@ -24,16 +24,15 @@ describe('config validation', () => {
 
   test('action with preconfigured actions', () => {
     const config: Record<string, unknown> = {
-      preconfigured: [
-        {
-          id: 'my-slack1',
+      preconfigured: {
+        mySlack1: {
           actionTypeId: '.slack',
           name: 'Slack #xyz',
           config: {
             webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
           },
         },
-      ],
+      },
     };
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
@@ -41,21 +40,57 @@ describe('config validation', () => {
         "enabledActionTypes": Array [
           "*",
         ],
-        "preconfigured": Array [
-          Object {
+        "preconfigured": Object {
+          "mySlack1": Object {
             "actionTypeId": ".slack",
             "config": Object {
               "webhookUrl": "https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz",
             },
-            "id": "my-slack1",
             "name": "Slack #xyz",
             "secrets": Object {},
           },
-        ],
+        },
         "whitelistedHosts": Array [
           "*",
         ],
       }
     `);
   });
+
+  test('validates preconfigured action ids', () => {
+    expect(() =>
+      configSchema.validate(preConfiguredActionConfig(''))
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[preconfigured]: invalid preconfigured action id \\"\\""`
+    );
+
+    expect(() =>
+      configSchema.validate(preConfiguredActionConfig('constructor'))
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[preconfigured]: invalid preconfigured action id \\"constructor\\""`
+    );
+
+    expect(() =>
+      configSchema.validate(preConfiguredActionConfig('__proto__'))
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[preconfigured]: invalid preconfigured action id \\"__proto__\\""`
+    );
+  });
 });
+
+// object creator that ensures we can create a property named __proto__ on an
+// object, via JSON.parse()
+function preConfiguredActionConfig(id: string) {
+  return JSON.parse(`{
+    "preconfigured": {
+        ${JSON.stringify(id)}: {
+            "actionTypeId": ".server-log",
+            "name": "server log 1"
+        },
+        "serverLog": {
+            "actionTypeId": ".server-log",
+            "name": "server log 2"
+        }
+    }
+  }`);
+}

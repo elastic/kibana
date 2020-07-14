@@ -1,0 +1,33 @@
+{
+  "laneLabels": [
+    "View by"
+  ],
+  "points": [
+    {
+      "laneLabel": "test-1",
+      "time": 1486425600,
+      "value": 0
+    },
+    {
+      "laneLabel": "test-2",
+      "time": 1486440000,
+      "value": 0.01107053
+    },
+    {
+      "laneLabel": "other-3",
+      "time": 1486454400,
+      "value": 0.1870243
+    },
+    {
+      "laneLabel": "other-4",
+      "time": 1486468800,
+      "value": 0.5947769
+    },
+    {
+      "laneLabel": "other-5",
+      "time": 1486483200,
+      "value": 0
+    }
+  ],
+  "interval": 14400
+}

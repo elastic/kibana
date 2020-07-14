@@ -5,44 +5,40 @@
  */
 
 import { IRouter } from 'kibana/server';
+import { schema } from '@kbn/config-schema';
 
 import { LIST_ITEM_URL } from '../../common/constants';
-import {
-  buildRouteValidation,
-  buildSiemResponse,
-  transformError,
-  validate,
-} from '../siem_server_deps';
-import {
-  ImportListItemSchema,
-  importListItemQuerySchema,
-  importListItemSchema,
-  listSchema,
-} from '../../common/schemas';
+import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
+import { validate } from '../../common/siem_common_deps';
+import { importListItemQuerySchema, listSchema } from '../../common/schemas';
+import { ConfigType } from '../config';
+
+import { createStreamFromBuffer } from './utils/create_stream_from_buffer';
 
 import { getListClient } from '.';
 
-export const importListItemRoute = (router: IRouter): void => {
+export const importListItemRoute = (router: IRouter, config: ConfigType): void => {
   router.post(
     {
       options: {
         body: {
-          output: 'stream',
+          accepts: ['multipart/form-data'],
+          maxBytes: config.maxImportPayloadBytes,
+          parse: false,
         },
         tags: ['access:lists'],
       },
       path: `${LIST_ITEM_URL}/_import`,
       validate: {
-        body: buildRouteValidation<typeof importListItemSchema, ImportListItemSchema>(
-          importListItemSchema
-        ),
+        body: schema.buffer(),
         query: buildRouteValidation(importListItemQuerySchema),
       },
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { list_id: listId, type } = request.query;
+        const stream = createStreamFromBuffer(request.body);
+        const { deserializer, list_id: listId, serializer, type } = request.query;
         const lists = getListClient(context);
         if (listId != null) {
           const list = await lists.getList({ id: listId });
@@ -53,9 +49,11 @@ export const importListItemRoute = (router: IRouter): void => {
             });
           }
           await lists.importListItemsToStream({
+            deserializer: list.deserializer,
             listId,
             meta: undefined,
-            stream: request.body.file,
+            serializer: list.serializer,
+            stream,
             type: list.type,
           });
 
@@ -66,22 +64,21 @@ export const importListItemRoute = (router: IRouter): void => {
             return response.ok({ body: validated ?? {} });
           }
         } else if (type != null) {
-          const { filename } = request.body.file.hapi;
-          // TODO: Should we prevent the same file from being uploaded multiple times?
-          const list = await lists.createListIfItDoesNotExist({
-            description: `File uploaded from file system of ${filename}`,
-            id: filename,
+          const importedList = await lists.importListItemsToStream({
+            deserializer,
+            listId: undefined,
             meta: undefined,
-            name: filename,
+            serializer,
+            stream,
             type,
           });
-          await lists.importListItemsToStream({
-            listId: list.id,
-            meta: undefined,
-            stream: request.body.file,
-            type: list.type,
-          });
-          const [validated, errors] = validate(list, listSchema);
+          if (importedList == null) {
+            return siemResponse.error({
+              body: 'Unable to parse a valid fileName during import',
+              statusCode: 400,
+            });
+          }
+          const [validated, errors] = validate(importedList, listSchema);
           if (errors != null) {
             return siemResponse.error({ body: errors, statusCode: 500 });
           } else {

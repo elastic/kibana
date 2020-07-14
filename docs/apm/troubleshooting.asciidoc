@@ -10,6 +10,11 @@ your proposed changes at https://github.com/elastic/kibana.
 
 Also, check out the https://discuss.elastic.co/c/apm[APM discussion forum].
 
+* <<no-apm-data-found>>
+* <<troubleshooting-too-many-transactions>>
+* <<troubleshooting-unknown-route>>
+* <<troubleshooting-fields-unsearchable>>
+
 [float]
 [[no-apm-data-found]]
 === No APM data found
@@ -58,6 +63,66 @@ Navigate to *APM* > *Settings* > *Indices*, and change all `apm_oss.*Pattern` va
 include the new index pattern. For example: `customIndexName-*`.
 
 [float]
+[[troubleshooting-too-many-transactions]]
+=== Too many unique transaction names
+
+Transaction names are defined in each APM Agent; when an Agent supports a framework,
+it includes logic for naming the transactions that the framework creates.
+In some cases though, like when using an Agent's API to create custom transactions,
+it is up to the user to define a pattern for transaction naming.
+When transactions are named incorrectly, each unique URL can be associated with a unique transaction group—causing
+an explosion in the number of transaction groups per service, and leading to inaccuracies in the APM app.
+
+To fix a large number of unique transaction names,
+you need to change how you are using the Agent API to name your transactions.
+To do this, ensure you are **not** naming based on parameters that can change.
+For example, user ids, product ids, order numbers, query parameters, etc.,
+should be stripped away, and commonality should be found between your unique URLs.
+
+Let's look at an example from the RUM Agent documentation. Here are a few URLs you might find on Elastic.co:
+
+[source,yml]
+----
+// Blog Posts
+https://www.elastic.co/blog/reflections-on-three-years-in-the-elastic-public-sector
+https://www.elastic.co/blog/say-heya-to-the-elastic-search-awards
+https://www.elastic.co/blog/and-the-winner-of-the-elasticon-2018-training-subscription-drawing-is
+
+// Documentation
+https://www.elastic.co/guide/en/elastic-stack/current/index.html
+https://www.elastic.co/guide/en/apm/get-started/current/index.html
+https://www.elastic.co/guide/en/infrastructure/guide/current/index.html
+----
+
+These URLs, like most, include unique names.
+If we named transactions based on each unique URL, we'd end up with the problem described above—a
+very large number of different transaction names.
+Instead, we should strip away the unique information and group our transactions based on common information.
+In this case, that means naming all blog transactions, `/blog`, and all documentation transactions, `/guide`.
+
+If you feel like you'd be losing valuable information by following this naming convention, don't fret!
+You can always add additional metadata to your transactions using {apm-overview-ref-v}/metadata.html#labels-fields[labels] (indexed) or
+{apm-overview-ref-v}/metadata.html#custom-fields[custom context] (non-indexed).
+
+After ensuring you've correctly named your transactions,
+you might still see an error in the APM app related to too many transaction names.
+If this is the case, you can increase the default number of transaction groups displayed in the APM app by configuring
+<<apm-settings-kb,`xpack.apm.ui.transactionGroupBucketSize`>>.
+
+**More information**
+
+While this can happen with any APM Agent, it typically occurs with the RUM Agent.
+For more information on how to correctly set `transaction.name` in the RUM Agent,
+see {apm-rum-ref}/custom-transaction-name.html[custom initial page load transaction names].
+
+The RUM Agent can also set the `transaction.name` when observing for transaction events.
+See {apm-rum-ref}/agent-api.html#observe[`apm.observe()`] for more information.
+
+If your problem is occurring in a different Agent, the tips above still apply.
+See the relevant {apm-agents-ref}[Agent API documentation] to adjust how you're naming your transactions.
+
+[float]
+[[troubleshooting-unknown-route]]
 === Unknown route
 
 The {apm-app-ref}/transactions.html[transaction overview] will only display helpful information
@@ -78,6 +143,7 @@ Specifically, view the Agent's supported technologies page.
 You can also use the Agent's public API to manually set a name for the transaction.
 
 [float]
+[[troubleshooting-fields-unsearchable]]
 === Fields are not searchable
 
 In Elasticsearch, index templates are used to define settings and mappings that determine how fields should be analyzed.

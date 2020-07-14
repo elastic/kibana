@@ -18,14 +18,14 @@ export const getTimeTicksTZ = ({ domain, totalTicks, width }: Params) =>
     .domain(domain)
     .range([0, width])
     .ticks(totalTicks)
-    .map(x => {
+    .map((x) => {
       const time = x.getTime();
       return new Date(time + getTimezoneOffsetInMs(time));
     });
 
 export const getDomainTZ = (min: number, max: number): [number, number] => {
   const [xMinZone, xMaxZone] = [min, max].map(
-    time => time - getTimezoneOffsetInMs(time)
+    (time) => time - getTimezoneOffsetInMs(time)
   );
   return [xMinZone, xMaxZone];
 };

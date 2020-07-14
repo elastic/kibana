@@ -39,10 +39,7 @@ export default function optInTest({ getService }: FtrProviderContext) {
         }
       }
 
-      await supertest
-        .put('/api/telemetry/v2/userHasSeenNotice')
-        .set('kbn-xsrf', 'xxx')
-        .expect(200);
+      await supertest.put('/api/telemetry/v2/userHasSeenNotice').set('kbn-xsrf', 'xxx').expect(200);
 
       const {
         _source: { telemetry },

@@ -19,16 +19,16 @@
 
 var forceRoot = require('./force');
 
-describe('forceRoot', function() {
-  it('with flag', function() {
+describe('forceRoot', function () {
+  it('with flag', function () {
     expect(forceRoot(['--allow-root'])).toBeTruthy();
   });
 
-  it('without flag', function() {
+  it('without flag', function () {
     expect(forceRoot(['--foo'])).toBeFalsy();
   });
 
-  test('remove argument', function() {
+  test('remove argument', function () {
     var args = ['--allow-root', 'foo'];
     forceRoot(args);
     expect(args.includes('--allow-root')).toBeFalsy();

@@ -18,7 +18,7 @@
  */
 
 import { SavedObject } from '../../../plugins/saved_objects/public';
-import { ISearchSource, AggConfigOptions } from '../../../plugins/data/public';
+import { AggConfigOptions, SearchSourceFields } from '../../../plugins/data/public';
 import { SerializedVis, Vis, VisParams } from './vis';
 
 export { Vis, SerializedVis, VisParams };
@@ -35,6 +35,7 @@ export type VisualizationControllerConstructor = new (
 ) => VisualizationController;
 
 export interface SavedVisState {
+  title: string;
   type: string;
   params: VisParams;
   aggs: AggConfigOptions[];
@@ -45,7 +46,7 @@ export interface ISavedVis {
   title: string;
   description?: string;
   visState: SavedVisState;
-  searchSource?: ISearchSource;
+  searchSourceFields?: SearchSourceFields;
   uiStateJSON?: string;
   savedSearchRefName?: string;
   savedSearchId?: string;

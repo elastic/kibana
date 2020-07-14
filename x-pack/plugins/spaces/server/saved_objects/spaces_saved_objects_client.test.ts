@@ -9,6 +9,7 @@ import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
 import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { SavedObjectTypeRegistry } from 'src/core/server';
+import { SpacesClient } from '../lib/spaces_client';
 
 const typeRegistry = new SavedObjectTypeRegistry();
 typeRegistry.registerType({
@@ -48,6 +49,7 @@ const createMockResponse = () => ({
   timeFieldName: '@timestamp',
   notExpandable: true,
   references: [],
+  score: 0,
 });
 
 const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
@@ -55,7 +57,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
 [
   { id: DEFAULT_SPACE_ID, expectedNamespace: undefined },
   { id: 'space_1', expectedNamespace: 'space_1' },
-].forEach(currentSpace => {
+].forEach((currentSpace) => {
   describe(`${currentSpace.id} space`, () => {
     const createSpacesSavedObjectsClient = async () => {
       const request = createMockRequest();
@@ -68,7 +70,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         spacesService,
         typeRegistry,
       });
-      return { client, baseClient };
+      return { client, baseClient, spacesService };
     };
 
     describe('#get', () => {
@@ -127,18 +129,10 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
     });
 
     describe('#find', () => {
-      test(`throws error if options.namespace is specified`, async () => {
-        const { client } = await createSpacesSavedObjectsClient();
-
-        await expect(client.find({ type: 'foo', namespace: 'bar' })).rejects.toThrow(
-          ERROR_NAMESPACE_SPECIFIED
-        );
-      });
-
       test(`passes options.type to baseClient if valid singular type specified`, async () => {
         const { client, baseClient } = await createSpacesSavedObjectsClient();
         const expectedReturnValue = {
-          saved_objects: [createMockResponse()],
+          saved_objects: [createMockResponse()].map((obj) => ({ ...obj, score: 1 })),
           total: 1,
           per_page: 0,
           page: 0,
@@ -151,14 +145,14 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         expect(actualReturnValue).toBe(expectedReturnValue);
         expect(baseClient.find).toHaveBeenCalledWith({
           type: ['foo'],
-          namespace: currentSpace.expectedNamespace,
+          namespaces: [currentSpace.expectedNamespace ?? 'default'],
         });
       });
 
       test(`supplements options with the current namespace`, async () => {
         const { client, baseClient } = await createSpacesSavedObjectsClient();
         const expectedReturnValue = {
-          saved_objects: [createMockResponse()],
+          saved_objects: [createMockResponse()].map((obj) => ({ ...obj, score: 1 })),
           total: 1,
           per_page: 0,
           page: 0,
@@ -171,8 +165,101 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         expect(actualReturnValue).toBe(expectedReturnValue);
         expect(baseClient.find).toHaveBeenCalledWith({
           type: ['foo', 'bar'],
-          namespace: currentSpace.expectedNamespace,
+          namespaces: [currentSpace.expectedNamespace ?? 'default'],
         });
+      });
+
+      test(`passes options.namespaces along`, async () => {
+        const { client, baseClient, spacesService } = await createSpacesSavedObjectsClient();
+        const expectedReturnValue = {
+          saved_objects: [createMockResponse()],
+          total: 1,
+          per_page: 0,
+          page: 0,
+        };
+        baseClient.find.mockReturnValue(Promise.resolve(expectedReturnValue));
+
+        const spacesClient = (await spacesService.scopedClient(null as any)) as jest.Mocked<
+          SpacesClient
+        >;
+        spacesClient.getAll.mockImplementation(() =>
+          Promise.resolve([
+            { id: 'ns-1', name: '', disabledFeatures: [] },
+            { id: 'ns-2', name: '', disabledFeatures: [] },
+          ])
+        );
+
+        const options = Object.freeze({ type: ['foo', 'bar'], namespaces: ['ns-1', 'ns-2'] });
+        const actualReturnValue = await client.find(options);
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.find).toHaveBeenCalledWith({
+          type: ['foo', 'bar'],
+          namespaces: ['ns-1', 'ns-2'],
+        });
+        expect(spacesClient.getAll).toHaveBeenCalledWith('findSavedObjects');
+      });
+
+      test(`filters options.namespaces based on authorization`, async () => {
+        const { client, baseClient, spacesService } = await createSpacesSavedObjectsClient();
+        const expectedReturnValue = {
+          saved_objects: [createMockResponse()],
+          total: 1,
+          per_page: 0,
+          page: 0,
+        };
+        baseClient.find.mockReturnValue(Promise.resolve(expectedReturnValue));
+
+        const spacesClient = (await spacesService.scopedClient(null as any)) as jest.Mocked<
+          SpacesClient
+        >;
+        spacesClient.getAll.mockImplementation(() =>
+          Promise.resolve([
+            { id: 'ns-1', name: '', disabledFeatures: [] },
+            { id: 'ns-2', name: '', disabledFeatures: [] },
+          ])
+        );
+
+        const options = Object.freeze({ type: ['foo', 'bar'], namespaces: ['ns-1', 'ns-3'] });
+        const actualReturnValue = await client.find(options);
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.find).toHaveBeenCalledWith({
+          type: ['foo', 'bar'],
+          namespaces: ['ns-1'],
+        });
+        expect(spacesClient.getAll).toHaveBeenCalledWith('findSavedObjects');
+      });
+
+      test(`translates options.namespace: ['*']`, async () => {
+        const { client, baseClient, spacesService } = await createSpacesSavedObjectsClient();
+        const expectedReturnValue = {
+          saved_objects: [createMockResponse()],
+          total: 1,
+          per_page: 0,
+          page: 0,
+        };
+        baseClient.find.mockReturnValue(Promise.resolve(expectedReturnValue));
+
+        const spacesClient = (await spacesService.scopedClient(null as any)) as jest.Mocked<
+          SpacesClient
+        >;
+        spacesClient.getAll.mockImplementation(() =>
+          Promise.resolve([
+            { id: 'ns-1', name: '', disabledFeatures: [] },
+            { id: 'ns-2', name: '', disabledFeatures: [] },
+          ])
+        );
+
+        const options = Object.freeze({ type: ['foo', 'bar'], namespaces: ['*'] });
+        const actualReturnValue = await client.find(options);
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.find).toHaveBeenCalledWith({
+          type: ['foo', 'bar'],
+          namespaces: ['ns-1', 'ns-2'],
+        });
+        expect(spacesClient.getAll).toHaveBeenCalledWith('findSavedObjects');
       });
     });
 

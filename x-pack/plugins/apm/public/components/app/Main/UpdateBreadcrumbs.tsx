@@ -11,7 +11,7 @@ import { getAPMHref } from '../../shared/Links/apm/APMLink';
 import {
   Breadcrumb,
   ProvideBreadcrumbs,
-  BreadcrumbRoute
+  BreadcrumbRoute,
 } from './ProvideBreadcrumbs';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
@@ -30,10 +30,18 @@ function getTitleFromBreadCrumbs(breadcrumbs: Breadcrumb[]) {
 
 class UpdateBreadcrumbsComponent extends React.Component<Props> {
   public updateHeaderBreadcrumbs() {
-    const breadcrumbs = this.props.breadcrumbs.map(({ value, match }) => ({
-      text: value,
-      href: getAPMHref(match.url, this.props.location.search)
-    }));
+    const breadcrumbs = this.props.breadcrumbs.map(
+      ({ value, match }, index) => {
+        const isLastBreadcrumbItem =
+          index === this.props.breadcrumbs.length - 1;
+        return {
+          text: value,
+          href: isLastBreadcrumbItem
+            ? undefined // makes the breadcrumb item not clickable
+            : getAPMHref(match.url, this.props.location.search),
+        };
+      }
+    );
 
     document.title = getTitleFromBreadCrumbs(this.props.breadcrumbs);
     this.props.core.chrome.setBreadcrumbs(breadcrumbs);

@@ -8,7 +8,7 @@ To integrate with the telemetry services for usage collection of your feature, t
 
 ## Creating and Registering Usage Collector
 
-All you need to provide is a `type` for organizing your fields, and a `fetch` method for returning your usage data. Then you need to make the Telemetry service aware of the collector by registering it.
+All you need to provide is a `type` for organizing your fields, `schema` field to define the expected types of usage fields reported, and a `fetch` method for returning your usage data. Then you need to make the Telemetry service aware of the collector by registering it.
 
 ### New Platform
 
@@ -45,6 +45,12 @@ All you need to provide is a `type` for organizing your fields, and a `fetch` me
     import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
     import { APICluster } from 'kibana/server';
 
+    interface Usage {
+      my_objects: {
+        total: number,
+      },
+    }
+
     export function registerMyPluginUsageCollector(usageCollection?: UsageCollectionSetup): void {
       // usageCollection is an optional dependency, so make sure to return if it is not registered.
       if (!usageCollection) {
@@ -52,8 +58,13 @@ All you need to provide is a `type` for organizing your fields, and a `fetch` me
       }
 
       // create usage collector
-      const myCollector = usageCollection.makeUsageCollector({
-        type: MY_USAGE_TYPE,
+      const myCollector = usageCollection.makeUsageCollector<Usage>({
+        type: 'MY_USAGE_TYPE',
+        schema: {
+          my_objects: {
+            total: 'long',
+          },
+        },
         fetch: async (callCluster: APICluster) => {
 
         // query ES and get some data
@@ -73,7 +84,11 @@ All you need to provide is a `type` for organizing your fields, and a `fetch` me
     }
     ```
 
-Some background: The `callCluster` that gets passed to the `fetch` method is created in a way that's a bit tricky, to support multiple contexts the `fetch` method could be called. Your `fetch` method could get called as a result of an HTTP API request: in this case, the `callCluster` function wraps `callWithRequest`, and the request headers are expected to have read privilege on the entire `.kibana` index. The use case for this is stats pulled from a Kibana Metricbeat module, where the Beat calls Kibana's stats API in Kibana to invoke collection.
+Some background: 
+
+- `MY_USAGE_TYPE` can be any string. It usually matches the plugin name. As a safety mechanism, we double check there are no duplicates at the moment of registering the collector.
+- The `fetch` method needs to support multiple contexts in which it is called. For example, when stats are pulled from a Kibana Metricbeat module, the Beat calls Kibana's stats API to invoke usage collection.
+In this case, the `fetch` method is called as a result of an HTTP API request and `callCluster` wraps `callWithRequest`, where the request headers are expected to have read privilege on the entire `.kibana' index.
 
 Note: there will be many cases where you won't need to use the `callCluster` function that gets passed in to your `fetch` method at all. Your feature might have an accumulating value in server memory, or read something from the OS, or use other clients like a custom SavedObjects client. In that case it's up to the plugin to initialize those clients like the example below:
 
@@ -98,10 +113,8 @@ class Plugin {
 ```ts
 // server/collectors/register.ts
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { ISavedObjectsRepository } from 'kibana/server';
 
 export function registerMyPluginUsageCollector(
-  getSavedObjectsRepository: () => ISavedObjectsRepository | undefined,
   usageCollection?: UsageCollectionSetup
   ): void {
   // usageCollection is an optional dependency, so make sure to return if it is not registered.
@@ -110,55 +123,50 @@ export function registerMyPluginUsageCollector(
   }
 
   // create usage collector
-  const myCollector = usageCollection.makeUsageCollector({
-    type: MY_USAGE_TYPE,
-    isReady: () => typeof getSavedObjectsRepository() !== 'undefined',
-    fetch: async () => {
-      const savedObjectsRepository = getSavedObjectsRepository()!;
-      // get something from the savedObjects
-
-      return { my_objects };
-    },
-  });
+  const myCollector = usageCollection.makeUsageCollector<Usage>(...)
 
   // register usage collector
   usageCollection.registerCollector(myCollector);
 }
 ```
 
-### Migrating to NP from Legacy Plugins
+## Schema Field
 
-Pass `usageCollection` to the setup NP plugin setup function under plugins. Inside the `setup` function call the `registerCollector` like what you'd do in the NP example above.
+The `schema` field is a proscribed data model assists with detecting changes in usage collector payloads. To define the collector schema add a schema field that specifies every possible field reported when registering the collector. Whenever the `schema` field is set or changed please run `node scripts/telemetry_check.js --fix` to update the stored schema json files.
 
-```js
-// index.js
-export const myPlugin = (kibana: any) => {
-  return new kibana.Plugin({
-    init: async function (server) {
-      const { usageCollection } = server.newPlatform.setup.plugins;
-      const plugins = {
-        usageCollection,
-      };
-      plugin(initializerContext).setup(core, plugins);
-    }
-  });
-}
+### Allowed Schema Types
+
+The `AllowedSchemaTypes` is the list of allowed schema types for the usage fields getting reported:
+
+```
+'keyword', 'text', 'number', 'boolean', 'long', 'date', 'float'
 ```
 
-### Legacy Plugins
+### Example
 
-Typically, a plugin will create the collector object and register it with the Telemetry service from the `init` method of the plugin definition, or a helper module called from `init`.
-
-```js
-// index.js
-export const myPlugin = (kibana: any) => {
-  return new kibana.Plugin({
-    init: async function (server) {
-      const { usageCollection } = server.newPlatform.setup.plugins;
-      registerMyPluginUsageCollector(usageCollection);
-    }
-  });
-}
+```ts
+export const myCollector = makeUsageCollector<Usage>({
+  type: 'my_working_collector',
+  isReady: () => true,
+  fetch() {
+    return {
+      my_greeting: 'hello',
+      some_obj: {
+        total: 123,
+      },
+    };
+  },
+  schema: {
+    my_greeting: {
+      type: 'keyword',
+    },
+    some_obj: {
+      total: {
+        type: 'number',
+      },
+    },
+  },
+});
 ```
 
 ## Update the telemetry payload and telemetry cluster field mappings
@@ -238,15 +246,6 @@ To track a user interaction, use the `reportUiStats` method exposed by the plugi
       }
     }
     ```
-
-Alternatively, in the Legacy world you can still import the `createUiStatsReporter` helper function from UI Metric app:
-
-```js
-import { createUiStatsReporter, METRIC_TYPE } from 'relative/path/to/src/legacy/core_plugins/ui_metric/public';
-const trackMetric = createUiStatsReporter(`<AppName>`);
-trackMetric(METRIC_TYPE.CLICK, `<EventName>`);
-trackMetric('click', `<EventName>`);
-```
 
 Metric Types:
 

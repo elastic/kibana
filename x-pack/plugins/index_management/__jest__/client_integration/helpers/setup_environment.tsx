@@ -3,10 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import React from 'react';
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
+import { merge } from 'lodash';
 
 import {
   notificationServiceMock,
@@ -32,7 +34,11 @@ export const services = {
 services.uiMetricService.setup({ reportUiStats() {} } as any);
 setExtensionsService(services.extensionsService);
 setUiMetricService(services.uiMetricService);
-const appDependencies = { services, core: {}, plugins: {} } as any;
+const appDependencies = {
+  services,
+  core: { getUrlForApp: () => {} },
+  plugins: {},
+} as any;
 
 export const setupEnvironment = () => {
   // Mock initialization of services
@@ -50,8 +56,13 @@ export const setupEnvironment = () => {
   };
 };
 
-export const WithAppDependencies = (Comp: any) => (props: any) => (
-  <AppContextProvider value={appDependencies}>
-    <Comp {...props} />
-  </AppContextProvider>
-);
+export const WithAppDependencies = (Comp: any, overridingDependencies: any = {}) => (
+  props: any
+) => {
+  const mergedDependencies = merge({}, appDependencies, overridingDependencies);
+  return (
+    <AppContextProvider value={mergedDependencies}>
+      <Comp {...props} />
+    </AppContextProvider>
+  );
+};

@@ -29,6 +29,7 @@ import {
   IIndexPattern,
   IndexPatternsContract,
   ISearchSource,
+  SearchSourceFields,
 } from '../../data/public';
 
 export interface SavedObject {
@@ -52,6 +53,7 @@ export interface SavedObject {
   migrationVersion?: Record<string, any>;
   save: (saveOptions: SavedObjectSaveOpts) => Promise<string>;
   searchSource?: ISearchSource;
+  searchSourceFields?: SearchSourceFields;
   showInRecentlyAccessed: boolean;
   title: string;
   unresolvedIndexPatternReference?: SavedObjectReference;
@@ -61,6 +63,7 @@ export interface SavedObjectSaveOpts {
   confirmOverwrite?: boolean;
   isTitleDuplicateConfirmed?: boolean;
   onTitleDuplicate?: () => void;
+  returnToOrigin?: boolean;
 }
 
 export interface SavedObjectCreationOpts {

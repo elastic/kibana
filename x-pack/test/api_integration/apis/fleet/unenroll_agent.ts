@@ -10,7 +10,7 @@ import uuid from 'uuid';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { setupIngest } from './agents/services';
 
-export default function(providerContext: FtrProviderContext) {
+export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
@@ -67,7 +67,7 @@ export default function(providerContext: FtrProviderContext) {
         .post(`/api/ingest_manager/fleet/agents/agent1/unenroll`)
         .set('kbn-xsrf', 'xxx')
         .send({
-          ids: ['agent1'],
+          force: true,
         })
         .expect(200);
 
@@ -80,7 +80,7 @@ export default function(providerContext: FtrProviderContext) {
         .post(`/api/ingest_manager/fleet/agents/agent1/unenroll`)
         .set('kbn-xsrf', 'xxx')
         .send({
-          ids: ['agent1'],
+          force: true,
         })
         .expect(200);
 

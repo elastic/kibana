@@ -6,7 +6,32 @@
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isRight } from 'fp-ts/lib/Either';
-import { HttpFetchQuery, HttpSetup } from '../../../../../../target/types/core/public';
+import { HttpFetchQuery, HttpSetup } from 'src/core/public';
+import * as t from 'io-ts';
+import { isObject } from 'lodash';
+
+// TODO: Copied from https://github.com/elastic/kibana/blob/master/x-pack/plugins/security_solution/common/format_errors.ts
+// We should figure out a better way to share this
+export const formatErrors = (errors: t.Errors): string[] => {
+  return errors.map((error) => {
+    if (error.message != null) {
+      return error.message;
+    } else {
+      const keyContext = error.context
+        .filter(
+          (entry) => entry.key != null && !Number.isInteger(+entry.key) && entry.key.trim() !== ''
+        )
+        .map((entry) => entry.key)
+        .join('.');
+
+      const nameContext = error.context.find((entry) => entry.type?.name?.length > 0);
+      const suppliedValue =
+        keyContext !== '' ? keyContext : nameContext != null ? nameContext.type.name : '';
+      const value = isObject(error.value) ? JSON.stringify(error.value) : error.value;
+      return `Invalid value "${value}" supplied to "${suppliedValue}"`;
+    }
+  });
+};
 
 class ApiService {
   private static instance: ApiService;
@@ -40,7 +65,10 @@ class ApiService {
       } else {
         // eslint-disable-next-line no-console
         console.error(
-          `API ${apiUrl} is not returning expected response, ${PathReporter.report(decoded)}`
+          `API ${apiUrl} is not returning expected response, ${formatErrors(
+            decoded.left
+          )} for response`,
+          response
         );
       }
     }

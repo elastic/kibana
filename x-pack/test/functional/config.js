@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable import/no-default-export */
-
 import { resolve } from 'path';
 
 import { services } from './services';
@@ -13,7 +11,7 @@ import { pageObjects } from './page_objects';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
-export default async function({ readConfigFile }) {
+export default async function ({ readConfigFile }) {
   const kibanaCommonConfig = await readConfigFile(
     require.resolve('../../../test/common/config.js')
   );
@@ -38,7 +36,7 @@ export default async function({ readConfigFile }) {
       resolve(__dirname, './apps/logstash'),
       resolve(__dirname, './apps/grok_debugger'),
       resolve(__dirname, './apps/infra'),
-      resolve(__dirname, './apps/machine_learning'),
+      resolve(__dirname, './apps/ml'),
       resolve(__dirname, './apps/rollup_job'),
       resolve(__dirname, './apps/maps'),
       resolve(__dirname, './apps/status_page'),
@@ -113,8 +111,7 @@ export default async function({ readConfigFile }) {
         pathname: '/app/monitoring',
       },
       logstashPipelines: {
-        pathname: '/app/kibana',
-        hash: '/management/logstash/pipelines',
+        pathname: '/app/management/ingest/pipelines',
       },
       maps: {
         pathname: '/app/maps',
@@ -123,12 +120,12 @@ export default async function({ readConfigFile }) {
         pathname: '/app/graph',
       },
       grokDebugger: {
-        pathname: '/app/kibana',
-        hash: '/dev_tools/grokdebugger',
+        pathname: '/app/dev_tools',
+        hash: '/grokdebugger',
       },
       searchProfiler: {
-        pathname: '/app/kibana',
-        hash: '/dev_tools/searchprofiler',
+        pathname: '/app/dev_tools',
+        hash: '/searchprofiler',
       },
       spaceSelector: {
         pathname: '/',
@@ -146,66 +143,50 @@ export default async function({ readConfigFile }) {
       uptime: {
         pathname: '/app/uptime',
       },
-      apm: {
-        pathname: '/app/apm',
-      },
       ml: {
         pathname: '/app/ml',
       },
       roleMappings: {
-        pathname: '/app/kibana',
-        hash: '/management/security/role_mappings',
+        pathname: '/app/management/security/role_mappings',
       },
       rollupJob: {
-        pathname: '/app/kibana',
-        hash: '/management/elasticsearch/rollup_jobs/',
+        pathname: '/app/management/data/rollup_jobs',
       },
       apiKeys: {
-        pathname: '/app/kibana',
-        hash: '/management/security/api_keys/',
+        pathname: '/app/management/security/api_keys',
       },
       licenseManagement: {
-        pathname: '/app/kibana',
-        hash: '/management/elasticsearch/license_management',
+        pathname: '/app/management/stack/license_management',
       },
       indexManagement: {
-        pathname: '/app/kibana',
-        hash: '/management/elasticsearch/index_management',
+        pathname: '/app/management/data/index_management',
       },
       indexLifecycleManagement: {
-        pathname: '/app/kibana',
-        hash: '/management/elasticsearch/index_lifecycle_management',
+        pathname: '/app/management/data/index_lifecycle_management',
       },
       ingestPipelines: {
-        pathname: '/app/kibana',
-        hash: '/management/elasticsearch/ingest_pipelines',
+        pathname: '/app/management/ingest/ingest_pipelines',
       },
       snapshotRestore: {
-        pathname: '/app/kibana',
-        hash: '/management/elasticsearch/snapshot_restore',
-      },
-      crossClusterReplication: {
-        pathname: '/app/kibana',
-        hash: '/management/elasticsearch/cross_cluster_replication',
+        pathname: '/app/management/data/snapshot_restore',
       },
       remoteClusters: {
-        pathname: '/app/kibana',
-        hash: '/management/elasticsearch/remote_clusters',
+        pathname: '/app/management/data/remote_clusters',
+      },
+      crossClusterReplication: {
+        pathname: '/app/management/data/cross_cluster_replication',
       },
       apm: {
         pathname: '/app/apm',
       },
       watcher: {
-        pathname: '/app/kibana',
-        hash: '/management/elasticsearch/watcher/watches/',
+        pathname: '/app/management/insightsAndAlerting/watcher/watches',
       },
       transform: {
-        pathname: '/app/kibana/',
-        hash: '/management/elasticsearch/transform',
+        pathname: '/app/management/data/transform',
       },
       reporting: {
-        pathname: '/app/kibana/',
-        hash: '/management/kibana/reporting',
+        pathname: '/app/management/insightsAndAlerting/reporting',
       },
     },
 
@@ -240,6 +221,72 @@ export default async function({ readConfigFile }) {
         },
 
         global_discover_read: {
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        global_visualize_read: {
+          kibana: [
+            {
+              feature: {
+                visualize: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        global_visualize_all: {
+          kibana: [
+            {
+              feature: {
+                visualize: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        global_maps_all: {
+          kibana: [
+            {
+              feature: {
+                maps: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        geoshape_data_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['geo_shapes*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+
+        global_devtools_read: {
+          kibana: [
+            {
+              feature: {
+                dev_tools: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        global_ccr_role: {
+          elasticsearch: {
+            cluster: ['manage', 'manage_ccr'],
+          },
           kibana: [
             {
               feature: {

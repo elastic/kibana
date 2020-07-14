@@ -12,10 +12,10 @@ import { registerBuiltInAlertTypes } from './application/components/builtin_aler
 import { hasShowActionsCapability, hasShowAlertsCapability } from './application/lib/capabilities';
 import { ActionTypeModel, AlertTypeModel } from './types';
 import { TypeRegistry } from './application/type_registry';
-import { ManagementStart } from '../../../../src/plugins/management/public';
+import { ManagementStart, ManagementSectionId } from '../../../../src/plugins/management/public';
 import { boot } from './application/boot';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
-import { PluginStartContract as AlertingStart } from '../../alerting/public';
+import { PluginStartContract as AlertingStart } from '../../alerts/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
@@ -32,7 +32,7 @@ interface PluginsStart {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
   management: ManagementStart;
-  alerting?: AlertingStart;
+  alerts?: AlertingStart;
   navigateToApp: CoreStart['application']['navigateToApp'];
 }
 
@@ -73,17 +73,17 @@ export class Plugin
 
     // Don't register routes when user doesn't have access to the application
     if (canShowActions || canShowAlerts) {
-      plugins.management.sections.getSection('kibana')!.registerApp({
+      plugins.management.sections.getSection(ManagementSectionId.InsightsAndAlerting).registerApp({
         id: 'triggersActions',
         title: i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
           defaultMessage: 'Alerts and Actions',
         }),
-        order: 7,
-        mount: params => {
+        order: 0,
+        mount: (params) => {
           boot({
             dataPlugin: plugins.data,
             charts: plugins.charts,
-            alerting: plugins.alerting,
+            alerts: plugins.alerts,
             element: params.element,
             toastNotifications: core.notifications.toasts,
             http: core.http,
@@ -95,6 +95,7 @@ export class Plugin
             capabilities: core.application.capabilities,
             navigateToApp: core.application.navigateToApp,
             setBreadcrumbs: params.setBreadcrumbs,
+            history: params.history,
             actionTypeRegistry: this.actionTypeRegistry,
             alertTypeRegistry: this.alertTypeRegistry,
           });

@@ -4,17 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { LegacyAPICaller, KibanaRequest } from 'kibana/server';
+import { mlLog } from '../../client/log';
 import {
   MlCapabilities,
   adminMlCapabilities,
   MlCapabilitiesResponse,
+  ResolveMlCapabilities,
+  MlCapabilitiesKey,
 } from '../../../common/types/capabilities';
 import { upgradeCheckProvider } from './upgrade';
 import { MlLicense } from '../../../common/license';
+import {
+  InsufficientMLCapabilities,
+  UnknownMLCapabilitiesError,
+  MLPrivilegesUninitialized,
+} from './errors';
 
 export function capabilitiesProvider(
-  callAsCurrentUser: IScopedClusterClient['callAsCurrentUser'],
+  callAsCurrentUser: LegacyAPICaller,
   capabilities: MlCapabilities,
   mlLicense: MlLicense,
   isMlEnabledInSpace: () => Promise<boolean>
@@ -41,9 +49,33 @@ export function capabilitiesProvider(
 }
 
 function disableAdminPrivileges(capabilities: MlCapabilities) {
-  Object.keys(adminMlCapabilities).forEach(k => {
+  Object.keys(adminMlCapabilities).forEach((k) => {
     capabilities[k as keyof MlCapabilities] = false;
   });
   capabilities.canCreateAnnotation = false;
   capabilities.canDeleteAnnotation = false;
+}
+
+export type HasMlCapabilities = (capabilities: MlCapabilitiesKey[]) => Promise<void>;
+
+export function hasMlCapabilitiesProvider(resolveMlCapabilities: ResolveMlCapabilities) {
+  return (request: KibanaRequest): HasMlCapabilities => {
+    let mlCapabilities: MlCapabilities | null = null;
+    return async (capabilities: MlCapabilitiesKey[]) => {
+      try {
+        mlCapabilities = await resolveMlCapabilities(request);
+      } catch (e) {
+        mlLog.error(e);
+        throw new UnknownMLCapabilitiesError(`Unable to perform ML capabilities check ${e}`);
+      }
+
+      if (mlCapabilities === null) {
+        throw new MLPrivilegesUninitialized('ML capabilities have not been initialized');
+      }
+
+      if (capabilities.every((c) => mlCapabilities![c] === true) === false) {
+        throw new InsufficientMLCapabilities('Insufficient privileges to access feature');
+      }
+    };
+  };
 }

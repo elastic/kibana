@@ -46,9 +46,9 @@ describe('Console Proxy Route', () => {
   });
 
   const readStream = (s: Readable) =>
-    new Promise(resolve => {
+    new Promise((resolve) => {
       let v = '';
-      s.on('data', data => {
+      s.on('data', (data) => {
         v += data;
       });
       s.on('end', () => resolve(v));

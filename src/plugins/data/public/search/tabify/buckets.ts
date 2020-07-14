@@ -68,7 +68,7 @@ export class TabifyBuckets {
     const buckets = this.buckets;
 
     if (this.objectMode) {
-      this._keys.forEach(key => {
+      this._keys.forEach((key) => {
         fn(buckets[key], key);
       });
     } else {

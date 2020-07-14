@@ -14,7 +14,7 @@ import {
   TableSuggestion,
   TableChangeType,
 } from '../types';
-import { State, SeriesType, XYState } from './types';
+import { State, SeriesType, XYState, visualizationTypes, LayerConfig } from './types';
 import { getIconForSeries } from './state_helpers';
 
 const columnSortOrder = {
@@ -42,8 +42,8 @@ export function getSuggestions({
     // We reject any datasource suggestions which have a column of an unknown type.
     !table.isMultiRow ||
     table.columns.length <= 1 ||
-    table.columns.every(col => col.operation.dataType !== 'number') ||
-    table.columns.some(col => !columnSortOrder.hasOwnProperty(col.operation.dataType))
+    table.columns.every((col) => col.operation.dataType !== 'number') ||
+    table.columns.some((col) => !columnSortOrder.hasOwnProperty(col.operation.dataType))
   ) {
     return [];
   }
@@ -62,7 +62,7 @@ function getSuggestionForColumns(
   keptLayerIds: string[],
   currentState?: State
 ): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> | undefined {
-  const [buckets, values] = partition(table.columns, col => col.operation.isBucketed);
+  const [buckets, values] = partition(table.columns, (col) => col.operation.isBucketed);
 
   if (buckets.length === 1 || buckets.length === 2) {
     const [x, splitBy] = getBucketMappings(table, currentState);
@@ -95,7 +95,7 @@ function getBucketMappings(table: TableSuggestion, currentState?: State) {
   const currentLayer =
     currentState && currentState.layers.find(({ layerId }) => layerId === table.layerId);
 
-  const buckets = table.columns.filter(col => col.operation.isBucketed);
+  const buckets = table.columns.filter((col) => col.operation.isBucketed);
   // reverse the buckets before prioritization to always use the most inner
   // bucket of the highest-prioritized group as x value (don't use nested
   // buckets as split series)
@@ -180,14 +180,14 @@ function getSuggestionsForLayer({
 
   // handles the simplest cases, acting as a chart switcher
   if (!currentState && changeType === 'unchanged') {
-    return [
-      {
-        ...buildSuggestion(options),
-        title: i18n.translate('xpack.lens.xySuggestions.barChartTitle', {
-          defaultMessage: 'Bar chart',
-        }),
-      },
-    ];
+    // Chart switcher needs to include every chart type
+    return visualizationTypes
+      .map((visType) => ({
+        ...buildSuggestion({ ...options, seriesType: visType.id as SeriesType }),
+        title: visType.label,
+        hide: visType.id !== 'bar_stacked',
+      }))
+      .sort((a, b) => (a.state.preferredSeriesType === 'bar_stacked' ? -1 : 1));
   }
 
   const isSameState = currentState && changeType === 'unchanged';
@@ -248,7 +248,21 @@ function getSuggestionsForLayer({
     );
   }
 
-  return sameStateSuggestions;
+  // Combine all pre-built suggestions with hidden suggestions for remaining chart types
+  return sameStateSuggestions.concat(
+    visualizationTypes
+      .filter((visType) => {
+        return !sameStateSuggestions.find(
+          (suggestion) => suggestion.state.preferredSeriesType === visType.id
+        );
+      })
+      .map((visType) => {
+        return {
+          ...buildSuggestion({ ...options, seriesType: visType.id as SeriesType }),
+          hide: true,
+        };
+      })
+  );
 }
 
 function toggleStackSeriesType(oldSeriesType: SeriesType) {
@@ -317,7 +331,7 @@ function getSuggestionTitle(
   tableLabel: string | undefined
 ) {
   const yTitle = yValues
-    .map(col => col.operation.label)
+    .map((col) => col.operation.label)
     .join(
       i18n.translate('xpack.lens.xySuggestions.yAxixConjunctionSign', {
         defaultMessage: ' & ',
@@ -365,23 +379,30 @@ function buildSuggestion({
   changeType: TableChangeType;
   keptLayerIds: string[];
 }) {
+  const existingLayer: LayerConfig | {} = getExistingLayer(currentState, layerId) || {};
+  const accessors = yValues.map((col) => col.columnId);
   const newLayer = {
-    ...(getExistingLayer(currentState, layerId) || {}),
+    ...existingLayer,
     layerId,
     seriesType,
     xAccessor: xValue.columnId,
     splitAccessor: splitBy?.columnId,
-    accessors: yValues.map(col => col.columnId),
+    accessors,
+    yConfig:
+      'yConfig' in existingLayer && existingLayer.yConfig
+        ? existingLayer.yConfig.filter(({ forAccessor }) => accessors.indexOf(forAccessor) !== -1)
+        : undefined,
   };
 
   const keptLayers = currentState
     ? currentState.layers.filter(
-        layer => layer.layerId !== layerId && keptLayerIds.includes(layer.layerId)
+        (layer) => layer.layerId !== layerId && keptLayerIds.includes(layer.layerId)
       )
     : [];
 
   const state: State = {
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
+    fittingFunction: currentState?.fittingFunction || 'None',
     preferredSeriesType: seriesType,
     layers: [...keptLayers, newLayer],
   };
@@ -411,5 +432,5 @@ function getScore(
 }
 
 function getExistingLayer(currentState: XYState | undefined, layerId: string) {
-  return currentState && currentState.layers.find(layer => layer.layerId === layerId);
+  return currentState && currentState.layers.find((layer) => layer.layerId === layerId);
 }

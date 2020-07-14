@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { CoreStart, IUiSettingsClient, NotificationsStart, SavedObjectsStart } from 'kibana/public';
 
 import { createGetterSetter } from '../../../kibana_utils/public';
 import { DataPublicPluginStart } from '../../../data/public';
-import { IUiSettingsClient, NotificationsStart, SavedObjectsStart } from 'kibana/public';
 import { dataPluginMock } from '../../../data/public/mocks';
 import { coreMock } from '../../../../core/public/mocks';
 
@@ -34,22 +34,24 @@ setNotifications(coreMock.createStart().notifications);
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 setUISettings(coreMock.createStart().uiSettings);
 
+export const [getInjectedMetadata, setInjectedMetadata] = createGetterSetter<
+  CoreStart['injectedMetadata']
+>('InjectedMetadata');
+setInjectedMetadata(coreMock.createStart().injectedMetadata);
+
 export const [getSavedObjects, setSavedObjects] = createGetterSetter<SavedObjectsStart>(
   'SavedObjects'
 );
 setSavedObjects(coreMock.createStart().savedObjects);
 
 export const [getInjectedVars, setInjectedVars] = createGetterSetter<{
-  esShardTimeout: number;
   enableExternalUrls: boolean;
   emsTileLayerId: unknown;
 }>('InjectedVars');
 setInjectedVars({
   emsTileLayerId: {},
   enableExternalUrls: true,
-  esShardTimeout: 10000,
 });
 
-export const getEsShardTimeout = () => getInjectedVars().esShardTimeout;
 export const getEnableExternalUrls = () => getInjectedVars().enableExternalUrls;
 export const getEmsTileLayerId = () => getInjectedVars().emsTileLayerId;

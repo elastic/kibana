@@ -8,13 +8,11 @@ export * from './rest_spec';
 
 export interface IngestManagerConfigType {
   enabled: boolean;
-  epm: {
-    enabled: boolean;
-    registryUrl?: string;
-  };
+  registryUrl?: string;
   fleet: {
     enabled: boolean;
-    defaultOutputHost: string;
+    tlsCheckDisabled: boolean;
+    pollingRequestTimeout: number;
     kibana: {
       host?: string;
       ca_sha256?: string;
@@ -23,6 +21,8 @@ export interface IngestManagerConfigType {
       host?: string;
       ca_sha256?: string;
     };
+    agentConfigRollupRateLimitIntervalMs: number;
+    agentConfigRollupRateLimitRequestPerInterval: number;
   };
 }
 

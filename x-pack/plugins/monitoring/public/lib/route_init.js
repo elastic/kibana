@@ -9,11 +9,11 @@ import { ajaxErrorHandlersProvider } from './ajax_error_handler';
 import { isInSetupMode } from './setup_mode';
 import { getClusterFromClusters } from './get_cluster_from_clusters';
 
-export function routeInitProvider(Private, monitoringClusters, globalState, license, kbnUrl) {
+export function routeInitProvider(Private, monitoringClusters, globalState, license) {
   const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
 
   function isOnPage(hash) {
-    return _.contains(window.location.hash, hash);
+    return _.includes(window.location.hash, hash);
   }
 
   /*
@@ -27,11 +27,12 @@ export function routeInitProvider(Private, monitoringClusters, globalState, lice
     return (
       monitoringClusters(clusterUuid, undefined, codePaths)
         // Set the clusters collection and current cluster in globalState
-        .then(clusters => {
+        .then((clusters) => {
           const inSetupMode = isInSetupMode();
           const cluster = getClusterFromClusters(clusters, globalState);
           if (!cluster && !inSetupMode) {
-            return kbnUrl.redirect('/no-data');
+            window.history.replaceState(null, null, '#/no-data');
+            return Promise.resolve();
           }
 
           if (cluster) {
@@ -39,13 +40,15 @@ export function routeInitProvider(Private, monitoringClusters, globalState, lice
 
             // check if we need to redirect because of license problems
             if (!(isOnPage('license') || isOnPage('home')) && license.isExpired()) {
-              return kbnUrl.redirect('/license');
+              window.history.replaceState(null, null, '#/license');
+              return Promise.resolve();
             }
 
             // check if we need to redirect because of attempt at unsupported multi-cluster monitoring
             const clusterSupported = cluster.isSupported || clusters.length === 1;
             if (!isOnPage('home') && !clusterSupported) {
-              return kbnUrl.redirect('/home');
+              window.history.replaceState(null, null, '#/home');
+              return Promise.resolve();
             }
           }
 

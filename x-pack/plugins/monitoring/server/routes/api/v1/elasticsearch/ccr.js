@@ -205,10 +205,10 @@ export function ccrRoute(server) {
 
         const fullStats = get(response, 'hits.hits').reduce((accum, hit) => {
           const innerHits = get(hit, 'inner_hits.by_shard.hits.hits');
-          const innerHitsSource = innerHits.map(innerHit => get(innerHit, '_source.ccr_stats'));
+          const innerHitsSource = innerHits.map((innerHit) => get(innerHit, '_source.ccr_stats'));
           const grouped = groupBy(
             innerHitsSource,
-            stat => `${stat.follower_index}:${stat.shard_id}`
+            (stat) => `${stat.follower_index}:${stat.shard_id}`
           );
 
           return {
@@ -248,7 +248,7 @@ export function ccrRoute(server) {
             return accum;
           }, []);
 
-          stat.error = (stat.shards.find(shard => shard.error) || {}).error;
+          stat.error = (stat.shards.find((shard) => shard.error) || {}).error;
           stat.opsSynced = stat.shards.reduce((sum, { opsSynced }) => sum + opsSynced, 0);
           stat.syncLagTime = stat.shards.reduce(
             (max, { syncLagTime }) => Math.max(max, syncLagTime),

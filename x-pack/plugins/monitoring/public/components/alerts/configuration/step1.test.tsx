@@ -135,7 +135,7 @@ describe('Step1', () => {
 
       expect(kfetch).toHaveBeenCalledWith({
         method: 'POST',
-        pathname: `/api/action`,
+        pathname: `/api/actions/action`,
         body: JSON.stringify({
           name: 'Email action for Stack Monitoring alerts',
           actionTypeId: ALERT_ACTION_TYPE_EMAIL,
@@ -193,7 +193,7 @@ describe('Step1', () => {
 
       expect(kfetch).toHaveBeenCalledWith({
         method: 'PUT',
-        pathname: `/api/action/${emailActions[0].id}`,
+        pathname: `/api/actions/action/${emailActions[0].id}`,
         body: JSON.stringify({
           name: emailActions[0].name,
           config: omit(data, ['user', 'password']),
@@ -209,8 +209,8 @@ describe('Step1', () => {
         jest.doMock('../../../legacy_shims', () => ({
           Legacy: {
             shims: {
-              kfetch: jest.fn().mockImplementation(arg => {
-                if (arg.pathname === '/api/action/1/_execute') {
+              kfetch: jest.fn().mockImplementation((arg) => {
+                if (arg.pathname === '/api/actions/action/1/_execute') {
                   return { status: 'ok' };
                 }
                 return {};
@@ -223,29 +223,11 @@ describe('Step1', () => {
 
       const component = shallow(<Step1 {...defaultProps} />);
 
-      expect(
-        component
-          .find('EuiButton')
-          .at(1)
-          .prop('isLoading')
-      ).toBe(false);
-      component
-        .find('EuiButton')
-        .at(1)
-        .simulate('click');
-      expect(
-        component
-          .find('EuiButton')
-          .at(1)
-          .prop('isLoading')
-      ).toBe(true);
+      expect(component.find('EuiButton').at(1).prop('isLoading')).toBe(false);
+      component.find('EuiButton').at(1).simulate('click');
+      expect(component.find('EuiButton').at(1).prop('isLoading')).toBe(true);
       await component.update();
-      expect(
-        component
-          .find('EuiButton')
-          .at(1)
-          .prop('isLoading')
-      ).toBe(false);
+      expect(component.find('EuiButton').at(1).prop('isLoading')).toBe(false);
     });
 
     it('should show a successful test', async () => {
@@ -254,7 +236,7 @@ describe('Step1', () => {
           Legacy: {
             shims: {
               kfetch: (arg: any) => {
-                if (arg.pathname === '/api/action/1/_execute') {
+                if (arg.pathname === '/api/actions/action/1/_execute') {
                   return { status: 'ok' };
                 }
                 return {};
@@ -267,10 +249,7 @@ describe('Step1', () => {
 
       const component = shallow(<Step1 {...defaultProps} />);
 
-      component
-        .find('EuiButton')
-        .at(1)
-        .simulate('click');
+      component.find('EuiButton').at(1).simulate('click');
       await component.update();
       expect(component).toMatchSnapshot();
     });
@@ -281,7 +260,7 @@ describe('Step1', () => {
           Legacy: {
             shims: {
               kfetch: (arg: any) => {
-                if (arg.pathname === '/api/action/1/_execute') {
+                if (arg.pathname === '/api/actions/action/1/_execute') {
                   return { message: 'Very detailed error message' };
                 }
                 return {};
@@ -294,10 +273,7 @@ describe('Step1', () => {
 
       const component = shallow(<Step1 {...defaultProps} />);
 
-      component
-        .find('EuiButton')
-        .at(1)
-        .simulate('click');
+      component.find('EuiButton').at(1).simulate('click');
       await component.update();
       expect(component).toMatchSnapshot();
     });
@@ -307,12 +283,7 @@ describe('Step1', () => {
         emailAddress: '',
       };
       const component = shallow(<Step1 {...defaultProps} {...customProps} />);
-      expect(
-        component
-          .find('EuiButton')
-          .at(1)
-          .prop('isDisabled')
-      ).toBe(true);
+      expect(component.find('EuiButton').at(1).prop('isDisabled')).toBe(true);
     });
 
     it('should should a tooltip if there is no email address', () => {
@@ -344,25 +315,17 @@ describe('Step1', () => {
       };
       const component = shallow(<Step1 {...defaultProps} {...customProps} />);
 
-      await component
-        .find('EuiButton')
-        .at(2)
-        .simulate('click');
+      await component.find('EuiButton').at(2).simulate('click');
       await component.update();
 
       expect(kfetch).toHaveBeenCalledWith({
         method: 'DELETE',
-        pathname: `/api/action/${emailActions[0].id}`,
+        pathname: `/api/actions/action/${emailActions[0].id}`,
       });
 
       expect(customProps.setSelectedEmailActionId).toHaveBeenCalledWith('');
       expect(customProps.onActionDone).toHaveBeenCalled();
-      expect(
-        component
-          .find('EuiButton')
-          .at(2)
-          .prop('isLoading')
-      ).toBe(false);
+      expect(component.find('EuiButton').at(2).prop('isLoading')).toBe(false);
     });
   });
 });

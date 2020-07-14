@@ -18,10 +18,7 @@ type Props = TlsProps & boolean;
 
 // Note This is just a mock sha256 value, this doesn't actually generate actually sha 256 val
 export const getSha256 = () => {
-  return crypto
-    .randomBytes(64)
-    .toString('hex')
-    .toUpperCase();
+  return crypto.randomBytes(64).toString('hex').toUpperCase();
 };
 
 export const makeTls = ({ valid = true, commonName = '*.elastic.co', expiry, sha256 }: Props) => {
@@ -39,7 +36,7 @@ export const makeTls = ({ valid = true, commonName = '*.elastic.co', expiry, sha
     server: {
       x509: {
         not_before: '2020-03-01T00:00:00.000Z',
-        not_after: '2020-05-30T12:00:00.000Z',
+        not_after: expiryDate,
         issuer: {
           distinguished_name:
             'CN=DigiCert SHA2 High Assurance Server CA,OU=www.digicert.com,O=DigiCert Inc,C=US',

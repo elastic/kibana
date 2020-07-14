@@ -147,14 +147,14 @@ export class IndexPrivileges extends Component<Props, State> {
       return;
     }
 
-    const patterns = privileges.map(index => index.names.join(','));
+    const patterns = privileges.map((index) => index.names.join(','));
 
     const cachedPatterns = Object.keys(this.state.availableFields);
     const patternsToFetch = _.difference(patterns, cachedPatterns);
 
     const fetchRequests = patternsToFetch.map(this.loadFieldsForPattern);
 
-    Promise.all(fetchRequests).then(response => {
+    Promise.all(fetchRequests).then((response) => {
       this.setState({
         availableFields: {
           ...this.state.availableFields,

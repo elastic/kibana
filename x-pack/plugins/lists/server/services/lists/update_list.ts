@@ -5,7 +5,7 @@
  */
 
 import { CreateDocumentResponse } from 'elasticsearch';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import {
   DescriptionOrUndefined,
@@ -20,7 +20,7 @@ import { getList } from '.';
 
 export interface UpdateListOptions {
   id: Id;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   listIndex: string;
   user: string;
   name: NameOrUndefined;
@@ -51,18 +51,21 @@ export const updateList = async ({
       updated_at: updatedAt,
       updated_by: user,
     };
-    const response: CreateDocumentResponse = await callCluster('update', {
+    const response = await callCluster<CreateDocumentResponse>('update', {
       body: { doc },
       id,
       index: listIndex,
+      refresh: 'wait_for',
     });
     return {
       created_at: list.created_at,
       created_by: list.created_by,
       description: description ?? list.description,
+      deserializer: list.deserializer,
       id: response._id,
       meta,
       name: name ?? list.name,
+      serializer: list.serializer,
       tie_breaker_id: list.tie_breaker_id,
       type: list.type,
       updated_at: updatedAt,

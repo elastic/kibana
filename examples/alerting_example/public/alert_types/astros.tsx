@@ -32,12 +32,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { flatten } from 'lodash';
 import { ALERTING_EXAMPLE_APP_ID, Craft, Operator } from '../../common/constants';
-import { SanitizedAlert } from '../../../../x-pack/plugins/alerting/common';
-import { PluginSetupContract as AlertingSetup } from '../../../../x-pack/plugins/alerting/public';
+import { SanitizedAlert } from '../../../../x-pack/plugins/alerts/common';
+import { PluginSetupContract as AlertingSetup } from '../../../../x-pack/plugins/alerts/public';
 import { AlertTypeModel } from '../../../../x-pack/plugins/triggers_actions_ui/public';
 
-export function registerNavigation(alerting: AlertingSetup) {
-  alerting.registerNavigation(
+export function registerNavigation(alerts: AlertingSetup) {
+  alerts.registerNavigation(
     ALERTING_EXAMPLE_APP_ID,
     'example.people-in-space',
     (alert: SanitizedAlert) => `/astros/${alert.id}`
@@ -51,7 +51,7 @@ interface PeopleinSpaceParamsProps {
 }
 
 function isValueInEnum(enumeratin: Record<string, any>, value: any): boolean {
-  return !!Object.values(enumeratin).find(enumVal => enumVal === value);
+  return !!Object.values(enumeratin).find((enumVal) => enumVal === value);
 }
 
 export function getAlertType(): AlertTypeModel {
@@ -99,6 +99,7 @@ export function getAlertType(): AlertTypeModel {
 
       return validationResult;
     },
+    requiresAppContext: false,
   };
 }
 
@@ -138,7 +139,7 @@ export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParam
 
   const errorsCallout = flatten(
     Object.entries(errors).map(([field, errs]: [string, string[]]) =>
-      errs.map(e => (
+      errs.map((e) => (
         <p>
           <EuiTextColor color="accent">{field}:</EuiTextColor>`: ${errs}`
         </p>
@@ -188,7 +189,7 @@ export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParam
               <EuiSelect
                 compressed
                 value={craftTrigger.craft}
-                onChange={event => {
+                onChange={(event) => {
                   setAlertParams('craft', event.target.value);
                   setCraftTrigger({
                     craft: event.target.value,
@@ -237,7 +238,7 @@ export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParam
                   <EuiSelect
                     compressed
                     value={outerSpaceCapacityTrigger.op}
-                    onChange={event => {
+                    onChange={(event) => {
                       setAlertParams('op', event.target.value);
                       setOuterSpaceCapacity({
                         ...outerSpaceCapacityTrigger,
@@ -257,7 +258,7 @@ export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParam
                   <EuiFieldNumber
                     compressed
                     value={outerSpaceCapacityTrigger.outerSpaceCapacity}
-                    onChange={event => {
+                    onChange={(event) => {
                       setAlertParams('outerSpaceCapacity', event.target.valueAsNumber);
                       setOuterSpaceCapacity({
                         ...outerSpaceCapacityTrigger,

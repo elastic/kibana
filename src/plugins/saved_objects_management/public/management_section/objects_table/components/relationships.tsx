@@ -235,7 +235,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
     ];
 
     const filterTypesMap = new Map(
-      relationships.map(relationship => [
+      relationships.map((relationship) => [
         relationship.type,
         {
           value: relationship.type,

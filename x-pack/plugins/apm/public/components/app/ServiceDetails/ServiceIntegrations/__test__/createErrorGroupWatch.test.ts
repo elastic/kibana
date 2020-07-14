@@ -13,10 +13,10 @@ import { esResponse } from './esResponse';
 import { HttpSetup } from 'kibana/public';
 
 // disable html escaping since this is also disabled in watcher\s mustache implementation
-mustache.escape = value => value;
+mustache.escape = (value) => value;
 
 jest.mock('../../../../../services/rest/callApi', () => ({
-  callApi: () => Promise.resolve(null)
+  callApi: () => Promise.resolve(null),
 }));
 
 describe('createErrorGroupWatch', () => {
@@ -34,20 +34,20 @@ describe('createErrorGroupWatch', () => {
       emails: ['my@email.dk', 'mySecond@email.dk'],
       schedule: {
         daily: {
-          at: '08:00'
-        }
+          at: '08:00',
+        },
       },
       serviceName: 'opbeans-node',
       slackUrl: 'https://hooks.slack.com/services/slackid1/slackid2/slackid3',
       threshold: 10,
       timeRange: { value: 24, unit: 'h' },
-      apmIndexPatternTitle: 'myIndexPattern'
+      apmIndexPatternTitle: 'myIndexPattern',
     });
 
     const watchBody = createWatchSpy.mock.calls[0][0].watch;
     const templateCtx = {
       payload: esResponse,
-      metadata: watchBody.metadata
+      metadata: watchBody.metadata,
     };
 
     tmpl = renderMustache(createWatchSpy.mock.calls[0][0].watch, templateCtx);
@@ -100,17 +100,17 @@ function renderMustache(
   if (isString(input)) {
     return mustache.render(input, {
       ctx,
-      join: () => (text: string, render: any) => render(`{{${text}}}`, { ctx })
+      join: () => (text: string, render: any) => render(`{{${text}}}`, { ctx }),
     });
   }
 
   if (isArray(input)) {
-    return input.map(itemValue => renderMustache(itemValue, ctx));
+    return input.map((itemValue) => renderMustache(itemValue, ctx));
   }
 
   if (isObject(input)) {
     return Object.keys(input).reduce((acc, key) => {
-      const value = input[key];
+      const value = (input as any)[key];
 
       return { ...acc, [key]: renderMustache(value, ctx) };
     }, {});

@@ -10,3 +10,4 @@ export * from './datafeed';
 export * from './datafeed_stats';
 export * from './combined_job';
 export * from './summary_job';
+export * from './model_snapshot';

@@ -30,6 +30,7 @@ import {
   EuiTab,
   EuiFlexItem,
   EuiFlexGrid,
+  EuiFlexGroup,
   EuiSpacer,
   EuiTitle,
   EuiPageBody,
@@ -75,10 +76,10 @@ class TutorialDirectoryUi extends React.Component {
         }),
       },
       {
-        id: 'siem',
+        id: 'security',
         name: this.props.intl.formatMessage({
-          id: 'home.tutorial.tabs.siemTitle',
-          defaultMessage: 'SIEM',
+          id: 'home.tutorial.tabs.securitySolutionTitle',
+          defaultMessage: 'Security',
         }),
       },
       {
@@ -93,7 +94,7 @@ class TutorialDirectoryUi extends React.Component {
     let openTab = ALL_TAB_ID;
     if (
       props.openTab &&
-      this.tabs.some(tab => {
+      this.tabs.some((tab) => {
         return tab.id === props.openTab;
       })
     ) {
@@ -102,6 +103,7 @@ class TutorialDirectoryUi extends React.Component {
     this.state = {
       selectedTabId: openTab,
       tutorialCards: [],
+      notices: getServices().tutorialService.getDirectoryNotices(),
     };
   }
 
@@ -115,7 +117,7 @@ class TutorialDirectoryUi extends React.Component {
     getServices().chrome.setBreadcrumbs([
       {
         text: homeTitle,
-        href: '#/home',
+        href: '#/',
       },
       { text: addDataTitle },
     ]);
@@ -126,7 +128,7 @@ class TutorialDirectoryUi extends React.Component {
       return;
     }
 
-    let tutorialCards = tutorialConfigs.map(tutorialConfig => {
+    let tutorialCards = tutorialConfigs.map((tutorialConfig) => {
       // add base path to SVG based icons
       let icon = tutorialConfig.euiIconType;
       if (icon && icon.includes('/')) {
@@ -138,7 +140,7 @@ class TutorialDirectoryUi extends React.Component {
         icon: icon,
         name: tutorialConfig.name,
         description: tutorialConfig.shortDescription,
-        url: this.props.addBasePath(`#/home/tutorial/${tutorialConfig.id}`),
+        url: this.props.addBasePath(`#/tutorial/${tutorialConfig.id}`),
         elasticCloud: tutorialConfig.elasticCloud,
         // Beta label is skipped on the tutorial overview page for now. Too many beta labels.
         //isBeta: tutorialConfig.isBeta,
@@ -155,13 +157,13 @@ class TutorialDirectoryUi extends React.Component {
         id: 'home.tutorial.card.sampleDataDescription',
         defaultMessage: 'Get started exploring Kibana with these "one click" data sets.',
       }),
-      url: this.props.addBasePath('#/home/tutorial_directory/sampleData'),
+      url: this.props.addBasePath('#/tutorial_directory/sampleData'),
       elasticCloud: true,
       onClick: this.onSelectedTabChanged.bind(null, SAMPLE_DATA_TAB_ID),
     });
 
     if (this.props.isCloudEnabled) {
-      tutorialCards = tutorialCards.filter(tutorial => {
+      tutorialCards = tutorialCards.filter((tutorial) => {
         return _.has(tutorial, 'elasticCloud');
       });
     }
@@ -176,7 +178,7 @@ class TutorialDirectoryUi extends React.Component {
     });
   }
 
-  onSelectedTabChanged = id => {
+  onSelectedTabChanged = (id) => {
     this.setState({
       selectedTabId: id,
     });
@@ -202,13 +204,13 @@ class TutorialDirectoryUi extends React.Component {
     return (
       <EuiFlexGrid columns={4}>
         {this.state.tutorialCards
-          .filter(tutorial => {
+          .filter((tutorial) => {
             return (
               this.state.selectedTabId === ALL_TAB_ID ||
               this.state.selectedTabId === tutorial.category
             );
           })
-          .map(tutorial => {
+          .map((tutorial) => {
             return (
               <EuiFlexItem key={tutorial.name}>
                 <Synopsis
@@ -227,18 +229,62 @@ class TutorialDirectoryUi extends React.Component {
     );
   };
 
+  renderNotices = () => {
+    const notices = getServices().tutorialService.getDirectoryNotices();
+    return notices.length ? (
+      <EuiFlexGroup direction="column" gutterSize="none">
+        {notices.map((DirectoryNotice, index) => (
+          <EuiFlexItem key={index}>
+            <DirectoryNotice />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    ) : null;
+  };
+
+  renderHeaderLinks = () => {
+    const headerLinks = getServices().tutorialService.getDirectoryHeaderLinks();
+    return headerLinks.length ? (
+      <EuiFlexGroup gutterSize="m" alignItems="center">
+        {headerLinks.map((HeaderLink, index) => (
+          <EuiFlexItem key={index}>
+            <HeaderLink />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    ) : null;
+  };
+
+  renderHeader = () => {
+    const notices = this.renderNotices();
+    const headerLinks = this.renderHeaderLinks();
+
+    return (
+      <>
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem>
+            <EuiTitle size="l">
+              <h1>
+                <FormattedMessage
+                  id="home.tutorial.addDataToKibanaTitle"
+                  defaultMessage="Add data"
+                />
+              </h1>
+            </EuiTitle>
+          </EuiFlexItem>
+          {headerLinks ? <EuiFlexItem grow={false}>{headerLinks}</EuiFlexItem> : null}
+        </EuiFlexGroup>
+        {notices}
+      </>
+    );
+  };
+
   render() {
     return (
       <EuiPage restrictWidth={1200}>
         <EuiPageBody>
-          <EuiTitle size="l">
-            <h1>
-              <FormattedMessage id="home.tutorial.addDataToKibanaTitle" defaultMessage="Add data" />
-            </h1>
-          </EuiTitle>
-
+          {this.renderHeader()}
           <EuiSpacer size="m" />
-
           <EuiTabs>{this.renderTabs()}</EuiTabs>
           <EuiSpacer />
           {this.renderTabContent()}

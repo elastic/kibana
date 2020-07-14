@@ -10,10 +10,10 @@ import {
   EuiTitle,
   EuiHorizontalRule,
   EuiFlexGroup,
-  EuiFlexItem
+  EuiFlexItem,
 } from '@elastic/eui';
-import _ from 'lodash';
 import React, { useMemo } from 'react';
+import { EuiFlexGrid } from '@elastic/eui';
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { useTransactionDistribution } from '../../../hooks/useTransactionDistribution';
 import { useWaterfall } from '../../../hooks/useWaterfall';
@@ -30,13 +30,14 @@ import { useTrackPageview } from '../../../../../observability/public';
 import { PROJECTION } from '../../../../common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { HeightRetainer } from '../../shared/HeightRetainer';
+import { ErroneousTransactionsRateChart } from '../../shared/charts/ErroneousTransactionsRateChart';
 
 export function TransactionDetails() {
   const location = useLocation();
   const { urlParams } = useUrlParams();
   const {
     data: distributionData,
-    status: distributionStatus
+    status: distributionStatus,
   } = useTransactionDistribution(urlParams);
 
   const { data: transactionChartsData } = useTransactionCharts();
@@ -55,15 +56,15 @@ export function TransactionDetails() {
       params: {
         transactionName,
         transactionType,
-        serviceName
-      }
+        serviceName,
+      },
     };
     return config;
   }, [transactionName, transactionType, serviceName]);
 
-  const bucketIndex = distributionData.buckets.findIndex(bucket =>
+  const bucketIndex = distributionData.buckets.findIndex((bucket) =>
     bucket.samples.some(
-      sample =>
+      (sample) =>
         sample.transactionId === urlParams.transactionId &&
         sample.traceId === urlParams.traceId
     )
@@ -85,12 +86,18 @@ export function TransactionDetails() {
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
           <ChartsSyncContextProvider>
-            <TransactionBreakdown />
+            <EuiFlexGrid columns={2} gutterSize="s">
+              <EuiFlexItem>
+                <TransactionBreakdown />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <ErroneousTransactionsRateChart />
+              </EuiFlexItem>
+            </EuiFlexGrid>
 
             <EuiSpacer size="s" />
 
             <TransactionCharts
-              hasMLJob={false}
               charts={transactionChartsData}
               urlParams={urlParams}
               location={location}

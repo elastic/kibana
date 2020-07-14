@@ -6,19 +6,20 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { indices } from '../../../../../../src/plugins/es_ui_shared/public';
 
-const isEmpty = value => {
+import { indices } from '../../shared_imports';
+
+const isEmpty = (value) => {
   return !value || !value.trim().length;
 };
 
-const hasSpaces = value => (typeof value === 'string' ? value.includes(' ') : false);
+const hasSpaces = (value) => (typeof value === 'string' ? value.includes(' ') : false);
 
-const beginsWithPeriod = value => {
+const beginsWithPeriod = (value) => {
   return value[0] === '.';
 };
 
-const findIllegalCharacters = value => {
+const findIllegalCharacters = (value) => {
   return indices.INDEX_ILLEGAL_CHARACTERS_VISIBLE.reduce((chars, char) => {
     if (value.includes(char)) {
       chars.push(char);
@@ -28,7 +29,7 @@ const findIllegalCharacters = value => {
   }, []);
 };
 
-export const indexNameValidator = value => {
+export const indexNameValidator = (value) => {
   if (isEmpty(value)) {
     return [
       <FormattedMessage
@@ -71,7 +72,7 @@ export const indexNameValidator = value => {
   return undefined;
 };
 
-export const leaderIndexValidator = value => {
+export const leaderIndexValidator = (value) => {
   if (isEmpty(value)) {
     return [
       <FormattedMessage

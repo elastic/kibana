@@ -6,7 +6,8 @@
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useMemo, useState } from 'react';
+import React, { FunctionComponent, useMemo, useState, MouseEvent } from 'react';
+import url from 'url';
 import { Filter } from '../../../../common/custom_link/custom_link_types';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import {
@@ -16,7 +17,7 @@ import {
   SectionLink,
   SectionLinks,
   SectionSubtitle,
-  SectionTitle
+  SectionTitle,
 } from '../../../../../observability/public';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useFetcher } from '../../../hooks/useFetcher';
@@ -27,7 +28,6 @@ import { CustomLink } from './CustomLink';
 import { CustomLinkPopover } from './CustomLink/CustomLinkPopover';
 import { getSections } from './sections';
 import { useLicense } from '../../../hooks/useLicense';
-import { px } from '../../../style/variables';
 import { convertFiltersToQuery } from '../../app/Settings/CustomizeUI/CustomLink/CustomLinkFlyout/helper';
 
 interface Props {
@@ -37,13 +37,13 @@ interface Props {
 const ActionMenuButton = ({ onClick }: { onClick: () => void }) => (
   <EuiButtonEmpty iconType="arrowDown" iconSide="right" onClick={onClick}>
     {i18n.translate('xpack.apm.transactionActionMenu.actionsButtonLabel', {
-      defaultMessage: 'Actions'
+      defaultMessage: 'Actions',
     })}
   </EuiButtonEmpty>
 );
 
 export const TransactionActionMenu: FunctionComponent<Props> = ({
-  transaction
+  transaction,
 }: Props) => {
   const license = useLicense();
   const hasValidLicense = license?.isActive && license?.hasAtLeast('gold');
@@ -64,16 +64,17 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
         { key: 'service.name', value: transaction?.service.name },
         { key: 'service.environment', value: transaction?.service.environment },
         { key: 'transaction.name', value: transaction?.transaction.name },
-        { key: 'transaction.type', value: transaction?.transaction.type }
+        { key: 'transaction.type', value: transaction?.transaction.type },
       ].filter((filter): filter is Filter => typeof filter.value === 'string'),
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [transaction]
   );
 
   const { data: customLinks = [], status, refetch } = useFetcher(
-    callApmApi =>
+    (callApmApi) =>
       callApmApi({
         pathname: '/api/apm/settings/custom_links',
-        params: { query: convertFiltersToQuery(filters) }
+        params: { query: convertFiltersToQuery(filters) },
       }),
     [filters]
   );
@@ -82,8 +83,41 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
     transaction,
     basePath: core.http.basePath,
     location,
-    urlParams
-  });
+    urlParams,
+  }).map((sectionList) =>
+    sectionList.map((section) => ({
+      ...section,
+      actions: section.actions.map((action) => {
+        const { href } = action;
+
+        // use navigateToApp as a temporary workaround for faster navigation between observability apps.
+        // see https://github.com/elastic/kibana/issues/65682
+
+        return {
+          ...action,
+          onClick: (event: MouseEvent) => {
+            const parsed = url.parse(href);
+
+            const appPathname = core.http.basePath.remove(
+              parsed.pathname ?? ''
+            );
+
+            const [, , app, ...rest] = appPathname.split('/');
+
+            if (app === 'uptime' || app === 'metrics' || app === 'logs') {
+              event.preventDefault();
+              const search = parsed.search || '';
+
+              const path = `${rest.join('/')}${search}`;
+              core.application.navigateToApp(app, {
+                path,
+              });
+            }
+          },
+        };
+      }),
+    }))
+  );
 
   const closePopover = () => {
     setIsActionPopoverOpen(false);
@@ -92,11 +126,11 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
 
   const toggleCustomLinkFlyout = () => {
     closePopover();
-    setIsCustomLinkFlyoutOpen(isOpen => !isOpen);
+    setIsCustomLinkFlyoutOpen((isOpen) => !isOpen);
   };
 
   const toggleCustomLinkPopover = () => {
-    setIsCustomLinksPopoverOpen(isOpen => !isOpen);
+    setIsCustomLinksPopoverOpen((isOpen) => !isOpen);
   };
 
   return (
@@ -124,7 +158,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
           <ActionMenuButton onClick={() => setIsActionPopoverOpen(true)} />
         }
       >
-        <div style={{ maxHeight: px(600), width: px(335) }}>
+        <div>
           {isCustomLinksPopoverOpen ? (
             <CustomLinkPopover
               customLinks={customLinks.slice(3, customLinks.length)}
@@ -138,7 +172,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
                 const isLastSection = idx !== sections.length - 1;
                 return (
                   <div key={idx}>
-                    {section.map(item => (
+                    {section.map((item) => (
                       <Section key={item.key}>
                         {item.title && (
                           <SectionTitle>{item.title}</SectionTitle>
@@ -147,11 +181,12 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
                           <SectionSubtitle>{item.subtitle}</SectionSubtitle>
                         )}
                         <SectionLinks>
-                          {item.actions.map(action => (
+                          {item.actions.map((action) => (
                             <SectionLink
                               key={action.key}
                               label={action.label}
                               href={action.href}
+                              onClick={action.onClick}
                             />
                           ))}
                         </SectionLinks>

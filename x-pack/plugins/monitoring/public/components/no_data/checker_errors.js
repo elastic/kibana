@@ -18,7 +18,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 const ErrorList = ({ errors }) => {
   const errorsMap = {};
   return errors
-    .filter(err => {
+    .filter((err) => {
       const { statusCode, error, message } = err;
       const key = `${statusCode}${error}${message}`;
       if (!errorsMap[key]) {

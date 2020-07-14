@@ -5,68 +5,9 @@
  */
 
 import * as t from 'io-ts';
-
-export const CheckMonitorType = t.intersection([
-  t.partial({
-    name: t.string,
-    ip: t.union([t.array(t.string), t.string]),
-  }),
-  t.type({
-    status: t.string,
-  }),
-]);
-
-export const CheckType = t.intersection([
-  t.partial({
-    agent: t.partial({
-      id: t.string,
-    }),
-    container: t.type({
-      id: t.string,
-    }),
-    kubernetes: t.type({
-      pod: t.type({
-        uid: t.string,
-      }),
-    }),
-    observer: t.type({
-      geo: t.partial({
-        name: t.string,
-        location: t.partial({
-          lat: t.number,
-          lon: t.number,
-        }),
-      }),
-    }),
-  }),
-  t.type({
-    monitor: CheckMonitorType,
-    timestamp: t.number,
-  }),
-]);
-
-export type Check = t.TypeOf<typeof CheckType>;
+import { PingType } from '../ping/ping';
 
 export const StateType = t.intersection([
-  t.partial({
-    checks: t.array(CheckType),
-    observer: t.partial({
-      geo: t.partial({
-        name: t.array(t.string),
-      }),
-    }),
-    summary: t.partial({
-      up: t.number,
-      down: t.number,
-      geo: t.partial({
-        name: t.string,
-        location: t.partial({
-          lat: t.number,
-          lon: t.number,
-        }),
-      }),
-    }),
-  }),
   t.type({
     timestamp: t.string,
     url: t.partial({
@@ -76,19 +17,40 @@ export const StateType = t.intersection([
       port: t.number,
       scheme: t.string,
     }),
+    summaryPings: t.array(PingType),
+    summary: t.partial({
+      status: t.string,
+      up: t.number,
+      down: t.number,
+    }),
+    monitor: t.partial({
+      name: t.string,
+    }),
+  }),
+  t.partial({
+    tls: t.partial({
+      not_after: t.union([t.string, t.null]),
+      not_before: t.union([t.string, t.null]),
+    }),
+    observer: t.type({
+      geo: t.type({
+        name: t.array(t.string),
+      }),
+    }),
   }),
 ]);
 
+export type MonitorSummaryState = t.TypeOf<typeof StateType>;
+
 export const HistogramPointType = t.type({
   timestamp: t.number,
-  up: t.number,
-  down: t.number,
+  up: t.union([t.number, t.undefined]),
+  down: t.union([t.number, t.undefined]),
 });
 
 export type HistogramPoint = t.TypeOf<typeof HistogramPointType>;
 
 export const HistogramType = t.type({
-  count: t.number,
   points: t.array(HistogramPointType),
 });
 
@@ -106,18 +68,18 @@ export const MonitorSummaryType = t.intersection([
 
 export type MonitorSummary = t.TypeOf<typeof MonitorSummaryType>;
 
-export const MonitorSummaryResultType = t.intersection([
+export const MonitorSummariesResultType = t.intersection([
   t.partial({
-    summaries: t.array(MonitorSummaryType),
+    totalSummaryCount: t.number,
   }),
   t.type({
+    summaries: t.array(MonitorSummaryType),
     prevPagePagination: t.union([t.string, t.null]),
     nextPagePagination: t.union([t.string, t.null]),
-    totalSummaryCount: t.number,
   }),
 ]);
 
-export type MonitorSummaryResult = t.TypeOf<typeof MonitorSummaryResultType>;
+export type MonitorSummariesResult = t.TypeOf<typeof MonitorSummariesResultType>;
 
 export const FetchMonitorStatesQueryArgsType = t.intersection([
   t.partial({

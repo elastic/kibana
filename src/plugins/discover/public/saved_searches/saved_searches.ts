@@ -34,7 +34,7 @@ export function createSavedSearchesLoader(services: SavedObjectKibanaServices) {
     nouns: 'saved searches',
   };
 
-  savedSearchLoader.urlFor = (id: string) => `#/discover/${encodeURIComponent(id)}`;
+  savedSearchLoader.urlFor = (id: string) => (id ? `#/view/${encodeURIComponent(id)}` : '#/');
 
   return savedSearchLoader;
 }

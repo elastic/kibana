@@ -21,12 +21,12 @@ import path from 'path';
 import fs from 'fs';
 import { services } from './services';
 
-export default async function({ readConfigFile }) {
+export default async function ({ readConfigFile }) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   // Find all folders in ./plugins since we treat all them as plugin folder
   const allFiles = fs.readdirSync(path.resolve(__dirname, 'plugins'));
-  const plugins = allFiles.filter(file =>
+  const plugins = allFiles.filter((file) =>
     fs.statSync(path.resolve(__dirname, 'plugins', file)).isDirectory()
   );
 
@@ -34,11 +34,11 @@ export default async function({ readConfigFile }) {
     testFiles: [
       require.resolve('./test_suites/custom_visualizations'),
       require.resolve('./test_suites/panel_actions'),
-      require.resolve('./test_suites/embeddable_explorer'),
       require.resolve('./test_suites/core_plugins'),
       require.resolve('./test_suites/management'),
-      require.resolve('./test_suites/bfetch_explorer'),
       require.resolve('./test_suites/doc_views'),
+      require.resolve('./test_suites/application_links'),
+      require.resolve('./test_suites/data_plugin'),
     ],
     services: {
       ...functionalConfig.get('services'),
@@ -63,7 +63,7 @@ export default async function({ readConfigFile }) {
         // Required to load new platform plugins via `--plugin-path` flag.
         '--env.name=development',
         ...plugins.map(
-          pluginDir => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
+          (pluginDir) => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
         ),
       ],
     },

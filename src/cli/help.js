@@ -24,7 +24,7 @@ export default function help(command, spaces) {
     return command.outputHelp();
   }
 
-  const defCmd = _.find(command.commands, function(cmd) {
+  const defCmd = _.find(command.commands, function (cmd) {
     return cmd._name === 'serve';
   });
 
@@ -53,12 +53,12 @@ function indent(str, n) {
 
 function commandsSummary(program) {
   const cmds = _.compact(
-    program.commands.map(function(cmd) {
+    program.commands.map(function (cmd) {
       const name = cmd._name;
       if (name === '*') return;
       const opts = cmd.options.length ? ' [options]' : '';
       const args = cmd._args
-        .map(function(arg) {
+        .map(function (arg) {
           return humanReadableArgName(arg);
         })
         .join(' ');
@@ -67,12 +67,12 @@ function commandsSummary(program) {
     })
   );
 
-  const cmdLColWidth = cmds.reduce(function(width, cmd) {
+  const cmdLColWidth = cmds.reduce(function (width, cmd) {
     return Math.max(width, cmd[0].length);
   }, 0);
 
-  return cmds.reduce(function(help, cmd) {
-    return `${help || ''}${_.padRight(cmd[0], cmdLColWidth)} ${cmd[1] || ''}\n`;
+  return cmds.reduce(function (help, cmd) {
+    return `${help || ''}${_.padEnd(cmd[0], cmdLColWidth)} ${cmd[1] || ''}\n`;
   }, '');
 }
 

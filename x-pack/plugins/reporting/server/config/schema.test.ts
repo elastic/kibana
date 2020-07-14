@@ -112,6 +112,8 @@ describe('Reporting Config Schema', () => {
         .encryptionKey
     ).toBe('qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq');
 
+    expect(ConfigSchema.validate({ encryptionKey: 'weaksauce' }).encryptionKey).toBe('weaksauce');
+
     // disableSandbox
     expect(
       ConfigSchema.validate({ capture: { browser: { chromium: { disableSandbox: true } } } })

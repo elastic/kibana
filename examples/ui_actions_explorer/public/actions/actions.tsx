@@ -47,14 +47,14 @@ export interface PhoneContext {
 export const makePhoneCallAction = createAction<typeof ACTION_CALL_PHONE_NUMBER>({
   type: ACTION_CALL_PHONE_NUMBER,
   getDisplayName: () => 'Call phone number',
-  execute: async context => alert(`Pretend calling ${context.phone}...`),
+  execute: async (context) => alert(`Pretend calling ${context.phone}...`),
 });
 
 export const lookUpWeatherAction = createAction<typeof ACTION_TRAVEL_GUIDE>({
   type: ACTION_TRAVEL_GUIDE,
   getIconType: () => 'popout',
   getDisplayName: () => 'View travel guide',
-  execute: async context => {
+  execute: async (context) => {
     window.open(`https://www.worldtravelguide.net/?s=${context.country}`, '_blank');
   },
 });
@@ -67,7 +67,7 @@ export const viewInMapsAction = createAction<typeof ACTION_VIEW_IN_MAPS>({
   type: ACTION_VIEW_IN_MAPS,
   getIconType: () => 'popout',
   getDisplayName: () => 'View in maps',
-  execute: async context => {
+  execute: async (context) => {
     window.open(`https://www.google.com/maps/place/${context.country}`, '_blank');
   },
 });
@@ -90,7 +90,7 @@ function EditUserModal({
   const [name, setName] = useState(user.name);
   return (
     <EuiModalBody>
-      <EuiFieldText prepend="Name" value={name} onChange={e => setName(e.target.value)} />
+      <EuiFieldText prepend="Name" value={name} onChange={(e) => setName(e.target.value)} />
       <EuiButton
         onClick={() => {
           update({ ...user, name });

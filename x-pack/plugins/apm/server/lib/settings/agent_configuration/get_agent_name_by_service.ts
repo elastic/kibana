@@ -7,13 +7,13 @@
 import { Setup } from '../../helpers/setup_request';
 import {
   PROCESSOR_EVENT,
-  SERVICE_NAME
+  SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { AGENT_NAME } from '../../../../common/elasticsearch_fieldnames';
 
 export async function getAgentNameByService({
   serviceName,
-  setup
+  setup,
 }: {
   serviceName: string;
   setup: Setup;
@@ -25,7 +25,7 @@ export async function getAgentNameByService({
     index: [
       indices['apm_oss.metricsIndices'],
       indices['apm_oss.errorIndices'],
-      indices['apm_oss.transactionIndices']
+      indices['apm_oss.transactionIndices'],
     ],
     body: {
       size: 0,
@@ -33,18 +33,18 @@ export async function getAgentNameByService({
         bool: {
           filter: [
             {
-              terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] }
+              terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] },
             },
-            { term: { [SERVICE_NAME]: serviceName } }
-          ]
-        }
+            { term: { [SERVICE_NAME]: serviceName } },
+          ],
+        },
       },
       aggs: {
         agent_names: {
-          terms: { field: AGENT_NAME, size: 1 }
-        }
-      }
-    }
+          terms: { field: AGENT_NAME, size: 1 },
+        },
+      },
+    },
   };
 
   const { aggregations } = await client.search(params);

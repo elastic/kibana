@@ -51,8 +51,7 @@ export abstract class Embeddable<
   // to update input when the parent changes.
   private parentSubscription?: Rx.Subscription;
 
-  // TODO: Rename to destroyed.
-  private destoyed: boolean = false;
+  private destroyed: boolean = false;
 
   constructor(input: TEmbeddableInput, output: TEmbeddableOutput, parent?: IContainer) {
     this.id = input.id;
@@ -123,7 +122,7 @@ export abstract class Embeddable<
   }
 
   public updateInput(changes: Partial<TEmbeddableInput>): void {
-    if (this.destoyed) {
+    if (this.destroyed) {
       throw new Error('Embeddable has been destroyed');
     }
     if (this.parent) {
@@ -135,7 +134,7 @@ export abstract class Embeddable<
   }
 
   public render(domNode: HTMLElement | Element): void {
-    if (this.destoyed) {
+    if (this.destroyed) {
       throw new Error('Embeddable has been destroyed');
     }
     return;
@@ -155,7 +154,7 @@ export abstract class Embeddable<
    * implementors to add any additional clean up tasks, like unmounting and unsubscribing.
    */
   public destroy(): void {
-    this.destoyed = true;
+    this.destroyed = true;
 
     this.input$.complete();
     this.output$.complete();

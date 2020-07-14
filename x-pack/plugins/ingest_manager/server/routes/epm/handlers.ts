@@ -6,6 +6,15 @@
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler, CustomHttpResponseOptions } from 'src/core/server';
 import {
+  GetInfoResponse,
+  InstallPackageResponse,
+  DeletePackageResponse,
+  GetCategoriesResponse,
+  GetPackagesResponse,
+  GetLimitedPackagesResponse,
+} from '../../../common';
+import {
+  GetCategoriesRequestSchema,
   GetPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
@@ -13,24 +22,21 @@ import {
   DeletePackageRequestSchema,
 } from '../../types';
 import {
-  GetInfoResponse,
-  InstallPackageResponse,
-  DeletePackageResponse,
-  GetCategoriesResponse,
-  GetPackagesResponse,
-} from '../../../common';
-import {
   getCategories,
   getPackages,
   getFile,
   getPackageInfo,
   installPackage,
   removeInstallation,
+  getLimitedPackages,
 } from '../../services/epm/packages';
 
-export const getCategoriesHandler: RequestHandler = async (context, request, response) => {
+export const getCategoriesHandler: RequestHandler<
+  undefined,
+  TypeOf<typeof GetCategoriesRequestSchema.query>
+> = async (context, request, response) => {
   try {
-    const res = await getCategories();
+    const res = await getCategories(request.query);
     const body: GetCategoriesResponse = {
       response: res,
       success: true,
@@ -52,9 +58,28 @@ export const getListHandler: RequestHandler<
     const savedObjectsClient = context.core.savedObjects.client;
     const res = await getPackages({
       savedObjectsClient,
-      category: request.query.category,
+      ...request.query,
     });
     const body: GetPackagesResponse = {
+      response: res,
+      success: true,
+    };
+    return response.ok({
+      body,
+    });
+  } catch (e) {
+    return response.customError({
+      statusCode: 500,
+      body: { message: e.message },
+    });
+  }
+};
+
+export const getLimitedListHandler: RequestHandler = async (context, request, response) => {
+  try {
+    const savedObjectsClient = context.core.savedObjects.client;
+    const res = await getLimitedPackages({ savedObjectsClient });
+    const body: GetLimitedPackagesResponse = {
       response: res,
       success: true,
     };
@@ -124,7 +149,7 @@ export const installPackageHandler: RequestHandler<TypeOf<
   try {
     const { pkgkey } = request.params;
     const savedObjectsClient = context.core.savedObjects.client;
-    const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
+    const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
     const res = await installPackage({
       savedObjectsClient,
       pkgkey,
@@ -155,7 +180,7 @@ export const deletePackageHandler: RequestHandler<TypeOf<
   try {
     const { pkgkey } = request.params;
     const savedObjectsClient = context.core.savedObjects.client;
-    const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
+    const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
     const res = await removeInstallation({ savedObjectsClient, pkgkey, callCluster });
     const body: DeletePackageResponse = {
       response: res,

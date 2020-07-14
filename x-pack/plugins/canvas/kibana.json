@@ -4,7 +4,8 @@
     "kibanaVersion": "kibana",
     "configPath": ["xpack", "canvas"],
     "server": true,
-    "ui": false,
-    "requiredPlugins": ["expressions", "features", "home"],
-    "optionalPlugins": ["usageCollection"]
+    "ui": true,
+    "requiredPlugins": ["data", "embeddable", "expressions", "features", "home", "inspector", "uiActions"],
+    "optionalPlugins": ["usageCollection"],
+    "requiredBundles": ["kibanaReact", "maps", "lens", "visualizations", "kibanaUtils", "kibanaLegacy", "discover", "savedObjects", "reporting"]
   }

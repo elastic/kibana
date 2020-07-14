@@ -36,6 +36,7 @@ export function elasticsearchMetricsSpecProvider(context: TutorialContext): Tuto
     name: i18n.translate('home.tutorials.elasticsearchMetrics.nameTitle', {
       defaultMessage: 'Elasticsearch metrics',
     }),
+    moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.elasticsearchMetrics.shortDescription', {
@@ -55,7 +56,7 @@ export function elasticsearchMetricsSpecProvider(context: TutorialContext): Tuto
         label: i18n.translate('home.tutorials.elasticsearchMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {

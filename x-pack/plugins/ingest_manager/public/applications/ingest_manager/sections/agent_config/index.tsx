@@ -5,26 +5,32 @@
  */
 import React from 'react';
 import { HashRouter as Router, Switch, Route } from 'react-router-dom';
+import { PAGE_ROUTING_PATHS } from '../../constants';
+import { useBreadcrumbs } from '../../hooks';
 import { AgentConfigListPage } from './list_page';
 import { AgentConfigDetailsPage } from './details_page';
-import { CreateDatasourcePage } from './create_datasource_page';
-import { EditDatasourcePage } from './edit_datasource_page';
+import { CreatePackageConfigPage } from './create_package_config_page';
+import { EditPackageConfigPage } from './edit_package_config_page';
 
-export const AgentConfigApp: React.FunctionComponent = () => (
-  <Router>
-    <Switch>
-      <Route path="/configs/:configId/edit-datasource/:datasourceId">
-        <EditDatasourcePage />
-      </Route>
-      <Route path="/configs/:configId/add-datasource">
-        <CreateDatasourcePage />
-      </Route>
-      <Route path="/configs/:configId">
-        <AgentConfigDetailsPage />
-      </Route>
-      <Route path="/">
-        <AgentConfigListPage />
-      </Route>
-    </Switch>
-  </Router>
-);
+export const AgentConfigApp: React.FunctionComponent = () => {
+  useBreadcrumbs('configurations');
+
+  return (
+    <Router>
+      <Switch>
+        <Route path={PAGE_ROUTING_PATHS.edit_integration}>
+          <EditPackageConfigPage />
+        </Route>
+        <Route path={PAGE_ROUTING_PATHS.add_integration_from_configuration}>
+          <CreatePackageConfigPage />
+        </Route>
+        <Route path={PAGE_ROUTING_PATHS.configuration_details}>
+          <AgentConfigDetailsPage />
+        </Route>
+        <Route path={PAGE_ROUTING_PATHS.configurations_list}>
+          <AgentConfigListPage />
+        </Route>
+      </Switch>
+    </Router>
+  );
+};

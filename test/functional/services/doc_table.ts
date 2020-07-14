@@ -39,11 +39,7 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       const $ = await table.parseDomContent();
       return $.findTestSubjects('~docTableRow')
         .toArray()
-        .map((row: any) =>
-          $(row)
-            .text()
-            .trim()
-        );
+        .map((row: any) => $(row).text().trim());
     }
 
     public async getBodyRows(): Promise<WebElementWrapper[]> {
@@ -60,6 +56,11 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       return options.isAnchorRow
         ? await this.getAnchorRow()
         : (await this.getBodyRows())[options.rowIndex];
+    }
+
+    public async getDetailsRow(): Promise<WebElementWrapper> {
+      const table = await this.getTable();
+      return await table.findByCssSelector('[data-test-subj~="docTableDetailsRow"]');
     }
 
     public async getAnchorDetailsRow(): Promise<WebElementWrapper> {
@@ -111,11 +112,7 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       const $ = await table.parseDomContent();
       return $.findTestSubjects('~docTableHeaderField')
         .toArray()
-        .map((field: any) =>
-          $(field)
-            .text()
-            .trim()
-        );
+        .map((field: any) => $(field).text().trim());
     }
 
     public async getTableDocViewRow(
@@ -137,6 +134,22 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
     ): Promise<void> {
       const tableDocViewRow = await this.getTableDocViewRow(detailsRow, fieldName);
       const addInclusiveFilterButton = await this.getAddInclusiveFilterButton(tableDocViewRow);
+      await addInclusiveFilterButton.click();
+      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+    }
+
+    public async getRemoveInclusiveFilterButton(
+      tableDocViewRow: WebElementWrapper
+    ): Promise<WebElementWrapper> {
+      return await tableDocViewRow.findByTestSubject(`~removeInclusiveFilterButton`);
+    }
+
+    public async removeInclusiveFilter(
+      detailsRow: WebElementWrapper,
+      fieldName: WebElementWrapper
+    ): Promise<void> {
+      const tableDocViewRow = await this.getTableDocViewRow(detailsRow, fieldName);
+      const addInclusiveFilterButton = await this.getRemoveInclusiveFilterButton(tableDocViewRow);
       await addInclusiveFilterButton.click();
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }

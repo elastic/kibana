@@ -4,20 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { isBoolean, isNumber, isObject } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 
 const EmptyValue = styled.span`
-  color: ${theme.euiColorMediumShade};
+  color: ${({ theme }) => theme.eui.euiColorMediumShade};
   text-align: left;
 `;
 
 export function FormattedKey({
   k,
-  value
+  value,
 }: {
   k: string;
   value: unknown;

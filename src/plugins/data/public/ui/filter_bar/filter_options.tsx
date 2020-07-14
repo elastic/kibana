@@ -43,7 +43,7 @@ class FilterOptionsUI extends Component<Props, State> {
   };
 
   public togglePopover = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       isPopoverOpen: !prevState.isPopoverOpen,
     }));
   };
@@ -167,6 +167,7 @@ class FilterOptionsUI extends Component<Props, State> {
         anchorPosition="rightUp"
         panelPaddingSize="none"
         withTitle
+        repositionOnScroll
       >
         <EuiPopoverTitle>
           <FormattedMessage

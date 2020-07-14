@@ -28,6 +28,7 @@ export const dataAnalyticsJobConfigSchema = schema.object({
   analysis: schema.any(),
   analyzed_fields: schema.any(),
   model_memory_limit: schema.string(),
+  max_num_threads: schema.maybe(schema.number()),
 });
 
 export const dataAnalyticsEvaluateSchema = schema.object({
@@ -47,10 +48,12 @@ export const dataAnalyticsExplainSchema = schema.object({
   /** Source */
   source: schema.object({
     index: schema.string(),
+    query: schema.maybe(schema.any()),
   }),
   analysis: schema.any(),
   analyzed_fields: schema.maybe(schema.any()),
   model_memory_limit: schema.maybe(schema.string()),
+  max_num_threads: schema.maybe(schema.number()),
 });
 
 export const analyticsIdSchema = schema.object({
@@ -58,6 +61,21 @@ export const analyticsIdSchema = schema.object({
    * Analytics ID
    */
   analyticsId: schema.string(),
+});
+
+export const deleteDataFrameAnalyticsJobSchema = schema.object({
+  /**
+   * Analytics Destination Index
+   */
+  deleteDestIndex: schema.maybe(schema.boolean()),
+  deleteDestIndexPattern: schema.maybe(schema.boolean()),
+});
+
+export const dataAnalyticsJobUpdateSchema = schema.object({
+  description: schema.maybe(schema.string()),
+  model_memory_limit: schema.maybe(schema.string()),
+  allow_lazy_start: schema.maybe(schema.boolean()),
+  max_num_threads: schema.maybe(schema.number()),
 });
 
 export const stopsDataFrameAnalyticsJobQuerySchema = schema.object({

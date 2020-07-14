@@ -7,46 +7,58 @@
 import {
   Setup,
   SetupUIFilters,
-  SetupTimeRange
+  SetupTimeRange,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../server/lib/helpers/setup_request';
 import { SERVICE_NAME, PROCESSOR_EVENT } from '../elasticsearch_fieldnames';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { rangeFilter } from '../../server/lib/helpers/range_filter';
+import { rangeFilter } from '../utils/range_filter';
 
 export function getServicesProjection({
-  setup
+  setup,
+  noEvents,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
+  noEvents?: boolean;
 }) {
   const { start, end, uiFiltersES, indices } = setup;
 
   return {
-    index: [
-      indices['apm_oss.metricsIndices'],
-      indices['apm_oss.errorIndices'],
-      indices['apm_oss.transactionIndices']
-    ],
+    ...(noEvents
+      ? {}
+      : {
+          index: [
+            indices['apm_oss.metricsIndices'],
+            indices['apm_oss.errorIndices'],
+            indices['apm_oss.transactionIndices'],
+          ],
+        }),
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
-            {
-              terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] }
-            },
+            ...(noEvents
+              ? []
+              : [
+                  {
+                    terms: {
+                      [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'],
+                    },
+                  },
+                ]),
             { range: rangeFilter(start, end) },
-            ...uiFiltersES
-          ]
-        }
+            ...uiFiltersES,
+          ],
+        },
       },
       aggs: {
         services: {
           terms: {
-            field: SERVICE_NAME
-          }
-        }
-      }
-    }
+            field: SERVICE_NAME,
+          },
+        },
+      },
+    },
   };
 }

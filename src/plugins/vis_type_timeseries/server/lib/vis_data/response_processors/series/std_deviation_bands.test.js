@@ -84,31 +84,20 @@ describe('stdDeviationBands(resp, panel, series)', () => {
   });
 
   test('creates a series', () => {
-    const next = results => results;
+    const next = (results) => results;
     const results = stdDeviationBands(resp, panel, series)(next)([]);
-    expect(results).toHaveLength(2);
+    expect(results).toHaveLength(1);
 
     expect(results[0]).toEqual({
-      id: 'test:upper',
+      id: 'test',
       label: 'Std. Deviation of cpu',
       color: 'rgb(255, 0, 0)',
-      lines: { show: true, fill: 0.5, lineWidth: 0 },
-      points: { show: false },
-      fillBetween: 'test:lower',
-      data: [
-        [1, 3.2],
-        [2, 3.5],
-      ],
-    });
-
-    expect(results[1]).toEqual({
-      id: 'test:lower',
-      color: 'rgb(255, 0, 0)',
-      lines: { show: true, fill: false, lineWidth: 0 },
+      lines: { show: true, fill: 0.5, lineWidth: 0, mode: 'band' },
+      bars: { show: false, fill: 0.5, mode: 'band' },
       points: { show: false },
       data: [
-        [1, 0.2],
-        [2, 0.5],
+        [1, 3.2, 0.2],
+        [2, 3.5, 0.5],
       ],
     });
   });

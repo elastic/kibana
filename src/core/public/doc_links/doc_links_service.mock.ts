@@ -29,10 +29,12 @@ const createStartContractMock = (): DocLinksStart => {
 
 type DocLinksServiceContract = PublicMethodsOf<DocLinksService>;
 const createMock = (): jest.Mocked<DocLinksServiceContract> => ({
+  setup: jest.fn().mockReturnValue(undefined),
   start: jest.fn().mockReturnValue(createStartContractMock()),
 });
 
 export const docLinksServiceMock = {
   create: createMock,
+  createSetupContract: () => jest.fn(),
   createStartContract: createStartContractMock,
 };

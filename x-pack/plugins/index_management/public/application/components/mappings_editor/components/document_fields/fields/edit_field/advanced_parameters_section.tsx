@@ -23,7 +23,7 @@ export const AdvancedParametersSection = ({ children }: Props) => {
     <div className="mappingsEditor__editField__advancedSettings">
       <EuiHorizontalRule />
 
-      <EuiButtonEmpty onClick={toggleIsVisible} flush="left">
+      <EuiButtonEmpty onClick={toggleIsVisible} flush="left" data-test-subj="toggleAdvancedSetting">
         {isVisible
           ? i18n.translate('xpack.idxMgmt.mappingsEditor.advancedSettings.hideButtonLabel', {
               defaultMessage: 'Hide advanced settings',
@@ -33,7 +33,7 @@ export const AdvancedParametersSection = ({ children }: Props) => {
             })}
       </EuiButtonEmpty>
 
-      <div style={{ display: isVisible ? 'block' : 'none' }}>
+      <div style={{ display: isVisible ? 'block' : 'none' }} data-test-subj="advancedSettings">
         <EuiSpacer size="m" />
         {/* We ned to wrap the children inside a "div" to have our css :first-child rule */}
         <div>{children}</div>

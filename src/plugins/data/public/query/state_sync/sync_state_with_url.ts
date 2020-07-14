@@ -84,7 +84,7 @@ export const syncQueryStateWithUrl = (
     stateStorage: kbnUrlStateStorage,
     stateContainer: {
       ...globalQueryStateContainer,
-      set: state => {
+      set: (state) => {
         if (state) {
           // syncState utils requires to handle incoming "null" value
           globalQueryStateContainer.set(state);

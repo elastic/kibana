@@ -105,8 +105,8 @@ export function expandFields(fields: Fields): Fields {
  */
 function dedupFields(fields: Fields): Fields {
   const dedupedFields: Fields = [];
-  fields.forEach(field => {
-    const found = dedupedFields.find(f => {
+  fields.forEach((field) => {
+    const found = dedupedFields.find((f) => {
       return f.name === field.name;
     });
     if (found) {
@@ -185,7 +185,7 @@ function dedupFields(fields: Fields): Fields {
 function validateFields(fields: Fields, allFields: Fields): Fields {
   const validatedFields: Fields = [];
 
-  fields.forEach(field => {
+  fields.forEach((field) => {
     if (field.type === 'alias') {
       if (field.path && getField(allFields, field.path.split('.'))) {
         validatedFields.push(field);

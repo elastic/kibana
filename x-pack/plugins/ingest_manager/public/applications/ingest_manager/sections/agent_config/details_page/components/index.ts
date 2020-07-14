@@ -3,4 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export { DatasourcesTable } from './datasources/datasources_table';
+export { PackageConfigsTable } from './package_configs/package_configs_table';
+export { ConfigPackageConfigsView } from './package_configs';
+export { ConfigSettingsView } from './settings';

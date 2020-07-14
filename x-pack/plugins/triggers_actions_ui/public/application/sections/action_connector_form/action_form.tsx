@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, Suspense, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -27,8 +27,9 @@ import {
   EuiCallOut,
   EuiHorizontalRule,
   EuiText,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
-import { HttpSetup, ToastsApi } from 'kibana/public';
+import { HttpSetup, ToastsApi, ApplicationStart, DocLinksStart } from 'kibana/public';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
   IErrorObject,
@@ -44,6 +45,7 @@ import { TypeRegistry } from '../../type_registry';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
+import { ServiceNowConnectorConfiguration } from '../../../common';
 
 interface ActionAccordionFormProps {
   actions: AlertAction[];
@@ -57,10 +59,12 @@ interface ActionAccordionFormProps {
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
+  docLinks: DocLinksStart;
   actionTypes?: ActionType[];
   messageVariables?: string[];
   defaultActionMessage?: string;
   setHasActionsDisabled?: (value: boolean) => void;
+  capabilities: ApplicationStart['capabilities'];
 }
 
 interface ActiveActionConnectorState {
@@ -81,6 +85,8 @@ export const ActionForm = ({
   defaultActionMessage,
   toastNotifications,
   setHasActionsDisabled,
+  capabilities,
+  docLinks,
 }: ActionAccordionFormProps) => {
   const [addModalVisible, setAddModalVisibility] = useState<boolean>(false);
   const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
@@ -126,7 +132,14 @@ export const ActionForm = ({
       try {
         setIsLoadingConnectors(true);
         const loadedConnectors = await loadConnectors({ http });
-        setConnectors(loadedConnectors);
+        setConnectors(
+          loadedConnectors.filter(
+            (action) =>
+              action.actionTypeId !== ServiceNowConnectorConfiguration.id ||
+              (action.actionTypeId === ServiceNowConnectorConfiguration.id &&
+                !action.config.isCaseOwned)
+          )
+        );
       } catch (e) {
         toastNotifications.addDanger({
           title: i18n.translate(
@@ -145,12 +158,13 @@ export const ActionForm = ({
 
   useEffect(() => {
     const setActionTypesAvalilability = () => {
-      const preconfiguredConnectors = connectors.filter(connector => connector.isPreconfigured);
+      const preconfiguredConnectors = connectors.filter((connector) => connector.isPreconfigured);
       const hasActionsDisabled = actions.some(
-        action =>
-          !actionTypesIndex![action.actionTypeId].enabled &&
+        (action) =>
+          actionTypesIndex &&
+          !actionTypesIndex[action.actionTypeId].enabled &&
           !checkActionFormActionTypeEnabled(
-            actionTypesIndex![action.actionTypeId],
+            actionTypesIndex[action.actionTypeId],
             preconfiguredConnectors
           ).isEnabled
       );
@@ -172,7 +186,7 @@ export const ActionForm = ({
   );
 
   const getSelectedOptions = (actionItemId: string) => {
-    const selectedConnector = connectors.find(connector => connector.id === actionItemId);
+    const selectedConnector = connectors.find((connector) => connector.id === actionItemId);
     if (
       !selectedConnector ||
       // if selected connector is not preconfigured and action type is for preconfiguration only,
@@ -204,11 +218,15 @@ export const ActionForm = ({
     },
     index: number
   ) => {
-    const actionType = actionTypesIndex![actionItem.actionTypeId];
+    if (!actionTypesIndex) {
+      return null;
+    }
+
+    const actionType = actionTypesIndex[actionItem.actionTypeId];
 
     const optionsList = connectors
       .filter(
-        connectorItem =>
+        (connectorItem) =>
           connectorItem.actionTypeId === actionItem.actionTypeId &&
           // include only enabled by config connectors or preconfigured
           (actionType.enabledInConfig || connectorItem.isPreconfigured)
@@ -222,8 +240,8 @@ export const ActionForm = ({
     if (!actionTypeRegistered || actionItem.group !== defaultActionGroupId) return null;
     const ParamsFieldsComponent = actionTypeRegistered.actionParamsFields;
     const checkEnabledResult = checkActionFormActionTypeEnabled(
-      actionTypesIndex![actionConnector.actionTypeId],
-      connectors.filter(connector => connector.isPreconfigured)
+      actionTypesIndex[actionConnector.actionTypeId],
+      connectors.filter((connector) => connector.isPreconfigured)
     );
 
     const accordionContent = checkEnabledResult.isEnabled ? (
@@ -244,7 +262,8 @@ export const ActionForm = ({
                 />
               }
               labelAppend={
-                actionTypesIndex![actionConnector.actionTypeId].enabledInConfig ? (
+                actionTypesIndex &&
+                actionTypesIndex[actionConnector.actionTypeId].enabledInConfig ? (
                   <EuiButtonEmpty
                     size="xs"
                     data-test-subj={`addNewActionConnectorButton-${actionItem.actionTypeId}`}
@@ -268,7 +287,7 @@ export const ActionForm = ({
                 id={`selectActionConnector-${actionItem.id}`}
                 data-test-subj={`selectActionConnector-${actionItem.actionTypeId}`}
                 selectedOptions={getSelectedOptions(actionItem.id)}
-                onChange={selectedOptions => {
+                onChange={(selectedOptions) => {
                   setActionIdByIndex(selectedOptions[0].id ?? '', index);
                 }}
                 isClearable={false}
@@ -278,14 +297,25 @@ export const ActionForm = ({
         </EuiFlexGroup>
         <EuiSpacer size="xl" />
         {ParamsFieldsComponent ? (
-          <ParamsFieldsComponent
-            actionParams={actionItem.params as any}
-            index={index}
-            errors={actionParamsErrors.errors}
-            editAction={setActionParamsProperty}
-            messageVariables={messageVariables}
-            defaultMessage={defaultActionMessage ?? undefined}
-          />
+          <Suspense
+            fallback={
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="m" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          >
+            <ParamsFieldsComponent
+              actionParams={actionItem.params as any}
+              index={index}
+              errors={actionParamsErrors.errors}
+              editAction={setActionParamsProperty}
+              messageVariables={messageVariables}
+              defaultMessage={defaultActionMessage ?? undefined}
+              docLinks={docLinks}
+            />
+          </Suspense>
         ) : null}
       </Fragment>
     ) : (
@@ -493,7 +523,7 @@ export const ActionForm = ({
     }
     setIsAddActionPanelOpen(false);
     const actionTypeConnectors = connectors.filter(
-      field => field.actionTypeId === actionTypeModel.id
+      (field) => field.actionTypeId === actionTypeModel.id
     );
 
     if (actionTypeConnectors.length > 0) {
@@ -522,14 +552,15 @@ export const ActionForm = ({
   let actionTypeNodes: Array<JSX.Element | null> | null = null;
   let hasDisabledByLicenseActionTypes = false;
   if (actionTypesIndex) {
-    const preconfiguredConnectors = connectors.filter(connector => connector.isPreconfigured);
+    const preconfiguredConnectors = connectors.filter((connector) => connector.isPreconfigured);
     actionTypeNodes = actionTypeRegistry
       .list()
-      .filter(item => actionTypesIndex[item.id])
+      .filter((item) => actionTypesIndex[item.id])
+      .filter((item) => !!item.actionParamsFields)
       .sort((a, b) =>
         actionTypeCompare(actionTypesIndex[a.id], actionTypesIndex[b.id], preconfiguredConnectors)
       )
-      .map(function(item, index) {
+      .map(function (item, index) {
         const actionType = actionTypesIndex[item.id];
         const checkEnabledResult = checkActionFormActionTypeEnabled(
           actionTypesIndex[item.id],
@@ -556,20 +587,20 @@ export const ActionForm = ({
         );
 
         return (
-          <Fragment key={`keypad-${item.id}`}>
+          <EuiFlexItem grow={false} key={`keypad-${item.id}`}>
             {checkEnabledResult.isEnabled && keyPadItem}
             {checkEnabledResult.isEnabled === false && (
               <EuiToolTip position="top" content={checkEnabledResult.message}>
                 {keyPadItem}
               </EuiToolTip>
             )}
-          </Fragment>
+          </EuiFlexItem>
         );
       });
   }
 
   const alertActionsList = actions.map((actionItem: AlertAction, index: number) => {
-    const actionConnector = connectors.find(field => field.id === actionItem.id);
+    const actionConnector = connectors.find((field) => field.id === actionItem.id);
     // connectors doesn't exists
     if (!actionConnector) {
       return getAddConnectorsForm(actionItem, index);
@@ -656,7 +687,7 @@ export const ActionForm = ({
                 )}
               </EuiFlexGroup>
               <EuiSpacer />
-              <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" wrap>
+              <EuiFlexGroup gutterSize="m" wrap>
                 {isLoadingActionTypes ? (
                   <SectionLoading>
                     <FormattedMessage
@@ -685,8 +716,13 @@ export const ActionForm = ({
           actionTypeRegistry={actionTypeRegistry}
           http={http}
           toastNotifications={toastNotifications}
+          docLinks={docLinks}
+          capabilities={capabilities}
         />
       ) : null}
     </Fragment>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { ActionForm as default };

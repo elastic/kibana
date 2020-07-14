@@ -35,6 +35,8 @@ const pLimit = require('p-limit');
 const pRetry = require('p-retry');
 const { argv } = require('yargs');
 const ora = require('ora');
+const userAgents = require('./user_agents');
+const userIps = require('./rum_ips');
 
 const APM_SERVER_URL = argv.serverUrl;
 const SECRET_TOKEN = argv.secretToken;
@@ -53,7 +55,7 @@ if (!EVENTS_PATH) {
 const requestProgress = {
   succeeded: 0,
   failed: 0,
-  total: 0
+  total: 0,
 };
 
 const spinner = ora({ text: 'Warming up...', stream: process.stdout });
@@ -66,13 +68,32 @@ function incrementSpinnerCount({ success }) {
 
   spinner.text = `Remaining: ${remaining}. Succeeded: ${requestProgress.succeeded}. Failed: ${requestProgress.failed}.`;
 }
+let iterIndex = 0;
+
+function setRumAgent(item) {
+  item.body = item.body.replace(
+    '"name":"client"',
+    '"name":"opbean-client-rum"'
+  );
+}
 
 async function insertItem(item) {
   try {
     const url = `${APM_SERVER_URL}${item.url}`;
     const headers = {
-      'content-type': 'application/x-ndjson'
+      'content-type': 'application/x-ndjson',
     };
+
+    if (item.url === '/intake/v2/rum/events') {
+      if (iterIndex === userAgents.length) {
+        // set some event agent to opbean
+        setRumAgent(item);
+        iterIndex = 0;
+      }
+      headers['User-Agent'] = userAgents[iterIndex];
+      headers['X-Forwarded-For'] = userIps[iterIndex];
+      iterIndex++;
+    }
 
     if (SECRET_TOKEN) {
       headers.Authorization = `Bearer ${SECRET_TOKEN}`;
@@ -82,7 +103,7 @@ async function insertItem(item) {
       method: item.method,
       url,
       headers,
-      data: item.body
+      data: item.body,
     });
   } catch (e) {
     console.error(
@@ -97,19 +118,25 @@ async function init() {
   const items = content
     .toString()
     .split('\n')
-    .filter(item => item)
-    .map(item => JSON.parse(item))
-    .filter(item => item.url === '/intake/v2/events');
+    .filter((item) => item)
+    .map((item) => JSON.parse(item))
+    .filter((item) => {
+      return (
+        item.url === '/intake/v2/events' || item.url === '/intake/v2/rum/events'
+      );
+    });
 
   spinner.start();
   requestProgress.total = items.length;
 
   const limit = pLimit(20); // number of concurrent requests
   await Promise.all(
-    items.map(async item => {
+    items.map(async (item) => {
       try {
         // retry 5 times with exponential backoff
-        await pRetry(() => limit(() => insertItem(item)), { retries: 5 });
+        await pRetry(() => limit(() => insertItem(item)), {
+          retries: 5,
+        });
         incrementSpinnerCount({ success: true });
       } catch (e) {
         incrementSpinnerCount({ success: false });
@@ -132,7 +159,7 @@ init()
       process.exit(1);
     }
   })
-  .catch(e => {
+  .catch((e) => {
     console.log('An error occurred:', e);
     process.exit(1);
   });

@@ -8,7 +8,10 @@ import { setHttp } from '../../crud_app/services';
 import { mockHttpRequest, pageHelpers } from './helpers';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 
-jest.mock('lodash/function/debounce', () => fn => fn);
+jest.mock('lodash', () => ({
+  ...jest.requireActual('lodash'),
+  debounce: (fn) => fn,
+}));
 
 const { setup } = pageHelpers.jobCreate;
 
@@ -174,7 +177,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
 
       it('should have "avg", "max", "min", "sum" & "value count" metrics for *numeric* fields', () => {
         addFieldToList('numeric');
-        numericTypeMetrics.forEach(type => {
+        numericTypeMetrics.forEach((type) => {
           try {
             expect(exists(`rollupJobMetricsCheckbox-${type}`)).toBe(true);
           } catch (e) {
@@ -198,7 +201,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       it('should have "max", "min", & "value count" metrics for *date* fields', () => {
         addFieldToList('date');
 
-        dateTypeMetrics.forEach(type => {
+        dateTypeMetrics.forEach((type) => {
           try {
             expect(exists(`rollupJobMetricsCheckbox-${type}`)).toBe(true);
           } catch (e) {
@@ -270,7 +273,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
 
       const expectAllFieldChooserInputs = (fieldChooserColumn, expected) => {
         const inputs = fieldChooserColumn.reactWrapper.find('input');
-        inputs.forEach(input => {
+        inputs.forEach((input) => {
           expect(input.props().checked).toBe(expected);
         });
       };
@@ -302,13 +305,13 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         const rows = getFieldListTableRows();
 
         rows
-          .filter(row => {
+          .filter((row) => {
             const [, metricTypeCol] = row.columns;
             return metricTypeCol.value === 'numeric';
           })
           .forEach((row, idx) => {
             const fieldChooser = getFieldChooserColumnForRow(idx);
-            fieldChooser.reactWrapper.find('input').forEach(input => {
+            fieldChooser.reactWrapper.find('input').forEach((input) => {
               const props = input.props();
               if (props['data-test-subj'].endsWith('avg')) {
                 expect(props.checked).toBe(true);
@@ -335,7 +338,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
             return;
           }
           const fieldChooser = getFieldChooserColumnForRow(idx);
-          fieldChooser.reactWrapper.find('input').forEach(input => {
+          fieldChooser.reactWrapper.find('input').forEach((input) => {
             expect(input.props().checked).toBe(false);
           });
         });
@@ -363,13 +366,9 @@ describe('Create Rollup Job, step 5: Metrics', () => {
          */
 
         // 1.
-        find('rollupJobMetricsSelectAllCheckbox-avg')
-          .first()
-          .simulate('change', { checked: true });
+        find('rollupJobMetricsSelectAllCheckbox-avg').first().simulate('change', { checked: true });
         // 2.
-        find('rollupJobMetricsSelectAllCheckbox-max')
-          .first()
-          .simulate('change', { checked: true });
+        find('rollupJobMetricsSelectAllCheckbox-max').first().simulate('change', { checked: true });
 
         const selectAllCheckbox = getSelectAllInputForRow(0);
 
@@ -380,25 +379,15 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         selectAllCheckbox.simulate('change', { checked: false });
 
         // 4.
-        expect(
-          find('rollupJobMetricsSelectAllCheckbox-avg')
-            .first()
-            .props().checked
-        ).toBe(false);
-        expect(
-          find('rollupJobMetricsSelectAllCheckbox-max')
-            .first()
-            .props().checked
-        ).toBe(false);
+        expect(find('rollupJobMetricsSelectAllCheckbox-avg').first().props().checked).toBe(false);
+        expect(find('rollupJobMetricsSelectAllCheckbox-max').first().props().checked).toBe(false);
 
         let rows = getFieldListTableRows();
         // 5.
         getSelectAllInputForRow(rows.length - 1).simulate('change', { checked: true });
 
         // 6.
-        find('rollupJobMetricsSelectAllCheckbox-max')
-          .first()
-          .simulate('change', { checked: true });
+        find('rollupJobMetricsSelectAllCheckbox-max').first().simulate('change', { checked: true });
         find('rollupJobMetricsSelectAllCheckbox-max')
           .first()
           .simulate('change', { checked: false });
@@ -406,7 +395,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         rows = getFieldListTableRows();
         const lastRowFieldChooserColumn = getFieldChooserColumnForRow(rows.length - 1);
         // 7.
-        lastRowFieldChooserColumn.reactWrapper.find('input').forEach(input => {
+        lastRowFieldChooserColumn.reactWrapper.find('input').forEach((input) => {
           const props = input.props();
           if (props['data-test-subj'].endsWith('max') || props['data-test-subj'].endsWith('All')) {
             expect(props.checked).toBe(false);

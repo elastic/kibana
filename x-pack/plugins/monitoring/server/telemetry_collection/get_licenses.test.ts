@@ -18,8 +18,8 @@ describe('get_licenses', () => {
       ],
     },
   };
-  const expectedClusters = response.hits.hits.map(hit => hit._source);
-  const clusterUuids = expectedClusters.map(cluster => ({ clusterUuid: cluster.cluster_uuid }));
+  const expectedClusters = response.hits.hits.map((hit) => hit._source);
+  const clusterUuids = expectedClusters.map((cluster) => ({ clusterUuid: cluster.cluster_uuid }));
   const expectedLicenses = {
     abc: { type: 'basic' },
     xyz: { type: 'basic' },

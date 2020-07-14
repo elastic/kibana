@@ -30,22 +30,15 @@ export function apmInit(config) {
   return apmEnabled ? `init(${config})` : '';
 }
 
-export function getApmConfig(appMetadata) {
+export function getApmConfig(requestPath) {
   if (!apmEnabled) {
-    return {};
+    return null;
   }
-  /**
-   * we use the injected app metadata from the server to extract the
-   * app URL path to be used for page-load transaction
-   */
-  const navLink = appMetadata.getNavLink();
-  const pageUrl = navLink ? navLink.toJSON().url : appMetadata._url;
-
   const config = {
     ...getConfig('kibana-frontend'),
     ...{
       active: true,
-      pageLoadTransactionName: pageUrl,
+      pageLoadTransactionName: requestPath,
     },
   };
   /**

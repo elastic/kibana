@@ -53,7 +53,7 @@ describe('plugin discovery/plugin pack', () => {
       pack.getPluginSpecs();
       sinon.assert.calledOnce(provider);
       sinon.assert.calledWithExactly(provider, {
-        Plugin: sinon.match(Class => {
+        Plugin: sinon.match((Class) => {
           return Class.prototype instanceof PluginSpec;
         }, 'Subclass of PluginSpec'),
       });
@@ -96,7 +96,7 @@ describe('plugin discovery/plugin pack', () => {
       const otherPack = new PluginPack({
         path: '/dev/null',
         pkg: { name: 'foo', version: 'kibana' },
-        provider: api => {
+        provider: (api) => {
           OtherPluginSpecClass = api.Plugin;
         },
       });
@@ -112,12 +112,12 @@ describe('plugin discovery/plugin pack', () => {
         new PluginPack({ provider: () => true }),
         new PluginPack({ provider: () => new Date() }),
         new PluginPack({ provider: () => /foo.*bar/ }),
-        new PluginPack({ provider: () => function() {} }),
+        new PluginPack({ provider: () => function () {} }),
         new PluginPack({ provider: () => new OtherPluginSpecClass({}) }),
       ];
 
       for (const pack of badPacks) {
-        expect(() => pack.getPluginSpecs()).to.throwError(error => {
+        expect(() => pack.getPluginSpecs()).to.throwError((error) => {
           expect(error.message).to.contain('unexpected plugin export');
         });
       }

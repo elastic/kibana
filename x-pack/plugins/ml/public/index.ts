@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializer } from 'kibana/public';
+import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
 import './index.scss';
 import {
   MlPlugin,
@@ -19,6 +19,7 @@ export const plugin: PluginInitializer<
   MlPluginStart,
   MlSetupDependencies,
   MlStartDependencies
-> = () => new MlPlugin();
+> = (initializerContext: PluginInitializerContext) => new MlPlugin(initializerContext);
 
 export { MlPluginSetup, MlPluginStart };
+export * from './shared';

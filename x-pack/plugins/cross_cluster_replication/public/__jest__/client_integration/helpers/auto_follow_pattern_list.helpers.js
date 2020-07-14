@@ -12,13 +12,24 @@ import { routing } from '../../../app/services/routing';
 const testBedConfig = {
   store: ccrStore,
   memoryRouter: {
-    onRouter: router => (routing.reactRouter = router),
+    onRouter: (router) =>
+      (routing.reactRouter = {
+        ...router,
+        history: {
+          ...router.history,
+          parentHistory: {
+            createHref: () => '',
+            push: () => {},
+          },
+        },
+        getUrlForApp: () => '',
+      }),
   },
 };
 
 const initTestBed = registerTestBed(AutoFollowPatternList, testBedConfig);
 
-export const setup = props => {
+export const setup = (props) => {
   const testBed = initTestBed(props);
   const EUI_TABLE = 'autoFollowPatternListTable';
 
@@ -84,6 +95,10 @@ export const setup = props => {
     autoFollowPatternLink.simulate('click');
   };
 
+  const clickPaginationNextButton = () => {
+    testBed.find('autoFollowPatternListTable.pagination-button-next').simulate('click');
+  };
+
   return {
     ...testBed,
     actions: {
@@ -94,6 +109,7 @@ export const setup = props => {
       clickAutoFollowPatternAt,
       getPatternsActionMenuItemText,
       clickPatternsActionMenuItem,
+      clickPaginationNextButton,
     },
   };
 };

@@ -5,8 +5,9 @@
  */
 
 import React from 'react';
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import { CauseStacktrace } from './CauseStacktrace';
+import { mountWithTheme } from '../../../utils/testHelpers';
 
 describe('CauseStacktrace', () => {
   describe('render', () => {
@@ -15,7 +16,7 @@ describe('CauseStacktrace', () => {
         const props = { id: 'testId', message: 'testMessage' };
 
         expect(
-          mount(<CauseStacktrace {...props} />).find('CausedBy')
+          mountWithTheme(<CauseStacktrace {...props} />).find('CausedBy')
         ).toHaveLength(1);
       });
     });
@@ -24,11 +25,11 @@ describe('CauseStacktrace', () => {
       it('says "Caused by …', () => {
         const props = {
           id: 'testId',
-          stackframes: [{ filename: 'testFilename', line: { number: 1 } }]
+          stackframes: [{ filename: 'testFilename', line: { number: 1 } }],
         };
 
         expect(
-          mount(<CauseStacktrace {...props} />)
+          mountWithTheme(<CauseStacktrace {...props} />)
             .find('EuiTitle span')
             .text()
         ).toEqual('…');
@@ -40,7 +41,7 @@ describe('CauseStacktrace', () => {
         const props = {
           id: 'testId',
           message: 'testMessage',
-          stackframes: [{ filename: 'testFilename', line: { number: 1 } }]
+          stackframes: [{ filename: 'testFilename', line: { number: 1 } }],
         };
 
         expect(

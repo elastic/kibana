@@ -25,12 +25,12 @@ import angular, { IModule } from 'angular';
 import 'angular-sanitize';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import {
-  AppMountContext,
   ChromeStart,
   IUiSettingsClient,
   CoreStart,
   SavedObjectsClientContract,
   PluginInitializerContext,
+  ScopedHistory,
 } from 'kibana/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { Storage } from '../../../kibana_utils/public';
@@ -41,7 +41,12 @@ import { NavigationPublicPluginStart as NavigationStart } from '../../../navigat
 import { DataPublicPluginStart } from '../../../data/public';
 import { SharePluginStart } from '../../../share/public';
 import { KibanaLegacyStart, configureAppAngularModule } from '../../../kibana_legacy/public';
-import { SavedObjectLoader } from '../../../saved_objects/public';
+import { SavedObjectLoader, SavedObjectsStart } from '../../../saved_objects/public';
+
+// required for i18nIdDirective
+import 'angular-sanitize';
+// required for ngRoute
+import 'angular-route';
 
 export interface RenderDeps {
   pluginInitializerContext: PluginInitializerContext;
@@ -63,20 +68,25 @@ export interface RenderDeps {
   embeddable: EmbeddableStart;
   localStorage: Storage;
   share?: SharePluginStart;
-  config: KibanaLegacyStart['config'];
   usageCollection?: UsageCollectionSetup;
+  navigateToDefaultApp: KibanaLegacyStart['navigateToDefaultApp'];
+  navigateToLegacyKibanaUrl: KibanaLegacyStart['navigateToLegacyKibanaUrl'];
+  scopedHistory: () => ScopedHistory;
+  savedObjects: SavedObjectsStart;
+  restorePreviousUrl: () => void;
 }
 
 let angularModuleInstance: IModule | null = null;
 
 export const renderApp = (element: HTMLElement, appBasePath: string, deps: RenderDeps) => {
   if (!angularModuleInstance) {
-    angularModuleInstance = createLocalAngularModule(deps.core, deps.navigation);
+    angularModuleInstance = createLocalAngularModule();
     // global routing stuff
     configureAppAngularModule(
       angularModuleInstance,
       { core: deps.core, env: deps.pluginInitializerContext.env },
-      true
+      true,
+      deps.scopedHistory
     );
     initDashboardApp(angularModuleInstance, deps);
   }
@@ -84,11 +94,12 @@ export const renderApp = (element: HTMLElement, appBasePath: string, deps: Rende
   const $injector = mountDashboardApp(appBasePath, element);
 
   return () => {
+    ($injector.get('kbnUrlStateStorage') as any).cancel();
     $injector.get('$rootScope').$destroy();
   };
 };
 
-const mainTemplate = (basePath: string) => `<div ng-view class="kbnLocalApplicationWrapper">
+const mainTemplate = (basePath: string) => `<div ng-view class="dshAppContainer">
   <base href="${basePath}" />
 </div>`;
 
@@ -98,7 +109,7 @@ const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react'];
 
 function mountDashboardApp(appBasePath: string, element: HTMLElement) {
   const mountpoint = document.createElement('div');
-  mountpoint.setAttribute('class', 'kbnLocalApplicationWrapper');
+  mountpoint.setAttribute('class', 'dshAppContainer');
   // eslint-disable-next-line
   mountpoint.innerHTML = mainTemplate(appBasePath);
   // bootstrap angular into detached element and attach it later to
@@ -109,7 +120,7 @@ function mountDashboardApp(appBasePath: string, element: HTMLElement) {
   return $injector;
 }
 
-function createLocalAngularModule(core: AppMountContext['core'], navigation: NavigationStart) {
+function createLocalAngularModule() {
   createLocalI18nModule();
   createLocalIconModule();
 
@@ -124,7 +135,7 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
 function createLocalIconModule() {
   angular
     .module('app/dashboard/icon', ['react'])
-    .directive('icon', reactDirective => reactDirective(EuiIcon));
+    .directive('icon', (reactDirective) => reactDirective(EuiIcon));
 }
 
 function createLocalI18nModule() {

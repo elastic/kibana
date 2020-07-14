@@ -50,7 +50,7 @@ jest.mock('../../capabilities/check_capabilities', () => ({
 }));
 
 jest.mock('../../../../../../../src/plugins/kibana_react/public', () => ({
-  withKibana: comp => {
+  withKibana: (comp) => {
     return comp;
   },
 }));

@@ -30,6 +30,8 @@ import { documentationLinksService } from '../../../services/documentation';
 import { SectionLoading } from '../../';
 import { StepProps } from './';
 
+import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
+
 export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
   policy,
   updatePolicy,
@@ -50,7 +52,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
     sendRequest: reloadRepositories,
   } = useLoadRepositories();
 
-  const { i18n } = useServices();
+  const { i18n, history } = useServices();
 
   // State for touched inputs
   const [touched, setTouched] = useState({
@@ -108,7 +110,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           defaultValue={policy.name}
           fullWidth
           onBlur={() => setTouched({ ...touched, name: true })}
-          onChange={e => {
+          onChange={(e) => {
             updatePolicy(
               {
                 name: e.target.value,
@@ -226,7 +228,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           }}
           actions={
             <EuiButton
-              href={linkToAddRepository(currentUrl)}
+              {...reactRouterNavigate(history, linkToAddRepository(currentUrl))}
               color="danger"
               iconType="plusInCircle"
               data-test-subj="addRepositoryButton"
@@ -262,7 +264,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
         }))}
         value={policy.repository || repositories[0].name}
         onBlur={() => setTouched({ ...touched, repository: true })}
-        onChange={e => {
+        onChange={(e) => {
           updatePolicy(
             {
               repository: e.target.value,
@@ -333,7 +335,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
         <EuiFieldText
           defaultValue={policy.snapshotName}
           fullWidth
-          onChange={e => {
+          onChange={(e) => {
             updatePolicy(
               {
                 snapshotName: e.target.value,
@@ -412,7 +414,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             <EuiFieldText
               defaultValue={policy.schedule}
               fullWidth
-              onChange={e => {
+              onChange={(e) => {
                 updatePolicy(
                   {
                     schedule: e.target.value,

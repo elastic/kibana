@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller, CoreSetup, Logger } from 'kibana/server';
+import { LegacyAPICaller, CoreSetup, Logger } from 'kibana/server';
 import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 import moment from 'moment';
 import {
   RunContext,
@@ -69,7 +70,7 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
 
 export async function getDailyEvents(
   kibanaIndex: string,
-  callCluster: APICaller
+  callCluster: LegacyAPICaller
 ): Promise<{
   byDate: Record<string, Record<string, number>>;
   suggestionsByDate: Record<string, Record<string, number>>;
@@ -140,15 +141,15 @@ export async function getDailyEvents(
   const byDateByType: Record<string, Record<string, number>> = {};
   const suggestionsByDate: Record<string, Record<string, number>> = {};
 
-  metrics.aggregations!.daily.buckets.forEach(daily => {
+  metrics.aggregations!.daily.buckets.forEach((daily) => {
     const byType: Record<string, number> = byDateByType[daily.key] || {};
-    daily.groups.buckets.regularEvents.names.buckets.forEach(bucket => {
+    daily.groups.buckets.regularEvents.names.buckets.forEach((bucket) => {
       byType[bucket.key] = (bucket.sums.value || 0) + (byType[daily.key] || 0);
     });
     byDateByType[daily.key] = byType;
 
     const suggestionsByType: Record<string, number> = suggestionsByDate[daily.key] || {};
-    daily.groups.buckets.suggestionEvents.names.buckets.forEach(bucket => {
+    daily.groups.buckets.suggestionEvents.names.buckets.forEach((bucket) => {
       suggestionsByType[bucket.key] =
         (bucket.sums.value || 0) + (suggestionsByType[daily.key] || 0);
     });
@@ -184,14 +185,14 @@ export function telemetryTaskRunner(
 ) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
-    const callCluster = async (...args: Parameters<APICaller>) => {
+    const callCluster = async (...args: Parameters<LegacyAPICaller>) => {
       const [coreStart] = await core.getStartServices();
       return coreStart.elasticsearch.legacy.client.callAsInternalUser(...args);
     };
 
     return {
       async run() {
-        const kibanaIndex = (await config.toPromise()).kibana.index;
+        const kibanaIndex = (await config.pipe(first()).toPromise()).kibana.index;
 
         return Promise.all([
           getDailyEvents(kibanaIndex, callCluster),
@@ -208,7 +209,7 @@ export function telemetryTaskRunner(
               runAt: getNextMidnight(),
             };
           })
-          .catch(errMsg => logger.warn(`Error executing lens telemetry task: ${errMsg}`));
+          .catch((errMsg) => logger.warn(`Error executing lens telemetry task: ${errMsg}`));
       },
       async cancel() {},
     };
@@ -216,8 +217,5 @@ export function telemetryTaskRunner(
 }
 
 function getNextMidnight() {
-  return moment()
-    .add(1, 'day')
-    .startOf('day')
-    .toDate();
+  return moment().add(1, 'day').startOf('day').toDate();
 }

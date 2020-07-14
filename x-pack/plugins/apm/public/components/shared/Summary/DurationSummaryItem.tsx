@@ -18,13 +18,13 @@ interface Props {
 const DurationSummaryItem = ({
   duration,
   totalDuration,
-  parentType
+  parentType,
 }: Props) => {
   const calculatedTotalDuration =
     totalDuration === undefined ? duration : totalDuration;
 
   const label = i18n.translate('xpack.apm.transactionDurationLabel', {
-    defaultMessage: 'Duration'
+    defaultMessage: 'Duration',
   });
   return (
     <>

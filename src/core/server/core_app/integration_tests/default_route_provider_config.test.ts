@@ -44,16 +44,16 @@ describe('default route provider', () => {
     await root.shutdown();
   });
 
-  it('redirects to the configured default route respecting basePath', async function() {
+  it('redirects to the configured default route respecting basePath', async function () {
     const { status, header } = await kbnTestServer.request.get(root, '/');
 
     expect(status).toEqual(302);
     expect(header).toMatchObject({
-      location: '/hello/app/kibana',
+      location: '/hello/app/home',
     });
   });
 
-  it('ignores invalid values', async function() {
+  it('ignores invalid values', async function () {
     const invalidRoutes = [
       'http://not-your-kibana.com',
       '///example.com',
@@ -71,11 +71,11 @@ describe('default route provider', () => {
     const { status, header } = await kbnTestServer.request.get(root, '/');
     expect(status).toEqual(302);
     expect(header).toMatchObject({
-      location: '/hello/app/kibana',
+      location: '/hello/app/home',
     });
   });
 
-  it('consumes valid values', async function() {
+  it('consumes valid values', async function () {
     await kbnTestServer.request
       .post(root, '/api/kibana/settings/defaultRoute')
       .send({ value: '/valid' })

@@ -7,7 +7,7 @@ import expect from '@kbn/expect';
 
 const application = 'has_privileges_test';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   describe('has_privileges', () => {
     before(async () => {
       const es = getService('legacyEs');
@@ -69,7 +69,7 @@ export default function({ getService }) {
     }
 
     it('should return true when user has the requested privilege', async () => {
-      await createHasPrivilegesRequest(['read']).then(response => {
+      await createHasPrivilegesRequest(['read']).then((response) => {
         expect(response.body).to.eql({
           username: 'testuser',
           has_all_requested: true,
@@ -88,7 +88,7 @@ export default function({ getService }) {
 
     it('should return true when user has a newly created privilege', async () => {
       // verify user does not have privilege yet
-      await createHasPrivilegesRequest(['action:a_new_privilege']).then(response => {
+      await createHasPrivilegesRequest(['action:a_new_privilege']).then((response) => {
         expect(response.body).to.eql({
           username: 'testuser',
           has_all_requested: false,
@@ -120,7 +120,7 @@ export default function({ getService }) {
       });
 
       // verify user has new privilege
-      await createHasPrivilegesRequest(['action:a_new_privilege']).then(response => {
+      await createHasPrivilegesRequest(['action:a_new_privilege']).then((response) => {
         expect(response.body).to.eql({
           username: 'testuser',
           has_all_requested: true,

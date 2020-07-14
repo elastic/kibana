@@ -18,7 +18,7 @@
  */
 import _ from 'lodash';
 import { SavedObject, SavedObjectConfig } from '../../types';
-import { expandShorthand } from '../../../../kibana_utils/public';
+import { extractSearchSourceReferences, expandShorthand } from '../../../../data/public';
 
 export function serializeSavedObject(savedObject: SavedObject, config: SavedObjectConfig) {
   // mapping definition for the fields that this object will expose
@@ -44,6 +44,15 @@ export function serializeSavedObject(savedObject: SavedObject, config: SavedObje
       searchSourceJSON,
       references: searchSourceReferences,
     } = savedObject.searchSource.serialize();
+    attributes.kibanaSavedObjectMeta = { searchSourceJSON };
+    references.push(...searchSourceReferences);
+  }
+
+  if (savedObject.searchSourceFields) {
+    const [searchSourceFields, searchSourceReferences] = extractSearchSourceReferences(
+      savedObject.searchSourceFields
+    );
+    const searchSourceJSON = JSON.stringify(searchSourceFields);
     attributes.kibanaSavedObjectMeta = { searchSourceJSON };
     references.push(...searchSourceReferences);
   }

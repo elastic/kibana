@@ -35,10 +35,19 @@ function flatKeys(source) {
   return _.uniq(_.flattenDeep(recursivelyFlatKeys(source))).sort((a, b) => a.localeCompare(b));
 }
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
+  const es = getService('es');
 
   describe('/api/telemetry/v2/clusters/_stats', () => {
+    before('create some telemetry-data tracked indices', async () => {
+      return es.indices.create({ index: 'filebeat-telemetry_tests_logs' });
+    });
+
+    after('cleanup telemetry-data tracked indices', () => {
+      return es.indices.delete({ index: 'filebeat-telemetry_tests_logs' });
+    });
+
     it('should pull local stats and validate data types', async () => {
       const timeRange = {
         min: '2018-07-23T22:07:00Z',
@@ -71,6 +80,17 @@ export default function({ getService }) {
       expect(stats.stack_stats.kibana.plugins.csp.strict).to.be(true);
       expect(stats.stack_stats.kibana.plugins.csp.warnLegacyBrowsers).to.be(true);
       expect(stats.stack_stats.kibana.plugins.csp.rulesChangedFromDefault).to.be(false);
+
+      // Testing stack_stats.data
+      expect(stats.stack_stats.data).to.be.an('object');
+      expect(stats.stack_stats.data).to.be.an('array');
+      expect(stats.stack_stats.data[0]).to.be.an('object');
+      expect(stats.stack_stats.data[0].pattern_name).to.be('filebeat');
+      expect(stats.stack_stats.data[0].shipper).to.be('filebeat');
+      expect(stats.stack_stats.data[0].index_count).to.be(1);
+      expect(stats.stack_stats.data[0].doc_count).to.be(0);
+      expect(stats.stack_stats.data[0].ecs_index_count).to.be(0);
+      expect(stats.stack_stats.data[0].size_in_bytes).to.be.greaterThan(0);
     });
 
     it('should pull local stats and validate fields', async () => {
@@ -113,6 +133,7 @@ export default function({ getService }) {
         'cluster_stats.nodes.plugins',
         'cluster_stats.nodes.process',
         'cluster_stats.nodes.versions',
+        'cluster_stats.nodes.usage',
         'cluster_stats.status',
         'cluster_stats.timestamp',
         'cluster_uuid',
@@ -127,7 +148,7 @@ export default function({ getService }) {
         'version',
       ];
 
-      expect(expected.every(m => actual.includes(m))).to.be.ok();
+      expect(expected.every((m) => actual.includes(m))).to.be.ok();
     });
   });
 }

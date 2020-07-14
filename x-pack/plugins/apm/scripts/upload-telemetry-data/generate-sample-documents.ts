@@ -11,12 +11,12 @@ import {
   range,
   mapValues,
   isPlainObject,
-  flatten
+  flatten,
 } from 'lodash';
 import uuid from 'uuid';
 import {
   CollectTelemetryParams,
-  collectDataTelemetry
+  collectDataTelemetry,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../server/lib/apm_telemetry/collect_data_telemetry';
 
@@ -64,8 +64,8 @@ export async function generateSampleDocuments(
       instances: 50,
       variation: {
         min: 0.1,
-        max: 4
-      }
+        max: 4,
+      },
     },
     preferredOptions
   );
@@ -78,24 +78,24 @@ export async function generateSampleDocuments(
   const dateOfScriptExecution = new Date();
 
   return flatten(
-    range(0, opts.instances).map(instanceNo => {
+    range(0, opts.instances).map(() => {
       const instanceId = uuid.v4();
       const defaults = {
         cluster_uuid: instanceId,
         stack_stats: {
           kibana: {
             versions: {
-              version: '8.0.0'
-            }
-          }
-        }
+              version: '8.0.0',
+            },
+          },
+        },
       };
 
       const instanceVariation =
         Math.random() * (opts.variation.max - opts.variation.min) +
         opts.variation.min;
 
-      return range(0, opts.days).map(dayNo => {
+      return range(0, opts.days).map((dayNo) => {
         const dailyGrowth = Math.pow(1.005, opts.days - 1 - dayNo);
 
         const timestamp = Date.UTC(
@@ -104,7 +104,7 @@ export async function generateSampleDocuments(
           -dayNo
         );
 
-        const generated = mapValuesDeep(omit(sample, 'versions'), value =>
+        const generated = mapValuesDeep(omit(sample, 'versions'), (value) =>
           randomize(value, instanceVariation, dailyGrowth)
         );
 
@@ -113,10 +113,10 @@ export async function generateSampleDocuments(
           stack_stats: {
             kibana: {
               plugins: {
-                apm: merge({}, sample, generated)
-              }
-            }
-          }
+                apm: merge({}, sample, generated),
+              },
+            },
+          },
         });
       });
     })

@@ -5,10 +5,10 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import React, { useContext, useEffect, useRef } from 'react';
-import * as d3 from 'd3';
+import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { Chart, Datum, Partition, Settings, PartitionLayout } from '@elastic/charts';
 import { DonutChartLegend } from './donut_chart_legend';
 import { UptimeThemeContext } from '../../../contexts';
 
@@ -16,7 +16,6 @@ interface DonutChartProps {
   down: number;
   height: number;
   up: number;
-  width: number;
 }
 
 export const GreenCheckIcon = styled(EuiIcon)`
@@ -28,77 +27,56 @@ export const GreenCheckIcon = styled(EuiIcon)`
   position: absolute;
 `;
 
-export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
-  const chartElement = useRef<SVGSVGElement | null>(null);
-
+export const DonutChart = ({ height, down, up }: DonutChartProps) => {
   const {
     colors: { danger, gray },
+    chartTheme,
   } = useContext(UptimeThemeContext);
-
-  let upCount = up;
-  if (up === 0 && down === 0) {
-    upCount = 1;
-  }
-  useEffect(() => {
-    if (chartElement.current !== null) {
-      // we must remove any existing paths before painting
-      d3.select(chartElement.current)
-        .selectAll('g')
-        .remove();
-
-      const svgElement = d3
-        .select(chartElement.current)
-        .append('g')
-        .attr('transform', `translate(${width / 2}, ${height / 2})`);
-
-      const color = d3.scale
-        .ordinal()
-        .domain(['up', 'down'])
-        .range([gray, danger]);
-
-      const pieGenerator = d3.layout
-        .pie()
-        .value(({ value }: any) => value)
-        // these start/end angles will reverse the direction of the pie,
-        // which matches our design
-        .startAngle(2 * Math.PI)
-        .endAngle(0);
-
-      svgElement
-        .selectAll('g')
-        .data(
-          // @ts-ignore pie generator expects param of type number[], but only works with
-          // output of d3.entries, which is like Array<{ key: string, value: number }>
-          pieGenerator(d3.entries({ up: upCount, down }))
-        )
-        .enter()
-        .append('path')
-        .attr(
-          'd',
-          // @ts-ignore attr does not expect a param of type Arc<Arc> but it behaves as desired
-          d3.svg
-            .arc()
-            .innerRadius(width * 0.28)
-            .outerRadius(Math.min(width, height) / 2 - 10)
-        )
-        .attr('fill', (d: any) => color(d.data.key));
-    }
-  }, [danger, down, gray, height, upCount, width]);
 
   return (
     <EuiFlexGroup alignItems="center" responsive={false}>
       <EuiFlexItem grow={false} style={{ position: 'relative' }}>
-        <svg
+        <Chart
+          size={height}
           aria-label={i18n.translate('xpack.uptime.snapshot.donutChart.ariaLabel', {
             defaultMessage:
               'Pie chart showing the current status. {down} of {total} monitors are down.',
             values: { down, total: up + down },
           })}
-          ref={chartElement}
-          width={width}
-          height={height}
-        />
-        {/* When all monitors are up we show green check icon in middle of donut to indicate, all is well */}
+          {...chartTheme}
+        >
+          <Settings />
+          <Partition
+            id="spec_1"
+            data={[
+              { value: down, label: 'Down' },
+              { value: up, label: 'Up' },
+            ]}
+            valueAccessor={(d: Datum) => d.value as number}
+            layers={[
+              {
+                groupByRollup: (d: Datum) => d.label,
+                nodeLabel: (d: Datum) => d,
+                shape: {
+                  fillColor: (d: Datum) => {
+                    return d.dataName === 'Down' ? danger : gray;
+                  },
+                },
+              },
+            ]}
+            config={{
+              partitionLayout: PartitionLayout.sunburst,
+              linkLabel: {
+                maximumSection: Infinity,
+              },
+              margin: { top: 0, bottom: 0, left: 0, right: 0 },
+              idealFontSizeJump: 1.1,
+              outerSizeRatio: 0.9,
+              emptySizeRatio: 0.4,
+              circlePadding: 4,
+            }}
+          />
+        </Chart>
         {down === 0 && <GreenCheckIcon className="greenCheckIcon" type="checkInCircleFilled" />}
       </EuiFlexItem>
       <EuiFlexItem>

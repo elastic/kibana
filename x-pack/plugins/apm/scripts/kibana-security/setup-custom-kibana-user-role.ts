@@ -15,7 +15,7 @@ import { argv } from 'yargs';
 
 const config = yaml.safeLoad(
   fs.readFileSync(
-    path.join(__filename, '../../../../../../../config/kibana.dev.yml'),
+    path.join(__filename, '../../../../../../config/kibana.dev.yml'),
     'utf8'
   )
 );
@@ -51,7 +51,7 @@ const getKibanaBasePath = once(async () => {
   return '';
 });
 
-init().catch(e => {
+init().catch((e) => {
   if (e instanceof AbortError) {
     console.error(e.message);
   } else if (isAxiosError(e)) {
@@ -130,30 +130,31 @@ async function init() {
   // read/write access to all apps + apm index access
   await createOrUpdateUser({
     username: 'apm_write_user',
-    roles: ['apm_user', KIBANA_WRITE_ROLE]
+    roles: ['apm_user', KIBANA_WRITE_ROLE],
   });
 
   // read access to all apps + apm index access
   await createOrUpdateUser({
     username: 'apm_read_user',
-    roles: ['apm_user', KIBANA_READ_ROLE]
+    roles: ['apm_user', KIBANA_READ_ROLE],
   });
 
   // read/write access to all apps (no apm index access)
   await createOrUpdateUser({
     username: 'kibana_write_user',
-    roles: [KIBANA_WRITE_ROLE]
+    roles: [KIBANA_WRITE_ROLE],
   });
 }
 
 async function isSecurityEnabled() {
-  interface XPackInfo {
-    features: { security?: { allow_rbac: boolean } };
+  try {
+    await callKibana({
+      url: `/internal/security/me`,
+    });
+    return true;
+  } catch (err) {
+    return false;
   }
-  const { features } = await callKibana<XPackInfo>({
-    url: `/api/xpack/v1/info`
-  });
-  return features.security?.allow_rbac;
 }
 
 async function callKibana<T>(options: AxiosRequestConfig): Promise<T> {
@@ -163,9 +164,9 @@ async function callKibana<T>(options: AxiosRequestConfig): Promise<T> {
     baseURL: KIBANA_BASE_URL + kibanaBasePath,
     auth: {
       username: ELASTICSEARCH_USERNAME,
-      password: ELASTICSEARCH_PASSWORD
+      password: ELASTICSEARCH_PASSWORD,
     },
-    headers: { 'kbn-xsrf': 'true', ...options.headers }
+    headers: { 'kbn-xsrf': 'true', ...options.headers },
   };
 
   const { data } = await axios.request(reqOptions);
@@ -174,7 +175,7 @@ async function callKibana<T>(options: AxiosRequestConfig): Promise<T> {
 
 async function createRole({
   roleName,
-  privilege
+  privilege,
 }: {
   roleName: string;
   privilege: 'read' | 'all';
@@ -191,8 +192,8 @@ async function createRole({
     data: {
       metadata: { version: 1 },
       elasticsearch: { cluster: [], indices: [] },
-      kibana: [{ base: [privilege], feature: {}, spaces: ['*'] }]
-    }
+      kibana: [{ base: [privilege], feature: {}, spaces: ['*'] }],
+    },
   });
 
   console.log(`Created role "${roleName}" with privilege "${privilege}"`);
@@ -214,8 +215,8 @@ async function createUser(newUser: User) {
     data: {
       ...newUser,
       enabled: true,
-      password: ELASTICSEARCH_PASSWORD
-    }
+      password: ELASTICSEARCH_PASSWORD,
+    },
   });
 
   console.log(`User "${newUser.username}" was created`);
@@ -237,7 +238,7 @@ async function updateUser(existingUser: User, newUser: User) {
   await callKibana({
     method: 'POST',
     url: `/internal/security/users/${username}`,
-    data: { ...existingUser, roles: allRoles }
+    data: { ...existingUser, roles: allRoles },
   });
 
   console.log(`User "${username}" was updated`);
@@ -246,7 +247,7 @@ async function updateUser(existingUser: User, newUser: User) {
 async function getUser(username: string) {
   try {
     return await callKibana<User>({
-      url: `/internal/security/users/${username}`
+      url: `/internal/security/users/${username}`,
     });
   } catch (e) {
     // return empty if user doesn't exist
@@ -262,7 +263,7 @@ async function getRole(roleName: string) {
   try {
     return await callKibana({
       method: 'GET',
-      url: `/api/security/role/${roleName}`
+      url: `/api/security/role/${roleName}`,
     });
   } catch (e) {
     // return empty if role doesn't exist
@@ -278,7 +279,7 @@ async function getKibanaVersion() {
   try {
     const res: { version: { number: number } } = await callKibana({
       method: 'GET',
-      url: `/api/status`
+      url: `/api/status`,
     });
     return res.version.number;
   } catch (e) {

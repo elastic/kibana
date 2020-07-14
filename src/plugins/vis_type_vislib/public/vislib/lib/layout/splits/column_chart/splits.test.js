@@ -25,8 +25,8 @@ import { chartTitleSplit } from './chart_title_split';
 import { xAxisSplit } from './x_axis_split';
 import { yAxisSplit } from './y_axis_split';
 
-describe('Vislib Split Function Test Suite', function() {
-  describe('Column Chart', function() {
+describe('Vislib Split Function Test Suite', function () {
+  describe('Column Chart', function () {
     let el;
     const data = {
       rows: [
@@ -150,54 +150,46 @@ describe('Vislib Split Function Test Suite', function() {
     };
 
     beforeEach(() => {
-      el = d3
-        .select('body')
-        .append('div')
-        .attr('class', 'visualization')
-        .datum(data);
+      el = d3.select('body').append('div').attr('class', 'visualization').datum(data);
     });
 
-    afterEach(function() {
+    afterEach(function () {
       el.remove();
     });
 
-    describe('chart split function', function() {
+    describe('chart split function', function () {
       let fixture;
 
-      beforeEach(function() {
+      beforeEach(function () {
         fixture = d3.select('.visualization').call(chartSplit);
       });
 
-      afterEach(function() {
+      afterEach(function () {
         fixture.remove();
       });
 
-      it('should append the correct number of divs', function() {
+      it('should append the correct number of divs', function () {
         expect($('.chart').length).toBe(2);
       });
 
-      it('should add the correct class name', function() {
+      it('should add the correct class name', function () {
         expect(!!$('.visWrapper__splitCharts--row').length).toBe(true);
       });
     });
 
-    describe('chart title split function', function() {
+    describe('chart title split function', function () {
       let visEl;
       let newEl;
       let fixture;
 
-      beforeEach(function() {
+      beforeEach(function () {
         visEl = el.append('div').attr('class', 'visWrapper');
         visEl.append('div').attr('class', 'visAxis__splitTitles--x');
         visEl.append('div').attr('class', 'visAxis__splitTitles--y');
         visEl.select('.visAxis__splitTitles--x').call(chartTitleSplit);
         visEl.select('.visAxis__splitTitles--y').call(chartTitleSplit);
 
-        newEl = d3
-          .select('body')
-          .append('div')
-          .attr('class', 'visWrapper')
-          .datum({ series: [] });
+        newEl = d3.select('body').append('div').attr('class', 'visWrapper').datum({ series: [] });
 
         newEl.append('div').attr('class', 'visAxis__splitTitles--x');
         newEl.append('div').attr('class', 'visAxis__splitTitles--y');
@@ -207,29 +199,29 @@ describe('Vislib Split Function Test Suite', function() {
         fixture = newEl.selectAll(this.childNodes)[0].length;
       });
 
-      afterEach(function() {
+      afterEach(function () {
         newEl.remove();
       });
 
-      it('should append the correct number of divs', function() {
+      it('should append the correct number of divs', function () {
         expect($('.chart-title').length).toBe(2);
       });
 
-      it('should remove the correct div', function() {
+      it('should remove the correct div', function () {
         expect($('.visAxis__splitTitles--y').length).toBe(1);
         expect($('.visAxis__splitTitles--x').length).toBe(0);
       });
 
-      it('should remove all chart title divs when only one chart is rendered', function() {
+      it('should remove all chart title divs when only one chart is rendered', function () {
         expect(fixture).toBe(0);
       });
     });
 
-    describe('x axis split function', function() {
+    describe('x axis split function', function () {
       let fixture;
       let divs;
 
-      beforeEach(function() {
+      beforeEach(function () {
         fixture = d3
           .select('body')
           .append('div')
@@ -239,21 +231,21 @@ describe('Vislib Split Function Test Suite', function() {
         divs = d3.selectAll('.x-axis-div')[0];
       });
 
-      afterEach(function() {
+      afterEach(function () {
         fixture.remove();
         $(divs).remove();
       });
 
-      it('should append the correct number of divs', function() {
+      it('should append the correct number of divs', function () {
         expect(divs.length).toBe(2);
       });
     });
 
-    describe('y axis split function', function() {
+    describe('y axis split function', function () {
       let fixture;
       let divs;
 
-      beforeEach(function() {
+      beforeEach(function () {
         fixture = d3
           .select('body')
           .append('div')
@@ -265,12 +257,12 @@ describe('Vislib Split Function Test Suite', function() {
         divs = d3.selectAll('.y-axis-div')[0];
       });
 
-      afterEach(function() {
+      afterEach(function () {
         fixture.remove();
         $(divs).remove();
       });
 
-      it('should append the correct number of divs', function() {
+      it('should append the correct number of divs', function () {
         expect(divs.length).toBe(2);
       });
     });

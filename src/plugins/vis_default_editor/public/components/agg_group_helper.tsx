@@ -63,13 +63,13 @@ const calcAggIsTooLow = (
 };
 
 function isInvalidAggsTouched(aggsState: AggsState) {
-  const invalidAggs = Object.values(aggsState).filter(agg => !agg.valid);
+  const invalidAggs = Object.values(aggsState).filter((agg) => !agg.valid);
 
   if (isEmpty(invalidAggs)) {
     return false;
   }
 
-  return invalidAggs.every(agg => agg.touched);
+  return invalidAggs.every((agg) => agg.touched);
 }
 
 export { isAggRemovable, calcAggIsTooLow, isInvalidAggsTouched, getEnabledMetricAggsCount };

@@ -24,7 +24,7 @@ export const CreateArchivesSourcesTask = {
   description: 'Creating platform-specific archive source directories',
   async run(config, log, build) {
     await Promise.all(
-      config.getTargetPlatforms().map(async platform => {
+      config.getTargetPlatforms().map(async (platform) => {
         // copy all files from generic build source directory into platform-specific build directory
         await scanCopy({
           source: build.resolvePath(),
@@ -33,7 +33,7 @@ export const CreateArchivesSourcesTask = {
 
         log.debug(
           'Generic build source copied into',
-          platform.getName(),
+          platform.getNodeArch(),
           'specific build directory'
         );
 
@@ -43,7 +43,7 @@ export const CreateArchivesSourcesTask = {
           destination: build.resolvePathForPlatform(platform, 'node'),
         });
 
-        log.debug('Node.js copied into', platform.getName(), 'specific build directory');
+        log.debug('Node.js copied into', platform.getNodeArch(), 'specific build directory');
       })
     );
   },

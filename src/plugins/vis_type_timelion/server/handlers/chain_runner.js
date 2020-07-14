@@ -97,7 +97,7 @@ export default function chainRunner(tlConfig) {
 
     args = _.map(args, resolveArgument);
 
-    return Bluebird.all(args).then(function(args) {
+    return Bluebird.all(args).then(function (args) {
       args.byName = indexArguments(functionDef, args);
       return functionDef.fn(args, tlConfig);
     });
@@ -119,23 +119,20 @@ export default function chainRunner(tlConfig) {
       promise = invoke(link.function, args);
     }
 
-    return promise.then(function(result) {
+    return promise.then(function (result) {
       return invokeChain({ type: 'chain', chain: chain }, [result]);
     });
   }
 
   function resolveChainList(chainList) {
-    const seriesList = _.map(chainList, function(chain) {
+    const seriesList = _.map(chainList, function (chain) {
       const values = invoke('first', [chain]);
-      return values.then(function(args) {
+      return values.then(function (args) {
         return args;
       });
     });
-    return Bluebird.all(seriesList).then(function(args) {
-      const list = _.chain(args)
-        .pluck('list')
-        .flatten()
-        .value();
+    return Bluebird.all(seriesList).then(function (args) {
+      const list = _.chain(args).map('list').flatten().value();
       const seriesList = _.merge.apply(this, _.flatten([{}, args]));
       seriesList.list = list;
       return seriesList;
@@ -144,9 +141,9 @@ export default function chainRunner(tlConfig) {
 
   function preProcessSheet(sheet) {
     let queries = {};
-    _.each(sheet, function(chainList, i) {
+    _.each(sheet, function (chainList, i) {
       try {
-        const queriesInCell = _.mapValues(preprocessChain(chainList), function(val) {
+        const queriesInCell = _.mapValues(preprocessChain(chainList), function (val) {
           val.cell = i;
           return val;
         });
@@ -159,15 +156,15 @@ export default function chainRunner(tlConfig) {
 
     const promises = _.chain(queries)
       .values()
-      .map(function(query) {
+      .map(function (query) {
         return invoke(query.function, query.arguments);
       })
       .value();
 
-    return Bluebird.settle(promises).then(function(resolvedDatasources) {
+    return Bluebird.settle(promises).then(function (resolvedDatasources) {
       stats.queryTime = new Date().getTime();
 
-      _.each(queries, function(query, i) {
+      _.each(queries, function (query, i) {
         const functionDef = tlConfig.getFunction(query.function);
         const resolvedDatasource = resolvedDatasources[i];
 
@@ -211,14 +208,14 @@ export default function chainRunner(tlConfig) {
 
     // This is setting the "global" sheet, required for resolving references
     sheet = parseSheet(request.sheet);
-    return preProcessSheet(sheet).then(function() {
-      return _.map(sheet, function(chainList, i) {
+    return preProcessSheet(sheet).then(function () {
+      return _.map(sheet, function (chainList, i) {
         return resolveChainList(chainList)
-          .then(function(seriesList) {
+          .then(function (seriesList) {
             stats.sheetTime = new Date().getTime();
             return seriesList;
           })
-          .catch(function(e) {
+          .catch(function (e) {
             throwWithCell(i, e);
           });
       });
@@ -227,7 +224,7 @@ export default function chainRunner(tlConfig) {
 
   return {
     processRequest: processRequest,
-    getStats: function() {
+    getStats: function () {
       return stats;
     },
   };

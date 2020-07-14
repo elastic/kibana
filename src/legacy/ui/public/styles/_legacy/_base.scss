@@ -1,3 +1,5 @@
+@import '@elastic/eui/src/components/collapsible_nav/variables';
+
 // Forms
 
 // Angular form states
@@ -38,7 +40,9 @@ input[type='checkbox'],
 // Application Layout
 
 // chrome-context
-.content {
+// TODO #64541
+// Delete this block
+.chrHeaderWrapper:not(.headerWrapper) .content {
   display: flex;
   flex-flow: row nowrap;
   width: 100%;
@@ -58,10 +62,6 @@ input[type='checkbox'],
 
   > navbar {
     padding-bottom: $euiSizeS;
-  }
-
-  .globalQueryBar {
-    padding: 0px $euiSizeS $euiSizeS $euiSizeS;
   }
 
   > nav,
@@ -119,13 +119,17 @@ input[type='checkbox'],
   }
 }
 
-// A neccessary hack so that the above focus policy doesn't polute some EUI
+// A necessary hack so that the above focus policy doesn't pollute some EUI
 // entrenched inputs.
 .euiComboBox {
   // :not() specificity needed to override the above
   input:not([class^='eui']):focus {
     animation: none !important;
   }
+}
+
+.euiBody--collapsibleNavIsDocked .euiBottomBar {
+  margin-left: $euiCollapsibleNavWidth;
 }
 
 // Utility classes

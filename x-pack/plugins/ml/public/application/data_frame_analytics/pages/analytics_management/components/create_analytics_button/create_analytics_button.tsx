@@ -10,21 +10,32 @@ import { i18n } from '@kbn/i18n';
 import { createPermissionFailureMessage } from '../../../../../capabilities/check_capabilities';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 
-export const CreateAnalyticsButton: FC<CreateAnalyticsFormProps> = props => {
-  const { disabled } = props.state;
-  const { openModal } = props.actions;
+interface Props extends CreateAnalyticsFormProps {
+  setIsSourceIndexModalVisible: React.Dispatch<React.SetStateAction<any>>;
+}
+
+export const CreateAnalyticsButton: FC<Props> = ({
+  state,
+  actions,
+  setIsSourceIndexModalVisible,
+}) => {
+  const { disabled } = state;
+
+  const handleClick = () => {
+    setIsSourceIndexModalVisible(true);
+  };
 
   const button = (
     <EuiButton
       disabled={disabled}
       fill
-      onClick={openModal}
+      onClick={handleClick}
       iconType="plusInCircle"
       size="s"
       data-test-subj="mlAnalyticsButtonCreate"
     >
       {i18n.translate('xpack.ml.dataframe.analyticsList.createDataFrameAnalyticsButton', {
-        defaultMessage: 'Create analytics job',
+        defaultMessage: 'Create job',
       })}
     </EuiButton>
   );

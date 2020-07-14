@@ -20,21 +20,23 @@
 import { getConfig, createRunner } from './lib';
 
 import {
+  BuildKibanaPlatformPluginsTask,
   BuildPackagesTask,
   CleanClientModulesOnDLLTask,
   CleanEmptyFoldersTask,
   CleanExtraBinScriptsTask,
-  CleanExtraBrowsersTask,
   CleanExtraFilesFromModulesTask,
-  CleanPackagesTask,
-  CleanTypescriptTask,
   CleanNodeBuildsTask,
+  CleanPackagesTask,
   CleanTask,
+  CleanTypescriptTask,
+  CopyBinScriptsTask,
   CopySourceTask,
   CreateArchivesSourcesTask,
   CreateArchivesTask,
   CreateDebPackageTask,
   CreateDockerPackageTask,
+  CreateDockerUbiPackageTask,
   CreateEmptyDirsAndFilesTask,
   CreateNoticeFileTask,
   CreatePackageJsonTask,
@@ -42,19 +44,20 @@ import {
   CreateRpmPackageTask,
   DownloadNodeBuildsTask,
   ExtractNodeBuildsTask,
+  InstallChromiumTask,
   InstallDependenciesTask,
-  BuildKibanaPlatformPluginsTask,
   OptimizeBuildTask,
+  PatchNativeModulesTask,
+  PathLengthTask,
   RemovePackageJsonDepsTask,
   RemoveWorkspacesTask,
   TranspileBabelTask,
   TranspileScssTask,
   UpdateLicenseFileTask,
+  UuidVerificationTask,
   VerifyEnvTask,
   VerifyExistingNodeBuildsTask,
-  PathLengthTask,
   WriteShaSumsTask,
-  UuidVerificationTask,
 } from './tasks';
 
 export async function buildDistributables(options) {
@@ -68,6 +71,7 @@ export async function buildDistributables(options) {
     createRpmPackage,
     createDebPackage,
     createDockerPackage,
+    createDockerUbiPackage,
     versionQualifier,
     targetAllPlatforms,
   } = options;
@@ -108,6 +112,7 @@ export async function buildDistributables(options) {
    * run platform-generic build tasks
    */
   await run(CopySourceTask);
+  await run(CopyBinScriptsTask);
   await run(CreateEmptyDirsAndFilesTask);
   await run(CreateReadmeTask);
   await run(TranspileBabelTask);
@@ -129,11 +134,12 @@ export async function buildDistributables(options) {
 
   /**
    * copy generic build outputs into platform-specific build
-   * directories and perform platform-specific steps
+   * directories and perform platform/architecture-specific steps
    */
   await run(CreateArchivesSourcesTask);
+  await run(PatchNativeModulesTask);
+  await run(InstallChromiumTask);
   await run(CleanExtraBinScriptsTask);
-  await run(CleanExtraBrowsersTask);
   await run(CleanNodeBuildsTask);
 
   await run(PathLengthTask);
@@ -156,8 +162,11 @@ export async function buildDistributables(options) {
     await run(CreateRpmPackageTask);
   }
   if (createDockerPackage) {
-    // control w/ --docker or --skip-os-packages
+    // control w/ --docker or --skip-docker-ubi or --skip-os-packages
     await run(CreateDockerPackageTask);
+    if (createDockerUbiPackage) {
+      await run(CreateDockerUbiPackageTask);
+    }
   }
 
   /**

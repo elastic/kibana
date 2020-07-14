@@ -22,9 +22,13 @@ import {
   DataPlaceholder,
   FormattedDateTime,
   CollapsibleIndicesList,
+  CollapsibleDataStreamsList,
 } from '../../../../../components';
 import { linkToPolicy } from '../../../../../services/navigation';
 import { SnapshotState } from './snapshot_state';
+import { useServices } from '../../../../../app_context';
+
+import { reactRouterNavigate } from '../../../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   snapshotDetails: SnapshotDetails;
@@ -37,6 +41,7 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
     // TODO: Add a tooltip explaining that: a false value means that the cluster global state
     // is not stored as part of the snapshot.
     includeGlobalState,
+    dataStreams,
     indices,
     state,
     startTimeInMillis,
@@ -45,6 +50,8 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
     uuid,
     policyName,
   } = snapshotDetails;
+
+  const { history } = useServices();
 
   return (
     <EuiDescriptionList textStyle="reverse">
@@ -131,6 +138,22 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
       </EuiFlexGroup>
 
       <EuiFlexGroup>
+        <EuiFlexItem data-test-subj="dataStreams">
+          <EuiDescriptionListTitle data-test-subj="title">
+            <FormattedMessage
+              id="xpack.snapshotRestore.snapshotDetails.itemDataStreamsLabel"
+              defaultMessage="Data streams ({dataStreamsCount})"
+              values={{ dataStreamsCount: dataStreams.length }}
+            />
+          </EuiDescriptionListTitle>
+
+          <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
+            <CollapsibleDataStreamsList dataStreams={dataStreams} />
+          </EuiDescriptionListDescription>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiFlexGroup>
         <EuiFlexItem data-test-subj="startTime">
           <EuiDescriptionListTitle data-test-subj="title">
             <FormattedMessage
@@ -201,7 +224,9 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
             </EuiDescriptionListTitle>
 
             <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-              <EuiLink href={linkToPolicy(policyName)}>{policyName}</EuiLink>
+              <EuiLink {...reactRouterNavigate(history, linkToPolicy(policyName))}>
+                {policyName}
+              </EuiLink>
             </EuiDescriptionListDescription>
           </EuiFlexItem>
         ) : null}

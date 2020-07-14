@@ -1,0 +1,1942 @@
+{
+  "items": [
+    {
+      "name": "GET /api",
+      "sample": {
+        "@timestamp": "2020-06-29T06:48:41.454Z",
+        "agent": { "name": "nodejs", "version": "3.6.1" },
+        "client": { "ip": "172.18.0.7" },
+        "container": { "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+        "ecs": { "version": "1.5.0" },
+        "event": { "ingested": "2020-06-29T06:48:43.992834Z" },
+        "host": {
+          "architecture": "x64",
+          "hostname": "41712ded148f",
+          "ip": "172.18.0.7",
+          "name": "41712ded148f",
+          "os": { "platform": "linux" }
+        },
+        "http": {
+          "request": {
+            "headers": {
+              "Connection": ["close"],
+              "Host": ["opbeans-node:3000"],
+              "User-Agent": ["workload/2.4.3"]
+            },
+            "method": "get",
+            "socket": { "encrypted": false, "remote_address": "::ffff:172.18.0.7" }
+          },
+          "response": {
+            "headers": {
+              "Connection": ["close"],
+              "Content-Type": ["application/json;charset=UTF-8"],
+              "Date": ["Mon, 29 Jun 2020 06:48:41 GMT"],
+              "Transfer-Encoding": ["chunked"],
+              "X-Powered-By": ["Express"]
+            },
+            "status_code": 200
+          },
+          "version": "1.1"
+        },
+        "labels": {
+          "foo": "bar",
+          "lorem": "ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.",
+          "multi-line": "foo\nbar\nbaz",
+          "this-is-a-very-long-tag-name-without-any-spaces": "test"
+        },
+        "observer": {
+          "ephemeral_id": "99908b73-9813-4a73-baa6-993db405523a",
+          "hostname": "aa0bd613aa4c",
+          "id": "1ccc5210-1e6c-4252-a5c8-1d6571a5fa2e",
+          "type": "apm-server",
+          "version": "8.0.0",
+          "version_major": 8
+        },
+        "process": {
+          "args": [
+            "/usr/local/bin/node",
+            "/usr/local/lib/node_modules/pm2/lib/ProcessContainer.js",
+            "ecosystem-workload.config.js"
+          ],
+          "pid": 137,
+          "ppid": 1,
+          "title": "node /app/server.js"
+        },
+        "processor": { "event": "transaction", "name": "transaction" },
+        "service": {
+          "environment": "production",
+          "framework": { "name": "express", "version": "4.17.1" },
+          "language": { "name": "javascript" },
+          "name": "opbeans-node",
+          "node": { "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+          "runtime": { "name": "node", "version": "12.18.1" },
+          "version": "1.0.0"
+        },
+        "source": { "ip": "172.18.0.7" },
+        "timestamp": { "us": 1593413321454009 },
+        "trace": { "id": "0507830eeff93f7bf1a354e4031097b3" },
+        "transaction": {
+          "custom": { "shoppingBasketCount": 42 },
+          "duration": { "us": 8334 },
+          "id": "878250a8b937445d",
+          "name": "GET /api",
+          "result": "HTTP 2xx",
+          "sampled": true,
+          "span_count": { "started": 1 },
+          "type": "request"
+        },
+        "url": {
+          "domain": "opbeans-node",
+          "full": "http://opbeans-node:3000/api/products/6",
+          "original": "/api/products/6",
+          "path": "/api/products/6",
+          "port": 3000,
+          "scheme": "http"
+        },
+        "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+        "user_agent": {
+          "device": { "name": "Other" },
+          "name": "Other",
+          "original": "workload/2.4.3"
+        }
+      },
+      "p95": 259040,
+      "averageResponseTime": 51175.73170731707,
+      "transactionsPerMinute": 10.25,
+      "impact": 100
+    },
+    {
+      "name": "POST /api/orders",
+      "sample": {
+        "@timestamp": "2020-06-29T06:48:39.953Z",
+        "agent": { "name": "nodejs", "version": "3.6.1" },
+        "client": { "ip": "172.18.0.7" },
+        "container": { "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+        "ecs": { "version": "1.5.0" },
+        "event": { "ingested": "2020-06-29T06:48:43.991549Z" },
+        "host": {
+          "architecture": "x64",
+          "hostname": "41712ded148f",
+          "ip": "172.18.0.7",
+          "name": "41712ded148f",
+          "os": { "platform": "linux" }
+        },
+        "http": {
+          "request": {
+            "body": { "original": "[REDACTED]" },
+            "headers": {
+              "Accept": ["application/json"],
+              "Connection": ["close"],
+              "Content-Length": ["129"],
+              "Content-Type": ["application/json"],
+              "Host": ["opbeans-node:3000"],
+              "User-Agent": ["workload/2.4.3"]
+            },
+            "method": "post",
+            "socket": { "encrypted": false, "remote_address": "::ffff:172.18.0.7" }
+          },
+          "response": {
+            "headers": {
+              "Connection": ["close"],
+              "Content-Length": ["13"],
+              "Content-Type": ["application/json; charset=utf-8"],
+              "Date": ["Mon, 29 Jun 2020 06:48:40 GMT"],
+              "Etag": ["W/\"d-eEOWU4Cnr5DZ23ErRUeYu9oOIks\""],
+              "X-Powered-By": ["Express"]
+            },
+            "status_code": 200
+          },
+          "version": "1.1"
+        },
+        "labels": {
+          "foo": "bar",
+          "lorem": "ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.",
+          "multi-line": "foo\nbar\nbaz",
+          "this-is-a-very-long-tag-name-without-any-spaces": "test"
+        },
+        "observer": {
+          "ephemeral_id": "99908b73-9813-4a73-baa6-993db405523a",
+          "hostname": "aa0bd613aa4c",
+          "id": "1ccc5210-1e6c-4252-a5c8-1d6571a5fa2e",
+          "type": "apm-server",
+          "version": "8.0.0",
+          "version_major": 8
+        },
+        "process": {
+          "args": [
+            "/usr/local/bin/node",
+            "/usr/local/lib/node_modules/pm2/lib/ProcessContainer.js",
+            "ecosystem-workload.config.js"
+          ],
+          "pid": 137,
+          "ppid": 1,
+          "title": "node /app/server.js"
+        },
+        "processor": { "event": "transaction", "name": "transaction" },
+        "service": {
+          "environment": "production",
+          "framework": { "name": "express", "version": "4.17.1" },
+          "language": { "name": "javascript" },
+          "name": "opbeans-node",
+          "node": { "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+          "runtime": { "name": "node", "version": "12.18.1" },
+          "version": "1.0.0"
+        },
+        "source": { "ip": "172.18.0.7" },
+        "timestamp": { "us": 1593413319953033 },
+        "trace": { "id": "52b8fda5f6df745b990740ba18378620" },
+        "transaction": {
+          "custom": { "shoppingBasketCount": 42 },
+          "duration": { "us": 270684 },
+          "id": "a3afc2a112e9c893",
+          "name": "POST /api/orders",
+          "result": "HTTP 2xx",
+          "sampled": true,
+          "span_count": { "started": 16 },
+          "type": "request"
+        },
+        "url": {
+          "domain": "opbeans-node",
+          "full": "http://opbeans-node:3000/api/orders",
+          "original": "/api/orders",
+          "path": "/api/orders",
+          "port": 3000,
+          "scheme": "http"
+        },
+        "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+        "user_agent": {
+          "device": { "name": "Other" },
+          "name": "Other",
+          "original": "workload/2.4.3"
+        }
+      },
+      "p95": 270336,
+      "averageResponseTime": 270684,
+      "transactionsPerMinute": 0.25,
+      "impact": 12.686265169840583
+    },
+    {
+      "name": "GET /api/customers",
+      "sample": {
+        "@timestamp": "2020-06-29T06:48:37.952Z",
+        "agent": { "name": "nodejs", "version": "3.6.1" },
+        "client": { "ip": "172.18.0.7" },
+        "container": { "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+        "ecs": { "version": "1.5.0" },
+        "event": { "ingested": "2020-06-29T06:48:39.492402Z" },
+        "host": {
+          "architecture": "x64",
+          "hostname": "41712ded148f",
+          "ip": "172.18.0.7",
+          "name": "41712ded148f",
+          "os": { "platform": "linux" }
+        },
+        "http": {
+          "request": {
+            "headers": {
+              "Connection": ["close"],
+              "Host": ["opbeans-node:3000"],
+              "User-Agent": ["workload/2.4.3"]
+            },
+            "method": "get",
+            "socket": { "encrypted": false, "remote_address": "::ffff:172.18.0.7" }
+          },
+          "response": {
+            "headers": {
+              "Connection": ["close"],
+              "Content-Length": ["186769"],
+              "Content-Type": ["application/json; charset=utf-8"],
+              "Date": ["Mon, 29 Jun 2020 06:48:37 GMT"],
+              "Etag": ["W/\"2d991-yG3J8W/roH7fSxXTudZrO27Ax9s\""],
+              "X-Powered-By": ["Express"]
+            },
+            "status_code": 200
+          },
+          "version": "1.1"
+        },
+        "labels": {
+          "foo": "bar",
+          "lorem": "ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.",
+          "multi-line": "foo\nbar\nbaz",
+          "this-is-a-very-long-tag-name-without-any-spaces": "test"
+        },
+        "observer": {
+          "ephemeral_id": "99908b73-9813-4a73-baa6-993db405523a",
+          "hostname": "aa0bd613aa4c",
+          "id": "1ccc5210-1e6c-4252-a5c8-1d6571a5fa2e",
+          "type": "apm-server",
+          "version": "8.0.0",
+          "version_major": 8
+        },
+        "process": {
+          "args": [
+            "/usr/local/bin/node",
+            "/usr/local/lib/node_modules/pm2/lib/ProcessContainer.js",
+            "ecosystem-workload.config.js"
+          ],
+          "pid": 137,
+          "ppid": 1,
+          "title": "node /app/server.js"
+        },
+        "processor": { "event": "transaction", "name": "transaction" },
+        "service": {
+          "environment": "production",
+          "framework": { "name": "express", "version": "4.17.1" },
+          "language": { "name": "javascript" },
+          "name": "opbeans-node",
+          "node": { "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+          "runtime": { "name": "node", "version": "12.18.1" },
+          "version": "1.0.0"
+        },
+        "source": { "ip": "172.18.0.7" },
+        "timestamp": { "us": 1593413317952016 },
+        "trace": { "id": "5d99327edae38ed735e8d7a6028cf719" },
+        "transaction": {
+          "custom": { "shoppingBasketCount": 42 },
+          "duration": { "us": 16824 },
+          "id": "071808429ec9d00b",
+          "name": "GET /api/customers",
+          "result": "HTTP 2xx",
+          "sampled": true,
+          "span_count": { "started": 2 },
+          "type": "request"
+        },
+        "url": {
+          "domain": "opbeans-node",
+          "full": "http://opbeans-node:3000/api/customers",
+          "original": "/api/customers",
+          "path": "/api/customers",
+          "port": 3000,
+          "scheme": "http"
+        },
+        "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+        "user_agent": {
+          "device": { "name": "Other" },
+          "name": "Other",
+          "original": "workload/2.4.3"
+        }
+      },
+      "p95": 26432,
+      "averageResponseTime": 16896.8,
+      "transactionsPerMinute": 1.25,
+      "impact": 3.790160870423129
+    },
+    {
+      "name": "GET /log-message",
+      "sample": {
+        "@timestamp": "2020-06-29T06:48:28.944Z",
+        "agent": { "name": "nodejs", "version": "3.6.1" },
+        "client": { "ip": "172.18.0.7" },
+        "container": { "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+        "ecs": { "version": "1.5.0" },
+        "event": { "ingested": "2020-06-29T06:48:39.370695Z" },
+        "host": {
+          "architecture": "x64",
+          "hostname": "41712ded148f",
+          "ip": "172.18.0.7",
+          "name": "41712ded148f",
+          "os": { "platform": "linux" }
+        },
+        "http": {
+          "request": {
+            "headers": {
+              "Connection": ["close"],
+              "Host": ["opbeans-node:3000"],
+              "User-Agent": ["workload/2.4.3"]
+            },
+            "method": "get",
+            "socket": { "encrypted": false, "remote_address": "::ffff:172.18.0.7" }
+          },
+          "response": {
+            "headers": {
+              "Connection": ["close"],
+              "Content-Length": ["24"],
+              "Content-Type": ["text/html; charset=utf-8"],
+              "Date": ["Mon, 29 Jun 2020 06:48:28 GMT"],
+              "Etag": ["W/\"18-MS3VbhH7auHMzO0fUuNF6v14N/M\""],
+              "X-Powered-By": ["Express"]
+            },
+            "status_code": 500
+          },
+          "version": "1.1"
+        },
+        "labels": {
+          "foo": "bar",
+          "lorem": "ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.",
+          "multi-line": "foo\nbar\nbaz",
+          "this-is-a-very-long-tag-name-without-any-spaces": "test"
+        },
+        "observer": {
+          "ephemeral_id": "99908b73-9813-4a73-baa6-993db405523a",
+          "hostname": "aa0bd613aa4c",
+          "id": "1ccc5210-1e6c-4252-a5c8-1d6571a5fa2e",
+          "type": "apm-server",
+          "version": "8.0.0",
+          "version_major": 8
+        },
+        "process": {
+          "args": [
+            "/usr/local/bin/node",
+            "/usr/local/lib/node_modules/pm2/lib/ProcessContainer.js",
+            "ecosystem-workload.config.js"
+          ],
+          "pid": 137,
+          "ppid": 1,
+          "title": "node /app/server.js"
+        },
+        "processor": { "event": "transaction", "name": "transaction" },
+        "service": {
+          "environment": "production",
+          "framework": { "name": "express", "version": "4.17.1" },
+          "language": { "name": "javascript" },
+          "name": "opbeans-node",
+          "node": { "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+          "runtime": { "name": "node", "version": "12.18.1" },
+          "version": "1.0.0"
+        },
+        "source": { "ip": "172.18.0.7" },
+        "timestamp": { "us": 1593413308944016 },
+        "trace": { "id": "afabe4cb397616f5ec35a2f3da49ba62" },
+        "transaction": {
+          "custom": { "shoppingBasketCount": 42 },
+          "duration": { "us": 26788 },
+          "id": "cc8c4261387507cf",
+          "name": "GET /log-message",
+          "result": "HTTP 5xx",
+          "sampled": true,
+          "span_count": { "started": 0 },
+          "type": "request"
+        },
+        "url": {
+          "domain": "opbeans-node",
+          "full": "http://opbeans-node:3000/log-message",
+          "original": "/log-message",
+          "path": "/log-message",
+          "port": 3000,
+          "scheme": "http"
+        },
+        "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+        "user_agent": {
+          "device": { "name": "Other" },
+          "name": "Other",
+          "original": "workload/2.4.3"
+        }
+      },
+      "p95": 38528,
+      "averageResponseTime": 32667.5,
+      "transactionsPerMinute": 0.5,
+      "impact": 2.875276331059301
+    },
+    {
+      "name": "GET /*",
+      "sample": {
+        "@timestamp": "2020-06-29T06:48:42.454Z",
+        "agent": { "name": "nodejs", "version": "3.6.1" },
+        "client": { "ip": "172.18.0.7" },
+        "container": { "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+        "ecs": { "version": "1.5.0" },
+        "event": { "ingested": "2020-06-29T06:48:43.995202Z" },
+        "host": {
+          "architecture": "x64",
+          "hostname": "41712ded148f",
+          "ip": "172.18.0.7",
+          "name": "41712ded148f",
+          "os": { "platform": "linux" }
+        },
+        "http": {
+          "request": {
+            "headers": {
+              "Connection": ["close"],
+              "Host": ["opbeans-node:3000"],
+              "User-Agent": ["workload/2.4.3"]
+            },
+            "method": "get",
+            "socket": { "encrypted": false, "remote_address": "::ffff:172.18.0.7" }
+          },
+          "response": {
+            "headers": {
+              "Connection": ["close"],
+              "Content-Length": ["813"],
+              "Content-Type": ["text/html"],
+              "Date": ["Mon, 29 Jun 2020 06:48:42 GMT"],
+              "X-Powered-By": ["Express"]
+            },
+            "status_code": 200
+          },
+          "version": "1.1"
+        },
+        "labels": {
+          "foo": "bar",
+          "lorem": "ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.",
+          "multi-line": "foo\nbar\nbaz",
+          "this-is-a-very-long-tag-name-without-any-spaces": "test"
+        },
+        "observer": {
+          "ephemeral_id": "99908b73-9813-4a73-baa6-993db405523a",
+          "hostname": "aa0bd613aa4c",
+          "id": "1ccc5210-1e6c-4252-a5c8-1d6571a5fa2e",
+          "type": "apm-server",
+          "version": "8.0.0",
+          "version_major": 8
+        },
+        "parent": { "id": "5baa6c3bedc93f9d" },
+        "process": {
+          "args": [
+            "/usr/local/bin/node",
+            "/usr/local/lib/node_modules/pm2/lib/ProcessContainer.js",
+            "ecosystem-workload.config.js"
+          ],
+          "pid": 137,
+          "ppid": 1,
+          "title": "node /app/server.js"
+        },
+        "processor": { "event": "transaction", "name": "transaction" },
+        "service": {
+          "environment": "production",
+          "framework": { "name": "express", "version": "4.17.1" },
+          "language": { "name": "javascript" },
+          "name": "opbeans-node",
+          "node": { "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+          "runtime": { "name": "node", "version": "12.18.1" },
+          "version": "1.0.0"
+        },
+        "source": { "ip": "172.18.0.7" },
+        "timestamp": { "us": 1593413322454015 },
+        "trace": { "id": "022b01256b291a4c417199d91ec8755f" },
+        "transaction": {
+          "custom": { "shoppingBasketCount": 42 },
+          "duration": { "us": 1737 },
+          "id": "eff3e45e0d9529d9",
+          "name": "GET /*",
+          "result": "HTTP 2xx",
+          "sampled": true,
+          "span_count": { "started": 0 },
+          "type": "request"
+        },
+        "url": {
+          "domain": "opbeans-node",
+          "full": "http://opbeans-node:3000/",
+          "original": "/",
+          "path": "/",
+          "port": 3000,
+          "scheme": "http"
+        },
+        "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+        "user_agent": {
+          "device": { "name": "Other" },
+          "name": "Other",
+          "original": "workload/2.4.3"
+        }
+      },
+      "p95": 4472,
+      "averageResponseTime": 3262.95,
+      "transactionsPerMinute": 5,
+      "impact": 2.8716452680799467
+    },
+    {
+      "name": "GET /api/orders",
+      "sample": {
+        "@timestamp": "2020-06-29T06:48:40.106Z",
+        "agent": { "name": "nodejs", "version": "3.6.1" },
+        "client": { "ip": "172.18.0.6" },
+        "container": { "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+        "ecs": { "version": "1.5.0" },
+        "event": { "ingested": "2020-06-29T06:48:43.988104Z" },
+        "host": {
+          "architecture": "x64",
+          "hostname": "41712ded148f",
+          "ip": "172.18.0.7",
+          "name": "41712ded148f",
+          "os": { "platform": "linux" }
+        },
+        "http": {
+          "request": {
+            "headers": {
+              "Accept": [
+                "text/plain, application/json, application/x-jackson-smile, application/cbor, application/*+json, */*"
+              ],
+              "Connection": ["keep-alive"],
+              "Elastic-Apm-Traceparent": [
+                "00-90bd7780b32cc51a7f4c200b1e0c170f-5ff346d602ce27b0-01"
+              ],
+              "Host": ["opbeans-node:3000"],
+              "Traceparent": ["00-90bd7780b32cc51a7f4c200b1e0c170f-5ff346d602ce27b0-01"],
+              "User-Agent": ["Java/11.0.7"]
+            },
+            "method": "get",
+            "socket": { "encrypted": false, "remote_address": "::ffff:172.18.0.6" }
+          },
+          "response": {
+            "headers": {
+              "Connection": ["keep-alive"],
+              "Content-Length": ["2"],
+              "Content-Type": ["application/json; charset=utf-8"],
+              "Date": ["Mon, 29 Jun 2020 06:48:40 GMT"],
+              "Etag": ["W/\"2-l9Fw4VUO7kr8CvBlt4zaMCqXZ0w\""],
+              "X-Powered-By": ["Express"]
+            },
+            "status_code": 200
+          },
+          "version": "1.1"
+        },
+        "labels": {
+          "foo": "bar",
+          "lorem": "ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.",
+          "multi-line": "foo\nbar\nbaz",
+          "this-is-a-very-long-tag-name-without-any-spaces": "test"
+        },
+        "observer": {
+          "ephemeral_id": "99908b73-9813-4a73-baa6-993db405523a",
+          "hostname": "aa0bd613aa4c",
+          "id": "1ccc5210-1e6c-4252-a5c8-1d6571a5fa2e",
+          "type": "apm-server",
+          "version": "8.0.0",
+          "version_major": 8
+        },
+        "parent": { "id": "5ff346d602ce27b0" },
+        "process": {
+          "args": [
+            "/usr/local/bin/node",
+            "/usr/local/lib/node_modules/pm2/lib/ProcessContainer.js",
+            "ecosystem-workload.config.js"
+          ],
+          "pid": 137,
+          "ppid": 1,
+          "title": "node /app/server.js"
+        },
+        "processor": { "event": "transaction", "name": "transaction" },
+        "service": {
+          "environment": "production",
+          "framework": { "name": "express", "version": "4.17.1" },
+          "language": { "name": "javascript" },
+          "name": "opbeans-node",
+          "node": { "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+          "runtime": { "name": "node", "version": "12.18.1" },
+          "version": "1.0.0"
+        },
+        "source": { "ip": "172.18.0.6" },
+        "timestamp": { "us": 1593413320106015 },
+        "trace": { "id": "90bd7780b32cc51a7f4c200b1e0c170f" },
+        "transaction": {
+          "custom": { "shoppingBasketCount": 42 },
+          "duration": { "us": 7424 },
+          "id": "f3dd00d12c594cba",
+          "name": "GET /api/orders",
+          "result": "HTTP 2xx",
+          "sampled": true,
+          "span_count": { "started": 2 },
+          "type": "request"
+        },
+        "url": {
+          "domain": "opbeans-node",
+          "full": "http://opbeans-node:3000/api/orders",
+          "original": "/api/orders",
+          "path": "/api/orders",
+          "port": 3000,
+          "scheme": "http"
+        },
+        "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+        "user_agent": {
+          "device": { "name": "Spider" },
+          "name": "Java",
+          "original": "Java/11.0.7",
+          "version": "0.7."
+        }
+      },
+      "p95": 11616,
+      "averageResponseTime": 7615.625,
+      "transactionsPerMinute": 2,
+      "impact": 2.6645791239678345
+    },
+    {
+      "name": "GET /api/products",
+      "sample": {
+        "@timestamp": "2020-06-29T06:48:27.452Z",
+        "agent": { "name": "nodejs", "version": "3.6.1" },
+        "client": { "ip": "172.18.0.6" },
+        "container": { "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+        "ecs": { "version": "1.5.0" },
+        "event": { "ingested": "2020-06-29T06:48:29.978463Z" },
+        "host": {
+          "architecture": "x64",
+          "hostname": "41712ded148f",
+          "ip": "172.18.0.7",
+          "name": "41712ded148f",
+          "os": { "platform": "linux" }
+        },
+        "http": {
+          "request": {
+            "headers": {
+              "Accept": [
+                "text/plain, application/json, application/x-jackson-smile, application/cbor, application/*+json, */*"
+              ],
+              "Connection": ["keep-alive"],
+              "Elastic-Apm-Traceparent": [
+                "00-27b168a328e0fd442377de8eaa0bf582-2c86873dedb66c2c-01"
+              ],
+              "Host": ["opbeans-node:3000"],
+              "Traceparent": ["00-27b168a328e0fd442377de8eaa0bf582-2c86873dedb66c2c-01"],
+              "User-Agent": ["Java/11.0.7"]
+            },
+            "method": "get",
+            "socket": { "encrypted": false, "remote_address": "::ffff:172.18.0.6" }
+          },
+          "response": {
+            "headers": {
+              "Connection": ["keep-alive"],
+              "Content-Length": ["1023"],
+              "Content-Type": ["application/json; charset=utf-8"],
+              "Date": ["Mon, 29 Jun 2020 06:48:27 GMT"],
+              "Etag": ["W/\"3ff-VyOxcDApb+a/lnjkm9FeTOGSDrs\""],
+              "X-Powered-By": ["Express"]
+            },
+            "status_code": 200
+          },
+          "version": "1.1"
+        },
+        "labels": {
+          "foo": "bar",
+          "lorem": "ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.",
+          "multi-line": "foo\nbar\nbaz",
+          "this-is-a-very-long-tag-name-without-any-spaces": "test"
+        },
+        "observer": {
+          "ephemeral_id": "99908b73-9813-4a73-baa6-993db405523a",
+          "hostname": "aa0bd613aa4c",
+          "id": "1ccc5210-1e6c-4252-a5c8-1d6571a5fa2e",
+          "type": "apm-server",
+          "version": "8.0.0",
+          "version_major": 8
+        },
+        "parent": { "id": "2c86873dedb66c2c" },
+        "process": {
+          "args": [
+            "/usr/local/bin/node",
+            "/usr/local/lib/node_modules/pm2/lib/ProcessContainer.js",
+            "ecosystem-workload.config.js"
+          ],
+          "pid": 137,
+          "ppid": 1,
+          "title": "node /app/server.js"
+        },
+        "processor": { "event": "transaction", "name": "transaction" },
+        "service": {
+          "environment": "production",
+          "framework": { "name": "express", "version": "4.17.1" },
+          "language": { "name": "javascript" },
+          "name": "opbeans-node",
+          "node": { "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+          "runtime": { "name": "node", "version": "12.18.1" },
+          "version": "1.0.0"
+        },
+        "source": { "ip": "172.18.0.6" },
+        "timestamp": { "us": 1593413307452013 },
+        "trace": { "id": "27b168a328e0fd442377de8eaa0bf582" },
+        "transaction": {
+          "custom": { "shoppingBasketCount": 42 },
+          "duration": { "us": 4292 },
+          "id": "141ecc2dfd55eeea",
+          "name": "GET /api/products",
+          "result": "HTTP 2xx",
+          "sampled": true,
+          "span_count": { "started": 2 },
+          "type": "request"
+        },
+        "url": {
+          "domain": "opbeans-node",
+          "full": "http://opbeans-node:3000/api/products",
+          "original": "/api/products",
+          "path": "/api/products",
+          "port": 3000,
+          "scheme": "http"
+        },
+        "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+        "user_agent": {
+          "device": { "name": "Spider" },
+          "name": "Java",
+          "original": "Java/11.0.7",
+          "version": "0.7."
+        }
+      },
+      "p95": 22112,
+      "averageResponseTime": 8585,
+      "transactionsPerMinute": 1.75,
+      "impact": 2.624924094061731
+    },
+    {
+      "name": "GET /api/products/:id",
+      "sample": {
+        "@timestamp": "2020-06-29T06:48:24.977Z",
+        "agent": { "name": "nodejs", "version": "3.6.1" },
+        "client": { "ip": "172.18.0.7" },
+        "container": { "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+        "ecs": { "version": "1.5.0" },
+        "event": { "ingested": "2020-06-29T06:48:27.004717Z" },
+        "host": {
+          "architecture": "x64",
+          "hostname": "41712ded148f",
+          "ip": "172.18.0.7",
+          "name": "41712ded148f",
+          "os": { "platform": "linux" }
+        },
+        "http": {
+          "request": {
+            "headers": {
+              "Connection": ["close"],
+              "Host": ["opbeans-node:3000"],
+              "User-Agent": ["workload/2.4.3"]
+            },
+            "method": "get",
+            "socket": { "encrypted": false, "remote_address": "::ffff:172.18.0.7" }
+          },
+          "response": {
+            "headers": {
+              "Connection": ["close"],
+              "Content-Length": ["231"],
+              "Content-Type": ["application/json; charset=utf-8"],
+              "Date": ["Mon, 29 Jun 2020 06:48:24 GMT"],
+              "Etag": ["W/\"e7-kkuzj37GZDzXDh0CWqh5Gan0VO4\""],
+              "X-Powered-By": ["Express"]
+            },
+            "status_code": 200
+          },
+          "version": "1.1"
+        },
+        "labels": {
+          "foo": "bar",
+          "lorem": "ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.",
+          "multi-line": "foo\nbar\nbaz",
+          "this-is-a-very-long-tag-name-without-any-spaces": "test"
+        },
+        "observer": {
+          "ephemeral_id": "99908b73-9813-4a73-baa6-993db405523a",
+          "hostname": "aa0bd613aa4c",
+          "id": "1ccc5210-1e6c-4252-a5c8-1d6571a5fa2e",
+          "type": "apm-server",
+          "version": "8.0.0",
+          "version_major": 8
+        },
+        "process": {
+          "args": [
+            "/usr/local/bin/node",
+            "/usr/local/lib/node_modules/pm2/lib/ProcessContainer.js",
+            "ecosystem-workload.config.js"
+          ],
+          "pid": 137,
+          "ppid": 1,
+          "title": "node /app/server.js"
+        },
+        "processor": { "event": "transaction", "name": "transaction" },
+        "service": {
+          "environment": "production",
+          "framework": { "name": "express", "version": "4.17.1" },
+          "language": { "name": "javascript" },
+          "name": "opbeans-node",
+          "node": { "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+          "runtime": { "name": "node", "version": "12.18.1" },
+          "version": "1.0.0"
+        },
+        "source": { "ip": "172.18.0.7" },
+        "timestamp": { "us": 1593413304977014 },
+        "trace": { "id": "b9b290bca14c99962fa9a1c509401630" },
+        "transaction": {
+          "custom": { "shoppingBasketCount": 42 },
+          "duration": { "us": 4482 },
+          "id": "b8d8284ff1fc25d6",
+          "name": "GET /api/products/:id",
+          "result": "HTTP 2xx",
+          "sampled": true,
+          "span_count": { "started": 1 },
+          "type": "request"
+        },
+        "url": {
+          "domain": "opbeans-node",
+          "full": "http://opbeans-node:3000/api/products/3",
+          "original": "/api/products/3",
+          "path": "/api/products/3",
+          "port": 3000,
+          "scheme": "http"
+        },
+        "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+        "user_agent": {
+          "device": { "name": "Other" },
+          "name": "Other",
+          "original": "workload/2.4.3"
+        }
+      },
+      "p95": 37856,
+      "averageResponseTime": 13516.5,
+      "transactionsPerMinute": 1,
+      "impact": 2.3368756900811305
+    },
+    {
+      "name": "GET /api/types",
+      "sample": {
+        "@timestamp": "2020-06-29T06:48:26.443Z",
+        "agent": { "name": "nodejs", "version": "3.6.1" },
+        "client": { "ip": "172.18.0.7" },
+        "container": { "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+        "ecs": { "version": "1.5.0" },
+        "event": { "ingested": "2020-06-29T06:48:29.977518Z" },
+        "host": {
+          "architecture": "x64",
+          "hostname": "41712ded148f",
+          "ip": "172.18.0.7",
+          "name": "41712ded148f",
+          "os": { "platform": "linux" }
+        },
+        "http": {
+          "request": {
+            "headers": {
+              "Connection": ["close"],
+              "Host": ["opbeans-node:3000"],
+              "User-Agent": ["workload/2.4.3"]
+            },
+            "method": "get",
+            "socket": { "encrypted": false, "remote_address": "::ffff:172.18.0.7" }
+          },
+          "response": {
+            "headers": {
+              "Connection": ["close"],
+              "Content-Length": ["112"],
+              "Content-Type": ["application/json; charset=utf-8"],
+              "Date": ["Mon, 29 Jun 2020 06:48:26 GMT"],
+              "Etag": ["W/\"70-1z6hT7P1WHgBgS/BeUEVeHhOCQU\""],
+              "X-Powered-By": ["Express"]
+            },
+            "status_code": 200
+          },
+          "version": "1.1"
+        },
+        "labels": {
+          "foo": "bar",
+          "lorem": "ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.",
+          "multi-line": "foo\nbar\nbaz",
+          "this-is-a-very-long-tag-name-without-any-spaces": "test"
+        },
+        "observer": {
+          "ephemeral_id": "99908b73-9813-4a73-baa6-993db405523a",
+          "hostname": "aa0bd613aa4c",
+          "id": "1ccc5210-1e6c-4252-a5c8-1d6571a5fa2e",
+          "type": "apm-server",
+          "version": "8.0.0",
+          "version_major": 8
+        },
+        "process": {
+          "args": [
+            "/usr/local/bin/node",
+            "/usr/local/lib/node_modules/pm2/lib/ProcessContainer.js",
+            "ecosystem-workload.config.js"
+          ],
+          "pid": 137,
+          "ppid": 1,
+          "title": "node /app/server.js"
+        },
+        "processor": { "event": "transaction", "name": "transaction" },
+        "service": {
+          "environment": "production",
+          "framework": { "name": "express", "version": "4.17.1" },
+          "language": { "name": "javascript" },
+          "name": "opbeans-node",
+          "node": { "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+          "runtime": { "name": "node", "version": "12.18.1" },
+          "version": "1.0.0"
+        },
+        "source": { "ip": "172.18.0.7" },
+        "timestamp": { "us": 1593413306443014 },
+        "trace": { "id": "be3f4eb50d253afc032c90eacaa85072" },
+        "transaction": {
+          "custom": { "shoppingBasketCount": 42 },
+          "duration": { "us": 8892 },
+          "id": "ccce129bb8c6b125",
+          "name": "GET /api/types",
+          "result": "HTTP 2xx",
+          "sampled": true,
+          "span_count": { "started": 2 },
+          "type": "request"
+        },
+        "url": {
+          "domain": "opbeans-node",
+          "full": "http://opbeans-node:3000/api/types",
+          "original": "/api/types",
+          "path": "/api/types",
+          "port": 3000,
+          "scheme": "http"
+        },
+        "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+        "user_agent": {
+          "device": { "name": "Other" },
+          "name": "Other",
+          "original": "workload/2.4.3"
+        }
+      },
+      "p95": 45248,
+      "averageResponseTime": 26992.5,
+      "transactionsPerMinute": 0.5,
+      "impact": 2.3330057413794503
+    },
+    {
+      "name": "GET static file",
+      "sample": {
+        "@timestamp": "2020-06-29T06:48:40.953Z",
+        "agent": { "name": "nodejs", "version": "3.6.1" },
+        "client": { "ip": "172.18.0.7" },
+        "container": { "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+        "ecs": { "version": "1.5.0" },
+        "event": { "ingested": "2020-06-29T06:48:43.992454Z" },
+        "host": {
+          "architecture": "x64",
+          "hostname": "41712ded148f",
+          "ip": "172.18.0.7",
+          "name": "41712ded148f",
+          "os": { "platform": "linux" }
+        },
+        "http": {
+          "request": {
+            "headers": {
+              "Connection": ["close"],
+              "Host": ["opbeans-node:3000"],
+              "User-Agent": ["workload/2.4.3"]
+            },
+            "method": "get",
+            "socket": { "encrypted": false, "remote_address": "::ffff:172.18.0.7" }
+          },
+          "response": {
+            "headers": {
+              "Accept-Ranges": ["bytes"],
+              "Cache-Control": ["public, max-age=0"],
+              "Connection": ["close"],
+              "Content-Length": ["15086"],
+              "Content-Type": ["image/x-icon"],
+              "Date": ["Mon, 29 Jun 2020 06:48:40 GMT"],
+              "Etag": ["W/\"3aee-1725aff14f0\""],
+              "Last-Modified": ["Thu, 28 May 2020 11:16:06 GMT"],
+              "X-Powered-By": ["Express"]
+            },
+            "status_code": 200
+          },
+          "version": "1.1"
+        },
+        "observer": {
+          "ephemeral_id": "99908b73-9813-4a73-baa6-993db405523a",
+          "hostname": "aa0bd613aa4c",
+          "id": "1ccc5210-1e6c-4252-a5c8-1d6571a5fa2e",
+          "type": "apm-server",
+          "version": "8.0.0",
+          "version_major": 8
+        },
+        "process": {
+          "args": [
+            "/usr/local/bin/node",
+            "/usr/local/lib/node_modules/pm2/lib/ProcessContainer.js",
+            "ecosystem-workload.config.js"
+          ],
+          "pid": 137,
+          "ppid": 1,
+          "title": "node /app/server.js"
+        },
+        "processor": { "event": "transaction", "name": "transaction" },
+        "service": {
+          "environment": "production",
+          "framework": { "name": "express", "version": "4.17.1" },
+          "language": { "name": "javascript" },
+          "name": "opbeans-node",
+          "node": { "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+          "runtime": { "name": "node", "version": "12.18.1" },
+          "version": "1.0.0"
+        },
+        "source": { "ip": "172.18.0.7" },
+        "timestamp": { "us": 1593413320953016 },
+        "trace": { "id": "292393440bbe04385f3c2e3715ac35fe" },
+        "transaction": {
+          "duration": { "us": 1671 },
+          "id": "d1d964ca1865dce3",
+          "name": "GET static file",
+          "result": "HTTP 2xx",
+          "sampled": true,
+          "span_count": { "started": 0 },
+          "type": "request"
+        },
+        "url": {
+          "domain": "opbeans-node",
+          "full": "http://opbeans-node:3000/favicon.ico",
+          "original": "/favicon.ico",
+          "path": "/favicon.ico",
+          "port": 3000,
+          "scheme": "http"
+        },
+        "user_agent": {
+          "device": { "name": "Other" },
+          "name": "Other",
+          "original": "workload/2.4.3"
+        }
+      },
+      "p95": 11900,
+      "averageResponseTime": 3492.9285714285716,
+      "transactionsPerMinute": 3.5,
+      "impact": 2.0901067389184496
+    },
+    {
+      "name": "GET /api/products/top",
+      "sample": {
+        "@timestamp": "2020-06-29T06:48:18.211Z",
+        "agent": { "name": "nodejs", "version": "3.6.1" },
+        "client": { "ip": "172.18.0.8" },
+        "container": { "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+        "ecs": { "version": "1.5.0" },
+        "event": { "ingested": "2020-06-29T06:48:21.007197Z" },
+        "host": {
+          "architecture": "x64",
+          "hostname": "41712ded148f",
+          "ip": "172.18.0.7",
+          "name": "41712ded148f",
+          "os": { "platform": "linux" }
+        },
+        "http": {
+          "request": {
+            "headers": {
+              "Accept": ["*/*"],
+              "Accept-Encoding": ["gzip, deflate"],
+              "Connection": ["keep-alive"],
+              "Host": ["opbeans-node:3000"],
+              "Referer": ["http://opbeans-node:3000/dashboard"],
+              "Traceparent": ["00-4879105b2de793ca54ce7299aff0f5ce-0d67fab9c9dec84d-01"],
+              "User-Agent": [
+                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/79.0.3945.0 Safari/537.36"
+              ]
+            },
+            "method": "get",
+            "socket": { "encrypted": false, "remote_address": "::ffff:172.18.0.8" }
+          },
+          "response": {
+            "headers": {
+              "Connection": ["keep-alive"],
+              "Content-Length": ["2"],
+              "Content-Type": ["application/json; charset=utf-8"],
+              "Date": ["Mon, 29 Jun 2020 06:48:18 GMT"],
+              "Etag": ["W/\"2-l9Fw4VUO7kr8CvBlt4zaMCqXZ0w\""],
+              "X-Powered-By": ["Express"]
+            },
+            "status_code": 200
+          },
+          "version": "1.1"
+        },
+        "labels": {
+          "foo": "bar",
+          "lorem": "ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.",
+          "multi-line": "foo\nbar\nbaz",
+          "this-is-a-very-long-tag-name-without-any-spaces": "test"
+        },
+        "observer": {
+          "ephemeral_id": "99908b73-9813-4a73-baa6-993db405523a",
+          "hostname": "aa0bd613aa4c",
+          "id": "1ccc5210-1e6c-4252-a5c8-1d6571a5fa2e",
+          "type": "apm-server",
+          "version": "8.0.0",
+          "version_major": 8
+        },
+        "parent": { "id": "0d67fab9c9dec84d" },
+        "process": {
+          "args": [
+            "/usr/local/bin/node",
+            "/usr/local/lib/node_modules/pm2/lib/ProcessContainer.js",
+            "ecosystem-workload.config.js"
+          ],
+          "pid": 137,
+          "ppid": 1,
+          "title": "node /app/server.js"
+        },
+        "processor": { "event": "transaction", "name": "transaction" },
+        "service": {
+          "environment": "production",
+          "framework": { "name": "express", "version": "4.17.1" },
+          "language": { "name": "javascript" },
+          "name": "opbeans-node",
+          "node": { "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+          "runtime": { "name": "node", "version": "12.18.1" },
+          "version": "1.0.0"
+        },
+        "source": { "ip": "172.18.0.8" },
+        "timestamp": { "us": 1593413298211013 },
+        "trace": { "id": "4879105b2de793ca54ce7299aff0f5ce" },
+        "transaction": {
+          "custom": { "shoppingBasketCount": 42 },
+          "duration": { "us": 12820 },
+          "id": "b15b12c837ab8b89",
+          "name": "GET /api/products/top",
+          "result": "HTTP 2xx",
+          "sampled": true,
+          "span_count": { "started": 1 },
+          "type": "request"
+        },
+        "url": {
+          "domain": "opbeans-node",
+          "full": "http://opbeans-node:3000/api/products/top",
+          "original": "/api/products/top",
+          "path": "/api/products/top",
+          "port": 3000,
+          "scheme": "http"
+        },
+        "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+        "user_agent": {
+          "device": { "name": "Other" },
+          "name": "HeadlessChrome",
+          "original": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/79.0.3945.0 Safari/537.36",
+          "os": { "name": "Linux" },
+          "version": "79.0.3945"
+        }
+      },
+      "p95": 33216,
+      "averageResponseTime": 22958.5,
+      "transactionsPerMinute": 0.5,
+      "impact": 1.9475397398343375
+    },
+    {
+      "name": "GET /api/stats",
+      "sample": {
+        "@timestamp": "2020-06-29T06:48:39.451Z",
+        "agent": { "name": "nodejs", "version": "3.6.1" },
+        "client": { "ip": "172.18.0.7" },
+        "container": { "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+        "ecs": { "version": "1.5.0" },
+        "event": { "ingested": "2020-06-29T06:48:43.984824Z" },
+        "host": {
+          "architecture": "x64",
+          "hostname": "41712ded148f",
+          "ip": "172.18.0.7",
+          "name": "41712ded148f",
+          "os": { "platform": "linux" }
+        },
+        "http": {
+          "request": {
+            "headers": {
+              "Connection": ["close"],
+              "Host": ["opbeans-node:3000"],
+              "User-Agent": ["workload/2.4.3"]
+            },
+            "method": "get",
+            "socket": { "encrypted": false, "remote_address": "::ffff:172.18.0.7" }
+          },
+          "response": {
+            "headers": {
+              "Connection": ["close"],
+              "Content-Length": ["92"],
+              "Content-Type": ["application/json; charset=utf-8"],
+              "Date": ["Mon, 29 Jun 2020 06:48:39 GMT"],
+              "Etag": ["W/\"5c-6I+bqIiLxvkWuwBUnTxhBoK4lBk\""],
+              "X-Powered-By": ["Express"]
+            },
+            "status_code": 200
+          },
+          "version": "1.1"
+        },
+        "labels": {
+          "foo": "bar",
+          "lorem": "ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.",
+          "multi-line": "foo\nbar\nbaz",
+          "this-is-a-very-long-tag-name-without-any-spaces": "test"
+        },
+        "observer": {
+          "ephemeral_id": "99908b73-9813-4a73-baa6-993db405523a",
+          "hostname": "aa0bd613aa4c",
+          "id": "1ccc5210-1e6c-4252-a5c8-1d6571a5fa2e",
+          "type": "apm-server",
+          "version": "8.0.0",
+          "version_major": 8
+        },
+        "process": {
+          "args": [
+            "/usr/local/bin/node",
+            "/usr/local/lib/node_modules/pm2/lib/ProcessContainer.js",
+            "ecosystem-workload.config.js"
+          ],
+          "pid": 137,
+          "ppid": 1,
+          "title": "node /app/server.js"
+        },
+        "processor": { "event": "transaction", "name": "transaction" },
+        "service": {
+          "environment": "production",
+          "framework": { "name": "express", "version": "4.17.1" },
+          "language": { "name": "javascript" },
+          "name": "opbeans-node",
+          "node": { "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+          "runtime": { "name": "node", "version": "12.18.1" },
+          "version": "1.0.0"
+        },
+        "source": { "ip": "172.18.0.7" },
+        "timestamp": { "us": 1593413319451016 },
+        "trace": { "id": "a05787cb03a0af0863fab5e05de942f1" },
+        "transaction": {
+          "custom": { "shoppingBasketCount": 42 },
+          "duration": { "us": 5050 },
+          "id": "a7e004eba8f021ce",
+          "name": "GET /api/stats",
+          "result": "HTTP 2xx",
+          "sampled": true,
+          "span_count": { "started": 4 },
+          "type": "request"
+        },
+        "url": {
+          "domain": "opbeans-node",
+          "full": "http://opbeans-node:3000/api/stats",
+          "original": "/api/stats",
+          "path": "/api/stats",
+          "port": 3000,
+          "scheme": "http"
+        },
+        "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+        "user_agent": {
+          "device": { "name": "Other" },
+          "name": "Other",
+          "original": "workload/2.4.3"
+        }
+      },
+      "p95": 15136,
+      "averageResponseTime": 7105.333333333333,
+      "transactionsPerMinute": 1.5,
+      "impact": 1.7905918202662048
+    },
+    {
+      "name": "GET /log-error",
+      "sample": {
+        "@timestamp": "2020-06-29T06:48:07.467Z",
+        "agent": { "name": "nodejs", "version": "3.6.1" },
+        "client": { "ip": "172.18.0.7" },
+        "container": { "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+        "ecs": { "version": "1.5.0" },
+        "event": { "ingested": "2020-06-29T06:48:18.533253Z" },
+        "host": {
+          "architecture": "x64",
+          "hostname": "41712ded148f",
+          "ip": "172.18.0.7",
+          "name": "41712ded148f",
+          "os": { "platform": "linux" }
+        },
+        "http": {
+          "request": {
+            "headers": {
+              "Connection": ["close"],
+              "Host": ["opbeans-node:3000"],
+              "User-Agent": ["workload/2.4.3"]
+            },
+            "method": "get",
+            "socket": { "encrypted": false, "remote_address": "::ffff:172.18.0.7" }
+          },
+          "response": {
+            "headers": {
+              "Connection": ["close"],
+              "Content-Length": ["24"],
+              "Content-Type": ["text/html; charset=utf-8"],
+              "Date": ["Mon, 29 Jun 2020 06:48:07 GMT"],
+              "Etag": ["W/\"18-MS3VbhH7auHMzO0fUuNF6v14N/M\""],
+              "X-Powered-By": ["Express"]
+            },
+            "status_code": 500
+          },
+          "version": "1.1"
+        },
+        "labels": {
+          "foo": "bar",
+          "lorem": "ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.",
+          "multi-line": "foo\nbar\nbaz",
+          "this-is-a-very-long-tag-name-without-any-spaces": "test"
+        },
+        "observer": {
+          "ephemeral_id": "99908b73-9813-4a73-baa6-993db405523a",
+          "hostname": "aa0bd613aa4c",
+          "id": "1ccc5210-1e6c-4252-a5c8-1d6571a5fa2e",
+          "type": "apm-server",
+          "version": "8.0.0",
+          "version_major": 8
+        },
+        "process": {
+          "args": [
+            "/usr/local/bin/node",
+            "/usr/local/lib/node_modules/pm2/lib/ProcessContainer.js",
+            "ecosystem-workload.config.js"
+          ],
+          "pid": 137,
+          "ppid": 1,
+          "title": "node /app/server.js"
+        },
+        "processor": { "event": "transaction", "name": "transaction" },
+        "service": {
+          "environment": "production",
+          "framework": { "name": "express", "version": "4.17.1" },
+          "language": { "name": "javascript" },
+          "name": "opbeans-node",
+          "node": { "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+          "runtime": { "name": "node", "version": "12.18.1" },
+          "version": "1.0.0"
+        },
+        "source": { "ip": "172.18.0.7" },
+        "timestamp": { "us": 1593413287467017 },
+        "trace": { "id": "d518b2c4d72cd2aaf1e39bad7ebcbdbb" },
+        "transaction": {
+          "custom": { "shoppingBasketCount": 42 },
+          "duration": { "us": 35846 },
+          "id": "c7a30c1b076907ec",
+          "name": "GET /log-error",
+          "result": "HTTP 5xx",
+          "sampled": true,
+          "span_count": { "started": 0 },
+          "type": "request"
+        },
+        "url": {
+          "domain": "opbeans-node",
+          "full": "http://opbeans-node:3000/log-error",
+          "original": "/log-error",
+          "path": "/log-error",
+          "port": 3000,
+          "scheme": "http"
+        },
+        "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+        "user_agent": {
+          "device": { "name": "Other" },
+          "name": "Other",
+          "original": "workload/2.4.3"
+        }
+      },
+      "p95": 35840,
+      "averageResponseTime": 35846,
+      "transactionsPerMinute": 0.25,
+      "impact": 1.466376117925459
+    },
+    {
+      "name": "POST /api",
+      "sample": {
+        "@timestamp": "2020-06-29T06:48:25.478Z",
+        "agent": { "name": "nodejs", "version": "3.6.1" },
+        "client": { "ip": "172.18.0.7" },
+        "container": { "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+        "ecs": { "version": "1.5.0" },
+        "event": { "ingested": "2020-06-29T06:48:27.005671Z" },
+        "host": {
+          "architecture": "x64",
+          "hostname": "41712ded148f",
+          "ip": "172.18.0.7",
+          "name": "41712ded148f",
+          "os": { "platform": "linux" }
+        },
+        "http": {
+          "request": {
+            "body": { "original": "[REDACTED]" },
+            "headers": {
+              "Accept": ["application/json"],
+              "Connection": ["close"],
+              "Content-Length": ["129"],
+              "Content-Type": ["application/json"],
+              "Host": ["opbeans-node:3000"],
+              "User-Agent": ["workload/2.4.3"]
+            },
+            "method": "post",
+            "socket": { "encrypted": false, "remote_address": "::ffff:172.18.0.7" }
+          },
+          "response": {
+            "headers": {
+              "Allow": ["GET"],
+              "Connection": ["close"],
+              "Content-Type": ["application/json;charset=UTF-8"],
+              "Date": ["Mon, 29 Jun 2020 06:48:25 GMT"],
+              "Transfer-Encoding": ["chunked"],
+              "X-Powered-By": ["Express"]
+            },
+            "status_code": 405
+          },
+          "version": "1.1"
+        },
+        "labels": {
+          "foo": "bar",
+          "lorem": "ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.",
+          "multi-line": "foo\nbar\nbaz",
+          "this-is-a-very-long-tag-name-without-any-spaces": "test"
+        },
+        "observer": {
+          "ephemeral_id": "99908b73-9813-4a73-baa6-993db405523a",
+          "hostname": "aa0bd613aa4c",
+          "id": "1ccc5210-1e6c-4252-a5c8-1d6571a5fa2e",
+          "type": "apm-server",
+          "version": "8.0.0",
+          "version_major": 8
+        },
+        "process": {
+          "args": [
+            "/usr/local/bin/node",
+            "/usr/local/lib/node_modules/pm2/lib/ProcessContainer.js",
+            "ecosystem-workload.config.js"
+          ],
+          "pid": 137,
+          "ppid": 1,
+          "title": "node /app/server.js"
+        },
+        "processor": { "event": "transaction", "name": "transaction" },
+        "service": {
+          "environment": "production",
+          "framework": { "name": "express", "version": "4.17.1" },
+          "language": { "name": "javascript" },
+          "name": "opbeans-node",
+          "node": { "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+          "runtime": { "name": "node", "version": "12.18.1" },
+          "version": "1.0.0"
+        },
+        "source": { "ip": "172.18.0.7" },
+        "timestamp": { "us": 1593413305478010 },
+        "trace": { "id": "4bd9027dd1e355ec742970e2d6333124" },
+        "transaction": {
+          "custom": { "shoppingBasketCount": 42 },
+          "duration": { "us": 20011 },
+          "id": "94104435cf151478",
+          "name": "POST /api",
+          "result": "HTTP 4xx",
+          "sampled": true,
+          "span_count": { "started": 1 },
+          "type": "request"
+        },
+        "url": {
+          "domain": "opbeans-node",
+          "full": "http://opbeans-node:3000/api/orders",
+          "original": "/api/orders",
+          "path": "/api/orders",
+          "port": 3000,
+          "scheme": "http"
+        },
+        "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+        "user_agent": {
+          "device": { "name": "Other" },
+          "name": "Other",
+          "original": "workload/2.4.3"
+        }
+      },
+      "p95": 19968,
+      "averageResponseTime": 20011,
+      "transactionsPerMinute": 0.25,
+      "impact": 0.7098250353192541
+    },
+    {
+      "name": "GET /api/types/:id",
+      "sample": {
+        "@timestamp": "2020-06-29T06:48:12.972Z",
+        "agent": { "name": "nodejs", "version": "3.6.1" },
+        "client": { "ip": "172.18.0.7" },
+        "container": { "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+        "ecs": { "version": "1.5.0" },
+        "event": { "ingested": "2020-06-29T06:48:18.543436Z" },
+        "host": {
+          "architecture": "x64",
+          "hostname": "41712ded148f",
+          "ip": "172.18.0.7",
+          "name": "41712ded148f",
+          "os": { "platform": "linux" }
+        },
+        "http": {
+          "request": {
+            "headers": {
+              "Connection": ["close"],
+              "Host": ["opbeans-node:3000"],
+              "User-Agent": ["workload/2.4.3"]
+            },
+            "method": "get",
+            "socket": { "encrypted": false, "remote_address": "::ffff:172.18.0.7" }
+          },
+          "response": {
+            "headers": {
+              "Connection": ["close"],
+              "Content-Length": ["205"],
+              "Content-Type": ["application/json; charset=utf-8"],
+              "Date": ["Mon, 29 Jun 2020 06:48:12 GMT"],
+              "Etag": ["W/\"cd-pFMi1QOVY6YqWe+nwcbZVviCths\""],
+              "X-Powered-By": ["Express"]
+            },
+            "status_code": 200
+          },
+          "version": "1.1"
+        },
+        "labels": {
+          "foo": "bar",
+          "lorem": "ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.",
+          "multi-line": "foo\nbar\nbaz",
+          "this-is-a-very-long-tag-name-without-any-spaces": "test"
+        },
+        "observer": {
+          "ephemeral_id": "99908b73-9813-4a73-baa6-993db405523a",
+          "hostname": "aa0bd613aa4c",
+          "id": "1ccc5210-1e6c-4252-a5c8-1d6571a5fa2e",
+          "type": "apm-server",
+          "version": "8.0.0",
+          "version_major": 8
+        },
+        "process": {
+          "args": [
+            "/usr/local/bin/node",
+            "/usr/local/lib/node_modules/pm2/lib/ProcessContainer.js",
+            "ecosystem-workload.config.js"
+          ],
+          "pid": 137,
+          "ppid": 1,
+          "title": "node /app/server.js"
+        },
+        "processor": { "event": "transaction", "name": "transaction" },
+        "service": {
+          "environment": "production",
+          "framework": { "name": "express", "version": "4.17.1" },
+          "language": { "name": "javascript" },
+          "name": "opbeans-node",
+          "node": { "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+          "runtime": { "name": "node", "version": "12.18.1" },
+          "version": "1.0.0"
+        },
+        "source": { "ip": "172.18.0.7" },
+        "timestamp": { "us": 1593413292972011 },
+        "trace": { "id": "aea65cef5f902dda5d8e38f9fb38864d" },
+        "transaction": {
+          "custom": { "shoppingBasketCount": 42 },
+          "duration": { "us": 6300 },
+          "id": "a5bdbe43ac05fae2",
+          "name": "GET /api/types/:id",
+          "result": "HTTP 2xx",
+          "sampled": true,
+          "span_count": { "started": 2 },
+          "type": "request"
+        },
+        "url": {
+          "domain": "opbeans-node",
+          "full": "http://opbeans-node:3000/api/types/2",
+          "original": "/api/types/2",
+          "path": "/api/types/2",
+          "port": 3000,
+          "scheme": "http"
+        },
+        "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+        "user_agent": {
+          "device": { "name": "Other" },
+          "name": "Other",
+          "original": "workload/2.4.3"
+        }
+      },
+      "p95": 10080,
+      "averageResponseTime": 8181,
+      "transactionsPerMinute": 0.5,
+      "impact": 0.5354862351657939
+    },
+    {
+      "name": "GET /api/orders/:id",
+      "sample": {
+        "@timestamp": "2020-06-29T06:48:35.951Z",
+        "agent": { "name": "nodejs", "version": "3.6.1" },
+        "client": { "ip": "172.18.0.7" },
+        "container": { "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+        "ecs": { "version": "1.5.0" },
+        "event": { "ingested": "2020-06-29T06:48:39.484133Z" },
+        "host": {
+          "architecture": "x64",
+          "hostname": "41712ded148f",
+          "ip": "172.18.0.7",
+          "name": "41712ded148f",
+          "os": { "platform": "linux" }
+        },
+        "http": {
+          "request": {
+            "headers": {
+              "Connection": ["close"],
+              "Host": ["opbeans-node:3000"],
+              "User-Agent": ["workload/2.4.3"]
+            },
+            "method": "get",
+            "socket": { "encrypted": false, "remote_address": "::ffff:172.18.0.7" }
+          },
+          "response": {
+            "headers": {
+              "Connection": ["close"],
+              "Content-Length": ["0"],
+              "Date": ["Mon, 29 Jun 2020 06:48:35 GMT"],
+              "X-Powered-By": ["Express"]
+            },
+            "status_code": 404
+          },
+          "version": "1.1"
+        },
+        "labels": {
+          "foo": "bar",
+          "lorem": "ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.",
+          "multi-line": "foo\nbar\nbaz",
+          "this-is-a-very-long-tag-name-without-any-spaces": "test"
+        },
+        "observer": {
+          "ephemeral_id": "99908b73-9813-4a73-baa6-993db405523a",
+          "hostname": "aa0bd613aa4c",
+          "id": "1ccc5210-1e6c-4252-a5c8-1d6571a5fa2e",
+          "type": "apm-server",
+          "version": "8.0.0",
+          "version_major": 8
+        },
+        "process": {
+          "args": [
+            "/usr/local/bin/node",
+            "/usr/local/lib/node_modules/pm2/lib/ProcessContainer.js",
+            "ecosystem-workload.config.js"
+          ],
+          "pid": 137,
+          "ppid": 1,
+          "title": "node /app/server.js"
+        },
+        "processor": { "event": "transaction", "name": "transaction" },
+        "service": {
+          "environment": "production",
+          "framework": { "name": "express", "version": "4.17.1" },
+          "language": { "name": "javascript" },
+          "name": "opbeans-node",
+          "node": { "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+          "runtime": { "name": "node", "version": "12.18.1" },
+          "version": "1.0.0"
+        },
+        "source": { "ip": "172.18.0.7" },
+        "timestamp": { "us": 1593413315951017 },
+        "trace": { "id": "95979caa80e6622cbbb2d308800c3016" },
+        "transaction": {
+          "custom": { "shoppingBasketCount": 42 },
+          "duration": { "us": 3210 },
+          "id": "30344988dace0b43",
+          "name": "GET /api/orders/:id",
+          "result": "HTTP 4xx",
+          "sampled": true,
+          "span_count": { "started": 1 },
+          "type": "request"
+        },
+        "url": {
+          "domain": "opbeans-node",
+          "full": "http://opbeans-node:3000/api/orders/117",
+          "original": "/api/orders/117",
+          "path": "/api/orders/117",
+          "port": 3000,
+          "scheme": "http"
+        },
+        "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+        "user_agent": {
+          "device": { "name": "Other" },
+          "name": "Other",
+          "original": "workload/2.4.3"
+        }
+      },
+      "p95": 7184,
+      "averageResponseTime": 4749.666666666667,
+      "transactionsPerMinute": 0.75,
+      "impact": 0.43453312891085794
+    },
+    {
+      "name": "GET /api/products/:id/customers",
+      "sample": {
+        "@timestamp": "2020-06-29T06:48:41.956Z",
+        "agent": { "name": "nodejs", "version": "3.6.1" },
+        "client": { "ip": "172.18.0.7" },
+        "container": { "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+        "ecs": { "version": "1.5.0" },
+        "event": { "ingested": "2020-06-29T06:48:43.994692Z" },
+        "host": {
+          "architecture": "x64",
+          "hostname": "41712ded148f",
+          "ip": "172.18.0.7",
+          "name": "41712ded148f",
+          "os": { "platform": "linux" }
+        },
+        "http": {
+          "request": {
+            "headers": {
+              "Connection": ["close"],
+              "Host": ["opbeans-node:3000"],
+              "User-Agent": ["workload/2.4.3"]
+            },
+            "method": "get",
+            "socket": { "encrypted": false, "remote_address": "::ffff:172.18.0.7" }
+          },
+          "response": {
+            "headers": {
+              "Connection": ["close"],
+              "Content-Length": ["2"],
+              "Content-Type": ["application/json; charset=utf-8"],
+              "Date": ["Mon, 29 Jun 2020 06:48:41 GMT"],
+              "Etag": ["W/\"2-l9Fw4VUO7kr8CvBlt4zaMCqXZ0w\""],
+              "X-Powered-By": ["Express"]
+            },
+            "status_code": 200
+          },
+          "version": "1.1"
+        },
+        "labels": {
+          "foo": "bar",
+          "lorem": "ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.",
+          "multi-line": "foo\nbar\nbaz",
+          "this-is-a-very-long-tag-name-without-any-spaces": "test"
+        },
+        "observer": {
+          "ephemeral_id": "99908b73-9813-4a73-baa6-993db405523a",
+          "hostname": "aa0bd613aa4c",
+          "id": "1ccc5210-1e6c-4252-a5c8-1d6571a5fa2e",
+          "type": "apm-server",
+          "version": "8.0.0",
+          "version_major": 8
+        },
+        "process": {
+          "args": [
+            "/usr/local/bin/node",
+            "/usr/local/lib/node_modules/pm2/lib/ProcessContainer.js",
+            "ecosystem-workload.config.js"
+          ],
+          "pid": 137,
+          "ppid": 1,
+          "title": "node /app/server.js"
+        },
+        "processor": { "event": "transaction", "name": "transaction" },
+        "service": {
+          "environment": "production",
+          "framework": { "name": "express", "version": "4.17.1" },
+          "language": { "name": "javascript" },
+          "name": "opbeans-node",
+          "node": { "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+          "runtime": { "name": "node", "version": "12.18.1" },
+          "version": "1.0.0"
+        },
+        "source": { "ip": "172.18.0.7" },
+        "timestamp": { "us": 1593413321956016 },
+        "trace": { "id": "f735ac5fca8f83eebc748f4a2e009e61" },
+        "transaction": {
+          "custom": { "shoppingBasketCount": 42 },
+          "duration": { "us": 3896 },
+          "id": "b24ce95c855f83a4",
+          "name": "GET /api/products/:id/customers",
+          "result": "HTTP 2xx",
+          "sampled": true,
+          "span_count": { "started": 1 },
+          "type": "request"
+        },
+        "url": {
+          "domain": "opbeans-node",
+          "full": "http://opbeans-node:3000/api/products/5/customers",
+          "original": "/api/products/5/customers",
+          "path": "/api/products/5/customers",
+          "port": 3000,
+          "scheme": "http"
+        },
+        "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+        "user_agent": {
+          "device": { "name": "Other" },
+          "name": "Other",
+          "original": "workload/2.4.3"
+        }
+      },
+      "p95": 5616,
+      "averageResponseTime": 4757,
+      "transactionsPerMinute": 0.5,
+      "impact": 0.20830834986820673
+    },
+    {
+      "name": "GET /throw-error",
+      "sample": {
+        "@timestamp": "2020-06-29T06:48:42.954Z",
+        "agent": { "name": "nodejs", "version": "3.6.1" },
+        "client": { "ip": "172.18.0.7" },
+        "container": { "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+        "ecs": { "version": "1.5.0" },
+        "event": { "ingested": "2020-06-29T06:48:43.996435Z" },
+        "host": {
+          "architecture": "x64",
+          "hostname": "41712ded148f",
+          "ip": "172.18.0.7",
+          "name": "41712ded148f",
+          "os": { "platform": "linux" }
+        },
+        "http": {
+          "request": {
+            "headers": {
+              "Connection": ["close"],
+              "Host": ["opbeans-node:3000"],
+              "User-Agent": ["workload/2.4.3"]
+            },
+            "method": "get",
+            "socket": { "encrypted": false, "remote_address": "::ffff:172.18.0.7" }
+          },
+          "response": {
+            "headers": {
+              "Connection": ["close"],
+              "Content-Length": ["148"],
+              "Content-Security-Policy": ["default-src 'none'"],
+              "Content-Type": ["text/html; charset=utf-8"],
+              "Date": ["Mon, 29 Jun 2020 06:48:42 GMT"],
+              "X-Content-Type-Options": ["nosniff"],
+              "X-Powered-By": ["Express"]
+            },
+            "status_code": 500
+          },
+          "version": "1.1"
+        },
+        "labels": {
+          "foo": "bar",
+          "lorem": "ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.",
+          "multi-line": "foo\nbar\nbaz",
+          "this-is-a-very-long-tag-name-without-any-spaces": "test"
+        },
+        "observer": {
+          "ephemeral_id": "99908b73-9813-4a73-baa6-993db405523a",
+          "hostname": "aa0bd613aa4c",
+          "id": "1ccc5210-1e6c-4252-a5c8-1d6571a5fa2e",
+          "type": "apm-server",
+          "version": "8.0.0",
+          "version_major": 8
+        },
+        "process": {
+          "args": [
+            "/usr/local/bin/node",
+            "/usr/local/lib/node_modules/pm2/lib/ProcessContainer.js",
+            "ecosystem-workload.config.js"
+          ],
+          "pid": 137,
+          "ppid": 1,
+          "title": "node /app/server.js"
+        },
+        "processor": { "event": "transaction", "name": "transaction" },
+        "service": {
+          "environment": "production",
+          "framework": { "name": "express", "version": "4.17.1" },
+          "language": { "name": "javascript" },
+          "name": "opbeans-node",
+          "node": { "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4" },
+          "runtime": { "name": "node", "version": "12.18.1" },
+          "version": "1.0.0"
+        },
+        "source": { "ip": "172.18.0.7" },
+        "timestamp": { "us": 1593413322954016 },
+        "trace": { "id": "9d5aee7443a43db9820f622a10dfac6e" },
+        "transaction": {
+          "custom": { "shoppingBasketCount": 42 },
+          "duration": { "us": 1928 },
+          "id": "8e6fc8c3f99e8fc9",
+          "name": "GET /throw-error",
+          "result": "HTTP 5xx",
+          "sampled": true,
+          "span_count": { "started": 0 },
+          "type": "request"
+        },
+        "url": {
+          "domain": "opbeans-node",
+          "full": "http://opbeans-node:3000/throw-error",
+          "original": "/throw-error",
+          "path": "/throw-error",
+          "port": 3000,
+          "scheme": "http"
+        },
+        "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+        "user_agent": {
+          "device": { "name": "Other" },
+          "name": "Other",
+          "original": "workload/2.4.3"
+        }
+      },
+      "p95": 3224,
+      "averageResponseTime": 2577,
+      "transactionsPerMinute": 0.5,
+      "impact": 0
+    }
+  ],
+  "isAggregationAccurate": true,
+  "bucketSize": 100
+}

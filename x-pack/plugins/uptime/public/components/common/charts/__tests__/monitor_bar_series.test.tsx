@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { MonitorBarSeries, MonitorBarSeriesProps } from '../monitor_bar_series';
-import { renderWithRouter, shallowWithRouter } from '../../../../lib';
+import { renderWithRouter, shallowWithRouter, MountWithReduxProvider } from '../../../../lib';
 import { HistogramPoint } from '../../../../../common/runtime_types';
 
 describe('MonitorBarSeries component', () => {
@@ -197,7 +197,11 @@ describe('MonitorBarSeries component', () => {
   });
 
   it('renders if the data series is present', () => {
-    const component = renderWithRouter(<MonitorBarSeries histogramSeries={histogramSeries} />);
+    const component = renderWithRouter(
+      <MountWithReduxProvider>
+        <MonitorBarSeries histogramSeries={histogramSeries} />
+      </MountWithReduxProvider>
+    );
     expect(component).toMatchSnapshot();
   });
 });

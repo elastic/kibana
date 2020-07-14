@@ -3,10 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { getServiceAnnotations } from '.';
+import { getDerivedServiceAnnotations } from './get_derived_service_annotations';
 import {
   SearchParamsMock,
-  inspectSearchParams
+  inspectSearchParams,
 } from '../../../../public/utils/testHelpers';
 import noVersions from './__fixtures__/no_versions.json';
 import oneVersion from './__fixtures__/one_version.json';
@@ -23,36 +23,36 @@ describe('getServiceAnnotations', () => {
   describe('with 0 versions', () => {
     it('returns no annotations', async () => {
       mock = await inspectSearchParams(
-        setup =>
-          getServiceAnnotations({
+        (setup) =>
+          getDerivedServiceAnnotations({
             setup,
             serviceName: 'foo',
-            environment: 'bar'
+            environment: 'bar',
           }),
         {
-          mockResponse: () => noVersions
+          mockResponse: () => noVersions,
         }
       );
 
-      expect(mock.response).toEqual({ annotations: [] });
+      expect(mock.response).toEqual([]);
     });
   });
 
   describe('with 1 version', () => {
     it('returns no annotations', async () => {
       mock = await inspectSearchParams(
-        setup =>
-          getServiceAnnotations({
+        (setup) =>
+          getDerivedServiceAnnotations({
             setup,
             serviceName: 'foo',
-            environment: 'bar'
+            environment: 'bar',
           }),
         {
-          mockResponse: () => oneVersion
+          mockResponse: () => oneVersion,
         }
       );
 
-      expect(mock.response).toEqual({ annotations: [] });
+      expect(mock.response).toEqual([]);
     });
   });
 
@@ -61,38 +61,36 @@ describe('getServiceAnnotations', () => {
       const responses = [
         multipleVersions,
         versionsFirstSeen,
-        versionsFirstSeen
+        versionsFirstSeen,
       ];
       mock = await inspectSearchParams(
-        setup =>
-          getServiceAnnotations({
+        (setup) =>
+          getDerivedServiceAnnotations({
             setup,
             serviceName: 'foo',
-            environment: 'bar'
+            environment: 'bar',
           }),
         {
-          mockResponse: () => responses.shift()
+          mockResponse: () => responses.shift(),
         }
       );
 
       expect(mock.spy.mock.calls.length).toBe(3);
 
-      expect(mock.response).toEqual({
-        annotations: [
-          {
-            id: '8.0.0',
-            text: '8.0.0',
-            time: 1.5281138e12,
-            type: 'version'
-          },
-          {
-            id: '7.5.0',
-            text: '7.5.0',
-            time: 1.5281138e12,
-            type: 'version'
-          }
-        ]
-      });
+      expect(mock.response).toEqual([
+        {
+          id: '8.0.0',
+          text: '8.0.0',
+          '@timestamp': 1.5281138e12,
+          type: 'version',
+        },
+        {
+          id: '7.5.0',
+          text: '7.5.0',
+          '@timestamp': 1.5281138e12,
+          type: 'version',
+        },
+      ]);
     });
   });
 });

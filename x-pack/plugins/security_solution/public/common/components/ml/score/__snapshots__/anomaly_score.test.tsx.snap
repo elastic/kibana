@@ -1,0 +1,280 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`anomaly_scores renders correctly against snapshot 1`] = `
+<Fragment>
+  <EuiFlexItem
+    grow={false}
+  >
+    <DraggableScore
+      id="anomaly-scores-job-key-1"
+      index={0}
+      score={
+        Object {
+          "detectorIndex": 0,
+          "entityName": "process.name",
+          "entityValue": "du",
+          "influencers": Array [
+            Object {
+              "host.name": "zeek-iowa",
+            },
+            Object {
+              "process.name": "du",
+            },
+            Object {
+              "user.name": "root",
+            },
+          ],
+          "jobId": "job-1",
+          "rowId": "1561157194802_0",
+          "severity": 16.193669439507826,
+          "source": Object {
+            "actual": Array [
+              1,
+            ],
+            "bucket_span": 900,
+            "by_field_name": "process.name",
+            "by_field_value": "du",
+            "detector_index": 0,
+            "function": "rare",
+            "function_description": "rare",
+            "influencers": Array [
+              Object {
+                "influencer_field_name": "user.name",
+                "influencer_field_values": Array [
+                  "root",
+                ],
+              },
+              Object {
+                "influencer_field_name": "process.name",
+                "influencer_field_values": Array [
+                  "du",
+                ],
+              },
+              Object {
+                "influencer_field_name": "host.name",
+                "influencer_field_values": Array [
+                  "zeek-iowa",
+                ],
+              },
+            ],
+            "initial_record_score": 16.193669439507826,
+            "is_interim": false,
+            "job_id": "job-1",
+            "multi_bucket_impact": 0,
+            "partition_field_name": "host.name",
+            "partition_field_value": "zeek-iowa",
+            "probability": 0.024041164411288146,
+            "record_score": 16.193669439507826,
+            "result_type": "record",
+            "timestamp": 1560664800000,
+            "typical": Array [
+              0.024041164411288146,
+            ],
+          },
+          "time": 1560664800000,
+        }
+      }
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiPopover
+      anchorPosition="downCenter"
+      button={
+        <Icon
+          type="iInCircle"
+        />
+      }
+      closePopover={[Function]}
+      data-test-subj="anomaly-score-popover"
+      display="inlineBlock"
+      hasArrow={true}
+      id="anomaly-score-popover"
+      isOpen={false}
+      onClick={[Function]}
+      ownFocus={false}
+      panelPaddingSize="m"
+      repositionOnScroll={true}
+    >
+      <EuiDescriptionList
+        data-test-subj="anomaly-description-list"
+        listItems={
+          Array [
+            Object {
+              "description": <React.Fragment>
+                <EuiSpacer
+                  size="m"
+                />
+                <LargeScore>
+                  17
+                </LargeScore>
+              </React.Fragment>,
+              "title": "Max Anomaly Score",
+            },
+            Object {
+              "description": <EuiFlexGroup
+                direction="column"
+                gutterSize="none"
+                responsive={false}
+              >
+                <EuiFlexItem
+                  grow={false}
+                >
+                  job-1
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <ExplorerLink
+                    endDate={32503680000000}
+                    linkName="View in Machine Learning"
+                    score={
+                      Object {
+                        "detectorIndex": 0,
+                        "entityName": "process.name",
+                        "entityValue": "du",
+                        "influencers": Array [
+                          Object {
+                            "host.name": "zeek-iowa",
+                          },
+                          Object {
+                            "process.name": "du",
+                          },
+                          Object {
+                            "user.name": "root",
+                          },
+                        ],
+                        "jobId": "job-1",
+                        "rowId": "1561157194802_0",
+                        "severity": 16.193669439507826,
+                        "source": Object {
+                          "actual": Array [
+                            1,
+                          ],
+                          "bucket_span": 900,
+                          "by_field_name": "process.name",
+                          "by_field_value": "du",
+                          "detector_index": 0,
+                          "function": "rare",
+                          "function_description": "rare",
+                          "influencers": Array [
+                            Object {
+                              "influencer_field_name": "user.name",
+                              "influencer_field_values": Array [
+                                "root",
+                              ],
+                            },
+                            Object {
+                              "influencer_field_name": "process.name",
+                              "influencer_field_values": Array [
+                                "du",
+                              ],
+                            },
+                            Object {
+                              "influencer_field_name": "host.name",
+                              "influencer_field_values": Array [
+                                "zeek-iowa",
+                              ],
+                            },
+                          ],
+                          "initial_record_score": 16.193669439507826,
+                          "is_interim": false,
+                          "job_id": "job-1",
+                          "multi_bucket_impact": 0,
+                          "partition_field_name": "host.name",
+                          "partition_field_value": "zeek-iowa",
+                          "probability": 0.024041164411288146,
+                          "record_score": 16.193669439507826,
+                          "result_type": "record",
+                          "timestamp": 1560664800000,
+                          "typical": Array [
+                            0.024041164411288146,
+                          ],
+                        },
+                        "time": 1560664800000,
+                      }
+                    }
+                    startDate={0}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>,
+              "title": <React.Fragment>
+                <EuiSpacer
+                  size="m"
+                />
+                Job
+              </React.Fragment>,
+            },
+            Object {
+              "description": <EuiFlexGroup
+                direction="column"
+                gutterSize="none"
+                responsive={false}
+              >
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <Memo(PreferenceFormattedDate)
+                    value={2019-06-16T06:00:00.000Z}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <EuiLink
+                    data-test-subj="anomaly-description-narrow-range-link"
+                    onClick={[Function]}
+                    target="_blank"
+                  >
+                    Narrow to this date range
+                  </EuiLink>
+                </EuiFlexItem>
+              </EuiFlexGroup>,
+              "title": "Detected",
+            },
+            Object {
+              "description": <EuiFlexGroup
+                direction="column"
+                gutterSize="none"
+                responsive={false}
+              >
+                <EuiFlexItem
+                  grow={false}
+                >
+                  process.name: "du"
+                </EuiFlexItem>
+              </EuiFlexGroup>,
+              "title": "Anomalous Entity",
+            },
+            Object {
+              "description": <EuiFlexGroup
+                direction="column"
+                gutterSize="none"
+                responsive={false}
+              >
+                <EuiFlexItem
+                  grow={false}
+                >
+                  host.name: "zeek-iowa"
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
+                  process.name: "du"
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
+                  user.name: "root"
+                </EuiFlexItem>
+              </EuiFlexGroup>,
+              "title": "Influenced By",
+            },
+          ]
+        }
+      />
+    </EuiPopover>
+  </EuiFlexItem>
+</Fragment>
+`;

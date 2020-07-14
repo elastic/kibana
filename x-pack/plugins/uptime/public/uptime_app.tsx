@@ -20,14 +20,13 @@ import {
   UptimeStartupPluginsContextProvider,
 } from './contexts';
 import { CommonlyUsedRange } from './components/common/uptime_date_picker';
-import { store } from './state';
 import { setBasePath } from './state/actions';
 import { PageRouter } from './routes';
 import {
   UptimeAlertsContextProvider,
   UptimeAlertsFlyoutWrapper,
 } from './components/overview/alerts';
-import { kibanaService } from './state/kibana_service';
+import { store } from './state';
 
 export interface UptimeAppColors {
   danger: string;
@@ -47,7 +46,6 @@ export interface UptimeAppProps {
   isApmAvailable: boolean;
   isInfraAvailable: boolean;
   isLogsAvailable: boolean;
-  kibanaBreadcrumbs: ChromeBreadcrumb[];
   plugins: ClientPluginsSetup;
   startPlugins: ClientPluginsStart;
   routerBasename: string;
@@ -88,8 +86,6 @@ const Application = (props: UptimeAppProps) => {
     );
   }, [canSave, renderGlobalHelpControls, setBadge]);
 
-  kibanaService.core = core;
-
   store.dispatch(setBasePath(basePath));
 
   return (
@@ -105,11 +101,8 @@ const Application = (props: UptimeAppProps) => {
                       <UptimeAlertsContextProvider>
                         <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
                           <main>
-                            <UptimeAlertsFlyoutWrapper
-                              alertTypeId="xpack.uptime.alerts.monitorStatus"
-                              canChangeTrigger={false}
-                            />
-                            <PageRouter autocomplete={plugins.data.autocomplete} />
+                            <UptimeAlertsFlyoutWrapper />
+                            <PageRouter />
                           </main>
                         </EuiPage>
                       </UptimeAlertsContextProvider>

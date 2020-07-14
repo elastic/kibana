@@ -23,7 +23,7 @@ import { resolve } from 'path';
 import { mergeMap } from 'rxjs/operators';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { initWebDriver } from './webdriver';
+import { initWebDriver, BrowserConfig } from './webdriver';
 import { Browsers } from './browsers';
 
 export async function RemoteProvider({ getService }: FtrProviderContext) {
@@ -58,21 +58,18 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     Fs.writeFileSync(path, JSON.stringify(JSON.parse(coverageJson), null, 2));
   };
 
-  const { driver, By, until, consoleLog$ } = await initWebDriver(
-    log,
-    browserType,
-    lifecycle,
-    config.get('browser.logPollingMs')
-  );
-  const isW3CEnabled = (driver as any).executor_.w3c;
+  const browserConfig: BrowserConfig = {
+    logPollingMs: config.get('browser.logPollingMs'),
+    acceptInsecureCerts: config.get('browser.acceptInsecureCerts'),
+  };
 
+  const { driver, consoleLog$ } = await initWebDriver(log, browserType, lifecycle, browserConfig);
   const caps = await driver.getCapabilities();
-  const browserVersion = caps.get(isW3CEnabled ? 'browserVersion' : 'version');
 
   log.info(
-    `Remote initialized: ${caps.get(
-      'browserName'
-    )} ${browserVersion}, w3c compliance=${isW3CEnabled}, collectingCoverage=${collectCoverage}`
+    `Remote initialized: ${caps.get('browserName')} ${caps.get(
+      'browserVersion'
+    )}, collectingCoverage=${collectCoverage}`
   );
 
   if ([Browsers.Chrome, Browsers.ChromiumEdge].includes(browserType)) {
@@ -83,7 +80,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
 
   consoleLog$
     .pipe(
-      mergeMap(logEntry => {
+      mergeMap((logEntry) => {
         if (collectCoverage && logEntry.message.includes(coveragePrefix)) {
           const [, coverageJsonBase64] = logEntry.message.split(coveragePrefix);
           const coverageJson = Buffer.from(coverageJsonBase64, 'base64').toString('utf8');
@@ -108,20 +105,12 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   lifecycle.beforeTests.add(async () => {
     // hard coded default, can be overridden per suite using `browser.setWindowSize()`
     // and will be automatically reverted after each suite
-    await driver
-      .manage()
-      .window()
-      .setRect({ width: 1600, height: 1000 });
+    await driver.manage().window().setRect({ width: 1600, height: 1000 });
   });
 
   const windowSizeStack: Array<{ width: number; height: number }> = [];
   lifecycle.beforeTestSuite.add(async () => {
-    windowSizeStack.unshift(
-      await driver
-        .manage()
-        .window()
-        .getRect()
-    );
+    windowSizeStack.unshift(await driver.manage().window().getRect());
   });
 
   lifecycle.beforeEachTest.add(async () => {
@@ -130,10 +119,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
 
   lifecycle.afterTestSuite.add(async () => {
     const { width, height } = windowSizeStack.shift()!;
-    await driver
-      .manage()
-      .window()
-      .setRect({ width, height });
+    await driver.manage().window().setRect({ width, height });
     await clearBrowserStorage('sessionStorage');
     await clearBrowserStorage('localStorage');
   });
@@ -144,7 +130,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
       const coverageJson = await driver
         .executeScript('return window.__coverage__')
         .catch(() => undefined)
-        .then(coverage => coverage && JSON.stringify(coverage));
+        .then((coverage) => coverage && JSON.stringify(coverage));
       if (coverageJson) {
         writeCoverage(coverageJson);
       }
@@ -153,5 +139,5 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     await driver.quit();
   });
 
-  return { driver, By, until, browserType, consoleLog$ };
+  return { driver, browserType, consoleLog$ };
 }

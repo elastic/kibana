@@ -278,25 +278,12 @@ exports[`LoginPage page renders as expected 1`] = `
       >
         <h1>
           <FormattedMessage
-            defaultMessage="Welcome to Elastic Kibana"
+            defaultMessage="Welcome to Elastic"
             id="xpack.security.loginPage.welcomeTitle"
             values={Object {}}
           />
         </h1>
       </EuiTitle>
-      <EuiText
-        className="loginWelcome__subtitle"
-        color="subdued"
-        size="s"
-      >
-        <p>
-          <FormattedMessage
-            defaultMessage="Your window into the Elastic Stack"
-            id="xpack.security.loginPage.welcomeDescription"
-            values={Object {}}
-          />
-        </p>
-      </EuiText>
       <EuiSpacer
         size="xl"
       />

@@ -8,10 +8,12 @@ import { mockHttpRequest, pageHelpers, nextTick } from './helpers';
 import { JOB_TO_CLONE, JOB_CLONE_INDEX_PATTERN_CHECK } from './helpers/constants';
 import { getRouter } from '../../crud_app/services/routing';
 import { setHttp } from '../../crud_app/services';
-import { CRUD_APP_BASE_PATH } from '../../crud_app/constants';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 
-jest.mock('lodash/function/debounce', () => fn => fn);
+jest.mock('lodash', () => ({
+  ...jest.requireActual('lodash'),
+  debounce: (fn) => fn,
+}));
 
 jest.mock('../../kibana_services', () => {
   const services = require.requireActual('../../kibana_services');
@@ -65,8 +67,8 @@ describe('Smoke test cloning an existing rollup job from job list', () => {
 
     find('jobActionMenuButton').simulate('click');
 
-    expect(router.history.location.pathname).not.toBe(`${CRUD_APP_BASE_PATH}/create`);
+    expect(router.history.location.pathname).not.toBe(`/create`);
     find('jobCloneActionContextMenu').simulate('click');
-    expect(router.history.location.pathname).toBe(`${CRUD_APP_BASE_PATH}/create`);
+    expect(router.history.location.pathname).toBe(`/create`);
   });
 });

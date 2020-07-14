@@ -6,7 +6,7 @@
 
 import { SearchParams } from 'elasticsearch';
 import { sum as arraySum, min as arrayMin, max as arrayMax, get } from 'lodash';
-import { CANVAS_TYPE } from '../../../../legacy/plugins/canvas/common/lib/constants';
+import { CANVAS_TYPE } from '../../common/lib/constants';
 import { collectFns } from './collector_helpers';
 import { TelemetryCollector, CanvasWorkpad } from '../../types';
 import { parseExpression } from '../../../../../src/plugins/expressions/common';
@@ -59,7 +59,7 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
   }
 
   // make a summary of info about each workpad
-  const workpadsInfo = workpadDocs.map(workpad => {
+  const workpadsInfo = workpadDocs.map((workpad) => {
     let pages = { count: 0 };
     try {
       pages = { count: workpad.pages.length };
@@ -72,9 +72,9 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
       []
     );
     const functionCounts = workpad.pages.reduce<number[]>((accum, page) => {
-      return page.elements.map(element => {
+      return page.elements.map((element) => {
         const ast = parseExpression(element.expression);
-        collectFns(ast, cFunction => {
+        collectFns(ast, (cFunction) => {
           functionSet.add(cFunction);
         });
         return ast.chain.length; // get the number of parts in the expression
@@ -133,8 +133,8 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
           total: elementsTotal,
           per_page: {
             avg: elementsTotal / elementCounts.length,
-            min: arrayMin(elementCounts),
-            max: arrayMax(elementCounts),
+            min: arrayMin(elementCounts) || 0,
+            max: arrayMax(elementCounts) || 0,
           },
         }
       : undefined;
@@ -145,8 +145,8 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
           in_use: Array.from(functionSet),
           per_element: {
             avg: functionsTotal / functionCounts.length,
-            min: arrayMin(functionCounts),
-            max: arrayMax(functionCounts),
+            min: arrayMin(functionCounts) || 0,
+            max: arrayMax(functionCounts) || 0,
           },
         }
       : undefined;
@@ -159,7 +159,7 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
   };
 }
 
-const workpadCollector: TelemetryCollector = async function(kibanaIndex, callCluster) {
+const workpadCollector: TelemetryCollector = async function (kibanaIndex, callCluster) {
   const searchParams: SearchParams = {
     size: 10000, // elasticsearch index.max_result_window default value
     index: kibanaIndex,
@@ -170,8 +170,8 @@ const workpadCollector: TelemetryCollector = async function(kibanaIndex, callClu
 
   const esResponse = await callCluster<WorkpadSearch>('search', searchParams);
 
-  if (get<number>(esResponse, 'hits.hits.length') > 0) {
-    const workpads = esResponse.hits.hits.map(hit => hit._source[CANVAS_TYPE]);
+  if (get(esResponse, 'hits.hits.length') > 0) {
+    const workpads = esResponse.hits.hits.map((hit) => hit._source[CANVAS_TYPE]);
     return summarizeWorkpads(workpads);
   }
 

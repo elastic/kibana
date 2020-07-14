@@ -4,22 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CANVAS_TYPE } from '../../../../../legacy/plugins/canvas/common/lib/constants';
+import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeGetWorkpadRoute } from './get';
-import {
-  IRouter,
-  kibanaResponseFactory,
-  RequestHandlerContext,
-  RequestHandler,
-} from 'src/core/server';
+import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
 import {
   savedObjectsClientMock,
   httpServiceMock,
   httpServerMock,
-  loggingServiceMock,
+  loggingSystemMock,
 } from 'src/core/server/mocks';
-import { workpadWithGroupAsElement } from '../../../../../legacy/plugins/canvas/__tests__/fixtures/workpads';
-import { CanvasWorkpad } from '../../../../../legacy/plugins/canvas/types';
+import { workpadWithGroupAsElement } from '../../../__tests__/fixtures/workpads';
+import { CanvasWorkpad } from '../../../types';
 
 const mockRouteContext = ({
   core: {
@@ -34,10 +29,10 @@ describe('GET workpad', () => {
 
   beforeEach(() => {
     const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
+    const router = httpService.createRouter();
     initializeGetWorkpadRoute({
       router,
-      logger: loggingServiceMock.create().get(),
+      logger: loggingSystemMock.create().get(),
     });
 
     routeHandler = router.get.mock.calls[0][1];

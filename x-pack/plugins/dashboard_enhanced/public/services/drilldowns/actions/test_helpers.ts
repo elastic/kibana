@@ -10,9 +10,9 @@ import {
   UiActionsEnhancedMemoryActionStorage as MemoryActionStorage,
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
   AdvancedUiActionsStart,
-} from '../../../../../advanced_ui_actions/public';
+} from '../../../../../ui_actions_enhanced/public';
 import { TriggerContextMapping } from '../../../../../../../src/plugins/ui_actions/public';
-import { uiActionsEnhancedPluginMock } from '../../../../../advanced_ui_actions/public/mocks';
+import { uiActionsEnhancedPluginMock } from '../../../../../ui_actions_enhanced/public/mocks';
 
 export class MockEmbeddable extends Embeddable {
   public rootType = 'dashboard';

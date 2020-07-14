@@ -20,16 +20,20 @@
 import Path from 'path';
 
 import { UnknownVals } from './ts_helpers';
+import { ThemeTags, parseThemeTags } from './theme_tags';
 
 export interface WorkerConfig {
   readonly repoRoot: string;
   readonly watch: boolean;
   readonly dist: boolean;
+  readonly themeTags: ThemeTags;
   readonly cache: boolean;
   readonly profileWebpack: boolean;
   readonly browserslistEnv: string;
   readonly optimizerCacheKey: unknown;
 }
+
+export type CacheableWorkerConfig = Omit<WorkerConfig, 'watch' | 'profileWebpack' | 'cache'>;
 
 export function parseWorkerConfig(json: string): WorkerConfig {
   try {
@@ -78,6 +82,8 @@ export function parseWorkerConfig(json: string): WorkerConfig {
       throw new Error('`browserslistEnv` must be a string');
     }
 
+    const themes = parseThemeTags(parsed.themeTags);
+
     return {
       repoRoot,
       cache,
@@ -86,6 +92,7 @@ export function parseWorkerConfig(json: string): WorkerConfig {
       profileWebpack,
       optimizerCacheKey,
       browserslistEnv,
+      themeTags: themes,
     };
   } catch (error) {
     throw new Error(`unable to parse worker config: ${error.message}`);

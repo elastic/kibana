@@ -4,21 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiSelectable,
-  EuiButtonEmptyProps,
-} from '@elastic/eui';
+import { EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
 import { EuiSelectableProps } from '@elastic/eui/src/components/selectable/selectable';
 import { IndexPatternRef } from './types';
 import { trackUiEvent } from '../lens_ui_telemetry';
+import { ToolbarButtonProps, ToolbarButton } from '../toolbar_button';
 
-export type ChangeIndexPatternTriggerProps = EuiButtonEmptyProps & {
+export type ChangeIndexPatternTriggerProps = ToolbarButtonProps & {
   label: string;
   title?: string;
 };
@@ -38,32 +32,27 @@ export function ChangeIndexPattern({
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
-  const createTrigger = function() {
+  const createTrigger = function () {
     const { label, title, ...rest } = trigger;
     return (
-      <EuiButtonEmpty
-        className="eui-textTruncate"
-        flush="left"
-        color="text"
-        iconSide="right"
-        iconType="arrowDown"
+      <ToolbarButton
         title={title}
         onClick={() => setPopoverIsOpen(!isPopoverOpen)}
+        fullWidth
         {...rest}
       >
         {label}
-      </EuiButtonEmpty>
+      </ToolbarButton>
     );
   };
 
   return (
     <>
       <EuiPopover
+        style={{ width: '100%' }}
         button={createTrigger()}
         isOpen={isPopoverOpen}
         closePopover={() => setPopoverIsOpen(false)}
-        className="eui-textTruncate"
-        anchorClassName="eui-textTruncate"
         display="block"
         panelPaddingSize="s"
         ownFocus
@@ -84,7 +73,7 @@ export function ChangeIndexPattern({
               value: id,
               checked: id === indexPatternId ? 'on' : undefined,
             }))}
-            onChange={choices => {
+            onChange={(choices) => {
               const choice = (choices.find(({ checked }) => checked) as unknown) as {
                 value: string;
               };

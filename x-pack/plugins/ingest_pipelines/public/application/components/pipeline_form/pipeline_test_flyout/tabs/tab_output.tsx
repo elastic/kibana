@@ -11,10 +11,10 @@ import {
   EuiSpacer,
   EuiText,
   EuiSwitch,
-  EuiLink,
-  EuiIcon,
+  EuiButton,
   EuiLoadingSpinner,
-  EuiIconTip,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { useTestConfigContext } from '../../test_config_context';
 
@@ -59,44 +59,39 @@ export const OutputTab: React.FunctionComponent<Props> = ({
         <p>
           <FormattedMessage
             id="xpack.ingestPipelines.testPipelineFlyout.outputTab.descriptionText"
-            defaultMessage="The output of the executed pipeline. {runLink}"
-            values={{
-              runLink: (
-                <EuiLink onClick={() => handleExecute(cachedDocuments!, cachedVerbose)}>
-                  <FormattedMessage
-                    id="xpack.ingestPipelines.testPipelineFlyout.outputTab.descriptionLinkLabel"
-                    defaultMessage="Refresh output"
-                  />{' '}
-                  <EuiIcon type="refresh" />
-                </EuiLink>
-              ),
-            }}
+            defaultMessage="View the output data, or see how each processor affects the document as it passes through the pipeline."
           />
         </p>
       </EuiText>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
 
-      <EuiSwitch
-        label={
-          <>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            label={
+              <FormattedMessage
+                id="xpack.ingestPipelines.testPipelineFlyout.outputTab.verboseSwitchLabel"
+                defaultMessage="View verbose output"
+              />
+            }
+            checked={cachedVerbose}
+            onChange={(e) => onEnableVerbose(e.target.checked)}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size="s"
+            onClick={() => handleExecute(cachedDocuments!, cachedVerbose)}
+            iconType="refresh"
+          >
             <FormattedMessage
-              id="xpack.ingestPipelines.testPipelineFlyout.outputTab.verboseSwitchLabel"
-              defaultMessage="View verbose output"
-            />{' '}
-            <EuiIconTip
-              content={
-                <FormattedMessage
-                  id="xpack.ingestPipelines.testPipelineFlyout.outputTab.verboseSwitchTooltipLabel"
-                  defaultMessage="Include output data for each processor in the executed pipeline response"
-                />
-              }
+              id="xpack.ingestPipelines.testPipelineFlyout.outputTab.descriptionLinkLabel"
+              defaultMessage="Refresh output"
             />
-          </>
-        }
-        checked={cachedVerbose}
-        onChange={e => onEnableVerbose(e.target.checked)}
-      />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiSpacer size="m" />
 

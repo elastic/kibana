@@ -21,10 +21,10 @@ import { i18n } from '@kbn/i18n';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
-import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
 
-export interface GeoBoundsMetricAggDependencies {
-  getInternalStartServices: GetInternalStartServicesFn;
+export interface AggParamsGeoBounds extends BaseAggParams {
+  field: string;
 }
 
 const geoBoundsTitle = i18n.translate('data.search.aggs.metrics.geoBoundsTitle', {
@@ -35,24 +35,17 @@ const geoBoundsLabel = i18n.translate('data.search.aggs.metrics.geoBoundsLabel',
   defaultMessage: 'Geo Bounds',
 });
 
-export const getGeoBoundsMetricAgg = ({
-  getInternalStartServices,
-}: GeoBoundsMetricAggDependencies) => {
-  return new MetricAggType(
-    {
-      name: METRIC_TYPES.GEO_BOUNDS,
-      title: geoBoundsTitle,
-      makeLabel: () => geoBoundsLabel,
-      params: [
-        {
-          name: 'field',
-          type: 'field',
-          filterFieldTypes: KBN_FIELD_TYPES.GEO_POINT,
-        },
-      ],
-    },
-    {
-      getInternalStartServices,
-    }
-  );
+export const getGeoBoundsMetricAgg = () => {
+  return new MetricAggType({
+    name: METRIC_TYPES.GEO_BOUNDS,
+    title: geoBoundsTitle,
+    makeLabel: () => geoBoundsLabel,
+    params: [
+      {
+        name: 'field',
+        type: 'field',
+        filterFieldTypes: KBN_FIELD_TYPES.GEO_POINT,
+      },
+    ],
+  });
 };

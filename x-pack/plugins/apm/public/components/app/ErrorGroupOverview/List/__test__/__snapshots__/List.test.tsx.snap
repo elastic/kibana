@@ -6,7 +6,21 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
     Array [
       Object {
         "field": "groupId",
-        "name": "Group ID",
+        "name": <React.Fragment>
+          Group ID
+           
+          <EuiIconTip
+            color="subdued"
+            content="Hash of the stack trace. Groups similar errors together, even when the error message is different due to dynamic parameters."
+            iconProps={
+              Object {
+                "className": "eui-alignTop",
+              }
+            }
+            size="s"
+            type="questionInCircle"
+          />
+        </React.Fragment>,
         "render": [Function],
         "sortable": false,
         "width": "96px",
@@ -119,6 +133,8 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
       </div>
       <table
         className="euiTable euiTable--responsive"
+        id="generated-id"
+        tabIndex={-1}
       >
         <caption
           className="euiScreenReaderOnly euiTableCaption"
@@ -141,9 +157,27 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
               >
                 <span
                   className="euiTableCellContent__text"
-                  title="Group ID"
+                  title="Group ID "
                 >
                   Group ID
+                   
+                  <span
+                    className="euiToolTipAnchor"
+                    onKeyUp={[Function]}
+                    onMouseOut={[Function]}
+                    onMouseOver={[Function]}
+                  >
+                    <div
+                      aria-label="Info"
+                      className="eui-alignTop"
+                      color="subdued"
+                      data-euiicon-type="questionInCircle"
+                      onBlur={[Function]}
+                      onFocus={[Function]}
+                      size="s"
+                      tabIndex={0}
+                    />
+                  </span>
                 </span>
               </div>
             </th>
@@ -358,7 +392,21 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
     Array [
       Object {
         "field": "groupId",
-        "name": "Group ID",
+        "name": <React.Fragment>
+          Group ID
+           
+          <EuiIconTip
+            color="subdued"
+            content="Hash of the stack trace. Groups similar errors together, even when the error message is different due to dynamic parameters."
+            iconProps={
+              Object {
+                "className": "eui-alignTop",
+              }
+            }
+            size="s"
+            type="questionInCircle"
+          />
+        </React.Fragment>,
         "render": [Function],
         "sortable": false,
         "width": "96px",
@@ -502,6 +550,8 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
       </div>
       <table
         className="euiTable euiTable--responsive"
+        id="generated-id"
+        tabIndex={-1}
       >
         <caption
           className="euiScreenReaderOnly euiTableCaption"
@@ -524,9 +574,27 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               >
                 <span
                   className="euiTableCellContent__text"
-                  title="Group ID"
+                  title="Group ID "
                 >
                   Group ID
+                   
+                  <span
+                    className="euiToolTipAnchor"
+                    onKeyUp={[Function]}
+                    onMouseOut={[Function]}
+                    onMouseOver={[Function]}
+                  >
+                    <div
+                      aria-label="Info"
+                      className="eui-alignTop"
+                      color="subdued"
+                      data-euiicon-type="questionInCircle"
+                      onBlur={[Function]}
+                      onFocus={[Function]}
+                      size="s"
+                      tabIndex={0}
+                    />
+                  </span>
                 </span>
               </div>
             </th>
@@ -689,6 +757,24 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
                 Group ID
+                 
+                <span
+                  className="euiToolTipAnchor"
+                  onKeyUp={[Function]}
+                  onMouseOut={[Function]}
+                  onMouseOver={[Function]}
+                >
+                  <div
+                    aria-label="Info"
+                    className="eui-alignTop"
+                    color="subdued"
+                    data-euiicon-type="questionInCircle"
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                    size="s"
+                    tabIndex={0}
+                  />
+                </span>
               </div>
               <div
                 className="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -780,6 +866,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   >
                     <span
                       className="euiToolTipAnchor"
+                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -810,6 +897,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     <br />
                     <span
                       className="euiToolTipAnchor"
+                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -879,6 +967,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               >
                 <span
                   className="euiToolTipAnchor"
+                  onKeyUp={[Function]}
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -902,6 +991,24 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
                 Group ID
+                 
+                <span
+                  className="euiToolTipAnchor"
+                  onKeyUp={[Function]}
+                  onMouseOut={[Function]}
+                  onMouseOver={[Function]}
+                >
+                  <div
+                    aria-label="Info"
+                    className="eui-alignTop"
+                    color="subdued"
+                    data-euiicon-type="questionInCircle"
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                    size="s"
+                    tabIndex={0}
+                  />
+                </span>
               </div>
               <div
                 className="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -993,6 +1100,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   >
                     <span
                       className="euiToolTipAnchor"
+                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -1023,6 +1131,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     <br />
                     <span
                       className="euiToolTipAnchor"
+                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -1092,6 +1201,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               >
                 <span
                   className="euiToolTipAnchor"
+                  onKeyUp={[Function]}
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -1115,6 +1225,24 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
                 Group ID
+                 
+                <span
+                  className="euiToolTipAnchor"
+                  onKeyUp={[Function]}
+                  onMouseOut={[Function]}
+                  onMouseOver={[Function]}
+                >
+                  <div
+                    aria-label="Info"
+                    className="eui-alignTop"
+                    color="subdued"
+                    data-euiicon-type="questionInCircle"
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                    size="s"
+                    tabIndex={0}
+                  />
+                </span>
               </div>
               <div
                 className="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -1206,6 +1334,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   >
                     <span
                       className="euiToolTipAnchor"
+                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -1236,6 +1365,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     <br />
                     <span
                       className="euiToolTipAnchor"
+                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -1305,6 +1435,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               >
                 <span
                   className="euiToolTipAnchor"
+                  onKeyUp={[Function]}
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -1328,6 +1459,24 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
                 Group ID
+                 
+                <span
+                  className="euiToolTipAnchor"
+                  onKeyUp={[Function]}
+                  onMouseOut={[Function]}
+                  onMouseOver={[Function]}
+                >
+                  <div
+                    aria-label="Info"
+                    className="eui-alignTop"
+                    color="subdued"
+                    data-euiicon-type="questionInCircle"
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                    size="s"
+                    tabIndex={0}
+                  />
+                </span>
               </div>
               <div
                 className="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -1419,6 +1568,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   >
                     <span
                       className="euiToolTipAnchor"
+                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -1449,6 +1599,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     <br />
                     <span
                       className="euiToolTipAnchor"
+                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -1518,6 +1669,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               >
                 <span
                   className="euiToolTipAnchor"
+                  onKeyUp={[Function]}
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -1547,9 +1699,8 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           <div
             className="euiFlexItem euiFlexItem--flexGrowZero"
           >
-            <div
+            <nav
               className="euiPagination"
-              role="group"
             >
               <button
                 aria-label="Previous page"
@@ -1566,23 +1717,34 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   size="m"
                 />
               </button>
-              <button
-                aria-label="Page 1 of 1"
-                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
-                data-test-subj="pagination-button-0"
-                onClick={[Function]}
-                type="button"
+              <ul
+                className="euiPagination__list"
               >
-                <span
-                  className="euiButtonEmpty__content"
+                <li
+                  className="euiPagination__item"
                 >
-                  <span
-                    className="euiButtonEmpty__text"
+                  <button
+                    aria-controls="generated-id"
+                    aria-current={true}
+                    aria-label="Page 1 of 1"
+                    className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                    data-test-subj="pagination-button-0"
+                    disabled={true}
+                    onClick={[Function]}
+                    type="button"
                   >
-                    1
-                  </span>
-                </span>
-              </button>
+                    <span
+                      className="euiButtonEmpty__content"
+                    >
+                      <span
+                        className="euiButtonEmpty__text"
+                      >
+                        1
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              </ul>
               <button
                 aria-label="Next page"
                 className="euiButtonIcon euiButtonIcon--text"
@@ -1598,7 +1760,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   size="m"
                 />
               </button>
-            </div>
+            </nav>
           </div>
         </div>
       </EuiFlexGroup>

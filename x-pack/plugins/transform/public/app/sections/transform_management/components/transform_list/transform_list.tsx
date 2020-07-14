@@ -35,13 +35,12 @@ import { AuthorizationContext } from '../../../../lib/authorization';
 
 import { CreateTransformButton } from '../create_transform_button';
 import { RefreshTransformListButton } from '../refresh_transform_list_button';
-import { getTaskStateBadge } from './columns';
-import { DeleteAction } from './action_delete';
-import { StartAction } from './action_start';
-import { StopAction } from './action_stop';
+import { useDeleteAction, DeleteButton, DeleteButtonModal } from '../action_delete';
+import { useStartAction, StartButton, StartButtonModal } from '../action_start';
+import { StopButton } from '../action_stop';
 
 import { ItemIdToExpandedRowMap, Clause, TermClause, FieldClause, Value } from './common';
-import { getColumns } from './columns';
+import { getTaskStateBadge, useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
 
 function getItemIdToExpandedRowMap(
@@ -49,7 +48,7 @@ function getItemIdToExpandedRowMap(
   transforms: TransformListRow[]
 ): ItemIdToExpandedRowMap {
   return itemIds.reduce((m: ItemIdToExpandedRowMap, transformId: TransformId) => {
-    const item = transforms.find(transform => transform.config.id === transformId);
+    const item = transforms.find((transform) => transform.config.id === transformId);
     if (item !== undefined) {
       m[transformId] = <ExpandedRow item={item} />;
     }
@@ -90,6 +89,8 @@ export const TransformList: FC<Props> = ({
 
   const [transformSelection, setTransformSelection] = useState<TransformListRow[]>([]);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
+  const bulkStartAction = useStartAction();
+  const bulkDeleteAction = useDeleteAction();
 
   const [searchError, setSearchError] = useState<any>(undefined);
 
@@ -139,7 +140,7 @@ export const TransformList: FC<Props> = ({
       return p;
     }, {});
 
-    clauses.forEach(c => {
+    clauses.forEach((c) => {
       // the search term could be negated with a minus, e.g. -bananas
       const bool = c.match === 'must';
       let ts = [];
@@ -150,13 +151,13 @@ export const TransformList: FC<Props> = ({
         // if the term has been negated, AND the matches
         if (bool === true) {
           ts = transforms.filter(
-            transform =>
+            (transform) =>
               stringMatch(transform.id, c.value) === bool ||
               stringMatch(transform.config.description, c.value) === bool
           );
         } else {
           ts = transforms.filter(
-            transform =>
+            (transform) =>
               stringMatch(transform.id, c.value) === bool &&
               stringMatch(transform.config.description, c.value) === bool
           );
@@ -165,23 +166,31 @@ export const TransformList: FC<Props> = ({
         // filter other clauses, i.e. the mode and status filters
         if (Array.isArray(c.value)) {
           // the status value is an array of string(s) e.g. ['failed', 'stopped']
-          ts = transforms.filter(transform => (c.value as Value[]).includes(transform.stats.state));
+          ts = transforms.filter((transform) =>
+            (c.value as Value[]).includes(transform.stats.state)
+          );
         } else {
-          ts = transforms.filter(transform => transform.mode === c.value);
+          ts = transforms.filter((transform) => transform.mode === c.value);
         }
       }
 
-      ts.forEach(t => matches[t.id].count++);
+      ts.forEach((t) => matches[t.id].count++);
     });
 
     // loop through the matches and return only transforms which have match all the clauses
     const filtered = Object.values(matches)
-      .filter(m => (m && m.count) >= clauses.length)
-      .map(m => m.transform);
+      .filter((m) => (m && m.count) >= clauses.length)
+      .map((m) => m.transform);
 
     setFilteredTransforms(filtered);
     setIsLoading(false);
   };
+
+  const { columns, modals: singleActionModals } = useColumns(
+    expandedRowItemIds,
+    setExpandedRowItemIds,
+    transformSelection
+  );
 
   // Before the transforms have been loaded for the first time, display the loading indicator only.
   // Otherwise a user would see 'No transforms found' during the initial loading.
@@ -229,8 +238,6 @@ export const TransformList: FC<Props> = ({
     );
   }
 
-  const columns = getColumns(expandedRowItemIds, setExpandedRowItemIds, transformSelection);
-
   const sorting = {
     sort: {
       field: sortField,
@@ -250,13 +257,13 @@ export const TransformList: FC<Props> = ({
 
   const bulkActionMenuItems = [
     <div key="startAction" className="transform__BulkActionItem">
-      <StartAction items={transformSelection} />
+      <StartButton items={transformSelection} onClick={bulkStartAction.openModal} />
     </div>,
     <div key="stopAction" className="transform__BulkActionItem">
-      <StopAction items={transformSelection} />
+      <StopButton items={transformSelection} />
     </div>,
     <div key="deleteAction" className="transform__BulkActionItem">
-      <DeleteAction items={transformSelection} />
+      <DeleteButton items={transformSelection} onClick={bulkDeleteAction.openModal} />
     </div>,
   ];
 
@@ -330,7 +337,7 @@ export const TransformList: FC<Props> = ({
         field: 'state.state',
         name: i18n.translate('xpack.transform.statusFilter', { defaultMessage: 'Status' }),
         multiSelect: 'or' as const,
-        options: Object.values(TRANSFORM_STATE).map(val => ({
+        options: Object.values(TRANSFORM_STATE).map((val) => ({
           value: val,
           name: val,
           view: getTaskStateBadge(val),
@@ -341,7 +348,7 @@ export const TransformList: FC<Props> = ({
         field: 'mode',
         name: i18n.translate('xpack.transform.modeFilter', { defaultMessage: 'Mode' }),
         multiSelect: false,
-        options: Object.values(TRANSFORM_MODE).map(val => ({
+        options: Object.values(TRANSFORM_MODE).map((val) => ({
           value: val,
           name: val,
           view: (
@@ -373,6 +380,13 @@ export const TransformList: FC<Props> = ({
 
   return (
     <div data-test-subj="transformListTableContainer">
+      {/* Bulk Action Modals */}
+      {bulkStartAction.isModalVisible && <StartButtonModal {...bulkStartAction} />}
+      {bulkDeleteAction.isModalVisible && <DeleteButtonModal {...bulkDeleteAction} />}
+
+      {/* Single Action Modals */}
+      {singleActionModals}
+
       <EuiInMemoryTable
         allowNeutralSort={false}
         className="transform__TransformTable"
@@ -387,7 +401,7 @@ export const TransformList: FC<Props> = ({
         loading={isLoading || transformsLoading}
         onTableChange={onTableChange}
         pagination={pagination}
-        rowProps={item => ({
+        rowProps={(item) => ({
           'data-test-subj': `transformListRow row-${item.id}`,
         })}
         selection={selection}

@@ -24,7 +24,7 @@ export const Influencers: FC = () => {
 
   useEffect(() => {
     jobCreator.removeAllInfluencers();
-    influencers.forEach(i => jobCreator.addInfluencer(i));
+    influencers.forEach((i) => jobCreator.addInfluencer(i));
     jobCreatorUpdate();
   }, [influencers.join()]);
 

@@ -68,7 +68,7 @@ const createMultiTestCases = () => {
 };
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService }: TestInvoker) {
+export default function ({ getService }: TestInvoker) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 

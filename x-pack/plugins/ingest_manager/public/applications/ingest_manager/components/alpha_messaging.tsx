@@ -9,12 +9,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText, EuiLink } from '@elastic/eui';
 import { AlphaFlyout } from './alpha_flyout';
 
-const Message = styled(EuiText).attrs(props => ({
+const Message = styled(EuiText).attrs((props) => ({
   color: 'subdued',
   textAlign: 'center',
   size: 's',
 }))`
-  padding: ${props => props.theme.eui.paddingSizes.m};
+  padding: ${(props) => props.theme.eui.paddingSizes.m};
+  margin-top: auto;
 `;
 
 export const AlphaMessaging: React.FC<{}> = () => {
@@ -27,17 +28,20 @@ export const AlphaMessaging: React.FC<{}> = () => {
           <strong>
             <FormattedMessage
               id="xpack.ingestManager.alphaMessageTitle"
-              defaultMessage="Experimental"
+              defaultMessage="Beta release"
             />
           </strong>
           {' – '}
           <FormattedMessage
             id="xpack.ingestManager.alphaMessageDescription"
-            defaultMessage="Ingest Manager is under active development and is not
-          intended for production purposes."
+            defaultMessage="Ingest Manager is not
+            recommended for production environments."
           />{' '}
           <EuiLink color="subdued" onClick={() => setIsAlphaFlyoutOpen(true)}>
-            View more details.
+            <FormattedMessage
+              id="xpack.ingestManager.alphaMessageLinkText"
+              defaultMessage="See more details."
+            />
           </EuiLink>
         </p>
       </Message>

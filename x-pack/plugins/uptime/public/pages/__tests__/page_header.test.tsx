@@ -6,47 +6,33 @@
 
 import React from 'react';
 import { PageHeader } from '../page_header';
-import { renderWithRouter } from '../../lib';
-import { Provider } from 'react-redux';
+import { renderWithRouter, MountWithReduxProvider } from '../../lib';
 
 describe('PageHeader', () => {
   it('shallow renders with the date picker', () => {
     const component = renderWithRouter(
-      <MockReduxProvider>
+      <MountWithReduxProvider>
         <PageHeader headingText={'TestingHeading'} datePicker={true} />
-      </MockReduxProvider>
+      </MountWithReduxProvider>
     );
     expect(component).toMatchSnapshot('page_header_with_date_picker');
   });
 
   it('shallow renders without the date picker', () => {
     const component = renderWithRouter(
-      <MockReduxProvider>
+      <MountWithReduxProvider>
         <PageHeader headingText={'TestingHeading'} datePicker={false} />
-      </MockReduxProvider>
+      </MountWithReduxProvider>
     );
     expect(component).toMatchSnapshot('page_header_no_date_picker');
   });
 
   it('shallow renders extra links', () => {
     const component = renderWithRouter(
-      <MockReduxProvider>
+      <MountWithReduxProvider>
         <PageHeader headingText={'TestingHeading'} extraLinks={true} datePicker={true} />
-      </MockReduxProvider>
+      </MountWithReduxProvider>
     );
     expect(component).toMatchSnapshot('page_header_with_extra_links');
   });
 });
-
-const MockReduxProvider = ({ children }: { children: React.ReactElement }) => (
-  <Provider
-    store={{
-      dispatch: jest.fn(),
-      getState: jest.fn(),
-      subscribe: jest.fn(),
-      replaceReducer: jest.fn(),
-    }}
-  >
-    {children}
-  </Provider>
-);

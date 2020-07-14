@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { uniq } from 'lodash';
 import { HttpSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -42,12 +43,12 @@ export const getIndexOptions = async (
     pattern,
     http,
   })) as string[];
-  const matchingIndexPatterns = indexPatternsParam.filter(anIndexPattern => {
+  const matchingIndexPatterns = indexPatternsParam.filter((anIndexPattern) => {
     return anIndexPattern.includes(pattern);
   }) as string[];
 
   if (matchingIndices.length || matchingIndexPatterns.length) {
-    const matchingOptions = _.uniq([...matchingIndices, ...matchingIndexPatterns]);
+    const matchingOptions = uniq([...matchingIndices, ...matchingIndexPatterns]);
 
     options.push({
       label: i18n.translate(
@@ -56,7 +57,7 @@ export const getIndexOptions = async (
           defaultMessage: 'Based on your index patterns',
         }
       ),
-      options: matchingOptions.map(match => {
+      options: matchingOptions.map((match) => {
         return {
           label: match,
           value: match,

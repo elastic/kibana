@@ -94,10 +94,10 @@ const COLUMNS = [
     fieldName: 'groups',
     isSortable: false,
     truncateText: true,
-    render: job =>
+    render: (job) =>
       ['histogram', 'terms'].reduce((text, field) => {
         if (job[field].length) {
-          return text ? `${text}, ${field}` : field.replace(/^\w/, char => char.toUpperCase());
+          return text ? `${text}, ${field}` : field.replace(/^\w/, (char) => char.toUpperCase());
         }
         return text;
       }, ''),
@@ -109,11 +109,11 @@ const COLUMNS = [
     fieldName: 'metrics',
     isSortable: false,
     truncateText: true,
-    render: job => {
+    render: (job) => {
       const { metrics } = job;
 
       if (metrics.length) {
-        return metrics.map(metric => metric.name).join(', ');
+        return metrics.map((metric) => metric.name).join(', ');
       }
 
       return '';
@@ -143,15 +143,15 @@ export class JobTable extends Component {
   static getDerivedStateFromProps(props, state) {
     // Deselct any jobs which no longer exist, e.g. they've been deleted.
     const { idToSelectedJobMap } = state;
-    const jobIds = props.jobs.map(job => job.id);
+    const jobIds = props.jobs.map((job) => job.id);
     const selectedJobIds = Object.keys(idToSelectedJobMap);
-    const missingJobIds = selectedJobIds.filter(selectedJobId => {
+    const missingJobIds = selectedJobIds.filter((selectedJobId) => {
       return !jobIds.includes(selectedJobId);
     });
 
     if (missingJobIds.length) {
       const newMap = { ...idToSelectedJobMap };
-      missingJobIds.forEach(missingJobId => delete newMap[missingJobId]);
+      missingJobIds.forEach((missingJobId) => delete newMap[missingJobId]);
       return { idToSelectedJobMap: newMap };
     }
 
@@ -183,7 +183,7 @@ export class JobTable extends Component {
     this.setState({ idToSelectedJobMap });
   };
 
-  toggleItem = id => {
+  toggleItem = (id) => {
     this.setState(({ idToSelectedJobMap }) => {
       const newMap = { ...idToSelectedJobMap };
 
@@ -201,33 +201,33 @@ export class JobTable extends Component {
     this.setState({ idToSelectedJobMap: {} });
   };
 
-  deselectItems = itemIds => {
+  deselectItems = (itemIds) => {
     this.setState(({ idToSelectedJobMap }) => {
       const newMap = { ...idToSelectedJobMap };
-      itemIds.forEach(id => delete newMap[id]);
+      itemIds.forEach((id) => delete newMap[id]);
       return { idToSelectedJobMap: newMap };
     });
   };
 
   areAllItemsSelected = () => {
     const { jobs } = this.props;
-    const indexOfUnselectedItem = jobs.findIndex(job => !this.isItemSelected(job.id));
+    const indexOfUnselectedItem = jobs.findIndex((job) => !this.isItemSelected(job.id));
     return indexOfUnselectedItem === -1;
   };
 
-  isItemSelected = id => {
+  isItemSelected = (id) => {
     return !!this.state.idToSelectedJobMap[id];
   };
 
   getSelectedJobs() {
     const { jobs } = this.props;
     const { idToSelectedJobMap } = this.state;
-    return Object.keys(idToSelectedJobMap).map(jobId => {
-      return jobs.find(job => job.id === jobId);
+    return Object.keys(idToSelectedJobMap).map((jobId) => {
+      return jobs.find((job) => job.id === jobId);
     });
   }
 
-  onSort = column => {
+  onSort = (column) => {
     const { sortField, isSortAscending, sortChanged } = this.props;
 
     const newIsSortAscending = sortField === column ? !isSortAscending : true;
@@ -265,7 +265,7 @@ export class JobTable extends Component {
           <EuiLink
             onClick={() => {
               trackUiMetric(METRIC_TYPE.CLICK, UIM_SHOW_DETAILS_CLICK);
-              openDetailPanel(job.id);
+              openDetailPanel(encodeURIComponent(job.id));
             }}
           >
             {value}
@@ -296,7 +296,7 @@ export class JobTable extends Component {
   buildRows() {
     const { jobs } = this.props;
 
-    return jobs.map(job => {
+    return jobs.map((job) => {
       const { id } = job;
 
       return (
@@ -357,7 +357,7 @@ export class JobTable extends Component {
             <EuiFieldSearch
               fullWidth
               value={filter}
-              onChange={event => {
+              onChange={(event) => {
                 filterChanged(event.target.value);
               }}
               data-test-subj="jobTableFilterInput"

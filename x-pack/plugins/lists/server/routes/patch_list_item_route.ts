@@ -7,12 +7,8 @@
 import { IRouter } from 'kibana/server';
 
 import { LIST_ITEM_URL } from '../../common/constants';
-import {
-  buildRouteValidation,
-  buildSiemResponse,
-  transformError,
-  validate,
-} from '../siem_server_deps';
+import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
+import { validate } from '../../common/siem_common_deps';
 import { listItemSchema, patchListItemSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
@@ -33,6 +29,7 @@ export const patchListItemRoute = (router: IRouter): void => {
       try {
         const { value, id, meta } = request.body;
         const lists = getListClient(context);
+        // TODO: This looks like just a regular update, implement a patchListItem API and add plumbing for that.
         const listItem = await lists.updateListItem({
           id,
           meta,

@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ScopedClusterClient, IRouter } from 'kibana/server';
+import { LegacyScopedClusterClient, IRouter } from 'kibana/server';
 
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SecurityPluginSetup } from '../../security/server';
-import { isEsError } from './lib/is_es_error';
+import { isEsError } from './shared_imports';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;
@@ -27,6 +27,6 @@ export interface RouteDependencies {
   };
 }
 
-export type CallAsCurrentUser = ScopedClusterClient['callAsCurrentUser'];
+export type CallAsCurrentUser = LegacyScopedClusterClient['callAsCurrentUser'];
 
-export type CallAsInternalUser = ScopedClusterClient['callAsInternalUser'];
+export type CallAsInternalUser = LegacyScopedClusterClient['callAsInternalUser'];

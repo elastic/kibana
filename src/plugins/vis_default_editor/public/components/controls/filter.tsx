@@ -22,6 +22,7 @@ import { EuiForm, EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSpacer } from '@el
 import { i18n } from '@kbn/i18n';
 
 import { IAggConfig, Query, QueryStringInput } from '../../../../data/public';
+import { useKibana } from '../../../../kibana_react/public';
 
 interface FilterRowProps {
   id: string;
@@ -48,6 +49,7 @@ function FilterRow({
   onChangeValue,
   onRemoveFilter,
 }: FilterRowProps) {
+  const { services } = useKibana();
   const [showCustomLabel, setShowCustomLabel] = useState(false);
   const filterLabel = i18n.translate('visDefaultEditor.controls.filters.filterLabel', {
     defaultMessage: 'Filter {index}',
@@ -55,6 +57,13 @@ function FilterRow({
       index: arrayIndex + 1,
     },
   });
+
+  const onBlur = () => {
+    if (value.query.length > 0) {
+      // Store filter to the query log so that it is available in autocomplete.
+      services.data.query.addToQueryLog(services.appName, value);
+    }
+  };
 
   const FilterControl = (
     <div>
@@ -96,6 +105,7 @@ function FilterRow({
           query={value}
           indexPatterns={[agg.getIndexPattern()]}
           onChange={(query: Query) => onChangeValue(id, query, customLabel)}
+          onBlur={onBlur}
           disableAutoFocus={!autoFocus}
           dataTestSubj={dataTestSubj}
           bubbleSubmitEvent={true}
@@ -121,7 +131,7 @@ function FilterRow({
             placeholder={i18n.translate('visDefaultEditor.controls.filters.labelPlaceholder', {
               defaultMessage: 'Label',
             })}
-            onChange={ev => onChangeValue(id, value, ev.target.value)}
+            onChange={(ev) => onChangeValue(id, value, ev.target.value)}
             fullWidth={true}
             compressed
           />

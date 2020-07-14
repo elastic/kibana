@@ -21,12 +21,12 @@ const sass = require('node-sass');
 const postcss = require('postcss');
 const postcssConfig = require('../../src/optimize/postcss.config');
 const chokidar = require('chokidar');
-const debounce = require('lodash/function/debounce');
+const { debounce } = require('lodash');
 
 const platform = require('os').platform();
 const isPlatformWindows = /^win/.test(platform);
 
-module.exports = function(grunt) {
+module.exports = function (grunt) {
   grunt.initConfig({
     clean: {
       target: ['target'],
@@ -62,7 +62,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.registerTask('prodBuild', ['clean:target', 'copy:makeProdBuild', 'babel:prodBuild']);
 
-  grunt.registerTask('docSiteBuild', function() {
+  grunt.registerTask('docSiteBuild', function () {
     const done = this.async();
 
     const serverCmd = {
@@ -94,17 +94,17 @@ module.exports = function(grunt) {
     uiFrameworkServerBuild.then(done);
   });
 
-  grunt.registerTask('docSiteStart', function() {
+  grunt.registerTask('docSiteStart', function () {
     const done = this.async();
     Promise.all([uiFrameworkWatch(), uiFrameworkServerStart()]).then(done);
   });
 
-  grunt.registerTask('compileCssLight', function() {
+  grunt.registerTask('compileCssLight', function () {
     const done = this.async();
     uiFrameworkCompileLight().then(done);
   });
 
-  grunt.registerTask('compileCssDark', function() {
+  grunt.registerTask('compileCssDark', function () {
     const done = this.async();
     uiFrameworkCompileDark().then(done);
   });
@@ -146,19 +146,19 @@ module.exports = function(grunt) {
     const src = 'src/kui_light.scss';
     const dest = 'dist/kui_light.css';
 
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       sass.render(
         {
           file: src,
         },
-        function(error, result) {
+        function (error, result) {
           if (error) {
             grunt.log.error(error);
           }
 
           postcss([postcssConfig])
             .process(result.css, { from: src, to: dest })
-            .then(result => {
+            .then((result) => {
               grunt.file.write(dest, result.css);
 
               if (result.map) {
@@ -176,19 +176,19 @@ module.exports = function(grunt) {
     const src = 'src/kui_dark.scss';
     const dest = 'dist/kui_dark.css';
 
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       sass.render(
         {
           file: src,
         },
-        function(error, result) {
+        function (error, result) {
           if (error) {
             grunt.log.error(error);
           }
 
           postcss([postcssConfig])
             .process(result.css, { from: src, to: dest })
-            .then(result => {
+            .then((result) => {
               grunt.file.write(dest, result.css);
 
               if (result.map) {

@@ -36,6 +36,7 @@ Array [
       class="euiToolTipAnchor"
     >
       <button
+        aria-label="Click to copy fingerprint value"
         class="euiButtonIcon euiButtonIcon--primary"
         title="Click to copy fingerprint value"
         type="button"
@@ -82,6 +83,7 @@ Array [
       class="euiToolTipAnchor"
     >
       <button
+        aria-label="Click to copy fingerprint value"
         class="euiButtonIcon euiButtonIcon--primary"
         title="Click to copy fingerprint value"
         type="button"
@@ -148,24 +150,59 @@ exports[`FingerprintCol shallow renders expected elements for valid props 1`] = 
     }
   }
 >
-  <FingerprintCol
-    cert={
+  <ContextProvider
+    value={
       Object {
-        "common_name": "github.com",
-        "issuer": "DigiCert SHA2 Extended Validation Server CA",
-        "monitors": Array [
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
           Object {
-            "id": "github",
-            "name": "",
-            "url": "https://github.com/",
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
           },
         ],
-        "not_after": "2020-05-08T00:00:00.000Z",
-        "not_before": "2018-05-08T00:00:00.000Z",
-        "sha1": "ca06f56b258b7a0d4f2b05470939478651151984",
-        "sha256": "3111500c4a66012cdae333ec3fca1c9dde45c954440e7ee413716bff3663c074",
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
       }
     }
-  />
+  >
+    <FingerprintCol
+      cert={
+        Object {
+          "common_name": "github.com",
+          "issuer": "DigiCert SHA2 Extended Validation Server CA",
+          "monitors": Array [
+            Object {
+              "id": "github",
+              "name": "",
+              "url": "https://github.com/",
+            },
+          ],
+          "not_after": "2020-05-08T00:00:00.000Z",
+          "not_before": "2018-05-08T00:00:00.000Z",
+          "sha1": "ca06f56b258b7a0d4f2b05470939478651151984",
+          "sha256": "3111500c4a66012cdae333ec3fca1c9dde45c954440e7ee413716bff3663c074",
+        }
+      }
+    />
+  </ContextProvider>
 </ContextProvider>
 `;

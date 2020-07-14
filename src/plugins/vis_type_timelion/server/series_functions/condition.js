@@ -127,8 +127,8 @@ export default new Chainable('condition', {
   aliases: ['if'],
   fn: function conditionFn(args) {
     const config = args.byName;
-    return alter(args, function(eachSeries) {
-      const data = _.map(eachSeries.data, function(point, i) {
+    return alter(args, function (eachSeries) {
+      const data = _.map(eachSeries.data, function (point, i) {
         function getNumber(source) {
           if (argType(source) === 'number') return source;
           if (argType(source) === 'null') return null;
@@ -144,7 +144,7 @@ export default new Chainable('condition', {
         const thenVal = getNumber(config.then);
         const elseVal = _.isUndefined(config.else) ? point[1] : getNumber(config.else);
 
-        const newValue = (function() {
+        const newValue = (function () {
           switch (config.operator) {
             case 'lt':
               return point[1] < ifVal ? thenVal : elseVal;

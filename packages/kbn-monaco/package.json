@@ -1,0 +1,27 @@
+{
+  "name": "@kbn/monaco",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./target/index.js",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "node ./scripts/build.js",
+    "kbn:bootstrap": "yarn build --dev"
+  },
+  "dependencies": {
+    "regenerator-runtime": "^0.13.3",
+    "monaco-editor": "~0.17.0"
+  },
+  "devDependencies": {
+    "@kbn/babel-preset": "1.0.0",
+    "@kbn/dev-utils": "1.0.0",
+    "babel-loader": "^8.0.6",
+    "css-loader": "^3.4.2",
+    "del": "^5.1.0",
+    "raw-loader": "3.1.0",
+    "supports-color": "^7.0.0",
+    "typescript": "3.9.5",
+    "webpack": "^4.41.5",
+    "webpack-cli": "^3.3.10"
+  }
+}

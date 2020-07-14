@@ -7,7 +7,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { EuiIcon, keyCodes } from '@elastic/eui';
+import { EuiIcon, keys } from '@elastic/eui';
 
 import { JobGroup } from '../../../job_group';
 
@@ -42,7 +42,7 @@ export class GroupList extends Component {
     this.selectItems = [];
   }
 
-  selectGroup = group => {
+  selectGroup = (group) => {
     this.props.selectGroup(group);
   };
 
@@ -63,17 +63,17 @@ export class GroupList extends Component {
   };
 
   handleKeyDown = (event, group, index) => {
-    switch (event.keyCode) {
-      case keyCodes.ENTER:
+    switch (event.key) {
+      case keys.ENTER:
         this.selectGroup(group);
         break;
-      case keyCodes.SPACE:
+      case keys.SPACE:
         this.selectGroup(group);
         break;
-      case keyCodes.DOWN:
+      case keys.ARROW_DOWN:
         this.moveDown(event, index);
         break;
-      case keyCodes.UP:
+      case keys.ARROW_UP:
         this.moveUp(event, index);
         break;
     }
@@ -91,11 +91,11 @@ export class GroupList extends Component {
         {groups.map((g, index) => (
           <div
             tabIndex={'0'}
-            onKeyDown={event => this.handleKeyDown(event, g, index)}
+            onKeyDown={(event) => this.handleKeyDown(event, g, index)}
             key={g.id}
             className="group-item"
             onClick={() => this.selectGroup(g)}
-            ref={ref => this.setRef(ref, index)}
+            ref={(ref) => this.setRef(ref, index)}
           >
             <Check group={g} selectedGroups={selectedGroups} />
             <JobGroup name={g.id} />

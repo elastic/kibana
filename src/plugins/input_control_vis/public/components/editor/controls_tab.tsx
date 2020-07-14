@@ -191,7 +191,7 @@ class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState
                     },
                   ]}
                   value={this.state.type}
-                  onChange={event => this.setState({ type: event.target.value as CONTROL_TYPES })}
+                  onChange={(event) => this.setState({ type: event.target.value as CONTROL_TYPES })}
                   aria-label={intl.formatMessage({
                     id: 'inputControl.editor.controlsTab.select.controlTypeAriaLabel',
                     defaultMessage: 'Select control type',

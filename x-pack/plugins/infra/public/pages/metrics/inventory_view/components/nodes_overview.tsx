@@ -5,7 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { max, min } from 'lodash';
 import React, { useCallback } from 'react';
 
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
@@ -16,6 +15,7 @@ import { InfraLoadingPanel } from '../../../../components/loading';
 import { Map } from './waffle/map';
 import { TableView } from './table_view';
 import { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
+import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
 
 export interface KueryFilterQuery {
   kind: 'kuery';
@@ -35,18 +35,6 @@ interface Props {
   autoBounds: boolean;
   formatter: InfraFormatter;
 }
-
-export const calculateBoundsFromNodes = (nodes: SnapshotNode[]): InfraWaffleMapBounds => {
-  const maxValues = nodes.map(node => node.metric.max);
-  const minValues = nodes.map(node => node.metric.value);
-  // if there is only one value then we need to set the bottom range to zero for min
-  // otherwise the legend will look silly since both values are the same for top and
-  // bottom.
-  if (minValues.length === 1) {
-    minValues.unshift(0);
-  }
-  return { min: min(minValues) || 0, max: max(maxValues) || 0 };
-};
 
 export const NodesOverview = ({
   autoBounds,
@@ -136,7 +124,7 @@ export const NodesOverview = ({
 };
 
 const TableContainer = euiStyled.div`
-  padding: ${props => props.theme.eui.paddingSizes.l};
+  padding: ${(props) => props.theme.eui.paddingSizes.l};
 `;
 
 const MapContainer = euiStyled.div`

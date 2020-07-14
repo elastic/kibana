@@ -31,7 +31,7 @@ export function statusMixin(kbnServer, server, config) {
   const metrics = new Metrics(config, server);
 
   const oppsy = new Oppsy(server);
-  oppsy.on('ops', event => {
+  oppsy.on('ops', (event) => {
     // Oppsy has a bad race condition that will modify this data before
     // we ship it off to the buffer. Let's create our copy first.
     event = cloneDeep(event);
@@ -41,7 +41,7 @@ export function statusMixin(kbnServer, server, config) {
 
       // captures (performs transforms on) the latest event data and stashes
       // the metrics for status/stats API payload
-      metrics.capture(event).then(data => {
+      metrics.capture(event).then((data) => {
         kbnServer.metrics = data;
       });
     });

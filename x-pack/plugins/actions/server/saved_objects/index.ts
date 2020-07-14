@@ -14,7 +14,7 @@ export function setupSavedObjects(
 ) {
   savedObjects.registerType({
     name: 'action',
-    hidden: false,
+    hidden: true,
     namespaceType: 'single',
     mappings: mappings.action,
   });
@@ -31,7 +31,7 @@ export function setupSavedObjects(
 
   savedObjects.registerType({
     name: 'action_task_params',
-    hidden: false,
+    hidden: true,
     namespaceType: 'single',
     mappings: mappings.action_task_params,
   });

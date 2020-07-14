@@ -15,6 +15,7 @@ const defaultSnapshot = {
   versionId: undefined,
   version: undefined,
   indices: [],
+  dataStreams: [],
   includeGlobalState: undefined,
   state: undefined,
   startTime: undefined,
@@ -225,14 +226,19 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
   });
 
   describe('deleteHandler()', () => {
-    const ids = ['fooRepository/snapshot-1', 'barRepository/snapshot-2'];
-
     const mockRequest: RequestMock = {
-      method: 'delete',
-      path: addBasePath('snapshots/{ids}'),
-      params: {
-        ids: ids.join(','),
-      },
+      method: 'post',
+      path: addBasePath('snapshots/bulk_delete'),
+      body: [
+        {
+          repository: 'fooRepository',
+          snapshot: 'snapshot-1',
+        },
+        {
+          repository: 'barRepository',
+          snapshot: 'snapshot-2',
+        },
+      ],
     };
 
     it('should return successful ES responses', async () => {

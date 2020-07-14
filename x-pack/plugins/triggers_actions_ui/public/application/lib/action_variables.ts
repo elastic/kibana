@@ -17,13 +17,13 @@ export function actionVariablesFromAlertType(alertType: AlertType): ActionVariab
 }
 
 function prefixKeys(actionVariables: ActionVariable[], prefix: string): ActionVariable[] {
-  return actionVariables.map(actionVariable => {
+  return actionVariables.map((actionVariable) => {
     return { name: `${prefix}${actionVariable.name}`, description: actionVariable.description };
   });
 }
 
 // this list should be the same as in:
-//   x-pack/plugins/alerting/server/task_runner/transform_action_params.ts
+//   x-pack/plugins/alerts/server/task_runner/transform_action_params.ts
 function getAlwaysProvidedActionVariables(): ActionVariable[] {
   const result: ActionVariable[] = [];
 

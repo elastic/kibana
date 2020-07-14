@@ -1,7 +1,8 @@
 var kbnCsp = JSON.parse(document.querySelector('kbn-csp').getAttribute('data'));
 window.__kbnStrictCsp__ = kbnCsp.strictCsp;
-window.__kbnDarkMode__ = {{darkMode}};
+window.__kbnThemeTag__ = "{{themeTag}}";
 window.__kbnPublicPath__ = {{publicPathMap}};
+window.__kbnBundles__ = {{kbnBundlesLoaderSource}}
 
 if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
   var legacyBrowserError = document.getElementById('kbn_legacy_browser_error');
@@ -72,12 +73,18 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
     }
 
     load([
-        {{#each jsDependencyPaths}}
-          '{{this}}',
-        {{/each}}
+      {{#each jsDependencyPaths}}
+        '{{this}}',
+      {{/each}}
     ], function () {
+      {{#unless legacyBundlePath}}
+        __kbnBundles__.get('entry/core/public').__kbnBootstrap__();
+      {{/unless}}
+
       load([
-        '{{entryBundlePath}}',
+        {{#if legacyBundlePath}}
+          '{{legacyBundlePath}}',
+        {{/if}}
         {{#each styleSheetPaths}}
           '{{this}}',
         {{/each}}

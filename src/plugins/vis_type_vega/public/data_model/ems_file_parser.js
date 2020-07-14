@@ -65,7 +65,7 @@ export class EmsFileParser {
     const layers = await this._fileLayersP;
 
     for (const { obj, name } of requests) {
-      const foundLayer = layers.find(v => v.name === name);
+      const foundLayer = layers.find((v) => v.name === name);
       if (!foundLayer) {
         throw new Error(
           i18n.translate('visTypeVega.emsFileParser.emsFileNameDoesNotExistErrorMessage', {

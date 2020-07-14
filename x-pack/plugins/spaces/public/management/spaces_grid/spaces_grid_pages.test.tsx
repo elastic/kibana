@@ -10,7 +10,7 @@ import { SpaceAvatar } from '../../space_avatar';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { SpacesManager } from '../../spaces_manager';
 import { SpacesGridPage } from './spaces_grid_page';
-import { httpServiceMock } from 'src/core/public/mocks';
+import { httpServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
 import { notificationServiceMock } from 'src/core/public/mocks';
 import { featuresPluginMock } from '../../../../features/public/mocks';
 import { Feature } from '../../../../features/public';
@@ -52,6 +52,9 @@ featuresStart.getFeatures.mockResolvedValue([
 ]);
 
 describe('SpacesGridPage', () => {
+  const getUrlForApp = (appId: string) => appId;
+  const history = scopedHistoryMock.create();
+
   it('renders as expected', () => {
     const httpStart = httpServiceMock.createStartContract();
     httpStart.get.mockResolvedValue([]);
@@ -63,6 +66,8 @@ describe('SpacesGridPage', () => {
           getFeatures={featuresStart.getFeatures}
           notifications={notificationServiceMock.createStartContract()}
           securityEnabled={true}
+          getUrlForApp={getUrlForApp}
+          history={history}
           capabilities={{
             navLinks: {},
             management: {},
@@ -84,6 +89,8 @@ describe('SpacesGridPage', () => {
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
         securityEnabled={true}
+        getUrlForApp={getUrlForApp}
+        history={history}
         capabilities={{
           navLinks: {},
           management: {},
@@ -116,6 +123,8 @@ describe('SpacesGridPage', () => {
         getFeatures={featuresStart.getFeatures}
         notifications={notifications}
         securityEnabled={true}
+        getUrlForApp={getUrlForApp}
+        history={history}
         capabilities={{
           navLinks: {},
           management: {},
@@ -149,6 +158,8 @@ describe('SpacesGridPage', () => {
         getFeatures={() => Promise.reject(error)}
         notifications={notifications}
         securityEnabled={true}
+        getUrlForApp={getUrlForApp}
+        history={history}
         capabilities={{
           navLinks: {},
           management: {},

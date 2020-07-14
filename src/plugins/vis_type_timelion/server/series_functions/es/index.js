@@ -114,13 +114,13 @@ export default new Datasource('es', {
       search: `"${config.index}"`,
       search_fields: ['title'],
     });
-    const indexPatternSavedObject = findResp.saved_objects.find(savedObject => {
+    const indexPatternSavedObject = findResp.saved_objects.find((savedObject) => {
       return savedObject.attributes.title === config.index;
     });
     let scriptedFields = [];
     if (indexPatternSavedObject) {
       const fields = JSON.parse(indexPatternSavedObject.attributes.fields);
-      scriptedFields = fields.filter(field => {
+      scriptedFields = fields.filter((field) => {
         return field.scripted;
       });
     }

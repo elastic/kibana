@@ -63,7 +63,7 @@ export class PluginPack {
     const specs = [].concat(result === undefined ? [] : result);
 
     // verify that all specs are instances of passed "Plugin" class
-    specs.forEach(spec => {
+    specs.forEach((spec) => {
       if (!(spec instanceof api.Plugin)) {
         throw new TypeError('unexpected plugin export ' + inspect(spec));
       }

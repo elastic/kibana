@@ -58,7 +58,7 @@ const localNavWithTabsHtml = renderToHtml(LocalNavWithTabs);
 
 import datePickerHtml from './local_nav_date_picker.html';
 
-export default props => (
+export default (props) => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="Simple"

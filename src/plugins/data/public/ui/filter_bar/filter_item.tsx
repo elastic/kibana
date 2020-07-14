@@ -18,9 +18,9 @@
  */
 
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { InjectedIntl } from '@kbn/i18n/react';
 import classNames from 'classnames';
-import React, { Component, MouseEvent } from 'react';
+import React, { MouseEvent, useState, useEffect } from 'react';
 import { IUiSettingsClient } from 'src/core/public';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
@@ -32,8 +32,9 @@ import {
   toggleFilterNegated,
   toggleFilterPinned,
   toggleFilterDisabled,
+  getIndexPatternFromFilter,
 } from '../../../common';
-import { getNotifications } from '../../services';
+import { getIndexPatterns } from '../../services';
 
 interface Props {
   id: string;
@@ -46,95 +47,125 @@ interface Props {
   uiSettings: IUiSettingsClient;
 }
 
-interface State {
-  isPopoverOpen: boolean;
+interface LabelOptions {
+  title: string;
+  status: string;
+  message?: string;
 }
 
-class FilterItemUI extends Component<Props, State> {
-  public state = {
-    isPopoverOpen: false,
-  };
+const FILTER_ITEM_OK = '';
+const FILTER_ITEM_WARNING = 'warn';
+const FILTER_ITEM_ERROR = 'error';
 
-  private handleBadgeClick = (e: MouseEvent<HTMLInputElement>) => {
-    if (e.shiftKey) {
-      this.onToggleDisabled();
+export function FilterItem(props: Props) {
+  const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+  const [indexPatternExists, setIndexPatternExists] = useState<boolean | undefined>(undefined);
+  const { id, filter, indexPatterns } = props;
+
+  useEffect(() => {
+    const index = props.filter.meta.index;
+    if (index) {
+      getIndexPatterns()
+        .get(index)
+        .then((indexPattern) => {
+          setIndexPatternExists(!!indexPattern);
+        })
+        .catch(() => {
+          setIndexPatternExists(false);
+        });
     } else {
-      this.togglePopover();
+      // Allow filters without an index pattern and don't validate them.
+      setIndexPatternExists(true);
     }
-  };
-  public render() {
-    const { filter, id } = this.props;
-    const { negate, disabled } = filter.meta;
-    let hasError: boolean = false;
+  }, [props.filter.meta.index]);
 
-    let valueLabel;
-    try {
-      valueLabel = getDisplayValueFromFilter(filter, this.props.indexPatterns);
-    } catch (e) {
-      getNotifications().toasts.addError(e, {
-        title: this.props.intl.formatMessage({
-          id: 'data.filter.filterBar.labelErrorMessage',
-          defaultMessage: 'Failed to display filter',
-        }),
-      });
-      valueLabel = this.props.intl.formatMessage({
-        id: 'data.filter.filterBar.labelErrorText',
-        defaultMessage: 'Error',
-      });
-      hasError = true;
+  function handleBadgeClick(e: MouseEvent<HTMLInputElement>) {
+    if (e.shiftKey) {
+      onToggleDisabled();
+    } else {
+      setIsPopoverOpen(!isPopoverOpen);
     }
-    const dataTestSubjKey = filter.meta.key ? `filter-key-${filter.meta.key}` : '';
-    const dataTestSubjValue = filter.meta.value ? `filter-value-${valueLabel}` : '';
-    const dataTestSubjDisabled = `filter-${
-      this.props.filter.meta.disabled ? 'disabled' : 'enabled'
-    }`;
-    const dataTestSubjPinned = `filter-${isFilterPinned(filter) ? 'pinned' : 'unpinned'}`;
+  }
 
-    const classes = classNames(
+  function onSubmit(f: Filter) {
+    setIsPopoverOpen(false);
+    props.onUpdate(f);
+  }
+
+  function onTogglePinned() {
+    const f = toggleFilterPinned(filter);
+    props.onUpdate(f);
+  }
+
+  function onToggleNegated() {
+    const f = toggleFilterNegated(filter);
+    props.onUpdate(f);
+  }
+
+  function onToggleDisabled() {
+    const f = toggleFilterDisabled(filter);
+    props.onUpdate(f);
+  }
+
+  function isValidLabel(labelConfig: LabelOptions) {
+    return labelConfig.status === FILTER_ITEM_OK;
+  }
+
+  function isDisabled(labelConfig: LabelOptions) {
+    const { disabled } = filter.meta;
+    return disabled || labelConfig.status === FILTER_ITEM_ERROR;
+  }
+
+  function getClasses(negate: boolean, labelConfig: LabelOptions) {
+    return classNames(
       'globalFilterItem',
       {
-        'globalFilterItem-isDisabled': disabled || hasError,
-        'globalFilterItem-isInvalid': hasError,
+        'globalFilterItem-isDisabled': isDisabled(labelConfig),
+        'globalFilterItem-isError': labelConfig.status === FILTER_ITEM_ERROR,
+        'globalFilterItem-isWarning': labelConfig.status === FILTER_ITEM_WARNING,
         'globalFilterItem-isPinned': isFilterPinned(filter),
         'globalFilterItem-isExcluded': negate,
       },
-      this.props.className
+      props.className
     );
+  }
 
-    const badge = (
-      <FilterView
-        filter={filter}
-        valueLabel={valueLabel}
-        className={classes}
-        iconOnClick={() => this.props.onRemove()}
-        onClick={this.handleBadgeClick}
-        data-test-subj={`filter ${dataTestSubjDisabled} ${dataTestSubjKey} ${dataTestSubjValue} ${dataTestSubjPinned}`}
-      />
-    );
+  function getDataTestSubj(labelConfig: LabelOptions) {
+    const dataTestSubjKey = filter.meta.key ? `filter-key-${filter.meta.key}` : '';
+    const dataTestSubjValue = filter.meta.value
+      ? `filter-value-${isValidLabel(labelConfig) ? labelConfig.title : labelConfig.status}`
+      : '';
+    const dataTestSubjNegated = filter.meta.negate ? 'filter-negated' : '';
+    const dataTestSubjDisabled = `filter-${isDisabled(labelConfig) ? 'disabled' : 'enabled'}`;
+    const dataTestSubjPinned = `filter-${isFilterPinned(filter) ? 'pinned' : 'unpinned'}`;
+    return `filter ${dataTestSubjDisabled} ${dataTestSubjKey} ${dataTestSubjValue} ${dataTestSubjPinned} ${dataTestSubjNegated}`;
+  }
 
-    const panelTree = [
+  function getPanels() {
+    const { negate, disabled } = filter.meta;
+    return [
       {
         id: 0,
         items: [
           {
             name: isFilterPinned(filter)
-              ? this.props.intl.formatMessage({
+              ? props.intl.formatMessage({
                   id: 'data.filter.filterBar.unpinFilterButtonLabel',
                   defaultMessage: 'Unpin',
                 })
-              : this.props.intl.formatMessage({
+              : props.intl.formatMessage({
                   id: 'data.filter.filterBar.pinFilterButtonLabel',
                   defaultMessage: 'Pin across all apps',
                 }),
             icon: 'pin',
             onClick: () => {
-              this.closePopover();
-              this.onTogglePinned();
+              setIsPopoverOpen(false);
+              onTogglePinned();
             },
             'data-test-subj': 'pinFilter',
           },
           {
-            name: this.props.intl.formatMessage({
+            name: props.intl.formatMessage({
               id: 'data.filter.filterBar.editFilterButtonLabel',
               defaultMessage: 'Edit filter',
             }),
@@ -144,47 +175,47 @@ class FilterItemUI extends Component<Props, State> {
           },
           {
             name: negate
-              ? this.props.intl.formatMessage({
+              ? props.intl.formatMessage({
                   id: 'data.filter.filterBar.includeFilterButtonLabel',
                   defaultMessage: 'Include results',
                 })
-              : this.props.intl.formatMessage({
+              : props.intl.formatMessage({
                   id: 'data.filter.filterBar.excludeFilterButtonLabel',
                   defaultMessage: 'Exclude results',
                 }),
             icon: negate ? 'plusInCircle' : 'minusInCircle',
             onClick: () => {
-              this.closePopover();
-              this.onToggleNegated();
+              setIsPopoverOpen(false);
+              onToggleNegated();
             },
             'data-test-subj': 'negateFilter',
           },
           {
             name: disabled
-              ? this.props.intl.formatMessage({
+              ? props.intl.formatMessage({
                   id: 'data.filter.filterBar.enableFilterButtonLabel',
                   defaultMessage: 'Re-enable',
                 })
-              : this.props.intl.formatMessage({
+              : props.intl.formatMessage({
                   id: 'data.filter.filterBar.disableFilterButtonLabel',
                   defaultMessage: 'Temporarily disable',
                 }),
             icon: `${disabled ? 'eye' : 'eyeClosed'}`,
             onClick: () => {
-              this.closePopover();
-              this.onToggleDisabled();
+              setIsPopoverOpen(false);
+              onToggleDisabled();
             },
             'data-test-subj': 'disableFilter',
           },
           {
-            name: this.props.intl.formatMessage({
+            name: props.intl.formatMessage({
               id: 'data.filter.filterBar.deleteFilterButtonLabel',
               defaultMessage: 'Delete',
             }),
             icon: 'trash',
             onClick: () => {
-              this.closePopover();
-              this.props.onRemove();
+              setIsPopoverOpen(false);
+              props.onRemove();
             },
             'data-test-subj': 'deleteFilter',
           },
@@ -197,63 +228,127 @@ class FilterItemUI extends Component<Props, State> {
           <div>
             <FilterEditor
               filter={filter}
-              indexPatterns={this.props.indexPatterns}
-              onSubmit={this.onSubmit}
-              onCancel={this.closePopover}
+              indexPatterns={indexPatterns}
+              onSubmit={onSubmit}
+              onCancel={() => {
+                setIsPopoverOpen(false);
+              }}
             />
           </div>
         ),
       },
     ];
-
-    return (
-      <EuiPopover
-        id={`popoverFor_filter${id}`}
-        className={`globalFilterItem__popover`}
-        anchorClassName={`globalFilterItem__popoverAnchor`}
-        isOpen={this.state.isPopoverOpen}
-        closePopover={this.closePopover}
-        button={badge}
-        anchorPosition="downLeft"
-        withTitle={true}
-        panelPaddingSize="none"
-      >
-        <EuiContextMenu initialPanelId={0} panels={panelTree} />
-      </EuiPopover>
-    );
   }
 
-  private closePopover = () => {
-    this.setState({
-      isPopoverOpen: false,
+  /**
+   * Checks if filter field exists in any of the index patterns provided,
+   * Because if so, a filter for the wrong index pattern may still be applied.
+   * This function makes this behavior explicit, but it needs to be revised.
+   */
+  function isFilterApplicable() {
+    // Any filter is applicable if no index patterns were provided to FilterBar.
+    if (!props.indexPatterns.length) return true;
+
+    const ip = getIndexPatternFromFilter(filter, indexPatterns);
+    if (ip) return true;
+
+    const allFields = indexPatterns.map((indexPattern) => {
+      return indexPattern.fields.map((field) => field.name);
     });
-  };
+    const flatFields = allFields.reduce((acc: string[], it: string[]) => [...acc, ...it], []);
+    return flatFields.includes(filter.meta?.key || '');
+  }
 
-  private togglePopover = () => {
-    this.setState({
-      isPopoverOpen: !this.state.isPopoverOpen,
-    });
-  };
+  function getValueLabel(): LabelOptions {
+    const label = {
+      title: '',
+      message: '',
+      status: FILTER_ITEM_OK,
+    };
+    if (indexPatternExists === false) {
+      label.status = FILTER_ITEM_ERROR;
+      label.title = props.intl.formatMessage({
+        id: 'data.filter.filterBar.labelErrorText',
+        defaultMessage: `Error`,
+      });
+      label.message = props.intl.formatMessage(
+        {
+          id: 'data.filter.filterBar.labelErrorInfo',
+          defaultMessage: 'Index pattern {indexPattern} not found',
+        },
+        {
+          indexPattern: filter.meta.index,
+        }
+      );
+    } else if (isFilterApplicable()) {
+      try {
+        label.title = getDisplayValueFromFilter(filter, indexPatterns);
+      } catch (e) {
+        label.status = FILTER_ITEM_ERROR;
+        label.title = props.intl.formatMessage({
+          id: 'data.filter.filterBar.labelErrorText',
+          defaultMessage: `Error`,
+        });
+        label.message = e.message;
+      }
+    } else {
+      label.status = FILTER_ITEM_WARNING;
+      label.title = props.intl.formatMessage({
+        id: 'data.filter.filterBar.labelWarningText',
+        defaultMessage: `Warning`,
+      });
+      label.message = props.intl.formatMessage(
+        {
+          id: 'data.filter.filterBar.labelWarningInfo',
+          defaultMessage: 'Field {fieldName} does not exist in current view',
+        },
+        {
+          fieldName: filter.meta.key,
+        }
+      );
+    }
 
-  private onSubmit = (filter: Filter) => {
-    this.closePopover();
-    this.props.onUpdate(filter);
-  };
+    return label;
+  }
 
-  private onTogglePinned = () => {
-    const filter = toggleFilterPinned(this.props.filter);
-    this.props.onUpdate(filter);
-  };
+  // Don't render until we know if the index pattern is valid
+  if (indexPatternExists === undefined) return null;
+  const valueLabelConfig = getValueLabel();
 
-  private onToggleNegated = () => {
-    const filter = toggleFilterNegated(this.props.filter);
-    this.props.onUpdate(filter);
-  };
+  // Disable errored filters and re-render
+  if (valueLabelConfig.status === FILTER_ITEM_ERROR && !filter.meta.disabled) {
+    filter.meta.disabled = true;
+    props.onUpdate(filter);
+    return null;
+  }
 
-  private onToggleDisabled = () => {
-    const filter = toggleFilterDisabled(this.props.filter);
-    this.props.onUpdate(filter);
-  };
+  const badge = (
+    <FilterView
+      filter={filter}
+      valueLabel={valueLabelConfig.title}
+      errorMessage={valueLabelConfig.message}
+      className={getClasses(filter.meta.negate, valueLabelConfig)}
+      iconOnClick={() => props.onRemove()}
+      onClick={handleBadgeClick}
+      data-test-subj={getDataTestSubj(valueLabelConfig)}
+    />
+  );
+
+  return (
+    <EuiPopover
+      id={`popoverFor_filter${id}`}
+      className={`globalFilterItem__popover`}
+      anchorClassName={`globalFilterItem__popoverAnchor`}
+      isOpen={isPopoverOpen}
+      closePopover={() => {
+        setIsPopoverOpen(false);
+      }}
+      button={badge}
+      anchorPosition="downLeft"
+      withTitle={true}
+      panelPaddingSize="none"
+    >
+      <EuiContextMenu initialPanelId={0} panels={getPanels()} />
+    </EuiPopover>
+  );
 }
-
-export const FilterItem = injectI18n(FilterItemUI);

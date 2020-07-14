@@ -8,7 +8,7 @@ by an index pattern, and then rolls it into a new index. Rollup indices are a go
 compactly store months or years of historical
 data for use in visualizations and reports.
 
-You’ll find *Rollup Jobs* under *Management > Elasticsearch*. With this UI,
+To get started, open the menu, then go to *Stack Management > {es} > Rollup Jobs*. With this UI,
 you can:
 
 * <<create-and-manage-rollup-job, Create a rollup job>>
@@ -60,7 +60,7 @@ You can read more at {ref}/rollup-job-config.html[rollup job configuration].
 === Try it: Create and visualize rolled up data
 
 This example creates a rollup job to capture log data from sample web logs.
-To follow along, add the <<add-sample-data, sample web logs data set>>.
+To follow along, add the <<get-data-in, sample web logs data set>>.
 
 In this example, you want data that is older than 7 days in the target index pattern `kibana_sample_data_logs`
 to roll up once a day into the index `rollup_logstash`. You’ll bucket the
@@ -127,19 +127,36 @@ rollup index, or you can remove or archive it using <<creating-index-lifecycle-p
 ==== Visualize the rolled up data
 
 Your next step is to visualize your rolled up data in a vertical bar chart.
-Most visualizations support rolled up data, with the exception of Timelion, TSVB, and Vega visualizations.
+Most visualizations support rolled up data, with the exception of Timelion and Vega visualizations.
 
-Using the information from the example rollup configuration,
-you can use `rollup_logstash` to match the rolled up index pattern,
-and `kibana_sample_data_logs` to match the index pattern for raw data.
+
+. Create the rollup index pattern in *Management > Index Patterns* so you can
+select your rolled up data for visualizations. Click *Create index pattern*, and select *Rollup index pattern* from the dropdown.
++
+[role="screenshot"]
+image::images/management-rollup-index-pattern.png[][Create rollup index pattern]
+
+. Enter *rollup_logstash,kibana_sample_logs* as your *Index Pattern* and `@timestamp`
+as the *Time Filter field name*.
++
 The notation for a combination index pattern with both raw and rolled up data
-is `rollup_logstash,kibana_sample_data_logs`.
+is `rollup_logstash,kibana_sample_data_logs`. In this index pattern, `rollup_logstash`
+matches the rolled up index pattern and `kibana_sample_data_logs` matches the index
+pattern for raw data.
 
+. Go to *Visualize* and create a vertical bar chart. Choose `rollup_logstash,kibana_sample_data_logs`
+as your source to see both the raw and rolled up data.
++
+[role="screenshot"]
+image::images/management-create-rollup-bar-chart.png[][Create visualization of rolled up data]
+
+. Look at the data in your visualization.
++
 [role="screenshot"]
 image::images/management_rollup_job_vis.png[][Visualization of rolled up data]
 
-You can then create a dashboard that contains visualizations of the rolled up
-data, raw data, or both. For more information, refer to <<rollup-index-pattern,rolled up data>>.
-
+. Optionally, create a dashboard that contains visualizations of the rolled up
+data, raw data, or both.
++
 [role="screenshot"]
 image::images/management_rollup_job_dashboard.png[][Dashboard with rolled up data]

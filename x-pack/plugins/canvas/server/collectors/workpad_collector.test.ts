@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import clonedeep from 'lodash.clonedeep';
+import { cloneDeep } from 'lodash';
 import { summarizeWorkpads } from './workpad_collector';
-import { workpads } from '../../../../legacy/plugins/canvas/__tests__/fixtures/workpads';
+import { workpads } from '../../__tests__/fixtures/workpads';
 
 describe('usage collector handle es response data', () => {
   it('should summarize workpads, pages, and elements', () => {
@@ -53,7 +53,7 @@ describe('usage collector handle es response data', () => {
   });
 
   it('should collect correctly if an expression has null as an argument (possible sub-expression)', () => {
-    const workpad = clonedeep(workpads[0]);
+    const workpad = cloneDeep(workpads[0]);
     workpad.pages[0].elements[0].expression = 'toast butter=null';
 
     const mockWorkpads = [workpad];
@@ -67,7 +67,7 @@ describe('usage collector handle es response data', () => {
   });
 
   it('should fail gracefully if workpad has 0 pages (corrupted workpad)', () => {
-    const workpad = clonedeep(workpads[0]);
+    const workpad = cloneDeep(workpads[0]);
     workpad.pages = [];
     const mockWorkpadsCorrupted = [workpad];
     const usage = summarizeWorkpads(mockWorkpadsCorrupted);

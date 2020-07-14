@@ -8,10 +8,10 @@
 
 import * as t from 'io-ts';
 
-import { idOrUndefined, list_idOrUndefined, valueOrUndefined } from '../common/schemas';
+import { id, list_id, value } from '../common/schemas';
+import { Identity, RequiredKeepUndefined } from '../../types';
 
-export const readListItemSchema = t.exact(
-  t.type({ id: idOrUndefined, list_id: list_idOrUndefined, value: valueOrUndefined })
-);
+export const readListItemSchema = t.exact(t.partial({ id, list_id, value }));
 
-export type ReadListItemSchema = t.TypeOf<typeof readListItemSchema>;
+export type ReadListItemSchemaPartial = Identity<t.TypeOf<typeof readListItemSchema>>;
+export type ReadListItemSchema = RequiredKeepUndefined<t.TypeOf<typeof readListItemSchema>>;

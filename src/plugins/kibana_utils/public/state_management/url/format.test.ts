@@ -31,7 +31,7 @@ describe('format', () => {
     it('should replace hash query', () => {
       const url = 'http://localhost:5601/oxf/app/kibana#?test=test';
       expect(
-        replaceUrlHashQuery(url, query => ({
+        replaceUrlHashQuery(url, (query) => ({
           ...query,
           test1: 'test1',
         }))

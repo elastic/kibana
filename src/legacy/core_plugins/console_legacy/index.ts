@@ -28,7 +28,7 @@ export const readLegacyEsConfig = () => {
 };
 
 // eslint-disable-next-line import/no-default-export
-export default function(kibana: any) {
+export default function (kibana: any) {
   return new kibana.Plugin({
     id: 'console_legacy',
 
@@ -41,7 +41,7 @@ export default function(kibana: any) {
     uiExports: {
       injectDefaultVars: () => ({
         elasticsearchUrl: url.format(
-          Object.assign(url.parse(head(_legacyEsConfig.hosts)), { auth: false })
+          Object.assign(url.parse(head(_legacyEsConfig.hosts) as any), { auth: false })
         ),
       }),
     },

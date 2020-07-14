@@ -21,28 +21,26 @@ import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
 import { EMSClient } from '@elastic/ems-client';
 import { i18n } from '@kbn/i18n';
-import { getInjectedVarFunc } from '../kibana_services';
+import { getKibanaVersion } from '../kibana_services';
 import { ORIGIN } from '../common/constants/origin';
 
 const TMS_IN_YML_ID = 'TMS in config/kibana.yml';
 
 export class ServiceSettings {
-  constructor() {
-    const getInjectedVar = getInjectedVarFunc();
-    this.mapConfig = getInjectedVar('mapConfig');
-    this.tilemapsConfig = getInjectedVar('tilemapsConfig');
-    const kbnVersion = getInjectedVar('version');
+  constructor(mapConfig, tilemapsConfig) {
+    this._mapConfig = mapConfig;
+    this._tilemapsConfig = tilemapsConfig;
 
     this._showZoomMessage = true;
     this._emsClient = new EMSClient({
       language: i18n.getLocale(),
-      appVersion: kbnVersion,
+      appVersion: getKibanaVersion(),
       appName: 'kibana',
-      fileApiUrl: this.mapConfig.emsFileApiUrl,
-      tileApiUrl: this.mapConfig.emsTileApiUrl,
-      landingPageUrl: this.mapConfig.emsLandingPageUrl,
+      fileApiUrl: this._mapConfig.emsFileApiUrl,
+      tileApiUrl: this._mapConfig.emsTileApiUrl,
+      landingPageUrl: this._mapConfig.emsLandingPageUrl,
       // Wrap to avoid errors passing window fetch
-      fetchFunction: function(...args) {
+      fetchFunction: function (...args) {
         return fetch(...args);
       },
     });
@@ -57,10 +55,10 @@ export class ServiceSettings {
 
     // TMS attribution
     const attributionFromConfig = _.escape(
-      markdownIt.render(this.tilemapsConfig.deprecated.config.options.attribution || '')
+      markdownIt.render(this._tilemapsConfig.deprecated.config.options.attribution || '')
     );
     // TMS Options
-    this.tmsOptionsFromConfig = _.assign({}, this.tilemapsConfig.deprecated.config.options, {
+    this.tmsOptionsFromConfig = _.assign({}, this._tilemapsConfig.deprecated.config.options, {
       attribution: attributionFromConfig,
     });
   }
@@ -91,28 +89,31 @@ export class ServiceSettings {
     };
   }
 
+  _backfillSettings = (fileLayer) => {
+    // Older version of Kibana stored EMS state in the URL-params
+    // Creates object literal with required parameters as key-value pairs
+    const format = fileLayer.getDefaultFormatType();
+    const meta = fileLayer.getDefaultFormatMeta();
+
+    return {
+      name: fileLayer.getDisplayName(),
+      origin: fileLayer.getOrigin(),
+      id: fileLayer.getId(),
+      created_at: fileLayer.getCreatedAt(),
+      attribution: getAttributionString(fileLayer),
+      fields: fileLayer.getFieldsInLanguage(),
+      format: format, //legacy: format and meta are split up
+      meta: meta, //legacy, format and meta are split up
+    };
+  };
+
   async getFileLayers() {
-    if (!this.mapConfig.includeElasticMapsService) {
+    if (!this._mapConfig.includeElasticMapsService) {
       return [];
     }
 
     const fileLayers = await this._emsClient.getFileLayers();
-    return fileLayers.map(fileLayer => {
-      //backfill to older settings
-      const format = fileLayer.getDefaultFormatType();
-      const meta = fileLayer.getDefaultFormatMeta();
-
-      return {
-        name: fileLayer.getDisplayName(),
-        origin: fileLayer.getOrigin(),
-        id: fileLayer.getId(),
-        created_at: fileLayer.getCreatedAt(),
-        attribution: fileLayer.getHTMLAttribution(),
-        fields: fileLayer.getFieldsInLanguage(),
-        format: format, //legacy: format and meta are split up
-        meta: meta, //legacy, format and meta are split up
-      };
-    });
+    return fileLayers.map(this._backfillSettings);
   }
 
   /**
@@ -121,7 +122,7 @@ export class ServiceSettings {
    */
   async getTMSServices() {
     let allServices = [];
-    if (this.tilemapsConfig.deprecated.isOverridden) {
+    if (this._tilemapsConfig.deprecated.isOverridden) {
       //use tilemap.* settings from yml
       const tmsService = _.cloneDeep(this.tmsOptionsFromConfig);
       tmsService.id = TMS_IN_YML_ID;
@@ -129,19 +130,19 @@ export class ServiceSettings {
       allServices.push(tmsService);
     }
 
-    if (this.mapConfig.includeElasticMapsService) {
+    if (this._mapConfig.includeElasticMapsService) {
       const servicesFromManifest = await this._emsClient.getTMSServices();
       const strippedServiceFromManifest = await Promise.all(
         servicesFromManifest
-          .filter(tmsService => tmsService.getId() === this.mapConfig.emsTileLayerId.bright)
-          .map(async tmsService => {
+          .filter((tmsService) => tmsService.getId() === this._mapConfig.emsTileLayerId.bright)
+          .map(async (tmsService) => {
             //shim for compatibility
             return {
               origin: tmsService.getOrigin(),
               id: tmsService.getId(),
               minZoom: await tmsService.getMinZoom(),
               maxZoom: await tmsService.getMaxZoom(),
-              attribution: tmsService.getHTMLAttribution(),
+              attribution: getAttributionString(tmsService),
             };
           })
       );
@@ -161,19 +162,28 @@ export class ServiceSettings {
     this._emsClient.addQueryParams(additionalQueryParams);
   }
 
-  async getEMSHotLink(fileLayerConfig) {
+  async getFileLayerFromConfig(fileLayerConfig) {
     const fileLayers = await this._emsClient.getFileLayers();
-    const layer = fileLayers.find(fileLayer => {
+    return fileLayers.find((fileLayer) => {
       const hasIdByName = fileLayer.hasId(fileLayerConfig.name); //legacy
       const hasIdById = fileLayer.hasId(fileLayerConfig.id);
       return hasIdByName || hasIdById;
     });
+  }
+
+  async getEMSHotLink(fileLayerConfig) {
+    const layer = await this.getFileLayerFromConfig(fileLayerConfig);
     return layer ? layer.getEMSHotLink() : null;
+  }
+
+  async loadFileLayerConfig(fileLayerConfig) {
+    const fileLayer = await this.getFileLayerFromConfig(fileLayerConfig);
+    return fileLayer ? this._backfillSettings(fileLayer) : null;
   }
 
   async _getAttributesForEMSTMSLayer(isDesaturated, isDarkMode) {
     const tmsServices = await this._emsClient.getTMSServices();
-    const emsTileLayerId = this.mapConfig.emsTileLayerId;
+    const emsTileLayerId = this._mapConfig.emsTileLayerId;
     let serviceId;
     if (isDarkMode) {
       serviceId = emsTileLayerId.dark;
@@ -184,14 +194,14 @@ export class ServiceSettings {
         serviceId = emsTileLayerId.bright;
       }
     }
-    const tmsService = tmsServices.find(service => {
+    const tmsService = tmsServices.find((service) => {
       return service.getId() === serviceId;
     });
     return {
       url: await tmsService.getUrlTemplate(),
       minZoom: await tmsService.getMinZoom(),
       maxZoom: await tmsService.getMaxZoom(),
-      attribution: await tmsService.getHTMLAttribution(),
+      attribution: getAttributionString(tmsService),
       origin: ORIGIN.EMS,
     };
   }
@@ -200,13 +210,13 @@ export class ServiceSettings {
     if (tmsServiceConfig.origin === ORIGIN.EMS) {
       return this._getAttributesForEMSTMSLayer(isDesaturated, isDarkMode);
     } else if (tmsServiceConfig.origin === ORIGIN.KIBANA_YML) {
-      const config = this.tilemapsConfig.deprecated.config;
+      const config = this._tilemapsConfig.deprecated.config;
       const attrs = _.pick(config, ['url', 'minzoom', 'maxzoom', 'attribution']);
       return { ...attrs, ...{ origin: ORIGIN.KIBANA_YML } };
     } else {
       //this is an older config. need to resolve this dynamically.
       if (tmsServiceConfig.id === TMS_IN_YML_ID) {
-        const config = this.tilemapsConfig.deprecated.config;
+        const config = this._tilemapsConfig.deprecated.config;
         const attrs = _.pick(config, ['url', 'minzoom', 'maxzoom', 'attribution']);
         return { ...attrs, ...{ origin: ORIGIN.KIBANA_YML } };
       } else {
@@ -218,7 +228,7 @@ export class ServiceSettings {
 
   async _getFileUrlFromEMS(fileLayerConfig) {
     const fileLayers = await this._emsClient.getFileLayers();
-    const layer = fileLayers.find(fileLayer => {
+    const layer = fileLayers.find((fileLayer) => {
       const hasIdByName = fileLayer.hasId(fileLayerConfig.name); //legacy
       const hasIdById = fileLayer.hasId(fileLayerConfig.id);
       return hasIdByName || hasIdById;
@@ -256,4 +266,18 @@ export class ServiceSettings {
     const response = await fetch(url);
     return await response.json();
   }
+}
+
+function getAttributionString(emsService) {
+  const attributions = emsService.getAttributions();
+  const attributionSnippets = attributions.map((attribution) => {
+    const anchorTag = document.createElement('a');
+    anchorTag.setAttribute('rel', 'noreferrer noopener');
+    if (attribution.url.startsWith('http://') || attribution.url.startsWith('https://')) {
+      anchorTag.setAttribute('href', attribution.url);
+    }
+    anchorTag.textContent = attribution.label;
+    return anchorTag.outerHTML;
+  });
+  return attributionSnippets.join(' | '); //!!!this is the current convention used in Kibana
 }

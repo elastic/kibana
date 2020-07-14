@@ -32,6 +32,7 @@ function createManifest(
     configPath: ['path'],
     requiredPlugins: required,
     optionalPlugins: optional,
+    requiredBundles: [],
   } as DiscoveredPlugin;
 }
 
@@ -101,7 +102,7 @@ describe('PluginWrapper', () => {
         setup: jest.fn(),
         start: jest.fn(async () => {
           // Add small delay to ensure startDependencies is not resolved until after the plugin instance's start resolves.
-          await new Promise(resolve => setTimeout(resolve, 10));
+          await new Promise((resolve) => setTimeout(resolve, 10));
           expect(startDependenciesResolved).toBe(false);
           return pluginStartContract;
         }),
@@ -113,7 +114,7 @@ describe('PluginWrapper', () => {
     const deps = { otherDep: 'value' };
     // Add promise callback prior to calling `start` to ensure calls in `setup` will not resolve before `start` is
     // called.
-    const startDependenciesCheck = plugin.startDependencies.then(res => {
+    const startDependenciesCheck = plugin.startDependencies.then((res) => {
       startDependenciesResolved = true;
       expect(res).toEqual([context, deps, pluginStartContract]);
     });

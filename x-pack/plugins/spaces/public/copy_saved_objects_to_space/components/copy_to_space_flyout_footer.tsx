@@ -8,8 +8,8 @@ import React, { Fragment } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiStat, EuiHorizontalRule } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { ProcessedImportResponse } from '../../../../../../src/legacy/core_plugins/kibana/public';
 import { ImportRetry } from '../types';
+import { ProcessedImportResponse } from '../../../../../../src/plugins/saved_objects_management/public';
 
 interface Props {
   copyInProgress: boolean;
@@ -33,18 +33,18 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
   if (copyResult) {
     summarizedResults = Object.entries(copyResult).reduce((acc, result) => {
       const [spaceId, spaceResult] = result;
-      const overwriteCount = (retries[spaceId] || []).filter(c => c.overwrite).length;
+      const overwriteCount = (retries[spaceId] || []).filter((c) => c.overwrite).length;
       return {
         loading: false,
         successCount: acc.successCount + spaceResult.importCount,
         overwriteConflictCount: acc.overwriteConflictCount + overwriteCount,
         conflictCount:
           acc.conflictCount +
-          spaceResult.failedImports.filter(i => i.error.type === 'conflict').length -
+          spaceResult.failedImports.filter((i) => i.error.type === 'conflict').length -
           overwriteCount,
         unresolvableErrorCount:
           acc.unresolvableErrorCount +
-          spaceResult.failedImports.filter(i => i.error.type !== 'conflict').length,
+          spaceResult.failedImports.filter((i) => i.error.type !== 'conflict').length,
       };
     }, summarizedResults);
   }

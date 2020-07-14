@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/siem/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -17,12 +17,14 @@ import {
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
   getSimpleRuleOutputWithoutRuleId,
-} from './utils';
+  getSimpleMlRule,
+  getSimpleMlRuleOutput,
+} from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   describe('patch_rules', () => {
     describe('patch rules', () => {
@@ -51,6 +53,28 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
+        outputRule.name = 'some other name';
+        outputRule.version = 2;
+        const bodyToCompare = removeServerGeneratedProperties(body);
+        expect(bodyToCompare).to.eql(outputRule);
+      });
+
+      it('should patch a single rule property of name using a rule_id of type "machine learning"', async () => {
+        // create a simple rule
+        await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getSimpleMlRule('rule-1'))
+          .expect(200);
+
+        // patch a simple rule's name
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ rule_id: 'rule-1', name: 'some other name' })
+          .expect(200);
+
+        const outputRule = getSimpleMlRuleOutput();
         outputRule.name = 'some other name';
         outputRule.version = 2;
         const bodyToCompare = removeServerGeneratedProperties(body);
@@ -186,12 +210,12 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send({ id: 'fake_id', name: 'some other name' })
+          .send({ id: '5096dec6-b6b9-4d8d-8f93-6c2602079d9d', name: 'some other name' })
           .expect(404);
 
         expect(body).to.eql({
           status_code: 404,
-          message: 'id: "fake_id" not found',
+          message: 'id: "5096dec6-b6b9-4d8d-8f93-6c2602079d9d" not found',
         });
       });
 

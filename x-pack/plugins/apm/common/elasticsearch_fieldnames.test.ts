@@ -17,20 +17,25 @@ describe('Transaction', () => {
     '@metadata': 'whatever',
     observer: {
       version: 'whatever',
-      version_major: 8
+      version_major: 8,
     },
     agent: {
       name: 'java',
-      version: 'agent version'
+      version: 'agent version',
+    },
+    cloud: {
+      availability_zone: 'europe-west1-c',
+      provider: 'gcp',
+      region: 'europe-west1',
     },
     http: {
       request: { method: 'GET' },
-      response: { status_code: 200 }
+      response: { status_code: 200 },
     },
     url: { full: 'http://www.elastic.co', domain: 'www.elastic.co' },
     service: {
       name: 'service name',
-      language: { name: 'nodejs', version: 'v1337' }
+      language: { name: 'nodejs', version: 'v1337' },
     },
     host: { hostname: 'my hostname' },
     processor: { name: 'transaction', event: 'transaction' },
@@ -39,7 +44,7 @@ describe('Transaction', () => {
     user: { id: '1337' },
     user_agent: { name: 'Other', original: 'test original' },
     parent: {
-      id: 'parentId'
+      id: 'parentId',
     },
     transaction: {
       duration: { us: 1337 },
@@ -47,16 +52,16 @@ describe('Transaction', () => {
       name: 'transaction name',
       result: 'transaction result',
       sampled: true,
-      type: 'transaction type'
+      type: 'transaction type',
     },
     kubernetes: {
       pod: {
-        uid: 'pod1234567890abcdef'
-      }
+        uid: 'pod1234567890abcdef',
+      },
     },
     container: {
-      id: 'container1234567890abcdef'
-    }
+      id: 'container1234567890abcdef',
+    },
   };
 
   matchSnapshot(transaction);
@@ -68,27 +73,32 @@ describe('Span', () => {
     '@metadata': 'whatever',
     observer: {
       version: 'whatever',
-      version_major: 8
+      version_major: 8,
     },
     agent: {
       name: 'java',
-      version: 'agent version'
+      version: 'agent version',
+    },
+    cloud: {
+      availability_zone: 'europe-west1-c',
+      provider: 'gcp',
+      region: 'europe-west1',
     },
     processor: {
       name: 'transaction',
-      event: 'span'
+      event: 'span',
     },
     timestamp: {
-      us: 1337
+      us: 1337,
     },
     trace: {
-      id: 'trace id'
+      id: 'trace id',
     },
     service: {
-      name: 'service name'
+      name: 'service name',
     },
     parent: {
-      id: 'parentId'
+      id: 'parentId',
     },
     span: {
       action: 'my action',
@@ -99,12 +109,12 @@ describe('Span', () => {
       sync: false,
       type: 'span type',
       db: {
-        statement: 'db statement'
-      }
+        statement: 'db statement',
+      },
     },
     transaction: {
-      id: 'transaction id'
-    }
+      id: 'transaction id',
+    },
   };
 
   matchSnapshot(span);
@@ -115,11 +125,16 @@ describe('Error', () => {
     '@metadata': 'whatever',
     observer: {
       version: 'whatever',
-      version_major: 8
+      version_major: 8,
     },
     agent: {
       name: 'java',
-      version: 'agent version'
+      version: 'agent version',
+    },
+    cloud: {
+      availability_zone: 'europe-west1-c',
+      provider: 'gcp',
+      region: 'europe-west1',
     },
     error: {
       exception: [
@@ -127,41 +142,41 @@ describe('Error', () => {
           module: 'errors',
           handled: false,
           message: 'sonic boom',
-          type: 'errorString'
-        }
+          type: 'errorString',
+        },
       ],
       culprit: 'handleOopsie',
       id: 'error id',
-      grouping_key: 'grouping key'
+      grouping_key: 'grouping key',
     },
     '@timestamp': new Date().toString(),
     host: {
-      hostname: 'my hostname'
+      hostname: 'my hostname',
     },
     processor: {
       name: 'error',
-      event: 'error'
+      event: 'error',
     },
     timestamp: {
-      us: 1337
+      us: 1337,
     },
     trace: {
-      id: 'trace id'
+      id: 'trace id',
     },
     service: {
       name: 'service name',
       language: {
         name: 'nodejs',
-        version: 'v1337'
-      }
+        version: 'v1337',
+      },
     },
     parent: {
-      id: 'parentId'
+      id: 'parentId',
     },
     transaction: {
       id: 'transaction id',
-      type: 'request'
-    }
+      type: 'request',
+    },
   };
 
   matchSnapshot(errorDoc);

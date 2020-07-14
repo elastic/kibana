@@ -13,7 +13,7 @@ jest.mock('../../crud_app/services', () => {
   const services = require.requireActual('../../crud_app/services');
   return {
     ...services,
-    getRouterLinkProps: link => ({ href: link }),
+    getRouterLinkProps: (link) => ({ href: link }),
   };
 });
 

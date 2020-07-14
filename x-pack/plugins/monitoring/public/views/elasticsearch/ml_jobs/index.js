@@ -16,7 +16,7 @@ import { CODE_PATH_ELASTICSEARCH, CODE_PATH_ML } from '../../../../common/consta
 uiRoutes.when('/elasticsearch/ml_jobs', {
   template,
   resolve: {
-    clusters: function(Private) {
+    clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
       return routeInit({ codePaths: [CODE_PATH_ELASTICSEARCH, CODE_PATH_ML] });
     },

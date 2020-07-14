@@ -28,7 +28,7 @@ import {
 async function concatToString(streams) {
   return await createPromiseFromStreams([
     ...streams,
-    createMapStream(buff => buff.toString('utf8')),
+    createMapStream((buff) => buff.toString('utf8')),
     createConcatStream(''),
   ]);
 }
@@ -41,7 +41,7 @@ describe('replaceStream', () => {
       createConcatStream([]),
     ]);
 
-    chunks.forEach(chunk => {
+    chunks.forEach((chunk) => {
       expect(chunk).toBeInstanceOf(Buffer);
     });
   });
@@ -53,7 +53,7 @@ describe('replaceStream', () => {
       createConcatStream([]),
     ]);
 
-    chunks.forEach(chunk => {
+    chunks.forEach((chunk) => {
       expect(chunk).toBeInstanceOf(Buffer);
     });
   });

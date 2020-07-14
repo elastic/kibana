@@ -35,6 +35,8 @@
  * @packageDocumentation
  */
 
+import './index.scss';
+
 import {
   ChromeBadge,
   ChromeBrand,
@@ -54,6 +56,7 @@ import {
   ChromeStart,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
+  NavType,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -77,7 +80,16 @@ import {
 } from './context';
 
 export { CoreContext, CoreSystem } from './core_system';
-export { RecursiveReadonly, DEFAULT_APP_CATEGORIES } from '../utils';
+export {
+  DEFAULT_APP_CATEGORIES,
+  getFlattenedObject,
+  URLMeaningfulParts,
+  modifyUrl,
+  isRelativeUrl,
+  Freezable,
+  deepFreeze,
+  assertNever,
+} from '../utils';
 export {
   AppCategory,
   UiSettingsParams,
@@ -93,6 +105,7 @@ export {
   ApplicationSetup,
   ApplicationStart,
   App,
+  PublicAppInfo,
   AppBase,
   AppMount,
   AppMountDeprecated,
@@ -109,6 +122,9 @@ export {
   AppUpdatableFields,
   AppUpdater,
   ScopedHistory,
+  LegacyApp,
+  PublicLegacyAppInfo,
+  NavigateToAppOptions,
 } from './application';
 
 export {
@@ -174,6 +190,8 @@ export {
 } from './notifications';
 
 export { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
+
+export { URL_MAX_LENGTH } from './core_app';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -344,4 +362,7 @@ export {
   PluginOpaqueId,
   IUiSettingsClient,
   UiSettingsState,
+  NavType,
 };
+
+export { __kbnBootstrap__ } from './kbn_bootstrap';

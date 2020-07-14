@@ -80,6 +80,17 @@ export interface SavedObjectsBulkResponse<T = unknown> {
 }
 
 /**
+ *
+ * @public
+ */
+export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
+  /**
+   * The Elasticsearch `_score` of this result.
+   */
+  score: number;
+}
+
+/**
  * Return type of the Saved Objects `find()` method.
  *
  * *Note*: this type is different between the Public and Server Saved Objects
@@ -88,7 +99,7 @@ export interface SavedObjectsBulkResponse<T = unknown> {
  * @public
  */
 export interface SavedObjectsFindResponse<T = unknown> {
-  saved_objects: Array<SavedObject<T>>;
+  saved_objects: Array<SavedObjectsFindResult<T>>;
   total: number;
   per_page: number;
   page: number;

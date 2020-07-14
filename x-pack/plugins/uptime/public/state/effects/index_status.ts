@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { takeLatest } from 'redux-saga/effects';
+import { takeLeading } from 'redux-saga/effects';
 import { indexStatusAction } from '../actions';
 import { fetchIndexStatus } from '../api';
 import { fetchEffectFactory } from './fetch_effect';
 
 export function* fetchIndexStatusEffect() {
-  yield takeLatest(
+  yield takeLeading(
     indexStatusAction.get,
     fetchEffectFactory(fetchIndexStatus, indexStatusAction.success, indexStatusAction.fail)
   );

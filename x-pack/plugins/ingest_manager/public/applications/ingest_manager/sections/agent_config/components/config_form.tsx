@@ -32,7 +32,7 @@ interface ValidationResults {
 
 const StyledEuiAccordion = styled(EuiAccordion)`
   .ingest-active-button {
-    color: ${props => props.theme.eui.euiColorPrimary};
+    color: ${(props) => props.theme.eui.euiColorPrimary};
   }
 `;
 
@@ -46,6 +46,15 @@ export const agentConfigFormValidation = (
       <FormattedMessage
         id="xpack.ingestManager.agentConfigForm.nameRequiredErrorMessage"
         defaultMessage="Agent config name is required"
+      />,
+    ];
+  }
+
+  if (!agentConfig.namespace?.trim()) {
+    errors.namespace = [
+      <FormattedMessage
+        id="xpack.ingestManager.agentConfigForm.namespaceRequiredErrorMessage"
+        defaultMessage="A namespace is required"
       />,
     ];
   }
@@ -73,7 +82,6 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
   onDelete = () => {},
 }) => {
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
-  const [showNamespace, setShowNamespace] = useState<boolean>(!!agentConfig.namespace);
   const fields: Array<{
     name: 'name' | 'description' | 'namespace';
     label: JSX.Element;
@@ -143,7 +151,7 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
         <EuiFieldText
           fullWidth
           value={agentConfig[name]}
-          onChange={e => updateAgentConfig({ [name]: e.target.value })}
+          onChange={(e) => updateAgentConfig({ [name]: e.target.value })}
           isInvalid={Boolean(touchedFields[name] && validation[name])}
           onBlur={() => setTouchedFields({ ...touchedFields, [name]: true })}
           placeholder={placeholder}
@@ -166,53 +174,32 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.ingestManager.agentConfigForm.namespaceFieldDescription"
-            defaultMessage="Apply a default namespace to data sources that use this configuration. Data sources can specify their own namespaces."
+            defaultMessage="Apply a default namespace to integrations that use this configuration. Integrations can specify their own namespaces."
           />
         }
       >
-        <EuiSwitch
-          showLabel={true}
-          label={
-            <FormattedMessage
-              id="xpack.ingestManager.agentConfigForm.namespaceUseDefaultsFieldLabel"
-              defaultMessage="Use default namespace"
-            />
-          }
-          checked={showNamespace}
-          onChange={() => {
-            setShowNamespace(!showNamespace);
-            if (showNamespace) {
-              updateAgentConfig({ namespace: '' });
-            }
-          }}
-        />
-        {showNamespace && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiFormRow
-              fullWidth
-              error={touchedFields.namespace && validation.namespace ? validation.namespace : null}
-              isInvalid={Boolean(touchedFields.namespace && validation.namespace)}
-            >
-              <EuiComboBox
-                fullWidth
-                singleSelection
-                noSuggestions
-                selectedOptions={agentConfig.namespace ? [{ label: agentConfig.namespace }] : []}
-                onCreateOption={(value: string) => {
-                  updateAgentConfig({ namespace: value });
-                }}
-                onChange={selectedOptions => {
-                  updateAgentConfig({
-                    namespace: (selectedOptions.length ? selectedOptions[0] : '') as string,
-                  });
-                }}
-                isInvalid={Boolean(touchedFields.namespace && validation.namespace)}
-                onBlur={() => setTouchedFields({ ...touchedFields, namespace: true })}
-              />
-            </EuiFormRow>
-          </>
-        )}
+        <EuiFormRow
+          fullWidth
+          error={touchedFields.namespace && validation.namespace ? validation.namespace : null}
+          isInvalid={Boolean(touchedFields.namespace && validation.namespace)}
+        >
+          <EuiComboBox
+            fullWidth
+            singleSelection
+            noSuggestions
+            selectedOptions={agentConfig.namespace ? [{ label: agentConfig.namespace }] : []}
+            onCreateOption={(value: string) => {
+              updateAgentConfig({ namespace: value });
+            }}
+            onChange={(selectedOptions) => {
+              updateAgentConfig({
+                namespace: (selectedOptions.length ? selectedOptions[0] : '') as string,
+              });
+            }}
+            isInvalid={Boolean(touchedFields.namespace && validation.namespace)}
+            onBlur={() => setTouchedFields({ ...touchedFields, namespace: true })}
+          />
+        </EuiFormRow>
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
         title={
@@ -254,7 +241,7 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
             },
             { logs: false, metrics: false }
           )}
-          onChange={id => {
+          onChange={(id) => {
             if (id !== 'logs' && id !== 'metrics') {
               return;
             }
@@ -265,7 +252,7 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
             const previousValues = agentConfig.monitoring_enabled || [];
             updateAgentConfig({
               monitoring_enabled: hasLogs
-                ? previousValues.filter(type => type !== id)
+                ? previousValues.filter((type) => type !== id)
                 : [...previousValues, id],
             });
           }}
@@ -289,7 +276,7 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
               />
               <EuiSpacer size="s" />
               <AgentConfigDeleteProvider>
-                {deleteAgentConfigPrompt => {
+                {(deleteAgentConfigPrompt) => {
                   return (
                     <EuiButton
                       color="danger"
@@ -349,7 +336,7 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
                     'xpack.ingestManager.agentConfigForm.systemMonitoringTooltipText',
                     {
                       defaultMessage:
-                        'Enable this option to bootstrap your configuration with a data source that collects system metrics and information.',
+                        'Enable this option to bootstrap your configuration with an integration that collects system metrics and information.',
                     }
                   )}
                   position="right"

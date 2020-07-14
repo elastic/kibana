@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
-} from '../../../../common/fixtures/plugins/actions_simulators';
+} from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
 const mapping = [
   {
@@ -50,7 +50,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
     params: {
       subAction: 'pushToService',
       subActionParams: {
-        caseId: '123',
+        savedObjectId: '123',
         title: 'a title',
         description: 'a description',
         createdAt: '2020-03-13T08:34:53.450Z',
@@ -87,7 +87,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
     describe('Jira - Action Creation', () => {
       it('should return 200 when creating a jira action successfully', async () => {
         const { body: createdAction } = await supertest
-          .post('/api/action')
+          .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A jira action',
@@ -113,7 +113,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
         });
 
         const { body: fetchedAction } = await supertest
-          .get(`/api/action/${createdAction.id}`)
+          .get(`/api/actions/action/${createdAction.id}`)
           .expect(200);
 
         expect(fetchedAction).to.eql({
@@ -131,7 +131,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
       it('should respond with a 400 Bad Request when creating a jira action with no apiUrl', async () => {
         await supertest
-          .post('/api/action')
+          .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A jira action',
@@ -151,7 +151,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
       it('should respond with a 400 Bad Request when creating a jira action with no projectKey', async () => {
         await supertest
-          .post('/api/action')
+          .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A jira action',
@@ -171,7 +171,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
       it('should respond with a 400 Bad Request when creating a jira action with a non whitelisted apiUrl', async () => {
         await supertest
-          .post('/api/action')
+          .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A jira action',
@@ -196,7 +196,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
       it('should respond with a 400 Bad Request when creating a jira action without secrets', async () => {
         await supertest
-          .post('/api/action')
+          .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A jira action',
@@ -220,7 +220,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
       it('should respond with a 400 Bad Request when creating a jira action without casesConfiguration', async () => {
         await supertest
-          .post('/api/action')
+          .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A jira action',
@@ -244,7 +244,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
       it('should respond with a 400 Bad Request when creating a jira action with empty mapping', async () => {
         await supertest
-          .post('/api/action')
+          .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A jira action',
@@ -269,7 +269,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
       it('should respond with a 400 Bad Request when creating a jira action with wrong actionType', async () => {
         await supertest
-          .post('/api/action')
+          .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A jira action',
@@ -297,7 +297,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
       let simulatedActionId: string;
       before(async () => {
         const { body } = await supertest
-          .post('/api/action')
+          .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A jira simulator',
@@ -315,7 +315,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
       describe('Validation', () => {
         it('should handle failing with a simulated success without action', async () => {
           await supertest
-            .post(`/api/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {},
@@ -332,7 +332,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
         it('should handle failing with a simulated success without unsupported action', async () => {
           await supertest
-            .post(`/api/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: { subAction: 'non-supported' },
@@ -350,7 +350,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
         it('should handle failing with a simulated success without subActionParams', async () => {
           await supertest
-            .post(`/api/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: { subAction: 'pushToService' },
@@ -361,14 +361,14 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.caseId]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.savedObjectId]: expected value of type [string] but got [undefined]',
               });
             });
         });
 
-        it('should handle failing with a simulated success without caseId', async () => {
+        it('should handle failing with a simulated success without savedObjectId', async () => {
           await supertest
-            .post(`/api/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: { subAction: 'pushToService', subActionParams: {} },
@@ -379,20 +379,20 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.caseId]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.savedObjectId]: expected value of type [string] but got [undefined]',
               });
             });
         });
 
         it('should handle failing with a simulated success without title', async () => {
           await supertest
-            .post(`/api/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
                 ...mockJira.params,
                 subActionParams: {
-                  caseId: 'success',
+                  savedObjectId: 'success',
                 },
               },
             })
@@ -409,13 +409,13 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
         it('should handle failing with a simulated success without createdAt', async () => {
           await supertest
-            .post(`/api/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
                 ...mockJira.params,
                 subActionParams: {
-                  caseId: 'success',
+                  savedObjectId: 'success',
                   title: 'success',
                 },
               },
@@ -433,14 +433,14 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
         it('should handle failing with a simulated success without commentId', async () => {
           await supertest
-            .post(`/api/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
                 ...mockJira.params,
                 subActionParams: {
                   ...mockJira.params.subActionParams,
-                  caseId: 'success',
+                  savedObjectId: 'success',
                   title: 'success',
                   createdAt: 'success',
                   createdBy: { username: 'elastic' },
@@ -461,14 +461,14 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
         it('should handle failing with a simulated success without comment message', async () => {
           await supertest
-            .post(`/api/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
                 ...mockJira.params,
                 subActionParams: {
                   ...mockJira.params.subActionParams,
-                  caseId: 'success',
+                  savedObjectId: 'success',
                   title: 'success',
                   createdAt: 'success',
                   createdBy: { username: 'elastic' },
@@ -489,14 +489,14 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
         it('should handle failing with a simulated success without comment.createdAt', async () => {
           await supertest
-            .post(`/api/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
                 ...mockJira.params,
                 subActionParams: {
                   ...mockJira.params.subActionParams,
-                  caseId: 'success',
+                  savedObjectId: 'success',
                   title: 'success',
                   createdAt: 'success',
                   createdBy: { username: 'elastic' },
@@ -519,7 +519,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
       describe('Execution', () => {
         it('should handle creating an incident without comments', async () => {
           const { body } = await supertest
-            .post(`/api/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {

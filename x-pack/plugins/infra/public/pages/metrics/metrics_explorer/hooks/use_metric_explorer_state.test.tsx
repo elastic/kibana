@@ -16,7 +16,7 @@ import {
 } from '../../../../utils/fixtures/metrics_explorer';
 
 const renderUseMetricsExplorerStateHook = () =>
-  renderHook(props => useMetricsExplorerState(props.source, props.derivedIndexPattern), {
+  renderHook((props) => useMetricsExplorerState(props.source, props.derivedIndexPattern), {
     initialProps: { source, derivedIndexPattern },
     wrapper: ({ children }) => (
       <MetricsExplorerOptionsContainer.Provider>

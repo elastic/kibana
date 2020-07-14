@@ -19,7 +19,7 @@
 
 import React, { Children, ReactNode, useRef, useState, useCallback, useEffect } from 'react';
 
-import { keyCodes } from '@elastic/eui';
+import { keys } from '@elastic/eui';
 import { PanelContextProvider } from '../context';
 import { Resizer, ResizerMouseEvent, ResizerKeyDownEvent } from '../components/resizer';
 import { PanelRegistry } from '../registry';
@@ -70,16 +70,16 @@ export function PanelsContainer({
 
   const handleKeyDown = useCallback(
     (ev: ResizerKeyDownEvent) => {
-      const { keyCode } = ev;
+      const { key } = ev;
 
-      if (keyCode === keyCodes.LEFT || keyCode === keyCodes.RIGHT) {
+      if (key === keys.ARROW_LEFT || key === keys.ARROW_RIGHT) {
         ev.preventDefault();
 
         const { current: registry } = registryRef;
         const [left, right] = registry.getPanels();
 
-        const leftPercent = left.width - (keyCode === keyCodes.LEFT ? 1 : -1);
-        const rightPercent = right.width - (keyCode === keyCodes.RIGHT ? 1 : -1);
+        const leftPercent = left.width - (key === keys.ARROW_LEFT ? 1 : -1);
+        const rightPercent = right.width - (key === keys.ARROW_RIGHT ? 1 : -1);
 
         left.setWidth(leftPercent);
         right.setWidth(rightPercent);
@@ -121,7 +121,7 @@ export function PanelsContainer({
         className={className}
         ref={containerRef}
         style={{ display: 'flex', height: '100%', width: '100%' }}
-        onMouseMove={event => {
+        onMouseMove={(event) => {
           if (state.isDragging) {
             const { clientX: x } = event;
             const { current: registry } = registryRef;

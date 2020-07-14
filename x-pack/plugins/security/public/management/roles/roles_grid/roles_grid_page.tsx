@@ -26,6 +26,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { NotificationsStart } from 'src/core/public';
+import { ScopedHistory } from 'kibana/public';
 import {
   Role,
   isRoleEnabled,
@@ -38,10 +39,12 @@ import { RolesAPIClient } from '../roles_api_client';
 import { ConfirmDelete } from './confirm_delete';
 import { PermissionDenied } from './permission_denied';
 import { DisabledBadge, DeprecatedBadge, ReservedBadge } from '../../badges';
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   notifications: NotificationsStart;
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
+  history: ScopedHistory;
 }
 
 interface State {
@@ -55,7 +58,7 @@ interface State {
 }
 
 const getRoleManagementHref = (action: 'edit' | 'clone', roleName?: string) => {
-  return `#/management/security/roles/${action}${roleName ? `/${roleName}` : ''}`;
+  return `/${action}${roleName ? `/${roleName}` : ''}`;
 };
 
 export class RolesGridPage extends Component<Props, State> {
@@ -106,7 +109,10 @@ export class RolesGridPage extends Component<Props, State> {
             </EuiText>
           </EuiPageContentHeaderSection>
           <EuiPageContentHeaderSection>
-            <EuiButton data-test-subj="createRoleButton" href={getRoleManagementHref('edit')}>
+            <EuiButton
+              data-test-subj="createRoleButton"
+              {...reactRouterNavigate(this.props.history, getRoleManagementHref('edit'))}
+            >
               <FormattedMessage
                 id="xpack.security.management.roles.createRoleButtonLabel"
                 defaultMessage="Create role"
@@ -118,7 +124,7 @@ export class RolesGridPage extends Component<Props, State> {
           {this.state.showDeleteConfirmation ? (
             <ConfirmDelete
               onCancel={this.onCancelDelete}
-              rolesToDelete={this.state.selection.map(role => role.name)}
+              rolesToDelete={this.state.selection.map((role) => role.name)}
               callback={this.handleDelete}
               notifications={this.props.notifications}
               rolesAPIClient={this.props.rolesAPIClient}
@@ -190,7 +196,10 @@ export class RolesGridPage extends Component<Props, State> {
         render: (name: string, record: Role) => {
           return (
             <EuiText color="subdued" size="s">
-              <EuiLink data-test-subj="roleRowName" href={getRoleManagementHref('edit', name)}>
+              <EuiLink
+                data-test-subj="roleRowName"
+                {...reactRouterNavigate(this.props.history, getRoleManagementHref('edit', name))}
+              >
                 {name}
               </EuiLink>
             </EuiText>
@@ -228,7 +237,10 @@ export class RolesGridPage extends Component<Props, State> {
                   title={title}
                   color={'primary'}
                   iconType={'pencil'}
-                  href={getRoleManagementHref('edit', role.name)}
+                  {...reactRouterNavigate(
+                    this.props.history,
+                    getRoleManagementHref('edit', role.name)
+                  )}
                 />
               );
             },
@@ -248,7 +260,10 @@ export class RolesGridPage extends Component<Props, State> {
                   title={title}
                   color={'primary'}
                   iconType={'copy'}
-                  href={getRoleManagementHref('clone', role.name)}
+                  {...reactRouterNavigate(
+                    this.props.history,
+                    getRoleManagementHref('clone', role.name)
+                  )}
                 />
               );
             },
@@ -259,7 +274,7 @@ export class RolesGridPage extends Component<Props, State> {
   };
 
   private getVisibleRoles = (roles: Role[], filter: string, includeReservedRoles: boolean) => {
-    return roles.filter(role => {
+    return roles.filter((role) => {
       const normalized = `${role.name}`.toLowerCase();
       const normalizedQuery = filter.toLowerCase();
       return (

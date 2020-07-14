@@ -19,28 +19,28 @@
 
 import { ErrorHandler } from './_error_handler';
 
-describe('Vislib ErrorHandler Test Suite', function() {
+describe('Vislib ErrorHandler Test Suite', function () {
   let errorHandler;
 
   beforeEach(() => {
     errorHandler = new ErrorHandler();
   });
 
-  describe('validateWidthandHeight Method', function() {
-    it('should throw an error when width and/or height is 0', function() {
-      expect(function() {
+  describe('validateWidthandHeight Method', function () {
+    it('should throw an error when width and/or height is 0', function () {
+      expect(function () {
         errorHandler.validateWidthandHeight(0, 200);
       }).toThrow();
-      expect(function() {
+      expect(function () {
         errorHandler.validateWidthandHeight(200, 0);
       }).toThrow();
     });
 
-    it('should throw an error when width and/or height is NaN', function() {
-      expect(function() {
+    it('should throw an error when width and/or height is NaN', function () {
+      expect(function () {
         errorHandler.validateWidthandHeight(null, 200);
       }).toThrow();
-      expect(function() {
+      expect(function () {
         errorHandler.validateWidthandHeight(200, null);
       }).toThrow();
     });

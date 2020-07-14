@@ -35,20 +35,22 @@ export const IGNORE_FILE_GLOBS = [
   '**/Gruntfile.js',
   'tasks/config/**/*',
   '**/{Dockerfile,docker-compose.yml}',
-  'x-pack/legacy/plugins/canvas/tasks/**/*',
-  'x-pack/legacy/plugins/canvas/canvas_plugin_src/**/*',
+  'x-pack/plugins/canvas/tasks/**/*',
+  'x-pack/plugins/canvas/canvas_plugin_src/**/*',
   'x-pack/plugins/monitoring/public/lib/jquery_flot/**/*',
   '**/.*',
   '**/{webpackShims,__mocks__}/**/*',
   'x-pack/docs/**/*',
   'src/core/server/core_app/assets/fonts/**/*',
+  'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/**/*',
   'packages/kbn-utility-types/test-d/**/*',
   '**/Jenkinsfile*',
   'Dockerfile*',
   'vars/*',
+  '.ci/pipeline-library/**/*',
 
   // Files in this directory must match a pre-determined name in some cases.
-  'x-pack/legacy/plugins/canvas/.storybook/*',
+  'x-pack/plugins/canvas/.storybook/*',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',
@@ -63,6 +65,8 @@ export const IGNORE_FILE_GLOBS = [
   'x-pack/plugins/apm/public/**/*',
   'x-pack/plugins/apm/scripts/**/*',
   'x-pack/plugins/apm/e2e/**/*',
+
+  'x-pack/plugins/maps/server/fonts/**/*',
 ];
 
 /**
@@ -94,7 +98,6 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'packages/*',
   'packages/kbn-ui-framework/generator-kui',
   'src/legacy/ui/public/flot-charts',
-  'src/legacy/ui/public/utils/lodash-mixins',
   'test/functional/fixtures/es_archiver/visualize_source-filters',
   'packages/kbn-pm/src/utils/__fixtures__/*',
   'x-pack/dev-tools',
@@ -170,12 +173,12 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'x-pack/plugins/monitoring/public/icons/health-green.svg',
   'x-pack/plugins/monitoring/public/icons/health-red.svg',
   'x-pack/plugins/monitoring/public/icons/health-yellow.svg',
-  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
-  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
-  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Italic.ttf',
-  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Medium.ttf',
-  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Regular.ttf',
-  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/img/logo-grey.png',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Italic.ttf',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Medium.ttf',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Regular.ttf',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/img/logo-grey.png',
   'x-pack/test/functional/es_archives/monitoring/beats-with-restarted-instance/data.json.gz',
   'x-pack/test/functional/es_archives/monitoring/beats-with-restarted-instance/mappings.json',
   'x-pack/test/functional/es_archives/monitoring/logstash-pipelines/data.json.gz',

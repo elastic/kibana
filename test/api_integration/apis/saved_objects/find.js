@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
@@ -33,7 +33,7 @@ export default function({ getService }) {
         await supertest
           .get('/api/saved_objects/_find?type=visualization&fields=title')
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql({
               page: 1,
               per_page: 20,
@@ -46,7 +46,9 @@ export default function({ getService }) {
                   attributes: {
                     title: 'Count of requests',
                   },
+                  score: 0,
                   migrationVersion: resp.body.saved_objects[0].migrationVersion,
+                  namespaces: ['default'],
                   references: [
                     {
                       id: '91200a00-9efd-11e7-acb3-3dab96693fab',
@@ -66,7 +68,7 @@ export default function({ getService }) {
           await supertest
             .get('/api/saved_objects/_find?type=wigwags')
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 page: 1,
                 per_page: 20,
@@ -81,7 +83,7 @@ export default function({ getService }) {
           await supertest
             .get('/api/saved_objects/_find?type=visualization&page=100&per_page=100')
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 page: 100,
                 per_page: 100,
@@ -96,13 +98,100 @@ export default function({ getService }) {
           await supertest
             .get('/api/saved_objects/_find?type=url&search_fields=a')
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 page: 1,
                 per_page: 20,
                 total: 0,
                 saved_objects: [],
               });
+            }));
+      });
+
+      describe('unknown namespace', () => {
+        it('should return 200 with empty response', async () =>
+          await supertest
+            .get('/api/saved_objects/_find?type=visualization&namespaces=foo')
+            .expect(200)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                page: 1,
+                per_page: 20,
+                total: 0,
+                saved_objects: [],
+              });
+            }));
+      });
+
+      describe('known namespace', () => {
+        it('should return 200 with individual responses', async () =>
+          await supertest
+            .get('/api/saved_objects/_find?type=visualization&fields=title&namespaces=default')
+            .expect(200)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                page: 1,
+                per_page: 20,
+                total: 1,
+                saved_objects: [
+                  {
+                    type: 'visualization',
+                    id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+                    version: 'WzIsMV0=',
+                    attributes: {
+                      title: 'Count of requests',
+                    },
+                    migrationVersion: resp.body.saved_objects[0].migrationVersion,
+                    namespaces: ['default'],
+                    score: 0,
+                    references: [
+                      {
+                        id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+                        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                        type: 'index-pattern',
+                      },
+                    ],
+                    updated_at: '2017-09-21T18:51:23.794Z',
+                  },
+                ],
+              });
+              expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
+            }));
+      });
+
+      describe('wildcard namespace', () => {
+        it('should return 200 with individual responses from the default namespace', async () =>
+          await supertest
+            .get('/api/saved_objects/_find?type=visualization&fields=title&namespaces=*')
+            .expect(200)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                page: 1,
+                per_page: 20,
+                total: 1,
+                saved_objects: [
+                  {
+                    type: 'visualization',
+                    id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+                    version: 'WzIsMV0=',
+                    attributes: {
+                      title: 'Count of requests',
+                    },
+                    migrationVersion: resp.body.saved_objects[0].migrationVersion,
+                    namespaces: ['default'],
+                    score: 0,
+                    references: [
+                      {
+                        id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+                        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                        type: 'index-pattern',
+                      },
+                    ],
+                    updated_at: '2017-09-21T18:51:23.794Z',
+                  },
+                ],
+              });
+              expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
             }));
       });
 
@@ -113,7 +202,7 @@ export default function({ getService }) {
               '/api/saved_objects/_find?type=visualization&filter=visualization.attributes.title:"Count of requests"'
             )
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 page: 1,
                 per_page: 20,
@@ -134,6 +223,8 @@ export default function({ getService }) {
                             .searchSourceJSON,
                       },
                     },
+                    namespaces: ['default'],
+                    score: 0,
                     references: [
                       {
                         name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
@@ -155,7 +246,7 @@ export default function({ getService }) {
               '/api/saved_objects/_find?type=visualization&filter=dashboard.attributes.title:foo'
             )
             .expect(400)
-            .then(resp => {
+            .then((resp) => {
               console.log('body', JSON.stringify(resp.body));
               expect(resp.body).to.eql({
                 error: 'Bad Request',
@@ -170,7 +261,7 @@ export default function({ getService }) {
               '/api/saved_objects/_find?type=dashboard&filter=dashboard.attributes.title:foo<invalid'
             )
             .expect(400)
-            .then(resp => {
+            .then((resp) => {
               console.log('body', JSON.stringify(resp.body));
               expect(resp.body).to.eql({
                 error: 'Bad Request',
@@ -198,7 +289,7 @@ export default function({ getService }) {
         await supertest
           .get('/api/saved_objects/_find?type=visualization')
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql({
               page: 1,
               per_page: 20,
@@ -212,7 +303,7 @@ export default function({ getService }) {
           await supertest
             .get('/api/saved_objects/_find?type=wigwags')
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 page: 1,
                 per_page: 20,
@@ -227,7 +318,7 @@ export default function({ getService }) {
           await supertest
             .get('/api/saved_objects/_find')
             .expect(400)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 error: 'Bad Request',
                 message:
@@ -242,7 +333,7 @@ export default function({ getService }) {
           await supertest
             .get('/api/saved_objects/_find?type=visualization&page=100&per_page=100')
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 page: 100,
                 per_page: 100,
@@ -257,7 +348,7 @@ export default function({ getService }) {
           await supertest
             .get('/api/saved_objects/_find?type=url&search_fields=a')
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 page: 1,
                 per_page: 20,
@@ -274,7 +365,7 @@ export default function({ getService }) {
               '/api/saved_objects/_find?type=visualization&filter=visualization.attributes.title:"Count of requests"'
             )
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 page: 1,
                 per_page: 20,
@@ -289,7 +380,7 @@ export default function({ getService }) {
               '/api/saved_objects/_find?type=visualization&filter=dashboard.attributes.title:foo'
             )
             .expect(400)
-            .then(resp => {
+            .then((resp) => {
               console.log('body', JSON.stringify(resp.body));
               expect(resp.body).to.eql({
                 error: 'Bad Request',

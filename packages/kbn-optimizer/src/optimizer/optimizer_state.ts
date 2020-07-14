@@ -80,7 +80,7 @@ function createOptimizerState(
  * calculate the total state, given a set of compiler messages
  */
 function getStatePhase(states: CompilerMsg[]) {
-  const types = states.map(s => s.type);
+  const types = states.map((s) => s.type);
 
   if (types.includes('running')) {
     return 'running';
@@ -90,7 +90,7 @@ function getStatePhase(states: CompilerMsg[]) {
     return 'issue';
   }
 
-  if (types.every(s => s === 'compiler success')) {
+  if (types.every((s) => s === 'compiler success')) {
     return 'success';
   }
 
@@ -127,7 +127,7 @@ export function createOptimizerStateSummarizer(
     }
 
     if (event.type === 'worker stdio' || event.type === 'worker started') {
-      // same state, but updated to the event is shared externally
+      // same state, but updated so the event is shared externally
       return createOptimizerState(state);
     }
 
@@ -173,7 +173,7 @@ export function createOptimizerStateSummarizer(
       event.type === 'running'
     ) {
       const compilerStates: CompilerMsg[] = [
-        ...state.compilerStates.filter(c => c.bundleId !== event.bundleId),
+        ...state.compilerStates.filter((c) => c.bundleId !== event.bundleId),
         event,
       ];
       return createOptimizerState(state, {

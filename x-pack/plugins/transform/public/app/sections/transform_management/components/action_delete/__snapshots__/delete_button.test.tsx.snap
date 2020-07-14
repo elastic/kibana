@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Transform: Transform List Actions <DeleteAction /> Minimal initialization 1`] = `
+<EuiToolTip
+  content="You do not have permission to delete transforms. Please contact your administrator."
+  delay="regular"
+  position="top"
+>
+  <EuiLink
+    aria-label="Delete"
+    color="subdued"
+    data-test-subj="transformActionDelete"
+    disabled={true}
+  >
+    <EuiIcon
+      type="trash"
+    />
+     
+    Delete
+  </EuiLink>
+</EuiToolTip>
+`;

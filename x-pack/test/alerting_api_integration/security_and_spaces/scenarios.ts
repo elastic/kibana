@@ -47,7 +47,7 @@ const GlobalRead: User = {
     kibana: [
       {
         feature: {
-          alerting: ['read'],
+          alerts: ['read'],
           actions: ['read'],
         },
         spaces: ['*'],
@@ -75,7 +75,7 @@ const Space1All: User = {
     kibana: [
       {
         feature: {
-          alerting: ['all'],
+          alerts: ['all'],
           actions: ['all'],
         },
         spaces: ['space1'],

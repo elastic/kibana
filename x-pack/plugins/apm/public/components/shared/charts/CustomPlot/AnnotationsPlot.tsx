@@ -5,15 +5,15 @@
  */
 import React from 'react';
 import { VerticalGridLines } from 'react-vis';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import {
   EuiIcon,
   EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useTheme } from '../../../../hooks/useTheme';
 import { Maybe } from '../../../../../typings/common';
 import { Annotation } from '../../../../../common/annotations';
 import { PlotValues, SharedPlot } from './plotUtils';
@@ -26,38 +26,37 @@ interface Props {
   overlay: Maybe<HTMLElement>;
 }
 
-const style = {
-  stroke: theme.euiColorSecondary,
-  strokeDasharray: 'none'
-};
+export const AnnotationsPlot = ({ plotValues, annotations }: Props) => {
+  const theme = useTheme();
+  const tickValues = annotations.map((annotation) => annotation['@timestamp']);
 
-export function AnnotationsPlot(props: Props) {
-  const { plotValues, annotations } = props;
-
-  const tickValues = annotations.map(annotation => annotation.time);
+  const style = {
+    stroke: theme.eui.euiColorSecondary,
+    strokeDasharray: 'none',
+  };
 
   return (
     <>
       <SharedPlot plotValues={plotValues}>
         <VerticalGridLines tickValues={tickValues} style={style} />
       </SharedPlot>
-      {annotations.map(annotation => (
+      {annotations.map((annotation) => (
         <div
           key={annotation.id}
           style={{
             position: 'absolute',
-            left: plotValues.x(annotation.time) - 8,
-            top: -2
+            left: plotValues.x(annotation['@timestamp']) - 8,
+            top: -2,
           }}
         >
           <EuiToolTip
-            title={asAbsoluteDateTime(annotation.time, 'seconds')}
+            title={asAbsoluteDateTime(annotation['@timestamp'], 'seconds')}
             content={
               <EuiFlexGroup>
                 <EuiFlexItem grow={true}>
                   <EuiText>
                     {i18n.translate('xpack.apm.version', {
-                      defaultMessage: 'Version'
+                      defaultMessage: 'Version',
                     })}
                   </EuiText>
                 </EuiFlexItem>
@@ -65,10 +64,10 @@ export function AnnotationsPlot(props: Props) {
               </EuiFlexGroup>
             }
           >
-            <EuiIcon type="dot" color={theme.euiColorSecondary} />
+            <EuiIcon type="dot" color={theme.eui.euiColorSecondary} />
           </EuiToolTip>
         </div>
       ))}
     </>
   );
-}
+};

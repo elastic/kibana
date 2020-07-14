@@ -8,7 +8,7 @@ import { Unionize, Overwrite } from 'utility-types';
 import { ChartBase } from './types';
 import {
   ESSearchResponse,
-  ESSearchRequest
+  ESSearchRequest,
 } from '../../../typings/elasticsearch';
 import { AggregationOptionsByType } from '../../../typings/elasticsearch/aggregations';
 import { getVizColorForIndex } from '../../../common/viz_colors';
@@ -33,7 +33,7 @@ type GenericMetricsRequest = Overwrite<
           date_histogram: AggregationOptionsByType['date_histogram'];
           aggs: Record<string, Unionize<MetricsAggregationMap>>;
         };
-      } & Record<string, Partial<MetricsAggregationMap>>;
+      } & Record<string, Unionize<MetricsAggregationMap>>;
     };
   }
 >;
@@ -51,7 +51,11 @@ export function transformDataToMetricsChart(
     yUnit: chartBase.yUnit,
     noHits: hits.total.value === 0,
     series: Object.keys(chartBase.series).map((seriesKey, i) => {
-      const overallValue = aggregations?.[seriesKey].value;
+      const overallValue = (aggregations?.[seriesKey] as
+        | {
+            value: number | null;
+          }
+        | undefined)?.value;
 
       return {
         title: chartBase.series[seriesKey].title,
@@ -61,15 +65,15 @@ export function transformDataToMetricsChart(
           chartBase.series[seriesKey].color || getVizColorForIndex(i, theme),
         overallValue,
         data:
-          timeseriesData?.buckets.map(bucket => {
+          timeseriesData?.buckets.map((bucket) => {
             const { value } = bucket[seriesKey] as { value: number | null };
             const y = value === null || isNaN(value) ? null : value;
             return {
               x: bucket.key,
-              y
+              y,
             };
-          }) || []
+          }) || [],
       };
-    })
+    }),
   };
 }

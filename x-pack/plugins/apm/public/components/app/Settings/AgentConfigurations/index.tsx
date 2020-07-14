@@ -12,7 +12,7 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
-  EuiButton
+  EuiButton,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { useFetcher } from '../../../../hooks/useFetcher';
@@ -22,10 +22,10 @@ import { createAgentConfigurationHref } from '../../../shared/Links/apm/agentCon
 
 export function AgentConfigurations() {
   const { refetch, data = [], status } = useFetcher(
-    callApmApi =>
+    (callApmApi) =>
       callApmApi({ pathname: '/api/apm/settings/agent-configuration' }),
     [],
-    { preservePreviousData: false }
+    { preservePreviousData: false, showToastOnError: false }
   );
 
   useTrackPageview({ app: 'apm', path: 'agent_configuration' });
@@ -67,7 +67,7 @@ function CreateConfigurationButton() {
         <EuiFlexItem grow={false}>
           <EuiButton color="primary" fill iconType="plusInCircle" href={href}>
             {i18n.translate('xpack.apm.agentConfig.createConfigButtonLabel', {
-              defaultMessage: 'Create configuration'
+              defaultMessage: 'Create configuration',
             })}
           </EuiButton>
         </EuiFlexItem>

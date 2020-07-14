@@ -40,8 +40,7 @@ export function validateInterval(bounds, panel, maxBuckets) {
           'visTypeTimeseries.validateInterval.notifier.maxBucketsExceededErrorMessage',
           {
             defaultMessage:
-              'Max buckets exceeded: {buckets} is greater than {maxBuckets}, try a larger time interval in the panel options.',
-            values: { buckets, maxBuckets },
+              'Your query attempted to fetch too much data. Reducing the time range or changing the interval used usually fixes the issue.',
           }
         )
       );

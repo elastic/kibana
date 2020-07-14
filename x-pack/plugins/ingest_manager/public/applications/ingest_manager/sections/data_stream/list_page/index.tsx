@@ -19,7 +19,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import { DataStream } from '../../../types';
 import { WithHeaderLayout } from '../../../layouts';
-import { useGetDataStreams, useStartDeps, usePagination } from '../../../hooks';
+import { useGetDataStreams, useStartDeps, usePagination, useBreadcrumbs } from '../../../hooks';
+import { PackageIcon } from '../../../components/package_icon';
+import { DataStreamRowActions } from './components/data_stream_row_actions';
 
 const DataStreamListPageLayout: React.FunctionComponent = ({ children }) => (
   <WithHeaderLayout
@@ -30,7 +32,7 @@ const DataStreamListPageLayout: React.FunctionComponent = ({ children }) => (
             <h1>
               <FormattedMessage
                 id="xpack.ingestManager.dataStreamList.pageTitle"
-                defaultMessage="Data streams"
+                defaultMessage="Datasets"
               />
             </h1>
           </EuiText>
@@ -53,13 +55,15 @@ const DataStreamListPageLayout: React.FunctionComponent = ({ children }) => (
 );
 
 export const DataStreamListPage: React.FunctionComponent<{}> = () => {
+  useBreadcrumbs('data_streams');
+
   const {
     data: { fieldFormats },
   } = useStartDeps();
 
   const { pagination, pageSizeOptions } = usePagination();
 
-  // Fetch agent configs
+  // Fetch data streams
   const { isLoading, data: dataStreamsData, sendRequest } = useGetDataStreams();
 
   // Some configs retrieved, set up table props
@@ -102,6 +106,23 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
         name: i18n.translate('xpack.ingestManager.dataStreamList.integrationColumnTitle', {
           defaultMessage: 'Integration',
         }),
+        render(pkg: DataStream['package'], datastream: DataStream) {
+          return (
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              {datastream.package_version && (
+                <EuiFlexItem grow={false}>
+                  <PackageIcon
+                    packageName={pkg}
+                    version={datastream.package_version}
+                    size="m"
+                    tryApi={true}
+                  />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false}>{pkg}</EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        },
       },
       {
         field: 'last_activity',
@@ -135,6 +156,16 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
           }
         },
       },
+      {
+        name: i18n.translate('xpack.ingestManager.dataStreamList.actionsColumnTitle', {
+          defaultMessage: 'Actions',
+        }),
+        actions: [
+          {
+            render: (datastream: DataStream) => <DataStreamRowActions datastream={datastream} />,
+          },
+        ],
+      },
     ];
     return cols;
   }, [fieldFormats]);
@@ -146,7 +177,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
           <h2>
             <FormattedMessage
               id="xpack.ingestManager.dataStreamList.noDataStreamsPrompt"
-              defaultMessage="No data streams"
+              defaultMessage="No datasets"
             />
           </h2>
         }
@@ -163,7 +194,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
   };
 
   if (dataStreamsData && dataStreamsData.data_streams.length) {
-    dataStreamsData.data_streams.forEach(stream => {
+    dataStreamsData.data_streams.forEach((stream) => {
       const { dataset, type, namespace, package: pkg } = stream;
       if (!filterOptions.dataset.includes(dataset)) {
         filterOptions.dataset.push(dataset);
@@ -189,14 +220,14 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
           isLoading ? (
             <FormattedMessage
               id="xpack.ingestManager.dataStreamList.loadingDataStreamsMessage"
-              defaultMessage="Loading data streams…"
+              defaultMessage="Loading datasets…"
             />
           ) : dataStreamsData && !dataStreamsData.data_streams.length ? (
             emptyPrompt
           ) : (
             <FormattedMessage
               id="xpack.ingestManager.dataStreamList.noFilteredDataStreamsMessage"
-              defaultMessage="No matching data streams found"
+              defaultMessage="No matching datasets found"
             />
           )
         }
@@ -210,7 +241,12 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
         sorting={true}
         search={{
           toolsRight: [
-            <EuiButton color="primary" iconType="refresh" onClick={() => sendRequest()}>
+            <EuiButton
+              key="reloadButton"
+              color="primary"
+              iconType="refresh"
+              onClick={() => sendRequest()}
+            >
               <FormattedMessage
                 id="xpack.ingestManager.dataStreamList.reloadDataStreamsButtonText"
                 defaultMessage="Reload"
@@ -221,7 +257,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
             placeholder: i18n.translate(
               'xpack.ingestManager.dataStreamList.searchPlaceholderTitle',
               {
-                defaultMessage: 'Filter data streams',
+                defaultMessage: 'Filter datasets',
               }
             ),
             incremental: true,
@@ -234,7 +270,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
                 defaultMessage: 'Dataset',
               }),
               multiSelect: 'or',
-              options: filterOptions.dataset.map(option => ({
+              options: filterOptions.dataset.map((option) => ({
                 value: option,
                 name: option,
               })),
@@ -246,7 +282,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
                 defaultMessage: 'Type',
               }),
               multiSelect: 'or',
-              options: filterOptions.type.map(option => ({
+              options: filterOptions.type.map((option) => ({
                 value: option,
                 name: option,
               })),
@@ -258,7 +294,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
                 defaultMessage: 'Namespace',
               }),
               multiSelect: 'or',
-              options: filterOptions.namespace.map(option => ({
+              options: filterOptions.namespace.map((option) => ({
                 value: option,
                 name: option,
               })),
@@ -270,7 +306,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
                 defaultMessage: 'Integration',
               }),
               multiSelect: 'or',
-              options: filterOptions.package.map(option => ({
+              options: filterOptions.package.map((option) => ({
                 value: option,
                 name: option,
               })),

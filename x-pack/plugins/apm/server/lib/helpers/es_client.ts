@@ -7,29 +7,28 @@
 /* eslint-disable no-console */
 import {
   IndexDocumentParams,
-  IndicesDeleteParams,
   SearchParams,
   IndicesCreateParams,
-  DeleteDocumentResponse
+  DeleteDocumentResponse,
+  DeleteDocumentParams,
 } from 'elasticsearch';
 import { cloneDeep, isString, merge } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
 import chalk from 'chalk';
 import {
   ESSearchRequest,
-  ESSearchResponse
+  ESSearchResponse,
 } from '../../../typings/elasticsearch';
 import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
 import { pickKeys } from '../../../common/utils/pick_keys';
 import { APMRequestHandlerContext } from '../../routes/typings';
-import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
+import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
 // `type` was deprecated in 7.0
 export type APMIndexDocumentParams<T> = Omit<IndexDocumentParams<T>, 'type'>;
 
-interface IndexPrivileges {
+export interface IndexPrivileges {
   has_all_requested: boolean;
-  username: string;
   index: Record<string, { read: boolean }>;
 }
 
@@ -48,7 +47,7 @@ export function isApmIndex(
     return apmIndices.includes(indexParam);
   } else if (Array.isArray(indexParam)) {
     // return false if at least one of the indices is not an APM index
-    return indexParam.every(index => apmIndices.includes(index));
+    return indexParam.every((index) => apmIndices.includes(index));
   }
   return false;
 }
@@ -68,37 +67,36 @@ function addFilterForLegacyData(
       body: {
         query: {
           bool: {
-            filter: []
-          }
-        }
-      }
+            filter: [],
+          },
+        },
+      },
     },
     cloneDeep(params)
   );
 
   // add filter for omitting pre-7.x data
   nextParams.body.query.bool.filter.push({
-    range: { [OBSERVER_VERSION_MAJOR]: { gte: 7 } }
+    range: { [OBSERVER_VERSION_MAJOR]: { gte: 7 } },
   });
 
   return nextParams;
 }
 
 // add additional params for search (aka: read) requests
-async function getParamsForSearchRequest(
-  context: APMRequestHandlerContext,
-  params: ESSearchRequest,
-  apmOptions?: APMOptions
-) {
-  const { uiSettings } = context.core;
-  const [indices, includeFrozen] = await Promise.all([
-    getApmIndices({
-      savedObjectsClient: context.core.savedObjects.client,
-      config: context.config
-    }),
-    uiSettings.client.get('search:includeFrozen')
-  ]);
-
+function getParamsForSearchRequest({
+  context,
+  params,
+  indices,
+  includeFrozen,
+  includeLegacyData,
+}: {
+  context: APMRequestHandlerContext;
+  params: ESSearchRequest;
+  indices: ApmIndicesConfig;
+  includeFrozen: boolean;
+  includeLegacyData?: boolean;
+}) {
   // Get indices for legacy data filter (only those which apply)
   const apmIndices = Object.values(
     pickKeys(
@@ -112,8 +110,8 @@ async function getParamsForSearchRequest(
     )
   );
   return {
-    ...addFilterForLegacyData(apmIndices, params, apmOptions), // filter out pre-7.0 data
-    ignore_throttled: !includeFrozen // whether to query frozen indices or not
+    ...addFilterForLegacyData(apmIndices, params, { includeLegacyData }), // filter out pre-7.0 data
+    ignore_throttled: !includeFrozen, // whether to query frozen indices or not
   };
 }
 
@@ -123,6 +121,8 @@ interface APMOptions {
 
 interface ClientCreateOptions {
   clientAsInternalUser?: boolean;
+  indices: ApmIndicesConfig;
+  includeFrozen: boolean;
 }
 
 export type ESClient = ReturnType<typeof getESClient>;
@@ -134,12 +134,12 @@ function formatObj(obj: Record<string, any>) {
 export function getESClient(
   context: APMRequestHandlerContext,
   request: KibanaRequest,
-  { clientAsInternalUser = false }: ClientCreateOptions = {}
+  { clientAsInternalUser = false, indices, includeFrozen }: ClientCreateOptions
 ) {
   const {
     callAsCurrentUser,
-    callAsInternalUser
-  } = context.core.elasticsearch.dataClient;
+    callAsInternalUser,
+  } = context.core.elasticsearch.legacy.client;
 
   async function callEs(operationName: string, params: Record<string, any>) {
     const startTime = process.hrtime();
@@ -194,18 +194,22 @@ export function getESClient(
       params: TSearchRequest,
       apmOptions?: APMOptions
     ): Promise<ESSearchResponse<TDocument, TSearchRequest>> => {
-      const nextParams = await getParamsForSearchRequest(
+      const nextParams = await getParamsForSearchRequest({
         context,
         params,
-        apmOptions
-      );
+        indices,
+        includeFrozen,
+        ...apmOptions,
+      });
 
       return callEs('search', nextParams);
     },
     index: <Body>(params: APMIndexDocumentParams<Body>) => {
       return callEs('index', params);
     },
-    delete: (params: IndicesDeleteParams): Promise<DeleteDocumentResponse> => {
+    delete: (
+      params: Omit<DeleteDocumentParams, 'type'>
+    ): Promise<DeleteDocumentResponse> => {
       return callEs('delete', params);
     },
     indicesCreate: (params: IndicesCreateParams) => {
@@ -217,8 +221,8 @@ export function getESClient(
       return callEs('transport.request', {
         method: 'POST',
         path: '/_security/user/_has_privileges',
-        body: params
+        body: params,
       });
-    }
+    },
   };
 }

@@ -21,7 +21,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function createAlert(overwrites: Record<string, any> = {}) {
     const { body: createdAlert } = await supertest
-      .post(`/api/alert`)
+      .post(`/api/alerts/alert`)
       .set('kbn-xsrf', 'foo')
       .send({
         enabled: true,
@@ -39,7 +39,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return createdAlert;
   }
 
-  describe('alerts', function() {
+  describe('alerts', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('alertsTab');
@@ -75,9 +75,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
       const createdConnectorToastTitle = await pageObjects.common.closeToast();
       expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
-      await testSubjects.setValue('slackMessageTextArea', 'test message');
+      await testSubjects.setValue('messageTextArea', 'test message ');
       await testSubjects.click('messageAddVariableButton');
       await testSubjects.click('variableMenuButton-0');
+      const messageTextArea = await find.byCssSelector('[data-test-subj="messageTextArea"]');
+      expect(await messageTextArea.getAttribute('value')).to.eql('test message {{alertId}}');
+      await messageTextArea.type(' some additional text ');
+
+      await testSubjects.click('messageAddVariableButton');
+      await testSubjects.click('variableMenuButton-1');
+
+      expect(await messageTextArea.getAttribute('value')).to.eql(
+        'test message {{alertId}} some additional text {{alertName}}'
+      );
 
       await testSubjects.click('saveAlertButton');
       const toastTitle = await pageObjects.common.closeToast();

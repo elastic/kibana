@@ -10,7 +10,8 @@ import rison from 'rison-node';
 
 import { mlJobService } from '../../../services/job_service';
 import { ml } from '../../../services/ml_api_service';
-import { getToastNotifications, getBasePath } from '../../../util/dependency_cache';
+import { getToastNotifications } from '../../../util/dependency_cache';
+import { stringMatch } from '../../../util/string_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { i18n } from '@kbn/i18n';
@@ -19,45 +20,45 @@ import { mlCalendarService } from '../../../services/calendar_service';
 export function loadFullJob(jobId) {
   return new Promise((resolve, reject) => {
     ml.jobs
-      .jobs(jobId)
-      .then(jobs => {
+      .jobs([jobId])
+      .then((jobs) => {
         if (jobs.length) {
           resolve(jobs[0]);
         } else {
           throw new Error(`Could not find job ${jobId}`);
         }
       })
-      .catch(error => {
+      .catch((error) => {
         reject(error);
       });
   });
 }
 
 export function isStartable(jobs) {
-  return jobs.some(j => j.datafeedState === DATAFEED_STATE.STOPPED);
+  return jobs.some((j) => j.datafeedState === DATAFEED_STATE.STOPPED);
 }
 
 export function isStoppable(jobs) {
   return jobs.some(
-    j => j.datafeedState === DATAFEED_STATE.STARTED || j.datafeedState === DATAFEED_STATE.STARTING
+    (j) => j.datafeedState === DATAFEED_STATE.STARTED || j.datafeedState === DATAFEED_STATE.STARTING
   );
 }
 
 export function isClosable(jobs) {
   return jobs.some(
-    j => j.datafeedState === DATAFEED_STATE.STOPPED && j.jobState !== JOB_STATE.CLOSED
+    (j) => j.datafeedState === DATAFEED_STATE.STOPPED && j.jobState !== JOB_STATE.CLOSED
   );
 }
 
 export function forceStartDatafeeds(jobs, start, end, finish = () => {}) {
-  const datafeedIds = jobs.filter(j => j.hasDatafeed).map(j => j.datafeedId);
+  const datafeedIds = jobs.filter((j) => j.hasDatafeed).map((j) => j.datafeedId);
   mlJobService
     .forceStartDatafeeds(datafeedIds, start, end)
-    .then(resp => {
+    .then((resp) => {
       showResults(resp, DATAFEED_STATE.STARTED);
       finish();
     })
-    .catch(error => {
+    .catch((error) => {
       mlMessageBarService.notify.error(error);
       const toastNotifications = getToastNotifications();
       toastNotifications.addDanger(
@@ -71,14 +72,14 @@ export function forceStartDatafeeds(jobs, start, end, finish = () => {}) {
 }
 
 export function stopDatafeeds(jobs, finish = () => {}) {
-  const datafeedIds = jobs.filter(j => j.hasDatafeed).map(j => j.datafeedId);
+  const datafeedIds = jobs.filter((j) => j.hasDatafeed).map((j) => j.datafeedId);
   mlJobService
     .stopDatafeeds(datafeedIds)
-    .then(resp => {
+    .then((resp) => {
       showResults(resp, DATAFEED_STATE.STOPPED);
       finish();
     })
-    .catch(error => {
+    .catch((error) => {
       mlMessageBarService.notify.error(error);
       const toastNotifications = getToastNotifications();
       toastNotifications.addDanger(
@@ -156,7 +157,7 @@ function showResults(resp, action) {
   );
 
   if (failures.length > 0) {
-    failures.forEach(f => {
+    failures.forEach((f) => {
       mlMessageBarService.notify.error(f.result.error);
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.jobsList.actionFailedNotificationMessage', {
@@ -228,14 +229,14 @@ export async function cloneJob(jobId) {
 }
 
 export function closeJobs(jobs, finish = () => {}) {
-  const jobIds = jobs.map(j => j.id);
+  const jobIds = jobs.map((j) => j.id);
   mlJobService
     .closeJobs(jobIds)
-    .then(resp => {
+    .then((resp) => {
       showResults(resp, JOB_STATE.CLOSED);
       finish();
     })
-    .catch(error => {
+    .catch((error) => {
       mlMessageBarService.notify.error(error);
       const toastNotifications = getToastNotifications();
       toastNotifications.addDanger(
@@ -249,14 +250,14 @@ export function closeJobs(jobs, finish = () => {}) {
 }
 
 export function deleteJobs(jobs, finish = () => {}) {
-  const jobIds = jobs.map(j => j.id);
+  const jobIds = jobs.map((j) => j.id);
   mlJobService
     .deleteJobs(jobIds)
-    .then(resp => {
+    .then((resp) => {
       showResults(resp, JOB_STATE.DELETED);
       finish();
     })
-    .catch(error => {
+    .catch((error) => {
       mlMessageBarService.notify.error(error);
       const toastNotifications = getToastNotifications();
       toastNotifications.addDanger(
@@ -284,7 +285,7 @@ export function filterJobs(jobs, clauses) {
     return p;
   }, {});
 
-  clauses.forEach(c => {
+  clauses.forEach((c) => {
     // the search term could be negated with a minus, e.g. -bananas
     const bool = c.match === 'must';
     let js = [];
@@ -295,14 +296,14 @@ export function filterJobs(jobs, clauses) {
       // if the term has been negated, AND the matches
       if (bool === true) {
         js = jobs.filter(
-          job =>
+          (job) =>
             stringMatch(job.id, c.value) === bool ||
             stringMatch(job.description, c.value) === bool ||
             stringMatch(job.memory_status, c.value) === bool
         );
       } else {
         js = jobs.filter(
-          job =>
+          (job) =>
             stringMatch(job.id, c.value) === bool &&
             stringMatch(job.description, c.value) === bool &&
             stringMatch(job.memory_status, c.value) === bool
@@ -312,18 +313,18 @@ export function filterJobs(jobs, clauses) {
       // filter other clauses, i.e. the toggle group buttons
       if (Array.isArray(c.value)) {
         // the groups value is an array of group ids
-        js = jobs.filter(job => jobProperty(job, c.field).some(g => c.value.indexOf(g) >= 0));
+        js = jobs.filter((job) => jobProperty(job, c.field).some((g) => c.value.indexOf(g) >= 0));
       } else {
-        js = jobs.filter(job => jobProperty(job, c.field) === c.value);
+        js = jobs.filter((job) => jobProperty(job, c.field) === c.value);
       }
     }
 
-    js.forEach(j => matches[j.id].count++);
+    js.forEach((j) => matches[j.id].count++);
   });
 
   // loop through the matches and return only those jobs which have match all the clauses
   const filteredJobs = [];
-  each(matches, m => {
+  each(matches, (m) => {
     if (m.count >= clauses.length) {
       filteredJobs.push(m.job);
     }
@@ -350,14 +351,6 @@ export function checkForAutoStartDatafeed() {
   }
 }
 
-function stringMatch(str, substr) {
-  return (
-    typeof str === 'string' &&
-    typeof substr === 'string' &&
-    (str.toLowerCase().match(substr.toLowerCase()) === null) === false
-  );
-}
-
 function jobProperty(job, prop) {
   const propMap = {
     job_state: 'jobState',
@@ -367,21 +360,9 @@ function jobProperty(job, prop) {
   return job[propMap[prop]];
 }
 
-export function getJobIdUrl(jobId) {
-  // Create url for filtering by job id for kibana management table
-  const settings = {
-    jobId,
-  };
-  const encoded = rison.encode(settings);
-  const url = `?mlManagement=${encoded}`;
-  const basePath = getBasePath();
-
-  return `${basePath.get()}/app/ml#/jobs${url}`;
-}
-
 function getUrlVars(url) {
   const vars = {};
-  url.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(_, key, value) {
+  url.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (_, key, value) {
     vars[key] = value;
   });
   return vars;

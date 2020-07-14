@@ -33,15 +33,15 @@ declare global {
 }
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
+export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const appsMenu = getService('appsMenu');
   const browser = getService('browser');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
 
-  const navigateTo = (path: string) =>
-    browser.navigateTo(`${PageObjects.common.getHostPort()}${path}`);
+  const navigateTo = async (path: string) =>
+    await browser.navigateTo(`${PageObjects.common.getHostPort()}${path}`);
   const navigateToApp = async (title: string) => {
     await appsMenu.clickLink(title);
     return browser.execute(() => {

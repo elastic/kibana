@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { MapSettings } from '../../reducers/map';
 import { AlphaSlider } from '../../components/alpha_slider';
-import { MbValidatedColorPicker } from '../../layers/styles/vector/components/color/mb_validated_color_picker';
+import { MbValidatedColorPicker } from '../../classes/styles/vector/components/color/mb_validated_color_picker';
 
 interface Props {
   settings: MapSettings;

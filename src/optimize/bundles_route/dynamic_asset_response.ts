@@ -21,6 +21,7 @@ import Fs from 'fs';
 import { resolve } from 'path';
 import { promisify } from 'util';
 
+import Accept from 'accept';
 import Boom from 'boom';
 import Hapi from 'hapi';
 
@@ -36,6 +37,41 @@ const DAY = 24 * HOUR;
 const asyncOpen = promisify(Fs.open);
 const asyncClose = promisify(Fs.close);
 const asyncFstat = promisify(Fs.fstat);
+
+async function tryToOpenFile(filePath: string) {
+  try {
+    return await asyncOpen(filePath, 'r');
+  } catch (e) {
+    if (e.code === 'ENOENT') {
+      return undefined;
+    } else {
+      throw e;
+    }
+  }
+}
+
+async function selectCompressedFile(acceptEncodingHeader: string | undefined, path: string) {
+  let fd: number | undefined;
+  let fileEncoding: 'gzip' | 'br' | undefined;
+
+  const supportedEncodings = Accept.encodings(acceptEncodingHeader, ['br', 'gzip']);
+
+  if (supportedEncodings[0] === 'br') {
+    fileEncoding = 'br';
+    fd = await tryToOpenFile(`${path}.br`);
+  }
+  if (!fd && supportedEncodings.includes('gzip')) {
+    fileEncoding = 'gzip';
+    fd = await tryToOpenFile(`${path}.gz`);
+  }
+  if (!fd) {
+    fileEncoding = undefined;
+    // Use raw open to trigger exception if it does not exist
+    fd = await asyncOpen(path, 'r');
+  }
+
+  return { fd, fileEncoding };
+}
 
 /**
  *  Create a Hapi response for the requested path. This is designed
@@ -74,6 +110,7 @@ export async function createDynamicAssetResponse({
   isDist: boolean;
 }) {
   let fd: number | undefined;
+  let fileEncoding: 'gzip' | 'br' | undefined;
 
   try {
     const path = resolve(bundlesPath, request.params.path);
@@ -86,7 +123,7 @@ export async function createDynamicAssetResponse({
     // we use and manage a file descriptor mostly because
     // that's what Inert does, and since we are accessing
     // the file 2 or 3 times per request it seems logical
-    fd = await asyncOpen(path, 'r');
+    ({ fd, fileEncoding } = await selectCompressedFile(request.headers['accept-encoding'], path));
 
     const stat = await asyncFstat(fd);
     const hash = isDist ? undefined : await getFileHash(fileHashCache, path, stat, fd);
@@ -111,6 +148,12 @@ export async function createDynamicAssetResponse({
     } else {
       response.etag(`${hash}-${publicPath}`);
       response.header('cache-control', 'must-revalidate');
+    }
+
+    // If we manually selected a compressed file, specify the encoding header.
+    // Otherwise, let Hapi automatically gzip the response.
+    if (fileEncoding) {
+      response.header('content-encoding', fileEncoding);
     }
 
     return response;

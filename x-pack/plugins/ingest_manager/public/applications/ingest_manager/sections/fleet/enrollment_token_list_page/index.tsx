@@ -20,6 +20,7 @@ import {
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
+  useBreadcrumbs,
   usePagination,
   useGetEnrollmentAPIKeys,
   useGetAgentConfigs,
@@ -125,6 +126,7 @@ const DeleteButton: React.FunctionComponent<{ apiKey: EnrollmentAPIKey; refresh:
 };
 
 export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
+  useBreadcrumbs('fleet_enrollment_tokens');
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [search, setSearch] = useState('');
   const { pagination, setPagination, pageSizeOptions } = usePagination();
@@ -173,10 +175,10 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
     {
       field: 'config_id',
       name: i18n.translate('xpack.ingestManager.enrollmentTokensList.configTitle', {
-        defaultMessage: 'Config',
+        defaultMessage: 'Agent config',
       }),
       render: (configId: string) => {
-        const config = agentConfigs.find(c => c.id === configId);
+        const config = agentConfigs.find((c) => c.id === configId);
         return <>{config ? config.name : configId}</>;
       },
     },
@@ -244,7 +246,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         <EuiFlexItem>
           <SearchBar
             value={search}
-            onChange={newSearch => {
+            onChange={(newSearch) => {
               setPagination({
                 ...pagination,
                 currentPage: 1,

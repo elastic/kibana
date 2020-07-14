@@ -1,0 +1,17 @@
+{
+  "item_id": "endpoint_list_item",
+  "_tags": ["endpoint", "process", "malware", "os:windows"],
+  "tags": ["user added string for a tag", "malware"],
+  "type": "simple",
+  "description": "This is a sample agnostic change here this list",
+  "name": "Sample Endpoint Exception List update change",
+  "namespace_type": "agnostic",
+  "entries": [
+    {
+      "field": "event.category",
+      "operator": "included",
+      "type": "match_any",
+      "value": ["process", "malware"]
+    }
+  ]
+}

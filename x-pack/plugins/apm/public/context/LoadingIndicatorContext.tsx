@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiPortal, EuiProgress } from '@elastic/eui';
+import { pickBy } from 'lodash';
 import React, { Fragment, useMemo, useReducer } from 'react';
 import { useDelayedVisibility } from '../components/shared/useDelayedVisibility';
 
 export const LoadingIndicatorContext = React.createContext({
   statuses: {},
-  dispatchStatus: (action: Action) => undefined as void
+  dispatchStatus: (_action: Action) => {},
 });
 
 interface State {
@@ -22,22 +23,21 @@ interface Action {
 }
 
 function reducer(statuses: State, action: Action) {
-  // add loading status
-  if (action.isLoading) {
-    return { ...statuses, [action.id]: true };
-  }
-
-  // remove loading status
-  const { [action.id]: statusToRemove, ...restStatuses } = statuses;
-  return restStatuses;
+  // Return an object with only the ids with `true` as their value, so that ids
+  // that previously had `false` are removed and do not remain hanging around in
+  // the object.
+  return pickBy(
+    { ...statuses, [action.id.toString()]: action.isLoading },
+    Boolean
+  );
 }
 
 function getIsAnyLoading(statuses: State) {
-  return Object.values(statuses).some(isLoading => isLoading);
+  return Object.values(statuses).some((isLoading) => isLoading);
 }
 
 export function LoadingIndicatorProvider({
-  children
+  children,
 }: {
   children: React.ReactNode;
 }) {
@@ -45,7 +45,7 @@ export function LoadingIndicatorProvider({
   const isLoading = useMemo(() => getIsAnyLoading(statuses), [statuses]);
   const shouldShowLoadingIndicator = useDelayedVisibility(isLoading);
   const contextValue = React.useMemo(() => ({ statuses, dispatchStatus }), [
-    statuses
+    statuses,
   ]);
 
   return (

@@ -7,6 +7,7 @@
 import { isNumber, last, max, sum, get } from 'lodash';
 import moment from 'moment';
 
+import { MetricsExplorerSeries } from '../../../common/http_api/metrics_explorer';
 import { getIntervalInSeconds } from '../../utils/get_interval_in_seconds';
 import { InfraSnapshotRequestOptions } from './types';
 import { findInventoryModel } from '../../../common/inventory_models';
@@ -90,7 +91,7 @@ export const getNodePath = (
   options: InfraSnapshotRequestOptions
 ): SnapshotNodePath[] => {
   const node = groupBucket.key;
-  const path = options.groupBy.map(gb => {
+  const path = options.groupBy.map((gb) => {
     return { value: node[`${gb.field}`], label: node[`${gb.field}`] } as SnapshotNodePath;
   });
   const ip = getIPFromBucket(options.nodeType, groupBucket);
@@ -117,23 +118,28 @@ export const getNodeMetricsForLookup = (
 export const getNodeMetrics = (
   nodeBuckets: InfraSnapshotMetricsBucket[],
   options: InfraSnapshotRequestOptions
-): SnapshotNodeMetric => {
+): SnapshotNodeMetric[] => {
   if (!nodeBuckets) {
-    return {
-      name: options.metric.type,
+    return options.metrics.map((metric) => ({
+      name: metric.type,
       value: null,
       max: null,
       avg: null,
-    };
+    }));
   }
-  const lastBucket = findLastFullBucket(nodeBuckets, options);
-  const result = {
-    name: options.metric.type,
-    value: getMetricValueFromBucket(options.metric.type, lastBucket),
-    max: calculateMax(nodeBuckets, options.metric.type),
-    avg: calculateAvg(nodeBuckets, options.metric.type),
-  };
-  return result;
+  const lastBucket = findLastFullBucket(nodeBuckets, options) as any;
+  return options.metrics.map((metric, index) => {
+    const metricResult: SnapshotNodeMetric = {
+      name: metric.type,
+      value: getMetricValueFromBucket(metric.type, lastBucket, index),
+      max: calculateMax(nodeBuckets, metric.type, index),
+      avg: calculateAvg(nodeBuckets, metric.type, index),
+    };
+    if (options.includeTimeseries) {
+      metricResult.timeseries = getTimeseriesData(nodeBuckets, metric.type, index);
+    }
+    return metricResult;
+  });
 };
 
 const findLastFullBucket = (
@@ -152,15 +158,49 @@ const findLastFullBucket = (
   }, last(buckets));
 };
 
-const getMetricValueFromBucket = (type: SnapshotMetricType, bucket: InfraSnapshotMetricsBucket) => {
-  const metric = bucket[type];
+const getMetricValueFromBucket = (
+  type: SnapshotMetricType,
+  bucket: InfraSnapshotMetricsBucket,
+  index: number
+) => {
+  const key = type === 'custom' ? `custom_${index}` : type;
+  const metric = bucket[key];
   return (metric && (metric.normalized_value || metric.value)) || 0;
 };
 
-function calculateMax(buckets: InfraSnapshotMetricsBucket[], type: SnapshotMetricType) {
-  return max(buckets.map(bucket => getMetricValueFromBucket(type, bucket))) || 0;
+function calculateMax(
+  buckets: InfraSnapshotMetricsBucket[],
+  type: SnapshotMetricType,
+  index: number
+) {
+  return max(buckets.map((bucket) => getMetricValueFromBucket(type, bucket, index))) || 0;
 }
 
-function calculateAvg(buckets: InfraSnapshotMetricsBucket[], type: SnapshotMetricType) {
-  return sum(buckets.map(bucket => getMetricValueFromBucket(type, bucket))) / buckets.length || 0;
+function calculateAvg(
+  buckets: InfraSnapshotMetricsBucket[],
+  type: SnapshotMetricType,
+  index: number
+) {
+  return (
+    sum(buckets.map((bucket) => getMetricValueFromBucket(type, bucket, index))) / buckets.length ||
+    0
+  );
+}
+
+function getTimeseriesData(
+  buckets: InfraSnapshotMetricsBucket[],
+  type: SnapshotMetricType,
+  index: number
+): MetricsExplorerSeries {
+  return {
+    id: type,
+    columns: [
+      { name: 'timestamp', type: 'date' },
+      { name: 'metric_0', type: 'number' },
+    ],
+    rows: buckets.map((bucket) => ({
+      timestamp: bucket.key as number,
+      metric_0: getMetricValueFromBucket(type, bucket, index),
+    })),
+  };
 }

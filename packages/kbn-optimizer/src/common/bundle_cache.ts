@@ -24,7 +24,9 @@ export interface State {
   optimizerCacheKey?: unknown;
   cacheKey?: unknown;
   moduleCount?: number;
+  workUnits?: number;
   files?: string[];
+  bundleRefExportIds?: string[];
 }
 
 const DEFAULT_STATE: State = {};
@@ -87,8 +89,16 @@ export class BundleCache {
     return this.get().files;
   }
 
+  public getBundleRefExportIds() {
+    return this.get().bundleRefExportIds;
+  }
+
   public getCacheKey() {
     return this.get().cacheKey;
+  }
+
+  public getWorkUnits() {
+    return this.get().workUnits;
   }
 
   public getOptimizerCacheKey() {

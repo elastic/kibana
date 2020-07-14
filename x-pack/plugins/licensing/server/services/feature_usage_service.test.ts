@@ -17,16 +17,13 @@ describe('FeatureUsageService', () => {
     jest.restoreAllMocks();
   });
 
-  const toObj = (map: ReadonlyMap<string, any>): Record<string, any> =>
-    Object.fromEntries(map.entries());
-
   describe('#setup', () => {
     describe('#register', () => {
       it('throws when registering the same feature twice', () => {
         const setup = service.setup();
-        setup.register('foo');
+        setup.register('foo', 'basic');
         expect(() => {
-          setup.register('foo');
+          setup.register('foo', 'basic');
         }).toThrowErrorMatchingInlineSnapshot(`"Feature 'foo' has already been registered."`);
       });
     });
@@ -36,32 +33,50 @@ describe('FeatureUsageService', () => {
     describe('#notifyUsage', () => {
       it('allows to notify a feature usage', () => {
         const setup = service.setup();
-        setup.register('feature');
+        setup.register('feature', 'basic');
         const start = service.start();
         start.notifyUsage('feature', 127001);
 
-        expect(start.getLastUsages().get('feature')).toBe(127001);
+        expect(start.getLastUsages()).toEqual([
+          {
+            lastUsed: new Date(127001),
+            licenseType: 'basic',
+            name: 'feature',
+          },
+        ]);
       });
 
       it('can receive a Date object', () => {
         const setup = service.setup();
-        setup.register('feature');
+        setup.register('feature', 'basic');
         const start = service.start();
 
         const usageTime = new Date(2015, 9, 21, 17, 54, 12);
         start.notifyUsage('feature', usageTime);
-        expect(start.getLastUsages().get('feature')).toBe(usageTime.getTime());
+        expect(start.getLastUsages()).toEqual([
+          {
+            lastUsed: usageTime,
+            licenseType: 'basic',
+            name: 'feature',
+          },
+        ]);
       });
 
       it('uses the current time when `usedAt` is unspecified', () => {
         jest.spyOn(Date, 'now').mockReturnValue(42);
 
         const setup = service.setup();
-        setup.register('feature');
+        setup.register('feature', 'basic');
         const start = service.start();
         start.notifyUsage('feature');
 
-        expect(start.getLastUsages().get('feature')).toBe(42);
+        expect(start.getLastUsages()).toEqual([
+          {
+            lastUsed: new Date(42),
+            licenseType: 'basic',
+            name: 'feature',
+          },
+        ]);
       });
 
       it('throws when notifying for an unregistered feature', () => {
@@ -76,40 +91,41 @@ describe('FeatureUsageService', () => {
     describe('#getLastUsages', () => {
       it('returns the last usage for all used features', () => {
         const setup = service.setup();
-        setup.register('featureA');
-        setup.register('featureB');
+        setup.register('featureA', 'basic');
+        setup.register('featureB', 'gold');
         const start = service.start();
         start.notifyUsage('featureA', 127001);
         start.notifyUsage('featureB', 6666);
 
-        expect(toObj(start.getLastUsages())).toEqual({
-          featureA: 127001,
-          featureB: 6666,
-        });
+        expect(start.getLastUsages()).toEqual([
+          { lastUsed: new Date(127001), licenseType: 'basic', name: 'featureA' },
+          { lastUsed: new Date(6666), licenseType: 'gold', name: 'featureB' },
+        ]);
       });
 
       it('returns the last usage even after notifying for an older usage', () => {
         const setup = service.setup();
-        setup.register('featureA');
+        setup.register('featureA', 'basic');
         const start = service.start();
         start.notifyUsage('featureA', 1000);
         start.notifyUsage('featureA', 500);
 
-        expect(toObj(start.getLastUsages())).toEqual({
-          featureA: 1000,
-        });
+        expect(start.getLastUsages()).toEqual([
+          { lastUsed: new Date(1000), licenseType: 'basic', name: 'featureA' },
+        ]);
       });
 
-      it('does not return entries for unused registered features', () => {
+      it('returns entries for unused registered features', () => {
         const setup = service.setup();
-        setup.register('featureA');
-        setup.register('featureB');
+        setup.register('featureA', 'basic');
+        setup.register('featureB', 'gold');
         const start = service.start();
         start.notifyUsage('featureA', 127001);
 
-        expect(toObj(start.getLastUsages())).toEqual({
-          featureA: 127001,
-        });
+        expect(start.getLastUsages()).toEqual([
+          { lastUsed: new Date(127001), licenseType: 'basic', name: 'featureA' },
+          { lastUsed: null, licenseType: 'gold', name: 'featureB' },
+        ]);
       });
     });
   });

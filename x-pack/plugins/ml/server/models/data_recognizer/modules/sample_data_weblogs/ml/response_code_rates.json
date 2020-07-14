@@ -26,11 +26,11 @@
     "custom_urls": [
       {
         "url_name": "Raw data",
-        "url_value": "kibana#/discover?_g=(time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(index:\u002790943e30-9a47-11e8-b64d-95841ca0b247\u0027,query:(language:kuery,query:\u0027response.keyword:\u0022$response.keyword$\u0022\u0027),sort:!('@timestamp',desc))"
+        "url_value": "discover#/?_g=(time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(index:\u002790943e30-9a47-11e8-b64d-95841ca0b247\u0027,query:(language:kuery,query:\u0027response.keyword:\u0022$response.keyword$\u0022\u0027),sort:!('@timestamp',desc))"
       },
       {
         "url_name": "Data dashboard",
-        "url_value": "kibana#/dashboard/edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b?_g=(filters:!(),time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(filters:!((\u0027$state\u0027:(store:appState),meta:(alias:!n,disabled:!f,index:\u0027INDEX_PATTERN_ID\u0027,key:response.keyword,negate:!f,params:(query:\u0027$response.keyword$\u0027),type:phrase,value:\u0027$response.keyword$\u0027),query:(match:(response.keyword:(query:\u0027$response.keyword$\u0027,type:phrase))))),query:(language:kuery,query:\u0027\u0027))"
+        "url_value": "dashboards#/view/edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b?_g=(filters:!(),time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(filters:!((\u0027$state\u0027:(store:appState),meta:(alias:!n,disabled:!f,index:\u0027INDEX_PATTERN_ID\u0027,key:response.keyword,negate:!f,params:(query:\u0027$response.keyword$\u0027),type:phrase,value:\u0027$response.keyword$\u0027),query:(match:(response.keyword:(query:\u0027$response.keyword$\u0027,type:phrase))))),query:(language:kuery,query:\u0027\u0027))"
       }
     ]
   }

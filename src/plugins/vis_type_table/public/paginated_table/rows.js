@@ -19,12 +19,13 @@
 
 import $ from 'jquery';
 import _ from 'lodash';
+import angular from 'angular';
 import tableCellFilterHtml from './table_cell_filter.html';
 
 export function KbnRows($compile) {
   return {
     restrict: 'A',
-    link: function($scope, $el, attr) {
+    link: function ($scope, $el, attr) {
       function addCell($tr, contents, column, row) {
         function createCell() {
           return $(document.createElement('td'));
@@ -46,8 +47,8 @@ export function KbnRows($compile) {
               data: [
                 {
                   table: $scope.table,
-                  row: $scope.rows.findIndex(r => r === row),
-                  column: $scope.table.columns.findIndex(c => c.id === column.id),
+                  row: $scope.rows.findIndex((r) => r === row),
+                  column: $scope.table.columns.findIndex((c) => c.id === column.id),
                   value,
                 },
               ],
@@ -65,7 +66,9 @@ export function KbnRows($compile) {
 
         if (column.filterable && contentsIsDefined) {
           $cell = createFilterableCell(contents);
-          $cellContent = $cell.find('[data-cell-content]');
+          // in jest tests 'angular' is using jqLite. In jqLite the method find lookups only by tags.
+          // Because of this, we should change a way how we get cell content so that tests will pass.
+          $cellContent = angular.element($cell[0].querySelector('[data-cell-content]'));
         } else {
           $cell = $cellContent = createCell();
         }
@@ -103,7 +106,7 @@ export function KbnRows($compile) {
         $tr.append($cell);
       }
 
-      $scope.$watchMulti([attr.kbnRows, attr.kbnRowsMin], function(vals) {
+      $scope.$watchMulti([attr.kbnRows, attr.kbnRowsMin], function (vals) {
         let rows = vals[0];
         const min = vals[1];
 
@@ -117,14 +120,14 @@ export function KbnRows($compile) {
           // crate the empty row which will be pushed into the row list over and over
           const emptyRow = {};
           // push as many empty rows into the row array as needed
-          _.times(min - rows.length, function() {
+          _.times(min - rows.length, function () {
             rows.push(emptyRow);
           });
         }
 
-        rows.forEach(function(row) {
+        rows.forEach(function (row) {
           const $tr = $(document.createElement('tr')).appendTo($el);
-          $scope.columns.forEach(column => {
+          $scope.columns.forEach((column) => {
             const value = row[column.id];
             addCell($tr, value, column, row);
           });

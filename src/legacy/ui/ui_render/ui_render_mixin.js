@@ -26,8 +26,6 @@ import { AppBootstrap } from './bootstrap';
 import { getApmConfig } from '../apm';
 import { DllCompiler } from '../../../optimize/dynamic_dll_plugin';
 
-const uniq = (...items) => Array.from(new Set(items));
-
 /**
  * @typedef {import('../../server/kbn_server').default} KbnServer
  * @typedef {import('../../server/kbn_server').ResponseToolkit} ResponseToolkit
@@ -91,10 +89,18 @@ export function uiRenderMixin(kbnServer, server, config) {
         const isCore = !app;
 
         const uiSettings = request.getUiSettingsService();
+
         const darkMode =
           !authEnabled || request.auth.isAuthenticated
             ? await uiSettings.get('theme:darkMode')
             : false;
+
+        const themeVersion =
+          !authEnabled || request.auth.isAuthenticated
+            ? await uiSettings.get('theme:version')
+            : 'v7';
+
+        const themeTag = `${themeVersion === 'v7' ? 'v7' : 'v8'}${darkMode ? 'dark' : 'light'}`;
 
         const buildHash = server.newPlatform.env.packageInfo.buildNum;
         const basePath = config.get('server.basePath');
@@ -103,10 +109,10 @@ export function uiRenderMixin(kbnServer, server, config) {
         const dllBundlePath = `${basePath}/${buildHash}/built_assets/dlls`;
 
         const dllStyleChunks = DllCompiler.getRawDllConfig().chunks.map(
-          chunk => `${dllBundlePath}/vendors${chunk}.style.dll.css`
+          (chunk) => `${dllBundlePath}/vendors${chunk}.style.dll.css`
         );
         const dllJsChunks = DllCompiler.getRawDllConfig().chunks.map(
-          chunk => `${dllBundlePath}/vendors${chunk}.bundle.dll.js`
+          (chunk) => `${dllBundlePath}/vendors${chunk}.bundle.dll.js`
         );
 
         const styleSheetPaths = [
@@ -114,25 +120,28 @@ export function uiRenderMixin(kbnServer, server, config) {
           `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
           ...(darkMode
             ? [
-                `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.darkCssDistFilename}`,
+                themeVersion === 'v7'
+                  ? `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.darkCssDistFilename}`
+                  : `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.darkV8CssDistFilename}`,
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.css`,
                 `${regularBundlePath}/dark_theme.style.css`,
               ]
             : [
-                `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`,
+                themeVersion === 'v7'
+                  ? `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`
+                  : `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.lightV8CssDistFilename}`,
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
                 `${regularBundlePath}/light_theme.style.css`,
               ]),
-          `${regularBundlePath}/commons.style.css`,
           ...(isCore
             ? []
             : [
                 `${regularBundlePath}/${app.getId()}.style.css`,
                 ...kbnServer.uiExports.styleSheetPaths
                   .filter(
-                    path => path.theme === '*' || path.theme === (darkMode ? 'dark' : 'light')
+                    (path) => path.theme === '*' || path.theme === (darkMode ? 'dark' : 'light')
                   )
-                  .map(path =>
+                  .map((path) =>
                     path.localPath.endsWith('.scss')
                       ? `${basePath}/${buildHash}/built_assets/css/${path.publicPath}`
                       : `${basePath}/${path.publicPath}`
@@ -141,32 +150,33 @@ export function uiRenderMixin(kbnServer, server, config) {
               ]),
         ];
 
-        const kpPluginIds = uniq(
-          // load these plugins first, they are "shared" and other bundles access their
-          // public/index exports without considering topographic sorting by plugin deps (for now)
-          'kibanaUtils',
-          'kibanaReact',
-          'data',
-          'esUiShared',
-          ...kbnServer.newPlatform.__internals.uiPlugins.public.keys()
-        );
+        const kpUiPlugins = kbnServer.newPlatform.__internals.uiPlugins;
+        const kpPluginPublicPaths = new Map();
+        const kpPluginBundlePaths = new Set();
+
+        // recursively iterate over the kpUiPlugin ids and their required bundles
+        // to populate kpPluginPublicPaths and kpPluginBundlePaths
+        (function readKpPlugins(ids) {
+          for (const id of ids) {
+            if (kpPluginPublicPaths.has(id)) {
+              continue;
+            }
+
+            kpPluginPublicPaths.set(id, `${regularBundlePath}/plugin/${id}/`);
+            kpPluginBundlePaths.add(`${regularBundlePath}/plugin/${id}/${id}.plugin.js`);
+            readKpPlugins(kpUiPlugins.internal.get(id).requiredBundles);
+          }
+        })(kpUiPlugins.public.keys());
 
         const jsDependencyPaths = [
           ...UiSharedDeps.jsDepFilenames.map(
-            filename => `${regularBundlePath}/kbn-ui-shared-deps/${filename}`
+            (filename) => `${regularBundlePath}/kbn-ui-shared-deps/${filename}`
           ),
           `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.jsFilename}`,
-          ...(isCore
-            ? []
-            : [
-                `${dllBundlePath}/vendors_runtime.bundle.dll.js`,
-                ...dllJsChunks,
-                `${regularBundlePath}/commons.bundle.js`,
-              ]),
+          ...(isCore ? [] : [`${dllBundlePath}/vendors_runtime.bundle.dll.js`, ...dllJsChunks]),
 
-          ...kpPluginIds.map(
-            pluginId => `${regularBundlePath}/plugin/${pluginId}/${pluginId}.plugin.js`
-          ),
+          `${regularBundlePath}/core/core.entry.js`,
+          ...kpPluginBundlePaths,
         ];
 
         // These paths should align with the bundle routes configured in
@@ -174,24 +184,16 @@ export function uiRenderMixin(kbnServer, server, config) {
         const publicPathMap = JSON.stringify({
           core: `${regularBundlePath}/core/`,
           'kbn-ui-shared-deps': `${regularBundlePath}/kbn-ui-shared-deps/`,
-          ...kpPluginIds.reduce(
-            (acc, pluginId) => ({
-              ...acc,
-              [pluginId]: `${regularBundlePath}/plugin/${pluginId}/`,
-            }),
-            {}
-          ),
+          ...Object.fromEntries(kpPluginPublicPaths),
         });
 
         const bootstrap = new AppBootstrap({
           templateData: {
-            darkMode,
+            themeTag,
             jsDependencyPaths,
             styleSheetPaths,
             publicPathMap,
-            entryBundlePath: isCore
-              ? `${regularBundlePath}/core/core.entry.js`
-              : `${regularBundlePath}/${app.getId()}.bundle.js`,
+            legacyBundlePath: isCore ? undefined : `${regularBundlePath}/${app.getId()}.bundle.js`,
           },
         });
 
@@ -237,11 +239,12 @@ export function uiRenderMixin(kbnServer, server, config) {
       rendering,
       legacy,
       savedObjectsClientProvider: savedObjects,
-      uiSettings: { asScopedToClient },
     } = kbnServer.newPlatform.__internals;
-    const uiSettings = asScopedToClient(savedObjects.getClient(h.request));
+    const uiSettings = kbnServer.newPlatform.start.core.uiSettings.asScopedToClient(
+      savedObjects.getClient(h.request)
+    );
     const vars = await legacy.getVars(app.getId(), h.request, {
-      apmConfig: getApmConfig(app),
+      apmConfig: getApmConfig(h.request.path),
       ...overrides,
     });
     const content = await rendering.render(h.request, uiSettings, {
@@ -250,17 +253,14 @@ export function uiRenderMixin(kbnServer, server, config) {
       vars,
     });
 
-    return h
-      .response(content)
-      .type('text/html')
-      .header('content-security-policy', http.csp.header);
+    return h.response(content).type('text/html').header('content-security-policy', http.csp.header);
   }
 
-  server.decorate('toolkit', 'renderApp', function(app, overrides) {
+  server.decorate('toolkit', 'renderApp', function (app, overrides) {
     return renderApp(this, app, true, overrides);
   });
 
-  server.decorate('toolkit', 'renderAppWithDefaultConfig', function(app) {
+  server.decorate('toolkit', 'renderAppWithDefaultConfig', function (app) {
     return renderApp(this, app, false);
   });
 }

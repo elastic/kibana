@@ -12,7 +12,7 @@ import {
   EuiTabs,
   EuiTitle,
   EuiIcon,
-  EuiToolTip
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
@@ -33,7 +33,7 @@ import {
   ErrorTab,
   exceptionStacktraceTab,
   getTabs,
-  logStacktraceTab
+  logStacktraceTab,
 } from './ErrorTabs';
 import { Summary } from '../../../shared/Summary';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
@@ -65,7 +65,7 @@ interface Props {
 function getCurrentTab(
   tabs: ErrorTab[] = [],
   currentTabKey: string | undefined
-) {
+): ErrorTab | {} {
   const selectedTab = tabs.find(({ key }) => key === currentTabKey);
   return selectedTab ? selectedTab : first(tabs) || {};
 }
@@ -78,7 +78,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
   }
 
   const tabs = getTabs(error);
-  const currentTab = getCurrentTab(tabs, urlParams.detailTab);
+  const currentTab = getCurrentTab(tabs, urlParams.detailTab) as ErrorTab;
 
   const errorUrl = error.error.page?.url || error.url?.full;
 
@@ -93,7 +93,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
             {i18n.translate(
               'xpack.apm.errorGroupDetails.errorOccurrenceTitle',
               {
-                defaultMessage: 'Error occurrence'
+                defaultMessage: 'Error occurrence',
               }
             )}
           </h3>
@@ -105,7 +105,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
               {
                 defaultMessage:
                   'View {occurrencesCount} {occurrencesCount, plural, one {occurrence} other {occurrences}} in Discover.',
-                values: { occurrencesCount }
+                values: { occurrencesCount },
               }
             )}
           </EuiButtonEmpty>
@@ -130,7 +130,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
               content={i18n.translate(
                 'xpack.apm.errorGroupDetails.relatedTransactionSample',
                 {
-                  defaultMessage: 'Related transaction sample'
+                  defaultMessage: 'Related transaction sample',
                 }
               )}
             >
@@ -147,7 +147,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
                 </TransactionLinkName>
               </TransactionDetailLink>
             </EuiToolTip>
-          )
+          ),
         ]}
       />
 
@@ -162,8 +162,8 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
                   ...location,
                   search: fromQuery({
                     ...toQuery(location.search),
-                    detailTab: key
-                  })
+                    detailTab: key,
+                  }),
                 });
               }}
               isSelected={currentTab.key === key}
@@ -182,7 +182,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
 
 function TabContent({
   error,
-  currentTab
+  currentTab,
 }: {
   error: APMError;
   currentTab: ErrorTab;

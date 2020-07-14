@@ -3,16 +3,37 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiPage, EuiPageBody, EuiPageProps } from '@elastic/eui';
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { DetailViewPanelName, InstallStatus } from '../../../../types';
-import { PackageInfo } from '../../../../types';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiText,
+  EuiSpacer,
+  EuiBetaBadge,
+  EuiButton,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+} from '@elastic/eui';
+import { DetailViewPanelName, InstallStatus, PackageInfo } from '../../../../types';
+import { Loading, Error } from '../../../../components';
+import {
+  useGetPackageInfoByKey,
+  useBreadcrumbs,
+  useLink,
+  useCapabilities,
+} from '../../../../hooks';
+import { WithHeaderLayout } from '../../../../layouts';
 import { useSetPackageInstallStatus } from '../../hooks';
+import { IconPanel, LoadingIconPanel } from '../../components/icon_panel';
+import { RELEASE_BADGE_LABEL, RELEASE_BADGE_DESCRIPTION } from '../../components/release_badge';
+import { UpdateIcon } from '../../components/icons';
 import { Content } from './content';
-import { Header } from './header';
-import { sendGetPackageInfoByKey, usePackageIconType } from '../../../../hooks';
 
 export const DEFAULT_PANEL: DetailViewPanelName = 'overview';
 
@@ -21,65 +42,202 @@ export interface DetailParams {
   panel?: DetailViewPanelName;
 }
 
+const Divider = styled.div`
+  width: 0;
+  height: 100%;
+  border-left: ${(props) => props.theme.eui.euiBorderThin};
+`;
+
+// Allows child text to be truncated
+const FlexItemWithMinWidth = styled(EuiFlexItem)`
+  min-width: 0px;
+`;
+
+function Breadcrumbs({ packageTitle }: { packageTitle: string }) {
+  useBreadcrumbs('integration_details', { pkgTitle: packageTitle });
+  return null;
+}
+
 export function Detail() {
   // TODO: fix forced cast if possible
   const { pkgkey, panel = DEFAULT_PANEL } = useParams() as DetailParams;
+  const { getHref } = useLink();
+  const hasWriteCapabilites = useCapabilities().write;
 
-  const [info, setInfo] = useState<PackageInfo | null>(null);
+  // Package info state
+  const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
   const setPackageInstallStatus = useSetPackageInstallStatus();
-  useEffect(() => {
-    sendGetPackageInfoByKey(pkgkey).then(response => {
-      const packageInfo = response.data?.response;
-      const title = packageInfo?.title;
-      const name = packageInfo?.name;
-      let installedVersion;
-      if (packageInfo && 'savedObject' in packageInfo) {
-        installedVersion = packageInfo.savedObject.attributes.version;
-      }
-      const status: InstallStatus = packageInfo?.status as any;
+  const updateAvailable =
+    packageInfo &&
+    'savedObject' in packageInfo &&
+    packageInfo.savedObject &&
+    packageInfo.savedObject.attributes.version < packageInfo.latestVersion;
 
-      // track install status state
+  // Fetch package info
+  const { data: packageInfoData, error: packageInfoError, isLoading } = useGetPackageInfoByKey(
+    pkgkey
+  );
+
+  // Track install status state
+  useEffect(() => {
+    if (packageInfoData?.response) {
+      const packageInfoResponse = packageInfoData.response;
+      setPackageInfo(packageInfoResponse);
+
+      let installedVersion;
+      const { name } = packageInfoData.response;
+      if ('savedObject' in packageInfoResponse) {
+        installedVersion = packageInfoResponse.savedObject.attributes.version;
+      }
+      const status: InstallStatus = packageInfoResponse?.status as any;
       if (name) {
         setPackageInstallStatus({ name, status, version: installedVersion || null });
       }
-      if (packageInfo) {
-        setInfo({ ...packageInfo, title: title || '' });
-      }
-    });
-  }, [pkgkey, setPackageInstallStatus]);
+    }
+  }, [packageInfoData, setPackageInstallStatus, setPackageInfo]);
 
-  if (!info) return null;
+  const headerLeftContent = useMemo(
+    () => (
+      <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiFlexItem>
+          {/* Allows button to break out of full width */}
+          <div>
+            <EuiButtonEmpty
+              iconType="arrowLeft"
+              size="xs"
+              flush="left"
+              href={getHref('integrations_all')}
+            >
+              <FormattedMessage
+                id="xpack.ingestManager.epm.browseAllButtonText"
+                defaultMessage="Browse all integrations"
+              />
+            </EuiButtonEmpty>
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="l">
+            <EuiFlexItem grow={false}>
+              {isLoading || !packageInfo ? (
+                <LoadingIconPanel />
+              ) : (
+                <IconPanel
+                  packageName={packageInfo.name}
+                  version={packageInfo.version}
+                  icons={packageInfo.icons}
+                />
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFlexGroup alignItems="center" gutterSize="m" className="eui-textTruncate">
+                <FlexItemWithMinWidth grow={false}>
+                  <EuiText>
+                    {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
+                    <h1 className="eui-textTruncate">{packageInfo?.title || '\u00A0'}</h1>
+                  </EuiText>
+                </FlexItemWithMinWidth>
+                {packageInfo?.release && packageInfo.release !== 'ga' ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiBetaBadge
+                      label={RELEASE_BADGE_LABEL[packageInfo.release]}
+                      tooltipContent={RELEASE_BADGE_DESCRIPTION[packageInfo.release]}
+                    />
+                  </EuiFlexItem>
+                ) : null}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    [getHref, isLoading, packageInfo]
+  );
 
-  return <DetailLayout restrictWidth={1200} {...info} panel={panel} />;
-}
+  const headerRightContent = useMemo(
+    () =>
+      packageInfo ? (
+        <>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup justifyContent="flexEnd" direction="row">
+            {[
+              {
+                label: i18n.translate('xpack.ingestManager.epm.versionLabel', {
+                  defaultMessage: 'Version',
+                }),
+                content: (
+                  <EuiFlexGroup gutterSize="s">
+                    <EuiFlexItem>{packageInfo.version}</EuiFlexItem>
+                    {updateAvailable ? (
+                      <EuiFlexItem>
+                        <UpdateIcon />
+                      </EuiFlexItem>
+                    ) : null}
+                  </EuiFlexGroup>
+                ),
+              },
+              { isDivider: true },
+              {
+                content: (
+                  <EuiButton
+                    fill
+                    isDisabled={!hasWriteCapabilites}
+                    iconType="plusInCircle"
+                    href={getHref('add_integration_to_configuration', {
+                      pkgkey,
+                    })}
+                  >
+                    <FormattedMessage
+                      id="xpack.ingestManager.epm.addPackageConfigButtonText"
+                      defaultMessage="Add {packageName}"
+                      values={{
+                        packageName: packageInfo.title,
+                      }}
+                    />
+                  </EuiButton>
+                ),
+              },
+            ].map((item, index) => (
+              <EuiFlexItem grow={false} key={index}>
+                {item.isDivider ?? false ? (
+                  <Divider />
+                ) : item.label ? (
+                  <EuiDescriptionList className="eui-textRight" compressed textStyle="reverse">
+                    <EuiDescriptionListTitle>{item.label}</EuiDescriptionListTitle>
+                    <EuiDescriptionListDescription>{item.content}</EuiDescriptionListDescription>
+                  </EuiDescriptionList>
+                ) : (
+                  item.content
+                )}
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </>
+      ) : undefined,
+    [getHref, hasWriteCapabilites, packageInfo, pkgkey, updateAvailable]
+  );
 
-const FullWidthHeader = styled(EuiPage)`
-  border-bottom: ${props => props.theme.eui.euiBorderThin};
-  padding-bottom: ${props => props.theme.eui.paddingSizes.xl};
-`;
-
-const FullWidthContent = styled(EuiPage)`
-  background-color: ${props => props.theme.eui.euiColorEmptyShade};
-  padding-top: ${props => parseInt(props.theme.eui.paddingSizes.xl, 10) * 1.25}px;
-  flex-grow: 1;
-`;
-
-type LayoutProps = PackageInfo & Pick<DetailParams, 'panel'> & Pick<EuiPageProps, 'restrictWidth'>;
-export function DetailLayout(props: LayoutProps) {
-  const { name: packageName, version, icons, restrictWidth } = props;
-  const iconType = usePackageIconType({ packageName, version, icons });
   return (
-    <Fragment>
-      <FullWidthHeader>
-        <EuiPageBody restrictWidth={restrictWidth}>
-          <Header iconType={iconType} {...props} />
-        </EuiPageBody>
-      </FullWidthHeader>
-      <FullWidthContent>
-        <EuiPageBody restrictWidth={restrictWidth}>
-          <Content hasIconPanel={!!iconType} {...props} />
-        </EuiPageBody>
-      </FullWidthContent>
-    </Fragment>
+    <WithHeaderLayout
+      leftColumn={headerLeftContent}
+      rightColumn={headerRightContent}
+      rightColumnGrow={false}
+    >
+      {packageInfo ? <Breadcrumbs packageTitle={packageInfo.title} /> : null}
+      {packageInfoError ? (
+        <Error
+          title={
+            <FormattedMessage
+              id="xpack.ingestManager.epm.loadingIntegrationErrorTitle"
+              defaultMessage="Error loading integration details"
+            />
+          }
+          error={packageInfoError}
+        />
+      ) : isLoading || !packageInfo ? (
+        <Loading />
+      ) : (
+        <Content {...packageInfo} panel={panel} />
+      )}
+    </WithHeaderLayout>
   );
 }

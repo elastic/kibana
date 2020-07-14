@@ -78,7 +78,7 @@ describe('config validation', () => {
   });
 
   test('config validation passes when valid methods are provided', () => {
-    ['post', 'put'].forEach(method => {
+    ['post', 'put'].forEach((method) => {
       const config: Record<string, string> = {
         url: 'http://mylisteningserver:9200/endpoint',
         method,
@@ -112,6 +112,17 @@ describe('config validation', () => {
       ...defaultValues,
       ...config,
     });
+  });
+
+  test('config validation failed when a url is invalid', () => {
+    const config: Record<string, string> = {
+      url: 'example.com/do-something',
+    };
+    expect(() => {
+      validateConfig(actionType, config);
+    }).toThrowErrorMatchingInlineSnapshot(
+      '"error validating action type config: error configuring webhook action: unable to parse url: TypeError: Invalid URL: example.com/do-something"'
+    );
   });
 
   test('config validation passes when valid headers are provided', () => {
@@ -164,7 +175,7 @@ describe('config validation', () => {
       logger: mockedLogger,
       configurationUtilities: {
         ...actionsConfigMock.create(),
-        ensureWhitelistedUri: _ => {
+        ensureWhitelistedUri: (_) => {
           throw new Error(`target url is not whitelisted`);
         },
       },

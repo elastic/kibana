@@ -25,6 +25,7 @@ import { Filter } from '../filters';
 
 function getValueFormatter(indexPattern?: IIndexPattern, key?: string) {
   if (!indexPattern || !key) return;
+
   let format = get(indexPattern, ['fields', 'byName', key, 'format']);
   if (!format && (indexPattern.fields as any).getByName) {
     // TODO: Why is indexPatterns sometimes a map and sometimes an array?
@@ -43,9 +44,8 @@ function getValueFormatter(indexPattern?: IIndexPattern, key?: string) {
 }
 
 export function getDisplayValueFromFilter(filter: Filter, indexPatterns: IIndexPattern[]): string {
-  const indexPattern = getIndexPatternFromFilter(filter, indexPatterns);
-
   if (typeof filter.meta.value === 'function') {
+    const indexPattern = getIndexPatternFromFilter(filter, indexPatterns);
     const valueFormatter: any = getValueFormatter(indexPattern, filter.meta.key);
     return filter.meta.value(valueFormatter);
   } else {

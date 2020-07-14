@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dataset, RegistryPackage, ElasticsearchAssetType, TemplateRef } from '../../../../types';
+import Boom from 'boom';
+import {
+  Dataset,
+  RegistryPackage,
+  ElasticsearchAssetType,
+  TemplateRef,
+  RegistryElasticsearch,
+} from '../../../../types';
 import { CallESAsCurrentUser } from '../../../../types';
 import { Field, loadFieldsFromYaml, processFields } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
@@ -15,13 +22,14 @@ export const installTemplates = async (
   registryPackage: RegistryPackage,
   callCluster: CallESAsCurrentUser,
   pkgName: string,
-  pkgVersion: string
+  pkgVersion: string,
+  paths: string[]
 ): Promise<TemplateRef[]> => {
   // install any pre-built index template assets,
   // atm, this is only the base package's global index templates
   // Install component templates first, as they are used by the index templates
-  installPreBuiltComponentTemplates(pkgName, pkgVersion, callCluster);
-  installPreBuiltTemplates(pkgName, pkgVersion, callCluster);
+  await installPreBuiltComponentTemplates(paths, callCluster);
+  await installPreBuiltTemplates(paths, callCluster);
 
   // build templates per dataset from yml files
   const datasets = registryPackage.datasets;
@@ -43,26 +51,9 @@ export const installTemplates = async (
   return [];
 };
 
-const installPreBuiltTemplates = async (
-  pkgName: string,
-  pkgVersion: string,
-  callCluster: CallESAsCurrentUser
-) => {
-  const templatePaths = await Registry.getArchiveInfo(
-    pkgName,
-    pkgVersion,
-    (entry: Registry.ArchiveEntry) => isTemplate(entry)
-  );
-  // templatePaths.forEach(async path => {
-  //   const { file } = Registry.pathParts(path);
-  //   const templateName = file.substr(0, file.lastIndexOf('.'));
-  //   const content = JSON.parse(Registry.getAsset(path).toString('utf8'));
-  //   await callCluster('indices.putTemplate', {
-  //     name: templateName,
-  //     body: content,
-  //   });
-  // });
-  templatePaths.forEach(async path => {
+const installPreBuiltTemplates = async (paths: string[], callCluster: CallESAsCurrentUser) => {
+  const templatePaths = paths.filter((path) => isTemplate(path));
+  const templateInstallPromises = templatePaths.map(async (path) => {
     const { file } = Registry.pathParts(path);
     const templateName = file.substr(0, file.lastIndexOf('.'));
     const content = JSON.parse(Registry.getAsset(path).toString('utf8'));
@@ -91,21 +82,23 @@ const installPreBuiltTemplates = async (
     // The existing convenience endpoint `indices.putTemplate` only sends to _template,
     // which does not support v2 templates.
     // See src/core/server/elasticsearch/api_types.ts for available endpoints.
-    await callCluster('transport.request', callClusterParams);
+    return callCluster('transport.request', callClusterParams);
   });
+  try {
+    return await Promise.all(templateInstallPromises);
+  } catch (e) {
+    throw new Boom(`Error installing prebuilt index templates ${e.message}`, {
+      statusCode: 400,
+    });
+  }
 };
 
 const installPreBuiltComponentTemplates = async (
-  pkgName: string,
-  pkgVersion: string,
+  paths: string[],
   callCluster: CallESAsCurrentUser
 ) => {
-  const templatePaths = await Registry.getArchiveInfo(
-    pkgName,
-    pkgVersion,
-    (entry: Registry.ArchiveEntry) => isComponentTemplate(entry)
-  );
-  templatePaths.forEach(async path => {
+  const templatePaths = paths.filter((path) => isComponentTemplate(path));
+  const templateInstallPromises = templatePaths.map(async (path) => {
     const { file } = Registry.pathParts(path);
     const templateName = file.substr(0, file.lastIndexOf('.'));
     const content = JSON.parse(Registry.getAsset(path).toString('utf8'));
@@ -124,16 +117,23 @@ const installPreBuiltComponentTemplates = async (
     // This uses the catch-all endpoint 'transport.request' because there is no
     // convenience endpoint for component templates yet.
     // See src/core/server/elasticsearch/api_types.ts for available endpoints.
-    await callCluster('transport.request', callClusterParams);
+    return callCluster('transport.request', callClusterParams);
   });
+  try {
+    return await Promise.all(templateInstallPromises);
+  } catch (e) {
+    throw new Boom(`Error installing prebuilt component templates ${e.message}`, {
+      statusCode: 400,
+    });
+  }
 };
 
-const isTemplate = ({ path }: Registry.ArchiveEntry) => {
+const isTemplate = (path: string) => {
   const pathParts = Registry.pathParts(path);
   return pathParts.type === ElasticsearchAssetType.indexTemplate;
 };
 
-const isComponentTemplate = ({ path }: Registry.ArchiveEntry) => {
+const isComponentTemplate = (path: string) => {
   const pathParts = Registry.pathParts(path);
   return pathParts.type === ElasticsearchAssetType.componentTemplate;
 };
@@ -159,7 +159,100 @@ export async function installTemplateForDataset({
     fields,
     dataset,
     packageVersion: pkg.version,
+    packageName: pkg.name,
   });
+}
+
+function putComponentTemplate(
+  body: object | undefined,
+  name: string,
+  callCluster: CallESAsCurrentUser
+): { clusterPromise: Promise<any>; name: string } | undefined {
+  if (body) {
+    const callClusterParams: {
+      method: string;
+      path: string;
+      ignore: number[];
+      body: any;
+    } = {
+      method: 'PUT',
+      path: `/_component_template/${name}`,
+      ignore: [404],
+      body,
+    };
+
+    return { clusterPromise: callCluster('transport.request', callClusterParams), name };
+  }
+}
+
+function buildComponentTemplates(registryElasticsearch: RegistryElasticsearch | undefined) {
+  let mappingsTemplate;
+  let settingsTemplate;
+
+  if (registryElasticsearch && registryElasticsearch['index_template.mappings']) {
+    mappingsTemplate = {
+      template: {
+        mappings: {
+          ...registryElasticsearch['index_template.mappings'],
+          // temporary change until https://github.com/elastic/elasticsearch/issues/58956 is resolved
+          // hopefully we'll be able to remove the entire properties section once that issue is resolved
+          properties: {
+            // if the timestamp_field changes here: https://github.com/elastic/kibana/blob/master/x-pack/plugins/ingest_manager/server/services/epm/elasticsearch/template/template.ts#L309
+            // we'll need to update this as well
+            '@timestamp': {
+              type: 'date',
+            },
+          },
+        },
+      },
+    };
+  }
+
+  if (registryElasticsearch && registryElasticsearch['index_template.settings']) {
+    settingsTemplate = {
+      template: {
+        settings: registryElasticsearch['index_template.settings'],
+      },
+    };
+  }
+  return { settingsTemplate, mappingsTemplate };
+}
+
+async function installDatasetComponentTemplates(
+  templateName: string,
+  registryElasticsearch: RegistryElasticsearch | undefined,
+  callCluster: CallESAsCurrentUser
+) {
+  const templates: string[] = [];
+  const componentPromises: Array<Promise<any>> = [];
+
+  const compTemplates = buildComponentTemplates(registryElasticsearch);
+
+  const mappings = putComponentTemplate(
+    compTemplates.mappingsTemplate,
+    `${templateName}-mappings`,
+    callCluster
+  );
+
+  const settings = putComponentTemplate(
+    compTemplates.settingsTemplate,
+    `${templateName}-settings`,
+    callCluster
+  );
+
+  if (mappings) {
+    templates.push(mappings.name);
+    componentPromises.push(mappings.clusterPromise);
+  }
+
+  if (settings) {
+    templates.push(settings.name);
+    componentPromises.push(settings.clusterPromise);
+  }
+
+  // TODO: Check return values for errors
+  await Promise.all(componentPromises);
+  return templates;
 }
 
 export async function installTemplate({
@@ -167,11 +260,13 @@ export async function installTemplate({
   fields,
   dataset,
   packageVersion,
+  packageName,
 }: {
   callCluster: CallESAsCurrentUser;
   fields: Field[];
   dataset: Dataset;
   packageVersion: string;
+  packageName: string;
 }): Promise<TemplateRef> {
   const mappings = generateMappings(processFields(fields));
   const templateName = generateTemplateName(dataset);
@@ -183,7 +278,22 @@ export async function installTemplate({
       packageVersion,
     });
   }
-  const template = getTemplate(dataset.type, templateName, mappings, pipelineName);
+
+  const composedOfTemplates = await installDatasetComponentTemplates(
+    templateName,
+    dataset.elasticsearch,
+    callCluster
+  );
+
+  const template = getTemplate({
+    type: dataset.type,
+    templateName,
+    mappings,
+    pipelineName,
+    packageName,
+    composedOfTemplates,
+  });
+
   // TODO: Check return values for errors
   const callClusterParams: {
     method: string;

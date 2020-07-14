@@ -85,7 +85,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
             <EuiFieldNumber
               value={retention.expireAfterValue || ''}
               onBlur={() => setTouched({ ...touched, expireAfterValue: true })}
-              onChange={e => {
+              onChange={(e) => {
                 const value = e.target.value;
                 updatePolicyRetention({
                   expireAfterValue: value !== '' ? Number(value) : value,
@@ -101,7 +101,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
               options={getExpirationTimeOptions(
                 retention.expireAfterValue ? retention.expireAfterValue.toString() : undefined
               )}
-              onChange={e => {
+              onChange={(e) => {
                 updatePolicyRetention({
                   expireAfterUnit: e.target.value,
                 });
@@ -151,7 +151,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
               fullWidth
               value={retention.minCount || ''}
               onBlur={() => setTouched({ ...touched, minCount: true })}
-              onChange={e => {
+              onChange={(e) => {
                 const value = e.target.value;
                 updatePolicyRetention({
                   minCount: value !== '' ? Number(value) : value,
@@ -178,7 +178,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
               fullWidth
               value={retention.maxCount || ''}
               onBlur={() => setTouched({ ...touched, maxCount: true })}
-              onChange={e => {
+              onChange={(e) => {
                 const value = e.target.value;
                 updatePolicyRetention({
                   maxCount: value !== '' ? Number(value) : value,

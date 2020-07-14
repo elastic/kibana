@@ -6,7 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
-import { APICaller } from 'kibana/server';
+import Boom from 'boom';
+import { LegacyAPICaller } from 'kibana/server';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import {
   MlSummaryJob,
@@ -45,7 +46,7 @@ interface Results {
   };
 }
 
-export function jobsProvider(callAsCurrentUser: APICaller) {
+export function jobsProvider(callAsCurrentUser: LegacyAPICaller) {
   const { forceDeleteDatafeed, getDatafeedIdsByJobId } = datafeedsProvider(callAsCurrentUser);
   const { getAuditMessagesSummary } = jobAuditMessagesProvider(callAsCurrentUser);
   const { getLatestBucketTimestampByJob } = resultsServiceProvider(callAsCurrentUser);
@@ -128,9 +129,26 @@ export function jobsProvider(callAsCurrentUser: APICaller) {
     return results;
   }
 
+  async function forceStopAndCloseJob(jobId: string) {
+    const datafeedIds = await getDatafeedIdsByJobId();
+    const datafeedId = datafeedIds[jobId];
+    if (datafeedId === undefined) {
+      throw Boom.notFound(`Cannot find datafeed for job ${jobId}`);
+    }
+
+    const dfResult = await callAsCurrentUser('ml.stopDatafeed', { datafeedId, force: true });
+    if (!dfResult || dfResult.stopped !== true) {
+      return { success: false };
+    }
+
+    await callAsCurrentUser('ml.closeJob', { jobId, force: true });
+
+    return { success: true };
+  }
+
   async function jobsSummary(jobIds: string[] = []) {
     const fullJobsList: CombinedJobWithStats[] = await createFullJobsList();
-    const fullJobsIds = fullJobsList.map(job => job.job_id);
+    const fullJobsIds = fullJobsList.map((job) => job.job_id);
     const auditMessages: AuditMessage[] = await getAuditMessagesSummary(fullJobsIds);
     const auditMessagesByJob = auditMessages.reduce((acc, cur) => {
       acc[cur.job_id] = cur;
@@ -141,7 +159,7 @@ export function jobsProvider(callAsCurrentUser: APICaller) {
       defaultMessage: 'deleting',
     });
 
-    const jobs = fullJobsList.map(job => {
+    const jobs = fullJobsList.map((job) => {
       const hasDatafeed =
         typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
       const dataCounts = job.data_counts;
@@ -169,7 +187,7 @@ export function jobsProvider(callAsCurrentUser: APICaller) {
         nodeName: job.node ? job.node.name : undefined,
         deleting: job.deleting || undefined,
       };
-      if (jobIds.find(j => j === tempJob.id)) {
+      if (jobIds.find((j) => j === tempJob.id)) {
         tempJob.fullJob = job;
       }
       const auditMessage = auditMessagesByJob[tempJob.id];
@@ -193,7 +211,7 @@ export function jobsProvider(callAsCurrentUser: APICaller) {
     const fullJobsList = await createFullJobsList();
     const jobsMap: { [id: string]: string[] } = {};
 
-    const jobs = fullJobsList.map(job => {
+    const jobs = fullJobsList.map((job) => {
       jobsMap[job.job_id] = job.groups || [];
       const hasDatafeed =
         typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
@@ -267,10 +285,10 @@ export function jobsProvider(callAsCurrentUser: APICaller) {
     >(requests);
 
     if (datafeedResults && datafeedResults.datafeeds) {
-      datafeedResults.datafeeds.forEach(datafeed => {
+      datafeedResults.datafeeds.forEach((datafeed) => {
         if (datafeedStatsResults && datafeedStatsResults.datafeeds) {
           const datafeedStats = datafeedStatsResults.datafeeds.find(
-            ds => ds.datafeed_id === datafeed.datafeed_id
+            (ds) => ds.datafeed_id === datafeed.datafeed_id
           );
           if (datafeedStats) {
             datafeeds[datafeed.job_id] = { ...datafeed, ...datafeedStats };
@@ -283,11 +301,11 @@ export function jobsProvider(callAsCurrentUser: APICaller) {
     // used for assigning calendars to jobs when a calendar has
     // only been attached to a group
     if (jobResults && jobResults.jobs) {
-      jobResults.jobs.forEach(job => {
+      jobResults.jobs.forEach((job) => {
         calendarsByJobId[job.job_id] = [];
 
         if (job.groups !== undefined) {
-          job.groups.forEach(gId => {
+          job.groups.forEach((gId) => {
             if (groups[gId] === undefined) {
               groups[gId] = [];
             }
@@ -299,12 +317,12 @@ export function jobsProvider(callAsCurrentUser: APICaller) {
 
     // assign calendars to jobs
     if (calendarResults) {
-      calendarResults.forEach(cal => {
-        cal.job_ids.forEach(id => {
+      calendarResults.forEach((cal) => {
+        cal.job_ids.forEach((id) => {
           if (id === GLOBAL_CALENDAR) {
             globalCalendars.push(cal.calendar_id);
           } else if (groups[id]) {
-            groups[id].forEach(jId => {
+            groups[id].forEach((jId) => {
               if (calendarsByJobId[jId] !== undefined) {
                 calendarsByJobId[jId].push(cal.calendar_id);
               }
@@ -327,8 +345,8 @@ export function jobsProvider(callAsCurrentUser: APICaller) {
 
     // create jobs objects containing job stats, datafeeds, datafeed stats and calendars
     if (jobResults && jobResults.jobs) {
-      jobResults.jobs.forEach(job => {
-        const tempJob = job as CombinedJobWithStats;
+      jobResults.jobs.forEach((job) => {
+        let tempJob = job as CombinedJobWithStats;
 
         const calendars: string[] = [
           ...(calendarsByJobId[tempJob.job_id] || []),
@@ -339,11 +357,9 @@ export function jobsProvider(callAsCurrentUser: APICaller) {
         }
 
         if (jobStatsResults && jobStatsResults.jobs) {
-          const jobStats = jobStatsResults.jobs.find(js => js.job_id === tempJob.job_id);
+          const jobStats = jobStatsResults.jobs.find((js) => js.job_id === tempJob.job_id);
           if (jobStats !== undefined) {
-            tempJob.state = jobStats.state;
-            tempJob.data_counts = jobStats.data_counts;
-            tempJob.model_size_stats = jobStats.model_size_stats;
+            tempJob = { ...tempJob, ...jobStats };
             if (jobStats.node) {
               tempJob.node = jobStats.node;
             }
@@ -377,9 +393,9 @@ export function jobsProvider(callAsCurrentUser: APICaller) {
     const jobIds = [];
     try {
       const tasksList = await callAsCurrentUser('tasks.list', { actions, detailed });
-      Object.keys(tasksList.nodes).forEach(nodeId => {
+      Object.keys(tasksList.nodes).forEach((nodeId) => {
         const tasks = tasksList.nodes[nodeId].tasks;
-        Object.keys(tasks).forEach(taskId => {
+        Object.keys(tasks).forEach((taskId) => {
           jobIds.push(tasks[taskId].description.replace(/^delete-job-/, ''));
         });
       });
@@ -387,7 +403,7 @@ export function jobsProvider(callAsCurrentUser: APICaller) {
       // if the user doesn't have permission to load the task list,
       // use the jobs list to get the ids of deleting jobs
       const { jobs } = await callAsCurrentUser<MlJobsResponse>('ml.jobs');
-      jobIds.push(...jobs.filter(j => j.deleting === true).map(j => j.job_id));
+      jobIds.push(...jobs.filter((j) => j.deleting === true).map((j) => j.job_id));
     }
     return { jobIds };
   }
@@ -403,17 +419,17 @@ export function jobsProvider(callAsCurrentUser: APICaller) {
 
     const results: { [id: string]: boolean } = {};
     if (jobsInfo.count > 0) {
-      const allJobIds = jobsInfo.jobs.map(job => job.job_id);
+      const allJobIds = jobsInfo.jobs.map((job) => job.job_id);
 
       // Check if each of the supplied IDs match existing jobs.
-      jobIds.forEach(jobId => {
+      jobIds.forEach((jobId) => {
         // Create a Regex for each supplied ID as wildcard * is allowed.
         const regexp = new RegExp(`^${jobId.replace(/\*+/g, '.*')}$`);
-        const exists = allJobIds.some(existsJobId => regexp.test(existsJobId));
+        const exists = allJobIds.some((existsJobId) => regexp.test(existsJobId));
         results[jobId] = exists;
       });
     } else {
-      jobIds.forEach(jobId => {
+      jobIds.forEach((jobId) => {
         results[jobId] = false;
       });
     }
@@ -424,9 +440,9 @@ export function jobsProvider(callAsCurrentUser: APICaller) {
   async function getAllJobAndGroupIds() {
     const { getAllGroups } = groupsProvider(callAsCurrentUser);
     const jobs = await callAsCurrentUser<MlJobsResponse>('ml.jobs');
-    const jobIds = jobs.jobs.map(job => job.job_id);
+    const jobIds = jobs.jobs.map((job) => job.job_id);
     const groups = await getAllGroups();
-    const groupIds = groups.map(group => group.id);
+    const groupIds = groups.map((group) => group.id);
 
     return {
       jobIds,
@@ -474,6 +490,7 @@ export function jobsProvider(callAsCurrentUser: APICaller) {
     forceDeleteJob,
     deleteJobs,
     closeJobs,
+    forceStopAndCloseJob,
     jobsSummary,
     jobsWithTimerange,
     createFullJobsList,

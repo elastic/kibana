@@ -49,10 +49,7 @@ export const setup = async (): Promise<WatchStatusTestBed> => {
   const selectTab = (tab: 'execution history' | 'action statuses') => {
     const tabs = ['execution history', 'action statuses'];
 
-    testBed
-      .find('tab')
-      .at(tabs.indexOf(tab))
-      .simulate('click');
+    testBed.find('tab').at(tabs.indexOf(tab)).simulate('click');
   };
 
   const clickToggleActivationButton = async () => {

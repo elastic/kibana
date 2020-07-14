@@ -19,14 +19,14 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const inspector = getService('inspector');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'visEditor', 'visChart']);
 
   // FLAKY: https://github.com/elastic/kibana/issues/22322
-  describe.skip('vertical bar chart with index without time filter', function() {
+  describe.skip('vertical bar chart with index without time filter', function () {
     const vizName1 = 'Visualization VerticalBarChart without time filter';
 
     const initBarChart = async () => {
@@ -50,18 +50,18 @@ export default function({ getService, getPageObjects }) {
 
     before(initBarChart);
 
-    it('should save and load', async function() {
+    it('should save and load', async function () {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visChart.waitForVisualization();
     });
 
-    it('should have inspector enabled', async function() {
+    it('should have inspector enabled', async function () {
       await inspector.expectIsEnabled();
     });
 
-    it('should show correct chart', async function() {
+    it('should show correct chart', async function () {
       const expectedChartValues = [
         37,
         202,
@@ -100,7 +100,7 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    it('should show correct data', async function() {
+    it('should show correct data', async function () {
       // this is only the first page of the tabular data.
       const expectedChartData = [
         ['2015-09-20 00:00', '37'],
@@ -248,10 +248,10 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    describe('vertical bar with split series', function() {
+    describe('vertical bar with split series', function () {
       before(initBarChart);
 
-      it('should show correct series', async function() {
+      it('should show correct series', async function () {
         await PageObjects.visEditor.toggleOpenEditor(2, 'false');
         await PageObjects.visEditor.clickBucket('Split series');
         await PageObjects.visEditor.selectAggregation('Terms');
@@ -268,10 +268,10 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    describe('vertical bar with multiple splits', function() {
+    describe('vertical bar with multiple splits', function () {
       before(initBarChart);
 
-      it('should show correct series', async function() {
+      it('should show correct series', async function () {
         await PageObjects.visEditor.toggleOpenEditor(2, 'false');
         await PageObjects.visEditor.clickBucket('Split series');
         await PageObjects.visEditor.selectAggregation('Terms');
@@ -309,7 +309,7 @@ export default function({ getService, getPageObjects }) {
         expect(legendEntries).to.eql(expectedEntries);
       });
 
-      it('should show correct series when disabling first agg', async function() {
+      it('should show correct series when disabling first agg', async function () {
         await PageObjects.visEditor.toggleDisabledAgg(3);
         await PageObjects.visEditor.clickGo();
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -320,10 +320,10 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    describe('vertical bar with derivative', function() {
+    describe('vertical bar with derivative', function () {
       before(initBarChart);
 
-      it('should show correct series', async function() {
+      it('should show correct series', async function () {
         await PageObjects.visEditor.toggleOpenEditor(2, 'false');
         await PageObjects.visEditor.toggleOpenEditor(1);
         await PageObjects.visEditor.selectAggregation('Derivative', 'metrics');

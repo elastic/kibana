@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import numeral from 'numeral';
+import numeral from '@elastic/numeral';
 
 export default function formatNumber(num, which) {
   let format = '0.00';

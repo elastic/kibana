@@ -27,12 +27,13 @@ import {
   coreDeprecationProvider,
 } from './config';
 import { CoreApp } from './core_app';
+import { AuditTrailService } from './audit_trail';
 import { ElasticsearchService } from './elasticsearch';
 import { HttpService } from './http';
 import { HttpResourcesService } from './http_resources';
 import { RenderingService } from './rendering';
 import { LegacyService, ensureValidConfiguration } from './legacy';
-import { Logger, LoggerFactory } from './logging';
+import { Logger, LoggerFactory, LoggingService, ILoggingSystem } from './logging';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
 import { SavedObjectsService } from '../server/saved_objects';
@@ -74,20 +75,24 @@ export class Server {
   private readonly metrics: MetricsService;
   private readonly httpResources: HttpResourcesService;
   private readonly status: StatusService;
+  private readonly logging: LoggingService;
   private readonly coreApp: CoreApp;
+  private readonly auditTrail: AuditTrailService;
 
-  private pluginsInitialized?: boolean;
+  #pluginsInitialized?: boolean;
   private coreStart?: InternalCoreStart;
+  private readonly logger: LoggerFactory;
 
   constructor(
     rawConfigProvider: RawConfigurationProvider,
     public readonly env: Env,
-    private readonly logger: LoggerFactory
+    private readonly loggingSystem: ILoggingSystem
   ) {
+    this.logger = this.loggingSystem.asLoggerFactory();
     this.log = this.logger.get('server');
-    this.configService = new ConfigService(rawConfigProvider, env, logger);
+    this.configService = new ConfigService(rawConfigProvider, env, this.logger);
 
-    const core = { coreId, configService: this.configService, env, logger };
+    const core = { coreId, configService: this.configService, env, logger: this.logger };
     this.context = new ContextService(core);
     this.http = new HttpService(core);
     this.rendering = new RenderingService(core);
@@ -102,6 +107,8 @@ export class Server {
     this.status = new StatusService(core);
     this.coreApp = new CoreApp(core);
     this.httpResources = new HttpResourcesService(core);
+    this.auditTrail = new AuditTrailService(core);
+    this.logging = new LoggingService(core);
   }
 
   public async setup() {
@@ -123,6 +130,7 @@ export class Server {
       pluginDependencies: new Map([...pluginTree, [this.legacy.legacyId, [...pluginTree.keys()]]]),
     });
 
+    const auditTrailSetup = this.auditTrail.setup();
     const uuidSetup = await this.uuid.setup();
 
     const httpSetup = await this.http.setup({
@@ -146,7 +154,7 @@ export class Server {
       savedObjects: savedObjectsSetup,
     });
 
-    const metricsSetup = await this.metrics.setup({ http: httpSetup });
+    await this.metrics.setup({ http: httpSetup });
 
     const renderingSetup = await this.rendering.setup({
       http: httpSetup,
@@ -164,6 +172,10 @@ export class Server {
       savedObjects: savedObjectsSetup,
     });
 
+    const loggingSetup = this.logging.setup({
+      loggingSystem: this.loggingSystem,
+    });
+
     const coreSetup: InternalCoreSetup = {
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,
@@ -173,13 +185,14 @@ export class Server {
       status: statusSetup,
       uiSettings: uiSettingsSetup,
       uuid: uuidSetup,
-      metrics: metricsSetup,
       rendering: renderingSetup,
       httpResources: httpResourcesSetup,
+      auditTrail: auditTrailSetup,
+      logging: loggingSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
-    this.pluginsInitialized = pluginsSetup.initialized;
+    this.#pluginsInitialized = pluginsSetup.initialized;
 
     await this.legacy.setup({
       core: { ...coreSetup, plugins: pluginsSetup, rendering: renderingSetup },
@@ -195,18 +208,28 @@ export class Server {
 
   public async start() {
     this.log.debug('starting server');
+    const auditTrailStart = this.auditTrail.start();
+
+    const elasticsearchStart = await this.elasticsearch.start({
+      auditTrail: auditTrailStart,
+    });
     const savedObjectsStart = await this.savedObjects.start({
-      pluginsInitialized: this.pluginsInitialized,
+      elasticsearch: elasticsearchStart,
+      pluginsInitialized: this.#pluginsInitialized,
     });
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
-    const elasticsearchStart = await this.elasticsearch.start();
+    const metricsStart = await this.metrics.start();
+    const httpStart = this.http.getStartContract();
 
     this.coreStart = {
       capabilities: capabilitiesStart,
       elasticsearch: elasticsearchStart,
+      http: httpStart,
+      metrics: metricsStart,
       savedObjects: savedObjectsStart,
       uiSettings: uiSettingsStart,
+      auditTrail: auditTrailStart,
     };
 
     const pluginsStart = await this.plugins.start(this.coreStart);
@@ -220,10 +243,10 @@ export class Server {
     });
 
     await this.http.start();
+
     await this.rendering.start({
       legacy: this.legacy,
     });
-    await this.metrics.start();
 
     return this.coreStart;
   }
@@ -240,6 +263,8 @@ export class Server {
     await this.rendering.stop();
     await this.metrics.stop();
     await this.status.stop();
+    await this.logging.stop();
+    await this.auditTrail.stop();
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup) {
@@ -247,21 +272,23 @@ export class Server {
       coreId,
       'core',
       async (context, req, res): Promise<RequestHandlerContext['core']> => {
-        const savedObjectsClient = this.coreStart!.savedObjects.getScopedClient(req);
-        const uiSettingsClient = coreSetup.uiSettings.asScopedToClient(savedObjectsClient);
+        const coreStart = this.coreStart!;
+        const savedObjectsClient = coreStart.savedObjects.getScopedClient(req);
 
         return {
           savedObjects: {
             client: savedObjectsClient,
-            typeRegistry: this.coreStart!.savedObjects.getTypeRegistry(),
+            typeRegistry: coreStart.savedObjects.getTypeRegistry(),
           },
           elasticsearch: {
-            adminClient: coreSetup.elasticsearch.adminClient.asScoped(req),
-            dataClient: coreSetup.elasticsearch.dataClient.asScoped(req),
+            legacy: {
+              client: coreStart.elasticsearch.legacy.client.asScoped(req),
+            },
           },
           uiSettings: {
-            client: uiSettingsClient,
+            client: coreStart.uiSettings.asScopedToClient(savedObjectsClient),
           },
+          auditor: coreStart.auditTrail.asScoped(req),
         };
       }
     );

@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Header should render normally 1`] = `
+<div>
+  <EuiTitle
+    size="s"
+  >
+    <h2>
+      <FormattedMessage
+        defaultMessage="Step 2 of 2: Configure settings"
+        id="indexPatternManagement.createIndexPattern.stepTimeHeader"
+        values={Object {}}
+      />
+    </h2>
+  </EuiTitle>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiText>
+    <strong>
+      ki*
+    </strong>
+  </EuiText>
+</div>
+`;

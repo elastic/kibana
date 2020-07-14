@@ -6,7 +6,7 @@
 
 Plugin specific context passed to a route handler.
 
-Provides the following clients and services: - [savedObjects.client](./kibana-plugin-core-server.savedobjectsclient.md) - Saved Objects client which uses the credentials of the incoming request - [savedObjects.typeRegistry](./kibana-plugin-core-server.isavedobjecttyperegistry.md) - Type registry containing all the registered types. - [elasticsearch.dataClient](./kibana-plugin-core-server.scopedclusterclient.md) - Elasticsearch data client which uses the credentials of the incoming request - [elasticsearch.adminClient](./kibana-plugin-core-server.scopedclusterclient.md) - Elasticsearch admin client which uses the credentials of the incoming request - [uiSettings.client](./kibana-plugin-core-server.iuisettingsclient.md) - uiSettings client which uses the credentials of the incoming request
+Provides the following clients and services: - [savedObjects.client](./kibana-plugin-core-server.savedobjectsclient.md) - Saved Objects client which uses the credentials of the incoming request - [savedObjects.typeRegistry](./kibana-plugin-core-server.isavedobjecttyperegistry.md) - Type registry containing all the registered types. - [elasticsearch.legacy.client](./kibana-plugin-core-server.legacyscopedclusterclient.md) - Elasticsearch data client which uses the credentials of the incoming request - [uiSettings.client](./kibana-plugin-core-server.iuisettingsclient.md) - uiSettings client which uses the credentials of the incoming request
 
 <b>Signature:</b>
 
@@ -18,5 +18,5 @@ export interface RequestHandlerContext
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [core](./kibana-plugin-core-server.requesthandlercontext.core.md) | <code>{</code><br/><code>        savedObjects: {</code><br/><code>            client: SavedObjectsClientContract;</code><br/><code>            typeRegistry: ISavedObjectTypeRegistry;</code><br/><code>        };</code><br/><code>        elasticsearch: {</code><br/><code>            dataClient: IScopedClusterClient;</code><br/><code>            adminClient: IScopedClusterClient;</code><br/><code>        };</code><br/><code>        uiSettings: {</code><br/><code>            client: IUiSettingsClient;</code><br/><code>        };</code><br/><code>    }</code> |  |
+|  [core](./kibana-plugin-core-server.requesthandlercontext.core.md) | <code>{</code><br/><code>        savedObjects: {</code><br/><code>            client: SavedObjectsClientContract;</code><br/><code>            typeRegistry: ISavedObjectTypeRegistry;</code><br/><code>        };</code><br/><code>        elasticsearch: {</code><br/><code>            legacy: {</code><br/><code>                client: ILegacyScopedClusterClient;</code><br/><code>            };</code><br/><code>        };</code><br/><code>        uiSettings: {</code><br/><code>            client: IUiSettingsClient;</code><br/><code>        };</code><br/><code>        auditor: Auditor;</code><br/><code>    }</code> |  |
 

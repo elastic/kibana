@@ -198,9 +198,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                           id="xpack.security.management.editRoles.indexPrivilegeForm.grantedFieldsFormRowHelpText"
                           defaultMessage="If no fields are granted, then users assigned to this role will not be able to see any data for this index."
                         />
-                      ) : (
-                        undefined
-                      )
+                      ) : undefined
                     }
                   >
                     <Fragment>

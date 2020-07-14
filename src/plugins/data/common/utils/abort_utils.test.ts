@@ -21,7 +21,7 @@ import { AbortError, toPromise, getCombinedSignal } from './abort_utils';
 
 jest.useFakeTimers();
 
-const flushPromises = () => new Promise(resolve => setImmediate(resolve));
+const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
 describe('AbortUtils', () => {
   describe('AbortError', () => {
@@ -38,31 +38,10 @@ describe('AbortUtils', () => {
   });
 
   describe('toPromise', () => {
-    describe('resolves', () => {
-      test('should not resolve if the signal does not abort', async () => {
-        const controller = new AbortController();
-        const promise = toPromise(controller.signal);
-        const whenResolved = jest.fn();
-        promise.then(whenResolved);
-        await flushPromises();
-        expect(whenResolved).not.toBeCalled();
-      });
-
-      test('should resolve if the signal does abort', async () => {
-        const controller = new AbortController();
-        const promise = toPromise(controller.signal);
-        const whenResolved = jest.fn();
-        promise.then(whenResolved);
-        controller.abort();
-        await flushPromises();
-        expect(whenResolved).toBeCalled();
-      });
-    });
-
     describe('rejects', () => {
       test('should not reject if the signal does not abort', async () => {
         const controller = new AbortController();
-        const promise = toPromise(controller.signal, true);
+        const promise = toPromise(controller.signal);
         const whenRejected = jest.fn();
         promise.catch(whenRejected);
         await flushPromises();
@@ -71,12 +50,13 @@ describe('AbortUtils', () => {
 
       test('should reject if the signal does abort', async () => {
         const controller = new AbortController();
-        const promise = toPromise(controller.signal, true);
+        const promise = toPromise(controller.signal);
         const whenRejected = jest.fn();
         promise.catch(whenRejected);
         controller.abort();
         await flushPromises();
         expect(whenRejected).toBeCalled();
+        expect(whenRejected.mock.calls[0][0]).toBeInstanceOf(AbortError);
       });
     });
   });
@@ -108,6 +88,14 @@ describe('AbortUtils', () => {
       expect(signal.aborted).toBe(false);
       jest.advanceTimersByTime(1000);
       await flushPromises();
+      expect(signal.aborted).toBe(true);
+    });
+
+    test('should be aborted if any of the signals is already aborted', async () => {
+      const controller1 = new AbortController();
+      const controller2 = new AbortController();
+      controller1.abort();
+      const signal = getCombinedSignal([controller1.signal, controller2.signal]);
       expect(signal.aborted).toBe(true);
     });
   });

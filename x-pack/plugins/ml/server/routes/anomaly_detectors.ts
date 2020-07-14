@@ -17,6 +17,8 @@ import {
   getCategoriesSchema,
   forecastAnomalyDetector,
   getBucketParamsSchema,
+  getModelSnapshotsSchema,
+  updateModelSnapshotSchema,
 } from './schemas/anomaly_detectors_schema';
 
 /**
@@ -173,9 +175,11 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { jobId } = request.params;
+        const body = request.body;
+
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.addJob', {
           jobId,
-          body: request.body,
+          body,
         });
         return response.ok({
           body: results,
@@ -526,7 +530,7 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
   /**
    * @apiGroup AnomalyDetectors
    *
-   * @api {get} /api/ml/anomaly_detectors/:jobId/results/categories/:categoryId Get results category data by job id and category id
+   * @api {get} /api/ml/anomaly_detectors/:jobId/results/categories/:categoryId Get results category data by job ID and category ID
    * @apiName GetCategories
    * @apiDescription Returns the categories results for the specified job ID and category ID.
    *
@@ -544,11 +548,148 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const options = {
+        const results = await context.ml!.mlClient.callAsCurrentUser('ml.categories', {
           jobId: request.params.jobId,
           categoryId: request.params.categoryId,
-        };
-        const results = await context.ml!.mlClient.callAsCurrentUser('ml.categories', options);
+        });
+        return response.ok({
+          body: results,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup AnomalyDetectors
+   *
+   * @api {get} /api/ml/anomaly_detectors/:jobId/model_snapshots Get model snapshots by job ID
+   * @apiName GetModelSnapshots
+   * @apiDescription Returns the model snapshots for the specified job ID
+   *
+   * @apiSchema (params) getModelSnapshotsSchema
+   */
+  router.get(
+    {
+      path: '/api/ml/anomaly_detectors/{jobId}/model_snapshots',
+      validate: {
+        params: getModelSnapshotsSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
+    },
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+      try {
+        const results = await context.ml!.mlClient.callAsCurrentUser('ml.modelSnapshots', {
+          jobId: request.params.jobId,
+        });
+        return response.ok({
+          body: results,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup AnomalyDetectors
+   *
+   * @api {get} /api/ml/anomaly_detectors/:jobId/model_snapshots/:snapshotId Get model snapshots by job ID and snapshot ID
+   * @apiName GetModelSnapshotsById
+   * @apiDescription Returns the model snapshots for the specified job ID and snapshot ID
+   *
+   * @apiSchema (params) getModelSnapshotsSchema
+   */
+  router.get(
+    {
+      path: '/api/ml/anomaly_detectors/{jobId}/model_snapshots/{snapshotId}',
+      validate: {
+        params: getModelSnapshotsSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
+    },
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+      try {
+        const results = await context.ml!.mlClient.callAsCurrentUser('ml.modelSnapshots', {
+          jobId: request.params.jobId,
+          snapshotId: request.params.snapshotId,
+        });
+        return response.ok({
+          body: results,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup AnomalyDetectors
+   *
+   * @api {post} /api/ml/anomaly_detectors/:jobId/model_snapshots/:snapshotId/_update update model snapshot by snapshot ID
+   * @apiName UpdateModelSnapshotsById
+   * @apiDescription Updates the model snapshot for the specified snapshot ID
+   *
+   * @apiSchema (params) getModelSnapshotsSchema
+   * @apiSchema (body) updateModelSnapshotSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/anomaly_detectors/{jobId}/model_snapshots/{snapshotId}/_update',
+      validate: {
+        params: getModelSnapshotsSchema,
+        body: updateModelSnapshotSchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateJob'],
+      },
+    },
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+      try {
+        const results = await context.ml!.mlClient.callAsCurrentUser('ml.updateModelSnapshot', {
+          jobId: request.params.jobId,
+          snapshotId: request.params.snapshotId,
+          body: request.body,
+        });
+        return response.ok({
+          body: results,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup AnomalyDetectors
+   *
+   * @api {delete} /api/ml/anomaly_detectors/:jobId/model_snapshots/:snapshotId Delete model snapshots by snapshot ID
+   * @apiName GetModelSnapshotsById
+   * @apiDescription Deletes the model snapshot for the specified snapshot ID
+   *
+   * @apiSchema (params) getModelSnapshotsSchema
+   */
+  router.delete(
+    {
+      path: '/api/ml/anomaly_detectors/{jobId}/model_snapshots/{snapshotId}',
+      validate: {
+        params: getModelSnapshotsSchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateJob'],
+      },
+    },
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+      try {
+        const results = await context.ml!.mlClient.callAsCurrentUser('ml.deleteModelSnapshot', {
+          jobId: request.params.jobId,
+          snapshotId: request.params.snapshotId,
+        });
         return response.ok({
           body: results,
         });

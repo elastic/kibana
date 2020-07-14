@@ -43,12 +43,13 @@ import {
 // are not listened for
 const pipeline = (...streams: Readable[]) =>
   streams.reduce((source, dest) =>
-    source.once('error', error => dest.emit('error', error)).pipe(dest as any)
+    source.once('error', (error) => dest.emit('error', error)).pipe(dest as any)
   );
 
 export async function loadAction({
   name,
   skipExisting,
+  useCreate,
   client,
   dataDir,
   log,
@@ -56,6 +57,7 @@ export async function loadAction({
 }: {
   name: string;
   skipExisting: boolean;
+  useCreate: boolean;
   client: Client;
   dataDir: string;
   log: ToolingLog;
@@ -70,7 +72,7 @@ export async function loadAction({
   // order, so that createIndexStream can track the state of indexes
   // across archives and properly skip docs from existing indexes
   const recordStream = concatStreamProviders(
-    files.map(filename => () => {
+    files.map((filename) => () => {
       log.info('[%s] Loading %j', name, filename);
 
       return pipeline(
@@ -87,7 +89,7 @@ export async function loadAction({
   await createPromiseFromStreams([
     recordStream,
     createCreateIndexStream({ client, stats, skipExisting, log }),
-    createIndexDocRecordsStream(client, stats, progress),
+    createIndexDocRecordsStream(client, stats, progress, useCreate),
   ]);
 
   progress.deactivate();
@@ -105,7 +107,7 @@ export async function loadAction({
   });
 
   // If we affected the Kibana index, we need to ensure it's migrated...
-  if (Object.keys(result).some(k => k.startsWith('.kibana'))) {
+  if (Object.keys(result).some((k) => k.startsWith('.kibana'))) {
     await migrateKibanaIndex({ client, kbnClient });
 
     if (kibanaPluginIds.includes('spaces')) {

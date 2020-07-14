@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { CSSProperties, memo, useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiSpacer,
   EuiText,
@@ -16,37 +16,27 @@ import {
   EuiTableActionsColumnType,
   EuiTableFieldDataColumnType,
   EuiTextColor,
-  EuiContextMenuItem,
 } from '@elastic/eui';
+import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import { useHistory } from 'react-router-dom';
 import { AgentConfig } from '../../../types';
-import {
-  AGENT_CONFIG_DETAILS_PATH,
-  AGENT_CONFIG_SAVED_OBJECT_TYPE,
-  AGENT_CONFIG_PATH,
-} from '../../../constants';
+import { AGENT_CONFIG_SAVED_OBJECT_TYPE } from '../../../constants';
 import { WithHeaderLayout } from '../../../layouts';
 import {
   useCapabilities,
   useGetAgentConfigs,
   usePagination,
+  useSorting,
   useLink,
   useConfig,
   useUrlParams,
+  useBreadcrumbs,
 } from '../../../hooks';
+import { SearchBar } from '../../../components';
+import { LinkedAgentCount, AgentConfigActionMenu } from '../components';
 import { CreateAgentConfigFlyout } from './components';
-import { SearchBar } from '../../../components/search_bar';
-import { LinkedAgentCount } from '../components';
-import { useAgentConfigLink } from '../details_page/hooks/use_details_uri';
-import { TableRowActions } from '../components/table_row_actions';
-
-const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-});
 
 const AgentConfigListPageLayout: React.FunctionComponent = ({ children }) => (
   <WithHeaderLayout
@@ -79,54 +69,14 @@ const AgentConfigListPageLayout: React.FunctionComponent = ({ children }) => (
   </WithHeaderLayout>
 );
 
-const ConfigRowActions = memo<{ config: AgentConfig; onDelete: () => void }>(
-  ({ config, onDelete }) => {
-    const hasWriteCapabilities = useCapabilities().write;
-    const detailsLink = useAgentConfigLink('details', { configId: config.id });
-    const addDatasourceLink = useAgentConfigLink('add-datasource', { configId: config.id });
-
-    return (
-      <TableRowActions
-        items={[
-          <EuiContextMenuItem icon="inspect" href={detailsLink} key="viewConfig">
-            <FormattedMessage
-              id="xpack.ingestManager.agentConfigList.viewConfigActionText"
-              defaultMessage="View configuration"
-            />
-          </EuiContextMenuItem>,
-
-          <EuiContextMenuItem
-            disabled={!hasWriteCapabilities}
-            icon="plusInCircle"
-            href={addDatasourceLink}
-            key="createDataSource"
-          >
-            <FormattedMessage
-              id="xpack.ingestManager.agentConfigList.createDatasourceActionText"
-              defaultMessage="Create data source"
-            />
-          </EuiContextMenuItem>,
-          // <EuiContextMenuItem disabled={true} icon="copy" key="copyConfig">
-          //   <FormattedMessage
-          //     id="xpack.ingestManager.agentConfigList.copyConfigActionText"
-          //     defaultMessage="Copy configuration"
-          //   />
-          // </EuiContextMenuItem>,
-        ]}
-      />
-    );
-  }
-);
-
 export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
+  useBreadcrumbs('configurations_list');
+  const { getHref, getPath } = useLink();
   // Config information
   const hasWriteCapabilites = useCapabilities().write;
   const {
     fleet: { enabled: isFleetEnabled },
   } = useConfig();
-
-  // Base URL paths
-  const DETAILS_URI = useLink(AGENT_CONFIG_DETAILS_PATH);
 
   // Table and search states
   const { urlParams, toUrlParams } = useUrlParams();
@@ -136,26 +86,34 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
       : urlParams.kuery ?? ''
   );
   const { pagination, pageSizeOptions, setPagination } = usePagination();
+  const { sorting, setSorting } = useSorting<AgentConfig>({
+    field: 'updated_at',
+    direction: 'desc',
+  });
   const history = useHistory();
   const isCreateAgentConfigFlyoutOpen = 'create' in urlParams;
   const setIsCreateAgentConfigFlyoutOpen = useCallback(
     (isOpen: boolean) => {
       if (isOpen !== isCreateAgentConfigFlyoutOpen) {
         if (isOpen) {
-          history.push(`${AGENT_CONFIG_PATH}?${toUrlParams({ ...urlParams, create: null })}`);
+          history.push(
+            `${getPath('configurations_list')}?${toUrlParams({ ...urlParams, create: null })}`
+          );
         } else {
           const { create, ...params } = urlParams;
-          history.push(`${AGENT_CONFIG_PATH}?${toUrlParams(params)}`);
+          history.push(`${getPath('configurations_list')}?${toUrlParams(params)}`);
         }
       }
     },
-    [history, isCreateAgentConfigFlyoutOpen, toUrlParams, urlParams]
+    [getPath, history, isCreateAgentConfigFlyoutOpen, toUrlParams, urlParams]
   );
 
   // Fetch agent configs
   const { isLoading, data: agentConfigData, sendRequest } = useGetAgentConfigs({
     page: pagination.currentPage,
     perPage: pagination.pageSize,
+    sortField: sorting?.field,
+    sortOrder: sorting?.direction,
     kuery: search,
   });
 
@@ -166,16 +124,17 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
     > = [
       {
         field: 'name',
+        sortable: true,
         name: i18n.translate('xpack.ingestManager.agentConfigList.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
         width: '20%',
         render: (name: string, agentConfig: AgentConfig) => (
           <EuiFlexGroup gutterSize="s" alignItems="baseline" style={{ minWidth: 0 }}>
-            <EuiFlexItem grow={false} style={NO_WRAP_TRUNCATE_STYLE}>
+            <EuiFlexItem grow={false} className="eui-textTruncate">
               <EuiLink
-                href={`${DETAILS_URI}${agentConfig.id}`}
-                style={NO_WRAP_TRUNCATE_STYLE}
+                className="eui-textTruncate"
+                href={getHref('configuration_details', { configId: agentConfig.id })}
                 title={name || agentConfig.id}
               >
                 {name || agentConfig.id}
@@ -201,17 +160,18 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         width: '35%',
         truncateText: true,
         render: (description: AgentConfig['description']) => (
-          <EuiTextColor color="subdued" style={NO_WRAP_TRUNCATE_STYLE}>
+          <EuiTextColor color="subdued" className="eui-textTruncate">
             {description}
           </EuiTextColor>
         ),
       },
       {
-        field: 'updated_on',
+        field: 'updated_at',
+        sortable: true,
         name: i18n.translate('xpack.ingestManager.agentConfigList.updatedOnColumnTitle', {
           defaultMessage: 'Last updated on',
         }),
-        render: (date: AgentConfig['updated_on']) => (
+        render: (date: AgentConfig['updated_at']) => (
           <FormattedDate value={date} year="numeric" month="short" day="2-digit" />
         ),
       },
@@ -226,12 +186,13 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         ),
       },
       {
-        field: 'datasources',
-        name: i18n.translate('xpack.ingestManager.agentConfigList.datasourcesCountColumnTitle', {
-          defaultMessage: 'Data sources',
+        field: 'package_configs',
+        name: i18n.translate('xpack.ingestManager.agentConfigList.packageConfigsCountColumnTitle', {
+          defaultMessage: 'Integrations',
         }),
         dataType: 'number',
-        render: (datasources: AgentConfig['datasources']) => (datasources ? datasources.length : 0),
+        render: (packageConfigs: AgentConfig['package_configs']) =>
+          packageConfigs ? packageConfigs.length : 0,
       },
       {
         name: i18n.translate('xpack.ingestManager.agentConfigList.actionsColumnTitle', {
@@ -240,7 +201,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         actions: [
           {
             render: (config: AgentConfig) => (
-              <ConfigRowActions config={config} onDelete={() => sendRequest()} />
+              <AgentConfigActionMenu config={config} onCopySuccess={() => sendRequest()} />
             ),
           },
         ],
@@ -249,11 +210,11 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
 
     // If Fleet is not enabled, then remove the `agents` column
     if (!isFleetEnabled) {
-      return cols.filter(col => ('field' in col ? col.field !== 'agents' : true));
+      return cols.filter((col) => ('field' in col ? col.field !== 'agents' : true));
     }
 
     return cols;
-  }, [DETAILS_URI, isFleetEnabled, sendRequest]);
+  }, [getHref, isFleetEnabled, sendRequest]);
 
   const createAgentConfigButton = useMemo(
     () => (
@@ -289,6 +250,16 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
     [createAgentConfigButton]
   );
 
+  const onTableChange = (criteria: CriteriaWithPagination<AgentConfig>) => {
+    const newPagination = {
+      ...pagination,
+      currentPage: criteria.page.index + 1,
+      pageSize: criteria.page.size,
+    };
+    setPagination(newPagination);
+    setSorting(criteria.sort);
+  };
+
   return (
     <AgentConfigListPageLayout>
       {isCreateAgentConfigFlyoutOpen ? (
@@ -303,7 +274,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         <EuiFlexItem grow={4}>
           <SearchBar
             value={search}
-            onChange={newSearch => {
+            onChange={(newSearch) => {
               setPagination({
                 ...pagination,
                 currentPage: 1,
@@ -325,7 +296,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
-      <EuiBasicTable
+      <EuiBasicTable<AgentConfig>
         loading={isLoading}
         hasActions={true}
         noItemsMessage={
@@ -363,14 +334,8 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
           totalItemCount: agentConfigData ? agentConfigData.total : 0,
           pageSizeOptions,
         }}
-        onChange={({ page }: { page: { index: number; size: number } }) => {
-          const newPagination = {
-            ...pagination,
-            currentPage: page.index + 1,
-            pageSize: page.size,
-          };
-          setPagination(newPagination);
-        }}
+        sorting={{ sort: sorting }}
+        onChange={onTableChange}
       />
     </AgentConfigListPageLayout>
   );

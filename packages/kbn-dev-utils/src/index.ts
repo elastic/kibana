@@ -37,4 +37,5 @@ export { run, createFailError, createFlagError, combineErrors, isFailError, Flag
 export { REPO_ROOT } from './repo_root';
 export { KbnClient } from './kbn_client';
 export * from './axios';
+export * from './stdio';
 export * from './ci_stats_reporter';

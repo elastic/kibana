@@ -36,7 +36,7 @@ export function getColumnData(confusionMatrixData: ConfusionMatrix[]) {
 
   let showOther = false;
 
-  confusionMatrixData.forEach(classData => {
+  confusionMatrixData.forEach((classData) => {
     const otherCount = classData.other_predicted_class_doc_count;
 
     if (otherCount > 0) {

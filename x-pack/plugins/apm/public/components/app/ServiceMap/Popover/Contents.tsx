@@ -8,21 +8,19 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
 import cytoscape from 'cytoscape';
-import React from 'react';
-import { SERVICE_FRAMEWORK_NAME } from '../../../../../common/elasticsearch_fieldnames';
+import React, { MouseEvent } from 'react';
 import { Buttons } from './Buttons';
 import { Info } from './Info';
 import { ServiceMetricFetcher } from './ServiceMetricFetcher';
-
-const popoverMinWidth = 280;
+import { popoverWidth } from '../cytoscapeOptions';
 
 interface ContentsProps {
   isService: boolean;
   label: string;
-  onFocusClick: () => void;
+  onFocusClick: (event: MouseEvent<HTMLAnchorElement>) => void;
   selectedNodeData: cytoscape.NodeDataDefinition;
   selectedNodeServiceName: string;
 }
@@ -56,14 +54,13 @@ export function Contents({
   isService,
   label,
   onFocusClick,
-  selectedNodeServiceName
+  selectedNodeServiceName,
 }: ContentsProps) {
-  const frameworkName = selectedNodeData[SERVICE_FRAMEWORK_NAME];
   return (
     <FlexColumnGroup
       direction="column"
       gutterSize="s"
-      style={{ minWidth: popoverMinWidth }}
+      style={{ width: popoverWidth }}
     >
       <FlexColumnItem>
         <EuiTitle size="xxs">
@@ -74,8 +71,8 @@ export function Contents({
       <FlexColumnItem>
         {isService ? (
           <ServiceMetricFetcher
-            frameworkName={frameworkName}
             serviceName={selectedNodeServiceName}
+            serviceAnomalyStats={selectedNodeData.serviceAnomalyStats}
           />
         ) : (
           <Info {...selectedNodeData} />

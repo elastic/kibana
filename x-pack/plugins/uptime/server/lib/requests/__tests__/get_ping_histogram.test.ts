@@ -62,7 +62,6 @@ describe('getPingHistogram', () => {
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       from: 'now-15m',
       to: 'now',
-      filters: null,
     });
 
     expect(mockEsClient).toHaveBeenCalledTimes(1);
@@ -81,7 +80,7 @@ describe('getPingHistogram', () => {
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       from: 'now-15m',
       to: 'now',
-      filters: null,
+      filters: '',
     });
 
     expect(mockEsClient).toHaveBeenCalledTimes(1);
@@ -145,7 +144,6 @@ describe('getPingHistogram', () => {
       to: '5678',
       filters: JSON.stringify(searchFilter),
       monitorId: undefined,
-      statusFilter: 'down',
     });
 
     expect(mockEsClient).toHaveBeenCalledTimes(1);
@@ -200,46 +198,6 @@ describe('getPingHistogram', () => {
       from: 'now-15m',
       to: 'now',
       filters,
-    });
-
-    expect(mockEsClient).toHaveBeenCalledTimes(1);
-    expect(result).toMatchSnapshot();
-  });
-
-  it('returns a down-filtered array for when filtered by down status', async () => {
-    expect.assertions(2);
-    const mockEsClient = jest.fn();
-    standardMockResponse.aggregations.timeseries.interval = '1d';
-    mockEsClient.mockReturnValue(standardMockResponse);
-    const result = await getPingHistogram({
-      callES: mockEsClient,
-      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
-      from: '1234',
-      to: '5678',
-      filters: '',
-      monitorId: undefined,
-      statusFilter: 'down',
-    });
-
-    expect(mockEsClient).toHaveBeenCalledTimes(1);
-    expect(result).toMatchSnapshot();
-  });
-
-  it('returns a down-filtered array for when filtered by up status', async () => {
-    expect.assertions(2);
-    const mockEsClient = jest.fn();
-
-    standardMockResponse.aggregations.timeseries.interval = '1s';
-    mockEsClient.mockReturnValue(standardMockResponse);
-
-    const result = await getPingHistogram({
-      callES: mockEsClient,
-      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
-      from: '1234',
-      to: '5678',
-      filters: '',
-      monitorId: undefined,
-      statusFilter: 'up',
     });
 
     expect(mockEsClient).toHaveBeenCalledTimes(1);

@@ -9,12 +9,13 @@ import React, {
   useEffect,
   useRef,
   useCallback,
-  useMemo
+  useMemo,
 } from 'react';
 import { Map, NavigationControl, Popup } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { shade, tint } from 'polished';
+import { EuiTheme } from '../../../../../../../observability/public';
+import { useTheme } from '../../../../../hooks/useTheme';
 import { ChoroplethToolTip } from './ChoroplethToolTip';
 
 interface ChoroplethItem {
@@ -47,8 +48,8 @@ const MAPBOX_STYLE =
 const GEOJSON_SOURCE =
   'https://vector.maps.elastic.co/files/world_countries_v1.geo.json?elastic_tile_service_tos=agree&my_app_name=ems-landing&my_app_version=7.2.0';
 
-export function getProgressionColor(scale: number) {
-  const baseColor = euiLightVars.euiColorPrimary;
+export function getProgressionColor(scale: number, theme: EuiTheme) {
+  const baseColor = theme.eui.euiColorPrimary;
   const adjustedScale = 0.75 * scale + 0.05; // prevents pure black & white as min/max colors.
   if (adjustedScale < 0.5) {
     return tint(adjustedScale * 2, baseColor);
@@ -60,14 +61,14 @@ export function getProgressionColor(scale: number) {
 }
 
 const getMin = (items: ChoroplethItem[]) =>
-  Math.min(...items.map(item => item.value));
+  Math.min(...items.map((item) => item.value));
 
 const getMax = (items: ChoroplethItem[]) =>
-  Math.max(...items.map(item => item.value));
+  Math.max(...items.map((item) => item.value));
 
-export const ChoroplethMap: React.FC<Props> = props => {
+export const ChoroplethMap: React.FC<Props> = (props) => {
+  const theme = useTheme();
   const { items } = props;
-
   const containerRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<Map | null>(null);
   const popupRef = useRef<Popup | null>(null);
@@ -104,7 +105,7 @@ export const ChoroplethMap: React.FC<Props> = props => {
       }
       (popupRef.current as Popup).setLngLat(event.lngLat);
       const hoverFeatures = (map as Map).queryRenderedFeatures(event.point, {
-        layers: [CHOROPLETH_LAYER_ID]
+        layers: [CHOROPLETH_LAYER_ID],
       });
 
       if (tooltipState && hoverFeatures.length === 0) {
@@ -127,7 +128,7 @@ export const ChoroplethMap: React.FC<Props> = props => {
         return setTooltipState({
           name: featureProperties.name,
           value: item.value,
-          docCount: item.docCount
+          docCount: item.docCount,
         });
       }
 
@@ -137,7 +138,7 @@ export const ChoroplethMap: React.FC<Props> = props => {
   }, [map, items, tooltipState]);
 
   const updateTooltipStateOnMousemoveRef = useRef(
-    (event: mapboxgl.MapMouseEvent & mapboxgl.EventData) => {}
+    (_event: mapboxgl.MapMouseEvent & mapboxgl.EventData) => {}
   );
 
   // initialization side effect, only runs once
@@ -154,7 +155,7 @@ export const ChoroplethMap: React.FC<Props> = props => {
       touchZoomRotate: false,
       zoom: 0.85,
       center: { lng: 0, lat: 30 },
-      style: MAPBOX_STYLE
+      style: MAPBOX_STYLE,
     });
 
     mapboxMap.addControl(
@@ -165,7 +166,7 @@ export const ChoroplethMap: React.FC<Props> = props => {
     // set up Popup object
     popupRef.current = new Popup({
       closeButton: false,
-      closeOnClick: false
+      closeOnClick: false,
     });
 
     // always use the current handler which changes with component state
@@ -183,7 +184,7 @@ export const ChoroplethMap: React.FC<Props> = props => {
     mapboxMap.on('load', () => {
       mapboxMap.addSource(CHOROPLETH_POLYGONS_SOURCE_ID, {
         type: 'geojson',
-        data: GEOJSON_SOURCE
+        data: GEOJSON_SOURCE,
       });
       setMap(mapboxMap);
     });
@@ -215,14 +216,14 @@ export const ChoroplethMap: React.FC<Props> = props => {
 
     const stops = items.map(({ key, value }) => [
       key,
-      getProgressionColor(getValueScale(value))
+      getProgressionColor(getValueScale(value), theme),
     ]);
 
     const fillColor: mapboxgl.FillPaint['fill-color'] = {
       property: GEOJSON_KEY_PROPERTY,
       stops,
       type: 'categorical',
-      default: 'transparent'
+      default: 'transparent',
     };
 
     map.addLayer(
@@ -233,12 +234,12 @@ export const ChoroplethMap: React.FC<Props> = props => {
         layout: {},
         paint: {
           'fill-opacity': 0.75,
-          'fill-color': fillColor
-        }
+          'fill-color': fillColor,
+        },
       },
       symbolLayer ? symbolLayer.id : undefined
     );
-  }, [map, items, getValueScale]);
+  }, [map, items, theme, getValueScale]);
 
   // side effect to only render the Popup when hovering a region with a matching item
   useEffect(() => {

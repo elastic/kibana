@@ -28,7 +28,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
     it('should handle create alert request appropriately', async () => {
       const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'MY action',
@@ -39,7 +39,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         .expect(200);
 
       const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
@@ -54,7 +54,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         );
 
       expect(response.status).to.eql(200);
-      objectRemover.add(Spaces.space1.id, response.body.id, 'alert');
+      objectRemover.add(Spaces.space1.id, response.body.id, 'alert', 'alerts');
       expect(response.body).to.eql({
         id: response.body.id,
         name: 'abc',
@@ -104,12 +104,12 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
     it('should handle create alert request appropriately when an alert is disabled ', async () => {
       const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData({ enabled: false }));
 
       expect(response.status).to.eql(200);
-      objectRemover.add(Spaces.space1.id, response.body.id, 'alert');
+      objectRemover.add(Spaces.space1.id, response.body.id, 'alert', 'alerts');
       expect(response.body.scheduledTaskId).to.eql(undefined);
     });
   });

@@ -31,17 +31,21 @@ export function FilterBarProvider({ getService, getPageObjects }: FtrProviderCon
      * @param key field name
      * @param value filter value
      * @param enabled filter status
+     * @param pinned filter pinned status
+     * @param negated filter including or excluding value
      */
     public async hasFilter(
       key: string,
       value: string,
       enabled: boolean = true,
-      pinned: boolean = false
+      pinned: boolean = false,
+      negated: boolean = false
     ): Promise<boolean> {
       const filterActivationState = enabled ? 'enabled' : 'disabled';
       const filterPinnedState = pinned ? 'pinned' : 'unpinned';
+      const filterNegatedState = negated ? 'filter-negated' : '';
       return testSubjects.exists(
-        `filter filter-${filterActivationState} filter-key-${key} filter-value-${value} filter-${filterPinnedState}`,
+        `filter filter-${filterActivationState} filter-key-${key} filter-value-${value} filter-${filterPinnedState} ${filterNegatedState}`,
         {
           allowHidden: true,
         }
@@ -187,10 +191,7 @@ export function FilterBarProvider({ getService, getPageObjects }: FtrProviderCon
       await testSubjects.click('addFilter');
       const indexPatterns = await comboBox.getOptionsList('filterIndexPatternsSelect');
       await this.ensureFieldEditorModalIsClosed();
-      return indexPatterns
-        .trim()
-        .split('\n')
-        .join(',');
+      return indexPatterns.trim().split('\n').join(',');
     }
 
     /**

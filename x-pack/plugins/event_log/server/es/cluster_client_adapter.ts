@@ -6,11 +6,11 @@
 
 import { reject, isUndefined } from 'lodash';
 import { SearchResponse, Client } from 'elasticsearch';
-import { Logger, ClusterClient } from '../../../../../src/core/server';
+import { Logger, LegacyClusterClient } from '../../../../../src/core/server';
 import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { FindOptionsType } from '../event_log_client';
 
-export type EsClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
+export type EsClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 export type IClusterClientAdapter = PublicMethodsOf<ClusterClientAdapter>;
 
 export interface ConstructorOpts {
@@ -41,7 +41,7 @@ export class ClusterClientAdapter {
   public async doesIlmPolicyExist(policyName: string): Promise<boolean> {
     const request = {
       method: 'GET',
-      path: `_ilm/policy/${policyName}`,
+      path: `/_ilm/policy/${policyName}`,
     };
     try {
       await this.callEs('transport.request', request);
@@ -55,7 +55,7 @@ export class ClusterClientAdapter {
   public async createIlmPolicy(policyName: string, policy: unknown): Promise<void> {
     const request = {
       method: 'PUT',
-      path: `_ilm/policy/${policyName}`,
+      path: `/_ilm/policy/${policyName}`,
       body: policy,
     };
     try {
@@ -206,7 +206,7 @@ export class ClusterClientAdapter {
         page,
         per_page: perPage,
         total,
-        data: hits.map(hit => hit._source) as IEvent[],
+        data: hits.map((hit) => hit._source) as IEvent[],
       };
     } catch (err) {
       throw new Error(

@@ -10,12 +10,13 @@ import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { PolicyForm } from '../../public/application/components/policy_form';
 import { PolicyFormTestBed } from './helpers/policy_form.helpers';
 import { POLICY_EDIT } from './helpers/constant';
+import { TIME_UNITS } from '../../common/constants';
 
 const { setup } = pageHelpers.policyEdit;
 const { setup: setupPolicyAdd } = pageHelpers.policyAdd;
 
 const EXPIRE_AFTER_VALUE = '5';
-const EXPIRE_AFTER_UNIT = 'm';
+const EXPIRE_AFTER_UNIT = TIME_UNITS.MINUTE;
 
 jest.mock('ui/i18n', () => {
   const I18nContext = ({ children }: any) => children;
@@ -34,7 +35,10 @@ describe('<PolicyEdit />', () => {
   describe('on component mount', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setGetPolicyResponse({ policy: POLICY_EDIT });
-      httpRequestsMockHelpers.setLoadIndicesResponse({ indices: ['my_index'] });
+      httpRequestsMockHelpers.setLoadIndicesResponse({
+        indices: ['my_index'],
+        dataStreams: ['my_data_stream'],
+      });
       httpRequestsMockHelpers.setLoadRepositoriesResponse({
         repositories: [{ name: POLICY_EDIT.repository }],
       });
@@ -81,28 +85,23 @@ describe('<PolicyEdit />', () => {
     });
 
     describe('form payload', () => {
-      beforeEach(async () => {
+      it('should send the correct payload with changed values', async () => {
         const { form, actions } = testBed;
 
         const { snapshotName } = POLICY_EDIT;
 
-        // Complete step 1
+        // Complete step 1, change snapshot name
         form.setInputValue('snapshotNameInput', `${snapshotName}-edited`);
         actions.clickNextButton();
 
-        // Complete step 2
-        // console.log(testBed.component.debug());
+        // Complete step 2, enable ignore unavailable indices switch
         form.toggleEuiSwitch('ignoreUnavailableIndicesToggle');
         actions.clickNextButton();
 
-        // Complete step 3
+        // Complete step 3, modify retention
         form.setInputValue('expireAfterValueInput', EXPIRE_AFTER_VALUE);
         form.setInputValue('expireAfterUnitSelect', EXPIRE_AFTER_UNIT);
         actions.clickNextButton();
-      });
-
-      it('should send the correct payload with changed values', async () => {
-        const { actions } = testBed;
 
         await act(async () => {
           actions.clickSubmitButton();
@@ -118,10 +117,42 @@ describe('<PolicyEdit />', () => {
               ignoreUnavailable: true,
             },
             retention: {
+              ...POLICY_EDIT.retention,
               expireAfterValue: Number(EXPIRE_AFTER_VALUE),
               expireAfterUnit: EXPIRE_AFTER_UNIT,
             },
             snapshotName: `${POLICY_EDIT.snapshotName}-edited`,
+          },
+        };
+        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+      });
+
+      it('should provide a default time unit value for retention', async () => {
+        const { form, actions } = testBed;
+
+        // Bypass step 1
+        actions.clickNextButton();
+
+        // Bypass step 2
+        actions.clickNextButton();
+
+        // Step 3: Add expire after value, but do not change unit
+        form.setInputValue('expireAfterValueInput', EXPIRE_AFTER_VALUE);
+        actions.clickNextButton();
+
+        await act(async () => {
+          actions.clickSubmitButton();
+          await nextTick();
+        });
+
+        const latestRequest = server.requests[server.requests.length - 1];
+
+        const expected = {
+          ...POLICY_EDIT,
+          retention: {
+            ...POLICY_EDIT.retention,
+            expireAfterValue: Number(EXPIRE_AFTER_VALUE),
+            expireAfterUnit: TIME_UNITS.DAY, // default value
           },
         };
         expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);

@@ -5,11 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { APP_ID, APP_ICON, MAP_BASE_URL } from '../common/constants';
-import { getInjectedVarFunc, getVisualizations } from './kibana_services';
+import { APP_ID, APP_ICON, MAP_PATH } from '../common/constants';
+import { getShowMapVisualizationTypes, getVisualizations } from './kibana_services';
 
 export function getMapsVisTypeAlias() {
-  const showMapVisualizationTypes = getInjectedVarFunc()('showMapVisualizationTypes', false);
+  const showMapVisualizationTypes = getShowMapVisualizationTypes();
   if (!showMapVisualizationTypes) {
     getVisualizations().hideTypes(['region_map', 'tile_map']);
   }
@@ -27,7 +27,8 @@ The Maps app offers more functionality and is easier to use.`,
   );
 
   return {
-    aliasUrl: MAP_BASE_URL,
+    aliasApp: APP_ID,
+    aliasPath: `/${MAP_PATH}`,
     name: APP_ID,
     title: i18n.translate('xpack.maps.visTypeAlias.title', {
       defaultMessage: 'Maps',

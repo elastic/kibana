@@ -24,7 +24,7 @@ import {
 import { serializeRestoreSettings } from '../../../../../common/lib';
 import { useServices } from '../../../app_context';
 import { StepProps } from './';
-import { CollapsibleIndicesList } from '../../collapsible_indices_list';
+import { CollapsibleIndicesList } from '../../collapsible_lists/collapsible_indices_list';
 
 export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
   restoreSettings,
@@ -73,8 +73,8 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
           <EuiDescriptionList textStyle="reverse">
             <EuiDescriptionListTitle>
               <FormattedMessage
-                id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.indicesLabel"
-                defaultMessage="Indices"
+                id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.dataStreamsAndIndicesLabel"
+                defaultMessage="Data streams and indices"
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
@@ -249,7 +249,7 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
                 <EuiDescriptionListDescription>
                   <EuiText>
                     <ul>
-                      {ignoreIndexSettings.map(setting => (
+                      {ignoreIndexSettings.map((setting) => (
                         <li key={setting}>
                           <EuiTitle size="xs">
                             <span>{setting}</span>

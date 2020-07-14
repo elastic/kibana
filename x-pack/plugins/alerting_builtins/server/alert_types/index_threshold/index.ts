@@ -23,14 +23,14 @@ export function getService() {
 interface RegisterParams {
   service: Service;
   router: IRouter;
-  alerting: AlertingSetup;
+  alerts: AlertingSetup;
   baseRoute: string;
 }
 
 export function register(params: RegisterParams) {
-  const { service, router, alerting, baseRoute } = params;
+  const { service, router, alerts, baseRoute } = params;
 
-  alerting.registerType(getAlertType(service));
+  alerts.registerType(getAlertType(service));
 
   const baseBuiltInRoute = `${baseRoute}/index_threshold`;
   registerRoutes({ service, router, baseRoute: baseBuiltInRoute });

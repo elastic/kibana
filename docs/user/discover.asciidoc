@@ -21,6 +21,7 @@ image::images/Discover-Start.png[Discover]
 
 
 [float]
+[[select-pattern]]
 === Set up your index pattern
 
 The first thing to do in *Discover* is to select an <<index-patterns, index pattern>>, which

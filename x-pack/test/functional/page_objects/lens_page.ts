@@ -30,15 +30,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('lnsIndexPatternFiltersToggle');
     },
 
-    /**
-     * Toggles the field existence checkbox.
-     */
-    async toggleExistenceFilter() {
-      await this.toggleIndexPatternFiltersPopover();
-      await testSubjects.click('lnsEmptyFilter');
-      await this.toggleIndexPatternFiltersPopover();
-    },
-
     async findAllFields() {
       return await testSubjects.findAll('lnsFieldListPanelField');
     },
@@ -47,10 +38,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Move the date filter to the specified time range, defaults to
      * a range that has data in our dataset.
      */
-    goToTimeRange(fromTime?: string, toTime?: string) {
+    async goToTimeRange(fromTime?: string, toTime?: string) {
+      await PageObjects.timePicker.ensureHiddenNoDataPopover();
       fromTime = fromTime || PageObjects.timePicker.defaultStartTime;
       toTime = toTime || PageObjects.timePicker.defaultEndTime;
-      return PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     },
 
     /**
@@ -63,7 +55,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       let actualText: string | undefined;
 
       await retry.waitForWithTimeout('assertExpectedText', 1000, async () => {
-        actualText = await find.byCssSelector(selector).then(el => el.getVisibleText());
+        actualText = await find.byCssSelector(selector).then((el) => el.getVisibleText());
         return test(actualText);
       });
 
@@ -79,7 +71,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param expectedText - the expected text
      */
     assertExactText(selector: string, expectedText: string) {
-      return this.assertExpectedText(selector, value => value === expectedText);
+      return this.assertExpectedText(selector, (value) => value === expectedText);
     },
 
     /**
@@ -133,16 +125,34 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Save the current Lens visualization.
      */
-    async save(title: string) {
+    async save(title: string, saveAsNew?: boolean, redirectToOrigin?: boolean) {
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('lnsApp_saveButton');
       await testSubjects.setValue('savedObjectTitle', title);
+
+      const saveAsNewCheckboxExists = await testSubjects.exists('saveAsNewCheckbox');
+      if (saveAsNewCheckboxExists) {
+        const state = saveAsNew ? 'check' : 'uncheck';
+        await testSubjects.setEuiSwitch('saveAsNewCheckbox', state);
+      }
+
+      const redirectToOriginCheckboxExists = await testSubjects.exists('returnToOriginModeSwitch');
+      if (redirectToOriginCheckboxExists) {
+        const state = redirectToOrigin ? 'check' : 'uncheck';
+        await testSubjects.setEuiSwitch('returnToOriginModeSwitch', state);
+      }
+
       await testSubjects.click('confirmSaveSavedObjectButton');
-      retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
+      await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
         testSubjects
           .missingOrFail('confirmSaveSavedObjectButton')
           .then(() => true)
           .catch(() => false)
       );
+    },
+
+    async saveAndReturn() {
+      await testSubjects.click('lnsApp_saveAndReturnButton');
     },
 
     getTitle() {

@@ -5,7 +5,7 @@
  */
 
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
-import { functions } from '../../../legacy/plugins/canvas/canvas_plugin_src/functions/server';
+import { functions } from '../canvas_plugin_src/functions/server';
 
 export function setupInterpreter(expressions: ExpressionsServerSetup) {
   expressions.__LEGACY.register({ types: [], serverFunctions: functions });

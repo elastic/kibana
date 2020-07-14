@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { download } from './download';
+import { download } from '../../lib';
 import { getNodeShasums } from './node_shasums';
 import { getNodeDownloadInfo } from './node_download_info';
 
@@ -27,7 +27,7 @@ export const DownloadNodeBuildsTask = {
   async run(config, log) {
     const shasums = await getNodeShasums(config.getNodeVersion());
     await Promise.all(
-      config.getNodePlatforms().map(async platform => {
+      config.getNodePlatforms().map(async (platform) => {
         const { url, downloadPath, downloadName } = getNodeDownloadInfo(config, platform);
         await download({
           log,

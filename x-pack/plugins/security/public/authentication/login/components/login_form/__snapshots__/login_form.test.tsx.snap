@@ -4,6 +4,7 @@ exports[`LoginForm login selector properly switches to login form -> login help 
 <ReactMarkdown
   astPlugins={Array []}
   escapeHtml={true}
+  parserOptions={Object {}}
   plugins={Array []}
   rawSourcePos={false}
   renderers={Object {}}
@@ -11,19 +12,25 @@ exports[`LoginForm login selector properly switches to login form -> login help 
   sourcePos={false}
   transformLinkUri={[Function]}
 >
-  <div
-    key="root-1-1"
+  <Root
+    key="root-1-1-0"
   >
     <p
-      key="paragraph-1-1"
+      key="paragraph-1-1-0"
     >
       <strong
-        key="strong-1-1"
+        key="strong-1-1-0"
       >
-        some help
+        <TextRenderer
+          key="text-1-3-0"
+          nodeKey="text-1-3-0"
+          value="some help"
+        >
+          some help
+        </TextRenderer>
       </strong>
     </p>
-  </div>
+  </Root>
 </ReactMarkdown>
 `;
 
@@ -31,6 +38,7 @@ exports[`LoginForm login selector properly switches to login help: Login Help 1`
 <ReactMarkdown
   astPlugins={Array []}
   escapeHtml={true}
+  parserOptions={Object {}}
   plugins={Array []}
   rawSourcePos={false}
   renderers={Object {}}
@@ -38,19 +46,25 @@ exports[`LoginForm login selector properly switches to login help: Login Help 1`
   sourcePos={false}
   transformLinkUri={[Function]}
 >
-  <div
-    key="root-1-1"
+  <Root
+    key="root-1-1-0"
   >
     <p
-      key="paragraph-1-1"
+      key="paragraph-1-1-0"
     >
       <strong
-        key="strong-1-1"
+        key="strong-1-1-0"
       >
-        some help
+        <TextRenderer
+          key="text-1-3-0"
+          nodeKey="text-1-3-0"
+          value="some help"
+        >
+          some help
+        </TextRenderer>
       </strong>
     </p>
-  </div>
+  </Root>
 </ReactMarkdown>
 `;
 
@@ -58,6 +72,7 @@ exports[`LoginForm properly switches to login help: Login Help 1`] = `
 <ReactMarkdown
   astPlugins={Array []}
   escapeHtml={true}
+  parserOptions={Object {}}
   plugins={Array []}
   rawSourcePos={false}
   renderers={Object {}}
@@ -65,19 +80,25 @@ exports[`LoginForm properly switches to login help: Login Help 1`] = `
   sourcePos={false}
   transformLinkUri={[Function]}
 >
-  <div
-    key="root-1-1"
+  <Root
+    key="root-1-1-0"
   >
     <p
-      key="paragraph-1-1"
+      key="paragraph-1-1-0"
     >
       <strong
-        key="strong-1-1"
+        key="strong-1-1-0"
       >
-        some help
+        <TextRenderer
+          key="text-1-3-0"
+          nodeKey="text-1-3-0"
+          value="some help"
+        >
+          some help
+        </TextRenderer>
       </strong>
     </p>
-  </div>
+  </Root>
 </ReactMarkdown>
 `;
 

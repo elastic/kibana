@@ -56,7 +56,7 @@ function stableCloneAppExtensions(appExtensions) {
     Object.entries(appExtensions).map(([extensionType, moduleIds]) => [
       extensionType,
       moduleIds
-        .map(moduleId => {
+        .map((moduleId) => {
           if (isAbsolute(moduleId)) {
             moduleId = `absolute:${relative(REPO_ROOT, moduleId)}`;
           }
@@ -246,7 +246,7 @@ export class UiBundlesController {
   }
 
   getIds() {
-    return this._bundles.map(bundle => bundle.getId());
+    return this._bundles.map((bundle) => bundle.getId());
   }
 
   getExtendedConfig(webpackConfig) {

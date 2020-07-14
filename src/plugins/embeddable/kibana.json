@@ -4,7 +4,15 @@
   "server": false,
   "ui": true,
   "requiredPlugins": [
+    "data",
     "inspector",
     "uiActions"
+  ],
+  "extraPublicDirs": [
+    "public/lib/test_samples"
+  ],
+  "requiredBundles": [
+    "savedObjects",
+    "kibanaReact"
   ]
 }

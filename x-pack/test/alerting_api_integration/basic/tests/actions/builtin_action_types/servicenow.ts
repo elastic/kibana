@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
-} from '../../../../common/fixtures/plugins/actions_simulators';
+} from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
 // node ../scripts/functional_test_runner.js --grep "Actions.servicenddd" --config=test/alerting_api_integration/security_and_spaces/config.ts
 
@@ -38,15 +38,27 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
   const mockServiceNow = {
     config: {
       apiUrl: 'www.servicenowisinkibanaactions.com',
-      casesConfiguration: { mapping: [...mapping] },
+      incidentConfiguration: { mapping: [...mapping] },
+      isCaseOwned: true,
     },
     secrets: {
       password: 'elastic',
       username: 'changeme',
     },
     params: {
-      comments: 'hello cool service now incident',
-      short_description: 'this is a cool service now incident',
+      savedObjectId: '123',
+      title: 'a title',
+      description: 'a description',
+      comment: 'test-alert comment',
+      severity: '1',
+      urgency: '2',
+      impact: '1',
+      comments: [
+        {
+          commentId: '456',
+          comment: 'first comment',
+        },
+      ],
     },
   };
   describe('servicenow', () => {
@@ -61,14 +73,15 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
 
     it('should return 403 when creating a servicenow action', async () => {
       await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A servicenow action',
           actionTypeId: '.servicenow',
           config: {
             apiUrl: servicenowSimulatorURL,
-            casesConfiguration: { ...mockServiceNow.config.casesConfiguration },
+            incidentConfiguration: { ...mockServiceNow.config.incidentConfiguration },
+            isCaseOwned: true,
           },
           secrets: mockServiceNow.secrets,
         })
