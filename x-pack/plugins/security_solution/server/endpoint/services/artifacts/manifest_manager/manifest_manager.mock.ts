@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line max-classes-per-file
 import { savedObjectsClientMock, loggingSystemMock } from 'src/core/server/mocks';
 import { Logger } from 'src/core/server';
+import { createPackageConfigMock } from '../../../../../../ingest_manager/common/mocks';
+import { PackageConfigServiceInterface } from '../../../../../../ingest_manager/server';
+import { createPackageConfigServiceMock } from '../../../../../../ingest_manager/server/mocks';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { listMock } from '../../../../../../lists/server/mocks';
 import {
@@ -21,40 +23,6 @@ import { getArtifactClientMock } from '../artifact_client.mock';
 import { getManifestClientMock } from '../manifest_client.mock';
 import { ManifestManager } from './manifest_manager';
 
-function getMockPackageConfig() {
-  return {
-    id: 'c6d16e42-c32d-4dce-8a88-113cfe276ad1',
-    inputs: [
-      {
-        config: {},
-      },
-    ],
-    revision: 1,
-    version: 'abcd', // TODO: not yet implemented in ingest_manager (https://github.com/elastic/kibana/issues/69992)
-    updated_at: '2020-06-25T16:03:38.159292',
-    updated_by: 'kibana',
-    created_at: '2020-06-25T16:03:38.159292',
-    created_by: 'kibana',
-  };
-}
-
-class PackageConfigServiceMock {
-  public create = jest.fn().mockResolvedValue(getMockPackageConfig());
-  public get = jest.fn().mockResolvedValue(getMockPackageConfig());
-  public getByIds = jest.fn().mockResolvedValue([getMockPackageConfig()]);
-  public list = jest.fn().mockResolvedValue({
-    items: [getMockPackageConfig()],
-    total: 1,
-    page: 1,
-    perPage: 20,
-  });
-  public update = jest.fn().mockResolvedValue(getMockPackageConfig());
-}
-
-export function getPackageConfigServiceMock() {
-  return new PackageConfigServiceMock();
-}
-
 async function mockBuildExceptionListArtifacts(
   os: string,
   schemaVersion: string
@@ -66,27 +34,23 @@ async function mockBuildExceptionListArtifacts(
   return [await buildArtifact(exceptions, os, schemaVersion)];
 }
 
-// @ts-ignore
 export class ManifestManagerMock extends ManifestManager {
-  // @ts-ignore
-  private buildExceptionListArtifacts = async () => {
-    return mockBuildExceptionListArtifacts('linux', 'v1');
-  };
+  protected buildExceptionListArtifacts = jest
+    .fn()
+    .mockResolvedValue(mockBuildExceptionListArtifacts('linux', 'v1'));
 
-  // @ts-ignore
-  private getLastDispatchedManifest = jest
+  public getLastDispatchedManifest = jest
     .fn()
     .mockResolvedValue(new Manifest(new Date(), 'v1', ManifestConstants.INITIAL_VERSION));
 
-  // @ts-ignore
-  private getManifestClient = jest
+  protected getManifestClient = jest
     .fn()
     .mockReturnValue(getManifestClientMock(this.savedObjectsClient));
 }
 
 export const getManifestManagerMock = (opts?: {
   cache?: ExceptionsCache;
-  packageConfigService?: PackageConfigServiceMock;
+  packageConfigService?: jest.Mocked<PackageConfigServiceInterface>;
   savedObjectsClient?: ReturnType<typeof savedObjectsClientMock.create>;
 }): ManifestManagerMock => {
   let cache = new ExceptionsCache(5);
@@ -94,10 +58,14 @@ export const getManifestManagerMock = (opts?: {
     cache = opts.cache;
   }
 
-  let packageConfigService = getPackageConfigServiceMock();
+  let packageConfigService = createPackageConfigServiceMock();
   if (opts?.packageConfigService !== undefined) {
     packageConfigService = opts.packageConfigService;
   }
+  packageConfigService.list = jest.fn().mockResolvedValue({
+    total: 1,
+    items: [{ version: 'abcd', ...createPackageConfigMock() }],
+  });
 
   let savedObjectsClient = savedObjectsClientMock.create();
   if (opts?.savedObjectsClient !== undefined) {
@@ -107,7 +75,6 @@ export const getManifestManagerMock = (opts?: {
   const manifestManager = new ManifestManagerMock({
     artifactClient: getArtifactClientMock(savedObjectsClient),
     cache,
-    // @ts-ignore
     packageConfigService,
     exceptionListClient: listMock.getExceptionListClient(),
     logger: loggingSystemMock.create().get() as jest.Mocked<Logger>,

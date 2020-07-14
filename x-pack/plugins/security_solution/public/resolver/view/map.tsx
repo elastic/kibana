@@ -29,6 +29,7 @@ import { SideEffectContext } from './side_effect_context';
 export const ResolverMap = React.memo(function ({
   className,
   databaseDocumentID,
+  resolverComponentInstanceID,
 }: {
   /**
    * Used by `styled-components`.
@@ -39,12 +40,17 @@ export const ResolverMap = React.memo(function ({
    * Used as the origin of the Resolver graph.
    */
   databaseDocumentID?: string;
+  /**
+   * A string literal describing where in the app resolver is located,
+   * used to prevent collisions in things like query params
+   */
+  resolverComponentInstanceID: string;
 }) {
   /**
    * This is responsible for dispatching actions that include any external data.
    * `databaseDocumentID`
    */
-  useStateSyncingActions({ databaseDocumentID });
+  useStateSyncingActions({ databaseDocumentID, resolverComponentInstanceID });
 
   const { timestamp } = useContext(SideEffectContext);
   const { processNodePositions, connectingEdgeLineSegments } = useSelector(

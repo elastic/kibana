@@ -36,6 +36,7 @@ export function stanMetricsSpecProvider(context: TutorialContext): TutorialSchem
     name: i18n.translate('home.tutorials.stanMetrics.nameTitle', {
       defaultMessage: 'STAN metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.stanMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from the STAN server.',
