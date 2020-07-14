@@ -85,7 +85,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_API_ROUTES.CHECKIN_PATTERN,
       validate: PostAgentCheckinRequestSchema,
-      options: { tags: [LIMITED_CONCURRENCY_ROUTE_TAG] },
+      options: { tags: [] },
     },
     postAgentCheckinHandler
   );
