@@ -218,7 +218,7 @@ export class LicenseExpirationAlert extends BaseAlert {
       });
     } else {
       const actionText = i18n.translate('xpack.monitoring.alerts.licenseExpiration.action', {
-        defaultMessage: 'Please update your license',
+        defaultMessage: 'Please update your license.',
       });
       const globalState = [`cluster_uuid:${cluster.clusterUuid}`];
       if (alertState.ccs) {

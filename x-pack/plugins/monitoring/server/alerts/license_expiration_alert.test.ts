@@ -174,12 +174,12 @@ describe('LicenseExpirationAlert', () => {
       });
       expect(scheduleActions).toHaveBeenCalledWith('default', {
         action:
-          '[Please update your license](http://localhost:5601/app/monitoring#elasticsearch/nodes?_g=(cluster_uuid:abc123))',
-        actionPlain: 'Please update your license',
+          '[Please update your license.](http://localhost:5601/app/monitoring#elasticsearch/nodes?_g=(cluster_uuid:abc123))',
+        actionPlain: 'Please update your license.',
         internalFullMessage:
-          'License expiration alert is firing for testCluster. Your license will expire in THE_DATE. [Please update your license](http://localhost:5601/app/monitoring#elasticsearch/nodes?_g=(cluster_uuid:abc123))',
+          'License expiration alert is firing for testCluster. Your license will expire in THE_DATE. [Please update your license.](http://localhost:5601/app/monitoring#elasticsearch/nodes?_g=(cluster_uuid:abc123))',
         internalShortMessage:
-          'License expiration alert is firing for testCluster. Your license will expire in THE_DATE. Please update your license',
+          'License expiration alert is firing for testCluster. Your license will expire in THE_DATE. Please update your license.',
         clusterName,
         expiredDate: 'THE_DATE',
         state: 'firing',

@@ -224,8 +224,11 @@ export class NodesChangedAlert extends BaseAlert {
         clusterName: cluster.clusterName,
       });
     } else {
-      const actionText = i18n.translate('xpack.monitoring.alerts.nodesChanged.action', {
-        defaultMessage: `View nodes`,
+      const shortActionText = i18n.translate('xpack.monitoring.alerts.nodesChanged.shortAction', {
+        defaultMessage: 'Verify that you added, removed, or restarted nodes.',
+      });
+      const fullActionText = i18n.translate('xpack.monitoring.alerts.nodesChanged.fullAction', {
+        defaultMessage: 'View nodes',
       });
       const globalState = [`cluster_uuid:${cluster.clusterUuid}`];
       if (alertState.ccs) {
@@ -234,7 +237,7 @@ export class NodesChangedAlert extends BaseAlert {
       const url = `${this.kibanaUrl}/app/monitoring#elasticsearch/nodes?_g=(${globalState.join(
         ','
       )})`;
-      const action = `[${actionText}](${url})`;
+      const action = `[${fullActionText}](${url})`;
       const states = this.getNodeStates(legacyAlert) || { added: {}, removed: {}, restarted: {} };
       const added = Object.values(states.added).join(',');
       const removed = Object.values(states.removed).join(',');
@@ -243,17 +246,17 @@ export class NodesChangedAlert extends BaseAlert {
         internalShortMessage: i18n.translate(
           'xpack.monitoring.alerts.nodesChanged.firing.internalShortMessage',
           {
-            defaultMessage: `Cluster health alert is firing for {clusterName}. {actionText}`,
+            defaultMessage: `Nodes changed alert is firing for {clusterName}. {shortActionText}`,
             values: {
               clusterName: cluster.clusterName,
-              actionText,
+              shortActionText,
             },
           }
         ),
         internalFullMessage: i18n.translate(
           'xpack.monitoring.alerts.nodesChanged.firing.internalFullMessage',
           {
-            defaultMessage: `Cluster health alert is firing for {clusterName}. The following Elasticsearch nodes have been added:{added} removed:{removed} restarted:{restarted}. {action}`,
+            defaultMessage: `Nodes changed alert is firing for {clusterName}. The following Elasticsearch nodes have been added:{added} removed:{removed} restarted:{restarted}. {action}`,
             values: {
               clusterName: cluster.clusterName,
               added,
@@ -269,7 +272,7 @@ export class NodesChangedAlert extends BaseAlert {
         removed,
         restarted,
         action,
-        actionPlain: actionText,
+        actionPlain: shortActionText,
       });
     }
   }

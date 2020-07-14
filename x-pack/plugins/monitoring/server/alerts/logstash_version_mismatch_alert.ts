@@ -223,9 +223,7 @@ export class LogstashVersionMismatchAlert extends BaseAlert {
       if (alertState.ccs) {
         globalState.push(`ccs:${alertState.ccs}`);
       }
-      const url = `${this.kibanaUrl}/app/monitoring#elasticsearch/nodes?_g=(${globalState.join(
-        ','
-      )})`;
+      const url = `${this.kibanaUrl}/app/monitoring#logstash/nodes?_g=(${globalState.join(',')})`;
       const action = `[${fullActionText}](${url})`;
       instance.scheduleActions('default', {
         internalShortMessage: i18n.translate(

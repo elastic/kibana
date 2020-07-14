@@ -158,10 +158,11 @@ describe('NodesChangedAlert', () => {
       expect(scheduleActions).toHaveBeenCalledWith('default', {
         action:
           '[View nodes](http://localhost:5601/app/monitoring#elasticsearch/nodes?_g=(cluster_uuid:abc123))',
-        actionPlain: 'View nodes',
+        actionPlain: 'Verify that you added, removed, or restarted nodes.',
         internalFullMessage:
-          'Cluster health alert is firing for testCluster. The following Elasticsearch nodes have been added: removed: restarted:test. [View nodes](http://localhost:5601/app/monitoring#elasticsearch/nodes?_g=(cluster_uuid:abc123))',
-        internalShortMessage: 'Cluster health alert is firing for testCluster. View nodes',
+          'Nodes changed alert is firing for testCluster. The following Elasticsearch nodes have been added: removed: restarted:test. [View nodes](http://localhost:5601/app/monitoring#elasticsearch/nodes?_g=(cluster_uuid:abc123))',
+        internalShortMessage:
+          'Nodes changed alert is firing for testCluster. Verify that you added, removed, or restarted nodes.',
         added: '',
         removed: '',
         restarted: 'test',
