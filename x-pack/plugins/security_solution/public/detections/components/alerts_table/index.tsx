@@ -63,10 +63,12 @@ interface OwnProps {
   defaultFilters?: Filter[];
   eventsViewerBodyHeight?: number;
   hasIndexWrite: boolean;
-  from: number;
+  from: string;
   loading: boolean;
+  showBuildingBlockAlerts: boolean;
+  onShowBuildingBlockAlertsChanged: (showBuildingBlockAlerts: boolean) => void;
   signalsIndex: string;
-  to: number;
+  to: string;
 }
 
 type AlertsTableComponentProps = OwnProps & PropsFromRedux;
@@ -96,6 +98,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   selectedEventIds,
   setEventsDeleted,
   setEventsLoading,
+  showBuildingBlockAlerts,
+  onShowBuildingBlockAlertsChanged,
   signalsIndex,
   to,
   updateTimeline,
@@ -304,6 +308,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           currentFilter={filterGroup}
           selectAll={selectAllCallback}
           selectedEventIds={selectedEventIds}
+          showBuildingBlockAlerts={showBuildingBlockAlerts}
+          onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
           showClearSelection={showClearSelectionAction}
           totalCount={totalCount}
           updateAlertsStatus={updateAlertsStatusCallback.bind(null, refetchQuery)}
@@ -315,6 +321,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       hasIndexWrite,
       clearSelectionCallback,
       filterGroup,
+      showBuildingBlockAlerts,
+      onShowBuildingBlockAlertsChanged,
       loadingEventIds.length,
       selectAllCallback,
       selectedEventIds,

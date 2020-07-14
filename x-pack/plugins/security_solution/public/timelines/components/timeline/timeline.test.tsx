@@ -60,8 +60,8 @@ describe('Timeline', () => {
     columnId: '@timestamp',
     sortDirection: Direction.desc,
   };
-  const startDate = new Date('2018-03-23T18:49:23.132Z').valueOf();
-  const endDate = new Date('2018-03-24T03:33:52.253Z').valueOf();
+  const startDate = '2018-03-23T18:49:23.132Z';
+  const endDate = '2018-03-24T03:33:52.253Z';
 
   const indexPattern = mockIndexPattern;
 
@@ -77,12 +77,14 @@ describe('Timeline', () => {
       columns: defaultHeaders,
       id: 'foo',
       dataProviders: mockDataProviders,
+      docValueFields: [],
       end: endDate,
       eventType: 'raw' as TimelineComponentProps['eventType'],
       filters: [],
       indexPattern,
       indexToAdd: [],
       isLive: false,
+      isLoadingSource: false,
       isSaving: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
@@ -154,6 +156,42 @@ describe('Timeline', () => {
       );
 
       expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
+    });
+
+    test('it does NOT render the timeline table when the source is loading', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mocks}>
+            <TimelineComponent {...props} isLoadingSource={true} />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(false);
+    });
+
+    test('it does NOT render the timeline table when start is empty', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mocks}>
+            <TimelineComponent {...props} start={''} />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(false);
+    });
+
+    test('it does NOT render the timeline table when end is empty', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mocks}>
+            <TimelineComponent {...props} end={''} />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(false);
     });
 
     test('it does NOT render the paging footer when you do NOT have any data providers', () => {

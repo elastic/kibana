@@ -66,8 +66,8 @@ describe('epicLocalStorage', () => {
     columnId: '@timestamp',
     sortDirection: Direction.desc,
   };
-  const startDate = new Date('2018-03-23T18:49:23.132Z').valueOf();
-  const endDate = new Date('2018-03-24T03:33:52.253Z').valueOf();
+  const startDate = '2018-03-23T18:49:23.132Z';
+  const endDate = '2018-03-24T03:33:52.253Z';
 
   const indexPattern = mockIndexPattern;
 
@@ -84,12 +84,14 @@ describe('epicLocalStorage', () => {
       columns: defaultHeaders,
       id: 'foo',
       dataProviders: mockDataProviders,
+      docValueFields: [],
       end: endDate,
       eventType: 'raw' as TimelineComponentProps['eventType'],
       filters: [],
       indexPattern,
       indexToAdd: [],
       isLive: false,
+      isLoadingSource: false,
       isSaving: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],

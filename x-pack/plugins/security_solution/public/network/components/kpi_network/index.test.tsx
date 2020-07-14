@@ -22,8 +22,8 @@ import { mockData } from './mock';
 
 describe('KpiNetwork Component', () => {
   const state: State = mockGlobalState;
-  const from = new Date('2019-06-15T06:00:00.000Z').valueOf();
-  const to = new Date('2019-06-18T06:00:00.000Z').valueOf();
+  const from = '2019-06-15T06:00:00.000Z';
+  const to = '2019-06-18T06:00:00.000Z';
   const narrowDateRange = jest.fn();
 
   const { storage } = createSecuritySolutionStorageMock();

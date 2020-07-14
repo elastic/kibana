@@ -49,6 +49,7 @@ export interface CustomReduxProps {
 
 export interface OwnProps extends QueryTemplateProps {
   children?: (args: TimelineArgs) => React.ReactNode;
+  endDate: string;
   eventType?: EventType;
   id: string;
   indexPattern?: IIndexPattern;
@@ -56,6 +57,7 @@ export interface OwnProps extends QueryTemplateProps {
   limit: number;
   sortField: SortField;
   fields: string[];
+  startDate: string;
 }
 
 type TimelineQueryProps = OwnProps & PropsFromRedux & WithKibanaProps & CustomReduxProps;
@@ -77,6 +79,8 @@ class TimelineQueryComponent extends QueryTemplate<
     const {
       children,
       clearSignalsState,
+      docValueFields,
+      endDate,
       eventType = 'raw',
       id,
       indexPattern,
@@ -88,6 +92,7 @@ class TimelineQueryComponent extends QueryTemplate<
       filterQuery,
       sourceId,
       sortField,
+      startDate,
     } = this.props;
     const defaultKibanaIndex = kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
     const defaultIndex =
@@ -101,9 +106,15 @@ class TimelineQueryComponent extends QueryTemplate<
       fieldRequested: fields,
       filterQuery: createFilter(filterQuery),
       sourceId,
+      timerange: {
+        interval: '12h',
+        from: startDate,
+        to: endDate,
+      },
       pagination: { limit, cursor: null, tiebreaker: null },
       sortField,
       defaultIndex,
+      docValueFields: docValueFields ?? [],
       inspect: isInspected,
     };
 

@@ -17,9 +17,9 @@ import * as i18n from './translations';
 import { useKibana } from '../../lib/kibana';
 
 export interface OwnProps {
-  end: number;
+  end: string;
   id: string;
-  start: number;
+  start: string;
 }
 
 const defaultAlertsFilters: Filter[] = [
@@ -57,9 +57,9 @@ const defaultAlertsFilters: Filter[] = [
 
 interface Props {
   timelineId: TimelineIdLiteral;
-  endDate: number;
+  endDate: string;
   eventsViewerBodyHeight?: number;
-  startDate: number;
+  startDate: string;
   pageFilters?: Filter[];
 }
 
