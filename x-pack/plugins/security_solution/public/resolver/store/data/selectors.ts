@@ -148,12 +148,15 @@ export const relatedEventsByCategory = createSelector(
         if (!relatedById) {
           return [];
         }
-        return relatedById.events.reduce((a: ResolverEvent[], candidate: ResolverEvent) => {
-          if ([candidate && allEventCategories(candidate)].flat().includes(ecsCategory)) {
-            a.push(candidate);
-          }
-          return a;
-        }, []);
+        return relatedById.events.reduce(
+          (eventsByCategory: ResolverEvent[], candidate: ResolverEvent) => {
+            if ([candidate && allEventCategories(candidate)].flat().includes(ecsCategory)) {
+              eventsByCategory.push(candidate);
+            }
+            return eventsByCategory;
+          },
+          []
+        );
       });
     });
   }
