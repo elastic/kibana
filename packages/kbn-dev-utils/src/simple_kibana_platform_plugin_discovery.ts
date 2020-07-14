@@ -58,27 +58,29 @@ export function simpleKibanaPlatformPluginDiscovery(scanDirs: string[], paths: s
     Path.resolve(path)
   );
 
-  return manifestPaths.map((manifestPath) => {
-    if (!Path.isAbsolute(manifestPath)) {
-      throw new TypeError('expected new platform manifest path to be absolute');
-    }
+  return manifestPaths.map(
+    (manifestPath): KibanaPlatformPlugin => {
+      if (!Path.isAbsolute(manifestPath)) {
+        throw new TypeError('expected new platform manifest path to be absolute');
+      }
 
-    const manifest = loadJsonFile.sync(manifestPath);
-    if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest)) {
-      throw new TypeError('expected new platform plugin manifest to be a JSON encoded object');
-    }
+      const manifest = loadJsonFile.sync(manifestPath);
+      if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest)) {
+        throw new TypeError('expected new platform plugin manifest to be a JSON encoded object');
+      }
 
-    if (typeof manifest.id !== 'string') {
-      throw new TypeError('expected new platform plugin manifest to have a string id');
-    }
+      if (typeof manifest.id !== 'string') {
+        throw new TypeError('expected new platform plugin manifest to have a string id');
+      }
 
-    return {
-      directory: Path.dirname(manifestPath),
-      manifestPath,
-      manifest: {
-        ...manifest,
-        id: manifest.id,
-      },
-    };
-  });
+      return {
+        directory: Path.dirname(manifestPath),
+        manifestPath,
+        manifest: {
+          ...manifest,
+          id: manifest.id,
+        },
+      };
+    }
+  );
 }

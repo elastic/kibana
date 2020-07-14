@@ -27,6 +27,9 @@ export interface KibanaPlatformPlugin {
   readonly extraPublicDirs: string[];
 }
 
+const isArrayOfStrings = (input: any): input is string[] =>
+  Array.isArray(input) && input.every((p) => typeof p === 'string');
+
 /**
  * Helper to find the new platform plugins.
  */
@@ -35,16 +38,12 @@ export function findKibanaPlatformPlugins(scanDirs: string[], paths: string[]) {
     ({ directory, manifestPath, manifest }): KibanaPlatformPlugin => {
       let extraPublicDirs: string[] | undefined;
       if (manifest.extraPublicDirs) {
-        if (
-          !Array.isArray(manifest.extraPublicDirs) ||
-          !manifest.extraPublicDirs.every((p) => typeof p === 'string')
-        ) {
+        if (!isArrayOfStrings(manifest.extraPublicDirs)) {
           throw new TypeError(
             'expected new platform plugin manifest to have an array of strings `extraPublicDirs` property'
           );
         }
-
-        extraPublicDirs = manifest.extraPublicDirs as string[];
+        extraPublicDirs = manifest.extraPublicDirs;
       }
 
       return {
