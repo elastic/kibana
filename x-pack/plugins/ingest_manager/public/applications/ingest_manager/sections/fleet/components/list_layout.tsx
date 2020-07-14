@@ -112,7 +112,7 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
             <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
               <FormattedMessage
                 id="xpack.ingestManager.agentList.enrollButton"
-                defaultMessage="Add Agent"
+                defaultMessage="Add agent"
               />
             </EuiButton>
           </EuiFlexItem>

@@ -84,7 +84,7 @@ export const IngestManagerOverview: React.FunctionComponent = () => {
             <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
               <FormattedMessage
                 id="xpack.ingestManager.overviewPageEnrollAgentButton"
-                defaultMessage="Add Agent"
+                defaultMessage="Add agent"
               />
             </EuiButton>
           </EuiFlexItem>

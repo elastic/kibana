@@ -85,7 +85,7 @@ export const AgentConfigActionMenu = memo<{
                   >
                     <FormattedMessage
                       id="xpack.ingestManager.agentConfigActionMenu.enrollAgentActionText"
-                      defaultMessage="Add Agent"
+                      defaultMessage="Add agent"
                     />
                   </EuiContextMenuItem>,
                   <EuiContextMenuItem
