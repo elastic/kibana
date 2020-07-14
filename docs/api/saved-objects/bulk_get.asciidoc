@@ -29,7 +29,7 @@ experimental[] Retrieve multiple {kib} saved objects by ID.
   (Required, string) ID of the retrieved object. The ID includes the {kib} unique identifier or a custom identifier.
 
 `fields`::
-  (Optional, array) The fields returned in the object response.
+  (Optional, array) The fields to return in the `attributes` key of the object response.
 
 [[saved-objects-api-bulk-get-response-body]]
 ==== Response body
