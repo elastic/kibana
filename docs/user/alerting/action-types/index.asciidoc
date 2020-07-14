@@ -2,7 +2,7 @@
 [[index-action-type]]
 === Index action
 
-The index action type will index a document into {es}. There is an {ref}/indices-create-index.html[info] how to create an index in {es}.
+The index action type will index a document into {es}. See also the {ref}/indices-create-index.html[create index API].
 
 [float]
 [[index-connector-configuration]]
@@ -55,9 +55,9 @@ Index actions have the following properties:
 
 Document::  The document to index in JSON format.
 
-Example of the index document for Index Threshold Alert:
+Example of the index document for Index Threshold alert:
 
-[source,js]
+[source,text]
 --------------------------------------------------
 {
     "alert_id": "{{alertId}}",
@@ -67,9 +67,9 @@ Example of the index document for Index Threshold Alert:
 } 
 --------------------------------------------------
 
-Example of create test index using index API.
+Example of create test index using the API.
 
-[source,js]
+[source,text]
 --------------------------------------------------
 PUT test
 {
