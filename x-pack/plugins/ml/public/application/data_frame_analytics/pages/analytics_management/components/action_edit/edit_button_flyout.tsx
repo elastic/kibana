@@ -28,11 +28,11 @@ import {
 
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { ml } from '../../../../../services/ml_api_service';
+import { useToastNotificationService } from '../../../../../services/toast_notification_service';
 import {
   memoryInputValidator,
   MemoryInputValidatorResult,
 } from '../../../../../../../common/util/validators';
-import { extractErrorMessage } from '../../../../../../../common/util/errors';
 import { DATA_FRAME_TASK_STATE } from '../analytics_list/common';
 import {
   useRefreshAnalyticsList,
@@ -59,6 +59,8 @@ export const EditButtonFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
     services: { notifications },
   } = useMlKibana();
   const { refresh } = useRefreshAnalyticsList();
+
+  const toastNotificationService = useToastNotificationService();
 
   // Disable if mml is not valid
   const updateButtonDisabled = mmlValidationError !== undefined || maxNumThreads === 0;
@@ -113,15 +115,15 @@ export const EditButtonFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
       // eslint-disable-next-line
       console.error(e);
 
-      notifications.toasts.addDanger({
-        title: i18n.translate('xpack.ml.dataframe.analyticsList.editFlyoutErrorMessage', {
+      toastNotificationService.displayErrorToast(
+        e,
+        i18n.translate('xpack.ml.dataframe.analyticsList.editFlyoutErrorMessage', {
           defaultMessage: 'Could not save changes to analytics job {jobId}',
           values: {
             jobId,
           },
-        }),
-        text: extractErrorMessage(e),
-      });
+        })
+      );
     }
   };
 
