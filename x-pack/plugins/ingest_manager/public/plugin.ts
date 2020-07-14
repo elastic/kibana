@@ -39,7 +39,7 @@ export interface IngestManagerSetup {}
  */
 export interface IngestManagerStart {
   registerPackageConfigComponent: typeof registerPackageConfigComponent;
-  waitForInitialization: () => Promise<true>;
+  isInitialized: () => Promise<true>;
 }
 
 export interface IngestManagerSetupDeps {
@@ -100,10 +100,10 @@ export class IngestManagerPlugin
   }
 
   public async start(core: CoreStart): Promise<IngestManagerStart> {
-    let successPromise: ReturnType<IngestManagerStart['waitForInitialization']>;
+    let successPromise: ReturnType<IngestManagerStart['isInitialized']>;
 
     return {
-      waitForInitialization: () => {
+      isInitialized: () => {
         if (!successPromise) {
           successPromise = Promise.resolve().then(async () => {
             const permissionsResponse = await core.http.get<CheckPermissionsResponse>(
