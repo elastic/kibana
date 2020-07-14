@@ -54,9 +54,8 @@ export const ResolverMap = React.memo(function ({
 
   const { timestamp } = useContext(SideEffectContext);
   const { processNodePositions, connectingEdgeLineSegments } = useSelector(
-    selectors.visibleProcessNodePositionsAndEdgeLineSegments
+    selectors.visibleNodesAndEdgeLines
   )(timestamp());
-  const { processToAdjacencyMap } = useSelector(selectors.processAdjacencies);
   const relatedEventsStats = useSelector(selectors.relatedEventsStats);
   const terminatedProcesses = useSelector(selectors.terminatedProcesses);
   const { projectionMatrix, ref, onMouseDown } = useCamera();
@@ -100,19 +99,13 @@ export const ResolverMap = React.memo(function ({
             />
           ))}
           {[...processNodePositions].map(([processEvent, position]) => {
-            const adjacentNodeMap = processToAdjacencyMap.get(processEvent);
             const processEntityId = entityId(processEvent);
-            if (!adjacentNodeMap) {
-              // This should never happen
-              throw new Error('Issue calculating adjacency node map.');
-            }
             return (
               <ProcessEventDot
                 key={processEntityId}
                 position={position}
                 projectionMatrix={projectionMatrix}
                 event={processEvent}
-                adjacentNodeMap={adjacentNodeMap}
                 relatedEventsStatsForProcess={
                   relatedEventsStats ? relatedEventsStats.get(entityId(processEvent)) : undefined
                 }
