@@ -33,4 +33,5 @@ export interface IDynamicStyleProperty extends IStyleProperty {
   pluckCategoricalStyleMetaFromFeatures(features: unknown[]): CategoryFieldMeta;
   pluckOrdinalStyleMetaFromFieldMetaData(fieldMetaData: unknown): RangeFieldMeta;
   pluckCategoricalStyleMetaFromFieldMetaData(fieldMetaData: unknown): CategoryFieldMeta;
+  getValueSuggestions(query: string): string[];
 }
