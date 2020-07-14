@@ -1,0 +1,42 @@
+[[code-exploration]]
+=== Exploring Kibana code
+
+The goals of our folder heirarchy are:
+
+- Easy for developers to know where to add new services, plugins and applications.
+- Easy for developers to know where to find the code from services, plugins and applications.
+- Easy to browse and understand our folder structure.
+
+To that aim, we strive to:
+
+- Avoid too many files in any given folder.
+- Choose clear, unambigious folder names.
+- Organize by domain.
+- Every folder should contain a README that describes the contents of that folder.
+
+[discrete]
+[[kibana-services-applications]]
+==== Services and Applications
+
+[discrete]
+===== src/plugins
+
+- advanced_settings 
+
+WARNING: Missing README.
+
+- apm_oss
+
+WARNING: Missing README.
+
+- {kib-repo}blob/{branch}/src/plugins/bfetch/README.md[bfetch]
+
+`bfetch` allows to batch HTTP requests and streams responses back.
+
+- {kib-repo}blob/{branch}/src/plugins/charts/README.md[charts]
+
+The Charts plugin is a way to create easier integration of shared colors, themes, types and other utilities across all Kibana charts and visualizations.
+
+[discrete]
+===== x-pack/plugins
+
