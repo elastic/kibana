@@ -29,7 +29,10 @@ describe('ML - error message utils', () => {
 
       const bodyWithStringMsg: MLCustomHttpResponseOptions<MLResponseError> = {
         body: {
-          msg: testMsg,
+          msg: 'Could not open job because no ML nodes with sufficient capacity were found',
+          statusCode: 404,
+          response:
+            '"{"error":{"root_cause":[{"type":"status_exception","reason":"Could not open job because no ML nodes with sufficient capacity were found"}],"type":"status_exception","reason":"Could not open job because no ML nodes with sufficient capacity were found","caused_by":{"type":"illegal_state_exception","reason":"Could not open job because no suitable nodes were found, allocation explanation [Not opening job [farequote_6gb] on node [{DESKTOP}{ml.machine_memory=16894709760}{ml.max_open_jobs=20}], because this node has insufficient available memory. Available memory for ML [5068412928], memory required by existing jobs [0], estimated memory required for this job [6484393984]]"}},"status":404}"',
         },
         statusCode: 404,
       };
