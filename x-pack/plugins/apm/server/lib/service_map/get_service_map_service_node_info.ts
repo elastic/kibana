@@ -16,17 +16,20 @@ import {
 import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { ESFilter } from '../../../typings/elasticsearch';
-import { getErrorRate } from '../errors/get_error_rate';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters,
+} from '../helpers/setup_request';
 import { percentMemoryUsedScript } from '../metrics/by_agent/shared/memory';
 import {
   TRANSACTION_REQUEST,
   TRANSACTION_PAGE_LOAD,
 } from '../../../common/transaction_types';
-import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { getErrorRate } from '../transaction_groups/get_error_rate';
 
 interface Options {
-  setup: Setup & SetupTimeRange;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
   environment?: string;
   serviceName: string;
 }
@@ -41,29 +44,18 @@ interface TaskParameters {
 
 export async function getServiceMapServiceNodeInfo({
   serviceName,
-  environment,
   setup,
-}: Options & { serviceName: string; environment?: string }) {
-  const { start, end } = setup;
+}: Options & { serviceName: string }) {
+  const { start, end, uiFiltersES } = setup;
 
   const filter: ESFilter[] = [
     { range: rangeFilter(start, end) },
     { term: { [SERVICE_NAME]: serviceName } },
+    ...uiFiltersES,
   ];
-
-  // The environment parameter given to this endpoint is not the same as the
-  // environment in the uiFilters (this endpoint doesn't take uiFilters as a
-  // parameter) but the evnironment of the selected node. We use the same function
-  // used by `getUiFiltersES` to create the filter used for environment.
-  const environmentFilter = getEnvironmentUiFilterES(environment);
-
-  if (environmentFilter) {
-    filter.push(environmentFilter);
-  }
 
   const minutes = Math.abs((end - start) / (1000 * 60));
   const taskParams = {
-    environment,
     filter,
     minutes,
     serviceName,
@@ -90,28 +82,13 @@ export async function getServiceMapServiceNodeInfo({
 }
 
 async function getErrorStats({
-  environment,
-  filter,
-  serviceName,
   setup,
+  serviceName,
 }: {
-  environment?: string;
-  filter: ESFilter[];
-  serviceName: string;
   setup: Options['setup'];
+  serviceName: string;
 }) {
-  // The endpoint that calls `getServiceMapServiceNodeInfo` does not take
-  // `uiFilters` but other endpoints that call getErrorRate do, so we pass in an
-  // a setup object with an empty list of uiFilters added to satisfy the type
-  // definition of `getErrorRate`
-  const setupWithBlankUiFilters = { ...setup, uiFiltersES: [] };
-
-  const { average, noHits } = await getErrorRate({
-    environment,
-    serviceName,
-    setup: setupWithBlankUiFilters,
-  });
-
+  const { noHits, average } = await getErrorRate({ setup, serviceName });
   return { avgErrorRate: noHits ? null : average };
 }
 

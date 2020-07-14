@@ -33,6 +33,7 @@ export function ServiceStatsFetcher({
 }: ServiceStatsFetcherProps) {
   const {
     urlParams: { start, end },
+    uiFilters,
   } = useUrlParams();
 
   const {
@@ -43,11 +44,14 @@ export function ServiceStatsFetcher({
       if (serviceName && start && end) {
         return callApmApi({
           pathname: '/api/apm/service-map/service/{serviceName}',
-          params: { path: { serviceName }, query: { start, end, environment } },
+          params: {
+            path: { serviceName },
+            query: { start, end, uiFilters: JSON.stringify(uiFilters) },
+          },
         });
       }
     },
-    [serviceName, start, end, environment],
+    [serviceName, start, end, uiFilters],
     {
       preservePreviousData: false,
     }
