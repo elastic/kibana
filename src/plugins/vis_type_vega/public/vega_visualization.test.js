@@ -43,6 +43,10 @@ import { coreMock } from '../../../core/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
 import { KibanaMap } from '../../maps_legacy/public/map/kibana_map';
 
+jest.mock('./default_spec', () => ({
+  getDefaultSpec: () => jest.requireActual('./__test__/default.spec.json'),
+}));
+
 jest.mock('./lib/vega', () => ({
   vega: jest.requireActual('vega'),
   vegaLite: jest.requireActual('vega-lite'),
