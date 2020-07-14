@@ -50,10 +50,8 @@ export const useJobSelection = (jobs: MlJobWithTimeRange[]) => {
   }, [tmpIds, invalidIds]);
 
   const jobSelection: JobSelection = useMemo(() => {
-    const jobIds = validIds;
     const selectedGroups = globalState?.ml?.groups ?? [];
-
-    return { jobIds, selectedGroups };
+    return { jobIds: validIds, selectedGroups };
   }, [validIds, globalState?.ml?.groups]);
 
   useEffect(() => {
