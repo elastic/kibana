@@ -27,7 +27,7 @@ import {
 export function createSavedSheetClass(
   services: SavedObjectKibanaServices,
   config: IUiSettingsClient
-) {
+): unknown {
   const SavedObjectClass = createSavedObjectClass(services);
 
   class SavedSheet extends SavedObjectClass {
