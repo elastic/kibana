@@ -302,7 +302,6 @@ export const signalRulesAlertType = ({
           }
         } else {
           const inputIndex = await getInputIndex(services, version, index);
-
           const esFilter = await getFilter({
             type,
             filters,
@@ -313,6 +312,7 @@ export const signalRulesAlertType = ({
             index: inputIndex,
             lists: exceptionItems ?? [],
           });
+
           result = await searchAfterAndBulkCreate({
             gap,
             previousStartedAt,

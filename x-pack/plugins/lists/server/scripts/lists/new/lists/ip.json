@@ -1,6 +1,6 @@
 {
-  "id": "ip_list",
-  "name": "Simple list with an ip",
+  "id": "ip_list_again",
+  "name": "Simple list with an ip again",
   "description": "This list describes bad internet ip",
   "type": "ip"
 }

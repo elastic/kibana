@@ -8,10 +8,15 @@
   "name": "Sample Endpoint Exception List",
   "entries": [
     {
-      "field": "process.name",
+      "field": "actingProcess.file.signer",
+      "operator": "excluded",
+      "type": "exists"
+    },
+    {
+      "field": "host.name",
       "operator": "included",
       "type": "match_any",
-      "value": ["bash"]
+      "value": ["some host", "another host"]
     }
   ]
 }

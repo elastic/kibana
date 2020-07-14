@@ -1,6 +1,5 @@
 {
-  "list_id": "endpoint_list",
-  "item_id": "endpoint_list_item_lg_val_list",
+  "item_id": "endpoint_list_item_lg_val_list_again",
   "_tags": ["endpoint", "process", "malware", "os:windows"],
   "tags": ["user added string for a tag", "malware"],
   "type": "simple",
@@ -12,13 +11,11 @@
       "field": "event.module",
       "operator": "excluded",
       "type": "match_any",
-      "value": [
-        "traefik"
-      ]
+      "value": ["suricata"]
     },
     {
       "field": "source.ip",
-      "operator": "included",
+      "operator": "excluded",
       "type": "list",
       "list": { "id": "ip_list", "type": "ip" }
     }

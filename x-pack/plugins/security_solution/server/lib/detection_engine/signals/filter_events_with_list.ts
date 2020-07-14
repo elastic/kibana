@@ -131,7 +131,6 @@ export const filterEventsAgainstList = async ({
         Promise.resolve<SignalSearchResponse['hits']['hits']>(eventSearchResult.hits.hits)
       );
 
-    // logger.debug(`filteredHits FINAL: ${JSON.stringify(filteredHits, null, 2)}`);
     const toReturn: SignalSearchResponse = {
       took: eventSearchResult.took,
       timed_out: eventSearchResult.timed_out,
