@@ -36,11 +36,11 @@ export const getAnomalySummary = (anomaly: AnomaliesTableRecord, monitorInfo: Pi
 
 const getAnomalies = async (
   plugins: UptimeCorePlugins,
-  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'],
+  mlClusterClient: ILegacyScopedClusterClient,
   params: Record<any, any>,
   lastCheckedAt: string
 ) => {
-  const { getAnomaliesTableData } = plugins.ml.resultsServiceProvider(callCluster, {
+  const { getAnomaliesTableData } = plugins.ml.resultsServiceProvider(mlClusterClient, {
     params: 'DummyKibanaRequest',
   } as any);
 
@@ -82,13 +82,23 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory = (_server, _li
   producer: 'uptime',
   async executor(options) {
     const {
-      services: { alertInstanceFactory, callCluster, savedObjectsClient },
+      services: {
+        alertInstanceFactory,
+        callCluster,
+        savedObjectsClient,
+        getLegacyScopedClusterClient,
+      },
       state,
       params,
     } = options;
 
     const { anomalies } =
-      (await getAnomalies(plugins, callCluster, params, state.lastCheckedAt)) ?? {};
+      (await getAnomalies(
+        plugins,
+        getLegacyScopedClusterClient(plugins.ml.mlClient),
+        params,
+        state.lastCheckedAt
+      )) ?? {};
 
     const foundAnomalies = anomalies?.length > 0;
 
