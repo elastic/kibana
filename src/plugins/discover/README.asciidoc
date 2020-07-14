@@ -1,0 +1,6 @@
+include::../../../docs/index.asciidoc[]
+
+[[kibana-discover]]
+== Discover
+
+Discover is an application inside {kib} that allows users to view, search and explore raw documents.
