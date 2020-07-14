@@ -745,52 +745,5 @@ describe('Exception helpers', () => {
       const result = prepareExceptionItemsForBulkClose(payload);
       expect(result).toEqual(expected);
     });
-
-    test("should update nested entry fields when they start with 'event.'", () => {
-      const payload: ExceptionListItemSchema[] = [
-        {
-          ...getExceptionListItemSchemaMock(),
-          entries: [
-            {
-              ...getEntryNestedMock(),
-              field: 'event.kind',
-            },
-            {
-              ...getEntryNestedMock(),
-              entries: [
-                {
-                  ...getEntryMatchMock(),
-                  field: 'event.module',
-                },
-                getEntryMatchMock(),
-              ],
-            },
-          ],
-        },
-      ];
-      const expected = [
-        {
-          ...getExceptionListItemSchemaMock(),
-          entries: [
-            {
-              ...getEntryNestedMock(),
-              field: 'signal.original_event.kind',
-            },
-            {
-              ...getEntryNestedMock(),
-              entries: [
-                {
-                  ...getEntryMatchMock(),
-                  field: 'signal.original_event.module',
-                },
-                getEntryMatchMock(),
-              ],
-            },
-          ],
-        },
-      ];
-      const result = prepareExceptionItemsForBulkClose(payload);
-      expect(result).toEqual(expected);
-    });
   });
 });

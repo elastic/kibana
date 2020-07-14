@@ -37,7 +37,6 @@ import {
   UpdateExceptionListItemSchema,
   ExceptionListType,
   EntriesArray,
-  EntryMatch,
 } from '../../../lists_plugin_deps';
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { TimelineNonEcsData } from '../../../graphql/types';
@@ -391,33 +390,15 @@ export const formatExceptionItemForUpdate = (
 export const prepareExceptionItemsForBulkClose = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
 ): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
-  const replaceField = (fieldToReplace: string) => {
-    return fieldToReplace.startsWith('event.')
-      ? fieldToReplace.replace(/^event./, 'signal.original_event.')
-      : fieldToReplace;
-  };
-
   return exceptionItems.map((item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
     if (item.entries !== undefined) {
       const newEntries = item.entries.map((itemEntry: EntriesArray[0]) => {
-        if (itemEntry.type === 'nested') {
-          const newNestedEntries = itemEntry.entries.map((nestedEntry: EntryMatch) => {
-            return {
-              ...nestedEntry,
-              field: replaceField(nestedEntry.field),
-            };
-          });
-          return {
-            ...itemEntry,
-            field: replaceField(itemEntry.field),
-            entries: newNestedEntries,
-          };
-        } else {
-          return {
-            ...itemEntry,
-            field: replaceField(itemEntry.field),
-          };
-        }
+        return {
+          ...itemEntry,
+          field: itemEntry.field.startsWith('event.')
+            ? itemEntry.field.replace(/^event./, 'signal.original_event.')
+            : itemEntry.field,
+        };
       });
       return {
         ...item,
