@@ -45,6 +45,7 @@ describe('state selectors', () => {
       esKuery: '',
       integrationsPopoverOpen: null,
       searchText: '',
+      monitorId: '',
     },
     monitorStatus: {
       status: null,
@@ -113,6 +114,10 @@ describe('state selectors', () => {
         data: null,
         loading: false,
       },
+    },
+    alerts: {
+      alertDeletion: { data: null, loading: false },
+      alert: { data: null, loading: false },
     },
   };
 
