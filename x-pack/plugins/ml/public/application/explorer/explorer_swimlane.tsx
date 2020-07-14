@@ -13,15 +13,17 @@ import './_explorer.scss';
 import _ from 'lodash';
 import d3 from 'd3';
 import moment from 'moment';
+import DragSelect from 'dragselect';
 
 import { i18n } from '@kbn/i18n';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { TooltipValue } from '@elastic/charts';
+import { htmlIdGenerator } from '@elastic/eui';
 import { formatHumanReadableDateTime } from '../util/date_utils';
 import { numTicksForDateFormat } from '../util/chart_utils';
 import { getSeverityColor } from '../../../common/util/anomaly_utils';
 import { mlEscape } from '../util/string_utils';
-import { ALLOW_CELL_RANGE_SELECTION, dragSelect$ } from './explorer_dashboard_service';
+import { ALLOW_CELL_RANGE_SELECTION } from './explorer_dashboard_service';
 import { DRAG_SELECT_ACTION, SwimlaneType } from './explorer_constants';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
@@ -29,7 +31,7 @@ import {
   ChartTooltipService,
   ChartTooltipValue,
 } from '../components/chart_tooltip/chart_tooltip_service';
-import { OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
+import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 
 const SCSS = {
   mlDragselectDragging: 'mlDragselectDragging',
@@ -56,7 +58,6 @@ export interface ExplorerSwimlaneProps {
   filterActive?: boolean;
   maskAll?: boolean;
   timeBuckets: InstanceType<typeof TimeBucketsClass>;
-  swimlaneCellClick?: Function;
   swimlaneData: OverallSwimlaneData | ViewBySwimLaneData;
   swimlaneType: SwimlaneType;
   selection?: {
@@ -64,8 +65,15 @@ export interface ExplorerSwimlaneProps {
     type: string;
     times: number[];
   };
-  swimlaneRenderDoneListener?: Function;
+  onCellsSelection: (payload?: AppStateSelectedCells) => void;
   tooltipService: ChartTooltipService;
+  'data-test-subj'?: string;
+  /**
+   * We need to be aware of the parent element in order to set
+   * the height so the swim lane widget doesn't jump during loading
+   * or page changes.
+   */
+  parentRef: React.RefObject<HTMLDivElement>;
 }
 
 export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
@@ -78,13 +86,70 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
 
   rootNode = React.createRef<HTMLDivElement>();
 
+  isSwimlaneSelectActive = false;
+  // make sure dragSelect is only available if the mouse pointer is actually over a swimlane
+  disableDragSelectOnMouseLeave = true;
+
+  dragSelect$ = new Subject<{
+    action: typeof DRAG_SELECT_ACTION[keyof typeof DRAG_SELECT_ACTION];
+    elements?: any[];
+  }>();
+
+  /**
+   * Unique id for swim lane instance
+   */
+  rootNodeId = htmlIdGenerator()();
+
+  /**
+   * Initialize drag select instance
+   */
+  dragSelect = new DragSelect({
+    selectorClass: 'ml-swimlane-selector',
+    selectables: document.querySelectorAll(`#${this.rootNodeId} .sl-cell`),
+    callback: (elements) => {
+      if (elements.length > 1 && !ALLOW_CELL_RANGE_SELECTION) {
+        elements = [elements[0]];
+      }
+
+      if (elements.length > 0) {
+        this.dragSelect$.next({
+          action: DRAG_SELECT_ACTION.NEW_SELECTION,
+          elements,
+        });
+      }
+
+      this.disableDragSelectOnMouseLeave = true;
+    },
+    onDragStart: (e) => {
+      // make sure we don't trigger text selection on label
+      e.preventDefault();
+      let target = e.target as HTMLElement;
+      while (target && target !== document.body && !target.classList.contains('sl-cell')) {
+        target = target.parentNode as HTMLElement;
+      }
+      if (ALLOW_CELL_RANGE_SELECTION && target !== document.body) {
+        this.dragSelect$.next({
+          action: DRAG_SELECT_ACTION.DRAG_START,
+        });
+        this.disableDragSelectOnMouseLeave = false;
+      }
+    },
+    onElementSelect: () => {
+      if (ALLOW_CELL_RANGE_SELECTION) {
+        this.dragSelect$.next({
+          action: DRAG_SELECT_ACTION.ELEMENT_SELECT,
+        });
+      }
+    },
+  });
+
   componentDidMount() {
     // property for data comparison to be able to filter
     // consecutive click events with the same data.
     let previousSelectedData: any = null;
 
     // Listen for dragSelect events
-    this.dragSelectSubscriber = dragSelect$.subscribe(({ action, elements = [] }) => {
+    this.dragSelectSubscriber = this.dragSelect$.subscribe(({ action, elements = [] }) => {
       const element = d3.select(this.rootNode.current!.parentNode!);
       const { swimlaneType } = this.props;
 
@@ -154,7 +219,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
   }
 
   selectCell(cellsToSelect: any[], { laneLabels, bucketScore, times }: SelectedData) {
-    const { selection, swimlaneCellClick = () => {}, swimlaneData, swimlaneType } = this.props;
+    const { selection, swimlaneData, swimlaneType } = this.props;
 
     let triggerNewSelection = false;
 
@@ -184,7 +249,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
     }
 
     if (triggerNewSelection === false) {
-      swimlaneCellClick({});
+      this.swimlaneCellClick();
       return;
     }
 
@@ -194,7 +259,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
       times: d3.extent(times),
       type: swimlaneType,
     };
-    swimlaneCellClick(selectedCells);
+    this.swimlaneCellClick(selectedCells);
   }
 
   highlightOverall(times: number[]) {
@@ -208,10 +273,8 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
   }
 
   highlightSelection(cellsToSelect: Node[], laneLabels: string[], times: number[]) {
-    const { swimlaneType } = this.props;
-
-    // This selects both overall and viewby swimlane
-    const wrapper = d3.selectAll('.mlExplorerSwimlane');
+    // This selects the embeddable container
+    const wrapper = d3.select(`#${this.rootNodeId}`);
 
     wrapper.selectAll('.lane-label').classed('lane-label-masked', true);
     wrapper
@@ -232,13 +295,12 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
     rootParent.selectAll('.lane-label').classed('lane-label-masked', function (this: HTMLElement) {
       return laneLabels.indexOf(d3.select(this).text()) === -1;
     });
-
-    if (swimlaneType === 'viewBy') {
-      // If selecting a cell in the 'view by' swimlane, indicate the corresponding time in the Overall swimlane.
-      this.highlightOverall(times);
-    }
   }
 
+  /**
+   * TODO should happen with props instead of imperative check
+   * @param maskAll
+   */
   maskIrrelevantSwimlanes(maskAll: boolean) {
     if (maskAll === true) {
       // This selects both overall and viewby swimlane
@@ -288,7 +350,6 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
       filterActive,
       maskAll,
       timeBuckets,
-      swimlaneCellClick,
       swimlaneData,
       swimlaneType,
       selection,
@@ -358,9 +419,12 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
     const numBuckets = Math.round((endTime - startTime) / stepSecs);
     const cellHeight = 30;
     const height = (lanes.length + 1) * cellHeight - 10;
-    const laneLabelWidth = 170;
+    // Set  height for the wrapper element
+    if (this.props.parentRef.current) {
+      this.props.parentRef.current.style.height = `${height + 20}px`;
+    }
 
-    element.style('height', `${height + 20}px`);
+    const laneLabelWidth = 170;
     const swimlanes = element.select('.ml-swimlanes');
     swimlanes.html('');
 
@@ -413,8 +477,8 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
         }
       })
       .on('click', () => {
-        if (selection && typeof selection.lanes !== 'undefined' && swimlaneCellClick) {
-          swimlaneCellClick({});
+        if (selection && typeof selection.lanes !== 'undefined') {
+          this.swimlaneCellClick();
         }
       })
       .each(function (this: HTMLElement) {
@@ -567,9 +631,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
       element.selectAll('.sl-cell-inner').classed('sl-cell-inner-masked', true);
     }
 
-    if (this.props.swimlaneRenderDoneListener) {
-      this.props.swimlaneRenderDoneListener();
-    }
+    this.swimlaneRenderDoneListener();
 
     if (
       (swimlaneType !== selectedType ||
@@ -593,10 +655,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
         selectedTimeExtent[1] <= endTime
       ) {
         // Locate matching cell - look for exact time, otherwise closest before.
-        const swimlaneElements = element.select('.ml-swimlanes');
-        const laneCells = swimlaneElements.selectAll(
-          `div[data-lane-label="${mlEscape(selectedLane)}"]`
-        );
+        const laneCells = element.selectAll(`div[data-lane-label="${mlEscape(selectedLane)}"]`);
 
         laneCells.each(function (this: HTMLElement) {
           const cell = d3.select(this);
@@ -632,9 +691,58 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
     return true;
   }
 
+  /**
+   * Listener for click events in the swim lane and execute a prop callback.
+   * @param selectedCellsUpdate
+   */
+  swimlaneCellClick(selectedCellsUpdate?: AppStateSelectedCells) {
+    // If selectedCells is an empty object we clear any existing selection,
+    // otherwise we save the new selection in AppState and update the Explorer.
+    if (!selectedCellsUpdate) {
+      this.props.onCellsSelection();
+    } else {
+      this.props.onCellsSelection(selectedCellsUpdate);
+    }
+  }
+
+  /**
+   * Listens to render updates of the swim lanes to update dragSelect
+   */
+  swimlaneRenderDoneListener() {
+    this.dragSelect.clearSelection();
+    this.dragSelect.setSelectables(document.querySelectorAll(`#${this.rootNodeId} .sl-cell`));
+  }
+
+  setSwimlaneSelectActive(active: boolean) {
+    if (this.isSwimlaneSelectActive && !active && this.disableDragSelectOnMouseLeave) {
+      this.dragSelect.stop();
+      this.isSwimlaneSelectActive = active;
+      return;
+    }
+    if (!this.isSwimlaneSelectActive && active) {
+      this.dragSelect.start();
+      this.dragSelect.clearSelection();
+      this.dragSelect.setSelectables(document.querySelectorAll(`#${this.rootNodeId} .sl-cell`));
+      this.isSwimlaneSelectActive = active;
+    }
+  }
+
   render() {
     const { swimlaneType } = this.props;
 
-    return <div className={`ml-swimlanes ml-swimlane-${swimlaneType}`} ref={this.rootNode} />;
+    return (
+      <div
+        className="mlExplorerSwimlane"
+        onMouseEnter={this.setSwimlaneSelectActive.bind(this, true)}
+        onMouseLeave={this.setSwimlaneSelectActive.bind(this, false)}
+        data-test-subj={this.props['data-test-subj'] ?? null}
+      >
+        <div
+          className={`ml-swimlanes ml-swimlane-${swimlaneType}`}
+          ref={this.rootNode}
+          id={this.rootNodeId}
+        />
+      </div>
+    );
   }
 }
