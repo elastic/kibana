@@ -4,27 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { environmentIncludes } from './AnomalyDetectionSetupLink';
+import { showAlert } from './AnomalyDetectionSetupLink';
 
-describe('#environmentIncludes', () => {
-  it('should return true if current environment is an element of the given environment list', () => {
-    const result = environmentIncludes(['staging', 'production'], 'staging');
-    expect(result).toBe(true);
+describe('#showAlert', () => {
+  describe('when an environment is selected', () => {
+    it('should return true when there are no jobs', () => {
+      const result = showAlert([], 'testing');
+      expect(result).toBe(true);
+    });
+    it('should return true when environment is not included in the jobs', () => {
+      const result = showAlert(
+        [{ environment: 'staging' }, { environment: 'production' }],
+        'testing'
+      );
+      expect(result).toBe(true);
+    });
+    it('should return false when environment is included in the jobs', () => {
+      const result = showAlert(
+        [{ environment: 'staging' }, { environment: 'production' }],
+        'staging'
+      );
+      expect(result).toBe(false);
+    });
   });
-  it('should return false if there is no current environment and the environment list is empty', () => {
-    const result = environmentIncludes([], undefined);
-    expect(result).toBe(false);
-  });
-  it('should return false if current environment is not an element of the given environment list', () => {
-    const result = environmentIncludes(['staging', 'production'], 'testing');
-    expect(result).toBe(false);
-  });
-  it('should return true if there is no current environment and the environment list has items', () => {
-    const result = environmentIncludes(['staging', 'production'], undefined);
-    expect(result).toBe(true);
-  });
-  it('should return false if there is a current environment and the environment list is empty', () => {
-    const result = environmentIncludes([], 'testing');
-    expect(result).toBe(false);
+  describe('there is no environment selected (All)', () => {
+    it('should return true when there are no jobs', () => {
+      const result = showAlert([], undefined);
+      expect(result).toBe(true);
+    });
+    it('should return false when there are any number of jobs', () => {
+      const result = showAlert(
+        [{ environment: 'staging' }, { environment: 'production' }],
+        undefined
+      );
+      expect(result).toBe(false);
+    });
   });
 });

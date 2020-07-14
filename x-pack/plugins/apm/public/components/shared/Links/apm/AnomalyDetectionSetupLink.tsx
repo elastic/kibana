@@ -23,20 +23,12 @@ export function AnomalyDetectionSetupLink() {
   );
   const isFetchSuccess = status === FETCH_STATUS.SUCCESS;
 
-  // Show alert if there are no jobs OR if no job matches the current environment
-  const showAlert =
-    isFetchSuccess &&
-    !environmentIncludes(
-      data.jobs.map((job) => job.environment),
-      environment
-    );
-
   return (
     <APMLink path="/settings/anomaly-detection">
       <EuiButtonEmpty size="s" color="primary" iconType="inspect">
         {ANOMALY_DETECTION_LINK_LABEL}
       </EuiButtonEmpty>
-      {showAlert && (
+      {isFetchSuccess && showAlert(data.jobs, environment) && (
         <EuiToolTip position="bottom" content={getTooltipText(environment)}>
           <EuiIcon type="alert" color="danger" />
         </EuiToolTip>
@@ -66,14 +58,15 @@ const ANOMALY_DETECTION_LINK_LABEL = i18n.translate(
   { defaultMessage: `Anomaly detection` }
 );
 
-export function environmentIncludes(
-  environments: string[],
-  selectedEnvironment?: string
+export function showAlert(
+  jobs: Array<{ environment: string }> = [],
+  environment: string | undefined
 ) {
-  if (selectedEnvironment) {
-    return environments.some(
-      (environment) => environment === selectedEnvironment
-    );
-  }
-  return environments.length > 0;
+  return (
+    // No job exists, or
+    jobs.length === 0 ||
+    // no job exists for the selected environment
+    (environment !== undefined &&
+      jobs.every((job) => environment !== job.environment))
+  );
 }
