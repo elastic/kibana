@@ -61,7 +61,7 @@ ServiceNow actions have the following configuration properties:
 
 Urgency::              The extent to which the incident's resolution can bear delay.
 Severity::             The severity value of the incident.
-Impact::               The effect an incident has on business. Can be measured by number of users affected or by the criticality of the business system in question.
+Impact::               The effect an incident has on business. Can be measured by the number of affected users or by how critical it is to the business in question.
 Short description::    A short description of the incident, used for searching the contents of the knowledge base. 
 Description::          The details about the incident.
 Additional comments::  Additional information for the client, such as how to troubleshoot the issue.
