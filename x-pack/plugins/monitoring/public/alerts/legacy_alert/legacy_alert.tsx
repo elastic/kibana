@@ -26,6 +26,7 @@ export function createLegacyAlertTypes(): AlertTypeModel[] {
           <EuiSpacer />
         </Fragment>
       ),
+      defaultActionMessage: '{{context.internalFullMessage}}',
       validate: () => ({ errors: {} }),
       requiresAppContext: false,
     };

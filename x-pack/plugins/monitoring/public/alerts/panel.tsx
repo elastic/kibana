@@ -14,6 +14,8 @@ import {
   EuiSwitch,
   EuiTitle,
   EuiHorizontalRule,
+  EuiListGroup,
+  EuiListGroupItem,
 } from '@elastic/eui';
 
 import { CommonAlertStatus } from '../../common/types';
@@ -23,7 +25,7 @@ import { replaceTokens } from './lib/replace_tokens';
 import { AlertsContextProvider } from '../../../triggers_actions_ui/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertEdit } from '../../../triggers_actions_ui/public';
-import { isInSetupMode } from '../lib/setup_mode';
+import { isInSetupMode, hideBottomBar, showBottomBar } from '../lib/setup_mode';
 import { BASE_ALERT_API_PATH } from '../../../alerts/common';
 
 interface Props {
@@ -113,7 +115,13 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
         capabilities: Legacy.shims.capabilities,
       }}
     >
-      <AlertEdit initialAlert={alert.rawAlert} onClose={() => setShowFlyout(false)} />
+      <AlertEdit
+        initialAlert={alert.rawAlert}
+        onClose={() => {
+          setShowFlyout(false);
+          showBottomBar();
+        }}
+      />
     </AlertsContextProvider>
   ) : null;
 
@@ -121,7 +129,14 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
     <Fragment>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={() => setShowFlyout(true)}>Edit alert</EuiButton>
+          <EuiButton
+            onClick={() => {
+              setShowFlyout(true);
+              hideBottomBar();
+            }}
+          >
+            Edit alert
+          </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSwitch
@@ -174,22 +189,22 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
   );
 
   if (inSetupMode) {
-    return configurationUi;
+    return <div style={{ padding: '1rem' }}>{configurationUi}</div>;
   }
 
   const firingStates = states.filter((state) => state.firing);
   if (!firingStates.length) {
-    return configurationUi;
+    return <div style={{ padding: '1rem' }}>{configurationUi}</div>;
   }
 
   const firingState = firingStates[0];
   const nextStepsUi =
     firingState.state.ui.message.nextSteps && firingState.state.ui.message.nextSteps.length ? (
-      <ul>
+      <EuiListGroup>
         {firingState.state.ui.message.nextSteps.map((step: AlertMessage, index: number) => (
-          <li key={index}>{replaceTokens(step)}</li>
+          <EuiListGroupItem size="s" key={index} label={replaceTokens(step)} />
         ))}
-      </ul>
+      </EuiListGroup>
     ) : null;
 
   return (

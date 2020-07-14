@@ -49,7 +49,9 @@ describe('BaseAlert', () => {
             {
               group: 'default',
               id: '1abc',
-              params: {},
+              params: {
+                message: '{{context.internalShortMessage}}',
+              },
             },
           ],
           alertTypeId: undefined,

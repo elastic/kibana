@@ -13,6 +13,7 @@ import { Expression } from './expression';
 import { CpuUsageAlert } from '../../../server/alerts';
 
 export function createCpuUsageAlertType(): AlertTypeModel {
+  const alert = new CpuUsageAlert();
   return {
     id: ALERT_CPU_USAGE,
     name: 'CPU Usage',
@@ -21,6 +22,7 @@ export function createCpuUsageAlertType(): AlertTypeModel {
       <Expression {...props} paramDetails={CpuUsageAlert.paramDetails} />
     ),
     validate,
+    defaultActionMessage: '{{context.internalFullMessage}}',
     requiresAppContext: false,
   };
 }

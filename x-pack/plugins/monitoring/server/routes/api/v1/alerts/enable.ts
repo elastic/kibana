@@ -20,22 +20,10 @@ export function enableAlertsRoute(server: any, npRoute: RouteDependencies) {
     {
       path: '/api/monitoring/v1/alerts/enable',
       options: { tags: ['access:monitoring'] },
-      validate: {
-        body: schema.object({
-          actions: schema.maybe(
-            schema.arrayOf(
-              schema.object({
-                id: schema.string(),
-                config: schema.recordOf(schema.string(), schema.any()),
-              })
-            )
-          ),
-        }),
-      },
+      validate: false,
     },
     async (context, request, response) => {
       try {
-        const { actions = [] } = request.body;
         const alertsClient = context.alerting?.getAlertsClient();
         const actionsClient = context.actions?.getActionsClient();
         const types = context.actions?.listTypes();
@@ -43,33 +31,33 @@ export function enableAlertsRoute(server: any, npRoute: RouteDependencies) {
           return response.notFound();
         }
 
-        if (!actions || actions.length === 0) {
-          // Get or create the default log action
-          let serverLogAction;
-          const allActions = await actionsClient.getAll();
-          for (const action of allActions) {
-            if (action.name === DEFAULT_SERVER_LOG_NAME) {
-              serverLogAction = action as ActionResult;
-              break;
-            }
+        // Get or create the default log action
+        let serverLogAction;
+        const allActions = await actionsClient.getAll();
+        for (const action of allActions) {
+          if (action.name === DEFAULT_SERVER_LOG_NAME) {
+            serverLogAction = action as ActionResult;
+            break;
           }
+        }
 
-          if (!serverLogAction) {
-            serverLogAction = await actionsClient.create({
-              action: {
-                name: DEFAULT_SERVER_LOG_NAME,
-                actionTypeId: ALERT_ACTION_TYPE_LOG,
-                config: {},
-                secrets: {},
-              },
-            });
-          }
-
-          actions.push({
-            id: serverLogAction.id,
-            config: {},
+        if (!serverLogAction) {
+          serverLogAction = await actionsClient.create({
+            action: {
+              name: DEFAULT_SERVER_LOG_NAME,
+              actionTypeId: ALERT_ACTION_TYPE_LOG,
+              config: {},
+              secrets: {},
+            },
           });
         }
+
+        const actions = [
+          {
+            id: serverLogAction.id,
+            config: {},
+          },
+        ];
 
         const alerts = AlertsFactory.getAll().filter((a) => a.isEnabled(npRoute.licenseService));
         const createdAlerts = await Promise.all(

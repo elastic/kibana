@@ -31,11 +31,7 @@ import {
 import { fetchAvailableCcs } from '../lib/alerts/fetch_available_ccs';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
-import {
-  INDEX_PATTERN_ELASTICSEARCH,
-  ALERT_ACTION_TYPE_LOG,
-  ALERT_ACTION_TYPE_EMAIL,
-} from '../../common/constants';
+import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import { MonitoringConfig } from '../config';
 import { AlertSeverity } from '../../common/enums';
 import { CommonAlertFilter, CommonAlertParams, CommonBaseAlert } from '../../common/types';
@@ -141,7 +137,7 @@ export class BaseAlert {
       },
     });
 
-    if (existingAlertData.total === 1) {
+    if (existingAlertData.total > 0) {
       const existingAlert = existingAlertData.data[0] as Alert;
       return existingAlert;
     }
@@ -156,7 +152,8 @@ export class BaseAlert {
         group: 'default',
         id: actionData.id,
         params: {
-          ...this.getDefaultActionParams(action.actionTypeId),
+          // This is just a server log right now, but will get more robut over time
+          message: this.getDefaultActionMessage(true),
           ...actionData.config,
         },
       });
@@ -300,16 +297,10 @@ export class BaseAlert {
     }
   }
 
-  public getDefaultActionParams(actionTypeId: string): any {
-    switch (actionTypeId) {
-      case ALERT_ACTION_TYPE_EMAIL:
-        return {};
-      case ALERT_ACTION_TYPE_LOG:
-        return {
-          message: null,
-        };
-    }
-    return null;
+  public getDefaultActionMessage(forDefaultServerLog: boolean): string {
+    return forDefaultServerLog
+      ? '{{context.internalShortMessage}}'
+      : '{{context.internalFullMessage}}';
   }
 
   protected findIndexInInstanceState(stateInstance: AlertInstanceState, cluster: AlertCluster) {
