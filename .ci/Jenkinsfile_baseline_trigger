@@ -1,0 +1,64 @@
+#!/bin/groovy
+
+def MAXIMUM_COMMITS_TO_CHECK = 10
+def MAXIMUM_COMMITS_TO_BUILD = 5
+
+if (!params.branches_yaml) {
+  error "'branches_yaml' parameter must be specified"
+}
+
+def additionalBranches = []
+
+def branches = readYaml(text: params.branches_yaml) + additionalBranches
+
+library 'kibana-pipeline-library'
+kibanaLibrary.load()
+
+withGithubCredentials {
+  branches.each { branch ->
+    stage(branch) {
+      def commits = getCommits(branch, MAXIMUM_COMMITS_TO_CHECK, MAXIMUM_COMMITS_TO_BUILD)
+
+      commits.take(MAXIMUM_COMMITS_TO_BUILD).each { commit ->
+        catchErrors {
+          githubCommitStatus.create(commit, 'pending', 'Baseline started.', 'kibana-ci-baseline')
+
+          build(
+            propagate: false,
+            wait: false,
+            job: 'elastic+kibana+baseline-capture',
+            parameters: [
+              string(name: 'branch_specifier', value: branch),
+              string(name: 'commit', value: commit),
+            ]
+          )
+        }
+      }
+    }
+  }
+}
+
+def getCommits(String branch, maximumCommitsToCheck, maximumCommitsToBuild) {
+  print "Getting latest commits for ${branch}..."
+  def commits = githubApi.get("repos/elastic/kibana/commits?sha=${branch}").take(maximumCommitsToCheck).collect { it.sha }
+  def commitsToBuild = []
+
+  for (commit in commits) {
+    print "Getting statuses for ${commit}"
+    def status = githubApi.get("repos/elastic/kibana/statuses/${commit}").find { it.context == 'kibana-ci-baseline' }
+    print "Commit '${commit}' already built? ${status ? 'Yes' : 'No'}"
+
+    if (!status) {
+      commitsToBuild << commit
+    } else {
+      // Stop at the first commit we find that's already been triggered
+      break
+    }
+
+    if (commitsToBuild.size() >= maximumCommitsToBuild) {
+      break
+    }
+  }
+
+  return commitsToBuild.reverse() // We want the builds to trigger oldest-to-newest
+}
