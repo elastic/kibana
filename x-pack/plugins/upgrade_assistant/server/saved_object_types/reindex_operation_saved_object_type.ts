@@ -15,13 +15,25 @@ export const reindexOperationSavedObjectType: SavedObjectsType = {
   mappings: {
     properties: {
       reindexTaskId: {
-        type: 'keyword',
+        type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+            ignore_above: 256,
+          },
+        },
       },
       indexName: {
         type: 'keyword',
       },
       newIndexName: {
-        type: 'keyword',
+        type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+            ignore_above: 256,
+          },
+        },
       },
       status: {
         type: 'integer',
@@ -30,10 +42,16 @@ export const reindexOperationSavedObjectType: SavedObjectsType = {
         type: 'date',
       },
       lastCompletedStep: {
-        type: 'integer',
+        type: 'long',
       },
       errorMessage: {
-        type: 'keyword',
+        type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+            ignore_above: 256,
+          },
+        },
       },
       reindexTaskPercComplete: {
         type: 'float',
