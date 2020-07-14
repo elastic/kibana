@@ -17,6 +17,8 @@
  * under the License.
  */
 
-export function isError<T>(error: T | Error): error is Error {
-  return error instanceof Error;
+import { HttpFetchError } from 'kibana/public';
+
+export function isError<T>(error: T | HttpFetchError): error is HttpFetchError {
+  return error instanceof HttpFetchError;
 }
