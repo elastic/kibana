@@ -9,10 +9,10 @@ import { ReportingCore } from '../';
 import { API_BASE_GENERATE_V1 } from '../../common/constants';
 import { scheduleTaskFnFactory } from '../export_types/csv_from_savedobject/server/create_job';
 import { runTaskFnFactory } from '../export_types/csv_from_savedobject/server/execute_job';
-import { getJobParamsFromRequest } from '../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
 import { LevelLogger as Logger } from '../lib';
 import { TaskRunResult } from '../types';
 import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
+import { getJobParamsFromRequest } from './lib/get_job_params_from_request';
 import { HandlerErrorFunction } from './types';
 
 /*

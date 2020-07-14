@@ -49,6 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
                     title: 'Count of requests',
                   },
                   migrationVersion: resp.body.saved_objects[0].migrationVersion,
+                  namespaces: ['default'],
                   references: [
                     {
                       id: '91200a00-9efd-11e7-acb3-3dab96693fab',
