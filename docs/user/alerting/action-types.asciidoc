@@ -29,7 +29,7 @@ a| <<slack-action-type, Slack>>
 
 a| <<servicenow-action-type, ServiceNow>>
 
-| Create new ServiceNow incident.
+| Push or update data to a new incident in ServiceNow.
 
 a| <<webhook-action-type, Webhook>>
 

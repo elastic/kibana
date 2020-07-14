@@ -2,7 +2,7 @@
 [[servicenow-action-type]]
 === ServiceNow action
 
-ServiceNow action type using [V2 Table API](https://developer.servicenow.com/app.do#!/rest_api_doc?v=orlando&id=c_TableAPI) to create ServiceNow incidents.
+ServiceNow action type using https://developer.servicenow.com/app.do#!/rest_api_doc?v=orlando&id=c_TableAPI[V2 Table API] to create ServiceNow incidents.
 
 [float]
 [[servicenow-connector-configuration]]
@@ -11,9 +11,9 @@ ServiceNow action type using [V2 Table API](https://developer.servicenow.com/app
 ServiceNow connectors have the following configuration properties:
 
 Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
-URL::    The from address for all emails sent with this connector, specified in `user@host-name` format.
-Username::  username for 'login' type authentication.
-Password::  password for 'login' type authentication.
+URL::       ServiceNow instance URL.
+Username::  Username for HTTP Basic authentication.
+Password::  Password for HTTP Basic authentication.
 
 [float]
 [[Preconfigured-servicenow-configuration]]
@@ -27,7 +27,7 @@ Password::  password for 'login' type authentication.
    config:
      apiUrl: https://dev94428.service-now.com/
    secrets:
-     user: testuser
+     username: testuser
      password: passwordkeystorevalue
 --
 
@@ -46,7 +46,7 @@ Password::  password for 'login' type authentication.
 [cols="2*<"]
 |===
 
-| `user`
+| `username`
 | A string that corresponds to *User*.
 
 | `password`
@@ -59,14 +59,14 @@ Password::  password for 'login' type authentication.
 
 ServiceNow actions have the following configuration properties:
 
-Urgency::              Each is a list of addresses. Addresses can be specified in `user@host-name` format, or in `name <user@host-name>` format. One of To, CC, or BCC must contain an entry.
-Severity::             The subject line of the email.
-Impact::               The message text of the email. Markdown format is supported.
-Short description::    The message text of the email. Markdown format is supported.
-Description::          The message text of the email. Markdown format is supported.
-Additional comments::  The message text of the email. Markdown format is supported.
+Urgency::              The extent to which the incident's resolution can bear delay.
+Severity::             The severity value of the incident.
+Impact::               The effect an incident has on business. Can be measured by number of users affected or by the criticality of the business system in question.
+Short description::    A short text field to describe the incident. The book icon will search the knowledge base using the contents of the short description. 
+Description::          The details about the incident issue in question.
+Additional comments::  The additional instructions or other information meant for the client, and any work notes or steps shoudl be taken to troubleshoot the issue.
 
 [[configuring-servicenow]]
-==== Configuring ServiceNow
+==== Configuring and testing ServiceNow
 
-The email action can send email using many popular SMTP email services.
+ServiceNow offers free https://developer.servicenow.com/dev.do#!/guides/madrid/now-platform/pdi-guide/obtaining-a-pdi[Personal Developer Instances], which can be used to test creating of the incidents.
