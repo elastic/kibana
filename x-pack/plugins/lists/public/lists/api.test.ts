@@ -114,6 +114,7 @@ describe('Value Lists API', () => {
     it('sends pagination as query parameters', async () => {
       const abortCtrl = new AbortController();
       await findLists({
+        cursor: 'cursor',
         http: httpMock,
         pageIndex: 1,
         pageSize: 10,
@@ -123,14 +124,21 @@ describe('Value Lists API', () => {
       expect(httpMock.fetch).toHaveBeenCalledWith(
         '/api/lists/_find',
         expect.objectContaining({
-          query: { page: 1, per_page: 10 },
+          query: {
+            cursor: 'cursor',
+            page: 1,
+            per_page: 10,
+          },
         })
       );
     });
 
     it('rejects with an error if request payload is invalid (and does not make API call)', async () => {
       const abortCtrl = new AbortController();
-      const payload: ApiPayload<FindListsParams> = { pageIndex: 10, pageSize: 0 };
+      const payload: ApiPayload<FindListsParams> = {
+        pageIndex: 10,
+        pageSize: 0,
+      };
 
       await expect(
         findLists({
@@ -144,7 +152,10 @@ describe('Value Lists API', () => {
 
     it('rejects with an error if response payload is invalid', async () => {
       const abortCtrl = new AbortController();
-      const payload: ApiPayload<FindListsParams> = { pageIndex: 1, pageSize: 10 };
+      const payload: ApiPayload<FindListsParams> = {
+        pageIndex: 1,
+        pageSize: 10,
+      };
       const badResponse = { ...getFoundListSchemaMock(), cursor: undefined };
       httpMock.fetch.mockResolvedValue(badResponse);
 
@@ -269,7 +280,7 @@ describe('Value Lists API', () => {
 
   describe('exportList', () => {
     beforeEach(() => {
-      httpMock.fetch.mockResolvedValue(getListResponseMock());
+      httpMock.fetch.mockResolvedValue({});
     });
 
     it('POSTs to the export endpoint', async () => {
@@ -319,66 +330,49 @@ describe('Value Lists API', () => {
       ).rejects.toEqual(new Error('Invalid value "23" supplied to "list_id"'));
       expect(httpMock.fetch).not.toHaveBeenCalled();
     });
+  });
+
+  describe('readListIndex', () => {
+    beforeEach(() => {
+      httpMock.fetch.mockResolvedValue(getListItemIndexExistSchemaResponseMock());
+    });
+
+    it('GETs the list index', async () => {
+      const abortCtrl = new AbortController();
+      await readListIndex({
+        http: httpMock,
+        signal: abortCtrl.signal,
+      });
+
+      expect(httpMock.fetch).toHaveBeenCalledWith(
+        '/api/lists/index',
+        expect.objectContaining({
+          method: 'GET',
+        })
+      );
+    });
+
+    it('returns the response when valid', async () => {
+      const abortCtrl = new AbortController();
+      const result = await readListIndex({
+        http: httpMock,
+        signal: abortCtrl.signal,
+      });
+
+      expect(result).toEqual(getListItemIndexExistSchemaResponseMock());
+    });
 
     it('rejects with an error if response payload is invalid', async () => {
       const abortCtrl = new AbortController();
-      const payload: ApiPayload<ExportListParams> = {
-        listId: 'list-id',
-      };
-      const badResponse = { ...getListResponseMock(), id: undefined };
+      const badResponse = { ...getListItemIndexExistSchemaResponseMock(), list_index: undefined };
       httpMock.fetch.mockResolvedValue(badResponse);
 
       await expect(
-        exportList({
+        readListIndex({
           http: httpMock,
-          ...payload,
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "id"'));
-    });
-
-    describe('readListIndex', () => {
-      beforeEach(() => {
-        httpMock.fetch.mockResolvedValue(getListItemIndexExistSchemaResponseMock());
-      });
-
-      it('GETs the list index', async () => {
-        const abortCtrl = new AbortController();
-        await readListIndex({
-          http: httpMock,
-          signal: abortCtrl.signal,
-        });
-
-        expect(httpMock.fetch).toHaveBeenCalledWith(
-          '/api/lists/index',
-          expect.objectContaining({
-            method: 'GET',
-          })
-        );
-      });
-
-      it('returns the response when valid', async () => {
-        const abortCtrl = new AbortController();
-        const result = await readListIndex({
-          http: httpMock,
-          signal: abortCtrl.signal,
-        });
-
-        expect(result).toEqual(getListItemIndexExistSchemaResponseMock());
-      });
-
-      it('rejects with an error if response payload is invalid', async () => {
-        const abortCtrl = new AbortController();
-        const badResponse = { ...getListItemIndexExistSchemaResponseMock(), list_index: undefined };
-        httpMock.fetch.mockResolvedValue(badResponse);
-
-        await expect(
-          readListIndex({
-            http: httpMock,
-            signal: abortCtrl.signal,
-          })
-        ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "list_index"'));
-      });
+      ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "list_index"'));
     });
   });
 

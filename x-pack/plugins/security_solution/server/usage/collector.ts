@@ -4,20 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller } from '../../../../../src/core/server';
+import { LegacyAPICaller, CoreSetup } from '../../../../../src/core/server';
 import { CollectorDependencies } from './types';
 import { DetectionsUsage, fetchDetectionsUsage } from './detections';
+import { EndpointUsage, getEndpointTelemetryFromFleet } from './endpoints';
 
 export type RegisterCollector = (deps: CollectorDependencies) => void;
 export interface UsageData {
   detections: DetectionsUsage;
+  endpoints: EndpointUsage;
 }
 
-export const registerCollector: RegisterCollector = ({ kibanaIndex, ml, usageCollection }) => {
+export async function getInternalSavedObjectsClient(core: CoreSetup) {
+  return core.getStartServices().then(async ([coreStart]) => {
+    return coreStart.savedObjects.createInternalRepository();
+  });
+}
+
+export const registerCollector: RegisterCollector = ({
+  core,
+  kibanaIndex,
+  ml,
+  usageCollection,
+}) => {
   if (!usageCollection) {
     return;
   }
-
   const collector = usageCollection.makeUsageCollector<UsageData>({
     type: 'security_solution',
     schema: {
@@ -43,11 +55,32 @@ export const registerCollector: RegisterCollector = ({ kibanaIndex, ml, usageCol
           },
         },
       },
+      endpoints: {
+        total_installed: { type: 'long' },
+        active_within_last_24_hours: { type: 'long' },
+        os: {
+          full_name: { type: 'keyword' },
+          platform: { type: 'keyword' },
+          version: { type: 'keyword' },
+          count: { type: 'long' },
+        },
+        policies: {
+          malware: {
+            success: { type: 'long' },
+            warning: { type: 'long' },
+            failure: { type: 'long' },
+          },
+        },
+      },
     },
     isReady: () => kibanaIndex.length > 0,
-    fetch: async (callCluster: LegacyAPICaller): Promise<UsageData> => ({
-      detections: await fetchDetectionsUsage(kibanaIndex, callCluster, ml),
-    }),
+    fetch: async (callCluster: LegacyAPICaller): Promise<UsageData> => {
+      const savedObjectsClient = await getInternalSavedObjectsClient(core);
+      return {
+        detections: await fetchDetectionsUsage(kibanaIndex, callCluster, ml),
+        endpoints: await getEndpointTelemetryFromFleet(savedObjectsClient),
+      };
+    },
   });
 
   usageCollection.registerCollector(collector);
