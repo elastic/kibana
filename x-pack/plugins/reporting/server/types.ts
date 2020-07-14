@@ -50,19 +50,19 @@ export type ReportingRequestPayload = GenerateExportTypePayload | JobParamPostPa
 
 export interface TimeRangeParams {
   timezone: string;
-  min: Date | string | number | null;
-  max: Date | string | number | null;
+  min?: Date | string | number | null;
+  max?: Date | string | number | null;
 }
 
 export interface JobParamPostPayload {
-  timerange: TimeRangeParams;
+  timerange?: TimeRangeParams;
 }
 
 export interface ScheduledTaskParams<JobParamsType> {
   headers?: string; // serialized encrypted headers
   jobParams: JobParamsType;
   title: string;
-  type: string | null;
+  type: string;
 }
 
 export interface JobSource<JobParamsType> {
@@ -80,6 +80,7 @@ export interface TaskRunResult {
   content_type: string;
   content: string | null;
   size: number;
+  csv_contains_formulas?: boolean;
   max_size_reached?: boolean;
   warnings?: string[];
 }
