@@ -136,7 +136,7 @@ export const schemas: Record<string, FormSchema> = {
       defaultValue: false,
       serializer: (value) => {
         if (value === true) {
-          // For now, ES expects an empty empty when defining a data stream
+          // For now, ES expects an empty object when defining a data stream
           // https://github.com/elastic/elasticsearch/pull/59317
           return {};
         }
