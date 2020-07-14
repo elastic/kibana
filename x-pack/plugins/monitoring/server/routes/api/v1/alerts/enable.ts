@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
 // @ts-ignore
 import { handleError } from '../../../../lib/errors';
 import { AlertsFactory } from '../../../../alerts';
