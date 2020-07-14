@@ -90,6 +90,7 @@ describe('epicLocalStorage', () => {
       indexPattern,
       indexToAdd: [],
       isLive: false,
+      isLoadingSource: false,
       isSaving: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],

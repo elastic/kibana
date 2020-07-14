@@ -63,9 +63,9 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   upsertColumn,
   utilityBar,
 }) => {
-  const [{ docValueFields, browserFields, indexPatterns }] = useFetchIndexPatterns(
-    defaultIndices ?? useUiSetting<string[]>(DEFAULT_INDEX_KEY)
-  );
+  const [
+    { docValueFields, browserFields, indexPatterns, isLoading: isLoadingIndexPattern },
+  ] = useFetchIndexPatterns(defaultIndices ?? useUiSetting<string[]>(DEFAULT_INDEX_KEY));
 
   useEffect(() => {
     if (createTimeline != null) {
@@ -123,6 +123,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         dataProviders={dataProviders!}
         deletedEventIds={deletedEventIds}
         end={end}
+        isLoadingIndexPattern={isLoadingIndexPattern}
         filters={globalFilters}
         headerFilterGroup={headerFilterGroup}
         indexPattern={indexPatterns}

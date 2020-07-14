@@ -83,6 +83,7 @@ describe('Timeline', () => {
       indexPattern,
       indexToAdd: [],
       isLive: false,
+      isLoadingSource: false,
       isSaving: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
@@ -154,6 +155,18 @@ describe('Timeline', () => {
       );
 
       expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
+    });
+
+    test('it does NOT render the timeline table when the source is loading', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mocks}>
+            <TimelineComponent {...props} isLoadingSource={true} />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(false);
     });
 
     test('it does NOT render the paging footer when you do NOT have any data providers', () => {

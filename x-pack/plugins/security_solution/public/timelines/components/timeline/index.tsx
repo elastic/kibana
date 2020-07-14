@@ -171,7 +171,10 @@ const StatefulTimelineComponent = React.memo<Props>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const { docValueFields, indexPattern, browserFields } = useWithSource('default', indexToAdd);
+    const { docValueFields, indexPattern, browserFields, loading: isLoadingSource } = useWithSource(
+      'default',
+      indexToAdd
+    );
 
     return (
       <Timeline
@@ -187,6 +190,7 @@ const StatefulTimelineComponent = React.memo<Props>(
         indexPattern={indexPattern}
         indexToAdd={indexToAdd}
         isLive={isLive}
+        isLoadingSource={isLoadingSource}
         isSaving={isSaving}
         itemsPerPage={itemsPerPage!}
         itemsPerPageOptions={itemsPerPageOptions!}

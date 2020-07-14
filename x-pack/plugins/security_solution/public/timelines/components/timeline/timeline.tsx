@@ -107,6 +107,7 @@ export interface Props {
   indexPattern: IIndexPattern;
   indexToAdd: string[];
   isLive: boolean;
+  isLoadingSource: boolean;
   isSaving: boolean;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
@@ -144,6 +145,7 @@ export const TimelineComponent: React.FC<Props> = ({
   indexPattern,
   indexToAdd,
   isLive,
+  isLoadingSource,
   isSaving,
   itemsPerPage,
   itemsPerPageOptions,
@@ -169,17 +171,42 @@ export const TimelineComponent: React.FC<Props> = ({
   const dispatch = useDispatch();
   const kibana = useKibana();
   const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
-  const combinedQueries = combineQueries({
-    config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-    dataProviders,
-    indexPattern,
-    browserFields,
-    filters,
-    kqlQuery: { query: kqlQueryExpression, language: 'kuery' },
-    kqlMode,
-    start,
-    end,
-  });
+  const esQueryConfig = useMemo(() => esQuery.getEsQueryConfig(kibana.services.uiSettings), [
+    kibana.services.uiSettings,
+  ]);
+  const kqlQuery = useMemo(() => ({ query: kqlQueryExpression, language: 'kuery' }), [
+    kqlQueryExpression,
+  ]);
+  const combinedQueries = useMemo(
+    () =>
+      combineQueries({
+        config: esQueryConfig,
+        dataProviders,
+        indexPattern,
+        browserFields,
+        filters,
+        kqlQuery,
+        kqlMode,
+        start,
+        end,
+      }),
+    [
+      browserFields,
+      dataProviders,
+      esQueryConfig,
+      start,
+      end,
+      filters,
+      indexPattern,
+      kqlMode,
+      kqlQuery,
+    ]
+  );
+
+  const canQueryTimeline = useMemo(
+    () => combinedQueries != null && isLoadingSource != null && !isLoadingSource,
+    [isLoadingSource, combinedQueries]
+  );
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const timelineQueryFields = useMemo(() => columnsHeader.map((c) => c.id), [columnsHeader]);
   const timelineQuerySortField = useMemo(
@@ -241,7 +268,7 @@ export const TimelineComponent: React.FC<Props> = ({
         </TimelineHeaderContainer>
       </StyledEuiFlyoutHeader>
       <TimelineKqlFetch id={id} indexPattern={indexPattern} inputId="timeline" />
-      {combinedQueries != null && docValueFields.length > 0 ? (
+      {canQueryTimeline ? (
         <TimelineQuery
           docValueFields={docValueFields}
           endDate={end}
@@ -251,7 +278,7 @@ export const TimelineComponent: React.FC<Props> = ({
           fields={timelineQueryFields}
           sourceId="default"
           limit={itemsPerPage}
-          filterQuery={combinedQueries.filterQuery}
+          filterQuery={combinedQueries!.filterQuery}
           sortField={timelineQuerySortField}
           startDate={start}
         >

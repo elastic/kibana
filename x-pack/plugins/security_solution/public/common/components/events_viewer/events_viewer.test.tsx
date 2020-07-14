@@ -23,13 +23,6 @@ jest.mock('../../components/url_state/normalize_time_range.ts');
 
 const mockUseFetchIndexPatterns: jest.Mock = useFetchIndexPatterns as jest.Mock;
 jest.mock('../../../detections/containers/detection_engine/rules/fetch_index_patterns');
-mockUseFetchIndexPatterns.mockImplementation(() => [
-  {
-    browserFields: mockBrowserFields,
-    indexPatterns: mockIndexPattern,
-    docValueFields: mockDocValueFields,
-  },
-]);
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
@@ -40,6 +33,17 @@ const to = '2019-08-27T22:10:56.794Z';
 
 describe('EventsViewer', () => {
   const mount = useMountAppended();
+
+  beforeEach(() => {
+    mockUseFetchIndexPatterns.mockImplementation(() => [
+      {
+        browserFields: mockBrowserFields,
+        indexPatterns: mockIndexPattern,
+        docValueFields: mockDocValueFields,
+        isLoading: false,
+      },
+    ]);
+  });
 
   test('it renders the "Showing..." subtitle with the expected event count', async () => {
     const wrapper = mount(
@@ -61,6 +65,35 @@ describe('EventsViewer', () => {
     expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().text()).toEqual(
       'Showing: 12 events'
     );
+  });
+
+  test('it does NOT render fetch index pattern is loading', async () => {
+    mockUseFetchIndexPatterns.mockImplementation(() => [
+      {
+        browserFields: mockBrowserFields,
+        indexPatterns: mockIndexPattern,
+        docValueFields: mockDocValueFields,
+        isLoading: true,
+      },
+    ]);
+
+    const wrapper = mount(
+      <TestProviders>
+        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+          <StatefulEventsViewer
+            defaultModel={eventsDefaultModel}
+            end={to}
+            id={'test-stateful-events-viewer'}
+            start={from}
+          />
+        </MockedProvider>
+      </TestProviders>
+    );
+
+    await wait();
+    wrapper.update();
+
+    expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().exists()).toBe(false);
   });
 
   test('it renders the Fields Browser as a settings gear', async () => {

@@ -59,6 +59,7 @@ interface Props {
   id: string;
   indexPattern: IIndexPattern;
   isLive: boolean;
+  isLoadingIndexPattern: boolean;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
   kqlMode: KqlMode;
@@ -83,6 +84,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   id,
   indexPattern,
   isLive,
+  isLoadingIndexPattern,
   itemsPerPage,
   itemsPerPageOptions,
   kqlMode,
@@ -121,6 +123,12 @@ const EventsViewerComponent: React.FC<Props> = ({
     end,
     isEventViewer: true,
   });
+
+  const canQueryTimeline = useMemo(
+    () => combinedQueries != null && isLoadingIndexPattern != null && !isLoadingIndexPattern,
+    [isLoadingIndexPattern, combinedQueries]
+  );
+
   const fields = useMemo(
     () =>
       union(
@@ -139,12 +147,12 @@ const EventsViewerComponent: React.FC<Props> = ({
 
   return (
     <StyledEuiPanel data-test-subj="events-viewer-panel">
-      {combinedQueries != null && docValueFields.length > 0 ? (
+      {canQueryTimeline ? (
         <EventDetailsWidthProvider>
           <TimelineQuery
             docValueFields={docValueFields}
             fields={fields}
-            filterQuery={combinedQueries.filterQuery}
+            filterQuery={combinedQueries!.filterQuery}
             id={id}
             indexPattern={indexPattern}
             limit={itemsPerPage}
