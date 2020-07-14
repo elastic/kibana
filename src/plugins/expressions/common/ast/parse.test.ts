@@ -37,6 +37,12 @@ describe('parse()', () => {
     });
   });
 
+  test('throws on malformed expression', () => {
+    expect(() => {
+      parse('{ intentionally malformed }', 'expression');
+    }).toThrowError();
+  });
+
   test('parses an argument', () => {
     const arg = parse('foo', 'argument');
     expect(arg).toBe('foo');

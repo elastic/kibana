@@ -144,6 +144,7 @@ export const searchAfterAndBulkCreate = async ({
             logger,
             filter,
             pageSize: tuple.maxSignals < pageSize ? Math.ceil(tuple.maxSignals) : pageSize, // maximum number of docs to receive per search result.
+            timestampOverride: ruleParams.timestampOverride,
           }
         );
         toReturn.searchAfterTimes.push(searchDuration);

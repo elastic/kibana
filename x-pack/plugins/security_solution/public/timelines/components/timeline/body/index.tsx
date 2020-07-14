@@ -6,7 +6,7 @@
 
 import React, { useMemo, useRef } from 'react';
 
-import { BrowserFields } from '../../../../common/containers/source';
+import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { TimelineItem, TimelineNonEcsData } from '../../../../graphql/types';
 import { Note } from '../../../../common/lib/note';
 import { ColumnHeaderOptions } from '../../../../timelines/store/timeline/model';
@@ -41,6 +41,7 @@ export interface BodyProps {
   columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
   data: TimelineItem[];
+  docValueFields: DocValueFields[];
   getNotesByIds: (noteIds: string[]) => Note[];
   graphEventId?: string;
   height?: number;
@@ -77,6 +78,7 @@ export const Body = React.memo<BodyProps>(
     columnHeaders,
     columnRenderers,
     data,
+    docValueFields,
     eventIdToNoteIds,
     getNotesByIds,
     graphEventId,
@@ -105,7 +107,7 @@ export const Body = React.memo<BodyProps>(
     updateNote,
   }) => {
     const containerElementRef = useRef<HTMLDivElement>(null);
-    const { getManageTimelineById, getIndexToAddById } = useManageTimeline();
+    const { getManageTimelineById } = useManageTimeline();
     const timelineActions = useMemo(
       () =>
         data.reduce((acc: TimelineRowAction[], rowData) => {
@@ -152,7 +154,6 @@ export const Body = React.memo<BodyProps>(
           <GraphOverlay
             bodyHeight={height}
             graphEventId={graphEventId}
-            indexToAdd={getIndexToAddById(id) ?? []}
             timelineId={id}
             timelineType={timelineType}
           />
@@ -192,6 +193,7 @@ export const Body = React.memo<BodyProps>(
               columnHeaders={columnHeaders}
               columnRenderers={columnRenderers}
               data={data}
+              docValueFields={docValueFields}
               eventIdToNoteIds={eventIdToNoteIds}
               getNotesByIds={getNotesByIds}
               id={id}

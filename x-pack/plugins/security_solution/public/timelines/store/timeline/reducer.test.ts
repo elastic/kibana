@@ -48,6 +48,8 @@ import { ColumnHeaderOptions } from './model';
 import { timelineDefaults } from './defaults';
 import { TimelineById } from './types';
 
+jest.mock('../../../common/components/url_state/normalize_time_range.ts');
+
 const timelineByIdMock: TimelineById = {
   foo: {
     dataProviders: [
@@ -92,8 +94,8 @@ const timelineByIdMock: TimelineById = {
     pinnedEventIds: {},
     pinnedEventsSaveObject: {},
     dateRange: {
-      start: 0,
-      end: 0,
+      start: '2020-07-07T08:20:18.966Z',
+      end: '2020-07-08T08:20:18.966Z',
     },
     selectedEventIds: {},
     show: true,
@@ -1009,8 +1011,8 @@ describe('Timeline', () => {
     test('should return a new reference and not the same reference', () => {
       const update = updateTimelineRange({
         id: 'foo',
-        start: 23,
-        end: 33,
+        start: '2020-07-07T08:20:18.966Z',
+        end: '2020-07-08T08:20:18.966Z',
         timelineById: timelineByIdMock,
       });
       expect(update).not.toBe(timelineByIdMock);
@@ -1019,16 +1021,16 @@ describe('Timeline', () => {
     test('should update the timeline range', () => {
       const update = updateTimelineRange({
         id: 'foo',
-        start: 23,
-        end: 33,
+        start: '2020-07-07T08:20:18.966Z',
+        end: '2020-07-08T08:20:18.966Z',
         timelineById: timelineByIdMock,
       });
       expect(update).toEqual(
         set(
           'foo.dateRange',
           {
-            start: 23,
-            end: 33,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           timelineByIdMock
         )
@@ -1135,8 +1137,8 @@ describe('Timeline', () => {
           templateTimelineId: null,
           noteIds: [],
           dateRange: {
-            start: 0,
-            end: 0,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           selectedEventIds: {},
           show: true,
@@ -1231,8 +1233,8 @@ describe('Timeline', () => {
           templateTimelineId: null,
           noteIds: [],
           dateRange: {
-            start: 0,
-            end: 0,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           selectedEventIds: {},
           show: true,
@@ -1437,8 +1439,8 @@ describe('Timeline', () => {
           templateTimelineId: null,
           noteIds: [],
           dateRange: {
-            start: 0,
-            end: 0,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           selectedEventIds: {},
           show: true,
@@ -1533,8 +1535,8 @@ describe('Timeline', () => {
           templateTimelineVersion: null,
           noteIds: [],
           dateRange: {
-            start: 0,
-            end: 0,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           selectedEventIds: {},
           show: true,
@@ -1635,8 +1637,8 @@ describe('Timeline', () => {
           templateTimelineId: null,
           noteIds: [],
           dateRange: {
-            start: 0,
-            end: 0,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           selectedEventIds: {},
           show: true,
@@ -1738,8 +1740,8 @@ describe('Timeline', () => {
           templateTimelineVersion: null,
           noteIds: [],
           dateRange: {
-            start: 0,
-            end: 0,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           selectedEventIds: {},
           show: true,
@@ -1933,8 +1935,8 @@ describe('Timeline', () => {
           templateTimelineId: null,
           noteIds: [],
           dateRange: {
-            start: 0,
-            end: 0,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           selectedEventIds: {},
           show: true,
@@ -2013,8 +2015,8 @@ describe('Timeline', () => {
           templateTimelineId: null,
           noteIds: [],
           dateRange: {
-            start: 0,
-            end: 0,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           selectedEventIds: {},
           show: true,
@@ -2117,8 +2119,8 @@ describe('Timeline', () => {
           templateTimelineId: null,
           noteIds: [],
           dateRange: {
-            start: 0,
-            end: 0,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           selectedEventIds: {},
           show: true,

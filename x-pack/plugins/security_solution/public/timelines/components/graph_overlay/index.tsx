@@ -71,17 +71,17 @@ const GraphOverlayComponent = ({
     (id?: string) => {
       onCloseCaseModal();
 
-      dispatch(
-        setInsertTimeline({
-          graphEventId,
-          timelineId,
-          timelineSavedObjectId: currentTimeline.savedObjectId,
-          timelineTitle: title.length > 0 ? title : UNTITLED_TIMELINE,
-        })
-      );
-
       navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
         path: id != null ? getCaseDetailsUrl({ id }) : getCreateCaseUrl(),
+      }).then(() => {
+        dispatch(
+          setInsertTimeline({
+            graphEventId,
+            timelineId,
+            timelineSavedObjectId: currentTimeline.savedObjectId,
+            timelineTitle: title.length > 0 ? title : UNTITLED_TIMELINE,
+          })
+        );
       });
     },
     [currentTimeline, dispatch, graphEventId, navigateToApp, onCloseCaseModal, timelineId, title]

@@ -27,7 +27,9 @@ When(`the user selected the breakdown`, () => {
 
 Then(`breakdown series should appear in chart`, () => {
   cy.get('.euiLoadingChart').should('not.be.visible');
-  cy.get('div.echLegendItem__label[title=Chrome] ')
+  cy.get('div.echLegendItem__label[title=Chrome] ', {
+    timeout: DEFAULT_TIMEOUT,
+  })
     .invoke('text')
     .should('eq', 'Chrome');
 });

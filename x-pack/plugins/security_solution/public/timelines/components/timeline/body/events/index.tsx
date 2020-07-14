@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { BrowserFields } from '../../../../../common/containers/source';
+import { BrowserFields, DocValueFields } from '../../../../../common/containers/source';
 import { TimelineItem, TimelineNonEcsData } from '../../../../../graphql/types';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { Note } from '../../../../../common/lib/note';
@@ -32,6 +32,7 @@ interface Props {
   columnRenderers: ColumnRenderer[];
   containerElementRef: HTMLDivElement;
   data: TimelineItem[];
+  docValueFields: DocValueFields[];
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   getNotesByIds: (noteIds: string[]) => Note[];
   id: string;
@@ -58,6 +59,7 @@ const EventsComponent: React.FC<Props> = ({
   columnRenderers,
   containerElementRef,
   data,
+  docValueFields,
   eventIdToNoteIds,
   getNotesByIds,
   id,
@@ -85,6 +87,7 @@ const EventsComponent: React.FC<Props> = ({
         columnRenderers={columnRenderers}
         containerElementRef={containerElementRef}
         disableSensorVisibility={data != null && data.length < 101}
+        docValueFields={docValueFields}
         event={event}
         eventIdToNoteIds={eventIdToNoteIds}
         getNotesByIds={getNotesByIds}
