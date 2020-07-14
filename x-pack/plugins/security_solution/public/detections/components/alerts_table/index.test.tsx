@@ -37,6 +37,8 @@ describe('AlertsTableComponent', () => {
           clearEventsLoading={jest.fn()}
           setEventsDeleted={jest.fn()}
           clearEventsDeleted={jest.fn()}
+          showBuildingBlockAlerts={false}
+          onShowBuildingBlockAlertsChanged={jest.fn()}
           updateTimelineIsLoading={jest.fn()}
           updateTimeline={jest.fn()}
         />

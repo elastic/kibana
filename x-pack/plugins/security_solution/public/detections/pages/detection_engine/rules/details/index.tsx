@@ -17,7 +17,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { FC, memo, useCallback, useMemo, useState } from 'react';
+import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
 import { connect, ConnectedProps } from 'react-redux';
@@ -48,7 +48,10 @@ import { OverviewEmpty } from '../../../../../overview/components/overview_empty
 import { useAlertInfo } from '../../../../components/alerts_info';
 import { StepDefineRule } from '../../../../components/rules/step_define_rule';
 import { StepScheduleRule } from '../../../../components/rules/step_schedule_rule';
-import { buildAlertsRuleIdFilter } from '../../../../components/alerts_table/default_config';
+import {
+  buildAlertsRuleIdFilter,
+  buildShowBuildingBlockFilter,
+} from '../../../../components/alerts_table/default_config';
 import { NoWriteAlertsCallOut } from '../../../../components/no_write_alerts_callout';
 import * as detectionI18n from '../../translations';
 import { ReadOnlyCallOut } from '../../../../components/rules/read_only_callout';
@@ -134,6 +137,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
           scheduleRuleData: null,
         };
   const [lastAlerts] = useAlertInfo({ ruleId });
+  const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const mlCapabilities = useMlCapabilities();
   const history = useHistory();
   const { formatUrl } = useFormatUrl(SecurityPageName.detections);
@@ -184,9 +188,17 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     [isLoading, rule]
   );
 
+  // Set showBuildingBlockAlerts if rule is a Building Block Rule otherwise we won't show alerts
+  useEffect(() => {
+    setShowBuildingBlockAlerts(rule?.building_block_type != null);
+  }, [rule]);
+
   const alertDefaultFilters = useMemo(
-    () => (ruleId != null ? buildAlertsRuleIdFilter(ruleId) : []),
-    [ruleId]
+    () => [
+      ...(ruleId != null ? buildAlertsRuleIdFilter(ruleId) : []),
+      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+    ],
+    [ruleId, showBuildingBlockAlerts]
   );
 
   const alertMergedFilters = useMemo(() => [...alertDefaultFilters, ...filters], [
@@ -260,6 +272,13 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
       history.push(getEditRuleUrl(ruleId ?? ''));
     },
     [history, ruleId]
+  );
+
+  const onShowBuildingBlockAlertsChangedCallback = useCallback(
+    (newShowBuildingBlockAlerts: boolean) => {
+      setShowBuildingBlockAlerts(newShowBuildingBlockAlerts);
+    },
+    [setShowBuildingBlockAlerts]
   );
 
   const { indicesExist, indexPattern } = useWithSource('default', indexToAdd);
@@ -447,6 +466,8 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                     hasIndexWrite={hasIndexWrite ?? false}
                     from={from}
                     loading={loading}
+                    showBuildingBlockAlerts={showBuildingBlockAlerts}
+                    onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
                     signalsIndex={signalIndexName ?? ''}
                     to={to}
                   />
