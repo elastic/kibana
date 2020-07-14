@@ -9,7 +9,6 @@ import { DataState } from '../../types';
 import { dataReducer } from './reducer';
 import { DataAction } from './action';
 import { createStore } from 'redux';
-import resolverTreeThatBreaksStuff from './resolver_tree_that_breaks_stuff.json';
 describe('data state', () => {
   let actions: DataAction[] = [];
 
@@ -262,21 +261,6 @@ describe('data state', () => {
           `);
         });
       });
-    });
-  });
-  describe('when there is an resolver tree that buttner gave us', () => {
-    beforeEach(() => {
-      actions.push({
-        type: 'serverReturnedResolverData',
-        payload: {
-          result: resolverTreeThatBreaksStuff,
-          // this value doesn't matter
-          databaseDocumentID: '',
-        },
-      });
-    });
-    it('still can get an indexed process tree', () => {
-      expect(() => selectors.indexedProcessTree(state())).not.toThrow();
     });
   });
 });
