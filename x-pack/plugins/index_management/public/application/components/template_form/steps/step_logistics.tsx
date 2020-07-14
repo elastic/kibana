@@ -62,7 +62,7 @@ function getFieldsMeta(esDocsBase: string) {
       description: (
         <FormattedMessage
           id="xpack.idxMgmt.templateForm.stepLogistics.dataStreamDescription"
-          defaultMessage="Create a data stream instead of an index. {docsLink}"
+          defaultMessage="The template creates data streams instead of indices. {docsLink}"
           values={{
             docsLink: (
               <EuiLink
@@ -73,7 +73,7 @@ function getFieldsMeta(esDocsBase: string) {
                 {i18n.translate(
                   'xpack.idxMgmt.templateForm.stepLogistics.dataStreamDocumentionLink',
                   {
-                    defaultMessage: 'Learn more about data streams.',
+                    defaultMessage: 'Learn more.',
                   }
                 )}
               </EuiLink>
