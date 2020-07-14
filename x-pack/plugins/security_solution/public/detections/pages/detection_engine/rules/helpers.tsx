@@ -122,6 +122,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
   const {
     author,
     building_block_type: buildingBlockType,
+    exceptions_list: exceptionsList,
     license,
     risk_score_mapping: riskScoreMapping,
     rule_name_override: ruleNameOverride,
@@ -138,6 +139,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
   return {
     isNew: false,
     author,
+    isAssociatedToEndpointList: exceptionsList?.some(({ id }) => id === 'endpoint_list') ?? false,
     isBuildingBlock: buildingBlockType !== undefined,
     license: license ?? '',
     ruleNameOverride: ruleNameOverride ?? '',
