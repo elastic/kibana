@@ -12,7 +12,6 @@ import {
 } from '@elastic/eui';
 import cytoscape from 'cytoscape';
 import React, { MouseEvent } from 'react';
-import { SERVICE_ENVIRONMENT } from '../../../../../common/elasticsearch_fieldnames';
 import { Buttons } from './Buttons';
 import { Info } from './Info';
 import { ServiceStatsFetcher } from './ServiceStatsFetcher';
