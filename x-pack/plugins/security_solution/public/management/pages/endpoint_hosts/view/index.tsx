@@ -401,7 +401,7 @@ export const HostList = () => {
             <p>
               <FormattedMessage
                 id="xpack.securitySolution.hostList.pageSubTitle"
-                defaultMessage="Hosts running the Elastic Endpoint"
+                defaultMessage="Hosts running Elastic Endpoint Security"
               />
             </p>
           </EuiText>

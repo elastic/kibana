@@ -17,8 +17,8 @@ import {
   entriesMatch,
   entriesNested,
   ExceptionListItemSchema,
-} from '../../../lists/common/schemas';
-import { Language } from './schemas/common/schemas';
+} from '../shared_imports';
+import { Language, Query } from './schemas/common/schemas';
 
 type Operators = 'and' | 'or' | 'not';
 type LuceneOperators = 'AND' | 'OR' | 'NOT';
