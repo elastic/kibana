@@ -80,7 +80,7 @@ const securitySubPlugins = [
   `${APP_ID}:${SecurityPageName.network}`,
   `${APP_ID}:${SecurityPageName.timelines}`,
   `${APP_ID}:${SecurityPageName.case}`,
-  `${APP_ID}:${SecurityPageName.management}`,
+  `${APP_ID}:${SecurityPageName.administration}`,
 ];
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
