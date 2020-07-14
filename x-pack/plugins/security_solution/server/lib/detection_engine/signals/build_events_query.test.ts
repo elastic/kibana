@@ -291,4 +291,158 @@ describe('create_signals', () => {
       },
     });
   });
+  test('if aggregations is not provided it should not be included', () => {
+    const query = buildEventsSearchQuery({
+      index: ['auditbeat-*'],
+      from: 'now-5m',
+      to: 'today',
+      filter: {},
+      size: 100,
+      searchAfterSortId: undefined,
+    });
+    expect(query).toEqual({
+      allowNoIndices: true,
+      index: ['auditbeat-*'],
+      size: 100,
+      ignoreUnavailable: true,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {},
+              {
+                bool: {
+                  filter: [
+                    {
+                      bool: {
+                        should: [
+                          {
+                            range: {
+                              '@timestamp': {
+                                gte: 'now-5m',
+                              },
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                    {
+                      bool: {
+                        should: [
+                          {
+                            range: {
+                              '@timestamp': {
+                                lte: 'today',
+                              },
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                match_all: {},
+              },
+            ],
+          },
+        },
+
+        sort: [
+          {
+            '@timestamp': {
+              order: 'asc',
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  test('if aggregations is provided it should be included', () => {
+    const query = buildEventsSearchQuery({
+      aggregations: {
+        tags: {
+          terms: {
+            field: 'tag',
+          },
+        },
+      },
+      index: ['auditbeat-*'],
+      from: 'now-5m',
+      to: 'today',
+      filter: {},
+      size: 100,
+      searchAfterSortId: undefined,
+    });
+    expect(query).toEqual({
+      allowNoIndices: true,
+      index: ['auditbeat-*'],
+      size: 100,
+      ignoreUnavailable: true,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {},
+              {
+                bool: {
+                  filter: [
+                    {
+                      bool: {
+                        should: [
+                          {
+                            range: {
+                              '@timestamp': {
+                                gte: 'now-5m',
+                              },
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                    {
+                      bool: {
+                        should: [
+                          {
+                            range: {
+                              '@timestamp': {
+                                lte: 'today',
+                              },
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                match_all: {},
+              },
+            ],
+          },
+        },
+        aggregations: {
+          tags: {
+            terms: {
+              field: 'tag',
+            },
+          },
+        },
+        sort: [
+          {
+            '@timestamp': {
+              order: 'asc',
+            },
+          },
+        ],
+      },
+    });
+  });
 });

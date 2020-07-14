@@ -4,14 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/no-empty-interface */
+/* eslint-disable @typescript-eslint/camelcase, @typescript-eslint/no-empty-interface */
 
 import * as runtimeTypes from 'io-ts';
-import { SavedObjectsClient } from 'kibana/server';
 
-import { unionWithNullType } from '../../utility_types';
+import { stringEnum, unionWithNullType } from '../../utility_types';
 import { NoteSavedObject, NoteSavedObjectToReturnRuntimeType } from './note';
 import { PinnedEventToReturnSavedObjectRuntimeType, PinnedEventSavedObject } from './pinned_event';
+import {
+  success,
+  success_count as successCount,
+} from '../../detection_engine/schemas/common/schemas';
+import { PositiveInteger } from '../../detection_engine/schemas/types';
+import { errorSchema } from '../../detection_engine/schemas/response/error_schema';
 
 /*
  *  ColumnHeader Types
@@ -164,6 +169,24 @@ export type TimelineStatusLiteralWithNull = runtimeTypes.TypeOf<
   typeof TimelineStatusLiteralWithNullRt
 >;
 
+export enum RowRendererId {
+  auditd = 'auditd',
+  auditd_file = 'auditd_file',
+  netflow = 'netflow',
+  plain = 'plain',
+  suricata = 'suricata',
+  system = 'system',
+  system_dns = 'system_dns',
+  system_endgame_process = 'system_endgame_process',
+  system_file = 'system_file',
+  system_fim = 'system_fim',
+  system_security_event = 'system_security_event',
+  system_socket = 'system_socket',
+  zeek = 'zeek',
+}
+
+export const RowRendererIdRuntimeType = stringEnum(RowRendererId, 'RowRendererId');
+
 /**
  * Timeline template type
  */
@@ -211,6 +234,7 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   dataProviders: unionWithNullType(runtimeTypes.array(SavedDataProviderRuntimeType)),
   description: unionWithNullType(runtimeTypes.string),
   eventType: unionWithNullType(runtimeTypes.string),
+  excludedRowRendererIds: unionWithNullType(runtimeTypes.array(RowRendererIdRuntimeType)),
   favorite: unionWithNullType(runtimeTypes.array(SavedFavoriteRuntimeType)),
   filters: unionWithNullType(runtimeTypes.array(SavedFilterRuntimeType)),
   kqlMode: unionWithNullType(runtimeTypes.string),
@@ -334,19 +358,6 @@ export interface AllTimelineSavedObject
  * Import/export timelines
  */
 
-export type ExportTimelineSavedObjectsClient = Pick<
-  SavedObjectsClient,
-  | 'get'
-  | 'errors'
-  | 'create'
-  | 'bulkCreate'
-  | 'delete'
-  | 'find'
-  | 'bulkGet'
-  | 'update'
-  | 'bulkUpdate'
->;
-
 export type ExportedGlobalNotes = Array<Exclude<NoteSavedObject, 'eventId'>>;
 export type ExportedEventNotes = NoteSavedObject[];
 
@@ -374,3 +385,15 @@ export type NotesAndPinnedEventsByTimelineId = Record<
   string,
   { notes: NoteSavedObject[]; pinnedEvents: PinnedEventSavedObject[] }
 >;
+
+export const importTimelineResultSchema = runtimeTypes.exact(
+  runtimeTypes.type({
+    success,
+    success_count: successCount,
+    timelines_installed: PositiveInteger,
+    timelines_updated: PositiveInteger,
+    errors: runtimeTypes.array(errorSchema),
+  })
+);
+
+export type ImportTimelineResultSchema = runtimeTypes.TypeOf<typeof importTimelineResultSchema>;

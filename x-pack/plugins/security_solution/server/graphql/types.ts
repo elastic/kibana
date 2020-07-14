@@ -98,9 +98,9 @@ export interface TlsSortField {
 }
 
 export interface PageInfoTimeline {
-  pageIndex: number;
+  pageIndex?: Maybe<number>;
 
-  pageSize: number;
+  pageSize?: Maybe<number>;
 }
 
 export interface SortTimeline {
@@ -125,6 +125,8 @@ export interface TimelineInput {
   description?: Maybe<string>;
 
   eventType?: Maybe<string>;
+
+  excludedRowRendererIds?: Maybe<RowRendererId[]>;
 
   filters?: Maybe<FilterTimelineInput[]>;
 
@@ -349,6 +351,22 @@ export enum TlsFields {
 export enum DataProviderType {
   default = 'default',
   template = 'template',
+}
+
+export enum RowRendererId {
+  auditd = 'auditd',
+  auditd_file = 'auditd_file',
+  netflow = 'netflow',
+  plain = 'plain',
+  suricata = 'suricata',
+  system = 'system',
+  system_dns = 'system_dns',
+  system_endgame_process = 'system_endgame_process',
+  system_file = 'system_file',
+  system_fim = 'system_fim',
+  system_security_event = 'system_security_event',
+  system_socket = 'system_socket',
+  zeek = 'zeek',
 }
 
 export enum TimelineStatus {
@@ -1053,6 +1071,8 @@ export interface RuleField {
   version?: Maybe<string[] | string>;
 
   note?: Maybe<string[] | string>;
+
+  threshold?: Maybe<ToAny>;
 
   exceptions_list?: Maybe<ToAny>;
 }
@@ -1962,6 +1982,8 @@ export interface TimelineResult {
   eventIdToNoteIds?: Maybe<NoteResult[]>;
 
   eventType?: Maybe<string>;
+
+  excludedRowRendererIds?: Maybe<RowRendererId[]>;
 
   favorite?: Maybe<FavoriteTimelineResult[]>;
 
@@ -4919,6 +4941,8 @@ export namespace RuleFieldResolvers {
 
     note?: NoteResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
+    threshold?: ThresholdResolver<Maybe<ToAny>, TypeParent, TContext>;
+
     exceptions_list?: ExceptionsListResolver<Maybe<ToAny>, TypeParent, TContext>;
   }
 
@@ -5074,6 +5098,11 @@ export namespace RuleFieldResolvers {
   > = Resolver<R, Parent, TContext>;
   export type NoteResolver<
     R = Maybe<string[] | string>,
+    Parent = RuleField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ThresholdResolver<
+    R = Maybe<ToAny>,
     Parent = RuleField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -8101,6 +8130,12 @@ export namespace TimelineResultResolvers {
 
     eventType?: EventTypeResolver<Maybe<string>, TypeParent, TContext>;
 
+    excludedRowRendererIds?: ExcludedRowRendererIdsResolver<
+      Maybe<RowRendererId[]>,
+      TypeParent,
+      TContext
+    >;
+
     favorite?: FavoriteResolver<Maybe<FavoriteTimelineResult[]>, TypeParent, TContext>;
 
     filters?: FiltersResolver<Maybe<FilterTimelineResult[]>, TypeParent, TContext>;
@@ -8181,6 +8216,11 @@ export namespace TimelineResultResolvers {
   > = Resolver<R, Parent, TContext>;
   export type EventTypeResolver<
     R = Maybe<string>,
+    Parent = TimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ExcludedRowRendererIdsResolver<
+    R = Maybe<RowRendererId[]>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
