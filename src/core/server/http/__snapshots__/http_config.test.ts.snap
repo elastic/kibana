@@ -102,8 +102,8 @@ Array [
 ]
 `;
 
-exports[`with compression throws if invalid referrer whitelist 1`] = `"[compression.referrerWhitelist.0]: value must be a valid hostname (see RFC 1123)."`;
+exports[`with compression throws if invalid referrer whitelist 1`] = `"[compression.referrerAllowlist.0]: value must be a valid hostname (see RFC 1123)."`;
 
-exports[`with compression throws if invalid referrer whitelist 2`] = `"[compression.referrerWhitelist]: array size is [0], but cannot be smaller than [1]"`;
+exports[`with compression throws if invalid referrer whitelist 2`] = `"[compression.referrerAllowlist]: array size is [0], but cannot be smaller than [1]"`;
 
-exports[`with compression throws if referrer whitelist is specified and compression is disabled 1`] = `"cannot use [compression.referrerWhitelist] when [compression.enabled] is set to false"`;
+exports[`with compression throws if referrer whitelist is specified and compression is disabled 1`] = `"cannot use [compression.referrerAllowlist] when [compression.enabled] is set to false"`;

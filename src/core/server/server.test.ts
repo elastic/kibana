@@ -35,12 +35,15 @@ import {
 } from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
-import { Env } from './config';
+import { coreDeprecationProvider, Env } from './config';
 import { Server } from './server';
 
 import { getEnvOptions } from './config/__mocks__/env';
 import { loggingSystemMock } from './logging/logging_system.mock';
 import { rawConfigServiceMock } from './config/raw_config_service.mock';
+import { config as elasticsearchConfig } from './elasticsearch';
+import { config as uiSettingsConfig } from './ui_settings';
+import { config as httpConfig } from './http';
 
 const env = new Env('.', getEnvOptions());
 const logger = loggingSystemMock.create();
@@ -214,4 +217,30 @@ test(`doesn't setup core services if legacy config validation fails`, async () =
   expect(mockMetricsService.setup).not.toHaveBeenCalled();
   expect(mockStatusService.setup).not.toHaveBeenCalled();
   expect(mockLoggingService.setup).not.toHaveBeenCalled();
+});
+
+describe('setupCoreConfig', () => {
+  it('registers the core service deprecation providers', async () => {
+    const server = new Server(rawConfigService, env, logger);
+    await server.setupCoreConfig();
+
+    expect(mockConfigService.addDeprecationProvider).toHaveBeenCalledTimes(4);
+
+    expect(mockConfigService.addDeprecationProvider).toHaveBeenCalledWith(
+      '',
+      coreDeprecationProvider
+    );
+    expect(mockConfigService.addDeprecationProvider).toHaveBeenCalledWith(
+      elasticsearchConfig.path,
+      elasticsearchConfig.deprecations
+    );
+    expect(mockConfigService.addDeprecationProvider).toHaveBeenCalledWith(
+      uiSettingsConfig.path,
+      uiSettingsConfig.deprecations
+    );
+    expect(mockConfigService.addDeprecationProvider).toHaveBeenCalledWith(
+      httpConfig.path,
+      httpConfig.deprecations
+    );
+  });
 });

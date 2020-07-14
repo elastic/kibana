@@ -241,7 +241,7 @@ export class HttpServer {
       this.log.warn(`setupConditionalCompression called after stop`);
     }
 
-    const { enabled, referrerWhitelist: list } = config.compression;
+    const { enabled, referrerAllowlist: list } = config.compression;
     if (!enabled) {
       this.log.debug('HTTP compression is disabled');
       this.server.ext('onRequest', (request, h) => {

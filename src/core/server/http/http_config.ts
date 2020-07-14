@@ -22,6 +22,7 @@ import { hostname } from 'os';
 
 import { CspConfigType, CspConfig, ICspConfig } from '../csp';
 import { SslConfig, sslSchema } from './ssl_config';
+import { ServiceConfigDescriptor } from '../internal_types';
 
 const validBasePathRegex = /^\/.*[^\/]$/;
 const uuidRegexp = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -31,102 +32,108 @@ const match = (regex: RegExp, errorMsg: string) => (str: string) =>
 
 // before update to make sure it's in sync with validation rules in Legacy
 // https://github.com/elastic/kibana/blob/master/src/legacy/server/config/schema.js
-export const config = {
-  path: 'server',
-  schema: schema.object(
-    {
-      name: schema.string({ defaultValue: () => hostname() }),
-      autoListen: schema.boolean({ defaultValue: true }),
-      basePath: schema.maybe(
-        schema.string({
-          validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
-        })
-      ),
-      cors: schema.conditional(
-        schema.contextRef('dev'),
-        true,
-        schema.object(
-          {
-            origin: schema.arrayOf(schema.string()),
+const configSchema = schema.object(
+  {
+    name: schema.string({ defaultValue: () => hostname() }),
+    autoListen: schema.boolean({ defaultValue: true }),
+    basePath: schema.maybe(
+      schema.string({
+        validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
+      })
+    ),
+    cors: schema.conditional(
+      schema.contextRef('dev'),
+      true,
+      schema.object(
+        {
+          origin: schema.arrayOf(schema.string()),
+        },
+        {
+          defaultValue: {
+            origin: ['*://localhost:9876'], // karma test server
           },
-          {
-            defaultValue: {
-              origin: ['*://localhost:9876'], // karma test server
-            },
-          }
-        ),
-        schema.boolean({ defaultValue: false })
-      ),
-      customResponseHeaders: schema.recordOf(schema.string(), schema.any(), {
-        defaultValue: {},
-      }),
-      host: schema.string({
-        defaultValue: 'localhost',
-        hostname: true,
-      }),
-      maxPayload: schema.byteSize({
-        defaultValue: '1048576b',
-      }),
-      port: schema.number({
-        defaultValue: 5601,
-      }),
-      rewriteBasePath: schema.boolean({ defaultValue: false }),
-      ssl: sslSchema,
-      keepaliveTimeout: schema.number({
-        defaultValue: 120000,
-      }),
-      socketTimeout: schema.number({
-        defaultValue: 120000,
-      }),
-      compression: schema.object({
-        enabled: schema.boolean({ defaultValue: true }),
-        referrerWhitelist: schema.maybe(
-          schema.arrayOf(
-            schema.string({
-              hostname: true,
-            }),
-            { minSize: 1 }
-          )
-        ),
-      }),
-      uuid: schema.maybe(
-        schema.string({
-          validate: match(uuidRegexp, 'must be a valid uuid'),
-        })
-      ),
-      xsrf: schema.object({
-        disableProtection: schema.boolean({ defaultValue: false }),
-        whitelist: schema.arrayOf(
-          schema.string({ validate: match(/^\//, 'must start with a slash') }),
-          { defaultValue: [] }
-        ),
-      }),
-    },
-    {
-      validate: (rawConfig) => {
-        if (!rawConfig.basePath && rawConfig.rewriteBasePath) {
-          return 'cannot use [rewriteBasePath] when [basePath] is not specified';
         }
-        if (!rawConfig.compression.enabled && rawConfig.compression.referrerWhitelist) {
-          return 'cannot use [compression.referrerWhitelist] when [compression.enabled] is set to false';
-        }
+      ),
+      schema.boolean({ defaultValue: false })
+    ),
+    customResponseHeaders: schema.recordOf(schema.string(), schema.any(), {
+      defaultValue: {},
+    }),
+    host: schema.string({
+      defaultValue: 'localhost',
+      hostname: true,
+    }),
+    maxPayload: schema.byteSize({
+      defaultValue: '1048576b',
+    }),
+    port: schema.number({
+      defaultValue: 5601,
+    }),
+    rewriteBasePath: schema.boolean({ defaultValue: false }),
+    ssl: sslSchema,
+    keepaliveTimeout: schema.number({
+      defaultValue: 120000,
+    }),
+    socketTimeout: schema.number({
+      defaultValue: 120000,
+    }),
+    compression: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+      referrerAllowlist: schema.maybe(
+        schema.arrayOf(
+          schema.string({
+            hostname: true,
+          }),
+          { minSize: 1 }
+        )
+      ),
+    }),
+    uuid: schema.maybe(
+      schema.string({
+        validate: match(uuidRegexp, 'must be a valid uuid'),
+      })
+    ),
+    xsrf: schema.object({
+      disableProtection: schema.boolean({ defaultValue: false }),
+      whitelist: schema.arrayOf(
+        schema.string({ validate: match(/^\//, 'must start with a slash') }),
+        { defaultValue: [] }
+      ),
+    }),
+  },
+  {
+    validate: (rawConfig) => {
+      if (!rawConfig.basePath && rawConfig.rewriteBasePath) {
+        return 'cannot use [rewriteBasePath] when [basePath] is not specified';
+      }
+      if (!rawConfig.compression.enabled && rawConfig.compression.referrerAllowlist) {
+        return 'cannot use [compression.referrerAllowlist] when [compression.enabled] is set to false';
+      }
 
-        if (
-          rawConfig.ssl.enabled &&
-          rawConfig.ssl.redirectHttpFromPort !== undefined &&
-          rawConfig.ssl.redirectHttpFromPort === rawConfig.port
-        ) {
-          return (
-            'Kibana does not accept http traffic to [port] when ssl is ' +
-            'enabled (only https is allowed), so [ssl.redirectHttpFromPort] ' +
-            `cannot be configured to the same value. Both are [${rawConfig.port}].`
-          );
-        }
-      },
-    }
-  ),
+      if (
+        rawConfig.ssl.enabled &&
+        rawConfig.ssl.redirectHttpFromPort !== undefined &&
+        rawConfig.ssl.redirectHttpFromPort === rawConfig.port
+      ) {
+        return (
+          'Kibana does not accept http traffic to [port] when ssl is ' +
+          'enabled (only https is allowed), so [ssl.redirectHttpFromPort] ' +
+          `cannot be configured to the same value. Both are [${rawConfig.port}].`
+        );
+      }
+    },
+  }
+);
+
+export const config: ServiceConfigDescriptor<HttpConfigType> = {
+  path: 'server',
+  schema: configSchema,
+  deprecations: ({ rename }) => [
+    rename('compression.referrerWhitelist', 'compression.referrerAllowlist'),
+  ],
 };
-export type HttpConfigType = TypeOf<typeof config.schema>;
+
+export type HttpConfigType = TypeOf<typeof configSchema>;
 
 export class HttpConfig {
   public name: string;
@@ -141,7 +148,7 @@ export class HttpConfig {
   public basePath?: string;
   public rewriteBasePath: boolean;
   public ssl: SslConfig;
-  public compression: { enabled: boolean; referrerWhitelist?: string[] };
+  public compression: { enabled: boolean; referrerAllowlist?: string[] };
   public csp: ICspConfig;
   public xsrf: { disableProtection: boolean; whitelist: string[] };
 

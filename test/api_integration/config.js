@@ -38,7 +38,7 @@ export default async function ({ readConfigFile }) {
         '--optimize.enabled=false',
         '--elasticsearch.healthCheck.delay=3600000',
         '--server.xsrf.disableProtection=true',
-        '--server.compression.referrerWhitelist=["some-host.com"]',
+        '--server.compression.referrerAllowlist=["some-host.com"]',
       ],
     },
   };

@@ -447,7 +447,7 @@ deprecation warning at startup. This setting cannot end in a slash (`/`).
 | [[server-compression]] `server.compression.enabled:`
  | Set to `false` to disable HTTP compression for all responses. *Default: `true`*
 
-| `server.compression.referrerWhitelist:`
+| `server.compression.referrerAllowlist:`
  | Specifies an array of trusted hostnames, such as the {kib} host, or a reverse
 proxy sitting in front of it. This determines whether HTTP compression may be used for responses, based on the request `Referer` header.
 This setting may not be used when `server.compression.enabled` is set to `false`. *Default: `none`*

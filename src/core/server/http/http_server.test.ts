@@ -837,12 +837,12 @@ describe('conditional compression', () => {
     expect(response.header).not.toHaveProperty('content-encoding');
   });
 
-  describe('with defined `compression.referrerWhitelist`', () => {
+  describe('with defined `compression.referrerAllowlist`', () => {
     let listener: Server;
     beforeEach(async () => {
       listener = await setupServer({
         ...config,
-        compression: { enabled: true, referrerWhitelist: ['foo'] },
+        compression: { enabled: true, referrerAllowlist: ['foo'] },
       });
     });
 

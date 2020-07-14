@@ -20,6 +20,9 @@
 import uuid from 'uuid';
 import { config, HttpConfig } from './http_config';
 import { CspConfig } from '../csp';
+import { applyDeprecations, configDeprecationFactory } from '../config/deprecation';
+
+const CONFIG_PATH = 'server';
 
 const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost'];
 const invalidHostname = 'asdf$%^';
@@ -166,26 +169,26 @@ test('can specify socket timeouts', () => {
 describe('with compression', () => {
   test('accepts valid referrer whitelist', () => {
     const {
-      compression: { referrerWhitelist },
+      compression: { referrerAllowlist },
     } = config.schema.validate({
       compression: {
-        referrerWhitelist: validHostnames,
+        referrerAllowlist: validHostnames,
       },
     });
 
-    expect(referrerWhitelist).toMatchSnapshot();
+    expect(referrerAllowlist).toMatchSnapshot();
   });
 
   test('throws if invalid referrer whitelist', () => {
     const httpSchema = config.schema;
     const invalidHostnames = {
       compression: {
-        referrerWhitelist: [invalidHostname],
+        referrerAllowlist: [invalidHostname],
       },
     };
     const emptyArray = {
       compression: {
-        referrerWhitelist: [],
+        referrerAllowlist: [],
       },
     };
     expect(() => httpSchema.validate(invalidHostnames)).toThrowErrorMatchingSnapshot();
@@ -197,10 +200,47 @@ describe('with compression', () => {
     const obj = {
       compression: {
         enabled: false,
-        referrerWhitelist: validHostnames,
+        referrerAllowlist: validHostnames,
       },
     };
     expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+  });
+});
+
+describe('deprecations', () => {
+  const applyElasticsearchDeprecations = (settings: Record<string, any> = {}) => {
+    const deprecations = config.deprecations!(configDeprecationFactory);
+    const deprecationMessages: string[] = [];
+    const _config: any = {};
+    _config[CONFIG_PATH] = settings;
+    const migrated = applyDeprecations(
+      _config,
+      deprecations.map((deprecation) => ({
+        deprecation,
+        path: CONFIG_PATH,
+      })),
+      (msg) => deprecationMessages.push(msg)
+    );
+    return {
+      messages: deprecationMessages,
+      migrated,
+    };
+  };
+
+  it('logs a warning and migrate `compression.referrerWhitelist` to `compression.referrerAllowlist`', () => {
+    const { messages, migrated } = applyElasticsearchDeprecations({
+      compression: {
+        referrerWhitelist: ['some-host', 'another-host'],
+      },
+    });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"server.compression.referrerWhitelist\\" is deprecated and has been replaced by \\"server.compression.referrerAllowlist\\"",
+      ]
+    `);
+    expect(migrated.server.compression).toEqual({
+      referrerAllowlist: ['some-host', 'another-host'],
+    });
   });
 });
 
