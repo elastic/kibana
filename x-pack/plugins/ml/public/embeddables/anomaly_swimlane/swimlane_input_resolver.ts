@@ -40,6 +40,7 @@ import { parseInterval } from '../../../common/util/parse_interval';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { isViewBySwimLaneData } from '../../application/explorer/swimlane_container';
 import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
+import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../../ui_actions/apply_influencer_filters_action';
 
 const FETCH_RESULTS_DEBOUNCE_MS = 500;
 
@@ -240,7 +241,9 @@ export function processFilters(filters: Filter[], query: Query) {
   const must = [inputQuery];
   const mustNot = [];
   for (const filter of filters) {
-    if (filter.meta.disabled) continue;
+    // ignore disabled filters as well as created by swim lane selection
+    if (filter.meta.disabled || filter.meta.controlledBy === CONTROLLED_BY_SWIM_LANE_FILTER)
+      continue;
 
     const {
       meta: { negate, type, key: fieldName },

@@ -103,7 +103,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
     return true;
   }
 
-  isJoinable() {
+  showJoinEditor() {
     return false;
   }
 
@@ -307,7 +307,6 @@ export class ESGeoGridSource extends AbstractESAggSource {
       },
       meta: {
         areResultsTrimmed: false,
-        sourceType: SOURCE_TYPES.ES_GEO_GRID,
       },
     };
   }

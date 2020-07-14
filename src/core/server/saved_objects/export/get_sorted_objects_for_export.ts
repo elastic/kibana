@@ -109,7 +109,7 @@ async function fetchObjectsToExport({
       type: types,
       search,
       perPage: exportSizeLimit,
-      namespace,
+      namespaces: namespace ? [namespace] : undefined,
     });
     if (findResponse.total > exportSizeLimit) {
       throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
@@ -162,10 +162,15 @@ export async function exportSavedObjectsToStream({
     exportedObjects = sortObjects(rootObjects);
   }
 
+  // redact attributes that should not be exported
+  const redactedObjects = exportedObjects.map<SavedObject<unknown>>(
+    ({ namespaces, ...object }) => object
+  );
+
   const exportDetails: SavedObjectsExportResultDetails = {
     exportedCount: exportedObjects.length,
     missingRefCount: missingReferences.length,
     missingReferences,
   };
-  return createListStream([...exportedObjects, ...(excludeExportDetails ? [] : [exportDetails])]);
+  return createListStream([...redactedObjects, ...(excludeExportDetails ? [] : [exportDetails])]);
 }

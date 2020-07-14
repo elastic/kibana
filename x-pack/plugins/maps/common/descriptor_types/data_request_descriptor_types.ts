@@ -51,7 +51,6 @@ export type VectorStyleRequestMeta = MapFilters & {
 
 export type ESSearchSourceResponseMeta = {
   areResultsTrimmed?: boolean;
-  sourceType?: string;
 
   // top hits meta
   areEntitiesTrimmed?: boolean;

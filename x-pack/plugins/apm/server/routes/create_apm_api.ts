@@ -13,7 +13,6 @@ import {
   errorDistributionRoute,
   errorGroupsRoute,
   errorsRoute,
-  errorRateRoute,
 } from './errors';
 import {
   serviceAgentNameRoute,
@@ -49,6 +48,7 @@ import {
   transactionGroupsRoute,
   transactionGroupsAvgDurationByCountry,
   transactionGroupsAvgDurationByBrowser,
+  transactionGroupsErrorRateRoute,
 } from './transaction_groups';
 import {
   errorGroupsLocalFiltersRoute,
@@ -79,9 +79,9 @@ import {
   rumServicesRoute,
 } from './rum_client';
 import {
-  observabilityDashboardHasDataRoute,
-  observabilityDashboardDataRoute,
-} from './observability_dashboard';
+  observabilityOverviewHasDataRoute,
+  observabilityOverviewRoute,
+} from './observability_overview';
 import {
   anomalyDetectionJobsRoute,
   createAnomalyDetectionJobsRoute,
@@ -99,7 +99,6 @@ const createApmApi = () => {
     .add(errorDistributionRoute)
     .add(errorGroupsRoute)
     .add(errorsRoute)
-    .add(errorRateRoute)
 
     // Services
     .add(serviceAgentNameRoute)
@@ -139,6 +138,7 @@ const createApmApi = () => {
     .add(transactionGroupsRoute)
     .add(transactionGroupsAvgDurationByBrowser)
     .add(transactionGroupsAvgDurationByCountry)
+    .add(transactionGroupsErrorRateRoute)
 
     // UI filters
     .add(errorGroupsLocalFiltersRoute)
@@ -176,8 +176,8 @@ const createApmApi = () => {
     .add(rumServicesRoute)
 
     // Observability dashboard
-    .add(observabilityDashboardHasDataRoute)
-    .add(observabilityDashboardDataRoute)
+    .add(observabilityOverviewHasDataRoute)
+    .add(observabilityOverviewRoute)
 
     // Anomaly detection
     .add(anomalyDetectionJobsRoute)
