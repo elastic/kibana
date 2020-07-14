@@ -365,7 +365,8 @@ class AgentConfigService {
 
   public async getFullConfig(
     soClient: SavedObjectsClientContract,
-    id: string
+    id: string,
+    options?: { standalone: boolean }
   ): Promise<FullAgentConfig | null> {
     let config;
 
@@ -400,6 +401,13 @@ class AgentConfigService {
               api_key,
               ...outputConfig,
             };
+
+            if (options?.standalone) {
+              delete outputs[name].api_key;
+              outputs[name].username = 'ES_USERNAME';
+              outputs[name].password = 'ES_PASSWORD';
+            }
+
             return outputs;
           },
           {} as FullAgentConfig['outputs']
@@ -409,7 +417,7 @@ class AgentConfigService {
       revision: config.revision,
       ...(config.monitoring_enabled && config.monitoring_enabled.length > 0
         ? {
-            settings: {
+            agent: {
               monitoring: {
                 use_output: defaultOutput.name,
                 enabled: true,
@@ -419,7 +427,7 @@ class AgentConfigService {
             },
           }
         : {
-            settings: {
+            agent: {
               monitoring: { enabled: false, logs: false, metrics: false },
             },
           }),

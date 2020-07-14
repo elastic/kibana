@@ -38,6 +38,14 @@ export const BULK_CLOSE_LABEL = i18n.translate(
   }
 );
 
+export const BULK_CLOSE_LABEL_DISABLED = i18n.translate(
+  'xpack.securitySolution.exceptions.editException.bulkCloseLabel.disabled',
+  {
+    defaultMessage:
+      'Close all alerts that match attributes in this exception (Lists and non-ECS fields are not supported)',
+  }
+);
+
 export const ENDPOINT_QUARANTINE_TEXT = i18n.translate(
   'xpack.securitySolution.exceptions.editException.endpointQuarantineText',
   {
