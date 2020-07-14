@@ -1,5 +1,5 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "./tsconfig.oss.json",
   "compilerOptions": {
     "target": "es5",
     "module": "esnext",

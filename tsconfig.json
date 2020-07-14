@@ -1,13 +1,8 @@
 {
-  "extends": "./tsconfig.base.json",
-  "compilerOptions": {
-    "incremental": true,
-    "tsBuildInfoFile": "./build/tsconfig.tsbuildinfo",
-    "noEmit": false,
-    "declarationDir": "./build",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true,
-    "preserveSymlinks": true
-  },
+  "references": [
+    {"path": "./tsconfig.oss.json"},
+    {"path": "./tsconfig.test.json"}, //TODO: Looks like tests weren't previously checked??
+    {"path": "./examples/embeddable_examples"}
+  ],
+  "files": []
 }

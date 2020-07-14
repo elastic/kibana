@@ -1,8 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "composite": true,
     "outDir": "./target",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "jsx": "react",
   },
   "include": [
     "index.ts",
@@ -12,5 +14,6 @@
     "server/**/*.ts",
     "../../typings/**/*"
   ],
-  "exclude": []
+  "exclude": [],
+  "references": [{"path": "../../tsconfig.oss.json"}]
 }

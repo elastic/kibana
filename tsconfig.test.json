@@ -1,0 +1,27 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./build/tsconfig.test.tsbuildinfo",
+    "noEmit": false,
+    "outDir": "./build",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true,
+    "skipLibCheck": true, // Don't typecheck .d.ts files
+  },
+  "include": [
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "typings/**/*",
+  ],
+  "exclude": [
+    "src/**/__fixtures__/**/*",
+    "src/plugins/ui_actions/public/tests/**/*.test.ts",
+    "src/plugins/embeddable/public/lib/panel/embeddable_panel.test.tsx",
+    "src/plugins/dashboard/public/application/tests/dashboard_container.test.tsx",
+    "src/core/server/utils/crypto/pkcs12.test.ts",
+  ],
+  "references": [{"path": "./tsconfig.oss.json"}, {"path": "./examples/embeddable_examples"}]
+}
