@@ -1,6 +1,6 @@
 {
   "job_type": "anomaly_detector",
-  "description": "Security: Packetbeat - Looks for unusual web browsing URL activity that could indicate execution, persistence, command-and-control or data exfiltration activity",
+  "description": "Security: Packetbeat - Looks for unusual web browsing URL activity that could indicate execution, persistence, command-and-control or data exfiltration activity.",
   "groups": [
     "security",
     "packetbeat",

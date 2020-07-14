@@ -5,7 +5,7 @@
     "winlogbeat",
     "process"
   ],
-  "description": "Security: Winlogbeat - Looks for activity in unusual paths that may indicate execution of malware or persistence mechanisms. Windows payloads often execute from user profile paths",
+  "description": "Security: Winlogbeat - Looks for activity in unusual paths that may indicate execution of malware or persistence mechanisms. Windows payloads often execute from user profile paths.",
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [

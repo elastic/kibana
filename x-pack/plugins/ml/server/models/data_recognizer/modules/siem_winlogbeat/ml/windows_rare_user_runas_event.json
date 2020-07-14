@@ -1,6 +1,6 @@
 {
   "job_type": "anomaly_detector",
-  "description": "Security: Winlogbeat - Unusual user context switches can be due to privilege escalation",
+  "description": "Security: Winlogbeat - Unusual user context switches can be due to privilege escalation.",
   "groups": [
     "security",
     "winlogbeat",

@@ -1,6 +1,6 @@
 {
   "job_type": "anomaly_detector",
-  "description": "Security: Winlogbeat Auth - Unusual RDP (remote desktop protocol) user logins can indicate account takeover or credentialed access",
+  "description": "Security: Winlogbeat Auth - Unusual RDP (remote desktop protocol) user logins can indicate account takeover or credentialed access.",
   "groups": [
     "security",
     "winlogbeat",

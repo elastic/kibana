@@ -5,7 +5,7 @@
     "winlogbeat",
     "process"
   ],
-  "description": "Security: Winlogbeat - Looks for unusual process relationships which may indicate execution of malware or persistence mechanisms",
+  "description": "Security: Winlogbeat - Looks for unusual process relationships which may indicate execution of malware or persistence mechanisms.",
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [

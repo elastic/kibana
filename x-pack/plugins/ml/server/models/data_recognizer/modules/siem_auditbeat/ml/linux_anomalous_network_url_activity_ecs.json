@@ -5,7 +5,7 @@
     "auditbeat",
     "network"
   ],
-  "description": "Security: Auditbeat - Looks for an unusual web URL request from a Linux instance. Curl and wget web request activity is very common but unusual web requests from a Linux server can sometimes be malware delivery or execution",
+  "description": "Security: Auditbeat - Looks for an unusual web URL request from a Linux instance. Curl and wget web request activity is very common but unusual web requests from a Linux server can sometimes be malware delivery or execution.",
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [

@@ -5,7 +5,7 @@
     "auditbeat",
     "process"
   ],
-  "description": "Security: Auditbeat - Rare and unusual users that are not normally active may indicate unauthorized changes or activity by an unauthorized user which may be credentialed access or lateral movement",
+  "description": "Security: Auditbeat - Rare and unusual users that are not normally active may indicate unauthorized changes or activity by an unauthorized user which may be credentialed access or lateral movement.",
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [

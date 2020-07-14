@@ -1,6 +1,6 @@
 {
   "job_type": "anomaly_detector",
-  "description": "Security: Auditbeat - Detect unusually high number of authentication attempts",
+  "description": "Security: Auditbeat - Detect unusually high number of authentication attempts.",
   "groups": [
     "security",
     "auditbeat",

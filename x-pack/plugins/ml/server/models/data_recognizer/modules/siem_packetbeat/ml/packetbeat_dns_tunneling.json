@@ -1,6 +1,6 @@
 {
   "job_type": "anomaly_detector",
-  "description": "Security: Packetbeat - Looks for unusual DNS activity that could indicate command-and-control or data exfiltration activity",
+  "description": "Security: Packetbeat - Looks for unusual DNS activity that could indicate command-and-control or data exfiltration activity.",
   "groups": [
     "security",
     "packetbeat",

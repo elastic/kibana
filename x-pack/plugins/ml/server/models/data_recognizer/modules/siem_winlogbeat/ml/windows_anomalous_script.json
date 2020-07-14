@@ -1,6 +1,6 @@
 {
   "job_type": "anomaly_detector",
-  "description": "Security: Winlogbeat - Looks for unusual powershell scripts that may indicate execution of malware, or persistence mechanisms",
+  "description": "Security: Winlogbeat - Looks for unusual powershell scripts that may indicate execution of malware, or persistence mechanisms.",
   "groups": [
     "security",
     "winlogbeat",

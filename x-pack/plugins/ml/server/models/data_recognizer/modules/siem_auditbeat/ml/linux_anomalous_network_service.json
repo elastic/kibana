@@ -5,7 +5,7 @@
     "auditbeat",
     "network"
   ],
-  "description": "Security: Auditbeat - Looks for unusual listening ports that could indicate execution of unauthorized services, backdoors, or persistence mechanisms",
+  "description": "Security: Auditbeat - Looks for unusual listening ports that could indicate execution of unauthorized services, backdoors, or persistence mechanisms.",
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
