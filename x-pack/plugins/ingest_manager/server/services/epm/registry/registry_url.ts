@@ -8,7 +8,7 @@ import { appContextService, licenseService } from '../../';
 
 export const getRegistryUrl = (): string => {
   const license = licenseService.getLicenseInformation();
-  const customUrl = appContextService.getConfig()?.epm.registryUrl;
+  const customUrl = appContextService.getConfig()?.registryUrl;
 
   if (
     customUrl &&
