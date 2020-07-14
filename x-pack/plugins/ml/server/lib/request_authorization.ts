@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
-import { annotationProvider } from './annotation';
+import { KibanaRequest } from 'kibana/server';
 
-export function annotationServiceProvider(mlClusterClient: ILegacyScopedClusterClient) {
+export function getAuthorizationHeader(request: KibanaRequest) {
   return {
-    ...annotationProvider(mlClusterClient),
+    headers: { 'es-secondary-authorization': request.headers.authorization },
   };
 }
