@@ -42,6 +42,13 @@ export function isLoading(state: DataState): boolean {
 }
 
 /**
+ * A string for uniquely identifying the instance of resolver within the app.
+ */
+export function resolverComponentInstanceID(state: DataState): string {
+  return state.resolverComponentInstanceID ? state.resolverComponentInstanceID : '';
+}
+
+/**
  * If a request was made and it threw an error or returned a failure response code.
  */
 export function hasError(state: DataState): boolean {
