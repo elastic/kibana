@@ -71,6 +71,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     after(async function () {
+      await browser.setWindowSize(1280, 800);
       await security.testUser.restoreDefaults();
     });
 

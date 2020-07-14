@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
   describe('visualize app', () => {
     before(async () => {
       log.debug('Starting visualize before method');
-      await browser.setWindowSize(1280, 800);
+      await browser.setScreenshotSize(1280, 700);
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.loadIfNeeded('long_window_logstash');
       await esArchiver.load('visualize');
@@ -41,6 +41,10 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
         [UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
       });
       isOss = await PageObjects.common.isOss();
+    });
+
+    after(async () => {
+      await browser.setWindowSize(1280, 800);
     });
 
     describe('', function () {
