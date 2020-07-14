@@ -35,20 +35,12 @@ export const IngestManagerPanel = () => {
           <EuiText size="s" color="subdued" style={{ maxWidth: '700px' }}>
             {i18n.translate('xpack.observability.ingestManafer.text', {
               defaultMessage:
-<<<<<<< HEAD
-                'The Elastic Agent provides a simple, unified way to add monitoring for logs, metrics, and other types of data to your hosts. You no longer need to install multiple Beats and other agents, which makes it easier and faster to deploy configurations across your infrastructure.',
-=======
                 'The Elastic Agent provides a simple, unified way to add monitoring for logs, metrics, and other types of data to your hosts. You no longer need to install multiple Beats and other agents, making it easier and faster to deploy configurations across your infrastructure.',
->>>>>>> 9154a23e507aeb831882c871e532d02121dfe80e
             })}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-<<<<<<< HEAD
-          <EuiLink href="www.elastic.co">
-=======
           <EuiLink href="https://www.elastic.co/blog/introducing-elastic-agent-and-ingest-manager">
->>>>>>> 9154a23e507aeb831882c871e532d02121dfe80e
             {i18n.translate('xpack.observability.ingestManafer.button', {
               defaultMessage: 'Try Ingest Manager Beta',
             })}
