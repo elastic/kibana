@@ -136,9 +136,9 @@ export const schemas: Record<string, FormSchema> = {
       defaultValue: false,
       serializer: (value) => {
         if (value === true) {
-          return {
-            timestamp_field: '@timestamp',
-          };
+          // For now, ES expects an empty empty when defining a data stream
+          // https://github.com/elastic/elasticsearch/pull/59317
+          return {};
         }
       },
       deserializer: (value) => {
