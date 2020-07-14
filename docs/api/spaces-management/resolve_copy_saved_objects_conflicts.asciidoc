@@ -116,7 +116,7 @@ Overwrite an index pattern in the `marketing` space, and a visualization in the 
 
 [source,sh]
 ----
-$ curl -X POST "localhost:5601/api/spaces/_resolve_copy_saved_objects_errors"
+$ curl -X POST api/spaces/_resolve_copy_saved_objects_errors
 {
   "objects": [{
     "type": "dashboard",
