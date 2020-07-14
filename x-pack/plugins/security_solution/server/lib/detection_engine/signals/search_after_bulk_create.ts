@@ -91,7 +91,7 @@ export const searchAfterAndBulkCreate = async ({
   };
 
   let sortId; // tells us where to start our next search_after query
-  let searchResultSize = 0;
+  let signalsCreatedCount = 0;
 
   /*
     The purpose of `maxResults` is to ensure we do not perform
@@ -127,8 +127,8 @@ export const searchAfterAndBulkCreate = async ({
       toReturn.success = false;
       return toReturn;
     }
-    searchResultSize = 0;
-    while (searchResultSize < tuple.maxSignals) {
+    signalsCreatedCount = 0;
+    while (signalsCreatedCount < tuple.maxSignals) {
       try {
         logger.debug(buildRuleMessage(`sortIds: ${sortId}`));
         const {
@@ -187,12 +187,12 @@ export const searchAfterAndBulkCreate = async ({
 
         // make sure we are not going to create more signals than maxSignals allows
         if (
-          searchResultSize != null &&
-          searchResultSize + filteredEvents.hits.hits.length > tuple.maxSignals
+          signalsCreatedCount != null &&
+          signalsCreatedCount + filteredEvents.hits.hits.length > tuple.maxSignals
         ) {
           filteredEvents.hits.hits = filteredEvents.hits.hits.slice(
             0,
-            tuple.maxSignals - searchResultSize
+            tuple.maxSignals - signalsCreatedCount
           );
         }
 
@@ -220,7 +220,7 @@ export const searchAfterAndBulkCreate = async ({
         });
         logger.debug(buildRuleMessage(`created ${createdCount} signals`));
         toReturn.createdSignalsCount += createdCount;
-        searchResultSize += createdCount;
+        signalsCreatedCount += createdCount;
         if (bulkDuration) {
           toReturn.bulkCreateTimes.push(bulkDuration);
         }
