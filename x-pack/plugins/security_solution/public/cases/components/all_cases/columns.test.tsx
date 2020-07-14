@@ -7,9 +7,9 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
+import '../../../common/mock/match_media';
 import { ExternalServiceColumn } from './columns';
 
-import '../../../common/mock/match_media';
 import { useGetCasesMockState } from '../../containers/mock';
 
 describe('ExternalServiceColumn ', () => {

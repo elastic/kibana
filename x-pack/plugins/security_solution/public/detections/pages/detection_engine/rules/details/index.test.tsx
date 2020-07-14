@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { mount } from 'enzyme';
 
 import '../../../../../common/mock/match_media';
 import {
@@ -22,7 +22,16 @@ import { setAbsoluteRangeDatePicker } from '../../../../../common/store/inputs/a
 import { useUserInfo } from '../../../../components/user_info';
 import { useWithSource } from '../../../../../common/containers/source';
 import { useParams } from 'react-router-dom';
+import { mockHistory, Router } from '../../../../../cases/components/__mock__/router';
 
+// Test will fail because we will to need to mock some core services to make the test work
+// For now let's forget about SiemSearchBar and QueryBar
+jest.mock('../../../../../common/components/search_bar', () => ({
+  SiemSearchBar: () => null,
+}));
+jest.mock('../../../../../common/components/query_bar', () => ({
+  QueryBar: () => null,
+}));
 jest.mock('../../../../containers/detection_engine/lists/use_lists_config');
 jest.mock('../../../../../common/components/link_to');
 jest.mock('../../../../components/user_info');
@@ -66,19 +75,21 @@ describe('RuleDetailsPageComponent', () => {
   });
 
   it('renders correctly', () => {
-    const wrapper = shallow(
+    const wrapper = mount(
       <TestProviders store={store}>
-        <RuleDetailsPageComponent
-          query={{ query: '', language: 'language' }}
-          filters={[]}
-          setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-        />
+        <Router history={mockHistory}>
+          <RuleDetailsPageComponent
+            query={{ query: '', language: 'language' }}
+            filters={[]}
+            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+          />
+        </Router>
       </TestProviders>,
       {
         wrappingComponent: TestProviders,
       }
     );
 
-    expect(wrapper.find('DetectionEngineHeaderPage')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="header-page-title"]').exists()).toBe(true);
   });
 });
