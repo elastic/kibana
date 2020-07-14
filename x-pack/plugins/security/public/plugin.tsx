@@ -32,7 +32,6 @@ import { AuthenticationService, AuthenticationServiceSetup } from './authenticat
 import { ConfigType } from './config';
 import { ManagementService } from './management';
 import { accountManagementApp } from './account_management';
-import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 
 export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;
@@ -44,7 +43,6 @@ export interface PluginStartDependencies {
   data: DataPublicPluginStart;
   features: FeaturesPluginStart;
   management?: ManagementStart;
-  kibanaLegacy?: KibanaLegacyStart;
 }
 
 export class SecurityPlugin
@@ -138,10 +136,9 @@ export class SecurityPlugin
     };
   }
 
-  public start(core: CoreStart, { management, kibanaLegacy }: PluginStartDependencies) {
+  public start(core: CoreStart, { management }: PluginStartDependencies) {
     this.sessionTimeout.start();
     this.navControlService.start({ core });
-    kibanaLegacy.loadStyles();
 
     if (management) {
       this.managementService.start({ management });
