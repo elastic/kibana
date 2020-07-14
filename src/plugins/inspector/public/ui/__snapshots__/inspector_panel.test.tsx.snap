@@ -306,9 +306,11 @@ exports[`InspectorPanel should render as expected 1`] = `
       </EuiFlexGroup>
     </div>
   </EuiFlyoutHeader>
-  <EuiFlyoutBody>
+  <EuiFlyoutBody
+    className="insFlyoutBody"
+  >
     <div
-      className="euiFlyoutBody"
+      className="euiFlyoutBody insFlyoutBody"
     >
       <div
         className="euiFlyoutBody__overflow"

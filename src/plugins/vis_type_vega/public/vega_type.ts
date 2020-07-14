@@ -26,10 +26,7 @@ import { createVegaRequestHandler } from './vega_request_handler';
 // @ts-expect-error
 import { createVegaVisualization } from './vega_visualization';
 import { getDefaultSpec } from './default_spec';
-
 import { createInspectorAdapters } from './vega_inspector';
-
-// @ts-expect-error
 
 export const createVegaTypeDefinition = (dependencies: VegaVisualizationDependencies) => {
   const requestHandler = createVegaRequestHandler(dependencies);
