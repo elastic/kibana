@@ -33,6 +33,7 @@ import {
   replaceTemplateFieldFromDataProviders,
 } from './helpers';
 import { KueryFilterQueryKind } from '../../../common/store';
+import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 
 export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
   return {
@@ -105,7 +106,7 @@ export const determineToAndFrom = ({ ecsData }: { ecsData: Ecs }) => {
 export const getThresholdAggregationDataProvider = (
   ecsData: Ecs,
   nonEcsData: TimelineNonEcsData[]
-) => {
+): DataProvider[] => {
   const aggregationField = ecsData.signal?.rule?.threshold.field;
   const aggregationValue =
     get(aggregationField, ecsData) ?? find(['field', aggregationField], nonEcsData)?.value;
