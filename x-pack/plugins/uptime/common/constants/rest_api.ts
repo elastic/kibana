@@ -27,4 +27,6 @@ export enum API_URLS {
 
   ALERT_ACTIONS = '/api/actions',
   CREATE_ALERT = '/api/alerts/alert',
+  ALERT = '/api/alerts/alert/',
+  ALERTS_FIND = '/api/alerts/_find',
 }

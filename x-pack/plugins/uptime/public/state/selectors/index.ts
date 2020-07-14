@@ -88,3 +88,5 @@ export const esKuerySelector = ({ ui: { esKuery } }: AppState) => esKuery;
 export const searchTextSelector = ({ ui: { searchText } }: AppState) => searchText;
 
 export const selectedFiltersSelector = ({ selectedFilters }: AppState) => selectedFilters;
+
+export const alertsSelector = ({ alerts }: AppState) => alerts.alerts;

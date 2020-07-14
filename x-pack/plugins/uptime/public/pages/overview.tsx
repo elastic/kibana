@@ -20,7 +20,7 @@ import { MonitorList } from '../components/overview/monitor_list/monitor_list_co
 import { EmptyState, FilterGroup, KueryBar, ParsingErrorCallout } from '../components/overview';
 import { StatusPanel } from '../components/overview/status_panel';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { getConnectorsAction } from '../state/alerts/alerts';
+import { getConnectorsAction, getMonitorAlertsAction } from '../state/alerts/alerts';
 
 interface Props {
   loading: boolean;
@@ -64,6 +64,7 @@ export const OverviewPageComponent = React.memo(
 
     useEffect(() => {
       dispatch(getConnectorsAction.get());
+      dispatch(getMonitorAlertsAction.get());
     }, [dispatch]);
 
     const linkParameters = stringifyUrlParams(params, true);

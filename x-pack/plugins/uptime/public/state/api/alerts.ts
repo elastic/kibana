@@ -7,6 +7,7 @@
 import { ACTION_GROUP_DEFINITIONS, API_URLS, CLIENT_ALERT_TYPES } from '../../../common/constants';
 import { apiService } from './utils';
 import { ActionConnector } from '../alerts/alerts';
+import { Alert } from '../../../../alerts/common';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
@@ -58,4 +59,22 @@ export const createAlert = async ({
   };
 
   return await apiService.post(API_URLS.CREATE_ALERT, data);
+};
+
+export const fetchAlertRecords = async (): Promise<Alert[]> => {
+  const data = {
+    page: 1,
+    per_page: 500,
+    filter: 'alert.attributes.alertTypeId:(xpack.uptime.alerts.monitorStatus)',
+    default_search_operator: 'AND',
+    sort_field: 'name.keyword',
+    sort_order: 'asc',
+    search_fields: ['name', 'tags'],
+    search: 'UPTIME_AUTO',
+  };
+  return await apiService.get(API_URLS.ALERTS_FIND, data);
+};
+
+export const disableAnomalyAlert = async ({ alertId }: { alertId: string }) => {
+  return await apiService.delete(API_URLS.ALERT + alertId);
 };
