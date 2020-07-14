@@ -164,15 +164,10 @@ import {
 export { ParsedInterval } from '../common';
 
 export {
-  ISearch,
-  ISearchCancel,
+  ISearchStrategy,
   ISearchOptions,
-  IRequestTypesMap,
-  IResponseTypesMap,
   ISearchSetup,
   ISearchStart,
-  TStrategyTypes,
-  ISearchStrategy,
   getDefaultSearchParams,
   getTotalLoaded,
 } from './search';
