@@ -9,5 +9,5 @@ Extension point exposed for other plugins to register their own search strategie
 <b>Signature:</b>
 
 ```typescript
-registerSearchStrategy: TRegisterSearchStrategy;
+registerSearchStrategy: (name: string, strategy: ISearchStrategy) => void;
 ```

@@ -18,7 +18,7 @@
  */
 
 import { dirname, resolve, relative } from 'path';
-import { platform as getOsPlatform } from 'os';
+import os from 'os';
 
 import { getVersionInfo } from './version_info';
 import { createPlatform } from './platform';
@@ -29,7 +29,12 @@ export async function getConfig({ isRelease, targetAllPlatforms, versionQualifie
   const repoRoot = dirname(pkgPath);
   const nodeVersion = pkg.engines.node;
 
-  const platforms = ['darwin', 'linux', 'windows'].map(createPlatform);
+  const platforms = [
+    createPlatform('linux', 'x64', 'linux-x86_64'),
+    createPlatform('linux', 'arm64', 'linux-aarch64'),
+    createPlatform('darwin', 'x64', 'darwin-x86_64'),
+    createPlatform('win32', 'x64', 'windows-x86_64'),
+  ];
 
   const versionInfo = await getVersionInfo({
     isRelease,
@@ -101,34 +106,22 @@ export async function getConfig({ isRelease, targetAllPlatforms, versionQualifie
       }
 
       if (process.platform === 'linux') {
-        return [this.getLinuxPlatform()];
+        return [this.getPlatform('linux', 'x64')];
       }
 
-      return [this.getPlatformForThisOs(), this.getLinuxPlatform()];
+      return [this.getPlatformForThisOs(), this.getPlatform('linux', 'x64')];
     }
 
-    /**
-     * Get the linux platform object
-     * @return {Platform}
-     */
-    getLinuxPlatform() {
-      return platforms.find((p) => p.isLinux());
-    }
+    getPlatform(name, arch) {
+      const selected = platforms.find((p) => {
+        return name === p.getName() && arch === p.getArchitecture();
+      });
 
-    /**
-     * Get the windows platform object
-     * @return {Platform}
-     */
-    getWindowsPlatform() {
-      return platforms.find((p) => p.isWindows());
-    }
+      if (!selected) {
+        throw new Error(`Unable to find platform (${name}) with architecture (${arch})`);
+      }
 
-    /**
-     * Get the mac platform object
-     * @return {Platform}
-     */
-    getMacPlatform() {
-      return platforms.find((p) => p.isMac());
+      return selected;
     }
 
     /**
@@ -136,16 +129,7 @@ export async function getConfig({ isRelease, targetAllPlatforms, versionQualifie
      * @return {Platform}
      */
     getPlatformForThisOs() {
-      switch (getOsPlatform()) {
-        case 'darwin':
-          return this.getMacPlatform();
-        case 'win32':
-          return this.getWindowsPlatform();
-        case 'linux':
-          return this.getLinuxPlatform();
-        default:
-          throw new Error(`Unable to find platform for this os`);
-      }
+      return this.getPlatform(os.platform(), os.arch());
     }
 
     /**
