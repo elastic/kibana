@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getMLJobId } from '../ml_anomaly';
+import { getMLJobId } from '../ml';
 
 describe('ML Anomaly API', () => {
   it('it generates a lowercase job id', async () => {
