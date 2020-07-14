@@ -132,7 +132,7 @@ describe('#checkOriginConflicts', () => {
 
       await checkOriginConflicts(objects, options);
       expect(find).toHaveBeenCalledTimes(1);
-      expect(find).toHaveBeenCalledWith(expect.objectContaining({ namespace }));
+      expect(find).toHaveBeenCalledWith(expect.objectContaining({ namespaces: [namespace] }));
     });
 
     test('search query escapes quote and backslash characters in `id` and/or `originId`', async () => {
