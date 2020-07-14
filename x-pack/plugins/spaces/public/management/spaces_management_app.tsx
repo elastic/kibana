@@ -23,18 +23,20 @@ interface CreateParams {
   securityLicense?: SecurityLicense;
 }
 
+const title = i18n.translate('xpack.spaces.displayName', {
+  defaultMessage: 'Spaces',
+});
+
 export const spacesManagementApp = Object.freeze({
   id: 'spaces',
   create({ getStartServices, spacesManager, securityLicense }: CreateParams) {
     return {
       id: this.id,
       order: 2,
-      title: i18n.translate('xpack.spaces.displayName', {
-        defaultMessage: 'Spaces',
-      }),
+      title,
       async mount({ element, setBreadcrumbs, history }) {
         const [
-          { notifications, i18n: i18nStart, application },
+          { notifications, i18n: i18nStart, application, chrome },
           { features },
         ] = await getStartServices();
         const spacesBreadcrumbs = [
@@ -112,6 +114,7 @@ export const spacesManagementApp = Object.freeze({
           );
         };
 
+        chrome.docTitle.change(title);
         render(
           <i18nStart.Context>
             <Router history={history}>
@@ -132,6 +135,7 @@ export const spacesManagementApp = Object.freeze({
         );
 
         return () => {
+          chrome.docTitle.reset();
           unmountComponentAtNode(element);
         };
       },
