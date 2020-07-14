@@ -33,7 +33,7 @@ import {
 } from './types';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 import { EndpointAppContext } from '../../endpoint/types';
-import { getHostData, MetadataRequestContext } from '../../endpoint/routes/metadata';
+import { getHostData } from '../../endpoint/routes/metadata';
 
 export class ElasticsearchHostsAdapter implements HostsAdapter {
   constructor(
@@ -114,7 +114,7 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
       if (agentService === undefined) {
         throw new Error('agentService not available');
       }
-      const metadataRequestContext: MetadataRequestContext = {
+      const metadataRequestContext = {
         agentService,
         logger,
         requestHandlerContext: request.context,

@@ -48,6 +48,7 @@ import { EndpointAppContextService } from './endpoint/endpoint_app_context_servi
 import { EndpointAppContext } from './endpoint/types';
 import { registerDownloadExceptionListRoute } from './endpoint/routes/artifacts';
 import { initUsageCollectors } from './usage';
+import { AppRequestContext } from './types';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
@@ -127,9 +128,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     };
 
     const router = core.http.createRouter();
-    core.http.registerRouteHandlerContext(APP_ID, (context, request, response) => ({
-      getAppClient: () => this.appClientFactory.create(request),
-    }));
+    core.http.registerRouteHandlerContext(
+      APP_ID,
+      (context, request, response): AppRequestContext => ({
+        getAppClient: () => this.appClientFactory.create(request),
+      })
+    );
 
     this.appClientFactory.setup({
       getSpaceId: plugins.spaces?.spacesService?.getSpaceId,
