@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,7 +20,6 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { RUM_AGENTS } from '../../../../common/agent_name';
 import { EnvironmentFilter } from '../../shared/EnvironmentFilter';
-import { LocalUIFilter } from '../../../../typings/ui_filters';
 
 export function RumOverview() {
   useTrackPageview({ app: 'apm', path: 'rum_overview' });
@@ -35,13 +34,11 @@ export function RumOverview() {
     return config;
   }, []);
 
-  const [filters, setFilters] = useState<LocalUIFilter[]>([]);
-
   const {
     urlParams: { start, end },
   } = useUrlParams();
 
-  const { data } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
@@ -66,20 +63,19 @@ export function RumOverview() {
         <EuiFlexItem grow={1}>
           <EnvironmentFilter />
           <EuiSpacer />
-          <LocalUIFilters
-            {...localUIFiltersConfig}
-            showCount={true}
-            onFiltersLoad={setFilters}
-          >
+          <LocalUIFilters {...localUIFiltersConfig} showCount={true}>
             <>
-              <ServiceNameFilter serviceNames={data ?? []} />
+              <ServiceNameFilter
+                loading={status !== 'success'}
+                serviceNames={data ?? []}
+              />
               <EuiSpacer size="xl" />
               <EuiHorizontalRule margin="none" />{' '}
             </>
           </LocalUIFilters>
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
-          <RumDashboard filters={filters} />
+          <RumDashboard />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

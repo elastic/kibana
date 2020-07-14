@@ -17,13 +17,8 @@ import { PageViewsTrend } from './PageViewsTrend';
 import { PageLoadDistribution } from './PageLoadDistribution';
 import { I18LABELS } from './translations';
 import { VisitorBreakdown } from './VisitorBreakdown';
-import { LocalUIFilter } from '../../../../typings/ui_filters';
 
-interface Props {
-  filters: LocalUIFilter[];
-}
-
-export const RumDashboard = ({ filters }: Props) => {
+export const RumDashboard = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
@@ -52,7 +47,7 @@ export const RumDashboard = ({ filters }: Props) => {
         <EuiPanel>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={3}>
-              <VisitorBreakdown filters={filters} />
+              <VisitorBreakdown />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>

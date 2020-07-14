@@ -8,16 +8,32 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { VisitorBreakdownChart } from '../Charts/VisitorBreakdownChart';
 import { VisitorBreakdownLabel } from '../translations';
-import { LocalUIFilter } from '../../../../../typings/ui_filters';
+import { useFetcher } from '../../../../hooks/useFetcher';
+import { useUrlParams } from '../../../../hooks/useUrlParams';
 
-interface Props {
-  filters: LocalUIFilter[];
-}
+export const VisitorBreakdown = () => {
+  const { urlParams, uiFilters } = useUrlParams();
 
-export const VisitorBreakdown = ({ filters = [] }: Props) => {
-  const os = filters?.find(({ name }) => name === 'os');
-  const device = filters?.find(({ name }) => name === 'device');
-  const browser = filters?.find(({ name }) => name === 'browser');
+  const { start, end, serviceName } = urlParams;
+
+  const { data } = useFetcher(
+    (callApmApi) => {
+      if (start && end && serviceName) {
+        return callApmApi({
+          pathname: '/api/apm/rum-client/visitor-breakdown',
+          params: {
+            query: {
+              start,
+              end,
+              uiFilters: JSON.stringify(uiFilters),
+            },
+          },
+        });
+      }
+      return Promise.resolve(null);
+    },
+    [end, start, serviceName, uiFilters]
+  );
 
   return (
     <>
@@ -26,19 +42,19 @@ export const VisitorBreakdown = ({ filters = [] }: Props) => {
       </EuiTitle>
       <EuiFlexGroup>
         <EuiFlexItem>
-          <VisitorBreakdownChart data={browser} />
+          <VisitorBreakdownChart options={data?.browsers} />
           <EuiTitle size="xs" className="eui-textCenter">
             <h4>Browser</h4>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          <VisitorBreakdownChart data={os} />
+          <VisitorBreakdownChart options={data?.os} />
           <EuiTitle size="xs" className="eui-textCenter">
             <h4>Operating System</h4>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          <VisitorBreakdownChart data={device} />
+          <VisitorBreakdownChart options={data?.devices} />
           <EuiTitle size="xs" className="eui-textCenter">
             <h4>Device</h4>
           </EuiTitle>

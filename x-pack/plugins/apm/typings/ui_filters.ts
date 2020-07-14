@@ -19,11 +19,3 @@ export interface BreakdownItem {
   fieldName: string;
   selected?: boolean;
 }
-
-export interface LocalUIFilter {
-  fieldName: string;
-  name: LocalUIFilterName;
-  options: unknown[];
-  title: string;
-  value: string[];
-}

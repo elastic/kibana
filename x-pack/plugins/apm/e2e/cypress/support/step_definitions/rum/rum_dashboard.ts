@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Given, When, Then } from 'cypress-cucumber-preprocessor/steps';
+import { Given, Then } from 'cypress-cucumber-preprocessor/steps';
 import { loginAndWaitForPage } from '../../../integration/helpers';
 
 /** The default time in ms to wait for a Cypress command to complete */
@@ -25,6 +25,8 @@ Then(`should have correct client metrics`, () => {
 
   // wait for all loading to finish
   cy.get('kbnLoadingIndicator').should('not.be.visible');
+  cy.get('.euiStat__title').should('be.visible');
+  cy.get('.euiSelect-isLoading').should('not.be.visible');
   cy.get('.euiStat__title-isLoading').should('not.be.visible');
 
   cy.get(clientMetrics).eq(2).invoke('text').snapshot();

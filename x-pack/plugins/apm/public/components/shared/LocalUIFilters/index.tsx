@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   EuiTitle,
   EuiSpacer,
@@ -19,15 +19,12 @@ import { Filter } from './Filter';
 import { useLocalUIFilters } from '../../../hooks/useLocalUIFilters';
 import { PROJECTION } from '../../../../common/projections/typings';
 
-const noop = () => {};
-
 interface Props {
   projection: PROJECTION;
   filterNames: LocalUIFilterName[];
   params?: Record<string, string | number | boolean | undefined>;
   showCount?: boolean;
   children?: React.ReactNode;
-  onFiltersLoad?: (value: any) => void;
 }
 
 const ButtonWrapper = styled.div`
@@ -40,18 +37,12 @@ const LocalUIFilters = ({
   filterNames,
   children,
   showCount = true,
-  onFiltersLoad = noop,
 }: Props) => {
-  const { filters, setFilterValue, clearValues, status } = useLocalUIFilters({
+  const { filters, setFilterValue, clearValues } = useLocalUIFilters({
     filterNames,
     projection,
     params,
   });
-
-  useEffect(() => {
-    onFiltersLoad(filters);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status]);
 
   const hasValues = filters.some((filter) => filter.value.length > 0);
 
