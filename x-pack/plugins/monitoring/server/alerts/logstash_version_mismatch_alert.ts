@@ -188,13 +188,19 @@ export class LogstashVersionMismatchAlert extends BaseAlert {
         internalShortMessage: i18n.translate(
           'xpack.monitoring.alerts.logstashVersionMismatch.resolved.internalShortMessage',
           {
-            defaultMessage: `Logstash version mismatch alert is resolved for ${cluster.clusterName}.`,
+            defaultMessage: `Logstash version mismatch alert is resolved for {clusterName}.`,
+            values: {
+              clusterName: cluster.clusterName,
+            },
           }
         ),
         internalFullMessage: i18n.translate(
           'xpack.monitoring.alerts.logstashVersionMismatch.resolved.internalFullMessage',
           {
-            defaultMessage: `Logstash version mismatch alert is resolved for ${cluster.clusterName}.`,
+            defaultMessage: `Logstash version mismatch alert is resolved for {clusterName}.`,
+            values: {
+              clusterName: cluster.clusterName,
+            },
           }
         ),
         state: RESOLVED,
@@ -225,13 +231,22 @@ export class LogstashVersionMismatchAlert extends BaseAlert {
         internalShortMessage: i18n.translate(
           'xpack.monitoring.alerts.logstashVersionMismatch.firing.internalShortMessage',
           {
-            defaultMessage: `Logstash version mismatch alert is firing for ${cluster.clusterName}. ${shortActionText}`,
+            defaultMessage: `Logstash version mismatch alert is firing for {clusterName}. {shortActionText}`,
+            values: {
+              clusterName: cluster.clusterName,
+              shortActionText,
+            },
           }
         ),
         internalFullMessage: i18n.translate(
           'xpack.monitoring.alerts.logstashVersionMismatch.firing.internalFullMessage',
           {
-            defaultMessage: `Logstash version mismatch alert is firing for ${cluster.clusterName}. Logstash is running ${versions}. ${action}`,
+            defaultMessage: `Logstash version mismatch alert is firing for {clusterName}. Logstash is running {versions}. {action}`,
+            values: {
+              clusterName: cluster.clusterName,
+              versions,
+              action,
+            },
           }
         ),
         state: FIRING,

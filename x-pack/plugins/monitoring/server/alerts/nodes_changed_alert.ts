@@ -73,21 +73,24 @@ export class NodesChangedAlert extends BaseAlert {
     },
     {
       name: 'added',
-      description: i18n.translate('xpack.monitoring.alerts.nodesChanged.actionVariables.action', {
+      description: i18n.translate('xpack.monitoring.alerts.nodesChanged.actionVariables.added', {
         defaultMessage: 'The list of nodes added to the cluster.',
       }),
     },
     {
       name: 'removed',
-      description: i18n.translate('xpack.monitoring.alerts.nodesChanged.actionVariables.action', {
+      description: i18n.translate('xpack.monitoring.alerts.nodesChanged.actionVariables.removed', {
         defaultMessage: 'The list of nodes removed from the cluster.',
       }),
     },
     {
       name: 'restarted',
-      description: i18n.translate('xpack.monitoring.alerts.nodesChanged.actionVariables.action', {
-        defaultMessage: 'The list of nodes restarted in the cluster.',
-      }),
+      description: i18n.translate(
+        'xpack.monitoring.alerts.nodesChanged.actionVariables.restarted',
+        {
+          defaultMessage: 'The list of nodes restarted in the cluster.',
+        }
+      ),
     },
     {
       name: 'action',
@@ -202,13 +205,19 @@ export class NodesChangedAlert extends BaseAlert {
         internalShortMessage: i18n.translate(
           'xpack.monitoring.alerts.nodesChanged.resolved.internalShortMessage',
           {
-            defaultMessage: `Elasticsearch nodes changed alert is resolved for ${cluster.clusterName}.`,
+            defaultMessage: `Elasticsearch nodes changed alert is resolved for {clusterName}.`,
+            values: {
+              clusterName: cluster.clusterName,
+            },
           }
         ),
         internalFullMessage: i18n.translate(
           'xpack.monitoring.alerts.nodesChanged.resolved.internalFullMessage',
           {
-            defaultMessage: `Elasticsearch nodes changed alert is resolved for ${cluster.clusterName}.`,
+            defaultMessage: `Elasticsearch nodes changed alert is resolved for {clusterName}.`,
+            values: {
+              clusterName: cluster.clusterName,
+            },
           }
         ),
         state: RESOLVED,
@@ -234,13 +243,24 @@ export class NodesChangedAlert extends BaseAlert {
         internalShortMessage: i18n.translate(
           'xpack.monitoring.alerts.nodesChanged.firing.internalShortMessage',
           {
-            defaultMessage: `Cluster health alert is firing for ${cluster.clusterName}. ${actionText}`,
+            defaultMessage: `Cluster health alert is firing for {clusterName}. {actionText}`,
+            values: {
+              clusterName: cluster.clusterName,
+              actionText,
+            },
           }
         ),
         internalFullMessage: i18n.translate(
           'xpack.monitoring.alerts.nodesChanged.firing.internalFullMessage',
           {
-            defaultMessage: `Cluster health alert is firing for ${cluster.clusterName}. The following Elasticsearch nodes have been added:${added} removed:${removed} restarted:${restarted}. ${action}`,
+            defaultMessage: `Cluster health alert is firing for {clusterName}. The following Elasticsearch nodes have been added:{added} removed:{removed} restarted:{restarted}. {action}`,
+            values: {
+              clusterName: cluster.clusterName,
+              added,
+              removed,
+              restarted,
+              action,
+            },
           }
         ),
         state: FIRING,

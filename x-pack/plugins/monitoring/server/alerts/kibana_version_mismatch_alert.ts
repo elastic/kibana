@@ -184,13 +184,19 @@ export class KibanaVersionMismatchAlert extends BaseAlert {
         internalShortMessage: i18n.translate(
           'xpack.monitoring.alerts.kibanaVersionMismatch.resolved.internalShortMessage',
           {
-            defaultMessage: `Kibana version mismatch alert is resolved for ${cluster.clusterName}.`,
+            defaultMessage: `Kibana version mismatch alert is resolved for {clusterName}.`,
+            values: {
+              clusterName: cluster.clusterName,
+            },
           }
         ),
         internalFullMessage: i18n.translate(
           'xpack.monitoring.alerts.kibanaVersionMismatch.resolved.internalFullMessage',
           {
-            defaultMessage: `Kibana version mismatch alert is resolved for ${cluster.clusterName}.`,
+            defaultMessage: `Kibana version mismatch alert is resolved for {clusterName}.`,
+            values: {
+              clusterName: cluster.clusterName,
+            },
           }
         ),
         state: RESOLVED,
@@ -219,13 +225,22 @@ export class KibanaVersionMismatchAlert extends BaseAlert {
         internalShortMessage: i18n.translate(
           'xpack.monitoring.alerts.kibanaVersionMismatch.firing.internalShortMessage',
           {
-            defaultMessage: `Kibana version mismatch alert is firing for ${cluster.clusterName}. ${shortActionText}`,
+            defaultMessage: `Kibana version mismatch alert is firing for {clusterName}. {shortActionText}`,
+            values: {
+              clusterName: cluster.clusterName,
+              shortActionText,
+            },
           }
         ),
         internalFullMessage: i18n.translate(
           'xpack.monitoring.alerts.kibanaVersionMismatch.firing.internalFullMessage',
           {
-            defaultMessage: `Kibana version mismatch alert is firing for ${cluster.clusterName}. Kibana is running ${versions}. ${action}`,
+            defaultMessage: `Kibana version mismatch alert is firing for {clusterName}. Kibana is running {versions}. {action}`,
+            values: {
+              clusterName: cluster.clusterName,
+              versions,
+              action,
+            },
           }
         ),
         state: FIRING,

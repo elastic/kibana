@@ -192,13 +192,19 @@ export class ElasticsearchVersionMismatchAlert extends BaseAlert {
         internalShortMessage: i18n.translate(
           'xpack.monitoring.alerts.elasticsearchVersionMismatch.resolved.internalShortMessage',
           {
-            defaultMessage: `Elasticsearch version mismatch alert is resolved for ${cluster.clusterName}.`,
+            defaultMessage: `Elasticsearch version mismatch alert is resolved for {clusterName}.`,
+            values: {
+              clusterName: cluster.clusterName,
+            },
           }
         ),
         internalFullMessage: i18n.translate(
           'xpack.monitoring.alerts.elasticsearchVersionMismatch.resolved.internalFullMessage',
           {
-            defaultMessage: `Elasticsearch version mismatch alert is resolved for ${cluster.clusterName}.`,
+            defaultMessage: `Elasticsearch version mismatch alert is resolved for {clusterName}.`,
+            values: {
+              clusterName: cluster.clusterName,
+            },
           }
         ),
         state: RESOLVED,
@@ -229,13 +235,22 @@ export class ElasticsearchVersionMismatchAlert extends BaseAlert {
         internalShortMessage: i18n.translate(
           'xpack.monitoring.alerts.elasticsearchVersionMismatch.firing.internalShortMessage',
           {
-            defaultMessage: `Elasticsearch version mismatch alert is firing for ${cluster.clusterName}. ${shortActionText}`,
+            defaultMessage: `Elasticsearch version mismatch alert is firing for {clusterName}. {shortActionText}`,
+            values: {
+              clusterName: cluster.clusterName,
+              shortActionText,
+            },
           }
         ),
         internalFullMessage: i18n.translate(
           'xpack.monitoring.alerts.elasticsearchVersionMismatch.firing.internalFullMessage',
           {
-            defaultMessage: `Elasticsearch version mismatch alert is firing for ${cluster.clusterName}. Elasticsearch is running ${versions}. ${action}`,
+            defaultMessage: `Elasticsearch version mismatch alert is firing for {clusterName}. Elasticsearch is running {versions}. {action}`,
+            values: {
+              clusterName: cluster.clusterName,
+              versions,
+              action,
+            },
           }
         ),
         state: FIRING,

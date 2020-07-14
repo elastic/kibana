@@ -200,13 +200,19 @@ export class ClusterHealthAlert extends BaseAlert {
         internalShortMessage: i18n.translate(
           'xpack.monitoring.alerts.clusterHealth.resolved.internalShortMessage',
           {
-            defaultMessage: `Cluster health alert is resolved for ${cluster.clusterName}.`,
+            defaultMessage: `Cluster health alert is resolved for {clusterName}.`,
+            values: {
+              clusterName: cluster.clusterName,
+            },
           }
         ),
         internalFullMessage: i18n.translate(
           'xpack.monitoring.alerts.clusterHealth.resolved.internalFullMessage',
           {
-            defaultMessage: `Cluster health alert is resolved for ${cluster.clusterName}.`,
+            defaultMessage: `Cluster health alert is resolved for {clusterName}.`,
+            values: {
+              clusterName: cluster.clusterName,
+            },
           }
         ),
         state: i18n.translate('xpack.monitoring.alerts.clusterHealth.resolved', {
@@ -236,13 +242,23 @@ export class ClusterHealthAlert extends BaseAlert {
         internalShortMessage: i18n.translate(
           'xpack.monitoring.alerts.clusterHealth.firing.internalShortMessage',
           {
-            defaultMessage: `Cluster health alert is firing for ${cluster.clusterName}. Current health is ${health}. ${actionText}`,
+            defaultMessage: `Cluster health alert is firing for {clusterName}. Current health is {health}. {actionText}`,
+            values: {
+              clusterName: cluster.clusterName,
+              health,
+              actionText,
+            },
           }
         ),
         internalFullMessage: i18n.translate(
           'xpack.monitoring.alerts.clusterHealth.firing.internalFullMessage',
           {
-            defaultMessage: `Cluster health alert is firing for ${cluster.clusterName}. Current health is ${health}. ${action}`,
+            defaultMessage: `Cluster health alert is firing for {clusterName}. Current health is {health}. {action}`,
+            values: {
+              clusterName: cluster.clusterName,
+              health,
+              action,
+            },
           }
         ),
         state: i18n.translate('xpack.monitoring.alerts.clusterHealth.firing', {

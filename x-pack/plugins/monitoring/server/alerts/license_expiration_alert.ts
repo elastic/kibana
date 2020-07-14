@@ -197,13 +197,19 @@ export class LicenseExpirationAlert extends BaseAlert {
         internalShortMessage: i18n.translate(
           'xpack.monitoring.alerts.licenseExpiration.resolved.internalShortMessage',
           {
-            defaultMessage: `License expiration alert is resolved for ${cluster.clusterName}.`,
+            defaultMessage: `License expiration alert is resolved for {clusterName}.`,
+            values: {
+              clusterName: cluster.clusterName,
+            },
           }
         ),
         internalFullMessage: i18n.translate(
           'xpack.monitoring.alerts.licenseExpiration.resolved.internalFullMessage',
           {
-            defaultMessage: `License expiration alert is resolved for ${cluster.clusterName}.`,
+            defaultMessage: `License expiration alert is resolved for {clusterName}.`,
+            values: {
+              clusterName: cluster.clusterName,
+            },
           }
         ),
         state: RESOLVED,
@@ -227,13 +233,23 @@ export class LicenseExpirationAlert extends BaseAlert {
         internalShortMessage: i18n.translate(
           'xpack.monitoring.alerts.licenseExpiration.firing.internalShortMessage',
           {
-            defaultMessage: `License expiration alert is firing for ${cluster.clusterName}. Your license will expire in ${expiredDate}. ${actionText}`,
+            defaultMessage: `License expiration alert is firing for {clusterName}. Your license will expire in {expiredDate}. {actionText}`,
+            values: {
+              clusterName: cluster.clusterName,
+              expiredDate,
+              actionText,
+            },
           }
         ),
         internalFullMessage: i18n.translate(
           'xpack.monitoring.alerts.licenseExpiration.firing.internalFullMessage',
           {
-            defaultMessage: `License expiration alert is firing for ${cluster.clusterName}. Your license will expire in ${expiredDate}. ${action}`,
+            defaultMessage: `License expiration alert is firing for {clusterName}. Your license will expire in {expiredDate}. {action}`,
+            values: {
+              clusterName: cluster.clusterName,
+              expiredDate,
+              action,
+            },
           }
         ),
         state: FIRING,

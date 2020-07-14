@@ -312,13 +312,21 @@ export class CpuUsageAlert extends BaseAlert {
         internalShortMessage: i18n.translate(
           'xpack.monitoring.alerts.cpuUsage.resolved.internalShortMessage',
           {
-            defaultMessage: `CPU usage alert is resolved for ${count} node(s) in cluster: ${cluster.clusterName}.`,
+            defaultMessage: `CPU usage alert is resolved for {count} node(s) in cluster: {clusterName}.`,
+            values: {
+              count,
+              clusterName: cluster.clusterName,
+            },
           }
         ),
         internalFullMessage: i18n.translate(
           'xpack.monitoring.alerts.cpuUsage.resolved.internalFullMessage',
           {
-            defaultMessage: `CPU usage alert is resolved for ${count} node(s) in cluster: ${cluster.clusterName}.`,
+            defaultMessage: `CPU usage alert is resolved for {count} node(s) in cluster: {clusterName}.`,
+            values: {
+              count,
+              clusterName: cluster.clusterName,
+            },
           }
         ),
         state: RESOLVED,
@@ -345,13 +353,23 @@ export class CpuUsageAlert extends BaseAlert {
         internalShortMessage: i18n.translate(
           'xpack.monitoring.alerts.cpuUsage.firing.internalShortMessage',
           {
-            defaultMessage: `CPU usage alert is firing for ${count} node(s) in cluster: ${cluster.clusterName}. ${shortActionText}`,
+            defaultMessage: `CPU usage alert is firing for {count} node(s) in cluster: {clusterName}. {shortActionText}`,
+            values: {
+              count,
+              clusterName: cluster.clusterName,
+              shortActionText,
+            },
           }
         ),
         internalFullMessage: i18n.translate(
           'xpack.monitoring.alerts.cpuUsage.firing.internalFullMessage',
           {
-            defaultMessage: `CPU usage alert is firing for ${count} node(s) in cluster: ${cluster.clusterName}. ${action}`,
+            defaultMessage: `CPU usage alert is firing for {count} node(s) in cluster: {clusterName}. {action}`,
+            values: {
+              count,
+              clusterName: cluster.clusterName,
+              action,
+            },
           }
         ),
         state: FIRING,
