@@ -181,9 +181,11 @@ export const EditExceptionModal = memo(function EditExceptionModal({
 
   const onEditExceptionConfirm = useCallback(() => {
     if (addOrUpdateExceptionItems !== null) {
-      addOrUpdateExceptionItems(enrichExceptionItems());
+      const bulkCloseIndex =
+        shouldBulkCloseAlert && signalIndexName !== null ? [signalIndexName] : undefined;
+      addOrUpdateExceptionItems(enrichExceptionItems(), undefined, bulkCloseIndex);
     }
-  }, [addOrUpdateExceptionItems, enrichExceptionItems]);
+  }, [addOrUpdateExceptionItems, enrichExceptionItems, shouldBulkCloseAlert, signalIndexName]);
 
   const indexPatternConfig = useCallback(() => {
     if (exceptionListType === 'endpoint') {
@@ -196,7 +198,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     <EuiOverlayMask>
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
         <ModalHeader>
-          <EuiModalHeaderTitle>{i18n.EDIT_EXCEPTION}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>{i18n.EDIT_EXCEPTION_TITLE}</EuiModalHeaderTitle>
           <ModalHeaderSubtitle className="eui-textTruncate" title={ruleName}>
             {ruleName}
           </ModalHeaderSubtitle>
@@ -239,10 +241,12 @@ export const EditExceptionModal = memo(function EditExceptionModal({
             </ModalBodySection>
             <EuiHorizontalRule />
             <ModalBodySection>
-              <EuiFormRow>
+              <EuiFormRow fullWidth>
                 <EuiCheckbox
                   id="close-alert-on-add-add-exception-checkbox"
-                  label={i18n.BULK_CLOSE_LABEL}
+                  label={
+                    shouldDisableBulkClose ? i18n.BULK_CLOSE_LABEL_DISABLED : i18n.BULK_CLOSE_LABEL
+                  }
                   checked={shouldBulkCloseAlert}
                   onChange={onBulkCloseAlertCheckboxChange}
                   disabled={shouldDisableBulkClose}
@@ -256,7 +260,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
           <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL}</EuiButtonEmpty>
 
           <EuiButton onClick={onEditExceptionConfirm} isLoading={addExceptionIsLoading} fill>
-            {i18n.EDIT_EXCEPTION}
+            {i18n.EDIT_EXCEPTION_SAVE_BUTTON}
           </EuiButton>
         </EuiModalFooter>
       </Modal>

@@ -6,7 +6,7 @@
 import sinon from 'sinon';
 import moment from 'moment';
 
-import { DATE_NOW, USER } from '../../../common/constants.mock';
+import { USER } from '../../../common/constants.mock';
 
 import {
   isCommentEqual,
@@ -16,8 +16,9 @@ import {
 } from './utils';
 
 describe('utils', () => {
-  const anchor = '2020-06-17T20:34:51.337Z';
-  const unix = moment(anchor).valueOf();
+  const oldDate = '2020-03-17T20:34:51.337Z';
+  const dateNow = '2020-06-17T20:34:51.337Z';
+  const unix = moment(dateNow).valueOf();
   let clock: sinon.SinonFakeTimers;
 
   beforeEach(() => {
@@ -42,11 +43,11 @@ describe('utils', () => {
     test('it formats newly added comments', () => {
       const comments = transformUpdateCommentsToComments({
         comments: [
-          { comment: 'Im an old comment', created_at: DATE_NOW, created_by: 'lily' },
+          { comment: 'Im an old comment', created_at: oldDate, created_by: 'bane' },
           { comment: 'Im a new comment' },
         ],
         existingComments: [
-          { comment: 'Im an old comment', created_at: DATE_NOW, created_by: 'lily' },
+          { comment: 'Im an old comment', created_at: oldDate, created_by: 'bane' },
         ],
         user: 'lily',
       });
@@ -54,12 +55,12 @@ describe('utils', () => {
       expect(comments).toEqual([
         {
           comment: 'Im an old comment',
-          created_at: anchor,
-          created_by: 'lily',
+          created_at: oldDate,
+          created_by: 'bane',
         },
         {
           comment: 'Im a new comment',
-          created_at: anchor,
+          created_at: dateNow,
           created_by: 'lily',
         },
       ]);
@@ -68,12 +69,12 @@ describe('utils', () => {
     test('it formats multiple newly added comments', () => {
       const comments = transformUpdateCommentsToComments({
         comments: [
-          { comment: 'Im an old comment', created_at: DATE_NOW, created_by: 'lily' },
+          { comment: 'Im an old comment', created_at: oldDate, created_by: 'lily' },
           { comment: 'Im a new comment' },
           { comment: 'Im another new comment' },
         ],
         existingComments: [
-          { comment: 'Im an old comment', created_at: DATE_NOW, created_by: 'lily' },
+          { comment: 'Im an old comment', created_at: oldDate, created_by: 'lily' },
         ],
         user: 'lily',
       });
@@ -81,17 +82,17 @@ describe('utils', () => {
       expect(comments).toEqual([
         {
           comment: 'Im an old comment',
-          created_at: anchor,
+          created_at: oldDate,
           created_by: 'lily',
         },
         {
           comment: 'Im a new comment',
-          created_at: anchor,
+          created_at: dateNow,
           created_by: 'lily',
         },
         {
           comment: 'Im another new comment',
-          created_at: anchor,
+          created_at: dateNow,
           created_by: 'lily',
         },
       ]);
@@ -99,9 +100,9 @@ describe('utils', () => {
 
     test('it should not throw if comments match existing comments', () => {
       const comments = transformUpdateCommentsToComments({
-        comments: [{ comment: 'Im an old comment', created_at: DATE_NOW, created_by: 'lily' }],
+        comments: [{ comment: 'Im an old comment', created_at: oldDate, created_by: 'lily' }],
         existingComments: [
-          { comment: 'Im an old comment', created_at: DATE_NOW, created_by: 'lily' },
+          { comment: 'Im an old comment', created_at: oldDate, created_by: 'lily' },
         ],
         user: 'lily',
       });
@@ -109,7 +110,7 @@ describe('utils', () => {
       expect(comments).toEqual([
         {
           comment: 'Im an old comment',
-          created_at: anchor,
+          created_at: oldDate,
           created_by: 'lily',
         },
       ]);
@@ -120,12 +121,12 @@ describe('utils', () => {
         comments: [
           {
             comment: 'Im an old comment that is trying to be updated',
-            created_at: DATE_NOW,
+            created_at: oldDate,
             created_by: 'lily',
           },
         ],
         existingComments: [
-          { comment: 'Im an old comment', created_at: DATE_NOW, created_by: 'lily' },
+          { comment: 'Im an old comment', created_at: oldDate, created_by: 'lily' },
         ],
         user: 'lily',
       });
@@ -133,9 +134,9 @@ describe('utils', () => {
       expect(comments).toEqual([
         {
           comment: 'Im an old comment that is trying to be updated',
-          created_at: DATE_NOW,
+          created_at: oldDate,
           created_by: 'lily',
-          updated_at: anchor,
+          updated_at: dateNow,
           updated_by: 'lily',
         },
       ]);
@@ -150,7 +151,7 @@ describe('utils', () => {
             },
           ],
           existingComments: [
-            { comment: 'Im an old comment', created_at: DATE_NOW, created_by: 'lily' },
+            { comment: 'Im an old comment', created_at: oldDate, created_by: 'lily' },
           ],
           user: 'lily',
         })
@@ -164,7 +165,7 @@ describe('utils', () => {
         transformUpdateCommentsToComments({
           comments: [],
           existingComments: [
-            { comment: 'Im an old comment', created_at: DATE_NOW, created_by: 'lily' },
+            { comment: 'Im an old comment', created_at: oldDate, created_by: 'lily' },
           ],
           user: 'lily',
         })
@@ -176,9 +177,9 @@ describe('utils', () => {
     test('it throws if user tries to update existing comment timestamp', () => {
       expect(() =>
         transformUpdateCommentsToComments({
-          comments: [{ comment: 'Im an old comment', created_at: anchor, created_by: 'lily' }],
+          comments: [{ comment: 'Im an old comment', created_at: dateNow, created_by: 'lily' }],
           existingComments: [
-            { comment: 'Im an old comment', created_at: DATE_NOW, created_by: 'lily' },
+            { comment: 'Im an old comment', created_at: oldDate, created_by: 'lily' },
           ],
           user: 'bane',
         })
@@ -188,9 +189,9 @@ describe('utils', () => {
     test('it throws if user tries to update existing comment author', () => {
       expect(() =>
         transformUpdateCommentsToComments({
-          comments: [{ comment: 'Im an old comment', created_at: anchor, created_by: 'lily' }],
+          comments: [{ comment: 'Im an old comment', created_at: oldDate, created_by: 'lily' }],
           existingComments: [
-            { comment: 'Im an old comment', created_at: DATE_NOW, created_by: 'me!' },
+            { comment: 'Im an old comment', created_at: oldDate, created_by: 'me!' },
           ],
           user: 'bane',
         })
@@ -203,12 +204,12 @@ describe('utils', () => {
           comments: [
             {
               comment: 'Im an old comment that is trying to be updated',
-              created_at: DATE_NOW,
+              created_at: oldDate,
               created_by: 'lily',
             },
           ],
           existingComments: [
-            { comment: 'Im an old comment', created_at: DATE_NOW, created_by: 'lily' },
+            { comment: 'Im an old comment', created_at: oldDate, created_by: 'lily' },
           ],
           user: 'bane',
         })
@@ -220,10 +221,10 @@ describe('utils', () => {
         transformUpdateCommentsToComments({
           comments: [
             { comment: 'Im a new comment' },
-            { comment: 'Im an old comment', created_at: DATE_NOW, created_by: 'lily' },
+            { comment: 'Im an old comment', created_at: oldDate, created_by: 'lily' },
           ],
           existingComments: [
-            { comment: 'Im an old comment', created_at: DATE_NOW, created_by: 'lily' },
+            { comment: 'Im an old comment', created_at: oldDate, created_by: 'lily' },
           ],
           user: 'lily',
         })
@@ -236,7 +237,7 @@ describe('utils', () => {
       expect(() =>
         transformUpdateCommentsToComments({
           comments: [
-            { comment: 'Im an old comment', created_at: DATE_NOW, created_by: 'lily' },
+            { comment: 'Im an old comment', created_at: oldDate, created_by: 'lily' },
             { comment: 'Im a new comment' },
           ],
           existingComments: [],
@@ -249,11 +250,11 @@ describe('utils', () => {
       expect(() =>
         transformUpdateCommentsToComments({
           comments: [
-            { comment: 'Im an old comment', created_at: DATE_NOW, created_by: 'lily' },
+            { comment: 'Im an old comment', created_at: oldDate, created_by: 'lily' },
             { comment: '    ' },
           ],
           existingComments: [
-            { comment: 'Im an old comment', created_at: DATE_NOW, created_by: 'lily' },
+            { comment: 'Im an old comment', created_at: oldDate, created_by: 'lily' },
           ],
           user: 'lily',
         })
@@ -280,12 +281,12 @@ describe('utils', () => {
       expect(comments).toEqual([
         {
           comment: 'Im a new comment',
-          created_at: anchor,
+          created_at: dateNow,
           created_by: 'lily',
         },
         {
           comment: 'Im another new comment',
-          created_at: anchor,
+          created_at: dateNow,
           created_by: 'lily',
         },
       ]);
@@ -302,16 +303,16 @@ describe('utils', () => {
   });
 
   describe('#transformUpdateComments', () => {
-    test('it updates comment and adds "updated_at" and "updated_by"', () => {
+    test('it updates comment and adds "updated_at" and "updated_by" if content differs', () => {
       const comments = transformUpdateComments({
         comment: {
           comment: 'Im an old comment that is trying to be updated',
-          created_at: DATE_NOW,
+          created_at: oldDate,
           created_by: 'lily',
         },
         existingComment: {
           comment: 'Im an old comment',
-          created_at: DATE_NOW,
+          created_at: oldDate,
           created_by: 'lily',
         },
         user: 'lily',
@@ -319,10 +320,32 @@ describe('utils', () => {
 
       expect(comments).toEqual({
         comment: 'Im an old comment that is trying to be updated',
-        created_at: '2020-04-20T15:25:31.830Z',
+        created_at: oldDate,
         created_by: 'lily',
-        updated_at: anchor,
+        updated_at: dateNow,
         updated_by: 'lily',
+      });
+    });
+
+    test('it does not update comment and add "updated_at" and "updated_by" if content is the same', () => {
+      const comments = transformUpdateComments({
+        comment: {
+          comment: 'Im an old comment ',
+          created_at: oldDate,
+          created_by: 'lily',
+        },
+        existingComment: {
+          comment: 'Im an old comment',
+          created_at: oldDate,
+          created_by: 'lily',
+        },
+        user: 'lily',
+      });
+
+      expect(comments).toEqual({
+        comment: 'Im an old comment',
+        created_at: oldDate,
+        created_by: 'lily',
       });
     });
 
@@ -331,12 +354,12 @@ describe('utils', () => {
         transformUpdateComments({
           comment: {
             comment: 'Im an old comment that is trying to be updated',
-            created_at: DATE_NOW,
+            created_at: oldDate,
             created_by: 'lily',
           },
           existingComment: {
             comment: 'Im an old comment',
-            created_at: DATE_NOW,
+            created_at: oldDate,
             created_by: 'lily',
           },
           user: 'bane',
@@ -348,13 +371,13 @@ describe('utils', () => {
       expect(() =>
         transformUpdateComments({
           comment: {
-            comment: 'Im an old comment that is trying to be updated',
-            created_at: anchor,
+            comment: 'Im an old comment',
+            created_at: dateNow,
             created_by: 'lily',
           },
           existingComment: {
             comment: 'Im an old comment',
-            created_at: DATE_NOW,
+            created_at: oldDate,
             created_by: 'lily',
           },
           user: 'lily',
@@ -368,12 +391,12 @@ describe('utils', () => {
       const result = isCommentEqual(
         {
           comment: 'some old comment',
-          created_at: DATE_NOW,
+          created_at: oldDate,
           created_by: USER,
         },
         {
           comment: 'some older comment',
-          created_at: DATE_NOW,
+          created_at: oldDate,
           created_by: USER,
         }
       );
@@ -385,12 +408,12 @@ describe('utils', () => {
       const result = isCommentEqual(
         {
           comment: 'some old comment',
-          created_at: DATE_NOW,
+          created_at: oldDate,
           created_by: USER,
         },
         {
           comment: 'some old comment',
-          created_at: anchor,
+          created_at: dateNow,
           created_by: USER,
         }
       );
@@ -402,12 +425,12 @@ describe('utils', () => {
       const result = isCommentEqual(
         {
           comment: 'some old comment',
-          created_at: DATE_NOW,
+          created_at: oldDate,
           created_by: USER,
         },
         {
           comment: 'some old comment',
-          created_at: DATE_NOW,
+          created_at: oldDate,
           created_by: 'lily',
         }
       );
@@ -419,11 +442,11 @@ describe('utils', () => {
       const result = isCommentEqual(
         {
           comment: 'some old comment',
-          created_at: DATE_NOW,
+          created_at: oldDate,
           created_by: USER,
         },
         {
-          created_at: DATE_NOW,
+          created_at: oldDate,
           created_by: USER,
           // Disabling to assure that order doesn't matter
           // eslint-disable-next-line sort-keys

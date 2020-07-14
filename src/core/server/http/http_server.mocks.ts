@@ -33,7 +33,7 @@ import {
 } from './router';
 import { OnPreResponseToolkit } from './lifecycle/on_pre_response';
 import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
-import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
+import { OnPreRoutingToolkit } from './lifecycle/on_pre_routing';
 
 interface RequestFixtureOptions<P = any, Q = any, B = any> {
   auth?: { isAuthenticated: boolean };
@@ -161,7 +161,7 @@ const createLifecycleResponseFactoryMock = (): jest.Mocked<LifecycleResponseFact
   customError: jest.fn(),
 });
 
-type ToolkitMock = jest.Mocked<OnPreResponseToolkit & OnPostAuthToolkit & OnPreAuthToolkit>;
+type ToolkitMock = jest.Mocked<OnPreResponseToolkit & OnPostAuthToolkit & OnPreRoutingToolkit>;
 
 const createToolkitMock = (): ToolkitMock => {
   return {

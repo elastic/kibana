@@ -942,7 +942,7 @@ export class MyPlugin implements Plugin<MyPluginSetup> {
         return mountApp(await core.getStartServices(), params);
       },
     });
-    plugins.management.sections.getSection('another').registerApp({
+    plugins.management.sections.section.kibana.registerApp({
       id: 'app',
       title: 'My app',
       order: 1,
@@ -1309,7 +1309,7 @@ This table shows where these uiExports have moved to in the New Platform. In mos
 | `hacks`                      | n/a                                                                                                                       | Just run the code in your plugin's `start` method.                                                                                    |
 | `home`                       | [`plugins.home.featureCatalogue.register`](./src/plugins/home/public/feature_catalogue)                                   | Must add `home` as a dependency in your kibana.json.                                                                                  |
 | `indexManagement`            |                                                                                                                           | Should be an API on the indexManagement plugin.                                                                                       |
-| `injectDefaultVars`          | n/a                                                                                                                       | Plugins will only be able to "whitelist" config values for the frontend. See [#41990](https://github.com/elastic/kibana/issues/41990) |
+| `injectDefaultVars`          | n/a                                                                                                                       | Plugins will only be able to allow config values for the frontend. See [#41990](https://github.com/elastic/kibana/issues/41990) |
 | `inspectorViews`             |                                                                                                                           | Should be an API on the data (?) plugin.                                                                                              |
 | `interpreter`                |                                                                                                                           | Should be an API on the interpreter plugin.                                                                                           |
 | `links`                      | n/a                                                                                                                       | Not necessary, just register your app via `core.application.register`                                                                 |
@@ -1389,7 +1389,7 @@ class MyPlugin {
   }
 ```
 
-If your plugin also have a client-side part, you can also expose configuration properties to it using a whitelisting mechanism with the configuration `exposeToBrowser` property.
+If your plugin also have a client-side part, you can also expose configuration properties to it using the configuration `exposeToBrowser` allow-list property.
 
 ```typescript
 // my_plugin/server/index.ts

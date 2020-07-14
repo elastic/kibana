@@ -28,7 +28,7 @@ import { useLinkProps } from '../../../../../hooks/use_link_props';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { partitionField } from '../../../../../../common/log_analysis/job_parameters';
 import { getEntitySpecificSingleMetricViewerLink } from '../../../../../components/logging/log_analysis_results/analyze_in_ml_button';
-import { LogEntryRateExample } from '../../../../../../common/http_api/log_analysis/results';
+import { LogEntryExample } from '../../../../../../common/http_api/log_analysis/results';
 import {
   LogColumnConfiguration,
   isTimestampLogColumnConfiguration,
@@ -36,6 +36,7 @@ import {
   isMessageLogColumnConfiguration,
 } from '../../../../../utils/source_configuration';
 import { localizedDate } from '../../../../../../common/formatters/datetime';
+import { LogEntryAnomaly } from '../../../../../../common/http_api';
 
 export const exampleMessageScale = 'medium' as const;
 export const exampleTimestampFormat = 'time' as const;
@@ -58,19 +59,19 @@ const VIEW_ANOMALY_IN_ML_LABEL = i18n.translate(
   }
 );
 
-type Props = LogEntryRateExample & {
+type Props = LogEntryExample & {
   timeRange: TimeRange;
-  jobId: string;
+  anomaly: LogEntryAnomaly;
 };
 
-export const LogEntryRateExampleMessage: React.FunctionComponent<Props> = ({
+export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
   id,
   dataset,
   message,
   timestamp,
   tiebreaker,
   timeRange,
-  jobId,
+  anomaly,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -107,8 +108,9 @@ export const LogEntryRateExampleMessage: React.FunctionComponent<Props> = ({
   });
 
   const viewAnomalyInMachineLearningLinkProps = useLinkProps(
-    getEntitySpecificSingleMetricViewerLink(jobId, timeRange, {
+    getEntitySpecificSingleMetricViewerLink(anomaly.jobId, timeRange, {
       [partitionField]: dataset,
+      ...(anomaly.categoryId ? { mlcategory: anomaly.categoryId } : {}),
     })
   );
 
@@ -233,11 +235,11 @@ export const exampleMessageColumnConfigurations: LogColumnConfiguration[] = [
   },
 ];
 
-export const LogEntryRateExampleMessageHeaders: React.FunctionComponent<{
+export const LogEntryExampleMessageHeaders: React.FunctionComponent<{
   dateTime: number;
 }> = ({ dateTime }) => {
   return (
-    <LogEntryRateExampleMessageHeadersWrapper>
+    <LogEntryExampleMessageHeadersWrapper>
       <>
         {exampleMessageColumnConfigurations.map((columnConfiguration) => {
           if (isTimestampLogColumnConfiguration(columnConfiguration)) {
@@ -280,11 +282,11 @@ export const LogEntryRateExampleMessageHeaders: React.FunctionComponent<{
           {null}
         </LogColumnHeader>
       </>
-    </LogEntryRateExampleMessageHeadersWrapper>
+    </LogEntryExampleMessageHeadersWrapper>
   );
 };
 
-const LogEntryRateExampleMessageHeadersWrapper = euiStyled(LogColumnHeadersWrapper)`
+const LogEntryExampleMessageHeadersWrapper = euiStyled(LogColumnHeadersWrapper)`
   border-bottom: none;
   box-shadow: none;
   padding-right: 0;
