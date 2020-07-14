@@ -24,7 +24,6 @@ import {
   SavedObjectsClientContract,
   SavedObjectsImportError,
   SavedObjectsImportRetry,
-  SavedObjectsFindOptions,
 } from '../types';
 import { ISavedObjectTypeRegistry } from '..';
 
