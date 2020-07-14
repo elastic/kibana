@@ -11,7 +11,10 @@ import {
   buildEsQuery,
   Query as DataQuery,
 } from '../../../../../src/plugins/data/common';
-import { ExceptionListItemSchema } from '../../../lists/common/schemas';
+import {
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+} from '../../../lists/common/schemas';
 import { buildQueryExceptions } from './build_exceptions_query';
 import { Query, Language, Index } from './schemas/common/schemas';
 
@@ -20,14 +23,20 @@ export const getQueryFilter = (
   language: Language,
   filters: Array<Partial<Filter>>,
   index: Index,
-  lists: ExceptionListItemSchema[]
+  lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
+  excludeExceptions: boolean = true
 ) => {
   const indexPattern: IIndexPattern = {
     fields: [],
     title: index.join(),
   };
 
-  const queries: DataQuery[] = buildQueryExceptions({ query, language, lists });
+  const queries: DataQuery[] = buildQueryExceptions({
+    query,
+    language,
+    lists,
+    exclude: excludeExceptions,
+  });
 
   const config = {
     allowLeadingWildcards: true,
