@@ -62,8 +62,8 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
           // has been initialized
           throw new Error('Visualization implementation was not initialized on first render.');
         }
-        // need to pass the title here again to refresh in case of save in-place or renaming
-        return this.visualization.render(visData, { ...visParams, title: vis.title });
+
+        return this.visualization.render(visData, visParams);
       })
     );
 

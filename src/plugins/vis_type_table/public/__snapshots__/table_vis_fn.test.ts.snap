@@ -8,7 +8,6 @@ Object {
     "params": Object {
       "listenOnChange": true,
     },
-    "title": "My Chart title",
     "visConfig": Object {
       "dimensions": Object {
         "buckets": Array [],
@@ -31,6 +30,7 @@ Object {
         "columnIndex": null,
         "direction": null,
       },
+      "title": "My Chart title",
       "totalFunc": "sum",
     },
     "visData": Object {
