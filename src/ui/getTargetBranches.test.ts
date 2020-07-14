@@ -210,4 +210,20 @@ describe('getTargetBranchChoices', () => {
       { checked: false, name: '7.7' },
     ]);
   });
+
+  it('should pre-select branches based on labels', () => {
+    const targetBranchesFromLabels = ['7.7'];
+
+    const branches = getTargetBranchChoices(
+      options,
+      targetBranchesFromLabels,
+      sourceBranch
+    );
+
+    expect(branches).toEqual([
+      { checked: false, name: '7.x' },
+      { checked: false, name: '7.8' },
+      { checked: true, name: '7.7' },
+    ]);
+  });
 });
