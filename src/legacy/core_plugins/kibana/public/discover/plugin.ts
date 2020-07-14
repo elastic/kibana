@@ -47,6 +47,7 @@ import {
   VisualizationsSetup,
 } from '../../../../../plugins/visualizations/public';
 import { createKbnUrlTracker } from '../../../../../plugins/kibana_utils/public';
+import { SearchEmbeddableFactory } from './np_ready/embeddable';
 
 export interface DiscoverSetupPlugins {
   uiActions: UiActionsSetup;
@@ -202,8 +203,6 @@ export class DiscoverPlugin implements Plugin<void, void> {
     core: CoreSetup<DiscoverStartPlugins>,
     plugins: DiscoverSetupPlugins
   ) {
-    const { SearchEmbeddableFactory } = await import('./np_ready/embeddable');
-
     if (!this.getEmbeddableInjector) {
       throw Error('Discover plugin method getEmbeddableInjector is undefined');
     }

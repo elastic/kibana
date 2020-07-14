@@ -23,18 +23,6 @@ import _ from 'lodash';
 import ChoroplethLayer from '../choropleth_layer';
 import { ImageComparator } from 'test_utils/image_comparator';
 import worldJson from './world.json';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import EMS_CATALOGUE from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_manifest.json';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import EMS_FILES from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_files.json';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import EMS_TILES from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_tiles.json';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import EMS_STYLE_ROAD_MAP_BRIGHT from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_style_bright';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import EMS_STYLE_ROAD_MAP_DESATURATED from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_style_desaturated';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import EMS_STYLE_DARK_MAP from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_style_dark';
 
 import initialPng from './initial.png';
 import toiso3Png from './toiso3.png';
@@ -100,7 +88,6 @@ describe('RegionMapsVisualizationTests', function () {
 
   beforeEach(ngMock.module('kibana'));
 
-  let getManifestStub;
   beforeEach(
     ngMock.inject(() => {
       setInjectedVarFunc((injectedVar) => {
@@ -128,6 +115,15 @@ describe('RegionMapsVisualizationTests', function () {
         }
       });
       const serviceSettings = new ServiceSettings();
+      serviceSettings.loadFileLayerConfig = async (fl) => {
+        // Region-maps visualization calls EMS to dynamically load attribution iso grabbing it from visState
+        // Mock this call to avoid network-roundtrip
+        return {
+          attribution: fl.attribution + '_sanitized',
+          name: fl.name,
+        };
+      };
+
       const regionmapsConfig = {
         includeElasticMapsService: true,
         layers: [],
@@ -163,31 +159,11 @@ describe('RegionMapsVisualizationTests', function () {
           }, 10);
         });
       };
-
-      getManifestStub = serviceSettings.__debugStubManifestCalls(async (url) => {
-        //simulate network calls
-        if (url.startsWith('https://foobar')) {
-          return EMS_CATALOGUE;
-        } else if (url.startsWith('https://tiles.foobar')) {
-          return EMS_TILES;
-        } else if (url.startsWith('https://files.foobar')) {
-          return EMS_FILES;
-        } else if (url.startsWith('https://raster-style.foobar')) {
-          if (url.includes('osm-bright-desaturated')) {
-            return EMS_STYLE_ROAD_MAP_DESATURATED;
-          } else if (url.includes('osm-bright')) {
-            return EMS_STYLE_ROAD_MAP_BRIGHT;
-          } else if (url.includes('dark-matter')) {
-            return EMS_STYLE_DARK_MAP;
-          }
-        }
-      });
     })
   );
 
   afterEach(function () {
     ChoroplethLayer.prototype._makeJsonAjaxCall = _makeJsonAjaxCallOld;
-    getManifestStub.removeStub();
   });
 
   describe('RegionMapVisualization - basics', function () {

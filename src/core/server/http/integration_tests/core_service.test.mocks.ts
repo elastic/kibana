@@ -18,10 +18,11 @@
  */
 import { elasticsearchServiceMock } from '../../elasticsearch/elasticsearch_service.mock';
 
+export const clusterClientInstanceMock = elasticsearchServiceMock.createScopedClusterClient();
 export const clusterClientMock = jest.fn();
 jest.doMock('../../elasticsearch/scoped_cluster_client', () => ({
   ScopedClusterClient: clusterClientMock.mockImplementation(function () {
-    return elasticsearchServiceMock.createScopedClusterClient();
+    return clusterClientInstanceMock;
   }),
 }));
 
