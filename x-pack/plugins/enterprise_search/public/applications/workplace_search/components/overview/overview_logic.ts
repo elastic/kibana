@@ -6,7 +6,7 @@
 
 import { HttpSetup } from 'src/core/public';
 
-import { storeLogic } from '../../../shared/store';
+import { kea } from 'kea';
 
 import { IAccount, IFlashMessagesProps, IOrganization } from '../../types';
 
@@ -52,7 +52,7 @@ interface IListenerParams {
   actions: IOverviewActions;
 }
 
-export const OverviewLogic = storeLogic({
+export const OverviewLogic = kea({
   actions: (): IOverviewActions => ({
     setServerData: (serverData: IOverviewServerData) => serverData,
     setFlashMessages: (flashMessages: IFlashMessagesProps) => ({
