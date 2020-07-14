@@ -29,7 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
           return response.body;
         };
         const listResponse = await fetchPackageList();
-        expect(listResponse.response.length).to.be(12);
+        expect(listResponse.response.length).to.be(11);
       } else {
         warnAndSkipTest(this, log);
       }
