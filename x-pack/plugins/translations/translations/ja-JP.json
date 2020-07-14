@@ -12239,7 +12239,6 @@
     "xpack.remoteClusters.addRemoteCluster.unknownRemoteClusterErrorMessage": "ES からレスポンスが返らず、クラスターを追加できません。",
     "xpack.remoteClusters.addTitle": "リモートクラスターを追加",
     "xpack.remoteClusters.appName": "リモートクラスター",
-    "xpack.remoteClusters.appTitle": "リモートクラスター",
     "xpack.remoteClusters.cloudClusterInformationDescription": "クラスターのプロキシアドレスとサーバー名を見つけるには、デプロイメニューの{security}ページに移動し、{searchString}を検索します。",
     "xpack.remoteClusters.cloudClusterInformationTitle": "Elasticsearch Cloudデプロイのプロキシモードを使用",
     "xpack.remoteClusters.cloudClusterSearchDescription": "リモートクラスターパラメーター",

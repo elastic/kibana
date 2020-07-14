@@ -12245,7 +12245,6 @@
     "xpack.remoteClusters.addRemoteCluster.unknownRemoteClusterErrorMessage": "无法添加集群，ES 未返回任何响应。",
     "xpack.remoteClusters.addTitle": "添加远程集群",
     "xpack.remoteClusters.appName": "远程集群",
-    "xpack.remoteClusters.appTitle": "远程集群",
     "xpack.remoteClusters.cloudClusterInformationDescription": "要查找您的集群的代理地址和服务器名称，请前往部署菜单的{security}页面并搜索“{searchString}”。",
     "xpack.remoteClusters.cloudClusterInformationTitle": "将代理模式用于 Elasticsearch Cloud 部署",
     "xpack.remoteClusters.cloudClusterSearchDescription": "远程集群参数",
