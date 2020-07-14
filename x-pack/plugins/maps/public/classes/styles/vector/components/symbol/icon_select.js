@@ -16,14 +16,10 @@ import {
 } from '@elastic/eui';
 import { SymbolIcon } from '../legend/symbol_icon';
 import { SYMBOL_OPTIONS } from '../../symbol_utils';
-import { getUiSettings } from '../../../../../kibana_services';
+import { getIsDarkMode } from '../../../../../kibana_services';
 
 function isKeyboardEvent(event) {
   return typeof event === 'object' && 'keyCode' in event;
-}
-
-function getIsDarkMode() {
-  return getUiSettings().get('theme:darkMode', false);
 }
 
 export class IconSelect extends Component {

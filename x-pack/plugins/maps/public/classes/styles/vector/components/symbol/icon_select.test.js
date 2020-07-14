@@ -6,15 +6,8 @@
 
 jest.mock('../../../../../kibana_services', () => {
   return {
-    getUiSettings() {
-      return {
-        get(key) {
-          if (key === 'theme:darkMode') {
-            return false;
-          }
-          throw new Error(`Unexpected ui settings key: ${key}`);
-        },
-      };
+    getIsDarkMode() {
+      return false;
     },
   };
 });

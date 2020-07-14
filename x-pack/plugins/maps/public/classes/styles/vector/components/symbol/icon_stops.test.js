@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+import { getFirstUnusedSymbol } from './icon_stops';
+
 jest.mock('./icon_select', () => ({
   IconSelect: () => {
     return <div>mockIconSelect</div>;
@@ -28,9 +31,6 @@ jest.mock('../../symbol_utils', () => {
     ],
   };
 });
-
-import React from 'react';
-import { getFirstUnusedSymbol } from './icon_stops';
 
 describe('getFirstUnusedSymbol', () => {
   test('Should return first unused icon from PREFERRED_ICONS', () => {
