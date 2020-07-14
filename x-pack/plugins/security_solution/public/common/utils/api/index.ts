@@ -7,6 +7,7 @@
 import { has } from 'lodash/fp';
 
 export interface KibanaApiError {
+  name: string;
   message: string;
   body: {
     message: string;

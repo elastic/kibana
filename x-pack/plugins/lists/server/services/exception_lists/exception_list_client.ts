@@ -21,6 +21,7 @@ import {
   DeleteExceptionListOptions,
   FindExceptionListItemOptions,
   FindExceptionListOptions,
+  FindExceptionListsItemOptions,
   GetExceptionListItemOptions,
   GetExceptionListOptions,
   UpdateExceptionListItemOptions,
@@ -36,6 +37,7 @@ import { deleteExceptionList } from './delete_exception_list';
 import { deleteExceptionListItem } from './delete_exception_list_item';
 import { findExceptionListItem } from './find_exception_list_item';
 import { findExceptionList } from './find_exception_list';
+import { findExceptionListsItem } from './find_exception_list_items';
 
 export class ExceptionListClient {
   private readonly user: string;
@@ -218,6 +220,28 @@ export class ExceptionListClient {
   }: FindExceptionListItemOptions): Promise<FoundExceptionListItemSchema | null> => {
     const { savedObjectsClient } = this;
     return findExceptionListItem({
+      filter,
+      listId,
+      namespaceType,
+      page,
+      perPage,
+      savedObjectsClient,
+      sortField,
+      sortOrder,
+    });
+  };
+
+  public findExceptionListsItem = async ({
+    listId,
+    filter,
+    perPage,
+    page,
+    sortField,
+    sortOrder,
+    namespaceType,
+  }: FindExceptionListsItemOptions): Promise<FoundExceptionListItemSchema | null> => {
+    const { savedObjectsClient } = this;
+    return findExceptionListsItem({
       filter,
       listId,
       namespaceType,
