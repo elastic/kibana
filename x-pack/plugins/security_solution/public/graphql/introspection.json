@@ -735,6 +735,28 @@
                   }
                 },
                 "defaultValue": null
+              },
+              {
+                "name": "docValueFields",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "INPUT_OBJECT",
+                        "name": "docValueFieldsInput",
+                        "ofType": null
+                      }
+                    }
+                  }
+                },
+                "defaultValue": null
               }
             ],
             "type": {
@@ -816,6 +838,28 @@
                   }
                 },
                 "defaultValue": null
+              },
+              {
+                "name": "docValueFields",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "INPUT_OBJECT",
+                        "name": "docValueFieldsInput",
+                        "ofType": null
+                      }
+                    }
+                  }
+                },
+                "defaultValue": null
               }
             ],
             "type": {
@@ -863,6 +907,28 @@
                       "kind": "NON_NULL",
                       "name": null,
                       "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+                    }
+                  }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "docValueFields",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "INPUT_OBJECT",
+                        "name": "docValueFieldsInput",
+                        "ofType": null
+                      }
                     }
                   }
                 },
@@ -920,6 +986,28 @@
                       "kind": "NON_NULL",
                       "name": null,
                       "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+                    }
+                  }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "docValueFields",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "INPUT_OBJECT",
+                        "name": "docValueFieldsInput",
+                        "ofType": null
+                      }
                     }
                   }
                 },
@@ -997,6 +1085,28 @@
                       "kind": "NON_NULL",
                       "name": null,
                       "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+                    }
+                  }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "docValueFields",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "INPUT_OBJECT",
+                        "name": "docValueFieldsInput",
+                        "ofType": null
+                      }
                     }
                   }
                 },
@@ -1105,6 +1215,28 @@
                   }
                 },
                 "defaultValue": null
+              },
+              {
+                "name": "docValueFields",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "INPUT_OBJECT",
+                        "name": "docValueFieldsInput",
+                        "ofType": null
+                      }
+                    }
+                  }
+                },
+                "defaultValue": null
               }
             ],
             "type": {
@@ -1154,6 +1286,28 @@
                       "kind": "NON_NULL",
                       "name": null,
                       "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+                    }
+                  }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "docValueFields",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "INPUT_OBJECT",
+                        "name": "docValueFieldsInput",
+                        "ofType": null
+                      }
                     }
                   }
                 },
@@ -1816,6 +1970,28 @@
                 "name": "stackByField",
                 "description": "",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
+              },
+              {
+                "name": "docValueFields",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "INPUT_OBJECT",
+                        "name": "docValueFieldsInput",
+                        "ofType": null
+                      }
+                    }
+                  }
+                },
                 "defaultValue": null
               }
             ],
@@ -2522,7 +2698,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
             },
             "defaultValue": null
           },
@@ -2532,7 +2708,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
             },
             "defaultValue": null
           }
@@ -2584,6 +2760,37 @@
               "kind": "NON_NULL",
               "name": null,
               "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
+            "defaultValue": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "docValueFieldsInput",
+        "description": "",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "field",
+            "description": "",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "format",
+            "description": "",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
             },
             "defaultValue": null
           }
@@ -10219,7 +10426,7 @@
             "name": "start",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToAny", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -10227,7 +10434,7 @@
             "name": "end",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToAny", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -11713,13 +11920,13 @@
           {
             "name": "start",
             "description": "",
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToAny", "ofType": null },
             "defaultValue": null
           },
           {
             "name": "end",
             "description": "",
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToAny", "ofType": null },
             "defaultValue": null
           }
         ],
