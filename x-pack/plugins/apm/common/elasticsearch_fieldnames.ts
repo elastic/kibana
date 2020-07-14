@@ -24,6 +24,7 @@ export const AGENT_VERSION = 'agent.version';
 
 export const URL_FULL = 'url.full';
 export const HTTP_REQUEST_METHOD = 'http.request.method';
+export const HTTP_RESPONSE_STATUS_CODE = 'http.response.status_code';
 export const USER_ID = 'user.id';
 export const USER_AGENT_ORIGINAL = 'user_agent.original';
 export const USER_AGENT_NAME = 'user_agent.name';
