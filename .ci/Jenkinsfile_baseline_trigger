@@ -21,7 +21,7 @@ withGithubCredentials {
 
       commits.take(MAXIMUM_COMMITS_TO_BUILD).each { commit ->
         catchErrors {
-          githubCommitStatus.create(commit, 'pending', 'Baseline started.', context = 'kibana-ci-baseline')
+          githubCommitStatus.create(commit, 'pending', 'Baseline started.', 'kibana-ci-baseline')
 
           build(
             propagate: false,
