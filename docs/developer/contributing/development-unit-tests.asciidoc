@@ -4,7 +4,7 @@
 {kib} is migrating unit testing from `Mocha` to `Jest`. Legacy unit tests
 still exist in Mocha but all new unit tests should be written in Jest.
 
-[float]
+[discrete]
 ===== Mocha (legacy)
 
 Mocha tests are contained in `__tests__` directories.
@@ -16,7 +16,7 @@ Mocha tests are contained in `__tests__` directories.
 yarn test:mocha
 -----------
 
-[float]
+[discrete]
 ==== Jest
 Jest tests are stored in the same directory as source code files with the `.test.{js,mjs,ts,tsx}` suffix.
 
@@ -27,7 +27,7 @@ Jest tests are stored in the same directory as source code files with the `.test
 yarn test:jest
 -----------
 
-[float]
+[discrete]
 ====== Writing Jest Unit Tests
 
 In order to write those tests there are two main things you need to be aware of.
@@ -37,7 +37,7 @@ test files with `babel-jest` both techniques are needed
 specially for the tests implemented on Typescript in order to benefit from the 
 auto-inference types feature.
 
-[float]
+[discrete]
 ====== Jest.mock vs Jest.doMock
 
 Both methods are essentially the same on their roots however the `jest.mock` 
@@ -47,7 +47,7 @@ reference pretty much any variable we want, however we have to assure those refe
 variables are instantiated at the time we need them which lead us to the next 
 section where we'll talk about our jest mock files pattern.
 
-[float]
+[discrete]
 ====== Jest Mock Files Pattern 
 
 Specially on typescript it is pretty common to have in unit tests 
@@ -76,7 +76,7 @@ like: `import * as Mocks from './mymodule.test.mocks'`,
 or just `import './mymodule.test.mocks'` if there isn't anything 
 exported to be used.
 
-[float]
+[discrete]
 [[debugging-unit-tests]]
 ===== Debugging Unit Tests
 
@@ -127,7 +127,7 @@ description.
 
 image:http://i.imgur.com/DwHxgfq.png[Browser test debugging]
 
-[float]
+[discrete]
 ===== Unit Testing Plugins
 
 This should work super if you’re using the

@@ -3,7 +3,7 @@
 
 There are many ways to run Elasticsearch while you are developing.
 
-[float]
+[discrete]
 
 ==== By snapshot
 

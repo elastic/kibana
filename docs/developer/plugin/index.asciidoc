@@ -9,7 +9,7 @@ The {kib} plugin interfaces are in a state of constant development.  We cannot p
 Most developers who contribute code directly to the {kib} repo are writing code inside plugins, so our <<contributing>> docs are the best place to
 start. However, there are a few differences when developing plugins outside the {kib} repo. These differences are covered here.
 
-[float]
+[discrete]
 [[automatic-plugin-generator]]
 ==== Automatic plugin generator
 
@@ -20,7 +20,7 @@ We recommend that you kick-start your plugin by generating it with the {kib-repo
 node scripts/generate_plugin my_plugin_name # replace "my_plugin_name" with your desired plugin name
 -----------
 
-[float]
+[discrete]
 === Plugin location
 
 The {kib} directory must be named `kibana`, and your plugin directory should be located in the root of `kibana` in a `plugins` directory, for example:

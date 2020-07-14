@@ -3,7 +3,7 @@
 
 To ensure that your changes will not break other functionality, please run the test suite and build (<<building-kibana>>) before submitting your Pull Request.
 
-[float]
+[discrete]
 ==== Running specific {kib} tests
 
 The following table outlines possible test file locations and how to
@@ -47,7 +47,7 @@ Examples: - Run the entire elasticsearch_service test suite:
 string: ``` yarn test:ftr:server –config test/api_integration/config.js
 yarn test:ftr:runner –config test/api_integration/config
 
-[float]
+[discrete]
 ==== Cross-browser compatibility
 
 **Testing IE on OS X**
@@ -71,7 +71,7 @@ your computer name).
 `http://computer.local:5601` to test {kib}.
 * Alternatively you can use browserstack
 
-[float]
+[discrete]
 ==== Running browser automation tests
 
 Check out <<development-functional-tests>> to learn more about how you can run
@@ -82,7 +82,7 @@ to learn more about using the node scripts we provide for building
 {kib}, running integration tests, and starting up {kib} and
 Elasticsearch while you develop.
 
-[float]
+[discrete]
 ==== More testing information:
 
 * <<development-functional-tests>>

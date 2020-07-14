@@ -34,7 +34,7 @@ for your editor, and browse our
 https://github.com/elastic/kibana/blob/master/.editorconfig[`.editorconfig`]
 file to see what config rules we set up.
 
-[float]
+[discrete]
 ==== Setup Guide for VS Code Users
 
 Note that for VSCode, to enable "`live`" linting of TypeScript (and

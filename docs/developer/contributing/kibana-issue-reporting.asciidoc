@@ -1,7 +1,7 @@
 [[kibana-issue-reporting]]
 === Effective issue reporting in {kib}
 
-[float]
+[discrete]
 ==== Voicing the importance of an issue
 
 We seriously appreciate thoughtful comments. If an issue is important to
@@ -17,7 +17,7 @@ https://github.com/blog/2119-add-reactions-to-pull-requests-issues-and-comments[
 thumbs up reaction] on the issue itself and on the comment which best
 summarizes your thoughts.
 
-[float]
+[discrete]
 ==== "`My issue isn’t getting enough attention`"
 
 First of all, *sorry about that!* We want you to have a great time with
@@ -31,7 +31,7 @@ more pressing issues.
 Feel free to bump your issues if you think they’ve been neglected for a
 prolonged period.
 
-[float]
+[discrete]
 ==== "`I want to help!`"
 
 *Now we’re talking*. If you have a bug fix or new feature that you would
