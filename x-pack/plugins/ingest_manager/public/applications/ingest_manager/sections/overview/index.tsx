@@ -71,7 +71,7 @@ export const IngestManagerOverview: React.FunctionComponent = () => {
               <p>
                 <FormattedMessage
                   id="xpack.ingestManager.overviewPageSubtitle"
-                  defaultMessage="Centralized management for Elastic Agents and configurations."
+                  defaultMessage="Central management for Elastic Agents and agent configurations."
                 />
               </p>
             </EuiText>
@@ -84,7 +84,7 @@ export const IngestManagerOverview: React.FunctionComponent = () => {
             <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
               <FormattedMessage
                 id="xpack.ingestManager.overviewPageEnrollAgentButton"
-                defaultMessage="Enroll new agent"
+                defaultMessage="Add Agent"
               />
             </EuiButton>
           </EuiFlexItem>
