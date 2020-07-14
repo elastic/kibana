@@ -28,6 +28,7 @@ export const renderApp = async (
   { history, appBasePath, element }: AppMountParameters,
   dependencies: ManagementAppDependencies
 ) => {
+  context.core.chrome.docTitle.reset();
   ReactDOM.render(
     <ManagementApp
       context={context}
