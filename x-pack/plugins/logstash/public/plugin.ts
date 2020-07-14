@@ -17,6 +17,8 @@ import {
 import { ManagementSetup, ManagementSectionId } from '../../../../src/plugins/management/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 
+import { PLUGIN } from '../common/constants';
+
 // @ts-ignore
 import { LogstashLicenseService } from './services';
 
@@ -39,9 +41,7 @@ export class LogstashPlugin implements Plugin<void, void, SetupDeps> {
       .getSection(ManagementSectionId.Ingest)
       .registerApp({
         id: 'pipelines',
-        title: i18n.translate('xpack.logstash.managementSection.pipelinesTitle', {
-          defaultMessage: 'Logstash Pipelines',
-        }),
+        title: PLUGIN.title,
         order: 1,
         mount: async (params) => {
           const [coreStart] = await core.getStartServices();

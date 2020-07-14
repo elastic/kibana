@@ -12,6 +12,7 @@ import { first } from 'rxjs/operators';
 
 import { CoreStart } from 'src/core/public';
 import { ManagementAppMountParams } from '../../../../../src/plugins/management/public';
+import { PLUGIN } from '../../common/constants';
 import {
   ClusterService,
   MonitoringService,
@@ -23,8 +24,6 @@ import {
 // @ts-ignore
 import { PipelineList } from './components/pipeline_list';
 import { PipelineEditView } from './pipeline_edit_view';
-// @ts-ignore
-import { Pipeline } from '../models/pipeline';
 // @ts-ignore
 import * as Breadcrumbs from './breadcrumbs';
 
@@ -40,6 +39,8 @@ export const renderApp = async (
   const pipelinesService = new PipelinesService(core.http, monitoringService);
   const pipelineService = new PipelineService(core.http, pipelinesService);
   const upgradeService = new UpgradeService(core.http);
+
+  core.chrome.docTitle.change(PLUGIN.title);
 
   ReactDOM.render(
     <core.i18n.Context>
@@ -108,6 +109,7 @@ export const renderApp = async (
   );
 
   return () => {
+    core.chrome.docTitle.reset();
     ReactDOM.unmountComponentAtNode(element);
   };
 };
