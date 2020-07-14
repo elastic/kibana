@@ -24,6 +24,7 @@ interface Aggregation {
     buckets: Array<{
       aggregatedValue: { value: number; values?: Array<{ key: number; value: number }> };
       doc_count: number;
+      key_as_string: string;
     }>;
   };
 }
@@ -58,17 +59,18 @@ export const evaluateAlert = (
       );
       const { threshold, comparator } = criterion;
       const comparisonFunction = comparatorMap[comparator];
-      return mapValues(currentValues, (values: number | number[] | null) => {
-        if (isTooManyBucketsPreviewException(values)) throw values;
+      return mapValues(currentValues, (points: any[] | typeof NaN | null) => {
+        if (isTooManyBucketsPreviewException(points)) throw points;
         return {
           ...criterion,
           metric: criterion.metric ?? DOCUMENT_COUNT_I18N,
-          currentValue: Array.isArray(values) ? last(values) : NaN,
-          shouldFire: Array.isArray(values)
-            ? values.map((value) => comparisonFunction(value, threshold))
+          currentValue: Array.isArray(points) ? last(points)?.value : NaN,
+          timestamp: Array.isArray(points) ? last(points)?.key : NaN,
+          shouldFire: Array.isArray(points)
+            ? points.map((point) => comparisonFunction(point.value, threshold))
             : [false],
-          isNoData: values === null,
-          isError: isNaN(values),
+          isNoData: points === null,
+          isError: isNaN(points),
         };
       });
     })
@@ -158,17 +160,20 @@ const getValuesFromAggregations = (
     const { buckets } = aggregations.aggregatedIntervals;
     if (!buckets.length) return null; // No Data state
     if (aggType === Aggregators.COUNT) {
-      return buckets.map((bucket) => bucket.doc_count);
+      return buckets.map((bucket) => ({ key: bucket.key_as_string, value: bucket.doc_count }));
     }
     if (aggType === Aggregators.P95 || aggType === Aggregators.P99) {
       return buckets.map((bucket) => {
         const values = bucket.aggregatedValue?.values || [];
         const firstValue = first(values);
         if (!firstValue) return null;
-        return firstValue.value;
+        return { key: bucket.key_as_string, value: firstValue.value };
       });
     }
-    return buckets.map((bucket) => bucket.aggregatedValue.value);
+    return buckets.map((bucket) => ({
+      key: bucket.key_as_string,
+      value: bucket.aggregatedValue.value,
+    }));
   } catch (e) {
     return NaN; // Error state
   }
