@@ -29,7 +29,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe('create_rules_bulk', () => {
+  // Preventing ES promotion: https://github.com/elastic/kibana/issues/71555
+  describe.skip('create_rules_bulk', () => {
     describe('validation errors', () => {
       it('should give a 200 even if the index does not exist as all bulks return a 200 but have an error of 409 bad request in the body', async () => {
         const { body } = await supertest
