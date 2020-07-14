@@ -79,9 +79,9 @@ import {
   rumServicesRoute,
 } from './rum_client';
 import {
-  observabilityDashboardHasDataRoute,
-  observabilityDashboardDataRoute,
-} from './observability_dashboard';
+  observabilityOverviewHasDataRoute,
+  observabilityOverviewRoute,
+} from './observability_overview';
 import {
   anomalyDetectionJobsRoute,
   createAnomalyDetectionJobsRoute,
@@ -176,8 +176,8 @@ const createApmApi = () => {
     .add(rumServicesRoute)
 
     // Observability dashboard
-    .add(observabilityDashboardHasDataRoute)
-    .add(observabilityDashboardDataRoute)
+    .add(observabilityOverviewHasDataRoute)
+    .add(observabilityOverviewRoute)
 
     // Anomaly detection
     .add(anomalyDetectionJobsRoute)
