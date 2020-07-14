@@ -23,16 +23,7 @@ export const searchTelemetry: SavedObjectsType = {
   namespaceType: 'agnostic',
   hidden: false,
   mappings: {
-    properties: {
-      errorCount: {
-        type: 'integer',
-      },
-      successCount: {
-        type: 'integer',
-      },
-      averageDuration: {
-        type: 'long',
-      },
-    },
+    dynamic: false,
+    properties: {},
   },
 };

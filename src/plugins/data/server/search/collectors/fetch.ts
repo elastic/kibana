@@ -17,13 +17,17 @@
  * under the License.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
+import { LegacyAPICaller, SharedGlobalConfig } from '../../../../../core/server';
 import { Usage } from './register';
 
-export function fetchProvider(index: string) {
+export function fetchProvider(config$: Observable<SharedGlobalConfig>) {
   return async (callCluster: LegacyAPICaller): Promise<Usage> => {
+    const config = await config$.pipe(first()).toPromise();
+
     const response = await callCluster('search', {
-      index,
+      index: config.kibana.index,
       body: {
         query: { term: { type: { value: 'search-telemetry' } } },
       },

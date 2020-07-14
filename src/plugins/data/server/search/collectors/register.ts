@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { first } from 'rxjs/operators';
 import { PluginInitializerContext } from 'kibana/server';
 import { UsageCollectionSetup } from '../../../../usage_collection/server';
 import { fetchProvider } from './fetch';
@@ -33,13 +32,10 @@ export async function registerUsageCollector(
   context: PluginInitializerContext
 ) {
   try {
-    const config = await context.config.legacy.globalConfig$.pipe(first()).toPromise();
-    const { index } = config.kibana;
-
     const collector = usageCollection.makeUsageCollector<Usage>({
       type: 'search',
       isReady: () => true,
-      fetch: fetchProvider(index),
+      fetch: fetchProvider(context.config.legacy.globalConfig$),
       schema: {
         successCount: { type: 'number' },
         errorCount: { type: 'number' },
