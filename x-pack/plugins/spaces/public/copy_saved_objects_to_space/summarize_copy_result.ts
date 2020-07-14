@@ -9,7 +9,10 @@ import {
   ProcessedImportResponse,
   FailedImport,
 } from 'src/plugins/saved_objects_management/public';
-import { SavedObjectsImportConflictError } from 'kibana/public';
+import {
+  SavedObjectsImportConflictError,
+  SavedObjectsImportAmbiguousConflictError,
+} from 'kibana/public';
 
 export interface SummarizedSavedObjectResult {
   type: string;
@@ -42,11 +45,11 @@ interface ProcessingResponse {
 
 interface FailedImportConflict {
   obj: FailedImport['obj'];
-  error: SavedObjectsImportConflictError;
+  error: SavedObjectsImportConflictError | SavedObjectsImportAmbiguousConflictError;
 }
 
 const isConflict = (failure: FailedImport): failure is FailedImportConflict =>
-  failure.error.type === 'conflict';
+  failure.error.type === 'conflict' || failure.error.type === 'ambiguous_conflict';
 const typeComparator = (a: { type: string }, b: { type: string }) =>
   a.type > b.type ? 1 : a.type < b.type ? -1 : 0;
 
@@ -120,7 +123,7 @@ export function summarizeCopyResult(
 
   const hasConflicts = conflicts.length > 0;
   const hasUnresolvableErrors = Boolean(
-    copyResult && copyResult.failedImports.some((failed) => failed.error.type !== 'conflict')
+    copyResult?.failedImports.some((failed) => !isConflict(failed))
   );
   return {
     successful,

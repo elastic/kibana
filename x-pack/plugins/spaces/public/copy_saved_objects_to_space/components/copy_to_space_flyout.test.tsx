@@ -315,18 +315,40 @@ describe('CopyToSpaceFlyout', () => {
     mockSpacesManager.copySavedObjects.mockResolvedValue({
       'space-1': {
         success: true,
-        successCount: 3,
+        successCount: 5,
       },
       'space-2': {
         success: false,
         successCount: 1,
         errors: [
+          // regular conflict without destinationId
           {
             type: 'index-pattern',
             id: 'conflicting-ip',
             error: { type: 'conflict' },
             meta: {},
           },
+          // regular conflict with destinationId
+          {
+            type: 'search',
+            id: 'conflicting-search',
+            error: { type: 'conflict', destinationId: 'another-search' },
+            meta: {},
+          },
+          // ambiguous conflict
+          {
+            type: 'canvas-workpad',
+            id: 'conflicting-canvas',
+            error: {
+              type: 'ambiguous_conflict',
+              destinations: [
+                { id: 'another-canvas', title: 'foo', updatedAt: undefined },
+                { id: 'yet-another-canvas', title: 'bar', updatedAt: undefined },
+              ],
+            },
+            meta: {},
+          },
+          // negative test case (skip)
           {
             type: 'visualization',
             id: 'my-viz',
@@ -366,12 +388,15 @@ describe('CopyToSpaceFlyout', () => {
     const spaceResult = findTestSubject(wrapper, `cts-space-result-space-2`);
     spaceResult.simulate('click');
 
-    const overwriteSwitch = findTestSubject(
-      wrapper,
-      `cts-overwrite-conflict-index-pattern:conflicting-ip`
-    );
-    expect(overwriteSwitch.props()['aria-checked']).toEqual(false);
-    overwriteSwitch.simulate('click');
+    [
+      'index-pattern:conflicting-ip',
+      'search:conflicting-search',
+      'canvas-workpad:conflicting-canvas',
+    ].forEach((id) => {
+      const overwriteSwitch = findTestSubject(wrapper, `cts-overwrite-conflict-${id}`);
+      expect(overwriteSwitch.props()['aria-checked']).toEqual(false);
+      overwriteSwitch.simulate('click');
+    });
 
     const finishButton = findTestSubject(wrapper, 'cts-finish-button');
 
@@ -385,7 +410,21 @@ describe('CopyToSpaceFlyout', () => {
       [{ type: savedObjectToCopy.type, id: savedObjectToCopy.id }],
       {
         'space-1': [],
-        'space-2': [{ type: 'index-pattern', id: 'conflicting-ip', overwrite: true }],
+        'space-2': [
+          { type: 'index-pattern', id: 'conflicting-ip', overwrite: true },
+          {
+            type: 'search',
+            id: 'conflicting-search',
+            overwrite: true,
+            destinationId: 'another-search',
+          },
+          {
+            type: 'canvas-workpad',
+            id: 'conflicting-canvas',
+            overwrite: true,
+            destinationId: 'another-canvas',
+          },
+        ],
       },
       true
     );

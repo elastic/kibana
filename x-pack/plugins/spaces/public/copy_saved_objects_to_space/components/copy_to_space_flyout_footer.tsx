@@ -8,7 +8,7 @@ import React, { Fragment } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiStat, EuiHorizontalRule } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { ProcessedImportResponse } from 'src/plugins/saved_objects_management/public';
+import { ProcessedImportResponse, FailedImport } from 'src/plugins/saved_objects_management/public';
 import { ImportRetry } from '../types';
 
 interface Props {
@@ -21,6 +21,10 @@ interface Props {
   onCopyStart: () => void;
   onCopyFinish: () => void;
 }
+
+const isConflict = (failure: FailedImport) =>
+  failure.error.type === 'conflict' || failure.error.type === 'ambiguous_conflict';
+
 export const CopyToSpaceFlyoutFooter = (props: Props) => {
   const { copyInProgress, initialCopyFinished, copyResult, retries } = props;
 
@@ -39,12 +43,9 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
         successCount: acc.successCount + spaceResult.importCount,
         overwriteConflictCount: acc.overwriteConflictCount + overwriteCount,
         conflictCount:
-          acc.conflictCount +
-          spaceResult.failedImports.filter((i) => i.error.type === 'conflict').length -
-          overwriteCount,
+          acc.conflictCount + spaceResult.failedImports.filter(isConflict).length - overwriteCount,
         unresolvableErrorCount:
-          acc.unresolvableErrorCount +
-          spaceResult.failedImports.filter((i) => i.error.type !== 'conflict').length,
+          acc.unresolvableErrorCount + spaceResult.failedImports.filter(isConflict).length,
       };
     }, summarizedResults);
   }

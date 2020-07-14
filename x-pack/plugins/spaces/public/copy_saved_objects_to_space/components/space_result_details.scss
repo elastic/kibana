@@ -11,3 +11,15 @@
   // Constrains name to the flex item, and allows for truncation when necessary
   min-width: 0;
 }
+
+.spcCopyToSpaceResultDetails__selectControl {
+  margin-left: 30px;
+}
+
+.spcCopyToSpaceResultDetails__selectControl.euiAccordion-isClosed {
+  .euiAccordion__childWrapper {
+    visibility: hidden;
+    opacity: 0;
+    height: 0;
+  }
+}
