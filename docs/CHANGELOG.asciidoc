@@ -14,6 +14,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.8.11>>
 * <<release-notes-6.8.10>>
 * <<release-notes-6.8.9>>
 * <<release-notes-6.8.8>>
@@ -97,14 +98,42 @@ This section summarizes the changes in each release.
 //=== Known Issues
 ////
 
+[[release-notes-6.8.11]]
+== {kib} 6.8.11
+
+[float]
+[[enhancement-v6.8.11]]
+=== Enhancements
+Platform::
+* Makes SameSite cookie's attribute configurable {kib-pull}68108[#68108]
+Security::
+* Supports deep links inside of `RelayState` for SAML IdP initiated login {kib-pull}69401[#69401]
++
+If users want to deep link into {kib} after a successful SAML Identity Provider initiated login,
+they can set `xpack.security.authc.providers.saml.<provider-name>.useRelayStateDeepLink`
+for a specific SAML authentication provider and provide a deep link in the `RelayState` parameter.
+
+[float]
+[[bug-v6.8.11]]
+=== Bug fixes
+Maps::
+* Loads configuration from EMS-metadata in region-maps {kib-pull}70888[#70888]
+Security::
+* Redirects to Logged Out UI on SAML Logout Response {kib-pull}69676[#69676]
++
+Previously {kib} redirected users to a default location as the last step of
+a SAML User/SP Initiated Single Logout (SP SLO), which forced users to log in again
+when the Login Selector UI was not available. Now, {kib} redirects users to either
+the Login Selector UI or the Logged Out UI at the end of SP SLO.
+
 [[release-notes-6.8.10]]
 == {kib} 6.8.10
 
 [float]
 [[security-update-6.8.10]]
 === Security update
-In {kib} 5.4.0 and later, TSVB visualizations contain a stored XSS flaw. Attackers that can 
-edit and create TSVB visualizations can obtain sensitive information, or perform 
+In {kib} 5.4.0 and later, TSVB visualizations contain a stored XSS flaw. Attackers that can
+edit and create TSVB visualizations can obtain sensitive information, or perform
 destructive actions, on behalf of the {kib} users who edit the TSVB visualization, CVE-2020-7015.
 
 You must upgrade to 6.8.10. If you are unable to upgrade, set `metrics.enabled:false` in your kibana.yml file to disable TSVB.
@@ -115,8 +144,8 @@ You must upgrade to 6.8.10. If you are unable to upgrade, set `metrics.enabled:f
 [float]
 [[security-update-6.8.9]]
 === Security updates
-* In 6.7.0 to 6.8.8, the Upgrade Assistant contains a prototype pollution flaw. An authenticated attacker with 
-privileges to write to the {kib} index can insert data that could cause {kib} to execute arbitrary code. This 
+* In 6.7.0 to 6.8.8, the Upgrade Assistant contains a prototype pollution flaw. An authenticated attacker with
+privileges to write to the {kib} index can insert data that could cause {kib} to execute arbitrary code. This
 could lead to an attacker executing code with the permissions of the {kib} process on the host system, CVE-2020-7012.
 +
 By default, the Upgrade Assistant flaw is mitigated in all {kib} instances accessed through {ess}.
@@ -126,8 +155,8 @@ For all other installations, you must upgrade to 6.8.9. If you are unable to upg
 ** In 6.7.0 and 6.7.1, set `upgrade_assistant.enabled:false`
 ** In 6.7.2 and later, set `xpack.upgrade_assistant_enabled:false`
 
-* In 6.8.9 and earlier, TSVB contains a prototype pollution flaw. Authenticated attackers with privileges to create 
-TSVB visualizations can insert data that could cause {kib} to execute arbitrary code. This 
+* In 6.8.9 and earlier, TSVB contains a prototype pollution flaw. Authenticated attackers with privileges to create
+TSVB visualizations can insert data that could cause {kib} to execute arbitrary code. This
 could lead to an attacker executing code with the permissions of the {kib} process on the host system, CVE-2020-7013.
 +
 By default, the Upgrade Assistant flaw is mitigated in all {kib} instances accessed through {ess}.
