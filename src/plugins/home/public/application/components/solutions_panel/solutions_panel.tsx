@@ -233,7 +233,7 @@ export const SolutionsPanel: FunctionComponent<Props> = ({
               <EuiPanel
                 className="homSolutionsPanel__solutionWrapper"
                 paddingSize="none"
-                onClick={createAppNavigationHandler('/app/app_search')} // TODO: double check this url once enterprise search plugin is merged
+                onClick={createAppNavigationHandler(appSearch.path)} // TODO: double check this url once enterprise search plugin is merged
               >
                 <EuiFlexGroup gutterSize="none">
                   <EuiFlexItem grow={1} className="homSolutionsPanel__appSearchHeader">
@@ -245,8 +245,8 @@ export const SolutionsPanel: FunctionComponent<Props> = ({
                       alt="Enterprise search top left background graphic"
                     />
                     <SolutionsTitle
-                      iconType="logoEnterpriseSearch"
-                      title="Enterprise Search"
+                      iconType={appSearch.icon}
+                      title={appSearch.title}
                       subtitle={i18n.translate('home.solutionsPanel.appSearchSubtitle', {
                         defaultMessage: 'Search everything',
                       })}
