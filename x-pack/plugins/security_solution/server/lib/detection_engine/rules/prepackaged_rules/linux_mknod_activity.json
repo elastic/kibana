@@ -1,4 +1,7 @@
 {
+  "author": [
+    "Elastic"
+  ],
   "description": "The Linux mknod program is sometimes used in the command payload of a remote command injection (RCI) and other exploits. It is used to export a command shell when the traditional version of netcat is not available to the payload.",
   "false_positives": [
     "Mknod is a Linux system program. Some normal use of this program, at varying levels of frequency, may originate from scripts, automation tools, and frameworks. Usage by web servers is more likely to be suspicious."
@@ -7,8 +10,9 @@
     "auditbeat-*"
   ],
   "language": "kuery",
+  "license": "Elastic License",
   "name": "Mknod Process Activity",
-  "query": "process.name:mknod and event.action:executed",
+  "query": "event.category:process and event.type:(start or process_started) and process.name:mknod",
   "references": [
     "https://pen-testing.sans.org/blog/2013/05/06/netcat-without-e-no-problem"
   ],
@@ -20,5 +24,5 @@
     "Linux"
   ],
   "type": "query",
-  "version": 2
+  "version": 3
 }
