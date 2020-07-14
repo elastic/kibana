@@ -6,7 +6,8 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('data frame analytics', function () {
+  // flaky tests
+  describe.skip('data frame analytics', function () {
     this.tags(['mlqa', 'skipFirefox']);
 
     loadTestFile(require.resolve('./outlier_detection_creation'));

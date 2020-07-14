@@ -5,11 +5,11 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiI18nNumber } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiTitle,
-  EuiButtonEmpty,
+  EuiFlexItem,
+  EuiI18nNumber,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
@@ -31,23 +31,19 @@ export const OverviewIntegrationSection: React.FC = () => {
     )?.length ?? 0;
   return (
     <EuiFlexItem component="section">
-      <OverviewPanel>
-        <header>
-          <EuiTitle size="xs">
-            <h2>
-              <FormattedMessage
-                id="xpack.ingestManager.overviewPageIntegrationsPanelTitle"
-                defaultMessage="Integrations"
-              />
-            </h2>
-          </EuiTitle>
-          <EuiButtonEmpty size="xs" flush="right" href={getHref('integrations_all')}>
-            <FormattedMessage
-              id="xpack.ingestManager.overviewPageIntegrationsPanelAction"
-              defaultMessage="View integrations"
-            />
-          </EuiButtonEmpty>
-        </header>
+      <OverviewPanel
+        title={i18n.translate('xpack.ingestManager.overviewPageIntegrationsPanelTitle', {
+          defaultMessage: 'Integrations',
+        })}
+        tooltip={i18n.translate('xpack.ingestManager.overviewPageIntegrationsPanelTooltip', {
+          defaultMessage:
+            'Browse and install integrations for the Elastic Stack. Add integrations to your agent configurations to start sending data.',
+        })}
+        linkTo={getHref('integrations_all')}
+        linkToText={i18n.translate('xpack.ingestManager.overviewPageIntegrationsPanelAction', {
+          defaultMessage: 'View integrations',
+        })}
+      >
         <OverviewStats>
           {packagesRequest.isLoading ? (
             <Loading />

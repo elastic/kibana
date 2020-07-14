@@ -35,6 +35,7 @@ import {
   buildUrlsDescription,
   buildNoteDescription,
   buildRuleTypeDescription,
+  buildThresholdDescription,
 } from './helpers';
 import { useSiemJobs } from '../../../../common/components/ml_popover/hooks/use_siem_jobs';
 import { buildMlJobDescription } from './ml_job_description';
@@ -179,6 +180,9 @@ export const getDescriptionItem = (
       (singleThreat: IMitreEnterpriseAttack) => singleThreat.tactic.name !== 'none'
     );
     return buildThreatDescription({ label, threat });
+  } else if (field === 'threshold') {
+    const threshold = get(field, data);
+    return buildThresholdDescription(label, threshold);
   } else if (field === 'references') {
     const urls: string[] = get(field, data);
     return buildUrlsDescription(label, urls);

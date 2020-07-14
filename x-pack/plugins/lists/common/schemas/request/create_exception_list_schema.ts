@@ -10,7 +10,6 @@ import * as t from 'io-ts';
 
 import {
   ListId,
-  NamespaceType,
   Tags,
   _Tags,
   _tags,
@@ -23,6 +22,7 @@ import {
 } from '../common/schemas';
 import { Identity, RequiredKeepUndefined } from '../../types';
 import { DefaultUuid } from '../../siem_common_deps';
+import { NamespaceType } from '../types';
 
 export const createExceptionListSchema = t.intersection([
   t.exact(

@@ -34,6 +34,7 @@ import {
 import { SiemSearchBar } from '../../../../../common/components/search_bar';
 import { WrapperPage } from '../../../../../common/components/wrapper_page';
 import { useRule } from '../../../../containers/detection_engine/rules';
+import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 
 import { useWithSource } from '../../../../../common/containers/source';
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
@@ -105,7 +106,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
 }) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
   const {
-    loading,
+    loading: userInfoLoading,
     isSignalIndexExists,
     isAuthenticated,
     hasEncryptionKey,
@@ -113,6 +114,11 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     hasIndexWrite,
     signalIndexName,
   } = useUserInfo();
+  const {
+    loading: listsConfigLoading,
+    needsConfiguration: needsListsConfiguration,
+  } = useListsConfig();
+  const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams();
   const [isLoading, rule] = useRule(ruleId);
   // This is used to re-trigger api rule status when user de/activate rule
@@ -282,7 +288,14 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     }
   }, [rule]);
 
-  if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
+  if (
+    redirectToDetections(
+      isSignalIndexExists,
+      isAuthenticated,
+      hasEncryptionKey,
+      needsListsConfiguration
+    )
+  ) {
     history.replace(getDetectionEngineUrl());
     return null;
   }

@@ -266,7 +266,9 @@ const makeMapStateToProps = () => {
 
     // return events on empty search
     const kqlQueryExpression =
-      isEmpty(dataProviders) && isEmpty(kqlQueryTimeline) ? ' ' : kqlQueryTimeline;
+      isEmpty(dataProviders) && isEmpty(kqlQueryTimeline) && timelineType === 'template'
+        ? ' '
+        : kqlQueryTimeline;
     return {
       columns,
       dataProviders,
