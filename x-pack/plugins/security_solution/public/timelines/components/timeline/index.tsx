@@ -210,6 +210,7 @@ const StatefulTimelineComponent = React.memo<Props>(
       />
     );
   },
+  // eslint-disable-next-line complexity
   (prevProps, nextProps) => {
     return (
       prevProps.eventType === nextProps.eventType &&
@@ -218,6 +219,7 @@ const StatefulTimelineComponent = React.memo<Props>(
       prevProps.id === nextProps.id &&
       prevProps.isLive === nextProps.isLive &&
       prevProps.isSaving === nextProps.isSaving &&
+      prevProps.isTimelineExists === nextProps.isTimelineExists &&
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       prevProps.kqlMode === nextProps.kqlMode &&
       prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
