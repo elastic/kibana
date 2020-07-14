@@ -25,6 +25,7 @@ import {
 import { EndpointAppContext } from '../../types';
 
 const allowlistBaseRoute: string = '/api/endpoint/artifacts';
+export const allowlistDownloadTag: string = 'endpoint:allowlistDownload';
 
 /**
  * Registers the exception list route to enable sensors to download an allowlist artifact
@@ -43,6 +44,7 @@ export function registerDownloadExceptionListRoute(
           DownloadArtifactRequestParamsSchema
         >(downloadArtifactRequestParamsSchema),
       },
+      options: { tags: [allowlistDownloadTag] },
     },
     async (context, req, res) => {
       let scopedSOClient: SavedObjectsClientContract;

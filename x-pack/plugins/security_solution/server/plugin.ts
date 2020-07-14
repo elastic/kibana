@@ -15,6 +15,11 @@ import {
   Plugin as IPlugin,
   PluginInitializerContext,
   SavedObjectsClient,
+  KibanaRequest,
+  LifecycleResponseFactory,
+  OnPreAuthToolkit,
+  OnPreResponseInfo,
+  OnPreResponseToolkit,
 } from '../../../../src/core/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { PluginSetupContract as AlertingSetup } from '../../alerts/server';
@@ -46,7 +51,10 @@ import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { ArtifactClient, ManifestManager } from './endpoint/services';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import { EndpointAppContext } from './endpoint/types';
-import { registerDownloadExceptionListRoute } from './endpoint/routes/artifacts';
+import {
+  registerDownloadExceptionListRoute,
+  allowlistDownloadTag,
+} from './endpoint/routes/artifacts';
 import { initUsageCollectors } from './usage';
 
 export interface SetupPlugins {
@@ -108,6 +116,35 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   public async setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
     this.logger.debug('plugin setup');
 
+    const maxConcurrentRequests = 100;
+    let concurrentRequests = 0;
+    const isAllowlistDownloadRequest = (request: KibanaRequest) => {
+      const tags = request.route.options.tags;
+      return tags.includes(allowlistDownloadTag);
+    };
+
+    // Set throttle for allowlist download requests
+    core.http.registerOnPreAuth(
+      (request: KibanaRequest, response: LifecycleResponseFactory, toolkit: OnPreAuthToolkit) => {
+        if (!isAllowlistDownloadRequest(request)) {
+          return toolkit.next();
+        }
+
+        if (concurrentRequests >= maxConcurrentRequests) {
+          return response.customError({ body: 'Too many requests', statusCode: 429 });
+        }
+        concurrentRequests += 1;
+        return toolkit.next();
+      }
+    );
+    core.http.registerOnPreResponse(
+      (request: KibanaRequest, preResponse: OnPreResponseInfo, toolkit: OnPreResponseToolkit) => {
+        if (isAllowlistDownloadRequest(request) && preResponse.statusCode !== 429) {
+          concurrentRequests -= 1;
+        }
+        return toolkit.next();
+      }
+    );
     const config = await this.config$.pipe(first()).toPromise();
     const globalConfig = await this.context.config.legacy.globalConfig$.pipe(first()).toPromise();
 
