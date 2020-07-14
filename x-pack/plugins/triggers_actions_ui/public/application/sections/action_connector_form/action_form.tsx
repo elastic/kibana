@@ -132,14 +132,7 @@ export const ActionForm = ({
       try {
         setIsLoadingConnectors(true);
         const loadedConnectors = await loadConnectors({ http });
-        setConnectors(
-          loadedConnectors.filter(
-            (action) =>
-              action.actionTypeId !== ServiceNowConnectorConfiguration.id ||
-              (action.actionTypeId === ServiceNowConnectorConfiguration.id &&
-                !action.config.isCaseOwned)
-          )
-        );
+        setConnectors(loadedConnectors);
       } catch (e) {
         toastNotifications.addDanger({
           title: i18n.translate(

@@ -1,0 +1,69 @@
+[role="xpack"]
+[[servicenow-action-type]]
+=== ServiceNow action
+
+ServiceNow action type using [V2 Table API](https://developer.servicenow.com/app.do#!/rest_api_doc?v=orlando&id=c_TableAPI) to create ServiceNow incidents.
+
+[float]
+[[servicenow-connector-configuration]]
+==== Connector configuration
+
+ServiceNow connectors have the following configuration properties:
+
+Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
+URL::    The from address for all emails sent with this connector, specified in `user@host-name` format.
+Username::  username for 'login' type authentication.
+Password::  password for 'login' type authentication.
+
+[float]
+[[Preconfigured-servicenow-configuration]]
+==== Preconfigured action type
+
+[source,text]
+--
+ my-servicenow:
+   name: preconfigured-servicenow-action-type
+   actionTypeId: .servicenow
+   config:
+     apiUrl: https://dev94428.service-now.com/
+   secrets:
+     user: testuser
+     password: passwordkeystorevalue
+--
+
+`config` defines the action type specific to the configuration and contains the following properties:
+
+[cols="2*<"]
+|===
+
+| `apiUrl`
+| An address that corresponds to *Sender*.
+
+|===
+
+`secrets` defines sensitive information for the action type:
+
+[cols="2*<"]
+|===
+
+| `user`
+| A string that corresponds to *User*.
+
+| `password`
+| A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>.
+
+|===
+
+[[servicenow-action-configuration]]
+==== Action configuration
+
+ServiceNow actions have the following configuration properties:
+
+To, CC, BCC::    Each is a list of addresses. Addresses can be specified in `user@host-name` format, or in `name <user@host-name>` format. One of To, CC, or BCC must contain an entry.
+Subject::       The subject line of the email.
+Message::       The message text of the email. Markdown format is supported.
+
+[[configuring-servicenow]]
+==== Configuring ServiceNow
+
+The email action can send email using many popular SMTP email services.

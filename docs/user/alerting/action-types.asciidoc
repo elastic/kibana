@@ -27,6 +27,10 @@ a| <<slack-action-type, Slack>>
 
 | Send a message to a Slack channel or user.
 
+a| <<servicenow-action-type, ServiceNow>>
+
+| Create new ServiceNow incident.
+
 a| <<webhook-action-type, Webhook>>
 
 | Send a request to a web service.
@@ -55,3 +59,4 @@ include::action-types/server-log.asciidoc[]
 include::action-types/slack.asciidoc[]
 include::action-types/webhook.asciidoc[]
 include::action-types/pre-configured-connectors.asciidoc[]
+include::action-types/servicenow.asciidoc[]

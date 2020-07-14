@@ -119,14 +119,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     setIsLoadingActions(true);
     try {
       const actionsResponse = await loadAllActions({ http });
-      setActions(
-        actionsResponse.filter(
-          (action) =>
-            action.actionTypeId !== ServiceNowConnectorConfiguration.id ||
-            (action.actionTypeId === ServiceNowConnectorConfiguration.id &&
-              !action.config.isCaseOwned)
-        )
-      );
+      setActions(actionsResponse);
     } catch (e) {
       toastNotifications.addDanger({
         title: i18n.translate(
