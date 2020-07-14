@@ -80,7 +80,7 @@ export class Plugin
         }),
         order: 0,
         mount: (params) => {
-          boot({
+          return boot({
             dataPlugin: plugins.data,
             charts: plugins.charts,
             alerts: plugins.alerts,
