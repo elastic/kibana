@@ -63,7 +63,6 @@ export class ESGeoGridSource extends AbstractESAggSource {
   getSyncMeta() {
     return {
       requestType: this._descriptor.requestType,
-      sourceType: SOURCE_TYPES.ES_GEO_GRID,
     };
   }
 
