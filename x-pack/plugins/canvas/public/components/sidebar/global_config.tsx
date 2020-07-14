@@ -17,8 +17,6 @@ export const GlobalConfig: FunctionComponent = () => (
   <Fragment>
     <SidebarSection>
       <WorkpadConfig />
-    </SidebarSection>
-    <SidebarSection>
       <ElementConfig />
     </SidebarSection>
     <SidebarSection>
