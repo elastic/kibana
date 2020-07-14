@@ -31,6 +31,7 @@ interface Props {
   securitySolution?: FeatureCatalogueEntry;
 }
 
+// TODO: Bolding the first word/verb won't look write in other languages
 const getActionsText = (actions: Array<{ verb: string; text: string }>) => (
   <EuiText size="s" style={{ padding: '16px' }}>
     {actions.map(({ verb, text }) => (
@@ -224,16 +225,16 @@ export const SolutionsPanel: FunctionComponent<Props> = ({
   observability,
   securitySolution,
 }) => (
-  <EuiFlexGroup justifyContent="spaceAround">
+  <EuiFlexGroup>
     {appSearch || observability || securitySolution ? (
       <EuiFlexItem>
+        {/* TODO: once app search is merged, register add to feature catalogue and remove hard coded text here */}
         <EuiFlexGroup direction="column">
           {appSearch ? (
             <EuiFlexItem className="homSolutionsPanel__appSearch">
               <EuiPanel
-                className="homSolutionsPanel__solutionWrapper"
                 paddingSize="none"
-                onClick={createAppNavigationHandler(appSearch.path)} // TODO: double check this url once enterprise search plugin is merged
+                onClick={createAppNavigationHandler('/app/app_search')} // TODO: double check this url once enterprise search plugin is merged
               >
                 <EuiFlexGroup gutterSize="none">
                   <EuiFlexItem grow={1} className="homSolutionsPanel__appSearchHeader">
@@ -245,8 +246,8 @@ export const SolutionsPanel: FunctionComponent<Props> = ({
                       alt="Enterprise search top left background graphic"
                     />
                     <SolutionsTitle
-                      iconType={appSearch.icon}
-                      title={appSearch.title}
+                      iconType="logoEnterpriseSearch"
+                      title="Enterprise Search"
                       subtitle={i18n.translate('home.solutionsPanel.appSearchSubtitle', {
                         defaultMessage: 'Search everything',
                       })}
@@ -259,20 +260,14 @@ export const SolutionsPanel: FunctionComponent<Props> = ({
                       alt="Enterprise search bottom right background graphic"
                     />
                   </EuiFlexItem>
-                  <EuiFlexItem grow={1} className="homSolutionsPanel__CTA">
-                    {getActionsText(solutionCTAs.appSearch)}
-                  </EuiFlexItem>
+                  <EuiFlexItem grow={1}>{getActionsText(solutionCTAs.appSearch)}</EuiFlexItem>
                 </EuiFlexGroup>
               </EuiPanel>
             </EuiFlexItem>
           ) : null}
           {observability ? (
             <EuiFlexItem className="homSolutionsPanel__observability">
-              <EuiPanel
-                className="homSolutionsPanel__solutionWrapper"
-                paddingSize="none"
-                onClick={createAppNavigationHandler(observability.path)}
-              >
+              <EuiPanel paddingSize="none" onClick={createAppNavigationHandler(observability.path)}>
                 <EuiFlexGroup gutterSize="none">
                   <EuiFlexItem grow={1} className="homSolutionsPanel__observabilityHeader">
                     <EuiImage
@@ -288,9 +283,7 @@ export const SolutionsPanel: FunctionComponent<Props> = ({
                       subtitle={observability.description}
                     />
                   </EuiFlexItem>
-                  <EuiFlexItem grow={1} className="homSolutionsPanel__CTA">
-                    {getActionsText(solutionCTAs.observability)}
-                  </EuiFlexItem>
+                  <EuiFlexItem grow={1}>{getActionsText(solutionCTAs.observability)}</EuiFlexItem>
                 </EuiFlexGroup>
               </EuiPanel>
             </EuiFlexItem>
@@ -298,7 +291,6 @@ export const SolutionsPanel: FunctionComponent<Props> = ({
           {securitySolution ? (
             <EuiFlexItem className="homSolutionsPanel__securitySolution">
               <EuiPanel
-                className="homSolutionsPanel__solutionWrapper"
                 paddingSize="none"
                 onClick={createAppNavigationHandler(securitySolution.path)}
               >
@@ -317,7 +309,7 @@ export const SolutionsPanel: FunctionComponent<Props> = ({
                       subtitle={securitySolution.description}
                     />
                   </EuiFlexItem>
-                  <EuiFlexItem grow={1} className="homSolutionsPanel__CTA">
+                  <EuiFlexItem grow={1}>
                     {getActionsText(solutionCTAs.securitySolution)}
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -328,11 +320,7 @@ export const SolutionsPanel: FunctionComponent<Props> = ({
       </EuiFlexItem>
     ) : null}
     <EuiFlexItem className="homSolutionsPanel__kibana">
-      <EuiPanel
-        className="homSolutionsPanel__solutionWrapper"
-        paddingSize="none"
-        onClick={createAppNavigationHandler('/app/dashboards')}
-      >
+      <EuiPanel paddingSize="none" onClick={createAppNavigationHandler('/app/dashboards')}>
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem grow={1} className="homSolutionsPanel__kibanaHeader">
             <EuiImage
@@ -353,9 +341,7 @@ export const SolutionsPanel: FunctionComponent<Props> = ({
               alt="Kibana bottom right background graphic"
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={1} className="homSolutionsPanel__CTA">
-            {getActionsText(solutionCTAs.kibana)}
-          </EuiFlexItem>
+          <EuiFlexItem grow={1}>{getActionsText(solutionCTAs.kibana)}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
     </EuiFlexItem>
