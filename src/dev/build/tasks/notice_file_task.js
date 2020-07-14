@@ -47,7 +47,7 @@ export const CreateNoticeFileTask = {
     log.info('Generating build notice');
     const { extractDir: nodeDir, version: nodeVersion } = getNodeDownloadInfo(
       config,
-      config.getLinuxPlatform()
+      config.getPlatform('linux', 'x64')
     );
 
     const notice = await generateBuildNoticeText({
