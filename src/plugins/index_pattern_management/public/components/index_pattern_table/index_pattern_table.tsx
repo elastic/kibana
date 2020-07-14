@@ -199,4 +199,4 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   );
 };
 
-export const IndexPatternTableWithRouter = withRouter(IndexPatternTable);
+export const IndexPatternTableWithRouter: any = withRouter(IndexPatternTable);

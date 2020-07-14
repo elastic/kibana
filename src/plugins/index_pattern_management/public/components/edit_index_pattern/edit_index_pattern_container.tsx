@@ -44,4 +44,4 @@ const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ .
   }
 };
 
-export const EditIndexPatternContainer = withRouter(EditIndexPatternCont);
+export const EditIndexPatternContainer: any = withRouter(EditIndexPatternCont);

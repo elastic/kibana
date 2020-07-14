@@ -31,7 +31,7 @@ import { InputControlVisDependencies } from './plugin';
 import { FilterManager, Filter } from '../../data/public';
 import { VisParams, Vis } from '../../visualizations/public';
 
-export const createInputControlVisController = (deps: InputControlVisDependencies) => {
+export const createInputControlVisController: any = (deps: InputControlVisDependencies) => {
   return class InputControlVisController {
     private I18nContext?: I18nStart['Context'];
 

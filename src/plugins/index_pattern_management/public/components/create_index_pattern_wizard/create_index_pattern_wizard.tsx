@@ -299,4 +299,4 @@ export class CreateIndexPatternWizard extends Component<
   }
 }
 
-export const CreateIndexPatternWizardWithRouter = withRouter(CreateIndexPatternWizard);
+export const CreateIndexPatternWizardWithRouter: any = withRouter(CreateIndexPatternWizard);

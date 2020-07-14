@@ -42,7 +42,7 @@ const newFieldPlaceholder = i18n.translate(
   }
 );
 
-export const CreateEditField = withRouter(
+export const CreateEditField: any = withRouter(
   ({ indexPattern, mode, fieldName, history }: CreateEditFieldProps) => {
     const { data, uiSettings, chrome, notifications } = useKibana<
       IndexPatternManagmentContext

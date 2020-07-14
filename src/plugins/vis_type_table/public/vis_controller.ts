@@ -30,7 +30,7 @@ const innerAngularName = 'kibana/table_vis';
 export function getTableVisualizationControllerClass(
   core: CoreSetup,
   context: PluginInitializerContext
-) {
+): unknown {
   return class TableVisualizationController {
     private tableVisModule: IModule | undefined;
     private injector: auto.IInjectorService | undefined;

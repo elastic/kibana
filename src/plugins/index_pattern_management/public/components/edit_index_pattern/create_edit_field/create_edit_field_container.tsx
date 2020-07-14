@@ -58,4 +58,4 @@ const CreateEditFieldCont: React.FC<CreateEditFieldContainerProps> = ({ ...props
   }
 };
 
-export const CreateEditFieldContainer = withRouter(CreateEditFieldCont);
+export const CreateEditFieldContainer: any = withRouter(CreateEditFieldCont);

@@ -31,7 +31,7 @@ interface HeaderProps extends RouteComponentProps {
   history: ScopedHistory;
 }
 
-export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => (
+export const Header: any = withRouter(({ indexPatternId, history }: HeaderProps) => (
   <EuiFlexGroup alignItems="center">
     <EuiFlexItem>
       <EuiTitle size="s">

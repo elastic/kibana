@@ -81,7 +81,7 @@ const confirmModalOptionsDelete = {
   }),
 };
 
-export const EditIndexPattern = withRouter(
+export const EditIndexPattern: any = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
     const {
       uiSettings,
