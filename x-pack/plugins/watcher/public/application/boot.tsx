@@ -6,7 +6,9 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { SavedObjectsClientContract } from 'kibana/public';
+import { ChromeDocTitle, SavedObjectsClientContract } from 'kibana/public';
+
+import { PLUGIN } from '../../common/constants';
 
 import { App, AppDeps } from './app';
 import { setHttpClient, setSavedObjectsClient } from './lib/api';
@@ -14,15 +16,17 @@ import { setHttpClient, setSavedObjectsClient } from './lib/api';
 interface BootDeps extends AppDeps {
   element: HTMLElement;
   savedObjects: SavedObjectsClientContract;
+  docTitle: ChromeDocTitle;
   I18nContext: any;
 }
 
 export const boot = (bootDeps: BootDeps) => {
-  const { I18nContext, element, savedObjects, ...appDeps } = bootDeps;
+  const { I18nContext, element, savedObjects, docTitle, ...appDeps } = bootDeps;
 
   setHttpClient(appDeps.http);
   setSavedObjectsClient(savedObjects);
 
+  docTitle.change(PLUGIN.title);
   render(
     <I18nContext>
       <App {...appDeps} />
@@ -30,6 +34,7 @@ export const boot = (bootDeps: BootDeps) => {
     element
   );
   return () => {
+    docTitle.reset();
     unmountComponentAtNode(element);
   };
 };
