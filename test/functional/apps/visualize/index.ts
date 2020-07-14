@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
   describe('visualize app', () => {
     before(async () => {
       log.debug('Starting visualize before method');
-      await browser.setScreenshotSize(1280, 700);
+      await browser.setScreenshotSize(1280, 640);
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.loadIfNeeded('long_window_logstash');
       await esArchiver.load('visualize');
