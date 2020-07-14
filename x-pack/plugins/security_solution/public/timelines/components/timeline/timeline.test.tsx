@@ -167,7 +167,7 @@ describe('Timeline', () => {
       expect(wrapper.find('[data-test-subj="table-pagination"]').exists()).toEqual(false);
     });
 
-    test('it defaults to showing `All events`', () => {
+    test('it defaults to showing `All`', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mocks}>
@@ -177,7 +177,7 @@ describe('Timeline', () => {
       );
 
       expect(wrapper.find('[data-test-subj="pick-event-type"] button').text()).toEqual(
-        'All events'
+        'All'
       );
     });
 
