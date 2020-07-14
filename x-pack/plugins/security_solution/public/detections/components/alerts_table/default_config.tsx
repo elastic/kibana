@@ -309,11 +309,12 @@ export const getAlertActions = ({
       displayType: 'icon',
       iconType: 'timeline',
       id: 'sendAlertToTimeline',
-      onClick: ({ ecsData }: TimelineRowActionOnClick) =>
+      onClick: ({ ecsData, data }: TimelineRowActionOnClick) =>
         sendAlertToTimelineAction({
           apolloClient,
           createTimeline,
           ecsData,
+          nonEcsData: data,
           updateTimelineIsLoading,
         }),
       width: DEFAULT_ICON_BUTTON_WIDTH,
