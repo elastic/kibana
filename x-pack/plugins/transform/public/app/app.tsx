@@ -74,6 +74,7 @@ export const renderApp = (element: HTMLElement, appDependencies: AppDependencies
   );
 
   return () => {
+    appDependencies.chrome.docTitle.reset();
     unmountComponentAtNode(element);
   };
 };
