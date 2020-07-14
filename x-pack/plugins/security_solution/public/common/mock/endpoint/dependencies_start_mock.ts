@@ -60,7 +60,7 @@ export const depsStartMock: () => DepsStartMock = () => {
   return {
     data: dataMock,
     ingestManager: {
-      waitForInitialization: () => Promise.resolve(true),
+      isInitialized: () => Promise.resolve(true),
       registerPackageConfigComponent,
     },
   };

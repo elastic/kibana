@@ -32,9 +32,7 @@ export const Setup: React.FunctionComponent<{
       });
     };
 
-    ingestManager
-      .waitForInitialization()
-      .catch((error: Error) => displayToastWithModal(error.message));
+    ingestManager.isInitialized().catch((error: Error) => displayToastWithModal(error.message));
   }, [ingestManager, notifications.toasts]);
 
   return null;
