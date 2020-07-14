@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreStart } from 'kibana/public';
+import { CoreStart, HttpFetchError } from 'kibana/public';
 import {
   RANDOM_NUMBER_ROUTE_PATH,
   RANDOM_NUMBER_BETWEEN_ROUTE_PATH,
@@ -26,10 +26,10 @@ import {
 } from '../common';
 
 export interface Services {
-  fetchRandomNumber: () => Promise<number | Error>;
-  fetchRandomNumberBetween: (max: number) => Promise<number | Error>;
-  postMessage: (message: string, id: string) => Promise<undefined | Error>;
-  getMessageById: (id: string) => Promise<string | Error>;
+  fetchRandomNumber: () => Promise<number | HttpFetchError>;
+  fetchRandomNumberBetween: (max: number) => Promise<number | HttpFetchError>;
+  postMessage: (message: string, id: string) => Promise<undefined | HttpFetchError>;
+  getMessageById: (id: string) => Promise<string | HttpFetchError>;
   addSuccessToast: (message: string) => void;
 }
 

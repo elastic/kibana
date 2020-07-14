@@ -26,6 +26,7 @@ import {
   EuiCallOut,
   EuiFormRow,
 } from '@elastic/eui';
+import { HttpFetchError } from 'kibana/public';
 import { isError } from './is_error';
 import { Services } from './services';
 
@@ -34,7 +35,7 @@ interface Props {
 }
 
 export function GetMessageRouteExample({ getMessageById }: Props) {
-  const [error, setError] = useState<Error | undefined>();
+  const [error, setError] = useState<HttpFetchError | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('');
   const [id, setId] = useState<string>('');

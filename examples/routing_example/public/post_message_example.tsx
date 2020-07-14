@@ -27,6 +27,7 @@ import {
   EuiFormRow,
   EuiTextArea,
 } from '@elastic/eui';
+import { HttpFetchError } from 'kibana/public';
 import { isError } from './is_error';
 import { Services } from './services';
 
@@ -36,7 +37,7 @@ interface Props {
 }
 
 export function PostMessageRouteExample({ postMessage, addSuccessToast }: Props) {
-  const [error, setError] = useState<Error | undefined>();
+  const [error, setError] = useState<HttpFetchError | undefined>();
   const [isPosting, setIsPosting] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('');
   const [id, setId] = useState<string>('');

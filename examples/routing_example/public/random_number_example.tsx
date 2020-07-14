@@ -19,6 +19,7 @@
 import React, { useCallback } from 'react';
 import { useState } from 'react';
 import { EuiText, EuiButton, EuiLoadingSpinner, EuiCallOut } from '@elastic/eui';
+import { HttpFetchError } from 'kibana/public';
 import { Services } from './services';
 import { isError } from './is_error';
 
@@ -27,7 +28,7 @@ interface Props {
 }
 
 export function RandomNumberRouteExample({ fetchRandomNumber }: Props) {
-  const [error, setError] = useState<Error | undefined>(undefined);
+  const [error, setError] = useState<HttpFetchError | undefined>(undefined);
   const [randomNumber, setRandomNumber] = useState<number>(0);
   const [isFetching, setIsFetching] = useState<boolean>(false);
 
