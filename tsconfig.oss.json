@@ -1,0 +1,30 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./build/tsconfig.oss.tsbuildinfo",
+    "noEmit": false,
+    "outDir": "./build",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true,
+    // "skipLibCheck": true, // Don't typecheck .d.ts files
+  },
+  "include": [
+    "kibana.d.ts",
+    "src/**/*",
+    "typings/**/*",
+    "test_utils/**/*",
+  ],
+  "exclude": [
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/__fixtures__/**/*",
+    // In the build we actually exclude **/public/**/* from this config so that
+    // we can run the TSC on both this and the .browser version of this config
+    // file, but if we did it during development IDEs would not be able to find
+    // the tsconfig.json file for public files correctly.
+    // "src/**/public/**/*"
+  ]
+}
