@@ -80,7 +80,6 @@ storiesOf('app/ServiceMap/Popover/ServiceStatsList', module)
           avgRequestsPerMinute: 164.47222031860858,
           avgTransactionDuration: 61634.38905590272,
         }}
-        isLoading={false}
         avgErrorRate={0.556068173242986}
       />
     ),
@@ -97,7 +96,6 @@ storiesOf('app/ServiceMap/Popover/ServiceStatsList', module)
           avgRequestsPerMinute: null,
           avgTransactionDuration: null,
         }}
-        isLoading={true}
       />
     ),
     { info: { propTablesExclude: [EuiThemeProvider] } }
@@ -113,7 +111,6 @@ storiesOf('app/ServiceMap/Popover/ServiceStatsList', module)
           avgRequestsPerMinute: 8.439583235652972,
           avgTransactionDuration: 238792.54809512055,
         }}
-        isLoading={false}
       />
     ),
     { info: { propTablesExclude: [EuiThemeProvider] } }
@@ -129,7 +126,6 @@ storiesOf('app/ServiceMap/Popover/ServiceStatsList', module)
           avgRequestsPerMinute: null,
           avgTransactionDuration: null,
         }}
-        isLoading={false}
       />
     ),
     { info: { propTablesExclude: [EuiThemeProvider] } }

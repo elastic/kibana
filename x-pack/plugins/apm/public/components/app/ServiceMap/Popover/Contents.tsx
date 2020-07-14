@@ -13,7 +13,6 @@ import {
 import cytoscape from 'cytoscape';
 import React, { MouseEvent } from 'react';
 import { SERVICE_ENVIRONMENT } from '../../../../../common/elasticsearch_fieldnames';
-import { popoverMinWidth } from '../cytoscapeOptions';
 import { Buttons } from './Buttons';
 import { Info } from './Info';
 import { ServiceStatsFetcher } from './ServiceStatsFetcher';
@@ -75,6 +74,7 @@ export function Contents({
           <ServiceStatsFetcher
             environment={selectedNodeData[SERVICE_ENVIRONMENT]}
             serviceName={selectedNodeServiceName}
+            serviceAnomalyStats={selectedNodeData.serviceAnomalyStats}
           />
         ) : (
           <Info {...selectedNodeData} />

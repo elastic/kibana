@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { UIFilters } from '../../../typings/ui_filters';
 import {
   TRANSACTION_TYPE,
   METRIC_SYSTEM_CPU_PERCENT,
@@ -16,20 +17,17 @@ import {
 import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { ESFilter } from '../../../typings/elasticsearch';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { percentMemoryUsedScript } from '../metrics/by_agent/shared/memory';
 import {
   TRANSACTION_REQUEST,
   TRANSACTION_PAGE_LOAD,
 } from '../../../common/transaction_types';
 import { getErrorRate } from '../transaction_groups/get_error_rate';
+import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 
 interface Options {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   environment?: string;
   serviceName: string;
 }
@@ -45,17 +43,19 @@ interface TaskParameters {
 export async function getServiceMapServiceNodeInfo({
   serviceName,
   setup,
-}: Options & { serviceName: string }) {
-  const { start, end, uiFiltersES } = setup;
+  uiFilters,
+}: Options & { serviceName: string; uiFilters: UIFilters }) {
+  const { start, end } = setup;
 
   const filter: ESFilter[] = [
     { range: rangeFilter(start, end) },
     { term: { [SERVICE_NAME]: serviceName } },
-    ...uiFiltersES,
+    ...getEnvironmentUiFilterES(uiFilters.environment),
   ];
 
   const minutes = Math.abs((end - start) / (1000 * 60));
   const taskParams = {
+    environment: uiFilters.environment,
     filter,
     minutes,
     serviceName,
@@ -84,11 +84,20 @@ export async function getServiceMapServiceNodeInfo({
 async function getErrorStats({
   setup,
   serviceName,
+  environment,
 }: {
   setup: Options['setup'];
   serviceName: string;
+  environment?: string;
 }) {
-  const { noHits, average } = await getErrorRate({ setup, serviceName });
+  const setupWithBlankUiFilters = {
+    ...setup,
+    uiFiltersES: getEnvironmentUiFilterES(environment),
+  };
+  const { noHits, average } = await getErrorRate({
+    setup: setupWithBlankUiFilters,
+    serviceName,
+  });
   return { avgErrorRate: noHits ? null : average };
 }
 

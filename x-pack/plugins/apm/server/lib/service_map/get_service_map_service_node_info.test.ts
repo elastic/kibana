@@ -6,7 +6,7 @@
 
 import { getServiceMapServiceNodeInfo } from './get_service_map_service_node_info';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import * as getErrorRateModule from '../errors/get_error_rate';
+import * as getErrorRateModule from '../transaction_groups/get_error_rate';
 
 describe('getServiceMapServiceNodeInfo', () => {
   describe('with no results', () => {
@@ -23,7 +23,7 @@ describe('getServiceMapServiceNodeInfo', () => {
       const environment = 'test environment';
       const serviceName = 'test service name';
       const result = await getServiceMapServiceNodeInfo({
-        environment,
+        uiFilters: { environment },
         setup,
         serviceName,
       });
@@ -32,17 +32,21 @@ describe('getServiceMapServiceNodeInfo', () => {
         avgCpuUsage: null,
         avgErrorRate: null,
         avgMemoryUsage: null,
-        avgRequestsPerMinute: null,
-        avgTransactionDuration: null,
+        transactionStats: {
+          avgRequestsPerMinute: null,
+          avgTransactionDuration: null,
+        },
       });
     });
   });
 
   describe('with some results', () => {
     it('returns data', async () => {
-      jest
-        .spyOn(getErrorRateModule, 'getErrorRate')
-        .mockResolvedValueOnce({ average: 0.5, errorRates: [], noHits: false });
+      jest.spyOn(getErrorRateModule, 'getErrorRate').mockResolvedValueOnce({
+        average: 0.5,
+        erroneousTransactionsRate: [],
+        noHits: false,
+      });
 
       const setup = ({
         client: {
@@ -58,7 +62,7 @@ describe('getServiceMapServiceNodeInfo', () => {
       const environment = 'test environment';
       const serviceName = 'test service name';
       const result = await getServiceMapServiceNodeInfo({
-        environment,
+        uiFilters: { environment },
         setup,
         serviceName,
       });
@@ -67,8 +71,10 @@ describe('getServiceMapServiceNodeInfo', () => {
         avgCpuUsage: null,
         avgErrorRate: 0.5,
         avgMemoryUsage: null,
-        avgRequestsPerMinute: 0.000001586873761097901,
-        avgTransactionDuration: null,
+        transactionStats: {
+          avgRequestsPerMinute: 0.000001586873761097901,
+          avgTransactionDuration: null,
+        },
       });
     });
   });
