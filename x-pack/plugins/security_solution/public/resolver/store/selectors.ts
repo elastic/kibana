@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector, defaultMemoize } from 'reselect';
 import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
 import { ResolverState } from '../types';
+import { uniquePidForProcess } from '../models/process_event';
 
 /**
  * A matrix that when applied to a Vector2 will convert it from world coordinates to screen coordinates.
@@ -244,11 +245,29 @@ export const ariaLevel: (
 
 /**
  * Takes a nodeID (aka entity_id) and returns the node ID of the node that aria should 'flowto' or null
+ * If the node has a following sibling that is currently visible, that will be returned, otherwise null.
  */
 export const ariaFlowtoNodeID: (
   state: ResolverState
-) => (nodeID: string) => string | null = composeSelectors(
-  dataStateSelector,
-  dataSelectors.ariaFlowtoNodeID
-);
+) => (time: number) => (nodeID: string) => string | null = createSelector(
+  visibleNodesAndEdgeLines,
+  composeSelectors(dataStateSelector, dataSelectors.followingSibling),
+  (visibleNodesAndEdgeLinesAtTime, followingSibling) => {
+    return defaultMemoize((time: number) => {
+      // get the visible nodes at `time`
+      const { processNodePositions } = visibleNodesAndEdgeLinesAtTime(time);
 
+      // get a `Set` containing their node IDs
+      const nodesVisibleAtTime: Set<string> = new Set(
+        [...processNodePositions.keys()].map(uniquePidForProcess)
+      );
+
+      // return the ID of `nodeID`'s following sibling, if it is visible
+      return (nodeID: string): string | null => {
+        const sibling: string | null = followingSibling(nodeID);
+
+        return sibling === null || nodesVisibleAtTime.has(sibling) === false ? null : sibling;
+      };
+    });
+  }
+);

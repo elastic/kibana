@@ -74,6 +74,7 @@ const UnstyledProcessEventDot = React.memo(
     isProcessTerminated,
     isProcessOrigin,
     relatedEventsStatsForProcess,
+    timeAtRender,
   }: {
     /**
      * A `className` string provided by `styled`
@@ -105,6 +106,11 @@ const UnstyledProcessEventDot = React.memo(
      * Statistics for the number of related events and alerts for this process node
      */
     relatedEventsStatsForProcess?: ResolverNodeStats;
+
+    /**
+     * The time (unix epoch) at render.
+     */
+    timeAtRender: number;
   }) => {
     // This should be unique to each instance of Resolver TODO
     const htmlIDPrefix = 'resolver';
@@ -127,8 +133,9 @@ const UnstyledProcessEventDot = React.memo(
     const ariaLevel: number | null = useSelector(selectors.ariaLevel)(nodeID);
 
     // the node ID to 'flowto'
-    const ariaFlowtoNodeID: string | null = useSelector(selectors.ariaFlowtoNodeID)(nodeID);
-
+    const ariaFlowtoNodeID: string | null = useSelector(selectors.ariaFlowtoNodeID)(timeAtRender)(
+      nodeID
+    );
 
     const isShowingEventActions = xScale > 0.8;
     const isShowingDescriptionText = xScale >= 0.55;
@@ -211,8 +218,8 @@ const UnstyledProcessEventDot = React.memo(
 
     const labelHTMLID = htmlIdGenerator('resolver')(`${nodeID}:label`);
 
-    const isActiveDescendant = nodeId === activeDescendantId;
-    const isSelectedDescendant = nodeId === selectedDescendantId;
+    const isAriaCurrent = nodeID === activeDescendantId;
+    const isAriaSelected = nodeID === selectedDescendantId;
 
     const dispatch = useResolverDispatch();
 
@@ -236,15 +243,19 @@ const UnstyledProcessEventDot = React.memo(
 
     const handleClick = useCallback(() => {
       if (animationTarget.current !== null) {
+        // This works but the types are missing in the typescript DOM lib
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (animationTarget.current as any).beginElement();
       }
       dispatch({
         type: 'userSelectedResolverNode',
-        payload: nodeID,
+        payload: {
+          nodeId: nodeHTMLID(nodeID),
+          selectedProcessId: nodeID,
+        },
       });
       pushToQueryParams({ crumbId: nodeID, crumbEvent: 'all' });
-    }, [animationTarget, dispatch, pushToQueryParams, nodeID]);
+    }, [animationTarget, dispatch, pushToQueryParams, nodeID, nodeHTMLID]);
 
     /**
      * Enumerates the stats for related events to display with the node as options,

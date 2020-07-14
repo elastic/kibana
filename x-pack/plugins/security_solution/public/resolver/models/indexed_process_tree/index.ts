@@ -90,6 +90,31 @@ export function parent(
 }
 
 /**
+ * Returns the following sibling
+ */
+export function nextSibling(
+  tree: IndexedProcessTree,
+  sibling: ResolverEvent
+): ResolverEvent | undefined {
+  const parentNode = parent(tree, sibling);
+  if (parentNode) {
+    // The siblings of `sibling` are the children of its parent.
+    const siblings = children(tree, parentNode);
+
+    // Find the sibling
+    const index = siblings.indexOf(sibling);
+
+    // if the sibling wasn't found, or if it was the last element in the array, return undefined
+    if (index === -1 || index === siblings.length - 1) {
+      return undefined;
+    }
+
+    // return the next sibling
+    return siblings[index + 1];
+  }
+}
+
+/**
  * Number of processes in the tree
  */
 export function size(tree: IndexedProcessTree) {
