@@ -6,7 +6,7 @@
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText, EuiLink } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { ML_TYPE_DESCRIPTION } from './translations';
 
@@ -19,19 +19,16 @@ const MlCardDescriptionComponent: React.FC<MlCardDescriptionProps> = ({
   subscriptionUrl,
   hasValidLicense = false,
 }) => {
-  const subscriptionsLinkConfig = useMemo(
-    () => ({
-      subscriptionsLink: (
-        <EuiLink href={subscriptionUrl} target="_blank">
-          <FormattedMessage
-            id="xpack.securitySolution.components.stepDefineRule.ruleTypeField.subscriptionsLink"
-            defaultMessage="Platinum subscription"
-          />
-        </EuiLink>
-      ),
-    }),
-    [subscriptionUrl]
-  );
+  const subscriptionsLinkConfig = {
+    subscriptionsLink: (
+      <EuiLink href={subscriptionUrl} target="_blank">
+        <FormattedMessage
+          id="xpack.securitySolution.components.stepDefineRule.ruleTypeField.subscriptionsLink"
+          defaultMessage="Platinum subscription"
+        />
+      </EuiLink>
+    ),
+  };
 
   return (
     <EuiText size="s">
