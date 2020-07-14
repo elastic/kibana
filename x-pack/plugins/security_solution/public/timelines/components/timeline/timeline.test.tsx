@@ -176,9 +176,7 @@ describe('Timeline', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="pick-event-type"] button').text()).toEqual(
-        'All'
-      );
+      expect(wrapper.find('[data-test-subj="pick-event-type"] button').text()).toEqual('All');
     });
 
     it('it shows the timeline footer', () => {
