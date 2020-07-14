@@ -118,7 +118,7 @@ const PolicyResponseFlyoutPanel = memo<{
   const responseAttentionCount = useHostSelector(policyResponseFailedOrWarningActionCount);
   const loading = useHostSelector(policyResponseLoading);
   const error = useHostSelector(policyResponseError);
-  const { formatUrl } = useFormatUrl(SecurityPageName.management);
+  const { formatUrl } = useFormatUrl(SecurityPageName.administration);
   const [detailsUri, detailsRoutePath] = useMemo(
     () => [
       formatUrl(

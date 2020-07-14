@@ -42,7 +42,7 @@ export enum SecurityPageName {
   network = 'network',
   timelines = 'timelines',
   case = 'case',
-  management = 'management',
+  administration = 'administration',
 }
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}/overview`;
@@ -59,9 +59,9 @@ export const DEFAULT_INDEX_PATTERN = [
   'auditbeat-*',
   'endgame-*',
   'filebeat-*',
+  'logs-*',
   'packetbeat-*',
   'winlogbeat-*',
-  'logs-*',
 ];
 
 /** This Kibana Advanced Setting enables the `Security news` feed widget */

@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+export KBN_PATH_CONF=${KBN_PATH_CONF:-<%= configDir %>}
+
 case $1 in
   # Debian
   configure)
@@ -35,4 +37,10 @@ case $1 in
 esac
 
 chown -R <%= user %>:<%= group %> <%= dataDir %>
-chown <%= user %>:<%= group %> <%= pluginsDir %>
+chmod 2750 <%= dataDir %>
+chmod -R 2755 <%= dataDir %>/*
+
+chown :<%= group %> ${KBN_PATH_CONF}
+chown :<%= group %> ${KBN_PATH_CONF}/kibana.yml
+chmod 2750 ${KBN_PATH_CONF}
+chmod 660 ${KBN_PATH_CONF}/kibana.yml
