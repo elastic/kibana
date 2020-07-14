@@ -50,7 +50,7 @@
 
 3.  ```cd x-pack/plugins/security_solution/server/lib/detection_engine/scripts```
 
-4.  ```sh ./timelines/run regen_prepackage_timelines_index.sh```
+4.  ```sh ./timelines/regen_prepackage_timelines_index.sh```
 
 (this will update `x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_timelines/index.ndjson`)
 
