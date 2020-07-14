@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { map, mapValues, remove, fromPairs } from 'lodash';
+import { map, mapValues, remove, fromPairs, has } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { ALERTS_FEATURE_ID } from '../../common';
@@ -114,6 +114,8 @@ export class AlertsAuthorization {
     operation: ReadOperations | WriteOperations
   ) {
     const { authorization } = this;
+
+    const isKnownConsumer = has(this.allPossibleConsumers, consumer);
     if (authorization && this.shouldCheckAuthorization()) {
       const alertType = this.alertTypeRegistry.get(alertTypeId);
       const requiredPrivilegesByScope = {
@@ -140,6 +142,25 @@ export class AlertsAuthorization {
               requiredPrivilegesByScope.producer,
             ]
       );
+
+      if (!isKnownConsumer) {
+        /**
+         * Under most circumstances this would have been caught by `checkPrivileges` as
+         * a user can't have Privileges to an unknown consumer, but super users
+         * don't actually get "privilege checked" so the made up consumer *will* return
+         * as Privileged.
+         * This check will ensure we don't accidentally let these through
+         */
+        throw Boom.forbidden(
+          this.auditLogger.alertsAuthorizationFailure(
+            username,
+            alertTypeId,
+            ScopeType.Consumer,
+            consumer,
+            operation
+          )
+        );
+      }
 
       if (hasAllRequested) {
         this.auditLogger.alertsAuthorizationSuccess(
@@ -174,6 +195,16 @@ export class AlertsAuthorization {
           )
         );
       }
+    } else if (!isKnownConsumer) {
+      throw Boom.forbidden(
+        this.auditLogger.alertsAuthorizationFailure(
+          '',
+          alertTypeId,
+          ScopeType.Consumer,
+          consumer,
+          operation
+        )
+      );
     }
   }
 
