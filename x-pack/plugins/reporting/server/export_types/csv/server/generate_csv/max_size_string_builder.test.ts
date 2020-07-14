@@ -62,6 +62,14 @@ describe('MaxSizeStringBuilder', function () {
       builder.tryAppend(str);
       expect(builder.getString()).to.be('a');
     });
+
+    it('should return string with bom character prepended', function () {
+      const str = 'a'; // each a is one byte
+      const builder = new MaxSizeStringBuilder(1, '∆');
+      builder.tryAppend(str);
+      builder.tryAppend(str);
+      expect(builder.getString()).to.be('∆a');
+    });
   });
 
   describe('getSizeInBytes', function () {

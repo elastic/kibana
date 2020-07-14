@@ -7,18 +7,18 @@
 import { notFound, notImplemented } from 'boom';
 import { get } from 'lodash';
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
-import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../../common/constants';
-import { cryptoFactory } from '../../../../lib';
-import { ScheduleTaskFnFactory, TimeRangeParams } from '../../../../types';
+import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
+import { cryptoFactory } from '../../../lib';
+import { ScheduleTaskFnFactory, TimeRangeParams } from '../../../types';
 import {
   JobParamsPanelCsv,
   SavedObject,
+  SavedObjectReference,
   SavedObjectServiceError,
   SavedSearchObjectAttributesJSON,
   SearchPanel,
   VisObjectAttributesJSON,
-} from '../../types';
-import { createJobSearch } from './create_job_search';
+} from '../types';
 
 export type ImmediateCreateJobFn = (
   jobParams: JobParamsPanelCsv,
@@ -26,7 +26,7 @@ export type ImmediateCreateJobFn = (
   context: RequestHandlerContext,
   req: KibanaRequest
 ) => Promise<{
-  type: string | null;
+  type: string;
   title: string;
   jobParams: JobParamsPanelCsv;
 }>;
@@ -73,7 +73,28 @@ export const scheduleTaskFnFactory: ScheduleTaskFnFactory<ImmediateCreateJobFn> 
         }
 
         // saved search type
-        return await createJobSearch(timerange, attributes, references, kibanaSavedObjectMeta);
+        const { searchSource } = kibanaSavedObjectMeta;
+        if (!searchSource || !references) {
+          throw new Error('The saved search object is missing configuration fields!');
+        }
+
+        const indexPatternMeta = references.find(
+          (ref: SavedObjectReference) => ref.type === 'index-pattern'
+        );
+        if (!indexPatternMeta) {
+          throw new Error('Could not find index pattern for the saved search!');
+        }
+
+        const sPanel = {
+          attributes: {
+            ...attributes,
+            kibanaSavedObjectMeta: { searchSource },
+          },
+          indexPatternSavedObjectId: indexPatternMeta.id,
+          timerange,
+        };
+
+        return { panel: sPanel, title: attributes.title, visType: 'search' };
       })
       .catch((err: Error) => {
         const boomErr = (err as unknown) as { isBoom: boolean };
@@ -93,7 +114,7 @@ export const scheduleTaskFnFactory: ScheduleTaskFnFactory<ImmediateCreateJobFn> 
     return {
       headers: serializedEncryptedHeaders,
       jobParams: { ...jobParams, panel, visType },
-      type: null,
+      type: visType,
       title,
     };
   };

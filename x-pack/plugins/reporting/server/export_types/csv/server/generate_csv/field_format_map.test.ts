@@ -5,25 +5,17 @@
  */
 
 import expect from '@kbn/expect';
-
-import {
-  fieldFormats,
-  FieldFormatsGetConfigFn,
-  UI_SETTINGS,
-} from '../../../../../../../../src/plugins/data/server';
+import { fieldFormats, FieldFormatsGetConfigFn, UI_SETTINGS } from 'src/plugins/data/server';
+import { IndexPatternSavedObject } from '../../types';
 import { fieldFormatMapFactory } from './field_format_map';
 
 type ConfigValue = { number: { id: string; params: {} } } | string;
 
 describe('field format map', function () {
-  const indexPatternSavedObject = {
-    id: 'logstash-*',
-    type: 'index-pattern',
-    version: 'abc',
+  const indexPatternSavedObject: IndexPatternSavedObject = {
+    timeFieldName: '@timestamp',
+    title: 'logstash-*',
     attributes: {
-      title: 'logstash-*',
-      timeFieldName: '@timestamp',
-      notExpandable: true,
       fields: '[{"name":"field1","type":"number"}, {"name":"field2","type":"number"}]',
       fieldFormatMap: '{"field1":{"id":"bytes","params":{"pattern":"0,0.[0]b"}}}',
     },
@@ -35,11 +27,16 @@ describe('field format map', function () {
   configMock[UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN] = '0,0.[000]';
   const getConfig = ((key: string) => configMock[key]) as FieldFormatsGetConfigFn;
   const testValue = '4000';
+  const mockTimezone = 'Browser';
 
   const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();
   fieldFormatsRegistry.init(getConfig, {}, [fieldFormats.BytesFormat, fieldFormats.NumberFormat]);
 
-  const formatMap = fieldFormatMapFactory(indexPatternSavedObject, fieldFormatsRegistry);
+  const formatMap = fieldFormatMapFactory(
+    indexPatternSavedObject,
+    fieldFormatsRegistry,
+    mockTimezone
+  );
 
   it('should build field format map with entry per index pattern field', function () {
     expect(formatMap.has('field1')).to.be(true);
@@ -48,10 +45,10 @@ describe('field format map', function () {
   });
 
   it('should create custom FieldFormat for fields with configured field formatter', function () {
-    expect(formatMap.get('field1').convert(testValue)).to.be('3.9KB');
+    expect(formatMap.get('field1')!.convert(testValue)).to.be('3.9KB');
   });
 
   it('should create default FieldFormat for fields with no field formatter', function () {
-    expect(formatMap.get('field2').convert(testValue)).to.be('4,000');
+    expect(formatMap.get('field2')!.convert(testValue)).to.be('4,000');
   });
 });
