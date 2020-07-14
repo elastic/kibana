@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { CoreSetup } from 'src/core/server';
 import { SetupPlugins } from '../plugin';
 
-export type CollectorDependencies = { kibanaIndex: string } & Pick<
+export type CollectorDependencies = { kibanaIndex: string; core: CoreSetup } & Pick<
   SetupPlugins,
   'ml' | 'usageCollection'
 >;
