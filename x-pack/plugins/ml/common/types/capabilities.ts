@@ -81,7 +81,7 @@ export function getPluginPrivileges() {
     catalogue: [PLUGIN_ID],
     savedObject: {
       all: [],
-      read: [],
+      read: ['index-pattern', 'search'],
     },
   };
 
