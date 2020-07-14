@@ -328,7 +328,7 @@ export const config: {
             preserveHost: import("@kbn/config-schema").Type<boolean>;
             username: import("@kbn/config-schema").Type<string | undefined>;
             password: import("@kbn/config-schema").Type<string | undefined>;
-            requestHeadersWhitelist: import("@kbn/config-schema").Type<string | string[]>;
+            allowedRequestHeaders: import("@kbn/config-schema").Type<string | string[]>;
             customHeaders: import("@kbn/config-schema").Type<Record<string, string>>;
             shardTimeout: import("@kbn/config-schema").Type<import("moment").Duration>;
             requestTimeout: import("@kbn/config-schema").Type<import("moment").Duration>;
@@ -644,6 +644,7 @@ export interface DiscoveredPlugin {
 // @public
 export class ElasticsearchConfig {
     constructor(rawConfig: ElasticsearchConfigType);
+    readonly allowedRequestHeaders: string[];
     readonly apiVersion: string;
     // Warning: (ae-forgotten-export) The symbol "ElasticsearchConfigType" needs to be exported by the entry point index.d.ts
     readonly customHeaders: ElasticsearchConfigType['customHeaders'];
@@ -653,7 +654,6 @@ export class ElasticsearchConfig {
     readonly logQueries: boolean;
     readonly password?: string;
     readonly pingTimeout: Duration;
-    readonly requestHeadersWhitelist: string[];
     readonly requestTimeout: Duration;
     readonly shardTimeout: Duration;
     readonly sniffInterval: false | Duration;
@@ -1290,7 +1290,7 @@ export interface LegacyConfig {
 }
 
 // @public (undocumented)
-export type LegacyElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' | 'plugins'> & Pick<ElasticsearchConfig, 'apiVersion' | 'customHeaders' | 'logQueries' | 'requestHeadersWhitelist' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'hosts' | 'username' | 'password'> & {
+export type LegacyElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' | 'plugins'> & Pick<ElasticsearchConfig, 'apiVersion' | 'customHeaders' | 'logQueries' | 'allowedRequestHeaders' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'hosts' | 'username' | 'password'> & {
     pingTimeout?: ElasticsearchConfig['pingTimeout'] | ConfigOptions['pingTimeout'];
     requestTimeout?: ElasticsearchConfig['requestTimeout'] | ConfigOptions['requestTimeout'];
     sniffInterval?: ElasticsearchConfig['sniffInterval'] | ConfigOptions['sniffInterval'];

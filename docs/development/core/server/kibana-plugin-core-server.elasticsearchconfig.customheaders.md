@@ -4,7 +4,7 @@
 
 ## ElasticsearchConfig.customHeaders property
 
-Header names and values to send to Elasticsearch with every request. These headers cannot be overwritten by client-side headers and aren't affected by `requestHeadersWhitelist` configuration.
+Header names and values to send to Elasticsearch with every request. These headers cannot be overwritten by client-side headers and aren't affected by `allowedRequestHeaders` configuration.
 
 <b>Signature:</b>
 
