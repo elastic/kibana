@@ -42,7 +42,7 @@ export const ViewButton: FC<ViewButtonProps> = ({ item, isManagementTable }) => 
     : () => navigateToUrl(url);
 
   const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.viewActionName', {
-    defaultMessage: 'Delete',
+    defaultMessage: 'View',
   });
 
   const button = (
