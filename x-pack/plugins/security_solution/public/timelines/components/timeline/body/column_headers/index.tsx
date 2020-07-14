@@ -18,8 +18,6 @@ import {
   DRAG_TYPE_FIELD,
   droppableTimelineColumnsPrefix,
 } from '../../../../../common/components/drag_and_drop/helpers';
-import { StatefulFieldsBrowser } from '../../../fields_browser';
-import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../../../fields_browser/helpers';
 import {
   OnColumnRemoved,
   OnColumnResized,
@@ -29,6 +27,9 @@ import {
   OnUpdateColumns,
 } from '../../events';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
+import { StatefulFieldsBrowser } from '../../../fields_browser';
+import { StatefulRowRenderersBrowser } from '../../../row_renderers_browser';
+import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../../../fields_browser/helpers';
 import {
   EventsTh,
   EventsThContent,
@@ -170,6 +171,7 @@ export const ColumnHeadersComponent = ({
         <EventsThGroupActions
           actionsColumnWidth={actionsColumnWidth}
           data-test-subj="actions-container"
+          isEventViewer={isEventViewer}
         >
           {showSelectAllCheckbox && (
             <EventsTh>
@@ -185,22 +187,23 @@ export const ColumnHeadersComponent = ({
           )}
 
           <EventsTh>
-            <EventsThContent
-              textAlign={showSelectAllCheckbox ? 'left' : 'center'}
-              width={DEFAULT_ICON_BUTTON_WIDTH}
-            >
-              <StatefulFieldsBrowser
-                browserFields={browserFields}
-                columnHeaders={columnHeaders}
-                data-test-subj="field-browser"
-                height={FIELD_BROWSER_HEIGHT}
-                isEventViewer={isEventViewer}
-                onUpdateColumns={onUpdateColumns}
-                timelineId={timelineId}
-                toggleColumn={toggleColumn}
-                width={FIELD_BROWSER_WIDTH}
-              />
-            </EventsThContent>
+            <StatefulFieldsBrowser
+              browserFields={browserFields}
+              columnHeaders={columnHeaders}
+              data-test-subj="field-browser"
+              height={FIELD_BROWSER_HEIGHT}
+              isEventViewer={isEventViewer}
+              onUpdateColumns={onUpdateColumns}
+              timelineId={timelineId}
+              toggleColumn={toggleColumn}
+              width={FIELD_BROWSER_WIDTH}
+            />
+          </EventsTh>
+          <EventsTh>
+            <StatefulRowRenderersBrowser
+              data-test-subj="row-renderers-browser"
+              timelineId={timelineId}
+            />
           </EventsTh>
 
           {showEventsSelect && (

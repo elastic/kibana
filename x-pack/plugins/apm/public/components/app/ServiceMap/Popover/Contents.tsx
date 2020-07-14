@@ -17,6 +17,7 @@ import { popoverMinWidth } from '../cytoscapeOptions';
 import { Buttons } from './Buttons';
 import { Info } from './Info';
 import { ServiceStatsFetcher } from './ServiceStatsFetcher';
+import { popoverWidth } from '../cytoscapeOptions';
 
 interface ContentsProps {
   isService: boolean;
@@ -61,7 +62,7 @@ export function Contents({
     <FlexColumnGroup
       direction="column"
       gutterSize="s"
-      style={{ minWidth: popoverMinWidth }}
+      style={{ width: popoverWidth }}
     >
       <FlexColumnItem>
         <EuiTitle size="xxs">
@@ -69,13 +70,6 @@ export function Contents({
         </EuiTitle>
         <EuiHorizontalRule margin="xs" />
       </FlexColumnItem>
-      {/* //TODO [APM ML] add service health stats here:
-      isService && (
-        <FlexColumnItem>
-          <ServiceHealth serviceNodeData={selectedNodeData} />
-          <EuiHorizontalRule margin="xs" />
-        </FlexColumnItem>
-      )*/}
       <FlexColumnItem>
         {isService ? (
           <ServiceStatsFetcher

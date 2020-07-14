@@ -72,7 +72,7 @@ const putRoleTest = (
     mockRouteDefinitionParams.authz.applicationName = application;
     mockRouteDefinitionParams.authz.privileges.get.mockReturnValue(privilegeMap);
 
-    const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
     mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
     for (const apiResponse of apiResponses) {
       mockScopedClusterClient.callAsCurrentUser.mockImplementationOnce(apiResponse);

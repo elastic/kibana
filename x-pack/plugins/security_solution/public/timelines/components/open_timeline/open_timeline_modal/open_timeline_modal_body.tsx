@@ -50,10 +50,12 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
     totalSearchResultsCount,
   }) => {
     const actionsToShow = useMemo(() => {
-      const actions: ActionTimelineToShow[] =
-        onDeleteSelected != null && deleteTimelines != null
-          ? ['delete', 'duplicate']
-          : ['duplicate'];
+      const actions: ActionTimelineToShow[] = ['createFrom', 'duplicate'];
+
+      if (onDeleteSelected != null && deleteTimelines != null) {
+        actions.push('delete');
+      }
+
       return actions.filter((action) => !hideActions.includes(action));
     }, [onDeleteSelected, deleteTimelines, hideActions]);
 
@@ -84,8 +86,8 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
                 onlyFavorites={onlyFavorites}
                 onQueryChange={onQueryChange}
                 onToggleOnlyFavorites={onToggleOnlyFavorites}
-                query={query}
-                totalSearchResultsCount={totalSearchResultsCount}
+                query=""
+                timelineType={timelineType}
               >
                 {SearchRowContent}
               </SearchRow>

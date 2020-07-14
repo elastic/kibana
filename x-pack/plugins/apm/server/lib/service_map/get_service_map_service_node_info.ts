@@ -5,6 +5,7 @@
  */
 
 import {
+  TRANSACTION_TYPE,
   METRIC_SYSTEM_CPU_PERCENT,
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
@@ -16,9 +17,13 @@ import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { ESFilter } from '../../../typings/elasticsearch';
 import { getErrorRate } from '../errors/get_error_rate';
-import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { percentMemoryUsedScript } from '../metrics/by_agent/shared/memory';
+import {
+  TRANSACTION_REQUEST,
+  TRANSACTION_PAGE_LOAD,
+} from '../../../common/transaction_types';
+import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 
 interface Options {
   setup: Setup & SetupTimeRange;
@@ -57,7 +62,6 @@ export async function getServiceMapServiceNodeInfo({
   }
 
   const minutes = Math.abs((end - start) / (1000 * 60));
-
   const taskParams = {
     environment,
     filter,
@@ -77,10 +81,9 @@ export async function getServiceMapServiceNodeInfo({
     getCpuStats(taskParams),
     getMemoryStats(taskParams),
   ]);
-
   return {
     ...errorStats,
-    ...transactionStats,
+    transactionStats,
     ...cpuStats,
     ...memoryStats,
   };
@@ -122,36 +125,35 @@ async function getTransactionStats({
 }> {
   const { indices, client } = setup;
 
-  const response = await client.search({
+  const params = {
     index: indices['apm_oss.transactionIndices'],
     body: {
-      size: 1,
+      size: 0,
       query: {
         bool: {
-          filter: filter.concat({
-            term: {
-              [PROCESSOR_EVENT]: ProcessorEvent.transaction,
+          filter: [
+            ...filter,
+            { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
+            {
+              terms: {
+                [TRANSACTION_TYPE]: [
+                  TRANSACTION_REQUEST,
+                  TRANSACTION_PAGE_LOAD,
+                ],
+              },
             },
-          }),
+          ],
         },
       },
       track_total_hits: true,
-      aggs: {
-        duration: {
-          avg: {
-            field: TRANSACTION_DURATION,
-          },
-        },
-      },
+      aggs: { duration: { avg: { field: TRANSACTION_DURATION } } },
     },
-  });
-
+  };
+  const response = await client.search(params);
+  const docCount = response.hits.total.value;
   return {
     avgTransactionDuration: response.aggregations?.duration.value ?? null,
-    avgRequestsPerMinute:
-      response.hits.total.value > 0
-        ? response.hits.total.value / minutes
-        : null,
+    avgRequestsPerMinute: docCount > 0 ? docCount / minutes : null,
   };
 }
 
@@ -168,32 +170,16 @@ async function getCpuStats({
       query: {
         bool: {
           filter: filter.concat([
-            {
-              term: {
-                [PROCESSOR_EVENT]: ProcessorEvent.metric,
-              },
-            },
-            {
-              exists: {
-                field: METRIC_SYSTEM_CPU_PERCENT,
-              },
-            },
+            { term: { [PROCESSOR_EVENT]: ProcessorEvent.metric } },
+            { exists: { field: METRIC_SYSTEM_CPU_PERCENT } },
           ]),
         },
       },
-      aggs: {
-        avgCpuUsage: {
-          avg: {
-            field: METRIC_SYSTEM_CPU_PERCENT,
-          },
-        },
-      },
+      aggs: { avgCpuUsage: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } } },
     },
   });
 
-  return {
-    avgCpuUsage: response.aggregations?.avgCpuUsage.value ?? null,
-  };
+  return { avgCpuUsage: response.aggregations?.avgCpuUsage.value ?? null };
 }
 
 async function getMemoryStats({
@@ -207,31 +193,13 @@ async function getMemoryStats({
       query: {
         bool: {
           filter: filter.concat([
-            {
-              term: {
-                [PROCESSOR_EVENT]: ProcessorEvent.metric,
-              },
-            },
-            {
-              exists: {
-                field: METRIC_SYSTEM_FREE_MEMORY,
-              },
-            },
-            {
-              exists: {
-                field: METRIC_SYSTEM_TOTAL_MEMORY,
-              },
-            },
+            { term: { [PROCESSOR_EVENT]: 'metric' } },
+            { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
+            { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
           ]),
         },
       },
-      aggs: {
-        avgMemoryUsage: {
-          avg: {
-            script: percentMemoryUsedScript,
-          },
-        },
-      },
+      aggs: { avgMemoryUsage: { avg: { script: percentMemoryUsedScript } } },
     },
   });
 

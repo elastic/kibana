@@ -4,9 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useCallback, useContext } from 'react';
+import { i18n } from '@kbn/i18n';
+import { encode } from 'rison-node';
+import moment from 'moment';
 
-import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
+import { LogEntry, LogEntryContext } from '../../../../../../common/http_api';
+import { TimeRange } from '../../../../../../common/http_api/shared';
+import {
+  getFriendlyNameForPartitionId,
+  partitionField,
+} from '../../../../../../common/log_analysis';
+import { ViewLogInContext } from '../../../../../containers/logs/view_log_in_context';
 import {
   LogEntryColumn,
   LogEntryFieldColumn,
@@ -15,15 +24,22 @@ import {
   LogEntryTimestampColumn,
 } from '../../../../../components/logging/log_text_stream';
 import { LogColumnConfiguration } from '../../../../../utils/source_configuration';
+import { LogEntryContextMenu } from '../../../../../components/logging/log_text_stream/log_entry_context_menu';
+import { useLinkProps } from '../../../../../hooks/use_link_props';
 
 export const exampleMessageScale = 'medium' as const;
 export const exampleTimestampFormat = 'dateTime' as const;
 
 export const CategoryExampleMessage: React.FunctionComponent<{
+  id: string;
   dataset: string;
   message: string;
+  timeRange: TimeRange;
   timestamp: number;
-}> = ({ dataset, message, timestamp }) => {
+  tiebreaker: number;
+  context: LogEntryContext;
+}> = ({ id, dataset, message, timestamp, timeRange, tiebreaker, context }) => {
+  const [, { setContextEntry }] = useContext(ViewLogInContext.Context);
   // the dataset must be encoded for the field column and the empty value must
   // be turned into a user-friendly value
   const encodedDatasetFieldValue = useMemo(
@@ -31,8 +47,40 @@ export const CategoryExampleMessage: React.FunctionComponent<{
     [dataset]
   );
 
+  const [isHovered, setIsHovered] = useState<boolean>(false);
+  const setHovered = useCallback(() => setIsHovered(true), []);
+  const setNotHovered = useCallback(() => setIsHovered(false), []);
+
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+  const openMenu = useCallback(() => setIsMenuOpen(true), []);
+  const closeMenu = useCallback(() => setIsMenuOpen(false), []);
+
+  const viewInStreamLinkProps = useLinkProps({
+    app: 'logs',
+    pathname: 'stream',
+    search: {
+      logPosition: encode({
+        end: moment(timeRange.endTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+        position: { tiebreaker, time: timestamp },
+        start: moment(timeRange.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+        streamLive: false,
+      }),
+      flyoutOptions: encode({
+        surroundingLogsId: id,
+      }),
+      logFilter: encode({
+        expression: `${partitionField}: ${dataset}`,
+        kind: 'kuery',
+      }),
+    },
+  });
+
   return (
-    <LogEntryRowWrapper scale={exampleMessageScale}>
+    <LogEntryRowWrapper
+      scale={exampleMessageScale}
+      onMouseEnter={setHovered}
+      onMouseLeave={setNotHovered}
+    >
       <LogEntryColumn {...columnWidths[timestampColumnId]}>
         <LogEntryTimestampColumn format={exampleTimestampFormat} time={timestamp} />
       </LogEntryColumn>
@@ -60,6 +108,39 @@ export const CategoryExampleMessage: React.FunctionComponent<{
           wrapMode="none"
         />
       </LogEntryColumn>
+      <LogEntryColumn {...columnWidths[iconColumnId]}>
+        {isHovered || isMenuOpen ? (
+          <LogEntryContextMenu
+            isOpen={isMenuOpen}
+            onOpen={openMenu}
+            onClose={closeMenu}
+            items={[
+              {
+                label: i18n.translate('xpack.infra.logs.categoryExample.viewInStreamText', {
+                  defaultMessage: 'View in stream',
+                }),
+                onClick: viewInStreamLinkProps.onClick!,
+                href: viewInStreamLinkProps.href,
+              },
+              {
+                label: i18n.translate('xpack.infra.logs.categoryExample.viewInContextText', {
+                  defaultMessage: 'View in context',
+                }),
+                onClick: () => {
+                  const logEntry: LogEntry = {
+                    id,
+                    context,
+                    cursor: { time: timestamp, tiebreaker },
+                    columns: [],
+                  };
+
+                  setContextEntry(logEntry);
+                },
+              },
+            ]}
+          />
+        ) : null}
+      </LogEntryColumn>
     </LogEntryRowWrapper>
   );
 };
@@ -68,6 +149,7 @@ const noHighlights: never[] = [];
 const timestampColumnId = 'category-example-timestamp-column' as const;
 const messageColumnId = 'category-examples-message-column' as const;
 const datasetColumnId = 'category-examples-dataset-column' as const;
+const iconColumnId = 'category-examples-icon-column' as const;
 
 const columnWidths = {
   [timestampColumnId]: {
@@ -85,7 +167,12 @@ const columnWidths = {
     growWeight: 0,
     shrinkWeight: 0,
     // w_dataset + w_max_anomaly + w_expand - w_padding = 200 px + 160 px + 40 px + 40 px - 8 px
-    baseWidth: '432px',
+    baseWidth: '400px',
+  },
+  [iconColumnId]: {
+    growWeight: 0,
+    shrinkWeight: 0,
+    baseWidth: '32px',
   },
 };
 

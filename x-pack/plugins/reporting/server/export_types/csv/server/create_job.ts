@@ -13,7 +13,6 @@ export const scheduleTaskFnFactory: ScheduleTaskFnFactory<ESQueueCreateJobFn<
 >> = function createJobFactoryFn(reporting) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
-  const setupDeps = reporting.getPluginSetupDeps();
 
   return async function scheduleTask(jobParams, context, request) {
     const serializedEncryptedHeaders = await crypto.encrypt(request.headers);
@@ -21,13 +20,12 @@ export const scheduleTaskFnFactory: ScheduleTaskFnFactory<ESQueueCreateJobFn<
     const savedObjectsClient = context.core.savedObjects.client;
     const indexPatternSavedObject = await savedObjectsClient.get(
       'index-pattern',
-      jobParams.indexPatternId!
+      jobParams.indexPatternId
     );
 
     return {
       headers: serializedEncryptedHeaders,
       indexPatternSavedObject,
-      basePath: setupDeps.basePath(request),
       ...jobParams,
     };
   };

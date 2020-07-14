@@ -75,11 +75,13 @@ storiesOf('app/ServiceMap/Popover/ServiceStatsList', module)
     () => (
       <ServiceStatsList
         avgCpuUsage={0.32809666568309237}
-        avgErrorRate={0.556068173242986}
         avgMemoryUsage={0.5504868173242986}
-        avgRequestsPerMinute={164.47222031860858}
-        avgTransactionDuration={61634.38905590272}
+        transactionStats={{
+          avgRequestsPerMinute: 164.47222031860858,
+          avgTransactionDuration: 61634.38905590272,
+        }}
         isLoading={false}
+        avgErrorRate={0.556068173242986}
       />
     ),
     { info: { propTablesExclude: [EuiThemeProvider] } }
@@ -91,8 +93,10 @@ storiesOf('app/ServiceMap/Popover/ServiceStatsList', module)
         avgCpuUsage={null}
         avgErrorRate={null}
         avgMemoryUsage={null}
-        avgRequestsPerMinute={null}
-        avgTransactionDuration={null}
+        transactionStats={{
+          avgRequestsPerMinute: null,
+          avgTransactionDuration: null,
+        }}
         isLoading={true}
       />
     ),
@@ -105,8 +109,10 @@ storiesOf('app/ServiceMap/Popover/ServiceStatsList', module)
         avgCpuUsage={null}
         avgErrorRate={0.615972134074397}
         avgMemoryUsage={null}
-        avgRequestsPerMinute={8.439583235652972}
-        avgTransactionDuration={238792.54809512055}
+        transactionStats={{
+          avgRequestsPerMinute: 8.439583235652972,
+          avgTransactionDuration: 238792.54809512055,
+        }}
         isLoading={false}
       />
     ),
@@ -119,8 +125,10 @@ storiesOf('app/ServiceMap/Popover/ServiceStatsList', module)
         avgCpuUsage={null}
         avgErrorRate={null}
         avgMemoryUsage={null}
-        avgRequestsPerMinute={null}
-        avgTransactionDuration={null}
+        transactionStats={{
+          avgRequestsPerMinute: null,
+          avgTransactionDuration: null,
+        }}
         isLoading={false}
       />
     ),

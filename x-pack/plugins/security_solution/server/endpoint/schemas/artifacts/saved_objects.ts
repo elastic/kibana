@@ -12,17 +12,19 @@ import {
   sha256,
   size,
 } from '../../../../common/endpoint/schema/common';
-import { body, created } from './common';
+import { created } from './common';
+
+export const body = t.string; // base64
 
 export const internalArtifactSchema = t.exact(
   t.type({
     identifier,
     compressionAlgorithm,
     encryptionAlgorithm,
-    decompressedSha256: sha256,
-    decompressedSize: size,
-    compressedSha256: sha256,
-    compressedSize: size,
+    decodedSha256: sha256,
+    decodedSize: size,
+    encodedSha256: sha256,
+    encodedSize: size,
     created,
     body,
   })

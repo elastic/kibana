@@ -30,37 +30,39 @@ describe('src/dev/build/lib/platform', () => {
 
   describe('getNodeArch()', () => {
     it('returns the node arch for the passed name', () => {
-      expect(createPlatform('windows').getNodeArch()).to.be('windows-x64');
+      expect(createPlatform('win32', 'x64').getNodeArch()).to.be('win32-x64');
     });
   });
 
   describe('getBuildName()', () => {
     it('returns the build name for the passed name', () => {
-      expect(createPlatform('windows').getBuildName()).to.be('windows-x86_64');
+      expect(createPlatform('linux', 'arm64', 'linux-aarch64').getBuildName()).to.be(
+        'linux-aarch64'
+      );
     });
   });
 
   describe('isWindows()', () => {
-    it('returns true if name is windows', () => {
-      expect(createPlatform('windows').isWindows()).to.be(true);
-      expect(createPlatform('linux').isWindows()).to.be(false);
-      expect(createPlatform('darwin').isWindows()).to.be(false);
+    it('returns true if name is win32', () => {
+      expect(createPlatform('win32', 'x64').isWindows()).to.be(true);
+      expect(createPlatform('linux', 'x64').isWindows()).to.be(false);
+      expect(createPlatform('darwin', 'x64').isWindows()).to.be(false);
     });
   });
 
   describe('isLinux()', () => {
     it('returns true if name is linux', () => {
-      expect(createPlatform('windows').isLinux()).to.be(false);
-      expect(createPlatform('linux').isLinux()).to.be(true);
-      expect(createPlatform('darwin').isLinux()).to.be(false);
+      expect(createPlatform('win32', 'x64').isLinux()).to.be(false);
+      expect(createPlatform('linux', 'x64').isLinux()).to.be(true);
+      expect(createPlatform('darwin', 'x64').isLinux()).to.be(false);
     });
   });
 
   describe('isMac()', () => {
     it('returns true if name is darwin', () => {
-      expect(createPlatform('windows').isMac()).to.be(false);
-      expect(createPlatform('linux').isMac()).to.be(false);
-      expect(createPlatform('darwin').isMac()).to.be(true);
+      expect(createPlatform('win32', 'x64').isMac()).to.be(false);
+      expect(createPlatform('linux', 'x64').isMac()).to.be(false);
+      expect(createPlatform('darwin', 'x64').isMac()).to.be(true);
     });
   });
 });

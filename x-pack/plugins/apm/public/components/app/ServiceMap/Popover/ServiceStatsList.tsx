@@ -4,25 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
 import { ServiceNodeStats } from '../../../../../common/service_map';
 import { asDuration, asPercent, tpmUnit } from '../../../../utils/formatters';
-
-function LoadingSpinner() {
-  return (
-    <EuiFlexGroup
-      alignItems="center"
-      justifyContent="spaceAround"
-      style={{ height: 170 }}
-    >
-      <EuiLoadingSpinner size="xl" />
-    </EuiFlexGroup>
-  );
-}
 
 export const ItemRow = styled('tr')`
   line-height: 2;
@@ -37,17 +24,13 @@ export const ItemDescription = styled('td')`
   text-align: right;
 `;
 
-interface ServiceStatsListProps extends ServiceNodeStats {
-  isLoading: boolean;
-}
+type ServiceStatsListProps = ServiceNodeStats;
 
 export function ServiceStatsList({
-  avgTransactionDuration,
-  avgRequestsPerMinute,
+  transactionStats,
   avgErrorRate,
   avgCpuUsage,
   avgMemoryUsage,
-  isLoading,
 }: ServiceStatsListProps) {
   const listItems = [
     {
@@ -57,16 +40,21 @@ export function ServiceStatsList({
           defaultMessage: 'Trans. duration (avg.)',
         }
       ),
-      description: isNumber(avgTransactionDuration)
-        ? asDuration(avgTransactionDuration)
+      description: isNumber(transactionStats.avgTransactionDuration)
+        ? asDuration(transactionStats.avgTransactionDuration)
         : null,
     },
     {
-      title: i18n.translate('xpack.apm.serviceMap.avgReqPerMinutePopoverStat', {
-        defaultMessage: 'Req. per minute (avg.)',
-      }),
-      description: isNumber(avgRequestsPerMinute)
-        ? `${avgRequestsPerMinute.toFixed(2)} ${tpmUnit('request')}`
+      title: i18n.translate(
+        'xpack.apm.serviceMap.avgReqPerMinutePopoverMetric',
+        {
+          defaultMessage: 'Req. per minute (avg.)',
+        }
+      ),
+      description: isNumber(transactionStats.avgRequestsPerMinute)
+        ? `${transactionStats.avgRequestsPerMinute.toFixed(2)} ${tpmUnit(
+            'request'
+          )}`
         : null,
     },
     {
@@ -91,9 +79,7 @@ export function ServiceStatsList({
     },
   ];
 
-  return isLoading ? (
-    <LoadingSpinner />
-  ) : (
+  return (
     <table>
       <tbody>
         {listItems.map(

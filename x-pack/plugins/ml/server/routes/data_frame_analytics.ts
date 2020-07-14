@@ -10,6 +10,7 @@ import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/a
 import { RouteInitialization } from '../types';
 import {
   dataAnalyticsJobConfigSchema,
+  dataAnalyticsJobUpdateSchema,
   dataAnalyticsEvaluateSchema,
   dataAnalyticsExplainSchema,
   analyticsIdSchema,
@@ -473,6 +474,45 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         const results = await context.ml!.mlClient.callAsCurrentUser(
           'ml.stopDataFrameAnalytics',
           options
+        );
+        return response.ok({
+          body: results,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup DataFrameAnalytics
+   *
+   * @api {post} /api/ml/data_frame/analytics/:analyticsId/_update Update specified analytics job
+   * @apiName UpdateDataFrameAnalyticsJob
+   * @apiDescription Updates a data frame analytics job.
+   *
+   * @apiSchema (params) analyticsIdSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/data_frame/analytics/{analyticsId}/_update',
+      validate: {
+        params: analyticsIdSchema,
+        body: dataAnalyticsJobUpdateSchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateDataFrameAnalytics'],
+      },
+    },
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+      try {
+        const { analyticsId } = request.params;
+        const results = await context.ml!.mlClient.callAsCurrentUser(
+          'ml.updateDataFrameAnalytics',
+          {
+            body: request.body,
+            analyticsId,
+          }
         );
         return response.ok({
           body: results,
