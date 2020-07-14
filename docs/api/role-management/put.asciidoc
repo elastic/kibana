@@ -58,7 +58,7 @@ Grant access to various features in all spaces:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X PUT "localhost:5601/api/security/role/my_kibana_role"
+$ curl -X PUT api/security/role/my_kibana_role
 {
   "metadata" : {
     "version" : 1
@@ -127,7 +127,7 @@ Grant dashboard-only access to only the Marketing space:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X PUT "localhost:5601/api/security/role/my_kibana_role"
+$ curl -X PUT api/security/role/my_kibana_role
 {
   "metadata" : {
     "version" : 1
@@ -155,7 +155,7 @@ Grant full access to all features in the Default space:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X PUT "localhost:5601/api/security/role/my_kibana_role"
+$ curl -X PUT api/security/role/my_kibana_role
 {
   "metadata" : {
     "version" : 1
@@ -182,7 +182,7 @@ Grant different access to different spaces:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X PUT "localhost:5601/api/security/role/my_kibana_role"
+$ curl -X PUT api/security/role/my_kibana_role
 {
   "metadata" : {
     "version" : 1
@@ -218,7 +218,7 @@ Grant access to {kib} and {es}:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X PUT "localhost:5601/api/security/role/my_kibana_role"
+$ curl -X PUT api/security/role/my_kibana_role
 {
   "metadata" : {
     "version" : 1
