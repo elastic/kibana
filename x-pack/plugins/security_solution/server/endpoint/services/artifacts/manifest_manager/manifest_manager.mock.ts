@@ -64,7 +64,7 @@ export const getManifestManagerMock = (opts?: {
   }
   packageConfigService.list = jest.fn().mockResolvedValue({
     total: 1,
-    items: [createPackageConfigMock()],
+    items: [{ version: 'abcd', ...createPackageConfigMock() }],
   });
 
   let savedObjectsClient = savedObjectsClientMock.create();
