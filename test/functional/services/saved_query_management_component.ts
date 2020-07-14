@@ -173,8 +173,8 @@ export function SavedQueryManagementComponentProvider({
       const isOpenAlready = await testSubjects.exists('saved-query-management-popover');
       if (isOpenAlready) return;
 
-      await testSubjects.click('saved-query-management-popover-button');
       await retry.waitFor('saved query management popover to have any text', async () => {
+        await testSubjects.click('saved-query-management-popover-button');
         const queryText = await testSubjects.getVisibleText('saved-query-management-popover');
         return queryText.length > 0;
       });
@@ -184,7 +184,10 @@ export function SavedQueryManagementComponentProvider({
       const isOpenAlready = await testSubjects.exists('saved-query-management-popover');
       if (!isOpenAlready) return;
 
-      await testSubjects.click('saved-query-management-popover-button');
+      await retry.try(async () => {
+        await testSubjects.click('saved-query-management-popover-button');
+        await testSubjects.missingOrFail('saved-query-management-popover');
+      });
     }
 
     async openSaveCurrentQueryModal() {
