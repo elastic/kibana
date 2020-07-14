@@ -6,7 +6,7 @@
 
 import { EuiFlexItem, EuiHealth } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { DescriptionList } from '../../../../../common/utility_types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
@@ -27,52 +27,58 @@ const getDescriptionList = (descriptionList: DescriptionList[], key: number) => 
 );
 
 export const EndpointOverview = React.memo<Props>(({ data }) => {
-  const getDefaultRenderer = (fieldName: string, fieldData: EndpointFields, attrName: string) => (
-    <DefaultFieldRenderer
-      rowItems={[getOr('', fieldName, fieldData)]}
-      attrName={attrName}
-      idPrefix="endpoint-overview"
-    />
+  const getDefaultRenderer = useCallback(
+    (fieldName: string, fieldData: EndpointFields, attrName: string) => (
+      <DefaultFieldRenderer
+        rowItems={[getOr('', fieldName, fieldData)]}
+        attrName={attrName}
+        idPrefix="endpoint-overview"
+      />
+    ),
+    []
   );
-  const descriptionLists: Readonly<DescriptionList[][]> = [
-    [
-      {
-        title: i18n.ENDPOINT_POLICY,
-        description:
-          data != null && data.endpointPolicy != null ? data.endpointPolicy : getEmptyTagValue(),
-      },
+  const descriptionLists: Readonly<DescriptionList[][]> = useMemo(
+    () => [
+      [
+        {
+          title: i18n.ENDPOINT_POLICY,
+          description:
+            data != null && data.endpointPolicy != null ? data.endpointPolicy : getEmptyTagValue(),
+        },
+      ],
+      [
+        {
+          title: i18n.POLICY_STATUS,
+          description:
+            data != null && data.policyStatus != null ? (
+              <EuiHealth
+                aria-label={data.policyStatus}
+                color={
+                  data.policyStatus === HostPolicyResponseActionStatus.failure
+                    ? 'danger'
+                    : data.policyStatus
+                }
+              >
+                {data.policyStatus}
+              </EuiHealth>
+            ) : (
+              getEmptyTagValue()
+            ),
+        },
+      ],
+      [
+        {
+          title: i18n.SENSORVERSION,
+          description:
+            data != null && data.sensorVersion != null
+              ? getDefaultRenderer('sensorVersion', data, 'agent.version')
+              : getEmptyTagValue(),
+        },
+      ],
+      [], // needs 4 columns for design
     ],
-    [
-      {
-        title: i18n.POLICY_STATUS,
-        description:
-          data != null && data.policyStatus != null ? (
-            <EuiHealth
-              aria-label={data.policyStatus}
-              color={
-                data.policyStatus === HostPolicyResponseActionStatus.failure
-                  ? 'danger'
-                  : data.policyStatus
-              }
-            >
-              {data.policyStatus}
-            </EuiHealth>
-          ) : (
-            getEmptyTagValue()
-          ),
-      },
-    ],
-    [
-      {
-        title: i18n.SENSORVERSION,
-        description:
-          data != null && data.sensorVersion != null
-            ? getDefaultRenderer('sensorVersion', data, 'agent.version')
-            : getEmptyTagValue(),
-      },
-    ],
-    [], // needs 4 columns for design
-  ];
+    [data, getDefaultRenderer]
+  );
 
   return (
     <>
