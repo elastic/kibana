@@ -29,21 +29,40 @@ export interface SearchUsage {
 }
 
 export function usageProvider(core: CoreSetup<object, DataPluginStart>): SearchUsage {
-  const getTracker = (eventType: string) => {
+  const getTracker = (eventType: keyof Usage) => {
     return async (duration: number) => {
       const repository = await core
         .getStartServices()
         .then(([coreStart]) => coreStart.savedObjects.createInternalRepository());
 
-      await repository.incrementCounter(SAVED_OBJECT_ID, SAVED_OBJECT_ID, eventType);
+      let attributes: Usage;
+      let doesSavedObjectExist: boolean = true;
 
-      const { attributes } = await repository.get<Usage>(SAVED_OBJECT_ID, SAVED_OBJECT_ID);
+      try {
+        const response = await repository.get<Usage>(SAVED_OBJECT_ID, SAVED_OBJECT_ID);
+        attributes = response.attributes;
+      } catch (e) {
+        doesSavedObjectExist = false;
+        attributes = {
+          successCount: 0,
+          errorCount: 0,
+          averageDuration: 0,
+        };
+      }
+
+      attributes[eventType]++;
+
       const averageDuration =
         (duration + (attributes.averageDuration ?? 0)) /
         ((attributes.errorCount ?? 0) + (attributes.successCount ?? 0));
 
       const newAttributes = { ...attributes, averageDuration };
-      await repository.update(SAVED_OBJECT_ID, SAVED_OBJECT_ID, newAttributes);
+
+      if (doesSavedObjectExist) {
+        await repository.update(SAVED_OBJECT_ID, SAVED_OBJECT_ID, newAttributes);
+      } else {
+        await repository.create(SAVED_OBJECT_ID, newAttributes, { id: SAVED_OBJECT_ID });
+      }
     };
   };
 
