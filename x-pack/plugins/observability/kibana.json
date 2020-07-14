@@ -6,8 +6,10 @@
     "xpack",
     "observability"
   ],
+  "requiredPlugins": [
+    "home"
+  ],
   "optionalPlugins": [
-    "home",
     "licensing"
   ],
   "ui": true,

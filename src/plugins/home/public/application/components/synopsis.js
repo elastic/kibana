@@ -21,7 +21,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import { EuiCard, EuiIcon } from '@elastic/eui';
+import { EuiCard, EuiIcon, EuiBetaBadge, EuiTitle } from '@elastic/eui';
 
 export function Synopsis({
   description,
@@ -32,6 +32,7 @@ export function Synopsis({
   wrapInPanel,
   onClick,
   isBeta,
+  betaLabel,
 }) {
   let optionalImg;
   if (iconUrl) {
@@ -50,12 +51,22 @@ export function Synopsis({
       layout="horizontal"
       icon={optionalImg}
       titleSize="xs"
-      title={title}
+      title={
+        isBeta ? (
+          <EuiTitle size="xs">
+            <span className="homSynopsis__cardTitle">
+              {title}&nbsp;
+              <EuiBetaBadge label={betaLabel} />
+            </span>
+          </EuiTitle>
+        ) : (
+          title
+        )
+      }
       description={description}
       onClick={onClick}
       href={url}
       data-test-subj={`homeSynopsisLink${title.toLowerCase()}`}
-      betaBadgeLabel={isBeta ? 'Beta' : null}
     />
   );
 }
@@ -72,4 +83,5 @@ Synopsis.propTypes = {
 
 Synopsis.defaultProps = {
   isBeta: false,
+  betaLabel: 'Beta',
 };

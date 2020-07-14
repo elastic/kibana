@@ -120,7 +120,7 @@ export class Home extends Component {
   findDirectoryById = (id) =>
     this.props.directories.find((directory) => directory.showOnHomePage && directory.id === id);
 
-  renderDirectory = (directory, { isBeta } = {}) => {
+  renderDirectory = (directory, { isBeta, betaLabel } = {}) => {
     const { addBasePath } = this.props;
 
     return directory ? (
@@ -133,6 +133,7 @@ export class Home extends Component {
           url={addBasePath(directory.path)}
           wrapInPanel
           isBeta={isBeta}
+          betaLabel={betaLabel}
         />
       </EuiFlexItem>
     ) : null;
@@ -269,7 +270,10 @@ export class Home extends Component {
                         wrapInPanel
                       />
                     </EuiFlexItem>
-                    {this.renderDirectory(ingestManager, { isBeta: true })}
+                    {this.renderDirectory(ingestManager, {
+                      isBeta: true,
+                      betaLabel: 'Experimental',
+                    })}
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
