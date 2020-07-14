@@ -10,6 +10,7 @@ interface BaseSettings {
   package_auto_upgrade?: boolean;
   kibana_url?: string;
   kibana_ca_sha256?: string;
+  has_seen_add_data_notice?: boolean;
 }
 
 export interface Settings extends BaseSettings {

@@ -46,7 +46,7 @@ import { createTimelines } from './utils/create_timelines';
 import { TimelineStatus } from '../../../../common/types/timeline';
 
 const CHUNK_PARSED_OBJECT_SIZE = 10;
-const DEFAULT_IMPORT_ERROR = `Something went wrong, there's something we didn't handle properly, please help us improve by providing the file you try to import on https://discuss.elastic.co/c/security/siem`;
+const DEFAULT_IMPORT_ERROR = `Something has gone wrong. We didn't handle something properly. To help us fix this, please upload your file to https://discuss.elastic.co/c/security/siem.`;
 
 export const importTimelinesRoute = (
   router: IRouter,
@@ -158,7 +158,7 @@ export const importTimelinesRoute = (
                       await compareTimelinesStatus.init();
                       const isTemplateTimeline = compareTimelinesStatus.isHandlingTemplateTimeline;
                       if (compareTimelinesStatus.isCreatableViaImport) {
-                        // create timeline / template timeline
+                        // create timeline / timeline template
                         newTimeline = await createTimelines({
                           frameworkRequest,
                           timeline: {
@@ -199,7 +199,7 @@ export const importTimelinesRoute = (
                         );
                       } else {
                         if (compareTimelinesStatus.isUpdatableViaImport) {
-                          // update template timeline
+                          // update timeline template
                           newTimeline = await createTimelines({
                             frameworkRequest,
                             timeline: parsedTimelineObject,

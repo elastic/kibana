@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { newRule, totalNumberOfPrebuiltRulesInEsArchive } from '../objects/rule';
+import { newRule, totalNumberOfPrebuiltRulesInEsArchiveCustomRule } from '../objects/rule';
 
 import {
   CUSTOM_RULES_BTN,
@@ -62,9 +62,9 @@ import {
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
-import { ALERTS_URL } from '../urls/navigation';
+import { DETECTIONS_URL } from '../urls/navigation';
 
-// // Skipped as was causing failures on master
+// Flaky: https://github.com/elastic/kibana/issues/67814
 describe.skip('Detection rules, custom', () => {
   before(() => {
     esArchiverLoad('custom_rule_with_timeline');
@@ -75,7 +75,7 @@ describe.skip('Detection rules, custom', () => {
   });
 
   it('Creates and activates a new custom rule', () => {
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
@@ -90,7 +90,7 @@ describe.skip('Detection rules, custom', () => {
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();
 
-    const expectedNumberOfRules = totalNumberOfPrebuiltRulesInEsArchive + 1;
+    const expectedNumberOfRules = totalNumberOfPrebuiltRulesInEsArchiveCustomRule + 1;
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
     });
@@ -131,6 +131,7 @@ describe.skip('Detection rules, custom', () => {
       'auditbeat-*',
       'endgame-*',
       'filebeat-*',
+      'logs-*',
       'packetbeat-*',
       'winlogbeat-*',
     ];
@@ -170,7 +171,7 @@ describe.skip('Detection rules, custom', () => {
 describe('Deletes custom rules', () => {
   beforeEach(() => {
     esArchiverLoad('custom_rules');
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();

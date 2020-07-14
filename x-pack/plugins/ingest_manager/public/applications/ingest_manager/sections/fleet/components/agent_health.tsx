@@ -53,6 +53,22 @@ const Status = {
       />
     </EuiHealth>
   ),
+  Degraded: (
+    <EuiHealth color="danger">
+      <FormattedMessage
+        id="xpack.ingestManager.agentHealth.degradedStatusText"
+        defaultMessage="Degraded"
+      />
+    </EuiHealth>
+  ),
+  Enrolling: (
+    <EuiHealth color="warning">
+      <FormattedMessage
+        id="xpack.ingestManager.agentHealth.enrollingStatusText"
+        defaultMessage="Enrolling"
+      />
+    </EuiHealth>
+  ),
   Unenrolling: (
     <EuiHealth color="warning">
       <FormattedMessage
@@ -67,6 +83,8 @@ function getStatusComponent(agent: Agent): React.ReactElement {
   switch (agent.status) {
     case 'error':
       return Status.Error;
+    case 'degraded':
+      return Status.Degraded;
     case 'inactive':
       return Status.Inactive;
     case 'offline':
@@ -75,6 +93,8 @@ function getStatusComponent(agent: Agent): React.ReactElement {
       return Status.Warning;
     case 'unenrolling':
       return Status.Unenrolling;
+    case 'enrolling':
+      return Status.Enrolling;
     default:
       return Status.Online;
   }

@@ -37,6 +37,18 @@ export default function ({ getService }: FtrProviderContext) {
         modelMemory: '5mb',
         createIndexPattern: true,
         expected: {
+          histogramCharts: [
+            { chartAvailable: true, id: '1stFlrSF', legend: '334 - 4692' },
+            { chartAvailable: true, id: 'BsmtFinSF1', legend: '0 - 5644' },
+            { chartAvailable: true, id: 'BsmtQual', legend: '0 - 5' },
+            { chartAvailable: true, id: 'CentralAir', legend: '2 categories' },
+            { chartAvailable: true, id: 'Condition2', legend: '2 categories' },
+            { chartAvailable: true, id: 'Electrical', legend: '2 categories' },
+            { chartAvailable: true, id: 'ExterQual', legend: '1 - 4' },
+            { chartAvailable: true, id: 'Exterior1st', legend: '2 categories' },
+            { chartAvailable: true, id: 'Exterior2nd', legend: '3 categories' },
+            { chartAvailable: true, id: 'Fireplaces', legend: '0 - 3' },
+          ],
           row: {
             type: 'outlier_detection',
             status: 'stopped',
@@ -64,6 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('selects the source data and loads the job wizard page', async () => {
           await ml.jobSourceSelection.selectSourceForAnalyticsJob(testData.source);
+          await ml.dataFrameAnalyticsCreation.assertConfigurationStepActive();
         });
 
         it('selects the job type', async () => {
@@ -79,13 +92,31 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertTrainingPercentInputMissing();
         });
 
+        it('displays the source data preview', async () => {
+          await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewExists();
+        });
+
+        it('enables the source data preview histogram charts', async () => {
+          await ml.dataFrameAnalyticsCreation.enableSourceDataPreviewHistogramCharts();
+        });
+
+        it('displays the source data preview histogram charts', async () => {
+          await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewHistogramCharts(
+            testData.expected.histogramCharts
+          );
+        });
+
+        it('displays the include fields selection', async () => {
+          await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
+        });
+
         it('continues to the additional options step', async () => {
           await ml.dataFrameAnalyticsCreation.continueToAdditionalOptionsStep();
         });
 
-        it('inputs the model memory limit', async () => {
+        it('accepts the suggested model memory limit', async () => {
           await ml.dataFrameAnalyticsCreation.assertModelMemoryInputExists();
-          await ml.dataFrameAnalyticsCreation.setModelMemory(testData.modelMemory);
+          await ml.dataFrameAnalyticsCreation.assertModelMemoryInputPopulated();
         });
 
         it('continues to the details step', async () => {

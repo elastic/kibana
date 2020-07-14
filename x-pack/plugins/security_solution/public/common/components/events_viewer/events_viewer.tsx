@@ -7,7 +7,6 @@
 import { EuiPanel } from '@elastic/eui';
 import { getOr, isEmpty, union } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
@@ -35,7 +34,6 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../store';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
-import { getInvestigateInResolverAction } from '../../../timelines/components/timeline/body/helpers';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 500;
 
@@ -69,6 +67,8 @@ interface Props {
   sort: Sort;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
+  // If truthy, the graph viewer (Resolver) is showing
+  graphEventId: string | undefined;
 }
 
 const EventsViewerComponent: React.FC<Props> = ({
@@ -92,35 +92,18 @@ const EventsViewerComponent: React.FC<Props> = ({
   sort,
   toggleColumn,
   utilityBar,
+  graphEventId,
 }) => {
-  const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const kibana = useKibana();
-  const { filterManager } = useKibana().services.data.query;
   const [isQueryLoading, setIsQueryLoading] = useState(false);
 
-  const {
-    getManageTimelineById,
-    setIsTimelineLoading,
-    setTimelineFilterManager,
-    setTimelineRowActions,
-  } = useManageTimeline();
-
-  useEffect(() => {
-    setTimelineRowActions({
-      id,
-      timelineRowActions: [getInvestigateInResolverAction({ dispatch, timelineId: id })],
-    });
-  }, [setTimelineRowActions, id, dispatch]);
+  const { getManageTimelineById, setIsTimelineLoading } = useManageTimeline();
 
   useEffect(() => {
     setIsTimelineLoading({ id, isLoading: isQueryLoading });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isQueryLoading]);
-  useEffect(() => {
-    setTimelineFilterManager({ id, filterManager });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterManager]);
 
   const { queryFields, title, unit } = useMemo(() => getManageTimelineById(id), [
     getManageTimelineById,
@@ -211,22 +194,28 @@ const EventsViewerComponent: React.FC<Props> = ({
                       toggleColumn={toggleColumn}
                     />
 
-                    <Footer
-                      getUpdatedAt={getUpdatedAt}
-                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                      height={footerHeight}
-                      id={id}
-                      isLive={isLive}
-                      isLoading={loading}
-                      itemsCount={events.length}
-                      itemsPerPage={itemsPerPage}
-                      itemsPerPageOptions={itemsPerPageOptions}
-                      onChangeItemsPerPage={onChangeItemsPerPage}
-                      onLoadMore={loadMore}
-                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                      serverSideEventCount={totalCountMinusDeleted}
-                      tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
-                    />
+                    {
+                      /** Hide the footer if Resolver is showing. */
+                      !graphEventId && (
+                        <Footer
+                          data-test-subj="events-viewer-footer"
+                          getUpdatedAt={getUpdatedAt}
+                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                          height={footerHeight}
+                          id={id}
+                          isLive={isLive}
+                          isLoading={loading}
+                          itemsCount={events.length}
+                          itemsPerPage={itemsPerPage}
+                          itemsPerPageOptions={itemsPerPageOptions}
+                          onChangeItemsPerPage={onChangeItemsPerPage}
+                          onLoadMore={loadMore}
+                          nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                          serverSideEventCount={totalCountMinusDeleted}
+                          tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
+                        />
+                      )
+                    }
                   </EventsContainerLoading>
                 </>
               );
@@ -257,5 +246,6 @@ export const EventsViewer = React.memo(
     deepEqual(prevProps.query, nextProps.query) &&
     prevProps.start === nextProps.start &&
     prevProps.sort === nextProps.sort &&
-    prevProps.utilityBar === nextProps.utilityBar
+    prevProps.utilityBar === nextProps.utilityBar &&
+    prevProps.graphEventId === nextProps.graphEventId
 );

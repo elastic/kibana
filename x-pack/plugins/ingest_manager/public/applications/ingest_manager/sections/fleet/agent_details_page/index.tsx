@@ -86,7 +86,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
           >
             <FormattedMessage
               id="xpack.ingestManager.agentDetails.viewAgentListTitle"
-              defaultMessage="View all agent configurations"
+              defaultMessage="View all agents"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>

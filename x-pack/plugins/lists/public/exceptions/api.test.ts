@@ -342,7 +342,7 @@ describe('Exceptions Lists API', () => {
     });
 
     test('it returns error if response payload fails decode', async () => {
-      const badPayload = getExceptionListItemSchemaMock();
+      const badPayload = getExceptionListSchemaMock();
       delete badPayload.id;
       fetchMock.mockResolvedValue(badPayload);
 

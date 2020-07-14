@@ -4,12 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  IndexPatternSavedObject,
-  SavedObjectReference,
-  SavedSearchObjectAttributesJSON,
-  SearchSource,
-} from '../../types';
+import { IndexPatternSavedObject } from '../../../csv/types';
+import { SavedObjectReference, SavedSearchObjectAttributesJSON, SearchSource } from '../../types';
 
 export async function getDataSource(
   savedObjectsClient: any,
