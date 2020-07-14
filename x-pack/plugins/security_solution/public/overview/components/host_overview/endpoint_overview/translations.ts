@@ -6,14 +6,23 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ENDPOINT_POLICY = i18n.translate('xpack.siem.host.details.endpoint.endpointPolicy', {
-  defaultMessage: 'Endpoint policy',
-});
+export const ENDPOINT_POLICY = i18n.translate(
+  'xpack.securitySolution.host.details.endpoint.endpointPolicy',
+  {
+    defaultMessage: 'Endpoint policy',
+  }
+);
 
-export const POLICY_STATUS = i18n.translate('xpack.siem.host.details.endpoint.policyStatus', {
-  defaultMessage: 'Policy status',
-});
+export const POLICY_STATUS = i18n.translate(
+  'xpack.securitySolution.host.details.endpoint.policyStatus',
+  {
+    defaultMessage: 'Policy status',
+  }
+);
 
-export const SENSORVERSION = i18n.translate('xpack.siem.host.details.endpoint.sensorversion', {
-  defaultMessage: 'Sensorversion',
-});
+export const SENSORVERSION = i18n.translate(
+  'xpack.securitySolution.host.details.endpoint.sensorversion',
+  {
+    defaultMessage: 'Sensorversion',
+  }
+);
