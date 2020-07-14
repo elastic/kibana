@@ -24,6 +24,8 @@ describe('AlertsUtilityBar', () => {
         currentFilter="closed"
         selectAll={jest.fn()}
         showClearSelection={true}
+        showBuildingBlockAlerts={false}
+        onShowBuildingBlockAlertsChanged={jest.fn()}
         updateAlertsStatus={jest.fn()}
       />
     );
