@@ -18,32 +18,28 @@ interface MlCardDescriptionProps {
 const MlCardDescriptionComponent: React.FC<MlCardDescriptionProps> = ({
   subscriptionUrl,
   hasValidLicense = false,
-}) => {
-  const subscriptionsLinkConfig = {
-    subscriptionsLink: (
-      <EuiLink href={subscriptionUrl} target="_blank">
-        <FormattedMessage
-          id="xpack.securitySolution.components.stepDefineRule.ruleTypeField.subscriptionsLink"
-          defaultMessage="Platinum subscription"
-        />
-      </EuiLink>
-    ),
-  };
-
-  return (
-    <EuiText size="s">
-      {hasValidLicense ? (
-        ML_TYPE_DESCRIPTION
-      ) : (
-        <FormattedMessage
-          id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.mlTypeDisabledDescription"
-          defaultMessage="Access to ML requires a {subscriptionsLink}."
-          values={subscriptionsLinkConfig}
-        />
-      )}
-    </EuiText>
-  );
-};
+}) => (
+  <EuiText size="s">
+    {hasValidLicense ? (
+      ML_TYPE_DESCRIPTION
+    ) : (
+      <FormattedMessage
+        id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.mlTypeDisabledDescription"
+        defaultMessage="Access to ML requires a {subscriptionsLink}."
+        values={{
+          subscriptionsLink: (
+            <EuiLink href={subscriptionUrl} target="_blank">
+              <FormattedMessage
+                id="xpack.securitySolution.components.stepDefineRule.ruleTypeField.subscriptionsLink"
+                defaultMessage="Platinum subscription"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    )}
+  </EuiText>
+);
 
 MlCardDescriptionComponent.displayName = 'MlCardDescriptionComponent';
 
