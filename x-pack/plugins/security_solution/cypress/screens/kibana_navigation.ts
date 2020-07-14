@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const ALERTS_PAGE = '[data-test-subj="collapsibleNavGroup-security"] [title="Alerts"]';
+export const DETECTIONS_PAGE =
+  '[data-test-subj="collapsibleNavGroup-security"] [title="Detections"]';
 
 export const CASES_PAGE = '[data-test-subj="collapsibleNavGroup-security"] [title="Cases"]';
 

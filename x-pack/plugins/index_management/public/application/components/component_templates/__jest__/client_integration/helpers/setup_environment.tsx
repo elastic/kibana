@@ -12,6 +12,7 @@ import { HttpSetup } from 'kibana/public';
 import {
   notificationServiceMock,
   docLinksServiceMock,
+  applicationServiceMock,
 } from '../../../../../../../../../../src/core/public/mocks';
 
 import { ComponentTemplatesProvider } from '../../../component_templates_context';
@@ -28,6 +29,7 @@ const appDependencies = {
   docLinks: docLinksServiceMock.createStartContract(),
   toasts: notificationServiceMock.createSetupContract().toasts,
   setBreadcrumbs: () => {},
+  getUrlForApp: applicationServiceMock.createStartContract().getUrlForApp,
 };
 
 export const setupEnvironment = () => {

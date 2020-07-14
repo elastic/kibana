@@ -5,6 +5,7 @@
  */
 
 import { createHash } from 'crypto';
+import { deflate } from 'zlib';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { validate } from '../../../../common/validate';
 
@@ -34,6 +35,7 @@ export async function buildArtifact(
   const exceptionsBuffer = Buffer.from(JSON.stringify(exceptions));
   const sha256 = createHash('sha256').update(exceptionsBuffer.toString()).digest('hex');
 
+  // Keep compression info empty in case its a duplicate. Lazily compress before committing if needed.
   return {
     identifier: `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-${os}-${schemaVersion}`,
     compressionAlgorithm: 'none',
@@ -95,10 +97,18 @@ export function translateToEndpointExceptions(
   exc: FoundExceptionListItemSchema,
   schemaVersion: string
 ): TranslatedExceptionListItem[] {
-  if (schemaVersion === '1.0.0') {
-    return exc.data.map((item) => {
-      return translateItem(schemaVersion, item);
+  const entrySet = new Set();
+  const entriesFiltered: TranslatedExceptionListItem[] = [];
+  if (schemaVersion === 'v1') {
+    exc.data.forEach((entry) => {
+      const translatedItem = translateItem(schemaVersion, entry);
+      const entryHash = createHash('sha256').update(JSON.stringify(translatedItem)).digest('hex');
+      if (!entrySet.has(entryHash)) {
+        entriesFiltered.push(translatedItem);
+        entrySet.add(entryHash);
+      }
     });
+    return entriesFiltered;
   } else {
     throw new Error('unsupported schemaVersion');
   }
@@ -122,12 +132,17 @@ function translateItem(
   schemaVersion: string,
   item: ExceptionListItemSchema
 ): TranslatedExceptionListItem {
+  const itemSet = new Set();
   return {
     type: item.type,
     entries: item.entries.reduce((translatedEntries: TranslatedEntry[], entry) => {
       const translatedEntry = translateEntry(schemaVersion, entry);
       if (translatedEntry !== undefined && translatedEntryType.is(translatedEntry)) {
-        translatedEntries.push(translatedEntry);
+        const itemHash = createHash('sha256').update(JSON.stringify(translatedEntry)).digest('hex');
+        if (!itemSet.has(itemHash)) {
+          translatedEntries.push(translatedEntry);
+          itemSet.add(itemHash);
+        }
       }
       return translatedEntries;
     }, []),
@@ -179,4 +194,16 @@ function translateEntry(
         : undefined;
     }
   }
+}
+
+export async function compressExceptionList(buffer: Buffer): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    deflate(buffer, function (err, buf) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(buf);
+      }
+    });
+  });
 }

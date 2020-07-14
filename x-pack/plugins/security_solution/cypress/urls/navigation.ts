@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const ALERTS_URL = 'app/security/alerts';
+export const DETECTIONS_URL = 'app/security/detections';
 export const CASES_URL = '/app/security/cases';
 export const DETECTIONS = '/app/siem#/detections';
 export const HOSTS_URL = '/app/security/hosts/allHosts';

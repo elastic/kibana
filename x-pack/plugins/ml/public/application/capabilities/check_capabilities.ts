@@ -16,8 +16,8 @@ let _capabilities: MlCapabilities = getDefaultCapabilities();
 
 export function checkGetManagementMlJobsResolver() {
   return new Promise<{ mlFeatureEnabledInSpace: boolean }>((resolve, reject) => {
-    getManageMlCapabilities().then(
-      ({ capabilities, isPlatinumOrTrialLicense, mlFeatureEnabledInSpace }) => {
+    getManageMlCapabilities()
+      .then(({ capabilities, isPlatinumOrTrialLicense, mlFeatureEnabledInSpace }) => {
         _capabilities = capabilities;
         // Loop through all capabilities to ensure they are all set to true.
         const isManageML = Object.values(_capabilities).every((p) => p === true);
@@ -28,62 +28,80 @@ export function checkGetManagementMlJobsResolver() {
           window.location.href = ACCESS_DENIED_PATH;
           return reject();
         }
-      }
-    );
+      })
+      .catch((e) => {
+        window.location.href = ACCESS_DENIED_PATH;
+        return reject();
+      });
   });
 }
 
 export function checkGetJobsCapabilitiesResolver(): Promise<MlCapabilities> {
   return new Promise((resolve, reject) => {
-    getCapabilities().then(({ capabilities, isPlatinumOrTrialLicense }) => {
-      _capabilities = capabilities;
-      // the minimum privilege for using ML with a platinum or trial license is being able to get the transforms list.
-      // all other functionality is controlled by the return capabilities object.
-      // if the license is basic (isPlatinumOrTrialLicense === false) then do not redirect,
-      // allow the promise to resolve as the separate license check will redirect then user to
-      // a basic feature
-      if (_capabilities.canGetJobs || isPlatinumOrTrialLicense === false) {
-        return resolve(_capabilities);
-      } else {
+    getCapabilities()
+      .then(({ capabilities, isPlatinumOrTrialLicense }) => {
+        _capabilities = capabilities;
+        // the minimum privilege for using ML with a platinum or trial license is being able to get the transforms list.
+        // all other functionality is controlled by the return capabilities object.
+        // if the license is basic (isPlatinumOrTrialLicense === false) then do not redirect,
+        // allow the promise to resolve as the separate license check will redirect then user to
+        // a basic feature
+        if (_capabilities.canGetJobs || isPlatinumOrTrialLicense === false) {
+          return resolve(_capabilities);
+        } else {
+          window.location.href = '#/access-denied';
+          return reject();
+        }
+      })
+      .catch((e) => {
         window.location.href = '#/access-denied';
         return reject();
-      }
-    });
+      });
   });
 }
 
 export function checkCreateJobsCapabilitiesResolver(): Promise<MlCapabilities> {
   return new Promise((resolve, reject) => {
-    getCapabilities().then(({ capabilities, isPlatinumOrTrialLicense }) => {
-      _capabilities = capabilities;
-      // if the license is basic (isPlatinumOrTrialLicense === false) then do not redirect,
-      // allow the promise to resolve as the separate license check will redirect then user to
-      // a basic feature
-      if (_capabilities.canCreateJob || isPlatinumOrTrialLicense === false) {
-        return resolve(_capabilities);
-      } else {
-        // if the user has no permission to create a job,
-        // redirect them back to the Transforms Management page
+    getCapabilities()
+      .then(({ capabilities, isPlatinumOrTrialLicense }) => {
+        _capabilities = capabilities;
+        // if the license is basic (isPlatinumOrTrialLicense === false) then do not redirect,
+        // allow the promise to resolve as the separate license check will redirect then user to
+        // a basic feature
+        if (_capabilities.canCreateJob || isPlatinumOrTrialLicense === false) {
+          return resolve(_capabilities);
+        } else {
+          // if the user has no permission to create a job,
+          // redirect them back to the Transforms Management page
+          window.location.href = '#/jobs';
+          return reject();
+        }
+      })
+      .catch((e) => {
         window.location.href = '#/jobs';
         return reject();
-      }
-    });
+      });
   });
 }
 
 export function checkFindFileStructurePrivilegeResolver(): Promise<MlCapabilities> {
   return new Promise((resolve, reject) => {
-    getCapabilities().then(({ capabilities }) => {
-      _capabilities = capabilities;
-      // the minimum privilege for using ML with a basic license is being able to use the datavisualizer.
-      // all other functionality is controlled by the return _capabilities object
-      if (_capabilities.canFindFileStructure) {
-        return resolve(_capabilities);
-      } else {
+    getCapabilities()
+      .then(({ capabilities }) => {
+        _capabilities = capabilities;
+        // the minimum privilege for using ML with a basic license is being able to use the datavisualizer.
+        // all other functionality is controlled by the return _capabilities object
+        if (_capabilities.canFindFileStructure) {
+          return resolve(_capabilities);
+        } else {
+          window.location.href = '#/access-denied';
+          return reject();
+        }
+      })
+      .catch((e) => {
         window.location.href = '#/access-denied';
         return reject();
-      }
-    });
+      });
   });
 }
 

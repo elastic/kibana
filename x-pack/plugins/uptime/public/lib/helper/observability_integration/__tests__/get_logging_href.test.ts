@@ -9,34 +9,36 @@ import {
   getLoggingKubernetesHref,
   getLoggingIpHref,
 } from '../get_logging_href';
-import { MonitorSummary } from '../../../../../common/runtime_types';
+import { MonitorSummary, makePing } from '../../../../../common/runtime_types';
 
 describe('getLoggingHref', () => {
   let summary: MonitorSummary;
 
   beforeEach(() => {
+    const ping = makePing({
+      docId: 'myDocId',
+      type: 'test',
+      id: 'myId',
+      ip: '151.101.202.217',
+      status: 'up',
+      duration: 123,
+      timestamp: '123',
+    });
+    ping.container = {
+      id: 'test-container-id',
+    };
+    ping.kubernetes = {
+      pod: {
+        uid: 'test-pod-id',
+      },
+    };
     summary = {
       monitor_id: 'foo',
       state: {
         summary: {},
-        checks: [
-          {
-            monitor: {
-              ip: '151.101.202.217',
-              status: 'up',
-            },
-            container: {
-              id: 'test-container-id',
-            },
-            kubernetes: {
-              pod: {
-                uid: 'test-pod-id',
-              },
-            },
-            timestamp: 123,
-          },
-        ],
+        summaryPings: [ping],
         timestamp: '123',
+        monitor: {},
         url: {},
       },
     };
@@ -91,32 +93,32 @@ describe('getLoggingHref', () => {
   });
 
   it('returns undefined if necessary container is not present', () => {
-    delete summary.state.checks;
+    delete summary.state.summaryPings;
     expect(getLoggingContainerHref(summary, '')).toBeUndefined();
   });
 
   it('returns undefined if necessary container is null', () => {
-    delete summary.state.checks![0].container!.id;
+    delete summary.state.summaryPings![0].container!.id;
     expect(getLoggingContainerHref(summary, '')).toBeUndefined();
   });
 
   it('returns undefined if necessary pod is not present', () => {
-    delete summary.state.checks;
+    delete summary.state.summaryPings;
     expect(getLoggingKubernetesHref(summary, '')).toBeUndefined();
   });
 
   it('returns undefined if necessary pod is null', () => {
-    delete summary.state.checks![0].kubernetes!.pod!.uid;
+    delete summary.state.summaryPings![0].kubernetes!.pod!.uid;
     expect(getLoggingKubernetesHref(summary, '')).toBeUndefined();
   });
 
   it('returns undefined ip href if ip is not present', () => {
-    delete summary.state.checks;
+    delete summary.state.summaryPings;
     expect(getLoggingIpHref(summary, '')).toBeUndefined();
   });
 
   it('returns undefined ip href if ip is null', () => {
-    delete summary.state.checks![0].monitor.ip;
+    delete summary.state.summaryPings![0].monitor.ip;
     expect(getLoggingIpHref(summary, '')).toBeUndefined();
   });
 });
