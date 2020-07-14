@@ -10,7 +10,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import { CoreStart } from '../../../../../src/core/public';
 
-import { API_BASE_PATH } from '../../common';
+import { API_BASE_PATH, PLUGIN } from '../../common';
 
 import { AppContextProvider, AppDependencies } from './app_context';
 import { App } from './app';
@@ -25,9 +25,11 @@ export const renderApp = (
     return () => undefined;
   }
 
-  const { i18n, docLinks, notifications } = core;
+  const { i18n, docLinks, notifications, chrome } = core;
   const { Context: I18nContext } = i18n;
   const { services, history, setBreadcrumbs } = dependencies;
+
+  chrome.docTitle.change(PLUGIN.i18nName);
 
   const componentTemplateProviderValues = {
     httpClient: services.httpService.httpClient,
@@ -52,6 +54,7 @@ export const renderApp = (
   );
 
   return () => {
+    chrome.docTitle.reset();
     unmountComponentAtNode(elem);
   };
 };

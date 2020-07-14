@@ -34,14 +34,13 @@ export async function mountManagementSection(
 ) {
   const { element, setBreadcrumbs, history } = params;
   const [core] = await coreSetup.getStartServices();
-  const { docLinks, fatalErrors, application, chrome } = core;
+  const { docLinks, fatalErrors, application } = core;
 
   breadcrumbService.setup(setBreadcrumbs);
   documentationService.setup(docLinks);
 
   const appDependencies: AppDependencies = {
     core: {
-      docTitle: chrome.docTitle,
       fatalErrors,
       getUrlForApp: application.getUrlForApp,
     },

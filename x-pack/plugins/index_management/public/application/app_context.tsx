@@ -5,7 +5,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { ChromeDocTitle, ScopedHistory } from 'kibana/public';
+import { ScopedHistory } from 'kibana/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { CoreStart } from '../../../../../src/core/public';
@@ -21,7 +21,6 @@ export interface AppDependencies {
   core: {
     fatalErrors: CoreStart['fatalErrors'];
     getUrlForApp: CoreStart['application']['getUrlForApp'];
-    docTitle: ChromeDocTitle;
   };
   plugins: {
     usageCollection: UsageCollectionSetup;
