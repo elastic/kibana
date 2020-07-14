@@ -9,6 +9,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { usePrePackagedRules, importRules } from '../../../containers/detection_engine/rules';
+import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
 import {
   getDetectionEngineUrl,
   getCreateRuleUrl,
@@ -35,13 +36,18 @@ const RulesPageComponent: React.FC = () => {
   const [showImportModal, setShowImportModal] = useState(false);
   const refreshRulesData = useRef<null | Func>(null);
   const {
-    loading,
+    loading: userInfoLoading,
     isSignalIndexExists,
     isAuthenticated,
     hasEncryptionKey,
     canUserCRUD,
     hasIndexWrite,
   } = useUserInfo();
+  const {
+    loading: listsConfigLoading,
+    needsConfiguration: needsListsConfiguration,
+  } = useListsConfig();
+  const loading = userInfoLoading || listsConfigLoading;
   const {
     createPrePackagedRules,
     loading: prePackagedRuleLoading,
@@ -58,12 +64,12 @@ const RulesPageComponent: React.FC = () => {
     isAuthenticated,
     hasEncryptionKey,
   });
+  const { formatUrl } = useFormatUrl(SecurityPageName.detections);
   const prePackagedRuleStatus = getPrePackagedRuleStatus(
     rulesInstalled,
     rulesNotInstalled,
     rulesNotUpdated
   );
-  const { formatUrl } = useFormatUrl(SecurityPageName.detections);
 
   const handleRefreshRules = useCallback(async () => {
     if (refreshRulesData.current != null) {
@@ -96,7 +102,14 @@ const RulesPageComponent: React.FC = () => {
     [history]
   );
 
-  if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
+  if (
+    redirectToDetections(
+      isSignalIndexExists,
+      isAuthenticated,
+      hasEncryptionKey,
+      needsListsConfiguration
+    )
+  ) {
     history.replace(getDetectionEngineUrl());
     return null;
   }
