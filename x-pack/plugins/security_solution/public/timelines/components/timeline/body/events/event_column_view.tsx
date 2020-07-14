@@ -21,7 +21,7 @@ import { Note } from '../../../../../common/lib/note';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { AssociateNote, UpdateNote } from '../../../notes/helpers';
 import { OnColumnResized, OnPinEvent, OnRowSelected, OnUnPinEvent } from '../../events';
-import { EventsTdContent, EventsTrData } from '../../styles';
+import { EventsTd, EventsTdContent, EventsTrData } from '../../styles';
 import { Actions } from '../actions';
 import { DataDrivenColumns } from '../data_driven_columns';
 import { eventHasNotes, getPinOnClick } from '../helpers';
@@ -133,22 +133,24 @@ export const EventColumnView = React.memo<Props>(
               ...acc,
               icon: [
                 ...acc.icon,
-                <EventsTdContent key={action.id} textAlign="center" width={action.width}>
-                  <EuiToolTip
-                    data-test-subj={`${action.dataTestSubj}-tool-tip`}
-                    content={action.content}
-                  >
-                    <EuiButtonIcon
-                      aria-label={action.ariaLabel}
-                      data-test-subj={`${action.dataTestSubj}-button`}
-                      iconType={action.iconType}
-                      isDisabled={
-                        action.isActionDisabled != null ? action.isActionDisabled(ecsData) : false
-                      }
-                      onClick={() => action.onClick({ eventId: id, ecsData, data })}
-                    />
-                  </EuiToolTip>
-                </EventsTdContent>,
+                <EventsTd>
+                  <EventsTdContent key={action.id} textAlign="center" width={action.width}>
+                    <EuiToolTip
+                      data-test-subj={`${action.dataTestSubj}-tool-tip`}
+                      content={action.content}
+                    >
+                      <EuiButtonIcon
+                        aria-label={action.ariaLabel}
+                        data-test-subj={`${action.dataTestSubj}-button`}
+                        iconType={action.iconType}
+                        isDisabled={
+                          action.isActionDisabled != null ? action.isActionDisabled(ecsData) : false
+                        }
+                        onClick={() => action.onClick({ eventId: id, ecsData, data })}
+                      />
+                    </EuiToolTip>
+                  </EventsTdContent>
+                </EventsTd>,
               ],
             };
           }
@@ -176,23 +178,25 @@ export const EventColumnView = React.memo<Props>(
       return grouped.contextMenu.length > 0
         ? [
             ...grouped.icon,
-            <EventsTdContent
-              key="actions-context-menu"
-              textAlign="center"
-              width={DEFAULT_ICON_BUTTON_WIDTH}
-            >
-              <EuiPopover
-                id="singlePanel"
-                button={button}
-                isOpen={isPopoverOpen}
-                closePopover={closePopover}
-                panelPaddingSize="none"
-                anchorPosition="downLeft"
-                repositionOnScroll
+            <EventsTd>
+              <EventsTdContent
+                key="actions-context-menu"
+                textAlign="center"
+                width={DEFAULT_ICON_BUTTON_WIDTH}
               >
-                <ContextMenuPanel items={grouped.contextMenu} />
-              </EuiPopover>
-            </EventsTdContent>,
+                <EuiPopover
+                  id="singlePanel"
+                  button={button}
+                  isOpen={isPopoverOpen}
+                  closePopover={closePopover}
+                  panelPaddingSize="none"
+                  anchorPosition="downLeft"
+                  repositionOnScroll
+                >
+                  <ContextMenuPanel items={grouped.contextMenu} />
+                </EuiPopover>
+              </EventsTdContent>
+            </EventsTd>,
           ]
         : grouped.icon;
     }, [button, closePopover, id, onClickCb, data, ecsData, timelineActions, isPopoverOpen]);

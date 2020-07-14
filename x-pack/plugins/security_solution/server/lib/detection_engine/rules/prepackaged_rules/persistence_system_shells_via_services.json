@@ -1,0 +1,39 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Windows services typically run as SYSTEM and can be used as a privilege escalation opportunity. Malware or penetration testers may run a shell as a service to gain SYSTEM permissions.",
+  "index": [
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "System Shells via Services",
+  "query": "event.category:process and event.type:(start or process_started) and process.parent.name:services.exe and process.name:(cmd.exe or powershell.exe)",
+  "risk_score": 47,
+  "rule_id": "0022d47d-39c7-4f69-a232-4fe9dc7a3acd",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Windows"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1050",
+          "name": "New Service",
+          "reference": "https://attack.mitre.org/techniques/T1050/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 3
+}

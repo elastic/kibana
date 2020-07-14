@@ -130,8 +130,6 @@ export function TransactionOverview() {
             <EuiSpacer size="s" />
 
             <TransactionCharts
-              // TODO [APM ML] set hasMLJob prop when ML integration is reintroduced:
-              hasMLJob={false}
               charts={transactionCharts}
               location={location}
               urlParams={urlParams}
