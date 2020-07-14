@@ -10,6 +10,7 @@ import { Logger } from '../../../../../../../src/core/server';
 import { SignalSearchResponse } from './types';
 import { buildEventsSearchQuery } from './build_events_query';
 import { makeFloatString } from './utils';
+import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
 
 interface SingleSearchAfterParams {
   aggregations?: unknown;
@@ -21,6 +22,7 @@ interface SingleSearchAfterParams {
   logger: Logger;
   pageSize: number;
   filter: unknown;
+  timestampOverride: TimestampOverrideOrUndefined;
 }
 
 // utilize search_after for paging results into bulk.
@@ -34,6 +36,7 @@ export const singleSearchAfter = async ({
   filter,
   logger,
   pageSize,
+  timestampOverride,
 }: SingleSearchAfterParams): Promise<{
   searchResult: SignalSearchResponse;
   searchDuration: string;
@@ -47,6 +50,7 @@ export const singleSearchAfter = async ({
       filter,
       size: pageSize,
       searchAfterSortId,
+      timestampOverride,
     });
     const start = performance.now();
     const nextSearchAfterResult: SignalSearchResponse = await services.callCluster(

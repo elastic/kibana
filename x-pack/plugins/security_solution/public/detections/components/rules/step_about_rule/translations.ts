@@ -26,6 +26,12 @@ export const ADD_FALSE_POSITIVE = i18n.translate(
     defaultMessage: 'Add false positive example',
   }
 );
+export const BUILDING_BLOCK = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepAboutRuleForm.buildingBlockLabel',
+  {
+    defaultMessage: 'Building block',
+  }
+);
 
 export const LOW = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepAboutRuleForm.severityOptionLowDescription',

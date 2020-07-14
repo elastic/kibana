@@ -7,6 +7,7 @@
 import React, { Component, Fragment, FC, ReactNode } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
+import { cloneDeep } from 'lodash';
 
 import {
   EuiButton,
@@ -21,13 +22,16 @@ import {
   EuiSpacer,
   EuiTextArea,
   EuiTitle,
+  EuiCheckbox,
 } from '@elastic/eui';
 
 import { CommonProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import { ANNOTATION_MAX_LENGTH_CHARS } from '../../../../../common/constants/annotations';
+import {
+  ANNOTATION_MAX_LENGTH_CHARS,
+  ANNOTATION_EVENT_USER,
+} from '../../../../../common/constants/annotations';
 import {
   annotation$,
   annotationsRefreshed,
@@ -35,21 +39,45 @@ import {
 } from '../../../services/annotations_service';
 import { AnnotationDescriptionList } from '../annotation_description_list';
 import { DeleteAnnotationModal } from '../delete_annotation_modal';
-
 import { ml } from '../../../services/ml_api_service';
 import { getToastNotifications } from '../../../util/dependency_cache';
+import {
+  getAnnotationFieldName,
+  getAnnotationFieldValue,
+} from '../../../../../common/types/annotations';
+import { PartitionFieldsType } from '../../../../../common/types/anomalies';
+import { PARTITION_FIELDS } from '../../../../../common/constants/anomalies';
+
+interface ViewableDetector {
+  index: number;
+  detector_description: string;
+}
+
+interface Entity {
+  fieldName: string;
+  fieldType: string;
+  fieldValue: string;
+}
 
 interface Props {
   annotation: AnnotationState;
+  chartDetails: {
+    entityData: { entities: Entity[] };
+    functionLabel: string;
+  };
+  detectorIndex: number;
+  detectors: ViewableDetector[];
 }
 
 interface State {
   isDeleteModalVisible: boolean;
+  applyAnnotationToSeries: boolean;
 }
 
 class AnnotationFlyoutUI extends Component<CommonProps & Props> {
   public state: State = {
     isDeleteModalVisible: false,
+    applyAnnotationToSeries: true,
   };
 
   public annotationSub: Rx.Subscription | null = null;
@@ -150,11 +178,31 @@ class AnnotationFlyoutUI extends Component<CommonProps & Props> {
   };
 
   public saveOrUpdateAnnotation = () => {
-    const { annotation } = this.props;
-
-    if (annotation === null) {
+    const { annotation: originalAnnotation, chartDetails, detectorIndex } = this.props;
+    if (originalAnnotation === null) {
       return;
     }
+    const annotation = cloneDeep(originalAnnotation);
+
+    if (this.state.applyAnnotationToSeries && chartDetails?.entityData?.entities) {
+      chartDetails.entityData.entities.forEach((entity: Entity) => {
+        const { fieldName, fieldValue } = entity;
+        const fieldType = entity.fieldType as PartitionFieldsType;
+        annotation[getAnnotationFieldName(fieldType)] = fieldName;
+        annotation[getAnnotationFieldValue(fieldType)] = fieldValue;
+      });
+      annotation.detector_index = detectorIndex;
+    }
+    // if unchecked, remove all the partitions before indexing
+    if (!this.state.applyAnnotationToSeries) {
+      delete annotation.detector_index;
+      PARTITION_FIELDS.forEach((fieldType) => {
+        delete annotation[getAnnotationFieldName(fieldType)];
+        delete annotation[getAnnotationFieldValue(fieldType)];
+      });
+    }
+    // Mark the annotation created by `user` if and only if annotation is being created, not updated
+    annotation.event = annotation.event ?? ANNOTATION_EVENT_USER;
 
     annotation$.next(null);
 
@@ -214,7 +262,7 @@ class AnnotationFlyoutUI extends Component<CommonProps & Props> {
   };
 
   public render(): ReactNode {
-    const { annotation } = this.props;
+    const { annotation, detectors, detectorIndex } = this.props;
     const { isDeleteModalVisible } = this.state;
 
     if (annotation === null) {
@@ -242,10 +290,13 @@ class AnnotationFlyoutUI extends Component<CommonProps & Props> {
         }
       );
     }
+    const detector = detectors ? detectors.find((d) => d.index === detectorIndex) : undefined;
+    const detectorDescription =
+      detector && 'detector_description' in detector ? detector.detector_description : '';
 
     return (
       <Fragment>
-        <EuiFlyout onClose={this.cancelEditingHandler} size="s" aria-labelledby="Add annotation">
+        <EuiFlyout onClose={this.cancelEditingHandler} size="m" aria-labelledby="Add annotation">
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="s">
               <h2 id="mlAnnotationFlyoutTitle">
@@ -264,7 +315,10 @@ class AnnotationFlyoutUI extends Component<CommonProps & Props> {
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <AnnotationDescriptionList annotation={annotation} />
+            <AnnotationDescriptionList
+              annotation={annotation}
+              detectorDescription={detectorDescription}
+            />
             <EuiSpacer size="m" />
             <EuiFormRow
               label={
@@ -284,6 +338,23 @@ class AnnotationFlyoutUI extends Component<CommonProps & Props> {
                 onChange={this.annotationTextChangeHandler}
                 placeholder="..."
                 value={annotation.annotation}
+              />
+            </EuiFormRow>
+            <EuiFormRow>
+              <EuiCheckbox
+                id={'xpack.ml.annotationFlyout.applyToPartition'}
+                label={
+                  <FormattedMessage
+                    id="xpack.ml.annotationFlyout.applyToPartitionTextLabel"
+                    defaultMessage="Apply annotation to this series"
+                  />
+                }
+                checked={this.state.applyAnnotationToSeries}
+                onChange={() =>
+                  this.setState({
+                    applyAnnotationToSeries: !this.state.applyAnnotationToSeries,
+                  })
+                }
               />
             </EuiFormRow>
           </EuiFlyoutBody>

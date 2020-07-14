@@ -8,8 +8,8 @@ import { schema } from '@kbn/config-schema';
 import Boom from 'boom';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
-import { jobsQueryFactory } from '../lib/jobs_query';
 import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
+import { jobsQueryFactory } from './lib/jobs_query';
 import {
   deleteJobResponseHandlerFactory,
   downloadJobResponseHandlerFactory,
