@@ -35,12 +35,14 @@ import { MlJobSelect } from '../ml_job_select';
 import { PickTimeline } from '../pick_timeline';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { NextStep } from '../next_step';
+import { ThresholdInput } from '../threshold_input';
 import {
   Field,
   Form,
-  FormDataProvider,
   getUseField,
   UseField,
+  UseMultiFields,
+  FormDataProvider,
   useForm,
   FormSchema,
 } from '../../../../shared_imports';
@@ -64,6 +66,10 @@ const stepDefineDefaultValue: DefineStepRule = {
     filters: [],
     saved_id: undefined,
   },
+  threshold: {
+    field: [],
+    value: '200',
+  },
   timeline: {
     id: null,
     title: DEFAULT_TIMELINE_TITLE,
@@ -84,6 +90,12 @@ MyLabelButton.defaultProps = {
   flush: 'right',
 };
 
+const RuleTypeEuiFormRow = styled(EuiFormRow).attrs<{ $isVisible: boolean }>(({ $isVisible }) => ({
+  style: {
+    display: $isVisible ? 'flex' : 'none',
+  },
+}))<{ $isVisible: boolean }>``;
+
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   addPadding = false,
   defaultValues,
@@ -97,7 +109,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
-  const [localIsMlRule, setIsMlRule] = useState(false);
+  const [localRuleType, setLocalRuleType] = useState(
+    defaultValues?.ruleType || stepDefineDefaultValue.ruleType
+  );
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [myStepData, setMyStepData] = useState<DefineStepRule>({
     ...stepDefineDefaultValue,
@@ -156,6 +170,17 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     setOpenTimelineSearch(false);
   }, []);
 
+  const ThresholdInputChildren = useCallback(
+    ({ thresholdField, thresholdValue }) => (
+      <ThresholdInput
+        browserFields={browserFields}
+        thresholdField={thresholdField}
+        thresholdValue={thresholdValue}
+      />
+    ),
+    [browserFields]
+  );
+
   return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
@@ -179,7 +204,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               isMlAdmin: hasMlAdminPermissions(mlCapabilities),
             }}
           />
-          <EuiFormRow fullWidth style={{ display: localIsMlRule ? 'none' : 'flex' }}>
+          <RuleTypeEuiFormRow $isVisible={!isMlRule(localRuleType)} fullWidth>
             <>
               <CommonUseField
                 path="index"
@@ -227,8 +252,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 }}
               />
             </>
-          </EuiFormRow>
-          <EuiFormRow fullWidth style={{ display: localIsMlRule ? 'flex' : 'none' }}>
+          </RuleTypeEuiFormRow>
+          <RuleTypeEuiFormRow $isVisible={isMlRule(localRuleType)} fullWidth>
             <>
               <UseField
                 path="machineLearningJobId"
@@ -245,7 +270,29 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 }}
               />
             </>
-          </EuiFormRow>
+          </RuleTypeEuiFormRow>
+          <RuleTypeEuiFormRow
+            $isVisible={localRuleType === 'threshold'}
+            data-test-subj="thresholdInput"
+            fullWidth
+          >
+            <>
+              <UseMultiFields
+                fields={{
+                  thresholdField: {
+                    path: 'threshold.field',
+                    defaultValue: defaultValues?.threshold?.field,
+                  },
+                  thresholdValue: {
+                    path: 'threshold.value',
+                    defaultValue: defaultValues?.threshold?.value,
+                  },
+                }}
+              >
+                {ThresholdInputChildren}
+              </UseMultiFields>
+            </>
+          </RuleTypeEuiFormRow>
           <UseField
             path="timeline"
             component={PickTimeline}
@@ -263,16 +310,15 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 } else if (!deepEqual(index, indicesConfig) && !indexModified) {
                   setIndexModified(true);
                 }
+                if (myStepData.index !== index) {
+                  setMyStepData((prevValue) => ({ ...prevValue, index }));
+                }
               }
 
-              if (isMlRule(ruleType) && !localIsMlRule) {
-                setIsMlRule(true);
-                clearErrors();
-              } else if (!isMlRule(ruleType) && localIsMlRule) {
-                setIsMlRule(false);
+              if (ruleType !== localRuleType) {
+                setLocalRuleType(ruleType);
                 clearErrors();
               }
-
               return null;
             }}
           </FormDataProvider>

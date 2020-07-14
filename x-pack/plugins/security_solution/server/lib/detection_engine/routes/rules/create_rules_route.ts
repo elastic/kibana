@@ -44,6 +44,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
+
       const {
         actions: actionsRest,
         anomaly_threshold: anomalyThreshold,
@@ -75,6 +76,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         severity_mapping: severityMapping,
         tags,
         threat,
+        threshold,
         throttle,
         timestamp_override: timestampOverride,
         to,
@@ -125,6 +127,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
             });
           }
         }
+
         const createdRule = await createRules({
           alertsClient,
           anomalyThreshold,
@@ -159,6 +162,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           to,
           type,
           threat,
+          threshold,
           timestampOverride,
           references,
           note,
