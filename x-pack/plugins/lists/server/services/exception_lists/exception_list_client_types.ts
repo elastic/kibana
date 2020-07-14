@@ -6,12 +6,17 @@
 
 import { SavedObjectsClientContract } from 'kibana/server';
 
+import { NamespaceTypeArray } from '../../../common/schemas/types/default_namespace_array';
+import { NonEmptyStringArrayDecoded } from '../../../common/schemas/types/non_empty_string_array';
+import { EmptyStringArrayDecoded } from '../../../common/schemas/types/empty_string_array';
 import {
   CreateCommentsArray,
   Description,
   DescriptionOrUndefined,
   EntriesArray,
   EntriesArrayOrUndefined,
+  ExceptionListItemType,
+  ExceptionListItemTypeOrUndefined,
   ExceptionListType,
   ExceptionListTypeOrUndefined,
   FilterOrUndefined,
@@ -98,7 +103,7 @@ export interface CreateExceptionListItemOptions {
   description: Description;
   meta: MetaOrUndefined;
   tags: Tags;
-  type: ExceptionListType;
+  type: ExceptionListItemType;
 }
 
 export interface UpdateExceptionListItemOptions {
@@ -112,13 +117,23 @@ export interface UpdateExceptionListItemOptions {
   description: DescriptionOrUndefined;
   meta: MetaOrUndefined;
   tags: TagsOrUndefined;
-  type: ExceptionListTypeOrUndefined;
+  type: ExceptionListItemTypeOrUndefined;
 }
 
 export interface FindExceptionListItemOptions {
   listId: ListId;
   namespaceType: NamespaceType;
   filter: FilterOrUndefined;
+  perPage: PerPageOrUndefined;
+  page: PageOrUndefined;
+  sortField: SortFieldOrUndefined;
+  sortOrder: SortOrderOrUndefined;
+}
+
+export interface FindExceptionListsItemOptions {
+  listId: NonEmptyStringArrayDecoded;
+  namespaceType: NamespaceTypeArray;
+  filter: EmptyStringArrayDecoded;
   perPage: PerPageOrUndefined;
   page: PageOrUndefined;
   sortField: SortFieldOrUndefined;

@@ -9,10 +9,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
+import { GlobalTimeArgs } from '../../containers/use_global_time';
 import { EventsByDataset } from '../../../overview/components/events_by_dataset';
 import { SignalsByCategory } from '../../../overview/components/signals_by_category';
 import { Filter, IIndexPattern, Query } from '../../../../../../../src/plugins/data/public';
-import { inputsModel } from '../../store';
 import { InputsModelId } from '../../store/inputs/constants';
 import { EventType } from '../../../timelines/store/timeline/model';
 
@@ -43,13 +43,11 @@ const TopNContent = styled.div`
   }
 `;
 
-export interface Props {
+export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
   combinedQueries?: string;
   defaultView: EventType;
-  deleteQuery?: ({ id }: { id: string }) => void;
   field: string;
   filters: Filter[];
-  from: number;
   indexPattern: IIndexPattern;
   indexToAdd?: string[] | null;
   options: TopNOption[];
@@ -60,13 +58,6 @@ export interface Props {
     to: number;
   }>;
   setAbsoluteRangeDatePickerTarget: InputsModelId;
-  setQuery: (params: {
-    id: string;
-    inspect: inputsModel.InspectQuery | null;
-    loading: boolean;
-    refetch: inputsModel.Refetch;
-  }) => void;
-  to: number;
   timelineId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;

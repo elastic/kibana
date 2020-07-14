@@ -19,7 +19,7 @@ import * as i18n from './translations';
 import { useWithSource } from '../../containers/source';
 import { useGetUrlSearch } from '../navigation/use_get_url_search';
 import { useKibana } from '../../lib/kibana';
-import { APP_ID, ADD_DATA_PATH, APP_ALERTS_PATH } from '../../../../common/constants';
+import { APP_ID, ADD_DATA_PATH, APP_DETECTIONS_PATH } from '../../../../common/constants';
 import { LinkAnchor } from '../links';
 
 const Wrapper = styled.header`
@@ -60,7 +60,7 @@ export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine
             <EuiFlexGroup alignItems="center" responsive={false}>
               <FlexItem grow={false}>
                 <LinkAnchor onClick={goToOverview} href={getAppOverviewUrl(search)}>
-                  <EuiIcon aria-label={i18n.SIEM} type="securityAnalyticsApp" size="l" />
+                  <EuiIcon aria-label={i18n.SIEM} type="logoSecurity" size="l" />
                 </LinkAnchor>
               </FlexItem>
 
@@ -70,7 +70,7 @@ export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine
                     display="condensed"
                     navTabs={
                       hideDetectionEngine
-                        ? pickBy((_, key) => key !== SecurityPageName.alerts, navTabs)
+                        ? pickBy((_, key) => key !== SecurityPageName.detections, navTabs)
                         : navTabs
                     }
                   />
@@ -86,7 +86,7 @@ export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine
 
           <FlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
-              {indicesExist && window.location.pathname.includes(APP_ALERTS_PATH) && (
+              {indicesExist && window.location.pathname.includes(APP_DETECTIONS_PATH) && (
                 <FlexItem grow={false}>
                   <MlPopover />
                 </FlexItem>

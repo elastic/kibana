@@ -55,14 +55,17 @@ export const updateList = async ({
       body: { doc },
       id,
       index: listIndex,
+      refresh: 'wait_for',
     });
     return {
       created_at: list.created_at,
       created_by: list.created_by,
       description: description ?? list.description,
+      deserializer: list.deserializer,
       id: response._id,
       meta,
       name: name ?? list.name,
+      serializer: list.serializer,
       tie_breaker_id: list.tie_breaker_id,
       type: list.type,
       updated_at: updatedAt,

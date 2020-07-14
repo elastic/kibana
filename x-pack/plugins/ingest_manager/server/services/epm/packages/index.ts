@@ -11,8 +11,7 @@ import {
   Installation,
   InstallationStatus,
   KibanaAssetType,
-} from '../../../../common/types/models/epm';
-
+} from '../../../types';
 export {
   getCategories,
   getFile,
@@ -20,6 +19,7 @@ export {
   getInstallation,
   getPackageInfo,
   getPackages,
+  getLimitedPackages,
   SearchParams,
 } from './get';
 
