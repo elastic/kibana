@@ -31,7 +31,9 @@ export interface CrumbInfo {
   readonly crumbEvent: string;
 }
 
-const ThemedBreadcrumbs = styled(EuiBreadcrumbs)<{ background: string; text: string }>`
+const ThemedBreadcrumbs = styled(EuiBreadcrumbs)<
+  { background: string; text: string } & EuiBreadcrumbsProps
+>`
   &.euiBreadcrumbs.euiBreadcrumbs--responsive {
     background-color: ${(props) => props.background};
     color: ${(props) => props.text};
