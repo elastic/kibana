@@ -13,8 +13,7 @@ import { NoteSavedObject, NoteSavedObjectToReturnRuntimeType } from './note';
 import { PinnedEventToReturnSavedObjectRuntimeType, PinnedEventSavedObject } from './pinned_event';
 import {
   success,
-  // eslint-disable-next-line @typescript-eslint/camelcase
-  success_count,
+  success_count as successCount,
 } from '../../detection_engine/schemas/common/schemas';
 import { PositiveInteger } from '../../detection_engine/schemas/types';
 import { errorSchema } from '../../detection_engine/schemas/response/error_schema';
@@ -390,7 +389,7 @@ export type NotesAndPinnedEventsByTimelineId = Record<
 export const importTimelineResultSchema = runtimeTypes.exact(
   runtimeTypes.type({
     success,
-    success_count,
+    success_count: successCount,
     timelines_installed: PositiveInteger,
     timelines_updated: PositiveInteger,
     errors: runtimeTypes.array(errorSchema),
