@@ -25,31 +25,31 @@ describe('resolver selectors', () => {
     return store.getState();
   };
   describe('ariaFlowtoNodeID', () => {
-    describe('when all nodes are in view', () => {
+    describe('with a tree with no descendants and 2 ancestors', () => {
+      const originID = 'c';
+      const firstAncestorID = 'b';
+      const secondAncestorID = 'a';
       beforeEach(() => {
-        const size = 1000000;
         actions.push({
-          // set the size of the camera
-          type: 'userSetRasterSize',
-          payload: [size, size],
+          type: 'serverReturnedResolverData',
+          payload: {
+            result: treeWith2AncestorsAndNoChildren({
+              originID,
+              firstAncestorID,
+              secondAncestorID,
+            }),
+            // this value doesn't matter
+            databaseDocumentID: '',
+          },
         });
       });
-      describe('with a tree with no descendants and 2 ancestors', () => {
-        const originID = 'c';
-        const firstAncestorID = 'b';
-        const secondAncestorID = 'a';
+      describe('when all nodes are in view', () => {
         beforeEach(() => {
+          const size = 1000000;
           actions.push({
-            type: 'serverReturnedResolverData',
-            payload: {
-              result: treeWith2AncestorsAndNoChildren({
-                originID,
-                firstAncestorID,
-                secondAncestorID,
-              }),
-              // this value doesn't matter
-              databaseDocumentID: '',
-            },
+            // set the size of the camera
+            type: 'userSetRasterSize',
+            payload: [size, size],
           });
         });
         it('should return no flowto for the second ancestor', () => {
@@ -62,18 +62,28 @@ describe('resolver selectors', () => {
           expect(selectors.ariaFlowtoNodeID(state())(0)(originID)).toBe(null);
         });
       });
-      describe('with a tree with 2 children and no ancestors', () => {
-        const originID = 'c';
-        const firstChildID = 'd';
-        const secondChildID = 'e';
+    });
+    describe('with a tree with 2 children and no ancestors', () => {
+      const originID = 'c';
+      const firstChildID = 'd';
+      const secondChildID = 'e';
+      beforeEach(() => {
+        actions.push({
+          type: 'serverReturnedResolverData',
+          payload: {
+            result: treeWithNoAncestorsAnd2Children({ originID, firstChildID, secondChildID }),
+            // this value doesn't matter
+            databaseDocumentID: '',
+          },
+        });
+      });
+      describe('when all nodes are in view', () => {
         beforeEach(() => {
+          const rasterSize = 1000000;
           actions.push({
-            type: 'serverReturnedResolverData',
-            payload: {
-              result: treeWithNoAncestorsAnd2Children({ originID, firstChildID, secondChildID }),
-              // this value doesn't matter
-              databaseDocumentID: '',
-            },
+            // set the size of the camera
+            type: 'userSetRasterSize',
+            payload: [rasterSize, rasterSize],
           });
         });
         it('should return no flowto for the origin', () => {
@@ -84,6 +94,56 @@ describe('resolver selectors', () => {
         });
         it('should return no flowto for second child', () => {
           expect(selectors.ariaFlowtoNodeID(state())(0)(secondChildID)).toBe(null);
+        });
+      });
+      describe('when only the origin and first child are in view', () => {
+        beforeEach(() => {
+          // set the raster size
+          const rasterSize = 1000000;
+          actions.push({
+            // set the size of the camera
+            type: 'userSetRasterSize',
+            payload: [rasterSize, rasterSize],
+          });
+
+          // get the layout
+          const layout = selectors.layout(state());
+
+          // find the position of the second child
+          const secondChild = selectors.processEventForID(state())(secondChildID);
+          const positionOfSecondChild = layout.processNodePositions.get(secondChild!)!;
+
+          // the child is indexed by an AABB that extends -720/2 to the left
+          const leftSideOfSecondChildAABB = positionOfSecondChild[0] - 720 / 2;
+
+          // adjust the camera so that it doesn't quite see the second child
+          actions.push({
+            // set the position of the camera so that the left edge of the second child is at the right edge
+            // of the viewable area
+            type: 'userSetPositionOfCamera',
+            payload: [rasterSize / -2 + leftSideOfSecondChildAABB, 0],
+          });
+        });
+        it('the origin should be in view', () => {
+          const origin = selectors.processEventForID(state())(originID)!;
+          expect(
+            selectors.visibleNodesAndEdgeLines(state())(0).processNodePositions.has(origin)
+          ).toBe(true);
+        });
+        it('the first child should be in view', () => {
+          const firstChild = selectors.processEventForID(state())(firstChildID)!;
+          expect(
+            selectors.visibleNodesAndEdgeLines(state())(0).processNodePositions.has(firstChild)
+          ).toBe(true);
+        });
+        it('the second child should not be in view', () => {
+          const secondChild = selectors.processEventForID(state())(secondChildID)!;
+          expect(
+            selectors.visibleNodesAndEdgeLines(state())(0).processNodePositions.has(secondChild)
+          ).toBe(false);
+        });
+        it('should return nothing as the flowto for the first child', () => {
+          expect(selectors.ariaFlowtoNodeID(state())(0)(firstChildID)).toBe(null);
         });
       });
     });
