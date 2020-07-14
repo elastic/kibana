@@ -143,8 +143,19 @@ export const SetupPage: React.FunctionComponent<{
           <RequirementItem isMissing={false}>
             <FormattedMessage
               id="xpack.ingestManager.setupPage.elasticsearchSecurityFlagText"
-              defaultMessage="Elasticsearch security. Set {securityFlag} to {true} ."
+              defaultMessage="{esSecurityLink}. Set {securityFlag} to {true} ."
               values={{
+                esSecurityLink: (
+                  <EuiLink
+                    href="https://www.elastic.co/guide/en/elasticsearch/reference/current/configuring-security.html"
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="xpack.ingestManager.setupPage.elasticsearchSecurityLink"
+                      defaultMessage="Elasticsearch security"
+                    />
+                  </EuiLink>
+                ),
                 securityFlag: <EuiCode>xpack.security.enabled</EuiCode>,
                 true: <EuiCode>true</EuiCode>,
               }}
@@ -154,10 +165,21 @@ export const SetupPage: React.FunctionComponent<{
           <RequirementItem isMissing={missingRequirements.includes('api_keys')}>
             <FormattedMessage
               id="xpack.ingestManager.setupPage.elasticsearchApiKeyFlagText"
-              defaultMessage="API key service. Set {apiKeyFlag} to {true} ."
+              defaultMessage="{apiKeyLink}. Set {apiKeyFlag} to {true} ."
               values={{
                 apiKeyFlag: <EuiCode>xpack.security.authc.api_key.enabled</EuiCode>,
                 true: <EuiCode>true</EuiCode>,
+                apiKeyLink: (
+                  <EuiLink
+                    href="https://www.elastic.co/guide/en/elasticsearch/reference/current/security-settings.html#api-key-service-settings"
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="xpack.ingestManager.setupPage.apiKeyServiceLink"
+                      defaultMessage="API key service"
+                    />
+                  </EuiLink>
+                ),
               }}
             />
           </RequirementItem>
@@ -175,9 +197,31 @@ xpack.security.authc.api_key.enabled: true`}
           <RequirementItem isMissing={missingRequirements.includes('tls_required')}>
             <FormattedMessage
               id="xpack.ingestManager.setupPage.tlsFlagText"
-              defaultMessage="Kibana security. Set {securityFlag} to {true}. For development purposes, you can disable TLS by setting {tlsFlag} to {true} as an unsafe alternative."
+              defaultMessage="{kibanaSecurityLink}. Set {securityFlag} to {true}. For development purposes, you can disable {tlsLink} by setting {tlsFlag} to {true} as an unsafe alternative."
               values={{
+                kibanaSecurityLink: (
+                  <EuiLink
+                    href="https://www.elastic.co/guide/en/kibana/current/using-kibana-with-security.html"
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="xpack.ingestManager.setupPage.kibanaSecurityLink"
+                      defaultMessage="Kibana security"
+                    />
+                  </EuiLink>
+                ),
                 securityFlag: <EuiCode>xpack.security.enabled</EuiCode>,
+                tlsLink: (
+                  <EuiLink
+                    href="https://www.elastic.co/guide/en/kibana/current/configuring-tls.html"
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="xpack.ingestManager.setupPage.tlsLink"
+                      defaultMessage="TLS"
+                    />
+                  </EuiLink>
+                ),
                 tlsFlag: <EuiCode>xpack.ingestManager.fleet.tlsCheckDisabled</EuiCode>,
                 true: <EuiCode>true</EuiCode>,
               }}
