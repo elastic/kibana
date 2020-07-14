@@ -16,11 +16,12 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { TimelineNonEcsData, Ecs } from '../../../../../graphql/types';
+import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 import { Note } from '../../../../../common/lib/note';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { AssociateNote, UpdateNote } from '../../../notes/helpers';
 import { OnColumnResized, OnPinEvent, OnRowSelected, OnUnPinEvent } from '../../events';
-import { EventsTdContent, EventsTrData } from '../../styles';
+import { EventsTd, EventsTdContent, EventsTrData } from '../../styles';
 import { Actions } from '../actions';
 import { DataDrivenColumns } from '../data_driven_columns';
 import { eventHasNotes, getPinOnClick } from '../helpers';
@@ -88,10 +89,10 @@ export const EventColumnView = React.memo<Props>(
     updateNote,
   }) => {
     const { getManageTimelineById } = useManageTimeline();
-    const timelineActions = useMemo(() => getManageTimelineById(timelineId).timelineRowActions, [
-      getManageTimelineById,
-      timelineId,
-    ]);
+    const timelineActions = useMemo(
+      () => getManageTimelineById(timelineId).timelineRowActions({ nonEcsData: data, ecsData }),
+      [data, ecsData, getManageTimelineById, timelineId]
+    );
     const [isPopoverOpen, setPopover] = useState(false);
 
     const onButtonClick = useCallback(() => {
@@ -104,6 +105,7 @@ export const EventColumnView = React.memo<Props>(
 
     const button = (
       <EuiButtonIcon
+        aria-label="context menu"
         data-test-subj="timeline-context-menu-button"
         size="s"
         iconType="boxesHorizontal"
@@ -131,20 +133,24 @@ export const EventColumnView = React.memo<Props>(
               ...acc,
               icon: [
                 ...acc.icon,
-                <EventsTdContent key={action.id} textAlign="center">
-                  <EuiToolTip
-                    data-test-subj={`${action.dataTestSubj}-tool-tip`}
-                    content={action.content}
-                  >
-                    <EuiButtonIcon
-                      aria-label={action.ariaLabel}
-                      data-test-subj={`${action.dataTestSubj}-button`}
-                      iconType={action.iconType}
-                      isDisabled={action.isActionDisabled ?? false}
-                      onClick={() => action.onClick({ eventId: id, ecsData })}
-                    />
-                  </EuiToolTip>
-                </EventsTdContent>,
+                <EventsTd>
+                  <EventsTdContent key={action.id} textAlign="center" width={action.width}>
+                    <EuiToolTip
+                      data-test-subj={`${action.dataTestSubj}-tool-tip`}
+                      content={action.content}
+                    >
+                      <EuiButtonIcon
+                        aria-label={action.ariaLabel}
+                        data-test-subj={`${action.dataTestSubj}-button`}
+                        iconType={action.iconType}
+                        isDisabled={
+                          action.isActionDisabled != null ? action.isActionDisabled(ecsData) : false
+                        }
+                        onClick={() => action.onClick({ eventId: id, ecsData, data })}
+                      />
+                    </EuiToolTip>
+                  </EventsTdContent>
+                </EventsTd>,
               ],
             };
           }
@@ -155,10 +161,12 @@ export const EventColumnView = React.memo<Props>(
               <EuiContextMenuItem
                 aria-label={action.ariaLabel}
                 data-test-subj={action.dataTestSubj}
-                disabled={action.isActionDisabled ?? false}
+                disabled={
+                  action.isActionDisabled != null ? action.isActionDisabled(ecsData) : false
+                }
                 icon={action.iconType}
                 key={action.id}
-                onClick={() => onClickCb(() => action.onClick({ eventId: id, ecsData }))}
+                onClick={() => onClickCb(() => action.onClick({ eventId: id, ecsData, data }))}
               >
                 {action.content}
               </EuiContextMenuItem>,
@@ -170,22 +178,28 @@ export const EventColumnView = React.memo<Props>(
       return grouped.contextMenu.length > 0
         ? [
             ...grouped.icon,
-            <EventsTdContent key="actions-context-menu" textAlign="center">
-              <EuiPopover
-                id="singlePanel"
-                button={button}
-                isOpen={isPopoverOpen}
-                closePopover={closePopover}
-                panelPaddingSize="none"
-                anchorPosition="downLeft"
+            <EventsTd>
+              <EventsTdContent
+                key="actions-context-menu"
+                textAlign="center"
+                width={DEFAULT_ICON_BUTTON_WIDTH}
               >
-                <ContextMenuPanel items={grouped.contextMenu} />
-              </EuiPopover>
-            </EventsTdContent>,
+                <EuiPopover
+                  id="singlePanel"
+                  button={button}
+                  isOpen={isPopoverOpen}
+                  closePopover={closePopover}
+                  panelPaddingSize="none"
+                  anchorPosition="downLeft"
+                  repositionOnScroll
+                >
+                  <ContextMenuPanel items={grouped.contextMenu} />
+                </EuiPopover>
+              </EventsTdContent>
+            </EventsTd>,
           ]
         : grouped.icon;
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [button, ecsData, timelineActions, isPopoverOpen]); // , isPopoverOpen, closePopover, onButtonClick]);
+    }, [button, closePopover, id, onClickCb, data, ecsData, timelineActions, isPopoverOpen]);
 
     return (
       <EventsTrData data-test-subj="event-column-view">

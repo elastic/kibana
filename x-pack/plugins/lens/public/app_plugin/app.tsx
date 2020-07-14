@@ -40,6 +40,7 @@ import {
 } from '../../../../../src/plugins/data/public';
 
 interface State {
+  indicateNoData: boolean;
   isLoading: boolean;
   isSaveModalVisible: boolean;
   indexPatternsForTopNav: IndexPatternInstance[];
@@ -97,8 +98,26 @@ export function App({
         toDate: currentRange.to,
       },
       filters: [],
+      indicateNoData: false,
     };
   });
+
+  const showNoDataPopover = useCallback(() => {
+    setState((prevState) => ({ ...prevState, indicateNoData: true }));
+  }, [setState]);
+
+  useEffect(() => {
+    if (state.indicateNoData) {
+      setState((prevState) => ({ ...prevState, indicateNoData: false }));
+    }
+  }, [
+    setState,
+    state.indicateNoData,
+    state.query,
+    state.filters,
+    state.dateRange,
+    state.indexPatternsForTopNav,
+  ]);
 
   const { lastKnownDoc } = state;
 
@@ -458,6 +477,7 @@ export function App({
               query={state.query}
               dateRangeFrom={state.dateRange.fromDate}
               dateRangeTo={state.dateRange.toDate}
+              indicateNoData={state.indicateNoData}
             />
           </div>
 
@@ -472,6 +492,7 @@ export function App({
                 savedQuery: state.savedQuery,
                 doc: state.persistedDoc,
                 onError,
+                showNoDataPopover,
                 onChange: ({ filterableIndexPatterns, doc }) => {
                   if (!_.isEqual(state.persistedDoc, doc)) {
                     setState((s) => ({ ...s, lastKnownDoc: doc }));

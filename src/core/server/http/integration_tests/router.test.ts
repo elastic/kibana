@@ -24,12 +24,12 @@ import { schema } from '@kbn/config-schema';
 import { HttpService } from '../http_service';
 
 import { contextServiceMock } from '../../context/context_service.mock';
-import { loggingServiceMock } from '../../logging/logging_service.mock';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { createHttpServer } from '../test_utils';
 
 let server: HttpService;
 
-let logger: ReturnType<typeof loggingServiceMock.create>;
+let logger: ReturnType<typeof loggingSystemMock.create>;
 const contextSetup = contextServiceMock.createSetupContract();
 
 const setupDeps = {
@@ -37,7 +37,7 @@ const setupDeps = {
 };
 
 beforeEach(() => {
-  logger = loggingServiceMock.create();
+  logger = loggingSystemMock.create();
 
   server = createHttpServer({ logger });
 });
@@ -347,7 +347,7 @@ describe('Handler', () => {
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
     expect(result.body.message).toBe('An internal server error occurred.');
-    expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
             [Error: unexpected error],
@@ -368,7 +368,7 @@ describe('Handler', () => {
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
     expect(result.body.message).toBe('An internal server error occurred.');
-    expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
           [Error: Unauthorized],
@@ -387,7 +387,7 @@ describe('Handler', () => {
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
     expect(result.body.message).toBe('An internal server error occurred.');
-    expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
           [Error: Unexpected result from Route Handler. Expected KibanaResponse, but given: string.],
@@ -763,7 +763,7 @@ describe('Response factory', () => {
       await supertest(innerServer.listener).get('/').expect(500);
 
       // error happens within hapi when route handler already finished execution.
-      expect(loggingServiceMock.collect(logger).error).toHaveLength(0);
+      expect(loggingSystemMock.collect(logger).error).toHaveLength(0);
     });
 
     it('200 OK with body', async () => {
@@ -855,7 +855,7 @@ describe('Response factory', () => {
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
       expect(result.body.message).toBe('An internal server error occurred.');
-      expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
             [Error: expected 'location' header to be set],
@@ -1261,7 +1261,7 @@ describe('Response factory', () => {
         message: 'An internal server error occurred.',
         statusCode: 500,
       });
-      expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
             [Error: Unexpected Http status code. Expected from 400 to 599, but given: 200],
@@ -1330,7 +1330,7 @@ describe('Response factory', () => {
 
       await supertest(innerServer.listener).get('/').expect(500);
 
-      expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
             [Error: expected 'location' header to be set],
@@ -1445,7 +1445,7 @@ describe('Response factory', () => {
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
       expect(result.body.message).toBe('reason');
-      expect(loggingServiceMock.collect(logger).error).toHaveLength(0);
+      expect(loggingSystemMock.collect(logger).error).toHaveLength(0);
     });
 
     it('throws an error if not valid error is provided', async () => {
@@ -1464,7 +1464,7 @@ describe('Response factory', () => {
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
       expect(result.body.message).toBe('An internal server error occurred.');
-      expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
             [Error: expected error message to be provided],
@@ -1488,7 +1488,7 @@ describe('Response factory', () => {
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
       expect(result.body.message).toBe('An internal server error occurred.');
-      expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
             [Error: expected error message to be provided],
@@ -1511,7 +1511,7 @@ describe('Response factory', () => {
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
       expect(result.body.message).toBe('An internal server error occurred.');
-      expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
             [Error: options.statusCode is expected to be set. given options: undefined],
@@ -1534,7 +1534,7 @@ describe('Response factory', () => {
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
       expect(result.body.message).toBe('An internal server error occurred.');
-      expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
             [Error: Unexpected Http status code. Expected from 100 to 599, but given: 20.],

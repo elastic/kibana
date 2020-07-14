@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { LegacyAPICaller } from 'kibana/server';
 import { getAdminCapabilities, getUserCapabilities } from './__mocks__/ml_capabilities';
 import { capabilitiesProvider } from './check_capabilities';
 import { MlLicense } from '../../../common/license';
@@ -22,8 +23,12 @@ const mlLicenseBasic = {
 const mlIsEnabled = async () => true;
 const mlIsNotEnabled = async () => false;
 
-const callWithRequestNonUpgrade = async () => ({ upgrade_mode: false });
-const callWithRequestUpgrade = async () => ({ upgrade_mode: true });
+const callWithRequestNonUpgrade = ((async () => ({
+  upgrade_mode: false,
+})) as unknown) as LegacyAPICaller;
+const callWithRequestUpgrade = ((async () => ({
+  upgrade_mode: true,
+})) as unknown) as LegacyAPICaller;
 
 describe('check_capabilities', () => {
   describe('getCapabilities() - right number of capabilities', () => {

@@ -35,6 +35,11 @@ type MetricsAggregationOptions =
 interface MetricsAggregationResponsePart {
   value: number | null;
 }
+interface DateHistogramBucket {
+  doc_count: number;
+  key: number;
+  key_as_string: string;
+}
 
 type GetCompositeKeys<
   TAggregationOptionsMap extends AggregationOptionsMap
@@ -145,6 +150,7 @@ export interface AggregationOptionsByType {
     field: string;
     values: string[];
     keyed?: boolean;
+    hdr?: { number_of_significant_value_digits: number };
   };
 }
 
@@ -204,14 +210,8 @@ interface AggregationResponsePart<
   };
   date_histogram: {
     buckets: Array<
-      {
-        doc_count: number;
-        key: number;
-        key_as_string: string;
-      } & BucketSubAggregationResponse<
-        TAggregationOptionsMap['aggs'],
-        TDocument
-      >
+      DateHistogramBucket &
+        BucketSubAggregationResponse<TAggregationOptionsMap['aggs'], TDocument>
     >;
   };
   avg: MetricsAggregationResponsePart;
@@ -312,20 +312,18 @@ interface AggregationResponsePart<
   };
   auto_date_histogram: {
     buckets: Array<
-      {
-        doc_count: number;
-        key: number;
-        key_as_string: string;
-      } & BucketSubAggregationResponse<
-        TAggregationOptionsMap['aggs'],
-        TDocument
-      >
+      DateHistogramBucket &
+        AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>
     >;
     interval: string;
   };
 
   percentile_ranks: {
-    values: Record<string, number> | Array<{ key: number; value: number }>;
+    values: TAggregationOptionsMap extends {
+      percentile_ranks: { keyed: false };
+    }
+      ? Array<{ key: number; value: number }>
+      : Record<string, number>;
   };
 }
 

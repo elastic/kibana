@@ -9,13 +9,12 @@ import { openAddFilterPopover, fillAddFilterForm } from '../tasks/search_bar';
 import { GLOBAL_SEARCH_BAR_FILTER_ITEM } from '../screens/search_bar';
 import { hostIpFilter } from '../objects/filter';
 
-import { HOSTS_PAGE } from '../urls/navigation';
+import { HOSTS_URL } from '../urls/navigation';
 import { waitForAllHostsToBeLoaded } from '../tasks/hosts/all_hosts';
 
-// FAILING: https://github.com/elastic/kibana/issues/69595
 describe.skip('SearchBar', () => {
   before(() => {
-    loginAndWaitForPage(HOSTS_PAGE);
+    loginAndWaitForPage(HOSTS_URL);
     waitForAllHostsToBeLoaded();
   });
 

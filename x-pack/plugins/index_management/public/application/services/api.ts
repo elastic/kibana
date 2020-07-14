@@ -53,11 +53,18 @@ export function useLoadDataStreams() {
   });
 }
 
-// TODO: Implement this API endpoint once we have content to surface in the detail panel.
 export function useLoadDataStream(name: string) {
-  return useRequest<DataStream[]>({
-    path: `${API_BASE_PATH}/data_stream/${encodeURIComponent(name)}`,
+  return useRequest<DataStream>({
+    path: `${API_BASE_PATH}/data_streams/${encodeURIComponent(name)}`,
     method: 'get',
+  });
+}
+
+export async function deleteDataStreams(dataStreams: string[]) {
+  return sendRequest({
+    path: `${API_BASE_PATH}/delete_data_streams`,
+    method: 'post',
+    body: { dataStreams },
   });
 }
 

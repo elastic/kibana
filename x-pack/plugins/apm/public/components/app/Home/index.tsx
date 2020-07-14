@@ -20,6 +20,7 @@ import { EuiTabLink } from '../../shared/EuiTabLink';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
 import { ServiceOverviewLink } from '../../shared/Links/apm/ServiceOverviewLink';
 import { SettingsLink } from '../../shared/Links/apm/SettingsLink';
+import { AnomalyDetectionSetupLink } from '../../shared/Links/apm/AnomalyDetectionSetupLink';
 import { TraceOverviewLink } from '../../shared/Links/apm/TraceOverviewLink';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 import { ServiceMap } from '../ServiceMap';
@@ -27,7 +28,6 @@ import { ServiceOverview } from '../ServiceOverview';
 import { TraceOverview } from '../TraceOverview';
 import { RumOverview } from '../RumDashboard';
 import { RumOverviewLink } from '../../shared/Links/apm/RumOverviewLink';
-import { EndUserExperienceLabel } from '../RumDashboard/translations';
 
 function getHomeTabs({
   serviceMapEnabled = true,
@@ -109,11 +109,7 @@ export function Home({ tab }: Props) {
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
-              <h1>
-                {selectedTab.name === 'rum-overview'
-                  ? EndUserExperienceLabel
-                  : 'APM'}
-              </h1>
+              <h1>APM</h1>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -122,6 +118,9 @@ export function Home({ tab }: Props) {
                 {SETTINGS_LINK_LABEL}
               </EuiButtonEmpty>
             </SettingsLink>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <AnomalyDetectionSetupLink />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <SetupInstructionsLink />

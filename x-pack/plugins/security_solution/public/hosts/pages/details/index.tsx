@@ -27,10 +27,8 @@ import { SiemSearchBar } from '../../../common/components/search_bar';
 import { WrapperPage } from '../../../common/components/wrapper_page';
 import { HostOverviewByNameQuery } from '../../containers/hosts/overview';
 import { KpiHostDetailsQuery } from '../../containers/kpi_host_details';
-import {
-  indicesExistOrDataTemporarilyUnavailable,
-  WithSource,
-} from '../../../common/containers/source';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { useWithSource } from '../../../common/containers/source';
 import { LastEventIndexKey } from '../../../graphql/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
@@ -40,7 +38,7 @@ import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '.
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { esQuery, Filter } from '../../../../../../../src/plugins/data/public';
 
-import { HostsEmptyPage } from '../hosts_empty_page';
+import { OverviewEmpty } from '../../../overview/components/overview_empty';
 import { HostDetailsTabs } from './details_tabs';
 import { navTabsHostDetails } from './nav_tabs';
 import { HostDetailsProps } from './types';
@@ -53,17 +51,13 @@ const KpiHostDetailsManage = manageQuery(KpiHostsComponent);
 const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
   ({
     filters,
-    from,
-    isInitializing,
     query,
     setAbsoluteRangeDatePicker,
     setHostDetailsTablesActivePageToZero,
-    setQuery,
-    to,
     detailName,
-    deleteQuery,
     hostDetailsPagePath,
   }) => {
+    const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
     useEffect(() => {
       setHostDetailsTablesActivePageToZero();
     }, [setHostDetailsTablesActivePageToZero, detailName]);
@@ -83,132 +77,126 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
       },
       [setAbsoluteRangeDatePicker]
     );
+    const { indicesExist, indexPattern } = useWithSource();
+    const filterQuery = convertToBuildEsQuery({
+      config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+      indexPattern,
+      queries: [query],
+      filters: getFilters(),
+    });
 
     return (
       <>
-        <WithSource sourceId="default">
-          {({ indicesExist, indexPattern }) => {
-            const filterQuery = convertToBuildEsQuery({
-              config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-              indexPattern,
-              queries: [query],
-              filters: getFilters(),
-            });
-            return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-              <StickyContainer>
-                <FiltersGlobal>
-                  <SiemSearchBar indexPattern={indexPattern} id="global" />
-                </FiltersGlobal>
+        {indicesExist ? (
+          <StickyContainer>
+            <FiltersGlobal>
+              <SiemSearchBar indexPattern={indexPattern} id="global" />
+            </FiltersGlobal>
 
-                <WrapperPage>
-                  <HeaderPage
-                    border
-                    subtitle={
-                      <LastEventTime
-                        indexKey={LastEventIndexKey.hostDetails}
-                        hostName={detailName}
-                      />
-                    }
-                    title={detailName}
-                  />
+            <WrapperPage>
+              <HeaderPage
+                border
+                subtitle={
+                  <LastEventTime indexKey={LastEventIndexKey.hostDetails} hostName={detailName} />
+                }
+                title={detailName}
+              />
 
-                  <HostOverviewByNameQuery
-                    sourceId="default"
-                    hostName={detailName}
-                    skip={isInitializing}
+              <HostOverviewByNameQuery
+                sourceId="default"
+                hostName={detailName}
+                skip={isInitializing}
+                startDate={from}
+                endDate={to}
+              >
+                {({ hostOverview, loading, id, inspect, refetch }) => (
+                  <AnomalyTableProvider
+                    criteriaFields={hostToCriteria(hostOverview)}
                     startDate={from}
                     endDate={to}
-                  >
-                    {({ hostOverview, loading, id, inspect, refetch }) => (
-                      <AnomalyTableProvider
-                        criteriaFields={hostToCriteria(hostOverview)}
-                        startDate={from}
-                        endDate={to}
-                        skip={isInitializing}
-                      >
-                        {({ isLoadingAnomaliesData, anomaliesData }) => (
-                          <HostOverviewManage
-                            id={id}
-                            inspect={inspect}
-                            refetch={refetch}
-                            setQuery={setQuery}
-                            data={hostOverview}
-                            anomaliesData={anomaliesData}
-                            isLoadingAnomaliesData={isLoadingAnomaliesData}
-                            loading={loading}
-                            startDate={from}
-                            endDate={to}
-                            narrowDateRange={(score, interval) => {
-                              const fromTo = scoreIntervalToDateTime(score, interval);
-                              setAbsoluteRangeDatePicker({
-                                id: 'global',
-                                from: fromTo.from,
-                                to: fromTo.to,
-                              });
-                            }}
-                          />
-                        )}
-                      </AnomalyTableProvider>
-                    )}
-                  </HostOverviewByNameQuery>
-
-                  <EuiHorizontalRule />
-
-                  <KpiHostDetailsQuery
-                    sourceId="default"
-                    filterQuery={filterQuery}
                     skip={isInitializing}
-                    startDate={from}
-                    endDate={to}
                   >
-                    {({ kpiHostDetails, id, inspect, loading, refetch }) => (
-                      <KpiHostDetailsManage
-                        data={kpiHostDetails}
-                        from={from}
+                    {({ isLoadingAnomaliesData, anomaliesData }) => (
+                      <HostOverviewManage
                         id={id}
                         inspect={inspect}
-                        loading={loading}
                         refetch={refetch}
                         setQuery={setQuery}
-                        to={to}
-                        narrowDateRange={narrowDateRange}
+                        data={hostOverview}
+                        anomaliesData={anomaliesData}
+                        isLoadingAnomaliesData={isLoadingAnomaliesData}
+                        loading={loading}
+                        startDate={from}
+                        endDate={to}
+                        narrowDateRange={(score, interval) => {
+                          const fromTo = scoreIntervalToDateTime(score, interval);
+                          setAbsoluteRangeDatePicker({
+                            id: 'global',
+                            from: fromTo.from,
+                            to: fromTo.to,
+                          });
+                        }}
                       />
                     )}
-                  </KpiHostDetailsQuery>
+                  </AnomalyTableProvider>
+                )}
+              </HostOverviewByNameQuery>
 
-                  <EuiSpacer />
+              <EuiHorizontalRule />
 
-                  <SiemNavigation
-                    navTabs={navTabsHostDetails(detailName, hasMlUserPermissions(capabilities))}
-                  />
-
-                  <EuiSpacer />
-
-                  <HostDetailsTabs
-                    isInitializing={isInitializing}
-                    deleteQuery={deleteQuery}
-                    pageFilters={hostDetailsPageFilters}
-                    to={to}
+              <KpiHostDetailsQuery
+                sourceId="default"
+                filterQuery={filterQuery}
+                skip={isInitializing}
+                startDate={from}
+                endDate={to}
+              >
+                {({ kpiHostDetails, id, inspect, loading, refetch }) => (
+                  <KpiHostDetailsManage
+                    data={kpiHostDetails}
                     from={from}
-                    detailName={detailName}
-                    type={type}
+                    id={id}
+                    inspect={inspect}
+                    loading={loading}
+                    refetch={refetch}
                     setQuery={setQuery}
-                    filterQuery={filterQuery}
-                    hostDetailsPagePath={hostDetailsPagePath}
-                    indexPattern={indexPattern}
-                    setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+                    to={to}
+                    narrowDateRange={narrowDateRange}
                   />
-                </WrapperPage>
-              </StickyContainer>
-            ) : (
-              <WrapperPage>
-                <HeaderPage border title={detailName} />
+                )}
+              </KpiHostDetailsQuery>
 
-                <HostsEmptyPage />
-              </WrapperPage>
-            );
-          }}
-        </WithSource>
+              <EuiSpacer />
+
+              <SiemNavigation
+                navTabs={navTabsHostDetails(detailName, hasMlUserPermissions(capabilities))}
+              />
+
+              <EuiSpacer />
+
+              <HostDetailsTabs
+                isInitializing={isInitializing}
+                deleteQuery={deleteQuery}
+                pageFilters={hostDetailsPageFilters}
+                to={to}
+                from={from}
+                detailName={detailName}
+                type={type}
+                setQuery={setQuery}
+                filterQuery={filterQuery}
+                hostDetailsPagePath={hostDetailsPagePath}
+                indexPattern={indexPattern}
+                setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+              />
+            </WrapperPage>
+          </StickyContainer>
+        ) : (
+          <WrapperPage>
+            <HeaderPage border title={detailName} />
+
+            <OverviewEmpty />
+          </WrapperPage>
+        )}
 
         <SpyRoute pageName={SecurityPageName.hosts} />
       </>

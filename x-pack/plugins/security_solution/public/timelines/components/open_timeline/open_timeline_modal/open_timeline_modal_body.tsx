@@ -23,6 +23,7 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
   ({
     deleteTimelines,
     defaultPageSize,
+    favoriteCount,
     hideActions = [],
     isLoading,
     itemIdToExpandedNotesRowMap,
@@ -42,17 +43,31 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
     selectedItems,
     sortDirection,
     sortField,
-    tabs,
+    timelineFilter,
+    timelineType,
+    templateTimelineFilter,
     title,
     totalSearchResultsCount,
   }) => {
     const actionsToShow = useMemo(() => {
-      const actions: ActionTimelineToShow[] =
-        onDeleteSelected != null && deleteTimelines != null
-          ? ['delete', 'duplicate']
-          : ['duplicate'];
+      const actions: ActionTimelineToShow[] = ['createFrom', 'duplicate'];
+
+      if (onDeleteSelected != null && deleteTimelines != null) {
+        actions.push('delete');
+      }
+
       return actions.filter((action) => !hideActions.includes(action));
     }, [onDeleteSelected, deleteTimelines, hideActions]);
+
+    const SearchRowContent = useMemo(
+      () => (
+        <>
+          {!!timelineFilter && timelineFilter}
+          {!!templateTimelineFilter && templateTimelineFilter}
+        </>
+      ),
+      [timelineFilter, templateTimelineFilter]
+    );
 
     return (
       <>
@@ -67,13 +82,15 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
             <>
               <SearchRow
                 data-test-subj="search-row"
+                favoriteCount={favoriteCount}
                 onlyFavorites={onlyFavorites}
                 onQueryChange={onQueryChange}
                 onToggleOnlyFavorites={onToggleOnlyFavorites}
-                query={query}
-                tabs={tabs}
-                totalSearchResultsCount={totalSearchResultsCount}
-              />
+                query=""
+                timelineType={timelineType}
+              >
+                {SearchRowContent}
+              </SearchRow>
             </>
           </HeaderContainer>
         </EuiModalHeader>
@@ -96,6 +113,7 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
             showExtendedColumns={false}
             sortDirection={sortDirection}
             sortField={sortField}
+            timelineType={timelineType}
             totalSearchResultsCount={totalSearchResultsCount}
           />
         </EuiModalBody>

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { loggingServiceMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { getResult } from '../routes/__mocks__/request_responses';
 import { rulesNotificationAlertType } from './rules_notification_alert_type';
 import { buildSignalsSearchQuery } from './build_signals_query';
@@ -15,12 +15,12 @@ jest.mock('./build_signals_query');
 describe('rules_notification_alert_type', () => {
   let payload: NotificationExecutorOptions;
   let alert: ReturnType<typeof rulesNotificationAlertType>;
-  let logger: ReturnType<typeof loggingServiceMock.createLogger>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let alertServices: AlertServicesMock;
 
   beforeEach(() => {
     alertServices = alertsMock.createAlertServices();
-    logger = loggingServiceMock.createLogger();
+    logger = loggingSystemMock.createLogger();
 
     payload = {
       alertId: '1111',

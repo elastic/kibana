@@ -19,40 +19,46 @@
 
 import _, { each, reject } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectsClientContract } from 'src/core/public';
+import { SavedObjectsClientCommon } from '../..';
 import { DuplicateField, SavedObjectNotFound } from '../../../../kibana_utils/common';
 
-import {
-  ES_FIELD_TYPES,
-  KBN_FIELD_TYPES,
-  IIndexPattern,
-  IFieldType,
-  UI_SETTINGS,
-} from '../../../common';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
 import { findByTitle } from '../utils';
 import { IndexPatternMissingIndices } from '../lib';
 import { Field, IIndexPatternFieldList, getIndexPatternFieldListCreator } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
-import { IIndexPatternsApiClient } from '.';
-import { TypeMeta } from '.';
-import { OnNotification, OnError } from '../types';
+import {
+  OnNotification,
+  OnError,
+  UiSettingsCommon,
+  IIndexPatternsApiClient,
+  IndexPatternAttributes,
+} from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { PatternCache } from './_pattern_cache';
 import { expandShorthand, FieldMappingSpec, MappingObject } from '../../field_mapping';
+import { IndexPatternSpec, TypeMeta, FieldSpec, SourceFilter } from '../types';
+import { SerializedFieldFormat } from '../../../../expressions/common';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
-const type = 'index-pattern';
+const savedObjectType = 'index-pattern';
+interface IUiSettingsValues {
+  [key: string]: any;
+  shortDotsEnable: any;
+  metaFields: any;
+}
 
 interface IndexPatternDeps {
-  getConfig: any;
-  savedObjectsClient: SavedObjectsClientContract;
+  getConfig: UiSettingsCommon['get'];
+  savedObjectsClient: SavedObjectsClientCommon;
   apiClient: IIndexPatternsApiClient;
   patternCache: PatternCache;
   fieldFormats: FieldFormatsStartCommon;
   onNotification: OnNotification;
   onError: OnError;
+  uiSettingsValues: IUiSettingsValues;
 }
 
 export class IndexPattern implements IIndexPattern {
@@ -60,10 +66,9 @@ export class IndexPattern implements IIndexPattern {
 
   public id?: string;
   public title: string = '';
-  public type?: string;
   public fieldFormatMap: any;
   public typeMeta?: TypeMeta;
-  public fields: IIndexPatternFieldList;
+  public fields: IIndexPatternFieldList & { toSpec: () => FieldSpec[] };
   public timeFieldName: string | undefined;
   public formatHit: any;
   public formatField: any;
@@ -71,10 +76,10 @@ export class IndexPattern implements IIndexPattern {
   public metaFields: string[];
 
   private version: string | undefined;
-  private savedObjectsClient: SavedObjectsClientContract;
+  private savedObjectsClient: SavedObjectsClientCommon;
   private patternCache: PatternCache;
-  private getConfig: any;
-  private sourceFilters?: [];
+  private getConfig: UiSettingsCommon['get'];
+  private sourceFilters?: SourceFilter[];
   private originalBody: { [key: string]: any } = {};
   public fieldsFetcher: any; // probably want to factor out any direct usage and change to private
   private shortDotsEnable: boolean = false;
@@ -82,6 +87,7 @@ export class IndexPattern implements IIndexPattern {
   private onNotification: OnNotification;
   private onError: OnError;
   private apiClient: IIndexPatternsApiClient;
+  private uiSettingsValues: IUiSettingsValues;
 
   private mapping: MappingObject = expandShorthand({
     title: ES_FIELD_TYPES.TEXT,
@@ -115,6 +121,7 @@ export class IndexPattern implements IIndexPattern {
       fieldFormats,
       onNotification,
       onError,
+      uiSettingsValues,
     }: IndexPatternDeps
   ) {
     this.id = id;
@@ -126,9 +133,10 @@ export class IndexPattern implements IIndexPattern {
     this.fieldFormats = fieldFormats;
     this.onNotification = onNotification;
     this.onError = onError;
+    this.uiSettingsValues = uiSettingsValues;
 
-    this.shortDotsEnable = this.getConfig(UI_SETTINGS.SHORT_DOTS_ENABLE);
-    this.metaFields = this.getConfig(UI_SETTINGS.META_FIELDS);
+    this.shortDotsEnable = uiSettingsValues.shortDotsEnable;
+    this.metaFields = uiSettingsValues.metaFields;
 
     this.createFieldList = getIndexPatternFieldListCreator({
       fieldFormats,
@@ -137,12 +145,8 @@ export class IndexPattern implements IIndexPattern {
 
     this.fields = this.createFieldList(this, [], this.shortDotsEnable);
     this.apiClient = apiClient;
-    this.fieldsFetcher = createFieldsFetcher(
-      this,
-      apiClient,
-      this.getConfig(UI_SETTINGS.META_FIELDS)
-    );
-    this.flattenHit = flattenHitWrapper(this, this.getConfig(UI_SETTINGS.META_FIELDS));
+    this.fieldsFetcher = createFieldsFetcher(this, apiClient, uiSettingsValues.metaFields);
+    this.flattenHit = flattenHitWrapper(this, uiSettingsValues.metaFields);
     this.formatHit = formatHitProvider(
       this,
       fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING)
@@ -159,7 +163,13 @@ export class IndexPattern implements IIndexPattern {
   private deserializeFieldFormatMap(mapping: any) {
     const FieldFormat = this.fieldFormats.getType(mapping.id);
 
-    return FieldFormat && new FieldFormat(mapping.params, this.getConfig);
+    return (
+      FieldFormat &&
+      new FieldFormat(
+        mapping.params,
+        (key: string) => this.uiSettingsValues[key]?.userValue || this.uiSettingsValues[key]?.value
+      )
+    );
   }
 
   private initFields(input?: any) {
@@ -196,9 +206,38 @@ export class IndexPattern implements IIndexPattern {
     this.initFields();
   }
 
+  public initFromSpec(spec: IndexPatternSpec) {
+    // create fieldFormatMap from field list
+    const fieldFormatMap: Record<string, SerializedFieldFormat> = {};
+    if (_.isArray(spec.fields)) {
+      spec.fields.forEach((field: FieldSpec) => {
+        if (field.format) {
+          fieldFormatMap[field.name as string] = { ...field.format };
+        }
+      });
+    }
+
+    this.version = spec.version;
+
+    this.title = spec.title || '';
+    this.timeFieldName = spec.timeFieldName;
+    this.sourceFilters = spec.sourceFilters;
+
+    // ignoring this because the same thing happens elsewhere but via _.assign
+    // @ts-expect-error
+    this.fields = spec.fields || [];
+    this.typeMeta = spec.typeMeta;
+    this.fieldFormatMap = _.mapValues(fieldFormatMap, (mapping) => {
+      return this.deserializeFieldFormatMap(mapping);
+    });
+
+    this.initFields();
+    return this;
+  }
+
   private updateFromElasticSearch(response: any, forceFieldRefresh: boolean = false) {
     if (!response.found) {
-      throw new SavedObjectNotFound(type, this.id, 'kibana#/management/kibana/indexPatterns');
+      throw new SavedObjectNotFound(savedObjectType, this.id, 'management/kibana/indexPatterns');
     }
 
     _.forOwn(this.mapping, (fieldMapping: FieldMappingSpec, name: string | undefined) => {
@@ -206,15 +245,16 @@ export class IndexPattern implements IIndexPattern {
         return;
       }
 
-      response._source[name] = fieldMapping._deserialize(response._source[name]);
+      response[name] = fieldMapping._deserialize(response[name]);
     });
 
-    // give index pattern all of the values in _source
-    _.assign(this, response._source);
+    // give index pattern all of the values
+    _.assign(this, response);
 
     if (!this.title && this.id) {
       this.title = this.id;
     }
+    this.version = response.version;
 
     return this.indexFields(forceFieldRefresh);
   }
@@ -265,14 +305,22 @@ export class IndexPattern implements IIndexPattern {
       return this; // no id === no elasticsearch document
     }
 
-    const savedObject = await this.savedObjectsClient.get(type, this.id);
-    this.version = savedObject._version;
+    const savedObject = await this.savedObjectsClient.get<IndexPatternAttributes>(
+      savedObjectType,
+      this.id
+    );
 
     const response = {
-      _id: savedObject.id,
-      _type: savedObject.type,
-      _source: _.cloneDeep(savedObject.attributes),
-      found: savedObject._version ? true : false,
+      version: savedObject.version,
+      found: savedObject.version ? true : false,
+      title: savedObject.attributes.title,
+      timeFieldName: savedObject.attributes.timeFieldName,
+      intervalName: savedObject.attributes.intervalName,
+      fields: savedObject.attributes.fields,
+      sourceFilters: savedObject.attributes.sourceFilters,
+      fieldFormatMap: savedObject.attributes.fieldFormatMap,
+      typeMeta: savedObject.attributes.typeMeta,
+      type: savedObject.attributes.type,
     };
     // Do this before we attempt to update from ES since that call can potentially perform a save
     this.originalBody = this.prepBody();
@@ -281,6 +329,19 @@ export class IndexPattern implements IIndexPattern {
     this.originalBody = this.prepBody();
 
     return this;
+  }
+
+  public toSpec(): IndexPatternSpec {
+    return {
+      id: this.id,
+      version: this.version,
+
+      title: this.title,
+      timeFieldName: this.timeFieldName,
+      sourceFilters: this.sourceFilters,
+      fields: this.fields.toSpec(),
+      typeMeta: this.typeMeta,
+    };
   }
 
   // Get the source filtering configuration for that index.
@@ -292,9 +353,9 @@ export class IndexPattern implements IIndexPattern {
 
   async addScriptedField(name: string, script: string, fieldType: string = 'string', lang: string) {
     const scriptedFields = this.getScriptedFields();
-    const names = _.pluck(scriptedFields, 'name');
+    const names = _.map(scriptedFields, 'name');
 
-    if (_.contains(names, name)) {
+    if (_.includes(names, name)) {
       throw new DuplicateField(name);
     }
 
@@ -346,21 +407,21 @@ export class IndexPattern implements IIndexPattern {
     field.count = count;
 
     try {
-      const res = await this.savedObjectsClient.update(type, this.id, this.prepBody(), {
+      const res = await this.savedObjectsClient.update(savedObjectType, this.id, this.prepBody(), {
         version: this.version,
       });
-      this.version = res._version;
+      this.version = res.version;
     } catch (e) {
       // no need for an error message here
     }
   }
 
   getNonScriptedFields() {
-    return _.where(this.fields, { scripted: false });
+    return _.filter(this.fields, { scripted: false });
   }
 
   getScriptedFields() {
-    return _.where(this.fields, { scripted: true });
+    return _.filter(this.fields, { scripted: true });
   }
 
   isTimeBased(): boolean {
@@ -412,21 +473,12 @@ export class IndexPattern implements IIndexPattern {
   async create(allowOverride: boolean = false) {
     const _create = async (duplicateId?: string) => {
       if (duplicateId) {
-        const duplicatePattern = new IndexPattern(duplicateId, {
-          getConfig: this.getConfig,
-          savedObjectsClient: this.savedObjectsClient,
-          apiClient: this.apiClient,
-          patternCache: this.patternCache,
-          fieldFormats: this.fieldFormats,
-          onNotification: this.onNotification,
-          onError: this.onError,
-        });
-
-        await duplicatePattern.destroy();
+        this.patternCache.clear(duplicateId);
+        await this.savedObjectsClient.delete(savedObjectType, duplicateId);
       }
 
       const body = this.prepBody();
-      const response = await this.savedObjectsClient.create(type, body, { id: this.id });
+      const response = await this.savedObjectsClient.create(savedObjectType, body, { id: this.id });
 
       this.id = response.id;
       return response.id;
@@ -454,10 +506,10 @@ export class IndexPattern implements IIndexPattern {
       (key) => body[key] !== this.originalBody[key]
     );
     return this.savedObjectsClient
-      .update(type, this.id, body, { version: this.version })
-      .then((resp: any) => {
+      .update(savedObjectType, this.id, body, { version: this.version })
+      .then((resp) => {
         this.id = resp.id;
-        this.version = resp._version;
+        this.version = resp.version;
       })
       .catch((err) => {
         if (
@@ -472,7 +524,12 @@ export class IndexPattern implements IIndexPattern {
             fieldFormats: this.fieldFormats,
             onNotification: this.onNotification,
             onError: this.onError,
+            uiSettingsValues: {
+              shortDotsEnable: this.shortDotsEnable,
+              metaFields: this.metaFields,
+            },
           });
+
           return samePattern.init().then(() => {
             // What keys changed from now and what the server returned
             const updatedBody = samePattern.prepBody();
@@ -563,12 +620,5 @@ export class IndexPattern implements IIndexPattern {
 
   toString() {
     return '' + this.toJSON();
-  }
-
-  destroy() {
-    if (this.id) {
-      this.patternCache.clear(this.id);
-      return this.savedObjectsClient.delete(type, this.id);
-    }
   }
 }

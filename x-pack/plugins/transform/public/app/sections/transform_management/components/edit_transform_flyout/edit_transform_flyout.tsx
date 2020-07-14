@@ -77,10 +77,15 @@ export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({ closeFlyout,
 
   return (
     <EuiOverlayMask>
-      <EuiFlyout onClose={closeFlyout} hideCloseButton aria-labelledby="flyoutComplicatedTitle">
+      <EuiFlyout
+        onClose={closeFlyout}
+        hideCloseButton
+        aria-labelledby="transformEditFlyoutTitle"
+        data-test-subj="transformEditFlyout"
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2 id="flyoutComplicatedTitle">
+            <h2 id="transformEditFlyoutTitle">
               {i18n.translate('xpack.transform.transformList.editFlyoutTitle', {
                 defaultMessage: 'Edit {transformId}',
                 values: {
@@ -121,7 +126,12 @@ export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({ closeFlyout,
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={submitFormHandler} fill isDisabled={isUpdateButtonDisabled}>
+              <EuiButton
+                data-test-subj="transformEditFlyoutUpdateButton"
+                onClick={submitFormHandler}
+                fill
+                isDisabled={isUpdateButtonDisabled}
+              >
                 {i18n.translate('xpack.transform.transformList.editFlyoutUpdateButtonText', {
                   defaultMessage: 'Update',
                 })}

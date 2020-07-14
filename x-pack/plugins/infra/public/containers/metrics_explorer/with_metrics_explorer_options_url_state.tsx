@@ -97,6 +97,7 @@ function isMetricExplorerOptions(subject: any): subject is MetricsExplorerOption
     limit: t.number,
     groupBy: t.string,
     filterQuery: t.string,
+    source: t.string,
   });
 
   const Options = t.intersection([OptionsRequired, OptionsOptional]);
@@ -156,6 +157,7 @@ const mapToUrlState = (value: any): MetricsExplorerUrlState | undefined => {
   const finalState = {};
   if (value) {
     if (value.options && isMetricExplorerOptions(value.options)) {
+      value.options.source = 'url';
       set(finalState, 'options', value.options);
     }
     if (value.timerange && isMetricExplorerTimeOption(value.timerange)) {

@@ -78,6 +78,14 @@ test('throws if basepath appends a slash', () => {
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
 });
 
+test('throws if basepath is an empty string', () => {
+  const httpSchema = config.schema;
+  const obj = {
+    basePath: '',
+  };
+  expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+});
+
 test('throws if basepath is not specified, but rewriteBasePath is set', () => {
   const httpSchema = config.schema;
   const obj = {

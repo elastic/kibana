@@ -22,6 +22,7 @@ import { exactCheck } from '../../../exact_check';
 import { foldLeftRight, getPaths } from '../../../test_utils';
 import { TypeAndTimelineOnly } from './type_timeline_only_schema';
 import { getRulesSchemaMock, getRulesMlSchemaMock } from './rules_schema.mocks';
+import { ListArray } from '../types/lists';
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
 
@@ -648,6 +649,49 @@ describe('rules_schema', () => {
     test('should return two fields for a rule of type "machine_learning"', () => {
       const fields = addMlFields({ type: 'machine_learning' });
       expect(fields.length).toEqual(2);
+    });
+  });
+
+  describe('exceptions_list', () => {
+    test('it should validate an empty array for "exceptions_list"', () => {
+      const payload = getRulesSchemaMock();
+      payload.exceptions_list = [];
+      const decoded = rulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected = getRulesSchemaMock();
+      expected.exceptions_list = [];
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(expected);
+    });
+
+    test('it should NOT validate when "exceptions_list" is not expected type', () => {
+      const payload: Omit<RulesSchema, 'exceptions_list'> & {
+        exceptions_list?: string;
+      } = { ...getRulesSchemaMock(), exceptions_list: 'invalid_data' };
+
+      const decoded = rulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "invalid_data" supplied to "exceptions_list"',
+      ]);
+      expect(message.schema).toEqual({});
+    });
+
+    test('it should default to empty array if "exceptions_list" is undefined ', () => {
+      const payload: Omit<RulesSchema, 'exceptions_list'> & {
+        exceptions_list?: ListArray;
+      } = getRulesSchemaMock();
+      payload.exceptions_list = undefined;
+
+      const decoded = rulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual({ ...payload, exceptions_list: [] });
     });
   });
 });

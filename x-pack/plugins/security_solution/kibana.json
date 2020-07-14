@@ -11,7 +11,7 @@
     "embeddable",
     "features",
     "home",
-    "ingestManager",
+    "taskManager",
     "inspector",
     "licensing",
     "maps",
@@ -20,6 +20,7 @@
   ],
   "optionalPlugins": [
     "encryptedSavedObjects",
+    "ingestManager",
     "ml",
     "newsfeed",
     "security",
@@ -28,5 +29,11 @@
     "lists"
   ],
   "server": true,
-  "ui": true
+  "ui": true,
+  "requiredBundles": [
+    "kibanaUtils",
+    "esUiShared",
+    "kibanaReact",
+    "ingestManager"
+  ]
 }

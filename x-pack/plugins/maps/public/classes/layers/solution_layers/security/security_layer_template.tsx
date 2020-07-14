@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
+import { EuiPanel } from '@elastic/eui';
 import { RenderWizardArguments } from '../../layer_wizard_registry';
 import { IndexPatternSelect } from './index_pattern_select';
 import { createSecurityLayerDescriptors } from './create_layer_descriptors';
@@ -44,12 +45,12 @@ export class SecurityLayerTemplate extends Component<RenderWizardArguments, Stat
 
   render() {
     return (
-      <Fragment>
+      <EuiPanel>
         <IndexPatternSelect
           value={this.state.indexPatternId ? this.state.indexPatternId! : ''}
           onChange={this._onIndexPatternChange}
         />
-      </Fragment>
+      </EuiPanel>
     );
   }
 }

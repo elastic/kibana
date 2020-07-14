@@ -17,4 +17,8 @@ export interface WithKibanaProps {
   };
 }
 
+export interface UseKibanaProps {
+  canvas: CanvasServices;
+}
+
 export const plugin = (initializerContext: PluginInitializerContext) => new CanvasPlugin();

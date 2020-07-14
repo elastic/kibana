@@ -22,7 +22,7 @@ export declare class Field implements IFieldType
 |  --- | --- | --- | --- |
 |  [$$spec](./kibana-plugin-plugins-data-public.indexpatternfield.__spec.md) |  | <code>FieldSpec</code> |  |
 |  [aggregatable](./kibana-plugin-plugins-data-public.indexpatternfield.aggregatable.md) |  | <code>boolean</code> |  |
-|  [conflictDescriptions](./kibana-plugin-plugins-data-public.indexpatternfield.conflictdescriptions.md) |  | <code>Record&lt;string, string[]&gt;</code> |  |
+|  [conflictDescriptions](./kibana-plugin-plugins-data-public.indexpatternfield.conflictdescriptions.md) |  | <code>FieldSpecConflictDescriptions</code> |  |
 |  [count](./kibana-plugin-plugins-data-public.indexpatternfield.count.md) |  | <code>number</code> |  |
 |  [displayName](./kibana-plugin-plugins-data-public.indexpatternfield.displayname.md) |  | <code>string</code> |  |
 |  [esTypes](./kibana-plugin-plugins-data-public.indexpatternfield.estypes.md) |  | <code>string[]</code> |  |
@@ -37,6 +37,7 @@ export declare class Field implements IFieldType
 |  [searchable](./kibana-plugin-plugins-data-public.indexpatternfield.searchable.md) |  | <code>boolean</code> |  |
 |  [sortable](./kibana-plugin-plugins-data-public.indexpatternfield.sortable.md) |  | <code>boolean</code> |  |
 |  [subType](./kibana-plugin-plugins-data-public.indexpatternfield.subtype.md) |  | <code>IFieldSubType</code> |  |
+|  [toSpec](./kibana-plugin-plugins-data-public.indexpatternfield.tospec.md) |  | <code>() =&gt; FieldSpecExportFmt</code> |  |
 |  [type](./kibana-plugin-plugins-data-public.indexpatternfield.type.md) |  | <code>string</code> |  |
 |  [visualizable](./kibana-plugin-plugins-data-public.indexpatternfield.visualizable.md) |  | <code>boolean</code> |  |
 

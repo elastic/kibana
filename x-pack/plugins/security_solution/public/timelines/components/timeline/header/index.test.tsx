@@ -15,6 +15,7 @@ import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 
 import { TimelineHeader } from '.';
+import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 
 const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
 
@@ -23,43 +24,34 @@ jest.mock('../../../../common/lib/kibana');
 describe('Header', () => {
   const indexPattern = mockIndexPattern;
   const mount = useMountAppended();
+  const props = {
+    browserFields: {},
+    dataProviders: mockDataProviders,
+    filterManager: new FilterManager(mockUiSettingsForFilterManager),
+    indexPattern,
+    onDataProviderEdited: jest.fn(),
+    onDataProviderRemoved: jest.fn(),
+    onToggleDataProviderEnabled: jest.fn(),
+    onToggleDataProviderExcluded: jest.fn(),
+    onToggleDataProviderType: jest.fn(),
+    show: true,
+    showCallOutUnauthorizedMsg: false,
+    status: TimelineStatus.active,
+    timelineId: 'foo',
+    timelineType: TimelineType.default,
+  };
 
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
-      const wrapper = shallow(
-        <TimelineHeader
-          browserFields={{}}
-          dataProviders={mockDataProviders}
-          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
-          id="foo"
-          indexPattern={indexPattern}
-          onDataProviderEdited={jest.fn()}
-          onDataProviderRemoved={jest.fn()}
-          onToggleDataProviderEnabled={jest.fn()}
-          onToggleDataProviderExcluded={jest.fn()}
-          show={true}
-          showCallOutUnauthorizedMsg={false}
-        />
-      );
+      const wrapper = shallow(<TimelineHeader {...props} />);
       expect(wrapper).toMatchSnapshot();
     });
 
     test('it renders the data providers when show is true', () => {
+      const testProps = { ...props, show: true };
       const wrapper = mount(
         <TestProviders>
-          <TimelineHeader
-            browserFields={{}}
-            dataProviders={mockDataProviders}
-            filterManager={new FilterManager(mockUiSettingsForFilterManager)}
-            id="foo"
-            indexPattern={indexPattern}
-            onDataProviderEdited={jest.fn()}
-            onDataProviderRemoved={jest.fn()}
-            onToggleDataProviderEnabled={jest.fn()}
-            onToggleDataProviderExcluded={jest.fn()}
-            show={true}
-            showCallOutUnauthorizedMsg={false}
-          />
+          <TimelineHeader {...testProps} />
         </TestProviders>
       );
 
@@ -67,21 +59,11 @@ describe('Header', () => {
     });
 
     test('it does NOT render the data providers when show is false', () => {
+      const testProps = { ...props, show: false };
+
       const wrapper = mount(
         <TestProviders>
-          <TimelineHeader
-            browserFields={{}}
-            dataProviders={mockDataProviders}
-            filterManager={new FilterManager(mockUiSettingsForFilterManager)}
-            id="foo"
-            indexPattern={indexPattern}
-            onDataProviderEdited={jest.fn()}
-            onDataProviderRemoved={jest.fn()}
-            onToggleDataProviderEnabled={jest.fn()}
-            onToggleDataProviderExcluded={jest.fn()}
-            show={false}
-            showCallOutUnauthorizedMsg={false}
-          />
+          <TimelineHeader {...testProps} />
         </TestProviders>
       );
 
@@ -89,21 +71,15 @@ describe('Header', () => {
     });
 
     test('it renders the unauthorized call out providers', () => {
+      const testProps = {
+        ...props,
+        filterManager: new FilterManager(mockUiSettingsForFilterManager),
+        showCallOutUnauthorizedMsg: true,
+      };
+
       const wrapper = mount(
         <TestProviders>
-          <TimelineHeader
-            browserFields={{}}
-            dataProviders={mockDataProviders}
-            filterManager={new FilterManager(mockUiSettingsForFilterManager)}
-            id="foo"
-            indexPattern={indexPattern}
-            onDataProviderEdited={jest.fn()}
-            onDataProviderRemoved={jest.fn()}
-            onToggleDataProviderEnabled={jest.fn()}
-            onToggleDataProviderExcluded={jest.fn()}
-            show={true}
-            showCallOutUnauthorizedMsg={true}
-          />
+          <TimelineHeader {...testProps} />
         </TestProviders>
       );
 

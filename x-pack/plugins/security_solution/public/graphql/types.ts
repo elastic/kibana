@@ -124,6 +124,8 @@ export interface TimelineInput {
 
   eventType?: Maybe<string>;
 
+  excludedRowRendererIds?: Maybe<RowRendererId[]>;
+
   filters?: Maybe<FilterTimelineInput[]>;
 
   kqlMode?: Maybe<string>;
@@ -185,6 +187,8 @@ export interface DataProviderInput {
   queryMatch?: Maybe<QueryMatchInput>;
 
   and?: Maybe<DataProviderInput[]>;
+
+  type?: Maybe<DataProviderType>;
 }
 
 export interface QueryMatchInput {
@@ -342,9 +346,31 @@ export enum TlsFields {
   _id = '_id',
 }
 
+export enum DataProviderType {
+  default = 'default',
+  template = 'template',
+}
+
+export enum RowRendererId {
+  auditd = 'auditd',
+  auditd_file = 'auditd_file',
+  netflow = 'netflow',
+  plain = 'plain',
+  suricata = 'suricata',
+  system = 'system',
+  system_dns = 'system_dns',
+  system_endgame_process = 'system_endgame_process',
+  system_file = 'system_file',
+  system_fim = 'system_fim',
+  system_security_event = 'system_security_event',
+  system_socket = 'system_socket',
+  zeek = 'zeek',
+}
+
 export enum TimelineStatus {
   active = 'active',
   draft = 'draft',
+  immutable = 'immutable',
 }
 
 export enum TimelineType {
@@ -357,6 +383,11 @@ export enum SortFieldTimeline {
   description = 'description',
   updated = 'updated',
   created = 'created',
+}
+
+export enum TemplateTimelineType {
+  elastic = 'elastic',
+  custom = 'custom',
 }
 
 export enum NetworkDirectionEcs {
@@ -763,6 +794,8 @@ export interface Ecs {
 
   _index?: Maybe<string>;
 
+  agent?: Maybe<AgentEcsField>;
+
   auditd?: Maybe<AuditdEcsFields>;
 
   destination?: Maybe<DestinationEcsFields>;
@@ -808,6 +841,10 @@ export interface Ecs {
   file?: Maybe<FileFields>;
 
   system?: Maybe<SystemEcsField>;
+}
+
+export interface AgentEcsField {
+  type?: Maybe<string[]>;
 }
 
 export interface AuditdEcsFields {
@@ -1032,6 +1069,8 @@ export interface RuleField {
   version?: Maybe<string[]>;
 
   note?: Maybe<string[]>;
+
+  exceptions_list?: Maybe<ToAny>;
 }
 
 export interface SuricataEcsFields {
@@ -1264,6 +1303,8 @@ export interface ProcessEcsFields {
   ppid?: Maybe<number[]>;
 
   args?: Maybe<string[]>;
+
+  entity_id?: Maybe<string[]>;
 
   executable?: Maybe<string[]>;
 
@@ -1938,6 +1979,8 @@ export interface TimelineResult {
 
   eventType?: Maybe<string>;
 
+  excludedRowRendererIds?: Maybe<RowRendererId[]>;
+
   favorite?: Maybe<FavoriteTimelineResult[]>;
 
   filters?: Maybe<FilterTimelineResult[]>;
@@ -2013,6 +2056,8 @@ export interface DataProviderResult {
   kqlQuery?: Maybe<string>;
 
   queryMatch?: Maybe<QueryMatchResult>;
+
+  type?: Maybe<DataProviderType>;
 
   and?: Maybe<DataProviderResult[]>;
 }
@@ -2109,6 +2154,16 @@ export interface ResponseTimelines {
   timeline: (Maybe<TimelineResult>)[];
 
   totalCount?: Maybe<number>;
+
+  defaultTimelineCount?: Maybe<number>;
+
+  templateTimelineCount?: Maybe<number>;
+
+  elasticTemplateTimelineCount?: Maybe<number>;
+
+  customTemplateTimelineCount?: Maybe<number>;
+
+  favoriteCount?: Maybe<number>;
 }
 
 export interface Mutation {
@@ -2246,6 +2301,10 @@ export interface GetAllTimelineQueryArgs {
   onlyUserFavorite?: Maybe<boolean>;
 
   timelineType?: Maybe<TimelineType>;
+
+  templateTimelineType?: Maybe<TemplateTimelineType>;
+
+  status?: Maybe<TimelineStatus>;
 }
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
@@ -4307,6 +4366,8 @@ export namespace GetAllTimeline {
     sort?: Maybe<SortTimeline>;
     onlyUserFavorite?: Maybe<boolean>;
     timelineType?: Maybe<TimelineType>;
+    templateTimelineType?: Maybe<TemplateTimelineType>;
+    status?: Maybe<TimelineStatus>;
   };
 
   export type Query = {
@@ -4319,6 +4380,16 @@ export namespace GetAllTimeline {
     __typename?: 'ResponseTimelines';
 
     totalCount: Maybe<number>;
+
+    defaultTimelineCount: Maybe<number>;
+
+    templateTimelineCount: Maybe<number>;
+
+    elasticTemplateTimelineCount: Maybe<number>;
+
+    customTemplateTimelineCount: Maybe<number>;
+
+    favoriteCount: Maybe<number>;
 
     timeline: (Maybe<Timeline>)[];
   };
@@ -4333,6 +4404,8 @@ export namespace GetAllTimeline {
     favorite: Maybe<Favorite[]>;
 
     eventIdToNoteIds: Maybe<EventIdToNoteIds[]>;
+
+    excludedRowRendererIds: Maybe<RowRendererId[]>;
 
     notes: Maybe<Notes[]>;
 
@@ -4605,6 +4678,8 @@ export namespace GetTimelineQuery {
 
     event: Maybe<Event>;
 
+    agent: Maybe<Agent>;
+
     auditd: Maybe<Auditd>;
 
     file: Maybe<File>;
@@ -4726,6 +4801,12 @@ export namespace GetTimelineQuery {
     start: Maybe<string[]>;
 
     timezone: Maybe<string[]>;
+
+    type: Maybe<string[]>;
+  };
+
+  export type Agent = {
+    __typename?: 'AgentEcsField';
 
     type: Maybe<string[]>;
   };
@@ -4984,6 +5065,8 @@ export namespace GetTimelineQuery {
     filters: Maybe<ToAny>;
 
     note: Maybe<string[]>;
+
+    exceptions_list: Maybe<ToAny>;
   };
 
   export type Suricata = {
@@ -5154,6 +5237,8 @@ export namespace GetTimelineQuery {
     ppid: Maybe<number[]>;
 
     args: Maybe<string[]>;
+
+    entity_id: Maybe<string[]>;
 
     executable: Maybe<string[]>;
 
@@ -5391,6 +5476,8 @@ export namespace GetOneTimeline {
 
     eventIdToNoteIds: Maybe<EventIdToNoteIds[]>;
 
+    excludedRowRendererIds: Maybe<RowRendererId[]>;
+
     favorite: Maybe<Favorite[]>;
 
     filters: Maybe<Filters[]>;
@@ -5468,6 +5555,8 @@ export namespace GetOneTimeline {
     excluded: Maybe<boolean>;
 
     kqlQuery: Maybe<string>;
+
+    type: Maybe<DataProviderType>;
 
     queryMatch: Maybe<QueryMatch>;
 

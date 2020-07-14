@@ -84,7 +84,7 @@
 /x-pack/plugins/infra/ @elastic/logs-metrics-ui
 /x-pack/plugins/ingest_manager/ @elastic/ingest-management
 /x-pack/legacy/plugins/ingest_manager/ @elastic/ingest-management
-/x-pack/plugins/observability/ @elastic/logs-metrics-ui @elastic/apm-ui @elastic/uptime @elastic/ingest-management
+/x-pack/plugins/observability/ @elastic/observability-ui
 /x-pack/legacy/plugins/monitoring/ @elastic/stack-monitoring-ui
 /x-pack/plugins/monitoring/ @elastic/stack-monitoring-ui
 /x-pack/plugins/uptime @elastic/uptime
@@ -132,6 +132,7 @@
 
 # Quality Assurance
 /src/dev/code_coverage @elastic/kibana-qa
+/vars/*Coverage.groovy @elastic/kibana-qa
 /test/functional/services/common @elastic/kibana-qa
 /test/functional/services/lib @elastic/kibana-qa
 /test/functional/services/remote @elastic/kibana-qa
@@ -143,6 +144,7 @@
 /x-pack/plugins/licensing/  @elastic/kibana-platform
 /x-pack/plugins/global_search/  @elastic/kibana-platform
 /x-pack/plugins/cloud/ @elastic/kibana-platform
+/x-pack/test/saved_objects_field_count/ @elastic/kibana-platform
 /packages/kbn-config-schema/ @elastic/kibana-platform
 /src/legacy/server/config/ @elastic/kibana-platform
 /src/legacy/server/http/ @elastic/kibana-platform
@@ -170,6 +172,7 @@
 
 # Kibana Telemetry
 /packages/kbn-analytics/ @elastic/kibana-telemetry
+/packages/kbn-telemetry-tools/ @elastic/kibana-telemetry
 /src/plugins/kibana_usage_collection/ @elastic/kibana-telemetry
 /src/plugins/newsfeed/ @elastic/kibana-telemetry
 /src/plugins/telemetry/ @elastic/kibana-telemetry
@@ -177,6 +180,11 @@
 /src/plugins/telemetry_management_section/ @elastic/kibana-telemetry
 /src/plugins/usage_collection/ @elastic/kibana-telemetry
 /x-pack/plugins/telemetry_collection_xpack/ @elastic/kibana-telemetry
+/.telemetryrc.json @elastic/kibana-telemetry
+/x-pack/.telemetryrc.json @elastic/kibana-telemetry
+src/plugins/telemetry/schema/legacy_oss_plugins.json @elastic/kibana-telemetry
+src/plugins/telemetry/schema/oss_plugins.json @elastic/kibana-telemetry
+x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kibana-telemetry
 
 # Kibana Alerting Services
 /x-pack/plugins/alerts/ @elastic/kibana-alerting-services
@@ -192,6 +200,11 @@
 
 # Design
 **/*.scss  @elastic/kibana-design
+
+# Enterprise Search
+/x-pack/plugins/enterprise_search/ @elastic/app-search-frontend @elastic/workplace-search-frontend
+/x-pack/test/functional_enterprise_search/ @elastic/app-search-frontend @elastic/workplace-search-frontend
+/x-pack/plugins/enterprise_search/**/*.scss @elastic/ent-search-design
 
 # Elasticsearch UI
 /src/plugins/dev_tools/ @elastic/es-ui

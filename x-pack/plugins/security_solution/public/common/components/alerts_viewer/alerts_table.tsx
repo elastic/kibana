@@ -5,13 +5,17 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 
 import { Filter } from '../../../../../../../src/plugins/data/public';
 import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
 import { alertsDefaultModel } from './default_headers';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
+import { getInvestigateInResolverAction } from '../../../timelines/components/timeline/body/helpers';
 import * as i18n from './translations';
+import { useKibana } from '../../lib/kibana';
+
 export interface OwnProps {
   end: number;
   id: string;
@@ -64,14 +68,19 @@ const AlertsTableComponent: React.FC<Props> = ({
   startDate,
   pageFilters = [],
 }) => {
+  const dispatch = useDispatch();
   const alertsFilter = useMemo(() => [...defaultAlertsFilters, ...pageFilters], [pageFilters]);
+  const { filterManager } = useKibana().services.data.query;
   const { initializeTimeline } = useManageTimeline();
 
   useEffect(() => {
     initializeTimeline({
       id: timelineId,
       documentType: i18n.ALERTS_DOCUMENT_TYPE,
+      filterManager,
+      defaultModel: alertsDefaultModel,
       footerText: i18n.TOTAL_COUNT_OF_ALERTS,
+      timelineRowActions: () => [getInvestigateInResolverAction({ dispatch, timelineId })],
       title: i18n.ALERTS_TABLE_TITLE,
       unit: i18n.UNIT,
     });

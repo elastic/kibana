@@ -6,17 +6,17 @@
 import { PluginInitializerContext } from 'src/core/public';
 import { IngestManagerPlugin } from './plugin';
 
-export { IngestManagerStart } from './plugin';
+export { IngestManagerSetup, IngestManagerStart } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new IngestManagerPlugin(initializerContext);
 };
 
 export {
-  CustomConfigureDatasourceContent,
-  CustomConfigureDatasourceProps,
-  registerDatasource,
-} from './applications/ingest_manager/sections/agent_config/create_datasource_page/components/custom_configure_datasource';
+  CustomConfigurePackageConfigContent,
+  CustomConfigurePackageConfigProps,
+  registerPackageConfigComponent,
+} from './applications/ingest_manager/sections/agent_config/create_package_config_page/components/custom_package_config';
 
-export { NewDatasource } from './applications/ingest_manager/types';
+export { NewPackageConfig } from './applications/ingest_manager/types';
 export * from './applications/ingest_manager/types/intra_app_route_state';

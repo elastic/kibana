@@ -9,10 +9,12 @@ import {
   EXISTS,
   FIELD,
   LIST,
+  LIST_ID,
   MATCH,
   MATCH_ANY,
   NESTED,
   OPERATOR,
+  TYPE,
 } from '../../constants.mock';
 
 import {
@@ -40,9 +42,9 @@ export const getEntryMatchAnyMock = (): EntryMatchAny => ({
 
 export const getEntryListMock = (): EntryList => ({
   field: FIELD,
+  list: { id: LIST_ID, type: TYPE },
   operator: OPERATOR,
   type: LIST,
-  value: [ENTRY_VALUE],
 });
 
 export const getEntryExistsMock = (): EntryExists => ({
@@ -52,7 +54,7 @@ export const getEntryExistsMock = (): EntryExists => ({
 });
 
 export const getEntryNestedMock = (): EntryNested => ({
-  entries: [getEntryMatchMock(), getEntryExistsMock()],
+  entries: [getEntryMatchMock(), getEntryMatchMock()],
   field: FIELD,
   type: NESTED,
 });

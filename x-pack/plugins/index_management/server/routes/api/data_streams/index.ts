@@ -6,8 +6,11 @@
 
 import { RouteDependencies } from '../../../types';
 
-import { registerGetAllRoute } from './register_get_route';
+import { registerGetOneRoute, registerGetAllRoute } from './register_get_route';
+import { registerDeleteRoute } from './register_delete_route';
 
 export function registerDataStreamRoutes(dependencies: RouteDependencies) {
+  registerGetOneRoute(dependencies);
   registerGetAllRoute(dependencies);
+  registerDeleteRoute(dependencies);
 }

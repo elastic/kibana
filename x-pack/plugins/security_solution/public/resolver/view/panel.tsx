@@ -4,17 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, {
-  memo,
-  useCallback,
-  useMemo,
-  useContext,
-  useLayoutEffect,
-  useState,
-  useEffect,
-} from 'react';
+import React, { memo, useCallback, useMemo, useContext, useLayoutEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
 import { EuiPanel } from '@elastic/eui';
@@ -22,7 +14,7 @@ import { displayNameRecord } from './process_event_dot';
 import * as selectors from '../store/selectors';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as event from '../../../common/endpoint/models/event';
-import { ResolverEvent } from '../../../common/endpoint/types';
+import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
 import { SideEffectContext } from './side_effect_context';
 import { ProcessEventListNarrowedByType } from './panels/panel_content_related_list';
 import { EventCountsForProcess } from './panels/panel_content_related_counts';
@@ -48,9 +40,10 @@ import { CrumbInfo } from './panels/panel_content_utilities';
  */
 const PanelContent = memo(function PanelContent() {
   const history = useHistory();
-  const urlSearch = history.location.search;
+  const urlSearch = useLocation().search;
   const dispatch = useResolverDispatch();
 
+  const { timestamp } = useContext(SideEffectContext);
   const queryParams: CrumbInfo = useMemo(() => {
     return { crumbId: '', crumbEvent: '', ...querystring.parse(urlSearch.slice(1)) };
   }, [urlSearch]);
@@ -84,7 +77,7 @@ const PanelContent = memo(function PanelContent() {
   const paramsSelectedEvent = useMemo(() => {
     return graphableProcesses.find((evt) => event.entityId(evt) === idFromParams);
   }, [graphableProcesses, idFromParams]);
-  const { timestamp } = useContext(SideEffectContext);
+
   const [lastUpdatedProcess, setLastUpdatedProcess] = useState<null | ResolverEvent>(null);
 
   /**
@@ -140,15 +133,10 @@ const PanelContent = memo(function PanelContent() {
     [history, urlSearch]
   );
 
-  // GO JONNY GO
   const relatedEventStats = useSelector(selectors.relatedEventsStats);
   const { crumbId, crumbEvent } = queryParams;
-  const relatedStatsForIdFromParams = useMemo(() => {
-    if (idFromParams) {
-      return relatedEventStats.get(idFromParams);
-    }
-    return undefined;
-  }, [relatedEventStats, idFromParams]);
+  const relatedStatsForIdFromParams: ResolverNodeStats | undefined =
+    idFromParams && relatedEventStats ? relatedEventStats.get(idFromParams) : undefined;
 
   /**
    * Determine which set of breadcrumbs to display based on the query parameters
@@ -209,24 +197,23 @@ const PanelContent = memo(function PanelContent() {
     return 'processListWithCounts';
   }, [uiSelectedEvent, crumbEvent, crumbId, graphableProcessEntityIds]);
 
-  useEffect(() => {
-    // dispatch `appDisplayedDifferentPanel` to sync state with which panel gets displayed
-    dispatch({
-      type: 'appDisplayedDifferentPanel',
-      payload: panelToShow,
-    });
-  }, [panelToShow, dispatch]);
-
-  const currentPanelView = useSelector(selectors.currentPanelView);
+  const terminatedProcesses = useSelector(selectors.terminatedProcesses);
+  const processEntityId = uiSelectedEvent ? event.entityId(uiSelectedEvent) : undefined;
+  const isProcessTerminated = processEntityId ? terminatedProcesses.has(processEntityId) : false;
 
   const panelInstance = useMemo(() => {
-    if (currentPanelView === 'processDetails') {
+    if (panelToShow === 'processDetails') {
       return (
-        <ProcessDetails processEvent={uiSelectedEvent!} pushToQueryParams={pushToQueryParams} />
+        <ProcessDetails
+          processEvent={uiSelectedEvent!}
+          pushToQueryParams={pushToQueryParams}
+          isProcessTerminated={isProcessTerminated}
+          isProcessOrigin={false}
+        />
       );
     }
 
-    if (currentPanelView === 'eventCountsForProcess') {
+    if (panelToShow === 'eventCountsForProcess') {
       return (
         <EventCountsForProcess
           processEvent={uiSelectedEvent!}
@@ -236,7 +223,7 @@ const PanelContent = memo(function PanelContent() {
       );
     }
 
-    if (currentPanelView === 'processEventListNarrowedByType') {
+    if (panelToShow === 'processEventListNarrowedByType') {
       return (
         <ProcessEventListNarrowedByType
           processEvent={uiSelectedEvent!}
@@ -247,7 +234,7 @@ const PanelContent = memo(function PanelContent() {
       );
     }
 
-    if (currentPanelView === 'relatedEventDetail') {
+    if (panelToShow === 'relatedEventDetail') {
       const parentCount: number = Object.values(
         relatedStatsForIdFromParams?.events.byCategory || {}
       ).reduce((sum, val) => sum + val, 0);
@@ -261,14 +248,21 @@ const PanelContent = memo(function PanelContent() {
       );
     }
     // The default 'Event List' / 'List of all processes' view
-    return <ProcessListWithCounts pushToQueryParams={pushToQueryParams} />;
+    return (
+      <ProcessListWithCounts
+        pushToQueryParams={pushToQueryParams}
+        isProcessTerminated={isProcessTerminated}
+        isProcessOrigin={false}
+      />
+    );
   }, [
     uiSelectedEvent,
     crumbEvent,
     crumbId,
     pushToQueryParams,
     relatedStatsForIdFromParams,
-    currentPanelView,
+    panelToShow,
+    isProcessTerminated,
   ]);
 
   return <>{panelInstance}</>;

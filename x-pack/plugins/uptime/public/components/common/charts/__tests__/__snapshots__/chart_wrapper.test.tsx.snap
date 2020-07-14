@@ -123,7 +123,6 @@ exports[`ChartWrapper component renders the component with loading false 1`] = `
       down={8}
       height={144}
       up={4}
-      width={144}
     />
   </div>
 </EuiErrorBoundary>
@@ -252,7 +251,6 @@ exports[`ChartWrapper component renders the component with loading true 1`] = `
       down={8}
       height={144}
       up={4}
-      width={144}
     />
   </div>
   <EuiFlexGroup

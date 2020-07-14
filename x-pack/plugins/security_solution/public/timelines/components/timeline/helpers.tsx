@@ -9,7 +9,12 @@ import memoizeOne from 'memoize-one';
 
 import { escapeQueryValue, convertToBuildEsQuery } from '../../../common/lib/keury';
 
-import { DataProvider, DataProvidersAnd, EXISTS_OPERATOR } from './data_providers/data_provider';
+import {
+  DataProvider,
+  DataProviderType,
+  DataProvidersAnd,
+  EXISTS_OPERATOR,
+} from './data_providers/data_provider';
 import { BrowserFields } from '../../../common/containers/source';
 import {
   IIndexPattern,
@@ -52,7 +57,8 @@ const buildQueryMatch = (
   browserFields: BrowserFields
 ) =>
   `${dataProvider.excluded ? 'NOT ' : ''}${
-    dataProvider.queryMatch.operator !== EXISTS_OPERATOR
+    dataProvider.queryMatch.operator !== EXISTS_OPERATOR &&
+    dataProvider.type !== DataProviderType.template
       ? checkIfFieldTypeIsDate(dataProvider.queryMatch.field, browserFields)
         ? convertDateFieldToQuery(dataProvider.queryMatch.field, dataProvider.queryMatch.value)
         : `${dataProvider.queryMatch.field} : ${
@@ -153,3 +159,5 @@ export const combineQueries = ({
  * the `Timeline` and the `Events Viewer` widget
  */
 export const STATEFUL_EVENT_CSS_CLASS_NAME = 'event-column-view';
+
+export const DEFAULT_ICON_BUTTON_WIDTH = 24;

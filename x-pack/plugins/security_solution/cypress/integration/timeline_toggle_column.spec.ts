@@ -22,11 +22,12 @@ import {
   uncheckTimestampToggleField,
 } from '../tasks/timeline';
 
-import { HOSTS_PAGE } from '../urls/navigation';
+import { HOSTS_URL } from '../urls/navigation';
 
-describe('toggle column in timeline', () => {
+// Flaky: https://github.com/elastic/kibana/issues/71361
+describe.skip('toggle column in timeline', () => {
   before(() => {
-    loginAndWaitForPage(HOSTS_PAGE);
+    loginAndWaitForPage(HOSTS_URL);
   });
 
   beforeEach(() => {

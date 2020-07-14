@@ -190,6 +190,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
         transformsInfo,
         deleteDestIndex,
         deleteDestIndexPattern,
+        forceDelete,
       } = req.body as DeleteTransformEndpointRequest;
 
       try {
@@ -197,6 +198,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
           transformsInfo,
           deleteDestIndex,
           deleteDestIndexPattern,
+          forceDelete,
           ctx,
           license,
           res
@@ -295,39 +297,28 @@ async function deleteTransforms(
   transformsInfo: TransformEndpointRequest[],
   deleteDestIndex: boolean | undefined,
   deleteDestIndexPattern: boolean | undefined,
+  shouldForceDelete: boolean = false,
   ctx: RequestHandlerContext,
   license: RouteDependencies['license'],
   response: KibanaResponseFactory
 ) {
-  const tempResults: TransformEndpointResult = {};
   const results: Record<string, DeleteTransformStatus> = {};
 
   for (const transformInfo of transformsInfo) {
     let destinationIndex: string | undefined;
+
     const transformDeleted: ResultData = { success: false };
     const destIndexDeleted: ResultData = { success: false };
     const destIndexPatternDeleted: ResultData = {
       success: false,
     };
     const transformId = transformInfo.id;
+    // force delete only if the transform has failed
+    let needToForceDelete = false;
+
     try {
       if (transformInfo.state === TRANSFORM_STATE.FAILED) {
-        try {
-          await ctx.transform!.dataClient.callAsCurrentUser('transform.stopTransform', {
-            transformId,
-            force: true,
-            waitForCompletion: true,
-          } as StopOptions);
-        } catch (e) {
-          if (isRequestTimeout(e)) {
-            return fillResultsWithTimeouts({
-              results: tempResults,
-              id: transformId,
-              items: transformsInfo,
-              action: TRANSFORM_ACTIONS.DELETE,
-            });
-          }
-        }
+        needToForceDelete = true;
       }
       // Grab destination index info to delete
       try {
@@ -383,6 +374,7 @@ async function deleteTransforms(
       try {
         await ctx.transform!.dataClient.callAsCurrentUser('transform.deleteTransform', {
           transformId,
+          force: shouldForceDelete && needToForceDelete,
         });
         transformDeleted.success = true;
       } catch (deleteTransformJobError) {

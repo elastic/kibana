@@ -42,7 +42,6 @@ import {
 } from '../../../../../common/transaction_types';
 
 interface TransactionChartProps {
-  hasMLJob: boolean;
   charts: ITransactionChartData;
   location: Location;
   urlParams: IUrlParams;
@@ -96,12 +95,13 @@ export class TransactionCharts extends Component<TransactionChartProps> {
   };
 
   public renderMLHeader(hasValidMlLicense: boolean | undefined) {
-    const { hasMLJob } = this.props;
-    if (!hasValidMlLicense || !hasMLJob) {
+    const { mlJobId } = this.props.charts;
+
+    if (!hasValidMlLicense || !mlJobId) {
       return null;
     }
 
-    const { serviceName, transactionType, kuery } = this.props.urlParams;
+    const { serviceName, kuery, transactionType } = this.props.urlParams;
     if (!serviceName) {
       return null;
     }
@@ -139,6 +139,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
             )}{' '}
           </span>
           <MLJobLink
+            jobId={mlJobId}
             serviceName={serviceName}
             transactionType={transactionType}
           >

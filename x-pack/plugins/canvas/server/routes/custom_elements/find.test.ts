@@ -10,7 +10,7 @@ import {
   savedObjectsClientMock,
   httpServiceMock,
   httpServerMock,
-  loggingServiceMock,
+  loggingSystemMock,
 } from 'src/core/server/mocks';
 
 const mockRouteContext = ({
@@ -29,7 +29,7 @@ describe('Find custom element', () => {
     const router = httpService.createRouter();
     initializeFindCustomElementsRoute({
       router,
-      logger: loggingServiceMock.create().get(),
+      logger: loggingSystemMock.create().get(),
     });
 
     routeHandler = router.get.mock.calls[0][1];

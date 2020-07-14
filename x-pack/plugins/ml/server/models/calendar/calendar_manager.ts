@@ -5,7 +5,7 @@
  */
 
 import { difference } from 'lodash';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { EventManager, CalendarEvent } from './event_manager';
 
 interface BasicCalendar {
@@ -23,10 +23,10 @@ export interface FormCalendar extends BasicCalendar {
 }
 
 export class CalendarManager {
-  private _callAsCurrentUser: APICaller;
+  private _callAsCurrentUser: LegacyAPICaller;
   private _eventManager: EventManager;
 
-  constructor(callAsCurrentUser: APICaller) {
+  constructor(callAsCurrentUser: LegacyAPICaller) {
     this._callAsCurrentUser = callAsCurrentUser;
     this._eventManager = new EventManager(callAsCurrentUser);
   }

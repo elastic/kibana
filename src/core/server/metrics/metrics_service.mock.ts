@@ -16,29 +16,46 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { BehaviorSubject } from 'rxjs';
 import { MetricsService } from './metrics_service';
 import {
   InternalMetricsServiceSetup,
   InternalMetricsServiceStart,
-  MetricsServiceSetup,
   MetricsServiceStart,
 } from './types';
 
-const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<MetricsServiceSetup> = {
-    getOpsMetrics$: jest.fn(),
-  };
-  return setupContract;
-};
-
 const createInternalSetupContractMock = () => {
-  const setupContract: jest.Mocked<InternalMetricsServiceSetup> = createSetupContractMock();
+  const setupContract: jest.Mocked<InternalMetricsServiceSetup> = {};
   return setupContract;
 };
 
 const createStartContractMock = () => {
-  const startContract: jest.Mocked<MetricsServiceStart> = {};
+  const startContract: jest.Mocked<MetricsServiceStart> = {
+    getOpsMetrics$: jest.fn(),
+  };
+  startContract.getOpsMetrics$.mockReturnValue(
+    new BehaviorSubject({
+      process: {
+        memory: {
+          heap: { total_in_bytes: 1, used_in_bytes: 1, size_limit: 1 },
+          resident_set_size_in_bytes: 1,
+        },
+        event_loop_delay: 1,
+        pid: 1,
+        uptime_in_millis: 1,
+      },
+      os: {
+        platform: 'darwin' as const,
+        platformRelease: 'test',
+        load: { '1m': 1, '5m': 1, '15m': 1 },
+        memory: { total_in_bytes: 1, free_in_bytes: 1, used_in_bytes: 1 },
+        uptime_in_millis: 1,
+      },
+      response_times: { avg_in_millis: 1, max_in_millis: 1 },
+      requests: { disconnects: 1, total: 1, statusCodes: { '200': 1 } },
+      concurrent_connections: 1,
+    })
+  );
   return startContract;
 };
 
@@ -60,7 +77,7 @@ const createMock = () => {
 
 export const metricsServiceMock = {
   create: createMock,
-  createSetupContract: createSetupContractMock,
+  createSetupContract: createStartContractMock,
   createStartContract: createStartContractMock,
   createInternalSetupContract: createInternalSetupContractMock,
   createInternalStartContract: createInternalStartContractMock,

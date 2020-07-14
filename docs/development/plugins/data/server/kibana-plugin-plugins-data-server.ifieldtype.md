@@ -28,6 +28,7 @@ export interface IFieldType
 |  [searchable](./kibana-plugin-plugins-data-server.ifieldtype.searchable.md) | <code>boolean</code> |  |
 |  [sortable](./kibana-plugin-plugins-data-server.ifieldtype.sortable.md) | <code>boolean</code> |  |
 |  [subType](./kibana-plugin-plugins-data-server.ifieldtype.subtype.md) | <code>IFieldSubType</code> |  |
+|  [toSpec](./kibana-plugin-plugins-data-server.ifieldtype.tospec.md) | <code>() =&gt; FieldSpec</code> |  |
 |  [type](./kibana-plugin-plugins-data-server.ifieldtype.type.md) | <code>string</code> |  |
 |  [visualizable](./kibana-plugin-plugins-data-server.ifieldtype.visualizable.md) | <code>boolean</code> |  |
 

@@ -24,6 +24,7 @@ import { screenshotsObservableFactory } from './export_types/common/lib/screensh
 import { checkLicense, getExportTypesRegistry } from './lib';
 import { ESQueueInstance } from './lib/create_queue';
 import { EnqueueJobFn } from './lib/enqueue_job';
+import { ReportingStore } from './lib/store';
 
 export interface ReportingInternalSetup {
   elasticsearch: ElasticsearchServiceSetup;
@@ -37,6 +38,7 @@ export interface ReportingInternalStart {
   browserDriverFactory: HeadlessChromiumDriverFactory;
   enqueueJob: EnqueueJobFn;
   esqueue: ESQueueInstance;
+  store: ReportingStore;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
 }

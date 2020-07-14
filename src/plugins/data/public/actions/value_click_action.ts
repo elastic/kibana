@@ -27,12 +27,12 @@ import {
 import { getOverlays, getIndexPatterns } from '../services';
 import { applyFiltersPopover } from '../ui/apply_filters';
 import { createFiltersFromValueClickAction } from './filters/create_filters_from_value_click';
-import { ValueClickTriggerContext } from '../../../embeddable/public';
+import { ValueClickContext } from '../../../embeddable/public';
 import { Filter, FilterManager, TimefilterContract, esFilters } from '..';
 
 export const ACTION_VALUE_CLICK = 'ACTION_VALUE_CLICK';
 
-export type ValueClickActionContext = ValueClickTriggerContext;
+export type ValueClickActionContext = ValueClickContext;
 
 async function isCompatible(context: ValueClickActionContext) {
   try {

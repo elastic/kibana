@@ -22,7 +22,7 @@ export interface InfraWaffleMapNode {
   name: string;
   ip?: string | null;
   path: SnapshotNodePath[];
-  metric: SnapshotNodeMetric;
+  metrics: SnapshotNodeMetric[];
 }
 
 export type InfraWaffleMapGroup = InfraWaffleMapGroupOfNodes | InfraWaffleMapGroupOfGroups;

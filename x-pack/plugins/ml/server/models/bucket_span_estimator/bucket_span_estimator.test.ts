@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import { ES_AGGREGATION } from '../../../common/constants/aggregation_types';
 
@@ -17,7 +17,7 @@ import { estimateBucketSpanFactory, BucketSpanEstimatorData } from './bucket_spa
 // sufficient permissions should be returned, the second time insufficient
 // permissions.
 const permissions = [false, true];
-const callWithRequest: APICaller = (method: string) => {
+const callWithRequest: LegacyAPICaller = (method: string) => {
   return new Promise((resolve) => {
     if (method === 'ml.privilegeCheck') {
       resolve({
@@ -34,7 +34,7 @@ const callWithRequest: APICaller = (method: string) => {
   }) as Promise<any>;
 };
 
-const callWithInternalUser: APICaller = () => {
+const callWithInternalUser: LegacyAPICaller = () => {
   return new Promise((resolve) => {
     resolve({});
   }) as Promise<any>;

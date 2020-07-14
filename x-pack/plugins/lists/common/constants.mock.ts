@@ -41,15 +41,15 @@ export const OPERATOR = 'included';
 export const ENTRY_VALUE = 'some host name';
 export const MATCH = 'match';
 export const MATCH_ANY = 'match_any';
+export const MAX_IMPORT_PAYLOAD_BYTES = 40000000;
+export const IMPORT_BUFFER_SIZE = 1000;
 export const LIST = 'list';
 export const EXISTS = 'exists';
 export const NESTED = 'nested';
 export const ENTRIES: EntriesArray = [
   {
-    entries: [
-      { field: 'some.not.nested.field', operator: 'included', type: 'match', value: 'some value' },
-    ],
-    field: 'some.field',
+    entries: [{ field: 'nested.field', operator: 'included', type: 'match', value: 'some value' }],
+    field: 'some.parentField',
     type: 'nested',
   },
   { field: 'some.not.nested.field', operator: 'included', type: 'match', value: 'some value' },

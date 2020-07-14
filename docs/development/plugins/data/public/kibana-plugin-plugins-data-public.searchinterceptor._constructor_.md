@@ -9,14 +9,13 @@ This class should be instantiated with a `requestTimeout` corresponding with how
 <b>Signature:</b>
 
 ```typescript
-constructor(toasts: ToastsStart, application: ApplicationStart, requestTimeout?: number | undefined);
+constructor(deps: SearchInterceptorDeps, requestTimeout?: number | undefined);
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  toasts | <code>ToastsStart</code> |  |
-|  application | <code>ApplicationStart</code> |  |
+|  deps | <code>SearchInterceptorDeps</code> |  |
 |  requestTimeout | <code>number &#124; undefined</code> |  |
 

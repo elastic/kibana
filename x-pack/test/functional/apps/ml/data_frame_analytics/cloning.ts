@@ -13,7 +13,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('jobs cloning supported by UI form', function () {
+  // Flaky: https://github.com/elastic/kibana/issues/70885
+  describe.skip('jobs cloning supported by UI form', function () {
     const testDataList: Array<{
       suiteTitle: string;
       archive: string;
@@ -45,6 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             analysis: {
               classification: {
+                prediction_field_name: 'test',
                 dependent_variable: 'y',
                 training_percent: 20,
               },
@@ -107,6 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             analysis: {
               regression: {
+                prediction_field_name: 'test',
                 dependent_variable: 'stab',
                 training_percent: 20,
               },
@@ -156,25 +159,45 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testResources.deleteIndexPatternByTitle(testData.job.dest!.index as string);
         });
 
-        it('should open the flyout with a proper header', async () => {
-          expect(await ml.dataFrameAnalyticsCreation.getHeaderText()).to.be(
-            `Clone job from ${testData.job.id}`
-          );
+        it('should open the wizard with a proper header', async () => {
+          const headerText = await ml.dataFrameAnalyticsCreation.getHeaderText();
+          expect(headerText).to.match(/Clone job/);
+          await ml.dataFrameAnalyticsCreation.assertConfigurationStepActive();
         });
 
-        it('should have correct init form values', async () => {
-          await ml.dataFrameAnalyticsCreation.assertInitialCloneJobForm(
+        it('should have correct init form values for config step', async () => {
+          await ml.dataFrameAnalyticsCreation.assertInitialCloneJobConfigStep(
             testData.job as DataFrameAnalyticsConfig
           );
         });
 
-        it('should have disabled Create button on open', async () => {
-          expect(await ml.dataFrameAnalyticsCreation.isCreateButtonDisabled()).to.be(true);
+        it('should continue to the additional options step', async () => {
+          await ml.dataFrameAnalyticsCreation.continueToAdditionalOptionsStep();
         });
 
-        it('should enable Create button on a valid form input', async () => {
+        it('should have correct init form values for additional options step', async () => {
+          await ml.dataFrameAnalyticsCreation.assertInitialCloneJobAdditionalOptionsStep(
+            testData.job.analysis as DataFrameAnalyticsConfig['analysis']
+          );
+        });
+
+        it('should continue to the details step', async () => {
+          await ml.dataFrameAnalyticsCreation.continueToDetailsStep();
+        });
+
+        it('should have correct init form values for details step', async () => {
+          await ml.dataFrameAnalyticsCreation.assertInitialCloneJobDetailsStep(
+            testData.job as DataFrameAnalyticsConfig
+          );
           await ml.dataFrameAnalyticsCreation.setJobId(cloneJobId);
           await ml.dataFrameAnalyticsCreation.setDestIndex(cloneDestIndex);
+        });
+
+        it('should continue to the create step', async () => {
+          await ml.dataFrameAnalyticsCreation.continueToCreateStep();
+        });
+
+        it('should have enabled Create button on a valid form input', async () => {
           expect(await ml.dataFrameAnalyticsCreation.isCreateButtonDisabled()).to.be(false);
         });
 
@@ -182,11 +205,12 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.createAnalyticsJob(cloneJobId);
         });
 
-        it('finishes analytics processing', async () => {
+        it('should finish analytics processing', async () => {
           await ml.dataFrameAnalytics.waitForAnalyticsCompletion(cloneJobId);
         });
 
-        it('displays the created job in the analytics table', async () => {
+        it('should display the created job in the analytics table', async () => {
+          await ml.dataFrameAnalyticsCreation.navigateToJobManagementPage();
           await ml.dataFrameAnalyticsTable.refreshAnalyticsTable();
           await ml.dataFrameAnalyticsTable.filterWithSearchString(cloneJobId);
           const rows = await ml.dataFrameAnalyticsTable.parseAnalyticsTable();

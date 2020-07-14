@@ -31,7 +31,7 @@ import { useResolverTheme } from '../assets';
 
 const StyledDescriptionList = styled(EuiDescriptionList)`
   &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
-    max-width: 8em;
+    max-width: 10em;
   }
 `;
 
@@ -41,10 +41,14 @@ const StyledDescriptionList = styled(EuiDescriptionList)`
  */
 export const ProcessDetails = memo(function ProcessDetails({
   processEvent,
+  isProcessTerminated,
+  isProcessOrigin,
   pushToQueryParams,
 }: {
   processEvent: ResolverEvent;
-  pushToQueryParams: (arg0: CrumbInfo) => unknown;
+  isProcessTerminated: boolean;
+  isProcessOrigin: boolean;
+  pushToQueryParams: (queryStringKeyValuePair: CrumbInfo) => unknown;
 }) {
   const processName = event.eventName(processEvent);
   const processInfoEntry = useMemo(() => {
@@ -52,73 +56,42 @@ export const ProcessDetails = memo(function ProcessDetails({
     const dateTime = eventTime ? formatDate(eventTime) : '';
 
     const createdEntry = {
-      title: i18n.translate(
-        'xpack.securitySolution.endpoint.resolver.panel.processDescList.created',
-        {
-          defaultMessage: 'Created',
-        }
-      ),
+      title: '@timestamp',
       description: dateTime,
     };
 
     const pathEntry = {
-      title: i18n.translate('xpack.securitySolution.endpoint.resolver.panel.processDescList.path', {
-        defaultMessage: 'Path',
-      }),
+      title: 'process.executable',
       description: processPath(processEvent),
     };
 
     const pidEntry = {
-      title: i18n.translate('xpack.securitySolution.endpoint.resolver.panel.processDescList.pid', {
-        defaultMessage: 'PID',
-      }),
+      title: 'process.pid',
       description: processPid(processEvent),
     };
 
     const userEntry = {
-      title: i18n.translate('xpack.securitySolution.endpoint.resolver.panel.processDescList.user', {
-        defaultMessage: 'User',
-      }),
+      title: 'user.name',
       description: (userInfoForProcess(processEvent) as { name: string }).name,
     };
 
     const domainEntry = {
-      title: i18n.translate(
-        'xpack.securitySolution.endpoint.resolver.panel.processDescList.domain',
-        {
-          defaultMessage: 'Domain',
-        }
-      ),
+      title: 'user.domain',
       description: (userInfoForProcess(processEvent) as { domain: string }).domain,
     };
 
     const parentPidEntry = {
-      title: i18n.translate(
-        'xpack.securitySolution.endpoint.resolver.panel.processDescList.parentPid',
-        {
-          defaultMessage: 'Parent PID',
-        }
-      ),
+      title: 'process.parent.pid',
       description: processParentPid(processEvent),
     };
 
     const md5Entry = {
-      title: i18n.translate(
-        'xpack.securitySolution.endpoint.resolver.panel.processDescList.md5hash',
-        {
-          defaultMessage: 'MD5',
-        }
-      ),
+      title: 'process.hash.md5',
       description: md5HashForProcess(processEvent),
     };
 
     const commandLineEntry = {
-      title: i18n.translate(
-        'xpack.securitySolution.endpoint.resolver.panel.processDescList.commandLine',
-        {
-          defaultMessage: 'Command Line',
-        }
-      ),
+      title: 'process.args',
       description: argsForProcess(processEvent),
     };
 
@@ -178,8 +151,8 @@ export const ProcessDetails = memo(function ProcessDetails({
     if (!processEvent) {
       return { descriptionText: '' };
     }
-    return cubeAssetsForNode(processEvent);
-  }, [processEvent, cubeAssetsForNode]);
+    return cubeAssetsForNode(isProcessTerminated, isProcessOrigin);
+  }, [processEvent, cubeAssetsForNode, isProcessTerminated, isProcessOrigin]);
 
   const titleId = useMemo(() => htmlIdGenerator('resolverTable')(), []);
   return (
@@ -188,7 +161,10 @@ export const ProcessDetails = memo(function ProcessDetails({
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
         <h4 aria-describedby={titleId}>
-          <CubeForProcess processEvent={processEvent} />
+          <CubeForProcess
+            isProcessTerminated={isProcessTerminated}
+            isProcessOrigin={isProcessOrigin}
+          />
           {processName}
         </h4>
       </EuiTitle>

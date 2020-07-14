@@ -8,14 +8,14 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { AlertExecutorOptions } from '../../../../../alerts/server';
 import { InfraBackendLibs } from '../../infra_types';
-import { AlertStates } from './types';
-import { evaluateAlert } from './lib/evaluate_alert';
 import {
   buildErrorAlertReason,
   buildFiredAlertReason,
   buildNoDataAlertReason,
   stateToAlertMessage,
-} from './messages';
+} from '../common/messages';
+import { AlertStates } from './types';
+import { evaluateAlert } from './lib/evaluate_alert';
 
 export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: string) =>
   async function (options: AlertExecutorOptions) {
@@ -33,10 +33,10 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
     const config = source.configuration;
     const alertResults = await evaluateAlert(services.callCluster, params, config);
 
-    // Because each alert result has the same group definitions, just grab the groups from the first one.
-    const groups = Object.keys(first(alertResults));
+    // Because each alert result has the same group definitions, just grap the groups from the first one.
+    const groups = Object.keys(first(alertResults) as any);
     for (const group of groups) {
-      const alertInstance = services.alertInstanceFactory(`${alertId}-${group}`);
+      const alertInstance = services.alertInstanceFactory(`${group}::${alertId}`);
 
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = alertResults.every((result) =>
@@ -58,7 +58,9 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
 
       let reason;
       if (nextState === AlertStates.ALERT) {
-        reason = alertResults.map((result) => buildFiredAlertReason(result[group])).join('\n');
+        reason = alertResults
+          .map((result) => buildFiredAlertReason(result[group] as any))
+          .join('\n');
       }
       if (alertOnNoData) {
         if (nextState === AlertStates.NO_DATA) {
@@ -74,11 +76,13 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
         }
       }
       if (reason) {
+        const firstResult = first(alertResults);
+        const timestamp = (firstResult && firstResult[group].timestamp) ?? moment().toISOString();
         alertInstance.scheduleActions(FIRED_ACTIONS.id, {
           group,
           alertState: stateToAlertMessage[nextState],
           reason,
-          timestamp: moment().toISOString(),
+          timestamp,
           value: mapToConditionsLookup(alertResults, (result) => result[group].currentValue),
           threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
           metric: mapToConditionsLookup(criteria, (c) => c.metric),

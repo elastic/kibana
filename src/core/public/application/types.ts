@@ -19,6 +19,7 @@
 
 import { Observable } from 'rxjs';
 import { History } from 'history';
+import { RecursiveReadonly } from '@kbn/utility-types';
 
 import { Capabilities } from './capabilities';
 import { ChromeStart } from '../chrome';
@@ -30,7 +31,6 @@ import { NotificationsStart } from '../notifications';
 import { OverlayStart } from '../overlays';
 import { PluginOpaqueId } from '../plugins';
 import { IUiSettingsClient } from '../ui_settings';
-import { RecursiveReadonly } from '../../utils';
 import { SavedObjectsStart } from '../saved_objects';
 import { AppCategory } from '../../types';
 import { ScopedHistory } from './scoped_history';
@@ -234,6 +234,24 @@ export interface App<HistoryLocationState = unknown> extends AppBase {
    * base path from HTTP.
    */
   appRoute?: string;
+
+  /**
+   * If set to true, the application's route will only be checked against an exact match. Defaults to `false`.
+   *
+   * @example
+   * ```ts
+   * core.application.register({
+   *   id: 'my_app',
+   *   title: 'My App'
+   *   exactRoute: true,
+   *   mount: () => { ... },
+   * })
+   *
+   * // '[basePath]/app/my_app' will be matched
+   * // '[basePath]/app/my_app/some/path' will not be matched
+   * ```
+   */
+  exactRoute?: boolean;
 }
 
 /** @public */
@@ -251,6 +269,10 @@ export interface LegacyApp extends AppBase {
  */
 export type PublicAppInfo = Omit<App, 'mount' | 'updater$'> & {
   legacy: false;
+  // remove optional on fields populated with default values
+  status: AppStatus;
+  navLinkStatus: AppNavLinkStatus;
+  appRoute: string;
 };
 
 /**
@@ -260,6 +282,9 @@ export type PublicAppInfo = Omit<App, 'mount' | 'updater$'> & {
  */
 export type PublicLegacyAppInfo = Omit<LegacyApp, 'updater$'> & {
   legacy: true;
+  // remove optional on fields populated with default values
+  status: AppStatus;
+  navLinkStatus: AppNavLinkStatus;
 };
 
 /**
@@ -569,6 +594,7 @@ export type Mounter<T = App | LegacyApp> = SelectivePartial<
     appBasePath: string;
     mount: T extends LegacyApp ? LegacyAppMounter : AppMounter;
     legacy: boolean;
+    exactRoute: boolean;
     unmountBeforeMounting: T extends LegacyApp ? true : boolean;
   },
   T extends LegacyApp ? never : 'unmountBeforeMounting'

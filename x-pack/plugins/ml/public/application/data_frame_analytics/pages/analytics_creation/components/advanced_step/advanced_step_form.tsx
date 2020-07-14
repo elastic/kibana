@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useMemo } from 'react';
+import React, { FC, Fragment, useMemo, useEffect, useState } from 'react';
 import {
   EuiAccordion,
   EuiFieldNumber,
@@ -23,9 +23,11 @@ import { getModelMemoryLimitErrors } from '../../../analytics_management/hooks/u
 import {
   ANALYSIS_CONFIG_TYPE,
   NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN,
+  ANALYSIS_ADVANCED_FIELDS,
 } from '../../../../common/analytics';
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { ANALYTICS_STEPS } from '../../page';
+import { fetchExplainData } from '../shared';
 import { ContinueButton } from '../continue_button';
 import { OutlierHyperParameters } from './outlier_hyper_parameters';
 
@@ -33,23 +35,39 @@ export function getNumberValue(value?: number) {
   return value === undefined ? '' : +value;
 }
 
+export type AdvancedParamErrors = {
+  [key in ANALYSIS_ADVANCED_FIELDS]?: string;
+};
+
 export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
   actions,
   state,
   setCurrentStep,
 }) => {
-  const { setFormState } = actions;
+  const [advancedParamErrors, setAdvancedParamErrors] = useState<AdvancedParamErrors>({});
+  const [fetchingAdvancedParamErrors, setFetchingAdvancedParamErrors] = useState<boolean>(false);
+
+  const { setEstimatedModelMemoryLimit, setFormState } = actions;
   const { form, isJobCreated } = state;
   const {
     computeFeatureInfluence,
+    eta,
+    featureBagFraction,
     featureInfluenceThreshold,
+    gamma,
     jobType,
+    lambda,
+    maxTrees,
+    method,
     modelMemoryLimit,
     modelMemoryLimitValidationResult,
+    nNeighbors,
     numTopClasses,
     numTopFeatureImportanceValues,
     numTopFeatureImportanceValuesValid,
+    outlierFraction,
     predictionFieldName,
+    randomizeSeed,
   } = form;
 
   const mmlErrors = useMemo(() => getModelMemoryLimitErrors(modelMemoryLimitValidationResult), [
@@ -60,6 +78,48 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
     jobType === ANALYSIS_CONFIG_TYPE.REGRESSION || jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
 
   const mmlInvalid = modelMemoryLimitValidationResult !== null;
+
+  const isStepInvalid =
+    mmlInvalid ||
+    Object.keys(advancedParamErrors).length > 0 ||
+    fetchingAdvancedParamErrors === true;
+
+  useEffect(() => {
+    setFetchingAdvancedParamErrors(true);
+    (async function () {
+      const { success, errorMessage, expectedMemory } = await fetchExplainData(form);
+      const paramErrors: AdvancedParamErrors = {};
+
+      if (success) {
+        if (modelMemoryLimit !== expectedMemory) {
+          setEstimatedModelMemoryLimit(expectedMemory);
+          setFormState({ modelMemoryLimit: expectedMemory });
+        }
+      } else {
+        // Check which field is invalid
+        Object.values(ANALYSIS_ADVANCED_FIELDS).forEach((param) => {
+          if (errorMessage.includes(`[${param}]`)) {
+            paramErrors[param] = errorMessage;
+          }
+        });
+      }
+      setFetchingAdvancedParamErrors(false);
+      setAdvancedParamErrors(paramErrors);
+    })();
+  }, [
+    eta,
+    featureBagFraction,
+    featureInfluenceThreshold,
+    gamma,
+    lambda,
+    maxTrees,
+    method,
+    nNeighbors,
+    numTopClasses,
+    numTopFeatureImportanceValues,
+    outlierFraction,
+    randomizeSeed,
+  ]);
 
   const outlierDetectionAdvancedConfig = (
     <Fragment>
@@ -126,6 +186,10 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
                 'The minimum outlier score that a document needs to have in order to calculate its feature influence score. Value range: 0-1. Defaults to 0.1.',
             }
           )}
+          isInvalid={
+            advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.FEATURE_INFLUENCE_THRESHOLD] !== undefined
+          }
+          error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.FEATURE_INFLUENCE_THRESHOLD]}
         >
           <EuiFieldNumber
             onChange={(e) =>
@@ -315,14 +379,24 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
       >
         <EuiFlexGroup wrap>
           {jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && (
-            <OutlierHyperParameters actions={actions} state={state} />
+            <OutlierHyperParameters
+              actions={actions}
+              state={state}
+              advancedParamErrors={advancedParamErrors}
+            />
           )}
-          {isRegOrClassJob && <HyperParameters actions={actions} state={state} />}
+          {isRegOrClassJob && (
+            <HyperParameters
+              actions={actions}
+              state={state}
+              advancedParamErrors={advancedParamErrors}
+            />
+          )}
         </EuiFlexGroup>
       </EuiAccordion>
       <EuiSpacer />
       <ContinueButton
-        isDisabled={mmlInvalid}
+        isDisabled={isStepInvalid}
         onClick={() => {
           setCurrentStep(ANALYTICS_STEPS.DETAILS);
         }}

@@ -13,7 +13,7 @@ import {
   EuiComboBox,
   EuiFieldText,
   EuiFormRow,
-  EuiForm,
+  EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
 import { WmsClient } from './wms_client';
@@ -289,7 +289,7 @@ export class WMSCreateSourceEditor extends Component {
 
   render() {
     return (
-      <EuiForm>
+      <EuiPanel>
         <EuiFormRow
           label={i18n.translate('xpack.maps.source.wms.urlLabel', {
             defaultMessage: 'Url',
@@ -303,7 +303,7 @@ export class WMSCreateSourceEditor extends Component {
         {this._renderLayerAndStyleInputs()}
 
         {this._renderAttributionInputs()}
-      </EuiForm>
+      </EuiPanel>
     );
   }
 }

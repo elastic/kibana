@@ -19,7 +19,7 @@
 
 import { get } from 'lodash';
 import { GeohashLayer } from './geohash_layer';
-import { getFormatService, getQueryService } from './services';
+import { getFormatService, getQueryService, getKibanaLegacy } from './services';
 import { scaleBounds, geoContains, mapTooltipProvider } from '../../maps_legacy/public';
 import { tooltipFormatter } from './tooltip_formatter';
 
@@ -59,6 +59,11 @@ export const createTileMapVisualization = (dependencies) => {
 
       this.vis.eventsSubject.next(updateVarsObject);
     };
+
+    async render(esResponse, visParams) {
+      getKibanaLegacy().loadFontAwesome();
+      await super.render(esResponse, visParams);
+    }
 
     async _makeKibanaMap() {
       await super._makeKibanaMap();

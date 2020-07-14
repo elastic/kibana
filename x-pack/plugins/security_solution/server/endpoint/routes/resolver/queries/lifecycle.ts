@@ -60,6 +60,6 @@ export class LifecycleQuery extends ResolverQuery<ResolverEvent[]> {
   }
 
   formatResponse(response: SearchResponse<ResolverEvent>): ResolverEvent[] {
-    return ResolverQuery.getResults(response);
+    return this.getResults(response);
   }
 }

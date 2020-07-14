@@ -6,68 +6,47 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const EndUserExperienceLabel = i18n.translate(
-  'xpack.apm.rum.dashboard.title',
-  {
-    defaultMessage: 'End User Experience',
-  }
-);
-
-export const getWhatIsGoingOnLabel = (environmentVal: string) =>
-  i18n.translate('xpack.apm.rum.dashboard.environment.title', {
-    defaultMessage: `What's going on in {environmentVal}?`,
-    values: { environmentVal },
-  });
-
-export const BackEndLabel = i18n.translate('xpack.apm.rum.dashboard.backend', {
-  defaultMessage: 'Backend',
-});
-
-export const FrontEndLabel = i18n.translate(
-  'xpack.apm.rum.dashboard.frontend',
-  {
+export const I18LABELS = {
+  backEnd: i18n.translate('xpack.apm.rum.dashboard.backend', {
+    defaultMessage: 'Backend',
+  }),
+  frontEnd: i18n.translate('xpack.apm.rum.dashboard.frontend', {
     defaultMessage: 'Frontend',
-  }
-);
-
-export const PageViewsLabel = i18n.translate(
-  'xpack.apm.rum.dashboard.pageViews',
-  {
+  }),
+  pageViews: i18n.translate('xpack.apm.rum.dashboard.pageViews', {
     defaultMessage: 'Page views',
-  }
-);
-
-export const DateTimeLabel = i18n.translate(
-  'xpack.apm.rum.dashboard.dateTime.label',
-  {
+  }),
+  dateTime: i18n.translate('xpack.apm.rum.dashboard.dateTime.label', {
     defaultMessage: 'Date / Time',
-  }
-);
-
-export const PercPageLoadedLabel = i18n.translate(
-  'xpack.apm.rum.dashboard.pagesLoaded.label',
-  {
+  }),
+  percPageLoaded: i18n.translate('xpack.apm.rum.dashboard.pagesLoaded.label', {
     defaultMessage: 'Pages loaded',
-  }
-);
-
-export const PageLoadTimeLabel = i18n.translate(
-  'xpack.apm.rum.dashboard.pageLoadTime.label',
-  {
+  }),
+  pageLoadTime: i18n.translate('xpack.apm.rum.dashboard.pageLoadTime.label', {
     defaultMessage: 'Page load time (seconds)',
-  }
-);
-
-export const PageLoadDistLabel = i18n.translate(
-  'xpack.apm.rum.dashboard.pageLoadDistribution.label',
-  {
-    defaultMessage: 'Page load distribution',
-  }
-);
-
-export const ResetZoomLabel = i18n.translate(
-  'xpack.apm.rum.dashboard.resetZoom.label',
-  {
+  }),
+  pageLoadTimes: i18n.translate('xpack.apm.rum.dashboard.pageLoadTimes.label', {
+    defaultMessage: 'Page load times',
+  }),
+  pageLoadDistribution: i18n.translate(
+    'xpack.apm.rum.dashboard.pageLoadDistribution.label',
+    {
+      defaultMessage: 'Page load distribution',
+    }
+  ),
+  resetZoom: i18n.translate('xpack.apm.rum.dashboard.resetZoom.label', {
     defaultMessage: 'Reset zoom',
-  }
-);
+  }),
+  overall: i18n.translate('xpack.apm.rum.dashboard.overall.label', {
+    defaultMessage: 'Overall',
+  }),
+  selectBreakdown: i18n.translate('xpack.apm.rum.filterGroup.selectBreakdown', {
+    defaultMessage: 'Select breakdown',
+  }),
+  breakdown: i18n.translate('xpack.apm.rum.filterGroup.breakdown', {
+    defaultMessage: 'Breakdown',
+  }),
+  seconds: i18n.translate('xpack.apm.rum.filterGroup.seconds', {
+    defaultMessage: 'seconds',
+  }),
+};

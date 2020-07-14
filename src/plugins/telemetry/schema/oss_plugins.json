@@ -1,0 +1,59 @@
+{
+  "properties": {
+    "kql": {
+      "properties": {
+        "optInCount": {
+          "type": "long"
+        },
+        "optOutCount": {
+          "type": "long"
+        },
+        "defaultQueryLanguage": {
+          "type": "keyword"
+        }
+      }
+    },
+    "sample-data": {
+      "properties": {
+        "installed": {
+          "type": "keyword"
+        },
+        "last_install_date": {
+          "type": "date"
+        },
+        "last_install_set": {
+          "type": "keyword"
+        },
+        "last_uninstall_date": {
+          "type": "date"
+        },
+        "last_uninstall_set": {
+          "type": "keyword"
+        },
+        "uninstalled": {
+          "type": "keyword"
+        }
+      }
+    },
+    "telemetry": {
+      "properties": {
+        "opt_in_status": {
+          "type": "boolean"
+        },
+        "usage_fetcher": {
+          "type": "keyword"
+        },
+        "last_reported": {
+          "type": "long"
+        }
+      }
+    },
+    "tsvb-validation": {
+      "properties": {
+        "failed_validations": {
+          "type": "long"
+        }
+      }
+    }
+  }
+}

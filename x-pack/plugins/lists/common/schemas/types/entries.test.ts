@@ -251,16 +251,16 @@ describe('Entries', () => {
       expect(message.schema).toEqual(payload);
     });
 
-    test('it should not validate when "value" is not string array', () => {
-      const payload: Omit<EntryList, 'value'> & { value: string } = {
+    test('it should not validate when "list" is not expected value', () => {
+      const payload: Omit<EntryList, 'list'> & { list: string } = {
         ...getEntryListMock(),
-        value: 'someListId',
+        list: 'someListId',
       };
       const decoded = entriesList.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "someListId" supplied to "value"',
+        'Invalid value "someListId" supplied to "list"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -334,6 +334,20 @@ describe('Entries', () => {
 
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "im a string" supplied to "entries"',
+      ]);
+      expect(message.schema).toEqual({});
+    });
+
+    test('it should NOT validate when "entries" contains an entry item that is not type "match"', () => {
+      const payload: Omit<EntryNested, 'entries'> & {
+        entries: EntryMatchAny[];
+      } = { ...getEntryNestedMock(), entries: [getEntryMatchAnyMock()] };
+      const decoded = entriesNested.decode(payload);
+      const message = pipe(decoded, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "match_any" supplied to "entries,type"',
+        'Invalid value "["some host name"]" supplied to "entries,value"',
       ]);
       expect(message.schema).toEqual({});
     });

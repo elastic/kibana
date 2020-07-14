@@ -4,26 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable max-classes-per-file */
 export class IngestManagerError extends Error {
-  public type: IngestManagerErrorType;
-  public message: string;
-
-  constructor(type: IngestManagerErrorType, message: string) {
+  constructor(message?: string) {
     super(message);
-    this.type = type;
-    this.message = message;
+    this.name = this.constructor.name; // for stack traces
   }
 }
 
 export const getHTTPResponseCode = (error: IngestManagerError): number => {
-  switch (error.type) {
-    case IngestManagerErrorType.RegistryError:
-      return 502; // Bad Gateway
-    default:
-      return 400; // Bad Request
+  if (error instanceof RegistryError) {
+    return 502; // Bad Gateway
+  } else {
+    return 400; // Bad Request
   }
 };
 
-export enum IngestManagerErrorType {
-  RegistryError,
-}
+export class RegistryError extends IngestManagerError {}

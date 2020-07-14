@@ -230,6 +230,72 @@ export default async function ({ readConfigFile }) {
             },
           ],
         },
+        global_visualize_read: {
+          kibana: [
+            {
+              feature: {
+                visualize: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        global_visualize_all: {
+          kibana: [
+            {
+              feature: {
+                visualize: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        global_maps_all: {
+          kibana: [
+            {
+              feature: {
+                maps: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        geoshape_data_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['geo_shapes*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+
+        global_devtools_read: {
+          kibana: [
+            {
+              feature: {
+                dev_tools: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        global_ccr_role: {
+          elasticsearch: {
+            cluster: ['manage', 'manage_ccr'],
+          },
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
 
         //Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965
         test_api_keys: {

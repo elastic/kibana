@@ -16,6 +16,7 @@ import { PolicyListState } from '../../types';
  */
 export const initialPolicyListState: () => Immutable<PolicyListState> = () => ({
   policyItems: [],
+  endpointPackageInfo: undefined,
   isLoading: false,
   isDeleting: false,
   deleteStatus: undefined,
@@ -92,6 +93,13 @@ export const policyListReducer: ImmutableReducer<PolicyListState, AppAction> = (
     return {
       ...state,
       ...action.payload,
+    };
+  }
+
+  if (action.type === 'serverReturnedEndpointPackageInfo') {
+    return {
+      ...state,
+      endpointPackageInfo: action.payload,
     };
   }
 

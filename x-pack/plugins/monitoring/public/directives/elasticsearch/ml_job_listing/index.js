@@ -72,7 +72,9 @@ const getColumns = () => [
     render: (name, node) => {
       if (node) {
         return (
-          <EuiLink href={getSafeForExternalLink(`/elasticsearch/nodes/${node.id}`)}>{name}</EuiLink>
+          <EuiLink href={getSafeForExternalLink(`#/elasticsearch/nodes/${node.id}`)}>
+            {name}
+          </EuiLink>
         );
       }
 

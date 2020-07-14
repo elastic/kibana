@@ -24,12 +24,12 @@ import {
   ActionByType,
 } from '../../../../plugins/ui_actions/public';
 import { createFiltersFromRangeSelectAction } from './filters/create_filters_from_range_select';
-import { RangeSelectTriggerContext } from '../../../embeddable/public';
+import { RangeSelectContext } from '../../../embeddable/public';
 import { FilterManager, TimefilterContract, esFilters } from '..';
 
 export const ACTION_SELECT_RANGE = 'ACTION_SELECT_RANGE';
 
-export type SelectRangeActionContext = RangeSelectTriggerContext;
+export type SelectRangeActionContext = RangeSelectContext;
 
 async function isCompatible(context: SelectRangeActionContext) {
   try {

@@ -7,7 +7,7 @@
 import fs from 'fs';
 import Boom from 'boom';
 import numeral from '@elastic/numeral';
-import { APICaller, SavedObjectsClientContract } from 'kibana/server';
+import { LegacyAPICaller, SavedObjectsClientContract } from 'kibana/server';
 import moment from 'moment';
 import { IndexPatternAttributes } from 'src/plugins/data/server';
 import { merge } from 'lodash';
@@ -113,7 +113,7 @@ export class DataRecognizer {
   jobsForModelMemoryEstimation: Array<{ job: ModuleJob; query: any }> = [];
 
   constructor(
-    private callAsCurrentUser: APICaller,
+    private callAsCurrentUser: LegacyAPICaller,
     private savedObjectsClient: SavedObjectsClientContract
   ) {}
 
@@ -362,7 +362,7 @@ export class DataRecognizer {
   // takes a module config id, an optional jobPrefix and the request object
   // creates all of the jobs, datafeeds and savedObjects  listed in the module config.
   // if any of the savedObjects already exist, they will not be overwritten.
-  async setupModuleItems(
+  async setup(
     moduleId: string,
     jobPrefix?: string,
     groups?: string[],

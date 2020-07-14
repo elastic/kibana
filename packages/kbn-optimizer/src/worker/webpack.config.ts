@@ -21,11 +21,10 @@ import Path from 'path';
 
 import { stringifyRequest } from 'loader-utils';
 import webpack from 'webpack';
-// @ts-ignore
+// @ts-expect-error
 import TerserPlugin from 'terser-webpack-plugin';
-// @ts-ignore
+// @ts-expect-error
 import webpackMerge from 'webpack-merge';
-// @ts-ignore
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CompressionPlugin from 'compression-webpack-plugin';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
@@ -134,8 +133,8 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           test: /\.scss$/,
           exclude: /node_modules/,
           oneOf: [
-            {
-              resourceQuery: /dark|light/,
+            ...worker.themeTags.map((theme) => ({
+              resourceQuery: `?${theme}`,
               use: [
                 {
                   loader: 'style-loader',
@@ -196,34 +195,27 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                         loaderContext,
                         Path.resolve(
                           worker.repoRoot,
-                          'src/legacy/ui/public/styles/_styling_constants.scss'
+                          `src/legacy/ui/public/styles/_globals_${theme}.scss`
                         )
                       )};\n`;
                     },
                     webpackImporter: false,
                     implementation: require('node-sass'),
-                    sassOptions(loaderContext: webpack.loader.LoaderContext) {
-                      const darkMode = loaderContext.resourceQuery === '?dark';
-
-                      return {
-                        outputStyle: 'nested',
-                        includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
-                        sourceMapRoot: `/${bundle.type}:${bundle.id}`,
-                        importer: (url: string) => {
-                          if (darkMode && url.includes('eui_colors_light')) {
-                            return { file: url.replace('eui_colors_light', 'eui_colors_dark') };
-                          }
-
-                          return { file: url };
-                        },
-                      };
+                    sassOptions: {
+                      outputStyle: 'nested',
+                      includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
+                      sourceMapRoot: `/${bundle.type}:${bundle.id}`,
                     },
                   },
                 },
               ],
-            },
+            })),
             {
               loader: require.resolve('./theme_loader'),
+              options: {
+                bundleId: bundle.id,
+                themeTags: worker.themeTags,
+              },
             },
           ],
         },

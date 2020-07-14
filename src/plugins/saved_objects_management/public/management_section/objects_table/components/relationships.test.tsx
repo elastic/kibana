@@ -77,7 +77,7 @@ describe('Relationships', () => {
           editUrl: '#/management/kibana/indexPatterns/patterns/1',
           inAppUrl: {
             path: '/management/kibana/indexPatterns/patterns/1',
-            uiCapabilitiesPath: 'management.kibana.index_patterns',
+            uiCapabilitiesPath: 'management.kibana.indexPatterns',
           },
         },
       },
@@ -113,7 +113,7 @@ describe('Relationships', () => {
             icon: 'indexPatternApp',
             inAppUrl: {
               path: '/app/management/kibana/indexPatterns/patterns/1',
-              uiCapabilitiesPath: 'management.kibana.index_patterns',
+              uiCapabilitiesPath: 'management.kibana.indexPatterns',
             },
             title: 'My Index Pattern',
           },

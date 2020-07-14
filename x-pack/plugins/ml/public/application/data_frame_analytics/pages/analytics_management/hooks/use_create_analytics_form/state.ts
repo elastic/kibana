@@ -4,21 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
-import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 
 import {
-  FieldSelectionItem,
-  isClassificationAnalysis,
-  isRegressionAnalysis,
   DataFrameAnalyticsId,
   DataFrameAnalyticsConfig,
   ANALYSIS_CONFIG_TYPE,
 } from '../../../../common/analytics';
-import { CloneDataFrameAnalyticsConfig } from '../../components/analytics_list/action_clone';
+import { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';
 
 export enum DEFAULT_MODEL_MEMORY_LIMIT {
   regression = '100mb',
@@ -52,8 +47,6 @@ export interface State {
     computeFeatureInfluence: string;
     createIndexPattern: boolean;
     dependentVariable: DependentVariable;
-    dependentVariableFetchFail: boolean;
-    dependentVariableOptions: EuiComboBoxOptionOption[];
     description: string;
     destinationIndex: EsIndexName;
     destinationIndexNameExists: boolean;
@@ -61,13 +54,10 @@ export interface State {
     destinationIndexNameValid: boolean;
     destinationIndexPatternTitleExists: boolean;
     eta: undefined | number;
-    excludes: string[];
-    excludesTableItems: FieldSelectionItem[];
-    excludesOptions: EuiComboBoxOptionOption[];
     featureBagFraction: undefined | number;
     featureInfluenceThreshold: undefined | number;
-    fieldOptionsFetchFail: boolean;
     gamma: undefined | number;
+    includes: string[];
     jobId: DataFrameAnalyticsId;
     jobIdExists: boolean;
     jobIdEmpty: boolean;
@@ -77,9 +67,7 @@ export interface State {
     jobConfigQuery: any;
     jobConfigQueryString: string | undefined;
     lambda: number | undefined;
-    loadingDepVarOptions: boolean;
     loadingFieldOptions: boolean;
-    maxDistinctValuesError: string | undefined;
     maxTrees: undefined | number;
     method: undefined | string;
     modelMemoryLimit: string | undefined;
@@ -94,6 +82,7 @@ export interface State {
     previousJobType: null | AnalyticsJobType;
     requiredFieldsError: string | undefined;
     randomizeSeed: undefined | number;
+    resultsField: undefined | string;
     sourceIndex: EsIndexName;
     sourceIndexNameEmpty: boolean;
     sourceIndexNameValid: boolean;
@@ -124,8 +113,6 @@ export const getInitialState = (): State => ({
     computeFeatureInfluence: 'true',
     createIndexPattern: true,
     dependentVariable: '',
-    dependentVariableFetchFail: false,
-    dependentVariableOptions: [],
     description: '',
     destinationIndex: '',
     destinationIndexNameExists: false,
@@ -133,13 +120,10 @@ export const getInitialState = (): State => ({
     destinationIndexNameValid: false,
     destinationIndexPatternTitleExists: false,
     eta: undefined,
-    excludes: [],
     featureBagFraction: undefined,
     featureInfluenceThreshold: undefined,
-    fieldOptionsFetchFail: false,
     gamma: undefined,
-    excludesTableItems: [],
-    excludesOptions: [],
+    includes: [],
     jobId: '',
     jobIdExists: false,
     jobIdEmpty: true,
@@ -149,9 +133,7 @@ export const getInitialState = (): State => ({
     jobConfigQuery: { match_all: {} },
     jobConfigQueryString: undefined,
     lambda: undefined,
-    loadingDepVarOptions: false,
     loadingFieldOptions: false,
-    maxDistinctValuesError: undefined,
     maxTrees: undefined,
     method: undefined,
     modelMemoryLimit: undefined,
@@ -166,6 +148,7 @@ export const getInitialState = (): State => ({
     previousJobType: null,
     requiredFieldsError: undefined,
     randomizeSeed: undefined,
+    resultsField: undefined,
     sourceIndex: '',
     sourceIndexNameEmpty: true,
     sourceIndexNameValid: false,
@@ -191,55 +174,6 @@ export const getInitialState = (): State => ({
   estimatedModelMemoryLimit: '',
 });
 
-const getExcludesFields = (excluded: string[]) => {
-  const { fields } = newJobCapsService;
-  const updatedExcluded: string[] = [];
-  // Loop through excluded fields to check for multiple types of same field
-  for (let i = 0; i < excluded.length; i++) {
-    const fieldName = excluded[i];
-    let mainField;
-
-    // No dot in fieldName - it is the main field
-    if (fieldName.includes('.') === false) {
-      mainField = fieldName;
-    } else {
-      // Dot in fieldName - check if there's a field whose name equals the fieldName with the last dot suffix removed
-      const regex = /\.[^.]*$/;
-      const suffixRemovedField = fieldName.replace(regex, '');
-      const fieldMatch = newJobCapsService.getFieldById(suffixRemovedField);
-
-      // There's a match - set as the main field
-      if (fieldMatch !== null) {
-        mainField = suffixRemovedField;
-      } else {
-        // No main field to be found - add the fieldName to updatedExcluded array if it's not already there
-        if (updatedExcluded.includes(fieldName) === false) {
-          updatedExcluded.push(fieldName);
-        }
-      }
-    }
-
-    if (mainField !== undefined) {
-      // Add the main field to the updatedExcluded array if it's not already there
-      if (updatedExcluded.includes(mainField) === false) {
-        updatedExcluded.push(mainField);
-      }
-      // Create regex to find all other fields whose names begin with main field followed by a dot
-      const regex = new RegExp(`${mainField}\\..+`);
-
-      // Loop through fields and add fields matching the pattern to updatedExcluded array
-      for (let j = 0; j < fields.length; j++) {
-        const field = fields[j].name;
-        if (updatedExcluded.includes(field) === false && field.match(regex) !== null) {
-          updatedExcluded.push(field);
-        }
-      }
-    }
-  }
-
-  return updatedExcluded;
-};
-
 export const getJobConfigFromFormState = (
   formState: State['form']
 ): DeepPartial<DataFrameAnalyticsConfig> => {
@@ -258,13 +192,20 @@ export const getJobConfigFromFormState = (
       index: formState.destinationIndex,
     },
     analyzed_fields: {
-      excludes: getExcludesFields(formState.excludes),
+      includes: formState.includes,
     },
     analysis: {
       outlier_detection: {},
     },
     model_memory_limit: formState.modelMemoryLimit,
   };
+
+  const resultsFieldEmpty =
+    typeof formState?.resultsField === 'string' && formState?.resultsField.trim() === '';
+
+  if (jobConfig.dest && !resultsFieldEmpty) {
+    jobConfig.dest.results_field = formState.resultsField;
+  }
 
   if (
     formState.jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
@@ -311,6 +252,9 @@ export const getJobConfigFromFormState = (
         n_neighbors: formState.nNeighbors,
       },
       formState.outlierFraction && { outlier_fraction: formState.outlierFraction },
+      formState.featureInfluenceThreshold && {
+        feature_influence_threshold: formState.featureInfluenceThreshold,
+      },
       formState.standardizationEnabled && {
         standardization_enabled: formState.standardizationEnabled,
       }
@@ -342,25 +286,21 @@ export function getCloneFormStateFromJobConfig(
   const resultState: Partial<State['form']> = {
     jobType,
     description: analyticsJobConfig.description ?? '',
+    resultsField: analyticsJobConfig.dest.results_field,
     sourceIndex: Array.isArray(analyticsJobConfig.source.index)
       ? analyticsJobConfig.source.index.join(',')
       : analyticsJobConfig.source.index,
     modelMemoryLimit: analyticsJobConfig.model_memory_limit,
-    excludes: analyticsJobConfig.analyzed_fields.excludes,
+    includes: analyticsJobConfig.analyzed_fields.includes,
   };
 
-  if (
-    isRegressionAnalysis(analyticsJobConfig.analysis) ||
-    isClassificationAnalysis(analyticsJobConfig.analysis)
-  ) {
-    const analysisConfig = analyticsJobConfig.analysis[jobType];
+  const analysisConfig = analyticsJobConfig.analysis[jobType];
 
-    for (const key in analysisConfig) {
-      if (analysisConfig.hasOwnProperty(key)) {
-        const camelCased = toCamelCase(key);
-        // @ts-ignore
-        resultState[camelCased] = analysisConfig[key];
-      }
+  for (const key in analysisConfig) {
+    if (analysisConfig.hasOwnProperty(key)) {
+      const camelCased = toCamelCase(key);
+      // @ts-ignore
+      resultState[camelCased] = analysisConfig[key];
     }
   }
 

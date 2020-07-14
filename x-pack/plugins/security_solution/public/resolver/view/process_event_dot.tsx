@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator, EuiButton, EuiI18nNumber, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
+import { useSelector } from 'react-redux';
 import { NodeSubMenu, subMenuAssets } from './submenu';
-import { applyMatrix3 } from '../lib/vector2';
+import { applyMatrix3 } from '../models/vector2';
 import { Vector2, Matrix3, AdjacentProcessMap } from '../types';
-import { SymbolIds, useResolverTheme, calculateResolverFontSize, nodeType } from './assets';
+import { SymbolIds, useResolverTheme, calculateResolverFontSize } from './assets';
 import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../common/endpoint/models/event';
@@ -23,7 +25,7 @@ import * as selectors from '../store/selectors';
 import { CrumbInfo } from './panels/panel_content_utilities';
 
 /**
- * A map of all known event types (in ugly schema format) to beautifully i18n'd display names
+ * A record of all known event types (in schema format) to translations
  */
 export const displayNameRecord = {
   application: i18n.translate(
@@ -177,11 +179,11 @@ type EventDisplayName = typeof displayNameRecord[keyof typeof displayNameRecord]
   typeof unknownEventTypeMessage;
 
 /**
- * Take a gross `schemaName` and return a beautiful translated one.
+ * Take a `schemaName` and return a translation.
  */
-const getDisplayName: (schemaName: string) => EventDisplayName = function nameInSchemaToDisplayName(
-  schemaName
-) {
+const schemaNameTranslation: (
+  schemaName: string
+) => EventDisplayName = function nameInSchemaToDisplayName(schemaName) {
   if (schemaName in displayNameRecord) {
     return displayNameRecord[schemaName as keyof typeof displayNameRecord];
   }
@@ -232,14 +234,16 @@ const StyledDescriptionText = styled.div<StyledDescriptionText>`
 /**
  * An artifact that represents a process node and the things associated with it in the Resolver
  */
-const ProcessEventDotComponents = React.memo(
+const UnstyledProcessEventDot = React.memo(
   ({
     className,
     position,
     event,
     projectionMatrix,
     adjacentNodeMap,
-    relatedEventsStats,
+    isProcessTerminated,
+    isProcessOrigin,
+    relatedEventsStatsForProcess,
   }: {
     /**
      * A `className` string provided by `styled`
@@ -262,16 +266,26 @@ const ProcessEventDotComponents = React.memo(
      */
     adjacentNodeMap: AdjacentProcessMap;
     /**
+     * Whether or not to show the process as terminated.
+     */
+    isProcessTerminated: boolean;
+    /**
+     * Whether or not to show the process as the originating event.
+     */
+    isProcessOrigin: boolean;
+    /**
+     * A collection of events related to the current node and statistics (e.g. counts indexed by event type)
+     * to provide the user some visibility regarding the contents thereof.
      * Statistics for the number of related events and alerts for this process node
      */
-    relatedEventsStats?: ResolverNodeStats;
+    relatedEventsStatsForProcess?: ResolverNodeStats;
   }) => {
     /**
      * Convert the position, which is in 'world' coordinates, to screen coordinates.
      */
     const [left, top] = applyMatrix3(position, projectionMatrix);
 
-    const [magFactorX] = projectionMatrix;
+    const [xScale] = projectionMatrix;
 
     // Node (html id=) IDs
     const selfId = adjacentNodeMap.self;
@@ -281,25 +295,14 @@ const ProcessEventDotComponents = React.memo(
     // Entity ID of self
     const selfEntityId = eventModel.entityId(event);
 
-    const isShowingEventActions = magFactorX > 0.8;
-    const isShowingDescriptionText = magFactorX >= 0.55;
+    const isShowingEventActions = xScale > 0.8;
+    const isShowingDescriptionText = xScale >= 0.55;
 
     /**
      * As the resolver zooms and buttons and text change visibility, we look to keep the overall container properly vertically aligned
      */
-    const actionalButtonsBaseTopOffset = 5;
-    let actionableButtonsTopOffset;
-    switch (true) {
-      case isShowingEventActions:
-        actionableButtonsTopOffset = actionalButtonsBaseTopOffset + 3.5 * magFactorX;
-        break;
-      case isShowingDescriptionText:
-        actionableButtonsTopOffset = actionalButtonsBaseTopOffset + magFactorX;
-        break;
-      default:
-        actionableButtonsTopOffset = actionalButtonsBaseTopOffset + 21 * magFactorX;
-        break;
-    }
+    const actionableButtonsTopOffset =
+      (isShowingEventActions ? 3.5 : isShowingDescriptionText ? 1 : 21) * xScale + 5;
 
     /**
      * The `left` and `top` values represent the 'center' point of the process node.
@@ -314,26 +317,24 @@ const ProcessEventDotComponents = React.memo(
     /**
      * As the scale changes and button visibility toggles on the graph, these offsets help scale to keep the nodes centered on the edge
      */
-    const nodeXOffsetValue = isShowingEventActions
-      ? -0.147413
-      : -0.147413 - (magFactorX - 0.5) * 0.08;
+    const nodeXOffsetValue = isShowingEventActions ? -0.147413 : -0.147413 - (xScale - 0.5) * 0.08;
     const nodeYOffsetValue = isShowingEventActions
       ? -0.53684
-      : -0.53684 + (-magFactorX * 0.2 * (1 - magFactorX)) / magFactorX;
+      : -0.53684 + (-xScale * 0.2 * (1 - xScale)) / xScale;
 
-    const processNodeViewXOffset = nodeXOffsetValue * logicalProcessNodeViewWidth * magFactorX;
-    const processNodeViewYOffset = nodeYOffsetValue * logicalProcessNodeViewHeight * magFactorX;
+    const processNodeViewXOffset = nodeXOffsetValue * logicalProcessNodeViewWidth * xScale;
+    const processNodeViewYOffset = nodeYOffsetValue * logicalProcessNodeViewHeight * xScale;
 
     const nodeViewportStyle = useMemo(
       () => ({
         left: `${left + processNodeViewXOffset}px`,
         top: `${top + processNodeViewYOffset}px`,
         // Width of symbol viewport scaled to fit
-        width: `${logicalProcessNodeViewWidth * magFactorX}px`,
+        width: `${logicalProcessNodeViewWidth * xScale}px`,
         // Height according to symbol viewbox AR
-        height: `${logicalProcessNodeViewHeight * magFactorX}px`,
+        height: `${logicalProcessNodeViewHeight * xScale}px`,
       }),
-      [left, magFactorX, processNodeViewXOffset, processNodeViewYOffset, top]
+      [left, xScale, processNodeViewXOffset, processNodeViewYOffset, top]
     );
 
     /**
@@ -342,7 +343,7 @@ const ProcessEventDotComponents = React.memo(
      *  18.75 : The smallest readable font size at which labels/descriptions can be read. Font size will not scale below this.
      *  12.5 : A 'slope' at which the font size will scale w.r.t. to zoom level otherwise
      */
-    const scaledTypeSize = calculateResolverFontSize(magFactorX, 18.75, 12.5);
+    const scaledTypeSize = calculateResolverFontSize(xScale, 18.75, 12.5);
 
     const markerBaseSize = 15;
     const markerSize = markerBaseSize;
@@ -363,7 +364,7 @@ const ProcessEventDotComponents = React.memo(
           })
         | null;
     } = React.createRef();
-    const { colorMap, nodeAssets } = useResolverTheme();
+    const { colorMap, cubeAssetsForNode } = useResolverTheme();
     const {
       backingFill,
       cubeSymbol,
@@ -371,7 +372,8 @@ const ProcessEventDotComponents = React.memo(
       isLabelFilled,
       labelButtonFill,
       strokeColor,
-    } = nodeAssets[nodeType(event)];
+    } = cubeAssetsForNode(isProcessTerminated, isProcessOrigin);
+
     const resolverNodeIdGenerator = useMemo(() => htmlIdGenerator('resolverNode'), []);
 
     const nodeId = useMemo(() => resolverNodeIdGenerator(selfId), [
@@ -400,13 +402,6 @@ const ProcessEventDotComponents = React.memo(
         payload: selfId,
       });
     }, [dispatch, selfId]);
-
-    const handleRelatedAlertsRequest = useCallback(() => {
-      dispatch({
-        type: 'userSelectedRelatedAlerts',
-        payload: event,
-      });
-    }, [dispatch, event]);
 
     const history = useHistory();
     const urlSearch = history.location.search;
@@ -459,47 +454,42 @@ const ProcessEventDotComponents = React.memo(
      * e.g. "10 DNS", "230 File"
      */
 
-    const [relatedEventOptions, grandTotal] = useMemo(() => {
+    const relatedEventOptions = useMemo(() => {
       const relatedStatsList = [];
 
-      if (!relatedEventsStats) {
+      if (!relatedEventsStatsForProcess) {
         // Return an empty set of options if there are no stats to report
-        return [[], 0];
+        return [];
       }
-      let runningTotal = 0;
       // If we have entries to show, map them into options to display in the selectable list
-      for (const category in relatedEventsStats.events.byCategory) {
-        if (Object.hasOwnProperty.call(relatedEventsStats.events.byCategory, category)) {
-          const total = relatedEventsStats.events.byCategory[category];
-          runningTotal += total;
-          const displayName = getDisplayName(category);
-          relatedStatsList.push({
-            prefix: <EuiI18nNumber value={total || 0} />,
-            optionTitle: `${displayName}`,
-            action: () => {
-              dispatch({
-                type: 'userSelectedRelatedEventCategory',
-                payload: {
-                  subject: event,
-                  category,
-                },
-              });
 
-              pushToQueryParams({ crumbId: selfEntityId, crumbEvent: category });
-            },
-          });
-        }
+      for (const [category, total] of Object.entries(
+        relatedEventsStatsForProcess.events.byCategory
+      )) {
+        relatedStatsList.push({
+          prefix: <EuiI18nNumber value={total || 0} />,
+          optionTitle: schemaNameTranslation(category),
+          action: () => {
+            dispatch({
+              type: 'userSelectedRelatedEventCategory',
+              payload: {
+                subject: event,
+                category,
+              },
+            });
+
+            pushToQueryParams({ crumbId: selfEntityId, crumbEvent: category });
+          },
+        });
       }
-      return [relatedStatsList, runningTotal];
-    }, [relatedEventsStats, dispatch, event, pushToQueryParams, selfEntityId]);
+      return relatedStatsList;
+    }, [relatedEventsStatsForProcess, dispatch, event, pushToQueryParams, selfEntityId]);
 
-    const relatedEventStatusOrOptions = (() => {
-      if (!relatedEventsStats) {
-        return subMenuAssets.initialMenuStatus;
-      }
+    const relatedEventStatusOrOptions = !relatedEventsStatsForProcess
+      ? subMenuAssets.initialMenuStatus
+      : relatedEventOptions;
 
-      return relatedEventOptions;
-    })();
+    const grandTotal: number | null = useSelector(selectors.relatedEventTotalForProcess)(event);
 
     /* eslint-disable jsx-a11y/click-events-have-key-events */
     /**
@@ -580,7 +570,7 @@ const ProcessEventDotComponents = React.memo(
             {descriptionText}
           </StyledDescriptionText>
           <div
-            className={magFactorX >= 2 ? 'euiButton' : 'euiButton euiButton--small'}
+            className={xScale >= 2 ? 'euiButton' : 'euiButton euiButton--small'}
             data-test-subject="nodeLabel"
             id={labelId}
             onClick={handleClick}
@@ -599,8 +589,8 @@ const ProcessEventDotComponents = React.memo(
               id={labelId}
               size="s"
               style={{
-                maxHeight: `${Math.min(26 + magFactorX * 3, 32)}px`,
-                maxWidth: `${isShowingEventActions ? 400 : 210 * magFactorX}px`,
+                maxHeight: `${Math.min(26 + xScale * 3, 32)}px`,
+                maxWidth: `${isShowingEventActions ? 400 : 210 * xScale}px`,
               }}
               tabIndex={-1}
               title={eventModel.eventName(event)}
@@ -624,22 +614,16 @@ const ProcessEventDotComponents = React.memo(
             }}
           >
             <EuiFlexItem grow={false} className="related-dropdown">
-              <NodeSubMenu
-                count={grandTotal}
-                buttonBorderColor={labelButtonFill}
-                buttonFill={colorMap.resolverBackground}
-                menuAction={handleRelatedEventRequest}
-                menuTitle={subMenuAssets.relatedEvents.title}
-                optionsWithActions={relatedEventStatusOrOptions}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <NodeSubMenu
-                buttonBorderColor={labelButtonFill}
-                buttonFill={colorMap.resolverBackground}
-                menuTitle={subMenuAssets.relatedAlerts.title}
-                menuAction={handleRelatedAlertsRequest}
-              />
+              {grandTotal !== null && grandTotal > 0 && (
+                <NodeSubMenu
+                  count={grandTotal}
+                  buttonBorderColor={labelButtonFill}
+                  buttonFill={colorMap.resolverBackground}
+                  menuAction={handleRelatedEventRequest}
+                  menuTitle={subMenuAssets.relatedEvents.title}
+                  optionsWithActions={relatedEventStatusOrOptions}
+                />
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </StyledActionsContainer>
@@ -649,9 +633,7 @@ const ProcessEventDotComponents = React.memo(
   }
 );
 
-ProcessEventDotComponents.displayName = 'ProcessEventDot';
-
-export const ProcessEventDot = styled(ProcessEventDotComponents)`
+export const ProcessEventDot = styled(UnstyledProcessEventDot)`
   position: absolute;
   text-align: left;
   font-size: 10px;

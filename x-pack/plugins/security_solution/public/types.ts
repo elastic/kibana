@@ -19,6 +19,7 @@ import {
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
 } from '../../triggers_actions_ui/public';
 import { SecurityPluginSetup } from '../../security/public';
+import { AppFrontendLibs } from './common/lib/lib';
 
 export interface SetupPlugins {
   home: HomePublicPluginSetup;
@@ -31,7 +32,7 @@ export interface StartPlugins {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
-  ingestManager: IngestManagerStart;
+  ingestManager?: IngestManagerStart;
   newsfeed?: NewsfeedStart;
   triggers_actions_ui: TriggersActionsStart;
   uiActions: UiActionsStart;
@@ -47,3 +48,7 @@ export type StartServices = CoreStart &
 export interface PluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
+
+export interface AppObservableLibs extends AppFrontendLibs {
+  kibana: CoreStart;
+}

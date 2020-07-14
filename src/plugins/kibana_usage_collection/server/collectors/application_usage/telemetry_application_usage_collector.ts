@@ -20,7 +20,6 @@
 import moment from 'moment';
 import { ISavedObjectsRepository, SavedObjectsServiceSetup } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { APPLICATION_USAGE_TYPE } from '../../../common/constants';
 import { findAll } from '../find_all';
 import {
   ApplicationUsageTotal,
@@ -62,7 +61,7 @@ export function registerApplicationUsageCollector(
   registerMappings(registerType);
 
   const collector = usageCollection.makeUsageCollector({
-    type: APPLICATION_USAGE_TYPE,
+    type: 'application_usage',
     isReady: () => typeof getSavedObjectsClient() !== 'undefined',
     fetch: async () => {
       const savedObjectsClient = getSavedObjectsClient();

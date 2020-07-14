@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import toPath from 'lodash.topath';
+import { toPath } from 'lodash';
 
 export function prepend(path, value) {
   return toPath(value).concat(toPath(path));

@@ -9,13 +9,15 @@ import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'sr
 import {
   httpServiceMock,
   httpServerMock,
-  loggingServiceMock,
+  loggingSystemMock,
   elasticsearchServiceMock,
 } from 'src/core/server/mocks';
 
 const mockRouteContext = ({
   core: {
-    elasticsearch: { legacy: { client: elasticsearchServiceMock.createScopedClusterClient() } },
+    elasticsearch: {
+      legacy: { client: elasticsearchServiceMock.createLegacyScopedClusterClient() },
+    },
   },
 } as unknown) as RequestHandlerContext;
 
@@ -29,7 +31,7 @@ describe('Retrieve ES Fields', () => {
     const router = httpService.createRouter();
     initializeESFieldsRoute({
       router,
-      logger: loggingServiceMock.create().get(),
+      logger: loggingSystemMock.create().get(),
     });
 
     routeHandler = router.get.mock.calls[0][1];

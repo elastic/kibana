@@ -38,7 +38,6 @@
 |  --- | --- |
 |  [getDefaultQuery(language)](./kibana-plugin-plugins-data-public.getdefaultquery.md) |  |
 |  [getEsPreference(uiSettings, sessionId)](./kibana-plugin-plugins-data-public.getespreference.md) |  |
-|  [getQueryLog(uiSettings, storage, appName, language)](./kibana-plugin-plugins-data-public.getquerylog.md) |  |
 |  [getSearchErrorType({ message })](./kibana-plugin-plugins-data-public.getsearcherrortype.md) |  |
 |  [getSearchParamsFromRequest(searchRequest, dependencies)](./kibana-plugin-plugins-data-public.getsearchparamsfromrequest.md) |  |
 |  [getTime(indexPattern, timeRange, options)](./kibana-plugin-plugins-data-public.gettime.md) |  |
@@ -67,11 +66,7 @@
 |  [IKibanaSearchResponse](./kibana-plugin-plugins-data-public.ikibanasearchresponse.md) |  |
 |  [IndexPatternAttributes](./kibana-plugin-plugins-data-public.indexpatternattributes.md) | Use data plugin interface instead |
 |  [IndexPatternTypeMeta](./kibana-plugin-plugins-data-public.indexpatterntypemeta.md) |  |
-|  [IRequestTypesMap](./kibana-plugin-plugins-data-public.irequesttypesmap.md) |  |
-|  [IResponseTypesMap](./kibana-plugin-plugins-data-public.iresponsetypesmap.md) |  |
 |  [ISearchOptions](./kibana-plugin-plugins-data-public.isearchoptions.md) |  |
-|  [ISearchStrategy](./kibana-plugin-plugins-data-public.isearchstrategy.md) | Search strategy interface contains a search method that takes in a request and returns a promise that resolves to a response. |
-|  [ISyncSearchRequest](./kibana-plugin-plugins-data-public.isyncsearchrequest.md) |  |
 |  [KueryNode](./kibana-plugin-plugins-data-public.kuerynode.md) |  |
 |  [OptionedValueProp](./kibana-plugin-plugins-data-public.optionedvalueprop.md) |  |
 |  [Query](./kibana-plugin-plugins-data-public.query.md) |  |
@@ -83,6 +78,7 @@
 |  [RefreshInterval](./kibana-plugin-plugins-data-public.refreshinterval.md) |  |
 |  [SavedQuery](./kibana-plugin-plugins-data-public.savedquery.md) |  |
 |  [SavedQueryService](./kibana-plugin-plugins-data-public.savedqueryservice.md) |  |
+|  [SearchInterceptorDeps](./kibana-plugin-plugins-data-public.searchinterceptordeps.md) |  |
 |  [SearchSourceFields](./kibana-plugin-plugins-data-public.searchsourcefields.md) |  |
 |  [TabbedAggColumn](./kibana-plugin-plugins-data-public.tabbedaggcolumn.md) | \* |
 |  [TabbedTable](./kibana-plugin-plugins-data-public.tabbedtable.md) | \* |
@@ -110,11 +106,14 @@
 |  [getKbnTypeNames](./kibana-plugin-plugins-data-public.getkbntypenames.md) | Get the esTypes known by all kbnFieldTypes {<!-- -->Array<string>} |
 |  [indexPatterns](./kibana-plugin-plugins-data-public.indexpatterns.md) |  |
 |  [injectSearchSourceReferences](./kibana-plugin-plugins-data-public.injectsearchsourcereferences.md) |  |
+|  [isFilter](./kibana-plugin-plugins-data-public.isfilter.md) |  |
+|  [isFilters](./kibana-plugin-plugins-data-public.isfilters.md) |  |
+|  [isQuery](./kibana-plugin-plugins-data-public.isquery.md) |  |
+|  [isTimeRange](./kibana-plugin-plugins-data-public.istimerange.md) |  |
 |  [parseSearchSourceJSON](./kibana-plugin-plugins-data-public.parsesearchsourcejson.md) |  |
 |  [QueryStringInput](./kibana-plugin-plugins-data-public.querystringinput.md) |  |
 |  [search](./kibana-plugin-plugins-data-public.search.md) |  |
 |  [SearchBar](./kibana-plugin-plugins-data-public.searchbar.md) |  |
-|  [SYNC\_SEARCH\_STRATEGY](./kibana-plugin-plugins-data-public.sync_search_strategy.md) |  |
 |  [syncQueryStateWithUrl](./kibana-plugin-plugins-data-public.syncquerystatewithurl.md) | Helper to setup syncing of global data with the URL |
 |  [UI\_SETTINGS](./kibana-plugin-plugins-data-public.ui_settings.md) |  |
 

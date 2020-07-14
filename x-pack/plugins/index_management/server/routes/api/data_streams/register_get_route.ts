@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { deserializeDataStreamList } from '../../../../common/lib';
+import { schema, TypeOf } from '@kbn/config-schema';
+
+import { deserializeDataStream, deserializeDataStreamList } from '../../../../common/lib';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 
@@ -15,7 +17,9 @@ export function registerGetAllRoute({ router, license, lib: { isEsError } }: Rou
       const { callAsCurrentUser } = ctx.dataManagement!.client;
 
       try {
-        const dataStreams = await callAsCurrentUser('dataManagement.getDataStreams');
+        const { data_streams: dataStreams } = await callAsCurrentUser(
+          'dataManagement.getDataStreams'
+        );
         const body = deserializeDataStreamList(dataStreams);
 
         return res.ok({ body });
@@ -28,6 +32,46 @@ export function registerGetAllRoute({ router, license, lib: { isEsError } }: Rou
         }
 
         return res.internalError({ body: error });
+      }
+    })
+  );
+}
+
+export function registerGetOneRoute({ router, license, lib: { isEsError } }: RouteDependencies) {
+  const paramsSchema = schema.object({
+    name: schema.string(),
+  });
+
+  router.get(
+    {
+      path: addBasePath('/data_streams/{name}'),
+      validate: { params: paramsSchema },
+    },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { name } = req.params as TypeOf<typeof paramsSchema>;
+      const { callAsCurrentUser } = ctx.dataManagement!.client;
+
+      try {
+        const { data_streams: dataStream } = await callAsCurrentUser(
+          'dataManagement.getDataStream',
+          { name }
+        );
+
+        if (dataStream[0]) {
+          const body = deserializeDataStream(dataStream[0]);
+          return res.ok({ body });
+        }
+
+        return res.notFound();
+      } catch (e) {
+        if (isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
       }
     })
   );

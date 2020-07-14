@@ -24,6 +24,10 @@ function isValue(field: string | string[], value: string) {
   }
 }
 
+export function isTerminatedProcess(passedEvent: ResolverEvent) {
+  return eventType(passedEvent) === 'processTerminated';
+}
+
 /**
  * Returns a custom event type for a process event based on the event's metadata.
  */

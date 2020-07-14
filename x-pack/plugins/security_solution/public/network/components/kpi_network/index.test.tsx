@@ -12,6 +12,7 @@ import {
   apolloClientObservable,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
+  kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { createStore, State } from '../../../common/store';
@@ -25,10 +26,22 @@ describe('KpiNetwork Component', () => {
   const narrowDateRange = jest.fn();
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    storage
+  );
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+    store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      kibanaObservable,
+      storage
+    );
   });
 
   describe('rendering', () => {

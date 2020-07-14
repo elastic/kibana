@@ -74,6 +74,7 @@ const getMockObject = (
   timeline: {
     id: '',
     isOpen: false,
+    graphEventId: '',
   },
   timerange: {
     global: {

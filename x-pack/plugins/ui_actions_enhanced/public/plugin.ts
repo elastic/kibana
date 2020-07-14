@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { BehaviorSubject, Subscription } from 'rxjs';
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -31,6 +32,7 @@ import {
 } from './custom_time_range_badge';
 import { CommonlyUsedRange } from './types';
 import { UiActionsServiceEnhancements } from './services';
+import { ILicense, LicensingPluginStart } from '../../licensing/public';
 import { createFlyoutManageDrilldowns } from './drilldowns';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 
@@ -42,6 +44,7 @@ interface SetupDependencies {
 interface StartDependencies {
   embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
+  licensing: LicensingPluginStart;
 }
 
 export interface SetupContract
@@ -63,7 +66,19 @@ declare module '../../../../src/plugins/ui_actions/public' {
 
 export class AdvancedUiActionsPublicPlugin
   implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
-  private readonly enhancements = new UiActionsServiceEnhancements();
+  readonly licenceInfo = new BehaviorSubject<ILicense | undefined>(undefined);
+  private getLicenseInfo(): ILicense {
+    if (!this.licenceInfo.getValue()) {
+      throw new Error(
+        'AdvancedUiActionsPublicPlugin: Licence is not ready! Licence becomes available only after setup.'
+      );
+    }
+    return this.licenceInfo.getValue()!;
+  }
+  private readonly enhancements = new UiActionsServiceEnhancements({
+    getLicenseInfo: () => this.getLicenseInfo(),
+  });
+  private subs: Subscription[] = [];
 
   constructor(initializerContext: PluginInitializerContext) {}
 
@@ -74,7 +89,9 @@ export class AdvancedUiActionsPublicPlugin
     };
   }
 
-  public start(core: CoreStart, { uiActions }: StartDependencies): StartContract {
+  public start(core: CoreStart, { uiActions, licensing }: StartDependencies): StartContract {
+    this.subs.push(licensing.license$.subscribe(this.licenceInfo));
+
     const dateFormat = core.uiSettings.get('dateFormat') as string;
     const commonlyUsedRanges = core.uiSettings.get(
       UI_SETTINGS.TIMEPICKER_QUICK_RANGES
@@ -106,5 +123,7 @@ export class AdvancedUiActionsPublicPlugin
     };
   }
 
-  public stop() {}
+  public stop() {
+    this.subs.forEach((s) => s.unsubscribe());
+  }
 }

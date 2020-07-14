@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -23,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const elasticChart = getService('elasticChart');
   const browser = getService('browser');
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const listingTable = getService('listingTable');
@@ -93,7 +93,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.lens.goToTimeRange();
       await clickOnBarHistogram();
-      await testSubjects.click('applyFiltersPopoverButton');
+
+      await retry.try(async () => {
+        await testSubjects.click('applyFiltersPopoverButton');
+        await testSubjects.missingOrFail('applyFiltersPopoverButton');
+      });
 
       await assertExpectedChart();
       await assertExpectedTimerange();

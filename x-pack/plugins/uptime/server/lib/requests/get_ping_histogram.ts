@@ -15,15 +15,17 @@ export interface GetPingHistogramParams {
   /** @member dateRangeEnd timestamp bounds */
   to: string;
   /** @member filters user-defined filters */
-  filters?: string | null;
+  filters?: string;
   /** @member monitorId optional limit to monitorId */
-  monitorId?: string | null;
+  monitorId?: string;
+
+  bucketSize?: string;
 }
 
 export const getPingHistogram: UMElasticsearchQueryFn<
   GetPingHistogramParams,
   HistogramResult
-> = async ({ callES, dynamicSettings, from, to, filters, monitorId }) => {
+> = async ({ callES, dynamicSettings, from, to, filters, monitorId, bucketSize }) => {
   const boolFilters = filters ? JSON.parse(filters) : null;
   const additionalFilters = [];
   if (monitorId) {
@@ -33,6 +35,22 @@ export const getPingHistogram: UMElasticsearchQueryFn<
     additionalFilters.push(boolFilters);
   }
   const filter = getFilterClause(from, to, additionalFilters);
+
+  const seriesHistogram: any = {};
+
+  if (bucketSize) {
+    seriesHistogram.date_histogram = {
+      field: '@timestamp',
+      fixed_interval: bucketSize,
+      missing: 0,
+    };
+  } else {
+    seriesHistogram.auto_date_histogram = {
+      field: '@timestamp',
+      buckets: QUERY.DEFAULT_BUCKET_COUNT,
+      missing: 0,
+    };
+  }
 
   const params = {
     index: dynamicSettings.heartbeatIndices,
@@ -45,10 +63,7 @@ export const getPingHistogram: UMElasticsearchQueryFn<
       size: 0,
       aggs: {
         timeseries: {
-          auto_date_histogram: {
-            field: '@timestamp',
-            buckets: QUERY.DEFAULT_BUCKET_COUNT,
-          },
+          ...seriesHistogram,
           aggs: {
             down: {
               filter: {

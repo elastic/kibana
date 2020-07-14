@@ -30,6 +30,10 @@ const CONFIG_PATHS = [
   fromRoot('config/kibana.yml'),
 ].filter(isString);
 
+const CONFIG_DIRECTORIES = [process.env.KIBANA_PATH_CONF, fromRoot('config'), '/etc/kibana'].filter(
+  isString
+);
+
 const DATA_PATHS = [
   process.env.DATA_PATH, // deprecated
   fromRoot('data'),
@@ -49,12 +53,19 @@ function findFile(paths: string[]) {
 }
 
 /**
- * Get the path where the config files are stored
+ * Get the path of kibana.yml
  * @internal
  */
 export const getConfigPath = () => findFile(CONFIG_PATHS);
+
 /**
- * Get the path where the data can be stored
+ * Get the directory containing configuration files
+ * @internal
+ */
+export const getConfigDirectory = () => findFile(CONFIG_DIRECTORIES);
+
+/**
+ * Get the directory containing runtime data
  * @internal
  */
 export const getDataPath = () => findFile(DATA_PATHS);

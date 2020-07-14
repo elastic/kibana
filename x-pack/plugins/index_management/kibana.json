@@ -10,7 +10,12 @@
   ],
   "optionalPlugins": [
     "security",
-    "usageCollection"
+    "usageCollection",
+    "ingestManager"
   ],
-  "configPath": ["xpack", "index_management"]
+  "configPath": ["xpack", "index_management"],
+  "requiredBundles": [
+    "kibanaReact",
+    "esUiShared"
+  ]
 }

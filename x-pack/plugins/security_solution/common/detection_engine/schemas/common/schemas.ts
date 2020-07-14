@@ -13,6 +13,18 @@ import { IsoDateString } from '../types/iso_date_string';
 import { PositiveIntegerGreaterThanZero } from '../types/positive_integer_greater_than_zero';
 import { PositiveInteger } from '../types/positive_integer';
 
+export const author = t.array(t.string);
+export type Author = t.TypeOf<typeof author>;
+
+export const authorOrUndefined = t.union([author, t.undefined]);
+export type AuthorOrUndefined = t.TypeOf<typeof authorOrUndefined>;
+
+export const building_block_type = t.string;
+export type BuildingBlockType = t.TypeOf<typeof building_block_type>;
+
+export const buildingBlockTypeOrUndefined = t.union([building_block_type, t.undefined]);
+export type BuildingBlockTypeOrUndefined = t.TypeOf<typeof buildingBlockTypeOrUndefined>;
+
 export const description = t.string;
 export type Description = t.TypeOf<typeof description>;
 
@@ -111,6 +123,12 @@ export type Language = t.TypeOf<typeof language>;
 export const languageOrUndefined = t.union([language, t.undefined]);
 export type LanguageOrUndefined = t.TypeOf<typeof languageOrUndefined>;
 
+export const license = t.string;
+export type License = t.TypeOf<typeof license>;
+
+export const licenseOrUndefined = t.union([license, t.undefined]);
+export type LicenseOrUndefined = t.TypeOf<typeof licenseOrUndefined>;
+
 export const objects = t.array(t.type({ rule_id }));
 
 export const output_index = t.string;
@@ -136,6 +154,12 @@ export type TimelineTitle = t.TypeOf<typeof t.string>;
 
 export const timelineTitleOrUndefined = t.union([timeline_title, t.undefined]);
 export type TimelineTitleOrUndefined = t.TypeOf<typeof timelineTitleOrUndefined>;
+
+export const timestamp_override = t.string;
+export type TimestampOverride = t.TypeOf<typeof timestamp_override>;
+
+export const timestampOverrideOrUndefined = t.union([timestamp_override, t.undefined]);
+export type TimestampOverrideOrUndefined = t.TypeOf<typeof timestampOverrideOrUndefined>;
 
 export const throttle = t.string;
 export type Throttle = t.TypeOf<typeof throttle>;
@@ -179,17 +203,64 @@ export type Name = t.TypeOf<typeof name>;
 export const nameOrUndefined = t.union([name, t.undefined]);
 export type NameOrUndefined = t.TypeOf<typeof nameOrUndefined>;
 
+export const operator = t.keyof({
+  equals: null,
+});
+export type Operator = t.TypeOf<typeof operator>;
+export enum OperatorEnum {
+  EQUALS = 'equals',
+}
+
 export const risk_score = RiskScore;
 export type RiskScore = t.TypeOf<typeof risk_score>;
 
 export const riskScoreOrUndefined = t.union([risk_score, t.undefined]);
 export type RiskScoreOrUndefined = t.TypeOf<typeof riskScoreOrUndefined>;
 
+export const risk_score_mapping_field = t.string;
+export const risk_score_mapping_value = t.string;
+export const risk_score_mapping_item = t.exact(
+  t.type({
+    field: risk_score_mapping_field,
+    operator,
+    value: risk_score_mapping_value,
+  })
+);
+
+export const risk_score_mapping = t.array(risk_score_mapping_item);
+export type RiskScoreMapping = t.TypeOf<typeof risk_score_mapping>;
+
+export const riskScoreMappingOrUndefined = t.union([risk_score_mapping, t.undefined]);
+export type RiskScoreMappingOrUndefined = t.TypeOf<typeof riskScoreMappingOrUndefined>;
+
+export const rule_name_override = t.string;
+export type RuleNameOverride = t.TypeOf<typeof rule_name_override>;
+
+export const ruleNameOverrideOrUndefined = t.union([rule_name_override, t.undefined]);
+export type RuleNameOverrideOrUndefined = t.TypeOf<typeof ruleNameOverrideOrUndefined>;
+
 export const severity = t.keyof({ low: null, medium: null, high: null, critical: null });
 export type Severity = t.TypeOf<typeof severity>;
 
 export const severityOrUndefined = t.union([severity, t.undefined]);
 export type SeverityOrUndefined = t.TypeOf<typeof severityOrUndefined>;
+
+export const severity_mapping_field = t.string;
+export const severity_mapping_value = t.string;
+export const severity_mapping_item = t.exact(
+  t.type({
+    field: severity_mapping_field,
+    operator,
+    value: severity_mapping_value,
+    severity,
+  })
+);
+
+export const severity_mapping = t.array(severity_mapping_item);
+export type SeverityMapping = t.TypeOf<typeof severity_mapping>;
+
+export const severityMappingOrUndefined = t.union([severity_mapping, t.undefined]);
+export type SeverityMappingOrUndefined = t.TypeOf<typeof severityMappingOrUndefined>;
 
 export const status = t.keyof({ open: null, closed: null, 'in-progress': null });
 export type Status = t.TypeOf<typeof status>;
@@ -341,40 +412,3 @@ export type Note = t.TypeOf<typeof note>;
 
 export const noteOrUndefined = t.union([note, t.undefined]);
 export type NoteOrUndefined = t.TypeOf<typeof noteOrUndefined>;
-
-// NOTE: Experimental list support not being shipped currently and behind a feature flag
-// TODO: Remove this comment once we lists have passed testing and is ready for the release
-export const list_field = t.string;
-export const list_values_operator = t.keyof({ included: null, excluded: null });
-export const list_values_type = t.keyof({ match: null, match_all: null, list: null, exists: null });
-export const list_values = t.exact(
-  t.intersection([
-    t.type({
-      name: t.string,
-    }),
-    t.partial({
-      id: t.string,
-      description: t.string,
-      created_at,
-    }),
-  ])
-);
-export const list = t.exact(
-  t.intersection([
-    t.type({
-      field: t.string,
-      values_operator: list_values_operator,
-      values_type: list_values_type,
-    }),
-    t.partial({ values: t.array(list_values) }),
-  ])
-);
-export const list_and = t.intersection([
-  list,
-  t.partial({
-    and: t.array(list),
-  }),
-]);
-
-export const listAndOrUndefined = t.union([t.array(list_and), t.undefined]);
-export type ListAndOrUndefined = t.TypeOf<typeof listAndOrUndefined>;

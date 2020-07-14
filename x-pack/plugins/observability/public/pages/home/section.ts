@@ -4,27 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-
-interface ISection {
-  id: string;
-  title: string;
-  icon: string;
-  description: string;
-  href?: string;
-  target?: '_blank';
-}
+import { ISection } from '../../typings/section';
 
 export const appsSection: ISection[] = [
   {
-    id: 'logs',
+    id: 'infra_logs',
     title: i18n.translate('xpack.observability.section.apps.logs.title', {
       defaultMessage: 'Logs',
     }),
     icon: 'logoLogging',
     description: i18n.translate('xpack.observability.section.apps.logs.description', {
       defaultMessage:
-        'The Elastic Stack (sometimes known as the ELK Stack) is the most popular open source logging platform.',
+        'Centralize logs from any source. Search, tail, automate anomaly detection, and visualize trends so you can take action quicker.',
     }),
+    href: 'https://www.elastic.co',
   },
   {
     id: 'apm',
@@ -34,19 +27,21 @@ export const appsSection: ISection[] = [
     icon: 'logoAPM',
     description: i18n.translate('xpack.observability.section.apps.apm.description', {
       defaultMessage:
-        'See exactly where your application is spending time so you can quickly fix issues and feel good about the code you push.',
+        'Trace transactions through a distributed architecture and map your services’ interactions to easily spot performance bottlenecks.',
     }),
+    href: 'https://www.elastic.co',
   },
   {
-    id: 'metrics',
+    id: 'infra_metrics',
     title: i18n.translate('xpack.observability.section.apps.metrics.title', {
       defaultMessage: 'Metrics',
     }),
     icon: 'logoMetrics',
     description: i18n.translate('xpack.observability.section.apps.metrics.description', {
       defaultMessage:
-        'Already using the Elastic Stack for logs? Add metrics in just a few steps and correlate metrics and logs in one place.',
+        'Analyze metrics from your infrastructure, apps, and services. Discover trends, forecast behavior, get alerts on anomalies, and more.',
     }),
+    href: 'https://www.elastic.co',
   },
   {
     id: 'uptime',
@@ -56,7 +51,8 @@ export const appsSection: ISection[] = [
     icon: 'logoUptime',
     description: i18n.translate('xpack.observability.section.apps.uptime.description', {
       defaultMessage:
-        'React to availability issues across your apps and services before they affect users.',
+        'Proactively monitor the availability of your sites and services. Receive alerts and resolve issues faster to optimize your users’ experience.',
     }),
+    href: 'https://www.elastic.co',
   },
 ];

@@ -21,7 +21,7 @@ import { UuidService } from './uuid_service';
 import { resolveInstanceUuid } from './resolve_uuid';
 import { CoreContext } from '../core_context';
 
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import { mockCoreContext } from '../core_context.mock';
 import { Env } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
@@ -31,12 +31,12 @@ jest.mock('./resolve_uuid', () => ({
 }));
 
 describe('UuidService', () => {
-  let logger: ReturnType<typeof loggingServiceMock.create>;
+  let logger: ReturnType<typeof loggingSystemMock.create>;
   let coreContext: CoreContext;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    logger = loggingServiceMock.create();
+    logger = loggingSystemMock.create();
     coreContext = mockCoreContext.create({ logger });
   });
 

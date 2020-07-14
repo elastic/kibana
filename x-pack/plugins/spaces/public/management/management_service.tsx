@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { StartServicesAccessor, Capabilities } from 'src/core/public';
+import { StartServicesAccessor } from 'src/core/public';
 import {
   ManagementSetup,
   ManagementApp,
@@ -22,9 +22,6 @@ interface SetupDeps {
   securityLicense?: SecurityLicense;
 }
 
-interface StartDeps {
-  capabilities: Capabilities;
-}
 export class ManagementService {
   private registeredSpacesManagementApp?: ManagementApp;
 
@@ -34,12 +31,6 @@ export class ManagementService {
       .registerApp(
         spacesManagementApp.create({ getStartServices, spacesManager, securityLicense })
       );
-  }
-
-  public start({ capabilities }: StartDeps) {
-    if (!capabilities.spaces.manage) {
-      this.disableSpacesApp();
-    }
   }
 
   public stop() {

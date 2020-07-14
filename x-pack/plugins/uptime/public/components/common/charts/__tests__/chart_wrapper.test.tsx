@@ -12,7 +12,6 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { ChartWrapper } from '../chart_wrapper';
 import { SnapshotHeading } from '../../../overview/snapshot/snapshot_heading';
 import { DonutChart } from '../donut_chart';
-const SNAPSHOT_CHART_WIDTH = 144;
 const SNAPSHOT_CHART_HEIGHT = 144;
 describe('ChartWrapper component', () => {
   it('renders the component with loading false', () => {
@@ -20,7 +19,7 @@ describe('ChartWrapper component', () => {
       <ChartWrapper loading={false}>
         <SnapshotHeading total={12} />
         <EuiSpacer size="xs" />
-        <DonutChart up={4} down={8} height={SNAPSHOT_CHART_HEIGHT} width={SNAPSHOT_CHART_WIDTH} />
+        <DonutChart up={4} down={8} height={SNAPSHOT_CHART_HEIGHT} />
       </ChartWrapper>
     );
     expect(component).toMatchSnapshot();
@@ -31,7 +30,7 @@ describe('ChartWrapper component', () => {
       <ChartWrapper loading={true}>
         <SnapshotHeading total={12} />
         <EuiSpacer size="xs" />
-        <DonutChart up={4} down={8} height={SNAPSHOT_CHART_HEIGHT} width={SNAPSHOT_CHART_WIDTH} />
+        <DonutChart up={4} down={8} height={SNAPSHOT_CHART_HEIGHT} />
       </ChartWrapper>
     );
     expect(component).toMatchSnapshot();
@@ -42,7 +41,7 @@ describe('ChartWrapper component', () => {
       <ChartWrapper loading={true}>
         <SnapshotHeading total={12} />
         <EuiSpacer size="xs" />
-        <DonutChart up={4} down={8} height={SNAPSHOT_CHART_HEIGHT} width={SNAPSHOT_CHART_WIDTH} />
+        <DonutChart up={4} down={8} height={SNAPSHOT_CHART_HEIGHT} />
       </ChartWrapper>
     );
 
@@ -64,7 +63,7 @@ describe('ChartWrapper component', () => {
       <ChartWrapper loading={true}>
         <SnapshotHeading total={12} />
         <EuiSpacer size="xs" />
-        <DonutChart up={4} down={8} height={SNAPSHOT_CHART_HEIGHT} width={SNAPSHOT_CHART_WIDTH} />
+        <DonutChart up={4} down={8} height={SNAPSHOT_CHART_HEIGHT} />
       </ChartWrapper>
     );
 

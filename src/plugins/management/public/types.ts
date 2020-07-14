@@ -18,7 +18,7 @@
  */
 
 import { ReactElement } from 'react';
-import { ScopedHistory } from 'kibana/public';
+import { ScopedHistory, Capabilities } from 'kibana/public';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import { ChromeBreadcrumb } from '../../../core/public/';
 
@@ -30,8 +30,12 @@ export interface ManagementStart {
   sections: SectionsServiceStart;
 }
 
+export interface SectionsServiceStartDeps {
+  capabilities: Capabilities;
+}
+
 export interface SectionsServiceSetup {
-  register: (args: RegisterManagementSectionArgs) => ManagementSection;
+  register: (args: Omit<RegisterManagementSectionArgs, 'capabilities'>) => ManagementSection;
   getSection: (sectionId: ManagementSectionId | string) => ManagementSection;
 }
 

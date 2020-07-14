@@ -1,6 +1,7 @@
 **/*.js.snap
 **/graphql/types.ts
 /.es
+/.chromium
 /build
 /built_assets
 /config/apm.dev.js
@@ -33,6 +34,7 @@ target
 /x-pack/plugins/canvas/shareable_runtime/build
 /x-pack/plugins/canvas/storybook
 /x-pack/plugins/monitoring/public/lib/jquery_flot
+/x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/**
 /x-pack/legacy/plugins/infra/common/graphql/types.ts
 /x-pack/legacy/plugins/infra/public/graphql/types.ts
 /x-pack/legacy/plugins/infra/server/graphql/types.ts

@@ -61,7 +61,7 @@ export type UnmappedTypeStrings = 'date' | 'filter';
  * Is used to carry information about how to format data in
  * a data table as part of the column definition.
  */
-export interface SerializedFieldFormat<TParams = object> {
+export interface SerializedFieldFormat<TParams = Record<string, any>> {
   id?: string;
   params?: TParams;
 }

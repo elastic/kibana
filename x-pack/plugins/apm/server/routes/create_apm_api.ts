@@ -75,7 +75,18 @@ import {
   rumClientMetricsRoute,
   rumPageViewsTrendRoute,
   rumPageLoadDistributionRoute,
+  rumPageLoadDistBreakdownRoute,
+  rumServicesRoute,
 } from './rum_client';
+import {
+  observabilityDashboardHasDataRoute,
+  observabilityDashboardDataRoute,
+} from './observability_dashboard';
+import {
+  anomalyDetectionJobsRoute,
+  createAnomalyDetectionJobsRoute,
+  anomalyDetectionEnvironmentsRoute,
+} from './settings/anomaly_detection';
 
 const createApmApi = () => {
   const api = createApi()
@@ -160,7 +171,18 @@ const createApmApi = () => {
     .add(rumOverviewLocalFiltersRoute)
     .add(rumPageViewsTrendRoute)
     .add(rumPageLoadDistributionRoute)
-    .add(rumClientMetricsRoute);
+    .add(rumPageLoadDistBreakdownRoute)
+    .add(rumClientMetricsRoute)
+    .add(rumServicesRoute)
+
+    // Observability dashboard
+    .add(observabilityDashboardHasDataRoute)
+    .add(observabilityDashboardDataRoute)
+
+    // Anomaly detection
+    .add(anomalyDetectionJobsRoute)
+    .add(createAnomalyDetectionJobsRoute)
+    .add(anomalyDetectionEnvironmentsRoute);
 
   return api;
 };

@@ -6,9 +6,8 @@
 
 import { getOr, omit, uniq, isEmpty, isEqualWith, union } from 'lodash/fp';
 
+import uuid from 'uuid';
 import { Filter } from '../../../../../../../src/plugins/data/public';
-
-import { disableTemplate } from '../../../../common/constants';
 
 import { getColumnWidthFromType } from '../../../timelines/components/timeline/body/column_headers/helpers';
 import { Sort } from '../../../timelines/components/timeline/body/sort';
@@ -16,10 +15,17 @@ import {
   DataProvider,
   QueryOperator,
   QueryMatch,
+  DataProviderType,
+  IS_OPERATOR,
+  EXISTS_OPERATOR,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/model';
 import { TimelineNonEcsData } from '../../../graphql/types';
-import { TimelineTypeLiteral } from '../../../../common/types/timeline';
+import {
+  TimelineTypeLiteral,
+  TimelineType,
+  RowRendererId,
+} from '../../../../common/types/timeline';
 
 import { timelineDefaults } from './defaults';
 import { ColumnHeaderOptions, KqlMode, TimelineModel, EventType } from './model';
@@ -128,6 +134,7 @@ interface AddNewTimelineParams {
     start: number;
     end: number;
   };
+  excludedRowRendererIds?: RowRendererId[];
   filters?: Filter[];
   id: string;
   itemsPerPage?: number;
@@ -138,7 +145,6 @@ interface AddNewTimelineParams {
   show?: boolean;
   sort?: Sort;
   showCheckboxes?: boolean;
-  showRowRenderers?: boolean;
   timelineById: TimelineById;
   timelineType: TimelineTypeLiteral;
 }
@@ -148,6 +154,7 @@ export const addNewTimeline = ({
   columns,
   dataProviders = [],
   dateRange = { start: 0, end: 0 },
+  excludedRowRendererIds = [],
   filters = timelineDefaults.filters,
   id,
   itemsPerPage = timelineDefaults.itemsPerPage,
@@ -155,31 +162,40 @@ export const addNewTimeline = ({
   sort = timelineDefaults.sort,
   show = false,
   showCheckboxes = false,
-  showRowRenderers = true,
   timelineById,
   timelineType,
-}: AddNewTimelineParams): TimelineById => ({
-  ...timelineById,
-  [id]: {
-    id,
-    ...timelineDefaults,
-    columns,
-    dataProviders,
-    dateRange,
-    filters,
-    itemsPerPage,
-    kqlQuery,
-    sort,
-    show,
-    savedObjectId: null,
-    version: null,
-    isSaving: false,
-    isLoading: false,
-    showCheckboxes,
-    showRowRenderers,
-    timelineType: !disableTemplate ? timelineType : timelineDefaults.timelineType,
-  },
-});
+}: AddNewTimelineParams): TimelineById => {
+  const templateTimelineInfo =
+    timelineType === TimelineType.template
+      ? {
+          templateTimelineId: uuid.v4(),
+          templateTimelineVersion: 1,
+        }
+      : {};
+  return {
+    ...timelineById,
+    [id]: {
+      id,
+      ...timelineDefaults,
+      columns,
+      dataProviders,
+      dateRange,
+      excludedRowRendererIds,
+      filters,
+      itemsPerPage,
+      kqlQuery,
+      sort,
+      show,
+      savedObjectId: null,
+      version: null,
+      isSaving: false,
+      isLoading: false,
+      showCheckboxes,
+      timelineType,
+      ...templateTimelineInfo,
+    },
+  };
+};
 
 interface PinTimelineEventParams {
   id: string;
@@ -224,6 +240,26 @@ export const updateTimelineShowTimeline = ({
     [id]: {
       ...timeline,
       show,
+    },
+  };
+};
+
+export const updateGraphEventId = ({
+  id,
+  graphEventId,
+  timelineById,
+}: {
+  id: string;
+  graphEventId: string;
+  timelineById: TimelineById;
+}): TimelineById => {
+  const timeline = timelineById[id];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      graphEventId,
     },
   };
 };
@@ -1015,6 +1051,92 @@ export const updateTimelineProviderKqlQuery = ({
   };
 };
 
+interface UpdateTimelineProviderTypeParams {
+  andProviderId?: string;
+  id: string;
+  providerId: string;
+  type: DataProviderType;
+  timelineById: TimelineById;
+}
+
+const updateTypeAndProvider = (
+  andProviderId: string,
+  type: DataProviderType,
+  providerId: string,
+  timeline: TimelineModel
+) =>
+  timeline.dataProviders.map((provider) =>
+    provider.id === providerId
+      ? {
+          ...provider,
+          and: provider.and.map((andProvider) =>
+            andProvider.id === andProviderId
+              ? {
+                  ...andProvider,
+                  type,
+                  name: type === DataProviderType.template ? `${andProvider.queryMatch.field}` : '',
+                  queryMatch: {
+                    ...andProvider.queryMatch,
+                    displayField: undefined,
+                    displayValue: undefined,
+                    value:
+                      type === DataProviderType.template ? `{${andProvider.queryMatch.field}}` : '',
+                    operator: (type === DataProviderType.template
+                      ? IS_OPERATOR
+                      : EXISTS_OPERATOR) as QueryOperator,
+                  },
+                }
+              : andProvider
+          ),
+        }
+      : provider
+  );
+
+const updateTypeProvider = (type: DataProviderType, providerId: string, timeline: TimelineModel) =>
+  timeline.dataProviders.map((provider) =>
+    provider.id === providerId
+      ? {
+          ...provider,
+          type,
+          name: type === DataProviderType.template ? `${provider.queryMatch.field}` : '',
+          queryMatch: {
+            ...provider.queryMatch,
+            displayField: undefined,
+            displayValue: undefined,
+            value: type === DataProviderType.template ? `{${provider.queryMatch.field}}` : '',
+            operator: (type === DataProviderType.template
+              ? IS_OPERATOR
+              : EXISTS_OPERATOR) as QueryOperator,
+          },
+        }
+      : provider
+  );
+
+export const updateTimelineProviderType = ({
+  andProviderId,
+  id,
+  providerId,
+  type,
+  timelineById,
+}: UpdateTimelineProviderTypeParams): TimelineById => {
+  const timeline = timelineById[id];
+
+  if (timeline.timelineType !== TimelineType.template && type === DataProviderType.template) {
+    // Not supported, timeline template cannot have template type providers
+    return timelineById;
+  }
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      dataProviders: andProviderId
+        ? updateTypeAndProvider(andProviderId, type, providerId, timeline)
+        : updateTypeProvider(type, providerId, timeline),
+    },
+  };
+};
+
 interface UpdateTimelineItemsPerPageParams {
   id: string;
   itemsPerPage: number;
@@ -1315,6 +1437,28 @@ export const updateFilters = ({ id, filters, timelineById }: UpdateFiltersParams
     [id]: {
       ...timeline,
       filters,
+    },
+  };
+};
+
+interface UpdateExcludedRowRenderersIds {
+  id: string;
+  excludedRowRendererIds: RowRendererId[];
+  timelineById: TimelineById;
+}
+
+export const updateExcludedRowRenderersIds = ({
+  id,
+  excludedRowRendererIds,
+  timelineById,
+}: UpdateExcludedRowRenderersIds): TimelineById => {
+  const timeline = timelineById[id];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      excludedRowRendererIds,
     },
   };
 };

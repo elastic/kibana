@@ -13,7 +13,7 @@ import {
   GRADIENT_INTERVALS,
 } from '../../color_utils';
 import React from 'react';
-import { COLOR_MAP_TYPE } from '../../../../../common/constants';
+import { COLOR_MAP_TYPE, MB_LOOKUP_FUNCTION } from '../../../../../common/constants';
 import {
   isCategoricalStopsInvalid,
   getOtherCategoryLabel,
@@ -152,7 +152,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
         makeMbClampedNumberExpression({
           minValue: rangeFieldMeta.min,
           maxValue: rangeFieldMeta.max,
-          lookupFunction: 'feature-state',
+          lookupFunction: MB_LOOKUP_FUNCTION.FEATURE_STATE,
           fallback: lessThanFirstStopValue,
           fieldName: targetName,
         }),

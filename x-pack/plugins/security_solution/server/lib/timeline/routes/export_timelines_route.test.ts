@@ -98,7 +98,7 @@ describe('export timelines', () => {
       const result = server.validate(request);
 
       expect(result.badRequest.mock.calls[1][0]).toEqual(
-        'Invalid value "undefined" supplied to "file_name",Invalid value "undefined" supplied to "exclude_export_details",Invalid value "undefined" supplied to "exclude_export_details"'
+        'Invalid value "undefined" supplied to "file_name"'
       );
     });
   });

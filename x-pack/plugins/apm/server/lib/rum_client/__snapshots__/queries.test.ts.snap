@@ -67,15 +67,12 @@ exports[`rum client dashboard queries fetches page load distribution 1`] = `
 Object {
   "body": Object {
     "aggs": Object {
-      "durationMinMax": Object {
-        "min": Object {
-          "field": "transaction.duration.us",
-          "missing": 0,
-        },
-      },
-      "durationPercentiles": Object {
+      "durPercentiles": Object {
         "percentiles": Object {
           "field": "transaction.duration.us",
+          "hdr": Object {
+            "number_of_significant_value_digits": 3,
+          },
           "percents": Array [
             50,
             75,
@@ -83,13 +80,12 @@ Object {
             95,
             99,
           ],
-          "script": Object {
-            "lang": "painless",
-            "params": Object {
-              "timeUnit": 1000,
-            },
-            "source": "doc['transaction.duration.us'].value / params.timeUnit",
-          },
+        },
+      },
+      "minDuration": Object {
+        "min": Object {
+          "field": "transaction.duration.us",
+          "missing": 0,
         },
       },
     },
@@ -139,16 +135,62 @@ Object {
   "body": Object {
     "aggs": Object {
       "pageViews": Object {
-        "aggs": Object {
-          "trans_count": Object {
-            "value_count": Object {
-              "field": "transaction.type",
-            },
-          },
-        },
+        "aggs": Object {},
         "auto_date_histogram": Object {
           "buckets": 50,
           "field": "@timestamp",
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "processor.event": "transaction",
+            },
+          },
+          Object {
+            "term": Object {
+              "transaction.type": "page-load",
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "transaction.marks.navigationTiming.fetchStart",
+            },
+          },
+          Object {
+            "term": Object {
+              "my.custom.ui.filter": "foo-bar",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": "myIndex",
+}
+`;
+
+exports[`rum client dashboard queries fetches rum services 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "services": Object {
+        "terms": Object {
+          "field": "service.name",
+          "size": 1000,
         },
       },
     },

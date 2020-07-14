@@ -11,6 +11,8 @@ export const totalNumberOfPrebuiltRules = rawRules.length;
 
 export const totalNumberOfPrebuiltRulesInEsArchive = 127;
 
+export const totalNumberOfPrebuiltRulesInEsArchiveCustomRule = 145;
+
 interface Mitre {
   tactic: string;
   techniques: string[];
@@ -57,7 +59,7 @@ const mitre2: Mitre = {
 };
 
 export const newRule: CustomRule = {
-  customQuery: 'host.name: *',
+  customQuery: 'host.name: * ',
   name: 'New Rule Test',
   description: 'The new rule description.',
   severity: 'High',
@@ -67,7 +69,7 @@ export const newRule: CustomRule = {
   falsePositivesExamples: ['False1', 'False2'],
   mitre: [mitre1, mitre2],
   note: '# test markdown',
-  timelineId: '352c6110-9ffb-11ea-b3d8-857d6042d9bd',
+  timelineId: '3270f530-bc84-11ea-b73f-89980a6a1ce7',
 };
 
 export const machineLearningRule: MachineLearningRule = {

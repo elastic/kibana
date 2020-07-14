@@ -6,7 +6,11 @@
 
 import moment from 'moment';
 
-import { SavedObjectsFindResponse, SavedObjectsClientContract, APICaller } from 'src/core/server';
+import {
+  SavedObjectsFindResponse,
+  SavedObjectsClientContract,
+  LegacyAPICaller,
+} from 'src/core/server';
 import {
   IndexGroup,
   REINDEX_OP_TYPE,
@@ -112,7 +116,7 @@ export interface ReindexActions {
 
 export const reindexActionsFactory = (
   client: SavedObjectsClientContract,
-  callAsUser: APICaller
+  callAsUser: LegacyAPICaller
 ): ReindexActions => {
   // ----- Internal functions
   const isLocked = (reindexOp: ReindexSavedObject) => {

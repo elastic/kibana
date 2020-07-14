@@ -10,7 +10,7 @@
 setup(core: CoreSetup<object, DataPluginStart>, { usageCollection }: DataPluginSetupDependencies): {
         search: ISearchSetup;
         fieldFormats: {
-            register: (customFieldFormat: import("../public").FieldFormatInstanceType) => number;
+            register: (customFieldFormat: import("../common").FieldFormatInstanceType) => number;
         };
     };
 ```
@@ -27,7 +27,7 @@ setup(core: CoreSetup<object, DataPluginStart>, { usageCollection }: DataPluginS
 `{
         search: ISearchSetup;
         fieldFormats: {
-            register: (customFieldFormat: import("../public").FieldFormatInstanceType) => number;
+            register: (customFieldFormat: import("../common").FieldFormatInstanceType) => number;
         };
     }`
 

@@ -10,6 +10,7 @@ import { Pipeline } from '../../../common/types';
 import { API_BASE_PATH } from '../../../common/constants';
 import { RouteDependencies } from '../../types';
 import { pipelineSchema } from './pipeline_schema';
+import { isObjectWithKeys } from './shared';
 
 const bodySchema = schema.object({
   name: schema.string(),
@@ -70,7 +71,12 @@ export const registerCreateRoute = ({
         if (isEsError(error)) {
           return res.customError({
             statusCode: error.statusCode,
-            body: error,
+            body: isObjectWithKeys(error.body)
+              ? {
+                  message: error.message,
+                  attributes: error.body,
+                }
+              : error,
           });
         }
 

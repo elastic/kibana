@@ -11,6 +11,7 @@ import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { Ast } from '@kbn/interpreter/common';
+import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -127,7 +128,7 @@ function stateFromPersistedState(
     indexPatterns: expectedIndexPatterns,
     indexPatternRefs: [],
     existingFields: {},
-    showEmptyFields: true,
+    isFirstExistenceFetch: false,
   };
 }
 
@@ -140,6 +141,7 @@ describe('IndexPattern Data Source', () => {
       storage: {} as IStorageWrapper,
       core: coreMock.createStart(),
       data: dataPluginMock.createStartContract(),
+      charts: chartPluginMock.createSetupContract(),
     });
 
     persistedState = {
@@ -402,7 +404,7 @@ describe('IndexPattern Data Source', () => {
           },
         },
         currentIndexPatternId: '1',
-        showEmptyFields: false,
+        isFirstExistenceFetch: false,
       };
       expect(indexPatternDatasource.insertLayer(state, 'newLayer')).toEqual({
         ...state,
@@ -423,7 +425,7 @@ describe('IndexPattern Data Source', () => {
       const state = {
         indexPatternRefs: [],
         existingFields: {},
-        showEmptyFields: false,
+        isFirstExistenceFetch: false,
         indexPatterns: expectedIndexPatterns,
         layers: {
           first: {
@@ -458,7 +460,7 @@ describe('IndexPattern Data Source', () => {
         indexPatternDatasource.getLayers({
           indexPatternRefs: [],
           existingFields: {},
-          showEmptyFields: false,
+          isFirstExistenceFetch: false,
           indexPatterns: expectedIndexPatterns,
           layers: {
             first: {
@@ -484,7 +486,7 @@ describe('IndexPattern Data Source', () => {
         indexPatternDatasource.getMetaData({
           indexPatternRefs: [],
           existingFields: {},
-          showEmptyFields: false,
+          isFirstExistenceFetch: false,
           indexPatterns: expectedIndexPatterns,
           layers: {
             first: {

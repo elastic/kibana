@@ -17,8 +17,6 @@
  * under the License.
  */
 
-export * from './index_patterns_api_client';
-export * from './types';
 export * from './_pattern_cache';
 export * from './flatten_hit';
 export * from './format_hit';

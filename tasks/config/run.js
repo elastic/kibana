@@ -149,6 +149,12 @@ module.exports = function (grunt) {
       args: ['scripts/i18n_check', '--ignore-missing'],
     }),
 
+    telemetryCheck: scriptWithGithubChecks({
+      title: 'Telemetry Schema check',
+      cmd: NODE,
+      args: ['scripts/telemetry_check'],
+    }),
+
     // used by the test:quick task
     //    runs all node.js/server mocha tests
     mocha: scriptWithGithubChecks({

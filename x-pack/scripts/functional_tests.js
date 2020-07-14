@@ -52,6 +52,8 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/endpoint_api_integration_no_ingest/config.ts'),
   require.resolve('../test/reporting_api_integration/config.js'),
   require.resolve('../test/functional_embedded/config.ts'),
+  require.resolve('../test/ingest_manager_api_integration/config.ts'),
+  require.resolve('../test/functional_enterprise_search/without_host_configured.config.ts'),
 ];
 
 require('@kbn/plugin-helpers').babelRegister();
