@@ -19,7 +19,7 @@ import { getUpdateAlertsQuery } from '../../../detections/components/alerts_tabl
 import { buildAlertStatusFilter } from '../../../detections/components/alerts_table/default_config';
 import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
 import { Index } from '../../../../common/detection_engine/schemas/common/schemas';
-import { formatExceptionItemForUpdate } from './helpers';
+import { formatExceptionItemForUpdate, prepareExceptionItemsForBulkClose } from './helpers';
 
 /**
  * Adds exception items to the list. Also optionally closes alerts.
@@ -123,7 +123,7 @@ export const useAddOrUpdateException = ({
             'kuery',
             buildAlertStatusFilter('open'),
             bulkCloseIndex,
-            exceptionItemsToAddOrUpdate,
+            prepareExceptionItemsForBulkClose(exceptionItemsToAddOrUpdate),
             false
           );
           await updateAlertStatus({
