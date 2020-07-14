@@ -12,7 +12,6 @@ import { SecurityPageName } from '../../../app/types';
 import { getTimelineTabsUrl, useFormatUrl } from '../../../common/components/link_to';
 import * as i18n from './translations';
 import { TimelineTabsStyle, TimelineTab } from './types';
-import { NetworkTopCountriesTableId } from '../../../network/components/network_top_countries_table';
 
 export const useTimelineTypes = ({
   defaultTimelineCount,

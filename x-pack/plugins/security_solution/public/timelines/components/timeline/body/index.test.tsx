@@ -18,6 +18,7 @@ import { Sort } from './sort';
 import { wait } from '../../../../common/lib/helpers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { SELECTOR_TIMELINE_BODY_CLASS_NAME } from '../styles';
+import { TimelineType } from '../../../../../common/types/timeline';
 
 const testBodyHeight = 700;
 const mockGetNotesByIds = (eventId: string[]) => [];
@@ -77,6 +78,7 @@ describe('Body', () => {
     show: true,
     sort: mockSort,
     showCheckboxes: false,
+    timelineType: TimelineType.default,
     toggleColumn: jest.fn(),
     updateNote: jest.fn(),
   };

@@ -34,6 +34,7 @@ import { useManageTimeline } from '../../manage_timeline';
 import { GraphOverlay } from '../../graph_overlay';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import { TimelineRowAction } from './actions';
+import { TimelineType } from '../../../../../common/types/timeline';
 
 export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
@@ -64,6 +65,7 @@ export interface BodyProps {
   show: boolean;
   showCheckboxes: boolean;
   sort: Sort;
+  timelineType: TimelineType;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   updateNote: UpdateNote;
 }
@@ -100,6 +102,7 @@ export const Body = React.memo<BodyProps>(
     showCheckboxes,
     sort,
     toggleColumn,
+    timelineType,
     updateNote,
   }) => {
     const containerElementRef = useRef<HTMLDivElement>(null);
@@ -147,7 +150,12 @@ export const Body = React.memo<BodyProps>(
     return (
       <>
         {showGraphView(graphEventId) && (
-          <GraphOverlay bodyHeight={height} graphEventId={graphEventId} timelineId={id} />
+          <GraphOverlay
+            bodyHeight={height}
+            graphEventId={graphEventId}
+            timelineId={id}
+            timelineType={timelineType}
+          />
         )}
         <TimelineBody
           data-test-subj="timeline-body"

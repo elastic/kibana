@@ -33,6 +33,7 @@ import * as i18n from '../../translations';
 import { MarkdownEditorForm } from '../../../common/components//markdown_editor/form';
 import { useGetTags } from '../../containers/use_get_tags';
 import { getCaseDetailsUrl } from '../../../common/components/link_to';
+import { useTimelineClick } from '../utils/use_timeline_click';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -87,6 +88,7 @@ export const Create = React.memo(() => {
     form,
     'description'
   );
+  const handleTimelineClick = useTimelineClick();
 
   const onSubmit = useCallback(async () => {
     const { isValid, data } = await form.submit();
@@ -94,8 +96,7 @@ export const Create = React.memo(() => {
       // `postCase`'s type is incorrect, it actually returns a promise
       await postCase(data);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form]);
+  }, [form, postCase]);
 
   const handleSetIsCancel = useCallback(() => {
     history.push('/');
@@ -145,6 +146,7 @@ export const Create = React.memo(() => {
               dataTestSubj: 'caseDescription',
               idAria: 'caseDescription',
               isDisabled: isLoading,
+              onClickTimeline: handleTimelineClick,
               onCursorPositionUpdate: handleCursorChange,
               topRightContent: (
                 <InsertTimelinePopover
