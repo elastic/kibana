@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty, isNumber, get } from 'lodash/fp';
+import { isEmpty, get } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 
 import { escapeQueryValue, convertToBuildEsQuery } from '../../../common/lib/keury';
@@ -22,6 +22,8 @@ import {
   EsQueryConfig,
   Filter,
 } from '../../../../../../../src/plugins/data/public';
+
+const isNumber = (value: string | number) => !isNaN(Number(value));
 
 const convertDateFieldToQuery = (field: string, value: string | number) =>
   `${field}: ${isNumber(value) ? value : new Date(value).valueOf()}`;

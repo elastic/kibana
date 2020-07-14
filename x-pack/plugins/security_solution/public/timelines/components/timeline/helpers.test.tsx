@@ -54,6 +54,14 @@ describe('Build KQL Query', () => {
     expect(cleanUpKqlQuery(kqlQuery)).toEqual('@timestamp: 1521848183232');
   });
 
+  test('Buld KQL query with one data provider as timestamp (numeric input as string)', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    dataProviders[0].queryMatch.field = '@timestamp';
+    dataProviders[0].queryMatch.value = '1521848183232';
+    const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('@timestamp: 1521848183232');
+  });
+
   test('Build KQL query with one data provider as date type (string input)', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
     dataProviders[0].queryMatch.field = 'event.end';
@@ -66,6 +74,14 @@ describe('Build KQL Query', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
     dataProviders[0].queryMatch.field = 'event.end';
     dataProviders[0].queryMatch.value = 1521848183232;
+    const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('event.end: 1521848183232');
+  });
+
+  test('Buld KQL query with one data provider as date type (numeric input as string)', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    dataProviders[0].queryMatch.field = 'event.end';
+    dataProviders[0].queryMatch.value = '1521848183232';
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
     expect(cleanUpKqlQuery(kqlQuery)).toEqual('event.end: 1521848183232');
   });
