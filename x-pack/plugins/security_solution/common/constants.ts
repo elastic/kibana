@@ -117,6 +117,7 @@ export const TIMELINE_URL = '/api/timeline';
 export const TIMELINE_DRAFT_URL = `${TIMELINE_URL}/_draft`;
 export const TIMELINE_EXPORT_URL = `${TIMELINE_URL}/_export`;
 export const TIMELINE_IMPORT_URL = `${TIMELINE_URL}/_import`;
+export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackaged`;
 
 /**
  * Default signals index key for kibana.dev.yml
