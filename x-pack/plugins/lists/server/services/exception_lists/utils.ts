@@ -318,7 +318,11 @@ export const transformUpdateCommentsToComments = ({
         );
       } else if (existingComment == null && commentsSchema.is(c)) {
         throw new ErrorWithStatusCode('Only new comments may be added', 403);
-      } else if (existingComment != null && isCommentEqual(c, existingComment)) {
+      } else if (
+        commentsSchema.is(c) &&
+        existingComment != null &&
+        isCommentEqual(c, existingComment)
+      ) {
         return existingComment;
       } else if (commentsSchema.is(c) && existingComment != null) {
         return transformUpdateComments({ comment: c, existingComment, user });
