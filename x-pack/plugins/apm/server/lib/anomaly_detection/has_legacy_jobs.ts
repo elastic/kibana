@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Setup } from '../helpers/setup_request';
-import { getMlJobsWithAPMGroup } from './get_ml_jobs_by_group';
+import { getMlJobsWithAPMGroup } from './get_ml_jobs_with_apm_group';
 
 // Determine whether there are any legacy ml jobs.
 // A legacy ML job has a job id that ends with "high_mean_response_time" and created_by=ml-module-apm-transaction

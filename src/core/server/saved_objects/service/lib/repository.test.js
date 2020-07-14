@@ -502,6 +502,7 @@ describe('SavedObjectsRepository', () => {
       ...obj,
       migrationVersion: { [obj.type]: '1.1.1' },
       version: mockVersion,
+      namespaces: obj.namespaces ?? [obj.namespace ?? 'default'],
       ...mockTimestampFields,
     });
 
@@ -835,9 +836,19 @@ describe('SavedObjectsRepository', () => {
         // Assert that both raw docs from the ES response are deserialized
         expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(1, {
           ...response.items[0].create,
+          _source: {
+            ...response.items[0].create._source,
+            namespaces: response.items[0].create._source.namespaces,
+          },
           _id: expect.stringMatching(/^myspace:config:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/),
         });
-        expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(2, response.items[1].create);
+        expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(2, {
+          ...response.items[1].create,
+          _source: {
+            ...response.items[1].create._source,
+            namespaces: response.items[1].create._source.namespaces,
+          },
+        });
 
         // Assert that ID's are deserialized to remove the type and namespace
         expect(result.saved_objects[0].id).toEqual(
@@ -995,7 +1006,7 @@ describe('SavedObjectsRepository', () => {
       const expectSuccessResult = ({ type, id }, doc) => ({
         type,
         id,
-        ...(doc._source.namespaces && { namespaces: doc._source.namespaces }),
+        namespaces: doc._source.namespaces ?? ['default'],
         ...(doc._source.originId && { originId: doc._source.originId }),
         ...(doc._source.updated_at && { updated_at: doc._source.updated_at }),
         version: encodeHitVersion(doc),
@@ -1038,12 +1049,12 @@ describe('SavedObjectsRepository', () => {
         });
       });
 
-      it(`includes namespaces property for multi-namespace documents`, async () => {
+      it(`includes namespaces property for single-namespace and multi-namespace documents`, async () => {
         const obj = { type: MULTI_NAMESPACE_TYPE, id: 'three' };
         const result = await bulkGetSuccess([obj1, obj]);
         expect(result).toEqual({
           saved_objects: [
-            expect.not.objectContaining({ namespaces: expect.anything() }),
+            expect.objectContaining({ namespaces: ['default'] }),
             expect.objectContaining({ namespaces: expect.any(Array) }),
           ],
         });
@@ -1369,13 +1380,14 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('returns', () => {
-      const expectSuccessResult = ({ type, id, attributes, references, originId }) => ({
+      const expectSuccessResult = ({ type, id, attributes, references, namespaces, originId }) => ({
         type,
         id,
         originId,
         attributes,
         references,
         version: mockVersion,
+        namespaces: namespaces ?? ['default'],
         ...mockTimestampFields,
       });
 
@@ -1409,12 +1421,12 @@ describe('SavedObjectsRepository', () => {
         });
       });
 
-      it(`includes namespaces property for multi-namespace documents`, async () => {
+      it(`includes namespaces property for single-namespace and multi-namespace documents`, async () => {
         const obj = { type: MULTI_NAMESPACE_TYPE, id: 'three' };
         const result = await bulkUpdateSuccess([obj1, obj]);
         expect(result).toEqual({
           saved_objects: [
-            expect.not.objectContaining({ namespaces: expect.anything() }),
+            expect.objectContaining({ namespaces: expect.any(Array) }),
             expect.objectContaining({ namespaces: expect.any(Array) }),
           ],
         });
@@ -1824,6 +1836,7 @@ describe('SavedObjectsRepository', () => {
           version: mockVersion,
           attributes,
           references,
+          namespaces: [namespace ?? 'default'],
           migrationVersion: { [type]: '1.1.1' },
         });
       });
@@ -2080,7 +2093,7 @@ describe('SavedObjectsRepository', () => {
         await deleteByNamespaceSuccess(namespace);
         const allTypes = registry.getAllTypes().map((type) => type.name);
         expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, {
-          namespace,
+          namespaces: [namespace],
           type: allTypes.filter((type) => !registry.isNamespaceAgnostic(type)),
         });
       });
@@ -2310,6 +2323,7 @@ describe('SavedObjectsRepository', () => {
             score: doc._score,
             attributes: doc._source[doc._source.type],
             references: [],
+            namespaces: doc._source.type === NAMESPACE_AGNOSTIC_TYPE ? undefined : ['default'],
           });
         });
       });
@@ -2319,7 +2333,7 @@ describe('SavedObjectsRepository', () => {
         callAdminCluster.mockReturnValue(namespacedSearchResults);
         const count = namespacedSearchResults.hits.hits.length;
 
-        const response = await savedObjectsRepository.find({ type, namespace });
+        const response = await savedObjectsRepository.find({ type, namespaces: [namespace] });
 
         expect(response.total).toBe(count);
         expect(response.saved_objects).toHaveLength(count);
@@ -2334,6 +2348,7 @@ describe('SavedObjectsRepository', () => {
             score: doc._score,
             attributes: doc._source[doc._source.type],
             references: [],
+            namespaces: doc._source.type === NAMESPACE_AGNOSTIC_TYPE ? undefined : [namespace],
           });
         });
       });
@@ -2353,7 +2368,7 @@ describe('SavedObjectsRepository', () => {
     describe('search dsl', () => {
       it(`passes mappings, registry, search, defaultSearchOperator, searchFields, type, sortField, sortOrder and hasReference to getSearchDsl`, async () => {
         const relevantOpts = {
-          namespace,
+          namespaces: [namespace],
           search: 'foo*',
           searchFields: ['foo'],
           type: [type],
@@ -2559,6 +2574,7 @@ describe('SavedObjectsRepository', () => {
             title: 'Testing',
           },
           references: [],
+          namespaces: ['default'],
         });
       });
 
@@ -2569,10 +2585,10 @@ describe('SavedObjectsRepository', () => {
         });
       });
 
-      it(`doesn't include namespaces if type is not multi-namespace`, async () => {
+      it(`include namespaces if type is not multi-namespace`, async () => {
         const result = await getSuccess(type, id);
-        expect(result).not.toMatchObject({
-          namespaces: expect.anything(),
+        expect(result).toMatchObject({
+          namespaces: ['default'],
         });
       });
 
@@ -3102,12 +3118,12 @@ describe('SavedObjectsRepository', () => {
         _id: `${type}:${id}`,
         ...mockVersionProps,
         result: 'updated',
+        // don't need the rest of the source for test purposes, just the namespace and namespaces attributes
         get: {
           _source: {
-            // don't need the rest of the source for test purposes, just the namespaces attribute
-            ...(registry.isMultiNamespace(type) && {
-              namespaces: [options?.namespace ?? 'default'],
-            }),
+            namespaces: [options?.namespace ?? 'default'],
+            namespace: options?.namespace,
+
             // "includeOriginId" is not an option for the operation; however, if the existing saved object contains an originId attribute, the
             // operation will return it in the result. This flag is just used for test purposes to modify the mock cluster call response.
             ...(includeOriginId && { originId }),
@@ -3210,14 +3226,19 @@ describe('SavedObjectsRepository', () => {
         expectClusterCallArgs({ id: expect.stringMatching(`${MULTI_NAMESPACE_TYPE}:${id}`) }, 2);
       });
 
-      it(`uses default _sourceIncludes when type is not multi-namespace`, async () => {
-        await updateSuccess(type, id, attributes);
-        expectClusterCallArgs({ _sourceIncludes: ['originId'] });
+      it(`includes _sourceIncludes when type is multi-namespace`, async () => {
+        await updateSuccess(MULTI_NAMESPACE_TYPE, id, attributes);
+        expectClusterCallArgs({ _sourceIncludes: ['namespace', 'namespaces', 'originId'] }, 2);
       });
 
-      it(`adds to _sourceIncludes when type is multi-namespace`, async () => {
-        await updateSuccess(MULTI_NAMESPACE_TYPE, id, attributes);
-        expectClusterCallArgs({ _sourceIncludes: ['originId', 'namespaces'] }, 2);
+      it(`includes _sourceIncludes when type is not multi-namespace`, async () => {
+        await updateSuccess(type, id, attributes);
+        expect(callAdminCluster).toHaveBeenLastCalledWith(
+          expect.any(String),
+          expect.objectContaining({
+            _sourceIncludes: ['namespace', 'namespaces', 'originId'],
+          })
+        );
       });
     });
 
@@ -3289,6 +3310,7 @@ describe('SavedObjectsRepository', () => {
           version: mockVersion,
           attributes,
           references,
+          namespaces: [namespace],
         });
       });
 
@@ -3299,10 +3321,10 @@ describe('SavedObjectsRepository', () => {
         });
       });
 
-      it(`doesn't include namespaces if type is not multi-namespace`, async () => {
+      it(`includes namespaces if type is not multi-namespace`, async () => {
         const result = await updateSuccess(type, id, attributes);
-        expect(result).not.toMatchObject({
-          namespaces: expect.anything(),
+        expect(result).toMatchObject({
+          namespaces: ['default'],
         });
       });
 

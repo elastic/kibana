@@ -18,12 +18,19 @@ import {
   EuiSelectableProps,
   EuiIcon,
   EuiLoadingSpinner,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import onboardingLogo from '../images/security_administration_onboarding.svg';
 
 const TEXT_ALIGN_CENTER: CSSProperties = Object.freeze({
   textAlign: 'center',
+});
+
+const MAX_SIZE_ONBOARDING_LOGO: CSSProperties = Object.freeze({
+  maxWidth: 550,
+  maxHeight: 420,
 });
 
 interface ManagementStep {
@@ -45,7 +52,7 @@ const PolicyEmptyState = React.memo<{
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <EuiFlexGroup data-test-subj="policyOnboardingInstructions">
+        <EuiFlexGroup data-test-subj="policyOnboardingInstructions" alignItems="center">
           <EuiFlexItem>
             <EuiText>
               <h3>
@@ -55,26 +62,26 @@ const PolicyEmptyState = React.memo<{
                 />
               </h3>
             </EuiText>
-            <EuiSpacer size="xl" />
+            <EuiSpacer size="m" />
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policyList.onboardingSectionOne"
-                defaultMessage="Elastic Endpoint Security gives you the power to keep your endpoints safe from attack, as well as unparalleled visibility into any threat in your environment."
+                defaultMessage="Elastic Endpoint Security protects your hosts with threat prevention, detection, and deep security data visibility."
               />
             </EuiText>
-            <EuiSpacer size="xl" />
+            <EuiSpacer size="m" />
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policyList.onboardingSectionTwo"
-                defaultMessage="You’ll be able to view and manage hosts in your environment running the Elastic Endpoint from this page."
+                defaultMessage="From this page, you’ll be able to view and manage the hosts in your environment running Elastic Endpoint Security."
               />
             </EuiText>
-            <EuiSpacer size="xl" />
-            <EuiFlexGroup>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup alignItems="center" style={{ maxWidth: '90%' }}>
               <EuiFlexItem>
                 <EuiFlexGroup>
                   <EuiFlexItem grow={false} style={{ marginRight: '10px' }}>
-                    <EuiIcon type="search" />
+                    <EuiIcon type="grid" />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false} style={{ marginLeft: '0' }}>
                     <EuiText>
@@ -91,14 +98,14 @@ const PolicyEmptyState = React.memo<{
                 <EuiText size="xs" color="subdued">
                   <FormattedMessage
                     id="xpack.securitySolution.endpoint.policyList.onboardingHostInfo"
-                    defaultMessage="Hosts running the Elastic Endpoint"
+                    defaultMessage="Hosts running Elastic Endpoint Security"
                   />
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFlexGroup>
                   <EuiFlexItem grow={false} style={{ marginRight: '10px' }}>
-                    <EuiIcon type="tableDensityExpanded" />
+                    <EuiIcon type="controlsHorizontal" />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false} style={{ marginLeft: '0' }}>
                     <EuiText>
@@ -120,14 +127,20 @@ const PolicyEmptyState = React.memo<{
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiSpacer size="xl" />
+            <EuiSpacer size="m" />
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policyList.onboardingSectionThree"
-                defaultMessage="To get started, you’ll have to add the Elastic Endpoint integration to your Agents. Let’s do that now!"
+                defaultMessage="To get started, add the Elastic Endpoint Security integration to your Agents. For more information, "
               />
+              <EuiLink external href="https://www.elastic.co/guide/en/security/current/index.html">
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policyList.onboardingDocsLink"
+                  defaultMessage="view the Security app documentation"
+                />
+              </EuiLink>
             </EuiText>
-            <EuiSpacer size="xl" />
+            <EuiSpacer size="l" />
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiButton
@@ -146,7 +159,7 @@ const PolicyEmptyState = React.memo<{
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiIcon type="logoSecurity" size="xl" />
+            <EuiIcon type={onboardingLogo} size="original" style={MAX_SIZE_ONBOARDING_LOGO} />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

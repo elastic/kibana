@@ -71,7 +71,7 @@ const getConflictDest = (id: string) => ({
 });
 
 export function importTestSuiteFactory(es: any, esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbidden = expectResponses.forbidden;
+  const expectForbidden = expectResponses.forbiddenTypes('bulk_create');
   const expectResponseBody = (
     testCases: ImportTestCase | ImportTestCase[],
     statusCode: 200 | 403,

@@ -44,26 +44,34 @@ export const findExceptionListItemRoute = (router: IRouter): void => {
           sort_field: sortField,
           sort_order: sortOrder,
         } = request.query;
-        const exceptionListItems = await exceptionLists.findExceptionListItem({
-          filter,
-          listId,
-          namespaceType,
-          page,
-          perPage,
-          sortField,
-          sortOrder,
-        });
-        if (exceptionListItems == null) {
+
+        if (listId.length !== namespaceType.length) {
           return siemResponse.error({
-            body: `list id: "${listId}" does not exist`,
-            statusCode: 404,
+            body: `list_id and namespace_id need to have the same comma separated number of values. Expected list_id length: ${listId.length} to equal namespace_type length: ${namespaceType.length}`,
+            statusCode: 400,
           });
-        }
-        const [validated, errors] = validate(exceptionListItems, foundExceptionListItemSchema);
-        if (errors != null) {
-          return siemResponse.error({ body: errors, statusCode: 500 });
         } else {
-          return response.ok({ body: validated ?? {} });
+          const exceptionListItems = await exceptionLists.findExceptionListsItem({
+            filter,
+            listId,
+            namespaceType,
+            page,
+            perPage,
+            sortField,
+            sortOrder,
+          });
+          if (exceptionListItems == null) {
+            return siemResponse.error({
+              body: `list id: "${listId}" does not exist`,
+              statusCode: 404,
+            });
+          }
+          const [validated, errors] = validate(exceptionListItems, foundExceptionListItemSchema);
+          if (errors != null) {
+            return siemResponse.error({ body: errors, statusCode: 500 });
+          } else {
+            return response.ok({ body: validated ?? {} });
+          }
         }
       } catch (err) {
         const error = transformError(err);
