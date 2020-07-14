@@ -48,7 +48,7 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
       url.searchParams.set('experimental', params.experimental.toString());
     }
   }
-  const kibanaVersion = appContextService.getKibanaVersion();
+  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be 8.0.0-SNAPSHOT
   if (kibanaVersion) {
     url.searchParams.set('kibana.version', kibanaVersion);
   }
@@ -61,7 +61,7 @@ export async function fetchFindLatestPackage(packageName: string): Promise<Regis
   const url = new URL(
     `${registryUrl}/search?package=${packageName}&internal=true&experimental=true`
   );
-  const kibanaVersion = appContextService.getKibanaVersion();
+  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be 8.0.0-SNAPSHOT
   if (kibanaVersion) {
     url.searchParams.set('kibana.version', kibanaVersion);
   }
