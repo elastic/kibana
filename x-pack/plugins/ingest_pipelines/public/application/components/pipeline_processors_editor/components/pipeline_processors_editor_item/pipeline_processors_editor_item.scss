@@ -26,7 +26,11 @@
     cursor: pointer;
 
     &--disabled {
-      background-color: $euiButtonColorDisabled;
+      color: $euiButtonColorDisabledText;
+    }
+
+    &__codeSnippet {
+      max-width: 400px;
     }
   }
 
