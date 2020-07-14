@@ -127,7 +127,6 @@ const StatefulEventComponent: React.FC<Props> = ({
   updateNote,
 }) => {
   const [expanded, setExpanded] = useState<{ [eventId: string]: boolean }>({});
-  // const [initialRender, setInitialRender] = useState(false);
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
   const timeline = useSelector<StoreState, TimelineModel>((state) => {
     return state.timeline.timelineById['timeline-1'];

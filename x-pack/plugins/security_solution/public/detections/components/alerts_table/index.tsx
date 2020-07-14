@@ -366,7 +366,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     }
   }, [defaultFilters, filterGroup]);
   const { filterManager } = useKibana().services.data.query;
-  const { initializeTimeline, setTimelineRowActions } = useManageTimeline();
+  const { initializeTimeline, setTimelineRowActions, setIndexToAdd } = useManageTimeline();
 
   useEffect(() => {
     initializeTimeline({
@@ -375,6 +375,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       filterManager,
       footerText: i18n.TOTAL_COUNT_OF_ALERTS,
       id: timelineId,
+      indexToAdd: defaultIndices,
       loadingText: i18n.LOADING_ALERTS,
       selectAll: canUserCRUD ? selectAll : false,
       timelineRowActions: () => [getInvestigateInResolverAction({ dispatch, timelineId })],
@@ -382,6 +383,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   useEffect(() => {
     setTimelineRowActions({
       id: timelineId,
@@ -390,6 +392,11 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [additionalActions]);
+
+  useEffect(() => {
+    setIndexToAdd({ id: timelineId, indexToAdd: defaultIndices });
+  }, [timelineId, defaultIndices, setIndexToAdd]);
+
   const headerFilterGroup = useMemo(
     () => <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />,
     [onFilterGroupChangedCallback]

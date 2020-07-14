@@ -105,7 +105,7 @@ export const Body = React.memo<BodyProps>(
     updateNote,
   }) => {
     const containerElementRef = useRef<HTMLDivElement>(null);
-    const { getManageTimelineById } = useManageTimeline();
+    const { getManageTimelineById, getIndexToAddById } = useManageTimeline();
     const timelineActions = useMemo(
       () =>
         data.reduce((acc: TimelineRowAction[], rowData) => {
@@ -152,6 +152,7 @@ export const Body = React.memo<BodyProps>(
           <GraphOverlay
             bodyHeight={height}
             graphEventId={graphEventId}
+            indexToAdd={getIndexToAddById(id) ?? []}
             timelineId={id}
             timelineType={timelineType}
           />
