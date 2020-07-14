@@ -54,7 +54,7 @@ export interface ProcessedImportResponse {
   conflictedSearchDocs: undefined;
 }
 
-const isConflict = ({ type }: FailedImport['error']) =>
+const isAnyConflict = ({ type }: FailedImport['error']) =>
   type === 'conflict' || type === 'ambiguous_conflict';
 
 export function processImportResponse(
@@ -92,7 +92,7 @@ export function processImportResponse(
     // Import won't be successful in the scenario unmatched references exist, import API returned errors of type unknown or import API
     // returned errors of type missing_references.
     status:
-      unmatchedReferences.size === 0 && !failedImports.some((issue) => isConflict(issue.error))
+      unmatchedReferences.size === 0 && !failedImports.some((issue) => isAnyConflict(issue.error))
         ? 'success'
         : 'idle',
     importCount: response.successCount,

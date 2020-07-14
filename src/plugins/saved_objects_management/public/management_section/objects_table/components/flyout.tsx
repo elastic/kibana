@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component, Fragment, ReactNode } from 'react';
 import { take, get as getField } from 'lodash';
 import {
   EuiFlyout,
@@ -40,9 +40,6 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiLink,
-  EuiConfirmModal,
-  EuiOverlayMask,
-  EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -57,7 +54,6 @@ import {
   importLegacyFile,
   resolveImportErrors,
   logLegacyImport,
-  getDefaultTitle,
   processImportResponse,
   ProcessedImportResponse,
 } from '../../../lib';
@@ -69,6 +65,7 @@ import {
 } from '../../../lib/resolve_saved_objects';
 import { ISavedObjectsManagementServiceRegistry } from '../../../services';
 import { FailedImportConflict, RetryDecision } from '../../../lib/resolve_import_errors';
+import { OverwriteModal } from './overwrite_modal';
 
 export interface FlyoutProps {
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
@@ -101,10 +98,8 @@ export interface FlyoutState {
 }
 
 interface ConflictingRecord {
-  id: string;
-  type: string;
-  title?: string;
-  done: (success: boolean) => void;
+  conflict: FailedImportConflict;
+  done: (result: [boolean, string | undefined]) => void;
 }
 
 export class Flyout extends Component<FlyoutProps, FlyoutState> {
@@ -196,17 +191,14 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
    */
   getConflictResolutions = async (failures: FailedImportConflict[]) => {
     const resolutions: Record<string, RetryDecision> = {};
-    for (const {
-      obj: { type, id, title },
-      error: { destinationId },
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-      // TODO: other destination properties (title, updated_at, etc.)
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    } of failures) {
-      const overwrite = await new Promise<boolean>((done) => {
-        this.setState({ conflictingRecord: { id, type, title, done } });
-      });
+    for (const conflict of failures) {
+      const [overwrite, destinationId] = await new Promise<[boolean, string | undefined]>(
+        (done) => {
+          this.setState({ conflictingRecord: { conflict, done } });
+        }
+      );
       if (overwrite) {
+        const { type, id } = conflict.obj;
         resolutions[`${type}:${id}`] = {
           retry: true,
           options: { overwrite: true, ...(destinationId && { destinationId }) },
@@ -915,57 +907,16 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     );
   }
 
-  overwriteConfirmed() {
-    this.state.conflictingRecord!.done(true);
-  }
-
-  overwriteSkipped() {
-    this.state.conflictingRecord!.done(false);
-  }
-
   render() {
     const { close } = this.props;
 
-    let confirmOverwriteModal;
-    if (this.state.conflictingRecord) {
-      confirmOverwriteModal = (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            title={i18n.translate(
-              'savedObjectsManagement.objectsTable.flyout.confirmOverwriteTitle',
-              {
-                defaultMessage: 'Overwrite {type}?',
-                values: { type: this.state.conflictingRecord.type },
-              }
-            )}
-            cancelButtonText={i18n.translate(
-              'savedObjectsManagement.objectsTable.flyout.confirmOverwriteCancelButtonText',
-              { defaultMessage: 'Cancel' }
-            )}
-            confirmButtonText={i18n.translate(
-              'savedObjectsManagement.objectsTable.flyout.confirmOverwriteOverwriteButtonText',
-              { defaultMessage: 'Overwrite' }
-            )}
-            buttonColor="danger"
-            onCancel={this.overwriteSkipped.bind(this)}
-            onConfirm={this.overwriteConfirmed.bind(this)}
-            defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-            maxWidth="500px"
-          >
-            <p>
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.flyout.confirmOverwriteBody"
-                defaultMessage="'{title}' conflicts with an existing object, are you sure you want to overwrite it?"
-                values={{
-                  title:
-                    this.state.conflictingRecord.title ||
-                    getDefaultTitle(this.state.conflictingRecord),
-                }}
-              />
-            </p>
-          </EuiConfirmModal>
-        </EuiOverlayMask>
-      );
+    let confirmOverwriteModal: ReactNode;
+    const { conflictingRecord } = this.state;
+    if (conflictingRecord) {
+      const { conflict } = conflictingRecord;
+      const finish = (overwrite: boolean, destinationId?: string) =>
+        conflictingRecord.done([overwrite, destinationId]);
+      confirmOverwriteModal = <OverwriteModal {...{ conflict, finish }} />;
     }
 
     return (

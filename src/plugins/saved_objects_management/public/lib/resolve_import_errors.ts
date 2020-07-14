@@ -22,6 +22,7 @@ import {
   SavedObjectsImportConflictError,
   SavedObjectsImportRetry,
   SavedObjectsImportResponse,
+  SavedObjectsImportAmbiguousConflictError,
 } from 'src/core/public';
 import { FailedImport, ProcessedImportResponse } from './process_import_response';
 
@@ -45,10 +46,18 @@ export interface RetryDecision {
 const RESOLVABLE_ERRORS = ['conflict', 'ambiguous_conflict', 'missing_references'];
 export interface FailedImportConflict {
   obj: FailedImport['obj'];
-  error: SavedObjectsImportConflictError;
+  error: SavedObjectsImportConflictError | SavedObjectsImportAmbiguousConflictError;
 }
-const isConflict = (failure: FailedImport): failure is FailedImportConflict =>
+const isConflict = (
+  failure: FailedImport
+): failure is { obj: FailedImport['obj']; error: SavedObjectsImportConflictError } =>
   failure.error.type === 'conflict';
+const isAmbiguousConflict = (
+  failure: FailedImport
+): failure is { obj: FailedImport['obj']; error: SavedObjectsImportAmbiguousConflictError } =>
+  failure.error.type === 'ambiguous_conflict';
+const isAnyConflict = (failure: FailedImport): failure is FailedImportConflict =>
+  isConflict(failure) || isAmbiguousConflict(failure);
 
 async function callResolveImportErrorsApi(
   http: HttpStart,
@@ -167,15 +176,7 @@ export async function resolveImportErrors({
   // Loop until all issues are resolved
   while (failedImports.some((failure) => RESOLVABLE_ERRORS.includes(failure.error.type))) {
     // Resolve regular conflicts
-    if (!isOverwriteAllChecked) {
-      // prompt the user for each conflict
-      const result = await getConflictResolutions(
-        failedImports.filter(isConflict).filter(doesntHaveRetryDecision)
-      );
-      for (const key of Object.keys(result)) {
-        retryDecisionCache.set(key, result[key]);
-      }
-    } else {
+    if (isOverwriteAllChecked) {
       failedImports.filter(isConflict).forEach(({ obj: { type, id }, error: { destinationId } }) =>
         retryDecisionCache.set(`${type}:${id}`, {
           retry: true,
@@ -187,7 +188,15 @@ export async function resolveImportErrors({
       );
     }
 
-    // TODO: resolve ambiguous conflicts
+    // prompt the user for each conflict
+    const result = await getConflictResolutions(
+      isOverwriteAllChecked
+        ? failedImports.filter(isAmbiguousConflict).filter(doesntHaveRetryDecision)
+        : failedImports.filter(isAnyConflict).filter(doesntHaveRetryDecision)
+    );
+    for (const key of Object.keys(result)) {
+      retryDecisionCache.set(key, result[key]);
+    }
 
     // Build retries array
     const failRetries = failedImports
