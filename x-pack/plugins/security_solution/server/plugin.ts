@@ -134,14 +134,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           return response.customError({ body: 'Too many requests', statusCode: 429 });
         }
         concurrentRequests += 1;
-        return toolkit.next();
-      }
-    );
-    core.http.registerOnPreResponse(
-      (request: KibanaRequest, preResponse: OnPreResponseInfo, toolkit: OnPreResponseToolkit) => {
-        if (isAllowlistDownloadRequest(request) && preResponse.statusCode !== 429) {
+
+        request.events.aborted$.toPromise().then(() => {
           concurrentRequests -= 1;
-        }
+        });
         return toolkit.next();
       }
     );
