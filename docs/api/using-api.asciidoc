@@ -13,7 +13,7 @@ NOTE: The {kib} Console supports only Elasticsearch APIs. You are unable to inte
 The {kib} APIs support key- and token-based authentication. 
 
 [float]
-[[token-authentication]]
+[[token-api-authentication]]
 ==== Token-based authentication
 
 To use token-based authentication, you use the same username and password that you use to log into Elastic.  
