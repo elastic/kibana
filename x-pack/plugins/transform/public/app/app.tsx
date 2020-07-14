@@ -75,6 +75,5 @@ export const renderApp = (element: HTMLElement, appDependencies: AppDependencies
 
   return () => {
     unmountComponentAtNode(element);
-    clearCache();
   };
 };
