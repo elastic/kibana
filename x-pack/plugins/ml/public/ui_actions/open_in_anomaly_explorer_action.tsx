@@ -30,7 +30,7 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
     async getHref({ embeddable, data }: SwimLaneDrilldownContext): Promise<string> {
       const [, pluginsStart] = await getStartServices();
       const urlGenerator = pluginsStart.share.urlGenerators.getUrlGenerator(ML_APP_URL_GENERATOR);
-      const { jobIds, timeRange } = embeddable.getInput();
+      const { jobIds, timeRange, viewBy } = embeddable.getInput();
       const { perPage, fromPage } = embeddable.getOutput();
 
       return urlGenerator.createUrl({
@@ -40,12 +40,12 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
         mlExplorerSwimlane: {
           viewByFromPage: fromPage,
           viewByPerPage: perPage,
+          viewByFieldName: viewBy,
           ...(data
             ? {
                 selectedType: data.type,
                 selectedTimes: data.times,
                 selectedLanes: data.lanes,
-                viewByFieldName: data.viewByFieldName,
               }
             : {}),
         },
