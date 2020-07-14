@@ -8,8 +8,9 @@ import { createSelector, defaultMemoize } from 'reselect';
 import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
-import { ResolverState } from '../types';
+import { ResolverState, IsometricTaxiLayout } from '../types';
 import { uniquePidForProcess } from '../models/process_event';
+import { ResolverEvent } from '../../../common/endpoint/types';
 
 /**
  * A matrix that when applied to a Vector2 will convert it from world coordinates to screen coordinates.
@@ -52,7 +53,22 @@ export const userIsPanning = composeSelectors(cameraStateSelector, cameraSelecto
  */
 export const isAnimating = composeSelectors(cameraStateSelector, cameraSelectors.isAnimating);
 
-export const processNodePositionsAndEdgeLineSegments = composeSelectors(
+/**
+ * Given a nodeID (aka entity_id) get the indexed process event.
+ * Legacy functions take process events instead of nodeID, use this to get
+ * process events for them.
+ */
+export const processEventForID: (
+  state: ResolverState
+) => (nodeID: string) => ResolverEvent | null = composeSelectors(
+  dataStateSelector,
+  dataSelectors.processEventForID
+);
+
+/**
+ * The position of nodes and edges.
+ */
+export const layout: (state: ResolverState) => IsometricTaxiLayout = composeSelectors(
   dataStateSelector,
   dataSelectors.layout
 );

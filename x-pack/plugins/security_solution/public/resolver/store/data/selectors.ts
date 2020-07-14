@@ -329,7 +329,7 @@ export const layout = createSelector(
  * Legacy functions take process events instead of nodeID, use this to get
  * process events for them.
  */
-const processEventForID: (
+export const processEventForID: (
   state: DataState
 ) => (nodeID: string) => ResolverEvent | null = createSelector(
   indexedProcessTree,
