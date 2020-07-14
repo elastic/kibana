@@ -10,7 +10,6 @@ import { useHistory, useLocation } from 'react-router-dom';
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
 import { EuiPanel } from '@elastic/eui';
-import { displayNameRecord } from './process_event_dot';
 import * as selectors from '../store/selectors';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as event from '../../../common/endpoint/models/event';
@@ -179,7 +178,7 @@ const PanelContent = memo(function PanelContent() {
        * | relateds list 1 type   | entity_id of process       | valid related event type |
        */
 
-      if (crumbEvent in displayNameRecord && uiSelectedEvent) {
+      if (crumbEvent && crumbEvent.length && uiSelectedEvent) {
         return 'processEventListNarrowedByType';
       }
     }

@@ -96,6 +96,15 @@ export const relatedEventsByEntityId = composeSelectors(
 );
 
 /**
+ * Returns a function that returns a function (when supplied with an entity id for a node)
+ * that returns related events for a node that match an event.category (when supplied with the category)
+ */
+export const relatedEventsByCategory = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventsByCategory
+);
+
+/**
  * Entity ids to booleans for waiting status
  */
 export const relatedEventsReady = composeSelectors(
