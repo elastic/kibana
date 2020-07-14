@@ -131,6 +131,7 @@ describe.skip('Detection rules, custom', () => {
       'auditbeat-*',
       'endgame-*',
       'filebeat-*',
+      'logs-*',
       'packetbeat-*',
       'winlogbeat-*',
     ];

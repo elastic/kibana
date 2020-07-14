@@ -6,15 +6,15 @@
 
 import { Logger } from 'kibana/server';
 import uuid from 'uuid/v4';
+import { snakeCase } from 'lodash';
 import { PromiseReturnType } from '../../../../observability/typings/common';
 import { Setup } from '../helpers/setup_request';
 import {
-  SERVICE_ENVIRONMENT,
   TRANSACTION_DURATION,
   PROCESSOR_EVENT,
 } from '../../../common/elasticsearch_fieldnames';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { APM_ML_JOB_GROUP, ML_MODULE_ID_APM_TRANSACTION } from './constants';
+import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 
 export type CreateAnomalyDetectionJobsAPIResponse = PromiseReturnType<
   typeof createAnomalyDetectionJobs
@@ -76,22 +76,19 @@ async function createAnomalyDetectionJob({
   environment: string;
   indexPatternName?: string | undefined;
 }) {
-  const convertedEnvironmentName = convertToMLIdentifier(environment);
   const randomToken = uuid().substr(-4);
 
   return ml.modules.setup({
     moduleId: ML_MODULE_ID_APM_TRANSACTION,
-    prefix: `${APM_ML_JOB_GROUP}-${convertedEnvironmentName}-${randomToken}-`,
-    groups: [APM_ML_JOB_GROUP, convertedEnvironmentName],
+    prefix: `${APM_ML_JOB_GROUP}-${snakeCase(environment)}-${randomToken}-`,
+    groups: [APM_ML_JOB_GROUP],
     indexPatternName,
     query: {
       bool: {
         filter: [
           { term: { [PROCESSOR_EVENT]: 'transaction' } },
           { exists: { field: TRANSACTION_DURATION } },
-          environment === ENVIRONMENT_NOT_DEFINED
-            ? ENVIRONMENT_NOT_DEFINED_FILTER
-            : { term: { [SERVICE_ENVIRONMENT]: environment } },
+          ...getEnvironmentUiFilterES(environment),
         ],
       },
     },
@@ -99,23 +96,13 @@ async function createAnomalyDetectionJob({
     jobOverrides: [
       {
         custom_settings: {
-          job_tags: { environment },
+          job_tags: {
+            environment,
+            // identifies this as an APM ML job & facilitates future migrations
+            apm_ml_version: 2,
+          },
         },
       },
     ],
   });
-}
-
-const ENVIRONMENT_NOT_DEFINED_FILTER = {
-  bool: {
-    must_not: {
-      exists: {
-        field: SERVICE_ENVIRONMENT,
-      },
-    },
-  },
-};
-
-export function convertToMLIdentifier(value: string) {
-  return value.replace(/\s+/g, '_').toLowerCase();
 }

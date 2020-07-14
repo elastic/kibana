@@ -84,6 +84,7 @@ export const createListItemsBulk = async ({
     await callCluster('bulk', {
       body,
       index: listItemIndex,
+      refresh: 'wait_for',
     });
   } catch (error) {
     // TODO: Log out the error with return values from the bulk insert into another index or saved object
