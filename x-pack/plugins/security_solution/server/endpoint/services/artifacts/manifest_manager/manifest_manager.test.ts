@@ -6,13 +6,14 @@
 
 import { inflateSync } from 'zlib';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { createPackageConfigServiceMock } from '../../../../../../ingest_manager/server/mocks';
 import {
   ArtifactConstants,
   ManifestConstants,
   Manifest,
   ExceptionsCache,
 } from '../../../lib/artifacts';
-import { getPackageConfigServiceMock, getManifestManagerMock } from './manifest_manager.mock';
+import { getManifestManagerMock } from './manifest_manager.mock';
 
 describe('manifest_manager', () => {
   describe('ManifestManager sanity checks', () => {
@@ -73,15 +74,43 @@ describe('manifest_manager', () => {
     });
 
     test('ManifestManager can dispatch manifest', async () => {
-      const packageConfigService = getPackageConfigServiceMock();
+      const packageConfigService = createPackageConfigServiceMock();
       const manifestManager = getManifestManagerMock({ packageConfigService });
       const snapshot = await manifestManager.getSnapshot();
-      const dispatched = await manifestManager.dispatch(snapshot!.manifest);
-      expect(dispatched).toEqual(true);
+      const dispatchErrors = await manifestManager.dispatch(snapshot!.manifest);
+      expect(dispatchErrors).toEqual([]);
       const entries = snapshot!.manifest.getEntries();
       const artifact = Object.values(entries)[0].getArtifact();
       expect(
-        packageConfigService.update.mock.calls[0][2].inputs[0].config.artifact_manifest.value
+        packageConfigService.update.mock.calls[0][2].inputs[0].config!.artifact_manifest.value
+      ).toEqual({
+        manifest_version: ManifestConstants.INITIAL_VERSION,
+        schema_version: 'v1',
+        artifacts: {
+          [artifact.identifier]: {
+            compression_algorithm: 'none',
+            encryption_algorithm: 'none',
+            decoded_sha256: artifact.decodedSha256,
+            encoded_sha256: artifact.encodedSha256,
+            decoded_size: artifact.decodedSize,
+            encoded_size: artifact.encodedSize,
+            relative_url: `/api/endpoint/artifacts/download/${artifact.identifier}/${artifact.decodedSha256}`,
+          },
+        },
+      });
+    });
+
+    test('ManifestManager fails to dispatch on conflict', async () => {
+      const packageConfigService = createPackageConfigServiceMock();
+      const manifestManager = getManifestManagerMock({ packageConfigService });
+      const snapshot = await manifestManager.getSnapshot();
+      packageConfigService.update.mockRejectedValue({ status: 409 });
+      const dispatchErrors = await manifestManager.dispatch(snapshot!.manifest);
+      expect(dispatchErrors).toEqual([{ status: 409 }]);
+      const entries = snapshot!.manifest.getEntries();
+      const artifact = Object.values(entries)[0].getArtifact();
+      expect(
+        packageConfigService.update.mock.calls[0][2].inputs[0].config!.artifact_manifest.value
       ).toEqual({
         manifest_version: ManifestConstants.INITIAL_VERSION,
         schema_version: 'v1',
@@ -115,7 +144,7 @@ describe('manifest_manager', () => {
       snapshot!.diffs.push(diff);
 
       const dispatched = await manifestManager.dispatch(snapshot!.manifest);
-      expect(dispatched).toEqual(true);
+      expect(dispatched).toEqual([]);
 
       await manifestManager.commit(snapshot!.manifest);
 

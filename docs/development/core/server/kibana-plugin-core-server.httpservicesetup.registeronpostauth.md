@@ -4,7 +4,7 @@
 
 ## HttpServiceSetup.registerOnPostAuth property
 
-To define custom logic to perform for incoming requests.
+To define custom logic after Auth interceptor did make sure a user has access to the requested resource.
 
 <b>Signature:</b>
 
@@ -14,5 +14,5 @@ registerOnPostAuth: (handler: OnPostAuthHandler) => void;
 
 ## Remarks
 
-Runs the handler after Auth interceptor did make sure a user has access to the requested resource. The auth state is available at stage via http.auth.get(..) Can register any number of registerOnPreAuth, which are called in sequence (from the first registered to the last). See [OnPostAuthHandler](./kibana-plugin-core-server.onpostauthhandler.md)<!-- -->.
+The auth state is available at stage via http.auth.get(..) Can register any number of registerOnPreRouting, which are called in sequence (from the first registered to the last). See [OnPostAuthHandler](./kibana-plugin-core-server.onpostauthhandler.md)<!-- -->.
 

@@ -17,5 +17,6 @@ export default function ({ loadTestFile }) {
 
     // Package configs
     loadTestFile(require.resolve('./package_config/create'));
+    loadTestFile(require.resolve('./package_config/update'));
   });
 }
