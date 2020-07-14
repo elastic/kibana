@@ -37,7 +37,7 @@ import {
   UsageStatsPayload,
   StatsCollectionContext,
 } from './types';
-
+import { isClusterOptedIn } from './util';
 import { encryptTelemetry } from './encryption';
 
 interface TelemetryCollectionPluginsDepsSetup {
@@ -240,7 +240,7 @@ export class TelemetryCollectionManagerPlugin
       collection.licenseGetter(clustersDetails, statsCollectionConfig, context),
     ]);
 
-    return stats.map((stat) => {
+    const clustersUsage = stats.map((stat) => {
       const license = licenses[stat.cluster_uuid];
       return {
         ...(license ? { license } : {}),
@@ -248,5 +248,7 @@ export class TelemetryCollectionManagerPlugin
         collectionSource: collection.title,
       };
     });
+
+    return clustersUsage.filter(isClusterOptedIn);
   }
 }
