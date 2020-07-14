@@ -25,6 +25,7 @@ import { DashboardStart } from '../../dashboard/public';
 import { DiscoverStart } from '../../discover/public';
 import { HomePublicPluginSetup, FeatureCatalogueCategory } from '../../home/public';
 import { VisualizationsStart } from '../../visualizations/public';
+import { PLUGIN } from '../common';
 import {
   SavedObjectsManagementActionService,
   SavedObjectsManagementActionServiceSetup,
@@ -90,9 +91,7 @@ export class SavedObjectsManagementPlugin
     const kibanaSection = management.sections.getSection(ManagementSectionId.Kibana);
     kibanaSection.registerApp({
       id: 'objects',
-      title: i18n.translate('savedObjectsManagement.managementSectionLabel', {
-        defaultMessage: 'Saved Objects',
-      }),
+      title: PLUGIN.title,
       order: 1,
       mount: async (mountParams) => {
         const { mountManagementSection } = await import('./management_section');

@@ -24,9 +24,10 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from '../../../management/public';
+import { getAllowedTypes } from './../lib';
+import { PLUGIN } from '../../common';
 import { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
 import { ISavedObjectsManagementServiceRegistry } from '../services';
-import { getAllowedTypes } from './../lib';
 
 interface MountParams {
   core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>;
@@ -61,6 +62,7 @@ export const mountManagementSection = async ({
     return children! as React.ReactElement;
   };
 
+  coreStart.chrome.docTitle.change(PLUGIN.title);
   ReactDOM.render(
     <I18nProvider>
       <Router history={history}>
@@ -98,6 +100,7 @@ export const mountManagementSection = async ({
   );
 
   return () => {
+    coreStart.chrome.docTitle.reset();
     ReactDOM.unmountComponentAtNode(element);
   };
 };

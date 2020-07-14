@@ -18,3 +18,5 @@
  */
 
 export { SavedObjectRelation, SavedObjectWithMetadata, SavedObjectMetadata } from './types';
+
+export { PLUGIN } from './constants';
