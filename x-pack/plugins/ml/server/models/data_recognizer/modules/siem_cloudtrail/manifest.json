@@ -8,11 +8,7 @@
   "query": {
     "bool": {
       "filter": [
-        {
-          "term": {
-            "event.dataset": "aws.cloudtrail"
-          }
-        }
+        {"term": {"event.dataset": "aws.cloudtrail"}}
       ]
     }
   },

@@ -8,11 +8,7 @@
   "query": {
     "bool": {
       "filter": [
-        {
-          "term": {
-            "agent.type": "auditbeat"
-          }
-        }
+        {"term": {"agent.type": "auditbeat"}}
       ]
     }
   },

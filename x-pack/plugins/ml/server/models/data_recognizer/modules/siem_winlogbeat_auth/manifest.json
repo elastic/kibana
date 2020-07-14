@@ -8,16 +8,8 @@
   "query": {
     "bool": {
       "filter": [
-        {
-          "term": {
-            "agent.type": "winlogbeat"
-          }
-        },
-        {
-          "term": {
-            "event.category": "authentication"
-          }
-        }
+        {"term": {"agent.type": "winlogbeat"}},
+        {"term": {"event.category": "authentication"}}
       ]
     }
   },

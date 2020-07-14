@@ -8,11 +8,7 @@
   "query": {
     "bool": {
       "filter": [
-        {
-          "term": {
-            "agent.type": "winlogbeat"
-          }
-        }
+        {"term": {"agent.type": "winlogbeat"}}
       ]
     }
   },
