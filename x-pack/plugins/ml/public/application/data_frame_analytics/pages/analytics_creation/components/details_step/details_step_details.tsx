@@ -26,7 +26,7 @@ export const DetailsStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
   state,
 }) => {
   const { form, isJobCreated } = state;
-  const { description, jobId, destinationIndex } = form;
+  const { description, jobId, destinationIndex, resultsField } = form;
 
   const detailsFirstCol: ListItems[] = [
     {
@@ -36,6 +36,19 @@ export const DetailsStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
       description: jobId,
     },
   ];
+
+  if (
+    resultsField !== undefined &&
+    typeof resultsField === 'string' &&
+    resultsField.trim() !== ''
+  ) {
+    detailsFirstCol.push({
+      title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.resultsField', {
+        defaultMessage: 'Results field',
+      }),
+      description: resultsField,
+    });
+  }
 
   const detailsSecondCol: ListItems[] = [
     {

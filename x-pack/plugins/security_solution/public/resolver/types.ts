@@ -45,10 +45,6 @@ export interface ResolverUIState {
    * The entity_id of the process for the resolver's currently selected descendant.
    */
   readonly processEntityIdOfSelectedDescendant: string | null;
-  /**
-   * Which panel the ui should display
-   */
-  readonly panelToDisplay: string | null;
 }
 
 /**
@@ -181,6 +177,7 @@ export interface DataState {
    * The id used for the pending request, if there is one.
    */
   readonly pendingRequestDatabaseDocumentID?: string;
+  readonly resolverComponentInstanceID: string | undefined;
 
   /**
    * The parameters and response from the last successful request.

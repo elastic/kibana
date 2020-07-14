@@ -26,12 +26,14 @@ import { initRoutes } from './routes';
 import { ILicense } from '../../licensing/common/types';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
+import { MapsLegacyPluginSetup } from '../../../../src/plugins/maps_legacy/server';
 
 interface SetupDeps {
   features: FeaturesPluginSetupContract;
   usageCollection: UsageCollectionSetup;
   home: HomeServerPluginSetup;
   licensing: LicensingPluginSetup;
+  mapsLegacy: MapsLegacyPluginSetup;
 }
 
 export class MapsPlugin implements Plugin {
@@ -129,9 +131,10 @@ export class MapsPlugin implements Plugin {
 
   // @ts-ignore
   async setup(core: CoreSetup, plugins: SetupDeps) {
-    const { usageCollection, home, licensing, features } = plugins;
+    const { usageCollection, home, licensing, features, mapsLegacy } = plugins;
     // @ts-ignore
     const config$ = this._initializerContext.config.create();
+    const mapsLegacyConfig = await mapsLegacy.config$.pipe(take(1)).toPromise();
     const currentConfig = await config$.pipe(take(1)).toPromise();
 
     // @ts-ignore
@@ -150,7 +153,7 @@ export class MapsPlugin implements Plugin {
         initRoutes(
           core.http.createRouter(),
           license.uid,
-          currentConfig,
+          mapsLegacyConfig,
           this.kibanaVersion,
           this._logger
         );

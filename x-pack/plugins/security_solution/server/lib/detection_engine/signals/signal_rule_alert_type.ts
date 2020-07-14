@@ -163,11 +163,11 @@ export const signalRulesAlertType = ({
             );
           }
 
-          const scopedMlCallCluster = services.getScopedCallCluster(ml.mlClient);
+          const scopedClusterClient = services.getLegacyScopedClusterClient(ml.mlClient);
           // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
           // currently unused by the jobsSummary function.
           const summaryJobs = await (
-            await ml.jobServiceProvider(scopedMlCallCluster, ({} as unknown) as KibanaRequest)
+            await ml.jobServiceProvider(scopedClusterClient, ({} as unknown) as KibanaRequest)
           ).jobsSummary([machineLearningJobId]);
           const jobSummary = summaryJobs.find((job) => job.id === machineLearningJobId);
 
@@ -185,7 +185,7 @@ export const signalRulesAlertType = ({
 
           const anomalyResults = await findMlSignals({
             ml,
-            callCluster: scopedMlCallCluster,
+            clusterClient: scopedClusterClient,
             // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
             // currently unused by the mlAnomalySearch function.
             request: ({} as unknown) as KibanaRequest,

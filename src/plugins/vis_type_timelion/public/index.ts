@@ -25,5 +25,10 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { getTimezone } from './helpers/get_timezone';
+export { tickFormatters } from './helpers/tick_formatters';
+export { xaxisFormatterProvider } from './helpers/xaxis_formatter';
+export { generateTicksProvider } from './helpers/tick_generator';
+
+export { DEFAULT_TIME_FORMAT, calculateInterval } from '../common/lib';
 
 export { VisTypeTimelionPluginStart } from './plugin';

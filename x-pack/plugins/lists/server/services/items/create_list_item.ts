@@ -71,6 +71,7 @@ export const createListItem = async ({
       body,
       id,
       index: listItemIndex,
+      refresh: 'wait_for',
     });
 
     return {

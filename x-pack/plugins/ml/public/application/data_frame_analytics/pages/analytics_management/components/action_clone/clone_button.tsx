@@ -247,12 +247,17 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
     },
     results_field: {
       optional: true,
+      formKey: 'resultsField',
       defaultValue: DEFAULT_RESULTS_FIELD,
     },
   },
   model_memory_limit: {
     optional: true,
     formKey: 'modelMemoryLimit',
+  },
+  max_num_threads: {
+    optional: true,
+    formKey: 'maxNumThreads',
   },
 });
 
