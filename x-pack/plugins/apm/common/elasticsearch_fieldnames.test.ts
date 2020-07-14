@@ -22,6 +22,11 @@ describe('Transaction', () => {
       name: 'java',
       version: 'agent version',
     },
+    cloud: {
+      availability_zone: 'europe-west1-c',
+      provider: 'gcp',
+      region: 'europe-west1',
+    },
     http: {
       request: { method: 'GET' },
       response: { status_code: 200 },
@@ -73,6 +78,11 @@ describe('Span', () => {
       name: 'java',
       version: 'agent version',
     },
+    cloud: {
+      availability_zone: 'europe-west1-c',
+      provider: 'gcp',
+      region: 'europe-west1',
+    },
     processor: {
       name: 'transaction',
       event: 'span',
@@ -119,6 +129,11 @@ describe('Error', () => {
     agent: {
       name: 'java',
       version: 'agent version',
+    },
+    cloud: {
+      availability_zone: 'europe-west1-c',
+      provider: 'gcp',
+      region: 'europe-west1',
     },
     error: {
       exception: [

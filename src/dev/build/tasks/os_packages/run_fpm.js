@@ -22,7 +22,7 @@ import { resolve } from 'path';
 import { exec } from '../../lib';
 
 export async function runFpm(config, log, build, type, pkgSpecificFlags) {
-  const linux = config.getLinuxPlatform();
+  const linux = config.getPlatform('linux', 'x64');
   const version = config.getBuildVersion();
 
   const resolveWithTrailingSlash = (...paths) => `${resolve(...paths)}/`;

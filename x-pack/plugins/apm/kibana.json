@@ -26,5 +26,10 @@
     "xpack",
     "apm"
   ],
-  "extraPublicDirs": ["public/style/variables"]
+  "extraPublicDirs": ["public/style/variables"],
+  "requiredBundles": [
+    "kibanaReact",
+    "kibanaUtils",
+    "observability"
+  ]
 }

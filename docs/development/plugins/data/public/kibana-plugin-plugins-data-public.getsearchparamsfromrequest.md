@@ -10,16 +10,7 @@
 export declare function getSearchParamsFromRequest(searchRequest: SearchRequest, dependencies: {
     injectedMetadata: CoreStart['injectedMetadata'];
     uiSettings: IUiSettingsClient;
-}): {
-    rest_total_hits_as_int: boolean;
-    ignore_unavailable: boolean;
-    ignore_throttled: boolean;
-    max_concurrent_shard_requests: any;
-    preference: any;
-    timeout: string | undefined;
-    index: any;
-    body: any;
-};
+}): ISearchRequestParams;
 ```
 
 ## Parameters
@@ -31,14 +22,5 @@ export declare function getSearchParamsFromRequest(searchRequest: SearchRequest,
 
 <b>Returns:</b>
 
-`{
-    rest_total_hits_as_int: boolean;
-    ignore_unavailable: boolean;
-    ignore_throttled: boolean;
-    max_concurrent_shard_requests: any;
-    preference: any;
-    timeout: string | undefined;
-    index: any;
-    body: any;
-}`
+`ISearchRequestParams`
 

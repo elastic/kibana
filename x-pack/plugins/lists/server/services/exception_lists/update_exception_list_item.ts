@@ -10,8 +10,8 @@ import {
   DescriptionOrUndefined,
   EntriesArrayOrUndefined,
   ExceptionListItemSchema,
+  ExceptionListItemTypeOrUndefined,
   ExceptionListSoSchema,
-  ExceptionListTypeOrUndefined,
   IdOrUndefined,
   ItemIdOrUndefined,
   MetaOrUndefined,
@@ -43,7 +43,7 @@ interface UpdateExceptionListItemOptions {
   user: string;
   tags: TagsOrUndefined;
   tieBreaker?: string;
-  type: ExceptionListTypeOrUndefined;
+  type: ExceptionListItemTypeOrUndefined;
 }
 
 export const updateExceptionListItem = async ({

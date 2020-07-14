@@ -911,6 +911,18 @@ module.exports = {
     },
 
     /**
+     * Enterprise Search overrides
+     */
+    {
+      files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
+      excludedFiles: ['x-pack/plugins/enterprise_search/**/*.{test,mock}.{ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+        '@typescript-eslint/no-explicit-any': 'error',
+      },
+    },
+
+    /**
      * disable jsx-a11y for kbn-ui-framework
      */
     {

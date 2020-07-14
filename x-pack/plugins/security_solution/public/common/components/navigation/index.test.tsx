@@ -92,12 +92,12 @@ describe('SIEM Navigation', () => {
       {
         detailName: undefined,
         navTabs: {
-          alerts: {
+          detections: {
             disabled: false,
-            href: '/app/security/alerts',
-            id: 'alerts',
-            name: 'Alerts',
-            urlKey: 'alerts',
+            href: '/app/security/detections',
+            id: 'detections',
+            name: 'Detections',
+            urlKey: 'detections',
           },
           case: {
             disabled: false,
@@ -106,12 +106,12 @@ describe('SIEM Navigation', () => {
             name: 'Cases',
             urlKey: 'case',
           },
-          management: {
+          administration: {
             disabled: false,
-            href: '/app/security/management',
-            id: 'management',
-            name: 'Management',
-            urlKey: 'management',
+            href: '/app/security/administration',
+            id: 'administration',
+            name: 'Administration',
+            urlKey: 'administration',
           },
           hosts: {
             disabled: false,
@@ -197,12 +197,12 @@ describe('SIEM Navigation', () => {
         filters: [],
         flowTarget: undefined,
         navTabs: {
-          alerts: {
+          detections: {
             disabled: false,
-            href: '/app/security/alerts',
-            id: 'alerts',
-            name: 'Alerts',
-            urlKey: 'alerts',
+            href: '/app/security/detections',
+            id: 'detections',
+            name: 'Detections',
+            urlKey: 'detections',
           },
           case: {
             disabled: false,
@@ -218,12 +218,12 @@ describe('SIEM Navigation', () => {
             name: 'Hosts',
             urlKey: 'host',
           },
-          management: {
+          administration: {
             disabled: false,
-            href: '/app/security/management',
-            id: 'management',
-            name: 'Management',
-            urlKey: 'management',
+            href: '/app/security/administration',
+            id: 'administration',
+            name: 'Administration',
+            urlKey: 'administration',
           },
           network: {
             disabled: false,

@@ -8,8 +8,9 @@
 
 import * as t from 'io-ts';
 
-import { NamespaceType, id, item_id, namespace_type } from '../common/schemas';
+import { id, item_id, namespace_type } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
+import { NamespaceType } from '../types';
 
 export const readExceptionListItemSchema = t.exact(
   t.partial({

@@ -1,2 +1,2 @@
-$dropZoneZIndex: 1;  /* Prevent the next item down from obscuring the button */
-$cancelButtonZIndex: 2;
+$dropZoneZIndex: $euiZLevel1;  /* Prevent the next item down from obscuring the button */
+$cancelButtonZIndex: $euiZLevel2;

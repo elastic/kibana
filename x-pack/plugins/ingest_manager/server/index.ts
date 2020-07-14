@@ -21,10 +21,7 @@ export const config = {
   },
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
-    epm: schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
-      registryUrl: schema.maybe(schema.uri()),
-    }),
+    registryUrl: schema.maybe(schema.uri()),
     fleet: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       tlsCheckDisabled: schema.boolean({ defaultValue: false }),
@@ -37,6 +34,8 @@ export const config = {
         host: schema.maybe(schema.string()),
         ca_sha256: schema.maybe(schema.string()),
       }),
+      agentConfigRollupRateLimitIntervalMs: schema.number({ defaultValue: 5000 }),
+      agentConfigRollupRateLimitRequestPerInterval: schema.number({ defaultValue: 50 }),
     }),
   }),
 };
