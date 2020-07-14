@@ -56,7 +56,7 @@ export const getAlertsHistogramQuery = (
           alerts: {
             date_histogram: {
               field: '@timestamp',
-              fixed_interval: `${Math.floor(moment(to).diff(from) / 32)}ms`,
+              fixed_interval: `${Math.floor(moment(to).diff(moment(from)) / 32)}ms`,
               min_doc_count: 0,
               extended_bounds: {
                 min: from,
