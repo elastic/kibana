@@ -83,5 +83,6 @@ export const buildRule = ({
     exceptions_list: ruleParams.exceptionsList ?? [],
     machine_learning_job_id: ruleParams.machineLearningJobId,
     anomaly_threshold: ruleParams.anomalyThreshold,
+    threshold: ruleParams.threshold,
   });
 };

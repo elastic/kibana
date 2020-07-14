@@ -1070,6 +1070,8 @@ export interface RuleField {
 
   note?: Maybe<string[]>;
 
+  threshold?: Maybe<ToAny>;
+
   exceptions_list?: Maybe<ToAny>;
 }
 
@@ -5065,6 +5067,10 @@ export namespace GetTimelineQuery {
     filters: Maybe<ToAny>;
 
     note: Maybe<string[]>;
+
+    type: Maybe<string[]>;
+
+    threshold: Maybe<ToAny>;
 
     exceptions_list: Maybe<ToAny>;
   };
