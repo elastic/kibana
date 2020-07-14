@@ -5,10 +5,9 @@
  */
 
 import React from 'react';
-
+import { LogEntryCategoriesModuleProvider } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { useKibanaSpaceId } from '../../../utils/use_kibana_space_id';
-import { LogEntryCategoriesModuleProvider } from './use_log_entry_categories_module';
 
 export const LogEntryCategoriesPageProviders: React.FunctionComponent = ({ children }) => {
   const { sourceId, sourceConfiguration } = useLogSourceContext();

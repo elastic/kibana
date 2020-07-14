@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
   bucketSpan,
   DatasetFilter,
@@ -11,19 +12,25 @@ import {
   LogEntryRateJobType,
   logEntryRateJobTypes,
   partitionField,
-} from '../../../../common/log_analysis';
-import {
-  cleanUpJobsAndDatafeeds,
-  ModuleDescriptor,
-  ModuleSourceConfiguration,
-} from '../../../containers/logs/log_analysis';
-import { callJobsSummaryAPI } from '../../../containers/logs/log_analysis/api/ml_get_jobs_summary_api';
-import { callGetMlModuleAPI } from '../../../containers/logs/log_analysis/api/ml_get_module';
-import { callSetupMlModuleAPI } from '../../../containers/logs/log_analysis/api/ml_setup_module_api';
-import { callValidateDatasetsAPI } from '../../../containers/logs/log_analysis/api/validate_datasets';
-import { callValidateIndicesAPI } from '../../../containers/logs/log_analysis/api/validate_indices';
+} from '../../../../../../common/log_analysis';
+import { ModuleDescriptor, ModuleSourceConfiguration } from '../../log_analysis_module_types';
+import { cleanUpJobsAndDatafeeds } from '../../log_analysis_cleanup';
+import { callJobsSummaryAPI } from '../../api/ml_get_jobs_summary_api';
+import { callGetMlModuleAPI } from '../../api/ml_get_module';
+import { callSetupMlModuleAPI } from '../../api/ml_setup_module_api';
+import { callValidateDatasetsAPI } from '../../api/validate_datasets';
+import { callValidateIndicesAPI } from '../../api/validate_indices';
 
 const moduleId = 'logs_ui_analysis';
+const moduleName = i18n.translate('xpack.infra.logs.analysis.logEntryRateModuleName', {
+  defaultMessage: 'Log rate',
+});
+const moduleDescription = i18n.translate(
+  'xpack.infra.logs.analysis.logEntryRateModuleDescription',
+  {
+    defaultMessage: 'Use Machine Learning to automatically detect anomalous log entry rates.',
+  }
+);
 
 const getJobIds = (spaceId: string, sourceId: string) =>
   logEntryRateJobTypes.reduce(
@@ -126,6 +133,8 @@ const validateSetupDatasets = async (
 
 export const logEntryRateModule: ModuleDescriptor<LogEntryRateJobType> = {
   moduleId,
+  moduleName,
+  moduleDescription,
   jobTypes: logEntryRateJobTypes,
   bucketSpan,
   getJobIds,

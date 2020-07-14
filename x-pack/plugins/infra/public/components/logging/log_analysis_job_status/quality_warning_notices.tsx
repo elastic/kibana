@@ -8,7 +8,10 @@ import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { CategoryQualityWarningReason, QualityWarning } from './quality_warnings';
+import type {
+  CategoryQualityWarningReason,
+  QualityWarning,
+} from '../../../containers/logs/log_analysis/log_analysis_module_types';
 
 export const CategoryQualityWarnings: React.FC<{ qualityWarnings: QualityWarning[] }> = ({
   qualityWarnings,
