@@ -16,6 +16,7 @@ export const LogAnalysisJobProblemIndicator: React.FC<{
   hasOutdatedJobDefinitions: boolean;
   hasStoppedJobs: boolean;
   isFirstUse: boolean;
+  moduleName: string;
   onRecreateMlJobForReconfiguration: () => void;
   onRecreateMlJobForUpdate: () => void;
 }> = ({
@@ -23,16 +24,23 @@ export const LogAnalysisJobProblemIndicator: React.FC<{
   hasOutdatedJobDefinitions,
   hasStoppedJobs,
   isFirstUse,
+  moduleName,
   onRecreateMlJobForReconfiguration,
   onRecreateMlJobForUpdate,
 }) => {
   return (
     <>
       {hasOutdatedJobDefinitions ? (
-        <JobDefinitionOutdatedCallout onRecreateMlJob={onRecreateMlJobForUpdate} />
+        <JobDefinitionOutdatedCallout
+          moduleName={moduleName}
+          onRecreateMlJob={onRecreateMlJobForUpdate}
+        />
       ) : null}
       {hasOutdatedJobConfigurations ? (
-        <JobConfigurationOutdatedCallout onRecreateMlJob={onRecreateMlJobForReconfiguration} />
+        <JobConfigurationOutdatedCallout
+          moduleName={moduleName}
+          onRecreateMlJob={onRecreateMlJobForReconfiguration}
+        />
       ) : null}
       {hasStoppedJobs ? <JobStoppedCallout /> : null}
       {isFirstUse ? <FirstUseCallout /> : null}
