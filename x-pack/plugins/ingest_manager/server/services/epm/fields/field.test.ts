@@ -314,7 +314,7 @@ describe('processFields', () => {
     expect(processFields(fields)).toEqual(fieldsExpanded);
   });
 
-  test('correctly handles properties of nested and object type fields together in different order', () => {
+  test('correctly handles properties of nested and object type fields in large depth', () => {
     const fields = [
       {
         name: 'a.h-object',
@@ -399,7 +399,7 @@ describe('processFields', () => {
     expect(processFields(fields)).toEqual(fieldsExpanded);
   });
 
-  test('correctly handles properties of nested and object type fields in large depth', () => {
+  test('correctly handles properties of nested and object type fields together in different order', () => {
     const fields = [
       {
         name: 'a.b.c',
