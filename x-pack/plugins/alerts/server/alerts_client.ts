@@ -713,6 +713,6 @@ export class AlertsClient {
   }
 
   private generateAPIKeyName(alertTypeId: string, alertName: string) {
-    return `alerting:${this.spaceId ?? ''}:${alertTypeId}:${_.snakeCase(alertName)}`;
+    return _.truncate(`Alerting: ${alertTypeId}/${alertName}`, { length: 256 });
   }
 }
