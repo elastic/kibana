@@ -2,39 +2,36 @@
 
 exports[`LayerWizardSelect Should render layer select after layer wizards are loaded 1`] = `
 <Fragment>
-  <EuiFlexItem>
-     
-    <EuiFacetGroup
-      gutterSize="s"
-      layout="horizontal"
+  <EuiFacetGroup
+    gutterSize="s"
+    layout="horizontal"
+  >
+    <EuiFacetButton
+      isSelected={true}
+      key="all"
+      onClick={[Function]}
     >
-      <EuiFacetButton
-        isSelected={true}
-        key="all"
-        onClick={[Function]}
-      >
-        <FormattedMessage
-          defaultMessage="All"
-          id="xpack.maps.layerWizardSelect.allCategories"
-          values={Object {}}
-        />
-      </EuiFacetButton>
-      <EuiFacetButton
-        isSelected={false}
-        key="ELASTICSEARCH"
-        onClick={[Function]}
-      >
-        Elasticsearch
-      </EuiFacetButton>
-      <EuiFacetButton
-        isSelected={false}
-        key="SOLUTIONS"
-        onClick={[Function]}
-      >
-        Solutions
-      </EuiFacetButton>
-    </EuiFacetGroup>
-  </EuiFlexItem>
+      <FormattedMessage
+        defaultMessage="All"
+        id="xpack.maps.layerWizardSelect.allCategories"
+        values={Object {}}
+      />
+    </EuiFacetButton>
+    <EuiFacetButton
+      isSelected={false}
+      key="ELASTICSEARCH"
+      onClick={[Function]}
+    >
+      Elasticsearch
+    </EuiFacetButton>
+    <EuiFacetButton
+      isSelected={false}
+      key="SOLUTIONS"
+      onClick={[Function]}
+    >
+      Solutions
+    </EuiFacetButton>
+  </EuiFacetGroup>
   <EuiSpacer
     size="s"
   />
