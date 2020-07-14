@@ -7,7 +7,7 @@
 export const APP_ID = 'securitySolution';
 export const SERVER_APP_ID = 'siem';
 export const APP_NAME = 'Security';
-export const APP_ICON = 'securityAnalyticsApp';
+export const APP_ICON = 'logoSecurity';
 export const APP_PATH = `/app/security`;
 export const ADD_DATA_PATH = `/app/home#/tutorial_directory/security`;
 export const DEFAULT_BYTES_FORMAT = 'format:bytes:defaultPattern';

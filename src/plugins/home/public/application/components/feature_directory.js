@@ -43,7 +43,6 @@ const OTHERS_TAB_ID = 'others';
 const isOtherCategory = (directory) => {
   return (
     directory.category !== FeatureCatalogueCategory.DATA &&
-    directory.category !== FeatureCatalogueCategory.SOLUTION &&
     directory.category !== FeatureCatalogueCategory.ADMIN
   );
 };

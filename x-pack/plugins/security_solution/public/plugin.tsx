@@ -81,7 +81,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         icon: APP_ICON,
         path: APP_OVERVIEW_PATH,
         showOnHomePage: true,
-        category: FeatureCatalogueCategory.SOLUTION,
+        category: FeatureCatalogueCategory.DATA,
       });
     }
 

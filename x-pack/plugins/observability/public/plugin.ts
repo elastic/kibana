@@ -63,7 +63,7 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
         icon: 'logoObservability',
         path: '/app/observability',
         showOnHomePage: true,
-        category: FeatureCatalogueCategory.SOLUTION,
+        category: FeatureCatalogueCategory.DATA,
       });
     }
 

@@ -21,7 +21,6 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 
 import { getPublicUrl } from './applications/shared/enterprise_search_url';
-import AppSearchLogo from './applications/app_search/assets/logo.svg';
 import WorkplaceSearchLogo from './applications/workplace_search/assets/logo.svg';
 
 export interface ClientConfigType {
@@ -78,7 +77,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     plugins.home.featureCatalogue.register({
       id: 'appSearch',
       title: 'App Search',
-      icon: AppSearchLogo,
+      icon: 'logoAppSearch',
       description:
         'Leverage dashboards, analytics, and APIs for advanced application search made simple.',
       path: '/app/enterprise_search/app_search',

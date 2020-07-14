@@ -25,7 +25,6 @@ export enum FeatureCatalogueCategory {
   ADMIN = 'admin',
   DATA = 'data',
   OTHER = 'other',
-  SOLUTION = 'solution',
 }
 
 /** @public */
