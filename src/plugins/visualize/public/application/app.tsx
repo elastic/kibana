@@ -28,7 +28,7 @@ import {
   VisualizeEditor,
   VisualizeListing,
   VisualizeNoMatch,
-  VisualizeReferenceEditor,
+  VisualizeByValueEditor,
 } from './components';
 import { VisualizeConstants } from './visualize_constants';
 
@@ -54,7 +54,7 @@ export const VisualizeApp = () => {
   return (
     <Switch>
       <Route exact path={`${VisualizeConstants.EDIT_PATH}/value`}>
-        <VisualizeReferenceEditor />
+        <VisualizeByValueEditor />
       </Route>
       <Route path={[VisualizeConstants.CREATE_PATH, `${VisualizeConstants.EDIT_PATH}/:id`]}>
         <VisualizeEditor />

@@ -40,21 +40,29 @@ function toObject(state: PureVisState): PureVisState {
   }) as PureVisState;
 }
 
-export function createVisualizeAppState({ stateDefaults, kbnUrlStateStorage }: Arguments) {
-  const urlState = kbnUrlStateStorage.get<VisualizeAppState>(STATE_STORAGE_KEY);
-  const initialState = migrateAppState({
-    ...stateDefaults,
-    ...urlState,
-  });
+export function createVisualizeAppState({ stateDefaults, kbnUrlStateStorage, byValue }: Arguments) {
+  let initialState;
+  if (!byValue) {
+    const urlState = kbnUrlStateStorage.get<VisualizeAppState>(STATE_STORAGE_KEY);
+    initialState = migrateAppState({
+      ...stateDefaults,
+      ...urlState,
+    });
 
-  /*
-    make sure url ('_a') matches initial state
-    Initializing appState does two things - first it translates the defaults into AppState,
-    second it updates appState based on the url (the url trumps the defaults). This means if
-    we update the state format at all and want to handle BWC, we must not only migrate the
-    data stored with saved vis, but also any old state in the url.
-  */
-  kbnUrlStateStorage.set(STATE_STORAGE_KEY, initialState, { replace: true });
+    /*
+      make sure url ('_a') matches initial state
+      Initializing appState does two things - first it translates the defaults into AppState,
+      second it updates appState based on the url (the url trumps the defaults). This means if
+      we update the state format at all and want to handle BWC, we must not only migrate the
+      data stored with saved vis, but also any old state in the url.
+    */
+    kbnUrlStateStorage.set(STATE_STORAGE_KEY, initialState, { replace: true });
+  } else {
+    initialState = migrateAppState({
+      ...stateDefaults,
+      ...stateDefaults,
+    });
+  }
 
   const stateContainer = createStateContainer<VisualizeAppState, VisualizeAppStateTransitions>(
     initialState,
@@ -104,7 +112,9 @@ export function createVisualizeAppState({ stateDefaults, kbnUrlStateStorage }: A
   });
 
   // start syncing the appState with the ('_a') url
-  startStateSync();
+  if (!byValue) {
+    startStateSync();
+  }
 
   return { stateContainer, stopStateSync };
 }

@@ -144,9 +144,9 @@ export const getTopNavConfig = (
       return { error };
     }
   }
-
+  debugger;
   const topNavMenu: TopNavMenuData[] = [
-    ...(originatingApp && savedVis.id
+    ...(originatingApp && savedVis && savedVis.id
       ? [
           {
             id: 'saveAndReturn',
@@ -188,14 +188,14 @@ export const getTopNavConfig = (
           {
             id: 'save',
             label:
-              savedVis.id && originatingApp
+              savedVis && savedVis.id && originatingApp
                 ? i18n.translate('visualize.topNavMenu.saveVisualizationAsButtonLabel', {
                     defaultMessage: 'save as',
                   })
                 : i18n.translate('visualize.topNavMenu.saveVisualizationButtonLabel', {
                     defaultMessage: 'save',
                   }),
-            emphasize: !savedVis.id || !originatingApp,
+            emphasize: !savedVis || !savedVis.id || !originatingApp,
             description: i18n.translate('visualize.topNavMenu.saveVisualizationButtonAriaLabel', {
               defaultMessage: 'Save Visualization',
             }),
@@ -242,13 +242,20 @@ export const getTopNavConfig = (
                 if (!originatingApp) {
                   return;
                 }
-                const input = {
-                  ...vis.serialize(),
-                  id: uuid.v4(),
+                const state = {
+                  input: {
+                    ...vis.serialize(),
+                    id: uuid.v4(),
+                  },
+                  type: VISUALIZE_EMBEDDABLE_TYPE,
+                  embeddableId: '',
                 };
-                embeddable.getStateTransfer().navigateToWithEmbeddablePackage(originatingApp, {
-                  state: { input, type: VISUALIZE_EMBEDDABLE_TYPE },
-                });
+                if (embeddableId) {
+                  state.embeddableId = embeddableId;
+                }
+                embeddable
+                  .getStateTransfer()
+                  .navigateToWithEmbeddablePackage(originatingApp, { state });
               };
 
               const saveModal = (
@@ -279,7 +286,7 @@ export const getTopNavConfig = (
       }),
       testId: 'shareTopNavButton',
       run: (anchorElement) => {
-        if (share) {
+        if (share && savedVis) {
           share.toggleShareContextMenu({
             anchorElement,
             allowEmbed: true,

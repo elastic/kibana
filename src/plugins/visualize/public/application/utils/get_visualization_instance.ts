@@ -21,11 +21,13 @@ import { i18n } from '@kbn/i18n';
 import {
   SavedVisState,
   SerializedVis,
+  Vis,
   VisSavedObject,
   VisualizeEmbeddableContract,
 } from 'src/plugins/visualizations/public';
 import { SearchSourceFields } from 'src/plugins/data/public';
 import { SavedObject } from 'src/plugins/saved_objects/public';
+import { cloneDeep } from 'lodash';
 import { createSavedSearchesLoader } from '../../../../discover/public';
 import { VisualizeServices } from '../types';
 import { EmbeddableInput } from '../../../../embeddable/public/lib/embeddables';
@@ -47,8 +49,22 @@ export const getVisualizationInstanceFromInput = async (
   if (!input) {
     return;
   }
-  const serializedVis = input.savedVis as SerializedVis;
-  let vis = await visualizations.createVis(serializedVis.type, serializedVis);
+  debugger;
+  const visState = input.savedVis as SerializedVis;
+  /* const uiState = visState.uiState;
+  delete visState.uiState;
+  const searchSource = visState.data.searchSource;
+  delete visState.data.searchSource;
+  const aggs = visState.data.aggs;
+  delete visState.data.aggs;
+*/
+
+  let vis = await visualizations.createVis(visState.type, cloneDeep(visState));
+  /* vis.uiState = uiState;
+  vis.data = {};
+  vis.data.searchSource = searchSource;
+  vis.data.aggs = aggs;*/
+  debugger;
 
   if (vis.type.setup) {
     try {

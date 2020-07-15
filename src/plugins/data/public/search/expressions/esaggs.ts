@@ -283,52 +283,57 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
     },
   },
   async fn(input, args, { inspectorAdapters, abortSignal }) {
-    const indexPatterns = getIndexPatterns();
-    const { filterManager } = getQueryService();
-    const searchService = getSearchService();
+    try {
+      const indexPatterns = getIndexPatterns();
+      const { filterManager } = getQueryService();
+      const searchService = getSearchService();
 
-    const aggConfigsState = JSON.parse(args.aggConfigs);
-    const indexPattern = await indexPatterns.get(args.index);
-    const aggs = searchService.aggs.createAggConfigs(indexPattern, aggConfigsState);
+      const aggConfigsState = JSON.parse(args.aggConfigs);
+      const indexPattern = await indexPatterns.get(args.index);
+      const aggs = searchService.aggs.createAggConfigs(indexPattern, aggConfigsState);
 
-    // we should move searchSource creation inside courier request handler
-    const searchSource = await searchService.searchSource.create();
+      // we should move searchSource creation inside courier request handler
+      const searchSource = await searchService.searchSource.create();
 
-    searchSource.setField('index', indexPattern);
-    searchSource.setField('size', 0);
+      searchSource.setField('index', indexPattern);
+      searchSource.setField('size', 0);
 
-    const response = await handleCourierRequest({
-      searchSource,
-      aggs,
-      indexPattern,
-      timeRange: get(input, 'timeRange', undefined),
-      query: get(input, 'query', undefined) as any,
-      filters: get(input, 'filters', undefined),
-      timeFields: args.timeFields,
-      forceFetch: true,
-      metricsAtAllLevels: args.metricsAtAllLevels,
-      partialRows: args.partialRows,
-      inspectorAdapters: inspectorAdapters as Adapters,
-      filterManager,
-      abortSignal: (abortSignal as unknown) as AbortSignal,
-    });
+      const response = await handleCourierRequest({
+        searchSource,
+        aggs,
+        indexPattern,
+        timeRange: get(input, 'timeRange', undefined),
+        query: get(input, 'query', undefined) as any,
+        filters: get(input, 'filters', undefined),
+        timeFields: args.timeFields,
+        forceFetch: true,
+        metricsAtAllLevels: args.metricsAtAllLevels,
+        partialRows: args.partialRows,
+        inspectorAdapters: inspectorAdapters as Adapters,
+        filterManager,
+        abortSignal: (abortSignal as unknown) as AbortSignal,
+      });
 
-    const table: KibanaDatatable = {
-      type: 'kibana_datatable',
-      rows: response.rows,
-      columns: response.columns.map((column: any) => {
-        const cleanedColumn: KibanaDatatableColumn = {
-          id: column.id,
-          name: column.name,
-          meta: serializeAggConfig(column.aggConfig),
-        };
-        if (args.includeFormatHints) {
-          cleanedColumn.formatHint = column.aggConfig.toSerializedFieldFormat();
-        }
-        return cleanedColumn;
-      }),
-    };
+      const table: KibanaDatatable = {
+        type: 'kibana_datatable',
+        rows: response.rows,
+        columns: response.columns.map((column: any) => {
+          const cleanedColumn: KibanaDatatableColumn = {
+            id: column.id,
+            name: column.name,
+            meta: serializeAggConfig(column.aggConfig),
+          };
+          if (args.includeFormatHints) {
+            cleanedColumn.formatHint = column.aggConfig.toSerializedFieldFormat();
+          }
+          return cleanedColumn;
+        }),
+      };
 
-    return table;
+      return table;
+    } catch (e) {
+      debugger;
+      console.dir(e);
+    }
   },
 });

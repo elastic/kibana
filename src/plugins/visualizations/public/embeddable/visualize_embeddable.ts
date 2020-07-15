@@ -20,6 +20,7 @@
 import _, { get } from 'lodash';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
+import { cloneDeep } from 'lodash';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IIndexPattern,
@@ -118,7 +119,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     );
     this.deps = deps;
     this.timefilter = timefilter;
-    this.vis = vis;
+    this.vis = cloneDeep(vis);
     this.vis.uiState.on('change', this.uiStateChangeHandler);
     this.vis.uiState.on('reload', this.reload);
 
@@ -218,7 +219,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     if (this.vis.description && this.domNode) {
       this.domNode.setAttribute('data-description', this.vis.description);
     }
-
+    debugger;
     if (this.handler && dirty) {
       this.updateHandler();
     }

@@ -90,9 +90,6 @@ export class EditPanelAction implements Action<ActionContext> {
   }
 
   public async execute(context: ActionContext) {
-    debugger;
-    const { embeddable } = context;
-    console.dir(embeddable);
     const appTarget = this.getAppTarget(context);
     if (appTarget) {
       if (this.stateTransfer && appTarget.state) {
@@ -104,20 +101,7 @@ export class EditPanelAction implements Action<ActionContext> {
         await this.application.navigateToApp(appTarget.app, { path: appTarget.path });
       }
       return;
-    } /* else if (embeddable && embeddable.type === 'visualization' && this.stateTransfer) {
-      debugger;
-      this.stateTransfer.navigateToEditor('visualize', {
-        state: {
-          originatingApp: 'dashboards',
-          input: embeddable.input,
-          type: 'visualization',
-          byValueMode: true,
-          embeddableId: embeddable.id,
-        },
-        appendToExistingState: true,
-      });
-      return;
-    }*/
+    }
 
     const href = await this.getHref(context);
     if (href) {

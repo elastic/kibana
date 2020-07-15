@@ -25,6 +25,7 @@ import { EuiErrorBoundary, EuiLoadingChart } from '@elastic/eui';
 
 import { EditorRenderProps } from 'src/plugins/visualize/public';
 import { Vis, VisualizeEmbeddableContract } from 'src/plugins/visualizations/public';
+import { cloneDeep } from 'lodash';
 import { DefaultEditorDataTab, OptionTab } from './components/sidebar';
 
 const DefaultEditor = lazy(() => import('./default_editor'));
@@ -42,9 +43,8 @@ class DefaultEditorController {
 
   constructor(el: HTMLElement, vis: Vis, eventEmitter: EventEmitter, embeddableHandler: any) {
     this.el = el;
-    console.dir(el);
     const { type: visType } = vis;
-
+    debugger;
     const optionTabs = [
       ...(visType.schemas.buckets || visType.schemas.metrics
         ? [
@@ -70,9 +70,9 @@ class DefaultEditorController {
           ]
         : visType.editorConfig.optionTabs),
     ];
-
+    debugger;
     this.state = {
-      vis,
+      vis: cloneDeep(vis),
       optionTabs,
       eventEmitter,
       embeddableHandler,

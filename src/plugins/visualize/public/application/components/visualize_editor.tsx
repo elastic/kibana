@@ -39,10 +39,10 @@ import { VisualizeTopNav } from './visualize_top_nav';
 export const VisualizeEditor = () => {
   const { id: visualizationIdFromUrl } = useParams();
   const [originatingApp, setOriginatingApp] = useState<string>();
+  const [embeddableId, setEmbeddableId] = useState<string>();
   const { services } = useKibana<VisualizeServices>();
   const [eventEmitter] = useState(new EventEmitter());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(!visualizationIdFromUrl);
-  const [embeddableId, setEmbeddableId] = useState<string>();
 
   const isChromeVisible = useChromeVisibility(services.chrome);
   const { savedVisInstance, visEditorRef, visEditorController } = useSavedVisInstance(
@@ -54,6 +54,7 @@ export const VisualizeEditor = () => {
   const { appState, hasUnappliedChanges } = useVisualizeAppState(
     services,
     eventEmitter,
+    false,
     savedVisInstance
   );
   const { isEmbeddableRendered, currentAppState } = useEditorUpdates(

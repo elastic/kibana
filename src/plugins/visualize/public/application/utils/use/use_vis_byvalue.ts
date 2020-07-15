@@ -24,7 +24,7 @@ import { getVisualizationInstanceFromInput } from '../get_visualization_instance
 import { getEditBreadcrumbs } from '../breadcrumbs';
 import { DefaultEditorController } from '../../../../../vis_default_editor/public';
 
-export const useVisReference = (
+export const useVisByValue = (
   services: VisualizeServices,
   eventEmitter: EventEmitter,
   isChromeVisible: boolean | undefined,
@@ -40,13 +40,11 @@ export const useVisReference = (
   useEffect(() => {
     const { chrome } = services;
     const getSavedVisInstance = async () => {
-      debugger;
-      if (loaded.current) {
+      if (!valueInput || loaded.current) {
         return;
       }
       const savedVisInstance = await getVisualizationInstanceFromInput(services, valueInput);
       const { embeddableHandler, vis } = savedVisInstance;
-      debugger;
       const Editor = vis.type.editor || DefaultEditorController;
       const visEditorController = new Editor(
         visEditorRef.current,
@@ -56,6 +54,7 @@ export const useVisReference = (
       );
       loaded.current = true;
       setState({
+        savedVis: valueInput.savedVis,
         savedVisInstance,
         visEditorController,
       });
@@ -75,7 +74,8 @@ export const useVisReference = (
     visualizationIdFromUrl,
     valueInput,
   ]);
-  /* useEffect(() => {
+
+  useEffect(() => {
     return () => {
       if (state.visEditorController) {
         state.visEditorController.destroy();
@@ -86,7 +86,7 @@ export const useVisReference = (
         state.savedVisInstance.savedVis.destroy();
       }
     };
-  }, [state]);*/
+  }, [state]);
 
   return {
     ...state,

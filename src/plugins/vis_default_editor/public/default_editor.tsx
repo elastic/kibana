@@ -56,7 +56,7 @@ function DefaultEditor({
     if (!visRef.current) {
       return;
     }
-
+    debugger;
     embeddableHandler.render(visRef.current);
     setTimeout(() => {
       eventEmitter.emit('embeddableRendered');
@@ -85,6 +85,7 @@ function DefaultEditor({
           ...core,
         }}
       >
+        {' '}
         <PanelsContainer
           className="visEditor--default"
           resizerClassName={`visEditor__resizer ${
@@ -94,7 +95,7 @@ function DefaultEditor({
           <Panel className="visEditor__visualization" initialWidth={100 - editorInitialWidth}>
             <div className="visEditor__canvas" ref={visRef} data-shared-items-container />
           </Panel>
-
+          {/*
           <Panel
             className={`visEditor__collapsibleSidebar ${
               isCollapsed ? 'visEditor__collapsibleSidebar-isClosed' : ''
@@ -113,7 +114,7 @@ function DefaultEditor({
               timeRange={timeRange}
               eventEmitter={eventEmitter}
             />
-          </Panel>
+          </Panel> */}
         </PanelsContainer>
       </KibanaContextProvider>
     </core.i18n.Context>
