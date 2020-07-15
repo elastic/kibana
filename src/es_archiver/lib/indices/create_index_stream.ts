@@ -18,6 +18,8 @@
  */
 
 import { Transform, Readable } from 'stream';
+import { inspect } from 'util';
+
 import { get, once } from 'lodash';
 import { Client } from 'elasticsearch';
 import { ToolingLog } from '@kbn/dev-utils';
@@ -88,8 +90,9 @@ export function createCreateIndexStream({
           err?.body?.error?.reason?.includes('index exists with the same name as the alias') &&
           attemptNumber < 3
         ) {
+          const aliasStr = inspect(aliases);
           log.info(
-            `failed to create aliases [${aliases}] because ES indicated an index/alias already exists, trying again`
+            `failed to create aliases [${aliasStr}] because ES indicated an index/alias already exists, trying again`
           );
           await attemptToCreate(attemptNumber + 1);
           return;
