@@ -10,7 +10,8 @@ import { getLifecycleMethods } from '../_get_lifecycle_methods';
 export default function ({ getService, getPageObjects }) {
   const overview = getService('monitoringClusterOverview');
 
-  describe('Cluster overview', () => {
+  // https://github.com/elastic/kibana/issues/71796
+  describe.skip('Cluster overview', () => {
     describe('for Green cluster with Gold license', () => {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
