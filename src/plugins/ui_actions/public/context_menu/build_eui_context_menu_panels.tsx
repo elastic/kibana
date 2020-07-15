@@ -29,7 +29,7 @@ export const defaultTitle = i18n.translate('uiActions.actionPanel.title', {
   defaultMessage: 'Options',
 });
 
-type ActionWithContext<Context extends BaseContext = any> = [Action<Context>, Context];
+type ActionWithContext<Context extends BaseContext = BaseContext> = [Action<Context>, Context];
 
 /**
  * Transforms an array of Actions to the shape EuiContextMenuPanel expects.
