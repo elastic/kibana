@@ -10,6 +10,7 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import { act } from 'react-dom/test-utils';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
+import '../../../common/mock/match_media';
 import {
   useSignalIndex,
   ReturnSignalIndex,
