@@ -50,9 +50,9 @@ import {
 } from '../timeline/body/constants';
 
 import { OpenTimelineResult, UpdateTimeline, DispatchUpdateTimeline } from './types';
-import { getTimeRangeSettings } from '../../../common/utils/default_date_settings';
 import { createNote } from '../notes/helpers';
 import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
+import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
 
@@ -314,10 +314,13 @@ export const queryTimelineById = <TCache>({
         if (onOpenTimeline != null) {
           onOpenTimeline(timeline);
         } else if (updateTimeline) {
-          const { from, to } = getTimeRangeSettings();
+          const { from, to } = normalizeTimeRange({
+            from: getOr(null, 'dateRange.start', timeline),
+            to: getOr(null, 'dateRange.end', timeline),
+          });
           updateTimeline({
             duplicate,
-            from: getOr(from, 'dateRange.start', timeline),
+            from,
             id: 'timeline-1',
             notes,
             timeline: {
@@ -325,7 +328,7 @@ export const queryTimelineById = <TCache>({
               graphEventId,
               show: openTimeline,
             },
-            to: getOr(to, 'dateRange.end', timeline),
+            to,
           })();
         }
       })

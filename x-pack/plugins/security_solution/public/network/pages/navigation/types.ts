@@ -18,8 +18,8 @@ import { NarrowDateRange } from '../../../common/components/ml/types';
 interface QueryTabBodyProps extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
   skip: boolean;
   type: networkModel.NetworkType;
-  startDate: number;
-  endDate: number;
+  startDate: string;
+  endDate: string;
   filterQuery?: string | ESTermQuery;
   narrowDateRange?: NarrowDateRange;
 }

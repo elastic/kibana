@@ -8,8 +8,8 @@ import { kibanaResponseFactory } from 'kibana/server';
 import { ReportingCore } from '../../';
 import { AuthenticatedUser } from '../../../../security/server';
 import { WHITELISTED_JOB_CONTENT_TYPES } from '../../../common/constants';
-import { jobsQueryFactory } from '../../lib/jobs_query';
 import { getDocumentPayloadFactory } from './get_document_payload';
+import { jobsQueryFactory } from './jobs_query';
 
 interface JobResponseHandlerParams {
   docId: string;

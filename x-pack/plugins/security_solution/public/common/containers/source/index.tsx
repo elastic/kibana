@@ -34,6 +34,11 @@ export interface BrowserField {
   type: string;
 }
 
+export interface DocValueFields {
+  field: string;
+  format: string;
+}
+
 export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
 
 export const getAllBrowserFields = (browserFields: BrowserFields): Array<Partial<BrowserField>> =>
@@ -76,14 +81,38 @@ export const getBrowserFields = memoizeOne(
   (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
 );
 
+export const getdocValueFields = memoizeOne(
+  (_title: string, fields: IndexField[]): DocValueFields[] =>
+    fields && fields.length > 0
+      ? fields.reduce<DocValueFields[]>((accumulator: DocValueFields[], field: IndexField) => {
+          if (field.type === 'date' && accumulator.length < 100) {
+            const format: string =
+              field.format != null && !isEmpty(field.format) ? field.format : 'date_time';
+            return [
+              ...accumulator,
+              {
+                field: field.name,
+                format,
+              },
+            ];
+          }
+          return accumulator;
+        }, [])
+      : [],
+  // Update the value only if _title has changed
+  (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
+);
+
 export const indicesExistOrDataTemporarilyUnavailable = (
   indicesExist: boolean | null | undefined
 ) => indicesExist || isUndefined(indicesExist);
 
 const EMPTY_BROWSER_FIELDS = {};
+const EMPTY_DOCVALUE_FIELD: DocValueFields[] = [];
 
 interface UseWithSourceState {
   browserFields: BrowserFields;
+  docValueFields: DocValueFields[];
   errorMessage: string | null;
   indexPattern: IIndexPattern;
   indicesExist: boolean | undefined | null;
@@ -105,6 +134,7 @@ export const useWithSource = (
 
   const [state, setState] = useState<UseWithSourceState>({
     browserFields: EMPTY_BROWSER_FIELDS,
+    docValueFields: EMPTY_DOCVALUE_FIELD,
     errorMessage: null,
     indexPattern: getIndexFields(defaultIndex.join(), []),
     indicesExist: indicesExistOrDataTemporarilyUnavailable(undefined),
@@ -144,6 +174,10 @@ export const useWithSource = (
               get('data.source.status.indicesExist', result)
             ),
             browserFields: getBrowserFields(
+              defaultIndex.join(),
+              get('data.source.status.indexFields', result)
+            ),
+            docValueFields: getdocValueFields(
               defaultIndex.join(),
               get('data.source.status.indexFields', result)
             ),
