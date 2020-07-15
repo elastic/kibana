@@ -40,7 +40,7 @@ describe('createSearchItems', () => {
         },
       },
       _version: 'WzI0OSw0XQ==',
-      id: '4b9b1010-c678-11ea-b6e6-e942978fa29c',
+      id: '4b9b1010-c678-11ea-b6e6-e942978da29c',
       type: 'search',
       migrationVersion: {
         search: '7.4.0',
