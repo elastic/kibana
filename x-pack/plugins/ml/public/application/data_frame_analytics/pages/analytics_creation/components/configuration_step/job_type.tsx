@@ -22,7 +22,7 @@ export const JobType: FC<Props> = ({ type, setFormState }) => {
     'xpack.ml.dataframe.analytics.create.outlierDetectionHelpText',
     {
       defaultMessage:
-        'Outlier detection jobs require a source index that is mapped as a table-like data structure and analyze only numeric and boolean fields. Use the advanced editor to add custom options to the configuration.',
+        'Outlier detection identifies unusual data points in the dataset. Outlier detection jobs analyze only numeric and boolean fields. Use the advanced editor to add custom options to the configuration.',
     }
   );
 
@@ -30,7 +30,7 @@ export const JobType: FC<Props> = ({ type, setFormState }) => {
     'xpack.ml.dataframe.analytics.create.outlierRegressionHelpText',
     {
       defaultMessage:
-        'Regression jobs analyze only numeric fields. Use the advanced editor to apply custom options, such as the prediction field name.',
+        'Regression makes predictions on your data after it determines certain relationships among your data points. Regression jobs analyze numeric, categorical, and boolean fields. Use the advanced editor to apply custom options.',
     }
   );
 
@@ -38,7 +38,7 @@ export const JobType: FC<Props> = ({ type, setFormState }) => {
     'xpack.ml.dataframe.analytics.create.classificationHelpText',
     {
       defaultMessage:
-        'Classification jobs require a source index that is mapped as a table-like data structure and support fields that are numeric, boolean, text, keyword, or ip. Use the advanced editor to apply custom options, such as the prediction field name.',
+        'Classification predicts the class or category of a given data point in a dataset. Classification jobs support fields that are numeric, boolean, text, keyword, or ip. Use the advanced editor to apply custom options.',
     }
   );
 
