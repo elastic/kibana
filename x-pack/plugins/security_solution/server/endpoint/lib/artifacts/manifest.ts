@@ -44,6 +44,10 @@ export class Manifest {
     this.schemaVersion = validated;
   }
 
+  public static getDefault(schemaVersion: string) {
+    return new Manifest(new Date(), schemaVersion, 'default');
+  }
+
   public static fromArtifacts(
     artifacts: InternalArtifactSchema[],
     schemaVersion: string,

@@ -346,17 +346,4 @@ export class ManifestManager {
 
     return null;
   }
-
-  /**
-   * Confirms that a packageConfig exists with provided name.
-   */
-  public async confirmPackageConfigExists(name: string) {
-    // TODO: what if there are multiple results? uh oh.
-    const { total } = await this.packageConfigService.list(this.savedObjectsClient, {
-      page: 1,
-      perPage: 20,
-      kuery: `ingest-package-configs.name:${name}`,
-    });
-    return total > 0;
-  }
 }
