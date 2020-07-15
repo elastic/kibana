@@ -38,6 +38,13 @@ export function generatePluginList(ossPlugins: Plugins, xpackPlugins: Plugins) {
 [[code-exploration]]
 === Exploring Kibana code
 
+NOTE: This is an automatically generated file. Please do not edit directly. Instead, run:
+[source,bash]
+----
+node scripts/build_plugin_list_docs
+----
+from the Kibana directory. You can update this text inside {kib-repo}blob/{branch}/packages/kbn-dev-utils/src/plugin_list/generate_plugin_list.ts[{kib-repo}blob/{branch}/packages/kbn-dev-utils/src/plugin_list/generate_plugin_list.ts].
+
 The goals of our folder heirarchy are:
 
 - Easy for developers to know where to add new services, plugins and applications.
