@@ -19,6 +19,8 @@
 import React, { ReactNode } from 'react';
 import { EuiDataGridColumn } from '@elastic/eui';
 import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns';
+import { DiscoverGridHeader } from './discover_grid_header_col';
+import { moveColumn } from '../../angular/doc_table/actions/columns';
 
 const kibanaJSON = 'kibana-json';
 const geoPoint = 'geo-point';
@@ -27,23 +29,22 @@ export function getEuiGridColumns(
   columns: string[],
   indexPattern: IndexPattern,
   showTimeCol: boolean,
-  timeString: string
+  timeString: string,
+  onSetColumns: (columns: string[]) => void,
+  onSort: (props: any) => void
 ) {
   const timeFieldName = indexPattern.timeFieldName;
 
-  if (showTimeCol && !columns.find((col) => col === timeFieldName)) {
-    return [
-      {
-        id: indexPattern.timeFieldName,
-        display: `${timeString} (${indexPattern.timeFieldName})`,
-        schema: 'datetime',
-        initialWidth: 200,
-      } as EuiDataGridColumn,
-      ...columns.map((column) => buildEuiGridColumn(column, indexPattern, timeString)),
-    ];
+  if (showTimeCol && indexPattern.timeFieldName && !columns.find((col) => col === timeFieldName)) {
+    const usedColumns = [indexPattern.timeFieldName, ...columns];
+    return usedColumns.map((column) =>
+      buildEuiGridColumn(column, indexPattern, timeString, usedColumns, onSetColumns, onSort)
+    );
   }
 
-  return columns.map((column) => buildEuiGridColumn(column, indexPattern, timeString));
+  return columns.map((column) =>
+    buildEuiGridColumn(column, indexPattern, timeString, columns, onSetColumns, onSort)
+  );
 }
 
 export function getVisibleColumns(
@@ -63,7 +64,10 @@ export function getVisibleColumns(
 export function buildEuiGridColumn(
   columnName: string,
   indexPattern: IndexPattern,
-  timeString: string
+  timeString: string,
+  columns: string[],
+  onSetColumns: (columns: string[]) => void,
+  onSort: (props: any) => void
 ) {
   const indexPatternField = indexPattern.getFieldByName(columnName);
   const column: EuiDataGridColumn = {
@@ -96,6 +100,49 @@ export function buildEuiGridColumn(
   if (column.id === indexPattern.timeFieldName) {
     column.display = `${timeString} (${indexPattern.timeFieldName})`;
   }
+  const listItems = [
+    {
+      label: 'Sort ASC',
+      onClick: () => onSort([[column.id, 'asc']]),
+      iconType: 'sortUp',
+      size: 'xs',
+      color: 'text',
+      isDisabled: !indexPatternField?.sortable,
+    },
+    {
+      label: 'Sort DESC',
+      onClick: () => onSort([[column.id, 'desc']]),
+      iconType: 'sortDown',
+      size: 'xs',
+      color: 'text',
+      isDisabled: !indexPatternField?.sortable,
+    },
+    {
+      label: 'Move left',
+      onClick: () => onSetColumns(moveColumn(columns, column.id, columns.indexOf(column.id) - 1)),
+      iconType: 'sortLeft',
+      size: 'xs',
+      color: 'text',
+      isDisabled: columns.indexOf(column.id) === 0,
+    },
+    {
+      label: 'Move right',
+      onClick: () => onSetColumns(moveColumn(columns, column.id, columns.indexOf(column.id) + 1)),
+      iconType: 'sortRight',
+      size: 'xs',
+      color: 'text',
+      isDisabled: columns.indexOf(column.id) === columns.length - 1,
+    },
+    {
+      label: 'Remove column',
+      onClick: () => onSetColumns(columns.filter((col: string) => col !== column.id)),
+      iconType: 'cross',
+      size: 'xs',
+      color: 'text',
+      isDisabled: columns.length === 1,
+    },
+  ];
+  column.display = <DiscoverGridHeader title={column.display} listItems={listItems} />;
   return column;
 }
 

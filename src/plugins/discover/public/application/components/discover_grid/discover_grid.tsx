@@ -62,7 +62,7 @@ interface Props {
   sampleSize: number;
   onFilter: DocViewFilterFn;
   showTimeCol: boolean;
-  onSort: Function;
+  onSort: (props: any) => void;
   getContextAppHref: (id: string | number | Record<string, unknown>) => string;
   onRemoveColumn: (column: string) => void;
   onAddColumn: (column: string) => void;
@@ -213,8 +213,8 @@ export const DiscoverGrid = React.memo(
 
     const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
     const euiGridColumns = useMemo(
-      () => getEuiGridColumns(columns, indexPattern, showTimeCol, timeString),
-      [columns, indexPattern, showTimeCol, timeString]
+      () => getEuiGridColumns(columns, indexPattern, showTimeCol, timeString, onSetColumns, onSort),
+      [columns, indexPattern, showTimeCol, timeString, onSetColumns, onSort]
     );
     const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
     const popoverContents = useMemo(() => getPopoverContents(), []);

@@ -79,3 +79,21 @@ div[data-rbd-draggable-id='Time'] {
 .euiDataGrid__verticalScroll {
   will-change: transform;
 }
+
+// We only truncate if the cell is not a control column.
+.euiDataGridHeader {
+
+  .euiDataGridHeaderCell__content {
+    @include euiTextTruncate;
+    overflow: hidden;
+    white-space: nowrap;
+    flex-grow: 1;
+  }
+
+  .euiDataGridHeaderCell__popover {
+    flex-grow: 0;
+    flex-basis: auto;
+    width: auto;
+    padding-left: $euiSizeXS;
+  }
+}
