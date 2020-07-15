@@ -2,7 +2,7 @@
 == Explore the underlying data for a visualization
 
 ++++
-Explore the underlying data
+<titleabbrev>Explore the underlying data</titleabbrev>
 ++++
 
 Dashboard panels have an *Explore underlying data* action that navigates you to *Discover*,
