@@ -19,17 +19,20 @@ export interface UseListsConfigReturn {
 }
 
 export const useListsConfig = (): UseListsConfigReturn => {
-  const { createIndex, indexExists, loading: indexLoading } = useListsIndex();
+  const { createIndex, createIndexError, indexExists, loading: indexLoading } = useListsIndex();
   const { canManageIndex, canWriteIndex, loading: privilegesLoading } = useListsPrivileges();
   const { lists } = useKibana().services;
 
   const enabled = lists != null;
   const loading = indexLoading || privilegesLoading;
   const needsIndex = indexExists === false;
-  const needsConfiguration = !enabled || needsIndex || canWriteIndex === false;
+  const indexCreationFailed = createIndexError != null;
+  const needsIndexConfiguration =
+    needsIndex && (canManageIndex === false || (canManageIndex === true && indexCreationFailed));
+  const needsConfiguration = !enabled || canWriteIndex === false || needsIndexConfiguration;
 
   useEffect(() => {
-    if (canManageIndex && needsIndex) {
+    if (needsIndex && canManageIndex) {
       createIndex();
     }
   }, [canManageIndex, createIndex, needsIndex]);

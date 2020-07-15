@@ -7,6 +7,7 @@
 import { mockKpiHostsData, mockKpiHostDetailsData } from './mock';
 import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
+import '../../../common/mock/match_media';
 import { KpiHostsComponentBase } from '.';
 import * as statItems from '../../../common/components/stat_items';
 import { kpiHostsMapping } from './kpi_hosts_mapping';
@@ -14,8 +15,8 @@ import { kpiHostDetailsMapping } from './kpi_host_details_mapping';
 
 describe('kpiHostsComponent', () => {
   const ID = 'kpiHost';
-  const from = new Date('2019-06-15T06:00:00.000Z').valueOf();
-  const to = new Date('2019-06-18T06:00:00.000Z').valueOf();
+  const from = '2019-06-15T06:00:00.000Z';
+  const to = '2019-06-18T06:00:00.000Z';
   const narrowDateRange = () => {};
   describe('render', () => {
     test('it should render spinner if it is loading', () => {

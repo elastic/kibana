@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import _ from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 
 import { MAPBOX_STYLES } from './mapbox_styles';
 
@@ -99,7 +99,7 @@ export default function ({ getPageObjects, getService }) {
 
       //circle layer for points
       expect(layersForVectorSource[CIRCLE_STYLE_LAYER_INDEX]).to.eql(
-        _.set(MAPBOX_STYLES.POINT_LAYER, 'paint.circle-stroke-color', dynamicColor)
+        set(MAPBOX_STYLES.POINT_LAYER, 'paint.circle-stroke-color', dynamicColor)
       );
 
       //fill layer
@@ -107,7 +107,7 @@ export default function ({ getPageObjects, getService }) {
 
       //line layer for borders
       expect(layersForVectorSource[LINE_STYLE_LAYER_INDEX]).to.eql(
-        _.set(MAPBOX_STYLES.LINE_LAYER, 'paint.line-color', dynamicColor)
+        set(MAPBOX_STYLES.LINE_LAYER, 'paint.line-color', dynamicColor)
       );
     });
 
