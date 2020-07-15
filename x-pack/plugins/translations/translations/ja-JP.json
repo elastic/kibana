@@ -8363,8 +8363,6 @@
     "xpack.ingestManager.setupPage.enableFleet": "ユーザーを作成してフリートを有効にます",
     "xpack.ingestManager.setupPage.enableText": "フリートを使用するには、Elasticユーザーを作成する必要があります。このユーザーは、APIキーを作成して、logs-*およびmetrics-*に書き込むことができます。",
     "xpack.ingestManager.setupPage.enableTitle": "フリートを有効にする",
-    "xpack.ingestManager.setupPage.missingRequirementsDescription": "Fleetを使用するには、次の機能を有効にする必要があります。{space}- Elasticsearch APIキーを有効にします。{space}- TLSを有効にして、エージェントKibanaの間の通信を保護します。 ",
-    "xpack.ingestManager.setupPage.missingRequirementsTitle": "見つからない要件",
     "xpack.ingestManager.unenrollAgents.confirmModal.cancelButtonLabel": "キャンセル",
     "xpack.ingestManager.unenrollAgents.confirmModal.confirmButtonLabel": "登録解除",
     "xpack.ingestManager.unenrollAgents.confirmModal.deleteMultipleTitle": "{count, plural, one {# エージェント} other {# エージェント}}の登録を解除しますか？",
