@@ -9,6 +9,7 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
+import '../../../common/mock/match_media';
 import {
   apolloClientObservable,
   mockGlobalState,

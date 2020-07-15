@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, getOr, has, head, set } from 'lodash/fp';
+import { set } from '@elastic/safer-lodash-set/fp';
+import { get, getOr, has, head } from 'lodash/fp';
 
 import {
   FirstLastSeenHost,

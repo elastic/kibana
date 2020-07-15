@@ -118,6 +118,7 @@ import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { MaybePromise } from '@kbn/utility-types';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { MGetParams } from 'elasticsearch';
 import { MGetResponse } from 'elasticsearch';
 import { Moment } from 'moment';
@@ -145,6 +146,7 @@ import { RecursiveReadonly } from '@kbn/utility-types';
 import { ReindexParams } from 'elasticsearch';
 import { ReindexRethrottleParams } from 'elasticsearch';
 import { RenderSearchTemplateParams } from 'elasticsearch';
+import { Reporter } from '@kbn/analytics';
 import { RequestAdapter } from 'src/plugins/inspector/common';
 import { RequestStatistics as RequestStatistics_2 } from 'src/plugins/inspector/common';
 import { Required } from '@kbn/utility-types';
@@ -1450,7 +1452,7 @@ export class Plugin implements Plugin_2<DataPublicPluginSetup, DataPublicPluginS
     // Warning: (ae-forgotten-export) The symbol "DataSetupDependencies" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    setup(core: CoreSetup, { expressions, uiActions }: DataSetupDependencies): DataPublicPluginSetup;
+    setup(core: CoreSetup, { expressions, uiActions, usageCollection }: DataSetupDependencies): DataPublicPluginSetup;
     // Warning: (ae-forgotten-export) The symbol "DataStartDependencies" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -1778,6 +1780,10 @@ export interface SearchInterceptorDeps {
     toasts: ToastsStart;
     // (undocumented)
     uiSettings: CoreStart['uiSettings'];
+    // Warning: (ae-forgotten-export) The symbol "SearchUsageCollector" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    usageCollector?: SearchUsageCollector;
 }
 
 // Warning: (ae-missing-release-tag) "SearchRequest" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -2003,9 +2009,9 @@ export const UI_SETTINGS: {
 // src/plugins/data/public/index.ts:393:1 - (ae-forgotten-export) The symbol "propFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:396:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/query/state_sync/connect_to_query_state.ts:41:60 - (ae-forgotten-export) The symbol "FilterStateStore" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/types.ts:52:5 - (ae-forgotten-export) The symbol "createFiltersFromValueClickAction" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/types.ts:53:5 - (ae-forgotten-export) The symbol "createFiltersFromRangeSelectAction" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/types.ts:61:5 - (ae-forgotten-export) The symbol "IndexPatternSelectProps" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/types.ts:54:5 - (ae-forgotten-export) The symbol "createFiltersFromValueClickAction" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/types.ts:55:5 - (ae-forgotten-export) The symbol "createFiltersFromRangeSelectAction" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/types.ts:63:5 - (ae-forgotten-export) The symbol "IndexPatternSelectProps" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
