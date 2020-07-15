@@ -31,7 +31,6 @@
 /examples/developer_examples/ @elastic/kibana-app-arch
 /examples/embeddable_examples/ @elastic/kibana-app-arch
 /examples/embeddable_explorer/ @elastic/kibana-app-arch
-/examples/search_explorer/ @elastic/kibana-app-arch
 /examples/state_container_examples/ @elastic/kibana-app-arch
 /examples/ui_actions_examples/ @elastic/kibana-app-arch
 /examples/ui_actions_explorer/ @elastic/kibana-app-arch
