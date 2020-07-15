@@ -27,7 +27,7 @@ function getOverallStats(
   earliestMs: number,
   latestMs: number
 ) {
-  const dv = new DataVisualizer(context.ml!.mlClient.callAsCurrentUser);
+  const dv = new DataVisualizer(context.ml!.mlClient);
   return dv.getOverallStats(
     indexPatternTitle,
     query,
@@ -52,7 +52,7 @@ function getStatsForFields(
   interval: number,
   maxExamples: number
 ) {
-  const dv = new DataVisualizer(context.ml!.mlClient.callAsCurrentUser);
+  const dv = new DataVisualizer(context.ml!.mlClient);
   return dv.getStatsForFields(
     indexPatternTitle,
     query,
@@ -73,7 +73,7 @@ function getHistogramsForFields(
   fields: HistogramField[],
   samplerShardSize: number
 ) {
-  const dv = new DataVisualizer(context.ml!.mlClient.callAsCurrentUser);
+  const dv = new DataVisualizer(context.ml!.mlClient);
   return dv.getHistogramsForFields(indexPatternTitle, query, fields, samplerShardSize);
 }
 

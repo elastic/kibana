@@ -46,11 +46,13 @@ export const EditConnector = React.memo(
     onSubmit,
     selectedConnector,
   }: EditConnectorProps) => {
+    const initialState = { connectors };
     const { form } = useForm({
-      defaultValue: { connectors },
+      defaultValue: initialState,
       options: { stripEmptyFields: false },
       schema,
     });
+    const { setFieldValue, submit } = form;
     const [connectorHasChanged, setConnectorHasChanged] = useState(false);
     const onChangeConnector = useCallback(
       (connectorId) => {
@@ -60,17 +62,18 @@ export const EditConnector = React.memo(
     );
 
     const onCancelConnector = useCallback(() => {
-      form.setFieldValue('connector', selectedConnector);
+      setFieldValue('connector', selectedConnector);
       setConnectorHasChanged(false);
-    }, [form, selectedConnector]);
+    }, [selectedConnector, setFieldValue]);
 
     const onSubmitConnector = useCallback(async () => {
-      const { isValid, data: newData } = await form.submit();
+      const { isValid, data: newData } = await submit();
       if (isValid && newData.connector) {
         onSubmit(newData.connector);
         setConnectorHasChanged(false);
       }
-    }, [form, onSubmit]);
+    }, [submit, onSubmit]);
+
     return (
       <EuiText>
         <MyFlexGroup alignItems="center" gutterSize="xs" justifyContent="spaceBetween">

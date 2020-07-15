@@ -27,6 +27,7 @@ import {
   StringTimeRange,
   useLogAnalysisResultsUrlState,
 } from './use_log_entry_rate_results_url_state';
+import { DatasetsSelector } from '../../../components/logging/log_analysis_results/datasets_selector';
 
 export const SORT_DEFAULTS = {
   direction: 'desc' as const,
@@ -80,11 +81,14 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
     [queryTimeRange.value.endTime, queryTimeRange.value.startTime]
   );
 
+  const [selectedDatasets, setSelectedDatasets] = useState<string[]>([]);
+
   const { getLogEntryRate, isLoading, logEntryRate } = useLogEntryRateResults({
     sourceId,
     startTime: queryTimeRange.value.startTime,
     endTime: queryTimeRange.value.endTime,
     bucketDuration,
+    filteredDatasets: selectedDatasets,
   });
 
   const {
@@ -97,12 +101,15 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
     changePaginationOptions,
     sortOptions,
     paginationOptions,
+    datasets,
+    isLoadingDatasets,
   } = useLogEntryAnomaliesResults({
     sourceId,
     startTime: queryTimeRange.value.startTime,
     endTime: queryTimeRange.value.endTime,
     defaultSortOptions: SORT_DEFAULTS,
     defaultPaginationOptions: PAGINATION_DEFAULTS,
+    filteredDatasets: selectedDatasets,
   });
 
   const handleQueryTimeRangeChange = useCallback(
@@ -175,7 +182,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
 
   useEffect(() => {
     getLogEntryRate();
-  }, [getLogEntryRate, queryTimeRange.lastChangedTime]);
+  }, [getLogEntryRate, selectedDatasets, queryTimeRange.lastChangedTime]);
 
   useInterval(
     () => {
@@ -191,7 +198,15 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
     <ResultsContentPage>
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem>
+              <DatasetsSelector
+                availableDatasets={datasets}
+                isLoading={isLoadingDatasets}
+                selectedDatasets={selectedDatasets}
+                onChangeDatasetSelection={setSelectedDatasets}
+              />
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiSuperDatePicker
                 start={selectedTimeRange.startTime}

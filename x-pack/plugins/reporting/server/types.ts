@@ -15,8 +15,8 @@ import { SecurityPluginSetup } from '../../security/server';
 import { JobStatus } from '../common/types';
 import { ReportingConfigType } from './config';
 import { ReportingCore } from './core';
-import { LayoutInstance } from './export_types/common/layouts';
 import { LevelLogger } from './lib';
+import { LayoutInstance } from './lib/layouts';
 
 /*
  * Routing / API types
