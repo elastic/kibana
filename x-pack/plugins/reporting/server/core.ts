@@ -20,7 +20,7 @@ import { SecurityPluginSetup } from '../../security/server';
 import { ScreenshotsObservableFn } from '../server/types';
 import { ReportingConfig } from './';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
-import { screenshotsObservableFactory } from './export_types/common/lib/screenshots';
+import { screenshotsObservableFactory } from './lib/screenshots';
 import { checkLicense, getExportTypesRegistry } from './lib';
 import { ESQueueInstance } from './lib/create_queue';
 import { EnqueueJobFn } from './lib/enqueue_job';
