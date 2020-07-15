@@ -16,7 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { querySavedObjectType } from './query';
-export { indexPatternSavedObjectType } from './index_patterns';
-export { kqlTelemetry } from './kql_telemetry';
-export { searchTelemetry } from './search_telemetry';
+
+import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
+import { LegacyAPICaller, SharedGlobalConfig } from '../../../../../core/server';
+import { Usage } from './register';
+
+export function fetchProvider(config$: Observable<SharedGlobalConfig>) {
+  return async (callCluster: LegacyAPICaller): Promise<Usage> => {
+    const config = await config$.pipe(first()).toPromise();
+
+    const response = await callCluster('search', {
+      index: config.kibana.index,
+      body: {
+        query: { term: { type: { value: 'search-telemetry' } } },
+      },
+      ignore: [404],
+    });
+
+    return response.hits.hits.length
+      ? (response.hits.hits[0]._source as Usage)
+      : {
+          successCount: 0,
+          errorCount: 0,
+          averageDuration: null,
+        };
+  };
+}
