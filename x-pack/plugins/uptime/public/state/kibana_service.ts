@@ -7,7 +7,7 @@
 import { CoreStart } from 'kibana/public';
 import { apiService } from './api/utils';
 
-class KibanaService {
+export class KibanaService {
   private static instance: KibanaService;
   private _core!: CoreStart;
 

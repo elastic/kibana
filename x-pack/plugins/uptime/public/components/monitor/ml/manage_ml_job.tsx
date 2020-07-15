@@ -8,7 +8,7 @@ import React, { useContext, useState } from 'react';
 
 import { EuiButtonEmpty, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
-import { CLIENT_ALERT_TYPES } from '../../../../common/constants';
+import { CLIENT_ALERT_TYPES } from '../../../../common/constants/alerts';
 import {
   canDeleteMLJobSelector,
   hasMLJobSelector,

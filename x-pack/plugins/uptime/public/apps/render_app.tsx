@@ -13,10 +13,10 @@ import {
   DEFAULT_DARK_MODE,
   DEFAULT_TIMEPICKER_QUICK_RANGES,
   INTEGRATED_SOLUTIONS,
-  PLUGIN,
 } from '../../common/constants';
-import { UptimeApp, UptimeAppProps } from '../uptime_app';
+import { UptimeApp, UptimeAppProps } from './uptime_app';
 import { ClientPluginsSetup, ClientPluginsStart } from './plugin';
+import { PLUGIN } from '../../common/constants/plugin';
 
 export function renderApp(
   core: CoreStart,

@@ -9,7 +9,7 @@ import { isRight } from 'fp-ts/lib/Either';
 import { HttpFetchQuery, HttpSetup } from 'src/core/public';
 import * as t from 'io-ts';
 
-function isObject(value) {
+function isObject(value: unknown) {
   const type = typeof value;
   return value != null && (type === 'object' || type === 'function');
 }

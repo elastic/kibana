@@ -5,8 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { EuiCallOut } from '@elastic/eui';
-import { htmlIdGenerator } from '@elastic/eui/lib/services';
+import { EuiCallOut, htmlIdGenerator } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Typeahead } from './typeahead';
