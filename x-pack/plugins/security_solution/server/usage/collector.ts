@@ -66,8 +66,8 @@ export const registerCollector: RegisterCollector = ({
         },
         policies: {
           malware: {
-            success: { type: 'long' },
-            warning: { type: 'long' },
+            active: { type: 'long' },
+            inactive: { type: 'long' },
             failure: { type: 'long' },
           },
         },
