@@ -7,15 +7,14 @@ import { get } from 'lodash/fp';
 import { Logger } from 'src/core/server';
 
 import { ListClient } from '../../../../../lists/server';
-import { SignalSearchResponse, SearchTypes, SignalSource } from './types';
+import { SignalSearchResponse, SearchTypes } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import {
-  entriesList,
   EntryList,
   ExceptionListItemSchema,
+  entriesList,
 } from '../../../../../lists/common/schemas';
 import { hasLargeValueList } from '../../../../common/detection_engine/utils';
-import { SearchHit } from '../../types';
 
 interface FilterEventsAgainstList {
   listClient: ListClient;
@@ -59,15 +58,8 @@ export const filterEventsAgainstList = async ({
     // narrow unioned type to be single
     const isStringableType = (val: SearchTypes) =>
       ['string', 'number', 'boolean'].includes(typeof val);
-    // const filteredAccum = eventSearchResult;
-    // grab the signals with values found in the given exception lists.
 
-    // yara's changes below
-    // const filteredHitsPromises = exceptionItemsWithLargeValueLists.map(
-    //   async (exceptionItem: ExceptionListItemSchema) => {
-    //     const { entries } = exceptionItem;
-    // end of yara's changes
-    // maybe turn this into a forEach?
+    // grab the signals with values found in the given exception lists.
     const allExceptionsEntries = exceptionsList
       .map((excItem: ExceptionListItemSchema) => {
         const { entries } = excItem;
@@ -124,7 +116,7 @@ export const filterEventsAgainstList = async ({
             return false;
           });
           const diff = eventSearchResult.hits.hits.length - filteredEvents.length;
-          logger.debug(buildRuleMessage(`Lists filtered out ${diff} events`));
+          logger.debug(buildRuleMessage(`List with id ${list.id} filtered out ${diff} events`));
           const toReturn = await filteredEvents;
           return toReturn;
         },
