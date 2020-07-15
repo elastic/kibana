@@ -35,6 +35,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     this.hideToast();
     this.abortController.abort();
     this.abortController = new AbortController();
+    if (this.deps.usageCollector) this.deps.usageCollector.trackQueriesCancelled();
   };
 
   /**
@@ -43,6 +44,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   public runBeyondTimeout = () => {
     this.hideToast();
     this.timeoutSubscriptions.unsubscribe();
+    if (this.deps.usageCollector) this.deps.usageCollector.trackLongQueryRunBeyondTimeout();
   };
 
   protected showToast = () => {
@@ -59,6 +61,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         toastLifeTimeMs: 1000000,
       }
     );
+    if (this.deps.usageCollector) this.deps.usageCollector.trackLongQueryPopupShown();
   };
 
   public search(
@@ -85,7 +88,12 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         }
 
         // If the response indicates it is complete, stop polling and complete the observable
-        if (!response.is_running) return EMPTY;
+        if (!response.is_running) {
+          if (this.deps.usageCollector && response.rawResponse) {
+            this.deps.usageCollector.trackSuccess(response.rawResponse.took);
+          }
+          return EMPTY;
+        }
 
         id = response.id;
         // Delay by the given poll interval
