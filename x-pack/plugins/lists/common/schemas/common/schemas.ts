@@ -273,7 +273,6 @@ export const cursorOrUndefined = t.union([cursor, t.undefined]);
 export type CursorOrUndefined = t.TypeOf<typeof cursorOrUndefined>;
 
 export const namespace_type = DefaultNamespace;
-export type NamespaceType = t.TypeOf<typeof namespace_type>;
 
 export const operator = t.keyof({ excluded: null, included: null });
 export type Operator = t.TypeOf<typeof operator>;

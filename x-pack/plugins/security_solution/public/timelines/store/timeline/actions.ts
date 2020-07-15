@@ -56,8 +56,8 @@ export const createTimeline = actionCreator<{
   id: string;
   dataProviders?: DataProvider[];
   dateRange?: {
-    start: number;
-    end: number;
+    start: string;
+    end: string;
   };
   excludedRowRendererIds?: RowRendererId[];
   filters?: Filter[];
@@ -209,7 +209,7 @@ export const updateProviders = actionCreator<{ id: string; providers: DataProvid
   'UPDATE_PROVIDERS'
 );
 
-export const updateRange = actionCreator<{ id: string; start: number; end: number }>(
+export const updateRange = actionCreator<{ id: string; start: string; end: string }>(
   'UPDATE_RANGE'
 );
 

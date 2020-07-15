@@ -8,6 +8,7 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
+import '../../../../../common/mock/match_media';
 import { TimelineNonEcsData } from '../../../../../graphql/types';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../../common/mock';
 import { getEmptyValue } from '../../../../../common/components/empty_value';

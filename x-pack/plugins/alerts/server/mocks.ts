@@ -59,7 +59,7 @@ const createAlertServicesMock = () => {
       .fn<jest.Mocked<AlertInstance>, [string]>()
       .mockReturnValue(alertInstanceFactoryMock),
     callCluster: elasticsearchServiceMock.createLegacyScopedClusterClient().callAsCurrentUser,
-    getScopedCallCluster: jest.fn(),
+    getLegacyScopedClusterClient: jest.fn(),
     savedObjectsClient: savedObjectsClientMock.create(),
   };
 };

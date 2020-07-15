@@ -91,6 +91,16 @@ export const schema: FormSchema = {
     ),
     labelAppend: OptionalFieldLabel,
   },
+  isAssociatedToEndpointList: {
+    type: FIELD_TYPES.CHECKBOX,
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldAssociatedToEndpointListLabel',
+      {
+        defaultMessage: 'Associate rule to Global Endpoint Exception List',
+      }
+    ),
+    labelAppend: OptionalFieldLabel,
+  },
   severity: {
     value: {
       type: FIELD_TYPES.SUPER_SELECT,

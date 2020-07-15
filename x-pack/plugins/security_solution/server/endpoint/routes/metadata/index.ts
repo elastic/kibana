@@ -7,8 +7,8 @@
 import { IRouter, Logger, RequestHandlerContext } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
-
 import Boom from 'boom';
+
 import { metadataIndexPattern } from '../../../../common/endpoint/constants';
 import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from './query_builders';
 import {
@@ -36,6 +36,16 @@ const HOST_STATUS_MAPPING = new Map<AgentStatus, HostStatus>([
   ['online', HostStatus.ONLINE],
   ['offline', HostStatus.OFFLINE],
 ]);
+
+/**
+ * 00000000-0000-0000-0000-000000000000 is initial Elastic Agent id sent by Endpoint before policy is configured
+ * 11111111-1111-1111-1111-111111111111 is Elastic Agent id sent by Endpoint when policy does not contain an id
+ */
+
+const IGNORED_ELASTIC_AGENT_IDS = [
+  '00000000-0000-0000-0000-000000000000',
+  '11111111-1111-1111-1111-111111111111',
+];
 
 const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
   return endpointAppContext.logFactory.get('metadata');
@@ -97,7 +107,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
           endpointAppContext,
           metadataIndexPattern,
           {
-            unenrolledAgentIds,
+            unenrolledAgentIds: unenrolledAgentIds.concat(IGNORED_ELASTIC_AGENT_IDS),
           }
         );
 

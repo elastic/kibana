@@ -9,6 +9,7 @@ import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { DraggableStateSnapshot, DraggingStyle } from 'react-beautiful-dnd';
 
+import '../../mock/match_media';
 import { mockBrowserFields, mocksSource } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
 import { mockDataProviders } from '../../../timelines/components/timeline/data_providers/mock/mock_data_providers';

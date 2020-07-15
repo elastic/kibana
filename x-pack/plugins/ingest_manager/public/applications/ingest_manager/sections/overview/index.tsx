@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState } from 'react';
-import styled from 'styled-components';
 import {
   EuiButton,
   EuiBetaBadge,
   EuiText,
+  EuiTitle,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,11 +22,6 @@ import { OverviewAgentSection } from './components/agent_section';
 import { OverviewConfigurationSection } from './components/configuration_section';
 import { OverviewIntegrationSection } from './components/integration_section';
 import { OverviewDatastreamSection } from './components/datastream_section';
-
-const AlphaBadge = styled(EuiBetaBadge)`
-  vertical-align: top;
-  margin-left: ${(props) => props.theme.eui.paddingSizes.s};
-`;
 
 export const IngestManagerOverview: React.FunctionComponent = () => {
   useBreadcrumbs('overview');
@@ -46,33 +41,37 @@ export const IngestManagerOverview: React.FunctionComponent = () => {
       leftColumn={
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem>
-            <EuiText>
-              <h1>
-                <FormattedMessage
-                  id="xpack.ingestManager.overviewPageTitle"
-                  defaultMessage="Ingest Manager"
-                />
-                <AlphaBadge
-                  label={i18n.translate('xpack.ingestManager.alphaBadge.labelText', {
-                    defaultMessage: 'Experimental',
+            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="l">
+                  <h1>
+                    <FormattedMessage
+                      id="xpack.ingestManager.overviewPageTitle"
+                      defaultMessage="Ingest Manager"
+                    />
+                  </h1>
+                </EuiTitle>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  label={i18n.translate('xpack.ingestManager.betaBadge.labelText', {
+                    defaultMessage: 'Beta',
                   })}
-                  title={i18n.translate('xpack.ingestManager.alphaBadge.titleText', {
-                    defaultMessage: 'Experimental',
-                  })}
-                  tooltipContent={i18n.translate('xpack.ingestManager.alphaBadge.tooltipText', {
+                  tooltipContent={i18n.translate('xpack.ingestManager.betaBadge.tooltipText', {
                     defaultMessage:
-                      'This plugin might change or be removed in a future release and is not subject to the support SLA.',
+                      'This plugin is not recommended for production environments. Please report bugs in our Discuss forum.',
                   })}
                 />
-              </h1>
-            </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText color="subdued">
               <p>
                 <FormattedMessage
                   id="xpack.ingestManager.overviewPageSubtitle"
-                  defaultMessage="Centralized management for Elastic Agents and configurations."
+                  defaultMessage="Central management for Elastic Agents and agent configurations."
                 />
               </p>
             </EuiText>
@@ -85,7 +84,7 @@ export const IngestManagerOverview: React.FunctionComponent = () => {
             <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
               <FormattedMessage
                 id="xpack.ingestManager.overviewPageEnrollAgentButton"
-                defaultMessage="Enroll new agent"
+                defaultMessage="Add agent"
               />
             </EuiButton>
           </EuiFlexItem>
@@ -102,9 +101,7 @@ export const IngestManagerOverview: React.FunctionComponent = () => {
       <EuiFlexGrid gutterSize="l" columns={2}>
         <OverviewIntegrationSection />
         <OverviewConfigurationSection agentConfigs={agentConfigs} />
-
         <OverviewAgentSection />
-
         <OverviewDatastreamSection />
       </EuiFlexGrid>
     </WithHeaderLayout>
