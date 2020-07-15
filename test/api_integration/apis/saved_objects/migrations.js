@@ -21,6 +21,7 @@
  * Smokescreen tests for core migration logic
  */
 
+import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { assert } from 'chai';
 import {
@@ -56,12 +57,12 @@ export default ({ getService }) => {
 
       const migrations = {
         foo: {
-          '1.0.0': (doc) => _.set(doc, 'attributes.name', doc.attributes.name.toUpperCase()),
+          '1.0.0': (doc) => set(doc, 'attributes.name', doc.attributes.name.toUpperCase()),
         },
         bar: {
-          '1.0.0': (doc) => _.set(doc, 'attributes.nomnom', doc.attributes.nomnom + 1),
-          '1.3.0': (doc) => _.set(doc, 'attributes', { mynum: doc.attributes.nomnom }),
-          '1.9.0': (doc) => _.set(doc, 'attributes.mynum', doc.attributes.mynum * 2),
+          '1.0.0': (doc) => set(doc, 'attributes.nomnom', doc.attributes.nomnom + 1),
+          '1.3.0': (doc) => set(doc, 'attributes', { mynum: doc.attributes.nomnom }),
+          '1.9.0': (doc) => set(doc, 'attributes.mynum', doc.attributes.mynum * 2),
         },
       };
 
@@ -172,12 +173,12 @@ export default ({ getService }) => {
 
       const migrations = {
         foo: {
-          '1.0.0': (doc) => _.set(doc, 'attributes.name', doc.attributes.name.toUpperCase()),
+          '1.0.0': (doc) => set(doc, 'attributes.name', doc.attributes.name.toUpperCase()),
         },
         bar: {
-          '1.0.0': (doc) => _.set(doc, 'attributes.nomnom', doc.attributes.nomnom + 1),
-          '1.3.0': (doc) => _.set(doc, 'attributes', { mynum: doc.attributes.nomnom }),
-          '1.9.0': (doc) => _.set(doc, 'attributes.mynum', doc.attributes.mynum * 2),
+          '1.0.0': (doc) => set(doc, 'attributes.nomnom', doc.attributes.nomnom + 1),
+          '1.3.0': (doc) => set(doc, 'attributes', { mynum: doc.attributes.nomnom }),
+          '1.9.0': (doc) => set(doc, 'attributes.mynum', doc.attributes.mynum * 2),
         },
       };
 
@@ -187,8 +188,8 @@ export default ({ getService }) => {
       await migrateIndex({ callCluster, index, migrations, mappingProperties });
 
       mappingProperties.bar.properties.name = { type: 'keyword' };
-      migrations.foo['2.0.1'] = (doc) => _.set(doc, 'attributes.name', `${doc.attributes.name}v2`);
-      migrations.bar['2.3.4'] = (doc) => _.set(doc, 'attributes.name', `NAME ${doc.id}`);
+      migrations.foo['2.0.1'] = (doc) => set(doc, 'attributes.name', `${doc.attributes.name}v2`);
+      migrations.bar['2.3.4'] = (doc) => set(doc, 'attributes.name', `NAME ${doc.id}`);
 
       await migrateIndex({ callCluster, index, migrations, mappingProperties });
 
@@ -267,7 +268,7 @@ export default ({ getService }) => {
 
       const migrations = {
         foo: {
-          '1.0.0': (doc) => _.set(doc, 'attributes.name', 'LOTR'),
+          '1.0.0': (doc) => set(doc, 'attributes.name', 'LOTR'),
         },
       };
 

@@ -9,6 +9,7 @@ import React from 'react';
 
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TestProviders } from '../../../common/mock';
+import '../../../common/mock/match_media';
 import { getColumnsWithTimestamp } from '../../../common/components/event_details/helpers';
 
 import { FieldName } from './field_name';

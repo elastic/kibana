@@ -9,6 +9,7 @@ import React from 'react';
 
 import { useWithSource } from '../../containers/source';
 import { mockBrowserFields } from '../../containers/source/mock';
+import '../../mock/match_media';
 import { useKibana } from '../../lib/kibana';
 import { TestProviders } from '../../mock';
 import { createKibanaCoreStartMock } from '../../mock/kibana_core';

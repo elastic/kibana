@@ -20,12 +20,12 @@ import * as fleetSavedObjects from './fleet_saved_objects';
 describe('test security solution endpoint telemetry', () => {
   let mockSavedObjectsRepository: jest.Mocked<ISavedObjectsRepository>;
   let getFleetSavedObjectsMetadataSpy: jest.SpyInstance<Promise<SavedObjectsFindResponse<Agent>>>;
-  let getFleetEventsSavedObjectsSpy: jest.SpyInstance<Promise<
+  let getLatestFleetEndpointEventSpy: jest.SpyInstance<Promise<
     SavedObjectsFindResponse<AgentEventSOAttributes>
   >>;
 
   beforeAll(() => {
-    getFleetEventsSavedObjectsSpy = jest.spyOn(fleetSavedObjects, 'getFleetEventsSavedObjects');
+    getLatestFleetEndpointEventSpy = jest.spyOn(fleetSavedObjects, 'getLatestFleetEndpointEvent');
     getFleetSavedObjectsMetadataSpy = jest.spyOn(fleetSavedObjects, 'getFleetSavedObjectsMetadata');
     mockSavedObjectsRepository = savedObjectsRepositoryMock.create();
   });
@@ -39,6 +39,13 @@ describe('test security solution endpoint telemetry', () => {
       Object {
         "active_within_last_24_hours": 0,
         "os": Array [],
+        "policies": Object {
+          "malware": Object {
+            "active": 0,
+            "failure": 0,
+            "inactive": 0,
+          },
+        },
         "total_installed": 0,
       }
     `);
@@ -58,6 +65,13 @@ describe('test security solution endpoint telemetry', () => {
         total_installed: 0,
         active_within_last_24_hours: 0,
         os: [],
+        policies: {
+          malware: {
+            failure: 0,
+            active: 0,
+            inactive: 0,
+          },
+        },
       });
     });
   });
@@ -67,7 +81,7 @@ describe('test security solution endpoint telemetry', () => {
       getFleetSavedObjectsMetadataSpy.mockImplementation(() =>
         Promise.resolve(mockFleetObjectsResponse())
       );
-      getFleetEventsSavedObjectsSpy.mockImplementation(() =>
+      getLatestFleetEndpointEventSpy.mockImplementation(() =>
         Promise.resolve(mockFleetEventsObjectsResponse())
       );
 
@@ -85,6 +99,13 @@ describe('test security solution endpoint telemetry', () => {
             count: 1,
           },
         ],
+        policies: {
+          malware: {
+            failure: 1,
+            active: 0,
+            inactive: 0,
+          },
+        },
       });
     });
 
@@ -92,7 +113,7 @@ describe('test security solution endpoint telemetry', () => {
       getFleetSavedObjectsMetadataSpy.mockImplementation(() =>
         Promise.resolve(mockFleetObjectsResponse())
       );
-      getFleetEventsSavedObjectsSpy.mockImplementation(() =>
+      getLatestFleetEndpointEventSpy.mockImplementation(() =>
         Promise.resolve(mockFleetEventsObjectsResponse(true))
       );
 
@@ -110,6 +131,13 @@ describe('test security solution endpoint telemetry', () => {
             count: 1,
           },
         ],
+        policies: {
+          malware: {
+            failure: 0,
+            active: 1,
+            inactive: 0,
+          },
+        },
       });
     });
   });
