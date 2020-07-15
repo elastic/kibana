@@ -415,7 +415,6 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
     const {
       chartWidth,
       filterActive,
-      maskAll,
       timeBuckets,
       swimlaneData,
       swimlaneType,
