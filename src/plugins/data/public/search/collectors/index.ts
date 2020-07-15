@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { querySavedObjectType } from './query';
-export { indexPatternSavedObjectType } from './index_patterns';
-export { kqlTelemetry } from './kql_telemetry';
-export { searchTelemetry } from './search_telemetry';
+
+export { createUsageCollector } from './create_usage_collector';
+export { SEARCH_EVENT_TYPE, SearchUsageCollector } from './types';
