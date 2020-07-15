@@ -90,6 +90,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
   toEsAggsConfig?: (column: C, columnId: string) => unknown;
   clientSideExecution?: (column: C, table: KibanaDatatable) => KibanaDatatable;
   showInBuilder?: boolean;
+  nonLeaveNode?: boolean;
   /**
    * Returns true if the `column` can also be used on `newIndexPattern`.
    * If this function returns false, the column is removed when switching index pattern
