@@ -16,4 +16,6 @@ See map.tilemap.url in <<settings>> for details.
 
 *Tile Map Service*:: Tile map service configured in interface.
 
+*Vector tiles*:: Data service implementing the Mapbox vector tile specification.
+
 *Web Map Service*:: Maps from OGC Standard WMS.
